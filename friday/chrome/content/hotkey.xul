@@ -1,8 +1,22 @@
 <?xml version="1.0"?>
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:svg="http://www.w3.org/2000/svg">
   <script src="friday.js"/>
-  <keyset>
+  <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"
          oncommand="friday.openWindow();"/>
   </keyset>
+  <popupset id="mainPopupSet">
+    <panel id="transparent-msg-panel" class="msgPanel"
+           width="300">
+      <vbox>
+        <svg:svg version="1.1"
+                 baseProfile="full"
+                 xmlns="http://www.w3.org/2000/svg">
+          <svg:rect width="100%" height="100%" fill="black" fill-opacity="0.9" />
+          <svg:text x="10" y="28" font-size="18" text-anchor="left" fill="white">enter command:</svg:text>
+        </svg:svg>
+      </vbox>
+    </panel>
+  </popupset>
 </overlay>
