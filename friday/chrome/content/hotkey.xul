@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="friday.js"/>
   <keyset>
     <key id="command-window-key" modifiers="control" key="X"
-         oncommand="dump('hotkey pressed\n');"/>
+         oncommand="friday.openWindow();"/>
   </keyset>
 </overlay>
