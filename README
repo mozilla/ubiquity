@@ -1,0 +1,5 @@
+Development Notes
+-----------------
+
+* In order to view the dump() statements, you need to enable debugging:
+  http://developer.mozilla.org/en/docs/DOM:window.dump

@@ -1,2 +1,2 @@
 content     friday    chrome/content/
-overlay chrome://browser/content/browser.xul chrome://friday/content/test.xul
+overlay chrome://browser/content/browser.xul chrome://friday/content/hotkey.xul
