@@ -18,6 +18,7 @@
           <svg:text x="10" y="28" font-size="18" text-anchor="left" fill="white">enter command:</svg:text>
         </svg:svg>
         <textbox id="cmd-entry"
+                 ontextentered="friday.onTextEntered();"
                  type="autocomplete" autocompletesearch="history" width="300"/>
       </hbox>
     </panel>
