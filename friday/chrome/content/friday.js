@@ -1,11 +1,23 @@
 friday = {
 
+needsToShow: false,
+
+onShown: function()
+{
+    if (friday.needsToShow)
+    {
+        textBox = document.getElementById("cmd-entry");
+        textBox.focus();
+        friday.needsToShow = false;
+    }
+},
+
 openWindow: function()
 {
-    dump("hai\n");
+    friday.needsToShow = false;
     msgPanel = document.getElementById("transparent-msg-panel");
-    msgPanel.openPopupAtScreen(0, 0, false);
-    dump("done\n");
+    msgPanel.openPopup(null, "", 0, 0, false, true);
+    friday.needsToShow = true;
 }
 
 }
