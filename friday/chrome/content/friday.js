@@ -1,18 +1,32 @@
+/*
+ * Creates a Friday interface and binds it to the given message
+ * panel and text box.
+ *
+ * The message panel should be a xul:panel instance, and the text box
+ * should be a xul:textbox instance with Firefox autocomplete.
+ */
 function Friday(msgPanel, textBox)
 {
     this.__needsToShow = false;
     this.__msgPanel = msgPanel;
     this.__textBox = textBox;
+
+    self = this;
+
+    msgPanel.addEventListener( "popupshown",
+                               function() { self.__onShown(); },
+                               false );
+    textBox.onTextEntered = function() { self.__onTextEntered() };
 }
 
 Friday.prototype = {
 
-onTextEntered: function()
+__onTextEntered: function()
 {
     this.__msgPanel.hidePopup();
 },
 
-onShown: function()
+__onShown: function()
 {
     if (this.__needsToShow)
     {
