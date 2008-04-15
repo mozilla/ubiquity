@@ -3,9 +3,27 @@
          xmlns:svg="http://www.w3.org/2000/svg">
   <script src="friday.js"/>
   <script src="setup.js"/>
+  <script>
+    <![CDATA[
+    function fridaySetup()
+    {
+        gFriday = new Friday(
+            document.getElementById("transparent-msg-panel"),
+            document.getElementById("cmd-entry")
+            );
+    }
+
+    function fridayTeardown()
+    {
+    }
+
+    window.addEventListener("load", fridaySetup, false);
+    window.addEventListener("unload", fridayTeardown, false);
+    ]]>
+  </script>
   <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"
-         oncommand="friday.openWindow();"/>
+         oncommand="gFriday.openWindow();"/>
   </keyset>
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel"
