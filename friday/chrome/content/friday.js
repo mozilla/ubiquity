@@ -1,30 +1,32 @@
-friday = {
+function Friday(msgPanel, textBox)
+{
+    this.__needsToShow = false;
+    this.__msgPanel = msgPanel;
+    this.__textBox = textBox;
+}
 
-needsToShow: false,
+Friday.prototype = {
 
 onTextEntered: function()
 {
-    var msgPanel = document.getElementById("transparent-msg-panel");
-    msgPanel.hidePopup();
+    this.__msgPanel.hidePopup();
 },
 
 onShown: function()
 {
-    if (this.needsToShow)
+    if (this.__needsToShow)
     {
-        var textBox = document.getElementById("cmd-entry");
-        textBox.focus();
-        textBox.select();
-        this.needsToShow = false;
+        this.__textBox.focus();
+        this.__textBox.select();
+        this.__needsToShow = false;
     }
 },
 
 openWindow: function()
 {
-    this.needsToShow = false;
-    var msgPanel = document.getElementById("transparent-msg-panel");
-    msgPanel.openPopup(null, "", 0, 0, false, true);
-    this.needsToShow = true;
+    this.__needsToShow = false;
+    this.__msgPanel.openPopup(null, "", 0, 0, false, true);
+    this.__needsToShow = true;
 }
 
-}
+};

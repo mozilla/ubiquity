@@ -2,6 +2,7 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
   <script src="friday.js"/>
+  <script src="setup.js"/>
   <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"
          oncommand="friday.openWindow();"/>
