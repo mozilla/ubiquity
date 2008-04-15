@@ -1,3 +1,10 @@
+Test Suite
+----------
+
+* Once the extension is installed, the Friday test suite can be run at:
+
+    chrome://friday/content/test.html
+
 Development Notes
 -----------------
 

@@ -1,0 +1,14 @@
+/*
+ * CSS inspired by Hemingway: http://warpspire.com/hemingway
+ */
+
+body{
+	background:#272727;
+	color:#BFBFBF;
+	font-size:11px;
+	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Verdana, Arial, sans-serif;
+}
+
+.error {
+    color:#FF0000;
+}
