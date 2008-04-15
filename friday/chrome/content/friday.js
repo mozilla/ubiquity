@@ -4,27 +4,27 @@ needsToShow: false,
 
 onTextEntered: function()
 {
-    msgPanel = document.getElementById("transparent-msg-panel");
+    var msgPanel = document.getElementById("transparent-msg-panel");
     msgPanel.hidePopup();
 },
 
 onShown: function()
 {
-    if (friday.needsToShow)
+    if (this.needsToShow)
     {
-        textBox = document.getElementById("cmd-entry");
+        var textBox = document.getElementById("cmd-entry");
         textBox.focus();
         textBox.select();
-        friday.needsToShow = false;
+        this.needsToShow = false;
     }
 },
 
 openWindow: function()
 {
-    friday.needsToShow = false;
-    msgPanel = document.getElementById("transparent-msg-panel");
+    this.needsToShow = false;
+    var msgPanel = document.getElementById("transparent-msg-panel");
     msgPanel.openPopup(null, "", 0, 0, false, true);
-    friday.needsToShow = true;
+    this.needsToShow = true;
 }
 
 }
