@@ -1,0 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html><head>
+<title>Friday Command Editor</title>
+<script type="text/javascript" src="prefcommands.js"></script>
+<link rel="stylesheet" href="test.css" type="text/css">
+</head>
+
+<body onload="document.getElementById('editor').value = PrefCommands.getCode();">
+<h1>Friday Command Editor</h1>
+<textarea id="editor" rows="40" cols="80"
+          onkeypress="PrefCommands.setCode(this.value);"></textarea>
+</body></html>
