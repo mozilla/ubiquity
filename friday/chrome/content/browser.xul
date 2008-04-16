@@ -2,14 +2,17 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
   <script src="friday.js"/>
-  <script src="setup.js"/>
+  <script src="cmdmanager.js"/>
+  <script src="msgservice.js"/>
   <script>
     <![CDATA[
     function fridaySetup()
     {
         gFriday = new Friday(
             document.getElementById("transparent-msg-panel"),
-            document.getElementById("cmd-entry")
+            document.getElementById("cmd-entry"),
+            new CommandManager(),
+            new MessageService()
             );
     }
 

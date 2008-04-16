@@ -5,11 +5,13 @@
  * The message panel should be a xul:panel instance, and the text box
  * should be a xul:textbox instance with Firefox autocomplete.
  */
-function Friday(msgPanel, textBox)
+function Friday(msgPanel, textBox, cmdManager, msgService)
 {
     this.__needsToShow = false;
     this.__msgPanel = msgPanel;
     this.__textBox = textBox;
+    this.__cmdManager = cmdManager;
+    this.__msgService = msgService;
 
     self = this;
 
@@ -24,6 +26,13 @@ Friday.prototype = {
 __onTextEntered: function()
 {
     this.__msgPanel.hidePopup();
+    var cmdName = this.__textBox.value;
+    if (this.__cmdManager.hasCommand(cmdName))
+        this.__cmdManager.executeCommand(cmdName);
+    else
+        this.__msgService.displayMessage(
+            "No command called " + cmdName + "."
+            );
 },
 
 __onShown: function()
