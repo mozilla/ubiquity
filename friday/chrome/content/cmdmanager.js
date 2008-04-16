@@ -1,17 +1,29 @@
-function CommandManager()
+function CommandManager(cmdSource, msgService)
 {
+    this.__cmdSource = cmdSource;
+    this.__msgService = msgService;
 }
 
 CommandManager.prototype = {
 
-hasCommand : function( name )
+execute : function(cmdName)
 {
-    return true;
+    cmd = this.__cmdSource.getCommand(cmdName);
+    if (!cmd)
+        this.__msgService.displayMessage(
+            "No command called " + cmdName + "."
+            );
+    else
+        cmd.execute();
 },
 
-executeCommand : function( name )
-{
-    dump( "running command " + name );
-},
+};
 
+function CommandSource()
+{
+    this.getCommand = function(name) {
+        return {
+        execute : function() { dump("Executing " + name + "."); }
+        };
+    }
 }

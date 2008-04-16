@@ -8,11 +8,14 @@
     <![CDATA[
     function fridaySetup()
     {
+        var cmdMan = new CommandManager(
+            new CommandSource(),
+            new MessageService()
+            );
         gFriday = new Friday(
             document.getElementById("transparent-msg-panel"),
             document.getElementById("cmd-entry"),
-            new CommandManager(),
-            new MessageService()
+            cmdMan
             );
     }
 
