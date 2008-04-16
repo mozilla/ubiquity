@@ -88,8 +88,6 @@ CommandSource.prototype = {
     {
         var code = this._codeSource.getCode();
 
-        //var context = {blah:"foo"};
-        //eval(code, context);
         var sandbox = Components.utils.Sandbox("http://www.example.com");
         var commands = {};
 
