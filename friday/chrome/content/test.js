@@ -15,10 +15,16 @@ run : function()
     this.__func();
 },
 
-assertIsDefined : function(condition)
+assertIsDefined : function(condition, msg)
+{
+    if (condition == undefined)
+        throw new AssertionError(msg);
+},
+
+assert : function(condition, msg)
 {
     if (!condition)
-        throw new AssertionError("A variable is not defined.");
+        throw new AssertionError(msg);
 }
 
 };
@@ -45,10 +51,13 @@ start : function()
             testCase.run();
             successes += 1;
         } catch (e) {
-            output.innerHTML += ("<p class=\"error\">Error in test " +
-                                 test.name + ": " +
-                                 e.message + " in " + e.fileName +
-                                 ", line " + e.lineNumber + ".</p>");
+            var html = ("<p class=\"error\">Error in test " +
+                        test.name + ": " + e.message);
+            if (e.fileName)
+                html += (" (in " + e.fileName +
+                         ", line " + e.lineNumber + ")");
+            html += "</p>";
+            output.innerHTML = html;
             failures += 1;
         }
     }

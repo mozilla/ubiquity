@@ -19,6 +19,22 @@ execute : function(cmdName)
 
 };
 
+function testCmdManagerExecutesCmd()
+{
+    var wasCalled = false;
+
+    var fakeSource = {
+    getCommand : function() {
+            return {execute:function() {wasCalled = true;}}
+        }
+    };
+
+    var cmdMan = new CommandManager( fakeSource, null );
+
+    cmdMan.execute("existentcommand");
+    this.assert(wasCalled, "command.execute() must be called.");
+}
+
 function testCmdManagerDisplaysNoCmdError()
 {
     var fakeSource = { getCommand : function() { return false; } };
@@ -28,7 +44,8 @@ function testCmdManagerDisplaysNoCmdError()
     var cmdMan = new CommandManager( fakeSource, mockMsgService );
 
     cmdMan.execute("nonexistentcommand");
-    this.assertIsDefined(mockMsgService.lastMsg);
+    this.assertIsDefined(mockMsgService.lastMsg,
+                         "Command manager must display a message.");
 }
 
 function CommandSource()
