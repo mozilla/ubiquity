@@ -4,12 +4,13 @@
   <script src="friday.js"/>
   <script src="cmdmanager.js"/>
   <script src="msgservice.js"/>
+  <script src="prefcommands.js"/>
   <script>
     <![CDATA[
     function fridaySetup()
     {
         var cmdMan = new CommandManager(
-            new CommandSource(),
+            new CommandSource(PrefCommands),
             new MessageService()
             );
         gFriday = new Friday(
