@@ -23,17 +23,23 @@ assertIsDefined : function(condition)
 
 };
 
-testSuite = {
+TestSuite = {
 start : function()
 {
     var output = window.document.getElementById( "test-output" );
-    var tests = [testCmdManagerDisplaysNoCmdError];
+    var parent = window;
+
+    var tests = [];
+
+    for (prop in parent)
+        if (prop.indexOf("test") == 0)
+            tests.push(parent[prop]);
 
     successes = 0;
     failures = 0;
 
-    for (i in tests) {
-        var test = tests[i];
+    for each (test in tests)
+    {
         testCase = new TestCase(test);
         try {
             testCase.run();
