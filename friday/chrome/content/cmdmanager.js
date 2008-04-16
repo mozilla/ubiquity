@@ -31,8 +31,8 @@ function testCmdManagerExecutesCmd()
     var wasCalled = false;
 
     var fakeSource = {
-    getCommand : function() {
-            return {execute:function() {wasCalled = true;}}
+        getCommand : function() {
+            return {execute:function() {wasCalled = true;}};
         }
     };
 
