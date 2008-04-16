@@ -8,5 +8,5 @@
 <body onload="document.getElementById('editor').value = PrefCommands.getCode();">
 <h1>Friday Command Editor</h1>
 <textarea id="editor" rows="40" cols="80"
-          onkeypress="PrefCommands.setCode(this.value);"></textarea>
+          onkeyup="PrefCommands.setCode(this.value);"></textarea>
 </body></html>

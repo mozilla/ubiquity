@@ -88,8 +88,16 @@ CommandSource.prototype = {
     {
         var code = this._codeSource.getCode();
 
-        var sandbox = Components.utils.Sandbox("http://www.example.com");
+        var sandbox = Components.utils.Sandbox(window);
         var commands = {};
+
+        url = function(spec) {
+            var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+            return ios.newURI(spec, null, null);
+        };
+
+        sandbox.Application = Application;
+        sandbox.url = url;
 
         Components.utils.evalInSandbox(code, sandbox);
         for (objName in sandbox)
