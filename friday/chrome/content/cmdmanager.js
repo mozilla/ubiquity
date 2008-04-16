@@ -22,7 +22,7 @@ execute : function(cmdName)
             );
         }
     }
-},
+}
 
 };
 
