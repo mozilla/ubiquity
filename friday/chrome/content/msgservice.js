@@ -1,12 +1,8 @@
 function MessageService()
 {
-}
-
-MessageService.prototype = {
-
-displayMessage : function(msg)
-{
-    dump(msg);
-}
-
+    this.displayMessage = function(msg)
+    {
+        dump(msg);
+        return null;
+    };
 }
