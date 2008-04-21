@@ -48,6 +48,7 @@ start : function()
     {
         testCase = new TestCase(test);
         try {
+            dump("Running test: "+test.name+"\n");
             testCase.run();
             successes += 1;
         } catch (e) {
@@ -63,8 +64,8 @@ start : function()
     }
     total = successes + failures;
 
-    output.innerHTML += ("<p>" + successes + " out of " + 
-                         total + " tests successful (" + failures + 
+    output.innerHTML += ("<p>" + successes + " out of " +
+                         total + " tests successful (" + failures +
                          " failed).</p>");
-},
+}
 };
