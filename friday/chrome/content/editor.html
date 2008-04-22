@@ -7,6 +7,11 @@
 
 <body onload="document.getElementById('editor').value = PrefCommands.getCode();">
 <h1>Friday Command Editor</h1>
+<p>For examples of built-in commands, look <a href="chrome://friday/content/builtincmds.js">here</a>.</p>
+<p>For information on available utility functions for use in commands, look
+<a href="chrome://friday/content/cmdutils.js">here</a>.</p>
+<p>You can enter new commands in the area below.  They will automatically be saved as you type, and will
+be able to be instantly used from the command entry mode.</p>
 <textarea id="editor" rows="40" cols="80"
           onkeyup="PrefCommands.setCode(this.value);"></textarea>
 </body></html>
