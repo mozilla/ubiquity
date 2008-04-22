@@ -9,8 +9,16 @@
     <![CDATA[
     function fridaySetup()
     {
+        var cmdUtils = new UriCodeSource(
+            "chrome://friday/content/cmdutils.js"
+        );
+
+        var builtinCmds = new UriCodeSource(
+            "chrome://friday/content/builtincmds.js"
+        );
+
         var cmdMan = new CommandManager(
-            new CommandSource(PrefCommands),
+            new CommandSource([cmdUtils, builtinCmds, PrefCommands]),
             new MessageService()
             );
         gFriday = new Friday(

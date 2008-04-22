@@ -101,9 +101,12 @@ function testCmdManagerDisplaysNoCmdError()
                          "Command manager must display a message.");
 }
 
-function CommandSource(codeSource)
+function CommandSource(codeSources)
 {
-    this._codeSource = codeSource;
+    if (codeSources.length == undefined)
+        codeSources = [codeSources];
+
+    this._codeSources = codeSources;
 }
 
 CommandSource.prototype = {
@@ -111,20 +114,19 @@ CommandSource.prototype = {
 
     getCommand : function(name)
     {
-        var code = this._codeSource.getCode();
-
         var sandbox = Components.utils.Sandbox(window);
-        var commands = {};
-
-        url = function(spec) {
-            var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
-            return ios.newURI(spec, null, null);
-        };
 
         sandbox.Application = Application;
-        sandbox.url = url;
+        sandbox.Components = Components;
 
-        Components.utils.evalInSandbox(code, sandbox);
+        var commands = {};
+
+        for (var i = 0; i < this._codeSources.length; i++)
+        {
+            var code = this._codeSources[i].getCode();
+
+            Components.utils.evalInSandbox(code, sandbox);
+        }
 
         var self = this;
 
@@ -182,6 +184,35 @@ function testCommandSourceOneCmdWorks()
                 "Sample command should execute properly.");
 }
 
+function testCommandSourceTwoCodeSourcesWork()
+{
+    var testCode1 = "function cmd_foo() { return 5; }\n";
+    var testCode2 = "function cmd_bar() { return 6; }\n";
+
+    var testCodeSource1 = {
+        getCode : function() { return testCode1; }
+    };
+
+    var testCodeSource2 = {
+        getCode : function() { return testCode2; }
+    };
+
+    var cmdSrc = new CommandSource([testCodeSource1,
+                                    testCodeSource2]);
+    this.assert(!cmdSrc.getCommand("nonexistent"),
+                "Nonexistent commands shouldn't exist.");
+
+    var cmd = cmdSrc.getCommand("foo");
+    this.assert(cmd, "Sample command 'foo' should exist.");
+    this.assert(cmd.execute() == 5,
+                "Sample command 'foo' should execute properly.");
+
+    cmd = cmdSrc.getCommand("bar");
+    this.assert(cmd, "Sample command 'bar' should exist.");
+    this.assert(cmd.execute() == 6,
+                "Sample command 'bar' should execute properly.");
+}
+
 function testCommandSourceTwoCmdsWork()
 {
     var testCode = ("function cmd_foo() { return 5; }\n" +
@@ -223,4 +254,23 @@ function testCommandsAutoCompleter()
     this.assert(ac,
                 "AutoCompleter must present an " +
                 "nsIAutoCompleteSearch interface");
+}
+
+function UriCodeSource(uri)
+{
+    this.uri = uri;
+}
+
+UriCodeSource.prototype = {
+    getCode : function()
+    {
+        var req = new XMLHttpRequest();
+        req.open('GET', this.uri, false);
+        req.send(null);
+        if (req.status == 0)
+            return req.responseText;
+        else
+            /* TODO: Throw an exception instead. */
+            return "";
+    }
 }
