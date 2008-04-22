@@ -12,6 +12,21 @@ Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
  * http://developer.mozilla.org/en/docs/XUL:textbox_(Firefox_autocomplete)
  * */
 
+var gSingleton = null;
+var CommandsAutoCompleterFactory = {
+    createInstance : function(aOuter, aIID)
+    {
+        if (aOuter != null)
+            throw Components.results.NS_ERROR_NO_AGGREGATION;
+
+        if (gSingleton == null) {
+            gSingleton = new CommandsAutoCompleter();
+        }
+
+        return gSingleton.QueryInterface(aIID);
+    }
+};
+
 function CommandsAutoCompleter()
 {
 }
@@ -20,6 +35,7 @@ CommandsAutoCompleter.prototype = {
     classDescription : "CommandsAutoCompleter",
     classID : Components.ID("de8db85f-c1de-4d87-94ba-7844890f91fe"),
     contractID : "@mozilla.org/autocomplete/search;1?name=commands",
+    _xpcom_factory : CommandsAutoCompleterFactory,
     QueryInterface : XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch]),
 
     startSearch : function(searchString, searchParam, previousResult,
