@@ -41,12 +41,12 @@ start : function()
         if (prop.indexOf("test") == 0)
             tests.push(parent[prop]);
 
-    successes = 0;
-    failures = 0;
+    var successes = 0;
+    var failures = 0;
 
     for each (test in tests)
     {
-        testCase = new TestCase(test);
+        var testCase = new TestCase(test);
         try {
             dump("Running test: "+test.name+"\n");
             testCase.run();
@@ -62,7 +62,7 @@ start : function()
             failures += 1;
         }
     }
-    total = successes + failures;
+    var total = successes + failures;
 
     output.innerHTML += ("<p>" + successes + " out of " +
                          total + " tests successful (" + failures +
