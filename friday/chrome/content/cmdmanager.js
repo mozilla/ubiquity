@@ -148,8 +148,16 @@ CommandSource.prototype = {
             if (objName.indexOf(this.CMD_PREFIX) == 0)
             {
                 var cmd = makeCmdForObj(objName);
+                var icon = sandbox[objName].icon;
+
+                if (!icon)
+                    icon = "";
+
                 commands[cmd.name] = cmd;
-                commandNames.push(cmd.name);
+                commandNames.push(
+                    {name : cmd.name,
+                     icon : icon}
+                );
             }
         }
         CommandRegistry.commands = commandNames;

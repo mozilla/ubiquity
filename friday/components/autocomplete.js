@@ -111,7 +111,7 @@ CommandsAutoCompleteResult.prototype = {
     getImageAt : function(index)
     {
         dump("getImageAt " + index + "\n");
-        return "blah";
+        return CommandRegistry.commands[index].icon;
     },
 
     getStyleAt : function(index)
@@ -123,7 +123,7 @@ CommandsAutoCompleteResult.prototype = {
     getValueAt : function(index)
     {
         dump("getValueAt " + index + "\n");
-        return CommandRegistry.commands[index];
+        return CommandRegistry.commands[index].name;
     },
 
     removeValueAt : function(rowIndex, removeFromDb)
