@@ -101,23 +101,31 @@ function testCmdManagerDisplaysNoCmdError()
                          "Command manager must display a message.");
 }
 
-function CommandSource(codeSources)
+function CommandSource(codeSources, messageService)
 {
     if (codeSources.length == undefined)
         codeSources = [codeSources];
 
     this._codeSources = codeSources;
+    this._messageService = messageService;
 }
 
 CommandSource.prototype = {
     CMD_PREFIX : "cmd_",
 
+    DEFAULT_CMD_ICON : "http://www.mozilla.com/favicon.ico",
+
     getCommand : function(name)
     {
         var sandbox = Components.utils.Sandbox(window);
+        var messageService = this._messageService;
 
         sandbox.Application = Application;
         sandbox.Components = Components;
+
+        sandbox.displayMessage = function(msg, title) {
+            messageService.displayMessage(msg, title);
+        };
 
         var commands = {};
 
@@ -153,7 +161,7 @@ CommandSource.prototype = {
                 var icon = sandbox[objName].icon;
 
                 if (!icon)
-                    icon = "";
+                    icon = this.DEFAULT_CMD_ICON;
 
                 commands[cmd.name] = cmd;
                 commandNames.push(

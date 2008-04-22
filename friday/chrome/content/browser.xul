@@ -17,9 +17,12 @@
             "chrome://friday/content/builtincmds.js"
         );
 
+        var msgService = new AlertMessageService();
+
         var cmdMan = new CommandManager(
-            new CommandSource([cmdUtils, builtinCmds, PrefCommands]),
-            new MessageService()
+            new CommandSource([cmdUtils, builtinCmds, PrefCommands],
+                              msgService),
+            msgService
             );
         gFriday = new Friday(
             document.getElementById("transparent-msg-panel"),
