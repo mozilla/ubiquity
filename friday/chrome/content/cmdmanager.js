@@ -1,3 +1,5 @@
+Components.utils.import("resource://friday-modules/cmdregistry.js");
+
 function CommandManager(cmdSource, msgService)
 {
     this.__cmdSource = cmdSource;
@@ -139,14 +141,18 @@ CommandSource.prototype = {
             };
         };
 
+        var commandNames = [];
+
         for (objName in sandbox)
         {
             if (objName.indexOf(this.CMD_PREFIX) == 0)
             {
                 var cmd = makeCmdForObj(objName);
                 commands[cmd.name] = cmd;
+                commandNames.push(cmd.name);
             }
         }
+        CommandRegistry.commands = commandNames;
         return commands[name];
     }
 };

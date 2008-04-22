@@ -2,6 +2,7 @@ const Ci = Components.interfaces;
 const Cc = Components.classes;
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://friday-modules/cmdregistry.js");
 
 /* nsIAutoCompleteSearch implementation
  *
@@ -86,13 +87,19 @@ CommandsAutoCompleteResult.prototype = {
     get matchCount()
     {
         dump("matchCount\n");
-        return 1;
+        return CommandRegistry.commands.length;
     },
 
     get searchResult()
     {
         dump("searchResult\n");
-        return this.RESULT_SUCCESS;
+        if (CommandRegistry.commands.length == 0) {
+            dump("  no match\n");
+            return this.RESULT_NOMATCH;
+        } else {
+            dump("  success "+CommandRegistry.commands.length+"\n");
+            return this.RESULT_SUCCESS;
+        }
     },
 
     getCommentAt : function(index)
@@ -116,7 +123,7 @@ CommandsAutoCompleteResult.prototype = {
     getValueAt : function(index)
     {
         dump("getValueAt " + index + "\n");
-        return "hai2u";
+        return CommandRegistry.commands[index];
     },
 
     removeValueAt : function(rowIndex, removeFromDb)
