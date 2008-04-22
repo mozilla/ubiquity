@@ -58,7 +58,7 @@ start : function()
                 html += (" (in " + e.fileName +
                          ", line " + e.lineNumber + ")");
             html += "</p>";
-            output.innerHTML = html;
+            output.innerHTML += html;
             failures += 1;
         }
     }
