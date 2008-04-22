@@ -8,7 +8,7 @@ function CommandManager(cmdSource, msgService)
 
 CommandManager.prototype = {
 
-execute : function(cmdName)
+execute : function(cmdName, context)
 {
     var cmd = this.__cmdSource.getCommand(cmdName);
     if (!cmd)
@@ -17,7 +17,7 @@ execute : function(cmdName)
         );
     else {
         try {
-            cmd.execute();
+            cmd.execute(context);
         } catch (e) {
             this.__msgService.displayMessage(
                 "An exception occurred: " + e
@@ -135,8 +135,8 @@ CommandSource.prototype = {
 
             return {
                 name : cmdName,
-                execute : function() {
-                    return cmdFunc();
+                execute : function(context) {
+                    return cmdFunc(context);
                 }
             };
         };

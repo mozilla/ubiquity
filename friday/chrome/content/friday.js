@@ -17,7 +17,7 @@ function Friday(msgPanel, textBox, cmdManager)
     msgPanel.addEventListener( "popupshown",
                                function() { self.__onShown(); },
                                false );
-    textBox.onTextEntered = function() { self.__onTextEntered() };
+    textBox.onTextEntered = function() { self.__onTextEntered(); };
 }
 
 Friday.prototype = {
@@ -25,7 +25,13 @@ Friday.prototype = {
 __onTextEntered: function()
 {
     this.__msgPanel.hidePopup();
-    this.__cmdManager.execute(this.__textBox.value);
+
+    var context = {focusedWindow : this.__focusedWindow,
+                   focusedElement : this.__focusedElement};
+    this.__focusedWindow = null;
+    this.__focusedElement = null;
+
+    this.__cmdManager.execute(this.__textBox.value, context);
 },
 
 __onShown: function()
@@ -40,6 +46,9 @@ __onShown: function()
 
 openWindow: function()
 {
+    this.__focusedWindow = document.commandDispatcher.focusedWindow;
+    this.__focusedElement = document.commandDispatcher.focusedElement;
+
     this.__needsToShow = false;
     this.__msgPanel.openPopup(null, "", 0, 0, false, true);
     this.__needsToShow = true;
