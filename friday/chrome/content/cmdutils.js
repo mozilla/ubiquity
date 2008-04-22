@@ -4,7 +4,7 @@ function url(spec) {
     return ios.newURI(spec, null, null);
 }
 
-function go_to_url(url_template, query)
+function openSearchResultsInBrowser(url_template, query)
 {
     var urlstr = url_template.replace("{QUERY}", query);
 
@@ -12,7 +12,7 @@ function go_to_url(url_template, query)
     tab.focus();
 }
 
-function get_text_selection(context)
+function getTextSelection(context)
 {
     var focused = context.focusedElement;
     var retval = "";
