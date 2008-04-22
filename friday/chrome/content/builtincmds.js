@@ -17,3 +17,14 @@ function cmd_imdb(context)
     );
 }
 cmd_imdb.icon = "http://i.imdb.com/favicon.ico";
+
+function cmd_bold(context)
+{
+    var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+    {
+        doc.execCommand("bold", false, null);
+    } else {
+        displayMessage("You're not in a rich text editing field.");
+    }
+}
