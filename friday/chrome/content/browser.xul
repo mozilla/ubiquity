@@ -46,7 +46,7 @@
         </svg:svg>
         <textbox id="cmd-entry"
                  type="autocomplete"
-                 autocompletesearch="history" width="300"/>
+                 autocompletesearch="commands" width="300"/>
       </hbox>
     </panel>
   </popupset>
