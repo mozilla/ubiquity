@@ -191,3 +191,22 @@ function testCommandSourceTwoCmdsWork()
     this.assert(cmd.execute() == 6,
                 "Sample command 'bar' should execute properly.");
 }
+
+function getCommandsAutoCompleter()
+{
+    var Ci = Components.interfaces;
+    var contractId = '@mozilla.org/autocomplete/search;1?name=commands';
+    var classObj = Components.classes[contractId];
+    return classObj.createInstance(Ci.nsIAutoCompleteSearch);
+}
+
+function testCommandsAutoCompleter()
+{
+    var ac = getCommandsAutoCompleter();
+
+    ac = ac.QueryInterface(Components.interfaces.nsIAutoCompleteSearch);
+
+    this.assert(ac,
+                "AutoCompleter must present an " +
+                "nsIAutoCompleteSearch interface");
+}
