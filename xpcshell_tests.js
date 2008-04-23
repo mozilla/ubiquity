@@ -36,14 +36,6 @@ function registerComponent(filename)
     registrar.autoRegister(file);
 }
 
-function testCommandsAutoCompleterObeysQueryInterface()
-{
-    var classObj = Cc["@mozilla.org/autocomplete/search;1?name=commands"];
-    var ac = classObj.createInstance(Ci.nsIAutoCompleteSearch);
-
-    ac = ac.QueryInterface(Ci.nsIAutoCompleteSearch);
-}
-
 if (arguments.length == 0)
     throw "Please provide the path to the root of the extension.";
 

@@ -141,7 +141,7 @@ function testCommandSourceTwoCmdsWork()
                 "Sample command 'bar' should execute properly.");
 }
 
-function testCommandsAutoCompleter()
+function testCommandsAutoCompleterObeysQueryInterface()
 {
     var ac = getCommandsAutoCompleter();
 
