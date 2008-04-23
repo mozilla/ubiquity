@@ -4,9 +4,18 @@
 <script type="text/javascript" src="cmdmanager.js"></script>
 <script type="text/javascript" src="tests.js"></script>
 <script type="text/javascript" src="test.js"></script>
+<script type="text/javascript">
+function startTestSuite()
+{
+    var outputElement = document.getElementById("test-output");
+    var suite = new TestSuite(new HtmlTestResponder(outputElement),
+                              window);
+    suite.start();
+}
+</script>
 <link rel="stylesheet" href="test.css" type="text/css">
 </head>
-<body onload="TestSuite.start();">
+<body onload="startTestSuite();">
 <h1>Friday Test Suite</h1>
 <div id="test-output"></div>
 </body></html>

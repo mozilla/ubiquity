@@ -28,7 +28,47 @@ TestCase.prototype = {
     }
 };
 
-var TestSuite = {
+function HtmlTestResponder(outputElement)
+{
+    this._output = outputElement;
+}
+
+HtmlTestResponder.prototype = {
+    onStartTest : function(test)
+    {
+        dump("Running test: "+test.name+"\n");
+    },
+
+    onException : function(test, e)
+    {
+        var html = ("<p class=\"error\">Error in test " +
+                    test.name + ": " + e.message);
+        if (e.fileName)
+            html += (" (in " + e.fileName +
+                     ", line " + e.lineNumber + ")");
+        html += "</p>";
+        this._output.innerHTML += html;
+    },
+
+    onFinished : function(successes, failures)
+    {
+        var total = successes + failures;
+
+        var html = ("<p>" + successes + " out of " +
+                    total + " tests successful (" + failures +
+                    " failed).</p>");
+
+        this._output.innerHTML += html;
+    }
+};
+
+function TestSuite(responder, parent)
+{
+    this._responder = responder;
+    this._parent = parent;
+}
+
+TestSuite.prototype = {
     getTests : function(parent)
     {
         var tests = [];
@@ -42,34 +82,22 @@ var TestSuite = {
 
     start : function()
     {
-        var output = window.document.getElementById( "test-output" );
-
         var successes = 0;
         var failures = 0;
 
-        var tests = this.getTests(window);
+        var tests = this.getTests(this._parent);
 
         for each (test in tests)
         {
             try {
-                dump("Running test: "+test.name+"\n");
+                this._responder.onStartTest(test);
                 test.run();
                 successes += 1;
             } catch (e) {
-                var html = ("<p class=\"error\">Error in test " +
-                            test.name + ": " + e.message);
-                if (e.fileName)
-                    html += (" (in " + e.fileName +
-                             ", line " + e.lineNumber + ")");
-                html += "</p>";
-                output.innerHTML += html;
+                this._responder.onException(test, e);
                 failures += 1;
             }
         }
-        var total = successes + failures;
-
-        output.innerHTML += ("<p>" + successes + " out of " +
-                             total + " tests successful (" + failures +
-                             " failed).</p>");
+        this._responder.onFinished(successes, failures);
     }
 };
