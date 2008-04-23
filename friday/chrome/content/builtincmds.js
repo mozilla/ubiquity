@@ -1,22 +1,24 @@
-function cmd_google(context)
+function makeSearchCommand(urlTemplate, icon)
 {
-    var sel = getTextSelection(context);
-    openSearchResultsInBrowser(
-        "http://www.google.com/search?q={QUERY}",
-        sel
-    );
-}
-cmd_google.icon = "http://www.google.com/favicon.ico";
+    var cmd = function(context) {
+        var sel = getTextSelection(context);
+        var urlString = urlTemplate.replace("{QUERY}", sel);
 
-function cmd_imdb(context)
-{
-    var sel = getTextSelection(context);
-    openSearchResultsInBrowser(
-        "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
-        sel
-    );
+        openUrlInBrowser(urlString);
+    };
+    cmd.icon = icon;
+    return cmd;
 }
-cmd_imdb.icon = "http://i.imdb.com/favicon.ico";
+
+var cmd_google = makeSearchCommand(
+    "http://www.google.com/search?q={QUERY}",
+    "http://www.google.com/favicon.ico"
+);
+
+var cmd_imdb = makeSearchCommand(
+    "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
+    "http://i.imdb.com/favicon.ico"
+);
 
 function cmd_bold(context)
 {
@@ -27,4 +29,9 @@ function cmd_bold(context)
     } else {
         displayMessage("You're not in a rich text editing field.");
     }
+}
+
+function cmd_editor(context)
+{
+    openUrlInBrowser("chrome://friday/content/editor.html");
 }

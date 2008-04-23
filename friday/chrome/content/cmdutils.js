@@ -4,11 +4,9 @@ function url(spec) {
     return ios.newURI(spec, null, null);
 }
 
-function openSearchResultsInBrowser(url_template, query)
+function openUrlInBrowser(urlString)
 {
-    var urlstr = url_template.replace("{QUERY}", query);
-
-    var tab = Application.activeWindow.open(url(urlstr));
+    var tab = Application.activeWindow.open(url(urlString));
     tab.focus();
 }
 
