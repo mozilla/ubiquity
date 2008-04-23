@@ -33,20 +33,26 @@ function CommandSource(codeSources, messageService)
 
     this._codeSources = codeSources;
     this._messageService = messageService;
+    this._sandboxTarget = CommandSource.sandboxTarget;
 }
+
+CommandSource.sandboxTarget = this;
 
 CommandSource.prototype = {
     CMD_PREFIX : "cmd_",
 
     DEFAULT_CMD_ICON : "http://www.mozilla.com/favicon.ico",
 
+    SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components"],
+
     getCommand : function(name)
     {
-        var sandbox = Components.utils.Sandbox(window);
+        var sandbox = Components.utils.Sandbox(this._sandboxTarget);
         var messageService = this._messageService;
 
-        sandbox.Application = Application;
-        sandbox.Components = Components;
+        for (symbolName in this.SANDBOX_SYMBOLS_TO_IMPORT)
+            if (this._sandboxTarget[symbolName])
+                sandbox[symbolName] = this._sandboxTarget[symbolName];
 
         sandbox.displayMessage = function(msg, title) {
             messageService.displayMessage(msg, title);
@@ -96,7 +102,10 @@ CommandSource.prototype = {
             }
         }
         CommandRegistry.commands = commandNames;
-        return commands[name];
+        if (commands[name] != undefined)
+            return commands[name]
+        else
+            return null;
     }
 };
 

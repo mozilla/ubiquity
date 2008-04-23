@@ -50,4 +50,39 @@ if (arguments.length == 0)
 var basePath = arguments[0];
 bindDirToResource(basePath + "/friday/modules", "friday-modules");
 registerComponent(basePath + "/friday/components/autocomplete.js");
-testCommandsAutoCompleterObeysQueryInterface();
+
+var XpcShellTestResponder = {
+    onStartTest : function(test)
+    {
+        dump("Running test: "+test.name+"\n");
+    },
+
+    onException : function(test, e)
+    {
+        var text = ("Error in test " +
+                    test.name + ": " + e.message);
+        if (e.fileName)
+            text += (" (in " + e.fileName +
+                     ", line " + e.lineNumber + ")");
+        dump(text);
+    },
+
+    onFinished : function(successes, failures)
+    {
+        var total = successes + failures;
+
+        var text = (successes + " out of " +
+                    total + " tests successful (" + failures +
+                    " failed).\n");
+
+        dump(text);
+    }
+};
+
+load(basePath + "/friday/chrome/content/test.js");
+load(basePath + "/friday/chrome/content/cmdmanager.js");
+load(basePath + "/friday/chrome/content/tests.js");
+
+var suite = new TestSuite(XpcShellTestResponder, this);
+
+suite.start();
