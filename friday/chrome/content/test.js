@@ -5,6 +5,7 @@ function AssertionError(message)
 
 function TestCase(func)
 {
+    this.name = func.name;
     this.__func = func;
 }
 
@@ -28,26 +29,31 @@ TestCase.prototype = {
 };
 
 var TestSuite = {
-    start : function()
+    getTests : function(parent)
     {
-        var output = window.document.getElementById( "test-output" );
-        var parent = window;
-
         var tests = [];
 
         for (prop in parent)
             if (prop.indexOf("test") == 0)
-                tests.push(parent[prop]);
+                tests.push(new TestCase(parent[prop]));
+
+        return tests;
+    },
+
+    start : function()
+    {
+        var output = window.document.getElementById( "test-output" );
 
         var successes = 0;
         var failures = 0;
 
+        var tests = this.getTests(window);
+
         for each (test in tests)
         {
-            var testCase = new TestCase(test);
             try {
                 dump("Running test: "+test.name+"\n");
-                testCase.run();
+                test.run();
                 successes += 1;
             } catch (e) {
                 var html = ("<p class=\"error\">Error in test " +
