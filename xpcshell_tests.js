@@ -40,8 +40,8 @@ if (arguments.length == 0)
     throw "Please provide the path to the root of the extension.";
 
 var basePath = arguments[0];
-bindDirToResource(basePath + "/friday/modules", "friday-modules");
-registerComponent(basePath + "/friday/components/autocomplete.js");
+bindDirToResource(basePath + "/modules", "friday-modules");
+registerComponent(basePath + "/components/autocomplete.js");
 
 var XpcShellTestResponder = {
     onStartTest : function(test)
@@ -72,9 +72,9 @@ var XpcShellTestResponder = {
     }
 };
 
-load(basePath + "/friday/chrome/content/test.js");
-load(basePath + "/friday/chrome/content/cmdmanager.js");
-load(basePath + "/friday/chrome/content/tests.js");
+load(basePath + "/chrome/content/test.js");
+load(basePath + "/chrome/content/cmdmanager.js");
+load(basePath + "/chrome/content/tests.js");
 
 var suite = new TestSuite(XpcShellTestResponder, this);
 
