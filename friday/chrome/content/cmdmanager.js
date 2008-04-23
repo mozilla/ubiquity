@@ -50,7 +50,7 @@ CommandSource.prototype = {
         var sandbox = Components.utils.Sandbox(this._sandboxTarget);
         var messageService = this._messageService;
 
-        for (symbolName in this.SANDBOX_SYMBOLS_TO_IMPORT)
+        for each (symbolName in this.SANDBOX_SYMBOLS_TO_IMPORT)
             if (this._sandboxTarget[symbolName])
                 sandbox[symbolName] = this._sandboxTarget[symbolName];
 
@@ -102,8 +102,8 @@ CommandSource.prototype = {
             }
         }
         CommandRegistry.commands = commandNames;
-        if (commands[name] != undefined)
-            return commands[name]
+        if (commands[name])
+            return commands[name];
         else
             return null;
     }
@@ -112,7 +112,7 @@ CommandSource.prototype = {
 function getCommandsAutoCompleter()
 {
     var Ci = Components.interfaces;
-    var contractId = '@mozilla.org/autocomplete/search;1?name=commands';
+    var contractId = "@mozilla.org/autocomplete/search;1?name=commands";
     var classObj = Components.classes[contractId];
     return classObj.createInstance(Ci.nsIAutoCompleteSearch);
 }

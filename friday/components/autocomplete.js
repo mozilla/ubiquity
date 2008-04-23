@@ -2,7 +2,6 @@ const Ci = Components.interfaces;
 const Cc = Components.classes;
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://friday-modules/cmdregistry.js");
 
 /* nsIAutoCompleteSearch implementation
  *
@@ -30,6 +29,8 @@ var CommandsAutoCompleterFactory = {
 
 function CommandsAutoCompleter()
 {
+    Components.utils.import("resource://friday-modules/cmdregistry.js");
+    this._cmdRegistry = CommandRegistry;
 }
 
 CommandsAutoCompleter.prototype = {
@@ -42,7 +43,8 @@ CommandsAutoCompleter.prototype = {
     startSearch : function(searchString, searchParam, previousResult,
                            listener)
     {
-        var result = new CommandsAutoCompleteResult(searchString);
+        var result = new CommandsAutoCompleteResult(this._cmdRegistry,
+                                                    searchString);
         dump("returning "+result+"\n");
         listener.onSearchResult(this, result);
     },
@@ -54,8 +56,9 @@ CommandsAutoCompleter.prototype = {
 
 /* nsIAutoCompleteResult implementation */
 
-function CommandsAutoCompleteResult(searchString)
+function CommandsAutoCompleteResult(cmdRegistry, searchString)
 {
+    this._cmdRegistry = cmdRegistry;
     this._searchString = searchString;
 }
 
@@ -87,17 +90,17 @@ CommandsAutoCompleteResult.prototype = {
     get matchCount()
     {
         dump("matchCount\n");
-        return CommandRegistry.commands.length;
+        return this._cmdRegistry.commands.length;
     },
 
     get searchResult()
     {
         dump("searchResult\n");
-        if (CommandRegistry.commands.length == 0) {
+        if (this._cmdRegistry.commands.length == 0) {
             dump("  no match\n");
             return this.RESULT_NOMATCH;
         } else {
-            dump("  success "+CommandRegistry.commands.length+"\n");
+            dump("  success "+this._cmdRegistry.commands.length+"\n");
             return this.RESULT_SUCCESS;
         }
     },
@@ -111,7 +114,7 @@ CommandsAutoCompleteResult.prototype = {
     getImageAt : function(index)
     {
         dump("getImageAt " + index + "\n");
-        return CommandRegistry.commands[index].icon;
+        return this._cmdRegistry.commands[index].icon;
     },
 
     getStyleAt : function(index)
@@ -123,7 +126,7 @@ CommandsAutoCompleteResult.prototype = {
     getValueAt : function(index)
     {
         dump("getValueAt " + index + "\n");
-        return CommandRegistry.commands[index].name;
+        return this._cmdRegistry.commands[index].name;
     },
 
     removeValueAt : function(rowIndex, removeFromDb)

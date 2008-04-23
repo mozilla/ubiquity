@@ -36,7 +36,6 @@ function HtmlTestResponder(outputElement)
 HtmlTestResponder.prototype = {
     onStartTest : function(test)
     {
-        dump("Running test: "+test.name+"\n");
     },
 
     onException : function(test, e)
