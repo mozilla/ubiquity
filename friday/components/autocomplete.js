@@ -45,7 +45,6 @@ CommandsAutoCompleter.prototype = {
     {
         var result = new CommandsAutoCompleteResult(this._cmdRegistry,
                                                     searchString);
-        dump("returning "+result+"\n");
         listener.onSearchResult(this, result);
     },
 
@@ -77,60 +76,51 @@ CommandsAutoCompleteResult.prototype = {
 
     get defaultIndex()
     {
-        dump("defaultIndex\n");
         return 0;
     },
 
     get errorDescription()
     {
-        dump("errorDescription\n");
         return null;
     },
 
     get matchCount()
     {
-        dump("matchCount\n");
         return this._cmdRegistry.commands.length;
     },
 
     get searchResult()
     {
-        dump("searchResult\n");
         if (this._cmdRegistry.commands.length == 0) {
-            dump("  no match\n");
             return this.RESULT_NOMATCH;
         } else {
-            dump("  success "+this._cmdRegistry.commands.length+"\n");
             return this.RESULT_SUCCESS;
         }
     },
 
     getCommentAt : function(index)
     {
-        dump("getCommentAt " + index + "\n");
         return "o yea";
     },
 
     getImageAt : function(index)
     {
-        dump("getImageAt " + index + "\n");
         return this._cmdRegistry.commands[index].icon;
     },
 
     getStyleAt : function(index)
     {
-        dump("getStyleAt " + index + "\n");
         return "";
     },
 
     getValueAt : function(index)
     {
-        dump("getValueAt " + index + "\n");
         return this._cmdRegistry.commands[index].name;
     },
 
     removeValueAt : function(rowIndex, removeFromDb)
     {
+        /* TODO: Actually implement this? When does it get called? */
         dump("removeValueAt " + rowIndex + "\n");
     },
 
