@@ -64,6 +64,7 @@ var XpcShellTestResponder = {
         if (e.fileName)
             text += (" (in " + e.fileName +
                      ", line " + e.lineNumber + ")");
+        text += "\n";
         dump(text);
     },
 

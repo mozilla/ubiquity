@@ -50,9 +50,12 @@ CommandSource.prototype = {
         var sandbox = Components.utils.Sandbox(this._sandboxTarget);
         var messageService = this._messageService;
 
-        for each (symbolName in this.SANDBOX_SYMBOLS_TO_IMPORT)
-            if (this._sandboxTarget[symbolName])
+        for each (symbolName in this.SANDBOX_SYMBOLS_TO_IMPORT) {
+            if (this._sandboxTarget[symbolName] &&
+                !sandbox[symbolName]) {
                 sandbox[symbolName] = this._sandboxTarget[symbolName];
+            }
+        }
 
         sandbox.displayMessage = function(msg, title) {
             messageService.displayMessage(msg, title);
