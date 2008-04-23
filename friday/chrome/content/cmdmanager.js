@@ -67,7 +67,14 @@ CommandSource.prototype = {
         {
             var code = this._codeSources[i].getCode();
 
-            Components.utils.evalInSandbox(code, sandbox);
+            try {
+                Components.utils.evalInSandbox(code, sandbox);
+            } catch (e) {
+                messageService.displayMessage(
+                    ("An exception occurred while loading " +
+                     "commands: " + e)
+                );
+            }
         }
 
         var self = this;

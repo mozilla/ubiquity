@@ -37,7 +37,7 @@ function testCmdManagerExecutesCmd()
     this.assert(wasCalled, "command.execute() must be called.");
 }
 
-function testCmdManagerCatchesExceptions()
+function testCmdManagerCatchesExceptionsInCmds()
 {
     var mockMsgService = {
         displayMessage : function(msg) { this.lastMsg = msg }
@@ -115,6 +115,25 @@ function testCommandSourceTwoCodeSourcesWork()
     this.assert(cmd, "Sample command 'bar' should exist.");
     this.assert(cmd.execute() == 6,
                 "Sample command 'bar' should execute properly.");
+}
+
+function testCommandSourceCatchesExceptionsWhenLoading()
+{
+    var mockMsgService = {
+        displayMessage : function(msg) { this.lastMsg = msg }
+    };
+
+    var testCodeSource = {
+        getCode : function() { return "awegaewg"; }
+    };
+
+    var cmdSrc = new CommandSource(testCodeSource, mockMsgService);
+    cmdSrc.getCommand("existentcommand");
+
+    this.assert(
+        mockMsgService.lastMsg.indexOf("exception occurred") >= 0,
+        "Command source must log exception."
+    );
 }
 
 function testCommandSourceTwoCmdsWork()
