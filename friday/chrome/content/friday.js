@@ -26,59 +26,57 @@ function Friday(msgPanel, textBox, cmdManager)
 }
 
 Friday.prototype = {
+    __onTextEntered: function()
+    {
+        if (this.__textBox.value)
+            this.__needsToExecute = true;
+        this.__msgPanel.hidePopup();
+    },
 
-__onTextEntered: function()
-{
-    if (this.__textBox.value)
-        this.__needsToExecute = true;
-    this.__msgPanel.hidePopup();
-},
+    __onTextReverted: function()
+    {
+        this.__msgPanel.hidePopup();
+    },
 
-__onTextReverted: function()
-{
-    this.__msgPanel.hidePopup();
-},
+    __onHidden: function()
+    {
+        this.__showCount -= 1;
 
-__onHidden: function()
-{
-    this.__showCount -= 1;
+        if (this.__showCount > 0)
+            return;
 
-    if (this.__showCount > 0)
-        return;
+        var context = {focusedWindow : this.__focusedWindow,
+                       focusedElement : this.__focusedElement};
 
-    var context = {focusedWindow : this.__focusedWindow,
-                   focusedElement : this.__focusedElement};
+        if (this.__focusedElement)
+            this.__focusedElement.focus();
+        else {
+            if (this.__focusedWindow)
+                this.__focusedWindow.focus();
+        }
+        this.__focusedWindow = null;
+        this.__focusedElement = null;
 
-    if (this.__focusedElement)
-        this.__focusedElement.focus();
-    else {
-        if (this.__focusedWindow)
-            this.__focusedWindow.focus();
+        if (this.__needsToExecute) {
+            this.__cmdManager.execute(this.__textBox.value, context);
+            this.__needsToExecute = false;
+        }
+    },
+
+    __onShown: function()
+    {
+        if (this.__showCount == 0) {
+            this.__textBox.focus();
+            this.__textBox.select();
+        }
+        this.__showCount += 1;
+    },
+
+    openWindow: function()
+    {
+        this.__focusedWindow = document.commandDispatcher.focusedWindow;
+        this.__focusedElement = document.commandDispatcher.focusedElement;
+
+        this.__msgPanel.openPopup(null, "", 0, 0, false, true);
     }
-    this.__focusedWindow = null;
-    this.__focusedElement = null;
-
-    if (this.__needsToExecute) {
-        this.__cmdManager.execute(this.__textBox.value, context);
-        this.__needsToExecute = false;
-    }
-},
-
-__onShown: function()
-{
-    if (this.__showCount == 0) {
-        this.__textBox.focus();
-        this.__textBox.select();
-    }
-    this.__showCount += 1;
-},
-
-openWindow: function()
-{
-    this.__focusedWindow = document.commandDispatcher.focusedWindow;
-    this.__focusedElement = document.commandDispatcher.focusedElement;
-
-    this.__msgPanel.openPopup(null, "", 0, 0, false, true);
-}
-
 };
