@@ -12,6 +12,7 @@ function Friday(msgPanel, textBox, cmdManager)
     this.__textBox = textBox;
     this.__cmdManager = cmdManager;
     this.__needsToExecute = false;
+    this.__needsToRefocus = false;
 
     var self = this;
 
@@ -22,6 +23,7 @@ function Friday(msgPanel, textBox, cmdManager)
                                function() { self.__onHidden(); },
                                false );
     textBox.onTextEntered = function() { self.__onTextEntered(); };
+    textBox.onTextReverted = function() { self.__onTextReverted(); };
 }
 
 Friday.prototype = {
@@ -29,31 +31,35 @@ Friday.prototype = {
 __onTextEntered: function()
 {
     this.__needsToExecute = true;
+    this.__needsToRefocus = true;
     this.__msgPanel.hidePopup();
 },
 
-__execute: function()
+__onTextReverted: function()
 {
-    var context = {focusedWindow : this.__focusedWindow,
-                   focusedElement : this.__focusedElement};
-
-    if (this.__focusedElement)
-        this.__focusedElement.focus();
-    else {
-        if (this.__focusedWindow)
-            this.__focusedWindow.focus();
-    }
-
-    this.__focusedWindow = null;
-    this.__focusedElement = null;
-
-    this.__cmdManager.execute(this.__textBox.value, context);
+    this.__needsToRefocus = true;
+    this.__msgPanel.hidePopup();
 },
 
 __onHidden: function()
 {
+    var context = {focusedWindow : this.__focusedWindow,
+                   focusedElement : this.__focusedElement};
+
+    if (this.__needsToRefocus) {
+        if (this.__focusedElement)
+            this.__focusedElement.focus();
+        else {
+            if (this.__focusedWindow)
+                this.__focusedWindow.focus();
+        }
+        this.__focusedWindow = null;
+        this.__focusedElement = null;
+        this.__needsToRefocus = false;
+    }
+
     if (this.__needsToExecute) {
-        this.__execute();
+        this.__cmdManager.execute(this.__textBox.value, context);
         this.__needsToExecute = false;
     }
 },
