@@ -7,12 +7,11 @@
  */
 function Friday(msgPanel, textBox, cmdManager)
 {
-    this.__needsToShow = false;
     this.__msgPanel = msgPanel;
     this.__textBox = textBox;
     this.__cmdManager = cmdManager;
     this.__needsToExecute = false;
-    this.__needsToRefocus = false;
+    this.__showCount = 0;
 
     var self = this;
 
@@ -31,32 +30,32 @@ Friday.prototype = {
 __onTextEntered: function()
 {
     this.__needsToExecute = true;
-    this.__needsToRefocus = true;
     this.__msgPanel.hidePopup();
 },
 
 __onTextReverted: function()
 {
-    this.__needsToRefocus = true;
     this.__msgPanel.hidePopup();
 },
 
 __onHidden: function()
 {
+    this.__showCount -= 1;
+
+    if (this.__showCount > 0)
+        return;
+
     var context = {focusedWindow : this.__focusedWindow,
                    focusedElement : this.__focusedElement};
 
-    if (this.__needsToRefocus) {
-        if (this.__focusedElement)
-            this.__focusedElement.focus();
-        else {
-            if (this.__focusedWindow)
-                this.__focusedWindow.focus();
-        }
-        this.__focusedWindow = null;
-        this.__focusedElement = null;
-        this.__needsToRefocus = false;
+    if (this.__focusedElement)
+        this.__focusedElement.focus();
+    else {
+        if (this.__focusedWindow)
+            this.__focusedWindow.focus();
     }
+    this.__focusedWindow = null;
+    this.__focusedElement = null;
 
     if (this.__needsToExecute) {
         this.__cmdManager.execute(this.__textBox.value, context);
@@ -66,12 +65,11 @@ __onHidden: function()
 
 __onShown: function()
 {
-    if (this.__needsToShow)
-    {
+    if (this.__showCount == 0) {
         this.__textBox.focus();
         this.__textBox.select();
-        this.__needsToShow = false;
     }
+    this.__showCount += 1;
 },
 
 openWindow: function()
@@ -79,9 +77,7 @@ openWindow: function()
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
 
-    this.__needsToShow = false;
     this.__msgPanel.openPopup(null, "", 0, 0, false, true);
-    this.__needsToShow = true;
 }
 
 };
