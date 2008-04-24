@@ -11,11 +11,15 @@ function Friday(msgPanel, textBox, cmdManager)
     this.__msgPanel = msgPanel;
     this.__textBox = textBox;
     this.__cmdManager = cmdManager;
+    this.__needsToExecute = false;
 
-    self = this;
+    var self = this;
 
     msgPanel.addEventListener( "popupshown",
                                function() { self.__onShown(); },
+                               false );
+    msgPanel.addEventListener( "popuphidden",
+                               function() { self.__onHidden(); },
                                false );
     textBox.onTextEntered = function() { self.__onTextEntered(); };
 }
@@ -24,14 +28,34 @@ Friday.prototype = {
 
 __onTextEntered: function()
 {
+    this.__needsToExecute = true;
     this.__msgPanel.hidePopup();
+},
 
+__execute: function()
+{
     var context = {focusedWindow : this.__focusedWindow,
                    focusedElement : this.__focusedElement};
+
+    if (this.__focusedElement)
+        this.__focusedElement.focus();
+    else {
+        if (this.__focusedWindow)
+            this.__focusedWindow.focus();
+    }
+
     this.__focusedWindow = null;
     this.__focusedElement = null;
 
     this.__cmdManager.execute(this.__textBox.value, context);
+},
+
+__onHidden: function()
+{
+    if (this.__needsToExecute) {
+        this.__execute();
+        this.__needsToExecute = false;
+    }
 },
 
 __onShown: function()
