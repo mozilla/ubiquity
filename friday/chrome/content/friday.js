@@ -29,7 +29,8 @@ Friday.prototype = {
 
 __onTextEntered: function()
 {
-    this.__needsToExecute = true;
+    if (this.__textBox.value)
+        this.__needsToExecute = true;
     this.__msgPanel.hidePopup();
 },
 
