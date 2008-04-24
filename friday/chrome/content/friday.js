@@ -23,9 +23,18 @@ function Friday(msgPanel, textBox, cmdManager)
                                false );
     textBox.onTextEntered = function() { self.__onTextEntered(); };
     textBox.onTextReverted = function() { self.__onTextReverted(); };
+    window.addEventListener("mousemove",
+                            function(event) { self.__onMouseMove(event) },
+                            false);
 }
 
 Friday.prototype = {
+    __onMouseMove: function(event)
+    {
+        this.__x = event.screenX;
+        this.__y = event.screenY;
+    },
+
     __onTextEntered: function()
     {
         if (this.__textBox.value)
@@ -46,7 +55,9 @@ Friday.prototype = {
             return;
 
         var context = {focusedWindow : this.__focusedWindow,
-                       focusedElement : this.__focusedElement};
+                       focusedElement : this.__focusedElement,
+                       screenX : this.__x,
+                       screenY : this.__y};
 
         if (this.__focusedElement)
             this.__focusedElement.focus();
