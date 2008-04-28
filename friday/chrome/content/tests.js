@@ -170,3 +170,41 @@ function testCommandsAutoCompleterObeysQueryInterface()
                 "AutoCompleter must present an " +
                 "nsIAutoCompleteSearch interface");
 }
+
+function testCommandsAutoCompleterAutocompletes()
+{
+    CommandRegistry.commands = [
+        { name : "blargy",
+          icon : "narg" },
+        { name : "foobar",
+          icon : "foobar_icon" },
+        { name : "foo",
+          icon : "foo_icon" }
+    ];
+
+    var ac = getCommandsAutoCompleter();
+
+    var acResult = null;
+
+    var fakeListener = {
+        onSearchResult : function(ac, result) {
+            acResult = result;
+        }
+    };
+
+    ac.startSearch("foo", null, null, fakeListener);
+
+    this.assert(acResult,
+                "AutoCompleter must provide a result.");
+
+    this.assert(acResult.matchCount == 2,
+                "AutoCompleter must have two results.");
+    this.assert(acResult.getValueAt(0) == "foo",
+                "AutoCompleter must have first result 'foo'");
+    this.assert(acResult.getValueAt(1) == "foobar",
+                "AutoCompleter must have second result 'foobar'");
+    this.assert(acResult.getImageAt(0) == "foo_icon",
+                "AutoCompleter must have first img result 'foo_icon'");
+    this.assert(acResult.getImageAt(1) == "foobar_icon",
+                "AutoCompleter must have second img result 'foobar_icon'");
+}

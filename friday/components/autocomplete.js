@@ -59,6 +59,23 @@ function CommandsAutoCompleteResult(cmdRegistry, searchString)
 {
     this._cmdRegistry = cmdRegistry;
     this._searchString = searchString;
+    this._results = [];
+    for (var i = 0; i < this._cmdRegistry.commands.length; i++) {
+        var command = this._cmdRegistry.commands[i];
+        if (command.name.indexOf(this._searchString) == 0) {
+            this._results.push(command);
+        }
+    }
+
+    var sortByLength = function(a, b) {
+        if (a.name.length < b.name.length)
+            return -1;
+        if (b.name.length < a.name.length)
+            return 1;
+        return 0;
+    };
+
+    this._results.sort(sortByLength);
 }
 
 CommandsAutoCompleteResult.prototype = {
@@ -86,12 +103,12 @@ CommandsAutoCompleteResult.prototype = {
 
     get matchCount()
     {
-        return this._cmdRegistry.commands.length;
+        return this._results.length;
     },
 
     get searchResult()
     {
-        if (this._cmdRegistry.commands.length == 0) {
+        if (this._results.length == 0) {
             return this.RESULT_NOMATCH;
         } else {
             return this.RESULT_SUCCESS;
@@ -100,12 +117,12 @@ CommandsAutoCompleteResult.prototype = {
 
     getCommentAt : function(index)
     {
-        return "o yea";
+        return "";
     },
 
     getImageAt : function(index)
     {
-        return this._cmdRegistry.commands[index].icon;
+        return this._results[index].icon;
     },
 
     getStyleAt : function(index)
@@ -115,7 +132,7 @@ CommandsAutoCompleteResult.prototype = {
 
     getValueAt : function(index)
     {
-        return this._cmdRegistry.commands[index].name;
+        return this._results[index].name;
     },
 
     removeValueAt : function(rowIndex, removeFromDb)
