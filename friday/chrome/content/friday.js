@@ -85,6 +85,7 @@ Friday.prototype = {
 
     openWindow: function()
     {
+        this.__cmdManager.refresh();
         this.__focusedWindow = document.commandDispatcher.focusedWindow;
         this.__focusedElement = document.commandDispatcher.focusedElement;
 

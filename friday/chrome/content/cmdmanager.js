@@ -7,6 +7,11 @@ function CommandManager(cmdSource, msgService)
 }
 
 CommandManager.prototype = {
+    refresh : function()
+    {
+        this.__cmdSource.refresh();
+    },
+
     execute : function(cmdName, context)
     {
         var cmd = this.__cmdSource.getCommand(cmdName);
@@ -34,6 +39,8 @@ function CommandSource(codeSources, messageService)
     this._codeSources = codeSources;
     this._messageService = messageService;
     this._sandboxTarget = CommandSource.sandboxTarget;
+    this._commands = [];
+    this._commandsLoaded = false;
 }
 
 CommandSource.sandboxTarget = this;
@@ -45,7 +52,7 @@ CommandSource.prototype = {
 
     SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components"],
 
-    getCommand : function(name)
+    refresh : function()
     {
         var sandbox = Components.utils.Sandbox(this._sandboxTarget);
         var messageService = this._messageService;
@@ -65,7 +72,9 @@ CommandSource.prototype = {
 
         for (var i = 0; i < this._codeSources.length; i++)
         {
+            dump("refresh - loading code "+i+" (uri "+this._codeSources[i].uri+")\n");
             var code = this._codeSources[i].getCode();
+            dump("refresh - done loading\n");
 
             try {
                 Components.utils.evalInSandbox(code, sandbox);
@@ -111,9 +120,18 @@ CommandSource.prototype = {
                 );
             }
         }
+
+        this._commands = commands;
         CommandRegistry.commands = commandNames;
-        if (commands[name])
-            return commands[name];
+        this._commandsLoaded = true;
+    },
+
+    getCommand : function(name)
+    {
+        if (!this._commandsLoaded)
+            this.refresh();
+        if (this._commands[name])
+            return this._commands[name];
         else
             return null;
     }
