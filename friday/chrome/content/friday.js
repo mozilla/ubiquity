@@ -79,13 +79,13 @@ Friday.prototype = {
         if (this.__showCount == 0) {
             this.__textBox.focus();
             this.__textBox.select();
+            this.__cmdManager.refresh();
         }
         this.__showCount += 1;
     },
 
     openWindow: function()
     {
-        this.__cmdManager.refresh();
         this.__focusedWindow = document.commandDispatcher.focusedWindow;
         this.__focusedElement = document.commandDispatcher.focusedElement;
 
