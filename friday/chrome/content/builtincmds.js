@@ -84,25 +84,21 @@ function cmd_email(context)
         var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
 
         var continuer = function() {
-            try {
-                var gmail = gmonkey.get("1");
-                var sidebar = gmail.getNavPaneElement();
-                var composeMail = sidebar.getElementsByTagName("span")[0];
-                var event = composeMail.ownerDocument.createEvent("Events");
-                event.initEvent("click", true, false);
-                composeMail.dispatchEvent(event);
-                var active = gmail.getActiveViewElement();
-                var subject = active.getElementsByTagName("input")[0];
-                subject.value = "'"+title+"'";
-                var iframe = active.getElementsByTagName("iframe")[0];
-                iframe.contentDocument.execCommand("insertHTML", false, html);
-                gmailTab.focus();
-            } catch (e) {
-                displayMessage(e);
-            }
+            var gmail = gmonkey.get("1");
+            var sidebar = gmail.getNavPaneElement();
+            var composeMail = sidebar.getElementsByTagName("span")[0];
+            var event = composeMail.ownerDocument.createEvent("Events");
+            event.initEvent("click", true, false);
+            composeMail.dispatchEvent(event);
+            var active = gmail.getActiveViewElement();
+            var subject = active.getElementsByTagName("input")[0];
+            subject.value = "'"+title+"'";
+            var iframe = active.getElementsByTagName("iframe")[0];
+            iframe.contentDocument.execCommand("insertHTML", false, html);
+            gmailTab.focus();
         };
 
-        gmonkey.load("1", continuer);
+        gmonkey.load("1", safeWrapper(continuer));
     } else {
         displayMessage("Gmail must be open in a tab.");
     }

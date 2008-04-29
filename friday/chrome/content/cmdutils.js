@@ -52,3 +52,15 @@ function getTextSelection(context)
     }
     return retval;
 }
+
+function safeWrapper(func)
+{
+    wrappedFunc = function() {
+        try {
+            func();
+        } catch (e) {
+            displayMessage("An exception occurred: " + e);
+        }
+    };
+    return wrappedFunc;
+}
