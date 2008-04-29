@@ -149,3 +149,24 @@ function cmd_to_html(context)
         }
     }
 }
+
+function cmd_link_to_wikipedia(context)
+{
+    var text = getTextSelection(context);
+
+    if (text) {
+        var wikiText = text.replace(/ /g, "_");
+
+        var html = ("<a href=\"http://en.wikipedia.org/wiki/" +
+                    + "Special:Search/" + wikiText +
+                    "\">" + text + "</a>");
+
+        var doc = context.focusedWindow.document;
+        if (doc.designMode == "on")
+        {
+            doc.execCommand("insertHTML", false, html);
+        } else {
+            displayMessage("You're not in a rich text editing field.");
+        }
+    }
+}
