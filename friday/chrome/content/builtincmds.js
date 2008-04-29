@@ -120,3 +120,36 @@ function cmd_highlight(context)
         range.surroundContents(newNode);
     }
 }
+
+function cmd_to_rich_text(context)
+{
+    var html = getTextSelection(context);
+
+    if (html) {
+        var doc = context.focusedWindow.document;
+        if (doc.designMode == "on")
+        {
+            doc.execCommand("insertHTML", false, html);
+        } else {
+            displayMessage("You're not in a rich text editing field.");
+        }
+    }
+}
+
+function cmd_to_html(context)
+{
+    var html = getSelectedHtml(context);
+
+    if (html) {
+        var doc = context.focusedWindow.document;
+        if (doc.designMode == "on")
+        {
+            html = html.replace(/&/g, "&amp;");
+            html = html.replace(/>/g, "&gt;");
+            html = html.replace(/</g, "&lt;");
+            doc.execCommand("insertHTML", false, html);
+        } else {
+            displayMessage("You're not in a rich text editing field.");
+        }
+    }
+}
