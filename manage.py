@@ -31,4 +31,5 @@ if __name__ == "__main__":
         path_to_extension_root
         ]
 
-    subprocess.call(xpcshell_args)
+    retval = subprocess.call(xpcshell_args)
+    sys.exit(retval)

@@ -73,6 +73,9 @@ var XpcShellTestResponder = {
                     " failed).\n");
 
         dump(text);
+
+        if (failures)
+            throw Error("Some tests were unsuccessful.");
     }
 };
 
