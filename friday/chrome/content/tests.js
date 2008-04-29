@@ -176,6 +176,8 @@ function testCommandsAutoCompleterAutocompletes()
     CommandRegistry.commands = [
         { name : "blargy",
           icon : "narg" },
+        { name : "superfoous",
+          icon : "superfoous_icon" },
         { name : "foobar",
           icon : "foobar_icon" },
         { name : "foo",
@@ -197,14 +199,18 @@ function testCommandsAutoCompleterAutocompletes()
     this.assert(acResult,
                 "AutoCompleter must provide a result.");
 
-    this.assert(acResult.matchCount == 2,
-                "AutoCompleter must have two results.");
+    this.assert(acResult.matchCount == 3,
+                "AutoCompleter must have three results.");
     this.assert(acResult.getValueAt(0) == "foo",
                 "AutoCompleter must have first result 'foo'");
     this.assert(acResult.getValueAt(1) == "foobar",
                 "AutoCompleter must have second result 'foobar'");
+    this.assert(acResult.getValueAt(2) == "superfoous",
+                "AutoCompleter must have third result 'superfoous'");
     this.assert(acResult.getImageAt(0) == "foo_icon",
                 "AutoCompleter must have first img result 'foo_icon'");
     this.assert(acResult.getImageAt(1) == "foobar_icon",
                 "AutoCompleter must have second img result 'foobar_icon'");
+    this.assert(acResult.getImageAt(2) == "superfoous_icon",
+                "AutoCompleter must have third img result 'superfoous_icon'");
 }

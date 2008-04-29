@@ -62,12 +62,18 @@ function CommandsAutoCompleteResult(cmdRegistry, searchString)
     this._results = [];
     for (var i = 0; i < this._cmdRegistry.commands.length; i++) {
         var command = this._cmdRegistry.commands[i];
-        if (command.name.indexOf(this._searchString) == 0) {
+        if (command.name.indexOf(this._searchString) != -1) {
             this._results.push(command);
         }
     }
 
-    var sortByLength = function(a, b) {
+    var sortByEarliestOccurrence = function(a, b) {
+        var aIndex = a.name.indexOf(searchString);
+        var bIndex = b.name.indexOf(searchString);
+        if (aIndex < bIndex)
+            return -1;
+        if (bIndex < aIndex)
+            return 1;
         if (a.name.length < b.name.length)
             return -1;
         if (b.name.length < a.name.length)
@@ -75,7 +81,7 @@ function CommandsAutoCompleteResult(cmdRegistry, searchString)
         return 0;
     };
 
-    this._results.sort(sortByLength);
+    this._results.sort(sortByEarliestOccurrence);
 }
 
 CommandsAutoCompleteResult.prototype = {
