@@ -50,30 +50,34 @@ function findGmailTab()
     return null;
 }
 
-function cmd_simple_email(context)
+function getSelectedHtml(context)
 {
-    var gmailUrl = "https://mail.google.com/mail/?fs=1&view=cm&shva=1";
-    gmailUrl += "&body=<html><b>hai2u</b></html>";
-    var newTab = Application.activeWindow.open(url(gmailUrl));
-    newTab.focus();
+    var sel = context.focusedWindow.getSelection();
+    var html = null;
+
+    if (sel.rangeCount >= 1) {
+        var html = sel.getRangeAt(0).cloneContents();
+        var newNode = context.focusedWindow.document.createElement("p");
+        newNode.appendChild(html);
+        return newNode.innerHTML;
+    }
+    return null;
 }
 
 function cmd_email(context)
 {
-    var sel = context.focusedWindow.getSelection();
-    var document = Application.activeWindow.activeTab.document;
+    var document = context.focusedWindow.document;
     var title = document.title;
     var location = document.location;
-
-    if (sel.rangeCount >= 1) {
-        var html = sel.getRangeAt(0).cloneContents();
-        var newNode = document.createElement("p");
-        newNode.appendChild(html);
-        var theStr = newNode.innerHTML;
-        html = "<p>From the page <a href=\""+location+"\">" + title + "</a>:</p>" + theStr;
-    }
-
     var gmailTab = findGmailTab();
+    var html = getSelectedHtml(context);
+
+    if (html) {
+        html = "<p>From the page <a href=\""+location+"\">" + title + "</a>:</p>" + html;
+    } else {
+        displayMessage("No selected HTML!");
+        return;
+    }
 
     if (gmailTab) {
         var console = gmailTab.document.defaultView.wrappedJSObject.console;
@@ -99,6 +103,8 @@ function cmd_email(context)
         };
 
         gmonkey.load("1", continuer);
+    } else {
+        displayMessage("Gmail must be open in a tab.");
     }
 }
 
