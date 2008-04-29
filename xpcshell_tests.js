@@ -1,7 +1,17 @@
 var Ci = Components.interfaces;
 var Cc = Components.classes;
 
-function bindDirToResource(dirName, alias)
+function getPath(path)
+{
+    var file = Cc["@mozilla.org/file/local;1"].createInstance(
+        Ci.nsILocalFile
+    );
+
+    file.initWithPath(path);
+    return file;
+}
+
+function bindDirToResource(path, alias)
 {
     var ioService = Cc["@mozilla.org/network/io-service;1"].getService(
         Ci.nsIIOService
@@ -11,37 +21,31 @@ function bindDirToResource(dirName, alias)
         Ci.nsIResProtocolHandler
     );
 
-    var aliasFile = Cc["@mozilla.org/file/local;1"].createInstance(
-        Ci.nsILocalFile
-    );
-
-    aliasFile.initWithPath(dirName);
-
-    var aliasURI = ioService.newFileURI(aliasFile);
+    var aliasURI = ioService.newFileURI(path);
     resProt.setSubstitution(alias, aliasURI);
 }
 
-function registerComponent(filename)
+function registerComponent(path)
 {
-    var file = Cc["@mozilla.org/file/local;1"].createInstance(
-        Ci.nsILocalFile
-    );
-
-    file.initWithPath(filename);
-
     var registrar = Components.manager.QueryInterface(
         Ci.nsIComponentRegistrar
     );
 
-    registrar.autoRegister(file);
+    registrar.autoRegister(path);
 }
 
 if (arguments.length == 0)
     throw "Please provide the path to the root of the extension.";
 
 var basePath = arguments[0];
-bindDirToResource(basePath + "/modules", "friday-modules");
-registerComponent(basePath + "/components/autocomplete.js");
+var modulesDir = getPath(basePath);
+modulesDir.appendRelativePath("modules");
+bindDirToResource(modulesDir, "friday-modules");
+
+var componentPath = getPath(basePath);
+componentPath.appendRelativePath("components");
+componentPath.appendRelativePath("autocomplete.js");
+registerComponent(componentPath);
 
 var XpcShellTestResponder = {
     onStartTest : function(test)
