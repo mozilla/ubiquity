@@ -50,7 +50,7 @@ CommandSource.prototype = {
 
     DEFAULT_CMD_ICON : "http://www.mozilla.com/favicon.ico",
 
-    SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components"],
+    SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components", "window"],
 
     refresh : function()
     {
@@ -76,14 +76,7 @@ CommandSource.prototype = {
             var code = this._codeSources[i].getCode();
             dump("refresh - done loading\n");
 
-            try {
-                Components.utils.evalInSandbox(code, sandbox);
-            } catch (e) {
-                messageService.displayMessage(
-                    ("An exception occurred while loading " +
-                     "commands: " + e)
-                );
-            }
+            Components.utils.evalInSandbox(code, sandbox);
         }
 
         var self = this;

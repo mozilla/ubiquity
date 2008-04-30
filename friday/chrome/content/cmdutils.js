@@ -64,3 +64,38 @@ function safeWrapper(func)
     };
     return wrappedFunc;
 }
+
+function ajaxGet(url, callbackFunction)
+{
+  var request = new window.XMLHttpRequest();
+  request.open("GET", url, true);
+  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); 
+ 
+  request.onreadystatechange = safeWrapper( function(){
+    if (request.readyState == 4 && request.status == 200){
+      if (request.responseText){
+          callbackFunction(request.responseText);
+      }
+    }
+  } );
+
+  request.send(null);
+}
+
+function setTextSelection( html, context ){
+    var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+    {
+        doc.execCommand("insertHTML", false, html);
+    } else {
+        displayMessage(html);
+		var div = doc.createElement("span");
+		div.innerHTML = html;
+		div.style.position = "absolute";
+		div.style.top = "100px";
+		div.style.left = "100px";
+		div.style.border = "5px solid #666";
+		div.style.backgroundColor = "white";
+		doc.body.appendChild( div );
+    }	
+}

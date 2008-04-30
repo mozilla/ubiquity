@@ -20,6 +20,12 @@ var cmd_imdb = makeSearchCommand(
     "http://i.imdb.com/favicon.ico"
 );
 
+var cmd_open_map = makeSearchCommand(
+	"http://maps.google.com/?q={QUERY}",
+	"http://www.google.com/favicon.ico"
+)
+
+
 function cmd_bold(context)
 {
     var doc = context.focusedWindow.document;
@@ -170,3 +176,51 @@ function cmd_link_to_wikipedia(context)
         }
     }
 }
+
+
+function cmd_signature(context)
+{
+	setTextSelection( "-- aza | ɐzɐ --", context );
+}
+
+function cmd_swedish(context)
+{
+	
+	URL = "http://www.cs.utexas.edu/users/jbc/bork/bork.cgi?";
+	params = "type=chef&input=" + getTextSelection(context);
+	
+	ajaxGet( URL + params, function(data){
+		setTextSelection( data, context );	
+	})
+}
+
+function cmd_calculate( context )
+{
+	result = eval( getTextSelection(context) );
+	displayMessage( getTextSelection(context) );
+	setTextSelection( result, context );
+}
+
+function cmd_map( context ){
+	var apiKey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+
+	var geocodeUrl = "http://maps.google.com/maps/geo?key={key}&q={query}&output=csv";
+	var query = getTextSelection(context);
+	geocodeUrl = geocodeUrl.replace( /{key}/, apiKey )
+						   .replace( /{query}/, escape(query) )
+
+	var mapUrl = "http://maps.google.com/staticmap?";
+	mapUrl += "center={point}&zoom=14&size=512x256&maptype=mobile&markers={point},red&key={key}";
+	mapUrl = mapUrl.replace( /{key}/, apiKey );
+
+	ajaxGet( geocodeUrl, function(data){
+		data = data.split(",");
+		var point = data[2] + "," + data[3];
+		
+		var src = mapUrl.replace( /{point}/g, point );
+		var imgHtml = "<img src='{src}'/>".replace( /{src}/, src );
+		
+		setTextSelection( query + "<br/>" + imgHtml, context );
+	})
+}
+
