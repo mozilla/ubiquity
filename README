@@ -14,3 +14,4 @@ Development Notes
 * In about:config, make sure to set 'javascript.options.showInConsole'
   to 'true' or else JS chrome errors won't show up in the error
   console.
+
