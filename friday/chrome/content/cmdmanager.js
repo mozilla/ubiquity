@@ -72,11 +72,15 @@ CommandSource.prototype = {
 
         for (var i = 0; i < this._codeSources.length; i++)
         {
-            dump("refresh - loading code "+i+" (uri "+this._codeSources[i].uri+")\n");
             var code = this._codeSources[i].getCode();
-            dump("refresh - done loading\n");
 
-            Components.utils.evalInSandbox(code, sandbox);
+            try {
+                Components.utils.evalInSandbox(code, sandbox);
+            } catch (e) {
+                messageService.displayMessage(
+                    "An exception occurred while loading code: "+e
+                );
+            }
         }
 
         var self = this;
