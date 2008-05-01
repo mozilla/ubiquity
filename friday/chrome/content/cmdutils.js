@@ -99,3 +99,48 @@ function setTextSelection( html, context ){
 		doc.body.appendChild( div );
     }	
 }
+
+function injectCss( css ){
+	context = window.context;
+    var doc = context.focusedWindow.document;
+	var style = doc.createElement("style");
+	style.innerHTML = css;
+	doc.body.appendChild( style );
+}
+
+function injectHtml( html ){
+	context = window.context;
+    var doc = context.focusedWindow.document;
+	var div = doc.createElement("div");
+	div.innerHTML = html;
+	doc.body.appendChild( div.firstChild );
+}
+
+
+
+function injectJavascript( src, callback ){
+	context = window.context;
+	var doc = context.focusedWindow.document;
+		
+	var script = doc.createElement("script");	
+	script.src = src;
+	doc.body.appendChild( script );
+	
+	script.addEventListener( "load", function(){
+		doc.body.removeChild( script );
+		if( typeof(callback) == "function" ){
+			callback();
+		}
+	}, true );
+	
+}
+
+function loadJQuery( func ){
+	injectJavascript(
+		"http://code.jquery.com/jquery-latest.pack.js",
+        safeWrapper(function(){
+			window.jQuery = window.$ = context.focusedWindow.window.wrappedJSObject.jQuery;
+			func();
+	  	})
+	);
+}

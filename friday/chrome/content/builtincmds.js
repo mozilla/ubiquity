@@ -224,3 +224,63 @@ function cmd_map( context ){
 	})
 }
 
+function cmd_inject_jquery( context ){
+	injectJavascript( "http://code.jquery.com/jquery-latest.pack.js", context );
+}
+
+function cmd_fade_page( context ){
+	var fadeTime = 1000;
+	window.context = context;
+	loadJQuery( function(){
+		$ = window.jQuery;
+		$("body").fadeOut( fadeTime );
+		setTimeout( function(){ $("body").fadeIn( fadeTime ) }, fadeTime);
+	});
+}
+
+function cmd_inspect( context ){
+	window.context = context;
+	injectCss( "._highlight{ background-color: #ffffcc;}" );
+	loadJQuery( function(){
+		$ = window.jQuery;
+		$("body").mouseover( function(e){
+			$(e.target).addClass("_highlight")
+			.one( "mouseout", function(){
+				$(this).removeClass( "_highlight" );
+			})
+		});
+	});	
+}
+
+function cmd_javascript_console( context ){
+	window.context = context;
+	injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; " +
+			   "       height: 200px; background-color:#CCC; display:none; " +
+			   "       border-top: 1px solid #999; font-size: 9pt; overflow-y: auto;} " + 
+			   "#_close{ float:right; } " + 
+			   "#_box #input{ width:95%; border:none; height:2em; font-weight:bold; background:none;}" + 
+			   "#_box #output{ width:100%; white-space: pre; white-space: -moz-pre-wrap;} " + 
+			   "#_box .input{ font-weight:bold;} " +
+			   "#_box .big{ font-weight:bold;}")
+	
+	injectHtml( "<div id='_box'><span id='_close'>[Close]</span><div id='output'><div class='big'>Welcome to the Ubiquity Javascript Console</div><div>Features: autocompletion of property names with Tab, multiline input with Shift+Enter, input history with (Ctrl+) Up/Down, <a accesskey=\"M\" href=\"javascript:go('scope(Math); mathHelp();');\" title=\"Accesskey: M\">Math</a>,</div><div>Values and functions: ans, print(string), <a accesskey=\"P\" href=\"javascript:go('props(ans)')\" title=\"Accesskey: P\">props(object)</a>, <a accesskey=\"B\" href=\"javascript:go('blink(ans)')\" title=\"Accesskey: B\">blink(node)</a>, <a accesskey=\"C\" href=\"javascript:go('clear()')\" title=\"Accesskey: C\">clear()</a>, load(scriptURL), scope(object), jQuery, $</div></div><textarea id='input' wrap='off' onkeydown='inputKeydown(event)' rows='1'></textarea></div>" );
+	
+	injectJavascript(
+		"http://jconsole.com/shell.js",
+		function(){ injectHtml( "<script>init();</script>") }
+	);
+	
+	loadJQuery( function(){
+		$ = window.jQuery;
+		$("#_box").slideDown();
+		setTimeout( function(){
+			$('#_box #input').select();
+		}, 1000 )
+		$("#_close").click( function(){
+			$("#_box").slideUp();
+		})
+	})
+}
+
+
+
