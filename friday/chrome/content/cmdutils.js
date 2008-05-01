@@ -116,7 +116,15 @@ function injectHtml( html ){
 	doc.body.appendChild( div.firstChild );
 }
 
-
+function log( what ){
+	context = window.context;
+	var console = context.focusedWindow.window.wrappedJSObject.console;
+	if( typeof(console) != "undefined" ){
+		console.log( what );
+	}else{
+		displayMessage( "Firebug Required For Full Usage\n\n" + what);
+	}
+}
 
 function injectJavascript( src, callback ){
 	context = window.context;

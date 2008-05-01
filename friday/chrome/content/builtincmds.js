@@ -283,4 +283,146 @@ function cmd_javascript_console( context ){
 }
 
 
+function cmd_inject_datejs( context ){
+	window.context = context;
+	injectJavascript( "http://datejs.googlecode.com/files/date.js" );
+	
+}
+
+function getCookie( domain, name )
+{
+	var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"]
+                   		.getService(Components.interfaces.nsICookieManager);
+
+	var iter = cookieManager.enumerator;
+	while (iter.hasMoreElements()){
+		var cookie = iter.getNext();
+		if (cookie instanceof Components.interfaces.nsICookie){
+			if (cookie.host == domain && cookie.name == name ){
+				return cookie.value;
+			}	
+		}
+	}
+}
+
+function paramsToString( params ){
+	var string = "?";
+	for( key in params ){
+		string += escape(key) + "=" + escape(params[key]) + "&";
+	}
+	// Remove the trailing &
+	return string.substr( 0, string.length - 1)
+}
+
+
+function addToGoogleCalendar( eventString ){
+	var secid = getCookie("www.google.com", "secid");
+	
+	var URLS = {
+		"parse": "http://www.google.com/calendar/compose",
+		"create": "http://www.google.com/calendar/event"
+	}
+	
+	function parseGoogleJson( json ){
+		securityPreface = "while(1)";
+		var splitString = json.split( ";", 2 );
+		if( splitString[0] != securityPreface ){ displayMessage( "Unexpected Return Value" ); return; }
+		// TODO: Security hull breach!
+		return eval( splitString[1] )[0];		
+	}
+	
+	var params = paramsToString({
+		"ctext": eventString,
+		"qa-src": "QUICK_ADD_BOX"
+	})
+		
+	ajaxGet( URLS["parse"]+params, function(json){
+		var data = parseGoogleJson( json );
+		var eventText = data[1];
+		var eventStart = data[4];
+		var eventEnd = data[5];
+		var secid = getCookie("www.google.com", "secid");
+		
+		var params = paramsToString({
+			"dates": eventStart + "/" + eventEnd,
+			"text": eventText,
+			"secid": secid,
+			"action": "CREATE",
+			"output": "js"
+		})
+		
+		ajaxGet( URLS["create"]+params, function(json){
+			// TODO: Should verify this, and print appropriate positive
+			// understand feedback. Like "blah at such a time was created.
+			displayMessage( "Event created." );
+			
+			// TODO: Should iterate through open tabs and cause any open
+			// Google Calendar tabs to refresh.
+		});
+		
+	})
+	
+}
+
+
+function cmd_add_to_google_calendar( context ){
+	window.context = context;
+	var sel = getTextSelection(context);
+	if( sel.length != 0 ){
+		addToGoogleCalendar( sel );
+	}
+	else
+	{
+		
+		injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
+				   "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
+				   "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
+				   "#_input{ width: 95%; font-size:24pt;}")
+
+		injectHtml( "<div id='_box'>Enter your event below, then hit enter:<br/><input id='_input'></div>" );
+
+		loadJQuery( function(){
+			$ = window.jQuery;
+			$("#_box").slideDown();
+			$("#_input").keydown(function(e){
+				// On hitting return.
+				if(e.which == 13){
+					addToGoogleCalendar( $(this).attr("value") );
+					$("#_box").slideUp();
+					setTimeout( function(){ $("#_box").remove(); }, 400)
+				}
+			})
+			setTimeout( function(){ $("#_input").focus(); }, 400)
+			
+		})
+		
+	}
+}
+
+
+function cmd_delete(context)
+{
+    var sel = context.focusedWindow.getSelection();
+    var document = context.focusedWindow.document;
+
+    if (sel.rangeCount >= 1) {
+        var range = sel.getRangeAt(0);
+        var newNode = document.createElement("div");
+		newNode.className = "_toRemove"
+        range.surroundContents(newNode);
+    }
+
+	loadJQuery( function(){
+		$ = window.jQuery;
+		$("._toRemove").slideUp();
+	})
+}
+
+function cmd_undelete( context ){
+	loadJQuery( function(){
+		$ = window.jQuery;
+		$("._toRemove").slideDown();
+	})	
+}
+
 
