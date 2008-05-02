@@ -389,12 +389,15 @@ function cmd_add_to_google_calendar( context ){
 			$ = window.jQuery;
 			$("#_box").slideDown();
 			$("#_input").keydown(function(e){
-				// On hitting return.
-				if(e.which == 13){
-					addToGoogleCalendar( $(this).attr("value") );
-					$("#_box").slideUp();
-					setTimeout( function(){ $("#_box").remove(); }, 400)
-				}
+				switch( e.which ){
+					case 13: // RETURN
+						addToGoogleCalendar( $(this).attr("value") );
+					case 27: // ESC (and continuation of RETURN )
+						$("#_box").slideUp();
+						setTimeout( function(){ $("#_box").remove(); }, 400);
+						break;
+				}				
+				
 			})
 			setTimeout( function(){ $("#_input").focus(); }, 400)
 			
