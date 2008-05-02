@@ -100,25 +100,33 @@ function setTextSelection( html, context ){
     }	
 }
 
+// This gets the outer document of the current tab.
+function getDocument(){
+	return Application.activeWindow.activeTab.document.defaultView.wrappedJSObject.document;
+}
+
+// This gets the outer window of the current tab.
+function getWindow(){
+	return Application.activeWindow.activeTab.document.defaultView.wrappedJSObject;
+}
+
+
 function injectCss( css ){
-	context = window.context;
-    var doc = context.focusedWindow.document;
+    var doc = getDocument();
 	var style = doc.createElement("style");
 	style.innerHTML = css;
 	doc.body.appendChild( style );
 }
 
 function injectHtml( html ){
-	context = window.context;
-    var doc = context.focusedWindow.document;
+	var doc = getDocument();
 	var div = doc.createElement("div");
 	div.innerHTML = html;
 	doc.body.appendChild( div.firstChild );
 }
 
 function log( what ){
-	context = window.context;
-	var console = context.focusedWindow.window.wrappedJSObject.console;
+	var console = getWindow().console;
 	if( typeof(console) != "undefined" ){
 		console.log( what );
 	}else{
@@ -127,9 +135,8 @@ function log( what ){
 }
 
 function injectJavascript( src, callback ){
-	context = window.context;
-	var doc = context.focusedWindow.document;
-		
+	var doc = getDocument();
+			
 	var script = doc.createElement("script");	
 	script.src = src;
 	doc.body.appendChild( script );
@@ -147,7 +154,7 @@ function loadJQuery( func ){
 	injectJavascript(
 		"http://code.jquery.com/jquery-latest.pack.js",
         safeWrapper(function(){
-			window.jQuery = window.$ = context.focusedWindow.window.wrappedJSObject.jQuery;
+			window.jQuery = window.$ = getWindow().jQuery;
 			func();
 	  	})
 	);

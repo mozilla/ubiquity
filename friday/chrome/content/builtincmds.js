@@ -364,6 +364,10 @@ function addToGoogleCalendar( eventString ){
 	
 }
 
+function cmd_go( context ){
+	injectHtml( "<h1 style='position:fixed;z-index:1000;top:0px;'>HELLO</h1>" );
+}
+
 
 function cmd_add_to_google_calendar( context ){
 	window.context = context;
