@@ -369,41 +369,77 @@ function cmd_go( context ){
 }
 
 
-function cmd_add_to_google_calendar( context ){
-	window.context = context;
-	var sel = getTextSelection(context);
-	if( sel.length != 0 ){
-		addToGoogleCalendar( sel );
-	}
-	else
-	{
-		
-		injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
-				   "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
-				   "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
-				   "#_input{ width: 95%; font-size:24pt;}")
+function humanePrompt( text, callback ){
+	injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
+			   "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
+			   "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
+			   "#_input{ width: 95%; font-size:24pt;}")
 
-		injectHtml( "<div id='_box'>Enter your event below, then hit enter:<br/><input id='_input'></div>" );
+	injectHtml( "<div id='_box'>" + text + "<br/><input id='_input'></div>" );
 
-		loadJQuery( function(){
-			$ = window.jQuery;
-			$("#_box").slideDown();
-			$("#_input").keydown(function(e){
-				switch( e.which ){
-					case 13: // RETURN
-						addToGoogleCalendar( $(this).attr("value") );
-					case 27: // ESC (and continuation of RETURN )
-						$("#_box").slideUp();
-						setTimeout( function(){ $("#_box").remove(); }, 400);
-						break;
-				}				
-				
-			})
-			setTimeout( function(){ $("#_input").focus(); }, 400)
+	loadJQuery( function(){
+		$ = window.jQuery;
+		$("#_box").slideDown();
+		$("#_input").keydown(function(e){
+			switch( e.which ){
+				case 13: // RETURN
+					callback( $(this).attr("value") );
+				case 27: // ESC (and continuation of RETURN )
+					$("#_box").slideUp();
+					setTimeout( function(){ $("#_box").remove(); }, 400);
+					break;
+			}				
 			
 		})
-		
-	}
+		setTimeout( function(){ $("#_input").focus(); }, 400)
+	})	
+}
+
+function useSelectionOrPrompt( message, callback ){
+	var sel = getTextSelection(window.context);
+	if( sel.length != 0 ){ callback( sel ); }
+	else{ humanePrompt( message , callback ); }
+}
+
+
+function cmd_add_to_google_calendar( context ){
+	window.context = context;
+	var msg = "Enter your event below, then hit enter:";	
+	useSelectionOrPrompt( msg , addToGoogleCalendar );
+}
+cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
+
+function cmd_send( context ){
+	loadJQuery( function(){
+		$ = window.jQuery;
+		var gm = getWindow().gmonkey.get(1);
+		var gmail = gm.getCanvasElement();
+		$(gmail).find("button[textContent=Send]").get(0).click();
+	})	
+}
+
+cmd_send.icon = "http://google.com/favicon.ico";
+
+
+function defineWord( word ){
+	var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
+	params = paramsToString({
+		dictId: "gcide", //WordNet
+		word: word
+	});
+	
+	ajaxGet( url + params, function(xml){
+		loadJQuery( function(){
+			$ = window.jQuery;
+			var text = $(xml).find("WordDefinition").text();
+			displayMessage(text);
+		});
+	});	
+}
+
+function cmd_define( context ){
+	window.context = context;
+    useSelectionOrPrompt( "Enter word to be defined:", defineWord );
 }
 
 
