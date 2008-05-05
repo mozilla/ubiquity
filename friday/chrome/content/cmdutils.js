@@ -55,7 +55,7 @@ function getTextSelection(context)
 
 function safeWrapper(func)
 {
-    wrappedFunc = function() {
+    var wrappedFunc = function() {
         try {
             func();
         } catch (e) {
@@ -67,95 +67,107 @@ function safeWrapper(func)
 
 function ajaxGet(url, callbackFunction)
 {
-  var request = new window.XMLHttpRequest();
-  request.open("GET", url, true);
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); 
- 
-  request.onreadystatechange = safeWrapper( function(){
-    if (request.readyState == 4 && request.status == 200){
-      if (request.responseText){
-          callbackFunction(request.responseText);
-      }
-    }
-  } );
+    var request = new window.XMLHttpRequest();
+    request.open("GET", url, true);
+    request.setRequestHeader("Content-Type",
+                             "application/x-www-form-urlencoded");
 
-  request.send(null);
+    request.onreadystatechange = safeWrapper( function() {
+        if (request.readyState == 4 && request.status == 200) {
+            if (request.responseText) {
+                callbackFunction(request.responseText);
+            }
+        }
+    });
+
+    request.send(null);
 }
 
-function setTextSelection( html, context ){
+function setTextSelection( html, context )
+{
     var doc = context.focusedWindow.document;
     if (doc.designMode == "on")
     {
         doc.execCommand("insertHTML", false, html);
     } else {
         displayMessage(html);
-		var div = doc.createElement("span");
-		div.innerHTML = html;
-		div.style.position = "absolute";
-		div.style.top = "100px";
-		div.style.left = "100px";
-		div.style.border = "5px solid #666";
-		div.style.backgroundColor = "white";
-		doc.body.appendChild( div );
-    }	
+        var div = doc.createElement("span");
+        div.innerHTML = html;
+        div.style.position = "absolute";
+        div.style.top = "100px";
+        div.style.left = "100px";
+        div.style.border = "5px solid #666";
+        div.style.backgroundColor = "white";
+        doc.body.appendChild( div );
+    }
 }
 
 // This gets the outer document of the current tab.
-function getDocument(){
-	return Application.activeWindow.activeTab.document.defaultView.wrappedJSObject.document;
+function getDocument()
+{
+    return getWindow().document;
 }
 
 // This gets the outer window of the current tab.
-function getWindow(){
-	return Application.activeWindow.activeTab.document.defaultView.wrappedJSObject;
+function getWindow()
+{
+    return Application.activeWindow
+                      .activeTab
+                      .document
+                      .defaultView
+                      .wrappedJSObject;
 }
 
 
-function injectCss( css ){
+function injectCss( css )
+{
     var doc = getDocument();
-	var style = doc.createElement("style");
-	style.innerHTML = css;
-	doc.body.appendChild( style );
+    var style = doc.createElement("style");
+    style.innerHTML = css;
+    doc.body.appendChild( style );
 }
 
-function injectHtml( html ){
-	var doc = getDocument();
-	var div = doc.createElement("div");
-	div.innerHTML = html;
-	doc.body.appendChild( div.firstChild );
+function injectHtml( html )
+{
+    var doc = getDocument();
+    var div = doc.createElement("div");
+    div.innerHTML = html;
+    doc.body.appendChild( div.firstChild );
 }
 
-function log( what ){
-	var console = getWindow().console;
-	if( typeof(console) != "undefined" ){
-		console.log( what );
-	}else{
-		displayMessage( "Firebug Required For Full Usage\n\n" + what);
-	}
+function log( what )
+{
+    var console = getWindow().console;
+    if( typeof(console) != "undefined" ) {
+        console.log( what );
+    } else {
+        displayMessage( "Firebug Required For Full Usage\n\n" + what );
+    }
 }
 
-function injectJavascript( src, callback ){
-	var doc = getDocument();
-			
-	var script = doc.createElement("script");	
-	script.src = src;
-	doc.body.appendChild( script );
-	
-	script.addEventListener( "load", function(){
-		doc.body.removeChild( script );
-		if( typeof(callback) == "function" ){
-			callback();
-		}
-	}, true );
-	
+function injectJavascript( src, callback )
+{
+    var doc = getDocument();
+
+    var script = doc.createElement("script");
+    script.src = src;
+    doc.body.appendChild( script );
+
+    script.addEventListener( "load", function(){
+        doc.body.removeChild( script );
+        if ( typeof(callback) == "function" ) {
+            callback();
+        }
+    }, true );
 }
 
-function loadJQuery( func ){
-	injectJavascript(
-		"http://code.jquery.com/jquery-latest.pack.js",
-        safeWrapper(function(){
-			window.jQuery = window.$ = getWindow().jQuery;
-			func();
-	  	})
-	);
+function loadJQuery( func )
+{
+    injectJavascript(
+        "http://code.jquery.com/jquery-latest.pack.js",
+        safeWrapper( function() {
+            window.jQuery = window.$ = getWindow().jQuery;
+            func();
+        })
+    );
 }
