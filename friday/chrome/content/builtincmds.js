@@ -26,8 +26,7 @@ var cmd_imdb = makeSearchCommand(
 var cmd_open_map = makeSearchCommand(
     "http://maps.google.com/?q={QUERY}",
     "http://www.google.com/favicon.ico"
-)
-
+);
 
 function cmd_bold(context)
 {
@@ -62,7 +61,6 @@ function findGmailTab()
 function getSelectedHtml(context)
 {
     var sel = context.focusedWindow.getSelection();
-    var html = null;
 
     if (sel.rangeCount >= 1) {
         var html = sel.getRangeAt(0).cloneContents();
