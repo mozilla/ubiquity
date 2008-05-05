@@ -13,7 +13,7 @@ function AlertMessageService()
 {
     this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
 
-    this.displayMessage = function(msg, title)
+    this.displayMessage = function(msg, title, icon)
     {
         var Ci = Components.interfaces;
         var classObj = Components.classes["@mozilla.org/alerts-service;1"];
@@ -22,8 +22,9 @@ function AlertMessageService()
         if (!title)
             title = "Friday Notification";
 
-        alertService.showAlertNotification(this.ALERT_IMG,
-                                           title,
-                                           msg);
+        if (icon == undefined)
+            icon = this.ALERT_IMG;
+
+        alertService.showAlertNotification(icon, title, msg);
     };
 }

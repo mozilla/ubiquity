@@ -64,8 +64,8 @@ CommandSource.prototype = {
             }
         }
 
-        sandbox.displayMessage = function(msg, title) {
-            messageService.displayMessage(msg, title);
+        sandbox.displayMessage = function(msg, title, icon) {
+            messageService.displayMessage(msg, title, icon);
         };
 
         var commands = {};
