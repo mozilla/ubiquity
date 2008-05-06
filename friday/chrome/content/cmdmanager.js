@@ -43,7 +43,7 @@ function CommandSource(codeSources, messageService)
     this._messageService = messageService;
     this._sandboxTarget = CommandSource.sandboxTarget;
     this._commands = [];
-    this._commandsLoaded = false;
+    this._codeCache = [];
 }
 
 CommandSource.sandboxTarget = this;
@@ -57,6 +57,15 @@ CommandSource.prototype = {
                                  "commandGlobals"],
 
     refresh : function()
+    {
+        for (var i = 0; i < this._codeSources.length; i++) {
+            var code = this._codeSources[i].getCode();
+            this._codeCache[i] = code;
+        }
+        this._loadCommands();
+    },
+
+    _loadCommands : function()
     {
         var sandbox = Components.utils.Sandbox(this._sandboxTarget);
         var messageService = this._messageService;
@@ -76,7 +85,7 @@ CommandSource.prototype = {
 
         for (var i = 0; i < this._codeSources.length; i++)
         {
-            var code = this._codeSources[i].getCode();
+            var code = this._codeCache[i];
 
             try {
                 Components.utils.evalInSandbox(code, sandbox);
@@ -124,13 +133,15 @@ CommandSource.prototype = {
 
         this._commands = commands;
         CommandRegistry.commands = commandNames;
-        this._commandsLoaded = true;
     },
 
     getCommand : function(name)
     {
-        if (!this._commandsLoaded)
+        if (this._codeCache.length == 0) {
             this.refresh();
+        } else {
+            this._loadCommands();
+        }
         if (this._commands[name])
             return this._commands[name];
         else

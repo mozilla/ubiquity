@@ -215,11 +215,30 @@ function testCommandsAutoCompleterAutocompletes()
                 "AutoCompleter must have third img result 'superfoous_icon'");
 }
 
+function testCommandNonGlobalsAreResetBetweenInvocations()
+{
+    var testCode = ( "x = 1; function cmd_foo() { return x++; }" );
+
+    var testCodeSource = {
+        getCode : function() { return testCode; }
+    };
+
+    var cmdSrc = new CommandSource(testCodeSource);
+
+    var cmd = cmdSrc.getCommand("foo");
+    this.assert(cmd.execute() == 1,
+                "Command 'foo' should return 1 on first call.");
+
+    var cmd = cmdSrc.getCommand("foo");
+    this.assert(cmd.execute() == 1,
+                "Command 'foo' should return 1 on second call.");
+}
+
 function testCommandGlobalsWork()
 {
     var testCode = ( "function cmd_foo() { " +
                      "  if (commandGlobals.x) " +
-                     "    return commandGlobals.x += 1; " +
+                     "    return ++commandGlobals.x; " +
                      "  commandGlobals.x = 1; " +
                      "  return commandGlobals.x; " +
                      "}" );
@@ -233,6 +252,8 @@ function testCommandGlobalsWork()
     var cmd = cmdSrc.getCommand("foo");
     this.assert(cmd.execute() == 1,
                 "Command 'foo' should return 1 on first call.");
+
+    cmd = cmdSrc.getCommand("foo");
     this.assert(cmd.execute() == 2,
                 "Command 'foo' should return 2 on second call.");
 }
