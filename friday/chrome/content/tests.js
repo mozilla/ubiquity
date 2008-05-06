@@ -40,7 +40,7 @@ function testCmdManagerExecutesCmd()
 function testCmdManagerCatchesExceptionsInCmds()
 {
     var mockMsgService = {
-        displayMessage : function(msg) { this.lastMsg = msg }
+        displayMessage : function(msg) { this.lastMsg = msg; }
     };
 
     var fakeSource = {
@@ -62,7 +62,7 @@ function testCmdManagerDisplaysNoCmdError()
 {
     var fakeSource = { getCommand : function() { return false; } };
     var mockMsgService = {
-    displayMessage : function(msg) { this.lastMsg = msg }
+        displayMessage : function(msg) { this.lastMsg = msg; }
     };
     var cmdMan = new CommandManager( fakeSource, mockMsgService );
 
@@ -120,7 +120,7 @@ function testCommandSourceTwoCodeSourcesWork()
 function testCommandSourceCatchesExceptionsWhenLoading()
 {
     var mockMsgService = {
-        displayMessage : function(msg) { this.lastMsg = msg }
+        displayMessage : function(msg) { this.lastMsg = msg; }
     };
 
     var testCodeSource = {
