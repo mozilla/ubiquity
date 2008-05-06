@@ -214,3 +214,25 @@ function testCommandsAutoCompleterAutocompletes()
     this.assert(acResult.getImageAt(2) == "superfoous_icon",
                 "AutoCompleter must have third img result 'superfoous_icon'");
 }
+
+function testCommandGlobalsWork()
+{
+    var testCode = ( "function cmd_foo() { " +
+                     "  if (commandGlobals.x) " +
+                     "    return commandGlobals.x += 1; " +
+                     "  commandGlobals.x = 1; " +
+                     "  return commandGlobals.x; " +
+                     "}" );
+
+    var testCodeSource = {
+        getCode : function() { return testCode; }
+    };
+
+    var cmdSrc = new CommandSource(testCodeSource);
+
+    var cmd = cmdSrc.getCommand("foo");
+    this.assert(cmd.execute() == 1,
+                "Command 'foo' should return 1 on first call.");
+    this.assert(cmd.execute() == 2,
+                "Command 'foo' should return 2 on second call.");
+}

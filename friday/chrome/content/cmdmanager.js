@@ -1,5 +1,8 @@
 Components.utils.import("resource://friday-modules/cmdregistry.js");
 
+/* Global storage for use between multiple executions of commands. */
+var commandGlobals = {};
+
 function CommandManager(cmdSource, msgService)
 {
     this.__cmdSource = cmdSource;
@@ -50,7 +53,8 @@ CommandSource.prototype = {
 
     DEFAULT_CMD_ICON : "http://www.mozilla.com/favicon.ico",
 
-    SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components", "window"],
+    SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components", "window",
+                                 "commandGlobals"],
 
     refresh : function()
     {
