@@ -194,15 +194,15 @@ function cmd_swedish(context)
 
 function calculate( expr )
 {
-	context = window.context;
-	result = eval( expr );
-	setTextSelection( result, context );	
+    context = window.context;
+    result = eval( expr );
+    setTextSelection( result, context );    
 }
 
 function cmd_calculate( context )
 {
-	window.context = context;
-	useSelectionOrPrompt( "Enter expression:", calculate );
+    window.context = context;
+    useSelectionOrPrompt( "Enter expression:", calculate );
 }
 cmd_calculate.icon = "http://humanized.com/favicon.ico";
 
@@ -500,4 +500,33 @@ function cmd_undelete( context ) {
         var $ = window.jQuery;
         $("._toRemove").slideDown();
     });
+}
+
+function checkCalendar( date ) {
+	var date = getWindow().Date.parse( date );
+	date = date._toString("yyyyMMdd");
+	
+	var url = "http://www.google.com/calendar/m";	
+	var params = paramsToString({ as_sdt: date });
+	
+	// jQuery is already loaded because we've done a humane prompt before
+	// getting here.
+	var $ = window.jQuery;
+	
+	ajaxGet( url + params, function( html ) {
+		var output = "";
+		$( html ).find( ".c2" ).each( function() {
+			// Strip out the extra whitespace.
+			var text = $(this).text().replace(/[ ]+/g, " " );
+			text = text.replace( / \n /g, " ");
+			output += text + "\n";
+		});
+		displayMessage( output );
+	});
+}
+
+function cmd_check_calendar( context ) {
+    window.context = context;
+    injectJavascript( "http://datejs.googlecode.com/files/date.js" );
+    humanePrompt( "What day would you like to check?", checkCalendar);
 }
