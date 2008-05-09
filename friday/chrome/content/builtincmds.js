@@ -192,12 +192,20 @@ function cmd_swedish(context)
     });
 }
 
+function calculate( expr )
+{
+	context = window.context;
+	result = eval( expr );
+	setTextSelection( result, context );	
+}
+
 function cmd_calculate( context )
 {
-    var result = eval( getTextSelection(context) );
-    displayMessage( getTextSelection(context) );
-    setTextSelection( result, context );
+	window.context = context;
+	useSelectionOrPrompt( "Enter expression:", calculate );
 }
+cmd_calculate.icon = "http://humanized.com/favicon.ico";
+
 
 function cmd_map( context )
 {
@@ -449,7 +457,7 @@ function defineWord( word )
 {
     var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
     var params = paramsToString({
-        dictId: "gcide", //WordNet
+        dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
         word: word
     });
 
