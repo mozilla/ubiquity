@@ -491,3 +491,28 @@ function cmd_check_calendar(context) {
   injectJavascript("http://datejs.googlecode.com/files/date.js");
   humanePrompt("What day would you like to check?", checkCalendar);
 }
+
+function gmailChecker() {
+  var url = "http://mail.google.com/mail/feed/atom";
+  ajaxGet(url, function(rss){
+    loadJQuery( function(){
+      var $ = window.jQuery;
+
+      var firstEntry = $(rss).find("entry").get(0);
+
+      var newEmailId = $(firstEntry).find("id").text();
+      var subject = $(firstEntry).find("title").text();
+      var author = $(firstEntry).find("author name").text();
+      var summary = $(firstEntry).find("summary").text();
+
+      var title = author + ' says "' + subject + '"';
+
+      displayMessage( summary, title );
+    });
+  });
+}
+
+function cmd_last_mail( context ){
+  gmailChecker();
+}
+cmd_last_mail.icon = "http://gmail.com/favicon.ico";
