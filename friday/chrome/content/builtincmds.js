@@ -1,8 +1,7 @@
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-function makeSearchCommand(urlTemplate, icon)
-{
+function makeSearchCommand(urlTemplate, icon) {
     var cmd = function(context) {
         var sel = getTextSelection(context);
         var urlString = urlTemplate.replace("{QUERY}", sel);
@@ -28,24 +27,20 @@ var cmd_open_map = makeSearchCommand(
     "http://www.google.com/favicon.ico"
 );
 
-function cmd_bold(context)
-{
+function cmd_bold(context) {
     var doc = context.focusedWindow.document;
-    if (doc.designMode == "on")
-    {
+    if (doc.designMode == "on") {
         doc.execCommand("bold", false, null);
     } else {
         displayMessage("You're not in a rich text editing field.");
     }
 }
 
-function cmd_editor(context)
-{
+function cmd_editor(context) {
     openUrlInBrowser("chrome://friday/content/editor.html");
 }
 
-function findGmailTab()
-{
+function findGmailTab() {
     var window = Application.activeWindow;
 
     for (var i = 0; i < window.tabs.length; i++) {
@@ -58,8 +53,7 @@ function findGmailTab()
     return null;
 }
 
-function getSelectedHtml(context)
-{
+function getSelectedHtml(context) {
     var sel = context.focusedWindow.getSelection();
 
     if (sel.rangeCount >= 1) {
@@ -71,8 +65,7 @@ function getSelectedHtml(context)
     return null;
 }
 
-function cmd_email(context)
-{
+function cmd_email(context) {
     var document = context.focusedWindow.document;
     var title = document.title;
     var location = document.location;
@@ -80,7 +73,8 @@ function cmd_email(context)
     var html = getSelectedHtml(context);
 
     if (html) {
-        html = "<p>From the page <a href=\""+location+"\">" + title + "</a>:</p>" + html;
+        html = ("<p>From the page <a href=\"" + location +
+                "\">" + title + "</a>:</p>" + html);
     } else {
         displayMessage("No selected HTML!");
         return;
@@ -111,8 +105,7 @@ function cmd_email(context)
     }
 }
 
-function cmd_highlight(context)
-{
+function cmd_highlight(context) {
     var sel = context.focusedWindow.getSelection();
     var document = context.focusedWindow.document;
 
@@ -124,8 +117,7 @@ function cmd_highlight(context)
     }
 }
 
-function cmd_to_rich_text(context)
-{
+function cmd_to_rich_text(context) {
     var html = getTextSelection(context);
 
     if (html) {
@@ -139,8 +131,7 @@ function cmd_to_rich_text(context)
     }
 }
 
-function cmd_to_html(context)
-{
+function cmd_to_html(context) {
     var html = getSelectedHtml(context);
 
     if (html) {
@@ -156,8 +147,7 @@ function cmd_to_html(context)
     }
 }
 
-function cmd_link_to_wikipedia(context)
-{
+function cmd_link_to_wikipedia(context) {
     var text = getTextSelection(context);
 
     if (text) {
@@ -177,13 +167,11 @@ function cmd_link_to_wikipedia(context)
 }
 
 
-function cmd_signature(context)
-{
+function cmd_signature(context) {
     setTextSelection( "-- aza | ɐzɐ --", context );
 }
 
-function cmd_swedish(context)
-{
+function cmd_swedish(context) {
     var URL = "http://www.cs.utexas.edu/users/jbc/bork/bork.cgi?";
     var params = "type=chef&input=" + getTextSelection(context);
 
@@ -192,23 +180,19 @@ function cmd_swedish(context)
     });
 }
 
-function calculate( expr )
-{
-    context = window.context;
-    result = eval( expr );
-    setTextSelection( result, context );    
+function calculate( expr ) {
+    var context = window.context;
+    var result = eval( expr );
+    setTextSelection( result, context );
 }
 
-function cmd_calculate( context )
-{
+function cmd_calculate( context ) {
     window.context = context;
     useSelectionOrPrompt( "Enter expression:", calculate );
 }
 cmd_calculate.icon = "http://humanized.com/favicon.ico";
 
-
-function cmd_map( context )
-{
+function cmd_map( context ) {
     var apiKey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
 
     var geocodeUrl = "http://maps.google.com/maps/geo?key={key}&q={query}&output=csv";
@@ -232,14 +216,12 @@ function cmd_map( context )
     });
 };
 
-function cmd_inject_jquery( context )
-{
+function cmd_inject_jquery( context ) {
     injectJavascript( "http://code.jquery.com/jquery-latest.pack.js",
                       context );
 }
 
-function cmd_fade_page( context )
-{
+function cmd_fade_page( context ) {
     var fadeTime = 1000;
     window.context = context;
     loadJQuery( function() {
@@ -250,8 +232,7 @@ function cmd_fade_page( context )
     });
 }
 
-function cmd_inspect( context )
-{
+function cmd_inspect( context ) {
     window.context = context;
     injectCss( "._highlight{ background-color: #ffffcc;}" );
 
@@ -269,8 +250,7 @@ function cmd_inspect( context )
     });
 }
 
-function cmd_javascript_console( context )
-{
+function cmd_javascript_console( context ) {
     window.context = context;
     injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; " +
                "       height: 200px; background-color:#CCC; display:none; " +
@@ -301,14 +281,12 @@ function cmd_javascript_console( context )
 }
 
 
-function cmd_inject_datejs( context )
-{
+function cmd_inject_datejs( context ) {
     window.context = context;
     injectJavascript( "http://datejs.googlecode.com/files/date.js" );
 }
 
-function getCookie( domain, name )
-{
+function getCookie( domain, name ) {
     var cookieManager = Cc["@mozilla.org/cookiemanager;1"]
         .getService(Ci.nsICookieManager);
 
@@ -323,8 +301,7 @@ function getCookie( domain, name )
     }
 }
 
-function paramsToString( params )
-{
+function paramsToString( params ) {
     var string = "?";
     for( key in params ) {
         string += escape(key) + "=" + escape(params[key]) + "&";
@@ -333,9 +310,7 @@ function paramsToString( params )
     return string.substr( 0, string.length - 1);
 }
 
-
-function addToGoogleCalendar( eventString )
-{
+function addToGoogleCalendar( eventString ) {
     var secid = getCookie("www.google.com", "secid");
 
     var URLS = {
@@ -385,14 +360,12 @@ function addToGoogleCalendar( eventString )
     });
 }
 
-function cmd_go( context )
-{
+function cmd_go( context ) {
     injectHtml( "<h1 style='position:fixed;z-index:1000;top:0px;'>HELLO</h1>" );
 }
 
 
-function humanePrompt( text, callback )
-{
+function humanePrompt( text, callback ) {
     injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
                "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
                "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
@@ -410,9 +383,9 @@ function humanePrompt( text, callback )
                 case 27: // ESC (and continuation of RETURN )
                     $("#_box").slideUp();
 
-                    /* TODO: We should be able to do
-                     $("#_box").slideUp(speed, callback) but we * * get
-                     a strange security error. */
+                    // TODO: We should be able to do
+                    // $("#_box").slideUp(speed, callback) but we get
+                    // a strange security error.
 
                     setTimeout( function() { $("#_box").remove(); }, 400);
                     break;
@@ -422,8 +395,7 @@ function humanePrompt( text, callback )
     });
 }
 
-function useSelectionOrPrompt( message, callback )
-{
+function useSelectionOrPrompt( message, callback ) {
     var sel = getTextSelection(window.context);
     if ( sel.length != 0 ) {
         callback( sel );
@@ -432,16 +404,14 @@ function useSelectionOrPrompt( message, callback )
     }
 }
 
-function cmd_add_to_google_calendar( context )
-{
+function cmd_add_to_google_calendar( context ) {
     window.context = context;
     var msg = "Enter your event below, then hit enter:";
     useSelectionOrPrompt( msg , addToGoogleCalendar );
 }
 cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
 
-function cmd_send( context )
-{
+function cmd_send( context ) {
     loadJQuery( function() {
         var $ = window.jQuery;
         var gm = getWindow().gmonkey.get(1);
@@ -449,12 +419,10 @@ function cmd_send( context )
         $(gmail).find("button[textContent=Send]").get(0).click();
     });
 }
-
 cmd_send.icon = "http://google.com/favicon.ico";
 
 
-function defineWord( word )
-{
+function defineWord( word ) {
     var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
     var params = paramsToString({
         dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
@@ -470,15 +438,12 @@ function defineWord( word )
     });
 }
 
-function cmd_define( context )
-{
+function cmd_define( context ) {
     window.context = context;
     useSelectionOrPrompt( "Enter word to be defined:", defineWord );
 }
 
-
-function cmd_delete(context)
-{
+function cmd_delete(context) {
     var sel = context.focusedWindow.getSelection();
     var document = context.focusedWindow.document;
 
@@ -505,14 +470,14 @@ function cmd_undelete( context ) {
 function checkCalendar( date ) {
 	var date = getWindow().Date.parse( date );
 	date = date._toString("yyyyMMdd");
-	
-	var url = "http://www.google.com/calendar/m";	
+
+	var url = "http://www.google.com/calendar/m";
 	var params = paramsToString({ as_sdt: date });
-	
+
 	// jQuery is already loaded because we've done a humane prompt before
 	// getting here.
 	var $ = window.jQuery;
-	
+
 	ajaxGet( url + params, function( html ) {
 		var output = "";
 		$( html ).find( ".c2" ).each( function() {

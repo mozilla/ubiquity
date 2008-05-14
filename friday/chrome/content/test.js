@@ -1,10 +1,8 @@
-function AssertionError(message)
-{
+function AssertionError(message) {
     this.message = message;
 }
 
-function TestCase(func)
-{
+function TestCase(func) {
     this.name = func.name;
     this.__func = func;
 }
@@ -28,18 +26,15 @@ TestCase.prototype = {
     }
 };
 
-function HtmlTestResponder(outputElement)
-{
+function HtmlTestResponder(outputElement) {
     this._output = outputElement;
 }
 
 HtmlTestResponder.prototype = {
-    onStartTest : function(test)
-    {
+    onStartTest : function(test) {
     },
 
-    onException : function(test, e)
-    {
+    onException : function(test, e) {
         var html = ("<p class=\"error\">Error in test " +
                     test.name + ": " + e.message);
         if (e.fileName)
@@ -49,8 +44,7 @@ HtmlTestResponder.prototype = {
         this._output.innerHTML += html;
     },
 
-    onFinished : function(successes, failures)
-    {
+    onFinished : function(successes, failures) {
         var total = successes + failures;
 
         var html = ("<p>" + successes + " out of " +
@@ -61,15 +55,13 @@ HtmlTestResponder.prototype = {
     }
 };
 
-function TestSuite(responder, parent)
-{
+function TestSuite(responder, parent) {
     this._responder = responder;
     this._parent = parent;
 }
 
 TestSuite.prototype = {
-    getTests : function(parent)
-    {
+    getTests : function(parent) {
         var tests = [];
 
         for (prop in parent)
@@ -79,8 +71,7 @@ TestSuite.prototype = {
         return tests;
     },
 
-    start : function()
-    {
+    start : function() {
         var successes = 0;
         var failures = 0;
 

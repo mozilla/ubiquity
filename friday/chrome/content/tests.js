@@ -1,5 +1,4 @@
-function testCmdManagerExecutesTwoCmds()
-{
+function testCmdManagerExecutesTwoCmds() {
     var oneWasCalled = false;
     var twoWasCalled = false;
 
@@ -21,8 +20,7 @@ function testCmdManagerExecutesTwoCmds()
     this.assert(twoWasCalled, "cmd_two must be called.");
 }
 
-function testCmdManagerExecutesCmd()
-{
+function testCmdManagerExecutesCmd() {
     var wasCalled = false;
 
     var fakeSource = {
@@ -37,8 +35,7 @@ function testCmdManagerExecutesCmd()
     this.assert(wasCalled, "command.execute() must be called.");
 }
 
-function testCmdManagerCatchesExceptionsInCmds()
-{
+function testCmdManagerCatchesExceptionsInCmds() {
     var mockMsgService = {
         displayMessage : function(msg) { this.lastMsg = msg; }
     };
@@ -58,8 +55,7 @@ function testCmdManagerCatchesExceptionsInCmds()
     );
 }
 
-function testCmdManagerDisplaysNoCmdError()
-{
+function testCmdManagerDisplaysNoCmdError() {
     var fakeSource = { getCommand : function() { return false; } };
     var mockMsgService = {
         displayMessage : function(msg) { this.lastMsg = msg; }
@@ -71,8 +67,7 @@ function testCmdManagerDisplaysNoCmdError()
                          "Command manager must display a message.");
 }
 
-function testCommandSourceOneCmdWorks()
-{
+function testCommandSourceOneCmdWorks() {
     var testCode = "function cmd_foo_thing() { return 5; }";
     var testCodeSource = {
         getCode : function() { return testCode; }
@@ -88,8 +83,7 @@ function testCommandSourceOneCmdWorks()
                 "Sample command should execute properly.");
 }
 
-function testCommandSourceTwoCodeSourcesWork()
-{
+function testCommandSourceTwoCodeSourcesWork() {
     var testCode1 = "function cmd_foo() { return 5; }\n";
     var testCode2 = "function cmd_bar() { return 6; }\n";
 
@@ -117,8 +111,7 @@ function testCommandSourceTwoCodeSourcesWork()
                 "Sample command 'bar' should execute properly.");
 }
 
-function testCommandSourceCatchesExceptionsWhenLoading()
-{
+function testCommandSourceCatchesExceptionsWhenLoading() {
     var mockMsgService = {
         displayMessage : function(msg) { this.lastMsg = msg; }
     };
@@ -136,8 +129,7 @@ function testCommandSourceCatchesExceptionsWhenLoading()
     );
 }
 
-function testCommandSourceTwoCmdsWork()
-{
+function testCommandSourceTwoCmdsWork() {
     var testCode = ("function cmd_foo() { return 5; }\n" +
                     "function cmd_bar() { return 6; }\n");
 
@@ -160,8 +152,7 @@ function testCommandSourceTwoCmdsWork()
                 "Sample command 'bar' should execute properly.");
 }
 
-function testCommandsAutoCompleterObeysQueryInterface()
-{
+function testCommandsAutoCompleterObeysQueryInterface() {
     var ac = getCommandsAutoCompleter();
 
     ac = ac.QueryInterface(Components.interfaces.nsIAutoCompleteSearch);
@@ -171,8 +162,7 @@ function testCommandsAutoCompleterObeysQueryInterface()
                 "nsIAutoCompleteSearch interface");
 }
 
-function testCommandsAutoCompleterAutocompletes()
-{
+function testCommandsAutoCompleterAutocompletes() {
     CommandRegistry.commands = [
         { name : "blargy",
           icon : "narg" },
@@ -215,8 +205,7 @@ function testCommandsAutoCompleterAutocompletes()
                 "AutoCompleter must have third img result 'superfoous_icon'");
 }
 
-function testCommandNonGlobalsAreResetBetweenInvocations()
-{
+function testCommandNonGlobalsAreResetBetweenInvocations() {
     var testCode = ( "x = 1; function cmd_foo() { return x++; }" );
 
     var testCodeSource = {
@@ -234,8 +223,7 @@ function testCommandNonGlobalsAreResetBetweenInvocations()
                 "Command 'foo' should return 1 on second call.");
 }
 
-function testCommandGlobalsWork()
-{
+function testCommandGlobalsWork() {
     var testCode = ( "function cmd_foo() { " +
                      "  if (commandGlobals.x) " +
                      "    return ++commandGlobals.x; " +

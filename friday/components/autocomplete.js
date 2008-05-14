@@ -3,19 +3,17 @@ const Cc = Components.classes;
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-/* nsIAutoCompleteSearch implementation
- *
- * Any XUL textbox element that wants to use this search should set
- * its 'type' attribute to 'autocomplete' and its 'autocompletesearch'
- * attribute to 'commands'. For more information, see:
- *
- * http://developer.mozilla.org/en/docs/XUL:textbox_(Firefox_autocomplete)
- * */
+// nsIAutoCompleteSearch implementation
+//
+// Any XUL textbox element that wants to use this search should set
+// its 'type' attribute to 'autocomplete' and its 'autocompletesearch'
+// attribute to 'commands'. For more information, see:
+//
+// http://developer.mozilla.org/en/docs/XUL:textbox_(Firefox_autocomplete)
 
 var gSingleton = null;
 var CommandsAutoCompleterFactory = {
-    createInstance : function(aOuter, aIID)
-    {
+    createInstance : function(aOuter, aIID) {
         if (aOuter != null)
             throw Components.results.NS_ERROR_NO_AGGREGATION;
 
@@ -27,8 +25,7 @@ var CommandsAutoCompleterFactory = {
     }
 };
 
-function CommandsAutoCompleter()
-{
+function CommandsAutoCompleter() {
     Components.utils.import("resource://friday-modules/cmdregistry.js");
     this._cmdRegistry = CommandRegistry;
 }
@@ -41,22 +38,19 @@ CommandsAutoCompleter.prototype = {
     QueryInterface : XPCOMUtils.generateQI([Ci.nsIAutoCompleteSearch]),
 
     startSearch : function(searchString, searchParam, previousResult,
-                           listener)
-    {
+                           listener) {
         var result = new CommandsAutoCompleteResult(this._cmdRegistry,
                                                     searchString);
         listener.onSearchResult(this, result);
     },
 
-    stopSearch : function()
-    {
+    stopSearch : function() {
     }
 };
 
-/* nsIAutoCompleteResult implementation */
+// nsIAutoCompleteResult implementation
 
-function CommandsAutoCompleteResult(cmdRegistry, searchString)
-{
+function CommandsAutoCompleteResult(cmdRegistry, searchString) {
     this._cmdRegistry = cmdRegistry;
     this._searchString = searchString;
     this._results = [];
@@ -92,28 +86,23 @@ CommandsAutoCompleteResult.prototype = {
     RESULT_NOMATCH_ONGOING : 5,
     RESULT_SUCCESS_ONGOING : 6,
 
-    get searchString()
-    {
+    get searchString() {
         return this._searchString;
     },
 
-    get defaultIndex()
-    {
+    get defaultIndex() {
         return 0;
     },
 
-    get errorDescription()
-    {
+    get errorDescription() {
         return null;
     },
 
-    get matchCount()
-    {
+    get matchCount() {
         return this._results.length;
     },
 
-    get searchResult()
-    {
+    get searchResult() {
         if (this._results.length == 0) {
             return this.RESULT_NOMATCH;
         } else {
@@ -121,29 +110,24 @@ CommandsAutoCompleteResult.prototype = {
         }
     },
 
-    getCommentAt : function(index)
-    {
+    getCommentAt : function(index) {
         return "";
     },
 
-    getImageAt : function(index)
-    {
+    getImageAt : function(index) {
         return this._results[index].icon;
     },
 
-    getStyleAt : function(index)
-    {
+    getStyleAt : function(index) {
         return "";
     },
 
-    getValueAt : function(index)
-    {
+    getValueAt : function(index) {
         return this._results[index].name;
     },
 
-    removeValueAt : function(rowIndex, removeFromDb)
-    {
-        /* TODO: Actually implement this? When does it get called? */
+    removeValueAt : function(rowIndex, removeFromDb) {
+        // TODO: Actually implement this? When does it get called?
         dump("removeValueAt " + rowIndex + "\n");
     },
 

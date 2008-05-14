@@ -1,8 +1,7 @@
 var Ci = Components.interfaces;
 var Cc = Components.classes;
 
-function getPath(path)
-{
+function getPath(path) {
     var file = Cc["@mozilla.org/file/local;1"].createInstance(
         Ci.nsILocalFile
     );
@@ -11,8 +10,7 @@ function getPath(path)
     return file;
 }
 
-function bindDirToResource(path, alias)
-{
+function bindDirToResource(path, alias) {
     var ioService = Cc["@mozilla.org/network/io-service;1"].getService(
         Ci.nsIIOService
     );
@@ -25,8 +23,7 @@ function bindDirToResource(path, alias)
     resProt.setSubstitution(alias, aliasURI);
 }
 
-function registerComponent(path)
-{
+function registerComponent(path) {
     var registrar = Components.manager.QueryInterface(
         Ci.nsIComponentRegistrar
     );
@@ -48,13 +45,11 @@ componentPath.appendRelativePath("autocomplete.js");
 registerComponent(componentPath);
 
 var XpcShellTestResponder = {
-    onStartTest : function(test)
-    {
+    onStartTest : function(test) {
         dump("Running test: "+test.name+"\n");
     },
 
-    onException : function(test, e)
-    {
+    onException : function(test, e) {
         var text = ("Error in test " +
                     test.name + ": " + e.message);
         if (e.fileName)
@@ -64,8 +59,7 @@ var XpcShellTestResponder = {
         dump(text);
     },
 
-    onFinished : function(successes, failures)
-    {
+    onFinished : function(successes, failures) {
         var total = successes + failures;
 
         var text = (successes + " out of " +

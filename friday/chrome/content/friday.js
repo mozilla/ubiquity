@@ -1,12 +1,10 @@
-/*
- * Creates a Friday interface and binds it to the given message
- * panel and text box.
- *
- * The message panel should be a xul:panel instance, and the text box
- * should be a xul:textbox instance with Firefox autocomplete.
- */
-function Friday(msgPanel, textBox, cmdManager)
-{
+// Creates a Friday interface and binds it to the given message
+// panel and text box.
+//
+// The message panel should be a xul:panel instance, and the text box
+// should be a xul:textbox instance with Firefox autocomplete.
+
+function Friday(msgPanel, textBox, cmdManager) {
     this.__msgPanel = msgPanel;
     this.__textBox = textBox;
     this.__cmdManager = cmdManager;
@@ -29,26 +27,22 @@ function Friday(msgPanel, textBox, cmdManager)
 }
 
 Friday.prototype = {
-    __onMouseMove: function(event)
-    {
+    __onMouseMove: function(event) {
         this.__x = event.screenX;
         this.__y = event.screenY;
     },
 
-    __onTextEntered: function()
-    {
+    __onTextEntered: function() {
         if (this.__textBox.value)
             this.__needsToExecute = true;
         this.__msgPanel.hidePopup();
     },
 
-    __onTextReverted: function()
-    {
+    __onTextReverted: function() {
         this.__msgPanel.hidePopup();
     },
 
-    __onHidden: function()
-    {
+    __onHidden: function() {
         this.__showCount -= 1;
 
         if (this.__showCount > 0)
@@ -74,8 +68,7 @@ Friday.prototype = {
         }
     },
 
-    __onShown: function()
-    {
+    __onShown: function() {
         if (this.__showCount == 0) {
             this.__textBox.focus();
             this.__textBox.select();
@@ -84,8 +77,7 @@ Friday.prototype = {
         this.__showCount += 1;
     },
 
-    openWindow: function()
-    {
+    openWindow: function() {
         this.__focusedWindow = document.commandDispatcher.focusedWindow;
         this.__focusedElement = document.commandDispatcher.focusedElement;
 

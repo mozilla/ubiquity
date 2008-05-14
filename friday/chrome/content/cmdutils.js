@@ -1,5 +1,4 @@
-function __TimerCallback(callback)
-{
+function __TimerCallback(callback) {
     Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
     var Ci = Components.interfaces;
 
@@ -13,8 +12,7 @@ __TimerCallback.prototype = {
     }
 };
 
-function setTimeout(callback, delay)
-{
+function setTimeout(callback, delay) {
     var classObj = Components.classes["@mozilla.org/timer;1"];
     var timer = classObj.createInstance(Components.interfaces.nsITimer);
 
@@ -29,14 +27,12 @@ function url(spec) {
     return ios.newURI(spec, null, null);
 }
 
-function openUrlInBrowser(urlString)
-{
+function openUrlInBrowser(urlString) {
     var tab = Application.activeWindow.open(url(urlString));
     tab.focus();
 }
 
-function getTextSelection(context)
-{
+function getTextSelection(context) {
     var focused = context.focusedElement;
     var retval = "";
 
@@ -53,8 +49,7 @@ function getTextSelection(context)
     return retval;
 }
 
-function safeWrapper(func)
-{
+function safeWrapper(func) {
     var wrappedFunc = function() {
         try {
             func();
@@ -65,8 +60,7 @@ function safeWrapper(func)
     return wrappedFunc;
 }
 
-function ajaxGet(url, callbackFunction)
-{
+function ajaxGet(url, callbackFunction) {
     var request = new window.XMLHttpRequest();
     request.open("GET", url, true);
     request.setRequestHeader("Content-Type",
@@ -83,8 +77,7 @@ function ajaxGet(url, callbackFunction)
     request.send(null);
 }
 
-function setTextSelection( html, context )
-{
+function setTextSelection( html, context ) {
     var doc = context.focusedWindow.document;
     if (doc.designMode == "on")
     {
@@ -103,14 +96,12 @@ function setTextSelection( html, context )
 }
 
 // This gets the outer document of the current tab.
-function getDocument()
-{
+function getDocument() {
     return getWindow().document;
 }
 
 // This gets the outer window of the current tab.
-function getWindow()
-{
+function getWindow() {
     return Application.activeWindow
                       .activeTab
                       .document
@@ -119,24 +110,21 @@ function getWindow()
 }
 
 
-function injectCss( css )
-{
+function injectCss( css ) {
     var doc = getDocument();
     var style = doc.createElement("style");
     style.innerHTML = css;
     doc.body.appendChild( style );
 }
 
-function injectHtml( html )
-{
+function injectHtml( html ) {
     var doc = getDocument();
     var div = doc.createElement("div");
     div.innerHTML = html;
     doc.body.appendChild( div.firstChild );
 }
 
-function log( what )
-{
+function log( what ) {
     var console = getWindow().console;
     if( typeof(console) != "undefined" ) {
         console.log( what );
@@ -145,8 +133,7 @@ function log( what )
     }
 }
 
-function injectJavascript( src, callback )
-{
+function injectJavascript( src, callback ) {
     var doc = getDocument();
 
     var script = doc.createElement("script");
@@ -161,8 +148,7 @@ function injectJavascript( src, callback )
     }, true );
 }
 
-function loadJQuery( func )
-{
+function loadJQuery( func ) {
     injectJavascript(
         "http://code.jquery.com/jquery-latest.pack.js",
         safeWrapper( function() {

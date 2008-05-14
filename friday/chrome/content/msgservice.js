@@ -1,7 +1,5 @@
-function ConsoleMessageService()
-{
-    this.displayMessage = function(msg, title)
-    {
+function ConsoleMessageService() {
+    this.displayMessage = function(msg, title) {
         if (!title)
             title = "Friday Message";
 
@@ -9,12 +7,10 @@ function ConsoleMessageService()
     };
 }
 
-function AlertMessageService()
-{
+function AlertMessageService() {
     this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
 
-    this.displayMessage = function(msg, title, icon)
-    {
+    this.displayMessage = function(msg, title, icon) {
         var Ci = Components.interfaces;
         var classObj = Components.classes["@mozilla.org/alerts-service;1"];
         var alertService = classObj.getService(Ci.nsIAlertsService);
