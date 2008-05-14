@@ -31,8 +31,9 @@ function registerComponent(path) {
     registrar.autoRegister(path);
 }
 
-if (arguments.length == 0)
+if (arguments.length === 0) {
     throw "Please provide the path to the root of the extension.";
+}
 
 var basePath = arguments[0];
 var modulesDir = getPath(basePath);
@@ -52,9 +53,10 @@ var XpcShellTestResponder = {
     onException : function(test, e) {
         var text = ("Error in test " +
                     test.name + ": " + e.message);
-        if (e.fileName)
+        if (e.fileName) {
             text += (" (in " + e.fileName +
                      ", line " + e.lineNumber + ")");
+        }
         text += "\n";
         dump(text);
     },
@@ -68,8 +70,9 @@ var XpcShellTestResponder = {
 
         dump(text);
 
-        if (failures)
-            throw Error("Some tests were unsuccessful.");
+        if (failures) {
+            throw new Error("Some tests were unsuccessful.");
+        }
     }
 };
 
