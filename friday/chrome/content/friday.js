@@ -22,7 +22,7 @@ function Friday(msgPanel, textBox, cmdManager) {
   textBox.onTextEntered = function() { self.__onTextEntered(); };
   textBox.onTextReverted = function() { self.__onTextReverted(); };
   window.addEventListener("mousemove",
-                          function(event) { self.__onMouseMove(event) },
+                          function(event) { self.__onMouseMove(event); },
                           false);
 }
 
