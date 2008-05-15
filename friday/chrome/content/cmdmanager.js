@@ -1,8 +1,5 @@
 Components.utils.import("resource://friday-modules/cmdregistry.js");
 
-// Global storage for use between multiple executions of commands.
-var commandGlobals = {};
-
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
@@ -31,22 +28,17 @@ function CommandSource(codeSources, messageService) {
   if (codeSources.length == undefined)
     codeSources = [codeSources];
 
+  this._sandboxFactory = new SandboxFactory(messageService);
   this._codeSources = codeSources;
   this._messageService = messageService;
-  this._sandboxTarget = CommandSource.sandboxTarget;
   this._commands = [];
   this._codeCache = [];
 }
-
-CommandSource.sandboxTarget = this;
 
 CommandSource.prototype = {
   CMD_PREFIX : "cmd_",
 
   DEFAULT_CMD_ICON : "http://www.mozilla.com/favicon.ico",
-
-  SANDBOX_SYMBOLS_TO_IMPORT : ["Application", "Components", "window",
-                               "commandGlobals"],
 
   refresh : function() {
     for (var i = 0; i < this._codeSources.length; i++) {
@@ -57,19 +49,7 @@ CommandSource.prototype = {
   },
 
   _loadCommands : function() {
-    var sandbox = Components.utils.Sandbox(this._sandboxTarget);
-    var messageService = this._messageService;
-
-    for each (symbolName in this.SANDBOX_SYMBOLS_TO_IMPORT) {
-      if (this._sandboxTarget[symbolName] &&
-          !sandbox[symbolName]) {
-        sandbox[symbolName] = this._sandboxTarget[symbolName];
-      }
-    }
-
-    sandbox.displayMessage = function(msg, title, icon) {
-      messageService.displayMessage(msg, title, icon);
-    };
+    var sandbox = this._sandboxFactory.makeSandbox();
 
     var commands = {};
 
@@ -79,7 +59,7 @@ CommandSource.prototype = {
       try {
         Components.utils.evalInSandbox(code, sandbox);
       } catch (e) {
-        messageService.displayMessage(
+        this._messageService.displayMessage(
           "An exception occurred while loading code: "+e
         );
       }

@@ -70,6 +70,7 @@ var XpcShellTestResponder = {
 };
 
 load(basePath + "/chrome/content/test.js");
+load(basePath + "/chrome/content/sandboxfactory.js");
 load(basePath + "/chrome/content/cmdmanager.js");
 load(basePath + "/chrome/content/tests.js");
 

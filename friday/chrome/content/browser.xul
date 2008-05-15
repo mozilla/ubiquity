@@ -2,6 +2,7 @@
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
   <script src="friday.js"/>
+  <script src="sandboxfactory.js"/>
   <script src="cmdmanager.js"/>
   <script src="msgservice.js"/>
   <script src="prefcommands.js"/>

@@ -225,10 +225,10 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
 
 function testCommandGlobalsWork() {
   var testCode = ( "function cmd_foo() { " +
-                   "  if (commandGlobals.x) " +
-                   "    return ++commandGlobals.x; " +
-                   "  commandGlobals.x = 1; " +
-                   "  return commandGlobals.x; " +
+                   "  if (globals.x) " +
+                   "    return ++globals.x; " +
+                   "  globals.x = 1; " +
+                   "  return globals.x; " +
                    "}" );
 
   var testCodeSource = {
