@@ -18,9 +18,9 @@
     </em:targetApplication>
    
     <!-- Front End MetaData -->
-    <em:name>Friday</em:name>
+    <em:name>Ubiquity</em:name>
     <em:description>An extension that allows for the use of dynamic commands in Firefox.</em:description>
     <em:creator>Mozilla Corporation</em:creator>
-    <em:homepageURL>http://labs.mozilla.com/projects/friday</em:homepageURL>
+    <em:homepageURL>http://labs.mozilla.com/projects/ubiquity</em:homepageURL>
   </Description>
 </RDF>
