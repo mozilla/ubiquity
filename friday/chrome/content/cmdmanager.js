@@ -24,11 +24,13 @@ CommandManager.prototype = {
   }
 };
 
-function CommandSource(codeSources, messageService) {
+function CommandSource(codeSources, messageService, sandboxFactory) {
   if (codeSources.length == undefined)
     codeSources = [codeSources];
 
-  this._sandboxFactory = new SandboxFactory(messageService);
+  if (sandboxFactory == undefined)
+    sandboxFactory = new SandboxFactory();
+  this._sandboxFactory = sandboxFactory;
   this._codeSources = codeSources;
   this._messageService = messageService;
   this._commands = [];

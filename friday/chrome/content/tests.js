@@ -235,7 +235,9 @@ function testCommandGlobalsWork() {
     getCode : function() { return testCode; }
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var sandboxFactory = new SandboxFactory({globals: {}});
+
+  var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
 
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,

@@ -6,40 +6,7 @@
   <script src="cmdmanager.js"/>
   <script src="msgservice.js"/>
   <script src="prefcommands.js"/>
-  <script>
-    <![CDATA[
-    function fridaySetup()
-    {
-      var cmdUtils = new UriCodeSource(
-        "chrome://friday/content/cmdutils.js"
-      );
-
-      var builtinCmds = new UriCodeSource(
-        "chrome://friday/content/builtincmds.js"
-      );
-
-      var msgService = new AlertMessageService();
-
-      var cmdMan = new CommandManager(
-        new CommandSource([cmdUtils, builtinCmds, PrefCommands],
-                          msgService),
-        msgService
-      );
-      gFriday = new Friday(
-        document.getElementById("transparent-msg-panel"),
-        document.getElementById("cmd-entry"),
-        cmdMan
-      );
-    }
-
-    function fridayTeardown()
-    {
-    }
-
-    window.addEventListener("load", fridaySetup, false);
-    window.addEventListener("unload", fridayTeardown, false);
-    ]]>
-  </script>
+  <script src="browser.js"/>
   <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"
          oncommand="gFriday.openWindow();"/>
