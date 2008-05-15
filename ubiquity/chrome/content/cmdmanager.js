@@ -1,4 +1,4 @@
-Components.utils.import("resource://friday-modules/cmdregistry.js");
+Components.utils.import("resource://ubiquity-modules/cmdregistry.js");
 
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;

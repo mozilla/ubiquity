@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-  <script src="friday.js"/>
+  <script src="ubiquity.js"/>
   <script src="sandboxfactory.js"/>
   <script src="cmdmanager.js"/>
   <script src="msgservice.js"/>
@@ -9,7 +9,7 @@
   <script src="browser.js"/>
   <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"
-         oncommand="gFriday.openWindow();"/>
+         oncommand="gUbiquity.openWindow();"/>
   </keyset>
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel"

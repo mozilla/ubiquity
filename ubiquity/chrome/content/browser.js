@@ -1,13 +1,13 @@
-var gFriday = null;
+var gUbiquity = null;
 
-function fridaySetup()
+function ubiquitySetup()
 {
   var cmdUtils = new UriCodeSource(
-    "chrome://friday/content/cmdutils.js"
+    "chrome://ubiquity/content/cmdutils.js"
   );
 
   var builtinCmds = new UriCodeSource(
-    "chrome://friday/content/builtincmds.js"
+    "chrome://ubiquity/content/builtincmds.js"
   );
 
   var msgService = new AlertMessageService();
@@ -31,16 +31,16 @@ function fridaySetup()
     msgService
   );
 
-  gFriday = new Friday(
+  gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan
   );
 }
 
-function fridayTeardown()
+function ubiquityTeardown()
 {
 }
 
-window.addEventListener("load", fridaySetup, false);
-window.addEventListener("unload", fridayTeardown, false);
+window.addEventListener("load", ubiquitySetup, false);
+window.addEventListener("unload", ubiquityTeardown, false);

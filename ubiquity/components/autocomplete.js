@@ -25,7 +25,7 @@ var CommandsAutoCompleterFactory = {
 };
 
 function CommandsAutoCompleter() {
-  Components.utils.import("resource://friday-modules/cmdregistry.js");
+  Components.utils.import("resource://ubiquity-modules/cmdregistry.js");
   this._cmdRegistry = CommandRegistry;
 }
 

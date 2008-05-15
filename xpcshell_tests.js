@@ -33,7 +33,7 @@ if (arguments.length === 0) {
 var basePath = arguments[0];
 var modulesDir = getPath(basePath);
 modulesDir.appendRelativePath("modules");
-bindDirToResource(modulesDir, "friday-modules");
+bindDirToResource(modulesDir, "ubiquity-modules");
 
 var componentPath = getPath(basePath);
 componentPath.appendRelativePath("components");

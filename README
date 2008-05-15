@@ -1,9 +1,9 @@
 Test Suite
 ----------
 
-* Once the extension is installed, the Friday test suite can be run at:
+* Once the extension is installed, the Ubiquity test suite can be run at:
 
-    chrome://friday/content/test.html
+    chrome://ubiquity/content/test.html
 
 Development Notes
 -----------------

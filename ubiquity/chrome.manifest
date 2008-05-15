@@ -1,0 +1,3 @@
+resource ubiquity-modules modules/
+content     ubiquity    chrome/content/
+overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul

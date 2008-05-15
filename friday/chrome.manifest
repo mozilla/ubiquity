@@ -1,3 +1,0 @@
-resource friday-modules modules/
-content     friday    chrome/content/
-overlay chrome://browser/content/browser.xul chrome://friday/content/browser.xul

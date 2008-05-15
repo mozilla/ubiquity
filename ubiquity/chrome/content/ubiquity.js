@@ -1,10 +1,10 @@
-// Creates a Friday interface and binds it to the given message
+// Creates a Ubiquity interface and binds it to the given message
 // panel and text box.
 //
 // The message panel should be a xul:panel instance, and the text box
 // should be a xul:textbox instance with Firefox autocomplete.
 
-function Friday(msgPanel, textBox, cmdManager) {
+function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__msgPanel = msgPanel;
   this.__textBox = textBox;
   this.__cmdManager = cmdManager;
@@ -26,7 +26,7 @@ function Friday(msgPanel, textBox, cmdManager) {
                           false);
 }
 
-Friday.prototype = {
+Ubiquity.prototype = {
   __onMouseMove: function(event) {
     this.__x = event.screenX;
     this.__y = event.screenY;

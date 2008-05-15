@@ -38,7 +38,7 @@ function cmd_bold(context) {
 }
 
 function cmd_editor(context) {
-  openUrlInBrowser("chrome://friday/content/editor.html");
+  openUrlInBrowser("chrome://ubiquity/content/editor.html");
 }
 
 function findGmailTab() {

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     main = __import__("__main__")
     mydir = os.path.abspath(os.path.split(main.__file__)[0])
 
-    path_to_extension_root = os.path.join(mydir, "friday")
+    path_to_extension_root = os.path.join(mydir, "ubiquity")
 
     if subprocess.call(["which", "xpcshell"],
                        stdout=subprocess.PIPE) != 0:

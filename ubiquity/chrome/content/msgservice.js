@@ -1,7 +1,7 @@
 function ConsoleMessageService() {
   this.displayMessage = function(msg, title) {
     if (!title)
-      title = "Friday Message";
+      title = "Ubiquity Message";
 
     dump(title+": "+msg+"\n");
   };
@@ -16,7 +16,7 @@ function AlertMessageService() {
     var alertService = classObj.getService(Ci.nsIAlertsService);
 
     if (!title)
-      title = "Friday Notification";
+      title = "Ubiquity Notification";
 
     if (icon == undefined)
       icon = this.ALERT_IMG;
