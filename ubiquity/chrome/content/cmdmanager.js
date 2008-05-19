@@ -20,6 +20,7 @@ CommandManager.prototype = {
       } catch (e) {
         this.__msgService.displayMessage("An exception occurred: " + e);
       }
+  }
 };
 
 function CommandSource(codeSources, messageService, sandboxFactory) {
