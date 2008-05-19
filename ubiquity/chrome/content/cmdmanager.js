@@ -14,14 +14,12 @@ CommandManager.prototype = {
     var cmd = this.__cmdSource.getCommand(cmdName);
     if (!cmd)
       this.__msgService.displayMessage("No command called " + cmdName + ".");
-    else {
+    else
       try {
         cmd.execute(context);
       } catch (e) {
         this.__msgService.displayMessage("An exception occurred: " + e);
       }
-    }
-  }
 };
 
 function CommandSource(codeSources, messageService, sandboxFactory) {
@@ -84,7 +82,7 @@ CommandSource.prototype = {
 
     var commandNames = [];
 
-    for (objName in sandbox) {
+    for (objName in sandbox)
       if (objName.indexOf(this.CMD_PREFIX) == 0) {
         var cmd = makeCmdForObj(objName);
         var icon = sandbox[objName].icon;
@@ -96,7 +94,6 @@ CommandSource.prototype = {
         commandNames.push({name : cmd.name,
                            icon : icon});
       }
-    }
 
     this._commands = commands;
     CommandRegistry.commands = commandNames;
