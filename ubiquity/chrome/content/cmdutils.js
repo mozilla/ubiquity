@@ -88,7 +88,7 @@ function ajaxGet(url, callbackFunction) {
   request.send(null);
 }
 
-function setTextSelection(html, context) {
+function setTextSelection(html) {
   var doc = context.focusedWindow.document;
   if (doc.designMode == "on")
     doc.execCommand("insertHTML", false, html);
