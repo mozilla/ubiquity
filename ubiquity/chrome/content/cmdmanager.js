@@ -74,7 +74,8 @@ CommandSource.prototype = {
       return {
         name : cmdName,
         execute : function(context) {
-          return cmdFunc(context);
+          sandbox.context = context;
+          return cmdFunc();
         }
       };
     };

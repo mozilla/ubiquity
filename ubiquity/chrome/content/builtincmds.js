@@ -1,6 +1,6 @@
 function makeSearchCommand(urlTemplate, icon) {
-  var cmd = function(context) {
-    var sel = getTextSelection(context);
+  var cmd = function() {
+    var sel = getTextSelection();
     var urlString = urlTemplate.replace("{QUERY}", sel);
 
     openUrlInBrowser(urlString);
@@ -25,7 +25,7 @@ var cmd_open_map = makeSearchCommand(
   "http://www.google.com/favicon.ico"
 );
 
-function cmd_bold(context) {
+function cmd_bold() {
   var doc = context.focusedWindow.document;
 
   if (doc.designMode == "on")
@@ -34,7 +34,7 @@ function cmd_bold(context) {
     displayMessage("You're not in a rich text editing field.");
 }
 
-function cmd_editor(context) {
+function cmd_editor() {
   openUrlInBrowser("chrome://ubiquity/content/editor.html");
 }
 
@@ -51,25 +51,12 @@ function findGmailTab() {
   return null;
 }
 
-function getSelectedHtml(context) {
-  var sel = context.focusedWindow.getSelection();
-
-  if (sel.rangeCount >= 1) {
-    var html = sel.getRangeAt(0).cloneContents();
-    var newNode = context.focusedWindow.document.createElement("p");
-    newNode.appendChild(html);
-    return newNode.innerHTML;
-  }
-
-  return null;
-}
-
-function cmd_email(context) {
+function cmd_email() {
   var document = context.focusedWindow.document;
   var title = document.title;
   var location = document.location;
   var gmailTab = findGmailTab();
-  var html = getSelectedHtml(context);
+  var html = getHtmlSelection();
 
   if (html)
     html = ("<p>From the page <a href=\"" + location +
@@ -103,7 +90,7 @@ function cmd_email(context) {
     displayMessage("Gmail must be open in a tab.");
 }
 
-function cmd_highlight(context) {
+function cmd_highlight() {
   var sel = context.focusedWindow.getSelection();
   var document = context.focusedWindow.document;
 
@@ -115,8 +102,8 @@ function cmd_highlight(context) {
   }
 }
 
-function cmd_to_rich_text(context) {
-  var html = getTextSelection(context);
+function cmd_to_rich_text() {
+  var html = getTextSelection();
 
   if (html) {
     var doc = context.focusedWindow.document;
@@ -127,8 +114,8 @@ function cmd_to_rich_text(context) {
   }
 }
 
-function cmd_to_html(context) {
-  var html = getSelectedHtml(context);
+function cmd_to_html() {
+  var html = getHtmlSelection();
 
   if (html) {
     var doc = context.focusedWindow.document;
@@ -142,8 +129,8 @@ function cmd_to_html(context) {
   }
 }
 
-function cmd_link_to_wikipedia(context) {
-  var text = getTextSelection(context);
+function cmd_link_to_wikipedia() {
+  var text = getTextSelection();
 
   if (text) {
     var wikiText = text.replace(/ /g, "_");

@@ -32,7 +32,20 @@ function openUrlInBrowser(urlString) {
   tab.focus();
 }
 
-function getTextSelection(context) {
+function getHtmlSelection() {
+  var sel = context.focusedWindow.getSelection();
+
+  if (sel.rangeCount >= 1) {
+    var html = sel.getRangeAt(0).cloneContents();
+    var newNode = context.focusedWindow.document.createElement("p");
+    newNode.appendChild(html);
+    return newNode.innerHTML;
+  }
+
+  return null;
+}
+
+function getTextSelection() {
   var focused = context.focusedElement;
   var retval = "";
 
