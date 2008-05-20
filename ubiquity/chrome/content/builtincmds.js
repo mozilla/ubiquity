@@ -531,6 +531,31 @@ function cmd_get_email_address() {
   });
 }
 
+function cmd_go() {
+  log( context.focusedElement.wrappedJSObject );
+  
+}
+
+function cmd_get_sel() {
+  function insertText(element, snippet)
+  {
+    var selectionEnd = element.selectionStart + snippet.length;
+    var currentValue = element.value;
+
+    var beforeText = currentValue.substring(0, element.selectionStart);
+    var afterText = currentValue.substring(element.selectionEnd, currentValue.length);
+
+    element.value = beforeText + snippet + afterText;
+    element.focus();
+
+    //put the cursor after the inserted text
+    element.setSelectionRange(selectionEnd, selectionEnd);
+  }
+  
+  insertText(context.focusedElement, "hello")
+  
+}
+
 // This function is run by Firefox on startup.
 
 function onStartup() {
@@ -541,7 +566,7 @@ function onStartup() {
 // have an icon set.
 
 var CMD_PREFIX = "cmd_";
-var DEFAULT_CMD_ICON = "http://www.mozilla.com/favicon.ico";
+var DEFAULT_CMD_ICON = "";
 
 for (name in this)
   if (name.indexOf(CMD_PREFIX) == 0) {

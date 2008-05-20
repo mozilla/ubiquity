@@ -88,10 +88,39 @@ function ajaxGet(url, callbackFunction) {
   request.send(null);
 }
 
+
 function setTextSelection(html) {
+
   var doc = context.focusedWindow.document;
-  if (doc.designMode == "on")
+  var focused = context.focusedElement;
+  
+  if (doc.designMode == "on") {
     doc.execCommand("insertHTML", false, html);
+  }
+  
+  else if( focused ) {
+    var el = doc.createElement( "html" );
+    el.innerHTML = "<div>" + html + "</div>";
+    
+    var text = el.textContent;
+    
+    if( html != text){
+      displayMessage( "This command requires a rich text field for full support.")
+    }
+    
+    var selectionEnd = focused.selectionStart + text.length;
+    var currentValue = focused.value;
+
+    var beforeText = currentValue.substring(0, focused.selectionStart);
+    var afterText = currentValue.substring(focused.selectionEnd, currentValue.length);
+
+    focused.value = beforeText + text + afterText;
+    focused.focus();
+
+    //put the cursor after the inserted text
+    focused.setSelectionRange(selectionEnd, selectionEnd);  
+  }
+    
   else {
     displayMessage(html);
     var div = doc.createElement("span");
