@@ -555,3 +555,18 @@ function cmd_get_email_address(context) {
     });
   });
 }
+
+// Functionality for when we're loaded in an HTML page
+
+function onDocumentLoad() {
+  for (name in window)
+    if (name.indexOf("cmd_") == 0 && $("#"+name).length == 0)
+      $(document.body).append('<p class="error">' + name +
+                              ' is not defined.</p>');
+}
+
+if (window.location != "chrome://browser/content/browser.xul") {
+  // We're being included in an HTML page.  Yes, this is a hack, but
+  // this solution is temporary anyways.
+  $(document).ready(onDocumentLoad);
+}
