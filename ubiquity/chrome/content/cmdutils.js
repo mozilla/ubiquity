@@ -135,9 +135,11 @@ function injectHtml( html ) {
 
 function log(what) {
   var console = getWindow().console;
-  if (typeof(console) != "undefined")
+  if (typeof(console) != "undefined"){
     console.log( what );
-  displayMessage("Firebug Required For Full Usage\n\n" + what);
+  } else {
+    displayMessage("Firebug Required For Full Usage\n\n" + what);
+  }
 }
 
 function injectJavascript(src, callback) {
