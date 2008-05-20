@@ -9,6 +9,38 @@ body{
 	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Verdana, Arial, sans-serif;
 }
 
+div.command{
+  margin:15px;
+  margin-bottom: 20px;
+}
+
+div.command span.name{
+  font-size: 15pt;
+  margin-left:20px;
+  color: white;
+}
+
+div.command img.icon{
+  position: absolute;
+  left: 22px; 
+  margin-top:6px;
+}
+
+div.command .documentation{
+  margin-top: 5px;
+  margin-left: 20px;
+  display: block;
+  color: #777;
+}
+
+div.command .description{
+  display: inline;
+  color: white;
+  font-size: 12pt;
+  margin-left: 10px;
+  color:#BFBFBF;
+}
+
 a, a:visited {
     color: #FFFFFF;
     text-decoration: none;
