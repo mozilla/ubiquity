@@ -39,8 +39,6 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
 CommandSource.prototype = {
   CMD_PREFIX : "cmd_",
 
-  DEFAULT_CMD_ICON : "http://www.mozilla.com/favicon.ico",
-
   refresh : function() {
     for (var i = 0; i < this._codeSources.length; i++) {
       var code = this._codeSources[i].getCode();
@@ -87,9 +85,6 @@ CommandSource.prototype = {
       if (objName.indexOf(this.CMD_PREFIX) == 0) {
         var cmd = makeCmdForObj(objName);
         var icon = sandbox[objName].icon;
-
-        if (!icon)
-          icon = this.DEFAULT_CMD_ICON;
 
         commands[cmd.name] = cmd;
         commandNames.push({name : cmd.name,

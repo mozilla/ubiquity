@@ -556,11 +556,23 @@ function cmd_get_email_address(context) {
   });
 }
 
+// Assign a default command icon for anything that doesn't explicitly
+// have an icon set.
+
+var CMD_PREFIX = "cmd_";
+var DEFAULT_CMD_ICON = "http://www.mozilla.com/favicon.ico";
+
+for (name in this)
+  if (name.indexOf(CMD_PREFIX) == 0) {
+    var cmd = this[name];
+
+    if (!cmd.icon)
+      cmd.icon = DEFAULT_CMD_ICON;
+  }
+
 // Functionality for when we're loaded in an HTML page
 
 function onDocumentLoad() {
-  var CMD_PREFIX = "cmd_";
-
   // Dynamically generate entries for undocumented commands.
   for (name in window)
     if (name.indexOf(CMD_PREFIX) == 0) {
