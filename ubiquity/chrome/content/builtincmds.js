@@ -513,47 +513,45 @@ function cmd_last_mail( context ) {
 }
 cmd_last_mail.icon = "http://gmail.com/favicon.ico";
 
-
 function getGmailContacts( callback ) {
-	var url = "http://mail.google.com/mail/contacts/data/export";
-	var params = paramsToString({
+  var url = "http://mail.google.com/mail/contacts/data/export";
+  var params = paramsToString({
     exportType: "ALL",
-    out: "CSV",
+    out: "CSV"
   });
 
-  if( typeof(globals.gmailContacts) != "undefined" ){
-    callback( globals.gmailContacts );
+  if (typeof(globals.gmailContacts) != "undefined") {
+    callback(globals.gmailContacts);
     return;
   }
 
-	ajaxGet( url + params , function(data) {
-		data = data.split("\n");
+  ajaxGet(url + params , function(data) {
+    data = data.split("\n");
 
-		contacts = {};
-		for each( var line in data ){
-		  var splitLine = line.split(",");
+    var contacts = {};
+    for each( var line in data ) {
+      var splitLine = line.split(",");
 
-		  var name = splitLine[0];
-		  var email = splitLine[1];
+      var name = splitLine[0];
+      var email = splitLine[1];
 
-		  contacts[name] = email;
-		}
+      contacts[name] = email;
+    }
 
-		globals.gmailContacts = contacts;
-		callback(contacts);
-	});
-}
-
-function cmd_get_email_address( context ){
-  window.context = context;
-  humanePrompt( "What's the persons name?", function(name) {
-   getGmailContacts( function(contacts) {
-     for( var c in contacts ){
-       if( c.match(name, "i") ){
-         displayMessage( contacts[c], c );
-       }
-     }
-   });
+    globals.gmailContacts = contacts;
+    callback(contacts);
   });
 }
 
+function cmd_get_email_address(context) {
+  window.context = context;
+  humanePrompt("What's the person's name?", function(name) {
+    getGmailContacts(function(contacts) {
+      for (var c in contacts) {
+        if (c.match(name, "i")) {
+          displayMessage(contacts[c], c);
+        }
+      }
+    });
+  });
+}
