@@ -1,6 +1,3 @@
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 function makeSearchCommand(urlTemplate, icon) {
   var cmd = function(context) {
     var sel = getTextSelection(context);
@@ -285,13 +282,13 @@ function cmd_inject_datejs(context) {
 }
 
 function getCookie(domain, name) {
-  var cookieManager = Cc["@mozilla.org/cookiemanager;1"].
-                      getService(Ci.nsICookieManager);
+  var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"].
+                      getService(Components.interfaces.nsICookieManager);
 
   var iter = cookieManager.enumerator;
   while (iter.hasMoreElements()) {
     var cookie = iter.getNext();
-    if (cookie instanceof Ci.nsICookie)
+    if (cookie instanceof Components.interfaces.nsICookie)
       if (cookie.host == domain && cookie.name == name )
         return cookie.value;
   }
@@ -523,7 +520,7 @@ function getGmailContacts( callback ) {
     exportType: "ALL",
     out: "CSV",
   });
-  
+
   if( typeof(globals.gmailContacts) != "undefined" ){
     callback( globals.gmailContacts );
     return;
@@ -531,17 +528,17 @@ function getGmailContacts( callback ) {
 
 	ajaxGet( url + params , function(data) {
 		data = data.split("\n");
-		
+
 		contacts = {};
 		for each( var line in data ){
 		  var splitLine = line.split(",");
-		  
+
 		  var name = splitLine[0];
 		  var email = splitLine[1];
-		  
+
 		  contacts[name] = email;
 		}
-		
+
 		globals.gmailContacts = contacts;
 		callback(contacts);
 	});
@@ -556,7 +553,7 @@ function cmd_get_email_address( context ){
          displayMessage( contacts[c], c );
        }
      }
-   }); 
+   });
   });
 }
 
