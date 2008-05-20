@@ -559,10 +559,28 @@ function cmd_get_email_address(context) {
 // Functionality for when we're loaded in an HTML page
 
 function onDocumentLoad() {
+  var CMD_PREFIX = "cmd_";
+
+  // Dynamically generate entries for undocumented commands.
   for (name in window)
-    if (name.indexOf("cmd_") == 0 && $("#"+name).length == 0)
-      $(document.body).append('<p class="error">' + name +
-                              ' is not defined.</p>');
+    if (name.indexOf(CMD_PREFIX) == 0) {
+      var cmd = window[name];
+      var cmdName = name.substr(CMD_PREFIX.length);
+      var cmdQuery = $("#" + name);
+
+      if (cmdQuery.length == 0) {
+        cmdName = cmdName.replace(/_/g, " ");
+        $(document.body).append(
+          ('<div class="command" id="' + name + '">' +
+           '<span class="name">' + cmdName + '</span>')
+        );
+        cmdQuery = $("#" + name);
+      }
+
+      if (cmd.icon && cmdQuery.children(".icon").length == 0) {
+        cmdQuery.prepend('<img class="icon" src="' + cmd.icon + '"/> ');
+      }
+    }
 }
 
 if (window.location != "chrome://browser/content/browser.xul") {
