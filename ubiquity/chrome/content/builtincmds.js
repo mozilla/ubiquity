@@ -543,6 +543,17 @@ function cmd_get_email_address(context) {
   });
 }
 
+// Configure a function to run on Firefox startup.
+
+function onStartup() {
+  displayMessage("Welcome to Firefox, now with Ubiquity support!");
+}
+
+if (!globals.hasRunOnce) {
+  globals.hasRunOnce = true;
+  onStartup();
+}
+
 // Assign a default command icon for anything that doesn't explicitly
 // have an icon set.
 

@@ -25,18 +25,20 @@ function ubiquitySetup()
 
   var sandboxFactory = new SandboxFactory(globals);
 
-  var cmdMan = new CommandManager(
-    new CommandSource([cmdUtils, builtinCmds, PrefCommands],
-                      msgService,
-                      sandboxFactory),
-    msgService
+  var cmdSource = new CommandSource(
+    [cmdUtils, builtinCmds, PrefCommands],
+    msgService,
+    sandboxFactory
   );
+
+  var cmdMan = new CommandManager(cmdSource, msgService);
 
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan
   );
+  cmdSource.refresh();
 }
 
 function ubiquityTeardown()
