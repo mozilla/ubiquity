@@ -13,6 +13,7 @@ function ubiquitySetup()
   var msgService = new AlertMessageService();
 
   var globals = {
+    jQuery: jQuery,
     Application: Application,
     Components: Components,
     window: window,

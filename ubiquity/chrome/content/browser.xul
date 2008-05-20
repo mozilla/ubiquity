@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
+  <script src="jquery-1.2.3.min.js"/>
   <script src="ubiquity.js"/>
   <script src="sandboxfactory.js"/>
   <script src="cmdmanager.js"/>
