@@ -531,6 +531,12 @@ function cmd_get_email_address() {
   });
 }
 
+// This function is run by Firefox on startup.
+
+function onStartup() {
+  displayMessage("Welcome to Firefox, now with Ubiquity support!");
+}
+
 // Assign a default command icon for anything that doesn't explicitly
 // have an icon set.
 
@@ -570,7 +576,13 @@ function onDocumentLoad() {
     }
 }
 
-if (window.location != "chrome://browser/content/browser.xul") {
+if (window.location == "chrome://browser/content/browser.xul") {
+  // Configure a function to run on Firefox startup.
+  if (!globals.hasRunOnce) {
+    globals.hasRunOnce = true;
+    onStartup();
+  }
+} else {
   // We're being included in an HTML page.  Yes, this is a hack, but
   // this solution is temporary anyways.
   $(document).ready(onDocumentLoad);
