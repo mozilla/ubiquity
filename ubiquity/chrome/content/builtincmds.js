@@ -147,36 +147,32 @@ function cmd_link_to_wikipedia() {
   }
 }
 
-function cmd_signature(context) {
-  setTextSelection( "-- aza | ɐzɐ --", context );
+function cmd_signature() {
+  setTextSelection( "-- aza | ɐzɐ --" );
 }
 
-function cmd_swedish(context) {
+function cmd_swedish() {
   var URL = "http://www.cs.utexas.edu/users/jbc/bork/bork.cgi?";
-  var params = "type=chef&input=" + getTextSelection(context);
+  var params = "type=chef&input=" + getTextSelection();
 
   ajaxGet(URL + params, function(data) {
-    setTextSelection(data, context);
+    setTextSelection(data);
   });
 }
 
 function calculate(expr) {
-  var context = window.context;
-  var result = eval(expr);
-  setTextSelection(result, context);
+  setTextSelection( eval(expr) );
 }
 
-function cmd_calculate(context) {
-  window.context = context;
+function cmd_calculate() {
   useSelectionOrPrompt("Enter expression:", calculate);
 }
 cmd_calculate.icon = "http://humanized.com/favicon.ico";
 
-function cmd_map(context) {
+function insertMap( query ) {
   var apiKey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
 
   var geocodeUrl = "http://maps.google.com/maps/geo?key={key}&q={query}&output=csv";
-  var query = getTextSelection(context);
 
   geocodeUrl = geocodeUrl.replace( /{key}/, apiKey );
   geocodeUrl = geocodeUrl.replace( /{query}/, escape(query) );
@@ -192,18 +188,20 @@ function cmd_map(context) {
     var src = mapUrl.replace( /{point}/g, point );
     var imgHtml = "<img src='{src}'/>".replace( /{src}/, src );
 
-    setTextSelection( query + "<br/>" + imgHtml, context );
+    setTextSelection( query + "<br/>" + imgHtml );
   });
 };
 
-function cmd_inject_jquery(context) {
-  injectJavascript( "http://code.jquery.com/jquery-latest.pack.js",
-                    context );
+function cmd_map() {
+  useSelectionOrPrompt("Where do you want to map?", insertMap);
 }
 
-function cmd_fade_page(context) {
+function cmd_inject_jquery() {
+  injectJavascript("http://code.jquery.com/jquery-latest.pack.js");
+}
+
+function cmd_fade_page() {
   var fadeTime = 1000;
-  window.context = context;
 
   loadJQuery( function() {
       var $ = window.jQuery;
@@ -213,14 +211,14 @@ function cmd_fade_page(context) {
   });
 }
 
-function cmd_inspect(context) {
-  window.context = context;
+function cmd_inspect() {
   injectCss( "._highlight{ background-color: #ffffcc;}" );
 
   var removeHighlight = function() {
     $(this).removeClass( "_highlight" );
   };
 
+  // TODO: Figure out why this no longer removes the highlight on mouse out.
   loadJQuery( function() {
     var $ = window.jQuery;
 
@@ -231,8 +229,7 @@ function cmd_inspect(context) {
   });
 }
 
-function cmd_javascript_console(context) {
-  window.context = context;
+function cmd_javascript_console() {
   injectCss( "#_box{ position:fixed; left:0; bottom:0; width:100%; " +
              "       height: 200px; background-color:#CCC; display:none; " +
              "       border-top: 1px solid #999; font-size: 9pt; overflow-y: auto;} " +
@@ -263,8 +260,7 @@ function cmd_javascript_console(context) {
   });
 }
 
-function cmd_inject_datejs(context) {
-  window.context = context;
+function cmd_inject_datejs() {
   injectJavascript("http://datejs.googlecode.com/files/date.js");
 }
 
@@ -342,10 +338,6 @@ function addToGoogleCalendar(eventString) {
   });
 }
 
-function cmd_go(context) {
-  injectHtml("<h1 style='position:fixed;z-index:1000;top:0px;'>HELLO</h1>");
-}
-
 function humanePrompt(text, callback) {
   injectCss("#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
             "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
@@ -377,22 +369,21 @@ function humanePrompt(text, callback) {
 }
 
 function useSelectionOrPrompt(message, callback) {
-  var sel = getTextSelection(window.context);
+  var sel = getTextSelection();
   if (sel.length != 0)
     callback(sel);
   else
     humanePrompt(message, callback);
 }
 
-function cmd_add_to_google_calendar(context) {
-  window.context = context;
+function cmd_add_to_google_calendar() {
   var msg = "Enter your event below, then hit enter:";
   useSelectionOrPrompt(msg , addToGoogleCalendar);
 }
 
 cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
 
-function cmd_send(context) {
+function cmd_send() {
   loadJQuery(function() {
     var $ = window.jQuery;
     var gm = getWindow().gmonkey.get(1);
@@ -418,12 +409,11 @@ function defineWord(word) {
   });
 }
 
-function cmd_define(context) {
-  window.context = context;
+function cmd_define() {
   useSelectionOrPrompt("Enter word to be defined:", defineWord);
 }
 
-function cmd_delete(context) {
+function cmd_delete() {
   var sel = context.focusedWindow.getSelection();
   var document = context.focusedWindow.document;
 
@@ -440,7 +430,7 @@ function cmd_delete(context) {
   });
 }
 
-function cmd_undelete(context) {
+function cmd_undelete() {
   loadJQuery(function() {
     var $ = window.jQuery;
     $("._toRemove").slideDown();
@@ -470,8 +460,7 @@ function checkCalendar(date) {
   });
 }
 
-function cmd_check_calendar(context) {
-  window.context = context;
+function cmd_check_calendar() {
   injectJavascript("http://datejs.googlecode.com/files/date.js");
   humanePrompt("What day would you like to check?", checkCalendar);
 }
@@ -495,7 +484,7 @@ function gmailChecker() {
   });
 }
 
-function cmd_last_mail( context ) {
+function cmd_last_mail() {
   gmailChecker();
 }
 cmd_last_mail.icon = "http://gmail.com/favicon.ico";
@@ -530,8 +519,7 @@ function getGmailContacts( callback ) {
   });
 }
 
-function cmd_get_email_address(context) {
-  window.context = context;
+function cmd_get_email_address() {
   humanePrompt("What's the person's name?", function(name) {
     getGmailContacts(function(contacts) {
       for (var c in contacts) {
