@@ -1,5 +1,6 @@
 import os
 import sys
+import xml.dom.minidom
 import subprocess
 
 if __name__ == "__main__":
@@ -44,8 +45,12 @@ if __name__ == "__main__":
             print "Path to profile directory not supplied."
             sys.exit(1)
         profile_dir = args[1]
-        # TODO: Get this out of the install.rdf to preserve DRY.
-        extension_id = "ubiquity@labs.mozilla.com"
+
+        rdf_path = os.path.join(path_to_extension_root, "install.rdf")
+        rdf = xml.dom.minidom.parse(rdf_path)
+        em_id = rdf.documentElement.getElementsByTagName("em:id")[0]
+        extension_id = em_id.firstChild.nodeValue
+
         extension_file = os.path.join(profile_dir,
                                       "extensions",
                                       extension_id)
@@ -61,9 +66,9 @@ if __name__ == "__main__":
             fileobj = open(extension_file, "w")
             fileobj.write(path_to_extension_root)
             fileobj.close()
-            print "Extension installed."
+            print "Extension '%s' installed." % extension_id
         else:
-            print "Extension uninstalled."
+            print "Extension '%s' uninstalled." % extension_id
     else:
         print "Unknown command '%s'" % cmd
         sys.exit(1)
