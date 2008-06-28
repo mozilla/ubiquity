@@ -247,3 +247,9 @@ function testCommandGlobalsWork() {
   this.assert(cmd.execute() == 2,
               "Command 'foo' should return 2 on second call.");
 }
+
+function testSandboxSupportsJs17() {
+  var sbf = new SandboxFactory({});
+  var s = sbf.makeSandbox();
+  Components.utils.evalInSandbox("let k = 1;", s);
+}
