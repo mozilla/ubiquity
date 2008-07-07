@@ -133,6 +133,11 @@ function cmd_define() {
   useSelectionOrPrompt("Enter word to be defined:", defineWord);
 }
 
+function cmd_edit_page() {
+  getDocument().body.contentEditable = 'true';
+  getDocument().designMode='on';
+}
+
 // -----------------------------------------------------------------
 // EMAIL/GOOGLE COMMANDS
 // -----------------------------------------------------------------
@@ -355,6 +360,11 @@ function cmd_get_email_address() {
 // MISC COMMANDS
 // -----------------------------------------------------------------
 
+function startup_inject_xss() {
+  onPageLoad( function(){
+    getWindow().ajaxGet = ajaxGet;
+  });
+}
 
 function insertMap( query ) {
   var apiKey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
