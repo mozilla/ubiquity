@@ -556,6 +556,185 @@ function cmd_get_sel() {
   
 }
 
+
+// -----------------------------------------------------------------
+// MICROFORMAT RELATED
+// -----------------------------------------------------------------
+
+
+function getMF( type ) {
+  Components.utils.import("resource://gre/modules/Microformats.js");
+
+  var count = Microformats.count( type , getDocument(), {recurseExternalFrames: true});
+  if( count > 0 ) {
+    return Microformats.get( type , getDocument(), {recurseExternalFrames: true});
+  }
+  return null;
+}
+
+function cmd_detect_microformat() {
+  var uf = getMF( "adr" )
+  if( uf ) {
+    displayMessage( "Found address: " + uf )
+    if( !globals.addresses ) globals.addresses = [];
+    globals.addresses.push( uf[0] );
+  }
+}
+
+// If Google Maps is open, go to the last harvested address
+// microformat.
+function cmd_populate_with_microformat() {
+  //displayMessage( globals.addresses.length )
+  if( globals.addresses.length == 0 ) return;
+
+  var last = globals.addresses.length - 1;    
+  var addr = globals.addresses[last].toString(); 
+  var url = getWindow().location.href;
+  
+  if( url == "http://maps.google.com/" ){
+    getDocument().getElementById("q_d").value = addr;      
+
+    setTimeout( function(){
+      getDocument().getElementById("q_sub").click();
+    }, 50 );
+  }
+}
+
+function startup_microfomrat() {
+  onPageLoad( cmd_detect_microformat )
+}
+
+function startup_populate() {
+  onPageLoad( cmd_populate_with_microformat )
+}
+
+// -----------------------------------------------------------------
+// SNAPSHOT RELATED
+// -----------------------------------------------------------------
+
+function getHiddenWindow() {
+  return Components.classes["@mozilla.org/appshell/appShellService;1"]
+                   .getService(Components.interfaces.nsIAppShellService)
+                   .hiddenDOMWindow;
+}
+
+function takeSnapshotOfWindow( window, scrollDict ) {
+  if( !scrollDict ) scrollDict = {};
+  var top = scrollDict.top || 0.001;
+  var left = scrollDict.left || 0.001;
+  
+  var hiddenWindow = getHiddenWindow();
+  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+
+  var body = window.document.body;
+  
+  var width = jQuery(body).width();
+  var height = window.innerHeight+110;
+ 
+  canvas.width = width;
+  canvas.height = height;
+  
+  var ctx = canvas.getContext( "2d" );
+  ctx.drawWindow( window, left, top, width, height, "rgb(255,255,255)" );
+  return canvas.toDataURL();
+}
+
+function cmd_inject_snapshot() {
+  var win = getWindow();
+  win.snapshot = takeSnapshotOfWindow;
+}
+
+function startup_inject_snapshot() {
+  onPageLoad( function(){
+    getWindow().snapshot = takeSnapshotOfWindow;
+  });
+}
+
+// -----------------------------------------------------------------
+// ZOOM RELATED
+// -----------------------------------------------------------------
+
+
+function setFullPageZoom( level ) {
+  var navigator1 = window
+                    .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                    .getInterface(Components.interfaces.nsIWebNavigation);
+  var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
+  docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
+  docviewer.fullZoom = level;  
+}
+
+function iframeFullPageZoom( iframe, level ) {
+  var navigator1 = iframe.contentWindow
+                    .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                    .getInterface(Components.interfaces.nsIWebNavigation);
+  var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
+  docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
+  docviewer.fullZoom = level;  
+}
+
+function cmd_scale_firefox_down() {
+  setFullPageZoom( .91 );
+}
+
+function cmd_zoom() {
+  var win = getWindow();
+  document = getDocument();
+  
+  var $ = jQuery;
+  
+  var dataUrl = takeSnapshotOfWindow( win, {top:win.scrollY} );
+
+  var div = document.createElement( "div" );
+  $(div).css({
+    position:"fixed",
+    top:0,
+    left: 0,
+    backgroundColor: "#222",
+    width: "100%",
+    height: "100%",
+    zIndex: 10000000,
+  });
+
+  var w = jQuery(document.body).width();
+  var h = window.innerHeight;
+
+  img = document.createElement("img");
+  img.src = dataUrl;
+  img.id = "theImage";
+  
+  $(img).css({
+    position:"fixed",
+    top: 0,
+    left: 0,
+    zIndex: 10000001
+  });  
+
+  $(document.body).append( img ).append(div);
+  $(document.body).css({overflow:"hidden"});
+      
+  // This is a hack which fixes an intermittent bug where the top wasn't
+  // being set correctly before animating.
+  $(img).animate({top:0, width:w, height: h}, 1);
+  
+  $(img).animate({top:100, left:w/2, width:w*.1, height: h*.1}, 500);
+  $(img).click( function(){
+    $(img).animate({top:0, left:0, width:w, height: h}, 500);
+    setTimeout( function(){
+      $(div).remove();
+      $(img).remove();
+      $(document.body).css({overflow:"auto"});    
+    },500);
+    
+  })
+}
+
+
+// -----------------------------------------------------------------
+// SYSTEM
+// -----------------------------------------------------------------
+
+
 // This function is run by Firefox on startup.
 
 function startup_welcome_message() {
