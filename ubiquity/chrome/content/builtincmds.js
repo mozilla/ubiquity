@@ -556,6 +556,68 @@ function cmd_get_sel() {
   
 }
 
+// -----------------------------------------------------------------
+// WORD-CLOUD RELATED
+// -----------------------------------------------------------------
+
+
+function cmd_capture_word_cloud( ){
+  onPageLoad( cloudPageLoadHandler );
+  displayMessage( "Word Cloud Handlers Added")
+}
+
+
+function cmd_reset_word_cloud( ) {
+  globals.wordCloud = {};
+}
+
+function cmd_display_word_cloud( ){
+
+  d = getDocument().createElement("div");
+  d.style.position = "absolute";
+  d.style.top = "0px";
+  d.style.left = "0px";
+  d.style.backgroundColor = "#cdcdcd";
+  for( var word in globals.wordCloud ) {
+    var actualWord = word.substring(5);
+    if( globals.wordCloud[word] > 3 ){
+      s = getDocument().createElement("span");
+      s.style.fontSize = globals.wordCloud[word] * 3 + "px";
+      s.innerHTML = actualWord;
+      d.appendChild( s );
+    }
+  }
+  
+  getDocument().body.appendChild( d );
+  
+}
+
+function cloudPageLoadHandler( ) {
+  if( typeof(globals.wordCloud) == "undefined" ){
+    globals.wordCloud = {};
+  }  
+  
+  var body = jQuery( getDocument().body ).clone();
+  body.find("script,head,style").remove();
+  
+  var text = jQuery( body ).text();
+  data = text.split(/\W/).filter( function(d){ 
+    if( d == "" ) return false;
+    if( d.length <= 3 ) return false;
+    if( d.match(/\d/) ) return false;
+    
+    return true;
+  } );
+    
+  for( var i=0; i<=data.length; i++ ){
+    var d = "word_" + data[i];
+    
+    if( typeof(globals.wordCloud[d]) == "undefined" ){ globals.wordCloud[d] = 1 }
+    else{ globals.wordCloud[d] += 1 }
+    if( typeof(globals.wordCloud.length) == "number" ){ displayMessage(d, data[i-1]); return;}
+  }
+
+}
 
 // -----------------------------------------------------------------
 // MICROFORMAT RELATED
