@@ -558,7 +558,7 @@ function cmd_get_sel() {
 
 // This function is run by Firefox on startup.
 
-function onStartup() {
+function startup_welcome_message() {
   displayMessage("Welcome to Firefox, now with Ubiquity support!");
 }
 
@@ -601,11 +601,19 @@ function onDocumentLoad() {
     }
 }
 
+var STARTUP_PREFIX = "startup_";
+
 if (window.location == "chrome://browser/content/browser.xul") {
   // Configure a function to run on Firefox startup.
   if (!globals.hasRunOnce) {
     globals.hasRunOnce = true;
-    onStartup();
+    // Run anything function starting with "startup_" on startup.
+    for (name in this) {
+      if (name.indexOf(STARTUP_PREFIX) == 0 && typeof(this[name]) == "function") {
+        this[name]();
+      }
+    }
+    
   }
 } else {
   // We're being included in an HTML page.  Yes, this is a hack, but
