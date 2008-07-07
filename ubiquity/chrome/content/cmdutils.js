@@ -213,3 +213,54 @@ function onPageLoad( callback ) {
   activeWin.events.removeListener( "TabOpen", addLoadHandlerToTab );    
   activeWin.events.addListener( "TabOpen", addLoadHandlerToTabs );
 }
+
+function getCookie(domain, name) {
+  var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"].
+                      getService(Components.interfaces.nsICookieManager);
+
+  var iter = cookieManager.enumerator;
+  while (iter.hasMoreElements()) {
+    var cookie = iter.getNext();
+    if (cookie instanceof Components.interfaces.nsICookie)
+      if (cookie.host == domain && cookie.name == name )
+        return cookie.value;
+  }
+}
+
+function humanePrompt(text, callback) {
+  injectCss("#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
+            "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
+            "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
+            "#_input{ width: 95%; font-size:24pt;}");
+
+  injectHtml("<div id='_box'>" + text + "<br/><input id='_input'></div>");
+
+  loadJQuery(function() {
+    var $ = window.jQuery;
+    $("#_box").slideDown();
+    $("#_input").keydown( function(e) {
+      switch( e.which ) {
+      case 13: // RETURN
+        callback( $(this).attr("value") );
+      case 27: // ESC (and continuation of RETURN )
+        $("#_box").slideUp();
+
+        // TODO: We should be able to do
+        // $("#_box").slideUp(speed, callback) but we get
+        // a strange security error.
+
+        setTimeout( function() { $("#_box").remove(); }, 400);
+        break;
+      }
+    });
+    setTimeout( function() { $("#_input").focus(); }, 400);
+  });
+}
+
+function useSelectionOrPrompt(message, callback) {
+  var sel = getTextSelection();
+  if (sel.length != 0)
+    callback(sel);
+  else
+    humanePrompt(message, callback);
+}

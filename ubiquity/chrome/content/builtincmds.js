@@ -1,3 +1,7 @@
+// -----------------------------------------------------------------
+// SEARCH COMMANDS
+// -----------------------------------------------------------------
+
 function makeSearchCommand(urlTemplate, icon) {
   var cmd = function() {
     var sel = getTextSelection();
@@ -20,10 +24,14 @@ var cmd_imdb = makeSearchCommand(
   "http://i.imdb.com/favicon.ico"
 );
 
-var cmd_open_map = makeSearchCommand(
+var cmd_map_it = makeSearchCommand(
   "http://maps.google.com/?q={QUERY}",
   "http://www.google.com/favicon.ico"
 );
+
+// -----------------------------------------------------------------
+// TEXT COMMANDS
+// -----------------------------------------------------------------
 
 function cmd_bold() {
   var doc = context.focusedWindow.document;
@@ -32,62 +40,6 @@ function cmd_bold() {
     doc.execCommand("bold", false, null);
   else
     displayMessage("You're not in a rich text editing field.");
-}
-
-function cmd_editor() {
-  openUrlInBrowser("chrome://ubiquity/content/editor.html");
-}
-
-function findGmailTab() {
-  var window = Application.activeWindow;
-
-  for (var i = 0; i < window.tabs.length; i++) {
-    var tab = window.tabs[i];
-    var location = String(tab.document.location);
-    if (location.indexOf("://mail.google.com") != -1) {
-      return tab;
-    }
-  }
-  return null;
-}
-
-function cmd_email() {
-  var document = context.focusedWindow.document;
-  var title = document.title;
-  var location = document.location;
-  var gmailTab = findGmailTab();
-  var html = getHtmlSelection();
-
-  if (html)
-    html = ("<p>From the page <a href=\"" + location +
-            "\">" + title + "</a>:</p>" + html);
-  else {
-    displayMessage("No selected HTML!");
-    return;
-  }
-
-  if (gmailTab) {
-    var console = gmailTab.document.defaultView.wrappedJSObject.console;
-    var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
-
-    var continuer = function() {
-      var gmail = gmonkey.get("1");
-      var sidebar = gmail.getNavPaneElement();
-      var composeMail = sidebar.getElementsByTagName("span")[0];
-      var event = composeMail.ownerDocument.createEvent("Events");
-      event.initEvent("click", true, false);
-      composeMail.dispatchEvent(event);
-      var active = gmail.getActiveViewElement();
-      var subject = active.getElementsByTagName("input")[0];
-      subject.value = "'"+title+"'";
-      var iframe = active.getElementsByTagName("iframe")[0];
-      iframe.contentDocument.execCommand("insertHTML", false, html);
-      gmailTab.focus();
-    };
-
-    gmonkey.load("1", safeWrapper(continuer));
-  } else
-    displayMessage("Gmail must be open in a tab.");
 }
 
 function cmd_highlight() {
@@ -168,6 +120,260 @@ function cmd_calculate() {
   useSelectionOrPrompt("Enter expression:", calculate);
 }
 cmd_calculate.icon = "http://humanized.com/favicon.ico";
+
+function defineWord(word) {
+  var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
+  var params = paramsToString({
+    dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
+    word: word
+  });
+
+  ajaxGet(url + params, function(xml) {
+    loadJQuery( function() {
+      var $ = window.jQuery;
+      var text = $(xml).find("WordDefinition").text();
+      displayMessage(text);
+    });
+  });
+}
+
+function cmd_define() {
+  useSelectionOrPrompt("Enter word to be defined:", defineWord);
+}
+
+// -----------------------------------------------------------------
+// EMAIL/GOOGLE COMMANDS
+// -----------------------------------------------------------------
+
+
+function findGmailTab() {
+  var window = Application.activeWindow;
+
+  for (var i = 0; i < window.tabs.length; i++) {
+    var tab = window.tabs[i];
+    var location = String(tab.document.location);
+    if (location.indexOf("://mail.google.com") != -1) {
+      return tab;
+    }
+  }
+  return null;
+}
+
+function cmd_email() {
+  var document = context.focusedWindow.document;
+  var title = document.title;
+  var location = document.location;
+  var gmailTab = findGmailTab();
+  var html = getHtmlSelection();
+
+  if (html)
+    html = ("<p>From the page <a href=\"" + location +
+            "\">" + title + "</a>:</p>" + html);
+  else {
+    displayMessage("No selected HTML!");
+    return;
+  }
+
+  if (gmailTab) {
+    var console = gmailTab.document.defaultView.wrappedJSObject.console;
+    var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
+
+    var continuer = function() {
+      var gmail = gmonkey.get("1");
+      var sidebar = gmail.getNavPaneElement();
+      var composeMail = sidebar.getElementsByTagName("span")[0];
+      var event = composeMail.ownerDocument.createEvent("Events");
+      event.initEvent("click", true, false);
+      composeMail.dispatchEvent(event);
+      var active = gmail.getActiveViewElement();
+      var subject = active.getElementsByTagName("input")[0];
+      subject.value = "'"+title+"'";
+      var iframe = active.getElementsByTagName("iframe")[0];
+      iframe.contentDocument.execCommand("insertHTML", false, html);
+      gmailTab.focus();
+    };
+
+    gmonkey.load("1", safeWrapper(continuer));
+  } else
+    displayMessage("Gmail must be open in a tab.");
+}
+
+function paramsToString(params) {
+  var string = "?";
+
+  for (key in params) {
+    string += escape(key) + "=" + escape(params[key]) + "&";
+  }
+
+  // Remove the trailing &
+  return string.substr(0, string.length - 1);
+}
+
+function addToGoogleCalendar(eventString) {
+  var secid = getCookie("www.google.com", "secid");
+
+  var URLS = {
+    parse: "http://www.google.com/calendar/compose",
+    create: "http://www.google.com/calendar/event"
+  };
+
+  function parseGoogleJson(json) {
+    var securityPreface = "while(1)";
+    var splitString = json.split( ";", 2 );
+    if ( splitString[0] != securityPreface ) {
+      displayMessage( "Unexpected Return Value" );
+      return null;
+    }
+    // TODO: Security hull breach!
+    return eval( splitString[1] )[0];
+  }
+
+  var params = paramsToString({
+    "ctext": eventString,
+    "qa-src": "QUICK_ADD_BOX"
+  });
+
+  ajaxGet(URLS["parse"]+params, function(json) {
+    var data = parseGoogleJson( json );
+    var eventText = data[1];
+    var eventStart = data[4];
+    var eventEnd = data[5];
+    var secid = getCookie("www.google.com", "secid");
+
+    var params = paramsToString({
+      "dates": eventStart + "/" + eventEnd,
+      "text": eventText,
+      "secid": secid,
+      "action": "CREATE",
+      "output": "js"
+    });
+
+    ajaxGet(URLS["create"] + params, function(json) {
+      // TODO: Should verify this, and print appropriate positive
+      // understand feedback. Like "blah at such a time was created.
+      displayMessage("Event created.");
+
+      // TODO: Should iterate through open tabs and cause any open
+      // Google Calendar tabs to refresh.
+    });
+  });
+}
+
+function cmd_add_to_google_calendar() {
+  var msg = "Enter your event below, then hit enter:";
+  useSelectionOrPrompt(msg , addToGoogleCalendar);
+}
+
+cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
+
+function cmd_send() {
+  loadJQuery(function() {
+    var $ = window.jQuery;
+    var gm = getWindow().gmonkey.get(1);
+    var gmail = gm.getCanvasElement();
+    $(gmail).find("button[textContent=Send]").get(0).click();
+  });
+}
+cmd_send.icon = "http://google.com/favicon.ico";
+
+function checkCalendar(date) {
+  var date = getWindow().Date.parse(date);
+  date = date._toString("yyyyMMdd");
+
+  var url = "http://www.google.com/calendar/m";
+  var params = paramsToString({ as_sdt: date });
+
+  // jQuery is already loaded because we've done a humane prompt before
+  // getting here.
+  var $ = window.jQuery;
+
+  ajaxGet(url + params, function(html) {
+    var output = "";
+    $(html).find(".c2").each(function() {
+      // Strip out the extra whitespace.
+      var text = $(this).text().replace(/[ ]+/g, " ");
+      text = text.replace(/ \n /g, " ");
+      output += text + "\n";
+    });
+    displayMessage(output);
+  });
+}
+
+function cmd_check_calendar() {
+  injectJavascript("http://datejs.googlecode.com/files/date.js");
+  humanePrompt("What day would you like to check?", checkCalendar);
+}
+
+function gmailChecker() {
+  var url = "http://mail.google.com/mail/feed/atom";
+  ajaxGet(url, function(rss) {
+    loadJQuery(function() {
+      var $ = window.jQuery;
+
+      var firstEntry = $(rss).find("entry").get(0);
+
+      var newEmailId = $(firstEntry).find("id").text();
+      var subject = $(firstEntry).find("title").text();
+      var author = $(firstEntry).find("author name").text();
+      var summary = $(firstEntry).find("summary").text();
+
+      var title = author + ' says "' + subject + '"';
+      displayMessage(summary, title);
+    });
+  });
+}
+
+function cmd_last_mail() {
+  gmailChecker();
+}
+cmd_last_mail.icon = "http://gmail.com/favicon.ico";
+
+function getGmailContacts( callback ) {
+  var url = "http://mail.google.com/mail/contacts/data/export";
+  var params = paramsToString({
+    exportType: "ALL",
+    out: "CSV"
+  });
+
+  if (typeof(globals.gmailContacts) != "undefined") {
+    callback(globals.gmailContacts);
+    return;
+  }
+
+  ajaxGet(url + params , function(data) {
+    data = data.split("\n");
+
+    var contacts = {};
+    for each( var line in data ) {
+      var splitLine = line.split(",");
+
+      var name = splitLine[0];
+      var email = splitLine[1];
+
+      contacts[name] = email;
+    }
+
+    globals.gmailContacts = contacts;
+    callback(contacts);
+  });
+}
+
+function cmd_get_email_address() {
+  humanePrompt("What's the person's name?", function(name) {
+    getGmailContacts(function(contacts) {
+      for (var c in contacts) {
+        if (c.match(name, "i")) {
+          displayMessage(contacts[c], c);
+        }
+      }
+    });
+  });
+}
+
+// -----------------------------------------------------------------
+// MISC COMMANDS
+// -----------------------------------------------------------------
+
 
 function insertMap( query ) {
   var apiKey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
@@ -264,155 +470,6 @@ function cmd_inject_datejs() {
   injectJavascript("http://datejs.googlecode.com/files/date.js");
 }
 
-function getCookie(domain, name) {
-  var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"].
-                      getService(Components.interfaces.nsICookieManager);
-
-  var iter = cookieManager.enumerator;
-  while (iter.hasMoreElements()) {
-    var cookie = iter.getNext();
-    if (cookie instanceof Components.interfaces.nsICookie)
-      if (cookie.host == domain && cookie.name == name )
-        return cookie.value;
-  }
-}
-
-function paramsToString(params) {
-  var string = "?";
-
-  for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
-  }
-
-  // Remove the trailing &
-  return string.substr(0, string.length - 1);
-}
-
-function addToGoogleCalendar(eventString) {
-  var secid = getCookie("www.google.com", "secid");
-
-  var URLS = {
-    parse: "http://www.google.com/calendar/compose",
-    create: "http://www.google.com/calendar/event"
-  };
-
-  function parseGoogleJson(json) {
-    var securityPreface = "while(1)";
-    var splitString = json.split( ";", 2 );
-    if ( splitString[0] != securityPreface ) {
-      displayMessage( "Unexpected Return Value" );
-      return null;
-    }
-    // TODO: Security hull breach!
-    return eval( splitString[1] )[0];
-  }
-
-  var params = paramsToString({
-    "ctext": eventString,
-    "qa-src": "QUICK_ADD_BOX"
-  });
-
-  ajaxGet(URLS["parse"]+params, function(json) {
-    var data = parseGoogleJson( json );
-    var eventText = data[1];
-    var eventStart = data[4];
-    var eventEnd = data[5];
-    var secid = getCookie("www.google.com", "secid");
-
-    var params = paramsToString({
-      "dates": eventStart + "/" + eventEnd,
-      "text": eventText,
-      "secid": secid,
-      "action": "CREATE",
-      "output": "js"
-    });
-
-    ajaxGet(URLS["create"] + params, function(json) {
-      // TODO: Should verify this, and print appropriate positive
-      // understand feedback. Like "blah at such a time was created.
-      displayMessage("Event created.");
-
-      // TODO: Should iterate through open tabs and cause any open
-      // Google Calendar tabs to refresh.
-    });
-  });
-}
-
-function humanePrompt(text, callback) {
-  injectCss("#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
-            "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
-            "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
-            "#_input{ width: 95%; font-size:24pt;}");
-
-  injectHtml("<div id='_box'>" + text + "<br/><input id='_input'></div>");
-
-  loadJQuery(function() {
-    var $ = window.jQuery;
-    $("#_box").slideDown();
-    $("#_input").keydown( function(e) {
-      switch( e.which ) {
-      case 13: // RETURN
-        callback( $(this).attr("value") );
-      case 27: // ESC (and continuation of RETURN )
-        $("#_box").slideUp();
-
-        // TODO: We should be able to do
-        // $("#_box").slideUp(speed, callback) but we get
-        // a strange security error.
-
-        setTimeout( function() { $("#_box").remove(); }, 400);
-        break;
-      }
-    });
-    setTimeout( function() { $("#_input").focus(); }, 400);
-  });
-}
-
-function useSelectionOrPrompt(message, callback) {
-  var sel = getTextSelection();
-  if (sel.length != 0)
-    callback(sel);
-  else
-    humanePrompt(message, callback);
-}
-
-function cmd_add_to_google_calendar() {
-  var msg = "Enter your event below, then hit enter:";
-  useSelectionOrPrompt(msg , addToGoogleCalendar);
-}
-
-cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
-
-function cmd_send() {
-  loadJQuery(function() {
-    var $ = window.jQuery;
-    var gm = getWindow().gmonkey.get(1);
-    var gmail = gm.getCanvasElement();
-    $(gmail).find("button[textContent=Send]").get(0).click();
-  });
-}
-cmd_send.icon = "http://google.com/favicon.ico";
-
-function defineWord(word) {
-  var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
-  var params = paramsToString({
-    dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
-    word: word
-  });
-
-  ajaxGet(url + params, function(xml) {
-    loadJQuery( function() {
-      var $ = window.jQuery;
-      var text = $(xml).find("WordDefinition").text();
-      displayMessage(text);
-    });
-  });
-}
-
-function cmd_define() {
-  useSelectionOrPrompt("Enter word to be defined:", defineWord);
-}
-
 function cmd_delete() {
   var sel = context.focusedWindow.getSelection();
   var document = context.focusedWindow.document;
@@ -437,104 +494,6 @@ function cmd_undelete() {
   });
 }
 
-function checkCalendar(date) {
-  var date = getWindow().Date.parse(date);
-  date = date._toString("yyyyMMdd");
-
-  var url = "http://www.google.com/calendar/m";
-  var params = paramsToString({ as_sdt: date });
-
-  // jQuery is already loaded because we've done a humane prompt before
-  // getting here.
-  var $ = window.jQuery;
-
-  ajaxGet(url + params, function(html) {
-    var output = "";
-    $(html).find(".c2").each(function() {
-      // Strip out the extra whitespace.
-      var text = $(this).text().replace(/[ ]+/g, " ");
-      text = text.replace(/ \n /g, " ");
-      output += text + "\n";
-    });
-    displayMessage(output);
-  });
-}
-
-function cmd_check_calendar() {
-  injectJavascript("http://datejs.googlecode.com/files/date.js");
-  humanePrompt("What day would you like to check?", checkCalendar);
-}
-
-function gmailChecker() {
-  var url = "http://mail.google.com/mail/feed/atom";
-  ajaxGet(url, function(rss) {
-    loadJQuery(function() {
-      var $ = window.jQuery;
-
-      var firstEntry = $(rss).find("entry").get(0);
-
-      var newEmailId = $(firstEntry).find("id").text();
-      var subject = $(firstEntry).find("title").text();
-      var author = $(firstEntry).find("author name").text();
-      var summary = $(firstEntry).find("summary").text();
-
-      var title = author + ' says "' + subject + '"';
-      displayMessage(summary, title);
-    });
-  });
-}
-
-function cmd_last_mail() {
-  gmailChecker();
-}
-cmd_last_mail.icon = "http://gmail.com/favicon.ico";
-
-function getGmailContacts( callback ) {
-  var url = "http://mail.google.com/mail/contacts/data/export";
-  var params = paramsToString({
-    exportType: "ALL",
-    out: "CSV"
-  });
-
-  if (typeof(globals.gmailContacts) != "undefined") {
-    callback(globals.gmailContacts);
-    return;
-  }
-
-  ajaxGet(url + params , function(data) {
-    data = data.split("\n");
-
-    var contacts = {};
-    for each( var line in data ) {
-      var splitLine = line.split(",");
-
-      var name = splitLine[0];
-      var email = splitLine[1];
-
-      contacts[name] = email;
-    }
-
-    globals.gmailContacts = contacts;
-    callback(contacts);
-  });
-}
-
-function cmd_get_email_address() {
-  humanePrompt("What's the person's name?", function(name) {
-    getGmailContacts(function(contacts) {
-      for (var c in contacts) {
-        if (c.match(name, "i")) {
-          displayMessage(contacts[c], c);
-        }
-      }
-    });
-  });
-}
-
-function cmd_go() {
-  log( context.focusedElement.wrappedJSObject );
-  
-}
 
 function cmd_get_sel() {
   function insertText(element, snippet)
@@ -796,9 +755,11 @@ function cmd_zoom() {
 // SYSTEM
 // -----------------------------------------------------------------
 
+function cmd_editor() {
+  openUrlInBrowser("chrome://ubiquity/content/editor.html");
+}
 
 // This function is run by Firefox on startup.
-
 function startup_welcome_message() {
   displayMessage("Welcome to Firefox, now with Ubiquity support!");
 }
