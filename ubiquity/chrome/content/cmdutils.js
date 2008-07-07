@@ -122,15 +122,14 @@ function setTextSelection(html) {
   }
     
   else {
-    displayMessage(html);
-    var div = doc.createElement("span");
-    div.innerHTML = html;
-    div.style.position = "absolute";
-    div.style.top = "100px";
-    div.style.left = "100px";
-    div.style.border = "5px solid #666";
-    div.style.backgroundColor = "white";
-    doc.body.appendChild(div);
+    var sel = context.focusedWindow.getSelection();
+
+    if (sel.rangeCount >= 1) {
+        var range = sel.getRangeAt(0);
+        var newNode = doc.createElement("span");
+        range.surroundContents(newNode);
+        jQuery(newNode).html( html );
+    }
   }
 }
 
