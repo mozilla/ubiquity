@@ -195,3 +195,21 @@ function loadJQuery(func) {
     })
   );
 }
+
+// Runs the function "callback" whenever a new page/tab is loaded
+// Also handles the case where new windows are opened.
+function onPageLoad( callback ) {
+  var activeWin = Application.activeWindow;
+  
+  function addLoadHandlerToTab( tab ) {
+    tab.events.addListener( "load", callback );    
+  }
+  
+  function addLoadHandlerToTabs(){
+    activeWin.tabs.forEach( addLoadHandlerToTab );
+  }
+  
+  addLoadHandlerToTabs();
+  activeWin.events.removeListener( "TabOpen", addLoadHandlerToTab );    
+  activeWin.events.addListener( "TabOpen", addLoadHandlerToTabs );
+}
