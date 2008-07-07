@@ -103,15 +103,6 @@ function cmd_signature() {
   setTextSelection( "-- aza | ɐzɐ --" );
 }
 
-function cmd_swedish() {
-  var URL = "http://www.cs.utexas.edu/users/jbc/bork/bork.cgi?";
-  var params = "type=chef&input=" + getTextSelection();
-
-  ajaxGet(URL + params, function(data) {
-    setTextSelection(data);
-  });
-}
-
 function calculate(expr) {
   setTextSelection( eval(expr) );
 }
@@ -196,17 +187,6 @@ function cmd_email() {
     gmonkey.load("1", safeWrapper(continuer));
   } else
     displayMessage("Gmail must be open in a tab.");
-}
-
-function paramsToString(params) {
-  var string = "?";
-
-  for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
-  }
-
-  // Remove the trailing &
-  return string.substr(0, string.length - 1);
 }
 
 function addToGoogleCalendar(eventString) {
@@ -577,6 +557,72 @@ function cloudPageLoadHandler( ) {
   }
 
 }
+
+// -----------------------------------------------------------------
+// LANGUAGE/TRANSLATE RELATED
+// -----------------------------------------------------------------
+
+function translate_to( lang ) {
+  var url = "http://ajax.googleapis.com/ajax/services/language/translate";
+  var params = paramsToString({
+    v: "1.0",
+    q: getTextSelection(),
+    langpair: "|" + lang
+  })
+  
+  ajaxGet( url + params, function(jsonData){
+    data = eval( '(' + jsonData + ')' );
+    var translatedText = data.responseData.translatedText;
+    setTextSelection( translatedText );
+  });
+}
+
+var Languages = {
+  'ARABIC' : 'ar',
+  'CHINESE' : 'zh',
+  'CHINESE_TRADITIONAL' : 'zh-TW',
+  'DANISH' : 'da',
+  'DUTCH': 'nl',  
+  'ENGLISH' : 'en',
+  'FINNISH' : 'fi',
+  'FRENCH' : 'fr',
+  'GERMAN' : 'de',
+  'GREEK' : 'el',
+  'HINDI' : 'hi',
+  'ITALIAN' : 'it',
+  'JAPANESE' : 'ja',
+  'KOREAN' : 'ko',
+  'NORWEGIAN' : 'no',
+  'POLISH' : 'pl',
+  'PORTUGUESE' : 'pt-PT',
+  'ROMANIAN' : 'ro',
+  'RUSSIAN' : 'ru',
+  'SPANISH' : 'es',
+  'SWEDISH' : 'sv',
+};
+
+function generateTranslateFunction( langCode ){
+  return function(){
+    translate_to( langCode );    
+  } 
+}
+
+for( lang in Languages ){  
+  var langCode = Languages[lang];
+  var langName = lang.toLowerCase();
+  
+  this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode )
+}
+
+function cmd_translate_to_fake_swedish() {
+  var URL = "http://www.cs.utexas.edu/users/jbc/bork/bork.cgi?";
+  var params = "type=chef&input=" + getTextSelection();
+
+  ajaxGet(URL + params, function(data) {
+    setTextSelection(data);
+  });
+}
+
 
 // -----------------------------------------------------------------
 // MICROFORMAT RELATED

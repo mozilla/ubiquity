@@ -264,3 +264,14 @@ function useSelectionOrPrompt(message, callback) {
   else
     humanePrompt(message, callback);
 }
+
+function paramsToString(params) {
+  var string = "?";
+
+  for (key in params) {
+    string += escape(key) + "=" + escape(params[key]) + "&";
+  }
+
+  // Remove the trailing &
+  return string.substr(0, string.length - 1);
+}
