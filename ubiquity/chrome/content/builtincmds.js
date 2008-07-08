@@ -363,10 +363,8 @@ function cmd_get_email_address() {
 // MISC COMMANDS
 // -----------------------------------------------------------------
 
-function windowOpen_inject_xss() {
-  onPageLoad( function(){
-    getWindowInsecure().ajaxGet = ajaxGet;
-  });
+function pageLoad_inject_xss(){
+  getWindowInsecure().ajaxGet = ajaxGet;
 }
 
 function insertMap( query ) {
@@ -835,12 +833,9 @@ function cmd_populate_with_microformat() {
   }
 }
 
-function windowOpen_installMicroformatHarvesters() {
-  function install() {
-    cmd_detect_microformat();
-    cmd_populate_with_microformat();
-  }
-  onPageLoad(install);
+function pageLoad_installMicroformatHarvesters() {
+  cmd_detect_microformat();
+  cmd_populate_with_microformat();
 }
 
 // -----------------------------------------------------------------
@@ -879,10 +874,8 @@ function cmd_inject_snapshot() {
   win.snapshot = takeSnapshotOfWindow;
 }
 
-function windowOpen_inject_snapshot() {
-  onPageLoad( function(){
-    getWindowInsecure().snapshot = takeSnapshotOfWindow;
-  });
+function pageLoad_inject_snapshot(){
+  getWindowInsecure().snapshot = takeSnapshotOfWindow;
 }
 
 // -----------------------------------------------------------------

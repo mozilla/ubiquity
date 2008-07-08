@@ -45,10 +45,16 @@ if (window.location == "chrome://browser/content/browser.xul") {
   // whenever a browser window is opened.
   callRunOnceFunctions(windowGlobals, "windowOpen_");
 
+  // Remove any old page-load event listeners.
+  if (windowGlobals._pageLoadFuncs)
+    for (var i = 0; i < windowGlobals._pageLoadFuncs.length; i++)
+      windowGlobals._pageLoadFuncs[i].remove();
+  windowGlobals._pageLoadFuncs = [];
+
   // Configure all functions starting with "pageLoad_" to be called
   // whenever a page is loaded.
   var funcs = findFunctionsWithPrefix("pageLoad_");
-  for (var i = 0; i < funcs.length; i++)
+  for (i = 0; i < funcs.length; i++)
     onPageLoad(funcs[i]);
 } else {
   // We're being included in an HTML page.  Yes, this is a hack, but

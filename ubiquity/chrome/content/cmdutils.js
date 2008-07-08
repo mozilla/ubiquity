@@ -207,6 +207,14 @@ function onPageLoad( callback ) {
   }
 
   var appcontent = window.document.getElementById("appcontent");
+  windowGlobals._pageLoadFuncs.push(_onPageLoad);
+
+  _onPageLoad.remove = function _onPageLoad_remove() {
+    appcontent.removeEventListener("DOMContentLoaded",
+                                   _onPageLoad,
+                                   true);
+  };
+
   appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
 }
 
