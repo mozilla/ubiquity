@@ -105,7 +105,8 @@ function setTextSelection(html) {
     var text = el.textContent;
 
     if( html != text){
-      displayMessage( "This command requires a rich text field for full support.")
+      displayMessage( "This command requires a rich " +
+                      "text field for full support.");
     }
 
     var selectionEnd = focused.selectionStart + text.length;
@@ -227,9 +228,12 @@ function getCookie(domain, name) {
 }
 
 function humanePrompt(text, callback) {
-  injectCss("#_box{ position:fixed; left:0; bottom:0; width:100%; z-index: 1000;" +
-            "       height: 85px; background-color:#CCC; display:none; text-align:center;" +
-            "       border-top: 1px solid #999; font-size: 12pt; overflow-y: auto;} " +
+  injectCss("#_box{ position:fixed; left:0; bottom:0; width:100%; " +
+            "       z-index: 1000;" +
+            "       height: 85px; background-color:#CCC; display:none; " +
+            "       text-align:center;" +
+            "       border-top: 1px solid #999; font-size: 12pt; " +
+            "       overflow-y: auto;} " +
             "#_input{ width: 95%; font-size:24pt;}");
 
   injectHtml("<div id='_box'>" + text + "<br/><input id='_input'></div>");

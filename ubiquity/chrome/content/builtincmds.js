@@ -601,30 +601,34 @@ function getXpath(el) {
   }
   else {
     var xml = context.focusedWindow.document;
-	var xpath = '';
-	var pos, tempitem2;
+    var xpath = '';
+    var pos, tempitem2;
 
-	while(el !== xml.documentElement) {
-        if (!el || !el.parentNode) {
-          return null;
-        }
+    while(el !== xml.documentElement) {
+      if (!el || !el.parentNode) {
+        return null;
+      }
 
-		pos = 0;
-		tempitem2 = el;
-		while(tempitem2) {
-			if (tempitem2.nodeType === 1 && tempitem2.nodeName === el.nodeName) { // If it is ELEMENT_NODE of the same name
-				pos += 1;
-			}
-			tempitem2 = tempitem2.previousSibling;
-		}
-
-		xpath = el.nodeName + (el.namespaceURI===null?'':el.namespaceURI) + "[" + pos + ']' + '/' + xpath;
-
-		el = el.parentNode;
+      pos = 0;
+      tempitem2 = el;
+      while(tempitem2) {
+	if (tempitem2.nodeType === 1 &&
+            tempitem2.nodeName === el.nodeName) {
+          // If it is ELEMENT_NODE of the same name
+	  pos += 1;
 	}
-	xpath = xml.documentElement.nodeName + (el.namespaceURI===null?'':el.namespaceURI)+'/'+xpath;
-	xpath = xpath.replace(/\/$/, '');
-	return xpath;
+	tempitem2 = tempitem2.previousSibling;
+      }
+
+      xpath = (el.nodeName + (el.namespaceURI===null?'':el.namespaceURI) +
+               "[" + pos + ']' + '/' + xpath);
+
+      el = el.parentNode;
+    }
+    xpath = (xml.documentElement.nodeName +
+             (el.namespaceURI===null?'':el.namespaceURI) + '/' + xpath);
+    xpath = xpath.replace(/\/$/, '');
+    return xpath;
   }
 }
 
@@ -644,7 +648,8 @@ function cmd_get_sel() {
     var currentValue = element.value;
 
     var beforeText = currentValue.substring(0, element.selectionStart);
-    var afterText = currentValue.substring(element.selectionEnd, currentValue.length);
+    var afterText = currentValue.substring(element.selectionEnd,
+                                           currentValue.length);
 
     element.value = beforeText + snippet + afterText;
     element.focus();
@@ -653,8 +658,7 @@ function cmd_get_sel() {
     element.setSelectionRange(selectionEnd, selectionEnd);
   }
 
-  insertText(context.focusedElement, "hello")
-
+  insertText(context.focusedElement, "hello");
 }
 
 // -----------------------------------------------------------------
@@ -664,7 +668,7 @@ function cmd_get_sel() {
 
 function cmd_capture_word_cloud( ){
   onPageLoad( cloudPageLoadHandler );
-  displayMessage( "Word Cloud Handlers Added")
+  displayMessage( "Word Cloud Handlers Added");
 }
 
 
@@ -674,7 +678,7 @@ function cmd_reset_word_cloud( ) {
 
 function cmd_display_word_cloud( ){
 
-  d = getDocumentInsecure().createElement("div");
+  var d = getDocumentInsecure().createElement("div");
   d.style.position = "absolute";
   d.style.top = "0px";
   d.style.left = "0px";
@@ -682,7 +686,7 @@ function cmd_display_word_cloud( ){
   for( var word in globals.wordCloud ) {
     var actualWord = word.substring(5);
     if( globals.wordCloud[word] > 3 ){
-      s = getDocumentInsecure().createElement("span");
+      var s = getDocumentInsecure().createElement("span");
       s.style.fontSize = globals.wordCloud[word] * 3 + "px";
       s.innerHTML = actualWord;
       d.appendChild( s );
@@ -702,7 +706,7 @@ function cloudPageLoadHandler( ) {
   body.find("script,head,style").remove();
 
   var text = jQuery( body ).text();
-  data = text.split(/\W/).filter( function(d){
+  var data = text.split(/\W/).filter( function(d){
     if( d == "" ) return false;
     if( d.length <= 3 ) return false;
     if( d.match(/\d/) ) return false;
@@ -713,8 +717,8 @@ function cloudPageLoadHandler( ) {
   for( var i=0; i<=data.length; i++ ){
     var d = "word_" + data[i];
 
-    if( typeof(globals.wordCloud[d]) == "undefined" ){ globals.wordCloud[d] = 1 }
-    else{ globals.wordCloud[d] += 1 }
+    if( typeof(globals.wordCloud[d]) == "undefined" ){ globals.wordCloud[d] = 1; }
+    else{ globals.wordCloud[d] += 1; }
     if( typeof(globals.wordCloud.length) == "number" ){ displayMessage(d, data[i-1]); return;}
   }
 
@@ -730,10 +734,10 @@ function translate_to( lang ) {
     v: "1.0",
     q: getTextSelection(),
     langpair: "|" + lang
-  })
+  });
 
   ajaxGet( url + params, function(jsonData){
-    data = eval( '(' + jsonData + ')' );
+    var data = eval( '(' + jsonData + ')' );
     var translatedText = data.responseData.translatedText;
     setTextSelection( translatedText );
   });
@@ -760,20 +764,20 @@ var Languages = {
   'ROMANIAN' : 'ro',
   'RUSSIAN' : 'ru',
   'SPANISH' : 'es',
-  'SWEDISH' : 'sv',
+  'SWEDISH' : 'sv'
 };
 
 function generateTranslateFunction( langCode ){
   return function(){
     translate_to( langCode );
-  }
+  };
 }
 
 for( lang in Languages ){
   var langCode = Languages[lang];
   var langName = lang.toLowerCase();
 
-  this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode )
+  this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode );
 }
 
 function cmd_translate_to_fake_swedish() {
@@ -802,9 +806,9 @@ function getMF( type ) {
 }
 
 function cmd_detect_microformat() {
-  var uf = getMF( "adr" )
+  var uf = getMF( "adr" );
   if( uf ) {
-    displayMessage( "Found address: " + uf )
+    displayMessage( "Found address: " + uf );
     if( !globals.addresses ) globals.addresses = [];
     globals.addresses.push( uf[0] );
   }
@@ -830,11 +834,11 @@ function cmd_populate_with_microformat() {
 }
 
 function startup_microfomrat() {
-  onPageLoad( cmd_detect_microformat )
+  onPageLoad( cmd_detect_microformat );
 }
 
 function startup_populate() {
-  onPageLoad( cmd_populate_with_microformat )
+  onPageLoad( cmd_populate_with_microformat );
 }
 
 // -----------------------------------------------------------------
@@ -889,7 +893,7 @@ function setFullPageZoom( level ) {
                     .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
                     .getInterface(Components.interfaces.nsIWebNavigation);
   var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
-  docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
+  var docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
   docviewer.fullZoom = level;
 }
 
@@ -898,7 +902,7 @@ function iframeFullPageZoom( iframe, level ) {
                     .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
                     .getInterface(Components.interfaces.nsIWebNavigation);
   var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
-  docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
+  var docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
   docviewer.fullZoom = level;
 }
 
@@ -908,7 +912,7 @@ function cmd_scale_firefox_down() {
 
 function cmd_zoom() {
   var win = getWindowInsecure();
-  document = getDocumentInsecure();
+  var document = getDocumentInsecure();
 
   var $ = jQuery;
 
@@ -922,13 +926,13 @@ function cmd_zoom() {
     backgroundColor: "#222",
     width: "100%",
     height: "100%",
-    zIndex: 10000000,
+    zIndex: 10000000
   });
 
   var w = jQuery(document.body).width();
   var h = window.innerHeight;
 
-  img = document.createElement("img");
+  var img = document.createElement("img");
   img.src = dataUrl;
   img.id = "theImage";
 
@@ -955,7 +959,7 @@ function cmd_zoom() {
       $(document.body).css({overflow:"auto"});
     },500);
 
-  })
+  });
 }
 
 
