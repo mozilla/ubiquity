@@ -972,13 +972,12 @@ function startup_welcome_message() {
 }
 
 // Apply annotations so that all changes to our document are "activated"
-function pageLoad_applyAnnotations() {
+function pageLoad_applyAnnotations(doc) {
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                   .getService(Components.interfaces.nsIIOService);
 
-  var doc = getDocumentInsecure();
   var uri = ioservice.newURI(doc.location.href, null, null);
 
   var annotationNames = annotationService.getPageAnnotationNames(uri, {});
