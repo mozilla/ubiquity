@@ -10,6 +10,10 @@ function ubiquitySetup()
     "chrome://ubiquity/content/builtincmds.js"
   );
 
+  var finalProcessing = new UriCodeSource(
+    "chrome://ubiquity/content/final.js"
+  );
+
   var msgService = new AlertMessageService();
 
   var globalSpace = {};
@@ -22,6 +26,7 @@ function ubiquitySetup()
     Application: Application,
     Components: Components,
     window: window,
+    windowGlobals: {},
     globals: globalSpace.UbiquityGlobals,
     displayMessage: function(msg, title, icon) {
       msgService.displayMessage(msg, title, icon);
@@ -30,8 +35,15 @@ function ubiquitySetup()
 
   var sandboxFactory = new SandboxFactory(globals);
 
+  var codeSources = [
+    cmdUtils,
+    builtinCmds,
+    PrefCommands,
+    finalProcessing
+  ];
+
   var cmdSource = new CommandSource(
-    [cmdUtils, builtinCmds, PrefCommands],
+    codeSources,
     msgService,
     sandboxFactory
   );
