@@ -18,16 +18,25 @@ for (name in this)
   }
 
 if (window.location == "chrome://browser/content/browser.xul") {
+  function findFunctionsWithPrefix(prefix) {
+    var funcs = [];
+
+    for (name in this)
+      if (name.indexOf(prefix) == 0 && typeof(this[name]) == "function")
+        funcs.push(this[name]);
+
+    return funcs;
+  }
+
   function callRunOnceFunctions(scopeObj, prefix) {
     if (!scopeObj.hasRunOnce) {
       scopeObj.hasRunOnce = true;
-      for (name in this) {
-        if (name.indexOf(prefix) == 0 && typeof(this[name]) == "function") {
-          this[name]();
-        }
-      }
+      var funcs = findFunctionsWithPrefix(prefix);
+      for (var i = 0; i < funcs.length; i++)
+        funcs[i]();
     }
   }
+
   // Configure all functions starting with "startup_" to be called on
   // Firefox startup.
   callRunOnceFunctions(globals, "startup_");
@@ -35,6 +44,12 @@ if (window.location == "chrome://browser/content/browser.xul") {
   // Configure all functions starting with "windowOpen_" to be called
   // whenever a browser window is opened.
   callRunOnceFunctions(windowGlobals, "windowOpen_");
+
+  // Configure all functions starting with "pageLoad_" to be called
+  // whenever a page is loaded.
+  var funcs = findFunctionsWithPrefix("pageLoad_");
+  for (var i = 0; i < funcs.length; i++)
+    onPageLoad(funcs[i]);
 } else {
   // We're being included in an HTML page.  Yes, this is a hack, but
   // this solution is temporary anyways.
