@@ -12,12 +12,17 @@ function ubiquitySetup()
 
   var msgService = new AlertMessageService();
 
+  var globalSpace = {};
+
+  Components.utils.import("resource://ubiquity-modules/globals.js",
+                          globalSpace);
+
   var globals = {
     jQuery: jQuery,
     Application: Application,
     Components: Components,
     window: window,
-    globals: {},
+    globals: globalSpace.UbiquityGlobals,
     displayMessage: function(msg, title, icon) {
       msgService.displayMessage(msg, title, icon);
     }
