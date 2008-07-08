@@ -196,8 +196,8 @@ function loadJQuery(func) {
   );
 }
 
-// Runs the function "callback" whenever a new page/tab is loaded
-// Also handles the case where new windows are opened.
+// Runs the function "callback" whenever a new page/tab is loaded in
+// the window that this Ubiquity sandbox is associated with.
 function onPageLoad( callback ) {
   var activeWin = Application.activeWindow;
 
