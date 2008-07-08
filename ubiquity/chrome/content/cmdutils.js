@@ -93,21 +93,21 @@ function setTextSelection(html) {
 
   var doc = context.focusedWindow.document;
   var focused = context.focusedElement;
-  
+
   if (doc.designMode == "on") {
     doc.execCommand("insertHTML", false, html);
   }
-  
+
   else if( focused ) {
     var el = doc.createElement( "html" );
     el.innerHTML = "<div>" + html + "</div>";
-    
+
     var text = el.textContent;
-    
+
     if( html != text){
       displayMessage( "This command requires a rich text field for full support.")
     }
-    
+
     var selectionEnd = focused.selectionStart + text.length;
     var currentValue = focused.value;
 
@@ -118,9 +118,9 @@ function setTextSelection(html) {
     focused.focus();
 
     //put the cursor after the inserted text
-    focused.setSelectionRange(selectionEnd, selectionEnd);  
+    focused.setSelectionRange(selectionEnd, selectionEnd);
   }
-    
+
   else {
     var sel = context.focusedWindow.getSelection();
 
@@ -134,12 +134,12 @@ function setTextSelection(html) {
 }
 
 // This gets the outer document of the current tab.
-function getDocument() {
-  return getWindow().document;
+function getDocumentInsecure() {
+  return getWindowInsecure().document;
 }
 
 // This gets the outer window of the current tab.
-function getWindow() {
+function getWindowInsecure() {
   return Application.activeWindow
                     .activeTab
                     .document
@@ -148,21 +148,21 @@ function getWindow() {
 }
 
 function injectCss(css) {
-  var doc = getDocument();
+  var doc = getDocumentInsecure();
   var style = doc.createElement("style");
   style.innerHTML = css;
   doc.body.appendChild(style);
 }
 
 function injectHtml( html ) {
-  var doc = getDocument();
+  var doc = getDocumentInsecure();
   var div = doc.createElement("div");
   div.innerHTML = html;
   doc.body.appendChild(div.firstChild);
 }
 
 function log(what) {
-  var console = getWindow().console;
+  var console = getWindowInsecure().console;
   if (typeof(console) != "undefined"){
     console.log( what );
   } else {
@@ -171,7 +171,7 @@ function log(what) {
 }
 
 function injectJavascript(src, callback) {
-  var doc = getDocument();
+  var doc = getDocumentInsecure();
 
   var script = doc.createElement("script");
   script.src = src;
@@ -189,7 +189,7 @@ function loadJQuery(func) {
   injectJavascript(
     "http://code.jquery.com/jquery-latest.pack.js",
     safeWrapper( function() {
-      window.jQuery = window.$ = getWindow().jQuery;
+      window.jQuery = window.$ = getWindowInsecure().jQuery;
       func();
     })
   );
@@ -199,17 +199,17 @@ function loadJQuery(func) {
 // Also handles the case where new windows are opened.
 function onPageLoad( callback ) {
   var activeWin = Application.activeWindow;
-  
+
   function addLoadHandlerToTab( tab ) {
-    tab.events.addListener( "load", callback );    
+    tab.events.addListener( "load", callback );
   }
-  
+
   function addLoadHandlerToTabs(){
     activeWin.tabs.forEach( addLoadHandlerToTab );
   }
-  
+
   addLoadHandlerToTabs();
-  activeWin.events.removeListener( "TabOpen", addLoadHandlerToTab );    
+  activeWin.events.removeListener( "TabOpen", addLoadHandlerToTab );
   activeWin.events.addListener( "TabOpen", addLoadHandlerToTabs );
 }
 

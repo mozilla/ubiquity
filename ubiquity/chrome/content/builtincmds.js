@@ -134,8 +134,8 @@ function cmd_define() {
 }
 
 function cmd_edit_page() {
-  getDocument().body.contentEditable = 'true';
-  getDocument().designMode='on';
+  getDocumentInsecure().body.contentEditable = 'true';
+  getDocumentInsecure().designMode='on';
 }
 
 // -----------------------------------------------------------------
@@ -172,6 +172,9 @@ function cmd_email() {
   }
 
   if (gmailTab) {
+    // Note that this is technically insecure because we're
+    // accessing wrappedJSObject, but we're only executing this
+    // in a Gmail tab, and Gmail is trusted code.
     var console = gmailTab.document.defaultView.wrappedJSObject.console;
     var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
 
@@ -255,7 +258,7 @@ cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
 function cmd_send() {
   loadJQuery(function() {
     var $ = window.jQuery;
-    var gm = getWindow().gmonkey.get(1);
+    var gm = getWindowInsecure().gmonkey.get(1);
     var gmail = gm.getCanvasElement();
     $(gmail).find("button[textContent=Send]").get(0).click();
   });
@@ -263,7 +266,7 @@ function cmd_send() {
 cmd_send.icon = "http://google.com/favicon.ico";
 
 function checkCalendar(date) {
-  var date = getWindow().Date.parse(date);
+  var date = getWindowInsecure().Date.parse(date);
   date = date._toString("yyyyMMdd");
 
   var url = "http://www.google.com/calendar/m";
@@ -362,7 +365,7 @@ function cmd_get_email_address() {
 
 function startup_inject_xss() {
   onPageLoad( function(){
-    getWindow().ajaxGet = ajaxGet;
+    getWindowInsecure().ajaxGet = ajaxGet;
   });
 }
 
@@ -492,9 +495,9 @@ function cmd_undo_delete() {
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                           .getService(Components.interfaces.nsIIOService);
-                          
-  annotationService.removePageAnnotations(ioservice.newURI(window.content.location.href, null, null));  
-  
+
+  annotationService.removePageAnnotations(ioservice.newURI(window.content.location.href, null, null));
+
   window.content.location.reload();
 }
 
@@ -515,7 +518,7 @@ function cmd_perm_delete() {
   var endOffset   = range.endOffset;
   var startXpath;
   var endXpath;
-    
+
   // see if we need to modify the startNode xpath
   if (startNode.nodeType == 3) {
     // modify the offset with respect to the parent
@@ -549,18 +552,18 @@ function cmd_perm_delete() {
   }
   startXpath = this.getXpath(startNode);
   endXpath = this.getXpath(endNode);
-  
+
   //displayMessage("start: " + startXpath + ", end: " + endXpath);
   if (!startXpath || !endXpath) {
     displayMessage("Can't delete!");
     return;
-  }  
+  }
   if ((countChars(startXpath, '/') != countChars(endXpath, '/')) ||
        (sel.toString().length > endOffset-startOffset)) {
     displayMessage("Can't delete nicely!");
     return;
   }
-  
+
   //endOffset = startOffset + sel.toString().length;
 
   // delete the text content in between the start and end nodes
@@ -600,8 +603,8 @@ function getXpath(el) {
     var xml = context.focusedWindow.document;
 	var xpath = '';
 	var pos, tempitem2;
-	
-	while(el !== xml.documentElement) {		
+
+	while(el !== xml.documentElement) {
         if (!el || !el.parentNode) {
           return null;
         }
@@ -614,9 +617,9 @@ function getXpath(el) {
 			}
 			tempitem2 = tempitem2.previousSibling;
 		}
-		
+
 		xpath = el.nodeName + (el.namespaceURI===null?'':el.namespaceURI) + "[" + pos + ']' + '/' + xpath;
-        
+
 		el = el.parentNode;
 	}
 	xpath = xml.documentElement.nodeName + (el.namespaceURI===null?'':el.namespaceURI)+'/'+xpath;
@@ -671,7 +674,7 @@ function cmd_reset_word_cloud( ) {
 
 function cmd_display_word_cloud( ){
 
-  d = getDocument().createElement("div");
+  d = getDocumentInsecure().createElement("div");
   d.style.position = "absolute";
   d.style.top = "0px";
   d.style.left = "0px";
@@ -679,14 +682,14 @@ function cmd_display_word_cloud( ){
   for( var word in globals.wordCloud ) {
     var actualWord = word.substring(5);
     if( globals.wordCloud[word] > 3 ){
-      s = getDocument().createElement("span");
+      s = getDocumentInsecure().createElement("span");
       s.style.fontSize = globals.wordCloud[word] * 3 + "px";
       s.innerHTML = actualWord;
       d.appendChild( s );
     }
   }
 
-  getDocument().body.appendChild( d );
+  getDocumentInsecure().body.appendChild( d );
 
 }
 
@@ -695,7 +698,7 @@ function cloudPageLoadHandler( ) {
     globals.wordCloud = {};
   }
 
-  var body = jQuery( getDocument().body ).clone();
+  var body = jQuery( getDocumentInsecure().body ).clone();
   body.find("script,head,style").remove();
 
   var text = jQuery( body ).text();
@@ -791,9 +794,9 @@ function cmd_translate_to_fake_swedish() {
 function getMF( type ) {
   Components.utils.import("resource://gre/modules/Microformats.js");
 
-  var count = Microformats.count( type , getDocument(), {recurseExternalFrames: true});
+  var count = Microformats.count( type , getDocumentInsecure(), {recurseExternalFrames: true});
   if( count > 0 ) {
-    return Microformats.get( type , getDocument(), {recurseExternalFrames: true});
+    return Microformats.get( type , getDocumentInsecure(), {recurseExternalFrames: true});
   }
   return null;
 }
@@ -815,13 +818,13 @@ function cmd_populate_with_microformat() {
 
   var last = globals.addresses.length - 1;
   var addr = globals.addresses[last].toString();
-  var url = getWindow().location.href;
+  var url = getWindowInsecure().location.href;
 
   if( url == "http://maps.google.com/" ){
-    getDocument().getElementById("q_d").value = addr;
+    getDocumentInsecure().getElementById("q_d").value = addr;
 
     setTimeout( function(){
-      getDocument().getElementById("q_sub").click();
+      getDocumentInsecure().getElementById("q_sub").click();
     }, 50 );
   }
 }
@@ -866,13 +869,13 @@ function takeSnapshotOfWindow( window, scrollDict ) {
 }
 
 function cmd_inject_snapshot() {
-  var win = getWindow();
+  var win = getWindowInsecure();
   win.snapshot = takeSnapshotOfWindow;
 }
 
 function startup_inject_snapshot() {
   onPageLoad( function(){
-    getWindow().snapshot = takeSnapshotOfWindow;
+    getWindowInsecure().snapshot = takeSnapshotOfWindow;
   });
 }
 
@@ -904,8 +907,8 @@ function cmd_scale_firefox_down() {
 }
 
 function cmd_zoom() {
-  var win = getWindow();
-  document = getDocument();
+  var win = getWindowInsecure();
+  document = getDocumentInsecure();
 
   var $ = jQuery;
 
