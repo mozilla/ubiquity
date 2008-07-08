@@ -64,7 +64,7 @@ function getTextSelection() {
 function safeWrapper(func) {
   var wrappedFunc = function() {
     try {
-      func();
+      func.apply(this, arguments);
     } catch (e) {
       displayMessage("An exception occurred: " + e);
     }
@@ -200,8 +200,10 @@ function loadJQuery(func) {
 // the window that this Ubiquity sandbox is associated with, passing
 // the window's document object as a parameter.
 function onPageLoad( callback ) {
+  var safeCallback = safeWrapper(callback);
+
   function _onPageLoad(aEvent) {
-    callback(aEvent.originalTarget);
+    safeCallback(aEvent.originalTarget);
   }
 
   var appcontent = window.document.getElementById("appcontent");

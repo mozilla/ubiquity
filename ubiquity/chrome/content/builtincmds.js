@@ -806,10 +806,12 @@ function getMF( type ) {
 }
 
 function cmd_detect_microformat() {
+  if( !globals.addresses )
+    globals.addresses = [];
+
   var uf = getMF( "adr" );
   if( uf ) {
     displayMessage( "Found address: " + uf );
-    if( !globals.addresses ) globals.addresses = [];
     globals.addresses.push( uf[0] );
   }
 }
@@ -833,12 +835,12 @@ function cmd_populate_with_microformat() {
   }
 }
 
-function windowOpen_microfomrat() {
-  onPageLoad( cmd_detect_microformat );
-}
-
-function windowOpen_populate() {
-  onPageLoad( cmd_populate_with_microformat );
+function windowOpen_installMicroformatHarvesters() {
+  function install() {
+    cmd_detect_microformat();
+    cmd_populate_with_microformat();
+  }
+  onPageLoad(install);
 }
 
 // -----------------------------------------------------------------
