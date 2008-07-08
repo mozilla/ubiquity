@@ -197,21 +197,15 @@ function loadJQuery(func) {
 }
 
 // Runs the function "callback" whenever a new page/tab is loaded in
-// the window that this Ubiquity sandbox is associated with.
+// the window that this Ubiquity sandbox is associated with, passing
+// the window's document object as a parameter.
 function onPageLoad( callback ) {
-  var activeWin = Application.activeWindow;
-
-  function addLoadHandlerToTab( tab ) {
-    tab.events.addListener( "load", callback );
+  function _onPageLoad(aEvent) {
+    callback(aEvent.originalTarget);
   }
 
-  function addLoadHandlerToTabs(){
-    activeWin.tabs.forEach( addLoadHandlerToTab );
-  }
-
-  addLoadHandlerToTabs();
-  activeWin.events.removeListener( "TabOpen", addLoadHandlerToTab );
-  activeWin.events.addListener( "TabOpen", addLoadHandlerToTabs );
+  var appcontent = window.document.getElementById("appcontent");
+  appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
 }
 
 function getCookie(domain, name) {
