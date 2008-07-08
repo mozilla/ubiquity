@@ -41,10 +41,6 @@ if (window.location == "chrome://browser/content/browser.xul") {
   // Firefox startup.
   callRunOnceFunctions(globals, "startup_");
 
-  // Configure all functions starting with "windowOpen_" to be called
-  // whenever a browser window is opened.
-  callRunOnceFunctions(windowGlobals, "windowOpen_");
-
   // Remove any old page-load event listeners.
   if (windowGlobals._pageLoadFuncs)
     for (var i = 0; i < windowGlobals._pageLoadFuncs.length; i++)
