@@ -8,7 +8,6 @@
   <script src="msgservice.js"/>
   <script src="prefcommands.js"/>
   <script src="browser.js"/>
-  <script src="annotations.js"/>
   
   <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"

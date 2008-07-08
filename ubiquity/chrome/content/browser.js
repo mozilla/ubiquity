@@ -22,6 +22,7 @@ function ubiquitySetup()
                           globalSpace);
 
   var globals = {
+    XPathResult: XPathResult,
     jQuery: jQuery,
     Application: Application,
     Components: Components,
