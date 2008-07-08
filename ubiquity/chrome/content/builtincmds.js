@@ -485,6 +485,7 @@ function cmd_undelete() {
   });
 }
 
+
 // removes all page annotations - add more functionality
 function cmd_undo_delete() {
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
@@ -493,6 +494,8 @@ function cmd_undo_delete() {
                           .getService(Components.interfaces.nsIIOService);
                           
   annotationService.removePageAnnotations(ioservice.newURI(window.content.location.href, null, null));  
+  
+  window.content.location.reload();
 }
 
 // permanent delete - in progress, slightly buggy
@@ -510,6 +513,8 @@ function cmd_perm_delete() {
   var endNode   = range.endContainer;
   var startOffset = range.startOffset;
   var endOffset   = range.endOffset;
+  var startXpath;
+  var endXpath;
     
   // see if we need to modify the startNode xpath
   if (startNode.nodeType == 3) {
@@ -537,6 +542,24 @@ function cmd_perm_delete() {
     endNode = endNode.parentNode;  
   }
 
+  var children = endNode.childNodes;
+  for (var i=0; i<children.length; i++) {
+    if (children[i] == startNode)
+      displayMessage("found it");
+  }
+  startXpath = this.getXpath(startNode);
+  endXpath = this.getXpath(endNode);
+  
+  //displayMessage("start: " + startXpath + ", end: " + endXpath);
+  if (!startXpath || !endXpath) {
+    displayMessage("Can't delete!");
+    return;
+  }  
+  if ((countChars(startXpath, '/') != countChars(endXpath, '/')) ||
+       (sel.toString().length > endOffset-startOffset)) {
+    displayMessage("Can't delete nicely!");
+    return;
+  }
   
   //endOffset = startOffset + sel.toString().length;
   
@@ -555,16 +578,60 @@ function cmd_perm_delete() {
     endNode.textContent = endNode.textContent.substring(endOffset);
   }
 
-  var annotationName = "ubiquity/delete/" + this.getXpath(startNode) + "#" + this.getXpath(endNode);
+  var annotationName = "ubiquity/delete/" + startXpath + "#" + endXpath;
   var annotationValue = startOffset + "#" + endOffset;
   
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), annotationName, annotationValue, 0, 4);
-}
 
+}
+/*
 function getXpath(node) {
   var generator = Components.classes["@mozilla.org/xpath-generator;1"].createInstance(Components.interfaces.nsIXPathGenerator);
   generator.addNamespace("html", "http://www.w3.org/1999/xhtml"); 
   return generator.generateXPath(node, context.focusedWindow.document);
+}
+*/
+function getXpath(el) {
+  if (el == null) {
+    displayMessage("Can't delete");
+    return null;
+  }
+  else {
+    var xml = context.focusedWindow.document;
+	var xpath = '';
+	var pos, tempitem2;
+	
+	while(el !== xml.documentElement) {		
+        if (!el || !el.parentNode) {
+          return null;
+        }
+
+		pos = 0;
+		tempitem2 = el;
+		while(tempitem2) {
+			if (tempitem2.nodeType === 1 && tempitem2.nodeName === el.nodeName) { // If it is ELEMENT_NODE of the same name
+				pos += 1;
+			}
+			tempitem2 = tempitem2.previousSibling;
+		}
+		
+		xpath = el.nodeName + (el.namespaceURI===null?'':el.namespaceURI) + "[" + pos + ']' + '/' + xpath;
+        
+		el = el.parentNode;
+	}
+	xpath = xml.documentElement.nodeName + (el.namespaceURI===null?'':el.namespaceURI)+'/'+xpath;
+	xpath = xpath.replace(/\/$/, '');
+	return xpath;
+  }
+}
+
+function countChars(str, chr) {
+  var count = 0;
+  while (str.match(chr)) {
+    count++;
+    str = str.substring(str.indexOf(chr) + 1);
+  }
+  return count;
 }
 
 function cmd_get_sel() {

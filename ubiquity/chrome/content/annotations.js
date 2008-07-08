@@ -65,6 +65,12 @@ var ubiquity = {
         }
         
       }
+      
+      if (annotationNames[i] == "test") {
+        displayMessage("test");
+        
+        //alert(eval(annotationService.getPageAnnotation(uri, annotationNames[i]))); 
+      }
     }
   },  
 } 
