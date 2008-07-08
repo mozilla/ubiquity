@@ -504,11 +504,11 @@ function cmd_perm_delete() {
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                           .getService(Components.interfaces.nsIIOService);
-	
+
   var document = context.focusedWindow.document;
   var sel      = context.focusedWindow.getSelection();
   var range    = sel.getRangeAt(0);
-  
+
   var startNode = range.startContainer;
   var endNode   = range.endContainer;
   var startOffset = range.startOffset;
@@ -520,26 +520,26 @@ function cmd_perm_delete() {
   if (startNode.nodeType == 3) {
     // modify the offset with respect to the parent
     var children = startNode.parentNode.childNodes;
-    var count = 0; 
+    var count = 0;
     while (children[count] != startNode) {
       startOffset = startOffset + children[count].textContent.length;
       count++;
     }
     // set the start node to its parent
-    startNode = startNode.parentNode;  
+    startNode = startNode.parentNode;
   }
-    
+
   // see if we need to modify the endNode xpath
   if (endNode.nodeType == 3) {
     // modify the offset with respect to the parent
     var children = endNode.parentNode.childNodes;
-    var count = 0; 
+    var count = 0;
     while (children[count] != endNode) {
       endOffset = endOffset + children[count].textContent.length;
       count++;
     }
     // set the start node to its parent
-    endNode = endNode.parentNode;  
+    endNode = endNode.parentNode;
   }
 
   var children = endNode.childNodes;
@@ -562,7 +562,7 @@ function cmd_perm_delete() {
   }
   
   //endOffset = startOffset + sel.toString().length;
-  
+
   // delete the text content in between the start and end nodes
   if (startNode == endNode) {
     startNode.textContent = startNode.textContent.substring(0, startOffset) +
@@ -580,14 +580,14 @@ function cmd_perm_delete() {
 
   var annotationName = "ubiquity/delete/" + startXpath + "#" + endXpath;
   var annotationValue = startOffset + "#" + endOffset;
-  
+
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), annotationName, annotationValue, 0, 4);
 
 }
 /*
 function getXpath(node) {
   var generator = Components.classes["@mozilla.org/xpath-generator;1"].createInstance(Components.interfaces.nsIXPathGenerator);
-  generator.addNamespace("html", "http://www.w3.org/1999/xhtml"); 
+  generator.addNamespace("html", "http://www.w3.org/1999/xhtml");
   return generator.generateXPath(node, context.focusedWindow.document);
 }
 */
@@ -649,9 +649,9 @@ function cmd_get_sel() {
     //put the cursor after the inserted text
     element.setSelectionRange(selectionEnd, selectionEnd);
   }
-  
+
   insertText(context.focusedElement, "hello")
-  
+
 }
 
 // -----------------------------------------------------------------
@@ -685,31 +685,31 @@ function cmd_display_word_cloud( ){
       d.appendChild( s );
     }
   }
-  
+
   getDocument().body.appendChild( d );
-  
+
 }
 
 function cloudPageLoadHandler( ) {
   if( typeof(globals.wordCloud) == "undefined" ){
     globals.wordCloud = {};
-  }  
-  
+  }
+
   var body = jQuery( getDocument().body ).clone();
   body.find("script,head,style").remove();
-  
+
   var text = jQuery( body ).text();
-  data = text.split(/\W/).filter( function(d){ 
+  data = text.split(/\W/).filter( function(d){
     if( d == "" ) return false;
     if( d.length <= 3 ) return false;
     if( d.match(/\d/) ) return false;
-    
+
     return true;
   } );
-    
+
   for( var i=0; i<=data.length; i++ ){
     var d = "word_" + data[i];
-    
+
     if( typeof(globals.wordCloud[d]) == "undefined" ){ globals.wordCloud[d] = 1 }
     else{ globals.wordCloud[d] += 1 }
     if( typeof(globals.wordCloud.length) == "number" ){ displayMessage(d, data[i-1]); return;}
@@ -728,7 +728,7 @@ function translate_to( lang ) {
     q: getTextSelection(),
     langpair: "|" + lang
   })
-  
+
   ajaxGet( url + params, function(jsonData){
     data = eval( '(' + jsonData + ')' );
     var translatedText = data.responseData.translatedText;
@@ -741,7 +741,7 @@ var Languages = {
   'CHINESE' : 'zh',
   'CHINESE_TRADITIONAL' : 'zh-TW',
   'DANISH' : 'da',
-  'DUTCH': 'nl',  
+  'DUTCH': 'nl',
   'ENGLISH' : 'en',
   'FINNISH' : 'fi',
   'FRENCH' : 'fr',
@@ -762,14 +762,14 @@ var Languages = {
 
 function generateTranslateFunction( langCode ){
   return function(){
-    translate_to( langCode );    
-  } 
+    translate_to( langCode );
+  }
 }
 
-for( lang in Languages ){  
+for( lang in Languages ){
   var langCode = Languages[lang];
   var langName = lang.toLowerCase();
-  
+
   this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode )
 }
 
@@ -813,12 +813,12 @@ function cmd_populate_with_microformat() {
   //displayMessage( globals.addresses.length )
   if( globals.addresses.length == 0 ) return;
 
-  var last = globals.addresses.length - 1;    
-  var addr = globals.addresses[last].toString(); 
+  var last = globals.addresses.length - 1;
+  var addr = globals.addresses[last].toString();
   var url = getWindow().location.href;
-  
+
   if( url == "http://maps.google.com/" ){
-    getDocument().getElementById("q_d").value = addr;      
+    getDocument().getElementById("q_d").value = addr;
 
     setTimeout( function(){
       getDocument().getElementById("q_sub").click();
@@ -848,18 +848,18 @@ function takeSnapshotOfWindow( window, scrollDict ) {
   if( !scrollDict ) scrollDict = {};
   var top = scrollDict.top || 0.001;
   var left = scrollDict.left || 0.001;
-  
+
   var hiddenWindow = getHiddenWindow();
   var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
 
   var body = window.document.body;
-  
+
   var width = jQuery(body).width();
   var height = window.innerHeight+110;
- 
+
   canvas.width = width;
   canvas.height = height;
-  
+
   var ctx = canvas.getContext( "2d" );
   ctx.drawWindow( window, left, top, width, height, "rgb(255,255,255)" );
   return canvas.toDataURL();
@@ -887,7 +887,7 @@ function setFullPageZoom( level ) {
                     .getInterface(Components.interfaces.nsIWebNavigation);
   var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
   docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
-  docviewer.fullZoom = level;  
+  docviewer.fullZoom = level;
 }
 
 function iframeFullPageZoom( iframe, level ) {
@@ -896,7 +896,7 @@ function iframeFullPageZoom( iframe, level ) {
                     .getInterface(Components.interfaces.nsIWebNavigation);
   var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
   docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
-  docviewer.fullZoom = level;  
+  docviewer.fullZoom = level;
 }
 
 function cmd_scale_firefox_down() {
@@ -906,9 +906,9 @@ function cmd_scale_firefox_down() {
 function cmd_zoom() {
   var win = getWindow();
   document = getDocument();
-  
+
   var $ = jQuery;
-  
+
   var dataUrl = takeSnapshotOfWindow( win, {top:win.scrollY} );
 
   var div = document.createElement( "div" );
@@ -928,30 +928,30 @@ function cmd_zoom() {
   img = document.createElement("img");
   img.src = dataUrl;
   img.id = "theImage";
-  
+
   $(img).css({
     position:"fixed",
     top: 0,
     left: 0,
     zIndex: 10000001
-  });  
+  });
 
   $(document.body).append( img ).append(div);
   $(document.body).css({overflow:"hidden"});
-      
+
   // This is a hack which fixes an intermittent bug where the top wasn't
   // being set correctly before animating.
   $(img).animate({top:0, width:w, height: h}, 1);
-  
+
   $(img).animate({top:100, left:w/2, width:w*.1, height: h*.1}, 500);
   $(img).click( function(){
     $(img).animate({top:0, left:0, width:w, height: h}, 500);
     setTimeout( function(){
       $(div).remove();
       $(img).remove();
-      $(document.body).css({overflow:"auto"});    
+      $(document.body).css({overflow:"auto"});
     },500);
-    
+
   })
 }
 
@@ -967,63 +967,4 @@ function cmd_editor() {
 // This function is run by Firefox on startup.
 function startup_welcome_message() {
   displayMessage("Welcome to Firefox, now with Ubiquity support!");
-}
-
-// Assign a default command icon for anything that doesn't explicitly
-// have an icon set.
-
-var CMD_PREFIX = "cmd_";
-var DEFAULT_CMD_ICON = "";
-
-for (name in this)
-  if (name.indexOf(CMD_PREFIX) == 0) {
-    var cmd = this[name];
-
-    if (!cmd.icon)
-      cmd.icon = DEFAULT_CMD_ICON;
-  }
-
-// Functionality for when we're loaded in an HTML page
-
-function onDocumentLoad() {
-  // Dynamically generate entries for undocumented commands.
-  for (name in window)
-    if (name.indexOf(CMD_PREFIX) == 0) {
-      var cmd = window[name];
-      var cmdName = name.substr(CMD_PREFIX.length);
-      var cmdQuery = $("#" + name);
-
-      if (cmdQuery.length == 0) {
-        cmdName = cmdName.replace(/_/g, " ");
-        $(document.body).append(
-          ('<div class="command" id="' + name + '">' +
-           '<span class="name">' + cmdName + '</span>')
-        );
-        cmdQuery = $("#" + name);
-      }
-
-      if (cmd.icon && cmdQuery.children(".icon").length == 0) {
-        cmdQuery.prepend('<img class="icon" src="' + cmd.icon + '"/> ');
-      }
-    }
-}
-
-var STARTUP_PREFIX = "startup_";
-
-if (window.location == "chrome://browser/content/browser.xul") {
-  // Configure a function to run on Firefox startup.
-  if (!globals.hasRunOnce) {
-    globals.hasRunOnce = true;
-    // Run anything function starting with "startup_" on startup.
-    for (name in this) {
-      if (name.indexOf(STARTUP_PREFIX) == 0 && typeof(this[name]) == "function") {
-        this[name]();
-      }
-    }
-    
-  }
-} else {
-  // We're being included in an HTML page.  Yes, this is a hack, but
-  // this solution is temporary anyways.
-  $(document).ready(onDocumentLoad);
 }
