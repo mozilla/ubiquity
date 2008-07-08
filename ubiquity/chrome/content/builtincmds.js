@@ -363,7 +363,7 @@ function cmd_get_email_address() {
 // MISC COMMANDS
 // -----------------------------------------------------------------
 
-function startup_inject_xss() {
+function windowOpen_inject_xss() {
   onPageLoad( function(){
     getWindowInsecure().ajaxGet = ajaxGet;
   });
@@ -833,11 +833,11 @@ function cmd_populate_with_microformat() {
   }
 }
 
-function startup_microfomrat() {
+function windowOpen_microfomrat() {
   onPageLoad( cmd_detect_microformat );
 }
 
-function startup_populate() {
+function windowOpen_populate() {
   onPageLoad( cmd_populate_with_microformat );
 }
 
@@ -877,7 +877,7 @@ function cmd_inject_snapshot() {
   win.snapshot = takeSnapshotOfWindow;
 }
 
-function startup_inject_snapshot() {
+function windowOpen_inject_snapshot() {
   onPageLoad( function(){
     getWindowInsecure().snapshot = takeSnapshotOfWindow;
   });
