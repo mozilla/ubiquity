@@ -1,26 +1,40 @@
 function ConsoleMessageService() {
-  this.displayMessage = function(msg, title) {
-    if (!title)
-      title = "Ubiquity Message";
+  this.displayMessage = function(msg) {
+    var text = msg;
+    var title = "Ubiquity Message";
 
-    dump(title+": "+msg+"\n");
+    if (typeof(msg) == "object") {
+      text = msg.text;
+      if (msg.title)
+        title = msg.title;
+    }
+
+    dump(title+": "+text+"\n");
   };
 }
 
 function AlertMessageService() {
   this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
 
-  this.displayMessage = function(msg, title, icon) {
+  this.displayMessage = function(msg) {
     var Ci = Components.interfaces;
     var classObj = Components.classes["@mozilla.org/alerts-service;1"];
     var alertService = classObj.getService(Ci.nsIAlertsService);
 
-    if (!title)
-      title = "Ubiquity Notification";
+    var text = msg;
+    var title = "Ubiquity Notification";
+    var icon = this.ALERT_IMG;
 
-    if (icon == undefined)
-      icon = this.ALERT_IMG;
+    if (typeof(msg) == "object") {
+      text = msg.text;
 
-    alertService.showAlertNotification(icon, title, msg);
+      if (msg.title)
+        title = msg.title;
+
+      if (msg.icon)
+        icon = msg.icon;
+    }
+
+    alertService.showAlertNotification(icon, title, text);
   };
 }
