@@ -207,7 +207,19 @@ function onPageLoad( callback ) {
   var safeCallback = safeWrapper(callback);
 
   function _onPageLoad(aEvent) {
-    safeCallback(aEvent.originalTarget);
+    var isValidPage = false;
+    try {
+      // See if we can get the current document;
+      // if we get an exception, then the page that's
+      // been loaded is probably XUL or something,
+      // and we won't want to deal with it.
+      var doc = Application.activeWindow
+                           .activeTab
+                           .document;
+      isValidPage = true;
+    } catch (e) {}
+    if (isValidPage)
+      safeCallback(aEvent.originalTarget);
   }
 
   var appcontent = window.document.getElementById("appcontent");
