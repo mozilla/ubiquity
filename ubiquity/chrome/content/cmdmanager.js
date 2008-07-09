@@ -18,7 +18,11 @@ CommandManager.prototype = {
       try {
         cmd.execute(context);
       } catch (e) {
-        this.__msgService.displayMessage("An exception occurred: " + e);
+        this.__msgService.displayMessage(
+          {text: ("An exception occurred while running the command '" +
+                  cmd.name + "'."),
+           exception: e}
+        );
       }
   }
 };
@@ -59,7 +63,8 @@ CommandSource.prototype = {
         Components.utils.evalInSandbox(code, sandbox);
       } catch (e) {
         this._messageService.displayMessage(
-          "An exception occurred while loading code: "+e
+          {text: "An exception occurred while loading code.",
+           exception: e}
         );
       }
     }

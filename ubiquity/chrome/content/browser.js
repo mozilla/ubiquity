@@ -14,7 +14,10 @@ function ubiquitySetup()
     "chrome://ubiquity/content/final.js"
   );
 
-  var msgService = new AlertMessageService();
+  var msgService = new CompositeMessageService();
+
+  msgService.add(new AlertMessageService());
+  msgService.add(new ErrorConsoleMessageService());
 
   var globalSpace = {};
 

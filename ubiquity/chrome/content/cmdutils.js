@@ -66,7 +66,11 @@ function safeWrapper(func) {
     try {
       func.apply(this, arguments);
     } catch (e) {
-      displayMessage("An exception occurred: " + e);
+      displayMessage(
+        {text: ("An exception occurred while running " +
+                func.name + "()."),
+         exception: e}
+      );
     }
   };
 
