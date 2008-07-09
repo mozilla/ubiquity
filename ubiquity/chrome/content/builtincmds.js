@@ -307,7 +307,7 @@ function gmailChecker() {
       var summary = $(firstEntry).find("summary").text();
 
       var title = author + ' says "' + subject + '"';
-      displayMessage(summary, title);
+      displayMessage({text: summary, title: title});
     });
   });
 }
@@ -352,7 +352,7 @@ function cmd_get_email_address() {
     getGmailContacts(function(contacts) {
       for (var c in contacts) {
         if (c.match(name, "i")) {
-          displayMessage(contacts[c], c);
+          displayMessage({text: contacts[c], title: c});
         }
       }
     });
@@ -717,7 +717,10 @@ function cloudPageLoadHandler( ) {
 
     if( typeof(globals.wordCloud[d]) == "undefined" ){ globals.wordCloud[d] = 1; }
     else{ globals.wordCloud[d] += 1; }
-    if( typeof(globals.wordCloud.length) == "number" ){ displayMessage(d, data[i-1]); return;}
+    if( typeof(globals.wordCloud.length) == "number" ){
+      displayMessage({text: d, title: data[i-1]});
+      return;
+    }
   }
 
 }

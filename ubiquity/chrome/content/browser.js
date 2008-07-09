@@ -29,8 +29,8 @@ function ubiquitySetup()
     window: window,
     windowGlobals: {},
     globals: globalSpace.UbiquityGlobals,
-    displayMessage: function(msg, title, icon) {
-      msgService.displayMessage(msg, title, icon);
+    displayMessage: function() {
+      msgService.displayMessage.apply(msgService, arguments);
     }
   };
 
