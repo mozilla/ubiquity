@@ -486,9 +486,24 @@ function cmd_undelete() {
   });
 }
 
+function cmd_save() {
+  // TODO: works w/o wrappedJSObject in getDocumentInsecure() call- fix this
+  getDocumentInsecure().body.contentEditable = 'false';
+  getDocumentInsecure().designMode='off';
+
+  var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
+                          .getService(Components.interfaces.nsIAnnotationService);
+  var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
+                          .getService(Components.interfaces.nsIIOService);
+
+  var body = jQuery( getDocumentInsecure().body );
+    
+  annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), "ubiquity/edit", body.html(), 0, 4);
+}
+
 
 // removes all page annotations - add more functionality
-function cmd_undo_delete() {
+function cmd_remove_annotations() {
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
@@ -1027,10 +1042,15 @@ function pageLoad_applyAnnotations(doc) {
 
     }
 
-    if (annotationNames[i] == "test") {
-      displayMessage("test");
+    if (annotationNames[i] == "ubiquity/edit") {
+      // TODO: works w/o wrappedJSObject in getDocumentInsecure() call- fix this
+      var body = jQuery( getDocumentInsecure().body );
 
-      //alert(eval(annotationService.getPageAnnotation(uri, annotationNames[i])));
+      annotationValue = annotationService.getPageAnnotation(uri, annotationNames[i]);
+      body.html(annotationValue);
+
+      // TODO: Fix "TypeError: head is not defined" on some pages
+
     }
   }
 }
