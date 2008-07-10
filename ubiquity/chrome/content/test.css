@@ -53,3 +53,7 @@ a:hover {
 .error {
     color:#FF0000;
 }
+
+li {
+    padding: 5px;
+}
