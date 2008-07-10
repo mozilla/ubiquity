@@ -50,7 +50,8 @@ function testCmdManagerCatchesExceptionsInCmds() {
 
   cmdMan.execute("existentcommand");
   this.assert(
-    mockMsgService.lastMsg.indexOf("exception occurred") >= 0,
+    (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
+     mockMsgService.lastMsg.exception),
     "Command manager must log exception."
   );
 }
@@ -124,7 +125,8 @@ function testCommandSourceCatchesExceptionsWhenLoading() {
   cmdSrc.getCommand("existentcommand");
 
   this.assert(
-    mockMsgService.lastMsg.indexOf("exception occurred") >= 0,
+    (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
+     mockMsgService.lastMsg.exception),
     "Command source must log exception."
   );
 }
