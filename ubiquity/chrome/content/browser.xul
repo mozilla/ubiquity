@@ -28,6 +28,7 @@
         <textbox id="cmd-entry"
                  type="autocomplete"
                  forcecomplete="true"
+                 completedefaultindex="true"
                  autocompletesearch="commands" width="300"/>
       </hbox>
     </panel>
