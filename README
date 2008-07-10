@@ -1,7 +1,30 @@
 Installing Ubiquity
 -------------------
 
-TODO: Finish this.
+To install Ubiquity to your default Firefox profile, just enter the
+root directory of your Ubiquity source code checkout and run:
+
+  python manage.py install
+
+If you have a separate profile that you'd prefer to install the
+extension under, such as 'testing', you can add that as an optional
+parameter:
+
+  python manage.py install testing
+
+Using Ubiquity
+--------------
+
+Once Ubiquity has been installed, you should be able to start up
+Firefox and press Ctrl+X.  A command entry window should pop up; now
+type 'help' and press enter.  The page that shows up should guide you
+from there.
+
+Uninstalling Ubiquity
+---------------------
+
+Just run "python manage.py uninstall", optionally specifying a profile
+name/directory if necessary.
 
 Test Suite
 ----------
