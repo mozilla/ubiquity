@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<script src="harness.js"/>
+<body xmlns="http://www.w3.org/1999/xhtml">
+  <p>This is a harness for developing Ubiquity's command-entry
+  mode. Press <b>Ctrl-X</b> to activate it. Once you've made changes,
+  you can reload this page and press the key combination again to see
+  your changes take effect immediately.</p>
+  <p>You can also use <a href="http://getfirebug.com/">Firebug</a> to
+  debug your code here.</p>
+</body>
+<popupset id="mainPopupSet">
+  <!-- This area will be populated by the browser.xul overlay. -->
+</popupset>
+</window>
