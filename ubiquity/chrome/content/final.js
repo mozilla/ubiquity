@@ -17,6 +17,11 @@ for (name in this)
       cmd.icon = DEFAULT_CMD_ICON;
   }
 
+function startup_setBasicPreferences() {
+  // Allow JS chrome errors to show up in the error console.
+  Application.prefs.setValue("javascript.options.showInConsole", true);
+}
+
 if (window.location == "chrome://browser/content/browser.xul") {
   // We're being loaded in the browser.
 
