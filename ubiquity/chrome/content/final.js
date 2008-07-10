@@ -18,6 +18,8 @@ for (name in this)
   }
 
 if (window.location == "chrome://browser/content/browser.xul") {
+  // We're being loaded in the browser.
+
   function findFunctionsWithPrefix(prefix) {
     var funcs = [];
 
@@ -52,6 +54,8 @@ if (window.location == "chrome://browser/content/browser.xul") {
   var funcs = findFunctionsWithPrefix("pageLoad_");
   for (i = 0; i < funcs.length; i++)
     onPageLoad(funcs[i]);
+} else if (window.location == "chrome://ubiquity/content/harness.xul") {
+  // We're being loaded in the development harness.  Do nothing.
 } else {
   // We're being included in an HTML page.  Yes, this is a hack, but
   // this solution is temporary anyways.
