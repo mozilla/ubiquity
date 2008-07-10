@@ -10,6 +10,7 @@
   <p>You can also use <a href="http://getfirebug.com/">Firebug</a> to
   debug your code here.</p>
 </body>
+<textbox id="sample-text" value="Sample text to select"/>
 <popupset id="mainPopupSet">
   <!-- This area will be populated by the browser.xul overlay. -->
 </popupset>
