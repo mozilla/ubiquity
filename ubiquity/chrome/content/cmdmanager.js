@@ -129,6 +129,7 @@ UriCodeSource.prototype = {
   getCode : function() {
     var req = new XMLHttpRequest();
     req.open('GET', this.uri, false);
+    req.overrideMimeType("text/javascript");
     req.send(null);
     if (req.status == 0)
       return req.responseText;
