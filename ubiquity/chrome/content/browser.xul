@@ -27,6 +27,7 @@
         </svg:svg>
         <textbox id="cmd-entry"
                  type="autocomplete"
+                 forcecomplete="true"
                  autocompletesearch="commands" width="300"/>
       </hbox>
     </panel>
