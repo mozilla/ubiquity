@@ -2,6 +2,38 @@ import os
 import sys
 import xml.dom.minidom
 import subprocess
+from ConfigParser import ConfigParser
+
+def find_profile_dir(name):
+    """
+    Given the name of a Firefox profile, attempts to find the absolute
+    path to its directory.  If it can't be found, None is returned.
+    """
+
+    base_path = None
+    if sys.platform == "darwin":
+        base_path = os.path.expanduser(
+            "~/Library/Application Support/Firefox/"
+            )
+    if not base_path:
+        print "Automatic detection of profile directories is not yet "
+        print "supported on this platform."
+        return None
+    inifile = os.path.join(base_path, "profiles.ini")
+    config = ConfigParser()
+    config.read(inifile)
+    profiles = [section for section in config.sections()
+                if section.startswith("Profile")]
+    for profile in profiles:
+        if config.get(profile, "Name") == name:
+            # TODO: Look at IsRelative?
+            path = config.get(profile, "Path")
+            if not os.path.isabs(path):
+                path = os.path.join(base_path, path)
+            print "Found profile '%s' at %s." % (name, path)
+            return path
+    print "Couldn't find a profile called '%s'." % name
+    return None
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -11,8 +43,8 @@ if __name__ == "__main__":
         print "'command' can be one of the following:"
         print
         print "    test - run unit tests"
-        print "    install - install to the given profile dir"
-        print "    uninstall - uninstall from the given profile dir"
+        print "    install - install to the given profile"
+        print "    uninstall - uninstall from the given profile"
         print
         sys.exit(1)
 
@@ -42,9 +74,21 @@ if __name__ == "__main__":
         sys.exit(retval)
     elif cmd in ["install", "uninstall"]:
         if len(args) != 2:
-            print "Path to profile directory not supplied."
+            print "Attempting to find location of default profile..."
+
+            profile_dir = find_profile_dir("default")
+        else:
+            profile_dir = args[1]
+            if not os.path.exists(profile_dir):
+                print "Attempting to find a profile with the name '%s'." % (
+                    profile_dir
+                    )
+                profile_dir = find_profile_dir(profile_dir)
+
+        if not (profile_dir and os.path.exists(profile_dir) and
+                os.path.isdir(profile_dir)):
+            print "Can't resolve profile directory; aborting."
             sys.exit(1)
-        profile_dir = args[1]
 
         rdf_path = os.path.join(path_to_extension_root, "install.rdf")
         rdf = xml.dom.minidom.parse(rdf_path)
