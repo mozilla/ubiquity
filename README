@@ -1,16 +1,15 @@
+Installing Ubiquity
+-------------------
+
+TODO: Finish this.
+
 Test Suite
 ----------
 
-* Once the extension is installed, the Ubiquity test suite can be run at:
+Once the extension is installed, the Ubiquity test suite can be run at:
 
-    chrome://ubiquity/content/test.html
+  chrome://ubiquity/content/test.html
 
-Development Notes
------------------
+Alternatively, the suite can be run from the command-line with:
 
-* In order to view the dump() statements, you need to enable debugging:
-  http://developer.mozilla.org/en/docs/DOM:window.dump
-
-* In about:config, make sure to set 'javascript.options.showInConsole'
-  to 'true' or else JS chrome errors won't show up in the error
-  console.
+  python manage.py test
