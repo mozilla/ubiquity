@@ -15,10 +15,12 @@ def find_profile_dir(name):
         base_path = os.path.expanduser(
             "~/Library/Application Support/Firefox/"
             )
-    if not base_path:
-        print "Automatic detection of profile directories is not yet "
-        print "supported on this platform."
-        return None
+    elif sys.platform.startswith("win"):
+        # TODO: This only works on 2000/XP/Vista, not 98/Me.
+        appdata = os.environ["APPDATA"]
+        base_path = os.path.join(appdata, "Mozilla\\Firefox\\Profiles")
+    else:
+        base_path = os.path.expanduser("~/.mozilla/firefox/")
     inifile = os.path.join(base_path, "profiles.ini")
     config = ConfigParser()
     config.read(inifile)
