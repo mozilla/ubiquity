@@ -16,9 +16,10 @@ Using Ubiquity
 --------------
 
 Once Ubiquity has been installed, you should be able to start up
-Firefox and press Ctrl+X.  A command entry window should pop up; now
-type 'help' and press enter.  The page that shows up should guide you
-from there.
+Firefox and press Ctrl+X.  A command entry window should pop up,
+which--for the time being--is the primary way through which Ubiquity
+commands are entered. Now type 'help' and press enter.  The page that
+shows up should guide you from there.
 
 Uninstalling Ubiquity
 ---------------------

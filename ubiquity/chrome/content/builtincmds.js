@@ -497,7 +497,7 @@ function cmd_save() {
                           .getService(Components.interfaces.nsIIOService);
 
   var body = jQuery( getDocumentInsecure().body );
-    
+
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), "ubiquity/edit", body.html(), 0, 4);
 }
 
@@ -1056,4 +1056,8 @@ function pageLoad_applyAnnotations(doc) {
 
     }
   }
+}
+
+function cmd_help() {
+  openUrlInBrowser("about:ubiquity");
 }
