@@ -57,7 +57,8 @@ function ubiquitySetup()
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
-    cmdMan
+    cmdMan,
+    document.getElementById("cmd-preview").contentWindow
   );
   cmdSource.refresh();
 }

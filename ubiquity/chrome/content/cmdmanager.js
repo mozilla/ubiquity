@@ -10,6 +10,24 @@ CommandManager.prototype = {
     this.__cmdSource.refresh();
   },
 
+  preview : function(cmdName, context, previewWindow) {
+    var wasPreviewShown = false;
+
+    var cmd = this.__cmdSource.getCommand(cmdName);
+    if (cmd && cmd.preview)
+      try {
+        cmd.preview(context, previewWindow);
+        wasPreviewShown = true;
+      } catch (e) {
+        this.__msgService.displayMessage(
+          {text: ("An exception occurred while previewing the command '" +
+                  cmd.name + "'."),
+           exception: e}
+          );
+      }
+    return wasPreviewShown;
+  },
+
   execute : function(cmdName, context) {
     var cmd = this.__cmdSource.getCommand(cmdName);
     if (!cmd)
@@ -76,13 +94,21 @@ CommandSource.prototype = {
       cmdName = cmdName.replace(/_/g, " ");
       var cmdFunc = sandbox[objName];
 
-      return {
+      var cmd = {
         name : cmdName,
         execute : function(context) {
           sandbox.context = context;
           return cmdFunc();
         }
       };
+
+      if (cmdFunc.preview)
+        cmd.preview = function(context, previewWindow) {
+          sandbox.context = context;
+          return cmdFunc.preview(previewWindow);
+        };
+
+      return cmd;
     };
 
     var commandNames = [];
