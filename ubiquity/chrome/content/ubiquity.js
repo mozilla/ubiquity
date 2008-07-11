@@ -2,8 +2,8 @@
 // panel, text box, and--optionally--preview window.
 //
 // The message panel should be a xul:panel instance, and the text box
-// should be a xul:textbox instance with Firefox autocomplete. The
-// preview window, if supplied, should be a DOM window.
+// should be a xul:textbox instance. The preview window, if supplied,
+// should be a DOM window.
 
 function Ubiquity(msgPanel, textBox, cmdManager, previewWindow) {
   this.__msgPanel = msgPanel;
@@ -22,22 +22,19 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewWindow) {
   msgPanel.addEventListener( "popuphidden",
                              function() { self.__onHidden(); },
                              false );
-  textBox.onTextEntered = function() { self.__onTextEntered(); };
-  textBox.onTextReverted = function() { self.__onTextReverted(); };
   window.addEventListener("mousemove",
                           function(event) { self.__onMouseMove(event); },
                           false);
-
-  if (previewWindow)
-    textBox.addEventListener("keydown",
-                             function(event) { self.__onInput(event); },
-                             false);
+  textBox.addEventListener("keyup",
+                           function(event) { self.__onInput(event); },
+                           false);
 
   this.__resetPreview();
 }
 
 Ubiquity.prototype = {
   __DEFAULT_PREVIEW_LOCATION: "chrome://ubiquity/content/preview.html",
+  __KEYCODE_ENTER: 13,
 
   __onMouseMove: function(event) {
     this.__x = event.screenX;
@@ -45,32 +42,32 @@ Ubiquity.prototype = {
   },
 
   __onInput: function(event) {
-    var cmdName = this.__textBox.value;
-    if (cmdName != this.__lastValue) {
-      var context = this.__makeContext();
+    if (event.keyCode == this.__KEYCODE_ENTER) {
+      if (this.__textBox.value)
+        this.__needsToExecute = true;
+      this.__msgPanel.hidePopup();
+    } else {
+      if (this.__previewWindow) {
+        var cmdName = this.__textBox.value;
+        if (cmdName != this.__lastValue) {
+          var context = this.__makeContext();
 
-      this.__lastValue = cmdName;
-      var wasPreviewShown = this.__cmdManager.preview(cmdName,
-                                                      context,
-                                                      this.__previewWindow);
-      if (!wasPreviewShown)
-        this.__resetPreview();
+          this.__lastValue = cmdName;
+          var wasPreviewShown = this.__cmdManager.preview(
+            cmdName,
+            context,
+            this.__previewWindow
+          );
+          if (!wasPreviewShown)
+            this.__resetPreview();
+        }
+      }
     }
   },
 
   __resetPreview: function() {
     if (this.__previewWindow)
       this.__previewWindow.location = this.__DEFAULT_PREVIEW_LOCATION;
-  },
-
-  __onTextEntered: function() {
-    if (this.__textBox.value)
-      this.__needsToExecute = true;
-    this.__msgPanel.hidePopup();
-  },
-
-  __onTextReverted: function() {
-    this.__msgPanel.hidePopup();
   },
 
   __makeContext: function() {

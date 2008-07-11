@@ -26,11 +26,7 @@
             <svg:text x="10" y="28" font-size="18"
                       fill="white">enter command:</svg:text>
           </svg:svg>
-          <textbox id="cmd-entry"
-                   type="autocomplete"
-                   forcecomplete="true"
-                   completedefaultindex="true"
-                   autocompletesearch="commands" width="300"/>
+          <textbox id="cmd-entry" width="300"/>
         </hbox>
         <iframe id="cmd-preview"/>
       </vbox>

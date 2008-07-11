@@ -37,7 +37,7 @@ bindDirToResource(modulesDir, "ubiquity-modules");
 
 var componentPath = getPath(basePath);
 componentPath.appendRelativePath("components");
-componentPath.appendRelativePath("autocomplete.js");
+componentPath.appendRelativePath("about.js");
 registerComponent(componentPath);
 
 var XpcShellTestResponder = {

@@ -1,5 +1,3 @@
-Components.utils.import("resource://ubiquity-modules/cmdregistry.js");
-
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
@@ -124,7 +122,6 @@ CommandSource.prototype = {
       }
 
     this._commands = commands;
-    CommandRegistry.commands = commandNames;
   },
 
   getCommand : function(name) {
