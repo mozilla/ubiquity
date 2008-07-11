@@ -3,7 +3,7 @@
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
 
-function makeSearchCommand(urlTemplate, icon) {
+function makeSearchCommand(name, urlTemplate, icon) {
   var cmd = function() {
     var sel = getTextSelection();
     var urlString = urlTemplate.replace("{QUERY}", sel);
@@ -12,20 +12,34 @@ function makeSearchCommand(urlTemplate, icon) {
   };
 
   cmd.icon = icon;
+  cmd.preview = function(pwind) {
+    var sel = getTextSelection();
+    var content = "Takes you to the " + name + " homepage.";
+
+    if (sel)
+      content = ("Performs a " + name + " search for <b>" +
+                 escape(sel) + "</b>.");
+
+    pwind.document.getElementById("content").innerHTML = content;
+  };
+
   return cmd;
 }
 
 var cmd_google = makeSearchCommand(
+  "Google",
   "http://www.google.com/search?q={QUERY}",
   "http://www.google.com/favicon.ico"
 );
 
 var cmd_imdb = makeSearchCommand(
+  "IMDB",
   "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
   "http://i.imdb.com/favicon.ico"
 );
 
 var cmd_map_it = makeSearchCommand(
+  "Google Maps",
   "http://maps.google.com/?q={QUERY}",
   "http://www.google.com/favicon.ico"
 );
