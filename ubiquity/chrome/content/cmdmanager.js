@@ -29,13 +29,13 @@ CommandManager.prototype = {
     return content;
   },
 
-  preview : function(cmdName, context, previewWindow) {
+  preview : function(cmdName, context, previewBlock) {
     var wasPreviewShown = false;
 
     var cmd = this.__cmdSource.getCommand(cmdName);
     if (cmd && cmd.preview) {
       try {
-        cmd.preview(context, previewWindow);
+        cmd.preview(context, previewBlock);
         wasPreviewShown = true;
       } catch (e) {
         this.__msgService.displayMessage(
@@ -54,7 +54,7 @@ CommandManager.prototype = {
         content = this.__getSuggestionContent(cmdName);
 
       if (content) {
-        previewWindow.document.getElementById("content").innerHTML = content;
+        previewBlock.innerHTML = content;
         wasPreviewShown = true;
       }
     }
@@ -136,9 +136,9 @@ CommandSource.prototype = {
       };
 
       if (cmdFunc.preview)
-        cmd.preview = function(context, previewWindow) {
+        cmd.preview = function(context, previewBlock) {
           sandbox.context = context;
-          return cmdFunc.preview(previewWindow);
+          return cmdFunc.preview(previewBlock);
         };
 
       return cmd;
