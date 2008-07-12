@@ -167,6 +167,8 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on first call.");
 
+  cmdSrc.refresh();
+
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on second call.");
@@ -192,6 +194,8 @@ function testCommandGlobalsWork() {
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on first call.");
 
+  cmdSrc.refresh();
+  
   cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 2,
               "Command 'foo' should return 2 on second call.");
