@@ -36,6 +36,8 @@ Ubiquity.prototype = {
   __DEFAULT_PREVIEW_LOCATION: "chrome://ubiquity/content/preview.html",
   __KEYCODE_ENTER: 13,
   __MIN_CMD_PREVIEW_LENGTH: 3,
+  __DEFAULT_PREVIEW: ("Type the name of a command and press enter to " +
+                      "execute it, or <b>help</b> for assistance."),
 
   __onMouseMove: function(event) {
     this.__x = event.screenX;
@@ -69,8 +71,12 @@ Ubiquity.prototype = {
   },
 
   __resetPreview: function() {
-    if (this.__previewWindow)
-      this.__previewWindow.location = this.__DEFAULT_PREVIEW_LOCATION;
+    if (this.__previewWindow) {
+      if (this.__previewWindow.location != this.__DEFAULT_PREVIEW_LOCATION)
+        this.__previewWindow.location = this.__DEFAULT_PREVIEW_LOCATION;
+      var content = this.__previewWindow.document.getElementById("content");
+      content.innerHTML = this.__DEFAULT_PREVIEW;
+    }
   },
 
   __makeContext: function() {
