@@ -49,23 +49,26 @@ Ubiquity.prototype = {
       if (this.__textBox.value)
         this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
-    } else {
-      if (this.__previewWindow) {
-        var cmdName = this.__textBox.value;
-        if (cmdName != this.__lastValue) {
+    } else
+      this.__updatePreview();
+  },
 
-          this.__lastValue = cmdName;
-          var wasPreviewShown = false;
+  __updatePreview: function() {
+    if (this.__previewWindow) {
+      var cmdName = this.__textBox.value;
+      if (cmdName != this.__lastValue) {
 
-          if (cmdName.length >= this.__MIN_CMD_PREVIEW_LENGTH)
-            wasPreviewShown = this.__cmdManager.preview(
-              cmdName,
-              this.__makeContext(),
-              this.__previewWindow
-            );
-          if (!wasPreviewShown)
-            this.__resetPreview();
-        }
+        this.__lastValue = cmdName;
+        var wasPreviewShown = false;
+
+        if (cmdName.length >= this.__MIN_CMD_PREVIEW_LENGTH)
+          wasPreviewShown = this.__cmdManager.preview(
+            cmdName,
+            this.__makeContext(),
+            this.__previewWindow
+          );
+        if (!wasPreviewShown)
+          this.__resetPreview();
       }
     }
   },
