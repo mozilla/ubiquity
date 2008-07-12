@@ -20,7 +20,7 @@
           <div style="padding: 10px; font-size: 12pt;">
           <input id="cmd-entry" size="20"
           style="border: none; font-size: 12pt; background: #272727; color: #ffffff;"/></div>
-          <div id="cmd-preview" style="padding: 10px; color: #bfbfbf"></div>
+          <div id="cmd-preview" style="padding: 10px; color: #bfbfbf; width: 500px;"></div>
       </div>
     </panel>
   </popupset>
