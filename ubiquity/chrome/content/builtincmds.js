@@ -12,7 +12,7 @@ function makeSearchCommand(name, urlTemplate, icon) {
   };
 
   cmd.icon = icon;
-  cmd.preview = function(pwind) {
+  cmd.preview = function(pblock) {
     var sel = getTextSelection();
     var content = "Takes you to the " + name + " homepage.";
 
@@ -20,7 +20,7 @@ function makeSearchCommand(name, urlTemplate, icon) {
       content = ("Performs a " + name + " search for <b>" +
                  escape(sel) + "</b>.");
 
-    pwind.document.getElementById("content").innerHTML = content;
+    pblock.innerHTML = content;
   };
 
   return cmd;

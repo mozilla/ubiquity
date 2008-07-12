@@ -1,15 +1,15 @@
 // Creates a Ubiquity interface and binds it to the given message
-// panel, text box, and--optionally--preview window.
+// panel, text box, and--optionally--preview block element.
 //
 // The message panel should be a xul:panel instance, and the text box
-// should be a xul:textbox instance. The preview window, if supplied,
-// should be a DOM window.
+// should be a xul:textbox instance. The preview block, if supplied,
+// should be a HTML block element (e.g., a DIV).
 
-function Ubiquity(msgPanel, textBox, cmdManager, previewWindow) {
+function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   this.__msgPanel = msgPanel;
   this.__textBox = textBox;
   this.__cmdManager = cmdManager;
-  this.__previewWindow = previewWindow;
+  this.__previewBlock = previewBlock;
   this.__needsToExecute = false;
   this.__showCount = 0;
   this.__lastValue = null;
@@ -54,7 +54,7 @@ Ubiquity.prototype = {
   },
 
   __updatePreview: function() {
-    if (this.__previewWindow) {
+    if (this.__previewBlock) {
       var cmdName = this.__textBox.value;
       if (cmdName != this.__lastValue) {
 
@@ -65,22 +65,17 @@ Ubiquity.prototype = {
           wasPreviewShown = this.__cmdManager.preview(
             cmdName,
             this.__makeContext(),
-            this.__previewWindow
+            this.__previewBlock
           );
         if (!wasPreviewShown)
           this.__resetPreview();
-        this.__previewWindow.frameElement.height = this.__previewWindow.document.height + 20;
       }
     }
   },
 
   __resetPreview: function() {
-    if (this.__previewWindow) {
-      if (this.__previewWindow.location != this.__DEFAULT_PREVIEW_LOCATION)
-        this.__previewWindow.location = this.__DEFAULT_PREVIEW_LOCATION;
-      var content = this.__previewWindow.document.getElementById("content");
-      if (content)
-        content.innerHTML = this.__DEFAULT_PREVIEW;
+    if (this.__previewBlock) {
+        this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
     }
   },
 

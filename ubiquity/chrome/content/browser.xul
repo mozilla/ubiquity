@@ -15,13 +15,15 @@
   </keyset>
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel">
+    <box>
       <div xmlns="http://www.w3.org/1999/xhtml"
            style="padding: 0px; margin: 0px; background: #272727;">
           <div style="padding: 10px; font-size: 12pt;">
           <input id="cmd-entry" size="20"
           style="border: none; font-size: 12pt; background: #272727; color: #ffffff;"/></div>
-          <div><iframe id="cmd-preview" style="border: none;" width="100%"/></div>
+          <div id="cmd-preview" style="padding: 10px; color: #bfbfbf"></div>
       </div>
+    </box>
     </panel>
   </popupset>
 </overlay>

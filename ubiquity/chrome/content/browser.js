@@ -58,7 +58,7 @@ function ubiquitySetup()
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan,
-    document.getElementById("cmd-preview").contentWindow
+    document.getElementById("cmd-preview")
   );
   cmdSource.refresh();
 }
