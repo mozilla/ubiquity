@@ -14,22 +14,14 @@
          oncommand="gUbiquity.openWindow();"/>
   </keyset>
   <popupset id="mainPopupSet">
-    <panel id="transparent-msg-panel" class="msgPanel"
-           width="500">
-      <vbox>
-        <hbox>
-          <svg:svg width="200" height="50"
-                   version="1.1"
-                   xmlns="http://www.w3.org/2000/svg">
-            <svg:rect width="100%" height="100%" fill="black"
-                      fill-opacity="0.9" />
-            <svg:text x="10" y="28" font-size="18"
-                      fill="white">enter command:</svg:text>
-          </svg:svg>
-          <textbox id="cmd-entry" width="300"/>
-        </hbox>
-        <iframe id="cmd-preview"/>
-      </vbox>
+    <panel id="transparent-msg-panel" class="msgPanel">
+      <div xmlns="http://www.w3.org/1999/xhtml"
+           style="padding: 0px; margin: 0px; background: #272727;">
+          <div style="padding: 10px; font-size: 12pt;">
+          <input id="cmd-entry" size="20"
+          style="border: none; font-size: 12pt; background: #272727; color: #ffffff;"/></div>
+          <div><iframe id="cmd-preview" style="border: none;" width="100%"/></div>
+      </div>
     </panel>
   </popupset>
 </overlay>

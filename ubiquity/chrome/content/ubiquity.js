@@ -69,6 +69,7 @@ Ubiquity.prototype = {
           );
         if (!wasPreviewShown)
           this.__resetPreview();
+        this.__previewWindow.frameElement.height = this.__previewWindow.document.height + 20;
       }
     }
   },
@@ -78,7 +79,8 @@ Ubiquity.prototype = {
       if (this.__previewWindow.location != this.__DEFAULT_PREVIEW_LOCATION)
         this.__previewWindow.location = this.__DEFAULT_PREVIEW_LOCATION;
       var content = this.__previewWindow.document.getElementById("content");
-      content.innerHTML = this.__DEFAULT_PREVIEW;
+      if (content)
+        content.innerHTML = this.__DEFAULT_PREVIEW;
     }
   },
 
