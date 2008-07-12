@@ -35,6 +35,7 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewWindow) {
 Ubiquity.prototype = {
   __DEFAULT_PREVIEW_LOCATION: "chrome://ubiquity/content/preview.html",
   __KEYCODE_ENTER: 13,
+  __MIN_CMD_PREVIEW_LENGTH: 3,
 
   __onMouseMove: function(event) {
     this.__x = event.screenX;
@@ -54,7 +55,7 @@ Ubiquity.prototype = {
           this.__lastValue = cmdName;
           var wasPreviewShown = false;
 
-          if (cmdName)
+          if (cmdName.length >= this.__MIN_CMD_PREVIEW_LENGTH)
             wasPreviewShown = this.__cmdManager.preview(
               cmdName,
               this.__makeContext(),

@@ -15,7 +15,7 @@ CommandManager.prototype = {
     var cmds = this.__cmdSource.commandNames;
 
     for (var i = 0; i < cmds.length; i++) {
-      if (cmds[i].name.indexOf(cmdName) == 0)
+      if (cmds[i].name.indexOf(cmdName) != -1)
         suggestions.push(cmds[i].name);
     }
     if (suggestions.length == 0)
