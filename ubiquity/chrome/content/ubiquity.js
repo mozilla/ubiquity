@@ -50,14 +50,16 @@ Ubiquity.prototype = {
       if (this.__previewWindow) {
         var cmdName = this.__textBox.value;
         if (cmdName != this.__lastValue) {
-          var context = this.__makeContext();
 
           this.__lastValue = cmdName;
-          var wasPreviewShown = this.__cmdManager.preview(
-            cmdName,
-            context,
-            this.__previewWindow
-          );
+          var wasPreviewShown = false;
+
+          if (cmdName)
+            wasPreviewShown = this.__cmdManager.preview(
+              cmdName,
+              this.__makeContext(),
+              this.__previewWindow
+            );
           if (!wasPreviewShown)
             this.__resetPreview();
         }

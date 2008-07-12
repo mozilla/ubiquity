@@ -8,11 +8,32 @@ CommandManager.prototype = {
     this.__cmdSource.refresh();
   },
 
+  __getSuggestionContent : function(cmdName) {
+    var content = "Suggestions: ";
+
+    var suggestions = [];
+    var cmds = this.__cmdSource.commandNames;
+
+    for (var i = 0; i < cmds.length; i++) {
+      if (cmds[i].name.indexOf(cmdName) == 0)
+        suggestions.push(cmds[i].name);
+    }
+    if (suggestions.length == 0)
+      return null;
+
+    for (i = 0; i < suggestions.length - 1; i++) {
+      content += "<b>" + suggestions[i] + "</b>, ";
+    }
+    content += "<b>" + suggestions[suggestions.length - 1] + "</b>";
+
+    return content;
+  },
+
   preview : function(cmdName, context, previewWindow) {
     var wasPreviewShown = false;
 
     var cmd = this.__cmdSource.getCommand(cmdName);
-    if (cmd && cmd.preview)
+    if (cmd && cmd.preview) {
       try {
         cmd.preview(context, previewWindow);
         wasPreviewShown = true;
@@ -23,6 +44,20 @@ CommandManager.prototype = {
            exception: e}
           );
       }
+    } else {
+      var content;
+
+      if (cmd)
+        // Command exists, but has no preview; provide a default one.
+        content = "Executes the <b>" + cmd.name + "</b> command.";
+      else
+        content = this.__getSuggestionContent(cmdName);
+
+      if (content) {
+        previewWindow.document.getElementById("content").innerHTML = content;
+        wasPreviewShown = true;
+      }
+    }
     return wasPreviewShown;
   },
 
@@ -122,13 +157,12 @@ CommandSource.prototype = {
       }
 
     this._commands = commands;
+    this.commandNames = commandNames;
   },
 
   getCommand : function(name) {
     if (this._codeCache.length == 0)
       this.refresh();
-    else
-      this._loadCommands();
 
     if (this._commands[name])
       return this._commands[name];
