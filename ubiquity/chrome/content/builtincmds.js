@@ -253,6 +253,72 @@ function cmd_unedit_page() {
   getDocumentInsecure().designMode='off';
 }
 
+function isAddress( query, callback ) {
+  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
+  var params = paramsToString({
+    location: query,
+    appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
+  });
+  
+  
+  jQuery.ajax({
+    url: url+params,
+    dataType: "xml",
+    error: function() {
+      callback( false );
+    },
+    success:function(data) {      
+      var results = jQuery(data).find("Result");
+      var allText = jQuery.makeArray(
+                      jQuery(data)
+                        .find(":contains()")
+                        .map( function(){ return jQuery(this).text().toLowerCase() } )
+                      );
+                      
+      // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
+
+      if( results.length == 0 ){
+        callback( false );
+        return;        
+      }
+            
+      function existsMatch( text ){
+        var joinedText = allText.join(" ");
+        return joinedText.indexOf( text.toLowerCase() ) != -1;
+      }
+      
+      missCount = 0;
+      
+      var queryWords = query.match(/\w+/g);
+      for( var i=0; i < queryWords.length; i++ ){
+        if( existsMatch( queryWords[i] ) == false ) {
+          missCount += 1;
+          //displayMessage( queryWords[i] );
+        }
+      }
+      
+      var missRatio = missCount / queryWords.length;
+      //displayMessage( missRatio );
+      
+      if( missRatio < .5 )
+        callback( true );
+      else
+        callback( false );
+    }
+  });
+}
+
+function cmd_is_address(){
+  humanePrompt( "Give me some text. I'll tell you if it's an address.", function( text ) {
+    isAddress( text, function( bool ) {
+      if( bool )
+        displayMessage( "Yes. It is an address." );
+      else
+        displayMessage( "No. An address this is not." );
+    })
+  })
+}
+
 // -----------------------------------------------------------------
 // EMAIL/GOOGLE COMMANDS
 // -----------------------------------------------------------------
