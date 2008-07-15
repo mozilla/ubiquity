@@ -12,7 +12,7 @@ function makeSearchCommand(name, urlTemplate, icon) {
   };
 
   cmd.icon = icon;
-  
+
   cmd.preview = function(pblock) {
     var sel = getTextSelection();
     var content = "Takes you to the " + name + " homepage.";
@@ -20,7 +20,7 @@ function makeSearchCommand(name, urlTemplate, icon) {
     if (sel) {
       if (name == "Google") {
         getGooglePreview(sel, pblock);
-        pblock.innerHTML = ("Getting google results for <b>" + 
+        pblock.innerHTML = ("Getting google results for <b>" +
                            escape(sel) + "</b>...");
       }
       else {
@@ -54,8 +54,8 @@ var cmd_map_it = makeSearchCommand(
 
 function getGooglePreview(searchTerm, pblock) {
   var url = "http://ajax.googleapis.com/ajax/services/search/web";
-  var params = "v=1.0&q=" + encodeURIComponent(searchTerm);   
-  
+  var params = "v=1.0&q=" + encodeURIComponent(searchTerm);
+
   var req = new XMLHttpRequest();
   req.open('GET', url + "?" + params, true);
   req.overrideMimeType('application/json');
@@ -73,19 +73,19 @@ function getGooglePreview(searchTerm, pblock) {
           var content = results[i].content;
           var url = results[i].url;
           var visibleUrl = results[i].visibleUrl;
-      
-          html = html + "<div class=\"gresult\">" + 
-                        "<a href='" + url + "'>" + title + "</a>" +  
-                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" + 
-                        "<div class=\"gresult-url\">" + visibleUrl + 
+
+          html = html + "<div class=\"gresult\">" +
+                        "<a href='" + url + "'>" + title + "</a>" +
+                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
+                        "<div class=\"gresult-url\">" + visibleUrl +
                         "</div></div>";
         }
       }
-      pblock.innerHTML = html;   
+      pblock.innerHTML = html;
     }
   };
   req.send(null);
-  
+
 }
 
 
@@ -148,6 +148,10 @@ function cmd_highlight() {
     newNode.style.background = "yellow";
     range.surroundContents(newNode);
   }
+}
+
+cmd_highlight.preview = function(pblock) {
+  pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
 }
 
 function cmd_to_rich_text() {
@@ -300,6 +304,11 @@ function cmd_email() {
   } else
     displayMessage("Gmail must be open in a tab.");
 }
+
+cmd_email.preview = function(pblock) {
+  pblock.innerHTML = 'Creates an email message with your current selection as the contents.';
+}
+
 
 function addToGoogleCalendar(eventString) {
   var secid = getCookie("www.google.com", "secid");
