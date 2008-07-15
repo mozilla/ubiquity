@@ -199,8 +199,19 @@ function cmd_link_to_wikipedia() {
   }
 }
 
+function cmd_escape_html_entities() {
+  var text = getTextSelection();
+  text = text.replace(/</g, "&amp;lt;");  
+  text = text.replace(/>/g, "&amp;gt;");  
+  setTextSelection( text );
+}
+
 function cmd_signature() {
   setTextSelection( "-- aza | ɐzɐ --" );
+}
+
+function cmd_am_i_drunk() {
+  displayMessage( "Yes, yes you are." )
 }
 
 function calculate(expr) {
@@ -233,8 +244,13 @@ function cmd_define() {
 }
 
 function cmd_edit_page() {
-  getDocumentInsecure().body.contentEditable = 'true';
-  getDocumentInsecure().designMode='on';
+  getDocumentInsecure.body.contentEditable = 'true';
+  getDocumentInsecure.designMode='on';
+}
+
+function cmd_unedit_page() {
+  getDocumentInsecure().body.contentEditable = 'false';
+  getDocumentInsecure().designMode='off';
 }
 
 // -----------------------------------------------------------------
@@ -474,6 +490,13 @@ function cmd_get_email_address() {
 // -----------------------------------------------------------------
 // MISC COMMANDS
 // -----------------------------------------------------------------
+
+function cmd_test() {
+  var generator = Components
+                    .classes["@mozilla.org/xpath-generator;1"]
+                    .createInstance(Components.interfaces.nsIXPathGenerator);  
+  displayMessage( generator );                  
+}
 
 function pageLoad_inject_xss(){
   getWindowInsecure().ajaxGet = ajaxGet;
