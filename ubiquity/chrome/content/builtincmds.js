@@ -1277,3 +1277,64 @@ function pageLoad_applyAnnotations(doc) {
 function cmd_help() {
   openUrlInBrowser("about:ubiquity");
 }
+
+
+
+// -----------------------------------------------------------------
+// EXTENSION-RELATED
+// -----------------------------------------------------------------
+
+function cmd_del_icio_us(){
+
+	if(!window.yAddBookMark){
+		displayMessage("To use this command, you need to have del.icio.us extension installed");
+		return;
+	}
+	
+  	window.yAddBookMark.open();
+
+}
+
+function cmd_lyrics(){
+
+	if(!window.foxytunesGetCurrentTrackTitle){
+		humanePrompt("Lyrics for which song?", lyrics_search);
+		return;
+	}
+
+	song_title = window.foxytunesGetCurrentTrackTitle();
+	openUrlInBrowser("http://www.google.com/search?q=" + escape(song_title + " lyrics"));
+   
+}
+
+function lyrics_search(song){
+	
+	openUrlInBrowser("http://www.google.com/search?q=" + escape(song + " lyrics"));
+	
+}
+
+function cmd_play_song(){
+	foxy_tunes_action("Play"); 
+}
+
+function cmd_pause_song(){
+	foxy_tunes_action("Pause"); 
+}
+
+function cmd_previous_song(){
+	foxy_tunes_action("Previous"); 
+}
+
+function cmd_next_song(){
+	foxy_tunes_action("Next"); 
+}
+
+function foxy_tunes_action(action){
+	
+	if(!window.foxytunesDispatchPlayerCommand){
+		displayMessage("To use this command, you need to have FoxyTunes extension installed");
+	}else{
+		window.foxytunesDispatchPlayerCommand(action, true);
+	}
+	
+}
