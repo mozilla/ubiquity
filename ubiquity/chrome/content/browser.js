@@ -26,6 +26,7 @@ function ubiquitySetup()
 
   var globals = {
     XPathResult: XPathResult,
+    XMLHttpRequest: XMLHttpRequest,
     jQuery: jQuery,
     Application: Application,
     Components: Components,

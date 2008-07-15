@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
+<?xml-stylesheet href="chrome://ubiquity/content/browser.css" type="text/css"?>
+
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
   <script src="jquery-1.2.3.min.js"/>
@@ -15,12 +17,13 @@
   </keyset>
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel">
-      <div xmlns="http://www.w3.org/1999/xhtml"
-           style="padding: 0px; margin: 0px; background: #272727;">
-          <div style="padding: 10px; font-size: 12pt;">
-          <input id="cmd-entry" size="20"
-          style="border: none; font-size: 12pt; background: #272727; color: #ffffff;"/></div>
-          <div id="cmd-preview" style="padding: 10px; color: #bfbfbf; width: 500px;"></div>
-      </div>    </panel>
+      <div id="panel" xmlns="http://www.w3.org/1999/xhtml"
+                      xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+        <div id="cmd-entry-container">
+          <input id="cmd-entry" size="20" />
+        </div>
+        <div id="cmd-preview"></div>
+      </div>    
+    </panel>
   </popupset>
 </overlay>

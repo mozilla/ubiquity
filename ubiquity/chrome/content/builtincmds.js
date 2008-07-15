@@ -12,15 +12,23 @@ function makeSearchCommand(name, urlTemplate, icon) {
   };
 
   cmd.icon = icon;
+  
   cmd.preview = function(pblock) {
     var sel = getTextSelection();
     var content = "Takes you to the " + name + " homepage.";
 
-    if (sel)
-      content = ("Performs a " + name + " search for <b>" +
-                 escape(sel) + "</b>.");
-
-    pblock.innerHTML = content;
+    if (sel) {
+      if (name == "Google") {
+        getGooglePreview(sel, pblock);
+        pblock.innerHTML = ("Getting google results for <b>" + 
+                           escape(sel) + "</b>...");
+      }
+      else {
+        content = ("Performs a " + name + " search for <b>" +
+                  escape(sel) + "</b>.");
+        pblock.innerHTML = content;
+      }
+    }
   };
 
   return cmd;
@@ -43,6 +51,43 @@ var cmd_map_it = makeSearchCommand(
   "http://maps.google.com/?q={QUERY}",
   "http://www.google.com/favicon.ico"
 );
+
+function getGooglePreview(searchTerm, pblock) {
+  var url = "http://ajax.googleapis.com/ajax/services/search/web";
+  var params = "v=1.0&q=" + encodeURIComponent(searchTerm);   
+  
+  var req = new XMLHttpRequest();
+  req.open('GET', url + "?" + params, true);
+  req.overrideMimeType('application/json');
+  req.onreadystatechange = function() {
+    if (req.readyState == 4 && req.status == 200) {
+      var jObj = eval( '(' + req.responseText + ')' );
+      var count = jObj.responseData.cursor.estimatedResultCount;
+      var numToDisplay = 3;
+      var results = jObj.responseData.results;
+      var html = "";
+
+      if (numToDisplay < count) {
+        for (var i=0; i<numToDisplay; i++) {
+          var title = results[i].title;
+          var content = results[i].content;
+          var url = results[i].url;
+          var visibleUrl = results[i].visibleUrl;
+      
+          html = html + "<div class=\"gresult\">" + 
+                        "<a href='" + url + "'>" + title + "</a>" +  
+                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" + 
+                        "<div class=\"gresult-url\">" + visibleUrl + 
+                        "</div></div>";
+        }
+      }
+      pblock.innerHTML = html;   
+    }
+  };
+  req.send(null);
+  
+}
+
 
 // -----------------------------------------------------------------
 // TEXT COMMANDS
