@@ -945,7 +945,7 @@ function cloudPageLoadHandler( ) {
 // LANGUAGE/TRANSLATE RELATED
 // -----------------------------------------------------------------
 
-function translate_to( lang ) {
+function translateTo( lang, callback ) {  
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
   var params = paramsToString({
     v: "1.0",
@@ -956,7 +956,10 @@ function translate_to( lang ) {
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
     var translatedText = data.responseData.translatedText;
-    setTextSelection( translatedText );
+    if( typeof callback == "function" )
+      callback( translatedText );
+    else
+      setTextSelection( translatedText );
   });
 }
 
@@ -984,10 +987,21 @@ var Languages = {
   'SWEDISH' : 'sv'
 };
 
-function generateTranslateFunction( langCode ){
+function generateTranslateFunction( langCode ) {
   return function(){
-    translate_to( langCode );
+    translateTo( langCode );
   };
+}
+
+function generateTranslatePreviewFunction( langCode, langName ) {
+  return function(pblock) {
+    var lang = langName[0].toUpperCase() + langName.substr(1);
+    pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
+    translateTo( langCode, function( translation ) {
+      pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
+    })
+  }
+  
 }
 
 for( lang in Languages ){
@@ -995,6 +1009,7 @@ for( lang in Languages ){
   var langName = lang.toLowerCase();
 
   this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode );
+  this["cmd_translate_to_" + langName].preview = generateTranslatePreviewFunction( langCode, langName );  
 }
 
 function cmd_translate_to_fake_swedish() {
