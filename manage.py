@@ -18,7 +18,7 @@ def find_profile_dir(name):
     elif sys.platform.startswith("win"):
         # TODO: This only works on 2000/XP/Vista, not 98/Me.
         appdata = os.environ["APPDATA"]
-        base_path = os.path.join(appdata, "Mozilla\\Firefox\\Profiles")
+        base_path = os.path.join(appdata, "Mozilla\\Firefox")
     else:
         base_path = os.path.expanduser("~/.mozilla/firefox/")
     inifile = os.path.join(base_path, "profiles.ini")
