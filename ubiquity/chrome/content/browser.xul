@@ -3,13 +3,21 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-  <script src="jquery-1.2.3.min.js"/>
-  <script src="ubiquity.js"/>
-  <script src="sandboxfactory.js"/>
-  <script src="cmdmanager.js"/>
-  <script src="msgservice.js"/>
-  <script src="prefcommands.js"/>
-  <script src="browser.js"/>
+  
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/jquery-1.2.3.min.js"/>
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/ubiquity.js"/>
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/sandboxfactory.js"/>
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/cmdmanager.js"/>
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/msgservice.js"/>
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/prefcommands.js"/>
+  <script type="application/x-javascript"
+          src="chrome://ubiquity/content/browser.js"/>
   
   <keyset id="mainKeyset">
     <key id="command-window-key" modifiers="control" key="X"
@@ -19,6 +27,9 @@
     <panel id="transparent-msg-panel" class="msgPanel">
       <div id="panel" xmlns="http://www.w3.org/1999/xhtml"
                       xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+        <script type="application/x-javascript"
+                src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA"/>
         <div id="cmd-entry-container">
           <input id="cmd-entry" size="20" />
         </div>

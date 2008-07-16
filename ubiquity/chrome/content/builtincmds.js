@@ -12,16 +12,21 @@ function makeSearchCommand(name, urlTemplate, icon) {
   };
 
   cmd.icon = icon;
-  
+
   cmd.preview = function(pblock) {
     var sel = getTextSelection();
     var content = "Takes you to the " + name + " homepage.";
 
     if (sel) {
       if (name == "Google") {
-        getGooglePreview(sel, pblock);
+        setGooglePreview(sel, pblock);
         pblock.innerHTML = ("Getting google results for <b>" + 
                            escape(sel) + "</b>...");
+      }
+      else if (name == "Google Maps") {
+        setMapPreview(sel, pblock);
+        pblock.innerHTML = ("Getting map for <b>" + 
+                           escape(sel) + "</b>...");        
       }
       else {
         content = ("Performs a " + name + " search for <b>" +
@@ -52,10 +57,10 @@ var cmd_map_it = makeSearchCommand(
   "http://www.google.com/favicon.ico"
 );
 
-function getGooglePreview(searchTerm, pblock) {
+function setGooglePreview(searchTerm, pblock) {
   var url = "http://ajax.googleapis.com/ajax/services/search/web";
-  var params = "v=1.0&q=" + encodeURIComponent(searchTerm);   
-  
+  var params = "v=1.0&q=" + encodeURIComponent(searchTerm);
+
   var req = new XMLHttpRequest();
   req.open('GET', url + "?" + params, true);
   req.overrideMimeType('application/json');
@@ -73,20 +78,81 @@ function getGooglePreview(searchTerm, pblock) {
           var content = results[i].content;
           var url = results[i].url;
           var visibleUrl = results[i].visibleUrl;
-      
-          html = html + "<div class=\"gresult\">" + 
-                        "<a href='" + url + "'>" + title + "</a>" +  
-                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" + 
-                        "<div class=\"gresult-url\">" + visibleUrl + 
+
+          html = html + "<div class=\"gresult\">" +
+                        "<a href='" + url + "'>" + title + "</a>" +
+                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
+                        "<div class=\"gresult-url\">" + visibleUrl +
                         "</div></div>";
         }
       }
-      pblock.innerHTML = html;   
+      pblock.innerHTML = html;
     }
   };
   req.send(null);
-  
+
 }
+
+function loadMap(lat, lng) {
+  if (GBrowserIsCompatible) {
+    var map = new GMap2(document.getElementById("map"));
+    var point = new GLatLng(lat, lng);
+    map.setCenter(point, 13);
+    map.addOverlay(new GMarker(point));
+    map.addControl(new GSmallMapControl());
+  }
+}
+
+function setMapPreview(searchTerm, pblock) {
+  var doc = context.focusedWindow.document;
+  var url = "http://maps.google.com/maps/geo";
+  var apikey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+  var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);   
+
+  var req = new XMLHttpRequest();
+  req.open('GET', url + "?" + params, true);
+  req.overrideMimeType('application/json');
+  req.onreadystatechange = function() {
+    if (req.readyState == 4 && req.status == 200) {
+      var jobj = eval( '(' + req.responseText + ')' );
+      var numToDisplay = 3;
+        
+      if (!jobj.Placemark) {
+        displayMessage("not specific enough");
+        return;
+      }
+
+      var placemark = jobj.Placemark[0];
+      var lng0 = placemark.Point.coordinates[0];
+      var lat0 = placemark.Point.coordinates[1];
+
+      var html = "<div id=\"address-list\">";
+      for (var i=0; i<numToDisplay; i++) {
+        if (jobj.Placemark[i]) {
+          var address = jobj.Placemark[i].address;
+          var lng = jobj.Placemark[i].Point.coordinates[0];
+          var lat = jobj.Placemark[i].Point.coordinates[1]; 
+        
+          html = html + "<div class=\"gaddress\">" + 
+                        "<a href=\"#\" onclick=\"loadMap(" + lat + ", " + lng + ");\">" + 
+                        address + "</a></div>";
+        }
+      }
+      html = html + "</div>" + 
+                    "<div id=\"map\">[map]</div>"; 
+                    
+      // For now, just displaying the address listings and the map
+      pblock.innerHTML = html;   
+      
+      // This call to load map doesn't have access to the google api script which is currently included in the popup in browser.xul
+      // Possibly insert a script tag here instead- doesn't seem to be working either: doesn't actually LOAD (ie: onload event never fires)
+      loadMap(lat0, lng0);
+      
+    }
+  };
+  req.send(null);
+}
+
 
 
 // -----------------------------------------------------------------
@@ -150,6 +216,10 @@ function cmd_highlight() {
   }
 }
 
+cmd_highlight.preview = function(pblock) {
+  pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
+}
+
 function cmd_to_rich_text() {
   var html = getTextSelection();
 
@@ -195,8 +265,19 @@ function cmd_link_to_wikipedia() {
   }
 }
 
+function cmd_escape_html_entities() {
+  var text = getTextSelection();
+  text = text.replace(/</g, "&amp;lt;");  
+  text = text.replace(/>/g, "&amp;gt;");  
+  setTextSelection( text );
+}
+
 function cmd_signature() {
   setTextSelection( "-- aza | ɐzɐ --" );
+}
+
+function cmd_am_i_drunk() {
+  displayMessage( "Yes, yes you are." )
 }
 
 function calculate(expr) {
@@ -229,8 +310,79 @@ function cmd_define() {
 }
 
 function cmd_edit_page() {
-  getDocumentInsecure().body.contentEditable = 'true';
-  getDocumentInsecure().designMode='on';
+  getDocumentInsecure.body.contentEditable = 'true';
+  getDocumentInsecure.designMode='on';
+}
+
+function cmd_unedit_page() {
+  getDocumentInsecure().body.contentEditable = 'false';
+  getDocumentInsecure().designMode='off';
+}
+
+function isAddress( query, callback ) {
+  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
+  var params = paramsToString({
+    location: query,
+    appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
+  });
+  
+  
+  jQuery.ajax({
+    url: url+params,
+    dataType: "xml",
+    error: function() {
+      callback( false );
+    },
+    success:function(data) {      
+      var results = jQuery(data).find("Result");
+      var allText = jQuery.makeArray(
+                      jQuery(data)
+                        .find(":contains()")
+                        .map( function(){ return jQuery(this).text().toLowerCase() } )
+                      );
+                      
+      // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
+
+      if( results.length == 0 ){
+        callback( false );
+        return;        
+      }
+            
+      function existsMatch( text ){
+        var joinedText = allText.join(" ");
+        return joinedText.indexOf( text.toLowerCase() ) != -1;
+      }
+      
+      missCount = 0;
+      
+      var queryWords = query.match(/\w+/g);
+      for( var i=0; i < queryWords.length; i++ ){
+        if( existsMatch( queryWords[i] ) == false ) {
+          missCount += 1;
+          //displayMessage( queryWords[i] );
+        }
+      }
+      
+      var missRatio = missCount / queryWords.length;
+      //displayMessage( missRatio );
+      
+      if( missRatio < .5 )
+        callback( true );
+      else
+        callback( false );
+    }
+  });
+}
+
+function cmd_is_address(){
+  humanePrompt( "Give me some text. I'll tell you if it's an address.", function( text ) {
+    isAddress( text, function( bool ) {
+      if( bool )
+        displayMessage( "Yes. It is an address." );
+      else
+        displayMessage( "No. An address this is not." );
+    })
+  })
 }
 
 // -----------------------------------------------------------------
@@ -300,6 +452,11 @@ function cmd_email() {
   } else
     displayMessage("Gmail must be open in a tab.");
 }
+
+cmd_email.preview = function(pblock) {
+  pblock.innerHTML = 'Creates an email message with your current selection as the contents.';
+}
+
 
 function addToGoogleCalendar(eventString) {
   var secid = getCookie("www.google.com", "secid");
@@ -465,6 +622,13 @@ function cmd_get_email_address() {
 // -----------------------------------------------------------------
 // MISC COMMANDS
 // -----------------------------------------------------------------
+
+function cmd_test() {
+  var generator = Components
+                    .classes["@mozilla.org/xpath-generator;1"]
+                    .createInstance(Components.interfaces.nsIXPathGenerator);  
+  displayMessage( generator );                  
+}
 
 function pageLoad_inject_xss(){
   getWindowInsecure().ajaxGet = ajaxGet;
@@ -847,7 +1011,7 @@ function cloudPageLoadHandler( ) {
 // LANGUAGE/TRANSLATE RELATED
 // -----------------------------------------------------------------
 
-function translate_to( lang ) {
+function translateTo( lang, callback ) {  
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
   var params = paramsToString({
     v: "1.0",
@@ -858,7 +1022,10 @@ function translate_to( lang ) {
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
     var translatedText = data.responseData.translatedText;
-    setTextSelection( translatedText );
+    if( typeof callback == "function" )
+      callback( translatedText );
+    else
+      setTextSelection( translatedText );
   });
 }
 
@@ -886,10 +1053,21 @@ var Languages = {
   'SWEDISH' : 'sv'
 };
 
-function generateTranslateFunction( langCode ){
+function generateTranslateFunction( langCode ) {
   return function(){
-    translate_to( langCode );
+    translateTo( langCode );
   };
+}
+
+function generateTranslatePreviewFunction( langCode, langName ) {
+  return function(pblock) {
+    var lang = langName[0].toUpperCase() + langName.substr(1);
+    pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
+    translateTo( langCode, function( translation ) {
+      pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
+    })
+  }
+  
 }
 
 for( lang in Languages ){
@@ -897,6 +1075,7 @@ for( lang in Languages ){
   var langName = lang.toLowerCase();
 
   this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode );
+  this["cmd_translate_to_" + langName].preview = generateTranslatePreviewFunction( langCode, langName );  
 }
 
 function cmd_translate_to_fake_swedish() {
@@ -1163,4 +1342,65 @@ function pageLoad_applyAnnotations(doc) {
 
 function cmd_help() {
   openUrlInBrowser("about:ubiquity");
+}
+
+
+
+// -----------------------------------------------------------------
+// EXTENSION-RELATED
+// -----------------------------------------------------------------
+
+function cmd_del_icio_us(){
+
+	if(!window.yAddBookMark){
+		displayMessage("To use this command, you need to have del.icio.us extension installed");
+		return;
+	}
+	
+  	window.yAddBookMark.open();
+
+}
+
+function cmd_lyrics(){
+
+	if(!window.foxytunesGetCurrentTrackTitle){
+		humanePrompt("Lyrics for which song?", lyrics_search);
+		return;
+	}
+
+	song_title = window.foxytunesGetCurrentTrackTitle();
+	openUrlInBrowser("http://www.google.com/search?q=" + escape(song_title + " lyrics"));
+   
+}
+
+function lyrics_search(song){
+	
+	openUrlInBrowser("http://www.google.com/search?q=" + escape(song + " lyrics"));
+	
+}
+
+function cmd_play_song(){
+	foxy_tunes_action("Play"); 
+}
+
+function cmd_pause_song(){
+	foxy_tunes_action("Pause"); 
+}
+
+function cmd_previous_song(){
+	foxy_tunes_action("Previous"); 
+}
+
+function cmd_next_song(){
+	foxy_tunes_action("Next"); 
+}
+
+function foxy_tunes_action(action){
+	
+	if(!window.foxytunesDispatchPlayerCommand){
+		displayMessage("To use this command, you need to have FoxyTunes extension installed");
+	}else{
+		window.foxytunesDispatchPlayerCommand(action, true);
+	}
+	
 }

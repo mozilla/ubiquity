@@ -58,13 +58,13 @@
 }
 
 .gaddress {
-  font-size: small;
+  font-size: x-small;
   margin-bottom: 10px;
 }
 #address-list {
   float: left;
   margin: 10px;
-  width: 300px;
+  width: 200px;
   height: 120px;
 }
 #map-actions {
