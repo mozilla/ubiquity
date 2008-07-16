@@ -204,5 +204,5 @@ function testCommandGlobalsWork() {
 function testSandboxSupportsJs17() {
   var sbf = new SandboxFactory({});
   var s = sbf.makeSandbox();
-  Components.utils.evalInSandbox("let k = 1;", s);
+  sbf.evalInSandbox("let k = 1;", s);
 }

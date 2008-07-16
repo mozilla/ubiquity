@@ -111,7 +111,7 @@ CommandSource.prototype = {
       var code = this._codeCache[i];
 
       try {
-        Components.utils.evalInSandbox(code, sandbox);
+        this._sandboxFactory.evalInSandbox(code, sandbox);
       } catch (e) {
         this._messageService.displayMessage(
           {text: "An exception occurred while loading code.",

@@ -17,5 +17,9 @@ SandboxFactory.prototype = {
     }
 
     return sandbox;
+  },
+
+  evalInSandbox: function(code, sandbox) {
+    Components.utils.evalInSandbox(code, sandbox);
   }
 };
