@@ -195,7 +195,7 @@ function testCommandGlobalsWork() {
               "Command 'foo' should return 1 on first call.");
 
   cmdSrc.refresh();
-  
+
   cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 2,
               "Command 'foo' should return 2 on second call.");
@@ -204,5 +204,5 @@ function testCommandGlobalsWork() {
 function testSandboxSupportsJs17() {
   var sbf = new SandboxFactory({});
   var s = sbf.makeSandbox();
-  Components.utils.evalInSandbox("let k = 1;", s);
+  Components.utils.evalInSandbox("let k = 1ERROR;", s);
 }
