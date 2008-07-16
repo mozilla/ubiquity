@@ -195,7 +195,7 @@ function testCommandGlobalsWork() {
               "Command 'foo' should return 1 on first call.");
 
   cmdSrc.refresh();
-  
+
   cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 2,
               "Command 'foo' should return 2 on second call.");
