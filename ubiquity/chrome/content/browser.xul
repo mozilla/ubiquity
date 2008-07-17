@@ -19,10 +19,6 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/browser.js"/>
   
-  <keyset id="mainKeyset">
-    <key id="command-window-key" modifiers="control" key="X"
-         oncommand="gUbiquity.openWindow();"/>
-  </keyset>
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel">
       <div id="panel" xmlns="http://www.w3.org/1999/xhtml"

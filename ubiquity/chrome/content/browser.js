@@ -68,5 +68,14 @@ function ubiquityTeardown()
 {
 }
 
+function ubiquityKeydown(aEvent)
+{
+  if (aEvent.keyCode == 32 && aEvent.altKey) {
+    gUbiquity.openWindow();
+    aEvent.stopPropagation();
+  }
+}
+
 window.addEventListener("load", ubiquitySetup, false);
 window.addEventListener("unload", ubiquityTeardown, false);
+window.addEventListener("keydown", ubiquityKeydown, false);
