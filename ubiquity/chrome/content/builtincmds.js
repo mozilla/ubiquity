@@ -310,8 +310,8 @@ function cmd_define() {
 }
 
 function cmd_edit_page() {
-  getDocumentInsecure.body.contentEditable = 'true';
-  getDocumentInsecure.designMode='on';
+  getDocumentInsecure().body.contentEditable = 'true';
+  getDocumentInsecure().designMode='on';
 }
 
 function cmd_unedit_page() {
