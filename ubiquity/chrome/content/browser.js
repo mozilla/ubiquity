@@ -70,7 +70,11 @@ function ubiquityTeardown()
 
 function ubiquityKeydown(aEvent)
 {
-  if (aEvent.keyCode == 32 && aEvent.altKey) {
+  // Key to invoke ubiquity is alt+space on Mac, ctrl+space on
+  // Windows; either one actually works, though this makes
+  // things buggy on the Mac b/c it doesn't allow the user to
+  // use ctrl+space to activate context menus.
+  if (aEvent.keyCode == 32 && (aEvent.altKey || aEvent.ctrlKey)) {
     gUbiquity.openWindow();
     aEvent.stopPropagation();
   }
