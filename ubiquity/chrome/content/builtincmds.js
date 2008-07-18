@@ -1,4 +1,3 @@
-
 // -----------------------------------------------------------------
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
@@ -270,6 +269,28 @@ function cmd_escape_html_entities() {
   text = text.replace(/</g, "&amp;lt;");  
   text = text.replace(/>/g, "&amp;gt;");  
   setTextSelection( text );
+}
+
+function cmd_word_count(){
+	var sel = getTextSelection();
+	displayMessage(wordCount(sel) + " words");
+}
+
+cmd_word_count.preview = function(pblock) {
+	var sel = getTextSelection();
+	pblock.innerHTML = wordCount(sel) + " words";
+}
+
+function wordCount(text){
+	var words = text.split(" ");
+	var wordCount = 0;
+	
+	for(i=0; i<words.length; i++){
+		if (words[i].length > 0)
+			wordCount++;
+	}
+	
+	return wordCount;
 }
 
 function cmd_signature() {
@@ -1403,4 +1424,49 @@ function foxy_tunes_action(action){
 		window.foxytunesDispatchPlayerCommand(action, true);
 	}
 	
+}
+
+// -----------------------------------------------------------------
+// TAB COMMANDS
+// -----------------------------------------------------------------
+
+function cmd_close_related_tabs(){
+	
+	var relatedWord = getTextSelection().toLowerCase();
+    
+	Application.activeWindow.tabs.forEach(function(tab){
+		if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord))
+			tab.close();
+	});
+	
+}
+
+cmd_close_related_tabs.preview = function(pblock) {
+	
+	var relatedWord = getTextSelection().toLowerCase();
+	
+	if(relatedWord.length != 0){
+		
+	  	var html = "Closes the following tabs that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
+		var numTabs = 0;
+	
+		Application.activeWindow.tabs.forEach(function(tab){
+			if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
+				html += "<li>" + tab.document.title + "</li>";
+				numTabs++;
+			}
+		});
+
+		if(numTabs == 0){
+			html = "No tabs related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b>";
+		}else{
+			html += "</ul>";
+		}
+		
+	}else{
+		html = "No text selected";
+	}
+	
+	pblock.innerHTML = html;
+
 }
