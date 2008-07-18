@@ -1,28 +1,35 @@
 function RemoteUriCodeSource(uri) {
   this.uri = uri;
   this._code = "";
-
-  var self = this;
-
-  // TODO: Retrieve the code on a timer.
-
-  var req = new XMLHttpRequest();
-  req.open('GET', this.uri, true);
-  req.overrideMimeType("text/javascript");
-  req.onreadystatechange =   function RemoteUriCodeSource_onXhrChange() {
-    if (req.readyState == 4)
-      if (req.status == 200)
-        self._code = req.responseText;
-      else {
-        // TODO: What should we do? Display a message?
-      }
-  };
-
-  req.send(null);
+  this._req = null;
 };
 
 RemoteUriCodeSource.prototype = {
   getCode : function() {
+    if (!this._req) {
+      // Queue another XMLHttpRequest to fetch the latest code.
+
+      var self = this;
+      self._req = new XMLHttpRequest();
+      self._req.open('GET', this.uri, true);
+      self._req.overrideMimeType("text/javascript");
+
+      self._req.onreadystatechange = function RUCS__onXhrChange() {
+        if (self._req.readyState == 4) {
+          if (self._req.status == 200) {
+            // Update our cache.
+            self._code = self._req.responseText;
+          } else {
+            // TODO: What should we do? Display a message?
+          }
+          self._req = null;
+        }
+      };
+
+      this._req.send(null);
+    }
+
+    // Return whatever we've got cached for now.
     return this._code;
   }
 };
@@ -40,7 +47,7 @@ LocalUriCodeSource.prototype = {
     if (req.status == 0)
       return req.responseText;
     else
-      // TODO: Throw an exception instead.
+      // TODO: Throw an exception or display a message.
       return "";
   }
 };
