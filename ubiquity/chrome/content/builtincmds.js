@@ -1,24 +1,3 @@
-function detectOS(){
-  var nav = Application.activeWindow
-                       .activeTab
-                       .document
-                       .defaultView
-                       .wrappedJSObject
-                       .navigator;
-  
-  var OSName="Unknown OS";
-  if (nav.appVersion.indexOf("Win")!=-1) OSName="Windows";
-  if (nav.appVersion.indexOf("Mac")!=-1) OSName="Mac";
-  if (nav.appVersion.indexOf("X11")!=-1) OSName="UNIX";
-  if (nav.appVersion.indexOf("Linux")!=-1) OSName="Linux";
-  
-  displayMessage( OSName );
-}
-
-function cmd_monkey() {
-  detectOS();
-}
-
 // -----------------------------------------------------------------
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
@@ -1059,7 +1038,20 @@ function translateTo( lang, callback ) {
 
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
-    var translatedText = data.responseData.translatedText;
+    
+    // The usefulness of this command is limited because of the
+    // length restriction enforced by Google. A better way to do
+    // this would be to split up the request into multiple chunks.
+    // The other method is to contact Google and get a special
+    // account.
+    
+    try {
+      var translatedText = data.responseData.translatedText;
+    } catch(e) {
+      displayMessage( "Translation Error: " + data.responseDetails )
+      return;
+    }
+    
     if( typeof callback == "function" )
       callback( translatedText );
     else
