@@ -206,3 +206,13 @@ function testSandboxSupportsJs17() {
   var s = sbf.makeSandbox();
   sbf.evalInSandbox("let k = 1;", s);
 }
+
+function testImportWorks() {
+  var jsmu = {};
+  Components.utils.import("resource://ubiquity-modules/jsmodutils.js", jsmu);
+
+  this.assert(!("_sandboxContext" in jsmu));
+  jsmu.setSandboxContext(new SandboxFactory({}));
+  this.assert("_sandboxContext" in jsmu);
+  jsmu.Import("resource://ubiquity-modules/jsmodutils.js");
+}
