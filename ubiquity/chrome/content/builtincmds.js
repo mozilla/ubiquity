@@ -1,3 +1,24 @@
+function detectOS(){
+  var nav = Application.activeWindow
+                       .activeTab
+                       .document
+                       .defaultView
+                       .wrappedJSObject
+                       .navigator;
+  
+  var OSName="Unknown OS";
+  if (nav.appVersion.indexOf("Win")!=-1) OSName="Windows";
+  if (nav.appVersion.indexOf("Mac")!=-1) OSName="Mac";
+  if (nav.appVersion.indexOf("X11")!=-1) OSName="UNIX";
+  if (nav.appVersion.indexOf("Linux")!=-1) OSName="Linux";
+  
+  displayMessage( OSName );
+}
+
+function cmd_monkey() {
+  detectOS();
+}
+
 // -----------------------------------------------------------------
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
@@ -295,10 +316,6 @@ function wordCount(text){
 
 function cmd_signature() {
   setTextSelection( "-- aza | ɐzɐ --" );
-}
-
-function cmd_am_i_drunk() {
-  displayMessage( "Yes, yes you are." )
 }
 
 function calculate(expr) {
