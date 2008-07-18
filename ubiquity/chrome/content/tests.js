@@ -209,10 +209,10 @@ function testSandboxSupportsJs17() {
 
 function testImportWorks() {
   var jsmu = {};
-  Components.utils.import("resource://ubiquity-modules/jsmodutils.js", jsmu);
+  Components.utils.import("resource://ubiquity-modules/jsmutils.js", jsmu);
 
   this.assert(!("_sandboxContext" in jsmu));
   jsmu.setSandboxContext(new SandboxFactory({}));
   this.assert("_sandboxContext" in jsmu);
-  jsmu.Import("resource://ubiquity-modules/jsmodutils.js");
+  jsmu.Import("resource://ubiquity-modules/jsmutils.js");
 }
