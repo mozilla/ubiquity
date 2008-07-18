@@ -14,6 +14,8 @@ function ubiquitySetup()
     "chrome://ubiquity/content/final.js"
   );
 
+  var bookmarksSource = new BookmarksCodeSource("ubiquity");
+
   var msgService = new CompositeMessageService();
 
   msgService.add(new AlertMessageService());
@@ -44,6 +46,7 @@ function ubiquitySetup()
     cmdUtils,
     builtinCmds,
     PrefCommands,
+    bookmarksSource,
     finalProcessing
   ];
 

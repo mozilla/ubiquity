@@ -44,3 +44,50 @@ LocalUriCodeSource.prototype = {
       return "";
   }
 };
+
+function BookmarksCodeSource(tagName) {
+  this._sources = {};
+
+  this._updateSourceList = function BCS__updateSourceList() {
+    var tags = Application.bookmarks.tags.children;
+    tags = [tag for each (tag in tags)
+                   if (tag.title == tagName)];
+    var newSources = {};
+
+    if (tags.length == 1) {
+      var tag = tags[0];
+
+      var children = [child for each (child in tag.children)
+                            if (child.type == "bookmark")];
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        var href = child.uri.spec;
+
+        if (this._sources[href]) {
+          newSources[href] = this._sources[href];
+        } else if (child.uri.scheme == "http" ||
+                   child.uri.scheme == "https") {
+          newSources[href] = new RemoteUriCodeSource(href);
+        } else if (child.uri.scheme == "file" ||
+                   child.uri.scheme == "chrome" ||
+                   child.uri.scheme == "resource") {
+          newSources[href] = new LocalUriCodeSource(href);
+        }
+
+        // TODO: What about data URIs? FTP?
+      }
+    }
+
+    this._sources = newSources;
+  },
+
+  this.getCode = function BCS_getCode() {
+    this._updateSourceList();
+
+    var code = "";
+    for each (source in this._sources)
+      code += source.getCode() + "\n";
+
+    return code;
+  };
+}
