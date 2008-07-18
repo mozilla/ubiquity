@@ -58,7 +58,7 @@ function BookmarksCodeSource(tagName) {
   this._updateSourceList = function BCS__updateSourceList() {
     var tags = Application.bookmarks.tags.children;
     tags = [tag for each (tag in tags)
-                   if (tag.title == tagName)];
+                if (tag.title == tagName)];
     var newSources = {};
 
     if (tags.length == 1) {
