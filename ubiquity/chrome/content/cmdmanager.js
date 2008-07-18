@@ -170,10 +170,3 @@ CommandSource.prototype = {
       return null;
   }
 };
-
-function getCommandsAutoCompleter() {
-  var Ci = Components.interfaces;
-  var contractId = "@mozilla.org/autocomplete/search;1?name=commands";
-  var classObj = Components.classes[contractId];
-  return classObj.createInstance(Ci.nsIAutoCompleteSearch);
-}
