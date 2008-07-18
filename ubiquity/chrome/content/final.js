@@ -22,6 +22,18 @@ function startup_setBasicPreferences() {
   Application.prefs.setValue("javascript.options.showInConsole", true);
 }
 
+function startup_openUbiquityWelcomePage()
+{
+  const VERSION_PREF ="extensions.ubiquity.lastversion";
+  const UBIQUITY_VERSION = "0.0.1";
+
+  var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
+  if (currVersion != UBIQUITY_VERSION) {
+    Application.prefs.setValue(VERSION_PREF, UBIQUITY_VERSION);
+    cmd_help();
+  }
+}
+
 if (window.location == "chrome://browser/content/browser.xul") {
   // We're being loaded in the browser.
 
