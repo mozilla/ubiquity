@@ -2,6 +2,8 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         onload="onLoad();">
+<description>This test requires Firebug. See the Firebug console for
+test output.</description>
 <script type="text/javascript;version=1.7"
         src="iframe_sandboxfactory.js"></script>
 <script>
@@ -14,6 +16,8 @@ function onLoad() {
   sbf.evalInSandbox("var p='blarg';", sandbox);
   if (sandbox.p != 'blarg')
     throw new Error("var statement didn't work");
+  console.log("Click on this ", sandbox, "to manually verify that " +
+              "'k' and 'p' exist.");
   console.log("Tests passed.");
 }
 </script>
