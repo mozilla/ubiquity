@@ -2,15 +2,15 @@ var gUbiquity = null;
 
 function ubiquitySetup()
 {
-  var cmdUtils = new UriCodeSource(
+  var cmdUtils = new LocalUriCodeSource(
     "chrome://ubiquity/content/cmdutils.js"
   );
 
-  var builtinCmds = new UriCodeSource(
+  var builtinCmds = new LocalUriCodeSource(
     "chrome://ubiquity/content/builtincmds.js"
   );
 
-  var finalProcessing = new UriCodeSource(
+  var finalProcessing = new LocalUriCodeSource(
     "chrome://ubiquity/content/final.js"
   );
 

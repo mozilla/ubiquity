@@ -207,11 +207,11 @@ RemoteUriCodeSource.prototype = {
   }
 };
 
-function UriCodeSource(uri) {
+function LocalUriCodeSource(uri) {
   this.uri = uri;
 }
 
-UriCodeSource.prototype = {
+LocalUriCodeSource.prototype = {
   getCode : function() {
     var req = new XMLHttpRequest();
     req.open('GET', this.uri, false);
