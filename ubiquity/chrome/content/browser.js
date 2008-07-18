@@ -2,20 +2,6 @@ var gUbiquity = null;
 
 function ubiquitySetup()
 {
-  var cmdUtils = new LocalUriCodeSource(
-    "chrome://ubiquity/content/cmdutils.js"
-  );
-
-  var builtinCmds = new LocalUriCodeSource(
-    "chrome://ubiquity/content/builtincmds.js"
-  );
-
-  var finalProcessing = new LocalUriCodeSource(
-    "chrome://ubiquity/content/final.js"
-  );
-
-  var bookmarksSource = new BookmarksCodeSource("ubiquity");
-
   var msgService = new CompositeMessageService();
 
   msgService.add(new AlertMessageService());
@@ -43,11 +29,11 @@ function ubiquitySetup()
   var sandboxFactory = new SandboxFactory(globals);
 
   var codeSources = [
-    cmdUtils,
-    builtinCmds,
+    new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
+    new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
     PrefCommands,
-    bookmarksSource,
-    finalProcessing
+    new BookmarksCodeSource("ubiquity"),
+    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
   ];
 
   var cmdSource = new CommandSource(
