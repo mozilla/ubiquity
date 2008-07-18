@@ -178,6 +178,35 @@ function getCommandsAutoCompleter() {
   return classObj.createInstance(Ci.nsIAutoCompleteSearch);
 }
 
+function RemoteUriCodeSource(uri) {
+  this.uri = uri;
+  this._code = "";
+
+  var self = this;
+
+  // TODO: Retrieve the code on a timer.
+
+  var req = new XMLHttpRequest();
+  req.open('GET', this.uri, true);
+  req.overrideMimeType("text/javascript");
+  req.onreadystatechange =   function RemoteUriCodeSource_onXhrChange() {
+    if (req.readyState == 4)
+      if (req.status == 200)
+        self._code = req.responseText;
+      else {
+        // TODO: What should we do? Display a message?
+      }
+  };
+
+  req.send(null);
+};
+
+RemoteUriCodeSource.prototype = {
+  getCode : function() {
+    return this._code;
+  }
+};
+
 function UriCodeSource(uri) {
   this.uri = uri;
 }
