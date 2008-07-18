@@ -214,5 +214,10 @@ function testImportWorks() {
   this.assert(!("_sandboxContext" in jsmu));
   jsmu.setSandboxContext(new SandboxFactory({}));
   this.assert("_sandboxContext" in jsmu);
+
+  this.assert(!("jsmutils" in jsmu));
   jsmu.Import("resource://ubiquity-modules/jsmutils.js");
+  this.assert(jsmu.jsmutils);
+
+  this.assert("Import" in jsmu.jsmutils);
 }

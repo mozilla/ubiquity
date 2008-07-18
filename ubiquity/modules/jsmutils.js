@@ -1,5 +1,18 @@
-function Import(url) {
-  var jsmodule = {};
+function _getUrlBasename(url) {
+  var start = url.lastIndexOf("/") + 1;
+  var end = url.lastIndexOf(".");
+
+  return url.slice(start, end);
+}
+
+function Import(url, jsmodule) {
+  var jsmName;
+  if (typeof(jsmodule) == "undefined") {
+    jsmodule = {};
+    jsmName = _getUrlBasename(url);
+    if (!jsmName)
+      throw new Error("Couldn't generate name for " + url);
+  }
 
   if (this._sandboxContext) {
     var context = this._sandboxContext;
@@ -8,12 +21,16 @@ function Import(url) {
 
     var sandbox = context.modules[url];
 
-    for (name in sandbox.EXPORTED_SYMBOLS)
+    for (var i = 0; i < sandbox.EXPORTED_SYMBOLS.length; i++) {
+      var name = sandbox.EXPORTED_SYMBOLS[i];
       jsmodule[name] = sandbox[name];
+    }
   } else {
     Components.utils.import(url, jsmodule);
   }
-  return jsmodule;
+
+  if (jsmName)
+    this[jsmName] = jsmodule;
 }
 
 function setSandboxContext(sandboxFactory) {
