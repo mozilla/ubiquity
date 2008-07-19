@@ -337,12 +337,28 @@ function cmd_unedit_page() {
 }
 
 function isAddress( query, callback ) {
+  // Culled from http://www.usps.com/ncsc/lookups/abbr_suffix.txt
+  var streetAbbr = "way,wls,cpe,orchrd,crescent,fall,beach,mssn,ramp,opas,kys,spg,jctn,tunel,byu,parkways,cove,byp,springs,islands,river,spur,jcts,viadct,pines,express,mnrs,tunls,groves,street,sumitt,loop,view,cmn,crsnt,pkwys,trk,throughway,square,cswy,cmp,centr,vlg,vly,frd,common,mtwy,grv,flat,loaf,jctns,inlet,union,bayoo,drives,bayou,grn,ferry,trce,blf,blfs,bypas,ml,radl,hls,vws,mt,grdn,hbrs,ft,gln,cts,smt,knol,station,bend,corner,point,shl,mdw,burgs,estate,crsent,corners,mount,mntain,medows,sprngs,grvs,turnpike,creek,sq,st,aly,roads,radiel,overpass,trls,ridge,forests,green,lf,gardn,vdct,la,ln,lk,bluff,cliffs,stravn,fork,frgs,sta,strave,keys,stn,ranch,forg,rest,ford,frway,crssng,cntr,str,knoll,fort,boul,sqrs,haven,nck,rst,pikes,glens,pne,sqre,rapid,pkway,gardens,pike,rad,exts,bottom,strav,frry,lcks,cnyn,rd,prt,prr,extn,road,crse,curve,shoars,crst,via,xing,streme,lake,trail,brks,radial,expressway,junctions,cliff,cnter,passage,trafficway,parkwy,frds,meadows,harbors,rte,mountain,greens,annx,cen,pky,falls,strvn,brnch,hill,village,plns,shr,missn,tunl,hgts,plaza,expy,motorway,bottm,shrs,hway,crest,highway,glen,shores,mountin,cres,canyon,ovl,frks,btm,centers,curv,court,iss,spring,sts,harbr,mission,courts,lane,land,jction,expr,streets,expw,lakes,causeway,villiage,gatewy,vista,uns,frg,mountains,frk,clf,clb,skyway,trks,frt,fry,boulv,islnds,hvn,key,ky,flts,bridge,dl,dm,extension,trpk,lodg,estates,islnd,dv,path,dr,highwy,valleys,camp,rpd,loops,cyn,rapids,holw,rnchs,hollow,mls,vally,mill,strvnue,annex,pnes,tunnl,isles,lgt,cir,meadow,trails,wl,ext,bgs,wells,exp,blvd,wy,circles,riv,grden,extensions,tunnels,shls,tpk,paths,knl,ville,park,villages,parks,tracks,bluf,pass,bnd,grdns,rdgs,lndg,landing,rdge,circle,crt,light,vlys,freeway,glns,shore,crk,port,spngs,pr,ldg,pt,fields,driv,mall,bypass,pk,pl,mews,divide,club,xrd,vill,lodge,anex,underpass,neck,trace,track,frst,strt,rpds,strm,stra,anx,lck,cor,junction,stream,dvd,harb,mtns,prk,rivr,oval,crecent,vist,manor,tunnel,gtway,pkwy,avenu,juncton,summit,hwy,mtin,traces,terrace,ck,orchard,centre,lock,coves,field,statn,cr,cp,grov,cv,ct,lgts,lndng,run,cresent,plz,trak,rue,locks,pln,mntn,tpke,trwy,cvs,ranches,frwy,div,knolls,lights,crcle,hiwy,terr,jct,inlt,is,brook,brooks,mtn,circl,vw,flats,arcade,pine,arc,ldge,bg,freewy,hills,well,drs,psge,bot,brdge,drv,fwy,br,ctrs,bch,forks,hiway,havn,vl,hbr,turnpk,ctr,cent,sprng,rvr,holws,prairie,branch,valley,ally,grove,clfs,ridges,ports,villag,bypa,views,harbor,sqr,squ,byps,sqs,fords,manors,isle,crcl,burg,hllw,garden,fls,flt,ht,hl,avenue,fld,gtwy,lanes,center,vis,mnr,mnt,plains,junctn,pts,row,forges,boulevard,trl,plaines,course,place,cape,heights,shoar,viaduct,avn,un,hts,shoal,crossing,ave,grns,route,flds,vlgs,avnue,ests,forge,stravenue,mntns,aven,vlly,vsta,upas,walks,trfy,ter,prts,rds,mills,rdg,knls,cors,canyn,crossroad,spurs,cirs,villg,ways,island,sumit,mdws,circ,brk,prarie,brg,gdn,dale,trnpk,walk,hrbor,wall,bluffs,drive,plza,msn,crssing,parkway,spng,skwy,extnsn,height,dam,tr,alley,lks,allee,points,forest,orch,plain,est,straven,shoals,rnch,hollows,av,squares,gdns,spgs,vst,crscnt,gateway,unions,gatway,causway";
+  var streetAbbr = streetAbbr.split(",");
+  
+  function stringEndsWithStreetAbbr( string ) {
+    var words = jQuery.trim(string).split(/\b/);
+    if( words.length == 0 ) return false;
+    var lastWord = words[ words.length-1 ].toLowerCase();
+    if( streetAbbr.indexOf(lastWord) != -1 ) return true;
+    return false;
+  }
+  
+  if( stringEndsWithStreetAbbr(query) ){
+    callback( true );
+    return;
+  }
+  
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = paramsToString({
     location: query,
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
   });
-  
   
   jQuery.ajax({
     url: url+params,
