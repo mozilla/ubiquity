@@ -207,17 +207,32 @@ function testSandboxSupportsJs17() {
   sbf.evalInSandbox("let k = 1;", s);
 }
 
-function testImportWorks() {
+function _testImport(test, jsmu) {
+  test.assert(!("jsmutils" in jsmu));
+  jsmu.Import("resource://ubiquity-modules/jsmutils.js");
+  test.assert(jsmu.jsmutils);
+  test.assert("Import" in jsmu.jsmutils);
+}
+
+function testImportWorksWithSandboxContext() {
+  var url = "resource://ubiquity-modules/jsmutils.js";
   var jsmu = {};
-  Components.utils.import("resource://ubiquity-modules/jsmutils.js", jsmu);
+  Components.utils.import(url, jsmu);
 
   this.assert(!("_sandboxContext" in jsmu));
   jsmu.setSandboxContext(new SandboxFactory({}));
   this.assert("_sandboxContext" in jsmu);
+  this.assert(!("_sandboxContext" in this));
 
-  this.assert(!("jsmutils" in jsmu));
-  jsmu.Import("resource://ubiquity-modules/jsmutils.js");
-  this.assert(jsmu.jsmutils);
+  this.assert(!(url in jsmu._sandboxContext.modules));
+  _testImport(this, jsmu);
+  this.assert(url in jsmu._sandboxContext.modules);
+}
 
-  this.assert("Import" in jsmu.jsmutils);
+function testImportWorksWithoutSandboxContext() {
+  var jsmu = {};
+  Components.utils.import("resource://ubiquity-modules/jsmutils.js", jsmu);
+
+  _testImport(this, jsmu);
+  this.assert(!("_sandboxContext" in jsmu));
 }
