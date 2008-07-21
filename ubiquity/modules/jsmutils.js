@@ -52,6 +52,7 @@ function _loadIntoContext(url, context) {
                 createInstance();
 
   request.open("GET", url, false);
+  request.overrideMimeType("text/javascript");
   request.send(null);
   // TODO: What if request failed?
   var code = request.responseText;
@@ -71,5 +72,15 @@ function exportPublicSymbols() {
 
   this["EXPORTED_SYMBOLS"] = exportedSymbols;
 }
+
+var Utils = {
+  _Application : null,
+  get Application() {
+    if (!this._Application)
+      this._Application = Components.classes["@mozilla.org/fuel/application;1"]
+                          .createInstance();
+    return this._Application;
+  }
+};
 
 exportPublicSymbols();

@@ -79,7 +79,7 @@ function setGooglePreview(searchTerm, pblock) {
           var visibleUrl = results[i].visibleUrl;
 
           html = html + "<div class=\"gresult\">" +
-                        "<a href='" + url + "'>" + title + "</a>" +
+                        "<div><a onclick=\"window.content.location.href = '" + url + "';\">" + title + "</a></div>" +
                         "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
                         "<div class=\"gresult-url\">" + visibleUrl +
                         "</div></div>";
@@ -1393,62 +1393,91 @@ function cmd_help() {
 
 
 // -----------------------------------------------------------------
-// EXTENSION-RELATED
+// EXTENSION-RELATED (ONLY ADDED IF EXTENSION IS RUNNING)
 // -----------------------------------------------------------------
 
-function cmd_del_icio_us(){
+//DEL.ICIO.US
+if(window.yAddBookMark){
+	
+	function cmd_del_icio_us(){
 
-	if(!window.yAddBookMark){
-		displayMessage("To use this command, you need to have del.icio.us extension installed");
-		return;
+		if(!window.yAddBookMark){
+			displayMessage("To use this command, you need to have del.icio.us extension installed");
+		}else{
+			window.yAddBookMark.open();
+		}
+	}
+}
+
+//FOXY.TUNES
+if(window.foxytunesDispatchPlayerCommand){
+	
+	function cmd_lyrics(){
+
+		if(!window.foxytunesGetCurrentTrackTitle){
+			humanePrompt("Lyrics for which song?", lyrics_search);
+		}else{
+			song_title = window.foxytunesGetCurrentTrackTitle();
+			lyrics_search(song_title);
+	   	}
+	}
+
+	function lyrics_search(song){
+		openUrlInBrowser("http://www.google.com/search?q=" + escape(song + " lyrics"));
+	}
+
+	function cmd_play_song(){
+		foxy_tunes_action("Play"); 
+	}
+
+	function cmd_pause_song(){
+		foxy_tunes_action("Pause"); 
+	}
+
+	function cmd_previous_song(){
+		foxy_tunes_action("Previous"); 
+	}
+
+	function cmd_next_song(){
+		foxy_tunes_action("Next"); 
+	}
+
+	function foxy_tunes_action(action){
+	
+		if(!window.foxytunesDispatchPlayerCommand){
+			displayMessage("To use this command, you need to have FoxyTunes extension installed");
+		}else{
+			window.foxytunesDispatchPlayerCommand(action, true);
+		}
+	
+	}
+
+}
+
+//STUMBLEUPON
+if(window.stumble){
+
+	function cmd_stumble(){
+		window.stumble(0);
 	}
 	
-  	window.yAddBookMark.open();
-
-}
-
-function cmd_lyrics(){
-
-	if(!window.foxytunesGetCurrentTrackTitle){
-		humanePrompt("Lyrics for which song?", lyrics_search);
-		return;
+	function cmd_stumble_thumbs_up(){
+		window.su_rate(1, 0, 0, 0);
+		displayMessage("You liked it");
 	}
 
-	song_title = window.foxytunesGetCurrentTrackTitle();
-	openUrlInBrowser("http://www.google.com/search?q=" + escape(song_title + " lyrics"));
-   
-}
-
-function lyrics_search(song){
-	
-	openUrlInBrowser("http://www.google.com/search?q=" + escape(song + " lyrics"));
-	
-}
-
-function cmd_play_song(){
-	foxy_tunes_action("Play"); 
-}
-
-function cmd_pause_song(){
-	foxy_tunes_action("Pause"); 
-}
-
-function cmd_previous_song(){
-	foxy_tunes_action("Previous"); 
-}
-
-function cmd_next_song(){
-	foxy_tunes_action("Next"); 
-}
-
-function foxy_tunes_action(action){
-	
-	if(!window.foxytunesDispatchPlayerCommand){
-		displayMessage("To use this command, you need to have FoxyTunes extension installed");
-	}else{
-		window.foxytunesDispatchPlayerCommand(action, true);
+	function cmd_stumble_thumbs_down(){
+		window.su_rate(0, 0, 0, 0);
+		displayMessage("You disliked it");
 	}
-	
+
+	function cmd_stumble_view_reviews(){
+		window.su_website_info(0,'', 0);
+	}
+
+	function cmd_stumble_toggle_toolbar(){
+		window.su_toggle_toolbar();
+	}
 }
 
 // -----------------------------------------------------------------
@@ -1495,3 +1524,4 @@ cmd_close_related_tabs.preview = function(pblock) {
 	pblock.innerHTML = html;
 
 }
+

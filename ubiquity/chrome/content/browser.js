@@ -57,32 +57,16 @@ function ubiquityTeardown()
 {
 }
 
-function detectOS(){
-  var nav = Application.activeWindow
-                       .activeTab
-                       .document
-                       .defaultView
-                       .wrappedJSObject
-                       .navigator;
-  
-  var OSName="Unknown OS";
-  if (nav.appVersion.indexOf("Win")!=-1) OSName="Windows";
-  if (nav.appVersion.indexOf("Mac")!=-1) OSName="Mac";
-  if (nav.appVersion.indexOf("X11")!=-1) OSName="UNIX";
-  if (nav.appVersion.indexOf("Linux")!=-1) OSName="Linux";
-  
-  return OSName;
-}
-
 function ubiquityKeydown(aEvent)
 {
   // Key to invoke ubiquity is ctrl+space on Window, and alt+space on
   // Mac, and everything else.
-  // TODO: Is this the best behavior for Linux?
-  if( detectOS() == "Windows" ) var modifierKey = aEvent.ctrlKey;
-  else var modifierKey = aEvent.altKey;
-  
-  if (aEvent.keyCode == 32 && modifierKey) {
+
+  // TODO: Fix the code below, because we actually accept ctrl+space
+  // *and* alt+space, which can be confusing, esp. it works but is
+  // buggy on mac.
+
+  if (aEvent.keyCode == 32 && (aEvent.ctrlKey || aEvent.altKey)) {
     gUbiquity.openWindow();
     aEvent.stopPropagation();
   }
