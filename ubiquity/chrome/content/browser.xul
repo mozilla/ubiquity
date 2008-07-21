@@ -5,6 +5,8 @@
          xmlns:svg="http://www.w3.org/2000/svg">
   
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/date.js"/>
+  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/nountypes.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/verbtypes.js"/>
