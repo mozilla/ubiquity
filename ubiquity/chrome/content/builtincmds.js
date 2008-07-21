@@ -100,7 +100,7 @@ function setGooglePreview(searchTerm, pblock) {
           var visibleUrl = results[i].visibleUrl;
 
           html = html + "<div class=\"gresult\">" +
-                        "<a href='" + url + "'>" + title + "</a>" +
+                        "<div><a onclick=\"window.content.location.href = '" + url + "';\">" + title + "</a></div>" +
                         "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
                         "<div class=\"gresult-url\">" + visibleUrl +
                         "</div></div>";
