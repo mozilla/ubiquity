@@ -1,7 +1,7 @@
-function QuerySource(verbList, nounList) {
+function NLParser(verbList, nounList) {
   this._init(verbList, nounList);
 }
-QuerySource.prototype = {
+NLParser.prototype = {
   _init: function(verbList, nounList) {
     this._verbList = verbList; //arrayof Verb objects to use for completions
     this._nounTypeList = nounList;
@@ -48,7 +48,8 @@ QuerySource.prototype = {
   },
 
   getSuggestionsAsHtml : function() {
-    return [ this._suggestionList[x].getDisplayText() for ( x in this._suggestionList ) ];
+    return [ this._suggestionList[x].getDisplayText()
+	     for ( x in this._suggestionList ) ];
   },
 
   getDescriptionText: function() {
