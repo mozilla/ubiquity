@@ -1,5 +1,15 @@
 var gUbiquity = null;
 
+// The space character
+var UBIQUITY_KEYCODE = 32;
+
+// If we're running in the development harness, don't use
+// the normal keycode, b/c the normal keycode won't propagate
+// down to the current tab.
+if (window.location != "chrome://browser/content/browser.xul")
+  // The character 'd'
+  UBIQUITY_KEYCODE = 68;
+
 function ubiquitySetup()
 {
   var msgService = new CompositeMessageService();
@@ -66,12 +76,13 @@ function ubiquityKeydown(aEvent)
   // *and* alt+space, which can be confusing, esp. it works but is
   // buggy on mac.
 
-  if (aEvent.keyCode == 32 && (aEvent.ctrlKey || aEvent.altKey)) {
+  if (aEvent.keyCode == UBIQUITY_KEYCODE &&
+      (aEvent.ctrlKey || aEvent.altKey)) {
     gUbiquity.openWindow();
-    aEvent.stopPropagation();
+    aEvent.preventDefault();
   }
 }
 
 window.addEventListener("load", ubiquitySetup, false);
 window.addEventListener("unload", ubiquityTeardown, false);
-window.addEventListener("keydown", ubiquityKeydown, false);
+window.addEventListener("keydown", ubiquityKeydown, true);
