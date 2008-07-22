@@ -2,8 +2,8 @@ function NLParser(verbList, nounList) {
   this._init(verbList, nounList);
 }
 NLParser.prototype = {
-  _init: function(verbList, nounList) {
-    this._verbList = verbList; //arrayof Verb objects to use for completions
+  _init: function(commandList, nounList) {
+    this._verbList = [ new Verb( commandList[x] ) for (x in commandList) ];
     this._nounTypeList = nounList;
     this._lockedInSentence = null;
     this._hilitedSuggestion = 0;
