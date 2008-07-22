@@ -35,6 +35,60 @@ NounType.prototype = {
   }
 };
 
+function getGmailContacts( callback ) {
+  var url = "http://mail.google.com/mail/contacts/data/export";
+  var params = paramsToString({
+    exportType: "ALL",
+    out: "CSV"
+  });
+
+  ajaxGet(url + params , function(data) {
+    data = data.split("\n");
+
+    var contacts = {};
+    for each( var line in data ) {
+      var splitLine = line.split(",");
+
+      var name = splitLine[0];
+      var email = splitLine[1];
+
+      contacts[name] = email;
+    }
+
+    callback(contacts);
+  });
+}
+
+var PersonNounType = {
+  _name: "contact",
+  contactList: null,
+  callback:function(contacts) {
+    PersonNounType.contactList = contacts;
+  },
+  match:function( fragment ) {
+    if (PersonNounType.contactList == null) {
+      getGmailContacts( PersonNounType.callback);
+      return false;
+    }
+    for ( var c in PersonNounType.contactList ) {
+      if (c.match(fragment, "i"))
+	    return true;
+    }
+    return false;
+  },
+  suggest: function( fragment ) {
+    if (PersonNounType.contactList == null) {
+      getGmailContacts( PersonNounType.callback);
+      return false;
+    }
+    for ( var c in PersonNounType.contactList ) {
+      if (c.match(fragment, "i"))
+	    return PersonNounType.contactList[c];
+    }
+    return [];
+  },
+}
+
 var arbText = {
   // a singleton object which can be used in place of a NounType.
  _name: "text",
@@ -96,7 +150,7 @@ function isAddress( query, callback ) {
         return joinedText.indexOf( text.toLowerCase() ) != -1;
       }
 
-      missCount = 0;
+      var missCount = 0;
 
       var queryWords = query.match(/\w+/g);
       for( var i=0; i < queryWords.length; i++ ){
@@ -119,6 +173,7 @@ function isAddress( query, callback ) {
 
 // TODO this is a really crappy implementation for async address detection
 var AddressNounType = {
+  _name: "address",
   knownAddresses: [],
   maybeAddress: null,
   callback: function( isAnAddress ) {
