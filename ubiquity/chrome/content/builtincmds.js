@@ -668,10 +668,6 @@ function cmd_test() {
   displayMessage( generator );
 }
 
-function pageLoad_inject_xss(){
-  getWindowInsecure().ajaxGet = ajaxGet;
-}
-
 function insertMap( query ) {
   var apiKey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
 
