@@ -656,6 +656,14 @@ function cmd_get_email_address() {
 // MISC COMMANDS
 // -----------------------------------------------------------------
 
+function cmd_view_source() {
+  var url = getWindowInsecure().location;
+  url = "view-source:" + url;
+  getWindowInsecure().location = url;
+}
+
+
+
 function cmd_test() {
   var generator = Components
                     .classes["@mozilla.org/xpath-generator;1"]
@@ -972,6 +980,13 @@ function cmd_get_sel() {
   }
 
   insertText(context.focusedElement, "hello");
+}
+
+function cmd_convert_page_to_pdf() {
+  var url = "http://www.htm2pdf.co.uk/?url=";
+  url += escape( getWindowInsecure().location );
+  
+  openUrlInBrowser(url);
 }
 
 // -----------------------------------------------------------------
