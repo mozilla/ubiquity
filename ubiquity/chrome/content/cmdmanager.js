@@ -139,7 +139,7 @@ CommandSource.prototype = {
       if (cmdFunc.preview)
         cmd.preview = function(context, directObject, modifiers, previewBlock) {
           sandbox.context = context;
-          return cmdFunc.preview(previewBlock);
+          return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
 
       if (cmdFunc.DOName)

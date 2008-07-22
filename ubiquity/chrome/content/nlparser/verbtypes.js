@@ -45,13 +45,18 @@ ParsedSentence.prototype = {
     return sentence;
   },
 
+// to become obsolete: use preview instead.
   getDescription: function() {
     // returns a string describing what the sentence will do if executed
     return this._verb.getDescription( this._DO, this._modifiers );
   },
 
-  execute: function() {
-    return this._verb.execute( this._DO, this._modifiers );
+  execute: function(context) {
+    return this._verb.execute( context, this._DO, this._modifiers );
+  },
+
+  preview: function(context, previewBlock) {
+    return this._verb.preview( context, this._DO, this._modifiers, previewBlock );
   }
 
 };
@@ -73,8 +78,12 @@ Verb.prototype = {
     // example:  { "from" : City, "to" : City, "on" : Day }
   },
 
-  execute: function( directObject, modifiers ) {
-    return this._cmd.execute( directObject, modifiers );
+  execute: function( context, directObject, modifiers ) {
+    return this._cmd.execute( context, directObject, modifiers );
+  },
+
+  preview: function( context, directObject, modifiers, previewBlock ) {
+    return this._cmd.preview( context, directObject, modifiers, previewBlock );
   },
 
   getDescription: function( directObject, prepositionPhrases ) {
