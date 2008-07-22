@@ -6,9 +6,11 @@
   <base href="chrome://ubiquity/content"/>
   <link rel="stylesheet" type="text/css" media="all"
         href="test.css" />
+  <script type="text/javascript" src="prefkeys.js"></script>
+  <script type="text/javascript" src="jquery-1.2.3.min.js"></script>
   <title>About Ubiquity</title>
 </head>
-<body>
+<body onload="PrefKeys.onLoad()">
 <h1>Welcome to Ubiquity!</h1>
 <p>Here's some things you can do:</p>
 <ul>
@@ -27,6 +29,14 @@
   <li>Use the <a href="chrome://ubiquity/content/harness.xul">development
   harness</a> to develop the actual Ubiquity command entry user interface
   and other aspects of Ubiquity without having to restart Firefox.</li>
+  
+  <li>
+    Change your hotkey. Your current hotkey is &nbsp
+    <input id="keyInputBox" type="text" size="27"
+           onkeydown="PrefKeys.onKeyChange(event)" 
+           onfocus="this.value = 'Press your combination'"/>
+    <p id="keyNotify"></p>
+  </li>
 </ul>
 </body>
 <script type="text/javascript" src=""></script>

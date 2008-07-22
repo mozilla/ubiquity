@@ -59,19 +59,37 @@ function ubiquityTeardown()
 
 function ubiquityKeydown(aEvent)
 {
-  // Key to invoke ubiquity is ctrl+space on Window, and alt+space on
-  // Mac, and everything else.
+  
+  const KEYCODE_PREF ="extensions.ubiquity.keycode";
+  const KEYMODIFIER_PREF = "extensions.ubiquity.keymodifier";
+  var UBIQUITY_KEYMODIFIER = null;
+  var UBIQUITY_KEYCODE = null;  
 
-  // TODO: Fix the code below, because we actually accept ctrl+space
-  // *and* alt+space, which can be confusing, esp. it works but is
-  // buggy on mac.
-
-  if (aEvent.keyCode == 32 && (aEvent.ctrlKey || aEvent.altKey)) {
-    gUbiquity.openWindow();
-    aEvent.stopPropagation();
+  // If we're running in the development harness, don't use
+  // the normal keycode, b/c the normal keycode won't propagate
+  // down to the current tab.
+  if (window.location != "chrome://browser/content/browser.xul"){
+    // The character 'd'
+    UBIQUITY_KEYCODE = 68;
+    UBIQUITY_KEYMODIFIER = "ALT";
+  }else{
+    UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32); //The space character
+    UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF, "ALT");
+  }
+  
+  // Default key to invoke ubiquity is alt+space on all platforms
+  // You can change key in about:ubiquity
+  if (aEvent.keyCode == UBIQUITY_KEYCODE) {
+    if((UBIQUITY_KEYMODIFIER == "SHIFT" && aEvent.shiftKey)
+        || (UBIQUITY_KEYMODIFIER == "CTRL" && aEvent.ctrlKey)
+        || (UBIQUITY_KEYMODIFIER == "ALT" && aEvent.altKey) 
+        || (UBIQUITY_KEYMODIFIER == "META" && aEvent.metaKey)){
+    	    gUbiquity.openWindow();
+    	    aEvent.stopPropagation();
+    }
   }
 }
 
 window.addEventListener("load", ubiquitySetup, false);
 window.addEventListener("unload", ubiquityTeardown, false);
-window.addEventListener("keydown", ubiquityKeydown, false);
+window.addEventListener("keydown", ubiquityKeydown, true);
