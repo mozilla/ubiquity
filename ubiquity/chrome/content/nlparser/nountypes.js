@@ -62,13 +62,91 @@ var DateNounType = {
   }
 };
 
-// TODO replace this with Aza's goodies
-var AddressNounType = {
-  match: function( fragment ) {
+function isAddress( query, callback ) {
+  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
+  var params = paramsToString({
+    location: query,
+    appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
+  });
 
+
+  jQuery.ajax({
+    url: url+params,
+    dataType: "xml",
+    error: function() {
+      callback( false );
+    },
+    success:function(data) {
+      var results = jQuery(data).find("Result");
+      var allText = jQuery.makeArray(
+                      jQuery(data)
+                        .find(":contains()")
+                        .map( function(){ return jQuery(this).text().toLowerCase() } )
+                      );
+
+      // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
+
+      if( results.length == 0 ){
+        callback( false );
+        return;
+      }
+
+      function existsMatch( text ){
+        var joinedText = allText.join(" ");
+        return joinedText.indexOf( text.toLowerCase() ) != -1;
+      }
+
+      missCount = 0;
+
+      var queryWords = query.match(/\w+/g);
+      for( var i=0; i < queryWords.length; i++ ){
+        if( existsMatch( queryWords[i] ) == false ) {
+          missCount += 1;
+          //displayMessage( queryWords[i] );
+        }
+      }
+
+      var missRatio = missCount / queryWords.length;
+      //displayMessage( missRatio );
+
+      if( missRatio < .5 )
+        callback( true );
+      else
+        callback( false );
+    }
+  });
+}
+
+// TODO this is a really crappy implementation for async address detection
+var AddressNounType = {
+  knownAddresses: [],
+  maybeAddress: null,
+  callback: function( isAnAddress ) {
+    if (isAnAddress) {
+      AddressNounType.knownAddresses.push( AddressNounType.maybeAddress );
+    }
+    AddressNounType.maybeAddress = null;
+  },
+  match: function( fragment ) {
+    for( x in knownAddresses) {
+      if (knownAddresses[x] == fragment) {
+	return true;
+      }
+    }
+    AddressNounType.maybeAddress = fragment;
+    isAddress( fragment, AddressNounType.callback );
+    return false;
   },
   suggest: function( fragment ) {
-
+    isAddress( fragment, AddressNounType.callback );
+    for( x in knownAddresses) {
+      if (knownAddresses[x] == fragment) {
+	return [ fragment ];
+      }
+    }
+    AddressNounType.maybeAddress = fragment;
+    isAddress( fragment, AddressNounType.callback );
+    return [];
   }
 };
 
