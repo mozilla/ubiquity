@@ -1,16 +1,80 @@
-function Verb( name, DOLabel, DOType, modifiers ) {
-  this._init( name, DOLabel, DOType, modifiers );
+function ParsedSentence( verb, DO, modifiers ) {
+  this._init( verb, DO, modifiers );
+}
+ParsedSentence.prototype = {
+  _init: function( verb, DO, modifiers ) {
+    /* modifiers is dictionary of preposition: noun */
+    this._verb = verb;
+    this._DO = DO;
+    this._modifiers = modifiers;
+  },
+
+  getCompletionText: function() {
+    // return plain text that we should set the input box to if user hits
+    // space bar on this sentence.
+    var sentence = this._verb._name;
+    if ( this._DO ) {
+      sentence = sentence + " " + this._DO;
+    }
+    for ( var x in this._modifiers ) {
+      if ( this._modifiers[x] ) {
+	sentence = sentence + " " + x + " " + this._modifiers[x];
+      }
+    }
+    return sentence;
+  },
+
+  getDisplayText: function() {
+    // returns html formatted sentence for display in suggestion list
+    var sentence = this._verb._name;
+    if ( this._verb._DOType ) {
+      if ( this._DO ) {
+	sentence = sentence + " " + this._DO;
+      } else {
+	sentence = sentence + " <span class=\"needarg\">(" + this._verb._DOLabel + ")</span>";
+      }
+    }
+
+    for ( var x in this._verb._modifiers ) {  // was this._verb._modifiers
+      if ( this._modifiers[ x ] ) {
+	sentence = sentence + " <b>" +  x + " " + this._modifiers[x] + "</b>";
+      } else {
+	sentence = sentence + " <span class=\"needarg\">(" + x + " " + this._verb._modifiers[x]._name + ")</span>";
+      }
+    }
+    return sentence;
+  },
+
+  getDescription: function() {
+    // returns a string describing what the sentence will do if executed
+    return this._verb.getDescription( this._DO, this._modifiers );
+  },
+
+  execute: function() {
+    return this._verb.execute( this._DO, this._modifiers );
+  }
+
+};
+
+
+function Verb( cmdFunction ) {
+  this._init( cmdFunction );
 }
 Verb.prototype = {
-  _init: function( name, DOLabel, DOType, modifiers ) {
-    this._name = name;
-    this._DOLabel = DOLabel;
-    this._DOType = DOType; // must be a NounType.
-    this._modifiers = modifiers;
+  _init: function( cmdFunction ) {
+    this._cmdFunction = cmdFunction;
+    this._name = cmdFunction.name;
+    this._DOLabel = cmdFunction.DOLabel;
+    this._DOType = cmdFunction.DOType; // must be a NounType.
+    this._modifiers = cmdFunction.modifiers;
     // modifiers should be a dictionary
     // keys are prepositions
     // values are NounTypes.
     // example:  { "from" : City, "to" : City, "on" : Day }
+  },
+
+  execute: function( directObject, modifiers ) {
+    return this._cmdFunction( directObject, modifiers );
   },
 
   getDescription: function( directObject, prepositionPhrases ) {
