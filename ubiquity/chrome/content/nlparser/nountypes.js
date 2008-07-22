@@ -244,10 +244,6 @@ var languageNounType = new NounType( "language",
 				       "de", "el", "hi", "it", "ja", "ko", "no", "pl", "pt-PT",
 				       "ro", "ru", "es", "sv"] );
 
-// TODO Replace this with gmail contact list or something
-var personNounType = new NounType( "person", ["atul@mozilla.com",
-					      "aza@mozilla.com",  "thunder@mozilla.com",
-					      "chris@mozilla.com", "myk@mozilla.com" ] );
 
 const NOUN_LIST = [AddressNounType,
 		                 languageNounType,
