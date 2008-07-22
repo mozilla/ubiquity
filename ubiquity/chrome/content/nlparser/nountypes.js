@@ -35,7 +35,7 @@ NounType.prototype = {
   }
 };
 
-var anyWord = {
+var arbText = {
   // a singleton object which can be used in place of a NounType.
  _name: "text",
  match: function( fragment ) {
@@ -62,11 +62,63 @@ var DateNounType = {
   }
 };
 
+// TODO replace this with Aza's goodies
 var AddressNounType = {
   match: function( fragment ) {
 
   },
   suggest: function( fragment ) {
-    
+
   }
 };
+
+// TODO replace this with ???
+var MathNounType = {
+  match: function( fragment ) {
+
+  },
+  suggest: function( fragment ) {
+
+  }
+};
+
+var Languages = {
+  'ARABIC' : 'ar',
+  'CHINESE' : 'zh',
+  'CHINESE_TRADITIONAL' : 'zh-TW',
+  'DANISH' : 'da',
+  'DUTCH': 'nl',
+  'ENGLISH' : 'en',
+  'FINNISH' : 'fi',
+  'FRENCH' : 'fr',
+  'GERMAN' : 'de',
+  'GREEK' : 'el',
+  'HINDI' : 'hi',
+  'ITALIAN' : 'it',
+  'JAPANESE' : 'ja',
+  'KOREAN' : 'ko',
+  'NORWEGIAN' : 'no',
+  'POLISH' : 'pl',
+  'PORTUGUESE' : 'pt-PT',
+  'ROMANIAN' : 'ro',
+  'RUSSIAN' : 'ru',
+  'SPANISH' : 'es',
+  'SWEDISH' : 'sv'
+};
+var languageNounType = new NounType( "language",
+				     [ "ar", "zh", "zh-TW", "da",
+				     "nl", "en", "fi", "fr",
+				       "de", "el", "hi", "it", "ja", "ko", "no", "pl", "pt-PT",
+				       "ro", "ru", "es", "sv"] );
+
+// TODO Replace this with gmail contact list or something
+var personNounType = new NounType( "person", ["atul@mozilla.com",
+					      "aza@mozilla.com",  "thunder@mozilla.com",
+					      "chris@mozilla.com", "myk@mozilla.com" ] );
+
+const NOUN_LIST = [AddressNounType,
+		                 languageNounType,
+				 personNounType,
+				 MathNounType,
+				 DateNounType,
+				 arbText];
