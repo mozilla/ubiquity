@@ -4,7 +4,7 @@
 <script type="application/javascript;version=1.7" src="harness.js"/>
 <body xmlns="http://www.w3.org/1999/xhtml">
   <p>This is a harness for developing Ubiquity's command-entry
-  mode. Press <b>Ctrl-D</b> or <b>Alt-D</b> to activate it. Once
+  mode. Press <b>Alt-D</b> to activate it. Once
   you've made changes, you can reload this page and press the key
   combination again to see your changes take effect immediately.</p>
   <p>You can also use <a href="http://getfirebug.com/">Firebug</a> to
