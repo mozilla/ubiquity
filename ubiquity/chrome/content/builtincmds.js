@@ -5,13 +5,13 @@ function detectOS(){
                        .defaultView
                        .wrappedJSObject
                        .navigator;
-  
+
   var OSName="Unknown OS";
   if (nav.appVersion.indexOf("Win")!=-1) OSName="Windows";
   if (nav.appVersion.indexOf("Mac")!=-1) OSName="Mac";
   if (nav.appVersion.indexOf("X11")!=-1) OSName="UNIX";
   if (nav.appVersion.indexOf("Linux")!=-1) OSName="Linux";
-  
+
   displayMessage( OSName );
 }
 
@@ -40,13 +40,13 @@ function makeSearchCommand(name, urlTemplate, icon) {
     if (sel) {
       if (name == "Google") {
         setGooglePreview(sel, pblock);
-        pblock.innerHTML = ("Getting google results for <b>" + 
+        pblock.innerHTML = ("Getting google results for <b>" +
                            escape(sel) + "</b>...");
       }
       else if (name == "Google Maps") {
         setMapPreview(sel, pblock);
-        pblock.innerHTML = ("Getting map for <b>" + 
-                           escape(sel) + "</b>...");        
+        pblock.innerHTML = ("Getting map for <b>" +
+                           escape(sel) + "</b>...");
       }
       else {
         content = ("Performs a " + name + " search for <b>" +
@@ -127,7 +127,7 @@ function setMapPreview(searchTerm, pblock) {
   var doc = context.focusedWindow.document;
   var url = "http://maps.google.com/maps/geo";
   var apikey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
-  var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);   
+  var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);
 
   var req = new XMLHttpRequest();
   req.open('GET', url + "?" + params, true);
@@ -136,7 +136,7 @@ function setMapPreview(searchTerm, pblock) {
     if (req.readyState == 4 && req.status == 200) {
       var jobj = eval( '(' + req.responseText + ')' );
       var numToDisplay = 3;
-        
+
       if (!jobj.Placemark) {
         displayMessage("not specific enough");
         return;
@@ -151,23 +151,23 @@ function setMapPreview(searchTerm, pblock) {
         if (jobj.Placemark[i]) {
           var address = jobj.Placemark[i].address;
           var lng = jobj.Placemark[i].Point.coordinates[0];
-          var lat = jobj.Placemark[i].Point.coordinates[1]; 
-        
-          html = html + "<div class=\"gaddress\">" + 
-                        "<a href=\"#\" onclick=\"loadMap(" + lat + ", " + lng + ");\">" + 
+          var lat = jobj.Placemark[i].Point.coordinates[1];
+
+          html = html + "<div class=\"gaddress\">" +
+                        "<a href=\"#\" onclick=\"loadMap(" + lat + ", " + lng + ");\">" +
                         address + "</a></div>";
         }
       }
-      html = html + "</div>" + 
-                    "<div id=\"map\">[map]</div>"; 
-                    
+      html = html + "</div>" +
+                    "<div id=\"map\">[map]</div>";
+
       // For now, just displaying the address listings and the map
-      pblock.innerHTML = html;   
-      
+      pblock.innerHTML = html;
+
       // This call to load map doesn't have access to the google api script which is currently included in the popup in browser.xul
       // Possibly insert a script tag here instead- doesn't seem to be working either: doesn't actually LOAD (ie: onload event never fires)
       loadMap(lat0, lng0);
-      
+
     }
   };
   req.send(null);
@@ -287,8 +287,8 @@ function cmd_link_to_wikipedia() {
 
 function cmd_escape_html_entities() {
   var text = getTextSelection();
-  text = text.replace(/</g, "&amp;lt;");  
-  text = text.replace(/>/g, "&amp;gt;");  
+  text = text.replace(/</g, "&amp;lt;");
+  text = text.replace(/>/g, "&amp;gt;");
   setTextSelection( text );
 }
 
@@ -305,12 +305,12 @@ cmd_word_count.preview = function(pblock) {
 function wordCount(text){
 	var words = text.split(" ");
 	var wordCount = 0;
-	
+
 	for(i=0; i<words.length; i++){
 		if (words[i].length > 0)
 			wordCount++;
 	}
-	
+
 	return wordCount;
 }
 
@@ -363,36 +363,36 @@ function isAddress( query, callback ) {
     location: query,
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
   });
-  
-  
+
+
   jQuery.ajax({
     url: url+params,
     dataType: "xml",
     error: function() {
       callback( false );
     },
-    success:function(data) {      
+    success:function(data) {
       var results = jQuery(data).find("Result");
       var allText = jQuery.makeArray(
                       jQuery(data)
                         .find(":contains()")
                         .map( function(){ return jQuery(this).text().toLowerCase() } )
                       );
-                      
+
       // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
 
       if( results.length == 0 ){
         callback( false );
-        return;        
+        return;
       }
-            
+
       function existsMatch( text ){
         var joinedText = allText.join(" ");
         return joinedText.indexOf( text.toLowerCase() ) != -1;
       }
-      
+
       missCount = 0;
-      
+
       var queryWords = query.match(/\w+/g);
       for( var i=0; i < queryWords.length; i++ ){
         if( existsMatch( queryWords[i] ) == false ) {
@@ -400,10 +400,10 @@ function isAddress( query, callback ) {
           //displayMessage( queryWords[i] );
         }
       }
-      
+
       var missRatio = missCount / queryWords.length;
       //displayMessage( missRatio );
-      
+
       if( missRatio < .5 )
         callback( true );
       else
@@ -664,8 +664,8 @@ function cmd_get_email_address() {
 function cmd_test() {
   var generator = Components
                     .classes["@mozilla.org/xpath-generator;1"]
-                    .createInstance(Components.interfaces.nsIXPathGenerator);  
-  displayMessage( generator );                  
+                    .createInstance(Components.interfaces.nsIXPathGenerator);
+  displayMessage( generator );
 }
 
 function pageLoad_inject_xss(){
@@ -1049,7 +1049,7 @@ function cloudPageLoadHandler( ) {
 // LANGUAGE/TRANSLATE RELATED
 // -----------------------------------------------------------------
 
-function translateTo( lang, callback ) {  
+function translateTo( lang, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
   var params = paramsToString({
     v: "1.0",
@@ -1105,7 +1105,7 @@ function generateTranslatePreviewFunction( langCode, langName ) {
       pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
     })
   }
-  
+
 }
 
 for( lang in Languages ){
@@ -1113,7 +1113,7 @@ for( lang in Languages ){
   var langName = lang.toLowerCase();
 
   this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode );
-  this["cmd_translate_to_" + langName].preview = generateTranslatePreviewFunction( langCode, langName );  
+  this["cmd_translate_to_" + langName].preview = generateTranslatePreviewFunction( langCode, langName );
 }
 
 function cmd_translate_to_fake_swedish() {
@@ -1124,177 +1124,6 @@ function cmd_translate_to_fake_swedish() {
     setTextSelection(data);
   });
 }
-
-
-// -----------------------------------------------------------------
-// MICROFORMAT RELATED
-// -----------------------------------------------------------------
-
-
-function getMF( type ) {
-  Components.utils.import("resource://gre/modules/Microformats.js");
-
-  var count = Microformats.count( type , getDocumentInsecure(), {recurseExternalFrames: true});
-  if( count > 0 ) {
-    return Microformats.get( type , getDocumentInsecure(), {recurseExternalFrames: true});
-  }
-  return null;
-}
-
-function cmd_detect_microformat() {
-  if( !globals.addresses )
-    globals.addresses = [];
-
-  var uf = getMF( "adr" );
-  if( uf ) {
-    displayMessage( "Found address: " + uf );
-    globals.addresses.push( uf[0] );
-  }
-}
-
-// If Google Maps is open, go to the last harvested address
-// microformat.
-function cmd_populate_with_microformat() {
-  //displayMessage( globals.addresses.length )
-  if( globals.addresses.length == 0 ) return;
-
-  var last = globals.addresses.length - 1;
-  var addr = globals.addresses[last].toString();
-  var url = getWindowInsecure().location.href;
-
-  if( url == "http://maps.google.com/" ){
-    getDocumentInsecure().getElementById("q_d").value = addr;
-
-    setTimeout( function(){
-      getDocumentInsecure().getElementById("q_sub").click();
-    }, 50 );
-  }
-}
-
-function pageLoad_installMicroformatHarvesters() {
-  cmd_detect_microformat();
-  cmd_populate_with_microformat();
-}
-
-// -----------------------------------------------------------------
-// SNAPSHOT RELATED
-// -----------------------------------------------------------------
-
-function getHiddenWindow() {
-  return Components.classes["@mozilla.org/appshell/appShellService;1"]
-                   .getService(Components.interfaces.nsIAppShellService)
-                   .hiddenDOMWindow;
-}
-
-function takeSnapshotOfWindow( window, scrollDict ) {
-  if( !scrollDict ) scrollDict = {};
-  var top = scrollDict.top || 0.001;
-  var left = scrollDict.left || 0.001;
-
-  var hiddenWindow = getHiddenWindow();
-  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
-
-  var body = window.document.body;
-
-  var width = jQuery(body).width();
-  var height = window.innerHeight+110;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  var ctx = canvas.getContext( "2d" );
-  ctx.drawWindow( window, left, top, width, height, "rgb(255,255,255)" );
-  return canvas.toDataURL();
-}
-
-function cmd_inject_snapshot() {
-  var win = getWindowInsecure();
-  win.snapshot = takeSnapshotOfWindow;
-}
-
-function pageLoad_inject_snapshot(){
-  getWindowInsecure().snapshot = takeSnapshotOfWindow;
-}
-
-// -----------------------------------------------------------------
-// ZOOM RELATED
-// -----------------------------------------------------------------
-
-
-function setFullPageZoom( level ) {
-  var navigator1 = window
-                    .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                    .getInterface(Components.interfaces.nsIWebNavigation);
-  var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
-  var docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
-  docviewer.fullZoom = level;
-}
-
-function iframeFullPageZoom( iframe, level ) {
-  var navigator1 = iframe.contentWindow
-                    .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                    .getInterface(Components.interfaces.nsIWebNavigation);
-  var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
-  var docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
-  docviewer.fullZoom = level;
-}
-
-function cmd_scale_firefox_down() {
-  setFullPageZoom( .91 );
-}
-
-function cmd_zoom() {
-  var win = getWindowInsecure();
-  var document = getDocumentInsecure();
-
-  var $ = jQuery;
-
-  var dataUrl = takeSnapshotOfWindow( win, {top:win.scrollY} );
-
-  var div = document.createElement( "div" );
-  $(div).css({
-    position:"fixed",
-    top:0,
-    left: 0,
-    backgroundColor: "#222",
-    width: "100%",
-    height: "100%",
-    zIndex: 10000000
-  });
-
-  var w = jQuery(document.body).width();
-  var h = window.innerHeight;
-
-  var img = document.createElement("img");
-  img.src = dataUrl;
-  img.id = "theImage";
-
-  $(img).css({
-    position:"fixed",
-    top: 0,
-    left: 0,
-    zIndex: 10000001
-  });
-
-  $(document.body).append( img ).append(div);
-  $(document.body).css({overflow:"hidden"});
-
-  // This is a hack which fixes an intermittent bug where the top wasn't
-  // being set correctly before animating.
-  $(img).animate({top:0, width:w, height: h}, 1);
-
-  $(img).animate({top:100, left:w/2, width:w*.1, height: h*.1}, 500);
-  $(img).click( function(){
-    $(img).animate({top:0, left:0, width:w, height: h}, 500);
-    setTimeout( function(){
-      $(div).remove();
-      $(img).remove();
-      $(document.body).css({overflow:"auto"});
-    },500);
-
-  });
-}
-
 
 // -----------------------------------------------------------------
 // SYSTEM
@@ -1390,7 +1219,7 @@ function cmd_help() {
 
 //DEL.ICIO.US
 if(window.yAddBookMark){
-	
+
 	function cmd_del_icio_us(){
 
 		if(!window.yAddBookMark){
@@ -1403,7 +1232,7 @@ if(window.yAddBookMark){
 
 //FOXY.TUNES
 if(window.foxytunesDispatchPlayerCommand){
-	
+
 	function cmd_lyrics(){
 
 		if(!window.foxytunesGetCurrentTrackTitle){
@@ -1419,29 +1248,29 @@ if(window.foxytunesDispatchPlayerCommand){
 	}
 
 	function cmd_play_song(){
-		foxy_tunes_action("Play"); 
+		foxy_tunes_action("Play");
 	}
 
 	function cmd_pause_song(){
-		foxy_tunes_action("Pause"); 
+		foxy_tunes_action("Pause");
 	}
 
 	function cmd_previous_song(){
-		foxy_tunes_action("Previous"); 
+		foxy_tunes_action("Previous");
 	}
 
 	function cmd_next_song(){
-		foxy_tunes_action("Next"); 
+		foxy_tunes_action("Next");
 	}
 
 	function foxy_tunes_action(action){
-	
+
 		if(!window.foxytunesDispatchPlayerCommand){
 			displayMessage("To use this command, you need to have FoxyTunes extension installed");
 		}else{
 			window.foxytunesDispatchPlayerCommand(action, true);
 		}
-	
+
 	}
 
 }
@@ -1452,7 +1281,7 @@ if(window.stumble){
 	function cmd_stumble(){
 		window.stumble(0);
 	}
-	
+
 	function cmd_stumble_thumbs_up(){
 		window.su_rate(1, 0, 0, 0);
 		displayMessage("You liked it");
@@ -1477,25 +1306,25 @@ if(window.stumble){
 // -----------------------------------------------------------------
 
 function cmd_close_related_tabs(){
-	
+
 	var relatedWord = getTextSelection().toLowerCase();
-    
+
 	Application.activeWindow.tabs.forEach(function(tab){
 		if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord))
 			tab.close();
 	});
-	
+
 }
 
 cmd_close_related_tabs.preview = function(pblock) {
-	
+
 	var relatedWord = getTextSelection().toLowerCase();
-	
+
 	if(relatedWord.length != 0){
-		
+
 	  	var html = "Closes the following tabs that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
 		var numTabs = 0;
-	
+
 		Application.activeWindow.tabs.forEach(function(tab){
 			if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
 				html += "<li>" + tab.document.title + "</li>";
@@ -1508,11 +1337,11 @@ cmd_close_related_tabs.preview = function(pblock) {
 		}else{
 			html += "</ul>";
 		}
-		
+
 	}else{
 		html = "No text selected";
 	}
-	
+
 	pblock.innerHTML = html;
 
 }
