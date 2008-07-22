@@ -83,7 +83,13 @@ Verb.prototype = {
   },
 
   preview: function( context, directObject, modifiers, previewBlock ) {
-    return this._cmd.preview( context, directObject, modifiers, previewBlock );
+    if (this._cmd.preview)
+      return this._cmd.preview( context, directObject, modifiers, previewBlock );
+    else {
+      // Command exists, but has no preview; provide a default one.
+      var content = "Executes the <b>" + this._cmd.name + "</b> command.";
+      previewBlock.innerHTML = content;
+    }
   },
 
   getDescription: function( directObject, prepositionPhrases ) {

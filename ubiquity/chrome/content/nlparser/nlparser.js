@@ -4,7 +4,7 @@ function NLParser(verbList) {
 }
 NLParser.prototype = {
   _init: function(commandList, nounList) {
-    this._verbList = [ new Verb( commandList[x] ) for (x in commandList) ];
+    this.setCommandList( commandList );
     this._nounTypeList = nounList;
     this._lockedInSentence = null;
     this._hilitedSuggestion = 0;
@@ -101,5 +101,17 @@ NLParser.prototype = {
     this._suggestionList = [];
     this._hilitedSuggestion = 0;
     this._lockedInSentence = null;
+  },
+
+  getHilitedSentence: function() {
+    if (this._suggestionList.length == 0) {
+      return null;
+    }
+    var hilited = this.getHilitedSuggestion();
+    return this._suggestionList[hilited];
+  },
+
+  setCommandList: function( commandList ) {
+    this._verbList = [ new Verb( commandList[x] ) for (x in commandList) ];
   }
 };

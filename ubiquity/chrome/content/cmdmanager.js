@@ -7,6 +7,7 @@ function CommandManager(cmdSource, msgService) {
 CommandManager.prototype = {
   refresh : function() {
     this.__cmdSource.refresh();
+    this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
   },
 
   __getSuggestionContent : function(cmdName) {
@@ -32,28 +33,25 @@ CommandManager.prototype = {
 
   preview : function(cmdName, context, previewBlock) {
     var wasPreviewShown = false;
-
-    var cmd = this.__cmdSource.getCommand(cmdName);
-    if (cmd && cmd.preview) {
+    this.__nlParser.updateSuggestionList(cmdName);
+    var parsedSentence = this.__nlParser.getHilitedSentence();
+    if (parsedSentence)
+    {
       try {
-        cmd.preview(context, previewBlock);
+        parsedSentence.preview(context, previewBlock);
         wasPreviewShown = true;
       } catch (e) {
         this.__msgService.displayMessage(
           {text: ("An exception occurred while previewing the command '" +
-                  cmd.name + "'."),
+                  cmdName + "'."),
            exception: e}
           );
       }
     } else {
+      // No match for the input, but maybe we can suggest another command with
+      // a similar name...?
       var content;
-
-      if (cmd)
-        // Command exists, but has no preview; provide a default one.
-        content = "Executes the <b>" + cmd.name + "</b> command.";
-      else
-        content = this.__getSuggestionContent(cmdName);
-
+      content = this.__getSuggestionContent(cmdName);
       if (content) {
         previewBlock.innerHTML = content;
         wasPreviewShown = true;
@@ -63,12 +61,13 @@ CommandManager.prototype = {
   },
 
   execute : function(cmdName, context) {
-    var cmd = this.__cmdSource.getCommand(cmdName);
-    if (!cmd)
+    this.__nlParser.updateSuggestionList(cmdName);
+    var parsedSentence = this.__nlParser.getHilitedSentence();
+    if (!parsedSentence)
       this.__msgService.displayMessage("No command called " + cmdName + ".");
     else
       try {
-        cmd.execute(context);
+        parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(
           {text: ("An exception occurred while running the command '" +
