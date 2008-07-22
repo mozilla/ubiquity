@@ -57,16 +57,16 @@ ParsedSentence.prototype = {
 };
 
 
-function Verb( cmdFunction ) {
-  this._init( cmdFunction );
+function Verb( cmd ) {
+  this._init( cmd );
 }
 Verb.prototype = {
-  _init: function( cmdFunction ) {
-    this._cmdFunction = cmdFunction;
-    this._name = cmdFunction.name;
-    this._DOLabel = cmdFunction.DOLabel;
-    this._DOType = cmdFunction.DOType; // must be a NounType.
-    this._modifiers = cmdFunction.modifiers;
+  _init: function( cmd ) {
+    this._cmd = cmd;
+    this._name = cmd.name;
+    this._DOLabel = cmd.DOLabel;
+    this._DOType = cmd.DOType; // must be a NounType.
+    this._modifiers = cmd.modifiers;
     // modifiers should be a dictionary
     // keys are prepositions
     // values are NounTypes.
@@ -74,7 +74,7 @@ Verb.prototype = {
   },
 
   execute: function( directObject, modifiers ) {
-    return this._cmdFunction( directObject, modifiers );
+    return this._cmd.execute( directObject, modifiers );
   },
 
   getDescription: function( directObject, prepositionPhrases ) {

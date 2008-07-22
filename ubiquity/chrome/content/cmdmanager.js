@@ -1,6 +1,7 @@
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
+  this.__nlParser = new NLParser( cmdSource.getAllCommands() );
 }
 
 CommandManager.prototype = {
@@ -129,17 +130,24 @@ CommandSource.prototype = {
 
       var cmd = {
         name : cmdName,
-        execute : function(context) {
+        execute : function(context, directObject, modifiers) {
           sandbox.context = context;
-          return cmdFunc();
+          return cmdFunc(directObject, modifiers);
         }
       };
-
+      // Attatch optional metadata to command object if it exists
       if (cmdFunc.preview)
-        cmd.preview = function(context, previewBlock) {
+        cmd.preview = function(context, directObject, modifiers, previewBlock) {
           sandbox.context = context;
           return cmdFunc.preview(previewBlock);
         };
+
+      if (cmdFunc.DOName)
+	cmd.DOName = DOName;
+      if (cmdFunc.DOType)
+	cmd.DOType = DOType;
+      if (cmdFunc.modifiers)
+	cmd.modifiers = modifiers;
 
       return cmd;
     };
@@ -158,6 +166,10 @@ CommandSource.prototype = {
 
     this._commands = commands;
     this.commandNames = commandNames;
+  },
+
+  getAllCommands: function() {
+    return this._commands;
   },
 
   getCommand : function(name) {
