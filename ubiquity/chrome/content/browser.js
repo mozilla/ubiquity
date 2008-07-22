@@ -80,14 +80,14 @@ function ubiquityKeydown(aEvent)
   // Default key to invoke ubiquity is alt+space on all platforms
   // You can change key in about:ubiquity
   if (aEvent.keyCode == UBIQUITY_KEYCODE) {
-		if( (UBIQUITY_KEYMODIFIER == "SHIFT" && aEvent.shiftKey) 
-		    || (UBIQUITY_KEYMODIFIER == "CTRL" && aEvent.ctrlKey)
-		 		|| (UBIQUITY_KEYMODIFIER == "ALT" && aEvent.altKey) 
-		 		|| (UBIQUITY_KEYMODIFIER == "META" && aEvent.metaKey)){
-    	gUbiquity.openWindow();
-    	aEvent.stopPropagation();
-  	}
-	}
+    if((UBIQUITY_KEYMODIFIER == "SHIFT" && aEvent.shiftKey)
+        || (UBIQUITY_KEYMODIFIER == "CTRL" && aEvent.ctrlKey)
+        || (UBIQUITY_KEYMODIFIER == "ALT" && aEvent.altKey) 
+        || (UBIQUITY_KEYMODIFIER == "META" && aEvent.metaKey)){
+    	    gUbiquity.openWindow();
+    	    aEvent.stopPropagation();
+    }
+  }
 }
 
 window.addEventListener("load", ubiquitySetup, false);
