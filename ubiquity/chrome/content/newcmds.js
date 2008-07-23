@@ -147,3 +147,52 @@ var cmd_map_it = makeSearchCommand(
   "http://maps.google.com/?q={QUERY}",
   "http://www.google.com/favicon.ico"
 );
+
+// -----------------------------------------------------------------
+// TEXT COMMANDS
+// -----------------------------------------------------------------
+
+function cmd_bold() {
+  var doc = context.focusedWindow.document;
+
+  if (doc.designMode == "on")
+    doc.execCommand("bold", false, null);
+  else
+    displayMessage("You're not in a rich text editing field.");
+}
+
+function cmd_italic() {
+  var doc = context.focusedWindow.document;
+
+  if (doc.designMode == "on")
+    doc.execCommand("italic", false, null);
+  else
+    displayMessage("You're not in a rich text editing field.");
+}
+
+function cmd_underline() {
+  var doc = context.focusedWindow.document;
+
+  if (doc.designMode == "on")
+    doc.execCommand("underline", false, null);
+  else
+    displayMessage("You're not in a rich text editing field.");
+}
+
+function cmd_undo() {
+  var doc = context.focusedWindow.document;
+
+  if (doc.designMode == "on")
+    doc.execCommand("undo", false, null);
+  else
+    displayMessage("You're not in a rich text editing field.");
+}
+
+function cmd_redo() {
+  var doc = context.focusedWindow.document;
+
+  if (doc.designMode == "on")
+    doc.execCommand("redo", false, null);
+  else
+    displayMessage("You're not in a rich text editing field.");
+}

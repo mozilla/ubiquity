@@ -143,10 +143,16 @@ CommandSource.prototype = {
 
       if (cmdFunc.DOName)
 	cmd.DOName = cmdFunc.DOName;
+      else
+	cmd.DOName = null;
       if (cmdFunc.DOType)
 	cmd.DOType = cmdFunc.DOType;
+      else
+	cmd.DOType = null;
       if (cmdFunc.modifiers)
 	cmd.modifiers = cmdFunc.modifiers;
+      else
+	cmd.modifiers = {};
 
       return cmd;
     };
