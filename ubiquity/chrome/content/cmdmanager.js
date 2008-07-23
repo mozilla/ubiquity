@@ -33,7 +33,7 @@ CommandManager.prototype = {
 
   preview : function(cmdName, context, previewBlock) {
     var wasPreviewShown = false;
-    this.__nlParser.updateSuggestionList(cmdName);
+    this.__nlParser.updateSuggestionList(cmdName, context);
     var parsedSentence = this.__nlParser.getHilitedSentence();
     if (parsedSentence)
     {
@@ -61,7 +61,7 @@ CommandManager.prototype = {
   },
 
   execute : function(cmdName, context) {
-    this.__nlParser.updateSuggestionList(cmdName);
+    this.__nlParser.updateSuggestionList(cmdName, context);
     var parsedSentence = this.__nlParser.getHilitedSentence();
     if (!parsedSentence)
       this.__msgService.displayMessage("No command called " + cmdName + ".");

@@ -204,7 +204,7 @@ Verb.prototype = {
     }
   },
 
-  getCompletions: function( words ) {
+  getCompletions: function( words, context ) {
     /* returns a list of ParsedSentences. */
     /* words is an array of words that were space-separated.
        The first word, which matched this verb, has already been removed.
@@ -218,7 +218,7 @@ Verb.prototype = {
     var completions = [];
     var subbedWords = words.slice();
     var selectionUsed = false;
-    var selection = getTextSelection();
+    var selection = getTextSelection(context);
     if ( selection ) {
       for ( var x in SELECTION_PRONOUNS ) {
 	var index = subbedWords.indexOf( SELECTION_PRONOUNS[x] );

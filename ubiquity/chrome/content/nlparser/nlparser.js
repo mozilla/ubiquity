@@ -11,7 +11,7 @@ NLParser.prototype = {
     this._suggestionList = []; // a list of ParsedSentences.
   },
 
-  updateSuggestionList: function( query ) {
+  updateSuggestionList: function( query, context ) {
     this._suggestionList = [];
     var completions = [];
     var x, y;
@@ -21,7 +21,7 @@ NLParser.prototype = {
     for ( x in this._verbList ) {
       verb = this._verbList[x];
       if ( verb.match( words[0] ) ) {
-	completions = verb.getCompletions( words.slice(1) );
+	completions = verb.getCompletions( words.slice(1), context );
 	this._suggestionList = this._suggestionList.concat(completions);
       }
     }
@@ -36,7 +36,7 @@ NLParser.prototype = {
 	    if (prefix) {
 	      var betterSentence = prefix + " " + query;
 	      words = betterSentence.split( " " );
-	      completions = verb.getCompletions(words.slice(1));
+	      completions = verb.getCompletions(words.slice(1), context);
 	      this._suggestionList = this._suggestionList.concat(completions);
 	    }
 	  }
