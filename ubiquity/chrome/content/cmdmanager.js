@@ -124,7 +124,7 @@ CommandSource.prototype = {
 
     var makeCmdForObj = function(objName) {
       var cmdName = objName.substr(self.CMD_PREFIX.length);
-      cmdName = cmdName.replace(/_/g, " ");
+      cmdName = cmdName.replace(/_/g, "-");
       var cmdFunc = sandbox[objName];
 
       var cmd = {
