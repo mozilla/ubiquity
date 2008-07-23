@@ -43,4 +43,11 @@
       </div>    
     </panel>
   </popupset>
+  <popup id="contentAreaContextMenu">
+    <menuseparator id="ubiquity-separator"/>
+    <menu id="ubiquity-menu" label="Ubiquity">
+      <menupopup id="ubiquity-menupopup">
+      </menupopup>
+    </menu>
+  </popup>
 </overlay>
