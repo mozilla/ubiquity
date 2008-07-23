@@ -25,6 +25,7 @@
 }
 
 /* formatting for data inside preview */
+
 .gresult {
   margin-bottom: 10px;
 }
@@ -32,7 +33,6 @@
   color: #0066cc;
   text-decoration: underline;
   font-size: small;
-  cursor: pointer;
 }
 .gresult-url {
   font-size: x-small;
