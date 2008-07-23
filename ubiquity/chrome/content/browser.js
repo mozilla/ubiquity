@@ -22,6 +22,11 @@ function ubiquitySetup()
     windowGlobals: {},
     globals: globalSpace.UbiquityGlobals,
     arbText: arbText,
+    AddressNounType: AddressNounType,
+    languageNounType: languageNounType,
+    PersonNounType: PersonNounType,
+    MathNounType: MathNounType,
+    DateNounType: DateNounType,
     getTextSelection: getTextSelection,
     displayMessage: function() {
       msgService.displayMessage.apply(msgService, arguments);
