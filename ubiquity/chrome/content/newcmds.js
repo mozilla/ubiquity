@@ -97,14 +97,14 @@ function setMapPreview(searchTerm, pblock) {
 
 
 function makeSearchCommand(name, urlTemplate, icon) {
-  var cmd = function(context, directObject, modifiers) {
+  var cmd = function(directObject, modifiers) {
     var urlString = urlTemplate.replace("{QUERY}", directObject);
     openUrlInBrowser(urlString);
   };
 
   cmd.icon = icon;
 
-  cmd.preview = function(context, directObject, modifiers, pblock) {
+  cmd.preview = function(pblock, directObject, modifiers) {
     if (directObject) {
       if (name == "Google") {
         setGooglePreview(directObject, pblock);
