@@ -142,11 +142,11 @@ CommandSource.prototype = {
         };
 
       if (cmdFunc.DOName)
-	cmd.DOName = DOName;
+	cmd.DOName = cmdFunc.DOName;
       if (cmdFunc.DOType)
-	cmd.DOType = DOType;
+	cmd.DOType = cmdFunc.DOType;
       if (cmdFunc.modifiers)
-	cmd.modifiers = modifiers;
+	cmd.modifiers = cmdFunc.modifiers;
 
       return cmd;
     };

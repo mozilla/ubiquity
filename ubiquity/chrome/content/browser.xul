@@ -7,13 +7,13 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/date.js"/>
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/jquery-1.2.3.min.js"/>
+  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/nountypes.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/verbtypes.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/nlparser.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/jquery-1.2.3.min.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/ubiquity.js"/>
   <script type="application/javascript;version=1.7"

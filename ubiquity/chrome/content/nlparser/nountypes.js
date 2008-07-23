@@ -183,8 +183,8 @@ var AddressNounType = {
     AddressNounType.maybeAddress = null;
   },
   match: function( fragment ) {
-    for( x in knownAddresses) {
-      if (knownAddresses[x] == fragment) {
+    for( x in AddressNounType.knownAddresses) {
+      if (AddressNounType.knownAddresses[x] == fragment) {
 	return true;
       }
     }
@@ -194,8 +194,8 @@ var AddressNounType = {
   },
   suggest: function( fragment ) {
     isAddress( fragment, AddressNounType.callback );
-    for( x in knownAddresses) {
-      if (knownAddresses[x] == fragment) {
+    for( x in AddressNounType.knownAddresses) {
+      if (AddressNounType.knownAddresses[x] == fragment) {
 	return [ fragment ];
       }
     }
@@ -247,7 +247,7 @@ var languageNounType = new NounType( "language",
 
 const NOUN_LIST = [AddressNounType,
 		                 languageNounType,
-				 personNounType,
+				 PersonNounType,
 				 MathNounType,
 				 DateNounType,
 				 arbText];

@@ -1,3 +1,19 @@
+const SELECTION_PRONOUNS = [ "this", "that", "it", "selection", "him", "her", "them"];
+
+// util functions to make it easier to use objects as fake dictionaries
+function dictDeepCopy( dict ) {
+  var newDict = {};
+  for (var i in dict ) {
+    newDict[i] = dict[i];
+  }
+  return newDict;
+};
+
+function dictKeys( dict ) {
+  return [ key for ( key in dict ) ];
+}
+
+
 function ParsedSentence( verb, DO, modifiers ) {
   this._init( verb, DO, modifiers );
 }
@@ -204,8 +220,8 @@ Verb.prototype = {
     var selectionUsed = false;
     var selection = getSelection();
     if ( selection ) {
-      for ( var x in wordsThatReferToSelection ) {
-	var index = subbedWords.indexOf( wordsThatReferToSelection[x] );
+      for ( var x in SELECTION_PRONOUNS ) {
+	var index = subbedWords.indexOf( SELECTION_PRONOUNS[x] );
 	if ( index > -1 ) {
 	  subbedWords.splice( index, 1, selection );
 	  // Notice the above line doesn't do what I want if selection

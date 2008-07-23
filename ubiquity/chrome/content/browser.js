@@ -21,6 +21,7 @@ function ubiquitySetup()
     window: window,
     windowGlobals: {},
     globals: globalSpace.UbiquityGlobals,
+    arbText: arbText,
     displayMessage: function() {
       msgService.displayMessage.apply(msgService, arguments);
     }
