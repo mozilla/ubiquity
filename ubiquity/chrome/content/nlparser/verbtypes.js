@@ -218,7 +218,7 @@ Verb.prototype = {
     var completions = [];
     var subbedWords = words.slice();
     var selectionUsed = false;
-    var selection = getSelection();
+    var selection = getTextSelection();
     if ( selection ) {
       for ( var x in SELECTION_PRONOUNS ) {
 	var index = subbedWords.indexOf( SELECTION_PRONOUNS[x] );
