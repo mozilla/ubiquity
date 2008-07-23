@@ -89,6 +89,7 @@ function ubiquityKeydown(aEvent)
         || (UBIQUITY_KEYMODIFIER == "META" && aEvent.metaKey)){
     	    gUbiquity.openWindow();
     	    aEvent.stopPropagation();
+	    aEvent.preventDefault();
     }
   }
 }
