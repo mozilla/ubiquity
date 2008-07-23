@@ -108,13 +108,11 @@ function makeSearchCommand(name, urlTemplate, icon) {
     if (directObject) {
       if (name == "Google") {
         setGooglePreview(directObject, pblock);
-        pblock.innerHTML = ("Getting google results for <b>" +
-                           escape(directObject) + "</b>...");
+        // TODO: Start throbber animation.
       }
       else if (name == "Google Maps") {
         setMapPreview(directObject, pblock);
-        pblock.innerHTML = ("Getting map for <b>" +
-                           escape(directObject) + "</b>...");
+        // TODO: Start throbber animation.
       }
       else {
         var content = ("Performs a " + name + " search for <b>" +
