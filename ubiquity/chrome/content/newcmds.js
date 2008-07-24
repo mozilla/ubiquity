@@ -288,3 +288,12 @@ cmd_translate.preview = function( pblock, textToTranslate, languages ) {
 cmd_translate.DOType = arbText;
 cmd_translate.DOName = "text to translate";
 cmd_translate.modifiers = {to:languageNounType, from:languageNounType};
+
+function cmd_help() {
+  openUrlInBrowser("about:ubiquity");
+}
+
+cmd_help.preview = function(pblock) {
+  pblock.innerHTML = ("Provides help on using Ubiquity, as well " +
+                      "as access to preferences, etc.");
+}
