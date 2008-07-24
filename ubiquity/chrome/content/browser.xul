@@ -41,7 +41,8 @@
         <div id="cmd-entry-container">
           <input id="cmd-entry" size="20" />
         </div>
-        <iframe id="cmd-preview" src="preview.html"></iframe>
+        <iframe id="cmd-preview"
+                src="chrome://ubiquity/content/preview.html"></iframe>
       </div>    
     </panel>
   </popupset>
