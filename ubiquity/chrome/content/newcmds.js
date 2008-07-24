@@ -21,9 +21,7 @@ function setGooglePreview(searchTerm, pblock) {
           var visibleUrl = results[i].visibleUrl;
 
           html = html + "<div class=\"gresult\">" +
-                        "<div><a onclick=\"window.content.location.href = '" + url + "';\"" +
-                                " onmouseover=\"window.setCursor('pointer');\"" +
-                                " onmouseout=\"window.setCursor('default');\">" +
+                        "<div><a onclick=\"window.content.location.href = '" + url + "';\">" +
                                 title +
                         "</a></div>" +
                         "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
@@ -212,14 +210,14 @@ cmd_calculate.preview = function( pblock, expr ) {
     pblock.innerHTML = "Calculates an expression. E.g., 22/7."
     return;
   }
-  
+
   pblock.innerHTML = expr + " = ";
   try{
     pblock.innerHTML += eval( expr );
   } catch(e) {
     pblock.innerHTML += "?"
   }
-  
+
 }
 
 cmd_calculate.DOType = arbText;
@@ -251,11 +249,11 @@ function cmd_define( word ) {
 
 cmd_define.preview = function( pblock, word ) {
   defineWord( word, function(text){
-    text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");   
+    text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
     text = text.replace(/(1:)/g, "<br/>$&");
     text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
     text = text.replace(/\[.*?\]/g, "");
-    
+
     pblock.innerHTML = text;
   });
 }
@@ -298,16 +296,16 @@ function log( title, what ){
 
 function translateTo( text, langCodePair, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
-    
+
   if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
   if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
-    
+
   var params = paramsToString({
     v: "1.0",
     q: text,
     langpair: langCodePair.from + "|" + langCodePair.to
   });
-  
+
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
 
@@ -320,7 +318,7 @@ function translateTo( text, langCodePair, callback ) {
     try {
       var translatedText = data.responseData.translatedText;
     } catch(e) {
-      
+
       // If we get this error message, that means Google wasn't able to
       // guess the originating language. Let's assume it was English.
       // TODO: Localize this.
