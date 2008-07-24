@@ -227,7 +227,9 @@ cmd_calculate.DOName = "expression";
 cmd_calculate.modifiers = {};
 cmd_calculate.icon = "http://www.metacalc.com/favicon.ico";
 
-function defineWord(word) {
+
+
+function defineWord(word, callback) {
   var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
   var params = paramsToString({
     dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
@@ -238,10 +240,29 @@ function defineWord(word) {
     loadJQuery( function() {
       var $ = window.jQuery;
       var text = $(xml).find("WordDefinition").text();
-      displayMessage(text);
+      callback(text);
     });
   });
 }
+
+function cmd_define( word ) {
+  openUrlInBrowser( "http://www.answers.com/" + escape(word) );
+}
+
+cmd_define.preview = function( pblock, word ) {
+  defineWord( word, function(text){
+    text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");   
+    text = text.replace(/(1:)/g, "<br/>$&");
+    text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
+    text = text.replace(/\[.*?\]/g, "");
+    
+    pblock.innerHTML = text;
+  });
+}
+
+cmd_define.DOType = arbText;
+cmd_define.DOName = "word";
+cmd_define.modifiers = {};
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS

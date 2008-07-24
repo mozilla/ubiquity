@@ -61,7 +61,6 @@ ParsedSentence.prototype = {
     return sentence;
   },
 
-// to become obsolete: use preview instead.
   getDescription: function() {
     // returns a string describing what the sentence will do if executed
     return this._verb.getDescription( this._DO, this._modifiers );
