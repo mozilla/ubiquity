@@ -119,19 +119,40 @@ NLParser.prototype = {
     // set previewBlock.innerHtml and return true/false
     // can set previewBlock as a callback in case we need to update
     // asynchronously.
+
+    // Here we'll get the contents of the current preview HTML, if
+    // they exist, to use them in the new display so that a "flicker"
+    // doesn't occur whereby the preview is momentarily empty (while
+    // an ajax request occurs) and then is filled with content a
+    // split-second later.
+    //
+    // While this prevents flicker, it's kind of a hack; it
+    // might be better for us to decouple the generation of
+    // suggestions from the preview display so that they can
+    // be updated independently, which would allow previews to
+    // only be displayed (and potentially costly Ajax requests
+    // to be made) after some amount of time has passed since
+    // the user's last keypress.  This might be done with a
+    // XUL:textbox whose 'type' is set to 'timed'.
+
+    var doc = previewBlock.ownerDocument;
+    var oldPreview = doc.getElementById("preview-pane");
+    var oldPreviewHTML = "";
+    if (oldPreview)
+      oldPreviewHTML = oldPreview.innerHTML;
+
     var content = "";
     for (var x in this._suggestionList ) {
       var suggText = this._suggestionList[x].getDisplayText();
       if ( x == this._hilitedSuggestion - 1 ) {
 	var descText = this._suggestionList[x].getDescription();
 	content += "<div class=\"hilited\">" + descText + "<br/>";
-	content += suggText + "<br/><div id=\"preview-pane\"></div></div>";
+	content += suggText + "<br/><div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
       } else {
 	content += "<div>" + suggText + "</div>";
       }
     }
     previewBlock.innerHTML = content;
-    var doc = previewBlock.ownerDocument;
     var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
     activeSugg.preview(context, doc.getElementById("preview-pane"));
     return true;
