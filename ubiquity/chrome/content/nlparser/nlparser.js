@@ -130,12 +130,10 @@ NLParser.prototype = {
 	content += "<div>" + suggText + "</div>";
       }
     }
-    //dump( "I made some content: " + content + "\n");
     previewBlock.innerHTML = content;
     var doc = previewBlock.ownerDocument;
-    this._suggestionList[x].preview(context,
-                                    doc.getElementById("preview-pane"));
-    //$("#cmd-preview").html( "PRETEND THIS IS A PREVIEW" );
+    var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
+    activeSugg.preview(context, doc.getElementById("preview-pane"));
     return true;
   },
 
