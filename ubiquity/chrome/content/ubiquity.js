@@ -125,6 +125,7 @@ Ubiquity.prototype = {
       this.__textBox.focus();
       this.__textBox.select();
       this.__cmdManager.refresh();
+      this.__updatePreview();
     }
     this.__showCount += 1;
   },
