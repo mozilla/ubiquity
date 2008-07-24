@@ -61,6 +61,19 @@ function safeWrapper(func) {
   return wrappedFunc;
 }
 
+// Synchronously retrieves the content of the given local URL
+// and returns it.
+function getLocalUrl(url) {
+  var req = new XMLHttpRequest();
+  req.open('GET', url, false);
+  req.overrideMimeType("text/plain");
+  req.send(null);
+  if (req.status == 0)
+    return req.responseText;
+  else
+    throw new Error("Failed to get " + url);
+}
+
 function ajaxGet(url, callbackFunction) {
   var request = new window.XMLHttpRequest();
   request.open("GET", url, true);
