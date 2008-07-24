@@ -43,7 +43,6 @@ function getGmailContacts( callback ) {
     out: "CSV"
   });
 
-  // TODO ajaxGet undefined here
   ajaxGet(url + params , function(data) {
     data = data.split("\n");
 
@@ -81,13 +80,14 @@ var PersonNounType = {
   suggest: function( fragment ) {
     if (PersonNounType.contactList == null) {
       getGmailContacts( PersonNounType.callback);
-      return false;
+      return [];
     }
+    var suggestions  = [];
     for ( var c in PersonNounType.contactList ) {
       if (c.match(fragment, "i"))
-	    return PersonNounType.contactList[c];
+	suggestions.push(PersonNounType.contactList[c]);
     }
-    return [];
+    return suggestions;
   },
 }
 
