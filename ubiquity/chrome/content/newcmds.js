@@ -21,9 +21,7 @@ function setGooglePreview(searchTerm, pblock) {
           var visibleUrl = results[i].visibleUrl;
 
           html = html + "<div class=\"gresult\">" +
-                        "<div><a onclick=\"window.content.location.href = '" + url + "';\"" +
-                                " onmouseover=\"window.setCursor('pointer');\"" +
-                                " onmouseout=\"window.setCursor('default');\">" +
+                        "<div><a onclick=\"window.content.location.href = '" + url + "';\">" +
                                 title +
                         "</a></div>" +
                         "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
@@ -199,6 +197,71 @@ function cmd_redo() {
     displayMessage("You're not in a rich text editing field.");
 }
 
+
+function cmd_calculate( expr ) {
+  if( expr.length > 0 )
+    setTextSelection( eval(expr) );
+  else
+    displayMessage( "Requires an expression.")
+}
+
+cmd_calculate.preview = function( pblock, expr ) {
+  if( expr.length < 1 ){
+    pblock.innerHTML = "Calculates an expression. E.g., 22/7."
+    return;
+  }
+
+  pblock.innerHTML = expr + " = ";
+  try{
+    pblock.innerHTML += eval( expr );
+  } catch(e) {
+    pblock.innerHTML += "?"
+  }
+
+}
+
+cmd_calculate.DOType = arbText;
+cmd_calculate.DOName = "expression";
+cmd_calculate.modifiers = {};
+cmd_calculate.icon = "http://www.metacalc.com/favicon.ico";
+
+
+
+function defineWord(word, callback) {
+  var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
+  var params = paramsToString({
+    dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
+    word: word
+  });
+
+  ajaxGet(url + params, function(xml) {
+    loadJQuery( function() {
+      var $ = window.jQuery;
+      var text = $(xml).find("WordDefinition").text();
+      callback(text);
+    });
+  });
+}
+
+function cmd_define( word ) {
+  openUrlInBrowser( "http://www.answers.com/" + escape(word) );
+}
+
+cmd_define.preview = function( pblock, word ) {
+  defineWord( word, function(text){
+    text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
+    text = text.replace(/(1:)/g, "<br/>$&");
+    text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
+    text = text.replace(/\[.*?\]/g, "");
+
+    pblock.innerHTML = text;
+  });
+}
+
+cmd_define.DOType = arbText;
+cmd_define.DOName = "word";
+cmd_define.modifiers = {};
+
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
@@ -309,6 +372,10 @@ cmd_translate.preview = function( pblock, textToTranslate, languages ) {
 cmd_translate.DOType = arbText;
 cmd_translate.DOLabel = "text to translate";
 cmd_translate.modifiers = {to:languageNounType, from:languageNounType};
+
+// -----------------------------------------------------------------
+// SYSTEM COMMANDS
+// -----------------------------------------------------------------
 
 function cmd_help() {
   openUrlInBrowser("about:ubiquity");

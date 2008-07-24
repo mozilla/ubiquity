@@ -25,6 +25,9 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   window.addEventListener("mousemove",
                           function(event) { self.__onMouseMove(event); },
                           false);
+  textBox.addEventListener("keydown",
+                           function(event) { self.__onKeydown(event); },
+                           true);
   textBox.addEventListener("keyup",
                            function(event) { self.__onInput(event); },
                            true);
@@ -46,19 +49,25 @@ Ubiquity.prototype = {
     this.__y = event.screenY;
   },
 
+  __onKeydown: function(event) {
+    if (event.keyCode == this.__KEYCODE_UP) {
+      event.preventDefault();
+      this.__cmdManager.moveIndicationUp(this.__makeContext(),
+                                         this.__previewBlock);
+    } else if (event.keyCode == this.__KEYCODE_DOWN) {
+      event.preventDefault();
+      this.__cmdManager.moveIndicationDown(this.__makeContext(),
+                                           this.__previewBlock);
+    }
+  },
+
   __onInput: function(event) {
     if (event.keyCode == this.__KEYCODE_ENTER) {
       if (this.__textBox.value)
         this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
-    } else if (event.keyCode == this.__KEYCODE_UP) {
-      this.__cmdManager.moveIndicationUp( this.__makeContext(),
-					  this.__previewBlock );
-      event.preventDefault();
-    } else if (event.keyCode == this.__KEYCODE_DOWN) {
-      this.__cmdManager.moveIndicationDown( this.__makeContext(),
-					    this.__previewBlock );
-      event.preventDefault();  //stopPropagation(); //
+    } else if (event.keyCode == this.__KEYCODE_UP ||
+               event.keyCode == this.__KEYCODE_DOWN) {
     } else
       this.__updatePreview();
   },
@@ -125,6 +134,7 @@ Ubiquity.prototype = {
       this.__textBox.focus();
       this.__textBox.select();
       this.__cmdManager.refresh();
+      this.__updatePreview();
     }
     this.__showCount += 1;
   },
