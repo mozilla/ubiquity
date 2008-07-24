@@ -227,14 +227,22 @@ var Languages = {
   'SWEDISH' : 'sv'
 };
 
-function translateTo( text, lang, callback ) {
+function log( title, what ){
+  getWindowInsecure().console.log( title, what );
+}
+
+function translateTo( text, langCodePair, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
+    
+  if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
+  if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
+    
   var params = paramsToString({
     v: "1.0",
     q: text,
-    langpair: "|" + lang
+    langpair: langCodePair.from + "|" + langCodePair.to
   });
-
+  
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
 
@@ -247,7 +255,21 @@ function translateTo( text, lang, callback ) {
     try {
       var translatedText = data.responseData.translatedText;
     } catch(e) {
-      displayMessage( "Translation Error: " + data.responseDetails )
+      
+      // If we get this error message, that means Google wasn't able to
+      // guess the originating language. Let's assume it was English.
+      // TODO: Localize this.
+      var BAD_FROM_LANG_GUESS_MSG = "invalid translation language pair";
+      if( data.responseDetails == BAD_FROM_LANG_GUESS_MSG ){
+        // Don't do infinite loops. If we already have a guess language
+        // that matches the current forced from language, abort!
+        if( langCodePair.from != "en" )
+          translateTo( text, {from:"en", to:langCodePair.to}, callback );
+        return;
+      }
+      else {
+        displayMessage( "Translation Error: " + data.responseDetails );
+      }
       return;
     }
 
@@ -267,18 +289,19 @@ function cmd_translate( textToTranslate, languages ) {
   var fromLang = languages.from || "";
   var toLangCode = Languages[toLang.toUpperCase()];
 
-  translateTo( textToTranslate, toLangCode );
+  translateTo( textToTranslate, {to:toLangCode} );
 }
 
 cmd_translate.preview = function( pblock, textToTranslate, languages ) {
-  if( typeof(languages.to) == "undefined" ) return;
+  // TODO: Why do we always get passed a blank languages? This is a bug
+  // in Ubiquity...
   var toLang = languages.to || "English";
 
   var toLangCode = Languages[toLang.toUpperCase()];
   var lang = toLang[0].toUpperCase() + toLang.substr(1);
 
   pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
-  translateTo( textToTranslate, toLangCode, function( translation ) {
+  translateTo( textToTranslate, {to:toLangCode}, function( translation ) {
     pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
     pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
   })
