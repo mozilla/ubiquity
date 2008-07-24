@@ -40,6 +40,7 @@ function ubiquitySetup()
     new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
     //new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
     new LocalUriCodeSource("chrome://ubiquity/content/newcmds.js"),
+    new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
     PrefCommands,
     new BookmarksCodeSource("ubiquity"),
     new LocalUriCodeSource("chrome://ubiquity/content/final.js")

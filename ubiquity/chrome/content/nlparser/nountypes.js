@@ -23,12 +23,13 @@ NounType.prototype = {
     }
     var suggestions = [];
     for ( var x in this._expectedWords ) {
-      word = this._expectedWords[x];
-      if ( word.indexOf( fragment ) > -1 ) {
-	suggestions.push( word );
-	// TODO sort these in order of goodness
-	// todo if fragment is multiple words, search for each of them
-	// separately within the expected word.
+      // Do the match in a non-case sensitive way
+      word = this._expectedWords[x].toLowerCase();
+      if ( word.indexOf( fragment.toLowerCase() ) > -1 ) {
+      	suggestions.push( word );
+      	// TODO sort these in order of goodness
+      	// todo if fragment is multiple words, search for each of them
+      	// separately within the expected word.
       }
     }
     return suggestions;
@@ -227,34 +228,30 @@ var MathNounType = {
   }
 };
 
-var Languages = {
-  'ARABIC' : 'ar',
-  'CHINESE' : 'zh',
-  'CHINESE_TRADITIONAL' : 'zh-TW',
-  'DANISH' : 'da',
-  'DUTCH': 'nl',
-  'ENGLISH' : 'en',
-  'FINNISH' : 'fi',
-  'FRENCH' : 'fr',
-  'GERMAN' : 'de',
-  'GREEK' : 'el',
-  'HINDI' : 'hi',
-  'ITALIAN' : 'it',
-  'JAPANESE' : 'ja',
-  'KOREAN' : 'ko',
-  'NORWEGIAN' : 'no',
-  'POLISH' : 'pl',
-  'PORTUGUESE' : 'pt-PT',
-  'ROMANIAN' : 'ro',
-  'RUSSIAN' : 'ru',
-  'SPANISH' : 'es',
-  'SWEDISH' : 'sv'
-};
-var languageNounType = new NounType( "language",
-				     [ "ar", "zh", "zh-TW", "da",
-				     "nl", "en", "fi", "fr",
-				       "de", "el", "hi", "it", "ja", "ko", "no", "pl", "pt-PT",
-				       "ro", "ru", "es", "sv"] );
+var Languages = [
+  'Arabic',
+  'Chinese',
+  'Chinese Traditional',
+  'Danish',
+  'Dutch',
+  'English',
+  'Finnish',
+  'French',
+  'German',
+  'Greek',
+  'Hindi',
+  'Italian',
+  'Japanese',
+  'Korean',
+  'Norwegian',
+  'Polish',
+  'Portuguese',
+  'Russian',
+  'Spanish',
+  'Swedish'
+];
+
+var languageNounType = new NounType( "language", Languages );
 
 
 const NOUN_LIST = [AddressNounType,
