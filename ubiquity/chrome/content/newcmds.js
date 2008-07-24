@@ -199,6 +199,50 @@ function cmd_redo() {
     displayMessage("You're not in a rich text editing field.");
 }
 
+
+function cmd_calculate( expr ) {
+  if( expr.length > 0 )
+    setTextSelection( eval(expr) );
+  else
+    displayMessage( "Requires an expression.")
+}
+
+cmd_calculate.preview = function( pblock, expr ) {
+  if( expr.length < 1 ){
+    pblock.innerHTML = "Calculates an expression. E.g., 22/7."
+    return;
+  }
+  
+  pblock.innerHTML = expr + " = ";
+  try{
+    pblock.innerHTML += eval( expr );
+  } catch(e) {
+    pblock.innerHTML += "?"
+  }
+  
+}
+
+cmd_calculate.DOType = arbText;
+cmd_calculate.DOName = "expression";
+cmd_calculate.modifiers = {};
+cmd_calculate.icon = "http://www.metacalc.com/favicon.ico";
+
+function defineWord(word) {
+  var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
+  var params = paramsToString({
+    dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
+    word: word
+  });
+
+  ajaxGet(url + params, function(xml) {
+    loadJQuery( function() {
+      var $ = window.jQuery;
+      var text = $(xml).find("WordDefinition").text();
+      displayMessage(text);
+    });
+  });
+}
+
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
