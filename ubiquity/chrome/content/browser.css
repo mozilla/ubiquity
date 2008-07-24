@@ -22,3 +22,14 @@
   padding: 10px;
   overflow: hidden;
 }
+
+/* formatting for suggestion list */
+
+.hilited {
+    background: #00aa00;
+}
+
+.needarg {
+    font-style: italic;
+    color: #999999;
+}

@@ -48,11 +48,13 @@ NLParser.prototype = {
     this._hilitedSuggestion = 1; // hilight the first suggestion by default
   },
 
+  // Obsolete
   getSuggestionsAsHtml : function() {
     return [ this._suggestionList[x].getDisplayText()
 	     for ( x in this._suggestionList ) ];
   },
 
+  // Obsolete
   getDescriptionText: function() {
     if ( this._suggestionList.length == 0 ) {
       return "You got the magic stick. Type some commands!";
@@ -67,18 +69,20 @@ NLParser.prototype = {
     return sentence.getDescription();
   },
 
-  indicationDown: function( ) {
+  indicationDown: function(context, previewBlock) {
     this._hilitedSuggestion ++;
     if ( this._hilitedSuggestion > this._suggestionList.length ) {
       this._hilitedSuggestion = 0;
       }
+    this.setPreviewAndSuggestions(context, previewBlock);
   },
 
-  indicationUp: function() {
+  indicationUp: function(context, previewBlock) {
     this._hilitedSuggestion --;
     if ( this._hilitedSuggestion < 0 ) {
       this._hilitedSuggestion = this._suggestionList.length;
       }
+    this.setPreviewAndSuggestions(context, previewBlock);
   },
 
   getHilitedSuggestion: function() {
@@ -109,6 +113,29 @@ NLParser.prototype = {
     }
     var hilited = this.getHilitedSuggestion();
     return this._suggestionList[hilited];
+  },
+
+  setPreviewAndSuggestions: function( context, previewBlock ) {
+    // set previewBlock.innerHtml and return true/false
+    // can set previewBlock as a callback in case we need to update
+    // asynchronously.
+    var content = "";
+    for (var x in this._suggestionList ) {
+      var suggText = this._suggestionList[x].getDisplayText();
+      if ( x == this._hilitedSuggestion - 1 ) {
+	var descText = this._suggestionList[x].getDescription();
+	content += "<div class=\"hilited\">" + descText + "<br/>";
+	content += suggText + "<br/><div id=\"preview-pane\"></div></div>";
+      } else {
+	content += "<div>" + suggText + "</div>";
+      }
+    }
+    //dump( "I made some content: " + content + "\n");
+    previewBlock.innerHTML = content;
+    this._suggestionList[x].preview(context,
+				    document.getElementById("preview-pane"));
+    //$("#cmd-preview").html( "PRETEND THIS IS A PREVIEW" );
+    return true;
   },
 
   setCommandList: function( commandList ) {

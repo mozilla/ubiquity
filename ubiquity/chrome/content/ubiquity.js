@@ -35,6 +35,8 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
 Ubiquity.prototype = {
   __DEFAULT_PREVIEW_LOCATION: "chrome://ubiquity/content/preview.html",
   __KEYCODE_ENTER: 13,
+  __KEYCODE_UP: 38,
+  __KEYCODE_DOWN: 40,
   __MIN_CMD_PREVIEW_LENGTH: 3,
   __DEFAULT_PREVIEW: ("Type the name of a command and press enter to " +
                       "execute it, or <b>help</b> for assistance."),
@@ -49,6 +51,10 @@ Ubiquity.prototype = {
       if (this.__textBox.value)
         this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
+    } else if (event.keyCode == this.__KEYCODE_UP) {
+      this.__cmdManager.moveIndicationUp();
+    } else if (event.keyCode == this.__KEYCODE_DOWN) {
+      this.__cmdManager.moveIndicationDown();
     } else
       this.__updatePreview();
   },
@@ -144,7 +150,7 @@ Ubiquity.prototype = {
     var menupopup = document.getElementById("ubiquity-menupopup");
     menupopup.removeEventListener("popupshowing", contextPopupShowing, false);
   }
-  
+
   function contextPopupShowing(event) {
     if (event.target.id != "ubiquity-menupopup") {
       return;
@@ -157,7 +163,7 @@ Ubiquity.prototype = {
 //      menupopup.removeEventListener("click", executeClick, true);
       menupopup.removeChild(menupopup.childNodes.item(i));
     }
-    
+
     var popupContext = [];
     var data = {};
     var mfNode;
@@ -185,12 +191,12 @@ Ubiquity.prototype = {
     popupContext["document"] = true;
     data.documentTitle = content.document.title;
     data.documentUrl = content.document.location.href;
-    
+
     /* data oject contains info about selection */
     /* popupContext determines what we have (for foo in bar to get it all) */
     /* Don't forget to worry about encoding when passing data to web services */
     /* Invoke ubiquity with popup context, data, get array of names/function back */
-    
+
     function ubiquity(popupContext, data) {
       var results = {};
       var contextString = "";
@@ -212,7 +218,7 @@ Ubiquity.prototype = {
       }
       return results;
     }
-    
+
     var results = ubiquity(popupContext, data);
 
     for (let i in results) {
@@ -228,7 +234,7 @@ Ubiquity.prototype = {
                          .getService(Components.interfaces.nsIStringBundleService)
                          .createBundle("chrome://ubiquity/locale/ubiquity.properties");
 
-  /* Attach listeners for page load */ 
+  /* Attach listeners for page load */
   window.addEventListener("load", startup, false);
   window.addEventListener("unload", shutdown, false);
 })();

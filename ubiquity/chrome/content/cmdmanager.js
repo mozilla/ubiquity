@@ -10,52 +10,28 @@ CommandManager.prototype = {
     this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
   },
 
-  __getSuggestionContent : function(cmdName) {
-    var content = "Suggestions: ";
+  moveIndicationUp : function(context, previewBlock) {
+    this.__nlParser.indicationUp(context, previewBlock);
+  },
 
-    var suggestions = [];
-    var cmds = this.__cmdSource.commandNames;
-
-    for (var i = 0; i < cmds.length; i++) {
-      if (cmds[i].name.indexOf(cmdName) != -1)
-        suggestions.push(cmds[i].name);
-    }
-    if (suggestions.length == 0)
-      return null;
-
-    for (i = 0; i < suggestions.length - 1; i++) {
-      content += "<b>" + suggestions[i] + "</b>, ";
-    }
-    content += "<b>" + suggestions[suggestions.length - 1] + "</b>";
-
-    return content;
+  moveIndicationDown : function(context, previewBlock) {
+    this.__nlParser.indicationDown(context, previewBlock);
   },
 
   preview : function(cmdName, context, previewBlock) {
     var wasPreviewShown = false;
     this.__nlParser.updateSuggestionList(cmdName, context);
-    var parsedSentence = this.__nlParser.getHilitedSentence();
-    if (parsedSentence)
-    {
-      try {
-        parsedSentence.preview(context, previewBlock);
-        wasPreviewShown = true;
-      } catch (e) {
-        this.__msgService.displayMessage(
-          {text: ("An exception occurred while previewing the command '" +
-                  cmdName + "'."),
-           exception: e}
-          );
-      }
-    } else {
-      // No match for the input, but maybe we can suggest another command with
-      // a similar name...?
-      var content;
-      content = this.__getSuggestionContent(cmdName);
-      if (content) {
-        previewBlock.innerHTML = content;
-        wasPreviewShown = true;
-      }
+
+    try {
+      wasPreviewShown = this.__nlParser.setPreviewAndSuggestions(context,
+								 previewBlock);
+      //dump( "Preview block has been set to: " + $("#cmd-preview").html() + "\n");
+    } catch (e) {
+      this.__msgService.displayMessage(
+        {text: ("An exception occurred while previewing the command '" +
+                cmdName + "'."),
+         exception: e}
+        );
     }
     return wasPreviewShown;
   },
@@ -141,10 +117,10 @@ CommandSource.prototype = {
           return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
 
-      if (cmdFunc.DOName)
-	cmd.DOName = cmdFunc.DOName;
+      if (cmdFunc.DOLabel)
+	cmd.DOLabel = cmdFunc.DOLabel;
       else
-	cmd.DOName = null;
+	cmd.DOLabel = null;
       if (cmdFunc.DOType)
 	cmd.DOType = cmdFunc.DOType;
       else
