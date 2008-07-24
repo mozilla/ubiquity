@@ -202,12 +202,12 @@ function cmd_calculate( expr ) {
   if( expr.length > 0 )
     setTextSelection( eval(expr) );
   else
-    displayMessage( "Requires an expression.")
+    displayMessage( "Requires an expression.");
 }
 
 cmd_calculate.preview = function( pblock, expr ) {
   if( expr.length < 1 ){
-    pblock.innerHTML = "Calculates an expression. E.g., 22/7."
+    pblock.innerHTML = "Calculates an expression. E.g., 22/7.";
     return;
   }
 
@@ -215,7 +215,7 @@ cmd_calculate.preview = function( pblock, expr ) {
   try{
     pblock.innerHTML += eval( expr );
   } catch(e) {
-    pblock.innerHTML += "?"
+    pblock.innerHTML += "?";
   }
 
 }
@@ -470,3 +470,8 @@ cmd_email.DOType = arbText;
 cmd_email.modifiers = {
   to: PersonNounType
 };
+
+
+function cmd_editor() {
+  openUrlInBrowser("chrome://ubiquity/content/editor.html");
+}

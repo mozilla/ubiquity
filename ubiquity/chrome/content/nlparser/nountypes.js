@@ -118,17 +118,6 @@ var DateNounType = {
   }
 };
 
-function paramsToString(params) {
-  var string = "?";
-
-  for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
-  }
-
-  // Remove the trailing &
-  return string.substr(0, string.length - 1);
-}
-
 function isAddress( query, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = paramsToString({

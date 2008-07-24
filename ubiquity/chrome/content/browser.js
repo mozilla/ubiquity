@@ -39,8 +39,8 @@ function ubiquitySetup()
     PersonNounType: PersonNounType,
     MathNounType: MathNounType,
     DateNounType: DateNounType,
-    getTextSelection: getTextSelection,
-    paramsToString: paramsToString,
+    //getTextSelection: getTextSelection,
+    //paramsToString: paramsToString,
     displayMessage: function() {
       msgService.displayMessage.apply(msgService, arguments);
     }
