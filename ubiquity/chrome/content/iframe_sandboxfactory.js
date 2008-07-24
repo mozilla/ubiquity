@@ -5,7 +5,7 @@ function IframeSandboxFactory(globals) {
 }
 
 IframeSandboxFactory.prototype = {
-  makeSandbox: function(cb) {
+  makeSandbox: function() {
     let iframe = window.document.createElementNS(
       "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
       "iframe"
