@@ -312,6 +312,10 @@ cmd_translate.DOType = arbText;
 cmd_translate.DOName = "text to translate";
 cmd_translate.modifiers = {to:languageNounType, from:languageNounType};
 
+// -----------------------------------------------------------------
+// SYSTEM COMMANDS
+// -----------------------------------------------------------------
+
 function cmd_help() {
   openUrlInBrowser("about:ubiquity");
 }
