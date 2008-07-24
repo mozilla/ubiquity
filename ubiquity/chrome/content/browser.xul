@@ -39,7 +39,7 @@
         <div id="cmd-entry-container">
           <input id="cmd-entry" size="20" />
         </div>
-        <div id="cmd-preview"></div>
+        <iframe id="cmd-preview" src="preview.html"></iframe>
       </div>    
     </panel>
   </popupset>

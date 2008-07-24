@@ -2,6 +2,18 @@ var gUbiquity = null;
 
 function ubiquitySetup()
 {
+  var previewIframe = document.getElementById("cmd-preview");
+
+  function onDomChange(aEvent) {
+    previewIframe.height = previewIframe.contentDocument.height;
+    previewIframe.width = (previewIframe.clientWidth +
+                           previewIframe.contentWindow.scrollMaxX);
+  }
+
+  previewIframe.contentDocument.addEventListener("DOMSubtreeModified",
+                                                 onDomChange,
+                                                 false);
+
   var msgService = new CompositeMessageService();
 
   msgService.add(new AlertMessageService());
@@ -57,7 +69,7 @@ function ubiquitySetup()
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan,
-    document.getElementById("cmd-preview")
+    previewIframe.contentDocument.getElementById("preview")
   );
   cmdSource.refresh();
 }
