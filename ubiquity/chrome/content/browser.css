@@ -87,3 +87,14 @@
   font-size: x-small;
   color: #00aa00;
 }
+
+/* formatting for suggestion list */
+
+.hilited {
+    background: #00aa00;
+}
+
+.needarg {
+    font-style: italic;
+    color: #999999;
+}

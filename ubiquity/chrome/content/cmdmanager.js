@@ -10,26 +10,12 @@ CommandManager.prototype = {
     this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
   },
 
-  // obsolete:
-  __getSuggestionContent : function(cmdName) {
-    var content = "Suggestions: ";
+  moveIndicationUp : function(context, previewBlock) {
+    this.__nlParser.indicationUp(context, previewBlock);
+  },
 
-    var suggestions = [];
-    var cmds = this.__cmdSource.commandNames;
-
-    for (var i = 0; i < cmds.length; i++) {
-      if (cmds[i].name.indexOf(cmdName) != -1)
-        suggestions.push(cmds[i].name);
-    }
-    if (suggestions.length == 0)
-      return null;
-
-    for (i = 0; i < suggestions.length - 1; i++) {
-      content += "<b>" + suggestions[i] + "</b>, ";
-    }
-    content += "<b>" + suggestions[suggestions.length - 1] + "</b>";
-
-    return content;
+  moveIndicationDown : function(context, previewBlock) {
+    this.__nlParser.indicationDown(context, previewBlock);
   },
 
   preview : function(cmdName, context, previewBlock) {

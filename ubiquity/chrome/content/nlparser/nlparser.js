@@ -48,11 +48,13 @@ NLParser.prototype = {
     this._hilitedSuggestion = 1; // hilight the first suggestion by default
   },
 
+  // Obsolete
   getSuggestionsAsHtml : function() {
     return [ this._suggestionList[x].getDisplayText()
 	     for ( x in this._suggestionList ) ];
   },
 
+  // Obsolete
   getDescriptionText: function() {
     if ( this._suggestionList.length == 0 ) {
       return "You got the magic stick. Type some commands!";
@@ -67,18 +69,20 @@ NLParser.prototype = {
     return sentence.getDescription();
   },
 
-  indicationDown: function( ) {
+  indicationDown: function(context, previewBlock) {
     this._hilitedSuggestion ++;
     if ( this._hilitedSuggestion > this._suggestionList.length ) {
       this._hilitedSuggestion = 0;
       }
+    this.setPreviewAndSuggestions(context, previewBlock);
   },
 
-  indicationUp: function() {
+  indicationUp: function(context, previewBlock) {
     this._hilitedSuggestion --;
     if ( this._hilitedSuggestion < 0 ) {
       this._hilitedSuggestion = this._suggestionList.length;
       }
+    this.setPreviewAndSuggestions(context, previewBlock);
   },
 
   getHilitedSuggestion: function() {
