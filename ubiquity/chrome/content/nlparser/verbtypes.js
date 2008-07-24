@@ -63,8 +63,6 @@ ParsedSentence.prototype = {
 
   getDescription: function() {
     // returns a string describing what the sentence will do if executed
-    window.console.log("In getDescription...");
-    window.console.log( this._modifiers );
     return this._verb.getDescription( this._DO, this._modifiers );
   },
 
@@ -73,8 +71,6 @@ ParsedSentence.prototype = {
   },
 
   preview: function(context, previewBlock) {
-    window.console.log(" In preview..." );
-    window.console.log( this._modifiers );
     return this._verb.preview( context, this._DO, this._modifiers, previewBlock );
   }
 
