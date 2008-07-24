@@ -132,8 +132,10 @@ NLParser.prototype = {
     }
     previewBlock.innerHTML = content;
     var doc = previewBlock.ownerDocument;
-    var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
-    activeSugg.preview(context, doc.getElementById("preview-pane"));
+    if ( this._suggestionList.length > 0 ) {
+      var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
+      activeSugg.preview(context, doc.getElementById("preview-pane"));
+    }
     return true;
   },
 

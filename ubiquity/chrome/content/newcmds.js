@@ -233,16 +233,16 @@ function log( title, what ){
 
 function translateTo( text, langCodePair, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
-    
+
   if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
   if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
-    
+
   var params = paramsToString({
     v: "1.0",
     q: text,
     langpair: langCodePair.from + "|" + langCodePair.to
   });
-  
+
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
 
@@ -255,7 +255,7 @@ function translateTo( text, langCodePair, callback ) {
     try {
       var translatedText = data.responseData.translatedText;
     } catch(e) {
-      
+
       // If we get this error message, that means Google wasn't able to
       // guess the originating language. Let's assume it was English.
       // TODO: Localize this.
@@ -293,8 +293,6 @@ function cmd_translate( textToTranslate, languages ) {
 }
 
 cmd_translate.preview = function( pblock, textToTranslate, languages ) {
-  // TODO: Why do we always get passed a blank languages? This is a bug
-  // in Ubiquity...
   var toLang = languages.to || "English";
 
   var toLangCode = Languages[toLang.toUpperCase()];
@@ -304,12 +302,12 @@ cmd_translate.preview = function( pblock, textToTranslate, languages ) {
   translateTo( textToTranslate, {to:toLangCode}, function( translation ) {
     pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
     pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
-  })
+	      })
 }
 
 
 cmd_translate.DOType = arbText;
-cmd_translate.DOName = "text to translate";
+cmd_translate.DOLabel = "text to translate";
 cmd_translate.modifiers = {to:languageNounType, from:languageNounType};
 
 function cmd_help() {
@@ -320,3 +318,88 @@ cmd_help.preview = function(pblock) {
   pblock.innerHTML = ("Provides help on using Ubiquity, as well " +
                       "as access to preferences, etc.");
 }
+
+
+function findGmailTab() {
+  var window = Application.activeWindow;
+
+  for (var i = 0; i < window.tabs.length; i++) {
+    var tab = window.tabs[i];
+    var location = String(tab.document.location);
+    if (location.indexOf("://mail.google.com") != -1) {
+      return tab;
+    }
+  }
+  return null;
+}
+
+function cmd_email(directObject, modifiers) {
+  var document = context.focusedWindow.document;
+  var title = document.title;
+  var location = document.location;
+  var gmailTab = findGmailTab();
+  /* TODO directObject will have the value of getTextSelection(), not
+   getHtmlSelection().  I guess we need to be able to make a command
+   able to request arbHtml, which is like arbText but affects how the
+   selection is retrieved...? */
+  var html = directObject;
+  //var html = getHtmlSelection();
+
+  if (html)
+    html = ("<p>From the page <a href=\"" + location +
+            "\">" + title + "</a>:</p>" + html);
+  else {
+    displayMessage("No selected HTML!");
+    return;
+  }
+
+  if (gmailTab) {
+    // Note that this is technically insecure because we're
+    // accessing wrappedJSObject, but we're only executing this
+    // in a Gmail tab, and Gmail is trusted code.
+    var console = gmailTab.document.defaultView.wrappedJSObject.console;
+    var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
+
+    var continuer = function() {
+      // For some reason continuer.apply() won't work--we get
+      // a security violation on Function.__parent__--so we'll
+      // manually safety-wrap this.
+      try {
+        var gmail = gmonkey.get("1");
+        var sidebar = gmail.getNavPaneElement();
+        var composeMail = sidebar.getElementsByTagName("span")[0];
+        var event = composeMail.ownerDocument.createEvent("Events");
+        event.initEvent("click", true, false);
+        composeMail.dispatchEvent(event);
+        var active = gmail.getActiveViewElement();
+        var subject = active.getElementsByTagName("input")[0];
+        subject.value = "'"+title+"'";
+        var iframe = active.getElementsByTagName("iframe")[0];
+        iframe.contentDocument.execCommand("insertHTML", false, html);
+        gmailTab.focus();
+      } catch (e) {
+        displayMessage({text: "A gmonkey exception occurred.",
+                        exception: e});
+      }
+    };
+
+    gmonkey.load("1", continuer);
+  } else
+    displayMessage("Gmail must be open in a tab.");
+  // TODO why not open gmail if it's not already open?
+}
+
+cmd_email.preview = function(pblock, directObject, modifiers) {
+  var html = "Creates an email message ";
+  if (modifiers["to"]) {
+    html += "to " + modifiers["to"];
+  }
+  html += "with these contents:" + directObject;
+  pblock.innerHTML = html;
+}
+
+cmd_email.DOLabel = "message";
+cmd_email.DOType = arbText;
+cmd_email.modifiers = {
+  to: PersonNounType
+};

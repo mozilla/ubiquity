@@ -27,7 +27,7 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
                           false);
   textBox.addEventListener("keyup",
                            function(event) { self.__onInput(event); },
-                           false);
+                           true);
 
   this.__resetPreview();
 }
@@ -54,11 +54,11 @@ Ubiquity.prototype = {
     } else if (event.keyCode == this.__KEYCODE_UP) {
       this.__cmdManager.moveIndicationUp( this.__makeContext(),
 					  this.__previewBlock );
-      event.stopPropagation(); //preventDefault();
+      event.preventDefault();
     } else if (event.keyCode == this.__KEYCODE_DOWN) {
       this.__cmdManager.moveIndicationDown( this.__makeContext(),
 					    this.__previewBlock );
-      event.stopPropagation(); //preventDefault();
+      event.preventDefault();  //stopPropagation(); //
     } else
       this.__updatePreview();
   },

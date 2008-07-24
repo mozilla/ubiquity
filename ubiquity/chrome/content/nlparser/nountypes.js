@@ -255,8 +255,8 @@ var languageNounType = new NounType( "language", Languages );
 
 
 const NOUN_LIST = [AddressNounType,
-		                 languageNounType,
-				 PersonNounType,
-				 MathNounType,
-				 DateNounType,
-				 arbText];
+                   languageNounType,
+                   PersonNounType,
+                   MathNounType,
+                   DateNounType,
+                   arbText];
