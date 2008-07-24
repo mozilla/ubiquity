@@ -52,9 +52,13 @@ Ubiquity.prototype = {
         this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
     } else if (event.keyCode == this.__KEYCODE_UP) {
-      this.__cmdManager.moveIndicationUp();
+      this.__cmdManager.moveIndicationUp( this.__makeContext(),
+					  this.__previewBlock );
+      event.stopPropagation(); //preventDefault();
     } else if (event.keyCode == this.__KEYCODE_DOWN) {
-      this.__cmdManager.moveIndicationDown();
+      this.__cmdManager.moveIndicationDown( this.__makeContext(),
+					    this.__previewBlock );
+      event.stopPropagation(); //preventDefault();
     } else
       this.__updatePreview();
   },
