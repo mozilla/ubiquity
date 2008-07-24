@@ -198,3 +198,93 @@ function cmd_redo() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
+
+// -----------------------------------------------------------------
+// TRANSLATE COMMANDS
+// -----------------------------------------------------------------
+
+var Languages = {
+  'ARABIC' : 'ar',
+  'CHINESE' : 'zh',
+  'CHINESE_TRADITIONAL' : 'zh-TW',
+  'DANISH' : 'da',
+  'DUTCH': 'nl',
+  'ENGLISH' : 'en',
+  'FINNISH' : 'fi',
+  'FRENCH' : 'fr',
+  'GERMAN' : 'de',
+  'GREEK' : 'el',
+  'HINDI' : 'hi',
+  'ITALIAN' : 'it',
+  'JAPANESE' : 'ja',
+  'KOREAN' : 'ko',
+  'NORWEGIAN' : 'no',
+  'POLISH' : 'pl',
+  'PORTUGUESE' : 'pt-PT',
+  'ROMANIAN' : 'ro',
+  'RUSSIAN' : 'ru',
+  'SPANISH' : 'es',
+  'SWEDISH' : 'sv'
+};
+
+function translateTo( text, lang, callback ) {  
+  var url = "http://ajax.googleapis.com/ajax/services/language/translate";
+  var params = paramsToString({
+    v: "1.0",
+    q: text,
+    langpair: "|" + lang
+  });
+
+  ajaxGet( url + params, function(jsonData){
+    var data = eval( '(' + jsonData + ')' );
+    
+    // The usefulness of this command is limited because of the
+    // length restriction enforced by Google. A better way to do
+    // this would be to split up the request into multiple chunks.
+    // The other method is to contact Google and get a special
+    // account.
+    
+    try {
+      var translatedText = data.responseData.translatedText;
+    } catch(e) {
+      displayMessage( "Translation Error: " + data.responseDetails )
+      return;
+    }
+    
+    if( typeof callback == "function" )
+      callback( translatedText );
+    else
+      setTextSelection( translatedText );
+  });
+}
+
+function cmd_translate( textToTranslate, languages ) {
+  // Default to translating to English if no to language
+  // is specified.
+  // TODO: Choose the default in a better way.
+  
+  var toLang = languages.to || "English";
+  var fromLang = languages.from || "";
+  var toLangCode = Languages[toLang.toUpperCase()];
+
+  translateTo( textToTranslate, toLangCode );
+}
+
+cmd_translate.preview = function( pblock, textToTranslate, languages ) {
+  if( typeof(languages.to) == "undefined" ) return;
+  var toLang = languages.to || "English";
+  
+  var toLangCode = Languages[toLang.toUpperCase()];
+  var lang = toLang[0].toUpperCase() + toLang.substr(1);
+  
+  pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";    
+  translateTo( textToTranslate, toLangCode, function( translation ) {
+    pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
+    pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
+  })  
+}
+
+
+cmd_translate.DOType = arbText;
+cmd_translate.DOName = "text to translate";
+cmd_translate.modifiers = {to:languageNounType, from:languageNounType};
