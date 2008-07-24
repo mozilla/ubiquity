@@ -125,7 +125,7 @@ function makeSearchCommand(name, urlTemplate, icon) {
   };
 
   cmd.DOType = arbText;
-  cmd.DOName = "search term";
+  cmd.DOLabel = "search term";
   cmd.modifiers = {};
   return cmd;
 }

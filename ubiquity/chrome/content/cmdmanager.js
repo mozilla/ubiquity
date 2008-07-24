@@ -10,6 +10,7 @@ CommandManager.prototype = {
     this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
   },
 
+  // obsolete:
   __getSuggestionContent : function(cmdName) {
     var content = "Suggestions: ";
 
@@ -34,28 +35,17 @@ CommandManager.prototype = {
   preview : function(cmdName, context, previewBlock) {
     var wasPreviewShown = false;
     this.__nlParser.updateSuggestionList(cmdName, context);
-    var parsedSentence = this.__nlParser.getHilitedSentence();
-    if (parsedSentence)
-    {
-      try {
-        parsedSentence.preview(context, previewBlock);
-        wasPreviewShown = true;
-      } catch (e) {
-        this.__msgService.displayMessage(
-          {text: ("An exception occurred while previewing the command '" +
-                  cmdName + "'."),
-           exception: e}
-          );
-      }
-    } else {
-      // No match for the input, but maybe we can suggest another command with
-      // a similar name...?
-      var content;
-      content = this.__getSuggestionContent(cmdName);
-      if (content) {
-        previewBlock.innerHTML = content;
-        wasPreviewShown = true;
-      }
+
+    try {
+      wasPreviewShown = this.__nlParser.setPreviewAndSuggestions(context,
+								 previewBlock);
+      //dump( "Preview block has been set to: " + $("#cmd-preview").html() + "\n");
+    } catch (e) {
+      this.__msgService.displayMessage(
+        {text: ("An exception occurred while previewing the command '" +
+                cmdName + "'."),
+         exception: e}
+        );
     }
     return wasPreviewShown;
   },
@@ -141,10 +131,10 @@ CommandSource.prototype = {
           return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
 
-      if (cmdFunc.DOName)
-	cmd.DOName = cmdFunc.DOName;
+      if (cmdFunc.DOLabel)
+	cmd.DOLabel = cmdFunc.DOLabel;
       else
-	cmd.DOName = null;
+	cmd.DOLabel = null;
       if (cmdFunc.DOType)
 	cmd.DOType = cmdFunc.DOType;
       else

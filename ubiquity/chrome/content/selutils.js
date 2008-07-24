@@ -1,5 +1,4 @@
 function getTextSelection(context) {
-  dump( "getting text selection.\n" );
   var focused = context.focusedElement;
   var retval = "";
 

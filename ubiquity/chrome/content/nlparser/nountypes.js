@@ -42,6 +42,7 @@ function getGmailContacts( callback ) {
     out: "CSV"
   });
 
+  // TODO ajaxGet undefined here
   ajaxGet(url + params , function(data) {
     data = data.split("\n");
 
@@ -115,6 +116,17 @@ var DateNounType = {
     return [ "parsed date: " + date.toString() ];
   }
 };
+
+function paramsToString(params) {
+  var string = "?";
+
+  for (key in params) {
+    string += escape(key) + "=" + escape(params[key]) + "&";
+  }
+
+  // Remove the trailing &
+  return string.substr(0, string.length - 1);
+}
 
 function isAddress( query, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
