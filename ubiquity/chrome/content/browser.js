@@ -3,11 +3,11 @@ var gUbiquity = null;
 function ubiquitySetup()
 {
   var previewIframe = document.getElementById("cmd-preview");
+  var previewBlock = previewIframe.contentDocument.getElementById("preview");
 
   function onDomChange(aEvent) {
     previewIframe.height = previewIframe.contentDocument.height;
-    previewIframe.width = (previewIframe.clientWidth +
-                           previewIframe.contentWindow.scrollMaxX);
+    previewIframe.width = previewBlock.scrollWidth;
   }
 
   previewIframe.contentDocument.addEventListener("DOMSubtreeModified",
@@ -70,7 +70,7 @@ function ubiquitySetup()
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan,
-    previewIframe.contentDocument.getElementById("preview")
+    previewBlock
   );
   cmdSource.refresh();
 }

@@ -132,8 +132,9 @@ NLParser.prototype = {
     }
     //dump( "I made some content: " + content + "\n");
     previewBlock.innerHTML = content;
+    var doc = previewBlock.ownerDocument;
     this._suggestionList[x].preview(context,
-				    document.getElementById("preview-pane"));
+                                    doc.getElementById("preview-pane"));
     //$("#cmd-preview").html( "PRETEND THIS IS A PREVIEW" );
     return true;
   },

@@ -24,14 +24,9 @@ body {
 .gresult-content {
   margin-right: 10px;
   font-size: x-small;  
-  white-space: nowrap;
-  /*overflow: hidden;*/
-  crop: right;
 }
 
 #preview-pane {
-  width: 650px;
-  height: 130px;
   padding: 7px;
 }
 
@@ -69,4 +64,15 @@ body {
   margin-top: 20px;
   font-size: x-small;
   color: #00aa00;
+}
+
+/* formatting for suggestion list */
+
+.hilited {
+    background: #00aa00;
+}
+
+.needarg {
+    font-style: italic;
+    color: #999999;
 }
