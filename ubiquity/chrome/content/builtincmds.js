@@ -1,22 +1,13 @@
 function setGooglePreview(searchTerm, pblock) {
-  var url = "http://ajax.googleapis.com/ajax/services/search/web";
-  var params = "v=1.0&q=" + encodeURIComponent(searchTerm);
-
-  var req = new XMLHttpRequest();
-  req.open('GET', url + "?" + params, true);
-  req.overrideMimeType('application/json');
-  req.onreadystatechange = function() {
-    if (req.readyState == 4 && req.status == 200) {
-      var jObj = eval( '(' + req.responseText + ')' );
-      var count = jObj.responseData.cursor.estimatedResultCount;
-      var numToDisplay = 3;
-      var limitedResults = jObj.responseData.results.splice( 0, numToDisplay );
-      
-      var html = renderTemplate( "searchresults.html", {results:limitedResults} );
-      pblock.innerHTML = html;
-    }
-  };
-  req.send(null);
+  var url = "http://ajax.googleapis.com/ajax/services/search/web";  
+  params = { v: "1.0", q: searchTerm }
+  
+  jQuery.get( url, params, function(data) {
+    var numToDisplay = 3;
+    var results = data.responseData.results.splice( 0, numToDisplay );
+    
+    pblock.innerHTML = renderTemplate( "searchresults.html", {results:results} );
+  }, "json")
 }
 
 function loadMap(lat, lng) {
@@ -138,6 +129,46 @@ var cmd_bugzilla = makeSearchCommand(
   "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   "https://bugzilla.mozilla.org/favicon.ico"
 );
+  
+
+function cmd_yelp( query, info ) {  
+  var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
+  url = url.replace( /{QUERY}/g, query);
+  url = url.replace( /{NEAR}/g, info.near);
+
+  openUrlInBrowser( url );
+}
+
+cmd_yelp.preview = function( pblock, query, info ) {
+  var url = "http://api.yelp.com/business_review_search?";
+  
+  if( query.length == 0 ) return;
+  
+  loc = getLocation();
+  var near = info.near || (loc.city + ", " + loc.state);
+    
+  var params = {
+    term: query,
+    num_biz_requested: 4,
+    location: near,
+    ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
+  }
+  
+  jQuery.get( url, params, function(data) {
+    pblock.innerHTML = renderTemplate( "yelp.html", {businesses: data.businesses} );
+  }, "json")
+  
+}
+
+cmd_yelp.DOName = "restaurant";
+cmd_yelp.DOType = arbText;
+cmd_yelp.icon = "http://www.yelp.com/favicon.ico";
+// TODO: Should be AddressNounType
+// Why doesn't {near:AddressNounType}; work?
+cmd_yelp.modifiers = {near:arbText};
+
+
+
 
 // -----------------------------------------------------------------
 // TEXT COMMANDS
