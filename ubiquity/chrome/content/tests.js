@@ -1,21 +1,31 @@
+const NOUN_LIST = [];
+
+function FakeCommandSource( cmdList ) {
+  this._cmdList = cmdList;
+}
+FakeCommandSource.prototype = {
+  getCommand: function(name) {
+    return this._cmdList[name];
+  },
+  getAllCommands: function(name) {
+    return this._cmdList;
+  }
+};
+
 function testCmdManagerExecutesTwoCmds() {
   var oneWasCalled = false;
   var twoWasCalled = false;
 
-  var fakeSource = {
-    getCommand : function(name) {
-      if (name == "cmd_one")
-        return {execute:function() {oneWasCalled = true;}};
-      else
-        return {execute:function() {twoWasCalled = true;}};
-    }
-  };
+  var fakeSource = new FakeCommandSource(
+    {
+      cmd_one: {execute:function() {oneWasCalled = true;}},
+      cmd_two: {execute:function() {twoWasCalled = true;}}
+    });
 
   var cmdMan = new CommandManager(fakeSource, null);
 
   cmdMan.execute("cmd_one");
   cmdMan.execute("cmd_two");
-
   this.assert(oneWasCalled, "cmd_one must be called.");
   this.assert(twoWasCalled, "cmd_two must be called.");
 }
@@ -23,11 +33,11 @@ function testCmdManagerExecutesTwoCmds() {
 function testCmdManagerExecutesCmd() {
   var wasCalled = false;
 
-  var fakeSource = {
-    getCommand : function() {
-      return {execute:function() {wasCalled = true;}};
+  var fakeSource = new FakeCommandSource (
+    {
+      existentcommand:{execute:function() {wasCalled = true;}}
     }
-  };
+  );
 
   var cmdMan = new CommandManager(fakeSource, null);
 
@@ -40,11 +50,11 @@ function testCmdManagerCatchesExceptionsInCmds() {
     displayMessage: function(msg) { this.lastMsg = msg; }
   };
 
-  var fakeSource = {
-    getCommand: function() {
-      return { execute: function() {throw 1;} };
+  var fakeSource = new FakeCommandSource (
+    {
+      existentcommand:{execute:function() {throw 1;}}
     }
-  };
+  );
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService);
 
@@ -57,7 +67,7 @@ function testCmdManagerCatchesExceptionsInCmds() {
 }
 
 function testCmdManagerDisplaysNoCmdError() {
-  var fakeSource = { getCommand : function() { return false; } };
+  var fakeSource = new FakeCommandSource ( {} );
   var mockMsgService = {
     displayMessage : function(msg) { this.lastMsg = msg; }
   };
