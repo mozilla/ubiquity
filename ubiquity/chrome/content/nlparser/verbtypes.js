@@ -210,9 +210,7 @@ Verb.prototype = {
     var selectionUsed = false;
 
     var selection = getTextSelection(context);
-    window.console.log( "Selection is " + selection );
     if (!selection) {
-      window.console.log( UbiquityGlobals);
       selection = UbiquityGlobals.lastCmdResult;
     }
     var htmlSelection = getHtmlSelection(context);
