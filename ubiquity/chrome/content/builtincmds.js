@@ -10,30 +10,13 @@ function setGooglePreview(searchTerm, pblock) {
       var jObj = eval( '(' + req.responseText + ')' );
       var count = jObj.responseData.cursor.estimatedResultCount;
       var numToDisplay = 3;
-      var results = jObj.responseData.results;
-      var html = "";
-
-      if (numToDisplay < count) {
-        for (var i=0; i<numToDisplay; i++) {
-          var title = results[i].title;
-          var content = results[i].content;
-          var url = results[i].url;
-          var visibleUrl = results[i].visibleUrl;
-
-          html = html + "<div class=\"gresult\">" +
-                        "<div><a onclick=\"window.content.location.href = '" + url + "';\">" +
-                                title +
-                        "</a></div>" +
-                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
-                        "<div class=\"gresult-url\">" + visibleUrl +
-                        "</div></div>";
-        }
-      }
+      var limitedResults = jObj.responseData.results.splice( 0, numToDisplay );
+      
+      var html = renderTemplate( "searchresults.html", {results:limitedResults} );
       pblock.innerHTML = html;
     }
   };
   req.send(null);
-
 }
 
 function loadMap(lat, lng) {
@@ -96,30 +79,32 @@ function setMapPreview(searchTerm, pblock) {
   req.send(null);
 }
 
-
+function setDefaultSearchPreview( name, query, pblock ) {
+  var content = ("Performs a " + name + " search for <b>" +
+            escape(query) + "</b>.");
+  pblock.innerHTML = content;
+}
 
 function makeSearchCommand(name, urlTemplate, icon) {
-  var cmd = function(directObject, modifiers) {
-    var urlString = urlTemplate.replace("{QUERY}", directObject);
+  var cmd = function(query, modifiers) {
+    var urlString = urlTemplate.replace("{QUERY}", query);
     openUrlInBrowser(urlString);
+    setLastResult( urlString );
   };
 
   cmd.icon = icon;
 
-  cmd.preview = function(pblock, directObject, modifiers) {
-    if (directObject) {
-      if (name == "Google") {
-        setGooglePreview(directObject, pblock);
-        // TODO: Start throbber animation.
-      }
-      else if (name == "Google Maps") {
-        setMapPreview(directObject, pblock);
-        // TODO: Start throbber animation.
-      }
-      else {
-        var content = ("Performs a " + name + " search for <b>" +
-                  escape(directObject) + "</b>.");
-        pblock.innerHTML = content;
+  cmd.preview = function(pblock, query, modifiers) {
+    if (query) {
+      switch( name ) {
+        case "Google":
+          setGooglePreview(query, pblock);
+          break;
+        case "Google Maps":
+          setMapPreview(query, pblock);
+          break;
+        default:
+          setDefaultSearchPreview(name, query, pblock);
       }
     }
   };
@@ -146,6 +131,12 @@ var cmd_map_it = makeSearchCommand(
   "Google Maps",
   "http://maps.google.com/?q={QUERY}",
   "http://www.google.com/favicon.ico"
+);
+
+var cmd_bugzilla = makeSearchCommand(
+  "Bugzilla",
+  "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
+  "https://bugzilla.mozilla.org/favicon.ico"
 );
 
 // -----------------------------------------------------------------
@@ -199,9 +190,11 @@ function cmd_redo() {
 
 
 function cmd_calculate( expr ) {
-  if( expr.length > 0 )
-    setTextSelection( eval(expr) );
-  else
+  if( expr.length > 0 ) {
+    var result = eval( expr );
+    setTextSelection( result );
+    setLastResult( result );
+  } else
     displayMessage( "Requires an expression.");
 }
 
@@ -340,6 +333,8 @@ function translateTo( text, langCodePair, callback ) {
       callback( translatedText );
     else
       setTextSelection( translatedText );
+
+    setLastResult( translatedText );
   });
 }
 
@@ -400,18 +395,12 @@ function findGmailTab() {
   return null;
 }
 
-function cmd_email(directObject, modifiers) {
+function cmd_email(html, headers) {
   var document = context.focusedWindow.document;
   var title = document.title;
   var location = document.location;
   var gmailTab = findGmailTab();
-  /* TODO directObject will have the value of getTextSelection(), not
-   getHtmlSelection().  I guess we need to be able to make a command
-   able to request arbHtml, which is like arbText but affects how the
-   selection is retrieved...? */
-  var html = directObject;
-  //var html = getHtmlSelection();
-  dump( "email html is " + html + "\n" );
+  /* TODO get headers["to"] and put it in the right field*/
   if (html)
     html = ("<p>From the page <a href=\"" + location +
             "\">" + title + "</a>:</p>" + html);
@@ -475,3 +464,15 @@ cmd_email.modifiers = {
 function cmd_editor() {
   openUrlInBrowser("chrome://ubiquity/content/editor.html");
 }
+
+function cmd_dostuff() {
+  displayMessage( "I am doing stuff!\n" );
+}
+
+function cmd_remember( directObj, modifiers ) {
+  displayMessage( "I am remembering " + directObj );
+  setLastResult( directObj );
+}
+cmd_remember.DOLabel = "thing";
+cmd_remember.DOType = arbText;
+cmd_remember.modifiers = {};

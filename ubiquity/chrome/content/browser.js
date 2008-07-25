@@ -28,6 +28,7 @@ function ubiquitySetup()
     XPathResult: XPathResult,
     XMLHttpRequest: XMLHttpRequest,
     jQuery: jQuery,
+    Template: TrimPath,
     Application: Application,
     Components: Components,
     window: window,

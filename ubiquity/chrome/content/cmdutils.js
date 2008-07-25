@@ -255,7 +255,7 @@ function paramsToString(params) {
   return string.substr(0, string.length - 1);
 }
 
-function getTextSelection(context) {
+function getTextSelection() {
   var focused = context.focusedElement;
   var retval = "";
 
@@ -269,4 +269,16 @@ function getTextSelection(context) {
       retval = sel.toString();
   }
   return retval;
+}
+
+function renderTemplate( templateName, data ) {
+  var chromePrefixUrl = "chrome://ubiquity/content/templates/";
+    
+  var template = getLocalUrl( chromePrefixUrl + templateName );
+  template = Template.parseTemplate( template );
+  return template.process( data );
+}
+
+function setLastResult( result ) {
+  globals.lastCmdResult = result;
 }

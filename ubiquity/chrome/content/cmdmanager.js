@@ -47,7 +47,7 @@ CommandManager.prototype = {
       } catch (e) {
         this.__msgService.displayMessage(
           {text: ("An exception occurred while running the command '" +
-                  cmd.name + "'."),
+                  cmdName + "'."),
            exception: e}
         );
       }

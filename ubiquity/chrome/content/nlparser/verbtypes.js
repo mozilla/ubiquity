@@ -1,5 +1,7 @@
 const SELECTION_PRONOUNS = [ "this", "that", "it", "selection", "him", "her", "them"];
 
+Components.utils.import("resource://ubiquity-modules/globals.js");
+
 // util functions to make it easier to use objects as fake dictionaries
 function dictDeepCopy( dict ) {
   var newDict = {};
@@ -203,22 +205,14 @@ Verb.prototype = {
     }
   },
 
-  getCompletions: function( words, context ) {
-    /* returns a list of ParsedSentences. */
-    /* words is an array of words that were space-separated.
-       The first word, which matched this verb, has already been removed.
-       Everything after that is either:
-       1. my direct object
-       2. a preposition
-       3. a noun following a preposition.
-    */
-
-    /* Look for words that refer to selection: */
-    var completions = [];
+  substitutePronoun: function( words, context ) {
     var subbedWords = words.slice();
     var selectionUsed = false;
 
     var selection = getTextSelection(context);
+    if (!selection) {
+      selection = UbiquityGlobals.lastCmdResult;
+    }
     var htmlSelection = getHtmlSelection(context);
     if (!htmlSelection)
       htmlSelection = selection;
@@ -235,9 +229,30 @@ Verb.prototype = {
       }
     }
 
-    if ( selectionUsed ) {
-      completions = this.recursiveParse( subbedWords, {}, this._modifiers );
-    }
+    if ( selectionUsed )
+      return subbedWords;
+    else
+      return false;
+  },
+
+  getCompletions: function( words, context ) {
+    /* returns a list of ParsedSentences. */
+    /* words is an array of words that were space-separated.
+       The first word, which matched this verb, has already been removed.
+       Everything after that is either:
+       1. my direct object
+       2. a preposition
+       3. a noun following a preposition.
+    */
+
+    /* Look for words that refer to selection: */
+    var completions = [];
+    var wordsWithPronounSubstituted = this.substitutePronoun( words, context );
+
+    if ( wordsWithPronounSubstituted )
+      completions = this.recursiveParse( wordsWithPronounSubstituted,
+					 {},
+					 this._modifiers );
 
     /* Also parse without that substitution, return both ways: */
     var completionsNoSub = this.recursiveParse( words, {}, this._modifiers );
