@@ -148,6 +148,12 @@ var cmd_map_it = makeSearchCommand(
   "http://www.google.com/favicon.ico"
 );
 
+var cmd_bugzilla = makeSearchCommand(
+  "Bugzilla",
+  "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
+  "https://bugzilla.mozilla.org/favicon.ico"
+);
+
 // -----------------------------------------------------------------
 // TEXT COMMANDS
 // -----------------------------------------------------------------
@@ -400,18 +406,12 @@ function findGmailTab() {
   return null;
 }
 
-function cmd_email(directObject, modifiers) {
+function cmd_email(html, headers) {
   var document = context.focusedWindow.document;
   var title = document.title;
   var location = document.location;
   var gmailTab = findGmailTab();
-  /* TODO directObject will have the value of getTextSelection(), not
-   getHtmlSelection().  I guess we need to be able to make a command
-   able to request arbHtml, which is like arbText but affects how the
-   selection is retrieved...? */
-  var html = directObject;
-  //var html = getHtmlSelection();
-  dump( "email html is " + html + "\n" );
+  /* TODO get headers["to"] and put it in the right field*/
   if (html)
     html = ("<p>From the page <a href=\"" + location +
             "\">" + title + "</a>:</p>" + html);
@@ -474,4 +474,8 @@ cmd_email.modifiers = {
 
 function cmd_editor() {
   openUrlInBrowser("chrome://ubiquity/content/editor.html");
+}
+
+function cmd_dostuff() {
+  displayMessage( "I am doing stuff!\n" );
 }
