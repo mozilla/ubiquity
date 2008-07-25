@@ -10,30 +10,13 @@ function setGooglePreview(searchTerm, pblock) {
       var jObj = eval( '(' + req.responseText + ')' );
       var count = jObj.responseData.cursor.estimatedResultCount;
       var numToDisplay = 3;
-      var results = jObj.responseData.results;
-      var html = "";
-
-      if (numToDisplay < count) {
-        for (var i=0; i<numToDisplay; i++) {
-          var title = results[i].title;
-          var content = results[i].content;
-          var url = results[i].url;
-          var visibleUrl = results[i].visibleUrl;
-
-          html = html + "<div class=\"gresult\">" +
-                        "<div><a onclick=\"window.content.location.href = '" + url + "';\">" +
-                                title +
-                        "</a></div>" +
-                        "<xul:description class=\"gresult-content\">" + content + "</xul:description>" +
-                        "<div class=\"gresult-url\">" + visibleUrl +
-                        "</div></div>";
-        }
-      }
+      var limitedResults = jObj.responseData.results.splice( 0, numToDisplay );
+      
+      var html = renderTemplate( "searchresults.html", {results:limitedResults} );
       pblock.innerHTML = html;
     }
   };
   req.send(null);
-
 }
 
 function loadMap(lat, lng) {
@@ -96,30 +79,32 @@ function setMapPreview(searchTerm, pblock) {
   req.send(null);
 }
 
+function setDefaultSearchPreview( name, query, pblock ) {
+  var content = ("Performs a " + name + " search for <b>" +
+            escape(query) + "</b>.");
+  pblock.innerHTML = content;
+}
 
 function makeSearchCommand(name, urlTemplate, icon) {
-  var cmd = function(directObject, modifiers) {
-    var urlString = urlTemplate.replace("{QUERY}", directObject);
+  var cmd = function(query, modifiers) {
+    var urlString = urlTemplate.replace("{QUERY}", query);
     openUrlInBrowser(urlString);
     setLastResult( urlString );
   };
 
   cmd.icon = icon;
 
-  cmd.preview = function(pblock, directObject, modifiers) {
-    if (directObject) {
-      if (name == "Google") {
-        setGooglePreview(directObject, pblock);
-        // TODO: Start throbber animation.
-      }
-      else if (name == "Google Maps") {
-        setMapPreview(directObject, pblock);
-        // TODO: Start throbber animation.
-      }
-      else {
-        var content = ("Performs a " + name + " search for <b>" +
-                  escape(directObject) + "</b>.");
-        pblock.innerHTML = content;
+  cmd.preview = function(pblock, query, modifiers) {
+    if (query) {
+      switch( name ) {
+        case "Google":
+          setGooglePreview(query, pblock);
+          break;
+        case "Google Maps":
+          setMapPreview(query, pblock);
+          break;
+        default:
+          setDefaultSearchPreview(name, query, pblock);
       }
     }
   };

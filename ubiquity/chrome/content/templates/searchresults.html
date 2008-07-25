@@ -1,0 +1,9 @@
+{for result in results}
+<div class="gresult">
+  <div>
+    <a onclick="window.content.location.href = '${result.url}';">${result.title}</a>
+  </div>
+  <xul:description class="gresult-content">${result.content}</xul:description>
+  <div class="gresult-url">${result.visibleUrl}</div>
+</div>
+{/for}

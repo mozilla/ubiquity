@@ -271,6 +271,14 @@ function getTextSelection() {
   return retval;
 }
 
+function renderTemplate( templateName, data ) {
+  var chromePrefixUrl = "chrome://ubiquity/content/templates/";
+    
+  var template = getLocalUrl( chromePrefixUrl + templateName );
+  template = Template.parseTemplate( template );
+  return template.process( data );
+}
+
 function setLastResult( result ) {
   globals.lastCmdResult = result;
 }
