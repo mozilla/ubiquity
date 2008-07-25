@@ -41,3 +41,19 @@ function ajaxGet(url, callbackFunction) {
 
   request.send(null);
 }
+
+function safeWrapper(func) {
+  var wrappedFunc = function() {
+    try {
+      func.apply(this, arguments);
+    } catch (e) {
+      displayMessage(
+        {text: ("An exception occurred while running " +
+                func.name + "()."),
+         exception: e}
+      );
+    }
+  };
+
+  return wrappedFunc;
+}
