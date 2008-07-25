@@ -411,7 +411,7 @@ function cmd_email(directObject, modifiers) {
    selection is retrieved...? */
   var html = directObject;
   //var html = getHtmlSelection();
-
+  dump( "email html is " + html + "\n" );
   if (html)
     html = ("<p>From the page <a href=\"" + location +
             "\">" + title + "</a>:</p>" + html);
