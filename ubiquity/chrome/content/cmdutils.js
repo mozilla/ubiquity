@@ -282,3 +282,28 @@ function renderTemplate( templateName, data ) {
 function setLastResult( result ) {
   globals.lastCmdResult = result;
 }
+
+// Uses Geo-ip lookup to get your current location.
+function getLocation( ){
+  if( globals.location ) return globals.location;
+
+  jQuery.ajax({
+    type: "GET",
+    url: "http://j.maxmind.com/app/geoip.js",
+    dataType: "text",
+    async: false,
+    success: function( js ) {
+      eval( js );
+      var loc = geoip_city() + ", " + geoip_region();
+      globals.location = {
+        city: geoip_city(),
+        state: geoip_region_name(),
+        country: geoip_country_name(),
+        lat: geoip_latitude(),
+        long: geoip_longitude()
+      };
+    }
+  });
+  
+  return globals.location;
+}
