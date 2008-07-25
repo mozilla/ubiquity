@@ -27,6 +27,19 @@ function getTextSelection(context) {
   return retval;
 }
 
+function getHtmlSelection(context) {
+  var sel = context.focusedWindow.getSelection();
+
+  if (sel.rangeCount >= 1) {
+    var html = sel.getRangeAt(0).cloneContents();
+    var newNode = context.focusedWindow.document.createElement("p");
+    newNode.appendChild(html);
+    return newNode.innerHTML;
+  }
+
+  return null;
+}
+
 function ajaxGet(url, callbackFunction) {
   var request = new window.XMLHttpRequest();
   request.open("GET", url, true);

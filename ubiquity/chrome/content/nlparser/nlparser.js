@@ -153,8 +153,10 @@ NLParser.prototype = {
       }
     }
     previewBlock.innerHTML = content;
-    if ( this._suggestionList.length > 0 ) {
+    if ( this._suggestionList.length > 0 && this._hilitedSuggestion > 0) {
       var doc = previewBlock.ownerDocument;
+      window.console.log( this._hilitedSuggestion - 1);
+      window.console.log( "out of " + this._suggestionList.length );
       var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
       activeSugg.preview(context, doc.getElementById("preview-pane"));
     }

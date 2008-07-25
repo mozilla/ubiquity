@@ -39,6 +39,7 @@ function ubiquitySetup()
     PersonNounType: PersonNounType,
     MathNounType: MathNounType,
     DateNounType: DateNounType,
+    arbHtml: arbHtml,
     //getTextSelection: getTextSelection,
     //paramsToString: paramsToString,
     displayMessage: function() {

@@ -102,6 +102,16 @@ var arbText = {
   }
 };
 
+var arbHtml = {
+  _name: "html",
+  match: function( fragment ) {
+    return true;
+  },
+  suggest: function( fragment ) {
+    return [ fragment ];
+  }
+};
+
 var DateNounType = {
   match: function( fragment ) {
     return (this.suggest(fragment).length > 0 );
@@ -248,4 +258,5 @@ const NOUN_LIST = [AddressNounType,
                    PersonNounType,
                    MathNounType,
                    DateNounType,
-                   arbText];
+                   arbText,
+		   arbHtml];

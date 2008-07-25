@@ -466,7 +466,7 @@ cmd_email.preview = function(pblock, directObject, modifiers) {
 }
 
 cmd_email.DOLabel = "message";
-cmd_email.DOType = arbText;
+cmd_email.DOType = arbHtml;
 cmd_email.modifiers = {
   to: PersonNounType
 };

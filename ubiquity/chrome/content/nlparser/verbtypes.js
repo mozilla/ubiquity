@@ -217,18 +217,24 @@ Verb.prototype = {
     var completions = [];
     var subbedWords = words.slice();
     var selectionUsed = false;
+
     var selection = getTextSelection(context);
-    if ( selection ) {
-      for ( var x in SELECTION_PRONOUNS ) {
-	var index = subbedWords.indexOf( SELECTION_PRONOUNS[x] );
-	if ( index > -1 ) {
+    var htmlSelection = getHtmlSelection(context);
+    if (!htmlSelection)
+      htmlSelection = selection;
+    for ( var x in SELECTION_PRONOUNS ) {
+      var index = subbedWords.indexOf( SELECTION_PRONOUNS[x] );
+      if ( index > -1 ) {
+	if (selection && this.canPossiblyUseNounType(arbText)) {
 	  subbedWords.splice( index, 1, selection );
-	  // Notice the above line doesn't do what I want if selection
-	  // is more than one word.
+	  selectionUsed = true;
+	} else if (htmlSelection && this.canPossiblyUseNounType(arbHtml)) {
+	  subbedWords.splice( index, 1, htmlSelection );
 	  selectionUsed = true;
 	}
       }
     }
+
     if ( selectionUsed ) {
       completions = this.recursiveParse( subbedWords, {}, this._modifiers );
     }
