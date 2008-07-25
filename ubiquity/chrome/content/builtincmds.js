@@ -97,11 +97,11 @@ function setMapPreview(searchTerm, pblock) {
 }
 
 
-
 function makeSearchCommand(name, urlTemplate, icon) {
   var cmd = function(directObject, modifiers) {
     var urlString = urlTemplate.replace("{QUERY}", directObject);
     openUrlInBrowser(urlString);
+    setLastResult( urlString );
   };
 
   cmd.icon = icon;
@@ -205,9 +205,11 @@ function cmd_redo() {
 
 
 function cmd_calculate( expr ) {
-  if( expr.length > 0 )
-    setTextSelection( eval(expr) );
-  else
+  if( expr.length > 0 ) {
+    var result = eval( expr );
+    setTextSelection( result );
+    setLastResult( result );
+  } else
     displayMessage( "Requires an expression.");
 }
 
@@ -346,6 +348,8 @@ function translateTo( text, langCodePair, callback ) {
       callback( translatedText );
     else
       setTextSelection( translatedText );
+
+    setLastResult( translatedText );
   });
 }
 
@@ -479,3 +483,11 @@ function cmd_editor() {
 function cmd_dostuff() {
   displayMessage( "I am doing stuff!\n" );
 }
+
+function cmd_remember( directObj, modifiers ) {
+  displayMessage( "I am remembering " + directObj );
+  setLastResult( directObj );
+}
+cmd_remember.DOLabel = "thing";
+cmd_remember.DOType = arbText;
+cmd_remember.modifiers = {};

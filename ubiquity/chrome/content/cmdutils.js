@@ -255,7 +255,7 @@ function paramsToString(params) {
   return string.substr(0, string.length - 1);
 }
 
-function getTextSelection(context) {
+function getTextSelection() {
   var focused = context.focusedElement;
   var retval = "";
 
@@ -269,4 +269,8 @@ function getTextSelection(context) {
       retval = sel.toString();
   }
   return retval;
+}
+
+function setLastResult( result ) {
+  globals.lastCmdResult = result;
 }
