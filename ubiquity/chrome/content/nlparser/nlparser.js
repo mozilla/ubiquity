@@ -145,8 +145,8 @@ NLParser.prototype = {
     for (var x in this._suggestionList ) {
       var suggText = this._suggestionList[x].getDisplayText();
       if ( x == this._hilitedSuggestion - 1 ) {
-	var descText = this._suggestionList[x].getDescription();
-	content += "<div class=\"hilited\">" + descText + "<br/>";
+	//var descText = this._suggestionList[x].getDescription();
+	content += "<div class=\"hilited\">"; // + descText + "<br/>";
 	content += suggText + "<br/><div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
       } else {
 	content += "<div>" + suggText + "</div>";
