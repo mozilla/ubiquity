@@ -22,7 +22,7 @@
 
 {for biz in businesses}
 <div class="biz">
-  <img src="${biz.photo_url_small}"/>
+  <img src="${biz.photo_url_small}" height="40" width="40"/>
   {var phone = biz.phone.replace(/(\d\d\d)(\d\d\d)(\d\d\d\d)/, "$1.$2.$3")}
   <span class="name"><a href="${biz.url}">${biz.name}</a></span> in ${biz.city} (${phone}) &mdash;
   ${biz.avg_rating} stars.

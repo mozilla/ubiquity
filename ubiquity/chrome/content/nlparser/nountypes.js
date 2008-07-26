@@ -82,12 +82,15 @@ var PersonNounType = {
       getGmailContacts( PersonNounType.callback);
       return [];
     }
+    
+    if( fragment.length < 3 ) return [];
+    
     var suggestions  = [];
     for ( var c in PersonNounType.contactList ) {
       if (c.match(fragment, "i"))
-	suggestions.push(PersonNounType.contactList[c]);
+	      suggestions.push(PersonNounType.contactList[c]);
     }
-    return suggestions;
+    return suggestions.splice(0, 5);
   },
 }
 
