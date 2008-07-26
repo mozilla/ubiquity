@@ -551,9 +551,43 @@ cmd_add_to_google_calendar.DOLabel = "event";
 cmd_add_to_google_calendar.DOType = arbText;
 cmd_add_to_google_calendar.modifiers = {};
 cmd_add_to_google_calendar.preview = function(pblock, directObj, modifiers) {
-  pblock.innerHtml = "Adds \"" + directObj + "\" to Google Calendar.";
+  pblock.innerHTML = "Adds \"" + directObj + "\" to Google Calendar.";
 };
 cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
+
+
+function checkCalendar(date) {
+  date = date._toString("yyyyMMdd");
+
+  var url = "http://www.google.com/calendar/m";
+  var params = paramsToString({ as_sdt: date });
+
+  // jQuery is already loaded because we've done a humane prompt before
+  // getting here.
+  var $ = window.jQuery;
+
+  ajaxGet(url + params, function(html) {
+    var output = "";
+    $(html).find(".c2").each(function() {
+      // Strip out the extra whitespace.
+      var text = $(this).text().replace(/[ ]+/g, " ");
+      text = text.replace(/ \n /g, " ");
+      output += text + "\n";
+    });
+    displayMessage(output);
+  });
+}
+
+function cmd_check_calendar(date, modifiers) {
+  checkCalendar(date);
+}
+cmd_check_calendar.DOLabel = "date to check";
+cmd_check_calendar.DOType = DateNounType;
+cmd_check_calendar.modifiers ={};
+cmd_check_calendar.preview = function( pblock, date, modifiers ) {
+  pblock.innerHTML = "Checks Google Calendar for events on " +
+		       date.toString("yyyy/MM/dd");
+};
 
 
 function cmd_editor() {
