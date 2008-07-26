@@ -25,7 +25,7 @@ cmd_test_mapping.preview = function(pblock) {
     browser.setAttribute("width", 500);
     browser.setAttribute("height", 300);
     function onBrowserLoad() {
-      window.console.log(browser.wrappedJSObject.contentDocument);
+      //window.console.log(browser.wrappedJSObject.contentDocument);
     }
     browser.addEventListener("load", safeWrapper(onBrowserLoad), false);
     iframe.contentDocument.documentElement.appendChild(browser);
