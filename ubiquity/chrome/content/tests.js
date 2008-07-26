@@ -2,6 +2,9 @@ const NOUN_LIST = [];
 
 function FakeCommandSource( cmdList ) {
   this._cmdList = cmdList;
+  for ( var x in cmdList ) {
+    this._cmdList[x].name = x;
+  }
 }
 FakeCommandSource.prototype = {
   getCommand: function(name) {
@@ -11,6 +14,14 @@ FakeCommandSource.prototype = {
     return this._cmdList;
   }
 };
+
+function getTextSelection(context) {
+  return "";
+}
+
+function getHtmlSelection(context) {
+  return "";
+}
 
 function testCmdManagerExecutesTwoCmds() {
   var oneWasCalled = false;
@@ -40,7 +51,6 @@ function testCmdManagerExecutesCmd() {
   );
 
   var cmdMan = new CommandManager(fakeSource, null);
-
   cmdMan.execute("existentcommand");
   this.assert(wasCalled, "command.execute() must be called.");
 }
