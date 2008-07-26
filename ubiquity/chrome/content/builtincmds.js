@@ -1,13 +1,13 @@
 function setGooglePreview(searchTerm, pblock) {
-  var url = "http://ajax.googleapis.com/ajax/services/search/web";  
-  params = { v: "1.0", q: searchTerm }
-  
+  var url = "http://ajax.googleapis.com/ajax/services/search/web";
+  var params = { v: "1.0", q: searchTerm };
+
   jQuery.get( url, params, function(data) {
     var numToDisplay = 3;
     var results = data.responseData.results.splice( 0, numToDisplay );
-    
+
     pblock.innerHTML = renderTemplate( "searchresults.html", {results:results} );
-  }, "json")
+	      }, "json");
 }
 
 function loadMap(lat, lng) {
@@ -129,9 +129,9 @@ var cmd_bugzilla = makeSearchCommand(
   "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   "https://bugzilla.mozilla.org/favicon.ico"
 );
-  
 
-function cmd_yelp( query, info ) {  
+
+function cmd_yelp( query, info ) {
   var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
   url = url.replace( /{QUERY}/g, query);
   url = url.replace( /{NEAR}/g, info.near);
@@ -141,23 +141,23 @@ function cmd_yelp( query, info ) {
 
 cmd_yelp.preview = function( pblock, query, info ) {
   var url = "http://api.yelp.com/business_review_search?";
-  
+
   if( query.length == 0 ) return;
-  
+
   loc = getLocation();
   var near = info.near || (loc.city + ", " + loc.state);
-    
+
   var params = {
     term: query,
     num_biz_requested: 4,
     location: near,
     ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
   }
-  
+
   jQuery.get( url, params, function(data) {
     pblock.innerHTML = renderTemplate( "yelp.html", {businesses: data.businesses} );
   }, "json")
-  
+
 }
 
 cmd_yelp.DOName = "restaurant";
@@ -491,13 +491,73 @@ cmd_email.modifiers = {
   to: PersonNounType
 };
 
+function addToGoogleCalendar(eventString) {
+  var secid = getCookie("www.google.com", "secid");
+
+  var URLS = {
+    parse: "http://www.google.com/calendar/compose",
+    create: "http://www.google.com/calendar/event"
+  };
+
+  function parseGoogleJson(json) {
+    var securityPreface = "while(1)";
+    var splitString = json.split( ";", 2 );
+    if ( splitString[0] != securityPreface ) {
+      displayMessage( "Unexpected Return Value" );
+      return null;
+    }
+    // TODO: Security hull breach!
+    return eval( splitString[1] )[0];
+  }
+
+  var params = paramsToString({
+    "ctext": eventString,
+    "qa-src": "QUICK_ADD_BOX"
+  });
+
+  ajaxGet(URLS["parse"]+params, function(json) {
+    var data = parseGoogleJson( json );
+    var eventText = data[1];
+    var eventStart = data[4];
+    var eventEnd = data[5];
+    var secid = getCookie("www.google.com", "secid");
+
+    var params = paramsToString({
+      "dates": eventStart + "/" + eventEnd,
+      "text": eventText,
+      "secid": secid,
+      "action": "CREATE",
+      "output": "js"
+    });
+
+    ajaxGet(URLS["create"] + params, function(json) {
+      // TODO: Should verify this, and print appropriate positive
+      // understand feedback. Like "blah at such a time was created.
+      displayMessage("Event created.");
+
+      // TODO: Should iterate through open tabs and cause any open
+      // Google Calendar tabs to refresh.
+    });
+  });
+}
+
+/* TODO this comman just takes unstructured text right now and relies on
+ google calendar to figure it out.  So we're not using the DateNounType
+ here.  Should we be?  And, is there a better name for this command? */
+function cmd_add_to_google_calendar( directObj, modifiers ) {
+  addToGoogleCalendar(directObj);
+}
+cmd_add_to_google_calendar.DOLabel = "event";
+cmd_add_to_google_calendar.DOType = arbText;
+cmd_add_to_google_calendar.modifiers = {};
+cmd_add_to_google_calendar.preview = function(pblock, directObj, modifiers) {
+  pblock.innerHtml = "Adds \"" + directObj + "\" to Google Calendar.";
+};
+cmd_add_to_google_calendar.icon = "http://google.com/favicon.ico";
+
 
 function cmd_editor() {
   openUrlInBrowser("chrome://ubiquity/content/editor.html");
-}
-
-function cmd_dostuff() {
-  displayMessage( "I am doing stuff!\n" );
 }
 
 function cmd_remember( directObj, modifiers ) {
