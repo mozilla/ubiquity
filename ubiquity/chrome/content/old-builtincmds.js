@@ -19,13 +19,13 @@ function makeSearchCommand(name, urlTemplate, icon) {
     if (sel) {
       if (name == "Google") {
         setGooglePreview(sel, pblock);
-        pblock.innerHTML = ("Getting google results for <b>" + 
+        pblock.innerHTML = ("Getting google results for <b>" +
                            escape(sel) + "</b>...");
       }
       else if (name == "Google Maps") {
         setMapPreview(sel, pblock);
-        pblock.innerHTML = ("Getting map for <b>" + 
-                           escape(sel) + "</b>...");        
+        pblock.innerHTML = ("Getting map for <b>" +
+                           escape(sel) + "</b>...");
       }
       else {
         content = ("Performs a " + name + " search for <b>" +
@@ -106,7 +106,7 @@ function setMapPreview(searchTerm, pblock) {
   var doc = context.focusedWindow.document;
   var url = "http://maps.google.com/maps/geo";
   var apikey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
-  var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);   
+  var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);
 
   var req = new XMLHttpRequest();
   req.open('GET', url + "?" + params, true);
@@ -115,7 +115,7 @@ function setMapPreview(searchTerm, pblock) {
     if (req.readyState == 4 && req.status == 200) {
       var jobj = eval( '(' + req.responseText + ')' );
       var numToDisplay = 3;
-        
+
       if (!jobj.Placemark) {
         displayMessage("not specific enough");
         return;
@@ -130,23 +130,23 @@ function setMapPreview(searchTerm, pblock) {
         if (jobj.Placemark[i]) {
           var address = jobj.Placemark[i].address;
           var lng = jobj.Placemark[i].Point.coordinates[0];
-          var lat = jobj.Placemark[i].Point.coordinates[1]; 
-        
-          html = html + "<div class=\"gaddress\">" + 
-                        "<a href=\"#\" onclick=\"loadMap(" + lat + ", " + lng + ");\">" + 
+          var lat = jobj.Placemark[i].Point.coordinates[1];
+
+          html = html + "<div class=\"gaddress\">" +
+                        "<a href=\"#\" onclick=\"loadMap(" + lat + ", " + lng + ");\">" +
                         address + "</a></div>";
         }
       }
-      html = html + "</div>" + 
-                    "<div id=\"map\">[map]</div>"; 
-                    
+      html = html + "</div>" +
+                    "<div id=\"map\">[map]</div>";
+
       // For now, just displaying the address listings and the map
-      pblock.innerHTML = html;   
-      
+      pblock.innerHTML = html;
+
       // This call to load map doesn't have access to the google api script which is currently included in the popup in browser.xul
       // Possibly insert a script tag here instead- doesn't seem to be working either: doesn't actually LOAD (ie: onload event never fires)
       loadMap(lat0, lng0);
-      
+
     }
   };
   req.send(null);
@@ -266,8 +266,8 @@ function cmd_link_to_wikipedia() {
 
 function cmd_escape_html_entities() {
   var text = getTextSelection();
-  text = text.replace(/</g, "&amp;lt;");  
-  text = text.replace(/>/g, "&amp;gt;");  
+  text = text.replace(/</g, "&amp;lt;");
+  text = text.replace(/>/g, "&amp;gt;");
   setTextSelection( text );
 }
 
@@ -284,12 +284,12 @@ cmd_word_count.preview = function(pblock) {
 function wordCount(text){
 	var words = text.split(" ");
 	var wordCount = 0;
-	
+
 	for(i=0; i<words.length; i++){
 		if (words[i].length > 0)
 			wordCount++;
 	}
-	
+
 	return wordCount;
 }
 
@@ -340,7 +340,7 @@ function isAddress( query, callback ) {
   // Culled from http://www.usps.com/ncsc/lookups/abbr_suffix.txt
   var streetAbbr = "way,wls,cpe,orchrd,crescent,fall,beach,mssn,ramp,opas,kys,spg,jctn,tunel,byu,parkways,cove,byp,springs,islands,river,spur,jcts,viadct,pines,express,mnrs,tunls,groves,street,sumitt,loop,view,cmn,crsnt,pkwys,trk,throughway,square,cswy,cmp,centr,vlg,vly,frd,common,mtwy,grv,flat,loaf,jctns,inlet,union,bayoo,drives,bayou,grn,ferry,trce,blf,blfs,bypas,ml,radl,hls,vws,mt,grdn,hbrs,ft,gln,cts,smt,knol,station,bend,corner,point,shl,mdw,burgs,estate,crsent,corners,mount,mntain,medows,sprngs,grvs,turnpike,creek,sq,st,aly,roads,radiel,overpass,trls,ridge,forests,green,lf,gardn,vdct,la,ln,lk,bluff,cliffs,stravn,fork,frgs,sta,strave,keys,stn,ranch,forg,rest,ford,frway,crssng,cntr,str,knoll,fort,boul,sqrs,haven,nck,rst,pikes,glens,pne,sqre,rapid,pkway,gardens,pike,rad,exts,bottom,strav,frry,lcks,cnyn,rd,prt,prr,extn,road,crse,curve,shoars,crst,via,xing,streme,lake,trail,brks,radial,expressway,junctions,cliff,cnter,passage,trafficway,parkwy,frds,meadows,harbors,rte,mountain,greens,annx,cen,pky,falls,strvn,brnch,hill,village,plns,shr,missn,tunl,hgts,plaza,expy,motorway,bottm,shrs,hway,crest,highway,glen,shores,mountin,cres,canyon,ovl,frks,btm,centers,curv,court,iss,spring,sts,harbr,mission,courts,lane,land,jction,expr,streets,expw,lakes,causeway,villiage,gatewy,vista,uns,frg,mountains,frk,clf,clb,skyway,trks,frt,fry,boulv,islnds,hvn,key,ky,flts,bridge,dl,dm,extension,trpk,lodg,estates,islnd,dv,path,dr,highwy,valleys,camp,rpd,loops,cyn,rapids,holw,rnchs,hollow,mls,vally,mill,strvnue,annex,pnes,tunnl,isles,lgt,cir,meadow,trails,wl,ext,bgs,wells,exp,blvd,wy,circles,riv,grden,extensions,tunnels,shls,tpk,paths,knl,ville,park,villages,parks,tracks,bluf,pass,bnd,grdns,rdgs,lndg,landing,rdge,circle,crt,light,vlys,freeway,glns,shore,crk,port,spngs,pr,ldg,pt,fields,driv,mall,bypass,pk,pl,mews,divide,club,xrd,vill,lodge,anex,underpass,neck,trace,track,frst,strt,rpds,strm,stra,anx,lck,cor,junction,stream,dvd,harb,mtns,prk,rivr,oval,crecent,vist,manor,tunnel,gtway,pkwy,avenu,juncton,summit,hwy,mtin,traces,terrace,ck,orchard,centre,lock,coves,field,statn,cr,cp,grov,cv,ct,lgts,lndng,run,cresent,plz,trak,rue,locks,pln,mntn,tpke,trwy,cvs,ranches,frwy,div,knolls,lights,crcle,hiwy,terr,jct,inlt,is,brook,brooks,mtn,circl,vw,flats,arcade,pine,arc,ldge,bg,freewy,hills,well,drs,psge,bot,brdge,drv,fwy,br,ctrs,bch,forks,hiway,havn,vl,hbr,turnpk,ctr,cent,sprng,rvr,holws,prairie,branch,valley,ally,grove,clfs,ridges,ports,villag,bypa,views,harbor,sqr,squ,byps,sqs,fords,manors,isle,crcl,burg,hllw,garden,fls,flt,ht,hl,avenue,fld,gtwy,lanes,center,vis,mnr,mnt,plains,junctn,pts,row,forges,boulevard,trl,plaines,course,place,cape,heights,shoar,viaduct,avn,un,hts,shoal,crossing,ave,grns,route,flds,vlgs,avnue,ests,forge,stravenue,mntns,aven,vlly,vsta,upas,walks,trfy,ter,prts,rds,mills,rdg,knls,cors,canyn,crossroad,spurs,cirs,villg,ways,island,sumit,mdws,circ,brk,prarie,brg,gdn,dale,trnpk,walk,hrbor,wall,bluffs,drive,plza,msn,crssing,parkway,spng,skwy,extnsn,height,dam,tr,alley,lks,allee,points,forest,orch,plain,est,straven,shoals,rnch,hollows,av,squares,gdns,spgs,vst,crscnt,gateway,unions,gatway,causway";
   var streetAbbr = streetAbbr.split(",");
-  
+
   function stringEndsWithStreetAbbr( string ) {
     var words = jQuery.trim(string).split(/\b/);
     if( words.length == 0 ) return false;
@@ -348,46 +348,46 @@ function isAddress( query, callback ) {
     if( streetAbbr.indexOf(lastWord) != -1 ) return true;
     return false;
   }
-  
+
   if( stringEndsWithStreetAbbr(query) ){
     callback( true );
     return;
   }
-  
+
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = paramsToString({
     location: query,
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
   });
-  
+
   jQuery.ajax({
     url: url+params,
     dataType: "xml",
     error: function() {
       callback( false );
     },
-    success:function(data) {      
+    success:function(data) {
       var results = jQuery(data).find("Result");
       var allText = jQuery.makeArray(
                       jQuery(data)
                         .find(":contains()")
                         .map( function(){ return jQuery(this).text().toLowerCase() } )
                       );
-                      
+
       // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
 
       if( results.length == 0 ){
         callback( false );
-        return;        
+        return;
       }
-            
+
       function existsMatch( text ){
         var joinedText = allText.join(" ");
         return joinedText.indexOf( text.toLowerCase() ) != -1;
       }
-      
+
       missCount = 0;
-      
+
       var queryWords = query.match(/\w+/g);
       for( var i=0; i < queryWords.length; i++ ){
         if( existsMatch( queryWords[i] ) == false ) {
@@ -395,10 +395,10 @@ function isAddress( query, callback ) {
           //displayMessage( queryWords[i] );
         }
       }
-      
+
       var missRatio = missCount / queryWords.length;
       //displayMessage( missRatio );
-      
+
       if( missRatio < .5 )
         callback( true );
       else
@@ -667,8 +667,8 @@ function cmd_view_source() {
 function cmd_test() {
   var generator = Components
                     .classes["@mozilla.org/xpath-generator;1"]
-                    .createInstance(Components.interfaces.nsIXPathGenerator);  
-  displayMessage( generator );                  
+                    .createInstance(Components.interfaces.nsIXPathGenerator);
+  displayMessage( generator );
 }
 
 function pageLoad_inject_xss(){
@@ -989,7 +989,7 @@ function cmd_aza() {
 function cmd_convert_page_to_pdf() {
   var url = "http://www.htm2pdf.co.uk/?url=";
   url += escape( getWindowInsecure().location );
-  
+
   openUrlInBrowser(url);
   /*jQuery.get( url, function(html){
     //displayMessage( html );
@@ -1068,7 +1068,7 @@ function cloudPageLoadHandler( ) {
 // LANGUAGE/TRANSLATE RELATED
 // -----------------------------------------------------------------
 
-function translateTo( lang, callback ) {  
+function translateTo( lang, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
   var params = paramsToString({
     v: "1.0",
@@ -1078,20 +1078,20 @@ function translateTo( lang, callback ) {
 
   ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
-    
+
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
     // this would be to split up the request into multiple chunks.
     // The other method is to contact Google and get a special
     // account.
-    
+
     try {
       var translatedText = data.responseData.translatedText;
     } catch(e) {
       displayMessage( "Translation Error: " + data.responseDetails )
       return;
     }
-    
+
     if( typeof callback == "function" )
       callback( translatedText );
     else
@@ -1137,7 +1137,7 @@ function generateTranslatePreviewFunction( langCode, langName ) {
       pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
     })
   }
-  
+
 }
 
 for( lang in Languages ){
@@ -1145,7 +1145,7 @@ for( lang in Languages ){
   var langName = lang.toLowerCase();
 
   this["cmd_translate_to_" + langName] = generateTranslateFunction( langCode );
-  this["cmd_translate_to_" + langName].preview = generateTranslatePreviewFunction( langCode, langName );  
+  this["cmd_translate_to_" + langName].preview = generateTranslatePreviewFunction( langCode, langName );
 }
 
 function cmd_translate_to_fake_swedish() {
@@ -1422,7 +1422,7 @@ function cmd_help() {
 
 //DEL.ICIO.US
 if(window.yAddBookMark){
-	
+
 	function cmd_del_icio_us(){
 
 		if(!window.yAddBookMark){
@@ -1435,7 +1435,7 @@ if(window.yAddBookMark){
 
 //FOXY.TUNES
 if(window.foxytunesDispatchPlayerCommand){
-	
+
 	function cmd_lyrics(){
 
 		if(!window.foxytunesGetCurrentTrackTitle){
@@ -1451,29 +1451,29 @@ if(window.foxytunesDispatchPlayerCommand){
 	}
 
 	function cmd_play_song(){
-		foxy_tunes_action("Play"); 
+		foxy_tunes_action("Play");
 	}
 
 	function cmd_pause_song(){
-		foxy_tunes_action("Pause"); 
+		foxy_tunes_action("Pause");
 	}
 
 	function cmd_previous_song(){
-		foxy_tunes_action("Previous"); 
+		foxy_tunes_action("Previous");
 	}
 
 	function cmd_next_song(){
-		foxy_tunes_action("Next"); 
+		foxy_tunes_action("Next");
 	}
 
 	function foxy_tunes_action(action){
-	
+
 		if(!window.foxytunesDispatchPlayerCommand){
 			displayMessage("To use this command, you need to have FoxyTunes extension installed");
 		}else{
 			window.foxytunesDispatchPlayerCommand(action, true);
 		}
-	
+
 	}
 
 }
@@ -1484,7 +1484,7 @@ if(window.stumble){
 	function cmd_stumble(){
 		window.stumble(0);
 	}
-	
+
 	function cmd_stumble_thumbs_up(){
 		window.su_rate(1, 0, 0, 0);
 		displayMessage("You liked it");
@@ -1509,25 +1509,25 @@ if(window.stumble){
 // -----------------------------------------------------------------
 
 function cmd_close_related_tabs(){
-	
+
 	var relatedWord = getTextSelection().toLowerCase();
-    
+
 	Application.activeWindow.tabs.forEach(function(tab){
 		if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord))
 			tab.close();
 	});
-	
+
 }
 
 cmd_close_related_tabs.preview = function(pblock) {
-	
+
 	var relatedWord = getTextSelection().toLowerCase();
-	
+
 	if(relatedWord.length != 0){
-		
+
 	  	var html = "Closes the following tabs that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
 		var numTabs = 0;
-	
+
 		Application.activeWindow.tabs.forEach(function(tab){
 			if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
 				html += "<li>" + tab.document.title + "</li>";
@@ -1540,11 +1540,11 @@ cmd_close_related_tabs.preview = function(pblock) {
 		}else{
 			html += "</ul>";
 		}
-		
+
 	}else{
 		html = "No text selected";
 	}
-	
+
 	pblock.innerHTML = html;
 
 }

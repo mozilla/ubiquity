@@ -98,7 +98,7 @@ function testCommandSourceOneCmdWorks() {
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
-  var cmd = cmdSrc.getCommand("foo thing");
+  var cmd = cmdSrc.getCommand("foo-thing");
   this.assert(cmd, "Sample command should exist.");
   this.assert(cmd.execute() == 5,
               "Sample command should execute properly.");

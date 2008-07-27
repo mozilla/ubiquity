@@ -69,6 +69,8 @@ var XpcShellTestResponder = {
   }
 };
 
+load(basePath + "/chrome/content/nlparser/verbtypes.js");
+load(basePath + "/chrome/content/nlparser/nlparser.js");
 load(basePath + "/chrome/content/test.js");
 load(basePath + "/chrome/content/sandboxfactory.js");
 load(basePath + "/chrome/content/cmdmanager.js");
