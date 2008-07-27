@@ -349,3 +349,8 @@ function CreateCommand( options ) {
   this["cmd_" + options.name] = options.execute || defaultExecute;
   this["cmd_" + options.name].setOptions( options );
 }
+
+
+function FBlog( title, what ){
+  getWindowInsecure().console.log( title, what );
+}

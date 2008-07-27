@@ -1,14 +1,3 @@
-function setGooglePreview(searchTerm, pblock) {
-  var url = "http://ajax.googleapis.com/ajax/services/search/web";  
-  params = { v: "1.0", q: searchTerm }
-  
-  jQuery.get( url, params, function(data) {
-    var numToDisplay = 3;
-    var results = data.responseData.results.splice( 0, numToDisplay );
-    
-    pblock.innerHTML = renderTemplate( "searchresults.html", {results:results} );
-  }, "json")
-}
 
 function loadMap(lat, lng) {
   if (GBrowserIsCompatible) {
@@ -20,6 +9,7 @@ function loadMap(lat, lng) {
   }
 }
 
+// TODO: Clean this up!
 function setMapPreview(searchTerm, pblock) {
   var doc = context.focusedWindow.document;
   var url = "http://maps.google.com/maps/geo";
@@ -76,59 +66,63 @@ function setDefaultSearchPreview( name, query, pblock ) {
   pblock.innerHTML = content;
 }
 
-function makeSearchCommand(name, urlTemplate, icon) {
+function makeSearchCommand( options ) {
   var cmd = function(query, modifiers) {
-    var urlString = urlTemplate.replace("{QUERY}", query);
+    var urlString = options.url.replace("{QUERY}", query);
     openUrlInBrowser(urlString);
     setLastResult( urlString );
   };
-
-  cmd.icon = icon;
-
-  cmd.preview = function(pblock, query, modifiers) {
-    if (query) {
-      switch( name ) {
-        case "Google":
-          setGooglePreview(query, pblock);
-          break;
-        case "Google Maps":
-          setMapPreview(query, pblock);
-          break;
-        default:
-          setDefaultSearchPreview(name, query, pblock);
+  
+  cmd.setOptions({
+    takes: {"search term": arbText},
+    icon: options.icon,
+    preview: function(pblock, query, modifiers) {
+      if (query) {
+        if( options.preview ) options.preview( query, pblock );
+        else setDefaultSearchPreview(options.name, query, pblock)
       }
     }
-  };
+  });
 
-  cmd.DOType = arbText;
-  cmd.DOLabel = "search term";
-  cmd.modifiers = {};
   return cmd;
 }
 
-var cmd_google = makeSearchCommand(
-  "Google",
-  "http://www.google.com/search?q={QUERY}",
-  "http://www.google.com/favicon.ico"
-);
 
-var cmd_imdb = makeSearchCommand(
-  "IMDB",
-  "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
-  "http://i.imdb.com/favicon.ico"
-);
+var cmd_google = makeSearchCommand({
+  name: "Google",
+  url: "http://www.google.com/search?q={QUERY}",
+  icon: "http://www.google.com/favicon.ico",
+  preview: function(searchTerm, pblock) {
+    var url = "http://ajax.googleapis.com/ajax/services/search/web";  
+    params = { v: "1.0", q: searchTerm }
 
-var cmd_map_it = makeSearchCommand(
-  "Google Maps",
-  "http://maps.google.com/?q={QUERY}",
-  "http://www.google.com/favicon.ico"
-);
+    jQuery.get( url, params, function(data) {
+      var numToDisplay = 3;
+      var results = data.responseData.results.splice( 0, numToDisplay );
 
-var cmd_bugzilla = makeSearchCommand(
-  "Bugzilla",
-  "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
-  "https://bugzilla.mozilla.org/favicon.ico"
-);
+      pblock.innerHTML = renderTemplate( "searchresults.html", {results:results} );
+    }, "json")
+  }
+});
+
+var cmd_imdb = makeSearchCommand({
+  name: "IMDB",
+  url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
+  icon: "http://i.imdb.com/favicon.ico"
+});
+
+var cmd_map_it = makeSearchCommand({
+  name: "Google Map",
+  url: "http://maps.google.com/?q={QUERY}",
+  icon: "http://www.google.com/favicon.ico",
+  preview: setMapPreview
+});
+
+var cmd_bugzilla = makeSearchCommand({
+  name: "Bugzilla",
+  url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
+  icon: "https://bugzilla.mozilla.org/favicon.ico"
+});
 
 CreateCommand({
   takes: { "restaurant":arbText },
@@ -305,10 +299,6 @@ var Languages = {
   'SWEDISH' : 'sv'
 };
 
-function log( title, what ){
-  getWindowInsecure().console.log( title, what );
-}
-
 function translateTo( text, langCodePair, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
 
@@ -360,49 +350,68 @@ function translateTo( text, langCodePair, callback ) {
   });
 }
 
-function cmd_translate( textToTranslate, languages ) {
-  // Default to translating to English if no to language
-  // is specified.
-  // TODO: Choose the default in a better way.
+CreateCommand({
+  name: "translate",
+  takes: {"text to translate": arbText},
+  modifiers: {to: languageNounType, from: languageNounType},
+  
+  execute: function( textToTranslate, languages ) {
+    // Default to translating to English if no to language
+    // is specified.
+    // TODO: Choose the default in a better way.
 
-  var toLang = languages.to || "English";
-  var fromLang = languages.from || "";
-  var toLangCode = Languages[toLang.toUpperCase()];
+    var toLang = languages.to || "English";
+    var fromLang = languages.from || "";
+    var toLangCode = Languages[toLang.toUpperCase()];
 
-  translateTo( textToTranslate, {to:toLangCode} );
-}
+    translateTo( textToTranslate, {to:toLangCode} );
+  },
+  
+  preview: function( pblock, textToTranslate, languages ) {
+    var toLang = languages.to || "English";
 
-cmd_translate.preview = function( pblock, textToTranslate, languages ) {
-  var toLang = languages.to || "English";
+    var toLangCode = Languages[toLang.toUpperCase()];
+    var lang = toLang[0].toUpperCase() + toLang.substr(1);
 
-  var toLangCode = Languages[toLang.toUpperCase()];
-  var lang = toLang[0].toUpperCase() + toLang.substr(1);
-
-  pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
-  translateTo( textToTranslate, {to:toLangCode}, function( translation ) {
     pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
-    pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
-	      })
-}
+    translateTo( textToTranslate, {to:toLangCode}, function( translation ) {
+      pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
+      pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
+  	})
+  }
+})
 
-
-cmd_translate.DOType = arbText;
-cmd_translate.DOLabel = "text to translate";
-cmd_translate.modifiers = {to:languageNounType, from:languageNounType};
 
 // -----------------------------------------------------------------
 // SYSTEM COMMANDS
 // -----------------------------------------------------------------
 
-function cmd_help() {
-  openUrlInBrowser("about:ubiquity");
+CreateCommand({
+  name: "help",
+  preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
+  execute: function(){ 
+    openUrlInBrowser("about:ubiquity");
+  }
+})
+
+function cmd_editor() {
+  openUrlInBrowser("chrome://ubiquity/content/editor.html");
 }
 
-cmd_help.preview = function(pblock) {
-  pblock.innerHTML = ("Provides help on using Ubiquity, as well " +
-                      "as access to preferences, etc.");
-}
 
+CreateCommand({
+  name: "remember",
+  takes: {"thing": arbText},
+  execute: function( thing, modifiers ) {
+    displayMessage( "I am remembering " + thing );
+    setLastResult( thing );    
+  }
+});
+
+
+// -----------------------------------------------------------------
+// EMAIL COMMANDS
+// -----------------------------------------------------------------
 
 function findGmailTab() {
   var window = Application.activeWindow;
@@ -417,84 +426,132 @@ function findGmailTab() {
   return null;
 }
 
-function cmd_email(html, headers) {
-  var document = context.focusedWindow.document;
-  var title = document.title;
-  var location = document.location;
-  var gmailTab = findGmailTab();
-  /* TODO get headers["to"] and put it in the right field*/
-  if (html)
-    html = ("<p>From the page <a href=\"" + location +
-            "\">" + title + "</a>:</p>" + html);
-  else {
-    displayMessage("No selected HTML!");
-    return;
+CreateCommand({
+  name: "email",
+  takes: {"message": arbHtml},
+  modifiers: {to: PersonNounType},
+  
+  preview: function(pblock, directObject, modifiers) {
+    var html = "Creates an email message ";
+    if (modifiers["to"]) {
+      html += "to " + modifiers["to"];
+    }
+    html += "with these contents:" + directObject;
+    pblock.innerHTML = html;
+  },
+  
+  execute: function(html, headers) {
+    var document = context.focusedWindow.document;
+    var title = document.title;
+    var location = document.location;
+    var gmailTab = findGmailTab();
+    /* TODO get headers["to"] and put it in the right field*/
+    if (html)
+      html = ("<p>From the page <a href=\"" + location +
+              "\">" + title + "</a>:</p>" + html);
+    else {
+      displayMessage("No selected HTML!");
+      return;
+    }
+
+    if (gmailTab) {
+      // Note that this is technically insecure because we're
+      // accessing wrappedJSObject, but we're only executing this
+      // in a Gmail tab, and Gmail is trusted code.
+      var console = gmailTab.document.defaultView.wrappedJSObject.console;
+      var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
+
+      var continuer = function() {
+        // For some reason continuer.apply() won't work--we get
+        // a security violation on Function.__parent__--so we'll
+        // manually safety-wrap this.
+        try {
+          var gmail = gmonkey.get("1");
+          var sidebar = gmail.getNavPaneElement();
+          var composeMail = sidebar.getElementsByTagName("span")[0];
+          var event = composeMail.ownerDocument.createEvent("Events");
+          event.initEvent("click", true, false);
+          composeMail.dispatchEvent(event);
+          var active = gmail.getActiveViewElement();
+          var subject = active.getElementsByTagName("input")[0];
+          subject.value = "'"+title+"'";
+          var iframe = active.getElementsByTagName("iframe")[0];
+          iframe.contentDocument.execCommand("insertHTML", false, html);
+          gmailTab.focus();
+        } catch (e) {
+          displayMessage({text: "A gmonkey exception occurred.",
+                          exception: e});
+        }
+      };
+
+      gmonkey.load("1", continuer);
+    } else
+      displayMessage("Gmail must be open in a tab.");
+    // TODO why not open gmail if it's not already open?
+  }  
+});
+
+
+// -----------------------------------------------------------------
+// CALENDAR COMMANDS
+// -----------------------------------------------------------------
+
+
+function addToGoogleCalendar(eventString) {
+  var secid = getCookie("www.google.com", "secid");
+
+  var URLS = {
+    parse: "http://www.google.com/calendar/compose",
+    create: "http://www.google.com/calendar/event"
+  };
+
+  function parseGoogleJson(json) {
+    var securityPreface = "while(1)";
+    var splitString = json.split( ";", 2 );
+    if ( splitString[0] != securityPreface ) {
+      displayMessage( "Unexpected Return Value" );
+      return null;
+    }
+    // TODO: Security hull breach!
+    return eval( splitString[1] )[0];
   }
 
-  if (gmailTab) {
-    // Note that this is technically insecure because we're
-    // accessing wrappedJSObject, but we're only executing this
-    // in a Gmail tab, and Gmail is trusted code.
-    var console = gmailTab.document.defaultView.wrappedJSObject.console;
-    var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
+  var params = paramsToString({
+    "ctext": eventString,
+    "qa-src": "QUICK_ADD_BOX"
+  });
 
-    var continuer = function() {
-      // For some reason continuer.apply() won't work--we get
-      // a security violation on Function.__parent__--so we'll
-      // manually safety-wrap this.
-      try {
-        var gmail = gmonkey.get("1");
-        var sidebar = gmail.getNavPaneElement();
-        var composeMail = sidebar.getElementsByTagName("span")[0];
-        var event = composeMail.ownerDocument.createEvent("Events");
-        event.initEvent("click", true, false);
-        composeMail.dispatchEvent(event);
-        var active = gmail.getActiveViewElement();
-        var subject = active.getElementsByTagName("input")[0];
-        subject.value = "'"+title+"'";
-        var iframe = active.getElementsByTagName("iframe")[0];
-        iframe.contentDocument.execCommand("insertHTML", false, html);
-        gmailTab.focus();
-      } catch (e) {
-        displayMessage({text: "A gmonkey exception occurred.",
-                        exception: e});
-      }
-    };
+  ajaxGet(URLS["parse"]+params, function(json) {
+    var data = parseGoogleJson( json );
+    var eventText = data[1];
+    var eventStart = data[4];
+    var eventEnd = data[5];
+    var secid = getCookie("www.google.com", "secid");
 
-    gmonkey.load("1", continuer);
-  } else
-    displayMessage("Gmail must be open in a tab.");
-  // TODO why not open gmail if it's not already open?
+    var params = paramsToString({
+      "dates": eventStart + "/" + eventEnd,
+      "text": eventText,
+      "secid": secid,
+      "action": "CREATE",
+      "output": "js"
+    });
+
+    ajaxGet(URLS["create"] + params, function(json) {
+      // TODO: Should verify this, and print appropriate positive
+      // understand feedback. Like "blah at such a time was created.
+      displayMessage("Event created.");
+
+      // TODO: Should iterate through open tabs and cause any open
+      // Google Calendar tabs to refresh.
+    });
+  });
 }
 
-cmd_email.preview = function(pblock, directObject, modifiers) {
-  var html = "Creates an email message ";
-  if (modifiers["to"]) {
-    html += "to " + modifiers["to"];
+CreateCommand({
+  name: "add&nbsp;to&nbsp;calendar",
+  takes: {"event": arbText}, //Probably should be EventNounType/DateNounType
+  preview: "Adds the event to Google Calendar.",
+  execute: function( eventString ) {
+    addToGoogleCalendar( eventString );
   }
-  html += "with these contents:" + directObject;
-  pblock.innerHTML = html;
-}
-
-cmd_email.DOLabel = "message";
-cmd_email.DOType = arbHtml;
-cmd_email.modifiers = {
-  to: PersonNounType
-};
-
-
-function cmd_editor() {
-  openUrlInBrowser("chrome://ubiquity/content/editor.html");
-}
-
-function cmd_dostuff() {
-  displayMessage( "I am doing stuff!\n" );
-}
-
-function cmd_remember( directObj, modifiers ) {
-  displayMessage( "I am remembering " + directObj );
-  setLastResult( directObj );
-}
-cmd_remember.DOLabel = "thing";
-cmd_remember.DOType = arbText;
-cmd_remember.modifiers = {};
+})
