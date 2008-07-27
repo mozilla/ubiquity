@@ -127,7 +127,7 @@ var DateNounType = {
     if (!date) {
       return [];
     }
-    return [ "parsed date: " + date.toString() ];
+    return [ date ];
   }
 };
 
