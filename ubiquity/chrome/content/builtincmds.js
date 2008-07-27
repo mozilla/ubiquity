@@ -600,3 +600,56 @@ function cmd_view_source() {
   //openUrlInBrowser( "http://www.google.com" );
   getWindowInsecure().location = url;
 }
+
+
+// -----------------------------------------------------------------
+// WEATHER COMMANDS
+// -----------------------------------------------------------------
+
+
+var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
+
+CreateCommand({
+  name: "weather",
+  takes: {"location": arbText},
+
+  execute: function( location ) {
+    var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
+    url += escape( location );
+    
+    openUrlInBrowser( url );
+  },
+
+  preview: function( pblock, location ) {
+    if( location.length < 1 ) {
+      pblock.innerHTML = "Gets the weather for a zip code/city."
+      return;
+    }
+    
+    var url = "http://www.google.com/ig/api";
+    jQuery.get( url, {weather: location}, function(xml) {
+      var el = jQuery(xml).find("current_conditions");
+      if( el.length == 0 ) return;
+
+      var condition = el.find("condition").attr("data");
+      
+      var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
+      var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
+      imgSrc += weatherId + "d.png";
+      
+      weather = {
+        condition: condition,
+        temp: el.find("temp_f").attr("data"),
+        humidity: el.find("humidity").attr("data"),
+        wind: el.find("wind_condition").attr("data"),
+        img: imgSrc
+      }
+      
+      weather["img"] = imgSrc;      
+      
+      html = renderTemplate( "weather.html", {w:weather});
+      
+      jQuery(pblock).html( html );
+    }, "xml")
+  }
+})

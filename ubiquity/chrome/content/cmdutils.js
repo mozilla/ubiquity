@@ -271,13 +271,18 @@ function getTextSelection() {
   return retval;
 }
 
+function renderStringTemplate( string, data ) {    
+  template = Template.parseTemplate( string );
+  return template.process( data );
+}
+
 function renderTemplate( templateName, data ) {
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
     
   var template = getLocalUrl( chromePrefixUrl + templateName );
-  template = Template.parseTemplate( template );
-  return template.process( data );
+  return renderStringTemplate( template, data );
 }
+
 
 function setLastResult( result ) {
   globals.lastCmdResult = result;
@@ -351,6 +356,10 @@ function CreateCommand( options ) {
 }
 
 
-function FBLog( title, what ){
-  getWindowInsecure().console.log( title, what );
+function FBLog( arg1, arg2 ){
+  if( arg2 )
+    getWindowInsecure().console.log( arg1, arg2 );
+  else
+    getWindowInsecure().console.log( arg1 );
+  
 }
