@@ -129,44 +129,42 @@ var cmd_bugzilla = makeSearchCommand(
   "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   "https://bugzilla.mozilla.org/favicon.ico"
 );
-  
 
-function cmd_yelp( query, info ) {  
-  var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
-  url = url.replace( /{QUERY}/g, query);
-  url = url.replace( /{NEAR}/g, info.near);
-
-  openUrlInBrowser( url );
-}
-
-cmd_yelp.preview = function( pblock, query, info ) {
-  var url = "http://api.yelp.com/business_review_search?";
+CreateCommand({
+  takes: { "restaurant":arbText },
+  // TODO: Should be AddressNounType, which is currently broken.
+  // See http://labs.toolness.com/trac/ticket/44
+  modifiers: { near:arbText },
+  icon: "http://www.yelp.com/favicon.ico",
   
-  if( query.length == 0 ) return;
+  execute: function( query, info ) {
+    var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
+    url = url.replace( /{QUERY}/g, query);
+    url = url.replace( /{NEAR}/g, info.near);
+
+    openUrlInBrowser( url );    
+  },
   
-  loc = getLocation();
-  var near = info.near || (loc.city + ", " + loc.state);
-    
-  var params = {
-    term: query,
-    num_biz_requested: 4,
-    location: near,
-    ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
+  preview: function( pblock, query, info ) {
+    var url = "http://api.yelp.com/business_review_search?";
+
+    if( query.length == 0 ) return;
+
+    loc = getLocation();
+    var near = info.near || (loc.city + ", " + loc.state);
+
+    var params = {
+      term: query,
+      num_biz_requested: 4,
+      location: near,
+      ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
+    }
+
+    jQuery.get( url, params, function(data) {
+      pblock.innerHTML = renderTemplate( "yelp.html", {businesses: data.businesses} );
+    }, "json")    
   }
-  
-  jQuery.get( url, params, function(data) {
-    pblock.innerHTML = renderTemplate( "yelp.html", {businesses: data.businesses} );
-  }, "json")
-  
-}
-
-cmd_yelp.DOName = "restaurant";
-cmd_yelp.DOType = arbText;
-cmd_yelp.icon = "http://www.yelp.com/favicon.ico";
-// TODO: Should be AddressNounType
-// Why doesn't {near:AddressNounType}; work?
-cmd_yelp.modifiers = {near:arbText};
-
+})
 
 
 
@@ -220,35 +218,29 @@ function cmd_redo() {
 }
 
 
-function cmd_calculate( expr ) {
-  if( expr.length > 0 ) {
-    var result = eval( expr );
-    setTextSelection( result );
-    setLastResult( result );
-  } else
-    displayMessage( "Requires an expression.");
-}
+CreateCommand({
+  name: "calculate",
+  takes: {"expression": arbText},
+  icon: "http://www.metacalc.com/favicon.ico",
+  execute: function( expr ) {
+    if( expr.length > 0 ) {
+      var result = eval( expr );
+      setTextSelection( result );
+      setLastResult( result );
+    } else
+      displayMessage( "Requires an expression.");    
+  },
+  preview: function( pblock, expr ) {
+    if( expr.length < 1 ){
+      pblock.innerHTML = "Calculates an expression. E.g., 22/7.";
+      return;
+    }
 
-cmd_calculate.preview = function( pblock, expr ) {
-  if( expr.length < 1 ){
-    pblock.innerHTML = "Calculates an expression. E.g., 22/7.";
-    return;
+    pblock.innerHTML = expr + " = ";
+    try{ pblock.innerHTML += eval( expr ); }
+    catch(e) { pblock.innerHTML += "?"; }
   }
-
-  pblock.innerHTML = expr + " = ";
-  try{
-    pblock.innerHTML += eval( expr );
-  } catch(e) {
-    pblock.innerHTML += "?";
-  }
-
-}
-
-cmd_calculate.DOType = arbText;
-cmd_calculate.DOName = "expression";
-cmd_calculate.modifiers = {};
-cmd_calculate.icon = "http://www.metacalc.com/favicon.ico";
-
+});
 
 
 function defineWord(word, callback) {
@@ -267,24 +259,23 @@ function defineWord(word, callback) {
   });
 }
 
-function cmd_define( word ) {
-  openUrlInBrowser( "http://www.answers.com/" + escape(word) );
-}
+CreateCommand({
+  name: "define",
+  takes: {"word": arbText},
+  execute: function( word ) {
+    openUrlInBrowser( "http://www.answers.com/" + escape(word) );    
+  },
+  preview: function( pblock, word ) {
+    defineWord( word, function(text){
+      text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
+      text = text.replace(/(1:)/g, "<br/>$&");
+      text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
+      text = text.replace(/\[.*?\]/g, "");
 
-cmd_define.preview = function( pblock, word ) {
-  defineWord( word, function(text){
-    text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
-    text = text.replace(/(1:)/g, "<br/>$&");
-    text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
-    text = text.replace(/\[.*?\]/g, "");
-
-    pblock.innerHTML = text;
-  });
-}
-
-cmd_define.DOType = arbText;
-cmd_define.DOName = "word";
-cmd_define.modifiers = {};
+      pblock.innerHTML = text;
+    });
+  }  
+})
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS

@@ -307,3 +307,45 @@ function getLocation( ){
   
   return globals.location;
 }
+
+// Use like this:
+// cmd_yelp.setOptions({
+//  takes: { "restaurant":arbText },
+//  modifiers: { near:arbText },
+//  icon: "http://www.yelp.com/favicon.ico"
+// })
+Function.prototype.setOptions = function( options ) {
+  // Returns the first key in a dictionary.
+  function getKey( dict ) {
+    for( var key in dict ) return key;
+  }
+  
+  if( options.takes ) {
+    this.DOName = getKey( options.takes );
+    this.DOType = options.takes[this.DOName];
+  }
+  
+  // Reserved keywords that shouldn't be added to the cmd function.
+  var RESERVED = ["takes", "execute", "name"];
+  
+  for( var key in options ) {
+    if( RESERVED.indexOf(key) == -1 )
+      this[key] = options[key];
+  }
+  
+  // If preview is a string, wrap it in a function that does
+  // what you'd expect it to.
+  if( typeof this["preview"] == "string" ) {
+    var previewString = this["preview"];
+    this["preview"] = function( pblock ){
+      pblock.innerHTML = previewString;
+    }
+  }
+}
+
+// Creates a command from a list of options
+function CreateCommand( options ) {
+  var defaultExecute = function(){ displayMessage("No action defined.")}
+  this["cmd_" + options.name] = options.execute || defaultExecute;
+  this["cmd_" + options.name].setOptions( options );
+}
