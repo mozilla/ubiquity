@@ -547,11 +547,42 @@ function addToGoogleCalendar(eventString) {
   });
 }
 
+/* TODO this comman just takes unstructured text right now and relies on
+ google calendar to figure it out.  So we're not using the DateNounType
+ here.  Should we be?  And, is there a better name for this command? */
 CreateCommand({
   name: "add&nbsp;to&nbsp;calendar",
-  takes: {"event": arbText}, //Probably should be EventNounType/DateNounType
+  takes: {"event": arbText}, // TODO: use DateNounType or EventNounType?
   preview: "Adds the event to Google Calendar.",
   execute: function( eventString ) {
     addToGoogleCalendar( eventString );
   }
 })
+
+
+
+// TODO: Don't do a whole-sale copy of the page ;)
+function checkCalendar(pblock, date) {
+  var url = "http://www.google.com/calendar/m";
+  var params = paramsToString({ as_sdt: date.toString("yyyyMMdd") });
+
+  ajaxGet(url + params, function(html) {
+    pblock.innerHTML = html;
+  });
+}
+
+CreateCommand({
+  name: "check&nbsp;calendar",
+  takes: {"date to check": DateNounType},
+  execute: function( date ) {
+    var url = "http://www.google.com/calendar/m";
+    var params = paramsToString({ as_sdt: date.toString("yyyyMMdd") });
+    
+    openUrlInBrowser( url + params );
+  },
+  preview: function( pblock, date ) {
+    pblock.innerHTML = "Checks Google Calendar for the day of" +
+  		       date.toString("dd MM, yyyy");  
+  	checkCalendar( pblock, date );  
+  }
+});

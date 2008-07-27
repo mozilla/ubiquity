@@ -351,6 +351,6 @@ function CreateCommand( options ) {
 }
 
 
-function FBlog( title, what ){
+function FBLog( title, what ){
   getWindowInsecure().console.log( title, what );
 }
