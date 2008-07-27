@@ -271,6 +271,24 @@ CreateCommand({
   }  
 })
 
+CreateCommand({
+  name: "syntax&nbsp;highlight",
+  takes: {"code": arbText},
+  execute: function( code ) {
+    var url = "http://azarask.in/services/syntaxhighlight/color.py"
+    params = {
+      code: code,
+      style: "native"
+    }
+    
+    jQuery.post( url, params, function( html ) {
+      html = "<style>.highlight{background-color:#222;padding:3px}</style>" + html;
+      setTextSelection( html );
+    });
+  },
+  preview: "Syntax highlights your code."
+})
+
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
