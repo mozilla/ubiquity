@@ -586,3 +586,17 @@ CreateCommand({
   	checkCalendar( pblock, date );  
   }
 });
+
+
+
+// -----------------------------------------------------------------
+// MISC COMMANDS
+// -----------------------------------------------------------------
+
+function cmd_view_source() {
+  url = Application.activeWindow.activeTab.document.location;
+  url = "view-source:" + url;
+  // TODO: Should do it this way.
+  //openUrlInBrowser( "http://www.google.com" );
+  getWindowInsecure().location = url;
+}
