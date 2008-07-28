@@ -622,19 +622,6 @@ function cmd_view_source() {
   getWindowInsecure().location = url;
 }
 
-function findGmailTab() {
-  var window = Application.activeWindow;
-
-  for (var i = 0; i < window.tabs.length; i++) {
-    var tab = window.tabs[i];
-    var location = String(tab.document.location);
-    if (location.indexOf("://mail.google.com") != -1) {
-      return tab;
-    }
-  }
-  return null;
-}
-
 var TabNounType = {
   _name: "tab name",
   
