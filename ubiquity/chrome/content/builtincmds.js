@@ -271,6 +271,8 @@ CreateCommand({
   }  
 })
 
+// TODO: Add the ability to manually set the language being highlighted.
+// TODO: Add the ability to select the style of code highlighting.
 CreateCommand({
   name: "syntax&nbsp;highlight",
   takes: {"code": arbText},
@@ -282,7 +284,7 @@ CreateCommand({
     }
     
     jQuery.post( url, params, function( html ) {
-      html = "<style>.highlight{background-color:#222;padding:3px}</style>" + html;
+      html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'")
       setTextSelection( html );
     });
   },
