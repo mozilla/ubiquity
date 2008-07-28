@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Maps JavaScript API Example: Simple Map</title>
+    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA"
+            type="text/javascript"></script>
+    <script src="../jquery-1.2.3.min.js"></script>
+    <script src="../cmdutils.js"></script>
+    <style>
+
+    body{
+      overflow: hidden;
+      margin: 0px;
+    }
+
+    /* preview pane for google results and initial map preview */
+    #preview-pane {
+      width: 500px;
+      height: 140px;
+      color: #bfbfbf;
+      padding-top: 5px;
+      
+    }
+    #preview-pane-large {
+      width: 450px;
+      height: 300px;
+      padding: 13px;
+      color: #bfbfbf;
+    }
+
+    /* initial map preview */
+    #map {
+      width: 225px;
+      height: 130px;
+      float: left;
+      cursor: pointer;
+      border: 5px solid #0066cc;
+      -moz-border-radius: 5px 0px 5px 5px;
+    }
+    #address-list {
+      float: left;
+      /*width: 400px;*/
+      height: 120px;
+    }
+    .gaddress, .gaddress-current {
+      font-size: small;
+      padding: 5px 5px 5px 25px;
+      margin-bottom: 5px;
+    }
+    .gaddress-current {
+      background-color: #0066cc;
+      border-width: 2px 2px 2px 0px;
+      border-style: solid solid solid none;
+      border-color: #0066cc; 
+      /*border: 5px solid #0066cc;*/
+      -moz-border-radius: 0px 5px 5px 0px;
+    }
+    .gaddress:hover {
+     
+    }
+    
+    .gaddress a {
+      color: #bfbfbf;
+    }
+    .gaddress-current a {
+      color: #bfbfbf;
+      text-decoration: none;
+    }
+    #goto-gmaps {
+      font-size: x-small;
+      margin-top: 40px;
+      padding-left: 20px;
+    }
+    #goto-gmaps a {
+      color: #0066cc;
+    }
+
+    /* secondary map preview */
+    #selected-address {
+      color: #bfbfbf;
+      font-size: medium;  
+      padding-bottom: 5px;
+      width: 500px;
+      float: left;
+      position: absolute;
+    }
+    .map-actions {
+      font-size: small;
+      float: right;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+    .map-action {
+      display: none;
+    }
+    .map-actions a {
+      color: #bfbfbf;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    
+    </style>
+    <script type="text/javascript">
+
+    var map;
+    var mapControl = new GSmallMapControl();
+    var mapType = new GMapTypeControl();
+
+    function loadMap(lat, lng, index) {
+      var curAddress = document.getElementsByClassName("gaddress-current");
+      curAddress[0].className = "gaddress";
+
+      var addresses = document.getElementsByClassName("gaddress");
+      for (var i=0; i < addresses.length; i++) {
+        if (i == index)
+          addresses[i].className = "gaddress-current";
+        else 
+          addresses[i].className = "gaddress";
+      }
+
+      $(".map-actions").hide();
+      $("#selected-address").hide();
+      if (GBrowserIsCompatible()) {
+        map = new GMap2(document.getElementById("map"));
+        var point = new GLatLng(lat, lng);
+        map.setCenter(point, 13);
+        map.addOverlay(new GMarker(point));
+        map.disableDragging();
+        GEvent.addListener(map, "click", function() {showMapPreview(map);});
+      }
+    }
+
+    function showAddressPreview() {
+      setTimeout( function(){
+        $(".suggestion").slideDown( 500 );
+        $("#address-list").fadeIn( 700 );
+      }, 500 );
+      $(".map-actions").hide();  
+      $("#selected-address").hide();
+      document.getElementById("preview-pane-large").id = "preview-pane";
+      $("#preview-pane")
+        .height("300px")
+        .animate({ height: "140px" });
+      $("#map").animate({ 
+        width: "225px",
+        height: "130px",
+      }, 500);
+
+      $("#map").css("border","5px solid #0066cc");
+
+      map.removeControl(mapControl);
+      map.removeControl(mapType);
+      map.disableDragging();
+    }
+
+    function showMapPreview(map) {
+      $("#address-list").hide();
+
+      $("#selected-address").fadeIn( 300 );
+      document.getElementById("preview-pane").id = "preview-pane-large";
+      $("#selected-address").text($(".gaddress-current").text());
+
+      map.addControl(mapControl);
+      map.addControl(mapType);
+      map.enableDragging();
+      $("#map").css("border-width","0px");
+      $("#map").css("border-style","none");
+      $("#preview-pane-large")
+        .height("140px")
+        .animate({ height: "300px" });
+
+      $("#map").animate({
+        width: "450px",
+        height: "240px",
+      }, 500);
+      setTimeout( function(){
+        $(".map-actions").fadeIn();
+        $(".suggestion").slideUp( 500 );    
+      }, 300 ); 
+    }
+
+    function setPreview(searchTerm) {
+      var url = "http://maps.google.com/maps/geo";
+      var apikey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+      var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);   
+
+      $.ajax( {
+        type: "GET",
+        url: url, 
+        data: params,
+        dataType: "jsonp",
+        success: function(jobj) {
+          var numToDisplay = 3;
+
+          if (!jobj.Placemark) {
+            $("#preview-pane").height("0px");
+            return;
+          }
+
+          var placemark = jobj.Placemark[0];
+          var lng0 = placemark.Point.coordinates[0];
+          var lat0 = placemark.Point.coordinates[1];
+
+
+          var html = "<div>" + "<div id=\"selected-address\"></div>" + 
+                     "<div class=\"map-actions\"> <a class=\"hand\" onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call email command');\">Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
+                     "</div>" + 
+                     "<div id=\"map\" class=\"hand\" ></div>" + 
+                     "<div id=\"address-list\">";
+          for (var i=0; i<numToDisplay; i++) {
+            if (jobj.Placemark[i]) {
+              var address = jobj.Placemark[i].address;
+              var lng = jobj.Placemark[i].Point.coordinates[0];
+              var lat = jobj.Placemark[i].Point.coordinates[1]; 
+
+              if (i == 0) {
+                html = html + "<div class=\"gaddress-current\">" + 
+                              "<a href=# onclick=\"loadMap(" + lat + ", " + lng + ", " + i + ");\">" + 
+                              address + "</a></div>";
+              }
+              else {
+                html = html + "<div class=\"gaddress\">" +  
+                              "<a href=# onclick=\"loadMap(" + lat + ", " + lng + ", " + i + ");\">" + 
+                              address + "</a></div>";
+              }
+            }
+          }
+
+          var googleMapsUrl = "http://maps.google.com/?q=" + encodeURIComponent(searchTerm);
+          html = html + "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
+
+          html = html + "</div>" + 
+                        "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call current map command');\">Insert map in page</a></div>";
+
+          $("#preview-pane").html(html);   
+
+          loadMap(lat0, lng0, 0);
+        } 
+      });
+    }
+    </script>
+  </head>
+
+  <body onunload="GUnload()">
+    <div style="overflow:hidden;">
+      <div id="preview-pane"></div> 
+    </div> 
+  </body>
+
+</html>
+
+
