@@ -284,7 +284,7 @@ CreateCommand({
     }
     
     jQuery.post( url, params, function( html ) {
-      html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'")
+      html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'");
       setTextSelection( html );
     });
   },
