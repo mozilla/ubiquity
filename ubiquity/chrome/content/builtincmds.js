@@ -541,20 +541,6 @@ CreateCommand({
 });
 
 
-
-// -----------------------------------------------------------------
-// MISC COMMANDS
-// -----------------------------------------------------------------
-
-function cmd_view_source() {
-  url = Application.activeWindow.activeTab.document.location;
-  url = "view-source:" + url;
-  // TODO: Should do it this way.
-  //openUrlInBrowser( "http://www.google.com" );
-  getWindowInsecure().location = url;
-}
-
-
 // -----------------------------------------------------------------
 // WEATHER COMMANDS
 // -----------------------------------------------------------------
@@ -612,45 +598,94 @@ CreateCommand({
 // MAPPING COMMANDS
 // -----------------------------------------------------------------
 
-function showPreviewFromFile( pblock, filePath, callback ) {
-  var iframe = pblock.ownerDocument.createElement("iframe");
-  iframe.setAttribute("src", "chrome://ubiquity/content/mapping/mapping.xul");
-  iframe.style.border = "none";
-  iframe.setAttribute("width", 500);
-  iframe.setAttribute("height", 300);
-  function onXulLoad() {
-    var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                .getService(Components.interfaces.nsIIOService);
-    var extMgr = Components.classes["@mozilla.org/extensions/manager;1"]
-                 .getService(Components.interfaces.nsIExtensionManager);
-    var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
-    var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
-    var uri = ioSvc.newFileURI(extD).spec;
-    uri += "chrome/content/" + filePath;
-    var browser = iframe.contentDocument.createElement("browser");
-    browser.setAttribute("src", uri);
-    browser.setAttribute("width", 500);
-    browser.setAttribute("height", 300);
-    function onBrowserLoad() {
-      // TODO: Security risk -- this is very insecure!
-      callback( browser.contentWindow );
-    }
-    browser.addEventListener("load", safeWrapper(onBrowserLoad), true);
-    iframe.contentDocument.documentElement.appendChild(browser);
-  }
-  iframe.addEventListener("load", safeWrapper(onXulLoad), true);
-  pblock.innerHTML = "";
-  pblock.appendChild(iframe);  
-}
-
-
 
 CreateCommand({
   name: "map",
   takes: {"address": arbText},
   preview: function(pblock, location) {
     showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
-     winInsecure.setPreview( location );
+      winInsecure.setPreview( location );
     }); 
+  }
+})
+
+
+// -----------------------------------------------------------------
+// MISC COMMANDS
+// -----------------------------------------------------------------
+
+function cmd_view_source() {
+  url = Application.activeWindow.activeTab.document.location.href;
+  url = "view-source:" + url;
+  // TODO: Should do it this way:
+  // openUrlInBrowser( "http://www.google.com" );
+  getWindowInsecure().location = url;
+}
+
+function findGmailTab() {
+  var window = Application.activeWindow;
+
+  for (var i = 0; i < window.tabs.length; i++) {
+    var tab = window.tabs[i];
+    var location = String(tab.document.location);
+    if (location.indexOf("://mail.google.com") != -1) {
+      return tab;
+    }
+  }
+  return null;
+}
+
+var TabNounType = {
+  _name: "tab name",
+  
+  // Returns all tabs from all windows.
+  getTabs: function(){
+    var tabs = {};
+
+    for( var j=0; j < Application.windows.length; j++ ) {
+      var window = Application.windows[j];
+      for (var i = 0; i < window.tabs.length; i++) {
+        var tab = window.tabs[i];
+        tabs[tab.document.title] = tab;
+      }
+    }
+    
+    return tabs;
+  },
+  
+  match:function( fragment ) {
+    return TabNounType.suggest( fragment ).length > 0
+  },
+  
+  suggest: function( fragment ) {
+    var suggestions  = [];
+    var tabs = TabNounType.getTabs();
+          
+    for ( var tabName in tabs ) {
+      if (tabName.match(fragment, "i"))
+	      suggestions.push( tabName );
+    }
+    return suggestions.splice(0, 5);
+  },
+}
+
+CreateCommand({
+  name: "tab",
+  takes: {"tab name": TabNounType},
+  
+  // TODO: BUG. This seems to get passed the first of whatever
+  // it is in the suggestion list, instead of the selected thing
+  // in the suggestion list. I wonder why that is?
+  execute: function( tabName ) {
+    var tabs = TabNounType.getTabs();
+    tabs[tabName]._window.focus();
+    tabs[tabName].focus();    
+  },
+  
+  preview: function( pblock, tabName ) {
+    if( tabName.length > 1 )
+      pblock.innerHTML = "Changes to <b>%s</b> tab.".replace(/%s/, tabName);
+    else
+      pblock.innerHTML = "Switch to tab by name."
   }
 })
