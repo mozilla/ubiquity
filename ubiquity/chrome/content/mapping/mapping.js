@@ -15,13 +15,10 @@ cmd_test_mapping.preview = function(pblock) {
                  .getService(Components.interfaces.nsIExtensionManager);
     var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
     var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
-    extD.append("chrome");
-    extD.append("content");
-    extD.append("mapping");
-    extD.append("mapping.html");
-    var uri = ioSvc.newFileURI(extD);
+    var uri = ioSvc.newFileURI(extD).spec;
+    uri += "chrome/content/mapping/mapping.html";
     var browser = iframe.contentDocument.createElement("browser");
-    browser.setAttribute("src", uri.spec);
+    browser.setAttribute("src", uri);
     browser.setAttribute("width", 500);
     browser.setAttribute("height", 300);
     function onBrowserLoad() {
