@@ -28,8 +28,12 @@ body {
 }
 
 #preview-pane {
+  margin-left: 15px;
   padding: 7px;
   background: #272727;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #00aa00;
 }
 
 #map {
