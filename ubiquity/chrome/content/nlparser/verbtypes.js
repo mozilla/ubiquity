@@ -73,7 +73,7 @@ ParsedSentence.prototype = {
   },
 
   preview: function(context, previewBlock) {
-    return this._verb.preview( context, this._DO, this._modifiers, previewBlock );
+    this._verb.preview( context, this._DO, this._modifiers, previewBlock );
   }
 
 };
@@ -101,7 +101,7 @@ Verb.prototype = {
 
   preview: function( context, directObject, modifiers, previewBlock ) {
     if (this._cmd.preview)
-      return this._cmd.preview( context, directObject, modifiers, previewBlock );
+      this._cmd.preview( context, directObject, modifiers, previewBlock );
     else {
       // Command exists, but has no preview; provide a default one.
       var content = "Executes the <b>" + this._cmd.name + "</b> command.";
