@@ -11,62 +11,61 @@ NLParser.prototype = {
     this._suggestionList = []; // a list of ParsedSentences.
   },
 
-  updateSuggestionList: function( query, context ) {
-    this._suggestionList = [];
-    var completions = [];
-    var x, y;
-    var nounType, verb;
-    var words = query.split( " " );
-    // verb-first matches
-    for ( x in this._verbList ) {
-      verb = this._verbList[x];
-      if ( verb.match( words[0] ) ) {
-	completions = verb.getCompletions( words.slice(1), context );
-	this._suggestionList = this._suggestionList.concat(completions);
-      }
-    }
-    // noun-first matches
-    if (this._suggestionList.length == 0 ){
-      for (x in this._nounTypeList) {
-	nounType = this._nounTypeList[x];
-	if (nounType.match( words[0] ) ){
-	  for (y in this._verbList) {
-	    verb = this._verbList[y];
-	    var prefix = verb.canPossiblyUseNounType(nounType);
-	    if (prefix) {
-	      var betterSentence = prefix + " " + query;
-	      words = betterSentence.split( " " );
-	      completions = verb.getCompletions(words.slice(1), context);
-	      this._suggestionList = this._suggestionList.concat(completions);
-	    }
+  nounFirstSuggestions: function( input, context ) {
+    //Treats input as a noun, figures out what nounTypes it could be,
+    //figures out what verbTypes can take that nounType as input
+    //(either for directObject or for modifiers) and returns a list of
+    //suggestions based on giving the input to those verbs.
+    var suggs = [];
+    var x, y, nounType, verb, words;
+
+    for (x in this._nounTypeList) {
+      nounType = this._nounTypeList[x];
+      if (nounType.match(input)){
+	for (y in this._verbList) {
+	  verb = this._verbList[y];
+	  var prefix = verb.canPossiblyUseNounType(nounType);
+	  if (prefix) {
+	    var betterSentence = prefix + " " + input;
+	    words = betterSentence.split( " " ).slice(1);
+	    suggs = suggs.concat( verb.getCompletions(words, context) );
 	  }
 	}
       }
     }
-
-    // TODO sort in order of match quality
-    this._hilitedSuggestion = 1; // hilight the first suggestion by default
+    return suggs;
   },
 
-  // Obsolete
-  getSuggestionsAsHtml : function() {
-    return [ this._suggestionList[x].getDisplayText()
-	     for ( x in this._suggestionList ) ];
-  },
+  updateSuggestionList: function( query, context ) {
+    var nounType, verb;
+    var newSuggs = [];
 
-  // Obsolete
-  getDescriptionText: function() {
-    if ( this._suggestionList.length == 0 ) {
-      return "You got the magic stick. Type some commands!";
-    }
-    var h = this._hilitedSuggestion;
-    if ( h == 0 ) {
-      return "Executes your input literally, with no autocompletion.";
+    // selection, no input, noun-first suggestion
+    if (!query) {
+      var sel = getTextSelection(context);
+      if (sel) {
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
+      }
     } else {
-      h = h - 1;
+      var words = query.split( " " );
+      // verb-first matches
+      for ( x in this._verbList ) {
+	verb = this._verbList[x];
+	if ( verb.match( words[0] ) ) {
+	  newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), context ));
+	}
+      }
+      // noun-first matches
+      if (newSuggs.length == 0 ){
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, context ));
+      }
     }
-    var sentence = this._suggestionList[h];
-    return sentence.getDescription();
+    // TODO sort in order of match quality!!
+    this._suggestionList = newSuggs;
+    if ( this._suggestionList.length > 0 )
+      this._hilitedSuggestion = 1; // hilight the first suggestion by default
+    else
+      this._hilitedSuggestion = 0;
   },
 
   indicationDown: function(context, previewBlock) {
@@ -90,6 +89,8 @@ NLParser.prototype = {
     // and the suggestion list starts at 1... fencepost!
   },
 
+  // Not currently used, but might be in the future...
+  // Autocompletes the input text based on the hilighted suggestion.
   autocomplete: function( query ) {
     var newText;
     var hilited = this.getHilitedSuggestion();
@@ -101,6 +102,7 @@ NLParser.prototype = {
     return newText;
   },
 
+  // Not currently used, but might be in the future...
   clear: function() {
     this._suggestionList = [];
     this._hilitedSuggestion = 0;
@@ -145,9 +147,8 @@ NLParser.prototype = {
     for (var x in this._suggestionList ) {
       var suggText = this._suggestionList[x].getDisplayText();
       if ( x == this._hilitedSuggestion - 1 ) {
-	//var descText = this._suggestionList[x].getDescription();
-	content += "<div class=\"hilited\">"; // + descText + "<br/>";
-	content += suggText + "<br/><div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
+	content += "<div class=\"hilited\">" + suggText + "<br/>";
+	content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
       } else {
 	content += "<div>" + suggText + "</div>";
       }

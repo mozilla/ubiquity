@@ -40,7 +40,7 @@ Ubiquity.prototype = {
   __KEYCODE_ENTER: 13,
   __KEYCODE_UP: 38,
   __KEYCODE_DOWN: 40,
-  __MIN_CMD_PREVIEW_LENGTH: 3,
+  __MIN_CMD_PREVIEW_LENGTH: 0,
   __DEFAULT_PREVIEW: ("Type the name of a command and press enter to " +
                       "execute it, or <b>help</b> for assistance."),
 

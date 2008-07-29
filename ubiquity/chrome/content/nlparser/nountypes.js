@@ -82,9 +82,9 @@ var PersonNounType = {
       getGmailContacts( PersonNounType.callback);
       return [];
     }
-    
+
     if( fragment.length < 3 ) return [];
-    
+
     var suggestions  = [];
     for ( var c in PersonNounType.contactList ) {
       if (c.match(fragment, "i"))
@@ -116,6 +116,7 @@ var arbHtml = {
 };
 
 var DateNounType = {
+  _name: "date",
   match: function( fragment ) {
     return (this.suggest(fragment).length > 0 );
   },
@@ -256,6 +257,8 @@ var Languages = [
 var languageNounType = new NounType( "language", Languages );
 
 
+// arbText and arbHtml are last on purpose, so that when we're looking for
+// a nountype to match our input, we'll hit the specific ones before the catch-alls.
 const NOUN_LIST = [AddressNounType,
                    languageNounType,
                    PersonNounType,

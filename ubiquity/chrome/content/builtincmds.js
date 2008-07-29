@@ -11,14 +11,14 @@ function makeSearchCommand( options ) {
     openUrlInBrowser(urlString);
     setLastResult( urlString );
   };
-  
+
   cmd.setOptions({
     takes: {"search term": arbText},
     icon: options.icon,
     preview: function(pblock, query, modifiers) {
       if (query) {
         if( options.preview ) options.preview( query, pblock );
-        else setDefaultSearchPreview(options.name, query, pblock)
+        else setDefaultSearchPreview(options.name, query, pblock);
       }
     }
   });
@@ -32,15 +32,15 @@ var cmd_google = makeSearchCommand({
   url: "http://www.google.com/search?q={QUERY}",
   icon: "http://www.google.com/favicon.ico",
   preview: function(searchTerm, pblock) {
-    var url = "http://ajax.googleapis.com/ajax/services/search/web";  
-    params = { v: "1.0", q: searchTerm }
+    var url = "http://ajax.googleapis.com/ajax/services/search/web";
+    var params = { v: "1.0", q: searchTerm };
 
     jQuery.get( url, params, function(data) {
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
       pblock.innerHTML = renderTemplate( "searchresults.html", {results:results} );
-    }, "json")
+		}, "json");
   }
 });
 
@@ -63,15 +63,15 @@ CreateCommand({
   // See http://labs.toolness.com/trac/ticket/44
   modifiers: { near:arbText },
   icon: "http://www.yelp.com/favicon.ico",
-  
+
   execute: function( query, info ) {
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
     url = url.replace( /{NEAR}/g, info.near);
 
-    openUrlInBrowser( url );    
+    openUrlInBrowser( url );
   },
-  
+
   preview: function( pblock, query, info ) {
     var url = "http://api.yelp.com/business_review_search?";
 
@@ -89,7 +89,7 @@ CreateCommand({
 
     jQuery.get( url, params, function(data) {
       pblock.innerHTML = renderTemplate( "yelp.html", {businesses: data.businesses} );
-    }, "json")    
+    }, "json")
   }
 })
 
@@ -155,7 +155,7 @@ CreateCommand({
       setTextSelection( result );
       setLastResult( result );
     } else
-      displayMessage( "Requires an expression.");    
+      displayMessage( "Requires an expression.");
   },
   preview: function( pblock, expr ) {
     if( expr.length < 1 ){
@@ -190,7 +190,7 @@ CreateCommand({
   name: "define",
   takes: {"word": arbText},
   execute: function( word ) {
-    openUrlInBrowser( "http://www.answers.com/" + escape(word) );    
+    openUrlInBrowser( "http://www.answers.com/" + escape(word) );
   },
   preview: function( pblock, word ) {
     defineWord( word, function(text){
@@ -201,7 +201,7 @@ CreateCommand({
 
       pblock.innerHTML = text;
     });
-  }  
+  }
 })
 
 // TODO: Add the ability to manually set the language being highlighted.
@@ -215,7 +215,7 @@ CreateCommand({
       code: code,
       style: "native"
     }
-    
+
     jQuery.post( url, params, function( html ) {
       html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'");
       setTextSelection( html );
@@ -307,7 +307,7 @@ CreateCommand({
   name: "translate",
   takes: {"text to translate": arbText},
   modifiers: {to: languageNounType, from: languageNounType},
-  
+
   execute: function( textToTranslate, languages ) {
     // Default to translating to English if no to language
     // is specified.
@@ -319,7 +319,7 @@ CreateCommand({
 
     translateTo( textToTranslate, {to:toLangCode} );
   },
-  
+
   preview: function( pblock, textToTranslate, languages ) {
     var toLang = languages.to || "English";
 
@@ -342,7 +342,7 @@ CreateCommand({
 CreateCommand({
   name: "help",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
-  execute: function(){ 
+  execute: function(){
     openUrlInBrowser("about:ubiquity");
   }
 })
@@ -357,7 +357,7 @@ CreateCommand({
   takes: {"thing": arbText},
   execute: function( thing, modifiers ) {
     displayMessage( "I am remembering " + thing );
-    setLastResult( thing );    
+    setLastResult( thing );
   }
 });
 
@@ -383,7 +383,7 @@ CreateCommand({
   name: "email",
   takes: {"message": arbHtml},
   modifiers: {to: PersonNounType},
-  
+
   preview: function(pblock, directObject, modifiers) {
     var html = "Creates an email message ";
     if (modifiers["to"]) {
@@ -392,7 +392,7 @@ CreateCommand({
     html += "with these contents:" + directObject;
     pblock.innerHTML = html;
   },
-  
+
   execute: function(html, headers) {
     var document = context.focusedWindow.document;
     var title = document.title;
@@ -441,7 +441,7 @@ CreateCommand({
     } else
       displayMessage("Gmail must be open in a tab.");
     // TODO why not open gmail if it's not already open?
-  }  
+  }
 });
 
 
@@ -530,13 +530,13 @@ CreateCommand({
   execute: function( date ) {
     var url = "http://www.google.com/calendar/m";
     var params = paramsToString({ as_sdt: date.toString("yyyyMMdd") });
-    
+
     openUrlInBrowser( url + params );
   },
   preview: function( pblock, date ) {
     pblock.innerHTML = "Checks Google Calendar for the day of" +
-  		       date.toString("dd MM, yyyy");  
-  	checkCalendar( pblock, date );  
+  		       date.toString("dd MM, yyyy");
+  	checkCalendar( pblock, date );
   }
 });
 
@@ -555,7 +555,7 @@ CreateCommand({
   execute: function( location ) {
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
-    
+
     openUrlInBrowser( url );
   },
 
@@ -564,18 +564,18 @@ CreateCommand({
       pblock.innerHTML = "Gets the weather for a zip code/city."
       return;
     }
-    
+
     var url = "http://www.google.com/ig/api";
     jQuery.get( url, {weather: location}, function(xml) {
       var el = jQuery(xml).find("current_conditions");
       if( el.length == 0 ) return;
 
       var condition = el.find("condition").attr("data");
-      
+
       var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
       var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
       imgSrc += weatherId + "d.png";
-      
+
       weather = {
         condition: condition,
         temp: el.find("temp_f").attr("data"),
@@ -583,11 +583,11 @@ CreateCommand({
         wind: el.find("wind_condition").attr("data"),
         img: imgSrc
       }
-      
-      weather["img"] = imgSrc;      
-      
+
+      weather["img"] = imgSrc;
+
       html = renderTemplate( "weather.html", {w:weather});
-      
+
       jQuery(pblock).html( html );
     }, "xml")
   }
@@ -597,7 +597,6 @@ CreateCommand({
 // -----------------------------------------------------------------
 // MAPPING COMMANDS
 // -----------------------------------------------------------------
-
 
 CreateCommand({
   name: "map",
