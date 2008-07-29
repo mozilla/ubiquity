@@ -28,7 +28,7 @@ NLParser.prototype = {
 	  if (prefix) {
 	    var betterSentence = prefix + " " + input;
 	    words = betterSentence.split( " " ).slice(1);
-	    suggestions.concat( verb.getCompletions(word, context) );
+	    suggestions.concat( verb.getCompletions(words, context) );
 	  }
 	}
       }
@@ -37,14 +37,14 @@ NLParser.prototype = {
   },
 
   updateSuggestionList: function( query, context ) {
-    this._suggestionList = [];
     var nounType, verb;
+    var newSuggs = [];
 
     // selection, no input, noun-first suggestion
     if (!query) {
       var sel = getTextSelection(context);
       if (sel) {
-	this._suggestionList.concat( this.nounFirstSuggestions(sel, context));
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
       }
     }
     var words = query.split( " " );
@@ -52,15 +52,16 @@ NLParser.prototype = {
     for ( x in this._verbList ) {
       verb = this._verbList[x];
       if ( verb.match( words[0] ) ) {
-	this._suggestionList.concat(verb.getCompletions( words.slice(1), context ));
+	newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), context ));
       }
     }
     // noun-first matches
     if (this._suggestionList.length == 0 ){
-      this._suggestionList.concat( this.nounFirstSuggestions( query, context ));
+      newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, context ));
     }
 
-    // TODO sort in order of match quality
+    // TODO sort in order of match quality'
+    this._suggestionList = newSuggs;
     this._hilitedSuggestion = 1; // hilight the first suggestion by default
   },
 
