@@ -16,6 +16,29 @@ NLParser.prototype = {
     var completions = [];
     var x, y;
     var nounType, verb;
+
+    // selection, no input, noun-first suggestion
+    if (!query) {
+      var sel = getTextSelection(context);
+      if (sel) {
+	// TODO duplicated code here!  Refactor it
+	for (x in this._nounTypeList) {
+	  nounType = this._nounTypeList[x];
+	  if (nounType.match(sel)){
+	    for (y in this._verbList) {
+	      verb = this._verbList[y];
+	      var prefix = verb.canPossiblyUseNounType(nounType);
+	      if (prefix) {
+		var betterSentence = prefix + " " + query;
+		words = betterSentence.split( " " );
+		completions = verb.getCompletions(words.slice(1), context);
+		this._suggestionList = this._suggestionList.concat(completions);
+	      }
+	    }
+	  }
+	}
+      }
+    }
     var words = query.split( " " );
     // verb-first matches
     for ( x in this._verbList ) {

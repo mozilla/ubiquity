@@ -118,6 +118,8 @@ Verb.prototype = {
     return desc;
   },
 
+  // RecursiveParse is huge and complicated.  It really oughtta have some
+  // unit tests written for it.
   recursiveParse: function( unusedWords, filledMods, unfilledMods ) {
     var x;
     var suggestions = [];
