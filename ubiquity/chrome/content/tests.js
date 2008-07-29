@@ -257,6 +257,8 @@ function testImportWorksWithoutSandboxContext() {
   this.assert(!("_sandboxContext" in jsmu));
 }
 
+
+
 function testParseDirectOnly() {
   var dogGotPetted = false;
   var dog = new NounType( dog, ["poodle", "golden retreiver",
@@ -269,10 +271,11 @@ function testParseDirectOnly() {
   cmd_pet.DOType = dog;
   cmd_pet.modifiers = {};
 
-  var verb = new Verb(cmd);
+  var verb = new Verb(cmd_pet);
   var inputWords = ["b"];
-
-  var completions = verb.getCompletions( input, fakeContext );
+  
+  var fakeContext = null;
+  var completions = verb.getCompletions( inputWords, fakeContext );
   this.assert( completions.length == 2 );
 }
 
