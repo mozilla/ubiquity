@@ -271,14 +271,14 @@ function getTextSelection() {
   return retval;
 }
 
-function renderStringTemplate( string, data ) {    
+function renderStringTemplate( string, data ) {
   template = Template.parseTemplate( string );
   return template.process( data );
 }
 
 function renderTemplate( templateName, data ) {
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
-    
+
   var template = getLocalUrl( chromePrefixUrl + templateName );
   return renderStringTemplate( template, data );
 }
@@ -309,7 +309,7 @@ function getLocation( ){
       };
     }
   });
-  
+
   return globals.location;
 }
 
@@ -324,20 +324,20 @@ Function.prototype.setOptions = function( options ) {
   function getKey( dict ) {
     for( var key in dict ) return key;
   }
-  
+
   if( options.takes ) {
-    this.DOName = getKey( options.takes );
+    this.DOLabel = getKey( options.takes );
     this.DOType = options.takes[this.DOName];
   }
-  
+
   // Reserved keywords that shouldn't be added to the cmd function.
   var RESERVED = ["takes", "execute", "name"];
-  
+
   for( var key in options ) {
     if( RESERVED.indexOf(key) == -1 )
       this[key] = options[key];
   }
-  
+
   // If preview is a string, wrap it in a function that does
   // what you'd expect it to.
   if( typeof this["preview"] == "string" ) {
@@ -361,5 +361,5 @@ function FBLog( arg1, arg2 ){
     getWindowInsecure().console.log( arg1, arg2 );
   else
     getWindowInsecure().console.log( arg1 );
-  
+
 }
