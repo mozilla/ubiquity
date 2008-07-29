@@ -75,12 +75,11 @@ ParsedSentence.prototype = {
   preview: function(context, previewBlock) {
     this._verb.preview( context, this._DO, this._modifiers, previewBlock );
   }
-
 };
 
-
 function Verb( cmd ) {
-  this._init( cmd );
+  if (cmd)
+    this._init( cmd );
 }
 Verb.prototype = {
   _init: function( cmd ) {
@@ -110,17 +109,8 @@ Verb.prototype = {
     }
   },
 
-  getDescription: function( directObject, prepositionPhrases ) {
-    // returns a string describing what the sentence will do if executed
-    var desc = "Hit enter to do " + this._name + " with direct object " + directObject;
-    for ( var x in prepositionPhrases ) {
-      desc = desc + ", " + x + " " + prepositionPhrases[x];
-    }
-    return desc;
-  },
-
-  // RecursiveParse is huge and complicated.  It really oughtta have some
-  // unit tests written for it.
+  // RecursiveParse is huge and complicated.
+  // I think it should probably be moved from Verb to NLParser.
   recursiveParse: function( unusedWords, filledMods, unfilledMods ) {
     var x;
     var suggestions = [];
