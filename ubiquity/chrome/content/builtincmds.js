@@ -1,65 +1,4 @@
 
-function loadMap(lat, lng) {
-  if (GBrowserIsCompatible) {
-    var map = new GMap2(document.getElementById("map"));
-    var point = new GLatLng(lat, lng);
-    map.setCenter(point, 13);
-    map.addOverlay(new GMarker(point));
-    map.addControl(new GSmallMapControl());
-  }
-}
-
-// TODO: Clean this up!
-function setMapPreview(searchTerm, pblock) {
-  var doc = context.focusedWindow.document;
-  var url = "http://maps.google.com/maps/geo";
-  var apikey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
-  var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);
-
-  var req = new XMLHttpRequest();
-  req.open('GET', url + "?" + params, true);
-  req.overrideMimeType('application/json');
-  req.onreadystatechange = function() {
-    if (req.readyState == 4 && req.status == 200) {
-      var jobj = eval( '(' + req.responseText + ')' );
-      var numToDisplay = 3;
-
-      if (!jobj.Placemark) {
-        displayMessage("not specific enough");
-        return;
-      }
-
-      var placemark = jobj.Placemark[0];
-      var lng0 = placemark.Point.coordinates[0];
-      var lat0 = placemark.Point.coordinates[1];
-
-      var html = "<div id=\"address-list\">";
-      for (var i=0; i<numToDisplay; i++) {
-        if (jobj.Placemark[i]) {
-          var address = jobj.Placemark[i].address;
-          var lng = jobj.Placemark[i].Point.coordinates[0];
-          var lat = jobj.Placemark[i].Point.coordinates[1];
-
-          html = html + "<div class=\"gaddress\">" +
-                        "<a href=\"#\" onclick=\"loadMap(" + lat + ", " + lng + ");\">" +
-                        address + "</a></div>";
-        }
-      }
-      html = html + "</div>" +
-                    "<div id=\"map\">[map]</div>";
-
-      // For now, just displaying the address listings and the map
-      pblock.innerHTML = html;
-
-      // This call to load map doesn't have access to the google api script which is currently included in the popup in browser.xul
-      // Possibly insert a script tag here instead- doesn't seem to be working either: doesn't actually LOAD (ie: onload event never fires)
-      loadMap(lat0, lng0);
-
-    }
-  };
-  req.send(null);
-}
-
 function setDefaultSearchPreview( name, query, pblock ) {
   var content = ("Performs a " + name + " search for <b>" +
             escape(query) + "</b>.");
@@ -111,13 +50,6 @@ var cmd_imdb = makeSearchCommand({
   icon: "http://i.imdb.com/favicon.ico"
 });
 
-var cmd_map_it = makeSearchCommand({
-  name: "Google Map",
-  url: "http://maps.google.com/?q={QUERY}",
-  icon: "http://www.google.com/favicon.ico",
-  preview: setMapPreview
-});
-
 var cmd_bugzilla = makeSearchCommand({
   name: "Bugzilla",
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
@@ -125,6 +57,7 @@ var cmd_bugzilla = makeSearchCommand({
 });
 
 CreateCommand({
+  name: "yelp",
   takes: { "restaurant":arbText },
   // TODO: Should be AddressNounType, which is currently broken.
   // See http://labs.toolness.com/trac/ticket/44
@@ -671,5 +604,53 @@ CreateCommand({
       
       jQuery(pblock).html( html );
     }, "xml")
+  }
+})
+
+
+// -----------------------------------------------------------------
+// MAPPING COMMANDS
+// -----------------------------------------------------------------
+
+function showPreviewFromFile( pblock, filePath, callback ) {
+  var iframe = pblock.ownerDocument.createElement("iframe");
+  iframe.setAttribute("src", "chrome://ubiquity/content/mapping/mapping.xul");
+  iframe.style.border = "none";
+  iframe.setAttribute("width", 500);
+  iframe.setAttribute("height", 300);
+  function onXulLoad() {
+    var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
+                .getService(Components.interfaces.nsIIOService);
+    var extMgr = Components.classes["@mozilla.org/extensions/manager;1"]
+                 .getService(Components.interfaces.nsIExtensionManager);
+    var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
+    var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
+    var uri = ioSvc.newFileURI(extD).spec;
+    uri += "chrome/content/" + filePath;
+    var browser = iframe.contentDocument.createElement("browser");
+    browser.setAttribute("src", uri);
+    browser.setAttribute("width", 500);
+    browser.setAttribute("height", 300);
+    function onBrowserLoad() {
+      // TODO: Security risk -- this is very insecure!
+      callback( browser.contentWindow );
+    }
+    browser.addEventListener("load", safeWrapper(onBrowserLoad), true);
+    iframe.contentDocument.documentElement.appendChild(browser);
+  }
+  iframe.addEventListener("load", safeWrapper(onXulLoad), true);
+  pblock.innerHTML = "";
+  pblock.appendChild(iframe);  
+}
+
+
+
+CreateCommand({
+  name: "map",
+  takes: {"address": arbText},
+  preview: function(pblock, location) {
+    showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
+     winInsecure.setPreview( location );
+    }); 
   }
 })
