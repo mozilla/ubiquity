@@ -257,25 +257,69 @@ function testImportWorksWithoutSandboxContext() {
   this.assert(!("_sandboxContext" in jsmu));
 }
 
-
-
 function testParseDirectOnly() {
   var dogGotPetted = false;
-  var dog = new NounType( dog, ["poodle", "golden retreiver",
-				"beagle", "bulldog", "husky"]);
-  var cmd_pet = function(directObject, modifiers) {
-    dogGotPetted = true;
+  var dog = new NounType( "dog", ["poodle", "golden retreiver",
+				  "beagle", "bulldog", "husky"]);
+  var cmd_pet = {
+    execute: function(context, directObject, modifiers) {
+      dogGotPetted = directObject;
+    },
+    name: "pet",
+    DOLabel: "kind of dog",
+    DOType: dog,
+    modifiers: {}
   };
-  cmd_pet.name = "pet";
-  cmd_pet.DOLabel = "kind of dog";
-  cmd_pet.DOType = dog;
-  cmd_pet.modifiers = {};
-
   var verb = new Verb(cmd_pet);
   var inputWords = ["b"];
-  
+
   var fakeContext = null;
   var completions = verb.getCompletions( inputWords, fakeContext );
   this.assert( completions.length == 2 );
+  this.assert( completions[0]._verb._name == "pet");
+  this.assert( completions[0]._DO == "beagle");
+  this.assert( completions[1]._verb._name == "pet");
+  this.assert( completions[1]._DO == "bulldog");
+  completions[0].execute(fakeContext);
+  this.assert( dogGotPetted == "beagle");
+  completions[1].execute(fakeContext);
+  this.assert( dogGotPetted == "bulldog" );
 }
 
+function testParseWithModifier() {
+  // wash dog with sponge
+  var dogGotWashed = null;
+  var dogGotWashedWith = null;
+  var dog = new NounType( "dog", ["poodle", "golden retreiver",
+				"beagle", "bulldog", "husky"]);
+  var washingObj = new NounType( "washing object", ["sponge", "hose", "spork",
+						    "bathtub", "fire hose"]);
+  var cmd_wash = {
+    execute: function(context, directObject, modifiers) {
+      dogGotWashed = directObject;
+      dogGotWashedWith = modifiers["with"];
+    },
+    name:"wash",
+    DOLabel:"kind of dog",
+    DOType: dog,
+    modifiers: {"with": washingObj}
+  };
+
+  var verb = new Verb(cmd_wash);
+  var inputWords = ["pood", "with", "sp"];
+  var fakeContext = null;
+  var completions = verb.getCompletions( inputWords, fakeContext );
+  this.assert( completions.length == 2 );
+  this.assert( completions[0]._verb._name == "wash");
+  this.assert( completions[0]._DO == "poodle");
+  this.assert( completions[0]._modifiers["with"] == "sponge");
+  this.assert( completions[1]._verb._name == "wash");
+  this.assert( completions[1]._DO == "poodle");
+  this.assert( completions[1]._modifiers["with"] == "spork");
+  completions[0].execute(fakeContext);
+  this.assert( dogGotWashed == "poodle");
+  this.assert( dogGotWashedWith == "sponge");
+  completions[1].execute(fakeContext);
+  this.assert( dogGotWashed == "poodle");
+  this.assert( dogGotWashedWith == "spork");
+}

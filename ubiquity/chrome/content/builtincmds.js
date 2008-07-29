@@ -210,11 +210,11 @@ CreateCommand({
   name: "syntax&nbsp;highlight",
   takes: {"code": arbText},
   execute: function( code ) {
-    var url = "http://azarask.in/services/syntaxhighlight/color.py"
-    params = {
+    var url = "http://azarask.in/services/syntaxhighlight/color.py";
+    var params = {
       code: code,
       style: "native"
-    }
+    };
 
     jQuery.post( url, params, function( html ) {
       html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'");
@@ -330,7 +330,7 @@ CreateCommand({
     translateTo( textToTranslate, {to:toLangCode}, function( translation ) {
       pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
       pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
-  	})
+      });
   }
 })
 
@@ -345,7 +345,7 @@ CreateCommand({
   execute: function(){
     openUrlInBrowser("about:ubiquity");
   }
-})
+});
 
 function cmd_editor() {
   openUrlInBrowser("chrome://ubiquity/content/editor.html");
@@ -604,7 +604,7 @@ CreateCommand({
   preview: function(pblock, location) {
     showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
       winInsecure.setPreview( location );
-    }); 
+    });
   }
 })
 
@@ -623,7 +623,7 @@ function cmd_view_source() {
 
 var TabNounType = {
   _name: "tab name",
-  
+
   // Returns all tabs from all windows.
   getTabs: function(){
     var tabs = {};
@@ -635,18 +635,18 @@ var TabNounType = {
         tabs[tab.document.title] = tab;
       }
     }
-    
+
     return tabs;
   },
-  
+
   match:function( fragment ) {
     return TabNounType.suggest( fragment ).length > 0
   },
-  
+
   suggest: function( fragment ) {
     var suggestions  = [];
     var tabs = TabNounType.getTabs();
-          
+
     for ( var tabName in tabs ) {
       if (tabName.match(fragment, "i"))
 	      suggestions.push( tabName );
@@ -658,16 +658,16 @@ var TabNounType = {
 CreateCommand({
   name: "tab",
   takes: {"tab name": TabNounType},
-  
+
   // TODO: BUG. This seems to get passed the first of whatever
   // it is in the suggestion list, instead of the selected thing
   // in the suggestion list. I wonder why that is?
   execute: function( tabName ) {
     var tabs = TabNounType.getTabs();
     tabs[tabName]._window.focus();
-    tabs[tabName].focus();    
+    tabs[tabName].focus();
   },
-  
+
   preview: function( pblock, tabName ) {
     if( tabName.length > 1 )
       pblock.innerHTML = "Changes to <b>%s</b> tab.".replace(/%s/, tabName);

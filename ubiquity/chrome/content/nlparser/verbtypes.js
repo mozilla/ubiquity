@@ -84,7 +84,8 @@ function Verb( cmd ) {
 }
 Verb.prototype = {
   _init: function( cmd ) {
-    this._cmd = cmd;
+    this._execute = cmd.execute;
+    this._preview = cmd.preview;
     this._name = cmd.name;
     this._DOLabel = cmd.DOLabel;
     this._DOType = cmd.DOType; // must be a NounType.
@@ -96,15 +97,15 @@ Verb.prototype = {
   },
 
   execute: function( context, directObject, modifiers ) {
-    return this._cmd.execute( context, directObject, modifiers );
+    return this._execute( context, directObject, modifiers );
   },
 
   preview: function( context, directObject, modifiers, previewBlock ) {
-    if (this._cmd.preview)
-      this._cmd.preview( context, directObject, modifiers, previewBlock );
+    if (this._preview)
+      this._preview( context, directObject, modifiers, previewBlock );
     else {
       // Command exists, but has no preview; provide a default one.
-      var content = "Executes the <b>" + this._cmd.name + "</b> command.";
+      var content = "Executes the <b>" + this._name + "</b> command.";
       previewBlock.innerHTML = content;
     }
   },
