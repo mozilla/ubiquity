@@ -16,53 +16,67 @@ NLParser.prototype = {
     //figures out what verbTypes can take that nounType as input
     //(either for directObject or for modifiers) and returns a list of
     //suggestions based on giving the input to those verbs.
-    var suggestions = [];
+    var suggs = [];
     var x, y, nounType, verb, words;
 
     for (x in this._nounTypeList) {
       nounType = this._nounTypeList[x];
       if (nounType.match(input)){
+	//window.console.log("noun type " + nounType._name + " matches." );
 	for (y in this._verbList) {
 	  verb = this._verbList[y];
 	  var prefix = verb.canPossiblyUseNounType(nounType);
 	  if (prefix) {
+	    //window.console.log("verb type " + verb._name + " matches.");
 	    var betterSentence = prefix + " " + input;
 	    words = betterSentence.split( " " ).slice(1);
-	    suggestions.concat( verb.getCompletions(words, context) );
+	    //window.console.log(words);
+	    suggs = suggs.concat( verb.getCompletions(words, context) );
 	  }
 	}
       }
     }
-    return suggestions;
+    return suggs;
   },
 
   updateSuggestionList: function( query, context ) {
     var nounType, verb;
     var newSuggs = [];
 
+    //window.console.log("Hello world");
+    //window.console.log("Query is " + query);
     // selection, no input, noun-first suggestion
     if (!query) {
+      //window.console.log("selection-based noun-first suggestions");
       var sel = getTextSelection(context);
+      //window.console.log("Selection is " + sel);
       if (sel) {
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
       }
-    }
-    var words = query.split( " " );
-    // verb-first matches
-    for ( x in this._verbList ) {
-      verb = this._verbList[x];
-      if ( verb.match( words[0] ) ) {
-	newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), context ));
+    } else {
+      var words = query.split( " " );
+      // verb-first matches
+      //window.console.log("Verb first suggestions");
+      //window.console.log(words);
+      for ( x in this._verbList ) {
+	verb = this._verbList[x];
+	if ( verb.match( words[0] ) ) {
+	  newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), context ));
+	}
+      }
+      // noun-first matches
+      if (newSuggs.length == 0 ){
+	//window.console.log("input-based noun-first suggestions");
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, context ));
       }
     }
-    // noun-first matches
-    if (this._suggestionList.length == 0 ){
-      newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, context ));
-    }
-
-    // TODO sort in order of match quality'
+    //window.console.log(newSuggs);
+    // TODO sort in order of match quality!!
     this._suggestionList = newSuggs;
-    this._hilitedSuggestion = 1; // hilight the first suggestion by default
+    if ( this._suggestionList.length > 0 )
+      this._hilitedSuggestion = 1; // hilight the first suggestion by default
+    else
+      this._hilitedSuggestion = 0;
   },
 
   indicationDown: function(context, previewBlock) {
@@ -133,6 +147,14 @@ NLParser.prototype = {
     // to be made) after some amount of time has passed since
     // the user's last keypress.  This might be done with a
     // XUL:textbox whose 'type' is set to 'timed'.
+    /*var x;
+    for (x in this._verbList) {
+      var y = this._verbList[x];
+      if (y._DOType)
+	window.console.log( y._name + " takes " + y._DOType._name );
+      else
+	window.console.log( y._name + " takes nothing.");
+    }*/
 
     var doc = previewBlock.ownerDocument;
     var oldPreview = doc.getElementById("preview-pane");

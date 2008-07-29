@@ -327,7 +327,7 @@ Function.prototype.setOptions = function( options ) {
 
   if( options.takes ) {
     this.DOLabel = getKey( options.takes );
-    this.DOType = options.takes[this.DOName];
+    this.DOType = options.takes[this.DOLabel];
   }
 
   // Reserved keywords that shouldn't be added to the cmd function.
@@ -344,13 +344,13 @@ Function.prototype.setOptions = function( options ) {
     var previewString = this["preview"];
     this["preview"] = function( pblock ){
       pblock.innerHTML = previewString;
-    }
+    };
   }
 }
 
 // Creates a command from a list of options
 function CreateCommand( options ) {
-  var defaultExecute = function(){ displayMessage("No action defined.")}
+  var defaultExecute = function(){ displayMessage("No action defined.");};
   this["cmd_" + options.name] = options.execute || defaultExecute;
   this["cmd_" + options.name].setOptions( options );
 }

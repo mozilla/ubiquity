@@ -116,6 +116,7 @@ var arbHtml = {
 };
 
 var DateNounType = {
+  _name: "date",
   match: function( fragment ) {
     return (this.suggest(fragment).length > 0 );
   },
