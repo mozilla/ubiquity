@@ -561,7 +561,7 @@ CreateCommand({
 
   preview: function( pblock, location ) {
     if( location.length < 1 ) {
-      pblock.innerHTML = "Gets the weather for a zip code/city."
+      pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
     }
 
@@ -576,20 +576,20 @@ CreateCommand({
       var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
       imgSrc += weatherId + "d.png";
 
-      weather = {
+      var weather = {
         condition: condition,
         temp: el.find("temp_f").attr("data"),
         humidity: el.find("humidity").attr("data"),
         wind: el.find("wind_condition").attr("data"),
         img: imgSrc
-      }
+      };
 
       weather["img"] = imgSrc;
 
       html = renderTemplate( "weather.html", {w:weather});
 
       jQuery(pblock).html( html );
-    }, "xml")
+      }, "xml");
   }
 })
 
@@ -614,7 +614,7 @@ CreateCommand({
 // -----------------------------------------------------------------
 
 function cmd_view_source() {
-  url = Application.activeWindow.activeTab.document.location.href;
+  var url = Application.activeWindow.activeTab.document.location.href;
   url = "view-source:" + url;
   // TODO: Should do it this way:
   // openUrlInBrowser( "http://www.google.com" );
@@ -640,7 +640,7 @@ var TabNounType = {
   },
 
   match:function( fragment ) {
-    return TabNounType.suggest( fragment ).length > 0
+    return TabNounType.suggest( fragment ).length > 0;
   },
 
   suggest: function( fragment ) {
