@@ -64,27 +64,6 @@ NLParser.prototype = {
     this._hilitedSuggestion = 1; // hilight the first suggestion by default
   },
 
-  // Obsolete
-  getSuggestionsAsHtml : function() {
-    return [ this._suggestionList[x].getDisplayText()
-	     for ( x in this._suggestionList ) ];
-  },
-
-  // Obsolete
-  getDescriptionText: function() {
-    if ( this._suggestionList.length == 0 ) {
-      return "You got the magic stick. Type some commands!";
-    }
-    var h = this._hilitedSuggestion;
-    if ( h == 0 ) {
-      return "Executes your input literally, with no autocompletion.";
-    } else {
-      h = h - 1;
-    }
-    var sentence = this._suggestionList[h];
-    return sentence.getDescription();
-  },
-
   indicationDown: function(context, previewBlock) {
     this._hilitedSuggestion ++;
     if ( this._hilitedSuggestion > this._suggestionList.length ) {
@@ -106,6 +85,8 @@ NLParser.prototype = {
     // and the suggestion list starts at 1... fencepost!
   },
 
+  // Not currently used, but might be in the future...
+  // Autocompletes the input text based on the hilighted suggestion.
   autocomplete: function( query ) {
     var newText;
     var hilited = this.getHilitedSuggestion();
@@ -117,6 +98,7 @@ NLParser.prototype = {
     return newText;
   },
 
+  // Not currently used, but might be in the future...
   clear: function() {
     this._suggestionList = [];
     this._hilitedSuggestion = 0;
@@ -161,9 +143,8 @@ NLParser.prototype = {
     for (var x in this._suggestionList ) {
       var suggText = this._suggestionList[x].getDisplayText();
       if ( x == this._hilitedSuggestion - 1 ) {
-	//var descText = this._suggestionList[x].getDescription();
-	content += "<div class=\"hilited\">"; // + descText + "<br/>";
-	content += suggText + "<br/><div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
+	content += "<div class=\"hilited\">" + suggText + "<br/>";
+	content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
       } else {
 	content += "<div>" + suggText + "</div>";
       }
