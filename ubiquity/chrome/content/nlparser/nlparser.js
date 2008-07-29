@@ -11,7 +11,7 @@ NLParser.prototype = {
     this._suggestionList = []; // a list of ParsedSentences.
   },
 
-  nounFirstSuggestion: function( input, context ) {
+  nounFirstSuggestions: function( input, context ) {
     //Treats input as a noun, figures out what nounTypes it could be,
     //figures out what verbTypes can take that nounType as input
     //(either for directObject or for modifiers) and returns a list of
@@ -57,7 +57,7 @@ NLParser.prototype = {
     }
     // noun-first matches
     if (this._suggestionList.length == 0 ){
-      this.suggestionList.concat( this.nounFirstSuggestions( query, context ));
+      this._suggestionList.concat( this.nounFirstSuggestions( query, context ));
     }
 
     // TODO sort in order of match quality
