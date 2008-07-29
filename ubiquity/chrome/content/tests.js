@@ -256,3 +256,23 @@ function testImportWorksWithoutSandboxContext() {
   _testImport(this, jsmu);
   this.assert(!("_sandboxContext" in jsmu));
 }
+
+function testParseDirectOnly() {
+  var dogGotPetted = false;
+  var dog = new NounType( dog, ["poodle", "golden retreiver",
+				"beagle", "bulldog", "husky"]);
+  var cmd_pet = function(directObject, modifiers) {
+    dogGotPetted = true;
+  };
+  cmd_pet.name = "pet";
+  cmd_pet.DOLabel = "kind of dog";
+  cmd_pet.DOType = dog;
+  cmd_pet.modifiers = {};
+
+  var verb = new Verb(cmd);
+  var inputWords = ["b"];
+
+  var completions = verb.getCompletions( input, fakeContext );
+  this.assert( completions.length == 2 );
+}
+
