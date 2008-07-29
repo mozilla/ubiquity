@@ -11,32 +11,40 @@ NLParser.prototype = {
     this._suggestionList = []; // a list of ParsedSentences.
   },
 
+  nounFirstSuggestion: function( input, context ) {
+    //Treats input as a noun, figures out what nounTypes it could be,
+    //figures out what verbTypes can take that nounType as input
+    //(either for directObject or for modifiers) and returns a list of
+    //suggestions based on giving the input to those verbs.
+    var suggestions = [];
+    var x, y, nounType, verb, words;
+
+    for (x in this._nounTypeList) {
+      nounType = this._nounTypeList[x];
+      if (nounType.match(input)){
+	for (y in this._verbList) {
+	  verb = this._verbList[y];
+	  var prefix = verb.canPossiblyUseNounType(nounType);
+	  if (prefix) {
+	    var betterSentence = prefix + " " + input;
+	    words = betterSentence.split( " " ).slice(1);
+	    suggestions.concat( verb.getCompletions(word, context) );
+	  }
+	}
+      }
+    }
+    return suggestions;
+  },
+
   updateSuggestionList: function( query, context ) {
     this._suggestionList = [];
-    var completions = [];
-    var x, y;
     var nounType, verb;
 
     // selection, no input, noun-first suggestion
     if (!query) {
       var sel = getTextSelection(context);
       if (sel) {
-	// TODO duplicated code here!  Refactor it
-	for (x in this._nounTypeList) {
-	  nounType = this._nounTypeList[x];
-	  if (nounType.match(sel)){
-	    for (y in this._verbList) {
-	      verb = this._verbList[y];
-	      var prefix = verb.canPossiblyUseNounType(nounType);
-	      if (prefix) {
-		var betterSentence = prefix + " " + query;
-		words = betterSentence.split( " " );
-		completions = verb.getCompletions(words.slice(1), context);
-		this._suggestionList = this._suggestionList.concat(completions);
-	      }
-	    }
-	  }
-	}
+	this._suggestionList.concat( this.nounFirstSuggestions(sel, context));
       }
     }
     var words = query.split( " " );
@@ -44,27 +52,12 @@ NLParser.prototype = {
     for ( x in this._verbList ) {
       verb = this._verbList[x];
       if ( verb.match( words[0] ) ) {
-	completions = verb.getCompletions( words.slice(1), context );
-	this._suggestionList = this._suggestionList.concat(completions);
+	this._suggestionList.concat(verb.getCompletions( words.slice(1), context ));
       }
     }
     // noun-first matches
     if (this._suggestionList.length == 0 ){
-      for (x in this._nounTypeList) {
-	nounType = this._nounTypeList[x];
-	if (nounType.match( words[0] ) ){
-	  for (y in this._verbList) {
-	    verb = this._verbList[y];
-	    var prefix = verb.canPossiblyUseNounType(nounType);
-	    if (prefix) {
-	      var betterSentence = prefix + " " + query;
-	      words = betterSentence.split( " " );
-	      completions = verb.getCompletions(words.slice(1), context);
-	      this._suggestionList = this._suggestionList.concat(completions);
-	    }
-	  }
-	}
-      }
+      this.suggestionList.concat( this.nounFirstSuggestions( query, context ));
     }
 
     // TODO sort in order of match quality
