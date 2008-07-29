@@ -22,15 +22,12 @@ NLParser.prototype = {
     for (x in this._nounTypeList) {
       nounType = this._nounTypeList[x];
       if (nounType.match(input)){
-	//window.console.log("noun type " + nounType._name + " matches." );
 	for (y in this._verbList) {
 	  verb = this._verbList[y];
 	  var prefix = verb.canPossiblyUseNounType(nounType);
 	  if (prefix) {
-	    //window.console.log("verb type " + verb._name + " matches.");
 	    var betterSentence = prefix + " " + input;
 	    words = betterSentence.split( " " ).slice(1);
-	    //window.console.log(words);
 	    suggs = suggs.concat( verb.getCompletions(words, context) );
 	  }
 	}
@@ -43,21 +40,15 @@ NLParser.prototype = {
     var nounType, verb;
     var newSuggs = [];
 
-    //window.console.log("Hello world");
-    //window.console.log("Query is " + query);
     // selection, no input, noun-first suggestion
     if (!query) {
-      //window.console.log("selection-based noun-first suggestions");
       var sel = getTextSelection(context);
-      //window.console.log("Selection is " + sel);
       if (sel) {
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
       }
     } else {
       var words = query.split( " " );
       // verb-first matches
-      //window.console.log("Verb first suggestions");
-      //window.console.log(words);
       for ( x in this._verbList ) {
 	verb = this._verbList[x];
 	if ( verb.match( words[0] ) ) {
@@ -66,11 +57,9 @@ NLParser.prototype = {
       }
       // noun-first matches
       if (newSuggs.length == 0 ){
-	//window.console.log("input-based noun-first suggestions");
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, context ));
       }
     }
-    //window.console.log(newSuggs);
     // TODO sort in order of match quality!!
     this._suggestionList = newSuggs;
     if ( this._suggestionList.length > 0 )
@@ -147,14 +136,6 @@ NLParser.prototype = {
     // to be made) after some amount of time has passed since
     // the user's last keypress.  This might be done with a
     // XUL:textbox whose 'type' is set to 'timed'.
-    /*var x;
-    for (x in this._verbList) {
-      var y = this._verbList[x];
-      if (y._DOType)
-	window.console.log( y._name + " takes " + y._DOType._name );
-      else
-	window.console.log( y._name + " takes nothing.");
-    }*/
 
     var doc = previewBlock.ownerDocument;
     var oldPreview = doc.getElementById("preview-pane");
