@@ -1,8 +1,10 @@
 CreateCommand({
   name: "計算して",
-  takes: {"巣学の表現": arbText},
+  takes: {},
+  modifiers: {"を": arbText},
   icon: "http://www.metacalc.com/favicon.ico",
-  execute: function( expr ) {
+  execute: function( unused, modifiers ) {
+    var expr = modifiers["を"];
     if( expr.length > 0 ) {
       var result = eval( expr );
       setTextSelection( result );
@@ -10,7 +12,8 @@ CreateCommand({
     } else
       displayMessage( "巣学の表現が必要です。");
   },
-  preview: function( pblock, expr ) {
+  preview: function( pblock, unused, modifiers ) {
+    var expr = modifiers["を"];
     if( expr.length < 1 ){
       pblock.innerHTML = "巣学の表現を計算する。例えば、 22/7.";
       return;
@@ -25,21 +28,23 @@ CreateCommand({
 
 CreateCommand({
   name: "翻訳して",
-  takes: {"翻訳するテキスト": arbText},
+  takes: {},
   modifiers: {
+    "を": arbText,
     "に": jpLanguageNounType,
     "から": jpLanguageNounType
   },
-  execute: function( textToTranslate, languages ) {
-    var toLang = languages["に"] || "日本語";
-    var fromLang = languages["から"] || "";
-    translateTo( textToTranslate, {to:Languages[toLang] } );
+  execute: function( unused, modifiers ) {
+    var toLang = modifiers["に"] || "日本語";
+    var fromLang = modifiers["から"] || "";
+    translateTo( textToTranslate, {to:JLanguages[toLang] } );
     //from:Languages[fromLang]} );
   },
 
-  preview: function( pblock, textToTranslate, languages ) {
-    var toLang = languages["に"] || "日本語";
-    var fromLang = languages["から"] || "";
+  preview: function( pblock, unused, modifiers ) {
+    var textToTranslate = modifiers["を"];
+    var toLang = modifiers["に"] || "日本語";
+    var fromLang = modifiers["から"] || "";
 
     var toLangCode = JLanguages[toLang];
 

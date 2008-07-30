@@ -21,13 +21,12 @@ const JP_PARTICLES = ["に", "を", "から", "と", "で", "が", "まで"];
 //const JP_PRONOUNS = ["これ"];
 
 function JapaneseNLParser(verbList, nounList) {
-  this._init(verbList, nounList);
+  if (nounList)
+    this._init(verbList, nounList);
+  else
+    this._init(verbList, NOUN_LIST);
 }
 JapaneseNLParser.prototype = {
-  _init: function( verbList, nounList ) {
-    this._verbList = verbList;
-    this._nounList = nounList;
-  },
   /* bad assumption: each particle appears at most once
    also bad assumption: strings that look like particles don't appear
    elsewhere.
@@ -83,9 +82,11 @@ JapaneseNLParser.prototype = {
   updateSuggestionList: function( query, context ) {
     var x, verb;
     var newSuggs = [];
+    //window.console.log("Japanese updateSuggestionList!!\n");
     var wordDict = this.splitByParticles( query );
     for ( x in this._verbList ) {
       verb = this._verbList[x];
+      //window.console.log("Comparing to verb " + verb._name);
       if (verb.match( wordDict["動詞"])) {
 	// TODO verb.getCompletions will barf on this wordDict because
 	// verb is expecting to do recursiveParse.
@@ -95,9 +96,9 @@ JapaneseNLParser.prototype = {
       }
     }
     if (newSuggs.length == 0) {
-      newSuggs = newSuggs.concat(this.nounFirstSuggestionsWithDict(query,
-								   parseDict,
-								   context));
+      newSuggs = newSuggs.concat(this.nounFirstSuggestions(query,
+							   wordDict,
+							   context));
     }
 
     this._suggestionList = newSuggs;
@@ -120,12 +121,12 @@ JVerb.prototype = {
   substitutePronoun: function(parseDict, context ) {
     var gotOne = false;
     var selection = getTextSelection(context);
-    if (!selection) {
+    /*if (!selection) {
       selection = UbiquityGlobals.lastCmdResult;
     }
     var htmlSelection = getHtmlSelection(context);
     if (!htmlSelection)
-      htmlSelection = selection;
+      htmlSelection = selection; */
 
     var newParseDict = {};
     for (var x in parseDict) {
@@ -152,59 +153,30 @@ JVerb.prototype = {
     return false;
   },
 
+  nounTypesMatch: function( parseDict ) {
+    for (var particle in parseDict) {
+      if (this._modifiers[particle])
+	if (!this._modifiers[particle].match(parseDict[particle]))
+	  return false;
+    }
+    return true;
+  },
+
   getCompletions: function(parseDict, context) {
     var completions = [];
+    var sentence;
     var dictWithKoreSubstituted = this.substitutePronoun(parseDict,
 							     context);
-    var sentence = new ParsedSentence(this, "", parseDict);
-    completions.push(sentence);
-    if (dictWithKoreSubstituted) {
-      sentence = new ParsedSentence(this, "", dictWitKoreSubstituted);
+    if (this.nounTypesMatch(parseDict)) {
+      sentence = new ParsedSentence(this, "", parseDict);
       completions.push(sentence);
     }
+    if (dictWithKoreSubstituted)
+      if (this.nounTypesMatch(dictWithKoreSubstituted)) {
+	sentence = new ParsedSentence(this, "", dictWitKoreSubstituted);
+	completions.push(sentence);
+      }
     return completions;
   }
 };
 JVerb.prototype.__proto__ = new Verb();
-
-
-function testAssertEqual( a, b ) {
-  if (a != b) {
-    dump("Error! " + a + " is not equal to " + b + "\n" );
-  } else {
-    dump("OK.\n");
-  }
-}
-
-function testSplitByParticles() {
-  var jnlp = new JapaneseNLParser( [], [], JP_PRONOUNS );
-
-  var sentence1 = "彼女と駅に行った";
-  var parsedSentence = jnlp.splitByParticles(sentence1);
-  testAssertEqual( parsedSentence["と"], "彼女");
-  testAssertEqual( parsedSentence["に"], "駅");
-  testAssertEqual( parsedSentence["動詞"], "行った");
-}
-
-function testSplitByParticles2() {
-  var jnlp = new JapaneseNLParser( [], [], JP_PRONOUNS );
-
-  var sentence1 = "これを英語から日本語に翻訳して";
-  var parsedSentence = jnlp.splitByParticles(sentence1);
-  testAssertEqual( parsedSentence["を"], "これ");
-  testAssertEqual( parsedSentence["から"], "英語");
-  testAssertEqual( parsedSentence["に"], "日本語");
-  testAssertEqual( parsedSentence["動詞"], "翻訳して");
-}
-
-function testSplitByParticles3() {
-  var jnlp = new JapaneseNLParser( [], [], JP_PRONOUNS );
-
-  var sentence1 = "計算して";
-  var parsedSentence = jnlp.splitByParticles(sentence1);
-  testAssertEqual( parsedSentence["動詞"], "計算して");
-}
-
-testSplitByParticles();
-testSplitByParticles2();
-testSplitByParticles3();

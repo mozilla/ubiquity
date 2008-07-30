@@ -1,7 +1,8 @@
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
-  this.__nlParser = new NLParser( cmdSource.getAllCommands() );
+  //this.__nlParser = new NLParser( cmdSource.getAllCommands() );
+  this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands() );
 }
 
 CommandManager.prototype = {

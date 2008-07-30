@@ -34,13 +34,14 @@ function ubiquitySetup()
     window: window,
     windowGlobals: {},
     globals: globalSpace.UbiquityGlobals,
-    arbText: arbText,
+    /*arbText: arbText,
+    jpLanguageNounType: jpLanguageNounType,
     AddressNounType: AddressNounType,
     languageNounType: languageNounType,
     PersonNounType: PersonNounType,
     MathNounType: MathNounType,
     DateNounType: DateNounType,
-    arbHtml: arbHtml,
+    arbHtml: arbHtml, */
     //getTextSelection: getTextSelection,
     //paramsToString: paramsToString,
     displayMessage: function() {
@@ -52,7 +53,10 @@ function ubiquitySetup()
 
   var codeSources = [
     new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
+    new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nounTypeBase.js"),
+    new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseNounTypes.js"),
+    //new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
+    new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseCmdsUtf8.js"),
     new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
     PrefCommands,
     new BookmarksCodeSource("ubiquity"),

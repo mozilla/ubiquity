@@ -1,6 +1,11 @@
-function NLParser(verbList) {
+function NLParser(verbList, nounList) {
   // NOUN_LIST is a const array defined in nountypes.js.
-  this._init(verbList, NOUN_LIST);
+  if (verbList) {
+    if (nounList)
+      this._init(verbList, nounList);
+    else
+      this._init(verbList, NOUN_LIST);
+  }
 }
 NLParser.prototype = {
   _init: function(commandList, nounList) {
@@ -37,7 +42,7 @@ NLParser.prototype = {
   },
 
   updateSuggestionList: function( query, context ) {
-    var nounType, verb;
+    var nounType, verb, x;
     var newSuggs = [];
 
     // selection, no input, noun-first suggestion
