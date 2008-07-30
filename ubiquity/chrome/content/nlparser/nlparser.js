@@ -1,10 +1,6 @@
 function NLParser(verbList, nounList) {
-  // NOUN_LIST is a const array defined in nountypes.js.
   if (verbList) {
-    if (nounList)
-      this._init(verbList, nounList);
-    else
-      this._init(verbList, NOUN_LIST);
+    this._init(verbList, nounList);
   }
 }
 NLParser.prototype = {

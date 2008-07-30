@@ -1,7 +1,14 @@
 var gUbiquity = null;
+Components.utils.import("resource://ubiquity-modules/globals.js");
 
 function ubiquitySetup()
 {
+
+  if (checkLanguagePreference() == "jp")
+    UbiquityGlobals.japaneseMode = true;
+  else
+    UbiquityGlobals.japaneseMode = false;
+
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
 
@@ -34,16 +41,6 @@ function ubiquitySetup()
     window: window,
     windowGlobals: {},
     globals: globalSpace.UbiquityGlobals,
-    /*arbText: arbText,
-    jpLanguageNounType: jpLanguageNounType,
-    AddressNounType: AddressNounType,
-    languageNounType: languageNounType,
-    PersonNounType: PersonNounType,
-    MathNounType: MathNounType,
-    DateNounType: DateNounType,
-    arbHtml: arbHtml, */
-    //getTextSelection: getTextSelection,
-    //paramsToString: paramsToString,
     displayMessage: function() {
       msgService.displayMessage.apply(msgService, arguments);
     }
@@ -53,15 +50,25 @@ function ubiquitySetup()
 
   var codeSources = [
     new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nounTypeBase.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseNounTypes.js"),
-    //new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseCmdsUtf8.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
-    PrefCommands,
-    new BookmarksCodeSource("ubiquity"),
-    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
+    new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nounTypeBase.js")
   ];
+  if (UbiquityGlobals.japaneseMode) {
+    codeSources = codeSources.concat([
+      new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseNounTypes.js"),
+      new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseCmdsUtf8.js")
+				      ]);
+  } else {
+    codeSources = codeSources.concat([
+      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nountypes.js"),
+      new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
+      new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
+      PrefCommands,
+      new BookmarksCodeSource("ubiquity")
+				     ]);
+  }
+  codeSources = condeSources.concat([
+    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
+				    ]);
 
   var cmdSource = new CommandSource(
     codeSources,

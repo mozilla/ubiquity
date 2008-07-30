@@ -1,8 +1,14 @@
+Components.utils.import("resource://ubiquity-modules/globals.js");
+
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
-  //this.__nlParser = new NLParser( cmdSource.getAllCommands() );
-  this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands() );
+  if ( UbiquityGlobals.japaneseMode ) {
+    this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands(),
+					    jpGetNounList());
+  } else
+    this.__nlParser = new NLParser( cmdSource.getAllCommands(),
+                                    getNounList());
 }
 
 CommandManager.prototype = {

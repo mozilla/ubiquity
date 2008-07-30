@@ -1,6 +1,6 @@
 const SELECTION_PRONOUNS = [ "this", "that", "it", "selection", "him", "her", "them"];
 
-//Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/globals.js");
 
 // util functions to make it easier to use objects as fake dictionaries
 function dictDeepCopy( dict ) {

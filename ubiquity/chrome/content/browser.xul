@@ -14,8 +14,10 @@
           src="chrome://ubiquity/content/selutils.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/nounTypeBase.js"/>
-  <!--<script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/nountypes.js"/>-->
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/nlparser/nountypes.js"/>
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/jp-nlparser/japaneseNounTypes.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/verbtypes.js"/>
   <script type="application/javascript;version=1.7"

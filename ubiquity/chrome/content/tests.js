@@ -1,5 +1,3 @@
-const NOUN_LIST = [];
-
 function FakeCommandSource( cmdList ) {
   this._cmdList = cmdList;
   for ( var x in cmdList ) {

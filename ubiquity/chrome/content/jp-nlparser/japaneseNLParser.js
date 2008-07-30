@@ -21,10 +21,7 @@ const JP_PARTICLES = ["に", "を", "から", "と", "で", "が", "まで"];
 //const JP_PRONOUNS = ["これ"];
 
 function JapaneseNLParser(verbList, nounList) {
-  if (nounList)
-    this._init(verbList, nounList);
-  else
-    this._init(verbList, NOUN_LIST);
+  this._init(verbList, nounList);
 }
 JapaneseNLParser.prototype = {
   /* bad assumption: each particle appears at most once

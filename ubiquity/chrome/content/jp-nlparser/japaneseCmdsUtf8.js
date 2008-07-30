@@ -1,7 +1,7 @@
 CreateCommand({
   name: "計算して",
   takes: {},
-  modifiers: {"を": arbText},
+  modifiers: {"を": jpArbText},
   icon: "http://www.metacalc.com/favicon.ico",
   execute: function( unused, modifiers ) {
     var expr = modifiers["を"];
@@ -30,7 +30,7 @@ CreateCommand({
   name: "翻訳して",
   takes: {},
   modifiers: {
-    "を": arbText,
+    "を": jpArbText,
     "に": jpLanguageNounType,
     "から": jpLanguageNounType
   },

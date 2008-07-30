@@ -25,7 +25,7 @@ var JLanguages = {
 var key;
 var jpLanguageNounType = new NounType( "言葉", [key for (key in JLanguages)]);
 
-var arbText = {
+var jpArbText = {
  _name: "何でもテキスト",
  match: function( fragment ) {
     return true;
@@ -35,5 +35,6 @@ var arbText = {
   }
 };
 
-
-const NOUN_LIST = [jpLanguageNounType, arbText];
+function jpGetNounList() {
+  return [jpLanguageNounType, jpArbText];
+}
