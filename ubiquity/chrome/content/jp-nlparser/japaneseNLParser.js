@@ -164,16 +164,35 @@ JVerb.prototype = {
     var sentence;
     var dictWithKoreSubstituted = this.substitutePronoun(parseDict,
 							     context);
-    if (this.nounTypesMatch(parseDict)) {
-      sentence = new ParsedSentence(this, "", parseDict);
-      completions.push(sentence);
-    }
     if (dictWithKoreSubstituted)
       if (this.nounTypesMatch(dictWithKoreSubstituted)) {
-	sentence = new ParsedSentence(this, "", dictWitKoreSubstituted);
+	sentence = new JParsedSentence(this, dictWithKoreSubstituted);
 	completions.push(sentence);
       }
+    if (this.nounTypesMatch(parseDict)) {
+      sentence = new JParsedSentence(this, parseDict);
+      completions.push(sentence);
+    }
     return completions;
   }
 };
 JVerb.prototype.__proto__ = new Verb();
+
+function JParsedSentence( verb, modifiers ) {
+  this._init(verb, "", modifiers);
+}
+JParsedSentence.prototype = {
+  getDisplayText: function() {
+    var sentence = "";
+    for (var x in this._verb._modifiers) {
+      if (this._modifiers[x]) {
+	sentence = sentence + "<b>" + this._modifiers[x] + x + "</b>";
+      } else {
+	sentence = sentence + "<span class=\"needarg\">(" + this._verb._modifiers[x]._name + x + ")</span>";
+      }
+    }
+    sentence = sentence + this._verb._name;
+    return sentence;
+  }
+};
+JParsedSentence.prototype.__proto__ = new ParsedSentence();

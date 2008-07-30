@@ -90,6 +90,8 @@ function ubiquitySetup()
     cmdMan,
     previewBlock
   );
+  if (UbiquityGlobals.japaneseMode)
+    gUbiquity.setLocalizedDefaults("jp");
   cmdSource.refresh();
 }
 

@@ -15,16 +15,17 @@ function dictKeys( dict ) {
   return [ key for ( key in dict ) ];
 }
 
-
 function ParsedSentence( verb, DO, modifiers ) {
   this._init( verb, DO, modifiers );
 }
 ParsedSentence.prototype = {
   _init: function( verb, DO, modifiers ) {
     /* modifiers is dictionary of preposition: noun */
-    this._verb = verb;
-    this._DO = DO;
-    this._modifiers = modifiers;
+    if (verb){
+      this._verb = verb;
+      this._DO = DO;
+      this._modifiers = modifiers;
+    }
   },
 
   getCompletionText: function() {
@@ -53,7 +54,7 @@ ParsedSentence.prototype = {
       }
     }
 
-    for ( var x in this._verb._modifiers ) {  // was this._verb._modifiers
+    for ( var x in this._verb._modifiers ) {
       if ( this._modifiers[ x ] ) {
 	sentence = sentence + " <b>" +  x + " " + this._modifiers[x] + "</b>";
       } else {
@@ -61,11 +62,6 @@ ParsedSentence.prototype = {
       }
     }
     return sentence;
-  },
-
-  getDescription: function() {
-    // returns a string describing what the sentence will do if executed
-    return this._verb.getDescription( this._DO, this._modifiers );
   },
 
   execute: function(context) {

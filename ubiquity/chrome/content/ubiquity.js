@@ -140,6 +140,13 @@ Ubiquity.prototype = {
     this.__showCount += 1;
   },
 
+  setLocalizedDefaults: function( langCode ) {
+    if (langCode == "jp") {
+      this.__DEFAULT_PREVIEW = "Japanese intro goes here.";
+      this.__KEYCODE_ENTER = 39;
+    }
+  },
+
   openWindow: function() {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
