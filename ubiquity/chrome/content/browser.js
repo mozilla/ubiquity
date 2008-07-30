@@ -72,7 +72,7 @@ function ubiquitySetup()
       new BookmarksCodeSource("ubiquity")
 				     ]);
   }
-  codeSources = condeSources.concat([
+  codeSources = codeSources.concat([
     new LocalUriCodeSource("chrome://ubiquity/content/final.js")
 				    ]);
 

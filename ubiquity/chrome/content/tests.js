@@ -21,6 +21,10 @@ function getHtmlSelection(context) {
   return "";
 }
 
+function getNounList() {
+  return [];
+}
+
 function testCmdManagerExecutesTwoCmds() {
   var oneWasCalled = false;
   var twoWasCalled = false;
