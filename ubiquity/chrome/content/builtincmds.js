@@ -675,3 +675,98 @@ CreateCommand({
       pblock.innerHTML = "Switch to tab by name."
   }
 })
+
+
+
+// -----------------------------------------------------------------
+// TAB COMMANDS
+// -----------------------------------------------------------------
+
+CreateCommand({
+  name: "close.related.tabs",
+  takes: {"related word": arbText},
+  
+  preview: function( pblock, query ) {
+    var relatedWord = query.toLowerCase();
+    var html = null;
+    if(relatedWord.length != 0){
+      html = "Closes the following tabs that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
+      var numTabs = 0;
+
+      Application.activeWindow.tabs.forEach(function(tab){
+        if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
+      	  html += "<li>" + tab.document.title + "</li>";
+      	  numTabs++;
+        }
+      });
+
+      if(numTabs == 0){
+        html = "No tabs related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b>";
+      }else{
+        html += "</ul>";
+      }
+    }else{
+      html = "Closes tabs related to the word";
+    }
+    jQuery(pblock).html( html );
+  },
+  
+  execute: function( query ) {
+    var relatedWord = query.toLowerCase();
+    var numTabs = 0;
+
+    Application.activeWindow.tabs.forEach(function(tab){
+      if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
+        tab.close();
+        numTabs++;
+      }
+    });
+    
+    displayMessage(numTabs + " tabs closed");
+  }
+  
+})
+
+
+CreateCommand({
+  name: "go.to.tab",
+  takes: {"related word": arbText},
+  
+  preview: function( pblock, query ) {
+    var relatedWord = query.toLowerCase();
+    var html = null;
+    if(relatedWord.length != 0){
+      html = "Goes to the first tab that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
+      var numTabs = 0;
+
+      Application.activeWindow.tabs.forEach(function(tab){
+        if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
+      	  html += "<li>" + tab.document.title + "</li>";
+      	  numTabs++;
+        }
+      });
+      if(numTabs == 0){
+        html = "No tabs related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b>";
+      }else{
+        html += "</ul>";
+      }
+    }else{
+      html = "Goes tabs related to the word";
+    }
+    jQuery(pblock).html( html );
+  },
+  
+  execute: function( query ) {
+    var relatedWord = query.toLowerCase();
+    var switchedFocus = false;
+    Application.activeWindow.tabs.forEach(function(tab){
+      if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
+        if(!switchedFocus){
+          tab.focus();
+          switchedFocus = true;
+        }
+      }
+    });
+  }
+  
+})
