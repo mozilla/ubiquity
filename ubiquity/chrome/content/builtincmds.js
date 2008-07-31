@@ -232,6 +232,24 @@ CreateCommand({
   preview: "Syntax highlights your code."
 })
 
+
+function cmd_highlight() {
+  var sel = context.focusedWindow.getSelection();
+  var document = context.focusedWindow.document;
+
+  if (sel.rangeCount >= 1) {
+    var range = sel.getRangeAt(0);
+    var newNode = document.createElement("span");
+    newNode.style.background = "yellow";
+    range.surroundContents(newNode);
+  }
+}
+
+cmd_highlight.preview = function(pblock) {
+  pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
+}
+
+
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
@@ -613,6 +631,40 @@ CreateCommand({
     showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
       winInsecure.setPreview( location );
     });
+  }
+})
+
+CreateCommand({
+  name: "aza",
+  takes: {"selection": arbHtml},
+  preview: function( pblock, html ) {
+    var div = getDocumentInsecure().createElement("div");
+    div.innerHTML = html;
+    
+    var host = getWindowInsecure().location.host;
+    /*
+    var houses = [];
+    jQuery(div).find("a").each( function(){
+      houses.push({
+        href: "http://" + host + jQuery(this).attr("href"),
+        title: jQuery(this).text()
+      })
+    });
+    */
+    
+    showPreviewFromFile( pblock, "templates/map_simple.html", function(winInsecure) {
+      winInsecure.addPoint( 0,0 );
+      //winInsecure.addPointByName( "Mountain View");
+      /*
+      for( var i=0; i < houses.length; i++ ){
+        jQuery.get( houses[i].href, function( html ) {
+          FBLog( html );
+        }, "html");
+      }*/
+      
+    });
+    
+    //FBLog( houses );
   }
 })
 
