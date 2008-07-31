@@ -15,11 +15,6 @@ function ubiquitySetup()
 
   checkLanguagePreference();
 
-  var popupMenu = UbiquityPopupMenu(
-    document.getElementById("ubiquity-menupopup"),
-    fakeCommandSuggester
-    );
-
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
 
@@ -88,6 +83,11 @@ function ubiquitySetup()
   );
 
   var cmdMan = new CommandManager(cmdSource, msgService);
+
+  var popupMenu = UbiquityPopupMenu(
+    document.getElementById("ubiquity-menupopup"),
+    makeDefaultCommandSuggester(cmdMan)
+  );
 
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),

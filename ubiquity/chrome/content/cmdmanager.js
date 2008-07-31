@@ -176,10 +176,13 @@ CommandSource.prototype = {
   }
 };
 
-function getAvailableCommands(commandManager, context) {
-  var suggestions = commandManager.getSuggestionListNoInput( context );
-  var retVal = {};
-  for (var x in stuff)
-    retVal[stuff[x]._verb._name] = stuff[x].execute;
-  return retVal;
+function makeDefaultCommandSuggester(commandManager) {
+  function getAvailableCommands(context) {
+    var suggestions = commandManager.getSuggestionListNoInput( context );
+    var retVal = {};
+    for (var x in stuff)
+      retVal[stuff[x]._verb._name] = stuff[x].execute;
+    return retVal;
+  }
+  return getAvailableCommands;
 }
