@@ -255,9 +255,10 @@ Verb.prototype = {
     //Compare based on the names of the nounTypes, so even if they are
     //not the same object (having originated one inside the sandbox and one
     //outside the sandbox) they will be detected as equal.
-    if (this._DOType._name == nounType._name ) {
-      return this._name;
-    }
+    if (this._DOType)
+      if (this._DOType._name == nounType._name ) {
+	return this._name;
+      }
     for( var prep in this._modifiers ) {
       if (this._modifiers[prep]._name == nounType._name) {
 	return this._name + " " + prep;

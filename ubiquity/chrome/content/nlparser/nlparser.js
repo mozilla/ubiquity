@@ -23,15 +23,14 @@ NLParser.prototype = {
     for (x in this._nounTypeList) {
       nounType = this._nounTypeList[x];
       if (nounType.match(input)){
-	window.console.log("This input could be a " + nounType._name);
 	for (y in this._verbList) {
 	  verb = this._verbList[y];
 	  var prefix = verb.canPossiblyUseNounType(nounType);
 	  if (prefix) {
-	    window.console.log("The verb " + verb._name + " could use it.");
 	    var betterSentence = prefix + " " + input;
 	    words = betterSentence.split( " " ).slice(1);
-	    suggs = suggs.concat( verb.getCompletions(words, context) );
+	    var moreSuggs = verb.getCompletions(words, context);
+	    suggs = suggs.concat( moreSuggs );
 	  }
 	}
       }
@@ -45,10 +44,8 @@ NLParser.prototype = {
 
     // selection, no input, noun-first suggestion
     if (!query || query.length == 0) {
-      window.console.log("This sure is a zero-length query.");
       var sel = getTextSelection(context);
       if (sel) {
-	window.console.log("There sure is a text selection.");
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
       }
     } else {
