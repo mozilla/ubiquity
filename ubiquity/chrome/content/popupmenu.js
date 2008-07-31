@@ -1,35 +1,13 @@
-(function () {
-   /* This function handles the window startup piece, initializing the
-   UI and preferences */
-   function startup()
-  {
-    var menupopup = document.getElementById("ubiquity-menupopup");
-    menupopup.addEventListener("popupshowing", contextPopupShowing, false);
-
-  }
-  function openURL(event) {
-    openUILink(event.target.url, event);
-  }
-
-   /* This function handles the window closing piece, removing
-    * listeners and observers */
-   function shutdown()
-  {
-    var menupopup = document.getElementById("ubiquity-menupopup");
-    menupopup.removeEventListener("popupshowing", contextPopupShowing, false);
-  }
-
+function UbiquityPopupMenu(popupElement, cmdSuggester) {
   function contextPopupShowing(event) {
-    if (event.target.id != "ubiquity-menupopup") {
+    if (event.target.id != popupElement.id)
       return;
-    }
 
     /* Remove previously added menus */
-    var menupopup = event.target;
-    for(let i=menupopup.childNodes.length - 1; i >= 0; i--) {
-      menupopup.removeEventListener("command", openURL, true);
-//      menupopup.removeEventListener("click", executeClick, true);
-      menupopup.removeChild(menupopup.childNodes.item(i));
+    for(let i=popupElement.childNodes.length - 1; i >= 0; i--) {
+      popupElement.removeEventListener("command", openURL, true);
+      // popupElement.removeEventListener("click", executeClick, true);
+      popupElement.removeChild(popupElement.childNodes.item(i));
     }
 
     var popupContext = [];
@@ -60,40 +38,7 @@
     data.documentTitle = content.document.title;
     data.documentUrl = content.document.location.href;
 
-    /* data oject contains info about selection */
-
-    /* popupContext determines what we have (for foo in bar to get it
-     * all) */
-
-    /* Don't forget to worry about encoding when passing data to web
-     * services */
-
-    /* Invoke ubiquity with popup context, data, get array of
-     * names/function back */
-
-    function ubiquity(popupContext, data) {
-      var results = {};
-      var contextString = "";
-      for (let i in popupContext) {
-        contextString += i + " ";
-      }
-      results["Context"] = function() {alert(contextString);};
-      if (popupContext["selection"]) {
-        results["Selection text"] = function() {alert(data.selection);};
-        results["Selection HTML"] = function() {alert(data.selectionHTML);};
-      }
-      if (popupContext["link"]) {
-        results["Link text"] = function() {alert(data.linkText);};
-        results["Link URL"] = function() {alert(data.link);};
-      }
-      if (popupContext["document"]) {
-        results["Document title"] = function() {alert(data.documentTitle);};
-        results["Document URL"] = function() {alert(data.documentUrl);};
-      }
-      return results;
-    }
-
-    var results = ubiquity(popupContext, data);
+    var results = cmdSuggester(popupContext, data);
 
     for (i in results) {
       var tempMenu = document.createElement("menuitem");
@@ -104,7 +49,38 @@
     }
   }
 
-  /* Attach listeners for page load */
-  window.addEventListener("load", startup, false);
-  window.addEventListener("unload", shutdown, false);
-})();
+  popupElement.addEventListener("popupshowing", contextPopupShowing, false);
+}
+
+/* data object contains info about selection */
+
+/* popupContext determines what we have (for foo in bar to get it
+ * all) */
+
+/* Don't forget to worry about encoding when passing data to web
+ * services */
+
+/* Invoke ubiquity with popup context, data, get array of
+ * names/function back */
+
+function fakeCommandSuggester(popupContext, data) {
+  var results = {};
+  var contextString = "";
+  for (let i in popupContext) {
+    contextString += i + " ";
+  }
+  results["Context"] = function() {alert(contextString);};
+  if (popupContext["selection"]) {
+    results["Selection text"] = function() {alert(data.selection);};
+    results["Selection HTML"] = function() {alert(data.selectionHTML);};
+  }
+  if (popupContext["link"]) {
+    results["Link text"] = function() {alert(data.linkText);};
+    results["Link URL"] = function() {alert(data.link);};
+  }
+  if (popupContext["document"]) {
+    results["Document title"] = function() {alert(data.documentTitle);};
+    results["Document URL"] = function() {alert(data.documentUrl);};
+  }
+  return results;
+}

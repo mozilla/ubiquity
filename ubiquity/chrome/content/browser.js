@@ -15,6 +15,11 @@ function ubiquitySetup()
 
   checkLanguagePreference();
 
+  var popupMenu = UbiquityPopupMenu(
+    document.getElementById("ubiquity-menupopup"),
+    fakeCommandSuggester
+    );
+
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
 
@@ -97,6 +102,7 @@ function ubiquitySetup()
 
 function ubiquityTeardown()
 {
+  /* TODO: Remove event listeners. */
 }
 
 function ubiquityKeydown(aEvent)
