@@ -1,6 +1,7 @@
 (function () {
-  /* This function handles the window startup piece, initializing the UI and preferences */
-  function startup()
+   /* This function handles the window startup piece, initializing the
+   UI and preferences */
+   function startup()
   {
     var menupopup = document.getElementById("ubiquity-menupopup");
     menupopup.addEventListener("popupshowing", contextPopupShowing, false);
@@ -9,8 +10,10 @@
   function openURL(event) {
     openUILink(event.target.url, event);
   }
-  /* This function handles the window closing piece, removing listeners and observers */
-  function shutdown()
+
+   /* This function handles the window closing piece, removing
+    * listeners and observers */
+   function shutdown()
   {
     var menupopup = document.getElementById("ubiquity-menupopup");
     menupopup.removeEventListener("popupshowing", contextPopupShowing, false);
@@ -58,9 +61,15 @@
     data.documentUrl = content.document.location.href;
 
     /* data oject contains info about selection */
-    /* popupContext determines what we have (for foo in bar to get it all) */
-    /* Don't forget to worry about encoding when passing data to web services */
-    /* Invoke ubiquity with popup context, data, get array of names/function back */
+
+    /* popupContext determines what we have (for foo in bar to get it
+     * all) */
+
+    /* Don't forget to worry about encoding when passing data to web
+     * services */
+
+    /* Invoke ubiquity with popup context, data, get array of
+     * names/function back */
 
     function ubiquity(popupContext, data) {
       var results = {};
@@ -86,7 +95,7 @@
 
     var results = ubiquity(popupContext, data);
 
-    for (let i in results) {
+    for (i in results) {
       var tempMenu = document.createElement("menuitem");
       tempMenu.label = i;
       tempMenu.setAttribute("label", tempMenu.label);
@@ -94,10 +103,6 @@
       event.target.appendChild(tempMenu);
     }
   }
-
-  var bundle = Components.classes["@mozilla.org/intl/stringbundle;1"]
-                         .getService(Components.interfaces.nsIStringBundleService)
-                         .createBundle("chrome://ubiquity/locale/ubiquity.properties");
 
   /* Attach listeners for page load */
   window.addEventListener("load", startup, false);
