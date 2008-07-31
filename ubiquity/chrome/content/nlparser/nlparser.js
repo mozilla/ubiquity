@@ -42,11 +42,17 @@ NLParser.prototype = {
     var nounType, verb, x;
     var newSuggs = [];
 
+    dump("updating suggestion list with query = " + query + "\n");
+    dump("Length of verblist is " + this._verbList.length + "\n");
+    dump("Length of nounlist is " + this._nounTypeList.length + "\n");
     // selection, no input, noun-first suggestion
     if (!query || query.length == 0) {
+      dump("Zero-query suggestions...\n");
       var sel = getTextSelection(context);
       if (sel) {
+	dump("There's a selection...\n");
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
+	dump("newSuggs.length is " + newSuggs.length + "\n");
       }
     } else {
       var words = query.split( " " );

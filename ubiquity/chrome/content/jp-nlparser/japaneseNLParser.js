@@ -79,11 +79,9 @@ JapaneseNLParser.prototype = {
   updateSuggestionList: function( query, context ) {
     var x, verb;
     var newSuggs = [];
-    //window.console.log("Japanese updateSuggestionList!!\n");
     var wordDict = this.splitByParticles( query );
     for ( x in this._verbList ) {
       verb = this._verbList[x];
-      //window.console.log("Comparing to verb " + verb._name);
       if (verb.match( wordDict["動詞"])) {
 	// TODO verb.getCompletions will barf on this wordDict because
 	// verb is expecting to do recursiveParse.
@@ -94,7 +92,6 @@ JapaneseNLParser.prototype = {
     }
     if (newSuggs.length == 0) {
       newSuggs = newSuggs.concat(this.nounFirstSuggestions(query,
-							   wordDict,
 							   context));
     }
 
@@ -196,3 +193,8 @@ JParsedSentence.prototype = {
   }
 };
 JParsedSentence.prototype.__proto__ = new ParsedSentence();
+
+
+function jpGetDefaultPreview() {
+  return "いらっしゃいませ";
+}

@@ -142,7 +142,7 @@ Ubiquity.prototype = {
 
   setLocalizedDefaults: function( langCode ) {
     if (langCode == "jp") {
-      this.__DEFAULT_PREVIEW = "Japanese intro goes here.";
+      this.__DEFAULT_PREVIEW = jpGetDefaultPreview();
       this.__KEYCODE_ENTER = 39;
     }
   },

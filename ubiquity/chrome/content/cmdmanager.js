@@ -61,6 +61,7 @@ CommandManager.prototype = {
   },
 
   getSuggestionListNoInput: function( context ) {
+    dump("GetSuggestionListNoInput...\n");
     this.__nlParser.updateSuggestionList("", context);
     return this.__nlParser.getSuggestionList();
   }
