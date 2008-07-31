@@ -825,7 +825,9 @@ function cmd_save() {
 
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), "ubiquity/edit", body.html(), 0, 4);
 }
-
+cmd_save.preview = function( pblock ) {
+  pblock.innerHTML = "Saves edits you've made to this page in an annotation.";
+}
 
 // removes all page annotations - add more functionality
 function cmd_remove_annotations() {
@@ -838,6 +840,10 @@ function cmd_remove_annotations() {
 
   window.content.location.reload();
 }
+cmd_remove_annotations.preview = function( pblock ) {
+  pblock.innerHTML = "Resets any annotation changes you've made to this page.";
+}
+
 
 // permanent delete - in progress, slightly buggy
 function cmd_perm_delete() {
@@ -924,4 +930,8 @@ function cmd_perm_delete() {
 
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), annotationName, annotationValue, 0, 4);
 
+}
+cmd_perm_delete.preview = function( pblock ) {
+  pblock.innerHTML = "Attempts to permanently delete the selected part of the"
+    + " page. (Experimental!)";
 }
