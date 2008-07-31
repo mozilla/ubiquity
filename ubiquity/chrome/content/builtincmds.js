@@ -197,6 +197,10 @@ CreateCommand({
     openUrlInBrowser( "http://www.answers.com/" + escape(word) );
   },
   preview: function( pblock, word ) {
+    if (word.length < 2)
+      pblock.innerHTML = "Gives the definition of a word.";
+    else
+      pblock.innerHTML = "Gives the definition of the word " + word + ".";
     defineWord( word, function(text){
       text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
       text = text.replace(/(1:)/g, "<br/>$&");
