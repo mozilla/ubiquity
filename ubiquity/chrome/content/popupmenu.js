@@ -68,18 +68,18 @@
       for (let i in popupContext) {
         contextString += i + " ";
       }
-      results["Context"] = function() {alert(contextString);}
+      results["Context"] = function() {alert(contextString);};
       if (popupContext["selection"]) {
-        results["Selection text"] = function() {alert(data.selection);}
-        results["Selection HTML"] = function() {alert(data.selectionHTML);}
+        results["Selection text"] = function() {alert(data.selection);};
+        results["Selection HTML"] = function() {alert(data.selectionHTML);};
       }
       if (popupContext["link"]) {
-        results["Link text"] = function() {alert(data.linkText);}
-        results["Link URL"] = function() {alert(data.link);}
+        results["Link text"] = function() {alert(data.linkText);};
+        results["Link URL"] = function() {alert(data.link);};
       }
       if (popupContext["document"]) {
-        results["Document title"] = function() {alert(data.documentTitle);}
-        results["Document URL"] = function() {alert(data.documentUrl);}
+        results["Document title"] = function() {alert(data.documentTitle);};
+        results["Document URL"] = function() {alert(data.documentUrl);};
       }
       return results;
     }
