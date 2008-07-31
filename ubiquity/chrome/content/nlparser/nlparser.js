@@ -23,10 +23,12 @@ NLParser.prototype = {
     for (x in this._nounTypeList) {
       nounType = this._nounTypeList[x];
       if (nounType.match(input)){
+	window.console.log("This input could be a " + nounType._name);
 	for (y in this._verbList) {
 	  verb = this._verbList[y];
 	  var prefix = verb.canPossiblyUseNounType(nounType);
 	  if (prefix) {
+	    window.console.log("The verb " + verb._name + " could use it.");
 	    var betterSentence = prefix + " " + input;
 	    words = betterSentence.split( " " ).slice(1);
 	    suggs = suggs.concat( verb.getCompletions(words, context) );
@@ -42,9 +44,11 @@ NLParser.prototype = {
     var newSuggs = [];
 
     // selection, no input, noun-first suggestion
-    if (!query) {
+    if (!query || query.length == 0) {
+      window.console.log("This sure is a zero-length query.");
       var sel = getTextSelection(context);
       if (sel) {
+	window.console.log("There sure is a text selection.");
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
       }
     } else {
@@ -160,7 +164,7 @@ NLParser.prototype = {
     }
     previewBlock.innerHTML = content;
     if ( this._suggestionList.length > 0 && this._hilitedSuggestion > 0) {
-      var doc = previewBlock.ownerDocument;
+      doc = previewBlock.ownerDocument;
       var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
       activeSugg.preview(context, doc.getElementById("preview-pane"));
     }

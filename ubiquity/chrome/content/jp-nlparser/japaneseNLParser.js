@@ -143,7 +143,7 @@ JVerb.prototype = {
 
   canPossiblyUseNounType: function(nounType) {
     for( var x in this._modifiers) {
-      if (this._modifiers[x] == nounType) {
+      if (this._modifiers[x]._name == nounType._name) {
 	return x;
       }
     }

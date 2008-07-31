@@ -252,11 +252,14 @@ Verb.prototype = {
   canPossiblyUseNounType: function(nounType){
     //returns the words that would be implied before the noun could makes sense,
     //i.e. put these words before the noun and try again.
-    if (this._DOType == nounType ) {
+    //Compare based on the names of the nounTypes, so even if they are
+    //not the same object (having originated one inside the sandbox and one
+    //outside the sandbox) they will be detected as equal.
+    if (this._DOType._name == nounType._name ) {
       return this._name;
     }
     for( var prep in this._modifiers ) {
-      if (this._modifiers[prep] == nounType) {
+      if (this._modifiers[prep]._name == nounType._name) {
 	return this._name + " " + prep;
 	// TODO returning multiple preps when more than one could use the
 	// nountype

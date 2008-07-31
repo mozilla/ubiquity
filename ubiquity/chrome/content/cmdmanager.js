@@ -177,11 +177,16 @@ CommandSource.prototype = {
 };
 
 function makeDefaultCommandSuggester(commandManager) {
+  dump( "makeDefaultCommandSuggester called!\n" );
+
   function getAvailableCommands(context) {
+    dump( "getAvailableCommands called!  Selection is " + getTextSelection(context) + "\n");
     var suggestions = commandManager.getSuggestionListNoInput( context );
     var retVal = {};
+    dump( "Length of suggestions is " + suggestions.length );
     for (var x in suggestions) {
       var parsedSentence = suggestions[x];
+      dump( "Suggestion: " + parsedSentence._verb._name + "\n" );
       retVal[parsedSentence._verb._name] = function() {
 	parsedSentence.execute(context);
       };
