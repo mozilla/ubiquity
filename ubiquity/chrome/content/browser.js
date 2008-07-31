@@ -84,6 +84,11 @@ function ubiquitySetup()
 
   var cmdMan = new CommandManager(cmdSource, msgService);
 
+  var popupMenu = UbiquityPopupMenu(
+    document.getElementById("ubiquity-menupopup"),
+    makeDefaultCommandSuggester(cmdMan)
+  );
+
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
@@ -97,6 +102,7 @@ function ubiquitySetup()
 
 function ubiquityTeardown()
 {
+  /* TODO: Remove event listeners. */
 }
 
 function ubiquityKeydown(aEvent)
