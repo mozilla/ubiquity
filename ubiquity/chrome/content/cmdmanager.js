@@ -180,8 +180,12 @@ function makeDefaultCommandSuggester(commandManager) {
   function getAvailableCommands(context) {
     var suggestions = commandManager.getSuggestionListNoInput( context );
     var retVal = {};
-    for (var x in stuff)
-      retVal[stuff[x]._verb._name] = stuff[x].execute;
+    for (var x in suggestions) {
+      var parsedSentence = suggestions[x];
+      retVal[parsedSentence._verb._name] = function() {
+	parsedSentence.execute(context);
+      };
+    }
     return retVal;
   }
   return getAvailableCommands;
