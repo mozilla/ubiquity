@@ -48,6 +48,91 @@ var cmd_google = makeSearchCommand({
   }
 });
 
+//Thanks to John Resig's http://ejohn.org/files/titleCaps.js
+
+function titleCaps(title){
+	var small = "(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|v[.]?|via|vs[.]?)";
+	var punct = "([!\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]*)";
+  var parts = [], split = /[:.;?!] |(?: |^)["Ò]/g, index = 0;
+  
+  function lower(word){
+  	return word.toLowerCase();
+  }
+  
+  function upper(word){
+    return word.substr(0,1).toUpperCase() + word.substr(1);
+  }
+		
+	while (true) {
+		var m = split.exec(title);
+
+		parts.push( title.substring(index, m ? m.index : title.length)
+			.replace(/\b([A-Za-z][a-z.'Õ]*)\b/g, function(all){
+				return /[A-Za-z]\.[A-Za-z]/.test(all) ? all : upper(all);
+			})
+			.replace(RegExp("\\b" + small + "\\b", "ig"), lower)
+			.replace(RegExp("^" + punct + small + "\\b", "ig"), function(all, punct, word){
+				return punct + upper(word);
+			})
+			.replace(RegExp("\\b" + small + punct + "$", "ig"), upper));
+		
+		index = split.lastIndex;
+		
+		if ( m ) parts.push( m[0] );
+		else break;
+	}
+	
+	return parts.join("").replace(/ V(s?)\. /ig, " v$1. ")
+		.replace(/(['Õ])S\b/ig, "$1s")
+		.replace(/\b(AT&T|Q&A)\b/ig, function(all){
+			return all.toUpperCase();
+		});
+	
+}
+
+//TODO: find a API to get summaries from wikipedia
+//TODO: when executing search action,
+//escaping search terms screws things up sometimes
+
+// Currently just uses screen scraping to get the relevant information
+var cmd_wikipedia = makeSearchCommand({
+  name: "Wikipedia",
+  url: "http://www.wikipedia.org/wiki/Special:Search?search={QUERY}",
+  icon: "http://www.wikipedia.org/favicon.ico",
+  preview: function(searchTerm, pblock) {
+    
+    //TODO: Implement this preview using renderTemplate
+    pblock.innerHTML =  "Gets wikipedia article for " + searchTerm + "<br/>";
+    var $ = jQuery;
+    // convert to first letter caps (Wikipedia requires that) and add to URL
+    var url  = "http://wikipedia.org/wiki/" + titleCaps(searchTerm).replace(/ /g,"_"); 
+    
+    $.get( url, function(data) {
+      
+      //attach the HTML page as invisible div to do screen scraping
+      pblock.innerHTML += "<div style='display:none'>" + data + "</div>";
+      
+      var summary = $(pblock).find("#bodyContent > p").eq(0).text();
+      // if we are not on a article page 
+      //(might be a search results page or a disambiguation page, etc.)
+      if($(pblock).find("#bodyContent > p").length == 0 || (summary.search("may refer to:") != -1 )){
+        return;
+      }
+      //remove citations like [3], [citation needed], etc.
+      //TODO: also remove audio links (.audiolink & .audiolinkinfo)
+      summary = summary.replace(/\[([^\]]+)\]/g,"");
+      
+      var img = $(pblock).find(".infobox").find("img").attr("src") 
+                || $(pblock).find(".thumbimage").attr("src");
+
+      pblock.innerHTML = "<div style='height:500px'>" + 
+                        "<img src=" + img + "/>" + summary + "</div>";
+      
+		});
+				
+  }
+});
+
 var cmd_imdb = makeSearchCommand({
   name: "IMDB",
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
@@ -231,6 +316,8 @@ CreateCommand({
   },
   preview: "Syntax highlights your code."
 })
+
+
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
@@ -939,3 +1026,4 @@ cmd_perm_delete.preview = function( pblock ) {
   pblock.innerHTML = "Attempts to permanently delete the selected part of the"
     + " page. (Experimental!)";
 }
+
