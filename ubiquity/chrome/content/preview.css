@@ -27,14 +27,7 @@ body {
   font-size: x-small;  
 }
 
-#preview-pane {
-  margin-left: 15px;
-  padding: 7px;
-  background: #272727;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #00aa00;
-}
+
 
 #map {
   width: 225px;
@@ -53,7 +46,7 @@ body {
   height: 120px;
 }
 #map-actions {
-  padding-left: 10px;
+  padding-left: 5px;
   width: 100px;
   float: left;
   margin: 3px;
@@ -74,11 +67,30 @@ body {
 
 /* formatting for suggestion list */
 
+#preview-pane {
+  min-height: 50px;
+  padding-left: 15px;
+  padding: 7px;
+  background: #272750;
+  border-left: solid 1px #0066cc;
+  color: #ffffff;
+}
+
+.hilited-text {
+    /*border-left: solid 5px #0066cc;*/
+    padding: 5px;
+}
 .hilited {
-    background: #00aa00;
+    background: #272750;
+    border-left: solid 1px #0066cc;
+    color: #ffffff;
+}
+.suggested {
+    padding: 5px;
+    border-left: solid 1px #272750;
 }
 
 .needarg {
-    font-style: italic;
+    font-style: oblique;
     color: #999999;
 }
