@@ -150,20 +150,25 @@ NLParser.prototype = {
       oldPreviewHTML = oldPreview.innerHTML;
 
     var content = "";
-    for (var x in this._suggestionList ) {
+    var numToDisplay = Math.min(5, this._suggestionList.length);
+    for (var x=0; x < numToDisplay; x++) {
       var suggText = this._suggestionList[x].getDisplayText();
       if ( x == this._hilitedSuggestion - 1 ) {
-	content += "<div class=\"hilited\">" + suggText + "<br/>";
-	content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
+	content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
+	content += "</div>";
       } else {
-	content += "<div>" + suggText + "</div>";
+	content += "<div class=\"suggested\">" + suggText + "</div>";
       }
     }
-    previewBlock.innerHTML = content;
+    content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div>";
+    
+   previewBlock.innerHTML = content;
+    
     if ( this._suggestionList.length > 0 && this._hilitedSuggestion > 0) {
       doc = previewBlock.ownerDocument;
       var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
       activeSugg.preview(context, doc.getElementById("preview-pane"));
+      
     }
     return true;
   },

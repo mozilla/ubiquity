@@ -50,6 +50,7 @@ ParsedSentence.prototype = {
       if ( this._DO ) {
 	sentence = sentence + " " + this._DO;
       } else {
+	//var arg = this._verb._DOLabel.substring
 	sentence = sentence + " <span class=\"needarg\">(" + this._verb._DOLabel + ")</span>";
       }
     }

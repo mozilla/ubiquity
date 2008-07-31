@@ -334,6 +334,7 @@ cmd_highlight.preview = function(pblock) {
   pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
 }
 
+
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
@@ -489,12 +490,10 @@ function findGmailTab() {
   return null;
 }
 
-var emailClientNoun = new NounType("email-client", ["Thunderbird", "Gmail"]);
-
 CreateCommand({
   name: "email",
   takes: {"message": arbHtml},
-  modifiers: {to: PersonNounType, in: emailClientNoun},
+  modifiers: {to: PersonNounType},
 
   preview: function(pblock, directObject, modifiers) {
     var html = "Creates an email message ";
@@ -509,7 +508,7 @@ CreateCommand({
     var document = context.focusedWindow.document;
     var title = document.title;
     var location = document.location;
-    
+    var gmailTab = findGmailTab();
     /* TODO get headers["to"] and put it in the right field*/
     if (html)
       html = ("<p>From the page <a href=\"" + location +
@@ -518,14 +517,6 @@ CreateCommand({
       displayMessage("No selected HTML!");
       return;
     }
-
-    if( headers.in == "thunderbird" ){
-      displayMessage(headers["to"])
-      document.location = "mailto:varmaa@gmail.com?body="+html;
-      return;
-    }
-    
-    var gmailTab = findGmailTab();
 
     if (gmailTab) {
       // Note that this is technically insecure because we're
@@ -722,30 +713,52 @@ CreateCommand({
   name: "map",
   takes: {"address": arbText},
   preview: function(pblock, location) {
-    
-    if( location == "these" ) {
-      imgSrc = "<img src='http://maps.google.com/staticmap?center=37.772614,-122.433701&markers=37.761758,-122.418766,red|37.751851,-122.428379,red|37.760673,-122.439537,red|37.757416,-122.420311,red|37.768951,-122.432327,red|37.763658,-122.459621,red|37.787810,-122.419281,red|37.752530,-122.415504,red|37.783604,-122.434044,red&zoom=12&size=500x300&key=ABQIAAAAjU0EJWnWPMv7oQ-jjS7dYxSPW5CJgpdgO_s4yyMovOaVh_KvvhSfpvagV18eOyDWu7VytS6Bi1CWxw'/>"
-      pblock.innerHTML = imgSrc;
-      return;
-    }
     showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
-      var doc = context.focusedWindow.document;
-      var focused = context.focusedElement;
+      winInsecure.setPreview( location );
+      
+      winInsecure.insertHtml = function(html) {
+        var doc = context.focusedWindow.document;
+        var focused = context.focusedElement;
 
-      winInsecure.insertIntoPage = function(html){
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);
-        }    
-      };
-      winInsecure.setPreview( location );
+        }
+      }
     });
   }
 })
 
 CreateCommand({
-  name: "map these",
+  name: "aza",
   takes: {"selection": arbHtml},
   preview: function( pblock, html ) {
+    var div = getDocumentInsecure().createElement("div");
+    div.innerHTML = html;
+    
+    var host = getWindowInsecure().location.host;
+    /*
+    var houses = [];
+    jQuery(div).find("a").each( function(){
+      houses.push({
+        href: "http://" + host + jQuery(this).attr("href"),
+        title: jQuery(this).text()
+      })
+    });
+    */
+    
+    showPreviewFromFile( pblock, "templates/map_simple.html", function(winInsecure) {
+      winInsecure.addPoint( 0,0 );
+      //winInsecure.addPointByName( "Mountain View");
+      /*
+      for( var i=0; i < houses.length; i++ ){
+        jQuery.get( houses[i].href, function( html ) {
+          FBLog( html );
+        }, "html");
+      }*/
+      
+    });
+    
+    //FBLog( houses );
   }
 })
 
@@ -945,16 +958,6 @@ function cmd_undelete() {
 }
 cmd_undelete.preview = function( pblock ) {
   pblock.innerHTML = "Restores the HTML deleted by the delete command.";
-}
-
-function cmd_edit_page() {
-  // TODO: works w/o wrappedJSObject in getDocumentInsecure() call- fix this
-  getDocumentInsecure().body.contentEditable = 'true';
-  getDocumentInsecure().designMode='on';
-}
-
-cmd_edit_page.preview = function( pblock ) {
-  pblock.innerHTML = "Edits a page. Use the 'save' command to finnish."
 }
 
 

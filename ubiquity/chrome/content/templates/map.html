@@ -286,6 +286,10 @@
           addresses[i].className = "gaddress";
       }
     }
+    
+    function insertMap( ) {
+      insertHtml( jQuery("#preview-pane-large").html() );
+    }
       
       
  
@@ -298,13 +302,15 @@
                  "<div id=\"address-list\"></div>";
   
       html = html + "</div>" + 
-                    "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap(" + searchTerm + ");\">Insert map in page</a></div>";
+                    "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>";
   
       $("#preview-pane").html(html);
   
       loadMap(searchTerm, 0);
 
     }
+    
+    
     </script>
   </head>
 
