@@ -118,7 +118,7 @@ NLParser.prototype = {
     return this._suggestionList[hilited];
   },
 
-  getSelectionList: function() {
+  getSuggestionList: function() {
     return this._suggestionList;
   },
 
