@@ -154,6 +154,10 @@
       map.removeControl(mapType);
       map.disableDragging();
     }
+    
+    function insertMap() {
+      insertIntoPage( jQuery("#preview-pane-large").html() );xxx
+    }
 
     function showMapPreview(map) {
       $("#address-list").hide();
@@ -232,7 +236,7 @@
           html = html + "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
 
           html = html + "</div>" + 
-                        "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call current map command');\">Insert map in page</a></div>";
+                        "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>";
 
           $("#preview-pane").html(html);   
 
