@@ -58,6 +58,11 @@ CommandManager.prototype = {
            exception: e}
         );
       }
+  },
+
+  getSuggestionListNoInput: function( context ) {
+    this.__nlParser.updateSuggestionList("", context);
+    return this.__nlParser.getSuggestionList();
   }
 };
 
@@ -170,3 +175,11 @@ CommandSource.prototype = {
       return null;
   }
 };
+
+function getAvailableCommands(commandManager, context) {
+  var suggestions = commandManager.getSuggestionListNoInput( context );
+  var retVal = {};
+  for (var x in stuff)
+    retVal[stuff[x]._verb._name] = stuff[x].execute;
+  return retVal;
+}

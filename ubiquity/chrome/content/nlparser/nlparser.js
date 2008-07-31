@@ -118,6 +118,10 @@ NLParser.prototype = {
     return this._suggestionList[hilited];
   },
 
+  getSelectionList: function() {
+    return this._suggestionList;
+  },
+
   setPreviewAndSuggestions: function( context, previewBlock ) {
     // set previewBlock.innerHtml and return true/false
     // can set previewBlock as a callback in case we need to update
