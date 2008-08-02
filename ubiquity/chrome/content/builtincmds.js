@@ -762,7 +762,6 @@ CreateCommand({
   }
 })
 
-
 // -----------------------------------------------------------------
 // MISC COMMANDS
 // -----------------------------------------------------------------
@@ -775,6 +774,12 @@ function cmd_view_source() {
   getWindowInsecure().location = url;
 }
 
+
+
+
+// -----------------------------------------------------------------
+// TAB COMMANDS
+// -----------------------------------------------------------------
 var TabNounType = {
   _name: "tab name",
 
@@ -800,13 +805,14 @@ var TabNounType = {
   suggest: function( fragment ) {
     var suggestions  = [];
     var tabs = TabNounType.getTabs();
-
+    
+    //TODO: implement a better match algorithm
     for ( var tabName in tabs ) {
       if (tabName.match(fragment, "i"))
 	      suggestions.push( tabName );
     }
     return suggestions.splice(0, 5);
-  },
+  }
 }
 
 CreateCommand({
@@ -824,17 +830,12 @@ CreateCommand({
 
   preview: function( pblock, tabName ) {
     if( tabName.length > 1 )
-      pblock.innerHTML = "Changes to <b>%s</b> tab.".replace(/%s/, tabName);
+      pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
       pblock.innerHTML = "Switch to tab by name."
   }
 })
 
-
-
-// -----------------------------------------------------------------
-// TAB COMMANDS
-// -----------------------------------------------------------------
 
 CreateCommand({
   name: "close.related.tabs",
@@ -880,51 +881,6 @@ CreateCommand({
   }
 
 })
-
-
-CreateCommand({
-  name: "go.to.tab",
-  takes: {"related word": arbText},
-
-  preview: function( pblock, query ) {
-    var relatedWord = query.toLowerCase();
-    var html = null;
-    if(relatedWord.length != 0){
-      html = "Goes to the first tab that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
-      var numTabs = 0;
-
-      Application.activeWindow.tabs.forEach(function(tab){
-        if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
-      	  html += "<li>" + tab.document.title + "</li>";
-      	  numTabs++;
-        }
-      });
-      if(numTabs == 0){
-        html = "No tabs related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b>";
-      }else{
-        html += "</ul>";
-      }
-    }else{
-      html = "Goes tabs related to the word";
-    }
-    jQuery(pblock).html( html );
-  },
-
-  execute: function( query ) {
-    var relatedWord = query.toLowerCase();
-    var switchedFocus = false;
-    Application.activeWindow.tabs.forEach(function(tab){
-      if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
-        if(!switchedFocus){
-          tab.focus();
-          switchedFocus = true;
-        }
-      }
-    });
-  }
-
-});
-
 
 // -----------------------------------------------------------------
 // PAGE EDIT COMMANDS
