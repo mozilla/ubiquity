@@ -836,7 +836,26 @@ CreateCommand({
   }
 })
 
+// Closes a single tab
+CreateCommand({
+  name: "close.tab",
+  takes: {"tab name": TabNounType},
+  
+  execute: function( tabName ) {
+    var tabs = TabNounType.getTabs();
+    tabs[tabName].close();
+    displayMessage(tabName + " tab closed");
+  },
 
+  preview: function( pblock, tabName ) {
+    if( tabName.length > 1 )
+      pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
+    else
+      pblock.innerHTML = "Closes the tab by name."
+  }
+})
+
+//Closes all tabs related to the specified word
 CreateCommand({
   name: "close.related.tabs",
   takes: {"related word": arbText},
@@ -861,7 +880,7 @@ CreateCommand({
         html += "</ul>";
       }
     }else{
-      html = "Closes tabs related to the word";
+      html = "Closes all tabs related to the word";
     }
     jQuery(pblock).html( html );
   },
