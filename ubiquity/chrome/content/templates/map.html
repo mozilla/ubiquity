@@ -4,9 +4,13 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>Google Maps JavaScript API Example: Simple Map</title>
-    <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA"
-            type="text/javascript"></script>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA"
+            type="text/javascript">
+    </script>
+    <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0" type="text/javascript"></script>
+    <script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>    
     <script src="../jquery-1.2.3.min.js"></script>
+    <script src="../browser.js"></script>
     <script src="../cmdutils.js"></script>
     <style>
 
@@ -32,7 +36,7 @@
 
     /* initial map preview */
     #map {
-      width: 225px;
+      width: 200px;
       height: 130px;
       float: left;
       cursor: pointer;
@@ -41,7 +45,7 @@
     }
     #address-list {
       float: left;
-      /*width: 400px;*/
+      width: 260px;
       height: 120px;
     }
     .gaddress, .gaddress-current {
@@ -76,7 +80,10 @@
     #goto-gmaps a {
       color: #0066cc;
     }
-
+    .address-line {
+      white-space: nowrap;
+      overflow: hidden;
+    }
     /* secondary map preview */
     #selected-address {
       color: #bfbfbf;
@@ -104,33 +111,19 @@
     </style>
     <script type="text/javascript">
 
-    var map;
-    var mapControl = new GSmallMapControl();
-    var mapType = new GMapTypeControl();
+    google.load('search', '1');
+    google.load('maps', '2');
+    
+    
+    var gLocalSearch;
+    var gMap;
+    var gSelectedResults = [];
+    var gCurrentResults = [];
+    var gSearchForm;
+    var currentMarker;
+    var mapControl;
+    var mapType;
 
-    function loadMap(lat, lng, index) {
-      var curAddress = document.getElementsByClassName("gaddress-current");
-      curAddress[0].className = "gaddress";
-
-      var addresses = document.getElementsByClassName("gaddress");
-      for (var i=0; i < addresses.length; i++) {
-        if (i == index)
-          addresses[i].className = "gaddress-current";
-        else 
-          addresses[i].className = "gaddress";
-      }
-
-      $(".map-actions").hide();
-      $("#selected-address").hide();
-      if (GBrowserIsCompatible()) {
-        map = new GMap2(document.getElementById("map"));
-        var point = new GLatLng(lat, lng);
-        map.setCenter(point, 13);
-        map.addOverlay(new GMarker(point));
-        map.disableDragging();
-        GEvent.addListener(map, "click", function() {showMapPreview(map);});
-      }
-    }
 
     function showAddressPreview() {
       setTimeout( function(){
@@ -144,33 +137,34 @@
         .height("300px")
         .animate({ height: "140px" });
       $("#map").animate({ 
-        width: "225px",
+        width: "200px",
         height: "130px",
       }, 500);
-
+      
       $("#map").css("border","5px solid #0066cc");
-
-      map.removeControl(mapControl);
-      map.removeControl(mapType);
-      map.disableDragging();
+    
+      gMap.removeControl(mapControl);
+      gMap.removeControl(mapType);
+      gMap.disableDragging();
     }
-
+    
     function showMapPreview(map) {
+    
       $("#address-list").hide();
-
+      
       $("#selected-address").fadeIn( 300 );
+      //$("#selected-address").text($(".gaddress-current").text());
       document.getElementById("preview-pane").id = "preview-pane-large";
-      $("#selected-address").text($(".gaddress-current").text());
-
-      map.addControl(mapControl);
-      map.addControl(mapType);
-      map.enableDragging();
+      
+      gMap.addControl(mapControl);
+      gMap.addControl(mapType);
+      gMap.enableDragging();
       $("#map").css("border-width","0px");
       $("#map").css("border-style","none");
       $("#preview-pane-large")
         .height("140px")
         .animate({ height: "300px" });
-
+      
       $("#map").animate({
         width: "450px",
         height: "240px",
@@ -180,66 +174,143 @@
         $(".suggestion").slideUp( 500 );    
       }, 300 ); 
     }
+    
+   
+    function loadMap(searchTerm, index) {
 
-    function setPreview(searchTerm) {
-      var url = "http://maps.google.com/maps/geo";
-      var apikey = "ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
-      var params = "key=" + apikey + "&q=" + encodeURIComponent(searchTerm);   
+      $(".map-actions").hide();  
+      $("#selected-address").hide();
 
-      $.ajax( {
-        type: "GET",
-        url: url, 
-        data: params,
-        dataType: "jsonp",
-        success: function(jobj) {
-          var numToDisplay = 3;
+      // Initialize the map
+      gMap = new google.maps.Map2(document.getElementById("map"));
+      //var curLocation = getLocation();
+      //gMap.setCenter(new google.maps.LatLng(curLocation.lat, curLocation.long), 13);
+      gMap.setCenter(new google.maps.LatLng(37.4419, -122.1419), 13);
+      GEvent.addListener(gMap, "click", function() {showMapPreview(gMap);});
+      gMap.disableDragging();
+      mapControl = new GSmallMapControl();
+      mapType = new GMapTypeControl();
 
-          if (!jobj.Placemark) {
-            $("#preview-pane").height("0px");
-            return;
-          }
+      // Initialize the local searcher
+      gLocalSearch = new google.search.LocalSearch();
+      gLocalSearch.setCenterPoint(gMap);
+      gLocalSearch.setSearchCompleteCallback(null, function() {OnLocalSearch(searchTerm);});
 
-          var placemark = jobj.Placemark[0];
-          var lng0 = placemark.Point.coordinates[0];
-          var lat0 = placemark.Point.coordinates[1];
-
-
-          var html = "<div>" + "<div id=\"selected-address\"></div>" + 
-                     "<div class=\"map-actions\"> <a class=\"hand\" onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call email command');\">Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
-                     "</div>" + 
-                     "<div id=\"map\" class=\"hand\" ></div>" + 
-                     "<div id=\"address-list\">";
-          for (var i=0; i<numToDisplay; i++) {
-            if (jobj.Placemark[i]) {
-              var address = jobj.Placemark[i].address;
-              var lng = jobj.Placemark[i].Point.coordinates[0];
-              var lat = jobj.Placemark[i].Point.coordinates[1]; 
-
-              if (i == 0) {
-                html = html + "<div class=\"gaddress-current\">" + 
-                              "<a href=# onclick=\"loadMap(" + lat + ", " + lng + ", " + i + ");\">" + 
-                              address + "</a></div>";
-              }
-              else {
-                html = html + "<div class=\"gaddress\">" +  
-                              "<a href=# onclick=\"loadMap(" + lat + ", " + lng + ", " + i + ");\">" + 
-                              address + "</a></div>";
-              }
-            }
-          }
-
-          var googleMapsUrl = "http://maps.google.com/?q=" + encodeURIComponent(searchTerm);
-          html = html + "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
-
-          html = html + "</div>" + 
-                        "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call current map command');\">Insert map in page</a></div>";
-
-          $("#preview-pane").html(html);   
-
-          loadMap(lat0, lng0, 0);
-        } 
-      });
+      // Execute the initial search
+      gLocalSearch.execute(searchTerm);
     }
+
+    // Called when Local Search results are returned, we clear the old
+    // results and load the new ones.
+    function OnLocalSearch(searchTerm) {
+      if (!gLocalSearch.results) return;
+      var searchWell = document.getElementById("address-list");
+
+      gCurrentResults = [];
+      var numToDisplay = 3; //or gLocalSearch.results.length
+      for (var i = 0; i < numToDisplay; i++) {
+        gCurrentResults.push(new LocalResult(gLocalSearch.results[i]));
+      }
+          
+      var googleMapsUrl = "http://maps.google.com/?q=" + encodeURIComponent(searchTerm);
+      var gUrlDiv = document.createElement("div");
+      gUrlDiv.innerHTML = "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
+      document.getElementById("address-list").appendChild(gUrlDiv);
+    
+
+
+      // move the map to the first result
+      var first = gLocalSearch.results[0];
+      var point = new google.maps.LatLng(first.lat, first.lng);
+      gMap.panTo(point);
+      currentMarker = new GMarker(point);
+      gMap.addOverlay(currentMarker);
+      
+    }
+
+
+    // A class representing a single Local Search result returned by the
+    // Google AJAX Search API.
+    function LocalResult(result) {
+      this.result_ = result;
+      this.resultNode_ = this.unselectedHtml();
+      document.getElementById("address-list").appendChild(this.resultNode_);
+      //gMap.addOverlay(this.marker(gSmallIcon));
+    }
+
+    LocalResult.prototype.unselectedHtml = function() {
+      var container = document.createElement("div");
+      var point = new google.maps.LatLng(this.result_.lat, this.result_.lng);
+      
+      if (this.result_ == gLocalSearch.results[0]) {
+        container.className = "gaddress-current";
+        container.addEventListener("click", function() {setMarker(point, 0);}, false);
+      }
+      else if (this.result_ == gLocalSearch.results[1]) {
+        container.className = "gaddress";
+        container.addEventListener("click", function() {setMarker(point, 1);}, false);
+      }
+      else if (this.result_ == gLocalSearch.results[2]) {
+        container.className = "gaddress";
+        container.addEventListener("click", function() {setMarker(point, 2);}, false);
+      }
+        
+      $("#selected-address").text(this.result_.titleNoFormatting);
+      
+      var html = "<div class='address-line'><a>" + this.result_.title + "</a></div>" +
+                 "<div class='address-line'>" + this.result_.streetAddress + "&nbsp;" + 
+                           this.result_.city + ",&nbsp;" +
+                           this.result_.region + "&nbsp;" +
+                           //this.result_.country +
+                  "</div>";
+      this.result_.html.innerHTML = html;
+      container.appendChild(this.result_.html.cloneNode(true));
+      return container;
+    }
+
+  
+    function setMarker(point, index) {
+      gMap.removeOverlay(currentMarker);
+      gMap.panTo(point);
+      currentMarker = new GMarker(point);
+      gMap.addOverlay(currentMarker);
+
+      var curAddress = document.getElementsByClassName("gaddress-current");
+      curAddress[0].className = "gaddress";
+
+      var addresses = document.getElementsByClassName("gaddress");
+      for (var i=0; i < addresses.length; i++) {
+        if (i == index)
+          addresses[i].className = "gaddress-current";
+        else 
+          addresses[i].className = "gaddress";
+      }
+    }
+    
+    function insertMap( ) {
+      insertHtml( jQuery("#preview-pane-large").html() );
+    }
+      
+      
+ 
+    function setPreview(searchTerm) {
+
+      var html = "<div>" + "<div id=\"selected-address\"></div>" + 
+                 "<div class=\"map-actions\"> <a class=\"hand\" onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call email command');\">Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
+                 "</div>" + 
+                 "<div id=\"map\"></div>" + 
+                 "<div id=\"address-list\"></div>";
+  
+      html = html + "</div>" + 
+                    "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>";
+  
+      $("#preview-pane").html(html);
+  
+      loadMap(searchTerm, 0);
+
+    }
+    
+    
     </script>
   </head>
 

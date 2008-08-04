@@ -4,7 +4,7 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>ubiquity@labs.mozilla.com</em:id>
-    <em:version>0.1</em:version>
+    <em:version>0.0.1a</em:version>
     <em:type>2</em:type>
 
     <!-- Target Application this extension can install into, 
@@ -21,6 +21,6 @@
     <em:name>Ubiquity</em:name>
     <em:description>An extension that allows for the use of dynamic commands in Firefox.</em:description>
     <em:creator>Mozilla Corporation</em:creator>
-    <em:homepageURL>http://labs.mozilla.com/projects/ubiquity</em:homepageURL>
+    <em:homepageURL>http://wiki.mozilla.org/Labs/Ubiquity</em:homepageURL>
   </Description>
 </RDF>

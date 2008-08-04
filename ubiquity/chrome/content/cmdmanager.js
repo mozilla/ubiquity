@@ -15,23 +15,31 @@ CommandManager.prototype = {
   refresh : function() {
     this.__cmdSource.refresh();
     this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
+    this.__hilitedSuggestion = 0;
   },
 
   moveIndicationUp : function(context, previewBlock) {
-    this.__nlParser.indicationUp(context, previewBlock);
+    this.__hilitedSuggestion -= 1;
+    if (this.__hilitedSuggestion < 0) {
+      this.__hilitedSuggestion = this.__nlParser.getNumSuggestions() - 1;
+    }
+    this._preview(context, previewBlock);
   },
 
   moveIndicationDown : function(context, previewBlock) {
-    this.__nlParser.indicationDown(context, previewBlock);
+    this.__hilitedSuggestion += 1;
+    if (this.__hilitedSuggestion > this.__nlParser.getNumSuggestions() - 1) {
+      this.__hilitedSuggestion = 0;
+    }
+    this._preview(context, previewBlock);
   },
 
-  preview : function(cmdName, context, previewBlock) {
+  _preview : function(context, previewBlock) {
     var wasPreviewShown = false;
-    this.__nlParser.updateSuggestionList(cmdName, context);
-
     try {
       wasPreviewShown = this.__nlParser.setPreviewAndSuggestions(context,
-								 previewBlock);
+								 previewBlock,
+								 this.__hilitedSuggestion);
       //dump( "Preview block has been set to: " + $("#cmd-preview").html() + "\n");
     } catch (e) {
       this.__msgService.displayMessage(
@@ -43,9 +51,16 @@ CommandManager.prototype = {
     return wasPreviewShown;
   },
 
+  updateInput : function(input, context, previewBlock) {
+    this.__nlParser.updateSuggestionList(input, context);
+    this.__hilitedSuggestion = 0;
+    return this._preview(context, previewBlock);
+  },
+
   execute : function(cmdName, context) {
-    this.__nlParser.updateSuggestionList(cmdName, context);
-    var parsedSentence = this.__nlParser.getHilitedSentence();
+    // TODO what happens if hilitedSuggestion is 0 here???
+    // what does it even mean to execute 'the exact input'?
+    var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
     if (!parsedSentence)
       this.__msgService.displayMessage("No command called " + cmdName + ".");
     else

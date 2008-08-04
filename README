@@ -1,8 +1,9 @@
 Installing Ubiquity
 -------------------
 
-To install Ubiquity to your default Firefox profile, just enter the
-root directory of your Ubiquity source code checkout and run:
+To install Ubiquity for development purposes to your default Firefox
+profile, just enter the root directory of your Ubiquity source code
+checkout and run:
 
   python manage.py install
 
@@ -26,7 +27,19 @@ Uninstalling Ubiquity
 ---------------------
 
 Just run "python manage.py uninstall", optionally specifying a profile
-name/directory if necessary.
+name/directory if necessary.  Alternatively, you can also uninstall
+the extension through the normal Firefox addon management UI.
+
+Building an XPI
+---------------
+
+To build an XPI for Ubiquity, just run:
+
+  python manage.py build-xpi
+
+This will create an XPI with the name "ubiquity-<version>.xpi", where
+"<version>" is taken from the contents of the "em:version" element in the
+"ubiquity/install.rdf" file.
 
 Test Suite
 ----------

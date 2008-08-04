@@ -25,11 +25,13 @@ function startup_setBasicPreferences() {
 function startup_openUbiquityWelcomePage()
 {
   const VERSION_PREF ="extensions.ubiquity.lastversion";
-  const UBIQUITY_VERSION = "0.0.1";
 
+  // Compare the version in our preferences from our version in the
+  // install.rdf.
+  var ext = Application.extensions.get("ubiquity@labs.mozilla.com");
   var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
-  if (currVersion != UBIQUITY_VERSION) {
-    Application.prefs.setValue(VERSION_PREF, UBIQUITY_VERSION);
+  if (currVersion != ext.version) {
+    Application.prefs.setValue(VERSION_PREF, ext.version);
     cmd_help();
   }
 }

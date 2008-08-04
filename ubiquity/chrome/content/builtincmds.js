@@ -48,6 +48,91 @@ var cmd_google = makeSearchCommand({
   }
 });
 
+//Thanks to John Resig's http://ejohn.org/files/titleCaps.js
+
+function titleCaps(title){
+	var small = "(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|v[.]?|via|vs[.]?)";
+	var punct = "([!\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]*)";
+  var parts = [], split = /[:.;?!] |(?: |^)["Ò]/g, index = 0;
+  
+  function lower(word){
+  	return word.toLowerCase();
+  }
+  
+  function upper(word){
+    return word.substr(0,1).toUpperCase() + word.substr(1);
+  }
+		
+	while (true) {
+		var m = split.exec(title);
+
+		parts.push( title.substring(index, m ? m.index : title.length)
+			.replace(/\b([A-Za-z][a-z.'Õ]*)\b/g, function(all){
+				return /[A-Za-z]\.[A-Za-z]/.test(all) ? all : upper(all);
+			})
+			.replace(RegExp("\\b" + small + "\\b", "ig"), lower)
+			.replace(RegExp("^" + punct + small + "\\b", "ig"), function(all, punct, word){
+				return punct + upper(word);
+			})
+			.replace(RegExp("\\b" + small + punct + "$", "ig"), upper));
+		
+		index = split.lastIndex;
+		
+		if ( m ) parts.push( m[0] );
+		else break;
+	}
+	
+	return parts.join("").replace(/ V(s?)\. /ig, " v$1. ")
+		.replace(/(['Õ])S\b/ig, "$1s")
+		.replace(/\b(AT&T|Q&A)\b/ig, function(all){
+			return all.toUpperCase();
+		});
+	
+}
+
+//TODO: find a API to get summaries from wikipedia
+//TODO: when executing search action,
+//escaping search terms screws things up sometimes
+
+// Currently just uses screen scraping to get the relevant information
+var cmd_wikipedia = makeSearchCommand({
+  name: "Wikipedia",
+  url: "http://www.wikipedia.org/wiki/Special:Search?search={QUERY}",
+  icon: "http://www.wikipedia.org/favicon.ico",
+  preview: function(searchTerm, pblock) {
+    
+    //TODO: Implement this preview using renderTemplate
+    pblock.innerHTML =  "Gets wikipedia article for " + searchTerm + "<br/>";
+    var $ = jQuery;
+    // convert to first letter caps (Wikipedia requires that) and add to URL
+    var url  = "http://wikipedia.org/wiki/" + titleCaps(searchTerm).replace(/ /g,"_"); 
+    
+    $.get( url, function(data) {
+      
+      //attach the HTML page as invisible div to do screen scraping
+      pblock.innerHTML += "<div style='display:none'>" + data + "</div>";
+      
+      var summary = $(pblock).find("#bodyContent > p").eq(0).text();
+      // if we are not on a article page 
+      //(might be a search results page or a disambiguation page, etc.)
+      if($(pblock).find("#bodyContent > p").length == 0 || (summary.search("may refer to:") != -1 )){
+        return;
+      }
+      //remove citations like [3], [citation needed], etc.
+      //TODO: also remove audio links (.audiolink & .audiolinkinfo)
+      summary = summary.replace(/\[([^\]]+)\]/g,"");
+      
+      var img = $(pblock).find(".infobox").find("img").attr("src") 
+                || $(pblock).find(".thumbimage").attr("src");
+
+      pblock.innerHTML = "<div style='height:500px'>" + 
+                        "<img src=" + img + "/>" + summary + "</div>";
+      
+		});
+				
+  }
+});
+
 var cmd_imdb = makeSearchCommand({
   name: "IMDB",
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
@@ -231,6 +316,24 @@ CreateCommand({
   },
   preview: "Syntax highlights your code."
 })
+
+
+function cmd_highlight() {
+  var sel = context.focusedWindow.getSelection();
+  var document = context.focusedWindow.document;
+
+  if (sel.rangeCount >= 1) {
+    var range = sel.getRangeAt(0);
+    var newNode = document.createElement("span");
+    newNode.style.background = "yellow";
+    range.surroundContents(newNode);
+  }
+}
+
+cmd_highlight.preview = function(pblock) {
+  pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
+}
+
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
@@ -612,10 +715,52 @@ CreateCommand({
   preview: function(pblock, location) {
     showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
       winInsecure.setPreview( location );
+      
+      winInsecure.insertHtml = function(html) {
+        var doc = context.focusedWindow.document;
+        var focused = context.focusedElement;
+
+        if (doc.designMode == "on") {
+          doc.execCommand("insertHTML", false, html);
+        }
+      }
     });
   }
 });
 
+CreateCommand({
+  name: "aza",
+  takes: {"selection": arbHtml},
+  preview: function( pblock, html ) {
+    var div = getDocumentInsecure().createElement("div");
+    div.innerHTML = html;
+    
+    var host = getWindowInsecure().location.host;
+    /*
+    var houses = [];
+    jQuery(div).find("a").each( function(){
+      houses.push({
+        href: "http://" + host + jQuery(this).attr("href"),
+        title: jQuery(this).text()
+      })
+    });
+    */
+    
+    showPreviewFromFile( pblock, "templates/map_simple.html", function(winInsecure) {
+      winInsecure.addPoint( 0,0 );
+      //winInsecure.addPointByName( "Mountain View");
+      /*
+      for( var i=0; i < houses.length; i++ ){
+        jQuery.get( houses[i].href, function( html ) {
+          FBLog( html );
+        }, "html");
+      }*/
+      
+    });
+    
+    //FBLog( houses );
+  }
+})
 
 // -----------------------------------------------------------------
 // MISC COMMANDS
@@ -629,6 +774,12 @@ function cmd_view_source() {
   getWindowInsecure().location = url;
 }
 
+
+
+
+// -----------------------------------------------------------------
+// TAB COMMANDS
+// -----------------------------------------------------------------
 var TabNounType = {
   _name: "tab name",
 
@@ -654,13 +805,14 @@ var TabNounType = {
   suggest: function( fragment ) {
     var suggestions  = [];
     var tabs = TabNounType.getTabs();
-
+    
+    //TODO: implement a better match algorithm
     for ( var tabName in tabs ) {
       if (tabName.match(fragment, "i"))
 	      suggestions.push( tabName );
     }
     return suggestions.splice(0, 5);
-  },
+  }
 }
 
 CreateCommand({
@@ -678,18 +830,32 @@ CreateCommand({
 
   preview: function( pblock, tabName ) {
     if( tabName.length > 1 )
-      pblock.innerHTML = "Changes to <b>%s</b> tab.".replace(/%s/, tabName);
+      pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
       pblock.innerHTML = "Switch to tab by name."
   }
 })
 
+// Closes a single tab
+CreateCommand({
+  name: "close.tab",
+  takes: {"tab name": TabNounType},
+  
+  execute: function( tabName ) {
+    var tabs = TabNounType.getTabs();
+    tabs[tabName].close();
+    displayMessage(tabName + " tab closed");
+  },
 
+  preview: function( pblock, tabName ) {
+    if( tabName.length > 1 )
+      pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
+    else
+      pblock.innerHTML = "Closes the tab by name."
+  }
+})
 
-// -----------------------------------------------------------------
-// TAB COMMANDS
-// -----------------------------------------------------------------
-
+//Closes all tabs related to the specified word
 CreateCommand({
   name: "close.related.tabs",
   takes: {"related word": arbText},
@@ -714,7 +880,7 @@ CreateCommand({
         html += "</ul>";
       }
     }else{
-      html = "Closes tabs related to the word";
+      html = "Closes all tabs related to the word";
     }
     jQuery(pblock).html( html );
   },
@@ -734,51 +900,6 @@ CreateCommand({
   }
 
 })
-
-
-CreateCommand({
-  name: "go.to.tab",
-  takes: {"related word": arbText},
-
-  preview: function( pblock, query ) {
-    var relatedWord = query.toLowerCase();
-    var html = null;
-    if(relatedWord.length != 0){
-      html = "Goes to the first tab that are related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
-      var numTabs = 0;
-
-      Application.activeWindow.tabs.forEach(function(tab){
-        if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
-      	  html += "<li>" + tab.document.title + "</li>";
-      	  numTabs++;
-        }
-      });
-      if(numTabs == 0){
-        html = "No tabs related to <b style=\"color:yellow\">\"" + relatedWord + "\"</b>";
-      }else{
-        html += "</ul>";
-      }
-    }else{
-      html = "Goes tabs related to the word";
-    }
-    jQuery(pblock).html( html );
-  },
-
-  execute: function( query ) {
-    var relatedWord = query.toLowerCase();
-    var switchedFocus = false;
-    Application.activeWindow.tabs.forEach(function(tab){
-      if ( tab.uri.spec.toLowerCase().match(relatedWord) || tab.document.title.toLowerCase().match(relatedWord)){
-        if(!switchedFocus){
-          tab.focus();
-          switchedFocus = true;
-        }
-      }
-    });
-  }
-
-});
-
 
 // -----------------------------------------------------------------
 // PAGE EDIT COMMANDS
@@ -939,3 +1060,4 @@ cmd_perm_delete.preview = function( pblock ) {
   pblock.innerHTML = "Attempts to permanently delete the selected part of the"
     + " page. (Experimental!)";
 }
+

@@ -81,7 +81,7 @@ Ubiquity.prototype = {
         var wasPreviewShown = false;
 
         if (cmdName.length >= this.__MIN_CMD_PREVIEW_LENGTH)
-          wasPreviewShown = this.__cmdManager.preview(
+          wasPreviewShown = this.__cmdManager.updateInput(
             cmdName,
             this.__makeContext(),
             this.__previewBlock

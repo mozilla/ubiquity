@@ -2,6 +2,8 @@ import os
 import sys
 import xml.dom.minidom
 import subprocess
+import shutil
+import zipfile
 from ConfigParser import ConfigParser
 
 def find_profile_dir(name):
@@ -37,6 +39,16 @@ def find_profile_dir(name):
     print "Couldn't find a profile called '%s'." % name
     return None
 
+def get_install_rdf_dom(path_to_extension_root):
+    rdf_path = os.path.join(path_to_extension_root, "install.rdf")
+    rdf = xml.dom.minidom.parse(rdf_path)
+    return rdf
+
+def get_install_rdf_property(path_to_extension_root, property):
+    rdf = get_install_rdf_dom(path_to_extension_root)
+    element = rdf.documentElement.getElementsByTagName(property)[0]
+    return element.firstChild.nodeValue
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if not args:
@@ -47,6 +59,7 @@ if __name__ == "__main__":
         print "    test - run unit tests"
         print "    install - install to the given profile"
         print "    uninstall - uninstall from the given profile"
+        print "    build-xpi - build an xpi of the addon"
         print
         sys.exit(1)
 
@@ -92,10 +105,8 @@ if __name__ == "__main__":
             print "Can't resolve profile directory; aborting."
             sys.exit(1)
 
-        rdf_path = os.path.join(path_to_extension_root, "install.rdf")
-        rdf = xml.dom.minidom.parse(rdf_path)
-        em_id = rdf.documentElement.getElementsByTagName("em:id")[0]
-        extension_id = em_id.firstChild.nodeValue
+        extension_id = get_install_rdf_property(path_to_extension_root,
+                                                "em:id")
 
         extension_file = os.path.join(profile_dir,
                                       "extensions",
@@ -107,7 +118,10 @@ if __name__ == "__main__":
             if os.path.exists(abspath):
                 os.remove(abspath)
         if os.path.exists(extension_file):
-            os.remove(extension_file)
+            if os.path.isdir(extension_file):
+                shutil.rmtree(extension_file)
+            else:
+                os.remove(extension_file)
         if cmd == "install":
             fileobj = open(extension_file, "w")
             fileobj.write(path_to_extension_root)
@@ -115,6 +129,19 @@ if __name__ == "__main__":
             print "Extension '%s' installed." % extension_id
         else:
             print "Extension '%s' uninstalled." % extension_id
+    elif cmd == "build-xpi":
+        version = get_install_rdf_property(path_to_extension_root,
+                                           "em:version")
+        zfname = "ubiquity-%s.xpi" % version
+        zf = zipfile.ZipFile(zfname,
+                             "w",
+                             zipfile.ZIP_DEFLATED)
+        for dirpath, dirnames, filenames in os.walk(path_to_extension_root):
+            for filename in filenames:
+                abspath = os.path.join(dirpath, filename)
+                arcpath = abspath[len(path_to_extension_root)+1:]
+                zf.write(abspath, arcpath)
+        print "Created %s." % zfname
     else:
         print "Unknown command '%s'" % cmd
         sys.exit(1)

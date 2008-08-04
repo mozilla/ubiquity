@@ -8,7 +8,6 @@ NLParser.prototype = {
     this.setCommandList( commandList );
     this._nounTypeList = nounList;
     this._lockedInSentence = null;
-    this._hilitedSuggestion = 0;
     this._suggestionList = []; // a list of ParsedSentences.
   },
 
@@ -42,17 +41,11 @@ NLParser.prototype = {
     var nounType, verb, x;
     var newSuggs = [];
 
-    dump("updating suggestion list with query = " + query + "\n");
-    dump("Length of verblist is " + this._verbList.length + "\n");
-    dump("Length of nounlist is " + this._nounTypeList.length + "\n");
     // selection, no input, noun-first suggestion
     if (!query || query.length == 0) {
-      dump("Zero-query suggestions...\n");
       var sel = getTextSelection(context);
       if (sel) {
-	dump("There's a selection...\n");
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
-	dump("newSuggs.length is " + newSuggs.length + "\n");
       }
     } else {
       var words = query.split( " " );
@@ -70,66 +63,21 @@ NLParser.prototype = {
     }
     // TODO sort in order of match quality!!
     this._suggestionList = newSuggs;
-    if ( this._suggestionList.length > 0 )
-      this._hilitedSuggestion = 1; // hilight the first suggestion by default
-    else
-      this._hilitedSuggestion = 0;
-  },
-
-  indicationDown: function(context, previewBlock) {
-    this._hilitedSuggestion ++;
-    if ( this._hilitedSuggestion > this._suggestionList.length ) {
-      this._hilitedSuggestion = 0;
-      }
-    this.setPreviewAndSuggestions(context, previewBlock);
-  },
-
-  indicationUp: function(context, previewBlock) {
-    this._hilitedSuggestion --;
-    if ( this._hilitedSuggestion < 0 ) {
-      this._hilitedSuggestion = this._suggestionList.length;
-      }
-    this.setPreviewAndSuggestions(context, previewBlock);
-  },
-
-  getHilitedSuggestion: function() {
-    return this._hilitedSuggestion - 1; // because 0 means no hilite
-    // and the suggestion list starts at 1... fencepost!
-  },
-
-  // Not currently used, but might be in the future...
-  // Autocompletes the input text based on the hilighted suggestion.
-  autocomplete: function( query ) {
-    var newText;
-    var hilited = this.getHilitedSuggestion();
-    if ( hilited > -1 ) {
-      newText = this._suggestionList[ hilited ].getCompletionText() + " ";
-    } else {
-      newText = query;
-    }
-    return newText;
-  },
-
-  // Not currently used, but might be in the future...
-  clear: function() {
-    this._suggestionList = [];
-    this._hilitedSuggestion = 0;
-    this._lockedInSentence = null;
-  },
-
-  getHilitedSentence: function() {
-    if (this._suggestionList.length == 0) {
-      return null;
-    }
-    var hilited = this.getHilitedSuggestion();
-    return this._suggestionList[hilited];
   },
 
   getSuggestionList: function() {
     return this._suggestionList;
   },
 
-  setPreviewAndSuggestions: function( context, previewBlock ) {
+  getNumSuggestions: function() {
+    return this._suggestionList.length;
+  },
+
+  getSentence: function(index) {
+    return this._suggestionList[index];
+  },
+
+  setPreviewAndSuggestions: function( context, previewBlock, hilitedSuggestion ) {
     // set previewBlock.innerHtml and return true/false
     // can set previewBlock as a callback in case we need to update
     // asynchronously.
@@ -156,20 +104,25 @@ NLParser.prototype = {
       oldPreviewHTML = oldPreview.innerHTML;
 
     var content = "";
-    for (var x in this._suggestionList ) {
+    var numToDisplay = Math.min(5, this._suggestionList.length);
+    for (var x=0; x < numToDisplay; x++) {
       var suggText = this._suggestionList[x].getDisplayText();
-      if ( x == this._hilitedSuggestion - 1 ) {
-	content += "<div class=\"hilited\">" + suggText + "<br/>";
-	content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div></div>";
+      if ( x == hilitedSuggestion ) {
+	content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
+	content += "</div>";
       } else {
-	content += "<div>" + suggText + "</div>";
+	content += "<div class=\"suggested\">" + suggText + "</div>";
       }
     }
-    previewBlock.innerHTML = content;
-    if ( this._suggestionList.length > 0 && this._hilitedSuggestion > 0) {
+    content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div>";
+
+   previewBlock.innerHTML = content;
+
+    if ( this._suggestionList.length > 0 ) {
       doc = previewBlock.ownerDocument;
-      var activeSugg = this._suggestionList[this._hilitedSuggestion -1];
+      var activeSugg = this._suggestionList[hilitedSuggestion];
       activeSugg.preview(context, doc.getElementById("preview-pane"));
+
     }
     return true;
   },
