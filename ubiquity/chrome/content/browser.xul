@@ -49,7 +49,7 @@
                       xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
         <div id="cmd-entry-container">
-          <input id="cmd-entry" size="20" />
+          <input id="cmd-entry"/>
         </div>
         <iframe id="cmd-preview"
                 src="chrome://ubiquity/content/preview.html"></iframe>
