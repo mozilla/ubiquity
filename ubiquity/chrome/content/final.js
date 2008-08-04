@@ -25,6 +25,7 @@ function startup_setBasicPreferences() {
 function startup_openUbiquityWelcomePage()
 {
   const VERSION_PREF ="extensions.ubiquity.lastversion";
+  // TODO: Read this from install.rdf.
   const UBIQUITY_VERSION = "0.0.1";
 
   var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
