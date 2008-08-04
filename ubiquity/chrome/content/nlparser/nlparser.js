@@ -1,3 +1,5 @@
+const MAX_SUGGESTIONS = 5;
+
 function NLParser(verbList, nounList) {
   if (verbList) {
     this._init(verbList, nounList);
@@ -70,7 +72,7 @@ NLParser.prototype = {
   },
 
   getNumSuggestions: function() {
-    return this._suggestionList.length;
+    return Math.min(MAX_SUGGESTIONS, this._suggestionList.length);
   },
 
   getSentence: function(index) {
@@ -104,7 +106,7 @@ NLParser.prototype = {
       oldPreviewHTML = oldPreview.innerHTML;
 
     var content = "";
-    var numToDisplay = Math.min(5, this._suggestionList.length);
+    var numToDisplay = this.getNumSuggestions();
     for (var x=0; x < numToDisplay; x++) {
       var suggText = this._suggestionList[x].getDisplayText();
       if ( x == hilitedSuggestion ) {
