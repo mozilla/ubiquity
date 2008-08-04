@@ -48,6 +48,9 @@
       width: 260px;
       height: 120px;
     }
+    .address-line {
+      cursor: pointer;
+    }
     .gaddress, .gaddress-current {
       font-size: small;
       padding: 5px 5px 5px 25px;
@@ -177,15 +180,38 @@
     
    
     function loadMap(searchTerm, index) {
+      var currentLat;
+      var currentLng;
 
-      $(".map-actions").hide();  
-      $("#selected-address").hide();
+      // should just call getLocation() from cmdutils.js, but "globals is not defined" ? 
+      jQuery.ajax({
+        type: "GET",
+        url: "http://j.maxmind.com/app/geoip.js",
+        dataType: "text",
+        async: false,
+        success: function( js ) {
+          eval( js );
+          var loc = geoip_city() + ", " + geoip_region();
+          currentLat = geoip_latitude();
+          currentLng = geoip_longitude();
+          //globals.location = {
+          //  city: geoip_city(),
+          //  state: geoip_region_name(),
+          //  country: geoip_country_name(),
+          //  lat: geoip_latitude(),
+          //  long: geoip_longitude()
+          //};
+        }
+      });
+
+      jQuery(".map-actions").hide();  
+      jQuery("#selected-address").hide();
 
       // Initialize the map
       gMap = new google.maps.Map2(document.getElementById("map"));
       //var curLocation = getLocation();
       //gMap.setCenter(new google.maps.LatLng(curLocation.lat, curLocation.long), 13);
-      gMap.setCenter(new google.maps.LatLng(37.4419, -122.1419), 13);
+      gMap.setCenter(new google.maps.LatLng(currentLat, currentLng), 13);
       GEvent.addListener(gMap, "click", function() {showMapPreview(gMap);});
       gMap.disableDragging();
       mapControl = new GSmallMapControl();
@@ -207,7 +233,7 @@
       var searchWell = document.getElementById("address-list");
 
       gCurrentResults = [];
-      var numToDisplay = 3; //or gLocalSearch.results.length
+      var numToDisplay = Math.min(3, gLocalSearch.results.length);
       for (var i = 0; i < numToDisplay; i++) {
         gCurrentResults.push(new LocalResult(gLocalSearch.results[i]));
       }
@@ -217,8 +243,6 @@
       gUrlDiv.innerHTML = "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
       document.getElementById("address-list").appendChild(gUrlDiv);
     
-
-
       // move the map to the first result
       var first = gLocalSearch.results[0];
       var point = new google.maps.LatLng(first.lat, first.lng);
