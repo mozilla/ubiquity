@@ -51,7 +51,7 @@
         <div id="cmd-entry-container">
           <!--<input id="cmd-entry"/>-->
           <xul:textbox id="cmd-entry"
-                       type="timed" timeout="500"
+                       type="timed" timeout="250"
                        oncommand="gUbiquity.__onInput(event);"/>
         </div>
         <iframe id="cmd-preview"
