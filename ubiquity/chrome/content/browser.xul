@@ -49,7 +49,10 @@
                       xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
         <div id="cmd-entry-container">
-          <input id="cmd-entry"/>
+          <!--<input id="cmd-entry"/>-->
+          <xul:textbox id="cmd-entry"
+                       type="timed" timeout="500"
+                       oncommand="gUbiquity.__onInput(event);"/>
         </div>
         <iframe id="cmd-preview"
                 src="chrome://ubiquity/content/preview.html"></iframe>

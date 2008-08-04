@@ -28,9 +28,10 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   textBox.addEventListener("keydown",
                            function(event) { self.__onKeydown(event); },
                            true);
-  textBox.addEventListener("keyup",
-                           function(event) { self.__onInput(event); },
-                           true);
+  // __onInput now called oncommand from xul input textbox
+  //textBox.addEventListener("keyup",
+  //                         function(event) { self.__onInput(event); },
+  //                         true);
 
   this.__resetPreview();
 }
