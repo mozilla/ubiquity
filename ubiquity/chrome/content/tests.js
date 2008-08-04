@@ -37,7 +37,9 @@ function testCmdManagerExecutesTwoCmds() {
 
   var cmdMan = new CommandManager(fakeSource, null);
 
+  cmdMan.updateInput("cmd_one");
   cmdMan.execute("cmd_one");
+  cmdMan.updateInput("cmd_two");
   cmdMan.execute("cmd_two");
   this.assert(oneWasCalled, "cmd_one must be called.");
   this.assert(twoWasCalled, "cmd_two must be called.");
@@ -53,6 +55,7 @@ function testCmdManagerExecutesCmd() {
   );
 
   var cmdMan = new CommandManager(fakeSource, null);
+  cmdMan.updateInput("existentcommand");
   cmdMan.execute("existentcommand");
   this.assert(wasCalled, "command.execute() must be called.");
 }
@@ -70,6 +73,7 @@ function testCmdManagerCatchesExceptionsInCmds() {
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService);
 
+  cmdMan.updateInput("existentcommand");
   cmdMan.execute("existentcommand");
   this.assert(
     (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&

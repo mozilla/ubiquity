@@ -76,6 +76,8 @@ NLParser.prototype = {
   },
 
   getSentence: function(index) {
+    if (this._suggestionList.length == 0 )
+      return null;
     return this._suggestionList[index];
   },
 
@@ -118,13 +120,12 @@ NLParser.prototype = {
     }
     content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div>";
 
-   previewBlock.innerHTML = content;
+    previewBlock.innerHTML = content;
 
-    if ( this._suggestionList.length > 0 ) {
+    var activeSugg = this.getSentence(hilitedSuggestion);
+    if ( activeSugg ) {
       doc = previewBlock.ownerDocument;
-      var activeSugg = this._suggestionList[hilitedSuggestion];
       activeSugg.preview(context, doc.getElementById("preview-pane"));
-
     }
     return true;
   },

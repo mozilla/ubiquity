@@ -58,8 +58,6 @@ CommandManager.prototype = {
   },
 
   execute : function(cmdName, context) {
-    // TODO what happens if hilitedSuggestion is 0 here???
-    // what does it even mean to execute 'the exact input'?
     var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
     if (!parsedSentence)
       this.__msgService.displayMessage("No command called " + cmdName + ".");
