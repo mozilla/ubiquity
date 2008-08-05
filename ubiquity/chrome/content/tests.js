@@ -14,10 +14,16 @@ FakeCommandSource.prototype = {
 };
 
 function getTextSelection(context) {
+  if (context)
+    if (context.textSelection)
+      return context.textSelection;
   return "";
 }
 
 function getHtmlSelection(context) {
+  if (context)
+    if (context.htmlSelection)
+      return context.htmlSelection;
   return "";
 }
 
@@ -330,4 +336,62 @@ function testParseWithModifier() {
   completions[1].execute(fakeContext);
   this.assert( dogGotWashed == "poodle");
   this.assert( dogGotWashedWith == "spork");
+}
+
+function testNlParserSuggestsForEmptyInput() {
+
+}
+
+function testCmdManagerSuggestsForEmptyInput() {
+  var oneWasCalled = false;
+  var twoWasCalled = false;
+  var nounTypeOne = {
+    _name: "thingType",
+    match: function(input) {
+      return (input == "tree");
+    },
+    suggest: function(input) {
+      if (input == "tree")
+	return ["tree"];
+      else
+	return [];
+    }
+  };
+  var nounTypeTwo = {
+    _name: "stuffType",
+    match: function(input) {
+      return (input == "mud");
+    },
+    suggest: function(input) {
+      if (input == "mud")
+	return ["mud"];
+      else
+	return [];
+    }
+  };
+
+  var fakeSource = new FakeCommandSource(
+  {
+    cmd_one: {execute:function(context, directObj) {oneWasCalled = directObj;},
+              DOLabel:"thing",
+	      DOType:nounTypeOne},
+    cmd_two: {execute:function(context, directObj) {twoWasCalled = directObj;},
+	      DOLabel:"stuff",
+	      DOType:nounTypeTwo}
+  });
+  var cmdMan = new CommandManager(fakeSource, null);
+  cmdMan.__nlParser._nounTypeList = [nounTypeOne, nounTypeTwo];
+  var getAC = makeDefaultCommandSuggester(cmdMan);
+  var suggDict = getAC({textSelection:"tree"});
+  this.assert( suggDict["cmd_one"] );
+  this.assert( !suggDict["cmd_two"] );
+  var execute = suggDict["cmd_one"];
+  execute();
+  this.assert( oneWasCalled == "tree" );
+  suggDict = getAC({textSelection:"mud"});
+  this.assert( !suggDict["cmd_one"] );
+  this.assert( suggDict["cmd_two"] );
+  execute = suggDict["cmd_two"];
+  execute();
+  this.assert( twoWasCalled == "mud" );
 }

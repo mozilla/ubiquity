@@ -53,15 +53,15 @@ function titleCaps(title){
 	var small = "(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|v[.]?|via|vs[.]?)";
 	var punct = "([!\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]*)";
   var parts = [], split = /[:.;?!] |(?: |^)["Ò]/g, index = 0;
-  
+
   function lower(word){
   	return word.toLowerCase();
   }
-  
+
   function upper(word){
     return word.substr(0,1).toUpperCase() + word.substr(1);
   }
-		
+
 	while (true) {
 		var m = split.exec(title);
 
@@ -74,19 +74,19 @@ function titleCaps(title){
 				return punct + upper(word);
 			})
 			.replace(RegExp("\\b" + small + punct + "$", "ig"), upper));
-		
+
 		index = split.lastIndex;
-		
+
 		if ( m ) parts.push( m[0] );
 		else break;
 	}
-	
+
 	return parts.join("").replace(/ V(s?)\. /ig, " v$1. ")
 		.replace(/(['Õ])S\b/ig, "$1s")
 		.replace(/\b(AT&T|Q&A)\b/ig, function(all){
 			return all.toUpperCase();
 		});
-	
+
 }
 
 //TODO: find a API to get summaries from wikipedia
@@ -99,20 +99,20 @@ var cmd_wikipedia = makeSearchCommand({
   url: "http://www.wikipedia.org/wiki/Special:Search?search={QUERY}",
   icon: "http://www.wikipedia.org/favicon.ico",
   preview: function(searchTerm, pblock) {
-    
+
     //TODO: Implement this preview using renderTemplate
     pblock.innerHTML =  "Gets wikipedia article for " + searchTerm + "<br/>";
     var $ = jQuery;
     // convert to first letter caps (Wikipedia requires that) and add to URL
-    var url  = "http://wikipedia.org/wiki/" + titleCaps(searchTerm).replace(/ /g,"_"); 
-    
+    var url  = "http://wikipedia.org/wiki/" + titleCaps(searchTerm).replace(/ /g,"_");
+
     $.get( url, function(data) {
-      
+
       //attach the HTML page as invisible div to do screen scraping
       pblock.innerHTML += "<div style='display:none'>" + data + "</div>";
-      
+
       var summary = $(pblock).find("#bodyContent > p").eq(0).text();
-      // if we are not on a article page 
+      // if we are not on a article page
       //(might be a search results page or a disambiguation page, etc.)
       if($(pblock).find("#bodyContent > p").length == 0 || (summary.search("may refer to:") != -1 )){
         return;
@@ -120,15 +120,15 @@ var cmd_wikipedia = makeSearchCommand({
       //remove citations like [3], [citation needed], etc.
       //TODO: also remove audio links (.audiolink & .audiolinkinfo)
       summary = summary.replace(/\[([^\]]+)\]/g,"");
-      
-      var img = $(pblock).find(".infobox").find("img").attr("src") 
+
+      var img = $(pblock).find(".infobox").find("img").attr("src")
                 || $(pblock).find(".thumbimage").attr("src");
 
-      pblock.innerHTML = "<div style='height:500px'>" + 
+      pblock.innerHTML = "<div style='height:500px'>" +
                         "<img src=" + img + "/>" + summary + "</div>";
-      
+
 		});
-				
+
   }
 });
 
@@ -336,7 +336,7 @@ cmd_highlight.preview = function(pblock) {
 CreateCommand({
   name : "link-to-wikipedia",
   takes : {"text" : arbText},
-  
+
   execute : function( text ){
     var wikiText = text.replace(/ /g, "_");
     var html = ("<a href=\"http://en.wikipedia.org/wiki/" +
@@ -349,13 +349,13 @@ CreateCommand({
     else
       displayMessage("You're not in a rich text editing field.");
   },
-  
+
   preview : function(pblock, text){
     if (text.length < 1){
       pblock.innerHTML = "Inserts a link to Wikipedia article on text";
     }else{
       var wikiText = text.replace(/ /g, "_");
-      var html = ("<a style=\"color: yellow;text-decoration: underline;\"" + 
+      var html = ("<a style=\"color: yellow;text-decoration: underline;\"" +
                   "href=\"http://en.wikipedia.org/wiki/" +
                   "Special:Search/" + wikiText +
                   "\">" + text + "</a>");
@@ -507,7 +507,7 @@ CreateCommand({
 CreateCommand({
   name: "add-command",
   execute: function() {
-    
+
     // Add current page as bookmark
     var currentTab = Application.activeWindow.activeTab;
     var currentPage = url(String(currentTab.document.location));
@@ -520,9 +520,9 @@ CreateCommand({
                     getService(Components.interfaces.nsITaggingService);
     // Tag the URI
     tagssvc.tagURI(currentPage, ["ubiquity"]);
-    
+
     displayMessage("Added commands to Ubiquity. You can use them now!");
-    
+
   },
   preview : "Adds the commands on this page to Ubiquity (bookmarks page with tag \"ubiquity\")"
 });
@@ -770,7 +770,7 @@ CreateCommand({
   preview: function(pblock, location) {
     showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
       winInsecure.setPreview( location );
-      
+
       winInsecure.insertHtml = function(html) {
         var doc = context.focusedWindow.document;
         var focused = context.focusedElement;
@@ -778,7 +778,7 @@ CreateCommand({
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);
         }
-      }
+      };
     });
   }
 });
@@ -789,7 +789,7 @@ CreateCommand({
   preview: function( pblock, html ) {
     var div = getDocumentInsecure().createElement("div");
     div.innerHTML = html;
-    
+
     var host = getWindowInsecure().location.host;
     /*
     var houses = [];
@@ -800,7 +800,7 @@ CreateCommand({
       })
     });
     */
-    
+
     showPreviewFromFile( pblock, "templates/map_simple.html", function(winInsecure) {
       winInsecure.addPoint( 0,0 );
       //winInsecure.addPointByName( "Mountain View");
@@ -810,9 +810,9 @@ CreateCommand({
           FBLog( html );
         }, "html");
       }*/
-      
+
     });
-    
+
     //FBLog( houses );
   }
 })
@@ -860,7 +860,7 @@ var TabNounType = {
   suggest: function( fragment ) {
     var suggestions  = [];
     var tabs = TabNounType.getTabs();
-    
+
     //TODO: implement a better match algorithm
     for ( var tabName in tabs ) {
       if (tabName.match(fragment, "i"))
@@ -895,7 +895,7 @@ CreateCommand({
 CreateCommand({
   name: "close.tab",
   takes: {"tab name": TabNounType},
-  
+
   execute: function( tabName ) {
     var tabs = TabNounType.getTabs();
     tabs[tabName].close();
@@ -906,7 +906,7 @@ CreateCommand({
     if( tabName.length > 1 )
       pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
-      pblock.innerHTML = "Closes the tab by name."
+      pblock.innerHTML = "Closes the tab by name.";
   }
 })
 
@@ -1115,4 +1115,3 @@ cmd_perm_delete.preview = function( pblock ) {
   pblock.innerHTML = "Attempts to permanently delete the selected part of the"
     + " page. (Experimental!)";
 }
-
