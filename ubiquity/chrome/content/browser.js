@@ -112,17 +112,20 @@ function ubiquityKeydown(aEvent)
   const KEYMODIFIER_PREF = "extensions.ubiquity.keymodifier";
   var UBIQUITY_KEYMODIFIER = null;
   var UBIQUITY_KEYCODE = null;
-  
+
+  // This is a temporary workaround for #43.
+  var anchor = window.document.getElementById("content");
+
   //Default keys are different for diff platforms
   // Windows Vista, XP, 2000 & NT: CTRL+SPACE
   // Mac, Linux, Others : ALT+SPACE
   var defaultKeyModifier = "ALT";
   var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
-                             .getService(Components.interfaces.nsIXULRuntime);  
+                             .getService(Components.interfaces.nsIXULRuntime);
   if(xulRuntime.OS == "WINNT"){
     defaultKeyModifier = "CTRL";
   }
-  
+
   // If we're running in the development harness, don't use
   // the normal keycode, b/c the normal keycode won't propagate
   // down to the current tab.
@@ -132,6 +135,7 @@ function ubiquityKeydown(aEvent)
   }else{
     UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32); //The space character
     UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF, defaultKeyModifier);
+    anchor = anchor.selectedBrowser;
   }
 
   //Open Ubiquity if the key pressed matches the shortcut key
@@ -140,7 +144,7 @@ function ubiquityKeydown(aEvent)
         || (UBIQUITY_KEYMODIFIER == "CTRL" && aEvent.ctrlKey)
         || (UBIQUITY_KEYMODIFIER == "ALT" && aEvent.altKey)
         || (UBIQUITY_KEYMODIFIER == "META" && aEvent.metaKey)){
-    	    gUbiquity.openWindow();
+    	    gUbiquity.openWindow(anchor);
  	    aEvent.preventDefault();
     }
   }

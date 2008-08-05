@@ -148,11 +148,11 @@ Ubiquity.prototype = {
     }
   },
 
-  openWindow: function() {
+  openWindow: function(anchor) {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
     this.__resetPreview();
 
-    this.__msgPanel.openPopup(null, "", 0, 0, false, true);
+    this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
   }
 };

@@ -11,6 +11,7 @@
   debug your code here.</p>
 </body>
 <textbox id="sample-text" value="Sample text to select"/>
+<iframe id="content"/>
 <popupset id="mainPopupSet">
   <!-- This area will be populated by the browser.xul overlay. -->
 </popupset>
