@@ -71,7 +71,6 @@ Ubiquity.prototype = {
                keyCode == this.__KEYCODE_DOWN) {
     } else
       this.__updatePreview();
-    }
   },
 
   __updatePreview: function() {
