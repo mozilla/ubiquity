@@ -42,6 +42,12 @@
           src="chrome://ubiquity/content/prefcommands.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/browser.js"/>
+  <script>
+    var lastKeyStroke;
+    function setLastKeyStroke(event) {
+      lastKeyStroke = event.keyCode;
+    }
+  </script>
   
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel">
@@ -52,13 +58,21 @@
           <!--<input id="cmd-entry"/>-->
           <xul:textbox id="cmd-entry"
                        type="timed" timeout="250"
-                       oncommand="gUbiquity.__onInput(event);"/>
+                       onkeydown="setLastKeyStroke(event);"
+                       oncommand="gUbiquity.__onInput(event, lastKeyStroke);"/>
         </div>
         <iframe id="cmd-preview"
                 src="chrome://ubiquity/content/preview.html"></iframe>
       </div>    
     </panel>
   </popupset>
+  
+  <popupset id="test-stuff">
+    <panel id="result-stuff">
+      <div id="panel">test</div>
+    </panel>
+  </popupset>
+  
   <popup id="contentAreaContextMenu">
     <menuseparator id="ubiquity-separator"/>
     <menu id="ubiquity-menu" label="Ubiquity">

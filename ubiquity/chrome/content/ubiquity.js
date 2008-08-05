@@ -62,13 +62,13 @@ Ubiquity.prototype = {
     }
   },
 
-  __onInput: function(event) {
-    if (event.keyCode == this.__KEYCODE_ENTER) {
+  __onInput: function(event, keyCode) {
+    if (keyCode == this.__KEYCODE_ENTER) {
       if (this.__textBox.value)
         this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
-    } else if (event.keyCode == this.__KEYCODE_UP ||
-               event.keyCode == this.__KEYCODE_DOWN) {
+    } else if (keyCode == this.__KEYCODE_UP ||
+               keyCode == this.__KEYCODE_DOWN) {
     } else
       this.__updatePreview();
   },

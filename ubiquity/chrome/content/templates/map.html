@@ -92,7 +92,6 @@
       color: #bfbfbf;
       font-size: medium;  
       padding-bottom: 5px;
-      width: 500px;
       float: left;
       position: absolute;
     }
@@ -110,7 +109,12 @@
       text-decoration: underline;
       cursor: pointer;
     }
-    
+ 
+     @media print {
+      .no-print{ display: none;}
+    }
+
+   
     </style>
     <script type="text/javascript">
 
@@ -319,15 +323,17 @@
  
     function setPreview(searchTerm) {
 
-      var html = "<div>" + "<div id=\"selected-address\"></div>" + 
-                 "<div class=\"map-actions\"> <a class=\"hand\" onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call email command');\">Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
-                 "</div>" + 
-                 "<div id=\"map\"></div>" + 
-                 "<div id=\"address-list\"></div>";
-  
-      html = html + "</div>" + 
-                    "<div class=\"map-actions\"><a class=\"hand\" onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>";
-  
+      var html = "<div class=\"no-print\">" + 
+                 "<div id=\"selected-address\"></div>" + 
+                 "<div class=\"map-actions\"> <a onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call email command');\">Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
+                 "</div>" +
+                 "<div id=\"map\"/></div>" +
+                 "<div class=\"no-print\">" + 
+                 "<div id=\"address-list\"></div>" +
+                 "<div class=\"map-actions\"><a onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>" +
+                 "</div>";
+
+ 
       $("#preview-pane").html(html);
   
       loadMap(searchTerm, 0);
