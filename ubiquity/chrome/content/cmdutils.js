@@ -1,3 +1,15 @@
+function encodeJson(object) {
+  var json = Components.classes["@mozilla.org/dom/json;1"]
+             .createInstance(Components.interfaces.nsIJSON);
+  return json.encode(object);
+}
+
+function decodeJson(string) {
+  var json = Components.classes["@mozilla.org/dom/json;1"]
+             .createInstance(Components.interfaces.nsIJSON);
+  return json.decode(string);
+}
+
 function __TimerCallback(callback) {
   Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
   var Ci = Components.interfaces;
@@ -306,7 +318,7 @@ function FBLog( arg1, arg2 ){
     getWindowInsecure().console.log( arg1, arg2 );
   else
     getWindowInsecure().console.log( arg1 );
-  
+
 }
 
 
@@ -362,14 +374,14 @@ function CreateCommand( options ) {
 // -----------------------------------------------------------------
 
 
-function renderStringTemplate( string, data ) {    
+function renderStringTemplate( string, data ) {
   template = Template.parseTemplate( string );
   return template.process( data );
 }
 
 function renderTemplate( templateName, data ) {
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
-    
+
   var template = getLocalUrl( chromePrefixUrl + templateName );
   return renderStringTemplate( template, data );
 }
@@ -402,5 +414,5 @@ function showPreviewFromFile( pblock, filePath, callback ) {
   }
   iframe.addEventListener("load", safeWrapper(onXulLoad), true);
   pblock.innerHTML = "";
-  pblock.appendChild(iframe);  
+  pblock.appendChild(iframe);
 }
