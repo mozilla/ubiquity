@@ -11,6 +11,7 @@
 }
 
 #cmd-entry {
+  -moz-appearance: none;
   border: none;
   font-size: 12pt;
   background: #272727;
