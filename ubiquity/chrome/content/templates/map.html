@@ -188,7 +188,6 @@
       var currentLat;
       var currentLng;
 
-      // should just call getLocation() from cmdutils.js, but "globals is not defined" ? 
       jQuery.ajax({
         type: "GET",
         url: "http://j.maxmind.com/app/geoip.js",
@@ -199,13 +198,6 @@
           var loc = geoip_city() + ", " + geoip_region();
           currentLat = geoip_latitude();
           currentLng = geoip_longitude();
-          //globals.location = {
-          //  city: geoip_city(),
-          //  state: geoip_region_name(),
-          //  country: geoip_country_name(),
-          //  lat: geoip_latitude(),
-          //  long: geoip_longitude()
-          //};
         }
       });
 
@@ -254,6 +246,13 @@
       gMap.panTo(point);
       currentMarker = new GMarker(point);
       gMap.addOverlay(currentMarker);
+      
+      var staticMap = "http://maps.google.com/staticmap?" +
+                        "markers=" + first.lat + "," + first.lng + "," + "red%26" +
+                        "zoom=13%26" +
+                        "size=450x240%26" + 
+                        "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+      document.getElementById("send-link").href = "mailto:?Subject=" + first.titleNoFormatting + "&body=" + staticMap;
       
     }
 
@@ -326,7 +325,7 @@
 
       var html = "<div class=\"no-print\">" + 
                  "<div id=\"selected-address\"></div>" + 
-                 "<div class=\"map-actions\"> <a onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"alert('Call email command');\">Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
+                 "<div class=\"map-actions\"> <a onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a id=\"send-link\" >Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
                  "</div>" +
                  "<div id=\"map\"/></div>" +
                  "<div class=\"no-print\">" + 
@@ -341,6 +340,8 @@
 
     }
     
+    
+
     
     </script>
   </head>

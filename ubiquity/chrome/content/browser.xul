@@ -66,13 +66,6 @@
       </div>    
     </panel>
   </popupset>
-  
-  <popupset id="test-stuff">
-    <panel id="result-stuff">
-      <div id="panel">test</div>
-    </panel>
-  </popupset>
-  
   <popup id="contentAreaContextMenu">
     <menuseparator id="ubiquity-separator"/>
     <menu id="ubiquity-menu" label="Ubiquity">

@@ -87,7 +87,7 @@ Ubiquity.prototype = {
             this.__makeContext(),
             this.__previewBlock
           );
-        if (!wasPreviewShown)
+        if (cmdName.length == 0 || !wasPreviewShown)
           this.__resetPreview();
       }
     }
