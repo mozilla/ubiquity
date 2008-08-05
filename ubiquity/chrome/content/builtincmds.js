@@ -501,6 +501,29 @@ CreateCommand({
   }
 });
 
+CreateCommand({
+  name: "add-command",
+  execute: function() {
+    
+    // Add current page as bookmark
+    var currentTab = Application.activeWindow.activeTab;
+    var currentPage = url(String(currentTab.document.location));
+    var currentPageTitle = String(currentTab.document.title);
+    Application.bookmarks.toolbar.addBookmark(currentPageTitle, currentPage);
+
+    //No tagging in FUEL yet. So, we must use nsITaggingService
+    // Get the tagging service
+    var tagssvc = Components.classes["@mozilla.org/browser/tagging-service;1"].
+                    getService(Components.interfaces.nsITaggingService);
+    // Tag the URI
+    tagssvc.tagURI(currentPage, ["ubiquity"]);
+    
+    displayMessage("Added commands to Ubiquity. You can use them now!");
+    
+  },
+  preview : "Adds the commands on this page to Ubiquity (bookmarks page with tag \"ubiquity\")"
+});
+
 
 // -----------------------------------------------------------------
 // EMAIL COMMANDS
