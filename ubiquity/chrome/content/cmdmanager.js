@@ -65,10 +65,12 @@ CommandManager.prototype = {
   },
 
   execute : function(context) {
+    window.console.log("In cmdmanager.execute.");
     var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
     if (!parsedSentence)
       this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
     else
+      window.console.log("There is a parsed sentence.");
       try {
         parsedSentence.execute(context);
       } catch (e) {
