@@ -487,10 +487,13 @@ CreateCommand({
   }
 });
 
-function cmd_editor() {
-  openUrlInBrowser("chrome://ubiquity/content/editor.html");
-}
-
+CreateCommand({
+  name: "command-editor",
+  preview: "Opens the editor for writing Ubiquity commands",
+  execute: function(){
+    openUrlInBrowser("chrome://ubiquity/content/editor.html");
+  }
+});
 
 CreateCommand({
   name: "remember",
@@ -509,7 +512,7 @@ CreateCommand({
     var currentTab = Application.activeWindow.activeTab;
     var currentPage = url(String(currentTab.document.location));
     var currentPageTitle = String(currentTab.document.title);
-    Application.bookmarks.toolbar.addBookmark(currentPageTitle, currentPage);
+    Application.bookmarks.unfiled.addBookmark(currentPageTitle, currentPage);
 
     //No tagging in FUEL yet. So, we must use nsITaggingService
     // Get the tagging service
