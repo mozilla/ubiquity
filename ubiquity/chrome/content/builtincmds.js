@@ -333,6 +333,36 @@ cmd_highlight.preview = function(pblock) {
   pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
 }
 
+CreateCommand({
+  name : "link-to-wikipedia",
+  takes : {"text" : arbText},
+  
+  execute : function( text ){
+    var wikiText = text.replace(/ /g, "_");
+    var html = ("<a href=\"http://en.wikipedia.org/wiki/" +
+                "Special:Search/" + wikiText +
+                "\">" + text + "</a>");
+
+    var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+      doc.execCommand("insertHTML", false, html);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  },
+  
+  preview : function(pblock, text){
+    if (text.length < 1){
+      pblock.innerHTML = "Inserts a link to Wikipedia article on text";
+    }else{
+      var wikiText = text.replace(/ /g, "_");
+      var html = ("<a style=\"color: yellow;text-decoration: underline;\"" + 
+                  "href=\"http://en.wikipedia.org/wiki/" +
+                  "Special:Search/" + wikiText +
+                  "\">" + text + "</a>");
+      pblock.innerHTML = "Inserts a link to Wikipedia article on " + text + " like this: " + html;
+    }
+  }
+})
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
