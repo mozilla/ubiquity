@@ -126,7 +126,6 @@ Ubiquity.prototype = {
     this.__focusedElement = null;
 
     if (this.__needsToExecute) {
-      window.console.log("Calling cmdmanager.execute.");
       this.__cmdManager.execute(context);
       this.__needsToExecute = false;
     }
