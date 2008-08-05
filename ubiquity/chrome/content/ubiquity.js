@@ -62,26 +62,14 @@ Ubiquity.prototype = {
     }
   },
 
-<<<<<<< local
-  __onInput: function(event) {
-    window.console.log(event);
-    if (event.keyCode == this.__KEYCODE_ENTER) {
-=======
   __onInput: function(event, keyCode) {
     if (keyCode == this.__KEYCODE_ENTER) {
->>>>>>> other
       if (this.__textBox.value)
         this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
-<<<<<<< local
-    } else if (event.keyCode == this.__KEYCODE_UP ||
-               event.keyCode == this.__KEYCODE_DOWN) {
-    } else {
-=======
     } else if (keyCode == this.__KEYCODE_UP ||
                keyCode == this.__KEYCODE_DOWN) {
     } else
->>>>>>> other
       this.__updatePreview();
     }
   },
