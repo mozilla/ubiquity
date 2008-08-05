@@ -28,6 +28,7 @@ function getNounList() {
 function testCmdManagerExecutesTwoCmds() {
   var oneWasCalled = false;
   var twoWasCalled = false;
+  var pblock = {};
 
   var fakeSource = new FakeCommandSource(
     {
@@ -38,9 +39,9 @@ function testCmdManagerExecutesTwoCmds() {
   var cmdMan = new CommandManager(fakeSource, null);
 
   cmdMan.updateInput("cmd_one");
-  cmdMan.execute("cmd_one");
+  cmdMan.execute();
   cmdMan.updateInput("cmd_two");
-  cmdMan.execute("cmd_two");
+  cmdMan.execute();
   this.assert(oneWasCalled, "cmd_one must be called.");
   this.assert(twoWasCalled, "cmd_two must be called.");
 }
@@ -56,7 +57,7 @@ function testCmdManagerExecutesCmd() {
 
   var cmdMan = new CommandManager(fakeSource, null);
   cmdMan.updateInput("existentcommand");
-  cmdMan.execute("existentcommand");
+  cmdMan.execute();
   this.assert(wasCalled, "command.execute() must be called.");
 }
 
@@ -74,7 +75,7 @@ function testCmdManagerCatchesExceptionsInCmds() {
   var cmdMan = new CommandManager(fakeSource, mockMsgService);
 
   cmdMan.updateInput("existentcommand");
-  cmdMan.execute("existentcommand");
+  cmdMan.execute();
   this.assert(
     (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
      mockMsgService.lastMsg.exception),
@@ -89,7 +90,8 @@ function testCmdManagerDisplaysNoCmdError() {
   };
   var cmdMan = new CommandManager(fakeSource, mockMsgService);
 
-  cmdMan.execute("nonexistentcommand");
+  cmdMan.updateInput("nonexistentcommand");
+  cmdMan.execute();
   this.assertIsDefined(mockMsgService.lastMsg,
                        "Command manager must display a message.");
 }

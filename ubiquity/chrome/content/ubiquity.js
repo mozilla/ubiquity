@@ -125,7 +125,7 @@ Ubiquity.prototype = {
     this.__focusedElement = null;
 
     if (this.__needsToExecute) {
-      this.__cmdManager.execute(this.__textBox.value, context);
+      this.__cmdManager.execute(context);
       this.__needsToExecute = false;
     }
   },

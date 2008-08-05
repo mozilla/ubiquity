@@ -3,6 +3,8 @@ Components.utils.import("resource://ubiquity-modules/globals.js");
 function CommandManager(cmdSource, msgService) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
+  this.__hilitedSuggestion = 0;
+  this.__lastInput = "";
   if ( UbiquityGlobals.japaneseMode ) {
     this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands(),
 					    jpGetNounList());
@@ -16,6 +18,7 @@ CommandManager.prototype = {
     this.__cmdSource.refresh();
     this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
     this.__hilitedSuggestion = 0;
+    this.__lastInput = "";
   },
 
   moveIndicationUp : function(context, previewBlock) {
@@ -44,7 +47,7 @@ CommandManager.prototype = {
     } catch (e) {
       this.__msgService.displayMessage(
         {text: ("An exception occurred while previewing the command '" +
-                cmdName + "'."),
+                this.__lastInput + "'."),
          exception: e}
         );
     }
@@ -52,22 +55,26 @@ CommandManager.prototype = {
   },
 
   updateInput : function(input, context, previewBlock) {
+    this.__lastInput = input;
     this.__nlParser.updateSuggestionList(input, context);
     this.__hilitedSuggestion = 0;
-    return this._preview(context, previewBlock);
+    if (previewBlock)
+      return this._preview(context, previewBlock);
+    else
+      return false;
   },
 
-  execute : function(cmdName, context) {
+  execute : function(context) {
     var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
     if (!parsedSentence)
-      this.__msgService.displayMessage("No command called " + cmdName + ".");
+      this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
     else
       try {
         parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(
           {text: ("An exception occurred while running the command '" +
-                  cmdName + "'."),
+                  this.__lastInput + "'."),
            exception: e}
         );
       }
