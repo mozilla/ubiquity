@@ -55,6 +55,7 @@ function ubiquitySetup()
   var sandboxFactory = new SandboxFactory(globals);
 
   var codeSources = [
+    new LocalUriCodeSource("chrome://ubiquity/content/utils.js"),
     new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
     new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nounTypeBase.js")
   ];
