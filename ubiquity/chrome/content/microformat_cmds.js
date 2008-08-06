@@ -5,9 +5,9 @@
 function getMF( type ) {
   Components.utils.import("resource://gre/modules/Microformats.js");
 
-  var count = Microformats.count( type , getDocumentInsecure(), {recurseExternalFrames: true});
+  var count = Microformats.count( type , CmdUtils.getDocumentInsecure(), {recurseExternalFrames: true});
   if( count > 0 ) {
-    return Microformats.get( type , getDocumentInsecure(), {recurseExternalFrames: true});
+    return Microformats.get( type , CmdUtils.getDocumentInsecure(), {recurseExternalFrames: true});
   }
   return null;
 }
@@ -31,13 +31,13 @@ function cmd_populate_with_microformat() {
 
   var last = globals.addresses.length - 1;
   var addr = globals.addresses[last].toString();
-  var url = getWindowInsecure().location.href;
+  var url = CmdUtils.getWindowInsecure().location.href;
 
   if( url == "http://maps.google.com/" ){
-    getDocumentInsecure().getElementById("q_d").value = addr;
+    CmdUtils.getDocumentInsecure().getElementById("q_d").value = addr;
 
-    setTimeout( function(){
-      getDocumentInsecure().getElementById("q_sub").click();
+    Utils.setTimeout( function(){
+      CmdUtils.getDocumentInsecure().getElementById("q_sub").click();
     }, 50 );
   }
 }

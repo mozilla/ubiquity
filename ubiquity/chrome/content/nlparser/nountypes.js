@@ -1,11 +1,11 @@
 function getGmailContacts( callback ) {
   var url = "http://mail.google.com/mail/contacts/data/export";
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     exportType: "ALL",
     out: "CSV"
   });
 
-  ajaxGet(url + params , function(data) {
+  Utils.ajaxGet(url + params , function(data) {
     data = data.split("\n");
 
     var contacts = {};
@@ -96,7 +96,7 @@ var DateNounType = {
 
 function isAddress( query, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     location: query,
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
   });

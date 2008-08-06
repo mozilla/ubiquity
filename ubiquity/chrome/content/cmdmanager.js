@@ -1,11 +1,9 @@
-Components.utils.import("resource://ubiquity-modules/globals.js");
-
-function CommandManager(cmdSource, msgService) {
+function CommandManager(cmdSource, msgService, isJapaneseMode) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
-  if ( UbiquityGlobals.japaneseMode ) {
+  if (isJapaneseMode) {
     this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands(),
 					    jpGetNounList());
   } else
@@ -174,7 +172,8 @@ CommandSource.prototype = {
         var icon = sandbox[objName].icon;
 
         commands[cmd.name] = cmd;
-        commandNames.push({name : cmd.name,
+        commandNames.push({id: objName,
+                           name : cmd.name,
                            icon : icon});
       }
 

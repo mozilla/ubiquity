@@ -30,12 +30,12 @@ function takeSnapshotOfWindow( window, scrollDict ) {
 }
 
 function cmd_inject_snapshot() {
-  var win = getWindowInsecure();
+  var win = CmdUtils.getWindowInsecure();
   win.snapshot = takeSnapshotOfWindow;
 }
 
 function pageLoad_inject_snapshot(){
-  getWindowInsecure().snapshot = takeSnapshotOfWindow;
+  CmdUtils.getWindowInsecure().snapshot = takeSnapshotOfWindow;
 }
 
 // -----------------------------------------------------------------
@@ -65,8 +65,8 @@ function cmd_scale_firefox_down() {
 }
 
 function cmd_zoom() {
-  var win = getWindowInsecure();
-  var document = getDocumentInsecure();
+  var win = CmdUtils.getWindowInsecure();
+  var document = CmdUtils.getDocumentInsecure();
 
   var $ = jQuery;
 
@@ -107,6 +107,8 @@ function cmd_zoom() {
   $(img).animate({top:100, left:w/2, width:w*.1, height: h*.1}, 500);
   $(img).click( function(){
     $(img).animate({top:0, left:0, width:w, height: h}, 500);
+    // TODO: Can't tell if this is an implicit window.setTimeout() or
+    // should be changed to Utils.setTimeout()... -Atul
     setTimeout( function(){
       $(div).remove();
       $(img).remove();

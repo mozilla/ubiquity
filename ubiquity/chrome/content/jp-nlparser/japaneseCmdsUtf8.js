@@ -1,4 +1,4 @@
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "計算して",
   takes: {},
   modifiers: {"を": jpArbText},
@@ -7,8 +7,8 @@ CreateCommand({
     var expr = modifiers["を"] || "";
     if( expr.length > 0 ) {
       var result = eval( expr );
-      setTextSelection( result );
-      setLastResult( result );
+      CmdUtils.setTextSelection( result );
+      CmdUtils.setLastResult( result );
     } else
       displayMessage( "巣学の表現が必要です。");
   },
@@ -31,13 +31,13 @@ function translateTo( text, langCodePair, callback ) {
   if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
   if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
 
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     v: "1.0",
     q: text,
     langpair: langCodePair.from + "|" + langCodePair.to
   });
 
-  ajaxGet( url + params, function(jsonData){
+  Utils.ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
 
     // The usefulness of this command is limited because of the
@@ -70,14 +70,14 @@ function translateTo( text, langCodePair, callback ) {
     if( typeof callback == "function" )
       callback( translatedText );
     else
-      setTextSelection( translatedText );
+      CmdUtils.setTextSelection( translatedText );
 
-    setLastResult( translatedText );
+    CmdUtils.setLastResult( translatedText );
   });
 }
 
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "翻訳して",
   takes: {},
   modifiers: {

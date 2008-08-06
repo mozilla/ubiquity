@@ -13,6 +13,8 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/selutils.js"/>
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/utils.js"/>
+  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/nounTypeBase.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/nountypes.js"/>
@@ -40,6 +42,8 @@
           src="chrome://ubiquity/content/msgservice.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/prefcommands.js"/>
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/builtinfactories.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/browser.js"/>
   <script>

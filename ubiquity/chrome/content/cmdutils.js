@@ -1,4 +1,8 @@
-function getHtmlSelection() {
+CmdUtils = {};
+
+CmdUtils.__globalObject = this;
+
+CmdUtils.getHtmlSelection = function getHtmlSelection() {
   var sel = context.focusedWindow.getSelection();
 
   if (sel.rangeCount >= 1) {
@@ -9,9 +13,9 @@ function getHtmlSelection() {
   }
 
   return null;
-}
+};
 
-function safeWrapper(func) {
+CmdUtils.safeWrapper = function safeWrapper(func) {
   var wrappedFunc = function() {
     try {
       func.apply(this, arguments);
@@ -25,9 +29,9 @@ function safeWrapper(func) {
   };
 
   return wrappedFunc;
-}
+};
 
-function setTextSelection(html) {
+CmdUtils.setTextSelection = function setTextSelection(html) {
 
   var doc = context.focusedWindow.document;
   var focused = context.focusedElement;
@@ -70,47 +74,47 @@ function setTextSelection(html) {
         jQuery(newNode).html( html );
     }
   }
-}
+};
 
 // This gets the outer document of the current tab.
-function getDocumentInsecure() {
-  return getWindowInsecure().document;
-}
+CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
+  return CmdUtils.getWindowInsecure().document;
+};
 
 // This gets the outer window of the current tab.
-function getWindowInsecure() {
+CmdUtils.getWindowInsecure = function getWindowInsecure() {
   return Application.activeWindow
                     .activeTab
                     .document
                     .defaultView
                     .wrappedJSObject;
-}
+};
 
-function injectCss(css) {
-  var doc = getDocumentInsecure();
+CmdUtils.injectCss = function injectCss(css) {
+  var doc = CmdUtils.getDocumentInsecure();
   var style = doc.createElement("style");
   style.innerHTML = css;
   doc.body.appendChild(style);
-}
+};
 
-function injectHtml( html ) {
-  var doc = getDocumentInsecure();
+CmdUtils.injectHtml = function injectHtml( html ) {
+  var doc = CmdUtils.getDocumentInsecure();
   var div = doc.createElement("div");
   div.innerHTML = html;
   doc.body.appendChild(div.firstChild);
-}
+};
 
-function log(what) {
-  var console = getWindowInsecure().console;
+CmdUtils.log = function log(what) {
+  var console = CmdUtils.getWindowInsecure().console;
   if (typeof(console) != "undefined"){
     console.log( what );
   } else {
     displayMessage("Firebug Required For Full Usage\n\n" + what);
   }
-}
+};
 
-function injectJavascript(src, callback) {
-  var doc = getDocumentInsecure();
+CmdUtils.injectJavascript = function injectJavascript(src, callback) {
+  var doc = CmdUtils.getDocumentInsecure();
 
   var script = doc.createElement("script");
   script.src = src;
@@ -122,23 +126,23 @@ function injectJavascript(src, callback) {
       callback();
     }
   }, true);
-}
+};
 
-function loadJQuery(func) {
-  injectJavascript(
+CmdUtils.loadJQuery = function loadJQuery(func) {
+  CmdUtils.injectJavascript(
     "http://code.jquery.com/jquery-latest.pack.js",
-    safeWrapper( function() {
-      window.jQuery = window.$ = getWindowInsecure().jQuery;
+    CmdUtils.safeWrapper( function() {
+      window.jQuery = window.$ = CmdUtils.getWindowInsecure().jQuery;
       func();
     })
   );
-}
+};
 
 // Runs the function "callback" whenever a new page/tab is loaded in
 // the window that this Ubiquity sandbox is associated with, passing
 // the window's document object as a parameter.
-function onPageLoad( callback ) {
-  var safeCallback = safeWrapper(callback);
+CmdUtils.onPageLoad = function onPageLoad( callback ) {
+  var safeCallback = CmdUtils.safeWrapper(callback);
 
   function _onPageLoad(aEvent) {
     var isValidPage = false;
@@ -166,9 +170,9 @@ function onPageLoad( callback ) {
   };
 
   appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
-}
+};
 
-function getTextSelection() {
+CmdUtils.getTextSelection = function getTextSelection() {
   var focused = context.focusedElement;
   var retval = "";
 
@@ -182,14 +186,14 @@ function getTextSelection() {
       retval = sel.toString();
   }
   return retval;
-}
+};
 
-function setLastResult( result ) {
+CmdUtils.setLastResult = function setLastResult( result ) {
   globals.lastCmdResult = result;
-}
+};
 
 // Uses Geo-ip lookup to get your current location.
-function getLocation( ){
+CmdUtils.getLocation = function getLocation( ){
   if( globals.location ) return globals.location;
 
   jQuery.ajax({
@@ -205,22 +209,21 @@ function getLocation( ){
         state: geoip_region_name(),
         country: geoip_country_name(),
         lat: geoip_latitude(),
-        long: geoip_longitude()
+        "long": geoip_longitude()
       };
     }
   });
 
   return globals.location;
-}
+};
 
 
-function FBLog( arg1, arg2 ){
+CmdUtils.FBLog = function FBLog( arg1, arg2 ){
   if( arg2 )
-    getWindowInsecure().console.log( arg1, arg2 );
+    CmdUtils.getWindowInsecure().console.log( arg1, arg2 );
   else
-    getWindowInsecure().console.log( arg1 );
-
-}
+    CmdUtils.getWindowInsecure().console.log( arg1 );
+};
 
 
 // -----------------------------------------------------------------
@@ -261,33 +264,46 @@ Function.prototype.setOptions = function( options ) {
       pblock.innerHTML = previewString;
     };
   }
-}
+};
 
 // Creates a command from a list of options
-function CreateCommand( options ) {
-  var defaultExecute = function(){ displayMessage("No action defined.");};
-  this["cmd_" + options.name] = options.execute || defaultExecute;
-  this["cmd_" + options.name].setOptions( options );
-}
+CmdUtils.CreateCommand = function CreateCommand( options ) {
+  var globalObj = CmdUtils.__globalObject;
+  var execute;
+
+  if (options.execute)
+    execute = function() {
+      options.execute.apply(options, arguments);
+    };
+  else
+    execute = function() {
+      displayMessage("No action defined.");
+    };
+
+  globalObj["cmd_" + options.name] = execute;
+  globalObj["cmd_" + options.name].setOptions( options );
+};
 
 // -----------------------------------------------------------------
 // TEMPLATING FUNCTIONS
 // -----------------------------------------------------------------
 
 
-function renderStringTemplate( string, data ) {
-  template = Template.parseTemplate( string );
+CmdUtils.renderStringTemplate = function renderStringTemplate( string, data ) {
+  var template = Template.parseTemplate( string );
   return template.process( data );
-}
+};
 
-function renderTemplate( templateName, data ) {
+CmdUtils.renderTemplate = function renderTemplate( templateName, data ) {
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
 
-  var template = getLocalUrl( chromePrefixUrl + templateName );
-  return renderStringTemplate( template, data );
-}
+  var template = Utils.getLocalUrl( chromePrefixUrl + templateName );
+  return CmdUtils.renderStringTemplate( template, data );
+};
 
-function showPreviewFromFile( pblock, filePath, callback ) {
+CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
+                                                             filePath,
+                                                             callback ) {
   var iframe = pblock.ownerDocument.createElement("iframe");
   iframe.setAttribute("src", "chrome://ubiquity/content/mapping/mapping.xul");
   iframe.style.border = "none";
@@ -310,10 +326,11 @@ function showPreviewFromFile( pblock, filePath, callback ) {
       // TODO: Security risk -- this is very insecure!
       callback( browser.contentWindow );
     }
-    browser.addEventListener("load", safeWrapper(onBrowserLoad), true);
+    browser.addEventListener("load", CmdUtils.safeWrapper(onBrowserLoad),
+                             true);
     iframe.contentDocument.documentElement.appendChild(browser);
   }
-  iframe.addEventListener("load", safeWrapper(onXulLoad), true);
+  iframe.addEventListener("load", CmdUtils.safeWrapper(onXulLoad), true);
   pblock.innerHTML = "";
   pblock.appendChild(iframe);
-}
+};

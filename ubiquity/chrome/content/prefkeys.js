@@ -13,8 +13,18 @@ var PrefKeys = {
   },
   
   onLoad : function(){
+
+    var defaultKeyModifier = "ALT";
+    //default key modifier for windows is CTRL
+    var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
+                               .getService(Components.interfaces.nsIXULRuntime);
+    if(xulRuntime.OS == "WINNT"){
+      defaultKeyModifier = "CTRL";
+    }
+    
     var keyCode = Application.prefs.getValue(this.KEYCODE_PREF, 32);
-    var keyModifier = Application.prefs.getValue(this.KEYMODIFIER_PREF, "ALT");
+    var keyModifier = Application.prefs.getValue(this.KEYMODIFIER_PREF, defaultKeyModifier);
+    
     var keyText = keyModifier + "+" 
                   + this._convertToText(keyCode) 
                   + " (Click here to change)";
