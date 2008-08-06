@@ -89,11 +89,12 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction) {
   request.setRequestHeader("Content-Type",
                            "application/x-www-form-urlencoded");
 
-  request.onreadystatechange = safeWrapper( function() {
+  // TODO: Any way to put a CmdUtils.safeWrapper() around this?
+  request.onreadystatechange = function() {
     if (request.readyState == 4 && request.status == 200)
       if (request.responseText)
         callbackFunction(request.responseText);
-  });
+  };
 
   request.send(null);
 };

@@ -16,7 +16,7 @@ function cmd_tag() {
   humanePrompt("Tag the current page:", function(aTagsString) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
-    var doc = getDocumentInsecure();
+    var doc = CmdUtils.getDocumentInsecure();
 
     var currentURI = Utils.url(doc.location);
     var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].

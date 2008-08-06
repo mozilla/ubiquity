@@ -72,5 +72,5 @@ if (window.location == "chrome://browser/content/browser.xul") {
   // whenever a page is loaded.
   var funcs = findFunctionsWithPrefix("pageLoad_");
   for (i = 0; i < funcs.length; i++)
-    onPageLoad(funcs[i]);
+    CmdUtils.onPageLoad(funcs[i]);
 }

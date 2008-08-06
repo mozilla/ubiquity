@@ -30,12 +30,12 @@ function takeSnapshotOfWindow( window, scrollDict ) {
 }
 
 function cmd_inject_snapshot() {
-  var win = getWindowInsecure();
+  var win = CmdUtils.getWindowInsecure();
   win.snapshot = takeSnapshotOfWindow;
 }
 
 function pageLoad_inject_snapshot(){
-  getWindowInsecure().snapshot = takeSnapshotOfWindow;
+  CmdUtils.getWindowInsecure().snapshot = takeSnapshotOfWindow;
 }
 
 // -----------------------------------------------------------------
@@ -65,8 +65,8 @@ function cmd_scale_firefox_down() {
 }
 
 function cmd_zoom() {
-  var win = getWindowInsecure();
-  var document = getDocumentInsecure();
+  var win = CmdUtils.getWindowInsecure();
+  var document = CmdUtils.getDocumentInsecure();
 
   var $ = jQuery;
 

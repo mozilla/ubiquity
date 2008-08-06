@@ -12,7 +12,7 @@ function makeSearchCommand( options ) {
   var cmd = function(query, modifiers) {
     var urlString = options.url.replace("{QUERY}", query);
     Utils.openUrlInBrowser(urlString);
-    setLastResult( urlString );
+    CmdUtils.setLastResult( urlString );
   };
 
   cmd.setOptions({
@@ -42,7 +42,8 @@ var cmd_google = makeSearchCommand({
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
-      pblock.innerHTML = renderTemplate( "searchresults.html", {results:results} );
+      pblock.innerHTML = CmdUtils.renderTemplate( "searchresults.html",
+                                                  {results:results} );
 		}, "json");
   }
 });
@@ -100,7 +101,7 @@ var cmd_wikipedia = makeSearchCommand({
   icon: "http://www.wikipedia.org/favicon.ico",
   preview: function(searchTerm, pblock) {
 
-    //TODO: Implement this preview using renderTemplate
+    //TODO: Implement this preview using CmdUtils.renderTemplate
     pblock.innerHTML =  "Gets wikipedia article for " + searchTerm + "<br/>";
     var $ = jQuery;
     // convert to first letter caps (Wikipedia requires that) and add to URL
@@ -144,7 +145,7 @@ var cmd_bugzilla = makeSearchCommand({
   icon: "https://bugzilla.mozilla.org/favicon.ico"
 });
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "yelp",
   takes: { "restaurant":arbText },
   // TODO: Should be AddressNounType, which is currently broken.
@@ -165,7 +166,7 @@ CreateCommand({
 
     if( query.length == 0 ) return;
 
-    loc = getLocation();
+    var loc = CmdUtils.getLocation();
     var near = info.near || (loc.city + ", " + loc.state);
 
     var params = {
@@ -176,7 +177,7 @@ CreateCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = renderTemplate( "yelp.html", {businesses: data.businesses} );
+      pblock.innerHTML = CmdUtils.renderTemplate( "yelp.html", {businesses: data.businesses} );
 		}, "json");
   }
 })
@@ -233,15 +234,15 @@ function cmd_redo() {
 }
 
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "calculate",
   takes: {"expression": arbText},
   icon: "http://www.metacalc.com/favicon.ico",
   execute: function( expr ) {
     if( expr.length > 0 ) {
       var result = eval( expr );
-      setTextSelection( result );
-      setLastResult( result );
+      CmdUtils.setTextSelection( result );
+      CmdUtils.setLastResult( result );
     } else
       displayMessage( "Requires an expression.");
   },
@@ -266,7 +267,7 @@ function defineWord(word, callback) {
   });
 
   Utils.ajaxGet(url + params, function(xml) {
-    loadJQuery( function() {
+    CmdUtils.loadJQuery( function() {
       var $ = window.jQuery;
       var text = $(xml).find("WordDefinition").text();
       callback(text);
@@ -274,7 +275,7 @@ function defineWord(word, callback) {
   });
 }
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "define",
   takes: {"word": arbText},
   execute: function( word ) {
@@ -298,7 +299,7 @@ CreateCommand({
 
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "syntax-highlight",
   takes: {"code": arbText},
   execute: function( code ) {
@@ -310,7 +311,7 @@ CreateCommand({
 
     jQuery.post( url, params, function( html ) {
       html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'");
-      setTextSelection( html );
+      CmdUtils.setTextSelection( html );
     });
   },
   preview: "Syntax highlights your code."
@@ -333,7 +334,7 @@ cmd_highlight.preview = function(pblock) {
   pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
 }
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name : "link-to-wikipedia",
   takes : {"text" : arbText},
 
@@ -437,13 +438,13 @@ function translateTo( text, langCodePair, callback ) {
     if( typeof callback == "function" )
       callback( translatedText );
     else
-      setTextSelection( translatedText );
+      CmdUtils.setTextSelection( translatedText );
 
-    setLastResult( translatedText );
+    CmdUtils.setLastResult( translatedText );
   });
 }
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "translate",
   takes: {"text to translate": arbText},
   modifiers: {to: languageNounType, from: languageNounType},
@@ -479,7 +480,7 @@ CreateCommand({
 // SYSTEM COMMANDS
 // -----------------------------------------------------------------
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "help",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   execute: function(){
@@ -487,7 +488,7 @@ CreateCommand({
   }
 });
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "command-editor",
   preview: "Opens the editor for writing Ubiquity commands",
   execute: function(){
@@ -495,16 +496,16 @@ CreateCommand({
   }
 });
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "remember",
   takes: {"thing": arbText},
   execute: function( thing, modifiers ) {
     displayMessage( "I am remembering " + thing );
-    setLastResult( thing );
+    CmdUtils.setLastResult( thing );
   }
 });
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "add-command",
   execute: function() {
 
@@ -545,7 +546,7 @@ function findGmailTab() {
   return null;
 }
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "email",
   takes: {"message": arbHtml},
   modifiers: {to: PersonNounType},
@@ -669,7 +670,7 @@ function addToGoogleCalendar(eventString) {
 /* TODO this comman just takes unstructured text right now and relies on
  google calendar to figure it out.  So we're not using the DateNounType
  here.  Should we be?  And, is there a better name for this command? */
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": arbText}, // TODO: use DateNounType or EventNounType?
   preview: "Adds the event to Google Calendar.",
@@ -690,7 +691,7 @@ function checkCalendar(pblock, date) {
   });
 }
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "check-calendar",
   takes: {"date to check": DateNounType},
   execute: function( date ) {
@@ -714,7 +715,7 @@ CreateCommand({
 
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": arbText},
 
@@ -752,7 +753,7 @@ CreateCommand({
 
       weather["img"] = imgSrc;
 
-      var html = renderTemplate( "weather.html", {w:weather});
+      var html = CmdUtils.renderTemplate( "weather.html", {w:weather});
 
       jQuery(pblock).html( html );
       }, "xml");
@@ -764,11 +765,13 @@ CreateCommand({
 // MAPPING COMMANDS
 // -----------------------------------------------------------------
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": arbText},
   preview: function(pblock, location) {
-    showPreviewFromFile( pblock, "templates/map.html", function(winInsecure) {
+    CmdUtils.showPreviewFromFile( pblock,
+                                  "templates/map.html",
+                                  function(winInsecure) {
       winInsecure.setPreview( location );
 
       winInsecure.insertHtml = function(html) {
@@ -783,14 +786,14 @@ CreateCommand({
   }
 });
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "aza",
   takes: {"selection": arbHtml},
   preview: function( pblock, html ) {
-    var div = getDocumentInsecure().createElement("div");
+    var div = CmdUtils.getDocumentInsecure().createElement("div");
     div.innerHTML = html;
 
-    var host = getWindowInsecure().location.host;
+    var host = CmdUtils.getWindowInsecure().location.host;
     /*
     var houses = [];
     jQuery(div).find("a").each( function(){
@@ -801,7 +804,9 @@ CreateCommand({
     });
     */
 
-    showPreviewFromFile( pblock, "templates/map_simple.html", function(winInsecure) {
+    CmdUtils.showPreviewFromFile( pblock,
+                                  "templates/map_simple.html",
+                                  function(winInsecure) {
       winInsecure.addPoint( 0,0 );
       //winInsecure.addPointByName( "Mountain View");
       /*
@@ -826,7 +831,7 @@ function cmd_view_source() {
   url = "view-source:" + url;
   // TODO: Should do it this way:
   // Utils.openUrlInBrowser( "http://www.google.com" );
-  getWindowInsecure().location = url;
+  CmdUtils.getWindowInsecure().location = url;
 }
 
 
@@ -870,7 +875,7 @@ var TabNounType = {
   }
 }
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": TabNounType},
 
@@ -892,7 +897,7 @@ CreateCommand({
 })
 
 // Closes a single tab
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "close-tab",
   takes: {"tab name": TabNounType},
 
@@ -911,7 +916,7 @@ CreateCommand({
 })
 
 //Closes all tabs related to the specified word
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": arbText},
 
@@ -971,7 +976,7 @@ function cmd_delete() {
       range.surroundContents(newNode);
   }
 
-  loadJQuery(function() {
+  CmdUtils.loadJQuery(function() {
     var $ = window.jQuery;
     $("._toRemove").slideUp();
   });
@@ -981,7 +986,7 @@ cmd_delete.preview = function( pblock ) {
 }
 
 function cmd_undelete() {
-  loadJQuery(function() {
+  CmdUtils.loadJQuery(function() {
     var $ = window.jQuery;
     $("._toRemove").slideDown();
   });
@@ -992,16 +997,16 @@ cmd_undelete.preview = function( pblock ) {
 
 
 function cmd_save() {
-  // TODO: works w/o wrappedJSObject in getDocumentInsecure() call- fix this
-  getDocumentInsecure().body.contentEditable = 'false';
-  getDocumentInsecure().designMode='off';
+  // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this
+  CmdUtils.getDocumentInsecure().body.contentEditable = 'false';
+  CmdUtils.getDocumentInsecure().designMode='off';
 
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                           .getService(Components.interfaces.nsIIOService);
 
-  var body = jQuery( getDocumentInsecure().body );
+  var body = jQuery( CmdUtils.getDocumentInsecure().body );
 
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), "ubiquity/edit", body.html(), 0, 4);
 }

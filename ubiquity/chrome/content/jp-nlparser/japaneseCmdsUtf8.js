@@ -1,4 +1,4 @@
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "計算して",
   takes: {},
   modifiers: {"を": jpArbText},
@@ -7,8 +7,8 @@ CreateCommand({
     var expr = modifiers["を"] || "";
     if( expr.length > 0 ) {
       var result = eval( expr );
-      setTextSelection( result );
-      setLastResult( result );
+      CmdUtils.setTextSelection( result );
+      CmdUtils.setLastResult( result );
     } else
       displayMessage( "巣学の表現が必要です。");
   },
@@ -70,14 +70,14 @@ function translateTo( text, langCodePair, callback ) {
     if( typeof callback == "function" )
       callback( translatedText );
     else
-      setTextSelection( translatedText );
+      CmdUtils.setTextSelection( translatedText );
 
-    setLastResult( translatedText );
+    CmdUtils.setLastResult( translatedText );
   });
 }
 
 
-CreateCommand({
+CmdUtils.CreateCommand({
   name: "翻訳して",
   takes: {},
   modifiers: {
