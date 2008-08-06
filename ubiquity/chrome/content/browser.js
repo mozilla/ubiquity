@@ -71,7 +71,8 @@ function ubiquitySetup()
     sandboxFactory
   );
 
-  var cmdMan = new CommandManager(cmdSource, msgService);
+  var cmdMan = new CommandManager(cmdSource, msgService,
+                                  UbiquityGlobals.japaneseMode);
 
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("ubiquity-menupopup"),
