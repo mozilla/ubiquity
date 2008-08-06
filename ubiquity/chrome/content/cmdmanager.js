@@ -200,17 +200,12 @@ CommandSource.prototype = {
 function makeDefaultCommandSuggester(commandManager) {
 
   function getAvailableCommands(context) {
-    //dump("GetAvailableCommands...\n");
     var suggestions = commandManager.getSuggestionListNoInput( context );
-    //dump("there are " + suggestions.length + " suggestions.\n");
     var retVal = {};
-    for (var x in suggestions) {
-      var parsedSentence = suggestions[x];
-      /*if (window)
-	if (window.console)
-	  window.console.log(parsedSentence._verb);*/
+    for each (let parsedSentence in suggestions) {
+      let sentenceClosure = parsedSentence;
       retVal[parsedSentence._verb._name] = function() {
-	parsedSentence.execute(context);
+	sentenceClosure.execute(context);
       };
     }
     return retVal;

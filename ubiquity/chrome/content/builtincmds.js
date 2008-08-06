@@ -1115,3 +1115,7 @@ cmd_perm_delete.preview = function( pblock ) {
   pblock.innerHTML = "Attempts to permanently delete the selected part of the"
     + " page. (Experimental!)";
 }
+
+function cmd_foo() {
+  displayMessage("Foo!");
+}
