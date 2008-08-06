@@ -199,6 +199,7 @@ CommandSource.prototype = {
 function makeDefaultCommandSuggester(commandManager) {
 
   function getAvailableCommands(context) {
+    commandManager.refresh();
     var suggestions = commandManager.getSuggestionListNoInput( context );
     var retVal = {};
     for each (let parsedSentence in suggestions) {
