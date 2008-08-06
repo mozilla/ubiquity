@@ -1,5 +1,7 @@
 var Utils = {};
 
+Utils.__globalObject = this;
+
 Utils.encodeJson = function encodeJson(object) {
   var json = Components.classes["@mozilla.org/dom/json;1"]
              .createInstance(Components.interfaces.nsIJSON);
@@ -89,12 +91,23 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction) {
   request.setRequestHeader("Content-Type",
                            "application/x-www-form-urlencoded");
 
-  // TODO: Any way to put a CmdUtils.safeWrapper() around this?
-  request.onreadystatechange = function() {
-    if (request.readyState == 4 && request.status == 200)
-      if (request.responseText)
-        callbackFunction(request.responseText);
+  var onRscFunc = function ajaxGet_onReadyStateChange() {
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        if (request.responseText)
+          callbackFunction(request.responseText);
+        else
+          callbackFunction("");
+      } else
+        throw new Error("Ajax request failed: " + url);
+    }
   };
 
+  // If we're being called in the context of a command, safe-wrap the
+  // callback.
+  if (Utils.__globalObject.CmdUtils)
+    onRscFunc = CmdUtils.safeWrapper(onRscFunc);
+
+  request.onreadystatechange = onRscFunc;
   request.send(null);
 };
