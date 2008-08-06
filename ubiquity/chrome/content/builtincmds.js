@@ -299,7 +299,7 @@ CreateCommand({
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.
 CreateCommand({
-  name: "syntax&nbsp;highlight",
+  name: "syntax-highlight",
   takes: {"code": arbText},
   execute: function( code ) {
     var url = "http://azarask.in/services/syntaxhighlight/color.py";
@@ -670,7 +670,7 @@ function addToGoogleCalendar(eventString) {
  google calendar to figure it out.  So we're not using the DateNounType
  here.  Should we be?  And, is there a better name for this command? */
 CreateCommand({
-  name: "add&nbsp;to&nbsp;calendar",
+  name: "add-to-calendar",
   takes: {"event": arbText}, // TODO: use DateNounType or EventNounType?
   preview: "Adds the event to Google Calendar.",
   execute: function( eventString ) {
@@ -691,7 +691,7 @@ function checkCalendar(pblock, date) {
 }
 
 CreateCommand({
-  name: "check&nbsp;calendar",
+  name: "check-calendar",
   takes: {"date to check": DateNounType},
   execute: function( date ) {
     var url = "http://www.google.com/calendar/m";
