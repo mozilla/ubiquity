@@ -283,7 +283,7 @@ function renderStringTemplate( string, data ) {
 function renderTemplate( templateName, data ) {
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
 
-  var template = getLocalUrl( chromePrefixUrl + templateName );
+  var template = Utils.getLocalUrl( chromePrefixUrl + templateName );
   return renderStringTemplate( template, data );
 }
 

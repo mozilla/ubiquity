@@ -1,15 +1,6 @@
-
-
-function paramsToString(params) {
-  var string = "?";
-
-  for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
-  }
-
-  // Remove the trailing &
-  return string.substr(0, string.length - 1);
-}
+// TODO: This code is duplicated from cmdutils.js, which should eventually
+// be namespaced so that it can be directly imported into browser.xul.
+// In other words, this file is temporary.
 
 function getTextSelection(context) {
   var focused = context.focusedElement;
@@ -38,21 +29,6 @@ function getHtmlSelection(context) {
   }
 
   return null;
-}
-
-function ajaxGet(url, callbackFunction) {
-  var request = new window.XMLHttpRequest();
-  request.open("GET", url, true);
-  request.setRequestHeader("Content-Type",
-                           "application/x-www-form-urlencoded");
-
-  request.onreadystatechange = safeWrapper( function() {
-    if (request.readyState == 4 && request.status == 200)
-      if (request.responseText)
-        callbackFunction(request.responseText);
-  });
-
-  request.send(null);
 }
 
 function safeWrapper(func) {

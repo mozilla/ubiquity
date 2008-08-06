@@ -36,7 +36,7 @@ function cmd_populate_with_microformat() {
   if( url == "http://maps.google.com/" ){
     getDocumentInsecure().getElementById("q_d").value = addr;
 
-    setTimeout( function(){
+    Utils.setTimeout( function(){
       getDocumentInsecure().getElementById("q_sub").click();
     }, 50 );
   }

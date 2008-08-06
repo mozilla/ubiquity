@@ -31,13 +31,13 @@ function translateTo( text, langCodePair, callback ) {
   if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
   if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
 
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     v: "1.0",
     q: text,
     langpair: langCodePair.from + "|" + langCodePair.to
   });
 
-  ajaxGet( url + params, function(jsonData){
+  Utils.ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
 
     // The usefulness of this command is limited because of the

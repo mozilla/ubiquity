@@ -107,6 +107,8 @@ function cmd_zoom() {
   $(img).animate({top:100, left:w/2, width:w*.1, height: h*.1}, 500);
   $(img).click( function(){
     $(img).animate({top:0, left:0, width:w, height: h}, 500);
+    // TODO: Can't tell if this is an implicit window.setTimeout() or
+    // should be changed to Utils.setTimeout()... -Atul
     setTimeout( function(){
       $(div).remove();
       $(img).remove();

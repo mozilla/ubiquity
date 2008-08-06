@@ -18,7 +18,7 @@ function cmd_tag() {
     var Ci = Components.interfaces;
     var doc = getDocumentInsecure();
 
-    var currentURI = url(doc.location);
+    var currentURI = Utils.url(doc.location);
     var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].
                     getService(Ci.nsINavBookmarksService);
 
@@ -36,7 +36,7 @@ function cmd_tag() {
 
     // trim leading/trailing spaces
     tags = tags.map(function(a) { return trim(a) });
-    
+
     var tagging = Cc["@mozilla.org/browser/tagging-service;1"].
                   getService(Ci.nsITaggingService);
     tagging.tagURI(currentURI, tags);

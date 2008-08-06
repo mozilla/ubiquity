@@ -11,7 +11,7 @@ function setDefaultSearchPreview( name, query, pblock ) {
 function makeSearchCommand( options ) {
   var cmd = function(query, modifiers) {
     var urlString = options.url.replace("{QUERY}", query);
-    openUrlInBrowser(urlString);
+    Utils.openUrlInBrowser(urlString);
     setLastResult( urlString );
   };
 
@@ -157,7 +157,7 @@ CreateCommand({
     url = url.replace( /{QUERY}/g, query);
     url = url.replace( /{NEAR}/g, info.near);
 
-    openUrlInBrowser( url );
+    Utils.openUrlInBrowser( url );
   },
 
   preview: function( pblock, query, info ) {
@@ -260,12 +260,12 @@ CreateCommand({
 
 function defineWord(word, callback) {
   var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
     word: word
   });
 
-  ajaxGet(url + params, function(xml) {
+  Utils.ajaxGet(url + params, function(xml) {
     loadJQuery( function() {
       var $ = window.jQuery;
       var text = $(xml).find("WordDefinition").text();
@@ -278,7 +278,7 @@ CreateCommand({
   name: "define",
   takes: {"word": arbText},
   execute: function( word ) {
-    openUrlInBrowser( "http://www.answers.com/" + escape(word) );
+    Utils.openUrlInBrowser( "http://www.answers.com/" + escape(word) );
   },
   preview: function( pblock, word ) {
     if (word.length < 2)
@@ -398,13 +398,13 @@ function translateTo( text, langCodePair, callback ) {
   if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
   if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
 
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     v: "1.0",
     q: text,
     langpair: langCodePair.from + "|" + langCodePair.to
   });
 
-  ajaxGet( url + params, function(jsonData){
+  Utils.ajaxGet( url + params, function(jsonData){
     var data = eval( '(' + jsonData + ')' );
 
     // The usefulness of this command is limited because of the
@@ -483,7 +483,7 @@ CreateCommand({
   name: "help",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   execute: function(){
-    openUrlInBrowser("about:ubiquity");
+    Utils.openUrlInBrowser("about:ubiquity");
   }
 });
 
@@ -491,7 +491,7 @@ CreateCommand({
   name: "command-editor",
   preview: "Opens the editor for writing Ubiquity commands",
   execute: function(){
-    openUrlInBrowser("chrome://ubiquity/content/editor.html");
+    Utils.openUrlInBrowser("chrome://ubiquity/content/editor.html");
   }
 });
 
@@ -510,7 +510,7 @@ CreateCommand({
 
     // Add current page as bookmark
     var currentTab = Application.activeWindow.activeTab;
-    var currentPage = url(String(currentTab.document.location));
+    var currentPage = Utils.url(String(currentTab.document.location));
     var currentPageTitle = String(currentTab.document.title);
     Application.bookmarks.unfiled.addBookmark(currentPageTitle, currentPage);
 
@@ -617,7 +617,7 @@ CreateCommand({
 
 
 function addToGoogleCalendar(eventString) {
-  var secid = getCookie("www.google.com", "secid");
+  var secid = Utils.getCookie("www.google.com", "secid");
 
   var URLS = {
     parse: "http://www.google.com/calendar/compose",
@@ -635,19 +635,19 @@ function addToGoogleCalendar(eventString) {
     return eval( splitString[1] )[0];
   }
 
-  var params = paramsToString({
+  var params = Utils.paramsToString({
     "ctext": eventString,
     "qa-src": "QUICK_ADD_BOX"
   });
 
-  ajaxGet(URLS["parse"]+params, function(json) {
+  Utils.ajaxGet(URLS["parse"]+params, function(json) {
     var data = parseGoogleJson( json );
     var eventText = data[1];
     var eventStart = data[4];
     var eventEnd = data[5];
-    var secid = getCookie("www.google.com", "secid");
+    var secid = Utils.getCookie("www.google.com", "secid");
 
-    var params = paramsToString({
+    var params = Utils.paramsToString({
       "dates": eventStart + "/" + eventEnd,
       "text": eventText,
       "secid": secid,
@@ -655,7 +655,7 @@ function addToGoogleCalendar(eventString) {
       "output": "js"
     });
 
-    ajaxGet(URLS["create"] + params, function(json) {
+    Utils.ajaxGet(URLS["create"] + params, function(json) {
       // TODO: Should verify this, and print appropriate positive
       // understand feedback. Like "blah at such a time was created.
       displayMessage("Event created.");
@@ -683,9 +683,9 @@ CreateCommand({
 // TODO: Don't do a whole-sale copy of the page ;)
 function checkCalendar(pblock, date) {
   var url = "http://www.google.com/calendar/m";
-  var params = paramsToString({ as_sdt: date.toString("yyyyMMdd") });
+  var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
 
-  ajaxGet(url + params, function(html) {
+  Utils.ajaxGet(url + params, function(html) {
     pblock.innerHTML = html;
   });
 }
@@ -695,9 +695,9 @@ CreateCommand({
   takes: {"date to check": DateNounType},
   execute: function( date ) {
     var url = "http://www.google.com/calendar/m";
-    var params = paramsToString({ as_sdt: date.toString("yyyyMMdd") });
+    var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
 
-    openUrlInBrowser( url + params );
+    Utils.openUrlInBrowser( url + params );
   },
   preview: function( pblock, date ) {
     pblock.innerHTML = "Checks Google Calendar for the day of" +
@@ -722,7 +722,7 @@ CreateCommand({
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
 
-    openUrlInBrowser( url );
+    Utils.openUrlInBrowser( url );
   },
 
   preview: function( pblock, location ) {
@@ -825,7 +825,7 @@ function cmd_view_source() {
   var url = Application.activeWindow.activeTab.document.location.href;
   url = "view-source:" + url;
   // TODO: Should do it this way:
-  // openUrlInBrowser( "http://www.google.com" );
+  // Utils.openUrlInBrowser( "http://www.google.com" );
   getWindowInsecure().location = url;
 }
 
