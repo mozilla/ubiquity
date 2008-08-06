@@ -172,7 +172,8 @@ CommandSource.prototype = {
         var icon = sandbox[objName].icon;
 
         commands[cmd.name] = cmd;
-        commandNames.push({name : cmd.name,
+        commandNames.push({id: objName,
+                           name : cmd.name,
                            icon : icon});
       }
 

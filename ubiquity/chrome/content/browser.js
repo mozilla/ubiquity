@@ -20,50 +20,9 @@ function ubiquitySetup()
   msgService.add(new AlertMessageService());
   msgService.add(new ErrorConsoleMessageService());
 
-  var globalSpace = {};
-
-  Components.utils.import("resource://ubiquity-modules/globals.js",
-                          globalSpace);
-
-  var globals = {
-    XPathResult: XPathResult,
-    XMLHttpRequest: XMLHttpRequest,
-    jQuery: jQuery,
-    Template: TrimPath,
-    Application: Application,
-    Components: Components,
-    window: window,
-    windowGlobals: {},
-    globals: globalSpace.UbiquityGlobals,
-    displayMessage: function() {
-      msgService.displayMessage.apply(msgService, arguments);
-    }
-  };
-
+  var globals = makeBuiltinGlobals(msgService, UbiquityGlobals);
   var sandboxFactory = new SandboxFactory(globals);
-
-  var codeSources = [
-    new LocalUriCodeSource("chrome://ubiquity/content/utils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nounTypeBase.js")
-  ];
-  if (UbiquityGlobals.japaneseMode) {
-    codeSources = codeSources.concat([
-      new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseNounTypes.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseCmdsUtf8.js")
-				      ]);
-  } else {
-    codeSources = codeSources.concat([
-      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nountypes.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
-      PrefCommands,
-      new BookmarksCodeSource("ubiquity")
-				     ]);
-  }
-  codeSources = codeSources.concat([
-    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
-				    ]);
+  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.japaneseMode);
 
   var cmdSource = new CommandSource(
     codeSources,
