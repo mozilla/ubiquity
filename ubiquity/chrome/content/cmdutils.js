@@ -269,8 +269,18 @@ Function.prototype.setOptions = function( options ) {
 // Creates a command from a list of options
 CmdUtils.CreateCommand = function CreateCommand( options ) {
   var globalObj = CmdUtils.__globalObject;
-  var defaultExecute = function(){ displayMessage("No action defined.");};
-  globalObj["cmd_" + options.name] = options.execute || defaultExecute;
+  var execute;
+
+  if (options.execute)
+    execute = function() {
+      options.execute.apply(options, arguments);
+    };
+  else
+    execute = function() {
+      displayMessage("No action defined.");
+    };
+
+  globalObj["cmd_" + options.name] = execute;
   globalObj["cmd_" + options.name].setOptions( options );
 };
 
