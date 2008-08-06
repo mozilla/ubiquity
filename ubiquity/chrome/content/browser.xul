@@ -41,6 +41,8 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/prefcommands.js"/>
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/builtinfactories.js"/>
+  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/browser.js"/>
   <script>
     var lastKeyStroke;

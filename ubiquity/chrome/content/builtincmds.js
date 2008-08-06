@@ -752,7 +752,7 @@ CreateCommand({
 
       weather["img"] = imgSrc;
 
-      html = renderTemplate( "weather.html", {w:weather});
+      var html = renderTemplate( "weather.html", {w:weather});
 
       jQuery(pblock).html( html );
       }, "xml");
@@ -887,13 +887,13 @@ CreateCommand({
     if( tabName.length > 1 )
       pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
-      pblock.innerHTML = "Switch to tab by name."
+      pblock.innerHTML = "Switch to tab by name.";
   }
 })
 
 // Closes a single tab
 CreateCommand({
-  name: "close.tab",
+  name: "close-tab",
   takes: {"tab name": TabNounType},
 
   execute: function( tabName ) {
@@ -912,7 +912,7 @@ CreateCommand({
 
 //Closes all tabs related to the specified word
 CreateCommand({
-  name: "close.related.tabs",
+  name: "close-related-tabs",
   takes: {"related word": arbText},
 
   preview: function( pblock, query ) {

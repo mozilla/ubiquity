@@ -73,34 +73,4 @@ if (window.location == "chrome://browser/content/browser.xul") {
   var funcs = findFunctionsWithPrefix("pageLoad_");
   for (i = 0; i < funcs.length; i++)
     onPageLoad(funcs[i]);
-} else if (window.location == "chrome://ubiquity/content/harness.xul") {
-  // We're being loaded in the development harness.  Do nothing.
-} else {
-  // We're being included in an HTML page.  Yes, this is a hack, but
-  // this solution is temporary anyways.
-
-  function onDocumentLoad() {
-    // Dynamically generate entries for undocumented commands.
-    for (name in window)
-      if (name.indexOf(CMD_PREFIX) == 0) {
-        var cmd = window[name];
-        var cmdName = name.substr(CMD_PREFIX.length);
-        var cmdQuery = $("#" + name);
-
-        if (cmdQuery.length == 0) {
-          cmdName = cmdName.replace(/_/g, " ");
-          $(document.body).append(
-            ('<div class="command" id="' + name + '">' +
-             '<span class="name">' + cmdName + '</span>')
-          );
-          cmdQuery = $("#" + name);
-        }
-
-        if (cmd.icon && cmdQuery.children(".icon").length == 0) {
-          cmdQuery.prepend('<img class="icon" src="' + cmd.icon + '"/> ');
-        }
-      }
-  }
-
-  $(document).ready(onDocumentLoad);
 }
