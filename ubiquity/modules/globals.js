@@ -4,4 +4,10 @@
 
 var EXPORTED_SYMBOLS = ["UbiquityGlobals"];
 
-var UbiquityGlobals = {};
+var UbiquityGlobals = {
+  get japaneseMode() {
+    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                .getService(Components.interfaces.nsIPrefBranch);
+    return (prefs.getCharPref("extensions.ubiquity.language") == "jp");
+  }
+};

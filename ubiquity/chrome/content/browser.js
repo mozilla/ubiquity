@@ -1,20 +1,8 @@
 var gUbiquity = null;
 Components.utils.import("resource://ubiquity-modules/globals.js");
 
-function checkLanguagePreference() {
-  var prefs = Components.classes["@mozilla.org/preferences-service;1"].
-                getService(Components.interfaces.nsIPrefBranch);
-  if (prefs.getCharPref("extensions.ubiquity.language") == "jp")
-    UbiquityGlobals.japaneseMode = true;
-  else
-    UbiquityGlobals.japaneseMode = false;
-}
-
 function ubiquitySetup()
 {
-
-  checkLanguagePreference();
-
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
 
