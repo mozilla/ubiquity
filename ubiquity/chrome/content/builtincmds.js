@@ -752,7 +752,7 @@ CreateCommand({
 
       weather["img"] = imgSrc;
 
-      html = renderTemplate( "weather.html", {w:weather});
+      var html = renderTemplate( "weather.html", {w:weather});
 
       jQuery(pblock).html( html );
       }, "xml");
@@ -887,7 +887,7 @@ CreateCommand({
     if( tabName.length > 1 )
       pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
-      pblock.innerHTML = "Switch to tab by name."
+      pblock.innerHTML = "Switch to tab by name.";
   }
 })
 

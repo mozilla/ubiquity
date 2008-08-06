@@ -276,7 +276,7 @@ function CreateCommand( options ) {
 
 
 function renderStringTemplate( string, data ) {
-  template = Template.parseTemplate( string );
+  var template = Template.parseTemplate( string );
   return template.process( data );
 }
 
