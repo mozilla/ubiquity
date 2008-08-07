@@ -594,7 +594,11 @@ CmdUtils.CreateCommand({
           composeMail.dispatchEvent(event);
           var active = gmail.getActiveViewElement();
           var subject = active.getElementsByTagName("input")[0];
+	    // the "to" field is textarea id ":3u"
+	  // and the body field is id ":4q".
           subject.value = "'"+title+"'";
+	  /*var toWho = gmailTab.document.getElementById(":3u");
+	  toWho.value = headers["to"];*/ // doesn't work
           var iframe = active.getElementsByTagName("iframe")[0];
           iframe.contentDocument.execCommand("insertHTML", false, html);
           gmailTab.focus();
