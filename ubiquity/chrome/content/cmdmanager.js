@@ -204,7 +204,9 @@ function makeDefaultCommandSuggester(commandManager) {
     var retVal = {};
     for each (let parsedSentence in suggestions) {
       let sentenceClosure = parsedSentence;
-      retVal[parsedSentence._verb._name] = function() {
+      let titleCasedName = parsedSentence._verb._name;
+      titleCasedName = titleCasedName[0].toUpperCase() + titleCasedName.slice(1);
+      retVal[titleCasedName] = function() {
 	sentenceClosure.execute(context);
       };
     }
