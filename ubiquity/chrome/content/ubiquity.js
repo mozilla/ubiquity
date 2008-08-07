@@ -134,6 +134,7 @@ Ubiquity.prototype = {
 
   __onShown: function() {
     if (this.__showCount == 0) {
+      this.__lastValue = null;
       this.__textBox.focus();
       this.__textBox.select();
       this.__cmdManager.refresh();
