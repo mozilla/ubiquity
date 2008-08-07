@@ -340,38 +340,11 @@ function testParseWithModifier() {
   this.assert( dogGotWashedWith == "spork");
 }
 
-function testNlParserSuggestsForEmptyInput() {
-
-}
-
 function testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
-  var nounTypeOne = {
-    _name: "thingType",
-    match: function(input) {
-      return (input == "tree");
-    },
-    suggest: function(input) {
-      if (input == "tree")
-	return ["tree"];
-      else
-	return [];
-    }
-  };
-  var nounTypeTwo = {
-    _name: "stuffType",
-    match: function(input) {
-      return (input == "mud");
-    },
-    suggest: function(input) {
-      if (input == "mud")
-	return ["mud"];
-      else
-	return [];
-    }
-  };
-
+  var nounTypeOne = new NounType( "thingType", ["tree"] );
+  var nounTypeTwo = new NounType( "stuffType", ["mud"] );
   var fakeSource = new FakeCommandSource(
   {
     cmd_one: {execute:function(context, directObj) {oneWasCalled = directObj;},
@@ -397,3 +370,45 @@ function testCmdManagerSuggestsForEmptyInput() {
   execute();
   this.assert( twoWasCalled == "mud" );
 }
+
+function testVerbEatsSelection() {
+  var foodGotEaten = null;
+  var foodGotEatenAt = null;
+  var food = new NounType( "food", ["breakfast", "lunch", "dinner"]);
+  var place = new NounType( "place", ["grill", "diner", "home"]);
+  var cmd_eat = {
+    name: "eat",
+    execute: function(context, directObject, modifiers) {
+      foodGotEaten = directObject;
+      if (modifiers["at"])
+	foodGotEatenAt = modifiers["at"];
+    },
+    DOLabel:"food",
+    DOType: food,
+    modifiers: {"at": place}
+  };
+  var verb = new Verb(cmd_eat);
+  var fakeContext = {textSelection:"lunch"};
+  var completions = verb.getCompletions(["this"], fakeContext);
+  this.assert( completions.length == 1 );
+  completions[0].execute(fakeContext);
+  this.assert(foodGotEaten == "lunch");
+  this.assert(foodGotEatenAt == null);
+
+  fakeContext.textSelection = "grill";
+  completions = verb.getCompletions(["breakfast", "at", "it"], fakeContext);
+  this.assert( completions.length == 1 );
+  completions[0].execute(fakeContext);
+  this.assert(foodGotEaten == "breakfast");
+  this.assert(foodGotEatenAt == "grill");
+
+  fakeContext.textSelection = "din";
+  completions = verb.getCompletions(["at", "home", "this"], fakeContext);
+  this.assert( completions.length == 1 );
+  completions[0].execute(fakeContext);
+  this.assert(foodGotEaten == "dinner");
+  this.assert(foodGotEatenAt == "home");
+
+}
+
+

@@ -195,6 +195,28 @@ Verb.prototype = {
     }
   },
 
+  canPossiblyUseSelection: function( textSel, htmlSel ) {
+    if (this._DOType) {
+      if (this._DOType.expectsHtmlSelection) {
+	if (this._DOType.match(htmlSel))
+	  return "html";
+      } else {
+	if (this._DOType.match(textSel))
+	  return "text";
+      }
+    }
+    for each( type in this._modifiers) {
+      if (type.expectsHtmlSelection) {
+	if (type.match(htmlSel))
+	  return "html";
+      } else {
+	if (type.match(textSel))
+	  return "text";
+      }
+    }
+    return false;
+  },
+
   substitutePronoun: function( words, context ) {
     var subbedWords = words.slice();
     var selectionUsed = false;
@@ -206,16 +228,16 @@ Verb.prototype = {
     var htmlSelection = getHtmlSelection(context);
     if (!htmlSelection)
       htmlSelection = selection;
-    for ( var x in SELECTION_PRONOUNS ) {
-      var index = subbedWords.indexOf( SELECTION_PRONOUNS[x] );
+
+    for each ( pronoun in SELECTION_PRONOUNS ) {
+      var index = subbedWords.indexOf( pronoun );
       if ( index > -1 ) {
-	if (selection && this.canPossiblyUseNounType(arbText)) {
-	  subbedWords.splice( index, 1, selection );
-	  selectionUsed = true;
-	} else if (htmlSelection && this.canPossiblyUseNounType(arbHtml)) {
-	  subbedWords.splice( index, 1, htmlSelection );
-	  selectionUsed = true;
-	}
+	selectionUsed = this.canPossiblyUseSelection( selection,
+						      htmlSelection);
+	if (selectionUsed == "text")
+	  subbedWords.splice(index, 1, selection);
+	else if (selectionUsed == "html")
+	  subbedWords.splice(index, 1, htmlSelection);
       }
     }
 
@@ -237,7 +259,8 @@ Verb.prototype = {
 
     /* Look for words that refer to selection: */
     var completions = [];
-    var wordsWithPronounSubstituted = this.substitutePronoun( words, context );
+    var wordsWithPronounSubstituted = this.substitutePronoun( words,
+							      context);
 
     if ( wordsWithPronounSubstituted )
       completions = this.recursiveParse( wordsWithPronounSubstituted,

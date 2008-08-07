@@ -69,6 +69,7 @@ var arbText = {
 
 var arbHtml = {
   _name: "html",
+  expectsHtmlSelection: true,
   match: function( fragment ) {
     return true;
   },
