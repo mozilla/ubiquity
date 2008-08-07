@@ -62,6 +62,9 @@ Ubiquity.prototype = {
   },
 
   __onInput: function(event) {
+    if (this.__showCount == 0)
+      return;
+
     var keyCode = event.keyCode;
 
     if (keyCode == this.__KEYCODE_ENTER) {
