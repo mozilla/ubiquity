@@ -10,6 +10,8 @@ FakeCommandSource.prototype = {
   },
   getAllCommands: function(name) {
     return this._cmdList;
+  },
+  refresh: function() {
   }
 };
 
