@@ -385,15 +385,15 @@ function testCmdManagerSuggestsForEmptyInput() {
   cmdMan.__nlParser._nounTypeList = [nounTypeOne, nounTypeTwo];
   var getAC = makeDefaultCommandSuggester(cmdMan);
   var suggDict = getAC({textSelection:"tree"});
-  this.assert( suggDict["cmd_one"] );
-  this.assert( !suggDict["cmd_two"] );
-  var execute = suggDict["cmd_one"];
+  this.assert( suggDict["Cmd_one"] );
+  this.assert( !suggDict["Cmd_two"] );
+  var execute = suggDict["Cmd_one"];
   execute();
   this.assert( oneWasCalled == "tree" );
   suggDict = getAC({textSelection:"mud"});
-  this.assert( !suggDict["cmd_one"] );
-  this.assert( suggDict["cmd_two"] );
-  execute = suggDict["cmd_two"];
+  this.assert( !suggDict["Cmd_one"] );
+  this.assert( suggDict["Cmd_two"] );
+  execute = suggDict["Cmd_two"];
   execute();
   this.assert( twoWasCalled == "mud" );
 }
