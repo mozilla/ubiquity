@@ -12,8 +12,15 @@ function trim (str) {
 }
 
 // command to tag the currently loaded URI via the humane prompt
-function cmd_tag() {
-  humanePrompt("Tag the current page:", function(aTagsString) {
+CmdUtils.CreateCommand({
+  name: "tag",
+  takes : {"text" : arbText},
+  icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
+  preview: function(aEl, aTagsString) {
+    aEl.innerHTML = "Describe the current location with tags";
+    aEl.innerHTML += aTagsString.length ? " (" + aTagsString + ")" : ".";
+  },
+  execute: function(aTagsString) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
     var doc = CmdUtils.getDocumentInsecure();
@@ -40,7 +47,5 @@ function cmd_tag() {
     var tagging = Cc["@mozilla.org/browser/tagging-service;1"].
                   getService(Ci.nsITaggingService);
     tagging.tagURI(currentURI, tags);
-  });
-}
-cmd_tag.preview = function(aEl) { aEl.innerHTML = "Add tags for the current location"; };
-cmd_tag.icon = "chrome://mozapps/skin/places/tagContainerIcon.png";
+  }
+});

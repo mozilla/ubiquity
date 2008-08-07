@@ -69,6 +69,8 @@ LocalUriCodeSource.prototype = {
 };
 
 function BookmarksCodeSource(tagName) {
+  BookmarksCodeSource.__install(window);
+
   this._sources = {};
 
   this._updateSourceList = function BCS__updateSourceList() {
@@ -84,16 +86,29 @@ function BookmarksCodeSource(tagName) {
                             if (child.type == "bookmark")];
       for (var i = 0; i < children.length; i++) {
         var child = children[i];
-        var href = child.uri.spec;
+        var uri = child.uri;
+
+        // See if there's any annotations for this page that tell us
+        // about the existence of a <link rel="commands"> tag
+        // that points to a JS file.  Note that we want to use the
+        // annotation service directly (as opposed to FUEL) because
+        // we want to see the annotations for the page, not the bookmark.
+        var annSvc = BookmarksCodeSource.__getAnnSvc();
+        if (annSvc.pageHasAnnotation(uri, "ubiquity/commands")) {
+          var val = annSvc.getPageAnnotation(uri, "ubiquity/commands");
+          uri = Utils.url(val);
+        }
+
+        var href = uri.spec;
 
         if (this._sources[href]) {
           newSources[href] = this._sources[href];
-        } else if (child.uri.scheme == "http" ||
-                   child.uri.scheme == "https") {
+        } else if (uri.scheme == "http" ||
+                   uri.scheme == "https") {
           newSources[href] = new RemoteUriCodeSource(href);
-        } else if (child.uri.scheme == "file" ||
-                   child.uri.scheme == "chrome" ||
-                   child.uri.scheme == "resource") {
+        } else if (uri.scheme == "file" ||
+                   uri.scheme == "chrome" ||
+                   uri.scheme == "resource") {
           newSources[href] = new LocalUriCodeSource(href);
         }
 
@@ -114,3 +129,34 @@ function BookmarksCodeSource(tagName) {
     return code;
   };
 }
+
+BookmarksCodeSource.__getAnnSvc = function BCS_getAnnSvc() {
+  var Cc = Components.classes;
+  var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
+               .getService(Components.interfaces.nsIAnnotationService);
+  return annSvc;
+}
+
+BookmarksCodeSource.__install = function BCS_install(window) {
+  if (BookmarksCodeSource.__isInstalled)
+    return;
+
+  // Watch for any tags of the form <link rel="commands">
+  // on pages and add annotations for them if they exist.
+  function onLinkAdded(event) {
+    if (event.target.rel != "commands")
+      return;
+
+    var annSvc = BookmarksCodeSource.__getAnnSvc();
+    var url = Utils.url(event.target.baseURI);
+    var commandsUrl = event.target.href;
+    annSvc.setPageAnnotation(url, "ubiquity/commands",
+                             commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
+    Components.utils.reportError("Link added at " + url.spec);
+  }
+
+  window.addEventListener("DOMLinkAdded", onLinkAdded, false);
+  BookmarksCodeSource.__isInstalled = true;
+};
+
+BookmarksCodeSource.__isInstalled = false;

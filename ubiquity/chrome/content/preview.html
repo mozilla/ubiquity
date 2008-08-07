@@ -10,29 +10,7 @@
   <link rel="stylesheet" href="preview.css" type="text/css">
 </head>
 <body>
-<script type="text/javascript">
-	document.addEventListener("click", function(event) {
-		var target = event.target;
-		if(target.nodeName != 'A' || !target.href)
-			return;
-		
-		event.preventDefault();
-		
-		openUrl(target.href);
-	}, true);
-	
-	function openUrl(url) {
-		var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-		var browser = browserWindow.getBrowser();
-		
-		if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-			browserWindow.loadURI(url, null, null, false);
-		else
-			browser.loadOneTab(url, null, null, null, false, false);
-	}
-</script>
 <div id="preview"></div>
 </body>
+<script src="preview.js"></script>
 </html>
