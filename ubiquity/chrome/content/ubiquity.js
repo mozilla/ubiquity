@@ -79,20 +79,21 @@ Ubiquity.prototype = {
 
   __updatePreview: function() {
     if (this.__previewBlock) {
-      var cmdName = this.__textBox.value;
-      if (cmdName != this.__lastValue) {
+      var input = this.__textBox.value;
+      if (input != this.__lastValue) {
 
-        this.__lastValue = cmdName;
+        this.__lastValue = input;
         var wasPreviewShown = false;
 
-        if (cmdName.length >= this.__MIN_CMD_PREVIEW_LENGTH)
+        if (input.length >= this.__MIN_CMD_PREVIEW_LENGTH)
           wasPreviewShown = this.__cmdManager.updateInput(
-            cmdName,
+            input,
             this.__makeContext(),
             this.__previewBlock
           );
-        if (cmdName.length == 0 || !wasPreviewShown)
-          this.__resetPreview();
+        if (!wasPreviewShown) {
+	  this.__resetPreview();
+	}
       }
     }
   },

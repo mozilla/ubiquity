@@ -53,9 +53,14 @@ CommandManager.prototype = {
   },
 
   updateInput : function(input, context, previewBlock) {
+    /* Return true if we created any suggestions, false if we didn't
+     * or if we had nowhere to put them.
+     */
     this.__lastInput = input;
     this.__nlParser.updateSuggestionList(input, context);
     this.__hilitedSuggestion = 0;
+    if ( this.__nlParser.getNumSuggestions() == 0 )
+      return false;
     if (previewBlock)
       return this._preview(context, previewBlock);
     else
