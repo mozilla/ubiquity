@@ -229,22 +229,38 @@ Verb.prototype = {
     if (!htmlSelection)
       htmlSelection = selection;
 
+    /* No selection to interpolate. */
+    if ((!selection) && (!htmlSelection))
+      return false;
+
+    selectionUsed = this.canPossiblyUseSelection( selection,
+						  htmlSelection);
+    /* There's a selection but no argument that can use it.*/
+    if (!selectionUsed)
+      return false;
+
+    /* There's no arguments or pronouns given... pretend we've got a
+     * "this" so we can interpolate the selection there and see what we get.*/
+    if (subbedWords.length == 0) {
+     subbedWords = ["this"];
+    }
+
     for each ( pronoun in SELECTION_PRONOUNS ) {
       var index = subbedWords.indexOf( pronoun );
       if ( index > -1 ) {
-	selectionUsed = this.canPossiblyUseSelection( selection,
-						      htmlSelection);
 	if (selectionUsed == "text")
 	  subbedWords.splice(index, 1, selection);
 	else if (selectionUsed == "html")
 	  subbedWords.splice(index, 1, htmlSelection);
+	return subbedWords;
       }
     }
-
-    if ( selectionUsed )
-      return subbedWords;
-    else
-      return false;
+    /* Note that the above will stop looking when it hits the first
+     * pronoun that can take the selection as substitution.  TODO is
+     * if there are more pronouns later in the input that could take it,
+     * offer each one of them as a suggestion.
+     */
+    return false;
   },
 
   getCompletions: function( words, context ) {
