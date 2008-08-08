@@ -30,6 +30,7 @@ function makeBuiltinCodeSources(isJapaneseMode) {
 				      ]);
   } else {
     codeSources = codeSources.concat([
+      new LocalUriCodeSource("chrome://ubiquity/content/date.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nountypes.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),

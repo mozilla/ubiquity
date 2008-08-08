@@ -54,7 +54,7 @@ var PersonNounType = {
     }
     return suggestions.splice(0, 5);
   }
-}
+};
 
 var arbText = {
   // a singleton object which can be used in place of a NounType.
@@ -84,13 +84,17 @@ var DateNounType = {
     return (this.suggest(fragment).length > 0 );
   },
   suggest: function( fragment )  {
+    dump("Suggesting date for " + fragment +".\n");
     if (!fragment) {
+      dump("Nothin!\n");
       return [];
     }
     var date = Date.parse( fragment );
     if (!date) {
+      dump("Totally not a date!\n");
       return [];
     }
+    dump("Returning " + date + "\n");
     return [ date ];
   }
 };
