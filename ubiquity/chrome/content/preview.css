@@ -68,6 +68,11 @@ body {
 /* formatting for suggestion list */
 
 #preview-pane {
+    color: #ffffff;
+    background: #272750;
+    padding-left: 15px;
+    padding: 7px;
+    border-left: solid 1px #0066cc;
 }
 
 .hilited-text {

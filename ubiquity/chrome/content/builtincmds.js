@@ -772,6 +772,13 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": arbText},
+  execute: function( location ) {
+           	   
+    var url = "http://maps.google.com/?q="; 
+    url += encodeURIComponent(location);
+ 
+    Utils.openUrlInBrowser( url );
+  },
   preview: function(pblock, location) {
     CmdUtils.showPreviewFromFile( pblock,
                                   "templates/map.html",
@@ -782,9 +789,16 @@ CmdUtils.CreateCommand({
         var doc = context.focusedWindow.document;
         var focused = context.focusedElement;
 
+        CmdUtils.setLastResult( html );	   
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);
         }
+        else if (CmdUtils.getTextSelection()) {
+	  CmdUtils.setTextSelection(html);
+	}
+	else {
+	  displayMessage("Cannot insert- not in an editable region. Use 'edit page' for an editable page.")
+	}
       };
     });
   }
@@ -1026,7 +1040,14 @@ cmd_undelete.preview = function( pblock ) {
   pblock.innerHTML = "Restores the HTML deleted by the delete command.";
 }
 
-
+function cmd_edit_page() {
+  // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this
+  CmdUtils.getDocumentInsecure().body.contentEditable = 'true';
+  CmdUtils.getDocumentInsecure().designMode='on';
+}
+cmd_edit_page.preview = function( pblock ) {
+  pblock.innerHTML = "Make changes to this page. Use 'save' for changes to persist on reload.";
+}
 function cmd_save() {
   // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this
   CmdUtils.getDocumentInsecure().body.contentEditable = 'false';
