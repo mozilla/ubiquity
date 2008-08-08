@@ -84,17 +84,13 @@ var DateNounType = {
     return (this.suggest(fragment).length > 0 );
   },
   suggest: function( fragment )  {
-    dump("Suggesting date for " + fragment +".\n");
     if (!fragment) {
-      dump("Nothin!\n");
       return [];
     }
     var date = Date.parse( fragment );
     if (!date) {
-      dump("Totally not a date!\n");
       return [];
     }
-    dump("Returning " + date + "\n");
     return [ date ];
   }
 };
