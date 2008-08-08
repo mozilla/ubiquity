@@ -10,8 +10,6 @@
     <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0" type="text/javascript"></script>
     <script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>    
     <script src="../jquery-1.2.3.min.js"></script>
-    <script src="../builtinfactories.js"></script>
-    <script src="../browser.js"></script>
     <script src="../utils.js"></script>
     <script src="../cmdutils.js"></script>
     <style>
@@ -22,18 +20,23 @@
     }
 
     /* preview pane for google results and initial map preview */
-    #preview-pane {
-      width: 500px;
-      height: 140px;
+    div[name="preview-pane"] {
+      font-family: sans-serif;
       color: #bfbfbf;
-      padding-top: 5px;
-      
+      width: 475px;
+      min-height: 50px;
+      background: #272750;
+    }
+
+    #preview-pane {
+      padding-left: 15px;
+      padding: 7px;
+      border-left: solid 1px #0066cc;
+      height: 140px;      
     }
     #preview-pane-large {
-      width: 450px;
       height: 300px;
       padding: 13px;
-      color: #bfbfbf;
     }
 
     /* initial map preview */
@@ -46,24 +49,27 @@
       -moz-border-radius: 5px 0px 5px 5px;
     }
     #address-list {
+      position: relative;
       float: left;
       width: 260px;
-      height: 120px;
+      height: 140px;
     }
     .address-line {
       cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
     }
     .gaddress, .gaddress-current {
       font-size: small;
-      padding: 5px 5px 5px 25px;
+      padding: 4px 4px 4px 10px;
       margin-bottom: 5px;
     }
     .gaddress-current {
       background-color: #0066cc;
-      border-width: 2px 2px 2px 0px;
+      border-width: 1.5px 1.5px 1.5px 0px;
       border-style: solid solid solid none;
-      border-color: #0066cc; 
-      /*border: 5px solid #0066cc;*/
+      border-color: #0066cc;
+      color: #ffffff;
       -moz-border-radius: 0px 5px 5px 0px;
     }
     .gaddress:hover {
@@ -74,20 +80,18 @@
       color: #bfbfbf;
     }
     .gaddress-current a {
-      color: #bfbfbf;
+      color: #ffffff;
       text-decoration: none;
     }
     #goto-gmaps {
+      position: absolute;
+      bottom: 0px;
+      right: 5px;
       font-size: x-small;
-      margin-top: 40px;
-      padding-left: 20px;
+      padding-left: 0px;
     }
     #goto-gmaps a {
       color: #0066cc;
-    }
-    .address-line {
-      white-space: nowrap;
-      overflow: hidden;
     }
     /* secondary map preview */
     #selected-address {
@@ -133,36 +137,49 @@
     var mapControl;
     var mapType;
 
+    // this div is inserted to make sure the DOMSubtreeModified event fires
+    var hackDiv = document.createElement("div");
 
     function showAddressPreview() {
-      setTimeout( function(){
-        $(".suggestion").slideDown( 500 );
-        $("#address-list").fadeIn( 700 );
-      }, 500 );
+      document.getElementById("preview-pane-large").id = "preview-pane";
       $(".map-actions").hide();  
       $("#selected-address").hide();
-      document.getElementById("preview-pane-large").id = "preview-pane";
+
+      /*
       $("#preview-pane")
         .height("300px")
         .animate({ height: "140px" });
+      
       $("#map").animate({ 
         width: "200px",
         height: "130px",
       }, 500);
-      
+      setTimeout( function(){
+        $(".suggestion").slideDown( 500 );
+        $("#address-list").fadeIn( 700 );
+      }, 500 );
+      */
+      $("#map").width("200px");
+      $("#map").height("130px");
       $("#map").css("border","5px solid #0066cc");
-    
+      $(".suggestion").show();
+      $("#address-list").show();
+      
+      $("#preview-pane").height("140px");
+     
       gMap.removeControl(mapControl);
       gMap.removeControl(mapType);
       gMap.disableDragging();
+      
+      document.getElementById("map").appendChild(hackDiv);
     }
     
     function showMapPreview(map) {
     
       $("#address-list").hide();
+      $(".suggestion").hide();
       
       $("#selected-address").fadeIn( 300 );
-      //$("#selected-address").text($(".gaddress-current").text());
       document.getElementById("preview-pane").id = "preview-pane-large";
       
       gMap.addControl(mapControl);
@@ -170,24 +187,36 @@
       gMap.enableDragging();
       $("#map").css("border-width","0px");
       $("#map").css("border-style","none");
+      
+      // animation: would be nice for future releases
+      /*
       $("#preview-pane-large")
         .height("140px")
         .animate({ height: "300px" });
+      */
       
+      $("#preview-pane-large").height("300px");
       $("#map").animate({
-        width: "450px",
+        width: "100%",
         height: "240px",
       }, 500);
+      
       setTimeout( function(){
         $(".map-actions").fadeIn();
         $(".suggestion").slideUp( 500 );    
-      }, 300 ); 
+      }, 300 );
+      
+      document.getElementById("map").appendChild(hackDiv);
     }
     
    
     function loadMap(searchTerm, index) {
+      
       var currentLat;
       var currentLng;
+
+      $(".map-actions").hide();  
+      $("#selected-address").hide();
 
       jQuery.ajax({
         type: "GET",
@@ -202,8 +231,6 @@
         }
       });
 
-      jQuery(".map-actions").hide();  
-      jQuery("#selected-address").hide();
 
       // Initialize the map
       gMap = new google.maps.Map2(document.getElementById("map"));
@@ -334,22 +361,19 @@
                  "<div class=\"map-actions\"><a onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>" +
                  "</div>";
 
- 
       $("#preview-pane").html(html);
   
       loadMap(searchTerm, 0);
 
     }
-    
-    
-
-    
+        
     </script>
   </head>
 
   <body onunload="GUnload()">
     <div style="overflow:hidden;">
-      <div id="preview-pane"></div> 
+      <!-- this div needs the name "preview-pane" for outer iframe/browser to resize -->
+      <div id="preview-pane" name="preview-pane"></div> 
     </div> 
   </body>
 

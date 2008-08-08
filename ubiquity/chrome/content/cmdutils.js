@@ -305,10 +305,10 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
                                                              filePath,
                                                              callback ) {
   var iframe = pblock.ownerDocument.createElement("iframe");
+  var browser;
   iframe.setAttribute("src", "chrome://ubiquity/content/mapping/mapping.xul");
   iframe.style.border = "none";
   iframe.setAttribute("width", 500);
-  iframe.setAttribute("height", 300);
   function onXulLoad() {
     var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
                 .getService(Components.interfaces.nsIIOService);
@@ -318,7 +318,7 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
     var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
     var uri = ioSvc.newFileURI(extD).spec;
     uri += "chrome/content/" + filePath;
-    var browser = iframe.contentDocument.createElement("browser");
+    browser = iframe.contentDocument.createElement("browser");
     browser.setAttribute("src", uri);
     browser.setAttribute("width", 500);
     browser.setAttribute("height", 300);
@@ -329,8 +329,23 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
     browser.addEventListener("load", CmdUtils.safeWrapper(onBrowserLoad),
                              true);
     iframe.contentDocument.documentElement.appendChild(browser);
+    browser.contentWindow.addEventListener("load", onBodyLoad, false);
   }
+  
   iframe.addEventListener("load", CmdUtils.safeWrapper(onXulLoad), true);
   pblock.innerHTML = "";
   pblock.appendChild(iframe);
+  
+  // In order to modify the browser/iframe size based on contents, add an event listener to check when the DOM is modified.
+  // This is done by specifically inserting a div when the preview size changes.
+  // This currently prevents the use of animation for the preview-pane... hopefully find a fix for future release.
+  function onBodyLoad() {
+    browser.contentWindow.document.getElementById("map").addEventListener("DOMNodeInserted", onDomModified, false);
+  }
+  function onDomModified() {
+    var previewPane = browser.contentWindow.document.getElementsByName("preview-pane")[0];
+    iframe.setAttribute("height", previewPane.clientHeight);
+    browser.setAttribute("height", previewPane.clientHeight);
+  }
+
 };

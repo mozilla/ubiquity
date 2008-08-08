@@ -42,7 +42,6 @@ NLParser.prototype = {
   updateSuggestionList: function( query, context ) {
     var nounType, verb, x;
     var newSuggs = [];
-
     // selection, no input, noun-first suggestion
     if (!query || query.length == 0) {
       var sel = getTextSelection(context);
