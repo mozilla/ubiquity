@@ -254,7 +254,10 @@
     // Called when Local Search results are returned, we clear the old
     // results and load the new ones.
     function OnLocalSearch(searchTerm) {
-      if (!gLocalSearch.results) return;
+      if (!gLocalSearch.results) {
+        
+        return;
+      }
       var searchWell = document.getElementById("address-list");
 
       gCurrentResults = [];
@@ -262,12 +265,15 @@
       for (var i = 0; i < numToDisplay; i++) {
         gCurrentResults.push(new LocalResult(gLocalSearch.results[i]));
       }
-          
+      
+      // Link to google maps- left out since execute for the maps command currently does this
+      /*    
       var googleMapsUrl = "http://maps.google.com/?q=" + encodeURIComponent(searchTerm);
       var gUrlDiv = document.createElement("div");
       gUrlDiv.innerHTML = "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
       document.getElementById("address-list").appendChild(gUrlDiv);
-    
+      */
+      
       // move the map to the first result
       var first = gLocalSearch.results[0];
       var point = new google.maps.LatLng(first.lat, first.lng);
@@ -275,15 +281,28 @@
       currentMarker = new GMarker(point);
       gMap.addOverlay(currentMarker);
       
+      // Makes a url for an email - uses %26 in place of & 
+      var curCenter = gMap.getCenter();
       var staticMap = "http://maps.google.com/staticmap?" +
-                        "markers=" + first.lat + "," + first.lng + "," + "red%26" +
+                        "markers=" + curCenter.lat() + "," + curCenter.lng() + "," + "red%26" +
                         "zoom=13%26" +
                         "size=450x240%26" + 
                         "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+          
+
       document.getElementById("send-link").href = "mailto:?Subject=" + first.titleNoFormatting + "&body=" + staticMap;
       
     }
 
+    function getStaticMapUrl(length, width) {
+      var curCenter = gMap.getCenter();
+      var url = "http://maps.google.com/staticmap?" +
+                "markers=" + curCenter.lat() + "," + curCenter.lng() + "," + "red&" +
+                "zoom=13&" +
+                "size=" + length + "x" + width + "&" + 
+                "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+      return url;
+    }
 
     // A class representing a single Local Search result returned by the
     // Google AJAX Search API.
@@ -344,7 +363,9 @@
     }
     
     function insertMap( ) {
-      insertHtml( jQuery("#map").html() );
+      
+      var mapHtml = jQuery("#map").html();
+      insertHtml( "<img src='" + getStaticMapUrl(325, 200) + "'\>" );
     }
       
       
@@ -353,7 +374,7 @@
 
       var html = "<div class=\"no-print\">" + 
                  "<div id=\"selected-address\"></div>" + 
-                 "<div class=\"map-actions\"> <a onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a id=\"send-link\" >Send</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" >Link</a> </div>" + 
+                 "<div class=\"map-actions\"> <a onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a id=\"send-link\" >Send</a></div>" + 
                  "</div>" +
                  "<div id=\"map\"/></div>" +
                  "<div class=\"no-print\">" + 
