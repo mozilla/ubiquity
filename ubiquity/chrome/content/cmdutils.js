@@ -227,6 +227,56 @@ CmdUtils.FBLog = function FBLog( arg1, arg2 ){
 
 
 // -----------------------------------------------------------------
+// SNAPSHOT RELATED
+// -----------------------------------------------------------------
+
+CmdUtils.getHiddenWindow = function getHiddenWindow() {
+  return Components.classes["@mozilla.org/appshell/appShellService;1"]
+                   .getService(Components.interfaces.nsIAppShellService)
+                   .hiddenDOMWindow;
+}
+
+CmdUtils.snapshotWindow = function snapshotWindow( window, callback) {
+  var top = 0;
+  var left = 0;
+
+  var hiddenWindow = CmdUtils.getHiddenWindow();
+  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+
+  var body = window.document.body;
+
+  var width = jQuery(body).width();
+  var height = window.innerHeight+110;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  var ctx = canvas.getContext( "2d" );
+  ctx.drawWindow( window, left, top, width, height, "rgb(255,255,255)" );
+  callback( canvas.toDataURL() );
+}
+
+CmdUtils.snapshotImage = function snapshotImage( url, callback ) {
+  var hiddenWindow = CmdUtils.getHiddenWindow();
+  var body = hiddenWindow.document.body;
+
+  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  
+  var img = new hiddenWindow.Image();
+  img.src = url;//"http://www.google.com/logos/olympics08_opening.gif";
+  img.addEventListener("load", function(){
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext( "2d" );
+    ctx.drawImage( img, 0, 0 );
+    
+    callback( canvas.toDataURL() );
+  }, true)  
+}
+
+
+
+// -----------------------------------------------------------------
 // COMMAND CREATION FUNCTIONS
 // -----------------------------------------------------------------
 
