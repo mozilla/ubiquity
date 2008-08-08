@@ -790,42 +790,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-CmdUtils.CreateCommand({
-  name: "aza",
-  takes: {"selection": arbHtml},
-  preview: function( pblock, html ) {
-    var div = CmdUtils.getDocumentInsecure().createElement("div");
-    div.innerHTML = html;
-
-    var host = CmdUtils.getWindowInsecure().location.host;
-    /*
-    var houses = [];
-    jQuery(div).find("a").each( function(){
-      houses.push({
-        href: "http://" + host + jQuery(this).attr("href"),
-        title: jQuery(this).text()
-      })
-    });
-    */
-
-    CmdUtils.showPreviewFromFile( pblock,
-                                  "templates/map_simple.html",
-                                  function(winInsecure) {
-      winInsecure.addPoint( 0,0 );
-      //winInsecure.addPointByName( "Mountain View");
-      /*
-      for( var i=0; i < houses.length; i++ ){
-        jQuery.get( houses[i].href, function( html ) {
-          FBLog( html );
-        }, "html");
-      }*/
-
-    });
-
-    //FBLog( houses );
-  }
-})
-
 // -----------------------------------------------------------------
 // MISC COMMANDS
 // -----------------------------------------------------------------
