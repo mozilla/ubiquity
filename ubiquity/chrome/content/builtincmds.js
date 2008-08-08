@@ -802,7 +802,70 @@ function cmd_view_source() {
   CmdUtils.getWindowInsecure().location = url;
 }
 
+/* TODO
+From Abi:
+	I think the ones I most often use would be to check the current status
+	of a specific friend (or maybe, the last 3 statuses). The ability to
+	check your friends timeline as a whole would also be nice.
+ 
+ 
+*/
 
+// max of 140 chars is recommended, but it really allows 160
+const TWITTER_STATUS_MAXLEN = 160;
+
+
+CmdUtils.CreateCommand({
+	name: "twitter",
+	icon: "http://assets3.twitter.com/images/favicon.ico",
+	takes: {status: arbText},
+	modifiers: {},
+	preview: function(previewBlock, statusText) {
+		var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
+		var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
+		var previewData = {
+			status: statusText,
+			chars: TWITTER_STATUS_MAXLEN - statusText.length
+		};
+			
+		var previewHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
+		
+		if(previewData.chars < 0) {
+			var truncateData = {
+				truncate: 0 - previewData.chars
+			};
+			
+			previewHTML += CmdUtils.renderStringTemplate(truncateTemplate, truncateData);
+		}
+		
+		previewBlock.innerHTML = previewHTML;
+	},
+	execute: function(statusText) {
+		if(statusText.length < 1) {
+			displayMessage("Twitter requires a status to be entered");
+			return;
+		}
+		
+		var updateUrl = "https://twitter.com/statuses/update.json";
+		var updateParams = {
+			source: "ubiquity",
+			status: statusText
+			};
+		
+		jQuery.ajax({
+			type: "POST",
+			url: updateUrl,
+			data: updateParams,
+			dataType: "json",
+			error: function() {
+				displayMessage("Twitter error - status not updated");
+			},
+			success: function() {
+				displayMessage("Twitter status updated");
+			}
+		});
+	}
+});
 
 
 // -----------------------------------------------------------------
