@@ -5,16 +5,18 @@ function CommandManager(cmdSource, msgService, isJapaneseMode) {
   this.__lastInput = "";
   if (isJapaneseMode) {
     this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands(),
-					    jpGetNounList());
-  } else
+					    cmdSource.getAllNounTypes());
+  } else {
     this.__nlParser = new NLParser( cmdSource.getAllCommands(),
-                                    getNounList());
+                                    cmdSource.getAllNounTypes());
+  }
 }
 
 CommandManager.prototype = {
   refresh : function() {
     this.__cmdSource.refresh();
     this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
+    this.__nlParser.setNounList( this.__cmdSource.getAllNounTypes());
     this.__hilitedSuggestion = 0;
     this.__lastInput = "";
   },
@@ -100,10 +102,12 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
   this._messageService = messageService;
   this._commands = [];
   this._codeCache = [];
+  this._nounTypes = [];
 }
 
 CommandSource.prototype = {
   CMD_PREFIX : "cmd_",
+  NOUN_PREFIX : "noun_",
 
   refresh : function() {
     for (var i = 0; i < this._codeSources.length; i++) {
@@ -169,8 +173,9 @@ CommandSource.prototype = {
     };
 
     var commandNames = [];
+    var nounTypes = [];
 
-    for (objName in sandbox)
+    for (objName in sandbox) {
       if (objName.indexOf(this.CMD_PREFIX) == 0) {
         var cmd = makeCmdForObj(objName);
         var icon = sandbox[objName].icon;
@@ -180,13 +185,22 @@ CommandSource.prototype = {
                            name : cmd.name,
                            icon : icon});
       }
+      if (objName.indexOf(this.NOUN_PREFIX) == 0) {
+	nounTypes.push( sandbox[objName] );
+      }
+    }
 
     this._commands = commands;
     this.commandNames = commandNames;
+    this._nounTypes = nounTypes;
   },
 
   getAllCommands: function() {
     return this._commands;
+  },
+
+  getAllNounTypes: function() {
+    return this._nounTypes;
   },
 
   getCommand : function(name) {

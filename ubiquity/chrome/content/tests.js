@@ -11,6 +11,9 @@ FakeCommandSource.prototype = {
   getAllCommands: function(name) {
     return this._cmdList;
   },
+  getAllNounTypes: function() {
+    return [];
+  },
   refresh: function() {
   }
 };
@@ -354,8 +357,10 @@ function testCmdManagerSuggestsForEmptyInput() {
 	      DOLabel:"stuff",
 	      DOType:nounTypeTwo}
   });
+  fakeSource.getAllNounTypes = function() {
+    return [nounTypeOne, nounTypeTwo];
+  };
   var cmdMan = new CommandManager(fakeSource, null);
-  cmdMan.__nlParser._nounTypeList = [nounTypeOne, nounTypeTwo];
   var getAC = makeDefaultCommandSuggester(cmdMan);
   var suggDict = getAC({textSelection:"tree"});
   this.assert( suggDict["Cmd_one"] );

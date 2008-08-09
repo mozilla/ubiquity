@@ -14,7 +14,7 @@ function trim (str) {
 // command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
   name: "tag",
-  takes : {"text" : arbText},
+  takes : {"text" : noun_arb_text},
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   preview: function(aEl, aTagsString) {
     aEl.innerHTML = "Describe the current location with tags";

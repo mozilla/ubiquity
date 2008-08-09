@@ -21,8 +21,7 @@ NLParser.prototype = {
     var suggs = [];
     var x, y, nounType, verb, words;
 
-    for (x in this._nounTypeList) {
-      nounType = this._nounTypeList[x];
+    for each (nounType in this._nounTypeList) {
       if (nounType.match(input)){
 	for (y in this._verbList) {
 	  verb = this._verbList[y];
@@ -131,5 +130,9 @@ NLParser.prototype = {
 
   setCommandList: function( commandList ) {
     this._verbList = [ new Verb( commandList[x] ) for (x in commandList) ];
+  },
+
+  setNounList: function( nounList ) {
+    this._nounTypeList = nounList;
   }
 };

@@ -261,7 +261,7 @@ CmdUtils.snapshotImage = function snapshotImage( url, callback ) {
   var body = hiddenWindow.document.body;
 
   var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
-  
+
   var img = new hiddenWindow.Image();
   img.src = url;//"http://www.google.com/logos/olympics08_opening.gif";
   img.addEventListener("load", function(){
@@ -269,9 +269,9 @@ CmdUtils.snapshotImage = function snapshotImage( url, callback ) {
     canvas.height = img.height;
     var ctx = canvas.getContext( "2d" );
     ctx.drawImage( img, 0, 0 );
-    
+
     callback( canvas.toDataURL() );
-  }, true)  
+		       }, true);
 }
 
 
@@ -283,8 +283,8 @@ CmdUtils.snapshotImage = function snapshotImage( url, callback ) {
 
 // Use like this:
 // cmd_yelp.setOptions({
-//  takes: { "restaurant":arbText },
-//  modifiers: { near:arbText },
+//  takes: { "restaurant":noun_arb_text },
+//  modifiers: { near:noun_arb_text },
 //  icon: "http://www.yelp.com/favicon.ico"
 // })
 Function.prototype.setOptions = function( options ) {
@@ -381,11 +381,11 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
     iframe.contentDocument.documentElement.appendChild(browser);
     browser.contentWindow.addEventListener("load", onBodyLoad, false);
   }
-  
+
   iframe.addEventListener("load", CmdUtils.safeWrapper(onXulLoad), true);
   pblock.innerHTML = "";
   pblock.appendChild(iframe);
-  
+
   // In order to modify the browser/iframe size based on contents, add an event listener to check when the DOM is modified.
   // This is done by specifically inserting a div when the preview size changes.
   // This currently prevents the use of animation for the preview-pane... hopefully find a fix for future release.

@@ -16,7 +16,7 @@ function makeSearchCommand( options ) {
   };
 
   cmd.setOptions({
-    takes: {"search term": arbText},
+    takes: {"search term": noun_arb_text},
     icon: options.icon,
     preview: function(pblock, query, modifiers) {
       if (query) {
@@ -147,10 +147,10 @@ var cmd_bugzilla = makeSearchCommand({
 
 CmdUtils.CreateCommand({
   name: "yelp",
-  takes: { "restaurant":arbText },
-  // TODO: Should be AddressNounType, which is currently broken.
+  takes: { "restaurant":noun_arb_text },
+  // TODO: Should be noun_type_address, which is currently broken.
   // See http://labs.toolness.com/trac/ticket/44
-  modifiers: { near:arbText },
+  modifiers: { near:noun_arb_text },
   icon: "http://www.yelp.com/favicon.ico",
 
   execute: function( query, info ) {
@@ -236,7 +236,7 @@ function cmd_redo() {
 
 CmdUtils.CreateCommand({
   name: "calculate",
-  takes: {"expression": arbText},
+  takes: {"expression": noun_arb_text},
   icon: "http://www.metacalc.com/favicon.ico",
   execute: function( expr ) {
     if( expr.length > 0 ) {
@@ -277,7 +277,7 @@ function defineWord(word, callback) {
 
 CmdUtils.CreateCommand({
   name: "define",
-  takes: {"word": arbText},
+  takes: {"word": noun_arb_text},
   execute: function( word ) {
     Utils.openUrlInBrowser( "http://www.answers.com/" + escape(word) );
   },
@@ -301,7 +301,7 @@ CmdUtils.CreateCommand({
 // TODO: Add the ability to select the style of code highlighting.
 CmdUtils.CreateCommand({
   name: "syntax-highlight",
-  takes: {"code": arbText},
+  takes: {"code": noun_arb_text},
   execute: function( code ) {
     var url = "http://azarask.in/services/syntaxhighlight/color.py";
     var params = {
@@ -336,7 +336,7 @@ cmd_highlight.preview = function(pblock) {
 
 CmdUtils.CreateCommand({
   name : "link-to-wikipedia",
-  takes : {"text" : arbText},
+  takes : {"text" : noun_arb_text},
 
   execute : function( text ){
     var wikiText = text.replace(/ /g, "_");
@@ -446,8 +446,8 @@ function translateTo( text, langCodePair, callback ) {
 
 CmdUtils.CreateCommand({
   name: "translate",
-  takes: {"text to translate": arbText},
-  modifiers: {to: languageNounType, from: languageNounType},
+  takes: {"text to translate": noun_arb_text},
+  modifiers: {to: noun_type_language, from: noun_type_language},
 
   execute: function( textToTranslate, languages ) {
     // Default to translating to English if no to language
@@ -498,7 +498,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "remember",
-  takes: {"thing": arbText},
+  takes: {"thing": noun_arb_text},
   execute: function( thing, modifiers ) {
     displayMessage( "I am remembering " + thing );
     CmdUtils.setLastResult( thing );
@@ -548,8 +548,8 @@ function findGmailTab() {
 
 CmdUtils.CreateCommand({
   name: "email",
-  takes: {"message": arbHtml},
-  modifiers: {to: PersonNounType},
+  takes: {"message": noun_arb_html},
+  modifiers: {to: noun_type_contact},
 
   preview: function(pblock, directObject, modifiers) {
     var html = "Creates an email message ";
@@ -676,7 +676,7 @@ function addToGoogleCalendar(eventString) {
  here.  Should we be?  And, is there a better name for this command? */
 CmdUtils.CreateCommand({
   name: "add-to-calendar",
-  takes: {"event": arbText}, // TODO: use DateNounType or EventNounType?
+  takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
   preview: "Adds the event to Google Calendar.",
   execute: function( eventString ) {
     addToGoogleCalendar( eventString );
@@ -697,7 +697,7 @@ function checkCalendar(pblock, date) {
 
 CmdUtils.CreateCommand({
   name: "check-calendar",
-  takes: {"date to check": DateNounType},
+  takes: {"date to check": noun_type_date},
   execute: function( date ) {
     var url = "http://www.google.com/calendar/m";
     var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
@@ -721,7 +721,7 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 
 CmdUtils.CreateCommand({
   name: "weather",
-  takes: {"location": arbText},
+  takes: {"location": noun_arb_text},
 
   execute: function( location ) {
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
@@ -771,12 +771,12 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "map",
-  takes: {"address": arbText},
+  takes: {"address": noun_arb_text},
   execute: function( location ) {
-           	   
-    var url = "http://maps.google.com/?q="; 
+
+    var url = "http://maps.google.com/?q=";
     url += encodeURIComponent(location);
- 
+
     Utils.openUrlInBrowser( url );
   },
   preview: function(pblock, location) {
@@ -789,7 +789,7 @@ CmdUtils.CreateCommand({
         var doc = context.focusedWindow.document;
         var focused = context.focusedElement;
 
-        CmdUtils.setLastResult( html );	   
+        CmdUtils.setLastResult( html );
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);
         }
@@ -821,8 +821,8 @@ From Abi:
 	I think the ones I most often use would be to check the current status
 	of a specific friend (or maybe, the last 3 statuses). The ability to
 	check your friends timeline as a whole would also be nice.
- 
- 
+
+
 */
 
 // max of 140 chars is recommended, but it really allows 160
@@ -832,7 +832,7 @@ const TWITTER_STATUS_MAXLEN = 160;
 CmdUtils.CreateCommand({
 	name: "twitter",
 	icon: "http://assets3.twitter.com/images/favicon.ico",
-	takes: {status: arbText},
+	takes: {status: noun_arb_text},
 	modifiers: {},
 	preview: function(previewBlock, statusText) {
 		var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
@@ -841,17 +841,17 @@ CmdUtils.CreateCommand({
 			status: statusText,
 			chars: TWITTER_STATUS_MAXLEN - statusText.length
 		};
-			
+
 		var previewHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
-		
+
 		if(previewData.chars < 0) {
 			var truncateData = {
 				truncate: 0 - previewData.chars
 			};
-			
+
 			previewHTML += CmdUtils.renderStringTemplate(truncateTemplate, truncateData);
 		}
-		
+
 		previewBlock.innerHTML = previewHTML;
 	},
 	execute: function(statusText) {
@@ -859,13 +859,13 @@ CmdUtils.CreateCommand({
 			displayMessage("Twitter requires a status to be entered");
 			return;
 		}
-		
+
 		var updateUrl = "https://twitter.com/statuses/update.json";
 		var updateParams = {
 			source: "ubiquity",
 			status: statusText
 			};
-		
+
 		jQuery.ajax({
 			type: "POST",
 			url: updateUrl,
@@ -885,50 +885,16 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 // TAB COMMANDS
 // -----------------------------------------------------------------
-var TabNounType = {
-  _name: "tab name",
-
-  // Returns all tabs from all windows.
-  getTabs: function(){
-    var tabs = {};
-
-    for( var j=0; j < Application.windows.length; j++ ) {
-      var window = Application.windows[j];
-      for (var i = 0; i < window.tabs.length; i++) {
-        var tab = window.tabs[i];
-        tabs[tab.document.title] = tab;
-      }
-    }
-
-    return tabs;
-  },
-
-  match:function( fragment ) {
-    return TabNounType.suggest( fragment ).length > 0;
-  },
-
-  suggest: function( fragment ) {
-    var suggestions  = [];
-    var tabs = TabNounType.getTabs();
-
-    //TODO: implement a better match algorithm
-    for ( var tabName in tabs ) {
-      if (tabName.match(fragment, "i"))
-	      suggestions.push( tabName );
-    }
-    return suggestions.splice(0, 5);
-  }
-}
 
 CmdUtils.CreateCommand({
   name: "tab",
-  takes: {"tab name": TabNounType},
+  takes: {"tab name": noun_type_tab},
 
   // TODO: BUG. This seems to get passed the first of whatever
   // it is in the suggestion list, instead of the selected thing
   // in the suggestion list. I wonder why that is?
   execute: function( tabName ) {
-    var tabs = TabNounType.getTabs();
+    var tabs = noun_type_tab.getTabs();
     tabs[tabName]._window.focus();
     tabs[tabName].focus();
   },
@@ -944,10 +910,10 @@ CmdUtils.CreateCommand({
 // Closes a single tab
 CmdUtils.CreateCommand({
   name: "close-tab",
-  takes: {"tab name": TabNounType},
+  takes: {"tab name": noun_type_tab},
 
   execute: function( tabName ) {
-    var tabs = TabNounType.getTabs();
+    var tabs = noun_type_tab.getTabs();
     tabs[tabName].close();
     displayMessage(tabName + " tab closed");
   },
@@ -963,7 +929,7 @@ CmdUtils.CreateCommand({
 //Closes all tabs related to the specified word
 CmdUtils.CreateCommand({
   name: "close-related-tabs",
-  takes: {"related word": arbText},
+  takes: {"related word": noun_arb_text},
 
   preview: function( pblock, query ) {
     var relatedWord = query.toLowerCase();

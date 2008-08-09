@@ -22,42 +22,41 @@ function getGmailContacts( callback ) {
   });
 }
 
-var PersonNounType = {
+var noun_type_contact = {
   _name: "contact",
   contactList: null,
   callback:function(contacts) {
-    PersonNounType.contactList = contacts;
+    noun_type_contact.contactList = contacts;
   },
   match:function( fragment ) {
-    if (PersonNounType.contactList == null) {
-      getGmailContacts( PersonNounType.callback);
+    if (noun_type_contact.contactList == null) {
+      getGmailContacts( noun_type_contact.callback);
       return false;
     }
-    for ( var c in PersonNounType.contactList ) {
+    for ( var c in noun_type_contact.contactList ) {
       if (c.match(fragment, "i"))
 	    return true;
     }
     return false;
   },
   suggest: function( fragment ) {
-    if (PersonNounType.contactList == null) {
-      getGmailContacts( PersonNounType.callback);
+    if (noun_type_contact.contactList == null) {
+      getGmailContacts( noun_type_contact.callback);
       return [];
     }
 
     if( fragment.length < 3 ) return [];
 
     var suggestions  = [];
-    for ( var c in PersonNounType.contactList ) {
+    for ( var c in noun_type_contact.contactList ) {
       if (c.match(fragment, "i"))
-	      suggestions.push(PersonNounType.contactList[c]);
+	      suggestions.push(noun_type_contact.contactList[c]);
     }
     return suggestions.splice(0, 5);
   }
 };
 
-var arbText = {
-  // a singleton object which can be used in place of a NounType.
+var noun_arb_text = {
  _name: "text",
  match: function( fragment ) {
     return true;
@@ -67,7 +66,7 @@ var arbText = {
   }
 };
 
-var arbHtml = {
+var noun_arb_html = {
   _name: "html",
   expectsHtmlSelection: true,
   match: function( fragment ) {
@@ -78,7 +77,7 @@ var arbHtml = {
   }
 };
 
-var DateNounType = {
+var noun_type_date = {
   _name: "date",
   match: function( fragment ) {
     return (this.suggest(fragment).length > 0 );
@@ -151,41 +150,41 @@ function isAddress( query, callback ) {
 }
 
 // TODO this is a really crappy implementation for async address detection
-var AddressNounType = {
+var noun_type_address = {
   _name: "address",
   knownAddresses: [],
   maybeAddress: null,
   callback: function( isAnAddress ) {
     if (isAnAddress) {
-      AddressNounType.knownAddresses.push( AddressNounType.maybeAddress );
+      noun_type_address.knownAddresses.push( noun_type_address.maybeAddress );
     }
-    AddressNounType.maybeAddress = null;
+    noun_type_address.maybeAddress = null;
   },
   match: function( fragment ) {
-    for( x in AddressNounType.knownAddresses) {
-      if (AddressNounType.knownAddresses[x] == fragment) {
+    for( x in noun_type_address.knownAddresses) {
+      if (noun_type_address.knownAddresses[x] == fragment) {
 	return true;
       }
     }
-    AddressNounType.maybeAddress = fragment;
-    isAddress( fragment, AddressNounType.callback );
+    noun_type_address.maybeAddress = fragment;
+    isAddress( fragment, noun_type_address.callback );
     return false;
   },
   suggest: function( fragment ) {
-    isAddress( fragment, AddressNounType.callback );
-    for( x in AddressNounType.knownAddresses) {
-      if (AddressNounType.knownAddresses[x] == fragment) {
+    isAddress( fragment, noun_type_address.callback );
+    for( x in noun_type_address.knownAddresses) {
+      if (noun_type_address.knownAddresses[x] == fragment) {
 	return [ fragment ];
       }
     }
-    AddressNounType.maybeAddress = fragment;
-    isAddress( fragment, AddressNounType.callback );
+    noun_type_address.maybeAddress = fragment;
+    isAddress( fragment, noun_type_address.callback );
     return [];
   }
 };
 
 // TODO replace this with ???
-var MathNounType = {
+var noun_type_math = {
   match: function( fragment ) {
 
   },
@@ -217,17 +216,39 @@ var Languages = [
   'Swedish'
 ];
 
-var languageNounType = new NounType( "language", Languages );
+var noun_type_language = new NounType( "language", Languages );
 
+var noun_type_tab = {
+  _name: "tab name",
 
-// arbText and arbHtml are last on purpose, so that when we're looking for
-// a nountype to match our input, we'll hit the specific ones before the catch-alls.
-function getNounList() {
-  return [AddressNounType,
-          languageNounType,
-          PersonNounType,
-          MathNounType,
-          DateNounType,
-          arbText,
-          arbHtml];
+  // Returns all tabs from all windows.
+  getTabs: function(){
+    var tabs = {};
+
+    for( var j=0; j < Application.windows.length; j++ ) {
+      var window = Application.windows[j];
+      for (var i = 0; i < window.tabs.length; i++) {
+        var tab = window.tabs[i];
+        tabs[tab.document.title] = tab;
+      }
+    }
+
+    return tabs;
+  },
+
+  match:function( fragment ) {
+    return noun_type_tab.suggest( fragment ).length > 0;
+  },
+
+  suggest: function( fragment ) {
+    var suggestions  = [];
+    var tabs = noun_type_tab.getTabs();
+
+    //TODO: implement a better match algorithm
+    for ( var tabName in tabs ) {
+      if (tabName.match(fragment, "i"))
+	      suggestions.push( tabName );
+    }
+    return suggestions.splice(0, 5);
+  }
 }

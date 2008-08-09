@@ -23,9 +23,9 @@ var JLanguages = {
 };
 
 var key;
-var jpLanguageNounType = new NounType( "言葉", [key for (key in JLanguages)]);
+var noun_type_jp_language = new NounType( "言葉", [key for (key in JLanguages)]);
 
-var jpArbText = {
+var noun_jpArbText = {
  _name: "何でもテキスト",
  match: function( fragment ) {
     return true;
@@ -35,6 +35,3 @@ var jpArbText = {
   }
 };
 
-function jpGetNounList() {
-  return [jpLanguageNounType, jpArbText];
-}
