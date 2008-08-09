@@ -20,8 +20,7 @@ function makeBuiltinGlobals(msgService, ubiquityGlobals) {
 function makeBuiltinCodeSources(isJapaneseMode) {
   var codeSources = [
     new LocalUriCodeSource("chrome://ubiquity/content/utils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nounTypeBase.js")
+    new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js")
   ];
   if (isJapaneseMode) {
     codeSources = codeSources.concat([

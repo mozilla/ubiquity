@@ -216,7 +216,7 @@ var Languages = [
   'Swedish'
 ];
 
-var noun_type_language = new NounType( "language", Languages );
+var noun_type_language = new CmdUtils.NounType( "language", Languages );
 
 var noun_type_tab = {
   _name: "tab name",

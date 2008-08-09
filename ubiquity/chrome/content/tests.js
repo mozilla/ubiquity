@@ -278,7 +278,7 @@ function testImportWorksWithoutSandboxContext() {
 
 function testParseDirectOnly() {
   var dogGotPetted = false;
-  var dog = new NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var cmd_pet = {
     execute: function(context, directObject, modifiers) {
@@ -309,10 +309,11 @@ function testParseWithModifier() {
   // wash dog with sponge
   var dogGotWashed = null;
   var dogGotWashedWith = null;
-  var dog = new NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
 				"beagle", "bulldog", "husky"]);
-  var washingObj = new NounType( "washing object", ["sponge", "hose", "spork",
-						    "bathtub", "fire hose"]);
+  var washingObj = new CmdUtils.NounType( "washing object",
+					  ["sponge", "hose", "spork",
+					  "bathtub", "fire hose"]);
   var cmd_wash = {
     execute: function(context, directObject, modifiers) {
       dogGotWashed = directObject;
@@ -346,8 +347,8 @@ function testParseWithModifier() {
 function testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
-  var nounTypeOne = new NounType( "thingType", ["tree"] );
-  var nounTypeTwo = new NounType( "stuffType", ["mud"] );
+  var nounTypeOne = new CmdUtils.NounType( "thingType", ["tree"] );
+  var nounTypeTwo = new CmdUtils.NounType( "stuffType", ["mud"] );
   var fakeSource = new FakeCommandSource(
   {
     cmd_one: {execute:function(context, directObj) {oneWasCalled = directObj;},
@@ -379,8 +380,8 @@ function testCmdManagerSuggestsForEmptyInput() {
 function testVerbEatsSelection() {
   var foodGotEaten = null;
   var foodGotEatenAt = null;
-  var food = new NounType( "food", ["breakfast", "lunch", "dinner"]);
-  var place = new NounType( "place", ["grill", "diner", "home"]);
+  var food = new CmdUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
+  var place = new CmdUtils.NounType( "place", ["grill", "diner", "home"]);
   var cmd_eat = {
     name: "eat",
     execute: function(context, directObject, modifiers) {
@@ -419,8 +420,8 @@ function testVerbEatsSelection() {
 function testImplicitPronoun() {
   var foodGotEaten = null;
   var foodGotEatenAt = null;
-  var food = new NounType( "food", ["breakfast", "lunch", "dinner"]);
-  var place = new NounType( "place", ["grill", "diner", "home"]);
+  var food = new CmdUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
+  var place = new CmdUtils.NounType( "place", ["grill", "diner", "home"]);
   var cmd_eat = {
     name: "eat",
     execute: function(context, directObject, modifiers) {
