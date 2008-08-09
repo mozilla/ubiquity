@@ -3,7 +3,8 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-  
+<head></head>
+ 
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/date.js"/>
   <script type="application/javascript;version=1.7"
