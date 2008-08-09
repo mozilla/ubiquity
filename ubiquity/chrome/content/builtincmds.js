@@ -890,9 +890,6 @@ CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": noun_type_tab},
 
-  // TODO: BUG. This seems to get passed the first of whatever
-  // it is in the suggestion list, instead of the selected thing
-  // in the suggestion list. I wonder why that is?
   execute: function( tabName ) {
     var tabs = noun_type_tab.getTabs();
     tabs[tabName]._window.focus();
