@@ -19,18 +19,29 @@ function ParsedSentence( verb, DO, modifiers ) {
   this._init( verb, DO, modifiers );
 }
 ParsedSentence.prototype = {
-  _init: function( verb, DO, modifiers ) {
+  _init: function( verb, DO, modifiers) {
     /* modifiers is dictionary of preposition: noun */
     if (verb){
       this._verb = verb;
       this._DO = DO;
       this._modifiers = modifiers;
+      this._summarizedModifiers = {};
+      this._summarizedDO = this._summarize(DO);
+      for (let x in modifiers) {
+	this._summarizedModifiers[x] = this._summarize(modifiers[x]);
+      }
     }
   },
 
+  _summarize: function(longText) {
+    if (longText.length > 80)
+      return "your selection (\"" + longText.slice(0,50) + "...\")";
+    return longText;
+  },
+
   getCompletionText: function() {
-    // return plain text that we should set the input box to if user hits
-    // space bar on this sentence.
+    /* return plain text that we should set the input box to if user hits
+     autocompletes to this sentence.  Currently unused! */
     var sentence = this._verb._name;
     if ( this._DO ) {
       sentence = sentence + " " + this._DO;
@@ -45,10 +56,10 @@ ParsedSentence.prototype = {
 
   getDisplayText: function() {
     // returns html formatted sentence for display in suggestion list
-    var sentence = this._verb._name;
+    let sentence = this._verb._name;
     if ( this._verb._DOType ) {
       if ( this._DO ) {
-	sentence = sentence + " " + this._DO;
+	sentence = sentence + " " + this._summarizedDO;
       } else {
 	//var arg = this._verb._DOLabel.substring
 	sentence = sentence + " <span class=\"needarg\">(" + this._verb._DOLabel + ")</span>";
@@ -57,7 +68,7 @@ ParsedSentence.prototype = {
 
     for ( var x in this._verb._modifiers ) {
       if ( this._modifiers[ x ] ) {
-	sentence = sentence + " <b>" +  x + " " + this._modifiers[x] + "</b>";
+	sentence = sentence + " <b>" +  x + " " + this._summarizedModifiers[x] + "</b>";
       } else {
 	sentence = sentence + " <span class=\"needarg\">(" + x + " " + this._verb._modifiers[x]._name + ")</span>";
       }
@@ -70,7 +81,9 @@ ParsedSentence.prototype = {
   },
 
   preview: function(context, previewBlock) {
-    this._verb.preview( context, this._DO, this._modifiers, previewBlock );
+    this._verb.preview( context, this._summarizedDO,
+			this._summarizedModifiers, previewBlock );
+
   }
 };
 
