@@ -536,10 +536,16 @@ CmdUtils.CreateCommand({
 function findGmailTab() {
   var window = Application.activeWindow;
 
+  var gmailURL = "://mail.google.com";
+  var currentLocation = String(Application.activeWindow.activeTab.document.location);
+  if(currentLocation.indexOf(gmailURL) != -1) {
+    return Application.activeWindow.activeTab;
+  }
+
   for (var i = 0; i < window.tabs.length; i++) {
     var tab = window.tabs[i];
     var location = String(tab.document.location);
-    if (location.indexOf("://mail.google.com") != -1) {
+    if (location.indexOf(gmailURL) != -1) {
       return tab;
     }
   }
@@ -588,7 +594,7 @@ CmdUtils.CreateCommand({
         try {
           var gmail = gmonkey.get("1");
           var sidebar = gmail.getNavPaneElement();
-          var composeMail = sidebar.getElementsByTagName("span")[0];
+          var composeMail = sidebar.getElementById(":qw");
           var event = composeMail.ownerDocument.createEvent("Events");
           event.initEvent("click", true, false);
           composeMail.dispatchEvent(event);
@@ -609,9 +615,12 @@ CmdUtils.CreateCommand({
       };
 
       gmonkey.load("1", continuer);
-    } else
-      displayMessage("Gmail must be open in a tab.");
-    // TODO why not open gmail if it's not already open?
+    } else {
+      // No gmail tab open?  Open a new one:
+      var params = {fs:1, tf:1, view:"cm", su:title, to:headers["to"], body:html};
+      Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
+			     Utils.paramsToString(params));
+    }
   }
 });
 
@@ -1024,7 +1033,7 @@ function cmd_save() {
   var body = jQuery( CmdUtils.getDocumentInsecure().body );
 
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), "ubiquity/edit", body.html(), 0, 4);
-  
+
 }
 cmd_save.preview = function( pblock ) {
   pblock.innerHTML = "Saves page edits. Undo with 'remove-annotations'";
