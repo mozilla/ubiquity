@@ -34,7 +34,10 @@ function ubiquitySetup()
                                   UbiquityGlobals.japaneseMode);
 
   var popupMenu = UbiquityPopupMenu(
+    document.getElementById("contentAreaContextMenu"),
     document.getElementById("ubiquity-menupopup"),
+    document.getElementById("ubiquity-menu"),
+    document.getElementById("ubiquity-separator"),
     makeDefaultCommandSuggester(cmdMan)
   );
 
