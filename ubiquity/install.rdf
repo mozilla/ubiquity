@@ -12,8 +12,8 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>2.0</em:minVersion>
-        <em:maxVersion>3.0.*</em:maxVersion>
+        <em:minVersion>3.0</em:minVersion>
+        <em:maxVersion>3.1.*</em:maxVersion>
       </Description>
     </em:targetApplication>
    
@@ -22,5 +22,6 @@
     <em:description>An extension that allows for the use of dynamic commands in Firefox.</em:description>
     <em:creator>Mozilla Corporation</em:creator>
     <em:homepageURL>http://wiki.mozilla.org/Labs/Ubiquity</em:homepageURL>
+    <em:updateURL>https://labs.toolness.com/ubiquity/update.rdf</em:updateURL>
   </Description>
 </RDF>
