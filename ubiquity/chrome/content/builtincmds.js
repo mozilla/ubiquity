@@ -789,7 +789,10 @@ CmdUtils.CreateCommand({
         var doc = context.focusedWindow.document;
         var focused = context.focusedElement;
 
-        CmdUtils.setLastResult( html );
+        // This would be nice to store the map in the buffer...
+	// But for now, it causes a problem with a large image showing up as the default
+        //CmdUtils.setLastResult( html );	   
+
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);
         }
@@ -797,7 +800,7 @@ CmdUtils.CreateCommand({
 	  CmdUtils.setTextSelection(html);
 	}
 	else {
-	  displayMessage("Cannot insert- not in an editable region. Use 'edit page' for an editable page.")
+	  displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.")
 	}
       };
     });

@@ -3,7 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Google Maps JavaScript API Example: Simple Map</title>
     <script src="http://maps.google.com/maps?file=api&amp;v=2&key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA"
             type="text/javascript">
     </script>
@@ -29,9 +28,6 @@
     }
 
     #preview-pane {
-      padding-left: 15px;
-      padding: 7px;
-      border-left: solid 1px #0066cc;
       height: 140px;      
     }
     #preview-pane-large {
@@ -41,13 +37,20 @@
 
     /* initial map preview */
     #map {
-      width: 200px;
-      height: 130px;
+      width: 200px !important;
+      height: 130px !important;
       float: left;
       cursor: pointer;
       border: 5px solid #0066cc;
       -moz-border-radius: 5px 0px 5px 5px;
     }
+    #map-large {
+      width: 100%;
+      height: 240px;
+      float: left;
+      border: none;
+    }
+
     #address-list {
       position: relative;
       float: left;
@@ -72,10 +75,6 @@
       color: #ffffff;
       -moz-border-radius: 0px 5px 5px 0px;
     }
-    .gaddress:hover {
-     
-    }
-    
     .gaddress a {
       color: #bfbfbf;
     }
@@ -83,16 +82,7 @@
       color: #ffffff;
       text-decoration: none;
     }
-    #goto-gmaps {
-      position: absolute;
-      bottom: 0px;
-      right: 5px;
-      font-size: x-small;
-      padding-left: 0px;
-    }
-    #goto-gmaps a {
-      color: #0066cc;
-    }
+    
     /* secondary map preview */
     #selected-address {
       color: #bfbfbf;
@@ -119,37 +109,50 @@
      @media print {
       .no-print{ display: none;}
     }
-
-   
     </style>
+
     <script type="text/javascript">
 
     google.load('search', '1');
     google.load('maps', '2');
     
-    
     var gLocalSearch;
     var gMap;
     var gSelectedResults = [];
     var gCurrentResults = [];
-    var gSearchForm;
     var currentMarker;
     var mapControl;
     var mapType;
 
     // this div is inserted to make sure the DOMSubtreeModified event fires
+    // put this into DOM whenever we need the preview-pane to resize (better method would be nice)
     var hackDiv = document.createElement("div");
 
     function showAddressPreview() {
-      document.getElementById("preview-pane-large").id = "preview-pane";
+      if (document.getElementById("preview-pane-large"))
+        document.getElementById("preview-pane-large").id = "preview-pane";
       $(".map-actions").hide();  
       $("#selected-address").hide();
+      $(".suggestion").show();
+      $("#address-list").show();
 
-      /*
-      $("#preview-pane")
+      if (document.getElementById("map-large"))
+        document.getElementById("map-large").id = "map";
+      
+      gMap.removeControl(mapControl);
+      gMap.removeControl(mapType);
+      gMap.disableDragging();
+      
+      // forces the preview pane to resize based on these contents (in cmdutils.js)
+      document.getElementById("map").appendChild(hackDiv);
+      
+      // this animation doesn't work since the preview pane size has to be changed from cmdutils.js
+      /* $("#preview-pane")
         .height("300px")
         .animate({ height: "140px" });
-      
+      */
+      // this animation works, but looks bad since the above was taken out
+      /*
       $("#map").animate({ 
         width: "200px",
         height: "130px",
@@ -159,19 +162,6 @@
         $("#address-list").fadeIn( 700 );
       }, 500 );
       */
-      $("#map").width("200px");
-      $("#map").height("130px");
-      $("#map").css("border","5px solid #0066cc");
-      $(".suggestion").show();
-      $("#address-list").show();
-      
-      $("#preview-pane").height("140px");
-     
-      gMap.removeControl(mapControl);
-      gMap.removeControl(mapType);
-      gMap.disableDragging();
-      
-      document.getElementById("map").appendChild(hackDiv);
     }
     
     function showMapPreview(map) {
@@ -180,44 +170,44 @@
       $(".suggestion").hide();
       
       $("#selected-address").fadeIn( 300 );
-      document.getElementById("preview-pane").id = "preview-pane-large";
+      var previewPane = document.getElementById("preview-pane");
+      if (previewPane)
+        previewPane.id = "preview-pane-large";
       
       gMap.addControl(mapControl);
       gMap.addControl(mapType);
       gMap.enableDragging();
-      $("#map").css("border-width","0px");
-      $("#map").css("border-style","none");
-      
-      // animation: would be nice for future releases
-      /*
-      $("#preview-pane-large")
-        .height("140px")
-        .animate({ height: "300px" });
-      */
-      
-      $("#preview-pane-large").height("300px");
+            
       $("#map").animate({
         width: "100%",
         height: "240px",
-      }, 500);
-      
+      }, 500); 
       setTimeout( function(){
         $(".map-actions").fadeIn();
         $(".suggestion").slideUp( 500 );    
       }, 300 );
       
+      // forces the preview pane to resize based on these contents (in cmdutils.js)
       document.getElementById("map").appendChild(hackDiv);
+      
+      if (document.getElementById("map"))
+        document.getElementById("map").id = "map-large";
+
+      /*
+      $("#preview-pane-large")
+        .height("140px")
+        .animate({ height: "300px" });
+      */
+
     }
     
-   
+    // initializes the map and starts the local search
     function loadMap(searchTerm, index) {
       
       var currentLat;
       var currentLng;
 
-      $(".map-actions").hide();  
-      $("#selected-address").hide();
-
+      // Get the user's lattitude and longitude based on ip address
       jQuery.ajax({
         type: "GET",
         url: "http://j.maxmind.com/app/geoip.js",
@@ -234,8 +224,6 @@
 
       // Initialize the map
       gMap = new google.maps.Map2(document.getElementById("map"));
-      //var curLocation = getLocation();
-      //gMap.setCenter(new google.maps.LatLng(curLocation.lat, curLocation.long), 13);
       gMap.setCenter(new google.maps.LatLng(currentLat, currentLng), 13);
       GEvent.addListener(gMap, "click", function() {showMapPreview(gMap);});
       gMap.disableDragging();
@@ -246,16 +234,17 @@
       gLocalSearch = new google.search.LocalSearch();
       gLocalSearch.setCenterPoint(gMap);
       gLocalSearch.setSearchCompleteCallback(null, function() {OnLocalSearch(searchTerm);});
-
+            
       // Execute the initial search
       gLocalSearch.execute(searchTerm);
+      
+      showAddressPreview();
     }
 
-    // Called when Local Search results are returned, we clear the old
-    // results and load the new ones.
+    // Called when Local Search results are returned
     function OnLocalSearch(searchTerm) {
-      if (!gLocalSearch.results) {
-        
+      if (!gLocalSearch.results || gLocalSearch.results.length == 0) {
+        $("#preview-pane").html("<div>No results for '" + searchTerm + "'</div>");
         return;
       }
       var searchWell = document.getElementById("address-list");
@@ -265,33 +254,12 @@
       for (var i = 0; i < numToDisplay; i++) {
         gCurrentResults.push(new LocalResult(gLocalSearch.results[i]));
       }
-      
-      // Link to google maps- left out since execute for the maps command currently does this
-      /*    
-      var googleMapsUrl = "http://maps.google.com/?q=" + encodeURIComponent(searchTerm);
-      var gUrlDiv = document.createElement("div");
-      gUrlDiv.innerHTML = "<div id=\"goto-gmaps\">&nbsp;&nbsp;&nbsp;<a href=" + googleMapsUrl + ">Open in Google Maps</a></div>";
-      document.getElementById("address-list").appendChild(gUrlDiv);
-      */
-      
+            
       // move the map to the first result
       var first = gLocalSearch.results[0];
       var point = new google.maps.LatLng(first.lat, first.lng);
-      gMap.panTo(point);
-      currentMarker = new GMarker(point);
-      gMap.addOverlay(currentMarker);
       
-      // Makes a url for an email - uses %26 in place of & 
-      var curCenter = gMap.getCenter();
-      var staticMap = "http://maps.google.com/staticmap?" +
-                        "markers=" + curCenter.lat() + "," + curCenter.lng() + "," + "red%26" +
-                        "zoom=13%26" +
-                        "size=450x240%26" + 
-                        "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
-          
-
-      document.getElementById("send-link").href = "mailto:?Subject=" + first.titleNoFormatting + "&body=" + staticMap;
-      
+      setMarker(point, 0);
     }
 
     function getStaticMapUrl(length, width) {
@@ -304,13 +272,11 @@
       return url;
     }
 
-    // A class representing a single Local Search result returned by the
-    // Google AJAX Search API.
+    // A class representing a single Local Search result returned by the Google AJAX Search API.
     function LocalResult(result) {
       this.result_ = result;
       this.resultNode_ = this.unselectedHtml();
       document.getElementById("address-list").appendChild(this.resultNode_);
-      //gMap.addOverlay(this.marker(gSmallIcon));
     }
 
     LocalResult.prototype.unselectedHtml = function() {
@@ -343,9 +309,11 @@
       return container;
     }
 
-  
+    /* onclick for each address in the results list */
     function setMarker(point, index) {
-      gMap.removeOverlay(currentMarker);
+      // adjust the map to the new address
+      if (currentMarker)
+        gMap.removeOverlay(currentMarker);
       gMap.panTo(point);
       currentMarker = new GMarker(point);
       gMap.addOverlay(currentMarker);
@@ -360,10 +328,27 @@
         else 
           addresses[i].className = "gaddress";
       }
+      
+      // adjust the email link
+      setEmailUrl();
     }
     
-    function insertMap( ) {
-      
+    /* Currently using default mail client. */
+    /* Would be nice to include the image itself in the body */
+    function setEmailUrl() {
+      var curCenter = gMap.getCenter();
+      var curAddress = document.getElementById("selected-address").innerHTML;
+      var staticMap = "http://maps.google.com/staticmap?" +
+                        "markers=" + curCenter.lat() + "," + curCenter.lng() + "," + "red%26" +
+                        "zoom=13%26" +
+                        "size=450x240%26" + 
+                        "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+          
+
+      document.getElementById("send-link").href = "mailto:?Subject=" + curAddress + "&body=" + staticMap;
+    }
+    
+    function insertMap( ) {     
       var mapHtml = jQuery("#map").html();
       insertHtml( "<img src='" + getStaticMapUrl(325, 200) + "'\>" );
     }
@@ -372,18 +357,6 @@
  
     function setPreview(searchTerm) {
 
-      var html = "<div class=\"no-print\">" + 
-                 "<div id=\"selected-address\"></div>" + 
-                 "<div class=\"map-actions\"> <a onclick=\"window.print();\" >Print</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a id=\"send-link\" >Send</a></div>" + 
-                 "</div>" +
-                 "<div id=\"map\"/></div>" +
-                 "<div class=\"no-print\">" + 
-                 "<div id=\"address-list\"></div>" +
-                 "<div class=\"map-actions\"><a onclick=\"showAddressPreview();\" >Back</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a class=\"hand\" onclick=\"insertMap();\">Insert map in page</a></div>" +
-                 "</div>";
-
-      $("#preview-pane").html(html);
-  
       loadMap(searchTerm, 0);
 
     }
@@ -394,7 +367,26 @@
   <body onunload="GUnload()">
     <div style="overflow:hidden;">
       <!-- this div needs the name "preview-pane" for outer iframe/browser to resize -->
-      <div id="preview-pane" name="preview-pane"></div> 
+      <div id="preview-pane" name="preview-pane">
+        
+        <div class="no-print"> 
+          <div id="selected-address"></div>
+          <div class="map-actions">
+            <a onclick="window.print();" >Print</a>
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a id="send-link" >Send</a>
+          </div>
+        </div>
+        <div id="map"> </div>
+        <div class="no-print">
+          <div id="address-list"></div>
+          <div class="map-actions">
+            <a onclick="showAddressPreview();" >Back</a>
+              &nbsp;&nbsp;|&nbsp;&nbsp;
+            <a class="hand" onclick="insertMap();">Insert map in page</a>
+          </div>
+        </div>
+      </div>
     </div> 
   </body>
 
