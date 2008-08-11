@@ -1,11 +1,13 @@
-const MAX_SUGGESTIONS = 5;
 
-function NLParser(verbList, nounList) {
+NLParser.EN_SELECTION_PRONOUNS =  [ "this", "that", "it", "selection",
+				    "him", "her", "them"];
+
+NLParser.EnParser = function(verbList, nounList) {
   if (verbList) {
     this._init(verbList, nounList);
   }
 }
-NLParser.prototype = {
+NLParser.EnParser.prototype = {
   _init: function(commandList, nounList) {
     this.setCommandList( commandList );
     this._nounTypeList = nounList;
@@ -70,7 +72,7 @@ NLParser.prototype = {
   },
 
   getNumSuggestions: function() {
-    return Math.min(MAX_SUGGESTIONS, this._suggestionList.length);
+    return Math.min(NLParser.MAX_SUGGESTIONS, this._suggestionList.length);
   },
 
   getSentence: function(index) {
@@ -129,7 +131,7 @@ NLParser.prototype = {
   },
 
   setCommandList: function( commandList ) {
-    this._verbList = [ new Verb( commandList[x] ) for (x in commandList) ];
+    this._verbList = [ new NLParser.EnVerb( commandList[x] ) for (x in commandList) ];
   },
 
   setNounList: function( nounList ) {

@@ -70,8 +70,9 @@ var XpcShellTestResponder = {
 };
 
 load(basePath + "/chrome/content/cmdutils.js");
-load(basePath + "/chrome/content/nlparser/verbtypes.js");
-load(basePath + "/chrome/content/nlparser/nlparser.js");
+load(basePath + "/chrome/content/nlparser/parsersettings.js");
+load(basePath + "/chrome/content/nlparser/en/verbtypes.js");
+load(basePath + "/chrome/content/nlparser/en/parser.js");
 load(basePath + "/chrome/content/test.js");
 load(basePath + "/chrome/content/sandboxfactory.js");
 load(basePath + "/chrome/content/cmdmanager.js");

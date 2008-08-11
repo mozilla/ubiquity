@@ -1,5 +1,3 @@
-const SELECTION_PRONOUNS = [ "this", "that", "it", "selection", "him", "her", "them"];
-
 Components.utils.import("resource://ubiquity-modules/globals.js");
 
 // util functions to make it easier to use objects as fake dictionaries
@@ -15,10 +13,10 @@ function dictKeys( dict ) {
   return [ key for ( key in dict ) ];
 }
 
-function ParsedSentence( verb, DO, modifiers ) {
+NLParser.EnParsedSentence = function( verb, DO, modifiers ) {
   this._init( verb, DO, modifiers );
 }
-ParsedSentence.prototype = {
+NLParser.EnParsedSentence.prototype = {
   _init: function( verb, DO, modifiers) {
     /* modifiers is dictionary of preposition: noun */
     if (verb){
@@ -87,11 +85,11 @@ ParsedSentence.prototype = {
   }
 };
 
-function Verb( cmd ) {
+NLParser.EnVerb = function( cmd ) {
   if (cmd)
     this._init( cmd );
 }
-Verb.prototype = {
+NLParser.EnVerb.prototype = {
   _init: function( cmd ) {
     this._execute = cmd.execute;
     this._preview = cmd.preview;
@@ -134,7 +132,7 @@ Verb.prototype = {
 	// No direct object, either because there are no words left,
 	// to use, or because the verb can't take a direct object.
 	// Try parsing sentence without them.
-	return [ new ParsedSentence( this, "", filledMods ) ];
+	return [ new NLParser.EnParsedSentence( this, "", filledMods ) ];
       } else {
 	// Transitive verb, can have direct object.  Try to use the
 	// remaining words in that slot.
@@ -144,7 +142,7 @@ Verb.prototype = {
 	  // possible noun completion based on it; return them all.
 	  suggestions = this._DOType.suggest( directObject );
 	  for ( var x in suggestions ) {
-	    completions.push( new ParsedSentence( this, suggestions[x],
+	    completions.push( new NLParser.EnParsedSentence( this, suggestions[x],
 						  filledMods ) );
 	  }
 	  return completions;
@@ -258,7 +256,7 @@ Verb.prototype = {
      subbedWords = ["this"];
     }
 
-    for each ( pronoun in SELECTION_PRONOUNS ) {
+    for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
       var index = subbedWords.indexOf( pronoun );
       if ( index > -1 ) {
 	if (selectionUsed == "text")
@@ -305,14 +303,11 @@ Verb.prototype = {
   canPossiblyUseNounType: function(nounType){
     //returns the words that would be implied before the noun could makes sense,
     //i.e. put these words before the noun and try again.
-    //Compare based on the names of the nounTypes, so even if they are
-    //not the same object (having originated one inside the sandbox and one
-    //outside the sandbox) they will be detected as equal.
     if (this._DOType)
       if (this._DOType._name == nounType._name ) {
 	return this._name;
       }
-    for( var prep in this._modifiers ) {
+    for( let prep in this._modifiers ) {
       if (this._modifiers[prep]._name == nounType._name) {
 	return this._name + " " + prep;
 	// TODO returning multiple preps when more than one could use the

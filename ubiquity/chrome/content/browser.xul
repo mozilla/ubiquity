@@ -13,11 +13,15 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/utils.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/verbtypes.js"/>
+          src="chrome://ubiquity/content/nlparser/parsersettings.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/nlparser.js"/>
+          src="chrome://ubiquity/content/nlparser/en/verbtypes.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/jp-nlparser/japaneseNLParser.js"/>
+          src="chrome://ubiquity/content/nlparser/en/parser.js"/>
+  <!-- <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/nlparser/jp/verbtypes.js"/>
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/nlparser/jp/parser.js"/> -->
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/ubiquity.js"/>
   <script type="application/javascript;version=1.7"

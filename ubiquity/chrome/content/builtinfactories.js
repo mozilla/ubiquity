@@ -17,20 +17,21 @@ function makeBuiltinGlobals(msgService, ubiquityGlobals) {
   return globals;
 }
 
-function makeBuiltinCodeSources(isJapaneseMode) {
+function makeBuiltinCodeSources(languageCode) {
   var codeSources = [
     new LocalUriCodeSource("chrome://ubiquity/content/utils.js"),
     new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js")
   ];
-  if (isJapaneseMode) {
+  dump( "Language code is " + languageCode + "\n");
+  if (languageCode == "jp") {
     codeSources = codeSources.concat([
-      new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseNounTypes.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/jp-nlparser/japaneseCmdsUtf8.js")
+      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/nountypes.js"),
+      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/builtincmds.js")
 				      ]);
-  } else {
+  } else if (languageCode == "en") {
     codeSources = codeSources.concat([
       new LocalUriCodeSource("chrome://ubiquity/content/date.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/nountypes.js"),
+      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/en/nountypes.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
       PrefCommands,

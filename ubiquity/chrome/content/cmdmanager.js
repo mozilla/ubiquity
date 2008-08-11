@@ -1,15 +1,11 @@
-function CommandManager(cmdSource, msgService, isJapaneseMode) {
+function CommandManager(cmdSource, msgService, languageCode) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
-  if (isJapaneseMode) {
-    this.__nlParser = new JapaneseNLParser( cmdSource.getAllCommands(),
-					    cmdSource.getAllNounTypes());
-  } else {
-    this.__nlParser = new NLParser( cmdSource.getAllCommands(),
-                                    cmdSource.getAllNounTypes());
-  }
+  this.__nlParser = NLParser.makeParserForLanguage( languageCode,
+						    cmdSource.getAllCommands(),
+						    cmdSource.getAllNounTypes() );
 }
 
 CommandManager.prototype = {

@@ -5,7 +5,7 @@ function onDocumentLoad() {
   var globals = makeBuiltinGlobals(msgService,
                                    UbiquityGlobals);
   var sandboxFactory = new SandboxFactory(globals);
-  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.japaneseMode);
+  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
   var cmdSource = new CommandSource(
     codeSources,
     msgService,

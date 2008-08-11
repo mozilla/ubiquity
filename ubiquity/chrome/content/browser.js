@@ -22,7 +22,7 @@ function ubiquitySetup()
 
   var globals = makeBuiltinGlobals(msgService, UbiquityGlobals);
   var sandboxFactory = new SandboxFactory(globals);
-  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.japaneseMode);
+  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
 
   var cmdSource = new CommandSource(
     codeSources,
@@ -31,7 +31,7 @@ function ubiquitySetup()
   );
 
   var cmdMan = new CommandManager(cmdSource, msgService,
-                                  UbiquityGlobals.japaneseMode);
+                                  UbiquityGlobals.languageCode);
 
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("contentAreaContextMenu"),
@@ -47,8 +47,7 @@ function ubiquitySetup()
     cmdMan,
     previewBlock
   );
-  if (UbiquityGlobals.japaneseMode)
-    gUbiquity.setLocalizedDefaults("jp");
+  gUbiquity.setLocalizedDefaults(UbiquityGlobals.languageCode);
   cmdSource.refresh();
 }
 

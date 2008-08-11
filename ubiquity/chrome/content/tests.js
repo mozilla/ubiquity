@@ -289,7 +289,7 @@ function testParseDirectOnly() {
     DOType: dog,
     modifiers: {}
   };
-  var verb = new Verb(cmd_pet);
+  var verb = new NLParser.EnVerb(cmd_pet);
   var inputWords = ["b"];
 
   var fakeContext = null;
@@ -325,7 +325,7 @@ function testParseWithModifier() {
     modifiers: {"with": washingObj}
   };
 
-  var verb = new Verb(cmd_wash);
+  var verb = new NLParser.EnVerb(cmd_wash);
   var inputWords = ["pood", "with", "sp"];
   var fakeContext = null;
   var completions = verb.getCompletions( inputWords, fakeContext );
@@ -394,7 +394,7 @@ function testVerbEatsSelection() {
     DOType: food,
     modifiers: {"at": place}
   };
-  var verb = new Verb(cmd_eat);
+  var verb = new NLParser.EnVerb(cmd_eat);
   var fakeContext = {textSelection:"lunch"};
   var completions = verb.getCompletions(["this"], fakeContext);
   this.assert( completions.length == 1 );
@@ -434,7 +434,7 @@ function testImplicitPronoun() {
     DOType: food,
     modifiers: {"at": place}
   };
-  var verb = new Verb(cmd_eat);
+  var verb = new NLParser.EnVerb(cmd_eat);
   var fakeContext = {textSelection:"lunch"};
 
   var completions = verb.getCompletions([], fakeContext);

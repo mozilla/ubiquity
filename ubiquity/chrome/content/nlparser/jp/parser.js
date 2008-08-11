@@ -17,13 +17,12 @@
  * of japaneseNLParser.js for nlParser.
  */
 
-const JP_PARTICLES = ["に", "を", "から", "と", "で", "が", "まで"];
-//const JP_PRONOUNS = ["これ"];
+NLParser.JP_PARTICLES = ["に", "を", "から", "と", "で", "が", "まで"];
 
-function JapaneseNLParser(verbList, nounList) {
+NLParser.JpParser = function(verbList, nounList) {
   this._init(verbList, nounList);
 }
-JapaneseNLParser.prototype = {
+NLParser.JpParser.prototype = {
   /* bad assumption: each particle appears at most once
    also bad assumption: strings that look like particles don't appear
    elsewhere.
@@ -103,15 +102,15 @@ JapaneseNLParser.prototype = {
   },
 
   setCommandList: function( commandList ) {
-    this._verbList = [ new JVerb( commandList[x] ) for (x in commandList)];
+    this._verbList = [ new NLParser.JpVerb( commandList[x] ) for (x in commandList)];
   }
 }
-JapaneseNLParser.prototype.__proto__ = new NLParser();
+NLParser.JpParser.prototype.__proto__ = new NLParser.BaseParser();
 
-function JVerb( cmd ) {
+NLParser.JpVerb = function( cmd ) {
   this._init( cmd );
 }
-JVerb.prototype = {
+NLParser.JpVerb.prototype = {
   substitutePronoun: function(parseDict, context ) {
     var gotOne = false;
     var selection = getTextSelection(context);
@@ -124,6 +123,7 @@ JVerb.prototype = {
 
     var newParseDict = {};
     for (var x in parseDict) {
+      // TODO move this "これ" to a constant
       if (parseDict[x] == "これ" ) {
 	newParseDict[x] = selection;
 	gotOne = true;
@@ -173,12 +173,12 @@ JVerb.prototype = {
     return completions;
   }
 };
-JVerb.prototype.__proto__ = new Verb();
+NLParser.JpVerb.prototype.__proto__ = new NLParser.BaseVerb();
 
-function JParsedSentence( verb, modifiers ) {
+NLParser.JpParsedSentence = function( verb, modifiers ) {
   this._init(verb, "", modifiers);
 }
-JParsedSentence.prototype = {
+NLParser.JpParsedSentence.prototype = {
   getDisplayText: function() {
     var sentence = "";
     for (var x in this._verb._modifiers) {
@@ -192,7 +192,7 @@ JParsedSentence.prototype = {
     return sentence;
   }
 };
-JParsedSentence.prototype.__proto__ = new ParsedSentence();
+JpParsedSentence.prototype.__proto__ = new NLParser.BaseParsedSentence();
 
 
 function jpGetDefaultPreview() {
