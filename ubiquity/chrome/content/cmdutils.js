@@ -404,14 +404,21 @@ CmdUtils.NounType = function( name, expectedWords ) {
   this._init( name, expectedWords );
 }
 CmdUtils.NounType.prototype = {
+  /* A NounType that accepts a finite list of specific words as the only valid
+   * values.  Instantiate it with an array giving all allowed words.
+   */
   _init: function( name, expectedWords ) {
     this._name = name;
     this._expectedWords = expectedWords; // an array
   },
 
   match: function( fragment ) {
+    /* TODO
+     Every noun type we currently have implements match() by looking
+     at whether suggest().length > 0. This is a clue that we might not
+     need a match() method at all, and client code should just use
+     suggest(). */
     var suggs = this.suggest( fragment );
-    // klugy!
     if ( suggs.length > 0 ) {
       return true;
     }
@@ -419,9 +426,18 @@ CmdUtils.NounType.prototype = {
   },
 
   suggest: function( fragment ) {
-    // returns (ordered) array of suggestions
-    if (!fragment) {
+    // returns array of suggestions
+    if (typeof fragment != "string") {
+      // Input undefined or not a string
       return [];
+    }
+    if (fragment == "") {
+      /* If input is empty, suggest all of the words we know.  This keeps the
+       * nountype (and therefore the verb using it) resolving as valid when the user
+       * has entered the verb and not yet the noun.  It also helps the user
+       * learn what nouns are valid and helps them choose the one they want.
+       */
+      return this._expectedWords;
     }
     var suggestions = [];
     for ( var x in this._expectedWords ) {

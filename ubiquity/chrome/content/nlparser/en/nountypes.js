@@ -83,6 +83,14 @@ var noun_type_date = {
     return (this.suggest(fragment).length > 0 );
   },
   suggest: function( fragment )  {
+    if (typeof fragment != "string") {
+      return [];
+    }
+    if (fragment == "") {
+      // If input is blank, suggest today's date
+      return [ Date.parse("today") ];
+    }
+
     if (!fragment) {
       return [];
     }
