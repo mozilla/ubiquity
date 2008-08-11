@@ -28,43 +28,6 @@ body {
 }
 
 
-
-#map {
-  width: 225px;
-  height: 130px;
-  float: left;
-}
-
-.gaddress {
-  font-size: x-small;
-  margin-bottom: 10px;
-}
-#address-list {
-  float: left;
-  margin: 10px;
-  width: 200px;
-  height: 120px;
-}
-#map-actions {
-  padding-left: 5px;
-  width: 100px;
-  float: left;
-  margin: 3px;
-}
-#map-accept-button {
-  position: relative;
-  bottom: -10px;
-  right: -25px;
-  font-size: small;
-  margin-top: 100px;
-}
-#gmaps-url {
-  float: right;
-  margin-top: 20px;
-  font-size: x-small;
-  color: #00aa00;
-}
-
 /* formatting for suggestion list */
 
 #preview-pane {
