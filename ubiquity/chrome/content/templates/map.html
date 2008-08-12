@@ -121,6 +121,7 @@
     var gSelectedResults = [];
     var gCurrentResults = [];
     var currentMarker;
+    var currentMarkerPoint;
     var mapControl;
     var mapType;
 
@@ -139,12 +140,17 @@
       if (document.getElementById("map-large"))
         document.getElementById("map-large").id = "map";
       
+      gMap.checkResize();
+      if (currentMarkerPoint)
+        gMap.panTo(currentMarkerPoint);
+
       gMap.removeControl(mapControl);
       gMap.removeControl(mapType);
       gMap.disableDragging();
       
       // forces the preview pane to resize based on these contents (in cmdutils.js)
       document.getElementById("map").appendChild(hackDiv);
+      
       
       // this animation doesn't work since the preview pane size has to be changed from cmdutils.js
       /* $("#preview-pane")
@@ -181,7 +187,7 @@
       $("#map").animate({
         width: "100%",
         height: "240px",
-      }, 500); 
+      }, 500);
       setTimeout( function(){
         $(".map-actions").fadeIn();
         $(".suggestion").slideUp( 500 );    
@@ -192,6 +198,9 @@
       
       if (document.getElementById("map"))
         document.getElementById("map").id = "map-large";
+
+      gMap.checkResize();
+      gMap.panTo(currentMarkerPoint);
 
       /*
       $("#preview-pane-large")
@@ -225,10 +234,15 @@
       // Initialize the map
       gMap = new google.maps.Map2(document.getElementById("map"));
       gMap.setCenter(new google.maps.LatLng(currentLat, currentLng), 13);
-      GEvent.addListener(gMap, "click", function() {showMapPreview(gMap);});
       gMap.disableDragging();
       mapControl = new GSmallMapControl();
       mapType = new GMapTypeControl();
+      GEvent.addListener(gMap, "click", function() {showMapPreview(gMap);});
+      
+      // add listeners so the map knows when we change it
+      GEvent.addListener(gMap, "dragend", function() {gMap.setCenter(gMap.getCenter());});
+      GEvent.addListener(gMap, "maptypechanged", function() {gMap.setMapType(gMap.getCurrentMapType()); });
+      //GEvent.addListener(gMap, )
 
       // Initialize the local searcher
       gLocalSearch = new google.search.LocalSearch();
@@ -262,12 +276,15 @@
       setMarker(point, 0);
     }
 
-    function getStaticMapUrl(length, width) {
+    function getStaticMapUrl() {
+      var curZoom = gMap.getZoom();
       var curCenter = gMap.getCenter();
+      
       var url = "http://maps.google.com/staticmap?" +
-                "markers=" + curCenter.lat() + "," + curCenter.lng() + "," + "red&" +
-                "zoom=13&" +
-                "size=" + length + "x" + width + "&" + 
+                "center=" + curCenter.lat() + "," + curCenter.lng() + "&" + 
+                "markers=" + currentMarkerPoint.lat() + "," + currentMarkerPoint.lng() + "," + "red&" +
+                "zoom=" + curZoom + "&" +
+                "size=" + $("#map-large").width() + "x" + $("#map-large").height() + "&" +
                 "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
       return url;
     }
@@ -315,6 +332,7 @@
       if (currentMarker)
         gMap.removeOverlay(currentMarker);
       gMap.panTo(point);
+      currentMarkerPoint = point;
       currentMarker = new GMarker(point);
       gMap.addOverlay(currentMarker);
 
@@ -350,7 +368,7 @@
     
     function insertMap( ) {     
       var mapHtml = jQuery("#map").html();
-      insertHtml( "<img src='" + getStaticMapUrl(325, 200) + "'\>" );
+      insertHtml( "<img src='" + getStaticMapUrl() + "'\>" );
     }
       
       
