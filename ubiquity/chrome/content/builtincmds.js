@@ -568,10 +568,13 @@ CmdUtils.CreateCommand({
 
   execute: function(html, headers) {
     var document = context.focusedWindow.document;
-    var title = document.title;
+    var title;
+    if (document.title)
+      title = document.title;
+    else
+      title = html;
     var location = document.location;
     var gmailTab = findGmailTab();
-    /* TODO get headers["to"] and put it in the right field*/
     if (html)
       html = ("<p>From the page <a href=\"" + location +
               "\">" + title + "</a>:</p>" + html);
@@ -591,20 +594,19 @@ CmdUtils.CreateCommand({
         // For some reason continuer.apply() won't work--we get
         // a security violation on Function.__parent__--so we'll
         // manually safety-wrap this.
-        try {
-          var gmail = gmonkey.get("1");
+	try {
+          var gmail = gmonkey.get("1.0");
           var sidebar = gmail.getNavPaneElement();
-          var composeMail = sidebar.getElementById(":qw");
+          var composeMail = sidebar.getElementsByTagName("span")[0];
+	  //var composeMail = sidebar.getElementById(":qw");
           var event = composeMail.ownerDocument.createEvent("Events");
           event.initEvent("click", true, false);
           composeMail.dispatchEvent(event);
           var active = gmail.getActiveViewElement();
+	  var to = composeMail.ownerDocument.getElementsByName("to")[0];
+	  if (to) to.value = headers["to"];
           var subject = active.getElementsByTagName("input")[0];
-	    // the "to" field is textarea id ":3u"
-	  // and the body field is id ":4q".
-          subject.value = "'"+title+"'";
-	  /*var toWho = gmailTab.document.getElementById(":3u");
-	  toWho.value = headers["to"];*/ // doesn't work
+          if (subject) subject.value = "'"+title+"'";
           var iframe = active.getElementsByTagName("iframe")[0];
           iframe.contentDocument.execCommand("insertHTML", false, html);
           gmailTab.focus();
@@ -614,7 +616,7 @@ CmdUtils.CreateCommand({
         }
       };
 
-      gmonkey.load("1", continuer);
+      gmonkey.load("1.0", continuer);
     } else {
       // No gmail tab open?  Open a new one:
       var params = {fs:1, tf:1, view:"cm", su:title, to:headers["to"], body:html};
