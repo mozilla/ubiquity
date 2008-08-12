@@ -33,6 +33,8 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/codesource.js"/>
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/linkrel_codesource.js"/>
+  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/msgservice.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/prefcommands.js"/>

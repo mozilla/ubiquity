@@ -35,6 +35,7 @@ function makeBuiltinCodeSources(languageCode) {
       new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
       PrefCommands,
+      new LinkRelCodeSource(),
       new BookmarksCodeSource("ubiquity")
 				     ]);
   }
