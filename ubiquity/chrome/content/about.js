@@ -1,7 +1,12 @@
 function makeRemover(element, uri) {
+  function onHidden() {
+    $(element).remove();
+    if (!$("#command-feeds").text())
+      $("#command-feeds-header").slideUp();
+  }
   function remove() {
     LinkRelCodeSource.removeMarkedPage(uri);
-    $(element).slideUp();
+    $(element).slideUp(onHidden);
   }
   return remove;
 }
