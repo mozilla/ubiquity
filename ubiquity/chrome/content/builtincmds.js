@@ -2,35 +2,29 @@
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
 
-function setDefaultSearchPreview( name, query, pblock ) {
-  var content = ("Performs a " + name + " search for <b>" +
-            escape(query) + "</b>.");
-  pblock.innerHTML = content;
-}
-
 function makeSearchCommand( options ) {
-  var cmd = function(query, modifiers) {
+  options.execute = function(query, modifiers) {
     var urlString = options.url.replace("{QUERY}", query);
     Utils.openUrlInBrowser(urlString);
     CmdUtils.setLastResult( urlString );
   };
 
-  cmd.setOptions({
-    takes: {"search term": noun_arb_text},
-    icon: options.icon,
-    preview: function(pblock, query, modifiers) {
-      if (query) {
-        if( options.preview ) options.preview( query, pblock );
-        else setDefaultSearchPreview(options.name, query, pblock);
-      }
-    }
-  });
+  options.takes = {"search term": noun_arb_text};
 
-  return cmd;
+  if (! options.preview )
+    options.preview = function(pblock, query, modifiers) {
+      var content = ("Performs a " + options.name + " search for <b>" +
+		     escape(query) + "</b>.");
+      pblock.innerHTML = content;
+    };
+
+  options.name = options.name.toLowerCase();
+
+  CmdUtils.CreateCommand(options);
 }
 
 
-var cmd_google = makeSearchCommand({
+makeSearchCommand({
   name: "Google",
   url: "http://www.google.com/search?q={QUERY}",
   icon: "http://www.google.com/favicon.ico",
@@ -95,7 +89,7 @@ function titleCaps(title){
 //escaping search terms screws things up sometimes
 
 // Currently just uses screen scraping to get the relevant information
-var cmd_wikipedia = makeSearchCommand({
+makeSearchCommand({
   name: "Wikipedia",
   url: "http://www.wikipedia.org/wiki/Special:Search?search={QUERY}",
   icon: "http://www.wikipedia.org/favicon.ico",
@@ -133,13 +127,13 @@ var cmd_wikipedia = makeSearchCommand({
   }
 });
 
-var cmd_imdb = makeSearchCommand({
+makeSearchCommand({
   name: "IMDB",
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
   icon: "http://i.imdb.com/favicon.ico"
 });
 
-var cmd_bugzilla = makeSearchCommand({
+makeSearchCommand({
   name: "Bugzilla",
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   icon: "https://bugzilla.mozilla.org/favicon.ico"
@@ -802,7 +796,7 @@ CmdUtils.CreateCommand({
 
         // This would be nice to store the map in the buffer...
 	// But for now, it causes a problem with a large image showing up as the default
-        //CmdUtils.setLastResult( html );	   
+        //CmdUtils.setLastResult( html );
 
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);

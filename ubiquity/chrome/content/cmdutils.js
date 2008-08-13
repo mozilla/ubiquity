@@ -281,45 +281,15 @@ CmdUtils.snapshotImage = function snapshotImage( url, callback ) {
 // -----------------------------------------------------------------
 
 
-// Use like this:
-// cmd_yelp.setOptions({
-//  takes: { "restaurant":noun_arb_text },
-//  modifiers: { near:noun_arb_text },
-//  icon: "http://www.yelp.com/favicon.ico"
-// })
-Function.prototype.setOptions = function( options ) {
-  // Returns the first key in a dictionary.
-  function getKey( dict ) {
-    for( var key in dict ) return key;
-  }
-
-  if( options.takes ) {
-    this.DOLabel = getKey( options.takes );
-    this.DOType = options.takes[this.DOLabel];
-  }
-
-  // Reserved keywords that shouldn't be added to the cmd function.
-  var RESERVED = ["takes", "execute", "name"];
-
-  for( var key in options ) {
-    if( RESERVED.indexOf(key) == -1 )
-      this[key] = options[key];
-  }
-
-  // If preview is a string, wrap it in a function that does
-  // what you'd expect it to.
-  if( typeof this["preview"] == "string" ) {
-    var previewString = this["preview"];
-    this["preview"] = function( pblock ){
-      pblock.innerHTML = previewString;
-    };
-  }
-};
-
 // Creates a command from a list of options
 CmdUtils.CreateCommand = function CreateCommand( options ) {
   var globalObj = CmdUtils.__globalObject;
   var execute;
+
+  // Returns the first key in a dictionary.
+  function getKey( dict ) {
+    for( var key in dict ) return key;
+  }
 
   if (options.execute)
     execute = function() {
@@ -330,8 +300,28 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
       displayMessage("No action defined.");
     };
 
+  if( options.takes ) {
+    execute.DOLabel = getKey( options.takes );
+    execute.DOType = options.takes[execute.DOLabel];
+  }
+
+  // Reserved keywords that shouldn't be added to the cmd function.
+  var RESERVED = ["takes", "execute", "name"];
+  for( var key in options ) {
+    if( RESERVED.indexOf(key) == -1 )
+      execute[key] = options[key];
+  }
+
+  // If preview is a string, wrap it in a function that does
+  // what you'd expect it to.
+  if( typeof execute["preview"] == "string" ) {
+    var previewString = execute["preview"];
+    execute["preview"] = function( pblock ){
+      pblock.innerHTML = previewString;
+    };
+  }
+
   globalObj["cmd_" + options.name] = execute;
-  globalObj["cmd_" + options.name].setOptions( options );
 };
 
 // -----------------------------------------------------------------
