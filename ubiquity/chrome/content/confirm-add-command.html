@@ -1,8 +1,11 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html class="blacklist"> <head>
-<title></title>
+<title>Ubiquity Command from Untrusted Source</title>
 <link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
 <link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/blacklist_favicon.png"/>
+<script type="application/javascript;version=1.7"
+        src="linkrel_codesource.js"></script>
+<script src="jquery-1.2.3.min.js"></script>
 <script type="application/javascript;version=1.7"
         src="linkrel_codesource.js"></script>
 <script>
@@ -20,16 +23,20 @@ function getUrlParams() {
 
 var gCommandFeedInfo = getUrlParams();
 
+function showConfirmation() {
+  $("#errorShortDesc").html($("#confirmationShortDesc").html());
+  $("#errorLongDesc").html($("#confirmationLongDesc").html());
+  $("#originalPage").get(0).href = gCommandFeedInfo.url;
+  $("#buttons").remove();
+}
+
 function onSubmit() {
   LinkRelCodeSource.addMarkedPage(gCommandFeedInfo.url);
-  // TODO: Add a real implementation here; close the page and/or
-  // notify the user somehow.
-  Components.utils.reportError("Added command feed.");
+  showConfirmation();
 }
 
 function onCancel() {
-  // TODO: Close the page.
-  Components.utils.reportError("User cancelled.");
+  window.history.back();
 }
 </script>
 </head>
@@ -78,10 +85,6 @@ unless the link was given to you by someone you know and trust.</p>
   dangers.  We hope this will help people make informed decisions about whether
   to subscribe to commands or not.  This feature should be coming in Ubiquity 0.2.
   </i></p></div>
-
-<p>You can use the Ubiquity &quot;help&quot; command at any time to get to the
-<a href="about:ubiquity">command management page</a>, where you can see what
-commands you are subscribed to, and cancel any that you no longer want.</p>
         </div>
         <div id="buttons">
 	  <p><input type="submit" value="Get me outta here!"
@@ -93,4 +96,23 @@ commands you are subscribed to, and cancel any that you no longer want.</p>
         </div>
       </div>
     </div>
-</body> </html>
+    <div id="confirmationContainer" style="display: none;">
+      <div id="confirmationShortDesc">
+      <p>You are now subscribing to the command feed and can use its functionality.</p>
+      </div>
+      <div id="confirmationLongDesc">
+      <p>If you ever want to unsubscribe, you can use the Ubiquity
+      &quot;help&quot; command at any time to get to the <a
+      href="about:ubiquity">command management page</a>, where you can
+      see what commands you are subscribed to, and cancel any that you
+      no longer want.</p>
+      <p>Click <a id="originalPage">here</a> to go back to the page
+      you were looking at.</p>
+      </div>
+    </div>
+</body>
+<script>
+if (LinkRelCodeSource.isMarkedPage(gCommandFeedInfo.url))
+  showConfirmation();
+</script>
+</html>
