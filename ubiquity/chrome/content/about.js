@@ -18,11 +18,10 @@ function onReady() {
     linkToHtml.href = info.htmlUri.spec;
     $(li).append(linkToHtml);
 
-    // TODO: This link should have a normal link cursor when
-    // the mouse hovers over it.
     var linkToUnsubscribe = document.createElement("div");
     $(linkToUnsubscribe).text("unsubscribe");
     $(linkToUnsubscribe).click(makeRemover(li, info.htmlUri));
+    $(linkToUnsubscribe).css({cursor: "pointer"});
     $(li).append(linkToUnsubscribe);
 
     $("#command-feeds").append(li);
