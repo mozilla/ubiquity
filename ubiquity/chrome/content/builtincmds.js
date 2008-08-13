@@ -136,7 +136,7 @@ makeSearchCommand({
 makeSearchCommand({
   name: "Bugzilla",
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
-  icon: "https://bugzilla.mozilla.org/favicon.ico"
+  icon: "http://www.mozilla.org/favicon.ico"
 });
 
 CmdUtils.CreateCommand({
@@ -331,6 +331,7 @@ cmd_highlight.preview = function(pblock) {
 CmdUtils.CreateCommand({
   name : "link-to-wikipedia",
   takes : {"text" : noun_arb_text},
+  icon: "http://www.wikipedia.org/favicon.ico",
 
   execute : function( text ){
     var wikiText = text.replace(/ /g, "_");
