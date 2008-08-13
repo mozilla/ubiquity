@@ -28,7 +28,7 @@ makeSearchCommand({
   name: "Google",
   url: "http://www.google.com/search?q={QUERY}",
   icon: "http://www.google.com/favicon.ico",
-  preview: function(searchTerm, pblock) {
+  preview: function(pblock, searchTerm) {
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
 
@@ -93,7 +93,7 @@ makeSearchCommand({
   name: "Wikipedia",
   url: "http://www.wikipedia.org/wiki/Special:Search?search={QUERY}",
   icon: "http://www.wikipedia.org/favicon.ico",
-  preview: function(searchTerm, pblock) {
+  preview: function(pblock, searchTerm) {
 
     //TODO: Implement this preview using CmdUtils.renderTemplate
     pblock.innerHTML =  "Gets wikipedia article for " + searchTerm + "<br/>";
