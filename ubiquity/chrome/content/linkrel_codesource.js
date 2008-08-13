@@ -8,12 +8,10 @@ function LinkRelCodeSource() {
   this._sources = {};
 
   this._updateSourceList = function LRCS_updateSourceList() {
-    let annSvc = LinkRelCodeSource.__getAnnSvc();
+    let markedPages = LinkRelCodeSource.getMarkedPages();
     let newSources = {};
-    let markedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
-    // I think getPagesWithAnnotation should return list of URIs, right?
-    for each (let uri in markedPages) {
-
+    for (let i = 0; i < markedPages.length; i++) {
+      let uri = markedPages[i].jsUri;
       let href = uri.spec;
       if (this._sources[href]) {
         newSources[href] = this._sources[href];
@@ -39,6 +37,64 @@ function LinkRelCodeSource() {
     return code;
   };
 }
+
+LinkRelCodeSource.__makeNsUri = function LRCS_makeNsUri(uri) {
+  if (typeof(uri) == "string") {
+    var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
+                .getService(Components.interfaces.nsIIOService);
+    uri = ioSvc.newURI(uri, null, null);
+  }
+  return uri;
+};
+
+LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
+  let annSvc = this.__getAnnSvc();
+  let confirmedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
+  let markedPages = [];
+
+  for (let i = 0; i < confirmedPages.length; i++) {
+    let uri = confirmedPages[i];
+
+    // TODO: Get the real title of the page.
+    let pageInfo = {title: uri.spec,
+                    htmlUri: uri};
+
+    // See if there's any annotations for this page that tell us
+    // about the existence of a <link rel="commands"> tag
+    // that points to a JS file.
+    if (annSvc.pageHasAnnotation(uri, CMD_URL_ANNO)) {
+      var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
+      pageInfo.jsUri = this.__makeNsUri(val);
+    } else {
+      // There's no <link rel="commands"> tag;, so we'll assume this
+      // is a raw JS file.
+      pageInfo.jsUri = uri;
+    }
+
+    markedPages.push(pageInfo);
+  }
+
+  return markedPages;
+};
+
+LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(uri) {
+  let annSvc = this.__getAnnSvc();
+  uri = this.__makeNsUri(uri);
+  annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
+                           annSvc.EXPIRE_NEVER);
+};
+
+LinkRelCodeSource.isMarkedPage = function LRCS_isMarkedPage(uri) {
+  let annSvc = this.__getAnnSvc();
+  uri = this.__makeNsUri(uri);
+  return annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO);
+};
+
+LinkRelCodeSource.removeMarkedPage = function LRCS_removeMarkedPage(uri) {
+  let annSvc = this.__getAnnSvc();
+  uri = this.__makeNsUri(uri);
+  annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
+};
 
 LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
   var Cc = Components.classes;
@@ -78,7 +134,8 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
       var buttons = [
         {accessKey: null,
          callback: function() {
-	   Utils.openUrlInBrowser(confirmUrl);
+	   //Utils.openUrlInBrowser(confirmUrl);
+           targetDoc.defaultView.location = confirmUrl;
 	 },
          label: "Subscribe...",
          popup: null}
@@ -108,9 +165,8 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
     var commandsUrl = event.target.href;
     annSvc.setPageAnnotation(url, CMD_URL_ANNO,
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
-    // TODO: Check to see if another annotation, like "ubiquity/confirmed",
-    // is set; if it's not, then show the notification.
-    showNotification(event.target.ownerDocument, commandsUrl);
+    if (!LinkRelCodeSource.isMarkedPage(url))
+      showNotification(event.target.ownerDocument, commandsUrl);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
