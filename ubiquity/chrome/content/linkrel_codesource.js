@@ -128,6 +128,11 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
     // Return the notificationBox associated with the browser.
     if (foundBrowser) {
       var box = tabbrowser.getNotificationBox(foundBrowser);
+      var BOX_NAME = "ubiquity_notify_commands_available";
+      var oldNotification = box.getNotificationWithValue(BOX_NAME);
+      if (oldNotification)
+        box.removeNotification(oldNotification);
+
       // Clicking on "subscribe" takes them to the warning page:
       var confirmUrl = WARNING_URL + "?url=" + targetDoc.URL + "&sourceUrl="
 			 + commandsUrl;
@@ -144,7 +149,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
         ("This page contains Ubiquity commands.  " +
          "If you'd like to subscribe to them, please " +
          "click the button to the right."),
-        "ubiquity_notify_commands_available",
+        BOX_NAME,
         "http://www.mozilla.com/favicon.ico",
         box.PRIORITY_INFO_MEDIUM,
         buttons
