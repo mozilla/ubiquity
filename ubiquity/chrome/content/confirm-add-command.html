@@ -2,9 +2,27 @@
 <html> <head>
 <title></title>
 <script>
-var gCommandFeedInfo = {};
-gCommandFeedInfo.url = "http://www.example.com";
-gCommandFeedInfo.sourceUrl = "http://www.example.com/ubiquity-commands.js";
+
+function getUrlParams() {
+  var urlFragments = document.URL.split("?")[1];
+  urlFragments = urlFragments.split("&");
+  var params = {};
+  for( var x in urlFragments ) {
+    var fragFrags = urlFragments[x].split("=");
+    params[ fragFrags[0] ] = fragFrags[1];
+  }
+  return params;
+}
+
+var gCommandFeedInfo = getUrlParams();
+
+function bookmarkCommand(sourceUrl) {
+  var Cc = Components.classes;
+  var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
+               .getService(Components.interfaces.nsIAnnotationService);
+  annSvc.setPageAnnotation(sourceUrl, "ubiquity/confirmed", "true", 0,
+                           annSvc.EXPIRE_NEVER);
+}
 </script>
 </head>
 
@@ -12,7 +30,7 @@ gCommandFeedInfo.sourceUrl = "http://www.example.com/ubiquity-commands.js";
 <h1 style="color:#ffff00; text-align:center; font-size:72pt">
 <blink>BEWARE, HUMAN!</blink></h1>
 
-<p>You are about to subscribe to a <a href="">Ubiquity</a>
+<p>You are about to subscribe to a <a href="about:ubiquity">Ubiquity</a>
 command from an unknown, untrusted third-party source
 
 <script>
@@ -31,8 +49,13 @@ document.write( "<iframe width=\"80%\" src=\"" +
                  "\"></iframe>");
 </script>
 
-<p>If you understand JavaScript, you should read the source code and try
-to understand what the command will do in order to decide whether it's safe
+<p>If you understand JavaScript, you should read
+
+<script>
+document.write( "<a href=\"" + gCommandFeedInfo.sourceUrl + "\">" +
+                "the source code</a>");
+</script>
+and try to understand what the command will do in order to decide whether it's safe
 to install or not. If you don't understand JavaScript, you should not subscribe to the command
 unless this link was given to you by someone you know and trust.</p>
 
@@ -48,13 +71,10 @@ unless this link was given to you by someone you know and trust.</p>
 <a href="about:ubiquity">command management page</a>, where you can see what
 commands you are subscribed to, and cancel any that you no longer want.</p>
 
-<form>
-<p><input type="submit" value="Get me outta here!"/>
+<p><input type="submit" value="Get me outta here!" onclick=""/>
 &nbsp;&nbsp;&nbsp;&nbsp;
-<input type="submit" value="I know what I'm doing. Subscribe to it!"/>
+<input type="submit" value="I know what I'm doing. Subscribe to it!"
+  onclick="bookmarkCommand(gCommandFeedInfo.sourceUrl);"/>
 </p>
-</form>
-
-
 
 </body> </html>

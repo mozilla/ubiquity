@@ -1,3 +1,6 @@
+const BOOKMARKED_CMD_ANNO = "ubiquity/confirmed";
+const WARNING_URL = "chrome://ubiquity/content/confirm-add-command.html";
+
 function LinkRelCodeSource() {
   LinkRelCodeSource.__install(window);
 
@@ -8,6 +11,9 @@ function LinkRelCodeSource() {
     // particular annotation, such as "ubiquity/confirmed".
     // See nsIAnnotationService.getPagesWithAnnotation() and
     // BookmarkCodeSource._updateSourceList() for guidance.
+    let annSvc = this.__getAnnSvc();
+    let markedPages = annSvc.getPagesWithAnnotation(BOOKMARKED_CMD_ANNO);
+
   };
 
   this.getCode = function LRCS_getCode() {
@@ -32,7 +38,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
   if (LinkRelCodeSource.__isInstalled)
     return;
 
-  function showNotification(targetDoc) {
+  function showNotification(targetDoc, commandsUrl) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
 
@@ -52,14 +58,15 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
 
     // Return the notificationBox associated with the browser.
     if (foundBrowser) {
-      // TODO: Clicking on "Subscribe..." should take them to
-      // Jono's recently-committed warning page, and clicking
-      // the confirmation button there should set an annotation
-      // for the page, such as "ubiquity/confirmed".
       var box = tabbrowser.getNotificationBox(foundBrowser);
+      // Clicking on "subscribe" takes them to the warning page:
+      var confirmUrl = WARNING_URL + "?url=" + targetDoc.URL + "&sourceUrl="
+			 + commandsUrl;
       var buttons = [
         {accessKey: null,
-         callback: function() { window.alert("Feature not implemented."); },
+         callback: function() {
+	   Utils.openUrlInBrowser(confirmUrl);
+	 },
          label: "Subscribe...",
          popup: null}
       ];
@@ -90,7 +97,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
     // TODO: Check to see if another annotation, like "ubiquity/confirmed",
     // is set; if it's not, then show the notification.
-    showNotification(event.target.ownerDocument);
+    showNotification(event.target.ownerDocument, commandsUrl);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
