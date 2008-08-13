@@ -185,7 +185,6 @@ CommandSource.prototype = {
 	nounTypes.push( sandbox[objName] );
       }
     }
-
     this._commands = commands;
     this.commandNames = commandNames;
     this._nounTypes = nounTypes;

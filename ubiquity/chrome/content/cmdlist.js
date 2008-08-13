@@ -14,7 +14,6 @@ function onDocumentLoad() {
 
   function updateCommands() {
     cmdSource.refresh();
-
     // Dynamically generate entries for undocumented commands.
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.commandNames[i];
@@ -39,6 +38,7 @@ function onDocumentLoad() {
   }
 
   updateCommands();
+
 }
 
 $(document).ready(onDocumentLoad);
