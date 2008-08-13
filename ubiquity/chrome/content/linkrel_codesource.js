@@ -15,8 +15,6 @@ function LinkRelCodeSource() {
     for each (let uri in markedPages) {
 
       let href = uri.spec;
-      dump("href is " + href);
-      dump("\nuri.scheme is " + uri.scheme + "\n");
       if (this._sources[href]) {
         newSources[href] = this._sources[href];
       } else if (uri.scheme == "http" ||

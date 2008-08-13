@@ -18,9 +18,13 @@ var gCommandFeedInfo = getUrlParams();
 
 function bookmarkCommand(sourceUrl) {
   var Cc = Components.classes;
+  var Ci = Components.interfaces;
   var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-               .getService(Components.interfaces.nsIAnnotationService);
-  annSvc.setPageAnnotation(sourceUrl, "ubiquity/confirmed", "true", 0,
+               .getService(Ci.nsIAnnotationService);
+  var ioSvc = Cc["@mozilla.org/network/io-service;1"]
+               .getService(Ci.nsIIOService);
+  var uri = ioSvc.newURI(sourceUrl, null, null);
+  annSvc.setPageAnnotation(uri, "ubiquity/confirmed", "true", 0,
                            annSvc.EXPIRE_NEVER);
 }
 </script>
