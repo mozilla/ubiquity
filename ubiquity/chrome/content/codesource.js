@@ -60,6 +60,9 @@ LocalUriCodeSource.prototype = {
     req.open('GET', this.uri, false);
     req.overrideMimeType("text/javascript");
     req.send(null);
+    /* TODO if you have a bookmark to a local file, and the expected file
+       isn't there, this will throw an exception that takes Ubiquity down
+       with it. */
     if (req.status == 0)
       return req.responseText;
     else

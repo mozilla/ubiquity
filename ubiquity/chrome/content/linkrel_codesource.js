@@ -8,12 +8,15 @@ function LinkRelCodeSource() {
   this._sources = {};
 
   this._updateSourceList = function LRCS_updateSourceList() {
-    let annSvc = this.__getAnnSvc();
+    let annSvc = LinkRelCodeSource.__getAnnSvc();
     let newSources = {};
-    let markedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO);
+    let markedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
+    // I think getPagesWithAnnotation should return list of URIs, right?
     for each (let uri in markedPages) {
-      let href = uri.spec;
 
+      let href = uri.spec;
+      dump("href is " + href);
+      dump("\nuri.scheme is " + uri.scheme + "\n");
       if (this._sources[href]) {
         newSources[href] = this._sources[href];
       } else if (uri.scheme == "http" ||
