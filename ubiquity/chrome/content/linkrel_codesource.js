@@ -1,4 +1,5 @@
-const BOOKMARKED_CMD_ANNO = "ubiquity/confirmed";
+const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
+const CMD_URL_ANNO = "ubiquity/commands";
 const WARNING_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 function LinkRelCodeSource() {
@@ -7,13 +8,24 @@ function LinkRelCodeSource() {
   this._sources = {};
 
   this._updateSourceList = function LRCS_updateSourceList() {
-    // TODO: Implement this.  Retrieve all pages with a
-    // particular annotation, such as "ubiquity/confirmed".
-    // See nsIAnnotationService.getPagesWithAnnotation() and
-    // BookmarkCodeSource._updateSourceList() for guidance.
     let annSvc = this.__getAnnSvc();
-    let markedPages = annSvc.getPagesWithAnnotation(BOOKMARKED_CMD_ANNO);
+    let newSources = {};
+    let markedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO);
+    for each (let uri in markedPages) {
+      let href = uri.spec;
 
+      if (this._sources[href]) {
+        newSources[href] = this._sources[href];
+      } else if (uri.scheme == "http" ||
+                 uri.scheme == "https") {
+        newSources[href] = new RemoteUriCodeSource(href);
+      } else if (uri.scheme == "file" ||
+                 uri.scheme == "chrome" ||
+                 uri.scheme == "resource") {
+        newSources[href] = new LocalUriCodeSource(href);
+      }
+    }
+    this._sources = newSources;
   };
 
   this.getCode = function LRCS_getCode() {
@@ -93,7 +105,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
     var annSvc = LinkRelCodeSource.__getAnnSvc();
     var url = Utils.url(event.target.baseURI);
     var commandsUrl = event.target.href;
-    annSvc.setPageAnnotation(url, "ubiquity/commands",
+    annSvc.setPageAnnotation(url, CMD_URL_ANNO,
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
     // TODO: Check to see if another annotation, like "ubiquity/confirmed",
     // is set; if it's not, then show the notification.
