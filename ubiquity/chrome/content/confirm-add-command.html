@@ -1,6 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html> <head>
+<html class="blacklist"> <head>
 <title></title>
+<link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
+<link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/blacklist_favicon.png"/>
 <script>
 
 function getUrlParams() {
@@ -30,21 +32,24 @@ function bookmarkCommand(sourceUrl) {
 </script>
 </head>
 
-<body bgcolor="#ff0000">
-<h1 style="color:#ffff00; text-align:center; font-size:72pt">
-<blink>BEWARE, HUMAN!</blink></h1>
+<body>
+    <div id="errorPageContainer">
+    
+      <!-- Error Title -->
+      <div id="errorTitle">
+        <h1>Ubiquity Command from Untrusted Source</h1>
+      </div>
+      
+      <div id="errorLongContent">
 
-<p>You are about to subscribe to a <a href="about:ubiquity">Ubiquity</a>
-command from an unknown, untrusted third-party source
-
-<script>
+        <div id="errorShortDesc">
+	  <p>You are about to subscribe to a <a href="about:ubiquity">Ubiquity</a>command from an unknown, untrusted third-party source <script>
 document.write( "at <a href=\"" + gCommandFeedInfo.url + "\">" +
                 gCommandFeedInfo.url + "</a>");
-</script>
-. If you subscribe, this command could do <i>anything it wants</i> to your browser.
-It could steal your credit card number or e-mail your grandmother your entire image
-browsing history.</p>
+</script>. If you subscribe, this command could do <i>anything it wants</i> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.</p>
+        </div>
 
+        <div id="errorLongDesc">
 <p>Here is the JavaScript source code to the command:</p>
 
 <script>
@@ -74,11 +79,14 @@ unless this link was given to you by someone you know and trust.</p>
 <p>You can use the Ubiquity &quot;help&quot; command at any time to get to the
 <a href="about:ubiquity">command management page</a>, where you can see what
 commands you are subscribed to, and cancel any that you no longer want.</p>
-
-<p><input type="submit" value="Get me outta here!" onclick=""/>
+        </div>
+        <div id="buttons">
+	  <p><input type="submit" value="Get me outta here!" onclick=""/>
 &nbsp;&nbsp;&nbsp;&nbsp;
 <input type="submit" value="I know what I'm doing. Subscribe to it!"
   onclick="bookmarkCommand(gCommandFeedInfo.sourceUrl);"/>
 </p>
-
+        </div>
+      </div>
+    </div>
 </body> </html>
