@@ -3,6 +3,8 @@
 <title></title>
 <link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
 <link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/blacklist_favicon.png"/>
+<script type="application/javascript;version=1.7"
+        src="linkrel_codesource.js"></script>
 <script>
 
 function getUrlParams() {
@@ -18,16 +20,16 @@ function getUrlParams() {
 
 var gCommandFeedInfo = getUrlParams();
 
-function bookmarkCommand(sourceUrl) {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-  var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-               .getService(Ci.nsIAnnotationService);
-  var ioSvc = Cc["@mozilla.org/network/io-service;1"]
-               .getService(Ci.nsIIOService);
-  var uri = ioSvc.newURI(sourceUrl, null, null);
-  annSvc.setPageAnnotation(uri, "ubiquity/confirmed", "true", 0,
-                           annSvc.EXPIRE_NEVER);
+function onSubmit() {
+  LinkRelCodeSource.addMarkedPage(gCommandFeedInfo.url);
+  // TODO: Add a real implementation here; close the page and/or
+  // notify the user somehow.
+  Components.utils.reportError("Added command feed.");
+}
+
+function onCancel() {
+  // TODO: Close the page.
+  Components.utils.reportError("User cancelled.");
 }
 </script>
 </head>
@@ -82,10 +84,11 @@ unless the link was given to you by someone you know and trust.</p>
 commands you are subscribed to, and cancel any that you no longer want.</p>
         </div>
         <div id="buttons">
-	  <p><input type="submit" value="Get me outta here!" onclick=""/>
+	  <p><input type="submit" value="Get me outta here!"
+                    onclick="onCancel();"/>
 &nbsp;&nbsp;&nbsp;&nbsp;
 <input type="submit" value="I know what I'm doing. Subscribe to it!"
-  onclick="bookmarkCommand(gCommandFeedInfo.sourceUrl);"/>
+       onclick="onSubmit();"/>
 </p>
         </div>
       </div>

@@ -10,7 +10,7 @@
   <script type="text/javascript" src="jquery-1.2.3.min.js"></script>
   <title>About Ubiquity</title>
 </head>
-<body onload="PrefKeys.onLoad()">
+<body>
 <h1>Welcome to Ubiquity!</h1>
 <p>Here's some things you can do:</p>
 <ul>
@@ -20,9 +20,6 @@
   experiment with Firefox development in general, because writing and
   changing commands doesn't require restarting Firefox, or even
   manually reloading anything.</li>
-
-  <!-- TODO show bookmarked commands by loading all places with the
-  "ubiquity/confirmed" annotation -->
 
   <li>Read <a href="cmdlist.html">command documentation</a> for
   information on the commands available to you.</li>
@@ -47,6 +44,12 @@
     <p id="keyNotify"></p>
   </li>
 </ul>
+<p id="command-feeds-header">You're currently subscribed to these command
+  feeds:</p>
+<ul id="command-feeds"></ul>
 </body>
-<script type="text/javascript" src=""></script>
+<script type="application/javascript;version=1.7"
+        src="linkrel_codesource.js"></script>
+<script type="application/javascript;version=1.7"
+        src="chrome://ubiquity/content/about.js"></script>
 </html>
