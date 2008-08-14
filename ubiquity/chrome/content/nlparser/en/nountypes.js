@@ -28,17 +28,6 @@ var noun_type_contact = {
   callback:function(contacts) {
     noun_type_contact.contactList = contacts;
   },
-  match:function( fragment ) {
-    if (noun_type_contact.contactList == null) {
-      getGmailContacts( noun_type_contact.callback);
-      return false;
-    }
-    for ( var c in noun_type_contact.contactList ) {
-      if (c.match(fragment, "i"))
-	    return true;
-    }
-    return false;
-  },
   suggest: function( fragment ) {
     if (noun_type_contact.contactList == null) {
       getGmailContacts( noun_type_contact.callback);
@@ -58,9 +47,6 @@ var noun_type_contact = {
 
 var noun_arb_text = {
  _name: "text",
- match: function( fragment ) {
-    return true;
-  },
  suggest: function( fragment ) {
     return [ fragment ];
   }
@@ -68,9 +54,6 @@ var noun_arb_text = {
 
 var noun_type_date = {
   _name: "date",
-  match: function( fragment ) {
-    return (this.suggest(fragment).length > 0 );
-  },
   suggest: function( fragment )  {
     if (typeof fragment != "string") {
       return [];
@@ -157,16 +140,6 @@ var noun_type_address = {
     }
     noun_type_address.maybeAddress = null;
   },
-  match: function( fragment ) {
-    for( x in noun_type_address.knownAddresses) {
-      if (noun_type_address.knownAddresses[x] == fragment) {
-	return true;
-      }
-    }
-    noun_type_address.maybeAddress = fragment;
-    isAddress( fragment, noun_type_address.callback );
-    return false;
-  },
   suggest: function( fragment ) {
     isAddress( fragment, noun_type_address.callback );
     for( x in noun_type_address.knownAddresses) {
@@ -180,15 +153,6 @@ var noun_type_address = {
   }
 };
 
-// TODO replace this with ???
-var noun_type_math = {
-  match: function( fragment ) {
-
-  },
-  suggest: function( fragment ) {
-
-  }
-};
 
 var Languages = [
   'Arabic',
@@ -231,10 +195,6 @@ var noun_type_tab = {
     }
 
     return tabs;
-  },
-
-  match:function( fragment ) {
-    return noun_type_tab.suggest( fragment ).length > 0;
   },
 
   suggest: function( fragment ) {

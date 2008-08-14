@@ -50,7 +50,7 @@ CmdUtils.setSelection = function setSelection(content, options) {
     if (options && options.text){
       plainText = options.text;
     }
-    
+
     if (plainText == null) {
       var el = doc.createElement( "html" );
       el.innerHTML = "<div>" + content + "</div>";
@@ -106,18 +106,18 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
   var params = {
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--",
     location: address
-  }
-  
+  };
+
   jQuery.get( url, params, function( doc ){
     var lats  = jQuery( "Latitude", doc );
     var longs = jQuery( "Longitude", doc );
-    
+
     var addrs    = jQuery( "Address", doc );
     var citys    = jQuery( "City", doc );
     var states   = jQuery( "State", doc );
     var zips     = jQuery( "Zip", doc );
-    var countrys = jQuery( "Country", doc );    
-            
+    var countrys = jQuery( "Country", doc );
+
     var points = [];
     for( var i=0; i<=lats.length; i++ ) {
       points.push({
@@ -130,7 +130,7 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
         country: jQuery(countrys[i]).text()
       });
     }
-    
+
     callback( points );
   }, "xml");
 }
@@ -449,19 +449,6 @@ CmdUtils.NounType.prototype = {
   _init: function( name, expectedWords ) {
     this._name = name;
     this._expectedWords = expectedWords; // an array
-  },
-
-  match: function( fragment ) {
-    /* TODO
-     Every noun type we currently have implements match() by looking
-     at whether suggest().length > 0. This is a clue that we might not
-     need a match() method at all, and client code should just use
-     suggest(). */
-    var suggs = this.suggest( fragment );
-    if ( suggs.length > 0 ) {
-      return true;
-    }
-    return false;
   },
 
   suggest: function( fragment ) {

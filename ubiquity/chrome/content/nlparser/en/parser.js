@@ -47,7 +47,7 @@ NLParser.EnParser.prototype = {
     var x, y, nounType, verb, words;
 
     for each (nounType in this._nounTypeList) {
-      if (nounType.match(input)){
+      if (nounType.suggest(input).length > 0){
 	for (y in this._verbList) {
 	  verb = this._verbList[y];
 	  var prefix = verb.canPossiblyUseNounType(nounType);

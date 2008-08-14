@@ -147,18 +147,13 @@ NLParser.EnVerb.prototype = {
 	// Transitive verb, can have direct object.  Try to use the
 	// remaining words in that slot.
 	directObject = unusedWords.join( " " );
-	if ( this._DOType.match( directObject ) ) {
-	  // it's a valid direct object.  Make a sentence for each
-	  // possible noun completion based on it; return them all.
-	  suggestions = this._DOType.suggest( directObject );
-	  for each ( let sugg in suggestions ) {
-	    completions.push( this._newSentence(sugg, filledMods ));
-	  }
-	  return completions;
-	} else {
-	  // word is invalid direct object.  Fail!
-	  return [];
+        // Make a sentence for each
+	// possible noun completion based on it; return them all.
+	suggestions = this._DOType.suggest( directObject );
+	for each ( let sugg in suggestions ) {
+	  completions.push( this._newSentence(sugg, filledMods ));
 	}
+	return completions;
       }
     } else {
       // "pop" a preposition off of the properties of unfilledMods
@@ -172,9 +167,10 @@ NLParser.EnVerb.prototype = {
       var matchIndices = [];
       for ( var x = 0; x < unusedWords.length - 1; x++ ) {
 	if ( preposition.indexOf( unusedWords[x] ) == 0 ) {
-	  if ( nounType.match( unusedWords[ x + 1 ] ) ) {
+	  if ( nounType.suggest( unusedWords[ x + 1 ] ).length > 0 ) {
 	    // Match for the preposition at index x followed by
 	    // an appropriate noun at index x+1
+	    // TODO this should be able to match a multi-word
 	    matchIndices.push( x );
 	  }
 	}
@@ -218,19 +214,19 @@ NLParser.EnVerb.prototype = {
   canPossiblyUseSelection: function( textSel, htmlSel ) {
     if (this._DOType) {
       if (this._DOType.expectsHtmlSelection) {
-	if (this._DOType.match(htmlSel))
+	if (this._DOType.suggest(htmlSel).length > 0)
 	  return "html";
       } else {
-	if (this._DOType.match(textSel))
+	if (this._DOType.suggest(textSel).length > 0)
 	  return "text";
       }
     }
     for each( type in this._modifiers) {
       if (type.expectsHtmlSelection) {
-	if (type.match(htmlSel))
+	if (type.suggest(htmlSel).length > 0)
 	  return "html";
       } else {
-	if (type.match(textSel))
+	if (type.suggest(textSel).length > 0)
 	  return "text";
       }
     }
