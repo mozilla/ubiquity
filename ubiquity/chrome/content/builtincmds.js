@@ -42,89 +42,93 @@ makeSearchCommand({
   }
 });
 
-//Thanks to John Resig's http://ejohn.org/files/titleCaps.js
 
-function titleCaps(title){
-	var small = "(a|an|and|as|at|but|by|en|for|if|in|of|on|or|the|to|v[.]?|via|vs[.]?)";
-	var punct = "([!\"#$%&'()*+,./:;<=>?@[\\\\\\]^_`{|}~-]*)";
-  var parts = [], split = /[:.;?!] |(?: |^)["Ò]/g, index = 0;
-
-  function lower(word){
-  	return word.toLowerCase();
-  }
-
-  function upper(word){
-    return word.substr(0,1).toUpperCase() + word.substr(1);
-  }
-
-	while (true) {
-		var m = split.exec(title);
-
-		parts.push( title.substring(index, m ? m.index : title.length)
-			.replace(/\b([A-Za-z][a-z.'Õ]*)\b/g, function(all){
-				return /[A-Za-z]\.[A-Za-z]/.test(all) ? all : upper(all);
-			})
-			.replace(RegExp("\\b" + small + "\\b", "ig"), lower)
-			.replace(RegExp("^" + punct + small + "\\b", "ig"), function(all, punct, word){
-				return punct + upper(word);
-			})
-			.replace(RegExp("\\b" + small + punct + "$", "ig"), upper));
-
-		index = split.lastIndex;
-
-		if ( m ) parts.push( m[0] );
-		else break;
-	}
-
-	return parts.join("").replace(/ V(s?)\. /ig, " v$1. ")
-		.replace(/(['Õ])S\b/ig, "$1s")
-		.replace(/\b(AT&T|Q&A)\b/ig, function(all){
-			return all.toUpperCase();
-		});
-
+function openUrl(url, postData) {
+	var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+	var browser = browserWindow.getBrowser();
+	
+	if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+		browserWindow.loadURI(url, null, postData, false);
+	else
+		browser.loadOneTab(url, null, null, postData, false, false);
 }
 
-//TODO: find a API to get summaries from wikipedia
-//TODO: when executing search action,
-//escaping search terms screws things up sometimes
 
-// Currently just uses screen scraping to get the relevant information
-makeSearchCommand({
-  name: "Wikipedia",
-  url: "http://www.wikipedia.org/wiki/Special:Search?search={QUERY}",
-  icon: "http://www.wikipedia.org/favicon.ico",
-  preview: function(pblock, searchTerm) {
-
-    //TODO: Implement this preview using CmdUtils.renderTemplate
-    pblock.innerHTML =  "Gets wikipedia article for " + searchTerm + "<br/>";
-    var $ = jQuery;
-    // convert to first letter caps (Wikipedia requires that) and add to URL
-    var url  = "http://wikipedia.org/wiki/" + titleCaps(searchTerm).replace(/ /g,"_");
-
-    $.get( url, function(data) {
-
-      //attach the HTML page as invisible div to do screen scraping
-      pblock.innerHTML += "<div style='display:none'>" + data + "</div>";
-
-      var summary = $(pblock).find("#bodyContent > p").eq(0).text();
-      // if we are not on a article page
-      //(might be a search results page or a disambiguation page, etc.)
-      if($(pblock).find("#bodyContent > p").length == 0 || (summary.search("may refer to:") != -1 )){
-        return;
-      }
-      //remove citations like [3], [citation needed], etc.
-      //TODO: also remove audio links (.audiolink & .audiolinkinfo)
-      summary = summary.replace(/\[([^\]]+)\]/g,"");
-
-      var img = $(pblock).find(".infobox").find("img").attr("src")
-                || $(pblock).find(".thumbimage").attr("src");
-
-      pblock.innerHTML = "<div style='height:500px'>" +
-                        "<img src=" + img + "/>" + summary + "</div>";
-
+CmdUtils.CreateCommand({
+	name: "wikipedia",
+	takes: {search: noun_arb_text},
+	locale: "en-US",
+	homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
+	author: {name: "Blair McBride", email: "blair@theunfocused.net"},
+	license: "MPL",
+	preview: function(previewBlock, searchText) {
+		var apiUrl = "http://en.wikipedia.org/w/api.php";
+		
+		searchText = jQuery.trim(searchText);
+		if(searchText.length < 1) {
+			previewBlock.innerHTML = "Searches Wikipedia";
+			return;
+		}
+		
+		var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
+		var previewData = {query: searchText};
+		previewBlock.innerHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
+		
+		var apiParams = {
+			format: "json",
+			action: "query",
+			list: "search",
+			srlimit: 10,
+			srwhat: "text",
+			srsearch: searchText
+		};
+		
+		jQuery.ajax({
+			type: "GET",
+			url: apiUrl,
+			data: apiParams,
+			datatype: "string",
+			error: function() {
+				previewBlock.innerHTML = "Error searching Wikipedia";
+			},
+			success: function(searchReponse) {
+				searchReponse = Utils.decodeJson(searchReponse);
+				
+				if(!("query" in searchReponse && "search" in searchReponse.query)) {
+					previewBlock.innerHTML = "Error searching Wikipedia";
+					return;
+				}
+				
+				function generateWikipediaLink(title) {
+					var wikipediaUrl = "http://en.wikipedia.org/wiki/";
+					return wikipediaUrl + title.replace(/ /g, "_");
+				}
+				
+				var previewTemplate = "Wikipedia articles found matching <b>${query}</b>:<br /><br />" +
+					"{for article in results}" +
+					"<a href=\"${article.title|wikilink}\">${article.title}</a><br />" +
+					"{forelse}" +
+					"<b>No articles found</b>" +
+					"{/for}";
+				
+				previewData = {
+					query: searchText,
+					results: searchReponse.query.search,
+					_MODIFIERS: {wikilink: generateWikipediaLink}
+					};
+				
+				previewBlock.innerHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
+			}
 		});
-
-  }
+	},
+	execute: function(searchText) {
+		var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
+		var searchParams = {search: searchText};
+		
+		openUrl(searchUrl + Utils.paramsToString(searchParams));
+	}
 });
 
 makeSearchCommand({
