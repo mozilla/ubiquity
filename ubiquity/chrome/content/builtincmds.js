@@ -639,7 +639,11 @@ CmdUtils.CreateCommand({
     if (modifiers.to) {
       html += "to " + modifiers.to.text;
     }
-    html += "with these contents:" + directObj.html;
+    if (directObj.html) {
+      html += "with these contents:" + directObj.html;
+    } else {
+      html += "with a link to the current page.";
+    }
     pblock.innerHTML = html;
   },
 
