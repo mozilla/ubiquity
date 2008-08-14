@@ -3,39 +3,6 @@
 <title>Ubiquity Command from Untrusted Source</title>
 <link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
 <link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/blacklist_favicon.png"/>
-<script src="jquery-1.2.3.min.js"></script>
-<script type="application/javascript;version=1.7"
-        src="linkrel_codesource.js"></script>
-<script>
-
-function getUrlParams() {
-  var urlFragments = document.URL.split("?")[1];
-  urlFragments = urlFragments.split("&");
-  var params = {};
-  for( var x in urlFragments ) {
-    var fragFrags = urlFragments[x].split("=");
-    params[ fragFrags[0] ] = fragFrags[1];
-  }
-  return params;
-}
-
-var gCommandFeedInfo = getUrlParams();
-
-function showConfirmation() {
-  $("#errorShortDesc").html($("#confirmationShortDesc").html());
-  $("#errorLongDesc").html($("#confirmationLongDesc").html());
-  $("#buttons").remove();
-}
-
-function onSubmit() {
-  LinkRelCodeSource.addMarkedPage(gCommandFeedInfo.url);
-  showConfirmation();
-}
-
-function onCancel() {
-  window.close();
-}
-</script>
 </head>
 
 <body>
@@ -49,32 +16,20 @@ function onCancel() {
       <div id="errorLongContent">
 
         <div id="errorShortDesc">
-	  <p>You are about to subscribe to a <a href="about:ubiquity">Ubiquity</a> command from an unknown, untrusted third-party source <script>
-document.write( "at <a href=\"" + gCommandFeedInfo.url + "\">" +
-                gCommandFeedInfo.url + "</a>");
-</script>. If you subscribe, this command could do <i>anything it wants</i> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.</p>
+	  <p>You are about to subscribe to a <a href="about:ubiquity">Ubiquity</a> command from an unknown, untrusted third-party source at <a id="targetLink"></a>. If you subscribe, this command could do <i>anything it wants</i> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.</p>
         </div>
 
         <div id="errorLongDesc">
 <p>Here is the JavaScript source code to the command:</p>
 
-<script>
-document.write( "<iframe width=\"80%\" src=\"" +
-                 gCommandFeedInfo.sourceUrl +
-                 "\"></iframe>");
-</script>
+<iframe id="jsIframe" width="80%"></iframe>
 
-<p>If you understand JavaScript, you should read
-
-<script>
-document.write( "<a href=\"" + gCommandFeedInfo.sourceUrl + "\">" +
-                "the source code</a>");
-</script>
-use your best judgement to decide whether the command is something that's
-safe to execute or not. Proceed at your own risk!</p>
-	  <p>If you don't understand JavaScript, you should not subscribe to the command
-unless the link was given to you by someone you know and trust.</p>
-
+<p>If you understand JavaScript, you should read this and use your
+best judgement to decide whether the command is something that's safe
+to execute or not. Proceed at your own risk!</p>
+<p>If you don't understand JavaScript, you should not subscribe to the
+command unless the link was given to you by someone you know and
+trust.</p>
 <div class="todo" style="border-style:solid; border-width:2px; width:80%; padding:10px; border-color:#ffff00"><p><i>In the future, we plan to have a widget here
   displaying what we call a &quot;social trust network&quot;.  You'll be able
   to see whether any of your friends have tried out this command.  They can
@@ -107,8 +62,9 @@ unless the link was given to you by someone you know and trust.</p>
       </div>
     </div>
 </body>
-<script>
-if (LinkRelCodeSource.isMarkedPage(gCommandFeedInfo.url))
-  showConfirmation();
-</script>
+<script src="jquery-1.2.3.min.js"></script>
+<script type="application/javascript;version=1.7"
+        src="linkrel_codesource.js"></script>
+<script type="application/javascript;version=1.7"
+        src="confirm-add-command.js"></script>
 </html>
