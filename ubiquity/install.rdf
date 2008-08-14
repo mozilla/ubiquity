@@ -23,5 +23,6 @@
     <em:creator>Mozilla Corporation</em:creator>
     <em:homepageURL>http://wiki.mozilla.org/Labs/Ubiquity</em:homepageURL>
     <em:updateURL>https://labs.toolness.com/ubiquity/update.rdf</em:updateURL>
+    <em:optionsURL>chrome://ubiquity/content/preferences.xul</em:optionsURL>
   </Description>
 </RDF>
