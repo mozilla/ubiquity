@@ -66,17 +66,6 @@ var noun_arb_text = {
   }
 };
 
-var noun_arb_html = {
-  _name: "html",
-  expectsHtmlSelection: true,
-  match: function( fragment ) {
-    return true;
-  },
-  suggest: function( fragment ) {
-    return [ fragment ];
-  }
-};
-
 var noun_type_date = {
   _name: "date",
   match: function( fragment ) {

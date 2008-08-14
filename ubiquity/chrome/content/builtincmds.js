@@ -1,23 +1,24 @@
 CmdUtils.CreateCommand({
   name:"map-these",
-  takes: {"selection": noun_arb_html },
-  preview: function( pblock, html ) {
+  takes: {"selection": noun_arb_text },
+  preview: function( pblock, directObject ) {
+    var html = directObject.html;
     pblock.innerHTML = "<span id='loading'>Mapping...</span>";
-    
+
     // TODO: Figure out why we have to do this?
     var doc = context.focusedWindow.document;
     var div = doc.createElement( "div" );
     div.innerHTML = html;
-        
+
     var pages = {};
-    
+
     jQuery( "a", div ).each( function() {
       if( this.href.indexOf(".html") != -1 ) {
         pages[ jQuery(this).text() ] = this.href;
         displayMessage( this.href );
       }
     });
-    
+
     var mapUrl = "http://maps.google.com/staticmap?";
 
     var params = {
@@ -26,20 +27,20 @@ CmdUtils.CreateCommand({
       markers: ""
     };
 
-    mapURL = mapUrl + jQuery.param( params );
+    var mapURL = mapUrl + jQuery.param( params );
     var img = doc.createElement( "img" );
     img.src = mapURL;
     jQuery(pblock).height( 300 )
                   .append( img )
                   .append( "<div id='spots'></div>");
-    
+
     var markerNumber = 97; // Lowercase a
-    
-    for( var description in pages ) {         
+
+    for( var description in pages ) {
       jQuery.get( pages[description], function(pageHtml) {
         var div = doc.createElement( "div" );
         div.innerHTML = pageHtml;
-        
+
         // Get the link entitled "Google Map" and then strip out
         // the location from it's href, which is always of the form
         // http://map.google.com?q=loc%3A+[location], where [location]
@@ -53,16 +54,16 @@ CmdUtils.CreateCommand({
           CmdUtils.geocodeAddress( loc, function(points){
             if( points != null){
               jQuery( "#loading:visible", pblock).slideUp();
-              
+
               var params = {
                 lat: points[0].lat,
                 long: points[0].long,
                 marker: String.fromCharCode( markerNumber++ ),
                 name: description
               }
-              
+
               img.src += CmdUtils.renderTemplate( "${lat},${long},red${marker}|", params );
-              
+
               params.marker = params.marker.toUpperCase();
               var spotName = CmdUtils.renderTemplate( "<div><b>${marker}</b>: <i>${name}</i></div>", params );
               jQuery( "#spots", pblock ).append( spotName );
@@ -72,7 +73,7 @@ CmdUtils.CreateCommand({
         }
       });
     }
-    
+
   }
 })
 
@@ -81,7 +82,8 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 function makeSearchCommand( options ) {
-  options.execute = function(query, modifiers) {
+  options.execute = function(directObject, modifiers) {
+    var query = directObject.text;
     var urlString = options.url.replace("{QUERY}", query);
     Utils.openUrlInBrowser(urlString);
     CmdUtils.setLastResult( urlString );
@@ -90,7 +92,8 @@ function makeSearchCommand( options ) {
   options.takes = {"search term": noun_arb_text};
 
   if (! options.preview )
-    options.preview = function(pblock, query, modifiers) {
+    options.preview = function(pblock, directObject, modifiers) {
+      var query = directObject.text;
       var content = ("Performs a " + options.name + " search for <b>" +
 		     query + "</b>.");
       pblock.innerHTML = content;
@@ -106,7 +109,8 @@ makeSearchCommand({
   name: "Google",
   url: "http://www.google.com/search?q={QUERY}",
   icon: "http://www.google.com/favicon.ico",
-  preview: function(pblock, searchTerm) {
+  preview: function(pblock, directObject) {
+    var searchTerm = directObject.text;
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
 
@@ -127,69 +131,69 @@ makeSearchCommand({
   url: "http://en.wikipedia.org/wiki/Special:Search?search={QUERY}",
   icon: "http://en.wikipedia.org/favicon.ico",
   locale: "en-US",
-	homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
-	author: {name: "Blair McBride", email: "blair@theunfocused.net"},
-	license: "MPL",
-  preview: function(previewBlock, searchText) {
-		var apiUrl = "http://en.wikipedia.org/w/api.php";
+  homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
+  author: {name: "Blair McBride", email: "blair@theunfocused.net"},
+  license: "MPL",
+  preview: function(previewBlock, directObject) {
+    var apiUrl = "http://en.wikipedia.org/w/api.php";
 
-		searchText = jQuery.trim(searchText);
-		if(searchText.length < 1) {
-			previewBlock.innerHTML = "Searches Wikipedia";
-			return;
-		}
+    var searchText = jQuery.trim(directObject.text);
+    if(searchText.length < 1) {
+      previewBlock.innerHTML = "Searches Wikipedia";
+      return;
+    }
 
-		var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
-		var previewData = {query: searchText};
-		previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+    var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
+    var previewData = {query: searchText};
+    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
-		var apiParams = {
-			format: "json",
-			action: "query",
-			list: "search",
-			srlimit: 10,
-			srwhat: "text",
-			srsearch: searchText
-		};
+    var apiParams = {
+      format: "json",
+      action: "query",
+      list: "search",
+      srlimit: 10,
+      srwhat: "text",
+      srsearch: searchText
+    };
 
-		jQuery.ajax({
-			type: "GET",
-			url: apiUrl,
-			data: apiParams,
-			datatype: "string",
-			error: function() {
-				previewBlock.innerHTML = "Error searching Wikipedia";
-			},
-			success: function(searchReponse) {
-				searchReponse = Utils.decodeJson(searchReponse);
+    jQuery.ajax({
+      type: "GET",
+      url: apiUrl,
+      data: apiParams,
+      datatype: "string",
+      error: function() {
+	previewBlock.innerHTML = "Error searching Wikipedia";
+      },
+      success: function(searchReponse) {
+        searchReponse = Utils.decodeJson(searchReponse);
 
-				if(!("query" in searchReponse && "search" in searchReponse.query)) {
-					previewBlock.innerHTML = "Error searching Wikipedia";
-					return;
-				}
-
-				function generateWikipediaLink(title) {
-					var wikipediaUrl = "http://en.wikipedia.org/wiki/";
-					return wikipediaUrl + title.replace(/ /g, "_");
-				}
-
-				var previewTemplate = "Wikipedia articles found matching <b>${query}</b>:<br /><br />" +
-					"{for article in results}" +
-					"<a href=\"${article.title|wikilink}\">${article.title}</a><br />" +
-					"{forelse}" +
-					"<b>No articles found</b>" +
-					"{/for}";
-
-				previewData = {
-					query: searchText,
-					results: searchReponse.query.search,
-					_MODIFIERS: {wikilink: generateWikipediaLink}
-					};
-
-				previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
-			}
-		});
+        if(!("query" in searchReponse && "search" in searchReponse.query)) {
+	  previewBlock.innerHTML = "Error searching Wikipedia";
+	  return;
 	}
+
+	function generateWikipediaLink(title) {
+          var wikipediaUrl = "http://en.wikipedia.org/wiki/";
+          return wikipediaUrl + title.replace(/ /g, "_");
+        }
+
+        var previewTemplate = "Wikipedia articles found matching <b>${query}</b>:<br /><br />" +
+                              "{for article in results}" +
+                              "<a href=\"${article.title|wikilink}\">${article.title}</a><br />" +
+                              "{forelse}" +
+                              "<b>No articles found</b>" +
+                              "{/for}";
+
+        previewData = {
+          query: searchText,
+          results: searchReponse.query.search,
+          _MODIFIERS: {wikilink: generateWikipediaLink}
+        };
+
+        previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+      }
+    });
+  }
 });
 
 // TODO: This should be added to Utils.openUrlInBrowser()
@@ -198,7 +202,7 @@ makeSearchCommand({
 //    .getService(Components.interfaces.nsIWindowMediator);
 //  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
 //  var browser = browserWindow.getBrowser();
-// 
+//
 //  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
 //    browserWindow.loadURI(url, null, postData, false);
 //  else
@@ -237,21 +241,23 @@ CmdUtils.CreateCommand({
   modifiers: { near:noun_arb_text },
   icon: "http://www.yelp.com/favicon.ico",
 
-  execute: function( query, info ) {
+  execute: function( directObject, info ) {
+    var query = directObject.text;
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
-    url = url.replace( /{NEAR}/g, info.near);
+    url = url.replace( /{NEAR}/g, info.near.text);
 
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function( pblock, query, info ) {
+  preview: function( pblock, directObject, info ) {
+    var query = directObject.text;
     var url = "http://api.yelp.com/business_review_search?";
 
     if( query.length == 0 ) return;
 
     var loc = CmdUtils.getLocation();
-    var near = info.near || (loc.city + ", " + loc.state);
+    var near = info.near.text || (loc.city + ", " + loc.state);
 
     var params = {
       term: query,
@@ -324,7 +330,8 @@ CmdUtils.CreateCommand({
   name: "calculate",
   takes: {"expression": noun_arb_text},
   icon: "http://www.metacalc.com/favicon.ico",
-  execute: function( expr ) {
+  execute: function( directObj ) {
+    var expr = directObj.text;
     if( expr.length > 0 ) {
       var result = eval( expr );
       CmdUtils.setSelection( result );
@@ -332,7 +339,8 @@ CmdUtils.CreateCommand({
     } else
       displayMessage( "Requires an expression.");
   },
-  preview: function( pblock, expr ) {
+  preview: function( pblock, directObj ) {
+    var expr = directObj.text;
     if( expr.length < 1 ){
       pblock.innerHTML = "Calculates an expression. E.g., 22/7.";
       return;
@@ -364,10 +372,12 @@ function defineWord(word, callback) {
 CmdUtils.CreateCommand({
   name: "define",
   takes: {"word": noun_arb_text},
-  execute: function( word ) {
+  execute: function( directObj ) {
+    var word = directObj.text;
     Utils.openUrlInBrowser( "http://www.answers.com/" + escape(word) );
   },
-  preview: function( pblock, word ) {
+  preview: function( pblock, directObj ) {
+    var word = directObj.text;
     if (word.length < 2)
       pblock.innerHTML = "Gives the definition of a word.";
     else
@@ -388,7 +398,8 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "syntax-highlight",
   takes: {"code": noun_arb_text},
-  execute: function( code ) {
+  execute: function( directObj ) {
+    var code = directObj.text;
     var url = "http://azarask.in/services/syntaxhighlight/color.py";
     var params = {
       code: code,
@@ -425,7 +436,8 @@ CmdUtils.CreateCommand({
   takes : {"text" : noun_arb_text},
   icon: "http://www.wikipedia.org/favicon.ico",
 
-  execute : function( text ){
+  execute : function( directObj ){
+    var text = directObj.text;
     var wikiText = text.replace(/ /g, "_");
     var html = ("<a href=\"http://en.wikipedia.org/wiki/" +
                 "Special:Search/" + wikiText +
@@ -438,7 +450,8 @@ CmdUtils.CreateCommand({
       displayMessage("You're not in a rich text editing field.");
   },
 
-  preview : function(pblock, text){
+  preview : function(pblock, directObj){
+    var text = directObj.text;
     if (text.length < 1){
       pblock.innerHTML = "Inserts a link to Wikipedia article on text";
     }else{
@@ -536,20 +549,21 @@ CmdUtils.CreateCommand({
   takes: {"text to translate": noun_arb_text},
   modifiers: {to: noun_type_language, from: noun_type_language},
 
-  execute: function( textToTranslate, languages ) {
+  execute: function( directObj, languages ) {
     // Default to translating to English if no to language
     // is specified.
     // TODO: Choose the default in a better way.
 
-    var toLang = languages.to || "English";
-    var fromLang = languages.from || "";
+    var toLang = languages.to.text || "English";
+    var fromLang = languages.from.text || "";
     var toLangCode = Languages[toLang.toUpperCase()];
 
-    translateTo( textToTranslate, {to:toLangCode} );
+    translateTo( directObj.text, {to:toLangCode} );
   },
 
-  preview: function( pblock, textToTranslate, languages ) {
-    var toLang = languages.to || "English";
+  preview: function( pblock, directObj, languages ) {
+    var toLang = languages.to.text || "English";
+    var textToTranslate = directObj.text;
 
     var toLangCode = Languages[toLang.toUpperCase()];
     var lang = toLang[0].toUpperCase() + toLang.substr(1);
@@ -587,7 +601,7 @@ CmdUtils.CreateCommand({
   name: "remember",
   takes: {"thing": noun_arb_text},
   execute: function( thing, modifiers ) {
-    displayMessage( "I am remembering " + thing );
+    displayMessage( "I am remembering " + thing.text );
     CmdUtils.setLastResult( thing );
   }
 });
@@ -617,19 +631,20 @@ function findGmailTab() {
 
 CmdUtils.CreateCommand({
   name: "email",
-  takes: {"message": noun_arb_html},
+  takes: {"message": noun_arb_text},
   modifiers: {to: noun_type_contact},
 
-  preview: function(pblock, directObject, modifiers) {
+  preview: function(pblock, directObj, modifiers) {
     var html = "Creates an email message ";
-    if (modifiers["to"]) {
-      html += "to " + modifiers["to"];
+    if (modifiers.to) {
+      html += "to " + modifiers.to.text;
     }
-    html += "with these contents:" + directObject;
+    html += "with these contents:" + directObj.html;
     pblock.innerHTML = html;
   },
 
-  execute: function(html, headers) {
+  execute: function(directObj, headers) {
+    var html = directObj.html;
     var document = context.focusedWindow.document;
     var title;
     if (document.title)
@@ -667,7 +682,7 @@ CmdUtils.CreateCommand({
           composeMail.dispatchEvent(event);
           var active = gmail.getActiveViewElement();
 	  var to = composeMail.ownerDocument.getElementsByName("to")[0];
-	  if (to) to.value = headers["to"];
+	  if (to && headers.to) to.value = headers.to.text;
           var subject = active.getElementsByTagName("input")[0];
           if (subject) subject.value = "'"+title+"'";
           var iframe = active.getElementsByTagName("iframe")[0];
@@ -682,7 +697,7 @@ CmdUtils.CreateCommand({
       gmonkey.load("1.0", continuer);
     } else {
       // No gmail tab open?  Open a new one:
-      var params = {fs:1, tf:1, view:"cm", su:title, to:headers["to"], body:html};
+      var params = {fs:1, tf:1, view:"cm", su:title, to:headers.to, body:html};
       Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
 			     Utils.paramsToString(params));
     }
@@ -772,13 +787,15 @@ function checkCalendar(pblock, date) {
 CmdUtils.CreateCommand({
   name: "check-calendar",
   takes: {"date to check": noun_type_date},
-  execute: function( date ) {
+  execute: function( directObj ) {
+    var date = directObj.data;
     var url = "http://www.google.com/calendar/m";
     var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
 
     Utils.openUrlInBrowser( url + params );
   },
-  preview: function( pblock, date ) {
+  preview: function( pblock, directObj ) {
+    var date = directObj.data;
     pblock.innerHTML = "Checks Google Calendar for the day of" +
   		       date.toString("dd MM, yyyy");
   	checkCalendar( pblock, date );
@@ -797,14 +814,16 @@ CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": noun_arb_text},
 
-  execute: function( location ) {
+  execute: function( directObj ) {
+    var location = directObj.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
 
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function( pblock, location ) {
+  preview: function( pblock, directObj ) {
+    var location = directObj.text;
     if( location.length < 1 ) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
@@ -848,14 +867,15 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": noun_arb_text},
-  execute: function( location ) {
-
+  execute: function( directObj ) {
+    var location = directObj.text;
     var url = "http://maps.google.com/?q=";
     url += encodeURIComponent(location);
 
     Utils.openUrlInBrowser( url );
   },
-  preview: function(pblock, location) {
+  preview: function(pblock, directObj) {
+    var location = directObj.text;
     CmdUtils.showPreviewFromFile( pblock,
                                   "templates/map.html",
                                   function(winInsecure) {
@@ -909,55 +929,57 @@ const TWITTER_STATUS_MAXLEN = 160;
 
 
 CmdUtils.CreateCommand({
-	name: "twitter",
-	icon: "http://assets3.twitter.com/images/favicon.ico",
-	takes: {status: noun_arb_text},
-	modifiers: {},
-	preview: function(previewBlock, statusText) {
-		var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
-		var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
-		var previewData = {
-			status: statusText,
-			chars: TWITTER_STATUS_MAXLEN - statusText.length
-		};
+  name: "twitter",
+  icon: "http://assets3.twitter.com/images/favicon.ico",
+  takes: {status: noun_arb_text},
+  modifiers: {},
+  preview: function(previewBlock, directObj) {
+    var statusText = directObj.text;
+    var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
+    var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
+    var previewData = {
+      status: statusText,
+      chars: TWITTER_STATUS_MAXLEN - statusText.length
+    };
 
-		var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+    var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
-		if(previewData.chars < 0) {
-			var truncateData = {
-				truncate: 0 - previewData.chars
-			};
+    if(previewData.chars < 0) {
+      var truncateData = {
+        truncate: 0 - previewData.chars
+      };
 
-			previewHTML += CmdUtils.renderTemplate(truncateTemplate, truncateData);
-		}
+      previewHTML += CmdUtils.renderTemplate(truncateTemplate, truncateData);
+    }
 
-		previewBlock.innerHTML = previewHTML;
-	},
-	execute: function(statusText) {
-		if(statusText.length < 1) {
-			displayMessage("Twitter requires a status to be entered");
-			return;
-		}
+    previewBlock.innerHTML = previewHTML;
+  },
+  execute: function(directObj) {
+    var statusText = directObj.text;
+    if(statusText.length < 1) {
+      displayMessage("Twitter requires a status to be entered");
+      return;
+    }
 
-		var updateUrl = "https://twitter.com/statuses/update.json";
-		var updateParams = {
-			source: "ubiquity",
-			status: statusText
-			};
+    var updateUrl = "https://twitter.com/statuses/update.json";
+    var updateParams = {
+      source: "ubiquity",
+      status: statusText
+    };
 
-		jQuery.ajax({
-			type: "POST",
-			url: updateUrl,
-			data: updateParams,
-			dataType: "json",
-			error: function() {
-				displayMessage("Twitter error - status not updated");
-			},
-			success: function() {
-				displayMessage("Twitter status updated");
-			}
-		});
-	}
+    jQuery.ajax({
+      type: "POST",
+      url: updateUrl,
+      data: updateParams,
+      dataType: "json",
+      error: function() {
+        displayMessage("Twitter error - status not updated");
+      },
+      success: function() {
+        displayMessage("Twitter status updated");
+      }
+    });
+  }
 });
 
 
@@ -969,13 +991,15 @@ CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": noun_type_tab},
 
-  execute: function( tabName ) {
+  execute: function( directObj ) {
+    var tabName = directObj;
     var tabs = noun_type_tab.getTabs();
     tabs[tabName]._window.focus();
     tabs[tabName].focus();
   },
 
-  preview: function( pblock, tabName ) {
+  preview: function( pblock, directObj ) {
+    var tabName = directObj;
     if( tabName.length > 1 )
       pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
@@ -988,13 +1012,15 @@ CmdUtils.CreateCommand({
   name: "close-tab",
   takes: {"tab name": noun_type_tab},
 
-  execute: function( tabName ) {
+  execute: function( directObj ) {
+    var tabName = directObj;
     var tabs = noun_type_tab.getTabs();
     tabs[tabName].close();
     displayMessage(tabName + " tab closed");
   },
 
-  preview: function( pblock, tabName ) {
+  preview: function( pblock, directObj ) {
+    var tabName = directObj;
     if( tabName.length > 1 )
       pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
     else
@@ -1007,7 +1033,8 @@ CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": noun_arb_text},
 
-  preview: function( pblock, query ) {
+  preview: function( pblock, directObj ) {
+    var query = directObj.text;
     var relatedWord = query.toLowerCase();
     var html = null;
     if(relatedWord.length != 0){
@@ -1032,7 +1059,8 @@ CmdUtils.CreateCommand({
     jQuery(pblock).html( html );
   },
 
-  execute: function( query ) {
+  execute: function( directObj ) {
+    var query = directObj.text;
     var relatedWord = query.toLowerCase();
     var numTabs = 0;
 

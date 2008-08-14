@@ -13,7 +13,11 @@ function dictKeys( dict ) {
   return [ key for ( key in dict ) ];
 }
 
+
 NLParser.EnParsedSentence = function( verb, DO, modifiers ) {
+  /* DO and the values of modifiers should be NLParser.EnInputData
+   * objects.
+   */
   this._init( verb, DO, modifiers );
 }
 NLParser.EnParsedSentence.prototype = {
@@ -23,18 +27,7 @@ NLParser.EnParsedSentence.prototype = {
       this._verb = verb;
       this._DO = DO;
       this._modifiers = modifiers;
-      this._summarizedModifiers = {};
-      this._summarizedDO = this._summarize(DO);
-      for (let x in modifiers) {
-	this._summarizedModifiers[x] = this._summarize(modifiers[x]);
-      }
     }
-  },
-
-  _summarize: function(longText) {
-    if (longText.length > 80)
-      return "your selection (\"" + longText.slice(0,50) + "...\")";
-    return longText;
   },
 
   getCompletionText: function() {
@@ -42,11 +35,11 @@ NLParser.EnParsedSentence.prototype = {
      autocompletes to this sentence.  Currently unused! */
     var sentence = this._verb._name;
     if ( this._DO ) {
-      sentence = sentence + " " + this._DO;
+      sentence = sentence + " " + this._DO.text;
     }
     for ( var x in this._modifiers ) {
       if ( this._modifiers[x] ) {
-	sentence = sentence + " " + x + " " + this._modifiers[x];
+	sentence = sentence + " " + x + " " + this._modifiers[x].text;
       }
     }
     return sentence;
@@ -56,8 +49,8 @@ NLParser.EnParsedSentence.prototype = {
     // returns html formatted sentence for display in suggestion list
     let sentence = this._verb._name;
     if ( this._verb._DOType ) {
-      if ( this._DO ) {
-	sentence = sentence + " " + this._summarizedDO;
+      if ( this._DO.summary ) {
+	sentence = sentence + " " + this._DO.summary;
       } else {
 	//var arg = this._verb._DOLabel.substring
 	sentence = sentence + " <span class=\"needarg\">(" + this._verb._DOLabel + ")</span>";
@@ -65,10 +58,12 @@ NLParser.EnParsedSentence.prototype = {
     }
 
     for ( var x in this._verb._modifiers ) {
-      if ( this._modifiers[ x ] ) {
-	sentence = sentence + " <b>" +  x + " " + this._summarizedModifiers[x] + "</b>";
+      if ( this._modifiers[ x ].summary ) {
+	sentence = sentence + " <b>" +  x + " " + this._modifiers[x].summary +
+		   "</b>";
       } else {
-	sentence = sentence + " <span class=\"needarg\">(" + x + " " + this._verb._modifiers[x]._name + ")</span>";
+	sentence = sentence + " <span class=\"needarg\">(" + x + " " +
+	  this._verb._modifiers[x]._name + ")</span>";
       }
     }
     return sentence;
@@ -79,9 +74,7 @@ NLParser.EnParsedSentence.prototype = {
   },
 
   preview: function(context, previewBlock) {
-    this._verb.preview( context, this._summarizedDO,
-			this._summarizedModifiers, previewBlock );
-
+    this._verb.preview( context, this._DO, this._modifiers, previewBlock );
   }
 };
 
@@ -117,6 +110,23 @@ NLParser.EnVerb.prototype = {
     }
   },
 
+  _newSentence: function( directObj, modifiersText ) {
+    let modifiersObjects= {};
+    let text = null;
+    let data = null;
+    // TODO THIS IS HACK
+    if (typeof directObj == "string") {
+      text = directObj;
+    } else {
+      data = directObj;
+    }
+    for (let x in modifiersText) {
+      modifiersObjects[x] = new NLParser.EnInputData( modifiersText[x] );
+    }
+    let directObject = new NLParser.EnInputData(text, null, data);
+    return new NLParser.EnParsedSentence(this, directObject, modifiersObjects);
+  },
+
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
   recursiveParse: function( unusedWords, filledMods, unfilledMods ) {
@@ -132,7 +142,7 @@ NLParser.EnVerb.prototype = {
 	// No direct object, either because there are no words left,
 	// to use, or because the verb can't take a direct object.
 	// Try parsing sentence without them.
-	return [ new NLParser.EnParsedSentence( this, "", filledMods ) ];
+	return [ this._newSentence("", filledMods ) ];
       } else {
 	// Transitive verb, can have direct object.  Try to use the
 	// remaining words in that slot.
@@ -141,9 +151,8 @@ NLParser.EnVerb.prototype = {
 	  // it's a valid direct object.  Make a sentence for each
 	  // possible noun completion based on it; return them all.
 	  suggestions = this._DOType.suggest( directObject );
-	  for ( var x in suggestions ) {
-	    completions.push( new NLParser.EnParsedSentence( this, suggestions[x],
-						  filledMods ) );
+	  for each ( let sugg in suggestions ) {
+	    completions.push( this._newSentence(sugg, filledMods ));
 	  }
 	  return completions;
 	} else {
@@ -229,6 +238,11 @@ NLParser.EnVerb.prototype = {
   },
 
   substitutePronoun: function( words, context ) {
+    /* TODO will need to refactor so that substitutePronoun is called from
+     * inside recursiveParse to interpolate the selection (by calling
+     * NLParser.inputObjectFromSelection) right before checking for noun
+     * validity and making a parsedSentence out of it.
+     */
     var subbedWords = words.slice();
     var selectionUsed = false;
 

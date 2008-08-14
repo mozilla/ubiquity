@@ -2,6 +2,29 @@
 NLParser.EN_SELECTION_PRONOUNS =  [ "this", "that", "it", "selection",
 				    "him", "her", "them"];
 
+NLParser.EnInputData = function( text, html, data ) {
+  this.text = text;
+  this.html = html;
+  this.data = data;
+
+  // try to fill in missing fields:
+  if (this.data && !this.text)
+    this.text = this.data.toString();
+  if (this.text && !this.html)
+    this.html = this.text;
+
+  if (text.length > 80)
+    this.summary = "your selection (\"" + text.slice(0,50) + "...\")";
+  else
+    this.summary = this.text;
+};
+
+NLParser.inputObjectFromSelection = function(context) {
+  return new NLParser.EnInputData(getTextSelection(context),
+				  getHtmlSelection(context));
+};
+
+
 NLParser.EnParser = function(verbList, nounList) {
   if (verbList) {
     this._init(verbList, nounList);

@@ -282,7 +282,7 @@ function testParseDirectOnly() {
 				  "beagle", "bulldog", "husky"]);
   var cmd_pet = {
     execute: function(context, directObject, modifiers) {
-      dogGotPetted = directObject;
+      dogGotPetted = directObject.text;
     },
     name: "pet",
     DOLabel: "kind of dog",
@@ -294,11 +294,11 @@ function testParseDirectOnly() {
 
   var fakeContext = null;
   var completions = verb.getCompletions( inputWords, fakeContext );
-  this.assert( completions.length == 2 );
-  this.assert( completions[0]._verb._name == "pet");
-  this.assert( completions[0]._DO == "beagle");
-  this.assert( completions[1]._verb._name == "pet");
-  this.assert( completions[1]._DO == "bulldog");
+  this.assert( completions.length == 2, "should be 2 completions" );
+  this.assert( completions[0]._verb._name == "pet", "verb should be pet");
+  this.assert( completions[0]._DO.text == "beagle", "obj should be beagle");
+  this.assert( completions[1]._verb._name == "pet", "verb should be pet");
+  this.assert( completions[1]._DO.text == "bulldog", "obj should be bulldog");
   completions[0].execute(fakeContext);
   this.assert( dogGotPetted == "beagle");
   completions[1].execute(fakeContext);
@@ -316,8 +316,8 @@ function testParseWithModifier() {
 					  "bathtub", "fire hose"]);
   var cmd_wash = {
     execute: function(context, directObject, modifiers) {
-      dogGotWashed = directObject;
-      dogGotWashedWith = modifiers["with"];
+      dogGotWashed = directObject.text;
+      dogGotWashedWith = modifiers["with"].text;
     },
     name:"wash",
     DOLabel:"kind of dog",
@@ -331,11 +331,11 @@ function testParseWithModifier() {
   var completions = verb.getCompletions( inputWords, fakeContext );
   this.assert( completions.length == 2 );
   this.assert( completions[0]._verb._name == "wash");
-  this.assert( completions[0]._DO == "poodle");
-  this.assert( completions[0]._modifiers["with"] == "sponge");
+  this.assert( completions[0]._DO.text == "poodle");
+  this.assert( completions[0]._modifiers["with"].text == "sponge");
   this.assert( completions[1]._verb._name == "wash");
-  this.assert( completions[1]._DO == "poodle");
-  this.assert( completions[1]._modifiers["with"] == "spork");
+  this.assert( completions[1]._DO.text == "poodle");
+  this.assert( completions[1]._modifiers["with"].text == "spork");
   completions[0].execute(fakeContext);
   this.assert( dogGotWashed == "poodle");
   this.assert( dogGotWashedWith == "sponge");
@@ -351,10 +351,14 @@ function testCmdManagerSuggestsForEmptyInput() {
   var nounTypeTwo = new CmdUtils.NounType( "stuffType", ["mud"] );
   var fakeSource = new FakeCommandSource(
   {
-    cmd_one: {execute:function(context, directObj) {oneWasCalled = directObj;},
+    cmd_one: {execute:function(context, directObj) {
+		oneWasCalled = directObj.text;
+	      },
               DOLabel:"thing",
 	      DOType:nounTypeOne},
-    cmd_two: {execute:function(context, directObj) {twoWasCalled = directObj;},
+    cmd_two: {execute:function(context, directObj) {
+		twoWasCalled = directObj.text;
+	      },
 	      DOLabel:"stuff",
 	      DOType:nounTypeTwo}
   });
@@ -385,10 +389,10 @@ function testVerbEatsSelection() {
   var cmd_eat = {
     name: "eat",
     execute: function(context, directObject, modifiers) {
-      if (directObject)
-	foodGotEaten = directObject;
-      if (modifiers["at"])
-	foodGotEatenAt = modifiers["at"];
+      if (directObject.text)
+	foodGotEaten = directObject.text;
+      if (modifiers["at"].text)
+	foodGotEatenAt = modifiers["at"].text;
     },
     DOLabel:"food",
     DOType: food,
@@ -397,24 +401,24 @@ function testVerbEatsSelection() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var fakeContext = {textSelection:"lunch"};
   var completions = verb.getCompletions(["this"], fakeContext);
-  this.assert( completions.length == 1 );
+  this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute(fakeContext);
-  this.assert(foodGotEaten == "lunch");
-  this.assert(foodGotEatenAt == null);
+  this.assert(foodGotEaten == "lunch", "obj should be lunch");
+  this.assert(foodGotEatenAt == null, "should be no modifier");
 
   fakeContext.textSelection = "grill";
   completions = verb.getCompletions(["breakfast", "at", "it"], fakeContext);
-  this.assert( completions.length == 1 );
+  this.assert( completions.length == 1, "should be one completion" );
   completions[0].execute(fakeContext);
-  this.assert(foodGotEaten == "breakfast");
-  this.assert(foodGotEatenAt == "grill");
+  this.assert(foodGotEaten == "breakfast", "food should be breakfast");
+  this.assert(foodGotEatenAt == "grill", "place should be grill");
 
   fakeContext.textSelection = "din";
   completions = verb.getCompletions(["at", "home", "this"], fakeContext);
   this.assert( completions.length == 1 );
   completions[0].execute(fakeContext);
-  this.assert(foodGotEaten == "dinner");
-  this.assert(foodGotEatenAt == "home");
+  this.assert(foodGotEaten == "dinner", "food should be dinner");
+  this.assert(foodGotEatenAt == "home", "place should be grill");
 }
 
 function testImplicitPronoun() {
@@ -425,10 +429,10 @@ function testImplicitPronoun() {
   var cmd_eat = {
     name: "eat",
     execute: function(context, directObject, modifiers) {
-      if (directObject)
-	foodGotEaten = directObject;
-      if (modifiers["at"])
-	foodGotEatenAt = modifiers["at"];
+      if (directObject.text)
+	foodGotEaten = directObject.text;
+      if (modifiers["at"].text)
+	foodGotEatenAt = modifiers["at"].text;
     },
     DOLabel:"food",
     DOType: food,
@@ -442,7 +446,7 @@ function testImplicitPronoun() {
   completions[0].execute(fakeContext);
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
   this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
-  this.assert((!completions[1]._DO), "second completion should have no DO.");
+  this.assert((!completions[1]._DO.text), "second completion should have no DO.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
@@ -452,7 +456,7 @@ function testImplicitPronoun() {
   completions[0].execute(fakeContext);
   this.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
   this.assert((foodGotEatenAt == null), "IndirectObjs shouldn't be set.");
-  this.assert((!completions[1]._DO), "second completion should have no DO.");
+  this.assert((!completions[1]._DO.text), "second completion should have no DO.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
