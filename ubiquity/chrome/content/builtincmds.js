@@ -14,7 +14,7 @@ function makeSearchCommand( options ) {
   if (! options.preview )
     options.preview = function(pblock, query, modifiers) {
       var content = ("Performs a " + options.name + " search for <b>" +
-		     escape(query) + "</b>.");
+		     query + "</b>.");
       pblock.innerHTML = content;
     };
 
@@ -44,28 +44,15 @@ makeSearchCommand({
   }
 });
 
-
-function openUrl(url, postData) {
-	var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
-	var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-	var browser = browserWindow.getBrowser();
-
-	if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-		browserWindow.loadURI(url, null, postData, false);
-	else
-		browser.loadOneTab(url, null, null, postData, false, false);
-}
-
-
-CmdUtils.CreateCommand({
-	name: "wikipedia",
-	takes: {search: noun_arb_text},
-	locale: "en-US",
+makeSearchCommand({
+  name: "Wikipedia",
+  url: "http://en.wikipedia.org/wiki/Special:Search?search={QUERY}",
+  icon: "http://en.wikipedia.org/favicon.ico",
+  locale: "en-US",
 	homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
 	author: {name: "Blair McBride", email: "blair@theunfocused.net"},
 	license: "MPL",
-	preview: function(previewBlock, searchText) {
+  preview: function(previewBlock, searchText) {
 		var apiUrl = "http://en.wikipedia.org/w/api.php";
 
 		searchText = jQuery.trim(searchText);
@@ -124,14 +111,21 @@ CmdUtils.CreateCommand({
 				previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 			}
 		});
-	},
-	execute: function(searchText) {
-		var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
-		var searchParams = {search: searchText};
-
-		openUrl(searchUrl + Utils.paramsToString(searchParams));
 	}
 });
+
+// TODO: This should be added to Utils.openUrlInBrowser()
+// function openUrl(url, postData) {
+//  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+//    .getService(Components.interfaces.nsIWindowMediator);
+//  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+//  var browser = browserWindow.getBrowser();
+// 
+//  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+//    browserWindow.loadURI(url, null, postData, false);
+//  else
+//    browser.loadOneTab(url, null, null, postData, false, false);
+// }
 
 makeSearchCommand({
   name: "IMDB",
