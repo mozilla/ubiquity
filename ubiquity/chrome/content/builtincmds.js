@@ -138,6 +138,18 @@ makeSearchCommand({
 });
 
 makeSearchCommand({
+  name: "YouTube",
+  url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
+  icon: "http://www.youtube.com/favicon.ico"
+});
+
+makeSearchCommand({
+  name: "Flickr",
+  url: "http://www.flickr.com/search/?q={QUERY}&w=all",
+  icon: "http://www.flickr.com/favicon.ico"
+});
+
+makeSearchCommand({
   name: "Bugzilla",
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   icon: "http://www.mozilla.org/favicon.ico"
