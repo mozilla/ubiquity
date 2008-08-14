@@ -160,5 +160,9 @@ Ubiquity.prototype = {
     this.__resetPreview();
 
     this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
+  },
+  
+  closeWindow: function(){
+    this.__msgPanel.hidePopup();
   }
 };
