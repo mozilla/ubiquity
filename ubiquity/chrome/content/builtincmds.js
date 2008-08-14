@@ -653,13 +653,15 @@ CmdUtils.CreateCommand({
       title = html;
     var location = document.location;
     var gmailTab = findGmailTab();
-    if (html)
-      html = ("<p>From the page <a href=\"" + location +
-              "\">" + title + "</a>:</p>" + html);
-    else {
-      displayMessage("No selected HTML!");
-      return;
+    var pageLink = "<a href=\"" + location + "\">" + title + "</a>";
+    if (html) {
+      html = ("<p>From the page " + pageLink + ":</p>" + html);
+    } else {
+      // If there's no selection, just send the current page.
+      html = "<p>You might be interested in " + pageLink + ".</p>";
     }
+
+    title = "'" + title + "'";
 
     if (gmailTab) {
       // Note that this is technically insecure because we're
@@ -684,7 +686,7 @@ CmdUtils.CreateCommand({
 	  var to = composeMail.ownerDocument.getElementsByName("to")[0];
 	  if (to && headers.to) to.value = headers.to.text;
           var subject = active.getElementsByTagName("input")[0];
-          if (subject) subject.value = "'"+title+"'";
+          if (subject) subject.value = title;
           var iframe = active.getElementsByTagName("iframe")[0];
           iframe.contentDocument.execCommand("insertHTML", false, html);
           gmailTab.focus();
