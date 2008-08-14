@@ -101,6 +101,40 @@ CmdUtils.getWindowInsecure = function getWindowInsecure() {
                     .wrappedJSObject;
 };
 
+CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
+  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
+  var params = {
+    appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--",
+    location: address
+  }
+  
+  jQuery.get( url, params, function( doc ){
+    var lats  = jQuery( "Latitude", doc );
+    var longs = jQuery( "Longitude", doc );
+    
+    var addrs    = jQuery( "Address", doc );
+    var citys    = jQuery( "City", doc );
+    var states   = jQuery( "State", doc );
+    var zips     = jQuery( "Zip", doc );
+    var countrys = jQuery( "Country", doc );    
+            
+    var points = [];
+    for( var i=0; i<=lats.length; i++ ) {
+      points.push({
+        lat: jQuery(lats[i]).text(),
+        long: jQuery(longs[i]).text(),
+        address: jQuery(addrs[i]).text(),
+        city: jQuery(citys[i]).text(),
+        state: jQuery(states[i]).text(),
+        zips: jQuery(zips[i]).text(),
+        country: jQuery(countrys[i]).text()
+      });
+    }
+    
+    callback( points );
+  }, "xml");
+}
+
 CmdUtils.injectCss = function injectCss(css) {
   var doc = CmdUtils.getDocumentInsecure();
   var style = doc.createElement("style");
