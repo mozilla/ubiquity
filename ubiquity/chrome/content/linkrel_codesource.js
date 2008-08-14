@@ -138,9 +138,8 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
 			 + commandsUrl;
       var buttons = [
         {accessKey: null,
-         callback: function() {
-	   //Utils.openUrlInBrowser(confirmUrl);
-           targetDoc.defaultView.location = confirmUrl;
+         callback: function(notification, button) {
+	   Utils.openUrlInBrowser(confirmUrl);
 	 },
          label: "Subscribe...",
          popup: null}

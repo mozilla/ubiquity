@@ -155,7 +155,6 @@ BookmarksCodeSource.__install = function BCS_install(window) {
     var commandsUrl = event.target.href;
     annSvc.setPageAnnotation(url, "ubiquity/commands",
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
-    Components.utils.reportError("Link added at " + url.spec);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
