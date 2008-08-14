@@ -7,7 +7,7 @@ CmdUtils.CreateCommand({
     var expr = modifiers["を"] || "";
     if( expr.length > 0 ) {
       var result = eval( expr );
-      CmdUtils.setTextSelection( result );
+      CmdUtils.setSelection( result );
       CmdUtils.setLastResult( result );
     } else
       displayMessage( "巣学の表現が必要です。");
@@ -70,7 +70,7 @@ function translateTo( text, langCodePair, callback ) {
     if( typeof callback == "function" )
       callback( translatedText );
     else
-      CmdUtils.setTextSelection( translatedText );
+      CmdUtils.setSelection( translatedText );
 
     CmdUtils.setLastResult( translatedText );
   });

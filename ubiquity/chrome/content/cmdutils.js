@@ -31,22 +31,32 @@ CmdUtils.safeWrapper = function safeWrapper(func) {
   return wrappedFunc;
 };
 
-CmdUtils.setTextSelection = function setTextSelection(html) {
-
+CmdUtils.setSelection = function setSelection(content, options) {
+  /* content can be text or html.
+   * options is a dictionary; if it has a "text" property then
+   * that value will be used in place of the html if we're in
+   * a plain-text only editable field.
+   */
   var doc = context.focusedWindow.document;
   var focused = context.focusedElement;
 
   if (doc.designMode == "on") {
-    doc.execCommand("insertHTML", false, html);
+    doc.execCommand("insertHTML", false, content);
   }
 
   else if( focused ) {
-    var el = doc.createElement( "html" );
-    el.innerHTML = "<div>" + html + "</div>";
+    var plainText = null;
 
-    var text = el.textContent;
+    if (options)
+      if (options.text)
+	plainText = options.text;
+    if (text == null) {
+      var el = doc.createElement( "html" );
+      el.innerHTML = "<div>" + content + "</div>";
+      plainText = el.textContent;
+    }
 
-    if( html != text){
+    if( content != text){
       displayMessage( "This command requires a rich " +
                       "text field for full support.");
     }
@@ -71,7 +81,7 @@ CmdUtils.setTextSelection = function setTextSelection(html) {
         var range = sel.getRangeAt(0);
         var newNode = doc.createElement("span");
         range.surroundContents(newNode);
-        jQuery(newNode).html( html );
+        jQuery(newNode).html( content );
     }
   }
 };

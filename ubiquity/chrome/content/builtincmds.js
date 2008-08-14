@@ -48,7 +48,7 @@ function openUrl(url, postData) {
 		.getService(Components.interfaces.nsIWindowMediator);
 	var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
 	var browser = browserWindow.getBrowser();
-	
+
 	if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
 		browserWindow.loadURI(url, null, postData, false);
 	else
@@ -65,17 +65,17 @@ CmdUtils.CreateCommand({
 	license: "MPL",
 	preview: function(previewBlock, searchText) {
 		var apiUrl = "http://en.wikipedia.org/w/api.php";
-		
+
 		searchText = jQuery.trim(searchText);
 		if(searchText.length < 1) {
 			previewBlock.innerHTML = "Searches Wikipedia";
 			return;
 		}
-		
+
 		var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
 		var previewData = {query: searchText};
 		previewBlock.innerHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
-		
+
 		var apiParams = {
 			format: "json",
 			action: "query",
@@ -84,7 +84,7 @@ CmdUtils.CreateCommand({
 			srwhat: "text",
 			srsearch: searchText
 		};
-		
+
 		jQuery.ajax({
 			type: "GET",
 			url: apiUrl,
@@ -95,30 +95,30 @@ CmdUtils.CreateCommand({
 			},
 			success: function(searchReponse) {
 				searchReponse = Utils.decodeJson(searchReponse);
-				
+
 				if(!("query" in searchReponse && "search" in searchReponse.query)) {
 					previewBlock.innerHTML = "Error searching Wikipedia";
 					return;
 				}
-				
+
 				function generateWikipediaLink(title) {
 					var wikipediaUrl = "http://en.wikipedia.org/wiki/";
 					return wikipediaUrl + title.replace(/ /g, "_");
 				}
-				
+
 				var previewTemplate = "Wikipedia articles found matching <b>${query}</b>:<br /><br />" +
 					"{for article in results}" +
 					"<a href=\"${article.title|wikilink}\">${article.title}</a><br />" +
 					"{forelse}" +
 					"<b>No articles found</b>" +
 					"{/for}";
-				
+
 				previewData = {
 					query: searchText,
 					results: searchReponse.query.search,
 					_MODIFIERS: {wikilink: generateWikipediaLink}
 					};
-				
+
 				previewBlock.innerHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
 			}
 		});
@@ -126,7 +126,7 @@ CmdUtils.CreateCommand({
 	execute: function(searchText) {
 		var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
 		var searchParams = {search: searchText};
-		
+
 		openUrl(searchUrl + Utils.paramsToString(searchParams));
 	}
 });
@@ -251,7 +251,7 @@ CmdUtils.CreateCommand({
   execute: function( expr ) {
     if( expr.length > 0 ) {
       var result = eval( expr );
-      CmdUtils.setTextSelection( result );
+      CmdUtils.setSelection( result );
       CmdUtils.setLastResult( result );
     } else
       displayMessage( "Requires an expression.");
@@ -321,7 +321,7 @@ CmdUtils.CreateCommand({
 
     jQuery.post( url, params, function( html ) {
       html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'");
-      CmdUtils.setTextSelection( html );
+      CmdUtils.setSelection( html );
     });
   },
   preview: "Syntax highlights your code."
@@ -449,7 +449,7 @@ function translateTo( text, langCodePair, callback ) {
     if( typeof callback == "function" )
       callback( translatedText );
     else
-      CmdUtils.setTextSelection( translatedText );
+      CmdUtils.setSelection( translatedText );
 
     CmdUtils.setLastResult( translatedText );
   });
@@ -795,10 +795,10 @@ CmdUtils.CreateCommand({
           doc.execCommand("insertHTML", false, html);
         }
         else if (CmdUtils.getTextSelection()) {
-	  CmdUtils.setTextSelection(html);
+	  CmdUtils.setSelection(html);
 	}
 	else {
-	  displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.")
+	  displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.");
 	}
       };
     });
