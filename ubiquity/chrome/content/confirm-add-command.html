@@ -24,7 +24,6 @@ var gCommandFeedInfo = getUrlParams();
 function showConfirmation() {
   $("#errorShortDesc").html($("#confirmationShortDesc").html());
   $("#errorLongDesc").html($("#confirmationLongDesc").html());
-  $("#originalPage").get(0).href = gCommandFeedInfo.url;
   $("#buttons").remove();
 }
 
@@ -34,7 +33,7 @@ function onSubmit() {
 }
 
 function onCancel() {
-  window.history.back();
+  window.close();
 }
 </script>
 </head>
@@ -104,8 +103,7 @@ unless the link was given to you by someone you know and trust.</p>
       href="about:ubiquity">command management page</a>, where you can
       see what commands you are subscribed to, and cancel any that you
       no longer want.</p>
-      <p>Click <a id="originalPage">here</a> to go back to the page
-      you were looking at.</p>
+      <p>You may now close this window.</p>
       </div>
     </div>
 </body>
