@@ -47,27 +47,28 @@ CmdUtils.setSelection = function setSelection(content, options) {
   else if( focused ) {
     var plainText = null;
 
-    if (options)
-      if (options.text)
-	plainText = options.text;
-    if (text == null) {
+    if (options && options.text){
+      plainText = options.text;
+    }
+    
+    if (plainText == null) {
       var el = doc.createElement( "html" );
       el.innerHTML = "<div>" + content + "</div>";
       plainText = el.textContent;
     }
 
-    if( content != text){
+    if( content != plainText){
       displayMessage( "This command requires a rich " +
                       "text field for full support.");
     }
 
-    var selectionEnd = focused.selectionStart + text.length;
+    var selectionEnd = focused.selectionStart + plainText.length;
     var currentValue = focused.value;
 
     var beforeText = currentValue.substring(0, focused.selectionStart);
     var afterText = currentValue.substring(focused.selectionEnd, currentValue.length);
 
-    focused.value = beforeText + text + afterText;
+    focused.value = beforeText + plainText + afterText;
     focused.focus();
 
     //put the cursor after the inserted text
@@ -182,7 +183,7 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
   appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
 };
 
-CmdUtils.getTextSelection = function getTextSelection() {
+CmdUtils.getSelection = function getSelection() {
   var focused = context.focusedElement;
   var retval = "";
 

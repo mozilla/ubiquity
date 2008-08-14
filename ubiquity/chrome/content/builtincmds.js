@@ -794,7 +794,7 @@ CmdUtils.CreateCommand({
         if (doc.designMode == "on") {
           doc.execCommand("insertHTML", false, html);
         }
-        else if (CmdUtils.getTextSelection()) {
+        else if (CmdUtils.getSelection()) {
 	  CmdUtils.setSelection(html);
 	}
 	else {
