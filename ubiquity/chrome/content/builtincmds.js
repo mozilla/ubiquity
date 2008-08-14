@@ -36,9 +36,11 @@ makeSearchCommand({
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
-      pblock.innerHTML = CmdUtils.renderTemplate( "searchresults.html",
-                                                  {results:results} );
-		}, "json");
+      pblock.innerHTML = CmdUtils.renderTemplate( null,
+						  {results:results},
+						  {file:"searchresults.html"}
+						);
+      }, "json");
   }
 });
 
@@ -74,7 +76,7 @@ CmdUtils.CreateCommand({
 
 		var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
 		var previewData = {query: searchText};
-		previewBlock.innerHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
+		previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
 		var apiParams = {
 			format: "json",
@@ -119,7 +121,7 @@ CmdUtils.CreateCommand({
 					_MODIFIERS: {wikilink: generateWikipediaLink}
 					};
 
-				previewBlock.innerHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
+				previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 			}
 		});
 	},
@@ -187,7 +189,9 @@ CmdUtils.CreateCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( "yelp.html", {businesses: data.businesses} );
+      pblock.innerHTML = CmdUtils.renderTemplate( null,
+                                          {businesses: data.businesses},
+                                          {file:"yelp.html"});
 		}, "json");
   }
 })
@@ -755,7 +759,9 @@ CmdUtils.CreateCommand({
 
       weather["img"] = imgSrc;
 
-      var html = CmdUtils.renderTemplate( "weather.html", {w:weather});
+      var html = CmdUtils.renderTemplate( null, {w:weather},
+                                                {file:"weather.html"}
+                                        );
 
       jQuery(pblock).html( html );
       }, "xml");
@@ -843,14 +849,14 @@ CmdUtils.CreateCommand({
 			chars: TWITTER_STATUS_MAXLEN - statusText.length
 		};
 
-		var previewHTML = CmdUtils.renderStringTemplate(previewTemplate, previewData);
+		var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
 		if(previewData.chars < 0) {
 			var truncateData = {
 				truncate: 0 - previewData.chars
 			};
 
-			previewHTML += CmdUtils.renderStringTemplate(truncateTemplate, truncateData);
+			previewHTML += CmdUtils.renderTemplate(truncateTemplate, truncateData);
 		}
 
 		previewBlock.innerHTML = previewHTML;

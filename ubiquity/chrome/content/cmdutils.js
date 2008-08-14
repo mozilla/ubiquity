@@ -339,16 +339,20 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 // -----------------------------------------------------------------
 
 
-CmdUtils.renderStringTemplate = function renderStringTemplate( string, data ) {
-  var template = Template.parseTemplate( string );
-  return template.process( data );
-};
-
-CmdUtils.renderTemplate = function renderTemplate( templateName, data ) {
+CmdUtils.renderTemplate = function renderTemplate( templStr, data, options ) {
+  /* if templStr is provided and options isn't, it will create a template
+   from templStr, render the data into it, and return the result.
+   if an object with a .file property is passed in to options, then
+   templStr will be ignored and the template will be read from the file
+   instead. */
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
 
-  var template = Utils.getLocalUrl( chromePrefixUrl + templateName );
-  return CmdUtils.renderStringTemplate( template, data );
+  if (options)
+    if (options.file)
+      templStr = Utils.getLocalUrl( chromePrefixUrl + options.file );
+
+  var template = Template.parseTemplate( templStr );
+  return template.process( data );
 };
 
 CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
