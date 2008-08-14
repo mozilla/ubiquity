@@ -692,7 +692,17 @@ CmdUtils.CreateCommand({
           var subject = active.getElementsByTagName("input")[0];
           if (subject) subject.value = title;
           var iframe = active.getElementsByTagName("iframe")[0];
-          iframe.contentDocument.execCommand("insertHTML", false, html);
+          if (iframe)
+            iframe.contentDocument.execCommand("insertHTML", false, html);
+          else {
+            var body = composeMail.ownerDocument.getElementsByName("body")[0];
+            html = ("Note: the following probably looks strange because " +
+                    "you don't have rich formatting enabled.  Please " +
+                    "click the 'Rich formatting' link above, discard " +
+                    "this message, and try " +
+                    "the email command again.\n\n" + html);
+            body.value = html;
+          }
           gmailTab.focus();
         } catch (e) {
           displayMessage({text: "A gmonkey exception occurred.",
