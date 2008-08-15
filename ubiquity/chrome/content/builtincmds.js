@@ -698,7 +698,7 @@ CmdUtils.CreateCommand({
       gmonkey.load("1.0", continuer);
     } else {
       // No gmail tab open?  Open a new one:
-      var params = {fs:1, tf:1, view:"cm", su:title, to:headers.to, body:html};
+      var params = {fs:1, tf:1, view:"cm", su:title, to:headers.to.text, body:html};
       Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
 			     Utils.paramsToString(params));
     }
