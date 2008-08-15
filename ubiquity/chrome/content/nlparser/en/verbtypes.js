@@ -180,14 +180,14 @@ NLParser.EnVerb.prototype = {
     var newFilledMods = {};
     var directObject = "";
     var newCompletions = [];
-    dump(" I'm in recursiveParse and selObj.text is " + selObj.text + "\n");
+    //dump(" I'm in recursiveParse and selObj.text is " + selObj.text + "\n");
     if ( dictKeys( unfilledMods ).length == 0 ) {
       // Done with modifiers, try to parse direct object.
       if ( unusedWords.length == 0 || this._DOType == null ) {
 	// No direct object, either because there are no words left,
 	// to use, or because the verb can't take a direct object.
 	// Try parsing sentence without them.
-	dump( "Making the sentence with no direct object.\n");
+	//dump( "Making the sentence with no direct object.\n");
 	return [ this._newSentence("", filledMods ) ];
       } else {
 	// Transitive verb, can have direct object.  Try to use the
@@ -198,15 +198,15 @@ NLParser.EnVerb.prototype = {
 	suggestions = this.suggestWithPronounSub( this._DOType,
 						  unusedWords,
 						  selObj );
-	dump("SuggestWithPronounSub (DO) produced " + suggestions.length + " suggs.\n");
+	//dump("SuggestWithPronounSub (DO) produced " + suggestions.length + " suggs.\n");
 
 	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
-	dump("Straightup direct obj completion produced " + moreSuggestions.length + " suggs.\n");
+	//dump("Straightup direct obj completion produced " + moreSuggestions.length + " suggs.\n");
 	suggestions = suggestions.concat(moreSuggestions);
 	for each ( let sugg in suggestions ) {
 	  completions.push( this._newSentence(sugg, filledMods ));
 	}
-	dump( "Making " + completions.length + " completions with DO.\n");
+	//dump( "Making " + completions.length + " completions with DO.\n");
 	return completions;
       }
     } else {
@@ -262,7 +262,7 @@ NLParser.EnVerb.prototype = {
 					    newUnfilledMods,
 					    selObj);
       completions = completions.concat( newCompletions );
-      dump( "Making " + completions.length + " completions with blank prep.\n");
+      //dump( "Making " + completions.length + " completions with blank prep.\n");
       return completions;
     }
   },
