@@ -425,7 +425,6 @@ function testVerbEatsSelection() {
   selObject.text = "grill";
   selObject.html = "grill";
   completions = verb.getCompletions(["breakfast", "at", "it"], selObject);
-  dump( "WTF dude there are " + completions.length + " completions.\n");
   this.assert( completions.length == 1, "should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "breakfast", "food should be breakfast");
@@ -433,10 +432,16 @@ function testVerbEatsSelection() {
 
   selObject.text = "din";
   completions = verb.getCompletions(["at", "home", "this"], selObject);
-  this.assert( completions.length == 1 );
+  dump( "WTF dude there are " + completions.length + " completions.\n");
+  dump( "The completions are like this: \n");
+  for each (let comp in completions) {
+    dump(comp.getDisplayText());
+    dump("\n");
+  }
+  this.assert( completions.length == 1, "second should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
-  this.assert(foodGotEatenAt == "home", "place should be grill");
+  this.assert(foodGotEatenAt == "home", "place should be home");
 }
 
 function testImplicitPronoun() {
@@ -490,6 +495,12 @@ function testImplicitPronoun() {
   foodGotEatenAt = null;
   selObject.text = "din";
   completions = verb.getCompletions(["lunch", "at", "selection"], selObject);
+  dump( "WTF dude there are " + completions.length + " completions.\n");
+  dump( "The completions are like this: \n");
+  for each (let comp in completions) {
+    dump(comp.getDisplayText());
+    dump("\n");
+  }
   this.assert( completions.length == 1, "Sould have 1 completion");
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
