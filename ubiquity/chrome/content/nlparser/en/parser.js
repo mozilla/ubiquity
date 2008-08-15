@@ -43,7 +43,7 @@ NLParser.EnParser.prototype = {
   },
 
   updateSuggestionList: function( query, context ) {
-    var nounType, verb, x;
+    var nounType, verb;
     var newSuggs = [];
     var selObj = getSelectionObject(context);
     // selection, no input, noun-first suggestion
@@ -55,8 +55,7 @@ NLParser.EnParser.prototype = {
     } else {
       var words = query.split( " " );
       // verb-first matches
-      for ( x in this._verbList ) {
-	verb = this._verbList[x];
+      for each ( verb in this._verbList ) {
 	if ( verb.match( words[0] ) ) {
 	  newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), selObj ));
 	}

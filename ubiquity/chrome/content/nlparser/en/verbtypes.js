@@ -262,14 +262,19 @@ NLParser.EnVerb.prototype = {
        selections.
     */
     if (words.length == 0) {
-      return this.getCompletionsFromNounOnly(selObj.text, selObj.html);
+      let completions;
+      // make suggestions by using selection as arguments...
+      completions = this.getCompletionsFromNounOnly(selObj.text, selObj.html);
+      // also, try a completion with all empty arguments
+      completions.push( this._newSentence( null, {} ) );
+      return completions;
     }
     else
       return this.recursiveParse( words, {}, this._modifiers, selObj );
   },
 
   getCompletionsFromNounOnly: function(text, html) {
-    // Try to complete sentence based just on noun, no input arguments.
+    // Try to complete sentence based just on given noun, no input arguments.
     let completions = [];
 
     if ((!text) && (!html))

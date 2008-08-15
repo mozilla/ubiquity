@@ -51,19 +51,14 @@ function testCmdManagerExecutesTwoCmds() {
       cmd_one: {execute:function() {oneWasCalled = true;}},
       cmd_two: {execute:function() {twoWasCalled = true;}}
     });
-  for (var x in fakeSource.getAllCommands()) {
-    dump ("I has a command called " + x + "\n");
-  }
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
 
-  for each (var verb in cmdMan.__nlParser._verbList) {
-    dump( "I has a verb called " + verb._name + "\n");
-  }
-
   cmdMan.updateInput("cmd_one");
+  this.assert(cmdMan.__nlParser.getNumSuggestions() == 1, "should have 1");
   cmdMan.execute();
   cmdMan.updateInput("cmd_two");
+  this.assert(cmdMan.__nlParser.getNumSuggestions() == 1, "should have 1");
   cmdMan.execute();
   this.assert(oneWasCalled, "cmd_one must be called.");
   this.assert(twoWasCalled, "cmd_two must be called.");
