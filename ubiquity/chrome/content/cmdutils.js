@@ -50,7 +50,7 @@ CmdUtils.setSelection = function setSelection(content, options) {
     if (options && options.text){
       plainText = options.text;
     }
-    
+
     if (plainText == null) {
       var el = doc.createElement( "html" );
       el.innerHTML = "<div>" + content + "</div>";
@@ -106,18 +106,18 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
   var params = {
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--",
     location: address
-  }
-  
+  };
+
   jQuery.get( url, params, function( doc ){
     var lats  = jQuery( "Latitude", doc );
     var longs = jQuery( "Longitude", doc );
-    
+
     var addrs    = jQuery( "Address", doc );
     var citys    = jQuery( "City", doc );
     var states   = jQuery( "State", doc );
     var zips     = jQuery( "Zip", doc );
-    var countrys = jQuery( "Country", doc );    
-            
+    var countrys = jQuery( "Country", doc );
+
     var points = [];
     for( var i=0; i<=lats.length; i++ ) {
       points.push({
@@ -130,7 +130,7 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
         country: jQuery(countrys[i]).text()
       });
     }
-    
+
     callback( points );
   }, "xml");
 }
@@ -439,6 +439,22 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
 
 };
 
+CmdUtils.makeSugg = function( text, html, data ) {
+  var suggestion = {text: text, html: html, data:data};
+  if (suggestion.data && !suggestion.text)
+    suggestion.text = suggestion.data.toString();
+  if (suggestion.text && !suggestion.html)
+    suggestion.html = suggestion.text;
+  if (text.length > 80)
+    suggestion.summary = "your selection (\"" +
+                         suggestion.text.slice(0,50) +
+                         "...\")";
+  else
+    suggestion.summary = suggestion.text;
+  return suggestion;
+};
+
+
 CmdUtils.NounType = function( name, expectedWords ) {
   this._init( name, expectedWords );
 }
@@ -451,39 +467,30 @@ CmdUtils.NounType.prototype = {
     this._expectedWords = expectedWords; // an array
   },
 
-  match: function( fragment ) {
-    /* TODO
-     Every noun type we currently have implements match() by looking
-     at whether suggest().length > 0. This is a clue that we might not
-     need a match() method at all, and client code should just use
-     suggest(). */
-    var suggs = this.suggest( fragment );
-    if ( suggs.length > 0 ) {
-      return true;
-    }
-    return false;
-  },
-
-  suggest: function( fragment ) {
-    // returns array of suggestions
-    if (typeof fragment != "string") {
+  suggest: function( text, html ) {
+    // returns array of suggestions where each suggestion is object
+    // with .text and .html properties.
+    var suggestions = [];
+    if (typeof text != "string") {
       // Input undefined or not a string
       return [];
     }
-    if (fragment == "") {
+    if (text == "") {
       /* If input is empty, suggest all of the words we know.  This keeps the
        * nountype (and therefore the verb using it) resolving as valid when the user
        * has entered the verb and not yet the noun.  It also helps the user
        * learn what nouns are valid and helps them choose the one they want.
        */
-      return this._expectedWords;
+      for each (var word in this._expectedWords) {
+	suggestions.push( CmdUtils.makeSugg(word) );
+      }
     }
-    var suggestions = [];
+
     for ( var x in this._expectedWords ) {
       // Do the match in a non-case sensitive way
       var word = this._expectedWords[x].toLowerCase();
-      if ( word.indexOf( fragment.toLowerCase() ) > -1 ) {
-      	suggestions.push( word );
+      if ( word.indexOf( text.toLowerCase() ) > -1 ) {
+      	suggestions.push( CmdUtils.makeSugg(word) );
       	// TODO sort these in order of goodness
       	// todo if fragment is multiple words, search for each of them
       	// separately within the expected word.

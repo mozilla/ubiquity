@@ -435,18 +435,19 @@ CmdUtils.CreateCommand({
     var word = directObj.text;
     if (word.length < 2)
       pblock.innerHTML = "Gives the definition of a word.";
-    else
+    else {
       pblock.innerHTML = "Gives the definition of the word " + word + ".";
-    defineWord( word, function(text){
-      text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
-      text = text.replace(/(1:)/g, "<br/>$&");
-      text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
-      text = text.replace(/\[.*?\]/g, "");
+      defineWord( word, function(text){
+        text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
+        text = text.replace(/(1:)/g, "<br/>$&");
+        text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
+        text = text.replace(/\[.*?\]/g, "");
 
-      pblock.innerHTML = text;
-    });
+        pblock.innerHTML = text;
+      });
+    }
   }
-})
+});
 
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.
@@ -768,7 +769,7 @@ CmdUtils.CreateCommand({
       gmonkey.load("1.0", continuer);
     } else {
       // No gmail tab open?  Open a new one:
-      var params = {fs:1, tf:1, view:"cm", su:title, to:headers.to, body:html};
+      var params = {fs:1, tf:1, view:"cm", su:title, to:headers.to.text, body:html};
       Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
 			     Utils.paramsToString(params));
     }
@@ -867,9 +868,12 @@ CmdUtils.CreateCommand({
   },
   preview: function( pblock, directObj ) {
     var date = directObj.data;
-    pblock.innerHTML = "Checks Google Calendar for the day of" +
-  		       date.toString("dd MM, yyyy");
-  	checkCalendar( pblock, date );
+    if (date) {
+      pblock.innerHTML = "Checks Google Calendar for the day of" +
+                         date.toString("dd MM, yyyy");
+      checkCalendar( pblock, date );
+    } else
+      pblock.innerHTML = "Checks Google Calendar for the date you specify.";
   }
 });
 

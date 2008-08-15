@@ -28,29 +28,18 @@ var noun_type_contact = {
   callback:function(contacts) {
     noun_type_contact.contactList = contacts;
   },
-  match:function( fragment ) {
-    if (noun_type_contact.contactList == null) {
-      getGmailContacts( noun_type_contact.callback);
-      return false;
-    }
-    for ( var c in noun_type_contact.contactList ) {
-      if (c.match(fragment, "i"))
-	    return true;
-    }
-    return false;
-  },
-  suggest: function( fragment ) {
+  suggest: function(text, html) {
     if (noun_type_contact.contactList == null) {
       getGmailContacts( noun_type_contact.callback);
       return [];
     }
 
-    if( fragment.length < 3 ) return [];
+    if( text.length < 3 ) return [];
 
     var suggestions  = [];
     for ( var c in noun_type_contact.contactList ) {
-      if (c.match(fragment, "i"))
-	      suggestions.push(noun_type_contact.contactList[c]);
+      if (c.match(text, "i"))
+	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
     return suggestions.splice(0, 5);
   }
@@ -58,36 +47,28 @@ var noun_type_contact = {
 
 var noun_arb_text = {
  _name: "text",
- match: function( fragment ) {
-    return true;
-  },
- suggest: function( fragment ) {
-    return [ fragment ];
+  suggest: function( text, html ) {
+    return [ CmdUtils.makeSugg(text, html) ];
   }
 };
 
 var noun_type_date = {
   _name: "date",
-  match: function( fragment ) {
-    return (this.suggest(fragment).length > 0 );
-  },
-  suggest: function( fragment )  {
-    if (typeof fragment != "string") {
+  suggest: function( text, html )  {
+    if (typeof text != "string") {
       return [];
     }
-    if (fragment == "") {
+    if (text == "") {
       // If input is blank, suggest today's date
-      return [ Date.parse("today") ];
+      return this.suggest("today");
     }
 
-    if (!fragment) {
-      return [];
-    }
-    var date = Date.parse( fragment );
+    var date = Date.parse( text );
     if (!date) {
       return [];
     }
-    return [ date ];
+    text = date.toString("dd MM, yyyy");
+    return [ CmdUtils.makeSugg(text, null, date) ];
   }
 };
 
@@ -157,38 +138,19 @@ var noun_type_address = {
     }
     noun_type_address.maybeAddress = null;
   },
-  match: function( fragment ) {
+  suggest: function( text, html ) {
+    isAddress( text, noun_type_address.callback );
     for( x in noun_type_address.knownAddresses) {
-      if (noun_type_address.knownAddresses[x] == fragment) {
-	return true;
+      if (noun_type_address.knownAddresses[x] == text) {
+	return [ CmdUtils.makeSugg(text) ];
       }
     }
-    noun_type_address.maybeAddress = fragment;
-    isAddress( fragment, noun_type_address.callback );
-    return false;
-  },
-  suggest: function( fragment ) {
-    isAddress( fragment, noun_type_address.callback );
-    for( x in noun_type_address.knownAddresses) {
-      if (noun_type_address.knownAddresses[x] == fragment) {
-	return [ fragment ];
-      }
-    }
-    noun_type_address.maybeAddress = fragment;
-    isAddress( fragment, noun_type_address.callback );
+    noun_type_address.maybeAddress = text;
+    isAddress( text, noun_type_address.callback );
     return [];
   }
 };
 
-// TODO replace this with ???
-var noun_type_math = {
-  match: function( fragment ) {
-
-  },
-  suggest: function( fragment ) {
-
-  }
-};
 
 var Languages = [
   'Arabic',
@@ -233,19 +195,15 @@ var noun_type_tab = {
     return tabs;
   },
 
-  match:function( fragment ) {
-    return noun_type_tab.suggest( fragment ).length > 0;
-  },
-
-  suggest: function( fragment ) {
+  suggest: function( text, html ) {
     var suggestions  = [];
     var tabs = noun_type_tab.getTabs();
 
     //TODO: implement a better match algorithm
     for ( var tabName in tabs ) {
-      if (tabName.match(fragment, "i"))
-	      suggestions.push( tabName );
+      if (tabName.match(text, "i"))
+	      suggestions.push( CmdUtils.makeSugg(tabName) );
     }
     return suggestions.splice(0, 5);
   }
-}
+};

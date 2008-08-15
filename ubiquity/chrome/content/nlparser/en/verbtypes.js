@@ -110,26 +110,23 @@ NLParser.EnVerb.prototype = {
     }
   },
 
-  _newSentence: function( directObj, modifiersText ) {
-    let modifiersObjects= {};
-    let text = null;
-    let data = null;
-    // TODO THIS IS HACK
-    if (typeof directObj == "string") {
-      text = directObj;
-    } else {
-      data = directObj;
-    }
-    for (let x in modifiersText) {
-      modifiersObjects[x] = new NLParser.EnInputData( modifiersText[x] );
-    }
-    let directObject = new NLParser.EnInputData(text, null, data);
-    return new NLParser.EnParsedSentence(this, directObject, modifiersObjects);
+  _makeNothingSugg: function() {
+    return { text:"", html:null, data:null, summary:"" };
+  },
+
+  _newSentence: function( directObjSugg, modifierSuggs ) {
+    /* Add in nothing-suggestion objects for any missing arguments.*/
+    if (this._DOType && !directObjSugg)
+      directObjSugg = this._makeNothingSugg();
+    for (let x in this._modifiers)
+      if (!modifierSuggs[x])
+	modifierSuggs[x] = this._makeNothingSugg();
+    return new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs);
   },
 
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
-  recursiveParse: function( unusedWords, filledMods, unfilledMods ) {
+  recursiveParse: function(unusedWords, filledMods, unfilledMods, context) {
     var x;
     var suggestions = [];
     var completions = [];
@@ -146,19 +143,19 @@ NLParser.EnVerb.prototype = {
       } else {
 	// Transitive verb, can have direct object.  Try to use the
 	// remaining words in that slot.
-	directObject = unusedWords.join( " " );
-	if ( this._DOType.match( directObject ) ) {
-	  // it's a valid direct object.  Make a sentence for each
-	  // possible noun completion based on it; return them all.
-	  suggestions = this._DOType.suggest( directObject );
-	  for each ( let sugg in suggestions ) {
-	    completions.push( this._newSentence(sugg, filledMods ));
-	  }
-	  return completions;
-	} else {
-	  // word is invalid direct object.  Fail!
-	  return [];
+        // Make a sentence for each
+	// possible noun completion based on it; return them all.
+
+	suggestions = this.suggestWithPronounSub( this._DOType,
+						  unusedWords,
+						  context );
+
+	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
+	suggestions = suggestions.concat(moreSuggestions);
+	for each ( let sugg in suggestions ) {
+	  completions.push( this._newSentence(sugg, filledMods ));
 	}
+	return completions;
       }
     } else {
       // "pop" a preposition off of the properties of unfilledMods
@@ -172,9 +169,11 @@ NLParser.EnVerb.prototype = {
       var matchIndices = [];
       for ( var x = 0; x < unusedWords.length - 1; x++ ) {
 	if ( preposition.indexOf( unusedWords[x] ) == 0 ) {
-	  if ( nounType.match( unusedWords[ x + 1 ] ) ) {
+	  if ( nounType.suggest( unusedWords[ x + 1 ] ).length > 0 ) {
 	    // Match for the preposition at index x followed by
 	    // an appropriate noun at index x+1
+	    // TODO this should be able to match a multi-word modifier, not
+	    // just a single word at x+1.
 	    matchIndices.push( x );
 	  }
 	}
@@ -189,63 +188,44 @@ NLParser.EnVerb.prototype = {
 	  newUnusedWords.splice( matchIndices[x], 2 );
 	  directObject = newUnusedWords.join( " " );
 
-	  suggestions = nounType.suggest( noun );
+	  suggestions = this.suggestWithPronounSub( nounType,
+						    [noun],
+                                                    context );
+
+	  let moreSuggestions = nounType.suggest( noun );
+	  suggestions = suggestions.concat(moreSuggestions);
+
 	  for ( var y in suggestions ) {
 	    newFilledMods = dictDeepCopy( filledMods );
 	    newFilledMods[ preposition ] = suggestions[y];
 	    newCompletions = this.recursiveParse( newUnusedWords,
 						  newFilledMods,
-						  newUnfilledMods );
+						  newUnfilledMods,
+						  context);
 	    completions = completions.concat( newCompletions );
 	  }
+
+
 	}
       }
       // If no match was found, all we'll return is one sentence formed by
       // leaving that preposition blank. But even if a match was found, we
       // still want to include this sentence as an additional possibility.
       newFilledMods = dictDeepCopy( filledMods );
-      newFilledMods[preposition] = "";
+      newFilledMods[preposition] = this._makeNothingSugg;
       directObject = unusedWords.join( " " );
       newCompletions = this.recursiveParse( unusedWords,
 					    newFilledMods,
-					    newUnfilledMods );
+					    newUnfilledMods,
+					    context);
       completions = completions.concat( newCompletions );
 
       return completions;
     }
   },
 
-  canPossiblyUseSelection: function( textSel, htmlSel ) {
-    if (this._DOType) {
-      if (this._DOType.expectsHtmlSelection) {
-	if (this._DOType.match(htmlSel))
-	  return "html";
-      } else {
-	if (this._DOType.match(textSel))
-	  return "text";
-      }
-    }
-    for each( type in this._modifiers) {
-      if (type.expectsHtmlSelection) {
-	if (type.match(htmlSel))
-	  return "html";
-      } else {
-	if (type.match(textSel))
-	  return "text";
-      }
-    }
-    return false;
-  },
-
-  substitutePronoun: function( words, context ) {
-    /* TODO will need to refactor so that substitutePronoun is called from
-     * inside recursiveParse to interpolate the selection (by calling
-     * NLParser.inputObjectFromSelection) right before checking for noun
-     * validity and making a parsedSentence out of it.
-     */
-    var subbedWords = words.slice();
-    var selectionUsed = false;
-
+  suggestWithPronounSub: function( nounType, words, context ) {
+    var suggestions = [];
     var selection = getTextSelection(context);
     if (!selection) {
       selection = UbiquityGlobals.lastCmdResult;
@@ -256,36 +236,25 @@ NLParser.EnVerb.prototype = {
 
     /* No selection to interpolate. */
     if ((!selection) && (!htmlSelection))
-      return false;
-
-    selectionUsed = this.canPossiblyUseSelection( selection,
-						  htmlSelection);
-    /* There's a selection but no argument that can use it.*/
-    if (!selectionUsed)
-      return false;
-
-    /* There's no arguments or pronouns given... pretend we've got a
-     * "this" so we can interpolate the selection there and see what we get.*/
-    if (subbedWords.length == 0) {
-     subbedWords = ["this"];
-    }
+      return [];
 
     for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
-      var index = subbedWords.indexOf( pronoun );
+      let index = words.indexOf( pronoun );
       if ( index > -1 ) {
-	if (selectionUsed == "text")
-	  subbedWords.splice(index, 1, selection);
-	else if (selectionUsed == "html")
-	  subbedWords.splice(index, 1, htmlSelection);
-	return subbedWords;
+	/*if (selection) {
+	  let wordsCopy = words.slice();
+	  let stuff = wordsCopy.splice(index, 1, selection );
+	  selection = wordsCopy.splice(index, 1, selection).join(" ");
+        }
+	if (htmlSelection) {
+	  let wordsCopy = words.slice();
+	  htmlSelection = wordsCopy.splice(index, 1, htmlSelection).join(" ");
+	}*/
+	let moreSuggs = nounType.suggest(selection, htmlSelection);
+	suggestions = suggestions.concat( moreSuggs );
       }
     }
-    /* Note that the above will stop looking when it hits the first
-     * pronoun that can take the selection as substitution.  TODO is
-     * if there are more pronouns later in the input that could take it,
-     * offer each one of them as a suggestion.
-     */
-    return false;
+    return suggestions;
   },
 
   getCompletions: function( words, context ) {
@@ -297,38 +266,45 @@ NLParser.EnVerb.prototype = {
        2. a preposition
        3. a noun following a preposition.
     */
-
-    /* Look for words that refer to selection: */
-    var completions = [];
-    var wordsWithPronounSubstituted = this.substitutePronoun( words,
-							      context);
-
-    if ( wordsWithPronounSubstituted )
-      completions = this.recursiveParse( wordsWithPronounSubstituted,
-					 {},
-					 this._modifiers );
-
-    /* Also parse without that substitution, return both ways: */
-    var completionsNoSub = this.recursiveParse( words, {}, this._modifiers );
-    completions = completions.concat( completionsNoSub );
-    return completions;
+    if (words.length == 0)
+      return this.getCompletionsFromSelectionOnly( context );
+    else
+      return this.recursiveParse( words, {}, this._modifiers, context );
   },
 
-  canPossiblyUseNounType: function(nounType){
-    //returns the words that would be implied before the noun could makes sense,
-    //i.e. put these words before the noun and try again.
-    if (this._DOType)
-      if (this._DOType._name == nounType._name ) {
-	return this._name;
-      }
-    for( let prep in this._modifiers ) {
-      if (this._modifiers[prep]._name == nounType._name) {
-	return this._name + " " + prep;
-	// TODO returning multiple preps when more than one could use the
-	// nountype
+  getCompletionsFromSelectionOnly: function(context) {
+    // Try to complete sentence based just on selection, no input arguments.
+    let completions = [];
+    var selection = getTextSelection(context);
+    if (!selection) {
+      selection = UbiquityGlobals.lastCmdResult;
+    }
+    var htmlSelection = getHtmlSelection(context);
+    if (!htmlSelection)
+      htmlSelection = selection;
+
+    /* No selection to interpolate. */
+    if ((!selection) && (!htmlSelection))
+      return [];
+
+    // Try selection as direct object...
+    if (this._DOType) {
+      let suggs = this._DOType.suggest(selection, htmlSelection);
+      for each (let sugg in suggs) {
+	completions.push( this._newSentence( sugg, {}) );
       }
     }
-    return false;
+
+    // Try it as each modifier....
+    for (let x in this._modifiers) {
+      let suggs = this._modifiers[x].suggest(selection, htmlSelection);
+      for each (let sugg in suggs) {
+	let mods = {};
+	mods[x] = sugg;
+	completions.push( this._newSentence(null, mods) );
+      }
+    }
+    return completions;
   },
 
   match: function( sentence ) {
