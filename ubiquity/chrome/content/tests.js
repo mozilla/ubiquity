@@ -415,24 +415,26 @@ function testVerbEatsSelection() {
     modifiers: {"at": place}
   };
   var verb = new NLParser.EnVerb(cmd_eat);
-  var fakeContext = {textSelection:"lunch"};
-  var completions = verb.getCompletions(["this"], fakeContext);
+  var selObject = { text: "lunch", html:"lunch" };
+  var completions = verb.getCompletions(["this"], selObject);
   this.assert( completions.length == 1, "Should be one completion" );
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
   this.assert(foodGotEatenAt == null, "should be no modifier");
 
-  fakeContext.textSelection = "grill";
-  completions = verb.getCompletions(["breakfast", "at", "it"], fakeContext);
+  selObject.text = "grill";
+  selObject.html = "grill";
+  completions = verb.getCompletions(["breakfast", "at", "it"], selObject);
+  dump( "WTF dude there are " + completions.length + " completions.\n");
   this.assert( completions.length == 1, "should be one completion" );
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert(foodGotEaten == "breakfast", "food should be breakfast");
   this.assert(foodGotEatenAt == "grill", "place should be grill");
 
-  fakeContext.textSelection = "din";
-  completions = verb.getCompletions(["at", "home", "this"], fakeContext);
+  selObject.text = "din";
+  completions = verb.getCompletions(["at", "home", "this"], selObject);
   this.assert( completions.length == 1 );
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
   this.assert(foodGotEatenAt == "home", "place should be grill");
 }
@@ -455,29 +457,29 @@ function testImplicitPronoun() {
     modifiers: {"at": place}
   };
   var verb = new NLParser.EnVerb(cmd_eat);
-  var fakeContext = {textSelection:"lunch"};
+  var selObject = { text: "lunch", html:"lunch" };
 
-  var completions = verb.getCompletions([], fakeContext);
+  var completions = verb.getCompletions([], selObject);
   this.assert( (completions.length == 2), "Should have 2 completions.");
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
   this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
   this.assert((!completions[1]._DO.text), "second completion should have no DO.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
-  fakeContext.textSelection = "din";
-  completions = verb.getCompletions([], fakeContext);
+  selObject.text = "din";
+  completions = verb.getCompletions([], selObject);
 
   this.assert( completions.length == 3, "Should have 3 completions.");
   // first completion should be directObject is dinner
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
   this.assert((foodGotEatenAt == null), "IndirectObjs shouldn't be set.");
   foodGotEaten = null;
   foodGotEatenAt = null;
   // second completion should be direct object null, place is diner
-  completions[1].execute(fakeContext);
+  completions[1].execute();
   this.assert((foodGotEaten == null), "DO should be null.");
   this.assert((foodGotEatenAt == "diner"), "Place should be diner.");
   // third completion should have all arguments blank.
@@ -486,33 +488,34 @@ function testImplicitPronoun() {
 
   foodGotEaten = null;
   foodGotEatenAt = null;
-  fakeContext.textSelection = "din";
-  completions = verb.getCompletions(["lunch", "at", "selection"], fakeContext);
+  selObject.text = "din";
+  completions = verb.getCompletions(["lunch", "at", "selection"], selObject);
   this.assert( completions.length == 1, "Sould have 1 completion");
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
   this.assert(foodGotEatenAt == "diner", "Should have eaten it at diner");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
-  fakeContext.textSelection = "din";
-  completions = verb.getCompletions(["at", "grill"], fakeContext);
+  selObject.text = "din";
+  completions = verb.getCompletions(["at", "grill"], selObject);
   this.assert( completions.length == 1, "Should have 1 completion");
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert((foodGotEaten == null), "DO should not be set.");
   this.assert((foodGotEatenAt == "grill"), "ate at grill.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
-  fakeContext.textSelection = "pants";
-  completions = verb.getCompletions([], fakeContext);
+  selObject.text = "pants";
+  completions = verb.getCompletions([], selObject);
   this.assert( completions.length == 1);
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert((foodGotEaten == null), "Should have no valid args.");
   this.assert((foodGotEatenAt == null), "Should have no valid args.");
 
-  fakeContext.textSelection = null;
-  completions = verb.getCompletions(["this"], fakeContext);
+  selObject.text = null;
+  selObject.html = null;
+  completions = verb.getCompletions(["this"], selObject);
   this.assert( completions.length == 0, "should have no completions");
 }
 

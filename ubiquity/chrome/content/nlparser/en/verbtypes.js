@@ -124,6 +124,53 @@ NLParser.EnVerb.prototype = {
     return new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs);
   },
 
+  _newSubParsing: function() {
+    let parsing = {};
+    if (this._DOType)
+      parsing.direct = "";
+    for (let x in this._modifiers)
+      parsing[x] = "";
+    return parsing;
+  },
+
+  moreBetterParse: function(unusedWords, subParsing) {
+    if (unusedWords.length == 0) {
+      return [subParsing];
+    }
+
+    let firstWord = unusedWords[0];
+    let restWords = unusedWords.slice(1);
+
+    let someParsings = [];
+    for (let pronoun in this._modifiers) {
+      if (firstWord == pronoun ) {
+	if (typeof subParsing[pronoun] != "string") {
+          let newSubParsing = dictDeepCopy(subParsing);
+          newSubParsing[pronoun] = "";
+          let moreParsings = this.moreBetterParse(restWords,
+		                                  newSubParsing);
+	  someParsings = someParsings.concat(moreParsings);
+          break;
+	}
+      }
+    }
+
+    for (let key in subParsing) {
+      let newSubParsing = dictDeepCopy(subParsing);
+      newSubParsing[key] = newSubParsing[key] + " " + firstWord;
+      let moreParsings = this.moreBetterParse(restWords, newSubParsing);
+      someParsings = someParsings.concat(moreParsings);
+    }
+
+    return someParsings;
+  },
+
+  startMoreBetterParse: function( words ) {
+    let subParsing = {direct:""};
+    let parsings = this.moreBetterParse(words, subParsing);
+    return parsings;
+  },
+
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
   recursiveParse: function(unusedWords, filledMods, unfilledMods, selObj) {
@@ -133,12 +180,14 @@ NLParser.EnVerb.prototype = {
     var newFilledMods = {};
     var directObject = "";
     var newCompletions = [];
+    dump(" I'm in recursiveParse and selObj.text is " + selObj.text + "\n");
     if ( dictKeys( unfilledMods ).length == 0 ) {
       // Done with modifiers, try to parse direct object.
       if ( unusedWords.length == 0 || this._DOType == null ) {
 	// No direct object, either because there are no words left,
 	// to use, or because the verb can't take a direct object.
 	// Try parsing sentence without them.
+	dump( "Making the sentence with no direct object.\n");
 	return [ this._newSentence("", filledMods ) ];
       } else {
 	// Transitive verb, can have direct object.  Try to use the
@@ -149,12 +198,15 @@ NLParser.EnVerb.prototype = {
 	suggestions = this.suggestWithPronounSub( this._DOType,
 						  unusedWords,
 						  selObj );
+	dump("SuggestWithPronounSub (DO) produced " + suggestions.length + " suggs.\n");
 
 	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
+	dump("Straightup direct obj completion produced " + moreSuggestions.length + " suggs.\n");
 	suggestions = suggestions.concat(moreSuggestions);
 	for each ( let sugg in suggestions ) {
 	  completions.push( this._newSentence(sugg, filledMods ));
 	}
+	dump( "Making " + completions.length + " completions with DO.\n");
 	return completions;
       }
     } else {
@@ -166,46 +218,38 @@ NLParser.EnVerb.prototype = {
 
       // Look for a match for this preposition
       var nounType = unfilledMods[ preposition ];
-      var matchIndices = [];
-      for ( var x = 0; x < unusedWords.length - 1; x++ ) {
+      for ( x = 0; x < unusedWords.length - 1; x++ ) {
 	if ( preposition.indexOf( unusedWords[x] ) == 0 ) {
-	  if ( nounType.suggest( unusedWords[ x + 1 ] ).length > 0 ) {
-	    // Match for the preposition at index x followed by
-	    // an appropriate noun at index x+1
-	    // TODO this should be able to match a multi-word modifier, not
-	    // just a single word at x+1.
-	    matchIndices.push( x );
-	  }
-	}
-      }
-      if ( matchIndices.length > 0 ) {
-	// Matches found for this preposition!  Add to the completions list
-	// all sentences that can be formed using these matches for this
-	// preposition.
-	for ( x in matchIndices ) {
-	  var noun = unusedWords[ matchIndices[x]+1 ];
-	  var newUnusedWords = unusedWords.slice();
-	  newUnusedWords.splice( matchIndices[x], 2 );
-	  directObject = newUnusedWords.join( " " );
+	  // a match for the preposition is found!
+	  // assume noun is first word following it.
+          // TODO this should be able to match a multi-word modifier, not
+	 // just a single word at x+1.
+	  let noun = unusedWords[ x+1 ];
+	  let newUnusedWords = unusedWords.slice();
+	  // remove preposition and following noun from the unused words list
+	  newUnusedWords.splice( x, 2 );
 
+	  // Add the suggestions that can be produced by substituting
+	  // selection for pronoun:
 	  suggestions = this.suggestWithPronounSub( nounType,
 						    [noun],
                                                     selObj );
-
-	  let moreSuggestions = nounType.suggest( noun );
+	  // Add the suggestions from the noun type straight-up
+  	  let moreSuggestions = nounType.suggest( noun );
 	  suggestions = suggestions.concat(moreSuggestions);
 
-	  for ( var y in suggestions ) {
+	  // Turn each suggestion into a sentence, after recursively
+	  // parsing the leftover words.
+	  for each( let sugg in suggestions ) {
 	    newFilledMods = dictDeepCopy( filledMods );
-	    newFilledMods[ preposition ] = suggestions[y];
+	    newFilledMods[ preposition ] = sugg;
 	    newCompletions = this.recursiveParse( newUnusedWords,
 						  newFilledMods,
 						  newUnfilledMods,
 						  selObj);
+	    // Add results to the ever-growing completion list...
 	    completions = completions.concat( newCompletions );
 	  }
-
-
 	}
       }
       // If no match was found, all we'll return is one sentence formed by
@@ -213,13 +257,12 @@ NLParser.EnVerb.prototype = {
       // still want to include this sentence as an additional possibility.
       newFilledMods = dictDeepCopy( filledMods );
       newFilledMods[preposition] = this._makeNothingSugg;
-      directObject = unusedWords.join( " " );
       newCompletions = this.recursiveParse( unusedWords,
 					    newFilledMods,
 					    newUnfilledMods,
 					    selObj);
       completions = completions.concat( newCompletions );
-
+      dump( "Making " + completions.length + " completions with blank prep.\n");
       return completions;
     }
   },
@@ -269,8 +312,10 @@ NLParser.EnVerb.prototype = {
       completions.push( this._newSentence( null, {} ) );
       return completions;
     }
-    else
+    else {
       return this.recursiveParse( words, {}, this._modifiers, selObj );
+    }
+
   },
 
   getCompletionsFromNounOnly: function(text, html) {
