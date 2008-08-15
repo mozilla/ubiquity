@@ -442,6 +442,9 @@ function testImplicitPronoun() {
   var fakeContext = {textSelection:"lunch"};
 
   var completions = verb.getCompletions([], fakeContext);
+  if (completions.length != 2) {
+    dump("Bah: " + completions.length + "\n");
+  }
   this.assert( (completions.length == 2), "Should have 2 completions.");
   completions[0].execute(fakeContext);
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
@@ -452,26 +455,36 @@ function testImplicitPronoun() {
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   completions = verb.getCompletions([], fakeContext);
-  this.assert( completions.length == 2, "Should have 2 completions.");
+
+  this.assert( completions.length == 3, "Should have 3 completions.");
+  // first completion should be directObject is dinner
   completions[0].execute(fakeContext);
   this.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
   this.assert((foodGotEatenAt == null), "IndirectObjs shouldn't be set.");
-  this.assert((!completions[1]._DO.text), "second completion should have no DO.");
+  foodGotEaten = null;
+  foodGotEatenAt = null;
+  // second completion should be direct object null, place is diner
+  completions[1].execute(fakeContext);
+  this.assert((foodGotEaten == null), "DO should be null.");
+  this.assert((foodGotEatenAt == "diner"), "Place should be diner.");
+  // third completion should have all arguments blank.
+  this.assert((!completions[2]._DO.text), "second completion should have no DO.");
+  this.assert((!completions[2]._modifiers["at"].text), "and no at mod either." );
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   completions = verb.getCompletions(["lunch", "at", "selection"], fakeContext);
-  this.assert( completions.length == 1);
+  this.assert( completions.length == 1, "Sould have 1 completion");
   completions[0].execute(fakeContext);
-  this.assert(foodGotEaten == "lunch");
-  this.assert(foodGotEatenAt == "diner");
+  this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
+  this.assert(foodGotEatenAt == "diner", "Should have eaten it at diner");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   completions = verb.getCompletions(["at", "grill"], fakeContext);
-  this.assert( completions.length == 1);
+  this.assert( completions.length == 1, "Should have 1 completion");
   completions[0].execute(fakeContext);
   this.assert((foodGotEaten == null), "DO should not be set.");
   this.assert((foodGotEatenAt == "grill"), "ate at grill.");
@@ -487,6 +500,6 @@ function testImplicitPronoun() {
 
   fakeContext.textSelection = null;
   completions = verb.getCompletions(["this"], fakeContext);
-  this.assert( completions.length == 0 );
+  this.assert( completions.length == 0, "should have no completions");
 }
 

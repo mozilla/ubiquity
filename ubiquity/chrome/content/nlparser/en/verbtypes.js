@@ -115,9 +115,10 @@ NLParser.EnVerb.prototype = {
   },
 
   _newSentence: function( directObjSugg, modifierSuggs ) {
-    if (!directObjSugg)
+    /* Add in nothing-suggestion objects for any missing arguments.*/
+    if (this._DOType && !directObjSugg)
       directObjSugg = this._makeNothingSugg();
-    for (let x in modifierSuggs)
+    for (let x in this._modifiers)
       if (!modifierSuggs[x])
 	modifierSuggs[x] = this._makeNothingSugg();
     return new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs);
@@ -265,15 +266,10 @@ NLParser.EnVerb.prototype = {
        2. a preposition
        3. a noun following a preposition.
     */
-    let completions = [];
-    if (words.length == 0) {
-      completions = this.getCompletionsFromSelectionOnly( context );
-    }
-    let moreCompletions = this.recursiveParse( words,
-					       {},
-					       this._modifiers,
-					       context );
-    return completions.concat(moreCompletions);
+    if (words.length == 0)
+      return this.getCompletionsFromSelectionOnly( context );
+    else
+      return this.recursiveParse( words, {}, this._modifiers, context );
   },
 
   getCompletionsFromSelectionOnly: function(context) {
@@ -305,7 +301,6 @@ NLParser.EnVerb.prototype = {
       for each (let sugg in suggs) {
 	let mods = {};
 	mods[x] = sugg;
-	window.console.log(mods);
 	completions.push( this._newSentence(null, mods) );
       }
     }
