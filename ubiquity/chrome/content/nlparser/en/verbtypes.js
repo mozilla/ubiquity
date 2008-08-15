@@ -126,7 +126,7 @@ NLParser.EnVerb.prototype = {
 
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
-  recursiveParse: function(unusedWords, filledMods, unfilledMods, context) {
+  recursiveParse: function(unusedWords, filledMods, unfilledMods, selObj) {
     var x;
     var suggestions = [];
     var completions = [];
@@ -148,7 +148,7 @@ NLParser.EnVerb.prototype = {
 
 	suggestions = this.suggestWithPronounSub( this._DOType,
 						  unusedWords,
-						  context );
+						  selObj );
 
 	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
 	suggestions = suggestions.concat(moreSuggestions);
@@ -190,7 +190,7 @@ NLParser.EnVerb.prototype = {
 
 	  suggestions = this.suggestWithPronounSub( nounType,
 						    [noun],
-                                                    context );
+                                                    selObj );
 
 	  let moreSuggestions = nounType.suggest( noun );
 	  suggestions = suggestions.concat(moreSuggestions);
@@ -201,7 +201,7 @@ NLParser.EnVerb.prototype = {
 	    newCompletions = this.recursiveParse( newUnusedWords,
 						  newFilledMods,
 						  newUnfilledMods,
-						  context);
+						  selObj);
 	    completions = completions.concat( newCompletions );
 	  }
 
@@ -217,25 +217,17 @@ NLParser.EnVerb.prototype = {
       newCompletions = this.recursiveParse( unusedWords,
 					    newFilledMods,
 					    newUnfilledMods,
-					    context);
+					    selObj);
       completions = completions.concat( newCompletions );
 
       return completions;
     }
   },
 
-  suggestWithPronounSub: function( nounType, words, context ) {
+  suggestWithPronounSub: function( nounType, words, selObj ) {
     var suggestions = [];
-    var selection = getTextSelection(context);
-    if (!selection) {
-      selection = UbiquityGlobals.lastCmdResult;
-    }
-    var htmlSelection = getHtmlSelection(context);
-    if (!htmlSelection)
-      htmlSelection = selection;
-
     /* No selection to interpolate. */
-    if ((!selection) && (!htmlSelection))
+    if ((!selObj.text) && (!selObj.html))
       return [];
 
     for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
@@ -250,14 +242,14 @@ NLParser.EnVerb.prototype = {
 	  let wordsCopy = words.slice();
 	  htmlSelection = wordsCopy.splice(index, 1, htmlSelection).join(" ");
 	}*/
-	let moreSuggs = nounType.suggest(selection, htmlSelection);
+	let moreSuggs = nounType.suggest(selObj.text, selObj.html);
 	suggestions = suggestions.concat( moreSuggs );
       }
     }
     return suggestions;
   },
 
-  getCompletions: function( words, context ) {
+  getCompletions: function( words, selObj ) {
     /* returns a list of ParsedSentences. */
     /* words is an array of words that were space-separated.
        The first word, which matched this verb, has already been removed.
@@ -265,31 +257,27 @@ NLParser.EnVerb.prototype = {
        1. my direct object
        2. a preposition
        3. a noun following a preposition.
+
+       selObj is a selectionObject, wrapping both the text and html
+       selections.
     */
-    if (words.length == 0)
-      return this.getCompletionsFromSelectionOnly( context );
+    if (words.length == 0) {
+      return this.getCompletionsFromNounOnly(selObj.text, selObj.html);
+    }
     else
-      return this.recursiveParse( words, {}, this._modifiers, context );
+      return this.recursiveParse( words, {}, this._modifiers, selObj );
   },
 
-  getCompletionsFromSelectionOnly: function(context) {
-    // Try to complete sentence based just on selection, no input arguments.
+  getCompletionsFromNounOnly: function(text, html) {
+    // Try to complete sentence based just on noun, no input arguments.
     let completions = [];
-    var selection = getTextSelection(context);
-    if (!selection) {
-      selection = UbiquityGlobals.lastCmdResult;
-    }
-    var htmlSelection = getHtmlSelection(context);
-    if (!htmlSelection)
-      htmlSelection = selection;
 
-    /* No selection to interpolate. */
-    if ((!selection) && (!htmlSelection))
+    if ((!text) && (!html))
       return [];
 
     // Try selection as direct object...
     if (this._DOType) {
-      let suggs = this._DOType.suggest(selection, htmlSelection);
+      let suggs = this._DOType.suggest(text, html);
       for each (let sugg in suggs) {
 	completions.push( this._newSentence( sugg, {}) );
       }
@@ -297,7 +285,7 @@ NLParser.EnVerb.prototype = {
 
     // Try it as each modifier....
     for (let x in this._modifiers) {
-      let suggs = this._modifiers[x].suggest(selection, htmlSelection);
+      let suggs = this._modifiers[x].suggest(text, html);
       for each (let sugg in suggs) {
 	let mods = {};
 	mods[x] = sugg;

@@ -1,3 +1,5 @@
+const LANG = "en";
+
 function FakeCommandSource( cmdList ) {
   this._cmdList = cmdList;
   for ( var x in cmdList ) {
@@ -37,6 +39,9 @@ function getNounList() {
 }
 
 function testCmdManagerExecutesTwoCmds() {
+  var mockMsgService = {
+    displayMessage: function(msg) { dump(msg); }
+  };
   var oneWasCalled = false;
   var twoWasCalled = false;
   var pblock = {};
@@ -46,8 +51,15 @@ function testCmdManagerExecutesTwoCmds() {
       cmd_one: {execute:function() {oneWasCalled = true;}},
       cmd_two: {execute:function() {twoWasCalled = true;}}
     });
+  for (var x in fakeSource.getAllCommands()) {
+    dump ("I has a command called " + x + "\n");
+  }
 
-  var cmdMan = new CommandManager(fakeSource, null);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+
+  for each (var verb in cmdMan.__nlParser._verbList) {
+    dump( "I has a verb called " + verb._name + "\n");
+  }
 
   cmdMan.updateInput("cmd_one");
   cmdMan.execute();
@@ -58,6 +70,9 @@ function testCmdManagerExecutesTwoCmds() {
 }
 
 function testCmdManagerExecutesCmd() {
+  var mockMsgService = {
+    displayMessage: function(msg) { dump(msg); }
+  };
   var wasCalled = false;
 
   var fakeSource = new FakeCommandSource (
@@ -66,7 +81,7 @@ function testCmdManagerExecutesCmd() {
     }
   );
 
-  var cmdMan = new CommandManager(fakeSource, null);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
   cmdMan.updateInput("existentcommand");
   cmdMan.execute();
   this.assert(wasCalled, "command.execute() must be called.");
@@ -83,7 +98,7 @@ function testCmdManagerCatchesExceptionsInCmds() {
     }
   );
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
 
   cmdMan.updateInput("existentcommand");
   cmdMan.execute();
@@ -99,7 +114,7 @@ function testCmdManagerDisplaysNoCmdError() {
   var mockMsgService = {
     displayMessage : function(msg) { this.lastMsg = msg; }
   };
-  var cmdMan = new CommandManager(fakeSource, mockMsgService);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
 
   cmdMan.updateInput("nonexistentcommand");
   cmdMan.execute();
@@ -365,7 +380,7 @@ function testCmdManagerSuggestsForEmptyInput() {
   fakeSource.getAllNounTypes = function() {
     return [nounTypeOne, nounTypeTwo];
   };
-  var cmdMan = new CommandManager(fakeSource, null);
+  var cmdMan = new CommandManager(fakeSource, null, LANG);
   var getAC = makeDefaultCommandSuggester(cmdMan);
   var suggDict = getAC({textSelection:"tree"});
   this.assert( suggDict["Cmd_one"] );
@@ -442,9 +457,6 @@ function testImplicitPronoun() {
   var fakeContext = {textSelection:"lunch"};
 
   var completions = verb.getCompletions([], fakeContext);
-  if (completions.length != 2) {
-    dump("Bah: " + completions.length + "\n");
-  }
   this.assert( (completions.length == 2), "Should have 2 completions.");
   completions[0].execute(fakeContext);
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");

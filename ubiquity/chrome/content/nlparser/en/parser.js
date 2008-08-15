@@ -2,6 +2,20 @@
 NLParser.EN_SELECTION_PRONOUNS =  [ "this", "that", "it", "selection",
 				    "him", "her", "them"];
 
+function getSelectionObject(context) {
+  var selection = getTextSelection(context);
+  if (!selection) {
+    selection = UbiquityGlobals.lastCmdResult;
+  }
+  var htmlSelection = getHtmlSelection(context);
+  if (!htmlSelection)
+    htmlSelection = selection;
+  return {
+    text: selection,
+    html: htmlSelection
+  };
+}
+
 NLParser.EnParser = function(verbList, nounList) {
   if (verbList) {
     this._init(verbList, nounList);
@@ -15,7 +29,7 @@ NLParser.EnParser.prototype = {
     this._suggestionList = []; // a list of ParsedSentences.
   },
 
-  nounFirstSuggestions: function( input, context ) {
+  nounFirstSuggestions: function( text, html ) {
     //Treats input as a noun, figures out what nounTypes it could be,
     //figures out what verbTypes can take that nounType as input
     //(either for directObject or for modifiers) and returns a list of
@@ -24,7 +38,7 @@ NLParser.EnParser.prototype = {
     let verb;
 
     for each(verb in this._verbList) {
-      suggs = suggs.concat( verb.getCompletionsFromSelectionOnly(context));
+      suggs = suggs.concat( verb.getCompletionsFromNounOnly(text, html));
     }
     return suggs;
   },
@@ -32,11 +46,12 @@ NLParser.EnParser.prototype = {
   updateSuggestionList: function( query, context ) {
     var nounType, verb, x;
     var newSuggs = [];
+    var selObj = getSelectionObject(context);
     // selection, no input, noun-first suggestion
     if (!query || query.length == 0) {
-      var sel = getTextSelection(context);
-      if (sel) {
-	newSuggs = newSuggs.concat( this.nounFirstSuggestions(sel, context));
+      if (selObj.text || selObj.html) {
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj.text,
+                                                              selObj.html));
       }
     } else {
       var words = query.split( " " );
@@ -49,7 +64,7 @@ NLParser.EnParser.prototype = {
       }
       // noun-first matches
       if (newSuggs.length == 0 ){
-	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, context ));
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, query ));
       }
     }
     // TODO sort in order of match quality!!

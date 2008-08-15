@@ -1,4 +1,4 @@
-CmdUtils = {};
+var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
 
