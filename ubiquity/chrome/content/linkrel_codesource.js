@@ -38,15 +38,6 @@ function LinkRelCodeSource() {
   };
 }
 
-LinkRelCodeSource.__makeNsUri = function LRCS_makeNsUri(uri) {
-  if (typeof(uri) == "string") {
-    var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                .getService(Components.interfaces.nsIIOService);
-    uri = ioSvc.newURI(uri, null, null);
-  }
-  return uri;
-};
-
 LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
   let annSvc = this.__getAnnSvc();
   let confirmedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
@@ -64,7 +55,7 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
     // that points to a JS file.
     if (annSvc.pageHasAnnotation(uri, CMD_URL_ANNO)) {
       var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
-      pageInfo.jsUri = this.__makeNsUri(val);
+      pageInfo.jsUri = Utils.url(val);
     } else {
       // There's no <link rel="commands"> tag;, so we'll assume this
       // is a raw JS file.
@@ -79,20 +70,20 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
 
 LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(uri) {
   let annSvc = this.__getAnnSvc();
-  uri = this.__makeNsUri(uri);
+  uri = Utils.url(uri);
   annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
                            annSvc.EXPIRE_NEVER);
 };
 
 LinkRelCodeSource.isMarkedPage = function LRCS_isMarkedPage(uri) {
   let annSvc = this.__getAnnSvc();
-  uri = this.__makeNsUri(uri);
+  uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO);
 };
 
 LinkRelCodeSource.removeMarkedPage = function LRCS_removeMarkedPage(uri) {
   let annSvc = this.__getAnnSvc();
-  uri = this.__makeNsUri(uri);
+  uri = Utils.url(uri);
   annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
 };
 

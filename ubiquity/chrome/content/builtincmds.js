@@ -126,18 +126,82 @@ makeSearchCommand({
   }
 });
 
-makeSearchCommand({
-  name: "Wikipedia",
-  url: "http://en.wikipedia.org/wiki/Special:Search?search={QUERY}",
-  icon: "http://en.wikipedia.org/favicon.ico",
+/* TODO
+ 
+ - apply CSS max-height & overflow-y to summary container
+ 
+*/
+
+function openUrl(url, postData) {
+	var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+	var browser = browserWindow.getBrowser();
+	
+	if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+		browserWindow.loadURI(url, null, postData, false);
+	else
+		browser.loadOneTab(url, null, null, postData, false, false);
+}
+
+function fetchWikipediaArticle(previewBlock, articleTitle) {
+  var apiUrl = "http://en.wikipedia.org/w/api.php";
+  var apiParams = {
+    format: "json",
+    action: "parse",
+    page: articleTitle
+  };
+
+  jQuery.ajax({
+    type: "GET",
+    url: apiUrl,
+    data: apiParams,
+    datatype: "string",
+    error: function() {
+      previewBlock.innerHTML = "<i>Error retreiving summary.</i>";
+    },
+    success: function(responseData) {
+      responseData = Utils.decodeJson(responseData);
+
+      var tempElement = CmdUtils.getHiddenWindow().document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+      tempElement.innerHTML = responseData.parse.text["*"];
+
+      //take only the text from summary because links won't work either way
+      var articleSummary = jQuery(tempElement).find('p').eq(0).text();
+      //remove citations [3], [citation needed], etc.
+      //TODO: also remove audio links (.audiolink & .audiolinkinfo)
+      articleSummary = articleSummary.replace(/\[([^\]]+)\]/g,"");
+
+      //TODO: remove "may refer to" summaries
+
+      var articleImageSrc = jQuery(tempElement).find(".infobox img").attr("src") ||
+      jQuery(tempElement).find(".thumbimage").attr("src");
+
+      var previewTemplate = "<img src=\"${img}\" style=\"float: left; max-width: 80px; max-height: 80px; background-color: white;\" />" +
+      "<span class=\"wikisummary\">${summary}</span>";
+
+      var previewData = {
+        img: articleImageSrc,
+        summary: articleSummary
+      };
+
+      previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+    }
+  });
+}
+
+CmdUtils.CreateCommand({
+  name: "wikipedia",
+  takes: {search: noun_arb_text},
   locale: "en-US",
   homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
   license: "MPL",
+  icon: "http://en.wikipedia.org/favicon.ico",
   preview: function(previewBlock, directObject) {
     var apiUrl = "http://en.wikipedia.org/w/api.php";
 
-    var searchText = jQuery.trim(directObject.text);
+    searchText = jQuery.trim(directObject.text);
     if(searchText.length < 1) {
       previewBlock.innerHTML = "Searches Wikipedia";
       return;
@@ -151,7 +215,7 @@ makeSearchCommand({
       format: "json",
       action: "query",
       list: "search",
-      srlimit: 10,
+      srlimit: 5, // is this a good limit?
       srwhat: "text",
       srsearch: searchText
     };
@@ -162,27 +226,20 @@ makeSearchCommand({
       data: apiParams,
       datatype: "string",
       error: function() {
-	previewBlock.innerHTML = "Error searching Wikipedia";
+        previewBlock.innerHTML = "Error searching Wikipedia";
       },
       success: function(searchReponse) {
         searchReponse = Utils.decodeJson(searchReponse);
 
         if(!("query" in searchReponse && "search" in searchReponse.query)) {
-	  previewBlock.innerHTML = "Error searching Wikipedia";
-	  return;
-	}
+          previewBlock.innerHTML = "Error searching Wikipedia";
+          return;
+        }
 
-	function generateWikipediaLink(title) {
+        function generateWikipediaLink(title) {
           var wikipediaUrl = "http://en.wikipedia.org/wiki/";
           return wikipediaUrl + title.replace(/ /g, "_");
         }
-
-        var previewTemplate = "Wikipedia articles found matching <b>${query}</b>:<br /><br />" +
-                              "{for article in results}" +
-                              "<a href=\"${article.title|wikilink}\">${article.title}</a><br />" +
-                              "{forelse}" +
-                              "<b>No articles found</b>" +
-                              "{/for}";
 
         previewData = {
           query: searchText,
@@ -190,24 +247,22 @@ makeSearchCommand({
           _MODIFIERS: {wikilink: generateWikipediaLink}
         };
 
-        previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+        previewBlock.innerHTML = CmdUtils.renderTemplate(null, previewData, {file:"wikipedia.html"});
+
+        jQuery(previewBlock).find("div[wikiarticle]").each(function() {
+          var article = jQuery(this).attr("wikiarticle");
+          fetchWikipediaArticle(this, article);
+        });
+
       }
     });
+  },
+  execute: function(directObject) {
+    var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
+    var searchParams = {search: directObject.text};
+    openUrl(searchUrl + Utils.paramsToString(searchParams));
   }
 });
-
-// TODO: This should be added to Utils.openUrlInBrowser()
-// function openUrl(url, postData) {
-//  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-//    .getService(Components.interfaces.nsIWindowMediator);
-//  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-//  var browser = browserWindow.getBrowser();
-//
-//  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-//    browserWindow.loadURI(url, null, postData, false);
-//  else
-//    browser.loadOneTab(url, null, null, postData, false, false);
-// }
 
 makeSearchCommand({
   name: "IMDB",
@@ -640,7 +695,11 @@ CmdUtils.CreateCommand({
     if (modifiers.to) {
       html += "to " + modifiers.to.text;
     }
-    html += "with these contents:" + directObj.html;
+    if (directObj.html) {
+      html += "with these contents:" + directObj.html;
+    } else {
+      html += "with a link to the current page.";
+    }
     pblock.innerHTML = html;
   },
 
@@ -654,13 +713,15 @@ CmdUtils.CreateCommand({
       title = html;
     var location = document.location;
     var gmailTab = findGmailTab();
-    if (html)
-      html = ("<p>From the page <a href=\"" + location +
-              "\">" + title + "</a>:</p>" + html);
-    else {
-      displayMessage("No selected HTML!");
-      return;
+    var pageLink = "<a href=\"" + location + "\">" + title + "</a>";
+    if (html) {
+      html = ("<p>From the page " + pageLink + ":</p>" + html);
+    } else {
+      // If there's no selection, just send the current page.
+      html = "<p>You might be interested in " + pageLink + ".</p>";
     }
+
+    title = "'" + title + "'";
 
     if (gmailTab) {
       // Note that this is technically insecure because we're
@@ -685,9 +746,19 @@ CmdUtils.CreateCommand({
 	  var to = composeMail.ownerDocument.getElementsByName("to")[0];
 	  if (to && headers.to) to.value = headers.to.text;
           var subject = active.getElementsByTagName("input")[0];
-          if (subject) subject.value = "'"+title+"'";
+          if (subject) subject.value = title;
           var iframe = active.getElementsByTagName("iframe")[0];
-          iframe.contentDocument.execCommand("insertHTML", false, html);
+          if (iframe)
+            iframe.contentDocument.execCommand("insertHTML", false, html);
+          else {
+            var body = composeMail.ownerDocument.getElementsByName("body")[0];
+            html = ("Note: the following probably looks strange because " +
+                    "you don't have rich formatting enabled.  Please " +
+                    "click the 'Rich formatting' link above, discard " +
+                    "this message, and try " +
+                    "the email command again.\n\n" + html);
+            body.value = html;
+          }
           gmailTab.focus();
         } catch (e) {
           displayMessage({text: "A gmonkey exception occurred.",
