@@ -193,7 +193,7 @@ NLParser.EnVerb.prototype = {
 
 	  let moreSuggestions = nounType.suggest( noun );
 	  suggestions = suggestions.concat(moreSuggestions);
-	  
+
 	  for ( var y in suggestions ) {
 	    newFilledMods = dictDeepCopy( filledMods );
 	    newFilledMods[ preposition ] = suggestions[y];
@@ -265,9 +265,54 @@ NLParser.EnVerb.prototype = {
        2. a preposition
        3. a noun following a preposition.
     */
-    return this.recursiveParse( words, {}, this._modifiers, context );
+    let completions = [];
+    if (words.length == 0) {
+      completions = this.getCompletionsFromSelectionOnly( context );
+    }
+    let moreCompletions = this.recursiveParse( words,
+					       {},
+					       this._modifiers,
+					       context );
+    return completions.concat(moreCompletions);
   },
 
+  getCompletionsFromSelectionOnly: function(context) {
+    // Try to complete sentence based just on selection, no input arguments.
+    let completions = [];
+    var selection = getTextSelection(context);
+    if (!selection) {
+      selection = UbiquityGlobals.lastCmdResult;
+    }
+    var htmlSelection = getHtmlSelection(context);
+    if (!htmlSelection)
+      htmlSelection = selection;
+
+    /* No selection to interpolate. */
+    if ((!selection) && (!htmlSelection))
+      return [];
+
+    // Try selection as direct object...
+    if (this._DOType) {
+      let suggs = this._DOType.suggest(selection, htmlSelection);
+      for each (let sugg in suggs) {
+	completions.push( this._newSentence( sugg, {}) );
+      }
+    }
+
+    // Try it as each modifier....
+    for (let x in this._modifiers) {
+      let suggs = this._modifiers[x].suggest(selection, htmlSelection);
+      for each (let sugg in suggs) {
+	let mods = {};
+	mods[x] = sugg;
+	window.console.log(mods);
+	completions.push( this._newSentence(null, mods) );
+      }
+    }
+    return completions;
+  },
+
+  // obsolete!
   canPossiblyUseNounType: function(nounType){
     //returns the words that would be implied before the noun could makes sense,
     //i.e. put these words before the noun and try again.
