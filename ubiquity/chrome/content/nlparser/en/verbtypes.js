@@ -312,24 +312,6 @@ NLParser.EnVerb.prototype = {
     return completions;
   },
 
-  // obsolete!
-  canPossiblyUseNounType: function(nounType){
-    //returns the words that would be implied before the noun could makes sense,
-    //i.e. put these words before the noun and try again.
-    if (this._DOType)
-      if (this._DOType._name == nounType._name ) {
-	return this._name;
-      }
-    for( let prep in this._modifiers ) {
-      if (this._modifiers[prep]._name == nounType._name) {
-	return this._name + " " + prep;
-	// TODO returning multiple preps when more than one could use the
-	// nountype
-      }
-    }
-    return false;
-  },
-
   match: function( sentence ) {
     // returns a float from 0 to 1 telling how good of a match the input
     // is to this verb.

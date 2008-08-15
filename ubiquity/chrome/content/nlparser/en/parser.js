@@ -20,22 +20,11 @@ NLParser.EnParser.prototype = {
     //figures out what verbTypes can take that nounType as input
     //(either for directObject or for modifiers) and returns a list of
     //suggestions based on giving the input to those verbs.
-    var suggs = [];
-    var x, y, nounType, verb, words;
+    let suggs = [];
+    let verb;
 
-    for each (nounType in this._nounTypeList) {
-      if (nounType.suggest(input).length > 0){
-	for (y in this._verbList) {
-	  verb = this._verbList[y];
-	  var prefix = verb.canPossiblyUseNounType(nounType);
-	  if (prefix) {
-	    var betterSentence = prefix + " " + input;
-	    words = betterSentence.split( " " ).slice(1);
-	    var moreSuggs = verb.getCompletions(words, context);
-	    suggs = suggs.concat( moreSuggs );
-	  }
-	}
-      }
+    for each(verb in this._verbList) {
+      suggs = suggs.concat( verb.getCompletionsFromSelectionOnly(context));
     }
     return suggs;
   },
