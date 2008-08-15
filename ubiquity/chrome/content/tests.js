@@ -340,8 +340,11 @@ function testParseWithModifier() {
 
   var verb = new NLParser.EnVerb(cmd_wash);
   var inputWords = ["pood", "with", "sp"];
-  var fakeContext = null;
-  var completions = verb.getCompletions( inputWords, fakeContext );
+  var selObject = {
+    text:"",
+    html:""
+  };
+  var completions = verb.getCompletions( inputWords, selObject);
   this.assert( completions.length == 2 );
   this.assert( completions[0]._verb._name == "wash");
   this.assert( completions[0]._DO.text == "poodle");
@@ -349,10 +352,10 @@ function testParseWithModifier() {
   this.assert( completions[1]._verb._name == "wash");
   this.assert( completions[1]._DO.text == "poodle");
   this.assert( completions[1]._modifiers["with"].text == "spork");
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert( dogGotWashed == "poodle");
   this.assert( dogGotWashedWith == "sponge");
-  completions[1].execute(fakeContext);
+  completions[1].execute();
   this.assert( dogGotWashed == "poodle");
   this.assert( dogGotWashedWith == "spork");
 }
