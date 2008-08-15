@@ -4,11 +4,10 @@ NLParser.EN_SELECTION_PRONOUNS =  [ "this", "that", "it", "selection",
 
 function getSelectionObject(context) {
   var selection = getTextSelection(context);
-  if (!selection) {
-    selection = UbiquityGlobals.lastCmdResult;
-  }
+  if (!selection && UbiquityGlobals.lastCmdResult)
+      selection = UbiquityGlobals.lastCmdResult;
   var htmlSelection = getHtmlSelection(context);
-  if (!htmlSelection)
+  if (!htmlSelection && selection)
     htmlSelection = selection;
   return {
     text: selection,
@@ -59,7 +58,7 @@ NLParser.EnParser.prototype = {
       for ( x in this._verbList ) {
 	verb = this._verbList[x];
 	if ( verb.match( words[0] ) ) {
-	  newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), context ));
+	  newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), selObj ));
 	}
       }
       // noun-first matches
