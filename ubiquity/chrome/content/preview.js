@@ -1,11 +1,22 @@
 function onClick(event) {
-  var target = event.target;
-  if (target.nodeName != 'A' || !target.href)
-    return;
-
-  event.preventDefault();
-
-  openUrl(target.href);
+	var target = event.target;
+	while(target) {
+		if (target.nodeName == 'A')
+			break;
+		
+		target = target.parentNode;
+	}
+	
+	if(!target)
+		return;
+	
+	// only those referencing an external page
+	if(!target.href || target.href.indexOf("#") == 0)
+		return;
+	
+	event.preventDefault();
+	
+	openUrl(target.href);
 }
 
 function openUrl(url) {
