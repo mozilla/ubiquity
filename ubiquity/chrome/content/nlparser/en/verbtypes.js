@@ -144,16 +144,14 @@ NLParser.EnVerb.prototype = {
 	// remaining words in that slot.
         // Make a sentence for each
 	// possible noun completion based on it; return them all.
-	suggestions = this._DOType.suggest(unusedWords.join(" "));
-	let sugg;
-	for each ( sugg in suggestions ) {
-	  completions.push( this._newSentence(sugg, filledMods ));
-	}
 
 	suggestions = this.suggestWithPronounSub( this._DOType,
 						  unusedWords,
 						  context );
-	for each ( sugg in suggestions ) {
+
+	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
+	suggestions = suggestions.concat(moreSuggestions);
+	for each ( let sugg in suggestions ) {
 	  completions.push( this._newSentence(sugg, filledMods ));
 	}
 	return completions;
@@ -189,7 +187,13 @@ NLParser.EnVerb.prototype = {
 	  newUnusedWords.splice( matchIndices[x], 2 );
 	  directObject = newUnusedWords.join( " " );
 
-	  suggestions = nounType.suggest( noun );
+	  suggestions = this.suggestWithPronounSub( nounType,
+						    [noun],
+                                                    context );
+
+	  let moreSuggestions = nounType.suggest( noun );
+	  suggestions = suggestions.concat(moreSuggestions);
+	  
 	  for ( var y in suggestions ) {
 	    newFilledMods = dictDeepCopy( filledMods );
 	    newFilledMods[ preposition ] = suggestions[y];
@@ -199,6 +203,8 @@ NLParser.EnVerb.prototype = {
 						  context);
 	    completions = completions.concat( newCompletions );
 	  }
+
+
 	}
       }
       // If no match was found, all we'll return is one sentence formed by
