@@ -380,18 +380,19 @@ CmdUtils.CreateCommand({
     var word = directObj.text;
     if (word.length < 2)
       pblock.innerHTML = "Gives the definition of a word.";
-    else
+    else {
       pblock.innerHTML = "Gives the definition of the word " + word + ".";
-    defineWord( word, function(text){
-      text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
-      text = text.replace(/(1:)/g, "<br/>$&");
-      text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
-      text = text.replace(/\[.*?\]/g, "");
+      defineWord( word, function(text){
+        text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
+        text = text.replace(/(1:)/g, "<br/>$&");
+        text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
+        text = text.replace(/\[.*?\]/g, "");
 
-      pblock.innerHTML = text;
-    });
+        pblock.innerHTML = text;
+      });
+    }
   }
-})
+});
 
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.

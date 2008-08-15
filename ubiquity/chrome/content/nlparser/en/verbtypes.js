@@ -110,26 +110,22 @@ NLParser.EnVerb.prototype = {
     }
   },
 
-  _newSentence: function( directObj, modifiersText ) {
-    let modifiersObjects= {};
-    let text = null;
-    let data = null;
-    // TODO THIS IS HACK
-    if (typeof directObj == "string") {
-      text = directObj;
-    } else {
-      data = directObj;
-    }
-    for (let x in modifiersText) {
-      modifiersObjects[x] = new NLParser.EnInputData( modifiersText[x] );
-    }
-    let directObject = new NLParser.EnInputData(text, null, data);
-    return new NLParser.EnParsedSentence(this, directObject, modifiersObjects);
+  _makeNothingSugg: function() {
+    return { text:"", html:null, data:null, summary:"" };
+  },
+
+  _newSentence: function( directObjSugg, modifierSuggs ) {
+    if (!directObjSugg)
+      directObjSugg = this._makeNothingSugg();
+    for (let x in modifierSuggs)
+      if (!modifierSuggs[x])
+	modifierSuggs[x] = this._makeNothingSugg();
+    return new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs);
   },
 
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
-  recursiveParse: function( unusedWords, filledMods, unfilledMods ) {
+  recursiveParse: function(unusedWords, filledMods, unfilledMods, context) {
     var x;
     var suggestions = [];
     var completions = [];
@@ -153,6 +149,8 @@ NLParser.EnVerb.prototype = {
 	for each ( let sugg in suggestions ) {
 	  completions.push( this._newSentence(sugg, filledMods ));
 	}
+
+	// Try replacing pronouns with text selection...
 	return completions;
       }
     } else {
@@ -170,7 +168,8 @@ NLParser.EnVerb.prototype = {
 	  if ( nounType.suggest( unusedWords[ x + 1 ] ).length > 0 ) {
 	    // Match for the preposition at index x followed by
 	    // an appropriate noun at index x+1
-	    // TODO this should be able to match a multi-word
+	    // TODO this should be able to match a multi-word modifier, not
+	    // just a single word at x+1.
 	    matchIndices.push( x );
 	  }
 	}
@@ -191,7 +190,8 @@ NLParser.EnVerb.prototype = {
 	    newFilledMods[ preposition ] = suggestions[y];
 	    newCompletions = this.recursiveParse( newUnusedWords,
 						  newFilledMods,
-						  newUnfilledMods );
+						  newUnfilledMods,
+						  context);
 	    completions = completions.concat( newCompletions );
 	  }
 	}
@@ -200,11 +200,12 @@ NLParser.EnVerb.prototype = {
       // leaving that preposition blank. But even if a match was found, we
       // still want to include this sentence as an additional possibility.
       newFilledMods = dictDeepCopy( filledMods );
-      newFilledMods[preposition] = "";
+      newFilledMods[preposition] = this._makeNothingSugg;
       directObject = unusedWords.join( " " );
       newCompletions = this.recursiveParse( unusedWords,
 					    newFilledMods,
-					    newUnfilledMods );
+					    newUnfilledMods,
+					    context);
       completions = completions.concat( newCompletions );
 
       return completions;
@@ -293,21 +294,7 @@ NLParser.EnVerb.prototype = {
        2. a preposition
        3. a noun following a preposition.
     */
-
-    /* Look for words that refer to selection: */
-    var completions = [];
-    var wordsWithPronounSubstituted = this.substitutePronoun( words,
-							      context);
-
-    if ( wordsWithPronounSubstituted )
-      completions = this.recursiveParse( wordsWithPronounSubstituted,
-					 {},
-					 this._modifiers );
-
-    /* Also parse without that substitution, return both ways: */
-    var completionsNoSub = this.recursiveParse( words, {}, this._modifiers );
-    completions = completions.concat( completionsNoSub );
-    return completions;
+    return this.recursiveParse( words, {}, this._modifiers, context );
   },
 
   canPossiblyUseNounType: function(nounType){
