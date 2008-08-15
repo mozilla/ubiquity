@@ -126,88 +126,144 @@ makeSearchCommand({
   }
 });
 
-makeSearchCommand({
-  name: "Wikipedia",
-  url: "http://en.wikipedia.org/wiki/Special:Search?search={QUERY}",
-  icon: "http://en.wikipedia.org/favicon.ico",
-  locale: "en-US",
-  homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
-  author: {name: "Blair McBride", email: "blair@theunfocused.net"},
-  license: "MPL",
-  preview: function(previewBlock, directObject) {
-    var apiUrl = "http://en.wikipedia.org/w/api.php";
+/* TODO
+ 
+ - apply CSS max-height & overflow-y to summary container
+ 
+*/
 
-    var searchText = jQuery.trim(directObject.text);
-    if(searchText.length < 1) {
-      previewBlock.innerHTML = "Searches Wikipedia";
-      return;
-    }
+function openUrl(url, postData) {
+	var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+		.getService(Components.interfaces.nsIWindowMediator);
+	var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+	var browser = browserWindow.getBrowser();
+	
+	if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+		browserWindow.loadURI(url, null, postData, false);
+	else
+		browser.loadOneTab(url, null, null, postData, false, false);
+}
 
-    var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
-    var previewData = {query: searchText};
-    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+function fetchWikipediaArticle(previewBlock, articleTitle) {
+	var apiUrl = "http://en.wikipedia.org/w/api.php";
+	var apiParams = {
+		format: "json",
+		action: "parse",
+		page: articleTitle
+	};
+	
+	jQuery.ajax({
+		type: "GET",
+		url: apiUrl,
+		data: apiParams,
+		datatype: "string",
+		error: function() {
+			previewBlock.innerHTML = "<i>Error retreiving summary.</i>";
+		},
+		success: function(responseData) {
+		  responseData = Utils.decodeJson(responseData);
+			
+			var tempElement = CmdUtils.getHiddenWindow().document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+			tempElement.innerHTML = responseData.parse.text["*"];
+	
+			//take only the text from summary because links won't work either way
+			var articleSummary = jQuery(tempElement).find('p').eq(0).text();
+			//remove citations [3], [citation needed], etc.
+			//TODO: also remove audio links (.audiolink & .audiolinkinfo)
+		  articleSummary = articleSummary.replace(/\[([^\]]+)\]/g,"");
 
-    var apiParams = {
-      format: "json",
-      action: "query",
-      list: "search",
-      srlimit: 10,
-      srwhat: "text",
-      srsearch: searchText
-    };
+      //TODO: remove "may refer to" summaries
+      
+			var articleImageSrc = jQuery(tempElement).find(".infobox img").attr("src") ||
+			                      jQuery(tempElement).find(".thumbimage").attr("src");
+			
+			var previewTemplate = "<img src=\"${img}\" style=\"float: left; max-width: 80px; max-height: 80px; background-color: white;\" />" +
+			"<span class=\"wikisummary\">${summary}</span>";
+			
+			var previewData = {
+				img: articleImageSrc,
+				summary: articleSummary
+			};
+			
+			previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+		}
+	});
+}
 
-    jQuery.ajax({
-      type: "GET",
-      url: apiUrl,
-      data: apiParams,
-      datatype: "string",
-      error: function() {
-	previewBlock.innerHTML = "Error searching Wikipedia";
-      },
-      success: function(searchReponse) {
-        searchReponse = Utils.decodeJson(searchReponse);
 
-        if(!("query" in searchReponse && "search" in searchReponse.query)) {
-	  previewBlock.innerHTML = "Error searching Wikipedia";
-	  return;
+CmdUtils.CreateCommand({
+	name: "wikipedia",
+	takes: {search: noun_arb_text},
+	locale: "en-US",
+	homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
+	author: {name: "Blair McBride", email: "blair@theunfocused.net"},
+	license: "MPL",
+	icon: "http://en.wikipedia.org/favicon.ico",
+	preview: function(previewBlock, directObject) {
+		var apiUrl = "http://en.wikipedia.org/w/api.php";
+		
+		searchText = jQuery.trim(directObject.text);
+		if(searchText.length < 1) {
+			previewBlock.innerHTML = "Searches Wikipedia";
+			return;
+		}
+		
+		var previewTemplate = "Searching Wikipedia for <b>${query}</b> ...";
+		var previewData = {query: searchText};
+		previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+		
+		var apiParams = {
+			format: "json",
+			action: "query",
+			list: "search",
+			srlimit: 5, // is this a good limit?
+			srwhat: "text",
+			srsearch: searchText
+		};
+		
+		jQuery.ajax({
+			type: "GET",
+			url: apiUrl,
+			data: apiParams,
+			datatype: "string",
+			error: function() {
+				previewBlock.innerHTML = "Error searching Wikipedia";
+			},
+			success: function(searchReponse) {
+				searchReponse = Utils.decodeJson(searchReponse);
+				
+				if(!("query" in searchReponse && "search" in searchReponse.query)) {
+					previewBlock.innerHTML = "Error searching Wikipedia";
+					return;
+				}
+				
+				function generateWikipediaLink(title) {
+					var wikipediaUrl = "http://en.wikipedia.org/wiki/";
+					return wikipediaUrl + title.replace(/ /g, "_");
+				}
+				
+				previewData = {
+					query: searchText,
+					results: searchReponse.query.search,
+					_MODIFIERS: {wikilink: generateWikipediaLink}
+				};
+  						
+				previewBlock.innerHTML = CmdUtils.renderTemplate(null, previewData, {file:"wikipedia.html"});
+				
+				jQuery(previewBlock).find("div[wikiarticle]").each(function() {
+					var article = jQuery(this).attr("wikiarticle");
+					fetchWikipediaArticle(this, article);
+				});
+				
+			}
+		});
+	},
+	execute: function(directObject) {
+		var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
+		var searchParams = {search: directObject.text};
+		openUrl(searchUrl + Utils.paramsToString(searchParams));
 	}
-
-	function generateWikipediaLink(title) {
-          var wikipediaUrl = "http://en.wikipedia.org/wiki/";
-          return wikipediaUrl + title.replace(/ /g, "_");
-        }
-
-        var previewTemplate = "Wikipedia articles found matching <b>${query}</b>:<br /><br />" +
-                              "{for article in results}" +
-                              "<a href=\"${article.title|wikilink}\">${article.title}</a><br />" +
-                              "{forelse}" +
-                              "<b>No articles found</b>" +
-                              "{/for}";
-
-        previewData = {
-          query: searchText,
-          results: searchReponse.query.search,
-          _MODIFIERS: {wikilink: generateWikipediaLink}
-        };
-
-        previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
-      }
-    });
-  }
 });
-
-// TODO: This should be added to Utils.openUrlInBrowser()
-// function openUrl(url, postData) {
-//  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-//    .getService(Components.interfaces.nsIWindowMediator);
-//  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-//  var browser = browserWindow.getBrowser();
-//
-//  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-//    browserWindow.loadURI(url, null, postData, false);
-//  else
-//    browser.loadOneTab(url, null, null, postData, false, false);
-// }
 
 makeSearchCommand({
   name: "IMDB",

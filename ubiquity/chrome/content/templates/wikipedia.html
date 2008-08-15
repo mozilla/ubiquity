@@ -1,0 +1,13 @@
+Wikipedia articles found matching <b>${query}</b>:
+<br/><br/>
+{for article in results}
+  <div style="clear: both;">
+    <b><a href="${article.title|wikilink}">${article.title}</a></b>
+    <br/>
+    <div style="margin-left: 20px; font-size: 80%;" wikiarticle="${article.title}">
+      <i>Retreiving article summary...</i>
+    </div>
+  </div>
+{forelse}
+  <b>No articles found</b>
+{/for}
