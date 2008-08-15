@@ -142,15 +142,20 @@ NLParser.EnVerb.prototype = {
       } else {
 	// Transitive verb, can have direct object.  Try to use the
 	// remaining words in that slot.
-	directObject = unusedWords.join( " " );
         // Make a sentence for each
 	// possible noun completion based on it; return them all.
-	suggestions = this._DOType.suggest( directObject );
-	for each ( let sugg in suggestions ) {
+	suggestions = this._DOType.suggest(unusedWords.join(" "));
+	let sugg;
+	for each ( sugg in suggestions ) {
 	  completions.push( this._newSentence(sugg, filledMods ));
 	}
 
-	// Try replacing pronouns with text selection...
+	suggestions = this.suggestWithPronounSub( this._DOType,
+						  unusedWords,
+						  context );
+	for each ( sugg in suggestions ) {
+	  completions.push( this._newSentence(sugg, filledMods ));
+	}
 	return completions;
       }
     } else {
@@ -212,37 +217,8 @@ NLParser.EnVerb.prototype = {
     }
   },
 
-  canPossiblyUseSelection: function( textSel, htmlSel ) {
-    if (this._DOType) {
-      if (this._DOType.expectsHtmlSelection) {
-	if (this._DOType.suggest(htmlSel).length > 0)
-	  return "html";
-      } else {
-	if (this._DOType.suggest(textSel).length > 0)
-	  return "text";
-      }
-    }
-    for each( type in this._modifiers) {
-      if (type.expectsHtmlSelection) {
-	if (type.suggest(htmlSel).length > 0)
-	  return "html";
-      } else {
-	if (type.suggest(textSel).length > 0)
-	  return "text";
-      }
-    }
-    return false;
-  },
-
-  substitutePronoun: function( words, context ) {
-    /* TODO will need to refactor so that substitutePronoun is called from
-     * inside recursiveParse to interpolate the selection (by calling
-     * NLParser.inputObjectFromSelection) right before checking for noun
-     * validity and making a parsedSentence out of it.
-     */
-    var subbedWords = words.slice();
-    var selectionUsed = false;
-
+  suggestWithPronounSub: function( nounType, words, context ) {
+    var suggestions = [];
     var selection = getTextSelection(context);
     if (!selection) {
       selection = UbiquityGlobals.lastCmdResult;
@@ -253,36 +229,25 @@ NLParser.EnVerb.prototype = {
 
     /* No selection to interpolate. */
     if ((!selection) && (!htmlSelection))
-      return false;
-
-    selectionUsed = this.canPossiblyUseSelection( selection,
-						  htmlSelection);
-    /* There's a selection but no argument that can use it.*/
-    if (!selectionUsed)
-      return false;
-
-    /* There's no arguments or pronouns given... pretend we've got a
-     * "this" so we can interpolate the selection there and see what we get.*/
-    if (subbedWords.length == 0) {
-     subbedWords = ["this"];
-    }
+      return [];
 
     for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
-      var index = subbedWords.indexOf( pronoun );
+      let index = words.indexOf( pronoun );
       if ( index > -1 ) {
-	if (selectionUsed == "text")
-	  subbedWords.splice(index, 1, selection);
-	else if (selectionUsed == "html")
-	  subbedWords.splice(index, 1, htmlSelection);
-	return subbedWords;
+	/*if (selection) {
+	  let wordsCopy = words.slice();
+	  let stuff = wordsCopy.splice(index, 1, selection );
+	  selection = wordsCopy.splice(index, 1, selection).join(" ");
+        }
+	if (htmlSelection) {
+	  let wordsCopy = words.slice();
+	  htmlSelection = wordsCopy.splice(index, 1, htmlSelection).join(" ");
+	}*/
+	let moreSuggs = nounType.suggest(selection, htmlSelection);
+	suggestions = suggestions.concat( moreSuggs );
       }
     }
-    /* Note that the above will stop looking when it hits the first
-     * pronoun that can take the selection as substitution.  TODO is
-     * if there are more pronouns later in the input that could take it,
-     * offer each one of them as a suggestion.
-     */
-    return false;
+    return suggestions;
   },
 
   getCompletions: function( words, context ) {
