@@ -302,16 +302,19 @@ function testParseDirectOnly() {
   var verb = new NLParser.EnVerb(cmd_pet);
   var inputWords = ["b"];
 
-  var fakeContext = null;
-  var completions = verb.getCompletions( inputWords, fakeContext );
+  var selObject = {
+    text:"",
+    html:""
+  };
+  var completions = verb.getCompletions( inputWords, selObject );
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb._name == "pet", "verb should be pet");
   this.assert( completions[0]._DO.text == "beagle", "obj should be beagle");
   this.assert( completions[1]._verb._name == "pet", "verb should be pet");
   this.assert( completions[1]._DO.text == "bulldog", "obj should be bulldog");
-  completions[0].execute(fakeContext);
+  completions[0].execute();
   this.assert( dogGotPetted == "beagle");
-  completions[1].execute(fakeContext);
+  completions[1].execute();
   this.assert( dogGotPetted == "bulldog" );
 }
 
