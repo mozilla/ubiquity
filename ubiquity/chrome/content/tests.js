@@ -432,12 +432,6 @@ function testVerbEatsSelection() {
 
   selObject.text = "din";
   completions = verb.getCompletions(["at", "home", "this"], selObject);
-  dump( "WTF dude there are " + completions.length + " completions.\n");
-  dump( "The completions are like this: \n");
-  for each (let comp in completions) {
-    dump(comp.getDisplayText());
-    dump("\n");
-  }
   this.assert( completions.length == 1, "second should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
@@ -495,12 +489,6 @@ function testImplicitPronoun() {
   foodGotEatenAt = null;
   selObject.text = "din";
   completions = verb.getCompletions(["lunch", "at", "selection"], selObject);
-  dump( "WTF dude there are " + completions.length + " completions.\n");
-  dump( "The completions are like this: \n");
-  for each (let comp in completions) {
-    dump(comp.getDisplayText());
-    dump("\n");
-  }
   this.assert( completions.length == 1, "Sould have 1 completion");
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
