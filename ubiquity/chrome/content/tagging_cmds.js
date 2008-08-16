@@ -14,21 +14,25 @@ function trim (str) {
 // command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
   name: "tag",
+  homepage: "http://autonome.wordpress.com/",
+  author: { name: "Dietrich Ayala", email: "dietrich@mozilla.com"},
+  license: "MPL/GPL/LGPL",
   takes : {"text" : noun_arb_text},
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   preview: function(aEl, aTagsString) {
-    aEl.innerHTML = "Describe the current location with tags";
-    aEl.innerHTML += aTagsString.length ? " (" + aTagsString + ")" : ".";
+    aEl.innerHTML = "Describe the current page with tags";
+    aEl.innerHTML += aTagsString.text.length ? " (" + aTagsString.text + ")" : ".";
   },
   execute: function(aTagsString) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
     var doc = CmdUtils.getDocumentInsecure();
 
-    var currentURI = Utils.url(doc.location);
+    var iosvc = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+    var currentURI = iosvc.newURI(doc.location, null, null);
+
     var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].
                     getService(Ci.nsINavBookmarksService);
-
     if (!bookmarks.isBookmarked(currentURI)) {
       // create unfiled bookmark
       bookmarks.insertBookmark(bookmarks.unfiledBookmarksFolder, currentURI,
@@ -37,9 +41,9 @@ CmdUtils.CreateCommand({
 
     // if there's a comma, split on commas, otherwise use spaces
     var splitChar = " ";
-    if (aTagsString.indexOf(",") == -1)
+    if (aTagsString.text.indexOf(",") == -1)
       splitChar = ",";
-    tags = aTagsString.split(splitChar);
+    tags = aTagsString.text.split(splitChar);
 
     // trim leading/trailing spaces
     tags = tags.map(function(a) { return trim(a) });
