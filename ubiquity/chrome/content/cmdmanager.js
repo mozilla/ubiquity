@@ -140,6 +140,7 @@ CommandSource.prototype = {
 
       var cmd = {
         name : cmdName,
+		icon : cmdFunc.icon,
         execute : function(context, directObject, modifiers) {
           sandbox.context = context;
           return cmdFunc(directObject, modifiers);
@@ -222,6 +223,11 @@ function makeDefaultCommandSuggester(commandManager) {
       retVal[titleCasedName] = function() {
 	sentenceClosure.execute(context);
       };
+	  
+	  let suggestedCommand = commandManager.__cmdSource.getCommand(parsedSentence._verb._name);
+	  if(suggestedCommand.icon)
+		retVal[titleCasedName].icon = suggestedCommand.icon;
+	  
     }
     return retVal;
   }

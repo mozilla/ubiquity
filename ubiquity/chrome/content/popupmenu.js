@@ -28,8 +28,11 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
       var results = cmdSuggester(context);
       for (i in results) {
         var tempMenu = document.createElement("menuitem");
-        tempMenu.label = i;
-        tempMenu.setAttribute("label", tempMenu.label);
+		tempMenu.setAttribute("label", i);
+		if(results[i].icon) {
+			tempMenu.setAttribute("class", "menuitem-iconic");
+			tempMenu.setAttribute("image", results[i].icon);
+		}
         tempMenu.addEventListener("command", results[i], true);
         event.target.appendChild(tempMenu);
       }
