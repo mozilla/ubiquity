@@ -1,0 +1,11 @@
+{for entry in results}
+<div style="display:block;margin-bottom:10px" >
+  <div style="float:left; padding-right: 10px;">
+    <img style="border:thin solid white;" src="${entry['media$group']['media$thumbnail'][0].url}" />
+  </div>
+  <div style="">
+    <a style="color:blue;font-size:14px;" href="${entry.link[0].href}">${entry.title.$t}</a>
+    <p>${entry.content.$t.substr(0,300) + " ..."}</p>
+  </div>
+</div>
+{/for}

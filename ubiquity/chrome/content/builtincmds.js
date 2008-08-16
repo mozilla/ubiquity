@@ -273,7 +273,26 @@ makeSearchCommand({
 makeSearchCommand({
   name: "YouTube",
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
-  icon: "http://www.youtube.com/favicon.ico"
+  icon: "http://www.youtube.com/favicon.ico",
+  preview: function(pblock, directObject){
+    var searchTerm = directObject.text;
+    pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
+    
+    var url = "http://gdata.youtube.com/feeds/api/videos";
+    var params = { 
+      alt: "json", 
+      vq: searchTerm
+    };
+    
+    jQuery.get( url, params, function(data) {
+      var numToDisplay = 3;
+      var results = data.feed.entry.splice( 0, numToDisplay );
+      pblock.innerHTML = CmdUtils.renderTemplate( null,
+						  {results:results},
+						  {file:"youtube.html"}
+			);
+    }, "json");
+  }
 });
 
 makeSearchCommand({
