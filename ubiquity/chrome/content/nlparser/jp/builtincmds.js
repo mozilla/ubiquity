@@ -38,7 +38,7 @@ function translateTo( text, langCodePair, callback ) {
   });
 
   Utils.ajaxGet( url + params, function(jsonData){
-    var data = eval( '(' + jsonData + ')' );
+    var data = Utils.decodeJson(jsonData);
 
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
