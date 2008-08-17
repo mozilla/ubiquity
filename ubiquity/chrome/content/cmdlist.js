@@ -17,18 +17,18 @@ function onDocumentLoad() {
     // Dynamically generate entries for undocumented commands.
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.commandNames[i];
-      var cmdQuery = $("#" + cmd.id);
+      var cmdElement = document.getElementById(cmd.id);
 
-      if (cmdQuery.length == 0) {
+      if (cmdElement == null) {
         $(document.body).append(
           ('<div class="command" id="' + cmd.id + '">' +
            '<span class="name">' + cmd.name + '</span>')
         );
-        cmdQuery = $("#" + cmd.id);
+        cmdElement = document.getElementById(cmd.id);
       }
 
-      if (cmd.icon && cmdQuery.children(".icon").length == 0) {
-        cmdQuery.prepend('<img class="icon" src="' + cmd.icon + '"/> ');
+      if (cmd.icon && $(cmdElement).children(".icon").length == 0) {
+        $(cmdElement).prepend('<img class="icon" src="' + cmd.icon + '"/> ');
       }
     }
 
