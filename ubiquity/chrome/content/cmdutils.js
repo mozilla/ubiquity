@@ -31,6 +31,12 @@ CmdUtils.safeWrapper = function safeWrapper(func) {
   return wrappedFunc;
 };
 
+CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
+  var newNode = context.focusedWindow.document.createElement("p");
+  newNode.innerHTML = html;
+  return newNode.textContent;
+}
+
 CmdUtils.setSelection = function setSelection(content, options) {
   /* content can be text or html.
    * options is a dictionary; if it has a "text" property then
@@ -445,6 +451,8 @@ CmdUtils.makeSugg = function( text, html, data ) {
     suggestion.text = suggestion.data.toString();
   if (suggestion.text && !suggestion.html)
     suggestion.html = suggestion.text;
+  if(suggestion.html && !suggestion.text)
+    suggestion.text = CmdUtils.getTextFromHtml(suggestion.html);
   if (text.length > 80)
     suggestion.summary = "your selection (\"" +
                          suggestion.text.slice(0,50) +
