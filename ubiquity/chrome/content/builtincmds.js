@@ -201,15 +201,18 @@ makeSearchCommand({
     
     var url = "http://gdata.youtube.com/feeds/api/videos";
     var params = { 
-      alt: "json", 
+      alt: "json",
+	  "max-results": 3,
       vq: searchTerm
     };
     
     jQuery.get( url, params, function(data) {
-      var numToDisplay = 3;
-      var results = data.feed.entry.splice( 0, numToDisplay );
       pblock.innerHTML = CmdUtils.renderTemplate( null,
-						  {results:results},
+						  {
+							results: data.feed.entry,
+							query: directObject.summary,
+							numresults: data.feed['openSearch$totalResults']['$t']
+						  },
 						  {file:"youtube.html"}
 			);
     }, "json");

@@ -1,11 +1,22 @@
+<p>
+  Found <b>${numresults}</b> YouTube Videos matching <b>${query}</b>
+</p>
 {for entry in results}
-<div style="display:block;margin-bottom:10px" >
-  <div style="float:left; padding-right: 10px;">
-    <img style="border:thin solid white;" src="${entry['media$group']['media$thumbnail'][0].url}" />
-  </div>
-  <div style="">
-    <a style="color:blue;font-size:14px;" href="${entry.link[0].href}">${entry.title.$t}</a>
-    <p>${entry.content.$t.substr(0,300) + " ..."}</p>
-  </div>
+<div style="display: block; margin-bottom: 10px; clear: both;" >
+    <a style="color: blue; font-size: 14px;" href="${entry.link[0].href}">
+      <img style="float:left; margin-right: 10px; border:thin solid white; height: ${entry['media$group']['media$thumbnail'][0].height}px; width: ${entry['media$group']['media$thumbnail'][0].width}px;"
+           src="${entry['media$group']['media$thumbnail'][0].url}" />
+      ${entry.title.$t} 
+    </a>
+    <br/>
+    <small>${entry['media$group']['yt$duration'].seconds} seconds</small>
+    <p>
+      {if entry.content.$t.length > 300}
+        ${entry.content.$t.substr(0,300)}...
+      {else}
+        ${entry.content.$t}
+      {/if}
+    </p>
 </div>
 {/for}
+<br/><br/>
