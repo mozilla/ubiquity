@@ -446,6 +446,10 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
 };
 
 CmdUtils.makeSugg = function( text, html, data ) {
+  if (!text && !html && !data) {
+    // all inputs empty!  There is no suggestion to be made.
+    return null;
+  }
   // make the basic object:
   var suggestion = {text: text, html: html, data:data};
   // Fill in missing fields however we can:
