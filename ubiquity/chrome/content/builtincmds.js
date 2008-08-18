@@ -48,21 +48,21 @@ makeSearchCommand({
 });
 
 /* TODO
- 
+
  - apply CSS max-height & overflow-y to summary container
- 
+
 */
 
 function openUrl(url, postData) {
-	var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-		.getService(Components.interfaces.nsIWindowMediator);
-	var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-	var browser = browserWindow.getBrowser();
-	
-	if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-		browserWindow.loadURI(url, null, postData, false);
-	else
-		browser.loadOneTab(url, null, null, postData, false, false);
+  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                      .getService(Components.interfaces.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  var browser = browserWindow.getBrowser();
+
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+    browserWindow.loadURI(url, null, postData, false);
+  else
+    browser.loadOneTab(url, null, null, postData, false, false);
 }
 
 function fetchWikipediaArticle(previewBlock, articleTitle) {
@@ -122,7 +122,7 @@ CmdUtils.CreateCommand({
   preview: function(previewBlock, directObject) {
     var apiUrl = "http://en.wikipedia.org/w/api.php";
 
-    searchText = jQuery.trim(directObject.text);
+    var searchText = jQuery.trim(directObject.text);
     if(searchText.length < 1) {
       previewBlock.innerHTML = "Searches Wikipedia";
       return;
@@ -174,7 +174,7 @@ CmdUtils.CreateCommand({
           var article = jQuery(this).attr("wikiarticle");
           fetchWikipediaArticle(this, article);
         });
-        
+
       }
     });
   },
@@ -192,20 +192,27 @@ makeSearchCommand({
 });
 
 makeSearchCommand({
+  name: "yahoo-search",
+  url: "http://search.yahoo.com/search?p={QUERY}&ei=UTF-8",
+  icon: "http://search.yahoo.com/favicon.ico"
+  // TODO: preview
+});
+
+makeSearchCommand({
   name: "YouTube",
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
   icon: "http://www.youtube.com/favicon.ico",
   preview: function(pblock, directObject){
     var searchTerm = directObject.text;
     pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
-    
+
     var url = "http://gdata.youtube.com/feeds/api/videos";
-    var params = { 
+    var params = {
       alt: "json",
 	  "max-results": 3,
       vq: searchTerm
     };
-    
+
     jQuery.get( url, params, function(data) {
       pblock.innerHTML = CmdUtils.renderTemplate( null,
 						  {

@@ -518,3 +518,14 @@ function testImplicitPronoun() {
   this.assert( completions.length == 0, "should have no completions");
 }
 
+function testMakeSugg() {
+  // test that CmdUtils.makeSugg doesn't fail on null input, that it preserves
+  // html, etc etc.
+  /*var thingy = CmdUtils.makeSugg(null, "alksdf");
+  this.assert( thingy.text == "alksdf", "thingy.text should be set.");*/
+  // test above can't be run from the command line as there is no
+  // context.focusedWindow, needed for getTextFromHtml.
+
+  var thingy2 = CmdUtils.makeSugg(null, null, null);
+  this.assert( thingy2 == null, "should return null");
+}

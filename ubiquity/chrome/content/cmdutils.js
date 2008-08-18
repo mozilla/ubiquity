@@ -446,13 +446,16 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
 };
 
 CmdUtils.makeSugg = function( text, html, data ) {
+  // make the basic object:
   var suggestion = {text: text, html: html, data:data};
+  // Fill in missing fields however we can:
   if (suggestion.data && !suggestion.text)
     suggestion.text = suggestion.data.toString();
   if (suggestion.text && !suggestion.html)
     suggestion.html = suggestion.text;
   if(suggestion.html && !suggestion.text)
     suggestion.text = CmdUtils.getTextFromHtml(suggestion.html);
+  // Create a summary of the text:
   if (text.length > 80)
     suggestion.summary = "your selection (\"" +
                          suggestion.text.slice(0,50) +
