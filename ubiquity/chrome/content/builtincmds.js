@@ -272,84 +272,7 @@ CmdUtils.CreateCommand({
   }
 })
 
-CmdUtils.CreateCommand({
-  name:"map-these",
-  takes: {"selection": noun_arb_text },
-  preview: function( pblock, directObject ) {
-    var html = directObject.html;
-    pblock.innerHTML = "<span id='loading'>Mapping...</span>";
 
-    // TODO: Figure out why we have to do this?
-    var doc = context.focusedWindow.document;
-    var div = doc.createElement( "div" );
-    div.innerHTML = html;
-
-    var pages = {};
-
-    jQuery( "a", div ).each( function() {
-      if( this.href.indexOf(".html") != -1 ) {
-        pages[ jQuery(this).text() ] = this.href;
-        displayMessage( this.href );
-      }
-    });
-
-    var mapUrl = "http://maps.google.com/staticmap?";
-
-    var params = {
-      size: "500x300",
-      key: "ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShQeSuJunOpTb3RsLsk00-MAdzxmXhQoiCd940lo0KlfQM5PeNYEPLW-3w",
-      markers: ""
-    };
-
-    var mapURL = mapUrl + jQuery.param( params );
-    var img = doc.createElement( "img" );
-    img.src = mapURL;
-    jQuery(pblock).height( 300 )
-                  .append( img )
-                  .append( "<div id='spots'></div>");
-
-    var markerNumber = 97; // Lowercase a
-
-    for( var description in pages ) {
-      jQuery.get( pages[description], function(pageHtml) {
-        var div = doc.createElement( "div" );
-        div.innerHTML = pageHtml;
-
-        // Get the link entitled "Google Map" and then strip out
-        // the location from it's href, which is always of the form
-        // http://map.google.com?q=loc%3A+[location], where [location]
-        // is the location string with spaces replaced by pluses.
-        var mapLink = jQuery( "a:contains(google map)", div );
-        if( mapLink.length > 0 ) {
-          mapLink = mapLink[0];
-          var loc = mapLink.href.match( /\?q=loc%3A\+(.*)/ )[1]
-                                .replace( /\+/g, " ");
-          displayMessage( loc );
-          CmdUtils.geocodeAddress( loc, function(points){
-            if( points != null){
-              jQuery( "#loading:visible", pblock).slideUp();
-
-              var params = {
-                lat: points[0].lat,
-                long: points[0].long,
-                marker: String.fromCharCode( markerNumber++ ),
-                name: description
-              }
-
-              img.src += CmdUtils.renderTemplate( "${lat},${long},red${marker}|", params );
-
-              params.marker = params.marker.toUpperCase();
-              var spotName = CmdUtils.renderTemplate( "<div><b>${marker}</b>: <i>${name}</i></div>", params );
-              jQuery( "#spots", pblock ).append( spotName );
-              jQuery( pblock ).animate( {height: "+=10px"} );
-            }
-          });
-        }
-      });
-    }
-
-  }
-})
 
 
 // -----------------------------------------------------------------
@@ -1411,3 +1334,81 @@ cmd_perm_delete.preview = function( pblock ) {
   pblock.innerHTML = "Attempts to permanently delete the selected part of the"
     + " page. (Experimental!)";
 }
+
+
+CmdUtils.CreateCommand({
+  name:"map-these",
+  takes: {"selection": noun_arb_text },
+  preview: function( pblock, directObject ) {
+    var html = directObject.html;
+    pblock.innerHTML = "<span id='loading'>Mapping...</span>";
+
+    // TODO: Figure out why we have to do this?
+    var doc = context.focusedWindow.document;
+    var div = doc.createElement( "div" );
+    div.innerHTML = html;
+
+    var pages = {};
+
+    jQuery( "a", div ).each( function() {
+      if( this.href.indexOf(".html") != -1 ) {
+        pages[ jQuery(this).text() ] = this.href;
+      }
+    });
+
+    var mapUrl = "http://maps.google.com/staticmap?";
+
+    var params = {
+      size: "500x300",
+      key: "ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShQeSuJunOpTb3RsLsk00-MAdzxmXhQoiCd940lo0KlfQM5PeNYEPLW-3w",
+      markers: ""
+    };
+
+    var mapURL = mapUrl + jQuery.param( params );
+    var img = doc.createElement( "img" );
+    img.src = mapURL;
+    jQuery(pblock).height( 300 )
+                  .append( img )
+                  .append( "<div id='spots'></div>");
+
+    var markerNumber = 97; // Lowercase a
+
+    for( var description in pages ) {
+      jQuery.get( pages[description], function(pageHtml) {
+        var div = doc.createElement( "div" );
+        div.innerHTML = pageHtml;
+
+        // Get the link entitled "Google Map" and then strip out
+        // the location from it's href, which is always of the form
+        // http://map.google.com?q=loc%3A+[location], where [location]
+        // is the location string with spaces replaced by pluses.
+        var mapLink = jQuery( "a:contains(google map)", div );
+        if( mapLink.length > 0 ) {
+          mapLink = mapLink[0];
+          var loc = mapLink.href.match( /\?q=loc%3A\+(.*)/ )[1]
+                                .replace( /\+/g, " ");
+          CmdUtils.geocodeAddress( loc, function(points){
+            if( points != null){
+              jQuery( "#loading:visible", pblock).slideUp();
+
+              var params = {
+                lat: points[0].lat,
+                long: points[0].long,
+                marker: String.fromCharCode( markerNumber++ ),
+                name: jQuery( "title", div).text()
+              }
+
+              img.src += CmdUtils.renderTemplate( "${lat},${long},red${marker}|", params );
+
+              params.marker = params.marker.toUpperCase();
+              var spotName = CmdUtils.renderTemplate( "<div><b>${marker}</b>: <i>${name}</i></div>", params );
+              jQuery( "#spots", pblock ).append( spotName );
+              jQuery( pblock ).animate( {height: "+=6px"} );
+            }
+          });
+        }
+      });
+    }
+
+  }
+})
