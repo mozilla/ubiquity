@@ -380,20 +380,20 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 // -----------------------------------------------------------------
 
 
-CmdUtils.renderTemplate = function renderTemplate( templStr, data, options ) {
-  /* if templStr is provided and options isn't, it will create a template
-   from templStr, render the data into it, and return the result.
-   if an object with a .file property is passed in to options, then
-   templStr will be ignored and the template will be read from the file
-   instead. */
+CmdUtils.renderTemplate = function renderTemplate( template, data ) {
+  /* template can be either a string, in which case the string is used
+   * for the template, or else it can be {file: "filename"}, in which
+   * case the contents are read from the file and used as the template.
+   */
   var chromePrefixUrl = "chrome://ubiquity/content/templates/";
+  var templStr;
+  if (typeof template == "string")
+    templStr = template;
+  else if (template.file)
+    templStr = Utils.getLocalUrl( chromePrefixUrl + template.file );
 
-  if (options)
-    if (options.file)
-      templStr = Utils.getLocalUrl( chromePrefixUrl + options.file );
-
-  var template = Template.parseTemplate( templStr );
-  return template.process( data );
+  var templateObject = Template.parseTemplate( templStr );
+  return templateObject.process( data );
 };
 
 CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,

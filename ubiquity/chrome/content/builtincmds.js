@@ -39,9 +39,8 @@ makeSearchCommand({
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
-      pblock.innerHTML = CmdUtils.renderTemplate( null,
-						  {results:results},
-						  {file:"searchresults.html"}
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"searchresults.html"},
+						  {results:results}
 						);
       }, "json");
   }
@@ -168,7 +167,7 @@ CmdUtils.CreateCommand({
           _MODIFIERS: {wikilink: generateWikipediaLink}
         };
 
-        previewBlock.innerHTML = CmdUtils.renderTemplate(null, previewData, {file:"wikipedia.html"});
+        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"wikipedia.html"}, previewData);
 
         jQuery(previewBlock).find("div[wikiarticle]").each(function() {
           var article = jQuery(this).attr("wikiarticle");
@@ -214,13 +213,12 @@ makeSearchCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( null,
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"youtube.html"},
 						  {
 							results: data.feed.entry,
 							query: directObject.summary,
 							numresults: data.feed['openSearch$totalResults']['$t']
-						  },
-						  {file:"youtube.html"}
+						  }
 			);
     }, "json");
   }
@@ -272,9 +270,9 @@ CmdUtils.CreateCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( null,
-                                          {businesses: data.businesses},
-                                          {file:"yelp.html"});
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"yelp.html"},
+                                          {businesses: data.businesses}
+                                          );
 		}, "json");
   }
 })
@@ -876,8 +874,7 @@ CmdUtils.CreateCommand({
 
       weather["img"] = imgSrc;
 
-      var html = CmdUtils.renderTemplate( null, {w:weather},
-                                                {file:"weather.html"}
+      var html = CmdUtils.renderTemplate( {file:"weather.html"}, {w:weather}
                                         );
 
       jQuery(pblock).html( html );
