@@ -338,7 +338,7 @@ NLParser.EnVerb.prototype = {
     for (let x in this._modifiers) {
       let suggs = this._modifiers[x].suggest(text, html);
       for each (let sugg in suggs) {
-	if (sugg {
+	if (sugg) {
           let mods = {};
 	  mods[x] = sugg;
 	  completions.push( this._newSentence(null, mods) );
