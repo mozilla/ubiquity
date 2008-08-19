@@ -3,6 +3,9 @@ const CMD_URL_ANNO = "ubiquity/commands";
 const WARNING_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 function LinkRelCodeSource() {
+  if (LinkRelCodeSource.__singleton)
+    return LinkRelCodeSource.__singleton;
+
   LinkRelCodeSource.__install(window);
 
   this._sources = {};
@@ -36,6 +39,8 @@ function LinkRelCodeSource() {
 
     return code;
   };
+
+  LinkRelCodeSource.__singleton = this;
 }
 
 LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
@@ -61,6 +66,10 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
       // is a raw JS file.
       pageInfo.jsUri = uri;
     }
+
+    if (this.__singleton)
+      if (pageInfo.jsUri.spec in this.__singleton._sources)
+        pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
 
     markedPages.push(pageInfo);
   }
@@ -95,9 +104,6 @@ LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
 };
 
 LinkRelCodeSource.__install = function LRCS_install(window) {
-  if (LinkRelCodeSource.__isInstalled)
-    return;
-
   function showNotification(targetDoc, commandsUrl) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
@@ -165,7 +171,4 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
-  LinkRelCodeSource.__isInstalled = true;
 };
-
-LinkRelCodeSource.__isInstalled = false;
