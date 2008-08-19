@@ -643,7 +643,7 @@ CmdUtils.CreateCommand({
   preview: function(pblock, directObj, modifiers) {
     var html = "Creates an email message ";
     if (modifiers.to) {
-      html += "to " + modifiers.to.text;
+      html += "to " + modifiers.to.text + " ";
     }
     if (directObj.html) {
       html += "with these contents:" + directObj.html;
