@@ -200,7 +200,8 @@ NLParser.EnVerb.prototype = {
 	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
 	suggestions = suggestions.concat(moreSuggestions);
 	for each ( let sugg in suggestions ) {
-	  completions.push( this._newSentence(sugg, filledMods ));
+	  if (sugg)
+	    completions.push( this._newSentence(sugg, filledMods ));
 	}
 	return completions;
       }
@@ -236,14 +237,16 @@ NLParser.EnVerb.prototype = {
 	  // Turn each suggestion into a sentence, after recursively
 	  // parsing the leftover words.
 	  for each( let sugg in suggestions ) {
-	    newFilledMods = dictDeepCopy( filledMods );
-	    newFilledMods[ preposition ] = sugg;
-	    newCompletions = this.recursiveParse( newUnusedWords,
+	    if (sugg) {
+              newFilledMods = dictDeepCopy( filledMods );
+              newFilledMods[ preposition ] = sugg;
+              newCompletions = this.recursiveParse( newUnusedWords,
 						  newFilledMods,
 						  newUnfilledMods,
 						  selObj);
-	    // Add results to the ever-growing completion list...
-	    completions = completions.concat( newCompletions );
+	      // Add results to the ever-growing completion list...
+	      completions = completions.concat( newCompletions );
+	    }
 	  }
 	}
       }
@@ -326,7 +329,8 @@ NLParser.EnVerb.prototype = {
     if (this._DOType) {
       let suggs = this._DOType.suggest(text, html);
       for each (let sugg in suggs) {
-	completions.push( this._newSentence( sugg, {}) );
+	if (sugg)
+          completions.push( this._newSentence( sugg, {}) );
       }
     }
 
@@ -334,9 +338,11 @@ NLParser.EnVerb.prototype = {
     for (let x in this._modifiers) {
       let suggs = this._modifiers[x].suggest(text, html);
       for each (let sugg in suggs) {
-	let mods = {};
-	mods[x] = sugg;
-	completions.push( this._newSentence(null, mods) );
+	if (sugg {
+          let mods = {};
+	  mods[x] = sugg;
+	  completions.push( this._newSentence(null, mods) );
+	}
       }
     }
     return completions;
