@@ -131,8 +131,8 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
         box.removeNotification(oldNotification);
 
       // Clicking on "subscribe" takes them to the warning page:
-      var confirmUrl = WARNING_URL + "?url=" + targetDoc.URL + "&sourceUrl="
-			 + commandsUrl;
+      var confirmUrl = WARNING_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
+			 + encodeURIComponent(commandsUrl);
       var buttons = [
         {accessKey: null,
          callback: function(notification, button) {

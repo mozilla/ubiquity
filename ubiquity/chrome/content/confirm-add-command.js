@@ -4,7 +4,7 @@ function getUrlParams() {
   var params = {};
   for( var x in urlFragments ) {
     var fragFrags = urlFragments[x].split("=");
-    params[ fragFrags[0] ] = fragFrags[1];
+    params[ fragFrags[0] ] = decodeURIComponent(fragFrags[1]);
   }
   return params;
 }
