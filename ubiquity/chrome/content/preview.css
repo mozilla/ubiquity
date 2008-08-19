@@ -56,3 +56,12 @@ body {
     font-style: oblique;
     color: #999999;
 }
+.cmdicon {
+    display: inline-block;
+    width: 16px;
+}
+.cmdicon img {
+    vertical-align: middle;
+    width: 16px;
+    height: 16px;
+}

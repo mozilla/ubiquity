@@ -113,11 +113,17 @@ NLParser.EnParser.prototype = {
     var numToDisplay = this.getNumSuggestions();
     for (var x=0; x < numToDisplay; x++) {
       var suggText = this._suggestionList[x].getDisplayText();
+	  var suggIconUrl = this._suggestionList[x].getIcon();
+	  var suggIcon = "";
+	  if(suggIconUrl) {
+		suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
+	  }
+	  suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" + suggText;
       if ( x == hilitedSuggestion ) {
-	content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
-	content += "</div>";
+		content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
+		content += "</div>";
       } else {
-	content += "<div class=\"suggested\">" + suggText + "</div>";
+		content += "<div class=\"suggested\">" + suggText + "</div>";
       }
     }
     content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div>";

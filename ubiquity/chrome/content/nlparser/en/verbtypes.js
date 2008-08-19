@@ -68,6 +68,10 @@ NLParser.EnParsedSentence.prototype = {
     }
     return sentence;
   },
+  
+  getIcon: function() {
+    return this._verb._icon;
+  },
 
   execute: function(context) {
     return this._verb.execute( context, this._DO, this._modifiers );
@@ -87,6 +91,7 @@ NLParser.EnVerb.prototype = {
     this._execute = cmd.execute;
     this._preview = cmd.preview;
     this._name = cmd.name;
+    this._icon = cmd.icon;
     this._DOLabel = cmd.DOLabel;
     this._DOType = cmd.DOType; // must be a NounType.
     this._modifiers = cmd.modifiers;
