@@ -446,7 +446,7 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
 };
 
 CmdUtils.makeSugg = function( text, html, data ) {
-  if (!text && !html && !data) {
+  if (typeof text != "string" && typeof html != "string" && !data) {
     // all inputs empty!  There is no suggestion to be made.
     return null;
   }
