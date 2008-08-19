@@ -15,8 +15,9 @@ function makeSearchCommand( options ) {
   if (! options.preview )
     options.preview = function(pblock, directObject, modifiers) {
       var query = directObject.text;
-      var content = ("Performs a " + options.name + " search for <b>" +
-		     query + "</b>.");
+      var content = "Performs a " + options.name + " search";
+	  if(query.length > 0)
+		content += " for <b>" + query + "</b>";
       pblock.innerHTML = content;
     };
 
