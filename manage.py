@@ -6,6 +6,10 @@ import shutil
 import zipfile
 from ConfigParser import ConfigParser
 
+# Path to the root of the extension, relative to where this script is
+# located.
+EXT_SUBDIR = "ubiquity"
+
 def find_profile_dir(name):
     """
     Given the name of a Firefox profile, attempts to find the absolute
@@ -66,7 +70,7 @@ if __name__ == "__main__":
     main = __import__("__main__")
     mydir = os.path.abspath(os.path.split(main.__file__)[0])
 
-    path_to_extension_root = os.path.join(mydir, "ubiquity")
+    path_to_extension_root = os.path.join(mydir, EXT_SUBDIR)
 
     cmd = args[0]
     
