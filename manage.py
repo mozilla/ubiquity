@@ -132,7 +132,9 @@ if __name__ == "__main__":
     elif cmd == "build-xpi":
         version = get_install_rdf_property(path_to_extension_root,
                                            "em:version")
-        zfname = "ubiquity-%s.xpi" % version
+        extname = get_install_rdf_property(path_to_extension_root,
+                                           "em:name").lower()
+        zfname = "%s-%s.xpi" % (extname, version)
         zf = zipfile.ZipFile(zfname,
                              "w",
                              zipfile.ZIP_DEFLATED)
