@@ -246,6 +246,26 @@ CmdUtils.CreateCommand({
   icon: "http://www.yelp.com/favicon.ico",
 
   execute: function( directObject, info ) {
+    var doc = context.focusedWindow.document;
+    var focused = context.focusedElement;
+
+    if (doc.designMode == "on") {
+      var data = globals.yelp[0];
+      var msg = "<img style='float:left;margin:5px;border:solid #ccc 5px;' src='${photoUrl}'/><a href='${url}'>${name}</a> is a <img style='position:relative;top:5px;' src='${starUrl}'> restaurant in <a href='${whereUrl}'>${where}</a>, ${city}.<br/> It's been reviewed ${times} times.";
+      var msg = CmdUtils.renderTemplate( msg, {
+        url: data.url,
+        starUrl: data.rating_img_url,
+        photoUrl: data.photo_url_small,
+        name: data.name,
+        whereUrl: data.neighborhoods[0].url,
+        where: data.neighborhoods[0].name,
+        city: data.city,
+        times: data.review_count
+      });
+      CmdUtils.setSelection( msg ); 
+      return;     
+    }
+
     var query = directObject.text;
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
@@ -271,9 +291,12 @@ CmdUtils.CreateCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"yelp.html"},
-                                          {businesses: data.businesses}
-                                          );
+      globals.yelp = data.businesses;
+      pblock.innerHTML = CmdUtils.renderTemplate(
+        {file:"yelp.html"},
+        {businesses: data.businesses}
+      );
+      
 		}, "json");
   }
 })
@@ -914,14 +937,14 @@ CmdUtils.CreateCommand({
         //CmdUtils.setLastResult( html );
 
         if (doc.designMode == "on") {
-          doc.execCommand("insertHTML", false, html);
+          doc.execCommand("insertHTML", false, location + "<br/>" + html);
         }
         else if (CmdUtils.getSelection()) {
-	  CmdUtils.setSelection(html);
-	}
-	else {
-	  displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.");
-	}
+	        CmdUtils.setSelection(html);
+      	}
+      	else {
+      	  displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.");
+      	}
       };
     });
   }

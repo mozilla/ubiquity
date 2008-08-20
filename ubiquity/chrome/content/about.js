@@ -23,16 +23,34 @@ function onReady() {
     linkToHtml.href = info.htmlUri.spec;
     $(li).append(linkToHtml);
 
-    var linkToUnsubscribe = document.createElement("div");
-    $(linkToUnsubscribe).text("unsubscribe");
+    var linkToUnsubscribe = document.createElement("span");
+    $(linkToUnsubscribe).text(" [unsubscribe]");
     $(linkToUnsubscribe).click(makeRemover(li, info.htmlUri));
-    $(linkToUnsubscribe).css({cursor: "pointer"});
+    $(linkToUnsubscribe).css({cursor: "pointer", color: "#aaa"});
     $(li).append(linkToUnsubscribe);
 
     $("#command-feeds").append(li);
   }
   if (!$("#command-feeds").text())
     $("#command-feeds-header").hide();
+    
+  jQuery.get( "http://hg.toolness.com/ubiquity-firefox/rss-log", loadNews);
+}
+
+function loadNews( data ) {
+  $("item", data).each(function(){
+    var p = document.createElement("p");
+    var a = document.createElement("a");
+    
+        
+    $(a).attr("href", $("link", this).text() )
+        .text( $("description", this).text() )
+    
+    var author = $("author", this).text();
+
+    $(p).append(a).append("<span class='light'><br/>by " + author + "</span>");
+    $("#news").append(p);
+  })
 }
 
 $(window).ready(onReady);
