@@ -33,6 +33,10 @@ makeSearchCommand({
   icon: "http://www.google.com/favicon.ico",
   preview: function(pblock, directObject) {
     var searchTerm = directObject.text;
+    var pTemplate = "Searches Google for <b>${query}</b>";
+    var pData = {query: searchTerm};
+    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
+    
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
 
@@ -40,7 +44,7 @@ makeSearchCommand({
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"searchresults.html"},
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"google-search.html"},
 						  {results:results}
 						);
       }, "json");
@@ -191,11 +195,33 @@ makeSearchCommand({
   icon: "http://i.imdb.com/favicon.ico"
 });
 
+
 makeSearchCommand({
   name: "yahoo-search",
   url: "http://search.yahoo.com/search?p={QUERY}&ei=UTF-8",
-  icon: "http://search.yahoo.com/favicon.ico"
-  // TODO: preview
+  icon: "http://search.yahoo.com/favicon.ico",
+  preview: function(pblock, directObject){
+    //TODO: Figure out some way around rate limits
+    //Currently, Yahoo rate limits to 5000 queries per IP per day
+    var searchTerm = directObject.text;
+    var pTemplate = "Searches Yahoo for <b>${query}</b>";
+    var pData = {query: searchTerm};
+    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
+        
+    var url = "http://search.yahooapis.com/WebSearchService/V1/webSearch";
+    var params = { 
+      appid: "wZ.3jHnV34GC4QakIuzfgHTGiU..1SfNPwPAuasmt.L5ytoIPOuZAdP1txE4s6KfRBp9",
+      query: searchTerm,
+      results: 3,
+      output: "json"
+    };
+
+    jQuery.get( url, params, function(data) {      
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"yahoo-search.html"},
+                   {results:data.ResultSet.Result}
+                 );
+    }, "json");
+  }
 });
 
 makeSearchCommand({
