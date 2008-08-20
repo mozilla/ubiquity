@@ -44,7 +44,7 @@ function loadNews( data ) {
     
         
     $(a).attr("href", $("link", this).text() )
-        .text( $("description", this).text() )
+        .text( $("title", this).text() +"..." )
     
     var author = $("author", this).text();
 

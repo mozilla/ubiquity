@@ -8,7 +8,10 @@ body{
 	font-size:13px;
 	font-family: "Helvetica", Verdana, Arial, sans-serif;
 	max-width: 900px;
-	border-top: 3px solid black;
+	border-top: 10px solid black;
+	margin-left: auto;
+	margin-right: auto;	
+	padding-top: 10px;
 }
 
 .col-two{
@@ -94,5 +97,5 @@ a:hover {
 }
 
 li {
-    padding: 5px;
+    padding: 0px;
 }
