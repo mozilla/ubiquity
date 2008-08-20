@@ -7,16 +7,23 @@
 
 <body onload="document.getElementById('editor').value = PrefCommands.getCode();">
 <h1>Ubiquity Command Editor</h1>
-<p>
-  For examples of built-in commands, look <a href="chrome://ubiquity/content/builtincmds.js">here</a>,
-  for information on available utility functions for use in commands, look <a href="chrome://ubiquity/content/cmdutils.js">here</a>.</p>
-<p><b>Get more involved!</b> Learn how by visiting the
-<a href="http://wiki.mozilla.org/Labs/Ubiquity">Ubiquity Wiki</a>.
-Want to share a command to the world? Post it on the
-<a href="http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">Commands in the Wild</a>
-wiki page.</p>
-<p>You can enter new commands in the area below.  They will automatically be saved as you type, and will
-be able to be instantly used from the command entry mode.</p>
-<textarea id="editor" rows="40" cols="80"
+<div class="col-three">
+  <p><strong>Enter new commands</strong> in the area below.  They will automatically be saved as you type, and will
+  be able to be instantly used from the command entry mode.</p>  
+</div>  
+
+<div class="col-three">
+  <p><strong>Read the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command authoring tutorial</a></strong> to learn more. For examples of built-in commands, look <a href="chrome://ubiquity/content/builtincmds.js">here</a>,
+    for information on available utility functions for use in commands, look <a href="chrome://ubiquity/content/cmdutils.js">here</a>.</p>
+</div>
+
+<div class="col-two">
+  <p><b>Get involved</b>. Learn how by visiting the
+  <a href="http://wiki.mozilla.org/Labs/Ubiquity">Ubiquity Wiki</a>.</p> 
+</div>
+
+<br clear="all"/>
+
+<textarea id="editor" rows="40" style="width:900px"
           onkeyup="PrefCommands.setCode(this.value);"></textarea>
 </body></html>
