@@ -52,25 +52,29 @@ em{
 }
 
 div.command{
-  margin:15px;
+  margin: 15px;
   margin-bottom: 20px;
 }
 
 div.command span.name{
   font-size: 15pt;
-  margin-left:20px;
-  color: white;
+  margin-left: 10px;
 }
 
-div.command img.icon{
-  position: absolute;
-  left: 22px; 
-  margin-top:6px;
+div.command .icon{
+  display: inline-block;
+  width: 16px;
+}
+
+div.command .icon img{
+  vertical-align: text-top;
+  width: 16px;
+  height: 16px;
 }
 
 div.command .documentation{
   margin-top: 5px;
-  margin-left: 20px;
+  margin-left: 30px;
   display: block;
   color: #777;
 }

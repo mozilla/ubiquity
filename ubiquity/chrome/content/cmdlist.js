@@ -22,13 +22,14 @@ function onDocumentLoad() {
       if (cmdElement == null) {
         $(document.body).append(
           ('<div class="command" id="' + cmd.id + '">' +
+           '<span class="icon"/>' +
            '<span class="name">' + cmd.name + '</span>')
         );
         cmdElement = document.getElementById(cmd.id);
       }
-
-      if (cmd.icon && $(cmdElement).children(".icon").length == 0) {
-        $(cmdElement).prepend('<img class="icon" src="' + cmd.icon + '"/> ');
+      
+      if (cmd.icon && $(cmdElement).find(".icon img").length == 0) {
+        $(cmdElement).find(".icon").append('<img src="' + cmd.icon + '"/>');
       }
     }
 
