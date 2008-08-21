@@ -1,0 +1,105 @@
+/*
+ * CSS inspired by Hemingway: http://warpspire.com/hemingway
+ */
+
+body{
+	background: #FFF;
+	color:#111;
+	font-size:13px;
+	font-family: "Helvetica", Verdana, Arial, sans-serif;
+	max-width: 900px;
+	border-top: 10px solid black;
+	margin-left: auto;
+	margin-right: auto;	
+	padding-top: 10px;
+}
+
+.col-two{
+  width: 225px;
+  float: left;
+}
+
+.col-three{
+  width: 315px;
+  margin-right: 20px;
+  float: left;
+}
+
+.light{
+  color: #ccc;
+  font-style: italic;
+}
+
+
+h1{
+  color: #E21E26;
+  font-variant: small-caps;  
+}
+
+h4{
+  font-variant: small-caps;
+}
+
+h2{
+  border-top: 1px solid black;
+  padding-top: 5px;
+  font-variant: small-caps;
+}
+
+em{
+  color: #66bb00;
+  font-style: normal;
+}
+
+div.command{
+  margin: 15px;
+  margin-bottom: 20px;
+}
+
+div.command span.name{
+  font-size: 15pt;
+  margin-left: 10px;
+}
+
+div.command .icon{
+  display: inline-block;
+  width: 16px;
+}
+
+div.command .icon img{
+  vertical-align: text-top;
+  width: 16px;
+  height: 16px;
+}
+
+div.command .documentation{
+  margin-top: 5px;
+  margin-left: 30px;
+  display: block;
+  color: #777;
+}
+
+div.command .description{
+  display: inline;
+  color: white;
+  font-size: 12pt;
+  margin-left: 10px;
+  color:#BFBFBF;
+}
+
+a, a:visited {
+    color: #CC6600;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.error {
+    color:#FF0000;
+}
+
+li {
+    padding: 3px;
+}
