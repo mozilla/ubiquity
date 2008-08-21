@@ -11,51 +11,41 @@
   
   <title>About Ubiquity</title>
 </head>
+
 <body>
+    
+  <div class="head">
+    <red>ubiquity</red> is 
+    an experiment in <em>connecting</em> the web with <em>language</em>.</span>
+  </div>
 
-<div class="col-three">
-  <h1>Welcome to Ubiquity!</h1>
-  <h4>An experiment in <em>connecting</em> the web with <em>language</em>.</h4>
-</div>  
-
-<div class="col-three">
-  &nbsp;
-</div>
-
-<div class="col-two">
-  <img src="ubiquity_logo.png" style="position:relative;top:9px; float:right;"/>
+    
+<div id="nav-container">
+  <ul id="nav">
+    <li><a href="about:ubiquity">Home</a></li>
+    <li><a href="chrome://ubiquity/content/cmdlist.html">Your Commands</a></li>
+    <li><a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_User_Tutorial">Tutorial</a></li>
+    <li><a href="https://labs.toolness.com/ubiquity-herd/">The Herd</a></li>
+  </ul>  
 </div>
 
 <br clear="all"/>
+<br clear="all"/>
 
-<div class="col-three">
-  <h2>Users</h2>
+
+<div class="col-five">
+  <h2 class="top">Users</h2>
 
   <p><strong>Take</strong> the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_User_Tutorial">Ubiquity tutorial</a> to master the basics.</p>
 
-  <p><strong>Sign-up</strong> to help us know about which Ubiquity commands are being used. Subscribe to the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">Herd Command</a>, which will add your data to the Herd Dashboard</a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
-
-
-  <p><object width="315" height="235">	<param name="allowfullscreen" value="true" />	<param name="allowscriptaccess" value="always" />	<param name="movie" value="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" />	<embed src="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="315" height="235"></embed></object></p>
-  
-  <p><strong>Read</strong> the <a href="cmdlist.html">command documentation</a> to find out what commands you can use.</p>
-  
+  <p><strong>Help us</strong>. Subscribe to the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">Herd</a>, which will add your data to the <a href="https://labs.toolness.com/ubiquity-herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
+    
   <p><strong>Change</strong> your hotkey.<br/>
   <input id="keyInputBox" type="text" size="27"
          onkeydown="PrefKeys.onKeyChange(event)" 
          onfocus="this.value = 'Press your combination'"/>
   <p id="keyNotify"></p></p>
   
-  <h2>Subscribed Feeds</h2>
-  
-  <p><p id="command-feeds-header">You're currently subscribed to these command
-    feeds:</p>
-  <ul id="command-feeds"></ul></p>
-  
-</div>
-
-
-<div class="col-three">
   <h2>Developers</h2>
   <p><strong>Learn</strong> how to develop for Ubiquity by reading the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command author tutorial</a>.</p>
   
@@ -76,17 +66,33 @@
   harness</a> to develop the actual Ubiquity command entry user interface
   and other aspects of Ubiquity without having to restart Firefox.</p>
   
-  <p>Run the <a href="test.html">unit tests</a>.</p>  
+  <p>Run the <a href="test.html">unit tests</a>.</p>
+  
 </div>
 
-<div class="col-two">
+
+<div class="col-four">
+  <h2 class="top">Introduction Movie</h2>
+
+  <p><object width="395" height="295">	<param name="allowfullscreen" value="true" />	<param name="allowscriptaccess" value="always" />	<param name="movie" value="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" />	<embed src="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="395" height="295"></embed></object></p>
+  
+  <h2>Subscribed Feeds</h2>
+  
+  <p><p id="command-feeds-header">You're currently subscribed to these command
+    feeds:</p>
+  <ul id="command-feeds"></ul></p>
+
   <h2>News</h2>
   <div id="news"></div>
-     
+
+
 </div>
 
-
 <br clear="all"/>
+
+
+
+
 
 </body>
 <script type="application/javascript;version=1.7"

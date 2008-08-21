@@ -8,10 +8,50 @@ body{
 	font-size:13px;
 	font-family: "Helvetica", Verdana, Arial, sans-serif;
 	max-width: 900px;
-	border-top: 10px solid black;
+	border-top: 5px solid #333;
 	margin-left: auto;
 	margin-right: auto;	
-	padding-top: 10px;
+	margin-top: 0px;
+}
+
+#nav-container{
+  margin-left: -40px;
+  float: left;  
+}
+
+li {
+    padding: 3px;
+}
+
+#nav ul{}
+
+#nav li{
+  background-color:#aaa;
+  border-left:1px solid #CCCCCC;
+
+  margin:0px;
+  padding:0pt;
+    
+  float:left;
+  height:45px;
+  text-align:left;  
+  list-style-image:none;
+  list-style-position:outside;
+  list-style-type:none;
+  width: 165px;
+}
+
+#nav a{
+  margin: 5px;
+  color: white;
+  display: block;
+  width: auto;
+  height: 100%;
+  text-decoration: none;  
+}
+
+#nav li:hover{
+  background-color: #66bb00;
 }
 
 .col-two{
@@ -25,15 +65,44 @@ body{
   float: left;
 }
 
+.col-five{
+  width: 480px;
+  margin-right: 20px;
+  float: left;
+}
+
+.col-four{
+  width: 395px;
+  float: left;
+}
+
 .light{
   color: #ccc;
   font-style: italic;
 }
 
+.head{
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 20pt;
+  background-color: #111;
+  color: white;
+  text-align: center;
+}
+
+.left{
+  text-align: left;
+  padding-left: 10px;
+}
+
+.head red{
+  color: #E21E26;
+  font-size: 36pt;
+}
 
 h1{
   color: #E21E26;
-  font-variant: small-caps;  
+  font-variant: small-caps;
 }
 
 h4{
@@ -42,8 +111,15 @@ h4{
 
 h2{
   border-top: 1px solid black;
-  padding-top: 5px;
   font-variant: small-caps;
+  color: black;
+  margin-top: 100px;
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+
+h2.top{
+  margin: 0px;
 }
 
 em{
@@ -98,8 +174,4 @@ a:hover {
 
 .error {
     color:#FF0000;
-}
-
-li {
-    padding: 3px;
 }
