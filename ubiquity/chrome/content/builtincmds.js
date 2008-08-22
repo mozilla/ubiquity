@@ -737,6 +737,7 @@ CmdUtils.CreateCommand({
     var html = directObj.html;
     var document = context.focusedWindow.document;
     var title;
+    var toAddress = "";
     if (document.title)
       title = document.title;
     else
@@ -752,6 +753,9 @@ CmdUtils.CreateCommand({
     }
 
     title = "'" + title + "'";
+    if (headers.to)
+      if (headers.to.text)
+	toAddress = headers.to.text;
 
     if (gmailTab) {
       // Note that this is technically insecure because we're
@@ -773,8 +777,8 @@ CmdUtils.CreateCommand({
           event.initEvent("click", true, false);
           composeMail.dispatchEvent(event);
           var active = gmail.getActiveViewElement();
-	  var to = composeMail.ownerDocument.getElementsByName("to")[0];
-	  if (to && headers.to) to.value = headers.to.text;
+	  var toField = composeMail.ownerDocument.getElementsByName("to")[0];
+	  toField.value = toAddress;
           var subject = active.getElementsByTagName("input")[0];
           if (subject) subject.value = title;
           var iframe = active.getElementsByTagName("iframe")[0];
@@ -799,7 +803,7 @@ CmdUtils.CreateCommand({
       gmonkey.load("1.0", continuer);
     } else {
       // No gmail tab open?  Open a new one:
-      var params = {fs:1, tf:1, view:"cm", su:title, to:headers.to.text, body:html};
+      var params = {fs:1, tf:1, view:"cm", su:title, to:toAddress, body:html};
       Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
 			     Utils.paramsToString(params));
     }
