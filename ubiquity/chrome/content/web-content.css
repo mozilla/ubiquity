@@ -131,60 +131,43 @@ em{
 	padding: 10px;
 }
 
-div.command{
+#command-list .command{
   margin: 15px;
   margin-bottom: 20px;
 }
 
-div.command span.name{
+#command-list .command .name{
   font-size: 15pt;
-  margin-left: 10px;
 }
 
-div.command .icon{
-  display: inline-block;
-  width: 16px;
+#command-list .command .homepage{
 }
 
-div.command .icon img{
-  vertical-align: text-top;
-  width: 16px;
-  height: 16px;
-}
-
-div.command .homepage{
-  padding-left: 10px;
-}
-
-div.command .author{
-  margin-top: 5px;
-  margin-left: 30px;
+#command-list .command .author{
   font-size: 90%;
 }
 
-div.command .help{
-  margin-top: 5px;
-  margin-left: 30px;
-  display: block;
-  color: #777;
-}
-
-div.command .description{
+#command-list .command .description{
   display: inline;
   font-size: 12pt;
   margin-left: 10px;
   color:#BFBFBF;
 }
 
+#command-list .command .help{
+  margin-top: 5px;
+  color: #777;
+}
+
 a, a:visited {
-    color: #CC6600;
-    text-decoration: none;
+  color: #CC6600;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .error {
-    color:#FF0000;
+  color:#FF0000;
 }

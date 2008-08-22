@@ -14,54 +14,68 @@ function onDocumentLoad() {
 
   function updateCommands() {
     cmdSource.refresh();
+    
     // Dynamically generate entries for undocumented commands.
+    
+    var cmdList = $('#command-list');
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.getCommand(cmdSource.commandNames[i].name);
-      var cmdId = cmdSource.commandNames[i].id;
+      var cmdId = cmdSource.commandNames[i].id.replace(/ /g, "_");
 
-      if (document.getElementById(cmdId) == null) {
-        $(document.body).append(
-          ('<div class="command" id="' + cmdId + '">' +
-           '<span class="icon"/>' +
+      if (cmdList.find('#' + cmdId).length == 0) {
+        cmdList.append(
+          '<li class="command" id="' + cmdId + '">' +
            '<span class="name">' + cmd.name + '</span>' +
-           '<span class="homepage"/>' +
            '<span class="description"/>' +
            '<div class="light"><span class="author"/><span class="license"/></div>' +
+           '<div class="homepage light"/>' +
            '<div class="help"/>' +
-           '</div>')
+           '</li>'
         );
       }
       
-      cmdElement = $(document.getElementById(cmdId));
+      cmdElement = cmdList.find('#' + cmdId);
       
+      if(cmd.icon) {
+        cmdElement.css('list-style-image', "url('" + cmd.icon + "')");
+      } else {
+        cmdElement.css('list-style-type', 'none');
+      }
       if(cmd.homepage) {
         cmdElement.find(".homepage").html(
-          '[<a href="' + cmd.homepage + '">Homepage</a>]'
+          'View more information at <a href="' + cmd.homepage + '">' + cmd.homepage + '</a>.'
         );
+      } else {
+        cmdElement.find(".homepage").empty();
       }
       if(cmd.description) {
         cmdElement.find(".description").html(cmd.description);
+      } else {
+        cmdElement.find(".description").empty();
       }
       if(cmd.author) {
         cmdElement.find(".author").html(formatCommandAuthor(cmd.author));
+      } else {
+        cmdElement.find(".author").empty();
       }
       if(cmd.license) {
         cmdElement.find(".license").html(' - licensed as ' + cmd.license);
+      } else {
+        cmdElement.find(".license").empty();
       }
       if(cmd.help) {
         cmdElement.find(".help").html(cmd.help);
+      } else {
+        cmdElement.find(".help").empty();
       }
       
-      if (cmd.icon && cmdElement.find(".icon img").length == 0) {
-        cmdElement.find(".icon").append('<img src="' + cmd.icon + '"/>');
-      }
     }
 
     // TODO: Remove any entries that no longer exist.
 
     sortCommandsBy(sortKey);
     
-    window.setTimeout(updateCommands, 1000);
+    //window.setTimeout(updateCommands, 1000);
   }
 
   var sortKey = $("#sortby").val();
@@ -106,8 +120,8 @@ function formatCommandAuthor(authorData) {
 }
 
 function sortCommandsBy(key) {
-  var body = $("body");
-  var allCommands = $(".command").get();
+  var cmdList = $("#command-list");
+  var allCommands = cmdList.find(".command").get();
   
   allCommands.sort(function(a, b) {
     var aKey = $(a).find(key).text().toLowerCase();
@@ -128,7 +142,7 @@ function sortCommandsBy(key) {
   })
   
   $.each(allCommands, function(cmdIndex, cmd) {
-    body.append(cmd);
+    cmdList.append(cmd);
   });
 }
 
