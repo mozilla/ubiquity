@@ -593,11 +593,13 @@ function translateTo( text, langCodePair, callback ) {
       var translatedText = data.responseData.translatedText;
     } catch(e) {
 
-      // If we get this error message, that means Google wasn't able to
-      // guess the originating language. Let's assume it was English.
+      // If we get either of these error messages, that means Google wasn't
+      // able to guess the originating language. Let's assume it was English.
       // TODO: Localize this.
-      var BAD_FROM_LANG_GUESS_MSG = "invalid translation language pair";
-      if( data.responseDetails == BAD_FROM_LANG_GUESS_MSG ){
+      var BAD_FROM_LANG_1 = "invalid translation language pair";
+      var BAD_FROM_LANG_2 = "could not reliably detect source language";
+      var errMsg = data.responseDetails;
+      if( errMsg == BAD_FROM_LANG_1 || errMsg == BAD_FROM_LANG_2 ) {
         // Don't do infinite loops. If we already have a guess language
         // that matches the current forced from language, abort!
         if( langCodePair.from != "en" )
