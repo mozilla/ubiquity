@@ -153,22 +153,29 @@ CommandSource.prototype = {
           return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
 
-      if (cmdFunc.DOLabel)
-	cmd.DOLabel = cmdFunc.DOLabel;
+		
+	  var propsToCopy = [
+		"DOLabel",
+		"DOType",
+		"author",
+		"homepage",
+		"contributors",
+		"license",
+		"description",
+		"help"
+	  ];
+	  
+	  propsToCopy.forEach(function(prop) {
+		if (cmdFunc[prop])
+		  cmd[prop] = cmdFunc[prop];
       else
-	cmd.DOLabel = null;
-      if (cmdFunc.DOType)
-	cmd.DOType = cmdFunc.DOType;
-      else
-	cmd.DOType = null;
+		  cmd[prop] = null;
+	  });
+	  
       if (cmdFunc.modifiers)
 	cmd.modifiers = cmdFunc.modifiers;
       else
 	cmd.modifiers = {};
-      if (cmdFunc.description)
-	cmd.description = cmdFunc.description;
-      if (cmdFunc.help)
-	cmd.help = cmdFunc.help;
 
       return cmd;
     };
@@ -184,9 +191,7 @@ CommandSource.prototype = {
         commands[cmd.name] = cmd;
         commandNames.push({id: objName,
                            name : cmd.name,
-                           icon : icon,
-			   description: cmd.description,
-			   help: cmd.help });
+                           icon : icon});
       }
       if (objName.indexOf(this.NOUN_PREFIX) == 0) {
 	nounTypes.push( sandbox[objName] );
@@ -229,11 +234,11 @@ function makeDefaultCommandSuggester(commandManager) {
       retVal[titleCasedName] = function() {
 	sentenceClosure.execute(context);
       };
-
+	  
 	  let suggestedCommand = commandManager.__cmdSource.getCommand(parsedSentence._verb._name);
 	  if(suggestedCommand.icon)
 		retVal[titleCasedName].icon = suggestedCommand.icon;
-
+	  
     }
     return retVal;
   }

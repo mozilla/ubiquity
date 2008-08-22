@@ -127,6 +127,10 @@ em{
   font-style: normal;
 }
 
+#sort-container {
+	padding: 10px;
+}
+
 div.command{
   margin: 15px;
   margin-bottom: 20px;
@@ -148,7 +152,17 @@ div.command .icon img{
   height: 16px;
 }
 
-div.command .documentation{
+div.command .homepage{
+  padding-left: 10px;
+}
+
+div.command .author{
+  margin-top: 5px;
+  margin-left: 30px;
+  font-size: 90%;
+}
+
+div.command .help{
   margin-top: 5px;
   margin-left: 30px;
   display: block;
@@ -157,7 +171,6 @@ div.command .documentation{
 
 div.command .description{
   display: inline;
-  color: white;
   font-size: 12pt;
   margin-left: 10px;
   color:#BFBFBF;
