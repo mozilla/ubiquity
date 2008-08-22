@@ -358,6 +358,7 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 
   // Reserved keywords that shouldn't be added to the cmd function.
   var RESERVED = ["takes", "execute", "name"];
+  // Add all other attributes of options to the cmd function.
   for( var key in options ) {
     if( RESERVED.indexOf(key) == -1 )
       execute[key] = options[key];

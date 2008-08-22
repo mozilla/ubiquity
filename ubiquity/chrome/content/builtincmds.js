@@ -31,12 +31,13 @@ makeSearchCommand({
   name: "Google",
   url: "http://www.google.com/search?q={QUERY}",
   icon: "http://www.google.com/favicon.ico",
+  description: "Searches Google for your words.",
   preview: function(pblock, directObject) {
     var searchTerm = directObject.text;
     var pTemplate = "Searches Google for <b>${query}</b>";
     var pData = {query: searchTerm};
     pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
-    
+
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
 
@@ -123,6 +124,7 @@ CmdUtils.CreateCommand({
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
   license: "MPL",
   icon: "http://en.wikipedia.org/favicon.ico",
+  description: "Searches Wikipedia for your words.",
   preview: function(previewBlock, directObject) {
     var apiUrl = "http://en.wikipedia.org/w/api.php";
 
@@ -192,7 +194,8 @@ CmdUtils.CreateCommand({
 makeSearchCommand({
   name: "IMDB",
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
-  icon: "http://i.imdb.com/favicon.ico"
+  icon: "http://i.imdb.com/favicon.ico",
+  description: "Searches the Internet Movie Database for your words."
 });
 
 
@@ -200,6 +203,7 @@ makeSearchCommand({
   name: "yahoo-search",
   url: "http://search.yahoo.com/search?p={QUERY}&ei=UTF-8",
   icon: "http://search.yahoo.com/favicon.ico",
+  description: "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words.",
   preview: function(pblock, directObject){
     //TODO: Figure out some way around rate limits
     //Currently, Yahoo rate limits to 5000 queries per IP per day
@@ -207,16 +211,16 @@ makeSearchCommand({
     var pTemplate = "Searches Yahoo for <b>${query}</b>";
     var pData = {query: searchTerm};
     pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
-        
+
     var url = "http://search.yahooapis.com/WebSearchService/V1/webSearch";
-    var params = { 
+    var params = {
       appid: "wZ.3jHnV34GC4QakIuzfgHTGiU..1SfNPwPAuasmt.L5ytoIPOuZAdP1txE4s6KfRBp9",
       query: searchTerm,
       results: 3,
       output: "json"
     };
 
-    jQuery.get( url, params, function(data) {      
+    jQuery.get( url, params, function(data) {
       pblock.innerHTML = CmdUtils.renderTemplate( {file:"yahoo-search.html"},
                    {results:data.ResultSet.Result}
                  );
@@ -228,6 +232,7 @@ makeSearchCommand({
   name: "YouTube",
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
   icon: "http://www.youtube.com/favicon.ico",
+  description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words.",
   preview: function(pblock, directObject){
     var searchTerm = directObject.text;
     pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
@@ -254,13 +259,15 @@ makeSearchCommand({
 makeSearchCommand({
   name: "Flickr",
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
-  icon: "http://www.flickr.com/favicon.ico"
+  icon: "http://www.flickr.com/favicon.ico",
+  description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words."
 });
 
 makeSearchCommand({
   name: "Bugzilla",
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
-  icon: "http://www.mozilla.org/favicon.ico"
+  icon: "http://www.mozilla.org/favicon.ico",
+  description: "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching your words."
 });
 
 CmdUtils.CreateCommand({
@@ -270,7 +277,8 @@ CmdUtils.CreateCommand({
   // See http://labs.toolness.com/trac/ticket/44
   modifiers: { near:noun_arb_text },
   icon: "http://www.yelp.com/favicon.ico",
-
+  description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.",
+  help: "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;.",
   execute: function( directObject, info ) {
     var doc = context.focusedWindow.document;
     var focused = context.focusedElement;
@@ -288,8 +296,8 @@ CmdUtils.CreateCommand({
         city: data.city,
         times: data.review_count
       });
-      CmdUtils.setSelection( msg ); 
-      return;     
+      CmdUtils.setSelection( msg );
+      return;
     }
 
     var query = directObject.text;
@@ -322,10 +330,10 @@ CmdUtils.CreateCommand({
         {file:"yelp.html"},
         {businesses: data.businesses}
       );
-      
+
 		}, "json");
   }
-})
+});
 
 
 
@@ -342,6 +350,8 @@ function cmd_bold() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
+cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
+
 
 function cmd_italic() {
   var doc = context.focusedWindow.document;
@@ -351,6 +361,7 @@ function cmd_italic() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
+cmd_italic.description = "If you're in a rich-text-edit area, makes the selected text italic.";
 
 function cmd_underline() {
   var doc = context.focusedWindow.document;
@@ -360,6 +371,7 @@ function cmd_underline() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
+cmd_underline.description = "If you're in a rich-text-edit area, underlines the selected text.";
 
 function cmd_undo() {
   var doc = context.focusedWindow.document;
@@ -369,6 +381,7 @@ function cmd_undo() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
+cmd_undo.description = "Undoes your latest style/formatting or page-editing changes.";
 
 function cmd_redo() {
   var doc = context.focusedWindow.document;
@@ -378,6 +391,7 @@ function cmd_redo() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
+cmd_redo.description = "Undoes your latest style/formatting or page-editing changes.";
 
 
 CmdUtils.CreateCommand({

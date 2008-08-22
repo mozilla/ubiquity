@@ -18,18 +18,28 @@ function onDocumentLoad() {
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.commandNames[i];
       var cmdElement = document.getElementById(cmd.id);
-
+      // it thinks cmd only has .id, .name, and .icon?
       if (cmdElement == null) {
         $(document.body).append(
           ('<div class="command" id="' + cmd.id + '">' +
            '<span class="icon"/>' +
-           '<span class="name">' + cmd.name + '</span>')
-        );
+           '<span class="name">' + cmd.name + '</span></div>')
+	);
+
+
         cmdElement = document.getElementById(cmd.id);
       }
-      
+
       if (cmd.icon && $(cmdElement).find(".icon img").length == 0) {
         $(cmdElement).find(".icon").append('<img src="' + cmd.icon + '"/>');
+      }
+
+      if (cmd.description && $(cmdElement).find(".description").length == 0) {
+	$(cmdElement).append('<div class="description">' + cmd.description + '</div>');
+      }
+
+      if (cmd.help && $(cmdElement).find(".help").length == 0) {
+	$(cmdElement).append('<div class="help"><p>' + cmd.help + '</p></div>');
       }
     }
 
