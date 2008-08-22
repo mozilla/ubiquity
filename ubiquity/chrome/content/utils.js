@@ -88,7 +88,7 @@ Utils.getLocalUrl = function getLocalUrl(url) {
     throw new Error("Failed to get " + url);
 };
 
-Utils.ajaxGet = function ajaxGet(url, callbackFunction) {
+Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
   var request = new window.XMLHttpRequest();
   request.open("GET", url, true);
   request.setRequestHeader("Content-Type",
@@ -101,8 +101,12 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction) {
           callbackFunction(request.responseText);
         else
           callbackFunction("");
-      } else
-        throw new Error("Ajax request failed: " + url);
+      } else {
+        if(failureFunction)
+          failureFunction();
+        else
+          throw new Error("Ajax request failed: " + url);
+      }
     }
   };
 

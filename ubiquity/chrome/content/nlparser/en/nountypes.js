@@ -4,8 +4,8 @@ function getGmailContacts( callback ) {
     exportType: "ALL",
     out: "CSV"
   });
-
-  Utils.ajaxGet(url + params , function(data) {
+  
+  Utils.ajaxGet(url + params, function(data) {
     data = data.split("\n");
 
     var contacts = {};
@@ -19,6 +19,9 @@ function getGmailContacts( callback ) {
     }
 
     callback(contacts);
+  }, function() {
+    // probably not logged in - fail gracefully
+    callback({});
   });
 }
 
