@@ -19,6 +19,7 @@ CmdUtils.CreateCommand({
   license: "MPL/GPL/LGPL",
   takes : {"text" : noun_arb_text},
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
+  description: "Adds a tag to describe the current page",
   preview: function(aEl, aTagsString) {
     aEl.innerHTML = "Describe the current page with tags";
     aEl.innerHTML += aTagsString.text.length ? " (" + aTagsString.text + ")" : ".";
@@ -43,7 +44,7 @@ CmdUtils.CreateCommand({
     var splitChar = " ";
     if (aTagsString.text.indexOf(",") == -1)
       splitChar = ",";
-    tags = aTagsString.text.split(splitChar);
+    var tags = aTagsString.text.split(splitChar);
 
     // trim leading/trailing spaces
     tags = tags.map(function(a) { return trim(a) });

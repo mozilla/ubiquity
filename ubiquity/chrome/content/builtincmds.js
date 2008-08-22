@@ -391,13 +391,15 @@ function cmd_redo() {
   else
     displayMessage("You're not in a rich text editing field.");
 }
-cmd_redo.description = "Undoes your latest style/formatting or page-editing changes.";
+cmd_redo.description = "Redoes your latest style/formatting or page-editing changes.";
 
 
 CmdUtils.CreateCommand({
   name: "calculate",
   takes: {"expression": noun_arb_text},
   icon: "http://www.metacalc.com/favicon.ico",
+  description: "Calculates the value of a mathematical expression.",
+  help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
   execute: function( directObj ) {
     var expr = directObj.text;
     if( expr.length > 0 ) {
@@ -439,6 +441,8 @@ function defineWord(word, callback) {
 
 CmdUtils.CreateCommand({
   name: "define",
+  description: "Gives the meaning of a word.",
+  help: "Try issuing &quot;define aglet&quot;",
   takes: {"word": noun_arb_text},
   execute: function( directObj ) {
     var word = directObj.text;
@@ -467,6 +471,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "syntax-highlight",
   takes: {"code": noun_arb_text},
+  description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
   execute: function( directObj ) {
     var code = directObj.text;
     var url = "http://azarask.in/services/syntaxhighlight/color.py";
@@ -495,16 +500,17 @@ function cmd_highlight() {
     range.surroundContents(newNode);
   }
 }
-
+cmd_highlight.description = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
 cmd_highlight.preview = function(pblock) {
-  pblock.innerHTML = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
+  pblock.innerHTML = cmd_highlight.description;
 }
 
 CmdUtils.CreateCommand({
   name : "link-to-wikipedia",
   takes : {"text" : noun_arb_text},
   icon: "http://www.wikipedia.org/favicon.ico",
-
+  description: "Turns a selected phrase into a link to the matching Wikipedia article.",
+  help: "Can only be used in a rich text-editing field.",
   execute : function( directObj ){
     var text = directObj.text;
     var wikiText = text.replace(/ /g, "_");
@@ -615,6 +621,11 @@ function translateTo( text, langCodePair, callback ) {
 
 CmdUtils.CreateCommand({
   name: "translate",
+  description: "Translates from one language to another.",
+  help: "You can specify the language to translate to, and the language to translate from.  For example," +
+	" try issuing &quot;translate mother from english to chinese&quot;. If you leave out the the" +
+	" languages, Ubiquity will try to guess what you want. It works on selected text in any web page, but" +
+        " there's a limit to how much it can translate at once (a couple of paragraphs.)",
   takes: {"text to translate": noun_arb_text},
   modifiers: {to: noun_type_language, from: noun_type_language},
 
@@ -653,6 +664,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "help",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
+  description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
   execute: function(){
     Utils.openUrlInBrowser("about:ubiquity");
   }
@@ -661,17 +673,18 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "command-editor",
   preview: "Opens the editor for writing Ubiquity commands",
+  description: "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page.",
   execute: function(){
     Utils.openUrlInBrowser("chrome://ubiquity/content/editor.html");
   }
 });
 
 CmdUtils.CreateCommand({
-  name: "remember",
-  takes: {"thing": noun_arb_text},
-  execute: function( thing, modifiers ) {
-    displayMessage( "I am remembering " + thing.text );
-    CmdUtils.setLastResult( thing );
+  name: "command-list",
+  preview: "Opens the list of all Ubiquity commands available and what they all do.",
+  description: "Takes you to the page you're on right now.",
+  execute: function(){
+    Utils.openUrlInBrowser("chrome://ubiquity/content/cmdlist.html");
   }
 });
 
@@ -702,7 +715,11 @@ CmdUtils.CreateCommand({
   name: "email",
   takes: {"message": noun_arb_text},
   modifiers: {to: noun_type_contact},
-
+  description:"Begins composing an email to a person from your contact list.",
+  help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a GMail account to use it." +
+       " Try selecting part of a web page (including links, images, etc) and then issuing &quot;email this&quot;.  You can" +
+       " also specify the recipient of the email using the word &quot;to&quot; and the name of someone from your contact list." +
+       " For example, try issuing &quot;email hello to jono&quot; (assuming you have a friend named &quot;jono&quot;).",
   preview: function(pblock, directObj, modifiers) {
     var html = "Creates an email message ";
     if (modifiers.to) {
@@ -852,6 +869,9 @@ CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
   preview: "Adds the event to Google Calendar.",
+  description: "Adds an event to your calendar.",
+  help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
+        "Google account to use it.  Try issuing &quot;add lunch with dan tomorrow&quot;.",
   execute: function( eventString ) {
     addToGoogleCalendar( eventString );
   }
@@ -872,6 +892,9 @@ function checkCalendar(pblock, date) {
 CmdUtils.CreateCommand({
   name: "check-calendar",
   takes: {"date to check": noun_type_date},
+  description: "Checks what events are on your calendar for a given date.",
+  help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
+        "Google account to use it.  Try issuing &quot;check thursday&quot;.",
   execute: function( directObj ) {
     var date = directObj.data;
     var url = "http://www.google.com/calendar/m";
@@ -901,7 +924,8 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": noun_arb_text},
-
+  description: "Checks the weather for a given location.",
+  help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
   execute: function( directObj ) {
     var location = directObj.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
@@ -954,6 +978,11 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": noun_arb_text},
+  description: "Turns an address or location name into a Google Map.",
+  help:"Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a" +
+       " larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot;" +
+       " (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email, " +
+       " select it, issue &quot;map&quot;, click on the preview, and then insert the map.",
   execute: function( directObj ) {
     var location = directObj.text;
     var url = "http://maps.google.com/?q=";
@@ -1001,6 +1030,7 @@ function cmd_view_source() {
   // Utils.openUrlInBrowser( "http://www.google.com" );
   CmdUtils.getWindowInsecure().location = url;
 }
+cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
 
 /* TODO
 From Abi:
@@ -1020,6 +1050,9 @@ CmdUtils.CreateCommand({
   icon: "http://assets3.twitter.com/images/favicon.ico",
   takes: {status: noun_arb_text},
   modifiers: {},
+  description: "Sets your Twitter status to a message of at most 160 characters.",
+  help: "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
+        " you'll be asked to log in.",
   preview: function(previewBlock, directObj) {
     var statusText = directObj.text;
     var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
@@ -1077,6 +1110,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": noun_type_tab},
+  description: "Switches to the tab that matches the given name.",
 
   execute: function( directObj ) {
     var tabName = directObj.text;
@@ -1098,6 +1132,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-tab",
   takes: {"tab name": noun_type_tab},
+  description: "Closes the tab that matches the given name.",
 
   execute: function( directObj ) {
     var tabName = directObj.text;
@@ -1119,7 +1154,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": noun_arb_text},
-
+  description: "Closes all open tabs that have the given word in common.",
   preview: function( pblock, directObj ) {
     var query = directObj.text;
     var relatedWord = query.toLowerCase();
@@ -1183,9 +1218,10 @@ function cmd_delete() {
     $("._toRemove").slideUp();
   });
 }
+cmd_delete.description = "Deletes the selected chunk of HTML from the page.";
 cmd_delete.preview = function( pblock ) {
-  pblock.innerHTML = "Deletes the selected chunk of HTML from the page.";
-}
+  pblock.innerHTML = cmd_delete.description;
+};
 
 function cmd_undelete() {
   CmdUtils.loadJQuery(function() {
@@ -1193,18 +1229,21 @@ function cmd_undelete() {
     $("._toRemove").slideDown();
   });
 }
+cmd_undelete.description = "Restores the HTML deleted by the delete command.";
 cmd_undelete.preview = function( pblock ) {
-  pblock.innerHTML = "Restores the HTML deleted by the delete command.";
-}
+  pblock.innerHTML = cmd_undelete.description;
+};
 
 function cmd_edit_page() {
   // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this
   CmdUtils.getDocumentInsecure().body.contentEditable = 'true';
   CmdUtils.getDocumentInsecure().designMode='on';
 }
+cmd_edit_page.description = "Make changes to this page. Use 'save' for changes to persist on reload.";
 cmd_edit_page.preview = function( pblock ) {
-  pblock.innerHTML = "Make changes to this page. Use 'save' for changes to persist on reload.";
-}
+  pblock.innerHTML = cmd_edit_page.description;
+};
+
 function cmd_save() {
   // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this
   CmdUtils.getDocumentInsecure().body.contentEditable = 'false';
@@ -1220,11 +1259,12 @@ function cmd_save() {
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), "ubiquity/edit", body.html(), 0, 4);
 
 }
+cmd_save.description = "Saves page edits. Undo with 'remove-annotations'";
 cmd_save.preview = function( pblock ) {
-  pblock.innerHTML = "Saves page edits. Undo with 'remove-annotations'";
-}
+  pblock.innerHTML = cmd_save.description;
+};
 
-pageLoad_restorePageAnnotations = function () {
+var pageLoad_restorePageAnnotations = function () {
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
@@ -1232,7 +1272,7 @@ pageLoad_restorePageAnnotations = function () {
 
   var uri = ioservice.newURI(window.content.location.href, null, null);
 
-  var annotationNames = annotationService.getPageAnnotationNames(uri, {}); 
+  var annotationNames = annotationService.getPageAnnotationNames(uri, {});
 
   for (var i=0; i<annotationNames.length; i++) {
 
@@ -1290,10 +1330,10 @@ pageLoad_restorePageAnnotations = function () {
 
     }
   }
-}
-
+};
+cmd_save.description = "Saves edits you've made to this page in an annotation.";
 cmd_save.preview = function( pblock ) {
-  pblock.innerHTML = "Saves edits you've made to this page in an annotation.";
+  pblock.innerHTML = cmd_save.description;
 }
 
 // removes all page annotations - add more functionality
@@ -1307,9 +1347,10 @@ function cmd_remove_annotations() {
 
   window.content.location.reload();
 }
+cmd_remove_annotations.description = "Resets any annotation changes you've made to this page.";
 cmd_remove_annotations.preview = function( pblock ) {
-  pblock.innerHTML = "Resets any annotation changes you've made to this page.";
-}
+  pblock.innerHTML = cmd_remove_annotations.description;
+};
 
 
 // permanent delete - in progress, slightly buggy
@@ -1398,15 +1439,17 @@ function cmd_perm_delete() {
   annotationService.setPageAnnotation(ioservice.newURI(window.content.location.href, null, null), annotationName, annotationValue, 0, 4);
 
 }
-cmd_perm_delete.preview = function( pblock ) {
-  pblock.innerHTML = "Attempts to permanently delete the selected part of the"
+cmd_perm_delete.description = "Attempts to permanently delete the selected part of the"
     + " page. (Experimental!)";
-}
+cmd_perm_delete.preview = function( pblock ) {
+  pblock.innerHTML = cmd_perm_delete.description;
+};
 
 
 CmdUtils.CreateCommand({
   name:"map-these",
   takes: {"selection": noun_arb_text },
+  description: "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)",
   preview: function( pblock, directObject ) {
     var html = directObject.html;
     pblock.innerHTML = "<span id='loading'>Mapping...</span>";
