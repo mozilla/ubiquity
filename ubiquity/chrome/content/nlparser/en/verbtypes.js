@@ -201,9 +201,15 @@ NLParser.EnVerb.prototype = {
 	suggestions = this.suggestWithPronounSub( this._DOType,
 						  unusedWords,
 						  selObj );
-
-	let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
-	suggestions = suggestions.concat(moreSuggestions);
+    
+    try {
+      let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
+      suggestions = suggestions.concat(moreSuggestions);
+    } catch(e) {
+      Components.utils.reportError(
+          'Exception occured while getting suggestions for "' + this._name +
+          '" with noun "' + this._DOLabel + '"'
+          );    }
 	for each ( let sugg in suggestions ) {
 	  if (sugg)
 	    completions.push( this._newSentence(sugg, filledMods ));
@@ -236,9 +242,15 @@ NLParser.EnVerb.prototype = {
 						    [noun],
                                                     selObj );
 	  // Add the suggestions from the noun type straight-up
-  	  let moreSuggestions = nounType.suggest( noun );
-	  suggestions = suggestions.concat(moreSuggestions);
-
+      try {
+        let moreSuggestions = nounType.suggest( noun );
+        suggestions = suggestions.concat(moreSuggestions);
+      } catch(e) {
+        Components.utils.reportError(
+          'Exception occured while getting suggestions for "' + this._name +
+          '" with preposition "' + preposition + '"'
+          );
+      }
 	  // Turn each suggestion into a sentence, after recursively
 	  // parsing the leftover words.
 	  for each( let sugg in suggestions ) {
@@ -280,18 +292,22 @@ NLParser.EnVerb.prototype = {
     for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
       let index = words.indexOf( pronoun );
       if ( index > -1 ) {
-	if (selection) {
-	  let wordsCopy = words.slice();
-	  wordsCopy[index] = selection;
-	  selection = wordsCopy.join(" ");
+        if (selection) {
+          let wordsCopy = words.slice();
+          wordsCopy[index] = selection;
+          selection = wordsCopy.join(" ");
+            }
+        if (htmlSelection) {
+          let wordsCopy = words.slice();
+          wordsCopy[index] = htmlSelection;
+          htmlSelection = wordsCopy.join(" ");
         }
-	if (htmlSelection) {
-	  let wordsCopy = words.slice();
-	  wordsCopy[index] = htmlSelection;
-	  htmlSelection = wordsCopy.join(" ");
-	}
-	let moreSuggs = nounType.suggest(selection, htmlSelection);
-	suggestions = suggestions.concat( moreSuggs );
+        try {
+          let moreSuggs = nounType.suggest(selection, htmlSelection);
+          suggestions = suggestions.concat( moreSuggs );
+        } catch(e) {
+          Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
+        }
       }
     }
     return suggestions;
@@ -332,23 +348,35 @@ NLParser.EnVerb.prototype = {
 
     // Try selection as direct object...
     if (this._DOType) {
+      try {
       let suggs = this._DOType.suggest(text, html);
       for each (let sugg in suggs) {
-	if (sugg)
+        if (sugg)
           completions.push( this._newSentence( sugg, {}) );
-      }
+        }
+      } catch(e) {
+        Components.utils.reportError(
+          'Exception occured while getting suggestions for "' + this._name +
+          '" with noun "' + this._DOLabel + '"'
+          );      }
     }
 
     // Try it as each modifier....
     for (let x in this._modifiers) {
-      let suggs = this._modifiers[x].suggest(text, html);
-      for each (let sugg in suggs) {
-	if (sugg) {
-          let mods = {};
-	  mods[x] = sugg;
-	  completions.push( this._newSentence(null, mods) );
-	}
-      }
+      try {
+        let suggs = this._modifiers[x].suggest(text, html);
+        for each (let sugg in suggs) {
+          if (sugg) {
+            let mods = {};
+            mods[x] = sugg;
+            completions.push( this._newSentence(null, mods) );
+          }
+        }
+      } catch(e) {
+        Components.utils.reportError(
+          'Exception occured while getting suggestions for "' + this._name +
+          '" with preposition "' + x + '"'
+          );      }
     }
     return completions;
   },
