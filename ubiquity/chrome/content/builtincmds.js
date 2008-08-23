@@ -1025,6 +1025,88 @@ CmdUtils.CreateCommand({
   }
 });
 
+
+// -----------------------------------------------------------------
+// CONVERSION COMMANDS
+// -----------------------------------------------------------------
+var noun_conversion_options = new CmdUtils.NounType( "conversion-options",
+						     ["pdf",
+						      "html",
+						      "rich-text"]);
+
+function convert_page_to_pdf() {
+  var url = "http://www.htm2pdf.co.uk/?url=";
+  url += escape( CmdUtils.getWindowInsecure().location );
+
+  Utils.openUrlInBrowser(url);
+  /*jQuery.get( url, function(html){
+    //displayMessage( html );
+    CmdUtils.getWindowInsecure().console.log( jQuery(html).filter(a) );
+
+  })*/
+}
+
+function convert_to_rich_text( html ) {
+  if (html) {
+    var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+      doc.execCommand("insertHTML", false, html);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  }
+}
+
+function convert_to_html( html ) {
+  if (html) {
+    var doc = context.focusedWindow.document;
+    if (doc.designMode == "on") {
+      html = html.replace(/&/g, "&amp;");
+      html = html.replace(/>/g, "&gt;");
+      html = html.replace(/</g, "&lt;");
+      doc.execCommand("insertHTML", false, html);
+    } else
+      displayMessage("You're not in a rich text editing field.");
+  }
+}
+
+CmdUtils.CreateCommand({
+  name:"convert",
+  takes:{text:noun_arb_text},
+  modifiers:{to:noun_conversion_options},
+  description:"Converts a selection to a PDF, to rich text, or to html.",
+  preview: function(pBlock, directObj, modifiers) {
+    if (modifiers.to && modifiers.to.text) {
+      pBlock.innerHTML = "Converts your selection to " + modifiers.to.text;
+    } else {
+      pBlock.innerHTML = "Converts a selection to a PDF, to rich text, or to html.";
+    }
+  },
+  execute: function(directObj, modifiers) {
+    if (modifiers.to && modifiers.to.text) {
+      switch( modifiers.to.text) {
+      case "pdf":
+        convert_page_to_pdf();
+	break;
+      case "html":
+	if (directObj.html)
+          convert_to_html(directObj.html);
+	else
+	  displayMessage("There is nothing to convert!");
+	break;
+      case "rich-text":
+	if (directObj.html)
+          convert_to_rich_text(directObj.html);
+	else
+	  displayMessage("There is nothing to convert!");
+	break;
+      }
+    } else {
+      displayMessage("You must specify what you want to conver to: pdf, html, or rich-text.");
+    }
+  }
+});
+
+
 // -----------------------------------------------------------------
 // MISC COMMANDS
 // -----------------------------------------------------------------
