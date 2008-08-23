@@ -228,6 +228,90 @@ makeSearchCommand({
   }
 });
 
+
+makeSearchCommand({
+  name: "amazon-search",
+  icon: "http://www.amazon.com/favicon.ico",
+  description: "Searches <a href=\"http://www.amazon.com\">Amazon</a> for books matching your words.",
+  url: "http://www.amazon.com/s/ref=nb_ss_gw?url=search-alias%3Dstripbooks&field-keywords={QUERY}",
+  preview: function(previewBlock, directObject) {
+	if(!directObject.text || directObject.text.lenth < 1) {
+	  previewBlock.innerHTML = "Searches for books on Amazon";
+	  return;
+	}
+	
+	previewBlock.innerHTML = "Searching Amazon for books matching <b>" + directObject.summary + "</b>";
+	
+	var apiUrl = "http://ecs.amazonaws.com/onca/xml";
+	var apiParams = {
+	  Service: "AWSECommerceService",
+	  AWSAccessKeyId: "08WX39XKK81ZEWHZ52R2",
+	  Version: "2008-08-19",
+	  Operation: "ItemSearch",
+	  Condition: "All",
+	  ResponseGroup: "ItemAttributes,Images",
+	  SearchIndex: "Books",
+	  Title: directObject.text
+	};
+	
+	jQuery.ajax({
+	  type: "GET",
+	  url: apiUrl,
+	  data: apiParams,
+	  dataType: "xml",
+	  error: function() {
+		previewBlock.innerHTML = "Error searching Amazon.";
+	  },
+	  success: function(responseData) {
+		const AMAZON_MAX_RESULTS = 5;
+		
+		responseData = jQuery(responseData);
+		var items = [];
+		
+		responseData.find("Items Item").slice(0, AMAZON_MAX_RESULTS).each(function(itemIndex) {
+		  var itemDetails = jQuery(this);
+		  
+		  items.push({
+			title: itemDetails.find("ItemAttributes Title").text(),
+			author: itemDetails.find("ItemAttributes Author").text(),
+			price: {
+			  amount: itemDetails.find("ItemAttributes ListPrice FormattedPrice").text(),
+			  currency: itemDetails.find("ItemAttributes ListPrice CurrencyCode").text()
+			},
+			url: itemDetails.find("DetailPageURL").text(),
+			image: {
+			  src: itemDetails.find("SmallImage:first URL").text(),
+			  height: itemDetails.find("SmallImage:first Height").text(),
+			  width: itemDetails.find("SmallImage:first Width").text()
+			}
+		  });
+		});
+			
+		var previewTemplate = "Found ${numitems} books on Amazon matching <b>${query}</b>" +
+		  "{for item in items}" +
+		  "<div style=\"clear: both; padding: 10px 0px;\">" +
+		  "<a href=\"${item.url}\">" +
+		  "<img src=\"${item.image.src}\" style=\"float: left; margin-right: 10px; height: ${item.image.height}px; width: ${item.image.width}px;\"/>" +
+		  "${item.title}" +
+		  "</a>" +
+		  "<br /><small>by ${item.author}</small>" +
+		  "<br /><small>for ${item.price.amount} (${item.price.currency})</small>" +
+		  "</div>" +
+		  "{/for}";
+		  
+		var previewData = {
+			query: directObject.summary,
+			numitems: responseData.find("Items TotalResults").text(),
+			items: items
+		};
+		
+		previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+	  }
+	});
+  }
+});
+
+
 makeSearchCommand({
   name: "YouTube",
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
