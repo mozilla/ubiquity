@@ -1038,6 +1038,62 @@ function cmd_view_source() {
 }
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
 
+function escape_html_entities(text) {
+  text = text.replace(/&/g, "&amp;");
+  text = text.replace(/</g, "&lt;");
+  text = text.replace(/>/g, "&gt;");
+  return text;
+}
+var escape_desc = "Replaces html entities (&lt;, &gt;, and &amp;) with their escape sequences.";
+CmdUtils.CreateCommand({
+  name:"escape-html-entities",
+  takes: {text: noun_arb_text},
+  description: escape_desc,
+  preview: function(pBlock, directObj) {
+   if (directObj.html)
+     pBlock.innerHTML = "Replaces your selection with " + escape_html_entities(directObj.html);
+   else
+     pBlock.innerHTML = escape_desc;
+  },
+  execute: function(directObj) {
+    if (directObj.html)
+      CmdUtils.setSelection(escape_html_entities(directObj.html));
+  }
+});
+
+
+function wordCount(text){
+  var words = text.split(" ");
+  var wordCount = 0;
+
+  for(i=0; i<words.length; i++){
+    if (words[i].length > 0)
+      wordCount++;
+  }
+
+  return wordCount;
+}
+
+CmdUtils.CreateCommand({
+  name: "word-count",
+  takes: {text: noun_arb_text},
+  description: "Displays the number of words in a selection.",
+  execute: function( directObj ) {
+    if (directObj.text)
+      displayMessage(wordCount(directObj.text) + " words");
+    else
+      displayMessage("No words selected.");
+  },
+  preview: function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHTML = wordCount(directObj.text) + " words";
+    else
+      pBlock.innerHTML = "Displays the number of words in a selection.";
+  }
+});
+
+
+
 /* TODO
 From Abi:
 	I think the ones I most often use would be to check the current status
