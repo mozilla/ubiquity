@@ -812,6 +812,54 @@ CmdUtils.CreateCommand({
   }
 });
 
+function gmailChecker(callback) {
+  var url = "http://mail.google.com/mail/feed/atom";
+  ajaxGet(url, function(rss) {
+    loadJQuery(function() {
+      var $ = window.jQuery;
+
+      var firstEntry = $(rss).find("entry").get(0);
+
+      var newEmailId = $(firstEntry).find("id").text();
+      var subject = $(firstEntry).find("title").text();
+      var author = $(firstEntry).find("author name").text();
+      var summary = $(firstEntry).find("summary").text();
+
+      var title = author + ' says "' + subject + '"';
+      callback({text: summary, title: title});
+    });
+  });
+}
+CmdUtils.CreateCommand({
+  name: "last-email",
+  icon: "http://gmail.com/favicon.ico",
+  description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
+  preview: function( pBlock ) {
+    pBlock.innerHTML = "Displays your most recent incoming email...";
+    gmailChecker(function(obj) {
+      pBlock.innerHTML = "<b>" + obj.title + "</b><p>" + obj.text + "</p>";
+    });
+  },
+  execute: function() {
+    gmailChecker(displayMessage);
+  }
+});
+
+CmdUtils.CreateCommand({
+  name: "get-email-address",
+  icon: "http://gmail.com/favicon.ico",
+  description: "Looks up the email address of a person from your contacts list given their name.",
+  takes: {name: noun_type_contact},
+  preview: function( pBlock, name ) {
+    if (name.text)
+      pBlock.innerHTML = name.text;
+    else
+      pBlock.innerHTML = "Looks up an email address from your contacts list.";
+  },
+  execute: function( name ) {
+    displayMessage(name.text);
+  }
+});
 
 // -----------------------------------------------------------------
 // CALENDAR COMMANDS
