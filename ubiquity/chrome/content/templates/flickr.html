@@ -1,0 +1,16 @@
+<b>${nummatches} photos were found on Flickr.<br/><br/>
+<table style="border-width: 0px;">
+{for photo in photos}
+  {if photo_index % numcols == 0}
+  <tr height=100>
+  {/if} 
+  <td>
+    <a href="http://www.flickr.com/photos/${photo.owner}/${photo.id}" title="${photo.title|escape}">
+      <img src="http://farm${photo.farm}.static.flickr.com/${photo.server}/${photo.id}_${photo.secret}_t.jpg" />
+    </a>
+  </td>
+  {if photo_index % numcols == (numcols - 1)}
+    </tr>
+  {/if}
+{/for}
+</table>

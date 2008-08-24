@@ -344,7 +344,55 @@ makeSearchCommand({
   name: "Flickr",
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
   icon: "http://www.flickr.com/favicon.ico",
-  description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words."
+  description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words.",
+  preview : function(previewBlock, inputObject){
+    var inputText = inputObject.text;
+
+    if(inputText.length < 1) {
+      previewBlock.innerHTML = "Searches for photos on Flickr.";
+      return;
+    }
+
+    previewBlock.innerHTML = "Searching for photos on Flickr...";
+
+    var apiUrl = "http://api.flickr.com/services/rest/";
+    var apiParams = {
+      api_key: "4ca9aaaf5c2d83260eba9ab68ac1b1ac",
+      format: "json",
+      nojsoncallback: 1,
+      method: "flickr.photos.search",
+      media: "photos",
+      text: inputText,
+      per_page: 8,
+      sort: "relevance"
+    };
+
+    jQuery.ajax({
+      type: "GET",
+      url: apiUrl,
+      data: apiParams,
+      datatype: "string",
+      error: function() {
+        previewBlock.innerHTML = "<i>Error searching Flickr.</i>";
+      },
+      success: function(responseData) {
+        responseData = Utils.decodeJson(responseData);
+
+        if(responseData.stat != "ok") {
+          previewBlock.innerHTML = "<i>Error searching Flickr.</i>";
+          return;
+        }
+
+        var previewData = {
+          numcols: 4,
+          nummatches: responseData.photos.total,
+          photos: responseData.photos.photo
+        };
+        
+        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"flickr.html"}, previewData);
+    }
+  });
+}
 });
 
 makeSearchCommand({
