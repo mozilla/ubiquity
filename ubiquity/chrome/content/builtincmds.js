@@ -484,7 +484,6 @@ function cmd_bold() {
 }
 cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
 
-
 function cmd_italic() {
   var doc = context.focusedWindow.document;
 
@@ -514,6 +513,7 @@ function cmd_undo() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_undo.description = "Undoes your latest style/formatting or page-editing changes.";
+cmd_undo.icon = "chrome://ubiquity/content/icons/arrow_undo.png";
 
 function cmd_redo() {
   var doc = context.focusedWindow.document;
@@ -524,6 +524,7 @@ function cmd_redo() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_redo.description = "Redoes your latest style/formatting or page-editing changes.";
+cmd_redo.icon = "chrome://ubiquity/content/icons/arrow_redo.png";
 
 
 CmdUtils.CreateCommand({
@@ -575,6 +576,7 @@ CmdUtils.CreateCommand({
   name: "define",
   description: "Gives the meaning of a word.",
   help: "Try issuing &quot;define aglet&quot;",
+  icon: "http://www.answers.com/favicon.ico",
   takes: {"word": noun_arb_text},
   execute: function( directObj ) {
     var word = directObj.text;
@@ -756,6 +758,7 @@ function translateTo( text, langCodePair, callback ) {
 CmdUtils.CreateCommand({
   name: "translate",
   description: "Translates from one language to another.",
+  icon: "http://www.google.com/favicon.ico",
   help: "You can specify the language to translate to, and the language to translate from.  For example," +
 	" try issuing &quot;translate mother from english to chinese&quot;. If you leave out the the" +
 	" languages, Ubiquity will try to guess what you want. It works on selected text in any web page, but" +
@@ -797,6 +800,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "help",
+  icon: "chrome://ubiquity/content/icons/help.png",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
   execute: function(){
@@ -806,6 +810,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "command-editor",
+  icon : "chrome://ubiquity/content/icons/plugin_edit.png",
   preview: "Opens the editor for writing Ubiquity commands",
   description: "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page.",
   execute: function(){
@@ -815,6 +820,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "command-list",
+  icon : "chrome://ubiquity/content/icons/application_view_list.png",
   preview: "Opens the list of all Ubiquity commands available and what they all do.",
   description: "Takes you to the page you're on right now.",
   execute: function(){
@@ -848,6 +854,7 @@ function findGmailTab() {
 CmdUtils.CreateCommand({
   name: "email",
   takes: {"message": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/email.png",
   modifiers: {to: noun_type_contact},
   description:"Begins composing an email to a person from your contact list.",
   help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a GMail account to use it." +
@@ -1006,6 +1013,7 @@ function addToGoogleCalendar(eventString) {
 CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
+  icon : "chrome://ubiquity/content/icons/calendar_add.png",
   preview: "Adds the event to Google Calendar.",
   description: "Adds an event to your calendar.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
@@ -1030,6 +1038,7 @@ function checkCalendar(pblock, date) {
 CmdUtils.CreateCommand({
   name: "check-calendar",
   takes: {"date to check": noun_type_date},
+  icon : "chrome://ubiquity/content/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
         "Google account to use it.  Try issuing &quot;check thursday&quot;.",
@@ -1062,6 +1071,7 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": noun_arb_text},
+  icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
   execute: function( directObj ) {
@@ -1116,6 +1126,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
   help:"Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a" +
        " larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot;" +
@@ -1382,6 +1393,7 @@ CmdUtils.CreateCommand({
   name: "digg",
   icon: "http://digg.com/favicon.ico",
   homepage: "http://www.gialloporpora.netsons.org",
+  description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
   author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
   license: "MPL,GPL",
   execute: function() {
@@ -1448,6 +1460,7 @@ CmdUtils.CreateCommand({
   name: "tinyurl",
   takes: {"url to shorten": noun_arb_text},
   icon: "http://tinyurl.com/favicon.ico",
+  description: "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyUrl</a>",
   preview: "Replaces the selected URL with a TinyUrl.",
   execute: function( urlToShorten ) {
     //escaping urlToShorten will not create the right tinyurl
@@ -1465,6 +1478,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": noun_type_tab},
+  icon: "chrome://ubiquity/content/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
 
   execute: function( directObj ) {
@@ -1487,6 +1501,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-tab",
   takes: {"tab name": noun_type_tab},
+  icon: "chrome://ubiquity/content/icons/tab_delete.png",
   description: "Closes the tab that matches the given name.",
 
   execute: function( directObj ) {
@@ -1509,6 +1524,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   preview: function( pblock, directObj ) {
     var query = directObj.text;
@@ -1574,6 +1590,7 @@ function cmd_delete() {
   });
 }
 cmd_delete.description = "Deletes the selected chunk of HTML from the page.";
+cmd_delete.icon = "chrome://ubiquity/content/icons/delete.png";
 cmd_delete.preview = function( pblock ) {
   pblock.innerHTML = cmd_delete.description;
 };
@@ -1595,6 +1612,7 @@ function cmd_edit_page() {
   CmdUtils.getDocumentInsecure().designMode='on';
 }
 cmd_edit_page.description = "Make changes to this page. Use 'save' for changes to persist on reload.";
+cmd_edit_page.icon = "chrome://ubiquity/content/icons/page_edit.png";
 cmd_edit_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_edit_page.description;
 };
@@ -1615,6 +1633,7 @@ function cmd_save() {
 
 }
 cmd_save.description = "Saves page edits. Undo with 'remove-annotations'";
+cmd_save.icon = "chrome://ubiquity/content/icons/page_save.png";
 cmd_save.preview = function( pblock ) {
   pblock.innerHTML = cmd_save.description;
 };
