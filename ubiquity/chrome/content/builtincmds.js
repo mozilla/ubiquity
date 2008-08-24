@@ -1383,10 +1383,22 @@ function cmd_edit_page() {
   CmdUtils.getDocumentInsecure().body.contentEditable = 'true';
   CmdUtils.getDocumentInsecure().designMode='on';
 }
-cmd_edit_page.description = "Make changes to this page. Use 'save' for changes to persist on reload.";
+cmd_edit_page.description = "Puts the web page into a mode where you can edit the contents.";
+cmd_edit_page.help = "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue \'bold\', \'italic\', or \'underline\' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode.";
 cmd_edit_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_edit_page.description;
 };
+
+function cmd_stop_editing_page() {
+  CmdUtils.getDocumentInsecure().body.contentEditable = 'false';
+  CmdUtils.getDocumentInsecure().designMode='off';
+}
+cmd_stop_editing_page.description = "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing.";
+cmd_stop_editing_page.preview = function( pblock ) {
+  pblock.innerHTML = cmd_stop_editing_page.description;
+}
+
+// I think edit-mode on and edit-mode off would be
 
 function cmd_save() {
   // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this
