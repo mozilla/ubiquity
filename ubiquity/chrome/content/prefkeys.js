@@ -1,7 +1,6 @@
 var PrefKeys = {
   
   KEYCODE_PREF : "extensions.ubiquity.keycode",
-  
   KEYMODIFIER_PREF : "extensions.ubiquity.keymodifier",
   
   _convertToText : function(aKeyCode){
@@ -69,6 +68,9 @@ var PrefKeys = {
                   + this._convertToText(keyCode) 
                   + " (Click here to change)";
     $("#keyInputBox").val(keyText).blur();
-    $("#keyNotify").text("");
+	  $("#keyNotify").text("Your key has been changed to " 
+	                        + keyModifier + "+" 
+                          + this._convertToText(keyCode));                          
+                          
   }
 }

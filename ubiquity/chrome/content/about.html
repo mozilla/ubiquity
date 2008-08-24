@@ -40,12 +40,13 @@
 
   <p><strong>Help us</strong>. Subscribe to the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">Herd</a>, which will add your data to the <a href="https://labs.toolness.com/ubiquity-herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
     
-  <p><strong>Change</strong> your hotkey.<br/>
+  <p><strong>Change</strong> your hotkey. <br/><br/>
   <input id="keyInputBox" type="text" size="27"
          onkeydown="PrefKeys.onKeyChange(event)" 
-         onfocus="this.value = 'Press your combination'"/>
+         onfocus="this.value = 'Press your combination'"
+         onblur="PrefKeys.onLoad()"/>
   <p id="keyNotify"></p></p>
-  
+
   <h2>Developers</h2>
   <p><strong>Learn</strong> how to develop for Ubiquity by reading the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command author tutorial</a>.</p>
   
