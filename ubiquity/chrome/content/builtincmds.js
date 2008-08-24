@@ -1396,6 +1396,20 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  name: "tinyurl",
+  takes: {"url to shorten": noun_arb_text},
+  icon: "http://tinyurl.com/favicon.ico",
+  preview: "Replaces the selected URL with a TinyUrl.",
+  execute: function( urlToShorten ) {
+    //escaping urlToShorten will not create the right tinyurl
+    var baseUrl = "http://tinyurl.com/api-create.php?url=";
+    jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
+      CmdUtils.setSelection( tinyUrl );
+    })
+  }
+});
+
 // -----------------------------------------------------------------
 // TAB COMMANDS
 // -----------------------------------------------------------------
