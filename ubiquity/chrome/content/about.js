@@ -2,7 +2,7 @@ function makeRemover(element, uri) {
   function onHidden() {
     $(element).remove();
     if (!$("#command-feeds").text())
-      $("#command-feeds-header").slideUp();
+      $("#commands-feeds-div").slideUp();
   }
   function remove() {
     LinkRelCodeSource.removeMarkedPage(uri);
@@ -32,7 +32,7 @@ function onReady() {
     $("#command-feeds").append(li);
   }
   if (!$("#command-feeds").text())
-    $("#command-feeds-header").hide();
+    $("#commands-feeds-div").hide();
     
   jQuery.get( "http://hg.toolness.com/ubiquity-firefox/rss-log", loadNews);
 }

@@ -228,6 +228,90 @@ makeSearchCommand({
   }
 });
 
+
+makeSearchCommand({
+  name: "amazon-search",
+  icon: "http://www.amazon.com/favicon.ico",
+  description: "Searches <a href=\"http://www.amazon.com\">Amazon</a> for books matching your words.",
+  url: "http://www.amazon.com/s/ref=nb_ss_gw?url=search-alias%3Dstripbooks&field-keywords={QUERY}",
+  preview: function(previewBlock, directObject) {
+	if(!directObject.text || directObject.text.lenth < 1) {
+	  previewBlock.innerHTML = "Searches for books on Amazon";
+	  return;
+	}
+
+	previewBlock.innerHTML = "Searching Amazon for books matching <b>" + directObject.summary + "</b>";
+
+	var apiUrl = "http://ecs.amazonaws.com/onca/xml";
+	var apiParams = {
+	  Service: "AWSECommerceService",
+	  AWSAccessKeyId: "08WX39XKK81ZEWHZ52R2",
+	  Version: "2008-08-19",
+	  Operation: "ItemSearch",
+	  Condition: "All",
+	  ResponseGroup: "ItemAttributes,Images",
+	  SearchIndex: "Books",
+	  Title: directObject.text
+	};
+
+	jQuery.ajax({
+	  type: "GET",
+	  url: apiUrl,
+	  data: apiParams,
+	  dataType: "xml",
+	  error: function() {
+		previewBlock.innerHTML = "Error searching Amazon.";
+	  },
+	  success: function(responseData) {
+		const AMAZON_MAX_RESULTS = 5;
+
+		responseData = jQuery(responseData);
+		var items = [];
+
+		responseData.find("Items Item").slice(0, AMAZON_MAX_RESULTS).each(function(itemIndex) {
+		  var itemDetails = jQuery(this);
+
+		  items.push({
+			title: itemDetails.find("ItemAttributes Title").text(),
+			author: itemDetails.find("ItemAttributes Author").text(),
+			price: {
+			  amount: itemDetails.find("ItemAttributes ListPrice FormattedPrice").text(),
+			  currency: itemDetails.find("ItemAttributes ListPrice CurrencyCode").text()
+			},
+			url: itemDetails.find("DetailPageURL").text(),
+			image: {
+			  src: itemDetails.find("SmallImage:first URL").text(),
+			  height: itemDetails.find("SmallImage:first Height").text(),
+			  width: itemDetails.find("SmallImage:first Width").text()
+			}
+		  });
+		});
+
+		var previewTemplate = "Found ${numitems} books on Amazon matching <b>${query}</b>" +
+		  "{for item in items}" +
+		  "<div style=\"clear: both; padding: 10px 0px;\">" +
+		  "<a href=\"${item.url}\">" +
+		  "<img src=\"${item.image.src}\" style=\"float: left; margin-right: 10px; height: ${item.image.height}px; width: ${item.image.width}px;\"/>" +
+		  "${item.title}" +
+		  "</a>" +
+		  "<br /><small>by ${item.author}</small>" +
+		  "<br /><small>for ${item.price.amount} (${item.price.currency})</small>" +
+		  "</div>" +
+		  "{/for}";
+
+		var previewData = {
+			query: directObject.summary,
+			numitems: responseData.find("Items TotalResults").text(),
+			items: items
+		};
+
+		previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+	  }
+	});
+  }
+});
+
+
 makeSearchCommand({
   name: "YouTube",
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
@@ -260,7 +344,55 @@ makeSearchCommand({
   name: "Flickr",
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
   icon: "http://www.flickr.com/favicon.ico",
-  description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words."
+  description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words.",
+  preview : function(previewBlock, inputObject){
+    var inputText = inputObject.text;
+
+    if(inputText.length < 1) {
+      previewBlock.innerHTML = "Searches for photos on Flickr.";
+      return;
+    }
+
+    previewBlock.innerHTML = "Searching for photos on Flickr...";
+
+    var apiUrl = "http://api.flickr.com/services/rest/";
+    var apiParams = {
+      api_key: "4ca9aaaf5c2d83260eba9ab68ac1b1ac",
+      format: "json",
+      nojsoncallback: 1,
+      method: "flickr.photos.search",
+      media: "photos",
+      text: inputText,
+      per_page: 8,
+      sort: "relevance"
+    };
+
+    jQuery.ajax({
+      type: "GET",
+      url: apiUrl,
+      data: apiParams,
+      datatype: "string",
+      error: function() {
+        previewBlock.innerHTML = "<i>Error searching Flickr.</i>";
+      },
+      success: function(responseData) {
+        responseData = Utils.decodeJson(responseData);
+
+        if(responseData.stat != "ok") {
+          previewBlock.innerHTML = "<i>Error searching Flickr.</i>";
+          return;
+        }
+
+        var previewData = {
+          numcols: 4,
+          nummatches: responseData.photos.total,
+          photos: responseData.photos.photo
+        };
+
+        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"flickr.html"}, previewData);
+    }
+  });
+}
 });
 
 makeSearchCommand({
@@ -352,7 +484,6 @@ function cmd_bold() {
 }
 cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
 
-
 function cmd_italic() {
   var doc = context.focusedWindow.document;
 
@@ -382,6 +513,7 @@ function cmd_undo() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_undo.description = "Undoes your latest style/formatting or page-editing changes.";
+cmd_undo.icon = "chrome://ubiquity/content/icons/arrow_undo.png";
 
 function cmd_redo() {
   var doc = context.focusedWindow.document;
@@ -392,6 +524,7 @@ function cmd_redo() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_redo.description = "Redoes your latest style/formatting or page-editing changes.";
+cmd_redo.icon = "chrome://ubiquity/content/icons/arrow_redo.png";
 
 
 CmdUtils.CreateCommand({
@@ -443,6 +576,7 @@ CmdUtils.CreateCommand({
   name: "define",
   description: "Gives the meaning of a word.",
   help: "Try issuing &quot;define aglet&quot;",
+  icon: "http://www.answers.com/favicon.ico",
   takes: {"word": noun_arb_text},
   execute: function( directObj ) {
     var word = directObj.text;
@@ -624,6 +758,7 @@ function translateTo( text, langCodePair, callback ) {
 CmdUtils.CreateCommand({
   name: "translate",
   description: "Translates from one language to another.",
+  icon: "http://www.google.com/favicon.ico",
   help: "You can specify the language to translate to, and the language to translate from.  For example," +
 	" try issuing &quot;translate mother from english to chinese&quot;. If you leave out the the" +
 	" languages, Ubiquity will try to guess what you want. It works on selected text in any web page, but" +
@@ -665,6 +800,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "help",
+  icon: "chrome://ubiquity/content/icons/help.png",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
   execute: function(){
@@ -674,6 +810,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "command-editor",
+  icon : "chrome://ubiquity/content/icons/plugin_edit.png",
   preview: "Opens the editor for writing Ubiquity commands",
   description: "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page.",
   execute: function(){
@@ -683,6 +820,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "command-list",
+  icon : "chrome://ubiquity/content/icons/application_view_list.png",
   preview: "Opens the list of all Ubiquity commands available and what they all do.",
   description: "Takes you to the page you're on right now.",
   execute: function(){
@@ -716,6 +854,7 @@ function findGmailTab() {
 CmdUtils.CreateCommand({
   name: "email",
   takes: {"message": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/email.png",
   modifiers: {to: noun_type_contact},
   description:"Begins composing an email to a person from your contact list.",
   help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a GMail account to use it." +
@@ -922,6 +1061,7 @@ function addToGoogleCalendar(eventString) {
 CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
+  icon : "chrome://ubiquity/content/icons/calendar_add.png",
   preview: "Adds the event to Google Calendar.",
   description: "Adds an event to your calendar.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
@@ -946,6 +1086,7 @@ function checkCalendar(pblock, date) {
 CmdUtils.CreateCommand({
   name: "check-calendar",
   takes: {"date to check": noun_type_date},
+  icon : "chrome://ubiquity/content/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
         "Google account to use it.  Try issuing &quot;check thursday&quot;.",
@@ -978,6 +1119,7 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": noun_arb_text},
+  icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
   execute: function( directObj ) {
@@ -1032,6 +1174,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
   help:"Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a" +
        " larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot;" +
@@ -1294,6 +1437,87 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  name: "digg",
+  icon: "http://digg.com/favicon.ico",
+  homepage: "http://www.gialloporpora.netsons.org",
+  description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
+  author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
+  license: "MPL,GPL",
+  execute: function() {
+    var doc = CmdUtils.getDocumentInsecure();
+    var sel = doc.getSelection().substring(0,375);
+
+    var params = Utils.paramsToString({
+      phase: "2",
+      url: doc.location,
+      title: doc.title,
+      bodytext: sel
+    });
+
+    story_url='http://digg.com/submit' + params;
+    Utils.openUrlInBrowser(story_url);
+
+  },
+  preview: function(pblock) {
+
+    var doc = CmdUtils.getDocumentInsecure();
+    var selected_text= doc.getSelection();
+    var api_url='http://services.digg.com/stories';
+
+    CmdUtils.log(selected_text);
+
+    var params = Utils.paramsToString({
+      appkey: "http://www.gialloporpora.netsons.org",
+      link: doc.location
+    });
+
+    var html= 'Submit or digg this page. Checking if this page has already been submitted...';
+    pblock.innerHTML = html;
+
+    jQuery.ajax({
+      type: "GET",
+      url: api_url+params,
+      error: function(){
+        //pblock.innerHTML= 'Digg API seems to be unavailable or the URI is incorrect.<br/>';
+      },
+      success: function(xml){
+        var el = jQuery(xml).find("story");
+        var diggs = el.attr("diggs");
+
+        if (diggs == null){
+          html = 'Submit this page to Digg';
+          if (selected_text.length > 0) {
+            html += " with the description:<br/> <i style='padding:10px;color: #CCC;display:block;'>" + selected_text + "</i>";
+            if (selected_text.length > 375){
+              html +='<br/> Description can only be 375 characters. The last <b>'
+              + (selected_text.length - 375) + '</b> characters will be truncated.';
+            }
+          }
+        }
+        else{
+          html = 'Digg this page. This page already has <b>'+diggs+'</b> diggs.';
+        }
+        pblock.innerHTML = html;
+      }
+    });
+  }
+});
+
+CmdUtils.CreateCommand({
+  name: "tinyurl",
+  takes: {"url to shorten": noun_arb_text},
+  icon: "http://tinyurl.com/favicon.ico",
+  description: "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyUrl</a>",
+  preview: "Replaces the selected URL with a TinyUrl.",
+  execute: function( urlToShorten ) {
+    //escaping urlToShorten will not create the right tinyurl
+    var baseUrl = "http://tinyurl.com/api-create.php?url=";
+    jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
+      CmdUtils.setSelection( tinyUrl );
+    })
+  }
+});
 
 // -----------------------------------------------------------------
 // TAB COMMANDS
@@ -1302,6 +1526,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": noun_type_tab},
+  icon: "chrome://ubiquity/content/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
 
   execute: function( directObj ) {
@@ -1324,6 +1549,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-tab",
   takes: {"tab name": noun_type_tab},
+  icon: "chrome://ubiquity/content/icons/tab_delete.png",
   description: "Closes the tab that matches the given name.",
 
   execute: function( directObj ) {
@@ -1346,6 +1572,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   preview: function( pblock, directObj ) {
     var query = directObj.text;
@@ -1411,6 +1638,7 @@ function cmd_delete() {
   });
 }
 cmd_delete.description = "Deletes the selected chunk of HTML from the page.";
+cmd_delete.icon = "chrome://ubiquity/content/icons/delete.png";
 cmd_delete.preview = function( pblock ) {
   pblock.innerHTML = cmd_delete.description;
 };
@@ -1433,6 +1661,7 @@ function cmd_edit_page() {
 }
 cmd_edit_page.description = "Puts the web page into a mode where you can edit the contents.";
 cmd_edit_page.help = "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue \'bold\', \'italic\', or \'underline\' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode.";
+cmd_edit_page.icon = "chrome://ubiquity/content/icons/page_edit.png";
 cmd_edit_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_edit_page.description;
 };
@@ -1464,6 +1693,7 @@ function cmd_save() {
 
 }
 cmd_save.description = "Saves page edits. Undo with 'remove-annotations'";
+cmd_save.icon = "chrome://ubiquity/content/icons/page_save.png";
 cmd_save.preview = function( pblock ) {
   pblock.innerHTML = cmd_save.description;
 };

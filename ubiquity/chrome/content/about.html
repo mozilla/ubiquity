@@ -40,12 +40,14 @@
 
   <p><strong>Help us</strong>. Subscribe to the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">Herd</a>, which will add your data to the <a href="https://labs.toolness.com/ubiquity-herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
     
-  <p><strong>Change</strong> your hotkey.<br/>
+  <p><strong>Change</strong> your hotkey. <br/><br/>
   <input id="keyInputBox" type="text" size="27"
+         style="cursor:pointer"
          onkeydown="PrefKeys.onKeyChange(event)" 
-         onfocus="this.value = 'Press your combination'"/>
+         onfocus="this.value = 'Press your combination'"
+         onblur="PrefKeys.onLoad()"/>
   <p id="keyNotify"></p></p>
-  
+
   <h2>Developers</h2>
   <p><strong>Learn</strong> how to develop for Ubiquity by reading the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command author tutorial</a>.</p>
   
@@ -76,12 +78,15 @@
 
   <p><object width="395" height="295">	<param name="allowfullscreen" value="true" />	<param name="allowscriptaccess" value="always" />	<param name="movie" value="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" />	<embed src="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="395" height="295"></embed></object></p>
   
-  <h2>Subscribed Feeds</h2>
+  <div id="commands-feeds-div">
+    <h2>Subscribed Feeds</h2>
+    <p>
+      <p id="command-feeds-header">You're currently subscribed to these command
+      feeds:</p>
+      <ul id="command-feeds"></ul>
+    </p>
+  </div>
   
-  <p><p id="command-feeds-header">You're currently subscribed to these command
-    feeds:</p>
-  <ul id="command-feeds"></ul></p>
-
   <h2>News</h2>
   <div id="news"></div>
 
