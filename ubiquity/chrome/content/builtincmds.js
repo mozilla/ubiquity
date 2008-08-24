@@ -1330,6 +1330,71 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  name: "digg",
+  icon: "http://digg.com/favicon.ico",
+  homepage: "http://www.gialloporpora.netsons.org",
+  author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
+  license: "MPL,GPL",
+  execute: function() {
+    var doc = CmdUtils.getDocumentInsecure();
+    var sel = doc.getSelection().substring(0,375);
+
+    var params = Utils.paramsToString({
+      phase: "2",
+      url: doc.location,
+      title: doc.title,
+      bodytext: sel
+    });
+
+    story_url='http://digg.com/submit' + params;
+    Utils.openUrlInBrowser(story_url);
+
+  },	    
+  preview: function(pblock) {
+
+    var doc = CmdUtils.getDocumentInsecure();
+    var selected_text= doc.getSelection();
+    var api_url='http://services.digg.com/stories';
+
+    CmdUtils.log(selected_text);
+
+    var params = Utils.paramsToString({
+      appkey: "http://www.gialloporpora.netsons.org",
+      link: doc.location
+    }); 
+
+    var html= 'Submit or digg this page. Checking if this page has already been submitted...';
+    pblock.innerHTML = html;
+
+    jQuery.ajax({  
+      type: "GET",
+      url: api_url+params,
+      error: function(){
+        //pblock.innerHTML= 'Digg API seems to be unavailable or the URI is incorrect.<br/>';
+      },
+      success: function(xml){
+        var el = jQuery(xml).find("story");
+        var diggs = el.attr("diggs");
+
+        if (diggs == null){
+          html = 'Submit this page to Digg';
+          if (selected_text.length > 0) {
+            html += " with the description:<br/> <i style='padding:10px;color: #CCC;display:block;'>" + selected_text + "</i>";
+            if (selected_text.length > 375){                
+              html +='<br/> Description can only be 375 characters. The last <b>'
+              + (selected_text.length - 375) + '</b> characters will be truncated.';
+            }
+          }
+        }
+        else{
+          html = 'Digg this page. This page already has <b>'+diggs+'</b> diggs.';
+        }
+        pblock.innerHTML = html;
+      }
+    });
+  }
+});
 
 // -----------------------------------------------------------------
 // TAB COMMANDS
