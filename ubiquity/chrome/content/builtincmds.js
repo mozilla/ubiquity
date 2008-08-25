@@ -953,8 +953,9 @@ CmdUtils.CreateCommand({
 
 function gmailChecker(callback) {
   var url = "http://mail.google.com/mail/feed/atom";
-  ajaxGet(url, function(rss) {
-    loadJQuery(function() {
+  // todo: loadJQuery not defined here!!
+  Utils.ajaxGet(url, function(rss) {
+    CmdUtils.loadJQuery(function() {
       var $ = window.jQuery;
 
       var firstEntry = $(rss).find("entry").get(0);
