@@ -4,11 +4,9 @@
 
 body{
 	background: #FFF;
-	color:#111;
 	font-size:13px;
 	font-family: "Helvetica", Verdana, Arial, sans-serif;
 	max-width: 900px;
-	border-top: 5px solid #333;
 	margin-left: auto;
 	margin-right: auto;	
 	margin-top: 0px;
@@ -82,12 +80,14 @@ li {
 }
 
 .head{
-  font-variant: small-caps;
   font-weight: bold;
-  font-size: 20pt;
-  background-color: #111;
-  color: white;
+  background-color: white;
+  color: black;
   text-align: center;
+  color: grey;
+  font-variant: small-caps;
+  font-size: 14pt;
+  margin-top: 10px;
 }
 
 .left{
@@ -95,8 +95,7 @@ li {
   padding-left: 10px;
 }
 
-.head red{
-  color: #E21E26;
+.large{
   font-size: 36pt;
 }
 
