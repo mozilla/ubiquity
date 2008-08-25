@@ -244,8 +244,8 @@ CmdUtils.setLastResult = function setLastResult( result ) {
 };
 
 // Uses Geo-ip lookup to get your current location.
-CmdUtils.getLocation = function getLocation( ){
-  if( globals.location ) return globals.location;
+CmdUtils.getGeoLocation = function getGeoLocation( ){
+  if( globals.geoLocation ) return globals.geoLocation;
 
   jQuery.ajax({
     type: "GET",
@@ -255,7 +255,7 @@ CmdUtils.getLocation = function getLocation( ){
     success: function( js ) {
       eval( js );
       var loc = geoip_city() + ", " + geoip_region();
-      globals.location = {
+      globals.geoLocation = {
         city: geoip_city(),
         state: geoip_region_name(),
         country: geoip_country_name(),
@@ -265,7 +265,7 @@ CmdUtils.getLocation = function getLocation( ){
     }
   });
 
-  return globals.location;
+  return globals.geoLocation;
 };
 
 

@@ -446,7 +446,7 @@ CmdUtils.CreateCommand({
 
     if( query.length == 0 ) return;
 
-    var loc = CmdUtils.getLocation();
+    var loc = CmdUtils.getGeoLocation();
     var near = info.near.text || (loc.city + ", " + loc.state);
 
     var params = {
@@ -1313,9 +1313,9 @@ function cmd_view_source() {
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
 
 function escape_html_entities(text) {
-  text = text.replace(/&/g, "&amp;");
-  text = text.replace(/</g, "&lt;");
-  text = text.replace(/>/g, "&gt;");
+  // TODO finish this?
+  text = text.replace(/</g, "&amp;lt;");
+  text = text.replace(/>/g, "&amp;gt;");
   return text;
 }
 var escape_desc = "Replaces html entities (&lt;, &gt;, and &amp;) with their escape sequences.";
