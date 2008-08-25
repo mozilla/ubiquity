@@ -24,11 +24,11 @@ cmd_test_mapping.preview = function(pblock) {
     function onBrowserLoad() {
       //window.console.log(browser.wrappedJSObject.contentDocument);
     }
-    browser.addEventListener("load", CmdUtils.safeWrapper(onBrowserLoad),
+    browser.addEventListener("load", Utils.safeWrapper(onBrowserLoad),
                              true);
     iframe.contentDocument.documentElement.appendChild(browser);
   }
-  iframe.addEventListener("load", CmdUtils.safeWrapper(onXulLoad), true);
+  iframe.addEventListener("load", Utils.safeWrapper(onXulLoad), true);
   pblock.innerHTML = "";
   pblock.appendChild(iframe);
 };

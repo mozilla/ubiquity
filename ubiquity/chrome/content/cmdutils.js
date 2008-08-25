@@ -15,22 +15,6 @@ CmdUtils.getHtmlSelection = function getHtmlSelection() {
   return null;
 };
 
-CmdUtils.safeWrapper = function safeWrapper(func) {
-  var wrappedFunc = function() {
-    try {
-      func.apply(this, arguments);
-    } catch (e) {
-      displayMessage(
-        {text: ("An exception occurred while running " +
-                func.name + "()."),
-         exception: e}
-      );
-    }
-  };
-
-  return wrappedFunc;
-};
-
 CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
   var newNode = context.focusedWindow.document.createElement("p");
   newNode.innerHTML = html;
@@ -182,7 +166,7 @@ CmdUtils.injectJavascript = function injectJavascript(src, callback) {
 CmdUtils.loadJQuery = function loadJQuery(func) {
   CmdUtils.injectJavascript(
     "http://code.jquery.com/jquery-latest.pack.js",
-    CmdUtils.safeWrapper( function() {
+    Utils.safeWrapper( function() {
       window.jQuery = window.$ = CmdUtils.getWindowInsecure().jQuery;
       func();
     })
@@ -193,7 +177,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 // the window that this Ubiquity sandbox is associated with, passing
 // the window's document object as a parameter.
 CmdUtils.onPageLoad = function onPageLoad( callback ) {
-  var safeCallback = CmdUtils.safeWrapper(callback);
+  var safeCallback = Utils.safeWrapper(callback);
 
   function _onPageLoad(aEvent) {
     var isValidPage = false;
@@ -413,13 +397,13 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
       // TODO: Security risk -- this is very insecure!
       callback( browser.contentWindow );
     }
-    browser.addEventListener("load", CmdUtils.safeWrapper(onBrowserLoad),
+    browser.addEventListener("load", Utils.safeWrapper(onBrowserLoad),
                              true);
     iframe.contentDocument.documentElement.appendChild(browser);
     browser.contentWindow.addEventListener("load", onBodyLoad, false);
   }
 
-  iframe.addEventListener("load", CmdUtils.safeWrapper(onXulLoad), true);
+  iframe.addEventListener("load", Utils.safeWrapper(onXulLoad), true);
   pblock.innerHTML = "";
   pblock.appendChild(iframe);
 

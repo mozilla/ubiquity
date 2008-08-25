@@ -2,6 +2,23 @@ var Utils = {};
 
 Utils.__globalObject = this;
 
+
+Utils.safeWrapper = function safeWrapper(func) {
+  var wrappedFunc = function() {
+    try {
+      func.apply(this, arguments);
+    } catch (e) {
+      displayMessage(
+        {text: ("An exception occurred while running " +
+                func.name + "()."),
+         exception: e}
+      );
+    }
+  };
+
+  return wrappedFunc;
+};
+
 Utils.encodeJson = function encodeJson(object) {
   var json = Components.classes["@mozilla.org/dom/json;1"]
              .createInstance(Components.interfaces.nsIJSON);
@@ -113,7 +130,7 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
   // If we're being called in the context of a command, safe-wrap the
   // callback.
   if (Utils.__globalObject.CmdUtils)
-    onRscFunc = CmdUtils.safeWrapper(onRscFunc);
+    onRscFunc = Utils.safeWrapper(onRscFunc);
 
   request.onreadystatechange = onRscFunc;
   request.send(null);
