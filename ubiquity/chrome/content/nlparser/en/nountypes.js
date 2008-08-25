@@ -4,7 +4,7 @@ function getGmailContacts( callback ) {
     exportType: "ALL",
     out: "CSV"
   });
-  
+
   Utils.ajaxGet(url + params, function(data) {
     data = data.split("\n");
 
@@ -72,6 +72,22 @@ var noun_type_date = {
     }
     text = date.toString("dd MM, yyyy");
     return [ CmdUtils.makeSugg(text, null, date) ];
+  }
+};
+
+var noun_type_percentage = {
+  _name: "percentage",
+  suggest: function( text, html ) {
+    if (!text)
+      return [ CmdUtils.makeSugg("100%", null, 1.0) ];
+    var number = parseFloat(text);
+    if (isNaN(number)) {
+      return [];
+    }
+    if (number > 1 && text.indexOf(".") == -1)
+      number = number / 100;
+    text = number*100 + "%";
+    return [ CmdUtils.makeSugg(text, null, number)];
   }
 };
 

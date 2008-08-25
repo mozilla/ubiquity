@@ -1615,7 +1615,42 @@ CmdUtils.CreateCommand({
     displayMessage(numTabs + " tabs closed");
   }
 
-})
+});
+
+// -----------------------------------------------------------------
+// ZOOM RELATED
+// -----------------------------------------------------------------
+
+
+function setFullPageZoom( level ) {
+  var navigator1 = window
+                    .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                    .getInterface(Components.interfaces.nsIWebNavigation);
+  var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
+  var docviewer = docShell.contentViewer.QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
+  docviewer.fullZoom = level;
+}
+
+CmdUtils.CreateCommand({
+  name:"zoom",
+  takes:{"percentage": noun_type_percentage},
+  description:"Zooms the Firefox window in or out.",
+  preview:function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHTML = "Zooms the Firefox window to " +
+        directObj.text + " of its normal size.";
+    else
+      pBlock.innerHTML = "Zooms the Firefox window to a given percentage " +
+      "of its normal size.";
+  },
+  execute:function(directObj) {
+    if (directObj.data)
+      setFullPageZoom(directObj.data);
+    else
+      displayMessage("You must provide a percentage to zoom to.");
+  }
+});
+
 
 // -----------------------------------------------------------------
 // PAGE EDIT COMMANDS
