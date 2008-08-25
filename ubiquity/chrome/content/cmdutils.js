@@ -268,15 +268,6 @@ CmdUtils.getGeoLocation = function getGeoLocation( ){
   return globals.geoLocation;
 };
 
-
-CmdUtils.FBLog = function FBLog( arg1, arg2 ){
-  if( arg2 )
-    CmdUtils.getWindowInsecure().console.log( arg1, arg2 );
-  else
-    CmdUtils.getWindowInsecure().console.log( arg1 );
-};
-
-
 // -----------------------------------------------------------------
 // SNAPSHOT RELATED
 // -----------------------------------------------------------------
