@@ -399,7 +399,59 @@ makeSearchCommand({
   name: "Bugzilla",
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   icon: "http://www.mozilla.org/favicon.ico",
-  description: "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching your words."
+  description: "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
+});
+
+makeSearchCommand({
+  name: "msn-search",
+  url: "http://search.msn.com/results.aspx?q={QUERY}",
+  icon: "http://search.msn.com/favicon.ico",
+  description: "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words.",
+  preview: function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHtml = "Searches MSN for " + directObj.text;
+    else
+      pBlock.innerHTML = "Searches MSN for the given words.";
+  }
+});
+
+makeSearchCommand({
+  name: "ebay-search",
+  url: "http://search.ebay.com/search/search.dll?satitle={QUERY}",
+  icon: "http://search.ebay.com/favicon.ico",
+  description: "Searches <a href=\"http://search.ebay.com\">EBay</a> for auctions matching the given words.",
+  preview: function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHtml = "Searches EBay for " + directObj.text;
+    else
+      pBlock.innerHTML = "Searches EBay for the given words.";
+  }
+});
+
+makeSearchCommand({
+  name: "ask-search",
+  url: "http://www.ask.com/web?q={QUERY}",
+  icon: "http://www.ask.com/favicon.ico",
+  description: "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words.",
+  preview: function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHtml = "Searches Ask.com for " + directObj.text;
+    else
+      pBlock.innerHTML = "Searches Ask.com for the given words.";
+  }
+});
+
+makeSearchCommand({
+  name: "answers-search",
+  url: "http://www.answers.com/{QUERY}",
+  icon: "http://www.answers.com/favicon.ico",
+  description: "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words.",
+  preview: function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHtml = "Searches Answers.com for " + directObj.text;
+    else
+      pBlock.innerHTML = "Searches Answers.com for the given words.";
+  }
 });
 
 CmdUtils.CreateCommand({
