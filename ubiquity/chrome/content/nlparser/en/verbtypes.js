@@ -129,53 +129,6 @@ NLParser.EnVerb.prototype = {
     return new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs);
   },
 
-  _newSubParsing: function() {
-    let parsing = {};
-    if (this._DOType)
-      parsing.direct = "";
-    for (let x in this._modifiers)
-      parsing[x] = "";
-    return parsing;
-  },
-
-  moreBetterParse: function(unusedWords, subParsing) {
-    if (unusedWords.length == 0) {
-      return [subParsing];
-    }
-
-    let firstWord = unusedWords[0];
-    let restWords = unusedWords.slice(1);
-
-    let someParsings = [];
-    for (let pronoun in this._modifiers) {
-      if (firstWord == pronoun ) {
-	if (typeof subParsing[pronoun] != "string") {
-          let newSubParsing = dictDeepCopy(subParsing);
-          newSubParsing[pronoun] = "";
-          let moreParsings = this.moreBetterParse(restWords,
-		                                  newSubParsing);
-	  someParsings = someParsings.concat(moreParsings);
-          break;
-	}
-      }
-    }
-
-    for (let key in subParsing) {
-      let newSubParsing = dictDeepCopy(subParsing);
-      newSubParsing[key] = newSubParsing[key] + " " + firstWord;
-      let moreParsings = this.moreBetterParse(restWords, newSubParsing);
-      someParsings = someParsings.concat(moreParsings);
-    }
-
-    return someParsings;
-  },
-
-  startMoreBetterParse: function( words ) {
-    let subParsing = {direct:""};
-    let parsings = this.moreBetterParse(words, subParsing);
-    return parsings;
-  },
-
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
   recursiveParse: function(unusedWords, filledMods, unfilledMods, selObj) {
