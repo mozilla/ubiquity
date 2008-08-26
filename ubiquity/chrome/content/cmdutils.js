@@ -262,7 +262,7 @@ CmdUtils.getHiddenWindow = function getHiddenWindow() {
                    .hiddenDOMWindow;
 }
 
-CmdUtils.snapshotWindow = function snapshotWindow( window, callback) {
+CmdUtils.getWindowSnapshot = function getWindowShapshot(window, callback) {
   var top = 0;
   var left = 0;
 
@@ -282,7 +282,7 @@ CmdUtils.snapshotWindow = function snapshotWindow( window, callback) {
   callback( canvas.toDataURL() );
 }
 
-CmdUtils.snapshotImage = function snapshotImage( url, callback ) {
+CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var hiddenWindow = CmdUtils.getHiddenWindow();
   var body = hiddenWindow.document.body;
 
