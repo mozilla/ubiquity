@@ -220,9 +220,9 @@ NLParser.EnVerb.prototype = {
 	if ( preposition.indexOf( unusedWords[x] ) == 0 ) {
 	  // a match for the preposition is found at position x!
 	  // Anything following this preposition could be part of the noun.
-          // Check every possibility from "just the next word" up to
-	  // "all remaining words".
-	  for (let lastWord = x+1; lastWord < unusedWords.length; lastWord++) {
+          // Check every possibility starting from "all remaining words" and
+	  // working backwards down to "just the word after the preposition."
+	  for (let lastWord = unusedWords.length - 1; lastWord > x; lastWord--) {
 	    //copy the array, don't modify the original
             let newUnusedWords = unusedWords.slice();
 	    // take out the preposition
