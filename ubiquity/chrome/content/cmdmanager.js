@@ -39,7 +39,6 @@ CommandManager.prototype = {
       wasPreviewShown = this.__nlParser.setPreviewAndSuggestions(context,
 								 previewBlock,
 								 this.__hilitedSuggestion);
-      //dump( "Preview block has been set to: " + $("#cmd-preview").html() + "\n");
     } catch (e) {
       this.__msgService.displayMessage(
         {text: ("An exception occurred while previewing the command '" +
@@ -79,6 +78,10 @@ CommandManager.prototype = {
            exception: e}
         );
       }
+  },
+
+  hasSuggestions: function() {
+    return (this.__nlParser.getNumSuggestions() > 0);
   },
 
   getSuggestionListNoInput: function( context ) {
@@ -153,7 +156,7 @@ CommandSource.prototype = {
           return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
 
-		
+
 	  var propsToCopy = [
 		"DOLabel",
 		"DOType",
@@ -164,14 +167,14 @@ CommandSource.prototype = {
 		"description",
 		"help"
 	  ];
-	  
+
 	  propsToCopy.forEach(function(prop) {
 		if (cmdFunc[prop])
 		  cmd[prop] = cmdFunc[prop];
       else
 		  cmd[prop] = null;
 	  });
-	  
+
       if (cmdFunc.modifiers)
 	cmd.modifiers = cmdFunc.modifiers;
       else
@@ -234,11 +237,11 @@ function makeDefaultCommandSuggester(commandManager) {
       retVal[titleCasedName] = function() {
 	sentenceClosure.execute(context);
       };
-	  
+
 	  let suggestedCommand = commandManager.__cmdSource.getCommand(parsedSentence._verb._name);
 	  if(suggestedCommand.icon)
 		retVal[titleCasedName].icon = suggestedCommand.icon;
-	  
+
     }
     return retVal;
   }

@@ -68,8 +68,9 @@ Ubiquity.prototype = {
     var keyCode = event.keyCode;
 
     if (keyCode == this.__KEYCODE_ENTER) {
-      if (this.__textBox.value)
-        this.__needsToExecute = true;
+      if (this.__cmdManager.hasSuggestions()) {
+	this.__needsToExecute = true;
+      }
       this.__msgPanel.hidePopup();
     } else if (keyCode == this.__KEYCODE_UP ||
                keyCode == this.__KEYCODE_DOWN) {
@@ -161,7 +162,7 @@ Ubiquity.prototype = {
 
     this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
   },
-  
+
   closeWindow: function(){
     this.__msgPanel.hidePopup();
   }
