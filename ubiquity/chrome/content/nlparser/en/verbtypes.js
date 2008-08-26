@@ -68,7 +68,7 @@ NLParser.EnParsedSentence.prototype = {
     }
     return sentence;
   },
-  
+
   getIcon: function() {
     return this._verb._icon;
   },
@@ -197,19 +197,10 @@ NLParser.EnVerb.prototype = {
 	// remaining words in that slot.
         // Make a sentence for each
 	// possible noun completion based on it; return them all.
-
-	suggestions = this.suggestWithPronounSub( this._DOType,
-						  unusedWords,
-						  selObj );
-    
-    try {
-      let moreSuggestions = this._DOType.suggest(unusedWords.join(" "));
-      suggestions = suggestions.concat(moreSuggestions);
-    } catch(e) {
-      Components.utils.reportError(
-          'Exception occured while getting suggestions for "' + this._name +
-          '" with noun "' + this._DOLabel + '"'
-          );    }
+	suggestions = this._suggestForNoun( this._DOType,
+					    this._DOLabel,
+					    unusedWords,
+					    selObj);
 	for each ( let sugg in suggestions ) {
 	  if (sugg)
 	    completions.push( this._newSentence(sugg, filledMods ));
@@ -238,19 +229,10 @@ NLParser.EnVerb.prototype = {
 
 	  // Add the suggestions that can be produced by substituting
 	  // selection for pronoun:
-	  suggestions = this.suggestWithPronounSub( nounType,
-						    [noun],
-                                                    selObj );
-	  // Add the suggestions from the noun type straight-up
-      try {
-        let moreSuggestions = nounType.suggest( noun );
-        suggestions = suggestions.concat(moreSuggestions);
-      } catch(e) {
-        Components.utils.reportError(
-          'Exception occured while getting suggestions for "' + this._name +
-          '" with preposition "' + preposition + '"'
-          );
-      }
+          suggestions = this._suggestForNoun( nounType,
+					      preposition,
+					      [noun],
+  					      selObj);
 	  // Turn each suggestion into a sentence, after recursively
 	  // parsing the leftover words.
 	  for each( let sugg in suggestions ) {
@@ -309,6 +291,20 @@ NLParser.EnVerb.prototype = {
           Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
         }
       }
+    }
+    return suggestions;
+  },
+
+  _suggestForNoun: function(nounType, nounLabel, words, selObj) {
+    var	suggestions = this.suggestWithPronounSub( nounType, words, selObj);
+    try {
+      let moreSuggestions = nounType.suggest(words.join(" "));
+      suggestions = suggestions.concat(moreSuggestions);
+    } catch(e) {
+      Components.utils.reportError(
+          'Exception occured while getting suggestions for "' + this._name +
+          '" with noun "' + nounLabel + '"'
+          );
     }
     return suggestions;
   },

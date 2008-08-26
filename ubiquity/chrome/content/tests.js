@@ -529,3 +529,39 @@ function testMakeSugg() {
   var thingy2 = CmdUtils.makeSugg(null, null, null);
   this.assert( thingy2 == null, "should return null");
 }
+
+function testModifiersTakeMultipleWords() {
+  var wishFound = null;
+  var wishFoundIn = null;
+  var wish = new CmdUtils.NounType( "wish", ["apartment", "significant other", "job"]);
+  var city = new CmdUtils.NounType( "city", ["chicago",
+					     "new york",
+					     "los angeles",
+					     "san francisco"]);
+  var cmd_find = {
+    name: "find",
+    execute: function(context, directObject, modifiers) {
+      if (directObject.text)
+	wishFound = directObject.text;
+      if (modifiers["in"].text)
+	wishFoundIn = modifiers["in"].text;
+    },
+    DOLabel:"wish",
+    DOType: wish,
+    modifiers: {"in": city}
+  };
+  var verb = new NLParser.EnVerb(cmd_find);
+  var selObject = {text:null, html:null};
+  var completions = verb.getCompletions(["job", "in", "chicago"], selObject);
+  this.assert(completions[0]._DO.text == "job", "should be job.");
+  this.assert(completions[0]._modifiers["in"].text == "chicago", "should be chicago");
+
+  completions = verb.getCompletions(["significant", "other", "in", "chicago"],
+				    selObject);
+  this.assert(completions[0]._modifiers["in"].text == "chicago", "should be chicago");
+  this.assert(completions[0]._DO.text == "significant other", "should be SO.");
+
+  completions = verb.getCompletions(["job", "in", "new", "york"], selObject);
+  this.assert(completions[0]._DO.text == "job", "should be job.");
+  this.assert(completions[0]._modifiers["in"].text == "new york", "should be NY");
+}
