@@ -218,33 +218,36 @@ NLParser.EnVerb.prototype = {
       var nounType = unfilledMods[ preposition ];
       for ( x = 0; x < unusedWords.length - 1; x++ ) {
 	if ( preposition.indexOf( unusedWords[x] ) == 0 ) {
-	  // a match for the preposition is found!
-	  // assume noun is first word following it.
-          // TODO this should be able to match a multi-word modifier, not
-	 // just a single word at x+1.
-	  let noun = unusedWords[ x+1 ];
-	  let newUnusedWords = unusedWords.slice();
-	  // remove preposition and following noun from the unused words list
-	  newUnusedWords.splice( x, 2 );
+	  // a match for the preposition is found at position x!
+	  // Anything following this preposition could be part of the noun.
+          // Check every possibility from "just the next word" up to
+	  // "all remaining words".
+	  for (let lastWord = x+1; lastWord < unusedWords.length; lastWord++) {
+	    //copy the array, don't modify the original
+            let newUnusedWords = unusedWords.slice();
+	    // take out the preposition
+	    newUnusedWords.splice(x, 1);
+	    // pull out words from preposition up to lastWord, as nounWords:
+            let nounWords = newUnusedWords.splice( x, lastWord - x );
 
-	  // Add the suggestions that can be produced by substituting
-	  // selection for pronoun:
-          suggestions = this._suggestForNoun( nounType,
-					      preposition,
-					      [noun],
-  					      selObj);
-	  // Turn each suggestion into a sentence, after recursively
-	  // parsing the leftover words.
-	  for each( let sugg in suggestions ) {
-	    if (sugg) {
-              newFilledMods = dictDeepCopy( filledMods );
-              newFilledMods[ preposition ] = sugg;
-              newCompletions = this.recursiveParse( newUnusedWords,
-						  newFilledMods,
-						  newUnfilledMods,
-						  selObj);
-	      // Add results to the ever-growing completion list...
-	      completions = completions.concat( newCompletions );
+            // Add all suggestions the nounType can produce for the noun words:
+            suggestions = this._suggestForNoun( nounType,
+		                                preposition,
+					        nounWords,
+  					        selObj);
+	    // Turn each suggestion into a sentence, after recursively
+	    // parsing the leftover words.
+	    for each( let sugg in suggestions ) {
+	      if (sugg) {
+                newFilledMods = dictDeepCopy( filledMods );
+                newFilledMods[ preposition ] = sugg;
+                newCompletions = this.recursiveParse( newUnusedWords,
+		    				      newFilledMods,
+						      newUnfilledMods,
+						      selObj);
+	        // Add results to the ever-growing completion list...
+	        completions = completions.concat( newCompletions );
+	      }
 	    }
 	  }
 	}
