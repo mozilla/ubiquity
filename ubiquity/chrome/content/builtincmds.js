@@ -1083,14 +1083,20 @@ function addToGoogleCalendar(eventString) {
   };
 
   function parseGoogleJson(json) {
-    var securityPreface = "while(1)";
-    var splitString = json.split( ";", 2 );
+    var securityPreface = "while(1);";
+    
+    var pos = json.indexOf(";") + 1;
+    var splitString = [
+      json.substr( 0, pos ),
+      json.substr( pos )
+    ];
+        
     if ( splitString[0] != securityPreface ) {
       displayMessage( "Unexpected Return Value" );
       return null;
     }
     // TODO: Security hull breach!
-    return eval( splitString[1] )[0];
+    return eval( splitString[1] );
   }
 
   var params = Utils.paramsToString({
@@ -1100,7 +1106,7 @@ function addToGoogleCalendar(eventString) {
 
   Utils.ajaxGet(URLS["parse"]+params, function(json) {
     dump( "First json from addToCalendar: " + json);
-    var data = parseGoogleJson( json );
+    var data = parseGoogleJson( json )[0];
     var eventText = data[1];
     var eventStart = data[4];
     var eventEnd = data[5];
@@ -1117,11 +1123,21 @@ function addToGoogleCalendar(eventString) {
     Utils.ajaxGet(URLS["create"] + params, function(json) {
       try{
         // Ugly hack to parse out the event description.
-        var msg = json.match(/\\76(.*?)'/)[1].replace(/\\74\/span\\76/,"");
-        displayMessage( "Event created:" + msg );
-        reloadGoogleCalendarTabs();
+        var result = eval( parseGoogleJson( json ) );
+        
+        var msg = json.match(/\\76(.*?)'/);
+        if( msg ){
+          displayMessage( "Event created: " + msg[1].replace(/\\74\/span\\76/,"") );
+          reloadGoogleCalendarTabs();
+        } else {
+          // Result now contains something like this:
+          // [["_ReportOperationError"], ["_RefreshCalendarWhenDisplayedNext"], ["_Ping", "500"], ["_Ping", "3000"], ["_Ping", "15000"], ["_ShowMessage", ["Please enter a complete start and end time"]]]
+          errorMessage = result[5][1][0];          
+          displayMessage( errorMessage );
+        }
+        
       } catch(e){
-        displayMessage( "Error parsing the event. " + e );
+        displayMessage( "Error creating the event. " + e );
       }
     });
   });
@@ -1134,7 +1150,7 @@ CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
   icon : "chrome://ubiquity/content/icons/calendar_add.png",
-  preview: "Adds the event to Google Calendar.",
+  preview: "Adds the event to Google Calendar.<br/> Enter the event naturally e.g., \"3pm Lunch with Myk and Thunder\", or \"Jono's Birthday on Friday\".",
   description: "Adds an event to your calendar.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
         "Google account to use it.  Try issuing &quot;add lunch with dan tomorrow&quot;.",
@@ -1539,8 +1555,6 @@ CmdUtils.CreateCommand({
     var doc = CmdUtils.getDocumentInsecure();
     var selected_text= doc.getSelection();
     var api_url='http://services.digg.com/stories';
-
-    CmdUtils.log(selected_text);
 
     var params = Utils.paramsToString({
       appkey: "http://www.gialloporpora.netsons.org",
