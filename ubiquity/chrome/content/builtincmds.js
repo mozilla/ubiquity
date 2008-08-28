@@ -615,9 +615,8 @@ function defineWord(word, callback) {
   });
 
   Utils.ajaxGet(url + params, function(xml) {
-    CmdUtils.loadJQuery( function() {
-      var $ = window.jQuery;
-      var text = $(xml).find("WordDefinition").text();
+    CmdUtils.loadJQuery( function(jQuery) {
+      var text = jQuery(xml).find("WordDefinition").text();
       callback(text);
     });
   });
@@ -1004,17 +1003,14 @@ CmdUtils.CreateCommand({
 
 function gmailChecker(callback) {
   var url = "http://mail.google.com/mail/feed/atom";
-  // todo: loadJQuery not defined here!!
   Utils.ajaxGet(url, function(rss) {
-    CmdUtils.loadJQuery(function() {
-      var $ = window.jQuery;
+    CmdUtils.loadJQuery(function(jQuery) {
+      var firstEntry = jQuery(rss).find("entry").get(0);
 
-      var firstEntry = $(rss).find("entry").get(0);
-
-      var newEmailId = $(firstEntry).find("id").text();
-      var subject = $(firstEntry).find("title").text();
-      var author = $(firstEntry).find("author name").text();
-      var summary = $(firstEntry).find("summary").text();
+      var newEmailId = jQuery(firstEntry).find("id").text();
+      var subject = jQuery(firstEntry).find("title").text();
+      var author = jQuery(firstEntry).find("author name").text();
+      var summary = jQuery(firstEntry).find("summary").text();
 
       var title = author + ' says "' + subject + '"';
       callback({text: summary, title: title});
@@ -1745,9 +1741,8 @@ function cmd_delete() {
       range.surroundContents(newNode);
   }
 
-  CmdUtils.loadJQuery(function() {
-    var $ = window.jQuery;
-    $("._toRemove").slideUp();
+  CmdUtils.loadJQuery(function(jQuery) {
+    jQuery("._toRemove").slideUp();
   });
 }
 cmd_delete.description = "Deletes the selected chunk of HTML from the page.";
@@ -1757,9 +1752,8 @@ cmd_delete.preview = function( pblock ) {
 };
 
 function cmd_undelete() {
-  CmdUtils.loadJQuery(function() {
-    var $ = window.jQuery;
-    $("._toRemove").slideDown();
+  CmdUtils.loadJQuery(function(jQuery) {
+    jQuery("._toRemove").slideDown();
   });
 }
 cmd_undelete.description = "Restores the HTML deleted by the delete command.";

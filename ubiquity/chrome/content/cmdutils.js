@@ -167,8 +167,8 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
   CmdUtils.injectJavascript(
     "http://code.jquery.com/jquery-latest.pack.js",
     Utils.safeWrapper( function() {
-      window.jQuery = window.$ = CmdUtils.getWindowInsecure().jQuery;
-      func();
+      var contentJQuery = CmdUtils.getWindowInsecure().jQuery;
+      func(contentJQuery);
     })
   );
 };
