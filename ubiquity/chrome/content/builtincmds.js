@@ -1502,7 +1502,7 @@ CmdUtils.CreateCommand({
     var updateUrl = "https://twitter.com/statuses/update.json";
     var updateParams = {
       source: "ubiquity",
-      status: statusText
+      status: statusText.slice(0, TWITTER_STATUS_MAXLEN)
     };
 
     jQuery.ajax({
