@@ -147,9 +147,9 @@ function sortCommandsBy(key) {
 
     // ensure empty fields get given lower priority
     if(aKey.length > 0  && bKey.length == 0)
-      return -1
+      return -1;
     if(aKey.length == 0  && bKey.length > 0)
-      return 1
+      return 1;
 
     if(aKey < bKey)
       return -1;
@@ -157,7 +157,7 @@ function sortCommandsBy(key) {
       return 1;
 
     return 0;
-  })
+  });
 
   $.each(allCommands, function(cmdIndex, cmd) {
     cmdList.append(cmd);
