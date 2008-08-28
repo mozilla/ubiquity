@@ -1,0 +1,25 @@
+Found ${numitems} books on Amazon matching <b>${query}</b>
+
+{for item in items}
+    <div style="clear: both; padding: 10px 0px;">
+        <a href="${item.url}">
+            {if item.image}
+                <img
+                    src="${item.image.src}"
+                    style="float: left; margin-right: 10px; height: ${item.image.height}px; width: ${item.image.width}px;"
+                    />
+            {/if}
+            
+            <u>${item.title}</u>
+        </a>
+        <small>
+            {if item.author}
+                <br />by ${item.author}
+            {/if}
+            
+            {if item.price}
+                <br />for ${item.price.amount} (${item.price.currency})
+            {/if}
+        </small>
+    </div>
+{/for}

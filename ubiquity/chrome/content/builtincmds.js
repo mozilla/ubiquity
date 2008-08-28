@@ -239,9 +239,9 @@ makeSearchCommand({
 	  previewBlock.innerHTML = "Searches for books on Amazon";
 	  return;
 	}
-
+	
 	previewBlock.innerHTML = "Searching Amazon for books matching <b>" + directObject.summary + "</b>";
-
+	
 	var apiUrl = "http://ecs.amazonaws.com/onca/xml";
 	var apiParams = {
 	  Service: "AWSECommerceService",
@@ -253,7 +253,7 @@ makeSearchCommand({
 	  SearchIndex: "Books",
 	  Title: directObject.text
 	};
-
+	
 	jQuery.ajax({
 	  type: "GET",
 	  url: apiUrl,
@@ -264,48 +264,47 @@ makeSearchCommand({
 	  },
 	  success: function(responseData) {
 		const AMAZON_MAX_RESULTS = 5;
-
+		
 		responseData = jQuery(responseData);
 		var items = [];
-
+		
 		responseData.find("Items Item").slice(0, AMAZON_MAX_RESULTS).each(function(itemIndex) {
 		  var itemDetails = jQuery(this);
-
-		  items.push({
+		  
+		  var newItem = {
 			title: itemDetails.find("ItemAttributes Title").text(),
-			author: itemDetails.find("ItemAttributes Author").text(),
-			price: {
+			url: itemDetails.find("DetailPageURL").text()
+		  };
+		  
+		  if(itemDetails.find("ItemAttributes Author").length > 0) {
+			newItem.author = itemDetails.find("ItemAttributes Author").text();
+		  }
+		  
+		  if(itemDetails.find("ItemAttributes ListPrice").length > 0) {
+			newItem.price = {
 			  amount: itemDetails.find("ItemAttributes ListPrice FormattedPrice").text(),
 			  currency: itemDetails.find("ItemAttributes ListPrice CurrencyCode").text()
-			},
-			url: itemDetails.find("DetailPageURL").text(),
-			image: {
+			};
+		  }
+		  
+		  if(itemDetails.find("SmallImage").length > 0) {
+			newItem.image = {
 			  src: itemDetails.find("SmallImage:first URL").text(),
 			  height: itemDetails.find("SmallImage:first Height").text(),
 			  width: itemDetails.find("SmallImage:first Width").text()
-			}
-		  });
+			};
+		  }
+		  
+		  items.push(newItem);
 		});
-
-		var previewTemplate = "Found ${numitems} books on Amazon matching <b>${query}</b>" +
-		  "{for item in items}" +
-		  "<div style=\"clear: both; padding: 10px 0px;\">" +
-		  "<a href=\"${item.url}\">" +
-		  "<img src=\"${item.image.src}\" style=\"float: left; margin-right: 10px; height: ${item.image.height}px; width: ${item.image.width}px;\"/>" +
-		  "${item.title}" +
-		  "</a>" +
-		  "<br /><small>by ${item.author}</small>" +
-		  "<br /><small>for ${item.price.amount} (${item.price.currency})</small>" +
-		  "</div>" +
-		  "{/for}";
-
+		
 		var previewData = {
 			query: directObject.summary,
 			numitems: responseData.find("Items TotalResults").text(),
 			items: items
 		};
-
-		previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+		
+		previewBlock.innerHTML = CmdUtils.renderTemplate({file: "amazon-search.html"}, previewData);
 	  }
 	});
   }
