@@ -1,7 +1,7 @@
 {for result in results}
 <div class="gresult">
   <div>
-    <a href="${result.url}">${result.title}</a>
+    <a href="${result.unescapedUrl}">${result.title}</a>
   </div>
   <xul:description class="gresult-content">${result.content}</xul:description>
   <div class="gresult-url">${result.visibleUrl}</div>
