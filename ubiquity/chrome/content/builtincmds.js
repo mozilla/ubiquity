@@ -1455,8 +1455,8 @@ From Abi:
 
 */
 
-// max of 140 chars is recommended, but it really allows 160
-const TWITTER_STATUS_MAXLEN = 160;
+// max of 140 chars is recommended, but it really allows 160... but that gets truncated on some displays? grr
+const TWITTER_STATUS_MAXLEN = 140;
 
 
 CmdUtils.CreateCommand({
@@ -1468,7 +1468,11 @@ CmdUtils.CreateCommand({
   help: "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
         " you'll be asked to log in.",
   preview: function(previewBlock, directObj) {
-    var statusText = directObj.text;
+	// these are converted in the Twitter database anyway, and counted as 4 characters
+    var statusText = directObj.text
+	  .replace("<", "&lt;")
+	  .replace(">", "&gt;");
+	
     var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
     var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
     var previewData = {
