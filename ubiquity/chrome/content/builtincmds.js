@@ -239,9 +239,9 @@ makeSearchCommand({
 	  previewBlock.innerHTML = "Searches for books on Amazon";
 	  return;
 	}
-	
+
 	previewBlock.innerHTML = "Searching Amazon for books matching <b>" + directObject.summary + "</b>";
-	
+
 	var apiUrl = "http://ecs.amazonaws.com/onca/xml";
 	var apiParams = {
 	  Service: "AWSECommerceService",
@@ -253,7 +253,7 @@ makeSearchCommand({
 	  SearchIndex: "Books",
 	  Title: directObject.text
 	};
-	
+
 	jQuery.ajax({
 	  type: "GET",
 	  url: apiUrl,
@@ -264,29 +264,29 @@ makeSearchCommand({
 	  },
 	  success: function(responseData) {
 		const AMAZON_MAX_RESULTS = 5;
-		
+
 		responseData = jQuery(responseData);
 		var items = [];
-		
+
 		responseData.find("Items Item").slice(0, AMAZON_MAX_RESULTS).each(function(itemIndex) {
 		  var itemDetails = jQuery(this);
-		  
+
 		  var newItem = {
 			title: itemDetails.find("ItemAttributes Title").text(),
 			url: itemDetails.find("DetailPageURL").text()
 		  };
-		  
+
 		  if(itemDetails.find("ItemAttributes Author").length > 0) {
 			newItem.author = itemDetails.find("ItemAttributes Author").text();
 		  }
-		  
+
 		  if(itemDetails.find("ItemAttributes ListPrice").length > 0) {
 			newItem.price = {
 			  amount: itemDetails.find("ItemAttributes ListPrice FormattedPrice").text(),
 			  currency: itemDetails.find("ItemAttributes ListPrice CurrencyCode").text()
 			};
 		  }
-		  
+
 		  if(itemDetails.find("SmallImage").length > 0) {
 			newItem.image = {
 			  src: itemDetails.find("SmallImage:first URL").text(),
@@ -294,16 +294,16 @@ makeSearchCommand({
 			  width: itemDetails.find("SmallImage:first Width").text()
 			};
 		  }
-		  
+
 		  items.push(newItem);
 		});
-		
+
 		var previewData = {
 			query: directObject.summary,
 			numitems: responseData.find("Items TotalResults").text(),
 			items: items
 		};
-		
+
 		previewBlock.innerHTML = CmdUtils.renderTemplate({file: "amazon-search.html"}, previewData);
 	  }
 	});
@@ -1103,6 +1103,7 @@ function addToGoogleCalendar(eventString) {
   });
 
   Utils.ajaxGet(URLS["parse"]+params, function(json) {
+    dump( "First json from addToCalendar: " + json);
     var data = parseGoogleJson( json );
     var eventText = data[1];
     var eventStart = data[4];
@@ -1118,9 +1119,6 @@ function addToGoogleCalendar(eventString) {
     });
 
     Utils.ajaxGet(URLS["create"] + params, function(json) {
-      // json looks like this:
-      // while(1);[['a','NjByNWVtNm81Y3A1dGVmYm5vZGo5aXYwa2sgYXphYXphQG0','dinner with Dan','20080828T160000','20080828T170000','YXphYXphQGdtYWlsLmNvbQ',0,0,525573,null,null,0,'',null,['spamScore','0.0'],null,null,[126975,60,null,'',[],0,'DEFAULT']],['_RefreshCalendarWhenDisplayedNext'],['_Ping','500'],['_Ping','3000'],['_Ping','15000'],['_ShowMessage','Added \74span class\75\42lk\42 onmousedown\75\42_EF_ShowEventDetails(\47NjByNWVtNm81Y3A1dGVmYm5vZGo5aXYwa2sgYXphYXphQG0\47);_HideMessage();\42\76dinner with Dan\74/span\76 on Thu Aug 28, 2008 at 4pm.']]
-      
       try{
         // Ugly hack to parse out the event description.
         var msg = json.match(/\\76(.*?)'/)[1].replace(/\\74\/span\\76/,"");
@@ -1147,8 +1145,7 @@ CmdUtils.CreateCommand({
   execute: function( eventString ) {
     addToGoogleCalendar( eventString.text );
   }
-})
-
+});
 
 
 // TODO: Don't do a whole-sale copy of the page ;)
@@ -1471,7 +1468,7 @@ CmdUtils.CreateCommand({
     var statusText = directObj.text
 	  .replace("<", "&lt;")
 	  .replace(">", "&gt;");
-	
+
     var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
     var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
     var previewData = {
