@@ -235,7 +235,7 @@ makeSearchCommand({
   description: "Searches <a href=\"http://www.amazon.com\">Amazon</a> for books matching your words.",
   url: "http://www.amazon.com/s/ref=nb_ss_gw?url=search-alias%3Dstripbooks&field-keywords={QUERY}",
   preview: function(previewBlock, directObject) {
-	if(!directObject.text || directObject.text.lenth < 1) {
+	if(!directObject.text || directObject.text.length < 1) {
 	  previewBlock.innerHTML = "Searches for books on Amazon";
 	  return;
 	}
