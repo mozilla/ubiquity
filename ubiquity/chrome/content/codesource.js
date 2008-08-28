@@ -18,7 +18,8 @@ RemoteUriCodeSource.prototype = {
         var validTypes = ["text/javascript",
                           "text/ecmascript",
                           "text/plain",
-                          "application/x-javascript"];
+                          "application/x-javascript",
+                          "application/javascript"];
         for (var i = 0; i < validTypes.length; i++) {
           // We only want to see if the string starts with the
           // type, since it might contain extra information, e.g.
