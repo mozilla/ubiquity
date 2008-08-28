@@ -1058,6 +1058,27 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 
+function reloadGoogleCalendarTabs() {
+  try {
+    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator);
+    var enumerator = wm.getEnumerator("navigator:browser");
+    while(enumerator.hasMoreElements()) {
+      var win = enumerator.getNext();
+      var index = 0, numTabs = win.getBrowser().mPanelContainer.childNodes.length;
+      while (index < numTabs) {
+      	var currentTab = win.getBrowser().getBrowserAtIndex(index);
+      	if(currentTab.currentURI.spec.indexOf("google.com/calendar") > -1) {
+      	  currentTab.reload();
+      	}
+      	index++;
+      }
+    }
+  } catch(e) {
+    displayMessage("Error reloading calendar tabs: " + e);
+  }
+}
+
+
 function addToGoogleCalendar(eventString) {
   var secid = Utils.getCookie("www.google.com", "secid");
 
@@ -1098,12 +1119,17 @@ function addToGoogleCalendar(eventString) {
     });
 
     Utils.ajaxGet(URLS["create"] + params, function(json) {
-      // TODO: Should verify this, and print appropriate positive
-      // understand feedback. Like "blah at such a time was created.
-      displayMessage("Event created.");
-
-      // TODO: Should iterate through open tabs and cause any open
-      // Google Calendar tabs to refresh.
+      // json looks like this:
+      // while(1);[['a','NjByNWVtNm81Y3A1dGVmYm5vZGo5aXYwa2sgYXphYXphQG0','dinner with Dan','20080828T160000','20080828T170000','YXphYXphQGdtYWlsLmNvbQ',0,0,525573,null,null,0,'',null,['spamScore','0.0'],null,null,[126975,60,null,'',[],0,'DEFAULT']],['_RefreshCalendarWhenDisplayedNext'],['_Ping','500'],['_Ping','3000'],['_Ping','15000'],['_ShowMessage','Added \74span class\75\42lk\42 onmousedown\75\42_EF_ShowEventDetails(\47NjByNWVtNm81Y3A1dGVmYm5vZGo5aXYwa2sgYXphYXphQG0\47);_HideMessage();\42\76dinner with Dan\74/span\76 on Thu Aug 28, 2008 at 4pm.']]
+      
+      try{
+        // Ugly hack to parse out the event description.
+        var msg = json.match(/\\76(.*?)'/)[1].replace(/\\74\/span\\76/,"");
+        displayMessage( "Event created:" + msg );
+        reloadGoogleCalendarTabs();
+      } catch(e){
+        displayMessage( "Error parsing the event. " + e );
+      }
     });
   });
 }
@@ -1120,7 +1146,7 @@ CmdUtils.CreateCommand({
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
         "Google account to use it.  Try issuing &quot;add lunch with dan tomorrow&quot;.",
   execute: function( eventString ) {
-    addToGoogleCalendar( eventString );
+    addToGoogleCalendar( eventString.text );
   }
 })
 
