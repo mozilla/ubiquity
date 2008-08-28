@@ -211,10 +211,19 @@ CmdUtils.getSelection = function getSelection() {
   var focused = context.focusedElement;
   var retval = "";
 
-  if (focused)
-    if (focused.selectionStart != focused.selectionEnd)
-      retval = focused.value.substring(focused.selectionStart,
-                                       focused.selectionEnd);
+  if (focused) {
+    var start = 0;
+    var end = 0;
+    try {
+      start = focused.selectionStart;
+      end = focused.selectionEnd;
+    } catch (e) {
+      // It's bizzarely possible for this to occur; see #156.
+    }
+    if (start != end)
+      retval = focused.value.substring(start, end);
+  }
+
   if (!retval) {
     var sel = context.focusedWindow.getSelection();
     if (sel.rangeCount >= 1)
