@@ -12,6 +12,11 @@ function getUrlParams() {
 var gCommandFeedInfo = getUrlParams();
 
 function showConfirmation() {
+  $("#errorPageContainer").css("background-color", "white");
+  $("#errorPageContainer h1,h2,p,a,div").css("background-color",
+                                             "transparent");
+  $("#errorTitle").html("<h1>Subscription Successful</h1>");
+
   $("#errorShortDesc").html($("#confirmationShortDesc").html());
   $("#errorLongDesc").html($("#confirmationLongDesc").html());
   $("#buttons").remove();
