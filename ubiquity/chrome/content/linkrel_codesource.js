@@ -1,3 +1,5 @@
+const CMD_SRC_ANNO = "ubiquity/source";
+const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
 const CMD_URL_ANNO = "ubiquity/commands";
 const WARNING_URL = "chrome://ubiquity/content/confirm-add-command.html";
@@ -14,16 +16,24 @@ function LinkRelCodeSource() {
     let markedPages = LinkRelCodeSource.getMarkedPages();
     let newSources = {};
     for (let i = 0; i < markedPages.length; i++) {
-      let uri = markedPages[i].jsUri;
-      let href = uri.spec;
+      let page = markedPages[i];
+      let href = page.jsUri.spec;
       if (this._sources[href]) {
+        // TODO: This won't distinguish between something
+        // that was a RemoteUriCodeSource but changed to
+        // an AnnotationCodeSource.
         newSources[href] = this._sources[href];
-      } else if (uri.scheme == "http" ||
-                 uri.scheme == "https") {
-        newSources[href] = new RemoteUriCodeSource(href);
-      } else if (uri.scheme == "file" ||
-                 uri.scheme == "chrome" ||
-                 uri.scheme == "resource") {
+      } else if (RemoteUriCodeSource.isValidUri(page.jsUri)) {
+        if (page.canUpdate)
+          // TODO: Initialize w/ cached source.
+          newSources[href] = new RemoteUriCodeSource(href);
+        else
+          // TODO: What about 0.1 feeds?  Just make users
+          // resubscribe to all their stuff?  Or implement
+          // manual updating?
+          newSources[href] = new AnnotationCodeSource(page.htmlUri,
+                                                      CMD_SRC_ANNO);
+      } else if (LocalUriCodeSource.isValidUri(page.jsUri)) {
         newSources[href] = new LocalUriCodeSource(href);
       }
     }
@@ -67,6 +77,11 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
       pageInfo.jsUri = uri;
     }
 
+    if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
+      pageInfo.canUpdate = annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
+    else
+      pageInfo.canUpdate = false;
+
     if (this.__singleton)
       if (pageInfo.jsUri.spec in this.__singleton._sources)
         pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
@@ -77,9 +92,13 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
   return markedPages;
 };
 
-LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(uri) {
+LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
   let annSvc = this.__getAnnSvc();
-  uri = Utils.url(uri);
+  let uri = Utils.url(info.url);
+  annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, info.sourceCode, 0,
+                           annSvc.EXPIRE_NEVER);
+  annSvc.setPageAnnotation(uri, CMD_AUTOUPDATE_ANNO, info.canUpdate, 0,
+                           annSvc.EXPIRE_NEVER);
   annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
                            annSvc.EXPIRE_NEVER);
 };
@@ -94,6 +113,7 @@ LinkRelCodeSource.removeMarkedPage = function LRCS_removeMarkedPage(uri) {
   let annSvc = this.__getAnnSvc();
   uri = Utils.url(uri);
   annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
+  // TODO: Remove source code and autoupdate annotations if they exist.
 };
 
 LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {

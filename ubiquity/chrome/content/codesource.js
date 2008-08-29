@@ -1,7 +1,30 @@
+function AnnotationCodeSource(uri, annotation) {
+  this.uri = uri;
+}
+
+AnnotationCodeSource.prototype = {
+  getCode: function() {
+    var Cc = Components.classes;
+    var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
+                 .getService(Components.interfaces.nsIAnnotationService);
+
+    if (annSvc.pageHasAnnotation(this.uri, CMD_SRC_ANNO))
+      return annSvc.getPageAnnotation(this.uri, CMD_SRC_ANNO);
+    else
+      return "";
+  }
+};
+
 function RemoteUriCodeSource(uri) {
   this.uri = uri;
   this._code = "";
   this._req = null;
+};
+
+RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
+  uri = Utils.url(uri);
+  return (uri.scheme == "http" ||
+          uri.scheme == "https");
 };
 
 RemoteUriCodeSource.prototype = {
@@ -54,6 +77,13 @@ RemoteUriCodeSource.prototype = {
 function LocalUriCodeSource(uri) {
   this.uri = uri;
 }
+
+LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
+  uri = Utils.url(uri);
+  return (uri.scheme == "file" ||
+          uri.scheme == "chrome" ||
+          uri.scheme == "resource");
+};
 
 LocalUriCodeSource.prototype = {
   getCode : function() {

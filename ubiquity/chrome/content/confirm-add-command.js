@@ -18,12 +18,35 @@ function showConfirmation() {
 }
 
 function onSubmit() {
-  LinkRelCodeSource.addMarkedPage(gCommandFeedInfo.url);
-  showConfirmation();
+  var code = $("#sourceCode").text();
+  var canUpdate = $("#autoupdate").attr("checked") ? true : false;
+  if (code) {
+    LinkRelCodeSource.addMarkedPage({url: gCommandFeedInfo.url,
+                                     sourceCode: code,
+                                     canUpdate: canUpdate});
+    showConfirmation();
+  }
 }
 
 function onCancel() {
   window.close();
+}
+
+function fetchSource(uri) {
+  function onSuccess(data) {
+    $("#sourceCode").css({whiteSpace: "pre-wrap",
+                          fontFamily: "Monospace"});
+    $("#sourceCode").text(data);
+  }
+  if (LocalUriCodeSource.isValidUri(uri)) {
+    $("#autoupdate-widget").hide();
+    var codeSource = new LocalUriCodeSource(uri);
+    onSuccess(codeSource.getCode());
+  } else {
+    jQuery.ajax({url: uri,
+                 dataType: "text",
+                 success: onSuccess});
+  }
 }
 
 function onReady() {
@@ -32,7 +55,7 @@ function onReady() {
 
   $("#targetLink").text(gCommandFeedInfo.url);
   $("#targetLink").attr("href", gCommandFeedInfo.url);
-  $("#jsIframe").attr("src", gCommandFeedInfo.sourceUrl);
+  fetchSource(gCommandFeedInfo.sourceUrl);
 }
 
 $(window).ready(onReady);
