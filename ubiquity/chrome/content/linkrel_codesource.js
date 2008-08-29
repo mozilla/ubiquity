@@ -92,6 +92,11 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
                                annSvc.EXPIRE_NEVER);
     };
 
+    // The following is used by the herd command feed code.
+    if (this.__singleton)
+      if (pageInfo.jsUri.spec in this.__singleton._sources)
+        pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
+
     markedPages.push(pageInfo);
   }
 
