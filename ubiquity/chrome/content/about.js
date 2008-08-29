@@ -11,8 +11,19 @@ function makeRemover(element, uri) {
   return remove;
 }
 
+function showBugRelatedAlerts() {
+  // Show a warning for bug #146.
+  var sanitizeOnShutdown = Application.prefs.getValue(
+    "privacy.sanitize.sanitizeOnShutdown",
+    false
+  );
+  if (sanitizeOnShutdown)
+    $("#sanitizeOnShutdown-alert").slideDown();
+}
+
 function onReady() {
   PrefKeys.onLoad();
+  showBugRelatedAlerts();
   let markedPages = LinkRelCodeSource.getMarkedPages();
   for (let i = 0; i < markedPages.length; i++) {
     let info = markedPages[i];
@@ -33,7 +44,7 @@ function onReady() {
   }
   if (!$("#command-feeds").text())
     $("#commands-feeds-div").hide();
-    
+
   jQuery.get( "http://hg.toolness.com/ubiquity-firefox/rss-log", loadNews);
 }
 
@@ -41,16 +52,16 @@ function loadNews( data ) {
   $("item", data).each(function(){
     var p = document.createElement("p");
     var a = document.createElement("a");
-    
-        
+
+
     $(a).attr("href", $("link", this).text() )
-        .text( $("title", this).text() +"..." )
-    
+        .text( $("title", this).text() +"..." );
+
     var author = $("author", this).text();
 
     $(p).append(a).append("<span class='light'><br/>by " + author + "</span>");
     $("#news").append(p);
-  })
+  });
 }
 
 $(window).ready(onReady);

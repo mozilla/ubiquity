@@ -170,3 +170,13 @@ a:hover {
 .error {
   color:#FF0000;
 }
+
+.alert {
+  color:#FFFFFF;
+  background:#FF0000;
+}
+
+.alert a {
+  color:#FFFFFF;
+  text-decoration: underline;
+}
