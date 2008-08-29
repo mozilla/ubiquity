@@ -2,7 +2,7 @@ const CMD_SRC_ANNO = "ubiquity/source";
 const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
 const CMD_URL_ANNO = "ubiquity/commands";
-const WARNING_URL = "chrome://ubiquity/content/confirm-add-command.html";
+const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 function LinkRelCodeSource() {
   if (LinkRelCodeSource.__singleton)
@@ -92,10 +92,6 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
                                annSvc.EXPIRE_NEVER);
     };
 
-    if (this.__singleton)
-      if (pageInfo.jsUri.spec in this.__singleton._sources)
-        pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
-
     markedPages.push(pageInfo);
   }
 
@@ -164,13 +160,40 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
         box.removeNotification(oldNotification);
 
       // Clicking on "subscribe" takes them to the warning page:
-      var confirmUrl = WARNING_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
+      var confirmUrl = CONFIRM_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
 			 + encodeURIComponent(commandsUrl);
+
+      function isTrustedUrl(commandsUrl) {
+        // TODO: Really implement this. If the domain is trusted and the
+        // protocol is https, then return true, otherwise return false.
+        // also potentially take the link's 'class' attribute into
+        // account and see if it's 'untrusted', for the case where a
+        // trusted host is mirroring an untrusted command feed.
+        return false;
+      }
+
+      function onSubscribeClick(notification, button) {
+        if (isTrustedUrl(commandsUrl)) {
+          function onSuccess(data) {
+            LinkRelCodeSource.addMarkedPage({url: targetDoc.URL,
+                                             canUpdate: true,
+                                             sourceCode: data});
+            Utils.openUrlInBrowser(confirmUrl);
+          }
+
+          if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
+            jQuery.ajax({url: commandsUrl,
+                         dataType: "text",
+                         success: onSuccess});
+          } else
+            onSuccess("");
+        } else
+          Utils.openUrlInBrowser(confirmUrl);
+      }
+
       var buttons = [
         {accessKey: null,
-         callback: function(notification, button) {
-	   Utils.openUrlInBrowser(confirmUrl);
-	 },
+         callback: onSubscribeClick,
          label: "Subscribe...",
          popup: null}
       ];
