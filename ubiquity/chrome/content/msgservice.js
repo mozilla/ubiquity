@@ -48,10 +48,6 @@ function AlertMessageService() {
   this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
 
   this.displayMessage = function(msg) {
-    var Ci = Components.interfaces;
-    var classObj = Components.classes["@mozilla.org/alerts-service;1"];
-    var alertService = classObj.getService(Ci.nsIAlertsService);
-
     var text = msg;
     var title = "Ubiquity Notification";
     var icon = this.ALERT_IMG;
@@ -69,7 +65,16 @@ function AlertMessageService() {
         text += "\n" + msg.exception;
     }
 
-    alertService.showAlertNotification(icon, title, text);
+    try {
+      var Ci = Components.interfaces;
+      var classObj = Components.classes["@mozilla.org/alerts-service;1"];
+      var alertService = classObj.getService(Ci.nsIAlertsService);
+
+      alertService.showAlertNotification(icon, title, text);
+    } catch (e) {
+      Components.utils.reportError(e);
+      Utils.openUrlInBrowser("chrome://ubiquity/content/bug19warning.html");
+    }
   };
 }
 
