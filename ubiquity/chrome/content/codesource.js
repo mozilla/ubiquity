@@ -1,23 +1,15 @@
-function AnnotationCodeSource(uri, annotation) {
-  this.uri = uri;
+function StringCodeSource(code) {
+  this._code = code;
 }
 
-AnnotationCodeSource.prototype = {
+StringCodeSource.prototype = {
   getCode: function() {
-    var Cc = Components.classes;
-    var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-                 .getService(Components.interfaces.nsIAnnotationService);
-
-    if (annSvc.pageHasAnnotation(this.uri, CMD_SRC_ANNO))
-      return annSvc.getPageAnnotation(this.uri, CMD_SRC_ANNO);
-    else
-      return "";
+    return this._code;
   }
 };
 
-function RemoteUriCodeSource(uri) {
-  this.uri = uri;
-  this._code = "";
+function RemoteUriCodeSource(pageInfo) {
+  this._pageInfo = pageInfo;
   this._req = null;
 };
 
@@ -34,7 +26,7 @@ RemoteUriCodeSource.prototype = {
 
       var self = this;
       self._req = new XMLHttpRequest();
-      self._req.open('GET', this.uri, true);
+      self._req.open('GET', this._pageInfo.jsUri.spec, true);
       self._req.overrideMimeType("text/javascript");
 
       function isJsType(type) {
@@ -58,7 +50,7 @@ RemoteUriCodeSource.prototype = {
           if (self._req.status == 200) {
             // Update our cache.
             if (isJsType(self._req.getResponseHeader("Content-Type")))
-              self._code = self._req.responseText;
+              self._pageInfo.setCode(self._req.responseText);
           } else {
             // TODO: What should we do? Display a message?
           }
@@ -70,7 +62,7 @@ RemoteUriCodeSource.prototype = {
     }
 
     // Return whatever we've got cached for now.
-    return this._code;
+    return this._pageInfo.getCode();
   }
 };
 
