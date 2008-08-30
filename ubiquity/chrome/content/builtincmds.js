@@ -56,6 +56,7 @@ makeSearchCommand({
 CmdUtils.CreateCommand({
   name: "search",
   icon: "chrome://ubiquity/content/icons/search.png",
+  description: "Search using your installed search engines",
   takes: {query: noun_arb_text},
   modifiers: {"with": noun_type_searchengine},
   preview: function(previewBlock, inputObject, queryModifiers) {
