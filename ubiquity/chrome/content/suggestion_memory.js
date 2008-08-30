@@ -59,9 +59,9 @@ SuggestionMemory.prototype = {
        with this input. */
     if (!this._table[input])
       return 0;
-    if (! this._table[input][chosenSuggestion])
+    if (! this._table[input][suggestion])
       return 0;
-    return this._table[input][chosenSuggestion];
+    return this._table[input][suggestion];
   }
 };
 

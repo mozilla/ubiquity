@@ -565,3 +565,23 @@ function testModifiersTakeMultipleWords() {
   this.assert(completions[0]._DO.text == "job", "should be job.");
   this.assert(completions[0]._modifiers["in"].text == "new york", "should be NY");
 }
+
+
+function testSuggestionMemory() {
+  var suggMem1 = new SuggestionMemory("test_1");
+  suggMem1.remember( "p", "peas");
+  suggMem1.remember( "p", "peas");
+  suggMem1.remember( "q", "quinine");
+  suggMem1.remember( "q", "quetzalcoatl");
+  suggMem1.remember( "p", "polymascotfoamulate");
+  suggMem1.remember( "q", "quinine");
+
+  this.assert(suggMem1.getScore("q", "quinine") == 2);
+  this.assert(suggMem1.getScore("q", "quetzalcoatl") == 1);
+  this.assert(suggMem1.getScore( "q", "peas") == 0 );
+  this.assert(suggMem1.getScore( "q", "qualifier") == 0);
+  this.assert(suggMem1.getScore( "p", "peas") == 2);
+  this.assert(suggMem1.getScore( "p", "polymascotfoamulate") == 1);
+  this.assert(suggMem1.getScore( "p", "popcorn" ) == 0 );
+  this.assert(suggMem1.getScore( "p", "quinine" ) == 0 );
+}
