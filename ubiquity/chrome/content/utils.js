@@ -63,9 +63,16 @@ Utils.url = function url(spec) {
   return ios.newURI(spec, null, null);
 };
 
-Utils.openUrlInBrowser = function openUrlInBrowser(urlString) {
-  var tab = Application.activeWindow.open(Utils.url(urlString));
-  tab.focus();
+Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
+  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  var browser = browserWindow.getBrowser();
+  
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+    browserWindow.loadURI(urlString, null, postData, false);
+  else
+    browser.loadOneTab(urlString, null, null, postData, false, false);
 };
 
 // Focuses a tab with the given URL if one exists in the current
