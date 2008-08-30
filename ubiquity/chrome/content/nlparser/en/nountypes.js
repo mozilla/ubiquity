@@ -37,7 +37,7 @@ var noun_type_contact = {
       return [];
     }
 
-    if( text.length < 3 ) return [];
+    if( text.length < 2 ) return [];
 
     var suggestions  = [];
     for ( var c in noun_type_contact.contactList ) {
@@ -225,4 +225,114 @@ var noun_type_tab = {
     }
     return suggestions.splice(0, 5);
   }
+};
+
+
+var noun_type_searchengine = {
+  _name: "search engine",
+  suggest: function(fragment) {
+    var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
+      .getService(Components.interfaces.nsIBrowserSearchService);
+    var engines = searchService.getVisibleEngines({});
+    
+    if (!fragment) {
+      return engines.map(function(engine) {
+        return CmdUtils.makeSugg(engine.name, null, engine);
+      });
+    }
+    
+    fragment = fragment.toLowerCase();
+    var suggestions = [];
+    
+    for(var i = 0; i < engines.length; i++) {
+      if(engines[i].name.toLowerCase().indexOf(fragment) > -1) {
+        suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i]));
+      }
+    }
+    
+    return suggestions;
+  },
+  getDefault: function() {
+    return Components.classes["@mozilla.org/browser/search-service;1"]
+      .getService(Components.interfaces.nsIBrowserSearchService)
+      .defaultEngine;
+  }
+};
+
+
+var noun_type_tag = {
+	_name: "tag-list",
+	suggest: function(fragment) {
+		var allTags = Components.classes["@mozilla.org/browser/tagging-service;1"]
+			.getService(Components.interfaces.nsITaggingService)
+			.allTags;
+		
+		if(fragment.length < 1) {
+			return allTags.map(function(tag) {
+        return CmdUtils.makeSugg(tag, null, [tag]);
+      });
+    }
+		
+		fragment = fragment.toLowerCase();
+		var numTags = allTags.length;
+		var suggestions = [];
+		
+		// can accept multiple tags, seperated by a comma
+		// assume last tag is still being typed - suggest completions for that
+		
+		var completedTags = fragment.split(",").map(function(tag) {
+      return Utils.trim(tag);
+    });;
+		
+		
+		// separate last tag in fragment, from the rest
+		var uncompletedTag = completedTags.pop();
+		
+		completedTags = completedTags.filter(function(tagName) {
+			return tagName.length > 0;
+		});
+		var fragmentTags = "";
+		if(completedTags.length > 0)
+			fragmentTags = completedTags.join(",");
+		
+		if(uncompletedTag.length > 0) {
+			
+			if(fragmentTags.length > 0) {
+				suggestions.push(CmdUtils.makeSugg(
+					fragmentTags + "," + uncompletedTag,
+					null,
+					completedTags.concat([uncompletedTag])
+				));
+			} else {
+				suggestions.push(CmdUtils.makeSugg(
+					uncompletedTag,
+					null,
+					completedTags
+				));
+			}
+				
+		} else {
+			suggestions.push(CmdUtils.makeSugg(
+				fragmentTags,
+				null,
+				completedTags
+			));
+		}
+		
+		for(var i = 0; i < numTags; i++) {
+			// handle cases where user has/hasn't typed anything for the current uncompleted tag in the fragment
+			// and only match from the begining of a tag name (not the middle)
+			if(uncompletedTag.length < 1 || allTags[i].indexOf(uncompletedTag) == 0) {
+				// only if its not in the list already
+				if(completedTags.indexOf(allTags[i]) == -1)
+					suggestions.push(CmdUtils.makeSugg(
+						fragmentTags + "," + allTags[i],
+						null,
+						completedTags.concat([allTags[i]])
+					));
+			}
+		}
+		
+		return suggestions;
+	}
 };

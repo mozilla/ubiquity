@@ -63,9 +63,28 @@ Utils.url = function url(spec) {
   return ios.newURI(spec, null, null);
 };
 
-Utils.openUrlInBrowser = function openUrlInBrowser(urlString) {
-  var tab = Application.activeWindow.open(Utils.url(urlString));
-  tab.focus();
+Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
+  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  var browser = browserWindow.getBrowser();
+  
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+    browserWindow.loadURI(urlString, null, postData, false);
+  else
+    browser.loadOneTab(urlString, null, null, postData, false, false);
+};
+
+// Focuses a tab with the given URL if one exists in the current
+// window, otherwise opens a new tab with the URL and focuses it.
+Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
+  var tabs = Application.activeWindow.tabs;
+  for (var i = 0; i < tabs.length; i++)
+    if (tabs[i].uri.spec == urlString) {
+      tabs[i].focus();
+      return;
+    }
+  Utils.openUrlInBrowser(urlString);
 };
 
 Utils.getCookie = function getCookie(domain, name) {
@@ -85,7 +104,7 @@ Utils.paramsToString = function paramsToString(params) {
   var string = "?";
 
   for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
+    string += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
   }
 
   // Remove the trailing &
@@ -135,3 +154,12 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
   request.onreadystatechange = onRscFunc;
   request.send(null);
 };
+
+
+Utils.trim = function(str) {
+  var str = str.replace(/^\s\s*/, ''),
+    ws = /\s/,
+    i = str.length;
+  while (ws.test(str.charAt(--i)));
+  return str.slice(0, i + 1);
+}

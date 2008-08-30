@@ -73,7 +73,7 @@ function AlertMessageService() {
       alertService.showAlertNotification(icon, title, text);
     } catch (e) {
       Components.utils.reportError(e);
-      Utils.openUrlInBrowser("chrome://ubiquity/content/bug19warning.html");
+      Utils.focusUrlInBrowser("chrome://ubiquity/content/bug19warning.html");
     }
   };
 }
