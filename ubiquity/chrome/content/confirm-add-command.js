@@ -61,6 +61,19 @@ function onReady() {
   $("#targetLink").text(gCommandFeedInfo.url);
   $("#targetLink").attr("href", gCommandFeedInfo.url);
   fetchSource(gCommandFeedInfo.sourceUrl);
+
+  function onAutoupdateClicked() {
+    if ($("#autoupdate").attr("checked"))
+      $("#autoupdate-warning").slideDown();
+    else
+      $("#autoupdate-warning").slideUp();
+  }
+
+  if (Utils.url(gCommandFeedInfo.sourceUrl).scheme == "http")
+    $("#mitm-warning").show();
+
+  $("#autoupdate").click(onAutoupdateClicked);
+  onAutoupdateClicked();
 }
 
 $(window).ready(onReady);

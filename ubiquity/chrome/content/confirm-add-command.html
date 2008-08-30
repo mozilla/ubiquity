@@ -50,7 +50,22 @@
         </div>
         <div id="buttons">
           <p id="autoupdate-widget">
-          <input type="checkbox" id="autoupdate"/>Auto-update this feed.
+          <input type="checkbox" id="autoupdate"/>
+          <span style="font-size: larger;">Auto-update this feed.</span>
+          <ul id="autoupdate-warning" style="display: none;">
+            <p>This means that the feed will constantly be checked for
+            functionality updates and automatically pushed to your
+            computer.  If you check this, make sure that you trust the
+            people who have access to change this code on the server
+            that it's hosted on.</p>
+            <p id="mitm-warning" style="display: none;">Note that
+              this feed is served using an insecure protocol, and is
+              therefore subject to <a
+              href="http://blog.johnath.com/2008/08/05/ssl-question-corner/">man-in-the-middle
+              attacks</a>.  Please only auto-update this feed if you
+              are sure about the implications of what you're
+              doing.</p>
+          </ul>
           <!-- TODO: Add description. If it's http (not https), -->
           <!-- we should deliver extra warnings about MITM vulns. -->
           </p>
