@@ -14,6 +14,8 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/utils.js"/>
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/suggestion_memory.js"/>
+  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/parsersettings.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/en/verbtypes.js"/>

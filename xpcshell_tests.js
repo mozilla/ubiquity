@@ -70,6 +70,7 @@ var XpcShellTestResponder = {
 };
 
 load(basePath + "/chrome/content/cmdutils.js");
+load(basePath + "/chrome/content/suggestion_memory.js");
 load(basePath + "/chrome/content/nlparser/parsersettings.js");
 load(basePath + "/chrome/content/nlparser/en/verbtypes.js");
 load(basePath + "/chrome/content/nlparser/en/parser.js");
