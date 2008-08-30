@@ -37,7 +37,7 @@ var noun_type_contact = {
       return [];
     }
 
-    if( text.length < 3 ) return [];
+    if( text.length < 2 ) return [];
 
     var suggestions  = [];
     for ( var c in noun_type_contact.contactList ) {
