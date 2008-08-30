@@ -68,6 +68,18 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString) {
   tab.focus();
 };
 
+// Focuses a tab with the given URL if one exists in the current
+// window, otherwise opens a new tab with the URL and focuses it.
+Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
+  var tabs = Application.activeWindow.tabs;
+  for (var i = 0; i < tabs.length; i++)
+    if (tabs[i].uri.spec == urlString) {
+      tabs[i].focus();
+      return;
+    }
+  Utils.openUrlInBrowser(urlString);
+};
+
 Utils.getCookie = function getCookie(domain, name) {
   var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"].
                       getService(Components.interfaces.nsICookieManager);
