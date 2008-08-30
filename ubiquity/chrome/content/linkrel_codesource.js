@@ -138,7 +138,7 @@ LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
 };
 
 LinkRelCodeSource.__install = function LRCS_install(window) {
-  function showNotification(targetDoc, commandsUrl) {
+  function showNotification(targetDoc, commandsUrl, mimetype) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
 
@@ -168,7 +168,14 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
       var confirmUrl = CONFIRM_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
 			 + encodeURIComponent(commandsUrl);
 
-      function isTrustedUrl(commandsUrl) {
+      function isTrustedUrl(commandsUrl, mimetype) {
+        // Even if the command feed resides on a trusted host, if
+        // the mime-type is application/x-javascript-untrusted, the
+        // host itself doesn't trust it (perhaps because it's mirroring
+        // code from somewhere else).
+        if (mimetype == "application/x-javascript-untrusted")
+          return false;
+
         var url = Utils.url(commandsUrl);
 
         if (url.scheme != "https")
@@ -183,14 +190,11 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
             return true;
         }
 
-        // TODO: also potentially take the link's 'class' attribute into
-        // account and see if it's 'untrusted', for the case where a
-        // trusted host is mirroring an untrusted command feed.
         return false;
       }
 
       function onSubscribeClick(notification, button) {
-        if (isTrustedUrl(commandsUrl)) {
+        if (isTrustedUrl(commandsUrl, mimetype)) {
           function onSuccess(data) {
             LinkRelCodeSource.addMarkedPage({url: targetDoc.URL,
                                              canUpdate: true,
@@ -240,7 +244,8 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
     annSvc.setPageAnnotation(url, CMD_URL_ANNO,
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
     if (!LinkRelCodeSource.isMarkedPage(url))
-      showNotification(event.target.ownerDocument, commandsUrl);
+      showNotification(event.target.ownerDocument, commandsUrl,
+                       event.target.type);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
