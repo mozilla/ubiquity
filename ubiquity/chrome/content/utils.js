@@ -104,7 +104,7 @@ Utils.paramsToString = function paramsToString(params) {
   var string = "?";
 
   for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
+    string += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
   }
 
   // Remove the trailing &
