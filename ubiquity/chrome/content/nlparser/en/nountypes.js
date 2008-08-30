@@ -280,7 +280,9 @@ var noun_type_tag = {
 		// can accept multiple tags, seperated by a comma
 		// assume last tag is still being typed - suggest completions for that
 		
-		var completedTags = fragment.split(",");
+		var completedTags = fragment.split(",").map(function(tag) {
+      return Utils.trim(tag);
+    });;
 		
 		
 		// separate last tag in fragment, from the rest
