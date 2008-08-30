@@ -170,11 +170,13 @@ NLParser.EnVerb.prototype = {
       // Look for a match for this preposition
       var nounType = unfilledMods[ preposition ];
       for ( x = 0; x < unusedWords.length - 1; x++ ) {
-	if ( preposition.indexOf( unusedWords[x] ) == 0 ) {
-	  // a match for the preposition is found at position x!
-	  // Anything following this preposition could be part of the noun.
-          // Check every possibility starting from "all remaining words" and
-	  // working backwards down to "just the word after the preposition."
+	if ( preposition == unusedWords[x] ) {
+	  /* a match for the preposition is found at position x!
+	   (require exact matches for prepositions.)
+	   Anything following this preposition could be part of the noun.
+           Check every possibility starting from "all remaining words" and
+	   working backwards down to "just the word after the preposition."
+	   */
 	  for (let lastWord = unusedWords.length - 1; lastWord > x; lastWord--) {
 	    //copy the array, don't modify the original
             let newUnusedWords = unusedWords.slice();
