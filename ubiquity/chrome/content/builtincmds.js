@@ -1282,12 +1282,19 @@ CmdUtils.CreateCommand({
 // WEATHER COMMANDS
 // -----------------------------------------------------------------
 
+var Temperature_Units = [
+  'fahrenheit',
+  'celsius'
+];
+
+var noun_type_temperature_units = new CmdUtils.NounType( "temperature units", Temperature_Units );
 
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
 CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": noun_arb_text},
+  modifiers: {"in": noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
@@ -1299,11 +1306,22 @@ CmdUtils.CreateCommand({
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function( pblock, directObj ) {
+  preview: function( pblock, directObj, modifiers) {
     var location = directObj.text;
     if( location.length < 1 ) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
+    }
+    
+    //use either the specified "in" unit or get from geolocation
+    var temp_units = 'celsius';
+    if(!modifiers.in.text){
+      var cc = CmdUtils.getGeoLocation().country_code;
+      if(["US","UM","BZ"].indexOf(cc) != -1){
+        temp_units = 'fahrenheit';
+      }
+    }else{
+      temp_units = modifiers.in.text;
     }
 
     var url = "http://www.google.com/ig/api";
@@ -1319,7 +1337,9 @@ CmdUtils.CreateCommand({
 
       var weather = {
         condition: condition,
-        temp: el.find("temp_f").attr("data"),
+        temp_units: temp_units,
+        tempc: el.find("temp_c").attr("data"), 
+        tempf: el.find("temp_f").attr("data"),
         humidity: el.find("humidity").attr("data"),
         wind: el.find("wind_condition").attr("data"),
         img: imgSrc

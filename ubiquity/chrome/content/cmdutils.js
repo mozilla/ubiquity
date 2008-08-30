@@ -252,6 +252,7 @@ CmdUtils.getGeoLocation = function getGeoLocation( ){
         city: geoip_city(),
         state: geoip_region_name(),
         country: geoip_country_name(),
+        country_code: geoip_country_code(),//for list, refer to http://www.maxmind.com/app/iso3166
         lat: geoip_latitude(),
         "long": geoip_longitude()
       };

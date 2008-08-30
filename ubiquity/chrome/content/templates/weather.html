@@ -7,7 +7,12 @@ img {float: left; }
 <div class="weather">
   <img src='${w.img}'/>
   <div class="temp">
-    ${w.temp}&deg;
+    {if w.temp_units == "fahrenheit"} 
+      ${w.tempf}&deg;F 
+    {else}
+      ${w.tempc}&deg;C
+    {/if}
+    <br/>
   </div>
   <div class="extra">
     ${w.condition}<br/>
