@@ -169,9 +169,21 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
 			 + encodeURIComponent(commandsUrl);
 
       function isTrustedUrl(commandsUrl) {
-        // TODO: Really implement this. If the domain is trusted and the
-        // protocol is https, then return true, otherwise return false.
-        // also potentially take the link's 'class' attribute into
+        var url = Utils.url(commandsUrl);
+
+        if (url.scheme != "https")
+          return false;
+
+        TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
+        var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
+        domains = domains.split(",");
+
+        for (var i = 0; i < domains.length; i++) {
+          if (domains[i] == url.host)
+            return true;
+        }
+
+        // TODO: also potentially take the link's 'class' attribute into
         // account and see if it's 'untrusted', for the case where a
         // trusted host is mirroring an untrusted command feed.
         return false;
