@@ -159,7 +159,8 @@ Ubiquity.prototype = {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
     this.__resetPreview();
-
+    
+    this.__msgPanel.hidden = false;
     this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
   },
 
