@@ -52,25 +52,41 @@ makeSearchCommand({
   }
 });
 
-/* TODO
 
- - apply CSS max-height & overflow-y to summary container
+CmdUtils.CreateCommand({
+  name: "search",
+  icon: "chrome://ubiquity/content/icons/search.png",
+  takes: {query: noun_arb_text},
+  modifiers: {"with": noun_type_searchengine},
+  preview: function(previewBlock, inputObject, queryModifiers) {
+    var searchEngine = queryModifiers["with"].data;
+    if(!searchEngine)
+      searchEngine = noun_type_searchengine.getDefault();
+    
+    var previewTemplate = "Search using <b>${engine}</b> for:<br /><b>${query}</b>";
+    var previewData = {
+      engine: searchEngine.name,
+      query: inputObject.text
+    };
+    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+  },
+  execute: function(inputObject, queryModifiers) {
+    var searchEngine = queryModifiers["with"].data;
+    if(!searchEngine)
+      searchEngine = noun_type_searchengine.getDefault();
+    
+    var searchSubmission = searchEngine.getSubmission(inputObject.text, null);
+    Utils.openUrlInBrowser(searchSubmission.uri.spec, searchSubmission.postData);
+  }
+});
 
-*/
 
-function openUrl(url, postData) {
-  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                      .getService(Components.interfaces.nsIWindowMediator);
-  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-  var browser = browserWindow.getBrowser();
 
-  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-    browserWindow.loadURI(url, null, postData, false);
-  else
-    browser.loadOneTab(url, null, null, postData, false, false);
-}
 
 function fetchWikipediaArticle(previewBlock, articleTitle) {
+  /* TODO
+   - apply CSS max-height & overflow-y to summary container
+  */
   var apiUrl = "http://en.wikipedia.org/w/api.php";
   var apiParams = {
     format: "json",
@@ -187,7 +203,7 @@ CmdUtils.CreateCommand({
   execute: function(directObject) {
     var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
     var searchParams = {search: directObject.text};
-    openUrl(searchUrl + Utils.paramsToString(searchParams));
+    Utils.openUrlInBrowser(searchUrl + Utils.paramsToString(searchParams));
   }
 });
 

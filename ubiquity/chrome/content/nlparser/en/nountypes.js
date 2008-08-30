@@ -226,3 +226,35 @@ var noun_type_tab = {
     return suggestions.splice(0, 5);
   }
 };
+
+
+var noun_type_searchengine = {
+  _name: "search engine",
+  suggest: function(fragment) {
+    var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
+      .getService(Components.interfaces.nsIBrowserSearchService);
+    var engines = searchService.getVisibleEngines({});
+    
+    if (!fragment) {
+      return engines.map(function(engine) {
+        return CmdUtils.makeSugg(engine.name, null, engine);
+      });
+    }
+    
+    fragment = fragment.toLowerCase();
+    var suggestions = [];
+    
+    for(var i = 0; i < engines.length; i++) {
+      if(engines[i].name.toLowerCase().indexOf(fragment) > -1) {
+        suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i]));
+      }
+    }
+    
+    return suggestions;
+  },
+  getDefault: function() {
+    return Components.classes["@mozilla.org/browser/search-service;1"]
+      .getService(Components.interfaces.nsIBrowserSearchService)
+      .defaultEngine;
+  }
+};
