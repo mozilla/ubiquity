@@ -581,30 +581,112 @@ cmd_redo.icon = "chrome://ubiquity/content/icons/arrow_redo.png";
 CmdUtils.CreateCommand({
   name: "calculate",
   takes: {"expression": noun_arb_text},
-  icon: "http://www.metacalc.com/favicon.ico",
+  icon: "chrome://ubiquity/content/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
-  execute: function( directObj ) {
-    var expr = directObj.text;
-    if( expr.length > 0 ) {
-      var result = eval( expr );
-      CmdUtils.setSelection( result );
-      CmdUtils.setLastResult( result );
-    } else
-      displayMessage( "Requires an expression.");
-  },
-  preview: function( pblock, directObj ) {
-    var expr = directObj.text;
-    if( expr.length < 1 ){
-      pblock.innerHTML = "Calculates an expression. E.g., 22/7.";
+  preview: function(previewBlock, directObject) {
+    var expression = directObject.text;
+  
+    if(expression.length < 1) {
+      previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";
       return;
     }
+  
+  var previewTemplate = "${expression} = <b>${result}</b>" +
+    "{if error}<p><b>Error:</b> ${error}</p>{/if}";
+  
+  var result = "?";
+  var error = null;
+  try {
+    var parser = new MathParser();
+    
+    result = parser.parse(expression);
+    
+    if(isNaN(result))
+      throw new Error("Invalid expression");
+  } catch(e) {
+    error = e.message;
+    result = "?";
+  }
+  
+  var previewData = {
+    "expression": expression,
+    "result": result,
+    "error": error
+  }
+    
+  previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+  
+  },
+  execute: function( directObj ) {
+  
+    var expression = directObject.text;
+ 
+    if(expression.length < 1) {
+      displayMessage("Requires a expression.");
+      return;
+    }
+  
+  try {
+    var parser = new MathParser();
+    var result = parser.parse(expression) + "";
+    
+    if(isNaN(result))
+      throw new Error("Invalid expression");
+    
+    CmdUtils.setSelection(result);
+    CmdUtils.setLastResult(result);
+  } catch(e) {
+    displayMessage("Error calculating expression: " + expression)
+  }
 
-    pblock.innerHTML = expr + " = ";
-    try{ pblock.innerHTML += eval( expr ); }
-    catch(e) { pblock.innerHTML += "?"; }
   }
 });
+
+//+ Carlos R. L. Rodrigues
+//@ http://jsfromhell.com/classes/math-parser [rev. #2]
+MathParser = function(){
+  var o = this, p = o.operator = {};
+  p["+"] = function(n, m){return n + m;}
+  p["-"] = function(n, m){return n - m;}
+  p["*"] = function(n, m){return n * m;}
+  p["/"] = function(m, n){return n / m;}
+  p["%"] = function(m, n){return n % m;}
+  p["^"] = function(m, n){return Math.pow(n, m);}
+  p["~"] = function(m, n){return Math.sqrt(n, m);}
+  o.custom = {}, p.f = function(s, n){
+    if(Math[s]) return Math[s](n);
+    else if(o.custom[s]) return o.custom[s].apply(o, n);
+    else throw new Error("Function \"" + s + "\" not defined.");
+  }, o.add = function(n, f){this.custom[n] = f;}
+}
+MathParser.prototype.eval = function(e){
+  var e = e.split(""), v = [], p = [], a, c = 0, s = 0, x, t, d = 0;
+  var n = "0123456789.", o = "+-*/^%~", f = this.operator;
+  for(var i = 0, l = e.length; i < l; i++)
+    if(o.indexOf(e[i]) > -1)
+      e[i] == "-" && (s > 1 || !d) && ++s, !s && d && (p.push(e[i]), s = 2), "+-".indexOf(e[i]) < (d = 0) && (c = 1);
+    else if(a = n.indexOf(e[i]) + 1 ? e[i++] : ""){
+      while(n.indexOf(e[i]) + 1) a += e[i++];
+      v.push(d = (s & 1 ? -1 : 1) * a), c && v.push(f[p.pop()](v.pop(), v.pop())) && (c = 0), --i, s = 0;
+    }
+  for(c = v[0], i = 0, l = p.length; l--; c = f[p[i]](c, v[++i]));
+  return c;
+}
+MathParser.prototype.parse = function(e){
+  var p = [], f = [], ag, n, c, a, o = this, v = "0123456789.+-*/^%~(, )";
+  for(var x, i = 0, l = e.length; i < l; i++){
+    if(v.indexOf(c = e.charAt(i)) < 0){
+      for(a = c; v.indexOf(c = e.charAt(++i)) < 0; a += c); f.push((--i, a));
+    }
+    else if(!(c == "(" && p.push(i)) && c == ")"){
+      if(a = e.slice(0, (n = p.pop()) - (x = v.indexOf(e.charAt(n - 1)) < 0 ? y = (c = f.pop()).length : 0)), x)
+        for(var j = (ag = e.slice(n, ++i).split(",")).length; j--; ag[j] = o.eval(ag[j]));
+      l = (e = a + (x ? o.operator.f(c, ag) : o.eval(e.slice(n, ++i))) + e.slice(i)).length, i -= i - n + c.length;
+    }
+  }
+  return o.eval(e);
+}
 
 
 function defineWord(word, callback) {
