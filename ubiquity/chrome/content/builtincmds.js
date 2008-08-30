@@ -551,6 +551,7 @@ function cmd_bold() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
+cmd_bold.icon = "chrome://ubiquity/content/icons/text_bold.png";
 
 function cmd_italic() {
   var doc = context.focusedWindow.document;
@@ -561,6 +562,7 @@ function cmd_italic() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_italic.description = "If you're in a rich-text-edit area, makes the selected text italic.";
+cmd_italic.icon = "chrome://ubiquity/content/icons/text_italic.png";
 
 function cmd_underline() {
   var doc = context.focusedWindow.document;
@@ -571,6 +573,7 @@ function cmd_underline() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_underline.description = "If you're in a rich-text-edit area, underlines the selected text.";
+cmd_underline.icon = "chrome://ubiquity/content/icons/text_underline.png";
 
 function cmd_undo() {
   var doc = context.focusedWindow.document;
@@ -754,6 +757,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "syntax-highlight",
   takes: {"code": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/color_wheel.png",
   description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
   execute: function( directObj ) {
     var code = directObj.text;
@@ -784,6 +788,7 @@ function cmd_highlight() {
   }
 }
 cmd_highlight.description = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
+cmd_highlight.icon = "chrome://ubiquity/content/icons/textfield_rename.png";
 cmd_highlight.preview = function(pblock) {
   pblock.innerHTML = cmd_highlight.description;
 }
@@ -1118,7 +1123,7 @@ function gmailChecker(callback) {
 }
 CmdUtils.CreateCommand({
   name: "last-email",
-  icon: "http://gmail.com/favicon.ico",
+  icon: "chrome://ubiquity/content/icons/email_open.png",
   description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
   preview: function( pBlock ) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
@@ -1133,7 +1138,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "get-email-address",
-  icon: "http://gmail.com/favicon.ico",
+  icon: "chrome://ubiquity/content/icons/email.png",
   description: "Looks up the email address of a person from your contacts list given their name.",
   takes: {name: noun_type_contact},
   preview: function( pBlock, name ) {
@@ -1470,6 +1475,7 @@ CmdUtils.CreateCommand({
   name:"convert",
   takes:{text:noun_arb_text},
   modifiers:{to:noun_conversion_options},
+  icon: "chrome://ubiquity/content/icons/convert.png",
   description:"Converts a selection to a PDF, to rich text, or to html.",
   preview: function(pBlock, directObj, modifiers) {
     if (modifiers.to && modifiers.to.text) {
@@ -1516,6 +1522,7 @@ function cmd_view_source() {
   CmdUtils.getWindowInsecure().location = url;
 }
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
+cmd_view_source.icon = "chrome://ubiquity/content/icons/page_code.png";
 
 function escape_html_entities(text) {
   // TODO finish this?
@@ -1527,6 +1534,7 @@ var escape_desc = "Replaces html entities (&lt;, &gt;, and &amp;) with their esc
 CmdUtils.CreateCommand({
   name:"escape-html-entities",
   takes: {text: noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/html_go.png",
   description: escape_desc,
   preview: function(pBlock, directObj) {
    if (directObj.html)
@@ -1556,6 +1564,7 @@ function wordCount(text){
 CmdUtils.CreateCommand({
   name: "word-count",
   takes: {text: noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/sum.png",
   description: "Displays the number of words in a selection.",
   execute: function( directObj ) {
     if (directObj.text)
@@ -1842,6 +1851,7 @@ function setFullPageZoom( level ) {
 CmdUtils.CreateCommand({
   name:"zoom",
   takes:{"percentage": noun_type_percentage},
+  icon: "chrome://ubiquity/content/icons/magnifier.png",
   description:"Zooms the Firefox window in or out.",
   preview:function(pBlock, directObj) {
     if (directObj.text)
@@ -1890,6 +1900,7 @@ function cmd_undelete() {
   });
 }
 cmd_undelete.description = "Restores the HTML deleted by the delete command.";
+cmd_undelete.icon = "chrome://ubiquity/content/icons/arrow_undo.png";
 cmd_undelete.preview = function( pblock ) {
   pblock.innerHTML = cmd_undelete.description;
 };
@@ -1914,6 +1925,7 @@ cmd_stop_editing_page.description = "If you used the 'edit page' command to put 
 cmd_stop_editing_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_stop_editing_page.description;
 }
+cmd_stop_editing_page.icon = "chrome://ubiquity/content/icons/page_refresh.png";
 
 // I think edit-mode on and edit-mode off would be
 
@@ -2026,9 +2038,13 @@ cmd_remove_annotations.preview = function( pblock ) {
   pblock.innerHTML = cmd_remove_annotations.description;
 };
 
+cmd_remove_annotations.icon = "chrome://ubiquity/content/icons/page_delete.png";
+
+
 CmdUtils.CreateCommand({
   name:"map-these",
   takes: {"selection": noun_arb_text },
+  icon : "chrome://ubiquity/content/icons/map_add.png",
   description: "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)",
   preview: function( pblock, directObject ) {
     var html = directObject.html;
