@@ -17,7 +17,12 @@ function showBugRelatedAlerts() {
     "privacy.sanitize.sanitizeOnShutdown",
     false
   );
-  if (sanitizeOnShutdown)
+  var clearHistory = Application.prefs.getValue(
+    "privacy.item.history",
+    false
+  );
+
+  if (sanitizeOnShutdown && clearHistory)
     $("#sanitizeOnShutdown-alert").slideDown();
 }
 
