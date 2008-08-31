@@ -1730,13 +1730,11 @@ CmdUtils.CreateCommand({
   preview: function( pblock, urlToShorten ){
     pblock.innerHTML = "Replaces the selected URL with a TinyUrl.";
     var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-    if( Application.activeWindow.activeTab.document.URL == urlToShorten.text || (CmdUtils.getSelection() == urlToShorten.text && regexp.test(urlToShorten.text))) {
       var baseUrl = "http://tinyurl.com/api-create.php?url=";
       pblock.innerHTML = "Replaces the selected URL with ",
       jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
         if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
       });
-    }    
   },
   execute: function( urlToShorten ) {
     //escaping urlToShorten will not create the right tinyurl
