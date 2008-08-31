@@ -1356,14 +1356,25 @@ CmdUtils.CreateCommand({
       var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
       var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
       imgSrc += weatherId + "d.png";
-
+      
+      //change wind speed to kmh based on geolocation
+      var wind_text = el.find("wind_condition").attr("data").split("at");
+      var wind_speed = parseInt(wind_text[1].split(" ")[1]);
+      var wind_units = "mph";
+      //http://en.wikipedia.org/wiki/Si_units
+      if(["US","UM", "LR", "MM"].indexOf(cc) == -1){
+        wind_units = "kmh";
+        wind_speed = wind_speed * 1.6;
+      }
+      var wind = wind_text[0] + " at " + wind_speed + wind_units;
+      
       var weather = {
         condition: condition,
         temp_units: temp_units,
         tempc: el.find("temp_c").attr("data"), 
         tempf: el.find("temp_f").attr("data"),
         humidity: el.find("humidity").attr("data"),
-        wind: el.find("wind_condition").attr("data"),
+        wind: wind,
         img: imgSrc
       };
 
