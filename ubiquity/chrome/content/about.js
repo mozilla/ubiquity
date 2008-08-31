@@ -29,16 +29,38 @@ function onReady() {
     let info = markedPages[i];
     var li = document.createElement("li");
 
-    var linkToHtml = document.createElement("a");
-    $(linkToHtml).text(info.title);
-    linkToHtml.href = info.htmlUri.spec;
-    $(li).append(linkToHtml);
+    function addLink(text, url, className) {
+      var linkToHtml = document.createElement("a");
+      $(linkToHtml).text(text);
+      if (className)
+        $(linkToHtml).addClass(className);
+      linkToHtml.href = url;
+      $(li).append(linkToHtml);
+    }
+
+    addLink(info.title, info.htmlUri.spec);
+
+    $(li).append("<br/>");
 
     var linkToUnsubscribe = document.createElement("span");
-    $(linkToUnsubscribe).text(" [unsubscribe]");
+    $(linkToUnsubscribe).text("[unsubscribe]");
     $(linkToUnsubscribe).click(makeRemover(li, info.htmlUri));
     $(linkToUnsubscribe).css({cursor: "pointer", color: "#aaa"});
     $(li).append(linkToUnsubscribe);
+
+    var sourceUrl;
+    var sourceName;
+
+    if (info.canUpdate) {
+      sourceUrl = info.jsUri.spec;
+      sourceName = "auto-updated source";
+    } else {
+      sourceUrl = "data:application/x-javascript," + escape(info.getCode());
+      sourceName = "source";
+    }
+
+    $(li).append(" ");
+    addLink("[view " + sourceName + "]", sourceUrl, "feed-action");
 
     $("#command-feeds").append(li);
   }

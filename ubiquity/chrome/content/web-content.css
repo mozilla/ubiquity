@@ -180,3 +180,8 @@ a:hover {
   color:#FFFFFF;
   text-decoration: underline;
 }
+
+.feed-action:visited, .feed-action, .feed-action:hover {
+  color: #aaaaaa;
+  text-decoration: none;
+}
