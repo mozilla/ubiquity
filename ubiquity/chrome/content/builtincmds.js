@@ -1109,15 +1109,16 @@ function gmailChecker(callback) {
   var url = "http://mail.google.com/mail/feed/atom";
   Utils.ajaxGet(url, function(rss) {
     CmdUtils.loadJQuery(function(jQuery) {
+      var emailDetails = null;
       var firstEntry = jQuery(rss).find("entry").get(0);
-
-      var newEmailId = jQuery(firstEntry).find("id").text();
-      var subject = jQuery(firstEntry).find("title").text();
-      var author = jQuery(firstEntry).find("author name").text();
-      var summary = jQuery(firstEntry).find("summary").text();
-
-      var title = author + ' says "' + subject + '"';
-      callback({text: summary, title: title});
+      if (firstEntry) {
+        emailDetails = {
+          author: jQuery(firstEntry).find("author name").text(),
+          subject: subject = jQuery(firstEntry).find("title").text(),
+          summary: jQuery(firstEntry).find("summary").text()
+        };
+      }
+      callback(emailDetails);
     });
   });
 }
@@ -1127,12 +1128,29 @@ CmdUtils.CreateCommand({
   description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
   preview: function( pBlock ) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
-    gmailChecker(function(obj) {
-      pBlock.innerHTML = "<b>" + obj.title + "</b><p>" + obj.text + "</p>";
-    });
+    // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt 
+    if (Utils.getCookie("mail.google.com", "S") != undefined) { 
+      gmailChecker(function(emailDetails) {
+        if (emailDetails) {
+          var previewTemplate = "<b>${author}</b> says: <b>${subject}</b><p>${summary}</p>";
+          pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
+        } else {
+          pBlock.innerHTML = "<b>You have no new mail</b>"; 
+        }
+      }); 
+    } else {
+      pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
+    }
   },
   execute: function() {
-    gmailChecker(displayMessage);
+    gmailChecker(function(emailDetails) {
+      var msg = "You have no new mail.";
+      if (emailDetails) {
+        var msgTemplate = "New email! ${author} says: ${subject}";
+        msg = CmdUtils.renderTemplate(msgTemplate, emailDetails);
+      }
+      displayMessage(msg);
+    }); 
   }
 });
 
