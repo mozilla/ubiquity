@@ -1109,13 +1109,17 @@ function gmailChecker(callback) {
   var url = "http://mail.google.com/mail/feed/atom";
   Utils.ajaxGet(url, function(rss) {
     CmdUtils.loadJQuery(function(jQuery) {
-      var emailDetails = null;
+      var emailDetails = {
+        account: jQuery(rss).children("title").text().split(" ").pop()
+      };
+      
       var firstEntry = jQuery(rss).find("entry").get(0);
       if (firstEntry) {
-        emailDetails = {
-          author: jQuery(firstEntry).find("author name").text(),
+        emailDetails.lastEmail = {
+          author: jQuery(firstEntry).find("author > name").text(),
           subject: subject = jQuery(firstEntry).find("title").text(),
-          summary: jQuery(firstEntry).find("summary").text()
+          summary: jQuery(firstEntry).find("summary").text(),
+          href: jQuery(firstEntry).find("link").attr("href")
         };
       }
       callback(emailDetails);
@@ -1131,12 +1135,15 @@ CmdUtils.CreateCommand({
     // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt 
     if (Utils.getCookie("mail.google.com", "S") != undefined) { 
       gmailChecker(function(emailDetails) {
-        if (emailDetails) {
-          var previewTemplate = "<b>${author}</b> says: <b>${subject}</b><p>${summary}</p>";
-          pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
-        } else {
-          pBlock.innerHTML = "<b>You have no new mail</b>"; 
+        var previewTemplate = "<b>You (${account}) have no new mail</b>"; 
+        if (emailDetails.lastEmail) {
+          var previewTemplate = "Last unread e-mail for ${account}:" +
+            "<a href=\"${lastEmail.href}\">" +
+            "<p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p>" +
+            "<p>${lastEmail.summary}</p>" +
+            "</a>";
         }
+        pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
       }); 
     } else {
       pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
@@ -1144,12 +1151,11 @@ CmdUtils.CreateCommand({
   },
   execute: function() {
     gmailChecker(function(emailDetails) {
-      var msg = "You have no new mail.";
-      if (emailDetails) {
-        var msgTemplate = "New email! ${author} says: ${subject}";
-        msg = CmdUtils.renderTemplate(msgTemplate, emailDetails);
+      var msgTemplate = "You (${account}) have no new mail.";
+      if (emailDetails.lastEmail) {
+        msgTemplate = "You (${account}) have new email! ${lastEmail.author} says: ${lastEmail.subject}";
       }
-      displayMessage(msg);
+      displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
     }); 
   }
 });
