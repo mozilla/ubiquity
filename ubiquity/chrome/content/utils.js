@@ -41,13 +41,22 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 
 Utils.__TimerCallback.prototype = {
   notify : function(timer) {
+    for(var i = 0; i < Utils.__timers.length; i++) {
+      if(Utils.__timers[i] == timer) {
+        Utils.__timers.splice(i, 1);
+        break;
+      }
+    }
     this._callback();
   }
 };
 
+Utils.__timers = [];
+
 Utils.setTimeout = function setTimeout(callback, delay) {
   var classObj = Components.classes["@mozilla.org/timer;1"];
   var timer = classObj.createInstance(Components.interfaces.nsITimer);
+  Utils.__timers.push(timer);
 
   timer.initWithCallback(new Utils.__TimerCallback(callback),
                          delay,
