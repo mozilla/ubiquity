@@ -4,7 +4,7 @@
 
 function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
-    var query = directObject.text;
+    var query = encodeURIComponent(directObject.text);
     var urlString = options.url.replace("{QUERY}", query);
     Utils.openUrlInBrowser(urlString);
     CmdUtils.setLastResult( urlString );
