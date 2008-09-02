@@ -302,7 +302,7 @@ function testParseDirectOnly() {
     modifiers: {}
   };
   var verb = new NLParser.EnVerb(cmd_pet);
-  var inputWords = ["b"];
+  var inputWords = ["pet", "b"];
 
   var selObject = {
     text:"",
@@ -341,7 +341,7 @@ function testParseWithModifier() {
   };
 
   var verb = new NLParser.EnVerb(cmd_wash);
-  var inputWords = ["pood", "with", "sp"];
+  var inputWords = ["wash", "pood", "with", "sp"];
   var selObject = {
     text:"",
     html:""
@@ -418,7 +418,7 @@ function testVerbEatsSelection() {
   };
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
-  var completions = verb.getCompletions(["this"], selObject);
+  var completions = verb.getCompletions(["eat", "this"], selObject);
   this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
@@ -426,14 +426,14 @@ function testVerbEatsSelection() {
 
   selObject.text = "grill";
   selObject.html = "grill";
-  completions = verb.getCompletions(["breakfast", "at", "it"], selObject);
+  completions = verb.getCompletions(["eat", "breakfast", "at", "it"], selObject);
   this.assert( completions.length == 1, "should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "breakfast", "food should be breakfast");
   this.assert(foodGotEatenAt == "grill", "place should be grill");
 
   selObject.text = "din";
-  completions = verb.getCompletions(["at", "home", "this"], selObject);
+  completions = verb.getCompletions(["eat", "at", "home", "this"], selObject);
   this.assert( completions.length == 1, "second should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
@@ -460,7 +460,7 @@ function testImplicitPronoun() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
 
-  var completions = verb.getCompletions([], selObject);
+  var completions = verb.getCompletions(["eat"], selObject);
   this.assert( (completions.length == 2), "Should have 2 completions.");
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
@@ -470,7 +470,7 @@ function testImplicitPronoun() {
   foodGotEaten = null;
   foodGotEatenAt = null;
   selObject.text = "din";
-  completions = verb.getCompletions([], selObject);
+  completions = verb.getCompletions(["eat"], selObject);
 
   this.assert( completions.length == 3, "Should have 3 completions.");
   // first completion should be directObject is dinner
@@ -490,7 +490,7 @@ function testImplicitPronoun() {
   foodGotEaten = null;
   foodGotEatenAt = null;
   selObject.text = "din";
-  completions = verb.getCompletions(["lunch", "at", "selection"], selObject);
+  completions = verb.getCompletions(["eat", "lunch", "at", "selection"], selObject);
   this.assert( completions.length == 1, "Sould have 1 completion");
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
@@ -499,7 +499,7 @@ function testImplicitPronoun() {
   foodGotEaten = null;
   foodGotEatenAt = null;
   selObject.text = "din";
-  completions = verb.getCompletions(["at", "grill"], selObject);
+  completions = verb.getCompletions(["eat", "at", "grill"], selObject);
   this.assert( completions.length == 1, "Should have 1 completion");
   completions[0].execute();
   this.assert((foodGotEaten == null), "DO should not be set.");
@@ -508,7 +508,7 @@ function testImplicitPronoun() {
   foodGotEaten = null;
   foodGotEatenAt = null;
   selObject.text = "pants";
-  completions = verb.getCompletions([], selObject);
+  completions = verb.getCompletions(["eat"], selObject);
   this.assert( completions.length == 1);
   completions[0].execute();
   this.assert((foodGotEaten == null), "Should have no valid args.");
@@ -516,7 +516,7 @@ function testImplicitPronoun() {
 
   selObject.text = null;
   selObject.html = null;
-  completions = verb.getCompletions(["this"], selObject);
+  completions = verb.getCompletions(["eat", "this"], selObject);
   this.assert( completions.length == 0, "should have no completions");
 }
 
@@ -554,16 +554,16 @@ function testModifiersTakeMultipleWords() {
   };
   var verb = new NLParser.EnVerb(cmd_find);
   var selObject = {text:null, html:null};
-  var completions = verb.getCompletions(["job", "in", "chicago"], selObject);
+  var completions = verb.getCompletions(["find", "job", "in", "chicago"], selObject);
   this.assert(completions[0]._DO.text == "job", "should be job.");
   this.assert(completions[0]._modifiers["in"].text == "chicago", "should be chicago");
 
-  completions = verb.getCompletions(["significant", "other", "in", "chicago"],
+  completions = verb.getCompletions(["find", "significant", "other", "in", "chicago"],
 				    selObject);
   this.assert(completions[0]._modifiers["in"].text == "chicago", "should be chicago");
   this.assert(completions[0]._DO.text == "significant other", "should be SO.");
 
-  completions = verb.getCompletions(["job", "in", "new", "york"], selObject);
+  completions = verb.getCompletions(["find", "job", "in", "new", "york"], selObject);
   this.assert(completions[0]._DO.text == "job", "should be job.");
   this.assert(completions[0]._modifiers["in"].text == "new york", "should be NY");
 }
@@ -600,5 +600,33 @@ function testSortedBySuggestionMemory() {
   var fakeContext = {text:"", html:""};
   nlParser.updateSuggestionList("c", fakeContext);
 
+}
+
+function testSortedByMatchQuality() {
+  var nounList = [];
+  var verbList = [{name: "frobnicate"},
+		  {name: "glurgle"},
+		  {name: "nonihilf"},
+		  {name: "bnurgle"},
+		  {name: "fangoriously"}];
+  var nlParser = new NLParser.EnParser( verbList, nounList );
+  var fakeContext = {text:"", html:""};
+
+  var assert = this.assert;
+  function testSortedSuggestions( input, expectedList ) {
+    nlParser.updateSuggestionList( input, fakeContext );
+    var suggs = nlParser.getSuggestionList();
+    assert( suggs.length == expectedList.length, "Should have " + expectedList.length + " suggestions.");
+    for (var x in suggs) {
+      assert( suggs[x]._verb._name == expectedList[x], expectedList[x] + " should be " + x);
+    }
+  }
+  testSortedSuggestions( "g", ["glurgle", "bnurgle", "fangoriously"]);
+  testSortedSuggestions( "n", ["nonihilf", "bnurgle", "frobnicate", "fangoriously"]);
+  testSortedSuggestions( "ni", ["nonihilf", "frobnicate"]);
+  testSortedSuggestions( "bn", ["bnurgle", "frobnicate"]);
+  testSortedSuggestions( "f", ["frobnicate", "fangoriously", "nonihilf"]);
+  testSortedSuggestions( "frob", ["frobnicate"]);
+  testSortedSuggestions( "urgle", ["glurgle", "bnurgle"]);
 
 }

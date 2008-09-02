@@ -43,17 +43,23 @@ NLParser.EnParser.prototype = {
   },
 
   _sortSuggestionList: function(query) {
-    // Experimental.  Not currently being called.
     let inputVerb = query.split(" ")[0];
+    /* Each suggestion in the suggestion list should already have a matchScore
+       assigned by Verb.getCompletions.  Give them also a frequencyScore based
+       on the suggestionMemory: */
     for each( let sugg in this._suggestionList) {
       let suggVerb = sugg._verb_name;
-      sugg.score = this._suggestionMemory.getScore(inputVerb, suggVerb);
+      sugg.frequencyScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
     }
 
+    /* TODO: sort first by frequencyScore, then by matchScore (i.e. matchScore
+     * breaks ties.  For now: ignore frequencyScore until we decide what the behavior
+     * there should actually be.
+     */
     this._suggestionList.sort( function( x, y ) {
-				 if (x.score > y.score)
+				 if (x.matchScore > y.matchScore)
 				   return -1;
-				 else if (y.score > x.score)
+				 else if (y.matchScore > x.matchScore)
 				   return 1;
 				 else
 				   return 0;
@@ -90,9 +96,7 @@ NLParser.EnParser.prototype = {
       words = [ word for each(word in words) if (word.length > 0)];
       // verb-first matches
       for each ( verb in this._verbList ) {
-	if ( verb.match( words[0] ) ) {
-	  newSuggs = newSuggs.concat(verb.getCompletions( words.slice(1), selObj ));
-	}
+	newSuggs = newSuggs.concat( verb.getCompletions( words, selObj ) );
       }
       // noun-first matches
       if (newSuggs.length == 0 ){
@@ -100,7 +104,7 @@ NLParser.EnParser.prototype = {
       }
     }
     this._suggestionList = newSuggs;
-    //this._sortSuggestionList(query);
+    this._sortSuggestionList(query);
   },
 
   getSuggestionList: function() {

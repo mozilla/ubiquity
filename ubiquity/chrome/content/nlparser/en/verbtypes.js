@@ -28,6 +28,8 @@ NLParser.EnParsedSentence.prototype = {
       this._DO = DO;
       this._modifiers = modifiers;
     }
+    this.matchScore = 0;
+    this.frequencyScore = 0;
   },
 
   getCompletionText: function() {
@@ -268,29 +270,34 @@ NLParser.EnVerb.prototype = {
   },
 
   getCompletions: function( words, selObj ) {
-    /* returns a list of ParsedSentences. */
-    /* words is an array of words that were space-separated.
-       The first word, which matched this verb, has already been removed.
-       Everything after that is either:
-       1. my direct object
-       2. a preposition
-       3. a noun following a preposition.
-
+    /* returns a list of ParsedSentences, each with a quality ranking.
+       words is an array of all the words in the input (already split).
        selObj is a selectionObject, wrapping both the text and html
        selections.
     */
-    if (words.length == 0) {
-      let completions;
+    let completions = [];
+    let inputVerb = words[0];
+    let matchScore = this.match( inputVerb );
+    if (matchScore == 0) {
+      // Not a match to this verb!
+      return [];
+    }
+
+    let inputArguments = words.slice(1);
+    if (inputArguments.length == 0) {
       // make suggestions by using selection as arguments...
       completions = this.getCompletionsFromNounOnly(selObj.text, selObj.html);
       // also, try a completion with all empty arguments
       completions.push( this._newSentence( null, {} ) );
-      return completions;
     }
     else {
-      return this.recursiveParse( words, {}, this._modifiers, selObj );
+      completions = this.recursiveParse( inputArguments, {}, this._modifiers, selObj );
     }
 
+    for each( let comp in completions) {
+      comp.matchScore = matchScore;
+    }
+    return completions;
   },
 
   getCompletionsFromNounOnly: function(text, html) {
@@ -335,15 +342,30 @@ NLParser.EnVerb.prototype = {
     return completions;
   },
 
-  match: function( sentence ) {
-    // returns a float from 0 to 1 telling how good of a match the input
-    // is to this verb.
-    if ( this._name.indexOf( sentence ) == 0 ) {
-      // verb starts with the sentence, i.e. you may be typing this
-      // verb but haven't typed the full thing yet.
-      return sentence.length / this._name.length;
+  match: function( inputWord ) {
+    /* returns a float from 0 to 1 telling how good of a match the input
+       is to this verb.  Return value will be used for sorting.
+       The current heuristic is very ad-hoc.*/
+
+    if (this._name == inputWord)
+      // Perfect match always gets maximum rating!
+      return 1.0;
+
+    let index = this._name.indexOf( inputWord );
+    if ( index == 0 ) {
+      // verb starts with the input! A good match.
+      // The more letters of the verb that have been typed, the better the
+      // match is. (Note this privileges short verbs over longer ones)
+      return inputWord.length / this._name.length;
+    } else if ( index > 0 ) {
+      // The input matches the middle of the verb.  Not such a good match but
+      // still a match.
+      return inputWord.length / (2 * this._name.length);
     } else {
+      // Not a match at all!
       return 0.0;
     }
+
+    // TODO: disjoint matches, e.g. matching "atc" to "add-to-calendar"
   }
 };
