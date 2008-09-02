@@ -566,7 +566,6 @@ function testModifiersTakeMultipleWords() {
   this.assert(completions[0]._modifiers["in"].text == "new york", "should be NY");
 }
 
-
 function testSuggestionMemory() {
   var suggMem1 = new SuggestionMemory("test_1");
   suggMem1.remember( "p", "peas");
@@ -584,4 +583,20 @@ function testSuggestionMemory() {
   this.assert(suggMem1.getScore( "p", "polymascotfoamulate") == 1);
   this.assert(suggMem1.getScore( "p", "popcorn" ) == 0 );
   this.assert(suggMem1.getScore( "p", "quinine" ) == 0 );
+}
+
+function testSortedBySuggestionMemory() {
+  var nounList = [];
+  var verbList = [{name: "clock"},
+		  {name: "calendar"},
+		  {name: "couch"},
+		  {name: "conch"},
+		  {name: "crouch"},
+		  {name: "coelecanth"},
+		  {name: "crab"} ];
+  var nlParser = new NLParser.EnParser( verbList, nounList );
+  var fakeContext = {text:"", html:""};
+  nlParser.updateSuggestionList("c", fakeContext);
+
+
 }

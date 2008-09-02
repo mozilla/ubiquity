@@ -25,6 +25,7 @@ NLParser.EnParser.prototype = {
     this.setCommandList( commandList );
     this._nounTypeList = nounList;
     this._suggestionList = []; // a list of ParsedSentences.
+    this._suggestionMemory = new SuggestionMemory("en_parser");
   },
 
   nounFirstSuggestions: function( text, html ) {
@@ -41,6 +42,36 @@ NLParser.EnParser.prototype = {
     return suggs;
   },
 
+  _sortSuggestionList: function(query) {
+    // Experimental.  Not currently being called.
+    let inputVerb = query.split(" ")[0];
+    for each( let sugg in this._suggestionList) {
+      let suggVerb = sugg._verb_name;
+      sugg.score = this._suggestionMemory.getScore(inputVerb, suggVerb);
+    }
+
+    this._suggestionList.sort( function( x, y ) {
+				 if (x.score > y.score)
+				   return -1;
+				 else if (y.score > x.score)
+				   return 1;
+				 else
+				   return 0;
+			       });
+  },
+
+  strengthenMemory: function(query, chosenSuggestion) {
+    // query is the whole input, chosenSuggestion is a parsedSentence.
+    // This parser only cares about the verb name.
+    let chosenVerb = chosenSuggestion._verb._name;
+    let inputVerb = query.split(" ")[0];
+    /* TODO not neccessarily accurate!  Input might have just been nouns,
+    // if this was noun-first completion, which means we're remembering
+    // an association from noun input to verb completion, which might be
+    // problematic.  Discuss. */
+    this._suggestionMemory.remember(inputVerb, chosenVerb);
+  },
+
   updateSuggestionList: function( query, context ) {
     var nounType, verb;
     var newSuggs = [];
@@ -53,6 +84,9 @@ NLParser.EnParser.prototype = {
       }
     } else {
       var words = query.split( " " );
+      // TODO
+      // Drop any words of zero length: so if input is "dostuff " we want
+      // to break it to just ["dostuff"], not ["dostuff", ""].
       // verb-first matches
       for each ( verb in this._verbList ) {
 	if ( verb.match( words[0] ) ) {
@@ -64,8 +98,8 @@ NLParser.EnParser.prototype = {
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, query ));
       }
     }
-    // TODO sort in order of match quality!!
     this._suggestionList = newSuggs;
+    //this._sortSuggestionList(query);
   },
 
   getSuggestionList: function() {
@@ -82,7 +116,7 @@ NLParser.EnParser.prototype = {
     return this._suggestionList[index];
   },
 
-  setPreviewAndSuggestions: function( context, previewBlock, hilitedSuggestion ) {
+  setPreviewAndSuggestions: function(context, previewBlock, hilitedSuggestion){
     // set previewBlock.innerHtml and return true/false
     // can set previewBlock as a callback in case we need to update
     // asynchronously.
@@ -117,9 +151,11 @@ NLParser.EnParser.prototype = {
       if(suggIconUrl) {
         suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
       }
-      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" + suggText;
+      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" +
+	suggText;
       if ( x == hilitedSuggestion ) {
-        content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
+        content += "<div class=\"hilited\"><div class=\"hilited-text\">" +
+	  suggText + "</div>";
         content += "</div>";
       } else {
         content += "<div class=\"suggested\">" + suggText + "</div>";
@@ -138,7 +174,8 @@ NLParser.EnParser.prototype = {
   },
 
   setCommandList: function( commandList ) {
-    this._verbList = [ new NLParser.EnVerb( commandList[x] ) for (x in commandList) ];
+    this._verbList = [ new NLParser.EnVerb( commandList[x] )
+                       for (x in commandList) ];
   },
 
   setNounList: function( nounList ) {

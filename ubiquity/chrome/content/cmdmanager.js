@@ -70,6 +70,7 @@ CommandManager.prototype = {
       this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
     else
       try {
+	this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
         parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(
