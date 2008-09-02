@@ -345,7 +345,8 @@ NLParser.EnVerb.prototype = {
   match: function( inputWord ) {
     /* returns a float from 0 to 1 telling how good of a match the input
        is to this verb.  Return value will be used for sorting.
-       The current heuristic is very ad-hoc.*/
+       The current heuristic is extremely ad-hoc but produces the ordering
+       we want... so far.*/
 
     if (this._name == inputWord)
       // Perfect match always gets maximum rating!
@@ -356,11 +357,11 @@ NLParser.EnVerb.prototype = {
       // verb starts with the input! A good match.
       // The more letters of the verb that have been typed, the better the
       // match is. (Note this privileges short verbs over longer ones)
-      return inputWord.length / this._name.length;
+      return 0.5 + 0.5* (inputWord.length / this._name.length);
     } else if ( index > 0 ) {
       // The input matches the middle of the verb.  Not such a good match but
       // still a match.
-      return inputWord.length / (2 * this._name.length);
+      return 0.5 * (inputWord.length / this._name.length);
     } else {
       // Not a match at all!
       return 0.0;

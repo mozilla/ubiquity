@@ -629,4 +629,12 @@ function testSortedByMatchQuality() {
   testSortedSuggestions( "frob", ["frobnicate"]);
   testSortedSuggestions( "urgle", ["glurgle", "bnurgle"]);
 
+  verbList = [{name: "google"},
+	      {name: "tag"},
+	      {name: "digg"},
+	      {name: "bugzilla"},
+	      {name: "get-email-address"},
+	      {name: "highlight"}];
+  nlParser.setCommandList( verbList );
+  testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
