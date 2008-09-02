@@ -6,6 +6,7 @@
   <base href="chrome://ubiquity/content"/>
   <link rel="stylesheet" type="text/css" media="all"
         href="web-content.css" />
+  <link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon" />
   <script type="text/javascript" src="prefkeys.js"></script>
   <script type="text/javascript"
           src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
@@ -31,6 +32,23 @@
 </div>
 
 <br clear="all"/>
+<div id="alerts">
+<div id="sanitizeOnShutdown-alert" class="alert" style="display: none;">
+<!-- Warning for bug #146. -->
+Your browsing history is set to be cleared every time you close
+Firefox.  At present, due to <a
+href="http://labs.toolness.com/trac/ticket/146">a bug in Ubiquity</a>,
+this also means that any command feeds you subscribe to will be lost.
+If you'd like to learn how to disable the clearing of private data
+when closing Firefox to work around this bug, please read <a
+href="http://support.mozilla.com/en-US/kb/Clearing+private+data#Configuring_private_data_removal">this
+support article</a>.  And if you'd like an alternative solution to
+ensure the privacy of your browsing history in a way that's compatible
+with Ubiquity, consider the <a
+href="http://site.voila.fr/closeforget/index.html">Close'n Forget</a>
+extension.
+</div>
+</div>
 <br clear="all"/>
 
 
@@ -75,9 +93,22 @@
 
 
 <div class="col-four">
+  <h2 class="top">Ubiquity 0.1.1 Released!</h2>
+
+  <p>We've just released the first patch for Ubiquity, which fixes a
+  lot of bugs and offers a few new features.  Feel free to check out the <a
+  href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1.1_Release_Notes">release
+  notes</a> for more information.</p>
+
+  <p>One caveat, though: the latest version may break your current
+  subscriptions, and you may have to unsubscribe from them and then
+  resubscribe to them to get them to work again.  Sorry for the
+  inconvenience, and thanks for participating in this Mozilla Labs
+  experiment.</p>
+
   <h2 class="top">Introduction Movie</h2>
 
-  <p><object width="395" height="295">	<param name="allowfullscreen" value="true" />	<param name="allowscriptaccess" value="always" />	<param name="movie" value="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" />	<embed src="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="395" height="295"></embed></object></p>
+  <p><iframe width="410" height="310" frameborder="0" scrolling="no" src="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1"></iframe></p>
   
   <div id="commands-feeds-div">
     <h2>Subscribed Feeds</h2>

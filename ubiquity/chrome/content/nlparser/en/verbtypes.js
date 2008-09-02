@@ -335,17 +335,15 @@ NLParser.EnVerb.prototype = {
     return completions;
   },
 
-  match: function( word ) {
+  match: function( sentence ) {
     // returns a float from 0 to 1 telling how good of a match the input
     // is to this verb.
-    if ( this._name.indexOf( word ) != -1 ) {
-      // verb equals or contains the input word
-      return word.length / this._name.length;
+    if ( this._name.indexOf( sentence ) == 0 ) {
+      // verb starts with the sentence, i.e. you may be typing this
+      // verb but haven't typed the full thing yet.
+      return sentence.length / this._name.length;
     } else {
       return 0.0;
     }
-    // TODO this return value isn't actually being used to rank anything yet, but
-    // once it is, we'll want to rank verbs higher if they START WITH the word than
-    // if they just CONTAIN the word.
   }
 };

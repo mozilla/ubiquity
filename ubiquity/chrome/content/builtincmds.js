@@ -4,7 +4,7 @@
 
 function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
-    var query = directObject.text;
+    var query = encodeURIComponent(directObject.text);
     var urlString = options.url.replace("{QUERY}", query);
     Utils.openUrlInBrowser(urlString);
     CmdUtils.setLastResult( urlString );
@@ -52,25 +52,42 @@ makeSearchCommand({
   }
 });
 
-/* TODO
 
- - apply CSS max-height & overflow-y to summary container
+CmdUtils.CreateCommand({
+  name: "search",
+  icon: "chrome://ubiquity/content/icons/search.png",
+  description: "Search using your installed search engines",
+  takes: {query: noun_arb_text},
+  modifiers: {"with": noun_type_searchengine},
+  preview: function(previewBlock, inputObject, queryModifiers) {
+    var searchEngine = queryModifiers["with"].data;
+    if(!searchEngine)
+      searchEngine = noun_type_searchengine.getDefault();
+    
+    var previewTemplate = "Search using <b>${engine}</b> for:<br /><b>${query}</b>";
+    var previewData = {
+      engine: searchEngine.name,
+      query: inputObject.text
+    };
+    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+  },
+  execute: function(inputObject, queryModifiers) {
+    var searchEngine = queryModifiers["with"].data;
+    if(!searchEngine)
+      searchEngine = noun_type_searchengine.getDefault();
+    
+    var searchSubmission = searchEngine.getSubmission(inputObject.text, null);
+    Utils.openUrlInBrowser(searchSubmission.uri.spec, searchSubmission.postData);
+  }
+});
 
-*/
 
-function openUrl(url, postData) {
-  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                      .getService(Components.interfaces.nsIWindowMediator);
-  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-  var browser = browserWindow.getBrowser();
 
-  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
-    browserWindow.loadURI(url, null, postData, false);
-  else
-    browser.loadOneTab(url, null, null, postData, false, false);
-}
 
 function fetchWikipediaArticle(previewBlock, articleTitle) {
+  /* TODO
+   - apply CSS max-height & overflow-y to summary container
+  */
   var apiUrl = "http://en.wikipedia.org/w/api.php";
   var apiParams = {
     format: "json",
@@ -187,7 +204,7 @@ CmdUtils.CreateCommand({
   execute: function(directObject) {
     var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
     var searchParams = {search: directObject.text};
-    openUrl(searchUrl + Utils.paramsToString(searchParams));
+    Utils.openUrlInBrowser(searchUrl + Utils.paramsToString(searchParams));
   }
 });
 
@@ -534,6 +551,7 @@ function cmd_bold() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
+cmd_bold.icon = "chrome://ubiquity/content/icons/text_bold.png";
 
 function cmd_italic() {
   var doc = context.focusedWindow.document;
@@ -544,6 +562,7 @@ function cmd_italic() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_italic.description = "If you're in a rich-text-edit area, makes the selected text italic.";
+cmd_italic.icon = "chrome://ubiquity/content/icons/text_italic.png";
 
 function cmd_underline() {
   var doc = context.focusedWindow.document;
@@ -554,6 +573,7 @@ function cmd_underline() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_underline.description = "If you're in a rich-text-edit area, underlines the selected text.";
+cmd_underline.icon = "chrome://ubiquity/content/icons/text_underline.png";
 
 function cmd_undo() {
   var doc = context.focusedWindow.document;
@@ -581,30 +601,112 @@ cmd_redo.icon = "chrome://ubiquity/content/icons/arrow_redo.png";
 CmdUtils.CreateCommand({
   name: "calculate",
   takes: {"expression": noun_arb_text},
-  icon: "http://www.metacalc.com/favicon.ico",
+  icon: "chrome://ubiquity/content/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
-  execute: function( directObj ) {
-    var expr = directObj.text;
-    if( expr.length > 0 ) {
-      var result = eval( expr );
-      CmdUtils.setSelection( result );
-      CmdUtils.setLastResult( result );
-    } else
-      displayMessage( "Requires an expression.");
-  },
-  preview: function( pblock, directObj ) {
-    var expr = directObj.text;
-    if( expr.length < 1 ){
-      pblock.innerHTML = "Calculates an expression. E.g., 22/7.";
+  preview: function(previewBlock, directObject) {
+    var expression = directObject.text;
+  
+    if(expression.length < 1) {
+      previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";
       return;
     }
+  
+  var previewTemplate = "${expression} = <b>${result}</b>" +
+    "{if error}<p><b>Error:</b> ${error}</p>{/if}";
+  
+  var result = "?";
+  var error = null;
+  try {
+    var parser = new MathParser();
+    
+    result = parser.parse(expression);
+    
+    if(isNaN(result))
+      throw new Error("Invalid expression");
+  } catch(e) {
+    error = e.message;
+    result = "?";
+  }
+  
+  var previewData = {
+    "expression": expression,
+    "result": result,
+    "error": error
+  }
+    
+  previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+  
+  },
+  execute: function( directObj ) {
+  
+    var expression = directObject.text;
+ 
+    if(expression.length < 1) {
+      displayMessage("Requires a expression.");
+      return;
+    }
+  
+  try {
+    var parser = new MathParser();
+    var result = parser.parse(expression) + "";
+    
+    if(isNaN(result))
+      throw new Error("Invalid expression");
+    
+    CmdUtils.setSelection(result);
+    CmdUtils.setLastResult(result);
+  } catch(e) {
+    displayMessage("Error calculating expression: " + expression)
+  }
 
-    pblock.innerHTML = expr + " = ";
-    try{ pblock.innerHTML += eval( expr ); }
-    catch(e) { pblock.innerHTML += "?"; }
   }
 });
+
+//+ Carlos R. L. Rodrigues
+//@ http://jsfromhell.com/classes/math-parser [rev. #2]
+MathParser = function(){
+  var o = this, p = o.operator = {};
+  p["+"] = function(n, m){return n + m;}
+  p["-"] = function(n, m){return n - m;}
+  p["*"] = function(n, m){return n * m;}
+  p["/"] = function(m, n){return n / m;}
+  p["%"] = function(m, n){return n % m;}
+  p["^"] = function(m, n){return Math.pow(n, m);}
+  p["~"] = function(m, n){return Math.sqrt(n, m);}
+  o.custom = {}, p.f = function(s, n){
+    if(Math[s]) return Math[s](n);
+    else if(o.custom[s]) return o.custom[s].apply(o, n);
+    else throw new Error("Function \"" + s + "\" not defined.");
+  }, o.add = function(n, f){this.custom[n] = f;}
+}
+MathParser.prototype.eval = function(e){
+  var e = e.split(""), v = [], p = [], a, c = 0, s = 0, x, t, d = 0;
+  var n = "0123456789.", o = "+-*/^%~", f = this.operator;
+  for(var i = 0, l = e.length; i < l; i++)
+    if(o.indexOf(e[i]) > -1)
+      e[i] == "-" && (s > 1 || !d) && ++s, !s && d && (p.push(e[i]), s = 2), "+-".indexOf(e[i]) < (d = 0) && (c = 1);
+    else if(a = n.indexOf(e[i]) + 1 ? e[i++] : ""){
+      while(n.indexOf(e[i]) + 1) a += e[i++];
+      v.push(d = (s & 1 ? -1 : 1) * a), c && v.push(f[p.pop()](v.pop(), v.pop())) && (c = 0), --i, s = 0;
+    }
+  for(c = v[0], i = 0, l = p.length; l--; c = f[p[i]](c, v[++i]));
+  return c;
+}
+MathParser.prototype.parse = function(e){
+  var p = [], f = [], ag, n, c, a, o = this, v = "0123456789.+-*/^%~(, )";
+  for(var x, i = 0, l = e.length; i < l; i++){
+    if(v.indexOf(c = e.charAt(i)) < 0){
+      for(a = c; v.indexOf(c = e.charAt(++i)) < 0; a += c); f.push((--i, a));
+    }
+    else if(!(c == "(" && p.push(i)) && c == ")"){
+      if(a = e.slice(0, (n = p.pop()) - (x = v.indexOf(e.charAt(n - 1)) < 0 ? y = (c = f.pop()).length : 0)), x)
+        for(var j = (ag = e.slice(n, ++i).split(",")).length; j--; ag[j] = o.eval(ag[j]));
+      l = (e = a + (x ? o.operator.f(c, ag) : o.eval(e.slice(n, ++i))) + e.slice(i)).length, i -= i - n + c.length;
+    }
+  }
+  return o.eval(e);
+}
 
 
 function defineWord(word, callback) {
@@ -655,6 +757,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "syntax-highlight",
   takes: {"code": noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/color_wheel.png",
   description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
   execute: function( directObj ) {
     var code = directObj.text;
@@ -685,6 +788,7 @@ function cmd_highlight() {
   }
 }
 cmd_highlight.description = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
+cmd_highlight.icon = "chrome://ubiquity/content/icons/textfield_rename.png";
 cmd_highlight.preview = function(pblock) {
   pblock.innerHTML = cmd_highlight.description;
 }
@@ -1005,36 +1109,60 @@ function gmailChecker(callback) {
   var url = "http://mail.google.com/mail/feed/atom";
   Utils.ajaxGet(url, function(rss) {
     CmdUtils.loadJQuery(function(jQuery) {
+      var emailDetails = {
+        account: jQuery(rss).children("title").text().split(" ").pop()
+      };
+      
       var firstEntry = jQuery(rss).find("entry").get(0);
-
-      var newEmailId = jQuery(firstEntry).find("id").text();
-      var subject = jQuery(firstEntry).find("title").text();
-      var author = jQuery(firstEntry).find("author name").text();
-      var summary = jQuery(firstEntry).find("summary").text();
-
-      var title = author + ' says "' + subject + '"';
-      callback({text: summary, title: title});
+      if (firstEntry) {
+        emailDetails.lastEmail = {
+          author: jQuery(firstEntry).find("author > name").text(),
+          subject: subject = jQuery(firstEntry).find("title").text(),
+          summary: jQuery(firstEntry).find("summary").text(),
+          href: jQuery(firstEntry).find("link").attr("href")
+        };
+      }
+      callback(emailDetails);
     });
   });
 }
 CmdUtils.CreateCommand({
   name: "last-email",
-  icon: "http://gmail.com/favicon.ico",
+  icon: "chrome://ubiquity/content/icons/email_open.png",
   description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
   preview: function( pBlock ) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
-    gmailChecker(function(obj) {
-      pBlock.innerHTML = "<b>" + obj.title + "</b><p>" + obj.text + "</p>";
-    });
+    // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt 
+    if (Utils.getCookie("mail.google.com", "S") != undefined) { 
+      gmailChecker(function(emailDetails) {
+        var previewTemplate = "<b>You (${account}) have no new mail</b>"; 
+        if (emailDetails.lastEmail) {
+          var previewTemplate = "Last unread e-mail for ${account}:" +
+            "<a href=\"${lastEmail.href}\">" +
+            "<p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p>" +
+            "<p>${lastEmail.summary}</p>" +
+            "</a>";
+        }
+        pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
+      }); 
+    } else {
+      pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
+    }
   },
   execute: function() {
-    gmailChecker(displayMessage);
+    gmailChecker(function(emailDetails) {
+      var msgTemplate = "You (${account}) have no new mail.";
+      if (emailDetails.lastEmail) {
+        msgTemplate = "You (${account}) have new email! ${lastEmail.author} says: ${lastEmail.subject}";
+      }
+      displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
+    }); 
   }
 });
 
 CmdUtils.CreateCommand({
   name: "get-email-address",
-  icon: "http://gmail.com/favicon.ico",
+  icon: "chrome://ubiquity/content/icons/email.png",
   description: "Looks up the email address of a person from your contacts list given their name.",
   takes: {name: noun_type_contact},
   preview: function( pBlock, name ) {
@@ -1200,12 +1328,19 @@ CmdUtils.CreateCommand({
 // WEATHER COMMANDS
 // -----------------------------------------------------------------
 
+var Temperature_Units = [
+  'fahrenheit',
+  'celsius'
+];
+
+var noun_type_temperature_units = new CmdUtils.NounType( "temperature units", Temperature_Units );
 
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
 CmdUtils.CreateCommand({
   name: "weather",
   takes: {"location": noun_arb_text},
+  modifiers: {"in": noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
@@ -1217,11 +1352,22 @@ CmdUtils.CreateCommand({
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function( pblock, directObj ) {
+  preview: function( pblock, directObj, modifiers) {
     var location = directObj.text;
     if( location.length < 1 ) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
+    }
+    
+    //use either the specified "in" unit or get from geolocation
+    var temp_units = 'celsius';
+    if(!modifiers.in.text){
+      var cc = CmdUtils.getGeoLocation().country_code;
+      if(["US","UM","BZ"].indexOf(cc) != -1){
+        temp_units = 'fahrenheit';
+      }
+    }else{
+      temp_units = modifiers.in.text;
     }
 
     var url = "http://www.google.com/ig/api";
@@ -1234,12 +1380,25 @@ CmdUtils.CreateCommand({
       var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
       var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
       imgSrc += weatherId + "d.png";
-
+      
+      //change wind speed to kmh based on geolocation
+      var wind_text = el.find("wind_condition").attr("data").split("at");
+      var wind_speed = parseInt(wind_text[1].split(" ")[1]);
+      var wind_units = "mph";
+      //http://en.wikipedia.org/wiki/Si_units
+      if(["US","UM", "LR", "MM"].indexOf(cc) == -1){
+        wind_units = "kmh";
+        wind_speed = wind_speed * 1.6;
+      }
+      var wind = wind_text[0] + " at " + wind_speed + wind_units;
+      
       var weather = {
         condition: condition,
-        temp: el.find("temp_f").attr("data"),
+        temp_units: temp_units,
+        tempc: el.find("temp_c").attr("data"), 
+        tempf: el.find("temp_f").attr("data"),
         humidity: el.find("humidity").attr("data"),
-        wind: el.find("wind_condition").attr("data"),
+        wind: wind,
         img: imgSrc
       };
 
@@ -1351,6 +1510,7 @@ CmdUtils.CreateCommand({
   name:"convert",
   takes:{text:noun_arb_text},
   modifiers:{to:noun_conversion_options},
+  icon: "chrome://ubiquity/content/icons/convert.png",
   description:"Converts a selection to a PDF, to rich text, or to html.",
   preview: function(pBlock, directObj, modifiers) {
     if (modifiers.to && modifiers.to.text) {
@@ -1397,6 +1557,7 @@ function cmd_view_source() {
   CmdUtils.getWindowInsecure().location = url;
 }
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
+cmd_view_source.icon = "chrome://ubiquity/content/icons/page_code.png";
 
 function escape_html_entities(text) {
   // TODO finish this?
@@ -1408,6 +1569,7 @@ var escape_desc = "Replaces html entities (&lt;, &gt;, and &amp;) with their esc
 CmdUtils.CreateCommand({
   name:"escape-html-entities",
   takes: {text: noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/html_go.png",
   description: escape_desc,
   preview: function(pBlock, directObj) {
    if (directObj.html)
@@ -1437,6 +1599,7 @@ function wordCount(text){
 CmdUtils.CreateCommand({
   name: "word-count",
   takes: {text: noun_arb_text},
+  icon: "chrome://ubiquity/content/icons/sum.png",
   description: "Displays the number of words in a selection.",
   execute: function( directObj ) {
     if (directObj.text)
@@ -1593,12 +1756,21 @@ CmdUtils.CreateCommand({
   }
 });
 
+
 CmdUtils.CreateCommand({
   name: "tinyurl",
   takes: {"url to shorten": noun_arb_text},
   icon: "http://tinyurl.com/favicon.ico",
   description: "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyUrl</a>",
-  preview: "Replaces the selected URL with a TinyUrl.",
+  preview: function( pblock, urlToShorten ){
+    pblock.innerHTML = "Replaces the selected URL with a TinyUrl.";
+    var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+      var baseUrl = "http://tinyurl.com/api-create.php?url=";
+      pblock.innerHTML = "Replaces the selected URL with ",
+      jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
+        if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
+      });
+  },
   execute: function( urlToShorten ) {
     //escaping urlToShorten will not create the right tinyurl
     var baseUrl = "http://tinyurl.com/api-create.php?url=";
@@ -1607,6 +1779,7 @@ CmdUtils.CreateCommand({
     })
   }
 });
+
 
 // -----------------------------------------------------------------
 // TAB COMMANDS
@@ -1723,6 +1896,7 @@ function setFullPageZoom( level ) {
 CmdUtils.CreateCommand({
   name:"zoom",
   takes:{"percentage": noun_type_percentage},
+  icon: "chrome://ubiquity/content/icons/magnifier.png",
   description:"Zooms the Firefox window in or out.",
   preview:function(pBlock, directObj) {
     if (directObj.text)
@@ -1771,6 +1945,7 @@ function cmd_undelete() {
   });
 }
 cmd_undelete.description = "Restores the HTML deleted by the delete command.";
+cmd_undelete.icon = "chrome://ubiquity/content/icons/arrow_undo.png";
 cmd_undelete.preview = function( pblock ) {
   pblock.innerHTML = cmd_undelete.description;
 };
@@ -1795,6 +1970,7 @@ cmd_stop_editing_page.description = "If you used the 'edit page' command to put 
 cmd_stop_editing_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_stop_editing_page.description;
 }
+cmd_stop_editing_page.icon = "chrome://ubiquity/content/icons/page_refresh.png";
 
 // I think edit-mode on and edit-mode off would be
 
@@ -1907,9 +2083,13 @@ cmd_remove_annotations.preview = function( pblock ) {
   pblock.innerHTML = cmd_remove_annotations.description;
 };
 
+cmd_remove_annotations.icon = "chrome://ubiquity/content/icons/page_delete.png";
+
+
 CmdUtils.CreateCommand({
   name:"map-these",
   takes: {"selection": noun_arb_text },
+  icon : "chrome://ubiquity/content/icons/map_add.png",
   description: "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)",
   preview: function( pblock, directObject ) {
     var html = directObject.html;

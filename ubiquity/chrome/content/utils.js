@@ -41,13 +41,22 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 
 Utils.__TimerCallback.prototype = {
   notify : function(timer) {
+    for(var i = 0; i < Utils.__timers.length; i++) {
+      if(Utils.__timers[i] == timer) {
+        Utils.__timers.splice(i, 1);
+        break;
+      }
+    }
     this._callback();
   }
 };
 
+Utils.__timers = [];
+
 Utils.setTimeout = function setTimeout(callback, delay) {
   var classObj = Components.classes["@mozilla.org/timer;1"];
   var timer = classObj.createInstance(Components.interfaces.nsITimer);
+  Utils.__timers.push(timer);
 
   timer.initWithCallback(new Utils.__TimerCallback(callback),
                          delay,
@@ -63,9 +72,52 @@ Utils.url = function url(spec) {
   return ios.newURI(spec, null, null);
 };
 
-Utils.openUrlInBrowser = function openUrlInBrowser(urlString) {
-  var tab = Application.activeWindow.open(Utils.url(urlString));
-  tab.focus();
+Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
+  // allow postData to be null/undefined, string representation, json representation, or nsIInputStream
+  // nsIInputStream is what is needed
+  
+  var postInputStream = null;
+  if(postData) {
+    if(postData instanceof Components.interfaces.nsIInputStream) {
+      postInputStream = postData;
+    } else {
+      if(typeof postData == "object") // json -> string
+        postData = Utils.paramsToString(postData);
+      
+      var stringStream = Components.classes["@mozilla.org/io/string-input-stream;1"]
+        .createInstance(Components.interfaces.nsIStringInputStream);
+      stringStream.data = postData;
+      
+      postInputStream = Components.classes["@mozilla.org/network/mime-input-stream;1"]
+        .createInstance(Components.interfaces.nsIMIMEInputStream);
+      postInputStream.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      postInputStream.addContentLength = true;
+      postInputStream.setData(stringStream);
+    }
+  }
+
+
+  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  var browser = browserWindow.getBrowser();
+  
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+    browserWindow.loadURI(urlString, null, postInputStream, false);
+  else
+    browser.loadOneTab(urlString, null, null, postInputStream, false, false);
+};
+
+// Focuses a tab with the given URL if one exists in the current
+// window, otherwise opens a new tab with the URL and focuses it.
+Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
+  var tabs = Application.activeWindow.tabs;
+  for (var i = 0; i < tabs.length; i++)
+    if (tabs[i].uri.spec == urlString) {
+      tabs[i].focus();
+      return;
+    }
+  Utils.openUrlInBrowser(urlString);
 };
 
 Utils.getCookie = function getCookie(domain, name) {
@@ -85,7 +137,7 @@ Utils.paramsToString = function paramsToString(params) {
   var string = "?";
 
   for (key in params) {
-    string += escape(key) + "=" + escape(params[key]) + "&";
+    string += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
   }
 
   // Remove the trailing &
@@ -135,3 +187,12 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
   request.onreadystatechange = onRscFunc;
   request.send(null);
 };
+
+
+Utils.trim = function(str) {
+  var str = str.replace(/^\s\s*/, ''),
+    ws = /\s/,
+    i = str.length;
+  while (ws.test(str.charAt(--i)));
+  return str.slice(0, i + 1);
+}

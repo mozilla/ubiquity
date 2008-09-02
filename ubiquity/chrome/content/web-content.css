@@ -170,3 +170,18 @@ a:hover {
 .error {
   color:#FF0000;
 }
+
+.alert {
+  color:#FFFFFF;
+  background:#FF0000;
+}
+
+.alert a {
+  color:#FFFFFF;
+  text-decoration: underline;
+}
+
+.feed-action:visited, .feed-action, .feed-action:hover {
+  color: #aaaaaa;
+  text-decoration: none;
+}

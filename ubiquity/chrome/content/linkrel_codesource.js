@@ -2,7 +2,7 @@ const CMD_SRC_ANNO = "ubiquity/source";
 const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
 const CMD_URL_ANNO = "ubiquity/commands";
-const WARNING_URL = "chrome://ubiquity/content/confirm-add-command.html";
+const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 function LinkRelCodeSource() {
   if (LinkRelCodeSource.__singleton)
@@ -16,26 +16,24 @@ function LinkRelCodeSource() {
     let markedPages = LinkRelCodeSource.getMarkedPages();
     let newSources = {};
     for (let i = 0; i < markedPages.length; i++) {
-      let page = markedPages[i];
-      let href = page.jsUri.spec;
-      if (this._sources[href]) {
-        // TODO: This won't distinguish between something
-        // that was a RemoteUriCodeSource but changed to
-        // an AnnotationCodeSource.
-        newSources[href] = this._sources[href];
-      } else if (RemoteUriCodeSource.isValidUri(page.jsUri)) {
-        if (page.canUpdate)
-          // TODO: Initialize w/ cached source.
-          newSources[href] = new RemoteUriCodeSource(href);
-        else
+      let pageInfo = markedPages[i];
+      let href = pageInfo.jsUri.spec;
+      let source;
+      if (RemoteUriCodeSource.isValidUri(pageInfo.jsUri)) {
+        if (pageInfo.canUpdate) {
+          source = new RemoteUriCodeSource(pageInfo);
+        } else
           // TODO: What about 0.1 feeds?  Just make users
           // resubscribe to all their stuff?  Or implement
           // manual updating?
-          newSources[href] = new AnnotationCodeSource(page.htmlUri,
-                                                      CMD_SRC_ANNO);
-      } else if (LocalUriCodeSource.isValidUri(page.jsUri)) {
-        newSources[href] = new LocalUriCodeSource(href);
+          source = new StringCodeSource(pageInfo.getCode());
+      } else if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
+        source = new LocalUriCodeSource(href);
+      } else {
+        throw new Error("Don't know how to make code source for " + href);
       }
+
+      newSources[href] = source;
     }
     this._sources = newSources;
   };
@@ -82,6 +80,19 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
     else
       pageInfo.canUpdate = false;
 
+    pageInfo.getCode = function pageInfo_getCode() {
+      if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
+        return annSvc.getPageAnnotation(uri, CMD_SRC_ANNO);
+      else
+        return "";
+    };
+
+    pageInfo.setCode = function pageInfo_setCode(code) {
+      annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, code, 0,
+                               annSvc.EXPIRE_NEVER);
+    };
+
+    // The following is used by the herd command feed code.
     if (this.__singleton)
       if (pageInfo.jsUri.spec in this.__singleton._sources)
         pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
@@ -113,7 +124,10 @@ LinkRelCodeSource.removeMarkedPage = function LRCS_removeMarkedPage(uri) {
   let annSvc = this.__getAnnSvc();
   uri = Utils.url(uri);
   annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
-  // TODO: Remove source code and autoupdate annotations if they exist.
+  if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
+    annSvc.removePageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
+  if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
+    annSvc.removePageAnnotation(uri, CMD_SRC_ANNO);
 };
 
 LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
@@ -124,7 +138,7 @@ LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
 };
 
 LinkRelCodeSource.__install = function LRCS_install(window) {
-  function showNotification(targetDoc, commandsUrl) {
+  function showNotification(targetDoc, commandsUrl, mimetype) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
 
@@ -151,13 +165,56 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
         box.removeNotification(oldNotification);
 
       // Clicking on "subscribe" takes them to the warning page:
-      var confirmUrl = WARNING_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
+      var confirmUrl = CONFIRM_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
 			 + encodeURIComponent(commandsUrl);
+
+      function isTrustedUrl(commandsUrl, mimetype) {
+        // Even if the command feed resides on a trusted host, if
+        // the mime-type is application/x-javascript-untrusted, the
+        // host itself doesn't trust it (perhaps because it's mirroring
+        // code from somewhere else).
+        if (mimetype == "application/x-javascript-untrusted")
+          return false;
+
+        var url = Utils.url(commandsUrl);
+
+        if (url.scheme != "https")
+          return false;
+
+        TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
+        var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
+        domains = domains.split(",");
+
+        for (var i = 0; i < domains.length; i++) {
+          if (domains[i] == url.host)
+            return true;
+        }
+
+        return false;
+      }
+
+      function onSubscribeClick(notification, button) {
+        if (isTrustedUrl(commandsUrl, mimetype)) {
+          function onSuccess(data) {
+            LinkRelCodeSource.addMarkedPage({url: targetDoc.URL,
+                                             canUpdate: true,
+                                             sourceCode: data});
+            Utils.openUrlInBrowser(confirmUrl);
+          }
+
+          if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
+            jQuery.ajax({url: commandsUrl,
+                         dataType: "text",
+                         success: onSuccess});
+          } else
+            onSuccess("");
+        } else
+          Utils.openUrlInBrowser(confirmUrl);
+      }
+
       var buttons = [
         {accessKey: null,
-         callback: function(notification, button) {
-	   Utils.openUrlInBrowser(confirmUrl);
-	 },
+         callback: onSubscribeClick,
          label: "Subscribe...",
          popup: null}
       ];
@@ -187,7 +244,8 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
     annSvc.setPageAnnotation(url, CMD_URL_ANNO,
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
     if (!LinkRelCodeSource.isMarkedPage(url))
-      showNotification(event.target.ownerDocument, commandsUrl);
+      showNotification(event.target.ownerDocument, commandsUrl,
+                       event.target.type);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
