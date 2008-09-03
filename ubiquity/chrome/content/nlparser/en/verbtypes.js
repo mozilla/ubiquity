@@ -310,10 +310,13 @@ NLParser.EnVerb.prototype = {
     // Try selection as direct object...
     if (this._DOType) {
       try {
-      let suggs = this._DOType.suggest(text, html);
-      for each (let sugg in suggs) {
-        if (sugg)
-          completions.push( this._newSentence( sugg, {}) );
+        let suggs = this._DOType.suggest(text, html);
+        for each (let sugg in suggs) {
+          if (sugg) {
+	    let sentence = this._newSentence( sugg, {});
+            sentence.matchScore = this._DOType.rankLast ? 0 : 1;
+            completions.push(sentence);
+	  }
         }
       } catch(e) {
         Components.utils.reportError(
@@ -330,7 +333,9 @@ NLParser.EnVerb.prototype = {
           if (sugg) {
             let mods = {};
             mods[x] = sugg;
-            completions.push( this._newSentence(null, mods) );
+	    let sentence = this._newSentence(null, mods);
+	    sentence.matchScore = this._modifiers[x].rankLast ? 0 : 1;
+            completions.push( sentence );
           }
         }
       } catch(e) {

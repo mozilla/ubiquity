@@ -597,7 +597,7 @@ function testSortedBySuggestionMemory() {
 		  {name: "coelecanth"},
 		  {name: "crab"} ];
   var nlParser = new NLParser.EnParser( verbList, nounList );
-  var fakeContext = {text:"", html:""};
+  var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList("c", fakeContext);
 
 }
@@ -610,7 +610,7 @@ function testSortedByMatchQuality() {
 		  {name: "bnurgle"},
 		  {name: "fangoriously"}];
   var nlParser = new NLParser.EnParser( verbList, nounList );
-  var fakeContext = {text:"", html:""};
+  var fakeContext = {textSelection:"", htmlSelection:""};
 
   var assert = this.assert;
   function testSortedSuggestions( input, expectedList ) {
@@ -637,4 +637,30 @@ function testSortedByMatchQuality() {
 	      {name: "highlight"}];
   nlParser.setCommandList( verbList );
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
+}
+
+function testSortSpecificNounsBeforeArbText() {
+  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
+				  "beagle", "bulldog", "husky"]);
+  var arb_text = {
+    _name: "text",
+    rankLast: true,
+    suggest: function( text, html ) {
+      return [ CmdUtils.makeSugg(text, html) ];
+    }
+  };
+
+  var verbList = [{name: "mumble", DOType: arb_text, DOLabel:"stuff"},
+              {name: "wash", DOType: dog, DOLabel: "dog"}];
+
+  var nlParser = new NLParser.EnParser( verbList, [arb_text, dog] );
+
+  var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
+  var selObj = getSelectionObject( fakeContext );
+  nlParser.updateSuggestionList( "", fakeContext );
+  var suggs = nlParser.getSuggestionList();
+    this.assert( suggs.length == 2, "Should be two suggestions.");
+  this.assert( suggs[0]._verb._name == "wash", "First suggestion should be wash");
+  this.assert( suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+
 }

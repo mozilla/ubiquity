@@ -49,7 +49,8 @@ var noun_type_contact = {
 };
 
 var noun_arb_text = {
- _name: "text",
+  _name: "text",
+  rankLast: true,
   suggest: function( text, html ) {
     return [ CmdUtils.makeSugg(text, html) ];
   }
@@ -234,22 +235,22 @@ var noun_type_searchengine = {
     var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
       .getService(Components.interfaces.nsIBrowserSearchService);
     var engines = searchService.getVisibleEngines({});
-    
+
     if (!fragment) {
       return engines.map(function(engine) {
         return CmdUtils.makeSugg(engine.name, null, engine);
       });
     }
-    
+
     fragment = fragment.toLowerCase();
     var suggestions = [];
-    
+
     for(var i = 0; i < engines.length; i++) {
       if(engines[i].name.toLowerCase().indexOf(fragment) > -1) {
         suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i]));
       }
     }
-    
+
     return suggestions;
   },
   getDefault: function() {
@@ -266,37 +267,37 @@ var noun_type_tag = {
 		var allTags = Components.classes["@mozilla.org/browser/tagging-service;1"]
 			.getService(Components.interfaces.nsITaggingService)
 			.allTags;
-		
+
 		if(fragment.length < 1) {
 			return allTags.map(function(tag) {
         return CmdUtils.makeSugg(tag, null, [tag]);
       });
     }
-		
+
 		fragment = fragment.toLowerCase();
 		var numTags = allTags.length;
 		var suggestions = [];
-		
+
 		// can accept multiple tags, seperated by a comma
 		// assume last tag is still being typed - suggest completions for that
-		
+
 		var completedTags = fragment.split(",").map(function(tag) {
       return Utils.trim(tag);
     });;
-		
-		
+
+
 		// separate last tag in fragment, from the rest
 		var uncompletedTag = completedTags.pop();
-		
+
 		completedTags = completedTags.filter(function(tagName) {
 			return tagName.length > 0;
 		});
 		var fragmentTags = "";
 		if(completedTags.length > 0)
 			fragmentTags = completedTags.join(",");
-		
+
 		if(uncompletedTag.length > 0) {
-			
+
 			if(fragmentTags.length > 0) {
 				suggestions.push(CmdUtils.makeSugg(
 					fragmentTags + "," + uncompletedTag,
@@ -310,7 +311,7 @@ var noun_type_tag = {
 					completedTags
 				));
 			}
-				
+
 		} else {
 			suggestions.push(CmdUtils.makeSugg(
 				fragmentTags,
@@ -318,7 +319,7 @@ var noun_type_tag = {
 				completedTags
 			));
 		}
-		
+
 		for(var i = 0; i < numTags; i++) {
 			// handle cases where user has/hasn't typed anything for the current uncompleted tag in the fragment
 			// and only match from the begining of a tag name (not the middle)
@@ -332,7 +333,7 @@ var noun_type_tag = {
 					));
 			}
 		}
-		
+
 		return suggestions;
 	}
 };
