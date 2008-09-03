@@ -340,18 +340,20 @@ var noun_type_tag = {
 
 var noun_type_geolocation = {
    _name : "geolocation",
-   
+
    default : function(fragment){
       var location = CmdUtils.getGeoLocation();
       return location.city + "," + location.country;
    },
-   
+
    suggest: function(fragment){
-      
-      var regexp = /here(\s)?.*/
+      /* LONGTERM TODO: try to detect whether fragment is anything like a valid location or not,
+       * and don't suggest anything for input that's not a location.
+       */
+      var regexp = /here(\s)?.*/;
       if(regexp.test(fragment)){
          var suggestions = [];
-         location = CmdUtils.getGeoLocation();
+         var location = CmdUtils.getGeoLocation();
          var loc = location.city + "," + location.country;
          suggestions.push(CmdUtils.makeSugg(loc));
          suggestions.push(CmdUtils.makeSugg(location.city));
@@ -359,7 +361,7 @@ var noun_type_geolocation = {
          suggestions.push(CmdUtils.makeSugg(fragment));
          return suggestions;
       }
-   
+
       return [CmdUtils.makeSugg(fragment)];
    }
 };
