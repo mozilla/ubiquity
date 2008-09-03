@@ -1401,12 +1401,13 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 
 CmdUtils.CreateCommand({
   name: "weather",
-  takes: {"location": noun_arb_text},
+  takes: {"location": noun_type_geolocation},
   modifiers: {"in": noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
   execute: function( directObj ) {
+    if (! directObj.text ) directObj.text = noun_type_geolocation.default();
     var location = directObj.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
@@ -1415,11 +1416,14 @@ CmdUtils.CreateCommand({
   },
 
   preview: function( pblock, directObj, modifiers) {
+    if (! directObj.text ) directObj.text = noun_type_geolocation.default();
     var location = directObj.text;
     if( location.length < 1 ) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
     }
+
+    pblock.innerHTML = "Weather for " + location;
     
     //use either the specified "in" unit or get from geolocation
     var temp_units = 'celsius';
@@ -1438,6 +1442,8 @@ CmdUtils.CreateCommand({
       if( el.length == 0 ) return;
 
       var condition = el.find("condition").attr("data");
+
+      var place = jQuery(xml).find("forecast_information > city").attr("data");
 
       var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
       var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
@@ -1466,7 +1472,7 @@ CmdUtils.CreateCommand({
 
       weather["img"] = imgSrc;
 
-      var html = CmdUtils.renderTemplate( {file:"weather.html"}, {w:weather}
+      var html = CmdUtils.renderTemplate( {file:"weather.html"}, {w:weather, location:place}
                                         );
 
       jQuery(pblock).html( html );

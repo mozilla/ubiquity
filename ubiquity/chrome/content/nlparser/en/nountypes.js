@@ -337,3 +337,29 @@ var noun_type_tag = {
 		return suggestions;
 	}
 };
+
+var noun_type_geolocation = {
+   _name : "geolocation",
+   
+   default : function(fragment){
+      var location = CmdUtils.getGeoLocation();
+      return location.city + "," + location.country;
+   },
+   
+   suggest: function(fragment){
+      
+      var regexp = /here(\s)?.*/
+      if(regexp.test(fragment)){
+         var suggestions = [];
+         location = CmdUtils.getGeoLocation();
+         var loc = location.city + "," + location.country;
+         suggestions.push(CmdUtils.makeSugg(loc));
+         suggestions.push(CmdUtils.makeSugg(location.city));
+         suggestions.push(CmdUtils.makeSugg(location.country));
+         suggestions.push(CmdUtils.makeSugg(fragment));
+         return suggestions;
+      }
+   
+      return [CmdUtils.makeSugg(fragment)];
+   }
+};
