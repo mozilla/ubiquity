@@ -1,5 +1,6 @@
 resource ubiquity-modules modules/
 resource ubiquity-scripts scripts/
-content     ubiquity    chrome/content/
+content ubiquity chrome/content/
+skin ubiquity skin chrome/skin/
 overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul
 overlay chrome://ubiquity/content/harness.xul chrome://ubiquity/content/browser.xul

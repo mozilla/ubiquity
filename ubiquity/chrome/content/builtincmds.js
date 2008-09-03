@@ -55,7 +55,7 @@ makeSearchCommand({
 
 CmdUtils.CreateCommand({
   name: "search",
-  icon: "chrome://ubiquity/content/icons/search.png",
+  icon: "chrome://ubiquity/skin/icons/search.png",
   description: "Search using your installed search engines",
   takes: {query: noun_arb_text},
   modifiers: {"with": noun_type_searchengine},
@@ -551,7 +551,7 @@ function cmd_bold() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
-cmd_bold.icon = "chrome://ubiquity/content/icons/text_bold.png";
+cmd_bold.icon = "chrome://ubiquity/skin/icons/text_bold.png";
 
 function cmd_italic() {
   var doc = context.focusedWindow.document;
@@ -562,7 +562,7 @@ function cmd_italic() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_italic.description = "If you're in a rich-text-edit area, makes the selected text italic.";
-cmd_italic.icon = "chrome://ubiquity/content/icons/text_italic.png";
+cmd_italic.icon = "chrome://ubiquity/skin/icons/text_italic.png";
 
 function cmd_underline() {
   var doc = context.focusedWindow.document;
@@ -573,7 +573,7 @@ function cmd_underline() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_underline.description = "If you're in a rich-text-edit area, underlines the selected text.";
-cmd_underline.icon = "chrome://ubiquity/content/icons/text_underline.png";
+cmd_underline.icon = "chrome://ubiquity/skin/icons/text_underline.png";
 
 function cmd_undo() {
   var doc = context.focusedWindow.document;
@@ -584,7 +584,7 @@ function cmd_undo() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_undo.description = "Undoes your latest style/formatting or page-editing changes.";
-cmd_undo.icon = "chrome://ubiquity/content/icons/arrow_undo.png";
+cmd_undo.icon = "chrome://ubiquity/skin/icons/arrow_undo.png";
 
 function cmd_redo() {
   var doc = context.focusedWindow.document;
@@ -595,13 +595,13 @@ function cmd_redo() {
     displayMessage("You're not in a rich text editing field.");
 }
 cmd_redo.description = "Redoes your latest style/formatting or page-editing changes.";
-cmd_redo.icon = "chrome://ubiquity/content/icons/arrow_redo.png";
+cmd_redo.icon = "chrome://ubiquity/skin/icons/arrow_redo.png";
 
 
 CmdUtils.CreateCommand({
   name: "calculate",
   takes: {"expression": noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/calculator.png",
+  icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
   preview: function(previewBlock, directObject) {
@@ -757,7 +757,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "syntax-highlight",
   takes: {"code": noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/color_wheel.png",
+  icon: "chrome://ubiquity/skin/icons/color_wheel.png",
   description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
   execute: function( directObj ) {
     var code = directObj.text;
@@ -788,7 +788,7 @@ function cmd_highlight() {
   }
 }
 cmd_highlight.description = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
-cmd_highlight.icon = "chrome://ubiquity/content/icons/textfield_rename.png";
+cmd_highlight.icon = "chrome://ubiquity/skin/icons/textfield_rename.png";
 cmd_highlight.preview = function(pblock) {
   pblock.innerHTML = cmd_highlight.description;
 }
@@ -954,7 +954,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "help",
-  icon: "chrome://ubiquity/content/icons/help.png",
+  icon: "chrome://ubiquity/skin/icons/help.png",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
   execute: function(){
@@ -964,7 +964,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "command-editor",
-  icon : "chrome://ubiquity/content/icons/plugin_edit.png",
+  icon : "chrome://ubiquity/skin/icons/plugin_edit.png",
   preview: "Opens the editor for writing Ubiquity commands",
   description: "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page.",
   execute: function(){
@@ -974,7 +974,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "command-list",
-  icon : "chrome://ubiquity/content/icons/application_view_list.png",
+  icon : "chrome://ubiquity/skin/icons/application_view_list.png",
   preview: "Opens the list of all Ubiquity commands available and what they all do.",
   description: "Takes you to the page you're on right now.",
   execute: function(){
@@ -1008,7 +1008,7 @@ function findGmailTab() {
 CmdUtils.CreateCommand({
   name: "email",
   takes: {"message": noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/email.png",
+  icon: "chrome://ubiquity/skin/icons/email.png",
   modifiers: {to: noun_type_contact},
   description:"Begins composing an email to a person from your contact list.",
   help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a GMail account to use it." +
@@ -1128,7 +1128,7 @@ function gmailChecker(callback) {
 }
 CmdUtils.CreateCommand({
   name: "last-email",
-  icon: "chrome://ubiquity/content/icons/email_open.png",
+  icon: "chrome://ubiquity/skin/icons/email_open.png",
   description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
   preview: function( pBlock ) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
@@ -1162,7 +1162,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "get-email-address",
-  icon: "chrome://ubiquity/content/icons/email.png",
+  icon: "chrome://ubiquity/skin/icons/email.png",
   description: "Looks up the email address of a person from your contacts list given their name.",
   takes: {name: noun_type_contact},
   preview: function( pBlock, name ) {
@@ -1277,7 +1277,7 @@ function addToGoogleCalendar(eventString) {
 CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
-  icon : "chrome://ubiquity/content/icons/calendar_add.png",
+  icon : "chrome://ubiquity/skin/icons/calendar_add.png",
   preview: "Adds the event to Google Calendar.<br/> Enter the event naturally e.g., \"3pm Lunch with Myk and Thunder\", or \"Jono's Birthday on Friday\".",
   description: "Adds an event to your calendar.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
@@ -1301,7 +1301,7 @@ function checkCalendar(pblock, date) {
 CmdUtils.CreateCommand({
   name: "check-calendar",
   takes: {"date to check": noun_type_date},
-  icon : "chrome://ubiquity/content/icons/calendar.png",
+  icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
         "Google account to use it.  Try issuing &quot;check thursday&quot;.",
@@ -1420,7 +1420,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "map",
   takes: {"address": noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/map.png",
+  icon: "chrome://ubiquity/skin/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
   help:"Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a" +
        " larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot;" +
@@ -1510,7 +1510,7 @@ CmdUtils.CreateCommand({
   name:"convert",
   takes:{text:noun_arb_text},
   modifiers:{to:noun_conversion_options},
-  icon: "chrome://ubiquity/content/icons/convert.png",
+  icon: "chrome://ubiquity/skin/icons/convert.png",
   description:"Converts a selection to a PDF, to rich text, or to html.",
   preview: function(pBlock, directObj, modifiers) {
     if (modifiers.to && modifiers.to.text) {
@@ -1557,7 +1557,7 @@ function cmd_view_source() {
   CmdUtils.getWindowInsecure().location = url;
 }
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
-cmd_view_source.icon = "chrome://ubiquity/content/icons/page_code.png";
+cmd_view_source.icon = "chrome://ubiquity/skin/icons/page_code.png";
 
 function escape_html_entities(text) {
   // TODO finish this?
@@ -1569,7 +1569,7 @@ var escape_desc = "Replaces html entities (&lt;, &gt;, and &amp;) with their esc
 CmdUtils.CreateCommand({
   name:"escape-html-entities",
   takes: {text: noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/html_go.png",
+  icon: "chrome://ubiquity/skin/icons/html_go.png",
   description: escape_desc,
   preview: function(pBlock, directObj) {
    if (directObj.html)
@@ -1599,7 +1599,7 @@ function wordCount(text){
 CmdUtils.CreateCommand({
   name: "word-count",
   takes: {text: noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/sum.png",
+  icon: "chrome://ubiquity/skin/icons/sum.png",
   description: "Displays the number of words in a selection.",
   execute: function( directObj ) {
     if (directObj.text)
@@ -1788,7 +1788,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "tab",
   takes: {"tab name": noun_type_tab},
-  icon: "chrome://ubiquity/content/icons/tab_go.png",
+  icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
 
   execute: function( directObj ) {
@@ -1811,7 +1811,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-tab",
   takes: {"tab name": noun_type_tab},
-  icon: "chrome://ubiquity/content/icons/tab_delete.png",
+  icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes the tab that matches the given name.",
 
   execute: function( directObj ) {
@@ -1834,7 +1834,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": noun_arb_text},
-  icon: "chrome://ubiquity/content/icons/tab_delete.png",
+  icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   preview: function( pblock, directObj ) {
     var query = directObj.text;
@@ -1896,7 +1896,7 @@ function setFullPageZoom( level ) {
 CmdUtils.CreateCommand({
   name:"zoom",
   takes:{"percentage": noun_type_percentage},
-  icon: "chrome://ubiquity/content/icons/magnifier.png",
+  icon: "chrome://ubiquity/skin/icons/magnifier.png",
   description:"Zooms the Firefox window in or out.",
   preview:function(pBlock, directObj) {
     if (directObj.text)
@@ -1934,7 +1934,7 @@ function cmd_delete() {
   });
 }
 cmd_delete.description = "Deletes the selected chunk of HTML from the page.";
-cmd_delete.icon = "chrome://ubiquity/content/icons/delete.png";
+cmd_delete.icon = "chrome://ubiquity/skin/icons/delete.png";
 cmd_delete.preview = function( pblock ) {
   pblock.innerHTML = cmd_delete.description;
 };
@@ -1945,7 +1945,7 @@ function cmd_undelete() {
   });
 }
 cmd_undelete.description = "Restores the HTML deleted by the delete command.";
-cmd_undelete.icon = "chrome://ubiquity/content/icons/arrow_undo.png";
+cmd_undelete.icon = "chrome://ubiquity/skin/icons/arrow_undo.png";
 cmd_undelete.preview = function( pblock ) {
   pblock.innerHTML = cmd_undelete.description;
 };
@@ -1957,7 +1957,7 @@ function cmd_edit_page() {
 }
 cmd_edit_page.description = "Puts the web page into a mode where you can edit the contents.";
 cmd_edit_page.help = "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue \'bold\', \'italic\', or \'underline\' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode.";
-cmd_edit_page.icon = "chrome://ubiquity/content/icons/page_edit.png";
+cmd_edit_page.icon = "chrome://ubiquity/skin/icons/page_edit.png";
 cmd_edit_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_edit_page.description;
 };
@@ -1970,7 +1970,7 @@ cmd_stop_editing_page.description = "If you used the 'edit page' command to put 
 cmd_stop_editing_page.preview = function( pblock ) {
   pblock.innerHTML = cmd_stop_editing_page.description;
 }
-cmd_stop_editing_page.icon = "chrome://ubiquity/content/icons/page_refresh.png";
+cmd_stop_editing_page.icon = "chrome://ubiquity/skin/icons/page_refresh.png";
 
 // I think edit-mode on and edit-mode off would be
 
@@ -1990,7 +1990,7 @@ function cmd_save() {
 
 }
 cmd_save.description = "Saves page edits. Undo with 'remove-annotations'";
-cmd_save.icon = "chrome://ubiquity/content/icons/page_save.png";
+cmd_save.icon = "chrome://ubiquity/skin/icons/page_save.png";
 cmd_save.preview = function( pblock ) {
   pblock.innerHTML = cmd_save.description;
 };
@@ -2083,13 +2083,13 @@ cmd_remove_annotations.preview = function( pblock ) {
   pblock.innerHTML = cmd_remove_annotations.description;
 };
 
-cmd_remove_annotations.icon = "chrome://ubiquity/content/icons/page_delete.png";
+cmd_remove_annotations.icon = "chrome://ubiquity/skin/icons/page_delete.png";
 
 
 CmdUtils.CreateCommand({
   name:"map-these",
   takes: {"selection": noun_arb_text },
-  icon : "chrome://ubiquity/content/icons/map_add.png",
+  icon : "chrome://ubiquity/skin/icons/map_add.png",
   description: "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)",
   preview: function( pblock, directObject ) {
     var html = directObject.html;
