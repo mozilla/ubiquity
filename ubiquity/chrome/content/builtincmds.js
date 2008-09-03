@@ -63,7 +63,7 @@ CmdUtils.CreateCommand({
     var searchEngine = queryModifiers["with"].data;
     if(!searchEngine)
       searchEngine = noun_type_searchengine.getDefault();
-    
+
     var previewTemplate = "Search using <b>${engine}</b> for:<br /><b>${query}</b>";
     var previewData = {
       engine: searchEngine.name,
@@ -75,7 +75,7 @@ CmdUtils.CreateCommand({
     var searchEngine = queryModifiers["with"].data;
     if(!searchEngine)
       searchEngine = noun_type_searchengine.getDefault();
-    
+
     var searchSubmission = searchEngine.getSubmission(inputObject.text, null);
     Utils.openUrlInBrowser(searchSubmission.uri.spec, searchSubmission.postData);
   }
@@ -84,11 +84,13 @@ CmdUtils.CreateCommand({
 
 
 
-function fetchWikipediaArticle(previewBlock, articleTitle) {
+function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   /* TODO
    - apply CSS max-height & overflow-y to summary container
   */
-  var apiUrl = "http://en.wikipedia.org/w/api.php";
+  if (!langCode)
+    langCode = "en";
+  var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
   var apiParams = {
     format: "json",
     action: "parse",
@@ -136,14 +138,17 @@ function fetchWikipediaArticle(previewBlock, articleTitle) {
 CmdUtils.CreateCommand({
   name: "wikipedia",
   takes: {search: noun_arb_text},
+  modifiers: {in: noun_type_language},
   locale: "en-US",
   homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
+  contributors: ["Viktor Pyatkovka"],
   license: "MPL",
   icon: "http://en.wikipedia.org/favicon.ico",
-  description: "Searches Wikipedia for your words.",
-  preview: function(previewBlock, directObject) {
-    var apiUrl = "http://en.wikipedia.org/w/api.php";
+  description: "Searches Wikipedia for your words, in a given language.",
+  preview: function(previewBlock, directObject, mods) {
+    var lang = mods.in.data || "en";
+    var apiUrl = "http://" + lang + ".wikipedia.org/w/api.php";
 
     var searchText = jQuery.trim(directObject.text);
     if(searchText.length < 1) {
@@ -606,54 +611,54 @@ CmdUtils.CreateCommand({
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
   preview: function(previewBlock, directObject) {
     var expression = directObject.text;
-  
+
     if(expression.length < 1) {
       previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";
       return;
     }
-  
+
   var previewTemplate = "${expression} = <b>${result}</b>" +
     "{if error}<p><b>Error:</b> ${error}</p>{/if}";
-  
+
   var result = "?";
   var error = null;
   try {
     var parser = new MathParser();
-    
+
     result = parser.parse(expression);
-    
+
     if(isNaN(result))
       throw new Error("Invalid expression");
   } catch(e) {
     error = e.message;
     result = "?";
   }
-  
+
   var previewData = {
     "expression": expression,
     "result": result,
     "error": error
   }
-    
+
   previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
-  
+
   },
   execute: function( directObj ) {
-  
+
     var expression = directObject.text;
- 
+
     if(expression.length < 1) {
       displayMessage("Requires a expression.");
       return;
     }
-  
+
   try {
     var parser = new MathParser();
     var result = parser.parse(expression) + "";
-    
+
     if(isNaN(result))
       throw new Error("Invalid expression");
-    
+
     CmdUtils.setSelection(result);
     CmdUtils.setLastResult(result);
   } catch(e) {
@@ -826,35 +831,11 @@ CmdUtils.CreateCommand({
       pblock.innerHTML = "Inserts a link to Wikipedia article on " + text + " like this: " + html;
     }
   }
-})
+});
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
-
-var Languages = {
-  'ARABIC' : 'ar',
-  'CHINESE' : 'zh',
-  'CHINESE_TRADITIONAL' : 'zh-TW',
-  'DANISH' : 'da',
-  'DUTCH': 'nl',
-  'ENGLISH' : 'en',
-  'FINNISH' : 'fi',
-  'FRENCH' : 'fr',
-  'GERMAN' : 'de',
-  'GREEK' : 'el',
-  'HINDI' : 'hi',
-  'ITALIAN' : 'it',
-  'JAPANESE' : 'ja',
-  'KOREAN' : 'ko',
-  'NORWEGIAN' : 'no',
-  'POLISH' : 'pl',
-  'PORTUGUESE' : 'pt-PT',
-  'ROMANIAN' : 'ro',
-  'RUSSIAN' : 'ru',
-  'SPANISH' : 'es',
-  'SWEDISH' : 'sv'
-};
 
 function translateTo( text, langCodePair, callback ) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
@@ -925,18 +906,17 @@ CmdUtils.CreateCommand({
     // is specified.
     // TODO: Choose the default in a better way.
 
-    var toLang = languages.to.text || "English";
-    var fromLang = languages.from.text || "";
-    var toLangCode = Languages[toLang.toUpperCase()];
+    var toLangCode = languages.to.data || "en";
+    var fromLang = languages.from.data || "";
 
     translateTo( directObj.text, {to:toLangCode} );
   },
 
   preview: function( pblock, directObj, languages ) {
     var toLang = languages.to.text || "English";
+    var toLangCode = languages.to.data || "en";
     var textToTranslate = directObj.text;
 
-    var toLangCode = Languages[toLang.toUpperCase()];
     var lang = toLang[0].toUpperCase() + toLang.substr(1);
 
     pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
@@ -993,17 +973,17 @@ CmdUtils.CreateCommand({
       Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
       return;
     }
-    
+
     var skin_id = directObj.text;
-    
+
     try {
       var style_service = Components.classes["@mozilla.org/content/style-sheet-service;1"]
         .getService(Components.interfaces.nsIStyleSheetService);
       var io_service = Components.classes["@mozilla.org/network/io-service;1"]
         .getService(Components.interfaces.nsIIOService);
-      
+
       var cur_skin = Application.prefs.get('extensions.ubiquity.skin').value;
-      
+
       var old_browser_css = io_service.newURI(
         ((cur_skin == "default") ? "chrome://ubiquity/content/browser.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/browser.css"),
         null,
@@ -1024,10 +1004,10 @@ CmdUtils.CreateCommand({
         null,
         null
         );
-      
+
       style_service.loadAndRegisterSheet(browser_css, style_service.USER_SHEET);
       style_service.loadAndRegisterSheet(preview_css, style_service.USER_SHEET);
-      
+
       try {
         // this can fail and the rest still work
         if(style_service.sheetRegistered(old_browser_css, style_service.USER_SHEET))
@@ -1037,7 +1017,7 @@ CmdUtils.CreateCommand({
       } catch(e) {
         // do nothing
       }
-      
+
       Application.prefs.setValue('extensions.ubiquity.skin', skin_id);
     } catch(e) {
       displayMessage("Error applying skin");
@@ -1174,7 +1154,7 @@ function gmailChecker(callback) {
       var emailDetails = {
         account: jQuery(rss).children("title").text().split(" ").pop()
       };
-      
+
       var firstEntry = jQuery(rss).find("entry").get(0);
       if (firstEntry) {
         emailDetails.lastEmail = {
@@ -1194,10 +1174,10 @@ CmdUtils.CreateCommand({
   description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
   preview: function( pBlock ) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
-    // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt 
-    if (Utils.getCookie("mail.google.com", "S") != undefined) { 
+    // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt
+    if (Utils.getCookie("mail.google.com", "S") != undefined) {
       gmailChecker(function(emailDetails) {
-        var previewTemplate = "<b>You (${account}) have no new mail</b>"; 
+        var previewTemplate = "<b>You (${account}) have no new mail</b>";
         if (emailDetails.lastEmail) {
           var previewTemplate = "Last unread e-mail for ${account}:" +
             "<a href=\"${lastEmail.href}\">" +
@@ -1206,7 +1186,7 @@ CmdUtils.CreateCommand({
             "</a>";
         }
         pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
-      }); 
+      });
     } else {
       pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
     }
@@ -1218,7 +1198,7 @@ CmdUtils.CreateCommand({
         msgTemplate = "You (${account}) have new email! ${lastEmail.author} says: ${lastEmail.subject}";
       }
       displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
-    }); 
+    });
   }
 });
 
@@ -1274,13 +1254,13 @@ function addToGoogleCalendar(eventString) {
 
   function parseGoogleJson(json) {
     var securityPreface = "while(1);";
-    
+
     var pos = json.indexOf(";") + 1;
     var splitString = [
       json.substr( 0, pos ),
       json.substr( pos )
     ];
-        
+
     if ( splitString[0] != securityPreface ) {
       displayMessage( "Unexpected Return Value" );
       return null;
@@ -1314,7 +1294,7 @@ function addToGoogleCalendar(eventString) {
       try{
         // Ugly hack to parse out the event description.
         var result = eval( parseGoogleJson( json ) );
-        
+
         var msg = json.match(/\\76(.*?)'/);
         if( msg ){
           displayMessage( "Event created: " + msg[1].replace(/\\74\/span\\76/,"") );
@@ -1322,10 +1302,10 @@ function addToGoogleCalendar(eventString) {
         } else {
           // Result now contains something like this:
           // [["_ReportOperationError"], ["_RefreshCalendarWhenDisplayedNext"], ["_Ping", "500"], ["_Ping", "3000"], ["_Ping", "15000"], ["_ShowMessage", ["Please enter a complete start and end time"]]]
-          errorMessage = result[5][1][0];          
+          errorMessage = result[5][1][0];
           displayMessage( errorMessage );
         }
-        
+
       } catch(e){
         displayMessage( "Error creating the event. " + e );
       }
@@ -1424,7 +1404,7 @@ CmdUtils.CreateCommand({
     }
 
     pblock.innerHTML = "Weather for " + location;
-    
+
     //use either the specified "in" unit or get from geolocation
     var temp_units = 'celsius';
     if(!modifiers.in.text){
@@ -1448,7 +1428,7 @@ CmdUtils.CreateCommand({
       var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
       var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
       imgSrc += weatherId + "d.png";
-      
+
       //change wind speed to kmh based on geolocation
       var wind_text = el.find("wind_condition").attr("data").split("at");
       var wind_speed = parseInt(wind_text[1].split(" ")[1]);
@@ -1458,12 +1438,12 @@ CmdUtils.CreateCommand({
         wind_units = "km/h";
         wind_speed = wind_speed * 1.6;
       }
-      
-      var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units; 
+
+      var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
       var weather = {
         condition: condition,
         temp_units: temp_units,
-        tempc: el.find("temp_c").attr("data"), 
+        tempc: el.find("temp_c").attr("data"),
         tempf: el.find("temp_f").attr("data"),
         humidity: el.find("humidity").attr("data"),
         wind: wind,
