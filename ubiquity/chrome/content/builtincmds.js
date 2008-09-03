@@ -147,12 +147,17 @@ CmdUtils.CreateCommand({
   icon: "http://en.wikipedia.org/favicon.ico",
   description: "Searches Wikipedia for your words, in a given language.",
   preview: function(previewBlock, directObject, mods) {
-    var lang = mods.in.data || "en";
-    var apiUrl = "http://" + lang + ".wikipedia.org/w/api.php";
+    var langCode = mods.in.data || "en";
+    var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
 
     var searchText = jQuery.trim(directObject.text);
     if(searchText.length < 1) {
-      previewBlock.innerHTML = "Searches Wikipedia";
+      var previewStr = "Searches Wikipedia";
+      if (mods.in.text) {
+        var language = mods.in.text[0].toUpperCase() + mods.in.text.slice(1);
+	previewStr = previewStr + " in " + language;
+      }
+      previewBlock.innerHTML = previewStr;
       return;
     }
 
@@ -177,22 +182,22 @@ CmdUtils.CreateCommand({
       error: function() {
         previewBlock.innerHTML = "Error searching Wikipedia";
       },
-      success: function(searchReponse) {
-        searchReponse = Utils.decodeJson(searchReponse);
+      success: function(searchResponse) {
+        searchResponse = Utils.decodeJson(searchResponse);
 
-        if(!("query" in searchReponse && "search" in searchReponse.query)) {
+        if(!("query" in searchResponse && "search" in searchResponse.query)) {
           previewBlock.innerHTML = "Error searching Wikipedia";
           return;
         }
 
         function generateWikipediaLink(title) {
-          var wikipediaUrl = "http://en.wikipedia.org/wiki/";
+          var wikipediaUrl = "http://" + langCode + ".wikipedia.org/wiki/";
           return wikipediaUrl + title.replace(/ /g, "_");
         }
 
         previewData = {
           query: searchText,
-          results: searchReponse.query.search,
+          results: searchResponse.query.search,
           _MODIFIERS: {wikilink: generateWikipediaLink}
         };
 
@@ -200,14 +205,15 @@ CmdUtils.CreateCommand({
 
         jQuery(previewBlock).find("div[wikiarticle]").each(function() {
           var article = jQuery(this).attr("wikiarticle");
-          fetchWikipediaArticle(this, article);
+          fetchWikipediaArticle(this, article, langCode);
         });
 
       }
     });
   },
-  execute: function(directObject) {
-    var searchUrl = "http://en.wikipedia.org/wiki/Special:Search";
+  execute: function(directObject, mods) {
+    var lang = mods.in.data || "en";
+    var searchUrl = "http://" + lang + ".wikipedia.org/wiki/Special:Search";
     var searchParams = {search: directObject.text};
     Utils.openUrlInBrowser(searchUrl + Utils.paramsToString(searchParams));
   }
