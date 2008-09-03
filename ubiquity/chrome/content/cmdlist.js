@@ -62,29 +62,19 @@ function onDocumentLoad() {
           cmdElement.find(".homepage").html(
             'View more information at <a href="' + cmd.homepage + '">' + cmd.homepage + '</a>.'
           );
-        } else {
-          cmdElement.find(".homepage").empty();
-        }
-        if(cmd.description) {
-          cmdElement.find(".description").html(cmd.description);
-        } else {
-          cmdElement.find(".description").empty();
-        }
-        if(cmd.author) {
-          cmdElement.find(".author").html(formatCommandAuthor(cmd.author));
-        } else {
-          cmdElement.find(".author").empty();
-        }
-        if(cmd.license) {
-          cmdElement.find(".license").html(' - licensed as ' + cmd.license);
-        } else {
-          cmdElement.find(".license").empty();
-        }
-        if(cmd.help) {
-          cmdElement.find(".help").html(cmd.help);
-        } else {
-          cmdElement.find(".help").empty();
-        }
+        } else cmdElement.find(".homepage").empty();
+		
+        if(cmd.description) cmdElement.find(".description").html(cmd.description);
+        else cmdElement.find(".description").empty();
+		
+        if(cmd.author) cmdElement.find(".author").html(formatCommandAuthor(cmd.author));
+        else cmdElement.find(".author").empty();
+		
+        if(cmd.license) cmdElement.find(".license").html(' - licensed as ' + cmd.license);
+        else cmdElement.find(".license").empty();
+		
+        if(cmd.help) cmdElement.find(".help").html(cmd.help);
+        else cmdElement.find(".help").empty();
 
       }
     }
@@ -108,11 +98,9 @@ function onDocumentLoad() {
 }
 
 function formatCommandAuthor(authorData) {
-  if(!authorData)
-    return "";
+  if(!authorData) return "";
 
-  if(typeof authorData == "string")
-    return authorData;
+  if(typeof authorData == "string") return authorData;
 
   var authorMarkup = '';
   if(authorData.name && !authorData.email) {

@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://ubiquity/content/browser.css" type="text/css"?>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
@@ -7,6 +6,13 @@
   <script type="application/javascript;version=1.7"
           src="resource://ubiquity-scripts/jquery-1.2.3.min.js"/>
   <script>jQuery.noConflict(); // Fixes #124</script>
+  <script>
+  // Set skin CSS file
+  sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
+  ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+  uri = ((s = Application.prefs.get('extensions.ubiquity.skin').value) != "default") ? "chrome://ubiquity/content/skins/"+s+"/browser.css" : "chrome://ubiquity/content/browser.css";
+  sss.loadAndRegisterSheet(ios.newURI(uri, null, null), sss.USER_SHEET);
+  </script>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/template.js"/>
   <script type="application/javascript;version=1.7"

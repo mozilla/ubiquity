@@ -10,6 +10,7 @@ body{
 	margin-left: auto;
 	margin-right: auto;	
 	margin-top: 0px;
+	color: #000;
 }
 
 #nav-container{
@@ -130,23 +131,26 @@ em{
 	padding: 10px;
 }
 
-#command-list .command{
+#command-list .command, #skin-list .command{
   margin: 15px;
   margin-bottom: 20px;
 }
 
-#command-list .command .name{
+#command-list .command .name, #skin-list .command .name{
   font-size: 15pt;
 }
-
-#command-list .command .homepage{
+#skin-list .command .name{
+  cursor: pointer;
 }
 
-#command-list .command .author{
+#command-list .command .homepage, #skin-list .command .homepage{
+}
+
+#command-list .command .author, #skin-list .command .author{
   font-size: 90%;
 }
 
-#command-list .command .description{
+#command-list .command .description, #skin-list .command .description{
   display: inline;
   font-size: 12pt;
   margin-left: 10px;
@@ -156,6 +160,18 @@ em{
 #command-list .command .help{
   margin-top: 5px;
   color: #777;
+}
+
+#skin-preview{
+  float: right;
+  border: 1px solid #000;
+  width: 50%;
+  padding: 4px;
+  text-align: center;
+}
+#preview-image{
+  border: 3px solid #000;
+  padding: 2px;
 }
 
 a, a:visited {

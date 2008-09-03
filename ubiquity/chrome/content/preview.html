@@ -7,8 +7,11 @@
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <link rel="stylesheet" href="preview.css" type="text/css">
+  <script>
+  if((s = Application.prefs.get('extensions.ubiquity.skin').value) != "default") document.getElementsByTagName('link')[0].href = "chrome://ubiquity/content/skins/"+s+"/preview.css";
+  </script>
 </head>
-<body>
+<body id="previewbody">
 <div id="preview"></div>
 </body>
 <script src="preview.js"></script>

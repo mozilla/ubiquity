@@ -982,6 +982,68 @@ CmdUtils.CreateCommand({
   }
 });
 
+// Change skins
+CmdUtils.CreateCommand({
+  name: "skin",
+  preview: "Changes your current Ubiquity skin.",
+  description: "Changes what skin you're using for Ubiquity.",
+  takes: {"skin name": noun_arb_text},
+  execute: function(directObj){
+    if(!directObj.text) {
+      Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
+      return;
+    }
+    
+    var skin_id = directObj.text;
+    
+    try {
+      var style_service = Components.classes["@mozilla.org/content/style-sheet-service;1"]
+        .getService(Components.interfaces.nsIStyleSheetService);
+      var io_service = Components.classes["@mozilla.org/network/io-service;1"]
+        .getService(Components.interfaces.nsIIOService);
+      
+      var cur_skin = Application.prefs.get('extensions.ubiquity.skin').value;
+      
+      var old_browser_css = io_service.newURI(
+        ((cur_skin == "default") ? "chrome://ubiquity/content/browser.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/browser.css"),
+        null,
+        null
+        );
+      var old_preview_css = io_service.newURI(
+        ((cur_skin == "default") ? "chrome://ubiquity/content/preview.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/preview.css"),
+        null,
+        null
+        );
+      var browser_css = io_service.newURI(
+        ((skin_id != "default") ? "chrome://ubiquity/content/skins/"+skin_id+"/browser.css" : "chrome://ubiquity/content/browser.css"),
+        null,
+        null
+        );
+      var preview_css = io_service.newURI(
+        ((skin_id != "default") ? "chrome://ubiquity/content/skins/"+skin_id+"/preview.css" : "chrome://ubiquity/content/preview.css"),
+        null,
+        null
+        );
+      
+      style_service.loadAndRegisterSheet(browser_css, style_service.USER_SHEET);
+      style_service.loadAndRegisterSheet(preview_css, style_service.USER_SHEET);
+      
+      try {
+        // this can fail and the rest still work
+        if(style_service.sheetRegistered(old_browser_css, style_service.USER_SHEET))
+          style_service.unregisterSheet(old_browser_css, style_service.USER_SHEET);
+        if(style_service.sheetRegistered(old_preview_css, style_service.USER_SHEET))
+          style_service.unregisterSheet(old_preview_css, style_service.USER_SHEET);
+      } catch(e) {
+        // do nothing
+      }
+      
+      Application.prefs.setValue('extensions.ubiquity.skin', skin_id);
+    } catch(e) {
+      displayMessage("Error applying skin");
+    }
+  }
+});
 // -----------------------------------------------------------------
 // EMAIL COMMANDS
 // -----------------------------------------------------------------
