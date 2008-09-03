@@ -1,0 +1,8 @@
+<skins>
+  <skin id="default">
+    <name>Default</name>
+    <author>Mozilla Labs</author>
+    <license>MPL/LGPL/GPL</license>
+	<description>The default Ubiquity skin</description>
+  </skin>
+</skins>
