@@ -1449,11 +1449,11 @@ CmdUtils.CreateCommand({
       var wind_units = "mph";
       //http://en.wikipedia.org/wiki/Si_units
       if(["US","UM", "LR", "MM"].indexOf(cc) == -1){
-        wind_units = "kmh";
+        wind_units = "km/h";
         wind_speed = wind_speed * 1.6;
       }
-      var wind = wind_text[0] + " at " + wind_speed + wind_units;
       
+      var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units; 
       var weather = {
         condition: condition,
         temp_units: temp_units,
