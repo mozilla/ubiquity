@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" media="all"
+        href="web-content.css" />
+  <link rel="shortcut icon" href="icons/favicon.ico" type="image/x-icon" />
+  <title>Ubiquity Skins</title>
+</head>
+<body>
+<script src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
+<script src="skinlist.js"></script>
+
+<div class="head">
+  <span class="large">Ubiquity:</span> Your skins</span>
+</div>
+
+
+<div id="nav-container">
+  <ul id="nav">
+    <li><a href="about:ubiquity">Home</a></li>
+    <li><a href="chrome://ubiquity/content/cmdlist.html">Your Commands</a></li>
+    <li><a href="chrome://ubiquity/content/skinlist.html">Your Skins</a></li>
+    <li><a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_User_Tutorial">Tutorial</a></li>
+    <li><a href="https://labs.toolness.com/ubiquity-herd/">Find New Commands</a></li>
+  </ul>  
+</div>
+
+<br clear="all"/>
+
+<div id="sort-container">
+  Sort commands by
+  <select id="sortby" size="1">
+    <option value=".name">Name</option>
+    <option value=".author">Author</option>
+    <option value=".license">License</option>
+    <option value=".homepage">Homepage</option>
+    <!--<option value=".subscribedate">Date Subscribed</option>
+    <option value=".updatedate">Date Updated</option>-->
+  </select>
+</div>
+<ul id="skin-list"></ul>
+<div id="skin-preview">
+  <div id="preview-image">Choose a skin.</div>
+  <input type="button" id="useskin" value="Use This Skin" disabled="disabled" />
+  <div id="error" class="error"></div>
+</div>
+
+</body>
+</html>
