@@ -1,34 +1,62 @@
 var skins = {};
 
-function loadSkinsXML() {
-  var req = new XMLHttpRequest();
-  req.open("GET", "chrome://ubiquity/content/skins.xml", false);
-  req.overrideMimeType("text/xml");
-  req.send(null);
-  if (req.status == 0)
-    return req.responseXML;
-  return null;
+function loadSkinsXML(skinNames) {
+  var skins = {};
+  for(i in skinNames) {
+    skinName = skinNames[i];
+    var req = new XMLHttpRequest();
+    //TODO: what if there's no skin.xml
+    req.open("GET", "chrome://ubiquity/skin/skins/"+skinName+"/skin.xml", false);
+    req.overrideMimeType("text/xml");
+    req.send(null);
+    if (req.status == 0){
+        skins[skinName] = $(req.responseXML.childNodes[0]);
+    }
+  }
+  return skins || null;
 }
 
 function onDocumentLoad() {
-  // TODO: See if there's any other way to check for skins
-  // in the skin folder.
-
-  skins = {};
-  var skinsXML = loadSkinsXML();
+  
+  //Get the extension folder
+  var extension = "ubiquity@labs.mozilla.com";
+  var file = Components.classes["@mozilla.org/extensions/manager;1"]
+            .getService(Components.interfaces.nsIExtensionManager)
+            .getInstallLocation(extension)
+            .getItemFile(extension, "install.rdf")
+            .parent.directoryEntries;
+  // Get into chrome/skin/skins
+  // TODO: find a better way to navigate folders
+  var dirs = ['chrome','skin','skins'];
+  for(i in dirs) {
+  	while(file.hasMoreElements()){
+  	  var entry = file.getNext();
+  	  entry.QueryInterface(Components.interfaces.nsIFile);
+  	  if(entry.leafName == dirs[i]) {
+  	    file = entry.directoryEntries;
+  		  break;
+  	  }
+  	}
+  }
+  // Find all directories (skins) in chrome/skin/skins
+  var skinNames = [];
+  while(file.hasMoreElements()){
+    var entry = file.getNext();
+    entry.QueryInterface(Components.interfaces.nsIFile);
+    skinNames.push(entry.leafName);
+  }
+    
+  var skinsXML = loadSkinsXML(skinNames);
   if(skinsXML == null) {
-    $("#skin-list").append(
-      '<strong>Error loading list of skins.</strong>'
-    );
+    $("#skin-list").append('<strong>Error loading list of skins.</strong>');
     return;
   }
-  
-  var sks = $(skinsXML).find("skins");
-  sks.find('skin').each(function(){
-    var skin = $(this);
+    
+  for(s in skinsXML) {
+    var skin = skinsXML[s];
     var skinMeta = {
-      'id': skin.attr('id'),
-      'name': skin.find('name').text(),
+      'id' : s,
+      'name': s,
       'author': {
         'name': skin.find('author').text(),
         'email': skin.find('author').attr('email'),
@@ -37,11 +65,10 @@ function onDocumentLoad() {
       'license': skin.find('license').text(),
       'description': skin.find('description').text()
     };
-    skins[skinMeta.id] = skinMeta;
-    
+    //TODO: Highlight current skin
     $('#skin-list').append(
       '<li class="command" id="skin_' + skinMeta.id + '">' +
-      '<a class="name" onClick="previewSkin(\''+skinMeta.id+'\');">' + skinMeta.name + '</a>' +
+      '<a class="name" onClick="changeSkin(\''+skinMeta.name +'\');">' + skinMeta.name + '</a>' +
       '<span class="description"/>' +
       '<div class="light"><span class="author"/><span class="license"/></div>' +
       '<div class="homepage light"/>' +
@@ -60,53 +87,9 @@ function onDocumentLoad() {
       skinElement.find(".license").html(' - licensed as ' + skinMeta.license);
     else
       skinElement.find(".license").empty();
-  });
-    
-  var sortKey = $("#sortby").val();
-  $("#sortby").change(function() {
-    sortKey = $("#sortby").val();
-    sortSkinsBy(sortKey);
-  });
-  $('input#useskin').attr('disabled','disabled');
-}
-
-function sortSkinsBy(key) {
-  var skinList = $("#skin-list");
-  var allSkins = skinList.find(".command").get();
-
-  allSkins.sort(function(a, b) {
-    var aKey = $(a).find(key).text().toLowerCase();
-    var bKey = $(b).find(key).text().toLowerCase();
-
-    // ensure empty fields get given lower priority
-    if(aKey.length > 0  && bKey.length == 0)
-      return -1;
-    if(aKey.length == 0  && bKey.length > 0)
-      return 1;
-
-    if(aKey < bKey)
-      return -1;
-    if(aKey > bKey)
-      return 1;
-
-    return 0;
-  });
-
-  $.each(allSkins, function(skinIndex, skin) {
-    skinList.append(skin);
-  });
-}
-
-function previewSkin(skin_id) {
-  var cur_skin = Application.prefs.get('extensions.ubiquity.skin').value;
-  $('#preview-image').html(skins[skin_id].name);
-  if(cur_skin == skin_id) {
-    $('input#useskin').attr('disabled','disabled');
-  } else {
-    $('input#useskin').removeAttr('disabled').click(function(){
-      changeSkin(skin_id);
-    });
   }
+  
+  $('input#useskin').attr('disabled','disabled');
 }
 
 function changeSkin(newSkinName) {
@@ -144,6 +127,8 @@ function changeSkin(newSkinName) {
     $('#error').text('Error applying skin: ' + skin_id);
     Components.utils.reportError("Error applying Ubiquity skin '" + skin_id + "': " + e);
   }
+  
+  $('#notify').text("Skin changed to " + newSkinName);
 }
 
 $(document).ready(onDocumentLoad);
