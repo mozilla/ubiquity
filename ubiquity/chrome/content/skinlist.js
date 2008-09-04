@@ -1,33 +1,5 @@
 var skins = {};
 
-function formatCommandAuthor(authorData) {
-  if(!authorData) return "";
-
-  if(typeof authorData == "string") return authorData;
-
-  var authorMarkup = '';
-  if(authorData.name && !authorData.email) {
-    authorMarkup += authorData.name + " ";
-  } else if(authorData.name && authorData.email) {
-    authorMarkup += '<a href="mailto:' + authorData.email + '">' +
-      authorData.name +
-      '</a> ';
-  } else if(!authorData.name && authorData.email) {
-    authorMarkup += '<a href="mailto:' + authorData.email + '">' +
-      authorData.email +
-      '</a> ';
-  }
-
-  if(authorData.homepage) {
-    authorMarkup += '[<a href="' + authorData.homepage + '">Homepage</a>]';
-  }
-
-  if(authorMarkup.length == 0)
-    return '';
-
-  return 'by ' + authorMarkup;
-}
-
 function loadSkinsXML() {
   var req = new XMLHttpRequest();
   req.open("GET", "chrome://ubiquity/content/skins.xml", false);
@@ -137,53 +109,37 @@ function previewSkin(skin_id) {
   }
 }
 
-function changeSkin(skin_id) {
+function changeSkin(newSkinName) {
   $('input#useskin').attr('disabled','disabled');
   $('#error').empty();
   
   try {
-    var style_service = Components.classes["@mozilla.org/content/style-sheet-service;1"]
+    var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
       .getService(Components.interfaces.nsIStyleSheetService);
-    var io_service = Components.classes["@mozilla.org/network/io-service;1"]
-      .getService(Components.interfaces.nsIIOService);
-      
-    var cur_skin = Application.prefs.get('extensions.ubiquity.skin').value;
-    Application.prefs.setValue('extensions.ubiquity.skin', skin_id);
+
+    var oldSkinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
+    var skinFolderUrl = "chrome://ubiquity/skin/skins/";
+    var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
+    var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
     
-    var old_browser_css = io_service.newURI(
-      ((cur_skin == "default") ? "chrome://ubiquity/content/browser.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/browser.css"),
-      null,
-      null
-      );
-    var old_preview_css = io_service.newURI(
-      ((cur_skin == "default") ? "chrome://ubiquity/content/preview.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/preview.css"),
-      null,
-      null
-      );
-    var browser_css = io_service.newURI(
-      ((skin_id != "default") ? "chrome://ubiquity/content/skins/"+skin_id+"/browser.css" : "chrome://ubiquity/content/browser.css"),
-      null,
-      null
-      );
-    var preview_css = io_service.newURI(
-      ((skin_id != "default") ? "chrome://ubiquity/content/skins/"+skin_id+"/preview.css" : "chrome://ubiquity/content/preview.css"),
-      null,
-      null
-      );
+    var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
+    var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
     
-    style_service.loadAndRegisterSheet(browser, style_service.USER_SHEET);
-    style_service.loadAndRegisterSheet(preview, style_service.USER_SHEET);
+    sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
+    sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
     
     try {
       // this can fail and the rest still work
-      if(style_service.sheetRegistered(old_browser, style_service.USER_SHEET))
-        style_service.unregisterSheet(old_browser, style_service.USER_SHEET);
-      if(style_service.sheetRegistered(old_preview, style_service.USER_SHEET))
-        style_service.unregisterSheet(old_preview, style_service.USER_SHEET);
+      if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
+        sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
+      if(sss.sheetRegistered(oldPreviewCss, sss.USER_SHEET))
+        sss.unregisterSheet(oldPreviewCss, sss.USER_SHEET);
     } catch(e) {
       // do nothing
     }
     
+    Application.prefs.setValue("extensions.ubiquity.skin", newSkinName);
+    $('input#useskin').attr('disabled','disabled');
   } catch(e) {
     $('#error').text('Error applying skin: ' + skin_id);
     Components.utils.reportError("Error applying Ubiquity skin '" + skin_id + "': " + e);

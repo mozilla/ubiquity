@@ -995,53 +995,40 @@ CmdUtils.CreateCommand({
       return;
     }
     
-    var skin_id = directObj.text;
+    //TODO style guide
+    //TODO: preview doesn't change
+    //TODO: changes affect web page
+    
+    var newSkinName = directObj.text;
     
     try {
-      var style_service = Components.classes["@mozilla.org/content/style-sheet-service;1"]
+      var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
         .getService(Components.interfaces.nsIStyleSheetService);
-      var io_service = Components.classes["@mozilla.org/network/io-service;1"]
-        .getService(Components.interfaces.nsIIOService);
+
+      var oldSkinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
+      var skinFolderUrl = "chrome://ubiquity/skin/skins/";
+      var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
+      var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
       
-      var cur_skin = Application.prefs.get('extensions.ubiquity.skin').value;
+      var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
+      var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
       
-      var old_browser_css = io_service.newURI(
-        ((cur_skin == "default") ? "chrome://ubiquity/content/browser.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/browser.css"),
-        null,
-        null
-        );
-      var old_preview_css = io_service.newURI(
-        ((cur_skin == "default") ? "chrome://ubiquity/content/preview.css" : "chrome://ubiquity/content/skins/"+cur_skin+"/preview.css"),
-        null,
-        null
-        );
-      var browser_css = io_service.newURI(
-        ((skin_id != "default") ? "chrome://ubiquity/content/skins/"+skin_id+"/browser.css" : "chrome://ubiquity/content/browser.css"),
-        null,
-        null
-        );
-      var preview_css = io_service.newURI(
-        ((skin_id != "default") ? "chrome://ubiquity/content/skins/"+skin_id+"/preview.css" : "chrome://ubiquity/content/preview.css"),
-        null,
-        null
-        );
-      
-      style_service.loadAndRegisterSheet(browser_css, style_service.USER_SHEET);
-      style_service.loadAndRegisterSheet(preview_css, style_service.USER_SHEET);
+      sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
+      sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
       
       try {
         // this can fail and the rest still work
-        if(style_service.sheetRegistered(old_browser_css, style_service.USER_SHEET))
-          style_service.unregisterSheet(old_browser_css, style_service.USER_SHEET);
-        if(style_service.sheetRegistered(old_preview_css, style_service.USER_SHEET))
-          style_service.unregisterSheet(old_preview_css, style_service.USER_SHEET);
+        if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
+          sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
+        if(sss.sheetRegistered(oldPreviewCss, sss.USER_SHEET))
+          sss.unregisterSheet(oldPreviewCss, sss.USER_SHEET);
       } catch(e) {
         // do nothing
       }
       
-      Application.prefs.setValue('extensions.ubiquity.skin', skin_id);
+      Application.prefs.setValue("extensions.ubiquity.skin", newSkinName);
     } catch(e) {
-      displayMessage("Error applying skin");
+      displayMessage("Error applying skin: " + e);
     }
   }
 });
