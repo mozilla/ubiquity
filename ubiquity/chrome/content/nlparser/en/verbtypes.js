@@ -163,8 +163,8 @@ NLParser.EnVerb.prototype = {
 	return completions;
       }
     } else {
-      // "pop" a preposition off of the properties of unfilledMods
-      var preposition = dictKeys( unfilledMods )[0];
+      // "pop" a preposition off -- the LAST unfilled mod in the sentence:
+      var preposition = dictKeys( unfilledMods ).reverse()[0];
       // newUnfilledMods is the same as unfilledMods without preposition
       var newUnfilledMods = dictDeepCopy( unfilledMods );
       delete newUnfilledMods[preposition];

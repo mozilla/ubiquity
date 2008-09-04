@@ -172,30 +172,47 @@ var noun_type_address = {
 };
 
 
-var Languages = [
-  'Arabic',
-  'Chinese',
-  'Chinese Traditional',
-  'Danish',
-  'Dutch',
-  'English',
-  'Finnish',
-  'French',
-  'German',
-  'Greek',
-  'Hindi',
-  'Italian',
-  'Japanese',
-  'Korean',
-  'Norwegian',
-  'Polish',
-  'Portuguese',
-  'Russian',
-  'Spanish',
-  'Swedish'
-];
+var LanguageCodes = {
+  'arabic' : 'ar',
+  'chinese' : 'zh',
+  'chinese_traditional' : 'zh-TW',
+  'danish' : 'da',
+  'dutch': 'nl',
+  'english' : 'en',
+  'finnish' : 'fi',
+  'french' : 'fr',
+  'german' : 'de',
+  'greek' : 'el',
+  'hindi' : 'hi',
+  'italian' : 'it',
+  'japanese' : 'ja',
+  'korean' : 'ko',
+  'norwegian' : 'no',
+  'polish' : 'pl',
+  'portugese' : 'pt-PT',
+  'romanian' : 'ro',
+  'russian' : 'ru',
+  'spanish' : 'es',
+  'swedish' : 'sv'
+};
 
-var noun_type_language = new CmdUtils.NounType( "language", Languages );
+var noun_type_language =  {
+  _name: "language",
+
+  suggest: function( text, html ) {
+    var suggestions = [];
+    for ( var word in LanguageCodes ) {
+      // Do the match in a non-case sensitive way
+      if ( word.indexOf( text.toLowerCase() ) > -1 ) {
+	// Use the 2-letter language code as the .data field of the suggestion
+        var sugg = CmdUtils.makeSugg(word, word, LanguageCodes[word]);
+      	suggestions.push( sugg );
+      }
+    }
+    return suggestions;
+  }
+};
+
 
 var noun_type_tab = {
   _name: "tab name",
@@ -222,7 +239,7 @@ var noun_type_tab = {
     //TODO: implement a better match algorithm
     for ( var tabName in tabs ) {
       if (tabName.match(text, "i"))
-	      suggestions.push( CmdUtils.makeSugg(tabName) );
+        suggestions.push( CmdUtils.makeSugg(tabName) );
     }
     return suggestions.splice(0, 5);
   }
@@ -336,4 +353,32 @@ var noun_type_tag = {
 
 		return suggestions;
 	}
+};
+
+var noun_type_geolocation = {
+   _name : "geolocation",
+
+   default : function(fragment){
+      var location = CmdUtils.getGeoLocation();
+      return location.city + "," + location.country;
+   },
+
+   suggest: function(fragment){
+      /* LONGTERM TODO: try to detect whether fragment is anything like a valid location or not,
+       * and don't suggest anything for input that's not a location.
+       */
+      var regexp = /here(\s)?.*/;
+      if(regexp.test(fragment)){
+         var suggestions = [];
+         var location = CmdUtils.getGeoLocation();
+         var loc = location.city + "," + location.country;
+         suggestions.push(CmdUtils.makeSugg(loc));
+         suggestions.push(CmdUtils.makeSugg(location.city));
+         suggestions.push(CmdUtils.makeSugg(location.country));
+         suggestions.push(CmdUtils.makeSugg(fragment));
+         return suggestions;
+      }
+
+      return [CmdUtils.makeSugg(fragment)];
+   }
 };
