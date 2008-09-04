@@ -983,6 +983,7 @@ CmdUtils.CreateCommand({
 });
 
 // Change skins
+//TODO: update this
 CmdUtils.CreateCommand({
   name: "skin",
   preview: "Changes your current Ubiquity skin.",

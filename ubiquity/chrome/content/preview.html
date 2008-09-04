@@ -6,9 +6,14 @@
       xml:lang="en" lang="en">
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-  <link rel="stylesheet" href="preview.css" type="text/css">
+  <link rel="stylesheet" 
+        href="chrome://ubiquity/skin/skins/default/preview.css"
+        type="text/css">
   <script>
-  if((s = Application.prefs.get('extensions.ubiquity.skin').value) != "default") document.getElementsByTagName('link')[0].href = "chrome://ubiquity/content/skins/"+s+"/preview.css";
+  //change CSS file if the user has picked a different skin
+  var skinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
+  var uri = "chrome://ubiquity/skin/skins/" + skinName + "/preview.css";
+  document.getElementsByTagName('link')[0].href = uri;
   </script>
 </head>
 <body id="previewbody">
