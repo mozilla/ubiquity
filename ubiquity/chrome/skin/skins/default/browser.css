@@ -1,10 +1,6 @@
 /* Formatting for the Ubiquity Pop-Up */
 
-#transparent-msg-panel {
-  -moz-appearance: none;
-  background-color: transparent;
-  border-width: 0px;
-}
+
 
 #panel {
   padding: 0px;
