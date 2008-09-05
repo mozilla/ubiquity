@@ -44,11 +44,11 @@ var noun_type_contact = {
       if (c.match(text, "i"))
 	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
-    
+
    if(/[A-Za-z0-9_.-]+@([A-Za-z0-9_.-]+\.)+[A-Za-z]{2,4}/.test(text)){
       suggestions.push(CmdUtils.makeSugg(text));
    }
-    
+
     return suggestions.splice(0, 5);
   }
 };
@@ -362,7 +362,7 @@ var noun_type_tag = {
 
 var noun_type_geolocation = {
    _name : "geolocation",
-
+   rankLast: true,
    default : function(fragment){
       var location = CmdUtils.getGeoLocation();
       return location.city + "," + location.country;
@@ -386,4 +386,26 @@ var noun_type_geolocation = {
 
       return [CmdUtils.makeSugg(fragment)];
    }
+};
+
+var noun_type_url = {
+  /* TODO longterm, noun_type_url could suggest URLs you've visited before, by querying
+   * the awesomebar's data source
+   */
+  _name : "url",
+  suggest: function(fragment) {
+    var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    // Magic words "page" or "url" result in the URL of the current page
+    if (fragment == "page" || fragment == "url") {
+      var url = Application.activeWindow.activeTab.document.URL;
+      return [CmdUtils.makeSugg(url)];
+    }
+    // If it's a valid URL, suggest it back
+    if (regexp.test(fragment)) {
+      return [CmdUtils.makeSugg(fragment)];
+    } else if (regexp.test( "http://" + fragment ) ) {
+      return [CmdUtils.makeSugg("http://" + fragment)];
+    }
+    return [];
+  }
 };

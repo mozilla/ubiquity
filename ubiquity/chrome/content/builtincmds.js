@@ -980,13 +980,13 @@ CmdUtils.CreateCommand({
       Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
       return;
     }
-    
+
     //TODO style guide
     //TODO: preview doesn't change
     //TODO: changes affect web page
-    
+
     var newSkinName = directObj.text;
-    
+
     try {
       var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
         .getService(Components.interfaces.nsIStyleSheetService);
@@ -995,13 +995,13 @@ CmdUtils.CreateCommand({
       var skinFolderUrl = "chrome://ubiquity/skin/skins/";
       var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
       var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
-      
+
       var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
       var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
-      
+
       sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
       sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
-      
+
       try {
         // this can fail and the rest still work
         if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
@@ -1011,7 +1011,7 @@ CmdUtils.CreateCommand({
       } catch(e) {
         // do nothing
       }
-      
+
       Application.prefs.setValue("extensions.ubiquity.skin", newSkinName);
     } catch(e) {
       displayMessage("Error applying skin: " + e);
@@ -1801,24 +1801,23 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "tinyurl",
-  takes: {"url to shorten": noun_arb_text},
+  takes: {"url to shorten": noun_type_url},
   icon: "http://tinyurl.com/favicon.ico",
   description: "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyUrl</a>",
   preview: function( pblock, urlToShorten ){
     pblock.innerHTML = "Replaces the selected URL with a TinyUrl.";
-    var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-      var baseUrl = "http://tinyurl.com/api-create.php?url=";
-      pblock.innerHTML = "Replaces the selected URL with ",
-      jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
-        if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
-      });
+    var baseUrl = "http://tinyurl.com/api-create.php?url=";
+    pblock.innerHTML = "Replaces the selected URL with ",
+    jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
+      if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
+    });
   },
   execute: function( urlToShorten ) {
     //escaping urlToShorten will not create the right tinyurl
     var baseUrl = "http://tinyurl.com/api-create.php?url=";
     jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
       CmdUtils.setSelection( tinyUrl );
-    })
+    });
   }
 });
 
