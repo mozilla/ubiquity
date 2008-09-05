@@ -75,7 +75,7 @@ Utils.url = function url(spec) {
 Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   // allow postData to be null/undefined, string representation, json representation, or nsIInputStream
   // nsIInputStream is what is needed
-  
+
   var postInputStream = null;
   if(postData) {
     if(postData instanceof Components.interfaces.nsIInputStream) {
@@ -83,11 +83,11 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
     } else {
       if(typeof postData == "object") // json -> string
         postData = Utils.paramsToString(postData);
-      
+
       var stringStream = Components.classes["@mozilla.org/io/string-input-stream;1"]
         .createInstance(Components.interfaces.nsIStringInputStream);
       stringStream.data = postData;
-      
+
       postInputStream = Components.classes["@mozilla.org/network/mime-input-stream;1"]
         .createInstance(Components.interfaces.nsIMIMEInputStream);
       postInputStream.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -101,8 +101,8 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
     .getService(Components.interfaces.nsIWindowMediator);
   var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
   var browser = browserWindow.getBrowser();
-  
-  if(browser.mCurrentBrowser.currentURI.spec == "about:blank")
+
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank" && !browser.webProgress.isLoadingDocument)
     browserWindow.loadURI(urlString, null, postInputStream, false);
   else
     browser.loadOneTab(urlString, null, null, postInputStream, false, false);
