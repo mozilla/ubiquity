@@ -98,26 +98,13 @@ function ubiquityKeydown(aEvent)
 }
 
 function ubiquityEventMatchesModifier(aEvent, aModifier) {
-  var numMod = 0;
-  var numMatch = 0;
-
-  if (aEvent.shiftKey){
-    numMod++;
-    if (aModifier == 'SHIFT') numMatch++;
-  }
-  if (aEvent.ctrlKey){
-    numMod++;
-    if (aModifier == 'CTRL') numMatch++;
-  }
-  if (aEvent.altKey){
-    numMod++;
-    if (aModifier == 'ALT') numMatch++;
-  }
-  if (aEvent.metaKey){
-    numMod++;
-    if (aModifier == 'META') numMatch++;
-  }
-  return (numMod == 1 && numMatch == 1);
+  /* Match only if the user is holding down the modifier key set for
+   * ubiquity AND NO OTHER modifier keys.
+   **/
+  return ((aEvent.shiftKey == (aModifier == 'SHIFT')) &&
+          (aEvent.ctrlKey == (aModifier == 'CTRL')) &&
+          (aEvent.altKey == (aModifier == 'ALT')) &&
+	  (aEvent.metaKey == (aModifier == 'META')));
 }
 
 window.addEventListener("load", ubiquitySetup, false);
