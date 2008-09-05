@@ -78,7 +78,6 @@ load(basePath + "/chrome/content/test.js");
 load(basePath + "/chrome/content/sandboxfactory.js");
 load(basePath + "/chrome/content/cmdmanager.js");
 load(basePath + "/chrome/content/tests.js");
-load(basePath + "/chrome/content/verbtypes_unit_tests.js");
 
 var suite = new TestSuite(XpcShellTestResponder, this);
 
