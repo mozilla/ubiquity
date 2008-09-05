@@ -90,15 +90,34 @@ function ubiquityKeydown(aEvent)
   }
 
   //Open Ubiquity if the key pressed matches the shortcut key
-  if (aEvent.keyCode == UBIQUITY_KEYCODE) {
-    if((UBIQUITY_KEYMODIFIER == "SHIFT" && aEvent.shiftKey)
-        || (UBIQUITY_KEYMODIFIER == "CTRL" && aEvent.ctrlKey)
-        || (UBIQUITY_KEYMODIFIER == "ALT" && aEvent.altKey)
-        || (UBIQUITY_KEYMODIFIER == "META" && aEvent.metaKey)){
-    	    gUbiquity.openWindow(anchor);
- 	    aEvent.preventDefault();
-    }
+  if (aEvent.keyCode == UBIQUITY_KEYCODE &&
+      ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
+    gUbiquity.openWindow(anchor);
+    aEvent.preventDefault();
   }
+}
+
+function ubiquityEventMatchesModifier(aEvent, aModifier) {
+  var numMod = 0;
+  var numMatch = 0;
+
+  if (aEvent.shiftKey){
+    numMod++;
+    if (aModifier == 'SHIFT') numMatch++;
+  }
+  if (aEvent.ctrlKey){
+    numMod++;
+    if (aModifier == 'CTRL') numMatch++;
+  }
+  if (aEvent.altKey){
+    numMod++;
+    if (aModifier == 'ALT') numMatch++;
+  }
+  if (aEvent.metaKey){
+    numMod++;
+    if (aModifier == 'META') numMatch++;
+  }
+  return (numMod == 1 && numMatch == 1);
 }
 
 window.addEventListener("load", ubiquitySetup, false);
