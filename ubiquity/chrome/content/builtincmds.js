@@ -1,3 +1,44 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Ubiquity.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Atul Varma <atul@mozilla.com>
+ *   Aza Raskin <aza@mozilla.com>
+ *   Maria Emerson <memerson@mozilla.com>
+ *   Abimanyu Raja <abimanyu@gmail.com>
+ *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Blair McBride <blair@theunfocused.net>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 // -----------------------------------------------------------------
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
@@ -980,13 +1021,13 @@ CmdUtils.CreateCommand({
       Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
       return;
     }
-    
+
     //TODO style guide
     //TODO: preview doesn't change
     //TODO: changes affect web page
-    
+
     var newSkinName = directObj.text;
-    
+
     try {
       var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
         .getService(Components.interfaces.nsIStyleSheetService);
@@ -995,13 +1036,13 @@ CmdUtils.CreateCommand({
       var skinFolderUrl = "chrome://ubiquity/skin/skins/";
       var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
       var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
-      
+
       var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
       var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
-      
+
       sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
       sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
-      
+
       try {
         // this can fail and the rest still work
         if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
@@ -1011,7 +1052,7 @@ CmdUtils.CreateCommand({
       } catch(e) {
         // do nothing
       }
-      
+
       Application.prefs.setValue("extensions.ubiquity.skin", newSkinName);
     } catch(e) {
       displayMessage("Error applying skin: " + e);
@@ -1801,24 +1842,23 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "tinyurl",
-  takes: {"url to shorten": noun_arb_text},
+  takes: {"url to shorten": noun_type_url},
   icon: "http://tinyurl.com/favicon.ico",
   description: "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyUrl</a>",
   preview: function( pblock, urlToShorten ){
     pblock.innerHTML = "Replaces the selected URL with a TinyUrl.";
-    var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-      var baseUrl = "http://tinyurl.com/api-create.php?url=";
-      pblock.innerHTML = "Replaces the selected URL with ",
-      jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
-        if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
-      });
+    var baseUrl = "http://tinyurl.com/api-create.php?url=";
+    pblock.innerHTML = "Replaces the selected URL with ",
+    jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
+      if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
+    });
   },
   execute: function( urlToShorten ) {
     //escaping urlToShorten will not create the right tinyurl
     var baseUrl = "http://tinyurl.com/api-create.php?url=";
     jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
       CmdUtils.setSelection( tinyUrl );
-    })
+    });
   }
 });
 
