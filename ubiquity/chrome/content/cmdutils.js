@@ -77,6 +77,16 @@ CmdUtils.setSelection = function setSelection(content, options) {
   }
 };
 
+//This gets the outer document of the current tab in a secure way
+CmdUtils.getDocument = function getDocument(){
+  return CmdUtils.getWindow().document;
+};
+
+//This gets the outer window of the current tab in a secure way
+CmdUtils.getWindow = function getWindow() {
+  return context.focusedWindow;
+};
+
 // This gets the outer document of the current tab.
 CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
   return CmdUtils.getWindowInsecure().document;

@@ -1741,7 +1741,7 @@ CmdUtils.CreateCommand({
   author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
   license: "MPL,GPL",
   execute: function() {
-    var doc = CmdUtils.getDocumentInsecure();
+    var doc = CmdUtils.getDocument();
     var sel = doc.getSelection().substring(0,375);
 
     var params = Utils.paramsToString({
@@ -1757,7 +1757,7 @@ CmdUtils.CreateCommand({
   },
   preview: function(pblock) {
 
-    var doc = CmdUtils.getDocumentInsecure();
+    var doc = CmdUtils.getDocument();
     var selected_text= doc.getSelection();
     var api_url='http://services.digg.com/stories';
 
