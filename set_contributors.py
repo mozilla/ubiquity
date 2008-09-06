@@ -47,6 +47,7 @@ LICENSE_POST = """
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
 """
 
 LICENSE_TEMPLATE = " *   %s"
