@@ -106,5 +106,6 @@ if __name__ == '__main__':
                     lines = "\n".join(lines)
                     new_contents = "".join([LICENSE_PRE,
                                             lines,
-                                            LICENSE_POST])
+                                            LICENSE_POST,
+                                            contents])
                     open(fullpath, "w").write(new_contents)
