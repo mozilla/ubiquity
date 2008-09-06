@@ -2246,3 +2246,99 @@ CmdUtils.CreateCommand({
 
   }
 })
+
+
+// -----------------------------------------------------------------
+// SPARKLINE
+// -----------------------------------------------------------------
+
+function sparkline(data) {
+  var p = data;
+
+  var nw = "auto";
+  var nh = "auto";
+  
+  
+  var f = 2;
+  var w = ( nw == "auto" || nw == 0 ? p.length * f : nw - 0 );
+  var h = ( nh == "auto" || nh == 0 ? "1em" : nh );
+  
+  var doc = context.focusedWindow.document;
+  var co = doc.createElement("canvas");
+
+  co.style.height = h;
+  co.style.width = w;
+  co.width = w;
+
+  var h = co.offsetHeight;
+  h = 10;
+  co.height = h;
+
+  var min = 9999;
+  var max = -1;
+
+  for ( var i = 0; i < p.length; i++ ) {
+    p[i] = p[i] - 0;
+    if ( p[i] < min ) min = p[i];
+    if ( p[i] > max ) max = p[i];
+  }
+  
+  if ( co.getContext ) {
+    var c = co.getContext("2d");
+    c.strokeStyle = "red";
+    c.lineWidth = 1.0;
+    c.beginPath();
+
+    for ( var i = 0; i < p.length; i++ ) {
+      c.lineTo( (w / p.length) * i, h - (((p[i] - min) / (max - min)) * h) );
+    }
+
+    c.stroke();
+  }
+  
+  return co.toDataURL()
+}
+
+CmdUtils.CreateCommand({
+  name: "sparkline",
+  description: "Graphs the current selection, turning it into a sparkline.",
+  takes: {"data": noun_arb_text},
+  author: {name: "Aza Raskin", email:"aza@mozilla.com"},
+  license: "MIT",
+  help: "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them.",
+  
+  _cleanData: function( string ) {
+    var dirtyData = string.split(/\W/);    
+    var data = [];
+    for(var i=0; i<dirtyData.length; i++){
+      var datum = parseFloat( dirtyData[i] );
+      if( datum.toString() != "NaN" ){
+        data.push( datum );
+      }
+    }
+    
+    return data;
+  },
+  
+  _dataToSparkline: function( string ) {
+    var data = this._cleanData( string );
+    if( data.length < 2 ) return null;
+    
+    var dataUrl = sparkline( data );
+    return img = "<img src='%'/>".replace(/%/, dataUrl);
+  },
+  
+  preview: function(pblock, input) { 
+    var img = this._dataToSparkline( input.text );
+    
+    if( !img )
+      jQuery(pblock).text( "Requires numbers to graph." );
+    else
+      jQuery(pblock).empty().append( img ).height( "15px" );
+  },
+  
+  execute: function( input ) {
+    var img = this._dataToSparkline( input.text );
+    if( img ) CmdUtils.setSelection( img );
+  }
+});

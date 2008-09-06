@@ -229,7 +229,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 // the window's document object as a parameter.
 CmdUtils.onPageLoad = function onPageLoad( callback ) {
   var safeCallback = Utils.safeWrapper(callback);
-
+  
   function _onPageLoad(aEvent) {
     var isValidPage = false;
     try {
