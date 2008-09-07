@@ -121,14 +121,14 @@ NLParser.EnVerb.prototype = {
     return { text:"", html:null, data:null, summary:"" };
   },
 
-  _newSentence: function( directObjSugg, modifierSuggs ) {
+  _newSentences: function( directObjSugg, modifierSuggs ) {
     /* Add in nothing-suggestion objects for any missing arguments.*/
     if (this._DOType && !directObjSugg)
       directObjSugg = this._makeNothingSugg();
     for (let x in this._modifiers)
       if (!modifierSuggs[x])
 	modifierSuggs[x] = this._makeNothingSugg();
-    return new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs);
+    return [new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs)];
   },
 
   // RecursiveParse is huge and complicated.
@@ -146,7 +146,7 @@ NLParser.EnVerb.prototype = {
 	// No direct object, either because there are no words left,
 	// to use, or because the verb can't take a direct object.
 	// Try parsing sentence without them.
-	return [ this._newSentence("", filledMods ) ];
+	return this._newSentences("", filledMods );
       } else {
 	// Transitive verb, can have direct object.  Try to use the
 	// remaining words in that slot.
@@ -158,7 +158,7 @@ NLParser.EnVerb.prototype = {
 					    selObj);
 	for each ( let sugg in suggestions ) {
 	  if (sugg)
-	    completions.push( this._newSentence(sugg, filledMods ));
+	    completions = completions.concat( this._newSentences(sugg, filledMods ));
 	}
 	return completions;
       }
@@ -288,7 +288,7 @@ NLParser.EnVerb.prototype = {
       // make suggestions by using selection as arguments...
       completions = this.getCompletionsFromNounOnly(selObj.text, selObj.html);
       // also, try a completion with all empty arguments
-      completions.push( this._newSentence( null, {} ) );
+      completions = completions.concat(this._newSentences( null, {} ) );
     }
     else {
       completions = this.recursiveParse( inputArguments, {}, this._modifiers, selObj );
@@ -313,9 +313,11 @@ NLParser.EnVerb.prototype = {
         let suggs = this._DOType.suggest(text, html);
         for each (let sugg in suggs) {
           if (sugg) {
-	    let sentence = this._newSentence( sugg, {});
-            sentence.matchScore = this._DOType.rankLast ? 0 : 1;
-            completions.push(sentence);
+	    let sentences = this._newSentences( sugg, {});
+	    for each( let sentence in sentences) {
+              sentence.matchScore = this._DOType.rankLast ? 0 : 1;
+              completions.push(sentence);
+	    }
 	  }
         }
       } catch(e) {
@@ -333,9 +335,11 @@ NLParser.EnVerb.prototype = {
           if (sugg) {
             let mods = {};
             mods[x] = sugg;
-	    let sentence = this._newSentence(null, mods);
-	    sentence.matchScore = this._modifiers[x].rankLast ? 0 : 1;
-            completions.push( sentence );
+	    let sentences = this._newSentences(null, mods);
+	    for each( let sentence in sentences) {
+              sentence.matchScore = this._modifiers[x].rankLast ? 0 : 1;
+              completions.push( sentence );
+	    }
           }
         }
       } catch(e) {
