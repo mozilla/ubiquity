@@ -101,6 +101,11 @@ NLParser.EnVerb.prototype = {
     // keys are prepositions
     // values are NounTypes.
     // example:  { "from" : City, "to" : City, "on" : Day }
+    if (cmd.modifierDefaults) {
+      this._modifierDefaults = cmd.modifierDefaults;
+    } else {
+      this._modifierDefaults = {};
+    }
   },
 
   execute: function( context, directObject, modifiers ) {
@@ -122,12 +127,28 @@ NLParser.EnVerb.prototype = {
   },
 
   _newSentences: function( directObjSugg, modifierSuggs ) {
-    /* Add in nothing-suggestion objects for any missing arguments.*/
-    if (this._DOType && !directObjSugg)
-      directObjSugg = this._makeNothingSugg();
-    for (let x in this._modifiers)
-      if (!modifierSuggs[x])
-	modifierSuggs[x] = this._makeNothingSugg();
+    /* Fill in missing arguments with defaults, or with nothing-suggestions if
+     * no default is available.*/
+    if (this._DOType && !directObjSugg) {
+      if (this._DODefault) { // Argument value from verb argument default
+       directObjSugg = CmdUtils.makeSugg(this._DODefault);
+      } else if (this._DOType.default) {  //Argument value from nountype default
+        directObjSugg = this._DOType.default();
+      } else { // No argument
+        directObjSugg = this._makeNothingSugg();
+      }
+    }
+    for (let x in this._modifiers) {
+      if (!modifierSuggs[x]) {
+        if (this._modifierDefaults[x]) { // Argument value from verb argument default
+	  modifierSuggs[x] = CmdUtils.makeSugg(this._modifierDefaults[x]);
+	} else if (this._modifiers[x].default) { // Argument value from nountype default
+          modifierSuggs[x] = this._modifiers[x].default();
+	} else { // No argument
+	  modifierSuggs[x] = this._makeNothingSugg();
+	}
+      }
+    }
     return [new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs)];
   },
 

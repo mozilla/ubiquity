@@ -144,7 +144,7 @@ CommandSource.prototype = {
 
       var cmd = {
         name : cmdName,
-		icon : cmdFunc.icon,
+        icon : cmdFunc.icon,
         execute : function(context, directObject, modifiers) {
           sandbox.context = context;
           return cmdFunc(directObject, modifiers);
@@ -157,8 +157,7 @@ CommandSource.prototype = {
           return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
 
-
-	  var propsToCopy = [
+      var propsToCopy = [
 		"DOLabel",
 		"DOType",
 		"author",
@@ -167,20 +166,25 @@ CommandSource.prototype = {
 		"license",
 		"description",
 		"help"
-	  ];
+      ];
 
-	  propsToCopy.forEach(function(prop) {
-		if (cmdFunc[prop])
-		  cmd[prop] = cmdFunc[prop];
-      else
-		  cmd[prop] = null;
-	  });
+      propsToCopy.forEach(function(prop) {
+        if (cmdFunc[prop])
+          cmd[prop] = cmdFunc[prop];
+        else
+          cmd[prop] = null;
+      });
 
-      if (cmdFunc.modifiers)
+      if (cmdFunc.modifiers) {
 	cmd.modifiers = cmdFunc.modifiers;
-      else
+      } else {
 	cmd.modifiers = {};
-
+      }
+      if (cmdFunc.modifierDefaults) {
+	cmd.modifierDefaults = cmdFunc.modifierDefaults;
+      } else {
+	cmd.modifierDefaults = {};
+      }
       return cmd;
     };
 
