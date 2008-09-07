@@ -102,11 +102,17 @@ Utils.setTimeout = function setTimeout(callback, delay) {
 };
 
 Utils.url = function url(spec) {
-  if (typeof(spec) != "string")
-    // Assume that a URI object was passed in, so just return it back.
+  if (typeof(spec) == "object" && spec instanceof Components.interfaces.nsIURI) {
+    // nsIURL object was passed in, so just return it back
     return spec;
-  var classObj = Components.classes["@mozilla.org/network/io-service;1"];
-  var ios = classObj.getService(Components.interfaces.nsIIOService);
+  }
+  if (typeof(spec) != "string") {
+    // unknown type
+	throw new Error("Unknown type passed to Utils.url()");
+  }
+
+  var ios = Components.classes["@mozilla.org/network/io-service;1"]
+    .getService(Components.interfaces.nsIIOService);
   return ios.newURI(spec, null, null);
 };
 
