@@ -158,14 +158,15 @@ CommandSource.prototype = {
         };
 
       var propsToCopy = [
-		"DOLabel",
-		"DOType",
-		"author",
-		"homepage",
-		"contributors",
-		"license",
-		"description",
-		"help"
+        "DOLabel",
+        "DOType",
+	"DODefault",
+        "author",
+        "homepage",
+        "contributors",
+        "license",
+        "description",
+        "help"
       ];
 
       propsToCopy.forEach(function(prop) {

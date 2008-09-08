@@ -651,7 +651,7 @@ function testSortSpecificNounsBeforeArbText() {
   };
 
   var verbList = [{name: "mumble", DOType: arb_text, DOLabel:"stuff"},
-              {name: "wash", DOType: dog, DOLabel: "dog"}];
+                  {name: "wash", DOType: dog, DOLabel: "dog"}];
 
   var nlParser = new NLParser.EnParser( verbList, [arb_text, dog] );
 
@@ -659,8 +659,37 @@ function testSortSpecificNounsBeforeArbText() {
   var selObj = getSelectionObject( fakeContext );
   nlParser.updateSuggestionList( "", fakeContext );
   var suggs = nlParser.getSuggestionList();
-    this.assert( suggs.length == 2, "Should be two suggestions.");
+  this.assert( suggs.length == 2, "Should be two suggestions.");
   this.assert( suggs[0]._verb._name == "wash", "First suggestion should be wash");
   this.assert( suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+}
+
+function testVerbUsesDefaultIfNoArgProvided() {
+  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
+				  "beagle", "bulldog", "husky"]);
+  dog.default = function() {
+    return CmdUtils.makeSugg( "husky" );
+  };
+  var verbList = [{name:"wash", DOType: dog, DOLabel: "dog"},
+		  {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
+  var nlParser = new NLParser.EnParser( verbList, [dog]);
+  var fakeContext = {textSelection:"", htmlSelection:""};
+  nlParser.updateSuggestionList( "wash", fakeContext );
+  var suggs = nlParser.getSuggestionList();
+  this.assert( suggs.length == 1, "Should be 1 suggestion.");
+  this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
+  this.assert( suggs[0]._DO.text == "husky", "Argument should be husky.\n");
+
+  nlParser.updateSuggestionList( "play", fakeContext );
+  var suggs = nlParser.getSuggestionList();
+  this.assert( suggs.length == 1, "Should be 1 suggestion.");
+  this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
+  this.assert( suggs[0]._DO.text == "basenji", "Argument should be basenji.\n");
+
+  nlParser.updateSuggestionList( "play retr", fakeContext );
+  var suggs = nlParser.getSuggestionList();
+  this.assert( suggs.length == 1, "Should be 1 suggestion.");
+  this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
+  this.assert( suggs[0]._DO.text == "golden retreiver", "Argument should be g.retr.\n");
 
 }

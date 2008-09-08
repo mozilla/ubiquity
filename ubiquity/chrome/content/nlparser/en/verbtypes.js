@@ -96,6 +96,7 @@ NLParser.EnVerb.prototype = {
     this._icon = cmd.icon;
     this._DOLabel = cmd.DOLabel;
     this._DOType = cmd.DOType; // must be a NounType.
+    this._DODefault = cmd.DODefault;
     this._modifiers = cmd.modifiers;
     // modifiers should be a dictionary
     // keys are prepositions
@@ -131,7 +132,7 @@ NLParser.EnVerb.prototype = {
      * no default is available.*/
     if (this._DOType && !directObjSugg) {
       if (this._DODefault) { // Argument value from verb argument default
-       directObjSugg = CmdUtils.makeSugg(this._DODefault);
+        directObjSugg = CmdUtils.makeSugg(this._DODefault);
       } else if (this._DOType.default) {  //Argument value from nountype default
         directObjSugg = this._DOType.default();
       } else { // No argument
