@@ -1469,7 +1469,8 @@ CmdUtils.CreateCommand({
       var wind_speed = parseInt(wind_text[1].split(" ")[1]);
       var wind_units = "mph";
       //http://en.wikipedia.org/wiki/Si_units
-      if(["US","UM", "LR", "MM"].indexOf(cc) == -1){
+      //UK uses mph
+      if(["US","UM", "LR", "MM", "GB"].indexOf(cc) == -1){
         wind_units = "km/h";
         wind_speed = wind_speed * 1.6;
       }
