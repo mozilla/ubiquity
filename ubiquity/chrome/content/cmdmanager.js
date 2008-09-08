@@ -127,6 +127,20 @@ CommandManager.prototype = {
   getSuggestionListNoInput: function( context ) {
     this.__nlParser.updateSuggestionList("", context);
     return this.__nlParser.getSuggestionList();
+  },
+  
+  copySuggestionToInput : function(context, previewBlock, textbox) {
+    if(this.hasSuggestions()) {
+      var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
+                                    .getCompletionText();
+      this.updateInput(suggText,
+                       context,
+                       previewBlock);
+
+      //Update the textbox value. This may be better done by returning the
+      //suggestion value so not to expose the text box.
+      textbox.value = suggText;
+    }
   }
 };
 

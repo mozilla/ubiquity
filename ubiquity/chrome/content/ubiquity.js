@@ -81,6 +81,7 @@ Ubiquity.prototype = {
   __KEYCODE_ENTER: 13,
   __KEYCODE_UP: 38,
   __KEYCODE_DOWN: 40,
+  __KEYCODE_TAB:  9,
   __MIN_CMD_PREVIEW_LENGTH: 0,
   __DEFAULT_PREVIEW: ("<div class=\"help\">" + "Type the name of a command and press enter to " +
                       "execute it, or <b>help</b> for assistance." + "</div>"),
@@ -99,6 +100,11 @@ Ubiquity.prototype = {
       event.preventDefault();
       this.__cmdManager.moveIndicationDown(this.__makeContext(),
                                            this.__previewBlock);
+    } else if (event.keyCode == this.__KEYCODE_TAB) {
+       event.preventDefault();
+       this.__cmdManager.copySuggestionToInput(this.__makeContext(),
+                                               this.__previewBlock,
+                                               this.__textBox);
     }
   },
 
@@ -110,11 +116,12 @@ Ubiquity.prototype = {
 
     if (keyCode == this.__KEYCODE_ENTER) {
       if (this.__cmdManager.hasSuggestions()) {
-	this.__needsToExecute = true;
+	      this.__needsToExecute = true;
       }
       this.__msgPanel.hidePopup();
     } else if (keyCode == this.__KEYCODE_UP ||
-               keyCode == this.__KEYCODE_DOWN) {
+               keyCode == this.__KEYCODE_DOWN ||
+               keyCode == this.__KEYCODE_TAB) {
     } else
       this.__updatePreview();
   },
