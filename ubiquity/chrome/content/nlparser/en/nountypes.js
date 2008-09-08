@@ -365,7 +365,7 @@ var noun_type_geolocation = {
    rankLast: true,
    default : function(fragment){
       var location = CmdUtils.getGeoLocation();
-      return location.city + "," + location.country;
+      return CmdUtils.makeSugg( location.city + "," + location.country );
    },
 
    suggest: function(fragment){

@@ -1381,7 +1381,6 @@ CmdUtils.CreateCommand({
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
   execute: function( directObj ) {
-    if (! directObj.text ) directObj.text = noun_type_geolocation.default();
     var location = directObj.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
@@ -1390,7 +1389,6 @@ CmdUtils.CreateCommand({
   },
 
   preview: function( pblock, directObj, modifiers) {
-    if (! directObj.text ) directObj.text = noun_type_geolocation.default();
     var location = directObj.text;
     if( location.length < 1 ) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
