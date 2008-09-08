@@ -140,16 +140,28 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
     }
   }
 
-
   var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
     .getService(Components.interfaces.nsIWindowMediator);
   var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
   var browser = browserWindow.getBrowser();
-
-  if(browser.mCurrentBrowser.currentURI.spec == "about:blank" && !browser.webProgress.isLoadingDocument)
+  
+  var prefService = Components.classes["@mozilla.org/preferences-service;1"]
+    .getService(Components.interfaces.nsIPrefBranch);
+  var openPref = prefService.getIntPref("browser.link.open_newwindow");
+  
+  //2 (default in SeaMonkey and Firefox 1.5): In a new window
+  //3 (default in Firefox 2 and above): In a new tab
+  //1 (or anything else): In the current tab or window
+  
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank" && !browser.webProgress.isLoadingDocument )
     browserWindow.loadURI(urlString, null, postInputStream, false);
-  else
+  else if(openPref == 3)
     browser.loadOneTab(urlString, null, null, postInputStream, false, false);
+  else if(openPref == 2)
+    window.openDialog('chrome://browser/content', '_blank', 'all,dialog=no',
+                  urlString, null, null, postInputStream);
+  else
+    browserWindow.loadURI(urlString, null, postInputStream, false);
 };
 
 // Focuses a tab with the given URL if one exists in the current
