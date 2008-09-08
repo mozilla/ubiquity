@@ -284,80 +284,79 @@ var noun_type_searchengine = {
 
 
 var noun_type_tag = {
-	_name: "tag-list",
-	suggest: function(fragment) {
-		var allTags = Components.classes["@mozilla.org/browser/tagging-service;1"]
-			.getService(Components.interfaces.nsITaggingService)
-			.allTags;
+  _name: "tag-list",
+  suggest: function(fragment) {
+    var allTags = Components.classes["@mozilla.org/browser/tagging-service;1"]
+                    .getService(Components.interfaces.nsITaggingService)
+                    .allTags;
 
-		if(fragment.length < 1) {
-			return allTags.map(function(tag) {
+    if(fragment.length < 1) {
+      return allTags.map(function(tag) {
         return CmdUtils.makeSugg(tag, null, [tag]);
       });
     }
 
-		fragment = fragment.toLowerCase();
-		var numTags = allTags.length;
-		var suggestions = [];
+    fragment = fragment.toLowerCase();
+    var numTags = allTags.length;
+    var suggestions = [];
 
-		// can accept multiple tags, seperated by a comma
-		// assume last tag is still being typed - suggest completions for that
+    // can accept multiple tags, seperated by a comma
+    // assume last tag is still being typed - suggest completions for that
 
-		var completedTags = fragment.split(",").map(function(tag) {
+    var completedTags = fragment.split(",").map(function(tag) {
       return Utils.trim(tag);
     });;
 
 
-		// separate last tag in fragment, from the rest
-		var uncompletedTag = completedTags.pop();
+    // separate last tag in fragment, from the rest
+    var uncompletedTag = completedTags.pop();
 
-		completedTags = completedTags.filter(function(tagName) {
-			return tagName.length > 0;
-		});
-		var fragmentTags = "";
-		if(completedTags.length > 0)
-			fragmentTags = completedTags.join(",");
+    completedTags = completedTags.filter(function(tagName) {
+      return tagName.length > 0;
+    });
+    var fragmentTags = "";
+    if(completedTags.length > 0)
+      fragmentTags = completedTags.join(",");
 
-		if(uncompletedTag.length > 0) {
+    if(uncompletedTag.length > 0) {
+      if(fragmentTags.length > 0) {
+        suggestions.push(CmdUtils.makeSugg(
+          fragmentTags + "," + uncompletedTag,
+          null,
+          completedTags.concat([uncompletedTag])
+         ));
+       } else {
+         suggestions.push(CmdUtils.makeSugg(
+                             uncompletedTag,
+                             null,
+                             completedTags
+                          ));
+       }
 
-			if(fragmentTags.length > 0) {
-				suggestions.push(CmdUtils.makeSugg(
-					fragmentTags + "," + uncompletedTag,
-					null,
-					completedTags.concat([uncompletedTag])
-				));
-			} else {
-				suggestions.push(CmdUtils.makeSugg(
-					uncompletedTag,
-					null,
-					completedTags
-				));
-			}
+    } else {
+      suggestions.push(CmdUtils.makeSugg(
+                         fragmentTags,
+                         null,
+                         completedTags
+                       ));
+    }
 
-		} else {
-			suggestions.push(CmdUtils.makeSugg(
-				fragmentTags,
-				null,
-				completedTags
-			));
-		}
+    for(var i = 0; i < numTags; i++) {
+      // handle cases where user has/hasn't typed anything for the current uncompleted tag in the fragment
+      // and only match from the begining of a tag name (not the middle)
+      if(uncompletedTag.length < 1 || allTags[i].indexOf(uncompletedTag) == 0) {
+        // only if its not in the list already
+        if(completedTags.indexOf(allTags[i]) == -1)
+          suggestions.push(CmdUtils.makeSugg(
+                             fragmentTags + "," + allTags[i],
+                             null,
+                             completedTags.concat([allTags[i]])
+         ));
+      }
+    }
 
-		for(var i = 0; i < numTags; i++) {
-			// handle cases where user has/hasn't typed anything for the current uncompleted tag in the fragment
-			// and only match from the begining of a tag name (not the middle)
-			if(uncompletedTag.length < 1 || allTags[i].indexOf(uncompletedTag) == 0) {
-				// only if its not in the list already
-				if(completedTags.indexOf(allTags[i]) == -1)
-					suggestions.push(CmdUtils.makeSugg(
-						fragmentTags + "," + allTags[i],
-						null,
-						completedTags.concat([allTags[i]])
-					));
-			}
-		}
-
-		return suggestions;
-	}
+    return suggestions;
+  }
 };
 
 var noun_type_geolocation = {
