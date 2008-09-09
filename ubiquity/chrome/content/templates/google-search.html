@@ -6,4 +6,6 @@
   <xul:description class="gresult-content">${result.content}</xul:description>
   <div class="gresult-url">${result.visibleUrl}</div>
 </div>
+{forelse}
+  <b>Your search - ${searchTerm} - did not match any documents. </b>
 {/for}

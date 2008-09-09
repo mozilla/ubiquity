@@ -87,7 +87,7 @@ makeSearchCommand({
       var results = data.responseData.results.splice( 0, numToDisplay );
 
       pblock.innerHTML = CmdUtils.renderTemplate( {file:"google-search.html"},
-						  {results:results}
+						  {results:results, searchTerm:searchTerm}
 						);
       }, "json");
   }
