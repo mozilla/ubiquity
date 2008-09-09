@@ -75,7 +75,12 @@ NLParser.EnParsedSentence.prototype = {
     var sentence = this._verb._name;
     for ( var x in this._argSuggs ) {
       if ( this._argSuggs[x] ) {
-	sentence = sentence + " " + x + " " + this._argSuggs[x].text;
+	let preposition;
+	if (x == "direct_object")
+	  preposition = " ";
+	else
+	  preposition = " " + x + " ";
+	sentence = sentence + preposition + this._argSuggs[x].text;
       }
     }
     return sentence;
@@ -169,7 +174,7 @@ NLParser.EnVerb.prototype = {
 
   execute: function( context, argumentValues ) {
     /* Once we convert all commands to using an arguments dictionary,
-     * this can just pass argumentValues to _execut().  But for now,
+     * this can just pass argumentValues to _execute().  But for now,
      * commands expect the direct object to be separate, so pull it out
      * to pass it in separately.
      */
@@ -287,10 +292,8 @@ NLParser.EnVerb.prototype = {
 	} // end if preposition matches
       } // end for each unsed word
       // Try adding a completion where the argument is left blank.
-      newFilledArgs = dictDeepCopy( filledArgs );
-      newFilledArgs[argName] = this._makeNothingSugg;
       newCompletions = this.recursiveParse( unusedWords,
-       					    newFilledArgs,
+       					    filledArgs,
        					    newUnfilledArgs,
        					    selObj);
       completions = completions.concat( newCompletions );
