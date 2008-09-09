@@ -91,7 +91,7 @@ NLParser.EnParsedSentence.prototype = {
     let sentence = this._verb._name;
     let label;
     for ( var x in this._verb._arguments ) {
-      if ( this._argSuggs[ x ] ) {
+      if ( this._argSuggs[ x ] && (this._argSuggs[x].text != "") ) {
 	if (x == "direct_object")
 	  label = "";
 	else
@@ -99,12 +99,12 @@ NLParser.EnParsedSentence.prototype = {
 	sentence = sentence + " <b>" + label + " " + this._argSuggs[x].summary +
 		   "</b>";
       } else {
-	if (this._verb._arguments[x].label) {
+	if ( x == "direct_object" ) {
 	  label = this._verb._arguments[x].label;
 	} else {
-	  label = this._verb._arguments[x].type._name;
+	  label = x + " " + this._verb._arguments[x].type._name;
         }
-	sentence = sentence + " <span class=\"needarg\">(" + x + " " +
+	sentence = sentence + " <span class=\"needarg\">(" +
 	  label + ")</span>";
       }
     }
