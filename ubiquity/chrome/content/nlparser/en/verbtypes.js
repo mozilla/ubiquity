@@ -84,13 +84,16 @@ NLParser.EnParsedSentence.prototype = {
   getDisplayText: function() {
     // returns html formatted sentence for display in suggestion list
     let sentence = this._verb._name;
-
+    let label;
     for ( var x in this._verb._arguments ) {
       if ( this._argSuggs[ x ] ) {
-	sentence = sentence + " <b>" +  x + " " + this._argSuggs[x].summary +
+	if (x == "direct_object")
+	  label = "";
+	else
+	  label = x;
+	sentence = sentence + " <b>" + label + " " + this._argSuggs[x].summary +
 		   "</b>";
       } else {
-	let label;
 	if (this._verb._arguments[x].label) {
 	  label = this._verb._arguments[x].label;
 	} else {
@@ -133,9 +136,14 @@ NLParser.EnVerb.prototype = {
     this._icon = cmd.icon;
     this._arguments = {};
 
+    // New-style API: command defines arguments dictionary
     if (cmd.arguments) {
       this._arguments = cmd.arguments;
     }
+
+    /* Old-style API for backwards compatibility: command
+       defines DirectObject and modifiers dictionary.  Convert
+       this to argument dictionary. */
     if (cmd.DOType) {
       this._arguments.direct_object = {
 	type: cmd.DOType,
@@ -160,16 +168,22 @@ NLParser.EnVerb.prototype = {
   },
 
   execute: function( context, argumentValues ) {
+    /* Once we convert all commands to using an arguments dictionary,
+     * this can just pass argumentValues to _execut().  But for now,
+     * commands expect the direct object to be separate, so pull it out
+     * to pass it in separately.
+     */
     let directObjectVal = null;
-    if (argumentValues)  {
-      if (argumentValues.direct_object)
-        directObjectVal = argumentValues.direct_object;
+    if (argumentValues && argumentValues.direct_object) {
+      // TODO: when direct obj is not specified, we should use a
+      // nothingSugg, so argumentValues.direct_object should never be false.
+      directObjectVal = argumentValues.direct_object;
     }
-    // Can argumentValues be false here?
     return this._execute( context, directObjectVal, argumentValues );
   },
 
   preview: function( context, argumentValues, previewBlock ) {
+    // Same logic as the execute command -- see comment above.
     if (this._preview) {
       let directObjectVal = null;
       if (argumentValues && argumentValues.direct_object)
