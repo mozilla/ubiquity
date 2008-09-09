@@ -1896,11 +1896,14 @@ CmdUtils.CreateCommand({
   takes: {"tab name": noun_type_tab},
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes the tab that matches the given name.",
-
   execute: function( directObj ) {
     var tabName = directObj.text;
     var tabs = noun_type_tab.getTabs();
-    tabs[tabName].close();
+    if(tabs[tabName]!=null){
+      tabs[tabName].close();
+    }else{
+      Application.activeWindow.activeTab.close();
+    }
     displayMessage(tabName + " tab closed");
   },
 
