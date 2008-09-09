@@ -79,9 +79,9 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 
 Utils.__TimerCallback.prototype = {
   notify : function(timer) {
-    for(var i = 0; i < Utils.__timers.length; i++) {
-      if(Utils.__timers[i] == timer) {
-        Utils.__timers.splice(i, 1);
+    for(timerID in Utils.__timerData.timers) {
+      if(Utils.__timerData.timers[timerID] == timer) {
+        delete Utils.__timerData.timers[timerID];
         break;
       }
     }
@@ -89,17 +89,33 @@ Utils.__TimerCallback.prototype = {
   }
 };
 
-Utils.__timers = [];
+Utils.__timerData = {
+  nextID: Math.floor(Math.random() * 100) + 1,
+  timers: {}
+};
 
 Utils.setTimeout = function setTimeout(callback, delay) {
   var classObj = Components.classes["@mozilla.org/timer;1"];
   var timer = classObj.createInstance(Components.interfaces.nsITimer);
-  Utils.__timers.push(timer);
+  var timerID = Utils.__timerData.nextID;
+  // emulate window.setTimeout() by incrementing next ID by random amount
+  Utils.__timerData.nextID += Math.floor(Math.random() * 100) + 1;
+  Utils.__timerData.timers[timerID] = timer;
 
   timer.initWithCallback(new Utils.__TimerCallback(callback),
                          delay,
                          classObj.TYPE_ONE_SHOT);
+  return timerID;
 };
+
+Utils.clearTimeout = function clearTimeout(timerID) {
+  if(!(timerID in Utils.__timerData.timers))
+    return;
+  
+  var timer = Utils.__timerData.timers[timerID];
+  timer.cancel();
+  delete Utils.__timerData.timers[timerID];
+}
 
 Utils.url = function url(spec) {
   if (typeof(spec) == "object" && spec instanceof Components.interfaces.nsIURI) {
