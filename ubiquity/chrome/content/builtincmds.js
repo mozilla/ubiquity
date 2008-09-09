@@ -1,3 +1,44 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Ubiquity.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Atul Varma <atul@mozilla.com>
+ *   Aza Raskin <aza@mozilla.com>
+ *   Maria Emerson <memerson@mozilla.com>
+ *   Abimanyu Raja <abimanyu@gmail.com>
+ *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Blair McBride <blair@theunfocused.net>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 // -----------------------------------------------------------------
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
@@ -1426,7 +1467,8 @@ CmdUtils.CreateCommand({
       var wind_speed = parseInt(wind_text[1].split(" ")[1]);
       var wind_units = "mph";
       //http://en.wikipedia.org/wiki/Si_units
-      if(["US","UM", "LR", "MM"].indexOf(cc) == -1){
+      //UK uses mph
+      if(["US","UM", "LR", "MM", "GB"].indexOf(cc) == -1){
         wind_units = "km/h";
         wind_speed = wind_speed * 1.6;
       }
@@ -1739,7 +1781,7 @@ CmdUtils.CreateCommand({
   author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
   license: "MPL,GPL",
   execute: function() {
-    var doc = CmdUtils.getDocumentInsecure();
+    var doc = CmdUtils.getDocument();
     var sel = doc.getSelection().substring(0,375);
 
     var params = Utils.paramsToString({
@@ -1755,7 +1797,7 @@ CmdUtils.CreateCommand({
   },
   preview: function(pblock) {
 
-    var doc = CmdUtils.getDocumentInsecure();
+    var doc = CmdUtils.getDocument();
     var selected_text= doc.getSelection();
     var api_url='http://services.digg.com/stories';
 
@@ -2203,3 +2245,99 @@ CmdUtils.CreateCommand({
 
   }
 })
+
+
+// -----------------------------------------------------------------
+// SPARKLINE
+// -----------------------------------------------------------------
+
+function sparkline(data) {
+  var p = data;
+
+  var nw = "auto";
+  var nh = "auto";
+  
+  
+  var f = 2;
+  var w = ( nw == "auto" || nw == 0 ? p.length * f : nw - 0 );
+  var h = ( nh == "auto" || nh == 0 ? "1em" : nh );
+  
+  var doc = context.focusedWindow.document;
+  var co = doc.createElement("canvas");
+
+  co.style.height = h;
+  co.style.width = w;
+  co.width = w;
+
+  var h = co.offsetHeight;
+  h = 10;
+  co.height = h;
+
+  var min = 9999;
+  var max = -1;
+
+  for ( var i = 0; i < p.length; i++ ) {
+    p[i] = p[i] - 0;
+    if ( p[i] < min ) min = p[i];
+    if ( p[i] > max ) max = p[i];
+  }
+  
+  if ( co.getContext ) {
+    var c = co.getContext("2d");
+    c.strokeStyle = "red";
+    c.lineWidth = 1.0;
+    c.beginPath();
+
+    for ( var i = 0; i < p.length; i++ ) {
+      c.lineTo( (w / p.length) * i, h - (((p[i] - min) / (max - min)) * h) );
+    }
+
+    c.stroke();
+  }
+  
+  return co.toDataURL()
+}
+
+CmdUtils.CreateCommand({
+  name: "sparkline",
+  description: "Graphs the current selection, turning it into a sparkline.",
+  takes: {"data": noun_arb_text},
+  author: {name: "Aza Raskin", email:"aza@mozilla.com"},
+  license: "MIT",
+  help: "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them.",
+  
+  _cleanData: function( string ) {
+    var dirtyData = string.split(/\W/);    
+    var data = [];
+    for(var i=0; i<dirtyData.length; i++){
+      var datum = parseFloat( dirtyData[i] );
+      if( datum.toString() != "NaN" ){
+        data.push( datum );
+      }
+    }
+    
+    return data;
+  },
+  
+  _dataToSparkline: function( string ) {
+    var data = this._cleanData( string );
+    if( data.length < 2 ) return null;
+    
+    var dataUrl = sparkline( data );
+    return img = "<img src='%'/>".replace(/%/, dataUrl);
+  },
+  
+  preview: function(pblock, input) { 
+    var img = this._dataToSparkline( input.text );
+    
+    if( !img )
+      jQuery(pblock).text( "Requires numbers to graph." );
+    else
+      jQuery(pblock).empty().append( img ).height( "15px" );
+  },
+  
+  execute: function( input ) {
+    var img = this._dataToSparkline( input.text );
+    if( img ) CmdUtils.setSelection( img );
+  }
+});
