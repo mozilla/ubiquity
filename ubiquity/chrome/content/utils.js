@@ -79,9 +79,9 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 
 Utils.__TimerCallback.prototype = {
   notify : function(timer) {
-    for(var i = 0; i < Utils.__timers.length; i++) {
-      if(Utils.__timers[i] == timer) {
-        Utils.__timers.splice(i, 1);
+    for(timerID in Utils.__timerData.timers) {
+      if(Utils.__timerData.timers[timerID] == timer) {
+        delete Utils.__timerData.timers[timerID];
         break;
       }
     }
@@ -89,17 +89,33 @@ Utils.__TimerCallback.prototype = {
   }
 };
 
-Utils.__timers = [];
+Utils.__timerData = {
+  nextID: Math.floor(Math.random() * 100) + 1,
+  timers: {}
+};
 
 Utils.setTimeout = function setTimeout(callback, delay) {
   var classObj = Components.classes["@mozilla.org/timer;1"];
   var timer = classObj.createInstance(Components.interfaces.nsITimer);
-  Utils.__timers.push(timer);
+  var timerID = Utils.__timerData.nextID;
+  // emulate window.setTimeout() by incrementing next ID by random amount
+  Utils.__timerData.nextID += Math.floor(Math.random() * 100) + 1;
+  Utils.__timerData.timers[timerID] = timer;
 
   timer.initWithCallback(new Utils.__TimerCallback(callback),
                          delay,
                          classObj.TYPE_ONE_SHOT);
+  return timerID;
 };
+
+Utils.clearTimeout = function clearTimeout(timerID) {
+  if(!(timerID in Utils.__timerData.timers))
+    return;
+  
+  var timer = Utils.__timerData.timers[timerID];
+  timer.cancel();
+  delete Utils.__timerData.timers[timerID];
+}
 
 Utils.url = function url(spec) {
   if (typeof(spec) == "object" && spec instanceof Components.interfaces.nsIURI) {
@@ -244,6 +260,93 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
   request.send(null);
 };
 
+Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, successCallback, errorCallback) {
+  // based on code from http://mxr.mozilla.org/mozilla/source/browser/components/microsummaries/src/nsMicrosummaryService.js
+  const Cc = Components.classes;
+  const Ci = Components.interfaces;
+  
+  var rootElement = null;
+  var iframe = null;
+  
+  var parseHandler = {
+    handleEvent: function(event) {
+      event.target.removeEventListener("DOMContentLoaded", this, false);
+      var doc = iframe.contentDocument;
+      rootElement.removeChild(iframe);
+      successCallback(doc);
+    }
+  };
+  
+  function parseHtml(htmlText) {  
+    var windowMediator = Cc['@mozilla.org/appshell/window-mediator;1']
+      .getService(Ci.nsIWindowMediator);
+    var window = windowMediator.getMostRecentWindow("navigator:browser");
+    var document = window.document;
+    rootElement = document.documentElement;
+    iframe = document.createElement('iframe');
+    iframe.setAttribute("collapsed", true);
+    // secure iframe against untrusted content
+    iframe.setAttribute("type", "content");
+    // needed to create a docshell
+    rootElement.appendChild(iframe);
+    // stop loading about:blank (not needed, and weird things could happpen apparently)
+    iframe.docShell.QueryInterface(Ci.nsIWebNavigation)
+      .stop(Ci.nsIWebNavigation.STOP_NETWORK);
+    // turn off unneeded/unwanted/bad things
+    iframe.docShell.allowJavascript = false;
+    iframe.docShell.allowAuth = false;
+    iframe.docShell.allowPlugins = false;
+    iframe.docShell.allowMetaRedirects = false;
+    iframe.docShell.allowSubframes = false;
+    iframe.docShell.allowImages = false;
+    
+    // Convert the HTML text into an input stream.
+    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+      .createInstance(Ci.nsIScriptableUnicodeConverter);
+    converter.charset = "UTF-8";
+    var stream = converter.convertToInputStream(htmlText);
+    // Set up a channel to load the input stream.
+    var channel = Cc["@mozilla.org/network/input-stream-channel;1"]
+      .createInstance(Ci.nsIInputStreamChannel);
+    channel.setURI(Utils.url(remoteUrl));
+    channel.contentStream = stream;
+    // Load in the background so we don't trigger web progress listeners.
+    channel.QueryInterface(Ci.nsIRequest)
+      .loadFlags |= Ci.nsIRequest.LOAD_BACKGROUND;
+    // need to specify content type, so user isn't prompted to download "unknown" file type
+    var baseChannel = channel.QueryInterface(Ci.nsIChannel)
+    baseChannel.contentType = "text/html";
+    // this will always be UTF-8 thanks to XMLHttpRequest and nsIScriptableUnicodeConverter
+    baseChannel.contentCharset = "UTF-8";
+    
+    // background loads don't fire "load" events, listen for DOMContentLoaded instead
+    iframe.addEventListener("DOMContentLoaded", parseHandler, true);
+    var uriLoader = Cc["@mozilla.org/uriloader;1"]
+      .getService(Ci.nsIURILoader);
+    uriLoader.openURI(channel, true, iframe.docShell);
+  }
+  
+  var ajaxOptions = {
+    url: remoteUrl,
+    type: "GET",
+    datatype: "string",
+    success: function(responseText) {
+      parseHtml(responseText);
+    },
+    error: function() {
+      if(errorCallback)
+        errorCallback();
+    }
+  };
+  
+  if(postParams) {
+    ajaxOptions.type = "POST";
+    ajaxOptions.data = postParams;
+  }
+  
+  jQuery.ajax(ajaxOptions);
+  
+}
 
 Utils.trim = function(str) {
   var str = str.replace(/^\s\s*/, ''),
