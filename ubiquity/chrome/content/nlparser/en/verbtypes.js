@@ -108,7 +108,6 @@ NLParser.EnParsedSentence.prototype = {
   },
 
   execute: function(context) {
-    //dump("ParsedSentence.execute() called!\n");
     return this._verb.execute( context, this._argSuggs );
   },
 
@@ -165,8 +164,6 @@ NLParser.EnVerb.prototype = {
     if (argumentValues)  {
       if (argumentValues.direct_object)
         directObjectVal = argumentValues.direct_object;
-    } else {
-      dump("argumentValues does not exist!!");
     }
     // Can argumentValues be false here?
     return this._execute( context, directObjectVal, argumentValues );
@@ -217,12 +214,10 @@ NLParser.EnVerb.prototype = {
     // First, the termination conditions of the recursion:
     if (unusedWords.length == 0) {
       // We've used the whole sentence; no more words. Return what we have.
-      //dump("accept!\n");
       return this._newSentences(filledArgs);
     } else if ( dictKeys( unfilledArgs ).length == 0 ) {
       // We've used up all arguments, so we can't continue parsing, but
       // there are still unused words.  This was a bad parsing; don't use it.
-      //dump("Reject!\n");
       return [];
     } else {
       // "pop" off the LAST unfilled argument in the sentence and try to fill it
@@ -235,7 +230,6 @@ NLParser.EnVerb.prototype = {
       var nounType = unfilledArgs[argName].type;
       var nounLabel = unfilledArgs[argName].label;
       var preposition = unfilledArgs[argName].flag;
-
       for ( x = 0; x < unusedWords.length; x++ ) {
 	if ( preposition == null || preposition == unusedWords[x] ) {
 	  /* a match for the preposition is found at position x!
@@ -255,11 +249,6 @@ NLParser.EnVerb.prototype = {
 	    }
 	    // pull out words from preposition up to lastWord, as nounWords:
             let nounWords = newUnusedWords.splice( x, lastWord - x );
-
-	/*    dump("Looking for words to put in argument " + nounLabel + "\n" );
-            dump("Considering words from " + x + " to " + lastWord);
-            dump(" of newUnusedWords( " + newUnusedWords.join(" ") + ")\n");
-            dump("Looking at the " + nounWords.length + " words for direct obj: " + nounWords.join(" ") + "\n");*/
 
             // Add all suggestions the nounType can produce for the noun words:
             suggestions = this._suggestForNoun( nounType,
@@ -281,10 +270,18 @@ NLParser.EnVerb.prototype = {
 	      }
 	    }
 	  }
-	}
-      }
+	} // end if preposition matches
+      } // end for each unsed word
+      // Try adding a completion where the argument is left blank.
+      newFilledArgs = dictDeepCopy( filledArgs );
+      newFilledArgs[argName] = this._makeNothingSugg;
+      newCompletions = this.recursiveParse( unusedWords,
+       					    newFilledArgs,
+       					    newUnfilledArgs,
+       					    selObj);
+      completions = completions.concat( newCompletions );
       return completions;
-    }
+    } // end if there are still arguments
   },
 
   suggestWithPronounSub: function( nounType, words, selObj ) {
@@ -330,7 +327,6 @@ NLParser.EnVerb.prototype = {
           '" with noun "' + nounLabel + '"'
           );
     }
-    //dump(" SuggestForNoun is returning " + suggestions.length + " suggs.\n");
     return suggestions;
   },
 
