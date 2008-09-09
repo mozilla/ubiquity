@@ -400,7 +400,7 @@ var noun_type_tag = {
 var noun_type_geolocation = {
    _name : "geolocation",
    rankLast: true,
-   default : function(fragment){
+   default : function(){
      var location = CmdUtils.getGeoLocation();
      var locString = location.city + "," + location.country;
      return CmdUtils.makeSugg( locString );

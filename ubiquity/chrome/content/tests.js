@@ -727,15 +727,19 @@ function testVerbUsesDefaultIfNoArgProvided() {
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
   nlParser.updateSuggestionList( "play", fakeContext );
-  var suggs = nlParser.getSuggestionList();
+  suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
   nlParser.updateSuggestionList( "play retr", fakeContext );
-  var suggs = nlParser.getSuggestionList();
+  suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
 
+  //TODO try out defaults for modifier arguments.
 }
+
+// TODO a test where a command has three arguments, all arbText; make sure
+// the top parsing is the sensible one.
