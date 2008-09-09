@@ -363,8 +363,9 @@ var noun_type_geolocation = {
    _name : "geolocation",
    rankLast: true,
    default : function(fragment){
-      var location = CmdUtils.getGeoLocation();
-      return CmdUtils.makeSugg( location.city + "," + location.country );
+     var location = CmdUtils.getGeoLocation();
+     var locString = location.city + "," + location.country;
+     return CmdUtils.makeSugg( locString );
    },
 
    suggest: function(fragment){

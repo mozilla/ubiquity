@@ -476,16 +476,6 @@ CmdUtils.NounType.prototype = {
       // Input undefined or not a string
       return [];
     }
-    if (text == "") {
-      /* If input is empty, suggest all of the words we know.  This keeps the
-       * nountype (and therefore the verb using it) resolving as valid when the user
-       * has entered the verb and not yet the noun.  It also helps the user
-       * learn what nouns are valid and helps them choose the one they want.
-       */
-      for each (var word in this._expectedWords) {
-	suggestions.push( CmdUtils.makeSugg(word) );
-      }
-    }
 
     for ( var x in this._expectedWords ) {
       // Do the match in a non-case sensitive way

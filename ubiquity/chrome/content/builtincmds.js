@@ -1579,7 +1579,7 @@ CmdUtils.CreateCommand({
 	break;
       }
     } else {
-      displayMessage("You must specify what you want to conver to: pdf, html, or rich-text.");
+      displayMessage("You must specify what you want to convert to: pdf, html, or rich-text.");
     }
   }
 });

@@ -21,12 +21,11 @@ NLParser.EnParsedSentence = function( verb, DO, modifiers ) {
   this._init( verb, DO, modifiers );
 }
 NLParser.EnParsedSentence.prototype = {
-  _init: function( verb, DO, modifiers) {
+  _init: function( verb, argumentSuggestions) {
     /* modifiers is dictionary of preposition: noun */
     if (verb){
       this._verb = verb;
-      this._DO = DO;
-      this._modifiers = modifiers;
+      this._argSuggs = argumentSuggestions;
     }
     this.matchScore = 0;
     this.frequencyScore = 0;
@@ -36,12 +35,9 @@ NLParser.EnParsedSentence.prototype = {
     /* return plain text that we should set the input box to if user hits
      autocompletes to this sentence.  Currently unused! */
     var sentence = this._verb._name;
-    if ( this._DO ) {
-      sentence = sentence + " " + this._DO.text;
-    }
-    for ( var x in this._modifiers ) {
-      if ( this._modifiers[x] ) {
-	sentence = sentence + " " + x + " " + this._modifiers[x].text;
+    for ( var x in this._argSuggs ) {
+      if ( this._argSuggs[x] ) {
+	sentence = sentence + " " + x + " " + this._argSuggs[x].text;
       }
     }
     return sentence;
@@ -50,22 +46,20 @@ NLParser.EnParsedSentence.prototype = {
   getDisplayText: function() {
     // returns html formatted sentence for display in suggestion list
     let sentence = this._verb._name;
-    if ( this._verb._DOType ) {
-      if ( this._DO.summary ) {
-	sentence = sentence + " " + this._DO.summary;
-      } else {
-	//var arg = this._verb._DOLabel.substring
-	sentence = sentence + " <span class=\"needarg\">(" + this._verb._DOLabel + ")</span>";
-      }
-    }
 
-    for ( var x in this._verb._modifiers ) {
-      if ( this._modifiers[ x ].summary ) {
-	sentence = sentence + " <b>" +  x + " " + this._modifiers[x].summary +
+    for ( var x in this._verb._arguments ) {
+      if ( this._argSuggs[ x ] ) {
+	sentence = sentence + " <b>" +  x + " " + this._argSuggs[x].summary +
 		   "</b>";
       } else {
+	let label;
+	if (this._verb._arguments[x].label) {
+	  label = this._verb._arguments[x].label;
+	} else {
+	  label = this._verb._arguments[x].type._name;
+        }
 	sentence = sentence + " <span class=\"needarg\">(" + x + " " +
-	  this._verb._modifiers[x]._name + ")</span>";
+	  label + ")</span>";
       }
     }
     return sentence;
@@ -76,11 +70,12 @@ NLParser.EnParsedSentence.prototype = {
   },
 
   execute: function(context) {
-    return this._verb.execute( context, this._DO, this._modifiers );
+    //dump("ParsedSentence.execute() called!\n");
+    return this._verb.execute( context, this._argSuggs );
   },
 
   preview: function(context, previewBlock) {
-    this._verb.preview( context, this._DO, this._modifiers, previewBlock );
+    this._verb.preview( context, this._argSuggs, previewBlock );
   }
 };
 
@@ -90,33 +85,62 @@ NLParser.EnVerb = function( cmd ) {
 }
 NLParser.EnVerb.prototype = {
   _init: function( cmd ) {
+    /* cmd.DOType must be a NounType, if provided.
+       cmd.modifiers should be a dictionary
+       keys are prepositions
+       values are NounTypes.
+       example:  { "from" : City, "to" : City, "on" : Day } */
     this._execute = cmd.execute;
     this._preview = cmd.preview;
     this._name = cmd.name;
     this._icon = cmd.icon;
-    this._DOLabel = cmd.DOLabel;
-    this._DOType = cmd.DOType; // must be a NounType.
-    this._DODefault = cmd.DODefault;
-    this._modifiers = cmd.modifiers;
-    // modifiers should be a dictionary
-    // keys are prepositions
-    // values are NounTypes.
-    // example:  { "from" : City, "to" : City, "on" : Day }
-    if (cmd.modifierDefaults) {
-      this._modifierDefaults = cmd.modifierDefaults;
-    } else {
-      this._modifierDefaults = {};
+    this._arguments = {};
+
+    if (cmd.arguments) {
+      this._arguments = cmd.arguments;
+    }
+    if (cmd.DOType) {
+      this._arguments.direct_object = {
+	type: cmd.DOType,
+	label: cmd.DOLabel,
+	flag: null,
+        default: cmd.DODefault
+      };
+    }
+
+    if (cmd.modifiers) {
+      for (let x in cmd.modifiers) {
+	this._arguments[x] = {
+	  type: cmd.modifiers[x],
+	  label: x,
+	  flag: x
+	};
+	if (cmd.modifierDefaults) {
+	  this._arguments[x].default = cmd.modifierDefaults[x];
+	}
+      }
     }
   },
 
-  execute: function( context, directObject, modifiers ) {
-    return this._execute( context, directObject, modifiers );
+  execute: function( context, argumentValues ) {
+    let directObjectVal = null;
+    if (argumentValues)  {
+      if (argumentValues.direct_object)
+        directObjectVal = argumentValues.direct_object;
+    } else {
+      dump("argumentValues does not exist!!");
+    }
+    // Can argumentValues be false here?
+    return this._execute( context, directObjectVal, argumentValues );
   },
 
-  preview: function( context, directObject, modifiers, previewBlock ) {
-    if (this._preview)
-      this._preview( context, directObject, modifiers, previewBlock );
-    else {
+  preview: function( context, argumentValues, previewBlock ) {
+    if (this._preview) {
+      let directObjectVal = null;
+      if (argumentValues && argumentValues.direct_object)
+        directObjectVal = argumentValues.direct_object;
+      this._preview( context, directObjectVal, argumentValues, previewBlock );
+    } else {
       // Command exists, but has no preview; provide a default one.
       var content = "Executes the <b>" + this._name + "</b> command.";
       previewBlock.innerHTML = content;
@@ -127,102 +151,92 @@ NLParser.EnVerb.prototype = {
     return { text:"", html:null, data:null, summary:"" };
   },
 
-  _newSentences: function( directObjSugg, modifierSuggs ) {
+  _newSentences: function( argumentSuggestions ) {
     /* Fill in missing arguments with defaults, or with nothing-suggestions if
      * no default is available.*/
-    if (this._DOType && !directObjSugg) {
-      if (this._DODefault) { // Argument value from verb argument default
-        directObjSugg = CmdUtils.makeSugg(this._DODefault);
-      } else if (this._DOType.default) {  //Argument value from nountype default
-        directObjSugg = this._DOType.default();
-      } else { // No argument
-        directObjSugg = this._makeNothingSugg();
-      }
-    }
-    for (let x in this._modifiers) {
-      if (!modifierSuggs[x]) {
-        if (this._modifierDefaults[x]) { // Argument value from verb argument default
-	  modifierSuggs[x] = CmdUtils.makeSugg(this._modifierDefaults[x]);
-	} else if (this._modifiers[x].default) { // Argument value from nountype default
-          modifierSuggs[x] = this._modifiers[x].default();
+    for (let x in this._arguments) {
+      if (!argumentSuggestions[x]) {
+        if (this._arguments[x].default) { // Argument value from verb argument default
+	  argumentSuggestions[x] = CmdUtils.makeSugg(this._arguments[x].default);
+	} else if (this._arguments[x].type.default) { // Argument value from nountype default
+          argumentSuggestions[x] = this._arguments[x].type.default();
 	} else { // No argument
-	  modifierSuggs[x] = this._makeNothingSugg();
+	  argumentSuggestions[x] = this._makeNothingSugg();
 	}
       }
     }
-    return [new NLParser.EnParsedSentence(this, directObjSugg, modifierSuggs)];
+    return [new NLParser.EnParsedSentence(this, argumentSuggestions)];
   },
 
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
-  recursiveParse: function(unusedWords, filledMods, unfilledMods, selObj) {
+  recursiveParse: function(unusedWords, filledArgs, unfilledArgs, selObj) {
     var x;
     var suggestions = [];
     var completions = [];
-    var newFilledMods = {};
-    var directObject = "";
+    var newFilledArgs = {};
     var newCompletions = [];
-    if ( dictKeys( unfilledMods ).length == 0 ) {
-      // Done with modifiers, try to parse direct object.
-      if ( unusedWords.length == 0 || this._DOType == null ) {
-	// No direct object, either because there are no words left,
-	// to use, or because the verb can't take a direct object.
-	// Try parsing sentence without them.
-	return this._newSentences("", filledMods );
-      } else {
-	// Transitive verb, can have direct object.  Try to use the
-	// remaining words in that slot.
-        // Make a sentence for each
-	// possible noun completion based on it; return them all.
-	suggestions = this._suggestForNoun( this._DOType,
-					    this._DOLabel,
-					    unusedWords,
-					    selObj);
-	for each ( let sugg in suggestions ) {
-	  if (sugg)
-	    completions = completions.concat( this._newSentences(sugg, filledMods ));
-	}
-	return completions;
-      }
+    // First, the termination conditions of the recursion:
+    if (unusedWords.length == 0) {
+      // We've used the whole sentence; no more words. Return what we have.
+      //dump("accept!\n");
+      return this._newSentences(filledArgs);
+    } else if ( dictKeys( unfilledArgs ).length == 0 ) {
+      // We've used up all arguments, so we can't continue parsing, but
+      // there are still unused words.  This was a bad parsing; don't use it.
+      //dump("Reject!\n");
+      return [];
     } else {
-      // "pop" a preposition off -- the LAST unfilled mod in the sentence:
-      var preposition = dictKeys( unfilledMods ).reverse()[0];
-      // newUnfilledMods is the same as unfilledMods without preposition
-      var newUnfilledMods = dictDeepCopy( unfilledMods );
-      delete newUnfilledMods[preposition];
+      // "pop" off the LAST unfilled argument in the sentence and try to fill it
+      var argName = dictKeys( unfilledArgs ).reverse()[0];
+      // newUnfilledArgs is the same as unfilledArgs without argName
+      var newUnfilledArgs = dictDeepCopy( unfilledArgs );
+      delete newUnfilledArgs[argName];
 
       // Look for a match for this preposition
-      var nounType = unfilledMods[ preposition ];
-      for ( x = 0; x < unusedWords.length - 1; x++ ) {
-	if ( preposition == unusedWords[x] ) {
+      var nounType = unfilledArgs[argName].type;
+      var nounLabel = unfilledArgs[argName].label;
+      var preposition = unfilledArgs[argName].flag;
+
+      for ( x = 0; x < unusedWords.length; x++ ) {
+	if ( preposition == null || preposition == unusedWords[x] ) {
 	  /* a match for the preposition is found at position x!
 	   (require exact matches for prepositions.)
 	   Anything following this preposition could be part of the noun.
            Check every possibility starting from "all remaining words" and
 	   working backwards down to "just the word after the preposition."
 	   */
-	  for (let lastWord = unusedWords.length - 1; lastWord > x; lastWord--) {
+	  let lastWordEnd = (preposition == null)? x : x +1;
+	  let lastWordStart = (preposition == null)? unusedWords.length : unusedWords.length -1;
+	  for (let lastWord = lastWordStart; lastWord >= lastWordEnd; lastWord--) {
 	    //copy the array, don't modify the original
             let newUnusedWords = unusedWords.slice();
-	    // take out the preposition
-	    newUnusedWords.splice(x, 1);
+	    if (preposition != null) {
+              // take out the preposition
+	      newUnusedWords.splice(x, 1);
+	    }
 	    // pull out words from preposition up to lastWord, as nounWords:
             let nounWords = newUnusedWords.splice( x, lastWord - x );
 
+	/*    dump("Looking for words to put in argument " + nounLabel + "\n" );
+            dump("Considering words from " + x + " to " + lastWord);
+            dump(" of newUnusedWords( " + newUnusedWords.join(" ") + ")\n");
+            dump("Looking at the " + nounWords.length + " words for direct obj: " + nounWords.join(" ") + "\n");*/
+
             // Add all suggestions the nounType can produce for the noun words:
             suggestions = this._suggestForNoun( nounType,
-		                                preposition,
+		                                nounLabel,
 					        nounWords,
   					        selObj);
 	    // Turn each suggestion into a sentence, after recursively
 	    // parsing the leftover words.
 	    for each( let sugg in suggestions ) {
 	      if (sugg) {
-                newFilledMods = dictDeepCopy( filledMods );
-                newFilledMods[ preposition ] = sugg;
+                newFilledArgs = dictDeepCopy( filledArgs );
+                newFilledArgs[ argName ] = sugg;
                 newCompletions = this.recursiveParse( newUnusedWords,
-		    				      newFilledMods,
-						      newUnfilledMods,
+		    				      newFilledArgs,
+						      newUnfilledArgs,
 						      selObj);
 	        // Add results to the ever-growing completion list...
 	        completions = completions.concat( newCompletions );
@@ -231,16 +245,6 @@ NLParser.EnVerb.prototype = {
 	  }
 	}
       }
-      // If no match was found, all we'll return is one sentence formed by
-      // leaving that preposition blank. But even if a match was found, we
-      // still want to include this sentence as an additional possibility.
-      newFilledMods = dictDeepCopy( filledMods );
-      newFilledMods[preposition] = this._makeNothingSugg;
-      newCompletions = this.recursiveParse( unusedWords,
-					    newFilledMods,
-					    newUnfilledMods,
-					    selObj);
-      completions = completions.concat( newCompletions );
       return completions;
     }
   },
@@ -278,7 +282,7 @@ NLParser.EnVerb.prototype = {
   },
 
   _suggestForNoun: function(nounType, nounLabel, words, selObj) {
-    var	suggestions = this.suggestWithPronounSub( nounType, words, selObj);
+    var suggestions = this.suggestWithPronounSub( nounType, words, selObj);
     try {
       let moreSuggestions = nounType.suggest(words.join(" "));
       suggestions = suggestions.concat(moreSuggestions);
@@ -288,6 +292,7 @@ NLParser.EnVerb.prototype = {
           '" with noun "' + nounLabel + '"'
           );
     }
+    //dump(" SuggestForNoun is returning " + suggestions.length + " suggs.\n");
     return suggestions;
   },
 
@@ -310,10 +315,10 @@ NLParser.EnVerb.prototype = {
       // make suggestions by using selection as arguments...
       completions = this.getCompletionsFromNounOnly(selObj.text, selObj.html);
       // also, try a completion with all empty arguments
-      completions = completions.concat(this._newSentences( null, {} ) );
+      completions = completions.concat(this._newSentences( {} ) );
     }
     else {
-      completions = this.recursiveParse( inputArguments, {}, this._modifiers, selObj );
+      completions = this.recursiveParse( inputArguments, {}, this._arguments, selObj );
     }
 
     for each( let comp in completions) {
@@ -329,37 +334,17 @@ NLParser.EnVerb.prototype = {
     if ((!text) && (!html))
       return [];
 
-    // Try selection as direct object...
-    if (this._DOType) {
+    // Try it as each argument...
+    for (let x in this._arguments) {
       try {
-        let suggs = this._DOType.suggest(text, html);
+        let suggs = this._arguments[x].type.suggest(text, html);
         for each (let sugg in suggs) {
           if (sugg) {
-	    let sentences = this._newSentences( sugg, {});
+            let argVals = {};
+            argVals[x] = sugg;
+	    let sentences = this._newSentences(argVals);
 	    for each( let sentence in sentences) {
-              sentence.matchScore = this._DOType.rankLast ? 0 : 1;
-              completions.push(sentence);
-	    }
-	  }
-        }
-      } catch(e) {
-        Components.utils.reportError(
-          'Exception occured while getting suggestions for "' + this._name +
-          '" with noun "' + this._DOLabel + '"'
-          );      }
-    }
-
-    // Try it as each modifier....
-    for (let x in this._modifiers) {
-      try {
-        let suggs = this._modifiers[x].suggest(text, html);
-        for each (let sugg in suggs) {
-          if (sugg) {
-            let mods = {};
-            mods[x] = sugg;
-	    let sentences = this._newSentences(null, mods);
-	    for each( let sentence in sentences) {
-              sentence.matchScore = this._modifiers[x].rankLast ? 0 : 1;
+              sentence.matchScore = this._arguments[x].type.rankLast ? 0 : 1;
               completions.push( sentence );
 	    }
           }

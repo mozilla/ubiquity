@@ -48,8 +48,8 @@ function testCmdManagerExecutesTwoCmds() {
 
   var fakeSource = new FakeCommandSource(
     {
-      cmd_one: {execute:function() {oneWasCalled = true;}},
-      cmd_two: {execute:function() {twoWasCalled = true;}}
+      cmd_one: {execute:function() {dump("one!!!\n");oneWasCalled = true;}},
+      cmd_two: {execute:function() {dump("two!!!\n");twoWasCalled = true;}}
     });
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
@@ -309,11 +309,14 @@ function testParseDirectOnly() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject );
+  dump("There are " + completions.length + " completions.\n");
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[0]._DO.text == "beagle", "obj should be beagle");
+  this.assert( completions[0]._argSuggs.direct_object.text == "beagle",
+	       "obj should be beagle");
   this.assert( completions[1]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[1]._DO.text == "bulldog", "obj should be bulldog");
+  this.assert( completions[1]._argSuggs.direct_object.text == "bulldog",
+	       "obj should be bulldog");
   completions[0].execute();
   this.assert( dogGotPetted == "beagle");
   completions[1].execute();
@@ -347,13 +350,17 @@ function testParseWithModifier() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject);
-  this.assert( completions.length == 2 );
+  dump("There are " + completions.length + " completions.\n");
+  for each( var x in completions)
+    dump( x.getDisplayText() + "\n");
+
+  this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
-  this.assert( completions[0]._DO.text == "poodle");
-  this.assert( completions[0]._modifiers["with"].text == "sponge");
+  this.assert( completions[0]._argSuggs.direct_object.text == "poodle");
+  this.assert( completions[0]._argSuggs.with.text == "sponge");
   this.assert( completions[1]._verb._name == "wash");
-  this.assert( completions[1]._DO.text == "poodle");
-  this.assert( completions[1]._modifiers["with"].text == "spork");
+  this.assert( completions[1]._argSuggs.direct_object.text == "poodle");
+  this.assert( completions[1]._argSuggs.with.text == "spork");
   completions[0].execute();
   this.assert( dogGotWashed == "poodle");
   this.assert( dogGotWashedWith == "sponge");
@@ -386,17 +393,17 @@ function testCmdManagerSuggestsForEmptyInput() {
   var cmdMan = new CommandManager(fakeSource, null, LANG);
   var getAC = makeDefaultCommandSuggester(cmdMan);
   var suggDict = getAC({textSelection:"tree"});
-  this.assert( suggDict["Cmd_one"] );
-  this.assert( !suggDict["Cmd_two"] );
+  this.assert( suggDict["Cmd_one"], "cmd one should be in" );
+  this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
   var execute = suggDict["Cmd_one"];
   execute();
-  this.assert( oneWasCalled == "tree" );
+  this.assert( oneWasCalled == "tree", "should have been calld with tree" );
   suggDict = getAC({textSelection:"mud"});
-  this.assert( !suggDict["Cmd_one"] );
-  this.assert( suggDict["Cmd_two"] );
+  this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
+  this.assert( suggDict["Cmd_two"], "cmd two should be in" );
   execute = suggDict["Cmd_two"];
   execute();
-  this.assert( twoWasCalled == "mud" );
+  this.assert( twoWasCalled == "mud", "should have been called with mud" );
 }
 
 function testVerbEatsSelection() {
@@ -419,6 +426,7 @@ function testVerbEatsSelection() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
   var completions = verb.getCompletions(["eat", "this"], selObject);
+  dump("There are " + completions.length + " completions.\n");
   this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
@@ -465,7 +473,8 @@ function testImplicitPronoun() {
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
   this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
-  this.assert((!completions[1]._DO.text), "second completion should have no DO.");
+  this.assert((!completions[1]._argSuggs.direct_object.text),
+	      "second completion should have no DO.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
@@ -484,8 +493,8 @@ function testImplicitPronoun() {
   this.assert((foodGotEaten == null), "DO should be null.");
   this.assert((foodGotEatenAt == "diner"), "Place should be diner.");
   // third completion should have all arguments blank.
-  this.assert((!completions[2]._DO.text), "second completion should have no DO.");
-  this.assert((!completions[2]._modifiers["at"].text), "and no at mod either." );
+  this.assert((!completions[2]._argSuggs.direct_object.text), "second completion should have no DO.");
+  this.assert((!completions[2]._argSuggs["at"].text), "and no at mod either." );
 
   foodGotEaten = null;
   foodGotEatenAt = null;
@@ -555,17 +564,17 @@ function testModifiersTakeMultipleWords() {
   var verb = new NLParser.EnVerb(cmd_find);
   var selObject = {text:null, html:null};
   var completions = verb.getCompletions(["find", "job", "in", "chicago"], selObject);
-  this.assert(completions[0]._DO.text == "job", "should be job.");
-  this.assert(completions[0]._modifiers["in"].text == "chicago", "should be chicago");
+  this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
+  this.assert(completions[0]._argSuggs["in"].text == "chicago", "should be chicago");
 
   completions = verb.getCompletions(["find", "significant", "other", "in", "chicago"],
 				    selObject);
-  this.assert(completions[0]._modifiers["in"].text == "chicago", "should be chicago");
-  this.assert(completions[0]._DO.text == "significant other", "should be SO.");
+  this.assert(completions[0]._argSuggs["in"].text == "chicago", "should be chicago");
+  this.assert(completions[0]._argSuggs.direct_object.text == "significant other", "should be SO.");
 
   completions = verb.getCompletions(["find", "job", "in", "new", "york"], selObject);
-  this.assert(completions[0]._DO.text == "job", "should be job.");
-  this.assert(completions[0]._modifiers["in"].text == "new york", "should be NY");
+  this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
+  this.assert(completions[0]._argSuggs["in"].text == "new york", "should be NY");
 }
 
 function testSuggestionMemory() {
@@ -678,18 +687,18 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
-  this.assert( suggs[0]._DO.text == "husky", "Argument should be husky.\n");
+  this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
   nlParser.updateSuggestionList( "play", fakeContext );
   var suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert( suggs[0]._DO.text == "basenji", "Argument should be basenji.\n");
+  this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
   nlParser.updateSuggestionList( "play retr", fakeContext );
   var suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert( suggs[0]._DO.text == "golden retreiver", "Argument should be g.retr.\n");
+  this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
 
 }
