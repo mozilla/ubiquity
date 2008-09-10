@@ -37,6 +37,84 @@
 
 const LANG = "en";
 
+function FakeAnnSvc() {
+  var ann = {};
+  var urls = {};
+
+  var self = this;
+
+  self.getPagesWithAnnotation = function(name) {
+    var results = [];
+    for (uri in ann)
+      if (typeof(ann[uri][name]) != 'undefined')
+        results.push(urls[uri]);
+    return results;
+  };
+
+  self.pageHasAnnotation = function(uri, name) {
+    if (ann[uri.spec] &&
+        typeof(ann[uri.spec][name]) != 'undefined')
+      return true;
+    return false;
+  };
+
+  self.getPageAnnotation = function(uri, name) {
+    if (!self.pageHasAnnotation(uri, name))
+      throw Error('No such annotation');
+  };
+
+  self.setPageAnnotation = function(uri, name, value, dummy,
+                                    expiration) {
+    if (!ann[uri.spec]) {
+      ann[uri.spec] = new Object();
+      urls[uri.spec] = uri;
+    }
+    ann[uri.spec][name] = value;
+  };
+
+  self.removePageAnnotation = function(uri, name) {
+    if (!self.pageHasAnnotation(uri, name))
+      throw Error('No such annotation');
+    delete ann[uri.spec][name];
+  };
+}
+
+function setupLrcsForTesting() {
+   LinkRelCodeSource.__install = function() {};
+
+   var annSvc = new FakeAnnSvc();
+
+   LinkRelCodeSource.__getAnnSvc = function() {
+     return annSvc;
+   };
+}
+
+function test_lrcs_works() {
+  setupLrcsForTesting();
+
+  var LRCS = LinkRelCodeSource;
+  var url = "http://www.foo.com";
+  var code = "function blah() {}";
+
+  this.assert(!LRCS.isMarkedPage(url));
+  LRCS.addMarkedPage({url: url,
+                      sourceCode: code,
+                      canUpdate: false});
+  this.assert(LRCS.isMarkedPage(url));
+
+  var results = LRCS.getMarkedPages();
+
+  this.assert(results.length == 1);
+
+  // TODO: Ensure the result is what we think it is.
+
+  // TODO: Make a LinkRelCodeSource object and ensure that it behaves
+  // how we think it should.
+
+  LRCS.removeMarkedPage(url);
+  this.assert(!LRCS.isMarkedPage(url));
+}
+
 function FakeCommandSource( cmdList ) {
   this._cmdList = cmdList;
   for ( var x in cmdList ) {
