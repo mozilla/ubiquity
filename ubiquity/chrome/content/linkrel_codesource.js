@@ -89,54 +89,57 @@ function LinkRelCodeSource() {
   LinkRelCodeSource.__singleton = this;
 }
 
+LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
+  let annSvc = this.__getAnnSvc();
+
+  // TODO: Get the real title of the page.
+  let pageInfo = {title: uri.spec,
+                  htmlUri: uri};
+
+  // See if there's any annotations for this page that tell us
+  // about the existence of a <link rel="commands"> tag
+  // that points to a JS file.
+  if (annSvc.pageHasAnnotation(uri, CMD_URL_ANNO)) {
+    var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
+    pageInfo.jsUri = Utils.url(val);
+  } else {
+    // There's no <link rel="commands"> tag;, so we'll assume this
+    // is a raw JS file.
+    pageInfo.jsUri = uri;
+  }
+
+  if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
+    pageInfo.canUpdate = annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
+  else
+    pageInfo.canUpdate = false;
+
+  pageInfo.getCode = function pageInfo_getCode() {
+    if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
+      return annSvc.getPageAnnotation(uri, CMD_SRC_ANNO);
+    else
+      return "";
+  };
+
+  pageInfo.setCode = function pageInfo_setCode(code) {
+    annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, code, 0,
+                             annSvc.EXPIRE_NEVER);
+  };
+
+  // The following is used by the herd command feed code.
+  if (this.__singleton)
+    if (pageInfo.jsUri.spec in this.__singleton._sources)
+      pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
+
+  return pageInfo;
+};
+
 LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
   let annSvc = this.__getAnnSvc();
   let confirmedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
   let markedPages = [];
 
-  for (let i = 0; i < confirmedPages.length; i++) {
-    let uri = confirmedPages[i];
-
-    // TODO: Get the real title of the page.
-    let pageInfo = {title: uri.spec,
-                    htmlUri: uri};
-
-    // See if there's any annotations for this page that tell us
-    // about the existence of a <link rel="commands"> tag
-    // that points to a JS file.
-    if (annSvc.pageHasAnnotation(uri, CMD_URL_ANNO)) {
-      var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
-      pageInfo.jsUri = Utils.url(val);
-    } else {
-      // There's no <link rel="commands"> tag;, so we'll assume this
-      // is a raw JS file.
-      pageInfo.jsUri = uri;
-    }
-
-    if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
-      pageInfo.canUpdate = annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
-    else
-      pageInfo.canUpdate = false;
-
-    pageInfo.getCode = function pageInfo_getCode() {
-      if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
-        return annSvc.getPageAnnotation(uri, CMD_SRC_ANNO);
-      else
-        return "";
-    };
-
-    pageInfo.setCode = function pageInfo_setCode(code) {
-      annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, code, 0,
-                               annSvc.EXPIRE_NEVER);
-    };
-
-    // The following is used by the herd command feed code.
-    if (this.__singleton)
-      if (pageInfo.jsUri.spec in this.__singleton._sources)
-        pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
-
-    markedPages.push(pageInfo);
-  }
+  for (let i = 0; i < confirmedPages.length; i++)
+    markedPages.push(LinkRelCodeSource.__makePage(confirmedPages[i]));
 
   return markedPages;
 };
