@@ -155,7 +155,7 @@ function getNounList() {
 
 function testCmdManagerExecutesTwoCmds() {
   var mockMsgService = {
-    displayMessage: function(msg) { dump(msg); }
+    displayMessage: function(msg) {}
   };
   var oneWasCalled = false;
   var twoWasCalled = false;
@@ -163,8 +163,8 @@ function testCmdManagerExecutesTwoCmds() {
 
   var fakeSource = new FakeCommandSource(
     {
-      cmd_one: {execute:function() {dump("one!!!\n");oneWasCalled = true;}},
-      cmd_two: {execute:function() {dump("two!!!\n");twoWasCalled = true;}}
+      cmd_one: {execute:function() {oneWasCalled = true;}},
+      cmd_two: {execute:function() {twoWasCalled = true;}}
     });
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
@@ -181,7 +181,7 @@ function testCmdManagerExecutesTwoCmds() {
 
 function testCmdManagerExecutesCmd() {
   var mockMsgService = {
-    displayMessage: function(msg) { dump(msg); }
+    displayMessage: function(msg) {}
   };
   var wasCalled = false;
 
@@ -424,7 +424,6 @@ function testParseDirectOnly() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject );
-  dump("There are " + completions.length + " completions.\n");
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb._name == "pet", "verb should be pet");
   this.assert( completions[0]._argSuggs.direct_object.text == "beagle",
@@ -465,9 +464,6 @@ function testParseWithModifier() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject);
-  dump("There are " + completions.length + " completions.\n");
-  for each( var x in completions)
-    dump( x.getDisplayText() + "\n");
 
   this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
@@ -541,7 +537,6 @@ function testVerbEatsSelection() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
   var completions = verb.getCompletions(["eat", "this"], selObject);
-  dump("There are " + completions.length + " completions.\n");
   this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
