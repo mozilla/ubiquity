@@ -89,7 +89,7 @@ function setupLrcsForTesting() {
    };
 }
 
-function test_lrcs_works() {
+function testLinkRelCodeSourceWorks() {
   setupLrcsForTesting();
 
   var LRCS = LinkRelCodeSource;
