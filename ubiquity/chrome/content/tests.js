@@ -61,6 +61,7 @@ function FakeAnnSvc() {
   self.getPageAnnotation = function(uri, name) {
     if (!self.pageHasAnnotation(uri, name))
       throw Error('No such annotation');
+    return ann[uri.spec][name];
   };
 
   self.setPageAnnotation = function(uri, name, value, dummy,
@@ -106,7 +107,19 @@ function testLinkRelCodeSourceWorks() {
 
   this.assert(results.length == 1);
 
-  // TODO: Ensure the result is what we think it is.
+  // Ensure the result is what we think it is.
+  var page = results[0];
+  this.assert(page.getCode() == code);
+
+  // Add another marked page and make sure things still make sense.
+  var moreCode = "function narg() {}";
+  LRCS.addMarkedPage({url: "http://www.bar.com",
+                      sourceCode: moreCode,
+                      canUpdate: false});
+  results = LRCS.getMarkedPages();
+
+  this.assert(results[0].getCode() == code);
+  this.assert(results[1].getCode() == moreCode);
 
   // TODO: Make a LinkRelCodeSource object and ensure that it behaves
   // how we think it should.
