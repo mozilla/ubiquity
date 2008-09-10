@@ -743,3 +743,5 @@ function testVerbUsesDefaultIfNoArgProvided() {
 
 // TODO a test where a command has three arguments, all arbText; make sure
 // the top parsing is the sensible one.
+
+// TODO a test for synonyms

@@ -128,7 +128,7 @@ CommandManager.prototype = {
     this.__nlParser.updateSuggestionList("", context);
     return this.__nlParser.getSuggestionList();
   },
-  
+
   copySuggestionToInput : function(context, previewBlock, textbox) {
     if(this.hasSuggestions()) {
       var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
@@ -219,7 +219,8 @@ CommandSource.prototype = {
         "contributors",
         "license",
         "description",
-        "help"
+        "help",
+	"synonyms"
       ];
 
       propsToCopy.forEach(function(prop) {

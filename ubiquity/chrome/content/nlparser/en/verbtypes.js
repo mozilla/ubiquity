@@ -139,6 +139,7 @@ NLParser.EnVerb.prototype = {
     this._preview = cmd.preview;
     this._name = cmd.name;
     this._icon = cmd.icon;
+    this._synonyms = cmd.synonyms;
     this._arguments = {};
 
     // New-style API: command defines arguments dictionary
@@ -424,15 +425,30 @@ NLParser.EnVerb.prototype = {
       // verb starts with the input! A good match.
       // The more letters of the verb that have been typed, the better the
       // match is. (Note this privileges short verbs over longer ones)
-      return 0.5 + 0.5* (inputWord.length / this._name.length);
-    } else if ( index > 0 ) {
+      return 0.75 + 0.25 * (inputWord.length / this._name.length);
+    }
+
+    if ( index > 0 ) {
       // The input matches the middle of the verb.  Not such a good match but
       // still a match.
-      return 0.5 * (inputWord.length / this._name.length);
-    } else {
-      // Not a match at all!
-      return 0.0;
+      return 0.5 + 0.25 * (inputWord.length / this._name.length);
     }
+
+    // Look for a match on synonyms:
+    if ( this._synonyms && this._synonyms.length > 0) {
+      for each( let syn in this._synonyms) {
+	index = syn.indexOf( inputWord );
+	if (index == 0) {
+	  return 0.25 + 0.25 * (inputWord.length / syn.length);
+	}
+	if (index > 0 ) {
+	  return 0.25 * (inputWord.length / syn.length);
+	}
+      }
+    }
+
+    // No match at all!
+    return 0.0;
 
     // TODO: disjoint matches, e.g. matching "atc" to "add-to-calendar"
   }
