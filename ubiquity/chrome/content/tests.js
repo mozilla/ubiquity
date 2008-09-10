@@ -37,6 +37,97 @@
 
 const LANG = "en";
 
+function FakeAnnSvc() {
+  var ann = {};
+  var urls = {};
+
+  var self = this;
+
+  self.getPagesWithAnnotation = function(name) {
+    var results = [];
+    for (uri in ann)
+      if (typeof(ann[uri][name]) != 'undefined')
+        results.push(urls[uri]);
+    return results;
+  };
+
+  self.pageHasAnnotation = function(uri, name) {
+    if (ann[uri.spec] &&
+        typeof(ann[uri.spec][name]) != 'undefined')
+      return true;
+    return false;
+  };
+
+  self.getPageAnnotation = function(uri, name) {
+    if (!self.pageHasAnnotation(uri, name))
+      throw Error('No such annotation');
+    return ann[uri.spec][name];
+  };
+
+  self.setPageAnnotation = function(uri, name, value, dummy,
+                                    expiration) {
+    if (!ann[uri.spec]) {
+      ann[uri.spec] = new Object();
+      urls[uri.spec] = uri;
+    }
+    ann[uri.spec][name] = value;
+  };
+
+  self.removePageAnnotation = function(uri, name) {
+    if (!self.pageHasAnnotation(uri, name))
+      throw Error('No such annotation');
+    delete ann[uri.spec][name];
+  };
+}
+
+function setupLrcsForTesting() {
+   LinkRelCodeSource.__install = function() {};
+
+   var annSvc = new FakeAnnSvc();
+
+   LinkRelCodeSource.__getAnnSvc = function() {
+     return annSvc;
+   };
+}
+
+function testLinkRelCodeSourceWorks() {
+  setupLrcsForTesting();
+
+  var LRCS = LinkRelCodeSource;
+  var url = "http://www.foo.com";
+  var code = "function blah() {}";
+
+  this.assert(!LRCS.isMarkedPage(url));
+  LRCS.addMarkedPage({url: url,
+                      sourceCode: code,
+                      canUpdate: false});
+  this.assert(LRCS.isMarkedPage(url));
+
+  var results = LRCS.getMarkedPages();
+
+  this.assert(results.length == 1);
+
+  // Ensure the result is what we think it is.
+  var page = results[0];
+  this.assert(page.getCode() == code);
+
+  // Add another marked page and make sure things still make sense.
+  var moreCode = "function narg() {}";
+  LRCS.addMarkedPage({url: "http://www.bar.com",
+                      sourceCode: moreCode,
+                      canUpdate: false});
+  results = LRCS.getMarkedPages();
+
+  this.assert(results[0].getCode() == code);
+  this.assert(results[1].getCode() == moreCode);
+
+  // TODO: Make a LinkRelCodeSource object and ensure that it behaves
+  // how we think it should.
+
+  LRCS.removeMarkedPage(url);
+  this.assert(!LRCS.isMarkedPage(url));
+}
+
 function FakeCommandSource( cmdList ) {
   this._cmdList = cmdList;
   for ( var x in cmdList ) {
@@ -77,7 +168,7 @@ function getNounList() {
 
 function testCmdManagerExecutesTwoCmds() {
   var mockMsgService = {
-    displayMessage: function(msg) { dump(msg); }
+    displayMessage: function(msg) {}
   };
   var oneWasCalled = false;
   var twoWasCalled = false;
@@ -85,8 +176,8 @@ function testCmdManagerExecutesTwoCmds() {
 
   var fakeSource = new FakeCommandSource(
     {
-      cmd_one: {execute:function() {dump("one!!!\n");oneWasCalled = true;}},
-      cmd_two: {execute:function() {dump("two!!!\n");twoWasCalled = true;}}
+      cmd_one: {execute:function() {oneWasCalled = true;}},
+      cmd_two: {execute:function() {twoWasCalled = true;}}
     });
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
@@ -103,7 +194,7 @@ function testCmdManagerExecutesTwoCmds() {
 
 function testCmdManagerExecutesCmd() {
   var mockMsgService = {
-    displayMessage: function(msg) { dump(msg); }
+    displayMessage: function(msg) {}
   };
   var wasCalled = false;
 
@@ -346,7 +437,6 @@ function testParseDirectOnly() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject );
-  dump("There are " + completions.length + " completions.\n");
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb._name == "pet", "verb should be pet");
   this.assert( completions[0]._argSuggs.direct_object.text == "beagle",
@@ -387,9 +477,6 @@ function testParseWithModifier() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject);
-  dump("There are " + completions.length + " completions.\n");
-  for each( var x in completions)
-    dump( x.getDisplayText() + "\n");
 
   this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
@@ -463,7 +550,6 @@ function testVerbEatsSelection() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
   var completions = verb.getCompletions(["eat", "this"], selObject);
-  dump("There are " + completions.length + " completions.\n");
   this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
