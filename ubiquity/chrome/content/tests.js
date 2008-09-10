@@ -744,4 +744,26 @@ function testVerbUsesDefaultIfNoArgProvided() {
 // TODO a test where a command has three arguments, all arbText; make sure
 // the top parsing is the sensible one.
 
-// TODO a test for synonyms
+function testSynonyms() {
+  var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
+		  {name: "frobnitz"},
+		  {name: "frobnicate"}];
+  var nlParser = new NLParser.EnParser( verbList, [] );
+  var fakeContext = {textSelection:"", htmlSelection:""};
+  nlParser.updateSuggestionList( "frob", fakeContext );
+  var suggs = nlParser.getSuggestionList();
+  this.assert( suggs.length == 3, "Should be 3 suggs.");
+  this.assert( suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
+  this.assert( suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
+  this.assert( suggs[2]._verb._name == "twiddle", "twiddle should be third");
+
+  nlParser.updateSuggestionList( "twid", fakeContext );
+  suggs = nlParser.getSuggestionList();
+  this.assert( suggs.length == 1, "Should be 1 sugg.");
+  this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
+
+  nlParser.updateSuggestionList( "twirl", fakeContext );
+  suggs = nlParser.getSuggestionList();
+  this.assert( suggs.length == 1, "Should be 1 sugg.");
+  this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
+}

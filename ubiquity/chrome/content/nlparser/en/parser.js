@@ -127,8 +127,9 @@ NLParser.EnParser.prototype = {
       }
     } else {
       var words = query.split( " " );
-      /* If input is "dostuff " (note space) then splitting on space will produce
-       * ["dostuff", ""].  We don't want the empty string, so drop all zero-length strings: */
+      /* If input is "dostuff " (note space) then splitting on space will
+       *  produce ["dostuff", ""].  We don't want the empty string, so drop
+       *  all zero-length strings: */
       let word;
       words = [ word for each(word in words) if (word.length > 0)];
       // verb-first matches
