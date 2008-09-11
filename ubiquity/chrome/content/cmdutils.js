@@ -313,6 +313,32 @@ CmdUtils.getGeoLocation = function getGeoLocation( ){
   return globals.geoLocation;
 };
 
+CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/prefcommands.js
+  COMMANDS_PREF : "extensions.ubiquity.commands",
+
+  setCode : function(code) {
+    Application.prefs.setValue(
+      this.COMMANDS_PREF,
+      code
+    );
+  },
+
+  getCode : function() {
+    return Application.prefs.getValue(
+      this.COMMANDS_PREF,
+      ""
+    );
+  },
+
+  appendCode : function(code){
+    this.setCode(this.getCode() + code);
+  },
+  
+  prependCode : function(code){
+    this.setCode(code + this.getCode());
+  }
+};
+
 // -----------------------------------------------------------------
 // SNAPSHOT RELATED
 // -----------------------------------------------------------------
