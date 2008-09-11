@@ -36,17 +36,48 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function makeRemover(element, uri) {
+function makeRemover(element, info) {
+  function onSlideDown() {
+    var newElement = makeFeedListElement(info,
+                                         "resubscribe",
+                                         makeUnremover);
+    $(newElement).hide();
+    $("#command-feed-graveyard").append(newElement);
+    $(newElement).fadeIn();
+  }
   function onHidden() {
     $(element).remove();
     if (!$("#command-feeds").text())
-      $("#commands-feeds-div").slideUp();
+      $("#command-feeds-div").slideUp();
+    $("#command-feed-graveyard-div").slideDown("normal", onSlideDown);
   }
   function remove() {
-    LinkRelCodeSource.removeMarkedPage(uri);
+    info.remove();
     $(element).slideUp(onHidden);
   }
   return remove;
+}
+
+function makeUnremover(element, info) {
+  function onSlideDown() {
+    var newElement = makeFeedListElement(info,
+                                         "unsubscribe",
+                                         makeRemover);
+    $(newElement).hide();
+    $("#command-feeds").append(newElement);
+    $(newElement).fadeIn();
+  }
+  function onHidden() {
+    $(element).remove();
+    if (!$("#command-feed-graveyard").text())
+      $("#command-feed-graveyard-div").slideUp();
+    $("#command-feeds-div").slideDown("normal", onSlideDown);
+  }
+  function unremove() {
+    info.unremove();
+    $(element).slideUp(onHidden);
+  }
+  return unremove;
 }
 
 function showBugRelatedAlerts() {
@@ -64,51 +95,64 @@ function showBugRelatedAlerts() {
     $("#sanitizeOnShutdown-alert").slideDown();
 }
 
+function makeFeedListElement(info, label, clickMaker) {
+  var li = document.createElement("li");
+
+  function addLink(text, url, className) {
+    var linkToHtml = document.createElement("a");
+    $(linkToHtml).text(text);
+    if (className)
+      $(linkToHtml).addClass(className);
+    linkToHtml.href = url;
+    $(li).append(linkToHtml);
+  }
+
+  addLink(info.title, info.htmlUri.spec);
+
+  $(li).append("<br/>");
+
+  var linkToAction = document.createElement("span");
+  $(linkToAction).text("[" + label + "]");
+  $(linkToAction).click(clickMaker(li, info));
+  $(linkToAction).css({cursor: "pointer", color: "#aaa"});
+  $(li).append(linkToAction);
+
+  var sourceUrl;
+  var sourceName;
+
+  if (info.canUpdate) {
+    sourceUrl = info.jsUri.spec;
+    sourceName = "auto-updated source";
+  } else {
+    sourceUrl = "data:application/x-javascript," + escape(info.getCode());
+    sourceName = "source";
+  }
+
+  $(li).append(" ");
+  addLink("[view " + sourceName + "]", sourceUrl, "feed-action");
+
+  return li;
+}
+
 function onReady() {
   PrefKeys.onLoad();
   showBugRelatedAlerts();
+
   let markedPages = LinkRelCodeSource.getMarkedPages();
-  for (let i = 0; i < markedPages.length; i++) {
-    let info = markedPages[i];
-    var li = document.createElement("li");
-
-    function addLink(text, url, className) {
-      var linkToHtml = document.createElement("a");
-      $(linkToHtml).text(text);
-      if (className)
-        $(linkToHtml).addClass(className);
-      linkToHtml.href = url;
-      $(li).append(linkToHtml);
-    }
-
-    addLink(info.title, info.htmlUri.spec);
-
-    $(li).append("<br/>");
-
-    var linkToUnsubscribe = document.createElement("span");
-    $(linkToUnsubscribe).text("[unsubscribe]");
-    $(linkToUnsubscribe).click(makeRemover(li, info.htmlUri));
-    $(linkToUnsubscribe).css({cursor: "pointer", color: "#aaa"});
-    $(li).append(linkToUnsubscribe);
-
-    var sourceUrl;
-    var sourceName;
-
-    if (info.canUpdate) {
-      sourceUrl = info.jsUri.spec;
-      sourceName = "auto-updated source";
-    } else {
-      sourceUrl = "data:application/x-javascript," + escape(info.getCode());
-      sourceName = "source";
-    }
-
-    $(li).append(" ");
-    addLink("[view " + sourceName + "]", sourceUrl, "feed-action");
-
-    $("#command-feeds").append(li);
-  }
+  for (let i = 0; i < markedPages.length; i++)
+    $("#command-feeds").append(makeFeedListElement(markedPages[i],
+                                                   "unsubscribe",
+                                                   makeRemover));
   if (!$("#command-feeds").text())
-    $("#commands-feeds-div").hide();
+    $("#command-feeds-div").hide();
+
+  let removedPages = LinkRelCodeSource.getRemovedPages();
+  for (i = 0; i < removedPages.length; i++)
+    $("#command-feed-graveyard").append(makeFeedListElement(removedPages[i],
+                                                            "resubscribe",
+                                                            makeUnremover));
+  if (!$("#command-feed-graveyard").text())
+    $("#command-feed-graveyard-div").hide();
 
   jQuery.get( "http://hg.toolness.com/ubiquity-firefox/rss-log", loadNews);
 }
