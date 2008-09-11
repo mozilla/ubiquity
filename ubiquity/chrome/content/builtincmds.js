@@ -2477,14 +2477,7 @@ CmdUtils.CreateCommand({
     //4. Append the code to Ubiqity's code
     CmdUtils.UserCode.appendCode(code);
     
-    //5. Refresh any code editor tabs that might be open:
-    Application.activeWindow.tabs.forEach(function (tab){
-      if(tab.document.location == "chrome://ubiquity/content/editor.html"){
-        tab.document.location.reload(true);
-      }
-    });
-    
-    //6. Tell the user we finished
+    //5. Tell the user we finished
     displayMessage("You have created the command: " + name +
                    ".  You can edit its source-code with the command-editor command.");
   }

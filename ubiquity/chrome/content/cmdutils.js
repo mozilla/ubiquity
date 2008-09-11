@@ -321,6 +321,12 @@ CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/pre
       this.COMMANDS_PREF,
       code
     );
+    //Refresh any code editor tabs that might be open
+    Application.activeWindow.tabs.forEach(function (tab){
+      if(tab.document.location == "chrome://ubiquity/content/editor.html"){
+        tab.document.location.reload(true);
+      }
+    });
   },
 
   getCode : function() {
