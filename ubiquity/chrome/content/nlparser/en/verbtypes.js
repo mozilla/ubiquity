@@ -52,11 +52,11 @@ function dictKeys( dict ) {
 }
 
 
-NLParser.EnParsedSentence = function( verb, DO, modifiers ) {
+NLParser.EnParsedSentence = function( verb, arguments ) {
   /* DO and the values of modifiers should be NLParser.EnInputData
    * objects.
    */
-  this._init( verb, DO, modifiers );
+  this._init( verb, arguments );
 }
 NLParser.EnParsedSentence.prototype = {
   _init: function( verb, argumentSuggestions) {
@@ -67,6 +67,24 @@ NLParser.EnParsedSentence.prototype = {
     }
     this.matchScore = 0;
     this.frequencyScore = 0;
+  },
+
+  setArgumentSuggestion: function( arg, sugg ) {
+    this._argSuggs[arg] = sugg;
+  },
+
+  argumentIsFilled: function( arg ) {
+    return ( this._argSuggs[arg] != undefined );
+  },
+
+  equals: function(other) {
+    if (this._verb._name != other._verb._name)
+      return false;
+    for (var x in this._argSuggs) {
+      if (this._argSuggs[x].text != other._argSuggs[x].text)
+	return false;
+    }
+    return true;
   },
 
   getCompletionText: function() {
@@ -121,8 +139,99 @@ NLParser.EnParsedSentence.prototype = {
 
   preview: function(context, previewBlock) {
     this._verb.preview( context, this._argSuggs, previewBlock );
+  },
+
+  copy: function() {
+    // Deep copy!
+    let newArgSuggs = {};
+    for (let x in this._argSuggs) {
+      newArgSuggs[x] = {};
+      for (let y in this._argSuggs[x])
+	newArgSuggs[x][y] = this._argSuggs[x][y];
+    }
+    let newSentence = new NLParser.EnParsedSentence(this._verb,
+						    newArgSuggs);
+    return newSentence;
   }
 };
+
+NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj) {
+  /*This is a partially parsed sentence.
+   * What that means is that we've decided what the verb is,
+   * and we've assigned all the words of the input to one of the arguments.
+   * What we haven't nailed down yet is the exact value to use for each
+   * argument, because the nountype may produce multiple argument suggestions
+   * from a single argument string.  So one of these partially parsed
+   * sentences can produce several completely-parsed sentences, in which
+   * final values for all arguments are specified.
+   */
+  this._init( verb, argStrings, selObj );
+}
+NLParser.EnPartiallyParsedSentence.prototype = {
+  _init: function( verb, argStrings, selObj ) {
+    this._verb = verb;
+    this._argStrings = argStrings;
+    this._selObj = selObj;
+    this._parsedSentences = [];
+
+    for (let argName in this._verb._arguments) {
+      let nounType = this._verb._arguments[argName].type;
+      let string = argStrings[argName];
+      let argSuggs = this._verb._suggestForNoun(nounType,
+						argName,
+						string.split(" "),
+						selObj);
+      for each( let argSugg in argSuggs ) {
+        this.addArgumentSuggestion( argName, argSugg );
+
+	//dump("Now the completions are: \n");
+        //for each (var p in this._parsedSentences)
+          //dump( p.getDisplayText() + "\n" );
+      }
+    }
+  },
+
+  addArgumentSuggestion: function( arg, sugg ) {
+    //dump(" Adding suggestion: " + sugg.text + " for: " + arg + "\n");
+    /* TODO: this function can eventually be used as a callback by
+     * asynchronously suggestion-generating nouns.
+     */
+    let newSentences = [];
+    let newSen;
+
+    if ( this._parsedSentences.length == 0) {
+      newSen = new NLParser.EnParsedSentence(this._verb, {});
+      this._parsedSentences = [newSen];
+    }
+
+    for each( let sen in this._parsedSentences) {
+      if ( ! sen.argumentIsFilled( arg ) ) {
+	//dump("Changing one.\n");
+        sen.setArgumentSuggestion( arg, sugg);
+      } else {
+        //dump("Copying one.\n");
+        let newSen = sen.copy();
+        newSen.setArgumentSuggestion(arg, sugg);
+	let duplicateSuggestion = false;
+	for each( let alreadyNewSen in newSentences ) {
+	  if (alreadyNewSen.equals(newSen))
+	    duplicateSuggestion = true;
+	}
+	if (!duplicateSuggestion)
+          newSentences.push( newSen );
+      }
+    }
+    //dump("len of newSentences is " + newSentences.length + "\n");
+    //dump("len of parsedSentences is " + this._parsedSentences.length + "\n");
+    this._parsedSentences = this._parsedSentences.concat(newSentences);
+    //dump("new len of parsedSentences is " + this._parsedSentences.length + "\n");
+  },
+
+  getParsedSentences: function() {
+    return this._parsedSentences;
+  }
+};
+
 
 NLParser.EnVerb = function( cmd ) {
   if (cmd)

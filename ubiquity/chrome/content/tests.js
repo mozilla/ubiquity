@@ -854,3 +854,60 @@ function testSynonyms() {
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 }
+
+// TODO test of verb initialized with new style arguments dict
+
+function testPartiallyParsedSentence() {
+  var noun_type_foo = {
+    _name: "foo",
+    suggest: function( text, html ) {
+      return [ CmdUtils.makeSugg("foo_a"), CmdUtils.makeSugg("foo_b") ];
+    }
+  };
+  var noun_type_bar = {
+    _name: "bar",
+    suggest: function( text, html ) {
+      return [ CmdUtils.makeSugg("bar_a"), CmdUtils.makeSugg("bar_b") ];
+    }
+  };
+
+  var verb = new NLParser.EnVerb({
+				   name: "frobnitz",
+				   arguments: {
+				     fooArg: {
+				       type: noun_type_foo,
+				       label: "the foo",
+				       flag: "from"
+				     },
+				     barArg: {
+				       type: noun_type_bar,
+				       label: "the bar",
+				       flag: "by"
+				     },
+				   }
+				 });
+
+  var argStrings = {fooArg: "nonihilf",
+		    barArg: "rocinante"};
+
+  var selObj = {
+    text: "", html: ""
+  };
+  var partiallyParsed = new NLParser.EnPartiallyParsedSentence(
+    verb,
+    argStrings,
+    selObj
+    );
+
+  var parsed  = partiallyParsed.getParsedSentences();
+
+  this.assert( parsed.length == 4, "Should be four parsings.\n");
+
+  partiallyParsed.addArgumentSuggestion( "barArg",
+					 CmdUtils.makeSugg("bar_c"));
+  parsed  = partiallyParsed.getParsedSentences();
+  /*dump("Now the completions are: \n");
+  for each (var p in parsed)
+    dump( p.getDisplayText() + "\n" );*/
+  this.assert( parsed.length == 6, "Should be six (not eight) parsings.\n");
+}
