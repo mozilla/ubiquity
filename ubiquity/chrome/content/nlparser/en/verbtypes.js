@@ -69,24 +69,6 @@ NLParser.EnParsedSentence.prototype = {
     this.frequencyScore = 0;
   },
 
-  setArgumentSuggestion: function( arg, sugg ) {
-    this._argSuggs[arg] = sugg;
-  },
-
-  argumentIsFilled: function( arg ) {
-    return ( this._argSuggs[arg] != undefined );
-  },
-
-  equals: function(other) {
-    if (this._verb._name != other._verb._name)
-      return false;
-    for (var x in this._argSuggs) {
-      if (this._argSuggs[x].text != other._argSuggs[x].text)
-	return false;
-    }
-    return true;
-  },
-
   getCompletionText: function() {
     /* return plain text that we should set the input box to if user hits
      autocompletes to this sentence.  Currently unused! */
@@ -152,7 +134,44 @@ NLParser.EnParsedSentence.prototype = {
     let newSentence = new NLParser.EnParsedSentence(this._verb,
 						    newArgSuggs);
     return newSentence;
+  },
+  setArgumentSuggestion: function( arg, sugg ) {
+    this._argSuggs[arg] = sugg;
+  },
+
+  argumentIsFilled: function( arg ) {
+    return ( this._argSuggs[arg] != undefined );
+  },
+
+  equals: function(other) {
+    if (this._verb._name != other._verb._name)
+      return false;
+    for (var x in this._argSuggs) {
+      if (this._argSuggs[x].text != other._argSuggs[x].text)
+	return false;
+    }
+    return true;
+  },
+
+  fillMissingArgsWithDefaults: function() {
+    let newSentence = this.copy();
+    let defaultValue;
+    for (let x in this._verb._arguments) {
+      if (!this._argSuggs[x]) {
+	let missingArg = this._verb._arguments[x];
+        if (missingArg.default) {
+	  defaultValue = CmdUtils.makeSugg(missingArg.default);
+	} else if (missingArg.type.default) { // Argument value from nountype default
+          defaultValue = missingArg.type.default();
+	} else { // No argument
+	  defaultValue = {text:"", html:"", data:null, summary:""};
+	}
+	newSentence.setArgumentSuggestion(missingArg, defaultValue);
+      }
+    }
+    return newSentence;
   }
+
 };
 
 NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj) {
@@ -228,7 +247,16 @@ NLParser.EnPartiallyParsedSentence.prototype = {
   },
 
   getParsedSentences: function() {
-    return this._parsedSentences;
+    /* For any parsed sentence that is missing any arguments, fill in those
+     arguments with the defaults before returning the list of sentences.
+     The reason we don't set the defaults directly on the object is cuz
+     an asynchronous call of addArgumentSuggestion could actually fill in
+     the missing argument after this.*/
+    let parsedSentences = [];
+    for each( let sen in this._parsedSentences) {
+      parsedSentences.push(sen.fillMissingArgsWithDefaults());
+    }
+    return parsedSentences;
   }
 };
 
