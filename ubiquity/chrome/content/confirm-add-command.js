@@ -53,7 +53,7 @@ function showConfirmation() {
   $("#errorPageContainer").css("background-color", "white");
   $("#errorPageContainer h1,h2,p,a,div").css("background-color",
                                              "transparent");
-                                             
+
   $("#errorTitle").html("<h1>Subscription Successful</h1>");
 
   $("#errorShortDesc").html($("#confirmationShortDesc").html());
@@ -76,12 +76,13 @@ function onCancel() {
   window.close();
 }
 
-function fetchSource(uri) {
-  function onSuccess(data) {
+function displayCode(data) {
     $("#sourceCode").css({whiteSpace: "pre-wrap",
                           fontFamily: "Monospace"});
     $("#sourceCode").text(data);
-  }
+}
+
+function fetchSource(uri, onSuccess) {
   if (LocalUriCodeSource.isValidUri(uri)) {
     $("#autoupdate-widget").hide();
     var codeSource = new LocalUriCodeSource(uri);
@@ -94,12 +95,18 @@ function fetchSource(uri) {
 }
 
 function onReady() {
-  if (LinkRelCodeSource.isMarkedPage(gCommandFeedInfo.url))
-    showConfirmation();
+  if (LinkRelCodeSource.isMarkedPage(gCommandFeedInfo.url)) {
+    if (gCommandFeedInfo.updateCode)
+      // TODO: Also check to see if updateCode is different from
+      // the current code.
+      displayCode(gCommandFeedInfo.updateCode);
+    else
+      showConfirmation();
+  } else
+    fetchSource(gCommandFeedInfo.sourceUrl, displayCode);
 
   $("#targetLink").text(gCommandFeedInfo.url);
   $("#targetLink").attr("href", gCommandFeedInfo.url);
-  fetchSource(gCommandFeedInfo.sourceUrl);
 
   function onAutoupdateClicked() {
     if ($("#autoupdate").attr("checked"))

@@ -201,3 +201,8 @@ a:hover {
   color: #aaaaaa;
   text-decoration: none;
 }
+
+.feed-updated {
+  font-size: 8pt;
+  color: #009900;
+}
