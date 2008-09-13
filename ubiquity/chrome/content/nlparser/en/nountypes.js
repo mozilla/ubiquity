@@ -433,6 +433,8 @@ var noun_type_url = {
   _name : "url",
   suggest: function(fragment) {
     var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    // alternately: /[A-Za-z0-9_.-]+:\/\/([A-Za-z0-9_.-])/
+
     // Magic words "page" or "url" result in the URL of the current page
     if (fragment == "page" || fragment == "url") {
       var url = Application.activeWindow.activeTab.document.URL;
