@@ -55,7 +55,7 @@
           src="chrome://ubiquity/content/browser.js"/>
   <popupset id="mainPopupSet">
     <panel id="transparent-msg-panel" class="msgPanel" hidden="true">
-      <div id="panel" xmlns="http://www.w3.org/1999/xhtml"
+      <div id="cmd-panel" xmlns="http://www.w3.org/1999/xhtml"
                       xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
         <div id="cmd-entry-container">
           <input id="cmd-entry"/>
