@@ -39,6 +39,7 @@
 const CMD_SRC_ANNO = "ubiquity/source";
 const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
+const CMD_REMOVED_ANNO = "ubiquity/removed";
 const CMD_URL_ANNO = "ubiquity/commands";
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
@@ -96,6 +97,22 @@ LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
   let pageInfo = {title: uri.spec,
                   htmlUri: uri};
 
+  pageInfo.remove = function pageInfo_remove() {
+    if (annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO)) {
+      annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
+      annSvc.setPageAnnotation(uri, CMD_REMOVED_ANNO, "true", 0,
+                               annSvc.EXPIRE_NEVER);
+    }
+  };
+
+  pageInfo.unremove = function pageInfo_undelete() {
+    if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO)) {
+      annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
+      annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
+                               annSvc.EXPIRE_NEVER);
+    }
+  };
+
   // See if there's any annotations for this page that tell us
   // about the existence of a <link rel="commands"> tag
   // that points to a JS file.
@@ -133,6 +150,17 @@ LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
   return pageInfo;
 };
 
+LinkRelCodeSource.getRemovedPages = function LRCS_getRemovedPages() {
+  let annSvc = this.__getAnnSvc();
+  let removedUris = annSvc.getPagesWithAnnotation(CMD_REMOVED_ANNO, {});
+  let removedPages = [];
+
+  for (let i = 0; i < removedUris.length; i++)
+    removedPages.push(LinkRelCodeSource.__makePage(removedUris[i]));
+
+  return removedPages;
+};
+
 LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
   let annSvc = this.__getAnnSvc();
   let confirmedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
@@ -147,6 +175,9 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
 LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
   let annSvc = this.__getAnnSvc();
   let uri = Utils.url(info.url);
+  
+  if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO))
+      annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
   annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, info.sourceCode, 0,
                            annSvc.EXPIRE_NEVER);
   annSvc.setPageAnnotation(uri, CMD_AUTOUPDATE_ANNO, info.canUpdate, 0,
@@ -159,16 +190,6 @@ LinkRelCodeSource.isMarkedPage = function LRCS_isMarkedPage(uri) {
   let annSvc = this.__getAnnSvc();
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO);
-};
-
-LinkRelCodeSource.removeMarkedPage = function LRCS_removeMarkedPage(uri) {
-  let annSvc = this.__getAnnSvc();
-  uri = Utils.url(uri);
-  annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
-  if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
-    annSvc.removePageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
-  if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
-    annSvc.removePageAnnotation(uri, CMD_SRC_ANNO);
 };
 
 LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {

@@ -124,7 +124,8 @@ function testLinkRelCodeSourceWorks() {
   // TODO: Make a LinkRelCodeSource object and ensure that it behaves
   // how we think it should.
 
-  LRCS.removeMarkedPage(url);
+  results[0].remove();
+
   this.assert(!LRCS.isMarkedPage(url));
 }
 

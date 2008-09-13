@@ -313,6 +313,38 @@ CmdUtils.getGeoLocation = function getGeoLocation( ){
   return globals.geoLocation;
 };
 
+CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/prefcommands.js
+  COMMANDS_PREF : "extensions.ubiquity.commands",
+
+  setCode : function(code) {
+    Application.prefs.setValue(
+      this.COMMANDS_PREF,
+      code
+    );
+    //Refresh any code editor tabs that might be open
+    Application.activeWindow.tabs.forEach(function (tab){
+      if(tab.document.location == "chrome://ubiquity/content/editor.html"){
+        tab.document.location.reload(true);
+      }
+    });
+  },
+
+  getCode : function() {
+    return Application.prefs.getValue(
+      this.COMMANDS_PREF,
+      ""
+    );
+  },
+
+  appendCode : function(code){
+    this.setCode(this.getCode() + code);
+  },
+  
+  prependCode : function(code){
+    this.setCode(code + this.getCode());
+  }
+};
+
 // -----------------------------------------------------------------
 // SNAPSHOT RELATED
 // -----------------------------------------------------------------

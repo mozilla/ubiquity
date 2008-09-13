@@ -26,7 +26,8 @@
   <ul id="nav">
     <li><a href="about:ubiquity">Home</a></li>
     <li><a href="chrome://ubiquity/content/cmdlist.html">Your Commands</a></li>
-    <li><a href="chrome://ubiquity/content/skinlist.html">Your Skins</a></li>
+    <li><a href="chrome://ubiquity/content/editor.html">Command Editor</a></li>
+    <!-- <li><a href="chrome://ubiquity/content/skinlist.html">Your Skins</a></li> -->
     <li><a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_User_Tutorial">Tutorial</a></li>
     <li><a href="https://labs.toolness.com/ubiquity-herd/">Find New Commands</a></li>
   </ul>  
@@ -89,7 +90,16 @@ extension.
   and other aspects of Ubiquity without having to restart Firefox.</p>
   
   <p>Run the <a href="test.html">unit tests</a>.</p>
-  
+
+  <div id="command-feed-graveyard-div">
+    <h2>Feed Graveyard</h2>
+    <p>
+      <p id="command-feed-graveyard-header">You've recently unsubscribed to these command
+      feeds:</p>
+      <ul id="command-feed-graveyard"></ul>
+    </p>
+  </div>
+
 </div>
 
 
@@ -111,7 +121,7 @@ extension.
 
   <p><iframe width="410" height="310" frameborder="0" scrolling="no" src="http://www.vimeo.com/moogaloop.swf?clip_id=1561578&amp;server=www.vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=cc6600&amp;fullscreen=1"></iframe></p>
   
-  <div id="commands-feeds-div">
+  <div id="command-feeds-div">
     <h2>Subscribed Feeds</h2>
     <p>
       <p id="command-feeds-header">You're currently subscribed to these command
@@ -119,7 +129,7 @@ extension.
       <ul id="command-feeds"></ul>
     </p>
   </div>
-  
+
   <h2>News</h2>
   <div id="news"></div>
 
