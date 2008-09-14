@@ -138,6 +138,9 @@ NLParser.EnParsedSentence.prototype = {
   setArgumentSuggestion: function( arg, sugg ) {
     this._argSuggs[arg] = sugg;
   },
+  getArgText: function( arg ) {
+    return this._argSuggs[arg].text;
+  },
 
   argumentIsFilled: function( arg ) {
     return ( this._argSuggs[arg] != undefined );
@@ -156,9 +159,9 @@ NLParser.EnParsedSentence.prototype = {
   fillMissingArgsWithDefaults: function() {
     let newSentence = this.copy();
     let defaultValue;
-    for (let x in this._verb._arguments) {
-      if (!this._argSuggs[x]) {
-	let missingArg = this._verb._arguments[x];
+    for (let argName in this._verb._arguments) {
+      if (!this._argSuggs[argName]) {
+	let missingArg = this._verb._arguments[argName];
         if (missingArg.default) {
 	  defaultValue = CmdUtils.makeSugg(missingArg.default);
 	} else if (missingArg.type.default) { // Argument value from nountype default
@@ -166,7 +169,7 @@ NLParser.EnParsedSentence.prototype = {
 	} else { // No argument
 	  defaultValue = {text:"", html:"", data:null, summary:""};
 	}
-	newSentence.setArgumentSuggestion(missingArg, defaultValue);
+	newSentence.setArgumentSuggestion(argName, defaultValue);
       }
     }
     return newSentence;
@@ -195,10 +198,10 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
     for (let argName in this._verb._arguments) {
       let nounType = this._verb._arguments[argName].type;
-      let string = argStrings[argName];
+      let argWords = argStrings[argName]? argStrings[argName].split(" ") : [];
       let argSuggs = this._verb._suggestForNoun(nounType,
 						argName,
-						string.split(" "),
+						argWords,
 						selObj);
       for each( let argSugg in argSuggs ) {
         this.addArgumentSuggestion( argName, argSugg );
@@ -257,6 +260,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
       parsedSentences.push(sen.fillMissingArgsWithDefaults());
     }
     return parsedSentences;
+    // TODO sort these before returning them
   }
 };
 

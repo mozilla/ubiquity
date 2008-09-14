@@ -870,6 +870,12 @@ function testPartiallyParsedSentence() {
       return [ CmdUtils.makeSugg("bar_a"), CmdUtils.makeSugg("bar_b") ];
     }
   };
+  var noun_type_baz = {
+    _name: "baz",
+    suggest: function( text, html ) {
+      return [];
+    }
+  };
 
   var verb = new NLParser.EnVerb({
 				   name: "frobnitz",
@@ -884,11 +890,21 @@ function testPartiallyParsedSentence() {
 				       label: "the bar",
 				       flag: "by"
 				     },
+				     bazArg: {
+				       type: noun_type_baz,
+				       label: "the baz",
+				       flag: "before",
+				       default: "super pants"
+				     }
 				   }
 				 });
 
+  // Interesting -- code throws an error if bazArg is not provided in
+  //
   var argStrings = {fooArg: "nonihilf",
-		    barArg: "rocinante"};
+		    barArg: "rocinante" };
+  // bazArg purposefully left out -- partiallyParsedSentence must be tolerant
+  // of missing args.
 
   var selObj = {
     text: "", html: ""
@@ -900,14 +916,31 @@ function testPartiallyParsedSentence() {
     );
 
   var parsed  = partiallyParsed.getParsedSentences();
+  // two suggestions for foo, two suggestions for bar: should be four
+  // combinations.
+  this.assert( parsed.length == 4, "Should be four parsings.");
 
-  this.assert( parsed.length == 4, "Should be four parsings.\n");
-
+  // Add another suggestion for bar.  Now there should be six combinations.
   partiallyParsed.addArgumentSuggestion( "barArg",
 					 CmdUtils.makeSugg("bar_c"));
   parsed  = partiallyParsed.getParsedSentences();
   /*dump("Now the completions are: \n");
   for each (var p in parsed)
     dump( p.getDisplayText() + "\n" );*/
-  this.assert( parsed.length == 6, "Should be six (not eight) parsings.\n");
+  this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
+
+  // All six should have the default for bazArg since we dind't provide any
+  for each (var p in parsed)
+    this.assert( p.getArgText('bazArg') == "super pants", "must use default.");
+
+  // Now provide an actual argument for baz:
+  partiallyParsed.addArgumentSuggestion( "bazArg",
+				         CmdUtils.makeSugg("baz_a"));
+  parsed  = partiallyParsed.getParsedSentences();
+  // Should still have six
+  this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
+
+  // All six should have the new value for bazArg.
+  for each (var p in parsed)
+    this.assert( p.getArgText('bazArg') == "baz_a", "should be baz_a.");
 }
