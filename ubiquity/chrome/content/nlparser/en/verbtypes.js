@@ -343,27 +343,6 @@ NLParser.EnVerb.prototype = {
     }
   },
 
-  _makeNothingSugg: function() {
-    return { text:"", html:null, data:null, summary:"" };
-  },
-
-  _newSentences: function( argumentSuggestions ) {
-    /* Fill in missing arguments with defaults, or with nothing-suggestions if
-     * no default is available.*/
-    for (let x in this._arguments) {
-      if (!argumentSuggestions[x]) {
-        if (this._arguments[x].default) { // Argument value from verb argument default
-	  argumentSuggestions[x] = CmdUtils.makeSugg(this._arguments[x].default);
-	} else if (this._arguments[x].type.default) { // Argument value from nountype default
-          argumentSuggestions[x] = this._arguments[x].type.default();
-	} else { // No argument
-	  argumentSuggestions[x] = this._makeNothingSugg();
-	}
-      }
-    }
-    return [new NLParser.EnParsedSentence(this, argumentSuggestions)];
-  },
-
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
   recursiveParse: function(unusedWords, filledArgs, unfilledArgs, selObj) {
@@ -375,7 +354,7 @@ NLParser.EnVerb.prototype = {
     // First, the termination conditions of the recursion:
     if (unusedWords.length == 0) {
       // We've used the whole sentence; no more words. Return what we have.
-      return this._newSentences(filledArgs);
+      return [new PartiallyParsedSentence(this, filledArgs, selObj)];
     } else if ( dictKeys( unfilledArgs ).length == 0 ) {
       // We've used up all arguments, so we can't continue parsing, but
       // there are still unused words.  This was a bad parsing; don't use it.
@@ -410,29 +389,16 @@ NLParser.EnVerb.prototype = {
 	    }
 	    // pull out words from preposition up to lastWord, as nounWords:
             let nounWords = newUnusedWords.splice( x, lastWord - x );
-
-            // Add all suggestions the nounType can produce for the noun words:
-            suggestions = this._suggestForNoun( nounType,
-		                                nounLabel,
-					        nounWords,
-  					        selObj);
-	    // Turn each suggestion into a sentence, after recursively
-	    // parsing the leftover words.
-	    for each( let sugg in suggestions ) {
-	      if (sugg) {
-                newFilledArgs = dictDeepCopy( filledArgs );
-                newFilledArgs[ argName ] = sugg;
-                newCompletions = this.recursiveParse( newUnusedWords,
-		    				      newFilledArgs,
-						      newUnfilledArgs,
-						      selObj);
-	        // Add results to the ever-growing completion list...
-	        completions = completions.concat( newCompletions );
-	      }
-	    }
+            newFilledArgs = dictDeepCopy( filledArgs );
+            newFilledArgs[ argName ] = nounWords;
+            newCompletions = this.recursiveParse( newUnusedWords,
+                                                  newFilledArgs,
+                                                  newUnfilledArgs,
+                                                  selObj);
+	    completions = completions.concat(newCompletions);
 	  }
 	} // end if preposition matches
-      } // end for each unsed word
+      } // end for each unused word
       // Try adding a completion where the argument is left blank.
       newCompletions = this.recursiveParse( unusedWords,
        					    filledArgs,
@@ -479,6 +445,7 @@ NLParser.EnVerb.prototype = {
     var suggestions = this.suggestWithPronounSub( nounType, words, selObj);
     try {
       let moreSuggestions = nounType.suggest(words.join(" "));
+      // TODO strip out null suggestions right here...
       suggestions = suggestions.concat(moreSuggestions);
     } catch(e) {
       Components.utils.reportError(
