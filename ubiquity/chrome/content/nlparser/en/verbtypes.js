@@ -52,20 +52,20 @@ function dictKeys( dict ) {
 }
 
 
-NLParser.EnParsedSentence = function( verb, arguments ) {
+NLParser.EnParsedSentence = function( verb, arguments, matchScore ) {
   /* DO and the values of modifiers should be NLParser.EnInputData
    * objects.
    */
-  this._init( verb, arguments );
+  this._init( verb, arguments, matchScore );
 }
 NLParser.EnParsedSentence.prototype = {
-  _init: function( verb, argumentSuggestions) {
+  _init: function( verb, argumentSuggestions, matchScore) {
     /* modifiers is dictionary of preposition: noun */
     if (verb){
       this._verb = verb;
       this._argSuggs = argumentSuggestions;
     }
-    this.matchScore = 0;
+    this.matchScore = matchScore;
     this.frequencyScore = 0;
   },
 
@@ -132,7 +132,8 @@ NLParser.EnParsedSentence.prototype = {
 	newArgSuggs[x][y] = this._argSuggs[x][y];
     }
     let newSentence = new NLParser.EnParsedSentence(this._verb,
-						    newArgSuggs);
+						    newArgSuggs,
+ 						    this.matchScore);
     return newSentence;
   },
   setArgumentSuggestion: function( arg, sugg ) {
@@ -177,7 +178,7 @@ NLParser.EnParsedSentence.prototype = {
 
 };
 
-NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj) {
+NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj, matchScore) {
   /*This is a partially parsed sentence.
    * What that means is that we've decided what the verb is,
    * and we've assigned all the words of the input to one of the arguments.
@@ -187,28 +188,30 @@ NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj) {
    * sentences can produce several completely-parsed sentences, in which
    * final values for all arguments are specified.
    */
-  this._init( verb, argStrings, selObj );
+  this._init( verb, argStrings, selObj, matchScore);
+  /* ArgStrings is a dictionary, where the keys match the argument names in
+   * the verb, and the values are each a ["list", "of", "words"] that have
+   * been assigned to that argument
+   */
 }
 NLParser.EnPartiallyParsedSentence.prototype = {
-  _init: function( verb, argStrings, selObj ) {
+  _init: function( verb, argStrings, selObj, matchScore ) {
     this._verb = verb;
     this._argStrings = argStrings;
     this._selObj = selObj;
     this._parsedSentences = [];
+    this._matchScore = matchScore;
 
     for (let argName in this._verb._arguments) {
       let nounType = this._verb._arguments[argName].type;
-      let argWords = argStrings[argName]? argStrings[argName].split(" ") : [];
+      if (! argStrings[argName] )
+	argStrings[argName] = [];
       let argSuggs = this._verb._suggestForNoun(nounType,
 						argName,
-						argWords,
+						argStrings[argName],
 						selObj);
       for each( let argSugg in argSuggs ) {
         this.addArgumentSuggestion( argName, argSugg );
-
-	//dump("Now the completions are: \n");
-        //for each (var p in this._parsedSentences)
-          //dump( p.getDisplayText() + "\n" );
       }
     }
   },
@@ -218,11 +221,18 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     /* TODO: this function can eventually be used as a callback by
      * asynchronously suggestion-generating nouns.
      */
+
+    // TODO: If an argument is set to a non-empty string, and its
+    // corresponding nounType produces NO suggestions for that string,
+    // then we shouldn't leave the argument unfilled -- we should declare
+    // the whole partiallyParsedSentence to be an invalid parsing, and
+    // getParsedSentences should return [];.
+
     let newSentences = [];
     let newSen;
 
     if ( this._parsedSentences.length == 0) {
-      newSen = new NLParser.EnParsedSentence(this._verb, {});
+      newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
       this._parsedSentences = [newSen];
     }
 
@@ -259,6 +269,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     for each( let sen in this._parsedSentences) {
       parsedSentences.push(sen.fillMissingArgsWithDefaults());
     }
+
     return parsedSentences;
     // TODO sort these before returning them
   }
@@ -345,7 +356,7 @@ NLParser.EnVerb.prototype = {
 
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
-  recursiveParse: function(unusedWords, filledArgs, unfilledArgs, selObj) {
+  recursiveParse: function(unusedWords, filledArgs, unfilledArgs, selObj, matchScore) {
     var x;
     var suggestions = [];
     var completions = [];
@@ -354,7 +365,7 @@ NLParser.EnVerb.prototype = {
     // First, the termination conditions of the recursion:
     if (unusedWords.length == 0) {
       // We've used the whole sentence; no more words. Return what we have.
-      return [new PartiallyParsedSentence(this, filledArgs, selObj)];
+      return [new NLParser.EnPartiallyParsedSentence(this, filledArgs, selObj, matchScore)];
     } else if ( dictKeys( unfilledArgs ).length == 0 ) {
       // We've used up all arguments, so we can't continue parsing, but
       // there are still unused words.  This was a bad parsing; don't use it.
@@ -394,7 +405,8 @@ NLParser.EnVerb.prototype = {
             newCompletions = this.recursiveParse( newUnusedWords,
                                                   newFilledArgs,
                                                   newUnfilledArgs,
-                                                  selObj);
+                                                  selObj,
+						  matchScore);
 	    completions = completions.concat(newCompletions);
 	  }
 	} // end if preposition matches
@@ -403,7 +415,8 @@ NLParser.EnVerb.prototype = {
       newCompletions = this.recursiveParse( unusedWords,
        					    filledArgs,
        					    newUnfilledArgs,
-       					    selObj);
+       					    selObj,
+					    matchScore);
       completions = completions.concat( newCompletions );
       return completions;
     } // end if there are still arguments
@@ -463,6 +476,7 @@ NLParser.EnVerb.prototype = {
        selections.
     */
     let completions = [];
+    let partials = [];
     let inputVerb = words[0];
     let matchScore = this.match( inputVerb );
     if (matchScore == 0) {
@@ -472,15 +486,31 @@ NLParser.EnVerb.prototype = {
 
     let inputArguments = words.slice(1);
     if (inputArguments.length == 0) {
-      // make suggestions by using selection as arguments...
-      completions = this.getCompletionsFromNounOnly(selObj.text, selObj.html);
+      // make suggestions by trying selection as each argument...
+      for (let x in this._arguments) {
+        let argStrings = {};
+        argStrings[x] = [selObj.text]; // TODO how to use HTML?
+
+        partials.push(new NLParser.EnPartiallyParsedSentence(this,
+                                                             argStrings,
+                                                             selObj,
+  							     matchScore));
+        }
       // also, try a completion with all empty arguments
-      completions = completions.concat(this._newSentences( {} ) );
+      partials.push(new NLParser.EnPartiallyParsedSentence(this, {}, selObj, matchScore));
     }
     else {
-      completions = this.recursiveParse( inputArguments, {}, this._arguments, selObj );
+      partials = this.recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
     }
 
+    // partials is now a list of PartiallyParsedSentences; get the specific
+    // parsings
+    for each( let part in partials ) {
+      completions = completions.concat( part.getParsedSentences());
+    }
+
+    // score each completion based on how well the verb matched
+    // LONGTERM TODO: also score based on how well the arguments matched!!
     for each( let comp in completions) {
       comp.matchScore = matchScore;
     }
@@ -488,32 +518,27 @@ NLParser.EnVerb.prototype = {
   },
 
   getCompletionsFromNounOnly: function(text, html) {
-    // Try to complete sentence based just on given noun, no input arguments.
     let completions = [];
-
+        // Try to complete sentence based just on given noun, no input arguments.
+    let partials = [];
     if ((!text) && (!html))
       return [];
 
+    // TODO... how can we use HTML for noun completions now?
     // Try it as each argument...
     for (let x in this._arguments) {
-      try {
-        let suggs = this._arguments[x].type.suggest(text, html);
-        for each (let sugg in suggs) {
-          if (sugg) {
-            let argVals = {};
-            argVals[x] = sugg;
-	    let sentences = this._newSentences(argVals);
-	    for each( let sentence in sentences) {
-              sentence.matchScore = this._arguments[x].type.rankLast ? 0 : 1;
-              completions.push( sentence );
-	    }
-          }
-        }
-      } catch(e) {
-        Components.utils.reportError(
-          'Exception occured while getting suggestions for "' + this._name +
-          '" with preposition "' + x + '"'
-          );      }
+      let argStrings = {};
+      argStrings[x] = [text];
+      let selObj = {
+	text: text,
+	html: html
+      };
+      let matchScore = this._arguments[x].type.rankLast ? 0 : 1;
+      let partial = new NLParser.EnPartiallyParsedSentence(this,
+                                                           argStrings,
+                                                           selObj,
+  							   matchScore);
+      completions = completions.concat( partial.getParsedSentences());
     }
     return completions;
   },
