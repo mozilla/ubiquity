@@ -246,10 +246,27 @@ function testCmdManagerDisplaysNoCmdError() {
                        "Command manager must display a message.");
 }
 
+function testIterableCollectionWorks() {
+  var fakeCodeSource = {
+    getCode: function() { return "a = 1"; },
+    id: 'http://www.foo.com/bar.js'
+  };
+
+  var coll = new IterableCollection([fakeCodeSource]);
+  var count = 0;
+  for (var cs in coll) {
+    this.assert(cs.getCode() == "a = 1");
+    this.assert(cs.id == "http://www.foo.com/bar.js");
+    count += 1;
+  }
+  this.assert(count == 1, "count must be 1.");
+}
+
 function testCommandSourceOneCmdWorks() {
   var testCode = "function cmd_foo_thing() { return 5; }";
   var testCodeSource = {
-    getCode : function() { return testCode; }
+    getCode : function() { return testCode; },
+    id: 'test'
   };
 
   var cmdSrc = new CommandSource(testCodeSource);
@@ -267,11 +284,13 @@ function testCommandSourceTwoCodeSourcesWork() {
   var testCode2 = "function cmd_bar() { return 6; }\n";
 
   var testCodeSource1 = {
-    getCode : function() { return testCode1; }
+    getCode : function() { return testCode1; },
+    id: 'source1'
   };
 
   var testCodeSource2 = {
-    getCode : function() { return testCode2; }
+    getCode : function() { return testCode2; },
+    id: 'source2'
   };
 
   var cmdSrc = new CommandSource([testCodeSource1,
@@ -296,7 +315,8 @@ function testCommandSourceCatchesExceptionsWhenLoading() {
   };
 
   var testCodeSource = {
-    getCode : function() { return "awegaewg"; }
+    getCode : function() { return "awegaewg"; },
+    id: "test"
   };
 
   var cmdSrc = new CommandSource(testCodeSource, mockMsgService);
@@ -314,7 +334,8 @@ function testCommandSourceTwoCmdsWork() {
                   "function cmd_bar() { return 6; }\n");
 
   var testCodeSource = {
-    getCode : function() { return testCode; }
+    getCode : function() { return testCode; },
+    id: "test"
   };
 
   var cmdSrc = new CommandSource(testCodeSource);
@@ -336,7 +357,8 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
   var testCode = ( "x = 1; function cmd_foo() { return x++; }" );
 
   var testCodeSource = {
-    getCode : function() { return testCode; }
+    getCode : function() { return testCode; },
+    id: "test"
   };
 
   var cmdSrc = new CommandSource(testCodeSource);
@@ -361,7 +383,8 @@ function testCommandGlobalsWork() {
                    "}" );
 
   var testCodeSource = {
-    getCode : function() { return testCode; }
+    getCode : function() { return testCode; },
+    id: "test"
   };
 
   var sandboxFactory = new SandboxFactory({globals: {}});

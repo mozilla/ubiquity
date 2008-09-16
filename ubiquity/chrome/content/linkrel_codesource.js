@@ -65,7 +65,8 @@ function LinkRelCodeSource() {
           // TODO: What about 0.1 feeds?  Just make users
           // resubscribe to all their stuff?  Or implement
           // manual updating?
-          source = new StringCodeSource(pageInfo.getCode());
+          source = new StringCodeSource(pageInfo.getCode(),
+                                        pageInfo.jsUri.spec);
       } else if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
         source = new LocalUriCodeSource(href);
       } else {
@@ -86,6 +87,8 @@ function LinkRelCodeSource() {
 
     return code;
   };
+
+  this.id = 'linkrel:singleton';
 
   LinkRelCodeSource.__singleton = this;
 }
@@ -175,7 +178,7 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
 LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
   let annSvc = this.__getAnnSvc();
   let uri = Utils.url(info.url);
-  
+
   if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO))
       annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
   annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, info.sourceCode, 0,

@@ -144,9 +144,20 @@ CommandManager.prototype = {
   }
 };
 
+function IterableCollection(itemList) {
+  this.__iterator__ = function iterator() {
+    for (var i = 0; i < itemList.length; i++)
+      yield itemList[i];
+  };
+}
+
 function CommandSource(codeSources, messageService, sandboxFactory) {
-  if (codeSources.length == undefined)
-    codeSources = [codeSources];
+  if (!codeSources.__iterator__) {
+    if (codeSources.constructor == Array)
+      codeSources = new IterableCollection(codeSources);
+    else
+      codeSources = new IterableCollection([codeSources]);
+  }
 
   if (sandboxFactory == undefined)
     sandboxFactory = new SandboxFactory();
@@ -154,7 +165,7 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
   this._codeSources = codeSources;
   this._messageService = messageService;
   this._commands = [];
-  this._codeCache = [];
+  this._codeCache = null;
   this._nounTypes = [];
 }
 
@@ -163,9 +174,13 @@ CommandSource.prototype = {
   NOUN_PREFIX : "noun_",
 
   refresh : function() {
-    for (var i = 0; i < this._codeSources.length; i++) {
-      var code = this._codeSources[i].getCode();
-      this._codeCache[i] = code;
+    this._codeCache = {};
+    for (var codeSource in this._codeSources) {
+      var code = codeSource.getCode();
+
+      if (typeof(codeSource.id) == "undefined")
+        throw new Error("Code source ID is undefined for code: " + code);
+      this._codeCache[codeSource.id] = code;
     }
     this._loadCommands();
   },
@@ -175,8 +190,8 @@ CommandSource.prototype = {
 
     var commands = {};
 
-    for (var i = 0; i < this._codeSources.length; i++) {
-      var code = this._codeCache[i];
+    for (var codeSource in this._codeSources) {
+      var code = this._codeCache[codeSource.id];
 
       try {
         this._sandboxFactory.evalInSandbox(code, sandbox);
@@ -274,7 +289,7 @@ CommandSource.prototype = {
   },
 
   getCommand : function(name) {
-    if (this._codeCache.length == 0)
+    if (this._codeCache === null)
       this.refresh();
 
     if (this._commands[name])

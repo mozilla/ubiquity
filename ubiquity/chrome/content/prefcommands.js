@@ -49,5 +49,9 @@ var PrefCommands = {
       this.COMMANDS_PREF,
       ""
     );
+  },
+
+  get id() {
+    return "preferences:" + this.COMMANDS_PREF;
   }
 };

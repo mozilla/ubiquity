@@ -35,8 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function StringCodeSource(code) {
+function StringCodeSource(code, id) {
   this._code = code;
+  this.id = id;
 }
 
 StringCodeSource.prototype = {
@@ -46,6 +47,7 @@ StringCodeSource.prototype = {
 };
 
 function RemoteUriCodeSource(pageInfo) {
+  this.id = pageInfo.jsUri.spec;
   this._pageInfo = pageInfo;
   this._req = null;
 };
@@ -104,6 +106,7 @@ RemoteUriCodeSource.prototype = {
 };
 
 function LocalUriCodeSource(uri) {
+  this.id = uri;
   this.uri = uri;
 }
 
