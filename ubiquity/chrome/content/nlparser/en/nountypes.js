@@ -119,6 +119,30 @@ var noun_type_date = {
   }
 };
 
+var noun_type_time = {
+   _name: "time",
+   
+   default: function(){
+      var time = Date.parse("now");
+      var text = time.toString("hh:mm tt")
+      return CmdUtils.makeSugg(text, null, time)
+   },
+   
+   suggest: function(text, html){
+      if (typeof text != "string"){
+         return [];
+      }
+            
+      var time = Date.parse( text );
+      if(!time ){
+         return []
+      }
+      
+      text = time.toString("hh:mm tt");
+      return [ CmdUtils.makeSugg(text, null, time) ]
+   }
+}
+
 var noun_type_percentage = {
   _name: "percentage",
   suggest: function( text, html ) {

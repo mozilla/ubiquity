@@ -477,7 +477,7 @@ makeSearchCommand({
   description: "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words.",
   preview: function(pBlock, directObj) {
     if (directObj.text)
-      pBlock.innerHtml = "Searches MSN for " + directObj.text;
+      pBlock.innerHTML = "Searches MSN for " + directObj.text;
     else
       pBlock.innerHTML = "Searches MSN for the given words.";
   }
@@ -490,7 +490,7 @@ makeSearchCommand({
   description: "Searches <a href=\"http://search.ebay.com\">EBay</a> for auctions matching the given words.",
   preview: function(pBlock, directObj) {
     if (directObj.text)
-      pBlock.innerHtml = "Searches EBay for " + directObj.text;
+      pBlock.innerHTML = "Searches EBay for " + directObj.text;
     else
       pBlock.innerHTML = "Searches EBay for the given words.";
   }
@@ -503,7 +503,7 @@ makeSearchCommand({
   description: "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words.",
   preview: function(pBlock, directObj) {
     if (directObj.text)
-      pBlock.innerHtml = "Searches Ask.com for " + directObj.text;
+      pBlock.innerHTML = "Searches Ask.com for " + directObj.text;
     else
       pBlock.innerHTML = "Searches Ask.com for the given words.";
   }
@@ -516,7 +516,7 @@ makeSearchCommand({
   description: "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words.",
   preview: function(pBlock, directObj) {
     if (directObj.text)
-      pBlock.innerHtml = "Searches Answers.com for " + directObj.text;
+      pBlock.innerHTML = "Searches Answers.com for " + directObj.text;
     else
       pBlock.innerHTML = "Searches Answers.com for the given words.";
   }
@@ -1281,72 +1281,33 @@ function reloadGoogleCalendarTabs() {
 
 
 function addToGoogleCalendar(eventString) {
-  var secid = Utils.getCookie("www.google.com", "secid");
 
-  var URLS = {
-    parse: "http://www.google.com/calendar/compose",
-    create: "http://www.google.com/calendar/event"
-  };
+  var quickAddEntry = "<entry xmlns='http://www.w3.org/2005/Atom' xmlns:gCal='http://schemas.google.com/gCal/2005'>";
+  quickAddEntry += "    <content type=\"html\">" + eventString + "</content>";
+  quickAddEntry += "    <gCal:quickadd value=\"true\"/>";
+  quickAddEntry += "</entry>";
 
-  function parseGoogleJson(json) {
-    var securityPreface = "while(1);";
-
-    var pos = json.indexOf(";") + 1;
-    var splitString = [
-      json.substr( 0, pos ),
-      json.substr( pos )
-    ];
-
-    if ( splitString[0] != securityPreface ) {
-      displayMessage( "Unexpected Return Value" );
-      return null;
-    }
-    // TODO: Security hull breach!
-    return eval( splitString[1] );
+  var authKey = Utils.getCookie(".www.google.com", "CAL");
+  if (authKey == "") {
+    displayMessage("Please make sure you are logged in to Google Calendar");
+    return;
   }
 
-  var params = Utils.paramsToString({
-    "ctext": eventString,
-    "qa-src": "QUICK_ADD_BOX"
-  });
+  currentCalendar = "http://www.google.com/calendar/feeds/default/private/full";
 
-  Utils.ajaxGet(URLS["parse"]+params, function(json) {
-    dump( "First json from addToCalendar: " + json);
-    var data = parseGoogleJson( json )[0];
-    var eventText = data[1];
-    var eventStart = data[4];
-    var eventEnd = data[5];
-    var secid = Utils.getCookie("www.google.com", "secid");
-
-    var params = Utils.paramsToString({
-      "dates": eventStart + "/" + eventEnd,
-      "text": eventText,
-      "secid": secid,
-      "action": "CREATE",
-      "output": "js"
-    });
-
-    Utils.ajaxGet(URLS["create"] + params, function(json) {
-      try{
-        // Ugly hack to parse out the event description.
-        var result = eval( parseGoogleJson( json ) );
-
-        var msg = json.match(/\\76(.*?)'/);
-        if( msg ){
-          displayMessage( "Event created: " + msg[1].replace(/\\74\/span\\76/,"") );
-          reloadGoogleCalendarTabs();
-        } else {
-          // Result now contains something like this:
-          // [["_ReportOperationError"], ["_RefreshCalendarWhenDisplayedNext"], ["_Ping", "500"], ["_Ping", "3000"], ["_Ping", "15000"], ["_ShowMessage", ["Please enter a complete start and end time"]]]
-          errorMessage = result[5][1][0];
-          displayMessage( errorMessage );
-        }
-
-      } catch(e){
-        displayMessage( "Error creating the event. " + e );
-      }
-    });
-  });
+  req = new XMLHttpRequest();
+  req.open('POST', currentCalendar, false);
+  req.setRequestHeader('Authorization', 'GoogleLogin auth=' + authKey);
+  req.setRequestHeader('Content-type', 'application/atom+xml');
+  req.send(quickAddEntry);
+  if (req.status == 401) {
+    displayMessage("Please make sure you are logged in to Google Calendar");
+    return;
+  } else if (req.status != 201) {
+    displayMessage("Error creating the event. Error code: " + req.status + " " + req.statusText);
+    return;
+  }
+      
 }
 
 /* TODO this comman just takes unstructured text right now and relies on

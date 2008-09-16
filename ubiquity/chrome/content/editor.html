@@ -4,6 +4,16 @@
 <head>
   <title>Ubiquity Command Editor</title>
   <script type="text/javascript" src="prefcommands.js"></script>
+  <script type="application/javascript;version=1.7"
+          src="utils.js"></script>
+  <script type="application/javascript;version=1.7"
+          src="codesource.js"></script>
+  <script type="application/javascript;version=1.7"
+          src="linkrel_codesource.js"></script>
+  <script type="text/javascript"
+          src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
+  <script type="application/javascript;version=1.7"
+          src="editor.js"></script>
   <link rel="stylesheet" href="web-content.css" type="text/css">
   <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 </head>
@@ -46,6 +56,13 @@
 
 <br clear="all"/>
 
-<textarea id="editor" rows="40" style="width:900px"
-          onkeyup="PrefCommands.setCode(this.value);"></textarea>
+<div id="editor-div">
+  <textarea id="editor" rows="40" style="width:900px"
+            onkeyup="PrefCommands.setCode(this.value);"></textarea>
+</div>
+
+<div id="save-as-div">
+  <a href="javascript:void(saveAs())">Save as</a> to edit in external editor.
+</div>
+
 </body></html>
