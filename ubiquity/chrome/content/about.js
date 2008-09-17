@@ -160,6 +160,7 @@ function makeFeedListElement(info, label, clickMaker) {
 
 function onReady() {
   PrefKeys.onLoad();
+  Editor.onLoad();
   showBugRelatedAlerts();
 
   let markedPages = LinkRelCodeSource.getMarkedPages();

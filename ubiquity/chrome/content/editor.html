@@ -14,12 +14,36 @@
           src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
   <script type="application/javascript;version=1.7"
           src="editor.js"></script>
+  <script type="text/javascript"> 
+   function initialize() { 
+       document.getElementById('editor').value = PrefCommands.getCode(); 
+   } 
+   var file; 
+   var lastModifiedTime = 0; 
+   function launch() { 
+       file = Editor.launchEditor(document.getElementById('editor').value); 
+       if(file != null && file.exists()){ 
+          lastModifiedTime = file.lastModifiedTime; 
+          setTimeout(watchFile, 500) 
+       } 
+   } 
+   function watchFile(){ 
+      if(file != null && file.exists()){ 
+        time = file.lastModifiedTime; 
+        if(time <= lastModifiedTime){ 
+            setTimeout(watchFile, 500);              
+        } else { 
+           document.getElementById('editor').value = Editor.readFile(file); 
+           PrefCommands.setCode(document.getElementById('editor').value); 
+        } 
+      } 
+   } 
+  </script>
   <link rel="stylesheet" href="web-content.css" type="text/css">
   <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 </head>
 
-<body onload="document.getElementById('editor').value = PrefCommands.getCode();">
-  
+<body onload="initialize()">
   <div class="head left">
     <red>ubiquity</red> the command <em>editor</em></span>
   </div>
@@ -62,7 +86,15 @@
 </div>
 
 <div id="save-as-div">
-  <a href="javascript:void(saveAs())">Save as</a> to edit in external editor.
+  <a href="javascript:void(saveAs())">Save</a> commands to file (and subscribe).
+</div>
+
+<div id="external-editor-div">
+  <a href="javascript:void(launch())">Launch</a> an external editor.
+</div>
+
+<div id="paste-as-div">
+  <a href="javascript:void(paste())">Paste</a> commands to <a href="http://gist.github.com/">gist.github</a> (and subscribe).
 </div>
 
 </body></html>
