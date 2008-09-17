@@ -485,7 +485,6 @@ function testParseWithModifier() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject);
-  debugSuggestionList( completions );
   this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
   this.assert( completions[0]._argSuggs.direct_object.text == "poodle");
@@ -525,13 +524,18 @@ function testCmdManagerSuggestsForEmptyInput() {
   var cmdMan = new CommandManager(fakeSource, null, LANG);
   var getAC = makeDefaultCommandSuggester(cmdMan);
   var suggDict = getAC({textSelection:"tree"});
-
+  /*dump("Text selection is tree.\n");
+  for (var x in suggDict)
+    dump("suggDict has " + x + "\n");*/
   this.assert( suggDict["Cmd_one"], "cmd one should be in" );
   this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
   var execute = suggDict["Cmd_one"];
   execute();
   this.assert( oneWasCalled == "tree", "should have been calld with tree" );
   suggDict = getAC({textSelection:"mud"});
+  /*dump("Text selection is mud.\n");
+  for (var x in suggDict)
+    dump("suggDict has " + x + "\n");*/
   this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
   this.assert( suggDict["Cmd_two"], "cmd two should be in" );
   execute = suggDict["Cmd_two"];
@@ -559,7 +563,6 @@ function testVerbEatsSelection() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
   var completions = verb.getCompletions(["eat", "this"], selObject);
-  debugSuggestionList( completions );
   this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
@@ -575,6 +578,7 @@ function testVerbEatsSelection() {
 
   selObject.text = "din";
   completions = verb.getCompletions(["eat", "at", "home", "this"], selObject);
+  //debugSuggestionList( completions );
   this.assert( completions.length == 1, "second should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
@@ -602,7 +606,7 @@ function testImplicitPronoun() {
   var selObject = { text: "lunch", html:"lunch" };
 
   var completions = verb.getCompletions(["eat"], selObject);
-  debugSuggestionList( completions );
+  //debugSuggestionList( completions );
   this.assert( (completions.length == 2), "Should have 2 completions.");
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");

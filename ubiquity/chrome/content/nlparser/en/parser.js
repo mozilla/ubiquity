@@ -119,9 +119,11 @@ NLParser.EnParser.prototype = {
     var nounType, verb;
     var newSuggs = [];
     var selObj = getSelectionObject(context);
-    // selection, no input, noun-first suggestion
+    // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
+	/*dump("Doing noun-first suggestion on selection, where selection is ");
+	dump(selObj.text + "\n");*/
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj.text,
                                                               selObj.html));
       }
@@ -132,11 +134,11 @@ NLParser.EnParser.prototype = {
        *  all zero-length strings: */
       let word;
       words = [ word for each(word in words) if (word.length > 0)];
-      // verb-first matches
+      // verb-first matches on input
       for each ( verb in this._verbList ) {
 	newSuggs = newSuggs.concat( verb.getCompletions( words, selObj ) );
       }
-      // noun-first matches
+      // noun-first matches on input
       if (newSuggs.length == 0 ){
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, query ));
       }

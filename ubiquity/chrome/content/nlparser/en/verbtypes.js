@@ -218,7 +218,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 						argName,
 						argStrings[argName],
 						selObj);
-      if (argStrings.length > 0 && argSuggs.length == 0) {
+      if (argStrings[argName].length > 0 && argSuggs.length == 0) {
 	//One of the arguments is supplied by the user, but produces
 	// no suggestions, meaning it's an invalid argument for this
 	// command -- that makes the whole parsing invalid!!
@@ -387,7 +387,8 @@ NLParser.EnVerb.prototype = {
       var newUnfilledArgs = dictDeepCopy( unfilledArgs );
       delete newUnfilledArgs[argName];
 
-      // Look for a match for this preposition
+      // Look for a match for this argument
+      let argumentFound = false;
       var nounType = unfilledArgs[argName].type;
       var nounLabel = unfilledArgs[argName].label;
       var preposition = unfilledArgs[argName].flag;
@@ -418,16 +419,19 @@ NLParser.EnVerb.prototype = {
                                                   selObj,
 						  matchScore);
 	    completions = completions.concat(newCompletions);
+	    argumentFound = true;
 	  }
 	} // end if preposition matches
       } // end for each unused word
-      // Try adding a completion where the argument is left blank.
-      newCompletions = this.recursiveParse( unusedWords,
-       					    filledArgs,
-       					    newUnfilledArgs,
-       					    selObj,
-					    matchScore);
-      completions = completions.concat( newCompletions );
+      // If argument was never found, try a completion where it's left blank.
+      if (!argumentFound) {
+        newCompletions = this.recursiveParse( unusedWords,
+                                              filledArgs,
+       					      newUnfilledArgs,
+       					      selObj,
+					      matchScore);
+        completions = completions.concat( newCompletions );
+      }
       return completions;
     } // end if there are still arguments
   },
@@ -520,7 +524,6 @@ NLParser.EnVerb.prototype = {
     // partials is now a list of PartiallyParsedSentences; get the specific
     // parsings
     for each( let part in partials ) {
-      dump
       completions = completions.concat( part.getParsedSentences());
     }
 
@@ -534,7 +537,7 @@ NLParser.EnVerb.prototype = {
 
   getCompletionsFromNounOnly: function(text, html) {
     let completions = [];
-        // Try to complete sentence based just on given noun, no input arguments.
+    // Try to complete sentence based just on given noun, no input arguments.
     let partials = [];
     if ((!text) && (!html))
       return [];
@@ -549,6 +552,8 @@ NLParser.EnVerb.prototype = {
 	html: html
       };
       let matchScore = this._arguments[x].type.rankLast ? 0 : 1;
+      /*dump("Creating partialy parsed sentence with verb = " + this._name);
+      dump(", argument " + x + " having value " + text + "\n");*/
       let partial = new NLParser.EnPartiallyParsedSentence(this,
                                                            argStrings,
                                                            selObj,
