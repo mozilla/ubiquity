@@ -80,6 +80,13 @@ function FakeAnnSvc() {
   };
 }
 
+function debugSuggestionList( list ) {
+  dump("There are " + list.length + " items in suggestion list.\n");
+  for each (var sugg in list) {
+    dump( sugg.getDisplayText() + "\n" );
+  }
+}
+
 function setupLrcsForTesting() {
    LinkRelCodeSource.__install = function() {};
 
@@ -478,7 +485,7 @@ function testParseWithModifier() {
     html:""
   };
   var completions = verb.getCompletions( inputWords, selObject);
-
+  debugSuggestionList( completions );
   this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
   this.assert( completions[0]._argSuggs.direct_object.text == "poodle");
@@ -518,6 +525,7 @@ function testCmdManagerSuggestsForEmptyInput() {
   var cmdMan = new CommandManager(fakeSource, null, LANG);
   var getAC = makeDefaultCommandSuggester(cmdMan);
   var suggDict = getAC({textSelection:"tree"});
+
   this.assert( suggDict["Cmd_one"], "cmd one should be in" );
   this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
   var execute = suggDict["Cmd_one"];
@@ -551,6 +559,7 @@ function testVerbEatsSelection() {
   var verb = new NLParser.EnVerb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
   var completions = verb.getCompletions(["eat", "this"], selObject);
+  debugSuggestionList( completions );
   this.assert( completions.length == 1, "Should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
@@ -593,6 +602,7 @@ function testImplicitPronoun() {
   var selObject = { text: "lunch", html:"lunch" };
 
   var completions = verb.getCompletions(["eat"], selObject);
+  debugSuggestionList( completions );
   this.assert( (completions.length == 2), "Should have 2 completions.");
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
@@ -809,6 +819,7 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "wash", fakeContext );
   var suggs = nlParser.getSuggestionList();
+  debugSuggestionList( suggs );
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
@@ -858,6 +869,26 @@ function testSynonyms() {
 // TODO test of verb initialized with new style arguments dict
 
 function testPartiallyParsedSentence() {
+
+  // make sure it also works with a no-arg command:
+  var cmd_grumble = {
+    name: "grumble",
+    execute: function(context, directObject, modifiers) {
+    }
+  };
+  var verbNoArgs = new NLParser.EnVerb(cmd_grumble);
+  var partiallyParsedNoArgs = new NLParser.EnPartiallyParsedSentence(
+    verbNoArgs,
+    {},
+    selObj
+    );
+
+  var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
+  debugSuggestionList( parsedNoArgs );
+  this.assert( parsedNoArgs.length == 1, "Should have 1 parsing.");
+  this.assert( parsedNoArgs[0]._verb._name == "grumble");
+
+
   var noun_type_foo = {
     _name: "foo",
     suggest: function( text, html ) {
@@ -924,9 +955,6 @@ function testPartiallyParsedSentence() {
   partiallyParsed.addArgumentSuggestion( "barArg",
 					 CmdUtils.makeSugg("bar_c"));
   parsed  = partiallyParsed.getParsedSentences();
-  /*dump("Now the completions are: \n");
-  for each (var p in parsed)
-    dump( p.getDisplayText() + "\n" );*/
   this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
 
   // All six should have the default for bazArg since we dind't provide any
@@ -943,4 +971,23 @@ function testPartiallyParsedSentence() {
   // All six should have the new value for bazArg.
   for each (var p in parsed)
     this.assert( p.getArgText('bazArg') == "baz_a", "should be baz_a.");
+
+}
+
+
+function testVerbGetCompletions() {
+  var grumbleCalled = false;
+  var cmd_grumble = {
+    name: "grumble",
+    execute: function(context, directObject, modifiers) {
+      grumbleCalled = true;
+    }
+  };
+  var verb = new NLParser.EnVerb(cmd_grumble);
+  var selObj = {
+    text: "", html: ""
+  };
+  var comps = verb.getCompletions( ["grum"], selObj);
+  this.assert( comps.length == 1, "Should be one suggestion." );
+  this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }

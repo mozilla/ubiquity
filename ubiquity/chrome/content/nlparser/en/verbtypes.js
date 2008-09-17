@@ -201,15 +201,30 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     this._selObj = selObj;
     this._parsedSentences = [];
     this._matchScore = matchScore;
+    this._valid = true;
+    /* Create fully parsed sentence with empty arguments:
+     * If this command takes no arguments, this is all we need.
+     * If it does take arguments, this initializes the parsedSentence
+     * list so that the algorithm in addArgumentSuggestion will work
+     * correctly. */
+    let newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
+    this._parsedSentences = [newSen];
 
     for (let argName in this._verb._arguments) {
-      let nounType = this._verb._arguments[argName].type;
       if (! argStrings[argName] )
-	argStrings[argName] = [];
+	continue;
+      let nounType = this._verb._arguments[argName].type;
       let argSuggs = this._verb._suggestForNoun(nounType,
 						argName,
 						argStrings[argName],
 						selObj);
+      if (argStrings.length > 0 && argSuggs.length == 0) {
+	//One of the arguments is supplied by the user, but produces
+	// no suggestions, meaning it's an invalid argument for this
+	// command -- that makes the whole parsing invalid!!
+	this._parsedSentences = [];
+	this._valid = false;
+      }
       for each( let argSugg in argSuggs ) {
         this.addArgumentSuggestion( argName, argSugg );
       }
@@ -230,11 +245,6 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
     let newSentences = [];
     let newSen;
-
-    if ( this._parsedSentences.length == 0) {
-      newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
-      this._parsedSentences = [newSen];
-    }
 
     for each( let sen in this._parsedSentences) {
       if ( ! sen.argumentIsFilled( arg ) ) {
@@ -479,12 +489,14 @@ NLParser.EnVerb.prototype = {
     let partials = [];
     let inputVerb = words[0];
     let matchScore = this.match( inputVerb );
+    //dump("Verb.getCompletions: matchScore is " + matchScore + "\n");
     if (matchScore == 0) {
       // Not a match to this verb!
       return [];
     }
 
     let inputArguments = words.slice(1);
+    //dump("Verb.getCompletions: inputArguments are " + inputArguments.join(" ") + "\n");
     if (inputArguments.length == 0) {
       // make suggestions by trying selection as each argument...
       for (let x in this._arguments) {
@@ -503,9 +515,12 @@ NLParser.EnVerb.prototype = {
       partials = this.recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
     }
 
+    //dump("Partials.length is " + partials.length + "\n");
+
     // partials is now a list of PartiallyParsedSentences; get the specific
     // parsings
     for each( let part in partials ) {
+      dump
       completions = completions.concat( part.getParsedSentences());
     }
 

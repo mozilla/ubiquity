@@ -89,8 +89,11 @@ CmdUtils.setSelection = function setSelection(content, options) {
     }
 
     if( content != plainText){
-      displayMessage( "This command requires a rich " +
-                      "text field for full support.");
+      /*displayMessage( "This command requires a rich " +
+                  "text field for full support.");*/
+      // Dims' patch for #253:
+      focused.value = content;
+      return;
     }
 
     var selectionEnd = focused.selectionStart + plainText.length;
@@ -229,7 +232,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 // the window's document object as a parameter.
 CmdUtils.onPageLoad = function onPageLoad( callback ) {
   var safeCallback = Utils.safeWrapper(callback);
-  
+
   function _onPageLoad(aEvent) {
     var isValidPage = false;
     try {
@@ -339,7 +342,7 @@ CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/pre
   appendCode : function(code){
     this.setCode(this.getCode() + code);
   },
-  
+
   prependCode : function(code){
     this.setCode(code + this.getCode());
   }
