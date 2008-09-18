@@ -39,17 +39,24 @@ function SandboxFactory(globals) {
 
   if (globals == undefined)
     globals = {};
-  this._globals = globals;
+
+  if (typeof(globals) == "function")
+    this._makeGlobals = globals;
+  else
+    this._makeGlobals = function defaultMakeGlobals(id) {
+      return globals;
+    };
 }
 
 SandboxFactory.target = this;
 
 SandboxFactory.prototype = {
-  makeSandbox: function() {
+  makeSandbox: function(id) {
     var sandbox = Components.utils.Sandbox(this._target);
+    var globals = this._makeGlobals(id);
 
-    for (symbolName in this._globals) {
-      sandbox[symbolName] = this._globals[symbolName];
+    for (symbolName in globals) {
+      sandbox[symbolName] = globals[symbolName];
     }
 
     return sandbox;

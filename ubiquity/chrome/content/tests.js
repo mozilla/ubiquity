@@ -90,6 +90,48 @@ function setupLrcsForTesting() {
    };
 }
 
+function testCompositeCollectionWorks() {
+  let a = new StringCodeSource('a', 'a');
+  let b = new StringCodeSource('b', 'b');
+  let c = new StringCodeSource('c', 'c');
+  let d = new StringCodeSource('d', 'd');
+
+  let coll_1 = new IterableCollection([a, b]);
+  let coll_2 = new IterableCollection([c, d]);
+
+  let iter = Iterator(new CompositeCollection([coll_1, coll_2]));
+  this.assert(iter.next().id == 'a');
+  this.assert(iter.next().id == 'b');
+  this.assert(iter.next().id == 'c');
+  this.assert(iter.next().id == 'd');
+}
+
+function testMixedCodeSourceCollectionWorks() {
+  let a = new StringCodeSource('a', 'a');
+  let b = new StringCodeSource('b', 'b');
+  let c = new StringCodeSource('c', 'c');
+  let d = new StringCodeSource('d', 'd');
+  let e = new StringCodeSource('e', 'e');
+  let f = new StringCodeSource('f', 'f');
+
+  let mixed = new MixedCodeSourceCollection(
+    new IterableCollection([a, b]),
+    new IterableCollection([c, d]),
+    new IterableCollection([e, f])
+    );
+
+  let codeSources = [];
+  for (cs in mixed) {
+    codeSources.push(cs);
+  }
+
+  this.assert(codeSources[0].getCode() == 'abcef');
+  this.assert(codeSources[0].id == 'c');
+
+  this.assert(codeSources[1].getCode() == 'abdef');
+  this.assert(codeSources[1].id == 'd');
+}
+
 function testLinkRelCodeSourceWorks() {
   setupLrcsForTesting();
 
@@ -280,8 +322,8 @@ function testCommandSourceOneCmdWorks() {
 }
 
 function testCommandSourceTwoCodeSourcesWork() {
-  var testCode1 = "function cmd_foo() { return 5; }\n";
-  var testCode2 = "function cmd_bar() { return 6; }\n";
+  var testCode1 = "a=5;function cmd_foo() { return a; }\n";
+  var testCode2 = "a=6;function cmd_bar() { return a; }\n";
 
   var testCodeSource1 = {
     getCode : function() { return testCode1; },
@@ -372,6 +414,27 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on second call.");
+}
+
+function testMakeGlobalsWork() {
+  function makeGlobals(id) {
+    return {id: id};
+  }
+
+  var testCode = "function cmd_foo() { return id; }";
+
+  var testCodeSource = {
+    getCode : function() { return testCode; },
+    id: "test"
+  };
+
+  var sandboxFactory = new SandboxFactory(makeGlobals);
+
+  var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
+
+  var cmd = cmdSrc.getCommand("foo");
+  this.assert(cmd.execute() == "test",
+              "Command 'foo' should return 'test'.");
 }
 
 function testCommandGlobalsWork() {

@@ -61,8 +61,8 @@ function ubiquitySetup()
   msgService.add(new AlertMessageService());
   msgService.add(new ErrorConsoleMessageService());
 
-  var globals = makeBuiltinGlobals(msgService, UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(globals);
+  var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals);
   var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
 
   var cmdSource = new CommandSource(
