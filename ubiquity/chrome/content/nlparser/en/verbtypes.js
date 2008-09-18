@@ -209,16 +209,10 @@ NLParser.EnPartiallyParsedSentence.prototype = {
      * correctly. */
     let newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
     this._parsedSentences = [newSen];
-    dump("Creating partiallyParsedSentence with argStrings:\n");
     for (let argName in this._verb._arguments) {
       // skip missing arguments
       if (! argStrings[argName] || argStrings[argName].length == 0)
 	continue;
-      dump( argName + ":" + argStrings[argName].join(" ") + ".\n");
-      dump("argStrings[argName].length is " + argStrings[argName].length + "\n");
-      for ( let x in argStrings[argName]) {
-	dump("argStrings[argName][" + x + "] = " + argStrings[argName][x] + ".\n");
-      }
       let nounType = this._verb._arguments[argName].type;
       let argSuggs = this._verb._suggestForNoun(nounType,
 						argName,
@@ -235,7 +229,6 @@ NLParser.EnPartiallyParsedSentence.prototype = {
         this.addArgumentSuggestion( argName, argSugg );
       }
     }
-    dump("This partiallyParsedSentence has " + this._parsedSentences.length + " completions.\n");
   },
 
   addArgumentSuggestion: function( arg, sugg ) {
@@ -245,13 +238,10 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
     let newSentences = [];
     let newSen;
-    //dump(" Adding suggestion: " + sugg.text + " for: " + arg + "\n");
     for each( let sen in this._parsedSentences) {
       if ( ! sen.argumentIsFilled( arg ) ) {
-	//dump("Changing one.\n");
         sen.setArgumentSuggestion( arg, sugg);
       } else {
-        //dump("Copying one.\n");
         let newSen = sen.copy();
         newSen.setArgumentSuggestion(arg, sugg);
 	let duplicateSuggestion = false;
@@ -263,10 +253,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
           newSentences.push( newSen );
       }
     }
-    //dump("len of newSentences is " + newSentences.length + "\n");
-    //dump("len of parsedSentences is " + this._parsedSentences.length + "\n");
     this._parsedSentences = this._parsedSentences.concat(newSentences);
-    //dump("new len of parsedSentences is " + this._parsedSentences.length + "\n");
   },
 
   getParsedSentences: function() {
@@ -469,10 +456,6 @@ NLParser.EnVerb.prototype = {
   },
 
   _suggestForNoun: function(nounType, nounLabel, words, selObj) {
-    /*dump("SuggestForNoun called, with nounType: " + nounType._name );
-    dump(", and words are " + words );
-    dump(", nounLabel: " + nounLabel + ", words: " + words.join(" "));
-    dump(", and selObj: " + selObj.text + "\n");*/
     var suggestions = this.suggestWithPronounSub( nounType, words, selObj);
     try {
       let moreSuggestions = nounType.suggest(words.join(" "));
@@ -493,24 +476,16 @@ NLParser.EnVerb.prototype = {
        selObj is a selectionObject, wrapping both the text and html
        selections.
     */
-    dump("verb.getCompletions: words are: " );
-    for ( let y in words ) {
-      dump("Words[" + y + "] = " + words[y] + "\n");
-    }
-    dump("That's all.\n");
     let completions = [];
     let partials = [];
     let inputVerb = words[0];
     let matchScore = this.match( inputVerb );
-    //dump("Verb.getCompletions: matchScore is " + matchScore + "\n");
     if (matchScore == 0) {
       // Not a match to this verb!
       return [];
     }
 
     let inputArguments = words.slice(1);
-    dump("Len of input arguments is " + inputArguments.length + "\n");
-    //dump("Verb.getCompletions: inputArguments are " + inputArguments.join(" ") + "\n");
     if (inputArguments.length == 0) {
       // make suggestions by trying selection as each argument...
       if (selObj.text || selObj.html) {
@@ -529,8 +504,6 @@ NLParser.EnVerb.prototype = {
     else {
       partials = this.recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
     }
-
-    //dump("Partials.length is " + partials.length + "\n");
 
     // partials is now a list of PartiallyParsedSentences; get the specific
     // parsings
@@ -563,8 +536,6 @@ NLParser.EnVerb.prototype = {
 	html: html
       };
       let matchScore = this._arguments[x].type.rankLast ? 0 : 1;
-      /*dump("Creating partialy parsed sentence with verb = " + this._name);
-      dump(", argument " + x + " having value " + text + "\n");*/
       let partial = new NLParser.EnPartiallyParsedSentence(this,
                                                            argStrings,
                                                            selObj,

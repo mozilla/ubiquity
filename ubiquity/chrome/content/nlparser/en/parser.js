@@ -122,8 +122,6 @@ NLParser.EnParser.prototype = {
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
-	/*dump("Doing noun-first suggestion on selection, where selection is ");
-	dump(selObj.text + "\n");*/
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj.text,
                                                               selObj.html));
       }
