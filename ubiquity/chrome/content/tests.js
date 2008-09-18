@@ -817,9 +817,6 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "wash", fakeContext );
   var suggs = nlParser.getSuggestionList();
-  debugSuggestionList( suggs );
-  // TODO debug: it produces not just 'wash husky' but 'wash husky' plus
-  // 'wash x' for each x accepted by dog.
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
@@ -838,9 +835,6 @@ function testVerbUsesDefaultIfNoArgProvided() {
 
   //TODO try out defaults for modifier arguments.
 }
-
-// TODO a test where a command has three arguments, all arbText; make sure
-// the top parsing is the sensible one.
 
 function testSynonyms() {
   var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
@@ -865,8 +859,6 @@ function testSynonyms() {
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 }
-
-// TODO test of verb initialized with new style arguments dict
 
 function testPartiallyParsedSentence() {
 
@@ -990,3 +982,60 @@ function testVerbGetCompletions() {
   this.assert( comps.length == 1, "Should be one suggestion." );
   this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }
+
+// TODO a test where a command has three arguments, all arbText; make sure
+// the top parsing is the sensible one.
+
+// TODO test of verb initialized with new style arguments dict,
+// and a verb initialized with old style arguments, make sure they're equivalent
+// in every way.
+
+function testTextAndHtmlDifferent() {
+  var executedText = null;
+  var executedHtml = null;
+  var selObj = {
+    text: "Pants", html:"<blink>Pants</blink>"
+  };
+  var noun_type_different = {
+    _name: "different",
+    suggest: function( text, html ) {
+      if (text == "Pants")
+        return [ CmdUtils.makeSugg(text, html) ];
+      else
+	return [];
+    }
+  };
+  var cmd_different = {
+    name: "dostuff",
+    DOLabel: "thing",
+    DOType: noun_type_different,
+    execute: function( context, directObject, modifiers) {
+      executedText = directObject.text;
+      executedHtml = directObject.html;
+    }
+  };
+  var verb = new NLParser.EnVerb(cmd_different);
+  var comps = verb.getCompletions( ["dostuff", "this"], selObj);
+  this.assert(comps.length == 1, "There should be one completion.");
+  comps[0].execute();
+  this.assert( executedText == "Pants", "text should be pants.");
+  this.assert( executedHtml == "<blink>Pants</blink>", "html should blink!");
+
+  executedText = null;
+  executedHtml = null;
+  //without any explicit 'this', should still work...
+  comps = verb.getCompletions( ["dostuff"], selObj);
+  this.assert(comps.length == 2, "There should be two completions.");
+  comps[0].execute();
+  this.assert( executedText == "Pants", "text should be pants.");
+  // TODO failing: html does not blink here.
+  this.assert( executedHtml == "<blink>Pants</blink>", "html should blink!");
+}
+
+
+
+
+
+// TODO disjoint verb matches: make them work and test that they do.
+// Maybe a useful subcategory of disjoint matches is "two letters transposed",
+// which is very easy to do by accident when typing words like "emial".

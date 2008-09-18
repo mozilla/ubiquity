@@ -224,6 +224,9 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 	// command -- that makes the whole parsing invalid!!
 	this._parsedSentences = [];
 	this._valid = false;
+	// TODO but if noun suggestions come in asynchronously, this could
+	// in theory become UN-INVALIDATED (re-validated?) when a suggestion
+	// comes in.  Bleah.
       }
       for each( let argSugg in argSuggs ) {
         this.addArgumentSuggestion( argName, argSugg );
