@@ -90,6 +90,18 @@ function setupLrcsForTesting() {
    };
 }
 
+function testUtilsUrlWorksWithNsURI() {
+  var ios = Components.classes["@mozilla.org/network/io-service;1"]
+    .getService(Components.interfaces.nsIIOService);
+  var uri = ios.newURI("http://www.foo.com", null, null);
+
+  this.assert(Utils.url(uri).spec == "http://www.foo.com/");
+}
+
+function testUtilsUrlWorksWithString() {
+  this.assert(Utils.url("http://www.foo.com").spec == "http://www.foo.com/");
+}
+
 function testCompositeCollectionWorks() {
   let a = new StringCodeSource('a', 'a');
   let b = new StringCodeSource('b', 'b');
