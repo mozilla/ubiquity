@@ -74,7 +74,12 @@ NLParser.EnParser.prototype = {
     let verb;
 
     for each(verb in this._verbList) {
-      suggs = suggs.concat( verb.getCompletionsFromNounOnly(text, html));
+      let selObj = {
+	text: text,
+	html: html
+      };
+      suggs = suggs.concat( verb.getCompletions([verb._name], selObj));
+      // TODO find a way to set matchScore = this._arguments[x].type.rankLast ? 0 : 1;
     }
     return suggs;
   },

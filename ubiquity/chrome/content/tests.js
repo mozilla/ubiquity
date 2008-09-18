@@ -600,19 +600,19 @@ function testImplicitPronoun() {
   var selObject = { text: "lunch", html:"lunch" };
 
   var completions = verb.getCompletions(["eat"], selObject);
-  //debugSuggestionList( completions );
-  this.assert( (completions.length == 2), "Should have 2 completions.");
+  this.assert( (completions.length == 1), "Should have 1 completion.");
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
   this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
-  this.assert((!completions[1]._argSuggs.direct_object.text),
-	      "second completion should have no DO.");
+  /*this.assert((!completions[1]._argSuggs.direct_object.text),
+	      "second completion should have no DO.");*/
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   selObject.text = "din";
   completions = verb.getCompletions(["eat"], selObject);
 
+  debugSuggestionList( completions );
   this.assert( completions.length == 3, "Should have 3 completions.");
   // first completion should be directObject is dinner
   completions[0].execute();
@@ -1019,11 +1019,24 @@ function testTextAndHtmlDifferent() {
   executedHtml = null;
   //without any explicit 'this', should still work...
   comps = verb.getCompletions( ["dostuff"], selObj);
-  this.assert(comps.length == 2, "There should be two completions.");
+    debugSuggestionList(comps);
+  this.assert(comps.length == 1, "There should be one completions (2)");
   comps[0].execute();
   this.assert( executedText == "Pants", "text should be pants.");
-  // TODO failing: html does not blink here.
   this.assert( executedHtml == "<blink>Pants</blink>", "html should blink!");
+
+  // when it's a noun-first suggestion from the parser, should still work...
+  executedText = null;
+  executedHtml = null;
+  var nlParser = new NLParser.EnParser( [cmd_different], [noun_type_different]);
+  comps = nlParser.nounFirstSuggestions( "Pantalones", "<blink>Pantalones</blink>");
+  debugSuggestionList(comps);
+  // TODO failing!  There are no suggestions!
+  this.assert(comps.length == 1, "There should be one completions (3)");
+  comps[0].execute();
+  this.assert( executedText == "Pantalones", "text should be pantalones.");
+  this.assert( executedHtml == "<blink>Pantalones</blink>", "html should blink!");
+
 }
 
 // TODO a test where we put inalid value into an argument on purpose, ensure

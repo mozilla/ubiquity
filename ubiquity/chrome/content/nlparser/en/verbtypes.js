@@ -166,6 +166,8 @@ NLParser.EnParsedSentence.prototype = {
         if (missingArg.default) {
 	  defaultValue = CmdUtils.makeSugg(missingArg.default);
 	} else if (missingArg.type.default) { // Argument value from nountype default
+          // TODO note this doesn't allow a nounType to return more than one item from
+          // its default() method.
           defaultValue = missingArg.type.default();
 	} else { // No argument
 	  defaultValue = {text:"", html:"", data:null, summary:""};
@@ -210,24 +212,35 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     let newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
     this._parsedSentences = [newSen];
     for (let argName in this._verb._arguments) {
-      // skip missing arguments
-      if (! argStrings[argName] || argStrings[argName].length == 0)
-	continue;
+      let argSuggs = [];
       let nounType = this._verb._arguments[argName].type;
-      let argSuggs = this._verb._suggestForNoun(nounType,
-						argName,
-						argStrings[argName],
-						selObj);
-      if (argStrings[argName].length > 0 && argSuggs.length == 0) {
-	//One of the arguments is supplied by the user, but produces
-	// no suggestions, meaning it's an invalid argument for this
-	// command -- that makes the whole parsing invalid!!
-	this._parsedSentences = [];
-	this._valid = false;
-	// TODO but if noun suggestions come in asynchronously, this could
-	// in theory become UN-INVALIDATED (re-validated?) when a suggestion
-	// comes in.  Bleah.
+      if (argStrings[argName] && argStrings[argName].length > 0) {
+	// If argument is present...
+        argSuggs = this._verb._suggestForNoun(nounType,
+	                                      argName,
+                                              argStrings[argName],
+                                              selObj);
+        if (argSuggs.length == 0) {
+	  //One of the arguments is supplied by the user, but produces
+	  // no suggestions, meaning it's an invalid argument for this
+	  // command -- that makes the whole parsing invalid!!
+	  this._parsedSentences = [];
+	  this._valid = false;
+          // TODO but if noun suggestions come in asynchronously, this could
+	  // in theory become UN-INVALIDATED (re-validated?) when a suggestion
+	  // comes in.  Bleah.
+        }
+      } else if (selObj && selObj.text && selObj.text.length > 0){
+        // Argument is not present, but there's a selection.  Try putting it here.
+        // TODO potential problem: selection blocks argument default.
+        try {
+          argSuggs = nounType.suggest(selObj.text, selObj.html);
+        } catch(e) {
+          Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
+        }
       }
+      // Otherwise, this argument will simply be left blank (or filled in with
+      // default value later.)
       for each( let argSugg in argSuggs ) {
         this.addArgumentSuggestion( argName, argSugg );
       }
@@ -490,18 +503,7 @@ NLParser.EnVerb.prototype = {
 
     let inputArguments = words.slice(1);
     if (inputArguments.length == 0) {
-      // make suggestions by trying selection as each argument...
-      if (selObj.text || selObj.html) {
-        for (let x in this._arguments) {
-          let argStrings = {};
-          argStrings[x] = [selObj.text]; // TODO how to use HTML?
-          partials.push(new NLParser.EnPartiallyParsedSentence(this,
-                                                               argStrings,
-                                                               selObj,
-  		  					     matchScore));
-        }
-      }
-      // also, try a completion with all empty arguments
+      // No arguments
       partials.push(new NLParser.EnPartiallyParsedSentence(this, {}, selObj, matchScore));
     }
     else {
@@ -518,34 +520,6 @@ NLParser.EnVerb.prototype = {
     // LONGTERM TODO: also score based on how well the arguments matched!!
     for each( let comp in completions) {
       comp.matchScore = matchScore;
-    }
-    return completions;
-  },
-
-  getCompletionsFromNounOnly: function(text, html) {
-    // note this is called only from outside verb, from the parser...
-    dump("I am in getCompletionsFromNounOnly.");
-    let completions = [];
-    // Try to complete sentence based just on given noun, no input arguments.
-    let partials = [];
-    if ((!text) && (!html))
-      return [];
-
-    // TODO... how can we use HTML for noun completions now?
-    // Try it as each argument...
-    for (let x in this._arguments) {
-      let argStrings = {};
-      argStrings[x] = [text];
-      let selObj = {
-	text: text,
-	html: html
-      };
-      let matchScore = this._arguments[x].type.rankLast ? 0 : 1;
-      let partial = new NLParser.EnPartiallyParsedSentence(this,
-                                                           argStrings,
-                                                           selObj,
-  							   matchScore);
-      completions = completions.concat( partial.getParsedSentences());
     }
     return completions;
   },
