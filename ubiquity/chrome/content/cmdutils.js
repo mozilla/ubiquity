@@ -190,6 +190,18 @@ CmdUtils.injectHtml = function injectHtml( html ) {
   doc.body.appendChild(div.firstChild);
 };
 
+
+//Function based on the one i found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
+CmdUtils.copyToClipboard = function copyToClipboard(text){
+   var clipboard = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+   var transferArea = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+   var string = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+   transferArea.addDataFlavor('text/unicode');
+   string.data = text;
+   transferArea.setTransferData("text/unicode", string, text.length * 2);
+   clipboard.setData(transferArea, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+}
+
 CmdUtils.log = function log(what) {
   var console = CmdUtils.getWindowInsecure().console;
   if (typeof(console) != "undefined"){
