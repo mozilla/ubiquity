@@ -99,12 +99,22 @@ NLParser.EnParser.prototype = {
      * there should actually be.
      */
     this._suggestionList.sort( function( x, y ) {
-				 if (x.matchScore > y.matchScore)
-				   return -1;
-				 else if (y.matchScore > x.matchScore)
-				   return 1;
-				 else
-				   return 0;
+				 let xMatchScores = x.getMatchScores();
+				 let yMatchScores = y.getMatchScores();
+				 for (let z in xMatchScores) {
+				   if (xMatchScores[z] > yMatchScores[z]) {
+				     return -1;
+				   }
+				   else if (yMatchScores[z] > xMatchScores[z]) {
+				     return 1;
+				   }
+				   /* if they are equal, then continue on to the
+				    * next loop iteration to compare them based on
+				    * the next most important score. */
+				 }
+				 // Got all the way through the lists and found
+				 // no tiebreaker... they are truly tied.
+                                 return 0;
 			       });
   },
 

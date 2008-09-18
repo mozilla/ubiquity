@@ -65,13 +65,14 @@ NLParser.EnParsedSentence.prototype = {
       this._verb = verb;
       this._argSuggs = argumentSuggestions;
     }
-    this.matchScore = matchScore;
-    this.frequencyScore = 0;
+    this.verbMatchScore = matchScore;
+    this.argMatchScore = 0; // not yet tracked
+    this.frequencyScore = 0;  // not yet tracked
   },
 
   getCompletionText: function() {
     /* return plain text that we should set the input box to if user hits
-     autocompletes to this sentence.  Currently unused! */
+     the key to autocomplete to this sentence. */
     var sentence = this._verb._name;
     for ( var x in this._argSuggs ) {
       if ( this._argSuggs[x] ) {
@@ -133,7 +134,7 @@ NLParser.EnParsedSentence.prototype = {
     }
     let newSentence = new NLParser.EnParsedSentence(this._verb,
 						    newArgSuggs,
- 						    this.matchScore);
+ 						    this.verbMatchScore);
     return newSentence;
   },
   setArgumentSuggestion: function( arg, sugg ) {
@@ -176,6 +177,12 @@ NLParser.EnParsedSentence.prototype = {
       }
     }
     return newSentence;
+  },
+
+  getMatchScores: function() {
+    return [this.frequencyMatchScore,
+	    this.verbMatchScore,
+	    this.argMatchScore];
   }
 
 };
