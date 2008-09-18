@@ -209,10 +209,16 @@ NLParser.EnPartiallyParsedSentence.prototype = {
      * correctly. */
     let newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
     this._parsedSentences = [newSen];
-
+    dump("Creating partiallyParsedSentence with argStrings:\n");
     for (let argName in this._verb._arguments) {
-      if (! argStrings[argName] )
+      // skip missing arguments
+      if (! argStrings[argName] || argStrings[argName].length == 0)
 	continue;
+      dump( argName + ":" + argStrings[argName].join(" ") + ".\n");
+      dump("argStrings[argName].length is " + argStrings[argName].length + "\n");
+      for ( let x in argStrings[argName]) {
+	dump("argStrings[argName][" + x + "] = " + argStrings[argName][x] + ".\n");
+      }
       let nounType = this._verb._arguments[argName].type;
       let argSuggs = this._verb._suggestForNoun(nounType,
 						argName,
@@ -229,23 +235,17 @@ NLParser.EnPartiallyParsedSentence.prototype = {
         this.addArgumentSuggestion( argName, argSugg );
       }
     }
+    dump("This partiallyParsedSentence has " + this._parsedSentences.length + " completions.\n");
   },
 
   addArgumentSuggestion: function( arg, sugg ) {
-    //dump(" Adding suggestion: " + sugg.text + " for: " + arg + "\n");
     /* TODO: this function can eventually be used as a callback by
      * asynchronously suggestion-generating nouns.
      */
 
-    // TODO: If an argument is set to a non-empty string, and its
-    // corresponding nounType produces NO suggestions for that string,
-    // then we shouldn't leave the argument unfilled -- we should declare
-    // the whole partiallyParsedSentence to be an invalid parsing, and
-    // getParsedSentences should return [];.
-
     let newSentences = [];
     let newSen;
-
+    //dump(" Adding suggestion: " + sugg.text + " for: " + arg + "\n");
     for each( let sen in this._parsedSentences) {
       if ( ! sen.argumentIsFilled( arg ) ) {
 	//dump("Changing one.\n");
@@ -469,6 +469,10 @@ NLParser.EnVerb.prototype = {
   },
 
   _suggestForNoun: function(nounType, nounLabel, words, selObj) {
+    /*dump("SuggestForNoun called, with nounType: " + nounType._name );
+    dump(", and words are " + words );
+    dump(", nounLabel: " + nounLabel + ", words: " + words.join(" "));
+    dump(", and selObj: " + selObj.text + "\n");*/
     var suggestions = this.suggestWithPronounSub( nounType, words, selObj);
     try {
       let moreSuggestions = nounType.suggest(words.join(" "));
@@ -489,6 +493,11 @@ NLParser.EnVerb.prototype = {
        selObj is a selectionObject, wrapping both the text and html
        selections.
     */
+    dump("verb.getCompletions: words are: " );
+    for ( let y in words ) {
+      dump("Words[" + y + "] = " + words[y] + "\n");
+    }
+    dump("That's all.\n");
     let completions = [];
     let partials = [];
     let inputVerb = words[0];
@@ -500,18 +509,20 @@ NLParser.EnVerb.prototype = {
     }
 
     let inputArguments = words.slice(1);
+    dump("Len of input arguments is " + inputArguments.length + "\n");
     //dump("Verb.getCompletions: inputArguments are " + inputArguments.join(" ") + "\n");
     if (inputArguments.length == 0) {
       // make suggestions by trying selection as each argument...
-      for (let x in this._arguments) {
-        let argStrings = {};
-        argStrings[x] = [selObj.text]; // TODO how to use HTML?
-
-        partials.push(new NLParser.EnPartiallyParsedSentence(this,
-                                                             argStrings,
-                                                             selObj,
-  							     matchScore));
+      if (selObj.text || selObj.html) {
+        for (let x in this._arguments) {
+          let argStrings = {};
+          argStrings[x] = [selObj.text]; // TODO how to use HTML?
+          partials.push(new NLParser.EnPartiallyParsedSentence(this,
+                                                               argStrings,
+                                                               selObj,
+  		  					     matchScore));
         }
+      }
       // also, try a completion with all empty arguments
       partials.push(new NLParser.EnPartiallyParsedSentence(this, {}, selObj, matchScore));
     }

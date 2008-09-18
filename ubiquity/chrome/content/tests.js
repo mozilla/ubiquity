@@ -824,6 +824,8 @@ function testVerbUsesDefaultIfNoArgProvided() {
   nlParser.updateSuggestionList( "wash", fakeContext );
   var suggs = nlParser.getSuggestionList();
   debugSuggestionList( suggs );
+  // TODO debug: it produces not just 'wash husky' but 'wash husky' plus
+  // 'wash x' for each x accepted by dog.
   this.assert( suggs.length == 1, "Should be 1 suggestion.");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
@@ -884,11 +886,11 @@ function testPartiallyParsedSentence() {
   var partiallyParsedNoArgs = new NLParser.EnPartiallyParsedSentence(
     verbNoArgs,
     {},
-    selObj
+    selObj,
+    0
     );
 
   var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
-  debugSuggestionList( parsedNoArgs );
   this.assert( parsedNoArgs.length == 1, "Should have 1 parsing.");
   this.assert( parsedNoArgs[0]._verb._name == "grumble");
 
@@ -934,10 +936,8 @@ function testPartiallyParsedSentence() {
 				   }
 				 });
 
-  // Interesting -- code throws an error if bazArg is not provided in
-  //
-  var argStrings = {fooArg: "nonihilf",
-		    barArg: "rocinante" };
+  var argStrings = {fooArg: ["nonihilf"],
+		    barArg: ["rocinante"] };
   // bazArg purposefully left out -- partiallyParsedSentence must be tolerant
   // of missing args.
 
@@ -947,7 +947,8 @@ function testPartiallyParsedSentence() {
   var partiallyParsed = new NLParser.EnPartiallyParsedSentence(
     verb,
     argStrings,
-    selObj
+    selObj,
+    0
     );
 
   var parsed  = partiallyParsed.getParsedSentences();
