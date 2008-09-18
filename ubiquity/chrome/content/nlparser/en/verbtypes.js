@@ -52,22 +52,31 @@ function dictKeys( dict ) {
 }
 
 
-NLParser.EnParsedSentence = function( verb, arguments, matchScore ) {
+NLParser.EnParsedSentence = function( verb, arguments, verbMatchScore ) {
   /* DO and the values of modifiers should be NLParser.EnInputData
    * objects.
    */
-  this._init( verb, arguments, matchScore );
+  this._init( verb, arguments, verbMatchScore );
 }
 NLParser.EnParsedSentence.prototype = {
-  _init: function( verb, argumentSuggestions, matchScore) {
+  _init: function( verb, argumentSuggestions, verbMatchScore) {
     /* modifiers is dictionary of preposition: noun */
     if (verb){
       this._verb = verb;
       this._argSuggs = argumentSuggestions;
     }
-    this.verbMatchScore = matchScore;
-    this.argMatchScore = 0; // not yet tracked
+    this.verbMatchScore = verbMatchScore;
     this.frequencyScore = 0;  // not yet tracked
+    this.argMatchScore = 0;
+    /* argument match score starts at 0 and gets +1 for each
+     argument where a specific nountype (i.e. non-arbitrary-text)
+     matches user input.  */
+    for (let argName in this._argSuggs) {
+      if (this._argSuggs[argName])
+	if (!this._verb._arguments[argName].type.rankLast)
+	  this.argMatchScore++;
+    }
+
   },
 
   getCompletionText: function() {
