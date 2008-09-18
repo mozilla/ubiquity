@@ -741,6 +741,7 @@ function testSortedBySuggestionMemory() {
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList("c", fakeContext);
 
+  // TODO finish this test-- once suggestion memory for verb ranking is hooked up.
 }
 
 function testSortedByMatchQuality() {
@@ -983,13 +984,6 @@ function testVerbGetCompletions() {
   this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }
 
-// TODO a test where a command has three arguments, all arbText; make sure
-// the top parsing is the sensible one.
-
-// TODO test of verb initialized with new style arguments dict,
-// and a verb initialized with old style arguments, make sure they're equivalent
-// in every way.
-
 function testTextAndHtmlDifferent() {
   var executedText = null;
   var executedHtml = null;
@@ -1032,10 +1026,28 @@ function testTextAndHtmlDifferent() {
   this.assert( executedHtml == "<blink>Pants</blink>", "html should blink!");
 }
 
+// TODO a test where we put inalid value into an argument on purpose, ensure
+// verb returns no suggestions.
 
+// TODO a test where a command has three arguments, all arbText; make sure
+// the top parsing is the sensible one.
 
+// TODO test of verb initialized with new style arguments dict,
+// and a verb initialized with old style arguments, make sure they're equivalent
+// in every way.
 
+// TODO have a bogus noun that returns empty suggestions, make sure it doesn't
+// crash everything.
+
+// tests for not yet implemented features:
 
 // TODO disjoint verb matches: make them work and test that they do.
 // Maybe a useful subcategory of disjoint matches is "two letters transposed",
 // which is very easy to do by accident when typing words like "emial".
+
+// TODO test that selection goes to ANY type-matching argument that's left empty, no
+// matter how many other filled arguments there are.  Test that if multiple arguments
+// are left empty, the selection is suggested for each one, although not all at the
+// same time.
+
+// TODO test for asynchronously generated noun suggestions.

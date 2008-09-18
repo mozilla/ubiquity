@@ -523,6 +523,8 @@ NLParser.EnVerb.prototype = {
   },
 
   getCompletionsFromNounOnly: function(text, html) {
+    // note this is called only from outside verb, from the parser...
+    dump("I am in getCompletionsFromNounOnly.");
     let completions = [];
     // Try to complete sentence based just on given noun, no input arguments.
     let partials = [];
