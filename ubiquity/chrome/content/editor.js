@@ -103,41 +103,16 @@ var Editor = {
 
 function paste() {
   try {
-  
+        
     editor = document.getElementById("editor");
-
     file = encodeURIComponent("[gistfile1]");
     quickPaste = "file_ext" + file + "=.js&file_name" + file + "=x&file_contents" + file + "=" + encodeURIComponent(editor.value) + "&x=27&y=27";
     updateUrl = "http://gist.github.com/gists";
-    req = new XMLHttpRequest();
-    req.open('POST', updateUrl, false);
-    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    req.send(quickPaste);
-    if (req.status != 200) {
-      displayMessage("Unable to paste error code : " + req.status + " status:" + req.statusText);
-      return;
-    }      
-    gitURL = req.responseText.match(/\git\@gist\.github\.com\:.*\.git/i);
-    newPasteURL = "http://gist.github.com/" + gitURL[0].match(/\d+/i);
-  
-    LinkRelCodeSource.addMarkedPage({url: newPasteURL,
-                                       sourceCode: "",
-                                       canUpdate: true});
-
-    editor.value = "";
-    PrefCommands.setCode("");
-
-    $("#paste-as-div").html(
-        "<p>The command source was saved to <b><a href=\'" + newPasteURL + "\'>" + newPasteURL + "</b> " +
-        "and you are now subscribed to that page. Any " +
-        "changes in the pasted page will take effect the moment you invoke Ubiquity.</p>" +
-        "<p>You can remove this subscription on the " +
-        "<a href='about:ubiquity'>Ubiquity main page</a></p>" +
-        "<p><a href=''>Reload this page</a> to create a new command.</p>");
-      $("#editor-div").slideUp();
+    Utils.openUrlInBrowser(updateUrl, quickPaste);
+    
   } catch(e) {
     Components.utils.reportError(e);
-    alert("Error: " + e);
+    displayMessage("Error: " + e);
   }
 }
 
@@ -177,7 +152,7 @@ function saveAs() {
     }
   } catch(e) {
     Components.utils.reportError(e);
-    alert("Error: " + e);
+    displayMessage("Error: " + e);
   }
 }
 
