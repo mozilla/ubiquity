@@ -13,7 +13,7 @@ var Editor = {
   launchEditor : function(value){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
     if(editor == null || editor == "") {
-      displayMessage('please set your external editor in about:ubiquity');
+      displayMessage('please set your external editor');
     }
    
     // For the mac, wrap with a call to "open".
@@ -147,9 +147,12 @@ function saveAs() {
 
     var fp = Components.classes["@mozilla.org/filepicker;1"]
                  .createInstance(nsIFilePicker);
-    fp.init(window, "Dialog Title", nsIFilePicker.modeSave);
-    fp.appendFilters(nsIFilePicker.filterAll);
-
+    fp.init(window, "Save your commands", nsIFilePicker.modeSave);
+    
+    //Save as a javascript file
+    //fp.appendFilters(nsIFilePicker.filterAll);
+    fp.appendFilter("Javascript","*.js");
+    
     var rv = fp.show();
     if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
       let editor = document.getElementById("editor");
@@ -163,7 +166,7 @@ function saveAs() {
       editor.value = "";
       PrefCommands.setCode("");
 
-      $("#save-as-div").html(
+      $("#editor-actions").html(
         "<p>The command source was saved to <b>" + fp.file.path + "</b> " +
         "and you are now subscribed to that page. Edit that file and any " +
         "changes will take effect the moment you invoke Ubiquity.</p>" +
@@ -193,4 +196,8 @@ function saveTextToFile(text, file) {
   os.close();
 
   foStream.close();
+}
+
+function displayMessage(msg){
+  $("#notification-bar").text(msg).show("fast");
 }

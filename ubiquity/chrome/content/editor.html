@@ -43,7 +43,7 @@
   <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 </head>
 
-<body onload="initialize()">
+<body onload="initialize();Editor.onLoad();">
   <div class="head left">
     <red>ubiquity</red> the command <em>editor</em></span>
   </div>
@@ -63,6 +63,8 @@
   <br clear="all"/>
     
 <h1>Ubiquity Command Editor</h1>
+<p id="notification-bar" class="notification" style="display:none"></p>
+
 <div class="col-three">
   <p><strong>Enter new commands</strong> in the area below.  They will automatically be saved as you type, and will
   be able to be instantly used from the command entry mode.</p>  
@@ -79,22 +81,28 @@
 </div>
 
 <br clear="all"/>
+<div id="editor-actions">
+  <div id="save-as-div" class="col-three">
+    <b><a href="javascript:void(saveAs())">Save</a> commands to file (and subscribe).</b>
+  </div>
+
+  <div id="external-editor-div" class="col-three">
+    <b><a href="javascript:void(launch())">Launch</a> an external editor.</b>
+    <br/>Your editor is
+    <input id="editorInputBox" type="file" size="20" 
+           style="cursor:pointer" 
+           onchange="Editor.onSave()"/>
+  </div>
+
+  <div id="paste-as-div" class="col-two">
+    <b><a href="javascript:void(paste())">Paste</a> commands to <a href="http://gist.github.com/">gist.github</a> (and subscribe).</b>
+  </div>
+</div>
 
 <div id="editor-div">
   <textarea id="editor" rows="40" style="width:900px"
             onkeyup="PrefCommands.setCode(this.value);"></textarea>
 </div>
 
-<div id="save-as-div">
-  <a href="javascript:void(saveAs())">Save</a> commands to file (and subscribe).
-</div>
-
-<div id="external-editor-div">
-  <a href="javascript:void(launch())">Launch</a> an external editor.
-</div>
-
-<div id="paste-as-div">
-  <a href="javascript:void(paste())">Paste</a> commands to <a href="http://gist.github.com/">gist.github</a> (and subscribe).
-</div>
 
 </body></html>
