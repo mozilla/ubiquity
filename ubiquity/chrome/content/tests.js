@@ -102,6 +102,19 @@ function testUtilsUrlWorksWithString() {
   this.assert(Utils.url("http://www.foo.com").spec == "http://www.foo.com/");
 }
 
+function testUtilsUrlWorksWithKeywordArgs() {
+  var kwargs = {
+    base: "http://www.foo.com",
+    uri: "bar/baz.txt"
+  };
+  var expected = "http://www.foo.com/bar/baz.txt";
+
+  this.assert(Utils.url(kwargs).spec == expected);
+
+  kwargs.base = Utils.url(kwargs.base);
+  this.assert(Utils.url(kwargs).spec == expected);
+}
+
 function testCompositeCollectionWorks() {
   let a = new StringCodeSource('a', 'a');
   let b = new StringCodeSource('b', 'b');
