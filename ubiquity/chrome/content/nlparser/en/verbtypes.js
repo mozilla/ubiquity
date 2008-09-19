@@ -613,11 +613,6 @@ NLParser.EnVerb.prototype = {
     for each(part in partialsWithSelection ) {
       completions = completions.concat( part.getParsedSentences());
     }
-    // score each completion based on how well the verb matched
-    // LONGTERM TODO: also score based on how well the arguments matched!!
-    for each( let comp in completions) {
-      comp.matchScore = matchScore;
-    }
 
     return completions;
   },
