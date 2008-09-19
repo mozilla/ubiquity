@@ -298,10 +298,9 @@ function makeDefaultCommandSuggester(commandManager) {
 	sentenceClosure.execute(context);
       };
 
-	  let suggestedCommand = commandManager.__cmdSource.getCommand(parsedSentence._verb._name);
-	  if(suggestedCommand.icon)
-		retVal[titleCasedName].icon = suggestedCommand.icon;
-
+      let suggestedCommand = commandManager.__cmdSource.getCommand(parsedSentence._verb._name);
+      if(suggestedCommand.icon)
+        retVal[titleCasedName].icon = suggestedCommand.icon;
     }
     return retVal;
   }

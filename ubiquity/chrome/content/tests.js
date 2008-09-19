@@ -604,16 +604,13 @@ function testImplicitPronoun() {
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
   this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
-  /*this.assert((!completions[1]._argSuggs.direct_object.text),
-	      "second completion should have no DO.");*/
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   selObject.text = "din";
   completions = verb.getCompletions(["eat"], selObject);
 
-  debugSuggestionList( completions );
-  this.assert( completions.length == 3, "Should have 3 completions.");
+  this.assert( completions.length == 2, "Should have 3 completions.");
   // first completion should be directObject is dinner
   completions[0].execute();
   this.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
@@ -624,9 +621,6 @@ function testImplicitPronoun() {
   completions[1].execute();
   this.assert((foodGotEaten == null), "DO should be null.");
   this.assert((foodGotEatenAt == "diner"), "Place should be diner.");
-  // third completion should have all arguments blank.
-  this.assert((!completions[2]._argSuggs.direct_object.text), "second completion should have no DO.");
-  this.assert((!completions[2]._argSuggs["at"].text), "and no at mod either." );
 
   foodGotEaten = null;
   foodGotEatenAt = null;
@@ -643,7 +637,7 @@ function testImplicitPronoun() {
   completions = verb.getCompletions(["eat", "at", "grill"], selObject);
   this.assert( completions.length == 1, "Should have 1 completion");
   completions[0].execute();
-  this.assert((foodGotEaten == null), "DO should not be set.");
+  this.assert((foodGotEaten == "dinner"), "DO should be dinner.");
   this.assert((foodGotEatenAt == "grill"), "ate at grill.");
 
   foodGotEaten = null;
@@ -993,7 +987,7 @@ function testTextAndHtmlDifferent() {
   var noun_type_different = {
     _name: "different",
     suggest: function( text, html ) {
-      if (text == "Pants")
+      if (text.indexOf("Pant") == 0)
         return [ CmdUtils.makeSugg(text, html) ];
       else
 	return [];
@@ -1019,7 +1013,6 @@ function testTextAndHtmlDifferent() {
   executedHtml = null;
   //without any explicit 'this', should still work...
   comps = verb.getCompletions( ["dostuff"], selObj);
-    debugSuggestionList(comps);
   this.assert(comps.length == 1, "There should be one completions (2)");
   comps[0].execute();
   this.assert( executedText == "Pants", "text should be pants.");
@@ -1030,8 +1023,6 @@ function testTextAndHtmlDifferent() {
   executedHtml = null;
   var nlParser = new NLParser.EnParser( [cmd_different], [noun_type_different]);
   comps = nlParser.nounFirstSuggestions( "Pantalones", "<blink>Pantalones</blink>");
-  debugSuggestionList(comps);
-  // TODO failing!  There are no suggestions!
   this.assert(comps.length == 1, "There should be one completions (3)");
   comps[0].execute();
   this.assert( executedText == "Pantalones", "text should be pantalones.");

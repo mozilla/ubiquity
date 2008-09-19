@@ -66,20 +66,37 @@ NLParser.EnParser.prototype = {
   },
 
   nounFirstSuggestions: function( text, html ) {
-    //Treats input as a noun, figures out what nounTypes it could be,
-    //figures out what verbTypes can take that nounType as input
-    //(either for directObject or for modifiers) and returns a list of
-    //suggestions based on giving the input to those verbs.
+    /*Treats input as a noun, figures out what nounTypes it could be,
+    figures out what verbTypes can take that nounType as input
+    (either for directObject or for modifiers) and returns a list of
+    suggestions based on giving the input to those verbs.*/
     let suggs = [];
+    let matchingNouns = [];
+    let matchingVerbs = [];
     let verb;
+    let noun;
 
+    for each(noun in this._nounTypeList) {
+      if (noun.suggest(text, html).length > 0 )
+	matchingNouns.push(noun);
+      // TODO: nouns will soon be able to suggest asynchronously,
+      // meaning that this is false at first but becomes true later.
+      // What to do then?
+    }
     for each(verb in this._verbList) {
+      for each(noun in matchingNouns) {
+	if (verb.usesNounType(noun)) {
+	  matchingVerbs.push(verb);
+	  continue;
+	}
+      }
+    }
+    for each(verb in matchingVerbs) {
       let selObj = {
 	text: text,
 	html: html
       };
-      suggs = suggs.concat( verb.getCompletions([verb._name], selObj));
-      // TODO find a way to set matchScore = this._arguments[x].type.rankLast ? 0 : 1;
+      suggs = suggs.concat(verb.getCompletions([verb._name], selObj));
     }
     return suggs;
   },
@@ -94,9 +111,7 @@ NLParser.EnParser.prototype = {
       sugg.frequencyScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
     }
 
-    /* TODO: sort first by frequencyScore, then by matchScore (i.e. matchScore
-     * breaks ties.  For now: ignore frequencyScore until we decide what the behavior
-     * there should actually be.
+    /* TODO: frequencyScore not yet implemented, is 0 for all suggestions.
      */
     this._suggestionList.sort( function( x, y ) {
 				 let xMatchScores = x.getMatchScores();

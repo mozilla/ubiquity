@@ -246,14 +246,6 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 	  // in theory become UN-INVALIDATED (re-validated?) when a suggestion
 	  // comes in.  Bleah.
         }
-      } else if (selObj && selObj.text && selObj.text.length > 0){
-        // Argument is not present, but there's a selection.  Try putting it here.
-        // TODO potential problem: selection blocks argument default.
-        try {
-          argSuggs = nounType.suggest(selObj.text, selObj.html);
-        } catch(e) {
-          Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
-        }
       }
       // Otherwise, this argument will simply be left blank (or filled in with
       // default value later.)
@@ -261,6 +253,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
         this.addArgumentSuggestion( argName, argSugg );
       }
     }
+
   },
 
   addArgumentSuggestion: function( arg, sugg ) {
@@ -300,7 +293,85 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     }
 
     return parsedSentences;
-    // TODO sort these before returning them
+  },
+
+  copy: function() {
+    // Deep copy constructor
+    let newPPSentence = new NLParser.EnPartiallyParsedSentence( this._verb,
+								{},
+								this._selObj,
+								this._matchScore);
+    newPPSentence._parsedSentences = [];
+    for each(let parsedSen in this._parsedSentences) {
+      newPPSentence._parsedSentences.push( parsedSen.copy() );
+    }
+    for (let argName in this._argStrings) {
+      newPPSentence._argStrings[argName] = this._argStrings[argName].slice();
+    }
+    newPPSentence._valid = this._valid;
+    return newPPSentence;
+  },
+
+  addImplicitSelectionArgument: function(arg) {
+    /* Takes the selection object and tries using it as a value for
+     * the argument given by arg.  Returns true if it can be used for that
+     * argument, false if not.
+     */
+    let nounType = this._verb._arguments[arg].type;
+    let foundMatches = false;
+    try {
+      let argSuggs = nounType.suggest(this._selObj.text, this._selObj.html);
+      if (argSuggs.length > 0)
+	foundMatches = true;
+      for each( let argSugg in argSuggs) {
+	this.addArgumentSuggestion(arg, argSugg);
+      }
+    } catch(e) {
+      Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
+    }
+    return foundMatches;
+  },
+
+  getUnfilledArguments: function() {
+    /* Returns list of the names of all arguments the verb expects for which
+     no argument was provided in this partially parsed sentence. */
+    let unfilledArguments = [];
+    for (let argName in this._verb._arguments) {
+      if (!this._argStrings[argName] || this._argStrings[argName].length == 0) {
+	unfilledArguments.push(argName);
+      }
+    }
+    return unfilledArguments;
+  },
+
+  getAlternateSelectionInterpolations: function() {
+    /* Returns a list of PartiallyParsedSentences with the selection
+     * interpolated into missing arguments -- one for each argument where
+     * the selection could go.
+     *
+     * If there's no selection, or the selection can't be used, returns a
+     * list containing just this object.
+     */
+    if (!this._selObj || !this._selObj.text || this._selObj.text.length == 0)
+      return [this];
+    let unfilledArgs = this.getUnfilledArguments();
+    if (unfilledArgs.length == 0)
+      return [this];
+    if (unfilledArgs.length == 1) {
+      this.addImplicitSelectionArgument(unfilledArgs[0]);
+      return [this];
+    }
+
+    let alternates = [];
+    for each(let arg in unfilledArgs) {
+      let newParsing = this.copy();
+      let canUseSelection = newParsing.addImplicitSelectionArgument(arg);
+      if (canUseSelection)
+	alternates.push(newParsing);
+    }
+    if (alternates.length == 0)
+      return [this];
+    return alternates;
   }
 };
 
@@ -455,6 +526,7 @@ NLParser.EnVerb.prototype = {
     } // end if there are still arguments
   },
 
+  // TODO move this to PartiallyParsedSentence
   suggestWithPronounSub: function( nounType, words, selObj ) {
     var suggestions = [];
     /* No selection to interpolate. */
@@ -487,6 +559,7 @@ NLParser.EnVerb.prototype = {
     return suggestions;
   },
 
+  // TODO move this to PartiallyParsedSentence too...
   _suggestForNoun: function(nounType, nounLabel, words, selObj) {
     var suggestions = this.suggestWithPronounSub( nounType, words, selObj);
     try {
@@ -510,6 +583,8 @@ NLParser.EnVerb.prototype = {
     */
     let completions = [];
     let partials = [];
+    let partialsWithSelection = [];
+    let part;
     let inputVerb = words[0];
     let matchScore = this.match( inputVerb );
     if (matchScore == 0) {
@@ -526,18 +601,36 @@ NLParser.EnVerb.prototype = {
       partials = this.recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
     }
 
-    // partials is now a list of PartiallyParsedSentences; get the specific
-    // parsings
-    for each( let part in partials ) {
-      completions = completions.concat( part.getParsedSentences());
+    // partials is now a list of PartiallyParsedSentences; if there's a
+    // selection, try using it for any missing arguments...
+    for each(part in partials) {
+      let withSel = part.getAlternateSelectionInterpolations();
+      partialsWithSelection = partialsWithSelection.concat( withSel );
     }
 
+    // partials is now a list of PartiallyParsedSentences (including implicit
+    // selection interpolation); get the specific fully parsed sentences:
+    for each(part in partialsWithSelection ) {
+      completions = completions.concat( part.getParsedSentences());
+    }
     // score each completion based on how well the verb matched
     // LONGTERM TODO: also score based on how well the arguments matched!!
     for each( let comp in completions) {
       comp.matchScore = matchScore;
     }
+
     return completions;
+  },
+
+  usesNounType: function( nounType ) {
+    //Return true if any of the verb's arguments matches nounType.
+    //Used for doing noun-first suggestions.
+    for each ( let arg in this._arguments) {
+      if (arg.type == nounType) {
+	return true;
+      }
+    }
+    return false;
   },
 
   match: function( inputWord ) {
