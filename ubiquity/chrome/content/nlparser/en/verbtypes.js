@@ -72,6 +72,7 @@ NLParser.EnParsedSentence.prototype = {
      argument where a specific nountype (i.e. non-arbitrary-text)
      matches user input.  */
     for (let argName in this._argSuggs) {
+      // TODO sometimes crashing here because argName is [object Object] ??
       if (this._argSuggs[argName])
 	if (!this._verb._arguments[argName].type.rankLast)
 	  this.argMatchScore++;
@@ -229,10 +230,15 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     this._parsedSentences = [newSen];
     for (let argName in this._verb._arguments) {
       let argSuggs = [];
-      let nounType = this._verb._arguments[argName].type;
+      let argument = this._verb._arguments[argName];
       if (argStrings[argName] && argStrings[argName].length > 0) {
-	// If argument is present...
-        argSuggs = this._suggestForNoun(nounType, argName, argStrings[argName]);
+	// If argument is present, try the noun suggestions based both on
+	// substituting pronoun...
+        argSuggs = this.suggestWithPronounSub(argument, argStrings[argName]);
+        let text = argStrings[argName].join(" ");
+	// and on not substituting pronoun...
+        argSuggs = argSuggs.concat(this._argSuggest(argument, text, text));
+
         if (argSuggs.length == 0) {
 	  //One of the arguments is supplied by the user, but produces
 	  // no suggestions, meaning it's an invalid argument for this
@@ -253,7 +259,21 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
   },
 
-  suggestWithPronounSub: function(nounType, words) {
+  _argSuggest: function(argument, text, html) {
+    let suggestions =[];
+    try {
+      suggestions = argument.type.suggest(text, html);
+      // TODO strip out null suggestions right here...
+    } catch(e) {
+      Components.utils.reportError(
+          'Exception occured while getting suggestions for "' +
+	  this._verb._name + '" with noun "' + argument.label + '"'
+          );
+    }
+    return suggestions;
+  },
+
+  suggestWithPronounSub: function(argument, words) {
     var suggestions = [];
     /* No selection to interpolate. */
     if ((!this._selObj.text) && (!this._selObj.html))
@@ -274,35 +294,13 @@ NLParser.EnPartiallyParsedSentence.prototype = {
           wordsCopy[index] = htmlSelection;
           htmlSelection = wordsCopy.join(" ");
         }
-        try {
-          let moreSuggs = nounType.suggest(selection, htmlSelection);
-          suggestions = suggestions.concat( moreSuggs );
-        } catch(e) {
-          Components.utils.reportError(
-	      'Exception occured while getting suggestions for "' +
-	      this._verb._name + '" with noun "' + nounLabel + '"'
-              );
-        }
+	suggestions = suggestions.concat(this._argSuggest(argument,
+  						          selection,
+							  htmlSelection));
       }
     }
     return suggestions;
   },
-
-  _suggestForNoun: function(nounType, nounLabel, words) {
-    var suggestions = this.suggestWithPronounSub( nounType, words);
-    try {
-      let moreSuggestions = nounType.suggest(words.join(" "));
-      // TODO strip out null suggestions right here...
-      suggestions = suggestions.concat(moreSuggestions);
-    } catch(e) {
-      Components.utils.reportError(
-          'Exception occured while getting suggestions for "' +
-	  this._verb._name + '" with noun "' + nounLabel + '"'
-          );
-    }
-    return suggestions;
-  },
-
 
   addArgumentSuggestion: function( arg, sugg ) {
     /* TODO: this function can eventually be used as a callback by
@@ -360,24 +358,17 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     return newPPSentence;
   },
 
-  addImplicitSelectionArgument: function(arg) {
+  addImplicitSelectionArgument: function(argName) {
     /* Takes the selection object and tries using it as a value for
-     * the argument given by arg.  Returns true if it can be used for that
+     * the argument given by argName.  Returns true if it can be used for that
      * argument, false if not.
      */
-    let nounType = this._verb._arguments[arg].type;
-    let foundMatches = false;
-    try {
-      let argSuggs = nounType.suggest(this._selObj.text, this._selObj.html);
-      if (argSuggs.length > 0)
-	foundMatches = true;
-      for each( let argSugg in argSuggs) {
-	this.addArgumentSuggestion(arg, argSugg);
-      }
-    } catch(e) {
-      Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
+    let arg = this._verb._arguments[argName];
+    let argSuggs = this._argSuggest(arg, this._selObj.text, this._selObj.html);
+    for each( let argSugg in argSuggs) {
+      this.addArgumentSuggestion(argName, argSugg);
     }
-    return foundMatches;
+    return ( argSuggs.length > 0 );
   },
 
   getUnfilledArguments: function() {
