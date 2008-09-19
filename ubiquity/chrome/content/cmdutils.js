@@ -467,14 +467,36 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   /* template can be either a string, in which case the string is used
    * for the template, or else it can be {file: "filename"}, in which
-   * case the contents are read from the file and used as the template.
+   * case the following happens:
+   *
+   *   * If the feed is on the user's local filesystem, the file's path
+   *     is assumed to be relative and the file's contents are read and
+   *     used as the template.
+   *
+   *   * Otherwise, the file's path is assumed to be a key into a global
+   *     object called Attachments, which is defined by the feed.  The
+   *     value of this key is used as the template.
+   *
+   * The reason this is done is so that a command feed can be developed
+   * locally and then easily deployed to a remote server as a single
+   * human-readable file without requiring any manual code
+   * modifications; with this system, it becomes straightforward to
+   * construct a post-processing tool for feed deployment that
+   * automatically generates the Attachments object and appends it to
+   * the command feed's code.
    */
-  var chromePrefixUrl = "chrome://ubiquity/content/templates/";
+
   var templStr;
   if (typeof template == "string")
     templStr = template;
-  else if (template.file)
-    templStr = Utils.getLocalUrl( chromePrefixUrl + template.file );
+  else if (template.file) {
+    if (Utils.url(feedId).scheme == "file") {
+      var url = Utils.url({uri: template.file, base: feedId});
+      templStr = Utils.getLocalUrl(url.spec);
+    } else {
+      templStr = Attachments[template.file];
+    }
+  }
 
   var templateObject = Template.parseTemplate( templStr );
   return templateObject.process( data );
