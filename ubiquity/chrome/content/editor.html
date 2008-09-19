@@ -30,12 +30,12 @@
    function watchFile(){ 
       if(file != null && file.exists()){ 
         time = file.lastModifiedTime; 
-        if(time <= lastModifiedTime){ 
-            setTimeout(watchFile, 500);              
-        } else { 
+        if(time > lastModifiedTime){
            document.getElementById('editor').value = Editor.readFile(file); 
            PrefCommands.setCode(document.getElementById('editor').value); 
-        } 
+           lastModifiedTime = time;
+        }
+        setTimeout(watchFile, 500);
       } 
    } 
   </script>
