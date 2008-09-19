@@ -43,6 +43,10 @@ const CMD_REMOVED_ANNO = "ubiquity/removed";
 const CMD_URL_ANNO = "ubiquity/commands";
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
+// This class can be used both as a code source or a collection.  If used as
+// a code source, the ID of the code source is 'linkrel:singleton' and its
+// code is a conglomeration of all subscribed feeds.  As a collection, it
+// yields a code source for every currently-subscribed feed.
 function LinkRelCodeSource() {
   if (LinkRelCodeSource.__singleton)
     return LinkRelCodeSource.__singleton;
@@ -78,11 +82,17 @@ function LinkRelCodeSource() {
     this._sources = newSources;
   };
 
-  this.getCode = function LRCS_getCode() {
+  this.__iterator__ = function LRCS_iterator() {
     this._updateSourceList();
 
+    for each (source in this._sources) {
+      yield source;
+    }
+  };
+
+  this.getCode = function LRCS_getCode() {
     var code = "";
-    for each (source in this._sources)
+    for (source in this)
       code += source.getCode() + "\n";
 
     return code;

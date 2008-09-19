@@ -36,48 +36,69 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function makeBuiltinGlobals(msgService, ubiquityGlobals) {
-  var globals = {
-    XPathResult: XPathResult,
-    XMLHttpRequest: XMLHttpRequest,
-    jQuery: jQuery,
-    Template: TrimPath,
-    Application: Application,
-    Components: Components,
-    window: window,
-    windowGlobals: {},
-    globals: ubiquityGlobals,
-    displayMessage: function() {
-      msgService.displayMessage.apply(msgService, arguments);
-    }
-  };
+function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
+  var windowGlobals = {};
 
-  return globals;
+  function makeGlobals(id) {
+    if (!(id in windowGlobals))
+      windowGlobals[id] = {};
+
+    return {
+      XPathResult: XPathResult,
+      XMLHttpRequest: XMLHttpRequest,
+      jQuery: jQuery,
+      Template: TrimPath,
+      Application: Application,
+      Components: Components,
+      window: window,
+      feedId: id,
+      windowGlobals: windowGlobals[id],
+      globals: ubiquityGlobals.getForId(id),
+      displayMessage: function() {
+        msgService.displayMessage.apply(msgService, arguments);
+      }
+    };
+  }
+
+  return makeGlobals;
 }
 
 function makeBuiltinCodeSources(languageCode) {
-  var codeSources = [
+  var headerCodeSources = [
     new LocalUriCodeSource("chrome://ubiquity/content/utils.js"),
     new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js")
   ];
+  var bodyCodeSources = [
+    new LocalUriCodeSource("chrome://ubiquity/content/onstartup.js")
+  ];
+  var footerCodeSources = [
+    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
+  ];
+
   dump( "Language code is " + languageCode + "\n");
   if (languageCode == "jp") {
-    codeSources = codeSources.concat([
-      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/nountypes.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/builtincmds.js")
-				      ]);
+    headerCodeSources.push(new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/nountypes.js"));
+    bodyCodeSources.push(new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/builtincmds.js"));
   } else if (languageCode == "en") {
-    codeSources = codeSources.concat([
+    headerCodeSources = headerCodeSources.concat([
       new LocalUriCodeSource("chrome://ubiquity/content/date.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/en/nountypes.js"),
+      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/en/nountypes.js")
+    ]);
+    bodyCodeSources = bodyCodeSources.concat([
       new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
       new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
-      PrefCommands,
-      new LinkRelCodeSource()
-				     ]);
+      PrefCommands
+    ]);
   }
-  codeSources = codeSources.concat([
-    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
-				    ]);
-  return codeSources;
+
+  bodyCodeSources = new CompositeCollection([
+    new IterableCollection(bodyCodeSources),
+    new LinkRelCodeSource()
+  ]);
+
+  return new MixedCodeSourceCollection(
+    new IterableCollection(headerCodeSources),
+    bodyCodeSources,
+    new IterableCollection(footerCodeSources)
+  );
 }

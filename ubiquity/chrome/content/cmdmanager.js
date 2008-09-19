@@ -151,6 +151,17 @@ function IterableCollection(itemList) {
   };
 }
 
+function CompositeCollection(collectionList) {
+  this.__iterator__ = function iterator() {
+    for (var i = 0; i < collectionList.length; i++) {
+      let collection = collectionList[i];
+
+      for (var item in collection)
+        yield item;
+    }
+  };
+}
+
 function CommandSource(codeSources, messageService, sandboxFactory) {
   if (!codeSources.__iterator__) {
     if (codeSources.constructor == Array)
@@ -186,15 +197,16 @@ CommandSource.prototype = {
   },
 
   _loadCommands : function() {
-    var sandbox = this._sandboxFactory.makeSandbox();
-
     var commands = {};
+    var sandboxes = {};
 
     for (var codeSource in this._codeSources) {
-      var code = this._codeCache[codeSource.id];
+      var id = codeSource.id;
+      var code = this._codeCache[id];
+      sandboxes[id] = this._sandboxFactory.makeSandbox(id);
 
       try {
-        this._sandboxFactory.evalInSandbox(code, sandbox);
+        this._sandboxFactory.evalInSandbox(code, sandboxes[id]);
       } catch (e) {
         this._messageService.displayMessage(
           {text: "An exception occurred while loading code.",
@@ -205,7 +217,7 @@ CommandSource.prototype = {
 
     var self = this;
 
-    var makeCmdForObj = function(objName) {
+    var makeCmdForObj = function(sandbox, objName) {
       var cmdName = objName.substr(self.CMD_PREFIX.length);
       cmdName = cmdName.replace(/_/g, "-");
       var cmdFunc = sandbox[objName];
@@ -261,18 +273,20 @@ CommandSource.prototype = {
     var commandNames = [];
     var nounTypes = [];
 
-    for (objName in sandbox) {
-      if (objName.indexOf(this.CMD_PREFIX) == 0) {
-        var cmd = makeCmdForObj(objName);
-        var icon = sandbox[objName].icon;
+    for each (sandbox in sandboxes) {
+      for (objName in sandbox) {
+        if (objName.indexOf(this.CMD_PREFIX) == 0) {
+          var cmd = makeCmdForObj(sandbox, objName);
+          var icon = sandbox[objName].icon;
 
-        commands[cmd.name] = cmd;
-        commandNames.push({id: objName,
-                           name : cmd.name,
-                           icon : icon});
-      }
-      if (objName.indexOf(this.NOUN_PREFIX) == 0) {
-	nounTypes.push( sandbox[objName] );
+          commands[cmd.name] = cmd;
+          commandNames.push({id: objName,
+                             name : cmd.name,
+                             icon : icon});
+        }
+        if (objName.indexOf(this.NOUN_PREFIX) == 0) {
+	  nounTypes.push( sandbox[objName] );
+        }
       }
     }
     this._commands = commands;

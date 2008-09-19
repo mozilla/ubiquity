@@ -111,25 +111,36 @@ Utils.setTimeout = function setTimeout(callback, delay) {
 Utils.clearTimeout = function clearTimeout(timerID) {
   if(!(timerID in Utils.__timerData.timers))
     return;
-  
+
   var timer = Utils.__timerData.timers[timerID];
   timer.cancel();
   delete Utils.__timerData.timers[timerID];
-}
+};
 
+// Given a string representing an absolute URL or a nsIURI object,
+// returns an equivalent nsIURI object.  Alternatively, an object with
+// keyword arguments as keys can also be passed in; the following
+// arguments are supported:
+//
+//   uri: a string/nsIURI representing an absolute or relative URL.
+//
+//   base: a string/nsIURI representing an absolute URL, which is used
+//         as the base URL for the 'uri' keyword argument.
 Utils.url = function url(spec) {
-  if (typeof(spec) == "object" && spec instanceof Components.interfaces.nsIURI) {
-    // nsIURL object was passed in, so just return it back
-    return spec;
-  }
-  if (typeof(spec) != "string") {
-    // unknown type
-	throw new Error("Unknown type passed to Utils.url()");
+  var base = null;
+  if (typeof(spec) == "object") {
+    if (spec instanceof Components.interfaces.nsIURI)
+      // nsIURL object was passed in, so just return it back
+      return spec;
+
+    // Assume jQuery-style dictionary with keyword args was passed in.
+    base = Utils.url(spec.base);
+    spec = spec.uri ? spec.uri : null;
   }
 
   var ios = Components.classes["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService);
-  return ios.newURI(spec, null, null);
+  return ios.newURI(spec, null, base);
 };
 
 Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
@@ -160,15 +171,15 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
     .getService(Components.interfaces.nsIWindowMediator);
   var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
   var browser = browserWindow.getBrowser();
-  
+
   var prefService = Components.classes["@mozilla.org/preferences-service;1"]
     .getService(Components.interfaces.nsIPrefBranch);
   var openPref = prefService.getIntPref("browser.link.open_newwindow");
-  
+
   //2 (default in SeaMonkey and Firefox 1.5): In a new window
   //3 (default in Firefox 2 and above): In a new tab
   //1 (or anything else): In the current tab or window
-  
+
   if(browser.mCurrentBrowser.currentURI.spec == "about:blank" && !browser.webProgress.isLoadingDocument )
     browserWindow.loadURI(urlString, null, postInputStream, false);
   else if(openPref == 3)
@@ -264,10 +275,10 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
   // based on code from http://mxr.mozilla.org/mozilla/source/browser/components/microsummaries/src/nsMicrosummaryService.js
   const Cc = Components.classes;
   const Ci = Components.interfaces;
-  
+
   var rootElement = null;
   var iframe = null;
-  
+
   var parseHandler = {
     handleEvent: function(event) {
       event.target.removeEventListener("DOMContentLoaded", this, false);
@@ -276,8 +287,8 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
       successCallback(doc);
     }
   };
-  
-  function parseHtml(htmlText) {  
+
+  function parseHtml(htmlText) {
     var windowMediator = Cc['@mozilla.org/appshell/window-mediator;1']
       .getService(Ci.nsIWindowMediator);
     var window = windowMediator.getMostRecentWindow("navigator:browser");
@@ -299,7 +310,7 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
     iframe.docShell.allowMetaRedirects = false;
     iframe.docShell.allowSubframes = false;
     iframe.docShell.allowImages = false;
-    
+
     // Convert the HTML text into an input stream.
     var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
       .createInstance(Ci.nsIScriptableUnicodeConverter);
@@ -318,14 +329,14 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
     baseChannel.contentType = "text/html";
     // this will always be UTF-8 thanks to XMLHttpRequest and nsIScriptableUnicodeConverter
     baseChannel.contentCharset = "UTF-8";
-    
+
     // background loads don't fire "load" events, listen for DOMContentLoaded instead
     iframe.addEventListener("DOMContentLoaded", parseHandler, true);
     var uriLoader = Cc["@mozilla.org/uriloader;1"]
       .getService(Ci.nsIURILoader);
     uriLoader.openURI(channel, true, iframe.docShell);
   }
-  
+
   var ajaxOptions = {
     url: remoteUrl,
     type: "GET",
@@ -338,14 +349,14 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
         errorCallback();
     }
   };
-  
+
   if(postParams) {
     ajaxOptions.type = "POST";
     ajaxOptions.data = postParams;
   }
-  
+
   jQuery.ajax(ajaxOptions);
-  
+
 }
 
 Utils.trim = function(str) {

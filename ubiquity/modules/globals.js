@@ -41,11 +41,25 @@
 
 var EXPORTED_SYMBOLS = ["UbiquityGlobals"];
 
+var globalObjects = {};
+
 var UbiquityGlobals = {
   get languageCode() {
     var prefs = Components.classes["@mozilla.org/preferences-service;1"]
                 .getService(Components.interfaces.nsIPrefBranch);
     var lang = prefs.getCharPref("extensions.ubiquity.language");
     return lang;
+  },
+
+  getForId: function UbiquityGlobals_getForId(id) {
+    var self = this;
+
+    if (!(id in globalObjects))
+      globalObjects[id] = {
+        get languageCode() {
+          return self.languageCode;
+        }
+      };
+    return globalObjects[id];
   }
 };
