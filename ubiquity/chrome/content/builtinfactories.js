@@ -64,29 +64,37 @@ function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
 }
 
 function makeBuiltinCodeSources(languageCode) {
+  var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
+              .getService(Components.interfaces.nsIIOService);
+  var extMgr = Components.classes["@mozilla.org/extensions/manager;1"]
+               .getService(Components.interfaces.nsIExtensionManager);
+  var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
+  var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
+  var baseUri = ioSvc.newFileURI(extD).spec + "chrome/content/";
+
   var headerCodeSources = [
-    new LocalUriCodeSource("chrome://ubiquity/content/utils.js"),
-    new LocalUriCodeSource("chrome://ubiquity/content/cmdutils.js")
+    new LocalUriCodeSource(baseUri + "utils.js"),
+    new LocalUriCodeSource(baseUri + "cmdutils.js")
   ];
   var bodyCodeSources = [
-    new LocalUriCodeSource("chrome://ubiquity/content/onstartup.js")
+    new LocalUriCodeSource(baseUri + "onstartup.js")
   ];
   var footerCodeSources = [
-    new LocalUriCodeSource("chrome://ubiquity/content/final.js")
+    new LocalUriCodeSource(baseUri + "final.js")
   ];
 
   dump( "Language code is " + languageCode + "\n");
   if (languageCode == "jp") {
-    headerCodeSources.push(new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/nountypes.js"));
-    bodyCodeSources.push(new LocalUriCodeSource("chrome://ubiquity/content/nlparser/jp/builtincmds.js"));
+    headerCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/nountypes.js"));
+    bodyCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/builtincmds.js"));
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource("chrome://ubiquity/content/date.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/nlparser/en/nountypes.js")
+      new LocalUriCodeSource(baseUri + "date.js"),
+      new LocalUriCodeSource(baseUri + "nlparser/en/nountypes.js")
     ]);
     bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource("chrome://ubiquity/content/builtincmds.js"),
-      new LocalUriCodeSource("chrome://ubiquity/content/tagging_cmds.js"),
+      new LocalUriCodeSource(baseUri + "builtincmds.js"),
+      new LocalUriCodeSource(baseUri + "tagging_cmds.js"),
       PrefCommands
     ]);
   }
