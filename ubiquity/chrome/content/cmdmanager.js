@@ -144,9 +144,31 @@ CommandManager.prototype = {
   }
 };
 
+function IterableCollection(itemList) {
+  this.__iterator__ = function iterator() {
+    for (var i = 0; i < itemList.length; i++)
+      yield itemList[i];
+  };
+}
+
+function CompositeCollection(collectionList) {
+  this.__iterator__ = function iterator() {
+    for (var i = 0; i < collectionList.length; i++) {
+      let collection = collectionList[i];
+
+      for (var item in collection)
+        yield item;
+    }
+  };
+}
+
 function CommandSource(codeSources, messageService, sandboxFactory) {
-  if (codeSources.length == undefined)
-    codeSources = [codeSources];
+  if (!codeSources.__iterator__) {
+    if (codeSources.constructor == Array)
+      codeSources = new IterableCollection(codeSources);
+    else
+      codeSources = new IterableCollection([codeSources]);
+  }
 
   if (sandboxFactory == undefined)
     sandboxFactory = new SandboxFactory();
@@ -154,7 +176,7 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
   this._codeSources = codeSources;
   this._messageService = messageService;
   this._commands = [];
-  this._codeCache = [];
+  this._codeCache = null;
   this._nounTypes = [];
 }
 
@@ -163,23 +185,28 @@ CommandSource.prototype = {
   NOUN_PREFIX : "noun_",
 
   refresh : function() {
-    for (var i = 0; i < this._codeSources.length; i++) {
-      var code = this._codeSources[i].getCode();
-      this._codeCache[i] = code;
+    this._codeCache = {};
+    for (var codeSource in this._codeSources) {
+      var code = codeSource.getCode();
+
+      if (typeof(codeSource.id) == "undefined")
+        throw new Error("Code source ID is undefined for code: " + code);
+      this._codeCache[codeSource.id] = code;
     }
     this._loadCommands();
   },
 
   _loadCommands : function() {
-    var sandbox = this._sandboxFactory.makeSandbox();
-
     var commands = {};
+    var sandboxes = {};
 
-    for (var i = 0; i < this._codeSources.length; i++) {
-      var code = this._codeCache[i];
+    for (var codeSource in this._codeSources) {
+      var id = codeSource.id;
+      var code = this._codeCache[id];
+      sandboxes[id] = this._sandboxFactory.makeSandbox(id);
 
       try {
-        this._sandboxFactory.evalInSandbox(code, sandbox);
+        this._sandboxFactory.evalInSandbox(code, sandboxes[id]);
       } catch (e) {
         this._messageService.displayMessage(
           {text: "An exception occurred while loading code.",
@@ -190,7 +217,7 @@ CommandSource.prototype = {
 
     var self = this;
 
-    var makeCmdForObj = function(objName) {
+    var makeCmdForObj = function(sandbox, objName) {
       var cmdName = objName.substr(self.CMD_PREFIX.length);
       cmdName = cmdName.replace(/_/g, "-");
       var cmdFunc = sandbox[objName];
@@ -246,18 +273,20 @@ CommandSource.prototype = {
     var commandNames = [];
     var nounTypes = [];
 
-    for (objName in sandbox) {
-      if (objName.indexOf(this.CMD_PREFIX) == 0) {
-        var cmd = makeCmdForObj(objName);
-        var icon = sandbox[objName].icon;
+    for each (sandbox in sandboxes) {
+      for (objName in sandbox) {
+        if (objName.indexOf(this.CMD_PREFIX) == 0) {
+          var cmd = makeCmdForObj(sandbox, objName);
+          var icon = sandbox[objName].icon;
 
-        commands[cmd.name] = cmd;
-        commandNames.push({id: objName,
-                           name : cmd.name,
-                           icon : icon});
-      }
-      if (objName.indexOf(this.NOUN_PREFIX) == 0) {
-	nounTypes.push( sandbox[objName] );
+          commands[cmd.name] = cmd;
+          commandNames.push({id: objName,
+                             name : cmd.name,
+                             icon : icon});
+        }
+        if (objName.indexOf(this.NOUN_PREFIX) == 0) {
+	  nounTypes.push( sandbox[objName] );
+        }
       }
     }
     this._commands = commands;
@@ -274,7 +303,7 @@ CommandSource.prototype = {
   },
 
   getCommand : function(name) {
-    if (this._codeCache.length == 0)
+    if (this._codeCache === null)
       this.refresh();
 
     if (this._commands[name])

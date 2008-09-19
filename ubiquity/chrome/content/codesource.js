@@ -35,8 +35,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function StringCodeSource(code) {
+function MixedCodeSourceCollection(headerSources,
+                                   bodySources,
+                                   footerSources) {
+  this.__iterator__ = function MCSC_iterator() {
+    let headerCode = '';
+    for (headerCs in headerSources) {
+      headerCode += headerCs.getCode();
+    }
+
+    let footerCode = '';
+    for (footerCs in footerSources) {
+      footerCode += footerCs.getCode();
+    }
+
+    for (bodyCs in bodySources) {
+      let code = headerCode + bodyCs.getCode() + footerCode;
+      yield new StringCodeSource(code, bodyCs.id);
+    }
+  };
+}
+
+function StringCodeSource(code, id) {
   this._code = code;
+  this.id = id;
 }
 
 StringCodeSource.prototype = {
@@ -46,6 +68,7 @@ StringCodeSource.prototype = {
 };
 
 function RemoteUriCodeSource(pageInfo) {
+  this.id = pageInfo.jsUri.spec;
   this._pageInfo = pageInfo;
   this._req = null;
 };
@@ -104,6 +127,7 @@ RemoteUriCodeSource.prototype = {
 };
 
 function LocalUriCodeSource(uri) {
+  this.id = uri;
   this.uri = uri;
 }
 

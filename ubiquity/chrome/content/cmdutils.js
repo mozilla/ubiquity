@@ -193,6 +193,18 @@ CmdUtils.injectHtml = function injectHtml( html ) {
   doc.body.appendChild(div.firstChild);
 };
 
+
+//Function based on the one i found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
+CmdUtils.copyToClipboard = function copyToClipboard(text){
+   var clipboard = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+   var transferArea = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+   var string = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+   transferArea.addDataFlavor('text/unicode');
+   string.data = text;
+   transferArea.setTransferData("text/unicode", string, text.length * 2);
+   clipboard.setData(transferArea, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+}
+
 CmdUtils.log = function log(what) {
   var console = CmdUtils.getWindowInsecure().console;
   if (typeof(console) != "undefined"){
@@ -477,14 +489,7 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
   iframe.style.border = "none";
   iframe.setAttribute("width", 500);
   function onXulLoad() {
-    var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                .getService(Components.interfaces.nsIIOService);
-    var extMgr = Components.classes["@mozilla.org/extensions/manager;1"]
-                 .getService(Components.interfaces.nsIExtensionManager);
-    var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
-    var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
-    var uri = ioSvc.newFileURI(extD).spec;
-    uri += "chrome/content/" + filePath;
+    var uri = Utils.url({uri: filePath, base: feedId}).spec;
     browser = iframe.contentDocument.createElement("browser");
     browser.setAttribute("src", uri);
     browser.setAttribute("width", 500);

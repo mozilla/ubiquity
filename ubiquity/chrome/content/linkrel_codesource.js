@@ -43,6 +43,10 @@ const CMD_REMOVED_ANNO = "ubiquity/removed";
 const CMD_URL_ANNO = "ubiquity/commands";
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
+// This class can be used both as a code source or a collection.  If used as
+// a code source, the ID of the code source is 'linkrel:singleton' and its
+// code is a conglomeration of all subscribed feeds.  As a collection, it
+// yields a code source for every currently-subscribed feed.
 function LinkRelCodeSource() {
   if (LinkRelCodeSource.__singleton)
     return LinkRelCodeSource.__singleton;
@@ -65,7 +69,8 @@ function LinkRelCodeSource() {
           // TODO: What about 0.1 feeds?  Just make users
           // resubscribe to all their stuff?  Or implement
           // manual updating?
-          source = new StringCodeSource(pageInfo.getCode());
+          source = new StringCodeSource(pageInfo.getCode(),
+                                        pageInfo.jsUri.spec);
       } else if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
         source = new LocalUriCodeSource(href);
       } else {
@@ -77,15 +82,23 @@ function LinkRelCodeSource() {
     this._sources = newSources;
   };
 
-  this.getCode = function LRCS_getCode() {
+  this.__iterator__ = function LRCS_iterator() {
     this._updateSourceList();
 
+    for each (source in this._sources) {
+      yield source;
+    }
+  };
+
+  this.getCode = function LRCS_getCode() {
     var code = "";
-    for each (source in this._sources)
+    for (source in this)
       code += source.getCode() + "\n";
 
     return code;
   };
+
+  this.id = 'linkrel:singleton';
 
   LinkRelCodeSource.__singleton = this;
 }
@@ -175,7 +188,7 @@ LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
 LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
   let annSvc = this.__getAnnSvc();
   let uri = Utils.url(info.url);
-  
+
   if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO))
       annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
   annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, info.sourceCode, 0,

@@ -206,3 +206,9 @@ a:hover {
   font-size: 8pt;
   color: #009900;
 }
+
+.notification {
+  color: blue;
+  font-variant: small-caps;
+  font-size: 15pt;
+}

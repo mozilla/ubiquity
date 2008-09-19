@@ -107,6 +107,7 @@ var XpcShellTestResponder = {
 };
 
 load(basePath + "/chrome/content/utils.js");
+load(basePath + "/chrome/content/codesource.js");
 load(basePath + "/chrome/content/linkrel_codesource.js");
 load(basePath + "/chrome/content/cmdutils.js");
 load(basePath + "/chrome/content/suggestion_memory.js");
