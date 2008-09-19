@@ -234,7 +234,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
       if (argStrings[argName] && argStrings[argName].length > 0) {
 	// If argument is present, try the noun suggestions based both on
 	// substituting pronoun...
-        argSuggs = this.suggestWithPronounSub(argument, argStrings[argName]);
+        argSuggs = this._suggestWithPronounSub(argument, argStrings[argName]);
         let text = argStrings[argName].join(" ");
 	// and on not substituting pronoun...
         argSuggs = argSuggs.concat(this._argSuggest(argument, text, text));
@@ -273,7 +273,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     return suggestions;
   },
 
-  suggestWithPronounSub: function(argument, words) {
+  _suggestWithPronounSub: function(argument, words) {
     var suggestions = [];
     /* No selection to interpolate. */
     if ((!this._selObj.text) && (!this._selObj.html))
@@ -358,7 +358,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     return newPPSentence;
   },
 
-  addImplicitSelectionArgument: function(argName) {
+  _addImplicitSelectionArgument: function(argName) {
     /* Takes the selection object and tries using it as a value for
      * the argument given by argName.  Returns true if it can be used for that
      * argument, false if not.
@@ -371,7 +371,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     return ( argSuggs.length > 0 );
   },
 
-  getUnfilledArguments: function() {
+  _getUnfilledArguments: function() {
     /* Returns list of the names of all arguments the verb expects for which
      no argument was provided in this partially parsed sentence. */
     let unfilledArguments = [];
@@ -393,18 +393,18 @@ NLParser.EnPartiallyParsedSentence.prototype = {
      */
     if (!this._selObj || !this._selObj.text || this._selObj.text.length == 0)
       return [this];
-    let unfilledArgs = this.getUnfilledArguments();
+    let unfilledArgs = this._getUnfilledArguments();
     if (unfilledArgs.length == 0)
       return [this];
     if (unfilledArgs.length == 1) {
-      this.addImplicitSelectionArgument(unfilledArgs[0]);
+      this._addImplicitSelectionArgument(unfilledArgs[0]);
       return [this];
     }
 
     let alternates = [];
     for each(let arg in unfilledArgs) {
       let newParsing = this.copy();
-      let canUseSelection = newParsing.addImplicitSelectionArgument(arg);
+      let canUseSelection = newParsing._addImplicitSelectionArgument(arg);
       if (canUseSelection)
 	alternates.push(newParsing);
     }
@@ -495,7 +495,11 @@ NLParser.EnVerb.prototype = {
 
   // RecursiveParse is huge and complicated.
   // I think it should probably be moved from Verb to NLParser.
-  recursiveParse: function(unusedWords, filledArgs, unfilledArgs, selObj, matchScore) {
+  _recursiveParse: function(unusedWords,
+			    filledArgs,
+			    unfilledArgs,
+			    selObj,
+			    matchScore) {
     var x;
     var suggestions = [];
     var completions = [];
@@ -542,7 +546,7 @@ NLParser.EnVerb.prototype = {
             let nounWords = newUnusedWords.splice( x, lastWord - x );
             newFilledArgs = dictDeepCopy( filledArgs );
             newFilledArgs[ argName ] = nounWords;
-            newCompletions = this.recursiveParse( newUnusedWords,
+            newCompletions = this._recursiveParse( newUnusedWords,
                                                   newFilledArgs,
                                                   newUnfilledArgs,
                                                   selObj,
@@ -554,7 +558,7 @@ NLParser.EnVerb.prototype = {
       } // end for each unused word
       // If argument was never found, try a completion where it's left blank.
       if (!argumentFound) {
-        newCompletions = this.recursiveParse( unusedWords,
+        newCompletions = this._recursiveParse( unusedWords,
                                               filledArgs,
        					      newUnfilledArgs,
        					      selObj,
@@ -576,7 +580,7 @@ NLParser.EnVerb.prototype = {
     let partialsWithSelection = [];
     let part;
     let inputVerb = words[0];
-    let matchScore = this.match( inputVerb );
+    let matchScore = this._match( inputVerb );
     if (matchScore == 0) {
       // Not a match to this verb!
       return [];
@@ -588,7 +592,7 @@ NLParser.EnVerb.prototype = {
       partials.push(new NLParser.EnPartiallyParsedSentence(this, {}, selObj, matchScore));
     }
     else {
-      partials = this.recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
+      partials = this._recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
     }
 
     // partials is now a list of PartiallyParsedSentences; if there's a
@@ -618,7 +622,7 @@ NLParser.EnVerb.prototype = {
     return false;
   },
 
-  match: function( inputWord ) {
+  _match: function( inputWord ) {
     /* returns a float from 0 to 1 telling how good of a match the input
        is to this verb.  Return value will be used for sorting.
        The current heuristic is extremely ad-hoc but produces the ordering
