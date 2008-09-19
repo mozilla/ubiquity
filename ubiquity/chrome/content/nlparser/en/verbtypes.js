@@ -232,10 +232,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
       let nounType = this._verb._arguments[argName].type;
       if (argStrings[argName] && argStrings[argName].length > 0) {
 	// If argument is present...
-        argSuggs = this._verb._suggestForNoun(nounType,
-	                                      argName,
-                                              argStrings[argName],
-                                              selObj);
+        argSuggs = this._suggestForNoun(nounType, argName, argStrings[argName]);
         if (argSuggs.length == 0) {
 	  //One of the arguments is supplied by the user, but produces
 	  // no suggestions, meaning it's an invalid argument for this
@@ -255,6 +252,57 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     }
 
   },
+
+  suggestWithPronounSub: function(nounType, words) {
+    var suggestions = [];
+    /* No selection to interpolate. */
+    if ((!this._selObj.text) && (!this._selObj.html))
+      return [];
+
+    let selection = this._selObj.text;
+    let htmlSelection = this._selObj.html;
+    for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
+      let index = words.indexOf( pronoun );
+      if ( index > -1 ) {
+        if (selection) {
+          let wordsCopy = words.slice();
+          wordsCopy[index] = selection;
+          selection = wordsCopy.join(" ");
+            }
+        if (htmlSelection) {
+          let wordsCopy = words.slice();
+          wordsCopy[index] = htmlSelection;
+          htmlSelection = wordsCopy.join(" ");
+        }
+        try {
+          let moreSuggs = nounType.suggest(selection, htmlSelection);
+          suggestions = suggestions.concat( moreSuggs );
+        } catch(e) {
+          Components.utils.reportError(
+	      'Exception occured while getting suggestions for "' +
+	      this._verb._name + '" with noun "' + nounLabel + '"'
+              );
+        }
+      }
+    }
+    return suggestions;
+  },
+
+  _suggestForNoun: function(nounType, nounLabel, words) {
+    var suggestions = this.suggestWithPronounSub( nounType, words);
+    try {
+      let moreSuggestions = nounType.suggest(words.join(" "));
+      // TODO strip out null suggestions right here...
+      suggestions = suggestions.concat(moreSuggestions);
+    } catch(e) {
+      Components.utils.reportError(
+          'Exception occured while getting suggestions for "' +
+	  this._verb._name + '" with noun "' + nounLabel + '"'
+          );
+    }
+    return suggestions;
+  },
+
 
   addArgumentSuggestion: function( arg, sugg ) {
     /* TODO: this function can eventually be used as a callback by
@@ -524,55 +572,6 @@ NLParser.EnVerb.prototype = {
       }
       return completions;
     } // end if there are still arguments
-  },
-
-  // TODO move this to PartiallyParsedSentence
-  suggestWithPronounSub: function( nounType, words, selObj ) {
-    var suggestions = [];
-    /* No selection to interpolate. */
-    if ((!selObj.text) && (!selObj.html))
-      return [];
-
-    let selection = selObj.text;
-    let htmlSelection = selObj.html;
-    for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
-      let index = words.indexOf( pronoun );
-      if ( index > -1 ) {
-        if (selection) {
-          let wordsCopy = words.slice();
-          wordsCopy[index] = selection;
-          selection = wordsCopy.join(" ");
-            }
-        if (htmlSelection) {
-          let wordsCopy = words.slice();
-          wordsCopy[index] = htmlSelection;
-          htmlSelection = wordsCopy.join(" ");
-        }
-        try {
-          let moreSuggs = nounType.suggest(selection, htmlSelection);
-          suggestions = suggestions.concat( moreSuggs );
-        } catch(e) {
-          Components.utils.reportError("Exception occured while getting suggestions for: " + this._name);
-        }
-      }
-    }
-    return suggestions;
-  },
-
-  // TODO move this to PartiallyParsedSentence too...
-  _suggestForNoun: function(nounType, nounLabel, words, selObj) {
-    var suggestions = this.suggestWithPronounSub( nounType, words, selObj);
-    try {
-      let moreSuggestions = nounType.suggest(words.join(" "));
-      // TODO strip out null suggestions right here...
-      suggestions = suggestions.concat(moreSuggestions);
-    } catch(e) {
-      Components.utils.reportError(
-          'Exception occured while getting suggestions for "' + this._name +
-          '" with noun "' + nounLabel + '"'
-          );
-    }
-    return suggestions;
   },
 
   getCompletions: function( words, selObj ) {
