@@ -178,6 +178,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
 
 CmdUtils.CreateCommand({
   name: "wikipedia",
+  synonyms: ["lookup"],
   takes: {search: noun_arb_text},
   modifiers: {in: noun_type_language},
   locale: "en-US",
@@ -262,6 +263,7 @@ CmdUtils.CreateCommand({
 
 makeSearchCommand({
   name: "IMDB",
+  synonyms: ["movie", "actor"],
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
   icon: "http://i.imdb.com/favicon.ico",
   description: "Searches the Internet Movie Database for your words."
@@ -382,6 +384,7 @@ makeSearchCommand({
 
 makeSearchCommand({
   name: "YouTube",
+  synonyms: ["video"],
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
   icon: "http://www.youtube.com/favicon.ico",
   description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words.",
@@ -410,6 +413,7 @@ makeSearchCommand({
 
 makeSearchCommand({
   name: "Flickr",
+  synonyms: ["images"],
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
   icon: "http://www.flickr.com/favicon.ico",
   description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words.",
@@ -1676,6 +1680,7 @@ const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
   name: "twitter",
+  synonyms: ["tweet"],
   icon: "http://assets3.twitter.com/images/favicon.ico",
   takes: {status: noun_arb_text},
   modifiers: {},
@@ -1737,6 +1742,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "digg",
+  synonyms: ["share-on-digg"],
   icon: "http://digg.com/favicon.ico",
   homepage: "http://www.gialloporpora.netsons.org",
   description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
@@ -2265,6 +2271,7 @@ function sparkline(data) {
 
 CmdUtils.CreateCommand({
   name: "sparkline",
+  synonyms: ["graph"],
   description: "Graphs the current selection, turning it into a sparkline.",
   takes: {"data": noun_arb_text},
   author: {name: "Aza Raskin", email:"aza@mozilla.com"},
