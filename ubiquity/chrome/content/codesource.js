@@ -51,14 +51,15 @@ function MixedCodeSourceCollection(headerSources,
 
     for (bodyCs in bodySources) {
       let code = headerCode + bodyCs.getCode() + footerCode;
-      yield new StringCodeSource(code, bodyCs.id);
+      yield new StringCodeSource(code, bodyCs.id, bodyCs.dom);
     }
   };
 }
 
-function StringCodeSource(code, id) {
+function StringCodeSource(code, id, dom) {
   this._code = code;
   this.id = id;
+  this.dom = dom;
 }
 
 StringCodeSource.prototype = {
@@ -184,6 +185,8 @@ function XhtmlCodeSource(codeSource) {
       jQuery("script", dom).each(function() { newCode += this.text; });
       return newCode;
     }
+
+    dom = undefined;
     return code;
   };
 }

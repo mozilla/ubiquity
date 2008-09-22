@@ -95,7 +95,7 @@ function makeBuiltinCodeSources(languageCode) {
     bodyCodeSources = bodyCodeSources.concat([
       new LocalUriCodeSource(baseUri + "builtincmds.js"),
       new LocalUriCodeSource(baseUri + "tagging_cmds.js"),
-      PrefCommands
+      new XhtmlCodeSource(PrefCommands)
     ]);
   }
 

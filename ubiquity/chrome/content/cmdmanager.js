@@ -206,6 +206,8 @@ CommandSource.prototype = {
       sandboxes[id] = this._sandboxFactory.makeSandbox(id);
 
       try {
+        if (codeSource.dom)
+          sandboxes[id].dom = codeSource.dom;
         this._sandboxFactory.evalInSandbox(code, sandboxes[id]);
       } catch (e) {
         this._messageService.displayMessage(
