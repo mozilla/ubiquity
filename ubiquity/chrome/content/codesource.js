@@ -165,6 +165,9 @@ function XhtmlCodeSource(codeSource) {
   this.__defineGetter__("dom",
                         function() { return dom ? dom : undefined; });
 
+  this.__defineGetter__("id",
+                        function() { return codeSource.id; });
+
   this.getCode = function XHTMLCS_getCode() {
     var code = codeSource.getCode();
 

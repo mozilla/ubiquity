@@ -100,10 +100,12 @@ function setupLrcsForTesting() {
 function testXhtmlCodeSourceWorks() {
   var code = "function cmd_foo() {};";
   var xhtml = '<html xmlns="http://www.w3.org/1999/xhtml"><script>' + code + '</script></html>';
-  var fakeSource = {getCode: function() { return xhtml; }};
+  var fakeSource = {getCode: function() { return xhtml; },
+                    id: "blah"};
 
   var xcs = new XhtmlCodeSource(fakeSource);
 
+  this.assert(xcs.id == "blah", "id must inherit");
   if (XhtmlCodeSource.isAvailable()) {
     var xcsCode = xcs.getCode();
     this.assert(xcsCode == code,
