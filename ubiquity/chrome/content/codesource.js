@@ -154,3 +154,42 @@ LocalUriCodeSource.prototype = {
       return "";
   }
 };
+
+function XhtmlCodeSource(codeSource) {
+  var dom;
+
+  function DomUnavailableError() {};
+
+  this.DomUnavailableError = DomUnavailableError;
+
+  this.__defineGetter__("dom",
+                        function() { return dom ? dom : undefined; });
+
+  this.getCode = function XHTMLCS_getCode() {
+    var code = codeSource.getCode();
+
+    var trimmedCode = Utils.trim(code);
+    if (trimmedCode.length > 0 &&
+        trimmedCode[0] == "<") {
+      if (!XhtmlCodeSource.isAvailable())
+        throw new DomUnavailableError();
+      var parser = new DOMParser();
+      // TODO: What if this fails?
+      dom = parser.parseFromString(code, "text/xml");
+
+      var newCode = "";
+      jQuery("script", dom).each(function() { newCode += this.text; });
+      return newCode;
+    }
+    return code;
+  };
+}
+
+XhtmlCodeSource.isAvailable = function isAvailable() {
+  try {
+    var parser = new DOMParser();
+  } catch (e if e instanceof ReferenceError) {
+    return false;
+  }
+  return true;
+};
