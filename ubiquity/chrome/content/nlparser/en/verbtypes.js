@@ -255,6 +255,9 @@ NLParser.EnPartiallyParsedSentence.prototype = {
   },
 
   _argSuggest: function(argName, text, html) {
+    /* For the given argument of the verb, sends (text,html) to the nounType
+     * gets back suggestions for the argument, and adds each suggestion.
+     * Return true if at least one arg suggestion was added in this way. */
     try {
       let argument = this._verb._arguments[argName];
       let suggestions = argument.type.suggest(text, html);
@@ -263,6 +266,20 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 	  this.addArgumentSuggestion(argName, argSugg);
 	}
       }
+      /* Now, if the noun has an asyncSuggest method (most don't), call that
+       with a callback so that any new suggestions the noun generates
+       will end up passed to addArgumentSuggestion. */
+      if (argument.type.asyncSuggest) {
+	let self = this;
+	let callback = function(newSugg) {
+          self.addArgumentSuggestion(argName, newSugg);
+	  /* TODO send a ping to the global observer to let the
+	   * Ubiquity UI know to update its UI to show the new suggestion
+	   * and resort the suggestion list if needed. */
+	};
+	argument.type.asyncSuggest(text, html, callback);
+      }
+
       return (suggestions.length > 0);
     } catch(e) {
       Components.utils.reportError(
@@ -274,6 +291,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
   },
 
   _suggestWithPronounSub: function(argName, words) {
+    /* */
     let gotAnySuggestions = false;
     /* No selection to interpolate. */
     if ((!this._selObj.text) && (!this._selObj.html))

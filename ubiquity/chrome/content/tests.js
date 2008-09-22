@@ -1141,6 +1141,48 @@ function testTextAndHtmlDifferent() {
 
 }
 
+function testAsyncNounSuggestions() {
+  var noun_type_slowness = {
+    _name: "slowness",
+    suggest: function( text, html ) {
+      if (text.indexOf("hello")== 0)
+        return [ CmdUtils.makeSugg("Robert E. Lee") ];
+      else
+	return [];
+    },
+    asyncSuggest: function( text, html, callback ) {
+      // Do all kinds of network calls here
+      if (text.indexOf("hello") == 0) {
+        callback( CmdUtils.makeSugg("slothitude") );
+        callback( CmdUtils.makeSugg("snuffleupagus") );
+      }
+    }
+  };
+  var cmd_slow = {
+    name: "dostuff",
+    DOLabel: "thing",
+    DOType: noun_type_slowness,
+    execute: function(context, directObject) {
+
+    }
+  };
+  var verb = new NLParser.EnVerb(cmd_slow);
+  var selObj = {
+    text: "", html: ""
+  };
+  var comps = verb.getCompletions(["dostuff", "hello"], selObj);
+  var assert = this.assert;
+  var assertDirObj = function( completion, expected) {
+    assert( completion._argSuggs.direct_object.text == expected,
+		 "Expected " + expected );
+  };
+
+  this.assert( comps.length == 3, "there should be 3 completions.");
+  assertDirObj( comps[0], "Robert E. Lee");
+  assertDirObj( comps[1], "slothitude");
+  assertDirObj( comps[2], "snuffleupagus");
+}
+
 // TODO a test where we put inalid value into an argument on purpose, ensure
 // verb returns no suggestions.
 
@@ -1169,3 +1211,7 @@ function testTextAndHtmlDifferent() {
 
 // TODO test ranking based on noun match quality, when verb-match quality is
 // equivalent.
+
+// TODO test that match with more (and more specific) arguments filled
+// is ranked ahead of match with unfilled arguments, even if there are
+// defaults.
