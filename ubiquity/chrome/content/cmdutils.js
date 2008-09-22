@@ -89,9 +89,6 @@ CmdUtils.setSelection = function setSelection(content, options) {
     }
 
     if( content != plainText){
-      /*displayMessage( "This command requires a rich " +
-                  "text field for full support.");*/
-      // Dims' patch for #253:
       focused.value = content;
       return;
     }

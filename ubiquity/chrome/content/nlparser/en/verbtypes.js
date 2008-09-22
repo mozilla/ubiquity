@@ -230,16 +230,15 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     this._parsedSentences = [newSen];
     for (let argName in this._verb._arguments) {
       let argSuggs = [];
-      let argument = this._verb._arguments[argName];
       if (argStrings[argName] && argStrings[argName].length > 0) {
 	// If argument is present, try the noun suggestions based both on
 	// substituting pronoun...
-        argSuggs = this._suggestWithPronounSub(argument, argStrings[argName]);
+        let gotSuggs = this._suggestWithPronounSub(argName, argStrings[argName]);
         let text = argStrings[argName].join(" ");
 	// and on not substituting pronoun...
-        argSuggs = argSuggs.concat(this._argSuggest(argument, text, text));
+        let gotSuggsDirect = this._argSuggest(argName, text, text);
 
-        if (argSuggs.length == 0) {
+        if (!gotSuggs && !gotSuggsDirect) {
 	  //One of the arguments is supplied by the user, but produces
 	  // no suggestions, meaning it's an invalid argument for this
 	  // command -- that makes the whole parsing invalid!!
@@ -252,32 +251,33 @@ NLParser.EnPartiallyParsedSentence.prototype = {
       }
       // Otherwise, this argument will simply be left blank (or filled in with
       // default value later.)
-      for each( let argSugg in argSuggs ) {
-        this.addArgumentSuggestion( argName, argSugg );
-      }
     }
-
   },
 
-  _argSuggest: function(argument, text, html) {
-    let suggestions =[];
+  _argSuggest: function(argName, text, html) {
     try {
-      suggestions = argument.type.suggest(text, html);
-      // TODO strip out null suggestions right here...
+      let argument = this._verb._arguments[argName];
+      let suggestions = argument.type.suggest(text, html);
+      for each( let argSugg in suggestions) {
+        if (argSugg) { // strip out null suggestions -- TODO not needed?
+	  this.addArgumentSuggestion(argName, argSugg);
+	}
+      }
+      return (suggestions.length > 0);
     } catch(e) {
       Components.utils.reportError(
           'Exception occured while getting suggestions for "' +
 	  this._verb._name + '" with noun "' + argument.label + '"'
           );
+      return false;
     }
-    return suggestions;
   },
 
-  _suggestWithPronounSub: function(argument, words) {
-    var suggestions = [];
+  _suggestWithPronounSub: function(argName, words) {
+    let gotAnySuggestions = false;
     /* No selection to interpolate. */
     if ((!this._selObj.text) && (!this._selObj.html))
-      return [];
+      return false;
 
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
@@ -294,12 +294,12 @@ NLParser.EnPartiallyParsedSentence.prototype = {
           wordsCopy[index] = htmlSelection;
           htmlSelection = wordsCopy.join(" ");
         }
-	suggestions = suggestions.concat(this._argSuggest(argument,
-  						          selection,
-							  htmlSelection));
+	if (this._argSuggest(argName, selection, htmlSelection)) {
+	  gotAnySuggestions = true;
+	}
       }
     }
-    return suggestions;
+    return gotAnySuggestions;
   },
 
   addArgumentSuggestion: function( arg, sugg ) {
@@ -358,19 +358,6 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     return newPPSentence;
   },
 
-  _addImplicitSelectionArgument: function(argName) {
-    /* Takes the selection object and tries using it as a value for
-     * the argument given by argName.  Returns true if it can be used for that
-     * argument, false if not.
-     */
-    let arg = this._verb._arguments[argName];
-    let argSuggs = this._argSuggest(arg, this._selObj.text, this._selObj.html);
-    for each( let argSugg in argSuggs) {
-      this.addArgumentSuggestion(argName, argSugg);
-    }
-    return ( argSuggs.length > 0 );
-  },
-
   _getUnfilledArguments: function() {
     /* Returns list of the names of all arguments the verb expects for which
      no argument was provided in this partially parsed sentence. */
@@ -397,14 +384,15 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     if (unfilledArgs.length == 0)
       return [this];
     if (unfilledArgs.length == 1) {
-      this._addImplicitSelectionArgument(unfilledArgs[0]);
+      this._argSuggest(unfilledArgs[0], this._selObj.text, this._selObj.html);
       return [this];
     }
 
     let alternates = [];
     for each(let arg in unfilledArgs) {
       let newParsing = this.copy();
-      let canUseSelection = newParsing._addImplicitSelectionArgument(arg);
+      let canUseSelection = newParsing._argSuggest(arg, this._selObj.text,
+						  this._selObj.html);
       if (canUseSelection)
 	alternates.push(newParsing);
     }
