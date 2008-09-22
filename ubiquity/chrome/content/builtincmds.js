@@ -86,7 +86,7 @@ makeSearchCommand({
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"google-search.html"},
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"templates/google-search.html"},
 						  {results:results, searchTerm:searchTerm}
 						);
       }, "json");
@@ -178,6 +178,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
 
 CmdUtils.CreateCommand({
   name: "wikipedia",
+  synonyms: ["lookup"],
   takes: {search: noun_arb_text},
   modifiers: {in: noun_type_language},
   locale: "en-US",
@@ -242,7 +243,7 @@ CmdUtils.CreateCommand({
           _MODIFIERS: {wikilink: generateWikipediaLink}
         };
 
-        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"wikipedia.html"}, previewData);
+        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"templates/wikipedia.html"}, previewData);
 
         jQuery(previewBlock).find("div[wikiarticle]").each(function() {
           var article = jQuery(this).attr("wikiarticle");
@@ -262,6 +263,7 @@ CmdUtils.CreateCommand({
 
 makeSearchCommand({
   name: "IMDB",
+  synonyms: ["movie", "actor"],
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
   icon: "http://i.imdb.com/favicon.ico",
   description: "Searches the Internet Movie Database for your words."
@@ -290,7 +292,7 @@ makeSearchCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"yahoo-search.html"},
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"templates/yahoo-search.html"},
                    {results:data.ResultSet.Result}
                  );
     }, "json");
@@ -373,7 +375,7 @@ makeSearchCommand({
 			items: items
 		};
 
-		previewBlock.innerHTML = CmdUtils.renderTemplate({file: "amazon-search.html"}, previewData);
+		previewBlock.innerHTML = CmdUtils.renderTemplate({file: "templates/amazon-search.html"}, previewData);
 	  }
 	});
   }
@@ -382,6 +384,7 @@ makeSearchCommand({
 
 makeSearchCommand({
   name: "YouTube",
+  synonyms: ["video"],
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
   icon: "http://www.youtube.com/favicon.ico",
   description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words.",
@@ -397,7 +400,7 @@ makeSearchCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"youtube.html"},
+      pblock.innerHTML = CmdUtils.renderTemplate( {file:"templates/youtube.html"},
 						  {
 							results: data.feed.entry,
 							query: directObject.summary,
@@ -410,6 +413,7 @@ makeSearchCommand({
 
 makeSearchCommand({
   name: "Flickr",
+  synonyms: ["images"],
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
   icon: "http://www.flickr.com/favicon.ico",
   description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words.",
@@ -457,7 +461,7 @@ makeSearchCommand({
           photos: responseData.photos.photo
         };
 
-        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"flickr.html"}, previewData);
+        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"templates/flickr.html"}, previewData);
     }
   });
 }
@@ -579,7 +583,7 @@ CmdUtils.CreateCommand({
     jQuery.get( url, params, function(data) {
       globals.yelp = data.businesses;
       pblock.innerHTML = CmdUtils.renderTemplate(
-        {file:"yelp.html"},
+        {file:"templates/yelp.html"},
         {businesses: data.businesses}
       );
 
@@ -1021,28 +1025,28 @@ CmdUtils.CreateCommand({
 //       Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
 //       return;
 //     }
-// 
+//
 //     //TODO style guide
 //     //TODO: preview doesn't change
 //     //TODO: changes affect web page
-// 
+//
 //     var newSkinName = directObj.text;
-// 
+//
 //     try {
 //       var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
 //         .getService(Components.interfaces.nsIStyleSheetService);
-// 
+//
 //       var oldSkinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
 //       var skinFolderUrl = "chrome://ubiquity/skin/skins/";
 //       var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
 //       var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
-// 
+//
 //       var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
 //       var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
-// 
+//
 //       sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
 //       sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
-// 
+//
 //       try {
 //         // this can fail and the rest still work
 //         if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
@@ -1052,7 +1056,7 @@ CmdUtils.CreateCommand({
 //       } catch(e) {
 //         // do nothing
 //       }
-// 
+//
 //       Application.prefs.setValue("extensions.ubiquity.skin", newSkinName);
 //     } catch(e) {
 //       displayMessage("Error applying skin: " + e);
@@ -1307,7 +1311,7 @@ function addToGoogleCalendar(eventString) {
     displayMessage("Error creating the event. Error code: " + req.status + " " + req.statusText);
     return;
   }
-      
+
 }
 
 /* TODO this comman just takes unstructured text right now and relies on
@@ -1448,7 +1452,7 @@ CmdUtils.CreateCommand({
 
       weather["img"] = imgSrc;
 
-      var html = CmdUtils.renderTemplate( {file:"weather.html"}, {w:weather, location:place}
+      var html = CmdUtils.renderTemplate( {file:"templates/weather.html"}, {w:weather, location:place}
                                         );
 
       jQuery(pblock).html( html );
@@ -1676,6 +1680,7 @@ const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
   name: "twitter",
+  synonyms: ["tweet"],
   icon: "http://assets3.twitter.com/images/favicon.ico",
   takes: {status: noun_arb_text},
   modifiers: {},
@@ -1737,6 +1742,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "digg",
+  synonyms: ["share-on-digg"],
   icon: "http://digg.com/favicon.ico",
   homepage: "http://www.gialloporpora.netsons.org",
   description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
@@ -2221,12 +2227,12 @@ function sparkline(data) {
 
   var nw = "auto";
   var nh = "auto";
-  
-  
+
+
   var f = 2;
   var w = ( nw == "auto" || nw == 0 ? p.length * f : nw - 0 );
   var h = ( nh == "auto" || nh == 0 ? "1em" : nh );
-  
+
   var doc = context.focusedWindow.document;
   var co = doc.createElement("canvas");
 
@@ -2246,7 +2252,7 @@ function sparkline(data) {
     if ( p[i] < min ) min = p[i];
     if ( p[i] > max ) max = p[i];
   }
-  
+
   if ( co.getContext ) {
     var c = co.getContext("2d");
     c.strokeStyle = "red";
@@ -2259,20 +2265,21 @@ function sparkline(data) {
 
     c.stroke();
   }
-  
+
   return co.toDataURL()
 }
 
 CmdUtils.CreateCommand({
   name: "sparkline",
+  synonyms: ["graph"],
   description: "Graphs the current selection, turning it into a sparkline.",
   takes: {"data": noun_arb_text},
   author: {name: "Aza Raskin", email:"aza@mozilla.com"},
   license: "MIT",
   help: "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them.",
-  
+
   _cleanData: function( string ) {
-    var dirtyData = string.split(/\W/);    
+    var dirtyData = string.split(/\W/);
     var data = [];
     for(var i=0; i<dirtyData.length; i++){
       var datum = parseFloat( dirtyData[i] );
@@ -2280,27 +2287,27 @@ CmdUtils.CreateCommand({
         data.push( datum );
       }
     }
-    
+
     return data;
   },
-  
+
   _dataToSparkline: function( string ) {
     var data = this._cleanData( string );
     if( data.length < 2 ) return null;
-    
+
     var dataUrl = sparkline( data );
     return img = "<img src='%'/>".replace(/%/, dataUrl);
   },
-  
-  preview: function(pblock, input) { 
+
+  preview: function(pblock, input) {
     var img = this._dataToSparkline( input.text );
-    
+
     if( !img )
       jQuery(pblock).text( "Requires numbers to graph." );
     else
       jQuery(pblock).empty().append( img ).height( "15px" );
   },
-  
+
   execute: function( input ) {
     var img = this._dataToSparkline( input.text );
     if( img ) CmdUtils.setSelection( img );
@@ -2322,35 +2329,35 @@ CmdUtils.CreateCommand({
   license: "GPL/LGPL/MPL",
   homepage: "http://stanford.edu/~marce110/verbs/new-command-from-search-box.html",
   takes: {"command name": noun_arb_text},
-  
+
   _makeURI : function(aURL, aOriginCharset, aBaseURI){
     var ioService = Components.classes["@mozilla.org/network/io-service;1"]
                               .getService(Components.interfaces.nsIIOService);
     return ioService.newURI(aURL, aOriginCharset, aBaseURI);
   },
-  
+
   _escapeNameValuePair: function(aName, aValue, aIsFormUrlEncoded){
     if (aIsFormUrlEncoded)
       return escape(aName + "=" + aValue);
     else
       return escape(aName) + "=" + escape(aValue);
   },
-  
-  preview: function(pblock, input) { 
+
+  preview: function(pblock, input) {
     if(input.text.length < 1){
       pblock.innerHTML = "Select a searchbox, click it and then type make-new... keyword, and a command named keyword will be created.";
     }else{
       pblock.innerHTML = "Creates a new search command called <b>" + input.text + "</b>";
     }
   },
-  
+
   execute: function(name){
     //1. Figure out what this search-bar does.
     var node = context.focusedElement;
     if(!node || !node.form){
       displayMessage("You need to click on a searchbox before running this command."); return;
     }
-     
+
     //Copied from chrome://browser/content/browser.js, function AddKeywordForSearchField()
     //Comments starting with MMH: indicates that something has been changed by me.
     PLACEHOLDER = "{QUERY}" //MMH: Note also: I have globally replaced "%s" with PLACEHOLDER
@@ -2366,7 +2373,7 @@ CmdUtils.CreateCommand({
 
     var spec = formURI.spec;
 
-    var isURLEncoded = 
+    var isURLEncoded =
                  (node.form.method.toUpperCase() == "POST"
                   && (node.form.enctype == "application/x-www-form-urlencoded" ||
                       node.form.enctype == ""));
@@ -2388,7 +2395,7 @@ CmdUtils.CreateCommand({
       }
 
       type = el.type.toLowerCase();
-  
+
       if ((type == "text" || type == "hidden" || type == "textarea") ||
           ((type == "checkbox" || type == "radio") && el.checked)) {
         formData.push(this._escapeNameValuePair(el.name, el.value, isURLEncoded));
@@ -2411,14 +2418,14 @@ CmdUtils.CreateCommand({
       spec += "?" + formData.join("&");
 
     //COPY ENDS
-    
-    if(postData){ 
-      displayMessage("Sorry.  Support for POST-method forms is yet to be implemented."); 
+
+    if(postData){
+      displayMessage("Sorry.  Support for POST-method forms is yet to be implemented.");
       return;
     }
-    
+
     var url = spec;
-    
+
     //2. Now that we have the form's URL, figure out the name, description and favicon for the command
     currentLocation = String(Application.activeWindow.activeTab.document.location);
     domain = currentLocation.replace(/^(.*):\/\//, '').split('/')[0];
@@ -2428,7 +2435,7 @@ CmdUtils.CreateCommand({
     var description = "Searches " + domain;
 
     //3. Build the piece of code that creates the command
-    var code =  '\n\n//Note: This command was automatically generated by the make-new-search-command command.\n' 
+    var code =  '\n\n//Note: This command was automatically generated by the make-new-search-command command.\n'
     code += 'makeSearchCommand({\n'
     code += '  name: "'+name+'",\n';
     code += '  url: "'+url+'",\n';
@@ -2437,7 +2444,7 @@ CmdUtils.CreateCommand({
     code += '});\n'
     //4. Append the code to Ubiqity's code
     CmdUtils.UserCode.appendCode(code);
-    
+
     //5. Tell the user we finished
     displayMessage("You have created the command: " + name +
                    ".  You can edit its source-code with the command-editor command.");
