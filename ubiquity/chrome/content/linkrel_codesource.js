@@ -240,7 +240,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
         box.removeNotification(oldNotification);
 
       // Clicking on "subscribe" takes them to the warning page:
-      var confirmUrl = CONFIRM_URL + "?url=" + encodeURIComponent(targetDoc.URL) + "&sourceUrl="
+      var confirmUrl = CONFIRM_URL + "?url=" + encodeURIComponent(targetDoc.location.href) + "&sourceUrl="
 			 + encodeURIComponent(commandsUrl);
 
       function isTrustedUrl(commandsUrl, mimetype) {
@@ -271,7 +271,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
       function onSubscribeClick(notification, button) {
         if (isTrustedUrl(commandsUrl, mimetype)) {
           function onSuccess(data) {
-            LinkRelCodeSource.addMarkedPage({url: targetDoc.URL,
+            LinkRelCodeSource.addMarkedPage({url: targetDoc.location.href,
                                              canUpdate: true,
                                              sourceCode: data});
             Utils.openUrlInBrowser(confirmUrl);
@@ -307,21 +307,42 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
     }
   }
 
+  function onPageWithCommands(pageUrl, commandsUrl, document, mimetype) {
+    var annSvc = LinkRelCodeSource.__getAnnSvc();
+
+    pageUrl = Utils.url(pageUrl);
+    annSvc.setPageAnnotation(pageUrl, CMD_URL_ANNO,
+                             commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
+    if (!LinkRelCodeSource.isMarkedPage(pageUrl))
+      showNotification(document, commandsUrl, mimetype);
+  }
+
+  function onContentLoaded(event) {
+    var document = event.target;
+    var matches = document.getElementsByClassName("commands");
+
+    Array.filter(matches,
+                 function(elem) { return elem.nodeName == "script"; });
+
+    if (matches.length > 0)
+      onPageWithCommands(document.location.href,
+                         document.location.href,
+                         document,
+                         document.contentType);
+  }
+
   // Watch for any tags of the form <link rel="commands">
   // on pages and add annotations for them if they exist.
   function onLinkAdded(event) {
     if (event.target.rel != "commands")
       return;
 
-    var annSvc = LinkRelCodeSource.__getAnnSvc();
-    var url = Utils.url(event.target.baseURI);
-    var commandsUrl = event.target.href;
-    annSvc.setPageAnnotation(url, CMD_URL_ANNO,
-                             commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
-    if (!LinkRelCodeSource.isMarkedPage(url))
-      showNotification(event.target.ownerDocument, commandsUrl,
+    onPageWithCommands(event.target.baseURI,
+                       event.target.href,
+                       event.target.ownerDocument,
                        event.target.type);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
+  window.addEventListener("DOMContentLoaded", onContentLoaded, false);
 };

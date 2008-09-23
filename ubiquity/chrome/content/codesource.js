@@ -162,7 +162,8 @@ function XhtmlCodeSource(codeSource) {
       dom = parser.parseFromString(code, "text/xml");
 
       var newCode = "";
-      jQuery("script", dom).each(function() { newCode += this.text; });
+      function addCode() { newCode += this.text; }
+      jQuery("script.commands", dom).each(addCode);
       return newCode;
     }
 
