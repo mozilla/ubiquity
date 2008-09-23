@@ -244,11 +244,13 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
 			 + encodeURIComponent(commandsUrl);
 
       function isTrustedUrl(commandsUrl, mimetype) {
-        // Even if the command feed resides on a trusted host, if
-        // the mime-type is application/x-javascript-untrusted, the
-        // host itself doesn't trust it (perhaps because it's mirroring
-        // code from somewhere else).
-        if (mimetype == "application/x-javascript-untrusted")
+        // Even if the command feed resides on a trusted host, if the
+        // mime-type is application/x-javascript-untrusted or
+        // application/xhtml+xml-untrusted, the host itself doesn't
+        // trust it (perhaps because it's mirroring code from
+        // somewhere else).
+        if (mimetype == "application/x-javascript-untrusted" ||
+            mimetype == "application/xhtml+xml-untrusted")
           return false;
 
         var url = Utils.url(commandsUrl);
