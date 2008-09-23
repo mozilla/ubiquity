@@ -95,9 +95,11 @@ function makeBuiltinCodeSources(languageCode) {
       new LocalUriCodeSource(baseUri + "date.js"),
       new LocalUriCodeSource(baseUri + "nlparser/en/nountypes.js")
     ]);
+    var templateCmds = new LocalUriCodeSource(baseUri + "templatecmds.xhtml");
     bodyCodeSources = bodyCodeSources.concat([
       new LocalUriCodeSource(baseUri + "builtincmds.js"),
       new LocalUriCodeSource(baseUri + "tagging_cmds.js"),
+      new XhtmlCodeSource(templateCmds),
       new XhtmlCodeSource(PrefCommands)
     ]);
   }

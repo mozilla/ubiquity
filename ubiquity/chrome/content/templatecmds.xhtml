@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+      xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<head>
+  <title>Ubiquity Built-in Template Commands</title>
+</head>
+<body>
+This script contains Ubiquity's built-in commands that use templates.
+<div id="google-search" style="display: none;">
+{for result in results}
+<div class="gresult">
+  <div>
+    <a href="${result.unescapedUrl}">${result.title}</a>
+  </div>
+  <xul:description class="gresult-content">${result.content}</xul:description>
+  <div class="gresult-url">${result.visibleUrl}</div>
+</div>
+{forelse}
+  <b>Your search - ${searchTerm} - did not match any documents. </b>
+{/for}
+</div>
+</body>
+<script>
+// Fake function so this page will load in content space.
+var CmdUtils = {
+  makeSearchCommand: function() {}
+};
+</script>
+<script class="commands">
+CmdUtils.makeSearchCommand({
+  name: "Google",
+  url: "http://www.google.com/search?q={QUERY}",
+  icon: "http://www.google.com/favicon.ico",
+  description: "Searches Google for your words.",
+  preview: function(pblock, directObject) {
+    var searchTerm = directObject.text;
+    var pTemplate = "Searches Google for <b>${query}</b>";
+    var pData = {query: searchTerm};
+    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
+
+    var url = "http://ajax.googleapis.com/ajax/services/search/web";
+    var params = { v: "1.0", q: searchTerm };
+
+    jQuery.get( url, params, function(data) {
+      var numToDisplay = 3;
+      var results = data.responseData.results.splice( 0, numToDisplay );
+
+      pblock.innerHTML = CmdUtils.renderTemplate( jQuery("#google-search", feed.dom).html(),
+						  {results:results, searchTerm:searchTerm}
+						);
+      }, "json");
+  }
+});
+</script>
+</html>

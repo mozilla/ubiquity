@@ -43,32 +43,6 @@
 // SEARCH COMMANDS
 // -----------------------------------------------------------------
 
-CmdUtils.makeSearchCommand({
-  name: "Google",
-  url: "http://www.google.com/search?q={QUERY}",
-  icon: "http://www.google.com/favicon.ico",
-  description: "Searches Google for your words.",
-  preview: function(pblock, directObject) {
-    var searchTerm = directObject.text;
-    var pTemplate = "Searches Google for <b>${query}</b>";
-    var pData = {query: searchTerm};
-    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
-
-    var url = "http://ajax.googleapis.com/ajax/services/search/web";
-    var params = { v: "1.0", q: searchTerm };
-
-    jQuery.get( url, params, function(data) {
-      var numToDisplay = 3;
-      var results = data.responseData.results.splice( 0, numToDisplay );
-
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"templates/google-search.html"},
-						  {results:results, searchTerm:searchTerm}
-						);
-      }, "json");
-  }
-});
-
-
 CmdUtils.CreateCommand({
   name: "search",
   icon: "chrome://ubiquity/skin/icons/search.png",
