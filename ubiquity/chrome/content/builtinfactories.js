@@ -36,6 +36,61 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+let UbiquitySetup = {
+  // TODO: This value is temporary.
+  BUILTIN_FEEDS: [{page: "builtincmds.html",
+                   source: "builtincmds.js"},
+                  {page: "templatecmds.html",
+                   source: "templatecmds.xhtml"}],
+
+  // TODO: This value is temporary.
+  BASE_REMOTE_URI: "http://localhost/",
+
+  __getExtDir: function __getExtDir() {
+    let Cc = Components.classes;
+    let extMgr = Cc["@mozilla.org/extensions/manager;1"]
+                 .getService(Components.interfaces.nsIExtensionManager);
+    let loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
+    let extDir = loc.getItemLocation("ubiquity@labs.mozilla.com");
+
+    return extDir;
+  },
+
+  getBaseUri: function getBaseUri() {
+    let ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
+                .getService(Components.interfaces.nsIIOService);
+    let extDir = this.__getExtDir();
+    let baseUri = ioSvc.newFileURI(extDir).spec + "chrome/content/";
+
+    return baseUri;
+  },
+
+  isInstalledAsXpi: function isInstalledAsXpi() {
+    let Cc = Components.classes;
+    let profileDir = Cc["@mozilla.org/file/directory_service;1"]
+                     .getService(Components.interfaces.nsIProperties)
+                     .get("ProfD", Components.interfaces.nsIFile);
+    let extDir = this.__getExtDir();
+    if (profileDir.contains(extDir, false))
+      return true;
+    return false;
+  },
+
+  installDefaults: function installDefaults() {
+    let baseLocalUri = this.getBaseUri();
+    let baseUri;
+
+    if (this.isInstalledAsXpi())
+      baseUri = this.BASE_REMOTE_URI;
+    else
+      baseUri = baseLocalUri;
+
+    LinkRelCodeSource.installDefaults(baseUri,
+                                      baseLocalUri,
+                                      this.BUILTIN_FEEDS);
+  }
+};
+
 function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
   var windowGlobals = {};
 
@@ -67,13 +122,7 @@ function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
 }
 
 function makeBuiltinCodeSources(languageCode) {
-  var ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-              .getService(Components.interfaces.nsIIOService);
-  var extMgr = Components.classes["@mozilla.org/extensions/manager;1"]
-               .getService(Components.interfaces.nsIExtensionManager);
-  var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
-  var extD = loc.getItemLocation("ubiquity@labs.mozilla.com");
-  var baseUri = ioSvc.newFileURI(extD).spec + "chrome/content/";
+  var baseUri = UbiquitySetup.getBaseUri();
 
   var headerCodeSources = [
     new LocalUriCodeSource(baseUri + "utils.js"),
