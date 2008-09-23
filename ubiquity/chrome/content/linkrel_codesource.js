@@ -344,5 +344,10 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
-  window.addEventListener("DOMContentLoaded", onContentLoaded, false);
+
+  // TODO: Right now, adding XHTML pages with <script class="commands">
+  // tags poses a number of complexities to the subscription process
+  // that we'll have to deal with, so we're temporarily disabling it for
+  // now.
+  //window.addEventListener("DOMContentLoaded", onContentLoaded, false);
 };
