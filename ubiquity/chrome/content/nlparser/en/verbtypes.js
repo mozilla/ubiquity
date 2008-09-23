@@ -220,7 +220,8 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     this._selObj = selObj;
     this._parsedSentences = [];
     this._matchScore = matchScore;
-    this._valid = true;
+    this._invalidArgs = {};
+    this._validArgs = {};
     /* Create fully parsed sentence with empty arguments:
      * If this command takes no arguments, this is all we need.
      * If it does take arguments, this initializes the parsedSentence
@@ -237,16 +238,11 @@ NLParser.EnPartiallyParsedSentence.prototype = {
         let text = argStrings[argName].join(" ");
 	// and on not substituting pronoun...
         let gotSuggsDirect = this._argSuggest(argName, text, text);
-
         if (!gotSuggs && !gotSuggsDirect) {
 	  //One of the arguments is supplied by the user, but produces
 	  // no suggestions, meaning it's an invalid argument for this
 	  // command -- that makes the whole parsing invalid!!
-	  this._parsedSentences = [];
-	  this._valid = false;
-          // TODO but if noun suggestions come in asynchronously, this could
-	  // in theory become UN-INVALIDATED (re-validated?) when a suggestion
-	  // comes in.  Bleah.
+	  this._invalidArgs[argName] = true;
         }
       }
       // Otherwise, this argument will simply be left blank (or filled in with
@@ -258,8 +254,8 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     /* For the given argument of the verb, sends (text,html) to the nounType
      * gets back suggestions for the argument, and adds each suggestion.
      * Return true if at least one arg suggestion was added in this way. */
+    let argument = this._verb._arguments[argName];
     try {
-      let argument = this._verb._arguments[argName];
       let suggestions = argument.type.suggest(text, html);
       for each( let argSugg in suggestions) {
         if (argSugg) { // strip out null suggestions -- TODO not needed?
@@ -327,9 +323,10 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
     let newSentences = [];
     let newSen;
+    this._validArgs[arg] = true;
     for each( let sen in this._parsedSentences) {
       if ( ! sen.argumentIsFilled( arg ) ) {
-        sen.setArgumentSuggestion( arg, sugg);
+        sen.setArgumentSuggestion(arg, sugg);
       } else {
         let newSen = sen.copy();
         newSen.setArgumentSuggestion(arg, sugg);
@@ -352,6 +349,12 @@ NLParser.EnPartiallyParsedSentence.prototype = {
      an asynchronous call of addArgumentSuggestion could actually fill in
      the missing argument after this.*/
     let parsedSentences = [];
+    // Return nothing if this parsing is invalid due to bad user-supplied args
+    for (let argName in this._invalidArgs) {
+      if (this._invalidArgs[argName] && !this._validArgs[argName])
+	return [];
+    }
+
     for each( let sen in this._parsedSentences) {
       parsedSentences.push(sen.fillMissingArgsWithDefaults());
     }
@@ -372,7 +375,14 @@ NLParser.EnPartiallyParsedSentence.prototype = {
     for (let argName in this._argStrings) {
       newPPSentence._argStrings[argName] = this._argStrings[argName].slice();
     }
-    newPPSentence._valid = this._valid;
+    newPPSentence._invalidArgs = {};
+    for (let invalidArg in this._invalidArgs) {
+      newPPSentence._invalidArgs[invalidArg] = this._invalidArgs[invalidArg];
+    }
+    newPPSentence._validArgs = {};
+    for (let validArg in this._validArgs) {
+      newPPSentence._validArgs[validArg] = this._validArgs[validArg];
+    }
     return newPPSentence;
   },
 

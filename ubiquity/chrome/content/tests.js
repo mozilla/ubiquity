@@ -1145,14 +1145,14 @@ function testAsyncNounSuggestions() {
   var noun_type_slowness = {
     _name: "slowness",
     suggest: function( text, html ) {
-      if (text.indexOf("hello")== 0)
+      if (text.indexOf("hello")== 0) {
         return [ CmdUtils.makeSugg("Robert E. Lee") ];
-      else
+      } else
 	return [];
     },
     asyncSuggest: function( text, html, callback ) {
       // Do all kinds of network calls here
-      if (text.indexOf("hello") == 0) {
+      if (text.indexOf("h") == 0) {
         callback( CmdUtils.makeSugg("slothitude") );
         callback( CmdUtils.makeSugg("snuffleupagus") );
       }
@@ -1176,11 +1176,18 @@ function testAsyncNounSuggestions() {
     assert( completion._argSuggs.direct_object.text == expected,
 		 "Expected " + expected );
   };
-
   this.assert( comps.length == 3, "there should be 3 completions.");
   assertDirObj( comps[0], "Robert E. Lee");
   assertDirObj( comps[1], "slothitude");
   assertDirObj( comps[2], "snuffleupagus");
+
+  // Now try one where the noun originally suggests nothing, but then comes
+  // up with some async suggestions.  What happens?
+  comps = verb.getCompletions(["dostuff", "halifax"], selObj);
+  this.assert( comps.length == 2, "there should be 2 completions.");
+  assertDirObj( comps[0], "slothitude");
+  assertDirObj( comps[1], "snuffleupagus");
+
 }
 
 // TODO a test where we put inalid value into an argument on purpose, ensure
@@ -1207,11 +1214,12 @@ function testAsyncNounSuggestions() {
 // are left empty, the selection is suggested for each one, although not all at the
 // same time.
 
-// TODO test for asynchronously generated noun suggestions.
-
 // TODO test ranking based on noun match quality, when verb-match quality is
 // equivalent.
 
 // TODO test that match with more (and more specific) arguments filled
 // is ranked ahead of match with unfilled arguments, even if there are
 // defaults.
+
+// TODO make a verb with two direct objects using the new API, make sure
+// an exception is raised.
