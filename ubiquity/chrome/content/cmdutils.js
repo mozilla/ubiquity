@@ -487,8 +487,8 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   if (typeof template == "string")
     templStr = template;
   else if (template.file) {
-    if (Utils.url(feedId).scheme == "file") {
-      var url = Utils.url({uri: template.file, base: feedId});
+    if (Utils.url(feed.id).scheme == "file") {
+      var url = Utils.url({uri: template.file, base: feed.id});
       templStr = Utils.getLocalUrl(url.spec);
     } else {
       templStr = Attachments[template.file];
@@ -508,7 +508,7 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
   iframe.style.border = "none";
   iframe.setAttribute("width", 500);
   function onXulLoad() {
-    var uri = Utils.url({uri: filePath, base: feedId}).spec;
+    var uri = Utils.url({uri: filePath, base: feed.id}).spec;
     browser = iframe.contentDocument.createElement("browser");
     browser.setAttribute("src", uri);
     browser.setAttribute("width", 500);
