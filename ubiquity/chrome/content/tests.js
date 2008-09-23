@@ -1143,19 +1143,16 @@ function testTextAndHtmlDifferent() {
 function testAsyncNounSuggestions() {
   var noun_type_slowness = {
     _name: "slowness",
-    suggest: function( text, html ) {
+    suggest: function( text, html, callback ) {
+      if (text.indexOf("h") == 0) {
+        callback( CmdUtils.makeSugg("slothitude") );
+        callback( CmdUtils.makeSugg("snuffleupagus") );
+      }
       if (text.indexOf("hello")== 0) {
         return [ CmdUtils.makeSugg("Robert E. Lee") ];
       } else
 	return [];
     },
-    asyncSuggest: function( text, html, callback ) {
-      // Do all kinds of network calls here
-      if (text.indexOf("h") == 0) {
-        callback( CmdUtils.makeSugg("slothitude") );
-        callback( CmdUtils.makeSugg("snuffleupagus") );
-      }
-    }
   };
   var cmd_slow = {
     name: "dostuff",
@@ -1176,9 +1173,9 @@ function testAsyncNounSuggestions() {
 		 "Expected " + expected );
   };
   this.assert( comps.length == 3, "there should be 3 completions.");
-  assertDirObj( comps[0], "Robert E. Lee");
-  assertDirObj( comps[1], "slothitude");
-  assertDirObj( comps[2], "snuffleupagus");
+  assertDirObj( comps[0], "slothitude");
+  assertDirObj( comps[1], "snuffleupagus");
+  assertDirObj( comps[2], "Robert E. Lee");
 
   // Now try one where the noun originally suggests nothing, but then comes
   // up with some async suggestions.  What happens?

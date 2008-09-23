@@ -256,26 +256,20 @@ NLParser.EnPartiallyParsedSentence.prototype = {
      * Return true if at least one arg suggestion was added in this way. */
     let argument = this._verb._arguments[argName];
     try {
-      let suggestions = argument.type.suggest(text, html);
+      let self = this;
+      // Callback function for asynchronously generated suggestions:
+      let callback = function(newSugg) {
+          self.addArgumentSuggestion(argName, newSugg);
+	  /* TODO send a ping to the global observer to let the
+	   * Ubiquity UI know to update its UI to show the new suggestion
+	   * and resort the suggestion list if needed. */
+      };
+      let suggestions = argument.type.suggest(text, html, callback);
       for each( let argSugg in suggestions) {
         if (argSugg) { // strip out null suggestions -- TODO not needed?
 	  this.addArgumentSuggestion(argName, argSugg);
 	}
       }
-      /* Now, if the noun has an asyncSuggest method (most don't), call that
-       with a callback so that any new suggestions the noun generates
-       will end up passed to addArgumentSuggestion. */
-      if (argument.type.asyncSuggest) {
-	let self = this;
-	let callback = function(newSugg) {
-          self.addArgumentSuggestion(argName, newSugg);
-	  /* TODO send a ping to the global observer to let the
-	   * Ubiquity UI know to update its UI to show the new suggestion
-	   * and resort the suggestion list if needed. */
-	};
-	argument.type.asyncSuggest(text, html, callback);
-      }
-
       return (suggestions.length > 0);
     } catch(e) {
       Components.utils.reportError(
@@ -317,8 +311,9 @@ NLParser.EnPartiallyParsedSentence.prototype = {
   },
 
   addArgumentSuggestion: function( arg, sugg ) {
-    /* TODO: this function can eventually be used as a callback by
-     * asynchronously suggestion-generating nouns.
+    /* Adds the given sugg as a suggested value for the given arg.
+     * Extends the parsedSentences list with every new combination that
+     * is made possible by the new suggestion.
      */
 
     let newSentences = [];
