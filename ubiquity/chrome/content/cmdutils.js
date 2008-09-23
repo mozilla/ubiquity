@@ -600,3 +600,33 @@ CmdUtils.NounType.prototype = {
     return suggestions;
   }
 };
+
+CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
+  options.execute = function(directObject, modifiers) {
+    var query = encodeURIComponent(directObject.text);
+    var urlString = options.url.replace("{QUERY}", query);
+    Utils.openUrlInBrowser(urlString);
+    CmdUtils.setLastResult( urlString );
+  };
+
+  options.takes = {"search term": noun_arb_text};
+
+  if (! options.preview )
+    options.preview = function(pblock, directObject, modifiers) {
+      var query = directObject.text;
+      var content = "Performs a " + options.name + " search";
+	  if(query.length > 0)
+		content += " for <b>" + query + "</b>";
+      pblock.innerHTML = content;
+    };
+
+  options.name = options.name.toLowerCase();
+
+  CmdUtils.CreateCommand(options);
+};
+
+// TODO: This is deprecated behavior from Ubiquity 0.1.1, and will
+// eventually need to be removed.  Note, however, that removing it
+// will break backwards compatibility with some legacy third-party
+// command feeds.
+var makeSearchCommand = CmdUtils.makeSearchCommand;
