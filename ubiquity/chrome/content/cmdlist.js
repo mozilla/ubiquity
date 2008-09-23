@@ -47,9 +47,8 @@ function onDocumentLoad() {
   // window's command manager and simply ask it.
 
   var msgService = new AlertMessageService();
-  var globals = makeBuiltinGlobals(msgService,
-                                   UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(globals);
+  var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals);
   var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
   var cmdSource = new CommandSource(
     codeSources,
@@ -102,16 +101,16 @@ function onDocumentLoad() {
             'View more information at <a href="' + cmd.homepage + '">' + cmd.homepage + '</a>.'
           );
         } else cmdElement.find(".homepage").empty();
-		
+
         if(cmd.description) cmdElement.find(".description").html(cmd.description);
         else cmdElement.find(".description").empty();
-		
+
         if(cmd.author) cmdElement.find(".author").html(formatCommandAuthor(cmd.author));
         else cmdElement.find(".author").empty();
-		
+
         if(cmd.license) cmdElement.find(".license").html(' - licensed as ' + cmd.license);
         else cmdElement.find(".license").empty();
-		
+
         if(cmd.help) cmdElement.find(".help").html(cmd.help);
         else cmdElement.find(".help").empty();
 
