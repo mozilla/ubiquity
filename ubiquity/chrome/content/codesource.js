@@ -88,33 +88,13 @@ RemoteUriCodeSource.prototype = {
       var self = this;
       self._req = new XMLHttpRequest();
       self._req.open('GET', this._pageInfo.jsUri.spec, true);
-      self._req.overrideMimeType("text/javascript");
-
-      function isJsType(type) {
-        var validTypes = ["text/javascript",
-                          "text/ecmascript",
-                          "text/plain",
-                          "application/x-javascript",
-                          "application/javascript"];
-        for (var i = 0; i < validTypes.length; i++) {
-          // We only want to see if the string starts with the
-          // type, since it might contain extra information, e.g.
-          // 'text/html;charset=utf-8'.
-          if (type.indexOf(validTypes[i]) == 0)
-            return true;
-        }
-        return false;
-      }
+      self._req.overrideMimeType("text/plain");
 
       self._req.onreadystatechange = function RUCS__onXhrChange() {
         if (self._req.readyState == 4) {
-          if (self._req.status == 200) {
+          if (self._req.status == 200)
             // Update our cache.
-            if (isJsType(self._req.getResponseHeader("Content-Type")))
-              self._pageInfo.setCode(self._req.responseText);
-          } else {
-            // TODO: What should we do? Display a message?
-          }
+            self._pageInfo.setCode(self._req.responseText);
           self._req = null;
         }
       };
