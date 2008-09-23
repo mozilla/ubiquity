@@ -203,11 +203,9 @@ CommandSource.prototype = {
     for (var codeSource in this._codeSources) {
       var id = codeSource.id;
       var code = this._codeCache[id];
-      sandboxes[id] = this._sandboxFactory.makeSandbox(id);
+      sandboxes[id] = this._sandboxFactory.makeSandbox(codeSource);
 
       try {
-        if (codeSource.dom)
-          sandboxes[id].dom = codeSource.dom;
         this._sandboxFactory.evalInSandbox(code, sandboxes[id]);
       } catch (e) {
         this._messageService.displayMessage(

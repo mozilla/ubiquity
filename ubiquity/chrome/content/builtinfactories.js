@@ -39,7 +39,9 @@
 function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
   var windowGlobals = {};
 
-  function makeGlobals(id) {
+  function makeGlobals(codeSource) {
+    var id = codeSource.id;
+
     if (!(id in windowGlobals))
       windowGlobals[id] = {};
 
@@ -52,6 +54,7 @@ function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
       Components: Components,
       window: window,
       feedId: id,
+      dom: codeSource.dom,
       windowGlobals: windowGlobals[id],
       globals: ubiquityGlobals.getForId(id),
       displayMessage: function() {

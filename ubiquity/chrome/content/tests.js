@@ -478,8 +478,8 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
 }
 
 function testMakeGlobalsWork() {
-  function makeGlobals(id) {
-    return {id: id};
+  function makeGlobals(codeSource) {
+    return {id: codeSource.id};
   }
 
   var testCode = "function cmd_foo() { return id; }";
