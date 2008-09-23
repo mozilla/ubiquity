@@ -77,7 +77,7 @@ function LinkRelCodeSource() {
         throw new Error("Don't know how to make code source for " + href);
       }
 
-      newSources[href] = source;
+      newSources[href] = new XhtmlCodeSource(source);
     }
     this._sources = newSources;
   };
