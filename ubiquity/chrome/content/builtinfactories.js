@@ -38,10 +38,8 @@
 
 let UbiquitySetup = {
   // TODO: This value is temporary.
-  BUILTIN_FEEDS: [{page: "builtincmds.html",
-                   source: "builtincmds.js"},
-                  {page: "templatecmds.html",
-                   source: "templatecmds.xhtml"}],
+  STANDARD_FEEDS: [{page: "sample.html",
+                    source: "sample.js"}],
 
   // TODO: This value is temporary.
   BASE_REMOTE_URI: "http://localhost/",
@@ -60,7 +58,7 @@ let UbiquitySetup = {
     let ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
                 .getService(Components.interfaces.nsIIOService);
     let extDir = this.__getExtDir();
-    let baseUri = ioSvc.newFileURI(extDir).spec + "chrome/content/";
+    let baseUri = ioSvc.newFileURI(extDir).spec;
 
     return baseUri;
   },
@@ -77,7 +75,7 @@ let UbiquitySetup = {
   },
 
   installDefaults: function installDefaults() {
-    let baseLocalUri = this.getBaseUri();
+    let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
     if (this.isInstalledAsXpi())
@@ -87,7 +85,7 @@ let UbiquitySetup = {
 
     LinkRelCodeSource.installDefaults(baseUri,
                                       baseLocalUri,
-                                      this.BUILTIN_FEEDS);
+                                      this.STANDARD_FEEDS);
   }
 };
 
@@ -122,7 +120,7 @@ function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
 }
 
 function makeBuiltinCodeSources(languageCode) {
-  var baseUri = UbiquitySetup.getBaseUri();
+  var baseUri = UbiquitySetup.getBaseUri() + "chrome/content/";
 
   var headerCodeSources = [
     new LocalUriCodeSource(baseUri + "utils.js"),
