@@ -37,6 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/Observers.js");
 
 // util functions to make it easier to use objects as fake dictionaries
 function dictDeepCopy( dict ) {
