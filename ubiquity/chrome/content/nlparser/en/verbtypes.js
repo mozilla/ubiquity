@@ -51,6 +51,9 @@ function dictKeys( dict ) {
   return [ key for ( key in dict ) ];
 }
 
+function notifyUpdateSuggestionList() {
+}
+
 
 NLParser.EnParsedSentence = function( verb, arguments, verbMatchScore ) {
   /* DO and the values of modifiers should be NLParser.EnInputData
@@ -239,14 +242,14 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 	// and on not substituting pronoun...
         let gotSuggsDirect = this._argSuggest(argName, text, text);
         if (!gotSuggs && !gotSuggsDirect) {
-	  //One of the arguments is supplied by the user, but produces
-	  // no suggestions, meaning it's an invalid argument for this
-	  // command -- that makes the whole parsing invalid!!
+	  /* One of the arguments is supplied by the user, but produces
+	   * no suggestions, meaning it's an invalid argument for this
+	   * command -- that makes the whole parsing invalid!! */
 	  this._invalidArgs[argName] = true;
         }
       }
-      // Otherwise, this argument will simply be left blank (or filled in with
-      // default value later.)
+      /* Otherwise, this argument will simply be left blank (or filled in with
+       * default value later.*/
     }
   },
 
@@ -259,10 +262,9 @@ NLParser.EnPartiallyParsedSentence.prototype = {
       let self = this;
       // Callback function for asynchronously generated suggestions:
       let callback = function(newSugg) {
-          self.addArgumentSuggestion(argName, newSugg);
-	  /* TODO send a ping to the global observer to let the
-	   * Ubiquity UI know to update its UI to show the new suggestion
-	   * and resort the suggestion list if needed. */
+        self.addArgumentSuggestion(argName, newSugg);
+	// send a notifcation to let the UI know to update the suggestion list
+	Observers.notify(self, "ubiq-suggestions-updated", "");
       };
       let suggestions = argument.type.suggest(text, html, callback);
       for each( let argSugg in suggestions) {

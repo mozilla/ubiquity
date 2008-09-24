@@ -1166,24 +1166,36 @@ function testAsyncNounSuggestions() {
   var selObj = {
     text: "", html: ""
   };
+  // register an observer to make sure it gets notified when the
+  // noun produces suggestions asynchronously.
+  var observerCalled = false;
+  var observe = function( subject, topic, data ) {
+      observerCalled = true;
+  };
+  Observers.add(observe, "ubiq-suggestions-updated");
+
+
   var comps = verb.getCompletions(["dostuff", "hello"], selObj);
   var assert = this.assert;
   var assertDirObj = function( completion, expected) {
     assert( completion._argSuggs.direct_object.text == expected,
 		 "Expected " + expected );
   };
+
   this.assert( comps.length == 3, "there should be 3 completions.");
   assertDirObj( comps[0], "slothitude");
   assertDirObj( comps[1], "snuffleupagus");
   assertDirObj( comps[2], "Robert E. Lee");
+  this.assert(observerCalled, "observer should have been called.");
 
   // Now try one where the noun originally suggests nothing, but then comes
   // up with some async suggestions.  What happens?
+  observerCalled = false;
   comps = verb.getCompletions(["dostuff", "halifax"], selObj);
   this.assert( comps.length == 2, "there should be 2 completions.");
   assertDirObj( comps[0], "slothitude");
   assertDirObj( comps[1], "snuffleupagus");
-
+  this.assert(observerCalled, "observer should have been called.");
 }
 
 // TODO a test where we put inalid value into an argument on purpose, ensure
