@@ -41,6 +41,7 @@ const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
 const CMD_REMOVED_ANNO = "ubiquity/removed";
 const CMD_URL_ANNO = "ubiquity/commands";
+const CMD_TITLE_ANNO = "ubiquity/title";
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 // This class can be used both as a code source or a collection.  If used as
@@ -106,8 +107,11 @@ function LinkRelCodeSource() {
 LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
   let annSvc = this.__getAnnSvc();
 
-  // TODO: Get the real title of the page.
-  let pageInfo = {title: uri.spec,
+  let title = uri.spec;
+  if (annSvc.pageHasAnnotation(uri, CMD_TITLE_ANNO))
+    title = annSvc.getPageAnnotation(uri, CMD_TITLE_ANNO);
+
+  let pageInfo = {title: title,
                   htmlUri: uri};
 
   pageInfo.remove = function pageInfo_remove() {
@@ -197,6 +201,9 @@ LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
                            annSvc.EXPIRE_NEVER);
   annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
                            annSvc.EXPIRE_NEVER);
+  if (info.title)
+    annSvc.setPageAnnotation(uri, CMD_TITLE_ANNO, info.title, 0,
+                             annSvc.EXPIRE_NEVER);
 };
 
 LinkRelCodeSource.isMarkedPage = function LRCS_isMarkedPage(uri) {
@@ -228,7 +235,8 @@ LinkRelCodeSource.installDefaults = function LRCS_installDefaults(baseUri,
       let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
       this.addMarkedPage({url: uri,
                           sourceCode: lcs.getCode(),
-                          canUpdate: true});
+                          canUpdate: true,
+                          title: info.title});
     }
   }
 };
