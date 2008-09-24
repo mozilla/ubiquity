@@ -212,6 +212,27 @@ LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
   return annSvc;
 };
 
+LinkRelCodeSource.installDefaults = function LRCS_installDefaults(baseUri,
+                                                                  baseLocalUri,
+                                                                  infos) {
+  let annSvc = this.__getAnnSvc();
+
+  for (let i = 0; i < infos.length; i++) {
+    let info = infos[i];
+    let uri = Utils.url(baseUri + info.page);
+
+    if (!annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO)) {
+      annSvc.setPageAnnotation(uri, CMD_URL_ANNO,
+                               baseUri + info.source,
+                               0, annSvc.EXPIRE_WITH_HISTORY);
+      let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
+      this.addMarkedPage({url: uri,
+                          sourceCode: lcs.getCode(),
+                          canUpdate: true});
+    }
+  }
+};
+
 LinkRelCodeSource.__install = function LRCS_install(window) {
   function showNotification(targetDoc, commandsUrl, mimetype) {
     var Cc = Components.classes;
