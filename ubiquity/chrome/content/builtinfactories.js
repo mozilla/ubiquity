@@ -49,7 +49,13 @@ let UbiquitySetup = {
 		    title: "Standard General Utility Command Feed"},
 		   {page: "email.html",
 		    source: "email.js",
-		    title: "Standard Email Command Feed"}],
+		    title: "Standard Email Command Feed"},
+     	  	   {page: "map.html",
+		    source: "map.js",
+		    title: "Standard Map Command Feed"},
+	  	   {page: "developer.html",
+		    source: "developer.js",
+		    title: "Standard Developer Command Feed"}],
 
 
   // TODO: This value is temporary.

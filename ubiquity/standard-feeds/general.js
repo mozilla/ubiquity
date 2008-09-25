@@ -99,115 +99,37 @@ cmd_redo.description = "Redoes your latest style/formatting or page-editing chan
 cmd_redo.icon = "chrome://ubiquity/skin/icons/arrow_redo.png";
 
 
+function wordCount(text){
+  var words = text.split(" ");
+  var wordCount = 0;
+
+  for(i=0; i<words.length; i++){
+    if (words[i].length > 0)
+      wordCount++;
+  }
+
+  return wordCount;
+}
+
 CmdUtils.CreateCommand({
-  name: "calculate",
-  takes: {"expression": noun_arb_text},
-  icon: "chrome://ubiquity/skin/icons/calculator.png",
-  description: "Calculates the value of a mathematical expression.",
-  help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
-  preview: function(previewBlock, directObject) {
-    var expression = directObject.text;
-
-    if(expression.length < 1) {
-      previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";
-      return;
-    }
-
-  var previewTemplate = "${expression} = <b>${result}</b>" +
-    "{if error}<p><b>Error:</b> ${error}</p>{/if}";
-
-  var result = "?";
-  var error = null;
-  try {
-    var parser = new MathParser();
-
-    result = parser.parse(expression);
-
-    if(isNaN(result))
-      throw new Error("Invalid expression");
-  } catch(e) {
-    error = e.message;
-    result = "?";
-  }
-
-  var previewData = {
-    "expression": expression,
-    "result": result,
-    "error": error
-  }
-
-  previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
-
-  },
+  name: "word-count",
+  takes: {text: noun_arb_text},
+  icon: "chrome://ubiquity/skin/icons/sum.png",
+  description: "Displays the number of words in a selection.",
   execute: function( directObj ) {
-
-    var expression = directObject.text;
-
-    if(expression.length < 1) {
-      displayMessage("Requires a expression.");
-      return;
-    }
-
-  try {
-    var parser = new MathParser();
-    var result = parser.parse(expression) + "";
-
-    if(isNaN(result))
-      throw new Error("Invalid expression");
-
-    CmdUtils.setSelection(result);
-    CmdUtils.setLastResult(result);
-  } catch(e) {
-    displayMessage("Error calculating expression: " + expression)
-  }
-
+    if (directObj.text)
+      displayMessage(wordCount(directObj.text) + " words");
+    else
+      displayMessage("No words selected.");
+  },
+  preview: function(pBlock, directObj) {
+    if (directObj.text)
+      pBlock.innerHTML = wordCount(directObj.text) + " words";
+    else
+      pBlock.innerHTML = "Displays the number of words in a selection.";
   }
 });
 
-//+ Carlos R. L. Rodrigues
-//@ http://jsfromhell.com/classes/math-parser [rev. #2]
-MathParser = function(){
-  var o = this, p = o.operator = {};
-  p["+"] = function(n, m){return n + m;}
-  p["-"] = function(n, m){return n - m;}
-  p["*"] = function(n, m){return n * m;}
-  p["/"] = function(m, n){return n / m;}
-  p["%"] = function(m, n){return n % m;}
-  p["^"] = function(m, n){return Math.pow(n, m);}
-  p["~"] = function(m, n){return Math.sqrt(n, m);}
-  o.custom = {}, p.f = function(s, n){
-    if(Math[s]) return Math[s](n);
-    else if(o.custom[s]) return o.custom[s].apply(o, n);
-    else throw new Error("Function \"" + s + "\" not defined.");
-  }, o.add = function(n, f){this.custom[n] = f;}
-};
-MathParser.prototype.eval = function(e){
-  var e = e.split(""), v = [], p = [], a, c = 0, s = 0, x, t, d = 0;
-  var n = "0123456789.", o = "+-*/^%~", f = this.operator;
-  for(var i = 0, l = e.length; i < l; i++)
-    if(o.indexOf(e[i]) > -1)
-      e[i] == "-" && (s > 1 || !d) && ++s, !s && d && (p.push(e[i]), s = 2), "+-".indexOf(e[i]) < (d = 0) && (c = 1);
-    else if(a = n.indexOf(e[i]) + 1 ? e[i++] : ""){
-      while(n.indexOf(e[i]) + 1) a += e[i++];
-      v.push(d = (s & 1 ? -1 : 1) * a), c && v.push(f[p.pop()](v.pop(), v.pop())) && (c = 0), --i, s = 0;
-    }
-  for(c = v[0], i = 0, l = p.length; l--; c = f[p[i]](c, v[++i]));
-  return c;
-};
-MathParser.prototype.parse = function(e){
-  var p = [], f = [], ag, n, c, a, o = this, v = "0123456789.+-*/^%~(, )";
-  for(var x, i = 0, l = e.length; i < l; i++){
-    if(v.indexOf(c = e.charAt(i)) < 0){
-      for(a = c; v.indexOf(c = e.charAt(++i)) < 0; a += c); f.push((--i, a));
-    }
-    else if(!(c == "(" && p.push(i)) && c == ")"){
-      if(a = e.slice(0, (n = p.pop()) - (x = v.indexOf(e.charAt(n - 1)) < 0 ? y = (c = f.pop()).length : 0)), x)
-        for(var j = (ag = e.slice(n, ++i).split(",")).length; j--; ag[j] = o.eval(ag[j]));
-      l = (e = a + (x ? o.operator.f(c, ag) : o.eval(e.slice(n, ++i))) + e.slice(i)).length, i -= i - n + c.length;
-    }
-  }
-  return o.eval(e);
-};
 
 function cmd_highlight() {
   var sel = context.focusedWindow.getSelection();
@@ -258,6 +180,214 @@ CmdUtils.CreateCommand({
                   "\">" + text + "</a>");
       pblock.innerHTML = "Inserts a link to Wikipedia article on " + text + " like this: " + html;
     }
+  }
+});
+
+
+// -----------------------------------------------------------------
+// CALCULATE COMMANDS
+// -----------------------------------------------------------------
+
+CmdUtils.CreateCommand({
+  name: "calculate",
+  takes: {"expression": noun_arb_text},
+  icon: "chrome://ubiquity/skin/icons/calculator.png",
+  description: "Calculates the value of a mathematical expression.",
+  help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
+  preview: function(previewBlock, directObject) {
+    var expression = directObject.text;
+
+    if(expression.length < 1) {
+      previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";
+      return;
+    }
+
+    var previewTemplate = "${expression} = <b>${result}</b>" +
+      "{if error}<p><b>Error:</b> ${error}</p>{/if}";
+
+    var result = "?";
+    var error = null;
+    try {
+      var parser = new MathParser();
+
+      result = parser.parse(expression);
+
+      if(isNaN(result))
+        throw new Error("Invalid expression");
+    } catch(e) {
+      error = e.message;
+      result = "?";
+    }
+    var previewData = {
+      "expression": expression,
+      "result": result,
+      "error": error
+    };
+    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+  },
+
+  execute: function( directObj ) {
+    var expression = directObject.text;
+
+    if(expression.length < 1) {
+      displayMessage("Requires a expression.");
+      return;
+    }
+
+    try {
+      var parser = new MathParser();
+      var result = parser.parse(expression) + "";
+
+      if(isNaN(result))
+        throw new Error("Invalid expression");
+
+      CmdUtils.setSelection(result);
+      CmdUtils.setLastResult(result);
+    } catch(e) {
+      displayMessage("Error calculating expression: " + expression);
+    }
+  }
+});
+
+//+ Carlos R. L. Rodrigues
+//@ http://jsfromhell.com/classes/math-parser [rev. #2]
+MathParser = function(){
+  var o = this, p = o.operator = {};
+  p["+"] = function(n, m){return n + m;};
+  p["-"] = function(n, m){return n - m;};
+  p["*"] = function(n, m){return n * m;};
+  p["/"] = function(m, n){return n / m;};
+  p["%"] = function(m, n){return n % m;};
+  p["^"] = function(m, n){return Math.pow(n, m);};
+  p["~"] = function(m, n){return Math.sqrt(n, m);};
+  o.custom = {}, p.f = function(s, n){
+    if(Math[s]) return Math[s](n);
+    else if(o.custom[s]) return o.custom[s].apply(o, n);
+    else throw new Error("Function \"" + s + "\" not defined.");
+  }, o.add = function(n, f){this.custom[n] = f;}
+};
+MathParser.prototype.eval = function(e){
+  var e = e.split(""), v = [], p = [], a, c = 0, s = 0, x, t, d = 0;
+  var n = "0123456789.", o = "+-*/^%~", f = this.operator;
+  for(var i = 0, l = e.length; i < l; i++)
+    if(o.indexOf(e[i]) > -1)
+      e[i] == "-" && (s > 1 || !d) && ++s, !s && d && (p.push(e[i]), s = 2), "+-".indexOf(e[i]) < (d = 0) && (c = 1);
+    else if(a = n.indexOf(e[i]) + 1 ? e[i++] : ""){
+      while(n.indexOf(e[i]) + 1) a += e[i++];
+      v.push(d = (s & 1 ? -1 : 1) * a), c && v.push(f[p.pop()](v.pop(), v.pop())) && (c = 0), --i, s = 0;
+    }
+  for(c = v[0], i = 0, l = p.length; l--; c = f[p[i]](c, v[++i]));
+  return c;
+};
+MathParser.prototype.parse = function(e){
+  var p = [], f = [], ag, n, c, a, o = this, v = "0123456789.+-*/^%~(, )";
+  for(var x, i = 0, l = e.length; i < l; i++){
+    if(v.indexOf(c = e.charAt(i)) < 0){
+      for(a = c; v.indexOf(c = e.charAt(++i)) < 0; a += c); f.push((--i, a));
+    }
+    else if(!(c == "(" && p.push(i)) && c == ")"){
+      if(a = e.slice(0, (n = p.pop()) - (x = v.indexOf(e.charAt(n - 1)) < 0 ? y = (c = f.pop()).length : 0)), x)
+        for(var j = (ag = e.slice(n, ++i).split(",")).length; j--; ag[j] = o.eval(ag[j]));
+      l = (e = a + (x ? o.operator.f(c, ag) : o.eval(e.slice(n, ++i))) + e.slice(i)).length, i -= i - n + c.length;
+    }
+  }
+  return o.eval(e);
+};
+
+
+// -----------------------------------------------------------------
+// SPARKLINE
+// -----------------------------------------------------------------
+
+function sparkline(data) {
+  var p = data;
+
+  var nw = "auto";
+  var nh = "auto";
+
+
+  var f = 2;
+  var w = ( nw == "auto" || nw == 0 ? p.length * f : nw - 0 );
+  var h = ( nh == "auto" || nh == 0 ? "1em" : nh );
+
+  var doc = context.focusedWindow.document;
+  var co = doc.createElement("canvas");
+
+  co.style.height = h;
+  co.style.width = w;
+  co.width = w;
+
+  var h = co.offsetHeight;
+  h = 10;
+  co.height = h;
+
+  var min = 9999;
+  var max = -1;
+
+  for ( var i = 0; i < p.length; i++ ) {
+    p[i] = p[i] - 0;
+    if ( p[i] < min ) min = p[i];
+    if ( p[i] > max ) max = p[i];
+  }
+
+  if ( co.getContext ) {
+    var c = co.getContext("2d");
+    c.strokeStyle = "red";
+    c.lineWidth = 1.0;
+    c.beginPath();
+
+    for ( var i = 0; i < p.length; i++ ) {
+      c.lineTo( (w / p.length) * i, h - (((p[i] - min) / (max - min)) * h) );
+    }
+
+    c.stroke();
+  }
+
+  return co.toDataURL();
+}
+
+CmdUtils.CreateCommand({
+  name: "sparkline",
+  synonyms: ["graph"],
+  description: "Graphs the current selection, turning it into a sparkline.",
+  takes: {"data": noun_arb_text},
+  author: {name: "Aza Raskin", email:"aza@mozilla.com"},
+  license: "MIT",
+  help: "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them.",
+
+  _cleanData: function( string ) {
+    var dirtyData = string.split(/\W/);
+    var data = [];
+    for(var i=0; i<dirtyData.length; i++){
+      var datum = parseFloat( dirtyData[i] );
+      if( datum.toString() != "NaN" ){
+        data.push( datum );
+      }
+    }
+
+    return data;
+  },
+
+  _dataToSparkline: function( string ) {
+    var data = this._cleanData( string );
+    if( data.length < 2 ) return null;
+
+    var dataUrl = sparkline( data );
+    return img = "<img src='%'/>".replace(/%/, dataUrl);
+  },
+
+  preview: function(pblock, input) {
+    var img = this._dataToSparkline( input.text );
+
+    if( !img )
+      jQuery(pblock).text( "Requires numbers to graph." );
+    else
+      jQuery(pblock).empty().append( img ).height( "15px" );
+  },
+
+  execute: function( input ) {
+    var img = this._dataToSparkline( input.text );
+    if( img ) CmdUtils.setSelection( img );
   }
 });
 
