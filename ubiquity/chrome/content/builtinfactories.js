@@ -43,10 +43,13 @@ let UbiquitySetup = {
                     title: "Standard Firefox Command Feed"},
 		   {page: "search.html",
 		    source: "search.js",
-		    title: "Web Search Command Feed"},
+		    title: "Standard Web Search Command Feed"},
 		   {page: "general.html",
 		    source: "general.js",
-		    title: "General Utility Command Feed"}],
+		    title: "Standard General Utility Command Feed"},
+		   {page: "email.html",
+		    source: "email.js",
+		    title: "Standard Email Command Feed"}],
 
 
   // TODO: This value is temporary.
