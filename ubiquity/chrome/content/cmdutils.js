@@ -163,7 +163,7 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
     for( var i=0; i<=lats.length; i++ ) {
       points.push({
         lat: jQuery(lats[i]).text(),
-        long: jQuery(longs[i]).text(),
+        "long": jQuery(longs[i]).text(),
         address: jQuery(addrs[i]).text(),
         city: jQuery(citys[i]).text(),
         state: jQuery(states[i]).text(),

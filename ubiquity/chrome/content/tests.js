@@ -1147,14 +1147,15 @@ function testAsyncNounSuggestions() {
   var noun_type_slowness = {
     _name: "slowness",
     suggest: function( text, html, callback ) {
-      if (text.indexOf("h") == 0) {
-        callback( CmdUtils.makeSugg("slothitude") );
-        callback( CmdUtils.makeSugg("snuffleupagus") );
-      }
+      this._callback = callback;
       if (text.indexOf("hello")== 0) {
         return [ CmdUtils.makeSugg("Robert E. Lee") ];
       } else
 	return [];
+    },
+    triggerCallback: function() {
+      this._callback( CmdUtils.makeSugg("slothitude") );
+      this._callback( CmdUtils.makeSugg("snuffleupagus") );
     }
   };
   var cmd_slow = {
@@ -1178,23 +1179,38 @@ function testAsyncNounSuggestions() {
   Observers.add(observe, "ubiq-suggestions-updated");
 
 
-  var comps = verb.getCompletions(["dostuff", "hello"], selObj);
+  var parsings = verb.getParsings(["dostuff", "hello"], selObj);
   var assert = this.assert;
   var assertDirObj = function( completion, expected) {
     assert( completion._argSuggs.direct_object.text == expected,
 		 "Expected " + expected );
   };
+  this.assert( parsings.length == 1, "there should be 1 completions.");
+  var comps = parsings[0].getParsedSentences();
+  this.assert( comps.length == 1, "there should be 1 completions.");
+  assertDirObj(comps[0], "Robert E. Lee");
 
-  this.assert( comps.length == 3, "there should be 3 completions.");
-  assertDirObj( comps[0], "slothitude");
-  assertDirObj( comps[1], "snuffleupagus");
-  assertDirObj( comps[2], "Robert E. Lee");
+  // Now here comes the async suggestion:
+  noun_type_slowness.triggerCallback();
+  this.assert( parsings.length == 1, "there should be 1 completions.");
+  comps = parsings[0].getParsedSentences();
+  this.assert( comps.length == 3, "there should be 1 completions.");
+  assertDirObj( comps[0], "Robert E. Lee");
+  assertDirObj( comps[1], "slothitude");
+  assertDirObj( comps[2], "snuffleupagus");
   this.assert(observerCalled, "observer should have been called.");
 
   // Now try one where the noun originally suggests nothing, but then comes
   // up with some async suggestions.  What happens?
   observerCalled = false;
-  comps = verb.getCompletions(["dostuff", "halifax"], selObj);
+  parsings = verb.getParsings(["dostuff", "halifax"], selObj);
+  this.assert( parsings.length == 1, "there should be 1 completions.");
+  comps = parsings[0].getParsedSentences();
+  this.assert( comps.length == 0, "there should be 0 completions.");
+  // here comes the async suggestion:
+  noun_type_slowness.triggerCallback();
+  this.assert( parsings.length == 1, "there should be 1 completions.");
+  comps = parsings[0].getParsedSentences();
   this.assert( comps.length == 2, "there should be 2 completions.");
   assertDirObj( comps[0], "slothitude");
   assertDirObj( comps[1], "snuffleupagus");
@@ -1206,13 +1222,13 @@ function testAsyncNounSuggestions() {
   var mockMsgService = {
     displayMessage: function(msg) {}
   };
-  var fakeSource = new FakeCommandSource ({slowcommand: cmd_slow});
+  var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
   var fakeContext = {textSelection:"", htmlSelection:""};
   var fakePBlock = {innerHTML: ""};
-  dump("Trying last test: \n");
   cmdMan.updateInput( "dostuff halifax", fakeContext, fakePBlock );
   this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
+  noun_type_slowness.triggerCallback();
   cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, fakePBlock );
   this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
@@ -1257,3 +1273,4 @@ function testAsyncNounSuggestions() {
 // TODO do a noun-first suggestion with a noun that suggests asynchronously,
 // and a verb that will only appear in the suggestion list if the nountype
 // has a suggestion...
+

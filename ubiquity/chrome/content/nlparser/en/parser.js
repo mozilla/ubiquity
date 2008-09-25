@@ -164,12 +164,9 @@ NLParser.EnParser.prototype = {
        *  all zero-length strings: */
       let word;
       words = [ word for each(word in words) if (word.length > 0)];
-      dump("Matching on words: " + query + "\n");
       // verb-first matches on input
       for each ( verb in this._verbList ) {
-	dump("Testing on verb " + verb._name + ":");
 	newSuggs = newSuggs.concat( verb.getParsings( words, selObj ) );
-	dump("It gave us " + newSuggs.length + " suggestions.\n");
       }
       // noun-first matches on input
       if (newSuggs.length == 0 ){
@@ -184,7 +181,6 @@ NLParser.EnParser.prototype = {
     // get completions from parsings -- the completions may have changed
     // since the parsing list was first generated.
     this._suggestionList = [];
-    dump("There are " + this._parsingsList.length + "parsings...");
     for each (let parsing in this._parsingsList) {
       let newSuggs = parsing.getParsedSentences();
       this._suggestionList = this._suggestionList.concat(newSuggs);
