@@ -1143,6 +1143,7 @@ function testTextAndHtmlDifferent() {
 }
 
 function testAsyncNounSuggestions() {
+  Components.utils.import("resource://ubiquity-modules/Observers.js");
   var noun_type_slowness = {
     _name: "slowness",
     suggest: function( text, html, callback ) {

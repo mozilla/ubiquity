@@ -38,8 +38,9 @@
 
 let UbiquitySetup = {
   // TODO: This value is temporary.
-  STANDARD_FEEDS: [{page: "sample.html",
-                    source: "sample.js"}],
+  STANDARD_FEEDS: [{page: "firefox.html",
+                    source: "firefox.js",
+                    title: "Standard Firefox Command Feed"}],
 
   // TODO: This value is temporary.
   BASE_REMOTE_URI: "http://localhost/",
