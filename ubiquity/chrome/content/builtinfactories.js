@@ -38,10 +38,7 @@
 
 let UbiquitySetup = {
   // TODO: This value is temporary.
-  STANDARD_FEEDS: [{page: "sample.html",
-                    source: "sample.js",
-                    title: "Sample Standard Feed"},
-                   {page: "firefox.html",
+  STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
                     title: "Standard Firefox Command Feed"}],
 
