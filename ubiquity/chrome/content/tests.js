@@ -1133,7 +1133,9 @@ function testTextAndHtmlDifferent() {
   executedHtml = null;
   var nlParser = new NLParser.EnParser( [cmd_different], [noun_type_different]);
   comps = nlParser.nounFirstSuggestions( "Pantalones", "<blink>Pantalones</blink>");
-  this.assert(comps.length == 1, "There should be one completions (3)");
+  this.assert(comps.length == 1, "There should be one partial completion");
+  comps = comps[0].getParsedSentences();
+  this.assert(comps.length == 1, "There should be one completion (3)");
   comps[0].execute();
   this.assert( executedText == "Pantalones", "text should be pantalones.");
   this.assert( executedHtml == "<blink>Pantalones</blink>", "html should blink!");
@@ -1210,6 +1212,9 @@ function testAsyncNounSuggestions() {
 
 // TODO have a bogus noun that returns empty suggestions, make sure it doesn't
 // crash everything.
+
+// TODO have input that matches either as a verb or as a noun, make sure the
+// verb matches come first.
 
 // tests for not yet implemented features:
 

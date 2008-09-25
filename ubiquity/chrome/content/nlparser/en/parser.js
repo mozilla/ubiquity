@@ -62,6 +62,7 @@ NLParser.EnParser.prototype = {
     this.setCommandList( commandList );
     this._nounTypeList = nounList;
     this._suggestionList = []; // a list of ParsedSentences.
+    this._parsingsList = []; // a list of PartiallyParsedSentences.
     this._suggestionMemory = new SuggestionMemory("en_parser");
   },
 
@@ -82,6 +83,7 @@ NLParser.EnParser.prototype = {
       // TODO: nouns will soon be able to suggest asynchronously,
       // meaning that this is false at first but becomes true later.
       // What to do then?
+      // We can pass a callback to the above...
     }
     for each(verb in this._verbList) {
       for each(noun in matchingNouns) {
@@ -96,7 +98,7 @@ NLParser.EnParser.prototype = {
 	text: text,
 	html: html
       };
-      suggs = suggs.concat(verb.getCompletions([verb._name], selObj));
+      suggs = suggs.concat(verb.getParsings([verb._name], selObj));
     }
     return suggs;
   },
@@ -164,16 +166,35 @@ NLParser.EnParser.prototype = {
       words = [ word for each(word in words) if (word.length > 0)];
       // verb-first matches on input
       for each ( verb in this._verbList ) {
-	newSuggs = newSuggs.concat( verb.getCompletions( words, selObj ) );
+	newSuggs = newSuggs.concat( verb.getParsings( words, selObj ) );
       }
       // noun-first matches on input
       if (newSuggs.length == 0 ){
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, query ));
       }
     }
-    this._suggestionList = newSuggs;
+    this._parsingsList = newSuggs;
+    this.refreshSuggestionList( query, context );
+  },
+
+  refreshSuggestionList: function( query, context ) {
+    // get completions from parsings -- the completions may have changed
+    // since the parsing list was first generated.
+    this._suggestionList = [];
+    for each (let parsing in this._parsingsList) {
+      let newSuggs = parsing.getParsedSentences();
+      this._suggestionList = this._suggestionList.concat(newSuggs);
+    }
     this._sortSuggestionList(query);
   },
+
+  /* TODO to make async suggestions work...
+   * 1. need to store the list of all partiallyParsedSentences
+   * 2. register an observer
+   * 3. when we get a notification "ubiq-suggestions-updated", re-query
+   *    the list of partiallyParsedSentences to get all of its parsedSentences
+   *    again, put them in _suggestionList, and sort again.
+   */
 
   getSuggestionList: function() {
     return this._suggestionList;

@@ -582,15 +582,13 @@ NLParser.EnVerb.prototype = {
     } // end if there are still arguments
   },
 
-  getCompletions: function( words, selObj ) {
-    /* returns a list of ParsedSentences, each with a quality ranking.
+  getParsings: function( words, selObj ) {
+    /* returns a list of PartiallyParsedSentences.
        words is an array of all the words in the input (already split).
        selObj is a selectionObject, wrapping both the text and html
        selections.
     */
-    let completions = [];
     let partials = [];
-    let partialsWithSelection = [];
     let part;
     let inputVerb = words[0];
     let matchScore = this._match( inputVerb );
@@ -610,17 +608,24 @@ NLParser.EnVerb.prototype = {
 
     // partials is now a list of PartiallyParsedSentences; if there's a
     // selection, try using it for any missing arguments...
-    for each(part in partials) {
-      let withSel = part.getAlternateSelectionInterpolations();
-      partialsWithSelection = partialsWithSelection.concat( withSel );
+    if (selObj.text || selObj.html) {
+      let partialsWithSelection = [];
+      for each(part in partials) {
+        let withSel = part.getAlternateSelectionInterpolations();
+        partialsWithSelection = partialsWithSelection.concat( withSel );
+      }
+      return partialsWithSelection;
     }
 
-    // partials is now a list of PartiallyParsedSentences (including implicit
-    // selection interpolation); get the specific fully parsed sentences:
-    for each(part in partialsWithSelection ) {
+    return partials;
+  },
+
+  getCompletions: function( words, selObj ) {
+    let partials = this.getParsings(words, selObj);
+    let completions = [];
+    for each (let part in partials) {
       completions = completions.concat( part.getParsedSentences());
     }
-
     return completions;
   },
 
