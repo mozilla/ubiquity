@@ -61,7 +61,10 @@ let UbiquitySetup = {
 		    title: "Standard Social Networking Command Feed"},
 	  	   {page: "developer.html",
 		    source: "developer.js",
-		    title: "Standard Developer Command Feed"}],
+		    title: "Standard Developer Command Feed"},
+  	  	   {page: "pageedit.html",
+		    source: "pageedit.js",
+		    title: "Standard Page Editing Command Feed"}],
 
 
   // TODO: This value is temporary.
