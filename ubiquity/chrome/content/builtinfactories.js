@@ -43,7 +43,11 @@ let UbiquitySetup = {
                     title: "Standard Firefox Command Feed"},
 		   {page: "search.html",
 		    source: "search.js",
-		    title: "Web Search Command Feed"}],
+		    title: "Web Search Command Feed"},
+		   {page: "general.html",
+		    source: "general.js",
+		    title: "General Utility Command Feed"}],
+
 
   // TODO: This value is temporary.
   BASE_REMOTE_URI: "http://localhost/",

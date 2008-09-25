@@ -633,6 +633,48 @@ CmdUtils.CreateCommand({
 });
 
 
+function defineWord(word, callback) {
+  var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
+  var params = Utils.paramsToString({
+    dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
+    word: word
+  });
+
+  Utils.ajaxGet(url + params, function(xml) {
+    CmdUtils.loadJQuery( function(jQuery) {
+      var text = jQuery(xml).find("WordDefinition").text();
+      callback(text);
+    });
+  });
+}
+
+CmdUtils.CreateCommand({
+  name: "define",
+  description: "Gives the meaning of a word.",
+  help: "Try issuing &quot;define aglet&quot;",
+  icon: "http://www.answers.com/favicon.ico",
+  takes: {"word": noun_arb_text},
+  execute: function( directObj ) {
+    var word = directObj.text;
+    Utils.openUrlInBrowser( "http://www.answers.com/" + escape(word) );
+  },
+  preview: function( pblock, directObj ) {
+    var word = directObj.text;
+    if (word.length < 2)
+      pblock.innerHTML = "Gives the definition of a word.";
+    else {
+      pblock.innerHTML = "Gives the definition of the word " + word + ".";
+      defineWord( word, function(text){
+        text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
+        text = text.replace(/(1:)/g, "<br/>$&");
+        text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
+        text = text.replace(/\[.*?\]/g, "");
+
+        pblock.innerHTML = text;
+      });
+    }
+  }
+});
 
 //Don't release now cos it's still rough and users may be disappointed
 //TODO: add support for POST forms
