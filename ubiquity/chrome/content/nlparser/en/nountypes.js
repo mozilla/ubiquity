@@ -1,4 +1,4 @@
-/* ***** BEGIN LICENSE BLOCK *****
+\/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -121,25 +121,25 @@ var noun_type_date = {
 
 var noun_type_time = {
    _name: "time",
-   
+
    default: function(){
-      var time = Date.parse("now");
-      var text = time.toString("hh:mm tt")
-      return CmdUtils.makeSugg(text, null, time)
+     var time = Date.parse("now");
+     var text = time.toString("hh:mm tt");
+     return CmdUtils.makeSugg(text, null, time);
    },
-   
+
    suggest: function(text, html){
-      if (typeof text != "string"){
-         return [];
-      }
-            
-      var time = Date.parse( text );
-      if(!time ){
-         return []
-      }
-      
-      text = time.toString("hh:mm tt");
-      return [ CmdUtils.makeSugg(text, null, time) ]
+     if (typeof text != "string"){
+       return [];
+     }
+
+     var time = Date.parse( text );
+     if(!time ){
+       return [];
+     }
+
+     text = time.toString("hh:mm tt");
+     return [ CmdUtils.makeSugg(text, null, time) ];
    }
 }
 

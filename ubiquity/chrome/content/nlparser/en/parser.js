@@ -164,9 +164,12 @@ NLParser.EnParser.prototype = {
        *  all zero-length strings: */
       let word;
       words = [ word for each(word in words) if (word.length > 0)];
+      dump("Matching on words: " + query + "\n");
       // verb-first matches on input
       for each ( verb in this._verbList ) {
+	dump("Testing on verb " + verb._name + ":");
 	newSuggs = newSuggs.concat( verb.getParsings( words, selObj ) );
+	dump("It gave us " + newSuggs.length + " suggestions.\n");
       }
       // noun-first matches on input
       if (newSuggs.length == 0 ){
@@ -177,24 +180,17 @@ NLParser.EnParser.prototype = {
     this.refreshSuggestionList( query, context );
   },
 
-  refreshSuggestionList: function( query, context ) {
+  refreshSuggestionList: function( query ) {
     // get completions from parsings -- the completions may have changed
     // since the parsing list was first generated.
     this._suggestionList = [];
+    dump("There are " + this._parsingsList.length + "parsings...");
     for each (let parsing in this._parsingsList) {
       let newSuggs = parsing.getParsedSentences();
       this._suggestionList = this._suggestionList.concat(newSuggs);
     }
     this._sortSuggestionList(query);
   },
-
-  /* TODO to make async suggestions work...
-   * 1. need to store the list of all partiallyParsedSentences
-   * 2. register an observer
-   * 3. when we get a notification "ubiq-suggestions-updated", re-query
-   *    the list of partiallyParsedSentences to get all of its parsedSentences
-   *    again, put them in _suggestionList, and sort again.
-   */
 
   getSuggestionList: function() {
     return this._suggestionList;

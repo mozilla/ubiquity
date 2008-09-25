@@ -1154,7 +1154,7 @@ function testAsyncNounSuggestions() {
         return [ CmdUtils.makeSugg("Robert E. Lee") ];
       } else
 	return [];
-    },
+    }
   };
   var cmd_slow = {
     name: "dostuff",
@@ -1198,6 +1198,22 @@ function testAsyncNounSuggestions() {
   assertDirObj( comps[0], "slothitude");
   assertDirObj( comps[1], "snuffleupagus");
   this.assert(observerCalled, "observer should have been called.");
+
+  // Now instead of going through the verb directly, we'll go through the
+  // command manager and get a suggestion list, then add a new noun suggestion
+  // asynchronously and make sure the parser's suggestion list updated.
+  var mockMsgService = {
+    displayMessage: function(msg) {}
+  };
+  var fakeSource = new FakeCommandSource ({slowcommand: cmd_slow});
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var fakeContext = {textSelection:"", htmlSelection:""};
+  var fakePBlock = {innerHTML: ""};
+  dump("Trying last test: \n");
+  cmdMan.updateInput( "dostuff halifax", fakeContext, fakePBlock );
+  this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
+  cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, fakePBlock );
+  this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
 
 // TODO a test where we put inalid value into an argument on purpose, ensure
@@ -1236,3 +1252,7 @@ function testAsyncNounSuggestions() {
 
 // TODO make a verb with two direct objects using the new API, make sure
 // an exception is raised.
+
+// TODO do a noun-first suggestion with a noun that suggests asynchronously,
+// and a verb that will only appear in the suggestion list if the nountype
+// has a suggestion...

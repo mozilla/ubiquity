@@ -73,6 +73,8 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
                            function(event) { self.__onInput(event); },
                            true);
 
+  Observers.add(function() {self.__onSuggestionsUpdated();},
+		"ubiq-suggestions-updated");
   this.__resetPreview();
 }
 
@@ -124,6 +126,13 @@ Ubiquity.prototype = {
                keyCode == this.__KEYCODE_TAB) {
     } else
       this.__updatePreview();
+  },
+
+  __onSuggestionsUpdated: function() {
+    var input = this.__textBox.value;
+    this.__cmdManager.onSuggestionsUpdated(input,
+					   this.__makeContext(),
+					   this.__previewBlock);
   },
 
   __updatePreview: function() {
@@ -207,7 +216,7 @@ Ubiquity.prototype = {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
     this.__resetPreview();
-    
+
     this.__msgPanel.hidden = false;
     this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
   },
