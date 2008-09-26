@@ -178,7 +178,7 @@ function isAddress( query, callback ) {
       var allText = jQuery.makeArray(
                       jQuery(data)
                         .find(":contains()")
-                        .map( function(){ return jQuery(this).text().toLowerCase() } )
+                        .map( function(){ return jQuery(this).text().toLowerCase(); } )
                       );
 
       // TODO: Handle non-abbriviated States. Like Illinois instead of IL.

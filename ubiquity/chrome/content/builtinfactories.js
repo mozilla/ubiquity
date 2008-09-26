@@ -37,45 +37,43 @@
  * ***** END LICENSE BLOCK ***** */
 
 let UbiquitySetup = {
-  // TODO: This value is temporary.
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
                     title: "Mozilla Browser Commands"},
-                    
+
                    {page: "search.html",
                     source: "search.js",
                     title: "Mozilla Web Search Commands"},
-                    
+
                    {page: "general.html",
                     source: "general.js",
                     title: "Mozilla General Utility Commands"},
-                   
+
                    {page: "email.html",
                     source: "email.js",
                     title: "Mozilla Email Commands"},
-                   
+
                    {page: "calendar.html",
                     source: "calendar.js",
                     title: "Mozilla Calendar Commands"},
-                   
+
                    {page: "map.html",
                     source: "map.js",
                     title: "Mozilla Map Commands"},
-                   
+
                    {page: "social.html",
                     source: "social.js",
                     title: "Mozilla Social Networking Commands"},
-                   
+
                    {page: "developer.html",
                     source: "developer.js",
                     title: "Mozilla Developer Commands"},
-                   
+
                    {page: "pageedit.html",
                     source: "pageedit.js",
                     title: "Mozilla Page Editing Commands"}],
 
-  // TODO: This value is temporary.
-  BASE_REMOTE_URI: "http://localhost/",
+  BASE_REMOTE_URI: "https://people.mozilla.com/~araskin/standard-feeds/",
 
   __getExtDir: function __getExtDir() {
     let Cc = Components.classes;
