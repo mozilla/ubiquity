@@ -159,7 +159,6 @@ function makeBuiltinCodeSources(languageCode) {
     new LocalUriCodeSource(baseUri + "final.js")
   ];
 
-  dump( "Language code is " + languageCode + "\n");
   if (languageCode == "jp") {
     headerCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/nountypes.js"));
     bodyCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/builtincmds.js"));
