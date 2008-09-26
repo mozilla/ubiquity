@@ -40,32 +40,39 @@ let UbiquitySetup = {
   // TODO: This value is temporary.
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
-                    title: "Standard Firefox Command Feed"},
-		   {page: "search.html",
-		    source: "search.js",
-		    title: "Standard Web Search Command Feed"},
-		   {page: "general.html",
-		    source: "general.js",
-		    title: "Standard General Utility Command Feed"},
-		   {page: "email.html",
-		    source: "email.js",
-		    title: "Standard Email Command Feed"},
-  		   {page: "calendar.html",
-		    source: "calendar.js",
-		    title: "Standard Calendar Command Feed"},
-     	  	   {page: "map.html",
-		    source: "map.js",
-		    title: "Standard Map Command Feed"},
-       	  	   {page: "social.html",
-		    source: "social.js",
-		    title: "Standard Social Networking Command Feed"},
-	  	   {page: "developer.html",
-		    source: "developer.js",
-		    title: "Standard Developer Command Feed"},
-  	  	   {page: "pageedit.html",
-		    source: "pageedit.js",
-		    title: "Standard Page Editing Command Feed"}],
-
+                    title: "Mozilla Browser Commands"},
+                    
+                   {page: "search.html",
+                    source: "search.js",
+                    title: "Mozilla Web Search Commands"},
+                    
+                   {page: "general.html",
+                    source: "general.js",
+                    title: "Mozilla General Utility Commands"},
+                   
+                   {page: "email.html",
+                    source: "email.js",
+                    title: "Mozilla Email Commands"},
+                   
+                   {page: "calendar.html",
+                    source: "calendar.js",
+                    title: "Mozilla Calendar Commands"},
+                   
+                   {page: "map.html",
+                    source: "map.js",
+                    title: "Mozilla Map Commands"},
+                   
+                   {page: "social.html",
+                    source: "social.js",
+                    title: "Mozilla Social Networking Commands"},
+                   
+                   {page: "developer.html",
+                    source: "developer.js",
+                    title: "Mozilla Developer Commands"},
+                   
+                   {page: "pageedit.html",
+                    source: "pageedit.js",
+                    title: "Mozilla Page Editing Commands"}],
 
   // TODO: This value is temporary.
   BASE_REMOTE_URI: "http://localhost/",
