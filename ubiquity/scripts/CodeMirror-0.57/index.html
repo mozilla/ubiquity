@@ -1,0 +1,145 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>CodeMirror: In-browser code editing</title>
+
+    <link rel="stylesheet" type="text/css" href="css/docs.css"/>
+    <style type="text/css">
+      div.top {text-align: center;}
+      div.top h1 {margin-bottom: 0;}
+      div.top h2 {margin-top: 0; margin-bottom: 1.5em;}
+    </style>
+  </head>
+  <body>
+
+<div style="float: right; padding-left: 10px;"><img src="css/people.jpg" alt=""/></div>
+<div class="top">
+  <h1>CodeMirror</h1>
+  <h2>In-browser code editing made slightly less painful</h2>
+</div>
+
+<p>CodeMirror is a JavaScript program that can be used to create a
+relatively pleasant editor interface for code-like content -- computer
+programs, HTML markup, and similar. If a parser has been written for
+the language you are editing (we currently have <a
+href="jstest.html">JavaScript</a>, <a href="htmltest.html">XML</a>,
+and <a href="csstest.html">CSS</a> covered), the code will be prettily
+coloured, and indentation will be taken care of for you, meaning the
+cursor will be placed at the right position when you press enter, and
+it is possible to re-indent blocks of code automatically.</p>
+
+<p>The program has, so far, been integrated in my <a
+href="http://eloquentjavascript.net">interactive book</a> on
+JavaScript and several few small sites. Though I can not guarantee
+that it works in all situations on all <a
+href="#supported">supported</a> browsers, it has proven itself quite
+stable and usable.</p>
+
+<p>To get a look at CodeMirror, see the <strong>demonstration
+pages</strong> for the <a href="jstest.html">JavaScript</a>, <a
+href="htmltest.html">XML/HTML</a>, and <a href="csstest.html">CSS</a>
+parsers.</p>
+
+<h2>Releases</h2>
+
+<p class="rel"><em>04-07-2008</em>: <a
+href="http://marijn.haverbeke.nl/codemirror/codemirror-0.57.zip">Version
+0.57</a>: A CSS parser and a nice tokenizer framework, bugfixes in the
+XML parser, a few browser-issue workarounds, one of which should fix
+the age-old Firefox cursor-showing-on-wrong line bug.</p>
+
+<p class="rel"><em>25-04-2008</em>: <a
+href="http://marijn.haverbeke.nl/codemirror/codemirror-0.56.zip">Version
+0.56</a>: Fixes for some minor bugs, no new features.</p>
+
+<p class="rel"><em>30-03-2008</em>: <a
+href="http://marijn.haverbeke.nl/codemirror/codemirror-0.55.zip">Version
+0.55</a>: Fixes a bug that broke redo, adds <code>readOnly</code>
+option.</p>
+
+<p class="rel"><em>10-03-2008</em>: <a
+href="http://marijn.haverbeke.nl/codemirror/codemirror-0.54.zip">Version
+0.54</a>: Some new utility functions and options (see
+<code>fromTextArea</code>, <code>saveFunction</code>,
+<code>initCallback</code>, <code>textWrapping</code>,
+<code>disableSpellcheck</code>, <code>jumpToLine</code>, and
+<code>reindent</code> in the <a href="manual.html">manual</a>), many
+bugfixes, and some cleaning up and shrinking of the codebase (<a
+href="http://www.mochikit.com">MochiKit</a> is no longer used).</p>
+
+<p class="rel"><em>26-01-2008</em>: <a
+href="http://marijn.haverbeke.nl/codemirror/codemirror-0.53.zip">Version
+0.53</a>: Adds support for continuous scanning, search/replace,
+undo/redo, jump-to-line, selection getting and setting. See <a
+href="manual.html">the manual</a> for details. Also fixes a bucket of
+bugs.</p>
+
+<p class="rel"><em>13-01-2008</em>: <a href="http://marijn.haverbeke.nl/codemirror/codemirror-0.52.zip">Version
+0.52</a>: Overhaul of the key handling (no longer configurable, but
+much more robust), different way of choosing a parser (by file instead
+of by object, see the <a href="manual.html">manual</a>), and most of
+the JavaScript has been moved into the editable frame, meaning
+CodeMirror no longer pollutes your namespace, and can coexist with
+Dojo and other frameworks.</p>
+
+<p class="rel"><em>12-01-2008</em>: <a href="http://marijn.haverbeke.nl/codemirror/codemirror-0.51.zip">Version
+0.51</a>: Fixes a few small bugs in the previous release:
+stringstreams raising exceptions without a good reason, and selections
+that are bigger than the visible part of the document in IE..</p>
+
+<p class="rel"><em>10-01-2008</em>: <a href="http://marijn.haverbeke.nl/codemirror/codemirror-0.5.zip">Version 0.50</a>:
+The very first numbered release.</p>
+
+<h2>Supported browsers</h2>
+
+<p>At this time, the following browsers are supported:</p>
+
+<ul>
+  <li>Firefox 1.5 or higher</li>
+  <li>Internet Explorer 6 or higher</li>
+  <li>Safari 3 or higher</li>
+  <li>Opera 9.5 or higher (a bit slow and glitchy, though)</li>
+</ul>
+
+<p>Making it work on other browsers that have decent support for the
+W3C DOM model should not be too hard, but I am not actively testing
+against those.</p>
+
+<h2>Getting the code</h2>
+
+<p>All of CodeMirror is released under a <a
+href="LICENSE">BSD-style</a> license. To get it, you can download the
+<a href="http://marijn.haverbeke.nl/codemirror/codemirror.zip">latest
+release</a> or the current <a
+href="http://marijn.haverbeke.nl/codemirror/codemirror-latest.zip">development
+snapshot</a> as zip files, or use the <a
+href="http://www.darcs.net/">darcs</a> version control system to get
+the repository:</p>
+
+<pre class="code">darcs get http://marijn.haverbeke.nl/codemirror</pre>
+
+<p>This second method is recommended if you are planning to hack on
+CodeMirror -- it makes it easy to record your patches and share them
+with me. To see the repository online, visit the <a
+href="http://marijn.haverbeke.nl/darcsweb.cgi?r=CodeMirror">CodeMirror
+darcsweb</a></p>
+
+<h2>Support</h2>
+
+<p>There is a <a
+href="http://groups.google.nl/group/codemirror">Google group</a> (a
+sort of mailing list/newsgroup thingy) for discussion and news related
+to CodeMirror. You can also e-mail me directly: <a
+href="mailto:marijnh@gmail.com">Marijn Haverbeke</a>.</p>
+
+<h2>Documentation</h2>
+
+<p>Due to limitations of browsers (and my taste for weird hacks) the
+implementation of CodeMirror is rather complicated. There is a big <a
+href="story.html">document</a> that informally describes its
+internals, and a <a href="manual.html">manual</a> that explains simple
+use. For detailed information, you can try looking at the comments in
+the <a
+href="http://marijn.haverbeke.nl/darcsweb.cgi?r=CodeMirror;a=tree">code</a>.</p>
+
+  </body>
+</html>
