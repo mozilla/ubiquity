@@ -648,3 +648,24 @@ var makeSearchCommand = function deprecated_makeSearchCommand() {
 
   return CmdUtils.makeSearchCommand.apply(CmdUtils, arguments);
 };
+
+//Requires at least two arguments - name
+//and url (which contains the bookmarklet code starting with "javascript:")
+
+CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand( options ) {
+  options.name = options.name.toLowerCase().replace(/ /g,'-');
+    
+  options.execute = function(directObject, modifiers) {
+    var code = options.url;
+    CmdUtils.getDocument().location = code;
+  };
+  
+  if (! options.preview ){
+    options.preview = function(pblock) {
+      var content = "Executes the <b>" + options.name + "</b> bookmarklet";
+      pblock.innerHTML = content;
+    };
+  }
+  
+  CmdUtils.CreateCommand(options);
+};
