@@ -16,10 +16,6 @@
           src="editor.js"></script>
   <script type="application/javascript;version=1.7"
           src="resource://ubiquity-scripts/codemirror/js/codemirror.js"></script>
-<!-- following line would be needed if CodeMirrors getCode() were to be changed from here, 
-instead of directly in the lib (see highlightWatcher() below) -->
-<!--  <script type="application/javascript;version=1.7"
-          src="resource://ubiquity-scripts/CodeMirror-0.57/js/util.js"></script>-->
   <script type="text/javascript"> 
    function initialize() { 
        document.getElementById('editor').value = PrefCommands.getCode(); 
@@ -69,15 +65,6 @@ instead of directly in the lib (see highlightWatcher() below) -->
           };
           editor.contentWindow.focus();
           editor.editor.editor.jumpToLine(1);
-/*          editor.editor.editor.getCode = function() {
-              if (!editor.editor.editor.container.firstChild)
-                  return "";
-              var temp = editor.editor.editor.container.cloneNode(true);
-
-              var accum = [];
-              forEach(editor.editor.editor.traverseDOM(temp.firstChild), method(accum, "push"));
-              return editor.editor.editor.cleanText(accum.join(""));
-          };*/ // can't get access to forEach (defined in Editor (editor.js)) so changing the lib directly
       } else window.setTimeout(function(){highlightWatcher()}, 100);
    }
   </script>
