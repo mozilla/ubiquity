@@ -1,4 +1,4 @@
-/* Functionality for finding, storing, and re-storing selections
+/* Functionality for finding, storing, and restoring selections
  *
  * This does not provide a generic API, just the minimal functionality
  * required by the CodeMirror system.
@@ -29,6 +29,8 @@ var select = {};
 
   // Used to prevent restoring a selection when we do not need to.
   var documentChanged = false;
+
+  var fourSpaces = "\u00a0\u00a0\u00a0\u00a0";
 
   // Most functions are defined in two ways, one for the IE selection
   // model, one for the W3C one.
@@ -73,10 +75,8 @@ var select = {};
           done = true;
         } catch(e) {}
       }
-      if (!done) {
-        range1.moveToBookmark(sel.bookmark);
-      }
-      range1.select();
+      if (!done) done = range1.moveToBookmark(sel.bookmark);
+      if (done) range1.select();
     };
 
 
@@ -111,6 +111,7 @@ var select = {};
         removeElement(temp);
         return result;
       }
+      return false;
     };
 
     // Place the cursor after this.start. This is only useful when
@@ -137,6 +138,10 @@ var select = {};
     // do widely different things when pressing enter in designMode.
     select.insertNewlineAtCursor = function(window) {
       insertAtCursor(window, "<br/>");
+    };
+
+    select.insertTabAtCursor = function(window) {
+      insertAtCursor(window, fourSpaces);
     };
 
     // Get the BR node at the start of the line on which the cursor
@@ -332,6 +337,10 @@ var select = {};
 
       var node = start ? range.startContainer : range.endContainer;
       var offset = start ? range.startOffset : range.endOffset;
+      // Work around (yet another) bug in Opera's selection model.
+      if (window.opera && !start && range.endContainer == container && range.endOffset == range.startOffset + 1 &&
+          container.childNodes[range.startOffset] && container.childNodes[range.startOffset].nodeName == "BR")
+        offset--;
 
       // For text nodes, we look at the node itself if the cursor is
       // inside, or at the node before it if the cursor is at the
@@ -389,33 +398,20 @@ var select = {};
       var range = selectionRange(window);
       if (!range) return;
 
-      // On Opera, insertNode is completely broken when the range is
-      // in the middle of a text node.
-      if (window.opera && range.startContainer.nodeType == 3 && range.startOffset != 0) {
-        var start = range.startContainer, text = start.nodeValue;
-        start.parentNode.insertBefore(window.document.createTextNode(text.substr(0, range.startOffset)), start);
-        start.nodeValue = text.substr(range.startOffset);
-        start.parentNode.insertBefore(node, start);
-      }
-      else {
-        range.insertNode(node);
-      }
-
+      range.deleteContents();
+      range.insertNode(node);
       range.setEndAfter(node);
       range.collapse(false);
       selectRange(range, window);
       return node;
     }
 
-    var gecko = /Gecko/.test(navigator.userAgent);
     select.insertNewlineAtCursor = function(window) {
       insertNodeAtCursor(window, window.document.createElement("BR"));
-      // Hack to work around an FF bug where (sometimes) the cursor
-      // will appear at the end of line N when it really is sitting on
-      // the empty line N + 1. If this line is not completely empty,
-      // but has an empty text node, the problem seems to go away.
-      if (gecko)
-        insertNodeAtCursor(window, window.document.createTextNode(""));
+    };
+
+    select.insertTabAtCursor = function(window) {
+      insertNodeAtCursor(window, window.document.createTextNode(fourSpaces));
     };
 
     select.cursorPos = function(container, start) {

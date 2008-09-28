@@ -15,7 +15,7 @@
   <script type="application/javascript;version=1.7"
           src="editor.js"></script>
   <script type="application/javascript;version=1.7"
-          src="resource://ubiquity-scripts/CodeMirror-0.57/js/codemirror.js"></script>
+          src="resource://ubiquity-scripts/codemirror/js/codemirror.js"></script>
 <!-- following line would be needed if CodeMirrors getCode() were to be changed from here, 
 instead of directly in the lib (see highlightWatcher() below) -->
 <!--  <script type="application/javascript;version=1.7"
@@ -50,8 +50,8 @@ instead of directly in the lib (see highlightWatcher() below) -->
          height: textarea.clientHeight,
          content: textarea.value,
          parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
-         stylesheet: "resource://ubiquity-scripts/CodeMirror-0.57/css/jscolors.css",
-         path: "resource://ubiquity-scripts/CodeMirror-0.57/js/",
+         stylesheet: "resource://ubiquity-scripts/codemirror/css/jscolors.css",
+         path: "resource://ubiquity-scripts/codemirror/js/",
          autoMatchParens: true
       });
       var iframe = document.getElementsByTagName("iframe")[0];

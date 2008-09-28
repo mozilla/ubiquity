@@ -1,12 +1,12 @@
 /* Simple parser for CSS */
 
-Editor.Parser = (function() {
+var CSSParser = Editor.Parser = (function() {
   var tokenizeCSS = (function() {
     function normal(source, setState) {
       var ch = source.next();
       if (ch == "@") {
         source.nextWhile(matcher(/\w/));
-        return "at";
+        return "css-at";
       }
       else if (ch == "/" && source.equals("*")) {
         setState(inCComment);
@@ -17,11 +17,11 @@ Editor.Parser = (function() {
         return null;
       }
       else if (ch == "=") {
-        return "compare";
+        return "css-compare";
       }
       else if (source.equals("=") && (ch == "~" || ch == "|")) {
         source.next();
-        return "compare";
+        return "css-compare";
       }
       else if (ch == "\"" || ch == "'") {
         setState(inString(ch));
@@ -29,26 +29,26 @@ Editor.Parser = (function() {
       }
       else if (ch == "#") {
         source.nextWhile(matcher(/\w/));
-        return "hash";
+        return "css-hash";
       }
       else if (ch == "!") {
         source.nextWhile(matcher(/[ \t]/));
         source.nextWhile(matcher(/\w/));
-        return "important";
+        return "css-important";
       }
       else if (/\d/.test(ch)) {
         source.nextWhile(matcher(/[\w.%]/));
-        return "unit";
+        return "css-unit";
       }
       else if (/[,.+>*\/]/.test(ch)) {
-        return "select-op";
+        return "css-select-op";
       }
       else if (/[;{}:\[\]]/.test(ch)) {
-        return "punctuation";
+        return "css-punctuation";
       }
       else {
         source.nextWhile(matcher(/[\w\\\-_]/));
-        return "identifier";
+        return "css-identifier";
       }
     }
 
@@ -62,7 +62,7 @@ Editor.Parser = (function() {
         }
         maybeEnd = (ch == "*");
       }
-      return "comment";
+      return "css-comment";
     }
 
     function inSGMLComment(source, setState) {
@@ -75,7 +75,7 @@ Editor.Parser = (function() {
         }
         dashes = (ch == "-") ? dashes + 1 : 0;
       }
-      return "comment";
+      return "css-comment";
     }
 
     function inString(quote) {
@@ -89,7 +89,7 @@ Editor.Parser = (function() {
         }
         if (!escaped)
           setState(normal);
-        return "string";
+        return "css-string";
       };
     }
 
@@ -98,18 +98,19 @@ Editor.Parser = (function() {
     };
   })();
 
-  function indentCSS(inBraces, inRule) {
+  function indentCSS(inBraces, inRule, base) {
     return function(nextChars) {
-      if (!inBraces || /^\}/.test(nextChars)) return 0;
-      else if (inRule) return 4;
-      else return 2;
+      if (!inBraces || /^\}/.test(nextChars)) return base;
+      else if (inRule) return base + 4;
+      else return base + 2;
     };
   }
 
   // This is a very simplistic parser -- since CSS does not really
   // nest, it works acceptably well, but some nicer colouroing could
   // be provided with a more complicated parser.
-  function parseCSS(source) {
+  function parseCSS(source, basecolumn) {
+    basecolumn = basecolumn || 0;
     var tokens = tokenizeCSS(source);
     var inBraces = false, inRule = false;
 
@@ -117,21 +118,21 @@ Editor.Parser = (function() {
       next: function() {
         var token = tokens.next(), style = token.style, content = token.content;
 
-        if (style == "identifier" && inRule)
-          token.style = "value";
-        if (style == "hash")
-          token.style =  inRule ? "colorcode" : "identifier";
+        if (style == "css-identifier" && inRule)
+          token.style = "css-value";
+        if (style == "css-hash")
+          token.style =  inRule ? "css-colorcode" : "css-identifier";
 
         if (content == "\n")
-          token.indentation = indentCSS(inBraces, inRule);
+          token.indentation = indentCSS(inBraces, inRule, basecolumn);
 
         if (content == "{")
           inBraces = true;
         else if (content == "}")
-          inBraces = false;
+          inBraces = inRule = false;
         else if (inBraces && content == ";")
           inRule = false;
-        else if (inBraces && style != "comment" && style != "whitespace")
+        else if (inBraces && style != "css-comment" && style != "whitespace")
           inRule = true;
 
         return token;

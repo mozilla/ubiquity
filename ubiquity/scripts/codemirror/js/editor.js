@@ -1,7 +1,3 @@
-// the code for getCode() modified slightly to get rid of bug causing weird 
-// cursor-jumping in the editor after call to getCode()
-// -- Christian Sonne (FreakCERS)
-
 /* The Editor object manages the content of the editable frame. It
  * catches events, colours nodes, and indents lines. This file also
  * holds some functions for transforming arbitrary DOM structures into
@@ -25,11 +21,14 @@ var Editor = (function(){
   }
 
   function splitSpaces(string) {
-    return string.replace(/[\t \u00a0]{2,}/g, function(s) {return safeWhiteSpace(s.length);});
+    if (string == " ") return nbsp;
+    else return string.replace(/[\t \u00a0]{2,}/g, function(s) {return safeWhiteSpace(s.length);});
   }
   function asEditorLines(string) {
     return splitSpaces(string.replace(/\u00a0/g, " ")).replace(/\r\n?/g, "\n").split("\n");
   }
+
+  var internetExplorer = document.selection && window.ActiveXObject && /MSIE/.test(navigator.userAgent);
 
   // Helper function for traverseDOM. Flattens an arbitrary DOM node
   // into an array of textnodes and <br> tags.
@@ -45,7 +44,7 @@ var Editor = (function(){
         result.push(node);
       }
       else if (node.nodeName == "BR" && node.childNodes.length == 0) {
-        leaving = false;
+        leaving = true;
         result.push(node);
       }
       else {
@@ -81,10 +80,9 @@ var Editor = (function(){
     function pointAt(node){
       var parent = node.parentNode;
       var next = node.nextSibling;
-      if (next)
-        return function(newnode){parent.insertBefore(newnode, next);};
-      else
-        return function(newnode){parent.appendChild(newnode);};
+      return function(newnode) {
+        parent.insertBefore(newnode, next);
+      };
     }
     var point = null;
 
@@ -297,9 +295,9 @@ var Editor = (function(){
 
     replace: function(string) {
       if (this.atOccurrence) {
-        this.editor.replaceRange(this.atOccurrence.from, this.atOccurrence.to, string);
-        this.line = this.atOccurrence.from.node;
-        this.offset = this.atOccurrence.from.offset;
+        var end = this.editor.replaceRange(this.atOccurrence.from, this.atOccurrence.to, string);
+        this.line = end.node;
+        this.offset = end.offset;
         this.atOccurrence = false;
       }
     }
@@ -312,7 +310,8 @@ var Editor = (function(){
     this.doc = document;
     this.container = this.doc.body;
     this.win = window;
-    this.history = new History(this.container, this.options.undoDepth, this.options.undoDelay, this);
+    this.history = new History(this.container, this.options.undoDepth, this.options.undoDelay,
+                               this, options.onChange);
 
     if (!Editor.Parser)
       throw "No parser loaded.";
@@ -328,7 +327,7 @@ var Editor = (function(){
     if (options.content)
       this.importCode(options.content);
     else // FF acts weird when the editable document is completely empty
-      this.container.appendChild(this.doc.createElement("SPAN"));
+      this.container.appendChild(this.doc.createElement("BR"));
 
     if (!options.readOnly) {
       if (options.continuousScanning !== false) {
@@ -363,6 +362,8 @@ var Editor = (function(){
       addEventHandler(document, "keyup", method(this, "keyUp"));
       addEventHandler(document.body, "paste", method(this, "markCursorDirty"));
       addEventHandler(document.body, "cut", method(this, "markCursorDirty"));
+      if (this.options.autoMatchParens)
+        addEventHandler(document.body, "click", method(this, "scheduleParenBlink"));
     }
   }
 
@@ -382,11 +383,14 @@ var Editor = (function(){
     getCode: function() {
       if (!this.container.firstChild)
         return "";
-      var temp = this.container.cloneNode(true); //fixes weird jumping in editor after call to getCode()
+      // a copy is used to avoid having the cursor jump in the editor
+      // modified by Christian Sonne (FreakCERS)
+      var temp = this.container.cloneNode(true);
 
       var accum = [];
+      // temp is used instead of this.container
+      // see above
       forEach(traverseDOM(temp.firstChild), method(accum, "push"));
-//      forEach(traverseDOM(this.container.firstChild), method(accum, "push"));
       return cleanText(accum.join(""));
     },
 
@@ -452,7 +456,7 @@ var Editor = (function(){
       lines[0] = this.history.textAfter(from.node).slice(0, from.offset) + lines[0];
       var lastLine = lines[lines.length - 1];
       lines[lines.length - 1] = lastLine + this.history.textAfter(to.node).slice(to.offset);
-      var end = this.history.nodeAfter(to.node)
+      var end = this.history.nodeAfter(to.node);
       this.history.push(from.node, end, lines);
       return {node: this.history.nodeBefore(end),
               offset: lastLine.length};
@@ -472,6 +476,9 @@ var Editor = (function(){
     keyDown: function(event) {
       // Don't scan when the user is typing.
       this.delayScanning();
+      // Schedule a paren-highlight event, if configured.
+      if (this.options.autoMatchParens)
+        this.scheduleParenBlink();
 
       if (event.keyCode == 13) { // enter
         if (event.ctrlKey) {
@@ -514,6 +521,8 @@ var Editor = (function(){
       // here.
       if (event.code == 13 || event.code == 9)
         event.stop();
+      else if ((event.character == "[" || event.character == "]") && event.ctrlKey)
+        event.stop(), this.blinkParens();
       else if (electric && electric.indexOf(event.character) != -1)
         this.parent.setTimeout(method(this, "indentAtCursor"), 0);
     },
@@ -521,6 +530,9 @@ var Editor = (function(){
     // Mark the node at the cursor dirty when a non-safe key is
     // released.
     keyUp: function(event) {
+      if (internetExplorer)
+        this.container.createTextRange().execCommand("unlink");
+
       if (!isSafeKey(event.keyCode))
         this.markCursorDirty();
     },
@@ -572,7 +584,7 @@ var Editor = (function(){
           if (start)
             insertAfter(whiteSpace, start);
           else
-            insertAtStart(whiteSpace, this.containter);
+            this.container.insertBefore(whiteSpace, this.container.firstChild);
         }
       }
       return whiteSpace;
@@ -604,14 +616,98 @@ var Editor = (function(){
     // re-indented, when nothing is selected, the line with the cursor
     // is re-indented.
     handleTab: function() {
-      var start = select.selectionTopNode(this.container, true),
-        end = select.selectionTopNode(this.container, false);
-      if (start === false || end === false) return;
+      if (this.options.dumbTabs) {
+        select.insertTabAtCursor(this.win);
+      }
+      else {
+        var start = select.selectionTopNode(this.container, true),
+            end = select.selectionTopNode(this.container, false);
+        if (start === false || end === false) return;
 
-      if (start == end)
-        this.indentAtCursor();
-      else
-        this.indentRegion(start, end);
+        if (start == end)
+          this.indentAtCursor();
+        else
+          this.indentRegion(start, end);
+      }
+    },
+
+    // Delay (or initiate) the next paren blink event.
+    scheduleParenBlink: function() {
+      if (this.parenEvent) this.parent.clearTimeout(this.parenEvent);
+      this.parenEvent = this.parent.setTimeout(method(this, "blinkParens"), 300);
+    },
+
+    // Take the token before the cursor. If it contains a character in
+    // '()[]{}', search for the matching paren/brace/bracket, and
+    // highlight them in green for a moment, or red if no proper match
+    // was found.
+    blinkParens: function() {
+      // Clear the event property.
+      if (this.parenEvent) this.parent.clearTimeout(this.parenEvent);
+      this.parenEvent = null;
+
+      // Extract a 'paren' from a piece of text.
+      function paren(node) {
+        if (node.currentText) {
+          var match = node.currentText.match(/^[\s\u00a0]*([\(\)\[\]{}])[\s\u00a0]*$/);
+          return match && match[1];
+        }
+      }
+      // Determine the direction a paren is facing.
+      function forward(ch) {
+        return /[\(\[\{]/.test(ch);
+      }
+
+      this.highlightAtCursor();
+      var cursor = select.selectionTopNode(this.container, true), ch, self = this;
+      if (!cursor || !(ch = paren(cursor))) return;
+      // We only look for tokens with the same className.
+      var className = cursor.className, dir = forward(ch), match = matching[ch];
+
+      // Since parts of the document might not have been properly
+      // highlighted, and it is hard to know in advance which part we
+      // have to scan, we just try, and when we find dirty nodes we
+      // abort, parse them, and re-try.
+      function tryFindMatch() {
+        var stack = [], ch, ok = true;;
+        for (var runner = cursor; runner; runner = dir ? runner.nextSibling : runner.previousSibling) {
+          if (runner.className == className && runner.nodeName == "SPAN" && (ch = paren(runner))) {
+            if (forward(ch) == dir)
+              stack.push(ch);
+            else if (!stack.length)
+              ok = false;
+            else if (stack.pop() != matching[ch])
+              ok = false;
+            if (!stack.length) break;
+          }
+          else if (runner.dirty || runner.nodeName != "SPAN" && runner.nodeName != "BR") {
+            return {node: runner, status: "dirty"};
+          }
+        }
+        return {node: runner, status: runner && ok};
+      }
+      // Temporarily give the relevant nodes a colour.
+      function blink(node, ok) {
+        node.style.fontWeight = "bold";
+        node.style.color = ok ? "#8F8" : "#F88";
+        self.parent.setTimeout(function() {node.style.fontWeight = ""; node.style.color = "";}, 500);
+      }
+
+      while (true) {
+        var found = tryFindMatch();
+        if (found.status == "dirty") {
+          this.highlight(found.node, 1);
+          // Needed because in some corner cases a highlight does not
+          // reach a node.
+          found.node.dirty = false;
+          continue;
+        }
+        else {
+          blink(cursor, found.status);
+          if (found.node) blink(found.node, found.status);
+          break;
+        }
+      }
     },
 
     // Adjust the amount of whitespace at the start of the line that
@@ -696,18 +792,23 @@ var Editor = (function(){
     scheduleHighlight: function() {
       // Timeouts are routed through the parent window, because on
       // some browsers designMode windows do not fire timeouts.
+      var self = this;
       this.parent.clearTimeout(this.highlightTimeout);
-      this.highlightTimeout = this.parent.setTimeout(method(this, "highlightDirty"), this.options.passDelay);
+      this.highlightTimeout = this.parent.setTimeout(function(){self.highlightDirty();}, this.options.passDelay);
     },
 
     // Fetch one dirty node, and remove it from the dirty set.
     getDirtyNode: function() {
       while (this.dirty.length > 0) {
         var found = this.dirty.pop();
-        // If the node has been coloured in the meantime, or is no
-        // longer in the document, it should not be returned.
-        if ((found.dirty || found.nodeType == 3) && found.parentNode)
-          return found;
+        // IE8 sometimes throws an unexplainable 'invalid argument'
+        // exception for found.parentNode
+        try {
+          // If the node has been coloured in the meantime, or is no
+          // longer in the document, it should not be returned.
+          if ((found.dirty || found.nodeType == 3) && found.parentNode)
+            return found;
+        } catch (e) {}
       }
       return null;
     },
@@ -719,8 +820,8 @@ var Editor = (function(){
     // left, and information about the place where it stopped. If
     // there are dirty nodes left after this function has spent all
     // its lines, it shedules another highlight to finish the job.
-    highlightDirty: function(all) {
-      var lines = all ? Infinity : this.options.linesPerPass;
+    highlightDirty: function(force) {
+      var lines = force ? Infinity : this.options.linesPerPass;
       var sel = select.markSelection(this.win);
       var start;
       while (lines > 0 && (start = this.getDirtyNode())){
@@ -734,6 +835,7 @@ var Editor = (function(){
       select.selectMarked(sel);
       if (start)
         this.scheduleHighlight();
+      return this.dirty.length == 0;
     },
 
     // Creates a function that, when called through a timeout, will
@@ -789,7 +891,7 @@ var Editor = (function(){
       // Check whether a part (<span> node) and the corresponding token
       // match.
       function correctPart(token, part){
-        return !part.reduced && part.currentText == token.value && hasClass(part, token.style);
+        return !part.reduced && part.currentText == token.value && part.className == "part " + token.style;
       }
       // Shorten the text associated with a part by chopping off
       // characters from the front. Note that only the currentText
@@ -813,7 +915,7 @@ var Editor = (function(){
       // parser from the start of the frame, otherwise a partial parse
       // is resumed.
       var traversal = traverseDOM(from ? from.nextSibling : container.firstChild),
-          stream = multiStringStream(traversal),
+          stream = stringStream(traversal),
           parsed = from ? from.parserFromHere(stream) : Editor.Parser.make(stream);
 
       // parts is an interface to make it possible to 'delay' fetching
@@ -848,11 +950,7 @@ var Editor = (function(){
           // insertNewlineAtCursor).
           while (part && part.nodeName == "SPAN" && part.currentText == ""){
             var old = part;
-            if ((!part.previousSibling || part.previousSibling.nodeName == "BR") &&
-                (!part.nextSibling || part.nextSibling.nodeName == "BR"))
-              this.next();
-            else
-              this.remove();
+            this.remove();
             part = this.get();
             // Adjust selection information, if any. See select.js for details.
             select.replaceSelection(old.firstChild, part.firstChild || part, 0, 0);
@@ -861,8 +959,7 @@ var Editor = (function(){
         }
       };
 
-      var lineDirty = false, lineHasNodes = false;;
-      this.history.touch(from);
+      var lineDirty = false, lineNodes = 0;
 
       // This forEach loops over the tokens from the parsed stream, and
       // at the same time uses the parts object to proceed through the
@@ -876,9 +973,9 @@ var Editor = (function(){
           if (part.nodeName != "BR")
             throw "Parser out of sync. Expected BR.";
 
-          if (part.dirty || !part.indentation)
-            lineDirty = true;
-          self.history.touch(part);
+          if (part.dirty || !part.indentation) lineDirty = true;
+          if (lineDirty) self.history.touch(from);
+          from = part;
 
           // Every <br> gets a copy of the parser state and a lexical
           // context assigned to it. The first is used to be able to
@@ -887,11 +984,12 @@ var Editor = (function(){
           part.parserFromHere = parsed.copy();
           part.indentation = token.indentation;
           part.dirty = false;
-          // A clean line means we are done. Throwing a StopIteration is
-          // the way to break out of a MochiKit forEach loop.
-          if ((lines !== undefined && --lines <= 0) || (!lineDirty && lineHasNodes && !cleanLines))
+          // A clean line with more than one node means we are done.
+          // Throwing a StopIteration is the way to break out of a
+          // MochiKit forEach loop.
+          if ((lines !== undefined && --lines <= 0) || (!lineDirty && lineNodes > 1 && !cleanLines))
             throw StopIteration;
-          lineDirty = false; lineHasNodes = false;
+          lineDirty = false; lineNodes = 0;
           parts.next();
         }
         else {
@@ -899,7 +997,7 @@ var Editor = (function(){
             throw "Parser out of sync. Expected SPAN.";
           if (part.dirty)
             lineDirty = true;
-          lineHasNodes = true;
+          lineNodes++;
 
           // If the part matches the token, we can leave it alone.
           if (correctPart(token, part)){
@@ -934,6 +1032,7 @@ var Editor = (function(){
           }
         }
       });
+      if (lineDirty) this.history.touch(from);
 
       // The function returns some status information that is used by
       // hightlightDirty to determine whether and where it has to

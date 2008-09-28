@@ -26,11 +26,11 @@
 // delay (of no input) after which it commits a set of changes, and,
 // unfortunately, the 'parent' window -- a window that is not in
 // designMode, and on which setTimeout works in every browser.
-function History(container, maxDepth, commitDelay, editor) {
+function History(container, maxDepth, commitDelay, editor, onChange) {
   this.container = container;
   this.maxDepth = maxDepth; this.commitDelay = commitDelay;
-  this.editor = editor;
-  this.parent = editor.parent;
+  this.editor = editor; this.parent = editor.parent;
+  this.onChange = onChange;
   // This line object represents the initial, empty editor.
   var initial = {text: "", from: null, to: null};
   // As the borders between lines are represented by BR elements, the
@@ -49,13 +49,17 @@ function History(container, maxDepth, commitDelay, editor) {
 }
 
 History.prototype = {
+  // Schedule a commit (if no other touches come in for commitDelay
+  // milliseconds).
+  scheduleCommit: function() {
+    this.parent.clearTimeout(this.commitTimeout);
+    this.commitTimeout = this.parent.setTimeout(method(this, "tryCommit"), this.commitDelay);
+  },
+
   // Mark a node as touched. Null is a valid argument.
   touch: function(node) {
     this.setTouched(node);
-    // Schedule a commit (if no other touches come in for commitDelay
-    // milliseconds).
-    this.parent.clearTimeout(this.commitTimeout);
-    this.commitTimeout = this.parent.setTimeout(method(this, "commit"), this.commitDelay);
+    this.scheduleCommit();
   },
 
   // Undo the last change.
@@ -63,18 +67,22 @@ History.prototype = {
     // Make sure pending changes have been committed.
     this.commit();
 
-    if (this.history.length)
+    if (this.history.length) {
       // Take the top diff from the history, apply it, and store its
       // shadow in the redo history.
       this.redoHistory.push(this.updateTo(this.history.pop(), "applyChain"));
+      if (this.onChange) this.onChange();
+    }
   },
 
   // Redo the last undone change.
   redo: function() {
     this.commit();
-    if (this.redoHistory.length)
+    if (this.redoHistory.length) {
       // The inverse of undo, basically.
       this.addUndoLevel(this.updateTo(this.redoHistory.pop(), "applyChain"));
+      if (this.onChange) this.onChange();
+    }
   },
 
   // Push a changeset into the document.
@@ -85,11 +93,11 @@ History.prototype = {
       chain.push({from: from, to: end, text: lines[i]});
       from = end;
     }
-    this.pushChains([chain]);
+    this.pushChains([chain], from == null && to == null);
   },
 
-  pushChains: function(chains) {
-    this.commit();
+  pushChains: function(chains, doNotHighlight) {
+    this.commit(doNotHighlight);
     this.addUndoLevel(this.updateTo(chains, "applyChain"));
     this.redoHistory = [];
   },
@@ -97,7 +105,6 @@ History.prototype = {
   // Clear the undo history, make the current document the start
   // position.
   reset: function() {
-    this.commit();
     this.history = []; this.redoHistory = [];
   },
 
@@ -113,18 +120,25 @@ History.prototype = {
     return this.before(br).from;
   },
 
+  // Commit unless there are pending dirty nodes.
+  tryCommit: function() {
+    if (this.editor.highlightDirty()) this.commit();
+    else this.scheduleCommit();
+  },
+
   // Check whether the touched nodes hold any changes, if so, commit
   // them.
-  commit: function() {
+  commit: function(doNotHighlight) {
     this.parent.clearTimeout(this.commitTimeout);
     // Make sure there are no pending dirty nodes.
-    this.editor.highlightDirty(true);
+    if (!doNotHighlight) this.editor.highlightDirty(true);
     // Build set of chains.
     var chains = this.touchedChains(), self = this;
-    
+
     if (chains.length) {
       this.addUndoLevel(this.updateTo(chains, "linkChain"));
       this.redoHistory = [];
+      if (this.onChange) this.onChange();
     }
   },
 
@@ -288,11 +302,6 @@ History.prototype = {
     });
 
     return chains;
-  },
-
-  recordChange: function(shadows, chains) {
-    if (this.onChange)
-      this.onChange(shadows, chains);
   },
 
   // Find the 'shadow' of a given chain by following the links in the

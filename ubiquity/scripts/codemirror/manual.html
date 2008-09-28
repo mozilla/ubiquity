@@ -21,6 +21,12 @@
     client scripts to capture control-z presses, but you can use
     control-backspace instead on that browser.</p>
 
+    <p>The key-combination control-[ triggers a paren-blink: If the
+    cursor is directly after a '(', ')', '[', ']', '{', or '}', the
+    editor looks for the matching character, and highlights these
+    characters for a moment. There is an option to enable this to
+    happen any time the user types something or moves the cursor.</p>
+
     <p>To use CodeMirror in a document, you should add a script tag to
     load <a href="js/codemirror.js"><code>codemirror.js</code></a>. This
     adds two objects to your environment, <code>CodeMirror</code> and
@@ -72,14 +78,23 @@
     its files are not located in the same directory as the current
     HTML page, but in <code>"lib/codemirror/"</code>.</p>
 
-    <p>There is another utility function
-    <code>CodeMirror.fromTextArea</code> that will, given a textarea
-    node or the id of such a node, hide the textarea and replace it
-    with a CodeMirror frame. If the textarea was part of a form, an
-    <code>onsubmit</code> handler will be registered with this form,
-    which will load the content of the editor into the textarea, so
-    that it can be submitted as normal. This function optionally takes
-    a configuration object as second argument.</p>
+    <p>There is a function
+    <code>CodeMirror.isProbablySupported()</code> that causes some
+    1998-style browser detection to happen, returning
+    <code>false</code> if CodeMirror is probably not supported on the
+    browser, <code>true</code> if it probably is, and
+    <code>null</code> if it has no idea. As the name suggests, this is
+    not something you can rely on, but it's usually better than
+    nothing.</p>
+
+    <p>Another utility function, <code>CodeMirror.fromTextArea</code>,
+    will, given a textarea node or the id of such a node, hide the
+    textarea and replace it with a CodeMirror frame. If the textarea
+    was part of a form, an <code>onsubmit</code> handler will be
+    registered with this form, which will load the content of the
+    editor into the textarea, so that it can be submitted as normal.
+    This function optionally takes a configuration object as second
+    argument.</p>
 
     <pre class="code">var editor = CodeMirror.fromTextArea("inputfield", {
   parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
@@ -199,6 +214,11 @@
       even for an idle editor. Default value is
       <code>false</code>.</dd>
 
+      <dt><code>autoMatchParens</code></dt><dd>When <code>true</code>,
+      will cause parens to be matched every time a key is pressed or
+      the user clicks on the document. Defaults to <code>false</code>.
+      Might be expensive for big documents.</dd>
+
       <dt><code>saveFunction</code></dt><dd>If given a function
       value, that function will be invoked when the user presses
       control-s. You should advise your Opera users to use
@@ -207,6 +227,10 @@
 
       <dt><code>undoDepth</code></dt><dd>Maximum length of the undo
       history. Default is 20.</dd>
+
+      <dt><code>onChange</code></dt><dd>An optional function of zero
+      arguments that gets called whenever the document is changed.
+      Happens at undo-commit time, it is not instantanious.</dd>
 
       <dt><code>undoDelay</code></dt><dd>When nothing is done in the
       editor for this amount of milliseconds, pending changes get
@@ -225,6 +249,11 @@
       <dt><code>textWrapping</code></dt><dd>Can be used to disable or
       enable text-wrapping in the editor frame. Default is
       <code>true</code>.</dd>
+
+      <dt><code>dumbTabs</code></dt><dd>When this is set to
+      <code>true</code>, pressing tab will insert four spaces rather
+      than re-indenting the selected lines. Default
+      <code>false</code>.</dd>
 
       <dt><code>readOnly</code></dt><dd>When set to <code>true</code>,
       the document is not editable.</dd>

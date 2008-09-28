@@ -31,47 +31,28 @@
     endOfLine: function() {
       var next = this.peek();
       return next == null || next == "\n";
-    }
-  };
-
-  // Make a stream out of a single string. Not used by the editor, but
-  // very useful for testing your parser.
-  window.singleStringStream = function(string) {
-    var pos = 0, start = 0;
-    return update({
-      peek: function() {
-        if (pos < string.length)
-          return string.charAt(pos);
-        else
-          return null;
-      },
-      next: function() {
-        if (pos >= string.length) {
-          if (pos < start)
-            throw "End of stringstream reached without emptying buffer.";
-          else 
-            throw StopIteration;
-        }
-        return string.charAt(pos++);
-      },
-      get: function() {
-        var result = string.slice(start, pos);
-        start = pos;
-        return result;
+    },
+    matches: function(string, caseSensitive) {
+      for (var i = 0; i < string.length; i++) {
+        var ch = this.peek();
+        if (!ch || string.charAt(i) != (caseSensitive ? ch : ch.toLowerCase()))
+          return false;
+        this.next();
       }
-    }, base);
+      return true;
+    }
   };
 
   // Make a string stream out of an iterator that returns strings. This
   // is applied to the result of traverseDOM (see codemirror.js), and
   // the resulting stream is fed to the parser.
-  window.multiStringStream = function(source){
+  window.stringStream = function(source){
     source = iter(source);
     var current = "", pos = 0;
     var peeked = null, accum = "";
 
     return update({
-      peek: function(){
+      peek: function() {
         if (!peeked) {
           try {peeked = this.step();}
           catch (e) {
@@ -81,13 +62,13 @@
         }
         return peeked;
       },
-      step: function(){
-        if (peeked){
+      step: function() {
+        if (peeked) {
           var temp = peeked;
           peeked = null;
           return temp;
         }
-        while (pos == current.length){
+        while (pos == current.length) {
           accum += current;
           current = ""; // In case source.next() throws
           pos = 0;
@@ -96,7 +77,7 @@
         return current.charAt(pos++);
 
       },
-      next: function(){
+      next: function() {
         try {return this.step();}
         catch (e) {
           if (e == StopIteration && accum.length > 0)
@@ -105,7 +86,7 @@
             throw e;
         }
       },
-      get: function(){
+      get: function() {
         var temp = accum;
         var realPos = peeked ? pos - 1 : pos;
         accum = "";
@@ -115,6 +96,15 @@
           pos = peeked ? 1 : 0;
         }
         return temp;
+      },
+      reset: function() {
+        current = accum + current;
+        accum = "";
+        pos = 0;
+        peeked = null;
+      },
+      push: function(str) {
+        current = current.slice(0, pos) + str + current.slice(pos);
       }
     }, base);
   };

@@ -7,7 +7,7 @@
  * See manual.html for more info about the parser interface.
  */
 
-Editor.Parser = (function() {
+var JSParser = Editor.Parser = (function() {
   // Token types that can be considered to be atoms.
   var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, "regexp": true};
   // Constructor for the lexical context objects.
@@ -45,7 +45,7 @@ Editor.Parser = (function() {
   }
 
   // The parser-iterator-producing function itself.
-  function parseJS(input) {
+  function parseJS(input, basecolumn) {
     // Wrap the input in a token stream
     var tokens = tokenizeJavaScript(input);
     // The parser state. cc is a stack of actions that have to be
@@ -59,7 +59,7 @@ Editor.Parser = (function() {
     // variables defined in that, and the scopes above it.
     var context = null;
     // The lexical scope, used mostly for indentation.
-    var lexical = new JSLexical(-2, 0, "block", false);
+    var lexical = new JSLexical((basecolumn || 0) - 2, 0, "block", false);
     // Current column, and the indentation at the start of the current
     // line. Used to create lexical scope objects.
     var column = 0;
@@ -116,7 +116,7 @@ Editor.Parser = (function() {
             token.style = marked;
           // Here we differentiate between local and global variables.
           else if (token.type == "variable" && inScope(token.content))
-            token.style = "localvariable";
+            token.style = "js-localvariable";
           return token;
         }
       }
@@ -176,7 +176,7 @@ Editor.Parser = (function() {
     // Register a variable in the current scope.
     function register(varname){
       if (context){
-        mark("variabledef");
+        mark("js-variabledef");
         context.vars[varname] = true;
       }
     }
@@ -263,11 +263,11 @@ Editor.Parser = (function() {
     // Property names need to have their style adjusted -- the
     // tokenizer think they are variables.
     function property(type){
-      if (type == "variable") {mark("property"); cont();}
+      if (type == "variable") {mark("js-property"); cont();}
     }
     // This parses a property and its value in an object literal.
     function objprop(type){
-      if (type == "variable") mark("property");
+      if (type == "variable") mark("js-property");
       if (atomicTypes.hasOwnProperty(type)) cont(expect(":"), expression);
     }
     // Parses a comma-separated list of the things that are recognized

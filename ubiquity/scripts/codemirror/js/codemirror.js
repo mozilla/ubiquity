@@ -34,6 +34,7 @@ var CodeMirror = (function(){
     passDelay: 200,
     continuousScanning: false,
     saveFunction: null,
+    onChange: null,
     undoDepth: 20,
     undoDelay: 800,
     disableSpellcheck: true,
@@ -41,7 +42,9 @@ var CodeMirror = (function(){
     readOnly: false,
     width: "100%",
     height: "300px",
-    parserConfig: null
+    autoMatchParens: false,
+    parserConfig: null,
+    dumbTabs: false
   });
 
   function CodeMirror(place, options) {
@@ -49,7 +52,7 @@ var CodeMirror = (function(){
     this.options = options = options || {};
     setDefaults(options, CodeMirrorConfig);
 
-    frame = document.createElement("IFRAME");
+    var frame = this.frame = document.createElement("IFRAME");
     frame.style.border = "0";
     frame.style.width = options.width;
     frame.style.height = options.height;
@@ -69,7 +72,13 @@ var CodeMirror = (function(){
 
     if (typeof options.parserfile == "string")
       options.parserfile = [options.parserfile];
-    var html = ["<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"" + options.stylesheet + "\"/>"];
+    if (typeof options.stylesheet == "string")
+      options.stylesheet = [options.stylesheet];
+
+    var html = ["<html><head>"];
+    forEach(options.stylesheet, function(file) {
+      html.push("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + file + "\"/>");
+    });
     forEach(options.basefiles.concat(options.parserfile), function(file) {
       html.push("<script type=\"text/javascript\" src=\"" + options.path + file + "\"></script>");
     });
@@ -159,6 +168,21 @@ var CodeMirror = (function(){
     area.style.display = "none";
     var mirror = new CodeMirror(insert, options);
     return mirror;
+  };
+
+  CodeMirror.isProbablySupported = function() {
+    // This is rather awful, but can be useful.
+    var match;
+    if (window.opera)
+      return Number(window.opera.version()) >= 9.52;
+    else if (/Apple Computers, Inc/.test(navigator.vendor) && (match = navigator.userAgent.match(/Version\/(\d+(?:\.\d+)?)\./)))
+      return Number(match[1]) >= 3;
+    else if (document.selection && window.ActiveXObject && (match = navigator.userAgent.match(/MSIE (\d+(?:\.\d*)?)\b/)))
+      return Number(match[1]) >= 6;
+    else if (match = navigator.userAgent.match(/gecko\/(\d{8})/i))
+      return Number(match[1]) >= 20050901;
+    else
+      return null;
   };
 
   return CodeMirror;
