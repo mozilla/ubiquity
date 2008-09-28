@@ -67,6 +67,8 @@ instead of directly in the lib (see highlightWatcher() below) -->
               editor.editor.editor._keyUp(e);
               PrefCommands.setCode(editor.editor.editor.getCode());
           };
+          editor.contentWindow.focus();
+          editor.editor.editor.jumpToLine(1);
 /*          editor.editor.editor.getCode = function() {
               if (!editor.editor.editor.container.firstChild)
                   return "";
