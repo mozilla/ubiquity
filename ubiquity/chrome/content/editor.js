@@ -119,28 +119,27 @@ function paste() {
 function importTemplate() {
   editor = document.getElementById("editor");
   var template = "\
-\/* This is a template command */\n\
-CmdUtils.CreateCommand({ \n\
-  name: \"example\",\n\
-  icon: \"http://example.com/example.png\",\n\
-  homepage: \"http://example.com/\",\n\
-  author: { name: \"Your Name\", email: \"you@example.com\"},\n\
-  license: \"GPL\",\n\
-  description: \"A short description of your command\",\n\
-  help: \"how to use your command\",\n\
-  takes: {\"input\": noun_arb_text},\n\
-  preview: function( pblock, input ) {\n\
-    var template = \"Hello ${name}\";\n\
-    pblock.innerHTML = CmdUtils.renderTemplate(template, {\"name\": \"World!\"});\n\
-  },\n\
-  execute: function(input) {\n\
-    CmdUtils.setSelection(\"You selected: \"+input.html);\n\
-  }\n\
-});"
-//  if (editor.value != "")
+  \/* This is a template command */\n\
+  CmdUtils.CreateCommand({ \n\
+    name: \"example\",\n\
+    icon: \"http://example.com/example.png\",\n\
+    homepage: \"http://example.com/\",\n\
+    author: { name: \"Your Name\", email: \"you@example.com\"},\n\
+    license: \"GPL\",\n\
+    description: \"A short description of your command\",\n\
+    help: \"how to use your command\",\n\
+    takes: {\"input\": noun_arb_text},\n\
+    preview: function( pblock, input ) {\n\
+      var template = \"Hello ${name}\";\n\
+      pblock.innerHTML = CmdUtils.renderTemplate(template, {\"name\": \"World!\"});\n\
+    },\n\
+    execute: function(input) {\n\
+      CmdUtils.setSelection(\"You selected: \"+input.html);\n\
+    }\n\
+  });"
   if (editor.editor.getCode() != "")
     template = "\n"+template;
-//  editor.value += template;
+  
   editor.editor.setCode(editor.editor.getCode()+template);
 }
 

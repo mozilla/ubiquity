@@ -27,7 +27,7 @@ instead of directly in the lib (see highlightWatcher() below) -->
    var file; 
    var lastModifiedTime = 0; 
    function launch() { 
-       file = Editor.launchEditor(document.getElementById('editor').value); 
+       file = Editor.launchEditor(document.getElementById('editor').editor.editor.getCode()); 
        if(file != null && file.exists()){ 
           lastModifiedTime = file.lastModifiedTime; 
           setTimeout(watchFile, 500) 
@@ -37,8 +37,8 @@ instead of directly in the lib (see highlightWatcher() below) -->
       if(file != null && file.exists()){ 
         time = file.lastModifiedTime; 
         if(time > lastModifiedTime){
-           document.getElementById('editor').value = Editor.readFile(file); 
-           PrefCommands.setCode(document.getElementById('editor').value); 
+           document.getElementById('editor').editor.setCode(Editor.readFile(file)); 
+           PrefCommands.setCode(document.getElementById('editor').editor.editor.getCode()); 
            lastModifiedTime = time;
         }
         setTimeout(watchFile, 500);
