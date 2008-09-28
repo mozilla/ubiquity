@@ -212,3 +212,5 @@ a:hover {
   font-variant: small-caps;
   font-size: 15pt;
 }
+
+div#editor-div iframe {border: 1px black solid !important; clear: both; margin: 1em auto;}

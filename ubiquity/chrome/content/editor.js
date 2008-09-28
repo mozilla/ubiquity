@@ -106,7 +106,7 @@ function paste() {
         
     editor = document.getElementById("editor");
     file = encodeURIComponent("[gistfile1]");
-    quickPaste = "file_ext" + file + "=.js&file_name" + file + "=x&file_contents" + file + "=" + encodeURIComponent(editor.value) + "&x=27&y=27";
+    quickPaste = "file_ext" + file + "=.js&file_name" + file + "=x&file_contents" + file + "=" + encodeURIComponent(editor.editor.editor.getCode()) + "&x=27&y=27";
     updateUrl = "http://gist.github.com/gists";
     Utils.openUrlInBrowser(updateUrl, quickPaste);
     
@@ -114,6 +114,34 @@ function paste() {
     Components.utils.reportError(e);
     displayMessage("Error: " + e);
   }
+}
+
+function importTemplate() {
+  editor = document.getElementById("editor");
+  var template = "\
+\/* This is a template command */\n\
+CmdUtils.CreateCommand({ \n\
+  name: \"example\",\n\
+  icon: \"http://example.com/example.png\",\n\
+  homepage: \"http://example.com/\",\n\
+  author: { name: \"Your Name\", email: \"you@example.com\"},\n\
+  license: \"GPL\",\n\
+  description: \"A short description of your command\",\n\
+  help: \"how to use your command\",\n\
+  takes: {\"input\": noun_arb_text},\n\
+  preview: function( pblock, input ) {\n\
+    var template = \"Hello ${name}\";\n\
+    pblock.innerHTML = CmdUtils.renderTemplate(template, {\"name\": \"World!\"});\n\
+  },\n\
+  execute: function(input) {\n\
+    CmdUtils.setSelection(\"You selected: \"+input.html);\n\
+  }\n\
+});"
+//  if (editor.value != "")
+  if (editor.editor.getCode() != "")
+    template = "\n"+template;
+//  editor.value += template;
+  editor.editor.setCode(editor.editor.getCode()+template);
 }
 
 function saveAs() {
@@ -132,13 +160,13 @@ function saveAs() {
     if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
       let editor = document.getElementById("editor");
 
-      saveTextToFile(editor.value, fp.file);
+      saveTextToFile(editor.editor.editor.getCode(), fp.file);
 
       LinkRelCodeSource.addMarkedPage({url: fp.fileURL.spec,
                                        sourceCode: "",
                                        canUpdate: true});
 
-      editor.value = "";
+      editor.editor.editor.container.innerHTML="<span></span>"; //apparently, it should contain an epmty span
       PrefCommands.setCode("");
 
       $("#editor-actions").html(

@@ -14,6 +14,12 @@
           src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
   <script type="application/javascript;version=1.7"
           src="editor.js"></script>
+  <script type="application/javascript;version=1.7"
+          src="resource://ubiquity-scripts/CodeMirror-0.57/js/codemirror.js"></script>
+<!-- following line would be needed if CodeMirrors getCode() were to be changed from here, 
+instead of directly in the lib (see highlightWatcher() below) -->
+<!--  <script type="application/javascript;version=1.7"
+          src="resource://ubiquity-scripts/CodeMirror-0.57/js/util.js"></script>-->
   <script type="text/javascript"> 
    function initialize() { 
        document.getElementById('editor').value = PrefCommands.getCode(); 
@@ -36,14 +42,48 @@
            lastModifiedTime = time;
         }
         setTimeout(watchFile, 500);
-      } 
-   } 
+      }
+   }
+   function highlight(){
+      var textarea = document.getElementById("editor");
+      var editor = new CodeMirror(CodeMirror.replace(textarea), {
+         height: textarea.clientHeight,
+         content: textarea.value,
+         parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+         stylesheet: "resource://ubiquity-scripts/CodeMirror-0.57/css/jscolors.css",
+         path: "resource://ubiquity-scripts/CodeMirror-0.57/js/",
+         autoMatchParens: true
+      });
+      var iframe = document.getElementsByTagName("iframe")[0];
+      iframe.setAttribute("id", "editor");
+      iframe.editor = editor;
+      highlightWatcher();
+   }
+   function highlightWatcher(){
+      var editor = document.getElementById("editor");
+      if (editor && editor.editor && editor.editor.editor && editor.editor.editor.keyUp) {
+          editor.editor.editor._keyUp = editor.editor.editor.keyUp;
+          editor.editor.editor.keyUp = function(e) {
+              editor.editor.editor._keyUp(e);
+              PrefCommands.setCode(editor.editor.editor.getCode());
+          };
+/*          editor.editor.editor.getCode = function() {
+              if (!editor.editor.editor.container.firstChild)
+                  return "";
+              var temp = editor.editor.editor.container.cloneNode(true);
+
+              var accum = [];
+              forEach(editor.editor.editor.traverseDOM(temp.firstChild), method(accum, "push"));
+              return editor.editor.editor.cleanText(accum.join(""));
+          };*/ // can't get access to forEach (defined in Editor (editor.js)) so changing the lib directly
+      } else window.setTimeout(function(){highlightWatcher()}, 100);
+   }
   </script>
   <link rel="stylesheet" href="web-content.css" type="text/css">
   <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 </head>
 
-<body onload="initialize();Editor.onLoad();">
+<body onload="initialize();Editor.onLoad();highlight()">
   <div class="head left">
     <red>ubiquity</red> the command <em>editor</em></span>
   </div>
@@ -84,6 +124,10 @@
 <div id="editor-actions">
   <div id="save-as-div" class="col-three">
     <b><a href="javascript:void(saveAs())">Save</a> commands to file (and subscribe).</b>
+  </div>
+  
+  <div id="import-template-div" class="col-three">
+    <b><a href="javascript:void(importTemplate())">Import</a> command template.<b>
   </div>
 
   <div id="external-editor-div" class="col-three">
