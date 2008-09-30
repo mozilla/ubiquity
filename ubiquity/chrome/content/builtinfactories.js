@@ -49,6 +49,10 @@ let UbiquitySetup = {
                     source: "developer.js",
                     title: "Mozilla Developer Commands"},
 
+                   {page: "pageedit.html",
+                    source: "pageedit.js",
+                    title: "Mozilla Page Editing Commands"},
+
                    {page: "general.html",
                     source: "general.js",
                     title: "Mozilla General Utility Commands"},
