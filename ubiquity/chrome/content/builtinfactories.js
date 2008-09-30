@@ -39,7 +39,11 @@
 let UbiquitySetup = {
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
-                    title: "Mozilla Browser Commands"}],
+                    title: "Mozilla Browser Commands"},
+
+                   {page: "general.html",
+                    source: "general.js",
+                    title: "Mozilla General Utility Commands"}],
 
   BASE_REMOTE_URI: "https://people.mozilla.com/~araskin/standard-feeds/",
 
