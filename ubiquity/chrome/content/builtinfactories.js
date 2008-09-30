@@ -43,7 +43,11 @@ let UbiquitySetup = {
 
                    {page: "general.html",
                     source: "general.js",
-                    title: "Mozilla General Utility Commands"}],
+                    title: "Mozilla General Utility Commands"},
+
+                   {page: "search.html",
+                    source: "search.xhtml",
+                    title: "Mozilla Web Search Commands"}],
 
   BASE_REMOTE_URI: "https://people.mozilla.com/~araskin/standard-feeds/",
 
