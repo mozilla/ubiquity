@@ -41,6 +41,10 @@ let UbiquitySetup = {
                     source: "firefox.js",
                     title: "Mozilla Browser Commands"},
 
+                   {page: "social.html",
+                    source: "social.js",
+                    title: "Mozilla Social Networking Commands"},
+
                    {page: "general.html",
                     source: "general.js",
                     title: "Mozilla General Utility Commands"},
