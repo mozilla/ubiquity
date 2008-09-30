@@ -52,7 +52,11 @@ let UbiquitySetup = {
                    {page: "calendar.html",
                     source: "calendar.js",
                     title: "Mozilla Calendar Commands"},
-                   
+
+                   {page: "map.html",
+                    source: "map.js",
+                    title: "Mozilla Map Commands"},
+
                    {page: "search.html",
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"}],
