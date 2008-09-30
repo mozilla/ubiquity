@@ -39,39 +39,7 @@
 let UbiquitySetup = {
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
-                    title: "Mozilla Browser Commands"},
-
-                   {page: "search.html",
-                    source: "search.js",
-                    title: "Mozilla Web Search Commands"},
-
-                   {page: "general.html",
-                    source: "general.js",
-                    title: "Mozilla General Utility Commands"},
-
-                   {page: "email.html",
-                    source: "email.js",
-                    title: "Mozilla Email Commands"},
-
-                   {page: "calendar.html",
-                    source: "calendar.js",
-                    title: "Mozilla Calendar Commands"},
-
-                   {page: "map.html",
-                    source: "map.js",
-                    title: "Mozilla Map Commands"},
-
-                   {page: "social.html",
-                    source: "social.js",
-                    title: "Mozilla Social Networking Commands"},
-
-                   {page: "developer.html",
-                    source: "developer.js",
-                    title: "Mozilla Developer Commands"},
-
-                   {page: "pageedit.html",
-                    source: "pageedit.js",
-                    title: "Mozilla Page Editing Commands"}],
+                    title: "Mozilla Browser Commands"}],
 
   BASE_REMOTE_URI: "https://people.mozilla.com/~araskin/standard-feeds/",
 
@@ -172,10 +140,8 @@ function makeBuiltinCodeSources(languageCode) {
       new LocalUriCodeSource(baseUri + "date.js"),
       new LocalUriCodeSource(baseUri + "nlparser/en/nountypes.js")
     ]);
-    var templateCmds = new LocalUriCodeSource(baseUri + "templatecmds.xhtml");
     bodyCodeSources = bodyCodeSources.concat([
       new LocalUriCodeSource(baseUri + "builtincmds.js"),
-      new XhtmlCodeSource(templateCmds),
       new XhtmlCodeSource(PrefCommands)
     ]);
   }
