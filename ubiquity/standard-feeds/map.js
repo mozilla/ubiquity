@@ -1,5 +1,5 @@
-var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhQBK8TPUEk0el8QiBSofqVEVTeNhBTUla4_AlmyCXJzGsQ4qPg8HLpUlw";
-// This API key is for https://people.mozilla.com/~araskin only"
+var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtGJjaVMeVURIpTa3cD1qNfA";
+// This API key is for https://people.mozilla.com only."
 
 CmdUtils.CreateCommand({
   name: "map",
