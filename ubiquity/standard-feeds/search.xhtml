@@ -1,49 +1,154 @@
-/* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1/GPL 2.0/LGPL 2.1
- *
- * The contents of this file are subject to the Mozilla Public License Version
- * 1.1 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- * http://www.mozilla.org/MPL/
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
- * for the specific language governing rights and limitations under the
- * License.
- *
- * The Original Code is Ubiquity.
- *
- * The Initial Developer of the Original Code is Mozilla.
- * Portions created by the Initial Developer are Copyright (C) 2007
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Atul Varma <atul@mozilla.com>
- *   Aza Raskin <aza@mozilla.com>
- *   Maria Emerson <memerson@mozilla.com>
- *   Abimanyu Raja <abimanyu@gmail.com>
- *   Jono DiCarlo <jdicarlo@mozilla.com>
- *   Blair McBride <blair@theunfocused.net>
- *
- * Alternatively, the contents of this file may be used under the terms of
- * either the GNU General Public License Version 2 or later (the "GPL"), or
- * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
- * in which case the provisions of the GPL or the LGPL are applicable instead
- * of those above. If you wish to allow use of your version of this file only
- * under the terms of either the GPL or the LGPL, and not to allow others to
- * use your version of this file under the terms of the MPL, indicate your
- * decision by deleting the provisions above and replace them with the notice
- * and other provisions required by the GPL or the LGPL. If you do not delete
- * the provisions above, a recipient may use your version of this file under
- * the terms of any one of the MPL, the GPL or the LGPL.
- *
- * ***** END LICENSE BLOCK ***** */
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"
+      xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<head>
+  <title>Ubiquity Web Search Commands</title>
+</head>
+<body>
+<p>This xhtml source contains commands for searching the Web.  Its
+corresponding feed is <a href="search.html">here</a>.</p>
+<script src="fake-infrastructure.js"></script>
+<div id="google-search" style="display: none;">
+{for result in results}
+<div class="gresult">
+  <div>
+    <a href="${result.unescapedUrl}">${result.title}</a>
+  </div>
+  <xul:description class="gresult-content">${result.content}</xul:description>
+  <div class="gresult-url">${result.visibleUrl}</div>
+</div>
+{forelse}
+  <b>Your search - ${searchTerm} - did not match any documents. </b>
+{/for}
+</div>
+<div id="amazon-search" style="display: none;">
+Found ${numitems} books on Amazon matching <b>${query}</b>
+{for item in items}
+    <div style="clear: both; padding: 10px 0px;">
+        <a href="${item.url}">
+            {if item.image}
+                <img
+                    src="${item.image.src}"
+                    style="float: left; margin-right: 10px; height: ${item.image.height}px; width: ${item.image.width}px;"
+                    />
+            {/if}
+            
+            <u>${item.title}</u>
+        </a>
+        <small>
+            {if item.author}
+                <br />by ${item.author}
+            {/if}
+            
+            {if item.price}
+                <br />for ${item.price.amount} (${item.price.currency})
+            {/if}
+        </small>
+    </div>
+{/for}
+</div>
+<div id="flickr-search" style="display: none;">
+<b>${nummatches} photos were found on Flickr.</b><br/><br/>
+<table style="border-width: 0px;">
+{for photo in photos}
+  {if photo_index % numcols == 0}
+  <tr height="100">
+  {/if} 
+  <td>
+    <a href="http://www.flickr.com/photos/${photo.owner}/${photo.id}" title="${photo.title|escape}">
+      <img src="http://farm${photo.farm}.static.flickr.com/${photo.server}/${photo.id}_${photo.secret}_t.jpg" />
+    </a>
+  </td>
+  {if photo_index % numcols == (numcols - 1)}
+  </tr>
+  {/if}
+{/for}
+</table>
+</div>
+<div id="weather-search" style="display: none;">
+<style>
+img {float: left; }
+.weather{ font-family: arial, helvetica; color:white;}
+.temp{ font-size: 60px; }
+</style>
+<div class="weather">
+  Weather For ${location}<br />
+  <img src='${w.img}'/>
+  <div class="temp">
+    {if w.temp_units == "fahrenheit"} 
+      ${w.tempf}°F 
+    {else}
+      ${w.tempc}°C
+    {/if}
+    <br/>
+  </div>
+  <div class="extra">
+    ${w.condition}<br/>
+    ${w.wind}<br/>
+    ${w.humidity}<br/>  
+  </div>
+</div>
+</div>
+<div id="wikipedia-search" style="display: none;">
+Wikipedia articles found matching <b>${query}</b>:
+<br/><br/>
+{for article in results}
+  <div style="clear: both;">
+    <b><a href="${article.title|wikilink}">${article.title}</a></b>
+    <br/>
+    <div style="margin-left: 20px; font-size: 80%;" wikiarticle="${article.title}">
+      <i>Retreiving article summary...</i>
+    </div>
+  </div>
+{forelse}
+  <b>No articles found</b>
+{/for}
+</div>
+<div id="yahoo-search" style="display: none;">
+{for result in results}
+<div class="gresult">
+  <div>
+    <a href="${result.Url}">${result.Title}</a>
+  </div>
+  <xul:description class="gresult-content">${result.Summary}</xul:description>
+</div>
+{/for}
+</div>
+<div id="yelp-search" style="display: none;">
+<style>
+.biz {
+  margin-bottom: 10px;
+}
 
+.name{ font-size: 120%;}
 
-// -----------------------------------------------------------------
-// SEARCH COMMANDS
-// -----------------------------------------------------------------
+.biz a {
+  color: #0066cc;
+  text-decoration: underline;
+  font-size: small;
+}
 
+.biz img{ position: relative; top: 15px;}
+
+.content {
+  margin-right: 10px;
+  font-size: x-small;  
+}
+
+</style>
+
+{for biz in businesses}
+<div class="biz">
+  <img src="${biz.photo_url_small}" height="40" width="40"/>
+  {var phone = biz.phone.replace(/(\d\d\d)(\d\d\d)(\d\d\d\d)/, "$1.$2.$3")}
+  <span class="name"><a href="${biz.url}">${biz.name}</a></span> in ${biz.city} (${phone}) —
+  ${biz.avg_rating} stars.
+</div>
+{/for}
+</div>
+<div id="youtube-search" style="display: none;">
+</div>
+<script class="commands"><![CDATA[
 CmdUtils.CreateCommand({
   name: "search",
   icon: "chrome://ubiquity/skin/icons/search.png",
@@ -72,6 +177,30 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.makeSearchCommand({
+  name: "Google",
+  url: "http://www.google.com/search?q={QUERY}",
+  icon: "http://www.google.com/favicon.ico",
+  description: "Searches Google for your words.",
+  preview: function(pblock, directObject) {
+    var searchTerm = directObject.text;
+    var pTemplate = "Searches Google for <b>${query}</b>";
+    var pData = {query: searchTerm};
+    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
+
+    var url = "http://ajax.googleapis.com/ajax/services/search/web";
+    var params = { v: "1.0", q: searchTerm };
+
+    jQuery.get( url, params, function(data) {
+      var numToDisplay = 3;
+      var results = data.responseData.results.splice( 0, numToDisplay );
+
+      pblock.innerHTML = CmdUtils.renderTemplate( jQuery("#google-search", feed.dom).html(),
+						  {results:results, searchTerm:searchTerm}
+						);
+      }, "json");
+  }
+});
 
 function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   /* TODO
@@ -191,7 +320,9 @@ CmdUtils.CreateCommand({
           _MODIFIERS: {wikilink: generateWikipediaLink}
         };
 
-        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"templates/wikipedia.html"}, previewData);
+        previewBlock.innerHTML = CmdUtils.renderTemplate(
+          jQuery("#wikipedia-search", feed.dom).html(),
+          previewData);
 
         jQuery(previewBlock).find("div[wikiarticle]").each(function() {
           var article = jQuery(this).attr("wikiarticle");
@@ -240,9 +371,10 @@ CmdUtils.makeSearchCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"templates/yahoo-search.html"},
-                   {results:data.ResultSet.Result}
-                 );
+      pblock.innerHTML = CmdUtils.renderTemplate(
+        jquery("#yahoo-search", feed.dom).html(),
+        {results:data.ResultSet.Result}
+      );
     }, "json");
   }
 });
@@ -323,7 +455,9 @@ CmdUtils.makeSearchCommand({
 			items: items
 		};
 
-		previewBlock.innerHTML = CmdUtils.renderTemplate({file: "templates/amazon-search.html"}, previewData);
+		previewBlock.innerHTML = CmdUtils.renderTemplate(
+                  jQuery("#amazon-search", feed.dom).html(),
+                  previewData);
 	  }
 	});
   }
@@ -348,13 +482,14 @@ CmdUtils.makeSearchCommand({
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate( {file:"templates/youtube.html"},
-						  {
-							results: data.feed.entry,
-							query: directObject.summary,
-							numresults: data.feed['openSearch$totalResults']['$t']
-						  }
-			);
+      pblock.innerHTML = CmdUtils.renderTemplate(
+        jQuery("#youtube-search", feed.dom).html(),
+	{
+	  results: data.feed.entry,
+          query: directObject.summary,
+          numresults: data.feed['openSearch$totalResults']['$t']
+        }
+      );
     }, "json");
   }
 });
@@ -409,7 +544,9 @@ CmdUtils.makeSearchCommand({
           photos: responseData.photos.photo
         };
 
-        previewBlock.innerHTML = CmdUtils.renderTemplate({file:"templates/flickr.html"}, previewData);
+        previewBlock.innerHTML = CmdUtils.renderTemplate(
+          jQuery("#flickr-search", feed.dom).html(),
+          previewData);
     }
   });
 }
@@ -531,7 +668,7 @@ CmdUtils.CreateCommand({
     jQuery.get( url, params, function(data) {
       globals.yelp = data.businesses;
       pblock.innerHTML = CmdUtils.renderTemplate(
-        {file:"templates/yelp.html"},
+        jQuery("#yelp-search", feed.dom).html(),
         {businesses: data.businesses}
       );
 
@@ -624,8 +761,10 @@ CmdUtils.CreateCommand({
 
       weather["img"] = imgSrc;
 
-      var html = CmdUtils.renderTemplate( {file:"templates/weather.html"}, {w:weather, location:place}
-                                        );
+      var html = CmdUtils.renderTemplate(
+        jQuery("#weather-search", feed.dom).html(),
+        {w:weather, location:place}
+      );
 
       jQuery(pblock).html( html );
       }, "xml");
@@ -675,140 +814,6 @@ CmdUtils.CreateCommand({
     }
   }
 });
-
-//Don't release now cos it's still rough and users may be disappointed
-//TODO: add support for POST forms
-//TODO: add preview with pictures showing how to use command (?)
-
-/*
-CmdUtils.CreateCommand({
-  description: "Creates a new Ubiquity command from a search-box.  Like creating a bookmark with keywords, except less clicking.",
-  help: "Select a searchbox, click it and then type make-new... keyword, and a command named keyword will be created.",
-  name: "make-new-search-command",
-  author: {name: "Marcello Herreshoff",
-           homepage: "http://stanford.edu/~marce110/"},
-  icon: "chrome://ubiquity/skin/icons/search.png",
-  license: "GPL/LGPL/MPL",
-  homepage: "http://stanford.edu/~marce110/verbs/new-command-from-search-box.html",
-  takes: {"command name": noun_arb_text},
-
-  _makeURI : function(aURL, aOriginCharset, aBaseURI){
-    var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                              .getService(Components.interfaces.nsIIOService);
-    return ioService.newURI(aURL, aOriginCharset, aBaseURI);
-  },
-
-  _escapeNameValuePair: function(aName, aValue, aIsFormUrlEncoded){
-    if (aIsFormUrlEncoded)
-      return escape(aName + "=" + aValue);
-    else
-      return escape(aName) + "=" + escape(aValue);
-  },
-
-  preview: function(pblock, input) {
-    if(input.text.length < 1){
-      pblock.innerHTML = "Select a searchbox, click it and then type make-new... keyword, and a command named keyword will be created.";
-    }else{
-      pblock.innerHTML = "Creates a new search command called <b>" + input.text + "</b>";
-    }
-  },
-
-  execute: function(name){
-    //1. Figure out what this search-bar does.
-    var node = context.focusedElement;
-    if(!node || !node.form){
-      displayMessage("You need to click on a searchbox before running this command."); return;
-    }
-
-    //Copied from chrome://browser/content/browser.js, function AddKeywordForSearchField()
-    //Comments starting with MMH: indicates that something has been changed by me.
-    PLACEHOLDER = "{QUERY}"; //MMH: Note also: I have globally replaced "%s" with PLACEHOLDER
-    //COPY STARTS
-    var charset = node.ownerDocument.characterSet;
-
-    var docURI = this._makeURI(node.ownerDocument.URL,
-                         charset);
-
-    var formURI = this._makeURI(node.form.getAttribute("action"),
-                          charset,
-                          docURI);
-
-    var spec = formURI.spec;
-
-    var isURLEncoded =
-                 (node.form.method.toUpperCase() == "POST"
-                  && (node.form.enctype == "application/x-www-form-urlencoded" ||
-                      node.form.enctype == ""));
-
-    var el, type;
-    var formData = [];
-
-    for (var i=0; i < node.form.elements.length; i++) {
-      el = node.form.elements[i];
-
-      if (!el.type) // happens with fieldsets
-        continue;
-
-      if (el == node) {
-        formData.push((isURLEncoded) ? this._escapeNameValuePair(el.name, PLACEHOLDER, true) :
-                                       // Don't escape PLACEHOLDER, just append
-                                       this._escapeNameValuePair(el.name, "", false) + PLACEHOLDER);
-        continue;
-      }
-
-      type = el.type.toLowerCase();
-
-      if ((type == "text" || type == "hidden" || type == "textarea") ||
-          ((type == "checkbox" || type == "radio") && el.checked)) {
-        formData.push(this._escapeNameValuePair(el.name, el.value, isURLEncoded));
-      //} else if (el instanceof HTMLSelectElement && el.selectedIndex >= 0) {
-      } else if (el.selectedIndex && el.getTagName() == "select" && el.selectedIndex >= 0){
-           //MMH: HTMLSelectElement was undefined.
-        for (var j=0; j < el.options.length; j++) {
-          if (el.options[j].selected)
-            formData.push(this._escapeNameValuePair(el.name, el.options[j].value,
-                                              isURLEncoded));
-        }
-      }
-    }
-
-    var postData;
-
-    if (isURLEncoded)
-      postData = formData.join("&");
-    else
-      spec += "?" + formData.join("&");
-
-    //COPY ENDS
-
-    if(postData){
-      displayMessage("Sorry.  Support for POST-method forms is yet to be implemented.");
-      return;
-    }
-
-    var url = spec;
-
-    //2. Now that we have the form's URL, figure out the name, description and favicon for the command
-    currentLocation = String(Application.activeWindow.activeTab.document.location);
-    domain = currentLocation.replace(/^(.*):\/\//, '').split('/')[0];
-    name = name.text;
-    if(!name){ var parts = domain.split('.'); name = parts[parts.length-2]}
-    var icon = "http://"+domain+"/favicon.ico";
-    var description = "Searches " + domain;
-
-    //3. Build the piece of code that creates the command
-    var code =  '\n\n//Note: This command was automatically generated by the make-new-search-command command.\n'
-    code += 'CmdUtils.makeSearchCommand({\n'
-    code += '  name: "'+name+'",\n';
-    code += '  url: "'+url+'",\n';
-    code += '  icon: "'+icon+'",\n';
-    code += '  description: "'+description+'"\n';
-    code += '});\n'
-    //4. Append the code to Ubiqity's code
-    CmdUtils.UserCode.appendCode(code);
-
-    //5. Tell the user we finished
-    displayMessage("You have created the command: " + name +
-                   ".  You can edit its source-code with the command-editor command.");
-  }
-});*/
+]]></script>
+</body>
+</html>
