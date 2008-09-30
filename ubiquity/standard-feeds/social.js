@@ -26,7 +26,7 @@ CmdUtils.CreateCommand({
 	  .replace("<", "&lt;")
 	  .replace(">", "&gt;");
 
-    var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b>";
+    var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b> <p style='font-size:11px'> tip: tweet @mozillaubiquity for help </p>";
     var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
     var previewData = {
       status: statusText,
