@@ -215,39 +215,32 @@ a:hover {
 
 div#editor-div iframe {border: 1px black solid !important; clear: both; margin: 1em auto;}
 
-/* CSS for buttons from http://www.oscaralexander.com/tutorials/how-to-make-sexy-buttons-with-css.html*/
+/* Using FreakCERS's CSS from http://users.skumleren.net/cers/examples/ubiquitybutton.html*/
 
-.clear { /* generic container (i.e. div) for floating buttons */
-    overflow: hidden;
-    width: 100%;
+ul.button-list {
+  list-style: none;
 }
 
-a.button {
-    background: transparent url('chrome://ubiquity/skin/buttons/bg_button_a.gif') no-repeat scroll top right;
-    color: #444;
-    display: block;
-    float: left;
-    font: normal 12px arial, sans-serif;
-    height: 24px;
-    margin-right: 6px;
-    padding-right: 18px; /* sliding doors padding */
-    text-decoration: none;
+ul.button-list li{
+  padding: 0px;
 }
 
-a.button span {
-    background: transparent url('chrome://ubiquity/skin/buttons/bg_button_span.gif') no-repeat;
-    display: block;
-    line-height: 14px;
-    padding: 5px 0 5px 18px;
+ul a.button {
+  border: 1px #aaa solid; 
+  -moz-border-radius: 12px; 
+  background: #ddd url('chrome://ubiquity/skin/buttons/grad.png') 0 0 repeat-x; 
+  display: block; 
+  float: left; 
+  padding: 0 2em;
+  height: 22px; 
+  color: black;
+  text-decoration: none;
+  text-align: center;
+  margin-right: 15px;
+  line-height: 22px;
+  outline: none;
 }
-
-a.button:active {
-    background-position: bottom right;
-    color: #000;
-    outline: none; /* hide dotted outline in Firefox */
-}
-
-a.button:active span {
-    background-position: bottom left;
-    padding: 6px 0 4px 18px; /* push text down 1px */
+ul a:active.button {
+  background-color: #cdcdcd; 
+  background-position: 0 -22px;
 }
