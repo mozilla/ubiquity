@@ -45,6 +45,10 @@ let UbiquitySetup = {
                     source: "general.js",
                     title: "Mozilla General Utility Commands"},
 
+                   {page: "email.html",
+                    source: "email.js",
+                    title: "Mozilla Email Commands"},
+
                    {page: "search.html",
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"}],
