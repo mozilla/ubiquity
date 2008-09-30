@@ -49,8 +49,8 @@
          stylesheet: "resource://ubiquity-scripts/codemirror/css/jscolors.css",
          path: "resource://ubiquity-scripts/codemirror/js/",
          autoMatchParens: true,
+         undoDelay: 100,
          onChange: function(){PrefCommands.setCode(editor.getCode())},
-         saveFunction: saveAs,
          initCallback: function(){editor.win.focus(); editor.jumpToLine(1);}
       });
       var iframe = document.getElementsByTagName("iframe")[0];
@@ -102,23 +102,23 @@
 <br clear="all"/>
 <div id="editor-actions">
   <div id="save-as-div" class="col-three">
-    <b><a href="javascript:void(saveAs())">Save</a> to file </b>
+    <a class="button" href="javascript:void(saveAs())"><span>Save to file</span></a>
   </div>
   
   <div id="import-template-div" class="col-three">
-    <b><a href="javascript:void(importTemplate())">Import</a> command template.<b>
+    <a class="button" href="javascript:void(importTemplate())"><span>Import Command Template</span></a>
   </div>
 
   <div id="external-editor-div" class="col-three">
-    <b><a href="javascript:void(launch())">Launch</a> an external editor.</b>
-    <br/>Your editor is
+    <a class="button" href="javascript:void(launch())"><span>Launch an external editor</span></a>
+    <br/><br/>Your editor is
     <input id="editorInputBox" type="file" size="20" 
            style="cursor:pointer" 
            onchange="Editor.onSave()"/>
   </div>
 
   <div id="paste-as-div" class="col-two">
-    <b><a href="javascript:void(paste())">Share</a></b>
+    <a class="button"href="javascript:void(paste())"><span>Share</span></a>
   </div>
 </div>
 
