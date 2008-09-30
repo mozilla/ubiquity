@@ -138,6 +138,7 @@ CmdUtils.CreateCommand({ \n\
   }\n\
 });";
   editor.editor.setCode(editor.editor.getCode()+template);
+  PrefCommands.setCode(editor.editor.getCode());
 }
 
 function saveAs() {

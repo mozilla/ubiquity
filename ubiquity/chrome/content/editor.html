@@ -48,24 +48,14 @@
          parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
          stylesheet: "resource://ubiquity-scripts/codemirror/css/jscolors.css",
          path: "resource://ubiquity-scripts/codemirror/js/",
-         autoMatchParens: true
+         autoMatchParens: true,
+         onChange: function(){PrefCommands.setCode(editor.getCode())},
+         saveFunction: saveAs,
+         initCallback: function(){editor.win.focus(); editor.jumpToLine(1);}
       });
       var iframe = document.getElementsByTagName("iframe")[0];
       iframe.setAttribute("id", "editor");
       iframe.editor = editor;
-      highlightWatcher();
-   }
-   function highlightWatcher(){
-      var editor = document.getElementById("editor");
-      if (editor && editor.editor && editor.editor.editor && editor.editor.editor.keyUp) {
-          editor.editor.editor._keyUp = editor.editor.editor.keyUp;
-          editor.editor.editor.keyUp = function(e) {
-              editor.editor.editor._keyUp(e);
-              PrefCommands.setCode(editor.editor.editor.getCode());
-          };
-          editor.contentWindow.focus();
-          editor.editor.editor.jumpToLine(1);
-      } else window.setTimeout(function(){highlightWatcher()}, 100);
    }
   </script>
   <link rel="stylesheet" href="web-content.css" type="text/css">
