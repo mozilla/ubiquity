@@ -110,6 +110,8 @@
     </style>
 
     <script type="text/javascript">
+    // This API key is for https://people.mozilla.com/~araskin only
+    var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhQBK8TPUEk0el8QiBSofqVEVTeNhBTUla4_AlmyCXJzGsQ4qPg8HLpUlw";
 
     google.load('search', '1');
     google.load('maps', '2');
@@ -283,7 +285,7 @@
                 "markers=" + currentMarkerPoint.lat() + "," + currentMarkerPoint.lng() + "," + "red&" +
                 "zoom=" + curZoom + "&" +
                 "size=" + $("#map-large").width() + "x" + $("#map-large").height() + "&" +
-                "key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSsTL4WIgxhMZ0ZK_kHjwHeQuOD4xQJpBVbSrqNn69S6DOTv203MQ5ufA";
+                "key=" + API_KEY;
       return url;
     }
 
@@ -352,15 +354,13 @@
     /* Currently using default mail client. */
     /* Would be nice to include the image itself in the body */
     function setEmailUrl() {
-      // This API key is for https://people.mozilla.com/~araskin only
-      var apiKey = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhQBK8TPUEk0el8QiBSofqVEVTeNhBTUla4_AlmyCXJzGsQ4qPg8HLpUlw";
       var curCenter = gMap.getCenter();
       var curAddress = document.getElementById("selected-address").innerHTML;
       var staticMap = "http://maps.google.com/staticmap?" +
                         "markers=" + curCenter.lat() + "," + curCenter.lng() + "," + "red%26" +
                         "zoom=13%26" +
                         "size=450x240%26" + 
-                        "key=" + apiKey;
+                        "key=" + API_KEY;
 
       document.getElementById("send-link").href = "mailto:?Subject=" + curAddress + "&body=" + staticMap;
     }
