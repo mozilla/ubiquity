@@ -6,8 +6,10 @@ var noun_type_searchengine = "noun_type_searchengine";
 var noun_type_language = "noun_type_language";
 var noun_type_geolocation = "noun_type_geolocation";
 
+var Utils = {
+  __noSuchMethod__: function noSuchMethod() {}
+};
+
 var CmdUtils = {
-  NounType: function NounType() {},
-  CreateCommand: function CreateCommand() {},
-  makeSearchCommand: function makeSearchCommand() {}
+  __noSuchMethod__: function noSuchMethod() {}
 };
