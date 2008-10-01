@@ -3,10 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&key=ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtGJjaVMeVURIpTa3cD1qNfA"
-            type="text/javascript">
-    </script>
-    <script src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0" type="text/javascript"></script>
+    <!-- // This API key is for https://people.mozilla.com/ only -->
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ"
+      type="text/javascript"></script>
+    <script src="http://www.google.com/uds/api?file=uds.js&v=1.0&amp;key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ" type="text/javascript"></script>
     <script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>    
     <script src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
     <style>
@@ -110,8 +110,9 @@
     </style>
 
     <script type="text/javascript">
+
     // This API key is for https://people.mozilla.com/ only
-    var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtGJjaVMeVURIpTa3cD1qNfA";
+    var API_KEY = "ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ";
 
     google.load('search', '1');
     google.load('maps', '2');
@@ -279,13 +280,14 @@
     function getStaticMapUrl() {
       var curZoom = gMap.getZoom();
       var curCenter = gMap.getCenter();
-      
+
       var url = "http://maps.google.com/staticmap?" +
                 "center=" + curCenter.lat() + "," + curCenter.lng() + "&" + 
                 "markers=" + currentMarkerPoint.lat() + "," + currentMarkerPoint.lng() + "," + "red&" +
                 "zoom=" + curZoom + "&" +
                 "size=" + $("#map-large").width() + "x" + $("#map-large").height() + "&" +
                 "key=" + API_KEY;
+
       return url;
     }
 
