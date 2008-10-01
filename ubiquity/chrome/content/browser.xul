@@ -5,6 +5,8 @@
          xmlns:svg="http://www.w3.org/2000/svg">
 <head></head>
   <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/system-tests.js"/>
+  <script type="application/javascript;version=1.7"
           src="resource://ubiquity-scripts/jquery-1.2.3.min.js"/>
   <script>jQuery.noConflict(); // Fixes #124</script>
   <script>
