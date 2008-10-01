@@ -84,18 +84,34 @@ NLParser.EnParsedSentence.prototype = {
 
   },
 
-  getCompletionText: function() {
+  getCompletionText: function( selObj ) {
     /* return plain text that we should set the input box to if user hits
      the key to autocomplete to this sentence. */
-    var sentence = this._verb._name;
-    for ( var x in this._argSuggs ) {
-      if ( this._argSuggs[x] ) {
-	let preposition;
-	if (x == "direct_object")
-	  preposition = " ";
-	else
-	  preposition = " " + x + " ";
-	sentence = sentence + preposition + this._argSuggs[x].text;
+     var sentence = this._verb._name;
+     var directObjPresent = false;
+     for ( var x in this._verb._arguments ) {
+       if ( this._argSuggs[x] ) {
+   	     let preposition = "";
+         let argText = this._argSuggs[x].text;
+   	     if (x == "direct_object") {
+           /*Check for a valid text/html selection. We'll replace
+              the text with a pronoun for readability */
+              if(selObj.text || selObj.html )
+              if((selObj.text == argText) || (selObj.html == argText) ) {
+                /*In future, the pronoun should be contextual to the
+                selection */
+                argText = "selection";
+              }
+              if(argText)
+                directObjPresent = true;
+              preposition = " ";
+        }
+        else{
+          //only append the modifiers if we have a valid direct-object
+          if(argText && directObjPresent)
+            preposition = " " + x + " ";
+          sentence += preposition + argText;
+        }
       }
     }
     return sentence;
