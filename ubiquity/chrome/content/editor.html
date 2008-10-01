@@ -113,6 +113,14 @@
 </div>
 
 <div id="editor-actions">
+  <br clear="all"/>
+  <div id="external-editor-pref">
+    Your external editor is
+    <input id="editorInputBox" type="file" size="20" 
+           style="cursor:pointer" 
+           onchange="Editor.onSave()"/>
+  </div>
+  <br clear="all"/>
   <ul class="button-list">
     <li>
       <a class="button" href="javascript:void(importTemplate())"><b>Import Command Template</b></a>
@@ -127,13 +135,7 @@
       <a class="button" href="javascript:void(saveAs())"><b>Save to file</b></a>
     </li>
   </ul>
-  <br clear="all"/><br/>
-  <div id="external-editor-pref">
-    Your external editor is
-    <input id="editorInputBox" type="file" size="20" 
-           style="cursor:pointer" 
-           onchange="Editor.onSave()"/>
-  </div>
+  <br clear="all"/>
 </div>
 
 
