@@ -42,20 +42,33 @@
    }
    function highlight(){
       var textarea = document.getElementById("editor");
-      var editor = new CodeMirror(CodeMirror.replace(textarea), {
-         height: textarea.clientHeight,
-         content: textarea.value,
-         parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
-         stylesheet: "resource://ubiquity-scripts/codemirror/css/jscolors.css",
-         path: "resource://ubiquity-scripts/codemirror/js/",
-         autoMatchParens: true,
-         undoDelay: 100,
-         onChange: function(){PrefCommands.setCode(editor.getCode())},
-         initCallback: function(){editor.win.focus(); editor.jumpToLine(1);}
-      });
-      var iframe = document.getElementsByTagName("iframe")[0];
-      iframe.setAttribute("id", "editor");
-      iframe.editor = editor;
+      try {
+         var editor = new CodeMirror(CodeMirror.replace(textarea), {
+            height: textarea.clientHeight,
+            content: textarea.value,
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: "resource://ubiquity-scripts/codemirror/css/jscolors.css",
+            path: "resource://ubiquity-scripts/codemirror/js/",
+            autoMatchParens: true,
+            undoDelay: 100,
+            onChange: function(){PrefCommands.setCode(editor.getCode())},
+            initCallback: function(){editor.win.focus(); editor.jumpToLine(1);}
+         });
+         var iframe = document.getElementsByTagName("iframe")[0];
+         iframe.setAttribute("id", "editor");
+         iframe.editor = editor;
+      } catch (e) { // Setup matching API for the normal textarea
+         Components.utils.reportError("CodeMirror failed to load: "+e);
+         displayMessage("Error: CodeMirror failed to load: " + e);
+         
+         textarea.editor = new Object();
+         textarea.editor.editor = new Object();
+         textarea.editor.editor.getCode = function() {return textarea.value;};
+         textarea.editor.getCode = textarea.editor.editor.getCode;
+         textarea.editor.editor.setCode = function(d) {textarea.value = d;};
+         textarea.editor.setCode = textarea.editor.editor.setCode;
+         textarea.focus();
+      }
    }
   </script>
   <link rel="stylesheet" href="web-content.css" type="text/css">
@@ -114,16 +127,16 @@
       <a class="button" href="javascript:void(saveAs())"><b>Save to file</b></a>
     </li>
   </ul>
+  <br clear="all"/><br/>
+  <div id="external-editor-pref">
+    Your external editor is
+    <input id="editorInputBox" type="file" size="20" 
+           style="cursor:pointer" 
+           onchange="Editor.onSave()"/>
+  </div>
 </div>
 
-<br clear="all"/><br/>
 
-<div id="external-editor-pref">
-  Your external editor is
-  <input id="editorInputBox" type="file" size="20" 
-         style="cursor:pointer" 
-         onchange="Editor.onSave()"/>
-</div>
 
 <div id="editor-div">
   <textarea id="editor" rows="40" style="width:900px"

@@ -163,7 +163,7 @@ function saveAs() {
                                        sourceCode: "",
                                        canUpdate: true});
 
-      editor.editor.editor.container.innerHTML="<span></span>"; //apparently, it should contain an epmty span
+      editor.editor.setCode("");
       PrefCommands.setCode("");
 
       $("#editor-actions").html(
