@@ -35,7 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-
 NLParser.EN_SELECTION_PRONOUNS =  [ "this", "that", "it", "selection",
 				    "him", "her", "them"];
 
@@ -66,7 +65,7 @@ NLParser.EnParser.prototype = {
     this._suggestionMemory = new SuggestionMemory("en_parser");
   },
 
-  nounFirstSuggestions: function( text, html ) {
+  nounFirstSuggestions: function( selObj ) {
     /*Treats input as a noun, figures out what nounTypes it could be,
     figures out what verbTypes can take that nounType as input
     (either for directObject or for modifiers) and returns a list of
@@ -78,7 +77,7 @@ NLParser.EnParser.prototype = {
     let noun;
 
     for each(noun in this._nounTypeList) {
-      if (noun.suggest(text, html).length > 0 )
+      if (noun.suggest(selObj.text, selObj.html).length > 0 )
 	matchingNouns.push(noun);
       // TODO: nouns will soon be able to suggest asynchronously,
       // meaning that this is false at first but becomes true later.
@@ -94,11 +93,10 @@ NLParser.EnParser.prototype = {
       }
     }
     for each(verb in matchingVerbs) {
-      let selObj = {
-	text: text,
-	html: html
-      };
-      suggs = suggs.concat(verb.getParsings([verb._name], selObj));
+      suggs.push( new NLParser.EnPartiallyParsedSentence(verb,
+							 {},
+							 selObj,
+							 0));
     }
     return suggs;
   },
@@ -154,8 +152,7 @@ NLParser.EnParser.prototype = {
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
-	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj.text,
-                                                              selObj.html));
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj));
       }
     } else {
       var words = query.split( " " );
@@ -170,10 +167,25 @@ NLParser.EnParser.prototype = {
       }
       // noun-first matches on input
       if (newSuggs.length == 0 ){
-	newSuggs = newSuggs.concat( this.nounFirstSuggestions( query, query ));
+	selObj = {
+	  text: query, html: query
+	};
+	newSuggs = newSuggs.concat( this.nounFirstSuggestions( selObj ));
       }
     }
-    this._parsingsList = newSuggs;
+    // partials is now a list of PartiallyParsedSentences; if there's a
+    // selection, try using it for any missing arguments...
+    if (selObj.text || selObj.html) {
+      let partialsWithSelection = [];
+      for each(part in newSuggs) {
+        let withSel = part.getAlternateSelectionInterpolations();
+        partialsWithSelection = partialsWithSelection.concat( withSel );
+      }
+      this._parsingsList = partialsWithSelection;
+    } else {
+      this._parsingsList = newSuggs;
+    }
+
     this.refreshSuggestionList( query, context );
   },
 

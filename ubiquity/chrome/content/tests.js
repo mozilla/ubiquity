@@ -1132,8 +1132,13 @@ function testTextAndHtmlDifferent() {
   executedText = null;
   executedHtml = null;
   var nlParser = new NLParser.EnParser( [cmd_different], [noun_type_different]);
-  comps = nlParser.nounFirstSuggestions( "Pantalones", "<blink>Pantalones</blink>");
+  selObj = {
+    text: "Pantalones", html: "<blink>Pantalones</blink>"
+  };
+  comps = nlParser.nounFirstSuggestions( selObj );
   this.assert(comps.length == 1, "There should be one partial completion");
+  comps = comps[0].getAlternateSelectionInterpolations();
+  this.assert(comps.length == 1, "There should still be one partial completion");
   comps = comps[0].getParsedSentences();
   this.assert(comps.length == 1, "There should be one completion (3)");
   comps[0].execute();
@@ -1249,23 +1254,29 @@ function testAsyncNounSuggestions() {
 // TODO have input that matches either as a verb or as a noun, make sure the
 // verb matches come first.
 
-// tests for not yet implemented features:
-
-// TODO disjoint verb matches: make them work and test that they do.
-// Maybe a useful subcategory of disjoint matches is "two letters transposed",
-// which is very easy to do by accident when typing words like "emial".
+// TODO how bout a test that all first-party feeds can be loaded and work?
 
 // TODO test that selection goes to ANY type-matching argument that's left empty, no
 // matter how many other filled arguments there are.  Test that if multiple arguments
 // are left empty, the selection is suggested for each one, although not all at the
 // same time.
 
-// TODO test ranking based on noun match quality, when verb-match quality is
-// equivalent.
-
 // TODO test that match with more (and more specific) arguments filled
 // is ranked ahead of match with unfilled arguments, even if there are
 // defaults.
+
+
+// tests for not yet implemented features:
+
+// TODO test japanese parsing right in this file by passing "jp" instead of
+// LANG into the command manager.
+
+// TODO disjoint verb matches: make them work and test that they do.
+// Maybe a useful subcategory of disjoint matches is "two letters transposed",
+// which is very easy to do by accident when typing words like "emial".
+
+// TODO test ranking based on noun match quality, when verb-match quality is
+// equivalent.
 
 // TODO make a verb with two direct objects using the new API, make sure
 // an exception is raised.

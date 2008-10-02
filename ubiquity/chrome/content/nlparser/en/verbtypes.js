@@ -623,26 +623,25 @@ NLParser.EnVerb.prototype = {
       partials = this._recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
     }
 
-    // partials is now a list of PartiallyParsedSentences; if there's a
-    // selection, try using it for any missing arguments...
+    return partials;
+  },
+
+  getCompletions: function( words, selObj ) {
+    // USED ONLY FOR UNIT TESTING
+    let partials = this.getParsings(words, selObj);
     if (selObj.text || selObj.html) {
       let partialsWithSelection = [];
       for each(part in partials) {
         let withSel = part.getAlternateSelectionInterpolations();
         partialsWithSelection = partialsWithSelection.concat( withSel );
       }
-      return partialsWithSelection;
+      partials = partialsWithSelection;
     }
-
-    return partials;
-  },
-
-  getCompletions: function( words, selObj ) {
-    let partials = this.getParsings(words, selObj);
     let completions = [];
     for each (let part in partials) {
       completions = completions.concat( part.getParsedSentences());
     }
+
     return completions;
   },
 
