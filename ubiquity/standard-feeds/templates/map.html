@@ -9,6 +9,7 @@
             src="http://www.google.com/jsapi?key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ"
     ></script>
     <script src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
+    <script src="resource://ubiquity-scripts/content-preview.js"></script>
     <style>
 
     body{
@@ -352,7 +353,7 @@
     
     function insertMap( ) {     
       var mapHtml = jQuery("#map").html();
-      insertHtml( "<img src='" + getStaticMapUrl() + "'\>" );
+      Ubiquity.insertHtml( "<img src='" + getStaticMapUrl() + "'\>" );
     }
       
       

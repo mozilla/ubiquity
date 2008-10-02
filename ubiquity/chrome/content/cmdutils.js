@@ -499,6 +499,41 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   return templateObject.process( data );
 };
 
+CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
+  function contentPreview(pblock, directObj) {
+    var query = directObj.text;
+
+    CmdUtils.showPreviewFromFile(
+      pblock,
+      filePath,
+      function onPreviewLoaded(winInsecure) {
+        winInsecure.setPreview(query);
+
+        winInsecure.Ubiquity.insertHtml = function(html) {
+          var doc = context.focusedWindow.document;
+          var focused = context.focusedElement;
+
+          // This would be nice to store the map in the buffer...
+	  // But for now, it causes a problem with a large image showing up as the default
+          //CmdUtils.setLastResult( html );
+
+          if (doc.designMode == "on") {
+            doc.execCommand("insertHTML", false, query + "<br/>" + html);
+          }
+          else if (CmdUtils.getSelection()) {
+	    CmdUtils.setSelection(html);
+      	  }
+      	  else {
+      	    displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.");
+      	  }
+        };
+      }
+    );
+  }
+
+  return contentPreview;
+};
+
 CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
                                                              filePath,
                                                              callback ) {
