@@ -223,18 +223,10 @@ NLParser.Parser.prototype = {
   },
 
   setPreviewAndSuggestions: function(context, previewBlock, hilitedSuggestion){
-    // set previewBlock.innerHtml and return true/false
     // can set previewBlock as a callback in case we need to update
     // asynchronously.
 
-    // Here we'll get the contents of the current preview HTML, if
-    // they exist, to use them in the new display so that a "flicker"
-    // doesn't occur whereby the preview is momentarily empty (while
-    // an ajax request occurs) and then is filled with content a
-    // split-second later.
-    //
-    // While this prevents flicker, it's kind of a hack; it
-    // might be better for us to decouple the generation of
+    // Note: it might be better for us to decouple the generation of
     // suggestions from the preview display so that they can
     // be updated independently, which would allow previews to
     // only be displayed (and potentially costly Ajax requests
@@ -243,11 +235,13 @@ NLParser.Parser.prototype = {
     // XUL:textbox whose 'type' is set to 'timed'.
 
     var doc = previewBlock.ownerDocument;
-    var oldPreview = doc.getElementById("preview-pane");
-    var oldPreviewHTML = "";
-    if (oldPreview)
-      oldPreviewHTML = oldPreview.innerHTML;
+    if (!doc.getElementById("suggestions")) {
+      // Set the initial contents of the preview block.
+      previewBlock.innerHTML = ('<div id="suggestions"></div>' +
+                                '<div id="preview-pane"></div>');
+    }
 
+    // Set suggestions content.
     var content = "";
     var numToDisplay = this.getNumSuggestions();
     for (var x=0; x < numToDisplay; x++) {
@@ -267,13 +261,12 @@ NLParser.Parser.prototype = {
         content += "<div class=\"suggested\">" + suggText + "</div>";
       }
     }
-    content += "<div id=\"preview-pane\">" + oldPreviewHTML + "</div>";
 
-    previewBlock.innerHTML = content;
+    doc.getElementById("suggestions").innerHTML = content;
 
     var activeSugg = this.getSentence(hilitedSuggestion);
     if ( activeSugg ) {
-      doc = previewBlock.ownerDocument;
+      // Set the preview contents.
       activeSugg.preview(context, doc.getElementById("preview-pane"));
     }
     return true;
