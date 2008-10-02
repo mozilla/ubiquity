@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <script src="http://j.maxmind.com/app/geoip.js"></script>
     <!-- // This API key is for https://people.mozilla.com/ only -->
     <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ"
       type="text/javascript"></script>
@@ -213,24 +214,9 @@
     
     // initializes the map and starts the local search
     function loadMap(searchTerm, index) {
-      
-      var currentLat;
-      var currentLng;
 
-      // Get the user's lattitude and longitude based on ip address
-      jQuery.ajax({
-        type: "GET",
-        url: "http://j.maxmind.com/app/geoip.js",
-        dataType: "text",
-        async: false,
-        success: function( js ) {
-          eval( js );
-          var loc = geoip_city() + ", " + geoip_region();
-          currentLat = geoip_latitude();
-          currentLng = geoip_longitude();
-        }
-      });
-
+      var currentLat = geoip_latitude();
+      var currentLng = geoip_longitude();
 
       // Initialize the map
       gMap = new google.maps.Map2(document.getElementById("map"));
