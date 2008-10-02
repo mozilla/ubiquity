@@ -75,7 +75,7 @@ NLParser.Parser.prototype = {
     this._suggestionList = []; // a list of ParsedSentences.
     this._parsingsList = []; // a list of PartiallyParsedSentences.
     this._pronouns = languagePlugin.PRONOUNS;
-    this._parseByPlugin = languagePlugin.parseSentence;
+    this._languageSpecificParse = languagePlugin.parseSentence;
     this._suggestionMemory = new SuggestionMemory("main_parser");
   },
 
@@ -125,8 +125,6 @@ NLParser.Parser.prototype = {
       sugg.frequencyScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
     }
 
-    /* TODO: frequencyScore not yet implemented, is 0 for all suggestions.
-     */
     this._suggestionList.sort( function( x, y ) {
 				 let xMatchScores = x.getMatchScores();
 				 let yMatchScores = y.getMatchScores();
@@ -169,16 +167,13 @@ NLParser.Parser.prototype = {
 	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj));
       }
     } else {
-      var words = query.split( " " );
-      /* If input is "dostuff " (note space) then splitting on space will
-       *  produce ["dostuff", ""].  We don't want the empty string, so drop
-       *  all zero-length strings: */
-      let word;
-      words = [ word for each(word in words) if (word.length > 0)];
-      // verb-first matches on input
-      for each ( verb in this._verbList ) {
-	newSuggs = newSuggs.concat( verb.getParsings( words, selObj ) );
-      }
+      // Language-specific full-sentence suggestions:
+      newSuggs = this._languageSpecificParse(
+	query,
+	this._nounTypeList,
+	this._verbList,
+	selObj
+      );
       // noun-first matches on input
       if (newSuggs.length == 0 ){
 	selObj = {

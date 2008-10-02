@@ -922,19 +922,19 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "wash", fakeContext );
   var suggs = nlParser.getSuggestionList();
-  this.assert( suggs.length == 1, "Should be 1 suggestion.");
+  this.assert( suggs.length == 1, "Should be 1 suggestion (A).");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
   nlParser.updateSuggestionList( "play", fakeContext );
   suggs = nlParser.getSuggestionList();
-  this.assert( suggs.length == 1, "Should be 1 suggestion.");
+  this.assert( suggs.length == 1, "Should be 1 suggestion (B).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
   nlParser.updateSuggestionList( "play retr", fakeContext );
   suggs = nlParser.getSuggestionList();
-  this.assert( suggs.length == 1, "Should be 1 suggestion.");
+  this.assert( suggs.length == 1, "Should be 1 suggestion (C).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
 
@@ -1237,6 +1237,9 @@ function testAsyncNounSuggestions() {
   cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, fakePBlock );
   this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
+
+// TODO a test where we go through the NLParser.Parser and make sure the
+// ordering is what we expect based on verb quality matches.
 
 // TODO a test where we put inalid value into an argument on purpose, ensure
 // verb returns no suggestions.

@@ -1,5 +1,7 @@
 var EnParser = {};
 
+EnParser.PRONOUNS = ["this", "that", "it", "selection", "him", "her", "them"];
+
 function _recursiveParse(unusedWords,
                          filledArgs,
                          unfilledArgs,
@@ -13,7 +15,7 @@ function _recursiveParse(unusedWords,
   // First, the termination conditions of the recursion:
   if (unusedWords.length == 0) {
     // We've used the whole sentence; no more words. Return what we have.
-    return [new NLParser.EnPartiallyParsedSentence(verb, filledArgs, selObj, verb.matchScore)];
+    return [new NLParser.PartiallyParsedSentence(verb, filledArgs, selObj, 0)];
   } else if ( dictKeys( unfilledArgs ).length == 0 ) {
     // We've used up all arguments, so we can't continue parsing, but
     // there are still unused words.  This was a bad parsing; don't use it.
@@ -74,9 +76,6 @@ function _recursiveParse(unusedWords,
   } // end if there are still arguments
 }
 
-EnParser.PRONOUNS = ["this", "that", "it", "selection", "him", "her", "them"];
-
-
 EnParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   // Returns a list of PartiallyParsedSentences.
   // Language-specific.  This one is for English.
@@ -84,6 +83,10 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj) {
 
   // English uses spaces between words:
   let words = inputString.split(" ");
+  /* If input is "dostuff " (note space) then splitting on space will
+   *  produce ["dostuff", ""].  We don't want the empty string, so drop
+   *  all zero-length strings: */
+  words = [ word for each(word in words) if (word.length > 0)];
   // English puts verb at the beginning of the sentence:
   let inputVerb = words[0];
   // And the arguments after it:
@@ -94,21 +97,27 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj) {
     let matchScore = verb.match( inputVerb );
     if (matchScore == 0)
       continue;
-
+    let newParsings = [];
     if (inputArguments.length == 0) {
       // No arguments
-      parsings.push(new NLParser.PartiallyParsedSentence(this,
+      newParsings = [new NLParser.PartiallyParsedSentence(verb,
 							 {},
 							 selObj,
-							 matchScore));
+							 matchScore)];
     } else {
-      parsings = parsings.concat( _recursiveParse( inputArguments,
-                                                   {},
-                                                   verb.arguments,
-                                                   selObj,
-                                                   verb)
-                                );
+      newParsings = _recursiveParse( inputArguments,
+                                     {},
+                                     verb._arguments,
+                                     selObj,
+                                     verb);
     }
+    // set matchScore on all the parsings!
+    for each (let parsing in newParsings) {
+      parsing._matchScore = matchScore;
+      // TODO -- should have a function for this?
+    }
+
+    parsings = parsings.concat( newParsings );
   }
   return parsings;
 }

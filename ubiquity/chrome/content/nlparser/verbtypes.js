@@ -52,10 +52,6 @@ function dictKeys( dict ) {
   return [ key for ( key in dict ) ];
 }
 
-function notifyUpdateSuggestionList() {
-}
-
-
 NLParser.ParsedSentence = function( verb, arguments, verbMatchScore ) {
   /* DO and the values of modifiers should be NLParser.EnInputData
    * objects.
@@ -76,7 +72,6 @@ NLParser.ParsedSentence.prototype = {
      argument where a specific nountype (i.e. non-arbitrary-text)
      matches user input.  */
     for (let argName in this._argSuggs) {
-      // TODO sometimes crashing here because argName is [object Object] ??
       if (this._argSuggs[argName])
 	if (!this._verb._arguments[argName].type.rankLast)
 	  this.argMatchScore++;
@@ -210,6 +205,8 @@ NLParser.ParsedSentence.prototype = {
   },
 
   getMatchScores: function() {
+     /* TODO: frequencyScore not yet implemented, is 0 for all suggestions.
+     */
     return [this.frequencyMatchScore,
 	    this.verbMatchScore,
 	    this.argMatchScore];
@@ -608,7 +605,7 @@ NLParser.Verb.prototype = {
     let partials = [];
     let part;
     let inputVerb = words[0];
-    let matchScore = this._match( inputVerb );
+    let matchScore = this.match( inputVerb );
     if (matchScore == 0) {
       // Not a match to this verb!
       return [];
@@ -656,7 +653,7 @@ NLParser.Verb.prototype = {
     return false;
   },
 
-  _match: function( inputWord ) {
+  match: function( inputWord ) {
     /* returns a float from 0 to 1 telling how good of a match the input
        is to this verb.  Return value will be used for sorting.
        The current heuristic is extremely ad-hoc but produces the ordering
