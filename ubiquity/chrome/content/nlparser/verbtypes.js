@@ -85,28 +85,27 @@ NLParser.ParsedSentence.prototype = {
      var sentence = this._verb._name;
      var directObjPresent = false;
      for ( var x in this._verb._arguments ) {
-       if ( this._argSuggs[x] ) {
-   	     let preposition = "";
+       if ( this._argSuggs[x] && this._argSuggs[x].text != "" ) {
+   	 let preposition = "";
          let argText = this._argSuggs[x].text;
-   	     if (x == "direct_object") {
+   	     if ( x == "direct_object" ) {
            /*Check for a valid text/html selection. We'll replace
               the text with a pronoun for readability */
-              if(selObj.text || selObj.html )
-              if((selObj.text == argText) || (selObj.html == argText) ) {
+              if ( (selObj.text == argText) || (selObj.html == argText) ) {
                 /*In future, the pronoun should be contextual to the
                 selection */
                 argText = "selection";
               }
-              if(argText)
+              if ( argText )
                 directObjPresent = true;
               preposition = " ";
-        }
-        else{
+        } else{
           //only append the modifiers if we have a valid direct-object
-          if(argText && directObjPresent)
+          if ( argText && directObjPresent )
             preposition = " " + x + " ";
-          sentence += preposition + argText;
         }
+          //Concatenate sentence pieces
+          sentence += preposition + argText;
       }
     }
     return sentence;
