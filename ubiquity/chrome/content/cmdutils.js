@@ -539,7 +539,8 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
                                                              callback ) {
   var iframe = pblock.ownerDocument.createElement("iframe");
   var browser;
-  iframe.setAttribute("src", "chrome://ubiquity/content/mapping/mapping.xul");
+  iframe.setAttribute("src",
+                      "chrome://ubiquity/content/content-preview/cp.xul");
   iframe.style.border = "none";
   iframe.setAttribute("width", 500);
   function onXulLoad() {
