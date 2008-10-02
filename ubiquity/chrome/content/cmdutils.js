@@ -511,6 +511,7 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
     var uri = Utils.url({uri: filePath, base: feed.id}).spec;
     browser = iframe.contentDocument.createElement("browser");
     browser.setAttribute("src", uri);
+    browser.setAttribute("disablesecurity", true);
     browser.setAttribute("width", 500);
     browser.setAttribute("height", 300);
     function onBrowserLoad() {
@@ -654,18 +655,18 @@ var makeSearchCommand = function deprecated_makeSearchCommand() {
 
 CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand( options ) {
   options.name = options.name.toLowerCase().replace(/ /g,'-');
-    
+
   options.execute = function(directObject, modifiers) {
     var code = options.url;
     CmdUtils.getDocument().location = code;
   };
-  
+
   if (! options.preview ){
     options.preview = function(pblock) {
       var content = "Executes the <b>" + options.name + "</b> bookmarklet";
       pblock.innerHTML = content;
     };
   }
-  
+
   CmdUtils.CreateCommand(options);
 };
