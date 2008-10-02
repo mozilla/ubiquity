@@ -507,7 +507,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
       pblock,
       filePath,
       function onPreviewLoaded(winInsecure) {
-        winInsecure.setPreview(query);
+        winInsecure.Ubiquity.onPreview(query);
 
         winInsecure.Ubiquity.insertHtml = function(html) {
           var doc = context.focusedWindow.document;
