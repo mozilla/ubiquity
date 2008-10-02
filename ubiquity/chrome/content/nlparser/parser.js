@@ -43,8 +43,7 @@ NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
     parserPlugin = EnParser;
   }
   if (languageCode == "jp") {
-    // TODO write this
-    parserPlugin = null;
+    parserPlugin = JpParser;
   }
 
   NLParser.SELECTION_PRONOUNS = parserPlugin.PRONOUNS;
