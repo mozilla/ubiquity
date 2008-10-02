@@ -64,7 +64,7 @@ ALIASES = {
     'Aza Raskin <azaaza@gmail.com>' : 'Aza Raskin <aza@mozilla.com>'
     }
 
-FILE_EXCEPTIONS = ["jquery.min.js",
+FILE_EXCEPTIONS = ["jquery.js",
                    "date.js",
                    "sample-cmd.js",
                    "preferences.js"]
