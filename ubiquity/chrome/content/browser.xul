@@ -26,15 +26,13 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/suggestion_memory.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/parsersettings.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/en/verbtypes.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/en/parser.js"/>
+          src="chrome://ubiquity/content/nlparser/en/parser_plugin.js"/>
   <!-- <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/jp/verbtypes.js"/>
+          src="chrome://ubiquity/content/nlparser/jp/parser_plugin.js"/>-->
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/nlparser/jp/parser.js"/> -->
+          src="chrome://ubiquity/content/nlparser/parser.js"/>
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/nlparser/verbtypes.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/ubiquity.js"/>
   <script type="application/javascript;version=1.7"

@@ -56,13 +56,13 @@ function notifyUpdateSuggestionList() {
 }
 
 
-NLParser.EnParsedSentence = function( verb, arguments, verbMatchScore ) {
+NLParser.ParsedSentence = function( verb, arguments, verbMatchScore ) {
   /* DO and the values of modifiers should be NLParser.EnInputData
    * objects.
    */
   this._init( verb, arguments, verbMatchScore );
 }
-NLParser.EnParsedSentence.prototype = {
+NLParser.ParsedSentence.prototype = {
   _init: function( verb, argumentSuggestions, verbMatchScore) {
     /* modifiers is dictionary of preposition: noun */
     if (verb){
@@ -162,7 +162,7 @@ NLParser.EnParsedSentence.prototype = {
       for (let y in this._argSuggs[x])
 	newArgSuggs[x][y] = this._argSuggs[x][y];
     }
-    let newSentence = new NLParser.EnParsedSentence(this._verb,
+    let newSentence = new NLParser.ParsedSentence(this._verb,
 						    newArgSuggs,
  						    this.verbMatchScore);
     return newSentence;
@@ -217,7 +217,7 @@ NLParser.EnParsedSentence.prototype = {
 
 };
 
-NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj, matchScore) {
+NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj, matchScore) {
   /*This is a partially parsed sentence.
    * What that means is that we've decided what the verb is,
    * and we've assigned all the words of the input to one of the arguments.
@@ -233,7 +233,7 @@ NLParser.EnPartiallyParsedSentence = function(verb, argStrings, selObj, matchSco
    * been assigned to that argument
    */
 }
-NLParser.EnPartiallyParsedSentence.prototype = {
+NLParser.PartiallyParsedSentence.prototype = {
   _init: function( verb, argStrings, selObj, matchScore ) {
     this._verb = verb;
     this._argStrings = argStrings;
@@ -247,7 +247,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
      * If it does take arguments, this initializes the parsedSentence
      * list so that the algorithm in addArgumentSuggestion will work
      * correctly. */
-    let newSen = new NLParser.EnParsedSentence(this._verb, {}, this._matchScore);
+    let newSen = new NLParser.ParsedSentence(this._verb, {}, this._matchScore);
     this._parsedSentences = [newSen];
     for (let argName in this._verb._arguments) {
       let argSuggs = [];
@@ -308,7 +308,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
-    for each ( pronoun in NLParser.EN_SELECTION_PRONOUNS ) {
+    for each ( pronoun in NLParser.SELECTION_PRONOUNS ) {
       let index = words.indexOf( pronoun );
       if ( index > -1 ) {
         if (selection) {
@@ -378,7 +378,7 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 
   copy: function() {
     // Deep copy constructor
-    let newPPSentence = new NLParser.EnPartiallyParsedSentence( this._verb,
+    let newPPSentence = new NLParser.PartiallyParsedSentence( this._verb,
 								{},
 								this._selObj,
 								this._matchScore);
@@ -445,11 +445,11 @@ NLParser.EnPartiallyParsedSentence.prototype = {
 };
 
 
-NLParser.EnVerb = function( cmd ) {
+NLParser.Verb = function( cmd ) {
   if (cmd)
     this._init( cmd );
 }
-NLParser.EnVerb.prototype = {
+NLParser.Verb.prototype = {
   _init: function( cmd ) {
     /* cmd.DOType must be a NounType, if provided.
        cmd.modifiers should be a dictionary
@@ -538,7 +538,7 @@ NLParser.EnVerb.prototype = {
     // First, the termination conditions of the recursion:
     if (unusedWords.length == 0) {
       // We've used the whole sentence; no more words. Return what we have.
-      return [new NLParser.EnPartiallyParsedSentence(this, filledArgs, selObj, matchScore)];
+      return [new NLParser.PartiallyParsedSentence(this, filledArgs, selObj, matchScore)];
     } else if ( dictKeys( unfilledArgs ).length == 0 ) {
       // We've used up all arguments, so we can't continue parsing, but
       // there are still unused words.  This was a bad parsing; don't use it.
@@ -617,7 +617,7 @@ NLParser.EnVerb.prototype = {
     let inputArguments = words.slice(1);
     if (inputArguments.length == 0) {
       // No arguments
-      partials.push(new NLParser.EnPartiallyParsedSentence(this, {}, selObj, matchScore));
+      partials.push(new NLParser.PartiallyParsedSentence(this, {}, selObj, matchScore));
     }
     else {
       partials = this._recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);

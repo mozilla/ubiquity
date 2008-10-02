@@ -35,8 +35,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-NLParser.EN_SELECTION_PRONOUNS =  [ "this", "that", "it", "selection",
-				    "him", "her", "them"];
+var NLParser = { MAX_SUGGESTIONS: 5};
+
+NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
+  let parserPlugin = null;
+  if (languageCode == "en") {
+    parserPlugin = EnParser;
+  }
+  if (languageCode == "jp") {
+    // TODO write this
+    parserPlugin = null;
+  }
+
+  NLParser.SELECTION_PRONOUNS = parserPlugin.PRONOUNS;
+
+  return new NLParser.Parser(verbList, nounList, parserPlugin);
+};
 
 function getSelectionObject(context) {
   var selection = getTextSelection(context);
@@ -51,18 +65,18 @@ function getSelectionObject(context) {
   };
 }
 
-NLParser.EnParser = function(verbList, nounList) {
-  if (verbList) {
-    this._init(verbList, nounList);
-  }
+NLParser.Parser = function(verbList, nounList, languagePlugin) {
+  this._init(verbList, nounList, languagePlugin);
 }
-NLParser.EnParser.prototype = {
-  _init: function(commandList, nounList) {
+NLParser.Parser.prototype = {
+  _init: function(commandList, nounList, languagePlugin) {
     this.setCommandList( commandList );
     this._nounTypeList = nounList;
     this._suggestionList = []; // a list of ParsedSentences.
     this._parsingsList = []; // a list of PartiallyParsedSentences.
-    this._suggestionMemory = new SuggestionMemory("en_parser");
+    this._pronouns = languagePlugin.PRONOUNS;
+    this._parseByPlugin = languagePlugin.parseSentence;
+    this._suggestionMemory = new SuggestionMemory("main_parser");
   },
 
   nounFirstSuggestions: function( selObj ) {
@@ -93,10 +107,10 @@ NLParser.EnParser.prototype = {
       }
     }
     for each(verb in matchingVerbs) {
-      suggs.push( new NLParser.EnPartiallyParsedSentence(verb,
-							 {},
-							 selObj,
-							 0));
+      suggs.push( new NLParser.PartiallyParsedSentence(verb,
+				                       {},
+                                                       selObj,
+                                                       0));
     }
     return suggs;
   },
@@ -272,7 +286,7 @@ NLParser.EnParser.prototype = {
   },
 
   setCommandList: function( commandList ) {
-    this._verbList = [ new NLParser.EnVerb( commandList[x] )
+    this._verbList = [ new NLParser.Verb( commandList[x] )
                        for (x in commandList) ];
   },
 

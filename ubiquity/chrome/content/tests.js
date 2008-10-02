@@ -547,7 +547,7 @@ function testParseDirectOnly() {
     DOType: dog,
     modifiers: {}
   };
-  var verb = new NLParser.EnVerb(cmd_pet);
+  var verb = new NLParser.Verb(cmd_pet);
   var inputWords = ["pet", "b"];
 
   var selObject = {
@@ -588,7 +588,7 @@ function testParseWithModifier() {
     modifiers: {"with": washingObj}
   };
 
-  var verb = new NLParser.EnVerb(cmd_wash);
+  var verb = new NLParser.Verb(cmd_wash);
   var inputWords = ["wash", "pood", "with", "sp"];
   var selObject = {
     text:"",
@@ -664,7 +664,7 @@ function testVerbEatsSelection() {
     DOType: food,
     modifiers: {"at": place}
   };
-  var verb = new NLParser.EnVerb(cmd_eat);
+  var verb = new NLParser.Verb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
   var completions = verb.getCompletions(["eat", "this"], selObject);
   this.assert( completions.length == 1, "Should be one completion" );
@@ -706,7 +706,7 @@ function testImplicitPronoun() {
     DOType: food,
     modifiers: {"at": place}
   };
-  var verb = new NLParser.EnVerb(cmd_eat);
+  var verb = new NLParser.Verb(cmd_eat);
   var selObject = { text: "lunch", html:"lunch" };
 
   var completions = verb.getCompletions(["eat"], selObject);
@@ -797,7 +797,7 @@ function testModifiersTakeMultipleWords() {
     DOType: wish,
     modifiers: {"in": city}
   };
-  var verb = new NLParser.EnVerb(cmd_find);
+  var verb = new NLParser.Verb(cmd_find);
   var selObject = {text:null, html:null};
   var completions = verb.getCompletions(["find", "job", "in", "chicago"], selObject);
   this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
@@ -841,7 +841,7 @@ function testSortedBySuggestionMemory() {
 		  {name: "crouch"},
 		  {name: "coelecanth"},
 		  {name: "crab"} ];
-  var nlParser = new NLParser.EnParser( verbList, nounList );
+  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList("c", fakeContext);
 
@@ -855,7 +855,7 @@ function testSortedByMatchQuality() {
 		  {name: "nonihilf"},
 		  {name: "bnurgle"},
 		  {name: "fangoriously"}];
-  var nlParser = new NLParser.EnParser( verbList, nounList );
+  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
 
   var assert = this.assert;
@@ -899,7 +899,7 @@ function testSortSpecificNounsBeforeArbText() {
   var verbList = [{name: "mumble", DOType: arb_text, DOLabel:"stuff"},
                   {name: "wash", DOType: dog, DOLabel: "dog"}];
 
-  var nlParser = new NLParser.EnParser( verbList, [arb_text, dog] );
+  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, [arb_text, dog]);
 
   var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
   var selObj = getSelectionObject( fakeContext );
@@ -918,7 +918,7 @@ function testVerbUsesDefaultIfNoArgProvided() {
   };
   var verbList = [{name:"wash", DOType: dog, DOLabel: "dog"},
 		  {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
-  var nlParser = new NLParser.EnParser( verbList, [dog]);
+  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, [dog]);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "wash", fakeContext );
   var suggs = nlParser.getSuggestionList();
@@ -945,7 +945,7 @@ function testSynonyms() {
   var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
 		  {name: "frobnitz"},
 		  {name: "frobnicate"}];
-  var nlParser = new NLParser.EnParser( verbList, [] );
+  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, []);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "frob", fakeContext );
   var suggs = nlParser.getSuggestionList();
@@ -973,8 +973,8 @@ function testPartiallyParsedSentence() {
     execute: function(context, directObject, modifiers) {
     }
   };
-  var verbNoArgs = new NLParser.EnVerb(cmd_grumble);
-  var partiallyParsedNoArgs = new NLParser.EnPartiallyParsedSentence(
+  var verbNoArgs = new NLParser.Verb(cmd_grumble);
+  var partiallyParsedNoArgs = new NLParser.PartiallyParsedSentence(
     verbNoArgs,
     {},
     selObj,
@@ -1005,7 +1005,7 @@ function testPartiallyParsedSentence() {
     }
   };
 
-  var verb = new NLParser.EnVerb({
+  var verb = new NLParser.Verb({
 				   name: "frobnitz",
 				   arguments: {
 				     fooArg: {
@@ -1035,7 +1035,7 @@ function testPartiallyParsedSentence() {
   var selObj = {
     text: "", html: ""
   };
-  var partiallyParsed = new NLParser.EnPartiallyParsedSentence(
+  var partiallyParsed = new NLParser.PartiallyParsedSentence(
     verb,
     argStrings,
     selObj,
@@ -1079,7 +1079,7 @@ function testVerbGetCompletions() {
       grumbleCalled = true;
     }
   };
-  var verb = new NLParser.EnVerb(cmd_grumble);
+  var verb = new NLParser.Verb(cmd_grumble);
   var selObj = {
     text: "", html: ""
   };
@@ -1112,7 +1112,7 @@ function testTextAndHtmlDifferent() {
       executedHtml = directObject.html;
     }
   };
-  var verb = new NLParser.EnVerb(cmd_different);
+  var verb = new NLParser.Verb(cmd_different);
   var comps = verb.getCompletions( ["dostuff", "this"], selObj);
   this.assert(comps.length == 1, "There should be one completion.");
   comps[0].execute();
@@ -1131,7 +1131,7 @@ function testTextAndHtmlDifferent() {
   // when it's a noun-first suggestion from the parser, should still work...
   executedText = null;
   executedHtml = null;
-  var nlParser = new NLParser.EnParser( [cmd_different], [noun_type_different]);
+  var nlParser = new NLParser.makeParserForLanguage(LANG, [cmd_different], [noun_type_different]);
   selObj = {
     text: "Pantalones", html: "<blink>Pantalones</blink>"
   };
@@ -1171,7 +1171,7 @@ function testAsyncNounSuggestions() {
 
     }
   };
-  var verb = new NLParser.EnVerb(cmd_slow);
+  var verb = new NLParser.Verb(cmd_slow);
   var selObj = {
     text: "", html: ""
   };
