@@ -5,10 +5,9 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <script src="http://j.maxmind.com/app/geoip.js"></script>
     <!-- // This API key is for https://people.mozilla.com/ only -->
-    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ"
-      type="text/javascript"></script>
-    <script src="http://www.google.com/uds/api?file=uds.js&v=1.0&amp;key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ" type="text/javascript"></script>
-    <script src="http://www.google.com/uds/solutions/localsearch/gmlocalsearch.js" type="text/javascript"></script>    
+    <script id="google-jsapi"
+            src="http://www.google.com/jsapi?key=ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ"
+    ></script>
     <script src="resource://ubiquity-scripts/jquery-1.2.3.min.js"></script>
     <style>
 
@@ -111,9 +110,7 @@
     </style>
 
     <script type="text/javascript">
-
-    // This API key is for https://people.mozilla.com/ only
-    var API_KEY = "ABQIAAAAGZ11mh1LzgQ8-8LRW3wEShR3yUCx-o6JvWtDFa7jNOakHN7MrBQxdoZFJjRzQzvdQfkXYwGOUnmXKQ";
+    var API_KEY = jQuery("#google-jsapi").get(0).src.split("?key=")[1];
 
     google.load('search', '1');
     google.load('maps', '2');
