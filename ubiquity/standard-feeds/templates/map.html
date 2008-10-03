@@ -246,6 +246,8 @@
         $("#preview-pane").html("<div>No results for '" + searchTerm + "'</div>");
         return;
       }
+      
+      $("#address-list").empty();
       var searchWell = document.getElementById("address-list");
 
       gCurrentResults = [];
@@ -359,9 +361,7 @@
       
  
     Ubiquity.onPreview = function setPreview(searchTerm) {
-
       loadMap(searchTerm, 0);
-
     }
         
     </script>
