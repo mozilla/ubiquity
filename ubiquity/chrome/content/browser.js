@@ -49,7 +49,14 @@ function ubiquitySetup()
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
 
-  function onDomChange(aEvent) {
+  function onDomChange() {
+    jQuery(previewIframe.contentDocument).find('img').each(function() {
+      this.addEventListener('load', resizePreview, false);
+    });
+    resizePreview();
+  }
+  
+  function resizePreview() {
     previewIframe.height = previewIframe.contentDocument.height;
     previewIframe.width = previewBlock.scrollWidth;
   }
