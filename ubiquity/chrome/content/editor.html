@@ -57,6 +57,7 @@
          var iframe = document.getElementsByTagName("iframe")[0];
          iframe.setAttribute("id", "editor");
          iframe.editor = editor;
+         window.addEventListener("unload", function() {PrefCommands.setCode(editor.getCode());}, false);
       } catch (e) { // Setup matching API for the normal textarea
          Components.utils.reportError("CodeMirror failed to load: "+e);
          displayMessage("Error: CodeMirror failed to load: " + e);
