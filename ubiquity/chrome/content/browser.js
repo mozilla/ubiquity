@@ -55,7 +55,7 @@ function ubiquitySetup()
     });
     resizePreview();
   }
-  
+
   function resizePreview() {
     previewIframe.height = previewIframe.contentDocument.height;
     previewIframe.width = previewBlock.scrollWidth;
@@ -91,7 +91,7 @@ function ubiquitySetup()
     makeDefaultCommandSuggester(cmdMan)
   );
 
-  gUbiquity = new Ubiquity(
+  gUbiquity = new UbiquityERROR(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan,
