@@ -53,6 +53,12 @@ def get_install_rdf_property(path_to_extension_root, property):
     element = rdf.documentElement.getElementsByTagName(property)[0]
     return element.firstChild.nodeValue
 
+def run_python_script(args):
+    retval = subprocess.call([sys.executable] + args)
+    if retval:
+        print "Process failed with exit code %d." % retval
+        sys.exit(retval)
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     if not args:
@@ -60,7 +66,8 @@ if __name__ == "__main__":
         print
         print "'command' can be one of the following:"
         print
-        print "    test - run unit tests"
+        print "    unittest - run unit tests"
+        print "    test - run system and unit tests"
         print "    install - install to the given profile"
         print "    uninstall - uninstall from the given profile"
         print "    build-xpi - build an xpi of the addon"
@@ -73,8 +80,16 @@ if __name__ == "__main__":
     path_to_extension_root = os.path.join(mydir, EXT_SUBDIR)
 
     cmd = args[0]
-    
+
     if cmd == "test":
+        this_script = sys.argv[0]
+        this_dir = os.path.dirname(this_script)
+        print "Running unit tests."
+        run_python_script([this_script, "unittest"])
+        print "Running system tests."
+        run_python_script([os.path.join(this_dir, "systemtests.py")])
+        print "All tests successful."
+    elif cmd == "unittest":
         if subprocess.call(["which", "xpcshell"],
                            stdout=subprocess.PIPE) != 0:
             print "You must have xpcshell on your PATH to run tests."
