@@ -102,6 +102,7 @@ function LinkRelCodeSource() {
   this.id = 'linkrel:singleton';
 
   LinkRelCodeSource.__singleton = this;
+  return LinkRelCodeSource.__singleton;
 }
 
 LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {

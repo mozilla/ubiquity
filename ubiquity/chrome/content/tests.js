@@ -270,6 +270,16 @@ function getNounList() {
   return [];
 }
 
+function getCompletions( input, verbs, nountypes, context ) {
+  var parser = NLParser.makeParserForLanguage( LANG,
+					       verbs,
+					       nountypes );
+  if (!context)
+    context = { textSelection: "", htmlSelection: "" };
+  parser.updateSuggestionList( input, context );
+  return parser.getSuggestionList();
+}
+
 function testCmdManagerExecutesTwoCmds() {
   var mockMsgService = {
     displayMessage: function(msg) {}
@@ -547,14 +557,8 @@ function testParseDirectOnly() {
     DOType: dog,
     modifiers: {}
   };
-  var verb = new NLParser.Verb(cmd_pet);
-  var inputWords = ["pet", "b"];
 
-  var selObject = {
-    text:"",
-    html:""
-  };
-  var completions = verb.getCompletions( inputWords, selObject );
+  var completions = getCompletions( "pet b", [cmd_pet], [dog], null );
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb._name == "pet", "verb should be pet");
   this.assert( completions[0]._argSuggs.direct_object.text == "beagle",
@@ -588,13 +592,9 @@ function testParseWithModifier() {
     modifiers: {"with": washingObj}
   };
 
-  var verb = new NLParser.Verb(cmd_wash);
-  var inputWords = ["wash", "pood", "with", "sp"];
-  var selObject = {
-    text:"",
-    html:""
-  };
-  var completions = verb.getCompletions( inputWords, selObject);
+  var inputWords = "wash pood with sp";
+  var completions = getCompletions( inputWords, [cmd_wash],
+				    [dog, washingObj], null);
   this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
   this.assert( completions[0]._argSuggs.direct_object.text == "poodle");
@@ -1327,9 +1327,9 @@ function testJapaneseParserSomeMore() {
   var fakeContext = {textSelection:"", htmlSelection:""};
   var query = "";
   parser.updateSuggestionList(query, fakeContext);
+  // TODO tests here that advanced features still work in japanese parser
+  // version: synonyms, defaults, suggestion ranking, async suggestions, etc.
 }
-
-// TODO test for Japanese parser!
 
 // TODO replace tests that hit Verb directly, with tests that go through
 // NLParser.Parser.

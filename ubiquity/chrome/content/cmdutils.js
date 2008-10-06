@@ -420,6 +420,8 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
   // Returns the first key in a dictionary.
   function getKey( dict ) {
     for( var key in dict ) return key;
+    // if no keys in dict:
+    return null;
   }
 
   if (options.execute)

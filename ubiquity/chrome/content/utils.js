@@ -214,6 +214,8 @@ Utils.getCookie = function getCookie(domain, name) {
       if (cookie.host == domain && cookie.name == name )
         return cookie.value;
   }
+  // if no matching cookie:
+  return null;
 };
 
 Utils.paramsToString = function paramsToString(params) {
@@ -360,9 +362,9 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
 }
 
 Utils.trim = function(str) {
-  var str = str.replace(/^\s\s*/, ''),
-    ws = /\s/,
-    i = str.length;
+  str = str.replace(/^\s\s*/, '');
+  var ws = /\s/;
+  var i = str.length;
   while (ws.test(str.charAt(--i)));
   return str.slice(0, i + 1);
 }

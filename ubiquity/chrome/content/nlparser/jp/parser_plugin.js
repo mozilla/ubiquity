@@ -70,7 +70,7 @@ JpParser._splitByParticles = function( input ) {
     oldDict = newDict;
   }
   return oldDict;
-}
+};
 
 JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   // Returns a list of PartiallyParsedSentences.
@@ -99,7 +99,7 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
     parsings = parsings.concat( newParsings );
   }
   return parsings;
-}
+};
 
 // TODO changing the key bindings for the japanese version!
 // Is it right to do that here, or... elsewhere...?
