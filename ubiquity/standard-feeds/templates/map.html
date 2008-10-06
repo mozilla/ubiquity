@@ -371,9 +371,33 @@
     }
         
     </script>
+    
+    
+    
+    <script>
+      function setupTestFramework(){
+        // Test Framework
+        if( window.console ) {
+
+          var input = document.createElement("input");
+          input.value = "Enter search term here (then hit enter)";
+          $(input)
+            .css({width: 300, position: "absolute", top: 400, left: 10})
+            .click(function(){
+              jQuery(this).select();
+            })
+            .keyup(function(e) {
+              if( e.which == 13 ){
+                Ubiquity.onPreview( this.value );
+              }
+            })  
+          $("body").append(input);
+        }
+      }
+    </script>
   </head>
 
-  <body onunload="GUnload()">
+  <body onload="setupTestFramework()" onunload="GUnload()">
     <div style="overflow:hidden;">
       <!-- this div needs the name "preview-pane" for outer iframe/browser to resize -->
       <div id="preview-pane" name="preview-pane">
@@ -398,7 +422,7 @@
           </div>
         </div>
       </div>
-    </div> 
+    </div>
   </body>
 
 </html>
