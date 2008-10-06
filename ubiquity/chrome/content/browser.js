@@ -91,7 +91,7 @@ function ubiquitySetup()
     makeDefaultCommandSuggester(cmdMan)
   );
 
-  gUbiquity = new UbiquityERROR(
+  gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
     cmdMan,
