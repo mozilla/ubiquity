@@ -502,21 +502,28 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 };
 
 CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
+  var previewWindow = null;
+
+  function showPreview(query) {
+    previewWindow.Ubiquity.onPreview(query);
+  }
+
   function contentPreview(pblock, directObj) {
     var query = directObj.text;
 
-    CmdUtils.showPreviewFromFile(
-      pblock,
-      filePath,
+    if (previewWindow) {
+      showPreview(query);
+    } else {
       function onPreviewLoaded(winInsecure) {
-        winInsecure.Ubiquity.onPreview(query);
+        previewWindow = winInsecure;
 
-        winInsecure.Ubiquity.insertHtml = function(html) {
+        previewWindow.Ubiquity.insertHtml = function(html) {
           var doc = context.focusedWindow.document;
           var focused = context.focusedElement;
 
-          // This would be nice to store the map in the buffer...
-	  // But for now, it causes a problem with a large image showing up as the default
+          // This would be nice to store the map in the buffer...  But
+	  // for now, it causes a problem with a large image showing
+	  // up as the default.
           //CmdUtils.setLastResult( html );
 
           if (doc.designMode == "on") {
@@ -526,19 +533,32 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
 	    CmdUtils.setSelection(html);
       	  }
       	  else {
-      	    displayMessage("Cannot insert in a non-editable space. Use 'edit page' for an editable page.");
+      	    displayMessage("Cannot insert in a non-editable space. Use " +
+                           "'edit page' for an editable page.");
       	  }
         };
+
+        showPreview(query);
       }
-    );
+
+      function onPreviewUnloaded() {
+        previewWindow = null;
+      }
+
+      CmdUtils.showPreviewFromFile(pblock, filePath, onPreviewLoaded,
+                                   onPreviewUnloaded);
+    }
   }
 
   return contentPreview;
 };
 
-CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
-                                                             filePath,
-                                                             callback ) {
+CmdUtils.showPreviewFromFile = function showPreviewFromFile(
+  pblock,
+  filePath,
+  loadCallback,
+  unloadCallback)
+{
   var iframe = pblock.ownerDocument.createElement("iframe");
   var browser;
   iframe.setAttribute("src",
@@ -554,9 +574,15 @@ CmdUtils.showPreviewFromFile = function showPreviewFromFile( pblock,
     browser.setAttribute("height", 300);
     function onBrowserLoad() {
       // TODO: Security risk -- this is very insecure!
-      callback( browser.contentWindow );
+      loadCallback( browser.contentWindow );
+    }
+    function onBrowserUnload() {
+      if (unloadCallback)
+        unloadCallback();
     }
     browser.addEventListener("load", Utils.safeWrapper(onBrowserLoad),
+                             true);
+    browser.addEventListener("unload", Utils.safeWrapper(onBrowserUnload),
                              true);
     iframe.contentDocument.documentElement.appendChild(browser);
     browser.contentWindow.addEventListener("load", onBodyLoad, false);
