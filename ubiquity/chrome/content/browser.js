@@ -55,7 +55,7 @@ function ubiquitySetup()
     });
     resizePreview();
   }
-  
+
   function resizePreview() {
     previewIframe.height = previewIframe.contentDocument.height;
     previewIframe.width = previewBlock.scrollWidth;

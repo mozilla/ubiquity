@@ -243,8 +243,12 @@
     // Called when Local Search results are returned
     function OnLocalSearch(searchTerm) {
       if (!gLocalSearch.results || gLocalSearch.results.length == 0) {
-        $("#preview-pane").html("<div>No results for '" + searchTerm + "'</div>");
+        $("#mapArea").hide();
+        $("#msg").html( "<div>No results for \"" + searchTerm + "\"</div>" )
         return;
+      } else {
+        $("#mapArea").show();
+        $("#msg").html( "" );
       }
       
       $("#address-list").empty();
@@ -361,36 +365,64 @@
       
  
     Ubiquity.onPreview = function setPreview(searchTerm) {
+      if( jQuery("#preview-pane-large").length == 1 )
+        showAddressPreview();
       loadMap(searchTerm, 0);
     }
         
     </script>
+    
+    
+    
+    <script>
+      function setupTestFramework(){
+        // Test Framework
+        if( window.console ) {
+
+          var input = document.createElement("input");
+          input.value = "Enter search term here (then hit enter)";
+          $(input)
+            .css({width: 300, position: "absolute", top: 400, left: 10})
+            .click(function(){
+              jQuery(this).select();
+            })
+            .keyup(function(e) {
+              if( e.which == 13 ){
+                Ubiquity.onPreview( this.value );
+              }
+            })  
+          $("body").append(input);
+        }
+      }
+    </script>
   </head>
 
-  <body onunload="GUnload()">
+  <body onload="setupTestFramework()" onunload="GUnload()">
     <div style="overflow:hidden;">
       <!-- this div needs the name "preview-pane" for outer iframe/browser to resize -->
       <div id="preview-pane" name="preview-pane">
-        
-        <div class="no-print"> 
-          <div id="selected-address"></div>
-          <div class="map-actions">
-            <a onclick="window.print();" >Print</a>
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-            <a id="send-link" >Send</a>
+        <div id="msg"></div>
+        <div id="mapArea">
+          <div class="no-print"> 
+            <div id="selected-address"></div>
+            <div class="map-actions">
+              <a onclick="window.print();" >Print</a>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+              <a id="send-link" >Send</a>
+            </div>
           </div>
-        </div>
-        <div id="map"> </div>
-        <div class="no-print">
-          <div id="address-list"></div>
-          <div class="map-actions">
-            <a onclick="showAddressPreview();" >Back</a>
-              &nbsp;&nbsp;|&nbsp;&nbsp;
-            <a class="hand" onclick="insertMap();">Insert map in page</a>
+          <div id="map"> </div>
+          <div class="no-print">
+            <div id="address-list"></div>
+            <div class="map-actions">
+              <a onclick="showAddressPreview();" >Back</a>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+              <a class="hand" onclick="insertMap();">Insert map in page</a>
+            </div>
           </div>
         </div>
       </div>
-    </div> 
+    </div>
   </body>
 
 </html>

@@ -8,14 +8,29 @@ import mozrunner.global_settings
 import jsbridge.global_settings
 import simplesettings
 
+# Maximum time, in seconds, that we'll let the tests run before giving
+# up and declaring them to be failed.
+MAX_TIME = 60.0
+
+# Amount of time we'll wait, in seconds, before polling to see if the
+# tests are done running yet.
+TIME_INCREMENT = 0.5
+
 def run_tests(bridge):
     tests = bridge.UbiquitySystemTests
     assert not tests.output.done
 
     tests.run();
 
+    time_elapsed = 0.0
+
     while not tests.output.done:
-        time.sleep(0.5)
+        time.sleep(TIME_INCREMENT)
+        time_elapsed += TIME_INCREMENT
+        if time_elapsed > MAX_TIME:
+            raise TestsFailedError("Maximum time elapsed; tests unresponsive.")
+
+    print "Tests finished in ~%.1f seconds." % time_elapsed
 
     if tests.output.errorsOccurred:
         raise TestsFailedError(tests.output.errors)
