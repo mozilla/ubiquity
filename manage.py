@@ -27,7 +27,7 @@ def find_profile_dir(name):
         base_path = os.path.join(appdata, "Mozilla\\Firefox")
     elif sys.platform == "cygwin":
         appdata = os.environ["APPDATA"]
-        base_path = os.path.join(appdata, "Mozilla\\Firefox").replace("/", "\\")
+        base_path = os.path.join(appdata, "Mozilla\\Firefox")
     else:
         base_path = os.path.expanduser("~/.mozilla/firefox/")
     inifile = os.path.join(base_path, "profiles.ini")
@@ -145,6 +145,12 @@ if __name__ == "__main__":
             else:
                 os.remove(extension_file)
         if cmd == "install":
+            #if cygwin, change the path to windows format so firefox can understand it
+            if sys.platform == "cygwin":
+                file = 'cygpath.exe -w ' + path_to_extension_root
+                path_to_extension_root = "".join(os.popen(file).readlines()).replace("\n", " ").rstrip()
+            
+            
             fileobj = open(extension_file, "w")
             fileobj.write(path_to_extension_root)
             fileobj.close()
