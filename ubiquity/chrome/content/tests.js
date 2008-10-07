@@ -1022,7 +1022,7 @@ function testPartiallyParsedSentence() {
 				       type: noun_type_baz,
 				       label: "the baz",
 				       flag: "before",
-				       default: "super pants"
+				       "default": "super pants"
 				     }
 				   }
 				 });
