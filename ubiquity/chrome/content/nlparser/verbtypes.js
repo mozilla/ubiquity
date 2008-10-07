@@ -536,7 +536,6 @@ NLParser.Verb.prototype = {
        is to this verb.  Return value will be used for sorting.
        The current heuristic is extremely ad-hoc but produces the ordering
        we want... so far.*/
-
     if (this._name == inputWord)
       // Perfect match always gets maximum rating!
       return 1.0;

@@ -118,11 +118,12 @@ NLParser.Parser.prototype = {
     let inputVerb = query.split(" ")[0];
     /* Each suggestion in the suggestion list should already have a matchScore
        assigned by Verb.getCompletions.  Give them also a frequencyScore based
-       on the suggestionMemory: */
-    for each( let sugg in this._suggestionList) {
+       on the suggestionMemory, once suggestionMemory is hooked up.
+     So, TODO: something like the following: */
+    /*for each( let sugg in this._suggestionList) {
       let suggVerb = sugg._verb_name;
       sugg.frequencyScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
-    }
+    }*/
 
     this._suggestionList.sort( function( x, y ) {
 				 let xMatchScores = x.getMatchScores();

@@ -1426,13 +1426,25 @@ function testWeirdCompletionsThatDontMakeSense() {
 	       "this object should be ac too.");
 }
 
-function testWeirdCompletionsTwo() {
-  var cmd_youtube = makeSearchCommand("YouTube");
+function testSynonymsGetDownrankedEvenWithArguments() {
+  var cmd_youtube = {
+    name: "youtube",
+    DOLabel: "string",
+    DOType: noun_arb_text,
+    synonyms: ["video"],
+    preview: function() {},
+    exectue: function() {}
+  };
   var cmd_define = makeSearchCommand("define");
   var comps = getCompletions("de m", [cmd_youtube, cmd_define], [noun_arb_text]);
-  // "define m" should be the first and only suggestion.
-  this.assert( comps.length == 1, "Should have 1 suggestions.");
+  // "define m" should be the first suggestion, while
+  // "youtube m" is the second suggestion (due to its synonym "video").
+  this.assert( comps.length == 2, "Should have 2 suggestions.");
   this.assert( comps[0]._verb._name == "define", "Should be define.");
   this.assert( comps[0]._argSuggs.direct_object.text == "m",
 	       "object should be m.");
+  this.assert( comps[1]._verb._name == "youtube", "Should be youtube.");
+  this.assert( comps[1]._argSuggs.direct_object.text == "m",
+	       "object should be m.");
+
 }
