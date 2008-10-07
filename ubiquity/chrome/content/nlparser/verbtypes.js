@@ -299,8 +299,9 @@ NLParser.PartiallyParsedSentence.prototype = {
     /* */
     let gotAnySuggestions = false;
     /* No selection to interpolate. */
-    if ((!this._selObj.text) && (!this._selObj.html))
+    if ((!this._selObj.text) && (!this._selObj.html)) {
       return false;
+    }
 
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
@@ -517,128 +518,6 @@ NLParser.Verb.prototype = {
       var content = "Executes the <b>" + this._name + "</b> command.";
       previewBlock.innerHTML = content;
     }
-  },
-
-  // RecursiveParse is huge and complicated.
-  // I think it should probably be moved from Verb to NLParser.
-  _recursiveParse: function(unusedWords,
-			    filledArgs,
-			    unfilledArgs,
-			    selObj,
-			    matchScore) {
-    var x;
-    var suggestions = [];
-    var completions = [];
-    var newFilledArgs = {};
-    var newCompletions = [];
-    // First, the termination conditions of the recursion:
-    if (unusedWords.length == 0) {
-      // We've used the whole sentence; no more words. Return what we have.
-      return [new NLParser.PartiallyParsedSentence(this, filledArgs, selObj, matchScore)];
-    } else if ( dictKeys( unfilledArgs ).length == 0 ) {
-      // We've used up all arguments, so we can't continue parsing, but
-      // there are still unused words.  This was a bad parsing; don't use it.
-      return [];
-    } else {
-      // "pop" off the LAST unfilled argument in the sentence and try to fill it
-      var argName = dictKeys( unfilledArgs ).reverse()[0];
-      // newUnfilledArgs is the same as unfilledArgs without argName
-      var newUnfilledArgs = dictDeepCopy( unfilledArgs );
-      delete newUnfilledArgs[argName];
-
-      // Look for a match for this argument
-      let argumentFound = false;
-      var nounType = unfilledArgs[argName].type;
-      var nounLabel = unfilledArgs[argName].label;
-      var preposition = unfilledArgs[argName].flag;
-      for ( x = 0; x < unusedWords.length; x++ ) {
-	if ( preposition == null || preposition == unusedWords[x] ) {
-	  /* a match for the preposition is found at position x!
-	   (require exact matches for prepositions.)
-	   Anything following this preposition could be part of the noun.
-           Check every possibility starting from "all remaining words" and
-	   working backwards down to "just the word after the preposition."
-	   */
-	  let lastWordEnd = (preposition == null)? x : x +1;
-	  let lastWordStart = (preposition == null)? unusedWords.length : unusedWords.length -1;
-	  for (let lastWord = lastWordStart; lastWord >= lastWordEnd; lastWord--) {
-	    //copy the array, don't modify the original
-            let newUnusedWords = unusedWords.slice();
-	    if (preposition != null) {
-              // take out the preposition
-	      newUnusedWords.splice(x, 1);
-	    }
-	    // pull out words from preposition up to lastWord, as nounWords:
-            let nounWords = newUnusedWords.splice( x, lastWord - x );
-            newFilledArgs = dictDeepCopy( filledArgs );
-            newFilledArgs[ argName ] = nounWords;
-            newCompletions = this._recursiveParse( newUnusedWords,
-                                                  newFilledArgs,
-                                                  newUnfilledArgs,
-                                                  selObj,
-						  matchScore);
-	    completions = completions.concat(newCompletions);
-	    argumentFound = true;
-	  }
-	} // end if preposition matches
-      } // end for each unused word
-      // If argument was never found, try a completion where it's left blank.
-      if (!argumentFound) {
-        newCompletions = this._recursiveParse( unusedWords,
-                                              filledArgs,
-       					      newUnfilledArgs,
-       					      selObj,
-					      matchScore);
-        completions = completions.concat( newCompletions );
-      }
-      return completions;
-    } // end if there are still arguments
-  },
-
-  getParsings: function( words, selObj ) {
-    /* returns a list of PartiallyParsedSentences.
-       words is an array of all the words in the input (already split).
-       selObj is a selectionObject, wrapping both the text and html
-       selections.
-    */
-    let partials = [];
-    let part;
-    let inputVerb = words[0];
-    let matchScore = this.match( inputVerb );
-    if (matchScore == 0) {
-      // Not a match to this verb!
-      return [];
-    }
-
-    let inputArguments = words.slice(1);
-    if (inputArguments.length == 0) {
-      // No arguments
-      partials.push(new NLParser.PartiallyParsedSentence(this, {}, selObj, matchScore));
-    }
-    else {
-      partials = this._recursiveParse( inputArguments, {}, this._arguments, selObj, matchScore);
-    }
-
-    return partials;
-  },
-
-  getCompletions: function( words, selObj ) {
-    // USED ONLY FOR UNIT TESTING
-    let partials = this.getParsings(words, selObj);
-    if (selObj.text || selObj.html) {
-      let partialsWithSelection = [];
-      for each(part in partials) {
-        let withSel = part.getAlternateSelectionInterpolations();
-        partialsWithSelection = partialsWithSelection.concat( withSel );
-      }
-      partials = partialsWithSelection;
-    }
-    let completions = [];
-    for each (let part in partials) {
-      completions = completions.concat( part.getParsedSentences());
-    }
-
-    return completions;
   },
 
   usesNounType: function( nounType ) {
