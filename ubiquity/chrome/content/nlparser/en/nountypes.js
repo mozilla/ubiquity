@@ -454,7 +454,7 @@ var noun_type_url = {
    * the awesomebar's data source
    */
   _name : "url",
-  _rankLast: true,
+  rankLast: true,
   suggest: function(fragment) {
     var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
     // alternately: /[A-Za-z0-9_.-]+:\/\/([A-Za-z0-9_.-])/
