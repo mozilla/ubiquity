@@ -73,7 +73,7 @@ let UbiquitySetup = {
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"}],
 
-  BASE_REMOTE_URI: "https://people.mozilla.com/~araskin/standard-feeds/",
+  BASE_REMOTE_URI: "https://labs.toolness.com/standard-feeds/",
 
   __getExtDir: function __getExtDir() {
     let Cc = Components.classes;

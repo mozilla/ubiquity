@@ -101,15 +101,18 @@ var noun_arb_text = {
 
 var noun_type_date = {
   _name: "date",
+  
+  default: function(){
+     var date = Date.parse("today");
+     var text = date.toString("dd MM, yyyy");
+     return CmdUtils.makeSugg(text, null, date);
+   },
+  
   suggest: function( text, html )  {
     if (typeof text != "string") {
       return [];
     }
-    if (text == "") {
-      // If input is blank, suggest today's date
-      return this.suggest("today");
-    }
-
+    
     var date = Date.parse( text );
     if (!date) {
       return [];

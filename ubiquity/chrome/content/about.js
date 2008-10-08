@@ -128,7 +128,26 @@ function makeFeedListElement(info, label, clickMaker) {
 
   var titleLink = addLink(info.title, info.htmlUri.spec);
 
-  $(li).append("<br/>");
+  var createCommands = /CmdUtils.CreateCommand\(\{\s*name:\s*"([^"]*)"/mg;
+  var stdCommands    = /function cmd_([^(]*)/g;
+  var stdCommandsAlt = /cmd_([^(.]*)\s+=\s+function\(/g;
+  var names = [];
+  var result;
+  var code = info.getCode();
+  var parser = new JSParser(code);
+  code = parser.clean();
+  var commandList = document.createElement("ul");
+  while (((result = createCommands.exec(code)) != null) || 
+         ((result = stdCommands(code)) != null) ||
+         ((result = stdCommandsAlt(code)) != null)) {
+    if (names.indexOf(result[1]) == -1) {
+      var command = document.createElement("li");
+      command.appendChild(document.createTextNode(result[1].replace(/_/g,"-")));
+      commandList.appendChild(command);
+      names.push(result[1]);
+    }
+  }
+  $(li).append(commandList);
 
   // TODO: This is confusing to read b/c info.canUpdate should
   // really be called 'info.canAutoUpdate'.
