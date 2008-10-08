@@ -147,6 +147,31 @@ Wikipedia articles found matching <b>${query}</b>:
 {/for}
 </div>
 <div id="youtube-search" style="display: none;">
+  <p>
+   Found <b>${numresults}</b> YouTube Videos matching <b>${query}</b>
+  </p>
+  {for entry in results}
+  <div style="display: block; margin-bottom: 10px; clear: both;" >
+   <a style="color: blue; font-size: 14px;" href="${entry.link[0].href}">
+   <img style="float:left; margin-right: 10px; border:thin solid white; height: ${entry['media$group']['media$thumbnail'][0].height}px; width: ${entry['media$group']['media$thumbnail'][0].width}px;"
+   src="${entry['media$group']['media$thumbnail'][0].url}" />
+   ${entry.title.$t}
+   </a>
+   <br/>
+   <small>${entry['media$group']['yt$duration'].seconds} seconds</small>
+   <p>
+     <!-- TODO: for some stupid reason, this doesn't work or am I missing something? -->
+     <!-- {if entry.content.$t.length > 300}
+         ${entry.content.$t.substr(0,300)} ...
+      {else}
+         ${entry.content.$t}
+      {/if} -->
+      
+      ${entry.content.$t.substr(0,300)}
+   </p>
+  </div>
+  {/for}
+  <br/><br/>
 </div>
 <script class="commands"><![CDATA[
 CmdUtils.CreateCommand({
@@ -474,22 +499,32 @@ CmdUtils.makeSearchCommand({
     var searchTerm = directObject.text;
     pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
 
+    if(searchTerm.length < 1) {
+      pblock.innerHTML = "Searches for videos on Youtube";
+      return;
+    }
+
+    pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
+    
     var url = "http://gdata.youtube.com/feeds/api/videos";
     var params = {
       alt: "json",
-	  "max-results": 3,
+	    "max-results": 3,
       vq: searchTerm
     };
 
     jQuery.get( url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#youtube-search", feed.dom).html(),
-	{
-	  results: data.feed.entry,
+      
+      var previewData = {
+    	    results: data.feed.entry,
           query: directObject.summary,
           numresults: data.feed['openSearch$totalResults']['$t']
-        }
-      );
+      };
+            
+      pblock.innerHTML = CmdUtils.renderTemplate(
+        jQuery("#youtube-search", feed.dom).html(),
+        previewData);
+      
     }, "json");
   }
 });
