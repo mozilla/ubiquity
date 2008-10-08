@@ -244,3 +244,28 @@ ul a:active.button {
   background-color: #cdcdcd; 
   background-position: 0 -22px;
 }
+
+ul#command-feeds ul {
+  list-style: none;
+}
+
+ul#command-feeds ul:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+ul#command-feeds ul li {
+  float: left;
+  white-space: nowrap;
+}
+
+ul#command-feeds ul li:after {
+  content: ",";
+}
+
+ul#command-feeds ul li:last-child:after {
+  content: "";
+}
