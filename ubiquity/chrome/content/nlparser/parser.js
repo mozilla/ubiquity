@@ -92,8 +92,8 @@ NLParser.Parser.prototype = {
     for each(noun in this._nounTypeList) {
       if (noun.suggest(selObj.text, selObj.html).length > 0 )
 	matchingNouns.push(noun);
-      // TODO: nouns will soon be able to suggest asynchronously,
-      // meaning that this is false at first but becomes true later.
+      // TODO: nouns can now suggest asynchronously,
+      // meaning that this is false at first but may become true later.
       // What to do then?
       // We can pass a callback to the above...
     }
@@ -235,7 +235,7 @@ NLParser.Parser.prototype = {
     // the user's last keypress.  This might be done with a
     // XUL:textbox whose 'type' is set to 'timed'.
 
-    var doc = previewBlock.ownerDocument;
+ var doc = previewBlock.ownerDocument;
     if (!doc.getElementById("suggestions")) {
       // Set the initial contents of the preview block.
       previewBlock.innerHTML = ('<div id="suggestions"></div>' +

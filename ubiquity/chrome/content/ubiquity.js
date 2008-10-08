@@ -54,6 +54,7 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   this.__needsToExecute = false;
   this.__showCount = 0;
   this.__lastValue = null;
+  this.__needsUpdate = false;
 
   var self = this;
 
@@ -75,6 +76,8 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
 
   Observers.add(function() {self.__onSuggestionsUpdated();},
 		"ubiq-suggestions-updated");
+
+  this.__resetTimer();
   this.__resetPreview();
 }
 
@@ -85,8 +88,19 @@ Ubiquity.prototype = {
   __KEYCODE_DOWN: 40,
   __KEYCODE_TAB:  9,
   __MIN_CMD_PREVIEW_LENGTH: 0,
+  __MICROSECOND_DELAY: 250,
   __DEFAULT_PREVIEW: ("<div class=\"help\">" + "Type the name of a command and press enter to " +
                       "execute it, or <b>help</b> for assistance." + "</div>"),
+
+  __resetTimer: function() {
+    var self = this;
+    this.__intervalId = setInterval(
+      function(){
+        if (self.__needsUpdate) self.__updatePreview();
+      },
+      this.__MICROSECOND_DELAY
+    );
+  },
 
   __onMouseMove: function(event) {
     this.__x = event.screenX;
@@ -124,8 +138,11 @@ Ubiquity.prototype = {
     } else if (keyCode == this.__KEYCODE_UP ||
                keyCode == this.__KEYCODE_DOWN ||
                keyCode == this.__KEYCODE_TAB) {
-    } else
-      this.__updatePreview();
+    } else {
+      this.__needsUpdate = true;
+      clearInterval( this.__intervalId );
+      this.__resetTimer();
+    }
   },
 
   __onSuggestionsUpdated: function() {
@@ -154,6 +171,7 @@ Ubiquity.prototype = {
 	}
       }
     }
+    this.__needsUpdate = false;
   },
 
   __resetPreview: function() {
