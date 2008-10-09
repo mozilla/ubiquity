@@ -23,7 +23,7 @@
     <em:creator>Mozilla Corporation</em:creator>
     <em:iconURL>chrome://ubiquity/content/ubiquity_logo.png</em:iconURL>
     <em:homepageURL>http://wiki.mozilla.org/Labs/Ubiquity</em:homepageURL>
-    <em:updateURL>https://labs.toolness.com/ubiquity/update.rdf</em:updateURL>
+    <em:updateURL>https://labs.toolness.com/ubiquity/%ITEM_VERSION%/update.rdf</em:updateURL>
     <em:optionsURL>chrome://ubiquity/content/preferences.xul</em:optionsURL>
   </Description>
 </RDF>
