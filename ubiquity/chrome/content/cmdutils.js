@@ -519,11 +519,9 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
       // TODO
     } else {
       var browser;
-      var newIframe;
 
       function onXulLoaded(event) {
         var uri = Utils.url({uri: filePath, base: feed.id}).spec;
-        xulIframe = newIframe;
         browser = xulIframe.contentDocument.createElement("browser");
         browser.setAttribute("src", uri);
         browser.setAttribute("disablesecurity", true);
@@ -536,8 +534,9 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
         xulIframe.contentDocument.documentElement.appendChild(browser);
       }
 
-      function onXulUnloaded() {
-        xulIframe = null;
+      function onXulUnloaded(event) {
+        if (event.target == pblock || event.target == xulIframe)
+          xulIframe = null;
       }
 
       function onPreviewLoaded() {
@@ -578,18 +577,17 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
         previewWindow = null;
       }
 
-      newIframe = pblock.ownerDocument.createElement("iframe");
-      newIframe.setAttribute("src",
+      xulIframe = pblock.ownerDocument.createElement("iframe");
+      xulIframe.setAttribute("src",
                              "chrome://ubiquity/content/content-preview.xul");
-      newIframe.style.border = "none";
-      newIframe.setAttribute("width", 500);
+      xulIframe.style.border = "none";
+      xulIframe.setAttribute("width", 500);
 
-      newIframe.addEventListener("load",
+      xulIframe.addEventListener("load",
                                  Utils.safeWrapper(onXulLoaded), true);
-      newIframe.addEventListener("unload",
-                                 Utils.safeWrapper(onXulUnloaded), true);
       pblock.innerHTML = "";
-      pblock.appendChild(newIframe);
+      pblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
+      pblock.appendChild(xulIframe);
     }
   }
 
