@@ -503,19 +503,51 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 
 CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
   var previewWindow = null;
+  var xulIframe = null;
+  var query = "";
 
-  function showPreview(query) {
+  function showPreview() {
     previewWindow.Ubiquity.onPreview(query);
   }
 
   function contentPreview(pblock, directObj) {
-    var query = directObj.text;
+    query = directObj.text;
 
     if (previewWindow) {
-      showPreview(query);
+      showPreview();
+    } else if (xulIframe) {
+      // TODO
     } else {
-      function onPreviewLoaded(winInsecure) {
-        previewWindow = winInsecure;
+      var browser;
+      var newIframe;
+
+      function onXulLoaded(event) {
+        var uri = Utils.url({uri: filePath, base: feed.id}).spec;
+        xulIframe = newIframe;
+        browser = xulIframe.contentDocument.createElement("browser");
+        browser.setAttribute("src", uri);
+        browser.setAttribute("disablesecurity", true);
+        browser.setAttribute("width", 500);
+        browser.setAttribute("height", 300);
+        browser.addEventListener("load", Utils.safeWrapper(onPreviewLoaded),
+                                 true);
+        browser.addEventListener("unload", Utils.safeWrapper(onPreviewUnloaded),
+                                 true);
+        xulIframe.contentDocument.documentElement.appendChild(browser);
+      }
+
+      function onXulUnloaded() {
+        xulIframe = null;
+      }
+
+      function onPreviewLoaded() {
+        // TODO: Security risk -- this is very insecure!
+        previewWindow = browser.contentWindow;
+
+        previewWindow.Ubiquity.resizePreview = function(height) {
+          xulIframe.setAttribute("height", height);
+          browser.setAttribute("height", height);
+        };
 
         previewWindow.Ubiquity.insertHtml = function(html) {
           var doc = context.focusedWindow.document;
@@ -527,6 +559,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
           //CmdUtils.setLastResult( html );
 
           if (doc.designMode == "on") {
+            // TODO: Remove use of query here?
             doc.execCommand("insertHTML", false, query + "<br/>" + html);
           }
           else if (CmdUtils.getSelection()) {
@@ -538,72 +571,29 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
       	  }
         };
 
-        showPreview(query);
+        showPreview();
       }
 
       function onPreviewUnloaded() {
         previewWindow = null;
       }
 
-      CmdUtils.showPreviewFromFile(pblock, filePath, onPreviewLoaded,
-                                   onPreviewUnloaded);
+      newIframe = pblock.ownerDocument.createElement("iframe");
+      newIframe.setAttribute("src",
+                             "chrome://ubiquity/content/content-preview.xul");
+      newIframe.style.border = "none";
+      newIframe.setAttribute("width", 500);
+
+      newIframe.addEventListener("load",
+                                 Utils.safeWrapper(onXulLoaded), true);
+      newIframe.addEventListener("unload",
+                                 Utils.safeWrapper(onXulUnloaded), true);
+      pblock.innerHTML = "";
+      pblock.appendChild(newIframe);
     }
   }
 
   return contentPreview;
-};
-
-CmdUtils.showPreviewFromFile = function showPreviewFromFile(
-  pblock,
-  filePath,
-  loadCallback,
-  unloadCallback)
-{
-  var iframe = pblock.ownerDocument.createElement("iframe");
-  var browser;
-  iframe.setAttribute("src",
-                      "chrome://ubiquity/content/content-preview.xul");
-  iframe.style.border = "none";
-  iframe.setAttribute("width", 500);
-  function onXulLoad() {
-    var uri = Utils.url({uri: filePath, base: feed.id}).spec;
-    browser = iframe.contentDocument.createElement("browser");
-    browser.setAttribute("src", uri);
-    browser.setAttribute("disablesecurity", true);
-    browser.setAttribute("width", 500);
-    browser.setAttribute("height", 300);
-    function onBrowserLoad() {
-      // TODO: Security risk -- this is very insecure!
-      loadCallback( browser.contentWindow );
-    }
-    function onBrowserUnload() {
-      if (unloadCallback)
-        unloadCallback();
-    }
-    browser.addEventListener("load", Utils.safeWrapper(onBrowserLoad),
-                             true);
-    browser.addEventListener("unload", Utils.safeWrapper(onBrowserUnload),
-                             true);
-    iframe.contentDocument.documentElement.appendChild(browser);
-    browser.contentWindow.addEventListener("load", onBodyLoad, false);
-  }
-
-  iframe.addEventListener("load", Utils.safeWrapper(onXulLoad), true);
-  pblock.innerHTML = "";
-  pblock.appendChild(iframe);
-
-  // In order to modify the browser/iframe size based on contents, add an event listener to check when the DOM is modified.
-  // This is done by specifically inserting a div when the preview size changes.
-  // This currently prevents the use of animation for the preview-pane... hopefully find a fix for future release.
-  function onBodyLoad() {
-    browser.contentWindow.document.getElementById("map").addEventListener("DOMNodeInserted", onDomModified, false);
-  }
-  function onDomModified() {
-    var previewPane = browser.contentWindow.document.getElementsByName("preview-pane")[0];
-    iframe.setAttribute("height", previewPane.clientHeight);
-    browser.setAttribute("height", previewPane.clientHeight);
-  }
-
 };
 
 CmdUtils.makeSugg = function( text, html, data ) {
