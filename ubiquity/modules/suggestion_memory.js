@@ -34,39 +34,116 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["SuggestionMemory"];
+var Ci = Components.interfaces;
+var Cc = Components.classes;
+var EXPORTED_SYMBOLS = ["SuggestionMemory", "wipeSuggestionMemoryDB"];
 
-/* Schema in sqlite will be like:
- *
- * CREATE TABLE ubiquity_suggestion_memory(
- *   id_string VARCHAR(256),
- *   input VARCHAR(256),
- *   suggestion VARCHAR(256),
- *   score INTEGER
- * );
- *
- * */
-
-/* The tricky bit is, we can only call 'remember' on execute... so cmds
- * which you "use" by looking at the preview will not be remembered.  I
- * don't have any good way to fix this.
+var SQLITE_FILE = "ubiquity_suggestion_memory.sqlite";
+/* In this schema, one row represents that fact that for the
+ * named suggestionMemory object identified by (id_string),
+ * it happened (score) number of times that the user typed in
+ * the string (input) and, out of all the suggested completions,
+ * the one the user chose was (suggestion).
  */
+var SQLITE_SCHEMA =
+    "CREATE TABLE ubiquity_suggestion_memory(" +
+    "  id_string VARCHAR(256)," +
+    "  input VARCHAR(256)," +
+    "  suggestion VARCHAR(256)," +
+    "  score INTEGER);";
+var _databaseConnection = null;
+var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
+                .getService(Ci.nsIProperties);
+var _storSvc = Cc["@mozilla.org/storage/service;1"]
+                 .getService(Ci.mozIStorageService);
 
-// This should probably be a module, so as to ensure that it's a global
-// singleton.
+function _connectToDatabase() {
+  // Only create a new connection if we don't already have one open.
+  if (!_databaseConnection) {
+    var file;
+    /* In production code: get the profile directory as a nsIFile
+       object, and "append" to it to make the object point to the
+       profiledirector/sqlitefile */
+    try {
+      // We really want to put the file in the profile directory:
+      file = _dirSvc.get("ProfD", Ci.nsIFile);
+    } catch( ex ) {
+      // But if the profile directory is unavailable (which happens
+      // when running tests from xpcshell) we can use the temp dir instead.
+      file = _dirSvc.get("TmpD", Ci.nsIFile);
+    }
+    file.append(SQLITE_FILE);
+    /* If the pointed-at file doesn't already exist, it means the database
+     * has never been initialized, so we'll have to do it now by running
+     * the CREATE TABLE sql. */
+    // openDatabase will create empty file if it's not there yet:
+    _databaseConnection = _storSvc.openDatabase(file);
+    if (file.fileSize == 0) { // empty file? needs initialization!
+      _databaseConnection.executeSimpleSQL(SQLITE_SCHEMA);
+    }
+  }
+  return _databaseConnection;
+}
+// TODO: when and how do we need to close our database connection?
+
+function wipeSuggestionMemoryDB() {
+  // Should really only be used by unit tests...
+  var file = _dirSvc.get("TmpD", Ci.nsIFile);
+  file.append(SQLITE_FILE);
+  file.remove(false);
+}
+
 function SuggestionMemory(id) {
-  // Id is a unique string which will keep this suggestion memory
-  // distinct from the others in the database when persisting.
+  /* Id is a unique string which will keep this suggestion memory
+   distinct from the others in the database when persisting.
+   mockFileObj is an nsIFile object to be used instead of the real file,
+   for unit-testing purposes; leave it out in production code.*/
+
   this._init(id);
 }
 SuggestionMemory.prototype = {
   _init: function(id) {
-    let sql = "SELECT input, suggestion, score FROM ubiquity_suggestion_memory"
-      + " WHERE id_string == " + id + ";";
-    // TODO execute this sql and use it to populate this._table.
-
+    this._connection = _connectToDatabase();
     this._id = id;
     this._table = {};
+    /* this._table is a JSON kind of object with a format like this:
+     * {
+     *   "input1" : {
+     *                "suggestion1" : 3,
+     *                "suggestion2" : 4
+     *              }
+     *   "input2" : {
+     *                "suggestion3" : 1
+     *              }
+     * }
+     */
+
+    /* So now, get everything from the database that matches our ID,
+     * and turn each row into an entry in this._table:
+     */
+    let selectSql = "SELECT input, suggestion, score " +
+		    "FROM ubiquity_suggestion_memory " +
+                    "WHERE id_string == ?1";
+    this._selStmt = this._connection.createStatement(selectSql);
+    this._selStmt.bindUTF8StringParameter(0, this._id);
+    while (this._selStmt.executeStep()) {
+      let input = this._selStmt.getUTF8String(0);
+      let suggestion = this._selStmt.getUTF8String(1);
+      let score = this._selStmt.getUTF8String(2);
+      if (!this._table[input])
+	this._table[input] = {};
+      this._table[input][suggestion] = score;
+    }
+    this._selStmt.reset();
+
+    /* Compile the insert and update statements that we'll need later: */
+    let insertSql = "INSERT INTO ubiquity_suggestion_memory " +
+                    "VALUES (?1, ?2, ?3, 1)";
+    this._insStmt = this._connection.createStatement(insertSql);
+    let updateSql = "UPDATE ubiquity_suggestion_memory " +
+		    "SET score = ?1 " +
+                    "WHERE id_string = ?2 AND input = ?3 AND suggestion = ?4";
+    this._updStmt = this._connection.createStatement(updateSql);
   },
 
   remember: function(input, chosenSuggestion) {
@@ -80,18 +157,20 @@ SuggestionMemory.prototype = {
 
     if (!this._table[input][chosenSuggestion]) {
       this._table[input][chosenSuggestion] = 1;
-      sql = "INSERT INTO ubiquity_suggestion_memory VALUES ('" + this._id +
-	"','" + input + "','" + chosenSuggestion + "',1);";
+      this._insStmt.bindUTF8StringParameter(0, this._id);
+      this._insStmt.bindUTF8StringParameter(1, input);
+      this._insStmt.bindUTF8StringParameter(2, chosenSuggestion);
+      this._insStmt.execute();
     }
     else {
       let score = this._table[input][chosenSuggestion] + 1;
       this._table[input][chosenSuggestion] = score;
-      sql = "UPDATE ubiquity_suggestion_memory SET score = " + score +
-      " WHERE input = " + input + " AND suggestion = " + chosenSuggestion +
-      " AND id_string = " + this._id + ";";
+      this._updStmt.bindInt32Parameter(0, score);
+      this._updStmt.bindUTF8StringParameter(1, this._id);
+      this._updStmt.bindUTF8StringParameter(2, input);
+      this._updStmt.bindUTF8StringParameter(3, chosenSuggestion);
+      this._updStmt.execute();
     }
-
-    // TODO execute this sql.
   },
 
   getScore: function(input, suggestion) {
@@ -104,4 +183,3 @@ SuggestionMemory.prototype = {
     return this._table[input][suggestion];
   }
 };
-

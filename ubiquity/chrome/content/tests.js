@@ -832,6 +832,10 @@ function testModifiersTakeMultipleWords() {
 
 function testSuggestionMemory() {
   Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
+  // Before running this test, ensure a clean slate by deleting the
+  // temporrary sqlite DB file, if it exists:
+  wipeSuggestionMemoryDB();
+
   var suggMem1 = new SuggestionMemory("test_1");
   suggMem1.remember( "p", "peas");
   suggMem1.remember( "p", "peas");
@@ -849,7 +853,19 @@ function testSuggestionMemory() {
   this.assert(suggMem1.getScore( "p", "popcorn" ) == 0 );
   this.assert(suggMem1.getScore( "p", "quinine" ) == 0 );
 
-  // Now destroy
+  // Get rid of the first suggestion memory object, make a new one:
+  suggMem1 = null;
+  var suggMem2 = new SuggestionMemory("test_1");
+  // Should have all the same values.
+  this.assert(suggMem2.getScore("q", "quinine") == 2);
+  this.assert(suggMem2.getScore("q", "quetzalcoatl") == 1);
+  this.assert(suggMem2.getScore( "q", "peas") == 0 );
+  this.assert(suggMem2.getScore( "q", "qualifier") == 0);
+  this.assert(suggMem2.getScore( "p", "peas") == 2);
+  this.assert(suggMem2.getScore( "p", "polymascotfoamulate") == 1);
+  this.assert(suggMem2.getScore( "p", "popcorn" ) == 0 );
+  this.assert(suggMem2.getScore( "p", "quinine" ) == 0 );
+
 }
 
 function testSortedBySuggestionMemory() {
