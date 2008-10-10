@@ -34,6 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["SuggestionMemory"];
+
 /* Schema in sqlite will be like:
  *
  * CREATE TABLE ubiquity_suggestion_memory(
@@ -50,6 +52,8 @@
  * don't have any good way to fix this.
  */
 
+// This should probably be a module, so as to ensure that it's a global
+// singleton.
 function SuggestionMemory(id) {
   // Id is a unique string which will keep this suggestion memory
   // distinct from the others in the database when persisting.

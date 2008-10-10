@@ -831,6 +831,7 @@ function testModifiersTakeMultipleWords() {
 }
 
 function testSuggestionMemory() {
+  Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
   var suggMem1 = new SuggestionMemory("test_1");
   suggMem1.remember( "p", "peas");
   suggMem1.remember( "p", "peas");
@@ -847,6 +848,8 @@ function testSuggestionMemory() {
   this.assert(suggMem1.getScore( "p", "polymascotfoamulate") == 1);
   this.assert(suggMem1.getScore( "p", "popcorn" ) == 0 );
   this.assert(suggMem1.getScore( "p", "quinine" ) == 0 );
+
+  // Now destroy
 }
 
 function testSortedBySuggestionMemory() {
@@ -919,7 +922,7 @@ function testSortSpecificNounsBeforeArbText() {
   var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, [arb_text, dog]);
 
   var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
-  var selObj = getSelectionObject( fakeContext );
+  var selObj = NLParser.getSelectionObject( fakeContext );
   nlParser.updateSuggestionList( "", fakeContext );
   var suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 2, "Should be two suggestions.");

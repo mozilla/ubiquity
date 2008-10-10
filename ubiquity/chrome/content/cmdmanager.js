@@ -140,8 +140,8 @@ CommandManager.prototype = {
 
   copySuggestionToInput : function(context, previewBlock, textbox) {
     if(this.hasSuggestions()) {
-      
-      var selObj = getSelectionObject(context);
+
+      var selObj = NLParser.getSelectionObject(context);
       var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
                                     .getCompletionText(selObj);
       this.updateInput(suggText,

@@ -110,7 +110,6 @@ load(basePath + "/chrome/content/utils.js");
 load(basePath + "/chrome/content/codesource.js");
 load(basePath + "/chrome/content/linkrel_codesource.js");
 load(basePath + "/chrome/content/cmdutils.js");
-load(basePath + "/chrome/content/suggestion_memory.js");
 load(basePath + "/chrome/content/nlparser/en/parser_plugin.js");
 load(basePath + "/chrome/content/nlparser/jp/parser_plugin.js");
 load(basePath + "/chrome/content/nlparser/parser.js");

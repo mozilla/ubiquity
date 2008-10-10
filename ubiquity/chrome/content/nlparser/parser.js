@@ -34,6 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
 
 var NLParser = { MAX_SUGGESTIONS: 5};
 
@@ -51,7 +52,7 @@ NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
   return new NLParser.Parser(verbList, nounList, parserPlugin);
 };
 
-function getSelectionObject(context) {
+NLParser.getSelectionObject = function(context) {
   var selection = getTextSelection(context);
   if (!selection && UbiquityGlobals.lastCmdResult)
       selection = UbiquityGlobals.lastCmdResult;
@@ -160,7 +161,7 @@ NLParser.Parser.prototype = {
   updateSuggestionList: function( query, context ) {
     var nounType, verb;
     var newSuggs = [];
-    var selObj = getSelectionObject(context);
+    var selObj = NLParser.getSelectionObject(context);
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
