@@ -73,6 +73,9 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   textBox.addEventListener("keyup",
                            function(event) { self.__onInput(event); },
                            true);
+  textBox.addEventListener("blur",
+                           function(event) { self.__onBlur(event); },
+                           false);
 
   Observers.add(function() {self.__onSuggestionsUpdated();},
 		"ubiq-suggestions-updated");
@@ -100,6 +103,22 @@ Ubiquity.prototype = {
       },
       this.__MICROSECOND_DELAY
     );
+  },
+
+  __onBlur: function() {
+    // Hackish fix for #330.
+    var self = this;
+
+    function refocusTextbox() {
+      if (self.__showCount) {
+        var isTextBoxFocused = (document.commandDispatcher.focusedElement ==
+                                self.__textBox);
+        if (!isTextBoxFocused)
+          self.__textBox.focus();
+      }
+    }
+
+    Utils.setTimeout(refocusTextbox, 100);
   },
 
   __onMouseMove: function(event) {
