@@ -1,6 +1,6 @@
 var Ubiquity = {
   // TODO: Implement this, instead of inserting it insecurely from chrome.
-  insertHtml: null,
-  resizePreview: null,
+  insertHtml: function insertHtml() {},
+  resizePreview: function resizePreview() {},
   onPreview: null
 };
