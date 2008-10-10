@@ -139,21 +139,16 @@ function changeSkin(newSkinName) {
 
     var oldSkinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
     var skinFolderUrl = "chrome://ubiquity/skin/skins/";
-    var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
-    var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
     
-    var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
-    var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
-    
+    var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");    
     sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
-    sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
+    
     
     try {
       // this can fail and the rest still work
+      var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
       if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
         sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
-      if(sss.sheetRegistered(oldPreviewCss, sss.USER_SHEET))
-        sss.unregisterSheet(oldPreviewCss, sss.USER_SHEET);
     } catch(e) {
       // do nothing
     }
