@@ -249,6 +249,10 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
       // if we get an exception, then the page that's
       // been loaded is probably XUL or something,
       // and we won't want to deal with it.
+
+      // TODO: This probably won't be accurate if it's the case that
+      // the user has navigated to a different tab by the time the
+      // load event occurs.
       var doc = Application.activeWindow
                            .activeTab
                            .document;
