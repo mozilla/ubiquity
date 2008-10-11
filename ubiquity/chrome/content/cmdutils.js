@@ -405,7 +405,37 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 		       }, true);
 }
 
+// ---------------------------
+// FUNCTIONS FOR STORING AND RETRIEVING PASSWORDS AND OTHER SENSITIVE INFORMATIONS
+// ---------------------------
 
+
+
+CmdUtils.savePassword = function savePassword( opts ){
+  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+  var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1", Components.interfaces.nsILoginInfo, "init");
+  //var loginInfo = new nsLoginInfo(hostname, formSubmitURL, httprealm, username, password, usernameField, passwordField);
+  var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'User Sensitive Information' + opts.name, null, opts.username, opts.password, "", "");
+
+  
+  passwordManager.addLogin(loginInfo);
+}
+
+CmdUtils.retrieveLogins = function retrieveLogins( name ){
+  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+  
+  var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", "User Sensitive Information" + name, null);
+  var returnedLogins = [];
+  
+  for each(login in logins){
+    loginObj = {
+      username: login.username,
+      password: login.password
+    }
+    returnedLogins.push(loginObj);
+  }
+  return returnedLogins;
+}
 
 // -----------------------------------------------------------------
 // COMMAND CREATION FUNCTIONS
