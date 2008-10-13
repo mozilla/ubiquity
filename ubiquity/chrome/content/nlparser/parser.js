@@ -101,14 +101,14 @@ NLParser.Parser.prototype = {
     for each(verb in this._verbList) {
       for each(noun in matchingNouns) {
 	if (verb.usesNounType(noun)) {
-	  matchingVerbs.push(verb);
-	  continue;
+          matchingVerbs.push(verb);
+          continue;
 	}
       }
     }
     for each(verb in matchingVerbs) {
       suggs.push( new NLParser.PartiallyParsedSentence(verb,
-				                       {},
+                                                       {},
                                                        selObj,
                                                        0));
     }
@@ -116,15 +116,19 @@ NLParser.Parser.prototype = {
   },
 
   _sortSuggestionList: function(query) {
+    // TODO the following is no good, it's English-specific:
     let inputVerb = query.split(" ")[0];
     /* Each suggestion in the suggestion list should already have a matchScore
        assigned by Verb.getCompletions.  Give them also a frequencyScore based
        on the suggestionMemory, once suggestionMemory is hooked up.
      So, TODO: something like the following: */
-    /*for each( let sugg in this._suggestionList) {
-      let suggVerb = sugg._verb_name;
-      sugg.frequencyScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
-    }*/
+    for each( let sugg in this._suggestionList) {
+      let suggVerb = sugg._verb._name;
+      /*dump("Querying frequency for inputVerb = " + inputVerb );
+      dump(" and suggestionVerb = " + suggVerb);*/
+      let freqScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
+      sugg.setFrequencyScore(freqScore);
+    }
 
     this._suggestionList.sort( function( x, y ) {
 				 let xMatchScores = x.getMatchScores();

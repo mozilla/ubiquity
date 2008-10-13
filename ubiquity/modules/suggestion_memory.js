@@ -90,7 +90,8 @@ function wipeSuggestionMemoryDB() {
   // Should really only be used by unit tests...
   var file = _dirSvc.get("TmpD", Ci.nsIFile);
   file.append(SQLITE_FILE);
-  file.remove(false);
+  if (file.exists())
+    file.remove(false);
 }
 
 function SuggestionMemory(id) {

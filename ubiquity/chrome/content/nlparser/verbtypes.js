@@ -210,6 +210,10 @@ NLParser.ParsedSentence.prototype = {
     return [this.frequencyMatchScore,
 	    this.verbMatchScore,
 	    this.argMatchScore];
+  },
+
+  setFrequencyScore: function( freqScore ) {
+    this.frequencyMatchScore = freqScore;
   }
 
 };

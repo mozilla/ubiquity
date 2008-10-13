@@ -869,6 +869,11 @@ function testSuggestionMemory() {
 }
 
 function testSortedBySuggestionMemory() {
+  Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
+  // Before running this test, ensure a clean slate by deleting the
+  // temporrary sqlite DB file, if it exists:
+  wipeSuggestionMemoryDB();
+
   var nounList = [];
   var verbList = [{name: "clock"},
 		  {name: "calendar"},
@@ -879,9 +884,24 @@ function testSortedBySuggestionMemory() {
 		  {name: "crab"} ];
   var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
-  nlParser.updateSuggestionList("c", fakeContext);
+ nlParser.updateSuggestionList("c", fakeContext);
+  var suggestions = nlParser.getSuggestionList();
+  //take the fifth and sixth suggestions, whatever they are...
+  var suggFive = suggestions[4];
+  var suggFiveName = suggFive._verb._name;
+  var suggSix = suggestions[5];
+  var suggSixName = suggSix._verb._name;
+  // tell the parser we like sugg five and REALLY like sugg six:
+  nlParser.strengthenMemory("c", suggFive);
+  nlParser.strengthenMemory("c", suggSix);
+  nlParser.strengthenMemory("c", suggSix);
 
-  // TODO finish this test-- once suggestion memory for verb ranking is hooked up.
+  // now give the same input again...
+  nlParser.updateSuggestionList("c", fakeContext);
+  suggestions = nlParser.getSuggestionList();
+  // the old six should be on top, with the old five in second place:
+  this.assert(suggestions[0]._verb._name == suggSixName, "Six should be one");
+  this.assert(suggestions[1]._verb._name == suggFiveName, "Five should be two");
 }
 
 function testSortedByMatchQuality() {
