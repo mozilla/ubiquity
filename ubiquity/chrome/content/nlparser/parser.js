@@ -120,12 +120,9 @@ NLParser.Parser.prototype = {
     let inputVerb = query.split(" ")[0];
     /* Each suggestion in the suggestion list should already have a matchScore
        assigned by Verb.getCompletions.  Give them also a frequencyScore based
-       on the suggestionMemory, once suggestionMemory is hooked up.
-     So, TODO: something like the following: */
+       on the suggestionMemory:*/
     for each( let sugg in this._suggestionList) {
       let suggVerb = sugg._verb._name;
-      /*dump("Querying frequency for inputVerb = " + inputVerb );
-      dump(" and suggestionVerb = " + suggVerb);*/
       let freqScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
       sugg.setFrequencyScore(freqScore);
     }
@@ -240,7 +237,7 @@ NLParser.Parser.prototype = {
     // the user's last keypress.  This might be done with a
     // XUL:textbox whose 'type' is set to 'timed'.
 
- var doc = previewBlock.ownerDocument;
+    var doc = previewBlock.ownerDocument;
     if (!doc.getElementById("suggestions")) {
       // Set the initial contents of the preview block.
       previewBlock.innerHTML = ('<div id="suggestions"></div>' +

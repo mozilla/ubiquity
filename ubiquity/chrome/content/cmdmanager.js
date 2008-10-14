@@ -109,7 +109,8 @@ CommandManager.prototype = {
   onSuggestionsUpdated : function(input, context, previewBlock) {
     // Called when we're notified of a newly incoming suggestion
     this.__nlParser.refreshSuggestionList(input);
-    //this._preview(context, previewBlock);
+    if (previewBlock)
+      this._preview(context, previewBlock);
   },
 
   execute : function(context) {

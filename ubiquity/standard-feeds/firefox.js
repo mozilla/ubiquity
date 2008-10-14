@@ -190,3 +190,16 @@ CmdUtils.CreateCommand({
     tagging.tagURI(currentURI, tags);
   }
 });
+
+// Here for debugging:
+
+CmdUtils.CreateCommand({
+  name: "asplode",
+  takes: { "place": noun_type_async_address },
+    preview: function(pBlock, dirObj) {
+      pBlock.innerHTML = "The place is " + dirObj.text;
+    },
+    execute: function(dirObj) {
+      displayMessage("The place is " + dirObj.text);
+    }
+});

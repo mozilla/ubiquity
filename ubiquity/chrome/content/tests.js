@@ -875,16 +875,16 @@ function testSortedBySuggestionMemory() {
   wipeSuggestionMemoryDB();
 
   var nounList = [];
-  var verbList = [{name: "clock"},
-		  {name: "calendar"},
-		  {name: "couch"},
-		  {name: "conch"},
-		  {name: "crouch"},
-		  {name: "coelecanth"},
-		  {name: "crab"} ];
+  var verbList = [{name: "clock", execute: function(){}},
+		  {name: "calendar", execute: function(){}},
+		  {name: "couch", execute: function(){}},
+		  {name: "conch", execute: function(){}},
+		  {name: "crouch", execute: function(){}},
+		  {name: "coelecanth", execute: function(){}},
+		  {name: "crab", execute: function(){}} ];
   var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
- nlParser.updateSuggestionList("c", fakeContext);
+  nlParser.updateSuggestionList("c", fakeContext);
   var suggestions = nlParser.getSuggestionList();
   //take the fifth and sixth suggestions, whatever they are...
   var suggFive = suggestions[4];
@@ -892,6 +892,7 @@ function testSortedBySuggestionMemory() {
   var suggSix = suggestions[5];
   var suggSixName = suggSix._verb._name;
   // tell the parser we like sugg five and REALLY like sugg six:
+  // TODO replace these strengthenMemory calls with execute() calls!
   nlParser.strengthenMemory("c", suggFive);
   nlParser.strengthenMemory("c", suggSix);
   nlParser.strengthenMemory("c", suggSix);
@@ -902,6 +903,16 @@ function testSortedBySuggestionMemory() {
   // the old six should be on top, with the old five in second place:
   this.assert(suggestions[0]._verb._name == suggSixName, "Six should be one");
   this.assert(suggestions[1]._verb._name == suggFiveName, "Five should be two");
+}
+
+function testNounFirstSortedByGeneralFrequency() {
+  Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
+  // Before running this test, ensure a clean slate by deleting the
+  // temporrary sqlite DB file, if it exists:
+  wipeSuggestionMemoryDB();
+
+  // Noun-first suggestions should be ranked by how often the verb has
+  // been chosen before, *regardless of input*.
 }
 
 function testSortedByMatchQuality() {
@@ -1280,11 +1291,10 @@ function testAsyncNounSuggestions() {
   };
   var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
-  var fakePBlock = {innerHTML: ""};
-  cmdMan.updateInput( "dostuff halifax", fakeContext, fakePBlock );
+  cmdMan.updateInput( "dostuff halifax", fakeContext, null );
   this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
   noun_type_slowness.triggerCallback();
-  cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, fakePBlock );
+  cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, null );
   this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
 

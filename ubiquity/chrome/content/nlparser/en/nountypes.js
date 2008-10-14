@@ -101,18 +101,18 @@ var noun_arb_text = {
 
 var noun_type_date = {
   _name: "date",
-  
+
   default: function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
      return CmdUtils.makeSugg(text, null, date);
    },
-  
+
   suggest: function( text, html )  {
     if (typeof text != "string") {
       return [];
     }
-    
+
     var date = Date.parse( text );
     if (!date) {
       return [];
@@ -217,7 +217,22 @@ function isAddress( query, callback ) {
   });
 }
 
-// TODO this is a really crappy implementation for async address detection
+var noun_type_async_address = {
+  _name: "address(async)",
+  // TODO caching
+  suggest: function(text, html, callback) {
+    isAddress( text, function( truthiness ) {
+		 if (truthiness) {
+		   callback(CmdUtils.makeSugg(text));
+		 }
+	       });
+    return [];
+  }
+};
+
+
+// TODO this is going on obsolete, and will be replaced entirely by
+// noun_type_async_address.
 var noun_type_address = {
   _name: "address",
   knownAddresses: [],
