@@ -73,8 +73,6 @@ let UbiquitySetup = {
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"}],
 
-  BASE_REMOTE_URI: "https://labs.toolness.com/standard-feeds/",
-
   __getExtDir: function __getExtDir() {
     let Cc = Components.classes;
     let extMgr = Cc["@mozilla.org/extensions/manager;1"]
@@ -109,9 +107,10 @@ let UbiquitySetup = {
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
-    if (this.isInstalledAsXpi())
-      baseUri = this.BASE_REMOTE_URI;
-    else
+    if (this.isInstalledAsXpi()) {
+      var STANDARD_FEEDS_PREF = "extensions.ubiquity.standardFeedsUri";
+      baseUri = Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
+    } else
       baseUri = baseLocalUri;
 
     LinkRelCodeSource.installDefaults(baseUri,
