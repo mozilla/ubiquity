@@ -205,8 +205,6 @@ NLParser.ParsedSentence.prototype = {
   },
 
   getMatchScores: function() {
-     /* TODO: frequencyScore not yet implemented, is 0 for all suggestions.
-     */
     return [this.frequencyMatchScore,
 	    this.verbMatchScore,
 	    this.argMatchScore];
