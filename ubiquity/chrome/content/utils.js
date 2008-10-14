@@ -94,6 +94,10 @@ Utils.__timerData = {
   timers: {}
 };
 
+//Utils.setTimeout works just like DOM setTimeout() method
+//but it can only accept a function (not a string) as the callback argument
+//TODO: Allow strings for the first argument like DOM setTimeout() does.
+
 Utils.setTimeout = function setTimeout(callback, delay) {
   var classObj = Components.classes["@mozilla.org/timer;1"];
   var timer = classObj.createInstance(Components.interfaces.nsITimer);
