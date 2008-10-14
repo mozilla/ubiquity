@@ -4,7 +4,7 @@
      xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>ubiquity@labs.mozilla.com</em:id>
-    <em:version>0.1.2rc4</em:version>
+    <em:version>0.1.2rc5</em:version>
     <em:type>2</em:type>
 
     <!-- Target Application this extension can install into, 
@@ -23,7 +23,7 @@
     <em:creator>Mozilla Corporation</em:creator>
     <em:iconURL>chrome://ubiquity/content/ubiquity_logo.png</em:iconURL>
     <em:homepageURL>http://wiki.mozilla.org/Labs/Ubiquity</em:homepageURL>
-    <em:updateURL>https://labs.toolness.com/ubiquity/%ITEM_VERSION%/update.rdf</em:updateURL>
+    <em:updateURL>https://ubiquity.mozilla.com/xpi/%ITEM_VERSION%/update.rdf</em:updateURL>
     <em:optionsURL>chrome://ubiquity/content/preferences.xul</em:optionsURL>
   </Description>
 </RDF>
