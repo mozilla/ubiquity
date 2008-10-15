@@ -42,7 +42,7 @@ Utils.__globalObject = this;
 
 
 Utils.safeWrapper = function safeWrapper(func) {
-  var wrappedFunc = function() {
+  var wrappedFunc = function safeWrappedFunc() {
     try {
       func.apply(this, arguments);
     } catch (e) {
@@ -78,7 +78,7 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 };
 
 Utils.__TimerCallback.prototype = {
-  notify : function(timer) {
+  notify : function notify(timer) {
     for(timerID in Utils.__timerData.timers) {
       if(Utils.__timerData.timers[timerID] == timer) {
         delete Utils.__timerData.timers[timerID];
@@ -286,7 +286,7 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
   var iframe = null;
 
   var parseHandler = {
-    handleEvent: function(event) {
+    handleEvent: function handleEvent(event) {
       event.target.removeEventListener("DOMContentLoaded", this, false);
       var doc = iframe.contentDocument;
       rootElement.removeChild(iframe);
@@ -331,7 +331,7 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
     channel.QueryInterface(Ci.nsIRequest)
       .loadFlags |= Ci.nsIRequest.LOAD_BACKGROUND;
     // need to specify content type, so user isn't prompted to download "unknown" file type
-    var baseChannel = channel.QueryInterface(Ci.nsIChannel)
+    var baseChannel = channel.QueryInterface(Ci.nsIChannel);
     baseChannel.contentType = "text/html";
     // this will always be UTF-8 thanks to XMLHttpRequest and nsIScriptableUnicodeConverter
     baseChannel.contentCharset = "UTF-8";
@@ -347,10 +347,10 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
     url: remoteUrl,
     type: "GET",
     datatype: "string",
-    success: function(responseText) {
+    success: function success(responseText) {
       parseHtml(responseText);
     },
-    error: function() {
+    error: function error() {
       if(errorCallback)
         errorCallback();
     }
@@ -363,12 +363,12 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
 
   jQuery.ajax(ajaxOptions);
 
-}
+};
 
-Utils.trim = function(str) {
+Utils.trim = function trim(str) {
   str = str.replace(/^\s\s*/, '');
   var ws = /\s/;
   var i = str.length;
   while (ws.test(str.charAt(--i)));
   return str.slice(0, i + 1);
-}
+};
