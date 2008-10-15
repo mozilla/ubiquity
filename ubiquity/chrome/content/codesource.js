@@ -63,7 +63,7 @@ function StringCodeSource(code, id, dom) {
 }
 
 StringCodeSource.prototype = {
-  getCode: function() {
+  getCode: function SCS_getCode() {
     return this._code;
   }
 };
@@ -81,7 +81,7 @@ RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
 };
 
 RemoteUriCodeSource.prototype = {
-  getCode : function() {
+  getCode : function RUCS_getCode() {
     if (!this._req) {
       // Queue another XMLHttpRequest to fetch the latest code.
 
@@ -120,7 +120,7 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 };
 
 LocalUriCodeSource.prototype = {
-  getCode : function() {
+  getCode : function LUCS_getCode() {
     var req = new XMLHttpRequest();
     req.open('GET', this.uri, false);
     req.overrideMimeType("text/javascript");

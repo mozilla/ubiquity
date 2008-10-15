@@ -51,7 +51,7 @@ function SandboxFactory(globals) {
 SandboxFactory.target = this;
 
 SandboxFactory.prototype = {
-  makeSandbox: function(codeSource) {
+  makeSandbox: function makeSandbox(codeSource) {
     var sandbox = Components.utils.Sandbox(this._target);
     var globals = this._makeGlobals(codeSource);
 
@@ -62,7 +62,7 @@ SandboxFactory.prototype = {
     return sandbox;
   },
 
-  evalInSandbox: function(code, sandbox) {
+  evalInSandbox: function evalInSandbox(code, sandbox) {
     Components.utils.evalInSandbox(code, sandbox);
   }
 };
