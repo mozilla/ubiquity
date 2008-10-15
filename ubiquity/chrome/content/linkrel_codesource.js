@@ -138,14 +138,16 @@ LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
     var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
     pageInfo.jsUri = Utils.url(val);
   } else {
-    // There's no <link rel="commands"> tag;, so we'll assume this
+    // There's no <link rel="commands"> tag, so we'll assume this
     // is a raw JS file.
     pageInfo.jsUri = uri;
   }
 
-  if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
+  if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
+    pageInfo.canUpdate = true;
+  } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
     pageInfo.canUpdate = annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
-  else
+  } else
     pageInfo.canUpdate = false;
 
   pageInfo.getCode = function pageInfo_getCode() {
