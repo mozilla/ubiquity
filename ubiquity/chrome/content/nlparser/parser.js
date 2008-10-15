@@ -152,7 +152,8 @@ NLParser.Parser.prototype = {
     // This parser only cares about the verb name.
     let chosenVerb = chosenSuggestion._verb._name;
     let inputVerb = query.split(" ")[0];
-    /* TODO not neccessarily accurate!  Input might have just been nouns,
+    /* TODO not neccessarily accurate!  Also English-specific!
+     * Input might have just been nouns,
     // if this was noun-first completion, which means we're remembering
     // an association from noun input to verb completion, which might be
     // problematic.  Discuss. */

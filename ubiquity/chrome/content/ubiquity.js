@@ -118,7 +118,7 @@ Ubiquity.prototype = {
       }
     }
 
-    Utils.setTimeout(refocusTextbox, 100);
+    Utils.setTimeout(refocusTextbox, this._MICROSECOND_DELAY);
   },
 
   __onMouseMove: function(event) {
@@ -195,7 +195,7 @@ Ubiquity.prototype = {
 
   __resetPreview: function() {
     if (this.__previewBlock) {
-        this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
+      this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
     }
   },
 
@@ -226,6 +226,8 @@ Ubiquity.prototype = {
     this.__focusedElement = null;
 
     if (this.__needsToExecute) {
+      if (this.__needsUpdate)
+	this.__updatePreview();
       this.__cmdManager.execute(context);
       this.__needsToExecute = false;
     }
