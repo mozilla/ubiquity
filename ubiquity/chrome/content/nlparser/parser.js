@@ -53,10 +53,10 @@ NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
 };
 
 NLParser.getSelectionObject = function(context) {
-  var selection = getTextSelection(context);
+  var selection = CmdUtils.getSelection(context);
   if (!selection && UbiquityGlobals.lastCmdResult)
       selection = UbiquityGlobals.lastCmdResult;
-  var htmlSelection = getHtmlSelection(context);
+  var htmlSelection = CmdUtils.getHtmlSelection(context);
   if (!htmlSelection && selection)
     htmlSelection = selection;
   return {

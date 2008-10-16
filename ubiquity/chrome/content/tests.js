@@ -252,19 +252,19 @@ FakeCommandSource.prototype = {
   }
 };
 
-function getTextSelection(context) {
+CmdUtils.getSelection = function fake_getSelection(context) {
   if (context)
     if (context.textSelection)
       return context.textSelection;
   return "";
-}
+};
 
-function getHtmlSelection(context) {
+CmdUtils.getHtmlSelection = function fake_getHtmlSelection(context) {
   if (context)
     if (context.htmlSelection)
       return context.htmlSelection;
   return "";
-}
+};
 
 function getNounList() {
   return [];

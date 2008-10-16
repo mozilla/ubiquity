@@ -43,7 +43,10 @@ var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
 
-CmdUtils.getHtmlSelection = function getHtmlSelection() {
+CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
+  if (typeof(context) == "undefined")
+    context = CmdUtils.__globalObject.context;
+
   var sel = context.focusedWindow.getSelection();
 
   if (sel.rangeCount >= 1) {
@@ -274,7 +277,10 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
   appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
 };
 
-CmdUtils.getSelection = function getSelection() {
+CmdUtils.getSelection = function getSelection(context) {
+  if (typeof(context) == "undefined")
+    context = CmdUtils.__globalObject.context;
+
   var focused = context.focusedElement;
   var retval = "";
 
