@@ -201,6 +201,9 @@ CommandSource.prototype = {
   NOUN_PREFIX : "noun_",
 
   refresh : function CS_refresh() {
+    var shouldLoadCommands = false;
+    var prevCodeCache = this._codeCache ? this._codeCache : {};
+
     this._codeCache = {};
     for (var codeSource in this._codeSources) {
       var code = codeSource.getCode();
@@ -208,8 +211,19 @@ CommandSource.prototype = {
       if (typeof(codeSource.id) == "undefined")
         throw new Error("Code source ID is undefined for code: " + code);
       this._codeCache[codeSource.id] = code;
+
+      if (!(codeSource.id in prevCodeCache) ||
+          prevCodeCache[codeSource.id] != code)
+        shouldLoadCommands = true;
     }
-    this._loadCommands();
+
+    if (!shouldLoadCommands)
+      for (var id in prevCodeCache)
+        if (!(id in this._codeCache))
+          shouldLoadCommands = true;
+
+    if (shouldLoadCommands)
+      this._loadCommands();
   },
 
   _loadCommands : function CS__loadCommands() {

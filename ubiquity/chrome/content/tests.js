@@ -480,9 +480,12 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on first call.");
 
+  // Change the code returned from the code source so we're
+  // guaranteed to rebuild the context.
+  testCode += "/* trivial code change */";
   cmdSrc.refresh();
 
-  var cmd = cmdSrc.getCommand("foo");
+  cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on second call.");
 }
