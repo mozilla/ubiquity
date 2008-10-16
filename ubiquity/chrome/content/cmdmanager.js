@@ -45,13 +45,12 @@ function CommandManager(cmdSource, msgService, languageCode) {
   this.__nlParser = NLParser.makeParserForLanguage( languageCode,
 						    cmdSource.getAllCommands(),
 						    cmdSource.getAllNounTypes() );
+  this.__cmdSource.parser = this.__nlParser;
 }
 
 CommandManager.prototype = {
   refresh : function CM_refresh() {
     this.__cmdSource.refresh();
-    this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
-    this.__nlParser.setNounList( this.__cmdSource.getAllNounTypes());
     this.__hilitedSuggestion = 0;
     this.__lastInput = "";
   },
@@ -194,6 +193,7 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
   this._commands = [];
   this._codeCache = null;
   this._nounTypes = [];
+  this.parser = null;
 }
 
 CommandSource.prototype = {
@@ -323,6 +323,11 @@ CommandSource.prototype = {
     this._commands = commands;
     this.commandNames = commandNames;
     this._nounTypes = nounTypes;
+
+    if (this.parser) {
+      this.parser.setCommandList(this._commands);
+      this.parser.setNounList(this._nounTypes);
+    }
   },
 
   getAllCommands: function CS_getAllCommands() {
