@@ -54,7 +54,6 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   this.__needsToExecute = false;
   this.__showCount = 0;
   this.__lastValue = null;
-  this.__needsUpdate = false;
 
   var self = this;
 
@@ -73,14 +72,9 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   textBox.addEventListener("keyup",
                            function(event) { self.__onInput(event); },
                            true);
-  textBox.addEventListener("blur",
-                           function(event) { self.__onBlur(event); },
-                           false);
 
   Observers.add(function() {self.__onSuggestionsUpdated();},
 		"ubiq-suggestions-updated");
-
-  this.__resetTimer();
   this.__resetPreview();
 }
 
@@ -91,42 +85,15 @@ Ubiquity.prototype = {
   __KEYCODE_DOWN: 40,
   __KEYCODE_TAB:  9,
   __MIN_CMD_PREVIEW_LENGTH: 0,
-  __MICROSECOND_DELAY: 100,
   __DEFAULT_PREVIEW: ("<div class=\"help\">" + "Type the name of a command and press enter to " +
                       "execute it, or <b>help</b> for assistance." + "</div>"),
 
-  __resetTimer: function __resetTimer() {
-    var self = this;
-    this.__intervalId = setInterval(
-      function onTimerInterval(){
-        if (self.__needsUpdate) self.__updatePreview();
-      },
-      this.__MICROSECOND_DELAY
-    );
-  },
-
-  __onBlur: function __onBlur() {
-    // Hackish fix for #330.
-    var self = this;
-
-    function refocusTextbox() {
-      if (self.__showCount) {
-        var isTextBoxFocused = (document.commandDispatcher.focusedElement ==
-                                self.__textBox);
-        if (!isTextBoxFocused)
-          self.__textBox.focus();
-      }
-    }
-
-    Utils.setTimeout(refocusTextbox, this._MICROSECOND_DELAY);
-  },
-
-  __onMouseMove: function __onMouseMove(event) {
+  __onMouseMove: function(event) {
     this.__x = event.screenX;
     this.__y = event.screenY;
   },
 
-  __onKeydown: function __onKeydown(event) {
+  __onKeydown: function(event) {
     if (event.keyCode == this.__KEYCODE_UP) {
       event.preventDefault();
       this.__cmdManager.moveIndicationUp(this.__makeContext(),
@@ -143,7 +110,7 @@ Ubiquity.prototype = {
     }
   },
 
-  __onInput: function __onInput(event) {
+  __onInput: function(event) {
     if (this.__showCount == 0)
       return;
 
@@ -157,21 +124,18 @@ Ubiquity.prototype = {
     } else if (keyCode == this.__KEYCODE_UP ||
                keyCode == this.__KEYCODE_DOWN ||
                keyCode == this.__KEYCODE_TAB) {
-    } else {
-      this.__needsUpdate = true;
-      clearInterval( this.__intervalId );
-      this.__resetTimer();
-    }
+    } else
+      this.__updatePreview();
   },
 
-  __onSuggestionsUpdated: function __onSuggestionsUpdated() {
+  __onSuggestionsUpdated: function() {
     var input = this.__textBox.value;
     this.__cmdManager.onSuggestionsUpdated(input,
 					   this.__makeContext(),
 					   this.__previewBlock);
   },
 
-  __updatePreview: function __updatePreview() {
+  __updatePreview: function() {
     if (this.__previewBlock) {
       var input = this.__textBox.value;
       if (input != this.__lastValue) {
@@ -190,16 +154,15 @@ Ubiquity.prototype = {
 	}
       }
     }
-    this.__needsUpdate = false;
   },
 
-  __resetPreview: function __resetPreview() {
+  __resetPreview: function() {
     if (this.__previewBlock) {
-      this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
+        this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
     }
   },
 
-  __makeContext: function __makeContext() {
+  __makeContext: function() {
     var context = {focusedWindow : this.__focusedWindow,
                    focusedElement : this.__focusedElement,
                    screenX : this.__x,
@@ -208,7 +171,7 @@ Ubiquity.prototype = {
     return context;
   },
 
-  __onHidden: function __onHidden() {
+  __onHidden: function() {
     this.__showCount -= 1;
 
     if (this.__showCount > 0)
@@ -226,14 +189,12 @@ Ubiquity.prototype = {
     this.__focusedElement = null;
 
     if (this.__needsToExecute) {
-      if (this.__needsUpdate)
-	this.__updatePreview();
       this.__cmdManager.execute(context);
       this.__needsToExecute = false;
     }
   },
 
-  __onShown: function __onShown() {
+  __onShown: function() {
     if (this.__showCount == 0) {
       this.__lastValue = null;
       this.__textBox.focus();
@@ -244,14 +205,14 @@ Ubiquity.prototype = {
     this.__showCount += 1;
   },
 
-  setLocalizedDefaults: function setLocalizedDefaults( langCode ) {
+  setLocalizedDefaults: function( langCode ) {
     if (langCode == "jp") {
       this.__DEFAULT_PREVIEW = jpGetDefaultPreview();
       this.__KEYCODE_ENTER = 39;
     }
   },
 
-  openWindow: function openWindow(anchor) {
+  openWindow: function(anchor) {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
     this.__resetPreview();
@@ -260,7 +221,7 @@ Ubiquity.prototype = {
     this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
   },
 
-  closeWindow: function closeWindow(){
+  closeWindow: function(){
     this.__msgPanel.hidePopup();
   }
 };
