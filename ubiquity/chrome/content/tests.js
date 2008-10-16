@@ -1500,3 +1500,8 @@ function testSynonymsGetDownrankedEvenWithArguments() {
 	       "object should be m.");
 
 }
+
+function testUtilsTrim() {
+  // Taken from http://www.somacon.com/p355.php.
+  this.assert(Utils.trim("\n  hello   ") == "hello");
+}
