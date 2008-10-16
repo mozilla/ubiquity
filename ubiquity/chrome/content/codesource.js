@@ -158,7 +158,10 @@ function XhtmlCodeSource(codeSource) {
       if (!XhtmlCodeSource.isAvailable())
         throw new DomUnavailableError();
       var parser = new DOMParser();
-      // TODO: What if this fails?
+      // TODO: What if this fails?  Right now the behavior generally
+      // seems ok simply because an exception doesn't get thrown here
+      // if the XML isn't well-formed, we just get an error results
+      // DOM back, which contains no command code.
       dom = parser.parseFromString(code, "text/xml");
 
       var newCode = "";
