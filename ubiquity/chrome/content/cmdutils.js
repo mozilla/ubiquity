@@ -47,13 +47,15 @@ CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
   if (typeof(context) == "undefined")
     context = CmdUtils.__globalObject.context;
 
-  var sel = context.focusedWindow.getSelection();
+  if (context.focusedWindow) {
+    var sel = context.focusedWindow.getSelection();
 
-  if (sel.rangeCount >= 1) {
-    var html = sel.getRangeAt(0).cloneContents();
-    var newNode = context.focusedWindow.document.createElement("p");
-    newNode.appendChild(html);
-    return newNode.innerHTML;
+    if (sel.rangeCount >= 1) {
+      var html = sel.getRangeAt(0).cloneContents();
+      var newNode = context.focusedWindow.document.createElement("p");
+      newNode.appendChild(html);
+      return newNode.innerHTML;
+    }
   }
 
   return null;
@@ -297,7 +299,7 @@ CmdUtils.getSelection = function getSelection(context) {
       retval = focused.value.substring(start, end);
   }
 
-  if (!retval) {
+  if (!retval && context.focusedWindow) {
     var sel = context.focusedWindow.getSelection();
     if (sel.rangeCount >= 1)
       retval = sel.toString();
