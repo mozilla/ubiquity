@@ -36,7 +36,7 @@
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
-var EXPORTED_SYMBOLS = ["SuggestionMemory", "wipeSuggestionMemoryDB"];
+var EXPORTED_SYMBOLS = ["SuggestionMemory"];
 
 var SQLITE_FILE = "ubiquity_suggestion_memory.sqlite";
 /* In this schema, one row represents that fact that for the
@@ -57,22 +57,28 @@ var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
 var _storSvc = Cc["@mozilla.org/storage/service;1"]
                  .getService(Ci.mozIStorageService);
 
+function _getDBFile() {
+  var file;
+
+  /* In production code: get the profile directory as a nsIFile
+   object, and "append" to it to make the object point to the
+   profiledirector/sqlitefile */
+  try {
+    // We really want to put the file in the profile directory:
+    file = _dirSvc.get("ProfD", Ci.nsIFile);
+  } catch( ex ) {
+    // But if the profile directory is unavailable (which happens
+    // when running tests from xpcshell) we can use the temp dir instead.
+    file = _dirSvc.get("TmpD", Ci.nsIFile);
+  }
+  file.append(SQLITE_FILE);
+  return file;
+}
+
 function _connectToDatabase() {
   // Only create a new connection if we don't already have one open.
   if (!_databaseConnection) {
-    var file;
-    /* In production code: get the profile directory as a nsIFile
-       object, and "append" to it to make the object point to the
-       profiledirector/sqlitefile */
-    try {
-      // We really want to put the file in the profile directory:
-      file = _dirSvc.get("ProfD", Ci.nsIFile);
-    } catch( ex ) {
-      // But if the profile directory is unavailable (which happens
-      // when running tests from xpcshell) we can use the temp dir instead.
-      file = _dirSvc.get("TmpD", Ci.nsIFile);
-    }
-    file.append(SQLITE_FILE);
+    var file = _getDBFile();
     /* If the pointed-at file doesn't already exist, it means the database
      * has never been initialized, so we'll have to do it now by running
      * the CREATE TABLE sql. */
@@ -85,14 +91,6 @@ function _connectToDatabase() {
   return _databaseConnection;
 }
 // TODO: when and how do we need to close our database connection?
-
-function wipeSuggestionMemoryDB() {
-  // Should really only be used by unit tests...
-  var file = _dirSvc.get("TmpD", Ci.nsIFile);
-  file.append(SQLITE_FILE);
-  if (file.exists())
-    file.remove(false);
-}
 
 function SuggestionMemory(id) {
   /* Id is a unique string which will keep this suggestion memory
@@ -183,4 +181,13 @@ SuggestionMemory.prototype = {
       return 0;
     return this._table[input][suggestion];
   }
+};
+
+// Static functions.
+
+SuggestionMemory.wipeDB = function wipeDB() {
+  // Should really only be used by unit tests...
+  var file = _getDBFile();
+  if (file.exists())
+    file.remove(false);
 };
