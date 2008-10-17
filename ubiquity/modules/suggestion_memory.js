@@ -51,58 +51,36 @@ var SQLITE_SCHEMA =
     "  input VARCHAR(256)," +
     "  suggestion VARCHAR(256)," +
     "  score INTEGER);";
-var _databaseConnection = null;
+var _gDatabaseConnection = null;
 var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
                 .getService(Ci.nsIProperties);
 var _storSvc = Cc["@mozilla.org/storage/service;1"]
                  .getService(Ci.mozIStorageService);
 
-function _getDBFile() {
-  var file;
-
-  /* In production code: get the profile directory as a nsIFile
-   object, and "append" to it to make the object point to the
-   profiledirector/sqlitefile */
-  try {
-    // We really want to put the file in the profile directory:
-    file = _dirSvc.get("ProfD", Ci.nsIFile);
-  } catch( ex ) {
-    // But if the profile directory is unavailable (which happens
-    // when running tests from xpcshell) we can use the temp dir instead.
-    file = _dirSvc.get("TmpD", Ci.nsIFile);
-  }
-  file.append(SQLITE_FILE);
-  return file;
-}
-
 function _connectToDatabase() {
   // Only create a new connection if we don't already have one open.
-  if (!_databaseConnection) {
-    var file = _getDBFile();
-    /* If the pointed-at file doesn't already exist, it means the database
-     * has never been initialized, so we'll have to do it now by running
-     * the CREATE TABLE sql. */
-    // openDatabase will create empty file if it's not there yet:
-    _databaseConnection = _storSvc.openDatabase(file);
-    if (file.fileSize == 0) { // empty file? needs initialization!
-      _databaseConnection.executeSimpleSQL(SQLITE_SCHEMA);
-    }
+  if (!_gDatabaseConnection) {
+    // We really want to put the file in the profile directory:
+    var file = _dirSvc.get("ProfD", Ci.nsIFile);
+    file.append(SQLITE_FILE);
+    _gDatabaseConnection = SuggestionMemory.openDatabase(file);
   }
-  return _databaseConnection;
+  return _gDatabaseConnection;
 }
+
 // TODO: when and how do we need to close our database connection?
 
-function SuggestionMemory(id) {
+function SuggestionMemory(id, connection) {
   /* Id is a unique string which will keep this suggestion memory
-   distinct from the others in the database when persisting.
-   mockFileObj is an nsIFile object to be used instead of the real file,
-   for unit-testing purposes; leave it out in production code.*/
+   distinct from the others in the database when persisting. */
 
-  this._init(id);
+  this._init(id, connection);
 }
 SuggestionMemory.prototype = {
-  _init: function(id) {
-    this._connection = _connectToDatabase();
+  _init: function(id, connection) {
+    if (!connection)
+      connection = _connectToDatabase();
+    this._connection = connection;
     this._id = id;
     this._table = {};
     /* this._table is a JSON kind of object with a format like this:
@@ -123,26 +101,17 @@ SuggestionMemory.prototype = {
     let selectSql = "SELECT input, suggestion, score " +
 		    "FROM ubiquity_suggestion_memory " +
                     "WHERE id_string == ?1";
-    this._selStmt = this._connection.createStatement(selectSql);
-    this._selStmt.bindUTF8StringParameter(0, this._id);
-    while (this._selStmt.executeStep()) {
-      let input = this._selStmt.getUTF8String(0);
-      let suggestion = this._selStmt.getUTF8String(1);
-      let score = this._selStmt.getUTF8String(2);
+    var selStmt = this._connection.createStatement(selectSql);
+    selStmt.bindUTF8StringParameter(0, this._id);
+    while (selStmt.executeStep()) {
+      let input = selStmt.getUTF8String(0);
+      let suggestion = selStmt.getUTF8String(1);
+      let score = selStmt.getUTF8String(2);
       if (!this._table[input])
 	this._table[input] = {};
       this._table[input][suggestion] = score;
     }
-    this._selStmt.reset();
-
-    /* Compile the insert and update statements that we'll need later: */
-    let insertSql = "INSERT INTO ubiquity_suggestion_memory " +
-                    "VALUES (?1, ?2, ?3, 1)";
-    this._insStmt = this._connection.createStatement(insertSql);
-    let updateSql = "UPDATE ubiquity_suggestion_memory " +
-		    "SET score = ?1 " +
-                    "WHERE id_string = ?2 AND input = ?3 AND suggestion = ?4";
-    this._updStmt = this._connection.createStatement(updateSql);
+    selStmt.finalize();
   },
 
   remember: function(input, chosenSuggestion) {
@@ -156,19 +125,29 @@ SuggestionMemory.prototype = {
 
     if (!this._table[input][chosenSuggestion]) {
       this._table[input][chosenSuggestion] = 1;
-      this._insStmt.bindUTF8StringParameter(0, this._id);
-      this._insStmt.bindUTF8StringParameter(1, input);
-      this._insStmt.bindUTF8StringParameter(2, chosenSuggestion);
-      this._insStmt.execute();
+      let insertSql = "INSERT INTO ubiquity_suggestion_memory " +
+                      "VALUES (?1, ?2, ?3, 1)";
+      var insStmt = this._connection.createStatement(insertSql);
+      insStmt.bindUTF8StringParameter(0, this._id);
+      insStmt.bindUTF8StringParameter(1, input);
+      insStmt.bindUTF8StringParameter(2, chosenSuggestion);
+      insStmt.execute();
+      insStmt.finalize();
     }
     else {
       let score = this._table[input][chosenSuggestion] + 1;
       this._table[input][chosenSuggestion] = score;
-      this._updStmt.bindInt32Parameter(0, score);
-      this._updStmt.bindUTF8StringParameter(1, this._id);
-      this._updStmt.bindUTF8StringParameter(2, input);
-      this._updStmt.bindUTF8StringParameter(3, chosenSuggestion);
-      this._updStmt.execute();
+      let updateSql = ("UPDATE ubiquity_suggestion_memory " +
+                       "SET score = ?1 " +
+                       "WHERE id_string = ?2 AND input = ?3 AND " +
+                       "suggestion = ?4");
+      var updStmt = this._connection.createStatement(updateSql);
+      updStmt.bindInt32Parameter(0, score);
+      updStmt.bindUTF8StringParameter(1, this._id);
+      updStmt.bindUTF8StringParameter(2, input);
+      updStmt.bindUTF8StringParameter(3, chosenSuggestion);
+      updStmt.execute();
+      updStmt.finalize();
     }
   },
 
@@ -183,11 +162,16 @@ SuggestionMemory.prototype = {
   }
 };
 
-// Static functions.
+// Static functions
 
-SuggestionMemory.wipeDB = function wipeDB() {
-  // Should really only be used by unit tests...
-  var file = _getDBFile();
-  if (file.exists())
-    file.remove(false);
+SuggestionMemory.openDatabase = function openDatabase(file) {
+  /* If the pointed-at file doesn't already exist, it means the database
+   * has never been initialized, so we'll have to do it now by running
+   * the CREATE TABLE sql. */
+  // openDatabase will create empty file if it's not there yet:
+  var connection = _storSvc.openDatabase(file);
+  if (file.fileSize == 0)
+    // empty file? needs initialization!
+    connection.executeSimpleSQL(SQLITE_SCHEMA);
+  return connection;
 };

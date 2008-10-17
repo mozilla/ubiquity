@@ -834,11 +834,6 @@ function testModifiersTakeMultipleWords() {
 }
 
 function testSuggestionMemory() {
-  Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
-  // Before running this test, ensure a clean slate by deleting the
-  // temporrary sqlite DB file, if it exists:
-  SuggestionMemory.wipeDB();
-
   var suggMem1 = new SuggestionMemory("test_1");
   suggMem1.remember( "p", "peas");
   suggMem1.remember( "p", "peas");
@@ -872,11 +867,6 @@ function testSuggestionMemory() {
 }
 
 function testSortedBySuggestionMemory() {
-  Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
-  // Before running this test, ensure a clean slate by deleting the
-  // temporrary sqlite DB file, if it exists:
-  SuggestionMemory.wipeDB();
-
   var nounList = [];
   var verbList = [{name: "clock", execute: function(){}},
 		  {name: "calendar", execute: function(){}},
@@ -909,11 +899,6 @@ function testSortedBySuggestionMemory() {
 }
 
 function testNounFirstSortedByGeneralFrequency() {
-  Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
-  // Before running this test, ensure a clean slate by deleting the
-  // temporrary sqlite DB file, if it exists:
-  SuggestionMemory.wipeDB();
-
   // Noun-first suggestions should be ranked by how often the verb has
   // been chosen before, *regardless of input*.
 }

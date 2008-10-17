@@ -113,12 +113,20 @@ TestSuite.prototype = {
     for each (test in tests) {
       try {
         this._responder.onStartTest(test);
+
+        // TODO: This is temporary, we shouldn't be adding such
+        // app-specific code here.
+        suggestionMemorySetup();
+
         test.run();
         successes += 1;
       } catch (e) {
         this._responder.onException(test, e);
         failures += 1;
       }
+      // TODO: This is temporary, we shouldn't be adding such
+      // app-specific code here.
+      suggestionMemoryTeardown();
     }
     this._responder.onFinished(successes, failures);
   }
