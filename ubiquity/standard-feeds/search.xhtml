@@ -209,9 +209,12 @@ CmdUtils.makeSearchCommand({
   description: "Searches Google for your words.",
   preview: function(pblock, directObject) {
     var searchTerm = directObject.text;
-    var pTemplate = "Searches Google for <b>${query}</b>";
-    var pData = {query: searchTerm};
-    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
+    // Don't even display any text before fetching search results,
+    // since the results come back nearly instantaneously. In the
+    // future, we can display a throbber.
+    //var pTemplate = "Searches Google for <b>${query}</b>";
+    //var pData = {query: searchTerm};
+    //pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
 
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
