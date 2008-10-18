@@ -516,7 +516,7 @@ CmdUtils.makeSearchCommand({
       vq: searchTerm
     };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       
       var previewData = {
     	    results: data.feed.entry,
@@ -703,14 +703,13 @@ CmdUtils.CreateCommand({
       ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
     };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       globals.yelp = data.businesses;
       pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#yelp-search", feed.dom).html(),
         {businesses: data.businesses}
       );
-
-		}, "json");
+    }, "json");
   }
 });
 
@@ -763,7 +762,7 @@ CmdUtils.CreateCommand({
     }
 
     var url = "http://www.google.com/ig/api";
-    jQuery.get( url, {weather: location}, function(xml) {
+    CmdUtils.previewGet( pblock, url, {weather: location}, function(xml) {
       var el = jQuery(xml).find("current_conditions");
       if( el.length == 0 ) return;
 
