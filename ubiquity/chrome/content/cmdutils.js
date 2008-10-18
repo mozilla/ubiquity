@@ -676,7 +676,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
 
   options.takes = {"search term": noun_arb_text};
 
-  if (! options.preview )
+  if (! options.preview ) {
     options.preview = function(pblock, directObject, modifiers) {
       var query = directObject.text;
       var content = "Performs a " + options.name + " search";
@@ -684,6 +684,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
 		content += " for <b>" + query + "</b>";
       pblock.innerHTML = content;
     };
+    options.previewDelay = 10;
+  }
 
   options.name = options.name.toLowerCase();
 
