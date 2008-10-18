@@ -219,7 +219,7 @@ CmdUtils.makeSearchCommand({
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
 
@@ -398,7 +398,7 @@ CmdUtils.makeSearchCommand({
       output: "json"
     };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#yahoo-search", feed.dom).html(),
         {results:data.ResultSet.Result}

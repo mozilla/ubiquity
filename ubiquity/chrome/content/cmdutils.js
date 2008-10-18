@@ -513,6 +513,51 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   return templateObject.process( data );
 };
 
+// Just like jQuery.get(), only for command previews; the given
+// callback isn't called if the preview is cancelled.
+CmdUtils.previewGet = function previewGet(pblock,
+                                          url,
+                                          data,
+                                          callback,
+                                          type) {
+  var xhr;
+  function abort() { xhr.abort(); }
+  var cb = CmdUtils.previewCallback(pblock, callback, abort);
+  xhr = jQuery.get(url, data, cb, type);
+  return xhr;
+};
+
+// Creates a 'preview callback': a wrapper for a function which
+// first checks to see if the current preview has been cancelled,
+// and if not, calls the real callback.
+CmdUtils.previewCallback = function previewCallback(pblock,
+                                                    callback,
+                                                    abortCallback) {
+  var previewChanged = false;
+
+  function onPreviewChange() {
+    pblock.removeEventListener("preview-change",
+                               onPreviewChange,
+                               false);
+    previewChanged = true;
+    if (abortCallback)
+      abortCallback();
+  }
+
+  pblock.addEventListener("preview-change", onPreviewChange, false);
+
+  function wrappedCallback() {
+    if (!previewChanged) {
+      pblock.removeEventListener("preview-change",
+                                 onPreviewChange,
+                                 false);
+      return callback.apply(this, arguments);
+    }
+  }
+
+  return wrappedCallback;
+};
+
 CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
   var previewWindow = null;
   var xulIframe = null;
