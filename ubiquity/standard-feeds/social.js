@@ -110,7 +110,7 @@ CmdUtils.CreateCommand({
     var html= 'Submit or digg this page. Checking if this page has already been submitted...';
     pblock.innerHTML = html;
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(pblock, {
       type: "GET",
       url: api_url+params,
       error: function(){
