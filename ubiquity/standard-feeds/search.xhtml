@@ -243,7 +243,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     page: articleTitle
   };
 
-  jQuery.ajax({
+  CmdUtils.previewAjax(previewBlock, {
     type: "GET",
     url: apiUrl,
     data: apiParams,
@@ -321,7 +321,7 @@ CmdUtils.CreateCommand({
       srsearch: searchText
     };
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
@@ -433,7 +433,7 @@ CmdUtils.makeSearchCommand({
       Title: directObject.text
     };
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
@@ -560,7 +560,7 @@ CmdUtils.makeSearchCommand({
       sort: "relevance"
     };
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,

@@ -513,6 +513,25 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   return templateObject.process( data );
 };
 
+// Just like jQuery.ajax(), only for command previews; no
+// callbacks in the options object are called if the preview is
+// cancelled.
+CmdUtils.previewAjax = function previewAjax(pblock, options) {
+  var xhr;
+  var newOptions = {};
+  function abort() { xhr.abort(); }
+  for (key in options) {
+    if (typeof(options[key]) == 'function')
+      newOptions[key] = CmdUtils.previewCallback(pblock,
+                                                 options[key],
+                                                 abort);
+    else
+      newOptions[key] = options[key];
+  }
+  xhr = jQuery.ajax(newOptions);
+  return xhr;
+};
+
 // Just like jQuery.get(), only for command previews; the given
 // callback isn't called if the preview is cancelled.
 CmdUtils.previewGet = function previewGet(pblock,
