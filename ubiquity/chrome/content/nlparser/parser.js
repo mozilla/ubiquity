@@ -280,6 +280,11 @@ NLParser.Parser.prototype = {
       this._queuedPreview = queuedPreview;
       Utils.setTimeout(this._queuedPreview, activeSugg.previewDelay);
     }
+
+    var evt = doc.createEvent("HTMLEvents");
+    evt.initEvent("preview-change", false, false);
+    doc.getElementById("preview-pane").dispatchEvent(evt);
+
     return true;
   },
 
