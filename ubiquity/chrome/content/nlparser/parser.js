@@ -77,6 +77,7 @@ NLParser.Parser.prototype = {
     this._pronouns = languagePlugin.PRONOUNS;
     this._languageSpecificParse = languagePlugin.parseSentence;
     this._suggestionMemory = new SuggestionMemory("main_parser");
+    this._queuedPreview = null;
   },
 
   nounFirstSuggestions: function( selObj ) {
@@ -270,8 +271,14 @@ NLParser.Parser.prototype = {
 
     var activeSugg = this.getSentence(hilitedSuggestion);
     if ( activeSugg ) {
-      // Set the preview contents.
-      activeSugg.preview(context, doc.getElementById("preview-pane"));
+      var self = this;
+      function queuedPreview() {
+        // Set the preview contents.
+        if (self._queuedPreview == queuedPreview)
+          activeSugg.preview(context, doc.getElementById("preview-pane"));
+      };
+      this._queuedPreview = queuedPreview;
+      Utils.setTimeout(this._queuedPreview, activeSugg.previewDelay);
     }
     return true;
   },

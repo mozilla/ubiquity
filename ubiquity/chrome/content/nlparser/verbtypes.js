@@ -149,6 +149,10 @@ NLParser.ParsedSentence.prototype = {
     this._verb.preview( context, this._argSuggs, previewBlock );
   },
 
+  get previewDelay() {
+    return this._verb.previewDelay;
+  },
+
   copy: function() {
     // Deep copy!
     let newArgSuggs = {};
@@ -461,6 +465,8 @@ NLParser.Verb.prototype = {
     this._name = cmd.name;
     this._icon = cmd.icon;
     this._synonyms = cmd.synonyms;
+    this.__defineGetter__("previewDelay",
+                          function() { return cmd.previewDelay; });
     this._arguments = {};
 
     // New-style API: command defines arguments dictionary

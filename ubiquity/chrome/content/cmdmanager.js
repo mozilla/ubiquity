@@ -278,7 +278,8 @@ CommandSource.prototype = {
         "license",
         "description",
         "help",
-	"synonyms"
+	"synonyms",
+        "previewDelay"
       ];
 
       propsToCopy.forEach(function CS_copyProp(prop) {
@@ -287,6 +288,10 @@ CommandSource.prototype = {
         else
           cmd[prop] = null;
       });
+
+      if (cmd.previewDelay === null)
+        // Default delay to wait before calling a preview function, in ms.
+        cmd.previewDelay = 250;
 
       if (cmdFunc.modifiers) {
 	cmd.modifiers = cmdFunc.modifiers;
