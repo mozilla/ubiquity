@@ -572,6 +572,7 @@ CmdUtils.previewCallback = function previewCallback(pblock,
                                  false);
       return callback.apply(this, arguments);
     }
+    return null;
   }
 
   return wrappedCallback;

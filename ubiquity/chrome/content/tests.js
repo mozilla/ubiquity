@@ -78,6 +78,8 @@ function FakeAnnSvc() {
       throw Error('No such annotation');
     delete ann[uri.spec][name];
   };
+
+  self.EXPIRE_NEVER = 0;
 }
 
 function debugSuggestionList( list ) {

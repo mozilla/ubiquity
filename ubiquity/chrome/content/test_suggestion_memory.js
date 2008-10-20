@@ -1,3 +1,6 @@
+var suggestionMemorySetup;
+var suggestionMemoryTeardown;
+
 (function() {
    var RealSuggestionMemory = {};
    Components.utils.import("resource://ubiquity-modules/suggestion_memory.js",
