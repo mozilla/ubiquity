@@ -613,7 +613,8 @@ function testParseWithModifier() {
   this.assert( dogGotWashedWith == "spork");
 }
 
-function testCmdManagerSuggestsForEmptyInput() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
   var nounTypeOne = new CmdUtils.NounType( "thingType", ["tree"] );
@@ -940,7 +941,8 @@ function testSortedByMatchQuality() {
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
 
-function testSortSpecificNounsBeforeArbText() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testSortSpecificNounsBeforeArbText() {
   var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var arb_text = {
@@ -1139,7 +1141,8 @@ function testVerbGetCompletions() {
   this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }
 
-function testTextAndHtmlDifferent() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testTextAndHtmlDifferent() {
   var executedText = null;
   var executedHtml = null;
   var fakeContext = {
@@ -1449,7 +1452,8 @@ function makeSearchCommand(name) {
   };
 }
 
-function testWeirdCompletionsThatDontMakeSense() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testWeirdCompletionsThatDontMakeSense() {
   var cmd_imdb = makeSearchCommand("IMDB");
   var cmd_amazon = makeSearchCommand("amazon-search");
   var comps = getCompletions("ac", [cmd_imdb, cmd_amazon], [noun_arb_text]);
