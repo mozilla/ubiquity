@@ -86,34 +86,37 @@ NLParser.Parser.prototype = {
     (either for directObject or for modifiers) and returns a list of
     suggestions based on giving the input to those verbs.*/
     let suggs = [];
-    let matchingNouns = [];
-    let matchingVerbs = [];
-    let verb;
-    let noun;
+// TODO: We're commenting out this code for now because it's quite
+// processor-intensive and doesn't currently provide a useful list
+// of suggestions. See #343 for more information.
+//     let matchingNouns = [];
+//     let matchingVerbs = [];
+//     let verb;
+//     let noun;
 
-    for each(noun in this._nounTypeList) {
-      if (noun.suggest(selObj.text, selObj.html,
-                       function dummy() {}).length > 0 )
-	matchingNouns.push(noun);
-      // TODO: nouns can now suggest asynchronously,
-      // meaning that this is false at first but may become true later.
-      // What to do then?
-      // We can pass a real callback to the above...
-    }
-    for each(verb in this._verbList) {
-      for each(noun in matchingNouns) {
-	if (verb.usesNounType(noun)) {
-          matchingVerbs.push(verb);
-          continue;
-	}
-      }
-    }
-    for each(verb in matchingVerbs) {
-      suggs.push( new NLParser.PartiallyParsedSentence(verb,
-                                                       {},
-                                                       selObj,
-                                                       0));
-    }
+//     for each(noun in this._nounTypeList) {
+//       if (noun.suggest(selObj.text, selObj.html,
+//                        function dummy() {}).length > 0 )
+// 	matchingNouns.push(noun);
+//       // TODO: nouns can now suggest asynchronously,
+//       // meaning that this is false at first but may become true later.
+//       // What to do then?
+//       // We can pass a real callback to the above...
+//     }
+//     for each(verb in this._verbList) {
+//       for each(noun in matchingNouns) {
+// 	if (verb.usesNounType(noun)) {
+//           matchingVerbs.push(verb);
+//           continue;
+// 	}
+//       }
+//     }
+//     for each(verb in matchingVerbs) {
+//       suggs.push( new NLParser.PartiallyParsedSentence(verb,
+//                                                        {},
+//                                                        selObj,
+//                                                        0));
+//     }
     return suggs;
   },
 
