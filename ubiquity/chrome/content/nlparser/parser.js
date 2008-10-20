@@ -92,12 +92,13 @@ NLParser.Parser.prototype = {
     let noun;
 
     for each(noun in this._nounTypeList) {
-      if (noun.suggest(selObj.text, selObj.html).length > 0 )
+      if (noun.suggest(selObj.text, selObj.html,
+                       function dummy() {}).length > 0 )
 	matchingNouns.push(noun);
       // TODO: nouns can now suggest asynchronously,
       // meaning that this is false at first but may become true later.
       // What to do then?
-      // We can pass a callback to the above...
+      // We can pass a real callback to the above...
     }
     for each(verb in this._verbList) {
       for each(noun in matchingNouns) {
