@@ -259,26 +259,44 @@ var noun_type_address = {
 
 var LanguageCodes = {
   'arabic' : 'ar',
+  'bulgarian' : 'bg',
+  'catalan' : 'ca',
   'chinese' : 'zh',
   'chinese_traditional' : 'zh-TW',
+  'croatian': 'hr',
+  'czech': 'cs',
   'danish' : 'da',
   'dutch': 'nl',
   'english' : 'en',
+  // Filipino should be 'fil', however Google
+  // improperly uses 'tl', which is actually
+  // the language code for tagalog. Using 'tl'
+  // for now so that filipino translations work.
+  'filipino' : 'tl',
   'finnish' : 'fi',
   'french' : 'fr',
   'german' : 'de',
   'greek' : 'el',
+  'hebrew' : 'he',
   'hindi' : 'hi',
+  'indonesian' : 'id',
   'italian' : 'it',
   'japanese' : 'ja',
   'korean' : 'ko',
+  'latvian' : 'lv',
+  'lithuanian' : 'lt',
   'norwegian' : 'no',
   'polish' : 'pl',
   'portugese' : 'pt-PT',
   'romanian' : 'ro',
   'russian' : 'ru',
+  'serbian' : 'sr',
+  'slovak' : 'sk',
+  'slovenian' : 'sl',
   'spanish' : 'es',
-  'swedish' : 'sv'
+  'swedish' : 'sv',
+  'ukranian' : 'uk',
+  'vietnamese' : 'vi'
 };
 
 var noun_type_language =  {
