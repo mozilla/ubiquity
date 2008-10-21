@@ -417,7 +417,46 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 		       }, true);
 }
 
+// ---------------------------
+// FUNCTIONS FOR STORING AND RETRIEVING PASSWORDS AND OTHER SENSITIVE INFORMATION
+// ---------------------------
 
+
+/**
+* Saves a pair of username/password (or username/api key) to the password manager. You have to pass the name of your command
+* (or other identifier) as to the command like: 
+* CmdUtils.savePassword( {name:'my command', username:'myUserName', password:'gu3ssm3'} )
+*/
+CmdUtils.savePassword = function savePassword( opts ){
+  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+  var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1", Components.interfaces.nsILoginInfo, "init");
+  //var loginInfo = new nsLoginInfo(hostname, formSubmitURL, httprealm, username, password, usernameField, passwordField);
+  var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'UbiquityInformation' + opts.name, null, opts.username, opts.password, "", "");
+
+  
+  passwordManager.addLogin(loginInfo);
+}
+
+/*
+* Retrieve one or more username/password saved with CmdUtils.savePassword
+* All you have to pass is the identifier (the name option) used on the other function.
+* You will get as return an array of { username:'', password:'' } objects.
+*/
+CmdUtils.retrieveLogins = function retrieveLogins( name ){
+  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+  
+  var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
+  var returnedLogins = [];
+  
+  for each(login in logins){
+    loginObj = {
+      username: login.username,
+      password: login.password
+    }
+    returnedLogins.push(loginObj);
+  }
+  return returnedLogins;
+}
 
 // -----------------------------------------------------------------
 // COMMAND CREATION FUNCTIONS
