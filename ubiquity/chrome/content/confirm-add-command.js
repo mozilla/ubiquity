@@ -115,7 +115,8 @@ function onReady() {
       $("#autoupdate-warning").slideUp();
   }
 
-  if (Utils.url(gCommandFeedInfo.sourceUrl).scheme == "http")
+  if ((Utils.url(gCommandFeedInfo.sourceUrl).scheme == "http") || 
+      (Utils.url(gCommandFeedInfo.sourceUrl).scheme == "ftp"))
     $("#mitm-warning").show();
 
   $("#autoupdate").click(onAutoupdateClicked);
