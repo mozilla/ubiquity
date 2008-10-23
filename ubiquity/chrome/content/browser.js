@@ -142,7 +142,11 @@ function ubiquityKeydown(aEvent)
   //Open Ubiquity if the key pressed matches the shortcut key
   if (aEvent.keyCode == UBIQUITY_KEYCODE &&
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
-    gUbiquity.openWindow(anchor);
+    if(gUbiquity.__msgPanel.hidden) {
+      gUbiquity.openWindow(anchor);
+    } else {
+      gUbiquity.closeWindow();
+    }
     aEvent.preventDefault();
   }
 }
@@ -160,3 +164,4 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 window.addEventListener("load", ubiquitySetup, false);
 window.addEventListener("unload", ubiquityTeardown, false);
 window.addEventListener("keydown", ubiquityKeydown, true);
+window.addEventListener("popuphidden",function() { gUbiquity.__msgPanel.hidden = true; }, false);
