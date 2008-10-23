@@ -735,37 +735,48 @@ CmdUtils.makeSugg = function( text, html, data ) {
 };
 
 
-CmdUtils.NounType = function( name, expectedWords ) {
-  this._init( name, expectedWords );
+CmdUtils.NounType = function(name, expectedWords, defaultWord) {
+  this._init(name, expectedWords, defaultWord);
 }
 CmdUtils.NounType.prototype = {
   /* A NounType that accepts a finite list of specific words as the only valid
    * values.  Instantiate it with an array giving all allowed words.
    */
-  _init: function( name, expectedWords ) {
+  _init: function(name, expectedWords, defaultWord) {
     this._name = name;
-    this._expectedWords = expectedWords; // an array
+    this._wordList = expectedWords; // an array
+    if(typeof defaultWord == "string") {
+      this.default = function() {
+        return CmdUtils.makeSugg(defaultWord);
+      };
+    }
   },
-
-  suggest: function( text, html ) {
+  suggest: function(text) {
     // returns array of suggestions where each suggestion is object
     // with .text and .html properties.
-    var suggestions = [];
     if (typeof text != "string") {
       // Input undefined or not a string
       return [];
     }
-
-    for ( var x in this._expectedWords ) {
+    
+    text = text.toLowerCase();
+    
+    var possibleWords = [];
+    if(typeof this._wordList == "function") {
+      possibleWords = this._wordList();
+    } else {
+      possibleWords = this._wordList;
+    }
+    
+    var suggestions = [];
+    possibleWords.forEach(function(word) {
       // Do the match in a non-case sensitive way
-      var word = this._expectedWords[x].toLowerCase();
-      if ( word.indexOf( text.toLowerCase() ) > -1 ) {
+      if ( word.toLowerCase().indexOf(text) > -1 ) {
       	suggestions.push( CmdUtils.makeSugg(word) );
-      	// TODO sort these in order of goodness
-      	// todo if fragment is multiple words, search for each of them
+      	// TODO if text input is multiple words, search for each of them
       	// separately within the expected word.
       }
-    }
+    });
     return suggestions;
   }
 };
