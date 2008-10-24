@@ -115,8 +115,9 @@ function onReady() {
       $("#autoupdate-warning").slideUp();
   }
 
-  if ((Utils.url(gCommandFeedInfo.sourceUrl).scheme != "https") && 
-      (Utils.url(gCommandFeedInfo.sourceUrl).scheme != "chrome"))
+  var urlScheme = Utils.url(gCommandFeedInfo.sourceUrl).scheme;
+  var safeSchemes = ["https", "chrome", "file", "resource"];
+  if (safeSchemes.indexOf(urlScheme) == -1)
     $("#mitm-warning").show();
 
   $("#autoupdate").click(onAutoupdateClicked);
