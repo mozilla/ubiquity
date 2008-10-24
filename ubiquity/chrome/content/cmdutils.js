@@ -208,11 +208,35 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
 }
 
 CmdUtils.log = function log(what) {
-  var console = CmdUtils.getWindowInsecure().console;
-  if (typeof(console) != "undefined"){
-    console.log( what );
+  var args = Array.prototype.slice.call(arguments);
+  if(args.length == 0)
+    return;
+  
+  var logPrefix = "Ubiquity: ";
+  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  
+  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
+    args.unshift(logPrefix);
+    browserWindow.Firebug.Console.logFormatted(args);
   } else {
-    displayMessage("Firebug Required For Full Usage\n\n" + what);
+    var logMessage = "";
+    if(typeof args[0] == "string") {
+      var formatStr = args.shift();
+      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
+        formatStr = formatStr.replace("%s", "" + args.shift());
+      }
+      args.unshift(formatStr);
+    }
+    args.forEach(function(arg) {
+      if(typeof arg == "object") {
+        logMessage += " " + Utils.encodeJson(arg) + " ";
+      } else {
+        logMessage += arg;
+      }
+    });
+    Application.console.log(logPrefix + logMessage);
   }
 };
 
