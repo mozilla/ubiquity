@@ -223,14 +223,24 @@ Utils.getCookie = function getCookie(domain, name) {
 };
 
 Utils.paramsToString = function paramsToString(params) {
-  var string = "?";
-
-  for (key in params) {
-    string += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
+  var stringPairs = [];
+  function addPair(key, value) {
+    stringPairs.push(
+      encodeURIComponent(key) + "=" + encodeURIComponent(value)
+    );
   }
-
-  // Remove the trailing &
-  return string.substr(0, string.length - 1);
+  for (key in params) {
+    // note: explicitly ignoring values that are objects!
+    if (params[key] instanceof Array) {
+      params[key].forEach(function(item) {
+        if(typeof item == "string")
+          addPair(key + "[]", item);
+      });
+    } else if (typeof params[key] == "string") {
+      addPair(key, params[key]);
+    };
+  }
+  return "?" + stringPairs.join("&");
 };
 
 // Synchronously retrieves the content of the given local URL
