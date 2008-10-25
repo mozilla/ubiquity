@@ -103,12 +103,18 @@ CmdUtils.setSelection = function setSelection(content, options) {
 
     var beforeText = currentValue.substring(0, focused.selectionStart);
     var afterText = currentValue.substring(focused.selectionEnd, currentValue.length);
-
+    
+    var scrollTop = focused.scrollTop;
+    var scrollLeft = focused.scrollLeft;
+    
     focused.value = beforeText + plainText + afterText;
     focused.focus();
 
     //put the cursor after the inserted text
     focused.setSelectionRange(selectionEnd, selectionEnd);
+    
+    focused.scrollTop = scrollTop;
+    focused.scrollLeft = scrollLeft;
   }
 
   else {

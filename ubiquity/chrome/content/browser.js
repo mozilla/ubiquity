@@ -44,6 +44,7 @@ Components.utils.import("resource://ubiquity-modules/globals.js");
 
 function ubiquitySetup()
 {
+//  window.console.profile("ubiquitySetup()");
   UbiquitySetup.installDefaults();
 
   var previewIframe = document.getElementById("cmd-preview");
@@ -99,6 +100,7 @@ function ubiquitySetup()
   );
   gUbiquity.setLocalizedDefaults(UbiquityGlobals.languageCode);
   cmdSource.refresh();
+//  window.console.profileEnd();
 }
 
 function ubiquityTeardown()
