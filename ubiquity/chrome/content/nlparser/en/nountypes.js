@@ -287,7 +287,7 @@ var LanguageCodes = {
   'lithuanian' : 'lt',
   'norwegian' : 'no',
   'polish' : 'pl',
-  'portugese' : 'pt-PT',
+  'portuguese' : 'pt',
   'romanian' : 'ro',
   'russian' : 'ru',
   'serbian' : 'sr',
