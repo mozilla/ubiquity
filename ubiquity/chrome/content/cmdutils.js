@@ -808,7 +808,7 @@ CmdUtils.NounType.prototype = {
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
     var query = encodeURIComponent(directObject.text);
-    var urlString = options.url.replace("{QUERY}", query);
+    var urlString = options.url.replace(/%s|{QUERY}/g, query);
     Utils.openUrlInBrowser(urlString);
     CmdUtils.setLastResult( urlString );
   };
