@@ -509,3 +509,60 @@ var noun_type_url = {
     return [];
   }
 };
+
+
+
+var noun_type_livemark = {
+  _name: "livemark",
+  rankLast: true,
+  
+  /*
+  * text & html = Livemark Title (string)
+  * data = { itemIds : [] } - an array of itemIds(long long) for the suggested livemarks.
+  * These values can be used to reference the livemark in bookmarks & livemark services
+  */
+  
+  getFeeds: function() {
+    
+    //Find all bookmarks with livemark annotation
+     return Components.classes["@mozilla.org/browser/annotation-service;1"]
+        .getService(Components.interfaces.nsIAnnotationService)
+        .getItemsWithAnnotation("livemark/feedURI", {});
+  },
+  
+  default: function() {
+    var feeds = this.getFeeds();
+    if( feeds.length > 0 ) {
+       return CmdUtils.makeSugg("all livemarks", null, {itemIds: feeds});
+    }
+    return null;
+  },
+  
+  suggest: function(fragment) {
+    fragment = fragment.toLowerCase();
+    
+    var suggestions = [];
+    var allFeeds = this.getFeeds();
+    
+    if(allFeeds.length > 0) {
+      var bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
+                                  .getService(Components.interfaces.nsINavBookmarksService);
+
+      for(var i = 0; i < allFeeds.length; ++i) {
+        var livemarkTitle = bookmarks.getItemTitle(allFeeds[i]).toLowerCase();
+        if(livemarkTitle.toLowerCase().indexOf(fragment) > -1) {
+          suggestions.push(CmdUtils.makeSugg(livemarkTitle , null,
+                                         { itemIds: [allFeeds[i]] } )); //data.itemIds[]
+        }
+      }
+     
+      //option for all livemarks
+      var all = "all livemarks";
+      if(all.indexOf(fragment) > -1) {
+	suggestions.push(CmdUtils.makeSugg( all , null, {itemIds: allFeeds} ));
+      }
+      return suggestions;
+    }
+    return [];
+  }  
+}
