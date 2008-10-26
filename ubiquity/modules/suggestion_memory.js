@@ -169,9 +169,23 @@ SuggestionMemory.openDatabase = function openDatabase(file) {
    * has never been initialized, so we'll have to do it now by running
    * the CREATE TABLE sql. */
   // openDatabase will create empty file if it's not there yet:
-  var connection = _storSvc.openDatabase(file);
-  if (file.fileSize == 0)
-    // empty file? needs initialization!
+  var connection = null;
+  try {
+    connection = _storSvc.openDatabase(file);
+    if (file.fileSize == 0) {
+      // empty file? needs initialization!
+      connection.executeSimpleSQL(SQLITE_SCHEMA);
+    }
+  } catch(e) {
+    Components.utils.reportError(
+      "Ubiquity's SuggestionMemory database appears to have been corrupted - resetting it."
+      );
+    if (file.exists()) {
+      // remove currupt database
+      file.remove(false);
+    }
+    connection = _storSvc.openDatabase(file);
     connection.executeSimpleSQL(SQLITE_SCHEMA);
+  }
   return connection;
 };
