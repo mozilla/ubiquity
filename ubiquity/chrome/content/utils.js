@@ -131,6 +131,7 @@ Utils.clearTimeout = function clearTimeout(timerID) {
 //   base: a string/nsIURI representing an absolute URL, which is used
 //         as the base URL for the 'uri' keyword argument.
 Utils.url = function url(spec) {
+  return null;
   var base = null;
   if (typeof(spec) == "object") {
     if (spec instanceof Components.interfaces.nsIURI)
