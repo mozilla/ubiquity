@@ -1513,4 +1513,19 @@ function testUbiquityComponent() {
   }
   this.assert(errorCaught == errorToThrow,
               "nsIUbiquity.throwArg() must work.");
+
+  var sandbox = Components.utils.Sandbox("http://www.foo.com");
+  ubiquity.evalInSandbox("var a = 1;", sandbox);
+  this.assert(sandbox.a == 1,
+              "nsIUbiquity.evalInSandbox() must work.");
+
+  errorCaught = null;
+  try {
+    ubiquity.evalInSandbox("throw new Error('hi')",
+                           sandbox);
+  } catch (e) {
+    errorCaught = e;
+  }
+  this.assert(errorCaught.message == 'hi',
+              "nsIUbiquity.evalInSandbox() must throw exceptions");
 }

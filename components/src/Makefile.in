@@ -17,6 +17,8 @@ REQUIRES	= \
 		  string \
 		  js \
 		  xpconnect \
+		  caps \
+		  dom \
 		  $(NULL)
 
 CPPSRCS = nsUbiquity.cpp

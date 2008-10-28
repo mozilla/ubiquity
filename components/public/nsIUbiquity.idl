@@ -5,4 +5,5 @@ interface nsIUbiquity : nsISupports
 {
   long add(in long a, in long b);
   void throwArg(/* optional param */);
+  void evalInSandbox(in AString source /* Sandbox param */);
 };
