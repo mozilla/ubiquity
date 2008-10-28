@@ -96,7 +96,7 @@ xpc_EvalInSandbox(JSContext *cx, JSObject *sandbox, const nsAString& source,
         return NS_ERROR_OUT_OF_MEMORY;
     }
 
-    JS_SetVersion(sandcx->GetJSContext(), JSVERSION_1_5);
+    JS_SetVersion(sandcx->GetJSContext(), JSVERSION_1_8);
 
     nsresult rv = NS_OK;
 

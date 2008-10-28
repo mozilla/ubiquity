@@ -1528,4 +1528,8 @@ function testUbiquityComponent() {
   }
   this.assert(errorCaught.message == 'hi',
               "nsIUbiquity.evalInSandbox() must throw exceptions");
+
+  ubiquity.evalInSandbox("let k = 1;", sandbox);
+  this.assert(sandbox.k == 1,
+              "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
 }
