@@ -1,0 +1,13 @@
+DEPTH   = ../../../..
+topsrcdir = @top_srcdir@
+srcdir    = @srcdir@
+VPATH   = @srcdir@
+
+include $(DEPTH)/config/autoconf.mk
+
+MODULE = ubiquity
+XPIDL_MODULE  = ubiquity
+
+XPIDLSRCS = nsIUbiquity.idl
+
+include $(topsrcdir)/config/rules.mk

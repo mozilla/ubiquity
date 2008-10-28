@@ -1496,3 +1496,11 @@ function testUtilsTrim() {
   // Taken from http://www.somacon.com/p355.php.
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
+
+function testUbiquityComponent() {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"].getService();
+  ubiquity = ubiquity.QueryInterface(Ci.nsIUbiquity);
+  this.assert(ubiquity.add(1,2) == 4);
+}
