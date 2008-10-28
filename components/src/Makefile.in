@@ -15,6 +15,8 @@ USE_STATIC_LIBS = 1
 REQUIRES	= \
 		  xpcom \
 		  string \
+		  js \
+		  xpconnect \
 		  $(NULL)
 
 CPPSRCS = nsUbiquity.cpp
@@ -22,6 +24,7 @@ CPPSRCS = nsUbiquity.cpp
 include $(topsrcdir)/config/rules.mk
 
 EXTRA_DSO_LDOPTS += \
+    $(MOZ_JS_LIBS) \
     $(XPCOM_GLUE_LDOPTS) \
     $(NSPR_LIBS) \
     $(NULL)

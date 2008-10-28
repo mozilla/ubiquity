@@ -1502,5 +1502,15 @@ function testUbiquityComponent() {
   var Ci = Components.interfaces;
   var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"].getService();
   ubiquity = ubiquity.QueryInterface(Ci.nsIUbiquity);
-  this.assert(ubiquity.add(1,2) == 4);
+  this.assert(ubiquity.add(1,2) == 4,
+              "nsIUbiquity.add() must work.");
+  var errorToThrow = new Error("testing");
+  var errorCaught = null;
+  try {
+    ubiquity.throwArg(errorToThrow);
+  } catch (e) {
+    errorCaught = e;
+  }
+  this.assert(errorCaught == errorToThrow,
+              "nsIUbiquity.throwArg() must work.");
 }
