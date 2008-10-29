@@ -1500,7 +1500,17 @@ function testUtilsTrim() {
 function testUbiquityComponent() {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"].getService();
+  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
+
+  if (typeof(ubiquity) == "undefined")
+    // Right now nsUbiquity is an optional component, and if
+    // it doesn't exist, let's just skip this test.
+
+    // TODO: We should really add a skipped-test exception or
+    // return code...
+    return;
+
+  ubiquity = ubiquity.getService();
   ubiquity = ubiquity.QueryInterface(Ci.nsIUbiquity);
   this.assert(ubiquity.add(1,2) == 4,
               "nsIUbiquity.add() must work.");
