@@ -176,7 +176,9 @@ xpc_EvalInSandbox(JSContext *cx, JSObject *sandbox, const nsAString& source,
     return rv;
 }
 
-NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source)
+NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source,
+                                        const char *filename,
+                                        PRInt32 lineNo)
 {
     // Implementation taken from js/src/xpconnect/src/xpccomponents.cpp
     // in mozilla-central and modified.
@@ -211,7 +213,7 @@ NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source)
     if(NS_FAILED(rv))
         return rv;
 
-    if (argc < 2)
+    if (argc < 4)
         return NS_ERROR_XPC_NOT_ENOUGH_ARGS;
 
     // The second argument is the sandbox object. It is required.
@@ -219,11 +221,11 @@ NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source)
     rv = cc->GetArgvPtr(&argv);
     if (NS_FAILED(rv))
         return rv;
-    if (JSVAL_IS_PRIMITIVE(argv[1]))
+    if (JSVAL_IS_PRIMITIVE(argv[3]))
         return NS_ERROR_INVALID_ARG;
-    JSObject *sandbox = JSVAL_TO_OBJECT(argv[1]);
+    JSObject *sandbox = JSVAL_TO_OBJECT(argv[3]);
 
-    rv = xpc_EvalInSandbox(cx, sandbox, source, "nothing.js", 1,
+    rv = xpc_EvalInSandbox(cx, sandbox, source, filename, lineNo,
                            PR_FALSE, rval);
 
     if (NS_SUCCEEDED(rv) && !JS_IsExceptionPending(cx))

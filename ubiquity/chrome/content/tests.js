@@ -1515,13 +1515,15 @@ function testUbiquityComponent() {
               "nsIUbiquity.throwArg() must work.");
 
   var sandbox = Components.utils.Sandbox("http://www.foo.com");
-  ubiquity.evalInSandbox("var a = 1;", sandbox);
+  ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, sandbox);
   this.assert(sandbox.a == 1,
               "nsIUbiquity.evalInSandbox() must work.");
 
   errorCaught = null;
   try {
     ubiquity.evalInSandbox("throw new Error('hi')",
+                           "nothing.js",
+                           1,
                            sandbox);
   } catch (e) {
     errorCaught = e;
@@ -1529,7 +1531,7 @@ function testUbiquityComponent() {
   this.assert(errorCaught.message == 'hi',
               "nsIUbiquity.evalInSandbox() must throw exceptions");
 
-  ubiquity.evalInSandbox("let k = 1;", sandbox);
+  ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1, sandbox);
   this.assert(sandbox.k == 1,
               "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
 }
