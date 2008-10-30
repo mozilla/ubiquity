@@ -4,11 +4,16 @@ import xml.dom.minidom
 import subprocess
 import shutil
 import zipfile
+import shutil
 from ConfigParser import ConfigParser
 
 # Path to the root of the extension, relative to where this script is
 # located.
 EXT_SUBDIR = "ubiquity"
+
+def clear_dir(dirname):
+    if os.path.exists(dirname) and os.path.isdir(dirname):
+        shutil.rmtree(dirname)
 
 def find_profile_dir(name):
     """
@@ -56,11 +61,27 @@ def get_install_rdf_property(path_to_extension_root, property):
     element = rdf.documentElement.getElementsByTagName(property)[0]
     return element.firstChild.nodeValue
 
-def run_python_script(args):
-    retval = subprocess.call([sys.executable] + args)
+def run_program(args, **kwargs):
+    retval = subprocess.call(args, **kwargs)
     if retval:
         print "Process failed with exit code %d." % retval
         sys.exit(retval)
+
+def run_python_script(args):
+    run_program([sys.executable] + args)
+
+def get_xpcom_info(mydir):
+    popen = subprocess.Popen(
+        ["xpcshell",
+         os.path.join(mydir, "get_xpcom_info.js")],
+        stdout = subprocess.PIPE
+        )
+    retval = popen.wait()
+    assert retval == 0
+    comsd, os_target, xpcomabi = popen.stdout.read().splitlines()
+    return dict(comsd = comsd,
+                os_target = os_target,
+                xpcomabi = xpcomabi)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -74,6 +95,7 @@ if __name__ == "__main__":
         print "    install - install to the given profile"
         print "    uninstall - uninstall from the given profile"
         print "    build-xpi - build an xpi of the addon"
+        print "    build-components - build C++ XPCOM components"
         print
         sys.exit(1)
 
@@ -172,6 +194,46 @@ if __name__ == "__main__":
                 arcpath = abspath[len(path_to_extension_root)+1:]
                 zf.write(abspath, arcpath)
         print "Created %s." % zfname
+    elif cmd == "build-components":
+        if "TOPSRCDIR" not in os.environ:
+            print ("Please set the TOPSRCDIR environment variable "
+                   "to the root of your mozilla-central checkout.")
+            sys.exit(1)
+        if "OBJDIR" not in os.environ:
+            print ("Please set the OBJDIR envirionment variable "
+                   "to the root of your objdir.")
+            sys.exit(1)
+        xpcominfo = get_xpcom_info(mydir)
+        topsrcdir = os.environ["TOPSRCDIR"]
+        objdir = os.environ["OBJDIR"]
+        comp_src_dir = os.path.join(mydir, "components")
+        rel_dest_dir = os.path.join("browser", "components", "ubiquity")
+        comp_dest_dir = os.path.join(topsrcdir, rel_dest_dir)
+        comp_xpi_dir = os.path.join(objdir, "dist", "xpi-stage",
+                                    "ubiquity", "components")
+        comp_plat_dir = os.path.join(
+            mydir, "ubiquity", "platform",
+            "%(os_target)s_%(xpcomabi)s" % xpcominfo,
+            "components",
+            )
+
+        clear_dir(comp_dest_dir)
+        clear_dir(comp_xpi_dir)
+        clear_dir(comp_plat_dir)
+
+        shutil.copytree(comp_src_dir, comp_dest_dir)
+        run_program([os.path.join(topsrcdir, "build", "autoconf",
+                                  "make-makefile"),
+                     "-t", topsrcdir,
+                     rel_dest_dir],
+                    cwd=objdir)
+        run_program(["make"],
+                    cwd=os.path.join(objdir, rel_dest_dir))
+
+        shutil.copytree(comp_xpi_dir, comp_plat_dir)
+        for filename in os.listdir(comp_xpi_dir):
+            shutil.copy(os.path.join(comp_xpi_dir, filename),
+                        xpcominfo["comsd"])
     else:
         print "Unknown command '%s'" % cmd
         sys.exit(1)

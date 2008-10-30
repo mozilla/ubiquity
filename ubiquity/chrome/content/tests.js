@@ -1496,3 +1496,52 @@ function testUtilsTrim() {
   // Taken from http://www.somacon.com/p355.php.
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
+
+function testUbiquityComponent() {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
+
+  if (typeof(ubiquity) == "undefined")
+    // Right now nsUbiquity is an optional component, and if
+    // it doesn't exist, let's just skip this test.
+
+    // TODO: We should really add a skipped-test exception or
+    // return code...
+    return;
+
+  ubiquity = ubiquity.getService();
+  ubiquity = ubiquity.QueryInterface(Ci.nsIUbiquity);
+  this.assert(ubiquity.add(1,2) == 4,
+              "nsIUbiquity.add() must work.");
+  var errorToThrow = new Error("testing");
+  var errorCaught = null;
+  try {
+    ubiquity.throwArg(errorToThrow);
+  } catch (e) {
+    errorCaught = e;
+  }
+  this.assert(errorCaught == errorToThrow,
+              "nsIUbiquity.throwArg() must work.");
+
+  var sandbox = Components.utils.Sandbox("http://www.foo.com");
+  ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, sandbox);
+  this.assert(sandbox.a == 1,
+              "nsIUbiquity.evalInSandbox() must work.");
+
+  errorCaught = null;
+  try {
+    ubiquity.evalInSandbox("throw new Error('hi')",
+                           "nothing.js",
+                           1,
+                           sandbox);
+  } catch (e) {
+    errorCaught = e;
+  }
+  this.assert(errorCaught.message == 'hi',
+              "nsIUbiquity.evalInSandbox() must throw exceptions");
+
+  ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1, sandbox);
+  this.assert(sandbox.k == 1,
+              "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
+}

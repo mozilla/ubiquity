@@ -217,6 +217,103 @@ function isAddress( query, callback ) {
   });
 }
 
+/*
+ * Noun type for searching links on the awesomebar database.
+ * Right now, the suggestion returned is:
+ *  -- text: title of the url
+ *  -- html: the link
+ *  -- data: the favicon
+ *  
+ *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html) 
+ */
+noun_type_awesomebar = {
+  
+  _getHistoryLinks: function(partialSearch, onSearchComplete) {
+        function AutoCompleteInput(aSearches) {
+            this.searches = aSearches;
+        }
+        AutoCompleteInput.prototype = {
+            constructor: AutoCompleteInput,
+
+            searches: null,
+
+            minResultsForPopup: 0,
+            timeout: 10,
+            searchParam: "",
+            textValue: "",
+            disableAutoComplete: false,
+            completeDefaultIndex: false,
+
+            get searchCount() {
+                return this.searches.length;
+            },
+
+            getSearchAt: function(aIndex) {
+                return this.searches[aIndex];
+            },
+
+            onSearchBegin: function() {},
+            onSearchComplete: function() {},
+
+            popupOpen: false,
+
+            popup: {
+                setSelectedIndex: function(aIndex) {},
+                invalidate: function() {},
+
+                // nsISupports implementation
+                QueryInterface: function(iid) {
+                    if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompletePopup)) return this;
+
+                    throw Components.results.NS_ERROR_NO_INTERFACE;
+                }
+            },
+
+            // nsISupports implementation
+            QueryInterface: function(iid) {
+                if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompleteInput)) return this;
+
+                throw Components.results.NS_ERROR_NO_INTERFACE;
+            }
+        }
+
+        var controller = Components.classes["@mozilla.org/autocomplete/controller;1"].getService(Components.interfaces.nsIAutoCompleteController);
+
+        var input = new AutoCompleteInput(["history"]);
+        controller.input = input;
+
+        input.onSearchComplete = function() {
+            onSearchComplete(controller);
+        };
+
+        controller.startSearch(partialSearch);
+  },
+  
+  _getLinks: function(controller, callback) {
+      var links = [];
+
+      for (var i = 0; i < controller.matchCount; i++) {
+        var url = controller.getValueAt(i);
+        var title = controller.getCommentAt(i);
+        if (title.length == 0) { title = url; }
+
+        var favicon = controller.getImageAt(i);
+    
+        callback( CmdUtils.makeSugg(url, title, favicon) );
+    }
+  },
+  name: "url",
+  _links: null,
+  suggest: function(part, html, callback){
+      var onSearchComplete = function(controller) {
+         noun_type_awesomebar._getLinks(controller, callback);
+      };
+
+      this._getHistoryLinks(part, onSearchComplete);
+  }
+}
+
+
 var noun_type_async_address = {
   _name: "address(async)",
   // TODO caching
