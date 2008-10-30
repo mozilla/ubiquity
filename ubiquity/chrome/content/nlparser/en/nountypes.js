@@ -82,11 +82,11 @@ var noun_type_contact = {
       if (c.match(text, "i"))
 	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
-
-   if(/[A-Za-z0-9_.-]+@([A-Za-z0-9_.-]+\.)+[A-Za-z]{2,4}/.test(text)){
-      suggestions.push(CmdUtils.makeSugg(text));
-   }
-
+    
+    //uses the email noun to see if the text is a valid email
+    suggs = noun_type_email.suggest(text, html)
+    suggs.length > 0 ? suggestions.push(suggs[0]) : null
+    
     return suggestions.splice(0, 5);
   }
 };
