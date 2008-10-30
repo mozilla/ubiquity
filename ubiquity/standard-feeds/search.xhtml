@@ -844,7 +844,7 @@ CmdUtils.CreateCommand({
         text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
         text = text.replace(/(1:)/g, "<br/>$&");
         text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
-        text = text.replace(/\[.*?\]/g, "");
+        text = text.replace(/\[[^\]]*\]/g, "");
 
         pblock.innerHTML = text;
       });
