@@ -8,6 +8,8 @@ include $(DEPTH)/config/autoconf.mk
 MODULE = ubiquity
 XPIDL_MODULE  = ubiquity
 
+XPI_NAME = ubiquity
+
 XPIDLSRCS = nsIUbiquity.idl
 
 include $(topsrcdir)/config/rules.mk

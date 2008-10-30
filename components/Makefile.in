@@ -7,4 +7,10 @@ include $(DEPTH)/config/autoconf.mk
 
 DIRS = public src
 
+XPI_NAME = ubiquity
+INSTALL_EXTENSION_ID = ubiquity-components@labs.mozilla.com
+XPI_PKGNAME = ubiquity-components
+
+DIST_FILES = install.rdf
+
 include $(topsrcdir)/config/rules.mk

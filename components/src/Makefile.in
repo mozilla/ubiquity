@@ -12,6 +12,8 @@ USE_STATIC_LIBS = 1
 #FORCE_SHARED_LIB = 1
 #FORCE_USE_PIC = 1
 
+XPI_NAME = ubiquity
+
 REQUIRES	= \
 		  xpcom \
 		  string \

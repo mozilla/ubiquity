@@ -11,6 +11,10 @@ from ConfigParser import ConfigParser
 # located.
 EXT_SUBDIR = "ubiquity"
 
+def clear_dir(dirname):
+    if os.path.exists(dirname) and os.path.isdir(dirname):
+        shutil.rmtree(dirname)
+
 def find_profile_dir(name):
     """
     Given the name of a Firefox profile, attempts to find the absolute
@@ -65,6 +69,19 @@ def run_program(args, **kwargs):
 
 def run_python_script(args):
     run_program([sys.executable] + args)
+
+def get_xpcom_info(mydir):
+    popen = subprocess.Popen(
+        ["xpcshell",
+         os.path.join(mydir, "get_xpcom_info.js")],
+        stdout = subprocess.PIPE
+        )
+    retval = popen.wait()
+    assert retval == 0
+    comsd, os_target, xpcomabi = popen.stdout.read().splitlines()
+    return dict(comsd = comsd,
+                os_target = os_target,
+                xpcomabi = xpcomabi)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -186,15 +203,24 @@ if __name__ == "__main__":
             print ("Please set the OBJDIR envirionment variable "
                    "to the root of your objdir.")
             sys.exit(1)
+        xpcominfo = get_xpcom_info(mydir)
         topsrcdir = os.environ["TOPSRCDIR"]
         objdir = os.environ["OBJDIR"]
-        ubiqdir = mydir
-        comp_src_dir = os.path.join(ubiqdir, "components")
+        comp_src_dir = os.path.join(mydir, "components")
         rel_dest_dir = os.path.join("browser", "components", "ubiquity")
         comp_dest_dir = os.path.join(topsrcdir, rel_dest_dir)
+        comp_xpi_dir = os.path.join(objdir, "dist", "xpi-stage",
+                                    "ubiquity", "components")
+        comp_plat_dir = os.path.join(
+            mydir, "ubiquity", "platform",
+            "%(os_target)s_%(xpcomabi)s" % xpcominfo,
+            "components",
+            )
 
-        if os.path.exists(comp_dest_dir) and os.path.isdir(comp_dest_dir):
-            shutil.rmtree(comp_dest_dir)
+        clear_dir(comp_dest_dir)
+        clear_dir(comp_xpi_dir)
+        clear_dir(comp_plat_dir)
+
         shutil.copytree(comp_src_dir, comp_dest_dir)
         run_program([os.path.join(topsrcdir, "build", "autoconf",
                                   "make-makefile"),
@@ -203,6 +229,11 @@ if __name__ == "__main__":
                     cwd=objdir)
         run_program(["make"],
                     cwd=os.path.join(objdir, rel_dest_dir))
+
+        shutil.copytree(comp_xpi_dir, comp_plat_dir)
+        for filename in os.listdir(comp_xpi_dir):
+            shutil.copy(os.path.join(comp_xpi_dir, filename),
+                        xpcominfo["comsd"])
     else:
         print "Unknown command '%s'" % cmd
         sys.exit(1)
