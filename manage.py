@@ -234,6 +234,11 @@ if __name__ == "__main__":
         for filename in os.listdir(comp_xpi_dir):
             shutil.copy(os.path.join(comp_xpi_dir, filename),
                         xpcominfo["comsd"])
+
+        for filename in ["compreg.dat", "xpti.dat"]:
+            fullpath = os.path.join(xpcominfo["comsd"], filename)
+            if os.path.exists(fullpath):
+                os.unlink(fullpath)
     else:
         print "Unknown command '%s'" % cmd
         sys.exit(1)
