@@ -17,6 +17,7 @@ function findGmailTab() {
   return null;
 }
 
+// TODO: Should also use the mailto application mapping.
 function detectEmailProvider() {
   var domains = {
     "mail.google.com":0,
