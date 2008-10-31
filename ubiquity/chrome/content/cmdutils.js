@@ -409,25 +409,35 @@ CmdUtils.getHiddenWindow = function getHiddenWindow() {
                    .hiddenDOMWindow;
 }
 
-CmdUtils.getWindowSnapshot = function getWindowShapshot(window, callback) {
-  var top = 0;
-  var left = 0;
-
-  var hiddenWindow = CmdUtils.getHiddenWindow();
-  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
-
-  var body = window.document.body;
-
-  var width = jQuery(body).width();
-  var height = window.innerHeight+110;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  var ctx = canvas.getContext( "2d" );
-  ctx.drawWindow( window, left, top, width, height, "rgb(255,255,255)" );
-  callback( canvas.toDataURL() );
+CmdUtils.getTabSnapshot = function getTabSnapshot( tab, options ) {
+  var win = tab.document.defaultView;
+  return CmdUtils.getWindowSnapshot( win, options );
 }
+
+CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {  
+  if( !options ) options = {};
+    
+  var hiddenWindow = CmdUtils.getHiddenWindow();
+  var thumbnail = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  
+  width = options.width || 200; // Default to 200px width
+  
+  var widthScale =  width / win.innerWidth;
+  var aspectRatio = win.innerHeight / win.innerWidth;
+  
+  thumbnail.mozOpaque = true;
+  thumbnail.width = width;
+  thumbnail.height = thumbnail.width * aspectRatio;
+  var ctx = thumbnail.getContext("2d");
+  ctx.scale(widthScale, widthScale);
+  ctx.drawWindow(win, win.scrollX, win.scrollY,
+                 win.innerWidth, win.innerWidth, "rgb(255,255,255)");
+
+  var data = thumbnail.toDataURL("image/jpeg", "quality=80");
+  if(options.callback) options.callback( imgData );
+  else return data;
+}
+
 
 CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var hiddenWindow = CmdUtils.getHiddenWindow();
@@ -436,7 +446,7 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
 
   var img = new hiddenWindow.Image();
-  img.src = url;//"http://www.google.com/logos/olympics08_opening.gif";
+  img.src = url;
   img.addEventListener("load", function(){
     canvas.width = img.width;
     canvas.height = img.height;
@@ -444,7 +454,7 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
     ctx.drawImage( img, 0, 0 );
 
     callback( canvas.toDataURL() );
-		       }, true);
+	}, true);
 }
 
 // ---------------------------
