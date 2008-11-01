@@ -181,7 +181,8 @@ SuggestionMemory.openDatabase = function openDatabase(file) {
   var connection = null;
   try {
     connection = _storSvc.openDatabase(file);
-    if (file.fileSize == 0) {
+    if (file.fileSize == 0 ||
+        !connection.tableExists("ubiquity_suggestion_memory")) {
       // empty file? needs initialization!
       connection.executeSimpleSQL(SQLITE_SCHEMA);
     }
