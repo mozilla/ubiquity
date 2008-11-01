@@ -17,6 +17,38 @@ function findGmailTab() {
   return null;
 }
 
+// TODO: Should also use the mailto application mapping.
+function detectEmailProvider() {
+  var domains = {
+    "mail.google.com":0,
+    "mail.yahoo.com":0,
+    "mail.aol.com":0,
+    "hotmail.com":0,
+  }
+  
+  var max = { domain: "", hits: 0 };
+  totalHits = 0;
+  
+  for( domain in domains){
+    hits = Utils.History.visitsToDomain( domain );
+    domains[domain] = hits;
+    totalHits += hits;
+    
+    if( max.hits <= hits ) {
+      max.domain = domain;
+      max.hits = hits;
+    }
+    
+  }
+  
+  max.ratio = max.hits / totalHits;
+  
+  if( max.ratio > .75 )
+    return max.domain;
+  return null;  
+}
+
+
 CmdUtils.CreateCommand({
   name: "email",
   takes: {"message": noun_arb_text},
@@ -138,6 +170,7 @@ function gmailChecker(callback) {
     });
   });
 }
+
 CmdUtils.CreateCommand({
   name: "last-email",
   icon: "chrome://ubiquity/skin/icons/email_open.png",
@@ -187,3 +220,10 @@ CmdUtils.CreateCommand({
     displayMessage(name.text);
   }
 });
+
+CmdUtils.CreateCommand({
+  name: "detect-email-provider",
+  execute: function (){
+    displayMessage( detectEmailProvider() );
+  }
+})

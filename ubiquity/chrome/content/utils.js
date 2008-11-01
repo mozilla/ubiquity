@@ -378,3 +378,30 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
 Utils.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
+
+
+Utils.History = {
+  visitsToDomain : function visitsToDomain( domain ) {
+      var Cc = Components.classes;
+      var Ci = Components.interfaces;
+      var hs = Cc["@mozilla.org/browser/nav-history-service;1"].
+               getService(Ci.nsINavHistoryService);
+
+      var query = hs.getNewQuery();
+      var options = hs.getNewQueryOptions();
+
+      options.maxResults = 10;
+      query.domain = domain;    
+        
+      // execute query
+      var result = hs.executeQuery(query, options );
+      var root = result.root;
+      root.containerOpen = true;
+      var count = 0;
+      for( var i=0; i < root.childCount; ++i ) {
+        place = root.getChild( i );
+        count += place.accessCount;
+      }
+    return count;
+  }
+}
