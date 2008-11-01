@@ -77,6 +77,15 @@ function SuggestionMemory(id, connection) {
   this._init(id, connection);
 }
 SuggestionMemory.prototype = {
+  _createStatement: function _createStatement(selectSql) {
+    try {
+      var selStmt = this._connection.createStatement(selectSql);
+      return selStmt;
+    } catch (e) {
+      throw new Error(this._connection.lastErrorString);
+    }
+  },
+
   _init: function(id, connection) {
     if (!connection)
       connection = _connectToDatabase();
@@ -101,7 +110,7 @@ SuggestionMemory.prototype = {
     let selectSql = "SELECT input, suggestion, score " +
 		    "FROM ubiquity_suggestion_memory " +
                     "WHERE id_string == ?1";
-    var selStmt = this._connection.createStatement(selectSql);
+    var selStmt = this._createStatement(selectSql);
     selStmt.bindUTF8StringParameter(0, this._id);
     while (selStmt.executeStep()) {
       let input = selStmt.getUTF8String(0);
@@ -127,7 +136,7 @@ SuggestionMemory.prototype = {
       this._table[input][chosenSuggestion] = 1;
       let insertSql = "INSERT INTO ubiquity_suggestion_memory " +
                       "VALUES (?1, ?2, ?3, 1)";
-      var insStmt = this._connection.createStatement(insertSql);
+      var insStmt = this._createStatement(insertSql);
       insStmt.bindUTF8StringParameter(0, this._id);
       insStmt.bindUTF8StringParameter(1, input);
       insStmt.bindUTF8StringParameter(2, chosenSuggestion);
@@ -141,7 +150,7 @@ SuggestionMemory.prototype = {
                        "SET score = ?1 " +
                        "WHERE id_string = ?2 AND input = ?3 AND " +
                        "suggestion = ?4");
-      var updStmt = this._connection.createStatement(updateSql);
+      var updStmt = this._createStatement(updateSql);
       updStmt.bindInt32Parameter(0, score);
       updStmt.bindUTF8StringParameter(1, this._id);
       updStmt.bindUTF8StringParameter(2, input);
