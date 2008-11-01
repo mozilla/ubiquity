@@ -1505,10 +1505,7 @@ function testUbiquityComponent() {
   if (typeof(ubiquity) == "undefined")
     // Right now nsUbiquity is an optional component, and if
     // it doesn't exist, let's just skip this test.
-
-    // TODO: We should really add a skipped-test exception or
-    // return code...
-    return;
+    throw new this.SkipTestError();
 
   ubiquity = ubiquity.getService();
   ubiquity = ubiquity.QueryInterface(Ci.nsIUbiquity);

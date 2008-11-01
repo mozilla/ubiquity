@@ -56,6 +56,10 @@ TestCase.prototype = {
   assert : function(condition, msg) {
     if (!condition)
       throw new AssertionError(msg);
+  },
+
+  // Exception to throw when we want to skip a test.
+  SkipTestError : function() {
   }
 };
 
@@ -65,6 +69,11 @@ function HtmlTestResponder(outputElement) {
 
 HtmlTestResponder.prototype = {
   onStartTest : function(test) {
+  },
+
+  onSkipTest : function(test, e) {
+    var html = "<p>Skipping test " + test.name + ".</p>";
+    this._output.innerHTML += html;
   },
 
   onException : function(test, e) {
@@ -77,12 +86,15 @@ HtmlTestResponder.prototype = {
     this._output.innerHTML += html;
   },
 
-  onFinished : function(successes, failures) {
+  onFinished : function(successes, failures, skips) {
     var total = successes + failures;
 
     var html = ("<p>" + successes + " out of " +
                 total + " tests successful (" + failures +
                 " failed).</p>");
+
+    if (skips)
+      html += "<p>Additionally, " + skips + " test(s) were skipped.</p>";
 
     this._output.innerHTML += html;
   }
@@ -107,6 +119,7 @@ TestSuite.prototype = {
   start : function() {
     var successes = 0;
     var failures = 0;
+    var skips = 0;
 
     var tests = this.getTests(this._parent);
 
@@ -120,6 +133,9 @@ TestSuite.prototype = {
 
         test.run();
         successes += 1;
+      } catch(e if e instanceof TestCase.prototype.SkipTestError) {
+        this._responder.onSkipTest(test, e);
+        skips += 1;
       } catch (e) {
         this._responder.onException(test, e);
         failures += 1;
@@ -128,6 +144,6 @@ TestSuite.prototype = {
       // app-specific code here.
       suggestionMemoryTeardown();
     }
-    this._responder.onFinished(successes, failures);
+    this._responder.onFinished(successes, failures, skips);
   }
 };
