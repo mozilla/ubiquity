@@ -73,56 +73,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// Commented out since skins functionality is not completely done.
-// //TODO: update this
-// CmdUtils.CreateCommand({
-//   name: "skin",
-//   preview: "Changes your current Ubiquity skin.",
-//   description: "Changes what skin you're using for Ubiquity.",
-//   takes: {"skin name": noun_arb_text},
-//   execute: function(directObj){
-//     if(!directObj.text) {
-//       Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
-//       return;
-//     }
-//
-//     //TODO style guide
-//     //TODO: preview doesn't change
-//     //TODO: changes affect web page
-//
-//     var newSkinName = directObj.text;
-//
-//     try {
-//       var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
-//         .getService(Components.interfaces.nsIStyleSheetService);
-//
-//       var oldSkinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
-//       var skinFolderUrl = "chrome://ubiquity/skin/skins/";
-//       var oldBrowserCss = Utils.url(skinFolderUrl + oldSkinName + "/browser.css");
-//       var oldPreviewCss = Utils.url(skinFolderUrl + oldSkinName + "/preview.css");
-//
-//       var browserCss = Utils.url(skinFolderUrl + newSkinName + "/browser.css");
-//       var previewCss = Utils.url(skinFolderUrl + newSkinName + "/preview.css");
-//
-//       sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
-//       sss.loadAndRegisterSheet(previewCss, sss.USER_SHEET);
-//
-//       try {
-//         // this can fail and the rest still work
-//         if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
-//           sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
-//         if(sss.sheetRegistered(oldPreviewCss, sss.USER_SHEET))
-//           sss.unregisterSheet(oldPreviewCss, sss.USER_SHEET);
-//       } catch(e) {
-//         // do nothing
-//       }
-//
-//       Application.prefs.setValue("extensions.ubiquity.skin", newSkinName);
-//     } catch(e) {
-//       displayMessage("Error applying skin: " + e);
-//     }
-//   }
-// });
 
 function startup_openUbiquityWelcomePage()
 {
