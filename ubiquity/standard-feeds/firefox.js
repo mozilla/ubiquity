@@ -17,10 +17,10 @@ CmdUtils.CreateCommand({
 
   preview: function( pblock, tab ) {
     var tabName = tab.text;
-    
+
     var tabs = noun_type_tab.getTabs();
     var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
-    
+
     if( tabName.length > 1 ){
       pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
       pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
@@ -52,7 +52,7 @@ CmdUtils.CreateCommand({
 
     var tabs = noun_type_tab.getTabs();
     var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
-    
+
     if( tabName.length > 1 ) {
       pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
       pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );

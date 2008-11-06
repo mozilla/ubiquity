@@ -62,7 +62,24 @@ SandboxFactory.prototype = {
     return sandbox;
   },
 
-  evalInSandbox: function evalInSandbox(code, sandbox) {
-    Components.utils.evalInSandbox(code, sandbox);
+  evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
+    var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"];
+
+    if (typeof(ubiquity) == "undefined")
+      Components.utils.evalInSandbox(code, sandbox);
+    else {
+      ubiquity = ubiquity.getService();
+      ubiquity = ubiquity.QueryInterface(Components.interfaces.nsIUbiquity);
+      let currIndex = 0;
+      for (let i = 0; i < codeSections.length; i++) {
+        let section = codeSections[i];
+        ubiquity.evalInSandbox(code.slice(currIndex,
+                                          currIndex + section.length),
+                               section.filename,
+                               1,
+                               sandbox);
+        currIndex += section.length;
+      }
+    }
   }
 };

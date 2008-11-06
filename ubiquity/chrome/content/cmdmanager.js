@@ -210,10 +210,11 @@ CommandSource.prototype = {
 
       if (typeof(codeSource.id) == "undefined")
         throw new Error("Code source ID is undefined for code: " + code);
-      this._codeCache[codeSource.id] = code;
+      this._codeCache[codeSource.id] = {code: code,
+                                        codeSections: codeSource.codeSections};
 
       if (!(codeSource.id in prevCodeCache) ||
-          prevCodeCache[codeSource.id] != code)
+          prevCodeCache[codeSource.id].code != code)
         shouldLoadCommands = true;
     }
 
@@ -232,11 +233,17 @@ CommandSource.prototype = {
 
     for (var codeSource in this._codeSources) {
       var id = codeSource.id;
-      var code = this._codeCache[id];
+      var code = this._codeCache[id].code;
+      var codeSections = this._codeCache[id].codeSections;
       sandboxes[id] = this._sandboxFactory.makeSandbox(codeSource);
 
       try {
-        this._sandboxFactory.evalInSandbox(code, sandboxes[id]);
+        if (!codeSections)
+          codeSections = [{length: code.length,
+                           filename: id}];
+        this._sandboxFactory.evalInSandbox(code,
+                                           sandboxes[id],
+                                           codeSections);
       } catch (e) {
         this._messageService.displayMessage(
           {text: "An exception occurred while loading code.",
