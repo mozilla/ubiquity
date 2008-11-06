@@ -52,6 +52,6 @@ var PrefCommands = {
   },
 
   get id() {
-    return "preferences:" + this.COMMANDS_PREF;
+    return "data:application/x-javascript," + escape(this.getCode());
   }
 };
