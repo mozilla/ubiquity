@@ -1546,3 +1546,11 @@ function testUbiquityComponent() {
   this.assert(sandbox.k == 1,
               "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
 }
+
+function testXmlScriptCommandsParser() {
+  Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js");
+  var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing>]]></script></foo>');
+  this.assert(code.length == 1);
+  this.assert(code[0].lineNumber == 2);
+  this.assert(code[0].code == 'testing>');
+}
