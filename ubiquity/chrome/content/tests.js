@@ -1549,8 +1549,8 @@ function testUbiquityComponent() {
 
 function testXmlScriptCommandsParser() {
   Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js");
-  var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing>]]></script></foo>');
+  var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing\n\n\n>]]></script></foo>');
   this.assert(code.length == 1);
-  this.assert(code[0].lineNumber == 2);
-  this.assert(code[0].code == 'testing>');
+  this.assert(code[0].lineNumber == 2, "hi");
+  this.assert(code[0].code == 'testing\n\n\n>');
 }

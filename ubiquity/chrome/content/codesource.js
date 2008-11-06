@@ -47,7 +47,8 @@ function MixedCodeSourceCollection(headerSources,
       code = headerCs.getCode();
       headerCode += code;
       headerCodeSections.push({length: code.length,
-                               filename: headerCs.id});
+                               filename: headerCs.id,
+                               lineNumber: 1});
     }
 
     let footerCode = '';
@@ -56,15 +57,20 @@ function MixedCodeSourceCollection(headerSources,
       code = footerCs.getCode();
       footerCode += code;
       footerCodeSections.push({length: code.length,
-                               filename: footerCs.id});
+                               filename: footerCs.id,
+                               lineNumber: 1});
     }
 
     for (bodyCs in bodySources) {
       code = bodyCs.getCode();
       let codeSections = [];
       codeSections = codeSections.concat(headerCodeSections);
-      codeSections.push({length: code.length,
-                         filename: bodyCs.id});
+      if (bodyCs.codeSections)
+        codeSections = codeSections.concat(bodyCs.codeSections);
+      else
+        codeSections.push({length: code.length,
+                           filename: bodyCs.id,
+                           lineNumber: 1});
       codeSections = codeSections.concat(footerCodeSections);
       let code = headerCode + code + footerCode;
       yield new StringCodeSource(code, bodyCs.id, bodyCs.dom,
@@ -156,6 +162,7 @@ LocalUriCodeSource.prototype = {
 
 function XhtmlCodeSource(codeSource) {
   var dom;
+  var codeSections;
 
   function DomUnavailableError() {};
 
@@ -166,6 +173,9 @@ function XhtmlCodeSource(codeSource) {
 
   this.__defineGetter__("id",
                         function() { return codeSource.id; });
+
+  this.__defineGetter__("codeSections",
+                        function() { return codeSections; });
 
   this.getCode = function XHTMLCS_getCode() {
     var code = codeSource.getCode();
@@ -182,13 +192,23 @@ function XhtmlCodeSource(codeSource) {
       // DOM back, which contains no command code.
       dom = parser.parseFromString(code, "text/xml");
 
+      codeSections = [];
       var newCode = "";
-      function addCode() { newCode += this.text; }
-      jQuery("script.commands", dom).each(addCode);
+      var xmlparser = {};
+      Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js", xmlparser);
+      var info = xmlparser.parseCodeFromXml(code);
+      for (var i = 0; i < info.length; i++) {
+        newCode += info[i].code;
+        codeSections.push({length: info[i].code.length,
+                           filename: codeSource.id,
+                           lineNumber: info[i].lineNumber});
+      }
+
       return newCode;
     }
 
     dom = undefined;
+    codeSections = undefined;
     return code;
   };
 }

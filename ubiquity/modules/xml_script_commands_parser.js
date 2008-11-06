@@ -47,6 +47,7 @@ SAXEventHandler = function(parser) {
                                                  // been returned in the text events. It is reset  when a non-text
                                                  //event is fired and should be read at that time
     this.parser = parser;
+    this.firstCodeLine = null;
     this.insideScriptCommands = false;
     this.code = [];
 }  // end function SAXEventHandler
@@ -213,6 +214,7 @@ SAXEventHandler.prototype.startElement = function(name, atts) {
     //place startElement event handling code below this line
 
     if (name.toLowerCase() == "script" && atts.getValueByName("class") == "commands") {
+      this.firstCodeLine = this.parser.getLineNumber();
       this.insideScriptCommands = true;
     }
 
@@ -295,7 +297,6 @@ SAXEventHandler.prototype.startCDATA = function() {
     this._handleCharacterData();
 
     //place startCDATA event handling code below this line
-
 
 }  // end function startCDATA
 
@@ -394,7 +395,7 @@ SAXEventHandler.prototype._fullCharacterDataReceived = function(fullCharacterDat
     //place character (text) event handling code below this line
 
   if (this.insideScriptCommands) {
-    this.code.push({lineNumber: this.parser.getLineNumber(),
+    this.code.push({lineNumber: this.firstCodeLine,
                     code: fullCharacterData});
   }
 };  // end function _fullCharacterDataReceived

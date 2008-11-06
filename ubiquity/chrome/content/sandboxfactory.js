@@ -76,7 +76,7 @@ SandboxFactory.prototype = {
         ubiquity.evalInSandbox(code.slice(currIndex,
                                           currIndex + section.length),
                                section.filename,
-                               1,
+                               section.lineNumber,
                                sandbox);
         currIndex += section.length;
       }
