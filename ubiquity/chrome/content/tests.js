@@ -190,9 +190,13 @@ function testMixedCodeSourceCollectionWorks() {
 
   this.assert(codeSources[0].getCode() == 'abcef');
   this.assert(codeSources[0].id == 'c');
+  this.assert(codeSources[0].codeSections[1].filename == 'b');
+  this.assert(codeSources[0].codeSections[1].length == 1);
 
   this.assert(codeSources[1].getCode() == 'abdef');
   this.assert(codeSources[1].id == 'd');
+  this.assert(codeSources[1].codeSections[2].filename == 'd');
+  this.assert(codeSources[1].codeSections[2].length == 1);
 }
 
 function testLinkRelCodeSourceWorks() {

@@ -39,27 +39,45 @@ function MixedCodeSourceCollection(headerSources,
                                    bodySources,
                                    footerSources) {
   this.__iterator__ = function MCSC_iterator() {
+    let code;
     let headerCode = '';
+    let headerCodeSections = [];
+
     for (headerCs in headerSources) {
-      headerCode += headerCs.getCode();
+      code = headerCs.getCode();
+      headerCode += code;
+      headerCodeSections.push({length: code.length,
+                               filename: headerCs.id});
     }
 
     let footerCode = '';
+    let footerCodeSections = [];
     for (footerCs in footerSources) {
-      footerCode += footerCs.getCode();
+      code = footerCs.getCode();
+      footerCode += code;
+      footerCodeSections.push({length: code.length,
+                               filename: footerCs.id});
     }
 
     for (bodyCs in bodySources) {
-      let code = headerCode + bodyCs.getCode() + footerCode;
-      yield new StringCodeSource(code, bodyCs.id, bodyCs.dom);
+      code = bodyCs.getCode();
+      let codeSections = [];
+      codeSections = codeSections.concat(headerCodeSections);
+      codeSections.push({length: code.length,
+                         filename: bodyCs.id});
+      codeSections = codeSections.concat(footerCodeSections);
+      let code = headerCode + code + footerCode;
+      yield new StringCodeSource(code, bodyCs.id, bodyCs.dom,
+                                 codeSections);
     }
   };
 }
 
-function StringCodeSource(code, id, dom) {
+function StringCodeSource(code, id, dom, codeSections) {
   this._code = code;
   this.id = id;
   this.dom = dom;
+  this.codeSections = codeSections;
 }
 
 StringCodeSource.prototype = {
