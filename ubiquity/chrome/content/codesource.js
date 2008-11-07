@@ -164,10 +164,6 @@ function XhtmlCodeSource(codeSource) {
   var dom;
   var codeSections;
 
-  function DomUnavailableError() {};
-
-  this.DomUnavailableError = DomUnavailableError;
-
   this.__defineGetter__("dom",
                         function() { return dom ? dom : undefined; });
 
@@ -183,9 +179,9 @@ function XhtmlCodeSource(codeSource) {
     var trimmedCode = Utils.trim(code);
     if (trimmedCode.length > 0 &&
         trimmedCode[0] == "<") {
-      if (!XhtmlCodeSource.isAvailable())
-        throw new DomUnavailableError();
-      var parser = new DOMParser();
+      var klass = Components.classes["@mozilla.org/xmlextras/domparser;1"];
+      var parser = klass.createInstance(Components.interfaces.nsIDOMParser);
+
       // TODO: What if this fails?  Right now the behavior generally
       // seems ok simply because an exception doesn't get thrown here
       // if the XML isn't well-formed, we just get an error results
@@ -212,12 +208,3 @@ function XhtmlCodeSource(codeSource) {
     return code;
   };
 }
-
-XhtmlCodeSource.isAvailable = function isAvailable() {
-  try {
-    var parser = new DOMParser();
-  } catch (e if e instanceof ReferenceError) {
-    return false;
-  }
-  return true;
-};

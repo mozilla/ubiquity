@@ -108,24 +108,10 @@ function testXhtmlCodeSourceWorks() {
   var xcs = new XhtmlCodeSource(fakeSource);
 
   this.assert(xcs.id == "blah", "id must inherit");
-  if (XhtmlCodeSource.isAvailable()) {
-    var xcsCode = xcs.getCode();
-    this.assert(xcsCode == code,
-                "code must be '" + code + "' (is '" + xcsCode + "')");
-    this.assert(xcs.dom, "xcs.dom must be truthy.");
-  } else {
-    var excRaised = false;
-
-    try {
-      xcs.getCode();
-    } catch (e if e instanceof xcs.DomUnavailableError) {
-      excRaised = true;
-    }
-
-    this.assert(excRaised, "DomUnavailableError expected.");
-    this.assert(typeof(xcs.dom) == 'undefined',
-                "xcs.dom must be undefined");
-  }
+  var xcsCode = xcs.getCode();
+  this.assert(xcsCode == code,
+              "code must be '" + code + "' (is '" + xcsCode + "')");
+  this.assert(xcs.dom, "xcs.dom must be truthy.");
 }
 
 function testUtilsUrlWorksWithNsURI() {
