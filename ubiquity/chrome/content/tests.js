@@ -1517,25 +1517,13 @@ function getUbiquityComponent() {
 
 function testUbiquityComponent() {
   var ubiquity = getUbiquityComponent();
-  this.assert(ubiquity.add(1,2) == 4,
-              "nsIUbiquity.add() must work.");
-  var errorToThrow = new Error("testing");
-  var errorCaught = null;
-  try {
-    ubiquity.throwArg(errorToThrow);
-  } catch (e) {
-    errorCaught = e;
-  }
-  this.assert(errorCaught == errorToThrow,
-              "nsIUbiquity.throwArg() must work.");
-
   var sandbox = Components.utils.Sandbox("http://www.foo.com");
   ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, "1.8",
                          sandbox);
   this.assert(sandbox.a == 1,
               "nsIUbiquity.evalInSandbox() must work.");
 
-  errorCaught = null;
+  var errorCaught = null;
   try {
     ubiquity.evalInSandbox("throw new Error('hi')",
                            "nothing.js",
