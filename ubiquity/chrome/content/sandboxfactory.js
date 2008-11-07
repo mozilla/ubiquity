@@ -77,6 +77,7 @@ SandboxFactory.prototype = {
                                           currIndex + section.length),
                                section.filename,
                                section.lineNumber,
+                               "1.8",
                                sandbox);
         currIndex += section.length;
       }

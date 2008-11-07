@@ -66,6 +66,7 @@ nsUbiquity::ThrowArg(void)
 nsresult
 xpc_EvalInSandbox(JSContext *cx, JSObject *sandbox, const nsAString& source,
                   const char *filename, PRInt32 lineNo,
+                  JSVersion jsVersion,
                   PRBool returnStringOnly, jsval *rval)
 {
     // Implementation taken from js/src/xpconnect/src/xpccomponents.cpp
@@ -96,7 +97,7 @@ xpc_EvalInSandbox(JSContext *cx, JSObject *sandbox, const nsAString& source,
         return NS_ERROR_OUT_OF_MEMORY;
     }
 
-    JS_SetVersion(sandcx->GetJSContext(), JSVERSION_1_8);
+    JS_SetVersion(sandcx->GetJSContext(), jsVersion);
 
     nsresult rv = NS_OK;
 
@@ -178,7 +179,8 @@ xpc_EvalInSandbox(JSContext *cx, JSObject *sandbox, const nsAString& source,
 
 NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source,
                                         const char *filename,
-                                        PRInt32 lineNo)
+                                        PRInt32 lineNo,
+                                        const char *jsVersion)
 {
     // Implementation taken from js/src/xpconnect/src/xpccomponents.cpp
     // in mozilla-central and modified.
@@ -213,7 +215,7 @@ NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source,
     if(NS_FAILED(rv))
         return rv;
 
-    if (argc < 4)
+    if (argc < 5)
         return NS_ERROR_XPC_NOT_ENOUGH_ARGS;
 
     // The second argument is the sandbox object. It is required.
@@ -221,12 +223,17 @@ NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source,
     rv = cc->GetArgvPtr(&argv);
     if (NS_FAILED(rv))
         return rv;
-    if (JSVAL_IS_PRIMITIVE(argv[3]))
+    
+    JSVersion version = JS_StringToVersion(jsVersion);
+    if (version == JSVERSION_UNKNOWN)
+      return NS_ERROR_INVALID_ARG;
+
+    if (JSVAL_IS_PRIMITIVE(argv[4]))
         return NS_ERROR_INVALID_ARG;
-    JSObject *sandbox = JSVAL_TO_OBJECT(argv[3]);
+    JSObject *sandbox = JSVAL_TO_OBJECT(argv[4]);
 
     rv = xpc_EvalInSandbox(cx, sandbox, source, filename, lineNo,
-                           PR_FALSE, rval);
+                           version, PR_FALSE, rval);
 
     if (NS_SUCCEEDED(rv) && !JS_IsExceptionPending(cx))
         cc->SetReturnValueWasSet(PR_TRUE);

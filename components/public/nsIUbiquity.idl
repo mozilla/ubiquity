@@ -7,6 +7,7 @@ interface nsIUbiquity : nsISupports
   void throwArg(/* optional param */);
   void evalInSandbox(in AString source,
                      in string filename,
-                     in long lineNo
+                     in long lineNo,
+                     in string jsVersion
                      /* Sandbox param */);
 };

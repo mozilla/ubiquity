@@ -1501,7 +1501,7 @@ function testUtilsTrim() {
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
 
-function testUbiquityComponent() {
+function getUbiquityComponent() {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
   var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
@@ -1512,7 +1512,11 @@ function testUbiquityComponent() {
     throw new this.SkipTestError();
 
   ubiquity = ubiquity.getService();
-  ubiquity = ubiquity.QueryInterface(Ci.nsIUbiquity);
+  return ubiquity.QueryInterface(Ci.nsIUbiquity);
+}
+
+function testUbiquityComponent() {
+  var ubiquity = getUbiquityComponent();
   this.assert(ubiquity.add(1,2) == 4,
               "nsIUbiquity.add() must work.");
   var errorToThrow = new Error("testing");
@@ -1526,7 +1530,8 @@ function testUbiquityComponent() {
               "nsIUbiquity.throwArg() must work.");
 
   var sandbox = Components.utils.Sandbox("http://www.foo.com");
-  ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, sandbox);
+  ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, "1.8",
+                         sandbox);
   this.assert(sandbox.a == 1,
               "nsIUbiquity.evalInSandbox() must work.");
 
@@ -1535,6 +1540,7 @@ function testUbiquityComponent() {
     ubiquity.evalInSandbox("throw new Error('hi')",
                            "nothing.js",
                            1,
+                           "1.8",
                            sandbox);
   } catch (e) {
     errorCaught = e;
@@ -1542,9 +1548,33 @@ function testUbiquityComponent() {
   this.assert(errorCaught.message == 'hi',
               "nsIUbiquity.evalInSandbox() must throw exceptions");
 
-  ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1, sandbox);
+  ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1, "1.7",
+                         sandbox);
   this.assert(sandbox.k == 1,
               "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
+}
+
+function testUbiquityComponentAcceptsJsVersion() {
+  var ubiquity = getUbiquityComponent();
+  var sandbox = Components.utils.Sandbox("http://www.foo.com");
+  var wasExceptionThrown = false;
+
+  try {
+    ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1,
+                           "1.5", sandbox);
+  } catch (e) {
+    wasExceptionThrown = true;
+  }
+  this.assert(wasExceptionThrown);
+  wasExceptionThrown = false;
+
+  try {
+    ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1,
+                           "foo", sandbox);
+  } catch (e if e.result == Components.results.NS_ERROR_INVALID_ARG) {
+    wasExceptionThrown = true;
+  }
+  this.assert(wasExceptionThrown);
 }
 
 function testXmlScriptCommandsParser() {
