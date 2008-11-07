@@ -78,9 +78,6 @@ CommandManager.prototype = {
 								 previewBlock,
 								 this.__hilitedSuggestion);
     } catch (e) {
-      dump("ERROR!!!\n");
-      dump(e);
-      dump("\n");
       this.__msgService.displayMessage(
         {text: ("An exception occurred while previewing the command '" +
                 this.__lastInput + "'."),
