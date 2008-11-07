@@ -196,6 +196,7 @@ Ubiquity.prototype = {
     if (this.__showCount > 0)
       return;
 
+    this.__msgPanel.hidden = true;
     var context = this.__makeContext();
 
     if (this.__focusedElement)
@@ -242,5 +243,9 @@ Ubiquity.prototype = {
 
   closeWindow: function closeWindow(){
     this.__msgPanel.hidePopup();
+  },
+
+  get isWindowOpen() {
+    return this.__msgPanel.hidden;
   }
 };

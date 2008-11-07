@@ -142,7 +142,7 @@ function ubiquityKeydown(aEvent)
   //Open Ubiquity if the key pressed matches the shortcut key
   if (aEvent.keyCode == UBIQUITY_KEYCODE &&
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
-    if(gUbiquity.__msgPanel.hidden) {
+    if(gUbiquity.isWindowOpen) {
       gUbiquity.openWindow(anchor);
     } else {
       gUbiquity.closeWindow();
@@ -164,4 +164,3 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 window.addEventListener("load", ubiquitySetup, false);
 window.addEventListener("unload", ubiquityTeardown, false);
 window.addEventListener("keydown", ubiquityKeydown, true);
-window.addEventListener("popuphidden",function() { gUbiquity.__msgPanel.hidden = true; }, false);
