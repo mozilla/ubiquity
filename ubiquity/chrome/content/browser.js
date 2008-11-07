@@ -44,7 +44,7 @@ Components.utils.import("resource://ubiquity-modules/globals.js");
 
 function ubiquitySetup()
 {
-  UbiquitySetup.installDefaults();
+  UbiquitySetup.installDefaults(UbiquityGlobals);
 
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");

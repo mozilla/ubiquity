@@ -103,7 +103,10 @@ let UbiquitySetup = {
     return false;
   },
 
-  installDefaults: function installDefaults() {
+  installDefaults: function installDefaults(ubiquityGlobals) {
+    if (ubiquityGlobals.wereDefaultsInstalled)
+      return;
+
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
@@ -116,6 +119,8 @@ let UbiquitySetup = {
     LinkRelCodeSource.installDefaults(baseUri,
                                       baseLocalUri,
                                       this.STANDARD_FEEDS);
+
+    ubiquityGlobals.wereDefaultsInstalled = true;
   }
 };
 
