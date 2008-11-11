@@ -127,17 +127,11 @@ function ubiquityKeydown(aEvent)
     defaultKeyModifier = "CTRL";
   }
 
-  // If we're running in the development harness, don't use
-  // the normal keycode, b/c the normal keycode won't propagate
-  // down to the current tab.
-  if (window.location != "chrome://browser/content/browser.xul"){
-    UBIQUITY_KEYCODE = 68; // The character 'd'
-    UBIQUITY_KEYMODIFIER = "ALT";
-  }else{
-    UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32); //The space character
-    UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF, defaultKeyModifier);
-    anchor = anchor.selectedBrowser;
-  }
+  //The space character
+  UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
+  UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
+                                                    defaultKeyModifier);
+  anchor = anchor.selectedBrowser;
 
   //Open Ubiquity if the key pressed matches the shortcut key
   if (aEvent.keyCode == UBIQUITY_KEYCODE &&
