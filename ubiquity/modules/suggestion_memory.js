@@ -117,7 +117,7 @@ SuggestionMemory.prototype = {
       let suggestion = selStmt.getUTF8String(1);
       let score = selStmt.getUTF8String(2);
       if (!this._table[input])
-	this._table[input] = {};
+	      this._table[input] = {};
       this._table[input][suggestion] = score;
     }
     selStmt.finalize();
@@ -144,7 +144,7 @@ SuggestionMemory.prototype = {
       insStmt.finalize();
     }
     else {
-      let score = this._table[input][chosenSuggestion] + 1;
+      let score = parseInt(this._table[input][chosenSuggestion]) + 1;
       this._table[input][chosenSuggestion] = score;
       let updateSql = ("UPDATE ubiquity_suggestion_memory " +
                        "SET score = ?1 " +
