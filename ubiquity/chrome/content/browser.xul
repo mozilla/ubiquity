@@ -18,7 +18,7 @@
   sss.loadAndRegisterSheet(ios.newURI(uri, null, null), sss.USER_SHEET);
   </script>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/template.js"/>
+          src="resource://ubiquity-scripts/template.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/cmdutils.js"/>
   <script type="application/javascript;version=1.7"
