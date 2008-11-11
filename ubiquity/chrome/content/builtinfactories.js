@@ -155,29 +155,31 @@ function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
 }
 
 function makeBuiltinCodeSources(languageCode) {
-  var baseUri = UbiquitySetup.getBaseUri() + "chrome/content/";
+  var baseUri = UbiquitySetup.getBaseUri();
+  var baseChromeUri = baseUri + "chrome/content/";
+  var baseModulesUri = baseUri + "modules/";
 
   var headerCodeSources = [
-    new LocalUriCodeSource(baseUri + "utils.js"),
-    new LocalUriCodeSource(baseUri + "cmdutils.js")
+    new LocalUriCodeSource(baseModulesUri + "utils.js"),
+    new LocalUriCodeSource(baseChromeUri + "cmdutils.js")
   ];
   var bodyCodeSources = [
-    new LocalUriCodeSource(baseUri + "onstartup.js")
+    new LocalUriCodeSource(baseChromeUri + "onstartup.js")
   ];
   var footerCodeSources = [
-    new LocalUriCodeSource(baseUri + "final.js")
+    new LocalUriCodeSource(baseChromeUri + "final.js")
   ];
 
   if (languageCode == "jp") {
-    headerCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/nountypes.js"));
-    bodyCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/builtincmds.js"));
+    headerCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/nountypes.js"));
+    bodyCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/builtincmds.js"));
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(baseUri + "date.js"),
-      new LocalUriCodeSource(baseUri + "nlparser/en/nountypes.js")
+      new LocalUriCodeSource(baseChromeUri + "date.js"),
+      new LocalUriCodeSource(baseChromeUri + "nlparser/en/nountypes.js")
     ]);
     bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(baseUri + "builtincmds.js"),
+      new LocalUriCodeSource(baseChromeUri + "builtincmds.js"),
       new XhtmlCodeSource(PrefCommands)
     ]);
   }

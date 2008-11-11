@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 const LANG = "en";
 
 function FakeAnnSvc() {
