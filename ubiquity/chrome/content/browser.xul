@@ -22,8 +22,6 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/cmdutils.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/utils.js"/>
-  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/en/parser_plugin.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/jp/parser_plugin.js"/>

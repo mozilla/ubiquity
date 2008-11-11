@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["Utils"];
+
 var Utils = {};
 
 Utils.__globalObject = this;
@@ -391,8 +393,8 @@ Utils.History = {
       var options = hs.getNewQueryOptions();
 
       options.maxResults = 10;
-      query.domain = domain;    
-        
+      query.domain = domain;
+
       // execute query
       var result = hs.executeQuery(query, options );
       var root = result.root;

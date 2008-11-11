@@ -40,6 +40,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 var gUbiquity = null;
+
+Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
 
 function ubiquitySetup()

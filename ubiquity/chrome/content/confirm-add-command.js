@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 function getUrlParams() {
   var urlFragments = document.URL.split("?")[1];
   urlFragments = urlFragments.split("&");
