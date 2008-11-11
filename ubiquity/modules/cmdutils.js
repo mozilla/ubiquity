@@ -39,6 +39,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["CmdUtils"];
+
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
@@ -103,16 +107,16 @@ CmdUtils.setSelection = function setSelection(content, options) {
 
     var beforeText = currentValue.substring(0, focused.selectionStart);
     var afterText = currentValue.substring(focused.selectionEnd, currentValue.length);
-    
+
     var scrollTop = focused.scrollTop;
     var scrollLeft = focused.scrollLeft;
-    
+
     focused.value = beforeText + plainText + afterText;
     focused.focus();
 
     //put the cursor after the inserted text
     focused.setSelectionRange(selectionEnd, selectionEnd);
-    
+
     focused.scrollTop = scrollTop;
     focused.scrollLeft = scrollLeft;
   }
@@ -217,12 +221,12 @@ CmdUtils.log = function log(what) {
   var args = Array.prototype.slice.call(arguments);
   if(args.length == 0)
     return;
-  
+
   var logPrefix = "Ubiquity: ";
   var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
     .getService(Components.interfaces.nsIWindowMediator);
   var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-  
+
   if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
     args.unshift(logPrefix);
     browserWindow.Firebug.Console.logFormatted(args);
@@ -414,17 +418,17 @@ CmdUtils.getTabSnapshot = function getTabSnapshot( tab, options ) {
   return CmdUtils.getWindowSnapshot( win, options );
 }
 
-CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {  
+CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
   if( !options ) options = {};
-    
+
   var hiddenWindow = CmdUtils.getHiddenWindow();
   var thumbnail = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
-  
+
   width = options.width || 200; // Default to 200px width
-  
+
   var widthScale =  width / win.innerWidth;
   var aspectRatio = win.innerHeight / win.innerWidth;
-  
+
   thumbnail.mozOpaque = true;
   thumbnail.width = width;
   thumbnail.height = thumbnail.width * aspectRatio;
@@ -464,7 +468,7 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 
 /**
 * Saves a pair of username/password (or username/api key) to the password manager. You have to pass the name of your command
-* (or other identifier) as to the command like: 
+* (or other identifier) as to the command like:
 * CmdUtils.savePassword( {name:'my command', username:'myUserName', password:'gu3ssm3'} )
 */
 CmdUtils.savePassword = function savePassword( opts ){
@@ -473,7 +477,7 @@ CmdUtils.savePassword = function savePassword( opts ){
   //var loginInfo = new nsLoginInfo(hostname, formSubmitURL, httprealm, username, password, usernameField, passwordField);
   var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'UbiquityInformation' + opts.name, null, opts.username, opts.password, "", "");
 
-  
+
   passwordManager.addLogin(loginInfo);
 }
 
@@ -484,10 +488,10 @@ CmdUtils.savePassword = function savePassword( opts ){
 */
 CmdUtils.retrieveLogins = function retrieveLogins( name ){
   var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
-  
+
   var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
   var returnedLogins = [];
-  
+
   for each(login in logins){
     loginObj = {
       username: login.username,
@@ -798,16 +802,16 @@ CmdUtils.NounType.prototype = {
       // Input undefined or not a string
       return [];
     }
-    
+
     text = text.toLowerCase();
-    
+
     var possibleWords = [];
     if(typeof this._wordList == "function") {
       possibleWords = this._wordList();
     } else {
       possibleWords = this._wordList;
     }
-    
+
     var suggestions = [];
     possibleWords.forEach(function(word) {
       // Do the match in a non-case sensitive way

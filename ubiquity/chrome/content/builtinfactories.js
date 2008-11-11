@@ -162,7 +162,7 @@ function makeBuiltinCodeSources(languageCode) {
 
   var headerCodeSources = [
     new LocalUriCodeSource(baseModulesUri + "utils.js"),
-    new LocalUriCodeSource(baseChromeUri + "cmdutils.js")
+    new LocalUriCodeSource(baseModulesUri + "cmdutils.js")
   ];
   var bodyCodeSources = [
     new LocalUriCodeSource(baseChromeUri + "onstartup.js")

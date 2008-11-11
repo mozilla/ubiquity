@@ -35,6 +35,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+OrigCmdUtils = {};
+Components.utils.import("resource://ubiquity-modules/cmdutils.js",
+                        OrigCmdUtils);
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
 const LANG = "en";
@@ -246,6 +249,8 @@ FakeCommandSource.prototype = {
   }
 };
 
+var CmdUtils = {};
+
 CmdUtils.getSelection = function fake_getSelection(context) {
   if (context)
     if (context.textSelection)
@@ -259,6 +264,8 @@ CmdUtils.getHtmlSelection = function fake_getHtmlSelection(context) {
       return context.htmlSelection;
   return "";
 };
+
+CmdUtils.__proto__ = OrigCmdUtils.CmdUtils;
 
 function getNounList() {
   return [];

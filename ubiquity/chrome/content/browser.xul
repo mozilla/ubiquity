@@ -20,8 +20,6 @@
   <script type="application/javascript;version=1.7"
           src="resource://ubiquity-scripts/template.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/cmdutils.js"/>
-  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/en/parser_plugin.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/nlparser/jp/parser_plugin.js"/>
