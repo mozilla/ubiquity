@@ -158,6 +158,7 @@ function makeBuiltinCodeSources(languageCode) {
   var baseUri = UbiquitySetup.getBaseUri();
   var baseChromeUri = baseUri + "chrome/content/";
   var baseModulesUri = baseUri + "modules/";
+  var baseScriptsUri = baseUri + "scripts/";
 
   var headerCodeSources = [
     new LocalUriCodeSource(baseModulesUri + "utils.js"),
@@ -175,7 +176,7 @@ function makeBuiltinCodeSources(languageCode) {
     bodyCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/builtincmds.js"));
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(baseChromeUri + "date.js"),
+      new LocalUriCodeSource(baseScriptsUri + "date.js"),
       new LocalUriCodeSource(baseChromeUri + "nlparser/en/nountypes.js")
     ]);
     bodyCodeSources = bodyCodeSources.concat([
