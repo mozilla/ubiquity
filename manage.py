@@ -122,10 +122,10 @@ if __name__ == "__main__":
         run_python_script([os.path.join(this_dir, "systemtests.py")])
         print "All tests successful."
     elif cmd == "unittest":
-        if subprocess.call(["which", g_xpcshell_path],
-                           stdout=subprocess.PIPE) != 0:
-            print "You must have xpcshell on your PATH to run tests."
-            sys.exit(1)
+        #if subprocess.call(["which", g_xpcshell_path],
+        #                   stdout=subprocess.PIPE) != 0:
+        #    print "You must have xpcshell on your PATH to run tests."
+        #    sys.exit(1)
 
         xpcshell_args = [
             g_xpcshell_path,
@@ -204,11 +204,15 @@ if __name__ == "__main__":
     elif cmd == "build-components":
         if "TOPSRCDIR" not in os.environ:
             print ("Please set the TOPSRCDIR environment variable "
-                   "to the root of your mozilla-central checkout.")
+                   "to the root of your mozilla-central checkout. "
+                   "If you're on Windows, this should be a standard "
+                   "Windows-style path, NOT a unix-style path.")
             sys.exit(1)
         if "OBJDIR" not in os.environ:
             print ("Please set the OBJDIR envirionment variable "
-                   "to the root of your objdir.")
+                   "to the root of your objdir. "
+                   "If you're on Windows, this should be a standard "
+                   "Windows-style path, NOT a unix-style path.")
             sys.exit(1)
         xpcominfo = get_xpcom_info()
         topsrcdir = os.environ["TOPSRCDIR"]
@@ -229,10 +233,22 @@ if __name__ == "__main__":
         clear_dir(comp_plat_dir)
 
         shutil.copytree(comp_src_dir, comp_dest_dir)
-        run_program([os.path.join(topsrcdir, "build", "autoconf",
+
+        # Ensure that these paths are unix-like on Windows.
+	sh_pwd = subprocess.Popen(["sh", "-c", "pwd"],
+                                  cwd=topsrcdir,
+                                  stdout=subprocess.PIPE)
+        sh_pwd.wait()
+        unix_topsrcdir = sh_pwd.stdout.read().strip()
+        unix_rel_dest_dir = rel_dest_dir.replace("\\", "/")
+
+        # We're specifying 'perl' here because we have to for this
+        # to work on Windows.
+        run_program(["perl",
+                     os.path.join(topsrcdir, "build", "autoconf",
                                   "make-makefile"),
-                     "-t", topsrcdir,
-                     rel_dest_dir],
+                     "-t", unix_topsrcdir,
+                     unix_rel_dest_dir],
                     cwd=objdir)
         run_program(["make"],
                     cwd=os.path.join(objdir, rel_dest_dir))
