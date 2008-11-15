@@ -39,6 +39,7 @@
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 
 function onDocumentLoad() {
   // TODO: This isn't implemented very well; we're essentially
@@ -49,7 +50,7 @@ function onDocumentLoad() {
 
   var msgService = new AlertMessageService();
   var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(makeGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals, window);
   var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
   var cmdSource = new CommandSource(
     codeSources,

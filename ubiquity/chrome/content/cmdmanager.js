@@ -182,8 +182,6 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
       codeSources = new IterableCollection([codeSources]);
   }
 
-  if (sandboxFactory == undefined)
-    sandboxFactory = new SandboxFactory();
   this._sandboxFactory = sandboxFactory;
   this._codeSources = codeSources;
   this._messageService = messageService;

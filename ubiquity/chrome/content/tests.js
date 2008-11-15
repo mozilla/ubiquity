@@ -39,7 +39,9 @@ OrigCmdUtils = {};
 Components.utils.import("resource://ubiquity-modules/cmdutils.js",
                         OrigCmdUtils);
 Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 
+var globalObj = this;
 const LANG = "en";
 
 function FakeAnnSvc() {
@@ -383,7 +385,8 @@ function testCommandSourceOneCmdWorks() {
     id: 'test'
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -408,7 +411,9 @@ function testCommandSourceTwoCodeSourcesWork() {
   };
 
   var cmdSrc = new CommandSource([testCodeSource1,
-                                  testCodeSource2]);
+                                  testCodeSource2],
+                                undefined,
+                                new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -433,7 +438,8 @@ function testCommandSourceCatchesExceptionsWhenLoading() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, mockMsgService);
+  var cmdSrc = new CommandSource(testCodeSource, mockMsgService,
+                                 new SandboxFactory({}, globalObj));
   cmdSrc.getCommand("existentcommand");
 
   this.assert(
@@ -452,7 +458,8 @@ function testCommandSourceTwoCmdsWork() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -475,7 +482,8 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
 
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
@@ -503,7 +511,7 @@ function testMakeGlobalsWork() {
     id: "test"
   };
 
-  var sandboxFactory = new SandboxFactory(makeGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals, globalObj);
 
   var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
 
@@ -525,7 +533,7 @@ function testCommandGlobalsWork() {
     id: "test"
   };
 
-  var sandboxFactory = new SandboxFactory({globals: {}});
+  var sandboxFactory = new SandboxFactory({globals: {}}, globalObj);
 
   var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
 

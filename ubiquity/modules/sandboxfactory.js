@@ -34,8 +34,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function SandboxFactory(globals) {
-  this._target = SandboxFactory.target;
+EXPORTED_SYMBOLS = ["SandboxFactory"];
+
+function SandboxFactory(globals, target) {
+  this._target = target;
 
   if (globals == undefined)
     globals = {};
@@ -47,8 +49,6 @@ function SandboxFactory(globals) {
       return globals;
     };
 }
-
-SandboxFactory.target = this;
 
 SandboxFactory.prototype = {
   makeSandbox: function makeSandbox(codeSource) {

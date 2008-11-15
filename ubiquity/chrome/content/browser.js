@@ -44,6 +44,7 @@ var gUbiquity = null;
 Components.utils.import("resource://ubiquity-modules/cmdutils.js");
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 
 function ubiquitySetup()
 {
@@ -74,7 +75,7 @@ function ubiquitySetup()
   msgService.add(new ErrorConsoleMessageService());
 
   var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(makeGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals, window);
   var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
 
   var cmdSource = new CommandSource(
