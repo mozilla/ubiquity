@@ -119,7 +119,6 @@ load(basePath + "/chrome/content/nlparser/jp/parser_plugin.js");
 load(basePath + "/chrome/content/nlparser/parser.js");
 load(basePath + "/chrome/content/nlparser/verbtypes.js");
 load(basePath + "/chrome/content/test.js");
-load(basePath + "/chrome/content/sandboxfactory.js");
 load(basePath + "/chrome/content/cmdmanager.js");
 load(basePath + "/chrome/content/test_suggestion_memory.js");
 load(basePath + "/chrome/content/tests.js");
