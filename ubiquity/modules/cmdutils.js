@@ -302,6 +302,8 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
   }
 
   var appcontent = window.document.getElementById("appcontent");
+  if(!windowGlobals._pageLoadFuncs)
+    windowGlobals._pageLoadFuncs = [];
   windowGlobals._pageLoadFuncs.push(_onPageLoad);
 
   _onPageLoad.remove = function _onPageLoad_remove() {

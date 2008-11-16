@@ -65,6 +65,18 @@ if (window.location == "chrome://browser/content/browser.xul") {
 
     return funcs;
   }
+  
+  // Remove any old page-load event listeners.
+  if (windowGlobals._pageLoadFuncs)
+    for (var i = 0; i < windowGlobals._pageLoadFuncs.length; i++)
+      windowGlobals._pageLoadFuncs[i].remove();
+  windowGlobals._pageLoadFuncs = [];
+
+  // Configure all functions starting with "pageLoad_" to be called
+  // whenever a page is loaded.
+  var funcs = findFunctionsWithPrefix("pageLoad_");
+  for (i = 0; i < funcs.length; i++)
+    CmdUtils.onPageLoad(funcs[i]);
 
   function callRunOnceFunctions(scopeObj, prefix) {
     if (!scopeObj.hasRunOnce) {
@@ -79,15 +91,4 @@ if (window.location == "chrome://browser/content/browser.xul") {
   // Firefox startup.
   callRunOnceFunctions(globals, "startup_");
 
-  // Remove any old page-load event listeners.
-  if (windowGlobals._pageLoadFuncs)
-    for (var i = 0; i < windowGlobals._pageLoadFuncs.length; i++)
-      windowGlobals._pageLoadFuncs[i].remove();
-  windowGlobals._pageLoadFuncs = [];
-
-  // Configure all functions starting with "pageLoad_" to be called
-  // whenever a page is loaded.
-  var funcs = findFunctionsWithPrefix("pageLoad_");
-  for (i = 0; i < funcs.length; i++)
-    CmdUtils.onPageLoad(funcs[i]);
 }
