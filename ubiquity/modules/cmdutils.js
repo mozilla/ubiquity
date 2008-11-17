@@ -480,7 +480,20 @@ CmdUtils.savePassword = function savePassword( opts ){
   var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'UbiquityInformation' + opts.name, null, opts.username, opts.password, "", "");
 
 
-  passwordManager.addLogin(loginInfo);
+  try {
+     passwordManager.addLogin(loginInfo);
+  } catch(e) {
+     // "This login already exists."
+     var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", 'UbiquityInformation' + opts.name, null);
+     CmdUtils.log(logins.length);
+     for each(login in logins) {
+        if (login.username == opts.username) {
+           //modifyLogin(oldLoginInfo, newLoginInfo);
+           passwordManager.modifyLogin(login, loginInfo);
+           break;
+        }
+     }
+  }
 }
 
 /*
