@@ -485,7 +485,6 @@ CmdUtils.savePassword = function savePassword( opts ){
   } catch(e) {
      // "This login already exists."
      var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", 'UbiquityInformation' + opts.name, null);
-     CmdUtils.log(logins.length);
      for each(login in logins) {
         if (login.username == opts.username) {
            //modifyLogin(oldLoginInfo, newLoginInfo);
