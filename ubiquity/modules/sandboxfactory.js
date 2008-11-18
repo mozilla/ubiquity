@@ -63,7 +63,23 @@ SandboxFactory.prototype = {
   },
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
-    var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"];
+    var ubiquity;
+
+    // TODO: This code is temporary; right now the pre-compiled
+    // nsIUbiquity XPCOM binary that comes with Ubiquity only works on
+    // FF 3.1 due to the fact that the JSAPI is backwards compatible
+    // at only the source-code level.  Eventually we'll change this so that
+    // the nsIUbiquity component is only compiled for FF 3.0, and the
+    // functionality we need is built-in to FF 3.1 (or rather, Gecko
+    // 1.9.1). See bug #445873 for more information.
+    try {
+      var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+                              .getService(Components.interfaces.nsIXULAppInfo);
+      if (appInfo.platformVersion.slice(0, 5) != "1.9.0")
+        ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"];
+    } catch (e) {
+      ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"];
+    }
 
     if (typeof(ubiquity) == "undefined")
       Components.utils.evalInSandbox(code, sandbox);
