@@ -87,7 +87,7 @@ NLParser.ParsedSentence.prototype = {
      var directObjPresent = false;
      for ( var x in this._verb._arguments ) {
        if ( this._argSuggs[x] && this._argSuggs[x].text != "" ) {
-   	 let preposition = "";
+   	     let preposition = "";
          let argText = this._argSuggs[x].text;
    	     if ( x == "direct_object" ) {
            /*Check for a valid text/html selection. We'll replace
@@ -109,7 +109,7 @@ NLParser.ParsedSentence.prototype = {
           sentence += preposition + argText;
       }
     }
-    return sentence;
+    return sentence + " ";
   },
 
   getDisplayText: function() {
