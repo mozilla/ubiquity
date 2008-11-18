@@ -13,6 +13,8 @@ CmdUtils.CreateCommand({
     var tabs = noun_type_tab.getTabs();
     tabs[tabName]._window.focus();
     tabs[tabName].focus();
+    // Focus on tab content
+    tabs[tabName]._window.content.focus();
   },
 
   preview: function( pblock, tab ) {
