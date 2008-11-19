@@ -11,12 +11,10 @@
 <body>
 <script src="resource://ubiquity-scripts/jquery.js"></script>
 <script src="skinlist.js"></script>
-<script src="cmdlist.js"></script>
 
 <div class="head">
   <span class="large">Ubiquity:</span> Your skins</span>
 </div>
-
 
 <div id="nav-container">
   <ul id="nav">
@@ -33,6 +31,11 @@
 
 <h1 id="notify"></h1>
 <ul id="skin-list"></ul>
+
+<script>
+  Components.utils.import("resource://ubiquity-modules/utils.js");
+  $(document).ready(onDocumentLoad);
+</script>
 
 </body>
 </html>

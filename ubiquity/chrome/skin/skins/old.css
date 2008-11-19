@@ -1,3 +1,45 @@
+/*
+  =skin=
+//  @name 0.1 Skin
+//  @author Mozilla Labs
+//  @homepage http://labs.mozilla.com
+  @email abimanyuraja@gmail.com
+  @license MPL/LGPL/GPL
+  =/skin=
+*/
+
+/* formatting for ubiquity pop-up */
+/* MAJOR TODO: Name all elements and classes so as to prevent 
+styling webpages unintentionally*/
+
+#cmd-panel {
+  padding: 0px;
+  margin: 0px;
+  background: #272727;
+}
+
+#cmd-entry-container {
+  padding: 10px;
+  font-size: 12pt;
+}
+
+#cmd-entry {
+  -moz-appearance: none;
+  border: none;
+  font-size: 12pt;
+  background: #272727;
+  color: #ffffff;
+  width: 100%;
+}
+
+#cmd-preview {
+  -moz-appearance: none;
+  border: none;
+  padding: 10px;
+  overflow: hidden;
+}
+
+
 body#previewbody {
     margin: 0;
     padding: 0;
