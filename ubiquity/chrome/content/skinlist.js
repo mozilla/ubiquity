@@ -83,7 +83,6 @@ function onDocumentLoad() {
       var skinMeta = {};
       //TODO: extracting filename only properly
       skinMeta.filename = entry.leafName.split(".")[0]; 
-      console.log(skinMeta.filename);
 
       //look for =skin= indicating start of metadata
       var foundMetaData = false;

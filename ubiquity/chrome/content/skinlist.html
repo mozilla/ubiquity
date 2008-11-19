@@ -11,8 +11,6 @@
 <body>
 <script src="resource://ubiquity-scripts/jquery.js"></script>
 <script src="skinlist.js"></script>
-<!-- <script src="cmdlist.js"></script> -->
-<script src="utils.js"></script>
 
 <div class="head">
   <span class="large">Ubiquity:</span> Your skins</span>
@@ -35,11 +33,8 @@
 <ul id="skin-list"></ul>
 
 <script>
-
-//alert("hi");
-$(document).ready(onDocumentLoad);
-
-
+  Components.utils.import("resource://ubiquity-modules/utils.js");
+  $(document).ready(onDocumentLoad);
 </script>
 
 </body>
