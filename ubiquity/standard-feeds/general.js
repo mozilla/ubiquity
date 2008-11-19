@@ -360,14 +360,14 @@ function translateTo( text, langCodePair, callback ) {
   if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
   if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
 
-  var params = Utils.paramsToString({
+  var params = {
     v: "1.0",
     q: text,
     langpair: langCodePair.from + "|" + langCodePair.to
-  });
-
-  Utils.ajaxGet( url + params, function(jsonData){
-    var data = Utils.decodeJson(jsonData);
+  };
+  
+  jQuery.get(url, params, function(data){
+    //var data = Utils.decodeJson(jsonData);
 
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
@@ -404,7 +404,7 @@ function translateTo( text, langCodePair, callback ) {
       CmdUtils.setSelection( translatedText );
 
     CmdUtils.setLastResult( translatedText );
-  });
+  }, "json");
 }
 
 CmdUtils.CreateCommand({
