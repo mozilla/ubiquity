@@ -35,6 +35,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+OrigCmdUtils = {};
+Components.utils.import("resource://ubiquity-modules/cmdutils.js",
+                        OrigCmdUtils);
+Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
+
+var globalObj = this;
 const LANG = "en";
 
 function FakeAnnSvc() {
@@ -78,6 +85,8 @@ function FakeAnnSvc() {
       throw Error('No such annotation');
     delete ann[uri.spec][name];
   };
+
+  self.EXPIRE_NEVER = 0;
 }
 
 function debugSuggestionList( list ) {
@@ -106,24 +115,10 @@ function testXhtmlCodeSourceWorks() {
   var xcs = new XhtmlCodeSource(fakeSource);
 
   this.assert(xcs.id == "blah", "id must inherit");
-  if (XhtmlCodeSource.isAvailable()) {
-    var xcsCode = xcs.getCode();
-    this.assert(xcsCode == code,
-                "code must be '" + code + "' (is '" + xcsCode + "')");
-    this.assert(xcs.dom, "xcs.dom must be truthy.");
-  } else {
-    var excRaised = false;
-
-    try {
-      xcs.getCode();
-    } catch (e if e instanceof xcs.DomUnavailableError) {
-      excRaised = true;
-    }
-
-    this.assert(excRaised, "DomUnavailableError expected.");
-    this.assert(typeof(xcs.dom) == 'undefined',
-                "xcs.dom must be undefined");
-  }
+  var xcsCode = xcs.getCode();
+  this.assert(xcsCode == code,
+              "code must be '" + code + "' (is '" + xcsCode + "')");
+  this.assert(xcs.dom, "xcs.dom must be truthy.");
 }
 
 function testUtilsUrlWorksWithNsURI() {
@@ -188,9 +183,13 @@ function testMixedCodeSourceCollectionWorks() {
 
   this.assert(codeSources[0].getCode() == 'abcef');
   this.assert(codeSources[0].id == 'c');
+  this.assert(codeSources[0].codeSections[1].filename == 'b');
+  this.assert(codeSources[0].codeSections[1].length == 1);
 
   this.assert(codeSources[1].getCode() == 'abdef');
   this.assert(codeSources[1].id == 'd');
+  this.assert(codeSources[1].codeSections[2].filename == 'd');
+  this.assert(codeSources[1].codeSections[2].length == 1);
 }
 
 function testLinkRelCodeSourceWorks() {
@@ -252,19 +251,23 @@ FakeCommandSource.prototype = {
   }
 };
 
-function getTextSelection(context) {
+var CmdUtils = {};
+
+CmdUtils.getSelection = function fake_getSelection(context) {
   if (context)
     if (context.textSelection)
       return context.textSelection;
   return "";
-}
+};
 
-function getHtmlSelection(context) {
+CmdUtils.getHtmlSelection = function fake_getHtmlSelection(context) {
   if (context)
     if (context.htmlSelection)
       return context.htmlSelection;
   return "";
-}
+};
+
+CmdUtils.__proto__ = OrigCmdUtils.CmdUtils;
 
 function getNounList() {
   return [];
@@ -382,7 +385,8 @@ function testCommandSourceOneCmdWorks() {
     id: 'test'
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -407,7 +411,9 @@ function testCommandSourceTwoCodeSourcesWork() {
   };
 
   var cmdSrc = new CommandSource([testCodeSource1,
-                                  testCodeSource2]);
+                                  testCodeSource2],
+                                undefined,
+                                new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -432,7 +438,8 @@ function testCommandSourceCatchesExceptionsWhenLoading() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, mockMsgService);
+  var cmdSrc = new CommandSource(testCodeSource, mockMsgService,
+                                 new SandboxFactory({}, globalObj));
   cmdSrc.getCommand("existentcommand");
 
   this.assert(
@@ -451,7 +458,8 @@ function testCommandSourceTwoCmdsWork() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -474,15 +482,19 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource);
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
 
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on first call.");
 
+  // Change the code returned from the code source so we're
+  // guaranteed to rebuild the context.
+  testCode += "/* trivial code change */";
   cmdSrc.refresh();
 
-  var cmd = cmdSrc.getCommand("foo");
+  cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
               "Command 'foo' should return 1 on second call.");
 }
@@ -499,7 +511,7 @@ function testMakeGlobalsWork() {
     id: "test"
   };
 
-  var sandboxFactory = new SandboxFactory(makeGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals, globalObj);
 
   var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
 
@@ -521,7 +533,7 @@ function testCommandGlobalsWork() {
     id: "test"
   };
 
-  var sandboxFactory = new SandboxFactory({globals: {}});
+  var sandboxFactory = new SandboxFactory({globals: {}}, globalObj);
 
   var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
 
@@ -610,7 +622,8 @@ function testParseWithModifier() {
   this.assert( dogGotWashedWith == "spork");
 }
 
-function testCmdManagerSuggestsForEmptyInput() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
   var nounTypeOne = new CmdUtils.NounType( "thingType", ["tree"] );
@@ -847,22 +860,57 @@ function testSuggestionMemory() {
   this.assert(suggMem1.getScore( "p", "polymascotfoamulate") == 1);
   this.assert(suggMem1.getScore( "p", "popcorn" ) == 0 );
   this.assert(suggMem1.getScore( "p", "quinine" ) == 0 );
+
+  // Get rid of the first suggestion memory object, make a new one:
+  suggMem1 = null;
+  var suggMem2 = new SuggestionMemory("test_1");
+  // Should have all the same values.
+  this.assert(suggMem2.getScore("q", "quinine") == 2);
+  this.assert(suggMem2.getScore("q", "quetzalcoatl") == 1);
+  this.assert(suggMem2.getScore( "q", "peas") == 0 );
+  this.assert(suggMem2.getScore( "q", "qualifier") == 0);
+  this.assert(suggMem2.getScore( "p", "peas") == 2);
+  this.assert(suggMem2.getScore( "p", "polymascotfoamulate") == 1);
+  this.assert(suggMem2.getScore( "p", "popcorn" ) == 0 );
+  this.assert(suggMem2.getScore( "p", "quinine" ) == 0 );
+
 }
 
 function testSortedBySuggestionMemory() {
   var nounList = [];
-  var verbList = [{name: "clock"},
-		  {name: "calendar"},
-		  {name: "couch"},
-		  {name: "conch"},
-		  {name: "crouch"},
-		  {name: "coelecanth"},
-		  {name: "crab"} ];
+  var verbList = [{name: "clock", execute: function(){}},
+		  {name: "calendar", execute: function(){}},
+		  {name: "couch", execute: function(){}},
+		  {name: "conch", execute: function(){}},
+		  {name: "crouch", execute: function(){}},
+		  {name: "coelecanth", execute: function(){}},
+		  {name: "crab", execute: function(){}} ];
   var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList("c", fakeContext);
+  var suggestions = nlParser.getSuggestionList();
+  //take the fifth and sixth suggestions, whatever they are...
+  var suggFive = suggestions[4];
+  var suggFiveName = suggFive._verb._name;
+  var suggSix = suggestions[5];
+  var suggSixName = suggSix._verb._name;
+  // tell the parser we like sugg five and REALLY like sugg six:
+  // TODO replace these strengthenMemory calls with execute() calls!
+  nlParser.strengthenMemory("c", suggFive);
+  nlParser.strengthenMemory("c", suggSix);
+  nlParser.strengthenMemory("c", suggSix);
 
-  // TODO finish this test-- once suggestion memory for verb ranking is hooked up.
+  // now give the same input again...
+  nlParser.updateSuggestionList("c", fakeContext);
+  suggestions = nlParser.getSuggestionList();
+  // the old six should be on top, with the old five in second place:
+  this.assert(suggestions[0]._verb._name == suggSixName, "Six should be one");
+  this.assert(suggestions[1]._verb._name == suggFiveName, "Five should be two");
+}
+
+function testNounFirstSortedByGeneralFrequency() {
+  // Noun-first suggestions should be ranked by how often the verb has
+  // been chosen before, *regardless of input*.
 }
 
 function testSortedByMatchQuality() {
@@ -902,7 +950,8 @@ function testSortedByMatchQuality() {
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
 
-function testSortSpecificNounsBeforeArbText() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testSortSpecificNounsBeforeArbText() {
   var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var arb_text = {
@@ -919,7 +968,7 @@ function testSortSpecificNounsBeforeArbText() {
   var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, [arb_text, dog]);
 
   var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
-  var selObj = getSelectionObject( fakeContext );
+  var selObj = NLParser.getSelectionObject( fakeContext );
   nlParser.updateSuggestionList( "", fakeContext );
   var suggs = nlParser.getSuggestionList();
   this.assert( suggs.length == 2, "Should be two suggestions.");
@@ -1101,7 +1150,8 @@ function testVerbGetCompletions() {
   this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }
 
-function testTextAndHtmlDifferent() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testTextAndHtmlDifferent() {
   var executedText = null;
   var executedHtml = null;
   var fakeContext = {
@@ -1241,11 +1291,10 @@ function testAsyncNounSuggestions() {
   };
   var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
-  var fakePBlock = {innerHTML: ""};
-  cmdMan.updateInput( "dostuff halifax", fakeContext, fakePBlock );
+  cmdMan.updateInput( "dostuff halifax", fakeContext, null );
   this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
   noun_type_slowness.triggerCallback();
-  cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, fakePBlock );
+  cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, null );
   this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
 
@@ -1412,7 +1461,8 @@ function makeSearchCommand(name) {
   };
 }
 
-function testWeirdCompletionsThatDontMakeSense() {
+// TODO: Re-enable when we fix #343
+function DISABLED_testWeirdCompletionsThatDontMakeSense() {
   var cmd_imdb = makeSearchCommand("IMDB");
   var cmd_amazon = makeSearchCommand("amazon-search");
   var comps = getCompletions("ac", [cmd_imdb, cmd_amazon], [noun_arb_text]);
@@ -1447,4 +1497,81 @@ function testSynonymsGetDownrankedEvenWithArguments() {
   this.assert( comps[1]._argSuggs.direct_object.text == "m",
 	       "object should be m.");
 
+}
+
+function testUtilsTrim() {
+  // Taken from http://www.somacon.com/p355.php.
+  this.assert(Utils.trim("\n  hello   ") == "hello");
+}
+
+function getUbiquityComponent() {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
+
+  if (typeof(ubiquity) == "undefined")
+    // Right now nsUbiquity is an optional component, and if
+    // it doesn't exist, let's just skip this test.
+    throw new this.SkipTestError();
+
+  ubiquity = ubiquity.getService();
+  return ubiquity.QueryInterface(Ci.nsIUbiquity);
+}
+
+function testUbiquityComponent() {
+  var ubiquity = getUbiquityComponent();
+  var sandbox = Components.utils.Sandbox("http://www.foo.com");
+  ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, "1.8",
+                         sandbox);
+  this.assert(sandbox.a == 1,
+              "nsIUbiquity.evalInSandbox() must work.");
+
+  var errorCaught = null;
+  try {
+    ubiquity.evalInSandbox("throw new Error('hi')",
+                           "nothing.js",
+                           1,
+                           "1.8",
+                           sandbox);
+  } catch (e) {
+    errorCaught = e;
+  }
+  this.assert(errorCaught.message == 'hi',
+              "nsIUbiquity.evalInSandbox() must throw exceptions");
+
+  ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1, "1.7",
+                         sandbox);
+  this.assert(sandbox.k == 1,
+              "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
+}
+
+function testUbiquityComponentAcceptsJsVersion() {
+  var ubiquity = getUbiquityComponent();
+  var sandbox = Components.utils.Sandbox("http://www.foo.com");
+  var wasExceptionThrown = false;
+
+  try {
+    ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1,
+                           "1.5", sandbox);
+  } catch (e) {
+    wasExceptionThrown = true;
+  }
+  this.assert(wasExceptionThrown);
+  wasExceptionThrown = false;
+
+  try {
+    ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1,
+                           "foo", sandbox);
+  } catch (e if e.result == Components.results.NS_ERROR_INVALID_ARG) {
+    wasExceptionThrown = true;
+  }
+  this.assert(wasExceptionThrown);
+}
+
+function testXmlScriptCommandsParser() {
+  Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js");
+  var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing\n\n\n>]]></script></foo>');
+  this.assert(code.length == 1);
+  this.assert(code[0].lineNumber == 2, "hi");
+  this.assert(code[0].code == 'testing\n\n\n>');
 }

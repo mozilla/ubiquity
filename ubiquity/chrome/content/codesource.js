@@ -39,31 +39,55 @@ function MixedCodeSourceCollection(headerSources,
                                    bodySources,
                                    footerSources) {
   this.__iterator__ = function MCSC_iterator() {
+    let code;
     let headerCode = '';
+    let headerCodeSections = [];
+
     for (headerCs in headerSources) {
-      headerCode += headerCs.getCode();
+      code = headerCs.getCode();
+      headerCode += code;
+      headerCodeSections.push({length: code.length,
+                               filename: headerCs.id,
+                               lineNumber: 1});
     }
 
     let footerCode = '';
+    let footerCodeSections = [];
     for (footerCs in footerSources) {
-      footerCode += footerCs.getCode();
+      code = footerCs.getCode();
+      footerCode += code;
+      footerCodeSections.push({length: code.length,
+                               filename: footerCs.id,
+                               lineNumber: 1});
     }
 
     for (bodyCs in bodySources) {
-      let code = headerCode + bodyCs.getCode() + footerCode;
-      yield new StringCodeSource(code, bodyCs.id, bodyCs.dom);
+      code = bodyCs.getCode();
+      let codeSections = [];
+      codeSections = codeSections.concat(headerCodeSections);
+      if (bodyCs.codeSections)
+        codeSections = codeSections.concat(bodyCs.codeSections);
+      else
+        codeSections.push({length: code.length,
+                           filename: bodyCs.id,
+                           lineNumber: 1});
+      codeSections = codeSections.concat(footerCodeSections);
+      let code = headerCode + code + footerCode;
+      yield new StringCodeSource(code, bodyCs.id, bodyCs.dom,
+                                 codeSections);
     }
   };
 }
 
-function StringCodeSource(code, id, dom) {
+function StringCodeSource(code, id, dom, codeSections) {
   this._code = code;
   this.id = id;
   this.dom = dom;
+  this.codeSections = codeSections;
 }
 
 StringCodeSource.prototype = {
-  getCode: function() {
+  getCode: function SCS_getCode() {
     return this._code;
   }
 };
@@ -81,7 +105,7 @@ RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
 };
 
 RemoteUriCodeSource.prototype = {
-  getCode : function() {
+  getCode : function RUCS_getCode() {
     if (!this._req) {
       // Queue another XMLHttpRequest to fetch the latest code.
 
@@ -120,7 +144,7 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 };
 
 LocalUriCodeSource.prototype = {
-  getCode : function() {
+  getCode : function LUCS_getCode() {
     var req = new XMLHttpRequest();
     req.open('GET', this.uri, false);
     req.overrideMimeType("text/javascript");
@@ -138,10 +162,7 @@ LocalUriCodeSource.prototype = {
 
 function XhtmlCodeSource(codeSource) {
   var dom;
-
-  function DomUnavailableError() {};
-
-  this.DomUnavailableError = DomUnavailableError;
+  var codeSections;
 
   this.__defineGetter__("dom",
                         function() { return dom ? dom : undefined; });
@@ -149,34 +170,41 @@ function XhtmlCodeSource(codeSource) {
   this.__defineGetter__("id",
                         function() { return codeSource.id; });
 
+  this.__defineGetter__("codeSections",
+                        function() { return codeSections; });
+
   this.getCode = function XHTMLCS_getCode() {
     var code = codeSource.getCode();
 
     var trimmedCode = Utils.trim(code);
     if (trimmedCode.length > 0 &&
         trimmedCode[0] == "<") {
-      if (!XhtmlCodeSource.isAvailable())
-        throw new DomUnavailableError();
-      var parser = new DOMParser();
-      // TODO: What if this fails?
+      var klass = Components.classes["@mozilla.org/xmlextras/domparser;1"];
+      var parser = klass.createInstance(Components.interfaces.nsIDOMParser);
+
+      // TODO: What if this fails?  Right now the behavior generally
+      // seems ok simply because an exception doesn't get thrown here
+      // if the XML isn't well-formed, we just get an error results
+      // DOM back, which contains no command code.
       dom = parser.parseFromString(code, "text/xml");
 
+      codeSections = [];
       var newCode = "";
-      function addCode() { newCode += this.text; }
-      jQuery("script.commands", dom).each(addCode);
+      var xmlparser = {};
+      Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js", xmlparser);
+      var info = xmlparser.parseCodeFromXml(code);
+      for (var i = 0; i < info.length; i++) {
+        newCode += info[i].code;
+        codeSections.push({length: info[i].code.length,
+                           filename: codeSource.id,
+                           lineNumber: info[i].lineNumber});
+      }
+
       return newCode;
     }
 
     dom = undefined;
+    codeSections = undefined;
     return code;
   };
 }
-
-XhtmlCodeSource.isAvailable = function isAvailable() {
-  try {
-    var parser = new DOMParser();
-  } catch (e if e instanceof ReferenceError) {
-    return false;
-  }
-  return true;
-};

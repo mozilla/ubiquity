@@ -30,7 +30,7 @@
     <li><a href="chrome://ubiquity/content/cmdlist.html">Your Commands</a></li>
     <li><a href="chrome://ubiquity/content/editor.html">Command Editor</a></li>
     <!-- <li><a href="chrome://ubiquity/content/skinlist.html">Your Skins</a></li> -->
-    <li><a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_User_Tutorial">Tutorial</a></li>
+    <li><a href="https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">Tutorial</a></li>
     <li><a href="https://labs.toolness.com/ubiquity-herd/">Find New Commands</a></li>
   </ul>  
 </div>
@@ -57,21 +57,26 @@ extension.
 
 
 <div class="col-five">
-  <h2 class="top">Users</h2>
-
-  <p><strong>Take</strong> the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_User_Tutorial">Ubiquity tutorial</a> to master the basics.</p>
-
-  <p><strong>Help us</strong>. Subscribe to the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">Herd</a>, which will add your data to the <a href="https://labs.toolness.com/ubiquity-herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
-    
-  <p><strong>Change</strong> your hotkey. <br/><br/>
+  <h2 class="top">Using Ubiquity</h2>
+  
+  <strong>Invoke</strong> Ubiquity by pressing:</legend>
+  <div style="margin-left:10px;"><p>
   <input id="keyInputBox" type="text" size="27"
          style="cursor:pointer"
          onkeydown="PrefKeys.onKeyChange(event)" 
          onfocus="this.value = 'Press your combination'"
-         onblur="PrefKeys.onLoad()"/>
-  <p id="keyNotify"></p></p>
+         onblur="PrefKeys.onLoad()"/><br/>
+  Click above to <strong>Change</strong> the keyboard shortcut used to open Ubiquity. <br/></p>
+  <p id="keyNotify"></p>
+  </div>
   
-  <h2>Developers</h2>
+  <p><strong>Take</strong> the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">Ubiquity tutorial</a> to master the basics.</p>
+
+  <p><strong>Help us</strong>. Subscribe to the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">Herd</a>, which will add your data to the <a href="https://labs.toolness.com/ubiquity-herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
+    
+
+  
+  <h2>Developing Ubiquity</h2>
   <p><strong>Learn</strong> how to develop for Ubiquity by reading the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command author tutorial</a>.</p>
   
   <p>Use the <a href="editor.html">command editor</a> to play around
@@ -86,13 +91,13 @@ extension.
   
   <p><strong>Share</strong> your commands. Post it on the
   <a href="http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">commands in the wild</a> wiki page. Also, sign up for the the <a href="https://labs.toolness.com/ubiquity-herd/command-feed/">herd command</a> which will then display your command on the <a href="https://labs.toolness.com/ubiquity-herd/">dashboard</a>.</p>
-
-  <p>Use the <a href="chrome://ubiquity/content/harness.xul">development
-  harness</a> to develop the actual Ubiquity command entry user interface
-  and other aspects of Ubiquity without having to restart Firefox.</p>
   
   <p>Run the <a href="test.html">unit tests</a>.</p>
 
+  <p>Help us test our 
+    <a href="chrome://ubiquity/content/experimental-commands.html">
+      experimental commands</a>!</p>
+      
   <div id="command-feed-graveyard-div">
     <h2>Feed Graveyard</h2>
     <p>
@@ -112,6 +117,8 @@ extension.
   lot of bugs and offers new features.  Feel free to check out the <a
   href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1.2_Release_Notes_(Raging_Stream)">release
   notes</a> for more information.</p>
+  
+  <p> Ubiquity is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Credits">credits</a> page.
 
   <h2 class="top">Introduction Movie</h2>
 
@@ -139,7 +146,7 @@ extension.
 
 </body>
 <script type="application/javascript;version=1.7"
-        src="utils.js"></script>
+        src="codesource.js"></script>
 <script type="application/javascript;version=1.7"
         src="linkrel_codesource.js"></script>
 <script type="application/javascript;version=1.7"

@@ -82,6 +82,10 @@ var XpcShellTestResponder = {
     dump("Running test: "+test.name+"\n");
   },
 
+  onSkipTest : function(test, e) {
+    dump("Test skipped: " + test.name + "\n");
+  },
+
   onException : function(test, e) {
     var text = ("Error in test " +
                 test.name + ": " + e.message);
@@ -92,12 +96,14 @@ var XpcShellTestResponder = {
     dump(text);
   },
 
-  onFinished : function(successes, failures) {
+  onFinished : function(successes, failures, skips) {
     var total = successes + failures;
 
     var text = (successes + " out of " +
                 total + " tests successful (" + failures +
                 " failed).\n");
+    if (skips)
+      text += "Additionally, " + skips + " test(s) were skipped.\n";
 
     dump(text);
 
@@ -106,18 +112,15 @@ var XpcShellTestResponder = {
   }
 };
 
-load(basePath + "/chrome/content/utils.js");
 load(basePath + "/chrome/content/codesource.js");
 load(basePath + "/chrome/content/linkrel_codesource.js");
-load(basePath + "/chrome/content/cmdutils.js");
-load(basePath + "/chrome/content/suggestion_memory.js");
 load(basePath + "/chrome/content/nlparser/en/parser_plugin.js");
 load(basePath + "/chrome/content/nlparser/jp/parser_plugin.js");
 load(basePath + "/chrome/content/nlparser/parser.js");
 load(basePath + "/chrome/content/nlparser/verbtypes.js");
 load(basePath + "/chrome/content/test.js");
-load(basePath + "/chrome/content/sandboxfactory.js");
 load(basePath + "/chrome/content/cmdmanager.js");
+load(basePath + "/chrome/content/test_suggestion_memory.js");
 load(basePath + "/chrome/content/tests.js");
 
 var suite = new TestSuite(XpcShellTestResponder, this);

@@ -8,17 +8,25 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
 
-  execute: function( directObj ) {
-    var tabName = directObj.text;
+  execute: function( tab ) {
+    var tabName = tab.text;
     var tabs = noun_type_tab.getTabs();
     tabs[tabName]._window.focus();
     tabs[tabName].focus();
+    // Focus on tab content
+    tabs[tabName]._window.content.focus();
   },
 
-  preview: function( pblock, directObj ) {
-    var tabName = directObj.text;
-    if( tabName.length > 1 )
+  preview: function( pblock, tab ) {
+    var tabName = tab.text;
+
+    var tabs = noun_type_tab.getTabs();
+    var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
+
+    if( tabName.length > 1 ){
       pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
+      pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
+    }
     else
       pblock.innerHTML = "Switch to tab by name.";
   }
@@ -43,12 +51,19 @@ CmdUtils.CreateCommand({
 
   preview: function( pblock, directObj ) {
     var tabName = directObj.text;
-    if( tabName.length > 1 )
+
+    var tabs = noun_type_tab.getTabs();
+    var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
+
+    if( tabName.length > 1 ) {
       pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
+      pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
+    }
     else
       pblock.innerHTML = "Closes the tab by name.";
   }
 });
+
 
 //Closes all tabs related to the specified word
 CmdUtils.CreateCommand({
@@ -190,3 +205,4 @@ CmdUtils.CreateCommand({
     tagging.tagURI(currentURI, tags);
   }
 });
+

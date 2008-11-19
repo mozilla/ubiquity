@@ -36,13 +36,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["Utils"];
+
 var Utils = {};
 
 Utils.__globalObject = this;
 
 
 Utils.safeWrapper = function safeWrapper(func) {
-  var wrappedFunc = function() {
+  var wrappedFunc = function safeWrappedFunc() {
     try {
       func.apply(this, arguments);
     } catch (e) {
@@ -78,7 +80,7 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 };
 
 Utils.__TimerCallback.prototype = {
-  notify : function(timer) {
+  notify : function notify(timer) {
     for(timerID in Utils.__timerData.timers) {
       if(Utils.__timerData.timers[timerID] == timer) {
         delete Utils.__timerData.timers[timerID];
@@ -93,6 +95,10 @@ Utils.__timerData = {
   nextID: Math.floor(Math.random() * 100) + 1,
   timers: {}
 };
+
+//Utils.setTimeout works just like DOM setTimeout() method
+//but it can only accept a function (not a string) as the callback argument
+//TODO: Allow strings for the first argument like DOM setTimeout() does.
 
 Utils.setTimeout = function setTimeout(callback, delay) {
   var classObj = Components.classes["@mozilla.org/timer;1"];
@@ -219,14 +225,24 @@ Utils.getCookie = function getCookie(domain, name) {
 };
 
 Utils.paramsToString = function paramsToString(params) {
-  var string = "?";
-
-  for (key in params) {
-    string += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
+  var stringPairs = [];
+  function addPair(key, value) {
+    stringPairs.push(
+      encodeURIComponent(key) + "=" + encodeURIComponent(value)
+    );
   }
-
-  // Remove the trailing &
-  return string.substr(0, string.length - 1);
+  for (key in params) {
+    // note: explicitly ignoring values that are objects!
+    if (params[key] instanceof Array) {
+      params[key].forEach(function(item) {
+        if(typeof item == "string")
+          addPair(key + "[]", item);
+      });
+    } else if (typeof params[key] == "string") {
+      addPair(key, params[key]);
+    };
+  }
+  return "?" + stringPairs.join("&");
 };
 
 // Synchronously retrieves the content of the given local URL
@@ -282,7 +298,7 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
   var iframe = null;
 
   var parseHandler = {
-    handleEvent: function(event) {
+    handleEvent: function handleEvent(event) {
       event.target.removeEventListener("DOMContentLoaded", this, false);
       var doc = iframe.contentDocument;
       rootElement.removeChild(iframe);
@@ -327,7 +343,7 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
     channel.QueryInterface(Ci.nsIRequest)
       .loadFlags |= Ci.nsIRequest.LOAD_BACKGROUND;
     // need to specify content type, so user isn't prompted to download "unknown" file type
-    var baseChannel = channel.QueryInterface(Ci.nsIChannel)
+    var baseChannel = channel.QueryInterface(Ci.nsIChannel);
     baseChannel.contentType = "text/html";
     // this will always be UTF-8 thanks to XMLHttpRequest and nsIScriptableUnicodeConverter
     baseChannel.contentCharset = "UTF-8";
@@ -343,10 +359,10 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
     url: remoteUrl,
     type: "GET",
     datatype: "string",
-    success: function(responseText) {
+    success: function success(responseText) {
       parseHtml(responseText);
     },
-    error: function() {
+    error: function error() {
       if(errorCallback)
         errorCallback();
     }
@@ -359,12 +375,35 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
 
   jQuery.ajax(ajaxOptions);
 
-}
+};
 
-Utils.trim = function(str) {
-  str = str.replace(/^\s\s*/, '');
-  var ws = /\s/;
-  var i = str.length;
-  while (ws.test(str.charAt(--i)));
-  return str.slice(0, i + 1);
+Utils.trim = function trim(str) {
+  return str.replace(/^\s+|\s+$/g,"");
+};
+
+
+Utils.History = {
+  visitsToDomain : function visitsToDomain( domain ) {
+      var Cc = Components.classes;
+      var Ci = Components.interfaces;
+      var hs = Cc["@mozilla.org/browser/nav-history-service;1"].
+               getService(Ci.nsINavHistoryService);
+
+      var query = hs.getNewQuery();
+      var options = hs.getNewQueryOptions();
+
+      options.maxResults = 10;
+      query.domain = domain;
+
+      // execute query
+      var result = hs.executeQuery(query, options );
+      var root = result.root;
+      root.containerOpen = true;
+      var count = 0;
+      for( var i=0; i < root.childCount; ++i ) {
+        place = root.getChild( i );
+        count += place.accessCount;
+      }
+    return count;
+  }
 }

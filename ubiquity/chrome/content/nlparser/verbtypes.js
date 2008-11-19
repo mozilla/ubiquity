@@ -37,6 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
 Components.utils.import("resource://ubiquity-modules/Observers.js");
 
 // util functions to make it easier to use objects as fake dictionaries
@@ -86,7 +87,7 @@ NLParser.ParsedSentence.prototype = {
      var directObjPresent = false;
      for ( var x in this._verb._arguments ) {
        if ( this._argSuggs[x] && this._argSuggs[x].text != "" ) {
-   	 let preposition = "";
+   	     let preposition = "";
          let argText = this._argSuggs[x].text;
    	     if ( x == "direct_object" ) {
            /*Check for a valid text/html selection. We'll replace
@@ -108,7 +109,7 @@ NLParser.ParsedSentence.prototype = {
           sentence += preposition + argText;
       }
     }
-    return sentence;
+    return sentence + " ";
   },
 
   getDisplayText: function() {
@@ -146,6 +147,10 @@ NLParser.ParsedSentence.prototype = {
 
   preview: function(context, previewBlock) {
     this._verb.preview( context, this._argSuggs, previewBlock );
+  },
+
+  get previewDelay() {
+    return this._verb.previewDelay;
   },
 
   copy: function() {
@@ -204,11 +209,13 @@ NLParser.ParsedSentence.prototype = {
   },
 
   getMatchScores: function() {
-     /* TODO: frequencyScore not yet implemented, is 0 for all suggestions.
-     */
     return [this.frequencyMatchScore,
 	    this.verbMatchScore,
 	    this.argMatchScore];
+  },
+
+  setFrequencyScore: function( freqScore ) {
+    this.frequencyMatchScore = freqScore;
   }
 
 };
@@ -458,6 +465,8 @@ NLParser.Verb.prototype = {
     this._name = cmd.name;
     this._icon = cmd.icon;
     this._synonyms = cmd.synonyms;
+    this.__defineGetter__("previewDelay",
+                          function() { return cmd.previewDelay; });
     this._arguments = {};
 
     // New-style API: command defines arguments dictionary

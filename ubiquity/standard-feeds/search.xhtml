@@ -12,7 +12,7 @@ corresponding feed is <a href="search.html">here</a>.</p>
 {for result in results}
 <div class="gresult">
   <div>
-    <a href="${result.unescapedUrl}">${result.title}</a>
+    ${result.key}: <a href="${result.unescapedUrl}" accesskey="${result.key}">${result.title}</a>
   </div>
   <xul:description class="gresult-content">${result.content}</xul:description>
   <div class="gresult-url">${result.visibleUrl}</div>
@@ -20,6 +20,7 @@ corresponding feed is <a href="search.html">here</a>.</p>
 {forelse}
   <b>Your search - ${searchTerm} - did not match any documents. </b>
 {/for}
+<small>Tip: You can go to any result in this preview by using its number as an access key. (Linux and Windows: alt-number, Mac: control-number)</small>
 </div>
 <div id="amazon-search" style="display: none;">
 Found ${numitems} books on Amazon matching <b>${query}</b>
@@ -202,6 +203,7 @@ CmdUtils.CreateCommand({
   }
 });
 
+
 CmdUtils.makeSearchCommand({
   name: "Google",
   url: "http://www.google.com/search?q={QUERY}",
@@ -209,17 +211,27 @@ CmdUtils.makeSearchCommand({
   description: "Searches Google for your words.",
   preview: function(pblock, directObject) {
     var searchTerm = directObject.text;
-    var pTemplate = "Searches Google for <b>${query}</b>";
-    var pData = {query: searchTerm};
-    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
+    // Don't even display any text before fetching search results,
+    // since the results come back nearly instantaneously. In the
+    // future, we can display a throbber.
+    if(searchTerm.length < 1) {
+      pblock.innerHTML = "Searches Google for your words.";
+      return;
+    }
 
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
     var params = { v: "1.0", q: searchTerm };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
-
+      
+      //for access keys
+      for(var i=0;i<results.length;i++){
+        var result = results[i];
+        result.key = i+1;
+      }
+      
       pblock.innerHTML = CmdUtils.renderTemplate( jQuery("#google-search", feed.dom).html(),
 						  {results:results, searchTerm:searchTerm}
 						);
@@ -240,7 +252,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     page: articleTitle
   };
 
-  jQuery.ajax({
+  CmdUtils.previewAjax(previewBlock, {
     type: "GET",
     url: apiUrl,
     data: apiParams,
@@ -318,7 +330,7 @@ CmdUtils.CreateCommand({
       srsearch: searchText
     };
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
@@ -395,9 +407,9 @@ CmdUtils.makeSearchCommand({
       output: "json"
     };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       pblock.innerHTML = CmdUtils.renderTemplate(
-        jquery("#yahoo-search", feed.dom).html(),
+        jQuery("#yahoo-search", feed.dom).html(),
         {results:data.ResultSet.Result}
       );
     }, "json");
@@ -430,7 +442,7 @@ CmdUtils.makeSearchCommand({
       Title: directObject.text
     };
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
@@ -513,7 +525,7 @@ CmdUtils.makeSearchCommand({
       vq: searchTerm
     };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       
       var previewData = {
     	    results: data.feed.entry,
@@ -557,7 +569,7 @@ CmdUtils.makeSearchCommand({
       sort: "relevance"
     };
 
-    jQuery.ajax({
+    CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
@@ -700,14 +712,13 @@ CmdUtils.CreateCommand({
       ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
     };
 
-    jQuery.get( url, params, function(data) {
+    CmdUtils.previewGet( pblock, url, params, function(data) {
       globals.yelp = data.businesses;
       pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#yelp-search", feed.dom).html(),
         {businesses: data.businesses}
       );
-
-		}, "json");
+    }, "json");
   }
 });
 
@@ -760,7 +771,7 @@ CmdUtils.CreateCommand({
     }
 
     var url = "http://www.google.com/ig/api";
-    jQuery.get( url, {weather: location}, function(xml) {
+    CmdUtils.previewGet( pblock, url, {weather: location}, function(xml) {
       var el = jQuery(xml).find("current_conditions");
       if( el.length == 0 ) return;
 
@@ -842,7 +853,7 @@ CmdUtils.CreateCommand({
         text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
         text = text.replace(/(1:)/g, "<br/>$&");
         text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
-        text = text.replace(/\[.*?\]/g, "");
+        text = text.replace(/\[[^\]]*\]/g, "");
 
         pblock.innerHTML = text;
       });

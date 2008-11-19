@@ -34,6 +34,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
 
 var NLParser = { MAX_SUGGESTIONS: 5};
 
@@ -51,11 +52,11 @@ NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
   return new NLParser.Parser(verbList, nounList, parserPlugin);
 };
 
-function getSelectionObject(context) {
-  var selection = getTextSelection(context);
+NLParser.getSelectionObject = function(context) {
+  var selection = CmdUtils.getSelection(context);
   if (!selection && UbiquityGlobals.lastCmdResult)
       selection = UbiquityGlobals.lastCmdResult;
-  var htmlSelection = getHtmlSelection(context);
+  var htmlSelection = CmdUtils.getHtmlSelection(context);
   if (!htmlSelection && selection)
     htmlSelection = selection;
   return {
@@ -76,6 +77,7 @@ NLParser.Parser.prototype = {
     this._pronouns = languagePlugin.PRONOUNS;
     this._languageSpecificParse = languagePlugin.parseSentence;
     this._suggestionMemory = new SuggestionMemory("main_parser");
+    this._queuedPreview = null;
   },
 
   nounFirstSuggestions: function( selObj ) {
@@ -84,46 +86,51 @@ NLParser.Parser.prototype = {
     (either for directObject or for modifiers) and returns a list of
     suggestions based on giving the input to those verbs.*/
     let suggs = [];
-    let matchingNouns = [];
-    let matchingVerbs = [];
-    let verb;
-    let noun;
+// TODO: We're commenting out this code for now because it's quite
+// processor-intensive and doesn't currently provide a useful list
+// of suggestions. See #343 for more information.
+//     let matchingNouns = [];
+//     let matchingVerbs = [];
+//     let verb;
+//     let noun;
 
-    for each(noun in this._nounTypeList) {
-      if (noun.suggest(selObj.text, selObj.html).length > 0 )
-	matchingNouns.push(noun);
-      // TODO: nouns can now suggest asynchronously,
-      // meaning that this is false at first but may become true later.
-      // What to do then?
-      // We can pass a callback to the above...
-    }
-    for each(verb in this._verbList) {
-      for each(noun in matchingNouns) {
-	if (verb.usesNounType(noun)) {
-	  matchingVerbs.push(verb);
-	  continue;
-	}
-      }
-    }
-    for each(verb in matchingVerbs) {
-      suggs.push( new NLParser.PartiallyParsedSentence(verb,
-				                       {},
-                                                       selObj,
-                                                       0));
-    }
+//     for each(noun in this._nounTypeList) {
+//       if (noun.suggest(selObj.text, selObj.html,
+//                        function dummy() {}).length > 0 )
+// 	matchingNouns.push(noun);
+//       // TODO: nouns can now suggest asynchronously,
+//       // meaning that this is false at first but may become true later.
+//       // What to do then?
+//       // We can pass a real callback to the above...
+//     }
+//     for each(verb in this._verbList) {
+//       for each(noun in matchingNouns) {
+// 	if (verb.usesNounType(noun)) {
+//           matchingVerbs.push(verb);
+//           continue;
+// 	}
+//       }
+//     }
+//     for each(verb in matchingVerbs) {
+//       suggs.push( new NLParser.PartiallyParsedSentence(verb,
+//                                                        {},
+//                                                        selObj,
+//                                                        0));
+//     }
     return suggs;
   },
 
   _sortSuggestionList: function(query) {
+    // TODO the following is no good, it's English-specific:
     let inputVerb = query.split(" ")[0];
     /* Each suggestion in the suggestion list should already have a matchScore
        assigned by Verb.getCompletions.  Give them also a frequencyScore based
-       on the suggestionMemory, once suggestionMemory is hooked up.
-     So, TODO: something like the following: */
-    /*for each( let sugg in this._suggestionList) {
-      let suggVerb = sugg._verb_name;
-      sugg.frequencyScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
-    }*/
+       on the suggestionMemory:*/
+    for each( let sugg in this._suggestionList) {
+      let suggVerb = sugg._verb._name;
+      let freqScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
+      sugg.setFrequencyScore(freqScore);
+    }
 
     this._suggestionList.sort( function( x, y ) {
 				 let xMatchScores = x.getMatchScores();
@@ -150,7 +157,8 @@ NLParser.Parser.prototype = {
     // This parser only cares about the verb name.
     let chosenVerb = chosenSuggestion._verb._name;
     let inputVerb = query.split(" ")[0];
-    /* TODO not neccessarily accurate!  Input might have just been nouns,
+    /* TODO not neccessarily accurate!  Also English-specific!
+     * Input might have just been nouns,
     // if this was noun-first completion, which means we're remembering
     // an association from noun input to verb completion, which might be
     // problematic.  Discuss. */
@@ -160,7 +168,7 @@ NLParser.Parser.prototype = {
   updateSuggestionList: function( query, context ) {
     var nounType, verb;
     var newSuggs = [];
-    var selObj = getSelectionObject(context);
+    var selObj = NLParser.getSelectionObject(context);
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
@@ -235,7 +243,7 @@ NLParser.Parser.prototype = {
     // the user's last keypress.  This might be done with a
     // XUL:textbox whose 'type' is set to 'timed'.
 
- var doc = previewBlock.ownerDocument;
+    var doc = previewBlock.ownerDocument;
     if (!doc.getElementById("suggestions")) {
       // Set the initial contents of the preview block.
       previewBlock.innerHTML = ('<div id="suggestions"></div>' +
@@ -267,9 +275,20 @@ NLParser.Parser.prototype = {
 
     var activeSugg = this.getSentence(hilitedSuggestion);
     if ( activeSugg ) {
-      // Set the preview contents.
-      activeSugg.preview(context, doc.getElementById("preview-pane"));
+      var self = this;
+      function queuedPreview() {
+        // Set the preview contents.
+        if (self._queuedPreview == queuedPreview)
+          activeSugg.preview(context, doc.getElementById("preview-pane"));
+      };
+      this._queuedPreview = queuedPreview;
+      Utils.setTimeout(this._queuedPreview, activeSugg.previewDelay);
     }
+
+    var evt = doc.createEvent("HTMLEvents");
+    evt.initEvent("preview-change", false, false);
+    doc.getElementById("preview-pane").dispatchEvent(evt);
+
     return true;
   },
 

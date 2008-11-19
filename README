@@ -51,4 +51,4 @@ Once the extension is installed, the Ubiquity test suite can be run at:
 Alternatively, the suite can be run from the command-line with:
 
   python manage.py test
-
+ 

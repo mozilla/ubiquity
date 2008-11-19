@@ -34,8 +34,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function SandboxFactory(globals) {
-  this._target = SandboxFactory.target;
+EXPORTED_SYMBOLS = ["SandboxFactory"];
+
+function SandboxFactory(globals, target) {
+  this._target = target;
 
   if (globals == undefined)
     globals = {};
@@ -48,10 +50,8 @@ function SandboxFactory(globals) {
     };
 }
 
-SandboxFactory.target = this;
-
 SandboxFactory.prototype = {
-  makeSandbox: function(codeSource) {
+  makeSandbox: function makeSandbox(codeSource) {
     var sandbox = Components.utils.Sandbox(this._target);
     var globals = this._makeGlobals(codeSource);
 
@@ -62,7 +62,41 @@ SandboxFactory.prototype = {
     return sandbox;
   },
 
-  evalInSandbox: function(code, sandbox) {
-    Components.utils.evalInSandbox(code, sandbox);
+  evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
+    var ubiquity;
+
+    // TODO: This code is temporary; right now the pre-compiled
+    // nsIUbiquity XPCOM binary that comes with Ubiquity only works on
+    // FF 3.1 due to the fact that the JSAPI is backwards compatible
+    // at only the source-code level.  Eventually we'll change this so that
+    // the nsIUbiquity component is only compiled for FF 3.0, and the
+    // functionality we need is built-in to FF 3.1 (or rather, Gecko
+    // 1.9.1). See bug #445873 for more information.
+    try {
+      var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+                              .getService(Components.interfaces.nsIXULAppInfo);
+      if (appInfo.platformVersion.slice(0, 5) != "1.9.0")
+        ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"];
+    } catch (e) {
+      ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"];
+    }
+
+    if (typeof(ubiquity) == "undefined")
+      Components.utils.evalInSandbox(code, sandbox);
+    else {
+      ubiquity = ubiquity.getService();
+      ubiquity = ubiquity.QueryInterface(Components.interfaces.nsIUbiquity);
+      let currIndex = 0;
+      for (let i = 0; i < codeSections.length; i++) {
+        let section = codeSections[i];
+        ubiquity.evalInSandbox(code.slice(currIndex,
+                                          currIndex + section.length),
+                               section.filename,
+                               section.lineNumber,
+                               "1.8",
+                               sandbox);
+        currIndex += section.length;
+      }
+    }
   }
 };

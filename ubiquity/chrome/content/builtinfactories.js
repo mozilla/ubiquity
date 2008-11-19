@@ -73,8 +73,6 @@ let UbiquitySetup = {
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"}],
 
-  BASE_REMOTE_URI: "https://labs.toolness.com/standard-feeds/",
-
   __getExtDir: function __getExtDir() {
     let Cc = Components.classes;
     let extMgr = Cc["@mozilla.org/extensions/manager;1"]
@@ -105,18 +103,24 @@ let UbiquitySetup = {
     return false;
   },
 
-  installDefaults: function installDefaults() {
+  installDefaults: function installDefaults(ubiquityGlobals) {
+    if (ubiquityGlobals.wereDefaultsInstalled)
+      return;
+
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
-    if (this.isInstalledAsXpi())
-      baseUri = this.BASE_REMOTE_URI;
-    else
+    if (this.isInstalledAsXpi()) {
+      var STANDARD_FEEDS_PREF = "extensions.ubiquity.standardFeedsUri";
+      baseUri = Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
+    } else
       baseUri = baseLocalUri;
 
     LinkRelCodeSource.installDefaults(baseUri,
                                       baseLocalUri,
                                       this.STANDARD_FEEDS);
+
+    ubiquityGlobals.wereDefaultsInstalled = true;
   }
 };
 
@@ -151,29 +155,32 @@ function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
 }
 
 function makeBuiltinCodeSources(languageCode) {
-  var baseUri = UbiquitySetup.getBaseUri() + "chrome/content/";
+  var baseUri = UbiquitySetup.getBaseUri();
+  var baseChromeUri = baseUri + "chrome/content/";
+  var baseModulesUri = baseUri + "modules/";
+  var baseScriptsUri = baseUri + "scripts/";
 
   var headerCodeSources = [
-    new LocalUriCodeSource(baseUri + "utils.js"),
-    new LocalUriCodeSource(baseUri + "cmdutils.js")
+    new LocalUriCodeSource(baseModulesUri + "utils.js"),
+    new LocalUriCodeSource(baseModulesUri + "cmdutils.js")
   ];
   var bodyCodeSources = [
-    new LocalUriCodeSource(baseUri + "onstartup.js")
+    new LocalUriCodeSource(baseChromeUri + "onstartup.js")
   ];
   var footerCodeSources = [
-    new LocalUriCodeSource(baseUri + "final.js")
+    new LocalUriCodeSource(baseChromeUri + "final.js")
   ];
 
   if (languageCode == "jp") {
-    headerCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/nountypes.js"));
-    bodyCodeSources.push(new LocalUriCodeSource(baseUri + "nlparser/jp/builtincmds.js"));
+    headerCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/nountypes.js"));
+    bodyCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/builtincmds.js"));
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(baseUri + "date.js"),
-      new LocalUriCodeSource(baseUri + "nlparser/en/nountypes.js")
+      new LocalUriCodeSource(baseScriptsUri + "date.js"),
+      new LocalUriCodeSource(baseChromeUri + "nlparser/en/nountypes.js")
     ]);
     bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(baseUri + "builtincmds.js"),
+      new LocalUriCodeSource(baseChromeUri + "builtincmds.js"),
       new XhtmlCodeSource(PrefCommands)
     ]);
   }

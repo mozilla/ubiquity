@@ -185,7 +185,7 @@ CmdUtils.CreateCommand({
     previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
   },
 
-  execute: function( directObj ) {
+  execute: function( directObject ) {
     var expression = directObject.text;
 
     if(expression.length < 1) {

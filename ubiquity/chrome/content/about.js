@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 function makeRemover(element, info) {
   function onSlideDown() {
     var newElement = makeFeedListElement(info,
@@ -137,7 +139,7 @@ function makeFeedListElement(info, label, clickMaker) {
   var parser = new JSParser(code);
   code = parser.clean();
   var commandList = document.createElement("ul");
-  while (((result = createCommands.exec(code)) != null) || 
+  while (((result = createCommands.exec(code)) != null) ||
          ((result = stdCommands(code)) != null) ||
          ((result = stdCommandsAlt(code)) != null)) {
     if (names.indexOf(result[1]) == -1) {

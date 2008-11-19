@@ -4,11 +4,22 @@ import xml.dom.minidom
 import subprocess
 import shutil
 import zipfile
+import shutil
 from ConfigParser import ConfigParser
 
 # Path to the root of the extension, relative to where this script is
 # located.
 EXT_SUBDIR = "ubiquity"
+
+# Full path to xpcshell; if it's not an absolute path, it's assumed
+# to be on the user's PATH.
+g_xpcshell_path = "xpcshell"
+
+g_mydir = os.path.abspath(os.path.split(__import__("__main__").__file__)[0])
+
+def clear_dir(dirname):
+    if os.path.exists(dirname) and os.path.isdir(dirname):
+        shutil.rmtree(dirname)
 
 def find_profile_dir(name):
     """
@@ -56,11 +67,27 @@ def get_install_rdf_property(path_to_extension_root, property):
     element = rdf.documentElement.getElementsByTagName(property)[0]
     return element.firstChild.nodeValue
 
-def run_python_script(args):
-    retval = subprocess.call([sys.executable] + args)
+def run_program(args, **kwargs):
+    retval = subprocess.call(args, **kwargs)
     if retval:
         print "Process failed with exit code %d." % retval
         sys.exit(retval)
+
+def run_python_script(args):
+    run_program([sys.executable] + args)
+
+def get_xpcom_info():
+    popen = subprocess.Popen(
+        [g_xpcshell_path,
+         os.path.join(g_mydir, "get_xpcom_info.js")],
+        stdout = subprocess.PIPE
+        )
+    retval = popen.wait()
+    assert retval == 0
+    comsd, os_target, xpcomabi = popen.stdout.read().splitlines()
+    return dict(comsd = comsd,
+                os_target = os_target,
+                xpcomabi = xpcomabi)
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -74,13 +101,15 @@ if __name__ == "__main__":
         print "    install - install to the given profile"
         print "    uninstall - uninstall from the given profile"
         print "    build-xpi - build an xpi of the addon"
+        print "    build-components - build C++ XPCOM components"
         print
         sys.exit(1)
 
-    main = __import__("__main__")
-    mydir = os.path.abspath(os.path.split(main.__file__)[0])
+    if os.environ.get("OBJDIR"):
+        g_xpcshell_path = os.path.join(os.environ["OBJDIR"],
+                                       "dist", "bin", g_xpcshell_path)
 
-    path_to_extension_root = os.path.join(mydir, EXT_SUBDIR)
+    path_to_extension_root = os.path.join(g_mydir, EXT_SUBDIR)
 
     cmd = args[0]
 
@@ -93,17 +122,17 @@ if __name__ == "__main__":
         run_python_script([os.path.join(this_dir, "systemtests.py")])
         print "All tests successful."
     elif cmd == "unittest":
-        if subprocess.call(["which", "xpcshell"],
-                           stdout=subprocess.PIPE) != 0:
-            print "You must have xpcshell on your PATH to run tests."
-            sys.exit(1)
+        #if subprocess.call(["which", g_xpcshell_path],
+        #                   stdout=subprocess.PIPE) != 0:
+        #    print "You must have xpcshell on your PATH to run tests."
+        #    sys.exit(1)
 
         xpcshell_args = [
-            "xpcshell",
+            g_xpcshell_path,
             "-v", "180",     # Use Javascript 1.8
             "-w",            # Enable warnings
             "-s",            # Enable strict mode
-            os.path.join(mydir, "xpcshell_tests.js"),
+            os.path.join(g_mydir, "xpcshell_tests.js"),
             path_to_extension_root
             ]
 
@@ -172,6 +201,67 @@ if __name__ == "__main__":
                 arcpath = abspath[len(path_to_extension_root)+1:]
                 zf.write(abspath, arcpath)
         print "Created %s." % zfname
+    elif cmd == "build-components":
+        if "TOPSRCDIR" not in os.environ:
+            print ("Please set the TOPSRCDIR environment variable "
+                   "to the root of your mozilla-central checkout. "
+                   "If you're on Windows, this should be a standard "
+                   "Windows-style path, NOT a unix-style path.")
+            sys.exit(1)
+        if "OBJDIR" not in os.environ:
+            print ("Please set the OBJDIR envirionment variable "
+                   "to the root of your objdir. "
+                   "If you're on Windows, this should be a standard "
+                   "Windows-style path, NOT a unix-style path.")
+            sys.exit(1)
+        xpcominfo = get_xpcom_info()
+        topsrcdir = os.environ["TOPSRCDIR"]
+        objdir = os.environ["OBJDIR"]
+        comp_src_dir = os.path.join(g_mydir, "components")
+        rel_dest_dir = os.path.join("browser", "components", "ubiquity")
+        comp_dest_dir = os.path.join(topsrcdir, rel_dest_dir)
+        comp_xpi_dir = os.path.join(objdir, "dist", "xpi-stage",
+                                    "ubiquity", "components")
+        comp_plat_dir = os.path.join(
+            g_mydir, "ubiquity", "platform",
+            "%(os_target)s_%(xpcomabi)s" % xpcominfo,
+            "components",
+            )
+
+        clear_dir(comp_dest_dir)
+        clear_dir(comp_xpi_dir)
+        clear_dir(comp_plat_dir)
+
+        shutil.copytree(comp_src_dir, comp_dest_dir)
+
+        # Ensure that these paths are unix-like on Windows.
+	sh_pwd = subprocess.Popen(["sh", "-c", "pwd"],
+                                  cwd=topsrcdir,
+                                  stdout=subprocess.PIPE)
+        sh_pwd.wait()
+        unix_topsrcdir = sh_pwd.stdout.read().strip()
+        unix_rel_dest_dir = rel_dest_dir.replace("\\", "/")
+
+        # We're specifying 'perl' here because we have to for this
+        # to work on Windows.
+        run_program(["perl",
+                     os.path.join(topsrcdir, "build", "autoconf",
+                                  "make-makefile"),
+                     "-t", unix_topsrcdir,
+                     unix_rel_dest_dir],
+                    cwd=objdir)
+        run_program(["make"],
+                    cwd=os.path.join(objdir, rel_dest_dir))
+
+        shutil.copytree(comp_xpi_dir, comp_plat_dir)
+        for filename in os.listdir(comp_xpi_dir):
+            shutil.copy(os.path.join(comp_xpi_dir, filename),
+                        xpcominfo["comsd"])
+
+        for filename in ["compreg.dat", "xpti.dat"]:
+            fullpath = os.path.join(xpcominfo["comsd"], filename)
+            if os.path.exists(fullpath):
+                os.unlink(fullpath)
     else:
         print "Unknown command '%s'" % cmd
         sys.exit(1)

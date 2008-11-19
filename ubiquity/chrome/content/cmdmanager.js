@@ -45,18 +45,17 @@ function CommandManager(cmdSource, msgService, languageCode) {
   this.__nlParser = NLParser.makeParserForLanguage( languageCode,
 						    cmdSource.getAllCommands(),
 						    cmdSource.getAllNounTypes() );
+  this.__cmdSource.parser = this.__nlParser;
 }
 
 CommandManager.prototype = {
-  refresh : function() {
+  refresh : function CM_refresh() {
     this.__cmdSource.refresh();
-    this.__nlParser.setCommandList( this.__cmdSource.getAllCommands());
-    this.__nlParser.setNounList( this.__cmdSource.getAllNounTypes());
     this.__hilitedSuggestion = 0;
     this.__lastInput = "";
   },
 
-  moveIndicationUp : function(context, previewBlock) {
+  moveIndicationUp : function CM_moveIndicationUp(context, previewBlock) {
     this.__hilitedSuggestion -= 1;
     if (this.__hilitedSuggestion < 0) {
       this.__hilitedSuggestion = this.__nlParser.getNumSuggestions() - 1;
@@ -64,7 +63,7 @@ CommandManager.prototype = {
     this._preview(context, previewBlock);
   },
 
-  moveIndicationDown : function(context, previewBlock) {
+  moveIndicationDown : function CM_moveIndicationDown(context, previewBlock) {
     this.__hilitedSuggestion += 1;
     if (this.__hilitedSuggestion > this.__nlParser.getNumSuggestions() - 1) {
       this.__hilitedSuggestion = 0;
@@ -72,16 +71,13 @@ CommandManager.prototype = {
     this._preview(context, previewBlock);
   },
 
-  _preview : function(context, previewBlock) {
+  _preview : function CM__preview(context, previewBlock) {
     var wasPreviewShown = false;
     try {
       wasPreviewShown = this.__nlParser.setPreviewAndSuggestions(context,
 								 previewBlock,
 								 this.__hilitedSuggestion);
     } catch (e) {
-      dump("ERROR!!!\n");
-      dump(e);
-      dump("\n");
       this.__msgService.displayMessage(
         {text: ("An exception occurred while previewing the command '" +
                 this.__lastInput + "'."),
@@ -91,7 +87,7 @@ CommandManager.prototype = {
     return wasPreviewShown;
   },
 
-  updateInput : function(input, context, previewBlock) {
+  updateInput : function CM_updateInput(input, context, previewBlock) {
     /* Return true if we created any suggestions, false if we didn't
      * or if we had nowhere to put them.
      */
@@ -106,13 +102,16 @@ CommandManager.prototype = {
       return false;
   },
 
-  onSuggestionsUpdated : function(input, context, previewBlock) {
+  onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
+                                                          context,
+                                                          previewBlock) {
     // Called when we're notified of a newly incoming suggestion
     this.__nlParser.refreshSuggestionList(input);
-    //this._preview(context, previewBlock);
+    if (previewBlock)
+      this._preview(context, previewBlock);
   },
 
-  execute : function(context) {
+  execute : function CM_execute(context) {
     var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
     if (!parsedSentence)
       this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
@@ -129,19 +128,21 @@ CommandManager.prototype = {
       }
   },
 
-  hasSuggestions: function() {
+  hasSuggestions: function CM_hasSuggestions() {
     return (this.__nlParser.getNumSuggestions() > 0);
   },
 
-  getSuggestionListNoInput: function( context ) {
+  getSuggestionListNoInput: function CM_getSuggestionListNoInput( context ) {
     this.__nlParser.updateSuggestionList("", context);
     return this.__nlParser.getSuggestionList();
   },
 
-  copySuggestionToInput : function(context, previewBlock, textbox) {
+  copySuggestionToInput : function CM_copySuggestionToInput(context,
+                                                            previewBlock,
+                                                            textbox) {
     if(this.hasSuggestions()) {
-      
-      var selObj = getSelectionObject(context);
+
+      var selObj = NLParser.getSelectionObject(context);
       var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
                                     .getCompletionText(selObj);
       this.updateInput(suggText,
@@ -181,43 +182,63 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
       codeSources = new IterableCollection([codeSources]);
   }
 
-  if (sandboxFactory == undefined)
-    sandboxFactory = new SandboxFactory();
   this._sandboxFactory = sandboxFactory;
   this._codeSources = codeSources;
   this._messageService = messageService;
   this._commands = [];
   this._codeCache = null;
   this._nounTypes = [];
+  this.parser = null;
 }
 
 CommandSource.prototype = {
   CMD_PREFIX : "cmd_",
   NOUN_PREFIX : "noun_",
 
-  refresh : function() {
+  refresh : function CS_refresh() {
+    var shouldLoadCommands = false;
+    var prevCodeCache = this._codeCache ? this._codeCache : {};
+
     this._codeCache = {};
     for (var codeSource in this._codeSources) {
       var code = codeSource.getCode();
 
       if (typeof(codeSource.id) == "undefined")
         throw new Error("Code source ID is undefined for code: " + code);
-      this._codeCache[codeSource.id] = code;
+      this._codeCache[codeSource.id] = {code: code,
+                                        codeSections: codeSource.codeSections};
+
+      if (!(codeSource.id in prevCodeCache) ||
+          prevCodeCache[codeSource.id].code != code)
+        shouldLoadCommands = true;
     }
-    this._loadCommands();
+
+    if (!shouldLoadCommands)
+      for (var id in prevCodeCache)
+        if (!(id in this._codeCache))
+          shouldLoadCommands = true;
+
+    if (shouldLoadCommands)
+      this._loadCommands();
   },
 
-  _loadCommands : function() {
+  _loadCommands : function CS__loadCommands() {
     var commands = {};
     var sandboxes = {};
 
     for (var codeSource in this._codeSources) {
       var id = codeSource.id;
-      var code = this._codeCache[id];
+      var code = this._codeCache[id].code;
+      var codeSections = this._codeCache[id].codeSections;
       sandboxes[id] = this._sandboxFactory.makeSandbox(codeSource);
 
       try {
-        this._sandboxFactory.evalInSandbox(code, sandboxes[id]);
+        if (!codeSections)
+          codeSections = [{length: code.length,
+                           filename: id}];
+        this._sandboxFactory.evalInSandbox(code,
+                                           sandboxes[id],
+                                           codeSections);
       } catch (e) {
         this._messageService.displayMessage(
           {text: "An exception occurred while loading code.",
@@ -228,7 +249,7 @@ CommandSource.prototype = {
 
     var self = this;
 
-    var makeCmdForObj = function(sandbox, objName) {
+    var makeCmdForObj = function CS_makeCmdForObj(sandbox, objName) {
       var cmdName = objName.substr(self.CMD_PREFIX.length);
       cmdName = cmdName.replace(/_/g, "-");
       var cmdFunc = sandbox[objName];
@@ -236,14 +257,15 @@ CommandSource.prototype = {
       var cmd = {
         name : cmdName,
         icon : cmdFunc.icon,
-        execute : function(context, directObject, modifiers) {
+        execute : function CS_execute(context, directObject, modifiers) {
           sandbox.context = context;
           return cmdFunc(directObject, modifiers);
         }
       };
       // Attatch optional metadata to command object if it exists
       if (cmdFunc.preview)
-        cmd.preview = function(context, directObject, modifiers, previewBlock) {
+        cmd.preview = function CS_preview(context, directObject, modifiers,
+                                          previewBlock) {
           sandbox.context = context;
           return cmdFunc.preview(previewBlock, directObject, modifiers);
         };
@@ -258,15 +280,20 @@ CommandSource.prototype = {
         "license",
         "description",
         "help",
-	"synonyms"
+	"synonyms",
+        "previewDelay"
       ];
 
-      propsToCopy.forEach(function(prop) {
+      propsToCopy.forEach(function CS_copyProp(prop) {
         if (cmdFunc[prop])
           cmd[prop] = cmdFunc[prop];
         else
           cmd[prop] = null;
       });
+
+      if (cmd.previewDelay === null)
+        // Default delay to wait before calling a preview function, in ms.
+        cmd.previewDelay = 250;
 
       if (cmdFunc.modifiers) {
 	cmd.modifiers = cmdFunc.modifiers;
@@ -303,17 +330,22 @@ CommandSource.prototype = {
     this._commands = commands;
     this.commandNames = commandNames;
     this._nounTypes = nounTypes;
+
+    if (this.parser) {
+      this.parser.setCommandList(this._commands);
+      this.parser.setNounList(this._nounTypes);
+    }
   },
 
-  getAllCommands: function() {
+  getAllCommands: function CS_getAllCommands() {
     return this._commands;
   },
 
-  getAllNounTypes: function() {
+  getAllNounTypes: function CS_getAllNounTypes() {
     return this._nounTypes;
   },
 
-  getCommand : function(name) {
+  getCommand : function CS_getCommand(name) {
     if (this._codeCache === null)
       this.refresh();
 
@@ -334,7 +366,7 @@ function makeDefaultCommandSuggester(commandManager) {
       let sentenceClosure = parsedSentence;
       let titleCasedName = parsedSentence._verb._name;
       titleCasedName = titleCasedName[0].toUpperCase() + titleCasedName.slice(1);
-      retVal[titleCasedName] = function() {
+      retVal[titleCasedName] = function execute() {
 	sentenceClosure.execute(context);
       };
 

@@ -44,9 +44,7 @@ const CMD_URL_ANNO = "ubiquity/commands";
 const CMD_TITLE_ANNO = "ubiquity/title";
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
-// This class can be used both as a code source or a collection.  If used as
-// a code source, the ID of the code source is 'linkrel:singleton' and its
-// code is a conglomeration of all subscribed feeds.  As a collection, it
+// TODO: This class isn't actually a code source, it's a collection that
 // yields a code source for every currently-subscribed feed.
 function LinkRelCodeSource() {
   if (LinkRelCodeSource.__singleton)
@@ -91,16 +89,6 @@ function LinkRelCodeSource() {
     }
   };
 
-  this.getCode = function LRCS_getCode() {
-    var code = "";
-    for (source in this)
-      code += source.getCode() + "\n";
-
-    return code;
-  };
-
-  this.id = 'linkrel:singleton';
-
   LinkRelCodeSource.__singleton = this;
   return LinkRelCodeSource.__singleton;
 }
@@ -138,14 +126,16 @@ LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
     var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
     pageInfo.jsUri = Utils.url(val);
   } else {
-    // There's no <link rel="commands"> tag;, so we'll assume this
+    // There's no <link rel="commands"> tag, so we'll assume this
     // is a raw JS file.
     pageInfo.jsUri = uri;
   }
 
-  if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO))
+  if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
+    pageInfo.canUpdate = true;
+  } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
     pageInfo.canUpdate = annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
-  else
+  } else
     pageInfo.canUpdate = false;
 
   pageInfo.getCode = function pageInfo_getCode() {

@@ -36,6 +36,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 function getUrlParams() {
   var urlFragments = document.URL.split("?")[1];
   urlFragments = urlFragments.split("&");
@@ -115,7 +117,9 @@ function onReady() {
       $("#autoupdate-warning").slideUp();
   }
 
-  if (Utils.url(gCommandFeedInfo.sourceUrl).scheme == "http")
+  var urlScheme = Utils.url(gCommandFeedInfo.sourceUrl).scheme;
+  var safeSchemes = ["https", "chrome", "file", "resource"];
+  if (safeSchemes.indexOf(urlScheme) == -1)
     $("#mitm-warning").show();
 
   $("#autoupdate").click(onAutoupdateClicked);

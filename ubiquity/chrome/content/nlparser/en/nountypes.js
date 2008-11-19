@@ -82,14 +82,37 @@ var noun_type_contact = {
       if (c.match(text, "i"))
 	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
-
-   if(/[A-Za-z0-9_.-]+@([A-Za-z0-9_.-]+\.)+[A-Za-z]{2,4}/.test(text)){
-      suggestions.push(CmdUtils.makeSugg(text));
-   }
-
+    
+    //uses the email noun to see if the text is a valid email
+    suggs = noun_type_email.suggest(text, html)
+    suggs.length > 0 ? suggestions.push(suggs[0]) : null
+    
     return suggestions.splice(0, 5);
   }
 };
+
+/*
+ * Noun that matches only emails based on the regexp
+ * found on http://iamcal.com/publish/articles/php/parsing_email by Cal Henderson
+ * This regexp is RFC822 compilant.
+ */
+var noun_type_email = {
+  _name: "email",
+  _regexp: new RegExp('^([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+' +
+                      '|\\x22([^\\x0d\\x22\\x5c\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x22)(\\x2e([^\\x00-\\x20\\x22' +
+                      '\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x22([^\\x0d\\x22\\x5c' +
+                      '\\x80-\\xff]|\\x5c\\x00-\\x7f)*\\x22))*\\x40([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-' +
+                      '\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x5b([^\\x0d\\x5b-\\x5d\\x80-\\xff]|\\x5c[\\x00-' +
+                      '\\x7f])*\\x5d)(\\x2e([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\' +
+                      'x5d\\x7f-\\xff]+|\\x5b([^\\x0d\\x5b-\\x5d\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x5d))*$'),
+  suggest: function(text, html){
+    if(this._regexp.test(text)){
+      return [ CmdUtils.makeSugg(text) ];
+    }
+    
+    return [];
+  }
+}
 
 var noun_arb_text = {
   _name: "text",
@@ -101,18 +124,18 @@ var noun_arb_text = {
 
 var noun_type_date = {
   _name: "date",
-  
+
   default: function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
      return CmdUtils.makeSugg(text, null, date);
    },
-  
+
   suggest: function( text, html )  {
     if (typeof text != "string") {
       return [];
     }
-    
+
     var date = Date.parse( text );
     if (!date) {
       return [];
@@ -217,7 +240,119 @@ function isAddress( query, callback ) {
   });
 }
 
-// TODO this is a really crappy implementation for async address detection
+/*
+ * Noun type for searching links on the awesomebar database.
+ * Right now, the suggestion returned is:
+ *  -- text: title of the url
+ *  -- html: the link
+ *  -- data: the favicon
+ *  
+ *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html) 
+ */
+noun_type_awesomebar = {
+  
+  _getHistoryLinks: function(partialSearch, onSearchComplete) {
+        function AutoCompleteInput(aSearches) {
+            this.searches = aSearches;
+        }
+        AutoCompleteInput.prototype = {
+            constructor: AutoCompleteInput,
+
+            searches: null,
+
+            minResultsForPopup: 0,
+            timeout: 10,
+            searchParam: "",
+            textValue: "",
+            disableAutoComplete: false,
+            completeDefaultIndex: false,
+
+            get searchCount() {
+                return this.searches.length;
+            },
+
+            getSearchAt: function(aIndex) {
+                return this.searches[aIndex];
+            },
+
+            onSearchBegin: function() {},
+            onSearchComplete: function() {},
+
+            popupOpen: false,
+
+            popup: {
+                setSelectedIndex: function(aIndex) {},
+                invalidate: function() {},
+
+                // nsISupports implementation
+                QueryInterface: function(iid) {
+                    if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompletePopup)) return this;
+
+                    throw Components.results.NS_ERROR_NO_INTERFACE;
+                }
+            },
+
+            // nsISupports implementation
+            QueryInterface: function(iid) {
+                if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompleteInput)) return this;
+
+                throw Components.results.NS_ERROR_NO_INTERFACE;
+            }
+        }
+
+        var controller = Components.classes["@mozilla.org/autocomplete/controller;1"].getService(Components.interfaces.nsIAutoCompleteController);
+
+        var input = new AutoCompleteInput(["history"]);
+        controller.input = input;
+
+        input.onSearchComplete = function() {
+            onSearchComplete(controller);
+        };
+
+        controller.startSearch(partialSearch);
+  },
+  
+  _getLinks: function(controller, callback) {
+      var links = [];
+
+      for (var i = 0; i < controller.matchCount; i++) {
+        var url = controller.getValueAt(i);
+        var title = controller.getCommentAt(i);
+        if (title.length == 0) { title = url; }
+
+        var favicon = controller.getImageAt(i);
+    
+        callback( CmdUtils.makeSugg(url, title, favicon) );
+    }
+  },
+  name: "url",
+  _links: null,
+  suggest: function(part, html, callback){
+      var onSearchComplete = function(controller) {
+         noun_type_awesomebar._getLinks(controller, callback);
+      };
+
+      this._getHistoryLinks(part, onSearchComplete);
+  }
+}
+
+
+var noun_type_async_address = {
+  _name: "address(async)",
+  // TODO caching
+  suggest: function(text, html, callback) {
+    isAddress( text, function( truthiness ) {
+		 if (truthiness) {
+		   callback(CmdUtils.makeSugg(text));
+		 }
+	       });
+    return [];
+  }
+};
+
+
+// TODO this is going on obsolete, and will be replaced entirely by
+// noun_type_async_address.
 var noun_type_address = {
   _name: "address",
   knownAddresses: [],
@@ -244,26 +379,44 @@ var noun_type_address = {
 
 var LanguageCodes = {
   'arabic' : 'ar',
+  'bulgarian' : 'bg',
+  'catalan' : 'ca',
   'chinese' : 'zh',
   'chinese_traditional' : 'zh-TW',
+  'croatian': 'hr',
+  'czech': 'cs',
   'danish' : 'da',
   'dutch': 'nl',
   'english' : 'en',
+  // Filipino should be 'fil', however Google
+  // improperly uses 'tl', which is actually
+  // the language code for tagalog. Using 'tl'
+  // for now so that filipino translations work.
+  'filipino' : 'tl',
   'finnish' : 'fi',
   'french' : 'fr',
   'german' : 'de',
   'greek' : 'el',
+  'hebrew' : 'he',
   'hindi' : 'hi',
+  'indonesian' : 'id',
   'italian' : 'it',
   'japanese' : 'ja',
   'korean' : 'ko',
+  'latvian' : 'lv',
+  'lithuanian' : 'lt',
   'norwegian' : 'no',
   'polish' : 'pl',
-  'portugese' : 'pt-PT',
+  'portuguese' : 'pt',
   'romanian' : 'ro',
   'russian' : 'ru',
+  'serbian' : 'sr',
+  'slovak' : 'sk',
+  'slovenian' : 'sl',
   'spanish' : 'es',
-  'swedish' : 'sv'
+  'swedish' : 'sv',
+  'ukranian' : 'uk',
+  'vietnamese' : 'vi'
 };
 
 var noun_type_language =  {
@@ -476,3 +629,60 @@ var noun_type_url = {
     return [];
   }
 };
+
+
+
+var noun_type_livemark = {
+  _name: "livemark",
+  rankLast: true,
+  
+  /*
+  * text & html = Livemark Title (string)
+  * data = { itemIds : [] } - an array of itemIds(long long) for the suggested livemarks.
+  * These values can be used to reference the livemark in bookmarks & livemark services
+  */
+  
+  getFeeds: function() {
+    
+    //Find all bookmarks with livemark annotation
+     return Components.classes["@mozilla.org/browser/annotation-service;1"]
+        .getService(Components.interfaces.nsIAnnotationService)
+        .getItemsWithAnnotation("livemark/feedURI", {});
+  },
+  
+  default: function() {
+    var feeds = this.getFeeds();
+    if( feeds.length > 0 ) {
+       return CmdUtils.makeSugg("all livemarks", null, {itemIds: feeds});
+    }
+    return null;
+  },
+  
+  suggest: function(fragment) {
+    fragment = fragment.toLowerCase();
+    
+    var suggestions = [];
+    var allFeeds = this.getFeeds();
+    
+    if(allFeeds.length > 0) {
+      var bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
+                                  .getService(Components.interfaces.nsINavBookmarksService);
+
+      for(var i = 0; i < allFeeds.length; ++i) {
+        var livemarkTitle = bookmarks.getItemTitle(allFeeds[i]).toLowerCase();
+        if(livemarkTitle.toLowerCase().indexOf(fragment) > -1) {
+          suggestions.push(CmdUtils.makeSugg(livemarkTitle , null,
+                                         { itemIds: [allFeeds[i]] } )); //data.itemIds[]
+        }
+      }
+     
+      //option for all livemarks
+      var all = "all livemarks";
+      if(all.indexOf(fragment) > -1) {
+	suggestions.push(CmdUtils.makeSugg( all , null, {itemIds: allFeeds} ));
+      }
+      return suggestions;
+    }
+    return [];
+  }  
+}

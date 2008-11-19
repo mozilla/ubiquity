@@ -1,0 +1,37 @@
+DEPTH   = ../../../..
+topsrcdir = @top_srcdir@
+srcdir    = @srcdir@
+VPATH   = @srcdir@
+
+include $(DEPTH)/config/autoconf.mk
+
+IS_COMPONENT = 1
+MODULE = ubiquity
+LIBRARY_NAME = ubiquity
+USE_STATIC_LIBS = 1
+#FORCE_SHARED_LIB = 1
+#FORCE_USE_PIC = 1
+
+XPI_NAME = ubiquity
+
+REQUIRES	= \
+		  xpcom \
+		  string \
+		  js \
+		  xpconnect \
+		  caps \
+		  dom \
+		  $(NULL)
+
+CPPSRCS = nsUbiquity.cpp
+
+include $(topsrcdir)/config/rules.mk
+
+EXTRA_DSO_LDOPTS += \
+    $(MOZ_JS_LIBS) \
+    $(XPCOM_GLUE_LDOPTS) \
+    $(NSPR_LIBS) \
+    $(NULL)
+
+clobber::
+	rm -f $(DIST)/lib/$(LIBRARY_NAME).lib

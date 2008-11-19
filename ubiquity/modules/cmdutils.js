@@ -39,18 +39,27 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["CmdUtils"];
+
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
 
-CmdUtils.getHtmlSelection = function getHtmlSelection() {
-  var sel = context.focusedWindow.getSelection();
+CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
+  if (typeof(context) == "undefined")
+    context = CmdUtils.__globalObject.context;
 
-  if (sel.rangeCount >= 1) {
-    var html = sel.getRangeAt(0).cloneContents();
-    var newNode = context.focusedWindow.document.createElement("p");
-    newNode.appendChild(html);
-    return newNode.innerHTML;
+  if (context.focusedWindow) {
+    var sel = context.focusedWindow.getSelection();
+
+    if (sel.rangeCount >= 1) {
+      var html = sel.getRangeAt(0).cloneContents();
+      var newNode = context.focusedWindow.document.createElement("p");
+      newNode.appendChild(html);
+      return newNode.innerHTML;
+    }
   }
 
   return null;
@@ -99,11 +108,17 @@ CmdUtils.setSelection = function setSelection(content, options) {
     var beforeText = currentValue.substring(0, focused.selectionStart);
     var afterText = currentValue.substring(focused.selectionEnd, currentValue.length);
 
+    var scrollTop = focused.scrollTop;
+    var scrollLeft = focused.scrollLeft;
+
     focused.value = beforeText + plainText + afterText;
     focused.focus();
 
     //put the cursor after the inserted text
     focused.setSelectionRange(selectionEnd, selectionEnd);
+
+    focused.scrollTop = scrollTop;
+    focused.scrollLeft = scrollLeft;
   }
 
   else {
@@ -203,11 +218,35 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
 }
 
 CmdUtils.log = function log(what) {
-  var console = CmdUtils.getWindowInsecure().console;
-  if (typeof(console) != "undefined"){
-    console.log( what );
+  var args = Array.prototype.slice.call(arguments);
+  if(args.length == 0)
+    return;
+
+  var logPrefix = "Ubiquity: ";
+  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+
+  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
+    args.unshift(logPrefix);
+    browserWindow.Firebug.Console.logFormatted(args);
   } else {
-    displayMessage("Firebug Required For Full Usage\n\n" + what);
+    var logMessage = "";
+    if(typeof args[0] == "string") {
+      var formatStr = args.shift();
+      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
+        formatStr = formatStr.replace("%s", "" + args.shift());
+      }
+      args.unshift(formatStr);
+    }
+    args.forEach(function(arg) {
+      if(typeof arg == "object") {
+        logMessage += " " + Utils.encodeJson(arg) + " ";
+      } else {
+        logMessage += arg;
+      }
+    });
+    Application.console.log(logPrefix + logMessage);
   }
 };
 
@@ -249,6 +288,10 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
       // if we get an exception, then the page that's
       // been loaded is probably XUL or something,
       // and we won't want to deal with it.
+
+      // TODO: This probably won't be accurate if it's the case that
+      // the user has navigated to a different tab by the time the
+      // load event occurs.
       var doc = Application.activeWindow
                            .activeTab
                            .document;
@@ -259,6 +302,8 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
   }
 
   var appcontent = window.document.getElementById("appcontent");
+  if(!windowGlobals._pageLoadFuncs)
+    windowGlobals._pageLoadFuncs = [];
   windowGlobals._pageLoadFuncs.push(_onPageLoad);
 
   _onPageLoad.remove = function _onPageLoad_remove() {
@@ -270,7 +315,10 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
   appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
 };
 
-CmdUtils.getSelection = function getSelection() {
+CmdUtils.getSelection = function getSelection(context) {
+  if (typeof(context) == "undefined")
+    context = CmdUtils.__globalObject.context;
+
   var focused = context.focusedElement;
   var retval = "";
 
@@ -287,7 +335,7 @@ CmdUtils.getSelection = function getSelection() {
       retval = focused.value.substring(start, end);
   }
 
-  if (!retval) {
+  if (!retval && context.focusedWindow) {
     var sel = context.focusedWindow.getSelection();
     if (sel.rangeCount >= 1)
       retval = sel.toString();
@@ -367,25 +415,35 @@ CmdUtils.getHiddenWindow = function getHiddenWindow() {
                    .hiddenDOMWindow;
 }
 
-CmdUtils.getWindowSnapshot = function getWindowShapshot(window, callback) {
-  var top = 0;
-  var left = 0;
+CmdUtils.getTabSnapshot = function getTabSnapshot( tab, options ) {
+  var win = tab.document.defaultView;
+  return CmdUtils.getWindowSnapshot( win, options );
+}
+
+CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
+  if( !options ) options = {};
 
   var hiddenWindow = CmdUtils.getHiddenWindow();
-  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  var thumbnail = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
 
-  var body = window.document.body;
+  width = options.width || 200; // Default to 200px width
 
-  var width = jQuery(body).width();
-  var height = window.innerHeight+110;
+  var widthScale =  width / win.innerWidth;
+  var aspectRatio = win.innerHeight / win.innerWidth;
 
-  canvas.width = width;
-  canvas.height = height;
+  thumbnail.mozOpaque = true;
+  thumbnail.width = width;
+  thumbnail.height = thumbnail.width * aspectRatio;
+  var ctx = thumbnail.getContext("2d");
+  ctx.scale(widthScale, widthScale);
+  ctx.drawWindow(win, win.scrollX, win.scrollY,
+                 win.innerWidth, win.innerWidth, "rgb(255,255,255)");
 
-  var ctx = canvas.getContext( "2d" );
-  ctx.drawWindow( window, left, top, width, height, "rgb(255,255,255)" );
-  callback( canvas.toDataURL() );
+  var data = thumbnail.toDataURL("image/jpeg", "quality=80");
+  if(options.callback) options.callback( imgData );
+  else return data;
 }
+
 
 CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var hiddenWindow = CmdUtils.getHiddenWindow();
@@ -394,7 +452,7 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
 
   var img = new hiddenWindow.Image();
-  img.src = url;//"http://www.google.com/logos/olympics08_opening.gif";
+  img.src = url;
   img.addEventListener("load", function(){
     canvas.width = img.width;
     canvas.height = img.height;
@@ -402,10 +460,61 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
     ctx.drawImage( img, 0, 0 );
 
     callback( canvas.toDataURL() );
-		       }, true);
+	}, true);
 }
 
+// ---------------------------
+// FUNCTIONS FOR STORING AND RETRIEVING PASSWORDS AND OTHER SENSITIVE INFORMATION
+// ---------------------------
 
+
+/**
+* Saves a pair of username/password (or username/api key) to the password manager. You have to pass the name of your command
+* (or other identifier) as to the command like:
+* CmdUtils.savePassword( {name:'my command', username:'myUserName', password:'gu3ssm3'} )
+*/
+CmdUtils.savePassword = function savePassword( opts ){
+  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+  var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1", Components.interfaces.nsILoginInfo, "init");
+  //var loginInfo = new nsLoginInfo(hostname, formSubmitURL, httprealm, username, password, usernameField, passwordField);
+  var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'UbiquityInformation' + opts.name, null, opts.username, opts.password, "", "");
+
+
+  try {
+     passwordManager.addLogin(loginInfo);
+  } catch(e) {
+     // "This login already exists."
+     var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", 'UbiquityInformation' + opts.name, null);
+     for each(login in logins) {
+        if (login.username == opts.username) {
+           //modifyLogin(oldLoginInfo, newLoginInfo);
+           passwordManager.modifyLogin(login, loginInfo);
+           break;
+        }
+     }
+  }
+}
+
+/*
+* Retrieve one or more username/password saved with CmdUtils.savePassword
+* All you have to pass is the identifier (the name option) used on the other function.
+* You will get as return an array of { username:'', password:'' } objects.
+*/
+CmdUtils.retrieveLogins = function retrieveLogins( name ){
+  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+
+  var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
+  var returnedLogins = [];
+
+  for each(login in logins){
+    loginObj = {
+      username: login.username,
+      password: login.password
+    }
+    returnedLogins.push(loginObj);
+  }
+  return returnedLogins;
+}
 
 // -----------------------------------------------------------------
 // COMMAND CREATION FUNCTIONS
@@ -499,6 +608,71 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 
   var templateObject = Template.parseTemplate( templStr );
   return templateObject.process( data );
+};
+
+// Just like jQuery.ajax(), only for command previews; no
+// callbacks in the options object are called if the preview is
+// cancelled.
+CmdUtils.previewAjax = function previewAjax(pblock, options) {
+  var xhr;
+  var newOptions = {};
+  function abort() { xhr.abort(); }
+  for (key in options) {
+    if (typeof(options[key]) == 'function')
+      newOptions[key] = CmdUtils.previewCallback(pblock,
+                                                 options[key],
+                                                 abort);
+    else
+      newOptions[key] = options[key];
+  }
+  xhr = jQuery.ajax(newOptions);
+  return xhr;
+};
+
+// Just like jQuery.get(), only for command previews; the given
+// callback isn't called if the preview is cancelled.
+CmdUtils.previewGet = function previewGet(pblock,
+                                          url,
+                                          data,
+                                          callback,
+                                          type) {
+  var xhr;
+  function abort() { xhr.abort(); }
+  var cb = CmdUtils.previewCallback(pblock, callback, abort);
+  xhr = jQuery.get(url, data, cb, type);
+  return xhr;
+};
+
+// Creates a 'preview callback': a wrapper for a function which
+// first checks to see if the current preview has been cancelled,
+// and if not, calls the real callback.
+CmdUtils.previewCallback = function previewCallback(pblock,
+                                                    callback,
+                                                    abortCallback) {
+  var previewChanged = false;
+
+  function onPreviewChange() {
+    pblock.removeEventListener("preview-change",
+                               onPreviewChange,
+                               false);
+    previewChanged = true;
+    if (abortCallback)
+      abortCallback();
+  }
+
+  pblock.addEventListener("preview-change", onPreviewChange, false);
+
+  function wrappedCallback() {
+    if (!previewChanged) {
+      pblock.removeEventListener("preview-change",
+                                 onPreviewChange,
+                                 false);
+      return callback.apply(this, arguments);
+    }
+    return null;
+  }
+
+  return wrappedCallback;
 };
 
 CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
@@ -619,37 +793,48 @@ CmdUtils.makeSugg = function( text, html, data ) {
 };
 
 
-CmdUtils.NounType = function( name, expectedWords ) {
-  this._init( name, expectedWords );
+CmdUtils.NounType = function(name, expectedWords, defaultWord) {
+  this._init(name, expectedWords, defaultWord);
 }
 CmdUtils.NounType.prototype = {
   /* A NounType that accepts a finite list of specific words as the only valid
    * values.  Instantiate it with an array giving all allowed words.
    */
-  _init: function( name, expectedWords ) {
+  _init: function(name, expectedWords, defaultWord) {
     this._name = name;
-    this._expectedWords = expectedWords; // an array
+    this._wordList = expectedWords; // an array
+    if(typeof defaultWord == "string") {
+      this.default = function() {
+        return CmdUtils.makeSugg(defaultWord);
+      };
+    }
   },
-
-  suggest: function( text, html ) {
+  suggest: function(text) {
     // returns array of suggestions where each suggestion is object
     // with .text and .html properties.
-    var suggestions = [];
     if (typeof text != "string") {
       // Input undefined or not a string
       return [];
     }
 
-    for ( var x in this._expectedWords ) {
+    text = text.toLowerCase();
+
+    var possibleWords = [];
+    if(typeof this._wordList == "function") {
+      possibleWords = this._wordList();
+    } else {
+      possibleWords = this._wordList;
+    }
+
+    var suggestions = [];
+    possibleWords.forEach(function(word) {
       // Do the match in a non-case sensitive way
-      var word = this._expectedWords[x].toLowerCase();
-      if ( word.indexOf( text.toLowerCase() ) > -1 ) {
+      if ( word.toLowerCase().indexOf(text) > -1 ) {
       	suggestions.push( CmdUtils.makeSugg(word) );
-      	// TODO sort these in order of goodness
-      	// todo if fragment is multiple words, search for each of them
+      	// TODO if text input is multiple words, search for each of them
       	// separately within the expected word.
       }
-    }
+    });
     return suggestions;
   }
 };
@@ -657,14 +842,14 @@ CmdUtils.NounType.prototype = {
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
     var query = encodeURIComponent(directObject.text);
-    var urlString = options.url.replace("{QUERY}", query);
+    var urlString = options.url.replace(/%s|{QUERY}/g, query);
     Utils.openUrlInBrowser(urlString);
     CmdUtils.setLastResult( urlString );
   };
 
   options.takes = {"search term": noun_arb_text};
 
-  if (! options.preview )
+  if (! options.preview ) {
     options.preview = function(pblock, directObject, modifiers) {
       var query = directObject.text;
       var content = "Performs a " + options.name + " search";
@@ -672,6 +857,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
 		content += " for <b>" + query + "</b>";
       pblock.innerHTML = content;
     };
+    options.previewDelay = 10;
+  }
 
   options.name = options.name.toLowerCase();
 

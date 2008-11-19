@@ -40,11 +40,15 @@
  * ***** END LICENSE BLOCK ***** */
 
 var gUbiquity = null;
+
+Components.utils.import("resource://ubiquity-modules/cmdutils.js");
+Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 
 function ubiquitySetup()
 {
-  UbiquitySetup.installDefaults();
+  UbiquitySetup.installDefaults(UbiquityGlobals);
 
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
@@ -71,7 +75,7 @@ function ubiquitySetup()
   msgService.add(new ErrorConsoleMessageService());
 
   var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(makeGlobals);
+  var sandboxFactory = new SandboxFactory(makeGlobals, window);
   var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
 
   var cmdSource = new CommandSource(
@@ -127,22 +131,20 @@ function ubiquityKeydown(aEvent)
     defaultKeyModifier = "CTRL";
   }
 
-  // If we're running in the development harness, don't use
-  // the normal keycode, b/c the normal keycode won't propagate
-  // down to the current tab.
-  if (window.location != "chrome://browser/content/browser.xul"){
-    UBIQUITY_KEYCODE = 68; // The character 'd'
-    UBIQUITY_KEYMODIFIER = "ALT";
-  }else{
-    UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32); //The space character
-    UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF, defaultKeyModifier);
-    anchor = anchor.selectedBrowser;
-  }
+  //The space character
+  UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
+  UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
+                                                    defaultKeyModifier);
+  anchor = anchor.selectedBrowser;
 
   //Open Ubiquity if the key pressed matches the shortcut key
   if (aEvent.keyCode == UBIQUITY_KEYCODE &&
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
-    gUbiquity.openWindow(anchor);
+    if(gUbiquity.isWindowOpen) {
+      gUbiquity.openWindow(anchor);
+    } else {
+      gUbiquity.closeWindow();
+    }
     aEvent.preventDefault();
   }
 }
