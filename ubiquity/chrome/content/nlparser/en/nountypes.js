@@ -38,12 +38,12 @@
 
 function getGmailContacts( callback ) {
   var url = "http://mail.google.com/mail/contacts/data/export";
-  var params = Utils.paramsToString({
+  var params = {
     exportType: "ALL",
     out: "CSV"
-  });
+  };
 
-  Utils.ajaxGet(url + params, function(data) {
+  jQuery.get(url, params, function(data) {
     data = data.split("\n");
 
     var contacts = {};
@@ -57,10 +57,7 @@ function getGmailContacts( callback ) {
     }
 
     callback(contacts);
-  }, function() {
-    // probably not logged in - fail gracefully
-    callback({});
-  });
+  }, "text");
 }
 
 var noun_type_contact = {
@@ -69,10 +66,12 @@ var noun_type_contact = {
   callback:function(contacts) {
     noun_type_contact.contactList = contacts;
   },
+  
   suggest: function(text, html) {
     if (noun_type_contact.contactList == null) {
       getGmailContacts( noun_type_contact.callback);
-      return [];
+      let suggs = noun_type_email.suggest(text, html)
+      return suggs.length > 0 ? suggs : []
     }
 
     if( text.length < 2 ) return [];
@@ -83,7 +82,6 @@ var noun_type_contact = {
 	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
     
-    //uses the email noun to see if the text is a valid email
     suggs = noun_type_email.suggest(text, html)
     suggs.length > 0 ? suggestions.push(suggs[0]) : null
     
