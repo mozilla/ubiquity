@@ -40,6 +40,7 @@
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 
 function onDocumentLoad() {
   // TODO: This isn't implemented very well; we're essentially
