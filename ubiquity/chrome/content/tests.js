@@ -38,6 +38,7 @@
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/nounutils.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity-modules/codesource.js");
 
 var globalObj = this;
 const LANG = "en";

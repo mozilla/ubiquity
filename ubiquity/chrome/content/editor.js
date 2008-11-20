@@ -1,5 +1,6 @@
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
+Components.utils.import("resource://ubiquity-modules/codesource.js");
 
 var Editor = {
 

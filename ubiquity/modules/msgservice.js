@@ -39,6 +39,8 @@ EXPORTED_SYMBOLS = ["ExceptionUtils",
                     "AlertMessageService",
                     "CompositeMessageService"];
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 var ExceptionUtils = {
   stackTraceFromFrame: function stackTraceFromFrame(frame, formatter) {
     if (!formatter)
