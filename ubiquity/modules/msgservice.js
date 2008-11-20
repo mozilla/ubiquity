@@ -34,6 +34,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+EXPORTED_SYMBOLS = ["ExceptionUtils",
+                    "ErrorConsoleMessageService",
+                    "AlertMessageService",
+                    "CompositeMessageService"];
+
 var ExceptionUtils = {
   stackTraceFromFrame: function stackTraceFromFrame(frame, formatter) {
     if (!formatter)
