@@ -37,14 +37,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function CommandManager(cmdSource, msgService, languageCode) {
+function CommandManager(cmdSource, msgService, languageCodeOrParser) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
-  this.__nlParser = NLParser.makeParserForLanguage( languageCode,
-						    cmdSource.getAllCommands(),
-						    cmdSource.getAllNounTypes() );
+  if (typeof(languageCodeOrParser) == "string")
+    this.__nlParser = NLParser.makeParserForLanguage(
+      languageCodeOrParser,
+      cmdSource.getAllCommands(),
+      cmdSource.getAllNounTypes()
+    );
+  else {
+    this.__nlParser = languageCodeOrParser;
+    this.__nlParser.setCommandList(cmdSource.getAllCommands());
+    this.__nlParser.setNounList(cmdSource.getAllNounTypes());
+  }
   this.__cmdSource.parser = this.__nlParser;
 }
 

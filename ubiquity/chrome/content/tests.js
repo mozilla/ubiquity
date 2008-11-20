@@ -263,12 +263,28 @@ function getCompletions( input, verbs, nountypes, context ) {
     getSelection: function() { return context.textSelection; }
   };
 
-  var parser = NLParser.makeParserForLanguage( LANG,
-					       verbs,
-					       nountypes,
-                                               fakeContextUtils );
+  var parser = makeTestParser( LANG,
+			       verbs,
+			       nountypes,
+                               fakeContextUtils,
+                               new TestSuggestionMemory() );
   parser.updateSuggestionList( input, context );
   return parser.getSuggestionList();
+}
+
+function makeTestParser(lang, verbs, nouns, contextUtils) {
+  lang = lang ? lang : LANG;
+  verbs = verbs ? verbs : [];
+  nouns = nouns ? nouns : [];
+
+  if (!contextUtils)
+    contextUtils = {
+      getHtmlSelection: function() { return ""; },
+      getSelection: function() { return ""; }
+    };
+
+  return NLParser.makeParserForLanguage(lang, verbs, nouns, contextUtils,
+                                        new TestSuggestionMemory());
 }
 
 function testCmdManagerExecutesTwoCmds() {
@@ -285,7 +301,9 @@ function testCmdManagerExecutesTwoCmds() {
       cmd_two: {execute:function() {twoWasCalled = true;}}
     });
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService,
+                                  makeTestParser());
+
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
@@ -313,7 +331,8 @@ function testCmdManagerExecutesCmd() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService,
+                                  makeTestParser());
   cmdMan.updateInput("existentcommand", fakeContext);
   cmdMan.execute(fakeContext);
   this.assert(wasCalled, "command.execute() must be called.");
@@ -332,7 +351,8 @@ function testCmdManagerCatchesExceptionsInCmds() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService,
+                                  makeTestParser());
 
   cmdMan.updateInput("existentcommand", fakeContext);
   cmdMan.execute(fakeContext);
@@ -351,7 +371,7 @@ function testCmdManagerDisplaysNoCmdError() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, makeTestParser());
 
   cmdMan.updateInput("nonexistentcommand", fakeContext);
   cmdMan.execute(fakeContext);
@@ -677,7 +697,8 @@ function testVerbEatsSelection() {
   var fakeContext = { textSelection: "lunch", htmlSelection:"lunch" };
   var completions = getCompletions("eat this", [cmd_eat], [food, place],
 				   fakeContext);
-  this.assert( completions.length == 1, "Should be one completion" );
+  this.assert( completions.length == 1,
+               "Should be one completion for 'eat this'" );
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
   this.assert(foodGotEatenAt == null, "should be no modifier");
@@ -694,7 +715,7 @@ function testVerbEatsSelection() {
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
   completions = getCompletions("eat at home this", [cmd_eat], [food, place],
-				    fakeContext);
+			       fakeContext);
   this.assert( completions.length == 1, "second should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
@@ -841,7 +862,7 @@ function testModifiersTakeMultipleWords() {
 }
 
 function testSuggestionMemory() {
-  var suggMem1 = new SuggestionMemory("test_1");
+  var suggMem1 = new TestSuggestionMemory();
   suggMem1.remember( "p", "peas");
   suggMem1.remember( "p", "peas");
   suggMem1.remember( "q", "quinine");
@@ -860,7 +881,7 @@ function testSuggestionMemory() {
 
   // Get rid of the first suggestion memory object, make a new one:
   suggMem1 = null;
-  var suggMem2 = new SuggestionMemory("test_1");
+  var suggMem2 = new TestSuggestionMemory();
   // Should have all the same values.
   this.assert(suggMem2.getScore("q", "quinine") == 2);
   this.assert(suggMem2.getScore("q", "quetzalcoatl") == 1);
@@ -882,7 +903,7 @@ function testSortedBySuggestionMemory() {
 		  {name: "crouch", execute: function(){}},
 		  {name: "coelecanth", execute: function(){}},
 		  {name: "crab", execute: function(){}} ];
-  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
+  var nlParser = makeTestParser(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList("c", fakeContext);
   var suggestions = nlParser.getSuggestionList();
@@ -917,7 +938,7 @@ function testSortedByMatchQuality() {
 		  {name: "nonihilf"},
 		  {name: "bnurgle"},
 		  {name: "fangoriously"}];
-  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, nounList);
+  var nlParser = makeTestParser(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
 
   var assert = this.assert;
@@ -962,7 +983,7 @@ function DISABLED_testSortSpecificNounsBeforeArbText() {
   var verbList = [{name: "mumble", DOType: arb_text, DOLabel:"stuff"},
                   {name: "wash", DOType: dog, DOLabel: "dog"}];
 
-  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, [arb_text, dog]);
+  var nlParser = makeTestParser(LANG, verbList, [arb_text, dog]);
 
   var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
   var selObj = NLParser.getSelectionObject( fakeContext );
@@ -981,7 +1002,7 @@ function testVerbUsesDefaultIfNoArgProvided() {
   };
   var verbList = [{name:"wash", DOType: dog, DOLabel: "dog"},
 		  {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
-  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, [dog]);
+  var nlParser = makeTestParser(LANG, verbList, [dog]);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "wash", fakeContext );
   var suggs = nlParser.getSuggestionList();
@@ -1008,7 +1029,7 @@ function testSynonyms() {
   var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
 		  {name: "frobnitz"},
 		  {name: "frobnicate"}];
-  var nlParser = new NLParser.makeParserForLanguage(LANG, verbList, []);
+  var nlParser = makeTestParser(LANG, verbList, []);
   var fakeContext = {textSelection:"", htmlSelection:""};
   nlParser.updateSuggestionList( "frob", fakeContext );
   var suggs = nlParser.getSuggestionList();
@@ -1192,7 +1213,7 @@ function DISABLED_testTextAndHtmlDifferent() {
   // when it's a noun-first suggestion from the parser, should still work...
   executedText = null;
   executedHtml = null;
-  var nlParser = new NLParser.makeParserForLanguage(LANG, [cmd_different], [noun_type_different]);
+  var nlParser = makeTestParser(LANG, [cmd_different], [noun_type_different]);
   var selObj = {
     text: "Pantalones", html: "<blink>Pantalones</blink>"
   };
@@ -1243,8 +1264,8 @@ function testAsyncNounSuggestions() {
   };
   Observers.add(observe, "ubiq-suggestions-updated");
 
-  var parser = NLParser.makeParserForLanguage(LANG, [cmd_slow],
-					      [noun_type_slowness]);
+  var parser = makeTestParser(LANG, [cmd_slow],
+			      [noun_type_slowness]);
   parser.updateSuggestionList( "dostuff hello", fakeContext );
   var comps = parser.getSuggestionList();
   var assert = this.assert;
@@ -1287,7 +1308,7 @@ function testAsyncNounSuggestions() {
     displayMessage: function(msg) {}
   };
   var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var cmdMan = new CommandManager(fakeSource, mockMsgService, makeTestParser());
   cmdMan.updateInput( "dostuff halifax", fakeContext, null );
   this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
   noun_type_slowness.triggerCallback();
@@ -1341,7 +1362,7 @@ function testJapaneseParserBasic() {
     DOType: null,
     modifiers: {"を": tekiType }
   };
-  var parser = NLParser.makeParserForLanguage( "jp",
+  var parser = makeTestParser( "jp",
 					       [cmd_sasu],
 					       [tekiType] );
   var fakeContext = {textSelection:"", htmlSelection:""};
@@ -1378,9 +1399,9 @@ function testJapaneseParserSomeMore() {
     }
   };
 
-  var parser = NLParser.makeParserForLanguage( "jp",
-					       [cmd_suru],
-					       [noun_type_mono]);
+  var parser = makeTestParser( "jp",
+			       [cmd_suru],
+			       [noun_type_mono] );
   var fakeContext = {textSelection:"", htmlSelection:""};
   var query = "";
   parser.updateSuggestionList(query, fakeContext);
