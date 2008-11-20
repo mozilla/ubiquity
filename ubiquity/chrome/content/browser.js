@@ -49,7 +49,10 @@ Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 function ubiquitySetup()
 {
   UbiquitySetup.installDefaults(UbiquityGlobals);
-
+  
+  //install SkinInstaller
+  var skinInstaller = new SkinInstaller();
+  
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("preview");
 

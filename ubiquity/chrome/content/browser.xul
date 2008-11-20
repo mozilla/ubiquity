@@ -13,8 +13,8 @@
   // Set skin CSS file
   var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"].getService(Components.interfaces.nsIStyleSheetService);
   var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);  
-  var skinName = Application.prefs.getValue("extensions.ubiquity.skin", "default");
-  var uri = "chrome://ubiquity/skin/skins/" + skinName + ".css";
+  var uri = Application.prefs.getValue("extensions.ubiquity.skin",
+            "chrome://ubiquity/skin/skins/default.css");
   sss.loadAndRegisterSheet(ios.newURI(uri, null, null), sss.USER_SHEET);
   </script>
   <script type="application/javascript;version=1.7"
@@ -37,6 +37,8 @@
           src="chrome://ubiquity/content/codesource.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/linkrel_codesource.js"/>
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/skin_installer.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/msgservice.js"/>
   <script type="application/javascript;version=1.7"
