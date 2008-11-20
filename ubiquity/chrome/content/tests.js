@@ -35,10 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-OrigCmdUtils = {};
-Components.utils.import("resource://ubiquity-modules/cmdutils.js",
-                        OrigCmdUtils);
 Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity-modules/nounutils.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 
 var globalObj = this;
@@ -251,34 +249,23 @@ FakeCommandSource.prototype = {
   }
 };
 
-var CmdUtils = {};
-
-CmdUtils.getSelection = function fake_getSelection(context) {
-  if (context)
-    if (context.textSelection)
-      return context.textSelection;
-  return "";
-};
-
-CmdUtils.getHtmlSelection = function fake_getHtmlSelection(context) {
-  if (context)
-    if (context.htmlSelection)
-      return context.htmlSelection;
-  return "";
-};
-
-CmdUtils.__proto__ = OrigCmdUtils.CmdUtils;
-
 function getNounList() {
   return [];
 }
 
 function getCompletions( input, verbs, nountypes, context ) {
-  var parser = NLParser.makeParserForLanguage( LANG,
-					       verbs,
-					       nountypes );
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
+
+  var fakeContextUtils = {
+    getHtmlSelection: function() { return context.htmlSelection; },
+    getSelection: function() { return context.textSelection; }
+  };
+
+  var parser = NLParser.makeParserForLanguage( LANG,
+					       verbs,
+					       nountypes,
+                                               fakeContextUtils );
   parser.updateSuggestionList( input, context );
   return parser.getSuggestionList();
 }
@@ -298,13 +285,15 @@ function testCmdManagerExecutesTwoCmds() {
     });
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
+  var fakeContext = {focusedElement: null,
+                     focusedWindow: null};
 
-  cmdMan.updateInput("cmd_one");
+  cmdMan.updateInput("cmd_one", fakeContext);
   this.assert(cmdMan.__nlParser.getNumSuggestions() == 1, "should have 1");
-  cmdMan.execute();
-  cmdMan.updateInput("cmd_two");
+  cmdMan.execute(fakeContext);
+  cmdMan.updateInput("cmd_two", fakeContext);
   this.assert(cmdMan.__nlParser.getNumSuggestions() == 1, "should have 1");
-  cmdMan.execute();
+  cmdMan.execute(fakeContext);
   this.assert(oneWasCalled, "cmd_one must be called.");
   this.assert(twoWasCalled, "cmd_two must be called.");
 }
@@ -320,10 +309,12 @@ function testCmdManagerExecutesCmd() {
       existentcommand:{execute:function() {wasCalled = true;}}
     }
   );
+  var fakeContext = {focusedElement: null,
+                     focusedWindow: null};
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
-  cmdMan.updateInput("existentcommand");
-  cmdMan.execute();
+  cmdMan.updateInput("existentcommand", fakeContext);
+  cmdMan.execute(fakeContext);
   this.assert(wasCalled, "command.execute() must be called.");
 }
 
@@ -337,11 +328,13 @@ function testCmdManagerCatchesExceptionsInCmds() {
       existentcommand:{execute:function() {throw 1;}}
     }
   );
+  var fakeContext = {focusedElement: null,
+                     focusedWindow: null};
 
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
 
-  cmdMan.updateInput("existentcommand");
-  cmdMan.execute();
+  cmdMan.updateInput("existentcommand", fakeContext);
+  cmdMan.execute(fakeContext);
   this.assert(
     (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
      mockMsgService.lastMsg.exception),
@@ -354,10 +347,13 @@ function testCmdManagerDisplaysNoCmdError() {
   var mockMsgService = {
     displayMessage : function(msg) { this.lastMsg = msg; }
   };
+  var fakeContext = {focusedElement: null,
+                     focusedWindow: null};
+
   var cmdMan = new CommandManager(fakeSource, mockMsgService, LANG);
 
-  cmdMan.updateInput("nonexistentcommand");
-  cmdMan.execute();
+  cmdMan.updateInput("nonexistentcommand", fakeContext);
+  cmdMan.execute(fakeContext);
   this.assertIsDefined(mockMsgService.lastMsg,
                        "Command manager must display a message.");
 }
@@ -558,7 +554,7 @@ function testCommandGlobalsWork() {
 
 function testParseDirectOnly() {
   var dogGotPetted = false;
-  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var cmd_pet = {
     execute: function(context, directObject, modifiers) {
@@ -588,9 +584,9 @@ function testParseWithModifier() {
   // wash dog with sponge
   var dogGotWashed = null;
   var dogGotWashedWith = null;
-  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				"beagle", "bulldog", "husky"]);
-  var washingObj = new CmdUtils.NounType( "washing object",
+  var washingObj = new NounUtils.NounType( "washing object",
 					  ["sponge", "hose", "spork",
 					  "bathtub", "fire hose"]);
   var cmd_wash = {
@@ -626,8 +622,8 @@ function testParseWithModifier() {
 function DISABLED_testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
-  var nounTypeOne = new CmdUtils.NounType( "thingType", ["tree"] );
-  var nounTypeTwo = new CmdUtils.NounType( "stuffType", ["mud"] );
+  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
+  var nounTypeTwo = new NounUtils.NounType( "stuffType", ["mud"] );
   var fakeSource = new FakeCommandSource(
   {
     cmd_one: {execute:function(context, directObj) {
@@ -663,8 +659,8 @@ function DISABLED_testCmdManagerSuggestsForEmptyInput() {
 function testVerbEatsSelection() {
   var foodGotEaten = null;
   var foodGotEatenAt = null;
-  var food = new CmdUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
-  var place = new CmdUtils.NounType( "place", ["grill", "diner", "home"]);
+  var food = new NounUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
+  var place = new NounUtils.NounType( "place", ["grill", "diner", "home"]);
   var cmd_eat = {
     name: "eat",
     execute: function(context, directObject, modifiers) {
@@ -707,8 +703,8 @@ function testVerbEatsSelection() {
 function testImplicitPronoun() {
   var foodGotEaten = null;
   var foodGotEatenAt = null;
-  var food = new CmdUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
-  var place = new CmdUtils.NounType( "place", ["grill", "diner", "home"]);
+  var food = new NounUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
+  var place = new NounUtils.NounType( "place", ["grill", "diner", "home"]);
   var cmd_eat = {
     name: "eat",
     execute: function(context, directObject, modifiers) {
@@ -796,22 +792,22 @@ function testImplicitPronoun() {
 }
 
 function testMakeSugg() {
-  // test that CmdUtils.makeSugg doesn't fail on null input, that it preserves
+  // test that NounUtils.makeSugg doesn't fail on null input, that it preserves
   // html, etc etc.
-  /*var thingy = CmdUtils.makeSugg(null, "alksdf");
+  /*var thingy = NounUtils.makeSugg(null, "alksdf");
   this.assert( thingy.text == "alksdf", "thingy.text should be set.");*/
   // test above can't be run from the command line as there is no
   // context.focusedWindow, needed for getTextFromHtml.
 
-  var thingy2 = CmdUtils.makeSugg(null, null, null);
+  var thingy2 = NounUtils.makeSugg(null, null, null);
   this.assert( thingy2 == null, "should return null");
 }
 
 function testModifiersTakeMultipleWords() {
   var wishFound = null;
   var wishFoundIn = null;
-  var wish = new CmdUtils.NounType( "wish", ["apartment", "significant other", "job"]);
-  var city = new CmdUtils.NounType( "city", ["chicago",
+  var wish = new NounUtils.NounType( "wish", ["apartment", "significant other", "job"]);
+  var city = new NounUtils.NounType( "city", ["chicago",
 					     "new york",
 					     "los angeles",
 					     "san francisco"]);
@@ -952,13 +948,13 @@ function testSortedByMatchQuality() {
 
 // TODO: Re-enable when we fix #343
 function DISABLED_testSortSpecificNounsBeforeArbText() {
-  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var arb_text = {
     _name: "text",
     rankLast: true,
     suggest: function( text, html ) {
-      return [ CmdUtils.makeSugg(text, html) ];
+      return [ NounUtils.makeSugg(text, html) ];
     }
   };
 
@@ -977,10 +973,10 @@ function DISABLED_testSortSpecificNounsBeforeArbText() {
 }
 
 function testVerbUsesDefaultIfNoArgProvided() {
-  var dog = new CmdUtils.NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   dog.default = function() {
-    return CmdUtils.makeSugg( "husky" );
+    return NounUtils.makeSugg( "husky" );
   };
   var verbList = [{name:"wash", DOType: dog, DOLabel: "dog"},
 		  {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
@@ -1055,13 +1051,13 @@ function testPartiallyParsedSentence() {
   var noun_type_foo = {
     _name: "foo",
     suggest: function( text, html ) {
-      return [ CmdUtils.makeSugg("foo_a"), CmdUtils.makeSugg("foo_b") ];
+      return [ NounUtils.makeSugg("foo_a"), NounUtils.makeSugg("foo_b") ];
     }
   };
   var noun_type_bar = {
     _name: "bar",
     suggest: function( text, html ) {
-      return [ CmdUtils.makeSugg("bar_a"), CmdUtils.makeSugg("bar_b") ];
+      return [ NounUtils.makeSugg("bar_a"), NounUtils.makeSugg("bar_b") ];
     }
   };
   var noun_type_baz = {
@@ -1115,7 +1111,7 @@ function testPartiallyParsedSentence() {
 
   // Add another suggestion for bar.  Now there should be six combinations.
   partiallyParsed.addArgumentSuggestion( "barArg",
-					 CmdUtils.makeSugg("bar_c"));
+					 NounUtils.makeSugg("bar_c"));
   parsed  = partiallyParsed.getParsedSentences();
   this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
 
@@ -1125,7 +1121,7 @@ function testPartiallyParsedSentence() {
 
   // Now provide an actual argument for baz:
   partiallyParsed.addArgumentSuggestion( "bazArg",
-				         CmdUtils.makeSugg("baz_a"));
+				         NounUtils.makeSugg("baz_a"));
   parsed  = partiallyParsed.getParsedSentences();
   // Should still have six
   this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
@@ -1161,7 +1157,7 @@ function DISABLED_testTextAndHtmlDifferent() {
     _name: "different",
     suggest: function( text, html ) {
       if (text.indexOf("Pant") == 0)
-        return [ CmdUtils.makeSugg(text, html) ];
+        return [ NounUtils.makeSugg(text, html) ];
       else
 	return [];
     }
@@ -1218,13 +1214,13 @@ function testAsyncNounSuggestions() {
     suggest: function( text, html, callback ) {
       this._callback = callback;
       if (text.indexOf("hello")== 0) {
-        return [ CmdUtils.makeSugg("Robert E. Lee") ];
+        return [ NounUtils.makeSugg("Robert E. Lee") ];
       } else
 	return [];
     },
     triggerCallback: function() {
-      this._callback( CmdUtils.makeSugg("slothitude") );
-      this._callback( CmdUtils.makeSugg("snuffleupagus") );
+      this._callback( NounUtils.makeSugg("slothitude") );
+      this._callback( NounUtils.makeSugg("snuffleupagus") );
     }
   };
   var cmd_slow = {
@@ -1330,7 +1326,7 @@ function testJapaneseParserBasic() {
   var tekiType = {
     suggest: function(text,html) {
       if (text == "敵") {
-	return [CmdUtils.makeSugg("敵")];
+	return [NounUtils.makeSugg("敵")];
       } else
 	return [];
     }
@@ -1447,7 +1443,7 @@ var noun_arb_text = {
   _name: "text",
   rankLast: true,
   suggest: function( text, html ) {
-    return [ CmdUtils.makeSugg(text, html) ];
+    return [ NounUtils.makeSugg(text, html) ];
   }
 };
 

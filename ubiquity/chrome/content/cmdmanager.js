@@ -142,7 +142,7 @@ CommandManager.prototype = {
                                                             textbox) {
     if(this.hasSuggestions()) {
 
-      var selObj = NLParser.getSelectionObject(context);
+      var selObj = this.__nlParser.getSelectionObject(context);
       var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
                                     .getCompletionText(selObj);
       this.updateInput(suggText,

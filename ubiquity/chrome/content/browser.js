@@ -41,7 +41,6 @@
 
 var gUbiquity = null;
 
-Components.utils.import("resource://ubiquity-modules/cmdutils.js");
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");

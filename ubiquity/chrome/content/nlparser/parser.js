@@ -38,7 +38,8 @@ Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
 
 var NLParser = { MAX_SUGGESTIONS: 5};
 
-NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
+NLParser.makeParserForLanguage = function(languageCode, verbList, nounList,
+                                          ContextUtils) {
   let parserPlugin = null;
   if (languageCode == "en") {
     parserPlugin = EnParser;
@@ -49,24 +50,19 @@ NLParser.makeParserForLanguage = function(languageCode, verbList, nounList) {
 
   NLParser.SELECTION_PRONOUNS = parserPlugin.PRONOUNS;
 
-  return new NLParser.Parser(verbList, nounList, parserPlugin);
+  return new NLParser.Parser(verbList, nounList, parserPlugin, ContextUtils);
 };
 
-NLParser.getSelectionObject = function(context) {
-  var selection = CmdUtils.getSelection(context);
-  if (!selection && UbiquityGlobals.lastCmdResult)
-      selection = UbiquityGlobals.lastCmdResult;
-  var htmlSelection = CmdUtils.getHtmlSelection(context);
-  if (!htmlSelection && selection)
-    htmlSelection = selection;
-  return {
-    text: selection,
-    html: htmlSelection
-  };
-}
-
-NLParser.Parser = function(verbList, nounList, languagePlugin) {
+NLParser.Parser = function(verbList, nounList, languagePlugin,
+                           ContextUtils) {
   this._init(verbList, nounList, languagePlugin);
+  if (!ContextUtils) {
+    var ctu = {};
+    Components.utils.import("resource://ubiquity-modules/contextutils.js",
+                            ctu);
+    ContextUtils = ctu.ContextUtils;
+  }
+  this._ContextUtils = ContextUtils;
 }
 NLParser.Parser.prototype = {
   _init: function(commandList, nounList, languagePlugin) {
@@ -78,6 +74,19 @@ NLParser.Parser.prototype = {
     this._languageSpecificParse = languagePlugin.parseSentence;
     this._suggestionMemory = new SuggestionMemory("main_parser");
     this._queuedPreview = null;
+  },
+
+  getSelectionObject: function(context) {
+    var selection = this._ContextUtils.getSelection(context);
+    if (!selection && UbiquityGlobals.lastCmdResult)
+      selection = UbiquityGlobals.lastCmdResult;
+    var htmlSelection = this._ContextUtils.getHtmlSelection(context);
+    if (!htmlSelection && selection)
+      htmlSelection = selection;
+    return {
+      text: selection,
+      html: htmlSelection
+    };
   },
 
   nounFirstSuggestions: function( selObj ) {
@@ -168,7 +177,7 @@ NLParser.Parser.prototype = {
   updateSuggestionList: function( query, context ) {
     var nounType, verb;
     var newSuggs = [];
-    var selObj = NLParser.getSelectionObject(context);
+    var selObj = this.getSelectionObject(context);
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
