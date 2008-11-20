@@ -487,7 +487,7 @@ NLParser.Verb.prototype = {
 	type: cmd.DOType,
 	label: cmd.DOLabel,
 	flag: null,
-        default: cmd.DODefault
+        'default': cmd.DODefault
       };
     }
 
