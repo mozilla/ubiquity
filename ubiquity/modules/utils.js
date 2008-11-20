@@ -259,34 +259,11 @@ Utils.getLocalUrl = function getLocalUrl(url) {
 };
 
 Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
-  var request = new window.XMLHttpRequest();
-  request.open("GET", url, true);
-  request.setRequestHeader("Content-Type",
-                           "application/x-www-form-urlencoded");
-
-  var onRscFunc = function ajaxGet_onReadyStateChange() {
-    if (request.readyState == 4) {
-      if (request.status == 200) {
-        if (request.responseText)
-          callbackFunction(request.responseText);
-        else
-          callbackFunction("");
-      } else {
-        if(failureFunction)
-          failureFunction();
-        else
-          throw new Error("Ajax request failed: " + url);
-      }
-    }
-  };
-
-  // If we're being called in the context of a command, safe-wrap the
-  // callback.
-  if (Utils.__globalObject.CmdUtils)
-    onRscFunc = Utils.safeWrapper(onRscFunc);
-
-  request.onreadystatechange = onRscFunc;
-  request.send(null);
+  jQuery.ajax({
+    url:url,
+    success: callbackFunction,
+    error: failureFunction
+  })
 };
 
 Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, successCallback, errorCallback) {
