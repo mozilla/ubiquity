@@ -3,14 +3,13 @@
 //  @name 0.1 Skin
 //  @author Mozilla Labs
 //  @homepage http://labs.mozilla.com
+
   @email abimanyuraja@gmail.com
   @license MPL/LGPL/GPL
   =/skin=
 */
 
 /* formatting for ubiquity pop-up */
-/* MAJOR TODO: Name all elements and classes so as to prevent 
-styling webpages unintentionally*/
 
 #cmd-panel {
   padding: 0px;
@@ -46,26 +45,26 @@ body#previewbody {
     color: #BBB;
 }
 
-#preview {
+div#ubiquity-preview{
     width: 500px;
 }
 
 /* formatting for data inside preview */
 
-.gresult {
+div#ubiquity-preview .gresult {
   margin-bottom: 10px;
 }
-.gresult a {
+div#ubiquity-preview .gresult a {
   color: #0066cc;
   text-decoration: underline;
   font-size: small;
   cursor: pointer;
 }
-.gresult-url {
+div#ubiquity-preview .gresult-url {
   font-size: x-small;
   /*color: #00aa00;*/
 }
-.gresult-content {
+div#ubiquity-preview .gresult-content {
   margin-right: 10px;
   font-size: x-small;  
 }
@@ -73,7 +72,7 @@ body#previewbody {
 
 /* formatting for suggestion list */
 
-#preview-pane {
+div#ubiquity-preview #preview-pane {
     color: #ffffff;
     background: #272750;
     padding-left: 15px;
@@ -81,29 +80,29 @@ body#previewbody {
     border-left: solid 1px #0066cc;
 }
 
-.hilited-text {
+div#ubiquity-preview .hilited-text {
     /*border-left: solid 5px #0066cc;*/
     padding: 5px;
 }
-.hilited {
+div#ubiquity-preview .hilited {
     background: #272750;
     border-left: solid 1px #0066cc;
     color: #ffffff;
 }
-.suggested {
+div#ubiquity-preview .suggested {
     padding: 5px;
     border-left: solid 1px #272750;
 }
 
-.needarg {
+div#ubiquity-preview .needarg {
     font-style: oblique;
     color: #999999;
 }
-.cmdicon {
+div#ubiquity-preview .cmdicon {
     display: inline-block;
     width: 16px;
 }
-.cmdicon img {
+div#ubiquity-preview .cmdicon img {
     vertical-align: middle;
     width: 16px;
     height: 16px;

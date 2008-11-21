@@ -56,7 +56,7 @@ function ubiquitySetup()
   var skinInstaller = new SkinInstaller();
   
   var previewIframe = document.getElementById("cmd-preview");
-  var previewBlock = previewIframe.contentDocument.getElementById("preview");
+  var previewBlock = previewIframe.contentDocument.getElementById("ubiquity-preview");
 
   function onDomChange() {
     jQuery(previewIframe.contentDocument).find('img').each(function() {
