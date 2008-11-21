@@ -15,6 +15,11 @@
   var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);  
   var uri = Application.prefs.getValue("extensions.ubiquity.skin",
             "chrome://ubiquity/skin/skins/default.css");
+  if(uri == "default" || uri == "old"){
+  Application.prefs.setValue("extensions.ubiquity.skin",
+            "chrome://ubiquity/skin/skins/default.css");
+    uri = "chrome://ubiquity/skin/skins/default.css";
+  }
   sss.loadAndRegisterSheet(ios.newURI(uri, null, null), sss.USER_SHEET);
   </script>
   <script type="application/javascript;version=1.7"
