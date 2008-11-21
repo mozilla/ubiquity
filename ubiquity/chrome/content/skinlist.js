@@ -79,8 +79,8 @@ function onDocumentLoad() {
       createSkinElement(file);
     }
   }
-  
 }
+
 
 //reads a local file and returns the contents as a string
 function readFile(file){
@@ -156,15 +156,20 @@ function createSkinElement(file){
       }
     }
         
+    
     if(!skinMeta.name){
       skinMeta.name = skinMeta.filename;
     }
-
+    
+    //Make the current skin distinct
+    var currentSkin = Application.prefs.getValue("extensions.ubiquity.skin", "default");
+    var elementClass = (skinMeta.filepath == currentSkin) ? "command current-skin": "command";
+    
     //TODO: Make everything optional
     $('#skin-list').append(
-       '<li class="command" id="skin_' + skinMeta.name + '">' +
+       '<li class="' + elementClass + '" id="skin_' + skinMeta.name + '">' +
        '<a class="name" onClick="changeSkin(\''+ skinMeta.filepath +'\',\'' + skinMeta.name + '\');">' + 
-       skinMeta.name + '</a>' +
+       ((elementClass != "command") ? skinMeta.name + " (current)" : skinMeta.name)+ '</a>' +
        (skinMeta.author ? 
        '<div class="light"><span class="author">by <a href="mailto:' + skinMeta.email + '">' + 
        skinMeta.author  + '</a></span></div>' : "") +  
@@ -188,10 +193,6 @@ function changeSkin(newSkinPath, newSkinName) {
   try {
     var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
       .getService(Components.interfaces.nsIStyleSheetService);
-    //Load the new skin CSS 
-    var browserCss = Utils.url(newSkinPath);
-    sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
-    
     try {
       // Remove the previous skin CSS
       var oldBrowserCss = Utils.url(Application.prefs.getValue("extensions.ubiquity.skin", "default"));
@@ -200,9 +201,14 @@ function changeSkin(newSkinPath, newSkinName) {
     } catch(e) {
       // do nothing      
     }
+
+    //Load the new skin CSS 
+    var browserCss = Utils.url(newSkinPath);
+    sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
     
     Application.prefs.setValue("extensions.ubiquity.skin", newSkinPath);
     $('#notify').text("Skin changed to " + newSkinName);
+    
     
   } catch(e) {
     $('#notify').text('Error applying skin: ' + newSkinName);
