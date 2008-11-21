@@ -34,15 +34,9 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/cmdmanager.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/codesource.js"/>
-  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/linkrel_codesource.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/skin_installer.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/msgservice.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/prefcommands.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/builtinfactories.js"/>
   <script type="application/javascript;version=1.7"
