@@ -76,8 +76,11 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
                            function(event) { self.__onBlur(event); },
                            false);
 
-  Observers.add(function() {self.__onSuggestionsUpdated();},
-		"ubiq-suggestions-updated");
+  var ob = {};
+  Components.utils.import("resource://ubiquity-modules/Observers.js", ob);
+  ob.Observers.add(function() {self.__onSuggestionsUpdated();},
+		   "ubiq-suggestions-updated");
+
   this.__resetPreview();
 }
 

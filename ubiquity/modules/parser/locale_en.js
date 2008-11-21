@@ -1,3 +1,20 @@
+EXPORTED_SYMBOLS = ["EnParser"];
+
+Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+
+// util functions to make it easier to use objects as fake dictionaries
+function dictDeepCopy( dict ) {
+  var newDict = {};
+  for (var i in dict ) {
+    newDict[i] = dict[i];
+  }
+  return newDict;
+};
+
+function dictKeys( dict ) {
+  return [ key for ( key in dict ) ];
+};
+
 var EnParser = {};
 
 EnParser.PRONOUNS = ["this", "that", "it", "selection", "him", "her", "them"];
@@ -121,3 +138,5 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   }
   return parsings;
 }
+
+NLParser.registerPluginForLanguage("en", EnParser);

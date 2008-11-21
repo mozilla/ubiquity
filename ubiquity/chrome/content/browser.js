@@ -47,14 +47,17 @@ Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
+Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
 
 function ubiquitySetup()
 {
   UbiquitySetup.installDefaults(UbiquityGlobals);
-  
+
   //install SkinInstaller
   var skinInstaller = new SkinInstaller();
-  
+
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument.getElementById("ubiquity-preview");
 

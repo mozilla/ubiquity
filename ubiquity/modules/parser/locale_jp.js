@@ -1,4 +1,4 @@
-/* ***** BEGIN LICENSE BLOCK *****
+/***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -33,6 +33,10 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+
+EXPORTED_SYMBOLS = ["JpParser"];
+
+Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 
 var JpParser = {};
 
@@ -101,6 +105,8 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   }
   return parsings;
 };
+
+NLParser.registerPluginForLanguage("jp", JpParser);
 
 // TODO changing the key bindings for the japanese version!
 // Is it right to do that here, or... elsewhere...?

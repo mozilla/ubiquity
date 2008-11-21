@@ -39,6 +39,9 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/nounutils.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
+Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
 
 var globalObj = this;
 const LANG = "en";
@@ -1321,6 +1324,11 @@ function testAsyncNounSuggestions() {
 function testJpSplitByParticles() {
   var sentence1 = "彼女と駅に行った";
   var parsedSentence = JpParser._splitByParticles(sentence1);
+  // TODO: Fix this weirdness... both of the things logged here should look
+  // like japanese characters, not garbled gobbledygook, but character
+  // encoding problems are making this hard.
+  //console.log(sentence1);
+  //console.log(JpParser.JP_PARTICLES[0]);
   this.assert( parsedSentence["と"] == "彼女");
   this.assert( parsedSentence["に"] == "駅");
   this.assert( parsedSentence["動詞"] == "行った");
@@ -1372,7 +1380,8 @@ function testJapaneseParserBasic() {
   parser.updateSuggestionList(input, fakeContext);
 
   var suggList = parser.getSuggestionList();
-  this.assert(suggList.length == 1, "Should be 1 suggestion");
+  this.assert(suggList.length == 1,
+              "Should be 1 suggestion, not " + suggList.length);
   this.assert(suggList[0]._verb._name == "刺す", "Should be sasu");
   this.assert(suggList[0]._argSuggs["を"].text == "敵", "Should be teki");
   suggList[0].execute(fakeContext);
