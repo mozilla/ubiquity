@@ -101,14 +101,16 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj) {
       newParsings = [new NLParser.PartiallyParsedSentence(verb,
 							 {},
 							 selObj,
-							 matchScore)];
+							 matchScore,
+                                                         EnParser)];
     } else {
       // Recursively parse to assign arguments
       let makeNewParsing = function( argStrings ) {
 	return new NLParser.PartiallyParsedSentence(verb,
 						    argStrings,
 						    selObj,
-						    matchScore);
+						    matchScore,
+                                                    EnParser);
       };
       newParsings = _recursiveParse( inputArguments,
                                      {},

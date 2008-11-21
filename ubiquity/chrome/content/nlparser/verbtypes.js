@@ -225,7 +225,8 @@ NLParser.ParsedSentence.prototype = {
 
 };
 
-NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj, matchScore) {
+NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj,
+                                            matchScore, parserPlugin) {
   /*This is a partially parsed sentence.
    * What that means is that we've decided what the verb is,
    * and we've assigned all the words of the input to one of the arguments.
@@ -235,49 +236,47 @@ NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj, matchScore
    * sentences can produce several completely-parsed sentences, in which
    * final values for all arguments are specified.
    */
-  this._init( verb, argStrings, selObj, matchScore);
+  this._parserPlugin = parserPlugin;
+  this._verb = verb;
+  this._argStrings = argStrings;
+  this._selObj = selObj;
+  this._parsedSentences = [];
+  this._matchScore = matchScore;
+  this._invalidArgs = {};
+  this._validArgs = {};
+  /* Create fully parsed sentence with empty arguments:
+   * If this command takes no arguments, this is all we need.
+   * If it does take arguments, this initializes the parsedSentence
+   * list so that the algorithm in addArgumentSuggestion will work
+   * correctly. */
+  let newSen = new NLParser.ParsedSentence(this._verb, {}, this._matchScore);
+  this._parsedSentences = [newSen];
+  for (let argName in this._verb._arguments) {
+    let argSuggs = [];
+    if (argStrings[argName] && argStrings[argName].length > 0) {
+      // If argument is present, try the noun suggestions based both on
+      // substituting pronoun...
+      let gotSuggs = this._suggestWithPronounSub(argName, argStrings[argName]);
+      let text = argStrings[argName].join(" ");
+      // and on not substituting pronoun...
+      let gotSuggsDirect = this._argSuggest(argName, text, text);
+      if (!gotSuggs && !gotSuggsDirect) {
+	/* One of the arguments is supplied by the user, but produces
+	 * no suggestions, meaning it's an invalid argument for this
+	 * command -- that makes the whole parsing invalid!! */
+	this._invalidArgs[argName] = true;
+      }
+    }
+    /* Otherwise, this argument will simply be left blank (or filled in with
+     * default value later.*/
+  }
   /* ArgStrings is a dictionary, where the keys match the argument names in
    * the verb, and the values are each a ["list", "of", "words"] that have
    * been assigned to that argument
    */
-}
-NLParser.PartiallyParsedSentence.prototype = {
-  _init: function( verb, argStrings, selObj, matchScore ) {
-    this._verb = verb;
-    this._argStrings = argStrings;
-    this._selObj = selObj;
-    this._parsedSentences = [];
-    this._matchScore = matchScore;
-    this._invalidArgs = {};
-    this._validArgs = {};
-    /* Create fully parsed sentence with empty arguments:
-     * If this command takes no arguments, this is all we need.
-     * If it does take arguments, this initializes the parsedSentence
-     * list so that the algorithm in addArgumentSuggestion will work
-     * correctly. */
-    let newSen = new NLParser.ParsedSentence(this._verb, {}, this._matchScore);
-    this._parsedSentences = [newSen];
-    for (let argName in this._verb._arguments) {
-      let argSuggs = [];
-      if (argStrings[argName] && argStrings[argName].length > 0) {
-	// If argument is present, try the noun suggestions based both on
-	// substituting pronoun...
-        let gotSuggs = this._suggestWithPronounSub(argName, argStrings[argName]);
-        let text = argStrings[argName].join(" ");
-	// and on not substituting pronoun...
-        let gotSuggsDirect = this._argSuggest(argName, text, text);
-        if (!gotSuggs && !gotSuggsDirect) {
-	  /* One of the arguments is supplied by the user, but produces
-	   * no suggestions, meaning it's an invalid argument for this
-	   * command -- that makes the whole parsing invalid!! */
-	  this._invalidArgs[argName] = true;
-        }
-      }
-      /* Otherwise, this argument will simply be left blank (or filled in with
-       * default value later.*/
-    }
-  },
+};
 
+NLParser.PartiallyParsedSentence.prototype = {
   _argSuggest: function(argName, text, html) {
     /* For the given argument of the verb, sends (text,html) to the nounType
      * gets back suggestions for the argument, and adds each suggestion.
@@ -317,7 +316,7 @@ NLParser.PartiallyParsedSentence.prototype = {
 
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
-    for each ( pronoun in NLParser.SELECTION_PRONOUNS ) {
+    for each ( pronoun in this._parserPlugin.PRONOUNS ) {
       let index = words.indexOf( pronoun );
       if ( index > -1 ) {
         if (selection) {
@@ -388,9 +387,9 @@ NLParser.PartiallyParsedSentence.prototype = {
   copy: function() {
     // Deep copy constructor
     let newPPSentence = new NLParser.PartiallyParsedSentence( this._verb,
-								{},
-								this._selObj,
-								this._matchScore);
+							      {},
+							      this._selObj,
+							      this._matchScore);
     newPPSentence._parsedSentences = [];
     for each(let parsedSen in this._parsedSentences) {
       newPPSentence._parsedSentences.push( parsedSen.copy() );

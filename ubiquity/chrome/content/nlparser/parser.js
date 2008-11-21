@@ -39,23 +39,26 @@ var NLParser = { MAX_SUGGESTIONS: 5};
 
 NLParser.makeParserForLanguage = function(languageCode, verbList, nounList,
                                           ContextUtils, suggestionMemory) {
-  let parserPlugin = null;
-  if (languageCode == "en") {
-    parserPlugin = EnParser;
-  }
-  if (languageCode == "jp") {
-    parserPlugin = JpParser;
-  }
-
-  NLParser.SELECTION_PRONOUNS = parserPlugin.PRONOUNS;
+  let parserPlugin = NLParser.getPluginForLanguage(languageCode);
 
   return new NLParser.Parser(verbList, nounList, parserPlugin, ContextUtils,
                              suggestionMemory);
 };
 
+NLParser.getPluginForLanguage = function(languageCode) {
+  var plugins = {en: EnParser,
+                 jp: JpParser};
+  return plugins[languageCode];
+};
+
 NLParser.Parser = function(verbList, nounList, languagePlugin,
                            ContextUtils, suggestionMemory) {
-  this._init(verbList, nounList, languagePlugin);
+  this.setCommandList( verbList );
+  this._nounTypeList = nounList;
+  this._suggestionList = []; // a list of ParsedSentences.
+  this._parsingsList = []; // a list of PartiallyParsedSentences.
+  this._pronouns = languagePlugin.PRONOUNS;
+  this._languageSpecificParse = languagePlugin.parseSentence;
 
   if (!ContextUtils) {
     var ctu = {};
@@ -75,15 +78,6 @@ NLParser.Parser = function(verbList, nounList, languagePlugin,
 };
 
 NLParser.Parser.prototype = {
-  _init: function(commandList, nounList, languagePlugin) {
-    this.setCommandList( commandList );
-    this._nounTypeList = nounList;
-    this._suggestionList = []; // a list of ParsedSentences.
-    this._parsingsList = []; // a list of PartiallyParsedSentences.
-    this._pronouns = languagePlugin.PRONOUNS;
-    this._languageSpecificParse = languagePlugin.parseSentence;
-  },
-
   getSelectionObject: function(context) {
     var selection = this._ContextUtils.getSelection(context);
     if (!selection && UbiquityGlobals.lastCmdResult)

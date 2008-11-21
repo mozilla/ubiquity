@@ -1062,7 +1062,8 @@ function testPartiallyParsedSentence() {
     verbNoArgs,
     {},
     selObj,
-    0
+    0,
+    NLParser.getPluginForLanguage(LANG)
     );
 
   var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
@@ -1123,7 +1124,8 @@ function testPartiallyParsedSentence() {
     verb,
     argStrings,
     selObj,
-    0
+    0,
+    NLParser.getPluginForLanguage(LANG)
     );
 
   var parsed  = partiallyParsed.getParsedSentences();
