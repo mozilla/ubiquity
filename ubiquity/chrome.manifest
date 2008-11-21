@@ -1,5 +1,6 @@
 resource ubiquity-modules modules/
 resource ubiquity-scripts scripts/
+resource ubiquity-tests tests/
 content ubiquity chrome/content/
 skin ubiquity skin chrome/skin/
 overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul

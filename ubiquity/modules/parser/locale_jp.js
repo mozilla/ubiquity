@@ -37,14 +37,17 @@
 EXPORTED_SYMBOLS = ["JpParser"];
 
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+Components.utils.import("resource://ubiquity-modules/localeutils.js");
+
+var dat = loadLocaleJson("resource://ubiquity-modules/parser/locale_jp.json");
 
 var JpParser = {};
 
-JpParser.JP_PARTICLES = ["に", "を", "から", "と", "で", "が", "まで"];
+JpParser.JP_PARTICLES = dat.particles;
 
-JpParser.PRONOUNS = ["これ", "それ", "あれ"];
+JpParser.PRONOUNS = dat.pronouns;
 
-JpParser.DEFAULT_PREVIEW = "いらっしゃいませ";
+JpParser.DEFAULT_PREVIEW = dat.defaultPreview;
 
 /* bad assumption: each particle appears at most once
  also bad assumption: strings that look like particles don't appear
@@ -56,7 +59,8 @@ JpParser.DEFAULT_PREVIEW = "いらっしゃいませ";
  We should also ultimately be able to suggest stuff even when expected
  particles are missing.*/
 JpParser._splitByParticles = function( input ) {
-  let oldDict = {"動詞": input};
+  let oldDict = {};
+  oldDict[dat.verb] = input;
   let newDict = oldDict;
   for each (let particle in JpParser.JP_PARTICLES ) {
 

@@ -68,14 +68,23 @@ if (arguments.length === 0) {
 }
 
 var basePath = arguments[0];
-var modulesDir = getPath(basePath);
-modulesDir.appendRelativePath("modules");
-bindDirToResource(modulesDir, "ubiquity-modules");
 
-var componentPath = getPath(basePath);
-componentPath.appendRelativePath("components");
-componentPath.appendRelativePath("about.js");
-registerComponent(componentPath);
+(
+  function() {
+    var modulesDir = getPath(basePath);
+    modulesDir.appendRelativePath("modules");
+    bindDirToResource(modulesDir, "ubiquity-modules");
+
+    var testsDir = getPath(basePath);
+    testsDir.appendRelativePath("tests");
+    bindDirToResource(testsDir, "ubiquity-tests");
+
+    var componentPath = getPath(basePath);
+    componentPath.appendRelativePath("components");
+    componentPath.appendRelativePath("about.js");
+    registerComponent(componentPath);
+  }
+)();
 
 var XpcShellTestResponder = {
   onStartTest : function(test) {

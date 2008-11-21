@@ -42,6 +42,9 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity-modules/localeutils.js");
+
+var dat = loadLocaleJson("resource://ubiquity-tests/strings.json");
 
 var globalObj = this;
 const LANG = "en";
@@ -1328,6 +1331,11 @@ function testJpSplitByParticles() {
   // like japanese characters, not garbled gobbledygook, but character
   // encoding problems are making this hard.
   //console.log(sentence1);
+  var str = "sentence 1 length is " + sentence1.length + ", particle 0 length is " + JpParser.JP_PARTICLES[0].length + "\n";
+  dump(str);
+  try {
+    console.log(str);
+  } catch (e) {}
   //console.log(JpParser.JP_PARTICLES[0]);
   this.assert( parsedSentence["と"] == "彼女");
   this.assert( parsedSentence["に"] == "駅");
@@ -1603,4 +1611,9 @@ function testXmlScriptCommandsParser() {
   this.assert(code.length == 1);
   this.assert(code[0].lineNumber == 2, "hi");
   this.assert(code[0].code == 'testing\n\n\n>');
+}
+
+function testLoadLocaleJsonWorks() {
+  this.assert(dat.testLoadLocaleJsonWorks.length == 1);
+  this.assert(dat.testLoadLocaleJsonWorks == "\u3053");
 }
