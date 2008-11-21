@@ -95,7 +95,8 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
     newParsings = [new NLParser.PartiallyParsedSentence(verb,
 							argStrings,
 							selObj,
-							matchScore)];
+							matchScore,
+                                                        JpParser)];
     parsings = parsings.concat( newParsings );
   }
   return parsings;
