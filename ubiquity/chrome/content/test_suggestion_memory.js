@@ -1,5 +1,4 @@
-var suggestionMemorySetup;
-var suggestionMemoryTeardown;
+var TestSuggestionMemory;
 
 (function() {
    var RealSuggestionMemory = {};
@@ -12,27 +11,32 @@ var suggestionMemoryTeardown;
                 .getService(Ci.nsIProperties);
    var file = dirSvc.get("TmpD", Ci.nsIFile);
    file.append("testdb.sqlite");
-   var testConnection;
+   var testConnection = null;
 
-   suggestionMemorySetup = function suggestionMemorySetup() {
-     if (file.exists())
-       file.remove(false);
-     testConnection = RealSuggestionMemory.openDatabase(file);
+   function suggestionMemorySetup() {
+     if (!testConnection) {
+       function suggestionMemoryTeardown() {
+         testConnection.close();
+         testConnection = null;
+         file.remove(false);
+       };
+
+       if (file.exists())
+         file.remove(false);
+       testConnection = RealSuggestionMemory.openDatabase(file);
+       TestSuite.currentTest.addToTeardown(suggestionMemoryTeardown);
+     }
    };
 
-   suggestionMemoryTeardown = function suggestionMemoryTeardown() {
-     testConnection.close();
-     file.remove(false);
+   TestSuggestionMemory = function TestSuggestionMemory() {
+     suggestionMemorySetup();
+
+     var connection = testConnection;
+     var id = "test";
+
+     this.__RealSuggestionMemory = RealSuggestionMemory;
+     this.__RealSuggestionMemory(id, connection);
    };
 
-   SuggestionMemory = function SuggestionMemory(id, connection) {
-     // If no connection was specified, then we're using the global
-     // app-wide singleton for the JS module; but we don't want to
-     // do that, so instead we use our global test-wide singleton.
-     if (!connection)
-       connection = testConnection;
-     this._init(id, connection);
-   };
-
-   SuggestionMemory.prototype = RealSuggestionMemory.prototype;
+   TestSuggestionMemory.prototype = RealSuggestionMemory.prototype;
 })();

@@ -41,6 +41,7 @@ function AssertionError(message) {
 function TestCase(func) {
   this.name = func.name;
   this.__func = func;
+  this.__teardownFunctions = [];
 }
 
 TestCase.prototype = {
@@ -56,6 +57,15 @@ TestCase.prototype = {
   assert : function(condition, msg) {
     if (!condition)
       throw new AssertionError(msg);
+  },
+
+  teardown : function() {
+    for (var i = 0; i < this.__teardownFunctions.length; i++)
+      this.__teardownFunctions[i]();
+  },
+
+  addToTeardown : function(func) {
+    this.__teardownFunctions.push(func);
   },
 
   // Exception to throw when we want to skip a test.
@@ -106,6 +116,8 @@ function TestSuite(responder, parent) {
 }
 
 TestSuite.prototype = {
+  currentTest : null,
+
   getTests : function(parent) {
     var tests = [];
 
@@ -124,12 +136,9 @@ TestSuite.prototype = {
     var tests = this.getTests(this._parent);
 
     for each (test in tests) {
+      TestSuite.currentTest = test;
       try {
         this._responder.onStartTest(test);
-
-        // TODO: This is temporary, we shouldn't be adding such
-        // app-specific code here.
-        suggestionMemorySetup();
 
         test.run();
         successes += 1;
@@ -140,9 +149,7 @@ TestSuite.prototype = {
         this._responder.onException(test, e);
         failures += 1;
       }
-      // TODO: This is temporary, we shouldn't be adding such
-      // app-specific code here.
-      suggestionMemoryTeardown();
+      test.teardown();
     }
     this._responder.onFinished(successes, failures, skips);
   }

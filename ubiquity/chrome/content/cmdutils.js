@@ -39,30 +39,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["CmdUtils"];
-
-Components.utils.import("resource://ubiquity-modules/utils.js");
-
 var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
 
 CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
+  var ctu = {};
+  Components.utils.import("resource://ubiquity-modules/contextutils.js",
+                          ctu);
+
   if (typeof(context) == "undefined")
     context = CmdUtils.__globalObject.context;
 
-  if (context.focusedWindow) {
-    var sel = context.focusedWindow.getSelection();
+  return ctu.ContextUtils.getHtmlSelection(CmdUtils.__getContext(context));
+};
 
-    if (sel.rangeCount >= 1) {
-      var html = sel.getRangeAt(0).cloneContents();
-      var newNode = context.focusedWindow.document.createElement("p");
-      newNode.appendChild(html);
-      return newNode.innerHTML;
-    }
-  }
+CmdUtils.getSelection = function getSelection(context) {
+  var ctu = {};
+  Components.utils.import("resource://ubiquity-modules/contextutils.js",
+                          ctu);
 
-  return null;
+  if (typeof(context) == "undefined")
+    context = CmdUtils.__globalObject.context;
+
+  return ctu.ContextUtils.getSelection(CmdUtils.__getContext(context));
 };
 
 CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
@@ -313,34 +313,6 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
   };
 
   appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
-};
-
-CmdUtils.getSelection = function getSelection(context) {
-  if (typeof(context) == "undefined")
-    context = CmdUtils.__globalObject.context;
-
-  var focused = context.focusedElement;
-  var retval = "";
-
-  if (focused) {
-    var start = 0;
-    var end = 0;
-    try {
-      start = focused.selectionStart;
-      end = focused.selectionEnd;
-    } catch (e) {
-      // It's bizzarely possible for this to occur; see #156.
-    }
-    if (start != end)
-      retval = focused.value.substring(start, end);
-  }
-
-  if (!retval && context.focusedWindow) {
-    var sel = context.focusedWindow.getSelection();
-    if (sel.rangeCount >= 1)
-      retval = sel.toString();
-  }
-  return retval;
 };
 
 CmdUtils.setLastResult = function setLastResult( result ) {
@@ -768,77 +740,6 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
   return contentPreview;
 };
 
-CmdUtils.makeSugg = function( text, html, data ) {
-  if (typeof text != "string" && typeof html != "string" && !data) {
-    // all inputs empty!  There is no suggestion to be made.
-    return null;
-  }
-  // make the basic object:
-  var suggestion = {text: text, html: html, data:data};
-  // Fill in missing fields however we can:
-  if (suggestion.data && !suggestion.text)
-    suggestion.text = suggestion.data.toString();
-  if (suggestion.text && !suggestion.html)
-    suggestion.html = suggestion.text;
-  if(suggestion.html && !suggestion.text)
-    suggestion.text = CmdUtils.getTextFromHtml(suggestion.html);
-  // Create a summary of the text:
-  if (text.length > 80)
-    suggestion.summary = "your selection (\"" +
-                         suggestion.text.slice(0,50) +
-                         "...\")";
-  else
-    suggestion.summary = suggestion.text;
-  return suggestion;
-};
-
-
-CmdUtils.NounType = function(name, expectedWords, defaultWord) {
-  this._init(name, expectedWords, defaultWord);
-}
-CmdUtils.NounType.prototype = {
-  /* A NounType that accepts a finite list of specific words as the only valid
-   * values.  Instantiate it with an array giving all allowed words.
-   */
-  _init: function(name, expectedWords, defaultWord) {
-    this._name = name;
-    this._wordList = expectedWords; // an array
-    if(typeof defaultWord == "string") {
-      this.default = function() {
-        return CmdUtils.makeSugg(defaultWord);
-      };
-    }
-  },
-  suggest: function(text) {
-    // returns array of suggestions where each suggestion is object
-    // with .text and .html properties.
-    if (typeof text != "string") {
-      // Input undefined or not a string
-      return [];
-    }
-
-    text = text.toLowerCase();
-
-    var possibleWords = [];
-    if(typeof this._wordList == "function") {
-      possibleWords = this._wordList();
-    } else {
-      possibleWords = this._wordList;
-    }
-
-    var suggestions = [];
-    possibleWords.forEach(function(word) {
-      // Do the match in a non-case sensitive way
-      if ( word.toLowerCase().indexOf(text) > -1 ) {
-      	suggestions.push( CmdUtils.makeSugg(word) );
-      	// TODO if text input is multiple words, search for each of them
-      	// separately within the expected word.
-      }
-    });
-    return suggestions;
-  }
-};
-
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
     var query = encodeURIComponent(directObject.text);
@@ -909,3 +810,13 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand( options ) {
 
   CmdUtils.CreateCommand(options);
 };
+
+(
+  function() {
+    var nu = {};
+    Components.utils.import("resource://ubiquity-modules/nounutils.js",
+                            nu);
+    CmdUtils.NounType = nu.NounUtils.NounType;
+    CmdUtils.makeSugg = nu.NounUtils.makeSugg;
+  }
+)();

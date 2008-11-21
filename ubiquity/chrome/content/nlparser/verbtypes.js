@@ -61,6 +61,11 @@ NLParser.ParsedSentence = function( verb, arguments, verbMatchScore ) {
 }
 NLParser.ParsedSentence.prototype = {
   _init: function( verb, argumentSuggestions, verbMatchScore) {
+    var nu = {};
+    Components.utils.import("resource://ubiquity-modules/nounutils.js",
+                            nu);
+    this._makeSugg = nu.NounUtils.makeSugg;
+
     /* modifiers is dictionary of preposition: noun */
     if (verb){
       this._verb = verb;
@@ -194,7 +199,7 @@ NLParser.ParsedSentence.prototype = {
       if (!this._argSuggs[argName]) {
 	let missingArg = this._verb._arguments[argName];
         if (missingArg.default) {
-	  defaultValue = CmdUtils.makeSugg(missingArg.default);
+	  defaultValue = this._makeSugg(missingArg.default);
 	} else if (missingArg.type.default) { // Argument value from nountype default
           // TODO note this doesn't allow a nounType to return more than one item from
           // its default() method.
@@ -482,7 +487,7 @@ NLParser.Verb.prototype = {
 	type: cmd.DOType,
 	label: cmd.DOLabel,
 	flag: null,
-        default: cmd.DODefault
+        'default': cmd.DODefault
       };
     }
 

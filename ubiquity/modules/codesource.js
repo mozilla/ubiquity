@@ -35,6 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+EXPORTED_SYMBOLS = ["MixedCodeSourceCollection",
+                    "StringCodeSource",
+                    "RemoteUriCodeSource",
+                    "LocalUriCodeSource",
+                    "XhtmlCodeSource"];
+
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
 function MixedCodeSourceCollection(headerSources,
                                    bodySources,
                                    footerSources) {
@@ -110,7 +121,8 @@ RemoteUriCodeSource.prototype = {
       // Queue another XMLHttpRequest to fetch the latest code.
 
       var self = this;
-      self._req = new XMLHttpRequest();
+      self._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                  .createInstance(Ci.nsIXMLHttpRequest);
       self._req.open('GET', this._pageInfo.jsUri.spec, true);
       self._req.overrideMimeType("text/plain");
 
@@ -145,7 +157,8 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 
 LocalUriCodeSource.prototype = {
   getCode : function LUCS_getCode() {
-    var req = new XMLHttpRequest();
+    var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+              .createInstance(Ci.nsIXMLHttpRequest);
     req.open('GET', this.uri, false);
     req.overrideMimeType("text/javascript");
     req.send(null);

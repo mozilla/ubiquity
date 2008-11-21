@@ -34,6 +34,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["PrefCommands"];
+
+var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                  .getService(Components.interfaces.fuelIApplication);
+
 var PrefCommands = {
   COMMANDS_PREF : "extensions.ubiquity.commands",
 
