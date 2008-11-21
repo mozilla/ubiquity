@@ -57,8 +57,7 @@ NLParser.Parser = function(verbList, nounList, languagePlugin,
   this._nounTypeList = nounList;
   this._suggestionList = []; // a list of ParsedSentences.
   this._parsingsList = []; // a list of PartiallyParsedSentences.
-  this._pronouns = languagePlugin.PRONOUNS;
-  this._languageSpecificParse = languagePlugin.parseSentence;
+  this._languagePlugin = languagePlugin;
 
   if (!ContextUtils) {
     var ctu = {};
@@ -187,7 +186,7 @@ NLParser.Parser.prototype = {
       }
     } else {
       // Language-specific full-sentence suggestions:
-      newSuggs = this._languageSpecificParse(
+      newSuggs = this._languagePlugin.parseSentence(
 	query,
 	this._nounTypeList,
 	this._verbList,
