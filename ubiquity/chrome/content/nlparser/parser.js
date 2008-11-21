@@ -82,7 +82,6 @@ NLParser.Parser.prototype = {
     this._parsingsList = []; // a list of PartiallyParsedSentences.
     this._pronouns = languagePlugin.PRONOUNS;
     this._languageSpecificParse = languagePlugin.parseSentence;
-    this._queuedPreview = null;
   },
 
   getSelectionObject: function(context) {
@@ -247,67 +246,6 @@ NLParser.Parser.prototype = {
     if (this._suggestionList.length == 0 )
       return null;
     return this._suggestionList[index];
-  },
-
-  setPreviewAndSuggestions: function(context, previewBlock, hilitedSuggestion){
-    // can set previewBlock as a callback in case we need to update
-    // asynchronously.
-
-    // Note: it might be better for us to decouple the generation of
-    // suggestions from the preview display so that they can
-    // be updated independently, which would allow previews to
-    // only be displayed (and potentially costly Ajax requests
-    // to be made) after some amount of time has passed since
-    // the user's last keypress.  This might be done with a
-    // XUL:textbox whose 'type' is set to 'timed'.
-
-    var doc = previewBlock.ownerDocument;
-    if (!doc.getElementById("suggestions")) {
-      // Set the initial contents of the preview block.
-      previewBlock.innerHTML = ('<div id="suggestions"></div>' +
-                                '<div id="preview-pane"></div>');
-    }
-
-    // Set suggestions content.
-    var content = "";
-    var numToDisplay = this.getNumSuggestions();
-    for (var x=0; x < numToDisplay; x++) {
-      var suggText = this._suggestionList[x].getDisplayText();
-      var suggIconUrl = this._suggestionList[x].getIcon();
-      var suggIcon = "";
-      if(suggIconUrl) {
-        suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
-      }
-      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" +
-	suggText;
-      if ( x == hilitedSuggestion ) {
-        content += "<div class=\"hilited\"><div class=\"hilited-text\">" +
-	  suggText + "</div>";
-        content += "</div>";
-      } else {
-        content += "<div class=\"suggested\">" + suggText + "</div>";
-      }
-    }
-
-    doc.getElementById("suggestions").innerHTML = content;
-
-    var activeSugg = this.getSentence(hilitedSuggestion);
-    if ( activeSugg ) {
-      var self = this;
-      function queuedPreview() {
-        // Set the preview contents.
-        if (self._queuedPreview == queuedPreview)
-          activeSugg.preview(context, doc.getElementById("preview-pane"));
-      };
-      this._queuedPreview = queuedPreview;
-      Utils.setTimeout(this._queuedPreview, activeSugg.previewDelay);
-    }
-
-    var evt = doc.createEvent("HTMLEvents");
-    evt.initEvent("preview-change", false, false);
-    doc.getElementById("preview-pane").dispatchEvent(evt);
-
-    return true;
   },
 
   setCommandList: function( commandList ) {

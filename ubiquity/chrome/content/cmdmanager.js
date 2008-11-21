@@ -54,6 +54,7 @@ function CommandManager(cmdSource, msgService, languageCodeOrParser) {
     this.__nlParser.setNounList(cmdSource.getAllNounTypes());
   }
   this.__cmdSource.parser = this.__nlParser;
+  this.__queuedPreview = null;
 }
 
 CommandManager.prototype = {
@@ -68,7 +69,7 @@ CommandManager.prototype = {
     if (this.__hilitedSuggestion < 0) {
       this.__hilitedSuggestion = this.__nlParser.getNumSuggestions() - 1;
     }
-    this._preview(context, previewBlock);
+    this._previewAndSuggest(context, previewBlock);
   },
 
   moveIndicationDown : function CM_moveIndicationDown(context, previewBlock) {
@@ -76,15 +77,55 @@ CommandManager.prototype = {
     if (this.__hilitedSuggestion > this.__nlParser.getNumSuggestions() - 1) {
       this.__hilitedSuggestion = 0;
     }
-    this._preview(context, previewBlock);
+    this._previewAndSuggest(context, previewBlock);
   },
 
-  _preview : function CM__preview(context, previewBlock) {
+  _renderSuggestions : function CMD__renderSuggestions(elem) {
+    var content = "";
+    var suggList = this.__nlParser.getSuggestionList();
+
+    for (var x = 0; x < suggList.length; x++) {
+      var suggText = suggList[x].getDisplayText();
+      var suggIconUrl = suggList[x].getIcon();
+      var suggIcon = "";
+      if(suggIconUrl) {
+        suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
+      }
+      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" +
+	suggText;
+      if ( x == this.__hilitedSuggestion ) {
+        content += "<div class=\"hilited\"><div class=\"hilited-text\">" +
+	  suggText + "</div>";
+        content += "</div>";
+      } else {
+        content += "<div class=\"suggested\">" + suggText + "</div>";
+      }
+    }
+    elem.innerHTML = content;
+  },
+
+  _renderPreview : function CM__renderPreview(context, previewBlock) {
+    var doc = previewBlock.ownerDocument;
     var wasPreviewShown = false;
+
     try {
-      wasPreviewShown = this.__nlParser.setPreviewAndSuggestions(context,
-								 previewBlock,
-								 this.__hilitedSuggestion);
+      var activeSugg = this.__nlParser.getSentence(this.__hilitedSuggestion);
+      if ( activeSugg ) {
+        var self = this;
+        function queuedPreview() {
+          // Set the preview contents.
+          if (self.__queuedPreview == queuedPreview)
+            activeSugg.preview(context, doc.getElementById("preview-pane"));
+        };
+        this.__queuedPreview = queuedPreview;
+        Utils.setTimeout(this.__queuedPreview, activeSugg.previewDelay);
+      }
+
+      var evt = doc.createEvent("HTMLEvents");
+      evt.initEvent("preview-change", false, false);
+      doc.getElementById("preview-pane").dispatchEvent(evt);
+
+      wasPreviewShown = true;
     } catch (e) {
       this.__msgService.displayMessage(
         {text: ("An exception occurred while previewing the command '" +
@@ -93,6 +134,18 @@ CommandManager.prototype = {
         );
     }
     return wasPreviewShown;
+  },
+
+  _previewAndSuggest : function CM__previewAndSuggest(context, previewBlock) {
+    var doc = previewBlock.ownerDocument;
+    if (!doc.getElementById("suggestions")) {
+      // Set the initial contents of the preview block.
+      previewBlock.innerHTML = ('<div id="suggestions"></div>' +
+                                '<div id="preview-pane"></div>');
+    }
+
+    this._renderSuggestions(doc.getElementById("suggestions"));
+    return this._renderPreview(context, previewBlock);
   },
 
   updateInput : function CM_updateInput(input, context, previewBlock) {
@@ -105,7 +158,7 @@ CommandManager.prototype = {
     if ( this.__nlParser.getNumSuggestions() == 0 )
       return false;
     if (previewBlock)
-      return this._preview(context, previewBlock);
+      return this._previewAndSuggest(context, previewBlock);
     else
       return false;
   },
@@ -116,7 +169,7 @@ CommandManager.prototype = {
     // Called when we're notified of a newly incoming suggestion
     this.__nlParser.refreshSuggestionList(input);
     if (previewBlock)
-      this._preview(context, previewBlock);
+      this._previewAndSuggest(context, previewBlock);
   },
 
   execute : function CM_execute(context) {
