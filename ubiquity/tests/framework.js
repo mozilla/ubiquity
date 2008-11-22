@@ -34,6 +34,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["exportTests",
+                        "AssertionError",
+                        "TestCase",
+                        "HtmlTestResponder",
+                        "TestSuite"];
+
+function exportTests(obj) {
+  var exportedSymbols = [];
+
+  for (name in obj) {
+    if (name.indexOf("test") == 0)
+      exportedSymbols.push(name);
+  }
+
+  obj.EXPORTED_SYMBOLS = exportedSymbols;
+}
+
 function AssertionError(message) {
   this.message = message;
 }

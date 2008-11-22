@@ -36,6 +36,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+EXPORTED_SYMBOLS = ["LinkRelCodeSource"];
+
+Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity-modules/codesource.js");
+
 const CMD_SRC_ANNO = "ubiquity/source";
 const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
@@ -46,7 +51,7 @@ const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 // TODO: This class isn't actually a code source, it's a collection that
 // yields a code source for every currently-subscribed feed.
-function LinkRelCodeSource() {
+function LinkRelCodeSource(window) {
   if (LinkRelCodeSource.__singleton)
     return LinkRelCodeSource.__singleton;
 

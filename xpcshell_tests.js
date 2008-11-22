@@ -121,12 +121,8 @@ var XpcShellTestResponder = {
   }
 };
 
-load(basePath + "/chrome/content/linkrel_codesource.js");
-load(basePath + "/chrome/content/test.js");
-load(basePath + "/chrome/content/cmdmanager.js");
-load(basePath + "/chrome/content/test_suggestion_memory.js");
-load(basePath + "/chrome/content/tests.js");
-load(basePath + "/chrome/content/safebox_tests.js");
+Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity-tests/test_all.js");
 
 var suite = new TestSuite(XpcShellTestResponder, this);
 

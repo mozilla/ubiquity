@@ -1,4 +1,5 @@
 Components.utils.import("resource://ubiquity-modules/safebox.js");
+Components.utils.import("resource://ubiquity-tests/framework.js");
 
 function testSafeboxWorks() {
   let inf = {evalInSandbox: Components.utils.evalInSandbox,
@@ -41,3 +42,5 @@ function testSafeboxWorks() {
   test.assert(received.dynamic == 0);
   test.assert(received.isEvil == false);
 }
+
+exportTests(this);

@@ -50,6 +50,8 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 
 function ubiquitySetup()
 {
@@ -92,8 +94,13 @@ function ubiquitySetup()
     sandboxFactory
   );
 
-  var cmdMan = new CommandManager(cmdSource, msgService,
-                                  UbiquityGlobals.languageCode);
+  var nlParser = NLParser.makeParserForLanguage(
+    UbiquityGlobals.languageCode,
+    [],
+    []
+  );
+
+  var cmdMan = new CommandManager(cmdSource, msgService, nlParser);
 
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("contentAreaContextMenu"),

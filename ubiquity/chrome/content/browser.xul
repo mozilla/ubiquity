@@ -29,10 +29,6 @@
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/popupmenu.js"/>
   <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/cmdmanager.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/linkrel_codesource.js"/>
-  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/skin_installer.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/builtinfactories.js"/>

@@ -37,22 +37,22 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function CommandManager(cmdSource, msgService, languageCodeOrParser) {
+var EXPORTED_SYMBOLS = ["CommandManager",
+                        "IterableCollection",
+                        "CompositeCollection",
+                        "CommandSource",
+                        "makeDefaultCommandSuggester"];
+
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
+function CommandManager(cmdSource, msgService, parser) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
-  if (typeof(languageCodeOrParser) == "string")
-    this.__nlParser = NLParser.makeParserForLanguage(
-      languageCodeOrParser,
-      cmdSource.getAllCommands(),
-      cmdSource.getAllNounTypes()
-    );
-  else {
-    this.__nlParser = languageCodeOrParser;
-    this.__nlParser.setCommandList(cmdSource.getAllCommands());
-    this.__nlParser.setNounList(cmdSource.getAllNounTypes());
-  }
+  this.__nlParser = parser;
+  this.__nlParser.setCommandList(cmdSource.getAllCommands());
+  this.__nlParser.setNounList(cmdSource.getAllNounTypes());
   this.__cmdSource.parser = this.__nlParser;
   this.__queuedPreview = null;
 }
@@ -237,7 +237,7 @@ function CompositeCollection(collectionList) {
 
 function CommandSource(codeSources, messageService, sandboxFactory) {
   if (!codeSources.__iterator__) {
-    if (codeSources.constructor == Array)
+    if (codeSources.constructor.name == "Array")
       codeSources = new IterableCollection(codeSources);
     else
       codeSources = new IterableCollection([codeSources]);

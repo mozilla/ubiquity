@@ -42,9 +42,13 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity-modules/localeutils.js");
 
-var dat = loadLocaleJson("resource://ubiquity-tests/strings.json");
+Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity-tests/test_safebox.js");
+Components.utils.import("resource://ubiquity-tests/test_suggestion_memory.js");
 
 var globalObj = this;
 const LANG = "en";
@@ -102,13 +106,21 @@ function debugSuggestionList( list ) {
 }
 
 function setupLrcsForTesting() {
-   LinkRelCodeSource.__install = function() {};
+  var oldInstall = LinkRelCodeSource.__install;
+  var oldGetAnnSvc = LinkRelCodeSource.__getAnnSvc;
+  var annSvc = new FakeAnnSvc();
 
-   var annSvc = new FakeAnnSvc();
+  LinkRelCodeSource.__install = function() {};
+  LinkRelCodeSource.__getAnnSvc = function() {
+    return annSvc;
+  };
 
-   LinkRelCodeSource.__getAnnSvc = function() {
-     return annSvc;
-   };
+  function teardown() {
+    LinkRelCodeSource.__install = oldInstall;
+    LinkRelCodeSource.__getAnnSvc = oldGetAnnSvc;
+  }
+
+  TestSuite.currentTest.addToTeardown(teardown);
 }
 
 function testXhtmlCodeSourceWorks() {
@@ -1614,6 +1626,9 @@ function testXmlScriptCommandsParser() {
 }
 
 function testLoadLocaleJsonWorks() {
+  var dat = loadLocaleJson("resource://ubiquity-tests/test_all.json");
   this.assert(dat.testLoadLocaleJsonWorks.length == 1);
   this.assert(dat.testLoadLocaleJsonWorks == "\u3053");
 }
+
+exportTests(this);
