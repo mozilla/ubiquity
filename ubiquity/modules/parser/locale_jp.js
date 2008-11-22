@@ -89,7 +89,7 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   // Splitting on spaces won't work for Japanese, so split on all known
   // particles to get a dictionary of {particle: noun}
   let wordDict = JpParser._splitByParticles( inputString );
-  for each ( let verb in verbList ) {
+  for each ( let verb in verbList ) if (!verb.disabled) {
     let matchScore = verb.match( wordDict["動詞"]);
     if (matchScore == 0)
       continue;

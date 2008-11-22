@@ -70,8 +70,8 @@ var noun_type_contact = {
   suggest: function(text, html) {
     if (noun_type_contact.contactList == null) {
       getGmailContacts( noun_type_contact.callback);
-      let suggs = noun_type_email.suggest(text, html)
-      return suggs.length > 0 ? suggs : []
+      let suggs = noun_type_email.suggest(text, html);
+      return suggs.length > 0 ? suggs : [];
     }
 
     if( text.length < 2 ) return [];
@@ -82,8 +82,8 @@ var noun_type_contact = {
 	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
     
-    suggs = noun_type_email.suggest(text, html)
-    suggs.length > 0 ? suggestions.push(suggs[0]) : null
+    suggs = noun_type_email.suggest(text, html);
+    suggs.length > 0 ? suggestions.push(suggs[0]) : null;
     
     return suggestions.splice(0, 5);
   }
@@ -110,7 +110,7 @@ var noun_type_email = {
     
     return [];
   }
-}
+};
 
 var noun_arb_text = {
   _name: "text",
@@ -165,7 +165,7 @@ var noun_type_time = {
      text = time.toString("hh:mm tt");
      return [ CmdUtils.makeSugg(text, null, time) ];
    }
-}
+};
 
 var noun_type_percentage = {
   _name: "percentage",
@@ -332,7 +332,7 @@ noun_type_awesomebar = {
 
       this._getHistoryLinks(part, onSearchComplete);
   }
-}
+};
 
 
 var noun_type_async_address = {
@@ -683,4 +683,4 @@ var noun_type_livemark = {
     }
     return [];
   }  
-}
+};

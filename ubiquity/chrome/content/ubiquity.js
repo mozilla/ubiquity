@@ -242,6 +242,7 @@ Ubiquity.prototype = {
 
     this.__msgPanel.hidden = false;
     this.__msgPanel.openPopup(anchor, "", 0, 0, false, true);
+    this.__cmdManager.setDisabledStatus();
   },
 
   closeWindow: function closeWindow(){

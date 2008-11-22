@@ -49,7 +49,7 @@ Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 function onDocumentLoad() {
   // TODO: This isn't implemented very well; we're essentially
   // re-creating an environment for commands and re-fetching all
-  // command feeds from scratch ust so we can see what commands are
+  // command feeds from scratch just so we can see what commands are
   // available, but we should really be able to get the browser
   // window's command manager and simply ask it.
 
@@ -62,6 +62,13 @@ function onDocumentLoad() {
     msgService,
     sandboxFactory
   );
+  
+  // get the list of suppressed commands.
+  var SUPPRESSCOMMANDS="extensions.ubiquity.suppresscommands",
+      suppressthese=Application.prefs.getValue(SUPPRESSCOMMANDS, '/');
+  // Ensure that the list (of suppressed commands) ends with the separator character
+  if (suppressthese.substr(-1)!=='/')
+    suppressthese=suppressthese+'/';
 
   // Number of times we'll update the commands before we assume that
   // all command feeds have been retrieved.
@@ -80,14 +87,18 @@ function onDocumentLoad() {
     // Dynamically generate entries for undocumented commands.
     var cmdsChanged = false;
     var cmdList = $('#command-list');
+    cmdList.find('.activebox').unbind('change');
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.getCommand(cmdSource.commandNames[i].name);
       var cmdId = cmdSource.commandNames[i].id.replace(/ /g, "_");
+      var isEnabled=suppressthese.search('/'+cmd.name+'/')===-1;
 
       if (cmdList.find('#' + cmdId).length == 0) {
         cmdsChanged = true;
         cmdList.append(
           '<li class="command" id="' + cmdId + '">' +
+           '<input type="checkbox" class="activebox"' +
+           (isEnabled ? ' checked="checked"' : '')+'/>'+
            '<span class="name">' + cmd.name + '</span>' +
            '<span class="description"/>' +
            '<div class="light"><span class="author"/><span class="license"/></div>' +
@@ -128,6 +139,20 @@ function onDocumentLoad() {
 
     if (cmdsChanged)
       sortCommandsBy(sortKey);
+
+    cmdList.find('.activebox').bind('change',function() {
+      // update the preferences, when the user toggles the active status of a command
+      var name=$(this).parents('li.command').find('span.name').text();
+      if (this.checked) {
+        // user has just made this command active, so remove it from the suppressed list
+        suppressthese=suppressthese.replace('/'+name+'/','/');
+      } else if (suppressthese.search('/'+name+'/')===-1) {
+        // user has just made this command inactive, so add it to the suppressed list, if it wasn't there already
+        suppressthese=suppressthese+name+'/';
+      }
+      // save the preference
+      Application.prefs.setValue(SUPPRESSCOMMANDS, suppressthese);
+    });
 
     window.setTimeout(updateCommands, updateDelay);
   }
@@ -171,10 +196,7 @@ function formatCommandAuthor(authorData) {
 }
 
 function sortCommandsBy(key) {
-  var cmdList = $("#command-list");
-  var allCommands = cmdList.find(".command").get();
-
-  allCommands.sort(function(a, b) {
+  function alphasort(a, b) {
     var aKey = $(a).find(key).text().toLowerCase();
     var bKey = $(b).find(key).text().toLowerCase();
 
@@ -190,7 +212,19 @@ function sortCommandsBy(key) {
       return 1;
 
     return 0;
-  });
+  }
+  function checksort(a, b) {
+    var aKey = $(':checkbox',a).attr('checked'),
+        bKey = $(':checkbox',b).attr('checked');
+    if (aKey===bKey)
+      return 0;
+    if(aKey)
+      return -1;
+    return 1;
+  }
+  var cmdList = $("#command-list");
+  var allCommands = cmdList.find(".command").get();
+  allCommands.sort( (key==='.active') ? checksort : alphasort);
 
   $.each(allCommands, function(cmdIndex, cmd) {
     cmdList.append(cmd);

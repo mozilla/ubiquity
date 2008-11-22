@@ -683,6 +683,7 @@ NLParser.Verb.prototype = {
     this.__defineGetter__("previewDelay",
                           function() { return cmd.previewDelay; });
     this._arguments = {};
+    this.disabled=cmd.disabled;
 
     // New-style API: command defines arguments dictionary
     if (cmd.arguments) {
@@ -760,6 +761,7 @@ NLParser.Verb.prototype = {
        is to this verb.  Return value will be used for sorting.
        The current heuristic is extremely ad-hoc but produces the ordering
        we want... so far.*/
+    if (this.disabled) return 0.0; // verb is disabled, so can't be a match
     if (this._name == inputWord)
       // Perfect match always gets maximum rating!
       return 1.0;

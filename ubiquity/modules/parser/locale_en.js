@@ -107,7 +107,7 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   let inputArguments = words.slice(1);
 
   // Try matching the verb against all the words we know:
-  for each (let verb in verbList) {
+  for each (let verb in verbList) if (!verb.disabled) {
     let matchScore = verb.match( inputVerb );
 
     if (matchScore == 0)

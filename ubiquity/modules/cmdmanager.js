@@ -43,6 +43,9 @@ var EXPORTED_SYMBOLS = ["CommandManager",
                         "CommandSource",
                         "makeDefaultCommandSuggester"];
 
+var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                  .getService(Components.interfaces.fuelIApplication);
+                  
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
 function CommandManager(cmdSource, msgService, parser) {
@@ -214,6 +217,10 @@ CommandManager.prototype = {
       //suggestion value so not to expose the text box.
       textbox.value = suggText;
     }
+  },
+  
+  setDisabledStatus : function CM_setDisabledStatus(){
+    return this.__cmdSource.setDisabledStatus();
   }
 };
 
@@ -321,9 +328,10 @@ CommandSource.prototype = {
         execute : function CS_execute(context, directObject, modifiers) {
           sandbox.context = context;
           return cmdFunc(directObject, modifiers);
-        }
+        },
+        disabled:false
       };
-      // Attatch optional metadata to command object if it exists
+      // Attach optional metadata to command object if it exists
       if (cmdFunc.preview)
         cmd.preview = function CS_preview(context, directObject, modifiers,
                                           previewBlock) {
@@ -396,6 +404,7 @@ CommandSource.prototype = {
       this.parser.setCommandList(this._commands);
       this.parser.setNounList(this._nounTypes);
     }
+    this.setDisabledStatus();
   },
 
   getAllCommands: function CS_getAllCommands() {
@@ -414,6 +423,16 @@ CommandSource.prototype = {
       return this._commands[name];
     else
       return null;
+  },
+  
+  setDisabledStatus: function CS_setDisabledStatus() {
+    var name,
+        suppressthese=Application.prefs.getValue("extensions.ubiquity.suppresscommands", '/');
+    if (suppressthese.substr(-1)!=='/')
+      suppressthese=suppressthese+'/';
+    for (name in this._commands)
+      this._commands[name].disabled=suppressthese.search('/'+name+'/')!==-1;
+    if (this.parser) this.parser.setCommandList(this._commands);
   }
 };
 
