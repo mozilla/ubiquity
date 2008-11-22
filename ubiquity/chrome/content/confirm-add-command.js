@@ -38,6 +38,7 @@
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 
 function getUrlParams() {
   var urlFragments = document.URL.split("?")[1];
