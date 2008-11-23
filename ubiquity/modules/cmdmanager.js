@@ -86,8 +86,10 @@ CommandManager.prototype = {
   _renderSuggestions : function CMD__renderSuggestions(elem) {
     var content = "";
     var suggList = this.__nlParser.getSuggestionList();
-
-    for (var x = 0; x < suggList.length; x++) {
+    var suggNumber = this.__nlParser.getNumSuggestions();
+    
+    
+    for (var x = 0; x < suggNumber; x++) {
       var suggText = suggList[x].getDisplayText();
       var suggIconUrl = suggList[x].getIcon();
       var suggIcon = "";
