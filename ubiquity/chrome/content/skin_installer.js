@@ -34,6 +34,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity-modules/msgservice.js");
 
 function SkinInstaller() {
   if (SkinInstaller.__singleton)
@@ -45,6 +46,9 @@ function SkinInstaller() {
 }
 
 SkinInstaller.changeSkin = function changeSkin(newSkinPath) {
+  
+  var msgService = new AlertMessageService();
+  
   try {
     var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
       .getService(Components.interfaces.nsIStyleSheetService);
@@ -63,15 +67,12 @@ SkinInstaller.changeSkin = function changeSkin(newSkinPath) {
     }
     
     Application.prefs.setValue("extensions.ubiquity.skin", newSkinPath);
-    //TODO: Find a better way to call displayMessage
-    window.gUbiquity.__cmdManager
-          .__msgService.displayMessage("Your Ubiquity skin has been changed!");
+    msgService.displayMessage("Your Ubiquity skin has been changed!");
     
   } catch(e) {
     Components.utils.reportError("Error applying Ubiquity skin from'" + 
                                   newSkinPath + "': " + e);
-    window.gUbiquity.__cmdManager
-           .__msgService.displayMessage("Error applying Ubiquity skin from " + newSkinPath);
+    msgService.displayMessage("Error applying Ubiquity skin from " + newSkinPath);
   } 
 }
 
