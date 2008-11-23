@@ -131,8 +131,11 @@ SkinInstaller.__install = function SkinInstaller_install(window) {
             .createInstance(Ci.nsIFileOutputStream);
             foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
             foStream.write(data, data.length);
-            foStream.close();          
-            SkinInstaller.changeSkin("file://" + file.path);
+            foStream.close();
+            var ios = Cc["@mozilla.org/network/io-service;1"]
+                                .getService(Ci.nsIIOService);
+            var url = ios.newFileURI(file);
+            SkinInstaller.changeSkin(url.spec);
           }
 
           //Only file:// is considered a local url
