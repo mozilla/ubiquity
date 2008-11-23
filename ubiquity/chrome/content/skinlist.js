@@ -108,7 +108,13 @@ function createSkinElement(file){
   
   var skinMeta = {};
   skinMeta.filename = file.leafName; 
-  skinMeta.filepath = "file://" + file.path;
+  //get the path to the file
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var ios = Cc["@mozilla.org/network/io-service;1"]
+                      .getService(Ci.nsIIOService);
+  var url = ios.newFileURI(file);
+  skinMeta.filepath = url.spec;
     
   //look for =skin= indicating start of metadata
   var foundMetaData = false;
