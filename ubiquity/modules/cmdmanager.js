@@ -43,9 +43,6 @@ var EXPORTED_SYMBOLS = ["CommandManager",
                         "CommandSource",
                         "makeDefaultCommandSuggester"];
 
-var Application = Components.classes["@mozilla.org/fuel/application;1"]
-                  .getService(Components.interfaces.fuelIApplication);
-                  
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
 function CommandManager(cmdSource, msgService, parser) {
@@ -87,8 +84,8 @@ CommandManager.prototype = {
     var content = "";
     var suggList = this.__nlParser.getSuggestionList();
     var suggNumber = this.__nlParser.getNumSuggestions();
-    
-    
+
+
     for (var x = 0; x < suggNumber; x++) {
       var suggText = suggList[x].getDisplayText();
       var suggIconUrl = suggList[x].getIcon();
@@ -220,7 +217,7 @@ CommandManager.prototype = {
       textbox.value = suggText;
     }
   },
-  
+
   setDisabledStatus : function CM_setDisabledStatus(){
     return this.__cmdSource.setDisabledStatus();
   }
@@ -426,8 +423,22 @@ CommandSource.prototype = {
     else
       return null;
   },
-  
+
   setDisabledStatus: function CS_setDisabledStatus() {
+    try {
+      var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                        .getService(Components.interfaces.fuelIApplication);
+    } catch (e) {
+      // We're in xpcshell, just assume we have no disabled commands
+      // for now.
+
+      // TODO: This should be cleaner; ideally, the specific place that
+      // we get out list of decoupled commands from should be decoupled
+      // from the code that actually disables the commands, so that
+      // we can easily unit test.
+      return;
+    }
+
     var name,
         suppressthese=Application.prefs.getValue("extensions.ubiquity.suppresscommands", '/');
     if (suppressthese.substr(-1)!=='/')
