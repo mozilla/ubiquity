@@ -123,7 +123,12 @@ let UbiquitySetup = {
 
   createServices: function createServices() {
     if (!gServices) {
-      this.__installDefaults();
+      var Cc = Components.classes;
+      var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
+                   .getService(Components.interfaces.nsIAnnotationService);
+      var linkRelCodeService = new LinkRelCodeService(annSvc);
+
+      this.__installDefaults(linkRelCodeService);
       var msgService = new CompositeMessageService();
 
       msgService.add(new AlertMessageService());
@@ -131,7 +136,8 @@ let UbiquitySetup = {
 
       var makeGlobals = makeBuiltinGlobalsMaker(msgService);
       var sandboxFactory = new SandboxFactory(makeGlobals);
-      var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
+      var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode,
+                                               linkRelCodeService);
 
       var cmdSource = new CommandSource(
         codeSources,
@@ -153,6 +159,7 @@ let UbiquitySetup = {
       gServices = {commandSource: cmdSource,
                    commandManager: cmdMan,
                    commandSuggester: cmdSugg,
+                   linkRelCodeService: linkRelCodeService,
                    messageService: msgService};
     }
 
@@ -160,10 +167,10 @@ let UbiquitySetup = {
   },
 
   setupWindow: function setupWindow(window) {
-    LinkRelCodeSource.installToWindow(window);
+    gServices.linkRelCodeService.installToWindow(window);
   },
 
-  __installDefaults: function installDefaults() {
+  __installDefaults: function installDefaults(linkRelCodeService) {
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
@@ -173,9 +180,9 @@ let UbiquitySetup = {
     } else
       baseUri = baseLocalUri;
 
-    LinkRelCodeSource.installDefaults(baseUri,
-                                      baseLocalUri,
-                                      this.STANDARD_FEEDS);
+    linkRelCodeService.installDefaults(baseUri,
+                                       baseLocalUri,
+                                       this.STANDARD_FEEDS);
   }
 };
 
@@ -217,7 +224,7 @@ function makeBuiltinGlobalsMaker(msgService) {
   return makeGlobals;
 }
 
-function makeBuiltinCodeSources(languageCode) {
+function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
   var baseUri = UbiquitySetup.getBaseUri();
   var baseChromeUri = baseUri + "chrome/content/";
   var baseModulesUri = baseUri + "modules/";
@@ -251,7 +258,7 @@ function makeBuiltinCodeSources(languageCode) {
 
   bodyCodeSources = new CompositeCollection([
     new IterableCollection(bodyCodeSources),
-    new LinkRelCodeSource()
+    linkRelCodeService
   ]);
 
   return new MixedCodeSourceCollection(

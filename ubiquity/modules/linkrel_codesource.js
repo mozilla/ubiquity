@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["LinkRelCodeSource"];
+EXPORTED_SYMBOLS = ["LinkRelCodeService"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
@@ -49,16 +49,14 @@ const CMD_URL_ANNO = "ubiquity/commands";
 const CMD_TITLE_ANNO = "ubiquity/title";
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
-// TODO: This class isn't actually a code source, it's a collection that
-// yields a code source for every currently-subscribed feed.
-function LinkRelCodeSource() {
-  if (LinkRelCodeSource.__singleton)
-    return LinkRelCodeSource.__singleton;
-
+// This class is a collection that yields a code source for every
+// currently-subscribed feed.
+function LinkRelCodeService(annSvc) {
   this._sources = {};
+  this._annSvc = annSvc;
 
   this._updateSourceList = function LRCS_updateSourceList() {
-    let markedPages = LinkRelCodeSource.getMarkedPages();
+    let markedPages = this.getMarkedPages();
     let newSources = {};
     for (let i = 0; i < markedPages.length; i++) {
       let pageInfo = markedPages[i];
@@ -91,13 +89,12 @@ function LinkRelCodeSource() {
       yield source;
     }
   };
-
-  LinkRelCodeSource.__singleton = this;
-  return LinkRelCodeSource.__singleton;
 }
 
-LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
-  let annSvc = this.__getAnnSvc();
+LinkRelCodeService.prototype = LRCSProto = {};
+
+LRCSProto.__makePage = function LRCS___makePage(uri) {
+  let annSvc = this._annSvc;
 
   let title = uri.spec;
   if (annSvc.pageHasAnnotation(uri, CMD_TITLE_ANNO))
@@ -153,38 +150,33 @@ LinkRelCodeSource.__makePage = function LRCS___makePage(uri) {
                              annSvc.EXPIRE_NEVER);
   };
 
-  // The following is used by the herd command feed code.
-  if (this.__singleton)
-    if (pageInfo.jsUri.spec in this.__singleton._sources)
-      pageInfo.codeSource = this.__singleton._sources[pageInfo.jsUri.spec];
-
   return pageInfo;
 };
 
-LinkRelCodeSource.getRemovedPages = function LRCS_getRemovedPages() {
-  let annSvc = this.__getAnnSvc();
+LRCSProto.getRemovedPages = function LRCS_getRemovedPages() {
+  let annSvc = this._annSvc;
   let removedUris = annSvc.getPagesWithAnnotation(CMD_REMOVED_ANNO, {});
   let removedPages = [];
 
   for (let i = 0; i < removedUris.length; i++)
-    removedPages.push(LinkRelCodeSource.__makePage(removedUris[i]));
+    removedPages.push(this.__makePage(removedUris[i]));
 
   return removedPages;
 };
 
-LinkRelCodeSource.getMarkedPages = function LRCS_getMarkedPages() {
-  let annSvc = this.__getAnnSvc();
+LRCSProto.getMarkedPages = function LRCS_getMarkedPages() {
+  let annSvc = this._annSvc;
   let confirmedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
   let markedPages = [];
 
   for (let i = 0; i < confirmedPages.length; i++)
-    markedPages.push(LinkRelCodeSource.__makePage(confirmedPages[i]));
+    markedPages.push(this.__makePage(confirmedPages[i]));
 
   return markedPages;
 };
 
-LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
-  let annSvc = this.__getAnnSvc();
+LRCSProto.addMarkedPage = function LRCS_addMarkedPage(info) {
+  let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
 
   if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO))
@@ -200,23 +192,16 @@ LinkRelCodeSource.addMarkedPage = function LRCS_addMarkedPage(info) {
                              annSvc.EXPIRE_NEVER);
 };
 
-LinkRelCodeSource.isMarkedPage = function LRCS_isMarkedPage(uri) {
-  let annSvc = this.__getAnnSvc();
+LRCSProto.isMarkedPage = function LRCS_isMarkedPage(uri) {
+  let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO);
 };
 
-LinkRelCodeSource.__getAnnSvc = function LRCS_getAnnSvc() {
-  var Cc = Components.classes;
-  var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-               .getService(Components.interfaces.nsIAnnotationService);
-  return annSvc;
-};
-
-LinkRelCodeSource.installDefaults = function LRCS_installDefaults(baseUri,
-                                                                  baseLocalUri,
-                                                                  infos) {
-  let annSvc = this.__getAnnSvc();
+LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
+                                                          baseLocalUri,
+                                                          infos) {
+  let annSvc = this._annSvc;
 
   for (let i = 0; i < infos.length; i++) {
     let info = infos[i];
@@ -235,7 +220,9 @@ LinkRelCodeSource.installDefaults = function LRCS_installDefaults(baseUri,
   }
 };
 
-LinkRelCodeSource.installToWindow = function LRCS_install(window) {
+LRCSProto.installToWindow = function LRCS_installToWindow(window) {
+  var self = this;
+
   function showNotification(targetDoc, commandsUrl, mimetype) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
@@ -296,9 +283,9 @@ LinkRelCodeSource.installToWindow = function LRCS_install(window) {
       function onSubscribeClick(notification, button) {
         if (isTrustedUrl(commandsUrl, mimetype)) {
           function onSuccess(data) {
-            LinkRelCodeSource.addMarkedPage({url: targetDoc.location.href,
-                                             canUpdate: true,
-                                             sourceCode: data});
+            self.addMarkedPage({url: targetDoc.location.href,
+                                canUpdate: true,
+                                sourceCode: data});
             Utils.openUrlInBrowser(confirmUrl);
           }
 
@@ -333,12 +320,12 @@ LinkRelCodeSource.installToWindow = function LRCS_install(window) {
   }
 
   function onPageWithCommands(pageUrl, commandsUrl, document, mimetype) {
-    var annSvc = LinkRelCodeSource.__getAnnSvc();
+    var annSvc = self._annSvc;
 
     pageUrl = Utils.url(pageUrl);
     annSvc.setPageAnnotation(pageUrl, CMD_URL_ANNO,
                              commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
-    if (!LinkRelCodeSource.isMarkedPage(pageUrl))
+    if (!self.isMarkedPage(pageUrl))
       showNotification(document, commandsUrl, mimetype);
   }
 

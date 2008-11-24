@@ -105,21 +105,6 @@ function debugSuggestionList( list ) {
   }
 }
 
-function setupLrcsForTesting() {
-  var oldGetAnnSvc = LinkRelCodeSource.__getAnnSvc;
-  var annSvc = new FakeAnnSvc();
-
-  LinkRelCodeSource.__getAnnSvc = function() {
-    return annSvc;
-  };
-
-  function teardown() {
-    LinkRelCodeSource.__getAnnSvc = oldGetAnnSvc;
-  }
-
-  TestSuite.currentTest.addToTeardown(teardown);
-}
-
 function testXhtmlCodeSourceWorks() {
   var code = "function cmd_foo() {};";
   var xhtml = '<html xmlns="http://www.w3.org/1999/xhtml"><script>a = 1;</script><script class="commands">' + code + '</script></html>';
@@ -206,10 +191,8 @@ function testMixedCodeSourceCollectionWorks() {
   this.assert(codeSources[1].codeSections[2].length == 1);
 }
 
-function testLinkRelCodeSourceWorks() {
-  setupLrcsForTesting();
-
-  var LRCS = LinkRelCodeSource;
+function testLinkRelCodeServiceWorks() {
+  var LRCS = new LinkRelCodeService(new FakeAnnSvc());
   var url = "http://www.foo.com";
   var code = "function blah() {}";
 
@@ -237,7 +220,7 @@ function testLinkRelCodeSourceWorks() {
   this.assert(results[0].getCode() == code);
   this.assert(results[1].getCode() == moreCode);
 
-  // TODO: Make a LinkRelCodeSource object and ensure that it behaves
+  // TODO: Iterate through the collection and ensure that it behaves
   // how we think it should.
 
   results[0].remove();
