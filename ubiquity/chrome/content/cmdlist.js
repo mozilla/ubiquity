@@ -37,32 +37,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/globals.js");
-Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/builtinfactories.js");
 
 function onDocumentLoad() {
-  // TODO: This isn't implemented very well; we're essentially
-  // re-creating an environment for commands and re-fetching all
-  // command feeds from scratch just so we can see what commands are
-  // available, but we should really be able to get the browser
-  // window's command manager and simply ask it.
-
-  var msgService = new AlertMessageService();
-  var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(makeGlobals, window);
-  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
-  var cmdSource = new CommandSource(
-    codeSources,
-    msgService,
-    sandboxFactory
-  );
-  
   // get the list of suppressed commands.
   var SUPPRESSCOMMANDS="extensions.ubiquity.suppresscommands",
       suppressthese=Application.prefs.getValue(SUPPRESSCOMMANDS, '/');
@@ -70,19 +47,8 @@ function onDocumentLoad() {
   if (suppressthese.substr(-1)!=='/')
     suppressthese=suppressthese+'/';
 
-  // Number of times we'll update the commands before we assume that
-  // all command feeds have been retrieved.
-  var timesLeftToUpdate = 10;
-  // Amount of time in milliseconds that we wait between asking our
-  // command source for commands again.
-  var updateDelay = 2000;
-
   function updateCommands() {
-    timesLeftToUpdate--;
-    if (!timesLeftToUpdate)
-      return;
-
-    cmdSource.refresh();
+    var cmdSource = UbiquitySetup.createServices().commandSource;
 
     // Dynamically generate entries for undocumented commands.
     var cmdsChanged = false;
@@ -137,9 +103,6 @@ function onDocumentLoad() {
 
     // TODO: Remove any entries that no longer exist.
 
-    if (cmdsChanged)
-      sortCommandsBy(sortKey);
-
     cmdList.find('.activebox').bind('change',function() {
       // update the preferences, when the user toggles the active status of a command
       var name=$(this).parents('li.command').find('span.name').text();
@@ -153,18 +116,19 @@ function onDocumentLoad() {
       // save the preference
       Application.prefs.setValue(SUPPRESSCOMMANDS, suppressthese);
     });
-
-    window.setTimeout(updateCommands, updateDelay);
   }
 
   var sortKey = $("#sortby").val();
 
-  $("#sortby").change(function() {
+  function doSort() {
     sortKey = $("#sortby").val();
     sortCommandsBy(sortKey);
-  });
+  }
+
+  $("#sortby").change(doSort);
 
   updateCommands();
+  doSort();
 }
 
 function formatCommandAuthor(authorData) {

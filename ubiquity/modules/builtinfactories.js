@@ -150,7 +150,8 @@ let UbiquitySetup = {
 
       cmdSource.refresh();
 
-      gServices = {commandManager: cmdMan,
+      gServices = {commandSource: cmdSource,
+                   commandManager: cmdMan,
                    commandSuggester: cmdSugg,
                    messageService: msgService};
     }
