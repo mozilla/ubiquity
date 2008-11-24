@@ -51,7 +51,7 @@ const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 // TODO: This class isn't actually a code source, it's a collection that
 // yields a code source for every currently-subscribed feed.
-function LinkRelCodeSource(window) {
+function LinkRelCodeSource() {
   if (LinkRelCodeSource.__singleton)
     return LinkRelCodeSource.__singleton;
 
