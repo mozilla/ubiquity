@@ -106,17 +106,14 @@ function debugSuggestionList( list ) {
 }
 
 function setupLrcsForTesting() {
-  var oldInstall = LinkRelCodeSource.__install;
   var oldGetAnnSvc = LinkRelCodeSource.__getAnnSvc;
   var annSvc = new FakeAnnSvc();
 
-  LinkRelCodeSource.__install = function() {};
   LinkRelCodeSource.__getAnnSvc = function() {
     return annSvc;
   };
 
   function teardown() {
-    LinkRelCodeSource.__install = oldInstall;
     LinkRelCodeSource.__getAnnSvc = oldGetAnnSvc;
   }
 

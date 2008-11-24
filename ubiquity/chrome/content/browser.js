@@ -42,26 +42,24 @@
 var gUbiquity = null;
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/globals.js");
-Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/parser/parser.js");
-Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
-Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
-Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 
 function ubiquitySetup()
 {
-  UbiquitySetup.installDefaults(UbiquityGlobals);
+  var jsm = {};
+  Components.utils.import("resource://ubiquity-modules/globals.js",
+                          jsm);
+  Components.utils.import("resource://ubiquity-modules/builtinfactories.js",
+                          jsm);
+
+  var services = jsm.UbiquitySetup.createServices();
+  jsm.UbiquitySetup.setupWindow(window);
 
   //install SkinInstaller
   var skinInstaller = new SkinInstaller();
 
   var previewIframe = document.getElementById("cmd-preview");
-  var previewBlock = previewIframe.contentDocument.getElementById("ubiquity-preview");
+  var previewBlock = previewIframe.contentDocument
+                     .getElementById("ubiquity-preview");
 
   function onDomChange() {
     jQuery(previewIframe.contentDocument).find('img').each(function() {
@@ -79,45 +77,21 @@ function ubiquitySetup()
                                                  onDomChange,
                                                  false);
 
-  var msgService = new CompositeMessageService();
-
-  msgService.add(new AlertMessageService());
-  msgService.add(new ErrorConsoleMessageService());
-
-  var makeGlobals = makeBuiltinGlobalsMaker(msgService, UbiquityGlobals);
-  var sandboxFactory = new SandboxFactory(makeGlobals, window);
-  var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
-
-  var cmdSource = new CommandSource(
-    codeSources,
-    msgService,
-    sandboxFactory
-  );
-
-  var nlParser = NLParser.makeParserForLanguage(
-    UbiquityGlobals.languageCode,
-    [],
-    []
-  );
-
-  var cmdMan = new CommandManager(cmdSource, msgService, nlParser);
-
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("contentAreaContextMenu"),
     document.getElementById("ubiquity-menupopup"),
     document.getElementById("ubiquity-menu"),
     document.getElementById("ubiquity-separator"),
-    makeDefaultCommandSuggester(cmdMan)
+    services.commandSuggester
   );
 
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
-    cmdMan,
+    services.commandManager,
     previewBlock
   );
-  gUbiquity.setLocalizedDefaults(UbiquityGlobals.languageCode);
-  cmdSource.refresh();
+  gUbiquity.setLocalizedDefaults(jsm.UbiquityGlobals.languageCode);
 }
 
 function ubiquityTeardown()
@@ -127,7 +101,6 @@ function ubiquityTeardown()
 
 function ubiquityKeydown(aEvent)
 {
-
   const KEYCODE_PREF ="extensions.ubiquity.keycode";
   const KEYMODIFIER_PREF = "extensions.ubiquity.keymodifier";
   var UBIQUITY_KEYMODIFIER = null;

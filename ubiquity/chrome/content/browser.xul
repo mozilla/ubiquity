@@ -23,15 +23,11 @@
   sss.loadAndRegisterSheet(ios.newURI(uri, null, null), sss.USER_SHEET);
   </script>
   <script type="application/javascript;version=1.7"
-          src="resource://ubiquity-scripts/template.js"/>
-  <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/ubiquity.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/popupmenu.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/skin_installer.js"/>
-  <script type="application/javascript;version=1.7"
-          src="chrome://ubiquity/content/builtinfactories.js"/>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/browser.js"/>
   <popupset id="mainPopupSet">

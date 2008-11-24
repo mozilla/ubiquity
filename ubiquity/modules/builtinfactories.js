@@ -36,6 +36,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+EXPORTED_SYMBOLS = ["UbiquitySetup"];
+
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity-modules/msgservice.js");
+Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity-modules/prefcommands.js");
+Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
+Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity-modules/globals.js");
+
+let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                  .getService(Components.interfaces.fuelIApplication);
+
+let gServices;
+
 let UbiquitySetup = {
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
@@ -103,10 +121,48 @@ let UbiquitySetup = {
     return false;
   },
 
-  installDefaults: function installDefaults(ubiquityGlobals) {
-    if (ubiquityGlobals.wereDefaultsInstalled)
-      return;
+  createServices: function createServices() {
+    if (!gServices) {
+      this.__installDefaults();
+      var msgService = new CompositeMessageService();
 
+      msgService.add(new AlertMessageService());
+      msgService.add(new ErrorConsoleMessageService());
+
+      var makeGlobals = makeBuiltinGlobalsMaker(msgService);
+      var sandboxFactory = new SandboxFactory(makeGlobals);
+      var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode);
+
+      var cmdSource = new CommandSource(
+        codeSources,
+        msgService,
+        sandboxFactory
+      );
+
+      var nlParser = NLParser.makeParserForLanguage(
+        UbiquityGlobals.languageCode,
+        [],
+        []
+      );
+
+      var cmdMan = new CommandManager(cmdSource, msgService, nlParser);
+      var cmdSugg = makeDefaultCommandSuggester(cmdMan);
+
+      cmdSource.refresh();
+
+      gServices = {commandManager: cmdMan,
+                   commandSuggester: cmdSugg,
+                   messageService: msgService};
+    }
+
+    return gServices;
+  },
+
+  setupWindow: function setupWindow(window) {
+    LinkRelCodeSource.installToWindow(window);
+  },
+
+  __installDefaults: function installDefaults() {
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
@@ -119,32 +175,38 @@ let UbiquitySetup = {
     LinkRelCodeSource.installDefaults(baseUri,
                                       baseLocalUri,
                                       this.STANDARD_FEEDS);
-
-    ubiquityGlobals.wereDefaultsInstalled = true;
   }
 };
 
-function makeBuiltinGlobalsMaker(msgService, ubiquityGlobals) {
-  var windowGlobals = {};
+function makeBuiltinGlobalsMaker(msgService) {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                     .getService(Ci.nsIAppShellService)
+                     .hiddenDOMWindow;
+
+  var uris = ["resource://ubiquity-scripts/jquery.js",
+              "resource://ubiquity-scripts/template.js"];
+
+  for (var i = 0; i < uris.length; i++) {
+    hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+                .getService(Components.interfaces.mozIJSSubScriptLoader)
+                .loadSubScript(uris[i]);
+  }
 
   function makeGlobals(codeSource) {
     var id = codeSource.id;
 
-    if (!(id in windowGlobals))
-      windowGlobals[id] = {};
-
     return {
-      XPathResult: XPathResult,
-      XMLHttpRequest: XMLHttpRequest,
-      jQuery: jQuery,
-      Template: TrimPath,
+      XPathResult: hiddenWindow.XPathResult,
+      XMLHttpRequest: hiddenWindow.XMLHttpRequest,
+      jQuery: hiddenWindow.jQuery,
+      Template: hiddenWindow.TrimPath,
       Application: Application,
       Components: Components,
-      window: window,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
-      windowGlobals: windowGlobals[id],
-      globals: ubiquityGlobals.getForId(id),
+      globals: UbiquityGlobals.getForId(id),
       displayMessage: function() {
         msgService.displayMessage.apply(msgService, arguments);
       }
@@ -168,7 +230,8 @@ function makeBuiltinCodeSources(languageCode) {
     new LocalUriCodeSource(baseChromeUri + "onstartup.js")
   ];
   var footerCodeSources = [
-    new LocalUriCodeSource(baseChromeUri + "final.js")
+// TODO: Resolve this
+//    new LocalUriCodeSource(baseChromeUri + "final.js")
   ];
 
   if (languageCode == "jp") {
@@ -187,7 +250,7 @@ function makeBuiltinCodeSources(languageCode) {
 
   bodyCodeSources = new CompositeCollection([
     new IterableCollection(bodyCodeSources),
-    new LinkRelCodeSource(window)
+    new LinkRelCodeSource()
   ]);
 
   return new MixedCodeSourceCollection(

@@ -55,8 +55,6 @@ function LinkRelCodeSource(window) {
   if (LinkRelCodeSource.__singleton)
     return LinkRelCodeSource.__singleton;
 
-  LinkRelCodeSource.__install(window);
-
   this._sources = {};
 
   this._updateSourceList = function LRCS_updateSourceList() {
@@ -237,7 +235,7 @@ LinkRelCodeSource.installDefaults = function LRCS_installDefaults(baseUri,
   }
 };
 
-LinkRelCodeSource.__install = function LRCS_install(window) {
+LinkRelCodeSource.installToWindow = function LRCS_install(window) {
   function showNotification(targetDoc, commandsUrl, mimetype) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
@@ -305,7 +303,7 @@ LinkRelCodeSource.__install = function LRCS_install(window) {
           }
 
           if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
-            jQuery.ajax({url: commandsUrl,
+            window.jQuery.ajax({url: commandsUrl,
                          dataType: "text",
                          success: onSuccess});
           } else

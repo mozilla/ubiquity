@@ -36,7 +36,11 @@
 
 EXPORTED_SYMBOLS = ["SandboxFactory"];
 
+var defaultTarget = this;
+
 function SandboxFactory(globals, target) {
+  if (typeof(target) == "undefined")
+    target = defaultTarget;
   this._target = target;
 
   if (globals == undefined)
