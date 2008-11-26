@@ -1425,7 +1425,7 @@ function testUtilsTrim() {
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
 
-function getUbiquityComponent() {
+function getUbiquityComponent(test) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
   var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
@@ -1433,14 +1433,14 @@ function getUbiquityComponent() {
   if (typeof(ubiquity) == "undefined")
     // Right now nsUbiquity is an optional component, and if
     // it doesn't exist, let's just skip this test.
-    throw new this.SkipTestError();
+    throw new test.SkipTestError();
 
   ubiquity = ubiquity.getService();
   return ubiquity.QueryInterface(Ci.nsIUbiquity);
 }
 
 function testUbiquityComponent() {
-  var ubiquity = getUbiquityComponent();
+  var ubiquity = getUbiquityComponent(this);
   var sandbox = Components.utils.Sandbox("http://www.foo.com");
   ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, "1.8",
                          sandbox);
@@ -1467,7 +1467,7 @@ function testUbiquityComponent() {
 }
 
 function testUbiquityComponentAcceptsJsVersion() {
-  var ubiquity = getUbiquityComponent();
+  var ubiquity = getUbiquityComponent(this);
   var sandbox = Components.utils.Sandbox("http://www.foo.com");
   var wasExceptionThrown = false;
 
