@@ -41,7 +41,7 @@ Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/linkrel_codesvc.js");
 Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 Components.utils.import("resource://ubiquity-modules/localeutils.js");

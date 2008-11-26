@@ -40,7 +40,7 @@ EXPORTED_SYMBOLS = ["UbiquitySetup"];
 
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/linkrel_codesvc.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
