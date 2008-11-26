@@ -88,6 +88,27 @@ TestCase.prototype = {
     }
   },
 
+  assertRaisesMessage : function(callback, message) {
+    let wasExceptionThrown = false;
+
+    try {
+      callback();
+    } catch (e) {
+      wasExceptionThrown = true;
+      if (e.message != message) {
+        throw new AssertionError(("Exception thrown but message '" +
+                                  e.message + "' is not equal to '" +
+                                  message + "'"),
+                                 Components.stack.caller.filename,
+                                 Components.stack.caller.lineNumber);
+      }
+    }
+    if (!wasExceptionThrown)
+      throw new AssertionError("No exception was thrown",
+                               Components.stack.caller.filename,
+                               Components.stack.caller.lineNumber);
+  },
+
   teardown : function() {
     for (var i = 0; i < this.__teardownFunctions.length; i++)
       this.__teardownFunctions[i]();
