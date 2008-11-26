@@ -38,7 +38,6 @@
 
 EXPORTED_SYMBOLS = ["NLParser"];
 
-Components.utils.import("resource://ubiquity-modules/globals.js");
 Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
 Components.utils.import("resource://ubiquity-modules/Observers.js");
 
@@ -92,8 +91,6 @@ NLParser.Parser = function(verbList, nounList, languagePlugin,
 NLParser.Parser.prototype = {
   getSelectionObject: function(context) {
     var selection = this._ContextUtils.getSelection(context);
-    if (!selection && UbiquityGlobals.lastCmdResult)
-      selection = UbiquityGlobals.lastCmdResult;
     var htmlSelection = this._ContextUtils.getHtmlSelection(context);
     if (!htmlSelection && selection)
       htmlSelection = selection;

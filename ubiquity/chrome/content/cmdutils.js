@@ -316,6 +316,9 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
 };
 
 CmdUtils.setLastResult = function setLastResult( result ) {
+  // TODO: This function was used for command piping, which has been
+  // removed for the time being; we should probably consider removing this
+  // function and anything that uses it.
   globals.lastCmdResult = result;
 };
 

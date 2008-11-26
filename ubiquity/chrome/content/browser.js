@@ -46,8 +46,6 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 function ubiquitySetup()
 {
   var jsm = {};
-  Components.utils.import("resource://ubiquity-modules/globals.js",
-                          jsm);
   Components.utils.import("resource://ubiquity-modules/builtinfactories.js",
                           jsm);
   Components.utils.import("resource://ubiquity-modules/parser/parser.js",
@@ -63,7 +61,7 @@ function ubiquitySetup()
   jsm.UbiquitySetup.setupWindow(window);
 
   var nlParser = jsm.NLParser.makeParserForLanguage(
-    jsm.UbiquityGlobals.languageCode,
+    jsm.UbiquitySetup.languageCode,
     [],
     []
   );
@@ -110,7 +108,7 @@ function ubiquitySetup()
     cmdMan,
     previewBlock
   );
-  gUbiquity.setLocalizedDefaults(jsm.UbiquityGlobals.languageCode);
+  gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
 }
 
 function ubiquityTeardown()

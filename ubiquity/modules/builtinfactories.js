@@ -43,7 +43,6 @@ Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/globals.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
 Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 
@@ -134,7 +133,7 @@ let UbiquitySetup = {
 
       var makeGlobals = makeBuiltinGlobalsMaker(msgService);
       var sandboxFactory = new SandboxFactory(makeGlobals);
-      var codeSources = makeBuiltinCodeSources(UbiquityGlobals.languageCode,
+      var codeSources = makeBuiltinCodeSources(this.languageCode,
                                                linkRelCodeService);
 
       var cmdSource = new CommandSource(
@@ -155,6 +154,13 @@ let UbiquitySetup = {
 
   setupWindow: function setupWindow(window) {
     gServices.linkRelCodeService.installToWindow(window);
+  },
+
+  get languageCode() {
+    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                .getService(Components.interfaces.nsIPrefBranch);
+    var lang = prefs.getCharPref("extensions.ubiquity.language");
+    return lang;
   },
 
   __installDefaults: function installDefaults(linkRelCodeService) {
@@ -189,8 +195,13 @@ function makeBuiltinGlobalsMaker(msgService) {
                 .loadSubScript(uris[i]);
   }
 
+  var globalObjects = {};
+
   function makeGlobals(codeSource) {
     var id = codeSource.id;
+
+    if (!(id in globalObjects))
+      globalObjects[id] = {};
 
     return {
       XPathResult: hiddenWindow.XPathResult,
@@ -201,7 +212,7 @@ function makeBuiltinGlobalsMaker(msgService) {
       Components: Components,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
-      globals: UbiquityGlobals.getForId(id),
+      globals: globalObjects[id],
       displayMessage: function() {
         msgService.displayMessage.apply(msgService, arguments);
       }
