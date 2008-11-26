@@ -153,6 +153,8 @@ Ubiquity.prototype = {
   },
 
   __updatePreview: function __updatePreview() {
+    var self = this;
+
     if (this.__previewBlock) {
       var input = this.__textBox.value;
       if (input != this.__lastValue) {
