@@ -39,7 +39,6 @@
 EXPORTED_SYMBOLS = ["NLParser"];
 
 Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
-Components.utils.import("resource://ubiquity-modules/Observers.js");
 
 var NLParser = { MAX_SUGGESTIONS: 5};
 
@@ -185,7 +184,7 @@ NLParser.Parser.prototype = {
     this._suggestionMemory.remember(inputVerb, chosenVerb);
   },
 
-  updateSuggestionList: function( query, context ) {
+  updateSuggestionList: function( query, context, asyncSuggestionCb ) {
     var nounType, verb;
     var newSuggs = [];
     var selObj = this.getSelectionObject(context);
@@ -200,7 +199,8 @@ NLParser.Parser.prototype = {
 	query,
 	this._nounTypeList,
 	this._verbList,
-	selObj
+	selObj,
+        asyncSuggestionCb
       );
       // noun-first matches on input
       if (newSuggs.length == 0 ){
@@ -434,7 +434,8 @@ NLParser.ParsedSentence.prototype = {
 };
 
 NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj,
-                                            matchScore, parserPlugin) {
+                                            matchScore, parserPlugin,
+                                            asyncSuggestionCb) {
   /*This is a partially parsed sentence.
    * What that means is that we've decided what the verb is,
    * and we've assigned all the words of the input to one of the arguments.
@@ -444,6 +445,7 @@ NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj,
    * sentences can produce several completely-parsed sentences, in which
    * final values for all arguments are specified.
    */
+  this._asyncSuggestionCb = asyncSuggestionCb;
   this._parserPlugin = parserPlugin;
   this._verb = verb;
   this._argStrings = argStrings;
@@ -495,8 +497,9 @@ NLParser.PartiallyParsedSentence.prototype = {
       // Callback function for asynchronously generated suggestions:
       let callback = function(newSugg) {
         self.addArgumentSuggestion(argName, newSugg);
-	// send a notifcation to let the UI know to update the suggestion list
-	Observers.notify(self, "ubiq-suggestions-updated", "");
+        // Call our asynchronous suggestion callback.
+        if (self._asyncSuggestionCb)
+          self._asyncSuggestionCb();
       };
       let suggestions = argument.type.suggest(text, html, callback);
       for each( let argSugg in suggestions) {

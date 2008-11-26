@@ -76,11 +76,6 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
                            function(event) { self.__onBlur(event); },
                            false);
 
-  var ob = {};
-  Components.utils.import("resource://ubiquity-modules/Observers.js", ob);
-  ob.Observers.add(function() {self.__onSuggestionsUpdated();},
-		   "ubiq-suggestions-updated");
-
   this.__resetPreview();
 }
 
@@ -169,7 +164,8 @@ Ubiquity.prototype = {
           wasPreviewShown = this.__cmdManager.updateInput(
             input,
             this.__makeContext(),
-            this.__previewBlock
+            this.__previewBlock,
+            function() {self.__onSuggestionsUpdated();}
           );
         if (!wasPreviewShown) {
 	  this.__resetPreview();

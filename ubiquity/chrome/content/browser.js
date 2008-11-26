@@ -69,7 +69,6 @@ function ubiquitySetup()
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
                                       nlParser);
-  var cmdSugg = jsm.makeDefaultCommandSuggester(cmdMan);
 
   //install SkinInstaller
   var skinInstaller = new SkinInstaller();
@@ -99,7 +98,7 @@ function ubiquitySetup()
     document.getElementById("ubiquity-menupopup"),
     document.getElementById("ubiquity-menu"),
     document.getElementById("ubiquity-separator"),
-    cmdSugg
+    cmdMan.makeCommandSuggester()
   );
 
   gUbiquity = new Ubiquity(

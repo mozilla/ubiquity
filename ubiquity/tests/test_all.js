@@ -662,7 +662,7 @@ function DISABLED_testCmdManagerSuggestsForEmptyInput() {
     return [nounTypeOne, nounTypeTwo];
   };
   var cmdMan = new CommandManager(fakeSource, null, LANG);
-  var getAC = makeDefaultCommandSuggester(cmdMan);
+  var getAC = cmdMan.makeCommandSuggester();
   var suggDict = getAC({textSelection:"tree"});
   this.assert( suggDict["Cmd_one"], "cmd one should be in" );
   this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
@@ -1232,7 +1232,6 @@ function DISABLED_testTextAndHtmlDifferent() {
 }
 
 function testAsyncNounSuggestions() {
-  Components.utils.import("resource://ubiquity-modules/Observers.js");
   var noun_type_slowness = {
     _name: "slowness",
     suggest: function( text, html, callback ) {
@@ -1261,14 +1260,13 @@ function testAsyncNounSuggestions() {
   // register an observer to make sure it gets notified when the
   // noun produces suggestions asynchronously.
   var observerCalled = false;
-  var observe = function( subject, topic, data ) {
+  var observe = function() {
       observerCalled = true;
   };
-  Observers.add(observe, "ubiq-suggestions-updated");
 
   var parser = makeTestParser(LANG, [cmd_slow],
 			      [noun_type_slowness]);
-  parser.updateSuggestionList( "dostuff hello", fakeContext );
+  parser.updateSuggestionList( "dostuff hello", fakeContext, observe );
   var comps = parser.getSuggestionList();
   var assert = this.assert;
   var assertDirObj = function( completion, expected) {
@@ -1291,7 +1289,7 @@ function testAsyncNounSuggestions() {
   // Now try one where the noun originally suggests nothing, but then comes
   // up with some async suggestions.  What happens?
   observerCalled = false;
-  parser.updateSuggestionList("dostuff halifax", fakeContext);
+  parser.updateSuggestionList("dostuff halifax", fakeContext, observe);
   comps = parser.getSuggestionList();
   this.assert( comps.length == 0, "there should be 0 completions.");
   // here comes the async suggestion:

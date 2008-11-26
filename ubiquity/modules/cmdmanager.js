@@ -37,8 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["CommandManager",
-                        "makeDefaultCommandSuggester"];
+var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
@@ -147,12 +146,13 @@ CommandManager.prototype = {
     return this._renderPreview(context, previewBlock);
   },
 
-  updateInput : function CM_updateInput(input, context, previewBlock) {
+  updateInput : function CM_updateInput(input, context, previewBlock,
+                                        asyncSuggestionCb) {
     /* Return true if we created any suggestions, false if we didn't
      * or if we had nowhere to put them.
      */
     this.__lastInput = input;
-    this.__nlParser.updateSuggestionList(input, context);
+    this.__nlParser.updateSuggestionList(input, context, asyncSuggestionCb);
     this.__hilitedSuggestion = 0;
     if ( this.__nlParser.getNumSuggestions() == 0 )
       return false;
@@ -192,8 +192,9 @@ CommandManager.prototype = {
     return (this.__nlParser.getNumSuggestions() > 0);
   },
 
-  getSuggestionListNoInput: function CM_getSuggestionListNoInput( context ) {
-    this.__nlParser.updateSuggestionList("", context);
+  getSuggestionListNoInput: function CM_getSuggListNoInput(context,
+                                                           asyncSuggestionCb) {
+    this.__nlParser.updateSuggestionList("", context, asyncSuggestionCb);
     return this.__nlParser.getSuggestionList();
   },
 
@@ -217,28 +218,34 @@ CommandManager.prototype = {
 
   setDisabledStatus : function CM_setDisabledStatus(){
     return this.__cmdSource.setDisabledStatus();
+  },
+
+  makeCommandSuggester : function CM_makeCommandSuggester() {
+    var self = this;
+
+    function getAvailableCommands(context) {
+      self.refresh();
+      var suggestions = self.getSuggestionListNoInput( context );
+
+      var retVal = {};
+      for each (let parsedSentence in suggestions) {
+        let sentenceClosure = parsedSentence;
+        let titleCasedName = parsedSentence._verb._name;
+        titleCasedName = (titleCasedName[0].toUpperCase() +
+                          titleCasedName.slice(1));
+        retVal[titleCasedName] = function execute() {
+	  sentenceClosure.execute(context);
+        };
+
+        let suggestedCommand = self.__cmdSource.getCommand(
+          parsedSentence._verb._name
+        );
+        if(suggestedCommand.icon)
+          retVal[titleCasedName].icon = suggestedCommand.icon;
+      }
+      return retVal;
+    }
+
+    return getAvailableCommands;
   }
 };
-
-function makeDefaultCommandSuggester(commandManager) {
-
-  function getAvailableCommands(context) {
-    commandManager.refresh();
-    var suggestions = commandManager.getSuggestionListNoInput( context );
-    var retVal = {};
-    for each (let parsedSentence in suggestions) {
-      let sentenceClosure = parsedSentence;
-      let titleCasedName = parsedSentence._verb._name;
-      titleCasedName = titleCasedName[0].toUpperCase() + titleCasedName.slice(1);
-      retVal[titleCasedName] = function execute() {
-	sentenceClosure.execute(context);
-      };
-
-      let suggestedCommand = commandManager.__cmdSource.getCommand(parsedSentence._verb._name);
-      if(suggestedCommand.icon)
-        retVal[titleCasedName].icon = suggestedCommand.icon;
-    }
-    return retVal;
-  }
-  return getAvailableCommands;
-}
