@@ -1,6 +1,6 @@
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/builtinfactories.js");
 
 var Editor = {
 
@@ -162,9 +162,10 @@ function saveAs() {
 
       saveTextToFile(editor.editor.editor.getCode(), fp.file);
 
-      LinkRelCodeSource.addMarkedPage({url: fp.fileURL.spec,
-                                       sourceCode: "",
-                                       canUpdate: true});
+      let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
+      linkRelCodeSvc.addMarkedPage({url: fp.fileURL.spec,
+                                    sourceCode: "",
+                                    canUpdate: true});
 
       editor.editor.setCode("");
       PrefCommands.setCode("");

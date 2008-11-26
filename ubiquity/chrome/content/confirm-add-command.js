@@ -38,7 +38,7 @@
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/builtinfactories.js");
 
 function getUrlParams() {
   var urlFragments = document.URL.split("?")[1];
@@ -69,9 +69,10 @@ function onSubmit() {
   var code = $("#sourceCode").text();
   var canUpdate = $("#autoupdate").attr("checked") ? true : false;
   if (code) {
-    LinkRelCodeSource.addMarkedPage({url: gCommandFeedInfo.url,
-                                     sourceCode: code,
-                                     canUpdate: canUpdate});
+    var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
+    linkRelCodeSvc.addMarkedPage({url: gCommandFeedInfo.url,
+                                  sourceCode: code,
+                                  canUpdate: canUpdate});
     showConfirmation();
   }
 }
@@ -99,7 +100,8 @@ function fetchSource(uri, onSuccess) {
 }
 
 function onReady() {
-  if (LinkRelCodeSource.isMarkedPage(gCommandFeedInfo.url)) {
+  var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
+  if (linkRelCodeSvc.isMarkedPage(gCommandFeedInfo.url)) {
     if (gCommandFeedInfo.updateCode)
       // TODO: Also check to see if updateCode is different from
       // the current code.

@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
+Components.utils.import("resource://ubiquity-modules/builtinfactories.js");
 
 function makeRemover(element, info) {
   function onSlideDown() {
@@ -183,7 +183,8 @@ function onReady() {
   PrefKeys.onLoad();
   showBugRelatedAlerts();
 
-  let markedPages = LinkRelCodeSource.getMarkedPages();
+  let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
+  let markedPages = linkRelCodeSvc.getMarkedPages();
   for (let i = 0; i < markedPages.length; i++)
     $("#command-feeds").append(makeFeedListElement(markedPages[i],
                                                    "unsubscribe",
@@ -191,7 +192,7 @@ function onReady() {
   if (!$("#command-feeds").text())
     $("#command-feeds-div").hide();
 
-  let removedPages = LinkRelCodeSource.getRemovedPages();
+  let removedPages = linkRelCodeSvc.getRemovedPages();
   for (i = 0; i < removedPages.length; i++)
     $("#command-feed-graveyard").append(makeFeedListElement(removedPages[i],
                                                             "resubscribe",
