@@ -224,33 +224,36 @@ function makeBuiltinGlobalsMaker(msgService) {
 
 function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
   var baseUri = UbiquitySetup.getBaseUri();
-  var baseChromeUri = baseUri + "chrome/content/";
-  var baseModulesUri = baseUri + "modules/";
+  var basePartsUri = baseUri + "feed-parts/";
   var baseScriptsUri = baseUri + "scripts/";
 
   var headerCodeSources = [
-    new LocalUriCodeSource(baseModulesUri + "utils.js"),
-    new LocalUriCodeSource(baseChromeUri + "cmdutils.js")
+    new LocalUriCodeSource(basePartsUri + "header/utils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js")
   ];
   var bodyCodeSources = [
-    new LocalUriCodeSource(baseChromeUri + "onstartup.js")
+    new LocalUriCodeSource(basePartsUri + "body/onstartup.js"),
+    new XhtmlCodeSource(PrefCommands)
   ];
   var footerCodeSources = [
 // TODO: Resolve this
-//    new LocalUriCodeSource(baseChromeUri + "final.js")
+//    new LocalUriCodeSource(basePartsUri + "footer/final.js")
   ];
 
   if (languageCode == "jp") {
-    headerCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/nountypes.js"));
-    bodyCodeSources.push(new LocalUriCodeSource(baseChromeUri + "nlparser/jp/builtincmds.js"));
+    headerCodeSources = headerCodeSources.concat([
+      new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
+    ]);
+    bodyCodeSources = bodyCodeSources.concat([
+      new LocalUriCodeSource(basePartsUri + "body/jp/builtincmds.js")
+    ]);
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
       new LocalUriCodeSource(baseScriptsUri + "date.js"),
-      new LocalUriCodeSource(baseChromeUri + "nlparser/en/nountypes.js")
+      new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")
     ]);
     bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(baseChromeUri + "builtincmds.js"),
-      new XhtmlCodeSource(PrefCommands)
+      new LocalUriCodeSource(basePartsUri + "body/en/builtincmds.js")
     ]);
   }
 
