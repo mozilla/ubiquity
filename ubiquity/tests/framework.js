@@ -51,9 +51,7 @@ function exportTests(obj) {
   obj.EXPORTED_SYMBOLS = exportedSymbols;
 }
 
-function AssertionError(message) {
-  this.message = message;
-}
+let AssertionError = Error;
 
 function TestCase(func) {
   this.name = func.name;
@@ -68,12 +66,26 @@ TestCase.prototype = {
 
   assertIsDefined : function(condition, msg) {
     if (condition == undefined)
-      throw new AssertionError(msg);
+      throw new AssertionError(msg,
+                               Components.stack.caller.filename,
+                               Components.stack.caller.lineNumber);
   },
 
   assert : function(condition, msg) {
     if (!condition)
-      throw new AssertionError(msg);
+      throw new AssertionError(msg,
+                               Components.stack.caller.filename,
+                               Components.stack.caller.lineNumber);
+  },
+
+  assertEquals : function(a, b, msg) {
+    if (!(a == b)) {
+      if (!msg)
+        msg = "'" + a + "' is not equal to '" + b + "'";
+      throw new AssertionError(msg,
+                               Components.stack.caller.filename,
+                               Components.stack.caller.lineNumber);
+    }
   },
 
   teardown : function() {
