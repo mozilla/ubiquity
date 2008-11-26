@@ -49,6 +49,7 @@ Components.utils.import("resource://ubiquity-modules/collection.js");
 
 Components.utils.import("resource://ubiquity-tests/framework.js");
 Components.utils.import("resource://ubiquity-tests/test_safebox.js");
+Components.utils.import("resource://ubiquity-tests/test_eventhub.js");
 Components.utils.import("resource://ubiquity-tests/test_suggestion_memory.js");
 
 var globalObj = this;
