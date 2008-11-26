@@ -44,7 +44,9 @@ Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
 Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 Components.utils.import("resource://ubiquity-modules/localeutils.js");
+Components.utils.import("resource://ubiquity-modules/collection.js");
 
 Components.utils.import("resource://ubiquity-tests/framework.js");
 Components.utils.import("resource://ubiquity-tests/test_safebox.js");

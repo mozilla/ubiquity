@@ -42,12 +42,10 @@ Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/linkrel_codesource.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/parser/parser.js");
-Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
-Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
 Components.utils.import("resource://ubiquity-modules/globals.js");
+Components.utils.import("resource://ubiquity-modules/collection.js");
+Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
@@ -145,20 +143,9 @@ let UbiquitySetup = {
         sandboxFactory
       );
 
-      var nlParser = NLParser.makeParserForLanguage(
-        UbiquityGlobals.languageCode,
-        [],
-        []
-      );
-
-      var cmdMan = new CommandManager(cmdSource, msgService, nlParser);
-      var cmdSugg = makeDefaultCommandSuggester(cmdMan);
-
       cmdSource.refresh();
 
       gServices = {commandSource: cmdSource,
-                   commandManager: cmdMan,
-                   commandSuggester: cmdSugg,
                    linkRelCodeService: linkRelCodeService,
                    messageService: msgService};
     }

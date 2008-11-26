@@ -50,9 +50,28 @@ function ubiquitySetup()
                           jsm);
   Components.utils.import("resource://ubiquity-modules/builtinfactories.js",
                           jsm);
+  Components.utils.import("resource://ubiquity-modules/parser/parser.js",
+                          jsm);
+  Components.utils.import("resource://ubiquity-modules/parser/locale_en.js",
+                          jsm);
+  Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js",
+                          jsm);
+  Components.utils.import("resource://ubiquity-modules/cmdmanager.js",
+                          jsm);
 
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
+
+  var nlParser = jsm.NLParser.makeParserForLanguage(
+    jsm.UbiquityGlobals.languageCode,
+    [],
+    []
+  );
+
+  var cmdMan = new jsm.CommandManager(services.commandSource,
+                                      services.messageService,
+                                      nlParser);
+  var cmdSugg = jsm.makeDefaultCommandSuggester(cmdMan);
 
   //install SkinInstaller
   var skinInstaller = new SkinInstaller();
@@ -82,13 +101,13 @@ function ubiquitySetup()
     document.getElementById("ubiquity-menupopup"),
     document.getElementById("ubiquity-menu"),
     document.getElementById("ubiquity-separator"),
-    services.commandSuggester
+    cmdSugg
   );
 
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
-    services.commandManager,
+    cmdMan,
     previewBlock
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquityGlobals.languageCode);
