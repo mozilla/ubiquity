@@ -40,13 +40,6 @@
 Components.utils.import("resource://ubiquity-modules/setup.js");
 
 function onDocumentLoad() {
-  // get the list of suppressed commands.
-  var SUPPRESSCOMMANDS="extensions.ubiquity.suppresscommands",
-      suppressthese=Application.prefs.getValue(SUPPRESSCOMMANDS, '/');
-  // Ensure that the list (of suppressed commands) ends with the separator character
-  if (suppressthese.substr(-1)!=='/')
-    suppressthese=suppressthese+'/';
-
   function updateCommands() {
     var cmdSource = UbiquitySetup.createServices().commandSource;
 
@@ -57,7 +50,7 @@ function onDocumentLoad() {
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.getCommand(cmdSource.commandNames[i].name);
       var cmdId = cmdSource.commandNames[i].id.replace(/ /g, "_");
-      var isEnabled=suppressthese.search('/'+cmd.name+'/')===-1;
+      var isEnabled = !cmd.disabled;
 
       if (cmdList.find('#' + cmdId).length == 0) {
         cmdsChanged = true;
@@ -103,19 +96,23 @@ function onDocumentLoad() {
 
     // TODO: Remove any entries that no longer exist.
 
-    cmdList.find('.activebox').bind('change',function() {
-      // update the preferences, when the user toggles the active status of a command
+    function onDisableOrEnableCmd() {
+      // update the preferences, when the user toggles the active
+      // status of a command
+
       var name=$(this).parents('li.command').find('span.name').text();
-      if (this.checked) {
-        // user has just made this command active, so remove it from the suppressed list
-        suppressthese=suppressthese.replace('/'+name+'/','/');
-      } else if (suppressthese.search('/'+name+'/')===-1) {
-        // user has just made this command inactive, so add it to the suppressed list, if it wasn't there already
-        suppressthese=suppressthese+name+'/';
-      }
-      // save the preference
-      Application.prefs.setValue(SUPPRESSCOMMANDS, suppressthese);
-    });
+      var cmdSource = UbiquitySetup.createServices().commandSource;
+      var cmd = cmdSource.getCommand(name);
+
+      if (this.checked)
+        // user has just made this command active.
+        cmd.disabled = false;
+      else
+        // user has just made this command inactive.
+        cmd.disabled = true;
+    }
+
+    cmdList.find('.activebox').bind('change', onDisableOrEnableCmd);
   }
 
   var sortKey = $("#sortby").val();

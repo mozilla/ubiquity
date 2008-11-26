@@ -216,10 +216,6 @@ CommandManager.prototype = {
     }
   },
 
-  setDisabledStatus : function CM_setDisabledStatus(){
-    return this.__cmdSource.setDisabledStatus();
-  },
-
   makeCommandSuggester : function CM_makeCommandSuggester() {
     var self = this;
 

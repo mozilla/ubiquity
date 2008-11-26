@@ -55,6 +55,7 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
   this._commands = [];
   this._codeCache = null;
   this._nounTypes = [];
+  this._disabledCommands = {};
   this.parser = null;
 }
 
@@ -87,6 +88,14 @@ CommandSource.prototype = {
 
     if (shouldLoadCommands)
       this._loadCommands();
+  },
+
+  _isCmdDisabled : function CS__isCmdDisabled(name) {
+    return this._disabledCommands[name];
+  },
+
+  _setCmdDisabled : function CS__setCmdDisabled(name, value) {
+    this._disabledCommands[name] = value;
   },
 
   _loadCommands : function CS__loadCommands() {
@@ -128,7 +137,8 @@ CommandSource.prototype = {
           sandbox.context = context;
           return cmdFunc(directObject, modifiers);
         },
-        disabled:false
+        get disabled() { return self._isCmdDisabled(cmdName); },
+        set disabled(value) { return self._setCmdDisabled(cmdName, value); }
       };
       // Attach optional metadata to command object if it exists
       if (cmdFunc.preview)
@@ -203,7 +213,6 @@ CommandSource.prototype = {
       this.parser.setCommandList(this._commands);
       this.parser.setNounList(this._nounTypes);
     }
-    this.setDisabledStatus();
   },
 
   getAllCommands: function CS_getAllCommands() {
@@ -222,29 +231,5 @@ CommandSource.prototype = {
       return this._commands[name];
     else
       return null;
-  },
-
-  setDisabledStatus: function CS_setDisabledStatus() {
-    try {
-      var Application = Components.classes["@mozilla.org/fuel/application;1"]
-                        .getService(Components.interfaces.fuelIApplication);
-    } catch (e) {
-      // We're in xpcshell, just assume we have no disabled commands
-      // for now.
-
-      // TODO: This should be cleaner; ideally, the specific place that
-      // we get out list of decoupled commands from should be decoupled
-      // from the code that actually disables the commands, so that
-      // we can easily unit test.
-      return;
-    }
-
-    var name,
-        suppressthese=Application.prefs.getValue("extensions.ubiquity.suppresscommands", '/');
-    if (suppressthese.substr(-1)!=='/')
-      suppressthese=suppressthese+'/';
-    for (name in this._commands)
-      this._commands[name].disabled=suppressthese.search('/'+name+'/')!==-1;
-    if (this.parser) this.parser.setCommandList(this._commands);
   }
 };

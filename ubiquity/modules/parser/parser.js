@@ -682,8 +682,9 @@ NLParser.Verb.prototype = {
     this._synonyms = cmd.synonyms;
     this.__defineGetter__("previewDelay",
                           function() { return cmd.previewDelay; });
+    this.__defineGetter__("disabled",
+                          function() { return cmd.disabled; });
     this._arguments = {};
-    this.disabled=cmd.disabled;
 
     // New-style API: command defines arguments dictionary
     if (cmd.arguments) {
