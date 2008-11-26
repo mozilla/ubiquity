@@ -40,8 +40,10 @@
 var EXPORTED_SYMBOLS = ["CommandSource"];
 
 Components.utils.import("resource://ubiquity-modules/collection.js");
+Components.utils.import("resource://ubiquity-modules/eventhub.js");
 
-function CommandSource(codeSources, messageService, sandboxFactory) {
+function CommandSource(codeSources, messageService, sandboxFactory,
+                       disabledCommands) {
   if (!codeSources.__iterator__) {
     if (codeSources.constructor.name == "Array")
       codeSources = new IterableCollection(codeSources);
@@ -49,13 +51,18 @@ function CommandSource(codeSources, messageService, sandboxFactory) {
       codeSources = new IterableCollection([codeSources]);
   }
 
+  if (!disabledCommands)
+    disabledCommands = {};
+
+  this._hub = new EventHub();
+  this._hub.attachMethods(this);
   this._sandboxFactory = sandboxFactory;
   this._codeSources = codeSources;
   this._messageService = messageService;
   this._commands = [];
   this._codeCache = null;
   this._nounTypes = [];
-  this._disabledCommands = {};
+  this._disabledCommands = disabledCommands;
   this.parser = null;
 }
 
@@ -95,7 +102,12 @@ CommandSource.prototype = {
   },
 
   _setCmdDisabled : function CS__setCmdDisabled(name, value) {
-    this._disabledCommands[name] = value;
+    if (this._disabledCommands[name] != value) {
+      this._disabledCommands[name] = value;
+      this._hub.notifyListeners("disabled-command-change",
+                                {name: name,
+                                 value: value});
+    }
   },
 
   _loadCommands : function CS__loadCommands() {

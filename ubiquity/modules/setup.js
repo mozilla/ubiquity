@@ -38,6 +38,7 @@
 
 EXPORTED_SYMBOLS = ["UbiquitySetup"];
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/linkrel_codesvc.js");
@@ -136,11 +137,18 @@ let UbiquitySetup = {
       var codeSources = makeBuiltinCodeSources(this.languageCode,
                                                linkRelCodeService);
 
+      var disabledStorage = new DisabledCmdStorage(
+        'extensions.ubiquity.disabledCommands'
+      );
+
       var cmdSource = new CommandSource(
         codeSources,
         msgService,
-        sandboxFactory
+        sandboxFactory,
+        disabledStorage.getDisabledCommands()
       );
+
+      disabledStorage.attach(cmdSource);
 
       cmdSource.refresh();
 
@@ -267,4 +275,23 @@ function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
     bodyCodeSources,
     new IterableCollection(footerCodeSources)
   );
+}
+
+function DisabledCmdStorage(prefName) {
+  let str = Application.prefs.getValue(prefName, '{}');
+  let disabledCommands = Utils.decodeJson(str);
+
+  this.getDisabledCommands = function getDisabledCommands() {
+    return disabledCommands;
+  };
+
+  function onDisableChange(eventName, value) {
+    disabledCommands[value.name] = value.value;
+    Application.prefs.setValue(prefName,
+                               Utils.encodeJson(disabledCommands));
+  };
+
+  this.attach = function attach(cmdSource) {
+    cmdSource.addListener('disabled-command-change', onDisableChange);
+  };
 }
