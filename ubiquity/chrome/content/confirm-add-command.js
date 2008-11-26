@@ -38,7 +38,7 @@
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/builtinfactories.js");
+Components.utils.import("resource://ubiquity-modules/setup.js");
 
 function getUrlParams() {
   var urlFragments = document.URL.split("?")[1];

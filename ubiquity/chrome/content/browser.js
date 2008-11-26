@@ -46,7 +46,7 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 function ubiquitySetup()
 {
   var jsm = {};
-  Components.utils.import("resource://ubiquity-modules/builtinfactories.js",
+  Components.utils.import("resource://ubiquity-modules/setup.js",
                           jsm);
   Components.utils.import("resource://ubiquity-modules/parser/parser.js",
                           jsm);
