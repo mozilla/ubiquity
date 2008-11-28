@@ -34,36 +34,23 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */ 
-
-var skins = {};
+ 
+var Cc = Components.classes;
+var Ci = Components.interfaces;
 
 function onDocumentLoad() {
-    
-  //Get the extension folder
-  var extension = "ubiquity@labs.mozilla.com";
-  var file = Components.classes["@mozilla.org/extensions/manager;1"]
-            .getService(Components.interfaces.nsIExtensionManager)
-            .getInstallLocation(extension)
-            .getItemFile(extension, "install.rdf")
-            .parent.directoryEntries;
-  // Get into chrome/skin/skins
-  // TODO: find a better way to navigate folders
-  var dirs = ['chrome','skin','skins'];
-  for(i in dirs) {
-  	while(file.hasMoreElements()){
-  	  var entry = file.getNext();
-  	  entry.QueryInterface(Components.interfaces.nsIFile);
-  	  if(entry.leafName == dirs[i]) {
-  	    file = entry.directoryEntries;
-  		  break;
-  	  }
-  	}
-  }
+  
+  var MY_ID = "ubiquity@labs.mozilla.com";
+  var em = Cc["@mozilla.org/extensions/manager;1"]
+                     .getService(Ci.nsIExtensionManager);
+  var file = em.getInstallLocation(MY_ID)
+                .getItemFile(MY_ID, "chrome/skin/skins/default.css")
+                .parent.directoryEntries;
+                
   // Find all skins in chrome/skin/skins (remote skins have been downloaded here)
   while(file.hasMoreElements()){
     var entry = file.getNext();
-    entry.QueryInterface(Components.interfaces.nsIFile);
-    
+    entry.QueryInterface(Ci.nsIFile);
     if(entry.isFile()){
       createSkinElement(entry);
     } 
@@ -74,21 +61,20 @@ function onDocumentLoad() {
   for(var i=0;i<localSkins.length;i++){
     if(localSkins[i] != ""){
       var url = Utils.url(localSkins[i]);
-      var file = url.QueryInterface(Components.interfaces.nsIFileURL)
+      var file = url.QueryInterface(Ci.nsIFileURL)
                     .file;
       createSkinElement(file);
     }
   }
 }
 
-
 //reads a local file and returns the contents as a string
 function readFile(file){
   
-  var istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-                          .createInstance(Components.interfaces.nsIFileInputStream);
+  var istream = Cc["@mozilla.org/network/file-input-stream;1"]
+                          .createInstance(Ci.nsIFileInputStream);
   istream.init(file, 0x01, 0444, 0);
-  istream.QueryInterface(Components.interfaces.nsILineInputStream);
+  istream.QueryInterface(Ci.nsILineInputStream);
 
   // read lines into array
   var line = {}, lines = [], hasmore;
@@ -109,8 +95,6 @@ function createSkinElement(file){
   var skinMeta = {};
   skinMeta.filename = file.leafName; 
   //get the path to the file
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
   var ios = Cc["@mozilla.org/network/io-service;1"]
                       .getService(Ci.nsIIOService);
   var url = ios.newFileURI(file);
@@ -128,8 +112,8 @@ function createSkinElement(file){
     }
   }
   
+  //extract the metadata
   if(foundMetaData){
-    
     for(var i=l; i<lines.length; i++){
       var line = jQuery.trim(lines[i]);
       if(line.indexOf("@") != -1){
@@ -137,68 +121,69 @@ function createSkinElement(file){
         var temp = line.substring(line.indexOf("@") + 1);
         var field = jQuery.trim(temp.substring( 0 , temp.indexOf(" ")));
         var value = jQuery.trim(temp.substring(temp.indexOf(" ") + 1));
-                
-        switch(field) {
-          case 'name':
-            skinMeta.name = value;
-            break;
-          case 'author':
-            skinMeta.author = value;
-            break;
-          case 'homepage':
-            skinMeta.homepage = value;
-            break;
-          case 'email':
-            skinMeta.email = value;
-            break
-          case 'license':
-            skinMeta.license = value;
-            break;
-        }
+        skinMeta[field] = value;
       }
 
       if(line.indexOf("=/skin=") != -1){
         break;
       }
     }
-        
-    
-    if(!skinMeta.name){
-      skinMeta.name = skinMeta.filename;
-    }
-    
-    //Make the current skin distinct
-    var currentSkin = Application.prefs.getValue("extensions.ubiquity.skin", "default");
-    var elementClass = (skinMeta.filepath == currentSkin) ? "command current-skin": "command";
-    
-    //TODO: Make everything optional
-    $('#skin-list').append(
-       '<li class="' + elementClass + '" id="skin_' + skinMeta.name + '">' +
-       '<a class="name" onClick="changeSkin(\''+ skinMeta.filepath +'\',\'' + skinMeta.name + '\');">' + 
-       ((elementClass != "command") ? skinMeta.name + " (current)" : skinMeta.name)+ '</a>' +
-       (skinMeta.author ? 
-       '<div class="light"><span class="author">by <a href="mailto:' + skinMeta.email + '">' + 
-       skinMeta.author  + '</a></span></div>' : "") +  
-       (skinMeta.license ? '<div class="light"><span class="license"> - licensed as ' + skinMeta.license + ' </span></div>' : '') 
-       + (skinMeta.homepage ? '<div class="homepage light"><a href="' + skinMeta.homepage  + '">' + skinMeta.homepage + 
-       '</a></div>' : "") + '</li>'
-     );
-
-  }else{
-     $('#skin-list').append(
-         '<li class="command" id="skin_' + skinMeta.filename + '">' +
-         '<a class="name" onClick="changeSkin(\''+ skinMeta.filepath +'\',\'' + skinMeta.filename + '\');">' + 
-         skinMeta.filename + '</a>' +
-         '</li>'
-      );
   }
+  
+  if(!skinMeta.name){
+    skinMeta.name = skinMeta.filename;
+  }
+  
+  //TODO: Find a better way to have unique ids
+  // +, # and some other characters will still screw up the id
+  var skinId = ("skin_" + skinMeta.name).replace(/ /g, "_").replace(/\./g, "");
+  
+  $('#skin-list').append(
+     '<div class="command" id="' + skinId + '">'+
+     '<input type="radio" name="skins" id="rad_'+ skinId +'"></input>' +
+     '<label class="label light" for="rad_'+  skinId + '">' +
+     '<a class="name"/>' + 
+     '<br/><span class="author"/><span class="license"/></label>' +  
+     '<div class="email light"></div>' +
+     '<div class="homepage light"></div></div>'
+   );
+   
+   var skinEl = $('#skin-list').find('#' + skinId);
+   
+   //Add the name and onclick event
+   skinEl.find('.name').text(skinMeta.name);
+   skinEl.find('.label').attr("onclick", "changeSkin('"+ skinMeta.filepath + "','" + skinMeta.name + "');");
+   
+   //Make the current skin distinct
+   var currentSkin = Application.prefs.getValue("extensions.ubiquity.skin", "default");
+   if(skinMeta.filepath == currentSkin){
+     skinEl.find('#rad_' + skinId).attr('checked','true');
+   }
+   
+   if(skinMeta.author) {
+     skinEl.find('.author').text("by " + skinMeta.author);
+   }
+   
+   if(skinMeta.email){
+     skinEl.find('.email').html("email: <a href='mailto:" + skinMeta.email  + 
+                                    "'>" + skinMeta.email + "</a>");
+   }
+   
+   if(skinMeta.license){
+     skinEl.find('.license').text(" licensed as " + skinMeta.license);
+   }
+   
+   if(skinMeta.homepage){
+     skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  + 
+                                    "'>" + skinMeta.homepage + "</a>");
+   }
 }
 
 function changeSkin(newSkinPath, newSkinName) {
   
   try {
-    var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
-      .getService(Components.interfaces.nsIStyleSheetService);
+    var sss = Cc["@mozilla.org/content/style-sheet-service;1"]
+      .getService(Ci.nsIStyleSheetService);
     try {
       // Remove the previous skin CSS
       var oldBrowserCss = Utils.url(Application.prefs.getValue("extensions.ubiquity.skin", "default"));
