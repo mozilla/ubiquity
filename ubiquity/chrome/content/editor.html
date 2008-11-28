@@ -1,42 +1,51 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html>
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <title>Ubiquity Command Editor</title>
+  <link rel="stylesheet" href="web-content.css" type="text/css">
+  <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
   <script type="text/javascript"
           src="resource://ubiquity-scripts/jquery.js"></script>
   <script type="application/javascript;version=1.7"
           src="editor.js"></script>
   <script type="application/javascript;version=1.7"
           src="resource://ubiquity-scripts/codemirror/js/codemirror.js"></script>
-  <script type="text/javascript"> 
-   function initialize() { 
-       document.getElementById('editor').value = PrefCommands.getCode(); 
-   } 
-   var file; 
-   var lastModifiedTime = 0; 
-   function launch() { 
-       file = Editor.launchEditor(document.getElementById('editor').editor.editor.getCode()); 
-       if(file != null && file.exists()){ 
-          lastModifiedTime = file.lastModifiedTime; 
-          setTimeout(watchFile, 500) 
-       } 
-   } 
-   function watchFile(){ 
-      if(file != null && file.exists()){ 
+  <script type="text/javascript">
+    const PREF_ENABLE_HIGHLIGHTING = "extensions.ubiquity.editor_highlighting";
+    var file; 
+    var lastModifiedTime = 0; 
+    function initialize() { 
+      document.getElementById("editor").value = PrefCommands.getCode();
+      document.getElementById("enableSyntaxHighlighting").checked = Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true);
+    } 
+    function launch() { 
+      file = Editor.launchEditor(document.getElementById('editor').editor.editor.getCode()); 
+      if (file != null && file.exists()) { 
+        lastModifiedTime = file.lastModifiedTime; 
+        setTimeout(watchFile, 500) 
+      } 
+    } 
+    function watchFile() { 
+      if (file != null && file.exists()) { 
         time = file.lastModifiedTime; 
-        if(time > lastModifiedTime){
-           document.getElementById('editor').editor.setCode(Editor.readFile(file)); 
-           PrefCommands.setCode(document.getElementById('editor').editor.editor.getCode()); 
-           lastModifiedTime = time;
+        if (time > lastModifiedTime) {
+          document.getElementById('editor').editor.setCode(Editor.readFile(file)); 
+          PrefCommands.setCode(document.getElementById('editor').editor.editor.getCode()); 
+          lastModifiedTime = time;
         }
         setTimeout(watchFile, 500);
       }
-   }
-   function highlight(){
+    }
+    function highlight() {
+      if(!Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true)) {
+        setupTextarea();
+        return;
+      }
       var textarea = document.getElementById("editor");
       try {
-         var editor = new CodeMirror(CodeMirror.replace(textarea), {
+        var editor = new CodeMirror(CodeMirror.replace(textarea), {
             height: textarea.clientHeight,
             content: textarea.value,
             parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
@@ -44,36 +53,41 @@
             path: "resource://ubiquity-scripts/codemirror/js/",
             autoMatchParens: true,
             undoDelay: 100,
-            onChange: function(){PrefCommands.setCode(editor.getCode())},
-            initCallback: function(){editor.win.focus(); editor.jumpToLine(1);}
-         });
-         var iframe = document.getElementsByTagName("iframe")[0];
-         iframe.setAttribute("id", "editor");
-         iframe.editor = editor;
-         window.addEventListener("unload", function() {PrefCommands.setCode(editor.getCode());}, false);
+            onChange: function() { PrefCommands.setCode(editor.getCode()) },
+            initCallback: function() { editor.win.focus(); editor.jumpToLine(1); }
+          });
+        var iframe = document.getElementsByTagName("iframe")[0];
+        iframe.setAttribute("id", "editor");
+        iframe.editor = editor;
+        window.addEventListener("unload", function() { PrefCommands.setCode(editor.getCode()); }, false);
       } catch (e) { // Setup matching API for the normal textarea
-         Components.utils.reportError("CodeMirror failed to load: "+e);
-         displayMessage("Error: CodeMirror failed to load: " + e);
-         
-         textarea.editor = new Object();
-         textarea.editor.editor = new Object();
-         textarea.editor.editor.getCode = function() {return textarea.value;};
-         textarea.editor.getCode = textarea.editor.editor.getCode;
-         textarea.editor.editor.setCode = function(d) {textarea.value = d;};
-         textarea.editor.setCode = textarea.editor.editor.setCode;
-         textarea.focus();
+        Components.utils.reportError("CodeMirror failed to load: "+e);
+        displayMessage("Error: CodeMirror failed to load: " + e);
+        
+        setupTextarea();
       }
-   }
+    }
+    function setupTextarea() {
+      var textarea = document.getElementById("editor");
+      textarea.editor = new Object();
+      textarea.editor.editor = new Object();
+      textarea.editor.editor.getCode = function() { return textarea.value; };
+      textarea.editor.getCode = textarea.editor.editor.getCode;
+      textarea.editor.editor.setCode = function(d) { textarea.value = d; };
+      textarea.editor.setCode = textarea.editor.editor.setCode;
+      textarea.focus();
+    }
+    function enableSyntaxHighlighter(enabled) {
+      Application.prefs.setValue(PREF_ENABLE_HIGHLIGHTING, enabled);
+      window.location.reload();
+    }
   </script>
-  <link rel="stylesheet" href="web-content.css" type="text/css">
-  <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 </head>
 
-<body onload="initialize();Editor.onLoad();highlight()">
+<body onload="initialize(); Editor.onLoad(); highlight();">
   <div class="head left">
     <red>ubiquity</red> the command <em>editor</em></span>
   </div>
-  
   
   <div id="nav-container">
     <ul id="nav">
@@ -87,56 +101,72 @@
 
   <br clear="all"/>
     
-<h1>Ubiquity Command Editor</h1>
-<p id="notification-bar" class="notification" style="display:none"></p>
-
-<div class="col-three">
-  <p><strong>Enter new commands</strong> in the area below.  They will automatically be saved as you type, and will
-  be able to be instantly used from the command entry mode.</p>  
-</div>  
-
-<div class="col-three">
-  <p><strong>Read the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command authoring tutorial</a></strong> to learn more. For examples of built-in commands, look <a href="chrome://ubiquity/content/builtincmds.js">here</a>,
-    for information on available utility functions for use in commands, look <a href="resource://ubiquity-modules/cmdutils.js">here</a>.</p>
-</div>
-
-<div class="col-two">
-  <p><b>Get involved</b>. Learn how by visiting the
-  <a href="http://wiki.mozilla.org/Labs/Ubiquity">Ubiquity Wiki</a>.</p> 
-</div>
-
-<div id="editor-actions">
-  <br clear="all"/>
-  <div id="external-editor-pref">
-    Your external editor is
-    <input id="editorInputBox" type="file" size="20" 
-           style="cursor:pointer" 
-           onchange="Editor.onSave()"/>
+  <h1>Ubiquity Command Editor</h1>
+  <p id="notification-bar" class="notification" style="display:none"></p>
+  
+  <div class="col-three">
+    <p>
+      <strong>Enter new commands</strong> in the area below.
+      They will automatically be saved as you type, and will be able to be instantly used from the command entry mode.
+    </p>  
+  </div>  
+  
+  <div class="col-three">
+    <p>
+      <strong>Read the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command authoring tutorial</a></strong> to learn more.
+      For examples of built-in commands, look <a href="chrome://ubiquity/content/builtincmds.js">here</a>,
+      for information on available utility functions for use in commands, look <a href="resource://ubiquity-modules/cmdutils.js">here</a>.
+    </p>
   </div>
-  <br clear="all"/>
-  <ul class="button-list">
-    <li>
-      <a class="button" href="javascript:void(importTemplate())"><b>Import Command Template</b></a>
-    </li>
-    <li>
-      <a class="button" href="javascript:void(launch())"><b>Launch an external editor</b></a>
-    </li>
-    <li>
-      <a class="button"href="javascript:void(paste())"><b>Share</b></a>
-    </li>
-    <li>
-      <a class="button" href="javascript:void(saveAs())"><b>Save to file</b></a>
-    </li>
-  </ul>
-  <br clear="all"/>
-</div>
+  
+  <div class="col-two">
+    <p>
+      <b>Get involved</b>.
+      Learn how by visiting the <a href="http://wiki.mozilla.org/Labs/Ubiquity">Ubiquity Wiki</a>.
+    </p> 
+  </div>
+  
+  <div id="editor-actions">
+    <br clear="all"/>
+    <div id="external-editor-pref">
+      Your external editor is
+      <input id="editorInputBox"
+             type="file"
+             size="20"
+             style="cursor:pointer" 
+             onchange="Editor.onSave()"/>
+    </div>
+    <br clear="all"/>
+    <ul class="button-list">
+      <li>
+        <a class="button" href="javascript:importTemplate();"><b>Import Command Template</b></a>
+      </li>
+      <li>
+        <a class="button" href="javascript:launch();"><b>Launch an external editor</b></a>
+      </li>
+      <li>
+        <a class="button" href="javascript:paste();"><b>Share</b></a>
+      </li>
+      <li>
+        <a class="button" href="javascript:saveAs();"><b>Save to file</b></a>
+      </li>
+    </ul>
+    <br clear="all"/>
+    <div id="editor-options">
+      <label for="enableSyntaxHighlighting">
+        <input type="checkbox" id="enableSyntaxHighlighting" onchange="enableSyntaxHighlighter(this.checked);"/>
+        Enable syntax highlighting
+      </label>
+    </div>
+  </div>
+  
+  <div id="editor-div">
+    <textarea id="editor"
+              rows="40"
+              style="width:900px"
+              onkeyup="PrefCommands.setCode(this.value);"></textarea>
+  </div>
 
 
-
-<div id="editor-div">
-  <textarea id="editor" rows="40" style="width:900px"
-            onkeyup="PrefCommands.setCode(this.value);"></textarea>
-</div>
-
-
-</body></html>
+</body>
+</html>
