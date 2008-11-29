@@ -130,18 +130,23 @@ function HtmlTestResponder(outputElement) {
 HtmlTestResponder.prototype = {
   onStartTest : function(test) {
   },
+  
+  onSuccess : function(test) {
+    var html = "<p class=\"success\">Passed test " + test.name + ".</p>";
+    this._output.innerHTML += html;
+  },
 
   onSkipTest : function(test, e) {
-    var html = "<p>Skipping test " + test.name + ".</p>";
+    var html = "<p class=\"skip\">Skipping test " + test.name + ".</p>";
     this._output.innerHTML += html;
   },
 
   onException : function(test, e) {
-    var html = ("<p class=\"error\">Error in test " +
-                test.name + ": " + e.message);
+    var html = "<p class=\"error\">";
+    var message = "Error in test " + test.name + ": " + e.message;
     if (e.fileName)
-      html += (" (in " + e.fileName +
-               ", line " + e.lineNumber + ")");
+      message += " (in " + e.fileName + ", line " + e.lineNumber + ")";
+    html += message.replace("<", "&lt;").replace(">", "&gt;");
     html += "</p>";
     this._output.innerHTML += html;
   },
@@ -149,7 +154,7 @@ HtmlTestResponder.prototype = {
   onFinished : function(successes, failures, skips) {
     var total = successes + failures;
 
-    var html = ("<p>" + successes + " out of " +
+    var html = ("<br/><br/><p>" + successes + " out of " +
                 total + " tests successful (" + failures +
                 " failed).</p>");
 
@@ -172,7 +177,7 @@ TestSuite.prototype = {
     var tests = [];
 
     for (prop in parent)
-      if (prop.indexOf("test") == 0)
+      if (prop.indexOf("test") == 0 && typeof parent[prop] == "function")
         tests.push(new TestCase(parent[prop]));
 
     return tests;
@@ -191,6 +196,7 @@ TestSuite.prototype = {
         this._responder.onStartTest(test);
 
         test.run();
+        this._responder.onSuccess(test);
         successes += 1;
       } catch(e if e instanceof TestCase.prototype.SkipTestError) {
         this._responder.onSkipTest(test, e);

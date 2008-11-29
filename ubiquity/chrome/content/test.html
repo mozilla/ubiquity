@@ -1,21 +1,102 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html><head>
-<title>Ubiquity Test Suite</title>
-<script type="text/javascript;version=1.7">
-Components.utils.import("resource://ubiquity-tests/framework.js");
-Components.utils.import("resource://ubiquity-tests/test_all.js");
-
-function startTestSuite() {
-  var outputElement = document.getElementById("test-output");
-  var suite = new TestSuite(new HtmlTestResponder(outputElement),
-                            window);
-  suite.start();
-}
-</script>
-<link rel="stylesheet" href="web-content.css" type="text/css">
-<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
-</head>
-<body onload="startTestSuite();">
-<h1>Ubiquity Test Suite</h1>
-<div id="test-output"></div>
-</body></html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" href="web-content.css" type="text/css">
+    <link rel="stylesheet" href="test.css" type="text/css">
+    <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
+    <title>Ubiquity Test Suite</title>
+    <script type="text/javascript;version=1.7" src="resource://ubiquity-scripts/jquery.js"></script>
+<!--    <script type="text/javascript;version=1.7" src="resource://ubiquity-tests/framework.js"></script>
+    <script type="text/javascript;version=1.7" src="resource://ubiquity-tests/test_all.js"></script>-->
+    <script type="text/javascript;version=1.7">
+    
+      Components.utils.import("resource://ubiquity-tests/framework.js");
+      Components.utils.import("resource://ubiquity-tests/test_all.js");
+  
+      function startTestSuite() {
+        var outputElement = document.getElementById("test-output");
+        var suite = new TestSuite(new HtmlTestResponder(outputElement),
+                                  window);
+        suite.start();
+      }
+      
+      function showSuccessfulTests() {
+        var show = document.getElementById("show-tests-successful").checked;
+        var tests = jQuery("#test-output .success");
+        if(show)
+          tests.show();
+        else
+          tests.hide();
+      }
+      
+      function showSkippedTests() {
+        var show = document.getElementById("show-tests-skipped").checked;
+        var tests = jQuery("#test-output .skip");
+        if(show)
+          tests.show();
+        else
+          tests.hide();
+      }
+      
+      function showFailedTests() {
+        var show = document.getElementById("show-tests-failed").checked;
+        var tests = jQuery("#test-output .error");
+        if(show)
+          tests.show();
+        else
+          tests.hide();
+      }
+      
+      function updateCounts() {
+        var numSuccessful = jQuery("#test-output .success").length;
+        jQuery("#test-options label[for='show-tests-successful'] .count").text("(" + numSuccessful + ")");
+        var numSkipped = jQuery("#test-output .skip").length;
+        jQuery("#test-options label[for='show-tests-skipped'] .count").text("(" + numSkipped + ")");
+        var numFailed = jQuery("#test-output .error").length;
+        jQuery("#test-options label[for='show-tests-failed'] .count").text("(" + numFailed + ")");
+      }
+      
+      jQuery(document).ready(function() {
+        jQuery("#show-tests-successful").change(showSuccessfulTests);
+        jQuery("#show-tests-skipped").change(showSkippedTests);
+        jQuery("#show-tests-failed").change(showFailedTests);
+        
+        startTestSuite();
+        
+        showSuccessfulTests();
+        showSkippedTests();
+        showFailedTests();
+        
+        updateCounts();
+      });
+      
+    </script>
+  </head>
+  <body>
+    
+    <h1>Ubiquity Test Suite</h1>
+    
+    <div id="test-options">
+      <label for="show-tests-successful">
+        <input type="checkbox" id="show-tests-successful" />
+        Show successful tests
+        <span class="count"></span>
+      </label>
+      <label for="show-tests-skipped">
+        <input type="checkbox" id="show-tests-skipped" />
+        Show skipped tests
+        <span class="count"></span>
+      </label>
+      <label for="show-tests-failed">
+        <input type="checkbox" id="show-tests-failed" checked="true" />
+        Show failed tests
+        <span class="count"></span>
+     </label>
+    </div>
+    
+    <div id="test-output"></div>
+    
+  </body>
+</html>

@@ -90,6 +90,8 @@ var XpcShellTestResponder = {
   onStartTest : function(test) {
     dump("Running test: "+test.name+"\n");
   },
+  
+  onSuccess : function(test) { },
 
   onSkipTest : function(test, e) {
     dump("Test skipped: " + test.name + "\n");

@@ -1,4 +1,5 @@
 Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity-tests/framework.js");
 
 function testJpSplitByParticles() {
   var sentence1 = "彼女と駅に行った";
