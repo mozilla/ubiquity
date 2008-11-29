@@ -70,7 +70,7 @@ var noun_type_contact = {
   suggest: function(text, html) {
     if (noun_type_contact.contactList == null) {
       getGmailContacts( noun_type_contact.callback);
-      let suggs = noun_type_email.suggest(text, html);
+      var suggs = noun_type_email.suggest(text, html);
       return suggs.length > 0 ? suggs : [];
     }
 
