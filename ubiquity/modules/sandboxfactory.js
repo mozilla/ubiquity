@@ -65,6 +65,7 @@ SandboxFactory.prototype = {
 
     return sandbox;
   },
+  
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
 
@@ -86,9 +87,21 @@ SandboxFactory.prototype = {
       return;
     }
     
-    try {
-      var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
-                               .getService(Components.interfaces.nsIUbiquity);
+    function getUbiquityComponent() {
+      try {
+        var sandbox = Components.utils.Sandbox(this._target);
+        var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
+                                 .getService(Components.interfaces.nsIUbiquity);
+        ubiquity.evalInSandbox("function test() {}", sandbox);
+        return ubiquity;
+      } catch (e) {
+        Components.utils.reportError("Error using nsIUbiquity.evalInSandbox(): " + e);
+        return null;
+      }
+    }
+    
+    var ubiquity = getUbiquityComponent();
+    if(ubiquity) {
       let currIndex = 0;
       for (let i = 0; i < codeSections.length; i++) {
         let section = codeSections[i];
@@ -99,8 +112,7 @@ SandboxFactory.prototype = {
                                sandbox);
         currIndex += section.length;
       }
-    } catch (e) {
-      Components.utils.reportError("Error using nsIUbiquity.evalInSandbox(): " + e);
+    } else {
       Components.utils.evalInSandbox(code, sandbox);
     }
   }
