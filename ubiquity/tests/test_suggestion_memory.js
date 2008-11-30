@@ -7,34 +7,39 @@ Components.utils.import("resource://ubiquity-modules/suggestion_memory.js",
                         RealSuggestionMemory);
 RealSuggestionMemory = RealSuggestionMemory.SuggestionMemory;
 
-
-TestSuggestionMemory = function TestSuggestionMemory() {
+function getTempDbFile() {
   var Ci = Components.interfaces;
   var dirSvc = Components.classes["@mozilla.org/file/directory_service;1"]
-               .getService(Ci.nsIProperties);
+                         .getService(Ci.nsIProperties);
   var file = dirSvc.get("TmpD", Ci.nsIFile);
   file.append("testdb.sqlite");
-  var testConnection = null;
-  
-  if (!testConnection) {
+  file.createUnique(Ci.nsIFile.TYPE_NORMAL_FILE, 0x600);
+  return file;
+}
+var suggestiondb_file = getTempDbFile();
+var suggestiondb_connection = null;
+
+
+TestSuggestionMemory = function TestSuggestionMemory() {
+  if (!suggestiondb_connection) {
     function suggestionMemoryTeardown() {
-      testConnection.close();
-      testConnection = null;
+      suggestiondb_connection.close();
+      suggestiondb_connection = null;
       try {
-        file.remove(false);
+        suggestiondb_file.remove(false);
       } catch (e) { }
     };
     
     try {
-      if (file.exists())
-        file.remove(false);
+      if (suggestiondb_file.exists())
+        suggestiondb_file.remove(false);
     } catch (e) { }
     
-    testConnection = RealSuggestionMemory.openDatabase(file);
+    suggestiondb_connection = RealSuggestionMemory.openDatabase(suggestiondb_file);
     TestSuite.currentTest.addToTeardown(suggestionMemoryTeardown);
   }
 
-  var connection = testConnection;
+  var connection = suggestiondb_connection;
   var id = "test";
 
   this.__RealSuggestionMemory = RealSuggestionMemory;
