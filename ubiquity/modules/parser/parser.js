@@ -152,23 +152,23 @@ NLParser.Parser.prototype = {
     }
 
     this._suggestionList.sort( function( x, y ) {
-				 let xMatchScores = x.getMatchScores();
-				 let yMatchScores = y.getMatchScores();
-				 for (let z in xMatchScores) {
-				   if (xMatchScores[z] > yMatchScores[z]) {
-				     return -1;
-				   }
-				   else if (yMatchScores[z] > xMatchScores[z]) {
-				     return 1;
-				   }
-				   /* if they are equal, then continue on to the
-				    * next loop iteration to compare them based on
-				    * the next most important score. */
-				 }
-				 // Got all the way through the lists and found
-				 // no tiebreaker... they are truly tied.
-                                 return 0;
-			       });
+      let xMatchScores = x.getMatchScores();
+      let yMatchScores = y.getMatchScores();
+      for (let z in xMatchScores) {
+        if (xMatchScores[z] > yMatchScores[z]) {
+          return -1;
+        }
+        else if (yMatchScores[z] > xMatchScores[z]) {
+          return 1;
+        }
+        /* if they are equal, then continue on to the
+         * next loop iteration to compare them based on
+         * the next most important score. */
+      }
+      // Got all the way through the lists and found
+      // no tiebreaker... they are truly tied.
+      return 0;
+    });
   },
 
   strengthenMemory: function(query, chosenSuggestion) {
@@ -191,23 +191,24 @@ NLParser.Parser.prototype = {
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
-	newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj));
+        newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj));
       }
     } else {
       // Language-specific full-sentence suggestions:
       newSuggs = this._languagePlugin.parseSentence(
-	query,
-	this._nounTypeList,
-	this._verbList,
-	selObj,
+        query,
+        this._nounTypeList,
+        this._verbList,
+        selObj,
         asyncSuggestionCb
       );
       // noun-first matches on input
-      if (newSuggs.length == 0 ){
-	selObj = {
-	  text: query, html: query
-	};
-	newSuggs = newSuggs.concat( this.nounFirstSuggestions( selObj ));
+      if (newSuggs.length == 0 ) {
+        selObj = {
+          text: query,
+          html: query
+        };
+        newSuggs = newSuggs.concat( this.nounFirstSuggestions( selObj ));
       }
     }
     // partials is now a list of PartiallyParsedSentences; if there's a
@@ -287,8 +288,8 @@ NLParser.ParsedSentence.prototype = {
      matches user input.  */
     for (let argName in this._argSuggs) {
       if (this._argSuggs[argName])
-	if (!this._verb._arguments[argName].type.rankLast)
-	  this.argMatchScore++;
+        if (!this._verb._arguments[argName].type.rankLast)
+          this.argMatchScore++;
     }
 
   },
@@ -331,20 +332,19 @@ NLParser.ParsedSentence.prototype = {
     let label;
     for ( var x in this._verb._arguments ) {
       if ( this._argSuggs[ x ] && (this._argSuggs[x].text != "") ) {
-	if (x == "direct_object")
-	  label = "";
-	else
-	  label = x;
-	sentence = sentence + " <b>" + label + " " + this._argSuggs[x].summary +
-		   "</b>";
+        if (x == "direct_object")
+          label = "";
+        else
+          label = x;
+        sentence = sentence + " <b>" + label + " " + this._argSuggs[x].summary +
+                   "</b>";
       } else {
-	if ( x == "direct_object" ) {
-	  label = this._verb._arguments[x].label;
-	} else {
-	  label = x + " " + this._verb._arguments[x].type._name;
+        if (x == "direct_object") {
+          label = this._verb._arguments[x].label;
+        } else {
+          label = x + " " + this._verb._arguments[x].type._name;
         }
-	sentence = sentence + " <span class=\"needarg\">(" +
-	  label + ")</span>";
+        sentence = sentence + " <span class=\"needarg\">(" + label + ")</span>";
       }
     }
     return sentence;
@@ -372,7 +372,7 @@ NLParser.ParsedSentence.prototype = {
     for (let x in this._argSuggs) {
       newArgSuggs[x] = {};
       for (let y in this._argSuggs[x])
-	newArgSuggs[x][y] = this._argSuggs[x][y];
+        newArgSuggs[x][y] = this._argSuggs[x][y];
     }
     let newSentence = new NLParser.ParsedSentence(this._verb,
 						    newArgSuggs,
@@ -405,17 +405,17 @@ NLParser.ParsedSentence.prototype = {
     let defaultValue;
     for (let argName in this._verb._arguments) {
       if (!this._argSuggs[argName]) {
-	let missingArg = this._verb._arguments[argName];
+        let missingArg = this._verb._arguments[argName];
         if (missingArg.default) {
-	  defaultValue = this._makeSugg(missingArg.default);
-	} else if (missingArg.type.default) { // Argument value from nountype default
+          defaultValue = this._makeSugg(missingArg.default);
+        } else if (missingArg.type.default) { // Argument value from nountype default
           // TODO note this doesn't allow a nounType to return more than one item from
           // its default() method.
           defaultValue = missingArg.type.default();
-	} else { // No argument
-	  defaultValue = {text:"", html:"", data:null, summary:""};
-	}
-	newSentence.setArgumentSuggestion(argName, defaultValue);
+        } else { // No argument
+          defaultValue = {text:"", html:"", data:null, summary:""};
+        }
+        newSentence.setArgumentSuggestion(argName, defaultValue);
       }
     }
     return newSentence;
@@ -504,14 +504,14 @@ NLParser.PartiallyParsedSentence.prototype = {
       let suggestions = argument.type.suggest(text, html, callback);
       for each( let argSugg in suggestions) {
         if (argSugg) { // strip out null suggestions -- TODO not needed?
-	  this.addArgumentSuggestion(argName, argSugg);
-	}
+          this.addArgumentSuggestion(argName, argSugg);
+        }
       }
       return (suggestions.length > 0);
     } catch(e) {
       Components.utils.reportError(
           'Exception occured while getting suggestions for "' +
-	  this._verb._name + '" with noun "' + argument.label + '"'
+          this._verb._name + '" with noun "' + argument.label + '"'
           );
       return false;
     }
@@ -540,9 +540,9 @@ NLParser.PartiallyParsedSentence.prototype = {
           wordsCopy[index] = htmlSelection;
           htmlSelection = wordsCopy.join(" ");
         }
-	if (this._argSuggest(argName, selection, htmlSelection)) {
-	  gotAnySuggestions = true;
-	}
+        if (this._argSuggest(argName, selection, htmlSelection)) {
+          gotAnySuggestions = true;
+        }
       }
     }
     return gotAnySuggestions;
@@ -563,12 +563,12 @@ NLParser.PartiallyParsedSentence.prototype = {
       } else {
         let newSen = sen.copy();
         newSen.setArgumentSuggestion(arg, sugg);
-	let duplicateSuggestion = false;
-	for each( let alreadyNewSen in newSentences ) {
-	  if (alreadyNewSen.equals(newSen))
-	    duplicateSuggestion = true;
-	}
-	if (!duplicateSuggestion)
+        let duplicateSuggestion = false;
+        for each( let alreadyNewSen in newSentences ) {
+          if (alreadyNewSen.equals(newSen))
+            duplicateSuggestion = true;
+        }
+        if (!duplicateSuggestion)
           newSentences.push( newSen );
       }
     }
@@ -585,7 +585,7 @@ NLParser.PartiallyParsedSentence.prototype = {
     // Return nothing if this parsing is invalid due to bad user-supplied args
     for (let argName in this._invalidArgs) {
       if (this._invalidArgs[argName] && !this._validArgs[argName])
-	return [];
+        return [];
     }
 
     for each( let sen in this._parsedSentences) {
@@ -625,7 +625,7 @@ NLParser.PartiallyParsedSentence.prototype = {
     let unfilledArguments = [];
     for (let argName in this._verb._arguments) {
       if (!this._argStrings[argName] || this._argStrings[argName].length == 0) {
-	unfilledArguments.push(argName);
+        unfilledArguments.push(argName);
       }
     }
     return unfilledArguments;
@@ -655,7 +655,7 @@ NLParser.PartiallyParsedSentence.prototype = {
       let canUseSelection = newParsing._argSuggest(arg, this._selObj.text,
 						  this._selObj.html);
       if (canUseSelection)
-	alternates.push(newParsing);
+        alternates.push(newParsing);
     }
     if (alternates.length == 0)
       return [this];
@@ -680,10 +680,14 @@ NLParser.Verb.prototype = {
     this._name = cmd.name;
     this._icon = cmd.icon;
     this._synonyms = cmd.synonyms;
-    this.__defineGetter__("previewDelay",
-                          function() { return cmd.previewDelay; });
-    this.__defineGetter__("disabled",
-                          function() { return cmd.disabled; });
+    this.__defineGetter__("previewDelay", function() {
+      return cmd.previewDelay;
+    });
+    this.__defineGetter__("disabled", function() {
+      if("disabled" in cmd)
+        return cmd.disabled;
+      return false;
+    });
     this._arguments = {};
 
     // New-style API: command defines arguments dictionary
@@ -696,23 +700,23 @@ NLParser.Verb.prototype = {
        this to argument dictionary. */
     if (cmd.DOType) {
       this._arguments.direct_object = {
-	type: cmd.DOType,
-	label: cmd.DOLabel,
-	flag: null,
+        type: cmd.DOType,
+        label: cmd.DOLabel,
+        flag: null,
         'default': cmd.DODefault
       };
     }
 
     if (cmd.modifiers) {
       for (let x in cmd.modifiers) {
-	this._arguments[x] = {
-	  type: cmd.modifiers[x],
-	  label: x,
-	  flag: x
-	};
-	if (cmd.modifierDefaults) {
-	  this._arguments[x].default = cmd.modifierDefaults[x];
-	}
+        this._arguments[x] = {
+          type: cmd.modifiers[x],
+          label: x,
+          flag: x
+        };
+        if (cmd.modifierDefaults) {
+          this._arguments[x].default = cmd.modifierDefaults[x];
+        }
       }
     }
   },
@@ -751,7 +755,7 @@ NLParser.Verb.prototype = {
     //Used for doing noun-first suggestions.
     for each ( let arg in this._arguments) {
       if (arg.type == nounType) {
-	return true;
+        return true;
       }
     }
     return false;
@@ -784,13 +788,13 @@ NLParser.Verb.prototype = {
     // Look for a match on synonyms:
     if ( this._synonyms && this._synonyms.length > 0) {
       for each( let syn in this._synonyms) {
-	index = syn.indexOf( inputWord );
-	if (index == 0) {
-	  return 0.25 + 0.25 * (inputWord.length / syn.length);
-	}
-	if (index > 0 ) {
-	  return 0.25 * (inputWord.length / syn.length);
-	}
+        index = syn.indexOf( inputWord );
+        if (index == 0) {
+          return 0.25 + 0.25 * (inputWord.length / syn.length);
+        }
+        if (index > 0 ) {
+          return 0.25 * (inputWord.length / syn.length);
+        }
       }
     }
 
