@@ -4,7 +4,7 @@ Components.utils.import("resource://ubiquity-tests/framework.js");
 function HubFramework() {
   let self = this;
   self.hub = new EventHub();
-  self.lastNotify = {};
+  self.lastNotify = {eventName: undefined, data: undefined};
   self.listener = function listener(eventName, data) {
     self.lastNotify.eventName = eventName;
     self.lastNotify.data = data;
