@@ -176,6 +176,8 @@ LocalUriCodeSource.prototype = {
 function XhtmlCodeSource(codeSource) {
   var dom;
   var codeSections;
+  var lastCode;
+  var finalCode;
 
   this.__defineGetter__("dom",
                         function() { return dom ? dom : undefined; });
@@ -188,6 +190,10 @@ function XhtmlCodeSource(codeSource) {
 
   this.getCode = function XHTMLCS_getCode() {
     var code = codeSource.getCode();
+    if (code == lastCode)
+      return finalCode;
+
+    lastCode = code;
 
     var trimmedCode = Utils.trim(code);
     if (trimmedCode.length > 0 &&
@@ -213,11 +219,12 @@ function XhtmlCodeSource(codeSource) {
                            lineNumber: info[i].lineNumber});
       }
 
-      return newCode;
+      finalCode = newCode;
+    } else {
+      dom = undefined;
+      codeSections = undefined;
+      finalCode = code;
     }
-
-    dom = undefined;
-    codeSections = undefined;
-    return code;
+    return finalCode;
   };
 }

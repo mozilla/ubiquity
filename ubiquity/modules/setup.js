@@ -261,7 +261,8 @@ function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
 
   var headerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "header/utils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js")
+    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
   ];
   var bodyCodeSources = [
     new LocalUriCodeSource(basePartsUri + "body/onstartup.js"),

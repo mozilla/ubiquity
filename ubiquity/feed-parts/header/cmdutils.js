@@ -738,17 +738,6 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   CmdUtils.CreateCommand(options);
 };
 
-// TODO: This is deprecated behavior from Ubiquity 0.1.1, and will
-// eventually need to be removed.  Note, however, that removing it
-// will break backwards compatibility with some legacy third-party
-// command feeds.
-var makeSearchCommand = function deprecated_makeSearchCommand() {
-  Utils.reportWarning("makeSearchCommand() is deprecated; please use " +
-                      "CmdUtils.makeSearchCommand() instead.",
-                      Components.stack.caller);
-  return CmdUtils.makeSearchCommand.apply(CmdUtils, arguments);
-};
-
 //Requires at least two arguments - name
 //and url (which contains the bookmarklet code starting with "javascript:")
 
