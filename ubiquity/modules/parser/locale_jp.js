@@ -49,6 +49,8 @@ JpParser.PRONOUNS = dat.pronouns;
 
 JpParser.DEFAULT_PREVIEW = dat.defaultPreview;
 
+JpParser.VERB_MARK = dat.verb_mark;
+
 /* bad assumption: each particle appears at most once
  also bad assumption: strings that look like particles don't appear
  elsewhere.
@@ -60,7 +62,7 @@ JpParser.DEFAULT_PREVIEW = dat.defaultPreview;
  particles are missing.*/
 JpParser._splitByParticles = function( input ) {
   let oldDict = {};
-  oldDict[dat.verb] = input;
+  oldDict[JpParser.VERB_MARK] = input;
   let newDict = oldDict;
   for each (let particle in JpParser.JP_PARTICLES ) {
 
@@ -91,7 +93,7 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj,
   // particles to get a dictionary of {particle: noun}
   let wordDict = JpParser._splitByParticles( inputString );
   for each ( let verb in verbList ) if (!verb.disabled) {
-    let matchScore = verb.match( wordDict["動詞"]);
+    let matchScore = verb.match( wordDict[JpParser.VERB_MARK]);
     if (matchScore == 0)
       continue;
     let argStrings = {};
