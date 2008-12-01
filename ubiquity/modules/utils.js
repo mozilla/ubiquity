@@ -42,23 +42,6 @@ var Utils = {};
 
 Utils.__globalObject = this;
 
-
-Utils.safeWrapper = function safeWrapper(func) {
-  var wrappedFunc = function safeWrappedFunc() {
-    try {
-      func.apply(this, arguments);
-    } catch (e) {
-      displayMessage(
-        {text: ("An exception occurred while running " +
-                func.name + "()."),
-         exception: e}
-      );
-    }
-  };
-
-  return wrappedFunc;
-};
-
 Utils.encodeJson = function encodeJson(object) {
   var json = Components.classes["@mozilla.org/dom/json;1"]
              .createInstance(Components.interfaces.nsIJSON);
