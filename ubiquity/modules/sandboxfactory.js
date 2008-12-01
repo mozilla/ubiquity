@@ -52,6 +52,27 @@ function SandboxFactory(globals, target) {
     this._makeGlobals = function defaultMakeGlobals(id) {
       return globals;
     };
+
+  // TODO: This code is temporary; right now the pre-compiled
+  // nsIUbiquity XPCOM binary that comes with Ubiquity only works on
+  // FF 3.1 due to the fact that the JSAPI is backwards compatible
+  // at only the source-code level.  Eventually we'll change this so that
+  // the nsIUbiquity component is only compiled for FF 3.0, and the
+  // functionality we need is built-in to FF 3.1 (or rather, Gecko
+  // 1.9.1). See bug #445873 for more information.
+
+  try {
+    var sandbox = Components.utils.Sandbox(target);
+    var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
+                   .getService(Components.interfaces.nsIUbiquity);
+    ubiquity.evalInSandbox("(function() {})();", "test.js", 1,
+                           "1.8", sandbox);
+    this._ubiquityComponent = ubiquity;
+  } catch (e) {
+    Components.utils.reportError("Error using nsIUbiquity." +
+                                 "evalInSandbox(): " + e);
+    this._ubiquityComponent = null;
+  }
 }
 
 SandboxFactory.prototype = {
@@ -65,47 +86,15 @@ SandboxFactory.prototype = {
 
     return sandbox;
   },
-  
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
-
-    // TODO: This code is temporary; right now the pre-compiled
-    // nsIUbiquity XPCOM binary that comes with Ubiquity only works on
-    // FF 3.1 due to the fact that the JSAPI is backwards compatible
-    // at only the source-code level.  Eventually we'll change this so that
-    // the nsIUbiquity component is only compiled for FF 3.0, and the
-    // functionality we need is built-in to FF 3.1 (or rather, Gecko
-    // 1.9.1). See bug #445873 for more information.
-    
-    let appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-                            .getService(Components.interfaces.nsIXULAppInfo);
-    let versionComparator = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-                                      .getService(Components.interfaces.nsIVersionComparator);
-    if (versionComparator.compare(appInfo.platformVersion, "1.9.0") <= 0 ||
-        !("@labs.mozilla.com/ubiquity;1" in Components.classes)) {
-      Components.utils.evalInSandbox(code, sandbox);
-      return;
-    }
-    
-    function getUbiquityComponent() {
-      try {
-        var sandbox = Components.utils.Sandbox(this._target);
-        var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
-                                 .getService(Components.interfaces.nsIUbiquity);
-        ubiquity.evalInSandbox("function test() {}", sandbox);
-        return ubiquity;
-      } catch (e) {
-        Components.utils.reportError("Error using nsIUbiquity.evalInSandbox(): " + e);
-        return null;
-      }
-    }
-    
-    var ubiquity = getUbiquityComponent();
-    if(ubiquity) {
+    var ubiquity = this._ubiquityComponent;
+    if (ubiquity) {
       let currIndex = 0;
       for (let i = 0; i < codeSections.length; i++) {
         let section = codeSections[i];
-        ubiquity.evalInSandbox(code.slice(currIndex, currIndex + section.length),
+        ubiquity.evalInSandbox(code.slice(currIndex, currIndex +
+                                          section.length),
                                section.filename,
                                section.lineNumber,
                                "1.8",
