@@ -9,12 +9,16 @@
   margin: 0px 10px;
 }
 
-#test-output .success { }
+#test-output .successful { }
 
-#test-output .error {
+#test-output .skipped {
+  color: #0000FF;
+}
+
+#test-output .failed {
   color: #FF0000;
 }
 
-#test-output .skip {
-  color: #0000FF;
+#test-output .summary {
+  margin-top: 20px;
 }

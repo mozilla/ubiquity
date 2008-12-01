@@ -406,7 +406,9 @@ function testCommandSourceOneCmdWorks() {
                                  new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
-
+  for(name in cmdSrc.commandNames) {
+    dump("command: " + name + "\n");
+  }
   var cmd = cmdSrc.getCommand("foo-thing");
   this.assert(cmd, "Sample command should exist.");
   this.assert(cmd.execute() == 5,
@@ -1512,6 +1514,11 @@ function getLocalFileAsUtf8(url) {
   req.send(null);
   return req.responseText;
 }
+
+function testSkip() {
+  throw new this.SkipTestError();
+}
+
 
 // TODO: This is a horrible workaround; modifying the tests to use
 // localeutils.js makes them unreadable and hard to maintain, but there
