@@ -770,6 +770,16 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand( options ) {
   CmdUtils.CreateCommand(options);
 };
 
+this.__defineGetter__(
+  "window",
+  function() {
+    Utils.reportWarning("The global window object is deprecated in command " +
+                        "feeds. Please use context.window instead.",
+                        Components.stack.caller);
+    return context.window;
+  }
+);
+
 (
   function() {
     var nu = {};
