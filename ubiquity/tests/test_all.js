@@ -60,6 +60,13 @@ function FakeAnnSvc() {
   var urls = {};
 
   var self = this;
+  var observer;
+
+  self.addObserver = function(anObserver) {
+    if (observer)
+      throw new Error("Don't know how to deal w/ multiple observers.");
+    observer = anObserver;
+  };
 
   self.getPagesWithAnnotation = function(name) {
     var results = [];
@@ -89,12 +96,14 @@ function FakeAnnSvc() {
       urls[uri.spec] = uri;
     }
     ann[uri.spec][name] = value;
+    observer.onPageAnnotationSet(uri, name);
   };
 
   self.removePageAnnotation = function(uri, name) {
     if (!self.pageHasAnnotation(uri, name))
       throw Error('No such annotation');
     delete ann[uri.spec][name];
+    observer.onPageAnnotationRemoved(uri, name);
   };
 
   self.EXPIRE_NEVER = 0;
