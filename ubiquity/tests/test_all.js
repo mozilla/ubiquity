@@ -395,6 +395,21 @@ function testIterableCollectionWorks() {
   this.assert(count == 1, "count must be 1.");
 }
 
+function testCommandSourcePageLoadFuncsWork() {
+  var testCode = "pageLoadFuncs = [function(window) {window.called = true;}];";
+  var testCodeSource = {
+    getCode : function() { return testCode; },
+    id: 'test'
+  };
+
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
+
+  var window = {called: false};
+  cmdSrc.onPageLoad(window);
+  this.assertEquals(window.called, true);
+}
+
 function testCommandSourceOneCmdWorks() {
   var testCode = "function cmd_foo_thing() { return 5; }";
   var testCodeSource = {

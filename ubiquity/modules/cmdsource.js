@@ -62,6 +62,7 @@ function CommandSource(codeSources, messageService, sandboxFactory,
   this._commands = [];
   this._codeCache = null;
   this._nounTypes = [];
+  this._pageLoadFuncLists = [];
   this._disabledCommands = disabledCommands;
   this.parser = null;
 }
@@ -69,6 +70,24 @@ function CommandSource(codeSources, messageService, sandboxFactory,
 CommandSource.prototype = {
   CMD_PREFIX : "cmd_",
   NOUN_PREFIX : "noun_",
+
+  onPageLoad : function CS_onPageLoad(window) {
+    if (this._codeCache === null)
+      this.refresh();
+
+    for (var i = 0; i < this._pageLoadFuncLists.length; i++)
+      for (var j = 0; j < this._pageLoadFuncLists[i].length; j++) {
+        var pageLoadFunc = this._pageLoadFuncLists[i][j];
+        try {
+          pageLoadFunc(window);
+        } catch (e) {
+          this._messageService.displayMessage(
+            {text: "An exception occurred while running page-load code.",
+             exception: e}
+          );
+        }
+      }
+  },
 
   refresh : function CS_refresh() {
     var shouldLoadCommands = false;
@@ -200,6 +219,7 @@ CommandSource.prototype = {
 
     var commandNames = [];
     var nounTypes = [];
+    var pageLoadFuncLists = [];
 
     for each (sandbox in sandboxes) {
       for (objName in sandbox) {
@@ -216,10 +236,14 @@ CommandSource.prototype = {
 	  nounTypes.push( sandbox[objName] );
         }
       }
+
+      if (sandbox.pageLoadFuncs)
+        pageLoadFuncLists.push(sandbox.pageLoadFuncs);
     }
     this._commands = commands;
     this.commandNames = commandNames;
     this._nounTypes = nounTypes;
+    this._pageLoadFuncLists = pageLoadFuncLists;
 
     if (this.parser) {
       this.parser.setCommandList(this._commands);

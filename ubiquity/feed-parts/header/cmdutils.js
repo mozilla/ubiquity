@@ -281,38 +281,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 CmdUtils.onPageLoad = function onPageLoad( callback ) {
   var safeCallback = Utils.safeWrapper(callback);
 
-  function _onPageLoad(aEvent) {
-    var isValidPage = false;
-    try {
-      // See if we can get the current document;
-      // if we get an exception, then the page that's
-      // been loaded is probably XUL or something,
-      // and we won't want to deal with it.
-
-      // TODO: This probably won't be accurate if it's the case that
-      // the user has navigated to a different tab by the time the
-      // load event occurs.
-      var doc = Application.activeWindow
-                           .activeTab
-                           .document;
-      isValidPage = true;
-    } catch (e) {}
-    if (isValidPage)
-      safeCallback(aEvent.originalTarget);
-  }
-
-  var appcontent = window.document.getElementById("appcontent");
-  if(!windowGlobals._pageLoadFuncs)
-    windowGlobals._pageLoadFuncs = [];
-  windowGlobals._pageLoadFuncs.push(_onPageLoad);
-
-  _onPageLoad.remove = function _onPageLoad_remove() {
-    appcontent.removeEventListener("DOMContentLoaded",
-                                   _onPageLoad,
-                                   true);
-  };
-
-  appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
+  pageLoadFuncs.push(safeCallback);
 };
 
 CmdUtils.setLastResult = function setLastResult( result ) {

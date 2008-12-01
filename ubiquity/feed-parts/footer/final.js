@@ -39,23 +39,8 @@
 // necessary post-processing and other finalization on the
 // contents of the sandbox.
 
-// Assign a default command icon for anything that doesn't explicitly
-// have an icon set.
-
-var CMD_PREFIX = "cmd_";
-var DEFAULT_CMD_ICON = "";
-
-for (name in this)
-  if (name.indexOf(CMD_PREFIX) == 0) {
-    var cmd = this[name];
-
-    if (!cmd.icon)
-      cmd.icon = DEFAULT_CMD_ICON;
-  }
-
-if (window.location == "chrome://browser/content/browser.xul") {
-  // We're being loaded in the browser.
-
+(function()
+{
   function findFunctionsWithPrefix(prefix) {
     var funcs = [];
 
@@ -65,12 +50,6 @@ if (window.location == "chrome://browser/content/browser.xul") {
 
     return funcs;
   }
-  
-  // Remove any old page-load event listeners.
-  if (windowGlobals._pageLoadFuncs)
-    for (var i = 0; i < windowGlobals._pageLoadFuncs.length; i++)
-      windowGlobals._pageLoadFuncs[i].remove();
-  windowGlobals._pageLoadFuncs = [];
 
   // Configure all functions starting with "pageLoad_" to be called
   // whenever a page is loaded.
@@ -90,5 +69,4 @@ if (window.location == "chrome://browser/content/browser.xul") {
   // Configure all functions starting with "startup_" to be called on
   // Firefox startup.
   callRunOnceFunctions(globals, "startup_");
-
-}
+})();
