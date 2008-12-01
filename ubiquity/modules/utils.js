@@ -42,6 +42,25 @@ var Utils = {};
 
 Utils.__globalObject = this;
 
+Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
+  if (!stackFrame)
+    stackFrame = Components.stack.caller;
+
+  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+                       .getService(Components.interfaces.nsIConsoleService);
+  var scriptError = Components.classes["@mozilla.org/scripterror;1"]
+                    .createInstance(Components.interfaces.nsIScriptError);
+  var aSourceName = stackFrame.filename;
+  var aSourceLine = stackFrame.sourceLine;
+  var aLineNumber = stackFrame.lineNumber;
+  var aColumnNumber = null;
+  var aFlags = scriptError.warningFlag;
+  var aCategory = "ubiquity javascript";
+  scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
+                   aColumnNumber, aFlags, aCategory);
+  consoleService.logMessage(scriptError);
+};
+
 Utils.encodeJson = function encodeJson(object) {
   var json = Components.classes["@mozilla.org/dom/json;1"]
              .createInstance(Components.interfaces.nsIJSON);

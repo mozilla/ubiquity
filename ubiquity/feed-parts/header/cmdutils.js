@@ -743,22 +743,9 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
 // will break backwards compatibility with some legacy third-party
 // command feeds.
 var makeSearchCommand = function deprecated_makeSearchCommand() {
-  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-                       .getService(Components.interfaces.nsIConsoleService);
-  var scriptError = Components.classes["@mozilla.org/scripterror;1"]
-                    .createInstance(Components.interfaces.nsIScriptError);
-  var aMessage = ("makeSearchCommand() is deprecated; please use " +
-                  "CmdUtils.makeSearchCommand() instead.");
-  var aSourceName = feed.id;
-  var aSourceLine = null;
-  var aLineNumber = null;
-  var aColumnNumber = null;
-  var aFlags = scriptError.warningFlag;
-  var aCategory = "ubiquity javascript";
-  scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
-                   aColumnNumber, aFlags, aCategory);
-  consoleService.logMessage(scriptError);
-
+  Utils.reportWarning("makeSearchCommand() is deprecated; please use " +
+                      "CmdUtils.makeSearchCommand() instead.",
+                      Components.stack.caller);
   return CmdUtils.makeSearchCommand.apply(CmdUtils, arguments);
 };
 
