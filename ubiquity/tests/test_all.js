@@ -120,6 +120,7 @@ function testXhtmlCodeSourceWorks() {
   this.assert(xcsCode == code,
               "code must be '" + code + "' (is '" + xcsCode + "')");
   this.assert(xcs.dom, "xcs.dom must be truthy.");
+  this.assertEquals(xcs.getCode(), xcsCode);
 }
 
 function testUtilsUrlWorksWithNsURI() {
