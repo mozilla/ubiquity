@@ -146,6 +146,8 @@ RemoteUriCodeSource.prototype = {
 function LocalUriCodeSource(uri) {
   this.id = uri;
   this.uri = uri;
+  this._cached = null;
+  this._cachedTimestamp = 0;
 }
 
 LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
@@ -157,6 +159,15 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 
 LocalUriCodeSource.prototype = {
   getCode : function LUCS_getCode() {
+    var file = Utils.url(this.uri)
+               .QueryInterface(Components.interfaces.nsIFileURL).file;
+    var lastModifiedTime = file.lastModifiedTime;
+
+    if (this._cached && this._cachedTimestamp == lastModifiedTime)
+      return this._cached;
+
+    this._cachedTimestamp = lastModifiedTime;
+
     var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
               .createInstance(Ci.nsIXMLHttpRequest);
     req.open('GET', this.uri, false);
@@ -165,9 +176,10 @@ LocalUriCodeSource.prototype = {
     /* TODO if you have a bookmark to a local file, and the expected file
        isn't there, this will throw an exception that takes Ubiquity down
        with it. */
-    if (req.status == 0)
-      return req.responseText;
-    else
+    if (req.status == 0) {
+      this._cached = req.responseText;
+      return this._cached;
+    } else
       // TODO: Throw an exception or display a message.
       return "";
   }
