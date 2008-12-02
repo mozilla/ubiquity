@@ -174,8 +174,8 @@ SuggestionMemory.prototype = {
     /* Return the top (numResults) number of suggestions that have the highest
      * correlation with (input), sorted.
      * May return fewer than numResults, if there aren't enough suggestions in
-     * the table.
-     */
+     * the table.*/
+
     let fetchSql = "SELECT suggestion FROM ubiquity_suggestion_memory " +
                    "WHERE id_string = ?1 AND input = ?2 ORDER BY score DESC " +
                    "LIMIT ?3";

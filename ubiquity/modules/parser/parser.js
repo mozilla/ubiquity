@@ -127,7 +127,7 @@ NLParser.Parser.prototype = {
 //         if (verb.usesNounType(noun)) {
 //           matchingVerbs.push(verb);
 //           continue;
- /         }
+//         }
 //       }
 //     }
 //     for each(verb in matchingVerbs) {

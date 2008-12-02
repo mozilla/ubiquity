@@ -920,7 +920,6 @@ function testSuggestionMemory() {
   this.assert(suggMem2.getScore( "p", "quinine" ) == 0 );
 
   // Now test the getTopRanked function:
-
   var topRankedQ = suggMem2.getTopRanked("q", 5);
   this.assert(topRankedQ.length == 2, "length of q should be two");
   this.assert(topRankedQ[0] == "quinine");
