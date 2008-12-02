@@ -1546,10 +1546,6 @@ function getLocalFileAsUtf8(url) {
   return req.responseText;
 }
 
-function testSkip() {
-  throw new this.SkipTestError();
-}
-
 
 // TODO: This is a horrible workaround; modifying the tests to use
 // localeutils.js makes them unreadable and hard to maintain, but there
