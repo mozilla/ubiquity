@@ -34,6 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["SkinSvc"];
+
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
@@ -52,6 +54,8 @@ var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
                 .getService(Ci.nsIProperties);
 var _storSvc = Cc["@mozilla.org/storage/service;1"]
                  .getService(Ci.mozIStorageService);
+var Application = Cc["@mozilla.org/fuel/application;1"]
+                 .getService(Ci.fuelIApplication);
 
 function _connectToDatabase() {
   // Only create a new connection if we don't already have one open.
@@ -59,24 +63,16 @@ function _connectToDatabase() {
     // We want to put the file in the profile directory
     var file = _dirSvc.get("ProfD", Ci.nsIFile);
     file.append(SQLITE_FILE);
-    _gDatabaseConnection = SkinInstaller.openDatabase(file);
+    _gDatabaseConnection = SkinSvc.openDatabase(file);
   }
   return _gDatabaseConnection;
 }
 
-function SkinInstaller() {
-  if (SkinInstaller.__singleton)
-    return SkinInstaller.__singleton;
-
+function SkinSvc() {
   this._init();
-  this.__install(window);
-  
-  SkinInstaller.__singleton = this;
-  return SkinInstaller.__singleton;
 }
 
-
-SkinInstaller.prototype = {
+SkinSvc.prototype = {
   
   SKIN_PREF : "extensions.ubiquity.skin",
   
@@ -127,25 +123,31 @@ SkinInstaller.prototype = {
                      "chrome://ubiquity/skin/skins/default.css"));
   },
   
+  //Unregister any current skins
+  //And load this new skin
+  loadSkin: function loadSkin(newSkinPath){
+    var sss = Cc["@mozilla.org/content/style-sheet-service;1"]
+      .getService(Ci.nsIStyleSheetService);
+    
+    try {
+      // Remove the previous skin CSS
+      var oldBrowserCss = this.getCurrentSkin();
+      if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
+        sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
+    } catch(e) {
+      // do nothing      
+    }
+    //Load the new skin CSS 
+    var browserCss = Utils.url(newSkinPath);
+    sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
+  },
+  
   //Change the SKIN_PREF to the new skin
   //And load it as the current skin
   setCurrentSkin: function setCurrentSkin(newSkinPath){
     try {
-      var sss = Cc["@mozilla.org/content/style-sheet-service;1"]
-        .getService(Ci.nsIStyleSheetService);
-      //Load the new skin CSS 
-      var browserCss = Utils.url(newSkinPath);
-      sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
-
-      try {
-        // Remove the previous skin CSS
-        var oldBrowserCss = this.getCurrentSkin();
-        if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
-          sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
-      } catch(e) {
-        // do nothing      
-      }
-
+      
+      this.loadSkin(newSkinPath);
       Application.prefs.setValue(this.SKIN_PREF, newSkinPath);
       this._msgService.displayMessage("Your Ubiquity skin has been changed!");
 
@@ -158,7 +160,7 @@ SkinInstaller.prototype = {
 }
 
 
-SkinInstaller.prototype.__install = function __install(window, callback) {
+SkinSvc.prototype.installToWindow = function installToWindow(window) {
   
   var self = this;
   
@@ -229,7 +231,7 @@ SkinInstaller.prototype.__install = function __install(window, callback) {
             self.setCurrentSkin(skinUrl);
           }else{
             //Get the CSS from the remote file
-            jQuery.ajax({url: skinUrl,
+            window.jQuery.ajax({url: skinUrl,
               dataType: "text",
               success: onSuccess});
           }
@@ -279,7 +281,7 @@ SkinInstaller.prototype.__install = function __install(window, callback) {
 
 //Static functions
 
-SkinInstaller.openDatabase = function openDatabase(file) {
+SkinSvc.openDatabase = function openDatabase(file) {
   /* If the pointed-at file doesn't already exist, it means the database
    * has never been initialized, so we'll have to do it now by running
    * the CREATE TABLE sql. */

@@ -56,7 +56,8 @@ function ubiquitySetup()
                           jsm);
   Components.utils.import("resource://ubiquity-modules/cmdmanager.js",
                           jsm);
-
+  Components.utils.import("resource://ubiquity-modules/skinsvc.js",
+                          jsm);
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
 
@@ -65,13 +66,25 @@ function ubiquitySetup()
     [],
     []
   );
+  
 
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
                                       nlParser);
 
-  //install SkinInstaller
-  var skinInstaller = new SkinInstaller();
+  //Install skin detector and load current skin
+  var skinService = new jsm.SkinSvc();
+  skinService.installToWindow(window);
+  var url = skinService.getCurrentSkin();
+  //For backwards compatibility since in 0.1.2
+  //The pref was "default" or "old"
+  //Now, we are storing the complete file path in the pref.
+  if(url == "default" || url == "old"){
+    Application.prefs.setValue("extensions.ubiquity.skin",
+             "chrome://ubiquity/skin/skins/default.css");
+    url = "chrome://ubiquity/skin/skins/default.css";
+  }
+  skinService.loadSkin(url);
 
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument
