@@ -1453,6 +1453,12 @@ function testUtilsTrim() {
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
 
+function testUtilsComputeCrpytoHash() {
+  var str = "hello world";
+  this.assert(Utils.computeCryptoHash("md5", str) == "5eb63bbbe01eeed093cb22bb8f5acdc3");
+  this.assert(Utils.computeCryptoHash("sha1", str) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+}
+
 function getUbiquityComponent(test) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;

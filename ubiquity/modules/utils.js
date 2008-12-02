@@ -386,3 +386,24 @@ Utils.History = {
     return count;
   }
 }
+
+
+// valid hash algorithms are: MD2, MD5, SHA1, SHA256, SHA384, SHA512
+Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = "UTF-8";
+  var result = {};
+  var data = converter.convertToByteArray(str, result);
+  var crypto = Components.classes["@mozilla.org/security/hash;1"]
+                          .createInstance(Components.interfaces.nsICryptoHash);
+  crypto.initWithString(algo);
+  crypto.update(data, data.length);
+  var hash = crypto.finish(false);
+
+  function toHexString(charCode) {
+    return ("0" + charCode.toString(16)).slice(-2);
+  }
+  var hashString = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+  return hashString;
+};
