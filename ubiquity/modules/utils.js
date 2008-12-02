@@ -240,18 +240,9 @@ Utils.paramsToString = function paramsToString(params) {
       );
     }
   }
-  function isArray(val) {
-    if (typeof val != "object")
-      return false;
-    if (val == null)
-      return false;
-    if (val.constructor.name != "Array")
-      return false;
-    return true;
-  }
   for (key in params) {
     // note: explicitly ignoring values that are objects/functions/undefined!
-    if (isArray(params[key])) {
+    if (Utils.isArray(params[key])) {
       params[key].forEach(function(item) {
         addPair(key + "[]", item);
       });
@@ -375,6 +366,15 @@ Utils.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
 
+Utils.isArray = function isArray(val) {
+  if (typeof val != "object")
+    return false;
+  if (val == null)
+    return false;
+  if (val.constructor.name != "Array")
+    return false;
+  return true;
+}
 
 Utils.History = {
   visitsToDomain : function visitsToDomain( domain ) {

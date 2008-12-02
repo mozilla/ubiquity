@@ -1482,7 +1482,10 @@ function testUtilsParamsToString() {
   };
   expected = "?multiple%5B%5D=one&multiple%5B%5D=two&multiple%5B%5D=three";
   this.assert(Utils.paramsToString(data) == expected);
+}
 
+function testUtilsIsArray() {
+  this.assert(Utils.isArray([]));
 }
 
 function getUbiquityComponent(test) {
