@@ -168,7 +168,29 @@ SuggestionMemory.prototype = {
     if (! this._table[input][suggestion])
       return 0;
     return this._table[input][suggestion];
+  },
+
+  getTopRanked: function(input, numResults) {
+    /* Return the top (numResults) number of suggestions that have the highest
+     * correlation with (input), sorted.
+     * May return fewer than numResults, if there aren't enough suggestions in
+     * the table.
+     */
+    let fetchSql = "SELECT suggestion FROM ubiquity_suggestion_memory " +
+                   "WHERE id_string = ?1 AND input = ?2 ORDER BY score DESC " +
+                   "LIMIT ?3";
+    let fetchStmt = this._createStatement(fetchSql);
+    fetchStmt.bindUTF8StringParameter(0, this._id);
+    fetchStmt.bindUTF8StringParameter(1, input);
+    fetchStmt.bindInt32Parameter(2, numResults);
+    let retVals = [];
+    while (fetchStmt.executeStep()) {
+      retVals.push(fetchStmt.getUTF8String(0));
+    }
+    fetchStmt.finalize();
+    return retVals;
   }
+
 };
 
 // Static functions

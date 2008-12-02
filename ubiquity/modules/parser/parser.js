@@ -124,10 +124,10 @@ NLParser.Parser.prototype = {
 //     }
 //     for each(verb in this._verbList) {
 //       for each(noun in matchingNouns) {
-// 	if (verb.usesNounType(noun)) {
+//         if (verb.usesNounType(noun)) {
 //           matchingVerbs.push(verb);
 //           continue;
-// 	}
+ /         }
 //       }
 //     }
 //     for each(verb in matchingVerbs) {
