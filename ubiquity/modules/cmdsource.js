@@ -58,6 +58,7 @@ function CommandSource(codeSources, messageService, sandboxFactory,
   this._hub.attachMethods(this);
   this._sandboxFactory = sandboxFactory;
   this._codeSources = codeSources;
+  this._sbInfos = {};
   this._messageService = messageService;
   this._commands = [];
   this._codeCache = null;
@@ -92,6 +93,11 @@ CommandSource.prototype = {
   refresh : function CS_refresh() {
     var shouldLoadCommands = false;
     var prevCodeCache = this._codeCache ? this._codeCache : {};
+    var ops = {load: [],
+               remove: [],
+               get isEmpty() {
+                 return (this.load.length || this.remove.length);
+               }};
 
     this._codeCache = {};
     for (var codeSource in this._codeSources) {
@@ -104,16 +110,15 @@ CommandSource.prototype = {
 
       if (!(codeSource.id in prevCodeCache) ||
           prevCodeCache[codeSource.id].code != code)
-        shouldLoadCommands = true;
+        ops.load.push(codeSource);
     }
 
-    if (!shouldLoadCommands)
-      for (var id in prevCodeCache)
-        if (!(id in this._codeCache))
-          shouldLoadCommands = true;
+    for (var id in prevCodeCache)
+      if (!(id in this._codeCache))
+        ops.remove.push(id);
 
-    if (shouldLoadCommands)
-      this._loadCommands();
+    if (ops.isEmpty)
+      this._loadCommands(ops);
   },
 
   _isCmdDisabled : function CS__isCmdDisabled(name) {
@@ -129,22 +134,91 @@ CommandSource.prototype = {
     }
   },
 
-  _loadCommands : function CS__loadCommands() {
-    var commands = {};
-    var sandboxes = {};
+  _makeCmdForObj : function CS__makeCmdForObj(sandbox, objName) {
+    var cmdName = objName.substr(this.CMD_PREFIX.length);
+    cmdName = cmdName.replace(/_/g, "-");
+    var cmdFunc = sandbox[objName];
+    var self = this;
 
-    for (var codeSource in this._codeSources) {
+    var cmd = {
+      name : cmdName,
+      icon : cmdFunc.icon,
+      execute : function CS_execute(context, directObject, modifiers) {
+        sandbox.context = context;
+        return cmdFunc(directObject, modifiers);
+      },
+      get disabled() { return self._isCmdDisabled(cmdName); },
+      set disabled(value) { return self._setCmdDisabled(cmdName, value); }
+    };
+    // Attach optional metadata to command object if it exists
+    if (cmdFunc.preview)
+      cmd.preview = function CS_preview(context, directObject, modifiers,
+                                        previewBlock) {
+        sandbox.context = context;
+        return cmdFunc.preview(previewBlock, directObject, modifiers);
+      };
+
+    var propsToCopy = [
+      "DOLabel",
+      "DOType",
+      "DODefault",
+      "author",
+      "homepage",
+      "contributors",
+      "license",
+      "description",
+      "help",
+      "synonyms",
+      "previewDelay"
+    ];
+
+    propsToCopy.forEach(function CS_copyProp(prop) {
+      if (cmdFunc[prop])
+        cmd[prop] = cmdFunc[prop];
+      else
+        cmd[prop] = null;
+    });
+
+    if (cmd.previewDelay === null)
+      // Default delay to wait before calling a preview function, in ms.
+      cmd.previewDelay = 250;
+
+    if (cmdFunc.modifiers) {
+      cmd.modifiers = cmdFunc.modifiers;
+    } else {
+      cmd.modifiers = {};
+    }
+    if (cmdFunc.modifierDefaults) {
+      cmd.modifierDefaults = cmdFunc.modifierDefaults;
+    } else {
+      cmd.modifierDefaults = {};
+    }
+    return cmd;
+  },
+
+  _executeOps : function CS__executeOps(ops) {
+    for (var i = 0; i < ops.remove.length; i++)
+      delete this._sbInfos[ops.remove[i]];
+
+    for (i = 0; i < ops.load.length; i++) {
+      var codeSource = ops.load[i];
       var id = codeSource.id;
       var code = this._codeCache[id].code;
       var codeSections = this._codeCache[id].codeSections;
-      sandboxes[id] = this._sandboxFactory.makeSandbox(codeSource);
+      var sbInfo = {
+        sandbox: this._sandboxFactory.makeSandbox(codeSource),
+        commands: {},
+        commandNames: [],
+        nounTypes: [],
+        pageLoadFuncs: []
+      };
 
       try {
         if (!codeSections)
           codeSections = [{length: code.length,
                            filename: id}];
         this._sandboxFactory.evalInSandbox(code,
-                                           sandboxes[id],
+                                           sbInfo.sandbox,
                                            codeSections);
       } catch (e) {
         this._messageService.displayMessage(
@@ -152,94 +226,46 @@ CommandSource.prototype = {
            exception: e}
         );
       }
+
+      for (objName in sbInfo.sandbox) {
+        if (objName.indexOf(this.CMD_PREFIX) == 0) {
+          var cmd = this._makeCmdForObj(sbInfo.sandbox, objName);
+          var icon = sbInfo.sandbox[objName].icon;
+
+          sbInfo.commands[cmd.name] = cmd;
+          sbInfo.commandNames.push({id: objName,
+                                    name: cmd.name,
+                                    icon: icon});
+        }
+        if (objName.indexOf(this.NOUN_PREFIX) == 0)
+          sbInfo.nounTypes.push( sbInfo.sandbox[objName] );
+      }
+
+      if (sbInfo.sandbox.pageLoadFuncs)
+        sbInfo.pageLoadFuncs = sbInfo.sandbox.pageLoadFuncs;
+
+      this._sbInfos[id] = sbInfo;
     }
+  },
 
-    var self = this;
-
-    var makeCmdForObj = function CS_makeCmdForObj(sandbox, objName) {
-      var cmdName = objName.substr(self.CMD_PREFIX.length);
-      cmdName = cmdName.replace(/_/g, "-");
-      var cmdFunc = sandbox[objName];
-
-      var cmd = {
-        name : cmdName,
-        icon : cmdFunc.icon,
-        execute : function CS_execute(context, directObject, modifiers) {
-          sandbox.context = context;
-          return cmdFunc(directObject, modifiers);
-        },
-        get disabled() { return self._isCmdDisabled(cmdName); },
-        set disabled(value) { return self._setCmdDisabled(cmdName, value); }
-      };
-      // Attach optional metadata to command object if it exists
-      if (cmdFunc.preview)
-        cmd.preview = function CS_preview(context, directObject, modifiers,
-                                          previewBlock) {
-          sandbox.context = context;
-          return cmdFunc.preview(previewBlock, directObject, modifiers);
-        };
-
-      var propsToCopy = [
-        "DOLabel",
-        "DOType",
-	"DODefault",
-        "author",
-        "homepage",
-        "contributors",
-        "license",
-        "description",
-        "help",
-	"synonyms",
-        "previewDelay"
-      ];
-
-      propsToCopy.forEach(function CS_copyProp(prop) {
-        if (cmdFunc[prop])
-          cmd[prop] = cmdFunc[prop];
-        else
-          cmd[prop] = null;
-      });
-
-      if (cmd.previewDelay === null)
-        // Default delay to wait before calling a preview function, in ms.
-        cmd.previewDelay = 250;
-
-      if (cmdFunc.modifiers) {
-	cmd.modifiers = cmdFunc.modifiers;
-      } else {
-	cmd.modifiers = {};
-      }
-      if (cmdFunc.modifierDefaults) {
-	cmd.modifierDefaults = cmdFunc.modifierDefaults;
-      } else {
-	cmd.modifierDefaults = {};
-      }
-      return cmd;
-    };
-
+  _loadCommands : function CS__loadCommands(ops) {
     var commandNames = [];
     var nounTypes = [];
     var pageLoadFuncLists = [];
+    var commands = {};
 
-    for each (sandbox in sandboxes) {
-      for (objName in sandbox) {
-        if (objName.indexOf(this.CMD_PREFIX) == 0) {
-          var cmd = makeCmdForObj(sandbox, objName);
-          var icon = sandbox[objName].icon;
+    this._executeOps(ops);
 
-          commands[cmd.name] = cmd;
-          commandNames.push({id: objName,
-                             name : cmd.name,
-                             icon : icon});
-        }
-        if (objName.indexOf(this.NOUN_PREFIX) == 0) {
-	  nounTypes.push( sandbox[objName] );
-        }
-      }
-
-      if (sandbox.pageLoadFuncs)
-        pageLoadFuncLists.push(sandbox.pageLoadFuncs);
+    for (id in this._sbInfos) {
+      var sbInfo = this._sbInfos[id];
+      commandNames = commandNames.concat(sbInfo.commandNames);
+      nounTypes = nounTypes.concat(sbInfo.nounTypes);
+      for (name in sbInfo.commands)
+        commands[name] = sbInfo.commands[name];
+      if (sbInfo.pageLoadFuncs.length > 0)
+        pageLoadFuncLists.push(sbInfo.pageLoadFuncs);
     }
+
     this._commands = commands;
     this.commandNames = commandNames;
     this._nounTypes = nounTypes;
