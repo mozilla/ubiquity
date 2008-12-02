@@ -194,6 +194,10 @@ let UbiquitySetup = {
     return lang;
   },
 
+  get version() {
+    return Application.extensions.get("ubiquity@labs.mozilla.com").version;
+  },
+
   __installDefaults: function installDefaults(linkRelCodeService) {
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
@@ -203,6 +207,8 @@ let UbiquitySetup = {
       baseUri = Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
     } else
       baseUri = baseLocalUri;
+
+    baseUri = baseUri.replace("%ITEM_VERSION%", this.version);
 
     linkRelCodeService.installDefaults(baseUri,
                                        baseLocalUri,
