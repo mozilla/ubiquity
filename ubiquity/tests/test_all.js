@@ -1459,6 +1459,32 @@ function testUtilsComputeCrpytoHash() {
   this.assert(Utils.computeCryptoHash("sha1", str) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
 }
 
+function testUtilsParamsToString() {
+  var data = {};
+  var expected = "?";
+  this.assert(Utils.paramsToString(data) == expected);
+  
+  data = {
+    hello: "world"
+  };
+  expected = "?hello=world";
+  this.assert(Utils.paramsToString(data) == expected);
+  
+  data = {
+    hello: "world",
+    life: 42
+  };
+  expected = "?hello=world&life=42";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    multiple: ["one", "two", "three"]
+  };
+  expected = "?multiple%5B%5D=one&multiple%5B%5D=two&multiple%5B%5D=three";
+  this.assert(Utils.paramsToString(data) == expected);
+
+}
+
 function getUbiquityComponent(test) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;

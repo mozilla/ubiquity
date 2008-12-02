@@ -228,19 +228,34 @@ Utils.getCookie = function getCookie(domain, name) {
 
 Utils.paramsToString = function paramsToString(params) {
   var stringPairs = [];
+  function valueTypeIsOk(val) {
+    var whitelist = ["string", "number", "boolean"];
+    var type = typeof val;
+    return whitelist.indexOf(type) > -1;
+  }
   function addPair(key, value) {
-    stringPairs.push(
-      encodeURIComponent(key) + "=" + encodeURIComponent(value)
-    );
+    if (valueTypeIsOk(value)) {
+      stringPairs.push(
+        encodeURIComponent(key) + "=" + encodeURIComponent(value)
+      );
+    }
+  }
+  function isArray(val) {
+    if (typeof val != "object")
+      return false;
+    if (val == null)
+      return false;
+    if (val.constructor.name != "Array")
+      return false;
+    return true;
   }
   for (key in params) {
-    // note: explicitly ignoring values that are objects!
-    if (params[key] instanceof Array) {
+    // note: explicitly ignoring values that are objects/functions/undefined!
+    if (isArray(params[key])) {
       params[key].forEach(function(item) {
-        if(typeof item == "string")
-          addPair(key + "[]", item);
+        addPair(key + "[]", item);
       });
-    } else if (typeof params[key] == "string") {
+    } else {
       addPair(key, params[key]);
     };
   }
