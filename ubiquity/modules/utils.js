@@ -422,3 +422,18 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   var hashString = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
   return hashString;
 };
+
+
+Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = toCharset;
+  return converter.ConvertFromUnicode(text);
+};
+
+Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = fromCharset;
+  return converter.ConvertToUnicode(text);
+};
