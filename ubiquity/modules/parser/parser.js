@@ -85,6 +85,7 @@ NLParser.Parser = function(verbList, nounList, languagePlugin,
     suggestionMemory = new sm.SuggestionMemory("main_parser");
   }
   this._suggestionMemory = suggestionMemory;
+  this._sortGenericVerbCache();
 };
 
 NLParser.Parser.prototype = {
@@ -101,11 +102,8 @@ NLParser.Parser.prototype = {
 
   nounFirstSuggestions: function( selObj ) {
     let suggs = [];
-    let verbsToTry = this._verbsThatUseSpecificNouns;
-
-    // TODO this gets us a list of verb names (maybe empty) not the verb objects --
-    // find a way of turning them into the objects, then concat to verbsToTry.
-    let moreVerbsToTry = this._suggestionMemory.getTopRanked("", 5);
+    let topGenerics = this._rankedVerbsThatUseGenericNouns.slice(0, 5);
+    let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
 
     for each(verb in verbsToTry) {
       let newPPS = new NLParser.PartiallyParsedSentence(verb, {}, selObj, 0);
@@ -162,6 +160,7 @@ NLParser.Parser.prototype = {
 
     if (chosenSuggestion.hasFilledArgs()) {
       this._suggestionMemory.remember("", chosenVerb);
+      this._sortGenericVerbCache();
     }
     if (!chosenSuggestion._cameFromNounFirstSuggestion ) {
       let inputVerb = query.split(" ")[0];
@@ -243,11 +242,32 @@ NLParser.Parser.prototype = {
                        for (x in commandList) ];
 
     this._verbsThatUseSpecificNouns = [];
+    this._rankedVerbsThatUseGenericNouns = [];
     for each ( let verb in this._verbList) {
       if (verb.usesAnySpecificNounType()) {
 	this._verbsThatUseSpecificNouns.push(verb);
+      } else {
+	this._rankedVerbsThatUseGenericNouns.push(verb);
       }
     }
+    if (this._suggestionMemory) {
+      this._sortGenericVerbCache();
+    }
+  },
+
+  _sortGenericVerbCache: function() {
+    var suggMemory = this._suggestionMemory;
+    let sortFunction = function(x, y) {
+      let xScore = suggMemory.getScore("", x._name);
+      let yScore = suggMemory.getScore("", y._name);
+      if (xScore > yScore) {
+        return -1;
+      } else if (yScore > xScore) {
+        return 1;
+      }
+      return 0;
+    };
+    this._rankedVerbsThatUseGenericNouns.sort(sortFunction);
   },
 
   setNounList: function( nounList ) {
