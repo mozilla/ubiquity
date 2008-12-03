@@ -100,42 +100,21 @@ NLParser.Parser.prototype = {
   },
 
   nounFirstSuggestions: function( selObj ) {
-    /*Treats input as a noun, figures out what nounTypes it could be,
-    figures out what verbTypes can take that nounType as input
-    (either for directObject or for modifiers) and returns a list of
-    suggestions based on giving the input to those verbs.*/
     let suggs = [];
-// TODO: We're commenting out this code for now because it's quite
-// processor-intensive and doesn't currently provide a useful list
-// of suggestions. See #343 for more information.
-//     let matchingNouns = [];
-//     let matchingVerbs = [];
-//     let verb;
-//     let noun;
+    let verbsToTry = this._verbsThatUseSpecificNouns;
 
-//     for each(noun in this._nounTypeList) {
-//       if (noun.suggest(selObj.text, selObj.html,
-//                        function dummy() {}).length > 0 )
-// 	matchingNouns.push(noun);
-//       // TODO: nouns can now suggest asynchronously,
-//       // meaning that this is false at first but may become true later.
-//       // What to do then?
-//       // We can pass a real callback to the above...
-//     }
-//     for each(verb in this._verbList) {
-//       for each(noun in matchingNouns) {
-//         if (verb.usesNounType(noun)) {
-//           matchingVerbs.push(verb);
-//           continue;
-//         }
-//       }
-//     }
-//     for each(verb in matchingVerbs) {
-//       suggs.push( new NLParser.PartiallyParsedSentence(verb,
-//                                                        {},
-//                                                        selObj,
-//                                                        0));
-//     }
+    // TODO this gets us a list of verb names (maybe empty) not the verb objects --
+    // find a way of turning them into the objects, then concat to verbsToTry.
+    let moreVerbsToTry = this._suggestionMemory.getTopRanked("", 5);
+
+    for each(verb in verbsToTry) {
+      let newPPS = new NLParser.PartiallyParsedSentence(verb, {}, selObj, 0);
+      // TODO make a better way of having the parsing remember its source than
+      // this encapsulation breaking...
+      newPPS._cameFromNounFirstSuggestion = true;
+      suggs.push( );
+    }
+
     return suggs;
   },
 
@@ -147,7 +126,12 @@ NLParser.Parser.prototype = {
        on the suggestionMemory:*/
     for each( let sugg in this._suggestionList) {
       let suggVerb = sugg._verb._name;
-      let freqScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
+      let freqScore = 0;
+      if (sugg._cameFromNounFirstSuggestion) {
+        freqScore = this._suggestionMemory.getScore("", suggVerb);
+      } else {
+	freqScore = this._suggestionMemory.getScore(inputVerb, suggVerb);
+      }
       sugg.setFrequencyScore(freqScore);
     }
 
@@ -175,13 +159,15 @@ NLParser.Parser.prototype = {
     // query is the whole input, chosenSuggestion is a parsedSentence.
     // This parser only cares about the verb name.
     let chosenVerb = chosenSuggestion._verb._name;
-    let inputVerb = query.split(" ")[0];
-    /* TODO not neccessarily accurate!  Also English-specific!
-     * Input might have just been nouns,
-    // if this was noun-first completion, which means we're remembering
-    // an association from noun input to verb completion, which might be
-    // problematic.  Discuss. */
-    this._suggestionMemory.remember(inputVerb, chosenVerb);
+
+    if (chosenSuggestion.hasFilledArgs()) {
+      this._suggestionMemory.remember("", chosenVerb);
+    }
+    if (!chosenSuggestion._cameFromNounFirstSuggestion ) {
+      let inputVerb = query.split(" ")[0];
+      /* TODO English-specific! */
+      this._suggestionMemory.remember(inputVerb, chosenVerb);
+    }
   },
 
   updateSuggestionList: function( query, context, asyncSuggestionCb ) {
@@ -397,6 +383,18 @@ NLParser.ParsedSentence.prototype = {
     return ( this._argSuggs[arg] != undefined );
   },
 
+  hasFilledArgs: function() {
+    /* True if suggestion has at least one filled argument.
+     False if verb has no arguments to fill, or if it has arguments but
+     none of them are filled. */
+    for (var x in this._argSuggs) {
+      if (this._argSuggs[x] != undefined ) {
+	return true;
+      }
+    }
+    return false;
+  },
+
   equals: function(other) {
     if (this._verb._name != other._verb._name)
       return false;
@@ -429,9 +427,13 @@ NLParser.ParsedSentence.prototype = {
   },
 
   getMatchScores: function() {
-    return [this.frequencyMatchScore,
-	    this.verbMatchScore,
-	    this.argMatchScore];
+    if (this._cameFromNounFirstSuggestion) {
+      return [this.argMatchScore, this.frequencyMatchScore];
+    } else {
+      return [this.frequencyMatchScore,
+	      this.verbMatchScore,
+              this.argMatchScore];
+    }
   },
 
   setFrequencyScore: function( freqScore ) {
@@ -595,8 +597,23 @@ NLParser.PartiallyParsedSentence.prototype = {
         return [];
     }
 
-    for each( let sen in this._parsedSentences) {
-      parsedSentences.push(sen.fillMissingArgsWithDefaults());
+    if (this._cameFromNounFirstSuggestion) {
+      for each( let sen in this._parsedSentences) {
+	if (sen.hasFilledArgs()) {
+	  /* When doing noun-first suggestion, we only want matches that put the
+	   * input or selection into an argument of the verb; therefore, explicitly
+	   * filter out suggestions that fill no arguments.
+	   */
+	  let filledSen = sen.fillMissingArgsWithDefaults();
+	  filledSen._cameFromNounFirstSuggestion = true;
+	  parsedSentences.push( filledSen );
+	}
+      }
+    } else {
+      for each( let sen in this._parsedSentences) {
+	let filledSen = sen.fillMissingArgsWithDefaults();
+	parsedSentences.push( filledSen );
+      }
     }
 
     return parsedSentences;
