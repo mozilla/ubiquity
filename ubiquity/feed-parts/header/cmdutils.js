@@ -39,6 +39,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
@@ -208,13 +211,13 @@ CmdUtils.injectHtml = function injectHtml( html ) {
 
 //Function based on the one i found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
 CmdUtils.copyToClipboard = function copyToClipboard(text){
-   var clipboard = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
-   var transferArea = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
-   var string = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+   var clipboard = Cc['@mozilla.org/widget/clipboard;1'].createInstance(Ci.nsIClipboard);
+   var transferArea = Cc['@mozilla.org/widget/transferable;1'].createInstance(Ci.nsITransferable);
+   var string = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
    transferArea.addDataFlavor('text/unicode');
    string.data = text;
    transferArea.setTransferData("text/unicode", string, text.length * 2);
-   clipboard.setData(transferArea, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+   clipboard.setData(transferArea, null, Ci.nsIClipboard.kGlobalClipboard);
 }
 
 CmdUtils.log = function log(what) {
@@ -223,8 +226,8 @@ CmdUtils.log = function log(what) {
     return;
 
   var logPrefix = "Ubiquity: ";
-  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Components.interfaces.nsIWindowMediator);
+  var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Ci.nsIWindowMediator);
   var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
 
   if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
@@ -354,8 +357,8 @@ CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/pre
 // -----------------------------------------------------------------
 
 CmdUtils.getHiddenWindow = function getHiddenWindow() {
-  return Components.classes["@mozilla.org/appshell/appShellService;1"]
-                   .getService(Components.interfaces.nsIAppShellService)
+  return Cc["@mozilla.org/appshell/appShellService;1"]
+                   .getService(Ci.nsIAppShellService)
                    .hiddenDOMWindow;
 }
 
@@ -418,8 +421,8 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 * CmdUtils.savePassword( {name:'my command', username:'myUserName', password:'gu3ssm3'} )
 */
 CmdUtils.savePassword = function savePassword( opts ){
-  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
-  var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1", Components.interfaces.nsILoginInfo, "init");
+  var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+  var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1", Ci.nsILoginInfo, "init");
   //var loginInfo = new nsLoginInfo(hostname, formSubmitURL, httprealm, username, password, usernameField, passwordField);
   var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'UbiquityInformation' + opts.name, null, opts.username, opts.password, "", "");
 
@@ -445,7 +448,7 @@ CmdUtils.savePassword = function savePassword( opts ){
 * You will get as return an array of { username:'', password:'' } objects.
 */
 CmdUtils.retrieveLogins = function retrieveLogins( name ){
-  var passwordManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+  var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
 
   var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
   var returnedLogins = [];
@@ -680,7 +683,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
             doc.execCommand("insertHTML", false, query + "<br/>" + html);
           }
           else if (CmdUtils.getSelection()) {
-	    CmdUtils.setSelection(html);
+	          CmdUtils.setSelection(html);
       	  }
       	  else {
       	    displayMessage("Cannot insert in a non-editable space. Use " +

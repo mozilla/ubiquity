@@ -38,6 +38,9 @@
 
 var EXPORTED_SYMBOLS = ["Utils"];
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 var Utils = {};
 
 Utils.__globalObject = this;
@@ -62,20 +65,19 @@ Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
 };
 
 Utils.encodeJson = function encodeJson(object) {
-  var json = Components.classes["@mozilla.org/dom/json;1"]
-             .createInstance(Components.interfaces.nsIJSON);
+  var json = Cc["@mozilla.org/dom/json;1"]
+             .createInstance(Ci.nsIJSON);
   return json.encode(object);
 };
 
 Utils.decodeJson = function decodeJson(string) {
-  var json = Components.classes["@mozilla.org/dom/json;1"]
-             .createInstance(Components.interfaces.nsIJSON);
+  var json = Cc["@mozilla.org/dom/json;1"]
+             .createInstance(Ci.nsIJSON);
   return json.decode(string);
 };
 
 Utils.__TimerCallback = function __TimerCallback(callback) {
   Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-  var Ci = Components.interfaces;
 
   this._callback = callback;
   this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
@@ -103,8 +105,8 @@ Utils.__timerData = {
 //TODO: Allow strings for the first argument like DOM setTimeout() does.
 
 Utils.setTimeout = function setTimeout(callback, delay) {
-  var classObj = Components.classes["@mozilla.org/timer;1"];
-  var timer = classObj.createInstance(Components.interfaces.nsITimer);
+  var classObj = Cc["@mozilla.org/timer;1"];
+  var timer = classObj.createInstance(Ci.nsITimer);
   var timerID = Utils.__timerData.nextID;
   // emulate window.setTimeout() by incrementing next ID by random amount
   Utils.__timerData.nextID += Math.floor(Math.random() * 100) + 1;
@@ -137,7 +139,7 @@ Utils.clearTimeout = function clearTimeout(timerID) {
 Utils.url = function url(spec) {
   var base = null;
   if (typeof(spec) == "object") {
-    if (spec instanceof Components.interfaces.nsIURI)
+    if (spec instanceof Ci.nsIURI)
       // nsIURL object was passed in, so just return it back
       return spec;
 
@@ -146,8 +148,8 @@ Utils.url = function url(spec) {
     spec = spec.uri ? spec.uri : null;
   }
 
-  var ios = Components.classes["@mozilla.org/network/io-service;1"]
-    .getService(Components.interfaces.nsIIOService);
+  var ios = Cc["@mozilla.org/network/io-service;1"]
+    .getService(Ci.nsIIOService);
   return ios.newURI(spec, null, base);
 };
 
@@ -157,31 +159,31 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 
   var postInputStream = null;
   if(postData) {
-    if(postData instanceof Components.interfaces.nsIInputStream) {
+    if(postData instanceof Ci.nsIInputStream) {
       postInputStream = postData;
     } else {
       if(typeof postData == "object") // json -> string
         postData = Utils.paramsToString(postData);
 
-      var stringStream = Components.classes["@mozilla.org/io/string-input-stream;1"]
-        .createInstance(Components.interfaces.nsIStringInputStream);
+      var stringStream = Cc["@mozilla.org/io/string-input-stream;1"]
+        .createInstance(Ci.nsIStringInputStream);
       stringStream.data = postData;
 
-      postInputStream = Components.classes["@mozilla.org/network/mime-input-stream;1"]
-        .createInstance(Components.interfaces.nsIMIMEInputStream);
+      postInputStream = Cc["@mozilla.org/network/mime-input-stream;1"]
+        .createInstance(Ci.nsIMIMEInputStream);
       postInputStream.addHeader("Content-Type", "application/x-www-form-urlencoded");
       postInputStream.addContentLength = true;
       postInputStream.setData(stringStream);
     }
   }
 
-  var windowManager = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Components.interfaces.nsIWindowMediator);
+  var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Ci.nsIWindowMediator);
   var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
   var browser = browserWindow.getBrowser();
 
-  var prefService = Components.classes["@mozilla.org/preferences-service;1"]
-    .getService(Components.interfaces.nsIPrefBranch);
+  var prefService = Cc["@mozilla.org/preferences-service;1"]
+    .getService(Ci.nsIPrefBranch);
   var openPref = prefService.getIntPref("browser.link.open_newwindow");
 
   //2 (default in SeaMonkey and Firefox 1.5): In a new window
@@ -212,13 +214,13 @@ Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
 };
 
 Utils.getCookie = function getCookie(domain, name) {
-  var cookieManager = Components.classes["@mozilla.org/cookiemanager;1"].
-                      getService(Components.interfaces.nsICookieManager);
+  var cookieManager = Cc["@mozilla.org/cookiemanager;1"].
+                      getService(Ci.nsICookieManager);
 
   var iter = cookieManager.enumerator;
   while (iter.hasMoreElements()) {
     var cookie = iter.getNext();
-    if (cookie instanceof Components.interfaces.nsICookie)
+    if (cookie instanceof Ci.nsICookie)
       if (cookie.host == domain && cookie.name == name )
         return cookie.value;
   }
@@ -228,19 +230,25 @@ Utils.getCookie = function getCookie(domain, name) {
 
 Utils.paramsToString = function paramsToString(params) {
   var stringPairs = [];
+  function valueTypeIsOk(val) {
+    var whitelist = ["string", "number", "boolean"];
+    var type = typeof val;
+    return whitelist.indexOf(type) > -1;
+  }
   function addPair(key, value) {
-    stringPairs.push(
-      encodeURIComponent(key) + "=" + encodeURIComponent(value)
-    );
+    if (valueTypeIsOk(value)) {
+      stringPairs.push(
+        encodeURIComponent(key) + "=" + encodeURIComponent(value)
+      );
+    }
   }
   for (key in params) {
-    // note: explicitly ignoring values that are objects!
-    if (params[key] instanceof Array) {
+    // note: explicitly ignoring values that are objects/functions/undefined!
+    if (Utils.isArray(params[key])) {
       params[key].forEach(function(item) {
-        if(typeof item == "string")
-          addPair(key + "[]", item);
+        addPair(key + "[]", item);
       });
-    } else if (typeof params[key] == "string") {
+    } else {
       addPair(key, params[key]);
     };
   }
@@ -270,8 +278,6 @@ Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
 
 Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, successCallback, errorCallback) {
   // based on code from http://mxr.mozilla.org/mozilla/source/browser/components/microsummaries/src/nsMicrosummaryService.js
-  const Cc = Components.classes;
-  const Ci = Components.interfaces;
 
   var rootElement = null;
   var iframe = null;
@@ -360,11 +366,19 @@ Utils.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
 
+Utils.isArray = function isArray(val) {
+  if (typeof val != "object")
+    return false;
+  if (val == null)
+    return false;
+  if (val.constructor.name != "Array")
+    return false;
+  return true;
+}
 
 Utils.History = {
   visitsToDomain : function visitsToDomain( domain ) {
-      var Cc = Components.classes;
-      var Ci = Components.interfaces;
+
       var hs = Cc["@mozilla.org/browser/nav-history-service;1"].
                getService(Ci.nsINavHistoryService);
 
@@ -406,4 +420,19 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   }
   var hashString = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
   return hashString;
+};
+
+
+Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = toCharset;
+  return converter.ConvertFromUnicode(text);
+};
+
+Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = fromCharset;
+  return converter.ConvertToUnicode(text);
 };

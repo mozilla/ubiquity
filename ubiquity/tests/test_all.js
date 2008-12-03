@@ -454,10 +454,14 @@ function testCommandSourceTwoCodeSourcesWork() {
     id: 'source2'
   };
 
-  var cmdSrc = new CommandSource([testCodeSource1,
-                                  testCodeSource2],
-                                undefined,
-                                new SandboxFactory({}, globalObj));
+  var sources = {
+    __iterator__: function() { yield testCodeSource1;
+                               yield testCodeSource2; }
+  };
+
+  var cmdSrc = new CommandSource(sources,
+                                 undefined,
+                                 new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -470,6 +474,28 @@ function testCommandSourceTwoCodeSourcesWork() {
   this.assert(cmd, "Sample command 'bar' should exist.");
   this.assert(cmd.execute() == 6,
               "Sample command 'bar' should execute properly.");
+
+  // Remove code source containing 'bar' command...
+  sources.__iterator__ = function() { yield testCodeSource1; };
+
+  cmdSrc.refresh();
+
+  cmd = cmdSrc.getCommand("foo");
+  this.assert(cmd, "Sample command 'foo' should exist.");
+
+  this.assert(!cmdSrc.getCommand("bar"),
+              "Sample command 'bar' should be removed.");
+
+  // Remove code source containing 'foo' command...
+  sources.__iterator__ = function() { yield testCodeSource2; };
+
+  cmdSrc.refresh();
+
+  cmd = cmdSrc.getCommand("bar");
+  this.assert(cmd, "Sample command 'bar' should exist.");
+
+  this.assert(!cmdSrc.getCommand("foo"),
+              "Sample command 'foo' should be removed.");
 }
 
 function testCommandSourceCatchesExceptionsWhenLoading() {
@@ -1481,6 +1507,35 @@ function testUtilsComputeCrpytoHash() {
   var str = "hello world";
   this.assert(Utils.computeCryptoHash("md5", str) == "5eb63bbbe01eeed093cb22bb8f5acdc3");
   this.assert(Utils.computeCryptoHash("sha1", str) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+}
+
+function testUtilsParamsToString() {
+  var data = {};
+  var expected = "?";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    hello: "world"
+  };
+  expected = "?hello=world";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    hello: "world",
+    life: 42
+  };
+  expected = "?hello=world&life=42";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    multiple: ["one", "two", "three"]
+  };
+  expected = "?multiple%5B%5D=one&multiple%5B%5D=two&multiple%5B%5D=three";
+  this.assert(Utils.paramsToString(data) == expected);
+}
+
+function testUtilsIsArray() {
+  this.assert(Utils.isArray([]));
 }
 
 function getUbiquityComponent(test) {
