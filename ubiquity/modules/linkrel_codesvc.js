@@ -82,8 +82,30 @@ function LinkRelCodeService(annSvc) {
     this._sources = newSources;
   };
 
+  var annotationsChanged = true;
+
+  function onAnnChanged(aURI, aName) {
+    if (aName == CMD_AUTOUPDATE_ANNO ||
+        aName == CMD_CONFIRMED_ANNO ||
+        aName == CMD_REMOVED_ANNO ||
+        aName == CMD_SRC_ANNO)
+      annotationsChanged = true;
+  }
+
+  var annObserver = {
+    onPageAnnotationSet : onAnnChanged,
+    onItemAnnotationSet : function(aItemId, aName) { },
+    onPageAnnotationRemoved : onAnnChanged,
+    onItemAnnotationRemoved: function(aItemId, aName) { }
+  };
+
+  annSvc.addObserver(annObserver);
+
   this.__iterator__ = function LRCS_iterator() {
-    this._updateSourceList();
+    if (annotationsChanged) {
+      this._updateSourceList();
+      annotationsChanged = false;
+    }
 
     for each (source in this._sources) {
       yield source;

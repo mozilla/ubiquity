@@ -162,6 +162,29 @@ let UbiquitySetup = {
 
   setupWindow: function setupWindow(window) {
     gServices.linkRelCodeService.installToWindow(window);
+
+    function onPageLoad(aEvent) {
+      var isValidPage = false;
+      try {
+        // See if we can get the current document;
+        // if we get an exception, then the page that's
+        // been loaded is probably XUL or something,
+        // and we won't want to deal with it.
+
+        // TODO: This probably won't be accurate if it's the case that
+        // the user has navigated to a different tab by the time the
+        // load event occurs.
+        var doc = Application.activeWindow
+                             .activeTab
+                             .document;
+        isValidPage = true;
+      } catch (e) {}
+      if (isValidPage)
+        gServices.commandSource.onPageLoad(aEvent.originalTarget);
+    }
+
+    var appcontent = window.document.getElementById("appcontent");
+    appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
   },
 
   get languageCode() {
@@ -169,6 +192,10 @@ let UbiquitySetup = {
                 .getService(Components.interfaces.nsIPrefBranch);
     var lang = prefs.getCharPref("extensions.ubiquity.language");
     return lang;
+  },
+
+  get version() {
+    return Application.extensions.get("ubiquity@labs.mozilla.com").version;
   },
 
   __installDefaults: function installDefaults(linkRelCodeService) {
@@ -180,6 +207,8 @@ let UbiquitySetup = {
       baseUri = Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
     } else
       baseUri = baseLocalUri;
+
+    baseUri = baseUri.replace("%ITEM_VERSION%", this.version);
 
     linkRelCodeService.installDefaults(baseUri,
                                        baseLocalUri,
@@ -220,6 +249,7 @@ function makeBuiltinGlobalsMaker(msgService) {
       Components: Components,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
+      pageLoadFuncs: [],
       globals: globalObjects[id],
       displayMessage: function() {
         msgService.displayMessage.apply(msgService, arguments);
@@ -237,15 +267,15 @@ function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
 
   var headerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "header/utils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js")
+    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
   ];
   var bodyCodeSources = [
     new LocalUriCodeSource(basePartsUri + "body/onstartup.js"),
     new XhtmlCodeSource(PrefCommands)
   ];
   var footerCodeSources = [
-// TODO: Resolve this
-//    new LocalUriCodeSource(basePartsUri + "footer/final.js")
+    new LocalUriCodeSource(basePartsUri + "footer/final.js")
   ];
 
   if (languageCode == "jp") {

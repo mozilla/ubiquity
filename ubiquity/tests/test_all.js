@@ -60,6 +60,13 @@ function FakeAnnSvc() {
   var urls = {};
 
   var self = this;
+  var observer;
+
+  self.addObserver = function(anObserver) {
+    if (observer)
+      throw new Error("Don't know how to deal w/ multiple observers.");
+    observer = anObserver;
+  };
 
   self.getPagesWithAnnotation = function(name) {
     var results = [];
@@ -89,12 +96,14 @@ function FakeAnnSvc() {
       urls[uri.spec] = uri;
     }
     ann[uri.spec][name] = value;
+    observer.onPageAnnotationSet(uri, name);
   };
 
   self.removePageAnnotation = function(uri, name) {
     if (!self.pageHasAnnotation(uri, name))
       throw Error('No such annotation');
     delete ann[uri.spec][name];
+    observer.onPageAnnotationRemoved(uri, name);
   };
 
   self.EXPIRE_NEVER = 0;
@@ -120,6 +129,7 @@ function testXhtmlCodeSourceWorks() {
   this.assert(xcsCode == code,
               "code must be '" + code + "' (is '" + xcsCode + "')");
   this.assert(xcs.dom, "xcs.dom must be truthy.");
+  this.assertEquals(xcs.getCode(), xcsCode);
 }
 
 function testUtilsUrlWorksWithNsURI() {
@@ -395,6 +405,21 @@ function testIterableCollectionWorks() {
   this.assert(count == 1, "count must be 1.");
 }
 
+function testCommandSourcePageLoadFuncsWork() {
+  var testCode = "pageLoadFuncs = [function(window) {window.called = true;}];";
+  var testCodeSource = {
+    getCode : function() { return testCode; },
+    id: 'test'
+  };
+
+  var cmdSrc = new CommandSource(testCodeSource, undefined,
+                                 new SandboxFactory({}, globalObj));
+
+  var window = {called: false};
+  cmdSrc.onPageLoad(window);
+  this.assertEquals(window.called, true);
+}
+
 function testCommandSourceOneCmdWorks() {
   var testCode = "function cmd_foo_thing() { return 5; }";
   var testCodeSource = {
@@ -406,7 +431,9 @@ function testCommandSourceOneCmdWorks() {
                                  new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
-
+  for(name in cmdSrc.commandNames) {
+    dump("command: " + name + "\n");
+  }
   var cmd = cmdSrc.getCommand("foo-thing");
   this.assert(cmd, "Sample command should exist.");
   this.assert(cmd.execute() == 5,
@@ -427,10 +454,14 @@ function testCommandSourceTwoCodeSourcesWork() {
     id: 'source2'
   };
 
-  var cmdSrc = new CommandSource([testCodeSource1,
-                                  testCodeSource2],
-                                undefined,
-                                new SandboxFactory({}, globalObj));
+  var sources = {
+    __iterator__: function() { yield testCodeSource1;
+                               yield testCodeSource2; }
+  };
+
+  var cmdSrc = new CommandSource(sources,
+                                 undefined,
+                                 new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -443,6 +474,28 @@ function testCommandSourceTwoCodeSourcesWork() {
   this.assert(cmd, "Sample command 'bar' should exist.");
   this.assert(cmd.execute() == 6,
               "Sample command 'bar' should execute properly.");
+
+  // Remove code source containing 'bar' command...
+  sources.__iterator__ = function() { yield testCodeSource1; };
+
+  cmdSrc.refresh();
+
+  cmd = cmdSrc.getCommand("foo");
+  this.assert(cmd, "Sample command 'foo' should exist.");
+
+  this.assert(!cmdSrc.getCommand("bar"),
+              "Sample command 'bar' should be removed.");
+
+  // Remove code source containing 'foo' command...
+  sources.__iterator__ = function() { yield testCodeSource2; };
+
+  cmdSrc.refresh();
+
+  cmd = cmdSrc.getCommand("bar");
+  this.assert(cmd, "Sample command 'bar' should exist.");
+
+  this.assert(!cmdSrc.getCommand("foo"),
+              "Sample command 'foo' should be removed.");
 }
 
 function testCommandSourceCatchesExceptionsWhenLoading() {
@@ -891,6 +944,17 @@ function testSuggestionMemory() {
   this.assert(suggMem2.getScore( "p", "polymascotfoamulate") == 1);
   this.assert(suggMem2.getScore( "p", "popcorn" ) == 0 );
   this.assert(suggMem2.getScore( "p", "quinine" ) == 0 );
+
+  // Now test the getTopRanked function:
+  var topRankedQ = suggMem2.getTopRanked("q", 5);
+  this.assert(topRankedQ.length == 2, "length of q should be two");
+  this.assert(topRankedQ[0] == "quinine");
+  this.assert(topRankedQ[1] == "quetzalcoatl");
+
+  var topRankedP = suggMem2.getTopRanked("p", 5);
+  this.assert(topRankedP.length == 2, "length of p should be two");
+  this.assert(topRankedP[0] == "peas");
+  this.assert(topRankedP[1] == "polymascotfoamulate");
 
 }
 
@@ -1426,6 +1490,41 @@ function testUtilsTrim() {
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
 
+function testUtilsComputeCrpytoHash() {
+  var str = "hello world";
+  this.assert(Utils.computeCryptoHash("md5", str) == "5eb63bbbe01eeed093cb22bb8f5acdc3");
+  this.assert(Utils.computeCryptoHash("sha1", str) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+}
+
+function testUtilsParamsToString() {
+  var data = {};
+  var expected = "?";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    hello: "world"
+  };
+  expected = "?hello=world";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    hello: "world",
+    life: 42
+  };
+  expected = "?hello=world&life=42";
+  this.assert(Utils.paramsToString(data) == expected);
+
+  data = {
+    multiple: ["one", "two", "three"]
+  };
+  expected = "?multiple%5B%5D=one&multiple%5B%5D=two&multiple%5B%5D=three";
+  this.assert(Utils.paramsToString(data) == expected);
+}
+
+function testUtilsIsArray() {
+  this.assert(Utils.isArray([]));
+}
+
 function getUbiquityComponent(test) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
@@ -1512,6 +1611,7 @@ function getLocalFileAsUtf8(url) {
   req.send(null);
   return req.responseText;
 }
+
 
 // TODO: This is a horrible workaround; modifying the tests to use
 // localeutils.js makes them unreadable and hard to maintain, but there

@@ -2,5 +2,5 @@
   particles: ["に", "を", "から", "と", "で", "が", "まで"],
   pronouns: ["これ", "それ", "あれ"],
   defaultPreview: "いらっしゃいませ",
-  verb: "動詞"
+  verb_mark: "動詞"
 }

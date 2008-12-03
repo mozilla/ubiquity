@@ -8,13 +8,11 @@
     <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
     <title>Ubiquity Test Suite</title>
     <script type="text/javascript;version=1.7" src="resource://ubiquity-scripts/jquery.js"></script>
-<!--    <script type="text/javascript;version=1.7" src="resource://ubiquity-tests/framework.js"></script>
-    <script type="text/javascript;version=1.7" src="resource://ubiquity-tests/test_all.js"></script>-->
     <script type="text/javascript;version=1.7">
     
       Components.utils.import("resource://ubiquity-tests/framework.js");
       Components.utils.import("resource://ubiquity-tests/test_all.js");
-  
+      
       function startTestSuite() {
         var outputElement = document.getElementById("test-output");
         var suite = new TestSuite(new HtmlTestResponder(outputElement),
@@ -24,7 +22,7 @@
       
       function showSuccessfulTests() {
         var show = document.getElementById("show-tests-successful").checked;
-        var tests = jQuery("#test-output .success");
+        var tests = jQuery("#test-output .successful");
         if(show)
           tests.show();
         else
@@ -33,7 +31,7 @@
       
       function showSkippedTests() {
         var show = document.getElementById("show-tests-skipped").checked;
-        var tests = jQuery("#test-output .skip");
+        var tests = jQuery("#test-output .skipped");
         if(show)
           tests.show();
         else
@@ -42,7 +40,7 @@
       
       function showFailedTests() {
         var show = document.getElementById("show-tests-failed").checked;
-        var tests = jQuery("#test-output .error");
+        var tests = jQuery("#test-output .failed");
         if(show)
           tests.show();
         else
@@ -50,12 +48,17 @@
       }
       
       function updateCounts() {
-        var numSuccessful = jQuery("#test-output .success").length;
-        jQuery("#test-options label[for='show-tests-successful'] .count").text("(" + numSuccessful + ")");
-        var numSkipped = jQuery("#test-output .skip").length;
-        jQuery("#test-options label[for='show-tests-skipped'] .count").text("(" + numSkipped + ")");
-        var numFailed = jQuery("#test-output .error").length;
-        jQuery("#test-options label[for='show-tests-failed'] .count").text("(" + numFailed + ")");
+        function updateCountFor(type) {
+          var count = jQuery("#test-output ." + type).length;
+          if (count == 1)
+            count = count + " test";
+          else
+            count = count + " tests";
+          jQuery("#test-options label[for='show-tests-" + type + "'] .count").text("(" + count + ")");
+        }
+        updateCountFor("successful");
+        updateCountFor("skipped");
+        updateCountFor("failed");
       }
       
       jQuery(document).ready(function() {
@@ -63,7 +66,12 @@
         jQuery("#show-tests-skipped").change(showSkippedTests);
         jQuery("#show-tests-failed").change(showFailedTests);
         
-        startTestSuite();
+        try {
+          startTestSuite();
+          jQuery("#tests-status").hide();
+        } catch (e) {
+          jQuery("#tests-status").text("Error running test suite: " + e);
+        }
         
         showSuccessfulTests();
         showSkippedTests();
@@ -82,21 +90,24 @@
       <label for="show-tests-successful">
         <input type="checkbox" id="show-tests-successful" />
         Show successful tests
-        <span class="count"></span>
+        <span class="count">(0 tests)</span>
       </label>
       <label for="show-tests-skipped">
         <input type="checkbox" id="show-tests-skipped" />
         Show skipped tests
-        <span class="count"></span>
+        <span class="count">(0 tests)</span>
       </label>
       <label for="show-tests-failed">
         <input type="checkbox" id="show-tests-failed" checked="true" />
         Show failed tests
-        <span class="count"></span>
+        <span class="count">(0 tests)</span>
      </label>
     </div>
     
     <div id="test-output"></div>
+    <div id="tests-status">
+      Tests are running...
+    </div>
     
   </body>
 </html>

@@ -45,21 +45,23 @@ var Utils = {};
 
 Utils.__globalObject = this;
 
+Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
+  if (!stackFrame)
+    stackFrame = Components.stack.caller;
 
-Utils.safeWrapper = function safeWrapper(func) {
-  var wrappedFunc = function safeWrappedFunc() {
-    try {
-      func.apply(this, arguments);
-    } catch (e) {
-      displayMessage(
-        {text: ("An exception occurred while running " +
-                func.name + "()."),
-         exception: e}
-      );
-    }
-  };
-
-  return wrappedFunc;
+  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+                       .getService(Components.interfaces.nsIConsoleService);
+  var scriptError = Components.classes["@mozilla.org/scripterror;1"]
+                    .createInstance(Components.interfaces.nsIScriptError);
+  var aSourceName = stackFrame.filename;
+  var aSourceLine = stackFrame.sourceLine;
+  var aLineNumber = stackFrame.lineNumber;
+  var aColumnNumber = null;
+  var aFlags = scriptError.warningFlag;
+  var aCategory = "ubiquity javascript";
+  scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
+                   aColumnNumber, aFlags, aCategory);
+  consoleService.logMessage(scriptError);
 };
 
 Utils.encodeJson = function encodeJson(object) {
@@ -228,19 +230,25 @@ Utils.getCookie = function getCookie(domain, name) {
 
 Utils.paramsToString = function paramsToString(params) {
   var stringPairs = [];
+  function valueTypeIsOk(val) {
+    var whitelist = ["string", "number", "boolean"];
+    var type = typeof val;
+    return whitelist.indexOf(type) > -1;
+  }
   function addPair(key, value) {
-    stringPairs.push(
-      encodeURIComponent(key) + "=" + encodeURIComponent(value)
-    );
+    if (valueTypeIsOk(value)) {
+      stringPairs.push(
+        encodeURIComponent(key) + "=" + encodeURIComponent(value)
+      );
+    }
   }
   for (key in params) {
-    // note: explicitly ignoring values that are objects!
-    if (params[key] instanceof Array) {
+    // note: explicitly ignoring values that are objects/functions/undefined!
+    if (Utils.isArray(params[key])) {
       params[key].forEach(function(item) {
-        if(typeof item == "string")
-          addPair(key + "[]", item);
+        addPair(key + "[]", item);
       });
-    } else if (typeof params[key] == "string") {
+    } else {
       addPair(key, params[key]);
     };
   }
@@ -358,6 +366,15 @@ Utils.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
 
+Utils.isArray = function isArray(val) {
+  if (typeof val != "object")
+    return false;
+  if (val == null)
+    return false;
+  if (val.constructor.name != "Array")
+    return false;
+  return true;
+}
 
 Utils.History = {
   visitsToDomain : function visitsToDomain( domain ) {
@@ -383,3 +400,39 @@ Utils.History = {
     return count;
   }
 }
+
+
+// valid hash algorithms are: MD2, MD5, SHA1, SHA256, SHA384, SHA512
+Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = "UTF-8";
+  var result = {};
+  var data = converter.convertToByteArray(str, result);
+  var crypto = Components.classes["@mozilla.org/security/hash;1"]
+                          .createInstance(Components.interfaces.nsICryptoHash);
+  crypto.initWithString(algo);
+  crypto.update(data, data.length);
+  var hash = crypto.finish(false);
+
+  function toHexString(charCode) {
+    return ("0" + charCode.toString(16)).slice(-2);
+  }
+  var hashString = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+  return hashString;
+};
+
+
+Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = toCharset;
+  return converter.ConvertFromUnicode(text);
+};
+
+Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
+  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
+                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  converter.charset = fromCharset;
+  return converter.ConvertToUnicode(text);
+};

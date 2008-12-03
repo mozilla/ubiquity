@@ -75,13 +75,13 @@ cmd_save.preview = function( pblock ) {
   pblock.innerHTML = cmd_save.description;
 };
 
-var pageLoad_restorePageAnnotations = function () {
+var pageLoad_restorePageAnnotations = function (window) {
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
                   .getService(Components.interfaces.nsIIOService);
 
-  var uri = ioservice.newURI(window.content.location.href, null, null);
+  var uri = ioservice.newURI(window.location.href, null, null);
 
   var annotationNames = annotationService.getPageAnnotationNames(uri, {});
 

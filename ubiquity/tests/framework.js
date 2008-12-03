@@ -132,17 +132,17 @@ HtmlTestResponder.prototype = {
   },
   
   onSuccess : function(test) {
-    var html = "<p class=\"success\">Passed test " + test.name + ".</p>";
+    var html = "<p class=\"successful\">Passed test " + test.name + ".</p>";
     this._output.innerHTML += html;
   },
 
   onSkipTest : function(test, e) {
-    var html = "<p class=\"skip\">Skipping test " + test.name + ".</p>";
+    var html = "<p class=\"skipped\">Skipping test " + test.name + ".</p>";
     this._output.innerHTML += html;
   },
 
   onException : function(test, e) {
-    var html = "<p class=\"error\">";
+    var html = "<p class=\"failed\">";
     var message = "Error in test " + test.name + ": " + e.message;
     if (e.fileName)
       message += " (in " + e.fileName + ", line " + e.lineNumber + ")";
@@ -154,12 +154,18 @@ HtmlTestResponder.prototype = {
   onFinished : function(successes, failures, skips) {
     var total = successes + failures;
 
-    var html = ("<br/><br/><p>" + successes + " out of " +
+    var html = "<p class=\"summary\">" + successes + " out of " +
                 total + " tests successful (" + failures +
-                " failed).</p>");
+                " failed).</p>";
 
-    if (skips)
-      html += "<p>Additionally, " + skips + " test(s) were skipped.</p>";
+    if (skips) {
+      html += "<p class=\"summary\">Additionally, " + skips + " test";
+      if (skips != 1)
+        html += "s were";
+      else
+        html += " was";
+      html += " skipped.</p>";
+    }
 
     this._output.innerHTML += html;
   }

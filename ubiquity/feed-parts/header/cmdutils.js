@@ -284,38 +284,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 CmdUtils.onPageLoad = function onPageLoad( callback ) {
   var safeCallback = Utils.safeWrapper(callback);
 
-  function _onPageLoad(aEvent) {
-    var isValidPage = false;
-    try {
-      // See if we can get the current document;
-      // if we get an exception, then the page that's
-      // been loaded is probably XUL or something,
-      // and we won't want to deal with it.
-
-      // TODO: This probably won't be accurate if it's the case that
-      // the user has navigated to a different tab by the time the
-      // load event occurs.
-      var doc = Application.activeWindow
-                           .activeTab
-                           .document;
-      isValidPage = true;
-    } catch (e) {}
-    if (isValidPage)
-      safeCallback(aEvent.originalTarget);
-  }
-
-  var appcontent = window.document.getElementById("appcontent");
-  if(!windowGlobals._pageLoadFuncs)
-    windowGlobals._pageLoadFuncs = [];
-  windowGlobals._pageLoadFuncs.push(_onPageLoad);
-
-  _onPageLoad.remove = function _onPageLoad_remove() {
-    appcontent.removeEventListener("DOMContentLoaded",
-                                   _onPageLoad,
-                                   true);
-  };
-
-  appcontent.addEventListener("DOMContentLoaded", _onPageLoad, true);
+  pageLoadFuncs.push(safeCallback);
 };
 
 CmdUtils.setLastResult = function setLastResult( result ) {
@@ -770,30 +739,6 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.name = options.name.toLowerCase();
 
   CmdUtils.CreateCommand(options);
-};
-
-// TODO: This is deprecated behavior from Ubiquity 0.1.1, and will
-// eventually need to be removed.  Note, however, that removing it
-// will break backwards compatibility with some legacy third-party
-// command feeds.
-var makeSearchCommand = function deprecated_makeSearchCommand() {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"]
-                       .getService(Ci.nsIConsoleService);
-  var scriptError = Cc["@mozilla.org/scripterror;1"]
-                    .createInstance(Ci.nsIScriptError);
-  var aMessage = ("makeSearchCommand() is deprecated; please use " +
-                  "CmdUtils.makeSearchCommand() instead.");
-  var aSourceName = feed.id;
-  var aSourceLine = null;
-  var aLineNumber = null;
-  var aColumnNumber = null;
-  var aFlags = scriptError.warningFlag;
-  var aCategory = "ubiquity javascript";
-  scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
-                   aColumnNumber, aFlags, aCategory);
-  consoleService.logMessage(scriptError);
-
-  return CmdUtils.makeSearchCommand.apply(CmdUtils, arguments);
 };
 
 //Requires at least two arguments - name

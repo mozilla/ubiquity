@@ -185,9 +185,9 @@ Ubiquity.prototype = {
   __makeContext: function __makeContext() {
     var context = {focusedWindow : this.__focusedWindow,
                    focusedElement : this.__focusedElement,
+                   window : window,
                    screenX : this.__x,
-                   screenY : this.__y,
-		   lastCmdResult: null };
+                   screenY : this.__y};
     return context;
   },
 
