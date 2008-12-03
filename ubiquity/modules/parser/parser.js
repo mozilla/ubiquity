@@ -255,6 +255,13 @@ NLParser.Parser.prototype = {
   setCommandList: function( commandList ) {
     this._verbList = [ new NLParser.Verb( commandList[x] )
                        for (x in commandList) ];
+
+    this._verbsThatUseSpecificNouns = [];
+    for each ( let verb in this._verbList) {
+      if (verb.usesAnySpecificNounType()) {
+	this._verbsThatUseSpecificNouns.push(verb);
+      }
+    }
   },
 
   setNounList: function( nounList ) {
@@ -750,11 +757,9 @@ NLParser.Verb.prototype = {
     }
   },
 
-  usesNounType: function( nounType ) {
-    //Return true if any of the verb's arguments matches nounType.
-    //Used for doing noun-first suggestions.
+  usesAnySpecificNounType: function() {
     for each ( let arg in this._arguments) {
-      if (arg.type == nounType) {
+      if (!arg.type.rankLast) {
         return true;
       }
     }

@@ -965,6 +965,7 @@ function testSortedBySuggestionMemory() {
 }
 
 function testNounFirstSortedByGeneralFrequency() {
+  // TODO this is really important!!
   // Noun-first suggestions should be ranked by how often the verb has
   // been chosen before, *regardless of input*.
 }
@@ -1419,6 +1420,18 @@ function makeSearchCommand(name) {
     preview: function() {},
     execute: function() {}
   };
+}
+
+function testListOfVerbsThatUseSpecificNounType() {
+  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
+  var verbUsingNounTypeOne = { name: "doStuff",
+			       execute:function(context, directObj) {},
+			       DOLabel:"thing",
+			       DOType:nounTypeOne};
+  var verbs = [makeSearchCommand("IMDB"), makeSearchCommand("amazon-search"), verbUsingNounTypeOne];
+  var parser = makeTestParser("en", verbs);
+  this.assert( parser._verbsThatUseSpecificNouns.length == 1, "Too many or not enough" );
+  this.assert( parser._verbsThatUseSpecificNouns[0]._name == "doStuff", "Name mismatch");
 }
 
 // TODO: Re-enable when we fix #343

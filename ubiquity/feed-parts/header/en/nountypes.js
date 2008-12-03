@@ -66,7 +66,7 @@ var noun_type_contact = {
   callback:function(contacts) {
     noun_type_contact.contactList = contacts;
   },
-  
+
   suggest: function(text, html) {
     if (noun_type_contact.contactList == null) {
       getGmailContacts( noun_type_contact.callback);
@@ -81,10 +81,11 @@ var noun_type_contact = {
       if (c.match(text, "i"))
 	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
     }
-    
-    suggs = noun_type_email.suggest(text, html);
+
+    var suggs = noun_type_email.suggest(text, html);
+    // TODO the next line would be a lot clearer as an if() {} statement.
     suggs.length > 0 ? suggestions.push(suggs[0]) : null;
-    
+
     return suggestions.splice(0, 5);
   }
 };
@@ -107,7 +108,7 @@ var noun_type_email = {
     if(this._regexp.test(text)){
       return [ CmdUtils.makeSugg(text) ];
     }
-    
+
     return [];
   }
 };
@@ -244,11 +245,11 @@ function isAddress( query, callback ) {
  *  -- text: title of the url
  *  -- html: the link
  *  -- data: the favicon
- *  
- *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html) 
+ *
+ *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html)
  */
 noun_type_awesomebar = {
-  
+
   _getHistoryLinks: function(partialSearch, onSearchComplete) {
         function AutoCompleteInput(aSearches) {
             this.searches = aSearches;
@@ -309,7 +310,7 @@ noun_type_awesomebar = {
 
         controller.startSearch(partialSearch);
   },
-  
+
   _getLinks: function(controller, callback) {
       var links = [];
 
@@ -319,7 +320,7 @@ noun_type_awesomebar = {
         if (title.length == 0) { title = url; }
 
         var favicon = controller.getImageAt(i);
-    
+
         callback( CmdUtils.makeSugg(url, title, favicon) );
     }
   },
@@ -633,21 +634,21 @@ var noun_type_url = {
 var noun_type_livemark = {
   _name: "livemark",
   rankLast: true,
-  
+
   /*
   * text & html = Livemark Title (string)
   * data = { itemIds : [] } - an array of itemIds(long long) for the suggested livemarks.
   * These values can be used to reference the livemark in bookmarks & livemark services
   */
-  
+
   getFeeds: function() {
-    
+
     //Find all bookmarks with livemark annotation
      return Components.classes["@mozilla.org/browser/annotation-service;1"]
         .getService(Components.interfaces.nsIAnnotationService)
         .getItemsWithAnnotation("livemark/feedURI", {});
   },
-  
+
   default: function() {
     var feeds = this.getFeeds();
     if( feeds.length > 0 ) {
@@ -655,13 +656,13 @@ var noun_type_livemark = {
     }
     return null;
   },
-  
+
   suggest: function(fragment) {
     fragment = fragment.toLowerCase();
-    
+
     var suggestions = [];
     var allFeeds = this.getFeeds();
-    
+
     if(allFeeds.length > 0) {
       var bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
                                   .getService(Components.interfaces.nsINavBookmarksService);
@@ -673,7 +674,7 @@ var noun_type_livemark = {
                                          { itemIds: [allFeeds[i]] } )); //data.itemIds[]
         }
       }
-     
+
       //option for all livemarks
       var all = "all livemarks";
       if(all.indexOf(fragment) > -1) {
@@ -682,5 +683,5 @@ var noun_type_livemark = {
       return suggestions;
     }
     return [];
-  }  
+  }
 };
