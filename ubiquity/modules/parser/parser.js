@@ -104,13 +104,12 @@ NLParser.Parser.prototype = {
     let suggs = [];
     let topGenerics = this._rankedVerbsThatUseGenericNouns.slice(0, 5);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
-
     for each(verb in verbsToTry) {
       let newPPS = new NLParser.PartiallyParsedSentence(verb, {}, selObj, 0);
       // TODO make a better way of having the parsing remember its source than
       // this encapsulation breaking...
       newPPS._cameFromNounFirstSuggestion = true;
-      suggs.push( );
+      suggs.push( newPPS );
     }
 
     return suggs;

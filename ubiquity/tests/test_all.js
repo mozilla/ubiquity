@@ -692,8 +692,7 @@ function testParseWithModifier() {
   this.assert( dogGotWashedWith == "spork");
 }
 
-// TODO: Re-enable when we fix #343
-function DISABLED_testCmdManagerSuggestsForEmptyInput() {
+function testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
   var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
@@ -714,7 +713,14 @@ function DISABLED_testCmdManagerSuggestsForEmptyInput() {
   fakeSource.getAllNounTypes = function() {
     return [nounTypeOne, nounTypeTwo];
   };
-  var cmdMan = new CommandManager(fakeSource, null, LANG);
+  var fakeContextUtils = {
+    getHtmlSelection: function(context) { return context.htmlSelection; },
+    getSelection: function(context) { return context.textSelection; }
+  };
+  var cmdMan = new CommandManager(fakeSource, null, makeTestParser( null,
+								    null,
+								    null,
+								  fakeContextUtils));
   var getAC = cmdMan.makeCommandSuggester();
   var suggDict = getAC({textSelection:"tree"});
   this.assert( suggDict["Cmd_one"], "cmd one should be in" );
