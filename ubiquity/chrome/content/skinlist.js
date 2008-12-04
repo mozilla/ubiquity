@@ -38,67 +38,39 @@
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
+
+Components.utils.import("resource://ubiquity-modules/skinsvc.js");
+var skinService = new SkinSvc();
+
 function onDocumentLoad() {
-  
-  var MY_ID = "ubiquity@labs.mozilla.com";
-  var em = Cc["@mozilla.org/extensions/manager;1"]
-                     .getService(Ci.nsIExtensionManager);
-  var file = em.getInstallLocation(MY_ID)
-                .getItemFile(MY_ID, "chrome/skin/skins/default.css")
-                .parent.directoryEntries;
-                
-  // Find all skins in chrome/skin/skins (remote skins have been downloaded here)
-  while(file.hasMoreElements()){
-    var entry = file.getNext();
-    entry.QueryInterface(Ci.nsIFile);
-    if(entry.isFile()){
-      createSkinElement(entry);
-    } 
-  }
-  
-  //Handle local skins (stored in preference)
-  var localSkins = Application.prefs.getValue("extensions.ubiquity.localskinlist", "").split("|");
-  for(var i=0;i<localSkins.length;i++){
-    if(localSkins[i] != ""){
-      var url = Utils.url(localSkins[i]);
-      var file = url.QueryInterface(Ci.nsIFileURL)
-                    .file;
-      createSkinElement(file);
-    }
+  var skinList = skinService.getSkinList()
+  for( i in skinList){
+    createSkinElement(skinList[i], i);    
   }
 }
 
-//reads a local file and returns the contents as a string
-function readFile(file){
-  
-  var istream = Cc["@mozilla.org/network/file-input-stream;1"]
-                          .createInstance(Ci.nsIFileInputStream);
-  istream.init(file, 0x01, 0444, 0);
-  istream.QueryInterface(Ci.nsILineInputStream);
+// Thanks to code by Torisugari at 
+// http://forums.mozillazine.org/viewtopic.php?p=921150#921150
+function readFile(url){
+  var ioService=Cc["@mozilla.org/network/io-service;1"]
+    .getService(Ci.nsIIOService);
+  var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"]
+    .getService(Ci.nsIScriptableInputStream);
 
-  // read lines into array
-  var line = {}, lines = [], hasmore;
-  do {
-    hasmore = istream.readLine(line);
-    lines.push(line.value); 
-  } while(hasmore);
-  
-  istream.close();
-  
-  return lines;
+  var channel = ioService.newChannel(url,null,null);
+  var input = channel.open();
+  scriptableStream.init(input);
+  var str = scriptableStream.read(input.available());
+  scriptableStream.close();
+  input.close();
+  return str.split("\n");
 }
 
-function createSkinElement(file){
+function createSkinElement(filepath, id){
   
-  var lines = readFile(file);
-  
+  var lines = readFile(filepath);
   var skinMeta = {};
-  skinMeta.filename = file.leafName; 
-  //get the path to the file
-  var ios = Cc["@mozilla.org/network/io-service;1"]
-                      .getService(Ci.nsIIOService);
-  var url = ios.newFileURI(file);
-  skinMeta.filepath = url.spec;
+  skinMeta.filepath = filepath;
     
   //look for =skin= indicating start of metadata
   var foundMetaData = false;
@@ -111,7 +83,7 @@ function createSkinElement(file){
       break;
     }
   }
-  
+    
   //extract the metadata
   if(foundMetaData){
     for(var i=l; i<lines.length; i++){
@@ -131,12 +103,11 @@ function createSkinElement(file){
   }
   
   if(!skinMeta.name){
-    skinMeta.name = skinMeta.filename;
+    skinMeta.name = skinMeta.filepath;
   }
   
-  //TODO: Find a better way to have unique ids
-  // +, # and some other characters will still screw up the id
-  var skinId = ("skin_" + skinMeta.name).replace(/ /g, "_").replace(/\./g, "");
+
+  var skinId = "skin_" + id;
   
   $('#skin-list').append(
      '<div class="command" id="' + skinId + '">'+
@@ -152,7 +123,7 @@ function createSkinElement(file){
    
    //Add the name and onclick event
    skinEl.find('.name').text(skinMeta.name);
-   skinEl.find('.label').attr("onclick", "changeSkin('"+ skinMeta.filepath + "','" + skinMeta.name + "');");
+   skinEl.find('input').attr("onclick", "skinService.changeSkin('"+ skinMeta.filepath + "');");
    
    //Make the current skin distinct
    var currentSkin = Application.prefs.getValue("extensions.ubiquity.skin", "default");
@@ -177,33 +148,4 @@ function createSkinElement(file){
      skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  + 
                                     "'>" + skinMeta.homepage + "</a>");
    }
-}
-
-function changeSkin(newSkinPath, newSkinName) {
-  
-  try {
-    var sss = Cc["@mozilla.org/content/style-sheet-service;1"]
-      .getService(Ci.nsIStyleSheetService);
-    try {
-      // Remove the previous skin CSS
-      var oldBrowserCss = Utils.url(Application.prefs.getValue("extensions.ubiquity.skin", "default"));
-      if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
-        sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
-    } catch(e) {
-      // do nothing      
-    }
-
-    //Load the new skin CSS 
-    var browserCss = Utils.url(newSkinPath);
-    sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
-    
-    Application.prefs.setValue("extensions.ubiquity.skin", newSkinPath);
-    $('#notify').text("Skin changed to " + newSkinName);
-    
-    
-  } catch(e) {
-    $('#notify').text('Error applying skin: ' + newSkinName);
-    Components.utils.reportError("Error applying Ubiquity skin '" + newSkinName + "': " + e);
-  }
-  
 }

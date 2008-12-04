@@ -43,10 +43,18 @@ var Ci = Components.interfaces;
 var Cc = Components.classes;
 
 var SQLITE_FILE = "ubiquity_skin_memory.sqlite";
+
+//Create database with two default skins
 var SQLITE_SCHEMA =
     "CREATE TABLE ubiquity_skin_memory(" +
     "  download_uri VARCHAR(256)," +
-    "  local_uri VARCHAR(256));";
+    "  local_uri VARCHAR(256));"+ 
+    "INSERT INTO ubiquity_skin_memory " +
+    "VALUES ('chrome://ubiquity/skin/skins/default.css'," +
+    "'chrome://ubiquity/skin/skins/default.css');" + 
+    "INSERT INTO ubiquity_skin_memory " +
+    "VALUES ('chrome://ubiquity/skin/skins/old.css'," +
+    "'chrome://ubiquity/skin/skins/old.css')";
     
 var _gDatabaseConnection = null;
 
@@ -75,6 +83,7 @@ function SkinSvc() {
 SkinSvc.prototype = {
   
   SKIN_PREF : "extensions.ubiquity.skin",
+  DEFAULT_SKIN: "chrome://ubiquity/skin/skins/default.css",
   
   _init: function _init(){
      this._connection = _connectToDatabase();
@@ -119,8 +128,11 @@ SkinSvc.prototype = {
   },
   
   getCurrentSkin: function getCurrentSkin(){
-    return Utils.url(Application.prefs.getValue(this.SKIN_PREF, 
-                     "chrome://ubiquity/skin/skins/default.css"));
+    return Application.prefs.getValue(this.SKIN_PREF, this.DEFAULT_SKIN);
+  },
+  
+  setCurrentSkin: function setCurrentSkin(skinPath){
+    Application.prefs.setValue(this.SKIN_PREF, skinPath);
   },
   
   //Unregister any current skins
@@ -131,32 +143,43 @@ SkinSvc.prototype = {
     
     try {
       // Remove the previous skin CSS
-      var oldBrowserCss = this.getCurrentSkin();
-      if(sss.sheetRegistered(oldBrowserCss, sss.USER_SHEET))
-        sss.unregisterSheet(oldBrowserCss, sss.USER_SHEET);
+      var oldCss = Utils.url(this.getCurrentSkin());
+      if(sss.sheetRegistered(oldCss, sss.USER_SHEET))
+        sss.unregisterSheet(oldCss, sss.USER_SHEET);
     } catch(e) {
       // do nothing      
     }
+    
     //Load the new skin CSS 
-    var browserCss = Utils.url(newSkinPath);
-    sss.loadAndRegisterSheet(browserCss, sss.USER_SHEET);
+    var newCss = Utils.url(newSkinPath);
+    sss.loadAndRegisterSheet(newCss, sss.USER_SHEET);
   },
   
   //Change the SKIN_PREF to the new skin
   //And load it as the current skin
-  setCurrentSkin: function setCurrentSkin(newSkinPath){
+  changeSkin: function changeSkin(newSkinPath){
     try {
-      
       this.loadSkin(newSkinPath);
-      Application.prefs.setValue(this.SKIN_PREF, newSkinPath);
+      this.setCurrentSkin(newSkinPath);
       this._msgService.displayMessage("Your Ubiquity skin has been changed!");
-
     } catch(e) {
       Components.utils.reportError("Error applying Ubiquity skin from'" + 
                                     newSkinPath + "': " + e);
       this._msgService.displayMessage("Error applying Ubiquity skin from " + newSkinPath);
     } 
+  },
+  
+  //Get all installed skins
+  getSkinList: function getSkinList(){
+    var selectSql = "SELECT local_uri FROM ubiquity_skin_memory";
+    var selStmt = this._createStatement(selectSql);
+    var skinList = [];
+    while (selStmt.executeStep()) {
+      skinList.push(selStmt.getUTF8String(0));
+    }
+    return skinList;
   }
+
 }
 
 
@@ -190,7 +213,7 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
 
       function isLocalUrl(skinUrl) {
         var url = Utils.url(skinUrl);
-        if (url.scheme == "file")
+        if (url.scheme == "file" || url.scheme == "chrome")
           return true;
         return false;
       }
@@ -221,14 +244,14 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
             var url = ios.newFileURI(file);
             //Add skin to DB and make it the current skin
             self.addSkin(skinUrl, url.spec);
-            self.setCurrentSkin(url.spec);
+            self.changeSkin(url.spec);
           }
 
           //Only file:// is considered a local url          
           if(isLocalUrl(skinUrl)){
             //Add skin to DB and make it the current skin
             self.addSkin(skinUrl, skinUrl);
-            self.setCurrentSkin(skinUrl);
+            self.changeSkin(skinUrl);
           }else{
             //Get the CSS from the remote file
             window.jQuery.ajax({url: skinUrl,

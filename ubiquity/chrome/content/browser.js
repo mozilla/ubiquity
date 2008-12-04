@@ -72,17 +72,18 @@ function ubiquitySetup()
                                       services.messageService,
                                       nlParser);
 
-  //Install skin detector and load current skin
+  //Install skin detector 
   var skinService = new jsm.SkinSvc();
   skinService.installToWindow(window);
+  
+  //Load current skin
   var url = skinService.getCurrentSkin();
   //For backwards compatibility since in 0.1.2
   //The pref was "default" or "old"
   //Now, we are storing the complete file path in the pref.
   if(url == "default" || url == "old"){
-    Application.prefs.setValue("extensions.ubiquity.skin",
-             "chrome://ubiquity/skin/skins/default.css");
     url = "chrome://ubiquity/skin/skins/default.css";
+    skinService.setCurrentSkin(url);
   }
   skinService.loadSkin(url);
 
