@@ -692,8 +692,7 @@ function testParseWithModifier() {
   this.assert( dogGotWashedWith == "spork");
 }
 
-// TODO: Re-enable when we fix #343
-function DISABLED_testCmdManagerSuggestsForEmptyInput() {
+function testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
   var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
@@ -714,7 +713,14 @@ function DISABLED_testCmdManagerSuggestsForEmptyInput() {
   fakeSource.getAllNounTypes = function() {
     return [nounTypeOne, nounTypeTwo];
   };
-  var cmdMan = new CommandManager(fakeSource, null, LANG);
+  var fakeContextUtils = {
+    getHtmlSelection: function(context) { return context.htmlSelection; },
+    getSelection: function(context) { return context.textSelection; }
+  };
+  var cmdMan = new CommandManager(fakeSource, null, makeTestParser( null,
+								    null,
+								    null,
+								  fakeContextUtils));
   var getAC = cmdMan.makeCommandSuggester();
   var suggDict = getAC({textSelection:"tree"});
   this.assert( suggDict["Cmd_one"], "cmd one should be in" );
@@ -991,9 +997,43 @@ function testSortedBySuggestionMemory() {
 }
 
 function testNounFirstSortedByGeneralFrequency() {
-  // TODO this is really important!!
-  // Noun-first suggestions should be ranked by how often the verb has
-  // been chosen before, *regardless of input*.
+  var fakeContextUtils = {
+    getHtmlSelection: function() { return "Pants"; },
+    getSelection: function() { return "<b>Pants</b>"; }
+  };
+
+  var verbList = [{name: "foo", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+		 {name: "bar", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+		  {name: "baz", DOType: noun_arb_text, DOLabel:"it", execute: function(){}}
+		 ];
+
+  var parser = makeTestParser( LANG, verbList, [noun_arb_text], fakeContextUtils);
+  parser.updateSuggestionList("");
+  var suggestions = parser.getSuggestionList();
+  this.assert(suggestions.length == 3, "Should be 3 suggs");
+  this.assert(suggestions[0]._verb._name == "foo", "Foo should be first...");
+  this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
+  this.assert(suggestions[2]._verb._name == "baz", "Baz should be last...");
+
+  // Now we select "baz" twice and "bar" once...
+  parser.updateSuggestionList("baz");
+  var choice = parser.getSuggestionList()[0];
+  parser.strengthenMemory("baz", choice);
+  parser.strengthenMemory("baz", choice);
+
+  parser.updateSuggestionList("bar");
+  choice = parser.getSuggestionList()[0];
+  parser.strengthenMemory("bar", choice);
+
+  // Now when we try the no-input suggestion again, should be ranked
+  // with baz first, then bar, then foo.
+  parser.updateSuggestionList("");
+  suggestions = parser.getSuggestionList();
+  this.assert(suggestions.length == 3, "Should be 3 suggs");
+  this.assert(suggestions[0]._verb._name == "baz", "Baz should be first...");
+  this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
+  this.assert(suggestions[2]._verb._name == "foo", "Foo should be last...");
+
 }
 
 function testSortedByMatchQuality() {
@@ -1033,8 +1073,7 @@ function testSortedByMatchQuality() {
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
 
-// TODO: Re-enable when we fix #343
-function DISABLED_testSortSpecificNounsBeforeArbText() {
+function testSortSpecificNounsBeforeArbText() {
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var arb_text = {
@@ -1048,15 +1087,14 @@ function DISABLED_testSortSpecificNounsBeforeArbText() {
   var verbList = [{name: "mumble", DOType: arb_text, DOLabel:"stuff"},
                   {name: "wash", DOType: dog, DOLabel: "dog"}];
 
-  var nlParser = makeTestParser(LANG, verbList, [arb_text, dog]);
-
   var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
-  var selObj = NLParser.getSelectionObject( fakeContext );
-  nlParser.updateSuggestionList( "", fakeContext );
-  var suggs = nlParser.getSuggestionList();
+  var suggs = getCompletions( "", verbList, [arb_text, dog], fakeContext );
+
   this.assert( suggs.length == 2, "Should be two suggestions.");
   this.assert( suggs[0]._verb._name == "wash", "First suggestion should be wash");
   this.assert( suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+  this.assert( suggs[0]._cameFromNounFirstSuggestion, "should be noun first");
+  this.assert( suggs[1]._cameFromNounFirstSuggestion, "should be noun first");
 }
 
 function testVerbUsesDefaultIfNoArgProvided() {
@@ -1235,8 +1273,7 @@ function testVerbGetCompletions() {
   this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }
 
-// TODO: Re-enable when we fix #343
-function DISABLED_testTextAndHtmlDifferent() {
+function testTextAndHtmlDifferent() {
   var executedText = null;
   var executedHtml = null;
   var fakeContext = {
@@ -1460,8 +1497,7 @@ function testListOfVerbsThatUseSpecificNounType() {
   this.assert( parser._verbsThatUseSpecificNouns[0]._name == "doStuff", "Name mismatch");
 }
 
-// TODO: Re-enable when we fix #343
-function DISABLED_testWeirdCompletionsThatDontMakeSense() {
+function testWeirdCompletionsThatDontMakeSense() {
   var cmd_imdb = makeSearchCommand("IMDB");
   var cmd_amazon = makeSearchCommand("amazon-search");
   var comps = getCompletions("ac", [cmd_imdb, cmd_amazon], [noun_arb_text]);
