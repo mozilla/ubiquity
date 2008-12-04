@@ -54,7 +54,8 @@
             autoMatchParens: true,
             undoDelay: 100,
             onChange: function() { PrefCommands.setCode(editor.getCode()) },
-            initCallback: function() { editor.win.focus(); editor.jumpToLine(1); }
+            initCallback: function() { editor.win.focus(); editor.jumpToLine(1); },
+            height: textarea.clientHeight+"px"
           });
         var iframe = document.getElementsByTagName("iframe")[0];
         iframe.setAttribute("id", "editor");
