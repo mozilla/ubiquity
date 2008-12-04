@@ -226,4 +226,4 @@ CmdUtils.CreateCommand({
   execute: function (){
     displayMessage( detectEmailProvider() );
   }
-})
+});
