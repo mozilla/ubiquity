@@ -222,7 +222,6 @@ CommandManager.prototype = {
     function getAvailableCommands(context) {
       self.refresh();
       var suggestions = self.getSuggestionListNoInput( context );
-      dump("getAC has " + suggestions.length + " suggestions.\n");
 
       var retVal = {};
       for each (let parsedSentence in suggestions) {
