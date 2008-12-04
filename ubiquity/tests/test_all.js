@@ -997,9 +997,43 @@ function testSortedBySuggestionMemory() {
 }
 
 function testNounFirstSortedByGeneralFrequency() {
-  // TODO this is really important!!
-  // Noun-first suggestions should be ranked by how often the verb has
-  // been chosen before, *regardless of input*.
+  var fakeContextUtils = {
+    getHtmlSelection: function() { return "Pants"; },
+    getSelection: function() { return "<b>Pants</b>"; }
+  };
+
+  var verbList = [{name: "foo", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+		 {name: "bar", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+		  {name: "baz", DOType: noun_arb_text, DOLabel:"it", execute: function(){}}
+		 ];
+
+  var parser = makeTestParser( LANG, verbList, [noun_arb_text], fakeContextUtils);
+  parser.updateSuggestionList("");
+  var suggestions = parser.getSuggestionList();
+  this.assert(suggestions.length == 3, "Should be 3 suggs");
+  this.assert(suggestions[0]._verb._name == "foo", "Foo should be first...");
+  this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
+  this.assert(suggestions[2]._verb._name == "baz", "Baz should be last...");
+
+  // Now we select "baz" twice and "bar" once...
+  parser.updateSuggestionList("baz");
+  var choice = parser.getSuggestionList()[0];
+  parser.strengthenMemory("baz", choice);
+  parser.strengthenMemory("baz", choice);
+
+  parser.updateSuggestionList("bar");
+  choice = parser.getSuggestionList()[0];
+  parser.strengthenMemory("bar", choice);
+
+  // Now when we try the no-input suggestion again, should be ranked
+  // with baz first, then bar, then foo.
+  parser.updateSuggestionList("");
+  suggestions = parser.getSuggestionList();
+  this.assert(suggestions.length == 3, "Should be 3 suggs");
+  this.assert(suggestions[0]._verb._name == "baz", "Baz should be first...");
+  this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
+  this.assert(suggestions[2]._verb._name == "foo", "Foo should be last...");
+
 }
 
 function testSortedByMatchQuality() {
