@@ -153,8 +153,6 @@ let UbiquitySetup = {
       var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
                    .getService(Components.interfaces.nsIAnnotationService);
       var linkRelCodeService = new LinkRelCodeService(annSvc);
-
-      this.__installDefaults(linkRelCodeService);
       var msgService = new CompositeMessageService();
 
       msgService.add(new AlertMessageService());
@@ -178,11 +176,17 @@ let UbiquitySetup = {
 
       disabledStorage.attach(cmdSource);
 
-      cmdSource.refresh();
-
       gServices = {commandSource: cmdSource,
                    linkRelCodeService: linkRelCodeService,
                    messageService: msgService};
+
+      // For some reason, the following function isn't executed
+      // atomically by Javascript; perhaps something being called is
+      // getting the '@mozilla.org/thread-manager;1' service and
+      // spinning via a call to processNextEvent() until some kind of
+      // I/O is finished?
+      this.__installDefaults(linkRelCodeService);
+      cmdSource.refresh();
     }
 
     return gServices;
