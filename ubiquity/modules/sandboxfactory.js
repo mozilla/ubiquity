@@ -36,6 +36,8 @@
 
 EXPORTED_SYMBOLS = ["SandboxFactory"];
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 var defaultTarget = this;
 
 function SandboxFactory(globals, target) {
@@ -69,8 +71,9 @@ function SandboxFactory(globals, target) {
                            "1.8", sandbox);
     this._ubiquityComponent = ubiquity;
   } catch (e) {
-    Components.utils.reportError("Error using nsIUbiquity." +
-                                 "evalInSandbox(): " + e);
+    Utils.reportWarning("nsUbiquity not available, using standard " +
+                        "Components.utils.evalInSandbox() instead (" + e +
+                        ").");
     this._ubiquityComponent = null;
   }
 }
