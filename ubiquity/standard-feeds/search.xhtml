@@ -757,7 +757,6 @@ CmdUtils.CreateCommand({
   },
 
   preview: function(pblock, directObj, modifiers) {
-    CmdUtils.log("previewing weather... :)");
     var location = directObj.text;
     if (location.length < 1) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
