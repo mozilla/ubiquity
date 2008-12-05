@@ -4,3 +4,4 @@ pref("extensions.ubiquity.trustedDomains",
 pref("extensions.ubiquity.skin", "old");
 pref("extensions.ubiquity.standardFeedsUri",
      "https://ubiquity.mozilla.com/xpi/%ITEM_VERSION%/standard-feeds/");
+pref("extensions.ubiquity.enablePageLoadHandlers", true);

@@ -195,7 +195,13 @@ let UbiquitySetup = {
   setupWindow: function setupWindow(window) {
     gServices.linkRelCodeService.installToWindow(window);
 
+    var PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
+
     function onPageLoad(aEvent) {
+      var isEnabled = Application.prefs.getValue(PAGE_LOAD_PREF, true);
+      if (!isEnabled)
+        return;
+
       var isValidPage = false;
       try {
         // See if we can get the current document;
