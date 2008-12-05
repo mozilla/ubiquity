@@ -54,7 +54,7 @@ CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
   if (typeof(context) == "undefined")
     context = CmdUtils.__globalObject.context;
 
-  return ctu.ContextUtils.getHtmlSelection(CmdUtils.__getContext(context));
+  return ctu.ContextUtils.getHtmlSelection(context);
 };
 
 CmdUtils.getSelection = function getSelection(context) {
@@ -65,7 +65,7 @@ CmdUtils.getSelection = function getSelection(context) {
   if (typeof(context) == "undefined")
     context = CmdUtils.__globalObject.context;
 
-  return ctu.ContextUtils.getSelection(CmdUtils.__getContext(context));
+  return ctu.ContextUtils.getSelection(context);
 };
 
 CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
