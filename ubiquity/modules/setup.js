@@ -52,6 +52,8 @@ let Application = Components.classes["@mozilla.org/fuel/application;1"]
 
 let gServices;
 
+let gIframe;
+
 let UbiquitySetup = {
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
@@ -117,6 +119,20 @@ let UbiquitySetup = {
     if (profileDir.contains(extDir, false))
       return true;
     return false;
+  },
+
+  preload: function preload(callback) {
+    var Cc = Components.classes;
+    var Ci = Components.interfaces;
+    var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                       .getService(Ci.nsIAppShellService)
+                       .hiddenDOMWindow;
+
+    gIframe = hiddenWindow.document.createElement("iframe");
+    gIframe.setAttribute("id", "ubiquityFrame");
+    gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.xul");
+    gIframe.addEventListener("pageshow", callback, false);
+    hiddenWindow.document.documentElement.appendChild(gIframe);
   },
 
   createServices: function createServices() {
@@ -219,9 +235,7 @@ let UbiquitySetup = {
 function makeBuiltinGlobalsMaker(msgService) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-  var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
-                     .getService(Ci.nsIAppShellService)
-                     .hiddenDOMWindow;
+  var hiddenWindow = gIframe.contentWindow;
 
   var uris = ["resource://ubiquity-scripts/jquery.js",
               "resource://ubiquity-scripts/template.js"];
@@ -232,6 +246,7 @@ function makeBuiltinGlobalsMaker(msgService) {
                 .loadSubScript(uris[i]);
   }
 
+  Components.utils.reportError("jquery is " + hiddenWindow.jQuery);
   var globalObjects = {};
 
   function makeGlobals(codeSource) {

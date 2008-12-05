@@ -43,8 +43,18 @@ var gUbiquity = null;
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
+function ubiquityPreSetup()
+{
+  var jsm = {};
+  Components.utils.import("resource://ubiquity-modules/setup.js",
+                          jsm);
+  jsm.UbiquitySetup.preload(ubiquitySetup);
+  Components.utils.reportError("finished presetup");
+}
+
 function ubiquitySetup()
 {
+  Components.utils.reportError("in ubiquitysetup");
   var jsm = {};
   Components.utils.import("resource://ubiquity-modules/setup.js",
                           jsm);
@@ -66,16 +76,16 @@ function ubiquitySetup()
     [],
     []
   );
-  
+
 
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
                                       nlParser);
 
-  //Install skin detector 
+  //Install skin detector
   var skinService = new jsm.SkinSvc();
   skinService.installToWindow(window);
-  
+
   //Load current skin
   var url = skinService.getCurrentSkin();
   //For backwards compatibility since in 0.1.2
@@ -177,6 +187,6 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 	  (aEvent.metaKey == (aModifier == 'META')));
 }
 
-window.addEventListener("load", ubiquitySetup, false);
+window.addEventListener("load", ubiquityPreSetup, false);
 window.addEventListener("unload", ubiquityTeardown, false);
 window.addEventListener("keydown", ubiquityKeydown, true);
