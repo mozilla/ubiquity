@@ -122,6 +122,11 @@ let UbiquitySetup = {
   },
 
   preload: function preload(callback) {
+    if (gIframe) {
+      callback();
+      return;
+    }
+
     var Cc = Components.classes;
     var Ci = Components.interfaces;
     var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
@@ -131,7 +136,14 @@ let UbiquitySetup = {
     gIframe = hiddenWindow.document.createElement("iframe");
     gIframe.setAttribute("id", "ubiquityFrame");
     gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.xul");
-    gIframe.addEventListener("pageshow", callback, false);
+    gIframe.addEventListener(
+      "pageshow",
+      function onPageShow() {
+        gIframe.removeEventListener("pageshow", onPageShow, false);
+        callback();
+      },
+      false
+    );
     hiddenWindow.document.documentElement.appendChild(gIframe);
   },
 
@@ -246,7 +258,6 @@ function makeBuiltinGlobalsMaker(msgService) {
                 .loadSubScript(uris[i]);
   }
 
-  Components.utils.reportError("jquery is " + hiddenWindow.jQuery);
   var globalObjects = {};
 
   function makeGlobals(codeSource) {

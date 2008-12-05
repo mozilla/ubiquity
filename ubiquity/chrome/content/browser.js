@@ -43,18 +43,8 @@ var gUbiquity = null;
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
-function ubiquityPreSetup()
-{
-  var jsm = {};
-  Components.utils.import("resource://ubiquity-modules/setup.js",
-                          jsm);
-  jsm.UbiquitySetup.preload(ubiquitySetup);
-  Components.utils.reportError("finished presetup");
-}
-
 function ubiquitySetup()
 {
-  Components.utils.reportError("in ubiquitysetup");
   var jsm = {};
   Components.utils.import("resource://ubiquity-modules/setup.js",
                           jsm);
@@ -187,6 +177,16 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 	  (aEvent.metaKey == (aModifier == 'META')));
 }
 
-window.addEventListener("load", ubiquityPreSetup, false);
+window.addEventListener(
+  "load",
+  function() {
+    var jsm = {};
+    Components.utils.import("resource://ubiquity-modules/setup.js",
+                            jsm);
+    jsm.UbiquitySetup.preload(ubiquitySetup);
+  },
+  false
+);
+
 window.addEventListener("unload", ubiquityTeardown, false);
 window.addEventListener("keydown", ubiquityKeydown, true);
