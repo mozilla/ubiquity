@@ -295,8 +295,12 @@ CmdUtils.setLastResult = function setLastResult( result ) {
 };
 
 // Uses Geo-ip lookup to get your current location.
-CmdUtils.getGeoLocation = function getGeoLocation( ){
-  if( globals.geoLocation ) return globals.geoLocation;
+CmdUtils.getGeoLocation = function getGeoLocation(callback) {
+  if (globals.geoLocation) {
+    if (callback)
+      callback(globals.geoLocation);
+    return globals.geoLocation;
+  }
 
   jQuery.ajax({
     type: "GET",
@@ -314,10 +318,12 @@ CmdUtils.getGeoLocation = function getGeoLocation( ){
         lat: geoip_latitude(),
         "long": geoip_longitude()
       };
+      if (callback)
+        callback(globals.geoLocation);
     }
   });
 
-  return globals.geoLocation;
+  return null;
 };
 
 CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/prefcommands.js
