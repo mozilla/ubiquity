@@ -5,6 +5,7 @@ import subprocess
 import shutil
 import zipfile
 import shutil
+import distutils.dir_util
 from ConfigParser import ConfigParser
 
 # Path to the root of the extension, relative to where this script is
@@ -182,8 +183,10 @@ if __name__ == "__main__":
             if sys.platform == "cygwin":
                 file = 'cygpath.exe -w ' + path_to_extension_root
                 path_to_extension_root = "".join(os.popen(file).readlines()).replace("\n", " ").rstrip()
-            
-            
+
+            extdir = os.path.dirname(extension_file)
+            if not os.path.exists(extdir):
+                distutils.dir_util.mkpath(extdir)
             fileobj = open(extension_file, "w")
             fileobj.write(path_to_extension_root)
             fileobj.close()
