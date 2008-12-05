@@ -569,7 +569,10 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 CmdUtils.previewAjax = function previewAjax(pblock, options) {
   var xhr;
   var newOptions = {};
-  function abort() { xhr.abort(); }
+  function abort() {
+    if (xhr)
+      xhr.abort();
+  }
   for (key in options) {
     if (typeof(options[key]) == 'function')
       newOptions[key] = CmdUtils.previewCallback(pblock,
@@ -590,7 +593,10 @@ CmdUtils.previewGet = function previewGet(pblock,
                                           callback,
                                           type) {
   var xhr;
-  function abort() { xhr.abort(); }
+  function abort() {
+    if (xhr)
+      xhr.abort();
+  }
   var cb = CmdUtils.previewCallback(pblock, callback, abort);
   xhr = jQuery.get(url, data, cb, type);
   return xhr;
