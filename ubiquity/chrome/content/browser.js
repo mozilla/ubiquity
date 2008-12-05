@@ -122,6 +122,14 @@ function ubiquitySetup()
     previewBlock
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
+
+  // Hack to get the default skin to work on Linux, which we don't
+  // support per-pixel alpha transparency on.
+  var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
+                     .getService(Components.interfaces.nsIXULRuntime);
+  if (xulr.OS == "Linux")
+    document.getElementById("transparent-msg-panel")
+            .style.backgroundColor = "#444";
 }
 
 function ubiquityTeardown()
