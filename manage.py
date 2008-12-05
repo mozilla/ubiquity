@@ -78,13 +78,17 @@ def run_python_script(args):
 
 def get_xpcom_info():
     popen = subprocess.Popen(
-        [g_xpcshell_path,
+        [os.path.join(os.path.dirname(g_xpcshell_path),
+                      "run-mozilla.sh"),
+         g_xpcshell_path,
          os.path.join(g_mydir, "get_xpcom_info.js")],
         stdout = subprocess.PIPE
         )
     retval = popen.wait()
     assert retval == 0
-    comsd, os_target, xpcomabi = popen.stdout.read().splitlines()
+    os_target, xpcomabi = popen.stdout.read().splitlines()
+    comsd = os.path.join(os.path.dirname(g_xpcshell_path),
+                         "components")
     return dict(comsd = comsd,
                 os_target = os_target,
                 xpcomabi = xpcomabi)
