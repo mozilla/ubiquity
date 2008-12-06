@@ -77,15 +77,16 @@ function ubiquitySetup()
   skinService.installToWindow(window);
 
   //Load current skin
-  var url = skinService.getCurrentSkin();
+  var skinUrl = skinService.getCurrentSkin();
+  var defaultSkinUrl = "chrome://ubiquity/skin/skins/default.css"
   //For backwards compatibility since in 0.1.2
   //The pref was "default" or "old"
   //Now, we are storing the complete file path in the pref.
-  if(url == "default" || url == "old"){
-    url = "chrome://ubiquity/skin/skins/default.css";
-    skinService.setCurrentSkin(url);
+  if(skinUrl == "default" || skinUrl == "old"){
+    skinUrl = defaultSkinUrl;
+    skinService.setCurrentSkin(skinUrl);
   }
-  skinService.loadSkin(url);
+  skinService.loadSkin(skinUrl);
 
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument
@@ -127,7 +128,7 @@ function ubiquitySetup()
   // support per-pixel alpha transparency on.
   var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
                      .getService(Components.interfaces.nsIXULRuntime);
-  if (xulr.OS == "Linux")
+  if (xulr.OS == "Linux" && skinUrl == defaultSkinUrl)
     document.getElementById("transparent-msg-panel")
             .style.backgroundColor = "#444";
 }
