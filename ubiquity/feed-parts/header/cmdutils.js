@@ -272,7 +272,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
   CmdUtils.injectJavascript(
     "resource://ubiquity-scripts/jquery.js",
     Utils.safeWrapper( function() {
-      var contentJQuery = CmdUtils.getWindow().jQuery;
+      var contentJQuery = CmdUtils.getWindowInsecure().jQuery;
       func(contentJQuery);
     })
   );
