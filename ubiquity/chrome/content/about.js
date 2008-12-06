@@ -38,6 +38,10 @@
 
 Components.utils.import("resource://ubiquity-modules/setup.js");
 
+// TODO: this is also defined in linkrel_codesvc.js - it should only be defined in one place!
+const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
+
+
 function makeRemover(element, info) {
   function onSlideDown() {
     var newElement = makeFeedListElement(info,
