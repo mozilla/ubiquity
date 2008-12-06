@@ -160,11 +160,32 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   } else
     pageInfo.canUpdate = false;
 
+  // Keep a cached copy of our code and update it only when necessary;
+  // it's much faster than constantly pinging the annotation service.
+  var cachedCode;
+
+  function onAnnChanged(aURI, aName) {
+    if (aURI.spec == uri.spec && aName == CMD_SRC_ANNO) {
+      if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
+        cachedCode = annSvc.getPageAnnotation(uri, CMD_SRC_ANNO);
+      else
+        cachedCode = "";
+    }
+  }
+
+  onAnnChanged(uri, CMD_SRC_ANNO);
+
+  var annObserver = {
+    onPageAnnotationSet : onAnnChanged,
+    onItemAnnotationSet : function(aItemId, aName) { },
+    onPageAnnotationRemoved : onAnnChanged,
+    onItemAnnotationRemoved: function(aItemId, aName) { }
+  };
+
+  annSvc.addObserver(annObserver);
+
   pageInfo.getCode = function pageInfo_getCode() {
-    if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
-      return annSvc.getPageAnnotation(uri, CMD_SRC_ANNO);
-    else
-      return "";
+    return cachedCode;
   };
 
   pageInfo.setCode = function pageInfo_setCode(code) {
