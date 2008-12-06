@@ -254,7 +254,7 @@ CmdUtils.log = function log(what) {
 };
 
 CmdUtils.injectJavascript = function injectJavascript(src, callback) {
-  var doc = CmdUtils.getDocumentInsecure();
+  var doc = CmdUtils.getDocument();
 
   var script = doc.createElement("script");
   script.src = src;
@@ -272,7 +272,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
   CmdUtils.injectJavascript(
     "resource://ubiquity-scripts/jquery.js",
     Utils.safeWrapper( function() {
-      var contentJQuery = CmdUtils.getWindowInsecure().jQuery;
+      var contentJQuery = CmdUtils.getWindow().jQuery;
       func(contentJQuery);
     })
   );
