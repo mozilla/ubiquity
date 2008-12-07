@@ -8,7 +8,7 @@ function getTempDbFile() {
                          .getService(Ci.nsIProperties);
   var file = dirSvc.get("TmpD", Ci.nsIFile);
   file.append("testdb.sqlite");
-  file.createUnique(Ci.nsIFile.TYPE_NORMAL_FILE, 0x600);
+  file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0x600);
   return file;
 }
 
