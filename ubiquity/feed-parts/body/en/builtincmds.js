@@ -73,6 +73,17 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  name: "skin-list",
+  synonyms: ["change-skin", "skin-editor"],
+  icon : "chrome://ubiquity/skin/icons/favicon.ico",
+  preview: "Opens the 'Your Skins' page where you can view, change and edit skins",
+  description: "Takes you to the <a href=\"chrome://ubiquity/content/skinlist.html\">Your Skins</a> page.",
+  execute: function(){
+    Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
+  }
+});
+
 
 function startup_openUbiquityWelcomePage()
 {
