@@ -48,6 +48,9 @@ function exportTests(obj) {
       exportedSymbols.push(name);
   }
 
+  if (obj.EXPORTED_SYMBOLS)
+    exportedSymbols = obj.EXPORTED_SYMBOLS.concat(exportedSymbols);
+
   obj.EXPORTED_SYMBOLS = exportedSymbols;
 }
 
@@ -130,7 +133,7 @@ function HtmlTestResponder(outputElement) {
 HtmlTestResponder.prototype = {
   onStartTest : function(test) {
   },
-  
+
   onSuccess : function(test) {
     var html = "<p class=\"successful\">Passed test " + test.name + ".</p>";
     this._output.innerHTML += html;

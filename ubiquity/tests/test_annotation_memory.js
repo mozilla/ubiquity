@@ -2,6 +2,12 @@ Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-tests/framework.js");
 
+EXPORTED_SYMBOLS = ["TestAnnotationMemory"];
+
+function TestAnnotationMemory(test) {
+  return new AnnotationService(getTempConnection(test));
+}
+
 function getTempDbFile() {
   var Ci = Components.interfaces;
   var dirSvc = Components.classes["@mozilla.org/file/directory_service;1"]
