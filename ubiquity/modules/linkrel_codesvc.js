@@ -47,6 +47,8 @@ const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
 const CMD_REMOVED_ANNO = "ubiquity/removed";
 const CMD_URL_ANNO = "ubiquity/commands";
 const CMD_TITLE_ANNO = "ubiquity/title";
+
+// TODO: This is repeated in chrome/content/about.js, which violates DRY.
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 // This class is a collection that yields a code source for every
