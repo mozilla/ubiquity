@@ -1,4 +1,8 @@
 Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity-modules/cmdsource.js");
+Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 
 const Ci = Components.interfaces;
 const Cc = Components.classes;
@@ -17,20 +21,8 @@ function testTagCommand() {
 
   var tagsvc = Cc["@mozilla.org/browser/tagging-service;1"]
                .getService(Ci.nsITaggingService);
-  var iosvc = Cc["@mozilla.org/network/io-service;1"]
-              .getService(Ci.nsIIOService);
 
   Components.utils.import("resource://ubiquity-modules/setup.js");
-  Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
-  Components.utils.import("resource://ubiquity-modules/cmdsource.js");
-  Components.utils.import("resource://ubiquity-modules/parser/parser.js");
-
-  function LOG(aMsg) {
-    aMsg = ("*** UBI TESTS: " + aMsg);
-    Components.classes["@mozilla.org/consoleservice;1"]
-              .getService(Components.interfaces.nsIConsoleService)
-              .logStringMessage(aMsg);
-  }
 
   var services = UbiquitySetup.createServices();
   var cmdSource = services.commandSource;
@@ -39,10 +31,6 @@ function testTagCommand() {
   var cmdManager = new CommandManager(cmdSource, services.messageService,
                                       nlParser);
 
-  function uri(spec) {
-    return iosvc.newURI(spec, null, null);
-  }
-
   function uriHasTags(aURI, aTags) {
     var tags = tagsvc.getTagsForURI(aURI, {});
     return aTags.every(function(aTag) {
@@ -50,7 +38,7 @@ function testTagCommand() {
     }, module);
   }
 
-  var testURI = uri("chrome://ubiquity/content/test.html");
+  var testURI = Utils.url("chrome://ubiquity/content/test.html");
 
   // for cleanup
   var isBookmarked = bmsvc.isBookmarked(testURI);
