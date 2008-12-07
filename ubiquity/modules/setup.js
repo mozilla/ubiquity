@@ -90,7 +90,11 @@ let UbiquitySetup = {
 
                    {page: "search.html",
                     source: "search.xhtml",
-                    title: "Mozilla Web Search Commands"}],
+                    title: "Mozilla Web Search Commands"},
+                    
+                   {page: "image.html",
+                    source: "image.xhtml",
+                    title: "Mozilla Image-Related Commands"}],
 
   __getExtDir: function __getExtDir() {
     let Cc = Components.classes;
