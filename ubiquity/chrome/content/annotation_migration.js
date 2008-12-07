@@ -11,8 +11,24 @@ $(window).ready(
     var markedPages = LRCS.getMarkedPages();
 
     function addFeed(page) {
-      feedList.append('<li><a href="' + page.htmlUri.spec + '">' +
-                      page.title + '</li>');
+      
+      function createLink(data){
+          var confirmUrl = ("chrome://ubiquity/content/confirm-add-command.html?url=" +
+                        encodeURIComponent(page.htmlUri.spec) + "&sourceUrl=" +
+                        encodeURIComponent(page.jsUri.spec) + "&updateCode=" +
+                        encodeURIComponent(data));
+          
+          feedList.append('<li><a href="' + page.htmlUri.spec + '">' +
+                      page.title + ' <a href="' + confirmUrl + '">[resubscribe]</a></li>');
+      }
+      
+      if(page.canUpdate){
+        jQuery.ajax({ url: page.jsUri.spec,
+               dataType: "text",
+               success: createLink });
+      } else {
+        createLink(page.getCode())
+      }
     }
 
     markedPages.forEach(addFeed);
