@@ -381,9 +381,6 @@ function testCommandSourceOneCmdWorks() {
                                  new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
-  for(name in cmdSrc.commandNames) {
-    dump("command: " + name + "\n");
-  }
   var cmd = cmdSrc.getCommand("foo-thing");
   this.assert(cmd, "Sample command should exist.");
   this.assert(cmd.execute() == 5,
