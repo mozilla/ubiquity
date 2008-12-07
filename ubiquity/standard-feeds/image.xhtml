@@ -33,6 +33,8 @@ CmdUtils.CreateCommand({
       jQuery(this).css("-moz-transform", "rotate(%sdeg)".replace(/%s/, deg));
     })
   },
+  
+  
   _imgsFromSelection: function( context ){
     var sel = context.focusedWindow.getSelection();
     var document = context.focusedWindow.document;
@@ -40,8 +42,12 @@ CmdUtils.CreateCommand({
     if( sel.rangeCount < 1 ) return [];
     var range = sel.getRangeAt(0);
     
-    CmdUtils.log( range );
-    
+    // TODO: This is overly aggressive and finds things that are
+    // outside the current selection. This logic should be fixed
+    // (requires playing with the ranges begining and ending and
+    // offsets) and moved into the selection variable. We currently
+    // have input.text and input.html. We'll need an input.pointer
+    // or input.selection or something.
     return jQuery.find( "img", range.commonAncestorContainer);    
   },
   
