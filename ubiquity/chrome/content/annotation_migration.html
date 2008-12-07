@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" media="all"
+        href="web-content.css" />
+  <link rel="shortcut icon"
+        href="chrome://ubiquity/skin/icons/favicon.ico"
+        type="image/x-icon" />
+  <title>Ubiquity Command Feed Migration</title>
+</head>
+<body>
+<h2 class="top">Ubiquity Command Feed Migration</h2>
+<p>As of Ubiquity 0.1.3, we have changed the way that command feed
+subscriptions are tracked.  This was done to significantly improve
+Ubiquity's performance and also allow command subscriptions to be kept
+when browser history is cleared (see
+bug <a href="http://labs.toolness.com/trac/ticket/146">#146</a> for
+more information).</p>
+<p>Unfortunately, one side effect of this is that most of the command
+feeds you were subscribed to prior to this change are no longer
+being subscribed to.</p>
+<p>Prior to Ubiquity 0.1.3, you were subscribed to the following
+   command feeds:</p>
+<ul id="command-feeds">
+</ul>
+<p>If there's any listed above, you can visit each of them and
+resubscribe to any that you'd still like to have.</p>
+</body>
+<script src="resource://ubiquity-scripts/jquery.js"></script>
+<script src="annotation_migration.js"></script>
+</html>
