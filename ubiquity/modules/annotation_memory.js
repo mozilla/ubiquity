@@ -18,7 +18,9 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Vladimir Markin <v.markin@utoronto.ca>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Atul Varma <atul@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -149,17 +151,22 @@ function AnnotationService(connection) {
       ann[uri.spec] = new Object();
       urls[uri.spec] = uri;
     }
-    ann[uri.spec][name] = value;
-    let insertSql = ("INSERT OR REPLACE INTO ubiquity_annotation_memory " +
-                     "VALUES (?1, ?2, ?3)");
-    var insStmt = connection.createStatement(insertSql);
-    try {
-      insStmt.bindUTF8StringParameter(0, uri.spec);
-      insStmt.bindUTF8StringParameter(1, name);
-      insStmt.bindUTF8StringParameter(2, value);
-      insStmt.execute();
-    } finally {
-      insStmt.finalize();
+
+    if (ann[uri.spec][name] != value) {
+      // Only write out to the database if our actual contents have
+      // changed.
+      ann[uri.spec][name] = value;
+      let insertSql = ("INSERT OR REPLACE INTO ubiquity_annotation_memory " +
+                       "VALUES (?1, ?2, ?3)");
+      var insStmt = connection.createStatement(insertSql);
+      try {
+        insStmt.bindUTF8StringParameter(0, uri.spec);
+        insStmt.bindUTF8StringParameter(1, name);
+        insStmt.bindUTF8StringParameter(2, value);
+        insStmt.execute();
+      } finally {
+        insStmt.finalize();
+      }
     }
     observers.forEach(
       function(observer) { observer.onPageAnnotationSet(uri, name); }
@@ -210,7 +217,6 @@ AnnotationService.openDatabase = function openDatabase(file) {
   connection = new NiceConnection(storSvc.openDatabase(file));
 
   if (!connection.tableExists("ubiquity_annotation_memory"))
-    // empty file? needs initialization!
     connection.executeSimpleSQL(SQLITE_SCHEMA);
 
   return connection;
