@@ -191,12 +191,7 @@ AnnotationService.openDatabase = function openDatabase(file) {
   // openDatabase will create empty file if it's not there yet.
   connection = new NiceConnection(storSvc.openDatabase(file));
 
-  // If the pointed-at file was just created, it means the database
-  // has never been initialized, so we'll have to do it now by running
-  // the CREATE TABLE sql.
-
-  if (file.fileSize == 0 ||
-      !connection.tableExists("ubiquity_annotation_memory"))
+  if (!connection.tableExists("ubiquity_annotation_memory"))
     // empty file? needs initialization!
     connection.executeSimpleSQL(SQLITE_SCHEMA);
 
