@@ -86,21 +86,6 @@ function makeUnremover(element, info) {
   return unremove;
 }
 
-function showBugRelatedAlerts() {
-  // Show a warning for bug #146.
-  var sanitizeOnShutdown = Application.prefs.getValue(
-    "privacy.sanitize.sanitizeOnShutdown",
-    false
-  );
-  var clearHistory = Application.prefs.getValue(
-    "privacy.item.history",
-    false
-  );
-
-  if (sanitizeOnShutdown && clearHistory)
-    $("#sanitizeOnShutdown-alert").slideDown();
-}
-
 function checkForManualUpdate(info, elem) {
   function onSuccess(data) {
     if (data != info.getCode()) {
@@ -185,7 +170,6 @@ function makeFeedListElement(info, label, clickMaker) {
 
 function onReady() {
   PrefKeys.onLoad();
-  showBugRelatedAlerts();
 
   let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
   let markedPages = linkRelCodeSvc.getMarkedPages();
