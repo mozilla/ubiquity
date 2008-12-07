@@ -34,68 +34,44 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["annSvc"];
+var EXPORTED_SYMBOLS = ["AnnotationService"];
 
-// Should be global to prevent slow opening of windows.
-var annSvc;
-if(annSvc == null)
-    annSvc = new AnnSvc();  // Singleton
+var Ci = Components.interfaces;
+var Cc = Components.classes;
+
+var SQLITE_SCHEMA =
+  ("CREATE TABLE ubiquity_annotation_memory(" +
+   "  uri VARCHAR(256)," +
+   "  name VARCHAR(256)," +
+   "  value MEDIUMTEXT," +
+   " PRIMARY KEY (uri, name));");
 
 // Annotation service replacement using SQLite file for storage
-function AnnSvc() {
+function AnnotationService(connection) {
   var ann = {};
   var urls = {};
   var self = this;
 
-  var Ci = Components.interfaces;
-  var Cc = Components.classes;
+  if (!connection)
+    throw new Error("AnnotationService's connection is " + connection);
 
-  var SQLITE_FILE = "ubiquity_annotation_memory.sqlite";
-
-  var SQLITE_SCHEMA =
-      "CREATE TABLE ubiquity_annotation_memory(" +
-      "  uri VARCHAR(256)," +
-      "  name VARCHAR(256)," +
-      "  value MEDIUMTEXT," +
-      " PRIMARY KEY (uri, name));";
-  var _gDatabaseConnection = null;
-  var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
-                  .getService(Ci.nsIProperties);
-  var _storSvc = Cc["@mozilla.org/storage/service;1"]
-                   .getService(Ci.mozIStorageService);
-  var _ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                    .getService(Ci.nsIIOService);
-
-  _connectToDatabase = function () {
-    // Only create a new connection if we don't already have one open.
-    if (!_gDatabaseConnection) {
-      var file = _dirSvc.get("Home", Ci.nsIFile);
-      file.append("mozilla");
-      if( !file.exists() || !file.isDirectory() ) {   // if it doesn't exist, create
-        file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0777);
-      }
-      file.append(SQLITE_FILE);
-      _gDatabaseConnection = openDatabase(file);
-    }
-    return _gDatabaseConnection;
-  }
-
-  self._createStatement = function (selectSql) {
+  function createStatement(selectSql) {
     try {
-      var selStmt = this._connection.createStatement(selectSql);
+      var selStmt = connection.createStatement(selectSql);
       return selStmt;
     } catch (e) {
-      throw new Error("AnnSvc SQL error: " + this._connection.lastErrorString + " in " + selectSql);
+      throw new Error("AnnotationService SQL error: " +
+                      connection.lastErrorString + " in " +
+                      selectSql);
     }
-  }
+  };
 
-  // Create DB connection and load all saved annotations
-  self._init = function() {
-    this._connection = _connectToDatabase();
-
-    let selectSql = "SELECT uri, name, value " +
-	      "FROM ubiquity_annotation_memory";
-    var selStmt = this._createStatement(selectSql);
+  function initialize() {
+    var ioSvc = Cc["@mozilla.org/network/io-service;1"]
+                .getService(Ci.nsIIOService);
+    let selectSql = ("SELECT uri, name, value " +
+                     "FROM ubiquity_annotation_memory");
+    var selStmt = createStatement(selectSql);
     try {
       while (selStmt.executeStep()) {
         let uri_spec = selStmt.getUTF8String(0);
@@ -103,7 +79,7 @@ function AnnSvc() {
         let value = selStmt.getUTF8String(2);
         if (!ann[uri_spec]) {
           ann[uri_spec] = new Object();
-          urls[uri_spec] = _ioSvc.newURI(uri_spec, null, null);
+          urls[uri_spec] = ioSvc.newURI(uri_spec, null, null);
         }
         ann[uri_spec][name] = value;
       }
@@ -133,14 +109,6 @@ function AnnSvc() {
     return ann[uri.spec][name];
   };
 
-  self.beginTransaction = function() {
-    this._connection.beginTransaction();
-  };
-
-  self.commitTransaction = function() {
-    this._connection.commitTransaction();
-  };
-
   self.setPageAnnotation = function(uri, name, value, dummy,
                                     expiration) {
     if (!ann[uri.spec]) {
@@ -148,17 +116,17 @@ function AnnSvc() {
       urls[uri.spec] = uri;
     }
     ann[uri.spec][name] = value;
-    let insertSql = "INSERT OR REPLACE INTO ubiquity_annotation_memory " +
-                      "VALUES (?1, ?2, ?3)";
-      var insStmt = this._createStatement(insertSql);
-      try {
-        insStmt.bindUTF8StringParameter(0, uri.spec);
-        insStmt.bindUTF8StringParameter(1, name);
-        insStmt.bindUTF8StringParameter(2, value);
-        insStmt.execute();
-      } finally {
-        insStmt.finalize();
-      }
+    let insertSql = ("INSERT OR REPLACE INTO ubiquity_annotation_memory " +
+                     "VALUES (?1, ?2, ?3)");
+    var insStmt = createStatement(insertSql);
+    try {
+      insStmt.bindUTF8StringParameter(0, uri.spec);
+      insStmt.bindUTF8StringParameter(1, name);
+      insStmt.bindUTF8StringParameter(2, value);
+      insStmt.execute();
+    } finally {
+      insStmt.finalize();
+    }
   };
 
   self.removePageAnnotation = function(uri, name) {
@@ -169,39 +137,57 @@ function AnnSvc() {
     // Delete from DB
     let updateSql = ("DELETE FROM ubiquity_annotation_memory " +
                      "WHERE uri = ?1 AND name = ?2");
-    var updStmt = this._createStatement(updateSql);
+    var updStmt = createStatement(updateSql);
     updStmt.bindUTF8StringParameter(0, uri);
     updStmt.bindUTF8StringParameter(1, name);
     updStmt.execute();
     updStmt.finalize();
   };
 
-  openDatabase = function openDatabase(file) {
-    /* If the pointed-at file doesn't already exist, it means the database
-     * has never been initialized, so we'll have to do it now by running
-     * the CREATE TABLE sql. */
-    // openDatabase will create empty file if it's not there yet:
-    var connection = null;
-    try {
-      connection = _storSvc.openDatabase(file);
-      if (file.fileSize == 0 ||
-          !connection.tableExists("ubiquity_annotation_memory")) {
-        // empty file? needs initialization!
-        connection.executeSimpleSQL(SQLITE_SCHEMA);
-      }
-    } catch(e) {
-      Components.utils.reportError(
-        "Ubiquity's AnnotationMemory database appears to have been corrupted - resetting it."
-        );
-      if (file.exists()) {
-        // remove currupt database
-        file.remove(false);
-      }
-      connection = _storSvc.openDatabase(file);
+  // These values don't actually mean anything, but are provided to
+  // ensure compatibility with nsIAnnotationService.
+  self.EXPIRE_WITH_HISTORY = 0;
+  self.EXPIRE_NEVER = 1;
+
+  initialize();
+}
+
+AnnotationService.getProfileFile = function getProfileFile(filename) {
+  var dirSvc = Cc["@mozilla.org/file/directory_service;1"]
+               .getService(Ci.nsIProperties);
+
+  var file = dirSvc.get("ProfD", Ci.nsIFile);
+  file.append(filename);
+  return file;
+};
+
+AnnotationService.openDatabase = function openDatabase(file) {
+  var storSvc = Cc["@mozilla.org/storage/service;1"]
+                .getService(Ci.mozIStorageService);
+
+  // If the pointed-at file doesn't already exist, it means the database
+  // has never been initialized, so we'll have to do it now by running
+  // the CREATE TABLE sql.
+
+  var connection = null;
+  try {
+    // openDatabase will create empty file if it's not there yet.
+    connection = storSvc.openDatabase(file);
+    if (file.fileSize == 0 ||
+        !connection.tableExists("ubiquity_annotation_memory")) {
+      // empty file? needs initialization!
       connection.executeSimpleSQL(SQLITE_SCHEMA);
     }
-    return connection;
-  };
-
-  this._init();
-}
+  } catch(e) {
+    Components.utils.reportError(
+      ("Ubiquity's annotation memory database appears to have " +
+       "been corrupted - resetting it.")
+    );
+    if (file.exists())
+      // remove currupt database
+      file.remove(false);
+    connection = storSvc.openDatabase(file);
+    connection.executeSimpleSQL(SQLITE_SCHEMA);
+  }
+  return connection;
+};
