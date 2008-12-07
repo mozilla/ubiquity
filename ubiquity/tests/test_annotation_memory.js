@@ -90,4 +90,41 @@ function testRemovePageAnnotation() {
   this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);
 }
 
+function testPageAnnotationObserversWork() {
+  var obRemoveCalled = false;
+  var obSetCalled = false;
+  var self = this;
+
+  var ob = {
+    onPageAnnotationSet: function(uri, name) {
+      self.assertEquals(uri.spec, "http://www.foo.com/");
+      self.assertEquals(name, "blah");
+      obSetCalled = true;
+    },
+    onPageAnnotationRemoved: function(uri, name) {
+      self.assertEquals(uri.spec, "http://www.foo.com/");
+      self.assertEquals(name, "blah");
+      obRemoveCalled = true;
+    }
+  };
+
+  var annSvc = new AnnotationService(getTempConnection(this));
+  var url = Utils.url("http://www.foo.com");
+  annSvc.addObserver(ob);
+
+  annSvc.setPageAnnotation(url, "blah", "foo");
+  this.assertEquals(obSetCalled, true);
+  annSvc.removePageAnnotation(url, "blah");
+  this.assertEquals(obRemoveCalled, true);
+
+  obSetCalled = false;
+  obRemoveCalled = false;
+  annSvc.removeObserver(ob);
+
+  annSvc.setPageAnnotation(url, "blah", "foo");
+  this.assertEquals(obSetCalled, false);
+  annSvc.removePageAnnotation(url, "blah");
+  this.assertEquals(obRemoveCalled, false);
+}
+
 exportTests(this);

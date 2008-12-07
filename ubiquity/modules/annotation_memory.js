@@ -81,6 +81,7 @@ function NiceConnection(connection) {
 function AnnotationService(connection) {
   var ann = {};
   var urls = {};
+  var observers = [];
   var self = this;
 
   if (!connection)
@@ -109,6 +110,17 @@ function AnnotationService(connection) {
       selStmt.finalize();
     }
   }
+
+  self.addObserver = function(anObserver) {
+    observers.push(anObserver);
+  };
+
+  self.removeObserver = function(anObserver) {
+    var index = observers.indexOf(anObserver);
+    if (index == -1)
+      throw new Error("Observer does not exist: " + anObserver);
+    observers.splice(index, 1);
+  };
 
   self.getPagesWithAnnotation = function(name) {
     var results = [];
@@ -149,6 +161,9 @@ function AnnotationService(connection) {
     } finally {
       insStmt.finalize();
     }
+    observers.forEach(
+      function(observer) { observer.onPageAnnotationSet(uri, name); }
+    );
   };
 
   self.removePageAnnotation = function(uri, name) {
@@ -164,6 +179,9 @@ function AnnotationService(connection) {
     updStmt.bindUTF8StringParameter(1, name);
     updStmt.execute();
     updStmt.finalize();
+    observers.forEach(
+        function(observer) { observer.onPageAnnotationRemoved(uri, name); }
+    );
   };
 
   // These values don't actually mean anything, but are provided to
