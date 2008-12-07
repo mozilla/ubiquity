@@ -46,6 +46,7 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
 Components.utils.import("resource://ubiquity-modules/cmdsource.js");
+Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
@@ -150,8 +151,11 @@ let UbiquitySetup = {
   createServices: function createServices() {
     if (!gServices) {
       var Cc = Components.classes;
-      var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-                   .getService(Components.interfaces.nsIAnnotationService);
+
+      var annDbFile = AnnotationService.getProfileFile("ubiquity_ann.sqlite");
+      var annDbConn = AnnotationService.openDatabase(annDbFile);
+      var annSvc = new AnnotationService(annDbConn);
+
       var linkRelCodeService = new LinkRelCodeService(annSvc);
       var msgService = new CompositeMessageService();
 
