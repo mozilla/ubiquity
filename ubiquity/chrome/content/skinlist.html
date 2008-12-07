@@ -30,6 +30,29 @@
 
 <ul id="skin-list"></ul>
 
+<ul class="button-list">
+  <li>
+    <a class="button" id="edit-button" 
+       href="javascript:openSkinEditor();">
+       Edit Custom Skin</a>
+  </li>
+</ul>
+
+<div id="editor-div" style="display:none">
+  <ul class="button-list">
+    <li>
+      <a type="button" class="button" href="javascript:saveCustomSkin();">Save</a>
+      After you save, open Ubiquity and you can see the changes (if your current skin is Custom, of course).
+      <br/> When you're done, share your skins with us! =)
+    </li>
+    <br/><br/>
+    <li>
+      <textarea rows="30" style="width:750px" id="skin-editor"></textarea>
+    </li>
+  </ul>  
+</div>
+  
+
 <script>
   Components.utils.import("resource://ubiquity-modules/utils.js");
   $(document).ready(onDocumentLoad);

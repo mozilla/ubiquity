@@ -40,6 +40,8 @@ var Ci = Components.interfaces;
 
 
 Components.utils.import("resource://ubiquity-modules/skinsvc.js");
+Components.utils.import("resource://ubiquity-modules/msgservice.js");
+
 var skinService = new SkinSvc();
 
 function onDocumentLoad() {
@@ -47,6 +49,13 @@ function onDocumentLoad() {
   for( i in skinList){
     createSkinElement(skinList[i]["local_uri"], i);    
   }
+  //If current skin is custom skin, auto-open the editor
+  var customSkin = "chrome://ubiquity/skin/skins/custom.css";
+  if(skinService.getCurrentSkin() == customSkin){
+    openSkinEditor();
+  }
+  //Readfile returns an array
+  $("#skin-editor").val(readFile(customSkin).join("\n"));
 }
 
 // Thanks to code by Torisugari at 
@@ -132,7 +141,7 @@ function createSkinElement(filepath, id){
    skinEl.find('input').attr("onclick", "skinService.changeSkin('"+ skinMeta.filepath + "');");
    
    //Make the current skin distinct
-   var currentSkin = Application.prefs.getValue("extensions.ubiquity.skin", "default");
+   var currentSkin = skinService.getCurrentSkin();
    if(skinMeta.filepath == currentSkin){
      skinEl.find('#rad_' + skinId).attr('checked','true');
    }
@@ -154,4 +163,33 @@ function createSkinElement(filepath, id){
      skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  + 
                                     "'>" + skinMeta.homepage + "</a>");
    }
+}
+
+
+function saveCustomSkin(){
+    var data = $("#skin-editor").val();
+    
+    var MY_ID = "ubiquity@labs.mozilla.com";
+    var em = Cc["@mozilla.org/extensions/manager;1"]
+                       .getService(Ci.nsIExtensionManager);
+    var file = em.getInstallLocation(MY_ID)
+                  .getItemFile(MY_ID, "chrome/skin/skins/custom.css");
+                  
+    var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
+    .createInstance(Ci.nsIFileOutputStream);
+    foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
+    foStream.write(data, data.length);
+    foStream.close();
+    
+    var msgService = new AlertMessageService();
+    msgService.displayMessage("Your skin has been saved!");
+    
+    skinService.loadSkin(skinService.getCurrentSkin());
+    
+}
+
+function openSkinEditor(){
+  $('#editor-div').show(); 
+  $('#skin-editor').focus();
+  $('#edit-button').hide();
 }

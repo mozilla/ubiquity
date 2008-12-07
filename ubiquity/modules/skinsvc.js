@@ -54,7 +54,10 @@ var SQLITE_SCHEMA =
     "'chrome://ubiquity/skin/skins/default.css');" + 
     "INSERT INTO ubiquity_skin_memory " +
     "VALUES ('chrome://ubiquity/skin/skins/old.css'," +
-    "'chrome://ubiquity/skin/skins/old.css')";
+    "'chrome://ubiquity/skin/skins/old.css');" +
+    "INSERT INTO ubiquity_skin_memory " +
+    "VALUES ('chrome://ubiquity/skin/skins/custom.css'," +
+    "'chrome://ubiquity/skin/skins/custom.css')";
     
 var _gDatabaseConnection = null;
 
