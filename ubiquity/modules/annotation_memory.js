@@ -46,6 +46,37 @@ var SQLITE_SCHEMA =
    "  value MEDIUMTEXT," +
    " PRIMARY KEY (uri, name));");
 
+// A friendier version of a mozIStorageConnection. If a SQL statement fails,
+// instead of an unhelpful XPCOM error with an NS_ERROR_FAILURE result being
+// raised, a more descriptive error is raised.
+function NiceConnection(connection) {
+  if (connection.constructor == NiceConnection)
+    return connection;
+
+  this.createStatement = function nice_createStatement(sql) {
+    try {
+      return connection.createStatement(sql);
+    } catch (e if e.result == Components.results.NS_ERROR_FAILURE) {
+      throw new Error("AnnotationService SQL error: " +
+                      connection.lastErrorString + " in " +
+                      sql);
+    }
+  };
+
+  this.executeSimpleSQL = function nice_executeSimpleSQL(sql) {
+    try {
+      connection.executeSimpleSQL(sql);
+    } catch (e if e.result == Components.results.NS_ERROR_FAILURE) {
+      throw new Error("AnnotationService SQL error: " +
+                      connection.lastErrorString + " in " +
+                      sql);
+    }
+  };
+
+  this.constructor = NiceConnection;
+  this.__proto__ = connection;
+}
+
 // Annotation service replacement using SQLite file for storage
 function AnnotationService(connection) {
   var ann = {};
@@ -55,23 +86,14 @@ function AnnotationService(connection) {
   if (!connection)
     throw new Error("AnnotationService's connection is " + connection);
 
-  function createStatement(selectSql) {
-    try {
-      var selStmt = connection.createStatement(selectSql);
-      return selStmt;
-    } catch (e) {
-      throw new Error("AnnotationService SQL error: " +
-                      connection.lastErrorString + " in " +
-                      selectSql);
-    }
-  };
+  connection = new NiceConnection(connection);
 
   function initialize() {
     var ioSvc = Cc["@mozilla.org/network/io-service;1"]
                 .getService(Ci.nsIIOService);
     let selectSql = ("SELECT uri, name, value " +
                      "FROM ubiquity_annotation_memory");
-    var selStmt = createStatement(selectSql);
+    var selStmt = connection.createStatement(selectSql);
     try {
       while (selStmt.executeStep()) {
         let uri_spec = selStmt.getUTF8String(0);
@@ -118,7 +140,7 @@ function AnnotationService(connection) {
     ann[uri.spec][name] = value;
     let insertSql = ("INSERT OR REPLACE INTO ubiquity_annotation_memory " +
                      "VALUES (?1, ?2, ?3)");
-    var insStmt = createStatement(insertSql);
+    var insStmt = connection.createStatement(insertSql);
     try {
       insStmt.bindUTF8StringParameter(0, uri.spec);
       insStmt.bindUTF8StringParameter(1, name);
@@ -137,7 +159,7 @@ function AnnotationService(connection) {
     // Delete from DB
     let updateSql = ("DELETE FROM ubiquity_annotation_memory " +
                      "WHERE uri = ?1 AND name = ?2");
-    var updStmt = createStatement(updateSql);
+    var updStmt = connection.createStatement(updateSql);
     updStmt.bindUTF8StringParameter(0, uri);
     updStmt.bindUTF8StringParameter(1, name);
     updStmt.execute();
@@ -164,30 +186,19 @@ AnnotationService.getProfileFile = function getProfileFile(filename) {
 AnnotationService.openDatabase = function openDatabase(file) {
   var storSvc = Cc["@mozilla.org/storage/service;1"]
                 .getService(Ci.mozIStorageService);
+  var connection = null;
 
-  // If the pointed-at file doesn't already exist, it means the database
+  // openDatabase will create empty file if it's not there yet.
+  connection = new NiceConnection(storSvc.openDatabase(file));
+
+  // If the pointed-at file was just created, it means the database
   // has never been initialized, so we'll have to do it now by running
   // the CREATE TABLE sql.
 
-  var connection = null;
-  try {
-    // openDatabase will create empty file if it's not there yet.
-    connection = storSvc.openDatabase(file);
-    if (file.fileSize == 0 ||
-        !connection.tableExists("ubiquity_annotation_memory")) {
-      // empty file? needs initialization!
-      connection.executeSimpleSQL(SQLITE_SCHEMA);
-    }
-  } catch(e) {
-    Components.utils.reportError(
-      ("Ubiquity's annotation memory database appears to have " +
-       "been corrupted - resetting it.")
-    );
-    if (file.exists())
-      // remove currupt database
-      file.remove(false);
-    connection = storSvc.openDatabase(file);
+  if (file.fileSize == 0 ||
+      !connection.tableExists("ubiquity_annotation_memory"))
+    // empty file? needs initialization!
     connection.executeSimpleSQL(SQLITE_SCHEMA);
-  }
+
   return connection;
 };
