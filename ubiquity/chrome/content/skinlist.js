@@ -45,7 +45,7 @@ var skinService = new SkinSvc();
 function onDocumentLoad() {
   var skinList = skinService.getSkinList()
   for( i in skinList){
-    createSkinElement(skinList[i], i);    
+    createSkinElement(skinList[i]["local_uri"], i);    
   }
 }
 
@@ -68,7 +68,13 @@ function readFile(url){
 
 function createSkinElement(filepath, id){
   
-  var lines = readFile(filepath);
+  try{
+    var lines = readFile(filepath);
+  }catch(e){
+    //If file cannot be read, just move on to the next skin
+    return;
+  }
+  
   var skinMeta = {};
   skinMeta.filepath = filepath;
     

@@ -73,8 +73,9 @@ function ubiquitySetup()
                                       nlParser);
 
   //Install skin detector
-  var skinService = new jsm.SkinSvc();
-  skinService.installToWindow(window);
+  var skinService = new jsm.SkinSvc(window);
+  skinService.installToWindow();
+  skinService.updateAllSkins();
 
   //Load current skin
   var skinUrl = skinService.getCurrentSkin();
