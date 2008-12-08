@@ -90,7 +90,7 @@ CommandManager.prototype = {
         suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
       }
       suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" +
-	suggText;
+	               suggText;
       if ( x == this.__hilitedSuggestion ) {
         content += "<div class=\"hilited\"><div class=\"hilited-text\">" +
 	  suggText + "</div>";
@@ -177,7 +177,7 @@ CommandManager.prototype = {
       this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
     else
       try {
-	this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
+        this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
         parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(
@@ -222,7 +222,6 @@ CommandManager.prototype = {
     function getAvailableCommands(context) {
       self.refresh();
       var suggestions = self.getSuggestionListNoInput( context );
-      dump("getAC has " + suggestions.length + " suggestions.\n");
 
       var retVal = {};
       for each (let parsedSentence in suggestions) {

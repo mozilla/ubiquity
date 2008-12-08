@@ -66,26 +66,37 @@ function ubiquitySetup()
     [],
     []
   );
-  
+
 
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
                                       nlParser);
 
-  //Install skin detector 
-  var skinService = new jsm.SkinSvc();
-  skinService.installToWindow(window);
-  
+  //Install skin detector
+  var skinService = new jsm.SkinSvc(window);
+  skinService.installToWindow();
+  skinService.updateAllSkins();
+
   //Load current skin
-  var url = skinService.getCurrentSkin();
+  var skinUrl = skinService.getCurrentSkin();
+  var defaultSkinUrl = "chrome://ubiquity/skin/skins/default.css"
   //For backwards compatibility since in 0.1.2
   //The pref was "default" or "old"
   //Now, we are storing the complete file path in the pref.
-  if(url == "default" || url == "old"){
-    url = "chrome://ubiquity/skin/skins/default.css";
-    skinService.setCurrentSkin(url);
+  if(skinUrl == "default" || skinUrl == "old"){
+    skinUrl = defaultSkinUrl;
+    skinService.setCurrentSkin(skinUrl);
   }
-  skinService.loadSkin(url);
+  try{
+    skinService.loadSkin(skinUrl);
+  }catch(e){
+    //If there's any error loading the current skin,
+    //load the default and tell the user about the failure
+    skinService.loadSkin(defaultSkinUrl);
+    services.messageService
+            .displayMessage("Loading your current skin failed." + 
+                            "The default skin will be loaded.");
+  }
 
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument
@@ -122,6 +133,14 @@ function ubiquitySetup()
     previewBlock
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
+
+  // Hack to get the default skin to work on Linux, which we don't
+  // support per-pixel alpha transparency on.
+  var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
+                     .getService(Components.interfaces.nsIXULRuntime);
+  if (xulr.OS == "Linux" && skinUrl == defaultSkinUrl)
+    document.getElementById("transparent-msg-panel")
+            .style.backgroundColor = "#444";
 }
 
 function ubiquityTeardown()
@@ -177,6 +196,16 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 	  (aEvent.metaKey == (aModifier == 'META')));
 }
 
-window.addEventListener("load", ubiquitySetup, false);
+window.addEventListener(
+  "load",
+  function() {
+    var jsm = {};
+    Components.utils.import("resource://ubiquity-modules/setup.js",
+                            jsm);
+    jsm.UbiquitySetup.preload(ubiquitySetup);
+  },
+  false
+);
+
 window.addEventListener("unload", ubiquityTeardown, false);
 window.addEventListener("keydown", ubiquityKeydown, true);

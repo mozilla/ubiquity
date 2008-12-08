@@ -546,7 +546,7 @@ NLParser.PartiallyParsedSentence.prototype = {
     } catch(e) {
       Components.utils.reportError(
           'Exception occured while getting suggestions for "' +
-          this._verb._name + '" with noun "' + argument.label + '"'
+          this._verb._name + '" with noun "' + argument.label + '": ' + e
           );
       return false;
     }

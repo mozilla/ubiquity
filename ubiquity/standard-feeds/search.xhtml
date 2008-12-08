@@ -700,11 +700,17 @@ CmdUtils.CreateCommand({
     var query = directObject.text;
     var url = "http://api.yelp.com/business_review_search?";
 
-    if( query.length == 0 ) return;
+    if (query.length == 0) return;
 
-    var loc = CmdUtils.getGeoLocation();
-    var near = info.near.text || (loc.city + ", " + loc.state);
-
+    var near = "";
+    if (info.near.text) {
+      near = info.near.text ;
+    } else {
+      var loc = CmdUtils.getGeoLocation();
+      if (loc)
+        var near = loc.city + ", " + loc.state;
+    }
+    
     var params = {
       term: query,
       num_biz_requested: 4,
@@ -750,30 +756,31 @@ CmdUtils.CreateCommand({
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function( pblock, directObj, modifiers) {
+  preview: function(pblock, directObj, modifiers) {
     var location = directObj.text;
-    if( location.length < 1 ) {
+    if (location.length < 1) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
     }
 
     pblock.innerHTML = "Weather for " + location;
 
+    var user_location = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
     var temp_units = 'celsius';
-    if(!modifiers.in.text){
-      var cc = CmdUtils.getGeoLocation().country_code;
-      if(["US","UM","BZ"].indexOf(cc) != -1){
+    if (!modifiers["in"].text) {
+      if (user_location && ["US","UM","BZ"].indexOf(user_location.country_code) != -1) {
         temp_units = 'fahrenheit';
       }
-    }else{
-      temp_units = modifiers.in.text;
+    } else {
+      temp_units = modifiers["in"].text;
     }
 
     var url = "http://www.google.com/ig/api";
     CmdUtils.previewGet( pblock, url, {weather: location}, function(xml) {
       var el = jQuery(xml).find("current_conditions");
-      if( el.length == 0 ) return;
+      if (el.length == 0)
+        return;
 
       var condition = el.find("condition").attr("data");
 
@@ -789,7 +796,7 @@ CmdUtils.CreateCommand({
       var wind_units = "mph";
       //http://en.wikipedia.org/wiki/Si_units
       //UK uses mph
-      if(["US","UM", "LR", "MM", "GB"].indexOf(cc) == -1){
+      if (user_location && ["US","UM", "LR", "MM", "GB"].indexOf(user_location.country_code) == -1) {
         wind_units = "km/h";
         wind_speed = wind_speed * 1.6;
       }
@@ -805,15 +812,12 @@ CmdUtils.CreateCommand({
         img: imgSrc
       };
 
-      weather["img"] = imgSrc;
-
-      var html = CmdUtils.renderTemplate(
+      pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#weather-search", feed.dom).html(),
-        {w:weather, location:place}
+        {w: weather, location: place}
       );
 
-      jQuery(pblock).html( html );
-      }, "xml");
+    }, "xml");
   }
 });
 

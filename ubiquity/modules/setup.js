@@ -46,11 +46,14 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
 Components.utils.import("resource://ubiquity-modules/cmdsource.js");
+Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
 
 let gServices;
+
+let gIframe;
 
 let UbiquitySetup = {
   STANDARD_FEEDS: [{page: "firefox.html",
@@ -87,7 +90,11 @@ let UbiquitySetup = {
 
                    {page: "search.html",
                     source: "search.xhtml",
-                    title: "Mozilla Web Search Commands"}],
+                    title: "Mozilla Web Search Commands"},
+                    
+                   {page: "image.html",
+                    source: "image.xhtml",
+                    title: "Mozilla Image-Related Commands"}],
 
   __getExtDir: function __getExtDir() {
     let Cc = Components.classes;
@@ -119,14 +126,41 @@ let UbiquitySetup = {
     return false;
   },
 
+  preload: function preload(callback) {
+    if (gIframe) {
+      callback();
+      return;
+    }
+
+    var Cc = Components.classes;
+    var Ci = Components.interfaces;
+    var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                       .getService(Ci.nsIAppShellService)
+                       .hiddenDOMWindow;
+
+    gIframe = hiddenWindow.document.createElement("iframe");
+    gIframe.setAttribute("id", "ubiquityFrame");
+    gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.xul");
+    gIframe.addEventListener(
+      "pageshow",
+      function onPageShow() {
+        gIframe.removeEventListener("pageshow", onPageShow, false);
+        callback();
+      },
+      false
+    );
+    hiddenWindow.document.documentElement.appendChild(gIframe);
+  },
+
   createServices: function createServices() {
     if (!gServices) {
       var Cc = Components.classes;
-      var annSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-                   .getService(Components.interfaces.nsIAnnotationService);
-      var linkRelCodeService = new LinkRelCodeService(annSvc);
 
-      this.__installDefaults(linkRelCodeService);
+      var annDbFile = AnnotationService.getProfileFile("ubiquity_ann.sqlite");
+      var annDbConn = AnnotationService.openDatabase(annDbFile);
+      var annSvc = new AnnotationService(annDbConn);
+
+      var linkRelCodeService = new LinkRelCodeService(annSvc);
       var msgService = new CompositeMessageService();
 
       msgService.add(new AlertMessageService());
@@ -150,11 +184,17 @@ let UbiquitySetup = {
 
       disabledStorage.attach(cmdSource);
 
-      cmdSource.refresh();
-
       gServices = {commandSource: cmdSource,
                    linkRelCodeService: linkRelCodeService,
                    messageService: msgService};
+
+      // For some reason, the following function isn't executed
+      // atomically by Javascript; perhaps something being called is
+      // getting the '@mozilla.org/thread-manager;1' service and
+      // spinning via a call to processNextEvent() until some kind of
+      // I/O is finished?
+      this.__installDefaults(linkRelCodeService);
+      cmdSource.refresh();
     }
 
     return gServices;
@@ -163,7 +203,13 @@ let UbiquitySetup = {
   setupWindow: function setupWindow(window) {
     gServices.linkRelCodeService.installToWindow(window);
 
+    var PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
+
     function onPageLoad(aEvent) {
+      var isEnabled = Application.prefs.getValue(PAGE_LOAD_PREF, true);
+      if (!isEnabled)
+        return;
+
       var isValidPage = false;
       try {
         // See if we can get the current document;
@@ -219,9 +265,7 @@ let UbiquitySetup = {
 function makeBuiltinGlobalsMaker(msgService) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-  var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
-                     .getService(Ci.nsIAppShellService)
-                     .hiddenDOMWindow;
+  var hiddenWindow = gIframe.contentWindow;
 
   var uris = ["resource://ubiquity-scripts/jquery.js",
               "resource://ubiquity-scripts/template.js"];

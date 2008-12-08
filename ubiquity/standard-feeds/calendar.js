@@ -93,8 +93,8 @@ CmdUtils.CreateCommand({
   preview: function( pblock, directObj ) {
     var date = directObj.data;
     if (date) {
-      pblock.innerHTML = "Checks Google Calendar for the day of" +
-                         date.toString("dd MM, yyyy");
+      pblock.innerHTML = "Checks Google Calendar for events on " +
+                         date.toString("dddd, dS MMMM, yyyy") + ".";
       checkCalendar( pblock, date );
     } else
       pblock.innerHTML = "Checks Google Calendar for the date you specify.";

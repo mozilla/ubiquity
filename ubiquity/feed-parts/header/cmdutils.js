@@ -54,7 +54,7 @@ CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
   if (typeof(context) == "undefined")
     context = CmdUtils.__globalObject.context;
 
-  return ctu.ContextUtils.getHtmlSelection(CmdUtils.__getContext(context));
+  return ctu.ContextUtils.getHtmlSelection(context);
 };
 
 CmdUtils.getSelection = function getSelection(context) {
@@ -65,7 +65,7 @@ CmdUtils.getSelection = function getSelection(context) {
   if (typeof(context) == "undefined")
     context = CmdUtils.__globalObject.context;
 
-  return ctu.ContextUtils.getSelection(CmdUtils.__getContext(context));
+  return ctu.ContextUtils.getSelection(context);
 };
 
 CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
@@ -254,7 +254,7 @@ CmdUtils.log = function log(what) {
 };
 
 CmdUtils.injectJavascript = function injectJavascript(src, callback) {
-  var doc = CmdUtils.getDocumentInsecure();
+  var doc = CmdUtils.getDocument();
 
   var script = doc.createElement("script");
   script.src = src;
@@ -295,8 +295,12 @@ CmdUtils.setLastResult = function setLastResult( result ) {
 };
 
 // Uses Geo-ip lookup to get your current location.
-CmdUtils.getGeoLocation = function getGeoLocation( ){
-  if( globals.geoLocation ) return globals.geoLocation;
+CmdUtils.getGeoLocation = function getGeoLocation(callback) {
+  if (globals.geoLocation) {
+    if (callback)
+      callback(globals.geoLocation);
+    return globals.geoLocation;
+  }
 
   jQuery.ajax({
     type: "GET",
@@ -314,10 +318,12 @@ CmdUtils.getGeoLocation = function getGeoLocation( ){
         lat: geoip_latitude(),
         "long": geoip_longitude()
       };
+      if (callback)
+        callback(globals.geoLocation);
     }
   });
 
-  return globals.geoLocation;
+  return null;
 };
 
 CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/prefcommands.js
@@ -563,7 +569,10 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 CmdUtils.previewAjax = function previewAjax(pblock, options) {
   var xhr;
   var newOptions = {};
-  function abort() { xhr.abort(); }
+  function abort() {
+    if (xhr)
+      xhr.abort();
+  }
   for (key in options) {
     if (typeof(options[key]) == 'function')
       newOptions[key] = CmdUtils.previewCallback(pblock,
@@ -584,7 +593,10 @@ CmdUtils.previewGet = function previewGet(pblock,
                                           callback,
                                           type) {
   var xhr;
-  function abort() { xhr.abort(); }
+  function abort() {
+    if (xhr)
+      xhr.abort();
+  }
   var cb = CmdUtils.previewCallback(pblock, callback, abort);
   xhr = jQuery.get(url, data, cb, type);
   return xhr;

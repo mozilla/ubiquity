@@ -578,28 +578,33 @@ var noun_type_tag = {
 var noun_type_geolocation = {
    _name : "geolocation",
    rankLast: true,
-   default : function(){
-     var location = CmdUtils.getGeoLocation();
-     var locString = location.city + "," + location.country;
-     return CmdUtils.makeSugg( locString );
+   default: function() {
+		var location = CmdUtils.getGeoLocation();
+		if (!location) {
+			// TODO: there needs to be a better way of doing this,
+			// as default() can't currently return null
+			return {text: "", html: "", data: null, summary: ""};
+		}
+		var fullLocation = location.city + ", " + location.country;
+		return CmdUtils.makeSugg(fullLocation);
    },
 
-   suggest: function(fragment){
+   suggest: function(fragment, html, callback) {
       /* LONGTERM TODO: try to detect whether fragment is anything like a valid location or not,
        * and don't suggest anything for input that's not a location.
        */
-      var regexp = /here(\s)?.*/;
-      if(regexp.test(fragment)){
-         var suggestions = [];
-         var location = CmdUtils.getGeoLocation();
-         var loc = location.city + "," + location.country;
-         suggestions.push(CmdUtils.makeSugg(loc));
-         suggestions.push(CmdUtils.makeSugg(location.city));
-         suggestions.push(CmdUtils.makeSugg(location.country));
-         suggestions.push(CmdUtils.makeSugg(fragment));
-         return suggestions;
+			function addAsyncGeoSuggestions(location) {
+				if(!location)
+					return;
+ 				var fullLocation = location.city + ", " + location.country;
+        callback(CmdUtils.makeSugg(fullLocation));
+				callback(CmdUtils.makeSugg(location.city));
+				callback(CmdUtils.makeSugg(location.country));
+			}
+      var regexpHere = /here(\s)?.*/;
+      if (regexpHere.test(fragment)) {
+         CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
       }
-
       return [CmdUtils.makeSugg(fragment)];
    }
 };

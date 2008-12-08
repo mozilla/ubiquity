@@ -51,63 +51,12 @@ Components.utils.import("resource://ubiquity-tests/framework.js");
 Components.utils.import("resource://ubiquity-tests/test_safebox.js");
 Components.utils.import("resource://ubiquity-tests/test_eventhub.js");
 Components.utils.import("resource://ubiquity-tests/test_suggestion_memory.js");
+Components.utils.import("resource://ubiquity-tests/test_annotation_memory.js");
+
+Components.utils.import("resource://ubiquity-tests/test_tag_command.js");
 
 var globalObj = this;
 const LANG = "en";
-
-function FakeAnnSvc() {
-  var ann = {};
-  var urls = {};
-
-  var self = this;
-  var observer;
-
-  self.addObserver = function(anObserver) {
-    if (observer)
-      throw new Error("Don't know how to deal w/ multiple observers.");
-    observer = anObserver;
-  };
-
-  self.getPagesWithAnnotation = function(name) {
-    var results = [];
-    for (uri in ann)
-      if (typeof(ann[uri][name]) != 'undefined')
-        results.push(urls[uri]);
-    return results;
-  };
-
-  self.pageHasAnnotation = function(uri, name) {
-    if (ann[uri.spec] &&
-        typeof(ann[uri.spec][name]) != 'undefined')
-      return true;
-    return false;
-  };
-
-  self.getPageAnnotation = function(uri, name) {
-    if (!self.pageHasAnnotation(uri, name))
-      throw Error('No such annotation');
-    return ann[uri.spec][name];
-  };
-
-  self.setPageAnnotation = function(uri, name, value, dummy,
-                                    expiration) {
-    if (!ann[uri.spec]) {
-      ann[uri.spec] = new Object();
-      urls[uri.spec] = uri;
-    }
-    ann[uri.spec][name] = value;
-    observer.onPageAnnotationSet(uri, name);
-  };
-
-  self.removePageAnnotation = function(uri, name) {
-    if (!self.pageHasAnnotation(uri, name))
-      throw Error('No such annotation');
-    delete ann[uri.spec][name];
-    observer.onPageAnnotationRemoved(uri, name);
-  };
-
-  self.EXPIRE_NEVER = 0;
-}
 
 function debugSuggestionList( list ) {
   dump("There are " + list.length + " items in suggestion list.\n");
@@ -204,7 +153,7 @@ function testMixedCodeSourceCollectionWorks() {
 }
 
 function testLinkRelCodeServiceWorks() {
-  var LRCS = new LinkRelCodeService(new FakeAnnSvc());
+  var LRCS = new LinkRelCodeService(new TestAnnotationMemory(this));
   var url = "http://www.foo.com";
   var code = "function blah() {}";
 
@@ -231,6 +180,9 @@ function testLinkRelCodeServiceWorks() {
 
   this.assert(results[0].getCode() == code);
   this.assert(results[1].getCode() == moreCode);
+
+  results[0].setCode("// new code");
+  this.assert(results[0].getCode() == "// new code");
 
   // TODO: Iterate through the collection and ensure that it behaves
   // how we think it should.
@@ -431,9 +383,6 @@ function testCommandSourceOneCmdWorks() {
                                  new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
-  for(name in cmdSrc.commandNames) {
-    dump("command: " + name + "\n");
-  }
   var cmd = cmdSrc.getCommand("foo-thing");
   this.assert(cmd, "Sample command should exist.");
   this.assert(cmd.execute() == 5,

@@ -107,6 +107,7 @@ function RemoteUriCodeSource(pageInfo) {
   this.id = pageInfo.jsUri.spec;
   this._pageInfo = pageInfo;
   this._req = null;
+  this._hasCheckedRecently = false;
 };
 
 RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
@@ -117,7 +118,9 @@ RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
 
 RemoteUriCodeSource.prototype = {
   getCode : function RUCS_getCode() {
-    if (!this._req) {
+    if (!this._req && !this._hasCheckedRecently) {
+      this._hasCheckedRecently = true;
+
       // Queue another XMLHttpRequest to fetch the latest code.
 
       var self = this;
@@ -132,6 +135,11 @@ RemoteUriCodeSource.prototype = {
             // Update our cache.
             self._pageInfo.setCode(self._req.responseText);
           self._req = null;
+          Utils.setTimeout(
+            function() { self._hasCheckedRecently = false; },
+            // TODO: Make the interval come from a preference.
+            60000
+          );
         }
       };
 

@@ -5,6 +5,7 @@ import subprocess
 import shutil
 import zipfile
 import shutil
+import distutils.dir_util
 from ConfigParser import ConfigParser
 
 # Path to the root of the extension, relative to where this script is
@@ -78,13 +79,17 @@ def run_python_script(args):
 
 def get_xpcom_info():
     popen = subprocess.Popen(
-        [g_xpcshell_path,
+        [os.path.join(os.path.dirname(g_xpcshell_path),
+                      "run-mozilla.sh"),
+         g_xpcshell_path,
          os.path.join(g_mydir, "get_xpcom_info.js")],
         stdout = subprocess.PIPE
         )
     retval = popen.wait()
     assert retval == 0
-    comsd, os_target, xpcomabi = popen.stdout.read().splitlines()
+    os_target, xpcomabi = popen.stdout.read().splitlines()
+    comsd = os.path.join(os.path.dirname(g_xpcshell_path),
+                         "components")
     return dict(comsd = comsd,
                 os_target = os_target,
                 xpcomabi = xpcomabi)
@@ -178,8 +183,10 @@ if __name__ == "__main__":
             if sys.platform == "cygwin":
                 file = 'cygpath.exe -w ' + path_to_extension_root
                 path_to_extension_root = "".join(os.popen(file).readlines()).replace("\n", " ").rstrip()
-            
-            
+
+            extdir = os.path.dirname(extension_file)
+            if not os.path.exists(extdir):
+                distutils.dir_util.mkpath(extdir)
             fileobj = open(extension_file, "w")
             fileobj.write(path_to_extension_root)
             fileobj.close()

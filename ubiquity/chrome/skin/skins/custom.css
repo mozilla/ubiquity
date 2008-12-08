@@ -1,11 +1,10 @@
 /*
   =skin=
   
-  @name Default
-  
-  @author Yatrik Solanki
-  @homepage http://www.yatriksolanki.com
-  @email yatriksolanki@gmail.com
+  @name Custom
+  @author You
+  @homepage http://www.yourpage.com
+  @email you@you.com
   @license MPL/LGPL/GPL
   
   =/skin=
@@ -18,7 +17,7 @@
 #cmd-panel {
   padding: 0px;
   margin: 10px;
-  background: rgba(0%, 0%, 0%, 0.8);
+  background: rgba(0%, 0%, 0%, 1.0);
   -moz-border-radius: 20px;
   -moz-border-radius-topleft: 0px;
 }

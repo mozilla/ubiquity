@@ -115,10 +115,12 @@ function onReady() {
   $("#targetLink").attr("href", gCommandFeedInfo.url);
 
   function onAutoupdateClicked() {
-    if ($("#autoupdate").attr("checked"))
+    if ($("#autoupdate").attr("checked")){
       $("#autoupdate-warning").slideDown();
-    else
+      $('html, body').animate({ scrollTop: 10000 }, 1000); //Fixes #280
+    }else{
       $("#autoupdate-warning").slideUp();
+    }
   }
 
   var urlScheme = Utils.url(gCommandFeedInfo.sourceUrl).scheme;
