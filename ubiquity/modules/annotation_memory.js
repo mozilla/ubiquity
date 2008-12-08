@@ -182,7 +182,7 @@ function AnnotationService(connection) {
     let updateSql = ("DELETE FROM ubiquity_annotation_memory " +
                      "WHERE uri = ?1 AND name = ?2");
     var updStmt = connection.createStatement(updateSql);
-    updStmt.bindUTF8StringParameter(0, uri);
+    updStmt.bindUTF8StringParameter(0, uri.spec);
     updStmt.bindUTF8StringParameter(1, name);
     updStmt.execute();
     updStmt.finalize();

@@ -45,15 +45,24 @@ function testMemoryPersists() {
   var connection = AnnotationService.openDatabase(file);
   var annSvc = new AnnotationService(connection);
 
+  function reopenDb() {
+    connection.close();
+    connection = AnnotationService.openDatabase(file);
+    annSvc = new AnnotationService(connection);
+  }
+
   var url = Utils.url("http://www.foo.com");
   annSvc.setPageAnnotation(url, "blah", "foo");
   this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 1);
 
-  connection.close();
-  connection = AnnotationService.openDatabase(file);
-  annSvc = new AnnotationService(connection);
+  reopenDb();
 
   this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 1);
+  annSvc.removePageAnnotation(url, "blah");
+
+  reopenDb();
+
+  this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);
 
   connection.close();
   file.remove(false);

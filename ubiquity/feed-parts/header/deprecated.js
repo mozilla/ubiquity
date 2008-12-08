@@ -9,9 +9,9 @@ this.__defineGetter__(
   "window",
   function() {
     Utils.reportWarning("The global window object is deprecated in command " +
-                        "feeds. Please use context.window instead.",
+                        "feeds. Please use context.chromeWindow instead.",
                         Components.stack.caller);
-    return context.window;
+    return context.chromeWindow;
   }
 );
 
