@@ -21,7 +21,7 @@
     <em:name>Ubiquity</em:name>
     <em:description>An extension that allows for the use of dynamic commands in Firefox.</em:description>
     <em:creator>Mozilla Corporation</em:creator>
-    <em:iconURL>chrome://ubiquity/content/ubiquity_logo.png</em:iconURL>
+    <em:iconURL>chrome://ubiquity/skin/icons/ubiquity_logo.png</em:iconURL>
     <em:homepageURL>http://wiki.mozilla.org/Labs/Ubiquity</em:homepageURL>
     <em:updateURL>https://ubiquity.mozilla.com/xpi/%ITEM_VERSION%/update.rdf</em:updateURL>
     <em:optionsURL>chrome://ubiquity/content/preferences.xul</em:optionsURL>
