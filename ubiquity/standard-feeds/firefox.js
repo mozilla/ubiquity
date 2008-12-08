@@ -178,7 +178,12 @@ CmdUtils.CreateCommand({
   execute: function(aTagsString) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
-    var doc = CmdUtils.getDocumentInsecure();
+    var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
+             getService(Ci.nsIWindowMediator);
+    var recentWindow = wm.getMostRecentWindow("navigator:browser");
+    var doc = recentWindow.content.document;
+    if (!doc)
+      return;
 
     var iosvc = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
     var currentURI = iosvc.newURI(doc.location, null, null);
@@ -193,7 +198,7 @@ CmdUtils.CreateCommand({
 
     // if there's a comma, split on commas, otherwise use spaces
     var splitChar = " ";
-    if (aTagsString.text.indexOf(",") == -1)
+    if (aTagsString.text.indexOf(",") != -1)
       splitChar = ",";
     var tags = aTagsString.text.split(splitChar);
 

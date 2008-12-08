@@ -87,7 +87,16 @@ function ubiquitySetup()
     skinUrl = defaultSkinUrl;
     skinService.setCurrentSkin(skinUrl);
   }
-  skinService.loadSkin(skinUrl);
+  try{
+    skinService.loadSkin(skinUrl);
+  }catch(e){
+    //If there's any error loading the current skin,
+    //load the default and tell the user about the failure
+    skinService.loadSkin(defaultSkinUrl);
+    services.messageService
+            .displayMessage("Loading your current skin failed." + 
+                            "The default skin will be loaded.");
+  }
 
   var previewIframe = document.getElementById("cmd-preview");
   var previewBlock = previewIframe.contentDocument

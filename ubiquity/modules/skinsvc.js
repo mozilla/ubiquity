@@ -33,6 +33,9 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+//MAJOR TODO: Split this module into SkinMemory and SkinSvc
+//so we don't open DB connections for simple functions like SkinSvc.getCurrentSkin()
 
 var EXPORTED_SYMBOLS = ["SkinSvc"];
 
@@ -141,15 +144,11 @@ SkinSvc.prototype = {
     if (selStmt.executeStep()) {
       count = selStmt.getInt32(0);
     }
-    if(count == 0){
-      return false;
-    }else{
-      return true;
-    }
+    return (count != 0);
   },
   
   //Add a new skin record into the database
-  addSkin: function addSkin(downloadUri, localUri, dateModified){
+  addSkin: function addSkin(downloadUri, localUri){
     var insertSql = "INSERT INTO ubiquity_skin_memory " +
                      "VALUES (?1, ?2)";
     var insStmt = this._createStatement(insertSql);
@@ -195,8 +194,10 @@ SkinSvc.prototype = {
       this.setCurrentSkin(newSkinPath);
       this._msgService.displayMessage("Your Ubiquity skin has been changed!");
     } catch(e) {
+      this.loadSkin(this.DEFAULT_SKIN);
+      this.setCurrentSkin(this.DEFAULT_SKIN);
       Components.utils.reportError("Error applying Ubiquity skin from'" + 
-                                    newSkinPath + "': " + e);
+                                    newSkinPath + "': " + e);                         
       this._msgService.displayMessage("Error applying Ubiquity skin from " + newSkinPath);
     } 
   },
@@ -216,7 +217,6 @@ SkinSvc.prototype = {
   },
   
   updateSkin: function updateSkin(local_uri, download_uri){
-    //download from internet
     var self = this;
     try {
       function onSuccess(data) {

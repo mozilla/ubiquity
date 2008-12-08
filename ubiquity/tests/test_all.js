@@ -53,6 +53,8 @@ Components.utils.import("resource://ubiquity-tests/test_eventhub.js");
 Components.utils.import("resource://ubiquity-tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity-tests/test_annotation_memory.js");
 
+Components.utils.import("resource://ubiquity-tests/test_tag_command.js");
+
 var globalObj = this;
 const LANG = "en";
 
@@ -381,9 +383,6 @@ function testCommandSourceOneCmdWorks() {
                                  new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
-  for(name in cmdSrc.commandNames) {
-    dump("command: " + name + "\n");
-  }
   var cmd = cmdSrc.getCommand("foo-thing");
   this.assert(cmd, "Sample command should exist.");
   this.assert(cmd.execute() == 5,
