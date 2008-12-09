@@ -41,9 +41,6 @@ var EXPORTED_SYMBOLS = ["Utils"];
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                  .getService(Components.interfaces.fuelIApplication);
-
 var Utils = {};
 
 Utils.__globalObject = this;
@@ -214,6 +211,9 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 // Focuses a tab with the given URL if one exists in the current
 // window, otherwise opens a new tab with the URL and focuses it.
 Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
+  let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                    .getService(Components.interfaces.fuelIApplication);
+
   var tabs = Application.activeWindow.tabs;
   for (var i = 0; i < tabs.length; i++)
     if (tabs[i].uri.spec == urlString) {
@@ -400,6 +400,9 @@ Utils.tabs = {
    */
   __cache: null,
   get _cache() {
+    let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+
     if (this.__cache)
       return this.__cache;
 
