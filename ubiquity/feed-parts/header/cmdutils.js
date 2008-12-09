@@ -634,7 +634,35 @@ CmdUtils.previewCallback = function previewCallback(pblock,
   return wrappedCallback;
 };
 
-CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
+CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
+  // TODO: Figure out when to kill this temp file.
+  if( typeof(filePathOrOptions) == "object" ) {
+    if( filePathOrOptions.file != null ) var filePath = filePathOrOptions.file;
+    if( filePathOrOptions.html != null) {
+      var data = filePathOrOptions.html;
+      var file = Components.classes["@mozilla.org/file/directory_service;1"]
+                           .getService(Components.interfaces.nsIProperties)
+                           .get("TmpD", Components.interfaces.nsIFile);
+      file.append("preview.tmp");
+      file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+      
+      // file is nsIFile, data is a string
+      var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+                               .createInstance(Components.interfaces.nsIFileOutputStream);
+
+      // use 0x02 | 0x10 to open file for appending.
+      foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
+      // write, create, truncate
+      // In a c file operation, we have no need to set file mode with or operation,
+      // directly using "r" or "w" usually.
+      foStream.write(data, data.length);
+      foStream.close();
+      var filePath = file.path;
+    }
+  } else {
+    filePath = filePathOrOptions;
+  }
+  
   var previewWindow = null;
   var xulIframe = null;
   var query = "";
@@ -644,8 +672,14 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
   }
 
   function contentPreview(pblock, directObj) {
-    query = directObj.text;
-
+    // TODO: This is a hack. Not sure that we should even
+    // be doing something with getting a query in here. It's
+    // command specifc. This function shouldn't be? -- Aza
+    if( !directObj ) directObj = {text:"", html:""};
+    
+    // This is meant to be a global, so that it can affect showPreview().
+    query = directObj;
+    
     if (previewWindow) {
       showPreview();
     } else if (xulIframe) {
@@ -686,13 +720,16 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePath) {
           var focused = context.focusedElement;
 
           // This would be nice to store the map in the buffer...  But
-	  // for now, it causes a problem with a large image showing
-	  // up as the default.
+	        // for now, it causes a problem with a large image showing
+	        // up as the default.
           //CmdUtils.setLastResult( html );
 
           if (doc.designMode == "on") {
             // TODO: Remove use of query here?
-            doc.execCommand("insertHTML", false, query + "<br/>" + html);
+            // The "query" here is useful so that you don't have to retype what
+            // you put in the map command. That said, this is map-command
+            // specific and should be factored out. -- Aza
+            doc.execCommand("insertHTML", false, query.html + "<br/>" + html);
           }
           else if (CmdUtils.getSelection()) {
 	          CmdUtils.setSelection(html);
