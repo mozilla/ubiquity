@@ -41,6 +41,9 @@ var EXPORTED_SYMBOLS = ["Utils"];
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                  .getService(Components.interfaces.fuelIApplication);
+
 var Utils = {};
 
 Utils.__globalObject = this;
@@ -62,6 +65,13 @@ Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
   scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
                    aColumnNumber, aFlags, aCategory);
   consoleService.logMessage(scriptError);
+};
+
+Utils.LOG = function LOG(aMessage) {
+  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+                       .getService(Components.interfaces.nsIConsoleService);
+  var aCategory = "ubiquity javascript: ";
+  consoleService.logStringMessage(aCategory + aMessage);
 };
 
 Utils.encodeJson = function encodeJson(object) {
@@ -305,8 +315,7 @@ Utils.History = {
       }
     return count;
   }
-}
-
+};
 
 // valid hash algorithms are: MD2, MD5, SHA1, SHA256, SHA384, SHA512
 Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
@@ -328,7 +337,6 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   return hashString;
 };
 
-
 Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
   var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
                             .getService(Components.interfaces.nsIScriptableUnicodeConverter);
@@ -341,4 +349,72 @@ Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
                             .getService(Components.interfaces.nsIScriptableUnicodeConverter);
   converter.charset = fromCharset;
   return converter.ConvertToUnicode(text);
+};
+
+Utils.tabs = {
+  /**
+   * Get open tabs.
+   *
+   * @param aName optional string tab name
+   *        If supplied, will return the named tab or null.
+   * @returns A hash of tab name -> tab reference, or if a
+   *          name parameter is passed, returns the matching
+   *          tab reference or null.
+   */
+  get: function Utils_tabs_get(aName) {
+    if (aName)
+      return this._cache[aName] ? this._cache[aName] : null;
+    return this._cache;
+  },
+
+  /**
+   * Search for tabs by tab name.
+   *
+   * @param aSearchText string
+   * @param aMaxResults integer
+   * @returns A hash of tab name -> tab reference
+   */
+  search: function Utils_tabs_search(aSearchText, aMaxResults) {
+    var matches = {};
+    for (var name in this._cache) {
+      //TODO: implement a better match algorithm
+      if (name.match(aSearchText, "i"))
+        matches[name] = this._cache[name];
+      if (matches.length == aMaxResults)
+        break;
+    }
+    return matches;
+  },
+
+  /**
+   * Handles TabOpen and TabClose window events
+   * clears tab cache
+   */
+  onTabEvent: function() {
+    this.__cache = null;
+  },
+
+  /**
+   * getter for the tab cache
+   * manages reloading cache
+   */
+  __cache: null,
+  get _cache() {
+    if (this.__cache)
+      return this.__cache;
+
+    this.__cache = {};
+    var windowCount = Application.windows.length;
+    for( var j=0; j < windowCount; j++ ) {
+      var window = Application.windows[j];
+      window.events.addListener("TabOpen", this.onTabEvent);
+      window.events.addListener("TabClose", this.onTabEvent);
+      var tabCount = window.tabs.length;
+      for (var i = 0; i < tabCount; i++) {
+        var tab = window.tabs[i];
+        this.__cache[tab.document.title] = tab;
+      }
+    }
+    return this.__cache;
+  }
 };
