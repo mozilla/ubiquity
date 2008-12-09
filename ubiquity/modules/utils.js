@@ -64,7 +64,7 @@ Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
   consoleService.logMessage(scriptError);
 };
 
-Utils.LOG = function LOG(aMessage) {
+Utils.reportInfo = function reportInfo(aMessage) {
   var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
                        .getService(Components.interfaces.nsIConsoleService);
   var aCategory = "ubiquity javascript: ";
