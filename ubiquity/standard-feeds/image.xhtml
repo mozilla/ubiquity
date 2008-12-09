@@ -88,19 +88,15 @@ CmdUtils.CreateCommand({
   execute: function() {}
 });
 
+
 CmdUtils.CreateCommand({
   name: "flip-page",
   preview: "Flips the entire page upside down. <span style='-moz-transform:rotate(180deg)'>Useful for bats</span>.",
   execute: function() {
-    var document = context.focusedWindow.document;
+    var document = CmdUtils.getDocument();
     jQuery(document.body).css("-moz-transform", "rotate(180deg)");
   }
 });
-
-
-
-
-
 
 function injectPixastic( context, callback ){
   if( jQuery("script#_pixastic_").length > 0 ){ callback(); }
@@ -123,7 +119,7 @@ function sanatizeImage( img ) {
   var ctx = canvas.getContext("2d");
   ctx.drawImage( img, 0, 0 );
   
-  img.src = canvas.toDataURL();    
+  img.src = canvas.toDataURL();      
 }
 
 
@@ -141,7 +137,8 @@ CmdUtils.CreateCommand({
       });
     });  
   }
-})
+});
+
 
 CmdUtils.CreateCommand({
   name: "invert-image",
@@ -155,7 +152,7 @@ CmdUtils.CreateCommand({
       });
     });  
   }
-})
+});
 
 
 CmdUtils.CreateCommand({
@@ -170,7 +167,7 @@ CmdUtils.CreateCommand({
       });
     });  
   }
-})
+});
 
 
 
