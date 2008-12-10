@@ -1526,15 +1526,23 @@ function testUtilsIsArray() {
 function getUbiquityComponent(test) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
 
-  if (typeof(ubiquity) == "undefined")
+  try {
+    var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
+
+    ubiquity = ubiquity.getService().QueryInterface(Ci.nsIUbiquity);
+    var sandbox = Components.utils.Sandbox("http://www.foo.com");
+    ubiquity.evalInSandbox("(function() {})();", "nothing.js", 1,
+                           "1.8", sandbox);
+    return ubiquity;
+  } catch (e) {
     // Right now nsUbiquity is an optional component, and if
-    // it doesn't exist, let's just skip this test.
+    // it doesn't exist, let's just skip this test. Unfortunately,
+    // there's a bunch of weird ways that the components can fail
+    // to load, e.g. if the wrong version of Firefox loads it, so
+    // we're just doing a blanket except here for now.
     throw new test.SkipTestError();
-
-  ubiquity = ubiquity.getService();
-  return ubiquity.QueryInterface(Ci.nsIUbiquity);
+  }
 }
 
 function testUbiquityComponent() {

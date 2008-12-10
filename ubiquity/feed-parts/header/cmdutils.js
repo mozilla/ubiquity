@@ -709,6 +709,8 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
       function onPreviewLoaded() {
         // TODO: Security risk -- this is very insecure!
         previewWindow = browser.contentWindow;
+        
+        previewWindow.Ubiquity.context = context;
 
         previewWindow.Ubiquity.resizePreview = function(height) {
           xulIframe.setAttribute("height", height);
