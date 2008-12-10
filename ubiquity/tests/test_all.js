@@ -1575,7 +1575,39 @@ function testUbiquityComponent() {
 function testUbiquityComponentFlagSystemFilenamePrefixWorks() {
   var ubiquity = getUbiquityComponent(this);
 
-  ubiquity.flagSystemFilenamePrefix("sup://", true);
+  ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
+}
+
+function testUbiquityComponentFlagSystemFilenamePrefixCreatesWrappers() {
+  // This is a regression test for #434.
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var ubiquity = getUbiquityComponent(this);
+
+  try {
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+  } catch (e) {
+    throw new this.SkipTestError();
+  }
+
+  ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
+
+  var sandbox = Components.utils.Sandbox(globalObj);
+  var code = "Application.activeWindow.activeTab.document.defaultView";
+  sandbox.Application = Application;
+
+  this.assertEquals(
+    ubiquity.evalInSandbox(code, "__arbitraryString2://blarg/", 1,
+                           "1.8", sandbox),
+    "[object Window]"
+  );
+
+  this.assertEquals(
+    ubiquity.evalInSandbox(code, "__arbitraryString1://blarg/", 1,
+                           "1.8", sandbox),
+    "[object XPCNativeWrapper [object Window]]"
+  );
 }
 
 function testUbiquityComponentAcceptsJsVersion() {
