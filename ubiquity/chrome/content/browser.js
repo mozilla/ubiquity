@@ -50,7 +50,7 @@ function ubiquitySetup()
   //To fix #385 (suggestion ranking is incorrect)
   //We need to delete the old database
   //SuggestionMemory will recreate the database later
-  
+  try{
   const VERSION_PREF ="extensions.ubiquity.lastversion";
   var ext = Application.extensions.get("ubiquity@labs.mozilla.com");
   var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
@@ -63,6 +63,9 @@ function ubiquitySetup()
     var SQLITE_FILE = "ubiquity_suggestion_memory.sqlite";
     file.append(SQLITE_FILE);
     file.remove(false);
+  }
+  }catch(e){
+    //do nothing
   }
   
   var jsm = {};
