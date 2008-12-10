@@ -1572,6 +1572,12 @@ function testUbiquityComponent() {
               "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
 }
 
+function testUbiquityComponentFlagSystemFilenamePrefixWorks() {
+  var ubiquity = getUbiquityComponent(this);
+
+  ubiquity.flagSystemFilenamePrefix("sup://", true);
+}
+
 function testUbiquityComponentAcceptsJsVersion() {
   var ubiquity = getUbiquityComponent(this);
   var sandbox = Components.utils.Sandbox("http://www.foo.com");
