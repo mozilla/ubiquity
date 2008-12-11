@@ -88,6 +88,11 @@ CmdUtils.CreateCommand({
 function startup_openUbiquityWelcomePage()
 {
   const VERSION_PREF ="extensions.ubiquity.lastversion";
+  const USERAGENT_PREF = "general.useragent.extra.ubiquity";
+
+  var expectedPref = "Ubiquity/" + ext.version;
+  if (Application.prefs.getValue(USERAGENT_PREF, "") != expectedPref)
+    Application.prefs.setValue(USERAGENT_PREF, expectedPref);
 
   // Compare the version in our preferences from our version in the
   // install.rdf.
