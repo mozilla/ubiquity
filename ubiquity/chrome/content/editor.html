@@ -14,12 +14,34 @@
           src="resource://ubiquity-scripts/codemirror/js/codemirror.js"></script>
   <script type="text/javascript">
     const PREF_ENABLE_HIGHLIGHTING = "extensions.ubiquity.editor_highlighting";
+
+    // Workaround for #437.
+    function isSyntaxHighlightingBroken() {
+      var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+                              .getService(Components.interfaces.nsIXULAppInfo);
+      var versionChecker = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+                                     .getService(Components.interfaces.nsIVersionComparator);
+      if (versionChecker.compare(appInfo.version, "3.1b1") >= 0)
+        return true;
+      else
+        return false;
+    }
+
+    function getHighlighting() {
+      if (isSyntaxHighlightingBroken())
+        return false;
+      else
+        return Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true);
+    }
+
     var file; 
     var lastModifiedTime = 0; 
     function initialize() { 
       document.getElementById("editor").value = PrefCommands.getCode();
-      document.getElementById("enableSyntaxHighlighting").checked = Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true);
-    } 
+      document.getElementById("enableSyntaxHighlighting").checked = getHighlighting();
+      if (isSyntaxHighlightingBroken())
+        $("#editor-options").hide();
+    }
     function launch() { 
       file = Editor.launchEditor(document.getElementById('editor').editor.editor.getCode()); 
       if (file != null && file.exists()) { 
@@ -39,7 +61,7 @@
       }
     }
     function highlight() {
-      if(!Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true)) {
+      if(!getHighlighting()) {
         setupTextarea();
         return;
       }
