@@ -1045,6 +1045,10 @@ var Editor = (function(){
 
 addEventHandler(window, "load", function() {
   var CodeMirror = window.frameElement.CodeMirror;
+  // FF3.1+ treats chrome content differently, so this is needed to 
+  // reference content (not backwards compatible, thus this check)
+  if (CodeMirror == undefined) 
+    CodeMirror = window.frameElement.wrappedJSObject.CodeMirror;
   CodeMirror.editor = new Editor(CodeMirror.options);
   if (CodeMirror.options.initCallback) {
     this.parent.setTimeout(function(){
