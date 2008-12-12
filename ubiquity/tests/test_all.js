@@ -199,6 +199,7 @@ function FakeCommandSource( cmdList ) {
   }
 }
 FakeCommandSource.prototype = {
+  addListener: function() {},
   getCommand: function(name) {
     return this._cmdList[name];
   },

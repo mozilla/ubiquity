@@ -47,10 +47,21 @@ function CommandManager(cmdSource, msgService, parser) {
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
   this.__nlParser = parser;
-  this.__nlParser.setCommandList(cmdSource.getAllCommands());
-  this.__nlParser.setNounList(cmdSource.getAllNounTypes());
-  this.__cmdSource.parser = this.__nlParser;
   this.__queuedPreview = null;
+
+  function onCommandsReloaded() {
+    parser.setCommandList(cmdSource.getAllCommands());
+    parser.setNounList(cmdSource.getAllNounTypes());
+  }
+
+  cmdSource.addListener("commands-reloaded", onCommandsReloaded);
+  onCommandsReloaded();
+
+  // TODO: Need to add a finalize() method to this class, or else
+  // we'll create memory leaks when a window with this instance closes
+  // and the command source is still holding a reference to us. Either
+  // that or perhaps nsIObservers are weak references and we can
+  // change eventhub to use those instead.
 }
 
 CommandManager.prototype = {
