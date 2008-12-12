@@ -241,14 +241,18 @@ Utils.getCookie = function getCookie(domain, name) {
 Utils.paramsToString = function paramsToString(params) {
   var stringPairs = [];
   function valueTypeIsOk(val) {
-    var whitelist = ["string", "number", "boolean"];
-    var type = typeof val;
-    return whitelist.indexOf(type) > -1;
+    if (typeof val == "function")
+      return false;
+    if (val === undefined)
+      return false;
+    if (val === null)
+      return false;
+    return true;
   }
   function addPair(key, value) {
     if (valueTypeIsOk(value)) {
       stringPairs.push(
-        encodeURIComponent(key) + "=" + encodeURIComponent(value)
+        encodeURIComponent(key) + "=" + encodeURIComponent(value.toString())
       );
     }
   }
