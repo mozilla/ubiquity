@@ -100,11 +100,9 @@ CommandManager.prototype = {
       if(suggIconUrl) {
         suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
       }
-      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" +
-	               suggText;
+      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" + suggText;
       if ( x == this.__hilitedSuggestion ) {
-        content += "<div class=\"hilited\"><div class=\"hilited-text\">" +
-	  suggText + "</div>";
+        content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
         content += "</div>";
       } else {
         content += "<div class=\"suggested\">" + suggText + "</div>";
@@ -154,6 +152,7 @@ CommandManager.prototype = {
     }
 
     this._renderSuggestions(doc.getElementById("suggestions"));
+    
     return this._renderPreview(context, previewBlock);
   },
 
@@ -188,7 +187,7 @@ CommandManager.prototype = {
       this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
     else
       try {
-        this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
+	this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
         parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(

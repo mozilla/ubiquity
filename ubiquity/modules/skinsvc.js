@@ -56,6 +56,9 @@ var SQLITE_SCHEMA =
     "VALUES ('chrome://ubiquity/skin/skins/default.css'," +
     "'chrome://ubiquity/skin/skins/default.css');" + 
     "INSERT INTO ubiquity_skin_memory " +
+    "VALUES ('chrome://ubiquity/skin/skins/experimental.css'," +
+    "'chrome://ubiquity/skin/skins/experimental.css');" + 
+    "INSERT INTO ubiquity_skin_memory " +
     "VALUES ('chrome://ubiquity/skin/skins/old.css'," +
     "'chrome://ubiquity/skin/skins/old.css');" +
     "INSERT INTO ubiquity_skin_memory " +
@@ -367,6 +370,7 @@ SkinSvc.openDatabase = function openDatabase(file) {
   /* If the pointed-at file doesn't already exist, it means the database
    * has never been initialized, so we'll have to do it now by running
    * the CREATE TABLE sql. */
+
   var connection = null;
   try {
     connection = _storSvc.openDatabase(file);
