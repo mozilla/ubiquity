@@ -133,6 +133,20 @@ xpc_EvalInSandbox(JSContext *cx, JSObject *sandbox, const nsAString& source,
     return rv;
 }
 
+NS_IMETHODIMP nsUbiquity::FlagSystemFilenamePrefix(const char *filenamePrefix,
+                                                   PRBool wantNativeWrappers)
+{
+  nsresult rv = NS_OK;
+  nsCOMPtr<nsIXPConnect> xpc = do_GetService("@mozilla.org/js/xpc/XPConnect;1", &rv);
+
+  if (NS_FAILED(rv))
+    return NS_ERROR_FAILURE;
+
+  rv = xpc->FlagSystemFilenamePrefix(filenamePrefix, wantNativeWrappers);
+
+  return rv;
+}
+
 NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source,
                                         const char *filename,
                                         PRInt32 lineNo,

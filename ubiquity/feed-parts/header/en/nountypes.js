@@ -439,31 +439,19 @@ var noun_type_language =  {
 var noun_type_tab = {
   _name: "tab name",
 
+  _tabCache: null,
+
   // Returns all tabs from all windows.
   getTabs: function(){
-    var tabs = {};
-
-    for( var j=0; j < Application.windows.length; j++ ) {
-      var window = Application.windows[j];
-      for (var i = 0; i < window.tabs.length; i++) {
-        var tab = window.tabs[i];
-        tabs[tab.document.title] = tab;
-      }
-    }
-
-    return tabs;
+    return Utils.tabs.get();
   },
 
   suggest: function( text, html ) {
     var suggestions  = [];
-    var tabs = noun_type_tab.getTabs();
-
-    //TODO: implement a better match algorithm
-    for ( var tabName in tabs ) {
-      if (tabName.match(text, "i"))
-        suggestions.push( CmdUtils.makeSugg(tabName) );
-    }
-    return suggestions.splice(0, 5);
+    var tabs = Utils.tabs.search(text, 5);
+    for ( var tabName in tabs )
+      suggestions.push( CmdUtils.makeSugg(tabName) );
+    return suggestions;
   }
 };
 

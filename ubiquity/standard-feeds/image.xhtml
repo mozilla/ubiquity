@@ -22,9 +22,25 @@ corresponding feed is <a href="search.html">here</a>.</p>
     -moz-border-radius: 45px; border-top: 5px solid #cc6600;
   }
   </style>
-</div>
+</div> 
 
 <script class="commands"><![CDATA[
+
+function getImgsFromSelection( context ){
+  var sel = context.focusedWindow.getSelection();
+  var document = context.focusedWindow.document;
+  
+  if( sel.rangeCount < 1 ) return [];
+  var range = sel.getRangeAt(0);
+  
+  // TODO: This is overly aggressive and finds things that are
+  // outside the current selection. This logic should be fixed
+  // (requires playing with the ranges begining and ending and
+  // offsets) and moved into the selection variable. We currently
+  // have input.text and input.html. We'll need an input.pointer
+  // or input.selection or something.
+  return jQuery.find( "img", range.commonAncestorContainer);    
+}
 
 CmdUtils.CreateCommand({
   name: "rotate-image",
@@ -32,23 +48,6 @@ CmdUtils.CreateCommand({
     jQuery.each(elems, function(){
       jQuery(this).css("-moz-transform", "rotate(%sdeg)".replace(/%s/, deg));
     })
-  },
-  
-  
-  _imgsFromSelection: function( context ){
-    var sel = context.focusedWindow.getSelection();
-    var document = context.focusedWindow.document;
-    
-    if( sel.rangeCount < 1 ) return [];
-    var range = sel.getRangeAt(0);
-    
-    // TODO: This is overly aggressive and finds things that are
-    // outside the current selection. This logic should be fixed
-    // (requires playing with the ranges begining and ending and
-    // offsets) and moved into the selection variable. We currently
-    // have input.text and input.html. We'll need an input.pointer
-    // or input.selection or something.
-    return jQuery.find( "img", range.commonAncestorContainer);    
   },
   
   preview: function( pblock ){
@@ -67,7 +66,7 @@ CmdUtils.CreateCommand({
       if( x < 0 ) angle += 180;
       
       self._rotate( jQuery("#control", pblock), angle );
-      var imgs = self._imgsFromSelection( context ); 
+      var imgs = getImgsFromSelection( context ); 
       self._rotate( imgs, angle );
     };
 
@@ -89,14 +88,89 @@ CmdUtils.CreateCommand({
   execute: function() {}
 });
 
+
 CmdUtils.CreateCommand({
   name: "flip-page",
   preview: "Flips the entire page upside down. <span style='-moz-transform:rotate(180deg)'>Useful for bats</span>.",
   execute: function() {
-    var document = context.focusedWindow.document;
+    var document = CmdUtils.getDocument();
     jQuery(document.body).css("-moz-transform", "rotate(180deg)");
   }
 });
+
+function injectPixastic( context, callback ){
+  if( jQuery("script#_pixastic_").length > 0 ){ callback(); }
+  
+  var doc = context.focusedWindow.document;
+  var s = doc.createElement("script");
+  s.src = "resource://ubiquity-scripts/pixastic.js";
+  s.id = "_pixastic_";
+  doc.body.appendChild( s );
+  jQuery(s).load( callback );
+}
+
+function sanatizeImage( img ) {
+  // Replaces an image src attribute with a data URL.
+  var hWin = CmdUtils.getHiddenWindow();
+  var canvas = hWin.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  canvas.width = img.width;
+  canvas.height = img.height;    
+
+  var ctx = canvas.getContext("2d");
+  ctx.drawImage( img, 0, 0 );
+  
+  img.src = canvas.toDataURL();      
+}
+
+
+// TODO: Make these into a factory, and add controls into the previews.
+
+CmdUtils.CreateCommand({
+  name: "desaturate-image",
+  execute: function(){
+    injectPixastic( context, function(){
+      var imgs = getImgsFromSelection( context );
+      
+      jQuery(imgs).each(function(){
+        sanatizeImage( this );
+        context.focusedWindow.Pixastic.process(this, "desaturate");      
+      });
+    });  
+  }
+});
+
+
+CmdUtils.CreateCommand({
+  name: "invert-image",
+  execute: function(){
+    injectPixastic( context, function(){
+      var imgs = getImgsFromSelection( context );
+      
+      jQuery(imgs).each(function(){
+        sanatizeImage( this );
+        context.focusedWindow.Pixastic.process(this, "invert");      
+      });
+    });  
+  }
+});
+
+
+CmdUtils.CreateCommand({
+  name: "edge-detect-image",
+  execute: function(){
+    injectPixastic( context, function(){
+      var imgs = getImgsFromSelection( context );
+      
+      jQuery(imgs).each(function(){
+        sanatizeImage( this );
+        context.focusedWindow.Pixastic.process(this, "edges", {mono:true,invert:false});      
+      });
+    });  
+  }
+});
+
+
+
 ]]></script>
 
 </body>

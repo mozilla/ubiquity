@@ -78,6 +78,9 @@ function SandboxFactory(globals, target) {
   }
 }
 
+var URI_PREFIX = "ubiquity://";
+var gRegistered = false;
+
 SandboxFactory.prototype = {
   makeSandbox: function makeSandbox(codeSource) {
     var sandbox = Components.utils.Sandbox(this._target);
@@ -96,9 +99,17 @@ SandboxFactory.prototype = {
       let currIndex = 0;
       for (let i = 0; i < codeSections.length; i++) {
         let section = codeSections[i];
+        if (!gRegistered) {
+          // Tell XPConnect that anything which begins with URI_PREFIX
+          // should be considered protected content, and therefore any
+          // untrusted content accessed by it should implicitly have
+          // XPCNativeWrappers made for it.
+          ubiquity.flagSystemFilenamePrefix(URI_PREFIX, true);
+          gRegistered = true;
+        }
         ubiquity.evalInSandbox(code.slice(currIndex, currIndex +
                                           section.length),
-                               section.filename,
+                               URI_PREFIX + section.filename,
                                section.lineNumber,
                                "1.8",
                                sandbox);

@@ -355,12 +355,11 @@
       Ubiquity.insertHtml( "<img src='" + getStaticMapUrl() + "'\>" );
     }
       
-      
- 
     Ubiquity.onPreview = function setPreview(searchTerm) {
-      if( jQuery("#preview-pane-large").length == 1 )
+      if( jQuery("#preview-pane-large").length == 1 ){
         showAddressPreview();
-      loadMap(searchTerm, 0);
+      }
+      loadMap(searchTerm.text, 0);
     }
         
     </script>
@@ -381,7 +380,7 @@
             })
             .keyup(function(e) {
               if( e.which == 13 ){
-                Ubiquity.onPreview( this.value );
+                Ubiquity.onPreview( {text:this.value} );
               }
             })  
           $("body").append(input);

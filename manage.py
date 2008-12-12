@@ -78,11 +78,16 @@ def run_python_script(args):
     run_program([sys.executable] + args)
 
 def get_xpcom_info():
+    cmdline = [
+        os.path.join(os.path.dirname(g_xpcshell_path),
+	             "run-mozilla.sh"),
+        g_xpcshell_path,
+        os.path.join(g_mydir, "get_xpcom_info.js")
+        ]
+    if not os.path.exists(cmdline[0]):
+        cmdline = cmdline[1:]
     popen = subprocess.Popen(
-        [os.path.join(os.path.dirname(g_xpcshell_path),
-                      "run-mozilla.sh"),
-         g_xpcshell_path,
-         os.path.join(g_mydir, "get_xpcom_info.js")],
+        cmdline,
         stdout = subprocess.PIPE
         )
     retval = popen.wait()

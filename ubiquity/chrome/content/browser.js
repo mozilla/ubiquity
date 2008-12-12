@@ -45,6 +45,29 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 
 function ubiquitySetup()
 {
+  
+  //TODO: Remove after 0.1.3
+  //To fix #385 (suggestion ranking is incorrect)
+  //We need to delete the old database
+  //SuggestionMemory will recreate the database later
+  try{
+  const VERSION_PREF ="extensions.ubiquity.lastversion";
+  var ext = Application.extensions.get("ubiquity@labs.mozilla.com");
+  var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
+  if (currVersion != ext.version) {
+    var Ci = Components.interfaces;
+    var Cc = Components.classes;
+    var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
+                    .getService(Ci.nsIProperties);
+    var file = _dirSvc.get("ProfD", Ci.nsIFile);
+    var SQLITE_FILE = "ubiquity_suggestion_memory.sqlite";
+    file.append(SQLITE_FILE);
+    file.remove(false);
+  }
+  }catch(e){
+    //do nothing
+  }
+  
   var jsm = {};
   Components.utils.import("resource://ubiquity-modules/setup.js",
                           jsm);

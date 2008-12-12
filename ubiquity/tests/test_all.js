@@ -1526,15 +1526,23 @@ function testUtilsIsArray() {
 function getUbiquityComponent(test) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-  var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
 
-  if (typeof(ubiquity) == "undefined")
+  try {
+    var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
+
+    ubiquity = ubiquity.getService().QueryInterface(Ci.nsIUbiquity);
+    var sandbox = Components.utils.Sandbox("http://www.foo.com");
+    ubiquity.evalInSandbox("(function() {})();", "nothing.js", 1,
+                           "1.8", sandbox);
+    return ubiquity;
+  } catch (e) {
     // Right now nsUbiquity is an optional component, and if
-    // it doesn't exist, let's just skip this test.
+    // it doesn't exist, let's just skip this test. Unfortunately,
+    // there's a bunch of weird ways that the components can fail
+    // to load, e.g. if the wrong version of Firefox loads it, so
+    // we're just doing a blanket except here for now.
     throw new test.SkipTestError();
-
-  ubiquity = ubiquity.getService();
-  return ubiquity.QueryInterface(Ci.nsIUbiquity);
+  }
 }
 
 function testUbiquityComponent() {
@@ -1562,6 +1570,44 @@ function testUbiquityComponent() {
                          sandbox);
   this.assert(sandbox.k == 1,
               "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
+}
+
+function testUbiquityComponentFlagSystemFilenamePrefixWorks() {
+  var ubiquity = getUbiquityComponent(this);
+
+  ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
+}
+
+function testUbiquityComponentFlagSystemFilenamePrefixCreatesWrappers() {
+  // This is a regression test for #434.
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var ubiquity = getUbiquityComponent(this);
+
+  try {
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+  } catch (e) {
+    throw new this.SkipTestError();
+  }
+
+  ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
+
+  var sandbox = Components.utils.Sandbox(globalObj);
+  var code = "Application.activeWindow.activeTab.document.defaultView";
+  sandbox.Application = Application;
+
+  this.assertEquals(
+    ubiquity.evalInSandbox(code, "__arbitraryString2://blarg/", 1,
+                           "1.8", sandbox),
+    "[object Window]"
+  );
+
+  this.assertEquals(
+    ubiquity.evalInSandbox(code, "__arbitraryString1://blarg/", 1,
+                           "1.8", sandbox),
+    "[object XPCNativeWrapper [object Window]]"
+  );
 }
 
 function testUbiquityComponentAcceptsJsVersion() {

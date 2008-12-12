@@ -10,25 +10,36 @@ CmdUtils.CreateCommand({
 
   execute: function( tab ) {
     var tabName = tab.text;
-    var tabs = noun_type_tab.getTabs();
-    tabs[tabName]._window.focus();
-    tabs[tabName].focus();
-    // Focus on tab content
-    tabs[tabName]._window.content.focus();
+    var tab = Utils.tabs.get(tabName);
+    if (tab) {
+      tab._window.focus();
+      tab.focus();
+      // Focus on tab content
+      tab._window.content.focus();
+    }
   },
 
   preview: function( pblock, tab ) {
     var tabName = tab.text;
 
-    var tabs = noun_type_tab.getTabs();
-    var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
-
-    if( tabName.length > 1 ){
-      pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
-      pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
+    if (tabName == this._cacheKey) {
+      pblock.innerHTML = this._cacheValue;
+    }
+    else if( tabName.length > 1 ){
+      var tab = Utils.tabs.get(tabName);
+      if (tab) {
+        var imgData = CmdUtils.getTabSnapshot( tab, {width:500} );
+        pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
+        pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
+      }
+      else
+        pblock.innerHTML = "Switch to tab by name.";
     }
     else
       pblock.innerHTML = "Switch to tab by name.";
+
+    this._cacheKey = tabName;
+    this._cacheValue = pblock.innerHTML;
   }
 });
 
@@ -40,9 +51,9 @@ CmdUtils.CreateCommand({
   description: "Closes the tab that matches the given name.",
   execute: function( directObj ) {
     var tabName = directObj.text;
-    var tabs = noun_type_tab.getTabs();
-    if(tabs[tabName]!=null){
-      tabs[tabName].close();
+    var tab = Utils.tabs.get(tabName);
+    if(tab){
+      tab.close();
     }else{
       Application.activeWindow.activeTab.close();
     }
@@ -52,12 +63,15 @@ CmdUtils.CreateCommand({
   preview: function( pblock, directObj ) {
     var tabName = directObj.text;
 
-    var tabs = noun_type_tab.getTabs();
-    var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
-
     if( tabName.length > 1 ) {
-      pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
-      pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
+      var tab = Utils.tabs.get(tabName);
+      if (tab) {
+        var imgData = CmdUtils.getTabSnapshot( tabs[tabName], {width:500} );
+        pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab.".replace(/%s/, tabName);
+        pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData );
+      }
+      else
+        pblock.innerHTML = "Closes the tab by name.";
     }
     else
       pblock.innerHTML = "Closes the tab by name.";

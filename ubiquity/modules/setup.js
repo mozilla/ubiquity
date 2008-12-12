@@ -91,7 +91,7 @@ let UbiquitySetup = {
                    {page: "search.html",
                     source: "search.xhtml",
                     title: "Mozilla Web Search Commands"},
-                    
+
                    {page: "image.html",
                     source: "image.xhtml",
                     title: "Mozilla Image-Related Commands"}],
@@ -253,8 +253,6 @@ let UbiquitySetup = {
       baseUri = Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
     } else
       baseUri = baseLocalUri;
-
-    baseUri = baseUri.replace("%ITEM_VERSION%", this.version);
 
     linkRelCodeService.installDefaults(baseUri,
                                        baseLocalUri,
