@@ -5,3 +5,4 @@ pref("extensions.ubiquity.skin", "old");
 pref("extensions.ubiquity.standardFeedsUri",
      "https://ubiquity.mozilla.com/standard-feeds/");
 pref("extensions.ubiquity.enablePageLoadHandlers", true);
+pref("extensions.ubiquity.displayAlertOnError", false);
