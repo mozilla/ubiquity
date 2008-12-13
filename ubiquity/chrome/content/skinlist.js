@@ -41,6 +41,7 @@ var Ci = Components.interfaces;
 
 Components.utils.import("resource://ubiquity-modules/skinsvc.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
+Components.utils.import("resource://ubiquity-modules/utils.js");
 
 var skinService = new SkinSvc();
 
@@ -167,25 +168,33 @@ function createSkinElement(filepath, id){
 
 
 function saveCustomSkin(){
-    var data = $("#skin-editor").val();
+  var data = $("#skin-editor").val();
+  
+  var MY_ID = "ubiquity@labs.mozilla.com";
+  var em = Cc["@mozilla.org/extensions/manager;1"]
+                     .getService(Ci.nsIExtensionManager);
+  var file = em.getInstallLocation(MY_ID)
+                .getItemFile(MY_ID, "chrome/skin/skins/custom.css");
+                
+  var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
+  .createInstance(Ci.nsIFileOutputStream);
+  foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
+  foStream.write(data, data.length);
+  foStream.close();
+  
+  var msgService = new AlertMessageService();
+  msgService.displayMessage("Your skin has been saved!");
+  
+  skinService.loadSkin(skinService.getCurrentSkin());
     
-    var MY_ID = "ubiquity@labs.mozilla.com";
-    var em = Cc["@mozilla.org/extensions/manager;1"]
-                       .getService(Ci.nsIExtensionManager);
-    var file = em.getInstallLocation(MY_ID)
-                  .getItemFile(MY_ID, "chrome/skin/skins/custom.css");
-                  
-    var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
-    .createInstance(Ci.nsIFileOutputStream);
-    foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
-    foStream.write(data, data.length);
-    foStream.close();
-    
-    var msgService = new AlertMessageService();
-    msgService.displayMessage("Your skin has been saved!");
-    
-    skinService.loadSkin(skinService.getCurrentSkin());
-    
+}
+
+function pasteToGist(){
+  var data = $("#skin-editor").val();
+  var file = encodeURIComponent("[gistfile1]");
+  quickPaste = "file_ext" + file + "=.js&file_name" + file + "=x&file_contents" + file + "=" + encodeURIComponent(data) + "&x=27&y=27";
+  updateUrl = "http://gist.github.com/gists";
+  Utils.openUrlInBrowser(updateUrl, quickPaste);
 }
 
 function openSkinEditor(){
