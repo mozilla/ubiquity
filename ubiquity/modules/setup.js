@@ -140,7 +140,7 @@ let UbiquitySetup = {
 
     gIframe = hiddenWindow.document.createElement("iframe");
     gIframe.setAttribute("id", "ubiquityFrame");
-    gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.xul");
+    gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.html");
     gIframe.addEventListener(
       "pageshow",
       function onPageShow() {
