@@ -143,12 +143,10 @@ CmdUtils.getDocument = function getDocument(){
 
 //This gets the outer window of the current tab in a secure way
 CmdUtils.getWindow = function getWindow() {
-  return context.focusedWindow;
-};
-
-// This gets the outer document of the current tab.
-CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
-  return CmdUtils.getWindowInsecure().document;
+  return Application.activeWindow
+                    .activeTab
+                    .document
+                    .defaultView;
 };
 
 // This gets the outer window of the current tab.
@@ -159,6 +157,13 @@ CmdUtils.getWindowInsecure = function getWindowInsecure() {
                     .defaultView
                     .wrappedJSObject;
 };
+
+
+// This gets the outer document of the current tab.
+CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
+  return CmdUtils.getWindowInsecure().document;
+};
+
 
 CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";

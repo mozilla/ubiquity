@@ -41,6 +41,9 @@ EXPORTED_SYMBOLS = ["ExceptionUtils",
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
+let Cc = Components.classes;
+let Ci = Components.interfaces;
+
 var ExceptionUtils = {
   stackTraceFromFrame: function stackTraceFromFrame(frame, formatter) {
     if (!formatter)
@@ -104,12 +107,20 @@ function AlertMessageService() {
       if (msg.icon)
         icon = msg.icon;
 
-      if (msg.exception)
-        text += "\n" + msg.exception;
+      if (msg.exception) {
+        let Application = Cc["@mozilla.org/fuel/application;1"]
+                          .getService(Ci.fuelIApplication);
+        let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
+        let showErr = Application.prefs.getValue(SHOW_ERR_PREF, false);
+
+        if (showErr)
+          text += "\n" + msg.exception;
+        else
+          return;
+      }
     }
 
     try {
-      var Ci = Components.interfaces;
       var classObj = Components.classes["@mozilla.org/alerts-service;1"];
       var alertService = classObj.getService(Ci.nsIAlertsService);
 

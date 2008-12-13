@@ -90,7 +90,10 @@ Protocol.prototype =
     // Strip off the 'ubiquity://' and use the rest of the URI as a URI.
 
     // TODO: This probably has serious security implications, but we
-    // can make a better mapping to command feeds later.
+    // can make a better mapping to command feeds later. For the time
+    // being, at least, it appears that e.g. going to
+    // ubiquity://http://evil.com does not give evil.com chrome
+    // privileges, so that's good news.
     return ios.newChannel(aURI.spec.slice(11), null, null);
   }
 };

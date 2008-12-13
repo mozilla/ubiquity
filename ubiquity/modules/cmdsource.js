@@ -65,7 +65,6 @@ function CommandSource(codeSources, messageService, sandboxFactory,
   this._nounTypes = [];
   this._pageLoadFuncLists = [];
   this._disabledCommands = disabledCommands;
-  this.parser = null;
 }
 
 CommandSource.prototype = {
@@ -271,10 +270,7 @@ CommandSource.prototype = {
     this._nounTypes = nounTypes;
     this._pageLoadFuncLists = pageLoadFuncLists;
 
-    if (this.parser) {
-      this.parser.setCommandList(this._commands);
-      this.parser.setNounList(this._nounTypes);
-    }
+    this._hub.notifyListeners("commands-reloaded", null);
   },
 
   getAllCommands: function CS_getAllCommands() {

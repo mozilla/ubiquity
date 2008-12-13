@@ -74,12 +74,7 @@ function SafeBox(sandbox, evalInSandbox) {
   };
 
   function sendOutside(object) {
-    // TODO: This assumes that it's safe to call json.encode() on an
-    // untrusted object.  If this isn't secure, we can always do the
-    // encoding in the sandbox's JS context by evaluating and using a
-    // JSON encoder from json.org.
-
-    let safeObject = json.decode(json.encode(object));
+    let safeObject = json.decode(json.encode(XPCSafeJSObjectWrapper(object)));
     for (let i = 0; i < responders.length; i++)
       responders[i].receiveFromInside(safeObject);
   }

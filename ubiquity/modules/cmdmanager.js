@@ -47,10 +47,21 @@ function CommandManager(cmdSource, msgService, parser) {
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
   this.__nlParser = parser;
-  this.__nlParser.setCommandList(cmdSource.getAllCommands());
-  this.__nlParser.setNounList(cmdSource.getAllNounTypes());
-  this.__cmdSource.parser = this.__nlParser;
   this.__queuedPreview = null;
+
+  function onCommandsReloaded() {
+    parser.setCommandList(cmdSource.getAllCommands());
+    parser.setNounList(cmdSource.getAllNounTypes());
+  }
+
+  cmdSource.addListener("commands-reloaded", onCommandsReloaded);
+  onCommandsReloaded();
+
+  // TODO: Need to add a finalize() method to this class, or else
+  // we'll create memory leaks when a window with this instance closes
+  // and the command source is still holding a reference to us. Either
+  // that or perhaps nsIObservers are weak references and we can
+  // change eventhub to use those instead.
 }
 
 CommandManager.prototype = {
@@ -89,11 +100,9 @@ CommandManager.prototype = {
       if(suggIconUrl) {
         suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
       }
-      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" +
-	               suggText;
+      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" + suggText;
       if ( x == this.__hilitedSuggestion ) {
-        content += "<div class=\"hilited\"><div class=\"hilited-text\">" +
-	  suggText + "</div>";
+        content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
         content += "</div>";
       } else {
         content += "<div class=\"suggested\">" + suggText + "</div>";
@@ -143,6 +152,7 @@ CommandManager.prototype = {
     }
 
     this._renderSuggestions(doc.getElementById("suggestions"));
+    
     return this._renderPreview(context, previewBlock);
   },
 
@@ -177,7 +187,7 @@ CommandManager.prototype = {
       this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
     else
       try {
-        this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
+	this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
         parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(

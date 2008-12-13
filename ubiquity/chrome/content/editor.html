@@ -14,12 +14,13 @@
           src="resource://ubiquity-scripts/codemirror/js/codemirror.js"></script>
   <script type="text/javascript">
     const PREF_ENABLE_HIGHLIGHTING = "extensions.ubiquity.editor_highlighting";
+
     var file; 
     var lastModifiedTime = 0; 
     function initialize() { 
       document.getElementById("editor").value = PrefCommands.getCode();
       document.getElementById("enableSyntaxHighlighting").checked = Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true);
-    } 
+    }
     function launch() { 
       file = Editor.launchEditor(document.getElementById('editor').editor.editor.getCode()); 
       if (file != null && file.exists()) { 
