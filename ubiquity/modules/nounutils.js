@@ -81,7 +81,7 @@ NounUtils.NounType.prototype = {
     possibleWords.forEach(function(word) {
       // Do the match in a non-case sensitive way
       if ( word.toLowerCase().indexOf(text) > -1 ) {
-      	suggestions.push( NounUtils.makeSugg(word) );
+      	suggestions.push( NounUtils.makeSugg(word) );//xxx
       	// TODO if text input is multiple words, search for each of them
       	// separately within the expected word.
       }
@@ -107,11 +107,34 @@ NounUtils.makeSugg = function( text, html, data ) {
     //TODO: Fix this.
     //CmdUtils.getTextFromHtml(suggestion.html);
   // Create a summary of the text:
-  if (text.length > 80)
-    suggestion.summary = "your selection (\"" +
-                         suggestion.text.slice(0,50) +
-                         "...\")";
-  else
-    suggestion.summary = suggestion.text;
+  
+  // TODO: Please see the related todo in parser.js. Just do a search
+  // for \u0099 to find it. This is all part of a small but UGLY HACK
+  // that embeds metadata into the parsed sentence text because it is
+  // a string and not an object, so can't carry sensible metadata
+  // properties...
+  var marker = "\u0099";
+  
+  var snippetLength = 35;
+  if( text.indexOf(marker) != -1 ){
+
+    // Shorten the representation of the selected text.
+    // The [\s\S] matches newline characters too "." does not.
+    var pattern = new RegExp( marker + "[\\s\\S]*?" + marker, "m" );
+    var newText = text.replace(pattern, function(str){
+      if( str.length > snippetLength )
+        return str.substring(0, snippetLength-3) + "..." + marker;
+      else
+        return str;
+    })
+    
+    suggestion.summary = newText.replace(marker, "<span class='selection'>")
+                                .replace(marker, "</span>");
+    suggestion.text = text.replace( marker, "", "g");
+    
+  } else {
+    suggestion.summary = suggestion.text;    
+  }
+
   return suggestion;
 };

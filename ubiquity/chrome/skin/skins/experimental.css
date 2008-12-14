@@ -19,6 +19,7 @@
   margin: 0px;
   background: white; /* Should be transparent. It's not due to rendering bugs on the Mac. */
   width: 800px;
+  /*opacity: .9;*/
 }
 
 #cmd-entry-container {
@@ -147,6 +148,20 @@ div#ubiquity-preview .suggested {
     background-color: #969696;
     max-height: 50px;
     overflow: hidden;
+}
+
+div#ubiquity-preview .selection {
+  padding: 2px;
+  -moz-border-radius: 3px;
+  display: inline-block;
+  font-variant: small-caps;
+  background-color: #BBB;
+  color: #333;
+  position: relative;
+  top: -2px;
+  font-size: 8pt;
+  font-weight: normal;
+  border: 1px solid #777;
 }
 
 div#ubiquity-preview .needarg {
