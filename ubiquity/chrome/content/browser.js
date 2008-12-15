@@ -45,7 +45,7 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 
 function ubiquitySetup()
 {
-  
+
   //TODO: Remove after 0.1.3
   //To fix #385 (suggestion ranking is incorrect)
   //We need to delete the old database
@@ -67,15 +67,9 @@ function ubiquitySetup()
   }catch(e){
     //do nothing
   }
-  
+
   var jsm = {};
   Components.utils.import("resource://ubiquity-modules/setup.js",
-                          jsm);
-  Components.utils.import("resource://ubiquity-modules/parser/parser.js",
-                          jsm);
-  Components.utils.import("resource://ubiquity-modules/parser/locale_en.js",
-                          jsm);
-  Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js",
                           jsm);
   Components.utils.import("resource://ubiquity-modules/cmdmanager.js",
                           jsm);
@@ -84,16 +78,9 @@ function ubiquitySetup()
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
 
-  var nlParser = jsm.NLParser.makeParserForLanguage(
-    jsm.UbiquitySetup.languageCode,
-    [],
-    []
-  );
-
-
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
-                                      nlParser);
+                                      services.parser);
 
   //Install skin detector
   var skinService = new jsm.SkinSvc(window);
@@ -117,7 +104,7 @@ function ubiquitySetup()
     //load the default and tell the user about the failure
     skinService.loadSkin(defaultSkinUrl);
     services.messageService
-            .displayMessage("Loading your current skin failed." + 
+            .displayMessage("Loading your current skin failed." +
                             "The default skin will be loaded.");
   }
 
