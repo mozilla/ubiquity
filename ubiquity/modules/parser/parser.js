@@ -309,6 +309,11 @@ NLParser.ParsedSentence.prototype = {
   getCompletionText: function( selObj ) {
     /* return plain text that we should set the input box to if user hits
      the key to autocomplete to this sentence. */
+
+    /* TODO: The whole logic of this function looks completely wrong to me
+     * on a cursory read-over.  If this ever generates correct output,
+     * I think it must be by sheer luck.  Rip this whole thing out and
+     * rewrite to make sense! -- JONO */
      var sentence = this._verb._name;
      var directObjPresent = false;
      for ( var x in this._verb._arguments ) {
@@ -546,23 +551,6 @@ NLParser.PartiallyParsedSentence.prototype = {
     }
   },
 
-  // We need a way of marking where the pronunoun substitution
-  // occured in the user's selection. Unfortunately, JS doesn't
-  // allow metadata to be passed around with a string, so we embed
-  // some markup internally -- using a character that's never used
-  // in even the most archaic text. We'll strip it out on the other
-  // side, to use as placement for html markup.
-  // This is a UGLY HACK. We should really have a better way of passing
-  // this information around. "selection" and "htmlSelection" should be
-  // turned into objects that can contain metadata about where the
-  // interpolation took place (as well as any other parsing data)
-  // worth keeping around.
-  // TODO: Fix this ugly hack using the method detailed about.
-  _markSelectionHACK: function( selectionText ) {
-    var marker = "\u0099"
-    return marker + selectionText + marker;
-  },
-
   _suggestWithPronounSub: function(argName, words) {
     /* */
     let gotAnySuggestions = false;
@@ -571,9 +559,9 @@ NLParser.PartiallyParsedSentence.prototype = {
       return false;
     }
 
-    let selection = this._markSelectionHACK( this._selObj.text );
+    let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
-    
+
     for each ( pronoun in this._parserPlugin.PRONOUNS ) {
       let index = words.indexOf( pronoun );
       if ( index > -1 ) {
@@ -628,7 +616,7 @@ NLParser.PartiallyParsedSentence.prototype = {
     The reason we don't set the defaults directly on the object is cuz
     an asynchronous call of addArgumentSuggestion could actually fill in
     the missing argument after this.*/
-    
+
     let parsedSentences = [];
     // Return nothing if this parsing is invalid due to bad user-supplied args
     for (let argName in this._invalidArgs) {
@@ -708,18 +696,16 @@ NLParser.PartiallyParsedSentence.prototype = {
     if (unfilledArgs.length == 0)
       return [this];
     if (unfilledArgs.length == 1) {
-      this._argSuggest(unfilledArgs[0],  this._markSelectionHACK( this._selObj.text ), this._selObj.html);
+      this._argSuggest(unfilledArgs[0], this._selObj.text, this._selObj.html);
       return [this];
     }
 
     let alternates = [];
     for each(let arg in unfilledArgs) {
       let newParsing = this.copy();
-      let canUseSelection = newParsing._argSuggest(
-        arg,
-        this._markSelectionHACK( this._selObj.text),
-				this._selObj.html
-			);
+      let canUseSelection = newParsing._argSuggest(arg,
+                                                   this._selObj.text,
+                                                   this._selObj.html);
       if (canUseSelection)
         alternates.push(newParsing);
     }

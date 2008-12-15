@@ -107,33 +107,12 @@ NounUtils.makeSugg = function( text, html, data ) {
     //TODO: Fix this.
     //CmdUtils.getTextFromHtml(suggestion.html);
   // Create a summary of the text:
-  
-  // TODO: Please see the related todo in parser.js. Just do a search
-  // for \u0099 to find it. This is all part of a small but UGLY HACK
-  // that embeds metadata into the parsed sentence text because it is
-  // a string and not an object, so can't carry sensible metadata
-  // properties...
-  var marker = "\u0099";
-  
-  var snippetLength = 35;
-  if( text.indexOf(marker) != -1 ){
 
-    // Shorten the representation of the selected text.
-    // The [\s\S] matches newline characters too "." does not.
-    var pattern = new RegExp( marker + "[\\s\\S]*?" + marker, "m" );
-    var newText = text.replace(pattern, function(str){
-      if( str.length > snippetLength )
-        return str.substring(0, snippetLength-3) + "..." + marker;
-      else
-        return str;
-    })
-    
-    suggestion.summary = newText.replace(marker, "<span class='selection'>")
-                                .replace(marker, "</span>");
-    suggestion.text = text.replace( marker, "", "g");
-    
+  var snippetLength = 35;
+  if( text.length > snippetLength ) {
+    suggestion.summary = text.substring(0, snippetLength-3) + "...";
   } else {
-    suggestion.summary = suggestion.text;    
+    suggestion.summary = suggestion.text;
   }
 
   return suggestion;
