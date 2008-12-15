@@ -71,16 +71,10 @@ function ubiquitySetup()
   var jsm = {};
   Components.utils.import("resource://ubiquity-modules/setup.js",
                           jsm);
-  Components.utils.import("resource://ubiquity-modules/cmdmanager.js",
-                          jsm);
   Components.utils.import("resource://ubiquity-modules/skinsvc.js",
                           jsm);
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
-
-  var cmdMan = new jsm.CommandManager(services.commandSource,
-                                      services.messageService,
-                                      services.parser);
 
   //Install skin detector
   var skinService = new jsm.SkinSvc(window);
@@ -133,13 +127,13 @@ function ubiquitySetup()
     document.getElementById("ubiquity-menupopup"),
     document.getElementById("ubiquity-menu"),
     document.getElementById("ubiquity-separator"),
-    cmdMan.makeCommandSuggester()
+    services.commandManager.makeCommandSuggester()
   );
 
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
-    cmdMan,
+    services.commandManager,
     previewBlock
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);

@@ -50,6 +50,7 @@ Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
@@ -193,7 +194,11 @@ let UbiquitySetup = {
         []
       );
 
-      gServices = {parser: parser,
+      var cmdMan = new CommandManager(cmdSource,
+                                      msgService,
+                                      parser);
+
+      gServices = {commandManager: cmdMan,
                    commandSource: cmdSource,
                    linkRelCodeService: linkRelCodeService,
                    messageService: msgService};
