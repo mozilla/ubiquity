@@ -499,10 +499,10 @@ NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj,
     if (argStrings[argName] && argStrings[argName].length > 0) {
       // If argument is present, try the noun suggestions based both on
       // substituting pronoun...
-      let gotSuggs = this._suggestWithPronounSub(argName, argStrings[argName]);
       let text = argStrings[argName].join(" ");
+      let gotSuggs = this._suggestWithPronounSub(argName, text);
       // and on not substituting pronoun...
-      let gotSuggsDirect = this._argSuggest(argName, text, text);
+      let gotSuggsDirect = this._argSuggest(argName, text, text, null);
       if (!gotSuggs && !gotSuggsDirect) {
 	/* One of the arguments is supplied by the user, but produces
 	 * no suggestions, meaning it's an invalid argument for this
@@ -520,7 +520,7 @@ NLParser.PartiallyParsedSentence = function(verb, argStrings, selObj,
 };
 
 NLParser.PartiallyParsedSentence.prototype = {
-  _argSuggest: function(argName, text, html) {
+  _argSuggest: function(argName, text, html, selectionIndices) {
     /* For the given argument of the verb, sends (text,html) to the nounType
      * gets back suggestions for the argument, and adds each suggestion.
      * Return true if at least one arg suggestion was added in this way. */
@@ -535,7 +535,8 @@ NLParser.PartiallyParsedSentence.prototype = {
           self._asyncSuggestionCb();
       };
       // This is where the suggestion is actually built.
-      let suggestions = argument.type.suggest(text, html, callback);
+      let suggestions = argument.type.suggest(text, html, callback,
+					     selectionIndices);
       for each( let argSugg in suggestions) {
         if (argSugg) { // strip out null suggestions -- TODO not needed?
           this.addArgumentSuggestion(argName, argSugg);
@@ -561,21 +562,22 @@ NLParser.PartiallyParsedSentence.prototype = {
 
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
+    let selectionIndices = null;
 
     for each ( pronoun in this._parserPlugin.PRONOUNS ) {
       let index = words.indexOf( pronoun );
       if ( index > -1 ) {
+	let before = words.slice(0, index);
+        let after = words.slice(index + pronoun.length);
         if (selection) {
-          let wordsCopy = words.slice();
-          wordsCopy[index] = selection;
-          selection = wordsCopy.join(" ");
+	  selectionIndices = [before.length, before.length + selection.length];
+	  selection = before + selection + after;
         }
         if (htmlSelection) {
-          let wordsCopy = words.slice();
-          wordsCopy[index] = htmlSelection;
-          htmlSelection = wordsCopy.join(" ");
+	  htmlSelection = before + htmlSelection + after;
         }
-        if (this._argSuggest(argName, selection, htmlSelection)) {
+        if (this._argSuggest(argName, selection,
+                             htmlSelection, selectionIndices)) {
           gotAnySuggestions = true;
         }
       }
@@ -696,7 +698,10 @@ NLParser.PartiallyParsedSentence.prototype = {
     if (unfilledArgs.length == 0)
       return [this];
     if (unfilledArgs.length == 1) {
-      this._argSuggest(unfilledArgs[0], this._selObj.text, this._selObj.html);
+      this._argSuggest(unfilledArgs[0],
+		       this._selObj.text,
+		       this._selObj.html,
+		       [0, this._selObj.text.length]);
       return [this];
     }
 
@@ -705,7 +710,8 @@ NLParser.PartiallyParsedSentence.prototype = {
       let newParsing = this.copy();
       let canUseSelection = newParsing._argSuggest(arg,
                                                    this._selObj.text,
-                                                   this._selObj.html);
+                                                   this._selObj.html,
+						   [0, this._selObj.text.length]);
       if (canUseSelection)
         alternates.push(newParsing);
     }

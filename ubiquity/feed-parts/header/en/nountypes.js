@@ -116,8 +116,22 @@ var noun_type_email = {
 var noun_arb_text = {
   _name: "text",
   rankLast: true,
-  suggest: function( text, html ) {
-    return [ CmdUtils.makeSugg(text, html) ];
+  suggest: function( text, html, callback, selectionIndices ) {
+    var suggestion = CmdUtils.makeSugg(text, html);
+    /* If the input comes all or in part from a text selection,
+     * we'll stick some html tags into the summary so that the part
+     * that comes from the text selection can be visually marked in
+     * the suggestion list.
+     */
+    if (selectionIndices) {
+      var pre = suggestion.summary.slice(0, selectionIndices[0]);
+      var middle = suggestion.summary.slice(selectionIndices[0],
+					    selectionIndices[1]);
+      var post = suggestion.summary.slice(selectionIndices[1]);
+      suggestion.summary = pre + "<span class='selection'>" +
+			     middle + "</span>" + post;
+    }
+    return [suggestion];
   }
 };
 
@@ -458,7 +472,7 @@ var noun_type_tab = {
 
 var noun_type_searchengine = {
   _name: "search engine",
-  suggest: function(fragment) {
+  suggest: function(fragment, html) {
     var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
       .getService(Components.interfaces.nsIBrowserSearchService);
     var engines = searchService.getVisibleEngines({});
@@ -469,7 +483,7 @@ var noun_type_searchengine = {
       });
     }
 
-    fragment = fragment.toLowerCase();
+    var fragment = fragment.toLowerCase();
     var suggestions = [];
 
     for(var i = 0; i < engines.length; i++) {
