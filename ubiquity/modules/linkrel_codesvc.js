@@ -294,6 +294,9 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
           return false;
 
         TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
+        // Application was undefined here - maybe it's because this is a js module
+        let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
         var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
         domains = domains.split(",");
 
