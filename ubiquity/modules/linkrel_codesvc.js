@@ -158,9 +158,8 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
     pageInfo.canUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
-    // fern: there's no hackish way of parsing a string to a boolean. 
-    var canUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
-    pageInfo.canUpdate = canUpdate;
+    // fern: there's no not-hackish way of parsing a string to a boolean. 
+    pageInfo.canUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
   } else
     pageInfo.canUpdate = false;
 
