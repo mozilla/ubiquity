@@ -367,7 +367,8 @@ Utils.tabs = {
    */
   get: function Utils_tabs_get(aName) {
     if (aName)
-      return this._cache[aName] ? this._cache[aName] : null;
+      return this._cache[aName] || null;
+
     return this._cache;
   },
 
@@ -380,22 +381,83 @@ Utils.tabs = {
    */
   search: function Utils_tabs_search(aSearchText, aMaxResults) {
     var matches = {};
+    var matchCount = 0;
     for (var name in this._cache) {
       //TODO: implement a better match algorithm
-      if (name.match(aSearchText, "i"))
+      if (name.match(aSearchText, "i")) {
         matches[name] = this._cache[name];
-      if (matches.length == aMaxResults)
+        matchCount++;
+      }
+      if (aMaxResults && aMaxResults == matchCount)
         break;
     }
     return matches;
   },
 
   /**
-   * Handles TabOpen and TabClose window events
+   * Handles TabOpen, TabClose and load events
    * clears tab cache
    */
-  onTabEvent: function() {
-    this.__cache = null;
+  onTabEvent: function(aEvent, aTab) {
+    switch ( aEvent.type ) {
+      case "TabOpen":
+        // this is received before the page content has loaded.
+        // so need to find the new tab, and add a load
+        // listener to it, and only then add it to the cache.
+        // TODO: once bug 470163 is fixed, can move to a much
+        // cleaner way of doing this.
+        var self = this;
+        var windowCount = this.Application.windows.length;
+        for( var i=0; i < windowCount; i++ ) {
+          var window = this.Application.windows[i];
+          var tabCount = window.tabs.length;
+          for (var j = 0; j < tabCount; j++) {
+            let tab = window.tabs[j];
+            if (!this.__cache[tab.document.title]) {
+              // add a load listener to the tab
+              // and add the tab to the cache after it has loaded.
+              tab.events.addListener("load", function(aEvent) {
+                self.onTabEvent(aEvent, tab);
+              });
+            }
+          }
+        }
+        break;
+      case "TabClose":
+        // for TabClose events, invalidate the cache.
+        // TODO: once bug 470163 is fixed, can just delete the tab from
+        // from the cache, instead of invalidating the entire thing.
+        this.__cache = null;
+        break;
+      case "load":
+        // handle new tab page loads, and reloads of existing tabs
+        if (aTab && aTab.document.title) {
+
+          // if a tab with this title is not cached, add it
+          if (!this._cache[aTab.document.title])
+            this._cache[aTab.document.title] = aTab;
+
+          // evict previous cache entries for the tab
+          for (var title in this._cache) {
+            if (this._cache[title] == aTab && title != aTab.document.title) {
+              // if the cache contains an entry for this tab, and the title
+              // differs from the tab's current title, then evict the entry.
+              delete this._cache[title];
+              break;
+            }
+          }
+        }
+        break;
+    }
+  },
+
+  /**
+   * smart-getter for fuel
+   */
+  get Application() {
+    delete this.Application;
+    return this.Application = Components.classes["@mozilla.org/fuel/application;1"].
+                              getService(Components.interfaces.fuelIApplication);
   },
 
   /**
@@ -404,24 +466,33 @@ Utils.tabs = {
    */
   __cache: null,
   get _cache() {
-    let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                      .getService(Components.interfaces.fuelIApplication);
-
     if (this.__cache)
       return this.__cache;
 
     this.__cache = {};
-    var windowCount = Application.windows.length;
+    var windowCount = this.Application.windows.length;
     for( var j=0; j < windowCount; j++ ) {
-      var window = Application.windows[j];
-      window.events.addListener("TabOpen", this.onTabEvent);
-      window.events.addListener("TabClose", this.onTabEvent);
-      var tabCount = window.tabs.length;
+
+      var win = this.Application.windows[j];
+      win.events.addListener("TabOpen", function(aEvent) { self.onTabEvent(aEvent); });
+      win.events.addListener("TabClose", function(aEvent) { self.onTabEvent(aEvent); });
+
+      var tabCount = win.tabs.length;
       for (var i = 0; i < tabCount; i++) {
-        var tab = window.tabs[i];
+
+        let tab = win.tabs[i];
+
+        // add load listener to tab
+        var self = this;
+        tab.events.addListener("load", function(aEvent) {
+          self.onTabEvent(aEvent, tab);
+        });
+
+        // add tab to cache
         this.__cache[tab.document.title] = tab;
       }
     }
+
     return this.__cache;
   }
 };
