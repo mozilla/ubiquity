@@ -830,10 +830,8 @@ function defineWord(word, callback) {
   });
 
   Utils.ajaxGet(url + params, function(xml) {
-    CmdUtils.loadJQuery( function(jQuery) {
-      var text = jQuery(xml).find("WordDefinition").text();
-      callback(text);
-    });
+    var text = jQuery(xml).find("WordDefinition").text();
+    callback(text);
   });
 }
 
