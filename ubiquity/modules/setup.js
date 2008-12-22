@@ -57,6 +57,7 @@ let Application = Components.classes["@mozilla.org/fuel/application;1"]
 
 let gServices;
 
+let gIframeWrapper;
 let gIframe;
 
 let UbiquitySetup = {
@@ -142,18 +143,31 @@ let UbiquitySetup = {
                        .getService(Ci.nsIAppShellService)
                        .hiddenDOMWindow;
 
-    gIframe = hiddenWindow.document.createElement("iframe");
-    gIframe.setAttribute("id", "ubiquityFrame");
-    gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.html");
-    gIframe.addEventListener(
-      "pageshow",
-      function onPageShow() {
-        gIframe.removeEventListener("pageshow", onPageShow, false);
-        callback();
-      },
-      false
-    );
-    hiddenWindow.document.documentElement.appendChild(gIframe);
+    gIframeWrapper = hiddenWindow.document.createElement("iframe");
+    gIframeWrapper.setAttribute("id", "ubiquityFrameWrapper");
+    gIframeWrapper.setAttribute("src",
+                                "chrome://ubiquity/content/hiddenframe.xul");
+    function onWrapperPageShow() {
+      gIframeWrapper.removeEventListener("pageshow", onWrapperPageShow,
+                                         false);
+      let innerHiddenWindow = gIframeWrapper.contentWindow;
+      gIframe = innerHiddenWindow.document.createElement("iframe");
+      gIframe.setAttribute("id", "ubiquityFrame");
+      gIframe.setAttribute("src",
+                           "chrome://ubiquity/content/hiddenframe.html");
+      gIframe.addEventListener(
+        "pageshow",
+        function onPageShow() {
+          gIframe.removeEventListener("pageshow", onPageShow, false);
+          callback();
+        },
+        false
+      );
+      innerHiddenWindow.document.documentElement.appendChild(gIframe);
+    }
+
+    gIframeWrapper.addEventListener("pageshow", onWrapperPageShow, false);
+    hiddenWindow.document.documentElement.appendChild(gIframeWrapper);
   },
 
   createServices: function createServices() {
