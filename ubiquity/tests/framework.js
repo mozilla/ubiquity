@@ -40,6 +40,8 @@ var EXPORTED_SYMBOLS = ["exportTests",
                         "HtmlTestResponder",
                         "TestSuite"];
 
+Components.utils.import("resource://ubiquity-modules/utils.js");
+
 function exportTests(obj) {
   var exportedSymbols = [];
 
@@ -193,6 +195,10 @@ function TestSuite(responder, parent) {
 }
 
 TestSuite.prototype = {
+  // Maximum execution time of a single test, in ms.
+  MAX_TEST_RUNTIME : 5000,
+
+  // Pointer to the currently-running test.
   currentTest : null,
 
   getTests : function(parent) {
@@ -221,6 +227,16 @@ TestSuite.prototype = {
         this._responder.onStartTest(test);
 
         let pendingException = null;
+
+        let maxTime = this.MAX_TEST_RUNTIME;
+
+        Utils.setTimeout(
+          function() {
+            pendingException = new Error("Maximum test execution time " +
+                                         "(" + maxTime + " ms) exceeded.");
+          },
+          maxTime
+        );
 
         function callbackRunner(callback, thisObj, argsObj) {
           try {
