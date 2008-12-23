@@ -87,46 +87,9 @@ var basePath = arguments[0];
   }
 )();
 
-var XpcShellTestResponder = {
-  onStartTest : function(test) {
-    dump("Running test: "+test.name+"\n");
-  },
-  
-  onSuccess : function(test) { },
-
-  onSkipTest : function(test, e) {
-    dump("Test skipped: " + test.name + "\n");
-  },
-
-  onException : function(test, e) {
-    var text = ("Error in test " +
-                test.name + ": " + e.message);
-    if (e.fileName)
-      text += (" (in " + e.fileName +
-               ", line " + e.lineNumber + ")");
-    text += "\n";
-    dump(text);
-  },
-
-  onFinished : function(successes, failures, skips) {
-    var total = successes + failures;
-
-    var text = (successes + " out of " +
-                total + " tests successful (" + failures +
-                " failed).\n");
-    if (skips)
-      text += "Additionally, " + skips + " test(s) were skipped.\n";
-
-    dump(text);
-
-    if (failures)
-      throw new Error("Some tests were unsuccessful.");
-  }
-};
-
 Components.utils.import("resource://ubiquity-tests/framework.js");
 Components.utils.import("resource://ubiquity-tests/test_all.js");
 
-var suite = new TestSuite(XpcShellTestResponder, this);
+var suite = new TestSuite(DumpTestResponder, this);
 
 suite.start();

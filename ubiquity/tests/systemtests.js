@@ -7,10 +7,29 @@ let events = {};
 Components.utils.import('resource://jsbridge/modules/events.js', events);
 
 Components.utils.import('resource://ubiquity-modules/utils.js');
+Components.utils.import("resource://ubiquity-tests/framework.js");
 
 let INTERVAL_MS = 100;
 
-function scheduleCheck() {
+function runTests() {
+  let tests = {};
+
+  Components.utils.import("resource://ubiquity-tests/test_all.js", tests);
+
+  var suite = new TestSuite(DumpTestResponder, tests);
+  var success = true;
+
+  try {
+    suite.start();
+  } catch (e) {
+    dump(e + '\n');
+    success = false;
+  }
+
+  events.fireEvent('ubiquity:success', success);
+}
+
+function scheduleCheckForUbiquity() {
   function doCheck() {
     var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
              .getService(Ci.nsIWindowMediator);
@@ -18,10 +37,10 @@ function scheduleCheck() {
 
     if (win.gUbiquity) {
       dump('Ubiquity found.\n');
-      events.fireEvent('ubiquity:success', true);
+      runTests();
     } else {
       dump('Waiting ' + INTERVAL_MS + ' ms...\n');
-      scheduleCheck();
+      scheduleCheckForUbiquity();
     }
   }
 
@@ -29,5 +48,5 @@ function scheduleCheck() {
 }
 
 function start() {
-  scheduleCheck();
+  scheduleCheckForUbiquity();
 }

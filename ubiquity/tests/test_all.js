@@ -1658,14 +1658,16 @@ function testLoadLocaleJsonWorks() {
 }
 
 function testUtilsSetTimeoutWorks() {
-  var self = this;
-  var first;
+  let self = this;
+  let foo;
 
-  function cb1() { first = "foo"; }
-  function cb2() { self.assertEquals(first, "foo"); }
+  function cb() {
+    self.assertEquals(foo, "foo");
+  }
 
-  Utils.setTimeout(self.makeCallback(cb2), 20);
-  Utils.setTimeout(self.makeCallback(cb1), 10);
+  Utils.setTimeout(self.makeCallback(cb), 10);
+
+  foo = "foo";
 }
 
 function getLocalFileAsUtf8(url) {

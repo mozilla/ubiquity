@@ -6,7 +6,8 @@ import jsbridge
 import jsbridge.events
 import jsbridge.network
 
-MAX_TIMEOUT = 5
+# Maximum time to wait for system tests to finish, in seconds.
+MAX_TIMEOUT = 25
 
 if __name__ == '__main__':
     module_path = os.path.abspath(os.path.dirname(__file__))

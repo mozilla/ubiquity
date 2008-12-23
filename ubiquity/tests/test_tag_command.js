@@ -38,7 +38,10 @@ function testTagCommand() {
     }, module);
   }
 
-  var testURI = Utils.url("chrome://ubiquity/content/test.html");
+  let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                    .getService(Components.interfaces.fuelIApplication);
+
+  var testURI = Application.activeWindow.activeTab.uri;
 
   // for cleanup
   var isBookmarked = bmsvc.isBookmarked(testURI);
