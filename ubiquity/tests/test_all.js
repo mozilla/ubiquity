@@ -1657,6 +1657,17 @@ function testLoadLocaleJsonWorks() {
   this.assert(dat.testLoadLocaleJsonWorks == "\u3053");
 }
 
+function testUtilsSetTimeoutWorks() {
+  var self = this;
+  var first;
+
+  function cb1() { first = "foo"; }
+  function cb2() { self.assertEquals(first, "foo"); }
+
+  Utils.setTimeout(self.makeCallback(cb2), 20);
+  Utils.setTimeout(self.makeCallback(cb1), 10);
+}
+
 function getLocalFileAsUtf8(url) {
   var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
                       .createInstance(Components.interfaces.nsIXMLHttpRequest);

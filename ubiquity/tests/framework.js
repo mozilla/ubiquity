@@ -58,13 +58,26 @@ let AssertionError = Error;
 
 function TestCase(func) {
   this.name = func.name;
+  this.pendingCallbacks = [];
   this.__func = func;
   this.__teardownFunctions = [];
 }
 
 TestCase.prototype = {
-  run : function() {
-    this.__func();
+  run : function(callbackRunner) {
+    var self = this;
+
+    self.makeCallback = function makeCallback(func) {
+      function wrapper() {
+        let index = self.pendingCallbacks.indexOf(func);
+        self.pendingCallbacks.splice(index, 1);
+        callbackRunner(func, this, arguments);
+      }
+      self.pendingCallbacks.push(func);
+      return wrapper;
+    };
+
+    self.__func();
   },
 
   assertIsDefined : function(condition, msg) {
@@ -199,12 +212,32 @@ TestSuite.prototype = {
 
     var tests = this.getTests(this._parent);
 
+    var threadMgr = Components.classes["@mozilla.org/thread-manager;1"]
+                    .getService().currentThread;
+
     for each (test in tests) {
       TestSuite.currentTest = test;
       try {
         this._responder.onStartTest(test);
 
-        test.run();
+        let pendingException = null;
+
+        function callbackRunner(callback, thisObj, argsObj) {
+          try {
+            callback.apply(thisObj, argsObj);
+          } catch (e) {
+            pendingException = e;
+          }
+        }
+
+        test.run(callbackRunner);
+
+        while (test.pendingCallbacks.length) {
+          threadMgr.processNextEvent(true);
+          if (pendingException)
+            throw pendingException;
+        }
+
         this._responder.onSuccess(test);
         successes += 1;
       } catch(e if e instanceof TestCase.prototype.SkipTestError) {
