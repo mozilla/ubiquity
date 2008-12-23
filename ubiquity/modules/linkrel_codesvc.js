@@ -158,7 +158,8 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
     pageInfo.canUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
-    pageInfo.canUpdate = annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO);
+    // fern: there's no not-hackish way of parsing a string to a boolean. 
+    pageInfo.canUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
   } else
     pageInfo.canUpdate = false;
 
@@ -293,6 +294,9 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
           return false;
 
         TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
+        // Application was undefined here - maybe it's because this is a js module
+        let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
         var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
         domains = domains.split(",");
 

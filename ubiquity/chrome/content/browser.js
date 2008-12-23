@@ -83,7 +83,8 @@ function ubiquitySetup()
 
   //Load current skin
   var skinUrl = skinService.getCurrentSkin();
-  var defaultSkinUrl = "chrome://ubiquity/skin/skins/experimental.css"
+  var defaultSkinUrl = skinService.DEFAULT_SKIN;
+
   //For backwards compatibility since in 0.1.2
   //The pref was "default" or "old"
   //Now, we are storing the complete file path in the pref.

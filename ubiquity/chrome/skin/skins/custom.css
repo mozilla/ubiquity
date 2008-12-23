@@ -144,3 +144,17 @@ div#ubiquity-preview .cmdicon img {
     width: 16px;
     height: 16px;
 }
+
+div#ubiquity-preview .selection {
+  padding: 2px;
+  -moz-border-radius: 3px;
+  display: inline-block;
+  font-variant: small-caps;
+  background-color: #BBB;
+  color: #333;
+  position: relative;
+  top: -2px;
+  font-size: 8pt;
+  font-weight: normal;
+  border: 1px solid #777;
+}
