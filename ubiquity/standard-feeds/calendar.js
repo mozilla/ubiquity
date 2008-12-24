@@ -49,9 +49,9 @@ function addToGoogleCalendar(eventString) {
 
 }
 
-/* TODO this comman just takes unstructured text right now and relies on
- google calendar to figure it out.  So we're not using the DateNounType
- here.  Should we be?  And, is there a better name for this command? */
+/* TODO this command just takes unstructured text right now and relies on
+ Google Calendar to figure it out.  So we're not using the DateNounType
+ here.  Should we be; is there a better name for this command? */
 CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?

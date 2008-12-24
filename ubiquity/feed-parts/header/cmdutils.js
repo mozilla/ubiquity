@@ -214,7 +214,7 @@ CmdUtils.injectHtml = function injectHtml( html ) {
 };
 
 
-//Function based on the one i found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
+//Function based on the one I found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
 CmdUtils.copyToClipboard = function copyToClipboard(text){
    var clipboard = Cc['@mozilla.org/widget/clipboard;1'].createInstance(Ci.nsIClipboard);
    var transferArea = Cc['@mozilla.org/widget/transferable;1'].createInstance(Ci.nsITransferable);
@@ -570,7 +570,7 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 
 // Just like jQuery.ajax(), only for command previews; no
 // callbacks in the options object are called if the preview is
-// cancelled.
+// canceled.
 CmdUtils.previewAjax = function previewAjax(pblock, options) {
   var xhr;
   var newOptions = {};
@@ -591,7 +591,7 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
 };
 
 // Just like jQuery.get(), only for command previews; the given
-// callback isn't called if the preview is cancelled.
+// callback isn't called if the preview is canceled.
 CmdUtils.previewGet = function previewGet(pblock,
                                           url,
                                           data,
@@ -608,7 +608,7 @@ CmdUtils.previewGet = function previewGet(pblock,
 };
 
 // Creates a 'preview callback': a wrapper for a function which
-// first checks to see if the current preview has been cancelled,
+// first checks to see if the current preview has been canceled,
 // and if not, calls the real callback.
 CmdUtils.previewCallback = function previewCallback(pblock,
                                                     callback,
