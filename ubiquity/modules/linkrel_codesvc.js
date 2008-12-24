@@ -64,7 +64,7 @@ function LinkRelCodeService(annSvc) {
       let href = pageInfo.jsUri.spec;
       let source;
       if (RemoteUriCodeSource.isValidUri(pageInfo.jsUri)) {
-        if (pageInfo.canUpdate) {
+        if (pageInfo.canAutoUpdate) {
           source = new RemoteUriCodeSource(pageInfo);
         } else
           // TODO: What about 0.1 feeds?  Just make users
@@ -156,12 +156,12 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   }
 
   if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
-    pageInfo.canUpdate = true;
+    pageInfo.canAutoUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
     // fern: there's no not-hackish way of parsing a string to a boolean.
-    pageInfo.canUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
+    pageInfo.canAutoUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
   } else
-    pageInfo.canUpdate = false;
+    pageInfo.canAutoUpdate = false;
 
   pageInfo.getCode = function pageInfo_getCode() {
     if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
@@ -178,7 +178,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   pageInfo.__defineGetter__(
     "viewSourceUri",
     function pageInfo_viewSource() {
-      if (pageInfo.canUpdate)
+      if (pageInfo.canAutoUpdate)
         return pageInfo.jsUri;
       else {
         let uri = ("data:application/x-javascript," +
@@ -221,7 +221,7 @@ LRCSProto.addMarkedPage = function LRCS_addMarkedPage(info) {
       annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
   annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, info.sourceCode, 0,
                            annSvc.EXPIRE_NEVER);
-  annSvc.setPageAnnotation(uri, CMD_AUTOUPDATE_ANNO, info.canUpdate, 0,
+  annSvc.setPageAnnotation(uri, CMD_AUTOUPDATE_ANNO, info.canAutoUpdate, 0,
                            annSvc.EXPIRE_NEVER);
   annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
                            annSvc.EXPIRE_NEVER);
@@ -252,7 +252,7 @@ LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
       let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
       this.addMarkedPage({url: uri,
                           sourceCode: lcs.getCode(),
-                          canUpdate: true,
+                          canAutoUpdate: true,
                           title: info.title});
     }
   }
@@ -325,7 +325,7 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
         if (isTrustedUrl(commandsUrl, mimetype)) {
           function onSuccess(data) {
             self.addMarkedPage({url: targetDoc.location.href,
-                                canUpdate: true,
+                                canAutoUpdate: true,
                                 sourceCode: data});
             Utils.openUrlInBrowser(confirmUrl);
           }

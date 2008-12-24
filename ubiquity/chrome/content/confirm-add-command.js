@@ -67,12 +67,12 @@ function showConfirmation() {
 
 function onSubmit() {
   var code = $("#sourceCode").text();
-  var canUpdate = $("#autoupdate").attr("checked") ? true : false;
+  var canAutoUpdate = $("#autoupdate").attr("checked") ? true : false;
   if (code) {
     var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
     linkRelCodeSvc.addMarkedPage({url: gCommandFeedInfo.url,
                                   sourceCode: code,
-                                  canUpdate: canUpdate});
+                                  canAutoUpdate: canAutoUpdate});
     showConfirmation();
   }
 }

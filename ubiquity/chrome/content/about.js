@@ -108,7 +108,7 @@ function makeFeedListElement(info, label, clickMaker) {
   var sourceUrl;
   var sourceName;
 
-  if (info.canUpdate)
+  if (info.canAutoUpdate)
     sourceName = "auto-updated source";
   else
     sourceName = "source";

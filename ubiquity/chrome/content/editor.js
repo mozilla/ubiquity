@@ -165,7 +165,7 @@ function saveAs() {
       let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
       linkRelCodeSvc.addMarkedPage({url: fp.fileURL.spec,
                                     sourceCode: "",
-                                    canUpdate: true});
+                                    canAutoUpdate: true});
 
       editor.editor.setCode("");
       PrefCommands.setCode("");

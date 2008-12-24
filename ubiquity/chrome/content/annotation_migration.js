@@ -22,7 +22,7 @@ $(window).ready(
                       page.title + ' <a href="' + confirmUrl + '">[resubscribe]</a></li>');
       }
       
-      if(page.canUpdate){
+      if(page.canAutoUpdate){
         jQuery.ajax({ url: page.jsUri.spec,
                dataType: "text",
                success: createLink });

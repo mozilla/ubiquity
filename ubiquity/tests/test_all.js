@@ -160,7 +160,7 @@ function testLinkRelCodeServiceWorks() {
   this.assert(!LRCS.isMarkedPage(url));
   LRCS.addMarkedPage({url: url,
                       sourceCode: code,
-                      canUpdate: false});
+                      canAutoUpdate: false});
   this.assert(LRCS.isMarkedPage(url));
 
   var results = LRCS.getMarkedPages();
@@ -175,7 +175,7 @@ function testLinkRelCodeServiceWorks() {
   var moreCode = "function narg() {}";
   LRCS.addMarkedPage({url: "http://www.bar.com",
                       sourceCode: moreCode,
-                      canUpdate: false});
+                      canAutoUpdate: false});
   results = LRCS.getMarkedPages();
 
   this.assert(results[0].getCode() == code);
