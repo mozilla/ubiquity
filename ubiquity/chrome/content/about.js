@@ -86,24 +86,6 @@ function makeUnremover(element, info) {
   return unremove;
 }
 
-function checkForManualUpdate(info, elem) {
-  function onSuccess(data) {
-    if (data != info.getCode()) {
-      var confirmUrl = (CONFIRM_URL + "?url=" +
-                        encodeURIComponent(info.htmlUri.spec) + "&sourceUrl=" +
-                        encodeURIComponent(info.jsUri.spec) + "&updateCode=" +
-                        encodeURIComponent(data));
-
-      $(elem).after('<br><a class="feed-updated" href="' + confirmUrl +
-                    '">An update for this feed is available.</a>');
-    }
-  }
-
-  jQuery.ajax({url: info.jsUri.spec,
-               dataType: "text",
-               success: onSuccess});
-}
-
 function makeFeedListElement(info, label, clickMaker) {
   var li = document.createElement("li");
 
@@ -120,11 +102,6 @@ function makeFeedListElement(info, label, clickMaker) {
   var titleLink = addLink(info.title, info.htmlUri.spec);
 
   $(li).append("<br>");
-
-  // TODO: This is confusing to read b/c info.canUpdate should
-  // really be called 'info.canAutoUpdate'.
-  if (label == "unsubscribe" && !info.canUpdate)
-    checkForManualUpdate(info, titleLink);
 
   var linkToAction = document.createElement("span");
   $(linkToAction).text("[" + label + "]");
