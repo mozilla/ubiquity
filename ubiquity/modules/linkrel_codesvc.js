@@ -48,7 +48,6 @@ const CMD_REMOVED_ANNO = "ubiquity/removed";
 const CMD_URL_ANNO = "ubiquity/commands";
 const CMD_TITLE_ANNO = "ubiquity/title";
 
-// TODO: This is repeated in chrome/content/about.js, which violates DRY.
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
 // This class is a collection that yields a code source for every
@@ -125,6 +124,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
     title = annSvc.getPageAnnotation(uri, CMD_TITLE_ANNO);
 
   let pageInfo = {title: title,
+                  uri: uri,
                   htmlUri: uri};
 
   pageInfo.remove = function pageInfo_remove() {
@@ -158,7 +158,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
     pageInfo.canUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
-    // fern: there's no not-hackish way of parsing a string to a boolean. 
+    // fern: there's no not-hackish way of parsing a string to a boolean.
     pageInfo.canUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
   } else
     pageInfo.canUpdate = false;
@@ -174,6 +174,19 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
     annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, code, 0,
                              annSvc.EXPIRE_NEVER);
   };
+
+  pageInfo.__defineGetter__(
+    "viewSourceUri",
+    function pageInfo_viewSource() {
+      if (pageInfo.canUpdate)
+        return pageInfo.jsUri;
+      else {
+        let uri = ("data:application/x-javascript," +
+                   escape(pageInfo.getCode()));
+        return Utils.url(uri);
+      }
+    }
+  );
 
   return pageInfo;
 };

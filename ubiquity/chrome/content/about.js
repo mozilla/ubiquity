@@ -38,10 +38,6 @@
 
 Components.utils.import("resource://ubiquity-modules/setup.js");
 
-// TODO: this is also defined in linkrel_codesvc.js - it should only be defined in one place!
-const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
-
-
 function makeRemover(element, info) {
   function onSlideDown() {
     var newElement = makeFeedListElement(info,
@@ -99,7 +95,7 @@ function makeFeedListElement(info, label, clickMaker) {
     return linkToHtml;
   }
 
-  var titleLink = addLink(info.title, info.htmlUri.spec);
+  var titleLink = addLink(info.title, info.uri.spec);
 
   $(li).append("<br>");
 
@@ -112,16 +108,14 @@ function makeFeedListElement(info, label, clickMaker) {
   var sourceUrl;
   var sourceName;
 
-  if (info.canUpdate) {
-    sourceUrl = info.jsUri.spec;
+  if (info.canUpdate)
     sourceName = "auto-updated source";
-  } else {
-    sourceUrl = "data:application/x-javascript," + escape(info.getCode());
+  else
     sourceName = "source";
-  }
 
   $(li).append(" ");
-  addLink("[view " + sourceName + "]", sourceUrl, "feed-action");
+  addLink("[view " + sourceName + "]", info.viewSourceUri.spec,
+          "feed-action");
 
   return li;
 }
