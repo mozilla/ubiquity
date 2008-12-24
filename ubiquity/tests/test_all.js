@@ -358,30 +358,30 @@ function testIterableCollectionWorks() {
   this.assert(count == 1, "count must be 1.");
 }
 
-function testCommandSourcePageLoadFuncsWork() {
+function testDefaultCommandSourcePageLoadFuncsWork() {
   var testCode = "pageLoadFuncs = [function(window) {window.called = true;}];";
   var testCodeSource = {
     getCode : function() { return testCode; },
     id: 'test'
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, undefined,
-                                 new SandboxFactory({}, globalObj));
+  var cmdSrc = new DefaultCommandSource(testCodeSource, undefined,
+                                        new SandboxFactory({}, globalObj));
 
   var window = {called: false};
   cmdSrc.onPageLoad(window);
   this.assertEquals(window.called, true);
 }
 
-function testCommandSourceOneCmdWorks() {
+function testDefaultCommandSourceOneCmdWorks() {
   var testCode = "function cmd_foo_thing() { return 5; }";
   var testCodeSource = {
     getCode : function() { return testCode; },
     id: 'test'
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, undefined,
-                                 new SandboxFactory({}, globalObj));
+  var cmdSrc = new DefaultCommandSource(testCodeSource, undefined,
+                                        new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
   var cmd = cmdSrc.getCommand("foo-thing");
@@ -390,7 +390,7 @@ function testCommandSourceOneCmdWorks() {
               "Sample command should execute properly.");
 }
 
-function testCommandSourceTwoCodeSourcesWork() {
+function testDefaultCommandSourceTwoCodeSourcesWork() {
   var testCode1 = "a=5;function cmd_foo() { return a; }\n";
   var testCode2 = "a=6;function cmd_bar() { return a; }\n";
 
@@ -409,9 +409,9 @@ function testCommandSourceTwoCodeSourcesWork() {
                                yield testCodeSource2; }
   };
 
-  var cmdSrc = new CommandSource(sources,
-                                 undefined,
-                                 new SandboxFactory({}, globalObj));
+  var cmdSrc = new DefaultCommandSource(sources,
+                                        undefined,
+                                        new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -448,7 +448,7 @@ function testCommandSourceTwoCodeSourcesWork() {
               "Sample command 'foo' should be removed.");
 }
 
-function testCommandSourceCatchesExceptionsWhenLoading() {
+function testDefaultCommandSourceCatchesExceptionsWhenLoading() {
   var mockMsgService = {
     displayMessage : function(msg) { this.lastMsg = msg; }
   };
@@ -458,8 +458,8 @@ function testCommandSourceCatchesExceptionsWhenLoading() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, mockMsgService,
-                                 new SandboxFactory({}, globalObj));
+  var cmdSrc = new DefaultCommandSource(testCodeSource, mockMsgService,
+                                        new SandboxFactory({}, globalObj));
   cmdSrc.getCommand("existentcommand");
 
   this.assert(
@@ -469,7 +469,7 @@ function testCommandSourceCatchesExceptionsWhenLoading() {
   );
 }
 
-function testCommandSourceTwoCmdsWork() {
+function testDefaultCommandSourceTwoCmdsWork() {
   var testCode = ("function cmd_foo() { return 5; }\n" +
                   "function cmd_bar() { return 6; }\n");
 
@@ -478,8 +478,8 @@ function testCommandSourceTwoCmdsWork() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, undefined,
-                                 new SandboxFactory({}, globalObj));
+  var cmdSrc = new DefaultCommandSource(testCodeSource, undefined,
+                                        new SandboxFactory({}, globalObj));
   this.assert(!cmdSrc.getCommand("nonexistent"),
               "Nonexistent commands shouldn't exist.");
 
@@ -502,8 +502,8 @@ function testCommandNonGlobalsAreResetBetweenInvocations() {
     id: "test"
   };
 
-  var cmdSrc = new CommandSource(testCodeSource, undefined,
-                                 new SandboxFactory({}, globalObj));
+  var cmdSrc = new DefaultCommandSource(testCodeSource, undefined,
+                                        new SandboxFactory({}, globalObj));
 
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,
@@ -533,7 +533,8 @@ function testMakeGlobalsWork() {
 
   var sandboxFactory = new SandboxFactory(makeGlobals, globalObj);
 
-  var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
+  var cmdSrc = new DefaultCommandSource(testCodeSource, undefined,
+                                        sandboxFactory);
 
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == "test",
@@ -555,7 +556,8 @@ function testCommandGlobalsWork() {
 
   var sandboxFactory = new SandboxFactory({globals: {}}, globalObj);
 
-  var cmdSrc = new CommandSource(testCodeSource, undefined, sandboxFactory);
+  var cmdSrc = new DefaultCommandSource(testCodeSource, undefined,
+                                        sandboxFactory);
 
   var cmd = cmdSrc.getCommand("foo");
   this.assert(cmd.execute() == 1,

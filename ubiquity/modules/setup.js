@@ -175,7 +175,7 @@ let UbiquitySetup = {
         'extensions.ubiquity.disabledCommands'
       );
 
-      var cmdSource = new CommandSource(
+      var cmdSource = new DefaultCommandSource(
         codeSources,
         msgService,
         sandboxFactory,

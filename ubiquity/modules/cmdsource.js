@@ -37,13 +37,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["CommandSource"];
+var EXPORTED_SYMBOLS = ["DefaultCommandSource"];
 
 Components.utils.import("resource://ubiquity-modules/collection.js");
 Components.utils.import("resource://ubiquity-modules/eventhub.js");
 
-function CommandSource(codeSources, messageService, sandboxFactory,
-                       disabledCommands) {
+function DefaultCommandSource(codeSources, messageService,
+                              sandboxFactory, disabledCommands) {
   if (!codeSources.__iterator__) {
     if (codeSources.constructor.name == "Array")
       codeSources = new IterableCollection(codeSources);
@@ -67,7 +67,7 @@ function CommandSource(codeSources, messageService, sandboxFactory,
   this._disabledCommands = disabledCommands;
 }
 
-CommandSource.prototype = {
+DefaultCommandSource.prototype = {
   CMD_PREFIX : "cmd_",
   NOUN_PREFIX : "noun_",
 
