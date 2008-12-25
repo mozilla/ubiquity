@@ -339,20 +339,6 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
       showNotification(document, commandsUrl, mimetype);
   }
 
-  function onContentLoaded(event) {
-    var document = event.target;
-    var matches = document.getElementsByClassName("commands");
-
-    Array.filter(matches,
-                 function(elem) { return elem.nodeName == "script"; });
-
-    if (matches.length > 0)
-      onPageWithCommands(document.location.href,
-                         document.location.href,
-                         document,
-                         document.contentType);
-  }
-
   // Watch for any tags of the form <link rel="commands">
   // on pages and add annotations for them if they exist.
   function onLinkAdded(event) {
@@ -366,12 +352,6 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
-
-  // TODO: Right now, adding XHTML pages with <script class="commands">
-  // tags poses a number of complexities to the subscription process
-  // that we'll have to deal with, so we're temporarily disabling it for
-  // now.
-  //window.addEventListener("DOMContentLoaded", onContentLoaded, false);
 };
 
 // This class is a collection that yields a code source for every
