@@ -222,6 +222,60 @@ LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
   }
 };
 
+function subscribeResponder(window, lrcs, targetDoc,
+                            commandsUrl, mimetype) {
+  // Clicking on "subscribe" takes them to the warning page:
+  var confirmUrl = (CONFIRM_URL + "?url=" +
+                    encodeURIComponent(targetDoc.location.href) +
+                    "&sourceUrl=" + encodeURIComponent(commandsUrl));
+
+  function isTrustedUrl(commandsUrl, mimetype) {
+    // Even if the command feed resides on a trusted host, if the
+    // mime-type is application/x-javascript-untrusted or
+    // application/xhtml+xml-untrusted, the host itself doesn't
+    // trust it (perhaps because it's mirroring code from
+    // somewhere else).
+    if (mimetype == "application/x-javascript-untrusted" ||
+        mimetype == "application/xhtml+xml-untrusted")
+      return false;
+
+    var url = Utils.url(commandsUrl);
+
+    if (url.scheme != "https")
+      return false;
+
+    TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
+    let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+    var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
+    domains = domains.split(",");
+
+    for (var i = 0; i < domains.length; i++) {
+      if (domains[i] == url.host)
+        return true;
+    }
+
+    return false;
+  }
+
+  if (isTrustedUrl(commandsUrl, mimetype)) {
+    function onSuccess(data) {
+      lrcs.addMarkedPage({url: targetDoc.location.href,
+                          canAutoUpdate: true,
+                          sourceCode: data});
+      Utils.openUrlInBrowser(confirmUrl);
+    }
+
+    if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
+      window.jQuery.ajax({url: commandsUrl,
+                          dataType: "text",
+                          success: onSuccess});
+    } else
+      onSuccess("");
+  } else
+    Utils.openUrlInBrowser(confirmUrl);
+}
+
 LRCSProto.installToWindow = function LRCS_installToWindow(window) {
   var self = this;
 
@@ -251,57 +305,8 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
       if (oldNotification)
         box.removeNotification(oldNotification);
 
-      // Clicking on "subscribe" takes them to the warning page:
-      var confirmUrl = CONFIRM_URL + "?url=" + encodeURIComponent(targetDoc.location.href) + "&sourceUrl="
-			 + encodeURIComponent(commandsUrl);
-
-      function isTrustedUrl(commandsUrl, mimetype) {
-        // Even if the command feed resides on a trusted host, if the
-        // mime-type is application/x-javascript-untrusted or
-        // application/xhtml+xml-untrusted, the host itself doesn't
-        // trust it (perhaps because it's mirroring code from
-        // somewhere else).
-        if (mimetype == "application/x-javascript-untrusted" ||
-            mimetype == "application/xhtml+xml-untrusted")
-          return false;
-
-        var url = Utils.url(commandsUrl);
-
-        if (url.scheme != "https")
-          return false;
-
-        TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
-        // Application was undefined here - maybe it's because this is a js module
-        let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                      .getService(Components.interfaces.fuelIApplication);
-        var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
-        domains = domains.split(",");
-
-        for (var i = 0; i < domains.length; i++) {
-          if (domains[i] == url.host)
-            return true;
-        }
-
-        return false;
-      }
-
       function onSubscribeClick(notification, button) {
-        if (isTrustedUrl(commandsUrl, mimetype)) {
-          function onSuccess(data) {
-            self.addMarkedPage({url: targetDoc.location.href,
-                                canAutoUpdate: true,
-                                sourceCode: data});
-            Utils.openUrlInBrowser(confirmUrl);
-          }
-
-          if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
-            window.jQuery.ajax({url: commandsUrl,
-                         dataType: "text",
-                         success: onSuccess});
-          } else
-            onSuccess("");
-        } else
-          Utils.openUrlInBrowser(confirmUrl);
+        subscribeResponder(window, self, targetDoc, commandsUrl, mimetype);
       }
 
       var buttons = [
