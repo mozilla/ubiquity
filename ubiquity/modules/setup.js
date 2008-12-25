@@ -339,7 +339,7 @@ function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
 
   bodyCodeSources = new CompositeCollection([
     new IterableCollection(bodyCodeSources),
-    linkRelCodeService
+    new LinkRelCodeCollection(linkRelCodeService)
   ]);
 
   return new MixedCodeSourceCollection(

@@ -36,10 +36,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["LinkRelCodeService"];
+EXPORTED_SYMBOLS = ["LinkRelCodeService",
+                    "LinkRelCodeCollection"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/eventhub.js");
 
 const CMD_SRC_ANNO = "ubiquity/source";
 const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
@@ -50,47 +52,18 @@ const CMD_TITLE_ANNO = "ubiquity/title";
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
-// This class is a collection that yields a code source for every
-// currently-subscribed feed.
 function LinkRelCodeService(annSvc) {
-  this._sources = {};
   this._annSvc = annSvc;
 
-  this._updateSourceList = function LRCS_updateSourceList() {
-    let markedPages = this.getMarkedPages();
-    let newSources = {};
-    for (let i = 0; i < markedPages.length; i++) {
-      let pageInfo = markedPages[i];
-      let href = pageInfo.jsUri.spec;
-      let source;
-      if (RemoteUriCodeSource.isValidUri(pageInfo.jsUri)) {
-        if (pageInfo.canAutoUpdate) {
-          source = new RemoteUriCodeSource(pageInfo);
-        } else
-          // TODO: What about 0.1 feeds?  Just make users
-          // resubscribe to all their stuff?  Or implement
-          // manual updating?
-          source = new StringCodeSource(pageInfo.getCode(),
-                                        pageInfo.jsUri.spec);
-      } else if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
-        source = new LocalUriCodeSource(href);
-      } else {
-        throw new Error("Don't know how to make code source for " + href);
-      }
-
-      newSources[href] = new XhtmlCodeSource(source);
-    }
-    this._sources = newSources;
-  };
-
-  var annotationsChanged = true;
+  let hub = new EventHub();
+  hub.attachMethods(this);
 
   function onAnnChanged(aURI, aName) {
     if (aName == CMD_AUTOUPDATE_ANNO ||
         aName == CMD_CONFIRMED_ANNO ||
         aName == CMD_REMOVED_ANNO ||
         aName == CMD_SRC_ANNO)
-      annotationsChanged = true;
+      hub.notifyListeners("change", null);
   }
 
   var annObserver = {
@@ -101,17 +74,6 @@ function LinkRelCodeService(annSvc) {
   };
 
   annSvc.addObserver(annObserver);
-
-  this.__iterator__ = function LRCS_iterator() {
-    if (annotationsChanged) {
-      this._updateSourceList();
-      annotationsChanged = false;
-    }
-
-    for each (source in this._sources) {
-      yield source;
-    }
-  };
 }
 
 LinkRelCodeService.prototype = LRCSProto = {};
@@ -159,7 +121,9 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
     pageInfo.canAutoUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
     // fern: there's no not-hackish way of parsing a string to a boolean.
-    pageInfo.canAutoUpdate = (/^true$/i).test(annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO));
+    pageInfo.canAutoUpdate = (/^true$/i).test(
+      annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO)
+    );
   } else
     pageInfo.canAutoUpdate = false;
 
@@ -404,3 +368,57 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
   // now.
   //window.addEventListener("DOMContentLoaded", onContentLoaded, false);
 };
+
+// This class is a collection that yields a code source for every
+// currently-subscribed feed.
+function LinkRelCodeCollection(lrcs) {
+  this._sources = {};
+
+  this._updateSourceList = function LRCC_updateSourceList() {
+    let markedPages = lrcs.getMarkedPages();
+    let newSources = {};
+    for (let i = 0; i < markedPages.length; i++) {
+      let pageInfo = markedPages[i];
+      let href = pageInfo.jsUri.spec;
+      let source;
+      if (RemoteUriCodeSource.isValidUri(pageInfo.jsUri)) {
+        if (pageInfo.canAutoUpdate) {
+          source = new RemoteUriCodeSource(pageInfo);
+        } else
+          // TODO: What about 0.1 feeds?  Just make users
+          // resubscribe to all their stuff?  Or implement
+          // manual updating?
+          source = new StringCodeSource(pageInfo.getCode(),
+                                        pageInfo.jsUri.spec);
+      } else if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
+        source = new LocalUriCodeSource(href);
+      } else {
+        throw new Error("Don't know how to make code source for " + href);
+      }
+
+      newSources[href] = new XhtmlCodeSource(source);
+    }
+    this._sources = newSources;
+  };
+
+  var subscriptionsChanged = true;
+
+  function listener(eventName, data) {
+    subscriptionsChanged = true;
+  }
+
+  lrcs.addListener("change", listener);
+
+  // TODO: When to remove listener?
+
+  this.__iterator__ = function LRCC_iterator() {
+    if (subscriptionsChanged) {
+      this._updateSourceList();
+      subscriptionsChanged = false;
+    }
+
+    for each (source in this._sources) {
+      yield source;
+    }
+  };
+}
