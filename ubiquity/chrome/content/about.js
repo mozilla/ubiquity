@@ -123,8 +123,8 @@ function makeFeedListElement(info, label, clickMaker) {
 function onReady() {
   PrefKeys.onLoad();
 
-  let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-  let subscribedFeeds = linkRelCodeSvc.getSubscribedFeeds();
+  let feedMgr = UbiquitySetup.createServices().feedManager;
+  let subscribedFeeds = feedMgr.getSubscribedFeeds();
   for (let i = 0; i < subscribedFeeds.length; i++)
     $("#command-feeds").append(makeFeedListElement(subscribedFeeds[i],
                                                    "unsubscribe",
@@ -132,7 +132,7 @@ function onReady() {
   if (!$("#command-feeds").text())
     $("#command-feeds-div").hide();
 
-  let unsubscribedFeeds = linkRelCodeSvc.getUnsubscribedFeeds();
+  let unsubscribedFeeds = feedMgr.getUnsubscribedFeeds();
   for (i = 0; i < unsubscribedFeeds.length; i++)
     $("#command-feed-graveyard").append(
       makeFeedListElement(unsubscribedFeeds[i],

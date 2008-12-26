@@ -41,7 +41,7 @@ Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesvc.js");
+Components.utils.import("resource://ubiquity-modules/feedmanager.js");
 Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 Components.utils.import("resource://ubiquity-modules/localeutils.js");
@@ -152,20 +152,20 @@ function testMixedCodeSourceCollectionWorks() {
   this.assert(codeSources[1].codeSections[2].length == 1);
 }
 
-function testLinkRelCodeServiceWorks() {
-  var LRCS = new LinkRelCodeService(new TestAnnotationMemory(this));
+function testFeedManagerWorks() {
+  var FMgr = new FeedManager(new TestAnnotationMemory(this));
   var url = "http://www.foo.com";
   var sourceUrl = "http://www.foo.com/code.js";
   var code = "function blah() {}";
 
-  this.assert(!LRCS.isSubscribedFeed(url));
-  LRCS.addSubscribedFeed({url: url,
+  this.assert(!FMgr.isSubscribedFeed(url));
+  FMgr.addSubscribedFeed({url: url,
                           sourceUrl: sourceUrl,
                           sourceCode: code,
                           canAutoUpdate: false});
-  this.assert(LRCS.isSubscribedFeed(url));
+  this.assert(FMgr.isSubscribedFeed(url));
 
-  var results = LRCS.getSubscribedFeeds();
+  var results = FMgr.getSubscribedFeeds();
 
   this.assert(results.length == 1);
 
@@ -175,11 +175,11 @@ function testLinkRelCodeServiceWorks() {
 
   // Add another subscribed feed and make sure things still make sense.
   var moreCode = "function narg() {}";
-  LRCS.addSubscribedFeed({url: "http://www.bar.com",
+  FMgr.addSubscribedFeed({url: "http://www.bar.com",
                           sourceUrl: "http://www.bar.com/code.js",
                           sourceCode: moreCode,
                           canAutoUpdate: false});
-  results = LRCS.getSubscribedFeeds();
+  results = FMgr.getSubscribedFeeds();
 
   this.assert(results[0].getCode() == code);
   this.assert(results[1].getCode() == moreCode);
@@ -192,7 +192,7 @@ function testLinkRelCodeServiceWorks() {
 
   results[0].remove();
 
-  this.assert(!LRCS.isSubscribedFeed(url));
+  this.assert(!FMgr.isSubscribedFeed(url));
 }
 
 function FakeCommandSource( cmdList ) {

@@ -41,7 +41,7 @@ EXPORTED_SYMBOLS = ["UbiquitySetup"];
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/linkrel_codesvc.js");
+Components.utils.import("resource://ubiquity-modules/feedmanager.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
@@ -160,7 +160,7 @@ let UbiquitySetup = {
       var annDbConn = AnnotationService.openDatabase(annDbFile);
       var annSvc = new AnnotationService(annDbConn);
 
-      var linkRelCodeService = new LinkRelCodeService(annSvc);
+      var feedManager = new FeedManager(annSvc);
       var msgService = new CompositeMessageService();
 
       msgService.add(new AlertMessageService());
@@ -169,7 +169,7 @@ let UbiquitySetup = {
       var makeGlobals = makeBuiltinGlobalsMaker(msgService);
       var sandboxFactory = new SandboxFactory(makeGlobals);
       var codeSources = makeBuiltinCodeSources(this.languageCode,
-                                               linkRelCodeService);
+                                               feedManager);
 
       var disabledStorage = new DisabledCmdStorage(
         'extensions.ubiquity.disabledCommands'
@@ -185,7 +185,7 @@ let UbiquitySetup = {
       disabledStorage.attach(cmdSource);
 
       gServices = {commandSource: cmdSource,
-                   linkRelCodeService: linkRelCodeService,
+                   feedManager: feedManager,
                    messageService: msgService};
 
       // For some reason, the following function isn't executed
@@ -193,7 +193,7 @@ let UbiquitySetup = {
       // getting the '@mozilla.org/thread-manager;1' service and
       // spinning via a call to processNextEvent() until some kind of
       // I/O is finished?
-      this.__installDefaults(linkRelCodeService);
+      this.__installDefaults(feedManager);
       cmdSource.refresh();
     }
 
@@ -201,7 +201,7 @@ let UbiquitySetup = {
   },
 
   setupWindow: function setupWindow(window) {
-    gServices.linkRelCodeService.installToWindow(window);
+    gServices.feedManager.installToWindow(window);
 
     var PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
 
@@ -244,7 +244,7 @@ let UbiquitySetup = {
     return Application.extensions.get("ubiquity@labs.mozilla.com").version;
   },
 
-  __installDefaults: function installDefaults(linkRelCodeService) {
+  __installDefaults: function installDefaults(feedManager) {
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
@@ -254,7 +254,7 @@ let UbiquitySetup = {
     } else
       baseUri = baseLocalUri;
 
-    linkRelCodeService.installDefaults(baseUri,
+    feedManager.installDefaults(baseUri,
                                        baseLocalUri,
                                        this.STANDARD_FEEDS);
   }
@@ -302,7 +302,7 @@ function makeBuiltinGlobalsMaker(msgService) {
   return makeGlobals;
 }
 
-function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
+function makeBuiltinCodeSources(languageCode, feedManager) {
   var baseUri = UbiquitySetup.getBaseUri();
   var basePartsUri = baseUri + "feed-parts/";
   var baseScriptsUri = baseUri + "scripts/";
@@ -339,7 +339,7 @@ function makeBuiltinCodeSources(languageCode, linkRelCodeService) {
 
   bodyCodeSources = new CompositeCollection([
     new IterableCollection(bodyCodeSources),
-    new LinkRelCodeCollection(linkRelCodeService)
+    new LinkRelCodeCollection(feedManager)
   ]);
 
   return new MixedCodeSourceCollection(

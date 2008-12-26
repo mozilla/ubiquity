@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["LinkRelCodeService",
+EXPORTED_SYMBOLS = ["FeedManager",
                     "LinkRelCodeCollection"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
@@ -52,7 +52,7 @@ const FEED_TITLE_ANNO = "ubiquity/title";
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
-function LinkRelCodeService(annSvc) {
+function FeedManager(annSvc) {
   this._annSvc = annSvc;
 
   let hub = new EventHub();
@@ -76,9 +76,9 @@ function LinkRelCodeService(annSvc) {
   annSvc.addObserver(annObserver);
 }
 
-LinkRelCodeService.prototype = LRCSProto = {};
+FeedManager.prototype = FMgrProto = {};
 
-LRCSProto.__makeFeed = function LRCS___makeFeed(uri) {
+FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   let annSvc = this._annSvc;
 
   let title = uri.spec;
@@ -145,7 +145,7 @@ LRCSProto.__makeFeed = function LRCS___makeFeed(uri) {
   return feedInfo;
 };
 
-LRCSProto.getUnsubscribedFeeds = function LRCS_getUnsubscribedFeeds() {
+FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
   let annSvc = this._annSvc;
   let removedUris = annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO, {});
   let unsubscribedFeeds = [];
@@ -156,7 +156,7 @@ LRCSProto.getUnsubscribedFeeds = function LRCS_getUnsubscribedFeeds() {
   return unsubscribedFeeds;
 };
 
-LRCSProto.getSubscribedFeeds = function LRCS_getSubscribedFeeds() {
+FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   let annSvc = this._annSvc;
   let confirmedPages = annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO, {});
   let subscribedFeeds = [];
@@ -167,7 +167,7 @@ LRCSProto.getSubscribedFeeds = function LRCS_getSubscribedFeeds() {
   return subscribedFeeds;
 };
 
-LRCSProto.addSubscribedFeed = function LRCS_addSubscribedFeed(info) {
+FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
   let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
 
@@ -186,19 +186,19 @@ LRCSProto.addSubscribedFeed = function LRCS_addSubscribedFeed(info) {
                              annSvc.EXPIRE_NEVER);
 };
 
-LRCSProto.isSubscribedFeed = function LRCS_isSubscribedFeed(uri) {
+FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO);
 };
 
-LRCSProto.isUnsubscribedFeed = function LRCS_isSubscribedFeed(uri) {
+FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 };
 
-LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
+FMgrProto.installDefaults = function FMgr_installDefaults(baseUri,
                                                           baseLocalUri,
                                                           infos) {
   for (let i = 0; i < infos.length; i++) {
@@ -216,7 +216,7 @@ LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
   }
 };
 
-function subscribeResponder(window, lrcs, targetDoc,
+function subscribeResponder(window, fMgr, targetDoc,
                             commandsUrl, mimetype) {
   // Clicking on "subscribe" takes them to the warning page:
   var confirmUrl = (CONFIRM_URL + "?url=" +
@@ -254,7 +254,7 @@ function subscribeResponder(window, lrcs, targetDoc,
 
   if (isTrustedUrl(commandsUrl, mimetype)) {
     function onSuccess(data) {
-      lrcs.addSubscribedFeed({url: targetDoc.location.href,
+      fMgr.addSubscribedFeed({url: targetDoc.location.href,
                               sourceUrl: commandsUrl,
                               canAutoUpdate: true,
                               sourceCode: data});
@@ -271,7 +271,7 @@ function subscribeResponder(window, lrcs, targetDoc,
     Utils.openUrlInBrowser(confirmUrl);
 }
 
-LRCSProto.installToWindow = function LRCS_installToWindow(window) {
+FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   var self = this;
 
   function showNotification(targetDoc, commandsUrl, mimetype) {
@@ -346,11 +346,11 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
 
 // This class is a collection that yields a code source for every
 // currently-subscribed feed.
-function LinkRelCodeCollection(lrcs) {
+function LinkRelCodeCollection(fMgr) {
   this._sources = {};
 
   this._updateSourceList = function LRCC_updateSourceList() {
-    let subscribedFeeds = lrcs.getSubscribedFeeds();
+    let subscribedFeeds = fMgr.getSubscribedFeeds();
     let newSources = {};
     for (let i = 0; i < subscribedFeeds.length; i++) {
       let feedInfo = subscribedFeeds[i];
@@ -379,7 +379,7 @@ function LinkRelCodeCollection(lrcs) {
     subscriptionsChanged = true;
   }
 
-  lrcs.addListener("change", listener);
+  fMgr.addListener("change", listener);
 
   // TODO: When to remove listener?
 

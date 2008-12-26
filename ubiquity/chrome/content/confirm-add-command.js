@@ -69,8 +69,8 @@ function onSubmit() {
   var code = $("#sourceCode").text();
   var canAutoUpdate = $("#autoupdate").attr("checked") ? true : false;
   if (code) {
-    var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-    linkRelCodeSvc.addSubscribedFeed({url: gCommandFeedInfo.url,
+    var feedMgr = UbiquitySetup.createServices().feedManager;
+    feedMgr.addSubscribedFeed({url: gCommandFeedInfo.url,
                                       sourceUrl: gCommandFeedInfo.sourceUrl,
                                       sourceCode: code,
                                       canAutoUpdate: canAutoUpdate});
@@ -101,8 +101,8 @@ function fetchSource(uri, onSuccess) {
 }
 
 function onReady() {
-  var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-  if (linkRelCodeSvc.isSubscribedFeed(gCommandFeedInfo.url)) {
+  var feedMgr = UbiquitySetup.createServices().feedManager;
+  if (feedMgr.isSubscribedFeed(gCommandFeedInfo.url)) {
     if (gCommandFeedInfo.updateCode)
       // TODO: Also check to see if updateCode is different from
       // the current code.
