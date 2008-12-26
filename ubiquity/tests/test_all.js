@@ -155,10 +155,12 @@ function testMixedCodeSourceCollectionWorks() {
 function testLinkRelCodeServiceWorks() {
   var LRCS = new LinkRelCodeService(new TestAnnotationMemory(this));
   var url = "http://www.foo.com";
+  var sourceUrl = "http://www.foo.com/code.js";
   var code = "function blah() {}";
 
   this.assert(!LRCS.isMarkedPage(url));
   LRCS.addMarkedPage({url: url,
+                      sourceUrl: sourceUrl,
                       sourceCode: code,
                       canAutoUpdate: false});
   this.assert(LRCS.isMarkedPage(url));
@@ -174,6 +176,7 @@ function testLinkRelCodeServiceWorks() {
   // Add another marked page and make sure things still make sense.
   var moreCode = "function narg() {}";
   LRCS.addMarkedPage({url: "http://www.bar.com",
+                      sourceUrl: "http://www.bar.com/code.js",
                       sourceCode: moreCode,
                       canAutoUpdate: false});
   results = LRCS.getMarkedPages();

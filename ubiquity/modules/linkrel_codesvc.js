@@ -43,12 +43,12 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/eventhub.js");
 
-const CMD_SRC_ANNO = "ubiquity/source";
-const CMD_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
-const CMD_CONFIRMED_ANNO = "ubiquity/confirmed";
-const CMD_REMOVED_ANNO = "ubiquity/removed";
-const CMD_URL_ANNO = "ubiquity/commands";
-const CMD_TITLE_ANNO = "ubiquity/title";
+const FEED_SRC_ANNO = "ubiquity/source";
+const FEED_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
+const FEED_SUBSCRIBED_ANNO = "ubiquity/confirmed";
+const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
+const FEED_SRC_URL_ANNO = "ubiquity/commands";
+const FEED_TITLE_ANNO = "ubiquity/title";
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 
@@ -59,10 +59,10 @@ function LinkRelCodeService(annSvc) {
   hub.attachMethods(this);
 
   function onAnnChanged(aURI, aName) {
-    if (aName == CMD_AUTOUPDATE_ANNO ||
-        aName == CMD_CONFIRMED_ANNO ||
-        aName == CMD_REMOVED_ANNO ||
-        aName == CMD_SRC_ANNO)
+    if (aName == FEED_AUTOUPDATE_ANNO ||
+        aName == FEED_SUBSCRIBED_ANNO ||
+        aName == FEED_UNSUBSCRIBED_ANNO ||
+        aName == FEED_SRC_ANNO)
       hub.notifyListeners("change", null);
   }
 
@@ -82,59 +82,50 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   let annSvc = this._annSvc;
 
   let title = uri.spec;
-  if (annSvc.pageHasAnnotation(uri, CMD_TITLE_ANNO))
-    title = annSvc.getPageAnnotation(uri, CMD_TITLE_ANNO);
+  if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
+    title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO);
 
   let pageInfo = {title: title,
                   uri: uri};
 
   pageInfo.remove = function pageInfo_remove() {
-    if (annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO)) {
-      annSvc.removePageAnnotation(uri, CMD_CONFIRMED_ANNO);
-      annSvc.setPageAnnotation(uri, CMD_REMOVED_ANNO, "true", 0,
+    if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {
+      annSvc.removePageAnnotation(uri, FEED_SUBSCRIBED_ANNO);
+      annSvc.setPageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO, "true", 0,
                                annSvc.EXPIRE_NEVER);
     }
   };
 
   pageInfo.unremove = function pageInfo_undelete() {
-    if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO)) {
-      annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
-      annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
+    if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO)) {
+      annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
+      annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
                                annSvc.EXPIRE_NEVER);
     }
   };
 
-  // See if there's any annotations for this page that tell us
-  // about the existence of a <link rel="commands"> tag
-  // that points to a JS file.
-  if (annSvc.pageHasAnnotation(uri, CMD_URL_ANNO)) {
-    var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
-    pageInfo.srcUri = Utils.url(val);
-  } else {
-    // There's no <link rel="commands"> tag, so we'll assume this
-    // is a raw JS file.
-    pageInfo.srcUri = uri;
-  }
+  var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
+  pageInfo.srcUri = Utils.url(val);
 
   if (LocalUriCodeSource.isValidUri(pageInfo.srcUri)) {
     pageInfo.canAutoUpdate = true;
-  } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
+  } else if (annSvc.pageHasAnnotation(uri, FEED_AUTOUPDATE_ANNO)) {
     // fern: there's no not-hackish way of parsing a string to a boolean.
     pageInfo.canAutoUpdate = (/^true$/i).test(
-      annSvc.getPageAnnotation(uri, CMD_AUTOUPDATE_ANNO)
+      annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO)
     );
   } else
     pageInfo.canAutoUpdate = false;
 
   pageInfo.getCode = function pageInfo_getCode() {
-    if (annSvc.pageHasAnnotation(uri, CMD_SRC_ANNO))
-      return annSvc.getPageAnnotation(uri, CMD_SRC_ANNO);
+    if (annSvc.pageHasAnnotation(uri, FEED_SRC_ANNO))
+      return annSvc.getPageAnnotation(uri, FEED_SRC_ANNO);
     else
       return "";
   };
 
   pageInfo.setCode = function pageInfo_setCode(code) {
-    annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, code, 0,
+    annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0,
                              annSvc.EXPIRE_NEVER);
   };
 
@@ -156,7 +147,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
 
 LRCSProto.getRemovedPages = function LRCS_getRemovedPages() {
   let annSvc = this._annSvc;
-  let removedUris = annSvc.getPagesWithAnnotation(CMD_REMOVED_ANNO, {});
+  let removedUris = annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO, {});
   let removedPages = [];
 
   for (let i = 0; i < removedUris.length; i++)
@@ -167,7 +158,7 @@ LRCSProto.getRemovedPages = function LRCS_getRemovedPages() {
 
 LRCSProto.getMarkedPages = function LRCS_getMarkedPages() {
   let annSvc = this._annSvc;
-  let confirmedPages = annSvc.getPagesWithAnnotation(CMD_CONFIRMED_ANNO, {});
+  let confirmedPages = annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO, {});
   let markedPages = [];
 
   for (let i = 0; i < confirmedPages.length; i++)
@@ -180,23 +171,31 @@ LRCSProto.addMarkedPage = function LRCS_addMarkedPage(info) {
   let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
 
-  if (annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO))
-      annSvc.removePageAnnotation(uri, CMD_REMOVED_ANNO);
-  annSvc.setPageAnnotation(uri, CMD_SRC_ANNO, info.sourceCode, 0,
+  if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO))
+    annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
+  annSvc.setPageAnnotation(uri, FEED_SRC_URL_ANNO, info.sourceUrl, 0,
                            annSvc.EXPIRE_NEVER);
-  annSvc.setPageAnnotation(uri, CMD_AUTOUPDATE_ANNO, info.canAutoUpdate, 0,
+  annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, info.sourceCode, 0,
                            annSvc.EXPIRE_NEVER);
-  annSvc.setPageAnnotation(uri, CMD_CONFIRMED_ANNO, "true", 0,
+  annSvc.setPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, info.canAutoUpdate, 0,
+                           annSvc.EXPIRE_NEVER);
+  annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
                            annSvc.EXPIRE_NEVER);
   if (info.title)
-    annSvc.setPageAnnotation(uri, CMD_TITLE_ANNO, info.title, 0,
+    annSvc.setPageAnnotation(uri, FEED_TITLE_ANNO, info.title, 0,
                              annSvc.EXPIRE_NEVER);
 };
 
 LRCSProto.isMarkedPage = function LRCS_isMarkedPage(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
-  return annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO);
+  return annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO);
+};
+
+LRCSProto.isRemovedPage = function LRCS_isMarkedPage(uri) {
+  let annSvc = this._annSvc;
+  uri = Utils.url(uri);
+  return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 };
 
 LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
@@ -208,12 +207,10 @@ LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
     let info = infos[i];
     let uri = Utils.url(baseUri + info.page);
 
-    if (!annSvc.pageHasAnnotation(uri, CMD_REMOVED_ANNO)) {
-      annSvc.setPageAnnotation(uri, CMD_URL_ANNO,
-                               baseUri + info.source,
-                               0, annSvc.EXPIRE_WITH_HISTORY);
+    if (!this.isRemovedPage(uri)) {
       let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
       this.addMarkedPage({url: uri,
+                          sourceUrl: baseUri + info.source,
                           sourceCode: lcs.getCode(),
                           canAutoUpdate: true,
                           title: info.title});
@@ -260,6 +257,7 @@ function subscribeResponder(window, lrcs, targetDoc,
   if (isTrustedUrl(commandsUrl, mimetype)) {
     function onSuccess(data) {
       lrcs.addMarkedPage({url: targetDoc.location.href,
+                          sourceUrl: commandsUrl,
                           canAutoUpdate: true,
                           sourceCode: data});
       Utils.openUrlInBrowser(confirmUrl);
@@ -329,11 +327,6 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
   }
 
   function onPageWithCommands(pageUrl, commandsUrl, document, mimetype) {
-    var annSvc = self._annSvc;
-
-    pageUrl = Utils.url(pageUrl);
-    annSvc.setPageAnnotation(pageUrl, CMD_URL_ANNO,
-                             commandsUrl, 0, annSvc.EXPIRE_WITH_HISTORY);
     if (!self.isMarkedPage(pageUrl))
       showNotification(document, commandsUrl, mimetype);
   }
@@ -369,9 +362,6 @@ function LinkRelCodeCollection(lrcs) {
         if (pageInfo.canAutoUpdate) {
           source = new RemoteUriCodeSource(pageInfo);
         } else
-          // TODO: What about 0.1 feeds?  Just make users
-          // resubscribe to all their stuff?  Or implement
-          // manual updating?
           source = new StringCodeSource(pageInfo.getCode(),
                                         pageInfo.srcUri.spec);
       } else if (LocalUriCodeSource.isValidUri(pageInfo.srcUri)) {

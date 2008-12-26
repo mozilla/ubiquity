@@ -71,6 +71,7 @@ function onSubmit() {
   if (code) {
     var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
     linkRelCodeSvc.addMarkedPage({url: gCommandFeedInfo.url,
+                                  sourceUrl: gCommandFeedInfo.sourceUrl,
                                   sourceCode: code,
                                   canAutoUpdate: canAutoUpdate});
     showConfirmation();
