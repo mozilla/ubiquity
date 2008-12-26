@@ -86,8 +86,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
     title = annSvc.getPageAnnotation(uri, CMD_TITLE_ANNO);
 
   let pageInfo = {title: title,
-                  uri: uri,
-                  htmlUri: uri};
+                  uri: uri};
 
   pageInfo.remove = function pageInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, CMD_CONFIRMED_ANNO)) {
@@ -110,14 +109,14 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   // that points to a JS file.
   if (annSvc.pageHasAnnotation(uri, CMD_URL_ANNO)) {
     var val = annSvc.getPageAnnotation(uri, CMD_URL_ANNO);
-    pageInfo.jsUri = Utils.url(val);
+    pageInfo.srcUri = Utils.url(val);
   } else {
     // There's no <link rel="commands"> tag, so we'll assume this
     // is a raw JS file.
-    pageInfo.jsUri = uri;
+    pageInfo.srcUri = uri;
   }
 
-  if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
+  if (LocalUriCodeSource.isValidUri(pageInfo.srcUri)) {
     pageInfo.canAutoUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, CMD_AUTOUPDATE_ANNO)) {
     // fern: there's no not-hackish way of parsing a string to a boolean.
@@ -143,7 +142,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
     "viewSourceUri",
     function pageInfo_viewSource() {
       if (pageInfo.canAutoUpdate)
-        return pageInfo.jsUri;
+        return pageInfo.srcUri;
       else {
         let uri = ("data:application/x-javascript," +
                    escape(pageInfo.getCode()));
@@ -364,9 +363,9 @@ function LinkRelCodeCollection(lrcs) {
     let newSources = {};
     for (let i = 0; i < markedPages.length; i++) {
       let pageInfo = markedPages[i];
-      let href = pageInfo.jsUri.spec;
+      let href = pageInfo.srcUri.spec;
       let source;
-      if (RemoteUriCodeSource.isValidUri(pageInfo.jsUri)) {
+      if (RemoteUriCodeSource.isValidUri(pageInfo.srcUri)) {
         if (pageInfo.canAutoUpdate) {
           source = new RemoteUriCodeSource(pageInfo);
         } else
@@ -374,8 +373,8 @@ function LinkRelCodeCollection(lrcs) {
           // resubscribe to all their stuff?  Or implement
           // manual updating?
           source = new StringCodeSource(pageInfo.getCode(),
-                                        pageInfo.jsUri.spec);
-      } else if (LocalUriCodeSource.isValidUri(pageInfo.jsUri)) {
+                                        pageInfo.srcUri.spec);
+      } else if (LocalUriCodeSource.isValidUri(pageInfo.srcUri)) {
         source = new LocalUriCodeSource(href);
       } else {
         throw new Error("Don't know how to make code source for " + href);

@@ -104,7 +104,7 @@ StringCodeSource.prototype = {
 };
 
 function RemoteUriCodeSource(pageInfo) {
-  this.id = pageInfo.jsUri.spec;
+  this.id = pageInfo.srcUri.spec;
   this._pageInfo = pageInfo;
   this._req = null;
   this._hasCheckedRecently = false;
@@ -126,7 +126,7 @@ RemoteUriCodeSource.prototype = {
       var self = this;
       self._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                   .createInstance(Ci.nsIXMLHttpRequest);
-      self._req.open('GET', this._pageInfo.jsUri.spec, true);
+      self._req.open('GET', this._pageInfo.srcUri.spec, true);
       self._req.overrideMimeType("text/plain");
 
       self._req.onreadystatechange = function RUCS__onXhrChange() {
