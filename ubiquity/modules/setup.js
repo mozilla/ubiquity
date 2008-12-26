@@ -42,6 +42,7 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/feedmanager.js");
+Components.utils.import("resource://ubiquity-modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
@@ -161,6 +162,7 @@ let UbiquitySetup = {
       var annSvc = new AnnotationService(annDbConn);
 
       var feedManager = new FeedManager(annSvc);
+      var defaultFeedPlugin = new DefaultFeedPlugin(feedManager);
       var msgService = new CompositeMessageService();
 
       msgService.add(new AlertMessageService());
@@ -168,8 +170,10 @@ let UbiquitySetup = {
 
       var makeGlobals = makeBuiltinGlobalsMaker(msgService);
       var sandboxFactory = new SandboxFactory(makeGlobals);
-      var codeSources = makeBuiltinCodeSources(this.languageCode,
-                                               feedManager);
+      var codeSources = makeBuiltinCodeSources(
+        this.languageCode,
+        defaultFeedPlugin.codeCollection
+      );
 
       var disabledStorage = new DisabledCmdStorage(
         'extensions.ubiquity.disabledCommands'
@@ -193,7 +197,7 @@ let UbiquitySetup = {
       // getting the '@mozilla.org/thread-manager;1' service and
       // spinning via a call to processNextEvent() until some kind of
       // I/O is finished?
-      this.__installDefaults(feedManager);
+      this.__installDefaults(defaultFeedPlugin);
       cmdSource.refresh();
     }
 
@@ -244,7 +248,7 @@ let UbiquitySetup = {
     return Application.extensions.get("ubiquity@labs.mozilla.com").version;
   },
 
-  __installDefaults: function installDefaults(feedManager) {
+  __installDefaults: function installDefaults(defaultFeedPlugin) {
     let baseLocalUri = this.getBaseUri() + "standard-feeds/";
     let baseUri;
 
@@ -254,9 +258,9 @@ let UbiquitySetup = {
     } else
       baseUri = baseLocalUri;
 
-    feedManager.installDefaults(baseUri,
-                                       baseLocalUri,
-                                       this.STANDARD_FEEDS);
+    defaultFeedPlugin.installDefaults(baseUri,
+                                      baseLocalUri,
+                                      this.STANDARD_FEEDS);
   }
 };
 
@@ -302,7 +306,7 @@ function makeBuiltinGlobalsMaker(msgService) {
   return makeGlobals;
 }
 
-function makeBuiltinCodeSources(languageCode, feedManager) {
+function makeBuiltinCodeSources(languageCode, subscribedCodeCollection) {
   var baseUri = UbiquitySetup.getBaseUri();
   var basePartsUri = baseUri + "feed-parts/";
   var baseScriptsUri = baseUri + "scripts/";
@@ -339,7 +343,7 @@ function makeBuiltinCodeSources(languageCode, feedManager) {
 
   bodyCodeSources = new CompositeCollection([
     new IterableCollection(bodyCodeSources),
-    new LinkRelCodeCollection(feedManager)
+    subscribedCodeCollection
   ]);
 
   return new MixedCodeSourceCollection(

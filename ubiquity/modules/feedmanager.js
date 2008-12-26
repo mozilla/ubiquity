@@ -36,24 +36,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["FeedManager",
-                    "LinkRelCodeCollection"];
+let EXPORTED_SYMBOLS = ["FeedManager"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/eventhub.js");
 
 const FEED_SRC_ANNO = "ubiquity/source";
+const FEED_TYPE_ANNO = "ubiquity/type";
 const FEED_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
 const FEED_SUBSCRIBED_ANNO = "ubiquity/confirmed";
 const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
 const FEED_SRC_URL_ANNO = "ubiquity/commands";
 const FEED_TITLE_ANNO = "ubiquity/title";
 
-const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
+const DEFAULT_FEED_TYPE = "commands";
 
 function FeedManager(annSvc) {
   this._annSvc = annSvc;
+  this._plugins = {};
 
   let hub = new EventHub();
   hub.attachMethods(this);
@@ -78,6 +78,14 @@ function FeedManager(annSvc) {
 
 FeedManager.prototype = FMgrProto = {};
 
+FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
+  if (plugin.type in this._plugins)
+    throw new Error("Feed plugin for type '" + plugin.type +
+                    "' already registered.");
+
+  this._plugins[plugin.type] = plugin;
+};
+
 FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   let annSvc = this._annSvc;
 
@@ -85,8 +93,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
     title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO);
 
+  let type = annSvc.getPageAnnotation(uri, FEED_TYPE_ANNO);
+
   let feedInfo = {title: title,
-                  uri: uri};
+                  uri: uri,
+                  type: type};
 
   feedInfo.remove = function feedInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {
@@ -107,14 +118,12 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
   feedInfo.srcUri = Utils.url(val);
 
-  if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
-    feedInfo.canAutoUpdate = true;
-  } else if (annSvc.pageHasAnnotation(uri, FEED_AUTOUPDATE_ANNO)) {
+  if (annSvc.pageHasAnnotation(uri, FEED_AUTOUPDATE_ANNO))
     // fern: there's no not-hackish way of parsing a string to a boolean.
     feedInfo.canAutoUpdate = (/^true$/i).test(
       annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO)
     );
-  } else
+  else
     feedInfo.canAutoUpdate = false;
 
   feedInfo.getCode = function feedInfo_getCode() {
@@ -142,7 +151,12 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     }
   );
 
-  return feedInfo;
+  let plugin = this._plugins[feedInfo.type];
+  if (!plugin)
+    throw new Error("No feed plugin registered for type '" +
+                    feedInfo.type + "'.");
+
+  return plugin.makeFeed(feedInfo);
 };
 
 FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
@@ -167,12 +181,25 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   return subscribedFeeds;
 };
 
-FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
+FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
+  // Overlay defaults atop the passed-in information without destructively
+  // modifying our arguments.
+  let info = new Object();
+
+  if (!baseInfo.type)
+    info.type = DEFAULT_FEED_TYPE;
+
+  info.__proto__ = baseInfo;
+
+  // Now add the feed.
   let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
 
   if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO))
     annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
+
+  annSvc.setPageAnnotation(uri, FEED_TYPE_ANNO, info.type, 0,
+                           annSvc.EXPIRE_NEVER);
   annSvc.setPageAnnotation(uri, FEED_SRC_URL_ANNO, info.sourceUrl, 0,
                            annSvc.EXPIRE_NEVER);
   annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, info.sourceCode, 0,
@@ -198,83 +225,10 @@ FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 };
 
-FMgrProto.installDefaults = function FMgr_installDefaults(baseUri,
-                                                          baseLocalUri,
-                                                          infos) {
-  for (let i = 0; i < infos.length; i++) {
-    let info = infos[i];
-    let uri = Utils.url(baseUri + info.page);
-
-    if (!this.isUnsubscribedFeed(uri)) {
-      let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
-      this.addSubscribedFeed({url: uri,
-                              sourceUrl: baseUri + info.source,
-                              sourceCode: lcs.getCode(),
-                              canAutoUpdate: true,
-                              title: info.title});
-    }
-  }
-};
-
-function subscribeResponder(window, fMgr, targetDoc,
-                            commandsUrl, mimetype) {
-  // Clicking on "subscribe" takes them to the warning page:
-  var confirmUrl = (CONFIRM_URL + "?url=" +
-                    encodeURIComponent(targetDoc.location.href) +
-                    "&sourceUrl=" + encodeURIComponent(commandsUrl));
-
-  function isTrustedUrl(commandsUrl, mimetype) {
-    // Even if the command feed resides on a trusted host, if the
-    // mime-type is application/x-javascript-untrusted or
-    // application/xhtml+xml-untrusted, the host itself doesn't
-    // trust it (perhaps because it's mirroring code from
-    // somewhere else).
-    if (mimetype == "application/x-javascript-untrusted" ||
-        mimetype == "application/xhtml+xml-untrusted")
-      return false;
-
-    var url = Utils.url(commandsUrl);
-
-    if (url.scheme != "https")
-      return false;
-
-    TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
-    let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                      .getService(Components.interfaces.fuelIApplication);
-    var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
-    domains = domains.split(",");
-
-    for (var i = 0; i < domains.length; i++) {
-      if (domains[i] == url.host)
-        return true;
-    }
-
-    return false;
-  }
-
-  if (isTrustedUrl(commandsUrl, mimetype)) {
-    function onSuccess(data) {
-      fMgr.addSubscribedFeed({url: targetDoc.location.href,
-                              sourceUrl: commandsUrl,
-                              canAutoUpdate: true,
-                              sourceCode: data});
-      Utils.openUrlInBrowser(confirmUrl);
-    }
-
-    if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
-      window.jQuery.ajax({url: commandsUrl,
-                          dataType: "text",
-                          success: onSuccess});
-    } else
-      onSuccess("");
-  } else
-    Utils.openUrlInBrowser(confirmUrl);
-}
-
 FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   var self = this;
 
-  function showNotification(targetDoc, commandsUrl, mimetype) {
+  function showNotification(plugin, targetDoc, commandsUrl, mimetype) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
 
@@ -301,7 +255,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
         box.removeNotification(oldNotification);
 
       function onSubscribeClick(notification, button) {
-        subscribeResponder(window, self, targetDoc, commandsUrl, mimetype);
+        plugin.onSubscribeClick(window, targetDoc, commandsUrl, mimetype);
       }
 
       var buttons = [
@@ -324,18 +278,20 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
     }
   }
 
-  function onPageWithCommands(pageUrl, commandsUrl, document, mimetype) {
+  function onPageWithCommands(plugin, pageUrl, commandsUrl, document,
+                              mimetype) {
     if (!self.isSubscribedFeed(pageUrl))
-      showNotification(document, commandsUrl, mimetype);
+      showNotification(plugin, document, commandsUrl, mimetype);
   }
 
   // Watch for any tags of the form <link rel="commands">
   // on pages and add annotations for them if they exist.
   function onLinkAdded(event) {
-    if (event.target.rel != "commands")
+    if (!(event.target.rel in self._plugins))
       return;
 
-    onPageWithCommands(event.target.baseURI,
+    onPageWithCommands(self._plugins[event.target.rel],
+                       event.target.baseURI,
                        event.target.href,
                        event.target.ownerDocument,
                        event.target.type);
@@ -343,54 +299,3 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
 };
-
-// This class is a collection that yields a code source for every
-// currently-subscribed feed.
-function LinkRelCodeCollection(fMgr) {
-  this._sources = {};
-
-  this._updateSourceList = function LRCC_updateSourceList() {
-    let subscribedFeeds = fMgr.getSubscribedFeeds();
-    let newSources = {};
-    for (let i = 0; i < subscribedFeeds.length; i++) {
-      let feedInfo = subscribedFeeds[i];
-      let href = feedInfo.srcUri.spec;
-      let source;
-      if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
-        if (feedInfo.canAutoUpdate) {
-          source = new RemoteUriCodeSource(feedInfo);
-        } else
-          source = new StringCodeSource(feedInfo.getCode(),
-                                        feedInfo.srcUri.spec);
-      } else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
-        source = new LocalUriCodeSource(href);
-      } else {
-        throw new Error("Don't know how to make code source for " + href);
-      }
-
-      newSources[href] = new XhtmlCodeSource(source);
-    }
-    this._sources = newSources;
-  };
-
-  var subscriptionsChanged = true;
-
-  function listener(eventName, data) {
-    subscriptionsChanged = true;
-  }
-
-  fMgr.addListener("change", listener);
-
-  // TODO: When to remove listener?
-
-  this.__iterator__ = function LRCC_iterator() {
-    if (subscriptionsChanged) {
-      this._updateSourceList();
-      subscriptionsChanged = false;
-    }
-
-    for each (source in this._sources) {
-      yield source;
-    }
-  };
-}
