@@ -170,15 +170,15 @@ function testLinkRelCodeServiceWorks() {
   this.assert(results.length == 1);
 
   // Ensure the result is what we think it is.
-  var page = results[0];
-  this.assert(page.getCode() == code);
+  var feed = results[0];
+  this.assert(feed.getCode() == code);
 
-  // Add another marked page and make sure things still make sense.
+  // Add another subscribed feed and make sure things still make sense.
   var moreCode = "function narg() {}";
   LRCS.addSubscribedFeed({url: "http://www.bar.com",
-                      sourceUrl: "http://www.bar.com/code.js",
-                      sourceCode: moreCode,
-                      canAutoUpdate: false});
+                          sourceUrl: "http://www.bar.com/code.js",
+                          sourceCode: moreCode,
+                          canAutoUpdate: false});
   results = LRCS.getSubscribedFeeds();
 
   this.assert(results[0].getCode() == code);

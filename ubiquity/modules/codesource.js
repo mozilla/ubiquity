@@ -103,9 +103,9 @@ StringCodeSource.prototype = {
   }
 };
 
-function RemoteUriCodeSource(pageInfo) {
-  this.id = pageInfo.srcUri.spec;
-  this._pageInfo = pageInfo;
+function RemoteUriCodeSource(feedInfo) {
+  this.id = feedInfo.srcUri.spec;
+  this._feedInfo = feedInfo;
   this._req = null;
   this._hasCheckedRecently = false;
 };
@@ -126,14 +126,14 @@ RemoteUriCodeSource.prototype = {
       var self = this;
       self._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                   .createInstance(Ci.nsIXMLHttpRequest);
-      self._req.open('GET', this._pageInfo.srcUri.spec, true);
+      self._req.open('GET', this._feedInfo.srcUri.spec, true);
       self._req.overrideMimeType("text/plain");
 
       self._req.onreadystatechange = function RUCS__onXhrChange() {
         if (self._req.readyState == 4) {
           if (self._req.status == 200)
             // Update our cache.
-            self._pageInfo.setCode(self._req.responseText);
+            self._feedInfo.setCode(self._req.responseText);
           self._req = null;
           Utils.setTimeout(
             function() { self._hasCheckedRecently = false; },
@@ -147,7 +147,7 @@ RemoteUriCodeSource.prototype = {
     }
 
     // Return whatever we've got cached for now.
-    return this._pageInfo.getCode();
+    return this._feedInfo.getCode();
   }
 };
 

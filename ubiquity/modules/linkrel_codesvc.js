@@ -85,10 +85,10 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
     title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO);
 
-  let pageInfo = {title: title,
+  let feedInfo = {title: title,
                   uri: uri};
 
-  pageInfo.remove = function pageInfo_remove() {
+  feedInfo.remove = function feedInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {
       annSvc.removePageAnnotation(uri, FEED_SUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO, "true", 0,
@@ -96,7 +96,7 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
     }
   };
 
-  pageInfo.unremove = function pageInfo_undelete() {
+  feedInfo.unremove = function feedInfo_undelete() {
     if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO)) {
       annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
@@ -105,44 +105,44 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   };
 
   var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
-  pageInfo.srcUri = Utils.url(val);
+  feedInfo.srcUri = Utils.url(val);
 
-  if (LocalUriCodeSource.isValidUri(pageInfo.srcUri)) {
-    pageInfo.canAutoUpdate = true;
+  if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
+    feedInfo.canAutoUpdate = true;
   } else if (annSvc.pageHasAnnotation(uri, FEED_AUTOUPDATE_ANNO)) {
     // fern: there's no not-hackish way of parsing a string to a boolean.
-    pageInfo.canAutoUpdate = (/^true$/i).test(
+    feedInfo.canAutoUpdate = (/^true$/i).test(
       annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO)
     );
   } else
-    pageInfo.canAutoUpdate = false;
+    feedInfo.canAutoUpdate = false;
 
-  pageInfo.getCode = function pageInfo_getCode() {
+  feedInfo.getCode = function feedInfo_getCode() {
     if (annSvc.pageHasAnnotation(uri, FEED_SRC_ANNO))
       return annSvc.getPageAnnotation(uri, FEED_SRC_ANNO);
     else
       return "";
   };
 
-  pageInfo.setCode = function pageInfo_setCode(code) {
+  feedInfo.setCode = function feedInfo_setCode(code) {
     annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0,
                              annSvc.EXPIRE_NEVER);
   };
 
-  pageInfo.__defineGetter__(
+  feedInfo.__defineGetter__(
     "viewSourceUri",
-    function pageInfo_viewSource() {
-      if (pageInfo.canAutoUpdate)
-        return pageInfo.srcUri;
+    function feedInfo_viewSource() {
+      if (feedInfo.canAutoUpdate)
+        return feedInfo.srcUri;
       else {
         let uri = ("data:application/x-javascript," +
-                   escape(pageInfo.getCode()));
+                   escape(feedInfo.getCode()));
         return Utils.url(uri);
       }
     }
   );
 
-  return pageInfo;
+  return feedInfo;
 };
 
 LRCSProto.getUnsubscribedFeeds = function LRCS_getUnsubscribedFeeds() {
@@ -355,16 +355,16 @@ function LinkRelCodeCollection(lrcs) {
     let subscribedFeeds = lrcs.getSubscribedFeeds();
     let newSources = {};
     for (let i = 0; i < subscribedFeeds.length; i++) {
-      let pageInfo = subscribedFeeds[i];
-      let href = pageInfo.srcUri.spec;
+      let feedInfo = subscribedFeeds[i];
+      let href = feedInfo.srcUri.spec;
       let source;
-      if (RemoteUriCodeSource.isValidUri(pageInfo.srcUri)) {
-        if (pageInfo.canAutoUpdate) {
-          source = new RemoteUriCodeSource(pageInfo);
+      if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
+        if (feedInfo.canAutoUpdate) {
+          source = new RemoteUriCodeSource(feedInfo);
         } else
-          source = new StringCodeSource(pageInfo.getCode(),
-                                        pageInfo.srcUri.spec);
-      } else if (LocalUriCodeSource.isValidUri(pageInfo.srcUri)) {
+          source = new StringCodeSource(feedInfo.getCode(),
+                                        feedInfo.srcUri.spec);
+      } else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
         source = new LocalUriCodeSource(href);
       } else {
         throw new Error("Don't know how to make code source for " + href);
