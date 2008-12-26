@@ -160,9 +160,9 @@ function testLinkRelCodeServiceWorks() {
 
   this.assert(!LRCS.isSubscribedFeed(url));
   LRCS.addSubscribedFeed({url: url,
-                      sourceUrl: sourceUrl,
-                      sourceCode: code,
-                      canAutoUpdate: false});
+                          sourceUrl: sourceUrl,
+                          sourceCode: code,
+                          canAutoUpdate: false});
   this.assert(LRCS.isSubscribedFeed(url));
 
   var results = LRCS.getSubscribedFeeds();
