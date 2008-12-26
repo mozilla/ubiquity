@@ -78,7 +78,7 @@ function LinkRelCodeService(annSvc) {
 
 LinkRelCodeService.prototype = LRCSProto = {};
 
-LRCSProto.__makePage = function LRCS___makePage(uri) {
+LRCSProto.__makeFeed = function LRCS___makeFeed(uri) {
   let annSvc = this._annSvc;
 
   let title = uri.spec;
@@ -151,7 +151,7 @@ LRCSProto.getUnsubscribedFeeds = function LRCS_getUnsubscribedFeeds() {
   let unsubscribedFeeds = [];
 
   for (let i = 0; i < removedUris.length; i++)
-    unsubscribedFeeds.push(this.__makePage(removedUris[i]));
+    unsubscribedFeeds.push(this.__makeFeed(removedUris[i]));
 
   return unsubscribedFeeds;
 };
@@ -162,7 +162,7 @@ LRCSProto.getSubscribedFeeds = function LRCS_getSubscribedFeeds() {
   let subscribedFeeds = [];
 
   for (let i = 0; i < confirmedPages.length; i++)
-    subscribedFeeds.push(this.__makePage(confirmedPages[i]));
+    subscribedFeeds.push(this.__makeFeed(confirmedPages[i]));
 
   return subscribedFeeds;
 };
@@ -201,8 +201,6 @@ LRCSProto.isUnsubscribedFeed = function LRCS_isSubscribedFeed(uri) {
 LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
                                                           baseLocalUri,
                                                           infos) {
-  let annSvc = this._annSvc;
-
   for (let i = 0; i < infos.length; i++) {
     let info = infos[i];
     let uri = Utils.url(baseUri + info.page);
