@@ -70,10 +70,10 @@ function onSubmit() {
   var canAutoUpdate = $("#autoupdate").attr("checked") ? true : false;
   if (code) {
     var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-    linkRelCodeSvc.addMarkedPage({url: gCommandFeedInfo.url,
-                                  sourceUrl: gCommandFeedInfo.sourceUrl,
-                                  sourceCode: code,
-                                  canAutoUpdate: canAutoUpdate});
+    linkRelCodeSvc.addSubscribedFeed({url: gCommandFeedInfo.url,
+                                      sourceUrl: gCommandFeedInfo.sourceUrl,
+                                      sourceCode: code,
+                                      canAutoUpdate: canAutoUpdate});
     showConfirmation();
   }
 }
@@ -102,7 +102,7 @@ function fetchSource(uri, onSuccess) {
 
 function onReady() {
   var linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-  if (linkRelCodeSvc.isMarkedPage(gCommandFeedInfo.url)) {
+  if (linkRelCodeSvc.isSubscribedFeed(gCommandFeedInfo.url)) {
     if (gCommandFeedInfo.updateCode)
       // TODO: Also check to see if updateCode is different from
       // the current code.

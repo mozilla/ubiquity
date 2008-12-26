@@ -158,14 +158,14 @@ function testLinkRelCodeServiceWorks() {
   var sourceUrl = "http://www.foo.com/code.js";
   var code = "function blah() {}";
 
-  this.assert(!LRCS.isMarkedPage(url));
-  LRCS.addMarkedPage({url: url,
+  this.assert(!LRCS.isSubscribedFeed(url));
+  LRCS.addSubscribedFeed({url: url,
                       sourceUrl: sourceUrl,
                       sourceCode: code,
                       canAutoUpdate: false});
-  this.assert(LRCS.isMarkedPage(url));
+  this.assert(LRCS.isSubscribedFeed(url));
 
-  var results = LRCS.getMarkedPages();
+  var results = LRCS.getSubscribedFeeds();
 
   this.assert(results.length == 1);
 
@@ -175,11 +175,11 @@ function testLinkRelCodeServiceWorks() {
 
   // Add another marked page and make sure things still make sense.
   var moreCode = "function narg() {}";
-  LRCS.addMarkedPage({url: "http://www.bar.com",
+  LRCS.addSubscribedFeed({url: "http://www.bar.com",
                       sourceUrl: "http://www.bar.com/code.js",
                       sourceCode: moreCode,
                       canAutoUpdate: false});
-  results = LRCS.getMarkedPages();
+  results = LRCS.getSubscribedFeeds();
 
   this.assert(results[0].getCode() == code);
   this.assert(results[1].getCode() == moreCode);
@@ -192,7 +192,7 @@ function testLinkRelCodeServiceWorks() {
 
   results[0].remove();
 
-  this.assert(!LRCS.isMarkedPage(url));
+  this.assert(!LRCS.isSubscribedFeed(url));
 }
 
 function FakeCommandSource( cmdList ) {

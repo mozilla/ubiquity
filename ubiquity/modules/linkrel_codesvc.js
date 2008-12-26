@@ -145,29 +145,29 @@ LRCSProto.__makePage = function LRCS___makePage(uri) {
   return pageInfo;
 };
 
-LRCSProto.getRemovedPages = function LRCS_getRemovedPages() {
+LRCSProto.getUnsubscribedFeeds = function LRCS_getUnsubscribedFeeds() {
   let annSvc = this._annSvc;
   let removedUris = annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO, {});
-  let removedPages = [];
+  let unsubscribedFeeds = [];
 
   for (let i = 0; i < removedUris.length; i++)
-    removedPages.push(this.__makePage(removedUris[i]));
+    unsubscribedFeeds.push(this.__makePage(removedUris[i]));
 
-  return removedPages;
+  return unsubscribedFeeds;
 };
 
-LRCSProto.getMarkedPages = function LRCS_getMarkedPages() {
+LRCSProto.getSubscribedFeeds = function LRCS_getSubscribedFeeds() {
   let annSvc = this._annSvc;
   let confirmedPages = annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO, {});
-  let markedPages = [];
+  let subscribedFeeds = [];
 
   for (let i = 0; i < confirmedPages.length; i++)
-    markedPages.push(this.__makePage(confirmedPages[i]));
+    subscribedFeeds.push(this.__makePage(confirmedPages[i]));
 
-  return markedPages;
+  return subscribedFeeds;
 };
 
-LRCSProto.addMarkedPage = function LRCS_addMarkedPage(info) {
+LRCSProto.addSubscribedFeed = function LRCS_addSubscribedFeed(info) {
   let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
 
@@ -186,13 +186,13 @@ LRCSProto.addMarkedPage = function LRCS_addMarkedPage(info) {
                              annSvc.EXPIRE_NEVER);
 };
 
-LRCSProto.isMarkedPage = function LRCS_isMarkedPage(uri) {
+LRCSProto.isSubscribedFeed = function LRCS_isSubscribedFeed(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO);
 };
 
-LRCSProto.isRemovedPage = function LRCS_isMarkedPage(uri) {
+LRCSProto.isUnsubscribedFeed = function LRCS_isSubscribedFeed(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
@@ -207,13 +207,13 @@ LRCSProto.installDefaults = function LRCS_installDefaults(baseUri,
     let info = infos[i];
     let uri = Utils.url(baseUri + info.page);
 
-    if (!this.isRemovedPage(uri)) {
+    if (!this.isUnsubscribedFeed(uri)) {
       let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
-      this.addMarkedPage({url: uri,
-                          sourceUrl: baseUri + info.source,
-                          sourceCode: lcs.getCode(),
-                          canAutoUpdate: true,
-                          title: info.title});
+      this.addSubscribedFeed({url: uri,
+                              sourceUrl: baseUri + info.source,
+                              sourceCode: lcs.getCode(),
+                              canAutoUpdate: true,
+                              title: info.title});
     }
   }
 };
@@ -256,10 +256,10 @@ function subscribeResponder(window, lrcs, targetDoc,
 
   if (isTrustedUrl(commandsUrl, mimetype)) {
     function onSuccess(data) {
-      lrcs.addMarkedPage({url: targetDoc.location.href,
-                          sourceUrl: commandsUrl,
-                          canAutoUpdate: true,
-                          sourceCode: data});
+      lrcs.addSubscribedFeed({url: targetDoc.location.href,
+                              sourceUrl: commandsUrl,
+                              canAutoUpdate: true,
+                              sourceCode: data});
       Utils.openUrlInBrowser(confirmUrl);
     }
 
@@ -327,7 +327,7 @@ LRCSProto.installToWindow = function LRCS_installToWindow(window) {
   }
 
   function onPageWithCommands(pageUrl, commandsUrl, document, mimetype) {
-    if (!self.isMarkedPage(pageUrl))
+    if (!self.isSubscribedFeed(pageUrl))
       showNotification(document, commandsUrl, mimetype);
   }
 
@@ -352,10 +352,10 @@ function LinkRelCodeCollection(lrcs) {
   this._sources = {};
 
   this._updateSourceList = function LRCC_updateSourceList() {
-    let markedPages = lrcs.getMarkedPages();
+    let subscribedFeeds = lrcs.getSubscribedFeeds();
     let newSources = {};
-    for (let i = 0; i < markedPages.length; i++) {
-      let pageInfo = markedPages[i];
+    for (let i = 0; i < subscribedFeeds.length; i++) {
+      let pageInfo = subscribedFeeds[i];
       let href = pageInfo.srcUri.spec;
       let source;
       if (RemoteUriCodeSource.isValidUri(pageInfo.srcUri)) {

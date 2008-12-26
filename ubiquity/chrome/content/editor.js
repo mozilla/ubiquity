@@ -163,9 +163,10 @@ function saveAs() {
       saveTextToFile(editor.editor.editor.getCode(), fp.file);
 
       let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-      linkRelCodeSvc.addMarkedPage({url: fp.fileURL.spec,
-                                    sourceCode: "",
-                                    canAutoUpdate: true});
+      linkRelCodeSvc.addSubscribedFeed({url: fp.fileURL.spec,
+                                        sourceUrl: fp.fileURL.spec,
+                                        sourceCode: "",
+                                        canAutoUpdate: true});
 
       editor.editor.setCode("");
       PrefCommands.setCode("");

@@ -124,19 +124,21 @@ function onReady() {
   PrefKeys.onLoad();
 
   let linkRelCodeSvc = UbiquitySetup.createServices().linkRelCodeService;
-  let markedPages = linkRelCodeSvc.getMarkedPages();
-  for (let i = 0; i < markedPages.length; i++)
-    $("#command-feeds").append(makeFeedListElement(markedPages[i],
+  let subscribedFeeds = linkRelCodeSvc.getSubscribedFeeds();
+  for (let i = 0; i < subscribedFeeds.length; i++)
+    $("#command-feeds").append(makeFeedListElement(subscribedFeeds[i],
                                                    "unsubscribe",
                                                    makeRemover));
   if (!$("#command-feeds").text())
     $("#command-feeds-div").hide();
 
-  let removedPages = linkRelCodeSvc.getRemovedPages();
-  for (i = 0; i < removedPages.length; i++)
-    $("#command-feed-graveyard").append(makeFeedListElement(removedPages[i],
-                                                            "resubscribe",
-                                                            makeUnremover));
+  let unsubscribedFeeds = linkRelCodeSvc.getUnsubscribedFeeds();
+  for (i = 0; i < unsubscribedFeeds.length; i++)
+    $("#command-feed-graveyard").append(
+      makeFeedListElement(unsubscribedFeeds[i],
+                          "resubscribe",
+                          makeUnremover)
+    );
   if (!$("#command-feed-graveyard").text())
     $("#command-feed-graveyard-div").hide();
 
