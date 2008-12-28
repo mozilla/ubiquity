@@ -39,15 +39,11 @@
 EXPORTED_SYMBOLS = ["UbiquitySetup"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/msgservice.js");
 Components.utils.import("resource://ubiquity-modules/feedmanager.js");
 Components.utils.import("resource://ubiquity-modules/default_feed_plugin.js");
-Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/collection.js");
-Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
+Components.utils.import("resource://ubiquity-modules/feedaggregator.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
@@ -168,24 +164,15 @@ let UbiquitySetup = {
       msgService.add(new AlertMessageService());
       msgService.add(new ErrorConsoleMessageService());
 
-      var makeGlobals = makeBuiltinGlobalsMaker(msgService);
-      var sandboxFactory = new SandboxFactory(makeGlobals);
-      var codeSources = makeBuiltinCodeSources(
-        this.languageCode,
-        defaultFeedPlugin.codeCollection
-      );
-
       var disabledStorage = new DisabledCmdStorage(
         'extensions.ubiquity.disabledCommands'
       );
 
-      var cmdSource = new DefaultCommandSource(
-        codeSources,
+      var cmdSource = new FeedAggregator(
+        feedManager,
         msgService,
-        sandboxFactory,
         disabledStorage.getDisabledCommands()
       );
-
       disabledStorage.attach(cmdSource);
 
       gServices = {commandSource: cmdSource,
@@ -263,95 +250,6 @@ let UbiquitySetup = {
                                       this.STANDARD_FEEDS);
   }
 };
-
-function makeBuiltinGlobalsMaker(msgService) {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-  var hiddenWindow = gIframe.contentWindow;
-
-  var uris = ["resource://ubiquity-scripts/jquery.js",
-              "resource://ubiquity-scripts/template.js"];
-
-  for (var i = 0; i < uris.length; i++) {
-    hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-                .getService(Components.interfaces.mozIJSSubScriptLoader)
-                .loadSubScript(uris[i]);
-  }
-
-  var globalObjects = {};
-
-  function makeGlobals(codeSource) {
-    var id = codeSource.id;
-
-    if (!(id in globalObjects))
-      globalObjects[id] = {};
-
-    return {
-      XPathResult: hiddenWindow.XPathResult,
-      XMLHttpRequest: hiddenWindow.XMLHttpRequest,
-      jQuery: hiddenWindow.jQuery,
-      Template: hiddenWindow.TrimPath,
-      Application: Application,
-      Components: Components,
-      feed: {id: codeSource.id,
-             dom: codeSource.dom},
-      pageLoadFuncs: [],
-      globals: globalObjects[id],
-      displayMessage: function() {
-        msgService.displayMessage.apply(msgService, arguments);
-      }
-    };
-  }
-
-  return makeGlobals;
-}
-
-function makeBuiltinCodeSources(languageCode, subscribedCodeCollection) {
-  var baseUri = UbiquitySetup.getBaseUri();
-  var basePartsUri = baseUri + "feed-parts/";
-  var baseScriptsUri = baseUri + "scripts/";
-
-  var headerCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "header/utils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
-  ];
-  var bodyCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "body/onstartup.js"),
-    new XhtmlCodeSource(PrefCommands)
-  ];
-  var footerCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "footer/final.js")
-  ];
-
-  if (languageCode == "jp") {
-    headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
-    ]);
-    bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(basePartsUri + "body/jp/builtincmds.js")
-    ]);
-  } else if (languageCode == "en") {
-    headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(baseScriptsUri + "date.js"),
-      new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")
-    ]);
-    bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(basePartsUri + "body/en/builtincmds.js")
-    ]);
-  }
-
-  bodyCodeSources = new CompositeCollection([
-    new IterableCollection(bodyCodeSources),
-    subscribedCodeCollection
-  ]);
-
-  return new MixedCodeSourceCollection(
-    new IterableCollection(headerCodeSources),
-    bodyCodeSources,
-    new IterableCollection(footerCodeSources)
-  );
-}
 
 function DisabledCmdStorage(prefName) {
   let str = Application.prefs.getValue(prefName, '{}');

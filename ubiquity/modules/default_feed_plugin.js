@@ -130,6 +130,14 @@ function DefaultFeedPlugin(feedManager) {
     if (LocalUriCodeSource.isValidUri(baseFeedInfo.srcUri))
       feedInfo.canAutoUpdate = true;
 
+    feedInfo.refresh = function refresh() {
+      // TODO: Implement this.
+      this.commandNames = [];
+      this.nounTypes = [];
+      this.commands = [];
+      this.pageLoadFuncs = [];
+    };
+
     feedInfo.__proto__ = baseFeedInfo;
 
     return feedInfo;
