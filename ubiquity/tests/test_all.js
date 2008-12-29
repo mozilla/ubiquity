@@ -155,7 +155,26 @@ function testMixedCodeSourceCollectionWorks() {
 
 function testFeedManagerWorks() {
   var FMgr = new FeedManager(new TestAnnotationMemory(this));
-  var dfp = new DefaultFeedPlugin(FMgr);
+  var fakeFeedPlugin = {
+    type: 'fake',
+    makeFeed: function makeFeed(baseFeedInfo, hub) {
+      var feedInfo = {};
+
+      feedInfo.refresh = function refresh() {
+        this.commandNames = [];
+        this.nounTypes = [];
+        this.commands = [];
+        this.pageLoadFuncs = [];
+      };
+
+      feedInfo.__proto__ = baseFeedInfo;
+
+      return feedInfo;
+    }
+  };
+
+  FMgr.registerPlugin(fakeFeedPlugin);
+
   var url = "http://www.foo.com";
   var sourceUrl = "http://www.foo.com/code.js";
   var code = "function blah() {}";
@@ -164,7 +183,8 @@ function testFeedManagerWorks() {
   FMgr.addSubscribedFeed({url: url,
                           sourceUrl: sourceUrl,
                           sourceCode: code,
-                          canAutoUpdate: false});
+                          canAutoUpdate: false,
+                          type: 'fake'});
   this.assert(FMgr.isSubscribedFeed(url));
 
   var results = FMgr.getSubscribedFeeds();
@@ -180,7 +200,8 @@ function testFeedManagerWorks() {
   FMgr.addSubscribedFeed({url: "http://www.bar.com",
                           sourceUrl: "http://www.bar.com/code.js",
                           sourceCode: moreCode,
-                          canAutoUpdate: false});
+                          canAutoUpdate: false,
+                          type: 'fake'});
   results = FMgr.getSubscribedFeeds();
 
   this.assert(results[0].getCode() == code);
