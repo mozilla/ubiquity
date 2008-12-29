@@ -124,7 +124,7 @@ function DefaultFeedPlugin(feedManager) {
       Utils.openUrlInBrowser(confirmUrl);
   };
 
-  this.makeFeed = function DFP_makeFeed(baseFeedInfo) {
+  this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
     let feedInfo = {};
 
     if (LocalUriCodeSource.isValidUri(baseFeedInfo.srcUri))

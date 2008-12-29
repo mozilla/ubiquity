@@ -54,26 +54,9 @@ const DEFAULT_FEED_TYPE = "commands";
 function FeedManager(annSvc) {
   this._annSvc = annSvc;
   this._plugins = {};
-
-  let hub = new EventHub();
-  hub.attachMethods(this);
-
-  function onAnnChanged(aURI, aName) {
-    if (aName == FEED_AUTOUPDATE_ANNO ||
-        aName == FEED_SUBSCRIBED_ANNO ||
-        aName == FEED_UNSUBSCRIBED_ANNO ||
-        aName == FEED_SRC_ANNO)
-      hub.notifyListeners("change", null);
-  }
-
-  var annObserver = {
-    onPageAnnotationSet : onAnnChanged,
-    onItemAnnotationSet : function(aItemId, aName) { },
-    onPageAnnotationRemoved : onAnnChanged,
-    onItemAnnotationRemoved: function(aItemId, aName) { }
-  };
-
-  annSvc.addObserver(annObserver);
+  this._feeds = {};
+  this._hub = new EventHub();
+  this._hub.attachMethods(this);
 }
 
 FeedManager.prototype = FMgrProto = {};
@@ -86,8 +69,16 @@ FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   this._plugins[plugin.type] = plugin;
 };
 
+FMgrProto.__getFeed = function FMgr___getFeed(uri) {
+  if (!(uri.spec in this._feeds))
+    this._feeds[uri.spec] = this.__makeFeed(uri);
+
+  return this._feeds[uri.spec];
+};
+
 FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   let annSvc = this._annSvc;
+  let hub = this._hub;
 
   let title = uri.spec;
   if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
@@ -99,11 +90,19 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                   uri: uri,
                   type: type};
 
+  feedInfo.__defineGetter__(
+    "isSubscribed",
+    function() {
+      return (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO));
+    }
+  );
+
   feedInfo.remove = function feedInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {
       annSvc.removePageAnnotation(uri, FEED_SUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO, "true", 0,
                                annSvc.EXPIRE_NEVER);
+      hub.notifyListeners("unsubscribe", uri);
     }
   };
 
@@ -112,6 +111,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
       annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
                                annSvc.EXPIRE_NEVER);
+      hub.notifyListeners("subscribe", uri);
     }
   };
 
@@ -156,7 +156,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     throw new Error("No feed plugin registered for type '" +
                     feedInfo.type + "'.");
 
-  return plugin.makeFeed(feedInfo);
+  return plugin.makeFeed(feedInfo, hub);
 };
 
 FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
@@ -165,7 +165,7 @@ FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
   let unsubscribedFeeds = [];
 
   for (let i = 0; i < removedUris.length; i++)
-    unsubscribedFeeds.push(this.__makeFeed(removedUris[i]));
+    unsubscribedFeeds.push(this.__getFeed(removedUris[i]));
 
   return unsubscribedFeeds;
 };
@@ -176,7 +176,7 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   let subscribedFeeds = [];
 
   for (let i = 0; i < confirmedPages.length; i++)
-    subscribedFeeds.push(this.__makeFeed(confirmedPages[i]));
+    subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
 
   return subscribedFeeds;
 };
@@ -211,6 +211,7 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
   if (info.title)
     annSvc.setPageAnnotation(uri, FEED_TITLE_ANNO, info.title, 0,
                              annSvc.EXPIRE_NEVER);
+  this._hub.notifyListeners("subscribe", uri);
 };
 
 FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) {

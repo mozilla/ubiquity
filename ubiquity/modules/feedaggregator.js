@@ -44,17 +44,18 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   let commandNames = [];
   let nounTypes = [];
   let pageLoadFuncLists = [];
-  let isInited = false;
+  let feedsChanged = true;
 
   let hub = new EventHub();
   hub.attachMethods(this);
 
-  function lazyInit() {
-    if (!isInited) {
-      self.refresh();
-      isInited = true;
-    }
+  function onFeedManagerChange(eventName, uri) {
+    feedsChanged = true;
   }
+
+  feedManager.addListener("unsubscribe", onFeedManagerChange);
+  feedManager.addListener("subscribe", onFeedManagerChange);
+  feedManager.addListener("feed-change", onFeedManagerChange);
 
   function makeCmdWithDisabler(cmd) {
     let newCmd = {
@@ -76,7 +77,8 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   }
 
   self.onPageLoad = function FA_onPageLoad(window) {
-    lazyInit();
+    if (feedsChanged)
+      self.refresh();
 
     for (let i = 0; i < pageLoadFuncLists.length; i++)
       for (let j = 0; j < pageLoadFuncLists[i].length; j++) {
@@ -102,38 +104,42 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 
     feeds.forEach(function(feed) { feed.refresh(); });
 
-    for (let i = 0; i < feeds.length; i++) {
-      let feed = feeds[i];
-
-      feed.refresh();
-      commandNames = commandNames.concat(feed.commandNames);
-      nounTypes = nounTypes.concat(feed.nounTypes);
-      for (name in feed.commands)
-        commands[name] = makeCmdWithDisabler(feed.commands[name]);
-      if (feed.pageLoadFuncs.length > 0)
-        pageLoadFuncLists.push(feed.pageLoadFuncs);
+    if (feedsChanged) {
+      feedsChanged = false;
+      feeds.forEach(
+        function processFeed(feed) {
+          commandNames = commandNames.concat(feed.commandNames);
+          nounTypes = nounTypes.concat(feed.nounTypes);
+          for (name in feed.commands)
+            commands[name] = makeCmdWithDisabler(feed.commands[name]);
+          if (feed.pageLoadFuncs.length > 0)
+            pageLoadFuncLists.push(feed.pageLoadFuncs);
+        }
+      );
+      hub.notifyListeners("feeds-reloaded", null);
     }
-
-    hub.notifyListeners("feeds-reloaded", null);
   };
 
   self.__defineGetter__("commandNames",
                         function() { return commandNames; });
 
   self.getAllCommands = function FA_getAllCommands() {
-    lazyInit();
+    if (feedsChanged)
+      self.refresh();
 
     return commands;
   };
 
   self.getAllNounTypes = function FA_getAllNounTypes() {
-    lazyInit();
+    if (feedsChanged)
+      self.refresh();
 
     return nounTypes;
   };
 
   self.getCommand = function FA_getCommand(name) {
-    lazyInit();
+    if (feedsChanged)
+      self.refresh();
 
     return commands[name] ? commands[name] : null;
   };
