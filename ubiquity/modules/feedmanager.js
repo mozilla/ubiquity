@@ -44,6 +44,7 @@ Components.utils.import("resource://ubiquity-modules/eventhub.js");
 const FEED_SRC_ANNO = "ubiquity/source";
 const FEED_TYPE_ANNO = "ubiquity/type";
 const FEED_AUTOUPDATE_ANNO = "ubiquity/autoupdate";
+const FEED_BUILTIN_ANNO = "ubiquity/builtin";
 const FEED_SUBSCRIBED_ANNO = "ubiquity/confirmed";
 const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
 const FEED_SRC_URL_ANNO = "ubiquity/commands";
@@ -91,17 +92,31 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                   type: type};
 
   feedInfo.__defineGetter__(
+    "isBuiltIn",
+    function() {
+      return (annSvc.pageHasAnnotation(uri, FEED_BUILTIN_ANNO));
+    }
+  );
+
+  feedInfo.__defineGetter__(
     "isSubscribed",
     function() {
       return (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO));
     }
   );
 
+  let expiration;
+
+  if (feedInfo.isBuiltIn)
+    expiration = annSvc.EXPIRE_SESSION;
+  else
+    expiration = annSvc.EXPIRE_NEVER;
+
   feedInfo.remove = function feedInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {
       annSvc.removePageAnnotation(uri, FEED_SUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO, "true", 0,
-                               annSvc.EXPIRE_NEVER);
+                               expiration);
       hub.notifyListeners("unsubscribe", uri);
     }
   };
@@ -110,7 +125,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO)) {
       annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
-                               annSvc.EXPIRE_NEVER);
+                               expiration);
       hub.notifyListeners("subscribe", uri);
     }
   };
@@ -135,7 +150,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   feedInfo.setCode = function feedInfo_setCode(code) {
     annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0,
-                             annSvc.EXPIRE_NEVER);
+                             expiration);
   };
 
   feedInfo.__defineGetter__(
@@ -194,23 +209,33 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
   // Now add the feed.
   let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
+  let expiration;
+
+  if (info.isBuiltIn)
+    expiration = annSvc.EXPIRE_SESSION;
+  else
+    expiration = annSvc.EXPIRE_NEVER;
 
   if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO))
     annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 
   annSvc.setPageAnnotation(uri, FEED_TYPE_ANNO, info.type, 0,
-                           annSvc.EXPIRE_NEVER);
+                           expiration);
   annSvc.setPageAnnotation(uri, FEED_SRC_URL_ANNO, info.sourceUrl, 0,
-                           annSvc.EXPIRE_NEVER);
+                           expiration);
   annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, info.sourceCode, 0,
-                           annSvc.EXPIRE_NEVER);
+                           expiration);
   annSvc.setPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, info.canAutoUpdate, 0,
-                           annSvc.EXPIRE_NEVER);
+                           expiration);
   annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
-                           annSvc.EXPIRE_NEVER);
+                           expiration);
   if (info.title)
     annSvc.setPageAnnotation(uri, FEED_TITLE_ANNO, info.title, 0,
-                             annSvc.EXPIRE_NEVER);
+                             expiration);
+  if (info.isBuiltIn)
+    annSvc.setPageAnnotation(uri, FEED_BUILTIN_ANNO, "true", 0,
+                             expiration);
+
   this._hub.notifyListeners("subscribe", uri);
 };
 
