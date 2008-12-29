@@ -1,7 +1,6 @@
 Components.utils.import("resource://ubiquity-tests/framework.js");
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 
 const Ci = Components.interfaces;
