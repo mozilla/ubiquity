@@ -158,7 +158,6 @@ let UbiquitySetup = {
       var annSvc = new AnnotationService(annDbConn);
 
       var feedManager = new FeedManager(annSvc);
-      var defaultFeedPlugin = new DefaultFeedPlugin(feedManager);
       var msgService = new CompositeMessageService();
 
       msgService.add(new AlertMessageService());
@@ -167,6 +166,12 @@ let UbiquitySetup = {
       var disabledStorage = new DisabledCmdStorage(
         'extensions.ubiquity.disabledCommands'
       );
+
+      var defaultFeedPlugin = new DefaultFeedPlugin(feedManager,
+                                                    msgService,
+                                                    gIframe.contentWindow,
+                                                    this.languageCode,
+                                                    this.getBaseUri());
 
       var cmdSource = new FeedAggregator(
         feedManager,

@@ -42,7 +42,6 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/parser/parser.js");
 Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity-modules/feedmanager.js");
-Components.utils.import("resource://ubiquity-modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity-modules/cmdsource.js");
 Components.utils.import("resource://ubiquity-modules/localeutils.js");

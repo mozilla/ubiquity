@@ -40,12 +40,21 @@ let EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity-modules/collection.js");
+Components.utils.import("resource://ubiquity-modules/prefcommands.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 const DEFAULT_FEED_TYPE = "commands";
 
-function DefaultFeedPlugin(feedManager) {
+function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
+                           languageCode, baseUri) {
   this.type = DEFAULT_FEED_TYPE;
+
+  let builtinCodeSources = makeBuiltinCodeSources(languageCode, baseUri);
+  let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService,
+                                                    hiddenWindow);
+  let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
 
   this.installDefaults = function DFP_installDefaults(baseUri,
                                                       baseLocalUri,
@@ -63,6 +72,8 @@ function DefaultFeedPlugin(feedManager) {
                                        title: info.title});
       }
     }
+
+    // TODO: Add body sources from BuiltinCodeSources.
   };
 
   this.onSubscribeClick = function DFP_onSubscribeClick(window,
@@ -125,78 +136,274 @@ function DefaultFeedPlugin(feedManager) {
   };
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
-    let feedInfo = {};
-
-    if (LocalUriCodeSource.isValidUri(baseFeedInfo.srcUri))
-      feedInfo.canAutoUpdate = true;
-
-    feedInfo.refresh = function refresh() {
-      // TODO: Implement this.
-      this.commandNames = [];
-      this.nounTypes = [];
-      this.commands = [];
-      this.pageLoadFuncs = [];
-    };
-
-    feedInfo.__proto__ = baseFeedInfo;
-
-    return feedInfo;
+    return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
+                       builtinCodeSources.headers, builtinCodeSources.footers);
   };
-
-  this.codeCollection = new DFPSubscribedCodeCollection(feedManager);
 
   feedManager.registerPlugin(this);
 }
 
-// This class is a collection that yields a code source for every
-// currently-subscribed feed that uses the DFP.
-function DFPSubscribedCodeCollection(fMgr) {
-  this._sources = {};
+function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
+                 headerSources, footerSources) {
+  if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
+    this.canAutoUpdate = true;
 
-  this._updateSourceList = function LRCC_updateSourceList() {
-    let subscribedFeeds = fMgr.getSubscribedFeeds();
-    let newSources = {};
-    for (let i = 0; i < subscribedFeeds.length; i++) {
-      let feedInfo = subscribedFeeds[i];
-      if (feedInfo.type != DEFAULT_FEED_TYPE)
-        continue;
-      let href = feedInfo.srcUri.spec;
-      let source;
-      if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
-        if (feedInfo.canAutoUpdate) {
-          source = new RemoteUriCodeSource(feedInfo);
-        } else
-          source = new StringCodeSource(feedInfo.getCode(),
+  let codeSource;
+  if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
+    if (feedInfo.canAutoUpdate) {
+      codeSource = new RemoteUriCodeSource(feedInfo);
+    } else
+      codeSource = new StringCodeSource(feedInfo.getCode(),
                                         feedInfo.srcUri.spec);
-      } else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
-        source = new LocalUriCodeSource(href);
-      } else {
-        throw new Error("Don't know how to make code source for " + href);
-      }
-
-      newSources[href] = new XhtmlCodeSource(source);
-    }
-    this._sources = newSources;
-  };
-
-  var subscriptionsChanged = true;
-
-  function listener(eventName, data) {
-    subscriptionsChanged = true;
+  } else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
+    codeSource = new LocalUriCodeSource(feedInfo.srcUri.spec);
+  } else {
+    // TODO: Take into account built-in code sources for prefs, etc.
+    throw new Error("Don't know how to make code source for " +
+                    feedInfo.srcUri.spec);
   }
 
-  fMgr.addListener("change", listener);
+  codeSource = new XhtmlCodeSource(codeSource);
 
-  // TODO: When to remove listener?
+  codeSource = new MixedCodeSource(codeSource,
+                                   headerSources,
+                                   footerSources);
 
-  this.__iterator__ = function LRCC_iterator() {
-    if (subscriptionsChanged) {
-      this._updateSourceList();
-      subscriptionsChanged = false;
+  let CMD_PREFIX = "cmd_";
+  let NOUN_PREFIX = "noun_";
+
+  let codeCache = null;
+  let sandbox = null;
+
+  function makeCmdForObj(sandbox, objName) {
+    var cmdName = objName.substr(CMD_PREFIX.length);
+    cmdName = cmdName.replace(/_/g, "-");
+    var cmdFunc = sandbox[objName];
+
+    var cmd = {
+      name : cmdName,
+      icon : cmdFunc.icon,
+      execute : function CS_execute(context, directObject, modifiers) {
+        sandbox.context = context;
+        return cmdFunc(directObject, modifiers);
+      }
+    };
+    // Attach optional metadata to command object if it exists
+    if (cmdFunc.preview)
+      cmd.preview = function CS_preview(context, directObject, modifiers,
+                                        previewBlock) {
+        sandbox.context = context;
+        return cmdFunc.preview(previewBlock, directObject, modifiers);
+      };
+
+    var propsToCopy = [
+      "DOLabel",
+      "DOType",
+      "DODefault",
+      "author",
+      "homepage",
+      "contributors",
+      "license",
+      "description",
+      "help",
+      "synonyms",
+      "previewDelay"
+    ];
+
+    propsToCopy.forEach(function CS_copyProp(prop) {
+      if (cmdFunc[prop])
+        cmd[prop] = cmdFunc[prop];
+      else
+        cmd[prop] = null;
+    });
+
+    if (cmd.previewDelay === null)
+      // Default delay to wait before calling a preview function, in ms.
+      cmd.previewDelay = 250;
+
+    if (cmdFunc.modifiers) {
+      cmd.modifiers = cmdFunc.modifiers;
+    } else {
+      cmd.modifiers = {};
+    }
+    if (cmdFunc.modifierDefaults) {
+      cmd.modifierDefaults = cmdFunc.modifierDefaults;
+    } else {
+      cmd.modifierDefaults = {};
+    }
+    return cmd;
+  };
+
+  this.commandNames = [];
+  this.nounTypes = [];
+  this.commands = [];
+  this.pageLoadFuncs = [];
+
+  this.refresh = function refresh() {
+    let code = codeSource.getCode();
+    if (code != codeCache) {
+      sandbox = sandboxFactory.makeSandbox(codeSource);
+      try {
+        sandboxFactory.evalInSandbox(code,
+                                     sandbox,
+                                     codeSource.codeSections);
+      } catch (e) {
+        messageService.displayMessage(
+          {text:  "An exception occurred while loading code.",
+           exception: e}
+        );
+      }
+
+      for (objName in sandbox) {
+        if (objName.indexOf(CMD_PREFIX) == 0) {
+          var cmd = makeCmdForObj(sandbox, objName);
+          var icon = sandbox[objName].icon;
+
+          this.commands[cmd.name] = cmd;
+          this.commandNames.push({id: objName,
+                                  name: cmd.name,
+                                  icon: icon});
+        }
+        if (objName.indexOf(NOUN_PREFIX) == 0)
+          this.nounTypes.push(sandbox[objName]);
+      }
+
+      if (sandbox.pageLoadFuncs)
+        this.pageLoadFuncs = sandbox.pageLoadFuncs;
+
+      hub.notifyListeners("feed-change", feedInfo.uri);
+    }
+  };
+
+  this.__proto__ = feedInfo;
+}
+
+function makeBuiltinGlobalsMaker(msgService, hiddenWindow) {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+
+  var uris = ["resource://ubiquity-scripts/jquery.js",
+              "resource://ubiquity-scripts/template.js"];
+
+  for (var i = 0; i < uris.length; i++) {
+    hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+                .getService(Components.interfaces.mozIJSSubScriptLoader)
+                .loadSubScript(uris[i]);
+  }
+
+  var globalObjects = {};
+
+  function makeGlobals(codeSource) {
+    var id = codeSource.id;
+
+    if (!(id in globalObjects))
+      globalObjects[id] = {};
+
+    return {
+      XPathResult: hiddenWindow.XPathResult,
+      XMLHttpRequest: hiddenWindow.XMLHttpRequest,
+      jQuery: hiddenWindow.jQuery,
+      Template: hiddenWindow.TrimPath,
+      Application: hiddenWindow.Application,
+      Components: Components,
+      feed: {id: codeSource.id,
+             dom: codeSource.dom},
+      pageLoadFuncs: [],
+      globals: globalObjects[id],
+      displayMessage: function() {
+        msgService.displayMessage.apply(msgService, arguments);
+      }
+    };
+  }
+
+  return makeGlobals;
+}
+
+function MixedCodeSource(bodySource,
+                         headerSources,
+                         footerSources) {
+  let code;
+  let codeSections = [];
+
+  this.id = bodySource.id;
+
+  this.getCode = function getCode() {
+    let headerCode = '';
+    let headerCodeSections = [];
+
+    for (headerCs in headerSources) {
+      code = headerCs.getCode();
+      headerCode += code;
+      headerCodeSections.push({length: code.length,
+                               filename: headerCs.id,
+                               lineNumber: 1});
     }
 
-    for each (source in this._sources) {
-      yield source;
+    let footerCode = '';
+    let footerCodeSections = [];
+    for (footerCs in footerSources) {
+      code = footerCs.getCode();
+      footerCode += code;
+      footerCodeSections.push({length: code.length,
+                               filename: footerCs.id,
+                               lineNumber: 1});
     }
+
+    code = bodySource.getCode();
+    codeSections = codeSections.concat(headerCodeSections);
+    if (bodySource.codeSections)
+      codeSections = codeSections.concat(bodySource.codeSections);
+    else
+      codeSections.push({length: code.length,
+                         filename: bodySource.id,
+                         lineNumber: 1});
+    codeSections = codeSections.concat(footerCodeSections);
+    code = headerCode + code + footerCode;
+
+    this.codeSections = codeSections;
+    this.dom = bodySource.dom;
+
+    return code;
+  };
+}
+
+function makeBuiltinCodeSources(languageCode, baseUri) {
+  var basePartsUri = baseUri + "feed-parts/";
+  var baseScriptsUri = baseUri + "scripts/";
+
+  var headerCodeSources = [
+    new LocalUriCodeSource(basePartsUri + "header/utils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
+  ];
+  var bodyCodeSources = [
+    new LocalUriCodeSource(basePartsUri + "body/onstartup.js"),
+    new XhtmlCodeSource(PrefCommands)
+  ];
+  var footerCodeSources = [
+    new LocalUriCodeSource(basePartsUri + "footer/final.js")
+  ];
+
+  if (languageCode == "jp") {
+    headerCodeSources = headerCodeSources.concat([
+      new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
+    ]);
+    bodyCodeSources = bodyCodeSources.concat([
+      new LocalUriCodeSource(basePartsUri + "body/jp/builtincmds.js")
+    ]);
+  } else if (languageCode == "en") {
+    headerCodeSources = headerCodeSources.concat([
+      new LocalUriCodeSource(baseScriptsUri + "date.js"),
+      new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")
+    ]);
+    bodyCodeSources = bodyCodeSources.concat([
+      new LocalUriCodeSource(basePartsUri + "body/en/builtincmds.js")
+    ]);
+  }
+
+  return {
+    body: new IterableCollection(bodyCodeSources),
+    headers: new IterableCollection(headerCodeSources),
+    footers: new IterableCollection(footerCodeSources)
   };
 }
