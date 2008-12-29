@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["MixedCodeSourceCollection",
+EXPORTED_SYMBOLS = ["MixedCodeSource",
                     "StringCodeSource",
                     "RemoteUriCodeSource",
                     "LocalUriCodeSource",
@@ -46,11 +46,15 @@ Components.utils.import("resource://ubiquity-modules/utils.js");
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-function MixedCodeSourceCollection(headerSources,
-                                   bodySources,
-                                   footerSources) {
-  this.__iterator__ = function MCSC_iterator() {
-    let code;
+function MixedCodeSource(bodySource,
+                         headerSources,
+                         footerSources) {
+  let code;
+  let codeSections = [];
+
+  this.id = bodySource.id;
+
+  this.getCode = function getCode() {
     let headerCode = '';
     let headerCodeSections = [];
 
@@ -72,21 +76,21 @@ function MixedCodeSourceCollection(headerSources,
                                lineNumber: 1});
     }
 
-    for (bodyCs in bodySources) {
-      code = bodyCs.getCode();
-      let codeSections = [];
-      codeSections = codeSections.concat(headerCodeSections);
-      if (bodyCs.codeSections)
-        codeSections = codeSections.concat(bodyCs.codeSections);
-      else
-        codeSections.push({length: code.length,
-                           filename: bodyCs.id,
-                           lineNumber: 1});
-      codeSections = codeSections.concat(footerCodeSections);
-      let code = headerCode + code + footerCode;
-      yield new StringCodeSource(code, bodyCs.id, bodyCs.dom,
-                                 codeSections);
-    }
+    code = bodySource.getCode();
+    codeSections = codeSections.concat(headerCodeSections);
+    if (bodySource.codeSections)
+      codeSections = codeSections.concat(bodySource.codeSections);
+    else
+      codeSections.push({length: code.length,
+                         filename: bodySource.id,
+                         lineNumber: 1});
+    codeSections = codeSections.concat(footerCodeSections);
+    code = headerCode + code + footerCode;
+
+    this.codeSections = codeSections;
+    this.dom = bodySource.dom;
+
+    return code;
   };
 }
 

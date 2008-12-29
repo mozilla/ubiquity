@@ -319,54 +319,6 @@ function makeBuiltinGlobalsMaker(msgService, hiddenWindow) {
   return makeGlobals;
 }
 
-function MixedCodeSource(bodySource,
-                         headerSources,
-                         footerSources) {
-  let code;
-  let codeSections = [];
-
-  this.id = bodySource.id;
-
-  this.getCode = function getCode() {
-    let headerCode = '';
-    let headerCodeSections = [];
-
-    for (headerCs in headerSources) {
-      code = headerCs.getCode();
-      headerCode += code;
-      headerCodeSections.push({length: code.length,
-                               filename: headerCs.id,
-                               lineNumber: 1});
-    }
-
-    let footerCode = '';
-    let footerCodeSections = [];
-    for (footerCs in footerSources) {
-      code = footerCs.getCode();
-      footerCode += code;
-      footerCodeSections.push({length: code.length,
-                               filename: footerCs.id,
-                               lineNumber: 1});
-    }
-
-    code = bodySource.getCode();
-    codeSections = codeSections.concat(headerCodeSections);
-    if (bodySource.codeSections)
-      codeSections = codeSections.concat(bodySource.codeSections);
-    else
-      codeSections.push({length: code.length,
-                         filename: bodySource.id,
-                         lineNumber: 1});
-    codeSections = codeSections.concat(footerCodeSections);
-    code = headerCode + code + footerCode;
-
-    this.codeSections = codeSections;
-    this.dom = bodySource.dom;
-
-    return code;
-  };
-}
-
 function makeBuiltinCodeSources(languageCode, baseUri) {
   var basePartsUri = baseUri + "feed-parts/";
   var baseScriptsUri = baseUri + "scripts/";

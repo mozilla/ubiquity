@@ -122,7 +122,7 @@ function testCompositeCollectionWorks() {
   this.assert(iter.next().id == 'd');
 }
 
-function testMixedCodeSourceCollectionWorks() {
+function testMixedCodeSourceWorks() {
   let a = new StringCodeSource('a', 'a');
   let b = new StringCodeSource('b', 'b');
   let c = new StringCodeSource('c', 'c');
@@ -130,16 +130,13 @@ function testMixedCodeSourceCollectionWorks() {
   let e = new StringCodeSource('e', 'e');
   let f = new StringCodeSource('f', 'f');
 
-  let mixed = new MixedCodeSourceCollection(
-    new IterableCollection([a, b]),
-    new IterableCollection([c, d]),
-    new IterableCollection([e, f])
-    );
+  let headers = new IterableCollection([a, b]);
+  let footers = new IterableCollection([e, f]);
 
-  let codeSources = [];
-  for (cs in mixed) {
-    codeSources.push(cs);
-  }
+  let codeSources = [
+    new MixedCodeSource(c, headers, footers),
+    new MixedCodeSource(d, headers, footers)
+  ];
 
   this.assert(codeSources[0].getCode() == 'abcef');
   this.assert(codeSources[0].id == 'c');
