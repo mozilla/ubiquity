@@ -52,17 +52,25 @@ function testMemoryPersists() {
   }
 
   var url = Utils.url("http://www.foo.com");
-  annSvc.setPageAnnotation(url, "blah", "foo");
-  this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 1);
+  annSvc.setPageAnnotation(url, "perm", "foo");
+  this.assertEquals(annSvc.getPagesWithAnnotation("perm").length, 1);
+
+  annSvc.setPageAnnotation(url, "temp", "foo", 0, annSvc.EXPIRE_SESSION);
+  this.assertEquals(annSvc.getPagesWithAnnotation("temp").length, 1);
 
   reopenDb();
 
-  this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 1);
-  annSvc.removePageAnnotation(url, "blah");
+  this.assertEquals(annSvc.getPagesWithAnnotation("perm").length, 1);
+  annSvc.removePageAnnotation(url, "perm");
+
+  this.assertEquals(annSvc.getPagesWithAnnotation("temp").length, 0);
+  annSvc.setPageAnnotation(url, "temp", "foo", 0, annSvc.EXPIRE_SESSION);
+  annSvc.removePageAnnotation(url, "temp");
+  this.assertEquals(annSvc.getPagesWithAnnotation("temp").length, 0);
 
   reopenDb();
 
-  this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);
+  this.assertEquals(annSvc.getPagesWithAnnotation("perm").length, 0);
 
   connection.close();
   file.remove(false);
