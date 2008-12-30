@@ -38,6 +38,10 @@ EXPORTED_SYMBOLS = ["SandboxFactory"];
 
 Components.utils.import("resource://ubiquity-modules/utils.js");
 
+var ubiquityProtocol = Components.utils.import(
+  "resource://ubiquity-modules/ubiquity_protocol.js"
+);
+
 var defaultTarget = this;
 
 function SandboxFactory(globals, target) {
@@ -107,9 +111,19 @@ SandboxFactory.prototype = {
           ubiquity.flagSystemFilenamePrefix(URI_PREFIX, true);
           gRegistered = true;
         }
-        ubiquity.evalInSandbox(code.slice(currIndex, currIndex +
-                                          section.length),
-                               URI_PREFIX + section.filename,
+
+        let filename;
+
+        if (section.filename.indexOf(URI_PREFIX) == 0)
+          filename = section.filename;
+        else {
+          filename = URI_PREFIX + section.filename;
+          ubiquityProtocol.setPath(section.filename, section.filename);
+        }
+
+        let sourceCode = code.slice(currIndex, currIndex + section.length);
+        ubiquity.evalInSandbox(sourceCode,
+                               filename,
                                section.lineNumber,
                                "1.8",
                                sandbox);

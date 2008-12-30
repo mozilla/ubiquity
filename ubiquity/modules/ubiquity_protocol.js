@@ -11,11 +11,11 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Ubiquity.
+ * The Original Code is Mozilla.
  *
- * The Initial Developer of the Original Code is Mozilla.
- * Portions created by the Initial Developer are Copyright (C) 2007
- * the Initial Developer. All Rights Reserved.
+ * The Initial Developer of the Original Code is IBM Corporation.
+ * Portions created by IBM Corporation are Copyright (C) 2004
+ * IBM Corporation. All Rights Reserved.
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
@@ -34,42 +34,34 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["PrefCommands"];
+let EXPORTED_SYMBOLS = ['newChannel',
+                        'setPath'];
 
-var ubiquityProtocol = Components.utils.import(
-  "resource://ubiquity-modules/ubiquity_protocol.js"
-);
+Components.utils.import("resource://ubiquity-modules/utils.js");
 
-var Application = Components.classes["@mozilla.org/fuel/application;1"]
-                  .getService(Components.interfaces.fuelIApplication);
+let paths = {};
 
-var PrefCommands = {
-  COMMANDS_PREF : "extensions.ubiquity.commands",
+function newChannel(aURI) {
+  var ios = Components.classes["@mozilla.org/network/io-service;1"]
+                      .getService(Components.interfaces.nsIIOService);
 
-  setCode : function(code) {
-    Application.prefs.setValue(
-      this.COMMANDS_PREF,
-      code
-    );
-  },
-
-  getCode : function() {
-    return Application.prefs.getValue(
-      this.COMMANDS_PREF,
-      ""
-    );
-  },
-
-  get id() {
-    return "ubiquity://command-editor-code";
+  var path = aURI.spec.slice(11);
+  if (path in paths) {
+    path = paths[path]();
+    return ios.newChannel(path, null, null);
+  } else {
+    return ios.newChannel("data:text/plain,ERROR:unknown path.",
+                          null, null);
   }
-};
+}
 
-ubiquityProtocol.setPath(
-  "command-editor-code",
-  function makeDataUri() {
-    let uri = ("data:application/x-javascript," +
-               escape(PrefCommands.getCode()));
-    return uri;
-  }
-);
+function setPath(path, funcOrUri) {
+  let func;
+
+  if (typeof(funcOrUri) == "string")
+    func = function() { return funcOrUri; };
+  else
+    func = funcOrUri;
+
+  paths[path] = func;
+}

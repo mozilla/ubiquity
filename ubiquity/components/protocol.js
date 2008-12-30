@@ -83,18 +83,10 @@ Protocol.prototype =
 
   newChannel: function(aURI)
   {
-    /* create dummy nsIURI and nsIChannel instances */
-    var ios = Components.classes[kIOSERVICE_CONTRACTID]
-                        .getService(nsIIOService);
-
-    // Strip off the 'ubiquity://' and use the rest of the URI as a URI.
-
-    // TODO: This probably has serious security implications, but we
-    // can make a better mapping to command feeds later. For the time
-    // being, at least, it appears that e.g. going to
-    // ubiquity://http://evil.com does not give evil.com chrome
-    // privileges, so that's good news.
-    return ios.newChannel(aURI.spec.slice(11), null, null);
+    var ubiquityProtocol = Components.utils.import(
+      "resource://ubiquity-modules/ubiquity_protocol.js"
+    );
+    return ubiquityProtocol.newChannel(aURI);
   }
 };
 

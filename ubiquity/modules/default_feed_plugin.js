@@ -56,6 +56,16 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
                                                     hiddenWindow);
   let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
 
+  function installBuiltins() {
+    feedManager.addSubscribedFeed({url: PrefCommands.id,
+                                   sourceUrl: PrefCommands.id,
+                                   canAutoUpdate: true,
+                                   title: "Command Editor Code",
+                                   isBuiltIn: true});
+  }
+
+  installBuiltins();
+
   this.installDefaults = function DFP_installDefaults(baseUri,
                                                       baseLocalUri,
                                                       infos) {
@@ -72,8 +82,6 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
                                        title: info.title});
       }
     }
-
-    // TODO: Add body sources from BuiltinCodeSources.
   };
 
   this.onSubscribeClick = function DFP_onSubscribeClick(window,
@@ -158,7 +166,6 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   } else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
     codeSource = new LocalUriCodeSource(feedInfo.srcUri.spec);
   } else {
-    // TODO: Take into account built-in code sources for prefs, etc.
     throw new Error("Don't know how to make code source for " +
                     feedInfo.srcUri.spec);
   }
@@ -234,14 +241,22 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
     return cmd;
   };
 
-  this.commandNames = [];
-  this.nounTypes = [];
-  this.commands = [];
-  this.pageLoadFuncs = [];
+  let self = this;
+
+  function reset() {
+    self.commandNames = [];
+    self.nounTypes = [];
+    self.commands = [];
+    self.pageLoadFuncs = [];
+  }
+
+  reset();
 
   this.refresh = function refresh() {
     let code = codeSource.getCode();
     if (code != codeCache) {
+      reset();
+      codeCache = code;
       sandbox = sandboxFactory.makeSandbox(codeSource);
       try {
         sandboxFactory.evalInSandbox(code,

@@ -49,12 +49,11 @@ var Ci = Components.interfaces;
 function MixedCodeSource(bodySource,
                          headerSources,
                          footerSources) {
-  let code;
-  let codeSections = [];
-
   this.id = bodySource.id;
 
   this.getCode = function getCode() {
+    let code;
+    let codeSections = [];
     let headerCode = '';
     let headerCodeSections = [];
 
@@ -166,19 +165,22 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
   uri = Utils.url(uri);
   return (uri.scheme == "file" ||
           uri.scheme == "chrome" ||
-          uri.scheme == "resource");
+          uri.scheme == "resource" ||
+          uri.scheme == "ubiquity");
 };
 
 LocalUriCodeSource.prototype = {
   getCode : function LUCS_getCode() {
-    var file = Utils.url(this.uri)
-               .QueryInterface(Components.interfaces.nsIFileURL).file;
-    var lastModifiedTime = file.lastModifiedTime;
+    var url = Utils.url(this.uri);
+    if (url.scheme != "ubiquity") {
+      var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
+      var lastModifiedTime = file.lastModifiedTime;
 
-    if (this._cached && this._cachedTimestamp == lastModifiedTime)
-      return this._cached;
+      if (this._cached && this._cachedTimestamp == lastModifiedTime)
+        return this._cached;
 
-    this._cachedTimestamp = lastModifiedTime;
+      this._cachedTimestamp = lastModifiedTime;
+    }
 
     var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
               .createInstance(Ci.nsIXMLHttpRequest);
@@ -192,7 +194,8 @@ LocalUriCodeSource.prototype = {
       this._cached = req.responseText;
       return this._cached;
     } else
-      // TODO: Throw an exception or display a message.
+      Components.utils.reportError("Retrieving " + this.uri +
+                                   " returned status " + req.status);
       return "";
   }
 };
