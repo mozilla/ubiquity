@@ -122,23 +122,26 @@ function makeFeedListElement(info, label, clickMaker) {
 
 function onReady() {
   PrefKeys.onLoad();
-
   let feedMgr = UbiquitySetup.createServices().feedManager;
-  let subscribedFeeds = feedMgr.getSubscribedFeeds();
-  for (let i = 0; i < subscribedFeeds.length; i++)
-    $("#command-feeds").append(makeFeedListElement(subscribedFeeds[i],
-                                                   "unsubscribe",
-                                                   makeRemover));
+
+  function addSubscribedFeed(feed) {
+    if (!feed.isBuiltIn)
+      $("#command-feeds").append(makeFeedListElement(feed,
+                                                     "unsubscribe",
+                                                     makeRemover));
+  }
+  feedMgr.getSubscribedFeeds().forEach(addSubscribedFeed);
+
   if (!$("#command-feeds").text())
     $("#command-feeds-div").hide();
 
-  let unsubscribedFeeds = feedMgr.getUnsubscribedFeeds();
-  for (i = 0; i < unsubscribedFeeds.length; i++)
-    $("#command-feed-graveyard").append(
-      makeFeedListElement(unsubscribedFeeds[i],
-                          "resubscribe",
-                          makeUnremover)
-    );
+  function addUnsubscribedFeed(feed) {
+    $("#command-feed-graveyard").append(makeFeedListElement(feed,
+                                                            "resubscribe",
+                                                            makeUnremover));
+  }
+  feedMgr.getUnsubscribedFeeds().forEach(addUnsubscribedFeed);
+
   if (!$("#command-feed-graveyard").text())
     $("#command-feed-graveyard-div").hide();
 
