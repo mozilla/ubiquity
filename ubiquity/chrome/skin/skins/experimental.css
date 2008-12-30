@@ -52,7 +52,7 @@ body#previewbody {
     margin: 0;
     padding: 0;
     color: #BBB;
-    background-color: none;
+    background: transparent;
 }
 
 #ubiquity-preview {
