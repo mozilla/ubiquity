@@ -51,20 +51,19 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
                            languageCode, baseUri) {
   this.type = DEFAULT_FEED_TYPE;
 
-  let builtinCodeSources = makeBuiltinCodeSources(languageCode, baseUri);
+  let builtins = makeBuiltins(languageCode, baseUri);
   let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService,
                                                     hiddenWindow);
   let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
 
-  function installBuiltins() {
-    feedManager.addSubscribedFeed({url: PrefCommands.id,
-                                   sourceUrl: PrefCommands.id,
-                                   canAutoUpdate: true,
-                                   title: "Command Editor Code",
-                                   isBuiltIn: true});
-  }
-
-  installBuiltins();
+  builtins.feeds.forEach(
+    function addFeed(url) {
+      feedManager.addSubscribedFeed({url: url,
+                                     sourceUrl: url,
+                                     canAutoUpdate: true,
+                                     isBuiltIn: true});
+    }
+  );
 
   this.installDefaults = function DFP_installDefaults(baseUri,
                                                       baseLocalUri,
@@ -145,7 +144,7 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
     return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
-                       builtinCodeSources.headers, builtinCodeSources.footers);
+                       builtins.headers, builtins.footers);
   };
 
   feedManager.registerPlugin(this);
@@ -334,7 +333,7 @@ function makeBuiltinGlobalsMaker(msgService, hiddenWindow) {
   return makeGlobals;
 }
 
-function makeBuiltinCodeSources(languageCode, baseUri) {
+function makeBuiltins(languageCode, baseUri) {
   var basePartsUri = baseUri + "feed-parts/";
   var baseScriptsUri = baseUri + "scripts/";
 
@@ -343,9 +342,9 @@ function makeBuiltinCodeSources(languageCode, baseUri) {
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
   ];
-  var bodyCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "body/onstartup.js"),
-    new XhtmlCodeSource(PrefCommands)
+  var feeds = [
+    basePartsUri + "body/onstartup.js",
+    PrefCommands.id
   ];
   var footerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "footer/final.js")
@@ -355,21 +354,21 @@ function makeBuiltinCodeSources(languageCode, baseUri) {
     headerCodeSources = headerCodeSources.concat([
       new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
     ]);
-    bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(basePartsUri + "body/jp/builtincmds.js")
+    feeds = feeds.concat([
+      basePartsUri + "body/jp/builtincmds.js"
     ]);
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
       new LocalUriCodeSource(baseScriptsUri + "date.js"),
       new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")
     ]);
-    bodyCodeSources = bodyCodeSources.concat([
-      new LocalUriCodeSource(basePartsUri + "body/en/builtincmds.js")
+    feeds = feeds.concat([
+      basePartsUri + "body/en/builtincmds.js"
     ]);
   }
 
   return {
-    body: new IterableCollection(bodyCodeSources),
+    feeds: feeds,
     headers: new IterableCollection(headerCodeSources),
     footers: new IterableCollection(footerCodeSources)
   };
