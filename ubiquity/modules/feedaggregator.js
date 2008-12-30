@@ -95,16 +95,16 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   };
 
   self.refresh = function FA_refresh() {
-    commands = {};
-    commandNames = [];
-    nounTypes = [];
-    pageLoadFuncLists = [];
-
     let feeds = feedManager.getSubscribedFeeds();
 
     feeds.forEach(function(feed) { feed.refresh(); });
 
     if (feedsChanged) {
+      commands = {};
+      commandNames = [];
+      nounTypes = [];
+      pageLoadFuncLists = [];
+
       feedsChanged = false;
       feeds.forEach(
         function processFeed(feed) {
