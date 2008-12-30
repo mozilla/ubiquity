@@ -95,7 +95,7 @@ function SkinSvc(window) {
 SkinSvc.prototype = {
   
   SKIN_PREF : "extensions.ubiquity.skin",
-  DEFAULT_SKIN: "chrome://ubiquity/skin/skins/default.css",
+  DEFAULT_SKIN: "chrome://ubiquity/skin/skins/experimental.css",
   
   _init: function _init(){
      this._connection = _connectToDatabase();
