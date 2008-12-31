@@ -279,8 +279,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
           this.nounTypes.push(sandbox[objName]);
       }
 
-      if (sandbox.pageLoadFuncs)
-        this.pageLoadFuncs = sandbox.pageLoadFuncs;
+      this.pageLoadFuncs = sandbox.pageLoadFuncs;
 
       hub.notifyListeners("feed-change", feedInfo.uri);
     }
