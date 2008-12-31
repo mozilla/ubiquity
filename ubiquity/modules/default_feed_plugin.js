@@ -147,6 +147,45 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
   feedManager.registerPlugin(this);
 }
 
+function finishCommand(srcCommand) {
+  var cmd = new Object();
+
+  // Default delay to wait before calling a preview function, in ms.
+  var DEFAULT_PREVIEW_DELAY = 250;
+
+  var propsToInherit = [
+    "DOLabel",
+    "DOType",
+    "DODefault",
+    "author",
+    "homepage",
+    "contributors",
+    "license",
+    "description",
+    "help",
+    "synonyms"
+  ];
+
+  propsToInherit.forEach(
+    function CS_copyProp(prop) {
+      if (!srcCommand[prop])
+        cmd[prop] = null;
+    });
+
+  if (!srcCommand.previewDelay && srcCommand.previewDelay != 0)
+    cmd.previewDelay = DEFAULT_PREVIEW_DELAY;
+
+  if (!srcCommand.modifiers)
+    cmd.modifiers = {};
+
+  if (!srcCommand.modifierDefaults)
+    cmd.modifierDefaults = {};
+
+  cmd.__proto__ = srcCommand;
+
+  return cmd;
+}
+
 function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                  headerSources, footerSources) {
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
@@ -191,7 +230,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
         return cmdFunc(directObject, modifiers);
       }
     };
-    // Attach optional metadata to command object if it exists
+
     if (cmdFunc.preview)
       cmd.preview = function CS_preview(context, directObject, modifiers,
                                         previewBlock) {
@@ -199,42 +238,9 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
         return cmdFunc.preview(previewBlock, directObject, modifiers);
       };
 
-    var propsToCopy = [
-      "DOLabel",
-      "DOType",
-      "DODefault",
-      "author",
-      "homepage",
-      "contributors",
-      "license",
-      "description",
-      "help",
-      "synonyms",
-      "previewDelay"
-    ];
+    cmd.__proto__ = cmdFunc;
 
-    propsToCopy.forEach(function CS_copyProp(prop) {
-      if (cmdFunc[prop])
-        cmd[prop] = cmdFunc[prop];
-      else
-        cmd[prop] = null;
-    });
-
-    if (cmd.previewDelay === null)
-      // Default delay to wait before calling a preview function, in ms.
-      cmd.previewDelay = 250;
-
-    if (cmdFunc.modifiers) {
-      cmd.modifiers = cmdFunc.modifiers;
-    } else {
-      cmd.modifiers = {};
-    }
-    if (cmdFunc.modifierDefaults) {
-      cmd.modifierDefaults = cmdFunc.modifierDefaults;
-    } else {
-      cmd.modifierDefaults = {};
-    }
-    return cmd;
+    return finishCommand(cmd);
   };
 
   let self = this;
