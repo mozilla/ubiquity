@@ -177,7 +177,7 @@ SkinSvc.prototype = {
     cssPath = cssPath.spec;
     if (cssPath == "chrome://ubiquity/skin/skins/experimental.css" &&
         xulr.OS == "Darwin") {
-      let hackCss = "chrome://ubiquity/skin/skins/experimental-Darwin.css";
+      let hackCss = "chrome://ubiquity/skin/skins/experimental-466hack.css";
       hackCss = Utils.url(hackCss);
       if (action == "register")
         sss.loadAndRegisterSheet(hackCss, sss.USER_SHEET);
