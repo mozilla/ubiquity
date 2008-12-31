@@ -83,8 +83,7 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
     }
   };
 
-  this.onSubscribeClick = function DFP_onSubscribeClick(window,
-                                                        targetDoc,
+  this.onSubscribeClick = function DFP_onSubscribeClick(targetDoc,
                                                         commandsUrl,
                                                         mimetype) {
     // Clicking on "subscribe" takes them to the warning page:
@@ -131,11 +130,9 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
       }
 
       if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
-        // TODO: Use a standard XHR instead of JQuery and we can decouple
-        // this function from the window object.
-        window.jQuery.ajax({url: commandsUrl,
-                            dataType: "text",
-                            success: onSuccess});
+        hiddenWindow.jQuery.ajax({url: commandsUrl,
+                                  dataType: "text",
+                                  success: onSuccess});
       } else
         onSuccess("");
     } else

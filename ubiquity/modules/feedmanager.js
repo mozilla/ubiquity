@@ -281,7 +281,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
         box.removeNotification(oldNotification);
 
       function onSubscribeClick(notification, button) {
-        plugin.onSubscribeClick(window, targetDoc, commandsUrl, mimetype);
+        plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
       }
 
       var buttons = [
