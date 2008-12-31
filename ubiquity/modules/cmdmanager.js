@@ -54,7 +54,7 @@ function CommandManager(cmdSource, msgService, parser) {
     parser.setNounList(cmdSource.getAllNounTypes());
   }
 
-  cmdSource.addListener("commands-reloaded", onCommandsReloaded);
+  cmdSource.addListener("feeds-reloaded", onCommandsReloaded);
   onCommandsReloaded();
 
   // TODO: Need to add a finalize() method to this class, or else
@@ -152,7 +152,7 @@ CommandManager.prototype = {
     }
 
     this._renderSuggestions(doc.getElementById("suggestions"));
-    
+
     return this._renderPreview(context, previewBlock);
   },
 

@@ -116,8 +116,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
             pageLoadFuncLists.push(feed.pageLoadFuncs);
         }
       );
-      // TODO: This should really be renamed to 'feeds-reloaded'...
-      hub.notifyListeners("commands-reloaded", null);
+      hub.notifyListeners("feeds-reloaded", null);
     }
   };
 
