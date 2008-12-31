@@ -332,6 +332,7 @@ function makeBuiltinGlobalsMaker(msgService, hiddenWindow) {
 
 function makeBuiltins(languageCode, baseUri) {
   var basePartsUri = baseUri + "feed-parts/";
+  var baseFeedsUri = baseUri + "builtin-feeds/";
   var baseScriptsUri = baseUri + "scripts/";
 
   var headerCodeSources = [
@@ -340,7 +341,7 @@ function makeBuiltins(languageCode, baseUri) {
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
   ];
   var feeds = [
-    basePartsUri + "body/onstartup.js",
+    baseFeedsUri + "onstartup.js",
     PrefCommands.id
   ];
   var footerCodeSources = [
@@ -352,7 +353,7 @@ function makeBuiltins(languageCode, baseUri) {
       new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
     ]);
     feeds = feeds.concat([
-      basePartsUri + "body/jp/builtincmds.js"
+      baseFeedsUri + "jp/builtincmds.js"
     ]);
   } else if (languageCode == "en") {
     headerCodeSources = headerCodeSources.concat([
@@ -360,7 +361,7 @@ function makeBuiltins(languageCode, baseUri) {
       new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")
     ]);
     feeds = feeds.concat([
-      basePartsUri + "body/en/builtincmds.js"
+      baseFeedsUri + "en/builtincmds.js"
     ]);
   }
 
