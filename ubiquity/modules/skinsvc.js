@@ -169,15 +169,23 @@ SkinSvc.prototype = {
     Application.prefs.setValue(this.SKIN_PREF, skinPath);
   },
 
-  _hackCssForBug466: function hackCssForBug466(cssPath) {
+  _hackCssForBug466: function hackCssForBug466(cssPath, sss,
+                                               action) {
     var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
                          .getService(Components.interfaces.nsIXULRuntime);
 
     cssPath = cssPath.spec;
     if (cssPath == "chrome://ubiquity/skin/skins/experimental.css" &&
-        xulr.OS == "Darwin")
-      cssPath = "chrome://ubiquity/skin/skins/experimental-Darwin.css";
-    return Utils.url(cssPath);
+        xulr.OS == "Darwin") {
+      let hackCss = "chrome://ubiquity/skin/skins/experimental-Darwin.css";
+      hackCss = Utils.url(hackCss);
+      if (action == "register")
+        sss.loadAndRegisterSheet(hackCss, sss.USER_SHEET);
+      else {
+        if(sss.sheetRegistered(hackCss, sss.USER_SHEET))
+          sss.unregisterSheet(hackCss, sss.USER_SHEET);
+      }
+    }
   },
 
   //Unregister any current skins
@@ -189,17 +197,17 @@ SkinSvc.prototype = {
     try {
       // Remove the previous skin CSS
       var oldCss = Utils.url(this.getCurrentSkin());
-      oldCss = this._hackCssForBug466(oldCss);
       if(sss.sheetRegistered(oldCss, sss.USER_SHEET))
         sss.unregisterSheet(oldCss, sss.USER_SHEET);
+      this._hackCssForBug466(oldCss, sss, "unregister");
     } catch(e) {
       // do nothing
     }
 
     //Load the new skin CSS
     var newCss = Utils.url(newSkinPath);
-    newCss = this._hackCssForBug466(newCss);
     sss.loadAndRegisterSheet(newCss, sss.USER_SHEET);
+    this._hackCssForBug466(oldCss, sss, "register");
   },
 
   //Change the SKIN_PREF to the new skin
