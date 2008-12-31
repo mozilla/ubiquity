@@ -1,7 +1,0 @@
-#cmd-panel {
-  padding: 0px;
-  margin: 0px;
-  background: white; /* Should be transparent. It's not due to rendering bugs on the Mac. */
-  width: 800px;
-  opacity: .9;
-}
