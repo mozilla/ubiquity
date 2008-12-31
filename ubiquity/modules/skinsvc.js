@@ -207,7 +207,7 @@ SkinSvc.prototype = {
     //Load the new skin CSS
     var newCss = Utils.url(newSkinPath);
     sss.loadAndRegisterSheet(newCss, sss.USER_SHEET);
-    this._hackCssForBug466(oldCss, sss, "register");
+    this._hackCssForBug466(newCss, sss, "register");
   },
 
   //Change the SKIN_PREF to the new skin
