@@ -172,7 +172,8 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 LocalUriCodeSource.prototype = {
   getCode : function LUCS_getCode() {
     var url = Utils.url(this.uri);
-    if (url.scheme != "ubiquity") {
+    if (url.scheme != "ubiquity" &&
+        url.scheme != "chrome") {
       var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
       var lastModifiedTime = file.lastModifiedTime;
 

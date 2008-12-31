@@ -44,7 +44,8 @@ var ubiquityProtocol = Components.utils.import(
 
 var defaultTarget = this;
 
-function SandboxFactory(globals, target) {
+function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
+  this._ignoreUbiquityProtocol = ignoreUbiquityProtocol;
   if (typeof(target) == "undefined")
     target = defaultTarget;
   this._target = target;
@@ -114,7 +115,8 @@ SandboxFactory.prototype = {
 
         let filename;
 
-        if (section.filename.indexOf(URI_PREFIX) == 0)
+        if (section.filename.indexOf(URI_PREFIX) == 0 ||
+            this._ignoreUbiquityProtocol)
           filename = section.filename;
         else {
           filename = URI_PREFIX + section.filename;

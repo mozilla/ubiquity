@@ -43,6 +43,7 @@ Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/collection.js");
 Components.utils.import("resource://ubiquity-modules/prefcommands.js");
+Components.utils.import("resource://ubiquity-modules/feed_plugin_utils.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 const DEFAULT_FEED_TYPE = "commands";
@@ -145,45 +146,6 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
   };
 
   feedManager.registerPlugin(this);
-}
-
-function finishCommand(srcCommand) {
-  var cmd = new Object();
-
-  // Default delay to wait before calling a preview function, in ms.
-  var DEFAULT_PREVIEW_DELAY = 250;
-
-  var propsToInherit = [
-    "DOLabel",
-    "DOType",
-    "DODefault",
-    "author",
-    "homepage",
-    "contributors",
-    "license",
-    "description",
-    "help",
-    "synonyms"
-  ];
-
-  propsToInherit.forEach(
-    function CS_copyProp(prop) {
-      if (!srcCommand[prop])
-        cmd[prop] = null;
-    });
-
-  if (!srcCommand.previewDelay && srcCommand.previewDelay != 0)
-    cmd.previewDelay = DEFAULT_PREVIEW_DELAY;
-
-  if (!srcCommand.modifiers)
-    cmd.modifiers = {};
-
-  if (!srcCommand.modifierDefaults)
-    cmd.modifierDefaults = {};
-
-  cmd.__proto__ = srcCommand;
-
-  return cmd;
 }
 
 function DFPFeed(feedInfo, hub, messageService, sandboxFactory,

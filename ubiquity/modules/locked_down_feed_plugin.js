@@ -36,6 +36,10 @@
 
 let EXPORTED_SYMBOLS = ["LockedDownFeedPlugin"];
 
+Components.utils.import("resource://ubiquity-modules/codesource.js");
+Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity-modules/feed_plugin_utils.js");
+
 function LockedDownFeedPlugin(feedManager, messageService) {
   this.type = "locked-down-commands";
 
@@ -59,16 +63,95 @@ function LockedDownFeedPlugin(feedManager, messageService) {
 
 function LDFPFeed(baseFeedInfo, eventHub, messageService) {
   let self = this;
-  self.pageLoadFuncs = [];
 
+  // Private instance variables.
+  let codeSource;
+  if (RemoteUriCodeSource.isValidUri(baseFeedInfo.srcUri))
+    codeSource = new RemoteUriCodeSource(baseFeedInfo);
+  else
+    codeSource = new LocalUriCodeSource(baseFeedInfo.srcUri.spec);
+  let codeCache;
+  let sandboxFactory = new SandboxFactory({}, "http://www.mozilla.com",
+                                          true);
+
+  // Private methods.
   function reset() {
     self.commandNames = [];
-    self.commands = [];
+    self.commands = {};
   }
 
+  // Public attributes.
+  self.pageLoadFuncs = [];
+  self.nounTypes = [];
+
+  // Public methods.
+  self.refresh = function refresh() {
+    let code = codeSource.getCode();
+    if (code != codeCache) {
+      reset();
+      codeCache = code;
+
+      let sandbox = sandboxFactory.makeSandbox(codeSource);
+
+      function displayMessage(text) {
+        if (typeof(text) == "string")
+          messageService.displayMessage(text);
+      }
+      sandbox.importFunction(displayMessage);
+
+      function _verb_add(info) {
+        info = new XPCSafeJSObjectWrapper(info);
+        let cmd = {
+          execute: function execute(context, directObject, modifiers) {
+            info.execute();
+          },
+          DOLabel: null,
+          DOType: null,
+          DODefault: null,
+          synonyms: null,
+          modifiers: {},
+          modifierDefaults: {}
+        };
+        if (info.preview) {
+          cmd.preview = function preview(context, directObject, modifiers,
+                                         previewBlock) {
+            let preview = info.preview;
+            if (typeof(preview) == "string")
+              previewBlock.textContent = preview;
+          };
+        }
+        cmd.__proto__ = info;
+        cmd = finishCommand(cmd);
+
+        self.commands[cmd.name] = cmd;
+        self.commandNames.push({id: cmd.name,
+                                name: cmd.name,
+                                icon: cmd.icon});
+      }
+      sandbox.importFunction(_verb_add);
+
+      let preamble = "Verbs = { add: _verb_add };";
+      let preambleFilename = ("data:application/x-javascript," +
+                              escape(preamble));
+      sandboxFactory.evalInSandbox(preamble,
+                                   sandbox,
+                                   [{length: preamble.length,
+                                     filename: preambleFilename,
+                                     lineNumber:  1}]);
+
+      sandboxFactory.evalInSandbox(code,
+                                   sandbox,
+                                   [{length: code.length,
+                                     filename: codeSource.id,
+                                     lineNumber: 1}]);
+
+      eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
+    }
+  };
+
+  // Initialization.
   reset();
 
-  self.refresh = function refresh() {};
-
+  // Set our superclass.
   self.__proto__ = baseFeedInfo;
 }
