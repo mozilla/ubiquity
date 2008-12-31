@@ -106,6 +106,7 @@ if __name__ == "__main__":
         print
         print "'command' can be one of the following:"
         print
+        print "    try - run Firefox w/ new profile and extension installed"
         print "    unittest - run unit tests"
         print "    test - run system and unit tests"
         print "    install - install to the given profile"
@@ -123,6 +124,19 @@ if __name__ == "__main__":
 
     cmd = args[0]
 
+    if cmd == "try":
+        import systemtests
+        import jsbridge
+        print ("Starting Firefox with a new profile and "
+               "the extension installed...")
+        moz = jsbridge.start_from_settings(systemtests.settings)
+        print "Firefox started, quit it or press CTRL-C to exit."
+        try:
+            moz.wait()
+        except KeyboardInterrupt:
+            moz.stop()
+        print "Farewell."
+        sys.exit(0)
     if cmd == "test":
         this_script = sys.argv[0]
         this_dir = os.path.dirname(this_script)

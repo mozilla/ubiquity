@@ -2,17 +2,29 @@ import os
 import sys
 import threading
 
-import jsbridge
+try:
+    import jsbridge
+except ImportError:
+    print ("I couldn't import jsbridge. Please install jsbridge, "
+           "either by running 'easy_install jsbridge' or going "
+           "to http://code.google.com/p/jsbridge/, and try "
+           "this again.")
+    sys.exit(1)
+
 import jsbridge.events
 import jsbridge.network
 
 # Maximum time to wait for system tests to finish, in seconds.
 MAX_TIMEOUT = 25
 
-if __name__ == '__main__':
-    module_path = os.path.abspath(os.path.dirname(__file__))
-    extension_path = os.path.join(module_path, 'ubiquity')
+module_path = os.path.abspath(os.path.dirname(__file__))
+extension_path = os.path.join(module_path, 'ubiquity')
 
+settings = jsbridge.get_settings()
+settings['JSBRIDGE_START_FIREFOX'] = True
+settings['MOZILLA_PLUGINS'].append(extension_path)
+
+if __name__ == '__main__':
     result = {'is_successful' : False}
     is_done = threading.Event()
 
@@ -23,9 +35,6 @@ if __name__ == '__main__':
 
     jsbridge.events.add_global_listener(listener)
 
-    settings = jsbridge.get_settings()
-    settings['JSBRIDGE_START_FIREFOX'] = True
-    settings['MOZILLA_PLUGINS'].append(extension_path)
     moz = jsbridge.start_from_settings(settings)
 
     uri = 'resource://ubiquity-tests/systemtests.js';
