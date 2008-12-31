@@ -71,9 +71,9 @@ function onSubmit() {
   if (code) {
     var feedMgr = UbiquitySetup.createServices().feedManager;
     feedMgr.addSubscribedFeed({url: gCommandFeedInfo.url,
-                                      sourceUrl: gCommandFeedInfo.sourceUrl,
-                                      sourceCode: code,
-                                      canAutoUpdate: canAutoUpdate});
+                               sourceUrl: gCommandFeedInfo.sourceUrl,
+                               sourceCode: code,
+                               canAutoUpdate: canAutoUpdate});
     showConfirmation();
   }
 }
