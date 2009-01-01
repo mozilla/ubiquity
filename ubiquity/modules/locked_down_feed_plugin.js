@@ -118,7 +118,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       }
       sandbox.importFunction(setSelection);
 
-      function _verb_add(info) {
+      function defineVerb(info) {
         info = new XPCSafeJSObjectWrapper(info);
         let cmd = {
           execute: function execute(context, directObject, modifiers) {
@@ -149,16 +149,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                                 name: cmd.name,
                                 icon: cmd.icon});
       }
-      sandbox.importFunction(_verb_add);
-
-      let preamble = "Verbs = { add: _verb_add };";
-      let preambleFilename = ("data:application/x-javascript," +
-                              escape(preamble));
-      sandboxFactory.evalInSandbox(preamble,
-                                   sandbox,
-                                   [{length: preamble.length,
-                                     filename: preambleFilename,
-                                     lineNumber:  1}]);
+      sandbox.importFunction(defineVerb);
 
       sandboxFactory.evalInSandbox(code,
                                    sandbox,

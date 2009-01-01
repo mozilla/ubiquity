@@ -1,10 +1,10 @@
-Verbs.add(
+defineVerb(
   {name: "locked-down-test",
    preview: "Test command that prints a message.",
    execute: function execute() { displayMessage("Hi there."); }}
 );
 
-Verbs.add(
+defineVerb(
   {name: "locked-down-evil",
    preview: "Command that tries to do something evil but fails.",
    execute: function execute() {
@@ -13,7 +13,7 @@ Verbs.add(
    }}
 );
 
-Verbs.add(
+defineVerb(
   {name: "locked-down-xhr",
    preview: "Command that tries to make an XMLHTTPRequest but fails.",
    execute: function execute() {
@@ -22,7 +22,7 @@ Verbs.add(
    }}
 );
 
-Verbs.add(
+defineVerb(
   {name: "locked-down-set-selection",
    preview: "Command that tries to set the current selection.",
    execute: function execute() {
