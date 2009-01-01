@@ -135,13 +135,14 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
             currentContext = null;
           }
         };
-        if (info.preview) {
+        let previewHtml = info.preview;
+        if (typeof(previewHtml) == "string") {
+          previewHtml = htmlSanitize(previewHtml);
           cmd.preview = function preview(context, directObject, modifiers,
                                          previewBlock) {
-            let preview = info.preview;
-            if (typeof(preview) == "string")
-              previewBlock.innerHTML = htmlSanitize(preview);
+            previewBlock.innerHTML = previewHtml;
           };
+          cmd.description = previewHtml;
         }
         cmd = finishCommand(cmd);
 

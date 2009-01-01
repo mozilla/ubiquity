@@ -35,7 +35,7 @@ defineVerb(
 
 defineVerb(
   {name: "locked-down-embolden",
-   preview: "Tries make the current selection boldfaced.",
+   preview: "Tries to make the current selection boldfaced.",
    execute: function execute() {
      setSelection("<b>" + getSelection() + "</b>");
    }}
