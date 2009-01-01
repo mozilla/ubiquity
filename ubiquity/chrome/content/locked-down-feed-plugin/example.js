@@ -1,5 +1,5 @@
 defineVerb(
-  {name: "locked-down-test",
+  {name: "locked-down-display-message",
    preview: "Test command that prints a message.",
    execute: function execute() { displayMessage("Hi there."); }}
 );
