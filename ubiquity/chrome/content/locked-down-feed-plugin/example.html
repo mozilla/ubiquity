@@ -9,5 +9,28 @@
 <body>
 This is an example Locked-Down Feed Plugin feed.  You can view the
 source code <a href="example.js">here</a>.
+
+<p>Commands in this feed:</p>
+<ul id="command-list"></ul>
 </body>
+<script>
+function init() {
+  var list = document.getElementById("command-list");
+  var html = "";
+  function listVerb(verb) {
+    html += "<li><b>" + verb.name + "</b>: " + verb.preview + "</li>";
+  }
+  verbs.forEach(listVerb);
+  list.innerHTML = html;
+}
+
+window.addEventListener("load", init, false);
+
+verbs = [];
+
+function defineVerb(verb) {
+  verbs.push(verb);
+}
+</script>
+<script src="example.js"></script>
 </html>

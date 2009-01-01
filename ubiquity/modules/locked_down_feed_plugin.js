@@ -146,7 +146,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                                          previewBlock) {
             let preview = info.preview;
             if (typeof(preview) == "string")
-              previewBlock.textContent = preview;
+              previewBlock.innerHTML = htmlSanitize(preview);
           };
         }
         cmd.__proto__ = info;
