@@ -174,8 +174,9 @@ let UbiquitySetup = {
                                                     this.languageCode,
                                                     this.getBaseUri());
 
-      var lockedDownFeedPlugin = new LockedDownFeedPlugin(feedManager,
-                                                          msgService);
+      var ldfPlugin = new LockedDownFeedPlugin(feedManager,
+                                               msgService,
+                                               gIframe.contentWindow);
 
       var cmdSource = new FeedAggregator(
         feedManager,

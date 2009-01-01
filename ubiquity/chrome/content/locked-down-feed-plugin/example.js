@@ -21,3 +21,11 @@ Verbs.add(
      displayMessage("You should never see this.");
    }}
 );
+
+Verbs.add(
+  {name: "locked-down-set-selection",
+   preview: "Command that tries to set the current selection.",
+   execute: function execute() {
+     setSelection("<b>o hai</b>");
+   }}
+);

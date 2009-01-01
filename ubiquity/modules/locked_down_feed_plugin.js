@@ -39,8 +39,9 @@ let EXPORTED_SYMBOLS = ["LockedDownFeedPlugin"];
 Components.utils.import("resource://ubiquity-modules/codesource.js");
 Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity-modules/feed_plugin_utils.js");
+Components.utils.import("resource://ubiquity-modules/contextutils.js");
 
-function LockedDownFeedPlugin(feedManager, messageService) {
+function LockedDownFeedPlugin(feedManager, messageService, hiddenWindow) {
   this.type = "locked-down-commands";
 
   this.onSubscribeClick = function LDFP_onSubscribeClick(targetDoc,
@@ -55,13 +56,19 @@ function LockedDownFeedPlugin(feedManager, messageService) {
   };
 
   this.makeFeed = function LDFP_makeFeed(baseFeedInfo, eventHub) {
-    return new LDFPFeed(baseFeedInfo, eventHub, messageService);
+    return new LDFPFeed(baseFeedInfo, eventHub, messageService,
+                        hiddenWindow.html_sanitize);
   };
+
+  let sanitizerUrl = "resource://ubiquity-scripts/html-sanitizer-minified.js";
+  hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+              .getService(Components.interfaces.mozIJSSubScriptLoader)
+              .loadSubScript(sanitizerUrl);
 
   feedManager.registerPlugin(this);
 }
 
-function LDFPFeed(baseFeedInfo, eventHub, messageService) {
+function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
   let self = this;
 
   // Private instance variables.
@@ -73,6 +80,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService) {
   let codeCache;
   let sandboxFactory = new SandboxFactory({}, "http://www.mozilla.com",
                                           true);
+  let currentContext = null;
 
   // Private methods.
   function reset() {
@@ -99,11 +107,24 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService) {
       }
       sandbox.importFunction(displayMessage);
 
+      function setSelection(content, options) {
+        if (typeof(options) != "undefined")
+          options = new XPCSafeJSObjectWrapper(options);
+        if (typeof(content) != "string" || !currentContext)
+          return;
+
+        content = htmlSanitize(content);
+        ContextUtils.setSelection(currentContext, content, options);
+      }
+      sandbox.importFunction(setSelection);
+
       function _verb_add(info) {
         info = new XPCSafeJSObjectWrapper(info);
         let cmd = {
           execute: function execute(context, directObject, modifiers) {
+            currentContext = context;
             info.execute();
+            currentContext = null;
           },
           DOLabel: null,
           DOType: null,

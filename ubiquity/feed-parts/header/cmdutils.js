@@ -75,65 +75,13 @@ CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
 }
 
 CmdUtils.setSelection = function setSelection(content, options) {
-  /* content can be text or html.
-   * options is a dictionary; if it has a "text" property then
-   * that value will be used in place of the html if we're in
-   * a plain-text only editable field.
-   */
-  var doc = context.focusedWindow.document;
-  var focused = context.focusedElement;
+  var ctu = {};
+  Components.utils.import("resource://ubiquity-modules/contextutils.js",
+                          ctu);
 
-  if (doc.designMode == "on") {
-    doc.execCommand("insertHTML", false, content);
-  }
+  var context = CmdUtils.__globalObject.context;
 
-  else if( focused ) {
-    var plainText = null;
-
-    if (options && options.text){
-      plainText = options.text;
-    }
-
-    if (plainText == null) {
-      var el = doc.createElement( "html" );
-      el.innerHTML = "<div>" + content + "</div>";
-      plainText = el.textContent;
-    }
-
-    if( content != plainText){
-      focused.value = content;
-      return;
-    }
-
-    var selectionEnd = focused.selectionStart + plainText.length;
-    var currentValue = focused.value;
-
-    var beforeText = currentValue.substring(0, focused.selectionStart);
-    var afterText = currentValue.substring(focused.selectionEnd, currentValue.length);
-
-    var scrollTop = focused.scrollTop;
-    var scrollLeft = focused.scrollLeft;
-
-    focused.value = beforeText + plainText + afterText;
-    focused.focus();
-
-    //put the cursor after the inserted text
-    focused.setSelectionRange(selectionEnd, selectionEnd);
-
-    focused.scrollTop = scrollTop;
-    focused.scrollLeft = scrollLeft;
-  }
-
-  else {
-    var sel = context.focusedWindow.getSelection();
-
-    if (sel.rangeCount >= 1) {
-        var range = sel.getRangeAt(0);
-        var newNode = doc.createElement("span");
-        range.surroundContents(newNode);
-        jQuery(newNode).html( content );
-    }
-  }
+  ctu.ContextUtils.setSelection(context, content, options);
 };
 
 //This gets the outer document of the current tab in a secure way
@@ -650,13 +598,13 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
                            .get("TmpD", Components.interfaces.nsIFile);
       file.append("preview.tmp");
       file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
-      
+
       // file is nsIFile, data is a string
       var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
                                .createInstance(Components.interfaces.nsIFileOutputStream);
 
       // use 0x02 | 0x10 to open file for appending.
-      foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
+      foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
       // write, create, truncate
       // In a c file operation, we have no need to set file mode with or operation,
       // directly using "r" or "w" usually.
@@ -667,7 +615,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
   } else {
     filePath = filePathOrOptions;
   }
-  
+
   var previewWindow = null;
   var xulIframe = null;
   var query = "";
@@ -681,10 +629,10 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
     // be doing something with getting a query in here. It's
     // command specifc. This function shouldn't be? -- Aza
     if( !directObj ) directObj = {text:"", html:""};
-    
+
     // This is meant to be a global, so that it can affect showPreview().
     query = directObj;
-    
+
     if (previewWindow) {
       showPreview();
     } else if (xulIframe) {
@@ -714,7 +662,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
       function onPreviewLoaded() {
         // TODO: Security risk -- this is very insecure!
         previewWindow = browser.contentWindow;
-        
+
         previewWindow.Ubiquity.context = context;
 
         previewWindow.Ubiquity.resizePreview = function(height) {
