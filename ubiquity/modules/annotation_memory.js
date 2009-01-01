@@ -139,9 +139,13 @@ function AnnotationService(connection) {
     return false;
   };
 
-  self.getPageAnnotation = function(uri, name) {
-    if (!self.pageHasAnnotation(uri, name))
-      throw Error('No such annotation');
+  self.getPageAnnotation = function(uri, name, defaultValue) {
+    if (!self.pageHasAnnotation(uri, name)) {
+      if (typeof(defaultValue) == 'undefined')
+        throw Error('No such annotation');
+      else
+        return defaultValue;
+    }
     return ann[uri.spec][name];
   };
 

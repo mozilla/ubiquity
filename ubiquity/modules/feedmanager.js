@@ -85,7 +85,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
     title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO);
 
-  let type = annSvc.getPageAnnotation(uri, FEED_TYPE_ANNO);
+  let type = annSvc.getPageAnnotation(uri, FEED_TYPE_ANNO, DEFAULT_FEED_TYPE);
 
   let feedInfo = {title: title,
                   uri: uri,
