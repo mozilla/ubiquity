@@ -5,8 +5,8 @@ defineVerb(
 );
 
 defineVerb(
-  {name: "locked-down-evil",
-   preview: "Command that tries to do something evil but fails.",
+  {name: "locked-down-evil-components",
+   preview: "Command that tries to access Components.classes but fails.",
    execute: function execute() {
      let Cc = Components.classes;
      displayMessage("You should never see this.");
@@ -14,11 +14,21 @@ defineVerb(
 );
 
 defineVerb(
-  {name: "locked-down-xhr",
+  {name: "locked-down-evil-xhr",
    preview: "Command that tries to make an XMLHTTPRequest but fails.",
    execute: function execute() {
      var req = new XMLHttpRequest();
      displayMessage("You should never see this.");
+   }}
+);
+
+defineVerb(
+  {name: "locked-down-evil-xss",
+   preview: ("Command that tries to make a cross-site scripting attack " +
+             "but fails."),
+   execute: function execute() {
+     setSelection('<div onclick="alert(\'You should never see this.\')">' +
+                  'Click me and nothing should happen.</div>');
    }}
 );
 
