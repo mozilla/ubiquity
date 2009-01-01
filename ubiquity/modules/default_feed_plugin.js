@@ -208,7 +208,6 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   let self = this;
 
   function reset() {
-    self.commandNames = [];
     self.nounTypes = [];
     self.commands = [];
     self.pageLoadFuncs = [];
@@ -236,12 +235,8 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       for (objName in sandbox) {
         if (objName.indexOf(CMD_PREFIX) == 0) {
           var cmd = makeCmdForObj(sandbox, objName);
-          var icon = sandbox[objName].icon;
 
           this.commands[cmd.name] = cmd;
-          this.commandNames.push({id: objName,
-                                  name: cmd.name,
-                                  icon: icon});
         }
         if (objName.indexOf(NOUN_PREFIX) == 0)
           this.nounTypes.push(sandbox[objName]);

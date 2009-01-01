@@ -108,10 +108,13 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
       feedsChanged = false;
       feeds.forEach(
         function processFeed(feed) {
-          commandNames = commandNames.concat(feed.commandNames);
           nounTypes = nounTypes.concat(feed.nounTypes);
-          for (name in feed.commands)
+          for (name in feed.commands) {
             commands[name] = makeCmdWithDisabler(feed.commands[name]);
+            commandNames.push({id: name,
+                               name: name,
+                               icon: commands[name].icon});
+          }
           if (feed.pageLoadFuncs.length > 0)
             pageLoadFuncLists.push(feed.pageLoadFuncs);
         }

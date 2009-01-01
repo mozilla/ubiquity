@@ -84,7 +84,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
   // Private methods.
   function reset() {
-    self.commandNames = [];
     self.commands = {};
   }
 
@@ -147,9 +146,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         cmd = finishCommand(cmd);
 
         self.commands[cmd.name] = cmd;
-        self.commandNames.push({id: cmd.name,
-                                name: cmd.name,
-                                icon: cmd.icon});
       }
       sandbox.importFunction(defineVerb);
 
