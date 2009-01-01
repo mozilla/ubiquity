@@ -129,17 +129,12 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       function defineVerb(info) {
         info = new XPCSafeJSObjectWrapper(info);
         let cmd = {
+          name: info.name,
           execute: function execute(context, directObject, modifiers) {
             currentContext = context;
             info.execute();
             currentContext = null;
-          },
-          DOLabel: null,
-          DOType: null,
-          DODefault: null,
-          synonyms: null,
-          modifiers: {},
-          modifierDefaults: {}
+          }
         };
         if (info.preview) {
           cmd.preview = function preview(context, directObject, modifiers,
@@ -149,7 +144,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
               previewBlock.innerHTML = htmlSanitize(preview);
           };
         }
-        cmd.__proto__ = info;
         cmd = finishCommand(cmd);
 
         self.commands[cmd.name] = cmd;
