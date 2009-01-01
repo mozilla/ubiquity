@@ -107,6 +107,14 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       }
       sandbox.importFunction(displayMessage);
 
+      function getSelection() {
+        if (!currentContext)
+          return "";
+
+        return ContextUtils.getSelection(currentContext);
+      }
+      sandbox.importFunction(getSelection);
+
       function setSelection(content, options) {
         if (typeof(options) != "undefined")
           options = new XPCSafeJSObjectWrapper(options);

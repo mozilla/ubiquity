@@ -23,9 +23,9 @@ defineVerb(
 );
 
 defineVerb(
-  {name: "locked-down-set-selection",
-   preview: "Command that tries to set the current selection.",
+  {name: "locked-down-embolden",
+   preview: "Command that tries make the current selection boldfaced.",
    execute: function execute() {
-     setSelection("<b>o hai</b>");
+     setSelection("<b>" + getSelection() + "</b>");
    }}
 );
