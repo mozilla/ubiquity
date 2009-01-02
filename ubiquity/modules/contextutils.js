@@ -69,7 +69,7 @@ ContextUtils.getSelection = function getSelection(context) {
       start = focused.selectionStart;
       end = focused.selectionEnd;
     } catch (e) {
-      // It's bizzarely possible for this to occur; see #156.
+      // It's bizarrely possible for this to occur; see #156.
     }
     if (start != end)
       retval = focused.value.substring(start, end);

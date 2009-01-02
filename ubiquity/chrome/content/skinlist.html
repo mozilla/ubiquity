@@ -7,6 +7,10 @@
         href="web-content.css" />
   <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
   <title>Ubiquity Skins</title>
+  <style>
+    .warning{ background-color: #FFFCBA; border: 1px solid #F09B9A; width: 740px; padding: 5px;}
+  
+  </style>
 </head>
 <body>
 <script src="resource://ubiquity-scripts/jquery.js"></script>
@@ -43,9 +47,10 @@
     <li>
       <a type="button" class="button" href="javascript:saveCustomSkin();">Save</a>
       <a type="button" class="button" href="javascript:pasteToGist();">Share</a>
-      After you save, open Ubiquity and you can see the changes (if your current skin is Custom).
-      <br/> When you're done, share your skins with us! =)
+      Clicking save immediately updates Ubiquity's look.
     </li>
+    <br/><br/>
+      <div class="warning">If you are using Windows, then any changes you make to a custom skin can only be seen after a browser restart. This is a <a href="http://labs.toolness.com/trac/ticket/449">known bug</a>.</div>
     <br/><br/>
     <li>
       <textarea rows="30" style="width:750px" id="skin-editor"></textarea>

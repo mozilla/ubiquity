@@ -17,9 +17,9 @@
 #cmd-panel {
   padding: 0px;
   margin: 0px;
-  background: white; /* Should be transparent. It's not due to rendering bugs on the Mac. */
+  background: transparent; /* On Mac this is changed to white, due to a rendering bug. */
   width: 800px;
-  /*opacity: .9;*/
+  opacity: .9;
 }
 
 #cmd-entry-container {
@@ -52,7 +52,7 @@ body#previewbody {
     margin: 0;
     padding: 0;
     color: #BBB;
-    background-color: none;
+    background: transparent;
 }
 
 #ubiquity-preview {
@@ -104,7 +104,6 @@ div#ubiquity-preview #suggestions {
   float: left;
   background-color: #969696;
   overflow: hidden;
-  
 }
 
 div#ubiquity-preview #preview-pane {

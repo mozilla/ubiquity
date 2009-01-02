@@ -55,7 +55,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/email.png",
   modifiers: {to: noun_type_contact},
   description:"Begins composing an email to a person from your contact list.",
-  help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a GMail account to use it." +
+  help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a Gmail account to use it." +
        " Try selecting part of a web page (including links, images, etc) and then issuing &quot;email this&quot;.  You can" +
        " also specify the recipient of the email using the word &quot;to&quot; and the name of someone from your contact list." +
        " For example, try issuing &quot;email hello to jono&quot; (assuming you have a friend named &quot;jono&quot;).",
@@ -141,7 +141,7 @@ CmdUtils.CreateCommand({
 
       gmonkey.load("1.0", continuer);
     } else {
-      // No gmail tab open?  Open a new one:
+      // No Gmail tab open?  Open a new one:
       var params = {fs:1, tf:1, view:"cm", su:title, to:toAddress, body:html};
       Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
 			     Utils.paramsToString(params));
