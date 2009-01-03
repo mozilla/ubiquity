@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Reset Ubiquity</title>
+</head>
+<body>
+<p>If Ubiquity isn't working properly, you may want to consider
+resetting it to its original "factory defaults".  To do this, click
+the button below.  In order to complete the operation, Firefox will
+be restarted.</p>
+<p><b>Warning:</b> doing this will remove any customizations you've
+made to Ubiquity, including but not limited to:</p>
+<ul>
+<li><a href="about:ubiquity">Subscribed feeds</a></li>
+<li><a href="skinlist.html">Custom skins</a></li>
+<li><a href="editor.html">Command editor code</a></li>
+</ul>
+</body>
+<input type="button"
+       value="Yes, I know what I'm doing. Reset Ubiquity and restart Firefox."
+       onclick="confirmReset();">
+<script>
+Components.utils.import("resource://ubiquity-modules/setup.js");
+
+function confirmReset() {
+  UbiquitySetup.isResetScheduled = true;
+  Application.restart();
+}
+</script>
+</html>
