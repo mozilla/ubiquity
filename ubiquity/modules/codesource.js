@@ -190,6 +190,8 @@ LocalUriCodeSource.prototype = {
       req.send(null);
 
       if (req.status == 0) {
+        if (req.responseText.indexOf("ERROR:") == 0)
+          throw new Error(req.responseText);
         this._cached = req.responseText;
         return this._cached;
       } else
