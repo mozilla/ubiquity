@@ -53,6 +53,9 @@ let gServices;
 
 let gIframe;
 
+const RESET_SCHEDULED_PREF = "extensions.ubiquity.isResetScheduled";
+const ANN_DB_FILENAME = "ubiquity_ann.sqlite";
+
 let UbiquitySetup = {
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
@@ -104,6 +107,42 @@ let UbiquitySetup = {
     return extDir;
   },
 
+  __maybeReset: function __maybeReset() {
+    if (this.isResetScheduled) {
+      // Reset all feed subscriptions.
+      let annDb = AnnotationService.getProfileFile(ANN_DB_FILENAME);
+      if (annDb.exists())
+        annDb.remove(false);
+
+      // Reset all skins.
+      let jsm = {};
+      Components.utils.import("resource://ubiquity-modules/skinsvc.js",
+                              jsm);
+      jsm.SkinSvc.reset();
+
+      // We'll reset the preferences for our extension here.  Unfortunately,
+      // there doesn't seem to be an easy way to get this from FUEL, so
+      // we'll have to use XPCOM directly.
+      var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                            .getService(Components.interfaces.nsIPrefService);
+      prefs = prefs.getBranch("extensions.ubiquity.");
+
+      // Ideally we'd call prefs.resetBranch() here, but according to MDC
+      // the function isn't implemented yet, so we'll have to do it
+      // manually.
+      var children = prefs.getChildList("", {});
+      children.forEach(
+        function(name) {
+          if (prefs.prefHasUserValue(name))
+            prefs.clearUserPref(name);
+        });
+
+      // This is likely redundant since we just reset all prefs, but we'll
+      // do it for completeness...
+      this.isResetScheduled = false;
+    }
+  },
+
   getBaseUri: function getBaseUri() {
     let ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
                 .getService(Components.interfaces.nsIIOService);
@@ -130,6 +169,8 @@ let UbiquitySetup = {
       return;
     }
 
+    this.__maybeReset();
+
     var Cc = Components.classes;
     var Ci = Components.interfaces;
     var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
@@ -150,11 +191,19 @@ let UbiquitySetup = {
     hiddenWindow.document.documentElement.appendChild(gIframe);
   },
 
+  get isResetScheduled() {
+    return Application.prefs.getValue(RESET_SCHEDULED_PREF, false);
+  },
+
+  set isResetScheduled(value) {
+    Application.prefs.setValue(RESET_SCHEDULED_PREF, value);
+  },
+
   createServices: function createServices() {
     if (!gServices) {
       var Cc = Components.classes;
 
-      var annDbFile = AnnotationService.getProfileFile("ubiquity_ann.sqlite");
+      var annDbFile = AnnotationService.getProfileFile(ANN_DB_FILENAME);
       var annDbConn = AnnotationService.openDatabase(annDbFile);
       var annSvc = new AnnotationService(annDbConn);
 

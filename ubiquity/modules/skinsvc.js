@@ -74,12 +74,17 @@ var _storSvc = Cc["@mozilla.org/storage/service;1"]
 var Application = Cc["@mozilla.org/fuel/application;1"]
                  .getService(Ci.fuelIApplication);
 
+function _getDatabaseFile() {
+  var file = _dirSvc.get("ProfD", Ci.nsIFile);
+  file.append(SQLITE_FILE);
+  return file;
+}
+
 function _connectToDatabase() {
   // Only create a new connection if we don't already have one open.
   if (!_gDatabaseConnection) {
     // We want to put the file in the profile directory
-    var file = _dirSvc.get("ProfD", Ci.nsIFile);
-    file.append(SQLITE_FILE);
+    var file = _getDatabaseFile();
     _gDatabaseConnection = SkinSvc.openDatabase(file);
   }
   return _gDatabaseConnection;
@@ -91,6 +96,12 @@ function SkinSvc(window) {
     this._window = window;
   }
 }
+
+SkinSvc.reset = function reset() {
+  var file = _getDatabaseFile();
+  if (file.exists())
+    file.remove(false);
+};
 
 SkinSvc.prototype = {
 
