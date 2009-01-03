@@ -1462,6 +1462,14 @@ function testXmlScriptCommandsParser() {
   this.assert(code[0].code == 'testing\n\n\n>');
 }
 
+function testLocalUriCodeSourceWorksWithBadFilename() {
+  var lucs = new LocalUriCodeSource("file://nonexistent");
+  this.assertEquals(lucs.getCode(), "");
+
+  lucs = new LocalUriCodeSource("file:///nonexistent");
+  this.assertEquals(lucs.getCode(), "");
+}
+
 function testLoadLocaleJsonWorks() {
   var dat = loadLocaleJson("resource://ubiquity-tests/test_all.json");
   this.assert(dat.testLoadLocaleJsonWorks.length == 1);

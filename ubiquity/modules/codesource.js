@@ -175,6 +175,10 @@ LocalUriCodeSource.prototype = {
     if (url.scheme != "ubiquity" &&
         url.scheme != "chrome") {
       var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
+
+      if (!file.exists())
+        return "";
+
       var lastModifiedTime = file.lastModifiedTime;
 
       if (this._cached && this._cachedTimestamp == lastModifiedTime)
@@ -187,10 +191,13 @@ LocalUriCodeSource.prototype = {
               .createInstance(Ci.nsIXMLHttpRequest);
     req.open('GET', this.uri, false);
     req.overrideMimeType("text/javascript");
-    req.send(null);
-    /* TODO if you have a bookmark to a local file, and the expected file
-       isn't there, this will throw an exception that takes Ubiquity down
-       with it. */
+
+    try {
+      req.send(null);
+    } catch (e if e.result == Components.results.NS_ERROR_FAILURE) {
+      return "";
+    }
+
     if (req.status == 0) {
       this._cached = req.responseText;
       return this._cached;
