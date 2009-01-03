@@ -171,40 +171,34 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 
 LocalUriCodeSource.prototype = {
   getCode : function LUCS_getCode() {
-    var url = Utils.url(this.uri);
-    if (url.scheme != "ubiquity" &&
-        url.scheme != "chrome") {
-      var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
-
-      if (!file.exists())
-        return "";
-
-      var lastModifiedTime = file.lastModifiedTime;
-
-      if (this._cached && this._cachedTimestamp == lastModifiedTime)
-        return this._cached;
-
-      this._cachedTimestamp = lastModifiedTime;
-    }
-
-    var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-              .createInstance(Ci.nsIXMLHttpRequest);
-    req.open('GET', this.uri, false);
-    req.overrideMimeType("text/javascript");
-
     try {
+      var url = Utils.url(this.uri);
+      if (url.scheme == "file") {
+        var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
+        var lastModifiedTime = file.lastModifiedTime;
+
+        if (this._cached && this._cachedTimestamp == lastModifiedTime)
+          return this._cached;
+
+        this._cachedTimestamp = lastModifiedTime;
+      }
+
+      var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                .createInstance(Ci.nsIXMLHttpRequest);
+      req.open('GET', this.uri, false);
+      req.overrideMimeType("text/javascript");
       req.send(null);
-    } catch (e if e.result == Components.results.NS_ERROR_FAILURE) {
+
+      if (req.status == 0) {
+        this._cached = req.responseText;
+        return this._cached;
+      } else
+        throw new Error("XHR returned status " + req.status);
+    } catch (e) {
+      Components.utils.reportError("Retrieving " + this.uri +
+                                   " raised exception " + e);
       return "";
     }
-
-    if (req.status == 0) {
-      this._cached = req.responseText;
-      return this._cached;
-    } else
-      Components.utils.reportError("Retrieving " + this.uri +
-                                   " returned status " + req.status);
-      return "";
   }
 };
 

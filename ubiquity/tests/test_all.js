@@ -1462,12 +1462,18 @@ function testXmlScriptCommandsParser() {
   this.assert(code[0].code == 'testing\n\n\n>');
 }
 
-function testLocalUriCodeSourceWorksWithBadFilename() {
-  var lucs = new LocalUriCodeSource("file://truly-nonexistent");
-  this.assertEquals(lucs.getCode(), "");
+function testLocalUriCodeSourceWorksWithBadFilenames() {
+  var urls = ["chrome://truly-nonexistent",
+              "file:///truly-nonexistent",
+              "resource://truly-nonexistent",
+              "ubiquity:///truly-nonexistent"];
+  var self = this;
 
-  lucs = new LocalUriCodeSource("file:///truly-nonexistent");
-  this.assertEquals(lucs.getCode(), "");
+  urls.forEach(
+    function(url) {
+      var lucs = new LocalUriCodeSource(url);
+      self.assertEquals(lucs.getCode(), "");
+    });
 }
 
 function testLoadLocaleJsonWorks() {
