@@ -1463,10 +1463,10 @@ function testXmlScriptCommandsParser() {
 }
 
 function testLocalUriCodeSourceWorksWithBadFilename() {
-  var lucs = new LocalUriCodeSource("file://nonexistent");
+  var lucs = new LocalUriCodeSource("file://truly-nonexistent");
   this.assertEquals(lucs.getCode(), "");
 
-  lucs = new LocalUriCodeSource("file:///nonexistent");
+  lucs = new LocalUriCodeSource("file:///truly-nonexistent");
   this.assertEquals(lucs.getCode(), "");
 }
 
