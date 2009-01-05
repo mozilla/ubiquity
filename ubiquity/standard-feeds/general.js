@@ -420,14 +420,16 @@ CmdUtils.CreateCommand({
   modifiers: {to: noun_type_language, from: noun_type_language},
 
   execute: function( directObj, languages ) {
-    var toLangCode = languages.to.data || Application.prefs.getValue(this.DEFAULT_LANG_PREF, "en");
+    var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
+    var toLangCode = languages.to.data || Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
     var fromLang = languages.from.data || "";
 
     translateTo( directObj.text, {to:toLangCode} );
   },
 
   preview: function( pblock, directObj, languages ) {
-    var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, "en");
+    var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
+    var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
     var toLang = languages.to.text || noun_type_language.getLangName(defaultLang);
     var toLangCode = languages.to.data || defaultLang;
     var textToTranslate = directObj.text;
