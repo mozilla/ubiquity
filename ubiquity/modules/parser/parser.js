@@ -100,12 +100,17 @@ NLParser.Parser.prototype = {
     };
   },
 
-  nounFirstSuggestions: function( selObj ) {
+  nounFirstSuggestions: function( selObj, callback ) {
     let suggs = [];
     let topGenerics = this._rankedVerbsThatUseGenericNouns.slice(0, 5);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
     for each(verb in verbsToTry) {
-      let newPPS = new NLParser.PartiallyParsedSentence(verb, {}, selObj, 0);
+      let newPPS = new NLParser.PartiallyParsedSentence( verb,
+                                                         {},
+                                                         selObj,
+                                                         0,
+                                                         this._languagePlugin,
+                                                         callback );
       // TODO make a better way of having the parsing remember its source than
       // this encapsulation breaking...
       newPPS._cameFromNounFirstSuggestion = true;
@@ -175,7 +180,8 @@ NLParser.Parser.prototype = {
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
-        newSuggs = newSuggs.concat( this.nounFirstSuggestions(selObj));
+        let nounSuggs =  this.nounFirstSuggestions(selObj, asyncSuggestionCb);
+        newSuggs = newSuggs.concat(nounSuggs);
       }
     } else {
       // Language-specific full-sentence suggestions:
@@ -192,7 +198,8 @@ NLParser.Parser.prototype = {
           text: query,
           html: query
         };
-        newSuggs = newSuggs.concat( this.nounFirstSuggestions( selObj ));
+        let nounSuggs = this.nounFirstSuggestions(selObj, asyncSuggestionCb);
+        newSuggs = newSuggs.concat(nounSuggs);
       }
     }
     // partials is now a list of PartiallyParsedSentences; if there's a
@@ -650,10 +657,14 @@ NLParser.PartiallyParsedSentence.prototype = {
 
   copy: function() {
     // Deep copy constructor
-    let newPPSentence = new NLParser.PartiallyParsedSentence( this._verb,
-							      {},
-							      this._selObj,
-							      this._matchScore);
+    let newPPSentence = new NLParser.PartiallyParsedSentence(
+        this._verb,
+				{},
+	      this._selObj,
+	      this._matchScore,
+	      this._parserPlugin,
+        this._asyncSuggestionCb
+    );
     newPPSentence._parsedSentences = [];
     for each(let parsedSen in this._parsedSentences) {
       newPPSentence._parsedSentences.push( parsedSen.copy() );
