@@ -408,6 +408,7 @@ function translateTo( text, langCodePair, callback ) {
 }
 
 CmdUtils.CreateCommand({
+  DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
   name: "translate",
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",
@@ -419,19 +420,16 @@ CmdUtils.CreateCommand({
   modifiers: {to: noun_type_language, from: noun_type_language},
 
   execute: function( directObj, languages ) {
-    // Default to translating to English if no to language
-    // is specified.
-    // TODO: Choose the default in a better way.
-
-    var toLangCode = languages.to.data || "en";
+    var toLangCode = languages.to.data || Application.prefs.getValue(this.DEFAULT_LANG_PREF, "en");
     var fromLang = languages.from.data || "";
 
     translateTo( directObj.text, {to:toLangCode} );
   },
 
   preview: function( pblock, directObj, languages ) {
-    var toLang = languages.to.text || "English";
-    var toLangCode = languages.to.data || "en";
+    var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, "en");
+    var toLang = languages.to.text || noun_type_language.getLangName(defaultLang);
+    var toLangCode = languages.to.data || defaultLang;
     var textToTranslate = directObj.text;
 
     var lang = toLang[0].toUpperCase() + toLang.substr(1);

@@ -446,6 +446,17 @@ var noun_type_language =  {
       }
     }
     return suggestions;
+  },
+  
+  // Returns the language name for the given lang code.
+  getLangName: function(langCode) {
+	var code = langCode.toLowerCase();
+	for ( var word in LanguageCodes ) {
+		if (code == LanguageCodes[word].toLowerCase()) {
+			return word;
+		}
+	}
+	return "Unknown";
   }
 };
 
