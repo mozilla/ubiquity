@@ -39,6 +39,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+ // = CmdUtils =
+ //
+ // This is a small library of general utility functions
+ // for use by command code.  Everything clients need is contained within
+ // the {{{CmdUtils}}} namespace.
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -224,6 +230,9 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
    transferArea.setTransferData("text/unicode", string, text.length * 2);
    clipboard.setData(transferArea, null, Ci.nsIClipboard.kGlobalClipboard);
 }
+
+// = TODO: Finish the rest of the documentation =
+
 
 CmdUtils.log = function log(what) {
   var args = Array.prototype.slice.call(arguments);
