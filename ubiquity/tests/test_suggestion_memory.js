@@ -1,9 +1,9 @@
 EXPORTED_SYMBOLS = ["TestSuggestionMemory"];
 
-Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
 
 var RealSuggestionMemory = {};
-Components.utils.import("resource://ubiquity-modules/suggestion_memory.js",
+Components.utils.import("resource://ubiquity/modules/suggestion_memory.js",
                         RealSuggestionMemory);
 RealSuggestionMemory = RealSuggestionMemory.SuggestionMemory;
 

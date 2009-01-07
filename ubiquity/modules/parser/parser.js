@@ -38,7 +38,7 @@
 
 EXPORTED_SYMBOLS = ["NLParser"];
 
-Components.utils.import("resource://ubiquity-modules/suggestion_memory.js");
+Components.utils.import("resource://ubiquity/modules/suggestion_memory.js");
 
 var NLParser = { MAX_SUGGESTIONS: 5};
 
@@ -72,7 +72,7 @@ NLParser.Parser = function(verbList, nounList, languagePlugin,
 
   if (!ContextUtils) {
     var ctu = {};
-    Components.utils.import("resource://ubiquity-modules/contextutils.js",
+    Components.utils.import("resource://ubiquity/modules/contextutils.js",
                             ctu);
     ContextUtils = ctu.ContextUtils;
   }
@@ -80,7 +80,7 @@ NLParser.Parser = function(verbList, nounList, languagePlugin,
 
   if (!suggestionMemory) {
     var sm = {};
-    Components.utils.import("resource://ubiquity-modules/suggestion_memory.js",
+    Components.utils.import("resource://ubiquity/modules/suggestion_memory.js",
                             sm);
     suggestionMemory = new sm.SuggestionMemory("main_parser");
   }
@@ -290,7 +290,7 @@ NLParser.ParsedSentence = function( verb, arguments, verbMatchScore ) {
 NLParser.ParsedSentence.prototype = {
   _init: function( verb, argumentSuggestions, verbMatchScore) {
     var nu = {};
-    Components.utils.import("resource://ubiquity-modules/nounutils.js",
+    Components.utils.import("resource://ubiquity/modules/nounutils.js",
                             nu);
     this._makeSugg = nu.NounUtils.makeSugg;
 

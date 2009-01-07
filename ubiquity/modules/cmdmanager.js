@@ -39,7 +39,7 @@
 
 var EXPORTED_SYMBOLS = ["CommandManager"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function CommandManager(cmdSource, msgService, parser) {
   this.__cmdSource = cmdSource;

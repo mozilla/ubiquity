@@ -48,7 +48,7 @@ CmdUtils.__globalObject = this;
 
 CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
   var ctu = {};
-  Components.utils.import("resource://ubiquity-modules/contextutils.js",
+  Components.utils.import("resource://ubiquity/modules/contextutils.js",
                           ctu);
 
   if (typeof(context) == "undefined")
@@ -59,7 +59,7 @@ CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
 
 CmdUtils.getSelection = function getSelection(context) {
   var ctu = {};
-  Components.utils.import("resource://ubiquity-modules/contextutils.js",
+  Components.utils.import("resource://ubiquity/modules/contextutils.js",
                           ctu);
 
   if (typeof(context) == "undefined")
@@ -76,7 +76,7 @@ CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
 
 CmdUtils.setSelection = function setSelection(content, options) {
   var ctu = {};
-  Components.utils.import("resource://ubiquity-modules/contextutils.js",
+  Components.utils.import("resource://ubiquity/modules/contextutils.js",
                           ctu);
 
   var context = CmdUtils.__globalObject.context;
@@ -223,7 +223,7 @@ CmdUtils.injectJavascript = function injectJavascript(src, callback) {
 
 CmdUtils.loadJQuery = function loadJQuery(func) {
   CmdUtils.injectJavascript(
-    "resource://ubiquity-scripts/jquery.js",
+    "resource://ubiquity/scripts/jquery.js",
     Utils.safeWrapper( function() {
       var contentJQuery = CmdUtils.getWindowInsecure().jQuery;
       func(contentJQuery);
@@ -769,7 +769,7 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand( options ) {
 (
   function() {
     var nu = {};
-    Components.utils.import("resource://ubiquity-modules/nounutils.js",
+    Components.utils.import("resource://ubiquity/modules/nounutils.js",
                             nu);
     CmdUtils.NounType = nu.NounUtils.NounType;
     CmdUtils.makeSugg = nu.NounUtils.makeSugg;

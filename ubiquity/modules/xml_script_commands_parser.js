@@ -429,7 +429,7 @@ SAXEventHandler.prototype._handleCharacterData = function()  {
 
 function parseCodeFromXml(xml) {
   var xmlsax = {};
-  Components.utils.import("resource://ubiquity-modules/xmlsax.js",
+  Components.utils.import("resource://ubiquity/modules/xmlsax.js",
                           xmlsax);
   var parser = new xmlsax.SAXDriver();
   var eventHandler = new SAXEventHandler(parser);

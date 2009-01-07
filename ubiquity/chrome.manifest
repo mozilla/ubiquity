@@ -1,8 +1,4 @@
-resource ubiquity-modules modules/
-resource ubiquity-scripts scripts/
-resource ubiquity-tests tests/
-resource ubiquity-standard-feeds standard-feeds/
-resource ubiquity-feed-parts feed-parts/
+resource ubiquity ./
 content ubiquity chrome/content/
 skin ubiquity skin chrome/skin/
 overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul

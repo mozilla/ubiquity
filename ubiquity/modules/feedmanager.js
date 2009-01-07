@@ -38,8 +38,8 @@
 
 let EXPORTED_SYMBOLS = ["FeedManager"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/eventhub.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/eventhub.js");
 
 const FEED_SRC_ANNO = "ubiquity/source";
 const FEED_TYPE_ANNO = "ubiquity/type";

@@ -103,7 +103,7 @@ function injectPixastic( context, callback ){
   
   var doc = CmdUtils.getDocument();
   var s = doc.createElement("script");
-  s.src = "resource://ubiquity-scripts/pixastic.js";
+  s.src = "resource://ubiquity/scripts/pixastic.js";
   s.id = "_pixastic_";
   doc.body.appendChild( s );
   jQuery(s).load( callback );

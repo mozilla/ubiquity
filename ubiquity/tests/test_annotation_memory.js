@@ -1,6 +1,6 @@
-Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
 
 EXPORTED_SYMBOLS = ["TestAnnotationMemory"];
 

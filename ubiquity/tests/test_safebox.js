@@ -1,5 +1,5 @@
-Components.utils.import("resource://ubiquity-modules/safebox.js");
-Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity/modules/safebox.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
 
 function testSafeboxWorks() {
   let inf = {evalInSandbox: Components.utils.evalInSandbox,

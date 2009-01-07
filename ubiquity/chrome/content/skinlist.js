@@ -39,9 +39,9 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 
-Components.utils.import("resource://ubiquity-modules/skinsvc.js");
-Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/skinsvc.js");
+Components.utils.import("resource://ubiquity/modules/msgservice.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var skinService = new SkinSvc();
 

@@ -6,7 +6,7 @@ App.trim = function trim(str) {
 
 App.getLocalUrlData = function getLocalUrlData(url) {
   var jsm = {};
-  Components.utils.import("resource://ubiquity-modules/codesource.js",
+  Components.utils.import("resource://ubiquity/modules/codesource.js",
                           jsm);
   var lcs = new jsm.LocalUriCodeSource(url);
   return lcs.getCode();
@@ -84,7 +84,7 @@ App.processCode = function processCode(code) {
 $(window).ready(
   function() {
     if (window.location.protocol == "chrome:") {
-      var code = App.getLocalUrlData("resource://ubiquity-modules/utils.js");
+      var code = App.getLocalUrlData("resource://ubiquity/modules/utils.js");
       App.processCode(code);
     } else
       jQuery.get("../../../modules/utils.js",

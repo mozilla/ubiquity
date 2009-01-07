@@ -1,7 +1,7 @@
-Components.utils.import("resource://ubiquity-tests/framework.js");
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity/modules/parser/parser.js");
 
 const Ci = Components.interfaces;
 const Cc = Components.classes;
@@ -21,7 +21,7 @@ function testTagCommand() {
   var tagsvc = Cc["@mozilla.org/browser/tagging-service;1"]
                .getService(Ci.nsITaggingService);
 
-  Components.utils.import("resource://ubiquity-modules/setup.js");
+  Components.utils.import("resource://ubiquity/modules/setup.js");
 
   var services = UbiquitySetup.createServices();
   var cmdSource = services.commandSource;

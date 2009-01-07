@@ -38,13 +38,13 @@
 
 EXPORTED_SYMBOLS = ["UbiquitySetup"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/feedmanager.js");
-Components.utils.import("resource://ubiquity-modules/default_feed_plugin.js");
-Components.utils.import("resource://ubiquity-modules/locked_down_feed_plugin.js");
-Components.utils.import("resource://ubiquity-modules/annotation_memory.js");
-Components.utils.import("resource://ubiquity-modules/feedaggregator.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/msgservice.js");
+Components.utils.import("resource://ubiquity/modules/feedmanager.js");
+Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
+Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
+Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
+Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
@@ -116,7 +116,7 @@ let UbiquitySetup = {
 
       // Reset all skins.
       let jsm = {};
-      Components.utils.import("resource://ubiquity-modules/skinsvc.js",
+      Components.utils.import("resource://ubiquity/modules/skinsvc.js",
                               jsm);
       jsm.SkinSvc.reset();
 

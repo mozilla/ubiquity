@@ -1,6 +1,6 @@
 EXPORTED_SYMBOLS = ["EnParser"];
 
-Components.utils.import("resource://ubiquity-modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/modules/parser/parser.js");
 
 // util functions to make it easier to use objects as fake dictionaries
 function dictDeepCopy( dict ) {

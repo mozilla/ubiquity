@@ -39,7 +39,7 @@ EXPORTED_SYMBOLS = ["ExceptionUtils",
                     "AlertMessageService",
                     "CompositeMessageService"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 let Cc = Components.classes;
 let Ci = Components.interfaces;

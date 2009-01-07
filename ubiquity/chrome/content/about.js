@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity-modules/setup.js");
+Components.utils.import("resource://ubiquity/modules/setup.js");
 
 function makeRemover(element, info) {
   function onSlideDown() {

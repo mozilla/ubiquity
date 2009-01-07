@@ -74,11 +74,11 @@ var basePath = arguments[0];
   function() {
     var modulesDir = getPath(basePath);
     modulesDir.appendRelativePath("modules");
-    bindDirToResource(modulesDir, "ubiquity-modules");
+    bindDirToResource(modulesDir, "ubiquity/modules");
 
     var testsDir = getPath(basePath);
     testsDir.appendRelativePath("tests");
-    bindDirToResource(testsDir, "ubiquity-tests");
+    bindDirToResource(testsDir, "ubiquity/tests");
 
     var componentPath = getPath(basePath);
     componentPath.appendRelativePath("components");
@@ -87,8 +87,8 @@ var basePath = arguments[0];
   }
 )();
 
-Components.utils.import("resource://ubiquity-tests/framework.js");
-Components.utils.import("resource://ubiquity-tests/test_all.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
+Components.utils.import("resource://ubiquity/tests/test_all.js");
 
 var suite = new TestSuite(DumpTestResponder, this);
 

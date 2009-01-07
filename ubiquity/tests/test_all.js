@@ -35,24 +35,24 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/nounutils.js");
-Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/parser/parser.js");
-Components.utils.import("resource://ubiquity-modules/parser/locale_en.js");
-Components.utils.import("resource://ubiquity-modules/feedmanager.js");
-Components.utils.import("resource://ubiquity-modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity-modules/localeutils.js");
-Components.utils.import("resource://ubiquity-modules/collection.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/nounutils.js");
+Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity/modules/codesource.js");
+Components.utils.import("resource://ubiquity/modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/modules/parser/locale_en.js");
+Components.utils.import("resource://ubiquity/modules/feedmanager.js");
+Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity/modules/localeutils.js");
+Components.utils.import("resource://ubiquity/modules/collection.js");
 
-Components.utils.import("resource://ubiquity-tests/framework.js");
-Components.utils.import("resource://ubiquity-tests/test_safebox.js");
-Components.utils.import("resource://ubiquity-tests/test_eventhub.js");
-Components.utils.import("resource://ubiquity-tests/test_suggestion_memory.js");
-Components.utils.import("resource://ubiquity-tests/test_annotation_memory.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
+Components.utils.import("resource://ubiquity/tests/test_safebox.js");
+Components.utils.import("resource://ubiquity/tests/test_eventhub.js");
+Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
+Components.utils.import("resource://ubiquity/tests/test_annotation_memory.js");
 
-Components.utils.import("resource://ubiquity-tests/test_tag_command.js");
+Components.utils.import("resource://ubiquity/tests/test_tag_command.js");
 
 var globalObj = this;
 const LANG = "en";
@@ -1455,7 +1455,7 @@ function testUbiquityComponentAcceptsJsVersion() {
 }
 
 function testXmlScriptCommandsParser() {
-  Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js");
+  Components.utils.import("resource://ubiquity/modules/xml_script_commands_parser.js");
   var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing\n\n\n>]]></script></foo>');
   this.assert(code.length == 1);
   this.assert(code[0].lineNumber == 2, "hi");
@@ -1477,7 +1477,7 @@ function testLocalUriCodeSourceWorksWithBadFilenames() {
 }
 
 function testLoadLocaleJsonWorks() {
-  var dat = loadLocaleJson("resource://ubiquity-tests/test_all.json");
+  var dat = loadLocaleJson("resource://ubiquity/tests/test_all.json");
   this.assert(dat.testLoadLocaleJsonWorks.length == 1);
   this.assert(dat.testLoadLocaleJsonWorks == "\u3053");
 }
@@ -1508,6 +1508,6 @@ function getLocalFileAsUtf8(url) {
 // TODO: This is a horrible workaround; modifying the tests to use
 // localeutils.js makes them unreadable and hard to maintain, but there
 // doesn't seem to be any way of loading utf-8 JS from xpcshell.
-eval(getLocalFileAsUtf8("resource://ubiquity-tests/test_locale_jp.js"));
+eval(getLocalFileAsUtf8("resource://ubiquity/tests/test_locale_jp.js"));
 
 exportTests(this);

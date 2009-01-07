@@ -37,7 +37,7 @@
 let EXPORTED_SYMBOLS = ['newChannel',
                         'setPath'];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 let paths = {};
 

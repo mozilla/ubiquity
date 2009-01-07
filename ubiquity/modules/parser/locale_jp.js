@@ -36,10 +36,10 @@
 
 EXPORTED_SYMBOLS = ["JpParser"];
 
-Components.utils.import("resource://ubiquity-modules/parser/parser.js");
-Components.utils.import("resource://ubiquity-modules/localeutils.js");
+Components.utils.import("resource://ubiquity/modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/modules/localeutils.js");
 
-var dat = loadLocaleJson("resource://ubiquity-modules/parser/locale_jp.json");
+var dat = loadLocaleJson("resource://ubiquity/modules/parser/locale_jp.json");
 
 var JpParser = {};
 

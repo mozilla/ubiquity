@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     moz = jsbridge.start_from_settings(settings)
 
-    uri = 'resource://ubiquity-tests/systemtests.js';
+    uri = 'resource://ubiquity/tests/systemtests.js';
     tests = jsbridge.JSObject(
         jsbridge.network.bridge,
         "Components.utils.import('%s')" % uri

@@ -41,7 +41,7 @@ EXPORTED_SYMBOLS = ["MixedCodeSource",
                     "LocalUriCodeSource",
                     "XhtmlCodeSource"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -241,7 +241,7 @@ function XhtmlCodeSource(codeSource) {
       codeSections = [];
       var newCode = "";
       var xmlparser = {};
-      Components.utils.import("resource://ubiquity-modules/xml_script_commands_parser.js", xmlparser);
+      Components.utils.import("resource://ubiquity/modules/xml_script_commands_parser.js", xmlparser);
       var info = xmlparser.parseCodeFromXml(code);
       for (var i = 0; i < info.length; i++) {
         newCode += info[i].code;

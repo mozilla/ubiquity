@@ -38,12 +38,12 @@
 
 let EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
-Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity-modules/collection.js");
-Components.utils.import("resource://ubiquity-modules/prefcommands.js");
-Components.utils.import("resource://ubiquity-modules/feed_plugin_utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/codesource.js");
+Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity/modules/collection.js");
+Components.utils.import("resource://ubiquity/modules/prefcommands.js");
+Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 const DEFAULT_FEED_TYPE = "commands";
@@ -255,8 +255,8 @@ function makeBuiltinGlobalsMaker(msgService, hiddenWindow) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
 
-  var uris = ["resource://ubiquity-scripts/jquery.js",
-              "resource://ubiquity-scripts/template.js"];
+  var uris = ["resource://ubiquity/scripts/jquery.js",
+              "resource://ubiquity/scripts/template.js"];
 
   for (var i = 0; i < uris.length; i++) {
     hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]

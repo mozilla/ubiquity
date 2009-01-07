@@ -36,7 +36,7 @@
 
 var EXPORTED_SYMBOLS = ["FeedAggregator"];
 
-Components.utils.import("resource://ubiquity-modules/eventhub.js");
+Components.utils.import("resource://ubiquity/modules/eventhub.js");
 
 function FeedAggregator(feedManager, messageService, disabledCommands) {
   let self = this;

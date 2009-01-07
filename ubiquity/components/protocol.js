@@ -84,7 +84,7 @@ Protocol.prototype =
   newChannel: function(aURI)
   {
     var ubiquityProtocol = Components.utils.import(
-      "resource://ubiquity-modules/ubiquity_protocol.js"
+      "resource://ubiquity/modules/ubiquity_protocol.js"
     );
     return ubiquityProtocol.newChannel(aURI);
   }

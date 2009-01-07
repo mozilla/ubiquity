@@ -36,10 +36,10 @@
 
 let EXPORTED_SYMBOLS = ["LockedDownFeedPlugin"];
 
-Components.utils.import("resource://ubiquity-modules/codesource.js");
-Components.utils.import("resource://ubiquity-modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity-modules/feed_plugin_utils.js");
-Components.utils.import("resource://ubiquity-modules/contextutils.js");
+Components.utils.import("resource://ubiquity/modules/codesource.js");
+Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
+Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
+Components.utils.import("resource://ubiquity/modules/contextutils.js");
 
 function LockedDownFeedPlugin(feedManager, messageService, hiddenWindow) {
   this.type = "locked-down-commands";
@@ -60,7 +60,7 @@ function LockedDownFeedPlugin(feedManager, messageService, hiddenWindow) {
                         hiddenWindow.html_sanitize);
   };
 
-  let sanitizerUrl = "resource://ubiquity-scripts/html-sanitizer-minified.js";
+  let sanitizerUrl = "resource://ubiquity/scripts/html-sanitizer-minified.js";
   hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
               .getService(Components.interfaces.mozIJSSubScriptLoader)
               .loadSubScript(sanitizerUrl);

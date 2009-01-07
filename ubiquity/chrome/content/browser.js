@@ -41,7 +41,7 @@
 
 var gUbiquity = null;
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function ubiquitySetup()
 {
@@ -69,17 +69,17 @@ function ubiquitySetup()
   }
   
   var jsm = {};
-  Components.utils.import("resource://ubiquity-modules/setup.js",
+  Components.utils.import("resource://ubiquity/modules/setup.js",
                           jsm);
-  Components.utils.import("resource://ubiquity-modules/parser/parser.js",
+  Components.utils.import("resource://ubiquity/modules/parser/parser.js",
                           jsm);
-  Components.utils.import("resource://ubiquity-modules/parser/locale_en.js",
+  Components.utils.import("resource://ubiquity/modules/parser/locale_en.js",
                           jsm);
-  Components.utils.import("resource://ubiquity-modules/parser/locale_jp.js",
+  Components.utils.import("resource://ubiquity/modules/parser/locale_jp.js",
                           jsm);
-  Components.utils.import("resource://ubiquity-modules/cmdmanager.js",
+  Components.utils.import("resource://ubiquity/modules/cmdmanager.js",
                           jsm);
-  Components.utils.import("resource://ubiquity-modules/skinsvc.js",
+  Components.utils.import("resource://ubiquity/modules/skinsvc.js",
                           jsm);
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
@@ -224,7 +224,7 @@ window.addEventListener(
   "load",
   function() {
     var jsm = {};
-    Components.utils.import("resource://ubiquity-modules/setup.js",
+    Components.utils.import("resource://ubiquity/modules/setup.js",
                             jsm);
     jsm.UbiquitySetup.preload(ubiquitySetup);
   },

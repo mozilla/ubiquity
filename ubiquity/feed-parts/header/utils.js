@@ -4,7 +4,7 @@ var Utils = {};
 {
   // Let's "subclass" the Utils JS module.
   var jsm = {};
-  Components.utils.import("resource://ubiquity-modules/utils.js", jsm);
+  Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
   Utils.__proto__ = jsm.Utils;
 })();
 

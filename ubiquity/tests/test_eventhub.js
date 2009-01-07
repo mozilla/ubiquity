@@ -1,5 +1,5 @@
-Components.utils.import("resource://ubiquity-modules/eventhub.js");
-Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import("resource://ubiquity/modules/eventhub.js");
+Components.utils.import("resource://ubiquity/tests/framework.js");
 
 function HubFramework() {
   let self = this;

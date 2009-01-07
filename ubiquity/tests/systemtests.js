@@ -6,15 +6,15 @@ let Ci = Components.interfaces;
 let events = {};
 Components.utils.import('resource://jsbridge/modules/events.js', events);
 
-Components.utils.import('resource://ubiquity-modules/utils.js');
-Components.utils.import("resource://ubiquity-tests/framework.js");
+Components.utils.import('resource://ubiquity/modules/utils.js');
+Components.utils.import("resource://ubiquity/tests/framework.js");
 
 let INTERVAL_MS = 100;
 
 function runTests() {
   let tests = {};
 
-  Components.utils.import("resource://ubiquity-tests/test_all.js", tests);
+  Components.utils.import("resource://ubiquity/tests/test_all.js", tests);
 
   var suite = new TestSuite(DumpTestResponder, tests);
   var success = true;

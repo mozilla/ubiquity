@@ -37,7 +37,7 @@
 var EXPORTED_SYMBOLS = ["PrefCommands"];
 
 var ubiquityProtocol = Components.utils.import(
-  "resource://ubiquity-modules/ubiquity_protocol.js"
+  "resource://ubiquity/modules/ubiquity_protocol.js"
 );
 
 var Application = Components.classes["@mozilla.org/fuel/application;1"]

@@ -39,8 +39,8 @@
 
 var EXPORTED_SYMBOLS = ["SkinSvc"];
 
-Components.utils.import("resource://ubiquity-modules/msgservice.js");
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/msgservice.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;

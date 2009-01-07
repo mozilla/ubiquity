@@ -36,10 +36,10 @@
 
 EXPORTED_SYMBOLS = ["SandboxFactory"];
 
-Components.utils.import("resource://ubiquity-modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var ubiquityProtocol = Components.utils.import(
-  "resource://ubiquity-modules/ubiquity_protocol.js"
+  "resource://ubiquity/modules/ubiquity_protocol.js"
 );
 
 var defaultTarget = this;
