@@ -291,8 +291,8 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 // ** {{{ Utils.focusUrlInBrowser() }}} **
 //
 // This function focuses a tab with the given URL if one exists in the
-// current window; otherwise, it delegates to
-// {{{Utils.openUrlInBrowser()}}}.
+// current window; otherwise, it delegates the opening of the URL in a
+// new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
 Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
   let Application = Components.classes["@mozilla.org/fuel/application;1"]
@@ -327,7 +327,11 @@ Utils.getCookie = function getCookie(domain, name) {
   return null;
 };
 
-// = The rest of this documentation still needs to be written. =
+// ** {{{ Utils.paramsToString() }}} **
+//
+// This function takes the given Object containing keys and
+// values into a querystring suitable for inclusion in an HTTP
+// GET or POST request.
 
 Utils.paramsToString = function paramsToString(params) {
   var stringPairs = [];
@@ -360,8 +364,12 @@ Utils.paramsToString = function paramsToString(params) {
   return "?" + stringPairs.join("&");
 };
 
-// Synchronously retrieves the content of the given local URL
-// and returns it.
+// ** {{{ Utils.getLocalUrl() }}} **
+//
+// This function synchronously retrieves the content of the given
+// local URL, such as a {{{file:}}} or {{{chrome:}}} URL, and returns
+// it.
+
 Utils.getLocalUrl = function getLocalUrl(url) {
   var req = new XMLHttpRequest();
   req.open('GET', url, false);
@@ -373,9 +381,19 @@ Utils.getLocalUrl = function getLocalUrl(url) {
     throw new Error("Failed to get " + url);
 };
 
+// ** {{{ Utils.trim() }}} **
+//
+// This function removes all whitespace surrounding a string and
+// returns the result.
+
 Utils.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
+
+// ** {{{ Utils.isArray() }}} **
+//
+// This function returns whether or not its parameter is an instance
+// of a JavaScript Array object.
 
 Utils.isArray = function isArray(val) {
   if (typeof val != "object")
@@ -387,7 +405,18 @@ Utils.isArray = function isArray(val) {
   return true;
 }
 
+// == {{{ Utils.History }}} ==
+//
+// This object contains functions that make it easy to access
+// information about the user's browsing history.
+
 Utils.History = {
+
+  // ** {{{ Utils.History.visitsToDomain() }}} **
+  //
+  // This function returns the number of times the user has visited
+  // the given domain name.
+
   visitsToDomain : function visitsToDomain( domain ) {
 
       var hs = Cc["@mozilla.org/browser/nav-history-service;1"].
@@ -412,15 +441,25 @@ Utils.History = {
   }
 };
 
-// valid hash algorithms are: MD2, MD5, SHA1, SHA256, SHA384, SHA512
+// ** {{{ Utils.computeCryptoHash() }}} **
+//
+// Computes and returns a cryptographic hash for a string given an
+// algorithm.
+//
+// {{{algo}}} is a string corresponding to a valid hash algorithm.  It
+// can be any one of {{{MD2}}}, {{{MD5}}}, {{{SHA1}}}, {{{SHA256}}},
+// {{{SHA384}}}, or {{{SHA512}}}.
+//
+// {{{str}}} is the string to be hashed.
+
 Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
-  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                            .createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                  .createInstance(Ci.nsIScriptableUnicodeConverter);
   converter.charset = "UTF-8";
   var result = {};
   var data = converter.convertToByteArray(str, result);
-  var crypto = Components.classes["@mozilla.org/security/hash;1"]
-                          .createInstance(Components.interfaces.nsICryptoHash);
+  var crypto = Cc["@mozilla.org/security/hash;1"]
+               .createInstance(Ci.nsICryptoHash);
   crypto.initWithString(algo);
   crypto.update(data, data.length);
   var hash = crypto.finish(false);
@@ -428,34 +467,63 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   function toHexString(charCode) {
     return ("0" + charCode.toString(16)).slice(-2);
   }
-  var hashString = [toHexString(hash.charCodeAt(i)) for (i in hash)].join("");
+  var hashString = [toHexString(hash.charCodeAt(i))
+                    for (i in hash)].join("");
   return hashString;
 };
 
+// ** {{{ Utils.convertFromUnicode() }}} **
+//
+// Encodes the given unicode text to a given character set and
+// returns the result.
+//
+// {{{toCharset}}} is a string corresponding to the character set
+// to encode to.
+//
+// {{{text}}} is a unicode string.
+
 Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
-  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                  .getService(Ci.nsIScriptableUnicodeConverter);
   converter.charset = toCharset;
   return converter.ConvertFromUnicode(text);
 };
 
+// ** {{{ Utils.convertToUnicode() }}} **
+//
+// Decodes the given text from a character set to unicode and returns
+// the result.
+//
+// {{{fromCharset}}} is a string corresponding to the character set to
+// decode from.
+//
+// {{{text}}} is a string encoded in the character set
+// {{{fromCharset}}}.
+
 Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
-  var converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
-                            .getService(Components.interfaces.nsIScriptableUnicodeConverter);
+  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                  .getService(Ci.nsIScriptableUnicodeConverter);
   converter.charset = fromCharset;
   return converter.ConvertToUnicode(text);
 };
 
+// == {{{ Utils.tabs }}} ==
+//
+// This Object contains functions related to Firefox tabs.
+
 Utils.tabs = {
-  /**
-   * Get open tabs.
-   *
-   * @param aName optional string tab name
-   *        If supplied, will return the named tab or null.
-   * @returns A hash of tab name -> tab reference, or if a
-   *          name parameter is passed, returns the matching
-   *          tab reference or null.
-   */
+
+  // ** {{{ Utils.tabs.get() }}} **
+  //
+  // Gets open tabs.
+  //
+  // {{{aName}}} is an optional string tab name.  If supplied, this
+  // function will return the named tab or null.
+  //
+  // This function returns a a hash of tab names to tab references; or,
+  // if a name parameter is passed, it returns the matching tab
+  // reference or null.
+
   get: function Utils_tabs_get(aName) {
     if (aName)
       return this._cache[aName] || null;
@@ -463,13 +531,16 @@ Utils.tabs = {
     return this._cache;
   },
 
-  /**
-   * Search for tabs by tab name.
-   *
-   * @param aSearchText string
-   * @param aMaxResults integer
-   * @returns A hash of tab name -> tab reference
-   */
+  // ** {{{ Utils.tabs.search() }}} **
+  //
+  // This function searches for tabs by tab name and returns a hash of
+  // tab names to tab references.
+  //
+  // {{{aSearchText}}} is a string specifying the text to search for.
+  //
+  // {{{aMaxResults}}} is an integer specifying the maximum number of
+  // results to return.
+
   search: function Utils_tabs_search(aSearchText, aMaxResults) {
     var matches = {};
     var matchCount = 0;
@@ -485,10 +556,8 @@ Utils.tabs = {
     return matches;
   },
 
-  /**
-   * Handles TabOpen, TabClose and load events
-   * clears tab cache
-   */
+  // Handles TabOpen, TabClose and load events; clears tab cache.
+
   onTabEvent: function(aEvent, aTab) {
     switch ( aEvent.type ) {
       case "TabOpen":
@@ -542,19 +611,16 @@ Utils.tabs = {
     }
   },
 
-  /**
-   * smart-getter for fuel
-   */
+  // Smart-getter for FUEL.
+
   get Application() {
     delete this.Application;
-    return this.Application = Components.classes["@mozilla.org/fuel/application;1"].
-                              getService(Components.interfaces.fuelIApplication);
+    return this.Application = Cc["@mozilla.org/fuel/application;1"]
+                              .getService(Ci.fuelIApplication);
   },
 
-  /**
-   * getter for the tab cache
-   * manages reloading cache
-   */
+   // Getter for the tab cache; manages reloading the cache.
+
   __cache: null,
   get _cache() {
     if (this.__cache)
@@ -565,8 +631,14 @@ Utils.tabs = {
     for( var j=0; j < windowCount; j++ ) {
 
       var win = this.Application.windows[j];
-      win.events.addListener("TabOpen", function(aEvent) { self.onTabEvent(aEvent); });
-      win.events.addListener("TabClose", function(aEvent) { self.onTabEvent(aEvent); });
+      win.events.addListener(
+        "TabOpen",
+        function(aEvent) { self.onTabEvent(aEvent); }
+      );
+      win.events.addListener(
+        "TabClose",
+        function(aEvent) { self.onTabEvent(aEvent); }
+      );
 
       var tabCount = win.tabs.length;
       for (var i = 0; i < tabCount; i++) {
