@@ -4,15 +4,7 @@ App.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
 
-App.getLocalUrlData = function getLocalUrlData(url) {
-  var jsm = {};
-  Components.utils.import("resource://ubiquity/modules/codesource.js",
-                          jsm);
-  var lcs = new jsm.LocalUriCodeSource(url);
-  return lcs.getCode();
-};
-
-App.processCode = function processCode(code) {
+App.processCode = function processCode(code, div) {
   var lines = code.split('\n');
   var blocks = [];
   var blockText = "";
@@ -68,36 +60,54 @@ App.processCode = function processCode(code) {
     function(i) {
       var docs = $('<div class="documentation">');
       creole.parse(docs.get(0), this.text);
-      $("#content").append(docs);
+      $(div).append(docs);
       var code = $('<div class="code">');
       code.text(this.code);
-      $("#content").append(code);
+      $(div).append(code);
 
       var docsSurplus = docs.height() - code.height() + 1;
       if (docsSurplus > 0)
         code.css({paddingBottom: docsSurplus + "px"});
 
-      $("#content").append('<div class="divider">');
+      $(div).append('<div class="divider">');
     });
+};
+
+App.currentPage = null;
+
+App.pages = {};
+
+App.navigate = function navigate() {
+  var newPage;
+  if (window.location.hash)
+    newPage = window.location.hash.slice(1);
+  else
+    newPage = "overview";
+
+  if (App.currentPage != newPage) {
+    if (App.currentPage)
+      $(App.pages[App.currentPage]).hide();
+    if (!App.pages[newPage]) {
+      var newDiv = $("<div>");
+      newDiv.attr("name", newPage);
+      $("#content").append(newDiv);
+      App.pages[newPage] = newDiv;
+      jQuery.get(newPage,
+                 {},
+                 function(code) { App.processCode(code, newDiv); },
+                 "text");
+    }
+    $(App.pages[newPage]).show();
+    App.currentPage = newPage;
+  }
 };
 
 $(window).ready(
   function() {
-    if (window.location.hash) {
-      var baseDir;
-      var filename = window.location.hash.slice(1);
-      if (window.location.protocol == "chrome:") {
-        baseDir = "resource://ubiquity/";
-        var code = App.getLocalUrlData(baseDir + filename);
-        App.processCode(code);
-      } else {
-        baseDir = "../../../";
-        jQuery.get(baseDir + filename,
-                   {},
-                   App.processCode,
-                   "text");
-      }
-    } else {
-      window.location = "overview.html";
-    }
+    App.pages["overview"] = $("#overview").get(0);
+    window.setInterval(
+      function() { App.navigate(); },
+      100
+    );
+    App.navigate();
   });
