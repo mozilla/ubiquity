@@ -46,6 +46,13 @@ var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
 
+// ** {{{ CmdUtils.getHtmlSelection( context ) }}} **
+//
+// Returns the HTML representation of the current selection.
+//
+// {{{context}}} is an optional argument that contains the execution
+// context (which is automatically generated inside of command code).
+
 CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
   var ctu = {};
   Components.utils.import("resource://ubiquity/modules/contextutils.js",
@@ -56,6 +63,14 @@ CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
 
   return ctu.ContextUtils.getHtmlSelection(context);
 };
+
+// ** {{{ CmdUtils.getSelection( context ) }}} **
+//
+// Returns the text representation of the current selection.
+//
+// {{{context}}} is an optional argument that contains the execution
+// context (which is automatically generated inside of command code).
+
 
 CmdUtils.getSelection = function getSelection(context) {
   var ctu = {};
@@ -68,11 +83,26 @@ CmdUtils.getSelection = function getSelection(context) {
   return ctu.ContextUtils.getSelection(context);
 };
 
+// ** {{{ CmdUtils.getTextFromHtml( html ) }}} **
+//
+// Strips out all HTML tags from a chunk of html &mdash; leaving the text.
+//
+// {{{html}}} is a string containing an html fragment.
+
 CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
   var newNode = context.focusedWindow.document.createElement("p");
   newNode.innerHTML = html;
   return newNode.textContent;
 }
+
+
+// ** {{{ CmdUtils.setSelection( content, options ) }}} **
+//
+// Replaces the current selection with new content.
+//
+// {{{content}}} TODO
+// 
+// {{{options}}} TODO
 
 CmdUtils.setSelection = function setSelection(content, options) {
   var ctu = {};
@@ -112,6 +142,22 @@ CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
   return CmdUtils.getWindowInsecure().document;
 };
 
+
+// ** {{{ CmdUtils.geocodeAddress( address, callback ) }}} **
+//
+// This function uses the Yahoo geocoding service to take a text
+// string of an address/location and turn it into a structured
+// geo-location.
+//
+// {{{address}}} is a plaintext string of the address or location
+// to be geocoded.
+//
+// {{{callback}}} is a function which gets passed the return of
+// the geocoding.
+//
+// The function returns an array of possible matches, where each match is
+// an object that includes {{{Latitude}}}, {{{Longitude}}},
+// {{{Address}}}, {{{City}}}, {{{State}}}, {{{Zip}}}, and {{{Country}}}.
 
 CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
@@ -161,6 +207,12 @@ CmdUtils.injectHtml = function injectHtml( html ) {
   doc.body.appendChild(div.firstChild);
 };
 
+
+// ** {{{ CmdUtils.copyToClipboard( text ) }}} **
+//
+// This function places the passed-in text into the OS's clipboard.
+//
+// {{{text}}} is a plaintext string that will be put into the clipboard.
 
 //Function based on the one I found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
 CmdUtils.copyToClipboard = function copyToClipboard(text){
@@ -351,6 +403,17 @@ CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
 }
 
 
+// ** {{{ CmdUtils.getImageSnapshot( url, callback ) }}} **
+//
+// Takes a snapshot of an image residing at the passed-in URL. This
+// is useful for when you want to get the bits of an image when it
+// is hosted elsewhere. The bits can then be manipulated at will
+// without worry of same-domain restrictions.
+//
+// {{{url}}} The URL where the image is located.
+//
+// {{{callback}}} A function that get's passed back the bits of the
+// image, in DataUrl form.
 CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var hiddenWindow = CmdUtils.getHiddenWindow();
   var body = hiddenWindow.document.body;
