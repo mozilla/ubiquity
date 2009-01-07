@@ -7,10 +7,14 @@
 </head>
 <body>
 <script>
-if (window.location.protocol == "chrome:")
-  window.location = "docs-chrome.html";
-else
-  window.location = "docs-content.html";
+if (!window.location.hash) {
+  window.location = "overview.html";
+} else {
+  if (window.location.protocol == "chrome:")
+    window.location = "docs-chrome.html" + window.location.hash;
+  else
+    window.location = "docs-content.html" + window.location.hash;
+}
 </script>
 </body>
 </html>

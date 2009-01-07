@@ -83,17 +83,21 @@ App.processCode = function processCode(code) {
 
 $(window).ready(
   function() {
-    var baseDir;
-    var filename = "modules/utils.js";
-    if (window.location.protocol == "chrome:") {
-      baseDir = "resource://ubiquity/";
-      var code = App.getLocalUrlData(baseDir + filename);
-      App.processCode(code);
+    if (window.location.hash) {
+      var baseDir;
+      var filename = window.location.hash.slice(1);
+      if (window.location.protocol == "chrome:") {
+        baseDir = "resource://ubiquity/";
+        var code = App.getLocalUrlData(baseDir + filename);
+        App.processCode(code);
+      } else {
+        baseDir = "../../../";
+        jQuery.get(baseDir + filename,
+                   {},
+                   App.processCode,
+                   "text");
+      }
     } else {
-      baseDir = "../../../";
-      jQuery.get(baseDir + filename,
-                 {},
-                 App.processCode,
-                 "text");
+      window.location = "overview.html";
     }
   });
