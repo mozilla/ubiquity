@@ -9,6 +9,7 @@ var Editor = {
   onLoad : function(){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
     $("#editorInputBox").val(editor);
+    $("#docs").attr("href", UbiquitySetup.getBaseUri() + "index.html");
   },
   onSave : function(){
     Application.prefs.setValue(this.EDITOR_PREF, $("#editorInputBox").val());

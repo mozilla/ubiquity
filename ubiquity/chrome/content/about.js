@@ -121,6 +121,7 @@ function makeFeedListElement(info, label, clickMaker) {
 }
 
 function onReady() {
+  $("#docs").attr("href", UbiquitySetup.getBaseUri() + "index.html");
   PrefKeys.onLoad();
   let feedMgr = UbiquitySetup.createServices().feedManager;
 
