@@ -72,13 +72,8 @@ var basePath = arguments[0];
 
 (
   function() {
-    var modulesDir = getPath(basePath);
-    modulesDir.appendRelativePath("modules");
-    bindDirToResource(modulesDir, "ubiquity/modules");
-
-    var testsDir = getPath(basePath);
-    testsDir.appendRelativePath("tests");
-    bindDirToResource(testsDir, "ubiquity/tests");
+    var rootDir = getPath(basePath);
+    bindDirToResource(rootDir, "ubiquity");
 
     var componentPath = getPath(basePath);
     componentPath.appendRelativePath("components");
