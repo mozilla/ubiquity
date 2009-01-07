@@ -52,6 +52,54 @@ var CmdUtils = {};
 
 CmdUtils.__globalObject = this;
 
+// ** {{{ CmdUtils.log(a, b, c, ...) }}} **
+//
+// One of the most useful functions to know both for development 
+// and debugging. This logging function takes
+// an arbitrary number of arguments and will log them to the most
+// appropriate output. If you have Firebug, the output will go to its
+// console. Otherwise, it the output will be routed to the Javascript
+// Console.
+//
+// {{{CmdUtils.log}}} implements smart pretty print, so you
+// can use it for inspecting arrays and objects.
+//
+// {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
+
+
+CmdUtils.log = function log(what) {
+  var args = Array.prototype.slice.call(arguments);
+  if(args.length == 0)
+    return;
+
+  var logPrefix = "Ubiquity: ";
+  var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Ci.nsIWindowMediator);
+  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+
+  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
+    args.unshift(logPrefix);
+    browserWindow.Firebug.Console.logFormatted(args);
+  } else {
+    var logMessage = "";
+    if(typeof args[0] == "string") {
+      var formatStr = args.shift();
+      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
+        formatStr = formatStr.replace("%s", "" + args.shift());
+      }
+      args.unshift(formatStr);
+    }
+    args.forEach(function(arg) {
+      if(typeof arg == "object") {
+        logMessage += " " + Utils.encodeJson(arg) + " ";
+      } else {
+        logMessage += arg;
+      }
+    });
+    Application.console.log(logPrefix + logMessage);
+  }
+};
+
 // ** {{{ CmdUtils.getHtmlSelection( context ) }}} **
 //
 // Returns the HTML representation of the current selection.
@@ -233,39 +281,6 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
 
 // = TODO: Finish the rest of the documentation =
 
-
-CmdUtils.log = function log(what) {
-  var args = Array.prototype.slice.call(arguments);
-  if(args.length == 0)
-    return;
-
-  var logPrefix = "Ubiquity: ";
-  var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Ci.nsIWindowMediator);
-  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
-
-  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
-    args.unshift(logPrefix);
-    browserWindow.Firebug.Console.logFormatted(args);
-  } else {
-    var logMessage = "";
-    if(typeof args[0] == "string") {
-      var formatStr = args.shift();
-      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
-        formatStr = formatStr.replace("%s", "" + args.shift());
-      }
-      args.unshift(formatStr);
-    }
-    args.forEach(function(arg) {
-      if(typeof arg == "object") {
-        logMessage += " " + Utils.encodeJson(arg) + " ";
-      } else {
-        logMessage += arg;
-      }
-    });
-    Application.console.log(logPrefix + logMessage);
-  }
-};
 
 CmdUtils.injectJavascript = function injectJavascript(src, callback) {
   var doc = CmdUtils.getDocument();
