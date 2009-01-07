@@ -36,6 +36,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = Utils =
+//
+// This is a small library of all-purpose, general utility functions
+// for use by chrome code.  Everything clients need is contained within
+// the {{{Utils}}} namespace.
+
 var EXPORTED_SYMBOLS = ["Utils"];
 
 const Cc = Components.classes;
@@ -43,7 +49,23 @@ const Ci = Components.interfaces;
 
 var Utils = {};
 
+// Keep a reference to the global object, as certain utility functions
+// need it.
 Utils.__globalObject = this;
+
+// ** {{{ Utils.reportWarning() }}} **
+//
+// This function can be used to report a warning to the JS Error Console,
+// which can be displayed in Firefox by choosing "Error Console" from
+// the "Tools" menu.
+//
+// {{{aMessage}}} is a plaintext string corresponding to the warning
+// to provide.
+//
+// {{{stackFrame}}} is an optional {{{nsIStackFrame}}} instance that
+// corresponds to the stack frame which is reporting the error; a link
+// to the line of source that it references will be shown in the JS
+// Error Console.  It defaults to the caller's stack frame.
 
 Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
   if (!stackFrame)
@@ -64,6 +86,13 @@ Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
   consoleService.logMessage(scriptError);
 };
 
+// ** {{{ Utils.reportInfo() }}} **
+//
+// Reports a purely informational message to the JS Error Console.
+// Source code links aren't provided for informational messages, so
+// unlike {{{Utils.reportWarning()}}}, a stack frame can't be passed
+// in to this function.
+
 Utils.reportInfo = function reportInfo(aMessage) {
   var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
                        .getService(Components.interfaces.nsIConsoleService);
@@ -71,17 +100,77 @@ Utils.reportInfo = function reportInfo(aMessage) {
   consoleService.logStringMessage(aCategory + aMessage);
 };
 
+// ** {{{ Utils.encodeJson() }}} **
+//
+// This function serializes the given object using JavaScript Object
+// Notation (JSON).
+
 Utils.encodeJson = function encodeJson(object) {
   var json = Cc["@mozilla.org/dom/json;1"]
              .createInstance(Ci.nsIJSON);
   return json.encode(object);
 };
 
+// ** {{{ Utils.decodeJson() }}} **
+//
+// This function unserializes the given string in JavaScript Object
+// Notation (JSON) format and returns the result.
+
 Utils.decodeJson = function decodeJson(string) {
   var json = Cc["@mozilla.org/dom/json;1"]
              .createInstance(Ci.nsIJSON);
   return json.decode(string);
 };
+
+// ** {{{ Utils.setTimeout() }}} **
+//
+// This function works just like the {{{window.setTimeout()}}} method
+// in content space, but it can only accept a function (not a string)
+// as the callback argument.
+//
+// {{{callback}}} is the callback function to call when the given
+// delay period expires.  It will be called only once (not at a regular
+// interval).
+//
+// {{{delay}}} is the delay, in milliseconds, after which the callback
+// will be called once.
+//
+// This function returns a timer ID, which can later be given to
+// {{{Utils.clearTimeout()}}} if the client decides that it wants to
+// cancel the callback from being triggered.
+
+// TODO: Allow strings for the first argument like DOM setTimeout() does.
+
+Utils.setTimeout = function setTimeout(callback, delay) {
+  var classObj = Cc["@mozilla.org/timer;1"];
+  var timer = classObj.createInstance(Ci.nsITimer);
+  var timerID = Utils.__timerData.nextID;
+  // emulate window.setTimeout() by incrementing next ID by random amount
+  Utils.__timerData.nextID += Math.floor(Math.random() * 100) + 1;
+  Utils.__timerData.timers[timerID] = timer;
+
+  timer.initWithCallback(new Utils.__TimerCallback(callback),
+                         delay,
+                         classObj.TYPE_ONE_SHOT);
+  return timerID;
+};
+
+// ** {{{ Utils.clearTimeout() }}} **
+//
+// This function behaves like the {{{window.clearTimeout()}}} function
+// in content space, and cancels the callback with the given timer ID
+// from ever being called.
+
+Utils.clearTimeout = function clearTimeout(timerID) {
+  if(!(timerID in Utils.__timerData.timers))
+    return;
+
+  var timer = Utils.__timerData.timers[timerID];
+  timer.cancel();
+  delete Utils.__timerData.timers[timerID];
+};
+
+// Support infrastructure for the timeout-related functions.
 
 Utils.__TimerCallback = function __TimerCallback(callback) {
   Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -107,42 +196,20 @@ Utils.__timerData = {
   timers: {}
 };
 
-//Utils.setTimeout works just like DOM setTimeout() method
-//but it can only accept a function (not a string) as the callback argument
-//TODO: Allow strings for the first argument like DOM setTimeout() does.
-
-Utils.setTimeout = function setTimeout(callback, delay) {
-  var classObj = Cc["@mozilla.org/timer;1"];
-  var timer = classObj.createInstance(Ci.nsITimer);
-  var timerID = Utils.__timerData.nextID;
-  // emulate window.setTimeout() by incrementing next ID by random amount
-  Utils.__timerData.nextID += Math.floor(Math.random() * 100) + 1;
-  Utils.__timerData.timers[timerID] = timer;
-
-  timer.initWithCallback(new Utils.__TimerCallback(callback),
-                         delay,
-                         classObj.TYPE_ONE_SHOT);
-  return timerID;
-};
-
-Utils.clearTimeout = function clearTimeout(timerID) {
-  if(!(timerID in Utils.__timerData.timers))
-    return;
-
-  var timer = Utils.__timerData.timers[timerID];
-  timer.cancel();
-  delete Utils.__timerData.timers[timerID];
-};
-
-// Given a string representing an absolute URL or a nsIURI object,
-// returns an equivalent nsIURI object.  Alternatively, an object with
-// keyword arguments as keys can also be passed in; the following
-// arguments are supported:
+// ** {{{ Utils.url() }}} **
 //
-//   uri: a string/nsIURI representing an absolute or relative URL.
+// Given a string representing an absolute URL or a {{{nsIURI}}}
+// object, returns an equivalent {{{nsIURI}}} object.  Alternatively,
+// an object with keyword arguments as keys can also be passed in; the
+// following arguments are supported:
 //
-//   base: a string/nsIURI representing an absolute URL, which is used
-//         as the base URL for the 'uri' keyword argument.
+// * {{{uri}}} is a string or {{{nsIURI}}} representing an absolute or
+//   relative URL.
+//
+// * {{{base}}} is a string or {{{nsIURI}}} representing an absolute
+//   URL, which is used as the base URL for the {{{uri}}} keyword
+//   argument.
+
 Utils.url = function url(spec) {
   var base = null;
   if (typeof(spec) == "object") {
@@ -160,10 +227,21 @@ Utils.url = function url(spec) {
   return ios.newURI(spec, null, base);
 };
 
-Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
-  // allow postData to be null/undefined, string representation, json representation, or nsIInputStream
-  // nsIInputStream is what is needed
+// ** {{{ Utils.openUrlInBrowser() }}} **
+//
+// This function opens the given URL in the user's browser, using
+// their current preferences for how new URLs should be opened (e.g.,
+// in a new window vs. a new tab, etc).
+//
+// {{{urlString}}} is a string corresponding to the URL to be
+// opened.
+//
+// {{{postData}}} is an optional argument that allows HTTP POST data
+// to be sent to the newly-opened page.  It may be a string, an Object
+// with keys and values corresponding to their POST analogues, or an
+// {{{nsIInputStream}}}.
 
+Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   var postInputStream = null;
   if(postData) {
     if(postData instanceof Ci.nsIInputStream) {
@@ -178,7 +256,8 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 
       postInputStream = Cc["@mozilla.org/network/mime-input-stream;1"]
         .createInstance(Ci.nsIMIMEInputStream);
-      postInputStream.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      postInputStream.addHeader("Content-Type",
+                                "application/x-www-form-urlencoded");
       postInputStream.addContentLength = true;
       postInputStream.setData(stringStream);
     }
@@ -197,7 +276,8 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   //3 (default in Firefox 2 and above): In a new tab
   //1 (or anything else): In the current tab or window
 
-  if(browser.mCurrentBrowser.currentURI.spec == "about:blank" && !browser.webProgress.isLoadingDocument )
+  if(browser.mCurrentBrowser.currentURI.spec == "about:blank" &&
+     !browser.webProgress.isLoadingDocument )
     browserWindow.loadURI(urlString, null, postInputStream, false);
   else if(openPref == 3)
     browser.loadOneTab(urlString, null, null, postInputStream, false, false);
@@ -208,8 +288,12 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
     browserWindow.loadURI(urlString, null, postInputStream, false);
 };
 
-// Focuses a tab with the given URL if one exists in the current
-// window, otherwise opens a new tab with the URL and focuses it.
+// ** {{{ Utils.focusUrlInBrowser() }}} **
+//
+// This function focuses a tab with the given URL if one exists in the
+// current window; otherwise, it delegates to
+// {{{Utils.openUrlInBrowser()}}}.
+
 Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
   let Application = Components.classes["@mozilla.org/fuel/application;1"]
                     .getService(Components.interfaces.fuelIApplication);
@@ -222,6 +306,11 @@ Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
     }
   Utils.openUrlInBrowser(urlString);
 };
+
+// ** {{{ Utils.getCookie() }}} **
+//
+// This function returns the cookie for the given domain and with the
+// given name.  If no matching cookie exists, {{{null}}} is returned.
 
 Utils.getCookie = function getCookie(domain, name) {
   var cookieManager = Cc["@mozilla.org/cookiemanager;1"].
@@ -237,6 +326,8 @@ Utils.getCookie = function getCookie(domain, name) {
   // if no matching cookie:
   return null;
 };
+
+// = The rest of this documentation still needs to be written. =
 
 Utils.paramsToString = function paramsToString(params) {
   var stringPairs = [];
