@@ -1,4 +1,8 @@
-var App = {};
+var App = {
+  XUL_PLANET_URL_TEMPLATE: ("http://www.xulplanet.com/references/xpcomref/" +
+                            "ifaces/%QUERY%.html"),
+  MDC_URL_TEMPLATE: "https://developer.mozilla.org/en/N%QUERY%"
+};
 
 App.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
@@ -70,6 +74,52 @@ App.processCode = function processCode(code, div) {
         code.css({paddingBottom: docsSurplus + "px"});
 
       $(div).append('<div class="divider">');
+    });
+  $(div).find(".documentation").find("tt").each(
+    function() {
+      var text = $(this).text();
+      if (!(text.indexOf("nsI") == 0))
+        return;
+      $(this).wrap('<span class="popup-enabled"></span>');
+
+    $(this).mousedown(
+      function(evt) {
+        evt.preventDefault();
+        var popup = $('<div class="popup"></div>');
+
+        function addMenuItem(label, urlOrCallback) {
+          var callback;
+          var menuItem = $('<div class="item"></div>');
+          menuItem.text(label);
+          function onOverOrOut() { $(this).toggleClass("selected"); }
+          menuItem.mouseover(onOverOrOut);
+          menuItem.mouseout(onOverOrOut);
+          if (typeof(urlOrCallback) == "string")
+            callback = function() {
+              window.open(urlOrCallback);
+            };
+          else
+            callback = urlOrCallback;
+          menuItem.mouseup(callback);
+          popup.append(menuItem);
+        }
+
+        addMenuItem("View MDC entry",
+                    App.MDC_URL_TEMPLATE.replace("%QUERY%",
+                                                 text.slice(1)));
+        addMenuItem("View XULPlanet entry",
+                    App.XUL_PLANET_URL_TEMPLATE.replace("%QUERY%", text));
+
+        popup.find(".item:last").addClass("bottom");
+
+        popup.css({left: evt.pageX + "px"});
+        $(window).mouseup(
+          function mouseup() {
+            popup.remove();
+            $(window).unbind("mouseup", mouseup);
+          });
+        $(this).append(popup);
+      });
     });
 };
 

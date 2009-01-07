@@ -4,6 +4,36 @@ body {
     text-align: center;
 }
 
+.popup-enabled {
+    cursor: pointer;
+    border-bottom: dotted 1px black;
+}
+
+.popup {
+    position: absolute;
+    z-index: 100;
+}
+
+.popup .item {
+    cursor: pointer;
+    font-family: helvetica neue, arial, sans-serif;
+    background-color: #eeeeee;
+    color: black;
+    padding: 3px;
+    border-top: 1px dotted;
+    border-left: 1px dotted;
+    border-right: 1px dotted;
+}
+
+.popup .selected {
+    background-color: black;
+    color: white;
+}
+
+.popup .bottom {
+    border-bottom: 1px dotted;
+}
+
 #content {
     width: 800px;
     text-align: left;
