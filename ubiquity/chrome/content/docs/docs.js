@@ -83,12 +83,17 @@ App.processCode = function processCode(code) {
 
 $(window).ready(
   function() {
+    var baseDir;
+    var filename = "modules/utils.js";
     if (window.location.protocol == "chrome:") {
-      var code = App.getLocalUrlData("resource://ubiquity/modules/utils.js");
+      baseDir = "resource://ubiquity/";
+      var code = App.getLocalUrlData(baseDir + filename);
       App.processCode(code);
-    } else
-      jQuery.get("../../../modules/utils.js",
+    } else {
+      baseDir = "../../../";
+      jQuery.get(baseDir + filename,
                  {},
                  App.processCode,
                  "text");
+    }
   });
