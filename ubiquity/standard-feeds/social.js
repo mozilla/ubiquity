@@ -67,7 +67,10 @@ CmdUtils.CreateCommand({
         displayMessage("Twitter error - status not updated");
       },
       success: function() {
-        displayMessage("Twitter status updated");
+        var msg = updateParams.status.match(/^d /) ?
+                  "Twitter direct message sent" :
+                  "Twitter status updated";
+        displayMessage(msg);
       }
     });
   }
