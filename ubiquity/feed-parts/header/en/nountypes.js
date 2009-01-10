@@ -456,7 +456,7 @@ var noun_type_language =  {
 			return word;
 		}
 	}
-	return "Unknown";
+	return null;
   }
 };
 
