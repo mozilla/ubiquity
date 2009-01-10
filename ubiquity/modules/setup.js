@@ -54,9 +54,12 @@ let gServices;
 let gIframe;
 
 const RESET_SCHEDULED_PREF = "extensions.ubiquity.isResetScheduled";
+const VERSION_PREF ="extensions.ubiquity.lastversion";
 const ANN_DB_FILENAME = "ubiquity_ann.sqlite";
 
 let UbiquitySetup = {
+  isNewlyInstalledOrUpgraded: false,
+
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
                     title: "Mozilla Browser Commands"},
@@ -213,6 +216,14 @@ let UbiquitySetup = {
 
   createServices: function createServices() {
     if (!gServices) {
+      // Compare the version in our preferences from our version in the
+      // install.rdf.
+      var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
+      if (currVersion != this.version) {
+        Application.prefs.setValue(VERSION_PREF, this.version);
+        this.isNewlyInstalledOrUpgraded = true;
+      }
+
       this.__modifyUserAgent();
 
       var Cc = Components.classes;
@@ -252,12 +263,14 @@ let UbiquitySetup = {
                    feedManager: feedManager,
                    messageService: msgService};
 
-      // For some reason, the following function isn't executed
-      // atomically by Javascript; perhaps something being called is
-      // getting the '@mozilla.org/thread-manager;1' service and
-      // spinning via a call to processNextEvent() until some kind of
-      // I/O is finished?
-      this.__installDefaults(defaultFeedPlugin);
+      if (this.isNewlyInstalledOrUpgraded)
+        // For some reason, the following function isn't executed
+        // atomically by Javascript; perhaps something being called is
+        // getting the '@mozilla.org/thread-manager;1' service and
+        // spinning via a call to processNextEvent() until some kind of
+        // I/O is finished?
+        this.__installDefaults(defaultFeedPlugin);
+
       cmdSource.refresh();
     }
 

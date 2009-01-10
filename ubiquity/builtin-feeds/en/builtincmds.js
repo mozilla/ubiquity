@@ -87,15 +87,9 @@ CmdUtils.CreateCommand({
 
 function startup_openUbiquityWelcomePage()
 {
-  const VERSION_PREF ="extensions.ubiquity.lastversion";
+  var jsm = {};
+  Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
 
-  var ext = Application.extensions.get("ubiquity@labs.mozilla.com");
-
-  // Compare the version in our preferences from our version in the
-  // install.rdf.
-  var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
-  if (currVersion != ext.version) {
-    Application.prefs.setValue(VERSION_PREF, ext.version);
+  if (jsm.UbiquitySetup.isNewlyInstalledOrUpgraded)
     cmd_help();
-  }
 }
