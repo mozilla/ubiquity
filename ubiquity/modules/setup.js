@@ -107,6 +107,18 @@ let UbiquitySetup = {
     return extDir;
   },
 
+  __modifyUserAgent: function __modifyUserAgent() {
+    const USERAGENT_PREF = "general.useragent.extra.ubiquity";
+    var expectedPref = "Ubiquity/" + this.version;
+    Application.prefs.setValue(USERAGENT_PREF, expectedPref);
+
+    function removePref() {
+      Application.prefs.setValue(USERAGENT_PREF, "");
+    }
+
+    Application.events.addListener("quit", {handleEvent: removePref});
+  },
+
   __maybeReset: function __maybeReset() {
     if (this.isResetScheduled) {
       // Reset all feed subscriptions.
@@ -201,6 +213,8 @@ let UbiquitySetup = {
 
   createServices: function createServices() {
     if (!gServices) {
+      this.__modifyUserAgent();
+
       var Cc = Components.classes;
 
       var annDbFile = AnnotationService.getProfileFile(ANN_DB_FILENAME);
