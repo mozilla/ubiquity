@@ -27,7 +27,7 @@ CmdUtils.CreateCommand({
 	  .replace(">", "&gt;");
 
     var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b><br /><br />Characters remaining: <b>${chars}</b> <p style='font-size:11px'> tip: tweet @mozillaubiquity for help </p>";
-    var truncateTemplate = "<br />The last <b>${truncate}</b> characters will be truncated!";
+    var truncateTemplate = "<span style='color: red;'><br />The last <b>${truncate}</b> characters will be truncated!</span>";
     var previewData = {
       status: statusText,
       chars: TWITTER_STATUS_MAXLEN - statusText.length
@@ -35,7 +35,7 @@ CmdUtils.CreateCommand({
 
     var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
-    if(previewData.chars < 0) {
+    if (previewData.chars < 0) {
       var truncateData = {
         truncate: 0 - previewData.chars
       };
