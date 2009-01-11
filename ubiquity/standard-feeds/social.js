@@ -142,7 +142,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-
 CmdUtils.CreateCommand({
   name: "tinyurl",
   takes: {"url to shorten": noun_type_url},
@@ -163,4 +162,241 @@ CmdUtils.CreateCommand({
       CmdUtils.setSelection( tinyUrl );
     });
   }
+});
+
+
+/**
+ * share-on-delicious - an Ubiquity command for sharing bookmarks on
+ * delicious.com
+ *
+ * l.m.orchard@pobox.com
+ * http://decafbad.com/
+ * Share and Enjoy!
+ * 
+ * TODO: convert to use xhtml templates
+ * TODO: work out how to use suggested tags in the UI
+ * TODO: enforce the 1000 character notes limit with a counter
+ * TODO: wrap selected text in quotes, typed notes without
+ * TODO: implement modifier to support private posting
+ * TODO: handle error codes from delicious, not just HTTP itself
+ */
+var uext = Application.extensions.get('ubiquity@labs.mozilla.com');
+
+var cookie_mgr = Components.classes["@mozilla.org/cookiemanager;1"]
+    .getService(Components.interfaces.nsICookieManager);
+
+CmdUtils.CreateCommand({
+    
+    name:        
+        'share-on-delicious',
+    icon:
+        'http://delicious.com/favicon.ico',
+    description: 
+        'Share the current page as a bookmark on delicious.com',
+    help:        
+        'Select text on the page to use as notes, or enter your own ' + 
+        'text after the command word.  You can also assign tags to the '+ 
+        'bookmark with the "tagged" modifier, and alter the bookmark ' + 
+        'default page title with the "entitled" modifier.  Note that ' + 
+        'you must also already be logged in at delicious.com to use ' +
+        'this command.',
+
+    homepage:   
+        'http://decafbad.com',
+    author: { 
+        name: 'Leslie Michael Orchard', 
+        email: 'l.m.orchard@pobox.com' 
+    },
+    license:
+        'MPL/GPL/LGPL',
+
+    takes: { notes: noun_arb_text },
+    modifiers: { 
+        tagged:   noun_arb_text,
+        entitled: noun_arb_text
+    },
+
+    /**
+     * Command configuration settings.
+     */
+    _config: {
+        // Base URL for the delicious v1 API
+        api_base:      'https://api.del.icio.us',
+
+        // Domain and name of the delicious login session cookie.
+        cookie_domain: '.delicious.com',
+        cookie_name:   '_user'
+    },
+
+    /**
+     * Present a preview of the bookmark under construction during the course
+     * of composing the command.
+     */
+    preview: function(pblock, input_obj, mods) {
+
+        var bm          = this._extractBookmarkData(input_obj, mods);
+        var user_cookie = this._getUserCookie();
+        var user_name   = (user_cookie) ? user_cookie.split(' ')[0] : '';
+
+        var ns = { user_name: user_name, bm: bm };
+
+        var tmpl;
+
+        if (!user_name) {
+
+            // If there's no user name, there's no login, so this command won't work. 
+            tmpl = [ 
+                '<p style="color: #d44">No active user found - log in at ', 
+                '<img src="http://delicious.com/favicon.ico"> ',
+                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ', 
+                'to use this command.</p>'
+            ].join('');
+
+        } else if (!bm.description) {
+
+            // If there's no title, somehow, then this is an error too.
+            tmpl = [ 
+                '<p style="color: #d44">A title is required for bookmarks on ', 
+                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ', 
+                '</p>'
+            ].join('');
+
+        } else {
+
+            // Attempt to construct a vaguely delicious-esque preview of a bookmark.
+            tmpl = [ 
+                '<style type="text/css">',
+                    '.preview a { color: #3774D0 }',
+                    '.del-bookmark { font: 12px arial; color: #ddd; background: #eee; line-height: 1.25em }',
+                    '.del-bookmark a.title { color: #1259C7 }',
+                    '.del-bookmark .full-url { color: #396C9B; font-size: 12px; display: block; padding: 0.25em 0 }',
+                    '.del-bookmark .notes { color: #4D4D4D }',
+                    '.del-bookmark .tags { color: #787878; padding-top: 0.25em; text-align: right }',
+                '</style>',
+                '<div class="preview">',
+                    '<p>Share a bookmark at <img src="http://delicious.com/favicon.ico"> ',
+                        '<b><a href="http://delicious.com/${user_name}">delicious.com/${user_name}</a></b>:</p>',
+                    '<div class="del-bookmark">',
+                        '<div style="padding: 1em;">',
+                        '<a class="title" href="${bm.url}">${bm.description}</a>',
+                        '<a class="full-url" href="${bm.url}">${bm.url}</a>',
+                        bm.extended ? 
+                            '<div class="notes">${bm.extended}</div>' : '',
+                        bm.tags ?
+                            '<div class="tags"><span>tags:</span> ${bm.tags}</div>' : '',
+                    '</div>',
+                '</div>'
+            ].join("\n");
+
+        }
+
+        pblock.innerHTML = CmdUtils.renderTemplate(tmpl, ns);
+    },
+    
+    /**
+     * Attempt to use the delicious v1 API to post a bookmark using the 
+     * command input
+     */
+    execute: function(input_obj, mods) {
+        var bm          = this._extractBookmarkData(input_obj, mods);
+        var user_cookie = this._getUserCookie();
+        var user_name   = (user_cookie) ? user_cookie.split(' ')[0] : '';
+
+        if (!user_name) {
+            // If there's no user name, there's no login, so this command won't work. 
+            displayMessage('No active user found - log in at delicious.com ' +
+                'to use this command.');
+            return false;
+        }
+
+        if (!bm.description) {
+            // If there's no title, somehow, then this is an error too.
+            displayMessage("A title is required for bookmarks at delicious.com");
+            return false;
+        }
+
+        var path = '/v1/posts/add';
+        var url  = this._config.api_base + path;
+
+        var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
+            createInstance();
+
+        req.open('POST', url, true);
+
+        var _this = this;
+        var onload, onerror;
+
+        req.onload  = onload  = function(ev) { 
+            displayMessage('Bookmark "' + bm.description + '" ' + 
+                'shared at delicious.com/' + user_name);
+        }
+
+        req.onerror = onerror = function(ev) { 
+            // TODO: more informative reporting on errors
+            displayMessage('ERROR: Bookmark "' + bm.description + '" ' + 
+                ' NOT shared on delicious.com/' + user_name);
+        }
+
+        // TODO: implement timeout here, in case requests take too long.
+
+        req.setRequestHeader('Authorization', 'Basic Y29va2llOmNvb2tpZQ=='); // btoa('cookie:cookie')
+        req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        var mediator = Components.classes["@mozilla.org/appshell/window-mediator;1"].
+            getService(Components.interfaces.nsIWindowMediator);
+        var win = mediator.getMostRecentWindow(null);
+        var user_agent = win.navigator.userAgent + ";Ubiquity-share-on-delicious";
+
+        req.setRequestHeader("User-Agent", user_agent);      
+
+        req.send(this._buildQueryString(bm));
+    },
+
+    /**
+     * Given input data and modifiers, attempt to assemble data necessary to
+     * post a bookmark.
+     */
+    _extractBookmarkData: function(input_obj, mods) {
+        return {
+            _user:
+                this._getUserCookie(),
+            url:
+                context.focusedWindow.location,
+            description:
+                mods.entitled.text || context.focusedWindow.document.title,
+            extended: 
+                input_obj.text ? '"' + input_obj.text + '"' : '',
+            tags: 
+                mods.tagged.text
+        };
+    },
+
+    /**
+     * Dig up the Delicious login session cookie.
+     */
+    _getUserCookie: function() {
+        var iter = cookie_mgr.enumerator;
+        while (iter.hasMoreElements()) {
+            var cookie = iter.getNext();
+            if( cookie instanceof Components.interfaces.nsICookie && 
+                cookie.host.indexOf(this._config.cookie_domain) != -1 && 
+                cookie.name == this._config.cookie_name) {
+                return decodeURIComponent(cookie.value);
+            }
+        }
+    },
+
+    /**
+     * Given an object, build a URL query string
+     */
+    _buildQueryString: function(data) {
+        var qs = [];
+        for (k in data) if (data[k]) 
+            qs.push( encodeURIComponent(k) + '=' + 
+                encodeURIComponent(data[k]) );
+        return qs.join('&');
+    },
+
+    EOF:null // I hate trailing commas
+
 });

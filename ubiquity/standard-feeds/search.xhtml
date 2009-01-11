@@ -862,6 +862,254 @@ CmdUtils.CreateCommand({
     }
   }
 });
+
+CmdUtils.makeSearchCommand({
+    name: "google-image-search",
+    synonyms: ["getimages"],
+    version: "0.2.3",
+    author: {
+        name: "Federico Parodi",
+        email: "getimages@jimmy2k.it"
+    },
+    homepage: "http://www.jimmy2k.it/getimagescommand",
+    license: "MPL",
+    icon: "http://www.google.com/favicon.ico",
+    description: "Browse and embed pictures from Google Images",
+    help: "Press return to show the Google Images results, left click on a picture to watch it, right click to insert it in a text or rich text area",
+    takes: {
+        "description": noun_arb_text
+    },
+    url: "http://images.google.com/images?hl=en&q={QUERY}",
+    pageCounter: 0,
+    imgsPerPage: 8,
+    previewDelay: 500,
+    preview: function(pblock, name) {
+
+        var nameText = name.text;
+        // user's query
+        if (nameText.length < 1) {
+            pblock.innerHTML = "Search on Google Images.";
+            return;
+        }
+
+        var apiUrl = "http://ajax.googleapis.com/ajax/services/search/images";
+
+        pageCounter = 0;
+        // keeps track of the page we are previewing
+        var pageArray = new Array();
+        // saves the first img of every previewed page
+        var previousResult = 0;
+        // saves the first img of the last previewed page
+        function refresh(currentResult, imgsPerPage) {
+            pblock.innerHTML = "Searching on Google Images...";
+
+            if (currentResult > previousResult)
+            pageCounter++;
+            else
+            pageCounter--;
+
+            previousResult = currentResult;
+            pageArray[pageCounter] = currentResult;
+			var newPageItem = (pageCounter * imgsPerPage) - 8;
+            var randomCode = Math.floor(Math.random() * 1000000001);
+            // This number will be the base for img elements naming.
+            var apiParams = {
+                q: nameText,
+                v: "1.0",
+				rsz: "large",
+				start: newPageItem
+            };
+			
+            CmdUtils.previewAjax(pblock, {
+                type: "GET",
+                url: apiUrl,
+                data: apiParams,
+                datatype: "string",
+                error: function() {
+                    pblock.innerHTML = "<i>Connection error.</i>";
+                },
+
+                success: function(response) {
+                    var responseData = null;
+
+                    try {
+                        responseData = Utils.decodeJson(response).responseData;
+                    }
+                    catch(e) {
+                        pblock.innerHTML = "Server error";
+						displayMessage("Server error");
+                        return;
+                    }
+					
+                    function action(e, image) {
+                        var rightclick = false;
+                        if (!e) var e = window.event;
+                        if (e.which) rightclick = (e.which == 3);
+                        else if (e.button) rightclick = (e.button == 2);
+
+                        if (rightclick) {
+                            var doc = context.focusedWindow.document;
+                            var focused = context.focusedElement;
+
+                            if (doc.designMode == "on")
+                            //rich text case
+                            doc.execCommand("insertHTML", false, "<img src='" + image.title + "'/>");
+
+
+                            else if (focused != null && ((focused.type == "textarea") || (focused.type == "text")))
+                            // simple text
+                            CmdUtils.setSelection(image.title);
+
+                            else
+                            displayMessage("Sorry, this function can be used in an editable box only");
+                        }
+                        else {
+                            // left click
+                            CmdUtils.setLastResult(image.title);
+                            Utils.openUrlInBrowser(image.title);
+                        }
+
+                        var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                        .getInterface(Components.interfaces.nsIWebNavigation)
+                        .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+                        .rootTreeItem
+                        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                        .getInterface(Components.interfaces.nsIDOMWindow);
+                        mainWindow.gUbiquity.closeWindow();
+                    }
+
+                    template = '<img id="img${counter}" src="${thumb}" title="${imgurl}" style="position: absolute; height:80px; margin: 5px; border:0px; vertical-align:top; z-index: 0; border: 0px solid #00C600; -moz-border-radius: 3px;" alt="." class="thumbnail"/>';
+					var htmlData = 'Image Search results for ' + nameText;
+					htmlData += '<div id="resImg" style="position: relative;">';
+
+					var numberOfResults = responseData.results.length;
+					
+					var resultsArray = responseData.results;
+					for (var index = 0; index < numberOfResults; index++) {
+					    var imgCode = randomCode + index;
+					    templateData = {
+					        imgurl: resultsArray[index].url,
+					        thumb: resultsArray[index].tbUrl,
+					        counter: imgCode
+					    };
+					    htmlData += CmdUtils.renderTemplate(template, templateData);
+					}
+					htmlData += '<div id="controls" style="position: relative; width: 95%; top:270px;"><div id="prev" class="control" style="display:none; float: left;width: 80px; height: 50px; border: 2px solid #00C600; -moz-border-radius: 3px; text-align: center; padding-top: 30px; opacity: 0.5">Prev</div>';
+					if (pageCounter < 8)
+						htmlData += '<div id="next" class="control" style="float: right;width: 80px; height: 50px;  border: 2px solid #00C600; -moz-border-radius: 3px; text-align: center; padding-top: 30px; opacity: 0.5">Next</div></div></div>';
+					else
+						htmlData += '<div id="next" class="control" style="float: right;width: 80px; height: 50px;  border: 2px solid #00C600; -moz-border-radius: 3px; text-align: center; padding-top: 30px; opacity: 0.5">More<br/>on site</div></div></div>';
+					pblock.innerHTML = htmlData;
+					var moreButton = jQuery(pblock.ownerDocument).find("div#next");
+					var prevButton = jQuery(pblock.ownerDocument).find("div#prev");
+					var controls = jQuery(pblock.ownerDocument).find("div.control");
+
+                    controls.mouseover(function() {
+                        jQuery(this).animate({
+                            opacity: 1
+                        },
+                        250);
+                    });
+
+                    controls.mouseout(function() {
+                        jQuery(this).animate({
+                            opacity: 0.5
+                        },
+                        250);
+                    });
+
+                    moreButton.click(function() {
+						if (pageCounter<8)
+                        	refresh(currentResult, imgsPerPage);
+						else {
+							Utils.openUrlInBrowser('http://images.google.com/images?q='+nameText+'&start=64');
+							var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+	                        .getInterface(Components.interfaces.nsIWebNavigation)
+	                        .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+	                        .rootTreeItem
+	                        .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+	                        .getInterface(Components.interfaces.nsIDOMWindow);
+	                        mainWindow.gUbiquity.closeWindow();
+						}
+                    });
+                    prevButton.click(function() {
+                        refresh(pageArray[pageCounter - 1], imgsPerPage);
+                    });
+
+                    if (pageCounter != 1) prevButton.css("display", "inline");
+
+                    var col = 0;
+                    var row = 0;
+
+                    for (var index = 0; index < numberOfResults; index++) {
+                        var elementName = "img" + (randomCode + index);
+                        // the id of every image will be different
+                        var imgTag = jQuery(pblock.ownerDocument).find("img#" + elementName);
+
+                        imgTag.mousedown(function(e) {
+                            action(e, this);
+                        });
+                        // positioning stuff
+                        var thisWidth = Math.floor((resultsArray[index].tbWidth / resultsArray[index].tbHeight) * 80);
+                        if (thisWidth > 470) {
+                            thisWidth = 470;
+                            imgTag.css("width", thisWidth);
+                        }
+
+                        if ((col + thisWidth) > 470) {
+                            row += 85;
+                            col = 0;
+                        }
+
+                        imgTag.css("left", col);
+                        imgTag.css("top", row);
+
+                        if (row >= 255)
+                        // if image is out of the last line, it hides it and it doesnt' count it
+                        imgTag.css("display", "none");
+                        else
+                        currentResult++;
+
+                        // zoom in effect
+                        var leftBig = Math.floor((thisWidth * -0.0625) + 5);
+
+                        imgTag.mouseover(function() {
+                            jQuery(this).css("z-index", 100);
+                            jQuery(this).animate({
+                                height: "90px",
+                                marginTop: "0px",
+                                marginLeft: leftBig,
+                                borderWidth: "2px"
+                            },
+                            80);
+
+                        });
+
+                        col += thisWidth + 5;
+                    }
+
+                    // zoom out effect
+                    jQuery(pblock.ownerDocument).find(".thumbnail").mouseout(function() {
+                        jQuery(this).css("z-index", 0);
+                        jQuery(this).animate({
+                            height: "80px",
+                            marginTop: "5px",
+                            marginLeft: "5px",
+                            borderWidth: "0px"
+                        },
+                        80);
+
+                    });
+                }
+            });
+        }
+
+        refresh(1, this.imgsPerPage);
+    }
+
+});
+
+
 ]]></script>
 </body>
 </html>
