@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------
-// HELPER OBJECT FOR CLOSING WNIDOWS
+// HELPER OBJECT FOR CLOSING WINDOWS
 // -----------------------------------------------------------------
 
 var extApplication = { // helper method for correct quitting/restarting
