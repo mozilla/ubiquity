@@ -26,4 +26,25 @@
 <script src="scripts/jquery.js"></script>
 <script src="scripts/wikicreole.js"></script>
 <script src="docs/docs.js"></script>
+<script>
+  var XUL_PLANET_URL_TEMPLATE = "http://www.xulplanet.com/references/" +
+                                "xpcomref/ifaces/%QUERY%.html";
+  var MDC_URL_TEMPLATE = "https://developer.mozilla.org/en/N%QUERY%";
+
+  App.processors.push(
+    function(documentation) {
+      $(documentation).find("tt").each(
+        function() {
+          var text = $(this).text();
+
+          if (!(text.indexOf("nsI") == 0))
+            return;
+
+          App.addMenuItem(this, "View MDC entry",
+                          MDC_URL_TEMPLATE.replace("%QUERY%", text.slice(1)));
+          App.addMenuItem(this, "View XULPlanet entry",
+                          XUL_PLANET_URL_TEMPLATE.replace("%QUERY%", text));
+        });
+    });
+</script>
 </html>

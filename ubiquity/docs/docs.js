@@ -35,14 +35,21 @@
  * ***** END LICENSE BLOCK ***** */
 
 var App = {
-  XUL_PLANET_URL_TEMPLATE: ("http://www.xulplanet.com/references/xpcomref/" +
-                            "ifaces/%QUERY%.html"),
-  MDC_URL_TEMPLATE: "https://developer.mozilla.org/en/N%QUERY%"
 };
 
 App.trim = function trim(str) {
   return str.replace(/^\s+|\s+$/g,"");
 };
+
+// ** {{{ App.processors }}} **
+//
+// An array of user-defined processor functions.  They should take one
+// argument, the DOM node containing the documentation.  User-defined
+// processor functions are called after standard processing is done.
+
+App.processors = [];
+
+App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
 
 App.processCode = function processCode(code, div) {
   var lines = code.split('\n');
@@ -111,19 +118,38 @@ App.processCode = function processCode(code, div) {
 
       $(div).append('<div class="divider">');
     });
-  $(div).find(".documentation").find("tt").each(
-    function() {
-      var text = $(this).text();
-      if (!(text.indexOf("nsI") == 0))
-        return;
-      $(this).wrap('<span class="popup-enabled"></span>');
 
-    $(this).mousedown(
+  // Run the user-defined processors.
+  jQuery.each(
+    App.processors,
+    function(i) {
+      App.processors[i]($(div).find(".documentation"));
+    });
+};
+
+// ** {{{ App.addMenuItem }}} **
+//
+// Adds a menu item to the {{{element}}} DOM node showing the {{{label}}}
+// text.  If {{{urlOrCallback}}} is an URL, choosing the item causes a new
+// window to be opened with that URL.  If it's a function, it will be called
+// when choosing the item.
+//
+// If the node does not have a menu yet, one will be created.
+
+App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
+  var text = $(element).text();
+
+  if (!$(element).parent().hasClass("popup-enabled")) {
+    App.menuItems[text] = [];
+
+    $(element).wrap('<span class="popup-enabled"></span>');
+
+    $(element).mousedown(
       function(evt) {
         evt.preventDefault();
         var popup = $('<div class="popup"></div>');
 
-        function addMenuItem(label, urlOrCallback) {
+        function addItemToPopup(label, urlOrCallback) {
           var callback;
           var menuItem = $('<div class="item"></div>');
           menuItem.text(label);
@@ -140,11 +166,12 @@ App.processCode = function processCode(code, div) {
           popup.append(menuItem);
         }
 
-        addMenuItem("View MDC entry",
-                    App.MDC_URL_TEMPLATE.replace("%QUERY%",
-                                                 text.slice(1)));
-        addMenuItem("View XULPlanet entry",
-                    App.XUL_PLANET_URL_TEMPLATE.replace("%QUERY%", text));
+        jQuery.each(
+          App.menuItems[text],
+          function(i) {
+            var item = App.menuItems[text][i];
+            addItemToPopup(item.label, item.urlOrCallback);
+          });
 
         popup.find(".item:last").addClass("bottom");
 
@@ -156,7 +183,9 @@ App.processCode = function processCode(code, div) {
           });
         $(this).append(popup);
       });
-    });
+  }
+
+  App.menuItems[text].push({ label: label, urlOrCallback: urlOrCallback });
 };
 
 App.currentPage = null;
