@@ -1,4 +1,96 @@
 // -----------------------------------------------------------------
+// HELPER OBJECT FOR CLOSING WNIDOWS
+// -----------------------------------------------------------------
+
+var extApplication = { // helper method for correct quitting/restarting
+  _warnOnClose: function app__warnOnClose( event ) {
+    var prefs = {
+      close:   "browser.tabs.warnOnClose",
+      restart: "browser.warnOnRestart",
+      quit:    "browser.warnOnQuit"
+    };
+    if (!(event in prefs) || Application.prefs.getValue(prefs[event], true)) {
+      var os = Components.classes["@mozilla.org/observer-service;1"]
+                         .getService(Components.interfaces.nsIObserverService);
+      var cancelQuit = Components.classes["@mozilla.org/supports-PRBool;1"]
+                                 .createInstance(Components.interfaces.nsISupportsPRBool);
+      os.notifyObservers(cancelQuit, "quit-application-requested", null);
+      if (cancelQuit.data) return false; // somebody canceled our quit request
+    } return true; // assume yes
+  },
+  _quitWithFlags: function app__quitWithFlags(aFlags, event) {
+    if (this._warnOnClose(event)) {
+      var appStartup = Components.classes['@mozilla.org/toolkit/app-startup;1']
+                                 .getService(Components.interfaces.nsIAppStartup);
+      appStartup.quit(aFlags);
+      return true;
+    } return false; 
+  },
+  quit: function app_quit() {
+    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit, "quit");
+  },
+  restart: function app_restart() {
+    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit | 
+                               Components.interfaces.nsIAppStartup.eRestart, "restart");
+  },
+  close: function app_close() {
+    if (this._warnOnClose("close")) {
+      Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                .getService(Components.interfaces.nsIWindowMediator)
+                .getMostRecentWindow(null)
+                .close();
+      return true;
+    } return false;
+  }
+};
+
+// -----------------------------------------------------------------
+// WINDOW COMMANDS
+// -----------------------------------------------------------------
+
+// exit firefox entirely
+CmdUtils.CreateCommand({ 
+  name: "exit",
+  description: "Exits firefox",
+  preview: function( pblock ) {pblock.innerHTML=this.description;},
+  execute: function() {
+    extApplication.quit();
+  }
+});
+
+// restarts firefox
+CmdUtils.CreateCommand({ 
+  name: "restart",
+  description: "Restarts firefox",
+  preview: function( pblock ) {pblock.innerHTML=this.description;},
+  execute: function() {
+    extApplication.restart();
+  }
+});
+
+// closes current firefox window
+// TODO: if last window is closed, we should offer to save session
+CmdUtils.CreateCommand({ 
+  name: "close",
+  description: "Close current window",
+  preview: function( pblock ) {pblock.innerHTML=this.description},
+  execute: function() {
+    extApplication.close();
+  }
+});
+
+// toggles fullscreen
+CmdUtils.CreateCommand({ 
+  name: "fullscreen",
+  description: "Toggles fullscreen mode",
+  preview: function( pblock ) {pblock.innerHTML=this.description},
+  execute: function() {
+    var win = CmdUtils.getWindow();
+    win.fullScreen = win.fullScreen ? false : true;
+  }
+});
+
+// -----------------------------------------------------------------
 // TAB COMMANDS
 // -----------------------------------------------------------------
 
@@ -128,6 +220,93 @@ CmdUtils.CreateCommand({
 
 });
 
+// refreshes current tab
+CmdUtils.CreateCommand({ 
+  name: "refresh",
+  description: "Refresh current document",
+  preview: function( pblock ) {pblock.innerHTML=this.description},
+  execute: function() {
+    var win = CmdUtils.getWindow();
+    win.location.reload( true );
+  }
+});
+
+// bookmark current tab
+CmdUtils.CreateCommand({ 
+  name: "bookmark",
+  description: "Add current document to bookmarks",
+  preview: function( pblock ) {pblock.innerHTML=this.description},
+  execute: function() {
+    var win = CmdUtils.getWindowInsecure();
+    var doc = CmdUtils.getDocument();
+    try {
+      win.sidebar.addPanel(doc.title, win.location.href,"");
+    } catch ( e ) { displayMessage("Page could not be bookmarked!" + ((e)?" - "+e:"")); }
+  }
+});
+
+// print current tab
+CmdUtils.CreateCommand({ 
+  name: "print",
+  description: "Print current page",
+  preview: function( pblock ) {pblock.innerHTML=this.description},
+  execute: function() {
+    var win = CmdUtils.getWindow();
+    win.print();
+  }
+});
+
+// goes back in history
+CmdUtils.CreateCommand({ 
+  name: "back",
+  description: "Go back in history",
+  takes: {steps: noun_arb_text},
+  _parseSteps: function(s) { 
+    var s = parseInt(s);
+    return isNaN(s) ? 1 : s;
+  },
+  preview: function( pblock, steps ) {
+    var steps = this._parseSteps(steps.text);
+    var template = "Go back ${steps} steps in history";
+    pblock.innerHTML=CmdUtils.renderTemplate(template, {"steps": steps});
+  },
+  execute: function(steps) {
+    var win = CmdUtils.getWindow();
+    win.history.go(-this._parseSteps(steps.text));
+  }
+});
+
+// goes forward in history
+CmdUtils.CreateCommand({ 
+  name: "forward",
+  description: "Go forward in history",
+  takes: {steps: noun_arb_text},
+  _parseSteps: function(s) { 
+    var s = parseInt(s);
+    return isNaN(s) ? 1 : s;
+  },
+  preview: function( pblock, steps ) {
+    var steps = this._parseSteps(steps.text);
+    var template = "Go forward ${steps} steps in history";
+    pblock.innerHTML=CmdUtils.renderTemplate(template, {"steps": steps});
+  },
+  execute: function(steps) {
+    var win = CmdUtils.getWindow();
+    win.history.go(this._parseSteps(steps.text));
+  }
+});
+
+// go to home page
+CmdUtils.CreateCommand({ 
+  name: "home",
+  description: "Go to home page",
+  preview: function( pblock ) {pblock.innerHTML=this.description},
+  execute: function() {
+    var win = CmdUtils.getWindow();
+    win.home();
+  }
+});
+
 // -----------------------------------------------------------------
 // ZOOM RELATED
 // -----------------------------------------------------------------
@@ -224,4 +403,3 @@ CmdUtils.CreateCommand({
     tagging.tagURI(currentURI, tags);
   }
 });
-
