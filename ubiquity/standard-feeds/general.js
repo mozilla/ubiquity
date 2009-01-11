@@ -420,16 +420,26 @@ CmdUtils.CreateCommand({
   modifiers: {to: noun_type_language, from: noun_type_language},
 
   execute: function( directObj, languages ) {
-    var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
-    var toLangCode = languages.to.data || Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
+    var toLangCode = languages.to.data || this._getDefaultLang();
     var fromLang = languages.from.data || "";
 
     translateTo( directObj.text, {to:toLangCode} );
   },
 
+  // Returns the default language for translation.  order of defaults: 
+  // extensions.ubiquity.default_translation_lang > general.useragent.locale > "en" 
+  // And also, if there unknown language code is found any of these preference, we fall back to English.
+  _getDefaultLang: function() {
+      var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
+      var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
+      // If defaultLang is invalid lang code, fall back to english.
+	  if (noun_type_language.getLangName(defaultLang) == null)  {
+	       return "en";
+	  }
+	  return defaultLang;	  
+  },
   preview: function( pblock, directObj, languages ) {
-    var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
-    var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
+    var defaultLang = this._getDefaultLang();
     var toLang = languages.to.text || noun_type_language.getLangName(defaultLang);
     var toLangCode = languages.to.data || defaultLang;
     var textToTranslate = directObj.text;

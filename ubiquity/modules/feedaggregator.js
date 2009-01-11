@@ -40,11 +40,11 @@ Components.utils.import("resource://ubiquity/modules/eventhub.js");
 
 function FeedAggregator(feedManager, messageService, disabledCommands) {
   let self = this;
-  let commands = {};
-  let commandNames = [];
-  let nounTypes = [];
-  let pageLoadFuncLists = [];
-  let feedsChanged = true;
+  var commands = {};
+  var commandNames = [];
+  var nounTypes = [];
+  var pageLoadFuncLists = [];
+  var feedsChanged = true;
 
   let hub = new EventHub();
   hub.attachMethods(this);

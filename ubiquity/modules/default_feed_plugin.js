@@ -176,8 +176,8 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   let CMD_PREFIX = "cmd_";
   let NOUN_PREFIX = "noun_";
 
-  let codeCache = null;
-  let sandbox = null;
+  var codeCache = null;
+  var sandbox = null;
 
   function makeCmdForObj(sandbox, objName) {
     var cmdName = objName.substr(CMD_PREFIX.length);

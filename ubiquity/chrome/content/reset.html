@@ -21,12 +21,43 @@ made to Ubiquity, including but not limited to:</p>
 <input type="button"
        value="Yes, I know what I'm doing. Reset Ubiquity and restart Firefox."
        onclick="confirmReset();">
-<script>
+<script type="application/javascript;version=1.7">
 Components.utils.import("resource://ubiquity/modules/setup.js");
+
+// This code was taken from mozilla-central's
+// toolkit/components/exthelper/extApplication.js file; it's being included in
+// here because Application.restart() doesn't seem to be part of FUEL for Firefox
+// 3.0.5.
+var extApplication = {
+  // helper method for correct quitting/restarting
+  _quitWithFlags: function app__quitWithFlags(aFlags) {
+    let os = Components.classes["@mozilla.org/observer-service;1"]
+                       .getService(Components.interfaces.nsIObserverService);
+    let cancelQuit = Components.classes["@mozilla.org/supports-PRBool;1"]
+                               .createInstance(Components.interfaces.nsISupportsPRBool);
+    os.notifyObservers(cancelQuit, "quit-application-requested", null);
+    if (cancelQuit.data)
+      return false; // somebody canceled our quit request
+    
+    let appStartup = Components.classes['@mozilla.org/toolkit/app-startup;1']
+                               .getService(Components.interfaces.nsIAppStartup);
+    appStartup.quit(aFlags);
+    return true;
+  },
+
+  quit: function app_quit() {
+    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit);
+  },
+
+  restart: function app_restart() {
+    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit |
+                               Components.interfaces.nsIAppStartup.eRestart);
+  },
+};
 
 function confirmReset() {
   UbiquitySetup.isResetScheduled = true;
-  Application.restart();
+  extApplication.restart();
 }
 </script>
 </html>
