@@ -97,7 +97,10 @@ function makeFeedListElement(info, label, clickMaker) {
 
   var titleLink = addLink(info.title, info.uri.spec);
 
-  $(li).append("<br>");
+  var commandList = $("<ul></ul>");
+  for (name in info.commands)
+    $(commandList).append($("<li></li>").text(name));
+  $(li).append(commandList);
 
   var linkToAction = document.createElement("span");
   $(linkToAction).text("[" + label + "]");
