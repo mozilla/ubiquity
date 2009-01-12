@@ -566,25 +566,22 @@ NLParser.PartiallyParsedSentence.prototype = {
     if ((!this._selObj.text) && (!this._selObj.html)) {
       return false;
     }
-
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
-    let selectionIndices = null;
 
+    dump("SuggestWithPronounSub called.  words is " + words + ", ");
+    dump("selection is " + selection + ", html selection is " + htmlSelection);
+    dump("\n");
     for each ( pronoun in this._parserPlugin.PRONOUNS ) {
-      let index = words.indexOf( pronoun );
+      let regexp = new RegExp("\\b" + pronoun + "\\b");
+      let index = words.search(regexp);
       if ( index > -1 ) {
-	let before = words.slice(0, index);
-        let after = words.slice(index + pronoun.length);
-        if (selection) {
-	  selectionIndices = [before.length, before.length + selection.length];
-	  selection = before + selection + after;
-        }
-        if (htmlSelection) {
-	  htmlSelection = before + htmlSelection + after;
-        }
-        if (this._argSuggest(argName, selection,
-                             htmlSelection, selectionIndices)) {
+	let selectionIndices = [index, index + selection.length];
+	let textArg = words.replace(regexp, selection);
+	let htmlArg = words.replace(regexp, htmlSelection);
+	dump("Suggesting " + textArg + "/" + htmlArg + "\n");
+	if (this._argSuggest(argName, textArg, htmlArg,
+                             selectionIndices)) {
           gotAnySuggestions = true;
         }
       }

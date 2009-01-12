@@ -633,6 +633,25 @@ function testImplicitPronoun() {
   this.assert( completions.length == 0, "should have no completions");
 }
 
+function testDontInterpolateInTheMiddleOfAWord() {
+  // a word like "iterate" contains "it", but the selection should not
+  // be interpolated in place of that "it".
+  var cmd_google = makeSearchCommand("google");
+  var fakeContext = { textSelection: "flab", htmlSelection:"flab" };
+  var completions = getCompletions("google iterate", [cmd_google],
+				   [noun_arb_text], fakeContext);
+  this.assert( completions.length == 1, "Should have 1 completion");
+  this.assert( completions[0]._argSuggs.direct_object.text == "iterate",
+	       "Should not interpolate for the 'it' in 'iterate'.");
+  completions = getCompletions("google it erate", [cmd_google],
+				   [noun_arb_text], fakeContext);
+  this.assert( completions.length == 2, "Should have 2 completions.");
+  this.assert( completions[0]._argSuggs.direct_object.text == "flab erate",
+	       "Should interpolate 'flab' for 'it'.");
+  this.assert( completions[1]._argSuggs.direct_object.text == "it erate",
+	       "input without interpolation should also be suggested.");
+}
+
 function testMakeSugg() {
   // test that NounUtils.makeSugg doesn't fail on null input, that it preserves
   // html, etc etc.
@@ -914,7 +933,8 @@ function testSynonyms() {
 }
 
 function testPartiallyParsedSentence() {
-
+  // TODO this test will need rewriting, because NLParser.Verb is about
+  // to not exist.
   // make sure it also works with a no-arg command:
   var cmd_grumble = {
     name: "grumble",
