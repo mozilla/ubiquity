@@ -1,7 +1,7 @@
+html, body {margin: 0; padding: 0;}
 body {
     font-family: palatino, georgia, verdana, arial, sans-serif;
     font-size: 10pt;
-    text-align: center;
 }
 
 .popup-enabled {
@@ -17,12 +17,11 @@ body {
 .popup .item {
     cursor: pointer;
     font-family: helvetica neue, arial, sans-serif;
-    background-color: #eeeeee;
+    background-color: #f0f0f0;
     color: black;
     padding: 3px;
-    border-top: 1px dotted;
-    border-left: 1px dotted;
-    border-right: 1px dotted;
+    border: black dotted;
+    border-width: 1px 1px 0 1px;
 }
 
 .popup .selected {
@@ -31,45 +30,43 @@ body {
 }
 
 .popup .bottom {
-    border-bottom: 1px dotted;
+    border-bottom: 1px black dotted;
 }
 
 #content {
-    width: 800px;
-    text-align: left;
-    margin: 0 auto;
+    min-width: 1024px;
 }
 
 .documentation {
-    width: 380px;
+    background: white;
     float: left;
-    padding-left: 10px;
-    padding-right: 10px;
     line-height: 1.4em;
 }
 
-.documentation h1 {
+.documentation h1, .documentation h2 {
     font-weight: normal;
     line-height: 1.4em;
 }
 
-.documentation h2 {
-    font-weight: normal;
-    line-height: 1.4em;
+.documentation, .code {
+    -moz-box-sizing: padding-box;
+    width: 50%;
+    padding: 0 10px;
+    border-top: 1px dashed black;
+    margin-top: -1px; // hides first top border
 }
 
 .code {
     font-family: monaco, andale mono, lucidatypewriter, courier,
                  courier new, monospace;
-    float: left;
     white-space: pre;
     font-size: 6pt;
     background-color: #f0f0f0;
-    padding-left: 10px;
-    padding-right: 10px;
-    width: 380px;
+    margin-left: 50%;
 }
 
 .divider {
     clear: both;
+    height: 0;
+    line-height: 0;
 }
