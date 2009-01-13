@@ -66,7 +66,6 @@ CmdUtils.__globalObject = this;
 //
 // {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
 
-
 CmdUtils.log = function log(what) {
   var args = Array.prototype.slice.call(arguments);
   if(args.length == 0)
@@ -390,7 +389,7 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
 
 // ** {{{ CmdUtils.setLastResult( result ) }}} **
 //
-// **Depreciated?**
+// **Deprecated.**
 //
 // Sets the last result of a command's execution, for use in command piping.
 //
@@ -404,8 +403,8 @@ CmdUtils.setLastResult = function setLastResult( result ) {
 };
 
 // ** {{{ CmdUtils.getGeoLocation( callback ) }}} **
-
-// Uses Geo-ip lookup to get your current location. Will cache the result.
+//
+// Uses Geo-IP lookup to get the user's physical location. Will cache the result.
 // If a result is already in the cache, this function works both
 // asyncronously and synchronously (for backwards compatability).
 // Otherwise it works only asynchronously.
@@ -813,29 +812,37 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 // TEMPLATING FUNCTIONS
 // -----------------------------------------------------------------
 
+// ** {{{ CmdUtils.renderTemplate( template, data ) }}} **
+//
+// Renders a template by substituting values from a dictionary into
+// a template string or file. The templating language used is
+// trimpath, which is defined here:
+// http://code.google.com/p/trimpath/wiki/JavaScriptTemplates
+//
+// {{{template}}} can be either a string, in which case the string is used
+// for the template, or else it can be {file: "filename"}, in which
+// case the following happens:
+//    * If the feed is on the user's local filesystem, the file's path
+//      is assumed to be relative and the file's contents are read and
+//      used as the template.
+//
+//      * Otherwise, the file's path is assumed to be a key into a global
+//      object called Attachments, which is defined by the feed.  The
+//      value of this key is used as the template.
+//
+// The reason this is done is so that a command feed can be developed
+// locally and then easily deployed to a remote server as a single
+// human-readable file without requiring any manual code
+// modifications; with this system, it becomes straightforward to
+// construct a post-processing tool for feed deployment that
+// automatically generates the Attachments object and appends it to
+// the command feed's code.
+//
+// {{{data}}} is a dictionary of values to be substituted.
+//
+// Returns a string containing the result of processing the template.
 
 CmdUtils.renderTemplate = function renderTemplate( template, data ) {
-  /* template can be either a string, in which case the string is used
-   * for the template, or else it can be {file: "filename"}, in which
-   * case the following happens:
-   *
-   *   * If the feed is on the user's local filesystem, the file's path
-   *     is assumed to be relative and the file's contents are read and
-   *     used as the template.
-   *
-   *   * Otherwise, the file's path is assumed to be a key into a global
-   *     object called Attachments, which is defined by the feed.  The
-   *     value of this key is used as the template.
-   *
-   * The reason this is done is so that a command feed can be developed
-   * locally and then easily deployed to a remote server as a single
-   * human-readable file without requiring any manual code
-   * modifications; with this system, it becomes straightforward to
-   * construct a post-processing tool for feed deployment that
-   * automatically generates the Attachments object and appends it to
-   * the command feed's code.
-   */
-
   var templStr;
   if (typeof template == "string")
     templStr = template;
@@ -852,9 +859,15 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   return templateObject.process( data );
 };
 
-// Just like jQuery.ajax(), only for command previews; no
-// callbacks in the options object are called if the preview is
-// canceled.
+// ** {{{ CmdUtils.previewAjax( pblock, options ) }}} **
+//
+// Does an asynchronous request to a remote web service.  It is used
+// just jQuery.ajax(), which is documented at http://docs.jquery.com/Ajax
+// . The difference is that CmdUtils.previewAjax is designed to handle
+// command previews, which can be canceled by the user between the
+// time that it's requested and the time it displays.  If the preview
+// is canceled, no callbacks in the options object will be called.
+
 CmdUtils.previewAjax = function previewAjax(pblock, options) {
   var xhr;
   var newOptions = {};
@@ -874,8 +887,16 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
   return xhr;
 };
 
-// Just like jQuery.get(), only for command previews; the given
-// callback isn't called if the preview is canceled.
+// ** {{{ CmdUtils.previewGet( pblock, url, data, callback, type ) }}} **
+//
+// Does an asynchronous request to a remote web service.  It is used
+// just jQuery.get(), which is documented at
+// http://docs.jquery.com/Ajax/jQuery.get
+// . The difference is that CmdUtils.previewAjax is designed to handle
+// command previews, which can be canceled by the user between the
+// time that it's requested and the time it displays.  If the preview
+// is canceled, the given callback will not be called.
+
 CmdUtils.previewGet = function previewGet(pblock,
                                           url,
                                           data,
