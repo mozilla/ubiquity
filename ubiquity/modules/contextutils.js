@@ -106,9 +106,18 @@ ContextUtils.setSelection = function setSelection(context,
     }
 
     if (plainText == null) {
+      // Rollin' in tha hack-illac: 1.9.0 wants html elements
+      // namespaced, whereas 1.9.1+ doesn't.
+      // 3.1.*
       var el = doc.createElement( "html" );
       el.innerHTML = "<div>" + content + "</div>";
       plainText = el.textContent;
+      if (!plainText.length) {
+        // 3.0.*
+        el = doc.createElementNS("http://www.w3.org/1999/xhtml", "html" );
+        el.innerHTML = "<div>" + content + "</div>";
+        plainText = el.textContent;
+      }
     }
 
     var selectionEnd = focused.selectionStart + plainText.length;
