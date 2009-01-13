@@ -294,6 +294,7 @@ CmdUtils.injectCss = function injectCss(css) {
 // {{{ html }}} The HTML source code to inject, in plain text.
 
 CmdUtils.injectHtml = function injectHtml( html ) {
+  // TODO: should be using CmdUtils.getDocument() instead
   var doc = CmdUtils.getDocumentInsecure();
   var div = doc.createElement("div");
   div.innerHTML = html;
@@ -364,14 +365,28 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
   );
 };
 
-// Runs the function "callback" whenever a new page/tab is loaded in
-// the window that this Ubiquity sandbox is associated with, passing
-// the window's document object as a parameter.
+
+// ** {{{ CmdUtils.onPageLoad( callback) }}} **
+//
+// Runs a given function whenever a browser tab is loaded.
+//
+// {{{ callback }}} Callback function to call.
+// Will be passed the window's document object.
+
 CmdUtils.onPageLoad = function onPageLoad( callback ) {
   var safeCallback = Utils.safeWrapper(callback);
 
   pageLoadFuncs.push(safeCallback);
 };
+
+
+// ** {{{ CmdUtils.setLastResult( result ) }}} **
+//
+// **Depreciated?**
+//
+// Sets the last result of a command's execution, for use in command piping.
+//
+// {{{ result }}} Result to remember (String?)
 
 CmdUtils.setLastResult = function setLastResult( result ) {
   // TODO: This function was used for command piping, which has been
@@ -380,7 +395,17 @@ CmdUtils.setLastResult = function setLastResult( result ) {
   globals.lastCmdResult = result;
 };
 
-// Uses Geo-ip lookup to get your current location.
+
+// ** {{{ CmdUtils.getGeoLocation( callback ) }}}
+//
+// Uses Geo-ip lookup to get your current location. Will cache the result.
+// If a result is already in the cache, this function works both
+// asyncronously and synchronously (for backwards compatability).
+// Otherwise it works only asynchronously.
+//
+// {{{ callback }}} Callback function to run when the geolocation is found.
+// This is not needed when the function is used only synchronously.
+
 CmdUtils.getGeoLocation = function getGeoLocation(callback) {
   if (globals.geoLocation) {
     if (callback)
@@ -411,6 +436,9 @@ CmdUtils.getGeoLocation = function getGeoLocation(callback) {
 
   return null;
 };
+
+
+// ** {{{ CmdUtils.UserCode }}} **
 
 CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/prefcommands.js
   COMMANDS_PREF : "extensions.ubiquity.commands",
