@@ -106,9 +106,11 @@ App.processCode = function processCode(code, div) {
     blocks,
     function(i) {
       var docs = $('<div class="documentation">');
+      $(docs).css(App.columnCss);
       creole.parse(docs.get(0), this.text);
       $(div).append(docs);
       var code = $('<div class="code">');
+      $(code).css(App.columnCss);
       code.text(this.code);
       $(div).append(code);
 
@@ -217,9 +219,31 @@ App.navigate = function navigate() {
   }
 };
 
+App.CHARS_PER_ROW = 80;
+
+App.initColumnSizes = function initSizes() {
+  // Get the width of a single monospaced character of code.
+  var oneCodeCharacter = $('<div class="code">M</div>');
+  $("#content").append(oneCodeCharacter);
+  App.charWidth = oneCodeCharacter.width();
+  App.columnWidth = App.charWidth * App.CHARS_PER_ROW;
+  $(oneCodeCharacter).remove();
+
+  // Dynamically determine the column widths and padding based on
+  // the font size.
+  var padding = App.charWidth * 2;
+  App.columnCss = {width: App.columnWidth,
+                   paddingLeft: padding,
+                   paddingRight: padding};
+  $("#content").css({width: (App.columnWidth + padding*2) * 2});
+  $(".documentation").css(App.columnCss);
+  $(".code").css(App.columnCss);
+};
+
 $(window).ready(
   function() {
     App.pages["overview"] = $("#overview").get(0);
+    App.initColumnSizes();
     window.setInterval(
       function() { App.navigate(); },
       100
