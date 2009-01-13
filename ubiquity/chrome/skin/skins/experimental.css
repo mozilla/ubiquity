@@ -15,10 +15,10 @@
 
 #cmd-panel {
   padding: 0px;
-  width: 800px;
+  width: 810px;
   background-color: transparent;
 
-  font-family: Geneva;
+  font-family: Geneva, Tahoma, Verdana;
   text-shadow: #AFAFAF 0px 1px .2px;
 }
 
@@ -52,7 +52,7 @@
   font-size: 20pt;
   color: black;
   width: 100%;
-  font-family: Geneva;
+  font-family: Geneva, Tahoma, Verdana;
   text-shadow: #AFAFAF 0px 1px .2px;
 }
 
@@ -60,7 +60,7 @@
   height: 500px;
   width: 800px;
 
-  font-family: Geneva;
+  font-family: Geneva, Tahoma, Verdana;
   text-shadow: #333 0px 1px .2px;
   color: #fff;
 
@@ -103,7 +103,7 @@ div#ubiquity-preview #preview-pane {
     color: #ffffff;
     padding: 5px;
     border-top: 1px solid #333;
-    font-family: Geneva;
+    font-family: Geneva, Tahoma, Verdana;
     text-shadow: #000 1px 1px .5px;
     font-size: 11pt;
     
@@ -116,7 +116,7 @@ div#ubiquity-preview .suggested {
     border: 1px solid rgba(162,162,162,1);;
     border-right: 1px solid rgba(82,82,82,1);;
     border-bottom: 1px solid rgba(82,82,82,1);;
-    font-family: Geneva;
+    font-family: Geneva, Tahoma, Verdana;
     text-shadow: #AFAFAF 0px 1px .2px;
 
     color: #000;
@@ -130,7 +130,7 @@ div#ubiquity-preview .hilited {
     font-size: 11pt;
     padding: 5px;
     border: none;
-    font-family: Geneva;
+    font-family: Geneva, Tahoma, Verdana;
     text-shadow: #FFF 0px 1px .2px;
     margin-right: -30px;
     padding-right: 30px;
