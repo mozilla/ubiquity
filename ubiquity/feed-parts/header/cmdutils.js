@@ -153,10 +153,13 @@ CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
 // ** {{{ CmdUtils.setSelection( content, options ) }}} **
 //
 // Replaces the current selection with new content.
+// See {{{ ContextUtils.setSelection }}}
 //
-// {{{content}}} TODO
+// {{{content}}} The text (or html) to see at the selection.
 // 
-// {{{options}}} TODO
+// {{{options}}} options is a dictionary; if it has a "text" property then
+// that value will be used in place of the html if we're in
+// a plain-text only editable field.
 
 CmdUtils.setSelection = function setSelection(content, options) {
   var ctu = {};
@@ -168,12 +171,20 @@ CmdUtils.setSelection = function setSelection(content, options) {
   ctu.ContextUtils.setSelection(context, content, options);
 };
 
-//This gets the outer document of the current tab in a secure way
+
+// ** {{{ CmdUtils.getDocument( ) }}} **
+//
+// This gets the document of the current tab in a secure way
+
 CmdUtils.getDocument = function getDocument(){
   return CmdUtils.getWindow().document;
 };
 
-//This gets the outer window of the current tab in a secure way
+
+// ** {{{ CmdUtils.getWindow( ) }}} **
+// 
+// This gets the window object of the current tab in a secure way.
+
 CmdUtils.getWindow = function getWindow() {
   return Application.activeWindow
                     .activeTab
@@ -181,7 +192,14 @@ CmdUtils.getWindow = function getWindow() {
                     .defaultView;
 };
 
-// This gets the outer window of the current tab.
+
+// ** {{{ CmdUtis.getWindowInsecure( ) }}} **
+//
+// This gets the window object of the current tab, without the
+// safe XPCNativeWrapper. While this allows access to scripts in the content,
+// it is potentially **unsafe** and {{{ CmdUtils.getWindow( ) }}} should
+// be used in place of this whenever possible.
+
 CmdUtils.getWindowInsecure = function getWindowInsecure() {
   return Application.activeWindow
                     .activeTab
@@ -191,7 +209,13 @@ CmdUtils.getWindowInsecure = function getWindowInsecure() {
 };
 
 
-// This gets the outer document of the current tab.
+// ** {{{ CmdUtis.getDocumentInsecure( ) }}} **
+//
+// This gets the document of the current tab, without the
+// safe XPCNativeWrapper. While this allows access to scripts in the content,
+// it is potentially **unsafe** and {{{ CmdUtils.getDocument( ) }}} should
+// be used in place of this whenever possible.
+
 CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
   return CmdUtils.getWindowInsecure().document;
 };
@@ -247,12 +271,27 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
   }, "xml");
 }
 
+
+// ** {{{ CmdUtils.injectCss( css ) }}} **
+//
+// Injects CSS source code into the current tab's document.
+//
+// {{{ css }}} The CSS source code to inject, in plain text.
+
 CmdUtils.injectCss = function injectCss(css) {
   var doc = CmdUtils.getDocumentInsecure();
   var style = doc.createElement("style");
   style.innerHTML = css;
   doc.body.appendChild(style);
 };
+
+
+// ** {{{ CmdUtils.injectHTML( html ) }}} **
+//
+// Injects HTML source code into the current tab's document,
+// at the end of the document.
+//
+// {{{ html }}} The HTML source code to inject, in plain text.
 
 CmdUtils.injectHtml = function injectHtml( html ) {
   var doc = CmdUtils.getDocumentInsecure();
@@ -267,8 +306,8 @@ CmdUtils.injectHtml = function injectHtml( html ) {
 // This function places the passed-in text into the OS's clipboard.
 //
 // {{{text}}} is a plaintext string that will be put into the clipboard.
-
-//Function based on the one I found here: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
+//
+// Function based on: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
 CmdUtils.copyToClipboard = function copyToClipboard(text){
    var clipboard = Cc['@mozilla.org/widget/clipboard;1'].createInstance(Ci.nsIClipboard);
    var transferArea = Cc['@mozilla.org/widget/transferable;1'].createInstance(Ci.nsITransferable);
@@ -279,8 +318,19 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
    clipboard.setData(transferArea, null, Ci.nsIClipboard.kGlobalClipboard);
 }
 
-// = TODO: Finish the rest of the documentation =
 
+// ** {{{ CmdUtils.injectJavascript( src, callback ) }}} **
+//
+// Injects Javascript from a URL into the current tab's document,
+// and calls an optional callback function once the script has loaded.
+//
+// Note that this is **not** intended to be used as a way of importing Javascript
+// into the command's sandbox.
+//
+// {{{ src }}} Source URL of the Javascript to inject.
+//
+// {{{ callback }}} Optional callback function to call once the script
+// has loaded in the document.
 
 CmdUtils.injectJavascript = function injectJavascript(src, callback) {
   var doc = CmdUtils.getDocument();
@@ -296,6 +346,13 @@ CmdUtils.injectJavascript = function injectJavascript(src, callback) {
     }
   }, true);
 };
+
+
+// ** {{{ CmdUtils.loadJQuery( func ) }}} **
+//
+// Injects jQuery into the current tab's document.
+//
+// {{{ func }}} Non-optional callback function to call once jQuery has loaded.
 
 CmdUtils.loadJQuery = function loadJQuery(func) {
   CmdUtils.injectJavascript(
