@@ -389,11 +389,9 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
 
 // ** {{{ CmdUtils.setLastResult( result ) }}} **
 //
-// **Deprecated.**
+// **Deprecated.  Do not use.**
 //
 // Sets the last result of a command's execution, for use in command piping.
-//
-// {{{ result }}} Result to remember (String?)
 
 CmdUtils.setLastResult = function setLastResult( result ) {
   // TODO: This function was used for command piping, which has been
@@ -862,8 +860,9 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 // ** {{{ CmdUtils.previewAjax( pblock, options ) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
-// just jQuery.ajax(), which is documented at http://docs.jquery.com/Ajax
-// . The difference is that CmdUtils.previewAjax is designed to handle
+// just like jQuery.ajax(), which is documented at
+// http://docs.jquery.com/Ajax .
+// The difference is that CmdUtils.previewAjax is designed to handle
 // command previews, which can be canceled by the user between the
 // time that it's requested and the time it displays.  If the preview
 // is canceled, no callbacks in the options object will be called.
@@ -890,9 +889,9 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
 // ** {{{ CmdUtils.previewGet( pblock, url, data, callback, type ) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
-// just jQuery.get(), which is documented at
-// http://docs.jquery.com/Ajax/jQuery.get
-// . The difference is that CmdUtils.previewAjax is designed to handle
+// just like jQuery.get(), which is documented at
+// http://docs.jquery.com/Ajax/jQuery.get .
+// The difference is that CmdUtils.previewAjax is designed to handle
 // command previews, which can be canceled by the user between the
 // time that it's requested and the time it displays.  If the preview
 // is canceled, the given callback will not be called.
@@ -912,9 +911,22 @@ CmdUtils.previewGet = function previewGet(pblock,
   return xhr;
 };
 
+// ** {{{ CmdUtils.previewCallback( pblock, callback, abortCallback ) }}} **
+//
 // Creates a 'preview callback': a wrapper for a function which
 // first checks to see if the current preview has been canceled,
 // and if not, calls the real callback.
+//
+// {{{pblock}}}: the preview display element (the same one which is
+// passed in as the first argument to the {{{preview()}}} method of every
+// command.
+//
+// {{{callback}}}: the function to be called if the preview is not
+// cancelled.
+//
+// {{{abortCallback}}}: (optional) a function that will be called instead
+// if the preview is cancelled.
+
 CmdUtils.previewCallback = function previewCallback(pblock,
                                                     callback,
                                                     abortCallback) {
@@ -943,6 +955,15 @@ CmdUtils.previewCallback = function previewCallback(pblock,
 
   return wrappedCallback;
 };
+
+// ** {{{ CmdUtils.makeContentPreview( filePathOrOptions ) }}} **
+//
+// Creates an interactive command preview from a given html template
+// file or a dictionary object providing the same information.
+//
+// Currently this contains a lot of code that is specific to the preview
+// of the Map command, and so can't be used for other commands.  In the
+// future we plan to make it into a general-purpose utility function.
 
 CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
   // TODO: Figure out when to kill this temp file.
@@ -1080,6 +1101,32 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
   return contentPreview;
 };
 
+// ** {{{ CmdUtils.makeSearchCommand( options ) }}} **
+//
+// A specialized version of CmdUtils.CreateCommand, this lets you make
+// commands that interface with search engines, without having to write
+// so much boilerplate code.
+//
+// {{{options}}} as the argument of CmdUtils.CreateCommand, except that
+// instead of {{{options.takes}}}, {{{options.execute}}}, and
+// {{{options.preview}}} you only need a single property:
+//
+// {{{options.url}}} The url of a search results page from the search
+// engine of your choice.  Must contain the literal string {QUERY}, which
+// will be replaced with the user's search term to generate a URL that
+// should point to the correct page of search results.
+// (We're assuming that the user's search term appears in the URL of the
+// search results page, which is true for most search engines.)
+// For example: http://www.google.com/search?q={QUERY}
+//
+// The {{{options.execute}}}, {{{options.preview}}}, and
+// {{{options.takes}}} properties are all automatically generated for you
+// from {{{options.url}}}, so all you need to provide is {{{options.url}}}
+// and {{{options.name}}}.  You can choose to provide other optional
+// properties, which work the same way as they do for
+// {{{CmdUtils.CreateCommand}}}.  You can also override the auto-generated
+// {{{preview()}}} function by providing your own as {{{options.preview}}}.
+
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
     var query = encodeURIComponent(directObject.text);
@@ -1106,8 +1153,25 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   CmdUtils.CreateCommand(options);
 };
 
-//Requires at least two arguments - name
-//and url (which contains the bookmarklet code starting with "javascript:")
+// ** {{{ CmdUtils.makeBookmarkletCommand }}} **
+//
+// Creates and registers a Ubiquity command based on a bookmarklet.
+// When the command is run, it will invoke the bookmarklet.
+//
+// {{{options}}} as the argument of CmdUtils.CreateCommand, except that
+// you must provide a property called:
+//
+// {{{options.url}}} the url of the bookmarklet code.
+// Must start with "javascript:".
+//
+// {{{options.execute}}} and {{{options.preview}}} are generated for you
+// from the url, so all you need to provide is {{{options.url}}} and
+// {{{options.name}}}.
+//
+// You can choose to provide other optional properties, which work the
+// same way as they do for {{{CmdUtils.CreateCommand}}}, except that
+// since bookmarklets can't take arguments, there's no reason to provide
+// {{{options.takes}}} or {{{options.modifiers}}}.
 
 CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand(
                                                              options ) {
