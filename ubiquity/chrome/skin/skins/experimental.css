@@ -72,7 +72,7 @@
   background: none;
   border: none;
   overflow: hidden;
-  width: 800px
+  width: 800px;
   height: 500px;
   background: none;
 }
@@ -98,7 +98,6 @@ div#ubiquity-preview #preview-pane {
     left: 300px;
     top: 0px;
     background: none;
-    //border-left: 1px solid #4E4E4E;
     height: 500px;
     color: #ffffff;
     padding: 5px;
