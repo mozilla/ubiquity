@@ -294,8 +294,7 @@ CmdUtils.injectCss = function injectCss(css) {
 // {{{ html }}} The HTML source code to inject, in plain text.
 
 CmdUtils.injectHtml = function injectHtml( html ) {
-  // TODO: should be using CmdUtils.getDocument() instead
-  var doc = CmdUtils.getDocumentInsecure();
+  var doc = CmdUtils.getDocument();
   var div = doc.createElement("div");
   div.innerHTML = html;
   doc.body.appendChild(div.firstChild);
