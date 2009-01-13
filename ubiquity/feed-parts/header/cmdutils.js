@@ -307,11 +307,15 @@ CmdUtils.injectHtml = function injectHtml( html ) {
 //
 // {{{text}}} is a plaintext string that will be put into the clipboard.
 //
-// Function based on: http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
+// Function based on:
+// http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
 CmdUtils.copyToClipboard = function copyToClipboard(text){
-   var clipboard = Cc['@mozilla.org/widget/clipboard;1'].createInstance(Ci.nsIClipboard);
-   var transferArea = Cc['@mozilla.org/widget/transferable;1'].createInstance(Ci.nsITransferable);
-   var string = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+   var clipboard = Cc['@mozilla.org/widget/clipboard;1'].
+                   createInstance(Ci.nsIClipboard);
+   var transferArea = Cc['@mozilla.org/widget/transferable;1'].
+                      createInstance(Ci.nsITransferable);
+   var string = Cc["@mozilla.org/supports-string;1"].
+                createInstance(Ci.nsISupportsString);
    transferArea.addDataFlavor('text/unicode');
    string.data = text;
    transferArea.setTransferData("text/unicode", string, text.length * 2);
@@ -324,8 +328,8 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
 // Injects Javascript from a URL into the current tab's document,
 // and calls an optional callback function once the script has loaded.
 //
-// Note that this is **not** intended to be used as a way of importing Javascript
-// into the command's sandbox.
+// Note that this is **not** intended to be used as a 
+// way of importing Javascript into the command's sandbox.
 //
 // {{{ src }}} Source URL of the Javascript to inject.
 //
@@ -424,7 +428,8 @@ CmdUtils.getGeoLocation = function getGeoLocation(callback) {
         city: geoip_city(),
         state: geoip_region_name(),
         country: geoip_country_name(),
-        country_code: geoip_country_code(),//for list, refer to http://www.maxmind.com/app/iso3166
+        //for list of country codes, refer to http://www.maxmind.com/app/iso3166
+        country_code: geoip_country_code(),
         lat: geoip_latitude(),
         "long": geoip_longitude()
       };
@@ -438,8 +443,8 @@ CmdUtils.getGeoLocation = function getGeoLocation(callback) {
 
 
 // ** {{{ CmdUtils.UserCode }}} **
-
-CmdUtils.UserCode = { //Copied with additions from chrome://ubiquity/content/prefcommands.js
+//Copied with additions from chrome://ubiquity/content/prefcommands.js
+CmdUtils.UserCode = {
   COMMANDS_PREF : "extensions.ubiquity.commands",
 
   setCode : function(code) {
@@ -490,7 +495,9 @@ CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
   if( !options ) options = {};
 
   var hiddenWindow = CmdUtils.getHiddenWindow();
-  var thumbnail = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  var thumbnail = hiddenWindow.
+                  document.
+                  createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
 
   width = options.width || 200; // Default to 200px width
 
@@ -526,7 +533,9 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
   var hiddenWindow = CmdUtils.getHiddenWindow();
   var body = hiddenWindow.document.body;
 
-  var canvas = hiddenWindow.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  var canvas = hiddenWindow.
+               document.
+               createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
 
   var img = new hiddenWindow.Image();
   img.src = url;
@@ -546,22 +555,43 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 
 
 /**
-* Saves a pair of username/password (or username/api key) to the password manager. You have to pass the name of your command
-* (or other identifier) as to the command like:
-* CmdUtils.savePassword( {name:'my command', username:'myUserName', password:'gu3ssm3'} )
+* Saves a pair of username/password (or username/api key) to the password 
+* manager. You have to pass the name of your command (or other identifier) 
+* as to the command like:
+* CmdUtils.savePassword( {name:'my command', 
+*                         username:'myUserName', 
+*                         password:'gu3ssm3'} )
 */
 CmdUtils.savePassword = function savePassword( opts ){
-  var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
-  var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1", Ci.nsILoginInfo, "init");
-  //var loginInfo = new nsLoginInfo(hostname, formSubmitURL, httprealm, username, password, usernameField, passwordField);
-  var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 'UbiquityInformation' + opts.name, null, opts.username, opts.password, "", "");
-
+  var passwordManager = Cc["@mozilla.org/login-manager;1"].
+                        getService(Ci.nsILoginManager);
+  var nsLoginInfo = new Components.
+                        Constructor("@mozilla.org/login-manager/loginInfo;1", 
+                                    Ci.nsILoginInfo, 
+                                    "init");
+  //var loginInfo = new nsLoginInfo(hostname, 
+  //                                formSubmitURL, 
+  //                                httprealm, 
+  //                                username, 
+  //                                password, 
+  //                                usernameField, 
+  //                                passwordField);
+  var loginInfo = new nsLoginInfo('chrome://ubiquity/content', 
+                                  'UbiquityInformation' + opts.name, 
+                                  null, 
+                                  opts.username, 
+                                  opts.password, 
+                                  "", 
+                                  "");
 
   try {
      passwordManager.addLogin(loginInfo);
   } catch(e) {
      // "This login already exists."
-     var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", 'UbiquityInformation' + opts.name, null);
+     var logins = passwordManager.findLogins({}, 
+                                             "chrome://ubiquity/content", 
+                                             'UbiquityInformation' + opts.name, 
+                                             null);
      for each(login in logins) {
         if (login.username == opts.username) {
            //modifyLogin(oldLoginInfo, newLoginInfo);
@@ -574,13 +604,18 @@ CmdUtils.savePassword = function savePassword( opts ){
 
 /*
 * Retrieve one or more username/password saved with CmdUtils.savePassword
-* All you have to pass is the identifier (the name option) used on the other function.
+* All you have to pass is the identifier (the name option) used on the other 
+* function.
 * You will get as return an array of { username:'', password:'' } objects.
 */
 CmdUtils.retrieveLogins = function retrieveLogins( name ){
-  var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+  var passwordManager = Cc["@mozilla.org/login-manager;1"].
+                        getService(Ci.nsILoginManager);
 
-  var logins = passwordManager.findLogins({}, "chrome://ubiquity/content", "UbiquityInformation" + name, null);
+  var logins = passwordManager.findLogins({}, 
+                                          "chrome://ubiquity/content", 
+                                          "UbiquityInformation" + name, 
+                                          null);
   var returnedLogins = [];
 
   for each(login in logins){
@@ -771,14 +806,15 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
       file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
 
       // file is nsIFile, data is a string
-      var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-                               .createInstance(Components.interfaces.nsIFileOutputStream);
+      var foStream = Components.
+                     classes["@mozilla.org/network/file-output-stream;1"].
+                     createInstance(Components.interfaces.nsIFileOutputStream);
 
       // use 0x02 | 0x10 to open file for appending.
       foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
       // write, create, truncate
-      // In a c file operation, we have no need to set file mode with or operation,
-      // directly using "r" or "w" usually.
+      // In a c file operation, we have no need to set file mode with or 
+      // operation, directly using "r" or "w" usually.
       foStream.write(data, data.length);
       foStream.close();
       var filePath = file.path;
@@ -818,9 +854,11 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
         browser.setAttribute("disablesecurity", true);
         browser.setAttribute("width", 500);
         browser.setAttribute("height", 300);
-        browser.addEventListener("load", Utils.safeWrapper(onPreviewLoaded),
+        browser.addEventListener("load", 
+                                 Utils.safeWrapper(onPreviewLoaded),
                                  true);
-        browser.addEventListener("unload", Utils.safeWrapper(onPreviewUnloaded),
+        browser.addEventListener("unload", 
+                                 Utils.safeWrapper(onPreviewUnloaded),
                                  true);
         xulIframe.contentDocument.documentElement.appendChild(browser);
       }
@@ -880,7 +918,8 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
       xulIframe.setAttribute("width", 500);
 
       xulIframe.addEventListener("load",
-                                 Utils.safeWrapper(onXulLoaded), true);
+                                 Utils.safeWrapper(onXulLoaded), 
+                                 true);
       pblock.innerHTML = "";
       pblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
       pblock.appendChild(xulIframe);
