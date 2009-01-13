@@ -175,12 +175,16 @@ LocalUriCodeSource.prototype = {
       var url = Utils.url(this.uri);
       if (url.scheme == "file") {
         var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
-        var lastModifiedTime = file.lastModifiedTime;
+        if (file.exists()) {
+          var lastModifiedTime = file.lastModifiedTime;
 
-        if (this._cached && this._cachedTimestamp == lastModifiedTime)
-          return this._cached;
+          if (this._cached && this._cachedTimestamp == lastModifiedTime)
+            return this._cached;
 
-        this._cachedTimestamp = lastModifiedTime;
+          this._cachedTimestamp = lastModifiedTime;
+        }
+        else
+          return "";
       }
 
       var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
