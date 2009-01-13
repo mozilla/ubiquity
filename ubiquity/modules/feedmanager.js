@@ -153,6 +153,10 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                              expiration);
   };
 
+  feedInfo.checkForManualUpdate = function feedInfo_checkForManualUpdate(cb) {
+    cb(false);
+  };
+
   feedInfo.__defineGetter__(
     "viewSourceUri",
     function feedInfo_viewSource() {

@@ -142,14 +142,15 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
     return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
-                       builtins.headers, builtins.footers);
+                       builtins.headers, builtins.footers,
+                       hiddenWindow.jQuery);
   };
 
   feedManager.registerPlugin(this);
 }
 
 function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
-                 headerSources, footerSources) {
+                 headerSources, footerSources, jQuery) {
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
     this.canAutoUpdate = true;
 
@@ -245,6 +246,31 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       this.pageLoadFuncs = sandbox.pageLoadFuncs;
 
       hub.notifyListeners("feed-change", feedInfo.uri);
+    }
+  };
+
+  this.checkForManualUpdate = function checkForManualUpdate(cb) {
+    if (LocalUriCodeSource.isValidUri(this.srcUri))
+      cb(false);
+    else {
+      function onSuccess(data) {
+        if (data != self.getCode()) {
+          var confirmUrl = (CONFIRM_URL +
+                            "?url=" +
+                            encodeURIComponent(self.uri.spec) +
+                            "&sourceUrl=" +
+                            encodeURIComponent(self.srcUri.spec) +
+                            "&updateCode=" +
+                            encodeURIComponent(data));
+          cb(true, confirmUrl);
+        } else
+          cb(false);
+      };
+      // TODO: We should call the callback w/ a false value or some kind
+      // of error value if the Ajax request fails.
+      jQuery.ajax({url: this.srcUri.spec,
+                   dataType: "text",
+                   success: onSuccess});
     }
   };
 

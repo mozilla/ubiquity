@@ -97,6 +97,15 @@ function makeFeedListElement(info, label, clickMaker) {
 
   var titleLink = addLink(info.title, info.uri.spec);
 
+  if (label == "unsubscribe" && !info.canAutoUpdate) {
+    info.checkForManualUpdate(
+      function(isAvailable, href) {
+        if (isAvailable)
+          $(titleLink).after('<br><a class="feed-updated" href="' + href +
+                             '">An update for this feed is available.</a>');
+      });
+  }
+
   var commandList = $("<ul></ul>");
   for (name in info.commands)
     $(commandList).append($("<li></li>").text(name));
