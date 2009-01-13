@@ -236,6 +236,8 @@ App.initColumnSizes = function initSizes() {
                    paddingLeft: padding,
                    paddingRight: padding};
   $("#content").css({width: (App.columnWidth + padding*2) * 2});
+  $(".documentation").css(App.columnCss);
+  $(".code").css(App.columnCss);
 };
 
 $(window).ready(
