@@ -58,11 +58,36 @@ CmdUtils.CreateCommand({
       status: statusText.slice(0, TWITTER_STATUS_MAXLEN)
     };
 
+    function make_basic_auth( user, password){
+      var tok = user + ":" + password;
+      var hash = CmdUtils.getWindow().btoa(tok); //Base64 encode.
+      return "Basic " + hash;
+    };
+    
+    
+    // TODO: Should respect multiple logins/accounts. Can be implemented as an
+    // optional field in the command (i.e, twitter [text] as [user]).
+    
+    var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+    var logins = passwordManager.findLogins({}, "http://twitter.com", "", null);
+    
+    if( logins ){
+      var login = logins[0];
+      var auth = make_basic_auth(login.username, login.password);
+      CmdUtils.log( auth );
+    } else {
+      var auth = null;
+    }
+
+
     jQuery.ajax({
       type: "POST",
       url: updateUrl,
       data: updateParams,
       dataType: "json",
+      beforeSend: function(req) {
+        if( auth ) req.setRequestHeader("Authorization", auth);
+      },
       error: function() {
         displayMessage("Twitter error - status not updated");
       },
