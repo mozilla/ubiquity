@@ -371,7 +371,8 @@ Utils.paramsToString = function paramsToString(params) {
 // it.
 
 Utils.getLocalUrl = function getLocalUrl(url) {
-  var req = new XMLHttpRequest();
+  var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+            .createInstance(Ci.nsIXMLHttpRequest);
   req.open('GET', url, false);
   req.overrideMimeType("text/plain");
   req.send(null);
