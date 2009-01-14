@@ -864,9 +864,9 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.makeSearchCommand({
-    name: "google-image-search",
-    synonyms: ["getimages"],
-    version: "0.2.3",
+    name: "image-search",
+	synonyms: ["getimages"],
+    version: "0.2.4",
     author: {
         name: "Federico Parodi",
         email: "getimages@jimmy2k.it"
@@ -919,12 +919,15 @@ CmdUtils.makeSearchCommand({
 				rsz: "large",
 				start: newPageItem
             };
-			
+
             CmdUtils.previewAjax(pblock, {
                 type: "GET",
                 url: apiUrl,
                 data: apiParams,
                 datatype: "string",
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader("referer","http://www.jimmy2k.it/getimagescommand");
+				},
                 error: function() {
                     pblock.innerHTML = "<i>Connection error.</i>";
                 },
@@ -966,7 +969,8 @@ CmdUtils.makeSearchCommand({
                         else {
                             // left click
                             CmdUtils.setLastResult(image.title);
-                            Utils.openUrlInBrowser(image.title);
+                            Utils.openUrlInBrowser(image.title);	
+							
                         }
 
                         var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
@@ -976,13 +980,21 @@ CmdUtils.makeSearchCommand({
                         .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
                         .getInterface(Components.interfaces.nsIDOMWindow);
                         mainWindow.gUbiquity.closeWindow();
+						Application.activeWindow.activeTab.focus();
+						
+						
                     }
 
                     template = '<img id="img${counter}" src="${thumb}" title="${imgurl}" style="position: absolute; height:80px; margin: 5px; border:0px; vertical-align:top; z-index: 0; border: 0px solid #00C600; -moz-border-radius: 3px;" alt="." class="thumbnail"/>';
 					var htmlData = 'Image Search results for ' + nameText;
-					htmlData += '<div id="resImg" style="position: relative;">';
+					htmlData += '<div id="resImg" style="position: relative; height:365px;">';
 
 					var numberOfResults = responseData.results.length;
+					if (numberOfResults == 0) {
+						pblock.innerHTML = 'Sorry, there are no results';
+						return;
+						
+					}
 					
 					var resultsArray = responseData.results;
 					for (var index = 0; index < numberOfResults; index++) {
@@ -1003,7 +1015,9 @@ CmdUtils.makeSearchCommand({
 					var moreButton = jQuery(pblock.ownerDocument).find("div#next");
 					var prevButton = jQuery(pblock.ownerDocument).find("div#prev");
 					var controls = jQuery(pblock.ownerDocument).find("div.control");
-
+					
+					if (numberOfResults != 8) moreButton.css("display", "none");
+					
                     controls.mouseover(function() {
                         jQuery(this).animate({
                             opacity: 1
