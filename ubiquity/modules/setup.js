@@ -269,7 +269,11 @@ let UbiquitySetup = {
         // getting the '@mozilla.org/thread-manager;1' service and
         // spinning via a call to processNextEvent() until some kind of
         // I/O is finished?
-        this.__installDefaults(defaultFeedPlugin);
+        defaultFeedPlugin.installDefaults(
+          this.standardFeedsUri,
+          this.getBaseUri() + "standard-feeds/",
+          this.STANDARD_FEEDS
+        );
 
       cmdSource.refresh();
     }
@@ -321,19 +325,12 @@ let UbiquitySetup = {
     return Application.extensions.get("ubiquity@labs.mozilla.com").version;
   },
 
-  __installDefaults: function installDefaults(defaultFeedPlugin) {
-    let baseLocalUri = this.getBaseUri() + "standard-feeds/";
-    let baseUri;
-
+  get standardFeedsUri() {
     if (this.isInstalledAsXpi()) {
       var STANDARD_FEEDS_PREF = "extensions.ubiquity.standardFeedsUri";
-      baseUri = Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
+      return Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
     } else
-      baseUri = baseLocalUri;
-
-    defaultFeedPlugin.installDefaults(baseUri,
-                                      baseLocalUri,
-                                      this.STANDARD_FEEDS);
+      return this.getBaseUri() + "standard-feeds/";
   }
 };
 
