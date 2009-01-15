@@ -76,6 +76,9 @@ cmd_save.preview = function( pblock ) {
 };
 
 var pageLoad_restorePageAnnotations = function (window) {
+  if (!window.location)
+    return;
+
   var annotationService = Components.classes["@mozilla.org/browser/annotation-service;1"]
                           .getService(Components.interfaces.nsIAnnotationService);
   var ioservice = Components.classes["@mozilla.org/network/io-service;1"]
