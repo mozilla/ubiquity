@@ -71,7 +71,7 @@ CmdUtils.CreateCommand({
     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
     var logins = passwordManager.findLogins({}, "http://twitter.com", "", null);
     
-    if( logins ){
+    if( logins.length > 0 ){
       var login = logins[0];
       var auth = make_basic_auth(login.username, login.password);
       CmdUtils.log( auth );
