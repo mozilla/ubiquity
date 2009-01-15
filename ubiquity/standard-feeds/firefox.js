@@ -497,6 +497,6 @@ CmdUtils.CreateCommand({
   preview: "Inserts Ubiquity debug information at the cursor. Use it when reporting bugs.",
   execute: function(){
     var debug = this._getDebugInfo(Application);
-    CmdUtils.setSelection( Utils.prettyPrint(debug) );
+    CmdUtils.setSelection( Utils.encodeJson(debug) );
   }
 })
