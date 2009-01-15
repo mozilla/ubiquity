@@ -403,3 +403,100 @@ CmdUtils.CreateCommand({
     tagging.tagURI(currentURI, tags);
   }
 });
+
+
+
+// -----------------------------------------------------------------
+// BUG REPORT COMMANDS
+// -----------------------------------------------------------------
+
+
+function _getExtensionInfo( Application ){
+  var extensions = {};
+  Application.extensions.all.forEach(function( ext ){
+    extensions[ext.name] = {
+      version: ext.version,
+      firstRun: ext.firstRun,
+      enabled: ext._enabled
+    };
+  });
+  return extensions;
+}
+
+function _getBrowserInfo( Application ){
+  numTabs = 0;
+  Application.windows.forEach(function(win){
+    numTabs += win.tabs.length;
+  });
+  
+  var nav = CmdUtils.getWindow().navigator;
+  
+  return {
+    name: Application.name,
+    version: Application.version,
+    numberOfWindows: Application.windows.length,
+    numberOfTabs: numTabs,
+    cookieEnabled: nav.cookieEnabled,
+    language: nav.language,
+    buildID: nav.buildID,
+  }
+}
+    
+function _getOSInfo(){
+  var hostJS = CmdUtils.getWindow().navigator;
+
+  return {
+    oscpu: hostJS.oscpu,
+    platform: hostJS.platform,
+  };
+}
+
+function _getPluginInfo(){
+  var plugins = [];
+  var hostJS = CmdUtils.getWindow().navigator;
+  for( var i=0; i < hostJS.plugins.length; i++){
+    plugins.push({
+      name: hostJS.plugins[i].name,
+      //description: hostJS.plugins[i].description,
+      filename: hostJS.plugins[i].filename      
+    });
+  }
+  return plugins;
+}
+
+function _getErrorInfo(){
+  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+      .getService(Components.interfaces.nsIConsoleService);
+  
+  // Get the last five errors
+  var errors = {};
+  var count = {}
+  consoleService.getMessageArray(errors, count);
+  errors = errors.value.slice(-5);
+  
+  var errorList = [];
+  errors.forEach(function(error){
+    errorList.push( error.message );    
+  });
+  
+  return errorList;
+}
+ 
+    
+CmdUtils.CreateCommand({
+  name:"report-bug",
+  _getDebugInfo: function(Application){
+    return {
+      browser: _getBrowserInfo(Application),
+      extensions: _getExtensionInfo(Application),
+      plugins: _getPluginInfo(),
+      os: _getOSInfo(),
+      errors: _getErrorInfo()
+    }
+  },
+  preview: "Inserts Ubiquity debug information at the cursor. Use it when reporting bugs.",
+  execute: function(){
+    var debug = this._getDebugInfo(Application);
+    CmdUtils.setSelection( Utils.prettyPrint(debug) );
+  }
+})
