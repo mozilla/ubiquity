@@ -47,10 +47,15 @@ Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 const DEFAULT_FEED_TYPE = "commands";
+const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
+const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
 
 function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
                            languageCode, baseUri) {
   this.type = DEFAULT_FEED_TYPE;
+
+  let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                    .getService(Components.interfaces.fuelIApplication);
 
   let builtins = makeBuiltins(languageCode, baseUri);
   let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService,
@@ -107,9 +112,6 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
       if (url.scheme != "https")
         return false;
 
-      TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
-      let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                        .getService(Components.interfaces.fuelIApplication);
       var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
       domains = domains.split(",");
 
@@ -141,23 +143,24 @@ function DefaultFeedPlugin(feedManager, messageService, hiddenWindow,
   };
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
+    var timeout = Application.prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
     return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
                        builtins.headers, builtins.footers,
-                       hiddenWindow.jQuery);
+                       hiddenWindow.jQuery, timeout);
   };
 
   feedManager.registerPlugin(this);
 }
 
 function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
-                 headerSources, footerSources, jQuery) {
+                 headerSources, footerSources, jQuery, timeoutInterval) {
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
     this.canAutoUpdate = true;
 
   let codeSource;
   if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
     if (feedInfo.canAutoUpdate) {
-      codeSource = new RemoteUriCodeSource(feedInfo);
+      codeSource = new RemoteUriCodeSource(feedInfo, timeoutInterval);
     } else
       codeSource = new StringCodeSource(feedInfo.getCode(),
                                         feedInfo.srcUri.spec);

@@ -106,11 +106,14 @@ StringCodeSource.prototype = {
   }
 };
 
-function RemoteUriCodeSource(feedInfo) {
+// timeoutInterval is the minimum amount of time to wait before
+// re-requesting the content of a code source, in milliseconds.
+function RemoteUriCodeSource(feedInfo, timeoutInterval) {
   this.id = feedInfo.srcUri.spec;
   this._feedInfo = feedInfo;
   this._req = null;
   this._hasCheckedRecently = false;
+  this.timeoutInterval = timeoutInterval;
 };
 
 RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
@@ -138,11 +141,13 @@ RemoteUriCodeSource.prototype = {
             // Update our cache.
             self._feedInfo.setCode(self._req.responseText);
           self._req = null;
-          Utils.setTimeout(
-            function() { self._hasCheckedRecently = false; },
-            // TODO: Make the interval come from a preference.
-            60000
-          );
+
+          function clearTimeout() { self._hasCheckedRecently = false; }
+
+          if (self.timeoutInterval)
+            Utils.setTimeout(clearTimeout, self.timeoutInterval);
+          else
+            clearTimeout();
         }
       };
 
