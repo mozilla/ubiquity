@@ -45,7 +45,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function ubiquitySetup()
 {
-  
+
   //TODO: Remove after 0.1.3
   //To fix #385 (suggestion ranking is incorrect)
   //We need to delete the old database
@@ -67,7 +67,7 @@ function ubiquitySetup()
   }catch(e){
     //do nothing
   }
-  
+
   var jsm = {};
   Components.utils.import("resource://ubiquity/modules/setup.js",
                           jsm);
@@ -118,7 +118,7 @@ function ubiquitySetup()
     //load the default and tell the user about the failure
     skinService.loadSkin(defaultSkinUrl);
     services.messageService
-            .displayMessage("Loading your current skin failed." + 
+            .displayMessage("Loading your current skin failed." +
                             "The default skin will be loaded.");
   }
 
@@ -157,6 +157,13 @@ function ubiquitySetup()
     previewBlock
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
+
+  function refreshUbiquityOnReload(evt) {
+    if (evt.target.id == "Browser:Reload")
+      cmdMan.refresh();
+  }
+
+  window.addEventListener("command", refreshUbiquityOnReload, false);
 
   // Hack to get the default skin to work on Linux, which we don't
   // support per-pixel alpha transparency on.
