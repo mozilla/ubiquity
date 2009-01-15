@@ -482,7 +482,9 @@ function _getErrorInfo(){
   return errorList;
 }
  
-    
+// TODO: Move this to developer.js on the next release of Ubiq.
+// I'me leaving it here so that it gets pushed out to users
+// now.
 CmdUtils.CreateCommand({
   name:"report-bug",
   _getDebugInfo: function(Application){
