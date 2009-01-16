@@ -133,6 +133,7 @@ function makeFeedListElement(info, label, clickMaker) {
 }
 
 function onReady() {
+  $(".version").text(UbiquitySetup.version);
   PrefKeys.onLoad();
   let feedMgr = UbiquitySetup.createServices().feedManager;
 
