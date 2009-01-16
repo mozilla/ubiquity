@@ -24,13 +24,13 @@ var extApplication = { // helper method for correct quitting/restarting
                                  .getService(Components.interfaces.nsIAppStartup);
       appStartup.quit(aFlags);
       return true;
-    } return false; 
+    } return false;
   },
   quit: function app_quit() {
     return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit, "quit");
   },
   restart: function app_restart() {
-    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit | 
+    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit |
                                Components.interfaces.nsIAppStartup.eRestart, "restart");
   },
   close: function app_close() {
@@ -49,7 +49,7 @@ var extApplication = { // helper method for correct quitting/restarting
 // -----------------------------------------------------------------
 
 // exit firefox entirely
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "exit",
   description: "Exits firefox",
   preview: function( pblock ) {pblock.innerHTML=this.description;},
@@ -59,7 +59,7 @@ CmdUtils.CreateCommand({
 });
 
 // restarts firefox
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "restart",
   description: "Restarts firefox",
   preview: function( pblock ) {pblock.innerHTML=this.description;},
@@ -70,7 +70,7 @@ CmdUtils.CreateCommand({
 
 // closes current firefox window
 // TODO: if last window is closed, we should offer to save session
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "close",
   description: "Close current window",
   preview: function( pblock ) {pblock.innerHTML=this.description},
@@ -80,7 +80,7 @@ CmdUtils.CreateCommand({
 });
 
 // toggles fullscreen
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "fullscreen",
   description: "Toggles fullscreen mode",
   preview: function( pblock ) {pblock.innerHTML=this.description},
@@ -221,7 +221,7 @@ CmdUtils.CreateCommand({
 });
 
 // refreshes current tab
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "refresh",
   description: "Refresh current document",
   preview: function( pblock ) {pblock.innerHTML=this.description},
@@ -232,7 +232,7 @@ CmdUtils.CreateCommand({
 });
 
 // bookmark current tab
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "bookmark",
   description: "Add current document to bookmarks",
   preview: function( pblock ) {pblock.innerHTML=this.description},
@@ -246,7 +246,7 @@ CmdUtils.CreateCommand({
 });
 
 // print current tab
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "print",
   description: "Print current page",
   preview: function( pblock ) {pblock.innerHTML=this.description},
@@ -257,11 +257,11 @@ CmdUtils.CreateCommand({
 });
 
 // goes back in history
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "back",
   description: "Go back in history",
   takes: {steps: noun_arb_text},
-  _parseSteps: function(s) { 
+  _parseSteps: function(s) {
     var s = parseInt(s);
     return isNaN(s) ? 1 : s;
   },
@@ -277,11 +277,11 @@ CmdUtils.CreateCommand({
 });
 
 // goes forward in history
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "forward",
   description: "Go forward in history",
   takes: {steps: noun_arb_text},
-  _parseSteps: function(s) { 
+  _parseSteps: function(s) {
     var s = parseInt(s);
     return isNaN(s) ? 1 : s;
   },
@@ -297,7 +297,7 @@ CmdUtils.CreateCommand({
 });
 
 // go to home page
-CmdUtils.CreateCommand({ 
+CmdUtils.CreateCommand({
   name: "home",
   description: "Go to home page",
   preview: function( pblock ) {pblock.innerHTML=this.description},
@@ -424,13 +424,13 @@ function _getExtensionInfo( Application ){
 }
 
 function _getBrowserInfo( Application ){
-  numTabs = 0;
+  var numTabs = 0;
   Application.windows.forEach(function(win){
     numTabs += win.tabs.length;
   });
-  
+
   var nav = CmdUtils.getWindow().navigator;
-  
+
   return {
     name: Application.name,
     version: Application.version,
@@ -438,16 +438,16 @@ function _getBrowserInfo( Application ){
     numberOfTabs: numTabs,
     cookieEnabled: nav.cookieEnabled,
     language: nav.language,
-    buildID: nav.buildID,
-  }
+    buildID: nav.buildID
+  };
 }
-    
+
 function _getOSInfo(){
   var hostJS = CmdUtils.getWindow().navigator;
 
   return {
     oscpu: hostJS.oscpu,
-    platform: hostJS.platform,
+    platform: hostJS.platform
   };
 }
 
@@ -458,7 +458,7 @@ function _getPluginInfo(){
     plugins.push({
       name: hostJS.plugins[i].name,
       //description: hostJS.plugins[i].description,
-      filename: hostJS.plugins[i].filename      
+      filename: hostJS.plugins[i].filename
     });
   }
   return plugins;
@@ -467,24 +467,24 @@ function _getPluginInfo(){
 function _getErrorInfo(){
   var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
       .getService(Components.interfaces.nsIConsoleService);
-  
+
   // Get the last five errors
   var errors = {};
-  var count = {}
+  var count = {};
   consoleService.getMessageArray(errors, count);
   errors = errors.value.slice(-5);
-  
+
   var errorList = [];
   errors.forEach(function(error){
-    errorList.push( error.message );    
+    errorList.push( error.message );
   });
-  
+
   return errorList;
 }
- 
+
 // TODO: Move this to developer.js on the next release of Ubiq.
-// I'me leaving it here so that it gets pushed out to users
-// now.
+// I'm leaving it here so that it gets pushed out to users
+// now. -Aza
 CmdUtils.CreateCommand({
   name:"report-bug",
   _getDebugInfo: function(Application){
@@ -494,11 +494,11 @@ CmdUtils.CreateCommand({
       plugins: _getPluginInfo(),
       os: _getOSInfo(),
       errors: _getErrorInfo()
-    }
+    };
   },
   preview: "Inserts Ubiquity debug information at the cursor. Use it when reporting bugs.",
   execute: function(){
     var debug = this._getDebugInfo(Application);
     CmdUtils.setSelection( Utils.encodeJson(debug) );
   }
-})
+});
