@@ -111,15 +111,33 @@ let UbiquitySetup = {
   },
 
   __modifyUserAgent: function __modifyUserAgent() {
+    // This is temporary code to fix old versions of Ubiquity that
+    // modified the User-Agent string without uninstalling cleanly.
+    // See #471 for more information.
     const USERAGENT_PREF = "general.useragent.extra.ubiquity";
-    var expectedPref = "Ubiquity/" + this.version;
-    Application.prefs.setValue(USERAGENT_PREF, expectedPref);
+    Application.prefs.setValue(USERAGENT_PREF, "");
 
-    function removePref() {
-      Application.prefs.setValue(USERAGENT_PREF, "");
-    }
+    // If we're talking to ubiquity.mozilla.com, pass extra information
+    // in the User-Agent string so it knows what version of the
+    // standard feeds to give us.
+    var userAgentExtra = "Ubiquity/" + this.version;
+    var Cc = Components.classes;
+    var Ci = Components.interfaces;
 
-    Application.events.addListener("quit", {handleEvent: removePref});
+    var observer = {
+      observe: function(subject, topic, data) {
+        subject = subject.QueryInterface(Ci.nsIHttpChannel);
+        if (subject.URI.host == "ubiquity.mozilla.com") {
+          var userAgent = subject.getRequestHeader("User-Agent");
+          userAgent += " " + userAgentExtra;
+          subject.setRequestHeader("User-Agent", userAgent, false);
+        }
+      }
+    };
+
+    var observerSvc = Cc["@mozilla.org/observer-service;1"]
+                      .getService(Ci.nsIObserverService);
+    observerSvc.addObserver(observer, "http-on-modify-request", false);
   },
 
   __maybeReset: function __maybeReset() {
