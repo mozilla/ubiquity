@@ -123,10 +123,11 @@ Ubiquity.prototype = {
       this.__cmdManager.moveIndicationDown(this.__makeContext(),
                                            this.__previewBlock);
     } else if (event.keyCode == this.__KEYCODE_TAB) {
-       event.preventDefault();
-       this.__cmdManager.copySuggestionToInput(this.__makeContext(),
-                                               this.__previewBlock,
-                                               this.__textBox);
+      event.preventDefault();
+      var suggestionText = this.__cmdManager.getHilitedSuggestionText(this.__makeContext(),
+                                               this.__previewBlock);
+      if(suggestionText)
+        this.__textBox.value = suggestionText;
     }
   },
 

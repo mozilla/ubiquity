@@ -208,22 +208,19 @@ CommandManager.prototype = {
     return this.__nlParser.getSuggestionList();
   },
 
-  copySuggestionToInput : function CM_copySuggestionToInput(context,
-                                                            previewBlock,
-                                                            textbox) {
-    if(this.hasSuggestions()) {
+  getHilitedSuggestionText : function CM_getHilitedSuggestionText(context,
+                                                            previewBlock) {
+    if(!this.hasSuggestions())
+      return null;
 
-      var selObj = this.__nlParser.getSelectionObject(context);
-      var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
-                                    .getCompletionText(selObj);
-      this.updateInput(suggText,
-                       context,
-                       previewBlock);
+    var selObj = this.__nlParser.getSelectionObject(context);
+    var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
+                                  .getCompletionText(selObj);
+    this.updateInput(suggText,
+                     context,
+                     previewBlock);
 
-      //Update the textbox value. This may be better done by returning the
-      //suggestion value so not to expose the text box.
-      textbox.value = suggText;
-    }
+    return suggText;
   },
 
   makeCommandSuggester : function CM_makeCommandSuggester() {
