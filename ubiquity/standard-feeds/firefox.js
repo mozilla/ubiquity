@@ -220,6 +220,48 @@ CmdUtils.CreateCommand({
 
 });
 
+
+function countTabs(filter, noHtml) {
+  var count = 0;
+  if (filter.length < 1) {
+     count = Application.activeWindow.tabs.length;
+  } else {
+    filter = filter.toLowerCase();
+    Application.activeWindow.tabs.forEach(function(tab) {
+      var title = tab.document.title;
+      if (title.toLowerCase().indexOf(filter) != -1)
+        count++;
+    });
+  }
+  if (noHtml) {
+    var previewTemplate = "${count} tabs"
+                          + "{if filter} matching '${filter}'{else} total{/if}.";
+  } else {
+    var previewTemplate = "<b>${count}</b> tabs"
+                          + "{if filter} matching <i>${filter}</i>{else} total{/if}.";
+  }
+  var previewData = {
+    count: count,
+    filter: filter
+  };
+  return CmdUtils.renderTemplate(previewTemplate, previewData);
+}
+
+
+CmdUtils.CreateCommand({
+  name: "count-tabs",
+  license: "MPL",
+  description: "Counts the number of tabs you have open.",
+  takes: { filter: noun_arb_text },
+  preview: function(previewBlock, inputObject) {
+    previewBlock.innerHTML = countTabs(inputObject.text);
+  },
+  execute: function(inputObject) {
+    displayMessage(countTabs(inputObject.text, true));
+  }
+});
+
+
 // refreshes current tab
 CmdUtils.CreateCommand({
   name: "refresh",
