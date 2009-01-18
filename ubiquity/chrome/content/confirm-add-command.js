@@ -54,10 +54,19 @@ function getUrlParams() {
 var gCommandFeedInfo = getUrlParams();
 
 function showConfirmation() {
-  $("#errorPageContainer").css("background-color", "white");
-  $("#errorPageContainer h1,h2,p,a,div").css("background-color",
-                                             "transparent");
+  var smallIconUrl = "chrome://global/skin/icons/information-16.png";
+  var largeIconUrl = "chrome://global/skin/icons/information-64.png";
+  
+  $("html").removeClass("blacklist");
+  
+  $("#favicon").remove();
+  $("head").append('<link rel="icon" type="image/png" id="favicon" ' +
+                   'href="' + smallIconUrl + '"/>');
 
+  $("#errorPageContainer").css("background-image",
+                               "url('" + largeIconUrl + "')");
+
+  $("title").text("Ubiquity Command Feed Subscription Successful");
   $("#errorTitle").html("<h1>Subscription Successful</h1>");
 
   $("#errorShortDesc").html($("#confirmationShortDesc").html());
