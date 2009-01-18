@@ -102,7 +102,8 @@ NLParser.Parser.prototype = {
 
   nounFirstSuggestions: function( selObj, callback ) {
     let suggs = [];
-    let topGenerics = this._rankedVerbsThatUseGenericNouns.slice(0, 5);
+    let topGenerics = this._rankedVerbsThatUseGenericNouns
+                          .slice(0, NLParser.MAX_SUGGESTIONS);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
     for each(verb in verbsToTry) {
       let newPPS = new NLParser.PartiallyParsedSentence( verb,
