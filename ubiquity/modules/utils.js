@@ -282,8 +282,9 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   else if(openPref == 3)
     browser.loadOneTab(urlString, null, null, postInputStream, false, false);
   else if(openPref == 2)
-    window.openDialog('chrome://browser/content', '_blank', 'all,dialog=no',
-                  urlString, null, null, postInputStream);
+    browserWindow.openDialog('chrome://browser/content', '_blank',
+                             'all,dialog=no', urlString, null, null,
+                             postInputStream);
   else
     browserWindow.loadURI(urlString, null, postInputStream, false);
 };
