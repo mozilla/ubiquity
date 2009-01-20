@@ -104,10 +104,14 @@ CmdUtils.CreateCommand({
     var tabName = tab.text;
     var tab = Utils.tabs.get(tabName);
     if (tab) {
-      tab._window.focus();
+      // TODO: window.focus() is missing on 1.9.2pre
+      if (tab._window && tab._window.focus)
+        tab._window.focus();
       tab.focus();
       // Focus on tab content
-      tab._window.content.focus();
+      // TODO: window.focus() is missing on 1.9.2pre
+      if (tab._window && tab._window.content)
+        tab._window.content.focus();
     }
   },
 
