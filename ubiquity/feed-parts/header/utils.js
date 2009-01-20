@@ -49,9 +49,7 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
   };
 
   function parseHtml(htmlText) {
-    var windowMediator = Cc['@mozilla.org/appshell/window-mediator;1']
-      .getService(Ci.nsIWindowMediator);
-    var window = windowMediator.getMostRecentWindow("navigator:browser");
+    var window = Utils.currentChromeWindow;
     var document = window.document;
     rootElement = document.documentElement;
     iframe = document.createElement('iframe');

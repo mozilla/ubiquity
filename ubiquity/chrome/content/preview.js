@@ -57,10 +57,7 @@ function onClick(event) {
 }
 
 function openUrl(url) {
-  
-  var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Components.interfaces.nsIWindowMediator);
-  var browserWindow = wm.getMostRecentWindow("navigator:browser");
+  var browserWindow = Utils.currentChromeWindow;
   var browser = browserWindow.getBrowser();
 
   if (browser.mCurrentBrowser.currentURI.spec == "about:blank")

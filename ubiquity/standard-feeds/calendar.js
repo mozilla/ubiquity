@@ -1,7 +1,7 @@
 function reloadGoogleCalendarTabs() {
   try {
     var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator);
-    var enumerator = wm.getEnumerator("navigator:browser");
+    var enumerator = wm.getEnumerator(Utils.appWindowType);
     while(enumerator.hasMoreElements()) {
       var win = enumerator.getNext();
       var index = 0, numTabs = win.getBrowser().mPanelContainer.childNodes.length;

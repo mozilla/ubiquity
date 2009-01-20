@@ -263,9 +263,7 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
     }
   }
 
-  var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Ci.nsIWindowMediator);
-  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  var browserWindow = Utils.currentChromeWindow;
   var browser = browserWindow.getBrowser();
 
   var prefService = Cc["@mozilla.org/preferences-service;1"]
@@ -661,3 +659,20 @@ Utils.tabs = {
     return this.__cache;
   }
 };
+
+Utils.__defineGetter__("appWindowType", function() {
+  var xulAppInfo = Cc["@mozilla.org/xre/app-info;1"].
+                   getService(Components.interfaces.nsIXULAppInfo);
+  switch(xulAppInfo.name) {
+    case "Songbird":
+      return "Songbird:Main";
+    default:
+      return "navigator:browser";
+  }
+});
+
+Utils.__defineGetter__("currentChromeWindow", function() {
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
+           getService(Ci.nsIWindowMediator);
+  return wm.getMostRecentWindow(Utils.appWindowType);
+});

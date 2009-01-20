@@ -31,9 +31,7 @@ function runTests() {
 
 function scheduleCheckForUbiquity() {
   function doCheck() {
-    var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-             .getService(Ci.nsIWindowMediator);
-    var win = wm.getMostRecentWindow('navigator:browser');
+    var win = Utils.currentChromeWindow;
 
     if (win.gUbiquity) {
       dump('Ubiquity found.\n');

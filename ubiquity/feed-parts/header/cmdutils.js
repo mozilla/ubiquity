@@ -72,9 +72,7 @@ CmdUtils.log = function log(what) {
     return;
 
   var logPrefix = "Ubiquity: ";
-  var windowManager = Cc["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Ci.nsIWindowMediator);
-  var browserWindow = windowManager.getMostRecentWindow("navigator:browser");
+  var browserWindow = Utils.currentChromeWindow;
 
   if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
     args.unshift(logPrefix);

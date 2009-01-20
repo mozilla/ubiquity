@@ -266,7 +266,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
     // through all the open windows and all the <browsers> in each.
     var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
              getService(Ci.nsIWindowMediator);
-    var enumerator = wm.getEnumerator("navigator:browser");
+    var enumerator = wm.getEnumerator(Utils.appWindowType);
     var tabbrowser = null;
     var foundBrowser = null;
 
