@@ -9,10 +9,13 @@
 <script>
 Components.utils.import("resource://ubiquity/modules/setup.js");
 
+var isRedirecting = false;
+
 function maybeRedirect() {
-  if (window.location.hash) {
+  if (!isRedirecting && window.location.hash) {
     var relPath = window.location.hash.slice(1);
     window.location = UbiquitySetup.standardFeedsUri + relPath;
+    isRedirecting = true;
   }
 }
 
