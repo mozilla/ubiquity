@@ -36,6 +36,7 @@
 
 var EXPORTED_SYMBOLS = ["FeedAggregator"];
 
+Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/eventhub.js");
 
 function FeedAggregator(feedManager, messageService, disabledCommands) {
@@ -94,8 +95,10 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
       }
   };
 
+
   self.refresh = function FA_refresh() {
     let feeds = feedManager.getSubscribedFeeds();
+    let defaultApps = ["Firefox"];
 
     feeds.forEach(function(feed) { feed.refresh(); });
 
@@ -110,10 +113,14 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
         function processFeed(feed) {
           nounTypes = nounTypes.concat(feed.nounTypes);
           for (name in feed.commands) {
-            commands[name] = makeCmdWithDisabler(feed.commands[name]);
-            commandNames.push({id: name,
-                               name: name,
-                               icon: commands[name].icon});
+            var cmd = makeCmdWithDisabler(feed.commands[name]);
+            var supportedApps = cmd.application || defaultApps;
+            if (supportedApps.indexOf(Utils.appName) > -1) {
+              commands[name] = cmd;
+              commandNames.push({id: name,
+                                 name: name,
+                                 icon: commands[name].icon});
+            }
           }
           if (feed.pageLoadFuncs.length > 0)
             pageLoadFuncLists.push(feed.pageLoadFuncs);

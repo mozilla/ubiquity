@@ -660,16 +660,39 @@ Utils.tabs = {
   }
 };
 
+// ** {{{ Utils.appName }}} **
+//
+// This property provides the chrome application name found in nsIXULAppInfo.name.
+// Examples values are "Firefox", "Songbird", "Thunderbird".
+//
+// TODO: cache the value since it won't change for the life of the application.
+
+Utils.__defineGetter__("appName", function() {
+  return Cc["@mozilla.org/xre/app-info;1"].
+         getService(Ci.nsIXULAppInfo).
+         name;
+});
+
+// ** {{{ Utils.appWindowType }}} **
+//
+// This property provides the name of "main" application windows for the chrome
+// application.
+// Examples values are "navigator:browser" for Firefox", and
+// "Songbird:Main" for Songbird.
+
 Utils.__defineGetter__("appWindowType", function() {
-  var xulAppInfo = Cc["@mozilla.org/xre/app-info;1"].
-                   getService(Components.interfaces.nsIXULAppInfo);
-  switch(xulAppInfo.name) {
+  switch(Utils.appName) {
     case "Songbird":
       return "Songbird:Main";
     default:
       return "navigator:browser";
   }
 });
+
+// ** {{{ Utils.currentChromeWindow }}} **
+//
+// This property is a reference to the application chrome window
+// that currently has focus.
 
 Utils.__defineGetter__("currentChromeWindow", function() {
   var wm = Cc["@mozilla.org/appshell/window-mediator;1"].

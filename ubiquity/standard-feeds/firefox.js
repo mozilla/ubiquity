@@ -417,12 +417,12 @@ CmdUtils.CreateCommand({
   execute: function(aTagsString) {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
-    var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
-             getService(Ci.nsIWindowMediator);
-    var recentWindow = wm.getMostRecentWindow("navigator:browser");
+    var recentWindow = Utils.currentChromeWindow;
     var doc = recentWindow.content.document;
     if (!doc)
       return;
+
+    Utils.reportInfo("URI: " + doc.location);
 
     var iosvc = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
     var currentURI = iosvc.newURI(doc.location, null, null);
