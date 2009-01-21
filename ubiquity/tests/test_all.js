@@ -1502,6 +1502,10 @@ function testLoadLocaleJsonWorks() {
   this.assert(dat.testLoadLocaleJsonWorks == "\u3053");
 }
 
+function testIntentionalFail() {
+  throw new Error("intentional failure");
+}
+
 function testUtilsSetTimeoutWorks() {
   let self = this;
   let foo;
