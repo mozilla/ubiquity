@@ -309,22 +309,7 @@ let UbiquitySetup = {
       if (!isEnabled)
         return;
 
-      var isValidPage = false;
-      try {
-        // See if we can get the current document;
-        // if we get an exception, then the page that's
-        // been loaded is probably XUL or something,
-        // and we won't want to deal with it.
-
-        // TODO: This probably won't be accurate if it's the case that
-        // the user has navigated to a different tab by the time the
-        // load event occurs.
-        var doc = Application.activeWindow
-                             .activeTab
-                             .document;
-        isValidPage = true;
-      } catch (e) {}
-      if (isValidPage)
+      if (aEvent.originalTarget.location)
         gServices.commandSource.onPageLoad(aEvent.originalTarget);
     }
 
