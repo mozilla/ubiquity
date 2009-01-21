@@ -9,7 +9,8 @@
 function markupTickets(query) {
   var html = query.html();
   var regexp = /#([0-9]+)/g;
-  var template = '<a href="http://labs.toolness.com/trac/ticket/$1">#$1</a>';
+  var template = ('<a href="https://ubiquity.mozilla.com/' +
+                  'trac/ticket/$1">#$1</a>');
   query.html(html.replace(regexp, template));
 }
 
@@ -18,9 +19,10 @@ function markupTickets(query) {
 // This function is a page-load function that applies transformations
 // to certain developer-related web pages to provide added functionality.
 function pageLoad_developerCommands(doc) {
-  if (doc.location.protocol == "http:" &&
-      doc.location.host == 'hg.toolness.com') {
-    var regexp = /\/ubiquity-firefox\/rev\/([0-9a-f]+)/;
+  if ((doc.location.protocol == "http:" ||
+       doc.location.protocol == "https:") &&
+      doc.location.host == 'ubiquity.mozilla.com') {
+    var regexp = /\/hg\/ubiquity-firefox\/rev\/([0-9a-f]+)/;
     var match = doc.location.pathname.match(regexp);
     if (match) {
       var rev = match[1];
