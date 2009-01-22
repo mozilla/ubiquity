@@ -126,21 +126,25 @@ function ubiquitySetup()
   var previewBlock = previewIframe.contentDocument
                      .getElementById("ubiquity-preview");
 
-  function onDomChange() {
-    jQuery(previewIframe.contentDocument).find('img').each(function() {
-      this.addEventListener('load', resizePreview, false);
-    });
-    resizePreview();
-  }
-
   function resizePreview() {
     previewIframe.height = previewIframe.contentDocument.height;
     previewIframe.width = previewBlock.scrollWidth;
   }
 
-  previewIframe.contentDocument.addEventListener("DOMSubtreeModified",
-                                                 onDomChange,
-                                                 false);
+  previewIframe.contentDocument.addEventListener(
+    "DOMSubtreeModified",
+    function() { resizePreview(); },
+    false
+  );
+
+  previewIframe.contentDocument.addEventListener(
+    "load",
+    function(aEvt) {
+      if (aEvt.originalTarget.nodeName == "IMG")
+        resizePreview();
+    },
+    true
+  );
 
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("contentAreaContextMenu"),
