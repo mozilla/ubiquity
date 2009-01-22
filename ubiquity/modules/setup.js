@@ -45,13 +45,14 @@ Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
+Components.utils.import("resource://ubiquity/modules/webjsm.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
 
 let gServices;
 
-let gIframe;
+let gWebJsModule;
 
 const RESET_SCHEDULED_PREF = "extensions.ubiquity.isResetScheduled";
 const VERSION_PREF ="extensions.ubiquity.lastversion";
@@ -197,31 +198,13 @@ let UbiquitySetup = {
   },
 
   preload: function preload(callback) {
-    if (gIframe) {
+    if (gWebJsModule) {
       callback();
       return;
     }
 
     this.__maybeReset();
-
-    var Cc = Components.classes;
-    var Ci = Components.interfaces;
-    var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
-                       .getService(Ci.nsIAppShellService)
-                       .hiddenDOMWindow;
-
-    gIframe = hiddenWindow.document.createElement("iframe");
-    gIframe.setAttribute("id", "ubiquityFrame");
-    gIframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.html");
-    gIframe.addEventListener(
-      "pageshow",
-      function onPageShow() {
-        gIframe.removeEventListener("pageshow", onPageShow, false);
-        callback();
-      },
-      false
-    );
-    hiddenWindow.document.documentElement.appendChild(gIframe);
+    gWebJsModule = new WebJsModule(callback);
   },
 
   get isResetScheduled() {
@@ -260,29 +243,15 @@ let UbiquitySetup = {
         'extensions.ubiquity.disabledCommands'
       );
 
-      var importedScripts = {};
-      gIframe.contentWindow.importScripts = function importScripts(urls) {
-        var wind = this;
-        urls.forEach(
-          function(url) {
-            if (!(url in importedScripts)) {
-              wind.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-                  .getService(Components.interfaces.mozIJSSubScriptLoader)
-                  .loadSubScript(url);
-              importedScripts[url] = true;
-            }
-          });
-      };
-
       var defaultFeedPlugin = new DefaultFeedPlugin(feedManager,
                                                     msgService,
-                                                    gIframe.contentWindow,
+                                                    gWebJsModule,
                                                     this.languageCode,
                                                     this.getBaseUri());
 
       var ldfPlugin = new LockedDownFeedPlugin(feedManager,
                                                msgService,
-                                               gIframe.contentWindow);
+                                               gWebJsModule);
 
       var cmdSource = new FeedAggregator(
         feedManager,

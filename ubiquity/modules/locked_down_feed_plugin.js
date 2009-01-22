@@ -56,12 +56,12 @@ Components.utils.import("resource://ubiquity/modules/contextutils.js");
 //   * {{{feedManager}}} is an instance of a {{{FeedManager}}} class.
 //   * {{{messageService}}} is an object that exposes a message service
 //     interface.
-//   * {{{hiddenWindow}}} is an instance of a hidden chrome HTML window.
+//   * {{{webJsm}}} is a WebJsModule instance.
 //
 // When instantiated, the LDFP automatically registers itself with the
 // feed manager that's passed to it.
 
-function LockedDownFeedPlugin(feedManager, messageService, hiddenWindow) {
+function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
   // === {{{LDFP.type}}} ===
   //
   // Ubiquity uses the value of the {{{rel}}} attribute contained in a
@@ -120,14 +120,12 @@ function LockedDownFeedPlugin(feedManager, messageService, hiddenWindow) {
 
   this.makeFeed = function LDFP_makeFeed(baseFeedInfo, eventHub) {
     return new LDFPFeed(baseFeedInfo, eventHub, messageService,
-                        hiddenWindow.html_sanitize);
+                        webJsm.html_sanitize);
   };
 
   // Load the Caja HTML sanitizer in our hidden window so we can use it
   // whenever we need it.
-  hiddenWindow.importScripts(
-    ["resource://ubiquity/scripts/html-sanitizer-minified.js"]
-  );
+  webJsm.importScript("resource://ubiquity/scripts/html-sanitizer-minified.js");
 
   feedManager.registerPlugin(this);
 }
