@@ -264,6 +264,8 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
       responseData = Utils.decodeJson(responseData);
 
       var tempElement = CmdUtils.getHiddenWindow().document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+      // TODO: This is insecure, as we're taking non-authenticated content
+      // and injecting it into a document with chrome privileges.
       tempElement.innerHTML = responseData.parse.text["*"];
 
       //take only the text from summary because links won't work either way
