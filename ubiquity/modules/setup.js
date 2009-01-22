@@ -260,6 +260,20 @@ let UbiquitySetup = {
         'extensions.ubiquity.disabledCommands'
       );
 
+      var importedScripts = {};
+      gIframe.contentWindow.importScripts = function importScripts(urls) {
+        var wind = this;
+        urls.forEach(
+          function(url) {
+            if (!(url in importedScripts)) {
+              wind.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+                  .getService(Components.interfaces.mozIJSSubScriptLoader)
+                  .loadSubScript(url);
+              importedScripts[url] = true;
+            }
+          });
+      };
+
       var defaultFeedPlugin = new DefaultFeedPlugin(feedManager,
                                                     msgService,
                                                     gIframe.contentWindow,

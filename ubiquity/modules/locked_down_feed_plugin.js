@@ -125,10 +125,9 @@ function LockedDownFeedPlugin(feedManager, messageService, hiddenWindow) {
 
   // Load the Caja HTML sanitizer in our hidden window so we can use it
   // whenever we need it.
-  let sanitizerUrl = "resource://ubiquity/scripts/html-sanitizer-minified.js";
-  hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-              .getService(Components.interfaces.mozIJSSubScriptLoader)
-              .loadSubScript(sanitizerUrl);
+  hiddenWindow.importScripts(
+    ["resource://ubiquity/scripts/html-sanitizer-minified.js"]
+  );
 
   feedManager.registerPlugin(this);
 }

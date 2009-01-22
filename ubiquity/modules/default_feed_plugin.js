@@ -284,14 +284,10 @@ function makeBuiltinGlobalsMaker(msgService, hiddenWindow) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
 
-  var uris = ["resource://ubiquity/scripts/jquery.js",
-              "resource://ubiquity/scripts/template.js"];
-
-  for (var i = 0; i < uris.length; i++) {
-    hiddenWindow.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-                .getService(Components.interfaces.mozIJSSubScriptLoader)
-                .loadSubScript(uris[i]);
-  }
+  hiddenWindow.importScripts(
+    ["resource://ubiquity/scripts/jquery.js",
+     "resource://ubiquity/scripts/template.js"]
+  );
 
   var globalObjects = {};
 
