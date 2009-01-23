@@ -9,14 +9,10 @@ const Cc = Components.classes;
 var module = this;
 
 function testTagCommand() {
-  try {
-    var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-                .getService(Ci.nsINavBookmarksService);
-  } catch (e) {
-    // We're apparently running in xpcshell, which this test can't be
-    // performed with.
-    throw new this.SkipTestError();
-  }
+  this.skipIfXPCShell();
+
+  var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+              .getService(Ci.nsINavBookmarksService);
 
   var tagsvc = Cc["@mozilla.org/browser/tagging-service;1"]
                .getService(Ci.nsITaggingService);

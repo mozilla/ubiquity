@@ -1421,16 +1421,14 @@ function testUbiquityComponentFlagSystemFilenamePrefixWorks() {
 
 function testUbiquityComponentFlagSystemFilenamePrefixCreatesWrappers() {
   // This is a regression test for #434.
+  this.skipIfXPCShell();
+
   var Cc = Components.classes;
   var Ci = Components.interfaces;
   var ubiquity = getUbiquityComponent(this);
 
-  try {
-    var Application = Components.classes["@mozilla.org/fuel/application;1"]
-                      .getService(Components.interfaces.fuelIApplication);
-  } catch (e) {
-    throw new this.SkipTestError();
-  }
+  var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                    .getService(Components.interfaces.fuelIApplication);
 
   ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
 

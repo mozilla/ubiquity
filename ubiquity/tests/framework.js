@@ -137,6 +137,19 @@ TestCase.prototype = {
     this.__teardownFunctions.push(func);
   },
 
+  // If we're running in xpcshell, skip this test.
+  skipIfXPCShell : function() {
+    var Cc = Components.classes;
+    var Ci = Components.interfaces;
+
+    try {
+      var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+                  .getService(Ci.nsINavBookmarksService);
+    } catch (e) {
+      throw new this.SkipTestError();
+    }
+  },
+
   // Exception to throw when we want to skip a test.
   SkipTestError : function() {
   }
