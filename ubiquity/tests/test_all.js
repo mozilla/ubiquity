@@ -47,7 +47,6 @@ Components.utils.import("resource://ubiquity/modules/localeutils.js");
 Components.utils.import("resource://ubiquity/modules/collection.js");
 
 Components.utils.import("resource://ubiquity/tests/framework.js");
-Components.utils.import("resource://ubiquity/tests/test_safebox.js");
 Components.utils.import("resource://ubiquity/tests/test_eventhub.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/test_annotation_memory.js");
