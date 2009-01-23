@@ -333,4 +333,10 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
+
+  for (name in this._plugins) {
+    var plugin = this._plugins[name];
+    if (plugin.installToWindow)
+      plugin.installToWindow(window);
+  }
 };
