@@ -36,10 +36,7 @@
 
 let EXPORTED_SYMBOLS = ["WebPageFeedPlugin"];
 
-Components.utils.import("resource://ubiquity/modules/codesource.js");
-Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
-Components.utils.import("resource://ubiquity/modules/contextutils.js");
 
 function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
@@ -114,7 +111,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
     $(".command", target).each(
       function() {
         var command = new Command(this, $);
-        self.commands[command.name] = command;
+        self.commands[command.name] = finishCommand(command);
       }
     );
     eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
