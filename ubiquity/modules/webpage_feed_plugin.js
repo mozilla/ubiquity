@@ -37,31 +37,50 @@
 let EXPORTED_SYMBOLS = ["WebPageFeedPlugin"];
 
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
+Components.utils.import("resource://ubiquity/modules/hiddenbrowser.js");
 
 function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
 
   this.type = "webpage-commands";
 
-  function onUbiquityEvent(aEvt) {
+  var self = this;
+  var hiddenBrowserFactory;
+
+  makeHiddenBrowserFactory(
+    function(aHiddenBrowserFactory) {
+      hiddenBrowserFactory = aHiddenBrowserFactory;
+      hiddenBrowserFactory.contentDocument.addEventListener(
+        "UbiquityEvent",
+        function(aEvt) { onUbiquityEvent(aEvt, true); },
+        false,
+        true
+      );
+      makeHiddenBrowser();
+    });
+
+  function onUbiquityEvent(aEvt, applyToShadow) {
     var loc = aEvt.target.ownerDocument.location;
     var feeds = feedManager.getSubscribedFeeds();
-    for (var i = 0; i < feeds.length; i++)
-      if (feeds[i].srcUri.spec == loc.href) {
+    for (var i = 0; i < feeds.length; i++) {
+      let feed = feeds[i];
+      if (feed.type == self.type &&
+          feed.srcUri.spec == loc.href) {
+        feed.processEvent(aEvt, applyToShadow);
         aEvt.target.ownerDocument.defaultView.addEventListener(
           "unload",
-          function(aEvt) { feeds[i].clear(); },
+          function(aEvt) { feed.onUnload(applyToShadow); },
           false
         );
-        feeds[i].processEvent(aEvt);
         return;
       }
+    }
   }
 
   this.installToWindow = function WPFP_installToWindow(window) {
     window.document.addEventListener(
       "UbiquityEvent",
-      onUbiquityEvent,
+      function(aEvt) { onUbiquityEvent(aEvt, false); },
       false,
       true
     );
@@ -79,7 +98,23 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
     targetDoc.location.reload();
   };
 
+  var queuedHiddenBrowsers = [];
+
+  function makeHiddenBrowser(url) {
+    if (url)
+      queuedHiddenBrowsers.push(url);
+    if (hiddenBrowserFactory)
+      queuedHiddenBrowsers.forEach(
+        function(url) {
+          hiddenBrowserFactory.makeBrowser(
+            url,
+            function(browser) {}
+          );
+        });
+  }
+
   this.makeFeed = function WPFP_makeFeed(baseFeedInfo, eventHub) {
+    makeHiddenBrowser(baseFeedInfo.srcUri.spec);
     return new WPFPFeed(baseFeedInfo, eventHub, messageService,
                         webJsm.jQuery);
   };
@@ -97,23 +132,33 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
 
   self.commands = {};
 
+  self.shadowCommands = {};
+
   self.refresh = function refresh() {
   };
 
-  self.clear = function clear() {
-    self.commands = {};
+  self.onUnload = function onUnload(applyToShadow) {
+    if (applyToShadow)
+      self.shadowCommands = {};
+    self.commands = self.shadowCommands;
     eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
   };
 
-  self.processEvent = function processEvent(aEvt) {
-    self.commands = {};
+  self.processEvent = function processEvent(aEvt, applyToShadow) {
+    var newCommands = {};
+
     var target = aEvt.target;
     $(".command", target).each(
       function() {
         var command = new Command(this, $);
-        self.commands[command.name] = finishCommand(command);
+        newCommands[command.name] = finishCommand(command);
       }
     );
+
+    if (applyToShadow)
+      self.shadowCommands = newCommands;
+    self.commands = newCommands;
+
     eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
   };
 
