@@ -51,6 +51,11 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
     var feeds = feedManager.getSubscribedFeeds();
     for (var i = 0; i < feeds.length; i++)
       if (feeds[i].srcUri.spec == loc.href) {
+        aEvt.target.ownerDocument.defaultView.addEventListener(
+          "unload",
+          function(aEvt) { feeds[i].clear(); },
+          false
+        );
         feeds[i].processEvent(aEvt);
         return;
       }
@@ -96,6 +101,11 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
   self.commands = {};
 
   self.refresh = function refresh() {
+  };
+
+  self.clear = function clear() {
+    self.commands = {};
+    eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
   };
 
   self.processEvent = function processEvent(aEvt) {
