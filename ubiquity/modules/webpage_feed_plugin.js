@@ -130,17 +130,22 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
 
   self.nounTypes = [];
 
-  self.commands = {};
+  var commands = null;
+  var shadowCommands = {};
 
-  self.shadowCommands = {};
+  self.__defineGetter__(
+    "commands",
+    function() { return commands ? commands : shadowCommands; }
+  );
 
   self.refresh = function refresh() {
   };
 
   self.onUnload = function onUnload(applyToShadow) {
     if (applyToShadow)
-      self.shadowCommands = {};
-    self.commands = self.shadowCommands;
+      shadowCommands = {};
+    else
+      commands = null;
     eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
   };
 
@@ -156,8 +161,9 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
     );
 
     if (applyToShadow)
-      self.shadowCommands = newCommands;
-    self.commands = newCommands;
+      shadowCommands = newCommands;
+    else
+      commands = newCommands;
 
     eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
   };
