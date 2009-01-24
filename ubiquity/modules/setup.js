@@ -42,6 +42,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/msgservice.js");
 Components.utils.import("resource://ubiquity/modules/feedmanager.js");
 Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
+Components.utils.import("resource://ubiquity/modules/webpage_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
@@ -252,6 +253,9 @@ let UbiquitySetup = {
       var ldfPlugin = new LockedDownFeedPlugin(feedManager,
                                                msgService,
                                                gWebJsModule);
+
+      var wpfp = new WebPageFeedPlugin(feedManager, msgService,
+                                       gWebJsModule);
 
       var cmdSource = new FeedAggregator(
         feedManager,
