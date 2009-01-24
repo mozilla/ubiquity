@@ -100,6 +100,8 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
 
   var queuedHiddenBrowsers = [];
 
+  // TODO: If a feed is unsubscribed-from, we need to be sure to
+  // close its hidden browser.
   function makeHiddenBrowser(url) {
     if (url)
       queuedHiddenBrowsers.push(url);
