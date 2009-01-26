@@ -155,19 +155,26 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
     var newCommands = {};
 
     var target = aEvt.target;
-    $(".command", target).each(
-      function() {
-        var command = new Command(this, $);
-        newCommands[command.name] = finishCommand(command);
-      }
-    );
+    if (target.className == "commands") {
+      $(".command", target).each(
+        function() {
+          var command = new Command(this, $);
+          newCommands[command.name] = finishCommand(command);
+        }
+      );
 
-    if (applyToShadow)
-      shadowCommands = newCommands;
-    else
-      commands = newCommands;
+      if (applyToShadow)
+        shadowCommands = newCommands;
+      else
+        commands = newCommands;
 
-    eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
+      eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
+    } else if (target.className == "display-message") {
+      // TODO: How to distinguish between the shadow sending a message
+      // or the tab?  Or should we just assume that all messages result
+      // from a command execution?
+      messageService.displayMessage($(target).text());
+    }
   };
 
   // Set our superclass.
