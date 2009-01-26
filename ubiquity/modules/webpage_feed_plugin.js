@@ -102,23 +102,24 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
 
   // TODO: If a feed is unsubscribed-from, we need to be sure to
   // close its hidden browser.
-  function makeHiddenBrowser(url) {
-    if (url)
-      queuedHiddenBrowsers.push(url);
+  function makeHiddenBrowser(feed) {
+    if (feed)
+      queuedHiddenBrowsers.push(feed);
     if (hiddenBrowserFactory)
       queuedHiddenBrowsers.forEach(
-        function(url) {
+        function(feed) {
           hiddenBrowserFactory.makeBrowser(
-            url,
-            function(browser) {}
+            feed.srcUri.spec,
+            function(browser) { feed.setShadowBrowser(browser); }
           );
         });
   }
 
   this.makeFeed = function WPFP_makeFeed(baseFeedInfo, eventHub) {
-    makeHiddenBrowser(baseFeedInfo.srcUri.spec);
-    return new WPFPFeed(baseFeedInfo, eventHub, messageService,
-                        webJsm.jQuery);
+    var feed = new WPFPFeed(baseFeedInfo, eventHub, messageService,
+                            webJsm.jQuery);
+    makeHiddenBrowser(feed);
+    return feed;
   };
 
   feedManager.registerPlugin(this);
@@ -134,6 +135,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
 
   var commands = null;
   var shadowCommands = {};
+  var shadowBrowser;
 
   self.__defineGetter__(
     "commands",
@@ -146,9 +148,16 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
   self.onUnload = function onUnload(applyToShadow) {
     if (applyToShadow)
       shadowCommands = {};
-    else
+    else {
       commands = null;
+      if (shadowBrowser)
+        shadowBrowser.reload();
+    }
     eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
+  };
+
+  self.setShadowBrowser = function setShadowBrowser(browser) {
+    shadowBrowser = browser;
   };
 
   self.processEvent = function processEvent(aEvt, applyToShadow) {
