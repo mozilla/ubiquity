@@ -38,6 +38,7 @@ let EXPORTED_SYMBOLS = ["WebPageFeedPlugin"];
 
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
 Components.utils.import("resource://ubiquity/modules/hiddenbrowser.js");
+Components.utils.import("resource://ubiquity/modules/nounutils.js");
 
 function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
@@ -212,6 +213,43 @@ function Command(div, jQuery) {
   self.execute = function execute(context, directObject, modifiers) {
     var elem = div.ownerDocument.createElement('div');
     elem.className = 'execute';
+    if (directObject && directObject.text)
+      $(elem).text(directObject.text);
     div.appendChild(elem);
   };
+
+  self.__defineGetter__(
+    "DOLabel",
+    function() { return $(".direct-object", div).text(); }
+  );
+
+  self.__defineGetter__(
+    "DOType",
+    function() {
+      if ($(".direct-object", div).length)
+        return noun_arb_text;
+    }
+  );
 }
+
+var noun_arb_text = {
+  _name: "text",
+  rankLast: true,
+  suggest: function(text, html, callback, selectionIndices) {
+    var suggestion = NounUtils.makeSugg(text, html);
+    /* If the input comes all or in part from a text selection,
+     * we'll stick some html tags into the summary so that the part
+     * that comes from the text selection can be visually marked in
+     * the suggestion list.
+     */
+    if (selectionIndices) {
+      var pre = suggestion.summary.slice(0, selectionIndices[0]);
+      var middle = suggestion.summary.slice(selectionIndices[0],
+					    selectionIndices[1]);
+      var post = suggestion.summary.slice(selectionIndices[1]);
+      suggestion.summary = pre + "<span class='selection'>" +
+			     middle + "</span>" + post;
+    }
+    return [suggestion];
+  }
+};
