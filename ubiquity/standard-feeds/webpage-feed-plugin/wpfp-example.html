@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <link rel="webpage-commands" type="text/html" href="wpfp-example.html" />
+  <title>Webpage Commands</title>
+</head>
+<body>
+<div id="commands" class="commands">
+  <div class="command" id="eat-cmd">
+    <div class="name">eat</div>
+    <div class="direct-object">food</div>
+    <div class="preview-text">Eats the given food.</div>
+  </div>
+</div>
+</body>
+<script src="ubiquity.js"></script>
+<script>
+Ubiquity.implementVerb(
+  "eat-cmd",
+  function(text) {
+    Ubiquity.displayMessage("You are eating " + text + "!");
+  }
+);
+</script>
+</html>
