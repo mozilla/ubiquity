@@ -60,6 +60,7 @@ function onDocumentLoad() {
            (isEnabled ? ' checked="checked"' : '')+'/>'+
            '<span class="name">' + cmd.name + '</span>' +
            '<span class="description"/>' +
+           '<div class="synonyms-container light">also called <span class="synonyms"/></div>' +
            '<div class="light"><span class="author"/><span class="license"/></div>' +
            '<div class="homepage light"/>' +
            '<div class="help"/>' +
@@ -78,7 +79,11 @@ function onDocumentLoad() {
             'View more information at <a href="' + cmd.homepage + '">' + cmd.homepage + '</a>.'
           );
         } else cmdElement.find(".homepage").empty();
-
+        
+        if(cmd.synonyms){
+          cmdElement.find(".synonyms").html(cmd.synonyms.join(", "));
+        } else cmdElement.find(".synonyms-container").empty();
+        
         if(cmd.description) cmdElement.find(".description").html(cmd.description);
         else cmdElement.find(".description").empty();
 

@@ -156,6 +156,10 @@ em{
   margin-left: 10px;
   color:#BFBFBF;
 }
+#command-list .synonyms{
+  color: black;
+}
+
 #skin-list .current-skin{
   color: blue;
   font-weight: 800;
