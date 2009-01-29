@@ -69,7 +69,7 @@ ubiquityProtocol.setPath(
   "command-editor-code",
   function makeDataUri() {
     let uri = ("data:application/x-javascript," +
-               escape(PrefCommands.getCode()));
+               encodeURIComponent(PrefCommands.getCode()));
     return uri;
   }
 );
