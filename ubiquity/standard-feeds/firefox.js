@@ -237,12 +237,22 @@ function countTabs(filter, noHtml) {
         count++;
     });
   }
-  if (noHtml) {
-    var previewTemplate = "${count} tabs"
+  if (count == 1) {
+    if (noHtml) {
+      var previewTemplate = "${count} tab"
                           + "{if filter} matching '${filter}'{else} total{/if}.";
-  } else {
-    var previewTemplate = "<b>${count}</b> tabs"
+    } else {
+      var previewTemplate = "<b>${count}</b> tab"
                           + "{if filter} matching <i>${filter}</i>{else} total{/if}.";
+    }
+  } else {
+    if (noHtml) {
+      var previewTemplate = "${count} tabs"
+                          + "{if filter} matching '${filter}'{else} total{/if}.";
+    } else {
+       var previewTemplate = "<b>${count}</b> tabs"
+                          + "{if filter} matching <i>${filter}</i>{else} total{/if}.";
+    }
   }
   var previewData = {
     count: count,
