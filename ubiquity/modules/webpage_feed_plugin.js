@@ -42,6 +42,7 @@ Components.utils.import("resource://ubiquity/modules/nounutils.js");
 
 function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
+  webJsm.importScript("resource://ubiquity/scripts/html-sanitizer-minified.js");
 
   this.type = "webpage-commands";
 
@@ -118,7 +119,7 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
 
   this.makeFeed = function WPFP_makeFeed(baseFeedInfo, eventHub) {
     var feed = new WPFPFeed(baseFeedInfo, eventHub, messageService,
-                            webJsm.jQuery);
+                            webJsm.jQuery, webJsm.html_sanitize);
     makeHiddenBrowser(feed);
     return feed;
   };
@@ -126,7 +127,8 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   feedManager.registerPlugin(this);
 }
 
-function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
+function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery,
+                  htmlSanitize) {
   let $ = jQuery;
   let self = this;
 
@@ -168,7 +170,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
     if (target.className == "commands") {
       $(".command", target).each(
         function() {
-          var command = new Command(this, $);
+          var command = new Command(this, $, htmlSanitize);
           newCommands[command.name] = finishCommand(command);
         }
       );
@@ -191,7 +193,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
   self.__proto__ = baseFeedInfo;
 }
 
-function Command(div, jQuery) {
+function Command(div, jQuery, htmlSanitize) {
   var self = this;
   var $ = jQuery;
 
@@ -200,9 +202,21 @@ function Command(div, jQuery) {
     function() { return $(".name", div).text(); }
   );
 
+  var contentPreview;
+
   self.preview = function preview(context, directObject, modifiers,
                                   previewBlock) {
-    previewBlock.innerHTML = $(".preview-text", div).text();
+    var query = $(".preview", div);
+
+    if (query.length) {
+      var preview = query.get(0);
+      if (preview.nodeName == "A") {
+        if (!contentPreview)
+          contentPreview = makeContentPreview(preview.href, self.name);
+        contentPreview(previewBlock, directObject);
+      } else
+        previewBlock.innerHTML = htmlSanitize($(preview).html());
+    }
   };
 
   self.__defineGetter__(
@@ -252,4 +266,97 @@ var noun_arb_text = {
     }
     return [suggestion];
   }
+};
+
+function makeContentPreview(url, commandName) {
+  var previewWindow = null;
+  var previewBlock = null;
+  var xulIframe = null;
+  var directObj;
+
+  function showPreview() {
+    if (previewBlock) {
+      var elem = previewBlock.ownerDocument.createElement('div');
+      elem.className = 'update-preview';
+      elem.setAttribute('command', commandName);
+      elem.setAttribute('directObjText', directObj.text);
+      elem.setAttribute('directObjHtml', directObj.html);
+      previewBlock.appendChild(elem);
+    }
+  }
+
+  function contentPreview(pblock, aDirectObj) {
+    if( !aDirectObj )
+      aDirectObj = {text:"", html:""};
+
+    // This is meant to be a global, so that it can affect showPreview().
+    directObj = aDirectObj;
+
+    if (previewWindow) {
+      showPreview();
+    } else if (xulIframe) {
+      // We're in the middle of loading the preview window, just
+      // wait and it'll eventually appear.
+    } else {
+      var browser;
+
+      function onUbiquityEvent(event) {
+        previewBlock = event.target;
+      }
+
+      function onXulLoaded(event) {
+        xulIframe.contentDocument.addEventListener(
+          "UbiquityEvent",
+          onUbiquityEvent,
+          false,
+          true
+        );
+
+        browser = xulIframe.contentDocument.createElement("browser");
+        browser.setAttribute("src", url);
+        browser.setAttribute("disablesecurity", true);
+        browser.setAttribute("type", "content");
+        browser.setAttribute("width", 500);
+        browser.setAttribute("height", 300);
+        browser.addEventListener("load",
+                                 onPreviewLoaded,
+                                 true);
+        browser.addEventListener("unload",
+                                 onPreviewUnloaded,
+                                 true);
+
+        xulIframe.contentDocument.documentElement.appendChild(browser);
+      }
+
+      function onXulUnloaded(event) {
+        if (event.target == pblock || event.target == xulIframe)
+          xulIframe = null;
+      }
+
+      function onPreviewLoaded() {
+        previewWindow = browser.contentWindow;
+        showPreview();
+      }
+
+      function onPreviewUnloaded() {
+        previewWindow = null;
+        previewBlock = null;
+      }
+
+      xulIframe = pblock.ownerDocument.createElement("iframe");
+      xulIframe.setAttribute("src",
+                             "chrome://ubiquity/content/content-preview.xul");
+      xulIframe.style.border = "none";
+      xulIframe.setAttribute("width", 500);
+
+      xulIframe.addEventListener("load",
+                                 onXulLoaded,
+                                 true);
+      pblock.innerHTML = "";
+      pblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
+      pblock.appendChild(xulIframe);
+    }
+  }
+
+  return contentPreview;
 };
