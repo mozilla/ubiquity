@@ -202,6 +202,8 @@ function Command(div, jQuery, htmlSanitize) {
     function() { return $(".name", div).text(); }
   );
 
+  var contentPreview;
+
   self.preview = function preview(context, directObject, modifiers,
                                   previewBlock) {
     var query = $(".preview", div);
@@ -209,7 +211,9 @@ function Command(div, jQuery, htmlSanitize) {
     if (query.length) {
       var preview = query.get(0);
       if (preview.nodeName == "A") {
-        // TODO: Do something with preview.href.
+        if (!contentPreview)
+          contentPreview = makeContentPreview(preview.href);
+        contentPreview(previewBlock, directObject);
       } else
         previewBlock.innerHTML = htmlSanitize($(preview).html());
     }
@@ -262,4 +266,85 @@ var noun_arb_text = {
     }
     return [suggestion];
   }
+};
+
+function makeContentPreview(url) {
+  var previewWindow = null;
+  var xulIframe = null;
+  var directObj;
+
+  function showPreview() {
+    // TODO: Securely send a preview message to the preview window.
+    //previewWindow.Ubiquity.onPreview(query);
+    Components.utils.reportError("Showing preview w/ D.O. text " +
+                                 directObj.text);
+  }
+
+  function contentPreview(pblock, aDirectObj) {
+    if( !aDirectObj )
+      aDirectObj = {text:"", html:""};
+
+    // This is meant to be a global, so that it can affect showPreview().
+    directObj = aDirectObj;
+
+    if (previewWindow) {
+      showPreview();
+    } else if (xulIframe) {
+      // We're in the middle of loading the preview window, just
+      // wait and it'll eventually appear.
+    } else {
+      var browser;
+
+      function onXulLoaded(event) {
+        browser = xulIframe.contentDocument.createElement("browser");
+        browser.setAttribute("src", url);
+        browser.setAttribute("disablesecurity", true);
+        browser.setAttribute("width", 500);
+        browser.setAttribute("height", 300);
+        browser.addEventListener("load",
+                                 onPreviewLoaded,
+                                 true);
+        browser.addEventListener("unload",
+                                 onPreviewUnloaded,
+                                 true);
+        xulIframe.contentDocument.documentElement.appendChild(browser);
+      }
+
+      function onXulUnloaded(event) {
+        if (event.target == pblock || event.target == xulIframe)
+          xulIframe = null;
+      }
+
+      function onPreviewLoaded() {
+        previewWindow = browser.contentWindow;
+
+        // TODO: When we get a resize event from the preview window,
+        // do the following:
+        //
+        // xulIframe.setAttribute("height", height);
+        // browser.setAttribute("height", height);
+
+        showPreview();
+      }
+
+      function onPreviewUnloaded() {
+        previewWindow = null;
+      }
+
+      xulIframe = pblock.ownerDocument.createElement("iframe");
+      xulIframe.setAttribute("src",
+                             "chrome://ubiquity/content/content-preview.xul");
+      xulIframe.style.border = "none";
+      xulIframe.setAttribute("width", 500);
+
+      xulIframe.addEventListener("load",
+                                 onXulLoaded,
+                                 true);
+      pblock.innerHTML = "";
+      pblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
+      pblock.appendChild(xulIframe);
+    }
+  }
+
+  return contentPreview;
 };
