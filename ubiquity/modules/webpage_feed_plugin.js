@@ -204,7 +204,15 @@ function Command(div, jQuery, htmlSanitize) {
 
   self.preview = function preview(context, directObject, modifiers,
                                   previewBlock) {
-    previewBlock.innerHTML = htmlSanitize($(".preview-text", div).html());
+    var query = $(".preview", div);
+
+    if (query.length) {
+      var preview = query.get(0);
+      if (preview.nodeName == "A") {
+        // TODO: Do something with preview.href.
+      } else
+        previewBlock.innerHTML = htmlSanitize($(preview).html());
+    }
   };
 
   self.__defineGetter__(
