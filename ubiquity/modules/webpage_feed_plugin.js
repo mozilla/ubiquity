@@ -42,6 +42,7 @@ Components.utils.import("resource://ubiquity/modules/nounutils.js");
 
 function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
+  webJsm.importScript("resource://ubiquity/scripts/html-sanitizer-minified.js");
 
   this.type = "webpage-commands";
 
@@ -118,7 +119,7 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
 
   this.makeFeed = function WPFP_makeFeed(baseFeedInfo, eventHub) {
     var feed = new WPFPFeed(baseFeedInfo, eventHub, messageService,
-                            webJsm.jQuery);
+                            webJsm.jQuery, webJsm.html_sanitize);
     makeHiddenBrowser(feed);
     return feed;
   };
@@ -126,7 +127,8 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   feedManager.registerPlugin(this);
 }
 
-function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
+function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery,
+                  htmlSanitize) {
   let $ = jQuery;
   let self = this;
 
@@ -168,7 +170,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
     if (target.className == "commands") {
       $(".command", target).each(
         function() {
-          var command = new Command(this, $);
+          var command = new Command(this, $, htmlSanitize);
           newCommands[command.name] = finishCommand(command);
         }
       );
@@ -191,7 +193,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery) {
   self.__proto__ = baseFeedInfo;
 }
 
-function Command(div, jQuery) {
+function Command(div, jQuery, htmlSanitize) {
   var self = this;
   var $ = jQuery;
 
@@ -202,7 +204,7 @@ function Command(div, jQuery) {
 
   self.preview = function preview(context, directObject, modifiers,
                                   previewBlock) {
-    previewBlock.innerHTML = $(".preview-text", div).text();
+    previewBlock.innerHTML = htmlSanitize($(".preview-text", div).html());
   };
 
   self.__defineGetter__(
