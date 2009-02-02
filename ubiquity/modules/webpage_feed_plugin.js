@@ -212,7 +212,7 @@ function Command(div, jQuery, htmlSanitize) {
       var preview = query.get(0);
       if (preview.nodeName == "A") {
         if (!contentPreview)
-          contentPreview = makeContentPreview(preview.href);
+          contentPreview = makeContentPreview(preview.href, self.name);
         contentPreview(previewBlock, directObject);
       } else
         previewBlock.innerHTML = htmlSanitize($(preview).html());
@@ -268,16 +268,22 @@ var noun_arb_text = {
   }
 };
 
-function makeContentPreview(url) {
+function makeContentPreview(url, commandName) {
   var previewWindow = null;
+  var previewBlock = null;
   var xulIframe = null;
   var directObj;
 
   function showPreview() {
-    // TODO: Securely send a preview message to the preview window.
-    //previewWindow.Ubiquity.onPreview(query);
-    Components.utils.reportError("Showing preview w/ D.O. text " +
-                                 directObj.text);
+    if (previewBlock) {
+      Components.utils.reportError("pb is " + previewBlock);
+      var elem = previewBlock.ownerDocument.createElement('div');
+      elem.className = 'update-preview';
+      elem.setAttribute('command', commandName);
+      elem.setAttribute('directObjText', directObj.text);
+      elem.setAttribute('directObjHtml', directObj.html);
+      previewBlock.appendChild(elem);
+    }
   }
 
   function contentPreview(pblock, aDirectObj) {
@@ -295,10 +301,22 @@ function makeContentPreview(url) {
     } else {
       var browser;
 
+      function onUbiquityEvent(event) {
+        previewBlock = event.target;
+      }
+
       function onXulLoaded(event) {
+        xulIframe.contentDocument.addEventListener(
+          "UbiquityEvent",
+          onUbiquityEvent,
+          false,
+          true
+        );
+
         browser = xulIframe.contentDocument.createElement("browser");
         browser.setAttribute("src", url);
         browser.setAttribute("disablesecurity", true);
+        browser.setAttribute("type", "content");
         browser.setAttribute("width", 500);
         browser.setAttribute("height", 300);
         browser.addEventListener("load",
@@ -307,6 +325,7 @@ function makeContentPreview(url) {
         browser.addEventListener("unload",
                                  onPreviewUnloaded,
                                  true);
+
         xulIframe.contentDocument.documentElement.appendChild(browser);
       }
 
@@ -317,18 +336,12 @@ function makeContentPreview(url) {
 
       function onPreviewLoaded() {
         previewWindow = browser.contentWindow;
-
-        // TODO: When we get a resize event from the preview window,
-        // do the following:
-        //
-        // xulIframe.setAttribute("height", height);
-        // browser.setAttribute("height", height);
-
         showPreview();
       }
 
       function onPreviewUnloaded() {
         previewWindow = null;
+        previewBlock = null;
       }
 
       xulIframe = pblock.ownerDocument.createElement("iframe");
