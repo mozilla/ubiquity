@@ -545,9 +545,10 @@ Utils.tabs = {
     var matches = {};
     var matchCount = 0;
     for (var name in this._cache) {
+       var tab = this._cache[name];
       //TODO: implement a better match algorithm
-      if (name.match(aSearchText, "i")) {
-        matches[name] = this._cache[name];
+      if (name.match(aSearchText, "i") || tab.document.URL.toString().match(aSearchText, "i")) {
+        matches[name] = tab;
         matchCount++;
       }
       if (aMaxResults && aMaxResults == matchCount)
