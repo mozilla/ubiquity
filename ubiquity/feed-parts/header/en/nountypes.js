@@ -474,8 +474,12 @@ var noun_type_tab = {
   suggest: function( text, html ) {
     var suggestions  = [];
     var tabs = Utils.tabs.search(text, 5);
-    for ( var tabName in tabs )
-      suggestions.push( CmdUtils.makeSugg(tabName) );
+    
+    for ( var tabName in tabs ){
+      var tab = tabs[tabName];
+      suggestions.push( CmdUtils.makeSugg(tabName, tab.document.URL, tab) );
+    }
+    
     return suggestions;
   }
 };
@@ -655,8 +659,10 @@ var noun_type_livemark = {
 
   /*
   * text & html = Livemark Title (string)
-  * data = { itemIds : [] } - an array of itemIds(long long) for the suggested livemarks.
-  * These values can be used to reference the livemark in bookmarks & livemark services
+  * data = { itemIds : [] } - an array of itemIds(long long) 
+  * for the suggested livemarks.
+  * These values can be used to reference the livemark in bookmarks & livemark 
+  * services
   */
 
   getFeeds: function() {
