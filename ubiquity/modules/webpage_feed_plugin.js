@@ -276,7 +276,6 @@ function makeContentPreview(url, commandName) {
 
   function showPreview() {
     if (previewBlock) {
-      Components.utils.reportError("pb is " + previewBlock);
       var elem = previewBlock.ownerDocument.createElement('div');
       elem.className = 'update-preview';
       elem.setAttribute('command', commandName);
