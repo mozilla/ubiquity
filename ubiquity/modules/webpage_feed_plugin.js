@@ -185,6 +185,7 @@ function WPFPFeed(baseFeedInfo, eventHub, messageService, jQuery,
       // TODO: How to distinguish between the shadow sending a message
       // or the tab?  Or should we just assume that all messages result
       // from a command execution?
+      $(target).remove();
       messageService.displayMessage($(target).text());
     }
   };
