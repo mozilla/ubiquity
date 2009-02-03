@@ -225,11 +225,13 @@ function Command(div, jQuery, htmlSanitize) {
     function() { return $(".description", div).text(); }
   );
 
-  self.execute = function execute(context, directObject, modifiers) {
+  self.execute = function execute(context, directObj, modifiers) {
     var elem = div.ownerDocument.createElement('div');
     elem.className = 'execute';
-    if (directObject && directObject.text)
-      $(elem).text(directObject.text);
+    if (directObj) {
+      elem.setAttribute('directObjText', directObj.text);
+      elem.setAttribute('directObjHtml', directObj.html);
+    }
     div.appendChild(elem);
   };
 

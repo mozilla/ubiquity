@@ -75,10 +75,11 @@ var Ubiquity = {
       function(aEvt) {
         var target = aEvt.target;
         target.parentNode.removeChild(target);
+        var directObj = {text: target.getAttribute("directObjText"),
+                         html: target.getAttribute("directObjHtml")};
         window.setTimeout(function executeCommand() {
-                            params.execute(target.innerHTML);
-                          },
-                          0);
+                            params.execute(directObj);
+                          }, 0);
       },
       false
     );

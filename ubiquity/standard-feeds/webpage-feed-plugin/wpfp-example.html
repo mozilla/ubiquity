@@ -11,8 +11,8 @@ Ubiquity.defineVerb({
   name: "eat",
   directObject: "food",
   previewUrl: "wpfp-example-preview.html",
-  execute: function(text) {
-    Ubiquity.displayMessage("You are eating " + text + ".");
+  execute: function(directObj) {
+    Ubiquity.displayMessage("You are eating " + directObj.text + ".");
   }
 });
 </script>
