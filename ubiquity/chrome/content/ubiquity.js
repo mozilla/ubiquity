@@ -75,9 +75,15 @@ function Ubiquity(msgPanel, textBox, cmdManager, previewBlock) {
   textBox.addEventListener("keypress",
                            function(event) { self.__onKeyPress(event); },
                            true);
-  textBox.addEventListener("blur",
+
+  var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
+                   .getService(Components.interfaces.nsIXULRuntime);
+
+  if(xulr.OS == "Windows"){                 
+     textBox.addEventListener("blur",
                            function(event) { self.__onBlur(event); },
                            false);
+   }
 
   this.__resetPreview();
 }
