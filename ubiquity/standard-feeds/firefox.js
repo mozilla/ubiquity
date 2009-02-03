@@ -230,10 +230,9 @@ function countTabs(filter, noHtml) {
   if (filter.length < 1) {
      count = Application.activeWindow.tabs.length;
   } else {
-    filter = filter.toLowerCase();
     Application.activeWindow.tabs.forEach(function(tab) {
       var title = tab.document.title;
-      if (title.toLowerCase().indexOf(filter) != -1)
+      if (title.toLowerCase().indexOf(filter.toLowerCase()) != -1)
         count++;
     });
   }
