@@ -43,6 +43,22 @@ var EXPORTED_SYMBOLS = ["ContextUtils"];
 
 var ContextUtils = {};
 
+// Take all the relative URLs specified as attributes in the given DOM
+// node (and its descendants) and convert them to absolute URLs. This
+// is a fix for #551.
+function absolutifyUrlsInNode(node) {
+  var URL_ATTRS = ['href', 'src'];
+  URL_ATTRS.forEach(
+    function(attr) {
+      if (node[attr])
+        node.setAttribute(attr, node[attr]);
+    });
+  if (node.nextSibling)
+    absolutifyUrlsInNode(node.nextSibling);
+  if (node.firstChild)
+    absolutifyUrlsInNode(node.firstChild);
+}
+
 ContextUtils.getHtmlSelection = function getHtmlSelection(context) {
   if (context.focusedWindow) {
     var sel = context.focusedWindow.getSelection();
@@ -51,6 +67,7 @@ ContextUtils.getHtmlSelection = function getHtmlSelection(context) {
       var html = sel.getRangeAt(0).cloneContents();
       var newNode = context.focusedWindow.document.createElement("p");
       newNode.appendChild(html);
+      absolutifyUrlsInNode(newNode);
       return newNode.innerHTML;
     }
   }
