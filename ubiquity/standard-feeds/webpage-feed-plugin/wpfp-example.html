@@ -4,21 +4,16 @@
   <title>Webpage Commands</title>
 </head>
 <body>
-<div id="commands" class="commands">
-  <div class="command" id="eat-cmd">
-    <div class="name">eat</div>
-    <div class="direct-object">food</div>
-    <a class="preview" href="wpfp-example-preview.html"></a>
-  </div>
-</div>
 </body>
 <script src="ubiquity.js"></script>
 <script>
-Ubiquity.implementVerb(
-  "eat-cmd",
-  function(text) {
-    Ubiquity.displayMessage("You are eating " + text + "!");
+Ubiquity.defineVerb({
+  name: "eat",
+  directObject: "food",
+  previewUrl: "wpfp-example-preview.html",
+  execute: function(text) {
+    Ubiquity.displayMessage("You are eating " + text + ".");
   }
-);
+});
 </script>
 </html>

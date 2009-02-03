@@ -25,22 +25,67 @@ var Ubiquity = {
     element.dispatchEvent(evt);
   },
 
-  implementVerb: function implementVerb(id, func) {
-    var cmd = document.getElementById(id);
-    cmd.addEventListener(
+  __commandsNode: null,
+
+  defineVerb: function defineVerb(params) {
+    if (!this.__commandsNode) {
+      var node = document.createElement("div");
+      node.className = "commands";
+      node.style.display = "none";
+      document.documentElement.appendChild(node);
+      this.__commandsNode = node;
+    }
+
+    var cmdNode = document.createElement("div");
+    cmdNode.className = "command";
+
+    var nameNode = document.createElement("div");
+    nameNode.className = "name";
+    nameNode.textContent = params.name;
+    cmdNode.appendChild(nameNode);
+
+    if (params.directObject) {
+      var doNode = document.createElement("div");
+      doNode.className = "direct-object";
+      doNode.textContent = params.directObject;
+      cmdNode.appendChild(doNode);
+    }
+
+    var previewNode;
+    if (params.previewUrl) {
+      previewNode = document.createElement("a");
+      previewNode.setAttribute("href", params.previewUrl);
+    } else {
+      var previewHtml;
+      if (params.previewHtml)
+        previewHtml = params.previewHtml;
+      else
+        previewHtml = "";
+      previewNode = document.createElement("div");
+      previewNode.innerHTML = previewHtml;
+    }
+
+    previewNode.className = "preview";
+    cmdNode.appendChild(previewNode);
+
+    this.__commandsNode.appendChild(cmdNode);
+
+    cmdNode.addEventListener(
       "DOMNodeInserted",
       function(aEvt) {
         var target = aEvt.target;
         target.parentNode.removeChild(target);
-        window.setTimeout(function() { func(target.innerHTML); }, 0);
+        window.setTimeout(function executeCommand() {
+                            params.execute(target.innerHTML);
+                          },
+                          0);
       },
       false
     );
 
-    var element = document.getElementById("commands");
     var evt = document.createEvent("Events");
     evt.initEvent("UbiquityEvent", true, false);
-    element.dispatchEvent(evt);
+    this.__commandsNode.dispatchEvent(evt);
   },
 
   displayMessage: function displayMessage(text) {
