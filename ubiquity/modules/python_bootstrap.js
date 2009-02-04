@@ -23,35 +23,42 @@ logFile.append('ubiquity_python.log');
 var configFile = profileDir.clone();
 configFile.append('ubiquity_python.config');
 
-var extMgr = Cc["@mozilla.org/extensions/manager;1"]
-             .getService(Ci.nsIExtensionManager);
-var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
-
 var pythonFile = Cc["@mozilla.org/file/local;1"].
                  createInstance(Ci.nsILocalFile);
 
 // TODO: Unix-specific.
 pythonFile.initWithPath('/usr/bin/python');
 
-var bootstrapDir = loc.getItemLocation("ubiquity@labs.mozilla.com");
-bootstrapDir.append('python');
-
-var bootstrapFile = bootstrapDir.clone();
-bootstrapFile.append('bootstrap.py');
-
 var fstream = Cc["@mozilla.org/network/file-input-stream;1"].
-                        createInstance(Ci.nsIFileInputStream);
+              createInstance(Ci.nsIFileInputStream);
 var sstream = Cc["@mozilla.org/scriptableinputstream;1"].
-                        createInstance(Ci.nsIScriptableInputStream);
+              createInstance(Ci.nsIScriptableInputStream);
+
+PyBootstrap.isJsbridgeStarted = false;
 
 PyBootstrap.startJsbridge = function startJsbridge(log) {
-  var configUri = ioSvc.newFileURI(configFile).spec;
-  var json = Utils.getLocalUrl(configUri);
+  if (this.isJsbridgeStarted) {
+    log("jsbridge is already started.");
+    return true;
+  }
+
+  var configUri = ioSvc.newFileURI(configFile);
+  if (!configFile.exists()) {
+    log("config file does not exist: " + configFile.path);
+    return false;
+  }
+
+  var json = Utils.getLocalUrl(configUri.spec);
   var config = Utils.decodeJson(json);
 
   var jsbridgeResourceDir = Cc["@mozilla.org/file/local;1"].
                             createInstance(Ci.nsILocalFile);
   jsbridgeResourceDir.initWithPath(config.jsbridge_resource_dir);
+
+  if (!jsbridgeResourceDir.exists()) {
+    log("jsbridge resource dir does not exist: " + jsbridgeResourceDir.path);
+    return false;
+  }
 
   var resProt = ioSvc.getProtocolHandler("resource")
                      .QueryInterface(Ci.nsIResProtocolHandler);
@@ -60,11 +67,24 @@ PyBootstrap.startJsbridge = function startJsbridge(log) {
 
   Components.utils.import("resource://jsbridge/modules/init.js");
 
-  log("done.");
+  log("jsbridge started.");
+
+  this.isJsbridgeStarted = true;
 };
 
 PyBootstrap.install = function install(window, log) {
   log("Attempting to bootstrap virtualenv + jsbridge.\n");
+
+  var extMgr = Cc["@mozilla.org/extensions/manager;1"].
+               getService(Ci.nsIExtensionManager);
+  var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
+
+  var bootstrapDir = loc.getItemLocation("ubiquity@labs.mozilla.com");
+  bootstrapDir.append('python');
+
+  var bootstrapFile = bootstrapDir.clone();
+  bootstrapFile.append('bootstrap.py');
+
   log("bootstrap file is at " + bootstrapFile.path);
   log("python dir is at " + envDir.path);
   log("logfile is at " + logFile.path);
