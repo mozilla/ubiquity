@@ -15,6 +15,9 @@ envDir.append('ubiquity_python');
 var logFile = profileDir.clone();
 logFile.append('ubiquity_python.log');
 
+var configFile = profileDir.clone();
+configFile.append('ubiquity_python.config');
+
 var extMgr = Cc["@mozilla.org/extensions/manager;1"]
              .getService(Ci.nsIExtensionManager);
 var loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
@@ -25,8 +28,10 @@ var pythonFile = Cc["@mozilla.org/file/local;1"].
 // TODO: Unix-specific.
 pythonFile.initWithPath('/usr/bin/python');
 
-var bootstrapFile = loc.getItemLocation("ubiquity@labs.mozilla.com");
-bootstrapFile.append('python');
+var bootstrapDir = loc.getItemLocation("ubiquity@labs.mozilla.com");
+bootstrapDir.append('python');
+
+var bootstrapFile = bootstrapDir.clone();
 bootstrapFile.append('bootstrap.py');
 
 var fstream = Components.classes["@mozilla.org/network/file-input-stream;1"].
@@ -54,7 +59,8 @@ function startInstall() {
                 .createInstance(Components.interfaces.nsIProcess);
 
   process.init(pythonFile);
-  var args = [bootstrapFile.path, envDir.path, logFile.path];
+  var args = [bootstrapFile.path, envDir.path, logFile.path,
+              configFile.path, bootstrapDir.path];
   process.run(false, args, args.length);
 
   window.setTimeout(waitForLogCreation, 100);
@@ -80,9 +86,13 @@ function waitForLogCreation() {
 function waitForLogEnd() {
   var str = sstream.read(4096);
   $("#install-log").append(str);
-  window.setTimeout(waitForLogEnd, 100);
-
-  //TODO:
-  //sstream.close();
-  //fstream.close();
+  var contents = $("#install-log").text();
+  var match = contents.match(/DONE:(SUCCESS|FAILURE)/);
+  if (match) {
+    var result = match[1];
+    log("Bootstrap result: " + result);
+    sstream.close();
+    fstream.close();
+  } else
+    window.setTimeout(waitForLogEnd, 100);
 }
