@@ -44,6 +44,15 @@ var fstream = Components.classes["@mozilla.org/network/file-input-stream;1"].
 var sstream = Components.classes["@mozilla.org/scriptableinputstream;1"].
                         createInstance(Components.interfaces.nsIScriptableInputStream);
 
+$(window).ready(
+  function() {
+    // TODO: Unix-specific.
+    var cmdline = ('"' + envDir.path + '/bin/python" "' +
+                   envDir.path + '/bin/jsbridge"');
+    $("#jsbridge-client-cmdline").text(cmdline);
+  }
+);
+
 function log(text) {
   $("#install-log").append(entityify(text) + "\n");
 }
