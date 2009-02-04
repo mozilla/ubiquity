@@ -133,8 +133,12 @@ PyBootstrap.install = function install(window, log) {
 
 PyBootstrap.uninstall = function uninstall(log) {
   if (envDir.exists()) {
-    log("Removing virtualenv dir.");
+    log("removing virtualenv dir: " + envDir.path);
     envDir.remove(true);
-    log("Done.");
   }
+  if (configFile.exists()) {
+    log("removing config file: " + configFile.path);
+    configFile.remove(true);
+  }
+  log("python bootstrap uninstalled.");
 };
