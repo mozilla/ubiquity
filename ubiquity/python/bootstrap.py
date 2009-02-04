@@ -959,8 +959,9 @@ def __easy_install(logfile, home_dir, package):
     else:
         bin = 'bin'
     path = join(home_dir, bin, 'easy_install')
+    python_path = join(home_dir, 'bin', 'python')
     popen = subprocess.Popen(
-        [path, package],
+        [python_path, path, package],
         stdout=logfile,
         stderr=subprocess.STDOUT
         )
