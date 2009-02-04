@@ -1,3 +1,5 @@
+Components.utils.import("resource://ubiquity/modules/utils.js");
+
 function entityify(string) {
     return string.replace(/&/g, "&amp;").replace(/</g,
         "&lt;").replace(/>/g, "&gt;");
@@ -5,6 +7,9 @@ function entityify(string) {
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
+
+var ioSvc = Cc["@mozilla.org/network/io-service;1"]
+            .getService(Ci.nsIIOService);
 
 var dirSvc = Cc["@mozilla.org/file/directory_service;1"]
              .getService(Ci.nsIProperties);
@@ -95,4 +100,23 @@ function waitForLogEnd() {
     fstream.close();
   } else
     window.setTimeout(waitForLogEnd, 100);
+}
+
+function startJsbridge() {
+  var configUri = ioSvc.newFileURI(configFile).spec;
+  var json = Utils.getLocalUrl(configUri);
+  var config = Utils.decodeJson(json);
+
+  var jsbridgeResourceDir = Cc["@mozilla.org/file/local;1"].
+                            createInstance(Ci.nsILocalFile);
+  jsbridgeResourceDir.initWithPath(config.jsbridge_resource_dir);
+
+  var resProt = ioSvc.getProtocolHandler("resource")
+                     .QueryInterface(Ci.nsIResProtocolHandler);
+  var aliasURI = ioSvc.newFileURI(jsbridgeResourceDir);
+  resProt.setSubstitution("jsbridge", aliasURI);
+
+  Components.utils.import("resource://jsbridge/modules/init.js");
+
+  log("done.");
 }
