@@ -49,6 +49,10 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/help.png",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
+  takes: { "command name": noun_type_commands },
+  preview: function(pblock, input){
+    pblock.innerHTML = input.html; 
+  },
   execute: function(){
     Utils.openUrlInBrowser("about:ubiquity");
   }
