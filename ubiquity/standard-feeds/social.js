@@ -18,7 +18,7 @@ CmdUtils.CreateCommand({
   takes: {status: noun_arb_text},
   modifiers: {},
   description: "Sets your Twitter status to a message of at most 160 characters.",
-  help: "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
+  help: "Sets your Twitter status to a message of at most 160 characters. You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
         " you'll be asked to log in.",
   preview: function(previewBlock, directObj) {
 	// these are converted in the Twitter database anyway, and counted as 4 characters
