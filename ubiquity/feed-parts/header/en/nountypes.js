@@ -765,7 +765,9 @@ var noun_type_commands = {
       for each( var cmd in this.__cmdSource.commandNames){
          if(cmd.name.match(fragment, "i")){
             var cmdObj = this.__cmdSource.getCommand(cmd.name);
-            cmds.push(CmdUtils.makeSugg(cmd.name, cmdObj.help, cmdObj));
+
+            var help = cmdObj.help ? cmdObj.help : cmdObj.description;
+            cmds.push(CmdUtils.makeSugg(cmd.name, help, cmdObj));
          }
       }
       return cmds;
