@@ -16,6 +16,7 @@ var dirSvc = Cc["@mozilla.org/file/directory_service;1"]
 var profileDir = dirSvc.get("ProfD", Ci.nsIFile);
 var envDir = profileDir.clone();
 envDir.append('ubiquity_python');
+PyBootstrap.envDir = envDir;
 
 var logFile = profileDir.clone();
 logFile.append('ubiquity_python.log');
@@ -70,6 +71,7 @@ PyBootstrap.startJsbridge = function startJsbridge(log) {
   log("jsbridge started.");
 
   this.isJsbridgeStarted = true;
+  return true;
 };
 
 PyBootstrap.install = function install(window, log) {
