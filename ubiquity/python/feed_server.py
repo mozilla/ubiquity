@@ -1,3 +1,4 @@
+import sys
 import asyncore
 import traceback
 import Queue
@@ -46,11 +47,15 @@ def on_event(event_name, obj):
     queue.put((event_name, obj))
 
 if __name__ == '__main__':
-    jsbridge.start()
+    port = int(sys.argv[1])
+    settings = jsbridge.get_settings()
+    settings['JSBRIDGE_REPL_HOST'] = 'localhost:%d' % port
+    jsbridge.start(settings)
     jsbridge.network.events.add_global_listener(on_event)
     endpoint = get_endpoint()
     endpoint.registerServer()
-    print "Python feed server running."
+    print "Python feed server running, attached to jsbridge server on "
+    print "port %d." % port
     while not finished:
         event_name, obj = queue.get()
         handle_event(event_name, obj)

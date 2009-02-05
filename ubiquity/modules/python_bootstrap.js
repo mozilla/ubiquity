@@ -66,11 +66,25 @@ PyBootstrap.startJsbridge = function startJsbridge(log) {
   var aliasURI = ioSvc.newFileURI(jsbridgeResourceDir);
   resProt.setSubstitution("jsbridge", aliasURI);
 
-  Components.utils.import("resource://jsbridge/modules/init.js");
+  var jsm = {};
+  Components.utils.import("resource://jsbridge/modules/init.js", jsm);
 
-  log("jsbridge started.");
+  var server = jsm.server.server;
+  for (var i = 0; i < 10; i++) {
+    if (server.port != server.serv.port) {
+      var msg = "listening on port " + server.port + " failed, trying next.";
+      log(msg);
+      Utils.reportWarning(msg);
+      server = new jsm.server.Server(server.port + 1);
+      server.start();
+    } else
+      break;
+  }
+
+  log("jsbridge started on port " + server.port + ".");
 
   this.isJsbridgeStarted = true;
+  this.jsbridgePort = server.port;
   return true;
 };
 

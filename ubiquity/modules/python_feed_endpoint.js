@@ -60,7 +60,7 @@ var Endpoint = {
     pythonFile.append('python');
 
     process.init(pythonFile);
-    var args = [serverFile.path];
+    var args = [serverFile.path, PyBootstrap.jsbridgePort];
     process.run(false, args, args.length);
     Endpoint.serverProcess = process;
   }
