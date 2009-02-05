@@ -13,6 +13,27 @@ finished = False
 queue = Queue.Queue()
 feeds = {}
 
+class UbiquityFeed(object):
+    def __init__(self, namespace, api):
+        self.namespace = namespace
+        self.api = api
+
+        name_prefix = 'cmd_'
+        names = [name for name in namespace
+                 if (name.startswith(name_prefix) and
+                     callable(namespace[name]))]
+
+        for name in names:
+            cmd = namespace[name]
+            readable_name = name[len(name_prefix):].replace('_', '-')
+            api.defineVerb({'name': readable_name,
+                            'id': name,
+                            'preview': cmd.preview})
+
+    def execute_verb(self, verb_id):
+        cmd = self.namespace[verb_id]
+        cmd(self.api)
+
 def get_endpoint():
     return jsbridge.JSObject(
         jsbridge.network.bridge,
@@ -26,10 +47,11 @@ def handle_event(event_name, obj):
             endpoint = get_endpoint()
             api = endpoint.getApi(obj['feed'])
             code = compile(obj['code'], obj['srcUri'], 'exec')
-            feeds[obj['feed']] = {'ubiquity': api}
-            exec code in feeds[obj['feed']]
+            globs = {}
+            exec code in globs
+            feeds[obj['feed']] = UbiquityFeed(globs, api)
         elif event_name == 'ubiquity-python:execute-verb':
-            feeds[obj['feed']]['execute_verb'](obj['id'])
+            feeds[obj['feed']].execute_verb(obj['id'])
         elif event_name == 'ubiquity-python:shutdown':
             finished = True
         print "python feed server event: %s  obj: %s" % (event_name, obj)
