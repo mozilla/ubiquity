@@ -754,3 +754,20 @@ var noun_type_livemark = {
     return [];
   }
 };
+
+Components.utils.import("resource://ubiquity/modules/setup.js");
+
+var noun_type_commands = {
+   _name: "command",
+   __cmdSource : UbiquitySetup.createServices().commandSource,
+   suggest : function(fragment){
+      var cmds = [];
+      for each( var cmd in this.__cmdSource.commandNames){
+         if(cmd.name.match(fragment, "i")){
+            var cmdObj = this.__cmdSource.getCommand(cmd.name);
+            cmds.push(CmdUtils.makeSugg(cmd.name, cmdObj.help, cmdObj));
+         }
+      }
+      return cmds;
+   }
+}
