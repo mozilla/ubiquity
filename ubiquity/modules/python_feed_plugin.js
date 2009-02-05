@@ -34,7 +34,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let EXPORTED_SYMBOLS = ["PythonFeedPlugin"];
+var EXPORTED_SYMBOLS = ["PythonFeedPlugin"];
 
 Components.utils.import("resource://ubiquity/modules/codesource.js");
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
@@ -71,15 +71,15 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
 }
 
 function PFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
-  let self = this;
+  var self = this;
 
   // Private instance variables.
-  let codeSource;
+  var codeSource;
   if (RemoteUriCodeSource.isValidUri(baseFeedInfo.srcUri))
     codeSource = new RemoteUriCodeSource(baseFeedInfo);
   else
     codeSource = new LocalUriCodeSource(baseFeedInfo.srcUri.spec);
-  let codeCache;
+  var codeCache;
 
   // Private methods.
   function reset() {
@@ -106,7 +106,7 @@ function PFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       return;
     }
 
-    let code = codeSource.getCode();
+    var code = codeSource.getCode();
 
     if (code != codeCache) {
       reset();
@@ -123,14 +123,14 @@ function PFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       };
 
       api.defineVerb = function defineVerb(info) {
-        let cmd = {
+        var cmd = {
           name: info.name,
           execute: function execute(context, directObject, modifiers) {
             Endpoint.executeVerb({feed: baseFeedInfo.uri.spec,
                                   id: info.id});
           }
         };
-        let previewHtml = info.preview;
+        var previewHtml = info.preview;
         if (typeof(previewHtml) == "string") {
           previewHtml = htmlSanitize(previewHtml);
           cmd.preview = function preview(context, directObject, modifiers,
