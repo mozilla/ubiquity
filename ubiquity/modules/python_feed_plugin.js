@@ -52,6 +52,16 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
                                                         mimetype) {
     var scheme = Utils.url(commandsUrl).scheme;
     if (scheme == 'file') {
+      var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"].
+                       getService(Components.interfaces.nsIXULRuntime);
+      if (xulRuntime.OS == "WINNT") {
+        messageService.displayMessage(
+          ("Sorry, Python command feeds aren't yet supported on " +
+           "Windows.")
+        );
+        return;
+      }
+
       var subscribeNow = true;
 
       function subscribe() {
