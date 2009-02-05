@@ -30,7 +30,9 @@ CmdUtils.CreateCommand({
     var truncateTemplate = "<span style='color: red;'><br />The last <b>${truncate}</b> characters will be truncated!</span>";
     var previewData = {
       status: statusText,
-      chars: TWITTER_STATUS_MAXLEN - statusText.length
+      chars: statusText.length
+      //dont cut the input since sometimes, the user selects a big url, and the total lenght is more than 140, but
+      // tinyurl takes care of that.
     };
 
     var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
