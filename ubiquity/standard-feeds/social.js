@@ -30,9 +30,7 @@ CmdUtils.CreateCommand({
     var truncateTemplate = "<span style='color: red;'><br />The last <b>${truncate}</b> characters will be truncated!</span>";
     var previewData = {
       status: statusText,
-      chars: statusText.length
-      //dont cut the input since sometimes, the user selects a big url, and the total lenght is more than 140, but
-      // tinyurl takes care of that.
+      chars: TWITTER_STATUS_MAXLEN - statusText.length
     };
 
     var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
@@ -57,7 +55,9 @@ CmdUtils.CreateCommand({
     var updateUrl = "https://twitter.com/statuses/update.json";
     var updateParams = {
       source: "ubiquity",
-      status: statusText.slice(0, TWITTER_STATUS_MAXLEN)
+      status: statusText
+      //dont cut the input since sometimes, the user selects a big url, and the total lenght is more than 140, but
+      // tinyurl takes care of that
     };
 
     function make_basic_auth( user, password){
