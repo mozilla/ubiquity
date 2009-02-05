@@ -15,7 +15,7 @@ function log(text, appendNewline) {
 }
 
 function startInstall() {
-  PyBootstrap.install(window, log);
+  PyBootstrap.install(log);
 }
 
 function killInstall() {

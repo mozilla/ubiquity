@@ -74,7 +74,7 @@ PyBootstrap.startJsbridge = function startJsbridge(log) {
   return true;
 };
 
-PyBootstrap.install = function install(window, log) {
+PyBootstrap.install = function install(log, callback) {
   log("Attempting to bootstrap virtualenv + jsbridge.\n");
 
   var extMgr = Cc["@mozilla.org/extensions/manager;1"].
@@ -105,15 +105,15 @@ PyBootstrap.install = function install(window, log) {
               configFile.path, bootstrapDir.path];
   process.run(false, args, args.length);
 
-  window.setTimeout(waitForLogCreation, 100);
+  Utils.setTimeout(waitForLogCreation, 100);
 
   function waitForLogCreation() {
     if (logFile.exists()) {
       fstream.init(logFile, -1, 0, 0);
       sstream.init(fstream);
-      window.setTimeout(waitForLogEnd, 100);
+      Utils.setTimeout(waitForLogEnd, 100);
     } else
-      window.setTimeout(waitForLogCreation, 100);
+      Utils.setTimeout(waitForLogCreation, 100);
   }
 
   var logContents = "";
@@ -125,11 +125,16 @@ PyBootstrap.install = function install(window, log) {
     var match = logContents.match(/DONE:(SUCCESS|FAILURE)/);
     if (match) {
       var result = match[1];
-      log("Bootstrap result: " + result);
       sstream.close();
       fstream.close();
+      if (callback) {
+        if (result == "SUCCESS")
+          callback(true);
+        else
+          callback(false);
+      }
     } else
-      window.setTimeout(waitForLogEnd, 100);
+      Utils.setTimeout(waitForLogEnd, 100);
   }
 };
 

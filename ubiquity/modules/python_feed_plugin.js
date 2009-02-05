@@ -43,6 +43,8 @@ Components.utils.import("resource://ubiquity/modules/python_bootstrap.js");
 Components.utils.import("resource://ubiquity/modules/python_feed_endpoint.js");
 
 function PythonFeedPlugin(feedManager, messageService, webJsm) {
+  var self = this;
+
   this.type = "python-commands";
 
   this.onSubscribeClick = function PFP_onSubscribeClick(targetDoc,
@@ -50,12 +52,38 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
                                                         mimetype) {
     var scheme = Utils.url(commandsUrl).scheme;
     if (scheme == 'file') {
-      feedManager.addSubscribedFeed({url: targetDoc.location.href,
-                                     title: targetDoc.title,
-                                     sourceUrl: commandsUrl,
-                                     type: this.type,
-                                     canAutoUpdate: true});
-      messageService.displayMessage("Subscription successful!");
+      var subscribeNow = true;
+
+      function subscribe() {
+        feedManager.addSubscribedFeed({url: targetDoc.location.href,
+                                       title: targetDoc.title,
+                                       sourceUrl: commandsUrl,
+                                       type: self.type,
+                                       canAutoUpdate: true});
+        messageService.displayMessage("Subscription successful!");
+      }
+
+      if (!PyBootstrap.isJsbridgeStarted) {
+        if (!PyBootstrap.startJsbridge(function log() {})) {
+          messageService.displayMessage(
+            ("Before subscribing to the feed, we need to set up " +
+             "a few things. You can continue to use your computer " +
+             "normally; we'll get back to you when everything is " +
+             "ready.")
+          );
+          function onFinished(wasSuccessful) {
+            if (wasSuccessful) {
+              subscribe();
+            } else
+              messageService.displayMessage("Setup failed.");
+          }
+          PyBootstrap.install(function log() {}, onFinished);
+          subscribeNow = false;
+        }
+      }
+
+      if (subscribeNow)
+        subscribe();
     } else {
       messageService.displayMessage("Subscription to " + scheme + " URLs " +
                                     "is not yet supported.");
