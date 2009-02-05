@@ -1,23 +1,5 @@
-function findGmailTab() {
-  var window = Application.activeWindow;
-
-  var gmailURL = "://mail.google.com";
-  var currentLocation = String(Application.activeWindow.activeTab.document.location);
-  if(currentLocation.indexOf(gmailURL) != -1) {
-    return Application.activeWindow.activeTab;
-  }
-
-  for (var i = 0; i < window.tabs.length; i++) {
-    var tab = window.tabs[i];
-    var location = String(tab.document.location);
-    if (location.indexOf(gmailURL) != -1) {
-      return tab;
-    }
-  }
-  return null;
-}
-
 // TODO: Should also use the mailto application mapping.
+// TODO: support Google Apps
 function detectEmailProvider() {
   var domains = {
     "mail.google.com":0,
@@ -48,6 +30,32 @@ function detectEmailProvider() {
   return null;  
 }
 
+CmdUtils.CreateCommand({
+  name: "detect-email-provider",
+  execute: function (){
+    displayMessage( detectEmailProvider() );
+  }
+});
+
+
+function findGmailTab() {
+  var window = Application.activeWindow;
+
+  var gmailURL = "://mail.google.com";
+  var currentLocation = String(Application.activeWindow.activeTab.document.location);
+  if(currentLocation.indexOf(gmailURL) != -1) {
+    return Application.activeWindow.activeTab;
+  }
+
+  for (var i = 0; i < window.tabs.length; i++) {
+    var tab = window.tabs[i];
+    var location = String(tab.document.location);
+    if (location.indexOf(gmailURL) != -1) {
+      return tab;
+    }
+  }
+  return null;
+}
 
 CmdUtils.CreateCommand({
   name: "email",
@@ -218,12 +226,5 @@ CmdUtils.CreateCommand({
   },
   execute: function( name ) {
     displayMessage(name.text);
-  }
-});
-
-CmdUtils.CreateCommand({
-  name: "detect-email-provider",
-  execute: function (){
-    displayMessage( detectEmailProvider() );
   }
 });

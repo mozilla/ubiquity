@@ -42,44 +42,89 @@ function getGmailContacts( callback ) {
     exportType: "ALL",
     out: "CSV"
   };
-
+  
   jQuery.get(url, params, function(data) {
     data = data.split("\n");
 
-    var contacts = {};
+    var contacts = [];
     for each( var line in data ) {
       var splitLine = line.split(",");
-
       var name = splitLine[0];
       var email = splitLine[1];
+      
+      var contact = {};
+      contact["name"] = name;
+      contact["email"] = email ? email : "";
+      
+      contacts.push(contact);
+    }
+    
 
-      contacts[name] = email;
+    callback(contacts);
+  }, "text");
+}
+
+function getYahooContacts( callback ){
+  
+  var url = "http://us.mg1.mail.yahoo.com/yab";
+  //TODO: I have no idea what these params mean
+  var params = {
+    v: "XM",
+    prog: "ymdc",
+    tags: "short",
+    attrs: "1",
+    xf: "sf,mf"
+  };
+  
+  jQuery.get(url, params, function(data) {
+
+    var contacts = [];
+    for each( var line in jQuery(data).find("ct") ){
+      var name = jQuery(line).attr("yi"); 
+      //accept it as as long as it is not undefined
+      if(name){
+        var contact = {};
+        contact["name"] = name;
+        contact["email"] = name + "@yahoo.com"; //TODO: what about yahoo.co.uk or ymail?
+        contacts.push(contact);
+      }
     }
 
     callback(contacts);
   }, "text");
+  
+}
+
+function getContacts(callback){
+  getGmailContacts(callback);
+  getYahooContacts(callback);  
 }
 
 var noun_type_contact = {
   _name: "contact",
   contactList: null,
   callback:function(contacts) {
-    noun_type_contact.contactList = contacts;
+    noun_type_contact.contactList = noun_type_contact.contactList.concat(contacts);    
   },
 
   suggest: function(text, html) {
+    
     if (noun_type_contact.contactList == null) {
-      getGmailContacts( noun_type_contact.callback);
+      noun_type_contact.contactList = [];
+      getContacts( noun_type_contact.callback);
       var suggs = noun_type_email.suggest(text, html);
       return suggs.length > 0 ? suggs : [];
     }
 
-    if( text.length < 2 ) return [];
+    if( text.length < 1 ) return [];
 
     var suggestions  = [];
     for ( var c in noun_type_contact.contactList ) {
-      if (c.match(text, "i"))
-	suggestions.push(CmdUtils.makeSugg(noun_type_contact.contactList[c]));
+      var contact = noun_type_contact.contactList[c];
+      
+      if ((contact["name"].match(text, "i")) || (contact["email"].match(text, "i"))){
+	      suggestions.push(CmdUtils.makeSugg(contact["email"]));
+	    }
     }
 
     var suggs = noun_type_email.suggest(text, html);
