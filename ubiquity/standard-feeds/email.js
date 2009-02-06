@@ -1,3 +1,80 @@
+
+var gmailAppsDomain="";
+
+CmdUtils.CreateCommand({
+  name: "detect-gmail-apps-domain",
+  execute: function (){
+    if (gmailAppsDomain.length == 0) {
+      getGmailAppsDomain();
+    }
+    if (gmailAppsDomain.secure) {
+      displayMessage( "secure " + gmailAppsDomain );
+    } else {
+      displayMessage( "insecure " + gmailAppsDomain );
+    }
+  }
+});
+
+function getGmailAppsDomain() {
+  // looks for and returns the gmail-for-apps domain
+  // as well as caches it for next time
+
+  var gmailAppsURL = "://mail.google.com/a/";
+  // return from cache
+  if (gmailAppsDomain.length > 0) {
+    return gmailAppsDomain;
+  }
+  
+  // look in cookie
+  var secure = false;
+  var secCookie = Utils.getCookie("mail.google.com", "GXAS");
+  if (secCookie == undefined) {
+    secCookie = Utils.getCookie("mail.google.com", "GXAS_SEC");
+    secure = true;
+  }
+  
+  if (secCookie != undefined) {
+    // cookie is of the form hosted-domain.com=DQAAAH4AA....
+    var domain = secCookie.split("=")[0];
+    if (domain != undefined && domain.length > 0) {
+      gmailAppsDomain = domain;
+      gmailAppsDomain.secure = secure;
+      return gmailAppsDomain;
+    }
+  } else {
+    // no cookie but look in open tabs
+    var tab = findGmailTab();
+    if (tab != undefined) {
+      var location = String(tab.document.location);
+      if (location.indexOf(gmailAppsURL) != -1) {
+        gmailAppsDomain = extractGmailAppsDomain(location);
+        gmailAppsDomain.secure = (location.indexOf("https://") == 0);
+      }
+    }
+  }
+  displayMessage(gmailAppsDomain);
+  
+  return gmailAppsDomain;
+}
+
+function extractGmailAppsDomain(URL) {
+  // given a URL, will find the gmail apps domain part of it
+  if (gmailAppsDomain.length > 0) {
+    return gmailAppsDomain;
+  }
+  var gmailAppsURL = "://mail.google.com/a/";
+  var index = URL.indexOf(gmailAppsURL);
+  if (index != -1) {
+    var domain = URL.slice(index+gmailAppsURL.length);
+    domain = domain.slice(0,domain.indexOf("/"));
+    if (domain != null && domain.length > 0) {
+      return domain;
+    }
+  }
+  return "none";
+}
+
+
 // TODO: Should also use the mailto application mapping.
 // TODO: support Google Apps
 function detectEmailProvider() {
