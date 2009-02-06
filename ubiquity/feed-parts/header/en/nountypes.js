@@ -61,25 +61,54 @@ function getGmailContacts( callback ) {
   var url = "http://mail.google.com/mail/contacts/data/export";
   var params = {
     exportType: "ALL",
-    out: "CSV"
+    out: "VCARD"
   };
   
   jQuery.get(url, params, function(data) {
     data = data.split("\n");
-
     var contacts = [];
+    var name="";
+    var email="";
+    var incard=false;
+    
     for each( var line in data ) {
-      var splitLine = line.split(",");
-      var name = splitLine[0];
-      var email = splitLine[1];
+
+      if (line.indexOf(" ") == 0) {
+        // a folded line, need to remove space and
+        // attach to previous line
+        if (linevar.length > 0) {
+          lineval = lineval + line.slice(1);
+        }
+      } else {
+        var colonIndex = line.indexOf(":");
+        var linevar = line.slice(0, colonIndex);
+        var lineval = line.slice(colonIndex + 1);
+        if (linevar == "BEGIN") {
+          // new card, reset values
+          incard = true;
+          name = "";
+          email = "";
+        } else if (linevar == "FN" || linevar.indexOf("FN;") == 0) {
+          name = lineval;
+        } else if (linevar == "EMAIL" || linevar.indexOf("EMAIL;") == 0) {
+          email = lineval;
+        } else if (linevar == "END") {
+          // end of card, store it
+          var contact = {};
+          if (incard) {
+            contact["name"] = name;
+            contact["email"] = email;
+            contacts.push(contact);
+          }
+          incard = false;
+          name = "";
+          email = "";
+        }
+      }
       
-      var contact = {};
-      contact["name"] = name;
-      contact["email"] = email ? email : "";
-      
-      contacts.push(contact);
     }
     
+
 
     callback(contacts);
   }, "text");
