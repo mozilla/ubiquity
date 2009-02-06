@@ -306,7 +306,8 @@ let UbiquitySetup = {
     }
 
     var appcontent = window.document.getElementById("appcontent");
-    appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
+    if (appcontent)
+      appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
   },
 
   get languageCode() {

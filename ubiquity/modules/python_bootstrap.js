@@ -28,7 +28,11 @@ var pythonFile = Cc["@mozilla.org/file/local;1"].
                  createInstance(Ci.nsILocalFile);
 
 // TODO: Unix-specific.
-pythonFile.initWithPath('/usr/bin/python');
+var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"].
+                 getService(Components.interfaces.nsIXULRuntime);
+if (xulRuntime.OS != "WINNT") {
+  pythonFile.initWithPath('/usr/bin/python');
+}
 
 var fstream = Cc["@mozilla.org/network/file-input-stream;1"].
               createInstance(Ci.nsIFileInputStream);

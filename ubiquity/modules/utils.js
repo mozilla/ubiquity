@@ -400,7 +400,7 @@ Utils.isArray = function isArray(val) {
     return false;
   if (val == null)
     return false;
-  if (val.constructor.name != "Array")
+  if (!val.constructor || val.constructor.name != "Array")
     return false;
   return true;
 }
