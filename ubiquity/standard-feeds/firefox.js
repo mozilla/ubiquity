@@ -542,6 +542,7 @@ function _getErrorInfo(){
 // now. -Aza
 CmdUtils.CreateCommand({
   name:"report-bug",
+  help : "Inserts Ubiquity debug information at the cursor. Use it when reporting bugs.",
   _getDebugInfo: function(Application){
     return {
       browser: _getBrowserInfo(Application),
