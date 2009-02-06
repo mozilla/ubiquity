@@ -35,6 +35,27 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+ var noun_type_emailservice = {
+   _name: "email service",
+   suggest: function(text, html) {
+
+     var providers = ["googleapps", "gmail", "yahoo"];
+     var suggestions = [];
+     //match based on input
+     for(var i = 0; i < providers.length; i++) {
+       var provider = providers[i];
+       if (provider.match(text, "i")){
+         suggestions.push(CmdUtils.makeSugg(provider, null, provider));
+       }
+     }
+     return suggestions;
+   },
+   default: function() {
+     //TODO: find a better way to pick the default
+     return CmdUtils.makeSugg("gmail", null, "gmail");
+   }
+};
 
 function getGmailContacts( callback ) {
   var url = "http://mail.google.com/mail/contacts/data/export";

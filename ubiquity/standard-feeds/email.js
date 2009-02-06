@@ -52,7 +52,6 @@ function getGmailAppsDomain() {
       }
     }
   }
-  displayMessage(gmailAppsDomain);
   
   return gmailAppsDomain;
 }
@@ -234,8 +233,13 @@ CmdUtils.CreateCommand({
   }
 });
 
-function gmailChecker(callback) {
+function gmailChecker(callback, service) {
+  
   var url = "http://mail.google.com/mail/feed/atom";
+  if(service == "googleapps"){
+    url = "http://mail.google.com/a/" + getGmailAppsDomain() + "/feed/atom";
+  }
+      
   Utils.ajaxGet(url, function(rss) {
     CmdUtils.loadJQuery(function(jQuery) {
       var emailDetails = {
@@ -257,10 +261,11 @@ function gmailChecker(callback) {
 }
 
 CmdUtils.CreateCommand({
-  name: "last-email",
+  name: "last-email-from",
+  takes: {"email service": noun_type_emailservice},
   icon: "chrome://ubiquity/skin/icons/email_open.png",
   description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
-  preview: function( pBlock ) {
+  preview: function( pBlock , arg) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
     // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt
     if (Utils.getCookie("mail.google.com", "S") != undefined) {
@@ -274,19 +279,19 @@ CmdUtils.CreateCommand({
             "</a>";
         }
         pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
-      });
+      }, arg.text);
     } else {
       pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
     }
   },
-  execute: function() {
+  execute: function(arg) {
     gmailChecker(function(emailDetails) {
       var msgTemplate = "You (${account}) have no new mail.";
       if (emailDetails.lastEmail) {
         msgTemplate = "You (${account}) have new email! ${lastEmail.author} says: ${lastEmail.subject}";
       }
       displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
-    });
+    }, arg.text);
   }
 });
 
