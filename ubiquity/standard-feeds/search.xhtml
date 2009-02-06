@@ -675,17 +675,25 @@ CmdUtils.CreateCommand({
 
     if (doc.designMode == "on") {
       var data = globals.yelp[0];
-      var msg = "<img style='float:left;margin:5px;border:solid #ccc 5px;' src='${photoUrl}'/><a href='${url}'>${name}</a> is a <img style='position:relative;top:5px;' src='${starUrl}'> restaurant in <a href='${whereUrl}'>${where}</a>, ${city}.<br/> It's been reviewed ${times} times.";
-      var msg = CmdUtils.renderTemplate( msg, {
+	  CmdUtils.log(data);
+      var msg = "<img style='float:left;margin:5px;border:solid #ccc 5px;' src='${photoUrl}'/><a href='${url}'>${name}</a> is a <img style='position:relative;top:5px;' src='${starUrl}'> restaurant in {if defined('where')} <a href='${whereUrl}'>${where}</a>, {/if} ${city}.<br/> It's been reviewed ${times} times.";
+      
+	  var templateParams = {
         url: data.url,
         starUrl: data.rating_img_url,
         photoUrl: data.photo_url_small,
         name: data.name,
-        whereUrl: data.neighborhoods[0].url,
-        where: data.neighborhoods[0].name,
         city: data.city,
-        times: data.review_count
-      });
+        times: data.review_count,
+      }
+ 
+      if(data.neighborhoods.length > 0){
+	     templateParams["whereUrl"] = data.neighborhoods[0].url
+	     templateParams["where"] = data.neighborhoods[0].name
+	  }
+
+      var msg = CmdUtils.renderTemplate( msg, templateParams);
+
       CmdUtils.setSelection( msg );
       return;
     }
