@@ -23,7 +23,14 @@ REQUIRES	= \
 		  dom \
 		  $(NULL)
 
-CPPSRCS = nsUbiquity.cpp
+CPPSRCS = nsUbiquity.cpp \
+          ubiquitymodule.cpp \
+          $(NULL)
+
+ifeq ($(OS_ARCH),Darwin)
+CMMSRCS = nsUbiquityDesktopIntegration.mm \
+          $(NULL)
+endif
 
 include $(topsrcdir)/config/rules.mk
 
@@ -32,6 +39,13 @@ EXTRA_DSO_LDOPTS += \
     $(XPCOM_GLUE_LDOPTS) \
     $(NSPR_LIBS) \
     $(NULL)
+
+ifeq ($(OS_ARCH),Darwin)
+LDFLAGS += \
+        -framework Carbon \
+        -framework AppKit \
+        $(NULL)
+endif
 
 clobber::
 	rm -f $(DIST)/lib/$(LIBRARY_NAME).lib

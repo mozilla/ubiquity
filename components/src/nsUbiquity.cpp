@@ -1,4 +1,3 @@
-#include "nsIGenericFactory.h"
 #include "nsUbiquity.h"
 
 #include "jsapi.h"
@@ -210,17 +209,3 @@ NS_IMETHODIMP nsUbiquity::EvalInSandbox(const nsAString &source,
 
     return rv;
 }
-
-NS_GENERIC_FACTORY_CONSTRUCTOR(nsUbiquity)
-
-static nsModuleComponentInfo components[] =
-{
-    {
-        NSUBIQUITY_CLASSNAME,
-        NSUBIQUITY_CID,
-        NSUBIQUITY_CONTRACTID,
-        nsUbiquityConstructor,
-    }
-};
-
-NS_IMPL_NSGETMODULE("nsUbiquityModule", components)

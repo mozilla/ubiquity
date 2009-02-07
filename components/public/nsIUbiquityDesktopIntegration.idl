@@ -1,0 +1,18 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(0ad2b8aa-f4cd-11dd-abef-b07a56d89593)]
+interface nsIUbiquityDesktopIntegration : nsISupports
+{
+  void registerGlobalHotkey(in long keyCode,
+                            in long modifiers);
+
+  void bringAppToForeground();
+
+  void deactivateApp();
+
+  void hideApp();
+
+  void unhideAppWithoutActivation();
+
+  void isAppActive(out boolean isActive);
+};
