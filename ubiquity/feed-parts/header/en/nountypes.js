@@ -782,8 +782,6 @@ noun_type_twitter_user = {
 
      var suggs = [];
 
-     CmdUtils.log(logins);
-
      for(var x = 0; x < logins.length; x++){
         var login = logins[x];
 	     if(login.username.indexOf(sugg) != -1){
@@ -797,3 +795,14 @@ noun_type_twitter_user = {
      
    },
 }
+
+noun_type_number = {
+   suggest : function(sugg){
+      return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : []
+   },
+   default : function(){
+      return CmdUtils.makeSugg("1");
+   }
+}
+
+

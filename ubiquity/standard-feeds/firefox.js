@@ -315,15 +315,11 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "back",
   description: "Go back in history",
-  takes: {steps: noun_arb_text},
-  _parseSteps: function(s) {
-    var s = parseInt(s);
-    return isNaN(s) ? 1 : s;
-  },
+  takes: {steps: noun_type_number},
+
   preview: function( pblock, steps ) {
-    var steps = this._parseSteps(steps.text);
-    var template = "Go back ${steps} steps in history";
-    pblock.innerHTML=CmdUtils.renderTemplate(template, {"steps": steps});
+    var template = "Go back ${steps} {if steps == '1'} step {else} steps {/if} in history";
+    pblock.innerHTML=CmdUtils.renderTemplate(template, {"steps": steps.text});
   },
   execute: function(steps) {
     var win = CmdUtils.getWindow();
@@ -335,15 +331,11 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "forward",
   description: "Go forward in history",
-  takes: {steps: noun_arb_text},
-  _parseSteps: function(s) {
-    var s = parseInt(s);
-    return isNaN(s) ? 1 : s;
-  },
+  takes: {steps: noun_type_number},
+
   preview: function( pblock, steps ) {
-    var steps = this._parseSteps(steps.text);
-    var template = "Go forward ${steps} steps in history";
-    pblock.innerHTML=CmdUtils.renderTemplate(template, {"steps": steps});
+    var template = "Go forward ${steps} {if steps == '1'} step {else} steps {/if} in history";
+    pblock.innerHTML=CmdUtils.renderTemplate(template, {"steps": steps.text});
   },
   execute: function(steps) {
     var win = CmdUtils.getWindow();
