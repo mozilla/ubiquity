@@ -570,9 +570,6 @@ NLParser.PartiallyParsedSentence.prototype = {
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
 
-    dump("SuggestWithPronounSub called.  words is " + words + ", ");
-    dump("selection is " + selection + ", html selection is " + htmlSelection);
-    dump("\n");
     for each ( pronoun in this._parserPlugin.PRONOUNS ) {
       let regexp = new RegExp("\\b" + pronoun + "\\b");
       let index = words.search(regexp);

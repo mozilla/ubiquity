@@ -823,3 +823,36 @@ var noun_type_commands = {
       return cmds;
    }
 }
+
+noun_type_twitter_user = {
+   _name: "twitter username",
+   suggest: function(sugg, html){
+     var passwordManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+     var logins = passwordManager.findLogins({}, "https://twitter.com", "", "");
+
+     var suggs = [];
+
+     for(var x = 0; x < logins.length; x++){
+        var login = logins[x];
+	     if(login.username.indexOf(sugg) != -1){
+           suggs.push(CmdUtils.makeSugg(login.username, null, login));
+        }
+     }
+
+     if(suggs.length == 0) suggs.push(CmdUtils.makeSugg(sugg, null, null));
+
+     return suggs;
+     
+   },
+}
+
+noun_type_number = {
+   suggest : function(sugg){
+      return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : []
+   },
+   default : function(){
+      return CmdUtils.makeSugg("1");
+   }
+}
+
+
