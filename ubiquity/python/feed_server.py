@@ -10,7 +10,6 @@ import jsbridge.network
 ENDPOINT_URI = 'resource://ubiquity/modules/python_feed_endpoint.js'
 
 finished = False
-queue = Queue.Queue()
 feeds = {}
 
 class UbiquityFeed(object):
@@ -65,8 +64,33 @@ def handle_event(event_name, obj):
         except:
             pass
 
+queue = Queue.Queue()
+
 def on_event(event_name, obj):
     queue.put((event_name, obj))
+
+def process_queue_event():
+    event_name, obj = queue.get()
+    handle_event(event_name, obj)
+
+loop = process_queue_event
+
+if sys.platform == 'darwin':
+    try:
+        import objc
+        import Foundation
+        import AppKit
+    except ImportError:
+        print ("OS X detected, but PyObjC not found. Using platform-"
+               "agnostic event loop.")
+    else:
+        def osx_event_loop():
+            date = Foundation.NSDate.dateWithTimeIntervalSinceNow_(0.1)
+            Foundation.NSRunLoop.currentRunLoop().runUntilDate_(date)
+            while not queue.empty():
+                process_queue_event()
+
+        loop = osx_event_loop
 
 if __name__ == '__main__':
     port = int(sys.argv[1])
@@ -79,5 +103,4 @@ if __name__ == '__main__':
     print "Python feed server running, attached to jsbridge server on "
     print "port %d." % port
     while not finished:
-        event_name, obj = queue.get()
-        handle_event(event_name, obj)
+        loop()
