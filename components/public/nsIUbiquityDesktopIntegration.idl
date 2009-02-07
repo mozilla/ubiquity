@@ -6,6 +6,8 @@ interface nsIUbiquityDesktopIntegration : nsISupports
   void registerGlobalHotkey(in long keyCode,
                             in long modifiers);
 
+  void unregisterGlobalHotkey();
+
   void bringAppToForeground();
 
   void deactivateApp();
