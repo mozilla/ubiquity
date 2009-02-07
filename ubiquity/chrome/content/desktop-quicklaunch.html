@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Ubiquity Desktop Quicklaunch</title>
+</head>
+<body>
+</body>
+<script>
+Components.utils.import("resource://ubiquity/modules/desktop.js");
+Components.utils.import("resource://ubiquity/modules/desktop_quicklaunch.js");
+
+if (!Desktop.getGlobalHotkey()) {
+  Desktop.registerGlobalHotkey({keycode: Desktop.KEYCODE_SPACE,
+                                modifiers: Desktop.MODIFIER_OPTION});
+  QuickLaunch.installHotkeyListener();
+  document.write("Desktop QuickLaunch is now enabled.");
+} else {
+  document.write("Desktop QuickLaunch is enabled.");
+}
+
+</script>
+</html>
