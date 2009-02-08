@@ -6,19 +6,57 @@
   <title>Ubiquity Desktop Quicklaunch</title>
 </head>
 <body>
+<p><b>Desktop QuickLaunch</b> is a very experimental new Ubiquity feature
+that allows Ubiquity to be used outside of the browser, from anywhere on
+your computer. Right now this feature is only supported on OS X, but
+we plan to make it available on other platforms too.</p>
+<p>To enable Desktop QuickLaunch, click the button below. Once you've
+enabled it, you can press option+space to invoke Ubiquity anywhere on
+your computer.</p>
+<div id="button"></div>
 </body>
+<script src="resource://ubiquity/scripts/jquery.js"></script>
 <script>
-Components.utils.import("resource://ubiquity/modules/desktop.js");
-Components.utils.import("resource://ubiquity/modules/desktop_quicklaunch.js");
+$(window).ready(
+  function() {
+    maybeShowButton();
+  });
 
-if (!Desktop.getGlobalHotkey()) {
+function maybeShowButton() {
+  var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"].
+                   getService(Components.interfaces.nsIXULRuntime);
+  if (xulRuntime.OS == "Darwin") {
+    showButton();
+  } else {
+    $("#button").text("Sorry, you're not using OS X, so you can't" +
+                      "use this feature yet.");
+  }
+}
+
+function showButton() {
+  Components.utils.import("resource://ubiquity/modules/desktop.js");
+
+  if (!Desktop.getGlobalHotkey()) {
+    var btn = $('<input type="button" value="Enable Desktop QuickLaunch"/>');
+    btn.click(install);
+    $("#button").append(btn);
+  } else {
+    $("#button").text("Desktop QuickLaunch is already enabled.");
+  }
+}
+
+function install() {
+  Components.utils.import("resource://ubiquity/modules/desktop_quicklaunch.js");
+
   Desktop.registerGlobalHotkey({keycode: Desktop.KEYCODE_SPACE,
                                 modifiers: Desktop.MODIFIER_OPTION});
   QuickLaunch.installHotkeyListener();
-  document.write("Desktop QuickLaunch is now enabled.");
-} else {
-  document.write("Desktop QuickLaunch is enabled.");
+  $("#button").text("Desktop QuickLaunch is now enabled.");
 }
 
+$(window).error(
+  function() {
+    $("#button").text("Ack, an error occurred. Sorry!");
+  });
 </script>
 </html>
