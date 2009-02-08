@@ -1,5 +1,6 @@
 #include <Carbon/Carbon.h>
 #include <AppKit/NSApplication.h>
+#include <ApplicationServices/ApplicationServices.h>
 
 #include "nsServiceManagerUtils.h"
 #include "nsStringAPI.h"
@@ -136,5 +137,67 @@ NS_IMETHODIMP nsUbiquityDesktopIntegration::IsAppActive(PRBool *isActive)
 {
   NSApplication *sharedApp = [NSApplication sharedApplication];
   *isActive = [sharedApp isActive];
+  return NS_OK;
+}
+
+NS_IMETHODIMP nsUbiquityDesktopIntegration::SwitchToLastApp()
+{
+  // Simulate the pressing of alt-tab.
+
+  CGEventRef events[2];
+  events[0] = CGEventCreateKeyboardEvent(NULL, (CGKeyCode) 48, true);
+  if (events[0] == NULL)
+    return NS_ERROR_FAILURE;
+  CGEventSetFlags(events[0], kCGEventFlagMaskCommand);
+
+  events[1] = CGEventCreateKeyboardEvent(NULL, (CGKeyCode) 48, false);
+  if (events[1] == NULL)
+    return NS_ERROR_FAILURE;
+  CGEventSetFlags(events[1], kCGEventFlagMaskCommand);
+
+  CGEventTapLocation loc = kCGHIDEventTap;
+  CGEventPost(loc, events[0]);
+  CGEventPost(loc, events[1]);
+
+  CFRelease(events[0]);
+  CFRelease(events[1]);
+  return NS_OK;
+}
+
+NS_IMETHODIMP nsUbiquityDesktopIntegration::ClickAt(PRInt32 x,
+                                                    PRInt32 y)
+{
+  // Simulate a mouse click.
+
+  CGPoint point;
+  point.x = 5;
+  point.y = 30;
+  CGEventRef events[2];
+  events[0] = CGEventCreateMouseEvent(
+    NULL,
+    kCGEventLeftMouseDown,
+    point,
+    NULL
+    );
+  if (events[0] == NULL)
+    return NS_ERROR_FAILURE;
+  CGEventSetFlags(events[0], 0);
+
+  events[1] = CGEventCreateMouseEvent(
+    NULL,
+    kCGEventLeftMouseUp,
+    point,
+    NULL
+    );
+  if (events[1] == NULL)
+    return NS_ERROR_FAILURE;
+  CGEventSetFlags(events[1], 0);
+
+  CGEventTapLocation loc = kCGHIDEventTap;
+  CGEventPost(loc, events[0]);
+  CGEventPost(loc, events[1]);
+
+  CFRelease(events[0]);
+  CFRelease(events[1]);
   return NS_OK;
 }

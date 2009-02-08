@@ -17,4 +17,9 @@ interface nsIUbiquityDesktopIntegration : nsISupports
   void unhideAppWithoutActivation();
 
   void isAppActive(out boolean isActive);
+
+  void switchToLastApp();
+
+  void clickAt(in long x,
+               in long y);
 };
