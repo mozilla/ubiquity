@@ -42,6 +42,7 @@
 // TODO: This is almost identical to ubiquity.js, which violates DRY.
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/desktop_quicklaunch.js");
 
 function Ubiquity(textBox, cmdManager, previewBlock, langCode) {
   this.__textBox = textBox;
@@ -74,6 +75,8 @@ function Ubiquity(textBox, cmdManager, previewBlock, langCode) {
   this.__setLocalizedDefaults(langCode);
   this.__resetPreview();
   this.__onShown();
+
+  QuickLaunch.onWindowReady(window);
 }
 
 Ubiquity.prototype = {
@@ -222,7 +225,7 @@ Ubiquity.prototype = {
       this.__cmdManager.execute(context);
       this.__needsToExecute = false;
     }
-    window.close();
+    QuickLaunch.onWindowClose(window);
   },
 
   __onShown: function __onShown() {

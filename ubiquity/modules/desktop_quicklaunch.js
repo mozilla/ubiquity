@@ -54,46 +54,22 @@ var QuickLaunch = {
       gInstalled = true;
     }
   },
-  onWindowReady: function onWindowReady() {
-    Desktop.bringAppToForeground();
+  onWindowReady: function onWindowReady(window) {
+    Utils.setTimeout(
+      function() { Desktop.clickAt(window.screenX, window.screenY); },
+      100
+    );
   },
-  onWindowClose: function onWindowClose() {
-    hideDesktopWindow();
+  onWindowClose: function onWindowClose(window) {
+    Desktop.switchToLastApp();
+    Utils.setTimeout(
+      function() { window.close(); },
+      300
+    );
   }
 };
 
-function hideDesktopWindow() {
-  Desktop.hideApp();
-
-  function moveBack() {
-    var enumerator = windowMediator.getEnumerator(null);
-    while (enumerator.hasMoreElements()) {
-      var win = enumerator.getNext();
-      if (win._oldX) {
-        win.moveTo(win._oldX, win.screenY);
-        delete win._oldX;
-      }
-    }
-    unhide();
-  }
-
-  function unhide() {
-    Desktop.unhideAppWithoutActivation();
-  }
-
-  Utils.setTimeout(moveBack, 100);
-}
-
 function showDesktopWindow() {
-  var enumerator = windowMediator.getEnumerator(null);
-  while (enumerator.hasMoreElements()) {
-    var win = enumerator.getNext();
-    if (win.title != "Mozilla Ubiquity") {
-      win._oldX = win.screenX;
-      win.moveTo(5000, win.screenY);
-    }
-  }
-
   // TODO: Where do we get window from if there's no
   // browser window available?
   var win = windowMediator.getMostRecentWindow("navigator:browser");

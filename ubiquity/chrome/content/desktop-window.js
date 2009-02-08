@@ -43,8 +43,6 @@
 
 var gUbiquity = null;
 
-Components.utils.import("resource://ubiquity/modules/desktop_quicklaunch.js");
-
 function ubiquitySetup()
 {
   var jsm = {};
@@ -131,14 +129,11 @@ function ubiquitySetup()
     previewBlock,
     jsm.UbiquitySetup.languageCode
   );
-
-  QuickLaunch.onWindowReady();
 }
 
 function ubiquityTeardown()
 {
   /* TODO: Remove event listeners. */
-  QuickLaunch.onWindowClose();
 }
 
 window.addEventListener(
