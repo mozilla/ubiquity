@@ -785,11 +785,13 @@ NLParser.Verb.prototype = {
        keys are prepositions
        values are NounTypes.
        example:  { "from" : City, "to" : City, "on" : Day } */
-    this._execute = cmd.execute;
-    this._preview = cmd.preview;
-    this._name = cmd.name;
-    this._icon = cmd.icon;
-    this._synonyms = cmd.synonyms;
+    this._execute     = cmd.execute;
+    this._preview     = cmd.preview;
+    this._description = cmd.description;
+    this._help        = cmd.help;
+    this._name        = cmd.name;
+    this._icon        = cmd.icon;
+    this._synonyms    = cmd.synonyms;
     this.__defineGetter__("previewDelay", function() {
       return cmd.previewDelay;
     });
@@ -855,8 +857,15 @@ NLParser.Verb.prototype = {
       this._preview( context, directObjectVal, argumentValues, previewBlock );
     } else {
       // Command exists, but has no preview; provide a default one.
-      var content = "Executes the <b>" + this._name + "</b> command.";
-      previewBlock.innerHTML = content;
+      var defaultPreview = "Executes the <b>" + this._name + "</b> command.";
+      var template = "";
+      if (this._description)
+        template += "<h2>The <em>"+this._name+"</em> command</h2><p>"+this._description+"</p>";
+      if (this._help)
+        template += "<h3>How to use it:</h3><p>"+this._help+"</p>";
+      if (template == "")
+        template = defaultPreview;
+      previewBlock.innerHTML = template;
     }
   },
 
