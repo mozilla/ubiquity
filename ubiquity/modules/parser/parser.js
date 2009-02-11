@@ -857,14 +857,14 @@ NLParser.Verb.prototype = {
       this._preview( context, directObjectVal, argumentValues, previewBlock );
     } else {
       // Command exists, but has no preview; provide a default one.
-      var defaultPreview = "Executes the <b>" + this._name + "</b> command.";
       var template = "";
       if (this._description)
         template += "<h2>The <em>"+this._name+"</em> command</h2><p>"+this._description+"</p>";
       if (this._help)
         template += "<h3>How to use it:</h3><p>"+this._help+"</p>";
+      // No description or help available, fall back to old defualt
       if (template == "")
-        template = defaultPreview;
+        template = "Executes the <b>" + this._name + "</b> command.";;
       previewBlock.innerHTML = template;
     }
   },
