@@ -547,7 +547,8 @@ Utils.tabs = {
     for (var name in this._cache) {
        var tab = this._cache[name];
       //TODO: implement a better match algorithm
-      if (name.match(aSearchText, "i") || tab.document.URL.toString().match(aSearchText, "i")) {
+      if (name.match(aSearchText, "i") || 
+          (tab.document.URL && tab.document.URL.toString().match(aSearchText, "i"))) {
         matches[name] = tab;
         matchCount++;
       }
