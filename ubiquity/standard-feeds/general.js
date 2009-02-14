@@ -507,82 +507,10 @@ CmdUtils.CreateCommand({
 // COMMANDS THAT CREATE NEW COMMANDS
 // -----------------------------------------------------------------
 
-function getBookmarklets(callback) {
-  
-  var bookmarklets = {};
-  
-  var Ci = Components.interfaces;
-  var Cc = Components.classes;
-  
-  var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-                  .getService(Ci.nsINavBookmarksService);
-  var history = Cc["@mozilla.org/browser/nav-history-service;1"]
-                .getService(Ci.nsINavHistoryService);
- 
-  var query = history.getNewQuery();
- 
-  // Specify folders to be searched
-  var folders = [bookmarks.toolbarFolder, bookmarks.bookmarksMenuFolder,
-                 bookmarks.unfiledBookmarksFolder];
-  query.setFolders(folders, folders.length);
-  
-  var options = history.getNewQueryOptions();
-  options.queryType = options.QUERY_TYPE_BOOKMARKS
- 
-  // Specify terms to search for, matches against title, URL and tags
-  query.searchTerms = "javascript";
- 
-  var result = history.executeQuery(query, options);
-  
-  // The root property of a query result is an object representing the folder you specified above.
-  var resultContainerNode = result.root;
-  // Open the folder, and iterate over it's contents.
-  resultContainerNode.containerOpen = true;
-  for (var i=0; i < resultContainerNode.childCount; ++i) {
-    var childNode = resultContainerNode.getChild(i);
- 
-    // Accessing properties of matching bookmarks
-    var title = childNode.title;
-    var uri = childNode.uri;
-    
-    if(uri.substring(0,11) == "javascript:") {
-      bookmarklets[title.toLowerCase().replace(/ /g,'-')] = uri;
-    }
-  }
-    
-  callback(bookmarklets);
-}
-
-var noun_type_bookmarklet = {
-  _name: "bookmarklet",
-  bookmarkletList: null,
-  callback: function(bookmarklets){
-    noun_type_bookmarklet.bookmarkletList = bookmarklets;
-  },
-  suggest: function( text, html )  {
-    
-    if (noun_type_bookmarklet.bookmarkletList == null) {
-      getBookmarklets(noun_type_bookmarklet.callback);
-      return [];
-    }
-
-    bookmarklets = noun_type_bookmarklet.bookmarkletList;
-
-    var suggestions  = [];
-    for ( var c in bookmarklets) {
-      if (c.match(text, "i"))
-	      suggestions.push(CmdUtils.makeSugg(c, "", bookmarklets[c]));
-    }
-    
-    return suggestions.splice(0, 5);
-      
-  }
-};
-
 
 CmdUtils.CreateCommand({
   name: "create-bookmarklet-command-from",
-  takes: {"bookmarklet name": noun_type_bookmarklet}, //add name modifier
+  takes: {"bookmarklet name": noun_type_bookmarklet},
   description: "Create a new command from a bookmarklet",
   author: {name: "Abimanyu Raja", email: "abimanyuraja@gmail.com"},
   license: "MPL",
