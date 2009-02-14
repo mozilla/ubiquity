@@ -164,7 +164,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
   //
   // This public property is an array of page-load functions that are called
   // whenever a web page has finished loading. Each page-load function is
-  // passed an instance of the page's {{{window}}} object.
+  // passed an instance of the page's {{{document}}} object.
   //
   // LDFP feeds can't expose page-load functions, so this property will
   // always be empty.
