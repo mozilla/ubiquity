@@ -700,28 +700,6 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // your execute method will be passed the direct object as its first
 // argument, and a modifiers dictionary as its second argument.
 //
-// {{{ options.preview }}} A description of what your command will do,
-// to be displayed to the user before the command is executed.  Can
-// be either a string or a function.  If a string, it will simply be
-// displayed as-is. If preview is a function, it will be called and
-// passed the following argument:
-// {{{ pblock }}} a reference to the preview display element.  Your
-// function can generate and display arbitrary HTML by setting the
-// value of {{{pblock.innerHTML}}}
-// If your command takes arguments (see below), your preview method will
-// be passed the direct object as its second argument, and a modifiers
-// dictionary as its third argument.
-//
-// {{{ options.previewDelay }}} Specifies the amount in time, in
-// milliseconds, to wait before calling the preview function defined
-// in {{{options.preview}}}. If the user presses a key before this
-// amount of time has passed, then the preview function isn't
-// called. This option is useful, for instance, if displaying the
-// preview involves a round-trip to a server and you only want to
-// display it once the user has stopped typing for a bit. If
-// {{{options.preview}}} isn't a function, then this option is
-// ignored.
-//
 // ** The following properties are used if you want your command to
 // accept arguments: **
 //
@@ -769,6 +747,28 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 //
 // {{{ options.license }}} A string naming the license under which your
 // command is distributed, for example "MPL".
+//
+// {{{ options.preview }}} A description of what your command will do,
+// to be displayed to the user before the command is executed.  Can be
+// either a string or a function.  If a string, it will simply be
+// displayed as-is. If preview is a function, it will be called and
+// passed a {{{pblock}}} argument, which is a reference to the
+// preview display element.  Your function can generate and display
+// arbitrary HTML by setting the value of {{{pblock.innerHTML}}}. If
+// your command takes arguments (see above), your preview method will
+// be passed the direct object as its second argument, and a modifiers
+// dictionary as its third argument.
+//
+// {{{ options.previewDelay }}} Specifies the amount in time, in
+// milliseconds, to wait before calling the preview function defined
+// in {{{options.preview}}}. If the user presses a key before this
+// amount of time has passed, then the preview function isn't
+// called. This option is useful, for instance, if displaying the
+// preview involves a round-trip to a server and you only want to
+// display it once the user has stopped typing for a bit. If
+// {{{options.preview}}} isn't a function, then this option is
+// ignored.
+
 CmdUtils.CreateCommand = function CreateCommand( options ) {
   var globalObj = CmdUtils.__globalObject;
   var execute;
