@@ -712,6 +712,16 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // be passed the direct object as its second argument, and a modifiers
 // dictionary as its third argument.
 //
+// {{{ options.previewDelay }}} Specifies the amount in time, in
+// milliseconds, to wait before calling the preview function defined
+// in {{{options.preview}}}. If the user presses a key before this
+// amount of time has passed, then the preview function isn't
+// called. This option is useful, for instance, if displaying the
+// preview involves a round-trip to a server and you only want to
+// display it once the user has stopped typing for a bit. If
+// {{{options.preview}}} isn't a function, then this option is
+// ignored.
+//
 // ** The following properties are used if you want your command to
 // accept arguments: **
 //
