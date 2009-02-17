@@ -572,9 +572,10 @@ NLParser.PartiallyParsedSentence.prototype = {
       let self = this;
       // Callback function for asynchronously generated suggestions:
       let callback = function(newSugg) {
-        var suggLen=newSugg.length
-        if (sugglen){ 
-           for (let i=0; i < suggLen; i++) self.addArgumentSuggestion(argName, newSugg[i]);
+        var suggLen = newSugg.length;
+        if (suggLen) {
+           for (let i=0; i < suggLen; i++)
+             self.addArgumentSuggestion(argName, newSugg[i]);
         } else {
            self.addArgumentSuggestion(argName, newSugg);
         }
@@ -677,7 +678,7 @@ NLParser.PartiallyParsedSentence.prototype = {
       	   * filter out suggestions that fill no arguments.
       	   */
       	  let filledSen = sen.fillMissingArgsWithDefaults();
-      	  
+
       	  for each (let oneSen in filledSen) {
               oneSen._cameFromNounFirstSuggestion = true;
               parsedSentences.push(oneSen);
