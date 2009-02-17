@@ -14,23 +14,25 @@ corresponding feed is <a href="search.html">here</a>.</p>
     <li>Select an image (or multiple images).</li>
     <li>Click and drag the rotator below to rotate the selected image(s).</li>
   </ol>
-  <center><div id="control"></div></center>
+  <div id="control"></div>
   <style>
   #control{
     width: 80px; height: 80px;
     color: black; background-color: white;
     -moz-border-radius: 45px; border-top: 5px solid #cc6600;
+    margin: 0 auto;
   }
   </style>
 </div> 
 
 <script class="commands"><![CDATA[
 
-function getImgsFromSelection( context ){
+function getImgsFromSelection(context) {
   var sel = CmdUtils.getWindowInsecure().getSelection();
   var document = CmdUtils.getDocumentInsecure();
   
-  if( sel.rangeCount < 1 ) return [];
+  if (sel.rangeCount < 1)
+    return [];
   var range = sel.getRangeAt(0);
   
   // TODO: This is overly aggressive and finds things that are
@@ -39,22 +41,38 @@ function getImgsFromSelection( context ){
   // offsets) and moved into the selection variable. We currently
   // have input.text and input.html. We'll need an input.pointer
   // or input.selection or something.
-  return jQuery.find( "img", range.commonAncestorContainer);    
+  return jQuery.find("img", range.commonAncestorContainer);    
+}
+
+function getRotationFromMatrix(matrix) {
+  if (matrix != "none")
+    args = matrix.substring(7,matrix.length).split(", ");
+  else
+    args = [1,0];
+  var acosa = parseFloat(args[0]);
+  var asina = parseFloat(args[1]);
+  var a = NaN;
+  with (Math) {
+    a = acos(acosa);
+    if (asina < 0)
+      a = 2*PI-a;
+  };
+  return a;
 }
 
 CmdUtils.CreateCommand({
   name: "rotate-image",
-  _rotate: function( elems, deg ){
-    jQuery.each(elems, function(){
+  _rotate: function(elems, deg) {
+    jQuery.each(elems, function() {
       jQuery(this).css("-moz-transform", "rotate(%sdeg)".replace(/%s/, deg));
     })
   },
   
-  preview: function( pblock ){
+  preview: function(pblock) {
     pblock.innerHTML = jQuery("#rotate", feed.dom).html()
     var self = this;
     
-    var handleControl = function(event){
+    var handleControl = function(event) {
       var controlPos = jQuery(event.currentTarget).position();
       var controlWidth = jQuery(event.currentTarget).width();
       var controlHeight = jQuery(event.currentTarget).height();
@@ -62,62 +80,94 @@ CmdUtils.CreateCommand({
       var x = event.clientX - controlPos.left - controlWidth/2;
       var y = event.clientY - controlPos.top - controlHeight/2;
       
-      var angle = Math.atan( y/x )/Math.PI*180 + 90;
-      if( x < 0 ) angle += 180;
+      var angle = Math.atan(y/x)/Math.PI*180 + 90;
+      if (x < 0)
+        angle += 180;
       
-      self._rotate( jQuery("#control", pblock), angle );
-      var imgs = getImgsFromSelection( context ); 
-      self._rotate( imgs, angle );
+      self._rotate(jQuery("#control", pblock), angle);
+      var imgs = getImgsFromSelection(context); 
+      self._rotate(imgs, angle);
     };
 
-    jQuery("#control", pblock).mousedown(function(event){
+    jQuery("#control", pblock).mousedown(function(event) {
       pblock.inDrag = true;
     });
 
-    jQuery("#control", pblock).mouseup(function(){
+    jQuery("#control", pblock).mouseup(function() {
         pblock.inDrag = false;
     });
     
-    jQuery("#control", pblock).mousemove(function( event ){
-      if( pblock.inDrag ) handleControl( event );
+    jQuery("#control", pblock).mousemove(function(event) {
+      if (pblock.inDrag)
+        handleControl(event);
     });
     
-    jQuery("#control", pblock).mousedown( handleControl );
+    jQuery("#control", pblock).mousedown(handleControl);
 
   },
   execute: function() {}
 });
 
-
 CmdUtils.CreateCommand({
-  name: "flip-page",
-  preview: "Flips the entire page upside down. <span style='-moz-transform:rotate(180deg)'>Useful for bats</span>.",
-  execute: function() {
+  name: "rotate-page",
+  takes: {"rot": noun_arb_text},
+  preview: function(pblock, rot) {
+    if (rot.text == "")
+      rot = "180";
+    else
+      rot = rot.text;
+    var preview = "<p>Rotates entire page ${angle} degrees</p>";
+    pblock.innerHTML = CmdUtils.renderTemplate(preview,{"angle": rot});
+  },
+  execute: function(rot) {
+    if (rot.text == "")
+      rot = Math.PI; // default rotation
+    else
+      rot = 2*Math.PI*rot.text/360;
     var document = CmdUtils.getDocument();
-    jQuery(document.body).css("-moz-transform", "rotate(180deg)");
+    var matrix = jQuery(document.body).css("-moz-transform");
+    jQuery(document.body).
+    css("-moz-transform", "rotate("+(getRotationFromMatrix(matrix)+rot)+"rad)");
   }
 });
 
-function injectPixastic( context, callback ){
-  if( jQuery("script#_pixastic_").length > 0 ){ callback(); }
-  
+
+CmdUtils.CreateCommand({
+  name: "flip-page",
+  preview: "Flips the entire page upside down. "
+         + "<span style='-moz-transform:rotate(180deg)'>"
+         + "Useful for bats</span>.",
+  execute: function() {
+    var document = CmdUtils.getDocument();
+    var matrix = jQuery(document.body).css("-moz-transform");
+    jQuery(document.body).css("-moz-transform", 
+                              "rotate("
+                              +(getRotationFromMatrix(matrix)+Math.PI)+"rad)");
+  }
+});
+
+function injectPixastic(context, callback) {
+  if (jQuery("script#_pixastic_").length > 0)
+    callback();
+
   var doc = CmdUtils.getDocument();
   var s = doc.createElement("script");
   s.src = "resource://ubiquity/scripts/pixastic.js";
   s.id = "_pixastic_";
-  doc.body.appendChild( s );
-  jQuery(s).load( callback );
+  doc.body.appendChild(s);
+  jQuery(s).load(callback);
 }
 
-function sanatizeImage( img ) {
+function sanatizeImage(img) {
   // Replaces an image src attribute with a data URL.
   var hWin = CmdUtils.getHiddenWindow();
-  var canvas = hWin.document.createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
+  var canvas = hWin.document.createElementNS("http://www.w3.org/1999/xhtml", 
+                                             "canvas");
   canvas.width = img.width;
   canvas.height = img.height;    
 
   var ctx = canvas.getContext("2d");
-  ctx.drawImage( img, 0, 0 );
+  ctx.drawImage(img, 0, 0);
   
   img.src = canvas.toDataURL();      
 }
@@ -127,13 +177,14 @@ function sanatizeImage( img ) {
 
 CmdUtils.CreateCommand({
   name: "desaturate-image",
-  execute: function(){
-    injectPixastic( context, function(){
-      var imgs = getImgsFromSelection( context );
+  execute: function() {
+    injectPixastic(context, function() {
+      var imgs = getImgsFromSelection(context);
       
-      jQuery(imgs).each(function(){
-        sanatizeImage( this );
-        CmdUtils.log( CmdUtils.getWindow(),  CmdUtils.getWindowInsecure()["Pixastic"] );
+      jQuery(imgs).each(function() {
+        sanatizeImage(this);
+        CmdUtils.log(CmdUtils.getWindow(), 
+                     CmdUtils.getWindowInsecure()["Pixastic"]);
         CmdUtils.getWindowInsecure().Pixastic.process(this, "desaturate");      
       });
     });  
@@ -143,12 +194,12 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "invert-image",
-  execute: function(){
-    injectPixastic( context, function(){
-      var imgs = getImgsFromSelection( context );
+  execute: function() {
+    injectPixastic(context, function() {
+      var imgs = getImgsFromSelection(context);
       
-      jQuery(imgs).each(function(){
-        sanatizeImage( this );
+      jQuery(imgs).each(function() {
+        sanatizeImage(this);
         CmdUtils.getWindowInsecure().Pixastic.process(this, "invert");      
       });
     });  
@@ -158,13 +209,15 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   name: "edge-detect-image",
-  execute: function(){
-    injectPixastic( context, function(){
-      var imgs = getImgsFromSelection( context );
+  execute: function() {
+    injectPixastic(context, function() {
+      var imgs = getImgsFromSelection(context);
       
-      jQuery(imgs).each(function(){
-        sanatizeImage( this );
-        CmdUtils.getWindowInsecure().Pixastic.process(this, "edges", {mono:true,invert:false});      
+      jQuery(imgs).each(function() {
+        sanatizeImage(this);
+        CmdUtils.getWindowInsecure().Pixastic.process(this, 
+                                                      "edges",
+                                                      {mono:true,invert:false});      
       });
     });  
   }
