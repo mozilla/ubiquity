@@ -1134,6 +1134,40 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // properties, which work the same way as they do for
 // {{{CmdUtils.CreateCommand}}}.  You can also override the auto-generated
 // {{{preview()}}} function by providing your own as {{{options.preview}}}.
+//
+// An extra option {{{options.parser}}} can be passed, which will make 
+// Ubiquity automatically generate a keyboard navigatable preview of the
+// results. It is passed as an object containing at the very least 
+// {{{options.parser.title}}}, a jQuery selector that matches the titles of
+// the results. Optionally, you can include members 
+// {{{options.parser.container}}}, a jQuery selector that will match a parent
+// to the results, making it easier to match results; 
+// {{{options.parser.preview}}}, a jQuery selector that will match the preview
+// returned by the search provider, and finaly {{{options.parser.baseurl}}}, a
+// string that will be prefixed to the link in the title, such that relative 
+// paths will still work out of context
+//
+// Examples:
+// {{{
+// CmdUtils.makeSearchCommand({
+//   name: "Trac",
+//   url: "https://ubiquity.mozilla.com/trac/search?q={QUERY}",
+//   icon: "https://ubiquity.mozilla.com/trac/chrome/common/trac.ico",
+//   parser: {container: "dl#results", title: "dt",
+//            preview: "dd.searchable", baseurl: "https://ubiquity.mozilla.com"},
+//   description: "Searches Trac for your words."
+// });
+// }}}
+// {{{
+// CmdUtils.makeSearchCommand({
+//   name: "Google",
+//   url: "http://www.google.com/search?q={QUERY}",
+//   icon: "http://www.google.com/favicon.ico",
+//   parser: {container: "div ol", title: "h3.r", preview: "div.s"},
+//   description: "Searches Google for your words."
+// });
+// }}}
+
 
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
@@ -1146,12 +1180,73 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.takes = {"search term": noun_arb_text};
 
   if (! options.preview ) {
-    options.preview = function(pblock, directObject, modifiers) {
+    options.preview = function searchPreview(pblock, directObject, modifiers) {
+      const MAX_RESULTS = 4;
       var query = directObject.text;
-      var content = "Performs a " + options.name + " search";
-	  if(query.length > 0)
-		content += " for <b>" + query + "</b>";
-      pblock.innerHTML = content;
+      if (options.parser && query.length > 0) {
+        pblock.innerHTML = "<p>Loading...</p>";
+        var query = encodeURIComponent(directObject.text);
+        var urlString = options.url.replace(/%s|{QUERY}/g, query);
+        CmdUtils.previewGet(pblock, urlString, function searchParser(data) {
+          var container = jQuery(data);
+          if (options.parser.container)
+            container = container.find(options.parser.container).eq(0);
+          if (container.length) {
+            var template = "";
+            pblock.innerHTML = "<h2>Results for <em>"+query+"</em>:</h2>"
+            var titles = container.find(options.parser.title);
+            if (options.parser.preview) {
+              var previews = container.find(options.parser.preview);
+              if (titles.length != previews.length)
+                CmdUtils.log("warning: unequal number of titles and previews -  "
+                            +"previews might be mixed up");
+            }
+            if (titles.length == 0) {
+              template = "<p>No results<p>";
+            }
+            else {
+              template = "<dl>";
+              for (var cnt = 0; cnt < Math.min(titles.length,MAX_RESULTS); cnt++) {
+                var link = null;
+                if (titles[cnt].tagName == "A")
+                  link = titles[cnt];
+                else
+                  link = jQuery(titles[cnt]).find("a")[0];
+                link.accessKey = cnt+1;
+                if (options.parser.baseurl) {
+                  jQuery(link).attr("href", options.parser.baseurl+
+                                            jQuery(link).attr("href"));
+                }
+                if (titles[cnt].tagName == "A") 
+                // weird jQuery hack, unless you know what you're doing, leave it alone
+                  var title = jQuery('<div>').append(titles.eq(cnt).clone()).html();
+                else
+                  var title = titles.eq(cnt).html();
+                template += "<dt style='font-weight: bold;'>"
+                          + title
+                          + "</dt>";
+                if (options.parser.preview) {
+                  template += "<dd>"
+                            + previews.eq(cnt).html()
+                            + "</dd>";
+                }
+              }
+              template += "</dl>";
+            }
+          }
+          else {
+            template = "<p>Error parsing search results.</p>"
+                     + "<p>Press return to go directly to search results</p>";
+          }
+          pblock.innerHTML += template;
+        });
+      }
+      else {
+        var content = "Performs a " + options.name + " search";
+	    if(query.length > 0)
+		    content += " for <b>" + query + "</b>";
+        pblock.innerHTML = content;
+      }
     };
     options.previewDelay = 10;
   }
