@@ -34,7 +34,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = EventHub =
+//
+// This is a simple class that can be used to provide an Observer pattern
+// to any functionality that needs it.
+
 let EXPORTED_SYMBOLS = ['EventHub'];
+
+// == The EventHub Class ==
+//
+// Creating an instance of this class takes no arguments.
 
 function EventHub() {
   let self = this;
@@ -45,6 +54,10 @@ function EventHub() {
       listeners[eventName] = [];
   };
 
+  // === {{{EventHub.addListener()}}} ===
+  //
+  // Adds a listener which will be called back whenever an event
+  // of the given name occurs.
   self.addListener = function addListener(eventName, listener) {
     ensureEventName(eventName);
 
@@ -54,6 +67,10 @@ function EventHub() {
     listeners[eventName].push(listener);
   };
 
+  // === {{{EventHub.removeListener()}}} ===
+  //
+  // Removes the given listener from being called back whenever the
+  // event of the given name occurs.
   self.removeListener = function removeListener(eventName, listener) {
     ensureEventName(eventName);
 
@@ -64,6 +81,10 @@ function EventHub() {
     listeners[eventName].splice(index, 1);
   };
 
+  // === {{{EventHub.notifyListeners()}}} ===
+  //
+  // Calls all registered listeners of the given event name, passing
+  // them the event name and the given data as arguments.
   self.notifyListeners = function notifyListeners(eventName, data) {
     ensureEventName(eventName);
 
@@ -73,6 +94,15 @@ function EventHub() {
 
     listeners[eventName].forEach(notify);
   };
+
+  // === {{{EventHub.attachMethods()}}} ===
+  //
+  // This function attaches its {{{addListener()}}} and
+  // {{{removeListener()}}} methods to the given object. It's useful
+  // as a way of dynamically adding observability to any object: the
+  // object keeps a privately-accessible {{{EventHub}}} instance so
+  // that it can notify listeners, and listeners can use the object's
+  // public methods to register and unregister themselves.
 
   self.attachMethods = function attachMethods(target) {
     target.addListener = self.addListener;
