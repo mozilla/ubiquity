@@ -8,3 +8,5 @@ pref("extensions.ubiquity.enablePageLoadHandlers", true);
 pref("extensions.ubiquity.displayAlertOnError", false);
 pref("extensions.ubiquity.isResetScheduled", false);
 pref("extensions.ubiquity.remoteUriTimeout", 60000);
+pref("extensions.ubiquity.bugReportUri",
+     "https://ubiquity.mozilla.com/report-bug/new/");

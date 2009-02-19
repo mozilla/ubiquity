@@ -1,0 +1,66 @@
+body {
+    font-family: helvetica;
+    font-size: 8pt;
+    text-align: center;
+}
+
+#content {
+    text-align: left;
+    width: 800px;
+    margin: 0 auto;
+}
+
+#left {
+    float: left;
+    width: 400px;
+}
+
+#right {
+    float: left;
+    width: 400px;
+}
+
+.data {
+    border-collapse: collapse; 
+}
+
+.item {
+    vertical-align: top;
+}
+
+.item td {
+    white-space: pre-wrap;
+    font-family: monaco;
+    font-size: 6pt;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.name {
+
+}
+
+.value {
+
+}
+
+#description {
+    font-family: helvetica;
+    font-size: 8pt;
+    padding: 5px;
+    width: 350px;
+    height: 20em;
+}
+
+#submit {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 10px;
+}
+
+#submit:hover {
+    background-color: #e0e0e0;
+}
