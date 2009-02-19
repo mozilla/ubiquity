@@ -17,10 +17,13 @@
   up-to-date.</p>
   <p>Here is what we've got for documentation so far.</p>
   <ul>
-    <li><a href="#modules/utils.js">Utils</a></li>
-    <li><a href="#feed-parts/header/cmdutils.js">CmdUtils</a></li>
-    <li><a href="#modules/locked_down_feed_plugin.js">Locked-Down Feed
-    Plugin</a>
+    <li><a class="intra-wiki"
+           href="#modules/utils.js">Utils</a></li>
+    <li><a class="intra-wiki"
+           href="#feed-parts/header/cmdutils.js">CmdUtils</a></li>
+    <li><a class="intra-wiki"
+           href="#modules/locked_down_feed_plugin.js">Locked-Down Feed
+           Plugin</a>
   </ul>
   <p>If you're interested in creating a Feed Plugin, check out the
   documentation for the proof-of-concept .</p>
@@ -35,19 +38,31 @@
                                 "xpcomref/ifaces/%QUERY%.html";
   var MDC_URL_TEMPLATE = "https://developer.mozilla.org/en/N%QUERY%";
 
+  var INTRA_DOC_LINKS = {
+    FeedManager: "modules/feedmanager.js",
+    WebJsModule: "modules/webjsm.js",
+    EventHub: "modules/eventhub.js"
+  }
+
   App.processors.push(
     function(documentation) {
       $(documentation).find("tt").each(
         function() {
           var text = $(this).text();
 
-          if (!(text.indexOf("nsI") == 0))
-            return;
-
-          App.addMenuItem(this, "View MDC entry",
-                          MDC_URL_TEMPLATE.replace("%QUERY%", text.slice(1)));
-          App.addMenuItem(this, "View XULPlanet entry",
-                          XUL_PLANET_URL_TEMPLATE.replace("%QUERY%", text));
+          if (text.indexOf("nsI") == 0) {
+            App.addMenuItem(this, "View MDC entry",
+                            MDC_URL_TEMPLATE.replace("%QUERY%",
+                                                     text.slice(1)));
+            App.addMenuItem(this, "View XULPlanet entry",
+                            XUL_PLANET_URL_TEMPLATE.replace("%QUERY%",
+                                                            text));
+          } else {
+            if (text in INTRA_DOC_LINKS)
+              $(this).wrap('<a class="intra-wiki" href="#' +
+                           INTRA_DOC_LINKS[text] +
+                           '"></a>');
+          }
         });
     });
 </script>
