@@ -60,10 +60,12 @@
                             XUL_PLANET_URL_TEMPLATE.replace("%QUERY%",
                                                             text));
           } else {
-            if (text in INTRA_DOC_LINKS)
-              $(this).wrap('<a class="intra-wiki" href="#' +
-                           INTRA_DOC_LINKS[text] +
-                           '"></a>');
+            if (text in INTRA_DOC_LINKS) {
+              var href = "#" + INTRA_DOC_LINKS[text];
+              if (window.location.hash != href)
+                $(this).wrap('<a class="intra-wiki" href="' + href +
+                             '"></a>');
+            }
           }
         });
     });
