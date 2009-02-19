@@ -1120,12 +1120,12 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // {{{options.preview}}} you only need a single property:
 //
 // {{{options.url}}} The url of a search results page from the search
-// engine of your choice.  Must contain the literal string {QUERY}, which
-// will be replaced with the user's search term to generate a URL that
-// should point to the correct page of search results.
-// (We're assuming that the user's search term appears in the URL of the
-// search results page, which is true for most search engines.)
-// For example: http://www.google.com/search?q={QUERY}
+// engine of your choice.  Must contain the literal string
+// {{{{QUERY}}}}, which will be replaced with the user's search term
+// to generate a URL that should point to the correct page of search
+// results.  (We're assuming that the user's search term appears in
+// the URL of the search results page, which is true for most search
+// engines.)  For example: {{{http://www.google.com/search?q={QUERY}}}}
 //
 // The {{{options.execute}}}, {{{options.preview}}}, and
 // {{{options.takes}}} properties are all automatically generated for you
@@ -1135,16 +1135,16 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // {{{CmdUtils.CreateCommand}}}.  You can also override the auto-generated
 // {{{preview()}}} function by providing your own as {{{options.preview}}}.
 //
-// An extra option {{{options.parser}}} can be passed, which will make 
+// An extra option {{{options.parser}}} can be passed, which will make
 // Ubiquity automatically generate a keyboard navigatable preview of the
-// results. It is passed as an object containing at the very least 
+// results. It is passed as an object containing at the very least
 // {{{options.parser.title}}}, a jQuery selector that matches the titles of
-// the results. Optionally, you can include members 
+// the results. Optionally, you can include members
 // {{{options.parser.container}}}, a jQuery selector that will match a parent
-// to the results, making it easier to match results; 
+// to the results, making it easier to match results;
 // {{{options.parser.preview}}}, a jQuery selector that will match the preview
 // returned by the search provider, and finaly {{{options.parser.baseurl}}}, a
-// string that will be prefixed to the link in the title, such that relative 
+// string that will be prefixed to the link in the title, such that relative
 // paths will still work out of context
 //
 // Examples:
@@ -1154,7 +1154,8 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 //   url: "https://ubiquity.mozilla.com/trac/search?q={QUERY}",
 //   icon: "https://ubiquity.mozilla.com/trac/chrome/common/trac.ico",
 //   parser: {container: "dl#results", title: "dt",
-//            preview: "dd.searchable", baseurl: "https://ubiquity.mozilla.com"},
+//            preview: "dd.searchable",
+//            baseurl: "https://ubiquity.mozilla.com"},
 //   description: "Searches Trac for your words."
 // });
 // }}}
@@ -1217,9 +1218,11 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                   jQuery(link).attr("href", options.parser.baseurl+
                                             jQuery(link).attr("href"));
                 }
-                if (titles[cnt].tagName == "A") 
-                // weird jQuery hack, unless you know what you're doing, leave it alone
-                  var title = jQuery('<div>').append(titles.eq(cnt).clone()).html();
+                if (titles[cnt].tagName == "A")
+                  // Weird jQuery hack, unless you know what you're doing,
+                  // leave it alone.
+                  var title = jQuery('<div>').append(titles.eq(cnt).clone())
+                                             .html();
                 else
                   var title = titles.eq(cnt).html();
                 template += "<dt style='font-weight: bold;'>"
