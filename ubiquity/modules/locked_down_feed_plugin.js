@@ -56,7 +56,7 @@ Components.utils.import("resource://ubiquity/modules/contextutils.js");
 //   * {{{feedManager}}} is an instance of a {{{FeedManager}}} class.
 //   * {{{messageService}}} is an object that exposes a message service
 //     interface.
-//   * {{{webJsm}}} is a WebJsModule instance.
+//   * {{{webJsm}}} is a {{{WebJsModule}}} instance.
 //
 // When instantiated, the LDFP automatically registers itself with the
 // feed manager that's passed to it.
