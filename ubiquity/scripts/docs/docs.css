@@ -53,6 +53,13 @@ body {
     line-height: 1.4em;
 }
 
+.documentation pre {
+    font-family: monaco, andale mono, lucidatypewriter, courier,
+                 courier new, monospace;
+    font-size: 6pt;
+    line-height: 1.4em;
+}
+
 .code {
     font-family: monaco, andale mono, lucidatypewriter, courier,
                  courier new, monospace;
