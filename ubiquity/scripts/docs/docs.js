@@ -216,6 +216,7 @@ App.navigate = function navigate() {
     }
     $(App.pages[newPage]).show();
     App.currentPage = newPage;
+    window.scroll(0, 0);
   }
 };
 
