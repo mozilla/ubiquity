@@ -58,7 +58,7 @@ EnParser.PRONOUNS = ["this", "that", "it", "selection", "him", "her", "them"];
 function _recursiveParse(unusedWords,
                          filledArgs,
                          unfilledArgs,
-			 creationCallback) {
+                         creationCallback) {
   var x;
   var suggestions = [];
   var completions = [];
@@ -88,46 +88,65 @@ function _recursiveParse(unusedWords,
       if ( preposition == null || preposition == unusedWords[x] ) {
         /* a match for the preposition is found at position x!
           (require exact matches for prepositions.)
-	   Anything following this preposition could be part of the noun.
-           Check every possibility starting from "all remaining words" and
-	   working backwards down to "just the word after the preposition."
-	   */
+          Things after modifiers which do not match the noun type are thrown out.
+          Check every possibility starting from "all remaining words" and
+          working backwards down to "just the word after the preposition."
+        */
         let lastWordEnd = (preposition == null)? x : x +1;
         let lastWordStart = (preposition == null)? unusedWords.length : unusedWords.length -1;
         for (let lastWord = lastWordStart; lastWord >= lastWordEnd; lastWord--) {
           //copy the array, don't modify the original
           let newUnusedWords = unusedWords.slice();
-	  if (preposition != null) {
+          if (preposition != null) {
             // take out the preposition
-	    newUnusedWords.splice(x, 1);
-	  }
-	  // pull out words from preposition up to lastWord, as nounWords:
+            newUnusedWords.splice(x, 1);
+          }
+  
+          // if we're repeating through this loop, it means the last word(s) were bad
+          // we'll kill them off now.
+          newUnusedWords.splice(lastWord);
+
+          // pull out words from preposition up to lastWord, as nounWords:
           let nounWords = newUnusedWords.splice( x, lastWord - x );
           newFilledArgs = dictDeepCopy( filledArgs );
           newFilledArgs[ argName ] = nounWords;
           newCompletions = this._recursiveParse( newUnusedWords,
                                                  newFilledArgs,
                                                  newUnfilledArgs,
-						 creationCallback);
-          completions = completions.concat(newCompletions);
+                                                 creationCallback);
+
           argumentFound = true;
-	}
+
+          // let's make sure no bad completions (with illegal arguments) go through
+          if (newCompletions.length != 0) {
+          
+            let isEmpty = function(o) { for(p in o) return false; return true; };
+
+            if (isEmpty(newCompletions[0]._invalidArgs)) {
+              completions = completions.concat(newCompletions);
+              // if we found a good one, we're done!
+              return completions;
+            }
+          }
+        
+        }
       } // end if preposition matches
     } // end for each unused word
     // If argument was never found, try a completion where it's left blank.
     if (!argumentFound) {
       newCompletions = _recursiveParse( unusedWords,
                                         filledArgs,
-     		                        newUnfilledArgs,
-					creationCallback );
+                                        newUnfilledArgs,
+                                        creationCallback );
       completions = completions.concat( newCompletions );
     }
+    
     return completions;
   } // end if there are still arguments
 }
 
 EnParser.parseSentence = function(inputString, nounList, verbList, selObj,
-                                  asyncSuggestionCb) {
+                                  asyncSuggestionCb) {  
   // Returns a list of PartiallyParsedSentences.
   // Language-specific.  This one is for English.
   let parsings = [];
@@ -153,28 +172,29 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj,
     if (inputArguments.length == 0) {
       // No arguments
       newParsings = [new NLParser.PartiallyParsedSentence(verb,
-							 {},
-							 selObj,
-							 matchScore,
-                                                         EnParser,
-                                                         asyncSuggestionCb)];
+                                                          {},
+                                                          selObj,
+                                                          matchScore,
+                                                          EnParser,
+                                                          asyncSuggestionCb)];
     } else {
       // Recursively parse to assign arguments
       let makeNewParsing = function( argStrings ) {
-	return new NLParser.PartiallyParsedSentence(verb,
-						    argStrings,
-						    selObj,
-						    matchScore,
+        return new NLParser.PartiallyParsedSentence(verb,
+                                                    argStrings,
+                                                    selObj,
+                                                    matchScore,
                                                     EnParser,
                                                     asyncSuggestionCb);
       };
       newParsings = _recursiveParse( inputArguments,
                                      {},
                                      verb._arguments,
-				     makeNewParsing);
+                                     makeNewParsing);
     }
     parsings = parsings.concat( newParsings );
   }
+  
   return parsings;
 }
 
