@@ -112,9 +112,10 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
   // Feeds are encapsulated by feed objects, and it's the goal of this
   // method to create a new one and return it.
   //
-  //   * {{{baseFeedInfo}}} is an object that contains basic information
-  //     about the feed. It's expected that the feed object returned by
-  //     this function will have {{{baseFeedInfo}}} as its prototype.
+  //   * {{{baseFeedInfo}}} is a {{{Feed}}} object that contains basic
+  //     information about the feed. It's expected that the feed
+  //     object returned by this function will have {{{baseFeedInfo}}}
+  //     as its prototype.
   //   * {{{eventHub}}} is an {{{EventHub}}} instance that the feed
   //     object should use to broadcast events related to it.
 
@@ -130,9 +131,11 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
   feedManager.registerPlugin(this);
 }
 
-// == The Feed Class ==
+// == The Feed Subclass ==
 //
-// This private class is created by {{{LDFP.makeFeed()}}}.
+// This private class is created by {{{LDFP.makeFeed()}}}. Its
+// constructor takes the base {{{Feed}}} object that it will use as
+// its prototype.
 //
 // === Notifying Listeners of Changes ===
 //

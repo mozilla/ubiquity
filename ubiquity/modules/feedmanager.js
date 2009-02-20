@@ -487,10 +487,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   // == Subclassing Feed ==
   //
-  // The {{{Feed}}} object created here is only used as a base class; the
-  // appropriate feed plugin dynamically subclasses it and adds more
-  // functionality when its {{{makeFeed()}}} method is called. For an
-  // example of this, see {{{LockedDownFeedPlugin}}}.
+  // The {{{Feed}}} object created by {{{FeedManager}}} instances is
+  // only used as a base class; the appropriate feed plugin
+  // dynamically subclasses it and adds more functionality when its
+  // {{{makeFeed()}}} method is called. For an example of this, see
+  // {{{LockedDownFeedPlugin}}}.
 
   let plugin = this._plugins[feedInfo.type];
   if (!plugin)
