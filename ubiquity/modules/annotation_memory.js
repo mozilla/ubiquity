@@ -36,6 +36,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = AnnotationService =
+//
+// The {{{AnnotationService}}} class presents an interface that is virtually
+// identical to {{{nsIAnnotationService}}}.
+
 var EXPORTED_SYMBOLS = ["AnnotationService"];
 
 var Ci = Components.interfaces;
@@ -48,9 +53,14 @@ var SQLITE_SCHEMA =
    "  value MEDIUMTEXT," +
    " PRIMARY KEY (uri, name));");
 
-// A friendier version of a mozIStorageConnection. If a SQL statement fails,
-// instead of an unhelpful XPCOM error with an NS_ERROR_FAILURE result being
-// raised, a more descriptive error is raised.
+// == The NiceConnection Class ==
+//
+// This is just a friendier wrapper for a
+// {{{mozIStorageConnection}}}. It has the exact same interface as the
+// object it wraps, with the exception that if a SQL statement fails,
+// instead of an unhelpful XPCOM error with an {{{NS_ERROR_FAILURE}}}
+// result being raised, a more descriptive one is raised.
+
 function NiceConnection(connection) {
   if (connection.constructor == NiceConnection)
     return connection;
@@ -79,7 +89,11 @@ function NiceConnection(connection) {
   this.__proto__ = connection;
 }
 
-// Annotation service replacement using SQLite file for storage
+// == The AnnotationService Class ==
+//
+// A {{{nsIAnnotationService}}} replacement using a SQLite database
+// for storage.
+
 function AnnotationService(connection) {
   var ann = {};
   var urls = {};
@@ -138,6 +152,15 @@ function AnnotationService(connection) {
       return true;
     return false;
   };
+
+  // === {{{AnnotationService.getPageAnnotation()}}} ===
+  //
+  // This method behaves just like its {{{nsIAnnotationService}}}
+  // counterpart, with the exception that it can optionally take a
+  // third parameter that specifies a default value to return if the
+  // given annotation doesn't exist. If no default value is passed,
+  // then this method behaves just like its {{{nsIAnnotationService}}}
+  // counterpart.
 
   self.getPageAnnotation = function(uri, name, defaultValue) {
     if (!self.pageHasAnnotation(uri, name)) {
@@ -207,6 +230,11 @@ function AnnotationService(connection) {
   initialize();
 }
 
+// === {{{AnnotationService.getProfileFile()}}} ===
+//
+// This static convenience method returns an {{{nsIFile}}} object
+// corresponding to a file in the current user's profile directory.
+
 AnnotationService.getProfileFile = function getProfileFile(filename) {
   var dirSvc = Cc["@mozilla.org/file/directory_service;1"]
                .getService(Ci.nsIProperties);
@@ -215,6 +243,15 @@ AnnotationService.getProfileFile = function getProfileFile(filename) {
   file.append(filename);
   return file;
 };
+
+// === {{{AnnotationService.openDatabase()}}} ===
+//
+// This static convenience method takes an {{{nsIFile}}} object
+// corresponding to a SQLite database for the {{{AnnotationService}}}
+// and returns a {{{NiceConnection}}} to the database. If the file
+// doesn't exist, it's automatically created, and if the database
+// doesn't already contain the table needed to store data for
+// {{{AnnotationService}}}, it's created too.
 
 AnnotationService.openDatabase = function openDatabase(file) {
   var storSvc = Cc["@mozilla.org/storage/service;1"]
