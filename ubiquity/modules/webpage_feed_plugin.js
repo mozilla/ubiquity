@@ -320,7 +320,7 @@ function makeContentPreview(url, commandName) {
         browser.setAttribute("disablesecurity", true);
         browser.setAttribute("type", "content");
         browser.setAttribute("width", 500);
-        browser.setAttribute("height", 300);
+        browser.setAttribute("height", 500);
         browser.addEventListener("load",
                                  onPreviewLoaded,
                                  true);
@@ -351,6 +351,7 @@ function makeContentPreview(url, commandName) {
                              "chrome://ubiquity/content/content-preview.xul");
       xulIframe.style.border = "none";
       xulIframe.setAttribute("width", 500);
+      xulIframe.setAttribute("height", 500);      
 
       xulIframe.addEventListener("load",
                                  onXulLoaded,
