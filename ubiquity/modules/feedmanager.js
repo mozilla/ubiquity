@@ -36,6 +36,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = FeedManager =
+//
+// The {{{FeedManager}}} class is used to manage Ubiquity's subscribed
+// and unsubscribed feeds. It's responsible for communicating with
+// feed plugins to reload feeds when they change and expose the
+// functionality of all feeds to client code as {{{Feed}}} objects.
+
 let EXPORTED_SYMBOLS = ["FeedManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
@@ -52,6 +59,13 @@ const FEED_TITLE_ANNO = "ubiquity/title";
 
 const DEFAULT_FEED_TYPE = "commands";
 
+// == The FeedManager Class =
+//
+// The constructor for this class takes an instance of an annotation
+// service, which has an interface that's virtually identical to
+// {{{nsIAnnotationService}}}. For an example implementation, see
+// {{{AnnotationService}}}.
+
 function FeedManager(annSvc) {
   this._annSvc = annSvc;
   this._plugins = {};
@@ -61,6 +75,11 @@ function FeedManager(annSvc) {
 }
 
 FeedManager.prototype = FMgrProto = {};
+
+// === {{{FeedManager.registerPlugin()}}} ===
+//
+// Registers a feed plugin with the feed manager. For an example feed
+// plugin, see {{{LockedDownFeedPlugin}}}.
 
 FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   if (plugin.type in this._plugins)
@@ -178,6 +197,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   return plugin.makeFeed(feedInfo, hub);
 };
 
+// === {{{FeedManager.getUnsubscribedFeeds()}}} ===
+//
+// Returns an Array of {{{Feed}}} objects that represent all feeds
+// that were once subscribed, but are currently unsubscribed.
+
 FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
   let annSvc = this._annSvc;
   let removedUris = annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO, {});
@@ -189,6 +213,11 @@ FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
   return unsubscribedFeeds;
 };
 
+// === {{{FeedManager.getSubscribedFeeds()}}} ===
+//
+// Returns an Array of {{{Feed}}} objects that represent all feeds
+// that are currently subscribed.
+
 FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   let annSvc = this._annSvc;
   let confirmedPages = annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO, {});
@@ -199,6 +228,31 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
 
   return subscribedFeeds;
 };
+
+// === {{{FeedManager.addSubscribedFeed()}}} ===
+//
+// Adds a feed with the given information to the {{{FeedManager}}}. The
+// information should be passed as a single Object with keys that
+// correspond to values:
+//
+//   * {{{isBuiltIn}}} is a boolean that indicates whether the feed is
+//     to be treated as a built-in feed. A built-in feed should not be
+//     able to be unsubscribed-from by the user, and the lifetime of
+//     its subscription does not persist across application restarts.
+//   * {{{type}}} is the type of the feed; this is usually specified by
+//     the {{{rel}}} attribute contained in a HTML page's {{{<link>}}}
+//     tag, and determines what feed plugin is used to load and process
+//     the feed.
+//   * {{{url}}} is the URL of the feed.
+//   * {{{sourceUrl}}} is the URL of the source code of the feed.
+//   * {{{sourceCode}}} is the actual source code for the feed, which
+//     which is cached.
+//   * {{{canAutoUpdate}}} specifies whether or not the feed manager
+//     should deal with automatically fetching the latest version of
+//     the feed's source code from the network. If this is {{{false}}},
+//     then the feed manager will only ever use the cached version of
+//     the source code.
+//   * {{{title}}} is the human-readable name for the feed.
 
 FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
   // Overlay defaults atop the passed-in information without destructively
@@ -243,17 +297,42 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
   this._hub.notifyListeners("subscribe", uri);
 };
 
+// === {{{FeedManager.isSubscribedFeed()}}} ===
+//
+// Returns whether or not the given feed URL is currently being
+// subscribed to.
+
 FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO);
 };
 
+// === {{{FeedManager.isSubscribedFeed()}}} ===
+//
+// Returns whether or not the given feed URL was once subscribed
+// to, but is no longer.
+
 FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   let annSvc = this._annSvc;
   uri = Utils.url(uri);
   return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 };
+
+// === {{{FeedManager.installToWindow()}}} ===
+//
+// This function installs the feed manager user interface to the
+// given chrome window that represents a web browser.
+//
+// Whenever the window loads a web page containing a {{{<link>}}} tag
+// that identifies it as a feed that can be loaded by one of the feed
+// manager's registered plugins, the feed manager displays a
+// notification box informing the user that they can subscribe to the
+// feed.
+//
+// If the user clicks on the notification box's "Subscribe..." button,
+// the feed manager passes control to the feed plugin responsible for
+// loading the feed.
 
 FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   var self = this;
