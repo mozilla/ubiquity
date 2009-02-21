@@ -919,6 +919,34 @@ CmdUtils.previewGet = function previewGet(pblock,
   return xhr;
 };
 
+
+// ** {{{ CmdUtils.previewGet( pblock, url, data, callback, type ) }}} **
+//
+// Does an asynchronous request to a remote web service.  It is used
+// just like jQuery.post(), which is documented at
+// http://docs.jquery.com/Ajax/jQuery.post .
+// The difference is that CmdUtils.previewAjax is designed to handle
+// command previews, which can be canceled by the user between the
+// time that it's requested and the time it displays.  If the preview
+// is canceled, the given callback will not be called.
+
+CmdUtils.previewPost = function previewPost(pblock,
+                                            url,
+                                            data,
+                                            callback,
+                                            type) {
+  var xhr;
+  function abort() {
+    if (xhr)
+      xhr.abort();
+  }
+  var cb = CmdUtils.previewCallback(pblock, callback, abort);
+  xhr = jQuery.post(url, data, cb, type);
+  return xhr;
+};
+
+
+
 // ** {{{ CmdUtils.previewCallback( pblock, callback, abortCallback ) }}} **
 //
 // Creates a 'preview callback': a wrapper for a function which
@@ -1135,6 +1163,13 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // {{{CmdUtils.CreateCommand}}}.  You can also override the auto-generated
 // {{{preview()}}} function by providing your own as {{{options.preview}}}.
 //
+// {{{options.postData}}} if passed will make ubiquity use POST instead of
+// GET, and the key:value pairs in it are all passed to the url passed in
+// {{{options.url}}}. Instead of passing the search params in the url, pass
+// it (along with any other params) like so:
+// postData: {"q": "{QUERY}", "hl": "en"} and the query will be substituded
+// in as usual.
+//
 // An extra option {{{options.parser}}} can be passed, which will make
 // Ubiquity automatically generate a keyboard navigatable preview of the
 // results. It is passed as an object containing at the very least
@@ -1173,8 +1208,17 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
     var query = encodeURIComponent(directObject.text);
-    var urlString = options.url.replace(/%s|{QUERY}/g, query);
-    Utils.openUrlInBrowser(urlString);
+    if (options.postData) {
+      var urlString = options.url;
+      for (data in options.postData)
+        options.postData[data] = options.postData[data]
+                                        .replace(/%s|{QUERY}/g, query);
+      Utils.openUrlInBrowser(urlString, options.postData);
+    }
+    else {
+      var urlString = options.url.replace(/%s|{QUERY}/g, query);
+      Utils.openUrlInBrowser(urlString);
+    }
     CmdUtils.setLastResult( urlString );
   };
 
@@ -1185,10 +1229,18 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
       const MAX_RESULTS = 4;
       var query = directObject.text;
       if (options.parser && query.length > 0) {
-        pblock.innerHTML = "<p>Loading...</p>";
+        pblock.innerHTML = "<p>Loading results...</p>";
         var query = encodeURIComponent(directObject.text);
-        var urlString = options.url.replace(/%s|{QUERY}/g, query);
-        CmdUtils.previewGet(pblock, urlString, function searchParser(data) {
+        if (options.postData) {
+          var urlString = options.url;
+          for (data in options.postData)
+            options.postData[data] = options.postData[data]
+                                            .replace(/%s|{QUERY}/g, query);
+        }
+        else {
+          var urlString = options.url.replace(/%s|{QUERY}/g, query);
+        }
+        searchParser = function searchParser(data) {
           var container = jQuery(data);
           if (options.parser.container)
             container = container.find(options.parser.container).eq(0);
@@ -1199,7 +1251,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             if (options.parser.preview) {
               var previews = container.find(options.parser.preview);
               if (titles.length != previews.length)
-                CmdUtils.log("warning: unequal number of titles and previews -  "
+                CmdUtils.log("warning from "+options.name+": "
+                            +"unequal number of titles and previews - "
                             +"previews might be mixed up");
             }
             if (titles.length == 0) {
@@ -1242,7 +1295,11 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                      + "<p>Press return to go directly to search results</p>";
           }
           pblock.innerHTML += template;
-        });
+        };
+        if (options.postData)
+          CmdUtils.previewPost(pblock, urlString, options.postData, searchParser);
+        else
+          CmdUtils.previewGet(pblock, urlString, searchParser);
       }
       else {
         var content = "Performs a " + options.name + " search";
