@@ -575,7 +575,7 @@ Utils.tabs = {
           var tabCount = window.tabs.length;
           for (var j = 0; j < tabCount; j++) {
             let tab = window.tabs[j];
-            if (!this.__cache[tab.document.title]) {
+            if (!this._cache[tab.document.title]) {
               // add a load listener to the tab
               // and add the tab to the cache after it has loaded.
               tab.events.addListener("load", function(aEvent) {
