@@ -1223,7 +1223,13 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   };
 
   options.takes = {"search term": noun_arb_text};
-
+  if (!options.icon && options.url) {
+    var domainRe = /.*?\/\/[^?/]*/;
+    var match = domainRe.exec(options.url);
+    options.icon = match+"/favicon.ico"
+  }
+  if (!options.description && options.name)
+    options.description = "Searches "+options.name+" for your words.";
   if (! options.preview ) {
     options.preview = function searchPreview(pblock, directObject, modifiers) {
       const MAX_RESULTS = 4;
@@ -1279,6 +1285,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                 else
                   var title = titles.eq(cnt).html();
                 template += "<dt style='font-weight: bold;'>"
+                          + "["+(cnt+1)+"] "
                           + title
                           + "</dt>";
                 if (options.parser.preview) {
