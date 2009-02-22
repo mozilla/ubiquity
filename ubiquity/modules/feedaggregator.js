@@ -98,7 +98,6 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 
   self.refresh = function FA_refresh() {
     let feeds = feedManager.getSubscribedFeeds();
-    let defaultApps = ["Firefox"];
 
     feeds.forEach(function(feed) { feed.refresh(); });
 
@@ -114,13 +113,14 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
           nounTypes = nounTypes.concat(feed.nounTypes);
           for (name in feed.commands) {
             var cmd = makeCmdWithDisabler(feed.commands[name]);
-            var supportedApps = cmd.application || defaultApps;
-            if (supportedApps.indexOf(Utils.appName) > -1) {
-              commands[name] = cmd;
-              commandNames.push({id: name,
-                                 name: name,
-                                 icon: commands[name].icon});
-            }
+            // if the command specifies limited application compatibility,
+            // then check against current app name.
+            if (cmd.application && cmd.application.indexOf(Utils.appName) == -1)
+              continue;
+            commands[name] = cmd;
+            commandNames.push({id: name,
+                               name: name,
+                               icon: commands[name].icon});
           }
           if (feed.pageLoadFuncs.length > 0)
             pageLoadFuncLists.push(feed.pageLoadFuncs);
