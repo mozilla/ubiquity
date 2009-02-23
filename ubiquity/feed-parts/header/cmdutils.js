@@ -1183,9 +1183,10 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // {{{options.parser.container}}}, a jQuery selector that will match a parent
 // to the results, making it easier to match results;
 // {{{options.parser.preview}}}, a jQuery selector that will match the preview
-// returned by the search provider, and finaly {{{options.parser.baseurl}}}, a
-// string that will be prefixed to the link in the title, such that relative
-// paths will still work out of context.
+// returned by the search provider; {{{options.parser.baseurl}}}, a
+// string that will be prefixed to relative links, such that relative paths 
+// will still work out of context. If not passed, it will be auto-generated
+// from {{{options.url}}} (and thus MAY be incorrect)
 // {{{options.parser.thumbnail}}}, a jQuery selector that will match a thumbnail
 // which will automatically be displayed in the preview. Note: if it doesn't point
 // to an img-element, ubiquity will try and find a child of the node of type img
@@ -1237,10 +1238,13 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   };
 
   options.takes = {"search term": noun_arb_text};
-  if (!options.icon && options.url) {
-    var domainRe = /.*?\/\/[^?/]*/;
-    var match = domainRe.exec(options.url);
-    options.icon = match+"/favicon.ico"
+  var domainRe = /.*?\/\/[^?/]*/;
+  var baseurl = "";
+  if (options.url) {
+    baseurl = domainRe.exec(options.url);
+    if (!options.icon) {
+      options.icon = baseurl+"/favicon.ico"
+    }
   }
   if (!options.description && options.name)
     options.description = "Searches "+options.name+" for your words.";
@@ -1260,6 +1264,9 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
         else {
           var urlString = options.url.replace(/%s|{QUERY}/g, query);
         }
+        if (!options.parser.baseurl) {
+          options.parser.baseurl = baseurl;
+        }
         searchParser = function searchParser(data) {
           var container = jQuery(data);
           if (options.parser.container)
@@ -1268,8 +1275,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             var template = "";
             pblock.innerHTML = "<h2>Results for <em>"+query+"</em>:</h2>"
             var titles = container.find(options.parser.title);
+            var sane = true;
             if (options.parser.preview) {
-              var sane = true;
               var previews = container.find(options.parser.preview);
               if (titles.length != previews.length) {
                 CmdUtils.log("ERROR from "+options.name+": "
@@ -1295,22 +1302,26 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
               template = "<dl>";
               for (var cnt = 0; cnt < Math.min(titles.length,MAX_RESULTS); cnt++) {
                 var link = null;
-                if (titles[cnt].tagName == "A")
+                if (titles[cnt].tagName == "A") {
                   link = titles[cnt];
-                else
-                  link = jQuery(titles[cnt]).find("a")[0];
-                link.accessKey = cnt+1;
-                if (options.parser.baseurl) {
-                  jQuery(link).attr("href", options.parser.baseurl+
-                                            jQuery(link).attr("href"));
                 }
-                if (titles[cnt].tagName == "A")
+                else {
+                  link = jQuery(titles[cnt]).find("a")[0];
+                }
+                link.accessKey = cnt+1;
+                var src = jQuery(link).attr("href");
+                if (!/:\/\//.exec(src)) {
+                  jQuery(link).attr("href", options.parser.baseurl+src);
+                }
+                if (titles[cnt].tagName == "A") {
                   // Weird jQuery hack, unless you know what you're doing,
                   // leave it alone.
                   var title = jQuery('<div>').append(titles.eq(cnt).clone())
                                              .html();
-                else
+                }
+                else {
                   var title = titles.eq(cnt).html();
+                }
                 template += "<dt style='font-weight: bold; clear: both;'>"
                           + "["+(cnt+1)+"] "
                           + title
