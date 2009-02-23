@@ -920,7 +920,7 @@ CmdUtils.previewGet = function previewGet(pblock,
 };
 
 
-// ** {{{ CmdUtils.previewGet( pblock, url, data, callback, type ) }}} **
+// ** {{{ CmdUtils.previewPost( pblock, url, data, callback, type ) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
 // just like jQuery.post(), which is documented at
@@ -1155,6 +1155,11 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // the URL of the search results page, which is true for most search
 // engines.)  For example: {{{http://www.google.com/search?q={QUERY}}}}
 //
+// Also note that {{{options.icon}}} if not passed, will be generated from
+// the url passed in {{{options.url}}}, and {{{options.description}}} if
+// not passed, will be auto generated from a template and 
+// {{{options.name}}}.
+//
 // The {{{options.execute}}}, {{{options.preview}}}, and
 // {{{options.takes}}} properties are all automatically generated for you
 // from {{{options.url}}}, so all you need to provide is {{{options.url}}}
@@ -1180,30 +1185,39 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // {{{options.parser.preview}}}, a jQuery selector that will match the preview
 // returned by the search provider, and finaly {{{options.parser.baseurl}}}, a
 // string that will be prefixed to the link in the title, such that relative
-// paths will still work out of context
+// paths will still work out of context.
+// {{{options.parser.thumbnail}}}, a jQuery selector that will match a thumbnail
+// which will automatically be displayed in the preview. Note: if it doesn't point
+// to an img-element, ubiquity will try and find a child of the node of type img
+// inside the element, and use the first-found one.
 //
 // Examples:
 // {{{
 // CmdUtils.makeSearchCommand({
 //   name: "Trac",
 //   url: "https://ubiquity.mozilla.com/trac/search?q={QUERY}",
-//   icon: "https://ubiquity.mozilla.com/trac/chrome/common/trac.ico",
 //   parser: {container: "dl#results", title: "dt",
 //            preview: "dd.searchable",
 //            baseurl: "https://ubiquity.mozilla.com"},
-//   description: "Searches Trac for your words."
 // });
 // }}}
 // {{{
 // CmdUtils.makeSearchCommand({
 //   name: "Google",
 //   url: "http://www.google.com/search?q={QUERY}",
-//   icon: "http://www.google.com/favicon.ico",
 //   parser: {container: "div ol", title: "h3.r", preview: "div.s"},
-//   description: "Searches Google for your words."
 // });
 // }}}
-
+// {{{
+// CmdUtils.makeSearchCommand({
+//   name: "Amazon",
+//   url: "http://www.amazon.com/s/ref=nb_ss_gw?url=search-alias%3Dstripbooks&field-keywords={QUERY}",
+//   parser: {container: "div.listView",
+//            title: "div.productTitle a",
+//            preview: "div.productTitle span.ptBrand",
+//            thumbnail: "div.productImage"}
+// });
+// }}}
 
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   options.execute = function(directObject, modifiers) {
@@ -1255,11 +1269,24 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             pblock.innerHTML = "<h2>Results for <em>"+query+"</em>:</h2>"
             var titles = container.find(options.parser.title);
             if (options.parser.preview) {
+              var sane = true;
               var previews = container.find(options.parser.preview);
-              if (titles.length != previews.length)
-                CmdUtils.log("warning from "+options.name+": "
+              if (titles.length != previews.length) {
+                CmdUtils.log("ERROR from "+options.name+": "
                             +"unequal number of titles and previews - "
                             +"previews might be mixed up");
+                sane = false;
+              }
+            }
+            if (options.parser.thumbnail) {
+              var thumbnails = container.find(options.parser.thumbnail);
+              if (titles.length != thumbnails.length) {
+                CmdUtils.log("ERROR from "+options.name+": "
+                            +"unequal number of titles and thumbnails - "
+                            +"thumbnails might be mixed up");
+                sane = false;
+              }
+
             }
             if (titles.length == 0) {
               template = "<p>No results<p>";
@@ -1284,17 +1311,35 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                                              .html();
                 else
                   var title = titles.eq(cnt).html();
-                template += "<dt style='font-weight: bold;'>"
+                template += "<dt style='font-weight: bold; clear: both;'>"
                           + "["+(cnt+1)+"] "
                           + title
                           + "</dt>";
-                if (options.parser.preview) {
+                if (sane && options.parser.thumbnail) {
+                  if (thumbnails[cnt].tagName == "IMG") {
+                    var src = thumbnails[cnt].src;
+                  }
+                  else {
+                    var src = thumbnails.eq(cnt).find("img")[0].src;
+                  }
+                  if (!/:\/\//.exec(src)) {
+                    src = options.parser.baseurl+src;
+                  }
+                  template += "<dd style='float: left; margin: 0 10px 0 0'>"
+                            + "<img src='"+src+"' height='75' />"
+                            + "</dd>";
+                }
+                if (sane && options.parser.preview) {
                   template += "<dd>"
                             + previews.eq(cnt).html()
                             + "</dd>";
                 }
               }
               template += "</dl>";
+              // we did not find an equal amount of titles, previews and thumbnails
+              if (!sane) {
+                template += "<p>Note: no previews have been generated, because an error occured while parsing the results</p>";
+              }
             }
           }
           else {
@@ -1309,9 +1354,9 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           CmdUtils.previewGet(pblock, urlString, searchParser);
       }
       else {
-        var content = "Performs a " + options.name + " search";
+        var content = "Searches "+options.name+" for your words";
 	    if(query.length > 0)
-		    content += " for <b>" + query + "</b>";
+		    content += ": <b>" + query + "</b>";
         pblock.innerHTML = content;
       }
     };
