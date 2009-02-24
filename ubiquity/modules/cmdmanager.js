@@ -76,7 +76,7 @@ CommandManager.prototype = {
     if (this.__hilitedSuggestion < 0) {
       this.__hilitedSuggestion = this.__nlParser.getNumSuggestions() - 1;
     }
-    this._previewAndSuggest(context, previewBlock);
+    this._previewAndSuggest(context, previewBlock, true);
   },
 
   moveIndicationDown : function CM_moveIndicationDown(context, previewBlock) {
@@ -84,7 +84,7 @@ CommandManager.prototype = {
     if (this.__hilitedSuggestion > this.__nlParser.getNumSuggestions() - 1) {
       this.__hilitedSuggestion = 0;
     }
-    this._previewAndSuggest(context, previewBlock);
+    this._previewAndSuggest(context, previewBlock, true);
   },
 
   _renderSuggestions : function CMD__renderSuggestions(elem) {
@@ -111,21 +111,25 @@ CommandManager.prototype = {
     elem.innerHTML = content;
   },
 
-  _renderPreview : function CM__renderPreview(context, previewBlock) {
+  _renderPreview : function CM__renderPreview(context, previewBlock, showImmediately) {
     var doc = previewBlock.ownerDocument;
     var wasPreviewShown = false;
 
     try {
       var activeSugg = this.__nlParser.getSentence(this.__hilitedSuggestion);
-      if ( activeSugg ) {
-        var self = this;
-        function queuedPreview() {
-          // Set the preview contents.
-          if (self.__queuedPreview == queuedPreview)
-            activeSugg.preview(context, doc.getElementById("preview-pane"));
-        };
-        this.__queuedPreview = queuedPreview;
-        Utils.setTimeout(this.__queuedPreview, activeSugg.previewDelay);
+      if (activeSugg) {
+        if (showImmediately) {
+          activeSugg.preview(context, doc.getElementById("preview-pane"));
+        } else {
+          var self = this;
+          function queuedPreview() {
+            // Set the preview contents.
+            if (self.__queuedPreview == queuedPreview)
+              activeSugg.preview(context, doc.getElementById("preview-pane"));
+          };
+          this.__queuedPreview = queuedPreview;
+          Utils.setTimeout(this.__queuedPreview, activeSugg.previewDelay);
+        }
       }
 
       var evt = doc.createEvent("HTMLEvents");
