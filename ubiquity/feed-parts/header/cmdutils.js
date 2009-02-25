@@ -24,6 +24,7 @@
  *   Maria Emerson <memerson@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
+ *   Christian Sonne <cers@geeksbynature.dk>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -1180,8 +1181,10 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // results. It is passed as an object containing at the very least
 // {{{options.parser.title}}}, a jQuery selector that matches the titles of
 // the results. Optionally, you can include members
-// {{{options.parser.container}}}, a jQuery selector that will match a parent
-// to the results, making it easier to match results;
+// It is highly recommended that you include {{{options.parser.container}}}, 
+// a jQuery selector that will match an element that groups result-data.
+// If this is not passed, Ubiquity will fall back to a fragile method of
+// pairing titles, previews and thumbnails, which might not always work.
 // {{{options.parser.preview}}}, a jQuery selector that will match the preview
 // returned by the search provider; {{{options.parser.baseurl}}}, a
 // string that will be prefixed to relative links, such that relative paths 
@@ -1195,32 +1198,34 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // Examples:
 // {{{
 // CmdUtils.makeSearchCommand({
-//   name: "Trac",
-//   url: "https://ubiquity.mozilla.com/trac/search?q={QUERY}",
-//   parser: {container: "dl#results", title: "dt",
-//            preview: "dd.searchable",
-//            baseurl: "https://ubiquity.mozilla.com"},
+//   name: "Yahoo",
+//   url: "http://search.yahoo.com/search?p={QUERY}",
+//   parser: {container: "div.res",
+//            title: "div h3",
+//            preview: "div.abstr, div.sm-abs"}
 // });
 // }}}
 // {{{
 // CmdUtils.makeSearchCommand({
 //   name: "Google",
 //   url: "http://www.google.com/search?q={QUERY}",
-//   parser: {container: "div ol", title: "h3.r", preview: "div.s"},
+//   parser: {container: "li.g.w0",
+//            title: "h3.r",
+//            preview: "div.s"}
 // });
 // }}}
 // {{{
 // CmdUtils.makeSearchCommand({
-//   name: "Amazon",
-//   url: "http://www.amazon.com/s/ref=nb_ss_gw?url=search-alias%3Dstripbooks&field-keywords={QUERY}",
-//   parser: {container: "div.listView",
-//            title: "div.productTitle a",
-//            preview: "div.productTitle span.ptBrand",
-//            thumbnail: "div.productImage"}
+//   name: "IMDb",
+//   url: "http://www.imdb.com/find?s=all&q={QUERY}",
+//   parser: {container: "table#outerbody table table table tr",
+//            title: "td+td>a",
+//            thumbnail: "td img:not([src='http://i.media-imdb.com/images/b.gif'])"}
 // });
 // }}}
 
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
+  options.takes = {"search term": noun_arb_text};
   options.execute = function(directObject, modifiers) {
     var query = encodeURIComponent(directObject.text);
     if (options.postData) {
@@ -1236,119 +1241,176 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     }
     CmdUtils.setLastResult( urlString );
   };
-
-  options.takes = {"search term": noun_arb_text};
   var domainRe = /.*?\/\/[^?/]*/;
+  var relRe = /:\/\//;
   var baseurl = "";
   if (options.url) {
     baseurl = domainRe.exec(options.url);
     if (!options.icon) {
+      // guess where the favicon is
       options.icon = baseurl+"/favicon.ico"
     }
   }
-  if (!options.description && options.name)
+  if (!options.description && options.name) {
+    // generate description from the name of the seach command
     options.description = "Searches "+options.name+" for your words.";
-  if (! options.preview ) {
+  }
+  if (!options.preview) {
     options.preview = function searchPreview(pblock, directObject, modifiers) {
       const MAX_RESULTS = 4;
-      var query = directObject.text;
-      if (options.parser && query.length > 0) {
-        pblock.innerHTML = "<p>Loading results...</p>";
+      if (options.parser && directObject.text.length > 0) {
+        var parser = options.parser;
         var query = encodeURIComponent(directObject.text);
+        pblock.innerHTML = "<p>Loading results...</p>";
+        // check if we're using POST
         if (options.postData) {
           var urlString = options.url;
           for (data in options.postData)
             options.postData[data] = options.postData[data]
                                             .replace(/%s|{QUERY}/g, query);
         }
+        // or GET
         else {
           var urlString = options.url.replace(/%s|{QUERY}/g, query);
         }
-        if (!options.parser.baseurl) {
-          options.parser.baseurl = baseurl;
+        if (!parser.baseurl) {
+          // use the calculated baseurl
+          parser.baseurl = baseurl;
         }
         searchParser = function searchParser(data) {
-          var container = jQuery(data);
-          if (options.parser.container)
-            container = container.find(options.parser.container).eq(0);
-          if (container.length) {
+          var doc = jQuery(data);
+          if (doc.length) {
             var template = "";
-            pblock.innerHTML = "<h2>Results for <em>"+query+"</em>:</h2>"
-            var titles = container.find(options.parser.title);
-            var sane = true;
-            if (options.parser.preview) {
-              var previews = container.find(options.parser.preview);
-              if (titles.length != previews.length) {
+            pblock.innerHTML = "<h2>Results for <em>"
+                             + directObject.text
+                             + "</em>:</h2>";
+            var results = [];
+            switch (parser.type) {
+              case "JSON":
                 CmdUtils.log("ERROR from "+options.name+": "
-                            +"unequal number of titles and previews - "
-                            +"previews might be mixed up");
-                sane = false;
-              }
-            }
-            if (options.parser.thumbnail) {
-              var thumbnails = container.find(options.parser.thumbnail);
-              if (titles.length != thumbnails.length) {
-                CmdUtils.log("ERROR from "+options.name+": "
-                            +"unequal number of titles and thumbnails - "
-                            +"thumbnails might be mixed up");
-                sane = false;
-              }
+                            +"JSON is not yet supported");
+                break;
+              case "HMTL":
+              default:
+                if (parser.container) {
+                  var set = doc.find(parser.container);
+                  set.each(function(){
+                    var result = {};
+                    result.title = jQuery(this).find(parser.title);
+                    if (parser.preview) {
+                      result.preview = jQuery(this).find(parser.preview);
+                    }
+                    if (parser.thumbnail) {
+                      result.thumbnail = jQuery(this).find(parser.thumbnail);
+                    }
+                    results.push(result);
+                  });
+                }
+                else {
+                  CmdUtils.log("WARNING from "+options.name+" : "
+                              +"falling back to fragile parsing");
+                  var titles = doc.find(parser.title);
+                  var sane = true;
+                  if (parser.preview) {
+                    var previews = doc.find(parser.preview);
+                    if (titles.length != previews.length) {
+                      CmdUtils.log("ERROR from "+options.name+": "
+                                  +"unequal number of titles and previews - "
+                                  +"previews might be mixed up");
+                      sane = false;
+                    }
+                  }
+                  if (parser.thumbnail) {
+                    var thumbnails = doc.find(parser.thumbnail);
+                    if (titles.length != thumbnails.length) {
+                      CmdUtils.log("ERROR from "+options.name+": "
+                                  +"unequal number of titles and thumbnails - "
+                                  +"thumbnails might be mixed up");
+                      sane = false;
+                    }
+                  }
+                  for (var cnt=0; cnt<titles.length; cnt++) {
+                    result = {};
+                    result.title = titles.eq(cnt);
+                    if (sane && parser.preview) {
+                      result.preview = previews.eq(cnt);
+                    }
+                    if (sane && parser.thumbnail) {
+                      result.thumbnail = thumbnails.eq(cnt);
+                    }
+                    results.push(result);
+                  }
+                }
+                var tmp = [];
+                for (result in results) {
+                  if (results[result].title && results[result].title.length) {
+                    var href = "";
+                    if (results[result].title[0].tagName == "A") {
+                      href = results[result].title.attr("href");
+                    }
+                    else {
+                      href = results[result].title.find("A").eq(0).attr("href");
+                    }
+                    if (!relRe.exec(href)) {
+                      href = parser.baseurl+href;
+                    }
+                    results[result].href = href;
+                    results[result].title = results[result].title.text();
 
+                    if (results[result].thumbnail && 
+                        results[result].thumbnail.length) {
+                      var src = "";
+                      if (results[result].thumbnail[0].tagName == "IMG") {
+                        src = results[result].thumbnail.attr("src");
+                      }
+                      else {
+                        src = results[result].thumbnail
+                                             .find("IMG")
+                                             .eq(0)
+                                             .attr("src");
+                      }
+                      if (!relRe.exec(src)) {
+                        src = parser.baseurl+src;
+                      }
+                      results[result].thumbnail = src;
+                    }
+                    if (results[result].preview) {
+                      results[result].preview = results[result].preview.text();
+                    }
+                    tmp.push(results[result]);
+                  }
+                }
+                results = tmp;
+                break;
             }
-            if (titles.length == 0) {
+            if (results.length == 0) {
               template = "<p>No results<p>";
             }
             else {
               template = "<dl>";
-              for (var cnt = 0; cnt < Math.min(titles.length,MAX_RESULTS); cnt++) {
-                var link = null;
-                if (titles[cnt].tagName == "A") {
-                  link = titles[cnt];
-                }
-                else {
-                  link = jQuery(titles[cnt]).find("a")[0];
-                }
-                link.accessKey = cnt+1;
-                var src = jQuery(link).attr("href");
-                if (!/:\/\//.exec(src)) {
-                  jQuery(link).attr("href", options.parser.baseurl+src);
-                }
-                if (titles[cnt].tagName == "A") {
-                  // Weird jQuery hack, unless you know what you're doing,
-                  // leave it alone.
-                  var title = jQuery('<div>').append(titles.eq(cnt).clone())
-                                             .html();
-                }
-                else {
-                  var title = titles.eq(cnt).html();
-                }
+              for (var cnt = 0;
+                   cnt < Math.min(results.length,MAX_RESULTS);
+                   cnt++) {
+                var result = results[cnt];
                 template += "<dt style='font-weight: bold; clear: both;'>"
                           + "["+(cnt+1)+"] "
-                          + title
+                          + "<a style='border-bottom: 1px solid;' href='"+result.href+"' accesskey='"+(cnt+1)+"'>"
+                          + result.title+"</a>"
                           + "</dt>";
-                if (sane && options.parser.thumbnail) {
-                  if (thumbnails[cnt].tagName == "IMG") {
-                    var src = thumbnails[cnt].src;
-                  }
-                  else {
-                    var src = thumbnails.eq(cnt).find("img")[0].src;
-                  }
-                  if (!/:\/\//.exec(src)) {
-                    src = options.parser.baseurl+src;
-                  }
+                if (result.thumbnail) {
                   template += "<dd style='float: left; margin: 0 10px 0 0'>"
-                            + "<img src='"+src+"' height='75' />"
+                            + "<img src='"+result.thumbnail+"' height='70' />"
                             + "</dd>";
                 }
-                if (sane && options.parser.preview) {
-                  template += "<dd>"
-                            + previews.eq(cnt).html()
+                if (result.preview) {
+                  template += "<dd style='margin-left: 2em;'>"
+                            + result.preview;
                             + "</dd>";
                 }
               }
               template += "</dl>";
               // we did not find an equal amount of titles, previews and thumbnails
-              if (!sane) {
+              if (sane == false) {
                 template += "<p>Note: no previews have been generated, because an error occured while parsing the results</p>";
               }
             }
@@ -1359,15 +1421,17 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           }
           pblock.innerHTML += template;
         };
-        if (options.postData)
+        if (options.postData) {
           CmdUtils.previewPost(pblock, urlString, options.postData, searchParser);
-        else
+        }
+        else {
           CmdUtils.previewGet(pblock, urlString, searchParser);
+        }
       }
       else {
         var content = "Searches "+options.name+" for your words";
-	    if(query.length > 0)
-		    content += ": <b>" + query + "</b>";
+        if(directObject.text.length > 0)
+          content += ": <b>" + directObject.text + "</b>";
         pblock.innerHTML = content;
       }
     };
