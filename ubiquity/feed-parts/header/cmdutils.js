@@ -1289,32 +1289,23 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             var results = [];
             switch (parser.type) {
               case "json":
-                if (JSON) {
-                  var data = JSON.parse(data);
-                }
-                else {
-                  var JSON = Components.
-                             classes["@mozilla.org/dom/json;1"].
-                             createInstance(Components.interfaces.nsIJSON);
-                  var data = JSON.decode(data);
-                }
-                var tmp = data;
+                data = Utils.decodeJson(data);
                 var path = parser.container.split(".");
                 for (p in path) {
-                  tmp = tmp[path[p]];
+                  data = data[path[p]];
                 }
-                for (t in tmp) {
+                for (d in data) {
                   var res = {}
-                  var title = tmp[t][parser.title];
+                  var title = data[d][parser.title];
                   res.title = title;
-                  var href = tmp[t][parser.href];
+                  var href = data[d][parser.href];
                   res.href = href;
                   if (parser.preview) {
-                    var preview = tmp[t][parser.preview];
+                    var preview = data[d][parser.preview];
                     res.preview = preview;
                   }
                   if (parser.thumbnail) {
-                    var thumbnail = tmp[t][parser.thumbnail];
+                    var thumbnail = data[d][parser.thumbnail];
                     res.thumbnail = thumbnail;
                   }
                   results.push(res);
