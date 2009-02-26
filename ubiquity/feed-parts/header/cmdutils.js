@@ -1293,8 +1293,10 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                   var data = JSON.parse(data);
                 }
                 else {
-                  // TODO: Is there a safer way to do this? evalInSandbox?
-                  var data = eval(data);
+                  var JSON = Components.
+                             classes["@mozilla.org/dom/json;1"].
+                             createInstance(Components.interfaces.nsIJSON);
+                  var data = JSON.decode(data);
                 }
                 var tmp = data;
                 var path = parser.container.split(".");
