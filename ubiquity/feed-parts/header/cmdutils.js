@@ -1255,43 +1255,72 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     // generate description from the name of the seach command
     options.description = "Searches "+options.name+" for your words.";
   }
+  if (options.parser && options.parser.type) {
+    options.parser.type = options.parser.type.toLowerCase()
+  }
   if (!options.preview) {
     options.preview = function searchPreview(pblock, directObject, modifiers) {
+      var urlString = options.parser.url || options.url;
       const MAX_RESULTS = 4;
       if (options.parser && directObject.text.length > 0) {
         var parser = options.parser;
         var query = encodeURIComponent(directObject.text);
-        pblock.innerHTML = "<p>Loading results...</p>";
         // check if we're using POST
         if (options.postData) {
-          var urlString = options.url;
           for (data in options.postData)
             options.postData[data] = options.postData[data]
                                             .replace(/%s|{QUERY}/g, query);
         }
         // or GET
         else {
-          var urlString = options.url.replace(/%s|{QUERY}/g, query);
+          urlString = urlString.replace(/%s|{QUERY}/g, query);
         }
+        pblock.innerHTML = "<p>Loading results...</p>";
         if (!parser.baseurl) {
           // use the calculated baseurl
           parser.baseurl = baseurl;
         }
         searchParser = function searchParser(data) {
-          var doc = jQuery(data);
-          if (doc.length) {
+          if (data.length) {
             var template = "";
             pblock.innerHTML = "<h2>Results for <em>"
                              + directObject.text
                              + "</em>:</h2>";
             var results = [];
             switch (parser.type) {
-              case "JSON":
-                CmdUtils.log("ERROR from "+options.name+": "
-                            +"JSON is not yet supported");
+              case "json":
+                if (JSON) {
+                  var data = JSON.parse(data);
+                }
+                else {
+                  // TODO: Is there a safer way to do this? evalInSandbox?
+                  var data = eval(data);
+                }
+                var tmp = data;
+                var path = parser.container.split(".");
+                for (p in path) {
+                  tmp = tmp[path[p]];
+                }
+                for (t in tmp) {
+                  var res = {}
+                  var title = tmp[t][parser.title];
+                  res.title = title;
+                  var href = tmp[t][parser.href];
+                  res.href = href;
+                  if (parser.preview) {
+                    var preview = tmp[t][parser.preview];
+                    res.preview = preview;
+                  }
+                  if (parser.thumbnail) {
+                    var thumbnail = tmp[t][parser.thumbnail];
+                    res.thumbnail = thumbnail;
+                  }
+                  results.push(res);
+                }
                 break;
-              case "HMTL":
+              case "html":
               default:
+                var doc = jQuery(data);
                 if (parser.container) {
                   var set = doc.find(parser.container);
                   set.each(function(){
@@ -1422,10 +1451,10 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           pblock.innerHTML += template;
         };
         if (options.postData) {
-          CmdUtils.previewPost(pblock, urlString, options.postData, searchParser);
+          CmdUtils.previewPost(pblock, urlString, options.postData, searchParser, options.parser.type || "html");
         }
         else {
-          CmdUtils.previewGet(pblock, urlString, searchParser);
+          CmdUtils.previewGet(pblock, urlString, searchParser, options.parser.type || "html");
         }
       }
       else {
