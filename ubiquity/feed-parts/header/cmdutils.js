@@ -1158,7 +1158,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 //
 // Also note that {{{options.icon}}} if not passed, will be generated from
 // the url passed in {{{options.url}}}, and {{{options.description}}} if
-// not passed, will be auto generated from a template and 
+// not passed, will be auto generated from a template and
 // {{{options.name}}}.
 //
 // The {{{options.execute}}}, {{{options.preview}}}, and
@@ -1181,13 +1181,13 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
 // results. It is passed as an object containing at the very least
 // {{{options.parser.title}}}, a jQuery selector that matches the titles of
 // the results. Optionally, you can include members
-// It is highly recommended that you include {{{options.parser.container}}}, 
+// It is highly recommended that you include {{{options.parser.container}}},
 // a jQuery selector that will match an element that groups result-data.
 // If this is not passed, Ubiquity will fall back to a fragile method of
 // pairing titles, previews and thumbnails, which might not always work.
 // {{{options.parser.preview}}}, a jQuery selector that will match the preview
 // returned by the search provider; {{{options.parser.baseurl}}}, a
-// string that will be prefixed to relative links, such that relative paths 
+// string that will be prefixed to relative links, such that relative paths
 // will still work out of context. If not passed, it will be auto-generated
 // from {{{options.url}}} (and thus MAY be incorrect)
 // {{{options.parser.thumbnail}}}, a jQuery selector that will match a thumbnail
@@ -1379,7 +1379,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                     results[result].href = href;
                     results[result].title = results[result].title.text();
 
-                    if (results[result].thumbnail && 
+                    if (results[result].thumbnail &&
                         results[result].thumbnail.length) {
                       var src = "";
                       if (results[result].thumbnail[0].tagName == "IMG") {
@@ -1503,6 +1503,153 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand(
 
   CmdUtils.CreateCommand(options);
 };
+
+/* Proof of concept:  Overlord verbs and underling verbs.  Usage is
+ * like:
+ * CmdUtils.makeOverlordVerb( { name: "add to"} );
+ * CmdUtils.makeUnderlingVerb( {name: "add to calendar"} );
+ *
+ * Still pretty hacky; not recommended for production use.
+ */
+
+CmdUtils.OverlordCmdObj = function CmdUtils_OverlordCmdObj(verb, modifier,
+							  nounType) {
+  this.name = verb;
+  this._switchModifier = modifier;
+  this.modifiers = {};
+  this.modifiers[modifier] = nounType;
+  this._underlingRegistry = {};
+};
+CmdUtils.OverlordCmdObj.prototype = {
+    execute: function( directObj, modifiers ) {
+      // delegate
+      var choice = modifiers[this._switchModifier].text;
+      var underling = this._underlingRegistry[choice];
+      if (underling)
+	underling.execute(directObj, modifiers );
+      else
+	displayMessage("Overlord verb with undefined underling " + choice);
+    },
+    preview: function( pBlock, directObj, modifiers ) {
+      // delegate
+      var choice = modifiers[this._switchModifier].text;
+      var underling = this._underlingRegistry[choice];
+      if (underling)
+	underling.preview( pBlock, directObj, modifiers );
+      else
+	pBlock.innerHTML = "Overlord verb with unrecognized choice " + choice;
+    },
+    registerNewUnderling: function(argumentValue, options) {
+      this._underlingRegistry[argumentValue] = options;
+    }
+};
+
+CmdUtils.OverlordNounType = function CmdUtils_OverlordNounType() {
+  this._underlingChoices = [];
+};
+CmdUtils.OverlordNounType.prototype = {
+    suggest: function(text, html, callback) {
+      // Work like the generic noun type.
+      // But put the "options" dict of the underling verb in the .data
+      // property of the returned suggestion.
+      var suggestions = [];
+      for each ( var choiceName in this._underlingChoices) {
+	if (choiceName.indexOf(text) > -1 ) {
+	  suggestions.push( CmdUtils.makeSugg( choiceName ) );
+	}
+      }
+      return suggestions;
+    },
+    default: function() {
+      // Always return something as default for the
+      // switchModifier, since the overlord verb can't run without one.
+      // When we allow multiple defaults, this should return everything!
+      var defaults = [];
+      for each ( var choiceName in this._underlingChoices) {
+	defaults.push( CmdUtils.makeSugg(choiceName));
+      }
+      return defaults;
+    },
+    addNewValue: function( newValue, options ) {
+      this._underlingChoices.push( newValue );
+    }
+};
+
+CmdUtils.makeOverlordVerb = function makeOverlordVerb( name ) {
+  // name must be of the form "add to"
+  var globalObj = CmdUtils.__globalObject;
+  var words = name.split(" ");
+  var overlordVerb = words[0];
+  var switchModifier = words[1];
+
+  var autoGeneratedNounType = new CmdUtils.OverlordNounType();
+
+  var overlordCmdObj = new CmdUtils.OverlordCmdObj( overlordVerb,
+				                    switchModifier,
+						    autoGeneratedNounType);
+  var execute = function() {
+    overlordCmdObj.execute.apply(overlordCmdObj, arguments);
+  };
+  // Reserved keywords that shouldn't be added to the cmd function.
+  var RESERVED = ["takes", "execute", "name"];
+  // Add all other attributes of options to the cmd function.
+  for( var key in overlordCmdObj ) {
+    if( RESERVED.indexOf(key) == -1 )
+      execute[key] = overlordCmdObj[key];
+  }
+  execute.modifiers[switchModifier] = autoGeneratedNounType;
+
+  // TODO big issue here:  The overlord verb needs to accept any additional
+  // arguments that *any* of its underling verbs can accept.  How will we
+  // do that??
+  // TODO need to be able to produce suggestion based on *two* *nouns* --
+  // one for the selector argument and one for another argument -- so that
+  // 'calendar pants' will complete to 'add-to-calendar pants'.  The parser
+  // doesn't do this yet -- noun-first suggestion tries to send all input
+  // to the same noun.
+  // TODO this is a hack: assume we always take arb text direct obj
+  execute.DOLabel = "object";
+  execute.DOType = globalObj["noun_arb_text"];
+
+  // TODO set various other attributes on overlordCmdObj... documentation
+  // strings, for instance, would be good.
+  globalObj["noun_type_" + overlordVerb + "_" + switchModifier + "_arg"] =
+    autoGeneratedNounType;
+
+  // TODO if an overlord verb is *empty*, then it should be kept out of
+  // the namespace of things that can be suggested.  Not sure how to
+  // accomplish this.  Maybe we could set a 'disabled' property on it,
+  // and then in makeUnderlingVerb, remove the disabled property because
+  // it now has at least one underling?
+
+  globalObj["cmd_" + overlordVerb] = execute;
+};
+
+CmdUtils.makeUnderlingVerb = function makeUnderlingVerb( options ) {
+  // options.name must be of the form "add to calendar".
+  var globalObj = CmdUtils.__globalObject;
+  var words = options.name.split(" ");
+  var overlordVerb = words[0];
+  var switchModifier = words[1];
+  var myArgumentValue = words[2];
+
+  // TODO make sure there's not already an underling verb with the
+  // same name.
+  var nounType = globalObj["noun_type_" + overlordVerb + "_"
+                           + switchModifier + "_arg"];
+  if (!nounType) {
+    // TODO handle error
+  }
+  var overlordVerbObj = globalObj["cmd_" + overlordVerb];
+  if (!overlordVerbObj) {
+    // TODO handle error
+  }
+  overlordVerbObj.registerNewUnderling( myArgumentValue, options );
+  nounType.addNewValue( myArgumentValue, options );
+  // TODO the underling verb should have its own entry in command-list
+  // etc. How do we do that?
+};
+
 
 /* The following odd-looking syntax means that the anonymous function
  * will be defined and immediately called.  This allows us to import
