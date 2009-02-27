@@ -5,6 +5,8 @@ var Ci = Components.interfaces;
 
 var BUG_REPORT_PREF = "extensions.ubiquity.bugReportUri";
 
+var gIsSubmitInProgress = false;
+
 function _getExtensionInfo(Application) {
   var extensions = {};
   Application.extensions.all.forEach(function(ext) {
@@ -129,6 +131,11 @@ function showResult(html) {
 }
 
 function doSubmit(info) {
+  if (gIsSubmitInProgress)
+    return;
+  gIsSubmitInProgress = true;
+  var lastStatus = $("#submit").attr("value");
+  $("#submit").attr("value", "Please wait...");
   var description = $("#description").attr("value");
   info.description = description;
   jQuery.ajax(
@@ -138,11 +145,15 @@ function doSubmit(info) {
      data: Utils.encodeJson(info),
      dataType: "json",
      success: function(data, textStatus) {
+       $("#submit").attr("value", lastStatus);
        showResult("<p>Bug submitted with report id <tt>" + data.report_id +
                   "</tt>.</p>");
+       gIsSubmitInProgress = false;
      },
      error: function(XMLHttpRequest, textStatus, errorThrown) {
+       $("#submit").attr("value", lastStatus);
        showResult("<p>An error occurred when submitting the report.</p>");
+       gIsSubmitInProgress = false;
      }
     });
 }
