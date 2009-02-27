@@ -123,11 +123,11 @@ function visualize(info, elem) {
   elem.append(table);
 }
 
-function showResult(html) {
+function showResult(html, cb) {
   var node = $(html);
   node.hide();
   $("#output").append(node);
-  node.slideDown();
+  node.slideDown("normal", cb);
 }
 
 function doSubmit(info) {
@@ -140,10 +140,12 @@ function doSubmit(info) {
   info.description = description;
 
   function doFinish(msg) {
-    $("#submit").removeClass("busy");
-    $("#submit").addClass("unbusy");
-    showResult(msg);
-    gIsSubmitInProgress = false;
+    showResult(msg,
+               function() {
+                 $("#submit").removeClass("busy");
+                 $("#submit").addClass("unbusy");
+                 gIsSubmitInProgress = false;
+               });
   }
 
   jQuery.ajax(
