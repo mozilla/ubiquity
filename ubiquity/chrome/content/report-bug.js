@@ -134,10 +134,16 @@ function doSubmit(info) {
   if (gIsSubmitInProgress)
     return;
   gIsSubmitInProgress = true;
-  var lastStatus = $("#submit").attr("value");
-  $("#submit").attr("value", "Please wait...");
+  $("#submit").addClass("busy");
   var description = $("#description").attr("value");
   info.description = description;
+
+  function doFinish(msg) {
+    $("#submit").removeClass("busy");
+    showResult(msg);
+    gIsSubmitInProgress = false;
+  }
+
   jQuery.ajax(
     {contentType: "application/json",
      type: "POST",
@@ -145,15 +151,11 @@ function doSubmit(info) {
      data: Utils.encodeJson(info),
      dataType: "json",
      success: function(data, textStatus) {
-       $("#submit").attr("value", lastStatus);
-       showResult("<p>Bug submitted with report id <tt>" + data.report_id +
-                  "</tt>.</p>");
-       gIsSubmitInProgress = false;
+       doFinish("<p>Bug submitted with report id <tt>" + data.report_id +
+                "</tt>.</p>");
      },
      error: function(XMLHttpRequest, textStatus, errorThrown) {
-       $("#submit").attr("value", lastStatus);
-       showResult("<p>An error occurred when submitting the report.</p>");
-       gIsSubmitInProgress = false;
+       doFinish("<p>An error occurred when submitting the report.</p>");
      }
     });
 }
