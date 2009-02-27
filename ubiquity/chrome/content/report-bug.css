@@ -56,11 +56,18 @@ body {
 }
 
 #submit {
-    background-color: #f0f0f0;
     border: none;
     padding: 10px;
 }
 
-#submit:hover {
+.unbusy {
+    background-color: #f0f0f0;
+}
+
+.unbusy:hover {
     background-color: #e0e0e0;
+}
+
+.busy {
+    color: #d0d0d0;
 }
