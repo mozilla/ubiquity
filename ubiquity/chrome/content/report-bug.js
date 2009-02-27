@@ -134,12 +134,14 @@ function doSubmit(info) {
   if (gIsSubmitInProgress)
     return;
   gIsSubmitInProgress = true;
+  $("#submit").removeClass("unbusy");
   $("#submit").addClass("busy");
   var description = $("#description").attr("value");
   info.description = description;
 
   function doFinish(msg) {
     $("#submit").removeClass("busy");
+    $("#submit").addClass("unbusy");
     showResult(msg);
     gIsSubmitInProgress = false;
   }
