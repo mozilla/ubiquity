@@ -126,7 +126,7 @@ function makeFeedListElement(info, label, clickMaker) {
     sourceName = "source";
 
   $(li).append(" ");
-  addLink("[view " + sourceName + "]", info.viewSourceUri.spec,
+  addLink("[view " + sourceName + "]", "view-source:" + info.viewSourceUri.spec,
           "feed-action");
 
   return li;
