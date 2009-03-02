@@ -1,10 +1,10 @@
-defineVerb(
+createCommand(
   {name: "locked-down-display-message",
    preview: "Prints a message.",
    execute: function execute() { displayMessage("Hi there."); }}
 );
 
-defineVerb(
+createCommand(
   {name: "locked-down-evil-components",
    preview: "Tries to access <tt>Components.classes</tt> but fails.",
    execute: function execute() {
@@ -13,7 +13,7 @@ defineVerb(
    }}
 );
 
-defineVerb(
+createCommand(
   {name: "locked-down-evil-xhr",
    preview: "Tries to make an <tt>XMLHTTPRequest</tt> but fails.",
    execute: function execute() {
@@ -22,7 +22,7 @@ defineVerb(
    }}
 );
 
-defineVerb(
+createCommand(
   {name: "locked-down-evil-xss",
    preview: ("Tries to make a cross-site scripting attack " +
              "but fails. Select some text on a webpage and try " +
@@ -33,7 +33,7 @@ defineVerb(
    }}
 );
 
-defineVerb(
+createCommand(
   {name: "locked-down-embolden",
    preview: "Tries to make the current selection boldfaced.",
    execute: function execute() {

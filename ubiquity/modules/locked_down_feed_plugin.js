@@ -254,9 +254,9 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       }
       sandbox.importFunction(setSelection);
 
-      // ==== {{{defineVerb()}}} ====
+      // ==== {{{createCommand()}}} ====
       //
-      // This function creates a new verb.  The dictionary-like object
+      // This function creates a new command.  The dictionary-like object
       // passed to it should contain the following keys:
       //
       //   * {{{name}}} is the name of the verb.
@@ -267,7 +267,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       //
       // This function has no return value.
 
-      function defineVerb(info) {
+      function createCommand(info) {
         info = new XPCSafeJSObjectWrapper(info);
         let cmd = {
           name: info.name,
@@ -290,7 +290,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
         self.commands[cmd.name] = cmd;
       }
-      sandbox.importFunction(defineVerb);
+      sandbox.importFunction(createCommand);
 
       sandboxFactory.evalInSandbox(code,
                                    sandbox,
