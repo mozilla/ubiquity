@@ -14,6 +14,19 @@ function markupTickets(query) {
   query.html(html.replace(regexp, template));
 }
 
+// === {{{addMoreLinks()}}} ===
+//
+// Adds a row labeled "more" to the changeset detail page, with links
+// to additional information contained in the revision, such as
+// the built-in documentation.
+function addMoreLinks(rev, doc) {
+  var newRow = jQuery('<tr><th class="files">more</th></tr>', doc);
+  newRow.append('<td class="files">' +
+                '<a href="/hg/ubiquity-firefox/raw-file/' + rev +
+                '/ubiquity/index.html">documentation</a></td>');
+  jQuery("#changesetEntry", doc).append(newRow);
+}
+
 // === {{{pageLoad_developerCommands()}}} ===
 //
 // This function is a page-load function that applies transformations
@@ -27,6 +40,7 @@ function pageLoad_developerCommands(doc) {
     if (match) {
       var rev = match[1];
       markupTickets(jQuery(".description", doc));
+      addMoreLinks(rev, doc);
     }
   }
 }
