@@ -7,11 +7,14 @@
 // This function finds any text in the given JQuery query that looks like
 // a Trac ticket and hyperlinks the text to the ticket.
 function markupTickets(query) {
-  var html = query.html();
-  var regexp = /#([0-9]+)/g;
+  var regexps = [/#([0-9]+)/g,
+                 /[T|t]icket ([0-9]+)/g];
   var template = ('<a href="https://ubiquity.mozilla.com/' +
                   'trac/ticket/$1">#$1</a>');
-  query.html(html.replace(regexp, template));
+  regexps.forEach(
+    function(regexp) {
+      query.html(query.html().replace(regexp, template));
+    });
 }
 
 // === {{{addMoreLinks()}}} ===
