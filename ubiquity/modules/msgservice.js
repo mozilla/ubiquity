@@ -34,6 +34,30 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = Message Services =
+//
+// {{{MessageService}}} is the name of an interface that provides a
+// means for notifying the end-user of important events in a non-intrusive
+// manner.
+//
+// An object that implements the {{{MessageService}}} interface must
+// expose the following method:
+//
+// === {{{MessageService.displayMessage(msg)}}} ===
+//
+// Displays the given message. {{{msg}}} may be a simple string, but it
+// can also be a JavaScript object with the following keys, all of them
+// optional:
+//
+// {{{msg.title}}} is the title of the message.
+//
+// {{{msg.text}}} is the body of the message.
+//
+// {{{msg.icon}}} is a URL pointing to an icon for the message.
+//
+// {{{msg.exception}}} is an exception object corresponding to the
+// exception that the message represents, if any.
+
 EXPORTED_SYMBOLS = ["ExceptionUtils",
                     "ErrorConsoleMessageService",
                     "AlertMessageService",
@@ -44,41 +68,13 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 let Cc = Components.classes;
 let Ci = Components.interfaces;
 
-var ExceptionUtils = {
-  stackTraceFromFrame: function stackTraceFromFrame(frame, formatter) {
-    if (!formatter)
-      formatter = function defaultFormatter(frame) { return frame; };
+// == Message Service Implementations ==
 
-    var output = "";
-
-    while (frame) {
-      output += formatter(frame) + "\n";
-      frame = frame.caller;
-    }
-
-    return output;
-  },
-
-  stackTrace: function stackTrace(e, formatter) {
-    var output = "";
-    if (e.location) {
-      // It's a wrapped nsIException.
-      output += this.stackTraceFromFrame(e.location, formatter);
-    } else if (e.stack)
-      // It's a standard JS exception.
-
-      // TODO: It would be nice if we could parse this string and
-      // create a 'fake' nsIStackFrame-like call stack out of it,
-      // so that we can do things w/ this stack trace like we do
-      // with nsIException traces.
-      output += e.stack;
-    else
-      // It's some other thrown object, e.g. a bare string.
-      output += "No traceback available.\n";
-
-    return output;
-  }
-};
+// === {{{ErrorConsoleMessageService}}} ===
+//
+// This {{{MessageService}}} logs messages containing exceptions to
+// the JavaScript error console, also logging their stack traces if
+// possible.
 
 function ErrorConsoleMessageService() {
   this.displayMessage = function(msg) {
@@ -89,6 +85,14 @@ function ErrorConsoleMessageService() {
     }
   };
 }
+
+// === {{{AlertMessageService}}} ===
+//
+// This {{{MessageService}}} uses {{{nsIAlertsService}}} to
+// non-modally display the message to the user. On Windows, this shows
+// up as a "toaster" notification at the bottom-right of the
+// screen. On OS X, it's shown using
+// [[http://en.wikipedia.org/wiki/Growl_%28software%29|Growl]].
 
 function AlertMessageService() {
   this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
@@ -132,6 +136,13 @@ function AlertMessageService() {
   };
 }
 
+// === {{{CompositeMessageService}}} ===
+//
+// Combines one or more {{{MessageService}}} implementations under a
+// single {{{MessageService}}} interface.
+//
+// Use the {{{add()}}} method to add new implementations.
+
 function CompositeMessageService() {
   this._services = [];
 }
@@ -146,3 +157,44 @@ CompositeMessageService.prototype = {
       this._services[i].displayMessage(msg);
   }
 }
+
+// == Exception Utilities ==
+//
+// The {{{ExceptionUtils}}} namespace provides some functionality for
+// introspecting JavaScript and XPCOM exceptions.
+
+var ExceptionUtils = {
+  stackTraceFromFrame: function stackTraceFromFrame(frame, formatter) {
+    if (!formatter)
+      formatter = function defaultFormatter(frame) { return frame; };
+
+    var output = "";
+
+    while (frame) {
+      output += formatter(frame) + "\n";
+      frame = frame.caller;
+    }
+
+    return output;
+  },
+
+  stackTrace: function stackTrace(e, formatter) {
+    var output = "";
+    if (e.location) {
+      // It's a wrapped nsIException.
+      output += this.stackTraceFromFrame(e.location, formatter);
+    } else if (e.stack)
+      // It's a standard JS exception.
+
+      // TODO: It would be nice if we could parse this string and
+      // create a 'fake' nsIStackFrame-like call stack out of it,
+      // so that we can do things w/ this stack trace like we do
+      // with nsIException traces.
+      output += e.stack;
+    else
+      // It's some other thrown object, e.g. a bare string.
+      output += "No traceback available.\n";
+
+    return output;
+  }
+};

@@ -54,7 +54,7 @@ Components.utils.import("resource://ubiquity/modules/contextutils.js");
 // constructor takes three parameters:
 //
 //   * {{{feedManager}}} is an instance of a {{{FeedManager}}} class.
-//   * {{{messageService}}} is an object that exposes a message service
+//   * {{{messageService}}} is an object that exposes a {{{MessageService}}}
 //     interface.
 //   * {{{webJsm}}} is a {{{WebJsModule}}} instance.
 //
