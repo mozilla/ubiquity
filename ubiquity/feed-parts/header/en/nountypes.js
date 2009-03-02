@@ -358,89 +358,12 @@ function isAddress( query, callback ) {
  *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html)
  */
 noun_type_awesomebar = {
-
-  _getHistoryLinks: function(partialSearch, onSearchComplete) {
-        function AutoCompleteInput(aSearches) {
-            this.searches = aSearches;
-        }
-        AutoCompleteInput.prototype = {
-            constructor: AutoCompleteInput,
-
-            searches: null,
-
-            minResultsForPopup: 0,
-            timeout: 10,
-            searchParam: "",
-            textValue: "",
-            disableAutoComplete: false,
-            completeDefaultIndex: false,
-
-            get searchCount() {
-                return this.searches.length;
-            },
-
-            getSearchAt: function(aIndex) {
-                return this.searches[aIndex];
-            },
-
-            onSearchBegin: function() {},
-            onSearchComplete: function() {},
-
-            popupOpen: false,
-
-            popup: {
-                setSelectedIndex: function(aIndex) {},
-                invalidate: function() {},
-
-                // nsISupports implementation
-                QueryInterface: function(iid) {
-                    if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompletePopup)) return this;
-
-                    throw Components.results.NS_ERROR_NO_INTERFACE;
-                }
-            },
-
-            // nsISupports implementation
-            QueryInterface: function(iid) {
-                if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompleteInput)) return this;
-
-                throw Components.results.NS_ERROR_NO_INTERFACE;
-            }
-        }
-
-        var controller = Components.classes["@mozilla.org/autocomplete/controller;1"].getService(Components.interfaces.nsIAutoCompleteController);
-
-        var input = new AutoCompleteInput(["history"]);
-        controller.input = input;
-
-        input.onSearchComplete = function() {
-            onSearchComplete(controller);
-        };
-
-        controller.startSearch(partialSearch);
-  },
-
-  _getLinks: function(controller, callback) {
-      var links = [];
-
-      for (var i = 0; i < controller.matchCount; i++) {
-        var url = controller.getValueAt(i);
-        var title = controller.getCommentAt(i);
-        if (title.length == 0) { title = url; }
-
-        var favicon = controller.getImageAt(i);
-
-        callback( CmdUtils.makeSugg(url, title, favicon) );
-    }
-  },
   name: "url",
-  _links: null,
-  suggest: function(part, html, callback){
-      var onSearchComplete = function(controller) {
-         noun_type_awesomebar._getLinks(controller, callback);
-      };
 
-      this._getHistoryLinks(part, onSearchComplete);
+  suggest: function(part, html, callback){
+     Utils.history.search(part, 5, function(result){
+        callback(CmdUtils.makeSugg(result.url, result.title, result.favicon))
+     })
   }
 };
 
@@ -810,12 +733,13 @@ Components.utils.import("resource://ubiquity/modules/setup.js");
 var noun_type_commands = {
    _name: "command",
    __cmdSource : UbiquitySetup.createServices().commandSource,
+   
    suggest : function(fragment){
       var cmds = [];
       for each( var cmd in this.__cmdSource.commandNames){
          if(cmd.name.match(fragment, "i")){
             var cmdObj = this.__cmdSource.getCommand(cmd.name);
-
+   
             var help = cmdObj.help ? cmdObj.help : cmdObj.description;
             cmds.push(CmdUtils.makeSugg(cmd.name, help, cmdObj));
          }
@@ -914,6 +838,8 @@ var noun_type_bookmarklet = {
       getBookmarklets(noun_type_bookmarklet.callback);
       return [];
     }
+
+    bookmarklets = noun_type_bookmarklet.bookmarkletList;
 
     bookmarklets = noun_type_bookmarklet.bookmarkletList;
 

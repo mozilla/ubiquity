@@ -662,6 +662,85 @@ Utils.tabs = {
   }
 };
 
+function AutoCompleteInput(aSearches) {
+    this.searches = aSearches;
+}
+
+AutoCompleteInput.prototype = {
+    constructor: AutoCompleteInput,
+
+    searches: null,
+
+    minResultsForPopup: 0,
+    timeout: 10,
+    searchParam: "",
+    textValue: "",
+    disableAutoComplete: false,
+    completeDefaultIndex: false,
+
+    get searchCount() {
+        return this.searches.length;
+    },
+
+    getSearchAt: function(aIndex) {
+        return this.searches[aIndex];
+    },
+
+    onSearchBegin: function() {},
+    onSearchComplete: function() {},
+
+    popupOpen: false,
+
+    popup: {
+        setSelectedIndex: function(aIndex) {},
+        invalidate: function() {},
+
+        // nsISupports implementation
+        QueryInterface: function(iid) {
+            if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompletePopup)) return this;
+
+            throw Components.results.NS_ERROR_NO_INTERFACE;
+        }
+    },
+
+    // nsISupports implementation
+    QueryInterface: function(iid) {
+        if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompleteInput)) return this;
+
+        throw Components.results.NS_ERROR_NO_INTERFACE;
+    }
+}
+
+Utils.history = {
+   
+     __createController : function createController(onSearchComplete){
+          var controller = Components.classes["@mozilla.org/autocomplete/controller;1"].getService(Components.interfaces.nsIAutoCompleteController);
+
+          var input = new AutoCompleteInput(["history"]);
+          input.onSearchComplete = function(){
+             onSearchComplete(controller);
+          };
+          controller.input = input;
+          return controller;
+     },
+   
+     search : function searchHistory(query, maxResults, callback){
+        
+        var ctrlr = this.__createController(function(controller){
+           for (var i = 0; i < controller.matchCount; i++) {
+              var url = controller.getValueAt(i);
+              var title = controller.getCommentAt(i);
+              if (title.length == 0) { title = url; }
+              var favicon = controller.getImageAt(i); 
+         
+              callback({url : url, title : title, favicon : favicon })
+           }
+        })
+        
+        ctrlr.startSearch(query);
+     }
+}
+
 // ** {{{ Utils.appName }}} **
 //
 // This property provides the chrome application name found in nsIXULAppInfo.name.
