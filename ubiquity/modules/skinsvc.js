@@ -41,6 +41,8 @@ var EXPORTED_SYMBOLS = ["SkinSvc"];
 
 Components.utils.import("resource://ubiquity/modules/msgservice.js");
 Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/webjsm.js");
+
 
 var Ci = Components.interfaces;
 var Cc = Components.classes;
@@ -94,6 +96,11 @@ function SkinSvc(window) {
   this._init();
   if(window){
     this._window = window;
+    
+    var webJsm =  new WebJsModule(function(){});
+    webJsm.importScript("resource://ubiquity/scripts/jquery.js");
+    this.webJsm = webJsm;
+    
   }
 }
 
@@ -264,7 +271,7 @@ SkinSvc.prototype = {
         self._writeToFile(file, data);
       }
 
-      this._window.jQuery.ajax({url: download_uri,
+      this.webJsm.jQuery.ajax({url: download_uri,
           dataType: "text",
           success: onSuccess});
     } catch(e) {
@@ -348,7 +355,7 @@ SkinSvc.prototype.installToWindow = function installToWindow() {
             self.changeSkin(skinUrl);
           }else{
             //Get the CSS from the remote file
-            window.jQuery.ajax({url: skinUrl,
+            self.webJsm.jQuery.ajax({url: skinUrl,
               dataType: "text",
               success: onSuccess});
           }
