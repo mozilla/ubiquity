@@ -876,7 +876,7 @@ CmdUtils.CreateCommand({
 CmdUtils.makeSearchCommand({
     name: "image-search",
 	synonyms: ["getimages"],
-    version: "0.2.4",
+    version: "0.2.5",
     author: {
         name: "Federico Parodi",
         email: "getimages@jimmy2k.it"
@@ -1010,7 +1010,7 @@ CmdUtils.makeSearchCommand({
 					for (var index = 0; index < numberOfResults; index++) {
 					    var imgCode = randomCode + index;
 					    templateData = {
-					        imgurl: resultsArray[index].url,
+					        imgurl: resultsArray[index].unescapedUrl,
 					        thumb: resultsArray[index].tbUrl,
 					        counter: imgCode
 					    };
@@ -1131,7 +1131,7 @@ CmdUtils.makeSearchCommand({
         refresh(1, this.imgsPerPage);
     }
 
-});
+})
 
 
 ]]></script>
