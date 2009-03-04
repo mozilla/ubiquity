@@ -28,7 +28,9 @@ window.addEventListener("load", init, false);
 
 verbs = [];
 
-function createCommand(verb) {
+var CmdUtils = {};
+
+CmdUtils.CreateCommand = function CmdUtils_CreateCommand(verb) {
   verbs.push(verb);
 }
 </script>

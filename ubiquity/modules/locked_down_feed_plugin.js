@@ -207,7 +207,11 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       // === Global Functions for LDFP Feeds ===
       //
       // The following functions are available at the global scope to
-      // all LDFP feeds.
+      // all LDFP feeds. They're specifically meant to be a strict
+      // subset of what's available to default command feeds, so that
+      // any locked-down command feed actually works fine as a
+      // default command feed too (albeit running with vastly
+      // escalated privileges).
 
       // ==== {{{displayMessage()}}} ====
       //
@@ -220,20 +224,20 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       }
       sandbox.importFunction(displayMessage);
 
-      // ==== {{{getSelection()}}} ====
+      // ==== {{{CmdUtils.getSelection()}}} ====
       //
       // This function returns the user's currently-selected text, if
       // any, as a plain string.
 
-      function getSelection() {
+      function CmdUtils_getSelection() {
         if (!currentContext)
           return "";
 
         return ContextUtils.getSelection(currentContext);
       }
-      sandbox.importFunction(getSelection);
+      sandbox.importFunction(CmdUtils_getSelection);
 
-      // ==== {{{setSelection()}}} ====
+      // ==== {{{CmdUtils.setSelection()}}} ====
       //
       // This function replaces the current selection with new content.
       //
@@ -243,7 +247,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       //     of the html specified by {{{content}}} if the current
       //     selection doesn't support HTML.
 
-      function setSelection(content, options) {
+      function CmdUtils_setSelection(content, options) {
         if (typeof(options) != "undefined")
           options = new XPCSafeJSObjectWrapper(options);
         if (typeof(content) != "string" || !currentContext)
@@ -252,9 +256,9 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         content = htmlSanitize(content);
         ContextUtils.setSelection(currentContext, content, options);
       }
-      sandbox.importFunction(setSelection);
+      sandbox.importFunction(CmdUtils_setSelection);
 
-      // ==== {{{createCommand()}}} ====
+      // ==== {{{CmdUtils.CreateCommand()}}} ====
       //
       // This function creates a new command.  The dictionary-like object
       // passed to it should contain the following keys:
@@ -267,7 +271,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       //
       // This function has no return value.
 
-      function createCommand(info) {
+      function CmdUtils_CreateCommand(info) {
         info = new XPCSafeJSObjectWrapper(info);
         let cmd = {
           name: info.name,
@@ -290,7 +294,21 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
         self.commands[cmd.name] = cmd;
       }
-      sandbox.importFunction(createCommand);
+      sandbox.importFunction(CmdUtils_CreateCommand);
+
+      var setupCode = ("var CmdUtils = {};" +
+                       "CmdUtils.getSelection = CmdUtils_getSelection;" +
+                       "CmdUtils.setSelection = CmdUtils_setSelection;" +
+                       "CmdUtils.CreateCommand = CmdUtils_CreateCommand;" +
+                       "delete CmdUtils_getSelection;" +
+                       "delete CmdUtils_setSelection;" +
+                       "delete CmdUtils_CreateCommand;");
+
+      sandboxFactory.evalInSandbox(setupCode,
+                                   sandbox,
+                                   [{length: setupCode.length,
+                                     filename: "<setup code>",
+                                     lineNumber: 1}]);
 
       sandboxFactory.evalInSandbox(code,
                                    sandbox,
