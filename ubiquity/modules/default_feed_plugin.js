@@ -323,6 +323,7 @@ function makeBuiltins(languageCode, baseUri) {
   var headerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "header/utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
   ];
   var feeds = [
