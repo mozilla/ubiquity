@@ -115,8 +115,16 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   let confirmedPages = annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO, {});
   let subscribedFeeds = [];
 
-  for (let i = 0; i < confirmedPages.length; i++)
-    subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
+  for (let i = 0; i < confirmedPages.length; i++) {
+    try {
+      subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
+    } catch (e) {
+      Components.utils.reportError(
+        ("An error occurred when retrieving the feed for " +
+         confirmedPages[i].spec + ": " + e)
+      );
+    }
+  }
 
   return subscribedFeeds;
 };
