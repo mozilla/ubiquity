@@ -707,10 +707,11 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // {{{ options.takes }}} Defines the primary argument of the command,
 // a.k.a. the direct-object of the verb.  A dictionary object with a
 // single property.  The name of the property will be the display name
-// of the primary argument.  The value of the property must be a
+// of the primary argument.  The value of the property must be either a
 // noun type (see
 // https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Nountypes_Reference
-// ) which defines what type of values are valid for the argument.
+// ) which defines what type of values are valid for the argument, or
+// a regular expression that filters what the argument can consist of.
 //
 // {{{ options.modifiers }}} Defines any number of secondary arguments
 // of the command, a.k.a. indirect objects of the verb.  A dictionary
@@ -793,6 +794,13 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
   if( options.takes ) {
     execute.DOLabel = getKey( options.takes );
     execute.DOType = options.takes[execute.DOLabel];
+
+    if (execute.DOType.constructor.name == "RegExp") {
+      var nu = {};
+      Components.utils.import("resource://ubiquity/modules/nounutils.js",
+                              nu);
+      execute.DOType = nu.NounUtils.nounTypeFromRegExp(execute.DOType);
+    }
   }
 
   // Reserved keywords that shouldn't be added to the cmd function.
@@ -1502,42 +1510,6 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand(
   }
 
   CmdUtils.CreateCommand(options);
-};
-
-// ** {{{ CmdUtils.nounTypeFromRegexp() }}} **
-//
-// Creates a noun type from the given regular expression object
-// and returns it. The {{{data}}} attribute of the noun type is
-// the {{{match}}} object resulting from the regular expression
-// match.
-
-CmdUtils.nounTypeFromRegexp = function nounTypeFromRegexp(regexp) {
-  var newNounType = {
-    _name: "regexp noun type",
-    suggest: function(text, html, callback, selectionIndices) {
-      var match = text.match(regexp);
-      if (match) {
-        var suggestion = CmdUtils.makeSugg(text, html, match);
-        /* If the input comes all or in part from a text selection,
-         * we'll stick some html tags into the summary so that the part
-         * that comes from the text selection can be visually marked in
-         * the suggestion list.
-         */
-        if (selectionIndices) {
-          var pre = suggestion.summary.slice(0, selectionIndices[0]);
-          var middle = suggestion.summary.slice(selectionIndices[0],
-					        selectionIndices[1]);
-          var post = suggestion.summary.slice(selectionIndices[1]);
-          suggestion.summary = (pre + "<span class='selection'>" +
-	                        middle + "</span>" + post);
-        }
-        return [suggestion];
-      } else
-        return [];
-    }
-  };
-
-  return newNounType;
 };
 
 /* The following odd-looking syntax means that the anonymous function

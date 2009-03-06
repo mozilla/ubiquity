@@ -117,3 +117,39 @@ NounUtils.makeSugg = function( text, html, data ) {
 
   return suggestion;
 };
+
+// ** {{{ NounUtils.nounTypeFromRegExp() }}} **
+//
+// Creates a noun type from the given regular expression object
+// and returns it. The {{{data}}} attribute of the noun type is
+// the {{{match}}} object resulting from the regular expression
+// match.
+
+NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
+  var newNounType = {
+    _name: "regexp noun type",
+    suggest: function(text, html, callback, selectionIndices) {
+      var match = text.match(regexp);
+      if (match) {
+        var suggestion = NounUtils.makeSugg(text, html, match);
+        /* If the input comes all or in part from a text selection,
+         * we'll stick some html tags into the summary so that the part
+         * that comes from the text selection can be visually marked in
+         * the suggestion list.
+         */
+        if (selectionIndices) {
+          var pre = suggestion.summary.slice(0, selectionIndices[0]);
+          var middle = suggestion.summary.slice(selectionIndices[0],
+					        selectionIndices[1]);
+          var post = suggestion.summary.slice(selectionIndices[1]);
+          suggestion.summary = (pre + "<span class='selection'>" +
+	                        middle + "</span>" + post);
+        }
+        return [suggestion];
+      } else
+        return [];
+    }
+  };
+
+  return newNounType;
+};

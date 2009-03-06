@@ -47,6 +47,7 @@ Components.utils.import("resource://ubiquity/modules/codesource.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
 Components.utils.import("resource://ubiquity/modules/contextutils.js");
+Components.utils.import("resource://ubiquity/modules/nounutils.js");
 
 // == The Plugin Class ==
 //
@@ -261,34 +262,70 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       // ==== {{{CmdUtils.CreateCommand()}}} ====
       //
       // This function creates a new command.  The dictionary-like object
-      // passed to it should contain the following keys:
+      // passed to it must contain the following keys:
       //
       //   * {{{name}}} is the name of the verb.
       //   * {{{execute}}} is a function that is called when the verb is
-      //     executed. It takes no parameters and has no return value.
-      //   * {{{preview}}} is an HTML string containing preview text
-      //     that is displayed before the user executes the command.
+      //     executed. It takes a direct object parameter and has no
+      //     return value.
+      //
+      // The following keys are optional:
+      //
+      //   * {{{takes}}} is an object with a single property; the name will
+      //     be the display name of the primary argument, and the value
+      //     must be a regular expression that filters what the primary
+      //     argument can consist of.
+      //   * {{{preview}}} is either an HTML string containing preview text
+      //     that is displayed before the user executes the command, or
+      //     a function that takes a preview HTML block and a direct
+      //     object. The preview HTML block is actually just a fake
+      //     DOM object, and its {{{innerHTML}}} attribute is expected to
+      //     be filled-in by the preview function.
       //
       // This function has no return value.
 
       function CmdUtils_CreateCommand(info) {
         info = new XPCSafeJSObjectWrapper(info);
+
         let cmd = {
           name: info.name,
           execute: function execute(context, directObject, modifiers) {
             currentContext = context;
-            info.execute();
+            info.execute(makeSafeDirectObj(directObject));
             currentContext = null;
           }
         };
-        let previewHtml = info.preview;
-        if (typeof(previewHtml) == "string") {
-          previewHtml = htmlSanitize(previewHtml);
-          cmd.preview = function preview(context, directObject, modifiers,
-                                         previewBlock) {
-            previewBlock.innerHTML = previewHtml;
+        if (info.takes)
+          for (var directObjLabel in info.takes) {
+            if (typeof(directObjLabel) != "string")
+              throw new Error("Direct object label is not a string: " +
+                              directObjLabel);
+            var regExp = safeConvertRegExp(info.takes[directObjLabel]);
+            cmd.DOLabel = directObjLabel;
+            cmd.DOType = NounUtils.nounTypeFromRegExp(regExp);
+            break;
+          }
+        let preview = info.preview;
+        if (typeof(preview) == "string") {
+          preview = htmlSanitize(preview);
+          cmd.preview = function cmd_preview(context, directObject,
+                                             modifiers, previewBlock) {
+            previewBlock.innerHTML = preview;
           };
-          cmd.description = previewHtml;
+          cmd.description = preview;
+        } else {
+          cmd.preview = function cmd_preview(context, directObject,
+                                             modifiers, previewBlock) {
+            // TODO: Is it actually safe to pass this in to untrusted code,
+            // even if we never use it again? This does mean the untrusted
+            // code will have access to the Object prototype...
+            var fakePreviewBlock = {innerHTML: ""};
+            preview(fakePreviewBlock,
+                    makeSafeDirectObj(directObject));
+            var html = fakePreviewBlock.innerHTML;
+            if (typeof(html) == "string")
+              previewBlock.innerHTML = htmlSanitize(html);
+          };
         }
         cmd = finishCommand(cmd);
 
@@ -332,4 +369,46 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
   // Set our superclass.
   self.__proto__ = baseFeedInfo;
+}
+
+// == Helper Functions ==
+
+// === {{{safeConvertRegExp()}}} ===
+//
+// This function takes what's expected to be a regular expression
+// object from an untrusted JS context and returns a safe {{{RegExp}}}
+// object that's equivalent to it.
+
+function safeConvertRegExp(regExp) {
+  var pattern = regExp.source;
+  var flags = "";
+
+  if (regExp.global)
+    flags += "g";
+  if (regExp.ignoreCase)
+    flags += "i";
+  if (regExp.multiline)
+    flags += "m";
+
+  if (typeof(pattern) != "string" ||
+      typeof(flags) != "string")
+    throw new Error("Parameter was not a RegExp object.");
+
+  return new RegExp(pattern, flags);
+}
+
+// === {{{makeSafeDirectObj()}}} ===
+//
+// This function takes a direct object and returns a new version of
+// it that's safe to pass into untrusted code.
+
+function makeSafeDirectObj(directObject) {
+  // TODO: Is it actually safe to pass this in to untrusted code,
+  // even if we never use it again? This does mean the untrusted
+  // code will have access to the Object prototype...
+  var safeDirectObj = {};
+  safeDirectObj.text = directObject.text;
+  if (typeof(safeDirectObj.text) != "string")
+    throw new Error("Assertion failure: DO text is not a string");
+  return safeDirectObj;
 }
