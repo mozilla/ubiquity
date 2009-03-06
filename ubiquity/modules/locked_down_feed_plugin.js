@@ -310,11 +310,18 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                                      filename: "<setup code>",
                                      lineNumber: 1}]);
 
-      sandboxFactory.evalInSandbox(code,
-                                   sandbox,
-                                   [{length: code.length,
-                                     filename: codeSource.id,
-                                     lineNumber: 1}]);
+      try {
+        sandboxFactory.evalInSandbox(code,
+                                     sandbox,
+                                     [{length: code.length,
+                                       filename: codeSource.id,
+                                       lineNumber: 1}]);
+      } catch (e) {
+        messageService.displayMessage(
+          {text:  "An exception occurred while loading code.",
+           exception: e}
+        );
+      }
 
       eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
     }
