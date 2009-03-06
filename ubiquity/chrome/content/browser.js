@@ -151,7 +151,7 @@ function ubiquitySetup()
   // support per-pixel alpha transparency on.
   var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
                      .getService(Components.interfaces.nsIXULRuntime);
-  if (xulr.OS == "Linux" && skinUrl == defaultSkinUrl)
+  if (xulr.OS == "Linux")
     document.getElementById("transparent-msg-panel")
             .style.backgroundColor = "#444";
 }
