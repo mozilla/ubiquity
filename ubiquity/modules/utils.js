@@ -363,6 +363,42 @@ Utils.paramsToString = function paramsToString(params) {
   return "?" + stringPairs.join("&");
 };
 
+// ** {{{ Utils.urlToParams() }}} **
+//
+// This function takes the given url and returns an Object containing keys and
+// values retrieved from its query-part
+
+Utils.urlToParams = function urlToParams(url) {
+  function isArray(key) {
+    return (key.substring(key.length-2)=="[]");
+  }
+  var params = {};
+  var paramList = url.substring(url.indexOf("?")+1).split("&");
+  for (param in paramList) {
+    var key="",
+        value="";
+    var kv = paramList[param].split("=");
+    try {
+      key = kv[0];
+      value = decodeURIComponent(kv[1]).replace(/\+/g," ");
+    }
+    catch (e){};
+    if (isArray(key)) {
+      key = key.substring(0,key.length-2);
+      if (params[key]) {
+        params[key].push(value);
+      }
+      else {
+        params[key]=[value];
+      }
+    }
+    else {
+      params[key] = value;
+    }
+  }
+  return params;
+}
+
 // ** {{{ Utils.getLocalUrl() }}} **
 //
 // This function synchronously retrieves the content of the given
