@@ -57,6 +57,15 @@ const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
 const FEED_SRC_URL_ANNO = "ubiquity/commands";
 const FEED_TITLE_ANNO = "ubiquity/title";
 
+const FEED_ANNOS = [FEED_SRC_ANNO,
+                    FEED_TYPE_ANNO,
+                    FEED_AUTOUPDATE_ANNO,
+                    FEED_BUILTIN_ANNO,
+                    FEED_SUBSCRIBED_ANNO,
+                    FEED_UNSUBSCRIBED_ANNO,
+                    FEED_SRC_URL_ANNO,
+                    FEED_TITLE_ANNO];
+
 const DEFAULT_FEED_TYPE = "commands";
 
 // == The FeedManager Class =
@@ -320,8 +329,19 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 };
 
 FMgrProto.__getFeed = function FMgr___getFeed(uri) {
-  if (!(uri.spec in this._feeds))
-    this._feeds[uri.spec] = this.__makeFeed(uri);
+  if (!(uri.spec in this._feeds)) {
+    var self = this;
+    var feed = self.__makeFeed(uri);
+    self._feeds[uri.spec] = feed;
+
+    function onPurge(eventName, aUri) {
+      if (aUri == uri) {
+        delete self._feeds[uri.spec];
+        self.removeListener("purge", onPurge);
+      }
+    }
+    self.addListener("purge", onPurge);
+  }
 
   return this._feeds[uri.spec];
 };
@@ -395,9 +415,24 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   else
     expiration = annSvc.EXPIRE_NEVER;
 
+  // === {{{Feed.purge()}}} ===
+  //
+  // Permanently deletes the feed.
+
+  feedInfo.purge = function feedInfo_purge() {
+    FEED_ANNOS.forEach(
+      function(ann) {
+        if (annSvc.pageHasAnnotation(uri, ann))
+          annSvc.removePageAnnotation(uri, ann);
+      });
+    hub.notifyListeners("purge", uri);
+  };
+
   // === {{{Feed.remove()}}} ===
   //
-  // If the feed is currently being subscribed to, unsubscribes it.
+  // If the feed is currently being subscribed to, unsubscribes
+  // it. This isn't permanent; the feed can be resubscribed-to later
+  // with {{{Feed.unremove()}}}.
 
   feedInfo.remove = function feedInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {

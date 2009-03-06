@@ -56,6 +56,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 
   feedManager.addListener("unsubscribe", onFeedManagerChange);
   feedManager.addListener("subscribe", onFeedManagerChange);
+  feedManager.addListener("purge", onFeedManagerChange);
   feedManager.addListener("feed-change", onFeedManagerChange);
 
   function makeCmdWithDisabler(cmd) {
