@@ -36,7 +36,8 @@
 
     var file; 
     var lastModifiedTime = 0; 
-    function initialize() { 
+    function initialize() {
+      document.getElementById("feedTypeMenu").value = PrefCommands.type;
       document.getElementById("editor").value = PrefCommands.getCode();
       document.getElementById("enableSyntaxHighlighting").checked = getHighlighting();
       if (isSyntaxHighlightingBroken())
@@ -160,6 +161,13 @@
              size="20"
              style="cursor:pointer" 
              onchange="Editor.onSave()"/>
+    </div>
+    <div id="feed-type-pref">
+      The feed type is
+      <select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
+        <option value="commands">commands</option>
+        <option value="locked-down-commands">locked-down-commands</option>
+      </select>
     </div>
     <br clear="all"/>
     <ul class="button-list">

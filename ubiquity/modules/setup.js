@@ -48,6 +48,7 @@ Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js"
 Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
 Components.utils.import("resource://ubiquity/modules/webjsm.js");
+Components.utils.import("resource://ubiquity/modules/prefcommands.js");
 
 let Application = Components.classes["@mozilla.org/fuel/application;1"]
                   .getService(Components.interfaces.fuelIApplication);
@@ -272,6 +273,8 @@ let UbiquitySetup = {
       gServices = {commandSource: cmdSource,
                    feedManager: feedManager,
                    messageService: msgService};
+
+      PrefCommands.init(feedManager);
 
       if (this.isNewlyInstalledOrUpgraded)
         // For some reason, the following function isn't executed

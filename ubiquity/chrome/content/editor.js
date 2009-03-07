@@ -3,9 +3,12 @@ Components.utils.import("resource://ubiquity/modules/prefcommands.js");
 Components.utils.import("resource://ubiquity/modules/setup.js");
 
 var Editor = {
-
   EDITOR_PREF : "extensions.ubiquity.editor",
 
+  onFeedTypeChange: function() {
+    var value = $("#feedTypeMenu").val();
+    PrefCommands.changeType(value);
+  },
   onLoad : function(){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
     $("#editorInputBox").val(editor);

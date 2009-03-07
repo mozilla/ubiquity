@@ -45,6 +45,42 @@ var Application = Components.classes["@mozilla.org/fuel/application;1"]
 
 var PrefCommands = {
   COMMANDS_PREF : "extensions.ubiquity.commands",
+  FEED_TYPE_PREF : "extensions.ubiquity.commandsFeedType",
+
+  __feedManager: null,
+
+  __subscribeFeed: function subscribeFeed() {
+    this.__feedManager.addSubscribedFeed({url: this.id,
+                                          type: this.type,
+                                          sourceUrl: this.id,
+                                          canAutoUpdate: true,
+                                          isBuiltIn: true});
+  },
+
+  init : function(feedManager) {
+    this.__feedManager = feedManager;
+    this.__subscribeFeed();
+  },
+
+  changeType : function(newType) {
+    var oldType = this.type;
+    Application.prefs.setValue(
+      this.FEED_TYPE_PREF,
+      newType
+    );
+    // TODO: If we're storing the feed type in a preference, we really need
+    // to attach an observer to the preference and have the following code
+    // execute whenever the preference changes, so that we behave the same
+    // way if e.g. the user uses about:config to change the pref instead
+    // of calling this method.
+    var self = this;
+    self.__feedManager.getSubscribedFeeds().forEach(
+      function(feed) {
+        if (feed.uri.spec == self.id)
+          feed.purge();
+      });
+    self.__subscribeFeed();
+  },
 
   setCode : function(code) {
     Application.prefs.setValue(
@@ -57,6 +93,13 @@ var PrefCommands = {
     return Application.prefs.getValue(
       this.COMMANDS_PREF,
       ""
+    );
+  },
+
+  get type() {
+    return Application.prefs.getValue(
+      this.FEED_TYPE_PREF,
+      "commands"
     );
   },
 

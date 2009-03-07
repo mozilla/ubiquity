@@ -42,7 +42,6 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/codesource.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity/modules/collection.js");
-Components.utils.import("resource://ubiquity/modules/prefcommands.js");
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
@@ -327,8 +326,7 @@ function makeBuiltins(languageCode, baseUri) {
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
   ];
   var feeds = [
-    baseFeedsUri + "onstartup.js",
-    PrefCommands.id
+    baseFeedsUri + "onstartup.js"
   ];
   var footerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "footer/final.js")
