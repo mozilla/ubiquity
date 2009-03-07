@@ -100,6 +100,7 @@ SandboxFactory.prototype = {
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
     var ubiquity = this._ubiquityComponent;
+    var retVal;
     if (ubiquity) {
       let currIndex = 0;
       for (let i = 0; i < codeSections.length; i++) {
@@ -124,15 +125,15 @@ SandboxFactory.prototype = {
         }
 
         let sourceCode = code.slice(currIndex, currIndex + section.length);
-        ubiquity.evalInSandbox(sourceCode,
-                               filename,
-                               section.lineNumber,
-                               "1.8",
-                               sandbox);
+        retVal = ubiquity.evalInSandbox(sourceCode,
+                                        filename,
+                                        section.lineNumber,
+                                        "1.8",
+                                        sandbox);
         currIndex += section.length;
       }
-    } else {
-      Components.utils.evalInSandbox(code, sandbox);
-    }
+    } else
+      retVal = Components.utils.evalInSandbox(code, sandbox);
+    return retVal;
   }
 };

@@ -48,6 +48,7 @@ Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
 Components.utils.import("resource://ubiquity/modules/contextutils.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 // == The Plugin Class ==
 //
@@ -205,6 +206,16 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
       let sandbox = sandboxFactory.makeSandbox(codeSource);
 
+      function safe(obj) {
+        return makeSafeObj(obj, sandboxFactory, sandbox);
+      };
+
+      function safeDirectObj(directObject) {
+        if (directObject === null)
+          return null;
+        return safe({text: directObject.text});
+      };
+
       // === Global Functions for LDFP Feeds ===
       //
       // The following functions are available at the global scope to
@@ -291,7 +302,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           name: info.name,
           execute: function execute(context, directObject, modifiers) {
             currentContext = context;
-            info.execute(makeSafeDirectObj(directObject));
+            info.execute(safeDirectObj(directObject));
             currentContext = null;
           }
         };
@@ -316,12 +327,9 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         } else if (typeof(preview) == "function") {
           cmd.preview = function cmd_preview(context, directObject,
                                              modifiers, previewBlock) {
-            // TODO: Is it actually safe to pass this in to untrusted code,
-            // even if we never use it again? This does mean the untrusted
-            // code will have access to the Object prototype...
-            var fakePreviewBlock = {innerHTML: ""};
+            var fakePreviewBlock = safe({innerHTML: ""});
             preview(fakePreviewBlock,
-                    makeSafeDirectObj(directObject));
+                    safeDirectObj(directObject));
             var html = fakePreviewBlock.innerHTML;
             if (typeof(html) == "string")
               previewBlock.innerHTML = htmlSanitize(html);
@@ -397,21 +405,20 @@ function safeConvertRegExp(regExp) {
   return new RegExp(pattern, flags);
 }
 
-// === {{{makeSafeDirectObj()}}} ===
+// === {{{makeSafeObj()}}} ===
 //
-// This function takes a direct object and returns a new version of
-// it that's safe to pass into untrusted code.
+// Takes an object that can be serialized to JSON and returns a
+// safe version of it native to the given sandbox.
 
-function makeSafeDirectObj(directObject) {
-  if (directObject === null)
-    return null;
-
-  // TODO: Is it actually safe to pass this in to untrusted code,
-  // even if we never use it again? This does mean the untrusted
-  // code will have access to the Object prototype...
-  var safeDirectObj = {};
-  safeDirectObj.text = directObject.text;
-  if (typeof(safeDirectObj.text) != "string")
-    throw new Error("Assertion failure: DO text is not a string");
-  return safeDirectObj;
+function makeSafeObj(obj, sandboxFactory, sandbox) {
+  var json = Utils.encodeJson(obj);
+  var code = "(" + json + ")";
+  var newObj = sandboxFactory.evalInSandbox(
+    code,
+    sandbox,
+    [{length: code.length,
+      filename: "<makeSafeObj code>",
+      lineNumber: 1}]
+  );
+  return XPCSafeJSObjectWrapper(newObj);
 }
