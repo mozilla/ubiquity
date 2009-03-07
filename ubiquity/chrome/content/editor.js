@@ -109,13 +109,21 @@ var Editor = {
 
 function paste() {
   try {
-
-    editor = document.getElementById("editor");
-    file = encodeURIComponent("[gistfile1]");
-    quickPaste = "file_ext" + file + "=.js&file_name" + file + "=x&file_contents" + file + "=" + encodeURIComponent(editor.editor.editor.getCode()) + "&x=27&y=27";
-    updateUrl = "http://gist.github.com/gists";
-    Utils.openUrlInBrowser(updateUrl, quickPaste);
-
+    var feedType = $("#feedTypeMenu").val();
+    var editor = document.getElementById("editor");
+    var code = editor.editor.editor.getCode();
+    if (feedType == "commands") {
+      var file = encodeURIComponent("[gistfile1]");
+      var quickPaste = ("file_ext" + file + "=.js&file_name" +
+                        file + "=x&file_contents" + file +
+                        "=" + encodeURIComponent(code) + "&x=27&y=27");
+      var updateUrl = "http://gist.github.com/gists";
+      Utils.openUrlInBrowser(updateUrl, quickPaste);
+    } else if (feedType == "locked-down-commands") {
+      var url = ("http://ubiquity.mozilla.com/locked-down-feeds/" +
+                 "?initial_content=" + encodeURIComponent(code));
+      Utils.openUrlInBrowser(url);
+    }
   } catch(e) {
     Components.utils.reportError(e);
     displayMessage("Error: " + e);
