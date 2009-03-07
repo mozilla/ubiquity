@@ -313,7 +313,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
             previewBlock.innerHTML = preview;
           };
           cmd.description = preview;
-        } else {
+        } else if (typeof(preview) == "function") {
           cmd.preview = function cmd_preview(context, directObject,
                                              modifiers, previewBlock) {
             // TODO: Is it actually safe to pass this in to untrusted code,
@@ -403,6 +403,9 @@ function safeConvertRegExp(regExp) {
 // it that's safe to pass into untrusted code.
 
 function makeSafeDirectObj(directObject) {
+  if (directObject === null)
+    return null;
+
   // TODO: Is it actually safe to pass this in to untrusted code,
   // even if we never use it again? This does mean the untrusted
   // code will have access to the Object prototype...
