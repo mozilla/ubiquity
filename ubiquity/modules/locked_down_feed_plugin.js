@@ -385,7 +385,8 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 //
 // This function takes what's expected to be a regular expression
 // object from an untrusted JS context and returns a safe {{{RegExp}}}
-// object that's equivalent to it.
+// object that's equivalent to it. The passed-in object is expected
+// to be wrapped with {{{XPCSafeJSObjectWrapper}}}.
 
 function safeConvertRegExp(regExp) {
   var pattern = regExp.source;
