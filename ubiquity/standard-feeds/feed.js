@@ -38,9 +38,12 @@ window.addEventListener(
   "load",
   function initial() {
     window.removeEventListener("load", initial, false);
+    var isParentDirUbiquity = /.*\/ubiquity\/standard-feeds\/.*/;
     Feed.SCRIPTS_TO_LOAD.reverse();
-    if (window.location.protocol == "file:")
-      // If we're on Windows, we don't have symlinks, so use the
+    if (window.location.protocol == "file:" ||
+        window.location.pathname.match(isParentDirUbiquity))
+      // If we're on Windows, we don't have symlinks, and if we're
+      // being served via hgweb we don't either, so use the
       // real path.
       Feed.SCRIPT_PREFIX = "../" + Feed.SCRIPT_PREFIX;
     Feed.loadNextScript();
