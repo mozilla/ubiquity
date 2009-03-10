@@ -356,7 +356,8 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
               cmd[propName] = htmlSanitize(propVal);
               break;
             }
-          } else if (propType == "json") {
+          } else if (typeof(propVal) == "object" &&
+                     propType == "json") {
             cmd[propName] = Utils.decodeJson(Utils.encodeJson(propVal));
           }
         }
