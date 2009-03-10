@@ -728,7 +728,8 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // make your command easier for users to learn: **
 //
 // {{{ options.description }}} A string containing a short description
-// of your command, to be displayed on the command-list page.
+// of your command, to be displayed on the command-list page. Can include
+// HTML tags.
 //
 // {{{ options.help }}} A string containing a longer description of
 // your command, also displayed on the command-list page, which can go
@@ -743,6 +744,8 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // {{{ options.author }}} A dictionary object describing the command's
 // author.  Can have {{{options.author.name}}}, {{{options.author.email}}},
 // and {{{options.author.homepage}}} properties, all strings.
+//
+// {{{ options.homepage }}} The URL of the command's homepage, if any.
 //
 // {{{ options.contributors }}} An array of strings naming other people
 // who have contributed to your command.
