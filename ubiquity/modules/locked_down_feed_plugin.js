@@ -323,7 +323,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                                              modifiers, previewBlock) {
             previewBlock.innerHTML = preview;
           };
-          cmd.description = preview;
         } else if (typeof(preview) == "function") {
           cmd.preview = function cmd_preview(context, directObject,
                                              modifiers, previewBlock) {
@@ -335,6 +334,33 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
               previewBlock.innerHTML = htmlSanitize(html);
           };
         }
+
+        var METADATA_PROPS = {
+          icon: "text",
+          license: "text",
+          description: "html",
+          help: "html",
+          author: "json",
+          contributors: "json"
+        };
+
+        for (propName in METADATA_PROPS) {
+          var propVal = info[propName];
+          var propType = METADATA_PROPS[propName];
+          if (typeof(propVal) == "string") {
+            switch (propType) {
+            case "text":
+              cmd[propName] = propVal;
+              break;
+            case "html":
+              cmd[propName] = htmlSanitize(propVal);
+              break;
+            }
+          } else if (propType == "json") {
+            cmd[propName] = Utils.decodeJson(Utils.encodeJson(propVal));
+          }
+        }
+
         cmd = finishCommand(cmd);
 
         self.commands[cmd.name] = cmd;
