@@ -299,7 +299,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         info = new XPCSafeJSObjectWrapper(info);
 
         let cmd = {
-          name: info.name,
           execute: function execute(context, directObject, modifiers) {
             currentContext = context;
             info.execute(safeDirectObj(directObject));
@@ -335,32 +334,19 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           };
         }
 
-        var METADATA_PROPS = {
-          icon: "text",
+        var CMD_METADATA_SCHEMA = {
+          name: "text",
+          icon: "url",
           license: "text",
           description: "html",
           help: "html",
-          author: "json",
-          contributors: "json"
+          author: {name: "text",
+                   email: "text",
+                   homepage: "url"},
+          contributors: "array"
         };
 
-        for (propName in METADATA_PROPS) {
-          var propVal = info[propName];
-          var propType = METADATA_PROPS[propName];
-          if (typeof(propVal) == "string") {
-            switch (propType) {
-            case "text":
-              cmd[propName] = propVal;
-              break;
-            case "html":
-              cmd[propName] = htmlSanitize(propVal);
-              break;
-            }
-          } else if (typeof(propVal) == "object" &&
-                     propType == "json") {
-            cmd[propName] = Utils.decodeJson(Utils.encodeJson(propVal));
-          }
-        }
+        setMetadata(info, cmd, CMD_METADATA_SCHEMA, htmlSanitize);
 
         cmd = finishCommand(cmd);
 
@@ -449,4 +435,47 @@ function makeSafeObj(obj, sandboxFactory, sandbox) {
       lineNumber: 1}]
   );
   return XPCSafeJSObjectWrapper(newObj);
+}
+
+// === {{{setMetadata()}}} ===
+//
+// A helper function to securely set the metadata of an object given
+// untrusted metadata, a schema, and an HTML sanitization function.
+
+function setMetadata(metadata, object, schema, htmlSanitize) {
+  for (propName in schema) {
+    var propVal = metadata[propName];
+    var propType = schema[propName];
+    if (typeof(propVal) == "string") {
+      switch (propType) {
+      case "text":
+        object[propName] = propVal;
+        break;
+      case "html":
+        object[propName] = htmlSanitize(propVal);
+        break;
+      case "url":
+        var url = Utils.url(propVal);
+        var SAFE_URL_PROTOCOLS = ["http", "https"];
+
+        SAFE_URL_PROTOCOLS.forEach(
+          function(protocol) {
+            if (url.schemeIs(protocol))
+              object[propName] = propVal;
+          });
+        if (typeof(object[propName]) == "undefined")
+          Utils.reportWarning("URL scheme is unsafe: " + propVal);
+        break;
+      }
+    } else if (typeof(propVal) == "object") {
+      propVal = Utils.decodeJson(Utils.encodeJson(propVal));
+      if (typeof(propType) == "object") {
+        object[propName] = new Object();
+        setMetadata(propVal, object[propName], propType, htmlSanitize);
+      } else if (propType == "array" &&
+                 propVal.constructor.name == "Array") {
+        object[propName] = propVal;
+      }
+    }
+  }
 }
