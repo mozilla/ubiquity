@@ -216,6 +216,16 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         return safe({text: directObject.text});
       };
 
+      function safeModifiers(modifiers) {
+        var safeMods = {};
+        for (modLabel in modifiers) {
+          if (typeof(modLabel) != "string")
+            throw new Error("Assertion error: expected string!");
+          safeMods[modLabel] = {text: modifiers[modLabel].text};
+        }
+        return safe(safeMods);
+      }
+
       // === Global Functions for LDFP Feeds ===
       //
       // The following functions are available at the global scope to
@@ -301,7 +311,8 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
         let cmd = {
           execute: function execute(context, directObject, modifiers) {
             currentContext = context;
-            info.execute(safeDirectObj(directObject));
+            info.execute(safeDirectObj(directObject),
+                         safeModifiers(modifiers));
             currentContext = null;
           }
         };
@@ -315,6 +326,16 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
             cmd.DOType = NounUtils.nounTypeFromRegExp(regExp);
             break;
           }
+        if (info.modifiers) {
+          cmd.modifiers = {};
+          for (var modLabel in info.modifiers) {
+            if (typeof(modLabel) != "string")
+              throw new Error("Modifier label is not a string: " +
+                              directObjLabel);
+            var regExp = safeConvertRegExp(info.modifiers[modLabel]);
+            cmd.modifiers[modLabel] = NounUtils.nounTypeFromRegExp(regExp);
+          }
+        }
         let preview = info.preview;
         if (typeof(preview) == "string") {
           preview = htmlSanitize(preview);
@@ -327,7 +348,8 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                                              modifiers, previewBlock) {
             var fakePreviewBlock = safe({innerHTML: ""});
             preview(fakePreviewBlock,
-                    safeDirectObj(directObject));
+                    safeDirectObj(directObject),
+                    safeModifiers(modifiers));
             var html = fakePreviewBlock.innerHTML;
             if (typeof(html) == "string")
               previewBlock.innerHTML = htmlSanitize(html);
