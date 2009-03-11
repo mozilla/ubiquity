@@ -1435,26 +1435,28 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                    cnt < Math.min(results.length,MAX_RESULTS);
                    cnt++) {
                 var result = results[cnt];
-                template += "<dt style='font-weight: bold; clear: both;'>"
-                          + "["+(cnt+1)+"] "
-                          + "<a style='border-bottom: 1px solid;' href='"+result.href+"' accesskey='"+(cnt+1)+"'>"
-                          + result.title+"</a>"
-                          + "</dt>";
+                template += ("<dt style='font-weight: bold; clear: both;'>" +
+                             "[" + (cnt+1) + "] " +
+                             "<a style='border-bottom: 1px solid;' href='" +
+                             result.href + "' accesskey='" + (cnt+1) + "'>" +
+                             result.title+"</a>" +
+                             "</dt>");
                 if (result.thumbnail) {
-                  template += "<dd style='float: left; margin: 0 10px 0 0'>"
-                            + "<img src='"+result.thumbnail+"' height='70' />"
-                            + "</dd>";
+                  template += ("<dd style='float: left; margin: 0 10px 0 0'>" +
+                               "<img src='" + result.thumbnail +
+                               "' height='70' />" + "</dd>");
                 }
                 if (result.preview) {
-                  template += "<dd style='margin-left: 2em;'>"
-                            + result.preview;
-                            + "</dd>";
+                  template += ("<dd style='margin-left: 2em;'>" +
+                               result.preview + "</dd>");
                 }
               }
               template += "</dl>";
               // we did not find an equal amount of titles, previews and thumbnails
               if (sane == false) {
-                template += "<p>Note: no previews have been generated, because an error occured while parsing the results</p>";
+                template += ("<p>Note: no previews have been generated, " +
+                             "because an error occured while parsing the " +
+                             "results</p>");
               }
             }
           }
@@ -1465,10 +1467,12 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           pblock.innerHTML += template;
         };
         if (options.postData) {
-          CmdUtils.previewPost(pblock, urlString, options.postData, searchParser, options.parser.type || "html");
+          CmdUtils.previewPost(pblock, urlString, options.postData,
+                               searchParser, options.parser.type || "html");
         }
         else {
-          CmdUtils.previewGet(pblock, urlString, searchParser, options.parser.type || "html");
+          CmdUtils.previewGet(pblock, urlString, searchParser,
+                              options.parser.type || "html");
         }
       }
       else {
