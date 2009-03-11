@@ -243,10 +243,7 @@ function gmailChecker(callback, service) {
       
   Utils.ajaxGet(url, function(rss) {
     CmdUtils.loadJQuery(function(jQuery) {
-      var emailDetails = {
-        account: jQuery(rss).children("title").text().split(" ").pop()
-      };
-
+      var emailDetails = {};
       var firstEntry = jQuery(rss).find("entry").get(0);
       if (firstEntry) {
         emailDetails.lastEmail = {
@@ -271,9 +268,9 @@ CmdUtils.CreateCommand({
     // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt
     if (Utils.getCookie("mail.google.com", "S") != undefined) {
       gmailChecker(function(emailDetails) {
-        var previewTemplate = "<b>You (${account}) have no new mail</b>";
+        var previewTemplate = "<b>You have no new mail!</b>";
         if (emailDetails.lastEmail) {
-          var previewTemplate = "Last unread e-mail for ${account}:" +
+          var previewTemplate = "Last unread e-mail:" +
             "<a href=\"${lastEmail.href}\">" +
             "<p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p>" +
             "<p>${lastEmail.summary}</p>" +
@@ -287,9 +284,9 @@ CmdUtils.CreateCommand({
   },
   execute: function(arg) {
     gmailChecker(function(emailDetails) {
-      var msgTemplate = "You (${account}) have no new mail.";
+      var msgTemplate = "You have no new mail.";
       if (emailDetails.lastEmail) {
-        msgTemplate = "You (${account}) have new email! ${lastEmail.author} says: ${lastEmail.subject}";
+        msgTemplate = "You have new email! ${lastEmail.author} says: ${lastEmail.subject}";
       }
       displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
     }, arg.text);
