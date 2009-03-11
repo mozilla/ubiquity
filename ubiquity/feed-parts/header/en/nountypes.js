@@ -35,7 +35,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
  var noun_type_emailservice = {
    _name: "email service",
    suggest: function(text, html) {
@@ -63,14 +63,14 @@ function getGmailContacts( callback ) {
     exportType: "ALL",
     out: "VCARD"
   };
-  
+
   jQuery.get(url, params, function(data) {
     data = data.split("\n");
     var contacts = [];
     var name="";
     var email="";
     var incard=false;
-    
+
     for each( var line in data ) {
 
       if (line.indexOf(" ") == 0) {
@@ -105,9 +105,9 @@ function getGmailContacts( callback ) {
           email = "";
         }
       }
-      
+
     }
-    
+
 
 
     callback(contacts);
@@ -115,7 +115,7 @@ function getGmailContacts( callback ) {
 }
 
 function getYahooContacts( callback ){
-  
+
   var url = "http://us.mg1.mail.yahoo.com/yab";
   //TODO: I have no idea what these params mean
   var params = {
@@ -125,12 +125,12 @@ function getYahooContacts( callback ){
     attrs: "1",
     xf: "sf,mf"
   };
-  
+
   jQuery.get(url, params, function(data) {
 
     var contacts = [];
     for each( var line in jQuery(data).find("ct") ){
-      var name = jQuery(line).attr("yi"); 
+      var name = jQuery(line).attr("yi");
       //accept it as as long as it is not undefined
       if(name){
         var contact = {};
@@ -142,23 +142,23 @@ function getYahooContacts( callback ){
 
     callback(contacts);
   }, "text");
-  
+
 }
 
 function getContacts(callback){
   getGmailContacts(callback);
-  getYahooContacts(callback);  
+  getYahooContacts(callback);
 }
 
 var noun_type_contact = {
   _name: "contact",
   contactList: null,
   callback:function(contacts) {
-    noun_type_contact.contactList = noun_type_contact.contactList.concat(contacts);    
+    noun_type_contact.contactList = noun_type_contact.contactList.concat(contacts);
   },
 
   suggest: function(text, html) {
-    
+
     if (noun_type_contact.contactList == null) {
       noun_type_contact.contactList = [];
       getContacts( noun_type_contact.callback);
@@ -171,7 +171,7 @@ var noun_type_contact = {
     var suggestions  = [];
     for ( var c in noun_type_contact.contactList ) {
       var contact = noun_type_contact.contactList[c];
-      
+
       if ((contact["name"].match(text, "i")) || (contact["email"].match(text, "i"))){
 	      suggestions.push(CmdUtils.makeSugg(contact["email"]));
 	    }
@@ -465,7 +465,7 @@ var noun_type_language =  {
     }
     return suggestions;
   },
-  
+
   // Returns the language name for the given lang code.
   getLangName: function(langCode) {
 	var code = langCode.toLowerCase();
@@ -492,12 +492,12 @@ var noun_type_tab = {
   suggest: function( text, html ) {
     var suggestions  = [];
     var tabs = Utils.tabs.search(text, 5);
-    
+
     for ( var tabName in tabs ){
       var tab = tabs[tabName];
       suggestions.push( CmdUtils.makeSugg(tabName, tab.document.URL, tab) );
     }
-    
+
     return suggestions;
   }
 };
@@ -613,7 +613,7 @@ var noun_type_tag = {
 var noun_type_geolocation = {
    _name : "geolocation",
    rankLast: true,
-   default: function() {
+   'default': function() {
 		var location = CmdUtils.getGeoLocation();
 		if (!location) {
 			// TODO: there needs to be a better way of doing this,
@@ -677,9 +677,9 @@ var noun_type_livemark = {
 
   /*
   * text & html = Livemark Title (string)
-  * data = { itemIds : [] } - an array of itemIds(long long) 
+  * data = { itemIds : [] } - an array of itemIds(long long)
   * for the suggested livemarks.
-  * These values can be used to reference the livemark in bookmarks & livemark 
+  * These values can be used to reference the livemark in bookmarks & livemark
   * services
   */
 
@@ -691,7 +691,7 @@ var noun_type_livemark = {
         .getItemsWithAnnotation("livemark/feedURI", {});
   },
 
-  default: function() {
+  'default': function() {
     var feeds = this.getFeeds();
     if( feeds.length > 0 ) {
        return CmdUtils.makeSugg("all livemarks", null, {itemIds: feeds});
@@ -733,13 +733,13 @@ Components.utils.import("resource://ubiquity/modules/setup.js");
 var noun_type_commands = {
    _name: "command",
    __cmdSource : UbiquitySetup.createServices().commandSource,
-   
+
    suggest : function(fragment){
       var cmds = [];
       for each( var cmd in this.__cmdSource.commandNames){
          if(cmd.name.match(fragment, "i")){
             var cmdObj = this.__cmdSource.getCommand(cmd.name);
-   
+
             var help = cmdObj.help ? cmdObj.help : cmdObj.description;
             cmds.push(CmdUtils.makeSugg(cmd.name, help, cmdObj));
          }
@@ -766,7 +766,7 @@ noun_type_twitter_user = {
      if(suggs.length == 0) suggs.push(CmdUtils.makeSugg(sugg, null, null));
 
      return suggs;
-     
+
    },
 }
 
@@ -774,55 +774,55 @@ noun_type_number = {
    suggest : function(sugg){
       return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : []
    },
-   default : function(){
+   'default' : function(){
       return CmdUtils.makeSugg("1");
    }
 }
 
 
 function getBookmarklets(callback) {
-  
+
   var bookmarklets = {};
-  
+
   var Ci = Components.interfaces;
   var Cc = Components.classes;
-  
+
   var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
                   .getService(Ci.nsINavBookmarksService);
   var history = Cc["@mozilla.org/browser/nav-history-service;1"]
                 .getService(Ci.nsINavHistoryService);
- 
+
   var query = history.getNewQuery();
- 
+
   // Specify folders to be searched
   var folders = [bookmarks.toolbarFolder, bookmarks.bookmarksMenuFolder,
                  bookmarks.unfiledBookmarksFolder];
   query.setFolders(folders, folders.length);
-  
+
   var options = history.getNewQueryOptions();
   options.queryType = options.QUERY_TYPE_BOOKMARKS
- 
+
   // Specify terms to search for, matches against title, URL and tags
   query.searchTerms = "javascript";
- 
+
   var result = history.executeQuery(query, options);
-  
+
   // The root property of a query result is an object representing the folder you specified above.
   var resultContainerNode = result.root;
   // Open the folder, and iterate over it's contents.
   resultContainerNode.containerOpen = true;
   for (var i=0; i < resultContainerNode.childCount; ++i) {
     var childNode = resultContainerNode.getChild(i);
- 
+
     // Accessing properties of matching bookmarks
     var title = childNode.title;
     var uri = childNode.uri;
-    
+
     if(uri.substring(0,11) == "javascript:") {
       bookmarklets[title.toLowerCase().replace(/ /g,'-')] = uri;
     }
   }
-    
+
   callback(bookmarklets);
 }
 
@@ -833,7 +833,7 @@ var noun_type_bookmarklet = {
     noun_type_bookmarklet.bookmarkletList = bookmarklets;
   },
   suggest: function( text, html )  {
-    
+
     if (noun_type_bookmarklet.bookmarkletList == null) {
       getBookmarklets(noun_type_bookmarklet.callback);
       return [];
@@ -848,8 +848,8 @@ var noun_type_bookmarklet = {
       if (c.match(text, "i"))
 	      suggestions.push(CmdUtils.makeSugg(c, "", bookmarklets[c]));
     }
-    
+
     return suggestions.splice(0, 5);
-      
+
   }
 };
