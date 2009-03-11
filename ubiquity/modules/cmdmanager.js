@@ -98,7 +98,7 @@ CommandManager.prototype = {
       var suggIconUrl = suggList[x].getIcon();
       var suggIcon = "";
       if(suggIconUrl) {
-        suggIcon = "<img src=\"" + suggIconUrl + "\"/>";
+        suggIcon = "<img src=\"" + Utils.escapeHtml(suggIconUrl) + "\"/>";
       }
       suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" + suggText;
       if ( x == this.__hilitedSuggestion ) {
