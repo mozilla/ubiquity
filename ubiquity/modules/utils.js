@@ -508,6 +508,22 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   return hashString;
 };
 
+// ** {{{ Utils.escapeHtml() }}} **
+//
+// This function returns a version of the string safe for
+// insertion into HTML. Useful when you just want to
+// concatenate a bunch of strings into an HTML fragment
+// and ensure that everything's escaped properly.
+
+Utils.escapeHtml = function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+};
+
+
 // ** {{{ Utils.convertFromUnicode() }}} **
 //
 // Encodes the given unicode text to a given character set and
@@ -583,7 +599,7 @@ Utils.tabs = {
     for (var name in this._cache) {
        var tab = this._cache[name];
       //TODO: implement a better match algorithm
-      if (name.match(aSearchText, "i") || 
+      if (name.match(aSearchText, "i") ||
           (tab.document.URL && tab.document.URL.toString().match(aSearchText, "i"))) {
         matches[name] = tab;
         matchCount++;
@@ -745,10 +761,10 @@ AutoCompleteInput.prototype = {
 
         throw Components.results.NS_ERROR_NO_INTERFACE;
     }
-}
+};
 
 Utils.history = {
-   
+
      __createController : function createController(onSearchComplete){
           var controller = Components.classes["@mozilla.org/autocomplete/controller;1"].getService(Components.interfaces.nsIAutoCompleteController);
 
@@ -759,23 +775,23 @@ Utils.history = {
           controller.input = input;
           return controller;
      },
-   
+
      search : function searchHistory(query, maxResults, callback){
-        
+
         var ctrlr = this.__createController(function(controller){
            for (var i = 0; i < controller.matchCount; i++) {
               var url = controller.getValueAt(i);
               var title = controller.getCommentAt(i);
               if (title.length == 0) { title = url; }
-              var favicon = controller.getImageAt(i); 
-         
+              var favicon = controller.getImageAt(i);
+
               callback({url : url, title : title, favicon : favicon })
            }
-        })
-        
+        });
+
         ctrlr.startSearch(query);
      }
-}
+};
 
 // ** {{{ Utils.appName }}} **
 //

@@ -715,11 +715,12 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 //
 // {{{ options.modifiers }}} Defines any number of secondary arguments
 // of the command, a.k.a. indirect objects of the verb.  A dictionary
-// object with any number of properties; the name of each property should
-// be a preposition-word ('to', 'from', 'with', etc.), and the value is
-// the noun type for the argument.  The name of the property is the word
-// that the user will type on the command line to invoke the modifier,
-// and the noun type determines the range of valid values.
+// object with any number of properties; the name of each property
+// should be a preposition-word ('to', 'from', 'with', etc.), and the
+// value is either the noun type or regular expression for the
+// argument.  The name of the property is the word that the user will
+// type on the command line to invoke the modifier, and the noun type
+// or regular expression determines the range of valid values.
 //
 // For more about the use of arguments in your command, see
 // https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial#Commands_with_Arguments
@@ -728,7 +729,8 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // make your command easier for users to learn: **
 //
 // {{{ options.description }}} A string containing a short description
-// of your command, to be displayed on the command-list page.
+// of your command, to be displayed on the command-list page. Can include
+// HTML tags.
 //
 // {{{ options.help }}} A string containing a longer description of
 // your command, also displayed on the command-list page, which can go
@@ -743,6 +745,8 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // {{{ options.author }}} A dictionary object describing the command's
 // author.  Can have {{{options.author.name}}}, {{{options.author.email}}},
 // and {{{options.author.homepage}}} properties, all strings.
+//
+// {{{ options.homepage }}} The URL of the command's homepage, if any.
 //
 // {{{ options.contributors }}} An array of strings naming other people
 // who have contributed to your command.
@@ -791,15 +795,24 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
       displayMessage("No action defined.");
     };
 
+  var nu = {};
+  Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
+  var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
+
   if( options.takes ) {
     execute.DOLabel = getKey( options.takes );
     execute.DOType = options.takes[execute.DOLabel];
 
     if (execute.DOType.constructor.name == "RegExp") {
-      var nu = {};
-      Components.utils.import("resource://ubiquity/modules/nounutils.js",
-                              nu);
-      execute.DOType = nu.NounUtils.nounTypeFromRegExp(execute.DOType);
+      execute.DOType = nounTypeFromRegExp(execute.DOType);
+    }
+  }
+
+  if( options.modifiers ) {
+    for (label in options.modifiers) {
+      var modNounType = options.modifiers[label];
+      if (modNounType.constructor.name == "RegExp")
+        options.modifiers[label] = nounTypeFromRegExp(modNounType);
     }
   }
 
