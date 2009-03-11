@@ -98,7 +98,7 @@ CmdUtils.log = function log(what) {
   }
 };
 
-// ** {{{ CmdUtils.getHtmlSelection( context ) }}} **
+// ** {{{ CmdUtils.getHtmlSelection(context) }}} **
 //
 // Returns a string containing the the html representation of the
 // user's current selection, i.e. text including tags.
@@ -117,7 +117,7 @@ CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
   return ctu.ContextUtils.getHtmlSelection(context);
 };
 
-// ** {{{ CmdUtils.getSelection( context ) }}} **
+// ** {{{ CmdUtils.getSelection(context) }}} **
 //
 // Returns a string containing the text and just the text of the user's
 // current selection, i.e. with html tags stripped out.
@@ -137,7 +137,7 @@ CmdUtils.getSelection = function getSelection(context) {
   return ctu.ContextUtils.getSelection(context);
 };
 
-// ** {{{ CmdUtils.getTextFromHtml( html ) }}} **
+// ** {{{ CmdUtils.getTextFromHtml(html) }}} **
 //
 // Strips out all HTML tags from a chunk of html and returns the text
 // that's left.
@@ -151,7 +151,7 @@ CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
 }
 
 
-// ** {{{ CmdUtils.setSelection( content, options ) }}} **
+// ** {{{ CmdUtils.setSelection(content, options) }}} **
 //
 // Replaces the current selection with new content.
 // See {{{ ContextUtils.setSelection }}}
@@ -173,7 +173,7 @@ CmdUtils.setSelection = function setSelection(content, options) {
 };
 
 
-// ** {{{ CmdUtils.getDocument( ) }}} **
+// ** {{{ CmdUtils.getDocument() }}} **
 //
 // This gets the document of the current tab in a secure way
 
@@ -182,7 +182,7 @@ CmdUtils.getDocument = function getDocument(){
 };
 
 
-// ** {{{ CmdUtils.getWindow( ) }}} **
+// ** {{{ CmdUtils.getWindow() }}} **
 //
 // This gets the window object of the current tab in a secure way.
 
@@ -194,7 +194,7 @@ CmdUtils.getWindow = function getWindow() {
 };
 
 
-// ** {{{ CmdUtis.getWindowInsecure( ) }}} **
+// ** {{{ CmdUtis.getWindowInsecure() }}} **
 //
 // This gets the window object of the current tab, without the
 // safe XPCNativeWrapper. While this allows access to scripts in the content,
@@ -210,7 +210,7 @@ CmdUtils.getWindowInsecure = function getWindowInsecure() {
 };
 
 
-// ** {{{ CmdUtis.getDocumentInsecure( ) }}} **
+// ** {{{ CmdUtis.getDocumentInsecure() }}} **
 //
 // This gets the document of the current tab, without the
 // safe XPCNativeWrapper. While this allows access to scripts in the content,
@@ -222,7 +222,7 @@ CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
 };
 
 
-// ** {{{ CmdUtils.geocodeAddress( address, callback ) }}} **
+// ** {{{ CmdUtils.geocodeAddress(address, callback) }}} **
 //
 // This function uses the Yahoo geocoding service to take a text
 // string of an address/location and turn it into a structured
@@ -273,7 +273,7 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
 }
 
 
-// ** {{{ CmdUtils.injectCss( css ) }}} **
+// ** {{{ CmdUtils.injectCss(css) }}} **
 //
 // Injects CSS source code into the current tab's document.
 //
@@ -287,7 +287,7 @@ CmdUtils.injectCss = function injectCss(css) {
 };
 
 
-// ** {{{ CmdUtils.injectHTML( html ) }}} **
+// ** {{{ CmdUtils.injectHTML(html) }}} **
 //
 // Injects HTML source code into the current tab's document,
 // at the end of the document.
@@ -302,7 +302,7 @@ CmdUtils.injectHtml = function injectHtml( html ) {
 };
 
 
-// ** {{{ CmdUtils.copyToClipboard( text ) }}} **
+// ** {{{ CmdUtils.copyToClipboard(text) }}} **
 //
 // This function places the passed-in text into the OS's clipboard.
 //
@@ -324,7 +324,7 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
 }
 
 
-// ** {{{ CmdUtils.injectJavascript( src, callback ) }}} **
+// ** {{{ CmdUtils.injectJavascript(src, callback) }}} **
 //
 // Injects Javascript from a URL into the current tab's document,
 // and calls an optional callback function once the script has loaded.
@@ -353,7 +353,7 @@ CmdUtils.injectJavascript = function injectJavascript(src, callback) {
 };
 
 
-// ** {{{ CmdUtils.loadJQuery( func ) }}} **
+// ** {{{ CmdUtils.loadJQuery(func) }}} **
 //
 // Injects the jQuery javascript library into the current tab's document.
 //
@@ -369,7 +369,7 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
   );
 };
 
-// ** {{{ CmdUtils.onPageLoad( callback ) }}} **
+// ** {{{ CmdUtils.onPageLoad(callback) }}} **
 //
 // Sets up a function to be run whenever a page is loaded in
 // the window that this Ubiquity sandbox is associated with.
@@ -386,7 +386,7 @@ CmdUtils.onPageLoad = function onPageLoad( callback ) {
 };
 
 
-// ** {{{ CmdUtils.setLastResult( result ) }}} **
+// ** {{{ CmdUtils.setLastResult(result) }}} **
 //
 // **Deprecated.  Do not use.**
 //
@@ -399,7 +399,7 @@ CmdUtils.setLastResult = function setLastResult( result ) {
   globals.lastCmdResult = result;
 };
 
-// ** {{{ CmdUtils.getGeoLocation( callback ) }}} **
+// ** {{{ CmdUtils.getGeoLocation(callback) }}} **
 //
 // Uses Geo-IP lookup to get the user's physical location. Will cache the result.
 // If a result is already in the cache, this function works both
@@ -507,7 +507,7 @@ CmdUtils.getHiddenWindow = function getHiddenWindow() {
                    .hiddenDOMWindow;
 }
 
-// ** {{{ CmdUtils.getTabSnapshot( tab, options ) }}} **
+// ** {{{ CmdUtils.getTabSnapshot(tab, options) }}} **
 //
 // Creates a thumbnail image of the contents of a given tab.
 // {{{ tab }}} a tab object.
@@ -518,7 +518,7 @@ CmdUtils.getTabSnapshot = function getTabSnapshot( tab, options ) {
   return CmdUtils.getWindowSnapshot( win, options );
 }
 
-// ** {{{ CmdUtils.getWindowSnapshot( win, options ) }}} **
+// ** {{{ CmdUtils.getWindowSnapshot(win, options) }}} **
 //
 // Creates a thumbnail image of the contents of the given window.
 // {{{ window }}} a window object.
@@ -564,7 +564,7 @@ CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
 }
 
 
-// ** {{{ CmdUtils.getImageSnapshot( url, callback ) }}} **
+// ** {{{ CmdUtils.getImageSnapshot(url, callback) }}} **
 //
 // Takes a snapshot of an image residing at the passed-in URL. This
 // is useful for when you want to get the bits of an image when it
@@ -599,7 +599,7 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 // FUNCTIONS FOR STORING AND RETRIEVING PASSWORDS AND OTHER SENSITIVE INFORMATION
 // ---------------------------
 
-// ** {{{ CmdUtils.savePassword( opts ) }}} **
+// ** {{{ CmdUtils.savePassword(opts) }}} **
 //
 // Saves a pair of username/password (or username/api key) to the password
 // manager.
@@ -651,7 +651,7 @@ CmdUtils.savePassword = function savePassword( opts ){
   }
 }
 
-// ** {{{ CmdUtils.retrieveLogins( name ) }}} **
+// ** {{{ CmdUtils.retrieveLogins(name) }}} **
 //
 // Retrieves one or more username/password saved with CmdUtils.savePassword.
 //
@@ -685,7 +685,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // COMMAND CREATION FUNCTIONS
 // -----------------------------------------------------------------
 
-// ** {{{ CmdUtils.CreateCommand( options ) }}} **
+// ** {{{ CmdUtils.CreateCommand(options) }}} **
 //
 // Creates and registers a Ubiquity command.
 //
@@ -840,7 +840,7 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 // TEMPLATING FUNCTIONS
 // -----------------------------------------------------------------
 
-// ** {{{ CmdUtils.renderTemplate( template, data ) }}} **
+// ** {{{ CmdUtils.renderTemplate(template, data) }}} **
 //
 // Renders a template by substituting values from a dictionary into
 // a template string or file. The templating language used is
@@ -887,7 +887,7 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
   return templateObject.process( data );
 };
 
-// ** {{{ CmdUtils.previewAjax( pblock, options ) }}} **
+// ** {{{ CmdUtils.previewAjax(pblock, options) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
 // just like jQuery.ajax(), which is documented at
@@ -916,7 +916,7 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
   return xhr;
 };
 
-// ** {{{ CmdUtils.previewGet( pblock, url, data, callback, type ) }}} **
+// ** {{{ CmdUtils.previewGet(pblock, url, data, callback, type) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
 // just like jQuery.get(), which is documented at
@@ -942,7 +942,7 @@ CmdUtils.previewGet = function previewGet(pblock,
 };
 
 
-// ** {{{ CmdUtils.previewPost( pblock, url, data, callback, type ) }}} **
+// ** {{{ CmdUtils.previewPost(pblock, url, data, callback, type) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
 // just like jQuery.post(), which is documented at
@@ -969,7 +969,7 @@ CmdUtils.previewPost = function previewPost(pblock,
 
 
 
-// ** {{{ CmdUtils.previewCallback( pblock, callback, abortCallback ) }}} **
+// ** {{{ CmdUtils.previewCallback(pblock, callback, abortCallback) }}} **
 //
 // Creates a 'preview callback': a wrapper for a function which
 // first checks to see if the current preview has been canceled,
@@ -1014,7 +1014,7 @@ CmdUtils.previewCallback = function previewCallback(pblock,
   return wrappedCallback;
 };
 
-// ** {{{ CmdUtils.makeContentPreview( filePathOrOptions ) }}} **
+// ** {{{ CmdUtils.makeContentPreview(filePathOrOptions) }}} **
 //
 // Creates an interactive command preview from a given html template
 // file or a dictionary object providing the same information.
@@ -1159,7 +1159,7 @@ CmdUtils.makeContentPreview = function makeContentPreview(filePathOrOptions) {
   return contentPreview;
 };
 
-// ** {{{ CmdUtils.makeSearchCommand( options ) }}} **
+// ** {{{ CmdUtils.makeSearchCommand(options) }}} **
 //
 // A specialized version of CmdUtils.CreateCommand, this lets you make
 // commands that interface with search engines, without having to write
@@ -1486,7 +1486,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   CmdUtils.CreateCommand(options);
 };
 
-// ** {{{ CmdUtils.makeBookmarkletCommand }}} **
+// ** {{{ CmdUtils.makeBookmarkletCommand(options) }}} **
 //
 // Creates and registers a Ubiquity command based on a bookmarklet.
 // When the command is run, it will invoke the bookmarklet.
@@ -1506,8 +1506,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
 // since bookmarklets can't take arguments, there's no reason to provide
 // {{{options.takes}}} or {{{options.modifiers}}}.
 
-CmdUtils.makeBookmarkletCommand = function makeBookmarkletCommand(
-                                                             options ) {
+CmdUtils.makeBookmarkletCommand = function makeBookmarkletCmd(options) {
   options.name = options.name.toLowerCase().replace(/ /g,'-');
 
   options.execute = function(directObject, modifiers) {
