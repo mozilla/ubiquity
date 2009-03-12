@@ -103,7 +103,7 @@ NounUtils.makeSugg = function( text, html, data, selectionIndices ) {
   if (suggestion.data && !suggestion.text)
     suggestion.text = suggestion.data.toString();
   if (suggestion.text && !suggestion.html)
-    suggestion.html = suggestion.text;
+    suggestion.html = Utils.escapeHtml(suggestion.text);
   if(suggestion.html && !suggestion.text)
     suggestion.text = suggestion.html;
     //TODO: Fix this.
