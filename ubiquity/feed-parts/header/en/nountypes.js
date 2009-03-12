@@ -51,7 +51,7 @@
      }
      return suggestions;
    },
-   default: function() {
+   'default': function() {
      //TODO: find a better way to pick the default
      return CmdUtils.makeSugg("gmail", null, "gmail");
    }
@@ -233,7 +233,7 @@ var noun_arb_text = {
 var noun_type_date = {
   _name: "date",
 
-  default: function(){
+  'default': function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
      return CmdUtils.makeSugg(text, null, date);
@@ -256,7 +256,7 @@ var noun_type_date = {
 var noun_type_time = {
    _name: "time",
 
-   default: function(){
+   'default': function(){
      var time = Date.parse("now");
      var text = time.toString("hh:mm tt");
      return CmdUtils.makeSugg(text, null, time);
