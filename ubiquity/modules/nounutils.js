@@ -148,9 +148,13 @@ NounUtils.makeSugg = function( text, html, data, selectionIndices ) {
 // match.
 
 NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
+  var rankLast = false;
+  if (regexp.source == ".*")
+    rankLast = true;
   var newNounType = {
     // This will show up if the noun type is the target of a modifier.
     _name: "text",
+    rankLast: rankLast,
     suggest: function(text, html, callback, selectionIndices) {
       var match = text.match(regexp);
       if (match) {
