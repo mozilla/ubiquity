@@ -122,6 +122,40 @@ Utils.decodeJson = function decodeJson(string) {
   return json.decode(string);
 };
 
+// ** {{{Utils.ellipsify()}}} **
+//
+// Given a DOM node and a maximum number of characters, returns a
+// new DOM node that has the same contents truncated to that number of
+// characters. If any truncation was performed, an ellipsis is placed
+// at the end of the content.
+
+Utils.ellipsify = function ellipsify(node, chars) {
+  var doc = node.ownerDocument;
+  var copy = node.cloneNode(false);
+  if (node.hasChildNodes()) {
+    var children = node.childNodes;
+    for (var i = 0; i < children.length && chars > 0; i++) {
+      var childNode = children[i];
+      var childCopy;
+      if (childNode.nodeType == childNode.TEXT_NODE) {
+        var value = childNode.nodeValue;
+        if (value.length >= chars) {
+          childCopy = doc.createTextNode(value.slice(0, chars) + "\u2026");
+          chars = 0;
+        } else {
+          childCopy = childNode.cloneNode(false);
+          chars -= value.length;
+        }
+      } else if (childNode.nodeType == childNode.ELEMENT_NODE) {
+        childCopy = ellipsify(childNode, chars);
+        chars -= childCopy.textContent.length;
+      }
+      copy.appendChild(childCopy);
+    }
+  }
+  return copy;
+}
+
 // ** {{{ Utils.setTimeout() }}} **
 //
 // This function works just like the {{{window.setTimeout()}}} method
