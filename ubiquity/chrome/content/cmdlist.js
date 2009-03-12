@@ -53,12 +53,13 @@ function onDocumentLoad() {
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.getCommand(cmdSource.commandNames[i].name);
       var cmdId = cmdSource.commandNames[i].id.replace(/ /g, "_");
+      cmdId = escapeHtml(cmdId);
       var isEnabled = !cmd.disabled;
 
       if (cmdList.find('#' + cmdId).length == 0) {
         cmdsChanged = true;
         cmdList.append(
-          '<li class="command" id="' + escapeHtml(cmdId) + '">' +
+          '<li class="command" id="' + cmdId + '">' +
            '<input type="checkbox" class="activebox"' +
            (isEnabled ? ' checked="checked"' : '')+'/>'+
            '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
