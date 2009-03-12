@@ -1269,7 +1269,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     baseurl = domainRe.exec(options.url);
     if (!options.icon) {
       // guess where the favicon is
-      options.icon = baseurl+"/favicon.ico"
+      options.icon = baseurl+"/favicon.ico";
     }
   }
   if (!options.description && options.name) {
@@ -1277,7 +1277,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     options.description = "Searches "+options.name+" for your words.";
   }
   if (options.parser && options.parser.type) {
-    options.parser.type = options.parser.type.toLowerCase()
+    options.parser.type = options.parser.type.toLowerCase();
   }
   if (!options.preview) {
     options.preview = function searchPreview(pblock, directObject, modifiers) {
@@ -1301,7 +1301,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           // use the calculated baseurl
           parser.baseurl = baseurl;
         }
-        searchParser = function searchParser(data) {
+        function searchParser(data) {
           if (data.length) {
             var template = "";
             pblock.innerHTML = "<h2>Results for <em>"
@@ -1316,7 +1316,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                   data = data[path[p]];
                 }
                 for (d in data) {
-                  var res = {}
+                  var res = {};
                   var title = data[d][parser.title];
                   res.title = title;
                   var href = data[d][parser.href];
@@ -1373,7 +1373,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                     }
                   }
                   for (var cnt=0; cnt<titles.length; cnt++) {
-                    result = {};
+                    var result = {};
                     result.title = titles.eq(cnt);
                     if (sane && parser.preview) {
                       result.preview = previews.eq(cnt);
@@ -1452,7 +1452,9 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                 }
               }
               template += "</dl>";
-              // we did not find an equal amount of titles, previews and thumbnails
+              // we did not find an equal amount of titles, previews
+              // and thumbnails
+
               if (sane == false) {
                 template += ("<p>Note: no previews have been generated, " +
                              "because an error occured while parsing the " +
