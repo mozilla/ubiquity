@@ -1013,6 +1013,7 @@ CmdUtils.safePreview = function safePreview(previewFunc) {
   var previewBlock = null;
   var xulIframe = null;
 
+  // TODO: When do these get set to null?
   var directObj;
   var modifiers;
 
@@ -1057,17 +1058,28 @@ CmdUtils.safePreview = function safePreview(previewFunc) {
           xulIframe = null;
       }
 
+      function onPreviewChange() {
+        // Propagate the preview-change event to the iframe.
+        var evt = previewWindow.document.createEvent("HTMLEvents");
+        evt.initEvent("preview-change", false, false);
+        previewBlock.dispatchEvent(evt);
+      }
+
       function onPreviewLoaded() {
         previewWindow = browser.contentWindow;
         previewBlock = previewWindow.document.getElementById("preview");
+        unsafePblock.addEventListener("preview-change",
+                                      onPreviewChange,
+                                      false);
         showPreview();
       }
 
       function onPreviewUnloaded() {
+        unsafePblock.removeEventListener("preview-change",
+                                         onPreviewChange,
+                                         false);
         previewWindow = null;
         previewBlock = null;
-        directObj = null;
-        modifiers = null;
       }
 
       xulIframe = unsafePblock.ownerDocument.createElement("iframe");

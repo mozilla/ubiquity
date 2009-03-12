@@ -263,9 +263,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     success: function(responseData) {
       responseData = Utils.decodeJson(responseData);
 
-      var tempElement = CmdUtils.getHiddenWindow().document.createElementNS("http://www.w3.org/1999/xhtml", "div");
-      // TODO: This is insecure, as we're taking non-authenticated content
-      // and injecting it into a document with chrome privileges.
+      var tempElement = previewBlock.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
       tempElement.innerHTML = responseData.parse.text["*"];
 
       //take only the text from summary because links won't work either way
@@ -304,7 +302,7 @@ CmdUtils.CreateCommand({
   license: "MPL",
   icon: "http://en.wikipedia.org/favicon.ico",
   description: "Searches Wikipedia for your words, in a given language.",
-  preview: function(previewBlock, directObject, mods) {
+  preview: CmdUtils.safePreview(function(previewBlock, directObject, mods) {
     var langCode = mods.in.data || "en";
     var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
 
@@ -370,7 +368,7 @@ CmdUtils.CreateCommand({
 
       }
     });
-  },
+  }),
   execute: function(directObject, mods) {
     var lang = mods.in.data || "en";
     var searchUrl = "http://" + lang + ".wikipedia.org/wiki/Special:Search";
