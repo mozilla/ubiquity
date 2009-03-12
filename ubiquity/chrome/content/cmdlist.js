@@ -72,7 +72,7 @@ function onDocumentLoad() {
         cmdElement.css('list-style-image', "url('" +
                        escapeHtml(cmd.icon) + "')");
       } else {
-        acmdElement.css('list-style-type', 'none');
+        cmdElement.css('list-style-type', 'none');
       }
       if(cmd.homepage) {
         cmdElement.find(".homepage").html(
