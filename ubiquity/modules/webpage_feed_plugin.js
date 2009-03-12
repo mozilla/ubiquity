@@ -253,20 +253,8 @@ var noun_arb_text = {
   _name: "text",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
-    var suggestion = NounUtils.makeSugg(text, html);
-    /* If the input comes all or in part from a text selection,
-     * we'll stick some html tags into the summary so that the part
-     * that comes from the text selection can be visually marked in
-     * the suggestion list.
-     */
-    if (selectionIndices) {
-      var pre = suggestion.summary.slice(0, selectionIndices[0]);
-      var middle = suggestion.summary.slice(selectionIndices[0],
-					    selectionIndices[1]);
-      var post = suggestion.summary.slice(selectionIndices[1]);
-      suggestion.summary = pre + "<span class='selection'>" +
-			     middle + "</span>" + post;
-    }
+    var suggestion = CmdUtils.makeSugg(text, html, null,
+                                       selectionIndices);
     return [suggestion];
   }
 };
@@ -351,7 +339,7 @@ function makeContentPreview(url, commandName) {
                              "chrome://ubiquity/content/content-preview.xul");
       xulIframe.style.border = "none";
       xulIframe.setAttribute("width", 500);
-      xulIframe.setAttribute("height", 500);      
+      xulIframe.setAttribute("height", 500);
 
       xulIframe.addEventListener("load",
                                  onXulLoaded,
