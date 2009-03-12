@@ -347,9 +347,11 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           cmd.preview = function cmd_preview(context, directObject,
                                              modifiers, previewBlock) {
             var fakePreviewBlock = safe({innerHTML: ""});
+            currentContext = context;
             preview(fakePreviewBlock,
                     safeDirectObj(directObject),
                     safeModifiers(modifiers));
+            currentContext = null;
             var html = fakePreviewBlock.innerHTML;
             if (typeof(html) == "string")
               previewBlock.innerHTML = htmlSanitize(html);
