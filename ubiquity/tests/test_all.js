@@ -655,10 +655,8 @@ function testDontInterpolateInTheMiddleOfAWord() {
 function testMakeSugg() {
   // test that NounUtils.makeSugg doesn't fail on null input, that it preserves
   // html, etc etc.
-  /*var thingy = NounUtils.makeSugg(null, "alksdf");
-  this.assert( thingy.text == "alksdf", "thingy.text should be set.");*/
-  // test above can't be run from the command line as there is no
-  // context.focusedWindow, needed for getTextFromHtml.
+  var thingy = NounUtils.makeSugg(null, "alksdf");
+  this.assert( thingy.text == "alksdf", "thingy.text should be set.");
 
   var thingy2 = NounUtils.makeSugg(null, null, null);
   this.assert( thingy2 == null, "should return null");

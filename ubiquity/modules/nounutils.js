@@ -105,14 +105,14 @@ NounUtils.makeSugg = function( text, html, data, selectionIndices ) {
   if (suggestion.text && !suggestion.html)
     suggestion.html = Utils.escapeHtml(suggestion.text);
   if(suggestion.html && !suggestion.text)
+    // TODO: Any easy way to strip the text out of the HTML here? We
+    // don't have immediate access to any HTML DOM objects...
     suggestion.text = suggestion.html;
-    //TODO: Fix this.
-    //CmdUtils.getTextFromHtml(suggestion.html);
   // Create a summary of the text:
 
   var snippetLength = 35;
   var summary;
-  if( text.length > snippetLength )
+  if( text && text.length > snippetLength )
     summary = text.substring(0, snippetLength-1) + "\u2026";
   else
     summary = suggestion.text;

@@ -137,20 +137,6 @@ CmdUtils.getSelection = function getSelection(context) {
   return ctu.ContextUtils.getSelection(context);
 };
 
-// ** {{{ CmdUtils.getTextFromHtml(html) }}} **
-//
-// Strips out all HTML tags from a chunk of html and returns the text
-// that's left.
-//
-// {{{html}}} is a string containing an html fragment.
-
-CmdUtils.getTextFromHtml = function getTextFromHtml(html) {
-  var newNode = context.focusedWindow.document.createElement("p");
-  newNode.innerHTML = html;
-  return newNode.textContent;
-}
-
-
 // ** {{{ CmdUtils.setSelection(content, options) }}} **
 //
 // Replaces the current selection with new content.
