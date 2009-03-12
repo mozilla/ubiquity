@@ -1000,6 +1000,75 @@ CmdUtils.previewCallback = function previewCallback(pblock,
   return wrappedCallback;
 };
 
+// ** {{{ CmdUtils.safePreview(previewFunc) }}} **
+//
+// A wrapper for a normal preview function that passes the
+// preview a "safe" preview block element: that is, a DOM
+// node which is contained inside a content-space iframe.
+// This is useful for when a preview function wants to
+// show untrusted HTML content to the user.
+
+CmdUtils.safePreview = function safePreview(previewFunc) {
+  function previewWrapper(pblock, aDirectObj, modifiers) {
+    var previewWindow = null;
+    var previewBlock = null;
+    var xulIframe = null;
+
+    var browser;
+
+    var url = 'data:text/html,<div id="preview"></div>';
+
+    function onXulLoaded(event) {
+      browser = xulIframe.contentDocument.createElement("browser");
+      browser.setAttribute("src", url);
+      browser.setAttribute("disablesecurity", true);
+      browser.setAttribute("type", "content");
+      browser.setAttribute("width", 500);
+      browser.setAttribute("height", 500);
+      browser.addEventListener("load",
+                               onPreviewLoaded,
+                               true);
+      browser.addEventListener("unload",
+                               onPreviewUnloaded,
+                               true);
+
+      xulIframe.contentDocument.documentElement.appendChild(browser);
+    }
+
+    function onXulUnloaded(event) {
+      if (event.target == pblock || event.target == xulIframe)
+        xulIframe = null;
+    }
+
+    function onPreviewLoaded() {
+      previewWindow = browser.contentWindow;
+      previewBlock = previewWindow.document.getElementById("preview");
+      return previewFunc(previewBlock, aDirectObj, modifiers);
+    }
+
+    function onPreviewUnloaded() {
+      previewWindow = null;
+      previewBlock = null;
+    }
+
+    xulIframe = pblock.ownerDocument.createElement("iframe");
+    xulIframe.setAttribute("src",
+                           "chrome://ubiquity/content/content-preview.xul");
+    xulIframe.style.border = "none";
+    xulIframe.setAttribute("width", 500);
+    xulIframe.setAttribute("height", 500);
+
+    xulIframe.addEventListener("load",
+                               onXulLoaded,
+                               true);
+    pblock.innerHTML = "";
+    pblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
+    pblock.appendChild(xulIframe);
+  };
+
+  return previewWrapper;
+};
+
 // ** {{{ CmdUtils.makeContentPreview(filePathOrOptions) }}} **
 //
 // Creates an interactive command preview from a given html template
