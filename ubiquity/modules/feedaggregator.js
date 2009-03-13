@@ -62,7 +62,10 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   function makeCmdWithDisabler(cmd) {
     let newCmd = {
       get disabled() {
-        return disabledCommands[cmd.name];
+        if (cmd.name in disabledCommands)
+          return disabledCommands[cmd.name];
+        else
+          return null;
       },
       set disabled(value) {
         if (disabledCommands[cmd.name] != value) {
