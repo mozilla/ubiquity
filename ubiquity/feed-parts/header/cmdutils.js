@@ -1018,7 +1018,6 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
   var previewBlock = null;
   var xulIframe = null;
 
-  // TODO: When do these get set to null?
   var directObj;
   var modifiers;
 
@@ -1035,13 +1034,15 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
     directObj = aDirectObj;
     modifiers = aModifiers;
 
+    aDirectObj = null;
+    aModifiers = null;
+
     if (previewBlock) {
       showPreview();
     } else if (xulIframe) {
       // We're in the middle of loading the preview window, just
       // wait and it'll eventually appear.
     } else {
-      // TODO: When does this get set to null?
       var browser;
 
       function onXulLoaded(event) {
@@ -1054,16 +1055,8 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
         browser.addEventListener("load",
                                  onPreviewLoaded,
                                  true);
-        browser.addEventListener("unload",
-                                 onPreviewUnloaded,
-                                 true);
 
         xulIframe.contentDocument.documentElement.appendChild(browser);
-      }
-
-      function onXulUnloaded(event) {
-        if (event.target == unsafePblock || event.target == xulIframe)
-          xulIframe = null;
       }
 
       function onPreviewChange() {
@@ -1074,6 +1067,9 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
       }
 
       function onPreviewLoaded() {
+        browser.addEventListener("unload",
+                                 onPreviewUnloaded,
+                                 true);
         previewWindow = browser.contentWindow;
         previewBlock = previewWindow.document.body;
         unsafePblock.addEventListener("preview-change",
@@ -1083,11 +1079,17 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
       }
 
       function onPreviewUnloaded() {
+        dump("\n\nPREVIEW UNLOADED " + this.ownerDocument.location.href + "\n\n");
         unsafePblock.removeEventListener("preview-change",
                                          onPreviewChange,
                                          false);
+	unsafePblock = null;
         previewWindow = null;
         previewBlock = null;
+        directObj = null;
+        modifiers = null;
+	browser = null;
+	xulIframe = null;
       }
 
       xulIframe = unsafePblock.ownerDocument.createElement("iframe");
@@ -1101,7 +1103,6 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
                                  onXulLoaded,
                                  true);
       unsafePblock.innerHTML = "";
-      unsafePblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
       unsafePblock.appendChild(xulIframe);
     }
   }
