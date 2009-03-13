@@ -151,12 +151,37 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   feedManager.registerPlugin(this);
 }
 
-function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
-                 headerSources, footerSources, jQuery, timeoutInterval) {
-  if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
-    this.canAutoUpdate = true;
+const CMD_PREFIX = "cmd_";
+const NOUN_PREFIX = "noun_";
 
-  let codeSource;
+function makeCmdForObj(sandbox, objName) {
+  var cmdName = objName.substr(CMD_PREFIX.length);
+  cmdName = cmdName.replace(/_/g, "-");
+  var cmdFunc = sandbox[objName];
+
+  var cmd = {
+    name : cmdName,
+    icon : cmdFunc.icon,
+    execute : function CS_execute(context, directObject, modifiers) {
+      sandbox.context = context;
+      return cmdFunc(directObject, modifiers);
+    }
+  };
+
+  if (cmdFunc.preview)
+    cmd.preview = function CS_preview(context, directObject, modifiers,
+                                      previewBlock) {
+      sandbox.context = context;
+      return cmdFunc.preview(previewBlock, directObject, modifiers);
+    };
+
+  cmd.__proto__ = cmdFunc;
+
+  return finishCommand(cmd);
+};
+
+function makeCodeSource(feedInfo, headerSources, footerSources,
+                        timeoutInterval) {
   if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
     if (feedInfo.canAutoUpdate) {
       codeSource = new RemoteUriCodeSource(feedInfo, timeoutInterval);
@@ -176,37 +201,19 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                                    headerSources,
                                    footerSources);
 
-  let CMD_PREFIX = "cmd_";
-  let NOUN_PREFIX = "noun_";
+  return codeSource;
+}
+
+function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
+                 headerSources, footerSources, jQuery, timeoutInterval) {
+  if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
+    this.canAutoUpdate = true;
+
+  let codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
+                                  timeoutInterval);
 
   var codeCache = null;
   var sandbox = null;
-
-  function makeCmdForObj(sandbox, objName) {
-    var cmdName = objName.substr(CMD_PREFIX.length);
-    cmdName = cmdName.replace(/_/g, "-");
-    var cmdFunc = sandbox[objName];
-
-    var cmd = {
-      name : cmdName,
-      icon : cmdFunc.icon,
-      execute : function CS_execute(context, directObject, modifiers) {
-        sandbox.context = context;
-        return cmdFunc(directObject, modifiers);
-      }
-    };
-
-    if (cmdFunc.preview)
-      cmd.preview = function CS_preview(context, directObject, modifiers,
-                                        previewBlock) {
-        sandbox.context = context;
-        return cmdFunc.preview(previewBlock, directObject, modifiers);
-      };
-
-    cmd.__proto__ = cmdFunc;
-
-    return finishCommand(cmd);
-  };
 
   let self = this;
 
