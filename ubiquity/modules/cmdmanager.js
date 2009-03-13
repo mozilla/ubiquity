@@ -160,6 +160,10 @@ CommandManager.prototype = {
     return this._renderPreview(context, previewBlock);
   },
 
+  reset : function CM_reset() {
+    this.__nlParser.reset();
+  },
+
   updateInput : function CM_updateInput(input, context, previewBlock,
                                         asyncSuggestionCb) {
     /* Return true if we created any suggestions, false if we didn't

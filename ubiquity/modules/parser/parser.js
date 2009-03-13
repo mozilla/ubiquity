@@ -175,6 +175,10 @@ NLParser.Parser.prototype = {
     }
   },
 
+  reset: function() {
+    this._parsingsList = [];
+  },
+
   updateSuggestionList: function( query, context, asyncSuggestionCb ) {
     var nounType, verb;
     var newSuggs = [];
@@ -204,6 +208,7 @@ NLParser.Parser.prototype = {
         newSuggs = newSuggs.concat(nounSuggs);
       }
     }
+
     // partials is now a list of PartiallyParsedSentences; if there's a
     // selection, try using it for any missing arguments...
     if (selObj.text || selObj.html) {
@@ -212,6 +217,7 @@ NLParser.Parser.prototype = {
         let withSel = part.getAlternateSelectionInterpolations();
         partialsWithSelection = partialsWithSelection.concat( withSel );
       }
+      part = null;
       this._parsingsList = partialsWithSelection;
     } else {
       this._parsingsList = newSuggs;

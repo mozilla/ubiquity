@@ -152,7 +152,7 @@ Ubiquity.prototype = {
 
    __onKeyPress: function(event) {
      var keyCode = event.keyCode;
-     
+
      if (keyCode == this.__KEYCODE_ENTER) {
        if (this.__cmdManager.hasSuggestions()) {
          this.__needsToExecute = true;
@@ -229,6 +229,7 @@ Ubiquity.prototype = {
       this.__cmdManager.execute(context);
       this.__needsToExecute = false;
     }
+    this.__cmdManager.reset();
   },
 
   __onShown: function __onShown() {
