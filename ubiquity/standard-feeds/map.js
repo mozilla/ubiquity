@@ -17,7 +17,42 @@ CmdUtils.CreateCommand({
 
     Utils.openUrlInBrowser( url );
   },
-  preview: CmdUtils.makeContentPreview("templates/map.html")
+  preview: CmdUtils.safePreview(
+    function(pblock, dobj, modifers) {
+      // TODO: This isn't terribly safe; ideally, we should be communicating
+      // with the other page via DOM events, etc.
+      var previewWindow = pblock.ownerDocument.defaultView.wrappedJSObject;
+      previewWindow = XPCSafeJSObjectWrapper(previewWindow);
+      previewWindow.Ubiquity.context = context;
+
+      previewWindow.Ubiquity.resizePreview = function(height) {
+        // TODO: Do something to change height of iframe?
+      };
+
+      previewWindow.Ubiquity.insertHtml = function(html) {
+        if (typeof(html) != "string")
+          return;
+        var doc = context.focusedWindow.document;
+        var focused = context.focusedElement;
+
+        if (doc.designMode == "on") {
+          // The "query" here is useful so that you don't have to retype what
+          // you put in the map command. That said, this is map-command
+          // specific and should be factored out. -- Aza
+          doc.execCommand("insertHTML", false, dobj.html + "<br/>" + html);
+        }
+        else if (CmdUtils.getSelection()) {
+	  CmdUtils.setSelection(html);
+      	}
+      	else {
+      	  displayMessage("Cannot insert in a non-editable space. Use " +
+                         "'edit page' for an editable page.");
+      	}
+      };
+
+      previewWindow.Ubiquity.onPreview(dobj);
+    },
+    Utils.url({uri: "templates/map.html", base: feed.id}))
 });
 
 
