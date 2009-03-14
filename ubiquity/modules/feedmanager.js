@@ -328,6 +328,16 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   }
 };
 
+// === {{{FeedManager.finalize()}}} ===
+//
+// Performs any necessary cleanup on the feed manager. Should be
+// called when the feed manager no longer needs to be used.
+
+FMgrProto.finalize = function FMgr_finalize() {
+  for (url in this._feeds)
+    this._feeds[url].finalize();
+};
+
 FMgrProto.__getFeed = function FMgr___getFeed(uri) {
   if (!(uri.spec in this._feeds)) {
     var self = this;
@@ -527,6 +537,12 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
       }
     }
   );
+
+  // === {{{Feed.finalize()}}} ===
+  //
+  // Performs any needed cleanup on the feed before it's destroyed.
+  feedInfo.finalize = function feedInfo_finalize() {
+  };
 
   // == Subclassing Feed ==
   //

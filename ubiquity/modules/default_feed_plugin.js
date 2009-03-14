@@ -283,6 +283,13 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
     }
   };
 
+  this.finalize = function finalize() {
+    // Not sure exactly why, but we get memory leaks if we don't
+    // manually remove these.
+    jQuery = null;
+    sandbox.jQuery = null;
+  };
+
   this.__proto__ = feedInfo;
 }
 
