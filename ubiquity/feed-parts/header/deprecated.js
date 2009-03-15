@@ -9,8 +9,7 @@ this.__defineGetter__(
   "window",
   function() {
     Utils.reportWarning("The global window object is deprecated in command " +
-                        "feeds. Please use context.chromeWindow instead.",
-                        Components.stack.caller);
+                        "feeds. Please use context.chromeWindow instead.", 1);
     return context.chromeWindow;
   }
 );
@@ -18,7 +17,6 @@ this.__defineGetter__(
 // This is deprecated behavior from Ubiquity 0.1.1.
 var makeSearchCommand = function deprecated_makeSearchCommand() {
   Utils.reportWarning("makeSearchCommand() is deprecated; please use " +
-                      "CmdUtils.makeSearchCommand() instead.",
-                      Components.stack.caller);
+                      "CmdUtils.makeSearchCommand() instead.", 1);
   return CmdUtils.makeSearchCommand.apply(CmdUtils, arguments);
 };

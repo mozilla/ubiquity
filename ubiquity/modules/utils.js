@@ -62,14 +62,20 @@ Utils.__globalObject = this;
 // {{{aMessage}}} is a plaintext string corresponding to the warning
 // to provide.
 //
-// {{{stackFrame}}} is an optional {{{nsIStackFrame}}} instance that
-// corresponds to the stack frame which is reporting the error; a link
-// to the line of source that it references will be shown in the JS
-// Error Console.  It defaults to the caller's stack frame.
+// {{{stackFrameNumber}}} is an optional number specifying how many
+// frames back in the call stack the warning message should be
+// associated with. Its default value is 0, meaning that the line
+// number of the caller is shown in the JS Error Console.  If it's 1,
+// then the line number of the caller's caller is shown.
 
-Utils.reportWarning = function reportWarning(aMessage, stackFrame) {
-  if (!stackFrame)
-    stackFrame = Components.stack.caller;
+Utils.reportWarning = function reportWarning(aMessage, stackFrameNumber) {
+  var stackFrame = Components.stack.caller;
+
+  if (typeof(stackFrameNumber) != "number")
+    stackFrameNumber = 0;
+
+  for (var i = 0; i < stackFrameNumber; i++)
+    stackFrame = stackFrame.caller;
 
   var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
                        .getService(Components.interfaces.nsIConsoleService);
