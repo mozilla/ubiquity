@@ -352,6 +352,11 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       function CmdUtils_CreateCommand(info) {
         info = new XPCSafeJSObjectWrapper(info);
 
+        if (!info.name)
+          throw new Error("Command name not provided.");
+        if (!info.execute)
+          throw new Error("Command execute function not provided.");
+
         let cmd = {
           execute: function execute(context, directObject, modifiers) {
             currentContext = context;
