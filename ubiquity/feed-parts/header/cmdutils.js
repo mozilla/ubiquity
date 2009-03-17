@@ -1079,7 +1079,6 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
       }
 
       function onPreviewUnloaded() {
-        dump("\n\nPREVIEW UNLOADED " + this.ownerDocument.location.href + "\n\n");
         unsafePblock.removeEventListener("preview-change",
                                          onPreviewChange,
                                          false);
