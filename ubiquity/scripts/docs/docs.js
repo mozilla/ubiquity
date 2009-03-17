@@ -265,12 +265,17 @@ App.navigate = function navigate() {
       newDiv.attr("name", newPage);
       $("#content").append(newDiv);
       App.pages[newPage] = newDiv;
-      jQuery.get(newPage,
-                 function onCodeLoaded(code) {
-                   App.layoutBlocks(blockifier.blockify(code), newDiv);
-                   onNewPageLoaded();
-                 },
-                 "text");
+      jQuery.ajax(
+        {url: newPage,
+         success: function onCodeLoaded(code) {
+           App.layoutBlocks(blockifier.blockify(code), newDiv);
+           onNewPageLoaded();
+         },
+         error: function onError() {
+           newDiv.text("Sorry, couldn't load " + newPage + ".");
+         },
+         dataType: "text"}
+      );
     } else
       onNewPageLoaded();
   } else
