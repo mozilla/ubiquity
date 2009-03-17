@@ -1111,13 +1111,13 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
 
 // ** {{{ CmdUtils.makeSearchCommand(options) }}} **
 //
-// A specialized version of CmdUtils.CreateCommand, this lets you make
-// commands that interface with search engines, without having to write
-// so much boilerplate code.
+// A specialized version of {{{CmdUtils.CreateCommand()}}}, this lets
+// you make commands that interface with search engines, without
+// having to write so much boilerplate code.
 //
-// {{{options}}} as the argument of CmdUtils.CreateCommand, except that
-// instead of {{{options.takes}}}, {{{options.execute}}}, and
-// {{{options.preview}}} you only need a single property:
+// {{{options}}} as the argument of {{{CmdUtils.CreateCommand()}}},
+// except that instead of {{{options.takes}}}, {{{options.execute}}},
+// and {{{options.preview}}} you only need a single property:
 //
 // {{{options.url}}} The url of a search results page from the search
 // engine of your choice.  Must contain the literal string
@@ -1137,33 +1137,37 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
 // from {{{options.url}}}, so all you need to provide is {{{options.url}}}
 // and {{{options.name}}}.  You can choose to provide other optional
 // properties, which work the same way as they do for
-// {{{CmdUtils.CreateCommand}}}.  You can also override the auto-generated
+// {{{CmdUtils.CreateCommand()}}}.  You can also override the auto-generated
 // {{{preview()}}} function by providing your own as {{{options.preview}}}.
 //
 // {{{options.postData}}} if passed will make ubiquity use POST instead of
 // GET, and the key:value pairs in it are all passed to the url passed in
 // {{{options.url}}}. Instead of passing the search params in the url, pass
 // it (along with any other params) like so:
-// postData: {"q": "{QUERY}", "hl": "en"} and the query will be substituded
-// in as usual.
+//
+//   {{{postData: {"q": "{QUERY}", "hl": "en"}}}}
+//
+// When this is done, the query will be substituted in as usual.
 //
 // An extra option {{{options.parser}}} can be passed, which will make
-// Ubiquity automatically generate a keyboard navigatable preview of the
-// results. It is passed as an object containing at the very least
-// {{{options.parser.title}}}, a jQuery selector that matches the titles of
-// the results. Optionally, you can include members
-// It is highly recommended that you include {{{options.parser.container}}},
-// a jQuery selector that will match an element that groups result-data.
-// If this is not passed, Ubiquity will fall back to a fragile method of
-// pairing titles, previews and thumbnails, which might not always work.
-// {{{options.parser.preview}}}, a jQuery selector that will match the preview
-// returned by the search provider; {{{options.parser.baseurl}}}, a
-// string that will be prefixed to relative links, such that relative paths
-// will still work out of context. If not passed, it will be auto-generated
-// from {{{options.url}}} (and thus MAY be incorrect)
-// {{{options.parser.thumbnail}}}, a jQuery selector that will match a thumbnail
-// which will automatically be displayed in the preview. Note: if it doesn't point
-// to an img-element, ubiquity will try and find a child of the node of type img
+// Ubiquity automatically generate a keyboard navigatable preview of
+// the results. It is passed as an object containing at the very least
+// {{{options.parser.title}}}, a jQuery selector that matches the
+// titles of the results. Optionally, you can include members It is
+// highly recommended that you include {{{options.parser.container}}},
+// a jQuery selector that will match an element that groups
+// result-data.  If this is not passed, Ubiquity will fall back to a
+// fragile method of pairing titles, previews and thumbnails, which
+// might not always work.  {{{options.parser.preview}}}, a jQuery
+// selector that will match the preview returned by the search
+// provider; {{{options.parser.baseurl}}}, a string that will be
+// prefixed to relative links, such that relative paths will still
+// work out of context. If not passed, it will be auto-generated from
+// {{{options.url}}} (and thus //may// be incorrect)
+// {{{options.parser.thumbnail}}}, a jQuery selector that will match a
+// thumbnail which will automatically be displayed in the
+// preview. Note: if it doesn't point to an {{{<img>}}} element,
+// ubiquity will try and find a child of the node of type {{{img}}}
 // inside the element, and use the first-found one.
 //
 // Examples:
