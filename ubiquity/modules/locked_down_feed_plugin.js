@@ -155,10 +155,10 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
     codeSource = new RemoteUriCodeSource(baseFeedInfo);
   else
     codeSource = new LocalUriCodeSource(baseFeedInfo.srcUri.spec);
-  let codeCache;
-  let sandboxFactory = new SandboxFactory({}, "http://www.mozilla.com",
+  var codeCache;
+  var sandboxFactory = new SandboxFactory({}, "http://www.mozilla.com",
                                           true);
-  let currentContext = null;
+  var currentContext = null;
 
   // Private methods.
   function reset() {
