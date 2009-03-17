@@ -51,7 +51,7 @@ App.processors = [];
 
 App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
 
-App.processCode = function processCode(code, div) {
+App.makeBlocksFromCode = function makeBlocksFromCode(code) {
   var lines = code.split('\n');
   var blocks = [];
   var blockText = "";
@@ -94,6 +94,10 @@ App.processCode = function processCode(code, div) {
     });
   maybeAppendBlock();
 
+  return blocks;
+};
+
+App.layoutBlocks = function layoutBlocks(blocks, div) {
   var creole = new Parse.Simple.Creole(
     {interwiki: {
        WikiCreole: 'http://www.wikicreole.org/wiki/',
@@ -240,7 +244,8 @@ App.navigate = function navigate() {
       App.pages[newPage] = newDiv;
       jQuery.get(newPage,
                  {},
-                 function(code) { App.processCode(code, newDiv);
+                 function(code) { var blocks = App.makeBlocksFromCode(code);
+                                  App.layoutBlocks(blocks, newDiv);
                                   onNewPageLoaded(); },
                  "text");
     } else
