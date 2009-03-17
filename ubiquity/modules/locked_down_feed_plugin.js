@@ -286,22 +286,66 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       // passed to it must contain the following keys:
       //
       //   * {{{name}}} is the name of the verb.
-      //   * {{{execute}}} is a function that is called when the verb is
-      //     executed. It takes a direct object parameter and has no
-      //     return value.
+      //
+      //   * {{{execute}}} is the function which gets run when the
+      //     user executes the command.  If the command takes
+      //     arguments (see below), the execute method will be passed
+      //     the direct object as its first argument, and a modifiers
+      //     dictionary as its second argument.
+      //
+      // The following properties are used if you want the command to
+      // accept arguments:
+      //
+      //   * {{{takes}}} defines the primary argument of the command,
+      //     a.k.a. the direct-object of the verb.  It's a dictionary
+      //     object with a single property.  The name of the property
+      //     will be the display name of the primary argument.  The
+      //     value of the property must be a regular expression that
+      //     filters what the argument can consist of.
+      //
+      //   * {{{modifiers}}} Defines any number of secondary arguments
+      //     of the command, a.k.a. indirect objects of the verb.  A
+      //     dictionary object with any number of properties; the name
+      //     of each property should be a preposition-word ('to',
+      //     'from', 'with', etc.), and the value is a regular
+      //     expression for the argument.  The name of the property is
+      //     the word that the user will type on the command line to
+      //     invoke the modifier, and the noun type or regular
+      //     expression determines the range of valid values.
       //
       // The following keys are optional:
       //
-      //   * {{{takes}}} is an object with a single property; the name will
-      //     be the display name of the primary argument, and the value
-      //     must be a regular expression that filters what the primary
-      //     argument can consist of.
       //   * {{{preview}}} is either an HTML string containing preview text
       //     that is displayed before the user executes the command, or
       //     a function that takes a preview HTML block and a direct
       //     object. The preview HTML block is actually just a fake
       //     DOM object, and its {{{innerHTML}}} attribute is expected to
       //     be filled-in by the preview function.
+      //
+      //   * {{{description}}} is a string containing a short
+      //     description of the command, to be displayed on the
+      //     command-list page. It can include HTML tags.
+      //
+      //   * {{{help}}} is a string containing a longer
+      //     description of the command, also displayed on the
+      //     command-list page, which can go into more depth, include
+      //     examples of usage, etc. It can include HTML tags.
+      //
+      //   * {{{icon}}} is a string containing the URL of a small
+      //     image (favicon-sized) to be displayed alongside the name
+      //     of the command in the interface.
+      //
+      //   * {{{author}}} is a dictionary object describing the
+      //     command's author.  It can have {{{name}}}, {{{email}}},
+      //     and {{{homepage}}} properties, all strings.
+      //
+      //   * {{{homepage}}} is the URL of the command's homepage, if any.
+      //
+      //   * {{{contributors}}} is an array of strings naming other people
+      //     who have contributed to the command.
+      //
+      //   * {{{license}}} is a string naming the license under which the
+      //     command is distributed, for example "MPL".
       //
       // This function has no return value.
 
