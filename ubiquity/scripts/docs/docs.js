@@ -191,19 +191,48 @@ App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
 };
 
 App.currentPage = null;
+App.currentSection = null;
 
 App.pages = {};
 
 App.navigate = function navigate() {
   var newPage;
+  var section;
   if (window.location.hash)
     newPage = window.location.hash.slice(1);
   else
     newPage = "overview";
 
+  var hashIndex = newPage.indexOf("#");
+  if (hashIndex != -1) {
+    section = newPage.slice(hashIndex + 1).replace(/_/g, " ");
+    newPage = newPage.slice(0, hashIndex);
+  }
+
+  function scrollToAnchor() {
+    if (section) {
+      var anchor;
+      $(":header").each(
+        function(i) {
+          if ($(this).text() == section && !anchor)
+            anchor = this;
+        });
+      if (anchor)
+        window.scroll(0, $(anchor).offset().top);
+    } else
+      window.scroll(0, 0);
+  }
+
+  function onNewPageLoaded() {
+    $(App.pages[newPage]).show();
+    scrollToAnchor();
+  }
+
   if (App.currentPage != newPage) {
     if (App.currentPage)
       $(App.pages[App.currentPage]).hide();
+    App.currentPage = newPage;
+    App.currentSection = section;
     if (!App.pages[newPage]) {
       var newDiv = $("<div>");
       newDiv.attr("name", newPage);
@@ -211,13 +240,16 @@ App.navigate = function navigate() {
       App.pages[newPage] = newDiv;
       jQuery.get(newPage,
                  {},
-                 function(code) { App.processCode(code, newDiv); },
+                 function(code) { App.processCode(code, newDiv);
+                                  onNewPageLoaded(); },
                  "text");
+    } else
+      onNewPageLoaded();
+  } else
+    if (App.currentSection != section) {
+      App.currentSection = section;
+      scrollToAnchor();
     }
-    $(App.pages[newPage]).show();
-    App.currentPage = newPage;
-    window.scroll(0, 0);
-  }
 };
 
 App.CHARS_PER_ROW = 80;
