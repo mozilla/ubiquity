@@ -8,10 +8,13 @@ var Editor = {
   onFeedTypeChange: function() {
     var value = $("#feedTypeMenu").val();
     PrefCommands.changeType(value);
+    $(".feed-type-desc").hide();
+    $("#" + value).show();
   },
   onLoad : function(){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
     $("#editorInputBox").val(editor);
+    this.onFeedTypeChange();
   },
   onSave : function(){
     Application.prefs.setValue(this.EDITOR_PREF, $("#editorInputBox").val());

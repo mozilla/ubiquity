@@ -165,9 +165,13 @@
     <div id="feed-type-pref">
       The feed type is
       <select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
-        <option value="commands">commands</option>
-        <option value="locked-down-commands">locked-down-commands</option>
+        <option value="commands">Regular</option>
+        <option value="locked-down-commands">Locked-Down</option>
       </select>
+    </div>
+    <div>
+      <span class="feed-type-desc" id="commands"><i>Regular</i> feeds have full freedom to do anything to your computer.</span>
+      <span class="feed-type-desc" id="locked-down-commands"><i>Locked-Down</i> feeds are very safe but don't have much freedom to interact with your computer. For more information, see the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial">Locked-Down Feed Tutorial</a>.</span>
     </div>
     <br clear="all"/>
     <ul class="button-list">
