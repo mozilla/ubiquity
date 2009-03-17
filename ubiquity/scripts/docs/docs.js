@@ -51,7 +51,23 @@ App.processors = [];
 
 App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
 
-App.makeBlocksFromCode = function makeBlocksFromCode(code) {
+App.blockifiers = [];
+
+App.getBlockifierForFile = function getBlockifierForFile(filename) {
+  for (var i = 0; i < App.blockifiers.length; i++)
+    if (filename.match(App.blockifiers[i].pattern))
+      return App.blockifiers[i];
+  return App.defaultBlockifier;
+};
+
+App.defaultBlockifier = function defaultBlockifier(code) {
+  return [{text: "No documentation exists for this file.",
+           lineno: 0,
+           numLines: 0,
+           code: code}];
+};
+
+App.makeBlocksFromJsCode = function makeBlocksFromJsCode(code) {
   var lines = code.split('\n');
   var blocks = [];
   var blockText = "";
@@ -94,8 +110,14 @@ App.makeBlocksFromCode = function makeBlocksFromCode(code) {
     });
   maybeAppendBlock();
 
-  return blocks;
+  if (blocks.length)
+    return blocks;
+  else
+    return App.defaultBlockifier(code);
 };
+
+App.blockifiers.push({pattern: /.*\.js$/,
+                      blockify: App.makeBlocksFromJsCode});
 
 App.layoutBlocks = function layoutBlocks(blocks, div) {
   var creole = new Parse.Simple.Creole(
@@ -238,15 +260,16 @@ App.navigate = function navigate() {
     App.currentPage = newPage;
     App.currentSection = section;
     if (!App.pages[newPage]) {
+      var blockifier = App.getBlockifierForFile(newPage);
       var newDiv = $("<div>");
       newDiv.attr("name", newPage);
       $("#content").append(newDiv);
       App.pages[newPage] = newDiv;
       jQuery.get(newPage,
-                 {},
-                 function(code) { var blocks = App.makeBlocksFromCode(code);
-                                  App.layoutBlocks(blocks, newDiv);
-                                  onNewPageLoaded(); },
+                 function onCodeLoaded(code) {
+                   App.layoutBlocks(blockifier.blockify(code), newDiv);
+                   onNewPageLoaded();
+                 },
                  "text");
     } else
       onNewPageLoaded();
