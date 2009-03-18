@@ -1235,7 +1235,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   }
   if (!options.preview) {
     options.preview = function searchPreview(pblock, directObject, modifiers) {
-      var urlString = options.parser.url || options.url;
+      var urlString = (options.parser && options.parser.url) || options.url;
       const MAX_RESULTS = 4;
       if (options.parser && directObject.text.length > 0) {
         var parser = options.parser;
