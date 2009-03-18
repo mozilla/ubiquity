@@ -87,7 +87,7 @@ App.TrivialParser.prototype = {
 // ** {{{ App.JsParser }}} **
 //
 // This is a parser implementation for parsing and rendering JavaScript with
-// WikiCreole-formatted comments as documentation.
+// [[http://wikicreole.org/|WikiCreole]] formatted comments as documentation.
 
 App.JsParser = function JsParser(creole) {
   if (creole)
