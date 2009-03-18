@@ -34,49 +34,60 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// == Code Illuminated Source Documentation ==
+//
+// Everything is contained in the {{{App}}} namespace.
+
 var App = {
 };
 
-App.trim = function trim(str) {
-  return str.replace(/^\s+|\s+$/g,"");
-};
-
-// ** {{{ App.processors }}} **
+// ** {{{ App.TrivialParser }}} **
 //
-// An array of user-defined processor functions.  They should take one
-// argument, the DOM node containing the documentation.  User-defined
-// processor functions are called after standard processing is done.
-
-App.processors = [];
-
-// Has a {label, urlOrCallback} dict for each keyword.
-App.menuItems = {};
-
-App.getParserForFile = function getParserForFile(filename) {
-  for (var i = App.parsers.length - 1; i >= 0; i--)
-    if (filename.match(App.parsers[i].pattern))
-      return App.parsers[i];
-  throw new Error("Parser not found for " + filename);
-};
+// This is a trivial parser implementation, which can be used for any file
+// that the application doesn't know how to properly parse and render. It just
+// outputs the full contents of the file as the code, and the documentation
+// states that there's no documentation for the file.
 
 App.TrivialParser = function TrivialParser(pattern) {
   this.pattern = pattern;
 };
 
 App.TrivialParser.prototype = {
+  // ** {{{ App.TrivialParser.blockify() }}} **
+  //
+  // Given a string containing the contents of a file, chops the file
+  // up into an array of segments containing documentation-code pairs.
+
   blockify: function TrivialParser_blockify(code) {
     return [{text: "No documentation exists for this file.",
              lineno: 0,
              numLines: 0,
              code: code}];
   },
+
+  // ** {{{ App.TrivialParser.renderDocText() }}} **
+  //
+  // Given a jQuery and a string containing documentation text, renders
+  // the documentation into the jQuery.
+
   renderDocText: function TrivialParser_renderDocText(jQuery, text) {
     jQuery.text(text);
   },
+
+  // ** {{{ App.TrivialParser.renderCode() }}} **
+  //
+  // Given a jQuery and a string containing code, renders the code
+  // into the jQuery.
+
   renderCode: function TrivialParser_renderCode(jQuery, code) {
     jQuery.text(code);
   }
 };
+
+// ** {{{ App.JsParser }}} **
+//
+// This is a parser implementation for parsing and rendering JavaScript with
+// WikiCreole-formatted comments as documentation.
 
 App.JsParser = function JsParser(creole) {
   if (creole)
@@ -157,8 +168,53 @@ App.JsParser.prototype = {
   }
 };
 
+// ** {{{ App.parsers }}} **
+//
+// An array of parser interfaces, from least-specific to
+// most-specific. That is, the "default" parser that is used if no
+// more specialized parser can be found is the first item in the
+// array, followed by the next least specific one, and so on.
+
 App.parsers = [new App.TrivialParser(/.*/),
                new App.JsParser()];
+
+// ** {{{ App.trim() }}} **
+//
+// Simple utility function to trim whitespace from both sides of a string.
+
+App.trim = function trim(str) {
+  return str.replace(/^\s+|\s+$/g,"");
+};
+
+// ** {{{ App.processors }}} **
+//
+// An array of user-defined processor functions.  They should take one
+// argument, the DOM node containing the documentation.  User-defined
+// processor functions are called after standard processing is done.
+
+App.processors = [];
+
+// Has a {label, urlOrCallback} dict for each keyword.
+
+App.menuItems = {};
+
+// ** {{{ App.getParserForFile() }}} **
+//
+// Given a filename, attempts to find the best parser for it and
+// returns it.
+
+App.getParserForFile = function getParserForFile(filename) {
+  for (var i = App.parsers.length - 1; i >= 0; i--)
+    if (filename.match(App.parsers[i].pattern))
+      return App.parsers[i];
+  throw new Error("Parser not found for " + filename);
+};
+
+// ** {{{ App.layout() }}} **
+//
+// Given a parser implementation, a body of text, and a DOM element,
+// splits the code from the documentation and lays them out
+// side-by-side into the DOM element.
 
 App.layout = function layout(parser, code, div) {
   jQuery.each(
@@ -188,7 +244,7 @@ App.layout = function layout(parser, code, div) {
     });
 };
 
-// ** {{{ App.addMenuItem }}} **
+// ** {{{ App.addMenuItem() }}} **
 //
 // Adds a menu item to the {{{element}}} DOM node showing the {{{label}}}
 // text.  If {{{urlOrCallback}}} is an URL, choosing the item causes a new
@@ -248,10 +304,24 @@ App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
   App.menuItems[text].push({ label: label, urlOrCallback: urlOrCallback });
 };
 
+// The current page we're on.
+
 App.currentPage = null;
+
+// The current section of the current page we're on.
+
 App.currentSection = null;
 
+// Maps filenames to DOM elements containing the rendered
+// documentation and source code for the filename.
+
 App.pages = {};
+
+// ** {{{ App.navigate() }}} **
+//
+// Navigates to the code/documentation of a different file if
+// needed. The appropriate view is fetched from the URL hash. If that
+// is empty, the overview is shown.
 
 App.navigate = function navigate() {
   var newPage;
@@ -317,7 +387,19 @@ App.navigate = function navigate() {
     }
 };
 
+// ** {{{ App.CHARS_PER_ROW }}} **
+//
+// Maximum number of characters per row to display on each column. By
+// default, this is typographically enforced: any lines that exceed
+// this number of characters per row will look bad because of
+// overflow, and intentionally so.
+
 App.CHARS_PER_ROW = 80;
+
+// ** {{{ App.initColumnSizes() }}} **
+//
+// Dynamically initializes the widths of the code and documentation
+// columns.
 
 App.initColumnSizes = function initSizes() {
   // Get the width of a single monospaced character of code.
@@ -337,6 +419,8 @@ App.initColumnSizes = function initSizes() {
   $(".documentation").css(App.columnCss);
   $(".code").css(App.columnCss);
 };
+
+// == Initialization ==
 
 $(window).ready(
   function() {
