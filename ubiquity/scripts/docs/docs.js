@@ -51,93 +51,125 @@ App.processors = [];
 
 App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
 
-App.blockifiers = [];
-
-App.getBlockifierForFile = function getBlockifierForFile(filename) {
-  for (var i = 0; i < App.blockifiers.length; i++)
-    if (filename.match(App.blockifiers[i].pattern))
-      return App.blockifiers[i];
-  return App.defaultBlockifier;
+App.getParserForFile = function getParserForFile(filename) {
+  for (var i = App.parsers.length - 1; i >= 0; i--)
+    if (filename.match(App.parsers[i].pattern))
+      return App.parsers[i];
+  throw new Error("Parser not found for " + filename);
 };
 
-App.defaultBlockifier = function defaultBlockifier(code) {
-  return [{text: "No documentation exists for this file.",
-           lineno: 0,
-           numLines: 0,
-           code: code}];
+App.TrivialParser = function TrivialParser(pattern) {
+  this.pattern = pattern;
 };
 
-App.makeBlocksFromJsCode = function makeBlocksFromJsCode(code) {
-  var lines = code.split('\n');
-  var blocks = [];
-  var blockText = "";
-  var codeText = "";
-  var firstCommentLine;
-  var lastCommentLine;
-
-  function maybeAppendBlock() {
-    if (blockText)
-      blocks.push({text: blockText,
-                   lineno: firstCommentLine,
-                   numLines: lastCommentLine - firstCommentLine + 1,
-                   code: codeText});
+App.TrivialParser.prototype = {
+  blockify: function TrivialParser_blockify(code) {
+    return [{text: "No documentation exists for this file.",
+             lineno: 0,
+             numLines: 0,
+             code: code}];
+  },
+  renderDocText: function TrivialParser_renderDocText(jQuery, text) {
+    jQuery.text(text);
+  },
+  renderCode: function TrivialParser_renderCode(jQuery, code) {
+    jQuery.text(code);
   }
-
-  jQuery.each(
-    lines,
-    function(lineNum) {
-      var line = this;
-      var isCode = true;
-      var isComment = (App.trim(line).indexOf("//") == 0);
-      if (isComment) {
-        var startIndex = line.indexOf("//");
-        var text = line.slice(startIndex + 3);
-        if (lineNum == lastCommentLine + 1) {
-          blockText += text + "\n";
-          lastCommentLine += 1;
-          isCode = false;
-        } else if (text[0] == "=" || text[0] == "*") {
-          maybeAppendBlock();
-          firstCommentLine = lineNum;
-          lastCommentLine = lineNum;
-          blockText = text + "\n";
-          codeText = "";
-          isCode = false;
-        }
-      }
-      if (isCode)
-        codeText += line + "\n";
-    });
-  maybeAppendBlock();
-
-  if (blocks.length)
-    return blocks;
-  else
-    return App.defaultBlockifier(code);
 };
 
-App.blockifiers.push({pattern: /.*\.js$/,
-                      blockify: App.makeBlocksFromJsCode});
+App.JsParser = function JsParser(creole) {
+  if (creole)
+    this._creole = creole;
+};
 
-App.layoutBlocks = function layoutBlocks(blocks, div) {
-  var creole = new Parse.Simple.Creole(
-    {interwiki: {
-       WikiCreole: 'http://www.wikicreole.org/wiki/',
-       Wikipedia: 'http://en.wikipedia.org/wiki/'
-     },
-     linkFormat: ''
-    });
+App.JsParser.prototype = {
+  pattern: /.*\.js$/,
+  blockify: function JsParser_blockify(code) {
+    var lines = code.split('\n');
+    var blocks = [];
+    var blockText = "";
+    var codeText = "";
+    var firstCommentLine;
+    var lastCommentLine;
 
+    function maybeAppendBlock() {
+      if (blockText)
+        blocks.push({text: blockText,
+                     lineno: firstCommentLine,
+                     numLines: lastCommentLine - firstCommentLine + 1,
+                     code: codeText});
+    }
+
+    jQuery.each(
+      lines,
+      function(lineNum) {
+        var line = this;
+        var isCode = true;
+        var isComment = (App.trim(line).indexOf("//") == 0);
+        if (isComment) {
+          var startIndex = line.indexOf("//");
+          var text = line.slice(startIndex + 3);
+          if (lineNum == lastCommentLine + 1) {
+            blockText += text + "\n";
+            lastCommentLine += 1;
+            isCode = false;
+          } else if (text[0] == "=" || text[0] == "*") {
+            maybeAppendBlock();
+            firstCommentLine = lineNum;
+            lastCommentLine = lineNum;
+            blockText = text + "\n";
+            codeText = "";
+            isCode = false;
+          }
+        }
+        if (isCode)
+          codeText += line + "\n";
+      });
+    maybeAppendBlock();
+
+    if (blocks.length)
+      return blocks;
+    else
+      return [{text: "No documentation exists for this file.",
+               lineno: 0,
+               numLines: 0,
+               code: code}];
+  },
+
+  renderDocText: function JsParser_renderDocText(jQuery, text) {
+    if (!this._creole)
+      this._creole = new Parse.Simple.Creole(
+        {interwiki: {
+           WikiCreole: 'http://www.wikicreole.org/wiki/',
+           Wikipedia: 'http://en.wikipedia.org/wiki/'
+         },
+         linkFormat: ''
+        });
+
+    var self = this;
+    jQuery.each(function() { self._creole.parse(this, text); });
+  },
+
+  renderCode: function JsParser_renderCode(jQuery, code) {
+    var self = this;
+    jQuery.text(code);
+  }
+};
+
+App.parsers = [new App.TrivialParser(/.*/),
+               new App.JsParser()];
+
+App.layout = function layout(parser, code, div) {
   jQuery.each(
-    blocks,
+    parser.blockify(code),
     function(i) {
       var docs = $('<div class="documentation">');
-      $(docs).css(App.columnCss);
-      creole.parse(docs.get(0), this.text);
+      docs.css(App.columnCss);
+      parser.renderDocText(docs, this.text);
       $(div).append(docs);
       var code = $('<div class="code">');
-      $(code).css(App.columnCss);
-      code.text(this.code);
+      code.css(App.columnCss);
+      parser.renderCode(code, this.code);
       $(div).append(code);
 
       var docsSurplus = docs.height() - code.height() + 1;
@@ -150,8 +182,8 @@ App.layoutBlocks = function layoutBlocks(blocks, div) {
   // Run the user-defined processors.
   jQuery.each(
     App.processors,
-    function(i) {
-      App.processors[i]($(div).find(".documentation"));
+    function() {
+      this($(div).find(".documentation"));
     });
 };
 
@@ -260,7 +292,7 @@ App.navigate = function navigate() {
     App.currentPage = newPage;
     App.currentSection = section;
     if (!App.pages[newPage]) {
-      var blockifier = App.getBlockifierForFile(newPage);
+      var parser = App.getParserForFile(newPage);
       var newDiv = $("<div>");
       newDiv.attr("name", newPage);
       $("#content").append(newDiv);
@@ -268,7 +300,7 @@ App.navigate = function navigate() {
       jQuery.ajax(
         {url: newPage,
          success: function onCodeLoaded(code) {
-           App.layoutBlocks(blockifier.blockify(code), newDiv);
+           App.layout(parser, code, newDiv);
            onNewPageLoaded();
          },
          error: function onError() {
