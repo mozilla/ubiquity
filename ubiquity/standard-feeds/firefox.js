@@ -411,8 +411,9 @@ CmdUtils.CreateCommand({
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   description: "Adds a tag to describe the current page",
   preview: function(aEl, aTagsString) {
-    aEl.innerHTML = "Describe the current page with tags"
-                  + aTagsString.text.length ? " (" + aTagsString.text + ")" : ".";
+    aEl.innerHTML = ("Describe the current page with tags" +
+                     (aTagsString.text.length ? " (" +
+                      aTagsString.text + ")" : "."));
   },
   execute: function(aTagsString) {
     var recentWindow = Utils.currentChromeWindow;
