@@ -182,6 +182,8 @@ function makeCmdForObj(sandbox, objName) {
 
 function makeCodeSource(feedInfo, headerSources, footerSources,
                         timeoutInterval) {
+  var codeSource;
+
   if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
     if (feedInfo.canAutoUpdate) {
       codeSource = new RemoteUriCodeSource(feedInfo, timeoutInterval);
