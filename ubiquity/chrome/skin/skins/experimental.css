@@ -97,15 +97,9 @@ div#ubiquity-preview #preview-pane {
     position: absolute;
     left: 300px;
     top: 0px;
-    background: none;
     height: 500px;
-    color: #ffffff;
     padding: 5px;
     border-top: 1px solid #333;
-    font-family: Geneva, Tahoma, Verdana;
-    text-shadow: #000 1px 1px .5px;
-    font-size: 11pt;
-    
 } 
 
 div#ubiquity-preview .suggested {
@@ -186,24 +180,32 @@ div#ubiquity-preview .selection {
 
 /* Formatting for the Preview box */
 
-div#ubiquity-preview .help {
+.ubiquity-preview-content {
+    background: none;
+    color: #ffffff;
+    font-family: Geneva, Tahoma, Verdana;
+    text-shadow: #000 1px 1px .5px;
+    font-size: 11pt;
 }
 
-div#ubiquity-preview .gresult {
+.ubiquity-preview-content .help {
+}
+
+.ubiquity-preview-content .gresult {
   margin-bottom: 10px;
 }
 
-div#ubiquity-preview .gresult a {
+.ubiquity-preview-content .gresult a {
   color: #FFFFFF;
   text-decoration: underline;
   font-size: 14pt;
   cursor: pointer;
 }
-div#ubiquity-preview .gresult-url {
+.ubiquity-preview-content .gresult-url {
   font-size: x-small;
   color: #777;
 }
-div#ubiquity-preview .gresult-content {
+.ubiquity-preview-content .gresult-content {
   margin-right: 10px;
   font-size: small;  
 }

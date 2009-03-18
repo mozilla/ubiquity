@@ -1021,24 +1021,17 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
   var directObj;
   var modifiers;
 
-  var width = 500;
+  var width = 490;
   var height = 500;
 
   if (previewFunc.isSafePreview && !url)
     return previewFunc;
 
   if (!url) {
-    // TODO: This is gross; we just need to clean up the way our
-    // CSS works.
-    let posCss = ('width: ' + width + 'px; height: ' + height + 'px; ' +
-                  'top: 0px; left: 0px; position: relative;');
-    url = (
-      ('data:text/html,' +
-       '<html><body style="overflow: hidden; margin: 0; padding: 0;">' +
-       '<div id="ubiquity-preview" style="' + posCss + '">' +
-       '<div id="preview-pane" style="' + posCss + '">' +
-       '</div></div></body></html>')
-      );
+    url = ('data:text/html,' +
+           '<html><body class="ubiquity-preview-content" ' +
+           'style="overflow: hidden; margin: 0; padding: 0;">' +
+           '</body></html>');
   } else
     url = Utils.url(url).spec;
 
@@ -1087,8 +1080,7 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
                                  onPreviewUnloaded,
                                  true);
         previewWindow = browser.contentWindow;
-        //previewBlock = previewWindow.document.body;
-        previewBlock = previewWindow.document.getElementById("preview-pane");
+        previewBlock = previewWindow.document.body;
         unsafePblock.addEventListener("preview-change",
                                       onPreviewChange,
                                       false);

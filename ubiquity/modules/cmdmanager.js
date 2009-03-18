@@ -152,7 +152,8 @@ CommandManager.prototype = {
     if (!doc.getElementById("suggestions")) {
       // Set the initial contents of the preview block.
       previewBlock.innerHTML = ('<div id="suggestions"></div>' +
-                                '<div id="preview-pane"></div>');
+                                '<div id="preview-pane" ' +
+                                'class="ubiquity-preview-content"></div>');
     }
 
     this._renderSuggestions(doc.getElementById("suggestions"));
