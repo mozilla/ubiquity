@@ -10,33 +10,33 @@ var extApplication = { // helper method for correct quitting/restarting
       quit:    "browser.warnOnQuit"
     };
     if (!(event in prefs) || Application.prefs.getValue(prefs[event], true)) {
-      var os = Components.classes["@mozilla.org/observer-service;1"]
-                         .getService(Components.interfaces.nsIObserverService);
-      var cancelQuit = Components.classes["@mozilla.org/supports-PRBool;1"]
-                                 .createInstance(Components.interfaces.nsISupportsPRBool);
+      var os = Cc["@mozilla.org/observer-service;1"]
+               .getService(Ci.nsIObserverService);
+      var cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]
+                       .createInstance(Ci.nsISupportsPRBool);
       os.notifyObservers(cancelQuit, "quit-application-requested", null);
       if (cancelQuit.data) return false; // somebody canceled our quit request
     } return true; // assume yes
   },
   _quitWithFlags: function app__quitWithFlags(aFlags, event) {
     if (this._warnOnClose(event)) {
-      var appStartup = Components.classes['@mozilla.org/toolkit/app-startup;1']
-                                 .getService(Components.interfaces.nsIAppStartup);
+      var appStartup = Cc['@mozilla.org/toolkit/app-startup;1']
+                                 .getService(Ci.nsIAppStartup);
       appStartup.quit(aFlags);
       return true;
     } return false;
   },
   quit: function app_quit() {
-    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit, "quit");
+    return this._quitWithFlags(Ci.nsIAppStartup.eAttemptQuit, "quit");
   },
   restart: function app_restart() {
-    return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit |
-                               Components.interfaces.nsIAppStartup.eRestart, "restart");
+    return this._quitWithFlags(Ci.nsIAppStartup.eAttemptQuit |
+                               Ci.nsIAppStartup.eRestart, "restart");
   },
   close: function app_close() {
     if (this._warnOnClose("close")) {
-      Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                .getService(Components.interfaces.nsIWindowMediator)
+      Cc["@mozilla.org/appshell/window-mediator;1"]
+                .getService(Ci.nsIWindowMediator)
                 .getMostRecentWindow(null)
                 .close();
       return true;
@@ -356,12 +356,12 @@ CmdUtils.CreateCommand({
 
 function setFullPageZoom(level) {
   var navigator1 = window.
-                   QueryInterface(Components.interfaces.nsIInterfaceRequestor).
-                   getInterface(Components.interfaces.nsIWebNavigation);
-  var docShell = navigator1.QueryInterface(Components.interfaces.nsIDocShell);
+                   QueryInterface(Ci.nsIInterfaceRequestor).
+                   getInterface(Ci.nsIWebNavigation);
+  var docShell = navigator1.QueryInterface(Ci.nsIDocShell);
   var docviewer = docShell.
                   contentViewer.
-                  QueryInterface(Components.interfaces.nsIMarkupDocumentViewer);
+                  QueryInterface(Ci.nsIMarkupDocumentViewer);
   docviewer.fullZoom = level;
 }
 
@@ -415,8 +415,6 @@ CmdUtils.CreateCommand({
                   + aTagsString.text.length ? " (" + aTagsString.text + ")" : ".";
   },
   execute: function(aTagsString) {
-    var Cc = Components.classes;
-    var Ci = Components.interfaces;
     var recentWindow = Utils.currentChromeWindow;
     var doc = recentWindow.content.document;
     if (!doc)
