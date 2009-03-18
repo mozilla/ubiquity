@@ -1021,13 +1021,25 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
   var directObj;
   var modifiers;
 
+  var width = 500;
+  var height = 500;
+
   if (previewFunc.isSafePreview && !url)
     return previewFunc;
 
-  if (!url)
-    // TODO: This is gross and is specific to the Ubiquity Evolved skin.
-    url = 'data:text/html,<html><body style="overflow: hidden; margin: 0; padding: 0;"><div id="ubiquity-preview" style="width: 490px; height: 490px;"><div id="preview-pane" style="top: 0px; left: 0px; width: 490px; height: 490px;"></div></div></body></html>';
-  else
+  if (!url) {
+    // TODO: This is gross; we just need to clean up the way our
+    // CSS works.
+    let posCss = ('width: ' + width + 'px; height: ' + height + 'px; ' +
+                  'top: 0px; left: 0px; position: relative;');
+    url = (
+      ('data:text/html,' +
+       '<html><body style="overflow: hidden; margin: 0; padding: 0;">' +
+       '<div id="ubiquity-preview" style="' + posCss + '">' +
+       '<div id="preview-pane" style="' + posCss + '">' +
+       '</div></div></body></html>')
+      );
+  } else
     url = Utils.url(url).spec;
 
   function showPreview() {
@@ -1054,8 +1066,8 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
         browser.setAttribute("src", url);
         browser.setAttribute("disablesecurity", true);
         browser.setAttribute("type", "content");
-        browser.setAttribute("width", 500);
-        browser.setAttribute("height", 500);
+        browser.setAttribute("width", width);
+        browser.setAttribute("height", width);
         browser.addEventListener("load",
                                  onPreviewLoaded,
                                  true);
@@ -1100,8 +1112,8 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
       xulIframe.setAttribute("src",
                              "chrome://ubiquity/content/content-preview.xul");
       xulIframe.style.border = "none";
-      xulIframe.setAttribute("width", 500);
-      xulIframe.setAttribute("height", 500);
+      xulIframe.setAttribute("width", width);
+      xulIframe.setAttribute("height", width);
 
       xulIframe.addEventListener("load",
                                  onXulLoaded,
