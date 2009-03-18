@@ -876,9 +876,9 @@ CmdUtils.renderTemplate = function renderTemplate( template, data ) {
 // ** {{{ CmdUtils.previewAjax(pblock, options) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
-// just like jQuery.ajax(), which is documented at
-// http://docs.jquery.com/Ajax .
-// The difference is that CmdUtils.previewAjax is designed to handle
+// just like {{{jQuery.ajax()}}}, which is documented at
+// http://docs.jquery.com/Ajax/jQuery.ajax.
+// The difference is that {{{CmdUtils.previewAjax()}}} is designed to handle
 // command previews, which can be canceled by the user between the
 // time that it's requested and the time it displays.  If the preview
 // is canceled, no callbacks in the options object will be called.
@@ -905,9 +905,9 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
 // ** {{{ CmdUtils.previewGet(pblock, url, data, callback, type) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
-// just like jQuery.get(), which is documented at
-// http://docs.jquery.com/Ajax/jQuery.get .
-// The difference is that CmdUtils.previewAjax is designed to handle
+// just like {{{jQuery.get()}}}, which is documented at
+// http://docs.jquery.com/Ajax/jQuery.get.
+// The difference is that {{{CmdUtils.previewGet()}}} is designed to handle
 // command previews, which can be canceled by the user between the
 // time that it's requested and the time it displays.  If the preview
 // is canceled, the given callback will not be called.
@@ -931,9 +931,9 @@ CmdUtils.previewGet = function previewGet(pblock,
 // ** {{{ CmdUtils.previewPost(pblock, url, data, callback, type) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
-// just like jQuery.post(), which is documented at
-// http://docs.jquery.com/Ajax/jQuery.post .
-// The difference is that CmdUtils.previewAjax is designed to handle
+// just like {{{jQuery.post()}}}, which is documented at
+// http://docs.jquery.com/Ajax/jQuery.post.
+// The difference is that {{{CmdUtils.previewPost()}}} is designed to handle
 // command previews, which can be canceled by the user between the
 // time that it's requested and the time it displays.  If the preview
 // is canceled, the given callback will not be called.
