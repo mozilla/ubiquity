@@ -1021,8 +1021,12 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
   var directObj;
   var modifiers;
 
+  if (previewFunc.isSafePreview && !url)
+    return previewFunc;
+
   if (!url)
-    url = 'data:text/html,';
+    // TODO: This is gross and is specific to the Ubiquity Evolved skin.
+    url = 'data:text/html,<html><body style="overflow: hidden; margin: 0; padding: 0;"><div id="ubiquity-preview" style="width: 490px; height: 490px;"><div id="preview-pane" style="top: 0px; left: 0px; width: 490px; height: 490px;"></div></div></body></html>';
   else
     url = Utils.url(url).spec;
 
@@ -1071,7 +1075,8 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
                                  onPreviewUnloaded,
                                  true);
         previewWindow = browser.contentWindow;
-        previewBlock = previewWindow.document.body;
+        //previewBlock = previewWindow.document.body;
+        previewBlock = previewWindow.document.getElementById("preview-pane");
         unsafePblock.addEventListener("preview-change",
                                       onPreviewChange,
                                       false);
@@ -1106,6 +1111,7 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
     }
   }
 
+  previewWrapper.isSafePreview = true;
   return previewWrapper;
 };
 

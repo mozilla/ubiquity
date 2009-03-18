@@ -168,12 +168,14 @@ function makeCmdForObj(sandbox, objName) {
     }
   };
 
-  if (cmdFunc.preview)
+  if (cmdFunc.preview) {
+    var safePreview = sandbox.CmdUtils.safePreview(cmdFunc.preview);
     cmd.preview = function CS_preview(context, directObject, modifiers,
                                       previewBlock) {
       sandbox.context = context;
-      return cmdFunc.preview(previewBlock, directObject, modifiers);
+      return safePreview(previewBlock, directObject, modifiers);
     };
+  }
 
   cmd.__proto__ = cmdFunc;
 
