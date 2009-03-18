@@ -173,7 +173,8 @@ function makeCmdForObj(sandbox, objName) {
     cmd.preview = function CS_preview(context, directObject, modifiers,
                                       previewBlock) {
       sandbox.context = context;
-      return safePreview(previewBlock, directObject, modifiers);
+      return safePreview.call(cmdFunc, previewBlock, directObject,
+                              modifiers);
     };
   }
 

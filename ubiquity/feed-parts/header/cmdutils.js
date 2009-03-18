@@ -1036,7 +1036,7 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
     url = Utils.url(url).spec;
 
   function showPreview() {
-    previewFunc(previewBlock, directObj, modifiers);
+    previewFunc.call(this, previewBlock, directObj, modifiers);
   }
 
   function previewWrapper(unsafePblock, aDirectObj, aModifiers) {
@@ -1047,12 +1047,13 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
     aModifiers = null;
 
     if (previewBlock) {
-      showPreview();
+      showPreview.call(this);
     } else if (xulIframe) {
       // We're in the middle of loading the preview window, just
       // wait and it'll eventually appear.
     } else {
       var browser;
+      var initialThis = this;
 
       function onXulLoaded(event) {
         browser = xulIframe.contentDocument.createElement("browser");
@@ -1084,7 +1085,8 @@ CmdUtils.safePreview = function safePreview(previewFunc, url) {
         unsafePblock.addEventListener("preview-change",
                                       onPreviewChange,
                                       false);
-        showPreview();
+        showPreview.call(initialThis);
+        initialThis = null;
       }
 
       function onPreviewUnloaded() {
