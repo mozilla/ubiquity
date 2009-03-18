@@ -49,7 +49,8 @@ App.trim = function trim(str) {
 
 App.processors = [];
 
-App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
+// Has a {label, urlOrCallback} dict for each keyword.
+App.menuItems = {};
 
 App.getParserForFile = function getParserForFile(filename) {
   for (var i = App.parsers.length - 1; i >= 0; i--)
@@ -162,7 +163,7 @@ App.parsers = [new App.TrivialParser(/.*/),
 App.layout = function layout(parser, code, div) {
   jQuery.each(
     parser.blockify(code),
-    function(i) {
+    function() {
       var docs = $('<div class="documentation">');
       docs.css(App.columnCss);
       parser.renderDocText(docs, this.text);
@@ -228,9 +229,8 @@ App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
 
         jQuery.each(
           App.menuItems[text],
-          function(i) {
-            var item = App.menuItems[text][i];
-            addItemToPopup(item.label, item.urlOrCallback);
+          function() {
+            addItemToPopup(this.label, this.urlOrCallback);
           });
 
         popup.find(".item:last").addClass("bottom");
@@ -271,7 +271,7 @@ App.navigate = function navigate() {
     if (section) {
       var anchor;
       $(":header").each(
-        function(i) {
+        function() {
           if ($(this).text() == section && !anchor)
             anchor = this;
         });
