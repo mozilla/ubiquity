@@ -41,14 +41,17 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-function CommandManager(cmdSource, msgService, parser, previewBlock) {
+function CommandManager(cmdSource, msgService, parser, suggsNode,
+                        previewPaneNode, helpNode) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
   this.__nlParser = parser;
   this.__queuedPreview = null;
-  this.__previewBlock = previewBlock;
+  this.__domNodes = {suggs: suggsNode,
+                     preview: previewPaneNode,
+                     help: helpNode};
 
   function onCommandsReloaded() {
     parser.setCommandList(cmdSource.getAllCommands());
@@ -69,20 +72,16 @@ function CommandManager(cmdSource, msgService, parser, previewBlock) {
 
 CommandManager.prototype = {
   setPreviewState: function CM_setPreviewState(state) {
-    var doc = this.__previewBlock.ownerDocument;
-    var previewPane = doc.getElementById("preview-pane");
-    var suggestions = doc.getElementById("suggestions");
-    var help = doc.getElementById("help");
     switch (state) {
     case "with-suggestions":
-      suggestions.style.display = "block";
-      previewPane.style.display = "block";
-      help.style.display = "none";
+      this.__domNodes.suggs.style.display = "block";
+      this.__domNodes.preview.style.display = "block";
+      this.__domNodes.help.style.display = "none";
       break;
     case "no-suggestions":
-      suggestions.style.display = "none";
-      previewPane.style.display = "none";
-      help.style.display = "block";
+      this.__domNodes.suggs.style.display = "none";
+      this.__domNodes.preview.style.display = "none";
+      this.__domNodes.help.style.display = "block";
       break;
     default:
       throw new Error("Unknown state: " + state);
@@ -111,7 +110,7 @@ CommandManager.prototype = {
     this._previewAndSuggest(context, true);
   },
 
-  _renderSuggestions : function CMD__renderSuggestions(elem) {
+  _renderSuggestions : function CMD__renderSuggestions() {
     var content = "";
     var suggList = this.__nlParser.getSuggestionList();
     var suggNumber = this.__nlParser.getNumSuggestions();
@@ -132,13 +131,12 @@ CommandManager.prototype = {
         content += "<div class=\"suggested\">" + suggText + "</div>";
       }
     }
-    elem.innerHTML = content;
+    this.__domNodes.suggs.innerHTML = content;
   },
 
   _renderPreview : function CM__renderPreview(context, showImmediately) {
-    var doc = this.__previewBlock.ownerDocument;
     var wasPreviewShown = false;
-    var previewPane = doc.getElementById("preview-pane");
+    var previewPane = this.__domNodes.preview;
 
     if (!previewPane)
       throw new Error("Assertion failed: previewPane is " + previewPane);
@@ -160,7 +158,7 @@ CommandManager.prototype = {
         }
       }
 
-      var evt = doc.createEvent("HTMLEvents");
+      var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
       evt.initEvent("preview-change", false, false);
       previewPane.dispatchEvent(evt);
 
@@ -176,10 +174,7 @@ CommandManager.prototype = {
   },
 
   _previewAndSuggest : function CM__previewAndSuggest(context) {
-    var previewBlock = this.__previewBlock;
-    var doc = previewBlock.ownerDocument;
-
-    this._renderSuggestions(doc.getElementById("suggestions"));
+    this._renderSuggestions();
 
     return this._renderPreview(context);
   },

@@ -69,13 +69,18 @@ function ubiquitySetup()
   );
 
   var previewIframe = document.getElementById("cmd-preview");
-  var previewBlock = previewIframe.contentDocument
-                     .getElementById("ubiquity-preview");
+  var previewDoc = previewIframe.contentDocument;
+  var previewBlock = previewDoc.getElementById("ubiquity-preview");
+  var previewSuggs = previewDoc.getElementById("suggestions");
+  var previewPane = previewDoc.getElementById("preview-pane");
+  var previewHelp = previewDoc.getElementById("help");
 
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
                                       nlParser,
-                                      previewBlock);
+                                      previewSuggs,
+                                      previewPane,
+                                      previewHelp);
 
   //Install skin detector
   var skinService = new jsm.SkinSvc(window);
