@@ -17,8 +17,8 @@ CmdUtils.CreateCommand({
 
     Utils.openUrlInBrowser( url );
   },
-  preview: CmdUtils.safePreview(
-    function(pblock, dobj, modifers) {
+  previewUrl: Utils.url({uri: "templates/map.html", base: feed.id}),
+  preview: function(pblock, dobj, modifers) {
       // TODO: This isn't terribly safe; ideally, we should be communicating
       // with the other page via DOM events, etc.
       var previewWindow = pblock.ownerDocument.defaultView.wrappedJSObject;
@@ -51,8 +51,7 @@ CmdUtils.CreateCommand({
       };
 
       previewWindow.Ubiquity.onPreview(dobj);
-    },
-    Utils.url({uri: "templates/map.html", base: feed.id}))
+    }
 });
 
 

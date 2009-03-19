@@ -400,6 +400,10 @@ NLParser.ParsedSentence.prototype = {
     return this._verb.previewDelay;
   },
 
+  get previewUrl() {
+    return this._verb.previewUrl;
+  },
+
   copy: function() {
     // Deep copy!
     let newArgSuggs = {};
@@ -803,6 +807,9 @@ NLParser.Verb.prototype = {
     this._synonyms    = cmd.synonyms;
     this.__defineGetter__("previewDelay", function() {
       return cmd.previewDelay;
+    });
+    this.__defineGetter__("previewUrl", function() {
+      return cmd.previewUrl;
     });
     this.__defineGetter__("disabled", function() {
       if("disabled" in cmd)

@@ -41,23 +41,27 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
+var DEFAULT_PREVIEW_BROWSER_URL = (
+  ('data:text/html,' +
+   encodeURI('<html><body class="ubiquity-preview-content" ' +
+             'style="overflow: hidden; margin: 0; padding: 0;">' +
+             '</body></html>'))
+);
+
 function makePreviewBrowser(unsafePblock, cb) {
-  var previewWindow = null;
-  var previewBlock = null;
   var xulIframe = null;
   var browser = null;
 
   var width = 490;
   var height = 500;
 
-  var url = ('data:text/html,' +
-             '<html><body class="ubiquity-preview-content" ' +
-             'style="overflow: hidden; margin: 0; padding: 0;">' +
-             '</body></html>');
-
   function onXulLoaded(event) {
+    xulIframe.removeEventListener("load",
+                                  onXulLoaded,
+                                  true);
+
     browser = xulIframe.contentDocument.createElement("browser");
-    browser.setAttribute("src", url);
+    browser.setAttribute("src", DEFAULT_PREVIEW_BROWSER_URL);
     browser.setAttribute("disablesecurity", true);
     browser.setAttribute("type", "content");
     browser.setAttribute("width", width);
@@ -70,18 +74,12 @@ function makePreviewBrowser(unsafePblock, cb) {
   }
 
   function onPreviewLoaded() {
-    browser.addEventListener("unload",
-                             onPreviewUnloaded,
-                             true);
-    previewWindow = browser.contentWindow;
-    previewBlock = previewWindow.document.body;
-    cb(browser);
-  }
+    browser.removeEventListener("load",
+                                onPreviewLoaded,
+                                true);
 
-  function onPreviewUnloaded() {
+    cb(browser);
     unsafePblock = null;
-    previewWindow = null;
-    previewBlock = null;
     browser = null;
     xulIframe = null;
   }
@@ -110,6 +108,7 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
   this.__queuedPreview = null;
   this.__previewBrowser = null;
   this.__previewBrowserCreatedCallback = null;
+  this.__previewBrowserUrlLoadedCallback = null;
   this.__domNodes = {suggs: suggsNode,
                      preview: previewPaneNode,
                      help: helpNode};
@@ -197,8 +196,9 @@ CommandManager.prototype = {
 
   _onPreviewBrowserCreate : function CM__onPreviewBrowserCreate(browser) {
     this.__previewBrowser = browser;
-    this.__previewBrowserCreatedCallback();
+    var cb = this.__previewBrowserCreatedCallback;
     this.__previewBrowserCreatedCallback = null;
+    cb();
   },
 
   _ensurePreviewBrowser : function CM__ensurePreviewBrowser(cb) {
@@ -218,6 +218,33 @@ CommandManager.prototype = {
     }
   },
 
+  _onPreviewBrowserLoadUrl : function CM__onPreviewBrowserLoadUrl() {
+    var cb = this.__previewBrowserUrlLoadedCallback;
+    this.__previewBrowserUrlLoadedCallback = null;
+    cb();
+  },
+
+  _ensurePreviewBrowserUrlLoaded : function CM__EPBUL(url, cb) {
+    var currUrl = this.__previewBrowser.getAttribute("src");
+    if (url == currUrl) {
+      if (this.__previewBrowserUrlLoadedCallback)
+        // The URL is still loading.
+        this.__previewBrowserUrlLoadedCallback = cb;
+      else
+        // The URL is already loaded.
+        cb();
+    } else {
+      var self = this;
+      function onLoad() {
+        self.__previewBrowser.removeEventListener("load", onLoad, true);
+        self._onPreviewBrowserLoadUrl();
+      }
+      this.__previewBrowserUrlLoadedCallback = cb;
+      this.__previewBrowser.addEventListener("load", onLoad, true);
+      this.__previewBrowser.setAttribute("src", url);
+    }
+  },
+
   _renderPreview : function CM__renderPreview(context, showImmediately) {
     var wasPreviewShown = false;
 
@@ -228,30 +255,46 @@ CommandManager.prototype = {
         var self = this;
 
         function showPreview() {
-          function postPreviewBrowserCreate() {
-            if (self.__queuedPreview == showPreview) {
-              self.__queuedPreview = null;
-              activeSugg.preview(context,
-                                 self.__previewBrowser.contentDocument.body);
-            }
-          }
+          self._ensurePreviewBrowser(
+            function() {
+              if (self.__queuedPreview == showPreview) {
+                var previewUrl;
+                if (activeSugg.previewUrl)
+                  previewUrl = Utils.url(activeSugg.previewUrl).spec;
+                else
+                  previewUrl = DEFAULT_PREVIEW_BROWSER_URL;
 
-          self._ensurePreviewBrowser(postPreviewBrowserCreate);
+                self._ensurePreviewBrowserUrlLoaded(
+                  previewUrl,
+                  function() {
+                    if (self.__queuedPreview == showPreview) {
+                      self.__queuedPreview = null;
+
+                      activeSugg.preview(context,
+                                         self.__previewBrowser
+                                         .contentDocument.body);
+                    }
+                  });
+              }
+            });
         }
 
         this.__queuedPreview = showPreview;
+
+        if (this.__previewBrowser &&
+            this.__previewBrowser.contentDocument) {
+          var previewPane = this.__previewBrowser.contentDocument.body;
+          if (previewPane) {
+            var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
+            evt.initEvent("preview-change", false, false);
+            previewPane.dispatchEvent(evt);
+          }
+        }
 
         if (showImmediately)
           showPreview();
         else
           Utils.setTimeout(showPreview, activeSugg.previewDelay);
-
-        if (this.__previewBrowser) {
-          var previewPane = this.__previewBrowser.contentDocument.body;
-          var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
-          evt.initEvent("preview-change", false, false);
-          previewPane.dispatchEvent(evt);
-        }
 
         wasPreviewShown = true;
       }
