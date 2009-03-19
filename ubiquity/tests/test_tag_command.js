@@ -11,6 +11,11 @@ var module = this;
 function testTagCommand() {
   this.skipIfXPCShell();
 
+  var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                     .getService(Ci.nsIAppShellService)
+                     .hiddenDOMWindow;
+  var fakeDom = hiddenWindow.document;
+
   var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
               .getService(Ci.nsINavBookmarksService);
 
@@ -24,7 +29,10 @@ function testTagCommand() {
   var nlParser = NLParser.makeParserForLanguage(UbiquitySetup.languageCode,
                                                 [], []);
   var cmdManager = new CommandManager(cmdSource, services.messageService,
-                                      nlParser);
+                                      nlParser,
+                                      fakeDom.createElement("div"),
+                                      fakeDom.createElement("div"),
+                                      fakeDom.createElement("div"));
 
   function uriHasTags(aURI, aTags) {
     var tags = tagsvc.getTagsForURI(aURI, {});

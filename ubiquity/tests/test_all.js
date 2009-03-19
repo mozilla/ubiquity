@@ -271,6 +271,23 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
                                         new TestSuggestionMemory());
 }
 
+function makeCommandManager(source, msgService, parser) {
+  this.skipIfXPCShell();
+
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+
+  var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
+                     .getService(Ci.nsIAppShellService)
+                     .hiddenDOMWindow;
+  var fakeDom = hiddenWindow.document;
+
+  return new CommandManager(source, msgService, parser,
+                            fakeDom.createElement("div"),
+                            fakeDom.createElement("div"),
+                            fakeDom.createElement("div"));
+}
+
 function testCmdManagerExecutesTwoCmds() {
   var mockMsgService = {
     displayMessage: function(msg) {}
@@ -285,8 +302,8 @@ function testCmdManagerExecutesTwoCmds() {
       cmd_two: {execute:function() {twoWasCalled = true;}}
     });
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService,
-                                  makeTestParser());
+  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
+                                       makeTestParser());
 
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
@@ -315,8 +332,8 @@ function testCmdManagerExecutesCmd() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService,
-                                  makeTestParser());
+  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
+                                       makeTestParser());
   cmdMan.updateInput("existentcommand", fakeContext);
   cmdMan.execute(fakeContext);
   this.assert(wasCalled, "command.execute() must be called.");
@@ -335,8 +352,8 @@ function testCmdManagerCatchesExceptionsInCmds() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService,
-                                  makeTestParser());
+  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
+                                       makeTestParser());
 
   cmdMan.updateInput("existentcommand", fakeContext);
   cmdMan.execute(fakeContext);
@@ -355,7 +372,8 @@ function testCmdManagerDisplaysNoCmdError() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, makeTestParser());
+  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
+                                       makeTestParser());
 
   cmdMan.updateInput("nonexistentcommand", fakeContext);
   cmdMan.execute(fakeContext);
@@ -478,10 +496,11 @@ function testCmdManagerSuggestsForEmptyInput() {
     getHtmlSelection: function(context) { return context.htmlSelection; },
     getSelection: function(context) { return context.textSelection; }
   };
-  var cmdMan = new CommandManager(fakeSource, null, makeTestParser( null,
-								    null,
-								    null,
-								  fakeContextUtils));
+  var cmdMan = makeCommandManager.call(this, fakeSource, null,
+                                       makeTestParser( null,
+						       null,
+						       null,
+						       fakeContextUtils));
   var getAC = cmdMan.makeCommandSuggester();
   var suggDict = getAC({textSelection:"tree"});
   this.assert( suggDict["Cmd_one"], "cmd one should be in" );
@@ -1189,7 +1208,8 @@ function testAsyncNounSuggestions() {
     displayMessage: function(msg) {}
   };
   var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
-  var cmdMan = new CommandManager(fakeSource, mockMsgService, makeTestParser());
+  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
+                                       makeTestParser());
   cmdMan.updateInput( "dostuff halifax", fakeContext, null );
   this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
   noun_type_slowness.triggerCallback();
