@@ -188,6 +188,28 @@ div#ubiquity-preview .selection {
     font-size: 11pt;
 }
 
+.ubiquity-preview-content a {
+  color: #FFFFFF;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ubiquity-preview-content a:hover {
+  color: #A0A0A0;
+}
+
+.ubiquity-preview-content a:link {
+  color: #FFFFFF;
+}
+
+.ubiquity-preview-content a:visited {
+  color: #FFFFFF;
+}
+
+.ubiquity-preview-content a:active {
+  color: #A0A0A0;
+}
+
 .ubiquity-preview-content .help {
 }
 
@@ -196,10 +218,7 @@ div#ubiquity-preview .selection {
 }
 
 .ubiquity-preview-content .gresult a {
-  color: #FFFFFF;
-  text-decoration: underline;
   font-size: 14pt;
-  cursor: pointer;
 }
 .ubiquity-preview-content .gresult-url {
   font-size: x-small;
