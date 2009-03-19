@@ -41,6 +41,68 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
+function makePreviewBrowser(unsafePblock, cb, url) {
+  var previewWindow = null;
+  var previewBlock = null;
+  var xulIframe = null;
+  var browser = null;
+
+  var width = 490;
+  var height = 500;
+
+  if (!url) {
+    url = ('data:text/html,' +
+           '<html><body class="ubiquity-preview-content" ' +
+           'style="overflow: hidden; margin: 0; padding: 0;">' +
+           '</body></html>');
+  } else
+    url = Utils.url(url).spec;
+
+  function onXulLoaded(event) {
+    browser = xulIframe.contentDocument.createElement("browser");
+    browser.setAttribute("src", url);
+    browser.setAttribute("disablesecurity", true);
+    browser.setAttribute("type", "content");
+    browser.setAttribute("width", width);
+    browser.setAttribute("height", width);
+    browser.addEventListener("load",
+                             onPreviewLoaded,
+                             true);
+
+    xulIframe.contentDocument.documentElement.appendChild(browser);
+  }
+
+  function onPreviewLoaded() {
+    browser.addEventListener("unload",
+                             onPreviewUnloaded,
+                             true);
+    previewWindow = browser.contentWindow;
+    previewBlock = previewWindow.document.body;
+    cb(browser);
+  }
+
+  function onPreviewUnloaded() {
+    unsafePblock = null;
+    previewWindow = null;
+    previewBlock = null;
+    browser = null;
+    xulIframe = null;
+  }
+
+  xulIframe = unsafePblock.ownerDocument.createElement("iframe");
+  xulIframe.setAttribute("src",
+                         "chrome://ubiquity/content/content-preview.xul");
+  xulIframe.style.border = "none";
+  xulIframe.setAttribute("width", width);
+  xulIframe.setAttribute("height", width);
+
+  xulIframe.addEventListener("load",
+                             onXulLoaded,
+                             true);
+  unsafePblock.innerHTML = "";
+  unsafePblock.appendChild(xulIframe);
+}
+
 function CommandManager(cmdSource, msgService, parser, suggsNode,
                         previewPaneNode, helpNode) {
   this.__cmdSource = cmdSource;
@@ -49,6 +111,8 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
   this.__lastInput = "";
   this.__nlParser = parser;
   this.__queuedPreview = null;
+  this.__previewBrowser = null;
+  this.__previewBrowserCreatedCallback = null;
   this.__domNodes = {suggs: suggsNode,
                      preview: previewPaneNode,
                      help: helpNode};
@@ -134,35 +198,64 @@ CommandManager.prototype = {
     this.__domNodes.suggs.innerHTML = content;
   },
 
+  _onPreviewBrowserCreate : function CM__onPreviewBrowserCreate(browser) {
+    this.__previewBrowser = browser;
+    this.__previewBrowserCreatedCallback();
+    this.__previewBrowserCreatedCallback = null;
+  },
+
+  _ensurePreviewBrowser : function CM__ensurePreviewBrowser(cb) {
+    if (this.__previewBrowser)
+      cb();
+    else {
+      if (this.__previewBrowserCreatedCallback) {
+        this.__previewBrowserCreatedCallback = cb;
+      } else {
+        var self = this;
+        this.__previewBrowserCreatedCallback = cb;
+        makePreviewBrowser(this.__domNodes.preview,
+                           function(browser) {
+                             self._onPreviewBrowserCreate(browser);
+                           });
+      }
+    }
+  },
+
   _renderPreview : function CM__renderPreview(context, showImmediately) {
     var wasPreviewShown = false;
-    var previewPane = this.__domNodes.preview;
-
-    if (!previewPane)
-      throw new Error("Assertion failed: previewPane is " + previewPane);
 
     try {
       var activeSugg = this.__nlParser.getSentence(this.__hilitedSuggestion);
+
       if (activeSugg) {
-        if (showImmediately) {
-          activeSugg.preview(context, previewPane);
-        } else {
-          var self = this;
-          function queuedPreview() {
-            // Set the preview contents.
-            if (self.__queuedPreview == queuedPreview)
-              activeSugg.preview(context, previewPane);
-          };
-          this.__queuedPreview = queuedPreview;
-          Utils.setTimeout(this.__queuedPreview, activeSugg.previewDelay);
+        var self = this;
+
+        function showPreview() {
+          function postPreviewBrowserCreate() {
+            if (self.__queuedPreview == showPreview) {
+              self.__queuedPreview = null;
+              activeSugg.preview(context,
+                                 self.__previewBrowser.contentDocument.body);
+            }
+          }
+
+          self._ensurePreviewBrowser(postPreviewBrowserCreate);
         }
+
+        this.__queuedPreview = showPreview;
+
+        if (showImmediately)
+          showPreview();
+        else
+          Utils.setTimeout(showPreview, activeSugg.previewDelay);
+
+        // TODO: Fix this.
+        //var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
+        //evt.initEvent("preview-change", false, false);
+        //previewPane.dispatchEvent(evt);
+
+        wasPreviewShown = true;
       }
-
-      var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
-      evt.initEvent("preview-change", false, false);
-      previewPane.dispatchEvent(evt);
-
-      wasPreviewShown = true;
     } catch (e) {
       this.__msgService.displayMessage(
         {text: ("An exception occurred while previewing the command '" +
