@@ -68,10 +68,14 @@ function ubiquitySetup()
     []
   );
 
+  var previewIframe = document.getElementById("cmd-preview");
+  var previewBlock = previewIframe.contentDocument
+                     .getElementById("ubiquity-preview");
 
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
-                                      nlParser);
+                                      nlParser,
+                                      previewBlock);
 
   //Install skin detector
   var skinService = new jsm.SkinSvc(window);
@@ -99,10 +103,6 @@ function ubiquitySetup()
             .displayMessage("Loading your current skin failed." +
                             "The default skin will be loaded.");
   }
-
-  var previewIframe = document.getElementById("cmd-preview");
-  var previewBlock = previewIframe.contentDocument
-                     .getElementById("ubiquity-preview");
 
   function resizePreview() {
     previewIframe.height = previewIframe.contentDocument.height;
@@ -135,8 +135,7 @@ function ubiquitySetup()
   gUbiquity = new Ubiquity(
     document.getElementById("transparent-msg-panel"),
     document.getElementById("cmd-entry"),
-    cmdMan,
-    previewBlock
+    cmdMan
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
 

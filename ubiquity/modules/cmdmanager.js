@@ -41,13 +41,14 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-function CommandManager(cmdSource, msgService, parser) {
+function CommandManager(cmdSource, msgService, parser, previewBlock) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
   this.__nlParser = parser;
   this.__queuedPreview = null;
+  this.__previewBlock = previewBlock;
 
   function onCommandsReloaded() {
     parser.setCommandList(cmdSource.getAllCommands());
@@ -57,6 +58,8 @@ function CommandManager(cmdSource, msgService, parser) {
   cmdSource.addListener("feeds-reloaded", onCommandsReloaded);
   onCommandsReloaded();
 
+  this.resetPreview();
+
   // TODO: Need to add a finalize() method to this class, or else
   // we'll create memory leaks when a window with this instance closes
   // and the command source is still holding a reference to us. Either
@@ -65,26 +68,35 @@ function CommandManager(cmdSource, msgService, parser) {
 }
 
 CommandManager.prototype = {
+  __DEFAULT_PREVIEW: ("<div class=\"help\">" +
+                      "Type the name of a command and press enter to " +
+                      "execute it, or <b>help</b> for assistance." +
+                      "</div>"),
+
+  resetPreview: function CM_resetPreview() {
+    this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
+  },
+
   refresh : function CM_refresh() {
     this.__cmdSource.refresh();
     this.__hilitedSuggestion = 0;
     this.__lastInput = "";
   },
 
-  moveIndicationUp : function CM_moveIndicationUp(context, previewBlock) {
+  moveIndicationUp : function CM_moveIndicationUp(context) {
     this.__hilitedSuggestion -= 1;
     if (this.__hilitedSuggestion < 0) {
       this.__hilitedSuggestion = this.__nlParser.getNumSuggestions() - 1;
     }
-    this._previewAndSuggest(context, previewBlock, true);
+    this._previewAndSuggest(context, true);
   },
 
-  moveIndicationDown : function CM_moveIndicationDown(context, previewBlock) {
+  moveIndicationDown : function CM_moveIndicationDown(context) {
     this.__hilitedSuggestion += 1;
     if (this.__hilitedSuggestion > this.__nlParser.getNumSuggestions() - 1) {
       this.__hilitedSuggestion = 0;
     }
-    this._previewAndSuggest(context, previewBlock, true);
+    this._previewAndSuggest(context, true);
   },
 
   _renderSuggestions : function CMD__renderSuggestions(elem) {
@@ -111,21 +123,25 @@ CommandManager.prototype = {
     elem.innerHTML = content;
   },
 
-  _renderPreview : function CM__renderPreview(context, previewBlock, showImmediately) {
-    var doc = previewBlock.ownerDocument;
+  _renderPreview : function CM__renderPreview(context, showImmediately) {
+    var doc = this.__previewBlock.ownerDocument;
     var wasPreviewShown = false;
+    var previewPane = doc.getElementById("preview-pane");
+
+    if (!previewPane)
+      throw new Error("Assertion failed: previewPane is " + previewPane);
 
     try {
       var activeSugg = this.__nlParser.getSentence(this.__hilitedSuggestion);
       if (activeSugg) {
         if (showImmediately) {
-          activeSugg.preview(context, doc.getElementById("preview-pane"));
+          activeSugg.preview(context, previewPane);
         } else {
           var self = this;
           function queuedPreview() {
             // Set the preview contents.
             if (self.__queuedPreview == queuedPreview)
-              activeSugg.preview(context, doc.getElementById("preview-pane"));
+              activeSugg.preview(context, previewPane);
           };
           this.__queuedPreview = queuedPreview;
           Utils.setTimeout(this.__queuedPreview, activeSugg.previewDelay);
@@ -134,7 +150,7 @@ CommandManager.prototype = {
 
       var evt = doc.createEvent("HTMLEvents");
       evt.initEvent("preview-change", false, false);
-      doc.getElementById("preview-pane").dispatchEvent(evt);
+      previewPane.dispatchEvent(evt);
 
       wasPreviewShown = true;
     } catch (e) {
@@ -147,7 +163,8 @@ CommandManager.prototype = {
     return wasPreviewShown;
   },
 
-  _previewAndSuggest : function CM__previewAndSuggest(context, previewBlock) {
+  _previewAndSuggest : function CM__previewAndSuggest(context) {
+    var previewBlock = this.__previewBlock;
     var doc = previewBlock.ownerDocument;
     if (!doc.getElementById("suggestions")) {
       // Set the initial contents of the preview block.
@@ -158,42 +175,38 @@ CommandManager.prototype = {
 
     this._renderSuggestions(doc.getElementById("suggestions"));
 
-    return this._renderPreview(context, previewBlock);
+    return this._renderPreview(context);
   },
 
   reset : function CM_reset() {
     this.__nlParser.reset();
   },
 
-  updateInput : function CM_updateInput(input, context, previewBlock,
-                                        asyncSuggestionCb) {
-    /* Return true if we created any suggestions, false if we didn't
-     * or if we had nowhere to put them.
-     */
+  updateInput : function CM_updateInput(input, context, asyncSuggestionCb) {
     this.__lastInput = input;
     this.__nlParser.updateSuggestionList(input, context, asyncSuggestionCb);
     this.__hilitedSuggestion = 0;
+    var shouldResetPreview;
     if ( this.__nlParser.getNumSuggestions() == 0 )
-      return false;
-    if (previewBlock)
-      return this._previewAndSuggest(context, previewBlock);
+      shouldResetPreview = true;
     else
-      return false;
+      shouldResetPreview = !this._previewAndSuggest(context);
+    if (shouldResetPreview)
+      this.resetPreview();
   },
 
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
-                                                          context,
-                                                          previewBlock) {
+                                                          context) {
     // Called when we're notified of a newly incoming suggestion
     this.__nlParser.refreshSuggestionList(input);
-    if (previewBlock)
-      this._previewAndSuggest(context, previewBlock);
+    this._previewAndSuggest(context);
   },
 
   execute : function CM_execute(context) {
     var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
     if (!parsedSentence)
-      this.__msgService.displayMessage("No command called " + this.__lastInput + ".");
+      this.__msgService.displayMessage("No command called " +
+                                       this.__lastInput + ".");
     else
       try {
 	this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
@@ -217,8 +230,7 @@ CommandManager.prototype = {
     return this.__nlParser.getSuggestionList();
   },
 
-  getHilitedSuggestionText : function CM_getHilitedSuggestionText(context,
-                                                            previewBlock) {
+  getHilitedSuggestionText : function CM_getHilitedSuggestionText(context) {
     if(!this.hasSuggestions())
       return null;
 
@@ -226,8 +238,7 @@ CommandManager.prototype = {
     var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
                                   .getCompletionText(selObj);
     this.updateInput(suggText,
-                     context,
-                     previewBlock);
+                     context);
 
     return suggText;
   },
