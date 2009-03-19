@@ -41,7 +41,7 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-function makePreviewBrowser(unsafePblock, cb, url) {
+function makePreviewBrowser(unsafePblock, cb) {
   var previewWindow = null;
   var previewBlock = null;
   var xulIframe = null;
@@ -50,13 +50,10 @@ function makePreviewBrowser(unsafePblock, cb, url) {
   var width = 490;
   var height = 500;
 
-  if (!url) {
-    url = ('data:text/html,' +
-           '<html><body class="ubiquity-preview-content" ' +
-           'style="overflow: hidden; margin: 0; padding: 0;">' +
-           '</body></html>');
-  } else
-    url = Utils.url(url).spec;
+  var url = ('data:text/html,' +
+             '<html><body class="ubiquity-preview-content" ' +
+             'style="overflow: hidden; margin: 0; padding: 0;">' +
+             '</body></html>');
 
   function onXulLoaded(event) {
     browser = xulIframe.contentDocument.createElement("browser");
@@ -249,10 +246,12 @@ CommandManager.prototype = {
         else
           Utils.setTimeout(showPreview, activeSugg.previewDelay);
 
-        // TODO: Fix this.
-        //var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
-        //evt.initEvent("preview-change", false, false);
-        //previewPane.dispatchEvent(evt);
+        if (this.__previewBrowser) {
+          var previewPane = this.__previewBrowser.contentDocument.body;
+          var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
+          evt.initEvent("preview-change", false, false);
+          previewPane.dispatchEvent(evt);
+        }
 
         wasPreviewShown = true;
       }
