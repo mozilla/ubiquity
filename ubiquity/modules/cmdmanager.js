@@ -142,6 +142,10 @@ CommandManager.prototype = {
       this.__domNodes.suggs.style.display = "none";
       this.__domNodes.preview.style.display = "none";
       this.__domNodes.help.style.display = "block";
+      if (this.__previewBrowser)
+        this._queuePreview(null,
+                           0,
+                           function(pblock) { pblock.innerHTML = ""; });
       break;
     default:
       throw new Error("Unknown state: " + state);
@@ -245,7 +249,49 @@ CommandManager.prototype = {
     }
   },
 
-  _renderPreview : function CM__renderPreview(context, showImmediately) {
+  _queuePreview : function CM__queuePreview(url, delay, cb) {
+    var self = this;
+
+    function showPreview() {
+      self._ensurePreviewBrowser(
+        function() {
+          if (self.__queuedPreview == showPreview) {
+            if (url)
+              url = Utils.url(url).spec;
+            else
+              url = DEFAULT_PREVIEW_BROWSER_URL;
+
+            self._ensurePreviewBrowserUrlLoaded(
+              url,
+              function() {
+                if (self.__queuedPreview == showPreview) {
+                  self.__queuedPreview = null;
+                  cb(self.__previewBrowser.contentDocument.body);
+                }
+              });
+          }
+        });
+    }
+
+    this.__queuedPreview = showPreview;
+
+    if (this.__previewBrowser &&
+        this.__previewBrowser.contentDocument) {
+      var previewPane = this.__previewBrowser.contentDocument.body;
+      if (previewPane) {
+        var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
+        evt.initEvent("preview-change", false, false);
+        previewPane.dispatchEvent(evt);
+      }
+    }
+
+    if (delay)
+      Utils.setTimeout(showPreview, delay);
+    else
+      showPreview();
+  },
+
+  _renderPreview : function CM__renderPreview(context) {
     var wasPreviewShown = false;
 
     try {
@@ -253,48 +299,13 @@ CommandManager.prototype = {
 
       if (activeSugg) {
         var self = this;
+        var previewUrl = activeSugg.previewUrl;
 
-        function showPreview() {
-          self._ensurePreviewBrowser(
-            function() {
-              if (self.__queuedPreview == showPreview) {
-                var previewUrl;
-                if (activeSugg.previewUrl)
-                  previewUrl = Utils.url(activeSugg.previewUrl).spec;
-                else
-                  previewUrl = DEFAULT_PREVIEW_BROWSER_URL;
-
-                self._ensurePreviewBrowserUrlLoaded(
-                  previewUrl,
-                  function() {
-                    if (self.__queuedPreview == showPreview) {
-                      self.__queuedPreview = null;
-
-                      activeSugg.preview(context,
-                                         self.__previewBrowser
-                                         .contentDocument.body);
-                    }
-                  });
-              }
-            });
-        }
-
-        this.__queuedPreview = showPreview;
-
-        if (this.__previewBrowser &&
-            this.__previewBrowser.contentDocument) {
-          var previewPane = this.__previewBrowser.contentDocument.body;
-          if (previewPane) {
-            var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
-            evt.initEvent("preview-change", false, false);
-            previewPane.dispatchEvent(evt);
-          }
-        }
-
-        if (showImmediately)
-          showPreview();
-        else
-          Utils.setTimeout(showPreview, activeSugg.previewDelay);
+        this._queuePreview(
+          previewUrl,
+          activeSugg.previewDelay,
+          function(pblock) { activeSugg.preview(context, pblock); }
+        );
 
         wasPreviewShown = true;
       }
