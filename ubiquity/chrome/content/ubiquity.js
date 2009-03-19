@@ -230,7 +230,7 @@ Ubiquity.prototype = {
   openWindow: function openWindow(anchor) {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
-    this.__cmdManager.resetPreview();
+    this.__cmdManager.setPreviewState("no-suggestions");
 
     this.__msgPanel.hidden = false;
     this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);

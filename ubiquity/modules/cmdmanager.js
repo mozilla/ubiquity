@@ -58,7 +58,7 @@ function CommandManager(cmdSource, msgService, parser, previewBlock) {
   cmdSource.addListener("feeds-reloaded", onCommandsReloaded);
   onCommandsReloaded();
 
-  this.resetPreview();
+  this.setPreviewState("no-suggestions");
 
   // TODO: Need to add a finalize() method to this class, or else
   // we'll create memory leaks when a window with this instance closes
@@ -68,13 +68,25 @@ function CommandManager(cmdSource, msgService, parser, previewBlock) {
 }
 
 CommandManager.prototype = {
-  __DEFAULT_PREVIEW: ("<div class=\"help\">" +
-                      "Type the name of a command and press enter to " +
-                      "execute it, or <b>help</b> for assistance." +
-                      "</div>"),
-
-  resetPreview: function CM_resetPreview() {
-    this.__previewBlock.innerHTML = this.__DEFAULT_PREVIEW;
+  setPreviewState: function CM_setPreviewState(state) {
+    var doc = this.__previewBlock.ownerDocument;
+    var previewPane = doc.getElementById("preview-pane");
+    var suggestions = doc.getElementById("suggestions");
+    var help = doc.getElementById("help");
+    switch (state) {
+    case "with-suggestions":
+      suggestions.style.display = "block";
+      previewPane.style.display = "block";
+      help.style.display = "none";
+      break;
+    case "no-suggestions":
+      suggestions.style.display = "none";
+      previewPane.style.display = "none";
+      help.style.display = "block";
+      break;
+    default:
+      throw new Error("Unknown state: " + state);
+    }
   },
 
   refresh : function CM_refresh() {
@@ -166,12 +178,6 @@ CommandManager.prototype = {
   _previewAndSuggest : function CM__previewAndSuggest(context) {
     var previewBlock = this.__previewBlock;
     var doc = previewBlock.ownerDocument;
-    if (!doc.getElementById("suggestions")) {
-      // Set the initial contents of the preview block.
-      previewBlock.innerHTML = ('<div id="suggestions"></div>' +
-                                '<div id="preview-pane" ' +
-                                'class="ubiquity-preview-content"></div>');
-    }
 
     this._renderSuggestions(doc.getElementById("suggestions"));
 
@@ -186,13 +192,11 @@ CommandManager.prototype = {
     this.__lastInput = input;
     this.__nlParser.updateSuggestionList(input, context, asyncSuggestionCb);
     this.__hilitedSuggestion = 0;
-    var shouldResetPreview;
-    if ( this.__nlParser.getNumSuggestions() == 0 )
-      shouldResetPreview = true;
-    else
-      shouldResetPreview = !this._previewAndSuggest(context);
-    if (shouldResetPreview)
-      this.resetPreview();
+    var previewState = "no-suggestions";
+    if (this.__nlParser.getNumSuggestions() > 0 &&
+        this._previewAndSuggest(context))
+      previewState = "with-suggestions";
+    this.setPreviewState(previewState);
   },
 
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
