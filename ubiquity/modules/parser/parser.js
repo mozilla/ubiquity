@@ -809,7 +809,7 @@ NLParser.Verb.prototype = {
       return cmd.previewDelay;
     });
     this.__defineGetter__("previewUrl", function() {
-      return cmd.previewUrl;
+      return cmd.previewUrl ? cmd.previewUrl : null;
     });
     this.__defineGetter__("disabled", function() {
       if("disabled" in cmd)
