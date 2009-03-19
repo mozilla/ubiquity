@@ -158,11 +158,13 @@ function ubiquitySetup()
   if (xulr.OS == "Linux")
     document.getElementById("transparent-msg-panel")
             .style.backgroundColor = "#444";
-}
 
-function ubiquityTeardown()
-{
-  /* TODO: Remove event listeners. */
+  function ubiquityTeardown() {
+    window.removeEventListener("unload", ubiquityTeardown, false);
+    cmdMan.finalize();
+  }
+
+  window.addEventListener("unload", ubiquityTeardown, false);
 }
 
 function ubiquityKeydown(aEvent)
@@ -224,5 +226,4 @@ window.addEventListener(
   false
 );
 
-window.addEventListener("unload", ubiquityTeardown, false);
 window.addEventListener("keydown", ubiquityKeydown, true);

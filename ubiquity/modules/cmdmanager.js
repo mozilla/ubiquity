@@ -123,11 +123,17 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
 
   this.setPreviewState("no-suggestions");
 
-  // TODO: Need to add a finalize() method to this class, or else
-  // we'll create memory leaks when a window with this instance closes
-  // and the command source is still holding a reference to us. Either
-  // that or perhaps nsIObservers are weak references and we can
-  // change eventhub to use those instead.
+  this.finalize = function CM_finalize() {
+    cmdSource.removeListener("feeds-reloaded", onCommandsReloaded);
+    this.__cmdSource = null;
+    this.__msgService = null;
+    this.__nlParser = null;
+    this.__queuedPreview = null;
+    this.__previewBrowser = null;
+    this.__previewBrowserCreatedCallback = null;
+    this.__previewBrowserUrlLoadedCallback = null;
+    this.__domNodes = null;
+  };
 }
 
 CommandManager.prototype = {
