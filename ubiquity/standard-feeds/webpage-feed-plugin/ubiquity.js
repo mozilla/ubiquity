@@ -1,16 +1,13 @@
 var Ubiquity = {
   registerPreview: function registerPreview(callback) {
-    var element = document.createElement("div");
-    element.className = "preview";
-    element.style.display = "none";
-
-    var container = document.documentElement;
-    container.appendChild(element);
-
-    element.addEventListener(
+    if (!document.body.className)
+      document.body.className = "ubiquity-preview-content";
+    document.body.addEventListener(
       "DOMNodeInserted",
       function(aEvt) {
         var target = aEvt.target;
+        if (target.className != "update-preview")
+          return;
         target.parentNode.removeChild(target);
         var cmd = target.getAttribute("command");
         var directObj = {text: target.getAttribute("directObjText"),
@@ -19,10 +16,6 @@ var Ubiquity = {
       },
       false
     );
-
-    var evt = document.createEvent("Events");
-    evt.initEvent("UbiquityEvent", true, false);
-    element.dispatchEvent(evt);
   },
 
   __commandsNode: null,

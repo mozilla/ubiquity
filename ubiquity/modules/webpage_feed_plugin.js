@@ -207,18 +207,29 @@ function Command(div, jQuery, htmlSanitize) {
 
   self.preview = function preview(context, directObject, modifiers,
                                   previewBlock) {
-    var query = $(".preview", div);
-
-    if (query.length) {
-      var preview = query.get(0);
-      if (preview.nodeName == "A") {
-        if (!contentPreview)
-          contentPreview = makeContentPreview(preview.href, self.name);
-        contentPreview(previewBlock, directObject);
-      } else
-        previewBlock.innerHTML = htmlSanitize($(preview).html());
-    }
+    if (self.previewUrl) {
+      var elem = previewBlock.ownerDocument.createElement('div');
+      elem.className = 'update-preview';
+      elem.style.display = "none";
+      elem.setAttribute('command', self.name);
+      elem.setAttribute('directObjText', directObject.text);
+      elem.setAttribute('directObjHtml', directObject.html);
+      previewBlock.appendChild(elem);
+    } else
+      previewBlock.innerHTML = htmlSanitize($(".preview", div).html());
   };
+
+  self.__defineGetter__(
+    "previewUrl",
+    function() {
+      var query = $(".preview", div);
+      if (query.length) {
+        var preview = query.get(0);
+        if (preview.nodeName == "A")
+          return preview.href;
+      }
+      return null;
+    });
 
   self.__defineGetter__(
     "description",
@@ -253,102 +264,8 @@ var noun_arb_text = {
   _name: "text",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
-    var suggestion = CmdUtils.makeSugg(text, html, null,
-                                       selectionIndices);
+    var suggestion = NounUtils.makeSugg(text, html, null,
+                                        selectionIndices);
     return [suggestion];
   }
-};
-
-function makeContentPreview(url, commandName) {
-  var previewWindow = null;
-  var previewBlock = null;
-  var xulIframe = null;
-  var directObj;
-
-  function showPreview() {
-    if (previewBlock) {
-      var elem = previewBlock.ownerDocument.createElement('div');
-      elem.className = 'update-preview';
-      elem.setAttribute('command', commandName);
-      elem.setAttribute('directObjText', directObj.text);
-      elem.setAttribute('directObjHtml', directObj.html);
-      previewBlock.appendChild(elem);
-    }
-  }
-
-  function contentPreview(pblock, aDirectObj) {
-    if( !aDirectObj )
-      aDirectObj = {text:"", html:""};
-
-    // This is meant to be a global, so that it can affect showPreview().
-    directObj = aDirectObj;
-
-    if (previewWindow) {
-      showPreview();
-    } else if (xulIframe) {
-      // We're in the middle of loading the preview window, just
-      // wait and it'll eventually appear.
-    } else {
-      var browser;
-
-      function onUbiquityEvent(event) {
-        previewBlock = event.target;
-      }
-
-      function onXulLoaded(event) {
-        xulIframe.contentDocument.addEventListener(
-          "UbiquityEvent",
-          onUbiquityEvent,
-          false,
-          true
-        );
-
-        browser = xulIframe.contentDocument.createElement("browser");
-        browser.setAttribute("src", url);
-        browser.setAttribute("disablesecurity", true);
-        browser.setAttribute("type", "content");
-        browser.setAttribute("width", 500);
-        browser.setAttribute("height", 500);
-        browser.addEventListener("load",
-                                 onPreviewLoaded,
-                                 true);
-        browser.addEventListener("unload",
-                                 onPreviewUnloaded,
-                                 true);
-
-        xulIframe.contentDocument.documentElement.appendChild(browser);
-      }
-
-      function onXulUnloaded(event) {
-        if (event.target == pblock || event.target == xulIframe)
-          xulIframe = null;
-      }
-
-      function onPreviewLoaded() {
-        previewWindow = browser.contentWindow;
-        showPreview();
-      }
-
-      function onPreviewUnloaded() {
-        previewWindow = null;
-        previewBlock = null;
-      }
-
-      xulIframe = pblock.ownerDocument.createElement("iframe");
-      xulIframe.setAttribute("src",
-                             "chrome://ubiquity/content/content-preview.xul");
-      xulIframe.style.border = "none";
-      xulIframe.setAttribute("width", 500);
-      xulIframe.setAttribute("height", 500);
-
-      xulIframe.addEventListener("load",
-                                 onXulLoaded,
-                                 true);
-      pblock.innerHTML = "";
-      pblock.addEventListener("DOMNodeRemoved", onXulUnloaded, false);
-      pblock.appendChild(xulIframe);
-    }
-  }
-
-  return contentPreview;
 };
