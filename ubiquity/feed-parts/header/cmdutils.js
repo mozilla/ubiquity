@@ -1329,7 +1329,6 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
         pblock.innerHTML = content;
       }
     };
-    options.previewDelay = 10;
   }
 
   options.name = options.name.toLowerCase();
