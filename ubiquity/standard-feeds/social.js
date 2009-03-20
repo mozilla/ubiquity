@@ -32,7 +32,7 @@ CmdUtils.CreateCommand({
       status: statusText,
       chars: TWITTER_STATUS_MAXLEN - statusText.length
     };
-    
+
     if(mods.as){
        previewData.username = mods.as.text;
     }
@@ -69,15 +69,15 @@ CmdUtils.CreateCommand({
       var hash = CmdUtils.getWindow().btoa(tok); //Base64 encode.
       return "Basic " + hash;
     };
-    
-    
+
+
     var auth = null;
-    
+
     if( mods.as && mods.as.data ){
        var login = mods.as.data;
        auth = make_basic_auth(login.username, login.password);
     }
-    
+
 
     jQuery.ajax({
       type: "POST",
@@ -125,7 +125,7 @@ CmdUtils.CreateCommand({
 
   },
   preview: function(pblock) {
-     
+
     var doc = CmdUtils.getDocument();
     var selected_text= doc.getSelection();
     var api_url='http://services.digg.com/stories';
@@ -197,7 +197,7 @@ CmdUtils.CreateCommand({
  * l.m.orchard@pobox.com
  * http://decafbad.com/
  * Share and Enjoy!
- * 
+ *
  * TODO: convert to use xhtml templates
  * TODO: work out how to use suggested tags in the UI
  * TODO: enforce the 1000 character notes limit with a counter
@@ -211,32 +211,32 @@ var cookie_mgr = Components.classes["@mozilla.org/cookiemanager;1"]
     .getService(Components.interfaces.nsICookieManager);
 
 CmdUtils.CreateCommand({
-    
-    name:        
+
+    name:
         'share-on-delicious',
     icon:
         'http://delicious.com/favicon.ico',
-    description: 
+    description:
         'Share the current page as a bookmark on delicious.com',
-    help:        
-        'Select text on the page to use as notes, or enter your own ' + 
-        'text after the command word.  You can also assign tags to the '+ 
-        'bookmark with the "tagged" modifier, and alter the bookmark ' + 
-        'default page title with the "entitled" modifier.  Note that ' + 
+    help:
+        'Select text on the page to use as notes, or enter your own ' +
+        'text after the command word.  You can also assign tags to the '+
+        'bookmark with the "tagged" modifier, and alter the bookmark ' +
+        'default page title with the "entitled" modifier.  Note that ' +
         'you must also already be logged in at delicious.com to use ' +
         'this command.',
 
-    homepage:   
+    homepage:
         'http://decafbad.com',
-    author: { 
-        name: 'Leslie Michael Orchard', 
-        email: 'l.m.orchard@pobox.com' 
+    author: {
+        name: 'Leslie Michael Orchard',
+        email: 'l.m.orchard@pobox.com'
     },
     license:
         'MPL/GPL/LGPL',
 
     takes: { notes: noun_arb_text },
-    modifiers: { 
+    modifiers: {
         tagged:   noun_arb_text,
         entitled: noun_arb_text
     },
@@ -269,27 +269,27 @@ CmdUtils.CreateCommand({
 
         if (!user_name) {
 
-            // If there's no user name, there's no login, so this command won't work. 
-            tmpl = [ 
-                '<p style="color: #d44">No active user found - log in at ', 
+            // If there's no user name, there's no login, so this command won't work.
+            tmpl = [
+                '<p style="color: #d44">No active user found - log in at ',
                 '<img src="http://delicious.com/favicon.ico"> ',
-                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ', 
+                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ',
                 'to use this command.</p>'
             ].join('');
 
         } else if (!bm.description) {
 
             // If there's no title, somehow, then this is an error too.
-            tmpl = [ 
-                '<p style="color: #d44">A title is required for bookmarks on ', 
-                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ', 
+            tmpl = [
+                '<p style="color: #d44">A title is required for bookmarks on ',
+                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ',
                 '</p>'
             ].join('');
 
         } else {
 
             // Attempt to construct a vaguely delicious-esque preview of a bookmark.
-            tmpl = [ 
+            tmpl = [
                 '<style type="text/css">',
                     '.preview a { color: #3774D0 }',
                     '.del-bookmark { font: 12px arial; color: #ddd; background: #eee; line-height: 1.25em }',
@@ -305,7 +305,7 @@ CmdUtils.CreateCommand({
                         '<div style="padding: 1em;">',
                         '<a class="title" href="${bm.url}">${bm.description}</a>',
                         '<a class="full-url" href="${bm.url}">${bm.url}</a>',
-                        bm.extended ? 
+                        bm.extended ?
                             '<div class="notes">${bm.extended}</div>' : '',
                         bm.tags ?
                             '<div class="tags"><span>tags:</span> ${bm.tags}</div>' : '',
@@ -317,9 +317,9 @@ CmdUtils.CreateCommand({
 
         pblock.innerHTML = CmdUtils.renderTemplate(tmpl, ns);
     },
-    
+
     /**
-     * Attempt to use the delicious v1 API to post a bookmark using the 
+     * Attempt to use the delicious v1 API to post a bookmark using the
      * command input
      */
     execute: function(input_obj, mods) {
@@ -328,7 +328,7 @@ CmdUtils.CreateCommand({
         var user_name   = (user_cookie) ? user_cookie.split(' ')[0] : '';
 
         if (!user_name) {
-            // If there's no user name, there's no login, so this command won't work. 
+            // If there's no user name, there's no login, so this command won't work.
             displayMessage('No active user found - log in at delicious.com ' +
                 'to use this command.');
             return false;
@@ -351,14 +351,14 @@ CmdUtils.CreateCommand({
         var _this = this;
         var onload, onerror;
 
-        req.onload  = onload  = function(ev) { 
-            displayMessage('Bookmark "' + bm.description + '" ' + 
+        req.onload  = onload  = function(ev) {
+            displayMessage('Bookmark "' + bm.description + '" ' +
                 'shared at delicious.com/' + user_name);
         }
 
-        req.onerror = onerror = function(ev) { 
+        req.onerror = onerror = function(ev) {
             // TODO: more informative reporting on errors
-            displayMessage('ERROR: Bookmark "' + bm.description + '" ' + 
+            displayMessage('ERROR: Bookmark "' + bm.description + '" ' +
                 ' NOT shared on delicious.com/' + user_name);
         }
 
@@ -372,7 +372,7 @@ CmdUtils.CreateCommand({
         var win = mediator.getMostRecentWindow(null);
         var user_agent = win.navigator.userAgent + ";Ubiquity-share-on-delicious";
 
-        req.setRequestHeader("User-Agent", user_agent);      
+        req.setRequestHeader("User-Agent", user_agent);
 
         req.send(this._buildQueryString(bm));
     },
@@ -389,9 +389,9 @@ CmdUtils.CreateCommand({
                 context.focusedWindow.location,
             description:
                 mods.entitled.text || context.focusedWindow.document.title,
-            extended: 
+            extended:
                 input_obj.text ? '"' + input_obj.text + '"' : '',
-            tags: 
+            tags:
                 mods.tagged.text
         };
     },
@@ -403,8 +403,8 @@ CmdUtils.CreateCommand({
         var iter = cookie_mgr.enumerator;
         while (iter.hasMoreElements()) {
             var cookie = iter.getNext();
-            if( cookie instanceof Components.interfaces.nsICookie && 
-                cookie.host.indexOf(this._config.cookie_domain) != -1 && 
+            if( cookie instanceof Components.interfaces.nsICookie &&
+                cookie.host.indexOf(this._config.cookie_domain) != -1 &&
                 cookie.name == this._config.cookie_name) {
                 return decodeURIComponent(cookie.value);
             }
@@ -416,12 +416,154 @@ CmdUtils.CreateCommand({
      */
     _buildQueryString: function(data) {
         var qs = [];
-        for (k in data) if (data[k]) 
-            qs.push( encodeURIComponent(k) + '=' + 
+        for (k in data) if (data[k])
+            qs.push( encodeURIComponent(k) + '=' +
                 encodeURIComponent(data[k]) );
         return qs.join('&');
     },
 
     EOF:null // I hate trailing commas
 
+});
+
+// max 100 chars for question
+const RYPPLE_QUESTION_MAXLEN = 100;
+const RYPPLE_ATTRIBUTE_MAX = 3;
+
+CmdUtils.CreateCommand({
+  name: "rypple-ask",
+  synonym: "ask-rypple",
+  takes: {"question": noun_arb_text},
+  icon: "https://www.rypple.com/feedback/images/favicon.ico",
+  description: "Asks a question on Rypple",
+  help: "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in",
+  homepage: "http://www.rypple.com/ubiquity/ask.html",
+
+  _parse: function (character, text) {
+    // parse text
+    var values = [];
+    var startIndex = 0;
+    var textLeft = '';
+    var lastIndex = startIndex;
+    do {
+      startIndex = text.indexOf(character, endIndex);
+      var endIndex = startIndex;
+      if (startIndex >= 0) {
+        var endIndex = text.indexOf(' ', startIndex);
+        if (endIndex < 0) {
+          endIndex = text.length;
+        }
+        var value = text.substring(startIndex + 1, endIndex);
+        if (value.length > 0) {
+          values.push(value);
+        }
+
+        textLeft += text.substring(lastIndex, startIndex);
+        lastIndex = endIndex + 1;
+      }
+    } while (startIndex >= 0);
+
+    // concat last chunk of text after last found item
+    if (lastIndex != text.length) {
+      textLeft += text.substring(lastIndex, text.length);
+    }
+
+    var parsed = [];
+    parsed.values = values;
+    parsed.textLeft = textLeft;
+    return parsed;
+  },
+
+  preview: function( previewBlock, entry ) {
+    // parse entry text
+    var parsedContacts = this._parse('@', entry.text);
+    var parsedAttr = this._parse('#', parsedContacts.textLeft);
+    var question = parsedAttr.textLeft;
+
+    // output preview
+    var template = '{if errorMsg}<span style="color: red;"><br />${errorMsg}<br/></span>{/if}';
+    template +=    '<b>Asks the following question (${charsLeft} characters left):</b><br/>';
+    template +=    '{if question != ""}${question}{else}NO QUESTION. PLEASE ENTER A QUESTION.{/if}<br/>';
+    template +=    '<br/>';
+    template +=    '<b>To:</b><br/>';
+    template +=    '{for c in contacts}${c}, {forelse}NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE.{/for}<br/>';
+    template +=    '<br/>';
+    template +=     '<b>Attributes:</b><br/>';
+    template +=    '{for a in attributes}${a}, {forelse}NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE.{/for}<br/>';
+    template +=    '<br/>';
+    template +=    '<br/>';
+    template +=    '<hr/>';
+    template +=    '<b>Usage:</b><br/>';
+    template +=    'rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;<br/>';
+    template +=    'Recipients must start with \'@\' and at least one recipient is required.<br/>';
+    template +=    'Attributes must start with \'#\' and at least one attribute is required.<br/>';
+
+    var charsLeft = RYPPLE_QUESTION_MAXLEN - question.length;
+    var errorMsg = "";
+    if (charsLeft < 0) {
+        errorMsg += "The last <b>" + charsLeft * -1 + "</b> character(s) of your question will be truncated!<br/>";
+    }
+    if (parsedAttr.values.length > RYPPLE_ATTRIBUTE_MAX) {
+        errorMsg += "The last <b>" + (parsedAttr.values.length - RYPPLE_ATTRIBUTE_MAX) + "</b> attributes(s) will not be used!<br/>";
+    }
+    var data = {
+      question : question,
+      contacts : parsedContacts.values,
+      attributes : parsedAttr.values,
+      charsLeft: charsLeft,
+      errorMsg : errorMsg
+    };
+
+    previewBlock.innerHTML = CmdUtils.renderTemplate( template, data );
+  },
+
+  //TODO email format validation, tags w/ spaces, msg format: @ character, advice/rated
+  execute: function(entry) {
+    // parse entry text
+    var parsedContacts = this._parse('@', entry.text);
+    var parsedAttr = this._parse('#', parsedContacts.textLeft);
+    var question = parsedAttr.textLeft;
+
+    // validation
+    if (parsedContacts.values.length < 1) {
+      displayMessage("At least one recipient is required");
+      return;
+    }
+    if (parsedAttr.values.length < 1) {
+      displayMessage("At least one attribute is required");
+      return;
+    }
+    if (question.length < 1) {
+      displayMessage("No question specified");
+      return;
+    }
+
+    var updateUrl = "https://www.rypple.com/feedback/api/v1/feedback";
+
+    var updateParams = {
+      recipients: parsedContacts.values,
+      attributes: parsedAttr.values.slice(0,RYPPLE_ATTRIBUTE_MAX),
+      title: question.substring(0, RYPPLE_QUESTION_MAXLEN),
+      type: "ADVICE"
+    };
+
+    jQuery.ajax({
+      type: "POST",
+      processData: false,
+      contentType: "application/json",
+      url: updateUrl,
+      data: Utils.encodeJson(updateParams),
+      dataType: "json",
+      error: function() {
+          displayMessage("Rypple error - are you logged in?");
+      },
+      success: function(returnValue ) {
+        if (returnValue.success) {
+          displayMessage("Asked Question Successfully on Rypple");
+        } else {
+          displayMessage("Rypple error - are you logged in?");
+        }
+      }
+    });
+  }
 });
