@@ -249,8 +249,11 @@ Utils.__timerData = {
 // * {{{base}}} is a string or {{{nsIURI}}} representing an absolute
 //   URL, which is used as the base URL for the {{{uri}}} keyword
 //   argument.
+//
+// An optional second argument may also be passed in, which specifies
+// a default URL to return if the given URL can't be parsed.
 
-Utils.url = function url(spec) {
+Utils.url = function url(spec, defaultUri) {
   var base = null;
   if (typeof(spec) == "object") {
     if (spec instanceof Ci.nsIURI)
@@ -258,13 +261,19 @@ Utils.url = function url(spec) {
       return spec;
 
     // Assume jQuery-style dictionary with keyword args was passed in.
-    base = Utils.url(spec.base);
+    base = spec.base ? Utils.url(spec.base, defaultUri) : null;
     spec = spec.uri ? spec.uri : null;
   }
 
   var ios = Cc["@mozilla.org/network/io-service;1"]
     .getService(Ci.nsIIOService);
-  return ios.newURI(spec, null, base);
+
+  try {
+    return ios.newURI(spec, null, base);
+  } catch (e if (e.result == Components.results.NS_ERROR_MALFORMED_URI) &&
+           defaultUri) {
+    return Utils.url(defaultUri);
+  }
 };
 
 // ** {{{ Utils.openUrlInBrowser() }}} **

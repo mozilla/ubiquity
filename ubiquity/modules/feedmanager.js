@@ -472,7 +472,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // Read-only.
 
   var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
-  feedInfo.srcUri = Utils.url(val);
+  feedInfo.srcUri = Utils.url(val, "data:text/plain,");
 
   // === {{{Feed.canAutoUpdate}}} ===
   //
