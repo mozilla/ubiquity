@@ -5,6 +5,21 @@ var Utils = {};
   // Let's "subclass" the Utils JS module.
   var jsm = {};
   Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
+
+  // Just like the standard Utils.url, only if we get a malformed URI
+  // error, we'll try re-evaluating the string using a base URI of the
+  // feed making the call.
+  Utils.url = function url(obj) {
+    if (typeof(obj) != "string")
+      return jsm.Utils.url(obj);
+
+    try {
+      return jsm.Utils.url(obj);
+    } catch (e if e.result == Components.results.NS_ERROR_MALFORMED_URI) {
+      return jsm.Utils.url({uri: obj, base: feed.id});
+    }
+  };
+
   Utils.__proto__ = jsm.Utils;
 })();
 

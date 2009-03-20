@@ -819,6 +819,11 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
     };
   }
 
+  if (execute.previewUrl)
+    // Call our "patched' Utils.url(), which has the ability
+    // to base a relative URL on the current feed's URL.
+    execute.previewUrl = Utils.url(execute.previewUrl);
+
   globalObj["cmd_" + options.name] = execute;
 };
 

@@ -17,7 +17,7 @@ CmdUtils.CreateCommand({
 
     Utils.openUrlInBrowser( url );
   },
-  previewUrl: Utils.url({uri: "templates/map.html", base: feed.id}),
+  previewUrl: "templates/map.html",
   preview: function(pblock, dobj, modifers) {
       // TODO: This isn't terribly safe; ideally, we should be communicating
       // with the other page via DOM events, etc.
