@@ -132,6 +132,7 @@ RemoteUriCodeSource.prototype = {
       var self = this;
       self._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
                   .createInstance(Ci.nsIXMLHttpRequest);
+      self._req.mozBackgroundRequest = true;
       self._req.open('GET', this._feedInfo.srcUri.spec, true);
       self._req.overrideMimeType("text/plain");
 

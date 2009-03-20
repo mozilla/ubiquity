@@ -898,6 +898,20 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
     else
       newOptions[key] = options[key];
   }
+
+  var wrappedXhr;
+  if (newOptions.xhr)
+    wrappedXhr = newOptions.xhr;
+  else
+    wrappedXhr = function() { return new XMLHttpRequest(); };
+
+  function backgroundXhr() {
+    var newXhr = wrappedXhr.apply(this, arguments);
+    newXhr.mozBackgroundRequest = true;
+    return newXhr;
+  }
+  newOptions.xhr = backgroundXhr;
+
   xhr = jQuery.ajax(newOptions);
   return xhr;
 };
@@ -917,14 +931,12 @@ CmdUtils.previewGet = function previewGet(pblock,
                                           data,
                                           callback,
                                           type) {
-  var xhr;
-  function abort() {
-    if (xhr)
-      xhr.abort();
-  }
-  var cb = CmdUtils.previewCallback(pblock, callback, abort);
-  xhr = jQuery.get(url, data, cb, type);
-  return xhr;
+  return CmdUtils.previewAjax(pblock,
+                              {type: "GET",
+                               url: url,
+                               data: data,
+                               success: callback,
+                               dataType: type});
 };
 
 
@@ -943,14 +955,17 @@ CmdUtils.previewPost = function previewPost(pblock,
                                             data,
                                             callback,
                                             type) {
-  var xhr;
-  function abort() {
-    if (xhr)
-      xhr.abort();
+  if ( jQuery.isFunction( data ) ) {
+    callback = data;
+    data = {};
   }
-  var cb = CmdUtils.previewCallback(pblock, callback, abort);
-  xhr = jQuery.post(url, data, cb, type);
-  return xhr;
+
+  return CmdUtils.previewAjax(pblock,
+                              {type: "POST",
+                               url: url,
+                               data: data,
+                               success: callback,
+                               dataType: type});
 };
 
 
