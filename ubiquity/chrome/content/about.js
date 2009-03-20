@@ -95,6 +95,14 @@ function makeFeedListElement(info, label, clickMaker) {
     return linkToHtml;
   }
 
+  function addLinkToAction(text, action) {
+    var linkToAction = document.createElement("span");
+    $(linkToAction).text(text);
+    $(linkToAction).click(action);
+    $(linkToAction).css({cursor: "pointer", color: "#aaa"});
+    $(li).append(linkToAction);
+  }
+
   var titleLink = addLink(info.title, info.uri.spec);
 
   if (label == "unsubscribe" && !info.canAutoUpdate) {
@@ -111,11 +119,14 @@ function makeFeedListElement(info, label, clickMaker) {
     $(commandList).append($("<li></li>").text(name));
   $(li).append(commandList);
 
-  var linkToAction = document.createElement("span");
-  $(linkToAction).text("[" + label + "]");
-  $(linkToAction).click(clickMaker(li, info));
-  $(linkToAction).css({cursor: "pointer", color: "#aaa"});
-  $(li).append(linkToAction);
+  addLinkToAction("[" + label + "]", clickMaker(li, info));
+
+  if (label == "resubscribe") {
+    $(li).append(" ");
+    addLinkToAction("[purge]",
+                    function() { $(li).slideUp("slow");
+                                 info.purge(); });
+  }
 
   var sourceUrl;
   var sourceName;
