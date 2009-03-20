@@ -760,6 +760,13 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // display it once the user has stopped typing for a bit. If
 // {{{options.preview}}} isn't a function, then this option is
 // ignored.
+//
+// {{{ options.previewUrl }}} Specifies the URL which the preview
+// pane's browser should load before calling the command's preview
+// function. When the command's preview function is called, its
+// {{{pblock}}} argument will be the {{{<body>}}} node of this URL's
+// document. This can also be a relative URL, in which case it will be
+// based off the URL from which the feed is being retrieved.
 
 CmdUtils.CreateCommand = function CreateCommand( options ) {
   var globalObj = CmdUtils.__globalObject;
