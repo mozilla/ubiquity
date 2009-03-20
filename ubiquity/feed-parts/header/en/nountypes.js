@@ -435,7 +435,8 @@ var LanguageCodes = {
   'spanish' : 'es',
   'swedish' : 'sv',
   'ukranian' : 'uk',
-  'vietnamese' : 'vi'
+  'vietnamese' : 'vi',
+  'simple english' : 'simple'
 };
 
 var noun_type_language =  {
