@@ -42,7 +42,7 @@ function finishCommand(srcCommand) {
   var cmd = new Object();
 
   // Default delay to wait before calling a preview function, in ms.
-  var DEFAULT_PREVIEW_DELAY = 250;
+  var DEFAULT_PREVIEW_DELAY = 150;
 
   var propsToInherit = [
     "DOLabel",

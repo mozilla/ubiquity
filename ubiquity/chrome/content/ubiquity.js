@@ -52,6 +52,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__needsToExecute = false;
   this.__showCount = 0;
   this.__lastValue = null;
+  this.__previewTimerID = -1;
 
   var self = this;
 
@@ -85,6 +86,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 }
 
 Ubiquity.prototype = {
+  __PROCESS_INPUT_DELAY: 50,
   __KEYCODE_ENTER: 13,
   __KEYCODE_UP: 38,
   __KEYCODE_DOWN: 40,
@@ -139,13 +141,14 @@ Ubiquity.prototype = {
                keyCode == this.__KEYCODE_DOWN ||
                keyCode == this.__KEYCODE_TAB) {
     } else
-      this.__updatePreview();
+      this.__processInput();
   },
 
    __onKeyPress: function(event) {
      var keyCode = event.keyCode;
 
      if (keyCode == this.__KEYCODE_ENTER) {
+       this.__forceProcessInput();
        if (this.__cmdManager.hasSuggestions()) {
          this.__needsToExecute = true;
        }
@@ -158,7 +161,8 @@ Ubiquity.prototype = {
     this.__cmdManager.onSuggestionsUpdated(input, this.__makeContext());
   },
 
-  __updatePreview: function __updatePreview() {
+  __delayedProcessInput: function __delayedProcessInput() {
+    this.__previewTimerID = -1;
     var self = this;
 
     var input = this.__textBox.value;
@@ -173,6 +177,24 @@ Ubiquity.prototype = {
           function() {self.__onSuggestionsUpdated();}
         );
     }
+  },
+
+  __forceProcessInput: function __forceProcessInput() {
+    if (this.__previewTimerID != -1) {
+      Utils.clearTimeout(this.__previewTimerID);
+      this.__delayedProcessInput();
+    }
+  },
+
+  __processInput: function __processInput() {
+    if (this.__previewTimerID != -1)
+      Utils.clearTimeout(this.__previewTimerID);
+
+    var self = this;
+    this.__previewTimerID = Utils.setTimeout(
+      function() { self.__delayedProcessInput(); },
+      this.__PROCESS_INPUT_DELAY
+    );
   },
 
   __makeContext: function __makeContext() {
@@ -215,7 +237,7 @@ Ubiquity.prototype = {
       this.__textBox.focus();
       this.__textBox.select();
       this.__cmdManager.refresh();
-      this.__updatePreview();
+      this.__processInput();
     }
     this.__showCount += 1;
   },
