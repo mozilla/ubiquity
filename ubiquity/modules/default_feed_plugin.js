@@ -94,7 +94,8 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
     // Clicking on "subscribe" takes them to the warning page:
     var confirmUrl = (CONFIRM_URL + "?url=" +
                       encodeURIComponent(targetDoc.location.href) +
-                      "&sourceUrl=" + encodeURIComponent(commandsUrl));
+                      "&sourceUrl=" + encodeURIComponent(commandsUrl) +
+                      "&title=" + encodeURIComponent(targetDoc.title));
 
     function isTrustedUrl(commandsUrl, mimetype) {
       // Even if the command feed resides on a trusted host, if the

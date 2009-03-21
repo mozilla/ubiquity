@@ -56,9 +56,9 @@ var gCommandFeedInfo = getUrlParams();
 function showConfirmation() {
   var smallIconUrl = "chrome://global/skin/icons/information-16.png";
   var largeIconUrl = "chrome://global/skin/icons/information-64.png";
-  
+
   $("html").removeClass("blacklist");
-  
+
   $("#favicon").remove();
   $("head").append('<link rel="icon" type="image/png" id="favicon" ' +
                    'href="' + smallIconUrl + '"/>');
@@ -82,7 +82,8 @@ function onSubmit() {
     feedMgr.addSubscribedFeed({url: gCommandFeedInfo.url,
                                sourceUrl: gCommandFeedInfo.sourceUrl,
                                sourceCode: code,
-                               canAutoUpdate: canAutoUpdate});
+                               canAutoUpdate: canAutoUpdate,
+                               title: gCommandFeedInfo.title});
     showConfirmation();
   }
 }
