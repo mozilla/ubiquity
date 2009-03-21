@@ -64,39 +64,69 @@ CmdUtils.CreateCommand({
       // tinyurl takes care of that
     };
 
-    function make_basic_auth( user, password){
-      var tok = user + ":" + password;
-      var hash = CmdUtils.getWindow().btoa(tok); //Base64 encode.
-      return "Basic " + hash;
-    };
-
-
-    var auth = null;
-
-    if( mods.as && mods.as.data ){
-       var login = mods.as.data;
-       auth = make_basic_auth(login.username, login.password);
+    function sendMessage() {
+      jQuery.ajax({
+        type: "POST",
+        url: updateUrl,
+        data: updateParams,
+        dataType: "json",
+        error: function() {
+          displayMessage("Twitter error - status not updated");
+        },
+        success: function() {
+          var msg = updateParams.status.match(/^d /) ?
+                    "Twitter direct message sent" :
+                    "Twitter status updated";
+          displayMessage(msg);
+        },
+        username: login.username,
+        password: login.password
+      });
     }
 
-
-    jQuery.ajax({
-      type: "POST",
-      url: updateUrl,
-      data: updateParams,
-      dataType: "json",
-      beforeSend: function(req) {
-        if( auth ) req.setRequestHeader("Authorization", auth);
-      },
-      error: function() {
-        displayMessage("Twitter error - status not updated");
-      },
-      success: function() {
-        var msg = updateParams.status.match(/^d /) ?
-                  "Twitter direct message sent" :
-                  "Twitter status updated";
-        displayMessage(msg);
+    var login;
+    if (mods.as) {
+      if (!mods.as.data) {
+        displayMessage("I can't find the password for the " +
+                       "Twitter user '" + mods.as.text + "'. Please " +
+                       "log in as this user and tell Firefox " +
+                       "to remember your password.");
+        return;
       }
-    });
+      login = mods.as.data;
+      sendMessage();
+    } else {
+      // Try to figure out who the currently logged-in Twitter user is.
+      jQuery.get(
+        "http://twitter.com/privacy",
+        null,
+        function(data) {
+          var parser = Cc["@mozilla.org/xmlextras/domparser;1"]
+                       .createInstance(Ci.nsIDOMParser);
+          data = parser.parseFromString(data, "text/xml");
+          var username = jQuery("meta[name=session-user-screen_name]",
+                                data).attr("content");
+
+          if (!username) {
+            displayMessage("Please log in to Twitter or specify a " +
+                           "username.");
+            return;
+          }
+          var suggs = noun_type_twitter_user.suggest(username, "");
+
+          if (!suggs[0].data) {
+            displayMessage("I can't find the password for the " +
+                           "Twitter user '" + username + "'. Please " +
+                           "log in again as this user and tell Firefox " +
+                           "to remember your password.");
+            return;
+          }
+          login = suggs[0].data;
+          sendMessage();
+        },
+        "text"
+      );
+    }
   }
 });
 
