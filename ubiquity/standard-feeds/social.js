@@ -85,16 +85,15 @@ CmdUtils.CreateCommand({
     }
 
     var login;
-    if (mods.as) {
-      if (!mods.as.data) {
-        displayMessage("I can't find the password for the " +
-                       "Twitter user '" + mods.as.text + "'. Please " +
-                       "log in as this user and tell Firefox " +
-                       "to remember your password.");
-        return;
-      }
+    if (mods.as && mods.as.text && mods.as.data) {
       login = mods.as.data;
       sendMessage();
+    } else if (mods.as && mods.as.text && !mods.as.data) {
+      displayMessage("I can't find the password for the " +
+                     "Twitter user '" + mods.as.text + "'. Please " +
+                     "log in as this user and tell Firefox " +
+                     "to remember your password.");
+      return;
     } else {
       // Try to figure out who the currently logged-in Twitter user is.
       jQuery.get(
