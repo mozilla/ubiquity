@@ -51,6 +51,7 @@ Components.utils.import("resource://ubiquity/tests/test_eventhub.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/test_annotation_memory.js");
 Components.utils.import("resource://ubiquity/tests/test_hiddenbrowser.js");
+Components.utils.import("resource://ubiquity/tests/test_weakref.js");
 
 Components.utils.import("resource://ubiquity/tests/test_tag_command.js");
 
