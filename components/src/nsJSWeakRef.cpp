@@ -34,6 +34,7 @@ void processGarbage() {
         // Tell the weak reference holder that its target no longer exists.
         node->data->impl->weakRef = nsnull;
         node->data->impl->weakCx = nsnull;
+        node->data->impl->node = nsnull;
 
         // Delete this node.
         if (prevNode)
@@ -158,20 +159,18 @@ NS_IMETHODIMP nsJSWeakRef::Get()
   if(!cc)
     return NS_ERROR_FAILURE;
 
-  if (this->impl->weakRef) {
-    // get place for return value
-    jsval *rval = nsnull;
-    rv = cc->GetRetValPtr(&rval);
-    if(NS_FAILED(rv) || !rval)
-      return NS_ERROR_FAILURE;
+  // get place for return value
+  jsval *rval = nsnull;
+  rv = cc->GetRetValPtr(&rval);
+  if(NS_FAILED(rv) || !rval)
+    return NS_ERROR_FAILURE;
 
-    // TODO: Do we have to increase the reference count of the object
-    // or anything?
+  // TODO: Do we have to increase the reference count of the object
+  // or anything?
 
-    *rval = OBJECT_TO_JSVAL(this->impl->weakRef);
-
-    cc->SetReturnValueWasSet(PR_TRUE);
-  }
+  // This automatically is set to JSVAL_NULL if weakRef is nsnull.
+  *rval = OBJECT_TO_JSVAL(this->impl->weakRef);
+  cc->SetReturnValueWasSet(PR_TRUE);
 
   return NS_OK;
 }
