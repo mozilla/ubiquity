@@ -739,6 +739,7 @@ var noun_type_commands = {
 
 var noun_type_twitter_user = {
    _name: "twitter username",
+   rankLast: true,
    suggest: function(sugg, html){
      var usersFound = {};
      var passwordManager = Cc["@mozilla.org/login-manager;1"]
