@@ -247,7 +247,11 @@ CommandManager.prototype = {
       var self = this;
       function onLoad() {
         self.__previewBrowser.removeEventListener("load", onLoad, true);
-        self._onPreviewBrowserLoadUrl();
+        // The source URL may actually have changed while our URL was loading,
+        // if the user switched command previews really fast, so make sure that
+        // we're still on the same URL.
+        if (self.__previewBrowser.getAttribute("src") == url)
+          self._onPreviewBrowserLoadUrl();
       }
       this.__previewBrowserUrlLoadedCallback = cb;
       this.__previewBrowser.addEventListener("load", onLoad, true);
