@@ -49,32 +49,9 @@ div#ubiquity-preview{
     width: 500px;
 }
 
-/* formatting for data inside preview */
-
-div#ubiquity-preview .gresult {
-  margin-bottom: 10px;
-}
-div#ubiquity-preview .gresult a {
-  color: #0066cc;
-  text-decoration: underline;
-  font-size: small;
-  cursor: pointer;
-}
-div#ubiquity-preview .gresult-url {
-  font-size: x-small;
-  /*color: #00aa00;*/
-}
-div#ubiquity-preview .gresult-content {
-  margin-right: 10px;
-  font-size: x-small;  
-}
-
-
 /* formatting for suggestion list */
 
 div#ubiquity-preview #preview-pane {
-    color: #ffffff;
-    background: #272750;
     padding-left: 15px;
     padding: 7px;
     border-left: solid 1px #0066cc;
@@ -120,4 +97,29 @@ div#ubiquity-preview .selection {
   font-size: 8pt;
   font-weight: normal;
   border: 1px solid #777;
+}
+
+/* formatting for data inside preview */
+
+.ubiquity-preview-content {
+    color: #ffffff;
+    background: #272750;
+}
+
+.ubiquity-preview-content .gresult {
+  margin-bottom: 10px;
+}
+.ubiquity-preview-content .gresult a {
+  color: #0066cc;
+  text-decoration: underline;
+  font-size: small;
+  cursor: pointer;
+}
+.ubiquity-preview-content .gresult-url {
+  font-size: x-small;
+  /*color: #00aa00;*/
+}
+.ubiquity-preview-content .gresult-content {
+  margin-right: 10px;
+  font-size: x-small;  
 }
