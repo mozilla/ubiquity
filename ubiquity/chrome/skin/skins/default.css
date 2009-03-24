@@ -62,51 +62,13 @@ body#previewbody {
     width: 500px;
 }
 
-/* Formatting for the Preview box */
-
-div#ubiquity-preview .help {
-  font-family: Calibri, Helvetica, Verdana, Arial;
-  font-size: 11pt;
-  color: #FFF;
-}
-
-div#ubiquity-preview .gresult {
-  margin-bottom: 10px;
-}
-
-div#ubiquity-preview .gresult a {
-  color: #FFFFFF;
-  text-decoration: underline;
-  font-size: 14pt;
-  font-family: Calibri, Helvetica, Verdana, Arial;
-  cursor: pointer;
-}
-div#ubiquity-preview .gresult-url {
-  font-size: x-small;
-  font-family: Calibri, Helvetica, Verdana, Arial;
-  color: #777;
-}
-div#ubiquity-preview .gresult-content {
-  margin-right: 10px;
-  font-family: Calibri, Helvetica, Verdana, Arial;
-  font-size: small;  
-}
-
-div#ubiquity-preview.img {
-    padding: 5px;
-}
-
 /* Formatting for the Preview Pane and Verb/Command suggestion list */
 
 div#ubiquity-preview #preview-pane {
-    color: #ffffff;
-    background: transparent;
     padding-left: 15px;
     padding: 7px;
     border-top: 1px solid #333;
     margin-top: 5px;
-    font-family: Calibri, Helvetica, Verdana, Arial;
-    font-size: 11pt;
 } 
 
 
@@ -159,4 +121,45 @@ div#ubiquity-preview .selection {
   font-size: 8pt;
   font-weight: normal;
   border: 1px solid #777;
+}
+
+/* Formatting for the Preview box */
+
+.ubiquity-preview-content {
+    color: #ffffff;
+    background: transparent;
+    font-family: Calibri, Helvetica, Verdana, Arial;
+    font-size: 11pt;    
+}
+
+.ubiquity-preview-content .help {
+  font-family: Calibri, Helvetica, Verdana, Arial;
+  font-size: 11pt;
+  color: #FFF;
+}
+
+.ubiquity-preview-content .gresult {
+  margin-bottom: 10px;
+}
+
+.ubiquity-preview-content .gresult a {
+  color: #FFFFFF;
+  text-decoration: underline;
+  font-size: 14pt;
+  font-family: Calibri, Helvetica, Verdana, Arial;
+  cursor: pointer;
+}
+.ubiquity-preview-content .gresult-url {
+  font-size: x-small;
+  font-family: Calibri, Helvetica, Verdana, Arial;
+  color: #777;
+}
+.ubiquity-preview-content .gresult-content {
+  margin-right: 10px;
+  font-family: Calibri, Helvetica, Verdana, Arial;
+  font-size: small;  
+}
+
+.ubiquity-preview-content.img {
+    padding: 5px;
 }
