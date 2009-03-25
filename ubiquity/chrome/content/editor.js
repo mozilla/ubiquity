@@ -45,7 +45,7 @@ var Editor = {
       var file = Components.classes["@mozilla.org/file/directory_service;1"]
                            .getService(Components.interfaces.nsIProperties)
                            .get("TmpD", Components.interfaces.nsIFile);
-      file.append("ubiquity.tmp");
+      file.append("ubiquity.tmp.js");
       file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
 
       Application.console.log("temp file path    : " + file.path);
