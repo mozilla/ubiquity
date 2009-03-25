@@ -1174,7 +1174,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           parser.baseurl = baseurl;
         }
         function searchParser(data) {
-          if (data.length) {
+          if (data) {
             var template = "";
             pblock.innerHTML = "<h2>Results for <em>"
                              + directObject.text
@@ -1182,7 +1182,6 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             var results = [];
             switch (parser.type) {
               case "json":
-                data = Utils.decodeJson(data);
                 var path = parser.container.split(".");
                 for (p in path) {
                   data = data[path[p]];
@@ -1345,7 +1344,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                                searchParser, options.parser.type || "html");
         }
         else {
-          CmdUtils.previewGet(pblock, urlString, searchParser,
+          CmdUtils.previewGet(pblock, urlString, null, searchParser,
                               options.parser.type || "html");
         }
       }
