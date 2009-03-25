@@ -3,13 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <script src="http://j.maxmind.com/app/geoip.js"></script>
-    <!-- // This API key is for https://people.mozilla.com/ only -->
-    <script id="google-jsapi"
-            src="http://www.google.com/jsapi?key=ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w"
-    ></script>
-    <script src="resource://ubiquity/scripts/jquery.js"></script>
-    <script src="resource://ubiquity/scripts/content-preview.js"></script>
     <style>
 
     body{
@@ -108,7 +101,47 @@
       .no-print{ display: none;}
     }
     </style>
+    <script>
+      function onPageUnload() {
+        if (window.GUnload)
+          GUnload();
+      }
+    </script>
+  </head>
 
+  <body onload="setupTestFramework()" onunload="onPageUnload()">
+    <div style="overflow:hidden;">
+      <!-- this div needs the name "preview-pane" for outer iframe/browser to resize -->
+      <div id="preview-pane" name="preview-pane">
+        <div id="msg"></div>
+        <div id="mapArea">
+          <div class="no-print"> 
+            <div id="selected-address"></div>
+            <div class="map-actions">
+              <a onclick="window.print();" >Print</a>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+              <a id="send-link" >Send</a>
+            </div>
+          </div>
+          <div id="map"> </div>
+          <div class="no-print">
+            <div id="address-list"></div>
+            <div class="map-actions">
+              <a onclick="showAddressPreview();" >Back</a>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+              <a class="hand" onclick="insertMap();">Insert map in page</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="http://j.maxmind.com/app/geoip.js"></script>
+    <!-- // This API key is for https://people.mozilla.com/ only -->
+    <script id="google-jsapi"
+            src="http://www.google.com/jsapi?key=ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w"
+    ></script>
+    <script src="resource://ubiquity/scripts/jquery.js"></script>
+    <script src="resource://ubiquity/scripts/content-preview.js"></script>
     <script type="text/javascript">
     var API_KEY = jQuery("#google-jsapi").get(0).src.split("?key=")[1];
 
@@ -386,36 +419,5 @@
         }
       }
     </script>
-  </head>
-
-  <body onload="setupTestFramework()" onunload="GUnload()">
-    <div style="overflow:hidden;">
-      <!-- this div needs the name "preview-pane" for outer iframe/browser to resize -->
-      <div id="preview-pane" name="preview-pane">
-        <div id="msg"></div>
-        <div id="mapArea">
-          <div class="no-print"> 
-            <div id="selected-address"></div>
-            <div class="map-actions">
-              <a onclick="window.print();" >Print</a>
-                &nbsp;&nbsp;|&nbsp;&nbsp;
-              <a id="send-link" >Send</a>
-            </div>
-          </div>
-          <div id="map"> </div>
-          <div class="no-print">
-            <div id="address-list"></div>
-            <div class="map-actions">
-              <a onclick="showAddressPreview();" >Back</a>
-                &nbsp;&nbsp;|&nbsp;&nbsp;
-              <a class="hand" onclick="insertMap();">Insert map in page</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </body>
-
 </html>
-
-
