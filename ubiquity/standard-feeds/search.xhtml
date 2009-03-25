@@ -500,10 +500,49 @@ CmdUtils.makeSearchCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  name: "VideoSurf",
+  synonyms: ["video", "videos", "videosurf"],
+  homepage: "http://www.videosurf.com/",
+  author: { name: "Udi Falkson", email: "udi@videosurf.com"},
+  description: "Performs a VideoSurf video search with advanced preview.",
+  help: "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!",
+  icon: "http://www.videosurf.com/favicon.ico",
+  takes: {"Search Term": noun_arb_text},
+  _fetchResults: function(pblock, query){  
+    var url = "http://www.videosurf.com/api/ext/services/ubiquityService.php";
+    var params = {'query': query};
+    jQuery.get( url, params, function( response ) {
+      pblock.innerHTML = response;
+
+      var originalSrc = null;
+      var getVidId = function(img){ return img.id.split("_")[2]; };
+      var tiles = jQuery(".tiles li a img", pblock);
+      tiles.mouseover(function(e){
+        var img = e.target;
+        var thumb = jQuery("#vs_thumb_"+getVidId(img), pblock)[0];
+        originalSrc = thumb.src;
+        thumb.src = img.src;
+        });
+      tiles.mouseout(function(e){
+        var img = e.target;
+        jQuery("#vs_thumb_"+getVidId(img), pblock)[0].src = originalSrc;
+      });      
+    })
+  },
+  preview: function( pblock, query ) {
+     pblock.innerHTML = "Loading Videos...";
+     this._fetchResults(pblock, query.text);
+   },
+  execute: function(query) {
+     query = query.text.replace(/^ +/,'').replace(/ +$/,'').replace(/ +/g,'+').replace(/[\/]/g,'%2f');
+     var url = "http://www.videosurf.com/videos/" + query + "?vlt=ubiquity"; 
+     Utils.openUrlInBrowser( url );
+   }
+});
 
 CmdUtils.makeSearchCommand({
   name: "YouTube",
-  synonyms: ["video"],
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
   icon: "http://www.youtube.com/favicon.ico",
   description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words.",
