@@ -92,6 +92,7 @@ Ubiquity.prototype = {
   __KEYCODE_DOWN: 40,
   __KEYCODE_TAB:  9,
   __MIN_CMD_PREVIEW_LENGTH: 0,
+  __KEYCODE_1: 49,
 
   __onBlur: function __onBlur() {
     // Hackish fix for #330.
@@ -140,6 +141,10 @@ Ubiquity.prototype = {
     if (keyCode == this.__KEYCODE_UP ||
                keyCode == this.__KEYCODE_DOWN ||
                keyCode == this.__KEYCODE_TAB) {
+    } else if (keyCode >= this.__KEYCODE_1 &&
+               keyCode < this.__KEYCODE_1 + 10 &&
+               event.altKey && event.ctrlKey) {
+      this.__cmdManager.activateAccessKey(keyCode - this.__KEYCODE_1 + 1);
     } else
       this.__processInput();
   },

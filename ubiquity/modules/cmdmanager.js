@@ -348,6 +348,24 @@ CommandManager.prototype = {
     return this._renderPreview(context);
   },
 
+  activateAccessKey: function CM_activateAccessKey(number) {
+    if (this.__previewBrowser &&
+        this.__previewBrowser.contentDocument) {
+      var doc = this.__previewBrowser.contentDocument;
+      for (var i = 0; i < doc.links.length; i++) {
+        var elem = doc.links[i];
+        if (elem.getAttribute("accesskey") == number) {
+          var evt = doc.createEvent("MouseEvents");
+          evt.initMouseEvent("click", true, true, doc.defaultView,
+                             0, 0, 0, 0, 0, false, false, false, false, 0,
+                             null);
+          elem.dispatchEvent(evt);
+          return;
+        }
+      }
+    }
+  },
+
   reset : function CM_reset() {
     this.__nlParser.reset();
   },
