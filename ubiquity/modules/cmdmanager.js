@@ -113,6 +113,19 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
                      preview: previewPaneNode,
                      help: helpNode};
 
+  var self = this;
+
+  previewPaneNode.addEventListener(
+    "DOMMouseScroll",
+    function(evt) {
+      if (self.__previewBrowser &&
+          self.__previewBrowser.contentWindow) {
+        self.__previewBrowser.contentWindow.scrollBy(0, evt.detail);
+      }
+    },
+    true
+  );
+
   function onCommandsReloaded() {
     parser.setCommandList(cmdSource.getAllCommands());
     parser.setNounList(cmdSource.getAllNounTypes());
