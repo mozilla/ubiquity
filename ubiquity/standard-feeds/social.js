@@ -88,43 +88,12 @@ CmdUtils.CreateCommand({
     if (mods.as && mods.as.text && mods.as.data) {
       login = mods.as.data;
       sendMessage();
-    } else if (mods.as && mods.as.text && !mods.as.data) {
-      displayMessage("I can't find the password for the " +
-                     "Twitter user '" + mods.as.text + "'. Please " +
-                     "log in as this user and tell Firefox " +
-                     "to remember your password.");
-      return;
     } else {
-      // Try to figure out who the currently logged-in Twitter user is.
-      jQuery.get(
-        "http://twitter.com/privacy",
-        null,
-        function(data) {
-          var parser = Cc["@mozilla.org/xmlextras/domparser;1"]
-                       .createInstance(Ci.nsIDOMParser);
-          data = parser.parseFromString(data, "text/xml");
-          var username = jQuery("meta[name=session-user-screen_name]",
-                                data).attr("content");
-
-          if (!username) {
-            displayMessage("Please log in to Twitter or specify a " +
-                           "username.");
-            return;
-          }
-          var suggs = noun_type_twitter_user.suggest(username, "");
-
-          if (!suggs[0].data) {
-            displayMessage("I can't find the password for the " +
-                           "Twitter user '" + username + "'. Please " +
-                           "log in again as this user and tell Firefox " +
-                           "to remember your password.");
-            return;
-          }
-          login = suggs[0].data;
-          sendMessage();
-        },
-        "text"
-      );
+      login = {username: null,
+               password: null};
+      if (mods.as && mods.as.text)
+        login.username = mods.as.text;
+      sendMessage();
     }
   }
 });

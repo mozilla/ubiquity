@@ -303,6 +303,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
   var Ci = Components.interfaces;
 
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
+  webJsm.importScript("resource://ubiquity/scripts/jquery_setup.js");
   webJsm.importScript("resource://ubiquity/scripts/template.js");
 
   var globalObjects = {};

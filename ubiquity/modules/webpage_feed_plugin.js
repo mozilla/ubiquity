@@ -42,6 +42,7 @@ Components.utils.import("resource://ubiquity/modules/nounutils.js");
 
 function WebPageFeedPlugin(feedManager, messageService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
+  webJsm.importScript("resource://ubiquity/scripts/jquery_setup.js");
   webJsm.importScript("resource://ubiquity/scripts/html-sanitizer-minified.js");
 
   this.type = "webpage-commands";
