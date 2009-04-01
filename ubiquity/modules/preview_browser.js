@@ -89,6 +89,7 @@ function makePreviewBrowser(unsafePblock, url, cb) {
 }
 
 function PreviewBrowser(previewPaneNode, defaultUrl) {
+  this.__isActive = false;
   this.__defaultUrl = defaultUrl;
   this.__queuedPreview = null;
   this.__previewBrowser = null;
@@ -109,9 +110,8 @@ function PreviewBrowser(previewPaneNode, defaultUrl) {
 }
 
 PreviewBrowser.prototype = {
-  isActive: function isActive() {
-    // TODO: should we also test this.__previewBrowserCreatedCallback?
-    return (this.__previewBrowser != null);
+  get isActive() {
+    return this.__isActive;
   },
 
   _onPreviewBrowserCreate : function PB__onPreviewBrowserCreate(browser) {
@@ -190,6 +190,8 @@ PreviewBrowser.prototype = {
 
   queuePreview : function PB__queuePreview(url, delay, cb) {
     var self = this;
+
+    self.__isActive = true;
 
     function showPreview() {
       self._ensurePreviewBrowser(

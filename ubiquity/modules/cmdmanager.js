@@ -95,7 +95,7 @@ CommandManager.prototype = {
       this.__domNodes.suggs.style.display = "none";
       this.__domNodes.preview.style.display = "none";
       this.__domNodes.help.style.display = "block";
-      if (this._previewer.isActive())
+      if (this._previewer.isActive)
         this._previewer.queuePreview(
           null,
           0,
