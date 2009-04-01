@@ -40,63 +40,14 @@
 var EXPORTED_SYMBOLS = ["CommandManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/preview_browser.js");
 
-var DEFAULT_PREVIEW_BROWSER_URL = (
+var DEFAULT_PREVIEW_URL = (
   ('data:text/html,' +
    encodeURI('<html><body class="ubiquity-preview-content" ' +
              'style="overflow: hidden; margin: 0; padding: 0;">' +
              '</body></html>'))
 );
-
-function makePreviewBrowser(unsafePblock, cb) {
-  var xulIframe = null;
-  var browser = null;
-
-  var width = 490;
-  var height = 500;
-
-  function onXulLoaded(event) {
-    xulIframe.removeEventListener("load",
-                                  onXulLoaded,
-                                  true);
-
-    browser = xulIframe.contentDocument.createElement("browser");
-    browser.setAttribute("src", DEFAULT_PREVIEW_BROWSER_URL);
-    browser.setAttribute("disablesecurity", true);
-    browser.setAttribute("type", "content");
-    browser.setAttribute("width", width);
-    browser.setAttribute("height", width);
-    browser.addEventListener("load",
-                             onPreviewLoaded,
-                             true);
-
-    xulIframe.contentDocument.documentElement.appendChild(browser);
-  }
-
-  function onPreviewLoaded() {
-    browser.removeEventListener("load",
-                                onPreviewLoaded,
-                                true);
-
-    cb(browser);
-    unsafePblock = null;
-    browser = null;
-    xulIframe = null;
-  }
-
-  xulIframe = unsafePblock.ownerDocument.createElement("iframe");
-  xulIframe.setAttribute("src",
-                         "chrome://ubiquity/content/content-preview.xul");
-  xulIframe.style.border = "none";
-  xulIframe.setAttribute("width", width);
-  xulIframe.setAttribute("height", width);
-
-  xulIframe.addEventListener("load",
-                             onXulLoaded,
-                             true);
-  unsafePblock.innerHTML = "";
-  unsafePblock.appendChild(xulIframe);
-}
 
 function CommandManager(cmdSource, msgService, parser, suggsNode,
                         previewPaneNode, helpNode) {
@@ -105,26 +56,13 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
   this.__nlParser = parser;
-  this.__queuedPreview = null;
-  this.__previewBrowser = null;
-  this.__previewBrowserCreatedCallback = null;
-  this.__previewBrowserUrlLoadedCallback = null;
   this.__domNodes = {suggs: suggsNode,
                      preview: previewPaneNode,
                      help: helpNode};
+  this._previewer = new PreviewBrowser(previewPaneNode,
+                                       DEFAULT_PREVIEW_URL);
 
   var self = this;
-
-  previewPaneNode.addEventListener(
-    "DOMMouseScroll",
-    function(evt) {
-      if (self.__previewBrowser &&
-          self.__previewBrowser.contentWindow) {
-        self.__previewBrowser.contentWindow.scrollBy(0, evt.detail);
-      }
-    },
-    true
-  );
 
   function onCommandsReloaded() {
     parser.setCommandList(cmdSource.getAllCommands());
@@ -141,10 +79,6 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
     this.__cmdSource = null;
     this.__msgService = null;
     this.__nlParser = null;
-    this.__queuedPreview = null;
-    this.__previewBrowser = null;
-    this.__previewBrowserCreatedCallback = null;
-    this.__previewBrowserUrlLoadedCallback = null;
     this.__domNodes = null;
   };
 }
@@ -161,10 +95,12 @@ CommandManager.prototype = {
       this.__domNodes.suggs.style.display = "none";
       this.__domNodes.preview.style.display = "none";
       this.__domNodes.help.style.display = "block";
-      if (this.__previewBrowser)
-        this._queuePreview(null,
-                           0,
-                           function(pblock) { pblock.innerHTML = ""; });
+      if (this._previewer.isActive())
+        this._previewer.queuePreview(
+          null,
+          0,
+          function(pblock) { pblock.innerHTML = ""; }
+        );
       break;
     default:
       throw new Error("Unknown state: " + state);
@@ -217,103 +153,6 @@ CommandManager.prototype = {
     this.__domNodes.suggs.innerHTML = content;
   },
 
-  _onPreviewBrowserCreate : function CM__onPreviewBrowserCreate(browser) {
-    this.__previewBrowser = browser;
-    var cb = this.__previewBrowserCreatedCallback;
-    this.__previewBrowserCreatedCallback = null;
-    cb();
-  },
-
-  _ensurePreviewBrowser : function CM__ensurePreviewBrowser(cb) {
-    if (this.__previewBrowser)
-      cb();
-    else {
-      if (this.__previewBrowserCreatedCallback) {
-        this.__previewBrowserCreatedCallback = cb;
-      } else {
-        var self = this;
-        this.__previewBrowserCreatedCallback = cb;
-        makePreviewBrowser(this.__domNodes.preview,
-                           function(browser) {
-                             self._onPreviewBrowserCreate(browser);
-                           });
-      }
-    }
-  },
-
-  _onPreviewBrowserLoadUrl : function CM__onPreviewBrowserLoadUrl() {
-    var cb = this.__previewBrowserUrlLoadedCallback;
-    this.__previewBrowserUrlLoadedCallback = null;
-    cb();
-  },
-
-  _ensurePreviewBrowserUrlLoaded : function CM__EPBUL(url, cb) {
-    var currUrl = this.__previewBrowser.getAttribute("src");
-    if (url == currUrl) {
-      if (this.__previewBrowserUrlLoadedCallback)
-        // The URL is still loading.
-        this.__previewBrowserUrlLoadedCallback = cb;
-      else
-        // The URL is already loaded.
-        cb();
-    } else {
-      var self = this;
-      function onLoad() {
-        self.__previewBrowser.removeEventListener("load", onLoad, true);
-        // The source URL may actually have changed while our URL was loading,
-        // if the user switched command previews really fast, so make sure that
-        // we're still on the same URL.
-        if (self.__previewBrowser.getAttribute("src") == url)
-          self._onPreviewBrowserLoadUrl();
-      }
-      this.__previewBrowserUrlLoadedCallback = cb;
-      this.__previewBrowser.addEventListener("load", onLoad, true);
-      this.__previewBrowser.setAttribute("src", url);
-    }
-  },
-
-  _queuePreview : function CM__queuePreview(url, delay, cb) {
-    var self = this;
-
-    function showPreview() {
-      self._ensurePreviewBrowser(
-        function() {
-          if (self.__queuedPreview == showPreview) {
-            if (url)
-              url = Utils.url(url).spec;
-            else
-              url = DEFAULT_PREVIEW_BROWSER_URL;
-
-            self._ensurePreviewBrowserUrlLoaded(
-              url,
-              function() {
-                if (self.__queuedPreview == showPreview) {
-                  self.__queuedPreview = null;
-                  cb(self.__previewBrowser.contentDocument.body);
-                }
-              });
-          }
-        });
-    }
-
-    this.__queuedPreview = showPreview;
-
-    if (this.__previewBrowser &&
-        this.__previewBrowser.contentDocument) {
-      var previewPane = this.__previewBrowser.contentDocument.body;
-      if (previewPane) {
-        var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
-        evt.initEvent("preview-change", false, false);
-        previewPane.dispatchEvent(evt);
-      }
-    }
-
-    if (delay)
-      Utils.setTimeout(showPreview, delay);
-    else
-      showPreview();
-  },
-
   _renderPreview : function CM__renderPreview(context) {
     var wasPreviewShown = false;
 
@@ -324,7 +163,7 @@ CommandManager.prototype = {
         var self = this;
         var previewUrl = activeSugg.previewUrl;
 
-        this._queuePreview(
+        this._previewer.queuePreview(
           previewUrl,
           activeSugg.previewDelay,
           function(pblock) { activeSugg.preview(context, pblock); }
@@ -349,21 +188,7 @@ CommandManager.prototype = {
   },
 
   activateAccessKey: function CM_activateAccessKey(number) {
-    if (this.__previewBrowser &&
-        this.__previewBrowser.contentDocument) {
-      var doc = this.__previewBrowser.contentDocument;
-      for (var i = 0; i < doc.links.length; i++) {
-        var elem = doc.links[i];
-        if (elem.getAttribute("accesskey") == number) {
-          var evt = doc.createEvent("MouseEvents");
-          evt.initMouseEvent("click", true, true, doc.defaultView,
-                             0, 0, 0, 0, 0, false, false, false, false, 0,
-                             null);
-          elem.dispatchEvent(evt);
-          return;
-        }
-      }
-    }
+    this._previewer.activateAccessKey(number);
   },
 
   reset : function CM_reset() {
