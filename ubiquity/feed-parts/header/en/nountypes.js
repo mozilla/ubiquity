@@ -740,22 +740,24 @@ var noun_type_commands = {
 var noun_type_twitter_user = {
    _name: "twitter username",
    rankLast: true,
-   suggest: function(sugg, html){
+   suggest: function(text, html){
+     // Twitter usernames can't contain spaces; reject input with spaces.
+     if (text.length && text.indexOf(" ") != -1)
+       return [];
+
+     // Look for twitter usernames stored in password manager
      var usersFound = {};
      var passwordManager = Cc["@mozilla.org/login-manager;1"]
                            .getService(Ci.nsILoginManager);
-
      var suggs = [];
-
      var urls = ["https://twitter.com", "http://twitter.com"];
-
      urls.forEach(
        function(url) {
          var logins = passwordManager.findLogins({}, url, "", "");
 
          for (var x = 0; x < logins.length; x++) {
            var login = logins[x];
-           if (login.username.indexOf(sugg) != -1 &&
+           if (login.username.indexOf(text) != -1 &&
                !usersFound[login.username]) {
              usersFound[login.username] = true;
              suggs.push(CmdUtils.makeSugg(login.username, null, login));
@@ -763,18 +765,20 @@ var noun_type_twitter_user = {
          }
        });
 
+     // If all else fails, treat the user's single-word input as a twitter
+     // username.
      if (suggs.length == 0)
-       suggs.push(CmdUtils.makeSugg(sugg, null, null));
+       suggs.push(CmdUtils.makeSugg(text, null, null));
 
      return suggs;
    }
 };
 
-noun_type_number = {
+var noun_type_number = {
    suggest : function(sugg){
-      return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : []
+     return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : [];
    },
-   'default' : function(){
+   default : function(){
       return CmdUtils.makeSugg("1");
    }
 }

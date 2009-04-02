@@ -21,21 +21,22 @@ CmdUtils.CreateCommand({
   help: "Sets your Twitter status to a message of at most 160 characters. You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
         " you'll be asked to log in.",
   preview: function(previewBlock, directObj, mods) {
-	// these are converted in the Twitter database anyway, and counted as 4 characters
+    // these are converted in the Twitter database anyway, and counted as 4 characters
     var statusText = directObj.text
 	  .replace("<", "&lt;")
 	  .replace(">", "&gt;");
+    var usernameText = null;
+    if (mods.as) {
+      usernameText = mods.as.text;
+    }
 
-    var previewTemplate = "Updates your Twitter status to: <br /><b>${status}</b> <br /><br />Characters remaining: <b>${chars}</b> <p style='font-size:11px'> tip: tweet @mozillaubiquity for help </p>";
+    var previewTemplate = "Updates your Twitter status ${username} to: <br /><b>${status}</b> <br /><br />Characters remaining: <b>${chars}</b> <p style='font-size:11px'> tip: tweet @mozillaubiquity for help </p>";
     var truncateTemplate = "<span style='color: red;'><br />The last <b>${truncate}</b> characters will be truncated!</span>";
     var previewData = {
       status: statusText,
+      username: usernameText ? ("(For user <b>" + usernameText + "</b>)"):"",
       chars: TWITTER_STATUS_MAXLEN - statusText.length
     };
-
-    if(mods.as){
-       previewData.username = mods.as.text;
-    }
 
     var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
