@@ -51,6 +51,13 @@ function makePreviewBrowser(unsafePblock, url, cb) {
                                   true);
 
     browser = xulIframe.contentDocument.createElement("browser");
+
+    // Possible fix for #633. At the very least, it allows this component to
+    // be used from within a chrome URL that's loaded in a browser tab, though
+    // I'm not sure why it's XPCNativeWrapped in the first place. -AV
+    if (browser.wrappedJSObject)
+      browser = browser.wrappedJSObject;
+
     browser.setAttribute("src", url);
     browser.setAttribute("disablesecurity", true);
     browser.setAttribute("type", "content");
