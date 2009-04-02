@@ -48,6 +48,25 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
                                         new TestSuggestionMemory());
 }
 
+var noun_arb_text = {
+  _name: "text",
+  rankLast: true,
+  suggest: function( text, html ) {
+    return [ NounUtils.makeSugg(text, html) ];
+  }
+};
+
+function makeSearchCommand(name) {
+  return {
+    name: name,
+    DOLabel: "string",
+    DOType: noun_arb_text,
+    preview: function() {},
+    execute: function() {}
+  };
+}
+
+
 // Parser tests:
 
 
@@ -863,6 +882,81 @@ function testAsyncNounSuggestions() {
   this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
 
+
+function testListOfVerbsThatUseSpecificNounType() {
+  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
+  var verbUsingNounTypeOne = { name: "doStuff",
+			       execute:function(context, directObj) {},
+			       DOLabel:"thing",
+			       DOType:nounTypeOne};
+  var verbs = [makeSearchCommand("IMDB"), makeSearchCommand("amazon-search"), verbUsingNounTypeOne];
+  var parser = makeTestParser("en", verbs);
+  this.assert( parser._verbsThatUseSpecificNouns.length == 1, "Too many or not enough" );
+  this.assert( parser._verbsThatUseSpecificNouns[0]._name == "doStuff", "Name mismatch");
+}
+
+function testWeirdCompletionsThatDontMakeSense() {
+  var cmd_imdb = makeSearchCommand("IMDB");
+  var cmd_amazon = makeSearchCommand("amazon-search");
+  var comps = getCompletions("ac", [cmd_imdb, cmd_amazon], [noun_arb_text]);
+  // Should be no verb-first suggestions, but since both commands take
+  // arb text, both of them should prodcue a suggestion with ac as the
+  // argument.
+  this.assert( comps.length == 2, "Should have 2 suggestions.");
+  this.assert( comps[0]._argSuggs.direct_object.text == "ac",
+	       "object should be ac.");
+  this.assert( comps[1]._argSuggs.direct_object.text == "ac",
+	       "this object should be ac too.");
+}
+
+function testSynonymsGetDownrankedEvenWithArguments() {
+  var cmd_youtube = {
+    name: "youtube",
+    DOLabel: "string",
+    DOType: noun_arb_text,
+    synonyms: ["video"],
+    preview: function() {},
+    exectue: function() {}
+  };
+  var cmd_define = makeSearchCommand("define");
+  var comps = getCompletions("de m", [cmd_youtube, cmd_define], [noun_arb_text]);
+  // "define m" should be the first suggestion, while
+  // "youtube m" is the second suggestion (due to its synonym "video").
+  this.assert( comps.length == 2, "Should have 2 suggestions.");
+  this.assert( comps[0]._verb._name == "define", "Should be define.");
+  this.assert( comps[0]._argSuggs.direct_object.text == "m",
+	       "object should be m.");
+  this.assert( comps[1]._verb._name == "youtube", "Should be youtube.");
+  this.assert( comps[1]._argSuggs.direct_object.text == "m",
+	       "object should be m.");
+}
+
+function testModifierWordsCanAlsoBeInArbTextDirectObj() {
+  var cmd_twitter = {
+    name: "twitter",
+    DOLabel: "status",
+    DOType: noun_arb_text,
+    modifiers: { as: noun_arb_text },
+    preview: function() {},
+    execute: function() {}
+  };
+
+  var comps = getCompletions("twitter i am happy as a clam as fern",
+                             [cmd_twitter], [noun_arb_text]);
+  // There are two places where we could make the division between status
+  // and "as" argument.  Make sure both get generated.
+  for (var x = 0; x < comps.length; x++) {
+    dump("Suggestion " + x + ": " + comps[x]._argSuggs.direct_object.text + "\n");
+  }
+  this.assert( comps.length == 2, "Should have 2 suggestions.");
+  this.assert( comps[0]._argSuggs.direct_object.text == "i am happy",
+               "First suggestion direct obj should be 'i am happy'.");
+  this.assert( comps[1]._argSuggs.direct_object.text == "i am happy as a clam",
+               "Second suggestion direct obj should be 'i am happy as a clam'.");
+}
+
+// TESTS TO WRITE:
+
 // TODO replace tests that hit Verb directly, with tests that go through
 // NLParser.Parser.
 
@@ -912,71 +1006,6 @@ function testAsyncNounSuggestions() {
 // TODO do a noun-first suggestion with a noun that suggests asynchronously,
 // and a verb that will only appear in the suggestion list if the nountype
 // has a suggestion...
-var noun_arb_text = {
-  _name: "text",
-  rankLast: true,
-  suggest: function( text, html ) {
-    return [ NounUtils.makeSugg(text, html) ];
-  }
-};
 
-function makeSearchCommand(name) {
-  return {
-    name: name,
-    DOLabel: "string",
-    DOType: noun_arb_text,
-    preview: function() {},
-    execute: function() {}
-  };
-}
-
-function testListOfVerbsThatUseSpecificNounType() {
-  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
-  var verbUsingNounTypeOne = { name: "doStuff",
-			       execute:function(context, directObj) {},
-			       DOLabel:"thing",
-			       DOType:nounTypeOne};
-  var verbs = [makeSearchCommand("IMDB"), makeSearchCommand("amazon-search"), verbUsingNounTypeOne];
-  var parser = makeTestParser("en", verbs);
-  this.assert( parser._verbsThatUseSpecificNouns.length == 1, "Too many or not enough" );
-  this.assert( parser._verbsThatUseSpecificNouns[0]._name == "doStuff", "Name mismatch");
-}
-
-function testWeirdCompletionsThatDontMakeSense() {
-  var cmd_imdb = makeSearchCommand("IMDB");
-  var cmd_amazon = makeSearchCommand("amazon-search");
-  var comps = getCompletions("ac", [cmd_imdb, cmd_amazon], [noun_arb_text]);
-  // Should be no verb-first suggestions, but since both commands take
-  // arb text, both of them should prodcue a suggestion with ac as the
-  // argument.
-  this.assert( comps.length == 2, "Should have 2 suggestions.");
-  this.assert( comps[0]._argSuggs.direct_object.text == "ac",
-	       "object should be ac.");
-  this.assert( comps[1]._argSuggs.direct_object.text == "ac",
-	       "this object should be ac too.");
-}
-
-function testSynonymsGetDownrankedEvenWithArguments() {
-  var cmd_youtube = {
-    name: "youtube",
-    DOLabel: "string",
-    DOType: noun_arb_text,
-    synonyms: ["video"],
-    preview: function() {},
-    exectue: function() {}
-  };
-  var cmd_define = makeSearchCommand("define");
-  var comps = getCompletions("de m", [cmd_youtube, cmd_define], [noun_arb_text]);
-  // "define m" should be the first suggestion, while
-  // "youtube m" is the second suggestion (due to its synonym "video").
-  this.assert( comps.length == 2, "Should have 2 suggestions.");
-  this.assert( comps[0]._verb._name == "define", "Should be define.");
-  this.assert( comps[0]._argSuggs.direct_object.text == "m",
-	       "object should be m.");
-  this.assert( comps[1]._verb._name == "youtube", "Should be youtube.");
-  this.assert( comps[1]._argSuggs.direct_object.text == "m",
-	       "object should be m.");
-
-}
 
 exportTests(this);
