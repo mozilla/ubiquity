@@ -104,6 +104,8 @@ function PreviewBrowser(previewPaneNode, defaultUrl) {
   this.__previewBrowserUrlLoadedCallback = null;
   this.__containingNode = previewPaneNode;
 
+  var self = this;
+
   this.__containingNode.addEventListener(
     "DOMMouseScroll",
     function(evt) {
