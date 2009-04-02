@@ -61,8 +61,34 @@ function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
     };
 }
 
-var URI_PREFIX = "ubiquity://";
-var gRegistered = false;
+var PROTOCOL_URI_PREFIX = "ubiquity://";
+var gDidTryToProtectProtocol = false;
+var gIsProtocolProtected = false;
+
+function tryToProtectProtocol() {
+  if (!gDidTryToProtectProtocol) {
+    // Tell XPConnect that anything which begins with PROTOCOL_URI_PREFIX
+    // should be considered protected content, and therefore any
+    // untrusted content accessed by it should implicitly have
+    // XPCNativeWrappers made for it.
+
+    try {
+      let ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
+                     .getService(Components.interfaces.nsIUbiquity);
+
+      ubiquity.flagSystemFilenamePrefix(PROTOCOL_URI_PREFIX, true);
+      gIsProtocolProtected = true;
+    } catch (e) {
+      // The binary component was probably compiled for a different
+      // version of the platform which is looking for a nonexistent
+      // IID of nsIXPConnect, or the binary component just isn't
+      // compiled for this particular platform.
+    }
+
+    gDidTryToProtectProtocol = true;
+  }
+  return gIsProtocolProtected;
+}
 
 SandboxFactory.prototype = {
   makeSandbox: function makeSandbox(codeSource) {
@@ -81,35 +107,29 @@ SandboxFactory.prototype = {
     let currIndex = 0;
     for (let i = 0; i < codeSections.length; i++) {
       let section = codeSections[i];
-      if (!gRegistered) {
-        // Tell XPConnect that anything which begins with URI_PREFIX
-        // should be considered protected content, and therefore any
-        // untrusted content accessed by it should implicitly have
-        // XPCNativeWrappers made for it.
-
-        let ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
-                       .getService(Components.interfaces.nsIUbiquity);
-
-        ubiquity.flagSystemFilenamePrefix(URI_PREFIX, true);
-        gRegistered = true;
-      }
-
       let filename;
 
-      if (section.filename.indexOf(URI_PREFIX) == 0 ||
+      if (section.filename.indexOf(PROTOCOL_URI_PREFIX) == 0 ||
           this._ignoreUbiquityProtocol)
         filename = section.filename;
       else {
-        filename = URI_PREFIX + section.filename;
+        filename = PROTOCOL_URI_PREFIX + section.filename;
         ubiquityProtocol.setPath(section.filename, section.filename);
       }
 
       let sourceCode = code.slice(currIndex, currIndex + section.length);
-      retVal = Components.utils.evalInSandbox(sourceCode,
-                                              sandbox,
-                                              "1.8",
-                                              filename,
-                                              section.lineNumber);
+
+      if (tryToProtectProtocol())
+        retVal = Components.utils.evalInSandbox(sourceCode,
+                                                sandbox,
+                                                "1.8",
+                                                filename,
+                                                section.lineNumber);
+      else
+        retVal = Components.utils.evalInSandbox(sourceCode,
+                                                sandbox,
+                                                "1.8");
+
       currIndex += section.length;
     }
     return retVal;
