@@ -794,10 +794,11 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
 
   if( options.takes ) {
     execute.DOLabel = getKey( options.takes );
-    execute.DOType = options.takes[execute.DOLabel];
+    if (execute.DOLabel) {
+      execute.DOType = options.takes[execute.DOLabel];
 
-    if (execute.DOType.constructor.name == "RegExp") {
-      execute.DOType = nounTypeFromRegExp(execute.DOType);
+      if (execute.DOType.constructor.name == "RegExp")
+        execute.DOType = nounTypeFromRegExp(execute.DOType);
     }
   }
 
