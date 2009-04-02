@@ -62,7 +62,7 @@ function makePreviewBrowser(unsafePblock, url, cb) {
     browser.setAttribute("disablesecurity", true);
     browser.setAttribute("type", "content");
     browser.setAttribute("width", width);
-    browser.setAttribute("height", width);
+    browser.setAttribute("height", height);
     browser.addEventListener("load",
                              onPreviewLoaded,
                              true);
@@ -86,7 +86,7 @@ function makePreviewBrowser(unsafePblock, url, cb) {
                          "chrome://ubiquity/content/content-preview.xul");
   xulIframe.style.border = "none";
   xulIframe.setAttribute("width", width);
-  xulIframe.setAttribute("height", width);
+  xulIframe.setAttribute("height", height);
 
   xulIframe.addEventListener("load",
                              onXulLoaded,
