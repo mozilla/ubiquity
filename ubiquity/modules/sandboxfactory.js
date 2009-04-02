@@ -59,28 +59,6 @@ function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
     this._makeGlobals = function defaultMakeGlobals(id) {
       return globals;
     };
-
-  // TODO: This code is temporary; right now the pre-compiled
-  // nsIUbiquity XPCOM binary that comes with Ubiquity only works on
-  // FF 3.1 due to the fact that the JSAPI is backwards compatible
-  // at only the source-code level.  Eventually we'll change this so that
-  // the nsIUbiquity component is only compiled for FF 3.0, and the
-  // functionality we need is built-in to FF 3.1 (or rather, Gecko
-  // 1.9.1). See bug #445873 for more information.
-
-  try {
-    var sandbox = Components.utils.Sandbox(target);
-    var ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
-                   .getService(Components.interfaces.nsIUbiquity);
-    ubiquity.evalInSandbox("(function() {})();", "test.js", 1,
-                           "1.8", sandbox);
-    this._ubiquityComponent = ubiquity;
-  } catch (e) {
-    Utils.reportWarning("nsUbiquity not available, using standard " +
-                        "Components.utils.evalInSandbox() instead (" + e +
-                        ").");
-    this._ubiquityComponent = null;
-  }
 }
 
 var URI_PREFIX = "ubiquity://";
@@ -99,41 +77,41 @@ SandboxFactory.prototype = {
   },
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
-    var ubiquity = this._ubiquityComponent;
     var retVal;
-    if (ubiquity) {
-      let currIndex = 0;
-      for (let i = 0; i < codeSections.length; i++) {
-        let section = codeSections[i];
-        if (!gRegistered) {
-          // Tell XPConnect that anything which begins with URI_PREFIX
-          // should be considered protected content, and therefore any
-          // untrusted content accessed by it should implicitly have
-          // XPCNativeWrappers made for it.
-          ubiquity.flagSystemFilenamePrefix(URI_PREFIX, true);
-          gRegistered = true;
-        }
+    let currIndex = 0;
+    for (let i = 0; i < codeSections.length; i++) {
+      let section = codeSections[i];
+      if (!gRegistered) {
+        // Tell XPConnect that anything which begins with URI_PREFIX
+        // should be considered protected content, and therefore any
+        // untrusted content accessed by it should implicitly have
+        // XPCNativeWrappers made for it.
 
-        let filename;
+        let ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
+                       .getService(Components.interfaces.nsIUbiquity);
 
-        if (section.filename.indexOf(URI_PREFIX) == 0 ||
-            this._ignoreUbiquityProtocol)
-          filename = section.filename;
-        else {
-          filename = URI_PREFIX + section.filename;
-          ubiquityProtocol.setPath(section.filename, section.filename);
-        }
-
-        let sourceCode = code.slice(currIndex, currIndex + section.length);
-        retVal = ubiquity.evalInSandbox(sourceCode,
-                                        filename,
-                                        section.lineNumber,
-                                        "1.8",
-                                        sandbox);
-        currIndex += section.length;
+        ubiquity.flagSystemFilenamePrefix(URI_PREFIX, true);
+        gRegistered = true;
       }
-    } else
-      retVal = Components.utils.evalInSandbox(code, sandbox);
+
+      let filename;
+
+      if (section.filename.indexOf(URI_PREFIX) == 0 ||
+          this._ignoreUbiquityProtocol)
+        filename = section.filename;
+      else {
+        filename = URI_PREFIX + section.filename;
+        ubiquityProtocol.setPath(section.filename, section.filename);
+      }
+
+      let sourceCode = code.slice(currIndex, currIndex + section.length);
+      retVal = Components.utils.evalInSandbox(sourceCode,
+                                              sandbox,
+                                              "1.8",
+                                              filename,
+                                              section.lineNumber);
+      currIndex += section.length;
+    }
     return retVal;
   }
 };
