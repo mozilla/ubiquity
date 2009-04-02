@@ -5,10 +5,4 @@ interface nsIUbiquity : nsISupports
 {
   void flagSystemFilenamePrefix(in string filenamePrefix,
                                 in boolean wantNativeWrappers);
-
-  void evalInSandbox(in AString source,
-                     in string filename,
-                     in long lineNo,
-                     in string jsVersion
-                     /* Sandbox param */);
 };
