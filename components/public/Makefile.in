@@ -10,8 +10,7 @@ XPIDL_MODULE  = ubiquity
 
 XPI_NAME = ubiquity
 
-XPIDLSRCS = nsIJSWeakRef.idl \
-            nsIUbiquityDesktopIntegration.idl \
+XPIDLSRCS = nsIUbiquityDesktopIntegration.idl \
             $(NULL)
 
 include $(topsrcdir)/config/rules.mk

@@ -1,8 +1,0 @@
-#include "nsISupports.idl"
-
-[scriptable, uuid(fc04ea60-17df-11de-8c30-0800200c9a66)]
-interface nsIJSWeakRef : nsISupports
-{
-  void set(/* JSObject param */);
-  /* JSObject param */ void get();
-};
