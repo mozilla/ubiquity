@@ -38,6 +38,9 @@ EXPORTED_SYMBOLS = ["SandboxFactory"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
 var ubiquityProtocol = Components.utils.import(
   "resource://ubiquity/modules/ubiquity_protocol.js"
 );
@@ -62,10 +65,11 @@ function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
 }
 
 var PROTOCOL_URI_PREFIX = "ubiquity://";
+var gProtectedFileUriPrefix = "";
 var gDidTryToProtectProtocol = false;
 var gIsProtocolProtected = false;
 
-function tryToProtectProtocol() {
+function makeProtectedFilename(filename) {
   if (!gDidTryToProtectProtocol) {
     // Tell XPConnect that anything which begins with PROTOCOL_URI_PREFIX
     // should be considered protected content, and therefore any
@@ -82,12 +86,34 @@ function tryToProtectProtocol() {
       // The binary component was probably compiled for a different
       // version of the platform which is looking for a nonexistent
       // IID of nsIXPConnect, or the binary component just isn't
-      // compiled for this particular platform.
+      // compiled for this particular platform. Guess we'll just
+      // do our best to let the user know what the "real"
+      // filename is by appending it to a known protected
+      // prefix.
+
+      var ioService = Cc["@mozilla.org/network/io-service;1"].
+                      getService(Ci.nsIIOService);
+
+      var resProt = ioService.getProtocolHandler("resource")
+                    .QueryInterface(Ci.nsIResProtocolHandler);
+
+      gProtectedFileUriPrefix = resProt.resolveURI(
+        Utils.url("resource://ubiquity/modules/sandboxfactory.js")
+      );
     }
 
     gDidTryToProtectProtocol = true;
   }
-  return gIsProtocolProtected;
+
+  if (gIsProtocolProtected) {
+    if (filename.indexOf(PROTOCOL_URI_PREFIX) != 0) {
+      ubiquityProtocol.setPath(filename, filename);
+      filename = PROTOCOL_URI_PREFIX + filename;
+    }
+  } else
+    filename = gProtectedFileUriPrefix + "#" + filename;
+
+  return filename;
 }
 
 SandboxFactory.prototype = {
@@ -109,26 +135,16 @@ SandboxFactory.prototype = {
       let section = codeSections[i];
       let filename;
 
-      if (section.filename.indexOf(PROTOCOL_URI_PREFIX) == 0 ||
-          this._ignoreUbiquityProtocol)
-        filename = section.filename;
-      else {
-        filename = PROTOCOL_URI_PREFIX + section.filename;
-        ubiquityProtocol.setPath(section.filename, section.filename);
-      }
+      if (!this._ignoreUbiquityProtocol)
+        filename = makeProtectedFilename(section.filename);
 
       let sourceCode = code.slice(currIndex, currIndex + section.length);
 
-      if (tryToProtectProtocol())
-        retVal = Components.utils.evalInSandbox(sourceCode,
-                                                sandbox,
-                                                "1.8",
-                                                filename,
-                                                section.lineNumber);
-      else
-        retVal = Components.utils.evalInSandbox(sourceCode,
-                                                sandbox,
-                                                "1.8");
+      retVal = Components.utils.evalInSandbox(sourceCode,
+                                              sandbox,
+                                              "1.8",
+                                              filename,
+                                              section.lineNumber);
 
       currIndex += section.length;
     }
