@@ -1,22 +1,5 @@
 <?xml version="1.0"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script><![CDATA[
-  // If a command feed's URL had to be "munged" by a sandbox in order to
-  // have XPConnect wrappers implicitly made for it, let's "un-munge" it
-  // here so that it looks intelligible to end-users.
-  Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
-
-  window.addEventListener("load", function() {
-    var box = document.getElementById("ConsoleBox");
-    box.addEventListener("DOMNodeInserted",
-    function(aEvt) {
-      var target = aEvt.originalTarget;
-      var href = target.getAttribute("href");
-      var prefix = SandboxFactory.protectedFileUriPrefix;
-      if (prefix && href.indexOf(prefix) == 0)
-        target.setAttribute("href", href.slice(prefix.length));
-    }, true);
-  },
-  false);
-  ]]></script>
+  <script type="application/javascript;version=1.7"
+          src="chrome://ubiquity/content/console.js"/>
 </overlay>

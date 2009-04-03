@@ -48,6 +48,7 @@ var ubiquityProtocol = Components.utils.import(
 var defaultTarget = this;
 
 function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
+  maybeInitialize();
   this._ignoreUbiquityProtocol = ignoreUbiquityProtocol;
   if (typeof(target) == "undefined")
     target = defaultTarget;
@@ -65,24 +66,36 @@ function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
 }
 
 SandboxFactory.protectedFileUriPrefix = "";
+SandboxFactory.fileUri = "";
+SandboxFactory.isFilenameReported = false;
+SandboxFactory.isInitialized = false;
 
-var PROTOCOL_URI_PREFIX = "ubiquity://";
-var gDidTryToProtectProtocol = false;
-var gIsProtocolProtected = false;
+var UBIQUITY_PROTOCOL_URI_PREFIX = "ubiquity://";
+var gIsUbiquityProtocolProtected = false;
 
-function makeProtectedFilename(filename) {
-  if (!gDidTryToProtectProtocol) {
-    // Tell XPConnect that anything which begins with PROTOCOL_URI_PREFIX
-    // should be considered protected content, and therefore any
-    // untrusted content accessed by it should implicitly have
-    // XPCNativeWrappers made for it.
+function maybeInitialize() {
+  if (!SandboxFactory.isInitialized) {
+    var ioService = Cc["@mozilla.org/network/io-service;1"].
+                    getService(Ci.nsIIOService);
+
+    var resProt = ioService.getProtocolHandler("resource")
+                  .QueryInterface(Ci.nsIResProtocolHandler);
+
+    SandboxFactory.fileUri = resProt.resolveURI(
+      Utils.url("resource://ubiquity/modules/sandboxfactory.js")
+    );
+
+    // Tell XPConnect that anything which begins with
+    // UBIQUITY_PROTOCOL_URI_PREFIX should be considered protected
+    // content, and therefore any untrusted content accessed by it
+    // should implicitly have XPCNativeWrappers made for it.
 
     try {
       let ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
                      .getService(Components.interfaces.nsIUbiquity);
 
-      ubiquity.flagSystemFilenamePrefix(PROTOCOL_URI_PREFIX, true);
-      gIsProtocolProtected = true;
+      ubiquity.flagSystemFilenamePrefix(UBIQUITY_PROTOCOL_URI_PREFIX, true);
+      gIsUbiquityProtocolProtected = true;
     } catch (e) {
       // The binary component was probably compiled for a different
       // version of the platform which is looking for a nonexistent
@@ -92,24 +105,33 @@ function makeProtectedFilename(filename) {
       // filename is by appending it to a known protected
       // prefix.
 
-      var ioService = Cc["@mozilla.org/network/io-service;1"].
-                      getService(Ci.nsIIOService);
-
-      var resProt = ioService.getProtocolHandler("resource")
-                    .QueryInterface(Ci.nsIResProtocolHandler);
-
-      SandboxFactory.protectedFileUriPrefix = resProt.resolveURI(
-        Utils.url("resource://ubiquity/modules/sandboxfactory.js")
-      ) + "#";
+      SandboxFactory.protectedFileUriPrefix = SandboxFactory.fileUri + "#";
     }
 
-    gDidTryToProtectProtocol = true;
-  }
+    // Now figure out if we're in a version of the platform that allows
+    // us to specify the filename of code that runs in the sandbox, and
+    // accurately reports it in tracebacks.
 
-  if (gIsProtocolProtected) {
-    if (filename.indexOf(PROTOCOL_URI_PREFIX) != 0) {
+    var sandbox = Components.utils.Sandbox("http://www.mozilla.com");
+    try {
+      Components.utils.evalInSandbox("throw new Error()",
+                                     sandbox,
+                                     "1.8",
+                                     "somefilename",
+                                     1);
+    } catch (e) {
+      SandboxFactory.isFilenameReported = ((e.fileName) == "somefilename");
+    }
+
+    SandboxFactory.isInitialized = true;
+  }
+}
+
+function makeProtectedFilename(filename) {
+  if (gIsUbiquityProtocolProtected) {
+    if (filename.indexOf(UBIQUITY_PROTOCOL_URI_PREFIX) != 0) {
       ubiquityProtocol.setPath(filename, filename);
-      filename = PROTOCOL_URI_PREFIX + filename;
+      filename = UBIQUITY_PROTOCOL_URI_PREFIX + filename;
     }
   } else
     filename = SandboxFactory.protectedFileUriPrefix + filename;
