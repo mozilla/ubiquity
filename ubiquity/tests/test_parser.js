@@ -44,7 +44,8 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
       getSelection: function() { return ""; }
     };
 
-  return NLParser.makeParserForLanguage(lang, verbs, nouns, contextUtils,
+  return NLParser.makeParserForLanguage( NLParser.ORIGINAL_SERIES,
+                                        lang, verbs, nouns, contextUtils,
                                         new TestSuggestionMemory());
 }
 

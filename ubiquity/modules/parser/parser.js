@@ -41,14 +41,22 @@ EXPORTED_SYMBOLS = ["NLParser"];
 Components.utils.import("resource://ubiquity/modules/suggestion_memory.js");
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-var NLParser = { MAX_SUGGESTIONS: 5};
+var NLParser = { MAX_SUGGESTIONS: 5,
+                 ORIGINAL_SERIES: 0,
+                 NEXT_GENERATION: 1};
 
-NLParser.makeParserForLanguage = function(languageCode, verbList, nounList,
+NLParser.makeParserForLanguage = function(parserVersion,
+                                          languageCode, verbList, nounList,
                                           ContextUtils, suggestionMemory) {
-  let parserPlugin = NLParser.getPluginForLanguage(languageCode);
 
-  return new NLParser.Parser(verbList, nounList, parserPlugin, ContextUtils,
-                             suggestionMemory);
+  if (parserVersion == NLParser.ORIGINAL_SERIES) {
+    let parserPlugin = NLParser.getPluginForLanguage(languageCode);
+
+    return new NLParser.Parser(verbList, nounList, parserPlugin, ContextUtils,
+                               suggestionMemory);
+  } else if (parserVersion == NLParser.NEXT_GENERATION) {
+    throw "Not yet implemented.";
+  }
 };
 
 (function() {
