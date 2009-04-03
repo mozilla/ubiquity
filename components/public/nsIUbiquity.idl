@@ -1,8 +1,0 @@
-#include "nsISupports.idl"
-
-[scriptable, uuid(4e3a2d20-a474-11dd-ad8b-0800200c9a66)]
-interface nsIUbiquity : nsISupports
-{
-  void flagSystemFilenamePrefix(in string filenamePrefix,
-                                in boolean wantNativeWrappers);
-};

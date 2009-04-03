@@ -24,7 +24,6 @@ REQUIRES	= \
 		  $(NULL)
 
 CPPSRCS = nsJSWeakRef.cpp \
-          nsUbiquity.cpp \
           ubiquitymodule.cpp \
           $(NULL)
 

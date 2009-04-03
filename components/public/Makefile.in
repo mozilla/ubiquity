@@ -11,7 +11,6 @@ XPIDL_MODULE  = ubiquity
 XPI_NAME = ubiquity
 
 XPIDLSRCS = nsIJSWeakRef.idl \
-            nsIUbiquity.idl \
             nsIUbiquityDesktopIntegration.idl \
             $(NULL)
 

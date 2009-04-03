@@ -41,15 +41,11 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var ubiquityProtocol = Components.utils.import(
-  "resource://ubiquity/modules/ubiquity_protocol.js"
-);
-
 var defaultTarget = this;
 
-function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
+function SandboxFactory(globals, target, ignoreForcedProtection) {
   maybeInitialize();
-  this._ignoreUbiquityProtocol = ignoreUbiquityProtocol;
+  this._ignoreForcedProtection = ignoreForcedProtection;
   if (typeof(target) == "undefined")
     target = defaultTarget;
   this._target = target;
@@ -70,9 +66,6 @@ SandboxFactory.fileUri = "";
 SandboxFactory.isFilenameReported = false;
 SandboxFactory.isInitialized = false;
 
-var UBIQUITY_PROTOCOL_URI_PREFIX = "ubiquity://";
-var gIsUbiquityProtocolProtected = false;
-
 function maybeInitialize() {
   if (!SandboxFactory.isInitialized) {
     var ioService = Cc["@mozilla.org/network/io-service;1"].
@@ -85,33 +78,14 @@ function maybeInitialize() {
       Utils.url("resource://ubiquity/modules/sandboxfactory.js")
     );
 
-    // Tell XPConnect that anything which begins with
-    // UBIQUITY_PROTOCOL_URI_PREFIX should be considered protected
-    // content, and therefore any untrusted content accessed by it
-    // should implicitly have XPCNativeWrappers made for it.
-
-    try {
-      let ubiquity = Components.classes["@labs.mozilla.com/ubiquity;1"]
-                     .getService(Components.interfaces.nsIUbiquity);
-
-      ubiquity.flagSystemFilenamePrefix(UBIQUITY_PROTOCOL_URI_PREFIX, true);
-      gIsUbiquityProtocolProtected = true;
-    } catch (e) {
-      // The binary component was probably compiled for a different
-      // version of the platform which is looking for a nonexistent
-      // IID of nsIXPConnect, or the binary component just isn't
-      // compiled for this particular platform. Guess we'll just
-      // do our best to let the user know what the "real"
-      // filename is by appending it to a known protected
-      // prefix.
-
-      SandboxFactory.protectedFileUriPrefix = SandboxFactory.fileUri + "#";
-    }
+    // We need to prefix any source code URI's with a known
+    // "protected" file URI so that XPConnect wrappers are implicitly
+    // made for them.
+    SandboxFactory.protectedFileUriPrefix = SandboxFactory.fileUri + "#";
 
     // Now figure out if we're in a version of the platform that allows
     // us to specify the filename of code that runs in the sandbox, and
     // accurately reports it in tracebacks.
-
     var sandbox = Components.utils.Sandbox("http://www.mozilla.com");
     try {
       Components.utils.evalInSandbox("throw new Error()",
@@ -127,18 +101,6 @@ function maybeInitialize() {
   }
 }
 
-function makeProtectedFilename(filename) {
-  if (gIsUbiquityProtocolProtected) {
-    if (filename.indexOf(UBIQUITY_PROTOCOL_URI_PREFIX) != 0) {
-      ubiquityProtocol.setPath(filename, filename);
-      filename = UBIQUITY_PROTOCOL_URI_PREFIX + filename;
-    }
-  } else
-    filename = SandboxFactory.protectedFileUriPrefix + filename;
-
-  return filename;
-}
-
 SandboxFactory.prototype = {
   makeSandbox: function makeSandbox(codeSource) {
     var sandbox = Components.utils.Sandbox(this._target);
@@ -152,14 +114,19 @@ SandboxFactory.prototype = {
   },
 
   evalInSandbox: function evalInSandbox(code, sandbox, codeSections) {
+    if (!codeSections)
+      codeSections = [{filename: "<string>",
+                       lineNumber: 0,
+                       length: code.length}];
+
     var retVal;
     let currIndex = 0;
     for (let i = 0; i < codeSections.length; i++) {
       let section = codeSections[i];
-      let filename;
+      let filename = section.filename;
 
-      if (!this._ignoreUbiquityProtocol)
-        filename = makeProtectedFilename(section.filename);
+      if (!this._ignoreForcedProtection)
+        filename = SandboxFactory.protectedFileUriPrefix + filename;
 
       let sourceCode = code.slice(currIndex, currIndex + section.length);
 

@@ -327,20 +327,12 @@ function testIterableCollectionWorks() {
   this.assert(count == 1, "count must be 1.");
 }
 
-// This tests bug #25, but it's being commented out for now so that
-// all unit tests succeed.
-//function testSandboxSupportsJs17() {
-//  var sbf = new SandboxFactory({});
-//  var s = sbf.makeSandbox();
-//  sbf.evalInSandbox("let k = 1;", s);
-//}
-
 function testUtilsTrim() {
   // Taken from http://www.somacon.com/p355.php.
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
 
-function testUtilsComputeCrpytoHash() {
+function testUtilsComputeCryptoHash() {
   var str = "hello world";
   this.assert(Utils.computeCryptoHash("md5", str) == "5eb63bbbe01eeed093cb22bb8f5acdc3");
   this.assert(Utils.computeCryptoHash("sha1", str) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
@@ -384,112 +376,43 @@ function testUtilsIsArray() {
   this.assert(Utils.isArray([]));
 }
 
-function getUbiquityComponent(test) {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
+// This tests bug #25.
+function testSandboxSupportsJs17() {
+  var sbf = new SandboxFactory({});
 
-  try {
-    var ubiquity = Cc["@labs.mozilla.com/ubiquity;1"];
+  if (!SandboxFactory.isFilenameReported)
+    // Only if the filename is reported can we also be certain that
+    // we have control over the JS version of the sandbox; see Bugzilla
+    // bug #445873 for more information.
+    throw new this.SkipTestError();
 
-    ubiquity = ubiquity.getService().QueryInterface(Ci.nsIUbiquity);
-    var sandbox = Components.utils.Sandbox("http://www.foo.com");
-    ubiquity.evalInSandbox("(function() {})();", "nothing.js", 1,
-                           "1.8", sandbox);
-    return ubiquity;
-  } catch (e) {
-    // Right now nsUbiquity is an optional component, and if
-    // it doesn't exist, let's just skip this test. Unfortunately,
-    // there's a bunch of weird ways that the components can fail
-    // to load, e.g. if the wrong version of Firefox loads it, so
-    // we're just doing a blanket except here for now.
-    throw new test.SkipTestError();
-  }
+  var s = sbf.makeSandbox();
+  sbf.evalInSandbox("let k = 1;", s);
 }
 
-function testUbiquityComponent() {
-  var ubiquity = getUbiquityComponent(this);
-  var sandbox = Components.utils.Sandbox("http://www.foo.com");
-  ubiquity.evalInSandbox("var a = 1;", "nothing.js", 1, "1.8",
-                         sandbox);
-  this.assert(sandbox.a == 1,
-              "nsIUbiquity.evalInSandbox() must work.");
-
-  var errorCaught = null;
-  try {
-    ubiquity.evalInSandbox("throw new Error('hi')",
-                           "nothing.js",
-                           1,
-                           "1.8",
-                           sandbox);
-  } catch (e) {
-    errorCaught = e;
-  }
-  this.assert(errorCaught.message == 'hi',
-              "nsIUbiquity.evalInSandbox() must throw exceptions");
-
-  ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1, "1.7",
-                         sandbox);
-  this.assert(sandbox.k == 1,
-              "nsIUbiquity.evalInSandbox() must accept JS 1.7.");
-}
-
-function testUbiquityComponentFlagSystemFilenamePrefixWorks() {
-  var ubiquity = getUbiquityComponent(this);
-
-  ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
-}
-
-function testUbiquityComponentFlagSystemFilenamePrefixCreatesWrappers() {
+function testSandboxFactoryProtectsSandbox() {
   // This is a regression test for #434.
   this.skipIfXPCShell();
 
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-  var ubiquity = getUbiquityComponent(this);
 
   var Application = Components.classes["@mozilla.org/fuel/application;1"]
                     .getService(Components.interfaces.fuelIApplication);
 
-  ubiquity.flagSystemFilenamePrefix("__arbitraryString1://", true);
-
-  var sandbox = Components.utils.Sandbox(globalObj);
+  var sbf = new SandboxFactory({}, globalObj);
+  var sandbox = sbf.makeSandbox();
   var code = "Application.activeWindow.activeTab.document.defaultView";
   sandbox.Application = Application;
 
   this.assertEquals(
-    ubiquity.evalInSandbox(code, "__arbitraryString2://blarg/", 1,
-                           "1.8", sandbox),
-    "[object Window]"
-  );
-
-  this.assertEquals(
-    ubiquity.evalInSandbox(code, "__arbitraryString1://blarg/", 1,
-                           "1.8", sandbox),
+    sbf.evalInSandbox(code,
+                      sandbox,
+                      [{filename: "__arbitraryString://blarg/",
+                        lineNumber: 1,
+                        length: code.length}]),
     "[object XPCNativeWrapper [object Window]]"
   );
-}
-
-function testUbiquityComponentAcceptsJsVersion() {
-  var ubiquity = getUbiquityComponent(this);
-  var sandbox = Components.utils.Sandbox("http://www.foo.com");
-  var wasExceptionThrown = false;
-
-  try {
-    ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1,
-                           "1.5", sandbox);
-  } catch (e) {
-    wasExceptionThrown = true;
-  }
-  this.assert(wasExceptionThrown);
-  wasExceptionThrown = false;
-
-  try {
-    ubiquity.evalInSandbox("let k = 1;", "nothing.js", 1,
-                           "foo", sandbox);
-  } catch (e if e.result == Components.results.NS_ERROR_INVALID_ARG) {
-    wasExceptionThrown = true;
-  }
-  this.assert(wasExceptionThrown);
 }
 
 function testXmlScriptCommandsParser() {
