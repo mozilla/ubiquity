@@ -2,3 +2,4 @@ resource ubiquity ./
 content ubiquity chrome/content/
 skin ubiquity skin chrome/skin/
 overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul
+overlay chrome://global/content/console.xul chrome://ubiquity/content/console.xul

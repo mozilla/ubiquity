@@ -64,8 +64,9 @@ function SandboxFactory(globals, target, ignoreUbiquityProtocol) {
     };
 }
 
+SandboxFactory.protectedFileUriPrefix = "";
+
 var PROTOCOL_URI_PREFIX = "ubiquity://";
-var gProtectedFileUriPrefix = "";
 var gDidTryToProtectProtocol = false;
 var gIsProtocolProtected = false;
 
@@ -97,9 +98,9 @@ function makeProtectedFilename(filename) {
       var resProt = ioService.getProtocolHandler("resource")
                     .QueryInterface(Ci.nsIResProtocolHandler);
 
-      gProtectedFileUriPrefix = resProt.resolveURI(
+      SandboxFactory.protectedFileUriPrefix = resProt.resolveURI(
         Utils.url("resource://ubiquity/modules/sandboxfactory.js")
-      );
+      ) + "#";
     }
 
     gDidTryToProtectProtocol = true;
@@ -111,7 +112,7 @@ function makeProtectedFilename(filename) {
       filename = PROTOCOL_URI_PREFIX + filename;
     }
   } else
-    filename = gProtectedFileUriPrefix + "#" + filename;
+    filename = SandboxFactory.protectedFileUriPrefix + filename;
 
   return filename;
 }
