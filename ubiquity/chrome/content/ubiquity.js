@@ -94,6 +94,10 @@ Ubiquity.prototype = {
   __MIN_CMD_PREVIEW_LENGTH: 0,
   __KEYCODE_1: 49,
 
+  get textBox() {
+    return this.__textBox;
+  },
+
   __onBlur: function __onBlur() {
     // Hackish fix for #330.
     var self = this;

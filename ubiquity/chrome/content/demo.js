@@ -79,7 +79,7 @@ function UbiquityAutomator(ubiquity, anchor) {
   };
 
   this.typeKey = function typeKey(character) {
-    var textBox = ubiquity.__textBox;
+    var textBox = ubiquity.textBox;
     var doc = textBox.ownerDocument;
 
     var keyCode = character.toUpperCase().charCodeAt(0);
