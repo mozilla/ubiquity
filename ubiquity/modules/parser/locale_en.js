@@ -118,8 +118,7 @@ function _recursiveParse(unusedWords,
   return completions;
 }
 
-EnParser.parseSentence = function(inputString, nounList, verbList, selObj,
-                                  asyncSuggestionCb) {
+EnParser.parseSentence = function(inputString, nounList, verbList, selObj ){
   // Returns a list of PartiallyParsedSentences.
   // Language-specific.  This one is for English.
   let parsings = [];
@@ -148,8 +147,7 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj,
                                                           {},
                                                           selObj,
                                                           matchScore,
-                                                          EnParser,
-                                                          asyncSuggestionCb)];
+                                                          EnParser)];
     } else {
       // Recursively parse to assign arguments
       let makeNewParsing = function( argStrings ) {
@@ -157,8 +155,7 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj,
                                                     argStrings,
                                                     selObj,
                                                     matchScore,
-                                                    EnParser,
-                                                    asyncSuggestionCb);
+                                                    EnParser);
       };
       newParsings = _recursiveParse( inputArguments,
                                      {},

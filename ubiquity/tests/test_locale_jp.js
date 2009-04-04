@@ -1,6 +1,9 @@
 Components.utils.import("resource://ubiquity/modules/parser/locale_jp.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
+const MAX_SUGGESTIONS = 10;
+var emptyContext = {textSelection:"", htmlSelection:""};
+
 function testJpSplitByParticles() {
   var sentence1 = "彼女と駅に行った";
   var parsedSentence = JpParser._splitByParticles(sentence1);
@@ -48,23 +51,21 @@ function testJapaneseParserBasic() {
     modifiers: {"を": tekiType }
   };
   var parser = makeTestParser( "jp",
-					       [cmd_sasu],
-					       [tekiType] );
-  var fakeContext = {textSelection:"", htmlSelection:""};
+				[cmd_sasu],
+				[tekiType] );
   var input = "敵を刺す";
-  parser.updateSuggestionList(input, fakeContext);
-
-  var suggList = parser.getSuggestionList();
+  var query = parser.newQuery(input, emptyContext, MAX_SUGGESTIONS);
+  var suggList = query.suggestionList;
   this.assert(suggList.length == 1,
               "Should be 1 suggestion, not " + suggList.length);
   this.assert(suggList[0]._verb._name == "刺す", "Should be sasu");
   this.assert(suggList[0]._argSuggs["を"].text == "敵", "Should be teki");
-  suggList[0].execute(fakeContext);
+  suggList[0].execute(emptyContext);
   this.assert(dareGaSasareta == "敵", "Enemy should be stabbed.");
 
   var input2 = "友達を刺す";
-  parser.updateSuggestionList(input2, fakeContext);
-  suggList = parser.getSuggestionList();
+  query = parser.newQuery(input2, emptyContext, MAX_SUGGESTIONS);
+  suggList = query.suggestionList;
   this.assert(suggList.length == 0, "Should be no suggestions.");
 }
 
@@ -88,9 +89,8 @@ function testJapaneseParserSomeMore() {
   var parser = makeTestParser( "jp",
 			       [cmd_suru],
 			       [noun_type_mono] );
-  var fakeContext = {textSelection:"", htmlSelection:""};
-  var query = "";
-  parser.updateSuggestionList(query, fakeContext);
+  var query = parser.newQuery( "", emptyContext, MAX_SUGGESTIONS);
+  var suggestionList = query.suggestionList;
   // TODO tests here that advanced features still work in japanese parser
   // version: synonyms, defaults, suggestion ranking, async suggestions, etc.
 }

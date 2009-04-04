@@ -82,8 +82,7 @@ JpParser._splitByParticles = function( input ) {
   return oldDict;
 };
 
-JpParser.parseSentence = function(inputString, nounList, verbList, selObj,
-                                  asyncSuggestionCb) {
+JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   // Returns a list of PartiallyParsedSentences.
   // Language-specific.  This one is for Japanese.
   let parsings = [];
@@ -107,8 +106,7 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj,
 							argStrings,
 							selObj,
 							matchScore,
-                                                        JpParser,
-                                                        asyncSuggestionCb)];
+                                                        JpParser)];
     parsings = parsings.concat( newParsings );
   }
   return parsings;

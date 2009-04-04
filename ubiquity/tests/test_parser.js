@@ -11,38 +11,42 @@ Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
 const Ci = Components.interfaces;
 const Cc = Components.classes;
 const LANG = "en";
+const MAX_SUGGESTIONS = 10;
 
 EXPORTED_SYMBOLS = ["makeTestParser"];
 
 // Utility functions:
 
+var fakeContextUtils = {
+  getHtmlSelection: function(context) { return context.htmlSelection; },
+  getSelection: function(context) { return context.textSelection; }
+};
+
+var emptyContext = {
+  textSelection: "",
+  htmlSelection: ""
+};
+
+
 function getCompletions( input, verbs, nountypes, context ) {
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
-
-  var fakeContextUtils = {
-    getHtmlSelection: function() { return context.htmlSelection; },
-    getSelection: function() { return context.textSelection; }
-  };
-
   var parser = makeTestParser( LANG,
 			       verbs,
 			       nountypes,
                                fakeContextUtils,
                                new TestSuggestionMemory() );
-  parser.updateSuggestionList( input, context );
-  return parser.getSuggestionList();
+  var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
+  return query.suggestionList;
 }
+
 function makeTestParser(lang, verbs, nouns, contextUtils) {
   lang = lang ? lang : LANG;
   verbs = verbs ? verbs : [];
   nouns = nouns ? nouns : [];
 
   if (!contextUtils)
-    contextUtils = {
-      getHtmlSelection: function() { return ""; },
-      getSelection: function() { return ""; }
-    };
+    contextUtils = fakeContextUtils;
 
   return NLParser.makeParserForLanguage( NLParser.ORIGINAL_SERIES,
                                         lang, verbs, nouns, contextUtils,
@@ -157,10 +161,6 @@ function testCmdManagerSuggestsForEmptyInput() {
   });
   fakeSource.getAllNounTypes = function() {
     return [nounTypeOne, nounTypeTwo];
-  };
-  var fakeContextUtils = {
-    getHtmlSelection: function(context) { return context.htmlSelection; },
-    getSelection: function(context) { return context.textSelection; }
   };
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
                                        makeTestParser( null,
@@ -438,8 +438,8 @@ function testSortedBySuggestionMemory() {
 		  {name: "crab", execute: function(){}} ];
   var nlParser = makeTestParser(LANG, verbList, nounList);
   var fakeContext = {textSelection:"", htmlSelection:""};
-  nlParser.updateSuggestionList("c", fakeContext);
-  var suggestions = nlParser.getSuggestionList();
+  var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS);
+  var suggestions = query.suggestionList;
   //take the fifth and sixth suggestions, whatever they are...
   var suggFive = suggestions[4];
   var suggFiveName = suggFive._verb._name;
@@ -452,51 +452,50 @@ function testSortedBySuggestionMemory() {
   nlParser.strengthenMemory("c", suggSix);
 
   // now give the same input again...
-  nlParser.updateSuggestionList("c", fakeContext);
-  suggestions = nlParser.getSuggestionList();
+  query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS);
+  suggestions = query.suggestionList;
+  dump("Suggestions has length " + suggestions.length + "\n");
   // the old six should be on top, with the old five in second place:
   this.assert(suggestions[0]._verb._name == suggSixName, "Six should be one");
   this.assert(suggestions[1]._verb._name == suggFiveName, "Five should be two");
 }
 
 function testNounFirstSortedByGeneralFrequency() {
-  var fakeContextUtils = {
-    getHtmlSelection: function() { return "Pants"; },
-    getSelection: function() { return "<b>Pants</b>"; }
-  };
+  var pantsContext = { htmlSelection: "<b>Pants</b>", textSelection: "Pants" };
 
   var verbList = [{name: "foo", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
 		 {name: "bar", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
 		  {name: "baz", DOType: noun_arb_text, DOLabel:"it", execute: function(){}}
 		 ];
 
+  // Note: Create the parser ourself instead of using getCompletion() because
+  // we need the suggestion memory in the parser state.
   var parser = makeTestParser( LANG, verbList, [noun_arb_text], fakeContextUtils);
-  parser.updateSuggestionList("");
-  var suggestions = parser.getSuggestionList();
+  var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS);
+  var suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
   this.assert(suggestions[0]._verb._name == "foo", "Foo should be first...");
   this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
   this.assert(suggestions[2]._verb._name == "baz", "Baz should be last...");
 
   // Now we select "baz" twice and "bar" once...
-  parser.updateSuggestionList("baz");
-  var choice = parser.getSuggestionList()[0];
+  query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS);
+  var choice = query.suggestionList[0];
   parser.strengthenMemory("baz", choice);
   parser.strengthenMemory("baz", choice);
 
-  parser.updateSuggestionList("bar");
-  choice = parser.getSuggestionList()[0];
+  query = parser.newQuery("bar", pantsContext, MAX_SUGGESTIONS);
+  choice = query.suggestionList[0];
   parser.strengthenMemory("bar", choice);
 
   // Now when we try the no-input suggestion again, should be ranked
   // with baz first, then bar, then foo.
-  parser.updateSuggestionList("");
-  suggestions = parser.getSuggestionList();
+  query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS);
+  suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
   this.assert(suggestions[0]._verb._name == "baz", "Baz should be first...");
   this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
   this.assert(suggestions[2]._verb._name == "foo", "Foo should be last...");
-
 }
 
 function testSortedByMatchQuality() {
@@ -506,13 +505,10 @@ function testSortedByMatchQuality() {
 		  {name: "nonihilf"},
 		  {name: "bnurgle"},
 		  {name: "fangoriously"}];
-  var nlParser = makeTestParser(LANG, verbList, nounList);
-  var fakeContext = {textSelection:"", htmlSelection:""};
 
   var assert = this.assert;
   function testSortedSuggestions( input, expectedList ) {
-    nlParser.updateSuggestionList( input, fakeContext );
-    var suggs = nlParser.getSuggestionList();
+    var suggs = getCompletions( input, verbList, nounList, emptyContext );
     assert( suggs.length == expectedList.length, "Should have " + expectedList.length + " suggestions.");
     for (var x in suggs) {
       assert( suggs[x]._verb._name == expectedList[x], expectedList[x] + " should be " + x);
@@ -532,26 +528,18 @@ function testSortedByMatchQuality() {
 	      {name: "bugzilla"},
 	      {name: "get-email-address"},
 	      {name: "highlight"}];
-  nlParser.setCommandList( verbList );
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
 
 function testSortSpecificNounsBeforeArbText() {
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
-  var arb_text = {
-    _name: "text",
-    rankLast: true,
-    suggest: function( text, html ) {
-      return [ NounUtils.makeSugg(text, html) ];
-    }
-  };
 
-  var verbList = [{name: "mumble", DOType: arb_text, DOLabel:"stuff"},
+  var verbList = [{name: "mumble", DOType: noun_arb_text, DOLabel:"stuff"},
                   {name: "wash", DOType: dog, DOLabel: "dog"}];
 
-  var fakeContext = {textSelection:"beagle", htmlSelection:"beagle"};
-  var suggs = getCompletions( "", verbList, [arb_text, dog], fakeContext );
+  var beagleContext = {textSelection:"beagle", htmlSelection:"beagle"};
+  var suggs = getCompletions( "", verbList, [noun_arb_text, dog], beagleContext );
 
   this.assert( suggs.length == 2, "Should be two suggestions.");
   this.assert( suggs[0]._verb._name == "wash", "First suggestion should be wash");
@@ -568,22 +556,17 @@ function testVerbUsesDefaultIfNoArgProvided() {
   };
   var verbList = [{name:"wash", DOType: dog, DOLabel: "dog"},
 		  {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
-  var nlParser = makeTestParser(LANG, verbList, [dog]);
-  var fakeContext = {textSelection:"", htmlSelection:""};
-  nlParser.updateSuggestionList( "wash", fakeContext );
-  var suggs = nlParser.getSuggestionList();
+  var suggs = getCompletions( "wash", verbList, [dog], emptyContext );
   this.assert( suggs.length == 1, "Should be 1 suggestion (A).");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
-  nlParser.updateSuggestionList( "play", fakeContext );
-  suggs = nlParser.getSuggestionList();
+  suggs = getCompletions( "play", verbList, [dog], emptyContext );
   this.assert( suggs.length == 1, "Should be 1 suggestion (B).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
-  nlParser.updateSuggestionList( "play retr", fakeContext );
-  suggs = nlParser.getSuggestionList();
+  suggs = getCompletions( "play retr", verbList, [dog], emptyContext );
   this.assert( suggs.length == 1, "Should be 1 suggestion (C).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
@@ -595,22 +578,17 @@ function testSynonyms() {
   var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
 		  {name: "frobnitz"},
 		  {name: "frobnicate"}];
-  var nlParser = makeTestParser(LANG, verbList, []);
-  var fakeContext = {textSelection:"", htmlSelection:""};
-  nlParser.updateSuggestionList( "frob", fakeContext );
-  var suggs = nlParser.getSuggestionList();
+  var suggs = getCompletions( "frob", verbList, [], emptyContext);
   this.assert( suggs.length == 3, "Should be 3 suggs.");
   this.assert( suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
   this.assert( suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
   this.assert( suggs[2]._verb._name == "twiddle", "twiddle should be third");
 
-  nlParser.updateSuggestionList( "twid", fakeContext );
-  suggs = nlParser.getSuggestionList();
+  suggs = getCompletions( "twid", verbList, [], emptyContext);
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 
-  nlParser.updateSuggestionList( "twirl", fakeContext );
-  suggs = nlParser.getSuggestionList();
+  suggs = getCompletions( "twirl", verbList, [], emptyContext);
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 }
@@ -723,7 +701,6 @@ function testPartiallyParsedSentence() {
 
 }
 
-
 function testVerbGetCompletions() {
   var grumbleCalled = false;
   var cmd_grumble = {
@@ -740,7 +717,7 @@ function testVerbGetCompletions() {
 function testTextAndHtmlDifferent() {
   var executedText = null;
   var executedHtml = null;
-  var fakeContext = {
+  var pantsContext = {
     textSelection: "Pants", htmlSelection:"<blink>Pants</blink>"
   };
   var noun_type_different = {
@@ -762,7 +739,7 @@ function testTextAndHtmlDifferent() {
     }
   };
   var comps = getCompletions("dostuff this", [cmd_different],
-			     [noun_type_different], fakeContext);
+			     [noun_type_different], pantsContext);
   this.assert(comps.length == 1, "There should be one completion.");
   comps[0].execute();
   this.assert( executedText == "Pants", "text should be pants.");
@@ -772,7 +749,7 @@ function testTextAndHtmlDifferent() {
   executedHtml = null;
   //without any explicit 'this', should still work...
   comps = getCompletions("dostuff", [cmd_different],
-			     [noun_type_different], fakeContext);
+			     [noun_type_different], pantsContext);
   this.assert(comps.length == 1, "There should be one completions (2)");
   comps[0].execute();
   this.assert( executedText == "Pants", "text should be pants.");
@@ -785,7 +762,7 @@ function testTextAndHtmlDifferent() {
   var selObj = {
     text: "Pantalones", html: "<blink>Pantalones</blink>"
   };
-  comps = nlParser.nounFirstSuggestions( selObj );
+  comps = nlParser._nounFirstSuggestions( selObj );
   this.assert(comps.length == 1, "There should be one partial completion");
   comps = comps[0].getAlternateSelectionInterpolations();
   this.assert(comps.length == 1, "There should still be one partial completion");
@@ -817,23 +794,19 @@ function testAsyncNounSuggestions() {
     DOLabel: "thing",
     DOType: noun_type_slowness,
     execute: function(context, directObject) {
-
     }
   };
-  var fakeContext = {
-    textSelection: "", htmlSelection: ""
-  };
-  // register an observer to make sure it gets notified when the
-  // noun produces suggestions asynchronously.
   var observerCalled = false;
-  var observe = function() {
-      observerCalled = true;
-  };
 
+  // We make the parser ourself instead of calling getCompletions() because
+  // we need to do stuff with the query callback.
   var parser = makeTestParser(LANG, [cmd_slow],
 			      [noun_type_slowness]);
-  parser.updateSuggestionList( "dostuff hello", fakeContext, observe );
-  var comps = parser.getSuggestionList();
+  var query = parser.newQuery("dostuff hello", emptyContext, MAX_SUGGESTIONS);
+  // register a handler to make sure it gets notified when the
+  // noun produces suggestions asynchronously.
+  query.onResults = function() { observerCalled = true; };
+  var comps = query.suggestionList;
   var assert = this.assert;
   var assertDirObj = function( completion, expected) {
     assert( completion._argSuggs.direct_object.text == expected,
@@ -844,8 +817,8 @@ function testAsyncNounSuggestions() {
 
   // Now here comes the async suggestion:
   noun_type_slowness.triggerCallback();
-  parser.refreshSuggestionList("dostuff hello");
-  comps = parser.getSuggestionList();
+  // parser.refreshSuggestionList("dostuff hello"); TODO replace this logic
+  comps = query.suggestionList;
   this.assert( comps.length == 3, "there should be 3 completions.");
   assertDirObj( comps[0], "Robert E. Lee");
   assertDirObj( comps[1], "slothitude");
@@ -855,14 +828,15 @@ function testAsyncNounSuggestions() {
   // Now try one where the noun originally suggests nothing, but then comes
   // up with some async suggestions.  What happens?
   observerCalled = false;
-  parser.updateSuggestionList("dostuff halifax", fakeContext, observe);
-  comps = parser.getSuggestionList();
+  query = parser.newQuery("dostuff halifax", emptyContext, MAX_SUGGESTIONS);
+  query.onResults = function() { observerCalled = true; };
+  comps = query.suggestionList;
   this.assert( comps.length == 0, "there should be 0 completions.");
   // here comes the async suggestion:
   noun_type_slowness.triggerCallback();
-  parser.refreshSuggestionList("dostuff halifax");
-  comps = parser.getSuggestionList();
-    this.assert( comps.length == 2, "there should be 2 completions.");
+  //parser.refreshSuggestionList("dostuff halifax");
+  comps = query.suggestionList;
+  this.assert( comps.length == 2, "there should be 2 completions.");
   assertDirObj( comps[0], "slothitude");
   assertDirObj( comps[1], "snuffleupagus");
   this.assert(observerCalled, "observer should have been called.");
@@ -996,6 +970,12 @@ function testParseWithComplexQuery() {
 }
 
 // TESTS TO WRITE:
+
+// TODO test that the max_suggestions argument is obeyed
+
+// TODO test with modifiers first and then direct object -- this has been
+// broken in the most recent parser by the patch on bug 571, for no good
+// reason that I can see.
 
 // TODO replace tests that hit Verb directly, with tests that go through
 // NLParser.Parser.

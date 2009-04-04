@@ -42,6 +42,9 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/preview_browser.js");
 
+// TODO make this a preference instead
+const MAX_SUGGESTIONS = 5;
+
 var DEFAULT_PREVIEW_URL = (
   ('data:text/html,' +
    encodeURI('<html><body class="ubiquity-preview-content" ' +
@@ -56,6 +59,7 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
   this.__hilitedSuggestion = 0;
   this.__lastInput = "";
   this.__nlParser = parser;
+  this.__activeQuery = null;
   this.__domNodes = {suggs: suggsNode,
                      preview: previewPaneNode,
                      help: helpNode};
@@ -116,14 +120,14 @@ CommandManager.prototype = {
   moveIndicationUp : function CM_moveIndicationUp(context) {
     this.__hilitedSuggestion -= 1;
     if (this.__hilitedSuggestion < 0) {
-      this.__hilitedSuggestion = this.__nlParser.getNumSuggestions() - 1;
+      this.__hilitedSuggestion = this.__activeQuery.suggestionList.length - 1;
     }
     this._previewAndSuggest(context, true);
   },
 
   moveIndicationDown : function CM_moveIndicationDown(context) {
     this.__hilitedSuggestion += 1;
-    if (this.__hilitedSuggestion > this.__nlParser.getNumSuggestions() - 1) {
+    if (this.__hilitedSuggestion > this.__activeQuery.suggestionList.length - 1) {
       this.__hilitedSuggestion = 0;
     }
     this._previewAndSuggest(context, true);
@@ -131,13 +135,10 @@ CommandManager.prototype = {
 
   _renderSuggestions : function CMD__renderSuggestions() {
     var content = "";
-    var suggList = this.__nlParser.getSuggestionList();
-    var suggNumber = this.__nlParser.getNumSuggestions();
-
-
-    for (var x = 0; x < suggNumber; x++) {
-      var suggText = suggList[x].getDisplayText();
-      var suggIconUrl = suggList[x].getIcon();
+    let suggestionList = this.__activeQuery.suggestionList;
+    for (var x = 0; x < suggestionList.length; x++) {
+      var suggText = suggestionList[x].getDisplayText();
+      var suggIconUrl = suggestionList[x].getIcon();
       var suggIcon = "";
       if(suggIconUrl) {
         suggIcon = "<img src=\"" + Utils.escapeHtml(suggIconUrl) + "\"/>";
@@ -157,7 +158,7 @@ CommandManager.prototype = {
     var wasPreviewShown = false;
 
     try {
-      var activeSugg = this.__nlParser.getSentence(this.__hilitedSuggestion);
+      var activeSugg = this.__activeQuery.suggestionList[this.__hilitedSuggestion];
 
       if (activeSugg) {
         var self = this;
@@ -192,15 +193,18 @@ CommandManager.prototype = {
   },
 
   reset : function CM_reset() {
-    this.__nlParser.reset();
+    // TODO: I think?
+    if (this.__activeQuery)
+      this.__activeQuery.cancel();
   },
 
   updateInput : function CM_updateInput(input, context, asyncSuggestionCb) {
     this.__lastInput = input;
-    this.__nlParser.updateSuggestionList(input, context, asyncSuggestionCb);
+    this.__activeQuery = this.__nlParser.newQuery(input, context, MAX_SUGGESTIONS);
+    this.__activeQuery.onResults = asyncSuggestionCb;
     this.__hilitedSuggestion = 0;
     var previewState = "no-suggestions";
-    if (this.__nlParser.getNumSuggestions() > 0 &&
+    if (this.__activeQuery.suggestionList.length > 0 &&
         this._previewAndSuggest(context))
       previewState = "with-suggestions";
     this.setPreviewState(previewState);
@@ -209,12 +213,14 @@ CommandManager.prototype = {
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
                                                           context) {
     // Called when we're notified of a newly incoming suggestion
-    this.__nlParser.refreshSuggestionList(input);
+    // TODO: Huh?
+    // this.__nlParser.refreshSuggestionList(input);
     this._previewAndSuggest(context);
   },
 
   execute : function CM_execute(context) {
-    var parsedSentence = this.__nlParser.getSentence(this.__hilitedSuggestion);
+    let suggestionList = this.__activeQuery.suggestionList;
+    var parsedSentence = suggestionList[this.__hilitedSuggestion];
     if (!parsedSentence)
       this.__msgService.displayMessage("No command called " +
                                        this.__lastInput + ".");
@@ -232,13 +238,14 @@ CommandManager.prototype = {
   },
 
   hasSuggestions: function CM_hasSuggestions() {
-    return (this.__nlParser.getNumSuggestions() > 0);
+    return (this.__activeQuery && this.__activeQuery.suggestionList.length > 0);
   },
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
                                                            asyncSuggestionCb) {
-    this.__nlParser.updateSuggestionList("", context, asyncSuggestionCb);
-    return this.__nlParser.getSuggestionList();
+    let noInputQuery = this.__nlParser.newQuery("", context, MAX_SUGGESTIONS);
+    noInputQuery.onResults = asyncSuggestionCb;
+    return query.suggestionList;
   },
 
   getHilitedSuggestionText : function CM_getHilitedSuggestionText(context) {
@@ -246,7 +253,7 @@ CommandManager.prototype = {
       return null;
 
     var selObj = this.__nlParser.getSelectionObject(context);
-    var suggText = this.__nlParser.getSentence(this.__hilitedSuggestion)
+    var suggText = this.__activeQuery.suggestionList[this.__hilitedSuggestion]
                                   .getCompletionText(selObj);
     this.updateInput(suggText,
                      context);
