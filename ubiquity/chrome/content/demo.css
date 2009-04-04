@@ -1,0 +1,8 @@
+.commentary {
+    float: right;
+    font-family: helvetica;
+    font-size: 24pt;
+    width: 10em;
+    text-align: right;
+    display: none;
+}
