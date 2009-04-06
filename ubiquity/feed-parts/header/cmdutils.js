@@ -944,6 +944,11 @@ CmdUtils.previewGet = function previewGet(pblock,
                                           data,
                                           callback,
                                           type) {
+  if ( jQuery.isFunction( data ) ) {
+    callback = data;
+    data = null;
+  }
+
   return CmdUtils.previewAjax(pblock,
                               {type: "GET",
                                url: url,
