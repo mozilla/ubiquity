@@ -754,7 +754,7 @@ var noun_type_number = {
    suggest : function(sugg){
      return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : [];
    },
-   default : function(){
+   "default" : function(){
       return CmdUtils.makeSugg("1");
    }
 }
