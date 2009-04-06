@@ -58,16 +58,29 @@
 };
 
 function getGmailContacts( callback ) {
+  // TODO: It's not really a security hazard since we're evaluating the
+  // Vcard data in a sandbox, but I'm not sure how accurate this
+  // algorithm is; we might want to consider using a third-party
+  // VCard parser instead, e.g.: git://github.com/mattt/vcard.js.git
+  // -AV
+
+  var sandbox = Components.utils.Sandbox("data:text/html,");
   jQuery.get(
     "http://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
     function(data) {
-      function unescapeBS(m) eval("'"+ m +"'");
+      function unescapeBS(m) {
+        var result =  Components.utils.evalInSandbox("'"+ m +"'", sandbox);
+        if (typeof(result) == "string")
+          return result;
+        else
+          return "";
+      }
       var contacts = [], name = '';
       for each(var line in data.replace(/\r\n /g, '').split(/\r\n/))
         if(/^(FN|EMAIL).*?:(.*)/.test(line)){
           var {$1: key, $2: val} = RegExp;
-          val = val.replace(/\\./g, unescapeBS);
+          var val = val.replace(/\\./g, unescapeBS);
           if(key === "FN")
             name = val;
           else
