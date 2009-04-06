@@ -850,10 +850,10 @@ function testAsyncNounSuggestions() {
   var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
   var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
                                        makeTestParser());
-  cmdMan.updateInput( "dostuff halifax", fakeContext, null );
+  cmdMan.updateInput( "dostuff halifax", emptyContext, null );
   this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
   noun_type_slowness.triggerCallback();
-  cmdMan.onSuggestionsUpdated( "dostuff h", fakeContext, null );
+  cmdMan.onSuggestionsUpdated( "dostuff h", emptyContext, null );
   this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
 }
 
