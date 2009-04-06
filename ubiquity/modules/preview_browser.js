@@ -63,6 +63,16 @@ function makePreviewBrowser(unsafePblock, url, cb) {
     browser.setAttribute("type", "content");
     browser.setAttribute("width", width);
     browser.setAttribute("height", height);
+
+    // Ensure that a vertical scroll bar is displayed when necessary.
+    browser.addEventListener(
+      "load",
+      function() {
+        this.contentDocument.body.style.overflowY = "auto";
+      },
+      true
+    );
+
     browser.addEventListener("load",
                              onPreviewLoaded,
                              true);
@@ -103,19 +113,6 @@ function PreviewBrowser(previewPaneNode, defaultUrl) {
   this.__previewBrowserCreatedCallback = null;
   this.__previewBrowserUrlLoadedCallback = null;
   this.__containingNode = previewPaneNode;
-
-  var self = this;
-
-  this.__containingNode.addEventListener(
-    "DOMMouseScroll",
-    function(evt) {
-      if (self.__previewBrowser &&
-          self.__previewBrowser.contentWindow) {
-        self.__previewBrowser.contentWindow.scrollBy(0, evt.detail);
-      }
-    },
-    true
-  );
 }
 
 PreviewBrowser.prototype = {
