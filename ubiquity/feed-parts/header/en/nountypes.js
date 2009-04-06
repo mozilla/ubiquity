@@ -721,25 +721,35 @@ var noun_type_twitter_user = {
      if (text.length && text.indexOf(" ") != -1)
        return [];
 
-     // Look for twitter usernames stored in password manager
-     var usersFound = {};
-     var passwordManager = Cc["@mozilla.org/login-manager;1"]
-                           .getService(Ci.nsILoginManager);
      var suggs = [];
-     var urls = ["https://twitter.com", "http://twitter.com"];
-     urls.forEach(
-       function(url) {
-         var logins = passwordManager.findLogins({}, url, "", "");
 
-         for (var x = 0; x < logins.length; x++) {
-           var login = logins[x];
-           if (login.username.indexOf(text) != -1 &&
-               !usersFound[login.username]) {
-             usersFound[login.username] = true;
-             suggs.push(CmdUtils.makeSugg(login.username, null, login));
+     // If we don't need to ask the user for their master password, let's
+     // see if we can suggest known users that the user has logged-in as
+     // before.
+     var tokenDB = Cc["@mozilla.org/security/pk11tokendb;1"].
+                   getService(Ci.nsIPK11TokenDB);
+     var token = tokenDB.getInternalKeyToken();
+
+     if (!token.needsLogin() || token.isLoggedIn()) {
+       // Look for twitter usernames stored in password manager
+       var usersFound = {};
+       var passwordManager = Cc["@mozilla.org/login-manager;1"]
+                             .getService(Ci.nsILoginManager);
+       var urls = ["https://twitter.com", "http://twitter.com"];
+       urls.forEach(
+         function(url) {
+           var logins = passwordManager.findLogins({}, url, "", "");
+
+           for (var x = 0; x < logins.length; x++) {
+             var login = logins[x];
+             if (login.username.indexOf(text) != -1 &&
+                 !usersFound[login.username]) {
+               usersFound[login.username] = true;
+               suggs.push(CmdUtils.makeSugg(login.username, null, login));
+             }
            }
-         }
-       });
+         });
+     }
 
      // If all else fails, treat the user's single-word input as a twitter
      // username.
