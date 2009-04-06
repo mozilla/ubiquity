@@ -238,10 +238,10 @@ function testCmdManagerExecutesTwoCmds() {
                      focusedWindow: null};
 
   cmdMan.updateInput("cmd_one", fakeContext);
-  this.assert(cmdMan.__nlParser.getNumSuggestions() == 1, "should have 1");
+  this.assert(cmdMan.__activeQuery.suggestionList.length == 1, "should have 1");
   cmdMan.execute(fakeContext);
   cmdMan.updateInput("cmd_two", fakeContext);
-  this.assert(cmdMan.__nlParser.getNumSuggestions() == 1, "should have 1");
+  this.assert(cmdMan.__activeQuery.suggestionList.length == 1, "should have 1");
   cmdMan.execute(fakeContext);
   this.assert(oneWasCalled, "cmd_one must be called.");
   this.assert(twoWasCalled, "cmd_two must be called.");

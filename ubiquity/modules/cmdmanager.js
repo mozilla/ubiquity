@@ -245,7 +245,7 @@ CommandManager.prototype = {
                                                            asyncSuggestionCb) {
     let noInputQuery = this.__nlParser.newQuery("", context, MAX_SUGGESTIONS);
     noInputQuery.onResults = asyncSuggestionCb;
-    return query.suggestionList;
+    return noInputQuery.suggestionList;
   },
 
   getHilitedSuggestionText : function CM_getHilitedSuggestionText(context) {
