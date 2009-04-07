@@ -41,14 +41,14 @@ function matchString(arr) {
 
 function allNames(verbs) {
   for each (verb in verbs) {
-    for each (name in (verb.names[mylang.lang] || verb.names.en)) {
+    for each (name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
       yield name;
     }
   }
 }
 
 function names(verb) {
-  for each (name in (verb.names[mylang.lang] || verb.names.en)) {
+  for each (name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
     yield name;
   }
 }

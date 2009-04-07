@@ -41,127 +41,8 @@ Parser.prototype = {
 
   },
   roles: [{role: 'object', delimiter: ''}], // a list of roles and their delimiters
-  parse: function(input) {
-  
-    threshold = $('#threshold').val()*1;
-    let displayParseInfo = $('#displayparseinfo').attr('checked');
-    $('#parseinfo').empty();
-
-    let times = [Date.now()];
-    let timefactor = 7;
-    
-    var input = (input || $('.input').val());
-    input = this.wordBreaker(input);
-    if (displayParseInfo)
-      $('<h3>step 1: split words</h3><code>'+input+'</code>').appendTo($('#parseinfo'));
-    $('#timeinfo .step1').css('width',((times[1] = Date.now()) - times[0]) * timefactor);
-
-    var verbArgPairs = this.verbFinder(input);
-    if (displayParseInfo) {
-      $('<h3>step 2: pick possible verbs</h3><ul id="verbArgPairs"></ul>').appendTo($('#parseinfo'));
-      for each (pair in verbArgPairs) {
-        $('<li>V: <code title="'+(pair.verb || 'null')+'">'+(pair.verbName || '<i>null</i>')+'</code>, argString: <code>'+pair.argString+'</code></li>').appendTo($('#verbArgPairs'));
-      }
-    }
-    
-    $('#timeinfo .step2').css('width',((times[2] = Date.now()) - times[1]) * timefactor);
-
-    if (displayParseInfo)
-      $('<h3>step 3: pick possible clitics (TODO)</h3>').appendTo($('#parseinfo'));
-    $('#timeinfo .step3').css('width',((times[3] = Date.now()) - times[2]) * timefactor);
-
-    if (displayParseInfo)
-      $('<h3>step 4: group into arguments</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
-
-    let possibleParses = [];
-    for each (var pair in verbArgPairs) {
-      var words = this.splitWords(pair.argString);
-      for each (var argSets in this.argFinder(words,pair.verb)) {
-        for each (var args in argSets) {
-          var thisParse = {verb:pair.verb,verbName:pair.verbName,argString:pair.argString,args:args,_display:args.display};
-          delete thisParse.args['display'];
-          possibleParses.push(thisParse);
-        }
-      }
-    }
-    
-    if (displayParseInfo) {
-      for each (var parse in possibleParses) {
-        $('<li><span class="verb" title='+(parse.verb || 'null')+'>'+(parse.verbName || '<i>null</i>')+'</span>'+parse._display+'</li>').appendTo($('#argParses'));
-      }
-      $('<p><small>'+possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
-    }
-        
-    $('#timeinfo .step4').css('width',((times[4] = Date.now()) - times[3]) * timefactor);
-
-    if (displayParseInfo)
-      $('<h3>step 5: anaphora substitution</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
-
-    let selection = $('#selection').val();
-    if (selection.length && patternCache.anaphora.test(input)) {
-      for each (let parse in possibleParses) {
-        let newParses = this.substitute(parse,selection);
-        if (newParses.length)
-          possibleParses = possibleParses.concat(newParses);
-      }
-    }
-
-    if (displayParseInfo) {
-      for each (var parse in possibleParses) {
-        $('<li><span class="verb" title='+(parse.verb || 'null')+'>'+(parse.verbName || '<i>null</i>')+'</span>'+parse._display+'</li>').appendTo($('#newPossibleParses'));
-      }
-      $('<p><small>'+possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
-    }
-
-    $('#timeinfo .step5').css('width',((times[5] = Date.now()) - times[4]) * timefactor);    
-    
-    //console.log(possibleParses);
-
-    if (displayParseInfo)
-      $('<h3>step 6: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
-    
-    for each (let parse in possibleParses) {
-      cacheNounTypes(parse.args);
-    }
-    
-    if (displayParseInfo) {
-      for (var text in nounCache) {
-        var html = $('<li><code>'+text+'</code></li>');
-        var list = $('<ul></ul>');
-        for (let type in nounCache[text]) {
-          $('<li>type: <code>'+type+'</code>, score: '+nounCache[text][type]+'</li>').appendTo(list);
-        }
-        list.appendTo(html);
-        html.appendTo($('#nounCache'));
-      }
-    }
-    
-    $('#timeinfo .step6').css('width',((times[5] = Date.now()) - times[5]) * timefactor);
-
-    if (displayParseInfo)    
-      $('<h3>step 7: ranking</h3>').appendTo($('#parseinfo'));
-    
-    $('#scoredParses').empty();
-    
-    var scoredParses = [];
-    for each (parse in possibleParses) {
-      scoredParses = scoredParses.concat(this.score(parse));
-    }
-    
-    scoredParses = scoredParses.sort(compareByScoreDesc);
-    
-    times[7] = Date.now(); // because everything after this is display code.
-    
-    for each (var parse in scoredParses.sort(compareByScoreDesc)) {
-      $('<tr><td><span class="verb" title="'+parse.verb+'">'+parse.verbName+'</span>'+parse._display+'</td><td>'+Math.floor(100*parse.score)/100+'</td></tr>').appendTo($('#scoredParses'));
-    }
-    
-    $('#timeinfo .step7').css('width',(times[7] - times[6]) * timefactor);
-    
-    $('#timeinfo span').text((times[7] - times[0])+'ms');
-    
-    //console.log(times);
-    
+  newQuery: function(queryString,context,maxSuggestions) {
+    return new Parser.Query(this,queryString,context,maxSuggestions);
   },
   wordBreaker: function(input) {
     return input;
@@ -479,6 +360,114 @@ Parser.prototype = {
   }
 }
 
-// initialize the patternCache
+// set up the Query class
 
-var patternCache = {};
+Parser.Query = function(parser,queryString, context, maxSuggestions) {
+  this.parser = parser;
+  this.input = queryString;
+  this.context = context;
+  this.maxSuggestions = maxSuggestions;
+
+  // code flow control stuff
+  this.finished = false;
+  this.hasResults = false;
+  this.suggestionList = [];
+  this._keepworking = true;
+  this._times = [];
+  this._step = 0;
+  
+  // internal variables
+  this._input = '';
+  this._verbArgPairs = [];
+  this._possibleParses = [];
+  this._scoredParses = [];
+
+}
+
+Parser.Query.prototype = {
+  run: function() {
+      
+    threshold = $('#threshold').val()*1;
+
+    this._times = [Date.now()];
+    this._step++;
+    
+    this._input = this.parser.wordBreaker(this.input);
+
+    this._times[this._step] = Date.now();
+    this._step++;
+    
+    this._verbArgPairs = this.parser.verbFinder(this._input);
+    
+    this._times[this._step] = Date.now();
+    this._step++;
+
+    // clitics go here
+
+    if (!this._keepworking) return false;
+    this._times[this._step] = Date.now();
+    this._step++;
+    
+    for each (var pair in this._verbArgPairs) {
+      let words = this.parser.splitWords(pair.argString);
+      for each (var argSets in this.parser.argFinder(words,pair.verb)) {
+        for each (var args in argSets) {
+          let thisParse = {verb:pair.verb,verbName:pair.verbName,argString:pair.argString,args:args,_display:args.display};
+          delete thisParse.args['display'];
+          this._possibleParses.push(thisParse);
+        }
+      }
+    }
+
+    if (!this._keepworking) return false;
+    this._times[this._step] = Date.now();
+    this._step++;
+    
+    let selection = $('#selection').val();
+    if (selection.length && patternCache.anaphora.test(this._input)) {
+      for each (let parse in this._possibleParses) {
+        let newParses = this.parser.substitute(parse,selection);
+        if (newParses.length)
+          this._possibleParses = this._possibleParses.concat(newParses);
+      }
+    }
+
+    if (!this._keepworking) return false;
+    this._times[this._step] = Date.now();
+    this._step++;
+    
+    for each (let parse in this._possibleParses) {
+      cacheNounTypes(parse.args);
+    }
+    
+    if (!this._keepworking) return false;
+    this._times[this._step] = Date.now();
+    this._step++;
+    
+    for each (parse in this._possibleParses) {
+      this._scoredParses = this._scoredParses.concat(this.parser.score(parse));
+    }
+    
+    this._scoredParses = this._scoredParses.sort(compareByScoreDesc);
+    
+    if (!this._keepworking) return false;    
+    this._times[this._step] = Date.now();
+    this._step++;
+    
+    this.finished = true;
+    // _scoredParses will be replaced by the suggestionList in the future...
+    if (this._scoredParses.length > 0)
+      this.hasResults = true
+    this.onResults();
+    
+    return true;
+           
+  },
+  getSuggestionList: function() {
+  },
+  cancel: function() {
+    //dump('cancelled!');
+    this._keepworking = false;
+  },
+  onResults: function() {}
+}
