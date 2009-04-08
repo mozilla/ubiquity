@@ -321,7 +321,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
 
-  for (name in this._plugins) {
+  for (var name in this._plugins) {
     var plugin = this._plugins[name];
     if (plugin.installToWindow)
       plugin.installToWindow(window);
@@ -334,7 +334,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 // called when the feed manager no longer needs to be used.
 
 FMgrProto.finalize = function FMgr_finalize() {
-  for (url in this._feeds)
+  for (var url in this._feeds)
     this._feeds[url].finalize();
 };
 

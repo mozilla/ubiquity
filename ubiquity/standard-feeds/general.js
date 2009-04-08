@@ -62,7 +62,7 @@ function wordCount(text){
   var words = text.split(" ");
   var wordCount = 0;
 
-  for(i=0; i<words.length; i++){
+  for(var i=0; i<words.length; i++){
     if (words[i].length > 0)
       wordCount++;
   }

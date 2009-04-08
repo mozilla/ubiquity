@@ -44,7 +44,7 @@
   function findFunctionsWithPrefix(prefix) {
     var funcs = [];
 
-    for (name in this)
+    for (var name in this)
       if (name.indexOf(prefix) == 0 && typeof(this[name]) == "function")
         funcs.push(this[name]);
 
@@ -54,7 +54,7 @@
   // Configure all functions starting with "pageLoad_" to be called
   // whenever a page is loaded.
   var funcs = findFunctionsWithPrefix("pageLoad_");
-  for (i = 0; i < funcs.length; i++)
+  for (var i = 0; i < funcs.length; i++)
     CmdUtils.onPageLoad(funcs[i]);
 
   function callRunOnceFunctions(scopeObj, prefix) {

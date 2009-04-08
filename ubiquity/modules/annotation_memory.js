@@ -140,7 +140,7 @@ function AnnotationService(connection) {
 
   self.getPagesWithAnnotation = function(name) {
     var results = [];
-    for (uri in ann)
+    for (var uri in ann)
       if (typeof(ann[uri][name]) != 'undefined')
         results.push(urls[uri]);
     return results;

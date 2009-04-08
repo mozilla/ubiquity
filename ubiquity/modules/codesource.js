@@ -57,7 +57,7 @@ function MixedCodeSource(bodySource,
     let headerCode = '';
     let headerCodeSections = [];
 
-    for (headerCs in headerSources) {
+    for (var headerCs in headerSources) {
       code = headerCs.getCode();
       headerCode += code;
       headerCodeSections.push({length: code.length,
@@ -67,7 +67,7 @@ function MixedCodeSource(bodySource,
 
     let footerCode = '';
     let footerCodeSections = [];
-    for (footerCs in footerSources) {
+    for (var footerCs in footerSources) {
       code = footerCs.getCode();
       footerCode += code;
       footerCodeSections.push({length: code.length,

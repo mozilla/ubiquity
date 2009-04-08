@@ -40,15 +40,15 @@ function matchString(arr) {
 }
 
 function allNames(verbs) {
-  for each (verb in verbs) {
-    for each (name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
+  for each (var verb in verbs) {
+    for each (var name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
       yield name;
     }
   }
 }
 
 function names(verb) {
-  for each (name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
+  for each (var name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
     yield name;
   }
 }

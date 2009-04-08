@@ -627,7 +627,7 @@ CmdUtils.savePassword = function savePassword( opts ){
                                              "chrome://ubiquity/content",
                                              'UbiquityInformation' + opts.name,
                                              null);
-     for each(login in logins) {
+     for each(var login in logins) {
         if (login.username == opts.username) {
            //modifyLogin(oldLoginInfo, newLoginInfo);
            passwordManager.modifyLogin(login, loginInfo);
@@ -657,7 +657,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
                                           null);
   var returnedLogins = [];
 
-  for each(login in logins){
+  for each(var login in logins){
     loginObj = {
       username: login.username,
       password: login.password
@@ -803,7 +803,7 @@ CmdUtils.CreateCommand = function CreateCommand( options ) {
   }
 
   if( options.modifiers ) {
-    for (label in options.modifiers) {
+    for (var label in options.modifiers) {
       var modNounType = options.modifiers[label];
       if (modNounType.constructor.name == "RegExp")
         options.modifiers[label] = nounTypeFromRegExp(modNounType);
@@ -903,7 +903,7 @@ CmdUtils.previewAjax = function previewAjax(pblock, options) {
     if (xhr)
       xhr.abort();
   }
-  for (key in options) {
+  for (var key in options) {
     if (typeof(options[key]) == 'function')
       newOptions[key] = CmdUtils.previewCallback(pblock,
                                                  options[key],
@@ -1129,7 +1129,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     var query = encodeURIComponent(directObject.text);
     if (options.postData) {
       var urlString = options.url;
-      for (data in options.postData)
+      for (var data in options.postData)
         options.postData[data] = options.postData[data]
                                         .replace(/%s|{QUERY}/g, query);
       Utils.openUrlInBrowser(urlString, options.postData);
@@ -1166,7 +1166,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
         var query = encodeURIComponent(directObject.text);
         // check if we're using POST
         if (options.postData) {
-          for (data in options.postData)
+          for (var data in options.postData)
             options.postData[data] = options.postData[data]
                                             .replace(/%s|{QUERY}/g, query);
         }
@@ -1189,10 +1189,10 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             switch (parser.type) {
               case "json":
                 var path = parser.container.split(".");
-                for (p in path) {
+                for (var p in path) {
                   data = data[path[p]];
                 }
-                for (d in data) {
+                for (var d in data) {
                   var res = {};
                   var title = data[d][parser.title];
                   res.title = title;
@@ -1262,7 +1262,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                   }
                 }
                 var tmp = [];
-                for (result in results) {
+                for (var result in results) {
                   if (results[result].title && results[result].title.length) {
                     var href = "";
                     if (results[result].title[0].tagName == "A") {

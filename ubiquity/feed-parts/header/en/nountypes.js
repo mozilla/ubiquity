@@ -360,7 +360,7 @@ var noun_type_address = {
   },
   suggest: function( text, html ) {
     isAddress( text, noun_type_address.callback );
-    for( x in noun_type_address.knownAddresses) {
+    for(var x in noun_type_address.knownAddresses) {
       if (noun_type_address.knownAddresses[x] == text) {
 	return [ CmdUtils.makeSugg(text) ];
       }

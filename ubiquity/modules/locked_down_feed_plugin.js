@@ -218,7 +218,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
       function safeModifiers(modifiers) {
         var safeMods = {};
-        for (modLabel in modifiers) {
+        for (var modLabel in modifiers) {
           if (typeof(modLabel) != "string")
             throw new Error("Assertion error: expected string!");
           safeMods[modLabel] = {text: modifiers[modLabel].text};
@@ -514,7 +514,7 @@ function makeSafeObj(obj, sandboxFactory, sandbox) {
 // untrusted metadata, a schema, and an HTML sanitization function.
 
 function setMetadata(metadata, object, schema, htmlSanitize) {
-  for (propName in schema) {
+  for (var propName in schema) {
     var propVal = metadata[propName];
     var propType = schema[propName];
     if (typeof(propVal) == "string") {

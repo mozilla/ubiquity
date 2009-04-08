@@ -247,7 +247,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
         );
       }
 
-      for (objName in sandbox) {
+      for (var objName in sandbox) {
         if (objName.indexOf(CMD_PREFIX) == 0) {
           var cmd = makeCmdForObj(sandbox, objName);
 

@@ -37,7 +37,7 @@ var Endpoint = {
          fireEvent('ubiquity-python:shutdown', true);
        }}
     );
-    for (uri in Endpoint.__registryCallbacks)
+    for (var uri in Endpoint.__registryCallbacks)
       Utils.setTimeout(Endpoint.__registryCallbacks[uri], 0);
     Endpoint.__registryCallbacks = {};
   },

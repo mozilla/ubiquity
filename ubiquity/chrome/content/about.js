@@ -115,7 +115,7 @@ function makeFeedListElement(info, label, clickMaker) {
   }
 
   var commandList = $("<ul></ul>");
-  for (name in info.commands)
+  for (var name in info.commands)
     $(commandList).append($("<li></li>").text(name));
   $(li).append(commandList);
 

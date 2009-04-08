@@ -64,7 +64,7 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
     if (context.focusedWindow) {
       
       var results = cmdSuggester(context);
-      for (i in results) {
+      for (var i in results) {
         var tempMenu = document.createElement("menuitem");
 		tempMenu.setAttribute("label", i);
 		if(results[i].icon) {

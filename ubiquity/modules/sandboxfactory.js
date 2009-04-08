@@ -106,7 +106,7 @@ SandboxFactory.prototype = {
     var sandbox = Components.utils.Sandbox(this._target);
     var globals = this._makeGlobals(codeSource);
 
-    for (symbolName in globals) {
+    for (var symbolName in globals) {
       sandbox[symbolName] = globals[symbolName];
     }
 

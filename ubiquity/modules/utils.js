@@ -221,7 +221,7 @@ Utils.__TimerCallback = function __TimerCallback(callback) {
 
 Utils.__TimerCallback.prototype = {
   notify : function notify(timer) {
-    for(timerID in Utils.__timerData.timers) {
+    for(var timerID in Utils.__timerData.timers) {
       if(Utils.__timerData.timers[timerID] == timer) {
         delete Utils.__timerData.timers[timerID];
         break;
@@ -399,7 +399,7 @@ Utils.paramsToString = function paramsToString(params) {
       );
     }
   }
-  for (key in params) {
+  for (var key in params) {
     // note: explicitly ignoring values that are objects/functions/undefined!
     if (Utils.isArray(params[key])) {
       params[key].forEach(function(item) {
@@ -423,7 +423,7 @@ Utils.urlToParams = function urlToParams(url) {
   }
   var params = {};
   var paramList = url.substring(url.indexOf("?")+1).split("&");
-  for (param in paramList) {
+  for (var param in paramList) {
     var key="",
         value="";
     var kv = paramList[param].split("=");

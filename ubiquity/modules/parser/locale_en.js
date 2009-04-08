@@ -54,7 +54,7 @@ function _recursiveParse(unusedWords,
 
   // separate names of prepositions and direct_object
   var unfilledNames = [], directName, name;
-  for(name in unfilledArgs) {
+  for(var name in unfilledArgs) {
     if(unfilledArgs[name].flag === null) {
       directName = name;
     } else {
@@ -80,7 +80,7 @@ function _recursiveParse(unusedWords,
   // "pop" off the LAST unfilled argument in the sentence and try to fill it
   // newUnfilledArgs is the same as unfilledArgs without argName
   var argName, newUnfilledArgs = {};
-  for (argName in unfilledArgs)  {
+  for (var argName in unfilledArgs)  {
     newUnfilledArgs[argName] = unfilledArgs[argName];
   }
   delete newUnfilledArgs[argName];

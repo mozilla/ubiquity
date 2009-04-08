@@ -87,7 +87,7 @@ function detectEmailProvider() {
   var max = { domain: "", hits: 0 };
   totalHits = 0;
   
-  for( domain in domains){
+  for(var domain in domains){
     hits = Utils.History.visitsToDomain( domain );
     domains[domain] = hits;
     totalHits += hits;

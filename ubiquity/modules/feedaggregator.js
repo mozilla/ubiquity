@@ -115,7 +115,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
       feeds.forEach(
         function processFeed(feed) {
           nounTypes = nounTypes.concat(feed.nounTypes);
-          for (name in feed.commands) {
+          for (var name in feed.commands) {
             var cmd = makeCmdWithDisabler(feed.commands[name]);
             // if the command specifies limited application compatibility,
             // then check against current app name.

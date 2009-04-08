@@ -56,9 +56,9 @@ Parser.prototype = {
     if ((test = input.match(patternCache.verbInitialTest)) != null) {
       let [ ,verbPrefix,argString] = test;
       
-      for (verb in verbs) {
+      for (var verb in verbs) {
         // check each verb synonym
-        for (name in names(verbs[verb])) {
+        for (var name in names(verbs[verb])) {
           if (name.indexOf(verbPrefix) == 0) {
             returnArray.push({verb: verb, argString: argString, verbName: name});
             break;
@@ -70,9 +70,9 @@ Parser.prototype = {
     if ((test = input.match(patternCache.verbFinalTest)) != null) {
       let [ ,argString,verbPrefix] = test;
       
-      for (verb in verbs) {
+      for (var verb in verbs) {
         // check each verb synonym
-        for (name in names(verbs[verb])) {
+        for (var name in names(verbs[verb])) {
           if (name.indexOf(verbPrefix) == 0) {
             returnArray.push({verb: verb, argString: argString, verbName: name});
             break;
@@ -444,7 +444,7 @@ Parser.Query.prototype = {
     this._times[this._step] = Date.now();
     this._step++;
     
-    for each (parse in this._possibleParses) {
+    for each (var parse in this._possibleParses) {
       this._scoredParses = this._scoredParses.concat(this.parser.score(parse));
     }
     

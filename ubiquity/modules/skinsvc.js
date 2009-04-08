@@ -285,7 +285,7 @@ SkinSvc.prototype = {
     var skinList = this.getSkinList();
     //Only have to update/download remote skins
     //Local skins are pointed at directly
-    for each( skin in skinList){
+    for each(var skin in skinList){
       if(!this._isLocalUrl(skin["download_uri"])){
         this.updateSkin(skin["local_uri"], skin["download_uri"]);
       }

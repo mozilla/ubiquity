@@ -47,7 +47,7 @@ var skinService = new SkinSvc();
 
 function onDocumentLoad() {
   var skinList = skinService.getSkinList()
-  for( i in skinList){
+  for(var i in skinList){
     createSkinElement(skinList[i]["local_uri"], i);    
   }
   //If current skin is custom skin, auto-open the editor
@@ -91,7 +91,7 @@ function createSkinElement(filepath, id){
   //look for =skin= indicating start of metadata
   var foundMetaData = false;
   var l = 0;
-  for(x in lines){
+  for(var x in lines){
     l = x;
     var line = lines[x];
     if(line.indexOf("=skin=") != -1){

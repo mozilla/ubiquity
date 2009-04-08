@@ -46,7 +46,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 function exportTests(obj) {
   var exportedSymbols = [];
 
-  for (name in obj) {
+  for (var name in obj) {
     if (name.indexOf("test") == 0)
       exportedSymbols.push(name);
   }
@@ -255,7 +255,7 @@ TestSuite.prototype = {
   getTests : function(parent) {
     var tests = [];
 
-    for (prop in parent)
+    for (var prop in parent)
       if (prop.indexOf("test") == 0 && typeof parent[prop] == "function")
         tests.push(new TestCase(parent[prop]));
 
@@ -272,7 +272,7 @@ TestSuite.prototype = {
     var threadMgr = Components.classes["@mozilla.org/thread-manager;1"]
                     .getService().currentThread;
 
-    for each (test in tests) {
+    for each (var test in tests) {
       TestSuite.currentTest = test;
       try {
         this._responder.onStartTest(test);

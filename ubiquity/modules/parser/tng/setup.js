@@ -26,7 +26,7 @@ var demoParserInterface = {
 
           case 2:
             $('<h3>step 2: pick possible verbs</h3><ul id="verbArgPairs"></ul>').appendTo($('#parseinfo'));
-            for each (pair in this._verbArgPairs) {
+            for each (var pair in this._verbArgPairs) {
               $('<li>V: <code title="'+(pair.verb || 'null')+'">'+(pair.verbName || '<i>null</i>')+'</code>, argString: <code>'+pair.argString+'</code></li>').appendTo($('#verbArgPairs'));
             }
             break;
@@ -99,7 +99,7 @@ var demoParserInterface = {
     window[this.currentLang].initialCache();
   
     $('#roles').empty();
-    for each (role in window[this.currentLang].roles) {
+    for each (var role in window[this.currentLang].roles) {
       $('<li><code>'+role.role+'</code>, delimiter: <code>'+role.delimiter+'</code></li>').appendTo($('#roles'));
     }
   
@@ -109,10 +109,10 @@ var demoParserInterface = {
     }
   
     $('#verblist').empty();
-    for (verb in verbs) {
+    for (var verb in verbs) {
       var li = $('<li><code>'+verb+'</code> (<code>'+(verbs[verb].names[window[this.currentLang].lang] || verbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
       var ul = $('<ul></ul>');
-      for each (arg in verbs[verb].arguments)
+      for each (var arg in verbs[verb].arguments)
         $('<li><code>'+arg.role+'</code>: <code>'+arg.nountype+'</code>').appendTo(ul);
       ul.appendTo(li);
       li.appendTo($('#verblist'));

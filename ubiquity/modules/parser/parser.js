@@ -223,7 +223,7 @@ NLParser.Parser.prototype = {
     let topGenerics = this._rankedVerbsThatUseGenericNouns
                           .slice(0, maxSuggestions);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
-    for each(verb in verbsToTry) {
+    for each(var verb in verbsToTry) {
       let newPPS = new NLParser.PartiallyParsedSentence( verb,
                                                          {},
                                                          selObj,
@@ -299,7 +299,7 @@ NLParser.Parser.prototype = {
     // partials is now a list of PartiallyParsedSentences; if there's a
     // selection, try using it for any missing arguments...
     if (selObj.text || selObj.html) {
-      for each(part in newSuggs) {
+      for each(var part in newSuggs) {
         let withSel = part.getAlternateSelectionInterpolations();
         for each( let sugg in withSel ) {
           theNewQuery._addPartiallyParsedSentence( sugg );
@@ -699,7 +699,7 @@ NLParser.PartiallyParsedSentence.prototype = {
     let selection = this._selObj.text;
     let htmlSelection = this._selObj.html;
 
-    for each ( pronoun in this._parserPlugin.PRONOUNS ) {
+    for each (var pronoun in this._parserPlugin.PRONOUNS ) {
       let regexp = new RegExp("\\b" + pronoun + "\\b");
       let index = words.search(regexp);
       if ( index > -1 ) {
