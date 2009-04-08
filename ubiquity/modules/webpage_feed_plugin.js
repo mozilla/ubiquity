@@ -265,7 +265,7 @@ var noun_arb_text = {
   _name: "text",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
-    var suggestion = NounUtils.makeSugg(text, html, null,
+    var suggestion = NounUtils.makeSugg(text, html, null, 0.7,
                                         selectionIndices);
     return [suggestion];
   }

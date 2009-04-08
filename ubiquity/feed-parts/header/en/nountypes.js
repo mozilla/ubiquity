@@ -43,8 +43,7 @@
      var providers = ["googleapps", "gmail", "yahoo"];
      var suggestions = [];
      //match based on input
-     for(var i = 0; i < providers.length; i++) {
-       var provider = providers[i];
+     for each (var provider in providers) {
        if (provider.match(text, "i")){
          suggestions.push(CmdUtils.makeSugg(provider, null, provider));
        }
@@ -53,7 +52,7 @@
    },
    'default': function() {
      //TODO: find a better way to pick the default
-     return CmdUtils.makeSugg("gmail", null, "gmail");
+     return CmdUtils.makeSugg("gmail", null, "gmail",0.9);
    }
 };
 
@@ -154,8 +153,8 @@ var noun_type_contact = {
     }
 
     var suggs = noun_type_email.suggest(text, html);
-    // TODO the next line would be a lot clearer as an if() {} statement.
-    suggs.length > 0 ? suggestions.push(suggs[0]) : null;
+    if (suggs.length > 0)
+      suggestions.push(suggs[0]);
 
     return suggestions.splice(0, 5);
   }
@@ -188,7 +187,7 @@ var noun_arb_text = {
   _name: "text",
   rankLast: true,
   suggest: function( text, html, callback, selectionIndices ) {
-    var suggestion = CmdUtils.makeSugg(text, html, null,
+    var suggestion = CmdUtils.makeSugg(text, html, null, 0.7,
                                        selectionIndices);
     return [suggestion];
   }
@@ -200,7 +199,7 @@ var noun_type_date = {
   'default': function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
-     return CmdUtils.makeSugg(text, null, date);
+     return CmdUtils.makeSugg(text, null, date, 0.9);
    },
 
   suggest: function( text, html )  {
@@ -223,7 +222,7 @@ var noun_type_time = {
    'default': function(){
      var time = Date.parse("now");
      var text = time.toString("hh:mm tt");
-     return CmdUtils.makeSugg(text, null, time);
+     return CmdUtils.makeSugg(text, null, time, 0.9);
    },
 
    suggest: function(text, html){
@@ -486,7 +485,7 @@ var noun_type_searchengine = {
 
     for(var i = 0; i < engines.length; i++) {
       if(engines[i].name.toLowerCase().indexOf(fragment) > -1) {
-        suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i]));
+        suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i], 0.9));
       }
     }
 
@@ -586,7 +585,7 @@ var noun_type_geolocation = {
 			return {text: "", html: "", data: null, summary: ""};
 		}
 		var fullLocation = location.city + ", " + location.country;
-		return CmdUtils.makeSugg(fullLocation);
+		return CmdUtils.makeSugg(fullLocation,null,null,0.9);
    },
 
    suggest: function(fragment, html, callback) {
@@ -754,7 +753,7 @@ var noun_type_twitter_user = {
      // If all else fails, treat the user's single-word input as a twitter
      // username.
      if (suggs.length == 0)
-       suggs.push(CmdUtils.makeSugg(text, null, null));
+       suggs.push(CmdUtils.makeSugg(text, null, null, 0.7));
 
      return suggs;
    }
@@ -765,7 +764,7 @@ var noun_type_number = {
      return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : [];
    },
    "default" : function(){
-      return CmdUtils.makeSugg("1");
+      return CmdUtils.makeSugg("1",null,null,0.9);
    }
 }
 

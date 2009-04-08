@@ -24,6 +24,7 @@
  *   Maria Emerson <memerson@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -92,22 +93,27 @@ NounUtils.NounType.prototype = {
   }
 };
 
-NounUtils.makeSugg = function( text, html, data, selectionIndices ) {
+NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
   if (typeof text != "string" && typeof html != "string" && !data) {
     // all inputs empty!  There is no suggestion to be made.
     return null;
   }
+  
   // make the basic object:
-  var suggestion = {text: text, html: html, data:data};
+  var suggestion = {text: text, html: html, data:data, score:score};
   // Fill in missing fields however we can:
   if (suggestion.data && !suggestion.text)
     suggestion.text = suggestion.data.toString();
   if (suggestion.text && !suggestion.html)
     suggestion.html = Utils.escapeHtml(suggestion.text);
-  if(suggestion.html && !suggestion.text)
+  if (suggestion.html && !suggestion.text)
     // TODO: Any easy way to strip the text out of the HTML here? We
     // don't have immediate access to any HTML DOM objects...
     suggestion.text = suggestion.html;
+
+  if (!suggestion.score)
+    suggestion.score = 1;
+
   // Create a summary of the text:
 
   var snippetLength = 35;
@@ -158,7 +164,7 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
     suggest: function(text, html, callback, selectionIndices) {
       var match = text.match(regexp);
       if (match) {
-        var suggestion = NounUtils.makeSugg(text, html, match,
+        var suggestion = NounUtils.makeSugg(text, html, match, 1,
                                             selectionIndices);
         return [suggestion];
       } else
