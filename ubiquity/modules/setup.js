@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Maria Emerson <memerson@mozilla.com>
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -329,6 +330,15 @@ let UbiquitySetup = {
                 .getService(Components.interfaces.nsIPrefBranch);
     var lang = prefs.getCharPref("extensions.ubiquity.language");
     return lang;
+  },
+
+  get parserVersion() {
+    //var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+    //            .getService(Components.interfaces.nsIPrefBranch);
+    //var version = prefs.getIntPref("extensions.ubiquity.parserVersion");
+    //return version;
+    var PARSER_VERSION_PREF = "extensions.ubiquity.parserVersion";
+    return Application.prefs.getValue(PARSER_VERSION_PREF, "");
   },
 
   get version() {

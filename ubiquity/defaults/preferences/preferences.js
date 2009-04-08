@@ -1,4 +1,5 @@
 pref("extensions.ubiquity.language", "en");
+pref("extensions.ubiquity.parserVersion", 0);
 pref("extensions.ubiquity.trustedDomains",
      "ubiquity.mozilla.com");
 pref("extensions.ubiquity.skin", "old");
