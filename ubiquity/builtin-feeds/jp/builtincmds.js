@@ -47,12 +47,12 @@ CmdUtils.CreateCommand({
       CmdUtils.setSelection( result );
       CmdUtils.setLastResult( result );
     } else
-      displayMessage( "巣学の表現が必要です。");
+      displayMessage( "数字の表現が必要です。");
   },
   preview: function( pblock, unused, modifiers ) {
     var expr = modifiers["を"] || "";
     if( expr.length < 1 ){
-      pblock.innerHTML = "巣学の表現を計算する。例えば、 22/7.";
+      pblock.innerHTML = "数字の表現を計算する。例えば、 22/7.";
       return;
     }
 
