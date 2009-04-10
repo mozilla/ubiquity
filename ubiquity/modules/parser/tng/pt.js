@@ -1,7 +1,10 @@
 // set up our parsers
+var EXPORTED_SYMBOLS = ["makePtParser"];
 
-NLParser2.parserFactories.pt = function() {
-  var pt = new NLParser2.Parser('pt');
+Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+
+function makePtParser() {
+  var pt = new Parser('pt');
   pt.roles = [
     {role: 'goal', delimiter: 'à'},
     {role: 'goal', delimiter: 'ao'},

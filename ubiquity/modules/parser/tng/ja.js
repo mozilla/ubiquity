@@ -1,6 +1,9 @@
+var EXPORTED_SYMBOLS = ["makeFrParser"];
 
-NLParser2.parserFactories.ja = function() {
-  var ja = new NLParser2.Parser('ja');
+Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+
+function makeJpParser() {
+  var ja = new Parser('ja');
   ja.anaphora = ["これ", "それ", "あれ"];
   ja.roles = [
     {role: 'object', delimiter: 'を'},

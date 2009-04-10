@@ -1,27 +1,11 @@
-var NLParser2 = {
-  // Namespace object
-  parserFactories: []
-};
-
-
-NLParser2.makeParserForLanguage = function(languageCode, verbList, nounList,
-                                           ContextUtils, suggestionMemory) {
-  if ( ! NLParser2.parserFactories[languageCode] ) {
-    throw "No parser is defined for " + languageCode;
-  } else {
-    let parser = NLParser2.parserFactories[languageCode]();
-    // todo set verblist, nounlist, contextutils, and suggestionmemory on the
-    // new parser object.
-    return parser;
-  }
-};
+var EXPORTED_SYMBOLS = ["Parser"];
 
 // set up the Parser class
 
-NLParser2.Parser = function(lang) {
+function Parser(lang) {
   this.lang = lang;
 }
-NLParser2.Parser.prototype = {
+Parser.prototype = {
   lang: '',
   branching: '', // left or right
   usespaces: true,
@@ -32,70 +16,8 @@ NLParser2.Parser.prototype = {
   rolesCache: {},
   _verbList: [],
 
-  _convertVerb: function( oldVerb ) {
-    // TODO: this code is temporary scaffolding: it turns old-style verbs
-    // into new-style verbs.  The correct solution is to add the needed
-    // new metadata directly to all verbs.
-    let newVerb = {
-      names: {
-        en: []
-      },
-      arguments: []
-    };
-
-    // TODO actually this should work from the NLParser.Verb object
-    newVerb.names.en.push( oldVerb.name );
-
-    if (oldVerb.synonyms) {
-      for (let i = 0; i < oldVerb.synonyms.length; i++) {
-        newVerb.names.en.push( oldVerb.synonyms[i] );
-      }
-    }
-
-    if (oldVerb.DOType) {
-      newVerb.arguments.push( { role: 'object', nountype: oldVerb.DOType } );
-    }
-
-    if (oldVerb.arguments) {
-    }
-
-    if (oldVerb.modifiers) {
-      for (let preposition in oldVerb.modifiers) {
-        let role;
-        switch (preposition) {
-          case 'to':
-            role = 'goal';
-          break;
-          case 'from':
-            role = 'source';
-          break;
-          case 'at': case 'on':
-            role = 'time';
-          break;
-          case 'with': case 'using':
-            role = 'instrument';
-          break;
-          case 'in':
-            // language, in the case of wikipedia.
-          break;
-          case 'near':
-            role = 'location';
-          break;
-          case 'as':
-            role = 'user';
-          break;
-        }
-      }
-    }
-    return newVerb;
-  },
-
   setCommandList: function( commandList ) {
-    this._verbList = [];
-    for each ( let v in commandList ) {
-      let newVerbObj = NLParser.Verb( v );
-      this._verbList.push( this._convertVerb( newVerbObj ) );
-    }
+    this._verbList = commandList;
   },
 
   initialCache: function() {
@@ -126,7 +48,7 @@ NLParser2.Parser.prototype = {
   },
   roles: [{role: 'object', delimiter: ''}], // a list of roles and their delimiters
   newQuery: function(queryString,context,maxSuggestions) {
-    return new NLParser2.Parser.Query(this,queryString,context,maxSuggestions);
+    return new Parser.Query(this,queryString,context,maxSuggestions);
   },
   wordBreaker: function(input) {
     return input;
@@ -446,7 +368,7 @@ NLParser2.Parser.prototype = {
 
 // set up the Query class
 
-NLParser2.Parser.Query = function(parser,queryString, context, maxSuggestions) {
+Parser.Query = function(parser,queryString, context, maxSuggestions) {
   this.parser = parser;
   this.input = queryString;
   this.context = context;
@@ -467,7 +389,7 @@ NLParser2.Parser.Query = function(parser,queryString, context, maxSuggestions) {
   this._scoredParses = [];
 
 }
-NLParser2.Parser.Query.prototype = {
+Parser.Query.prototype = {
   run: function() {
     this._times = [Date.now()];
     this._step++;

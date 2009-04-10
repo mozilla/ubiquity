@@ -1,7 +1,10 @@
 // set up our parsers
+var EXPORTED_SYMBOLS = ["makeDaParser"];
 
-NLParser2.parserFactories.da = function() {
-  var da = new NLParser2.Parser('da');
+Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+
+function makeDaParser() {
+  var da = new Parser('da');
   da.roles = [
     {role: 'goal', delimiter: 'til'},
     {role: 'source', delimiter: 'fra'},

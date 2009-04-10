@@ -1,7 +1,10 @@
 // set up our parsers
+var EXPORTED_SYMBOLS = ["makeEnParser"];
 
-NLParser2.parserFactories.en = function() {
-  var en = new NLParser2.Parser('en');
+Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+
+function makeEnParser() {
+  var en = new Parser('en');
   en.anaphora = ["this", "that", "it", "selection", "him", "her", "them"];
   en.roles = [
     {role: 'goal', delimiter: 'to'},

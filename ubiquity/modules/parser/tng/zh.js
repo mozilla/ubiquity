@@ -1,8 +1,10 @@
 // set up our parsers
+var EXPORTED_SYMBOLS = ["makeZhParser"];
 
-NLParser2.parserFactories.zh = function() {
+Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
 
-  var zh = new NLParser2.Parser('zh');
+function makeZhParser() {
+  var zh = new Parser('zh');
   zh.roles = [
     {role: 'goal', delimiter: '到'},
     {role: 'source', delimiter: '从'},

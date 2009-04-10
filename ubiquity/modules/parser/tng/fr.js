@@ -1,7 +1,10 @@
 // set up our parsers
+var EXPORTED_SYMBOLS = ["makeFrParser"];
 
-NLParser2.parserFactories.fr = function() {
-  var fr = new NLParser2.Parser('fr');
+Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+
+function makeFrParser() {
+  var fr = new Parser('fr');
   fr.roles = [
     {role: 'goal', delimiter: 'à'},
     {role: 'goal', delimiter: 'a'},
