@@ -15,6 +15,7 @@ Parser.prototype = {
   anaphora: ['this'],
   rolesCache: {},
   patternCache: {},
+  threshold: 0,
   _verbList: [],
 
   setCommandList: function( commandList ) {
