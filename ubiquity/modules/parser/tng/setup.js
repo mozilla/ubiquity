@@ -1,15 +1,52 @@
+/***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Ubiquity.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 // set up the interface which will control the parser.
 
 var demoParserInterface = {
   currentLang: 'en',
-  currentQuery: { cancel: function(){} },
+  currentParser: {},
+  currentQuery: {},
   parse: function() {
-    if (this.currentQuery != undefined)
+    if (this.currentQuery.cancel != undefined)
       if (!this.currentQuery.finished)
         this.currentQuery.cancel();
 
     $('#parseinfo').empty();
-    this.currentQuery = window[this.currentLang].newQuery($('.input').val(),{getSelection:function() $('#selection').val()},$('#maxSuggestions').val()*1);
+    this.currentQuery = this.currentParser.newQuery($('.input').val(),{getSelection:function() $('#selection').val()},$('#maxSuggestions').val()*1);
     this.currentQuery._threshold = $('#threshold').val()*1;
     if (!$('#async').attr('checked'))
       this.currentQuery._async = false;
@@ -117,11 +154,14 @@ var demoParserInterface = {
 
     nounCache = [];
   
-    window[this.currentLang].setCommandList(verbs);
-    window[this.currentLang].initialCache();
+    // this is just a hack to make the makeXxParser() functions work. :D
+    this.currentParser = window['make'+lang.slice(0,1).toUpperCase().concat(lang.slice(1))+'Parser']();
+  
+    this.currentParser.setCommandList(verbs);
+    this.currentParser.initialCache();
   
     $('#roles').empty();
-    for each (role in window[this.currentLang].roles) {
+    for each (role in this.currentParser.roles) {
       $('<li><code>'+role.role+'</code>, delimiter: <code>'+role.delimiter+'</code></li>').appendTo($('#roles'));
     }
   
@@ -132,7 +172,7 @@ var demoParserInterface = {
   
     $('#verblist').empty();
     for (verb in verbs) {
-      var li = $('<li><code>'+verb+'</code> (<code>'+(verbs[verb].names[window[this.currentLang].lang] || verbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
+      var li = $('<li><code>'+verb+'</code> (<code>'+(verbs[verb].names[lang] || verbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
       var ul = $('<ul></ul>');
       for each (arg in verbs[verb].arguments)
         $('<li><code>'+arg.role+'</code>: <code>'+arg.nountype+'</code>').appendTo(ul);
@@ -140,7 +180,7 @@ var demoParserInterface = {
       li.appendTo($('#verblist'));
     }
     
-    $('#examples').html(window[this.currentLang].examples.map(function(code){return '<code>'+code+'</code>'}).join(', '));
+    $('#examples').html(this.currentParser.examples.map(function(code){return '<code>'+code+'</code>'}).join(', '));
     
   }
 }
