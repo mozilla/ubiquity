@@ -14,6 +14,7 @@ Parser.prototype = {
   clitics: [],
   anaphora: ['this'],
   rolesCache: {},
+  patternCache: {},
   _verbList: [],
 
   setCommandList: function( commandList ) {
@@ -22,28 +23,26 @@ Parser.prototype = {
 
   initialCache: function() {
     // this method is initialized when the language is loaded
-
     // caches a number of commonly used regex's into patternCache
-    let patternCache = {};
 
-    patternCache.verbMatcher = matchString([name for (name in allNames(this._verbList))]);
+    this.patternCache.verbMatcher = matchString([name for (name in allNames(this._verbList))]);
 
-    patternCache.verbInitialTest = new RegExp('^\\s*('+patternCache.verbMatcher+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'));
-    patternCache.verbFinalTest = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+patternCache.verbMatcher+')\\s*$');
+    this.patternCache.verbInitialTest = new RegExp('^\\s*('+this.patternCache.verbMatcher+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'));
+    this.patternCache.verbFinalTest = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+this.patternCache.verbMatcher+')\\s*$');
 
-    patternCache.anaphora = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+(this.anaphora.join('|'))+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'))
+    this.patternCache.anaphora = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+(this.anaphora.join('|'))+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'))
 
     // cache the roles used in each verb
     // also cache a regex for recognizing its delimiters
-    patternCache.delimiters = {};
+    this.patternCache.delimiters = {};
 
     for (let verb in this._verbList) {
       this.rolesCache[verb] = [role for each (role in this.roles) if (this._verbList[verb].arguments
                             .some(function(arg) arg.role == role.role ) ) ];
-      patternCache.delimiters[verb] = new RegExp('^('+[role.delimiter for each (role in this.rolesCache[verb]) ].join('|')+')$');
+      this.patternCache.delimiters[verb] = new RegExp('^('+[role.delimiter for each (role in this.rolesCache[verb]) ].join('|')+')$');
     }
 
-    patternCache.delimiters[null] = new RegExp('^('+[role.delimiter for each (role in this.roles) ].join('|')+')$');
+    this.patternCache.delimiters[null] = new RegExp('^('+[role.delimiter for each (role in this.roles) ].join('|')+')$');
 
   },
   roles: [{role: 'object', delimiter: ''}], // a list of roles and their delimiters
@@ -59,7 +58,7 @@ Parser.prototype = {
   verbFinder: function(input) {
     let returnArray = [{verb: null, argString: input.replace(/^\s*(.*?)\s*$/,'$1'), verbName: null}];
 
-    if ((test = input.match(patternCache.verbInitialTest)) != null) {
+    if ((test = input.match(this.patternCache.verbInitialTest)) != null) {
       let [ ,verbPrefix,argString] = test;
 
       for (var verb in this._verbList) {
@@ -73,7 +72,7 @@ Parser.prototype = {
       }
     }
 
-    if ((test = input.match(patternCache.verbFinalTest)) != null) {
+    if ((test = input.match(this.patternCache.verbFinalTest)) != null) {
       let [ ,argString,verbPrefix] = test;
 
       for (var verb in this._verbList) {
@@ -234,7 +233,7 @@ Parser.prototype = {
       let args = (role == 'object'?parse.args[role]:[parse.args[role]]);
       for (let i in args) {
         let newArg;
-        if (newArg = args[i].replace(patternCache.anaphora,"$1"+selection+"$3")) {
+        if (newArg = args[i].replace(this.patternCache.anaphora,"$1"+selection+"$3")) {
           if (newArg != args[i]) {
             let parseCopy = cloneObject(parse);
             if (role == 'object') {
@@ -256,7 +255,7 @@ Parser.prototype = {
     return returnArr;
   },
   hasDelimiter: function(delimiter,verb) {
-    return patternCache.delimiters[verb].exec(delimiter);
+    return this.patternCache.delimiters[verb].exec(delimiter);
   },
   getRoleByDelimiter: function(delimiter,roles) {
     return [role.role for each (role in roles) if (role.delimiter == delimiter) ];
@@ -426,7 +425,7 @@ Parser.Query.prototype = {
     this._step++;
 
     let selection = context.getSelection();
-    if (selection.length && patternCache.anaphora.test(this._input)) {
+    if (selection.length && this.patternCache.anaphora.test(this._input)) {
       for each (let parse in this._possibleParses) {
         let newParses = this.parser.substitute(parse,selection);
         if (newParses.length)
