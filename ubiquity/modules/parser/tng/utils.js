@@ -1,9 +1,8 @@
-// power set function, from http://www.bushong.net/dave/comparisons/powerset.html
-function p(l){if(!l.length)return[[]];var a=[];var s=p(l.slice(1));for(var i=0;i<s.length;i++)a.push(s[i],[l[0]].concat(s[i]));return a}
-
 // cloneObject function, from http://bytes.com/topic/javascript/answers/715567-deep-cloning-object
 
 function cloneObject(obj) {
+  if (obj == null)
+    return null;
   var c = obj instanceof Array ? [] : {};
   for (var i in obj) {
     var prop = obj[i];
@@ -25,34 +24,4 @@ function cloneObject(obj) {
     }
   }
   return c;
-}
-
-// TODO: order by descending order of length of prefixes
-function matchString(arr) {
-  // construct a regexp to match the 
-  var prefixes = [];
-  for each (var a in arr) {
-    for (var i=1;i<=a.length;i++) {
-      prefixes.push(a.slice(0,i));
-    }
-  }
-  return prefixes.reverse().join('|');
-}
-
-function allNames(verbs) {
-  for each (var verb in verbs) {
-    for each (var name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
-      yield name;
-    }
-  }
-}
-
-function names(verb) {
-  for each (var name in (verb.names[demoParserInterface.currentLang] || verb.names.en)) {
-    yield name;
-  }
-}
-
-function compareByScoreDesc(a,b) {
-    return b.score - a.score;
 }

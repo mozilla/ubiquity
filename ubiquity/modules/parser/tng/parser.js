@@ -25,7 +25,30 @@ Parser.prototype = {
     // this method is initialized when the language is loaded
     // caches a number of commonly used regex's into this.patternCache
 
-    this.patternCache.verbMatcher = matchString([name for (name in allNames(this._verbList))]);
+    // just a little utility generator
+    function allNames(verbs,lang) {
+      for each (verb in verbs) {
+        for each (name in (verb.names[lang] || verb.names.en)) {
+          yield name;
+        }
+      }
+    }
+
+    // a little utility function to create a RegExp which matches any prefix of a set of strings
+    // it was only being used in one place so I moved it here
+    // TODO: order by descending order of length of prefixes
+    function matchString(arr) {
+      // construct a regexp to match the 
+      var prefixes = [];
+      for each (var a in arr) {
+        for (var i=1;i<=a.length;i++) {
+          prefixes.push(a.slice(0,i));
+        }
+      }
+      return prefixes.reverse().join('|');
+    }
+
+    this.patternCache.verbMatcher = matchString([name for (name in allNames(this._verbList,this.lang))]);
 
     this.patternCache.verbInitialTest = new RegExp('^\\s*('+this.patternCache.verbMatcher+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'));
     this.patternCache.verbFinalTest = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+this.patternCache.verbMatcher+')\\s*$');
@@ -58,12 +81,20 @@ Parser.prototype = {
   verbFinder: function(input) {
     let returnArray = [{verb: {id: null, text: null, _order: null}, argString: input.replace(/^\s*(.*?)\s*$/,'$1')}];
 
+    // just a little utility generator
+    // yields the synonymous names this verb in a given language
+    function names(verb,lang) {
+      for each (name in (verb.names[lang] || verb.names.en)) {
+        yield name;
+      }
+    }
+
     if ((test = input.match(this.patternCache.verbInitialTest)) != null) {
       let [ ,verbPrefix,argString] = test;
       
       for (verb in this._verbList) {
         // check each verb synonym
-        for (name in names(this._verbList[verb])) {
+        for (name in names(this._verbList[verb],this.lang)) {
           if (name.indexOf(verbPrefix) == 0) {
             returnArray.push({verb: {id: verb, text: name, _order: 0}, argString: argString});
             break;
@@ -77,7 +108,7 @@ Parser.prototype = {
       
       for (verb in this._verbList) {
         // check each verb synonym
-        for (name in names(this._verbList[verb])) {
+        for (name in names(this._verbList[verb],this.lang)) {
           if (name.indexOf(verbPrefix) == 0) {
             returnArray.push({verb: {id: verb, text: name, _order: -1}, argString: argString});
             break;
@@ -108,7 +139,9 @@ Parser.prototype = {
     let rolesForEachDelimiterCache = {};
     
     // find all the possible combinations of delimiters
-    var possibleDelimiterCombinations = p(possibleDelimiterIndices);
+    // this method uses .reduce to return a power set
+    // http://twitter.com/mitchoyoshitaka/status/1489386225
+    var possibleDelimiterCombinations = possibleDelimiterIndices.reduce(function(last, current) last.concat([a.concat([current]) for each (a in last)]), [[]]);
     
     for each (var delimiterIndices in possibleDelimiterCombinations) {
       // don't process invalid delimiter combinations
@@ -533,7 +566,7 @@ Parser.Query.prototype = {
       yield true;
     }
     
-    this._scoredParses = this._scoredParses.sort(compareByScoreDesc);
+    this._scoredParses = this._scoredParses.sort( function(a,b) b.score - a.score );
     
     this._times[this._step] = Date.now();
     this._step++;
