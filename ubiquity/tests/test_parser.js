@@ -2,7 +2,6 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
 Components.utils.import("resource://ubiquity/modules/parser/parser.js");
-Components.utils.import("resource://ubiquity/modules/parser/locale_en.js");
 
 Components.utils.import("resource://ubiquity/tests/framework.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
@@ -48,8 +47,7 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
   if (!contextUtils)
     contextUtils = fakeContextUtils;
 
-  return NLParser.makeParserForLanguage( NLParser.ORIGINAL_SERIES,
-                                        lang, verbs, nouns, contextUtils,
+  return NLParser.makeParserForLanguage(lang, verbs, nouns, contextUtils,
                                         new TestSuggestionMemory());
 }
 

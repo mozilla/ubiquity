@@ -36,7 +36,7 @@
 
 EXPORTED_SYMBOLS = ["EnParser"];
 
-Components.utils.import("resource://ubiquity/modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
 
 var EnParser = {};
 
@@ -143,7 +143,7 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj ){
     let newParsings = [];
     if (inputArguments.length == 0) {
       // No arguments
-      newParsings = [new NLParser.PartiallyParsedSentence(verb,
+      newParsings = [new NLParser1.PartiallyParsedSentence(verb,
                                                           {},
                                                           selObj,
                                                           matchScore,
@@ -151,7 +151,7 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj ){
     } else {
       // Recursively parse to assign arguments
       let makeNewParsing = function( argStrings ) {
-        return new NLParser.PartiallyParsedSentence(verb,
+        return new NLParser1.PartiallyParsedSentence(verb,
                                                     argStrings,
                                                     selObj,
                                                     matchScore,
@@ -168,4 +168,4 @@ EnParser.parseSentence = function(inputString, nounList, verbList, selObj ){
   return parsings;
 }
 
-NLParser.registerPluginForLanguage("en", EnParser);
+NLParser1.registerPluginForLanguage("en", EnParser);

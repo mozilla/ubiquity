@@ -36,10 +36,10 @@
 
 EXPORTED_SYMBOLS = ["JpParser"];
 
-Components.utils.import("resource://ubiquity/modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
 Components.utils.import("resource://ubiquity/modules/localeutils.js");
 
-var dat = loadLocaleJson("resource://ubiquity/modules/parser/locale_jp.json");
+var dat = loadLocaleJson("resource://ubiquity/modules/parser/original/locale_jp.json");
 
 var JpParser = {};
 
@@ -102,7 +102,7 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
 	argStrings[argName] = [wordDict[particle]];
       }
     }
-    newParsings = [new NLParser.PartiallyParsedSentence(verb,
+    newParsings = [new NLParser1.PartiallyParsedSentence(verb,
 							argStrings,
 							selObj,
 							matchScore,
@@ -112,7 +112,7 @@ JpParser.parseSentence = function(inputString, nounList, verbList, selObj) {
   return parsings;
 };
 
-NLParser.registerPluginForLanguage("jp", JpParser);
+NLParser1.registerPluginForLanguage("jp", JpParser);
 
 // TODO changing the key bindings for the japanese version!
 // Is it right to do that here, or... elsewhere...?

@@ -1,8 +1,10 @@
-Components.utils.import("resource://ubiquity/modules/parser/locale_jp.js");
+Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
 const MAX_SUGGESTIONS = 10;
 var emptyContext = {textSelection:"", htmlSelection:""};
+
+var JpParser = NLParser1.getPluginForLanguage("jp");
 
 function testJpSplitByParticles() {
   var sentence1 = "彼女と駅に行った";

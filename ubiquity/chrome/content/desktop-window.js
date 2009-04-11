@@ -50,10 +50,6 @@ function ubiquitySetup()
                           jsm);
   Components.utils.import("resource://ubiquity/modules/parser/parser.js",
                           jsm);
-  Components.utils.import("resource://ubiquity/modules/parser/locale_en.js",
-                          jsm);
-  Components.utils.import("resource://ubiquity/modules/parser/locale_jp.js",
-                          jsm);
   Components.utils.import("resource://ubiquity/modules/cmdmanager.js",
                           jsm);
   Components.utils.import("resource://ubiquity/modules/skinsvc.js",
@@ -62,7 +58,6 @@ function ubiquitySetup()
   jsm.UbiquitySetup.setupWindow(window);
 
   var nlParser = jsm.NLParser.makeParserForLanguage(
-    jsm.UbiquitySetup.parserVersion,
     jsm.UbiquitySetup.languageCode,
     [],
     []

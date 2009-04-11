@@ -40,7 +40,6 @@ Components.utils.import("resource://ubiquity/modules/nounutils.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity/modules/codesource.js");
 Components.utils.import("resource://ubiquity/modules/parser/parser.js");
-Components.utils.import("resource://ubiquity/modules/parser/locale_en.js");
 Components.utils.import("resource://ubiquity/modules/feedmanager.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity/modules/localeutils.js");
