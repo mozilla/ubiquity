@@ -49,7 +49,7 @@ var sampleVerbs = {
       pt: ['adicionar', 'incluir', 'marcar']
     },
     arguments: [
-      {role: 'object', nountype: 'arb'},
+      {role: 'object', nountype: 'text'},
       {role: 'time', nountype: 'time'},
       {role: 'goal', nountype: 'service'}
     ]
@@ -62,7 +62,7 @@ var sampleVerbs = {
       pt: ['comprar', 'compre']
     },
     arguments: [
-      {role: 'object', nountype: 'arb'},
+      {role: 'object', nountype: 'text'},
       {role: 'source', nountype: 'service'},
       {role: 'instrument', nountype: 'service'}
     ]
@@ -75,7 +75,7 @@ var sampleVerbs = {
       pt: ['dizer', 'diga']
     },
     arguments: [
-      {role: 'object', nountype: 'arb'}
+      {role: 'object', nountype: 'text'}
     ]
   },
   move: {
@@ -86,7 +86,7 @@ var sampleVerbs = {
       pt: ['ir', 'vá', 'vai']
     },
     arguments: [
-      {role: 'object', nountype: 'arb'},
+      {role: 'object', nountype: 'text'},
       {role: 'source', nountype: 'city'},
       {role: 'goal', nountype: 'city'}
     ]
@@ -101,7 +101,7 @@ var sampleVerbs = {
     arguments: [
       {role: 'source', nountype: 'language'},
       {role: 'goal', nountype: 'language'},
-      {role: 'object', nountype: 'arb'}
+      {role: 'object', nountype: 'text'}
     ]
   }
 };

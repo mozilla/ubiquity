@@ -260,7 +260,8 @@ let UbiquitySetup = {
                                                     msgService,
                                                     gWebJsModule,
                                                     this.languageCode,
-                                                    this.getBaseUri());
+                                                    this.getBaseUri(),
+                                                    this.parserVersion);
 
       var ldfPlugin = new LockedDownFeedPlugin(feedManager,
                                                msgService,

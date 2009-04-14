@@ -46,7 +46,7 @@ var demoParserInterface = {
         this.currentQuery.cancel();
 
     $('#parseinfo').empty();
-    this.currentQuery = this.currentParser.newQuery($('.input').val(),{getSelection:function() $('#selection').val()},$('#maxSuggestions').val()*1);
+    this.currentQuery = this.currentParser.newQuery($('.input').val(),{getSelection:function() $('#selection').val()},$('#maxSuggestions').val()*1,true); // this last true is for dontRunImmediately
     this.currentQuery._threshold = $('#threshold').val()*1;
     if (!$('#async').attr('checked'))
       this.currentQuery._async = false;
@@ -64,7 +64,7 @@ var demoParserInterface = {
           case 2:
             $('<h3>step 2: pick possible verbs</h3><ul id="verbArgPairs"></ul>').appendTo($('#parseinfo'));
             for each (pair in this._verbArgPairs) {
-              $('<li>V: <code title="'+(pair.verb.id || 'null')+'">'+(pair.verb.text || '<i>null</i>')+'</code>, argString: <code>'+pair.argString+'</code></li>').appendTo($('#verbArgPairs'));
+              $('<li>V: <code title="'+(pair._verb.id || 'null')+'">'+(pair._verb.text || '<i>null</i>')+'</code>, argString: <code>'+pair.argString+'</code></li>').appendTo($('#verbArgPairs'));
             }
             break;
         
@@ -75,7 +75,7 @@ var demoParserInterface = {
           case 4: 
             $('<h3>step 4: group into arguments</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('<li>'+parse+'</li>').appendTo($('#argParses'));
+              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#argParses'));
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -83,7 +83,7 @@ var demoParserInterface = {
           case 5:
             $('<h3>step 5: anaphora substitution</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('<li>'+parse+'</li>').appendTo($('#newPossibleParses'));
+              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#newPossibleParses'));
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -91,7 +91,7 @@ var demoParserInterface = {
           case 6:
             $('<h3>step 6: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
-              $('<li>'+parse+'</li>').appendTo($('#verbedParses'));
+              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#verbedParses'));
             }
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
@@ -114,7 +114,7 @@ var demoParserInterface = {
           case 8:
             $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._suggestedParses) {
-              $('<li>'+parse+'</li>').appendTo($('#suggestedParses'));
+              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#suggestedParses'));
             }
             $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
             break;
@@ -122,7 +122,7 @@ var demoParserInterface = {
           case 9:
             $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._scoredParses) {
-              $('<li>'+parse+' '+Math.floor(100*parse.score)/100+'</li>').appendTo($('#debugScoredParses'));
+              $('<li>'+parse.getDisplayText()+' '+Math.floor(100*parse.score)/100+'</li>').appendTo($('#debugScoredParses'));
             }
             $('<p><small>'+this._scoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -140,7 +140,7 @@ var demoParserInterface = {
     this.currentQuery.onResults = function() {
       $('#scoredParses').empty();
       for each (var parse in this._scoredParses.slice(0,this.maxSuggestions)) {
-        $('<tr><td>'+parse+'</td><td>'+Math.floor(100*parse.score)/100+'</td></tr>').appendTo($('#scoredParses'));
+        $('<tr><td>'+parse.getDisplayText()+'</td><td>'+Math.floor(100*parse.score)/100+'</td></tr>').appendTo($('#scoredParses'));
       }
     }
     this.currentQuery.run();
@@ -157,8 +157,8 @@ var demoParserInterface = {
     // this is just a hack to make the makeXxParser() functions work. :D
     this.currentParser = window['make'+lang.slice(0,1).toUpperCase().concat(lang.slice(1))+'Parser']();
   
-    this.currentParser.setCommandList(verbs);
-    this.currentParser.initialCache();
+    this.currentParser.setCommandList(sampleVerbs);
+    this.currentParser.setNounList(nounTypes,true);
   
     $('#roles').empty();
     for each (role in this.currentParser.roles) {
@@ -166,15 +166,15 @@ var demoParserInterface = {
     }
   
     $('#nountypes').empty();
-    for (let type in nounTypes) {
-      $('<li><code>'+type+'</code>'+(nounTypes[type].list != undefined ? ': {<code>'+nounTypes[type].list.join('</code>, <code>')+'</code>}':'')+'</li>').appendTo($('#nountypes'));
+    for (let type in this.currentParser._nounTypes) {
+      $('<li><code>'+type+'</code>'+(this.currentParser._nounTypes[type].list != undefined ? ': {<code>'+this.currentParser._nounTypes[type].list.join('</code>, <code>')+'</code>}':'')+'</li>').appendTo($('#nountypes'));
     }
   
     $('#verblist').empty();
-    for (verb in verbs) {
-      var li = $('<li><code>'+verb+'</code> (<code>'+(verbs[verb].names[lang] || verbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
+    for (verb in sampleVerbs) {
+      var li = $('<li><code>'+verb+'</code> (<code>'+(sampleVerbs[verb].names[lang] || sampleVerbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
       var ul = $('<ul></ul>');
-      for each (arg in verbs[verb].arguments)
+      for each (arg in sampleVerbs[verb].arguments)
         $('<li><code>'+arg.role+'</code>: <code>'+arg.nountype+'</code>').appendTo(ul);
       ul.appendTo(li);
       li.appendTo($('#verblist'));

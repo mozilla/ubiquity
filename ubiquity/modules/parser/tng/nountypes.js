@@ -40,9 +40,10 @@ var nounCache = {};
 
 // set up noun type detectors
 
-var nounTypes = {
-  arb:      { suggest: function(x) [ { text:x, html:x, score:0.7 } ] },
-  contact:  {
+var nounTypes = [
+  { _name: 'text',
+    suggest: function(x) [ { text:x, html:x, score:0.7 } ] },
+  { _name: 'contact',
     list: ['John','Mary','Bill'],
     suggest: function(x) { 
       let suggestions = [];
@@ -60,7 +61,7 @@ var nounTypes = {
       return suggestions;
     }
   },
-  city:  {
+  { _name: 'city',
     list: ['San Francisco', 'San Diego', 'Tokyo', 'Boston'],
     suggest: function(x) { 
       let suggestions = [];
@@ -78,19 +79,21 @@ var nounTypes = {
       return suggestions;
     }
   },
-  time:   { suggest: function(x) {
+  { _name: 'time',
+    suggest: function(x) {
     if (x.search(/^\d+ ?\w+$/i) >= 0) 
       return [ { text:x, html:x, score:1 } ];    
     else
       return [];
   } },
-  number: { suggest: function(x) {
+  { _name: 'number',
+    suggest: function(x) {
     if (x.search(/^\d+$/) >= 0) 
       return [ { text:x, html:x, score:1 } ];    
     else
       return [];
   } },
-  service:  {
+  { _name: 'service',
     list: ['Google', 'Yahoo', 'calendar'],
     suggest: function(x) { 
       let suggestions = [];
@@ -108,7 +111,7 @@ var nounTypes = {
       return suggestions;
     }
   },
-  language:  {
+  { _name: 'language',
     list: ['English','French','Japanese','Chinese'],
     suggest: function(x) { 
       let suggestions = [];
@@ -126,31 +129,4 @@ var nounTypes = {
       return suggestions;
     }
   }
-};
-
-function detectNounType(x) {
-  if (nounCache[x] == undefined)
-    nounCache[x] = protoDetectNounType(x);
-  return nounCache[x];
-}
-
-function protoDetectNounType(x) {
-  let returnObj = {};
-  for (let type in nounTypes) {
-    var suggestions = nounTypes[type].suggest(x);
-    for each (suggestion in suggestions) {
-      suggestion.nountype = type;
-    }    
-    if (suggestions.length > 0)
-      returnObj[type] = suggestions;
-  }
-  return returnObj;
-}
-
-function cacheNounTypes(args) {
-  for each (let arg in args) {
-    for each (let x in arg)
-      detectNounType(x._substitutedInput);
-  }
-  return true;
-}
+];

@@ -1,6 +1,8 @@
+var EXPORTED_SYMBOLS = ["cloneObject"];
+
 // cloneObject function, from http://bytes.com/topic/javascript/answers/715567-deep-cloning-object
 
-function cloneObject(obj) {
+var cloneObject = function (obj) {
   if (obj == null)
     return null;
   var c = obj instanceof Array ? [] : {};

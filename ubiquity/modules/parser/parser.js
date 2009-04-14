@@ -1,9 +1,18 @@
 var EXPORTED_SYMBOLS = ["NLParser"];
 
-const USE_VERSION = 1;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                  .getService(Components.interfaces.fuelIApplication);
+
+var PARSER_VERSION_PREF = "extensions.ubiquity.parserVersion";
+const USE_VERSION = Application.prefs.getValue(PARSER_VERSION_PREF, "");
+
+dump('loading parser version: '+USE_VERSION);
 
 var NLParser;
-if (USE_VERSION == 1 ) {
+if (USE_VERSION < 2 ) {
   Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
   Components.utils.import("resource://ubiquity/modules/parser/original/locale_en.js");
   Components.utils.import("resource://ubiquity/modules/parser/original/locale_jp.js");

@@ -36,10 +36,16 @@
 
 var EXPORTED_SYMBOLS = ["Parser"];
 
+Components.utils.import("resource://ubiquity/modules/parser/tng/utils.js");
+
+var nounCache = {};
+
 // set up the Parser class
 
 function Parser(lang) {
   this.lang = lang;
+  if (this._verbList.length && this._nounTypes.length)
+    this.initialCache();
 }
 Parser.prototype = {
   lang: '',
@@ -52,14 +58,36 @@ Parser.prototype = {
   rolesCache: {},
   patternCache: {},
   _verbList: [],
+  _nounTypes: [],
 
   setCommandList: function( commandList ) {
-    this._verbList = commandList;
+    for (let verb in commandList) {
+      if (commandList[verb].names != undefined) {
+        this._verbList.push(commandList[verb]);
+        //dump("loaded verb: "+verb+"\n");
+      }
+    }
+    //this._verbList = commandList;
   },
-
+  
   setNounList: function( nounList ) {
-    // TODO
-    // Not Yet Implemented
+
+    let registeredNounTypes = [];
+
+    // TODO: for some reason the nounList contains lots of duplicates now...
+    // this filter just reduces those
+
+    this._nounTypes = nounList.filter(function(type) {
+      if (type._name != undefined) {
+        if (registeredNounTypes[type._name] == undefined) {
+          registeredNounTypes[type._name] = true;
+          return true;
+        }
+      } 
+      return false;
+    });
+
+    this.initialCache();
   },
 
   initialCache: function() {
@@ -110,8 +138,8 @@ Parser.prototype = {
 
   },
   roles: [{role: 'object', delimiter: ''}], // a list of roles and their delimiters
-  newQuery: function(queryString,context,maxSuggestions) {
-    return new Parser.Query(this,queryString,context,maxSuggestions);
+  newQuery: function(queryString,context,maxSuggestions,dontRunImmediately) {
+    return new Parser.Query(this,queryString,context,maxSuggestions,dontRunImmediately);
   },
   wordBreaker: function(input) {
     return input;
@@ -120,7 +148,7 @@ Parser.prototype = {
     return input.replace(/^\s*(.*?)\s*$/,'$1').split(/\s+/);
   },
   verbFinder: function(input) {
-    let returnArray = [{verb: {id: null, text: null, _order: null}, argString: input.replace(/^\s*(.*?)\s*$/,'$1')}];
+    let returnArray = new Array({_verb: {id: null, text: null, _order: null}, argString: input.replace(/^\s*(.*?)\s*$/,'$1')});
 
     // just a little utility generator
     // yields the synonymous names this verb in a given language
@@ -137,7 +165,11 @@ Parser.prototype = {
         // check each verb synonym
         for (name in names(this._verbList[verb],this.lang)) {
           if (name.indexOf(verbPrefix) == 0) {
-            returnArray.push({verb: {id: verb, text: name, _order: 0}, argString: argString});
+            let thisParse = {_verb: cloneObject(this._verbList[verb]), argString: argString};
+            thisParse._verb.id = verb;
+            thisParse._verb.text = name;
+            thisParse._verb._order = 0;
+            returnArray.push(thisParse);
             break;
           }
         }
@@ -151,7 +183,11 @@ Parser.prototype = {
         // check each verb synonym
         for (name in names(this._verbList[verb],this.lang)) {
           if (name.indexOf(verbPrefix) == 0) {
-            returnArray.push({verb: {id: verb, text: name, _order: -1}, argString: argString});
+            let thisParse = {_verb: cloneObject(this._verbList[verb]), argString: argString};
+            thisParse._verb.id = verb;
+            thisParse._verb.text = name;
+            thisParse._verb._order = -1;
+            returnArray.push(thisParse);
             break;
           }
         }
@@ -161,6 +197,7 @@ Parser.prototype = {
     return returnArray;
   },
   argFinder: function(argString,verb) {
+
     let possibleParses = [];
 
     let words = this.splitWords(argString);
@@ -185,6 +222,7 @@ Parser.prototype = {
     var possibleDelimiterCombinations = possibleDelimiterIndices.reduce(function(last, current) last.concat([a.concat([current]) for each (a in last)]), [[]]);
 
     for each (var delimiterIndices in possibleDelimiterCombinations) {
+
       // don't process invalid delimiter combinations
       // (where two delimiters are back to back)
       var breaknow = false;
@@ -193,6 +231,8 @@ Parser.prototype = {
           breaknow = true;
       }
       if (breaknow) break;
+      if (delimiterIndices[delimiterIndices.length - 1] == words.length-1)
+        dump('maybe this is why I\'m dead.\n'); // TODO check if this breaks things
 
       var theseParses = [new Parser.Parse(this.branching,this.joindelimiter,verb,argString)];
 
@@ -226,7 +266,7 @@ Parser.prototype = {
         delimiterIndices = delimiterIndices.reverse();
 
       // for each delimiter
-      for (var i in delimiterIndices) {
+      for (let i=0; i<delimiterIndices.length; i++) {
 
         var newParses = []; // we'll update each copy of theseParses and them put them here for the time being
 
@@ -241,16 +281,18 @@ Parser.prototype = {
         // compute the possible roles for this delimiter
         if (rolesForEachDelimiterCache[words[delimiterIndices[i]]] == undefined)
           rolesForEachDelimiterCache[words[delimiterIndices[i]]] = this.getRoleByDelimiter(words[delimiterIndices[i]],roles);
-
+          
         // for each scope
         for (var j = jmin; j <= jmax; j++) {
+
           // for each delimiter's possible role
           for each (var role in rolesForEachDelimiterCache[words[delimiterIndices[i]]]) {
             // for each of the current parses
 
             for (var k in theseParses) {
-              let thisParse = new cloneObject(theseParses[k]);
 
+              let thisParse = new cloneObject(theseParses[k]);
+              
               if (this.branching == 'left') {// find args right to left
 
                 // put the selected argument in its proper role
@@ -261,13 +303,12 @@ Parser.prototype = {
                 // put the extra words between the earlier delimiter and our arguments
                 if (j != jmin) {
 
-                  if (thisParse.args.object == undefined)
+                  if (thisParse.args.object == undefined || !(thisParse.args.object instanceof Array))
                     thisParse.args.object = [];
                   thisParse.args.object.push({ _order: 2*(delimiterIndices.length - i), input:this.cleanArgument(words.slice(jmin,j).join(this.joindelimiter)), modifier:'' });
 
                 }
               } else {
-
                 // put the selected argument in its proper role
                 if (thisParse.args[role] == undefined)
                   thisParse.args[role] = [];
@@ -276,7 +317,7 @@ Parser.prototype = {
                 // put the extra words between this delimiter and the next in the direct object array
                 if (j != jmax) {
 
-                  if (thisParse.args.object == undefined)
+                  if (thisParse.args.object == undefined || !(thisParse.args.object instanceof Array))
                     thisParse.args.object = [];
                   thisParse.args.object.push({ _order: 1 + 2*(i)+2, input:this.cleanArgument(words.slice(j + 1,jmax + 1).join(this.joindelimiter)), modifier:'' });
 
@@ -326,7 +367,7 @@ Parser.prototype = {
   suggestVerb: function(parse,threshold) {
 
     // for parses which already have a verb
-    if (parse.verb.id != null)
+    if (parse._verb.id != null)
       return [parse];
 
     // for parses WITHOUT a set verb:
@@ -342,9 +383,10 @@ Parser.prototype = {
 
       if (suggestThisVerb) {
         let parseCopy = cloneObject(parse);
-        parseCopy.verb.id = verb;
-        parseCopy.verb.text = this._verbList[verb].names[this.lang][0];
-        parseCopy.verb._order = 0; // TODO: for verb forms which clearly should be sentence-final, change this value to -1
+        parseCopy._verb = cloneObject(this._verbList[verb]);
+        parseCopy._verb.id = verb;
+        parseCopy._verb.text = this._verbList[verb].names[this.lang][0];
+        parseCopy._verb._order = 0; // TODO: for verb forms which clearly should be sentence-final, change this value to -1
 
         parseCopy.score = 0.5; // lowered because we had to suggest a verb
         parseCopy._suggested = true;
@@ -377,7 +419,7 @@ Parser.prototype = {
 
       let thisVerbTakesThisRole = false;
 
-      for each (let verbArg in this._verbList[parse.verb.id].arguments) {
+      for each (let verbArg in parse._verb.arguments) {
         if (role == verbArg.role) {
 
           for (let i in parse.args[role]) {
@@ -438,7 +480,7 @@ Parser.prototype = {
 
     }
 
-    for each (var verbArg in this._verbList[parse.verb.id].arguments) {
+    for each (var verbArg in this._verbList[parse._verb.id].arguments) {
       score *= 0.8; // lower for each unset argument
 
       for (var role in parse.args) {
@@ -456,12 +498,42 @@ Parser.prototype = {
     parse.score = score;
 
     return [parse];
+  },
+  
+  // Noun Type stuff
+  
+  _detectNounType: function(x) {
+    if (nounCache[x] == undefined) {
+      nounCache[x] = this._protoDetectNounType(x);
+    }
+    return nounCache[x];
+  },
+  _protoDetectNounType: function (x) {
+    let returnObj = {};
+
+    for each (let nounType in this._nounTypes) {
+      var suggestions = nounType.suggest(x);
+      for each (suggestion in suggestions) {
+        suggestion.nountype = nounType._name;
+      }
+      if (suggestions.length > 0)
+        returnObj[nounType._name] = suggestions;
+    }
+    return returnObj;
+  },
+  cacheNounTypes: function (args) {
+    for each (let arg in args) {
+      for each (let x in arg)
+        this._detectNounType(x._substitutedInput);
+    }
+    return true;
   }
+  
 }
 
 // set up the Query class
 
-Parser.Query = function(parser,queryString, context, maxSuggestions) {
+Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImmediately) {
   this.parser = parser;
   this.input = queryString;
   this.context = context;
@@ -469,8 +541,6 @@ Parser.Query = function(parser,queryString, context, maxSuggestions) {
 
   // code flow control stuff
   this.finished = false;
-  this.hasResults = false;
-  this.suggestionList = [];
   this._keepworking = true;
   this._times = [];
   this._step = 0;
@@ -483,11 +553,19 @@ Parser.Query = function(parser,queryString, context, maxSuggestions) {
   this._verbedParses = [];
   this._suggestedParses = [];
   this._scoredParses = [];
-  this._threshold = 0.3;
+  this._threshold = 0.2;
+  
+  if (!dontRunImmediately) {
+    this._async = false;
+    this.run();
+  }
 }
 
 Parser.Query.prototype = {
   run: function() {
+  
+    //dump("run: "+this.input+"\n");
+  
     this._keepworking = true;
 
     this._times = [Date.now()];
@@ -507,7 +585,7 @@ Parser.Query.prototype = {
     }*/
 
     function doAsyncParse() {
-      //console.log("tick");
+      //dump("step:"+self._step+"\n");
       var done = false;
       var ok = true;
       try {
@@ -547,7 +625,7 @@ Parser.Query.prototype = {
     this._step++;
 
     for each (var pair in this._verbArgPairs) {
-      for each (var argParses in this.parser.argFinder(pair.argString,pair.verb)) {
+      for each (var argParses in this.parser.argFinder(pair.argString,pair._verb)) {
         this._possibleParses = this._possibleParses.concat(argParses);
         yield true;
       }
@@ -555,8 +633,13 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
+    
+    let selection;
+    if (this.context.getSelection != undefined)
+      selection = this.context.getSelection();
+    else
+      selection = '';
 
-    let selection = this.context.getSelection();
     for each (let parse in this._possibleParses) {
       // make sure we keep the original input intact... we're going to make changes to _substitutedInput
       for each (let args in parse.args) {
@@ -587,7 +670,7 @@ Parser.Query.prototype = {
     this._step++;
 
     for each (let parse in this._verbedParses) {
-      cacheNounTypes(parse.args);
+      this.parser.cacheNounTypes(parse.args);
       yield true;
     }
 
@@ -595,7 +678,9 @@ Parser.Query.prototype = {
     this._step++;
 
     for each (let parse in this._verbedParses) {
+      //mylog(parse);
       this._suggestedParses = this._suggestedParses.concat(this.parser.suggestArgs(parse));
+      //mylog(this._suggestedParses);
       yield true;
     }
 
@@ -613,16 +698,11 @@ Parser.Query.prototype = {
     this._step++;
 
     this.finished = true;
-    //console.log("finished! ", this._scoredParses);
-    // _scoredParses will be replaced by the suggestionList in the future...
-    if (this._scoredParses.length > 0)
-      this.hasResults = true
+
     this.onResults();
   },
-  getSuggestionList: function() {
-    // TODO scoredParses probably has the wrong format.
-    return this._scoredParses;
-  },
+  get hasResults() { return this._scoredParses.length > 0; },
+  get suggestionList() { return this._scoredParses; },
   cancel: function() {
     //console.log("cancelled!");
     this._keepworking = false;
@@ -633,20 +713,20 @@ Parser.Query.prototype = {
 Parser.Parse = function(branching, delimiter, verb, argString) {
   this._branching = branching;
   this._delimiter = delimiter,
-  this.verb = verb;
+  this._verb = verb;
   this.argString = argString;
   this.args = {};
 }
 
 Parser.Parse.prototype = {
-  toString: function() {
+  getDisplayText: function() {
     let display = '';
     let displayFinal = '';
 
-    if (this.verb._order != -1)
-      display = "<span class='verb' title='"+(this.verb.id || 'null')+"'>"+(this.verb.text || '<i>null</i>')+"</span>"+this._delimiter;
+    if (this._verb._order != -1)
+      display = "<span class='verb' title='"+(this._verb.id || 'null')+"'>"+(this._verb.text || '<i>null</i>')+"</span>"+this._delimiter;
     else
-      displayFinal = this._delimiter+"<span class='verb' title='"+this.verb.id+"'>"+(this.verb.text || '<i>null</i>')+"</span>";
+      displayFinal = this._delimiter+"<span class='verb' title='"+this._verb.id+"'>"+(this._verb.text || '<i>null</i>')+"</span>";
 
     argsArray = [];
     for (let role in this.args) {
@@ -669,5 +749,34 @@ Parser.Parse.prototype = {
 
     return display + displayFinal;
 
+  },
+  getIcon: function() {
+    return this._verb._icon;
+  },
+
+  execute: function(context) {
+    return this._verb.execute( context, this._argSuggs );
+  },
+
+  preview: function(context, previewBlock) {
+    // TODO: enable real preview
+    return '';
+    //this._verb.preview( context, this._argSuggs, previewBlock );
+  },
+
+  get previewDelay() {
+    return this._verb.previewDelay;
+  },
+
+  get previewUrl() {
+    return this._verb.previewUrl;
   }
+}
+
+// mitcho just uses this function for debug purposes:
+function mylog(what) {
+  const Cc = Components.classes;
+  const Ci = Components.interfaces;
+  Cc["@mozilla.org/appshell/window-mediator;1"].
+           getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").Firebug.Console.logFormatted([what]);
 }

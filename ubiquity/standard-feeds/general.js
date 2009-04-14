@@ -459,6 +459,17 @@ function translateTo( text, langCodePair, callback ) {
 CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
   name: "translate",
+  names: {
+    da: ['oversæt'],
+    en: ['translate'],
+    ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
+    pt: ['traduzir', 'traduza']
+  },
+  arguments: [
+    {role: 'source', nountype: 'language'},
+    {role: 'goal', nountype: 'language'},
+    {role: 'object', nountype: 'text'}
+  ],
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",
   help: "You can specify the language to translate to, and the language to translate from.  For example," +

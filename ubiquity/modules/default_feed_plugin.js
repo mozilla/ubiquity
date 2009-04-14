@@ -50,13 +50,13 @@ const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
 const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
 
 function DefaultFeedPlugin(feedManager, messageService, webJsm,
-                           languageCode, baseUri) {
+                           languageCode, baseUri, parserVersion) {
   this.type = DEFAULT_FEED_TYPE;
 
   let Application = Components.classes["@mozilla.org/fuel/application;1"]
                     .getService(Components.interfaces.fuelIApplication);
 
-  let builtins = makeBuiltins(languageCode, baseUri);
+  let builtins = makeBuiltins(languageCode, baseUri, parserVersion);
   let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService,
                                                     webJsm);
   let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
@@ -334,7 +334,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
   return makeGlobals;
 }
 
-function makeBuiltins(languageCode, baseUri) {
+function makeBuiltins(languageCode, baseUri, parserVersion) {
   var basePartsUri = baseUri + "feed-parts/";
   var baseFeedsUri = baseUri + "builtin-feeds/";
   var baseScriptsUri = baseUri + "scripts/";
@@ -352,14 +352,17 @@ function makeBuiltins(languageCode, baseUri) {
     new LocalUriCodeSource(basePartsUri + "footer/final.js")
   ];
 
-  if (languageCode == "jp") {
+  // TODO: think of a better way to switch nountypes files for different languages
+  // and keep english as a default, etc.
+  // mitcho's guess: we should keep nountypes separate but verbs together... :/
+  if (languageCode == "jp" && parserVersion < 2) {
     headerCodeSources = headerCodeSources.concat([
       new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
     ]);
     feeds = feeds.concat([
       baseFeedsUri + "jp/builtincmds.js"
     ]);
-  } else if (languageCode == "en") {
+  } else if (languageCode == "en" || parserVersion == 2) {
     headerCodeSources = headerCodeSources.concat([
       new LocalUriCodeSource(baseScriptsUri + "date.js"),
       new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")

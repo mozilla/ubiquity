@@ -64,15 +64,16 @@ var NLParser2 = {
       throw "No parser is defined for " + languageCode;
     } else {
       let parser = NLParser2.parserFactories[languageCode]();
-      // todo set verblist, nounlist, contextutils, and suggestionmemory on the
+      // todo set contextutils, and suggestionmemory on the
       // new parser object.
-      /*let convertedVerbList = [];
-      for each ( let v in verbList ) {
-        let newVerbObj = NLParser.Verb( v );
-        convertedVerbList.push( NLParser2._convertVerb( newVerbObj ) );
-      }*/
+
       // test by just using the sample verbs from verbs.js.
-      parser.setCommandList( sampleVerbs );
+      //parser.setCommandList( sampleVerbs );
+
+      parser.setCommandList( verbList );
+      parser.setNounList( nounList );
+      parser.initialCache();
+
       return parser;
     }
   },
