@@ -93,6 +93,25 @@ div#ubiquity-preview #suggestions {
   height: 500px;
 }
 
+/* below are the only TNG debug changes*/
+div#ubiquity-preview #suggestions .verb {
+  border-bottom: 2px blue solid;
+}
+ 
+div#ubiquity-preview #suggestions .prefix {
+  border-bottom: 2px orange solid;
+  font-weight: bold;
+}
+ 
+div#ubiquity-preview #suggestions .argument {
+  border-bottom: 2px orange solid;
+}
+ 
+div#ubiquity-preview #suggestions .object {
+  border-bottom: 2px black solid;
+}
+/*end TNG version additions*/
+
 div#ubiquity-preview #preview-pane {
     position: absolute;
     left: 300px;
