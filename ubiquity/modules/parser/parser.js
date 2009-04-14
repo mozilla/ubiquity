@@ -1,13 +1,11 @@
 var EXPORTED_SYMBOLS = ["NLParser"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+//let Application = Components.classes["@mozilla.org/fuel/application;1"]
+//                  .getService(Components.interfaces.fuelIApplication);
 
-let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                  .getService(Components.interfaces.fuelIApplication);
-
-var PARSER_VERSION_PREF = "extensions.ubiquity.parserVersion";
-const USE_VERSION = Application.prefs.getValue(PARSER_VERSION_PREF, "");
+//var PARSER_VERSION_PREF = "extensions.ubiquity.parserVersion";
+//var USE_VERSION = Application.prefs.getValue(PARSER_VERSION_PREF, "");
+var USE_VERSION = 1;
 
 dump('loading parser version: '+USE_VERSION);
 
