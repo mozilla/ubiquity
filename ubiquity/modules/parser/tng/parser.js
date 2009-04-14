@@ -56,7 +56,12 @@ Parser.prototype = {
   setCommandList: function( commandList ) {
     this._verbList = commandList;
   },
-  
+
+  setNounList: function( nounList ) {
+    // TODO
+    // Not Yet Implemented
+  },
+
   initialCache: function() {
     // this method is initialized when the language is loaded
     // caches a number of commonly used regex's into this.patternCache
@@ -74,7 +79,7 @@ Parser.prototype = {
     // it was only being used in one place so I moved it here
     // TODO: order by descending order of length of prefixes
     function matchString(arr) {
-      // construct a regexp to match the 
+      // construct a regexp to match the
       var prefixes = [];
       for each (var a in arr) {
         for (var i=1;i<=a.length;i++) {
@@ -88,13 +93,13 @@ Parser.prototype = {
 
     this.patternCache.verbInitialTest = new RegExp('^\\s*('+this.patternCache.verbMatcher+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'));
     this.patternCache.verbFinalTest = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+this.patternCache.verbMatcher+')\\s*$');
-    
+
     this.patternCache.anaphora = new RegExp((this.usespaces?'(^.*\\s+|^)':'(^.*)')+'('+(this.anaphora.join('|'))+')'+(this.usespaces?'(\\s+.*$|$)':'(.*$)'))
-    
+
     // cache the roles used in each verb
     // also cache a regex for recognizing its delimiters
     this.patternCache.delimiters = {};
-    
+
     for (let verb in this._verbList) {
       this.rolesCache[verb] = [role for each (role in this.roles) if (this._verbList[verb].arguments
                             .some(function(arg) arg.role == role.role ) ) ];
@@ -127,7 +132,7 @@ Parser.prototype = {
 
     if ((test = input.match(this.patternCache.verbInitialTest)) != null) {
       let [ ,verbPrefix,argString] = test;
-      
+
       for (verb in this._verbList) {
         // check each verb synonym
         for (name in names(this._verbList[verb],this.lang)) {
@@ -141,7 +146,7 @@ Parser.prototype = {
 
     if ((test = input.match(this.patternCache.verbFinalTest)) != null) {
       let [ ,argString,verbPrefix] = test;
-      
+
       for (verb in this._verbList) {
         // check each verb synonym
         for (name in names(this._verbList[verb],this.lang)) {
@@ -157,12 +162,12 @@ Parser.prototype = {
   },
   argFinder: function(argString,verb) {
     let possibleParses = [];
-    
+
     let words = this.splitWords(argString);
-    
+
     // find all the possible delimiters
     let possibleDelimiterIndices = [];
-    
+
     // if the verb is set, only look for delimiters which are available
     let roles = ( verb.id ? this.rolesCache[verb.id] : this.roles );
 
@@ -170,15 +175,15 @@ Parser.prototype = {
       if (this.hasDelimiter(words[i],verb.id))
         possibleDelimiterIndices.push(i);
     }
-    
+
     // this is a cache of the possible roles for each delimiter word encountered
     let rolesForEachDelimiterCache = {};
-    
+
     // find all the possible combinations of delimiters
     // this method uses .reduce to return a power set
     // http://twitter.com/mitchoyoshitaka/status/1489386225
     var possibleDelimiterCombinations = possibleDelimiterIndices.reduce(function(last, current) last.concat([a.concat([current]) for each (a in last)]), [[]]);
-    
+
     for each (var delimiterIndices in possibleDelimiterCombinations) {
       // don't process invalid delimiter combinations
       // (where two delimiters are back to back)
@@ -190,14 +195,14 @@ Parser.prototype = {
       if (breaknow) break;
 
       var theseParses = [new Parser.Parse(this.branching,this.joindelimiter,verb,argString)];
-            
+
       // if there are no delimiters at all, put it all in the direct object
       if (delimiterIndices.length == 0) {
         if (theseParses[0].args.object == undefined)
           theseParses[0].args.object = [];
         theseParses[0].args.object.push({ _order:1, input:words.join(this.joindelimiter), modifier:'' });
       }
-      
+
       // if there are extra words at the beginning or end, make them a direct object
       if (this.branching == 'left') {
         if (delimiterIndices[delimiterIndices.length - 1] < words.length - 1 && delimiterIndices[delimiterIndices.length - 1] != undefined) {
@@ -216,15 +221,15 @@ Parser.prototype = {
 
         }
       }
-            
+
       if (this.branching == 'left')
         delimiterIndices = delimiterIndices.reverse();
-      
+
       // for each delimiter
       for (var i in delimiterIndices) {
-        
+
         var newParses = []; // we'll update each copy of theseParses and them put them here for the time being
-        
+
         if (this.branching == 'left') {// find args right to left
           var jmin = ((delimiterIndices[(i*1) + 1] == undefined) ? 0 : delimiterIndices[(i*1) + 1] + 1);
           var jmax = delimiterIndices[(i*1)] - 1;
@@ -236,13 +241,13 @@ Parser.prototype = {
         // compute the possible roles for this delimiter
         if (rolesForEachDelimiterCache[words[delimiterIndices[i]]] == undefined)
           rolesForEachDelimiterCache[words[delimiterIndices[i]]] = this.getRoleByDelimiter(words[delimiterIndices[i]],roles);
-        
+
         // for each scope
         for (var j = jmin; j <= jmax; j++) {
           // for each delimiter's possible role
           for each (var role in rolesForEachDelimiterCache[words[delimiterIndices[i]]]) {
             // for each of the current parses
-            
+
             for (var k in theseParses) {
               let thisParse = new cloneObject(theseParses[k]);
 
@@ -252,22 +257,22 @@ Parser.prototype = {
                 if (thisParse.args[role] == undefined)
                   thisParse.args[role] = [];
                 thisParse.args[role].push({ _order: 1 + 2*(delimiterIndices.length - i), input:this.cleanArgument(words.slice(j,jmax + 1).join(this.joindelimiter)), modifier:words[delimiterIndices[i]] });
-                  
+
                 // put the extra words between the earlier delimiter and our arguments
                 if (j != jmin) {
-                  
+
                   if (thisParse.args.object == undefined)
                     thisParse.args.object = [];
                   thisParse.args.object.push({ _order: 2*(delimiterIndices.length - i), input:this.cleanArgument(words.slice(jmin,j).join(this.joindelimiter)), modifier:'' });
 
                 }
               } else {
-      
+
                 // put the selected argument in its proper role
                 if (thisParse.args[role] == undefined)
                   thisParse.args[role] = [];
                 thisParse.args[role].push({ _order: 1 + 2*(i)+2 - 1, input:this.cleanArgument(words.slice(jmin,j + 1).join(this.joindelimiter)), modifier:words[delimiterIndices[i]] });
-                  
+
                 // put the extra words between this delimiter and the next in the direct object array
                 if (j != jmax) {
 
@@ -287,7 +292,7 @@ Parser.prototype = {
 
       possibleParses.push(theseParses);
     }
-    
+
     return possibleParses;
   },
   cleanArgument: function(word) {
@@ -298,7 +303,7 @@ Parser.prototype = {
 
     for (let role in parse.args) {
       let args = parse.args[role];
-      for (let i in args) {      
+      for (let i in args) {
         let newArg;
         if (newArg = args[i].input.replace(this.patternCache.anaphora,"$1"+selection+"$3")) {
           if (newArg != args[i].input) {
@@ -323,18 +328,18 @@ Parser.prototype = {
     // for parses which already have a verb
     if (parse.verb.id != null)
       return [parse];
-    
+
     // for parses WITHOUT a set verb:
     var returnArray = [];
     for (let verb in this._verbList) {
       let suggestThisVerb = true;
-      
+
       for (let role in parse.args) {
         let thisRoleIsUsed = this._verbList[verb].arguments.some(function(arg) arg.role == role);
         if (!thisRoleIsUsed)
           suggestThisVerb = false;
       }
-              
+
       if (suggestThisVerb) {
         let parseCopy = cloneObject(parse);
         parseCopy.verb.id = verb;
@@ -349,7 +354,7 @@ Parser.prototype = {
     }
     return returnArray;
   },
-  
+
   /* suggestArgs returns an array of copies of the given parse.
      there may be multiple returned as different noun suggestions are thrown in together.
   */
@@ -374,11 +379,11 @@ Parser.prototype = {
 
       for each (let verbArg in this._verbList[parse.verb.id].arguments) {
         if (role == verbArg.role) {
-        
+
           for (let i in parse.args[role]) {
-          
+
             let argText = parse.args[role][i]._substitutedInput;
-  
+
             // if a score for this arg as this nountype is set
             if (nounCache[argText][verbArg.nountype] != undefined) {
               //score *= nounCache[argText][verbArg.nountype];
@@ -391,7 +396,7 @@ Parser.prototype = {
                   parseCopy.args[role][i].html = argument.html;
                   parseCopy.args[role][i].score = argument.score;
                   parseCopy.args[role][i].nountype = verbArg.nountype;
-                  
+
                   newreturn.push(parseCopy);
                 }
               }
@@ -402,7 +407,7 @@ Parser.prototype = {
             }
 
           }
-          
+
           if (thisVerbTakesThisRole)
             continue;
         }
@@ -418,16 +423,16 @@ Parser.prototype = {
     let score = (parse.score || 1); // start with a perfect score
 
     for (let role in parse.args) {
-      
+
       // if there are multiple of any role, mark this parse down.
       if (parse.args[role].length > 1) {
         score *= Math.pow(0.5,(parse.args[role].length - 1));
         if (score < threshold)
           return [];
       }
-      
+
       score *= parse.args[role][0].score;
-  
+
       if (score < threshold)
         return [];
 
@@ -445,7 +450,7 @@ Parser.prototype = {
 
       if (score < threshold)
         return [];
-        
+
     }
 
     parse.score = score;
@@ -470,7 +475,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions) {
   this._times = [];
   this._step = 0;
   this._async = true;
-  
+
   // internal variables
   this._input = '';
   this._verbArgPairs = [];
@@ -484,15 +489,15 @@ Parser.Query = function(parser,queryString, context, maxSuggestions) {
 Parser.Query.prototype = {
   run: function() {
     this._keepworking = true;
-    
+
     this._times = [Date.now()];
     this._step++;
-    
+
     this._input = this.parser.wordBreaker(this.input);
 
     this._times[this._step] = Date.now();
     this._step++;
-        
+
     var parseGenerator = this._yieldingParse();
     var self = this;
     /*var ok = true;
@@ -500,7 +505,7 @@ Parser.Query.prototype = {
     while (ok && !done && self._keepworking) {
       ok = parseGenerator.next();
     }*/
-    
+
     function doAsyncParse() {
       //console.log("tick");
       var done = false;
@@ -524,14 +529,14 @@ Parser.Query.prototype = {
       window.setTimeout(doAsyncParse, 0);
     else
       doAsyncParse();
-    
+
     return true;
   },
   _yieldingParse: function() {
-    
+
     this._verbArgPairs = this.parser.verbFinder(this._input);
     //yield true;
-    
+
     this._times[this._step] = Date.now();
     this._step++;
 
@@ -540,7 +545,7 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
-    
+
     for each (var pair in this._verbArgPairs) {
       for each (var argParses in this.parser.argFinder(pair.argString,pair.verb)) {
         this._possibleParses = this._possibleParses.concat(argParses);
@@ -550,8 +555,8 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
-    
-    let selection = this.context.getSelection(); 
+
+    let selection = this.context.getSelection();
     for each (let parse in this._possibleParses) {
       // make sure we keep the original input intact... we're going to make changes to _substitutedInput
       for each (let args in parse.args) {
@@ -567,12 +572,12 @@ Parser.Query.prototype = {
           this._possibleParses = this._possibleParses.concat(newParses);
         yield true;
       }
-      
+
     }
-    
+
     this._times[this._step] = Date.now();
     this._step++;
-    
+
     for each (let parse in this._possibleParses) {
       this._verbedParses = this._verbedParses.concat(this.parser.suggestVerb(parse,this._threshold));
       yield true;
@@ -580,7 +585,7 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
-    
+
     for each (let parse in this._verbedParses) {
       cacheNounTypes(parse.args);
       yield true;
@@ -588,25 +593,25 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
-    
+
     for each (let parse in this._verbedParses) {
       this._suggestedParses = this._suggestedParses.concat(this.parser.suggestArgs(parse));
       yield true;
     }
-    
+
     this._times[this._step] = Date.now();
     this._step++;
-    
+
     for each (parse in this._suggestedParses) {
       this._scoredParses = this._scoredParses.concat(this.parser.score(parse,this._threshold));
       yield true;
     }
-    
+
     this._scoredParses = this._scoredParses.sort( function(a,b) b.score - a.score );
-    
+
     this._times[this._step] = Date.now();
     this._step++;
-    
+
     this.finished = true;
     //console.log("finished! ", this._scoredParses);
     // _scoredParses will be replaced by the suggestionList in the future...
@@ -637,12 +642,12 @@ Parser.Parse.prototype = {
   toString: function() {
     let display = '';
     let displayFinal = '';
-  
+
     if (this.verb._order != -1)
       display = "<span class='verb' title='"+(this.verb.id || 'null')+"'>"+(this.verb.text || '<i>null</i>')+"</span>"+this._delimiter;
     else
       displayFinal = this._delimiter+"<span class='verb' title='"+this.verb.id+"'>"+(this.verb.text || '<i>null</i>')+"</span>";
-  
+
     argsArray = [];
     for (let role in this.args) {
       for each (let argument in this.args[role]) {
@@ -650,7 +655,7 @@ Parser.Parse.prototype = {
         argsArray[argument._order].role = role;
       }
     }
-  
+
     for each (let arg in argsArray) {
       if (arg.role == 'object')
         display += this._delimiter+"<span class='object'>"+(arg.text || arg._substitutedInput || arg.input)+"</span>";
@@ -661,8 +666,8 @@ Parser.Parse.prototype = {
           display += this._delimiter+"<span class='argument' title=''>"+(arg.text || arg._substitutedInput || arg.input)+"</span><span class='prefix' title='"+arg.role+"'>"+this._delimiter+arg.modifier+"</span>";
       }
     }
-    
+
     return display + displayFinal;
-    
+
   }
 }

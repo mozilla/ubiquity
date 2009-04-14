@@ -1,4 +1,4 @@
-﻿/***** BEGIN LICENSE BLOCK *****
+/***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -38,9 +38,11 @@
 
 // set up fake verbs
 
-var verbs = {
+var EXPORTED_SYMBOLS = ["sampleVerbs"];
+
+var sampleVerbs = {
   add: {
-    names: { 
+    names: {
       da: ['tilføj', 'indsæt'],
       en: ['add'],
       ja: ['追加する','追加しろ','追加して','ついかする','ついかしろ','ついかして'],

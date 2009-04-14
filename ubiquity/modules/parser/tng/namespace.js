@@ -45,6 +45,8 @@ Components.utils.import("resource://ubiquity/modules/parser/tng/da.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/ja.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/zh.js");
 
+Components.utils.import("resource://ubiquity/modules/parser/tng/verbs.js");
+
 var NLParser2 = {
   // Namespace object
   parserFactories: {
@@ -64,12 +66,13 @@ var NLParser2 = {
       let parser = NLParser2.parserFactories[languageCode]();
       // todo set verblist, nounlist, contextutils, and suggestionmemory on the
       // new parser object.
-      let convertedVerbList = [];
+      /*let convertedVerbList = [];
       for each ( let v in verbList ) {
         let newVerbObj = NLParser.Verb( v );
         convertedVerbList.push( NLParser2._convertVerb( newVerbObj ) );
-      }
-      parser.setCommandList( convertedVerbList );
+      }*/
+      // test by just using the sample verbs from verbs.js.
+      parser.setCommandList( sampleVerbs );
       return parser;
     }
   },
