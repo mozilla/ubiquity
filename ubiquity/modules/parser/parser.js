@@ -1,10 +1,10 @@
 var EXPORTED_SYMBOLS = ["NLParser"];
 
-var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                    .getService(Components.interfaces.nsIPrefService);
-prefs = prefs.getBranch("extensions.ubiquity.");
-var USE_VERSION = prefs.getIntPref("parserVersion");
-//var USE_VERSION = 1;
+//var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+//                    .getService(Components.interfaces.nsIPrefService);
+//prefs = prefs.getBranch("extensions.ubiquity.");
+//var USE_VERSION = prefs.getIntPref("parserVersion");
+var USE_VERSION = 1;
 
 dump('loading parser version: '+USE_VERSION);
 
