@@ -1,11 +1,13 @@
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
-Components.utils.import("resource://ubiquity/modules/parser/parser.js");
+Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
 
 Components.utils.import("resource://ubiquity/tests/framework.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
+
+//FLAGRANTLY_INCORRECT;
 
 const Ci = Components.interfaces;
 const Cc = Components.classes;
@@ -47,7 +49,7 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
   if (!contextUtils)
     contextUtils = fakeContextUtils;
 
-  return NLParser.makeParserForLanguage(lang, verbs, nouns, contextUtils,
+  return NLParser1.makeParserForLanguage(lang, verbs, nouns, contextUtils,
                                         new TestSuggestionMemory());
 }
 
@@ -592,7 +594,7 @@ function testSynonyms() {
 }
 
 function testPartiallyParsedSentence() {
-  // TODO this test will need rewriting, because NLParser.Verb is about
+  // TODO this test will need rewriting, because NLParser1.Verb is about
   // to not exist.
   // make sure it also works with a no-arg command:
   var cmd_grumble = {
@@ -600,13 +602,13 @@ function testPartiallyParsedSentence() {
     execute: function(context, directObject, modifiers) {
     }
   };
-  var verbNoArgs = new NLParser.Verb(cmd_grumble);
-  var partiallyParsedNoArgs = new NLParser.PartiallyParsedSentence(
+  var verbNoArgs = new NLParser1.Verb(cmd_grumble);
+  var partiallyParsedNoArgs = new NLParser1.PartiallyParsedSentence(
     verbNoArgs,
     {},
     selObj,
     0,
-    NLParser.getPluginForLanguage(LANG)
+    NLParser1.getPluginForLanguage(LANG)
     );
 
   var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
@@ -633,7 +635,7 @@ function testPartiallyParsedSentence() {
     }
   };
 
-  var verb = new NLParser.Verb({
+  var verb = new NLParser1.Verb({
 				   name: "frobnitz",
 				   arguments: {
 				     fooArg: {
@@ -663,12 +665,12 @@ function testPartiallyParsedSentence() {
   var selObj = {
     text: "", html: ""
   };
-  var partiallyParsed = new NLParser.PartiallyParsedSentence(
+  var partiallyParsed = new NLParser1.PartiallyParsedSentence(
     verb,
     argStrings,
     selObj,
     0,
-    NLParser.getPluginForLanguage(LANG)
+    NLParser1.getPluginForLanguage(LANG)
     );
 
   var parsed  = partiallyParsed.getParsedSentences();
