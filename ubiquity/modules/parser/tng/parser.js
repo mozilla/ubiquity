@@ -746,7 +746,7 @@ Parser.Parse.prototype = {
 
     }
 
-    return display + displayFinal;
+    return display + displayFinal + ' (' + (Math.floor(this.score*100)/100 || '<i>no score</i>') + ')';
 
   },
   getIcon: function() {

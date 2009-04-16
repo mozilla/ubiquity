@@ -1,4 +1,4 @@
-/* TODO
+﻿/* TODO
 From Abi:
 	I think the ones I most often use would be to check the current status
 	of a specific friend (or maybe, the last 3 statuses). The ability to
@@ -13,6 +13,14 @@ const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
   name: "twitter",
+  names: {
+    en: ['twitter','tweet'],
+    ja: ['呟く','呟け','呟いて','つぶやく','つぶやけ','つぶやいて']
+  },
+  arguments: [
+    {role: 'object', nountype: 'text'},
+    {role: 'alias', nountype: 'twitter username'}
+  ],
   synonyms: ["tweet"],
   icon: "http://assets3.twitter.com/images/favicon.ico",
   takes: {status: noun_arb_text},

@@ -4,10 +4,11 @@ roles: [
   {role: 'object', delimiter: 'を'},
   {role: 'goal', delimiter: 'に'},
   {role: 'source', delimiter: 'から'},
-  {role: 'time', delimiter: 'に'},
+  {role: 'position', delimiter: 'に'},
+  {role: 'position', delimiter: 'で'},
   {role: 'instrument', delimiter: 'で'},
-  //{role: 'instrument', delimiter: 'に'},
-
+  {role: 'alias', delimiter: 'として'},
+  
   // 「の」は何でもOK
   {role: 'goal', delimiter: 'の'},
   {role: 'source', delimiter: 'の'},

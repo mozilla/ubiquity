@@ -46,8 +46,9 @@ function makeEnParser() {
   en.roles = [
     {role: 'goal', delimiter: 'to'},
     {role: 'source', delimiter: 'from'},
-    {role: 'time', delimiter: 'at'},
-    {role: 'time', delimiter: 'on'},
+    {role: 'position', delimiter: 'at'},
+    {role: 'position', delimiter: 'on'},
+    {role: 'alias', delimiter: 'as'},
     {role: 'instrument', delimiter: 'using'},
     {role: 'instrument', delimiter: 'with'}
   ];

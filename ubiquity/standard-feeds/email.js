@@ -135,6 +135,14 @@ function findGmailTab() {
 
 CmdUtils.CreateCommand({
   name: "email",
+  names: {
+    en: ['email','email','mail'],
+    ja: ['メールする','メールして','メールしろ','送信する','送信して','送信しろ','そうしんして','そうしんして','そうしんしろ']
+  },
+  arguments: [
+    {role: 'object', nountype: 'text'},
+    {role: 'source', nountype: 'contact'}
+  ],
   synonyms: ["mail.yahoo.com", "gmail.com", "hotmail.com", "email.comcast"],
   takes: {"message": noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/email.png",
