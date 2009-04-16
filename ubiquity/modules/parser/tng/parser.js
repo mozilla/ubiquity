@@ -36,8 +36,6 @@
 
 var EXPORTED_SYMBOLS = ["Parser"];
 
-Components.utils.import("resource://ubiquity/modules/parser/tng/utils.js");
-
 var nounCache = {};
 
 // set up the Parser class
@@ -267,7 +265,7 @@ Parser.prototype = {
 
       // for each delimiter
       for (let i=0; i<delimiterIndices.length; i++) {
-
+      
         var newParses = []; // we'll update each copy of theseParses and them put them here for the time being
 
         if (this.branching == 'left') {// find args right to left
@@ -296,14 +294,16 @@ Parser.prototype = {
               if (this.branching == 'left') {// find args right to left
 
                 // put the selected argument in its proper role
+
                 if (thisParse.args[role] == undefined)
                   thisParse.args[role] = [];
+
                 thisParse.args[role].push({ _order: 1 + 2*(delimiterIndices.length - i), input:this.cleanArgument(words.slice(j,jmax + 1).join(this.joindelimiter)), modifier:words[delimiterIndices[i]] });
 
                 // put the extra words between the earlier delimiter and our arguments
                 if (j != jmin) {
 
-                  if (thisParse.args.object == undefined || !(thisParse.args.object instanceof Array))
+                  if (thisParse.args.object == undefined)
                     thisParse.args.object = [];
                   thisParse.args.object.push({ _order: 2*(delimiterIndices.length - i), input:this.cleanArgument(words.slice(jmin,j).join(this.joindelimiter)), modifier:'' });
 
@@ -317,7 +317,7 @@ Parser.prototype = {
                 // put the extra words between this delimiter and the next in the direct object array
                 if (j != jmax) {
 
-                  if (thisParse.args.object == undefined || !(thisParse.args.object instanceof Array))
+                  if (thisParse.args.object == undefined)
                     thisParse.args.object = [];
                   thisParse.args.object.push({ _order: 1 + 2*(i)+2, input:this.cleanArgument(words.slice(j + 1,jmax + 1).join(this.joindelimiter)), modifier:'' });
 
@@ -678,9 +678,7 @@ Parser.Query.prototype = {
     this._step++;
 
     for each (let parse in this._verbedParses) {
-      //mylog(parse);
       this._suggestedParses = this._suggestedParses.concat(this.parser.suggestArgs(parse));
-      //mylog(this._suggestedParses);
       yield true;
     }
 
@@ -737,14 +735,15 @@ Parser.Parse.prototype = {
     }
 
     for each (let arg in argsArray) {
-      if (arg.role == 'object')
-        display += this._delimiter+"<span class='object'>"+(arg.text || arg._substitutedInput || arg.input)+"</span>";
-      else {
-        if (this._branching == 'right')
-          display += this._delimiter+"<span class='prefix' title='"+arg.role+"'>"+arg.modifier+this._delimiter+"</span><span class='argument' title=''>"+(arg.text || arg._substitutedInput || arg.input)+"</span>";
-        else
-          display += this._delimiter+"<span class='argument' title=''>"+(arg.text || arg._substitutedInput || arg.input)+"</span><span class='prefix' title='"+arg.role+"'>"+this._delimiter+arg.modifier+"</span>";
-      }
+      let className = 'argument';
+      if (!arg.modifier)
+        className = 'object';
+
+      if (this._branching == 'right')
+        display += this._delimiter+"<span class='prefix' title='"+arg.role+"'>"+arg.modifier+this._delimiter+"</span><span class='"+className+"' title=''>"+(arg.text || arg._substitutedInput || arg.input)+"</span>";
+      else
+        display += this._delimiter+"<span class='"+className+"' title=''>"+(arg.text || arg._substitutedInput || arg.input)+"</span><span class='prefix' title='"+arg.role+"'>"+this._delimiter+arg.modifier+"</span>";
+
     }
 
     return display + displayFinal;
@@ -773,10 +772,34 @@ Parser.Parse.prototype = {
   }
 }
 
-// mitcho just uses this function for debug purposes:
-function mylog(what) {
-  const Cc = Components.classes;
-  const Ci = Components.interfaces;
-  Cc["@mozilla.org/appshell/window-mediator;1"].
-           getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").Firebug.Console.logFormatted([what]);
+if ((typeof window) == 'undefined') {// kick it chrome style
+
+  // mitcho just uses this function for debug purposes:
+  mylog = function mylog(what) {
+    const Cc = Components.classes;
+    const Ci = Components.interfaces;
+    Cc["@mozilla.org/appshell/window-mediator;1"].
+             getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").Firebug.Console.logFormatted([what]);
+  }
+  
+} else {
+//  mylog = console.log;
+}
+
+var cloneObject = function(o) {
+  if (o == null)
+    return null;
+  if (o == undefined)
+    return undefined;
+
+  if (typeof o != 'object')
+    return o;
+
+  var ret = (o instanceof Array) ? new Array() : new Object();
+
+  for (var i in o) {
+    ret[i] = cloneObject(o[i]);
+  }
+
+  return ret;
 }

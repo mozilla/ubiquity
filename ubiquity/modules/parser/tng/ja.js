@@ -37,35 +37,39 @@
 
 var EXPORTED_SYMBOLS = ["makeJaParser"];
 
-if ((typeof window) == 'undefined') // kick it chrome style
+if ((typeof window) == 'undefined') { // kick it chrome style
   Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+  Components.utils.import("resource://ubiquity/modules/localeutils.js");
+} else {
+  loadLocaleJson = function loadLocaleJson(url) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url, false);
+    req.overrideMimeType("text/plain; charset=utf-8");
+    req.send(null);
+    return eval('(' + req.responseText + ')');
+  }
+}
 
 function makeJaParser() {
   var ja = new Parser('ja');
-  ja.anaphora = ["これ", "それ", "あれ"];
-  ja.roles = [
-    {role: 'object', delimiter: 'を'},
-    {role: 'goal', delimiter: 'に'},
-    {role: 'source', delimiter: 'から'},
-    {role: 'time', delimiter: 'に'},
-    {role: 'instrument', delimiter: 'で'},
-    //{role: 'instrument', delimiter: 'に'},
-
-    // 「の」は何でもOK
-    {role: 'goal', delimiter: 'の'},
-    {role: 'source', delimiter: 'の'},
-    {role: 'time', delimiter: 'の'},
-    {role: 'object', delimiter: 'の'}
-  ];
   ja.branching = 'left';
-  ja.wordBreaker = function(input) {
-    return input.replace(eval('/('+[role.delimiter for each (role in ja.roles)].join('|')+')/g'),' $1 ');
-  };
   ja.usespaces = false;
   ja.joindelimiter = '';
-  ja.examples = ['くつしたをgooでかって',
-  '1pmの会議をcalに追加',
-  'tokからbostonに'];
+
+  // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
+  if ((typeof window) == 'undefined')
+    japarts = loadLocaleJson("resource://ubiquity/modules/parser/tng/ja.json");
+  else 
+    japarts = loadLocaleJson('ja.json');
+  ja.anaphora = japarts.anaphora;
+  ja.roles = japarts.roles;
+  ja.examples = japarts.examples;
+  
+  ja.patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in ja.roles)].join('|')+')','g');
+  ja.wordBreaker = function(input) {
+    return input.replace(this.patternCache.particleMatcher,' $1 ');
+  };
+
 
   return ja;
 };
