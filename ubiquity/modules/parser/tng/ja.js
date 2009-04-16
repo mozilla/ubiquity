@@ -70,6 +70,5 @@ function makeJaParser() {
     return input.replace(this.patternCache.particleMatcher,' $1 ');
   };
 
-
   return ja;
 };

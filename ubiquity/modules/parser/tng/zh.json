@@ -1,0 +1,16 @@
+﻿{
+anaphora: ["这个","那个","這個","那個"],
+roles: [
+    {role: 'goal', delimiter: '到'},
+    {role: 'goal', delimiter: '成'},
+    {role: 'goal', delimiter: '为'},
+    {role: 'goal', delimiter: '為'},
+    {role: 'goal', delimiter: '给'},
+    {role: 'goal', delimiter: '給'},
+    {role: 'source', delimiter: '从'},
+    {role: 'source', delimiter: '從'},
+    {role: 'position', delimiter: '在'},
+    {role: 'instrument', delimiter: '用'}
+],
+examples: []
+}
