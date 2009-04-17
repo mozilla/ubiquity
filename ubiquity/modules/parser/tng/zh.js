@@ -66,9 +66,9 @@ function makeZhParser() {
   zh.roles = zhparts.roles;
   zh.examples = zhparts.examples;
   
-  zh.patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
+  zh._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
   zh.wordBreaker = function(input) {
-    return input.replace(this.patternCache.particleMatcher,' $1 ');
+    return input.replace(this._patternCache.particleMatcher,' $1 ');
   };
   
   return zh;
