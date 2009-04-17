@@ -42,6 +42,7 @@ Components.utils.import("resource://ubiquity/modules/parser/tng/en.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/pt.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/fr.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/da.js");
+Components.utils.import("resource://ubiquity/modules/parser/tng/sv.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/ja.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/zh.js");
 
@@ -54,6 +55,7 @@ var NLParser2 = {
     pt: makePtParser,
     fr: makeFrParser,
     da: makeDaParser,
+    sv: makeSvParser,
     ja: makeJaParser,
     zh: makeZhParser
   },

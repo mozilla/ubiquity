@@ -21,6 +21,7 @@
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Christian Sonne <cers@geeksbynature.dk>
  *   Felipe Gomes <felipc@gmail.com>
+ *   Kim Ahlström <kim.ahlstrom@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -44,6 +45,7 @@ var sampleVerbs = {
   add: {
     names: {
       da: ['tilføj', 'indsæt'],
+      sv: ['lägg till', 'addera', 'plussa'],
       en: ['add'],
       ja: ['追加する','追加しろ','追加して','ついかする','ついかしろ','ついかして'],
       pt: ['adicionar', 'incluir', 'marcar']
@@ -57,6 +59,7 @@ var sampleVerbs = {
   buy: {
     names: {
       da: ['køb'],
+      sv: ['köp', 'handla'],
       en: ['buy','purchase'],
       ja: ['買う','買え','買って','かう','かえ','かって'],
       pt: ['comprar', 'compre']
@@ -70,6 +73,7 @@ var sampleVerbs = {
   say: {
     names: {
       da: ['sig'],
+      sv: ['säg'],
       en: ['say'],
       ja: ['言う','言え','言って','いう','いえ','いって'],
       pt: ['dizer', 'diga']
@@ -81,6 +85,7 @@ var sampleVerbs = {
   move: {
     names: {
       da: ['flyt'],
+      sv: ['flytta'],
       en: ['move'],
       ja: ['動かす','動かせ','動かして','うごかす','うごかせ','うごかして','移す','移せ','移して','うつす','うつせ','うつして'],
       pt: ['ir', 'vá', 'vai']
@@ -94,6 +99,7 @@ var sampleVerbs = {
   translate: {
     names: {
       da: ['oversæt'],
+      sv: ['översätt'],
       en: ['translate'],
       ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
       pt: ['traduzir', 'traduza']
