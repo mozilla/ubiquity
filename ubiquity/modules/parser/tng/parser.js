@@ -250,11 +250,9 @@ Parser.prototype = {
     // this method uses .reduce to return a power set
     // http://twitter.com/mitchoyoshitaka/status/1489386225
     var possibleDelimiterCombinations = possibleDelimiterIndices.reduce(
-      function(last, current) {
-        return last.concat([a.concat([current]) for each (a in last)]), [[]];
-      }
+      function(last, current) last.concat([a.concat([current]) for each (a in last)]), [[]]
     );
-
+    
     for each (var delimiterIndices in possibleDelimiterCombinations) {
       // don't process invalid delimiter combinations
       // (where two delimiters are back to back)
