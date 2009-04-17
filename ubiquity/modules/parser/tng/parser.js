@@ -642,6 +642,8 @@ Parser.Query = function(parser,queryString, context, maxSuggestions,
   this._scoredParses = [];
   this._threshold = 0.2;
 
+  dump("Making a new parser2 query.  String = " + queryString + "\n");
+
   if (!dontRunImmediately) {
     this._async = false;
     this.run();
@@ -651,7 +653,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions,
 Parser.Query.prototype = {
   run: function() {
 
-    //dump("run: "+this.input+"\n");
+    dump("run: "+this.input+"\n");
 
     this._keepworking = true;
 
@@ -695,6 +697,7 @@ Parser.Query.prototype = {
     else
       doAsyncParse();
 
+    dump("I am done running query.\n");
     return true;
   },
   _yieldingParse: function() {
