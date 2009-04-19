@@ -164,7 +164,8 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
     suggest: function(text, html, callback, selectionIndices) {
       var match = text.match(regexp);
       if (match) {
-        var suggestion = NounUtils.makeSugg(text, html, match, 1,
+        var suggestion = NounUtils.makeSugg(text, html, match,
+                                            (rankLast ? 1 : 0.7),
                                             selectionIndices);
         return [suggestion];
       } else

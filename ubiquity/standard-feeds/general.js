@@ -154,9 +154,9 @@ CmdUtils.CreateCommand({
     ja: ['計算する','計算しろ','計算して','けいさんする','けいさんしろ','けいさんして']
   },
   arguments: [
-    {role: 'object', nountype: noun_arb_text}
+    {role: 'object', nountype: /^[\d\.\+\-\*\/\^%~(, )]+$/}
   ],
-  takes: {"expression": noun_arb_text},
+  takes: {"expression": /^[\d\.\+\-\*\/\^%~(, )]+$/},
   icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",

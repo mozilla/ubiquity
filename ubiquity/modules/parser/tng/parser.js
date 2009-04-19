@@ -165,6 +165,8 @@ Parser.prototype = {
       if (nountype._name == undefined)
         continue;
 
+      dump('checking '+nountype._name+'...\n');
+
       var thisNounTypeIsAlreadyRegistered = false;
 
       for each (registeredNounType in this._nounTypes) {
@@ -172,7 +174,7 @@ Parser.prototype = {
         if (sameObject(nountype,registeredNounType)) {
         
           thisNounTypeIsAlreadyRegistered = true;
-          //dump("this noun type is already registered.");
+          dump("  this noun type is already registered.\n");
           // search no more. it's already registered.
           break;
         }
@@ -181,7 +183,7 @@ Parser.prototype = {
       // if it hasn't been registered yet, register it now.
       if (!thisNounTypeIsAlreadyRegistered) {
         this._nounTypes.push(nountype);
-        //dump("just registered"+nountype._name+"\n");
+        dump("  just registered "+nountype._name+"\n");
       }
     }
     
@@ -910,9 +912,26 @@ Parser.prototype = {
 
             for each (suggestion in nounCache[argText]) {
 
+//              mylog(suggestion);
+
+              let targetNounType = verbArg.nountype;
+
+              // If a verb's target nountype is a regexp, we'll convert it to
+              // the form stored in the nounList for comparison.
+              // We only have to deal with regexp nountypes in chrome, not
+              // in the parser-demo, so we'll check for chrominess first.
+              if ((typeof window) == 'undefined') { // kick it chrome style
+                var nu = {};
+                Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
+                var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
+  
+                if (targetNounType.constructor.name == 'RegExp') {
+                  targetNounType = nounTypeFromRegExp(targetNounType);
+                  dump('just converted '+verbArg.nountype+' for comparison\n');
+                }
+              }
+
               if (sameObject(suggestion.nountype,verbArg.nountype)) {
-              
-                // TODO: real comparison of the nountypes
               
                 thereWasASuggestionWithTheRightNounType = true;
             
@@ -926,11 +945,6 @@ Parser.prototype = {
   
                   newreturn.push(parseCopy);
                 }
-              
-              } else {
-
-                if (suggestion.nountype._name == verbArg.nountype._name)
-                  dump('sameObject just said no, but the names are the same: '+suggestion.nountype._name+'\n');
               
               }
             }
@@ -1534,34 +1548,6 @@ var cloneObject = function(o) {
   }
 
   return ret;
-}
-
-function sameNounType(nountype1,nountype2) {
-  dump(nountype1._name+'<>'+nountype2._name+'\n');
-  if (nountype1._name != nountype2._name) {
-    dump('different _name\n');
-    return false;
-  }
-  if (nountype1.list != undefined && nountype2.list != undefined) {
-    if (nountype1.list.length != nountype2.list.length) {
-      dump('different list length\n');
-      return false;
-    }
-    for (let i in nountype1.list) {
-      if (nountype1.list[i] != nountype2.list[i]) {
-        dump('different list item\n');
-        return false;
-      }
-    }
-  } else {
-    dump('different list status\n');
-    return false;
-  }
-  if (nountype1.suggest != nountype2.suggest) {
-    dump('different suggest function\n');
-    return false;
-  }
-  return true;
 }
 
 function sameObject(a,b,print) {
