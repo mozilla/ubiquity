@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameNounType','sameObject'];
+var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameObject'];
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -165,18 +165,14 @@ Parser.prototype = {
       if (nountype._name == undefined)
         continue;
 
-      dump("checking"+nountype._name+"\n");
-
       var thisNounTypeIsAlreadyRegistered = false;
 
       for each (registeredNounType in this._nounTypes) {
-        dump(nountype._name+'<>'+registeredNounType._name+'\n');
-        if (nountype._name == registeredNounType._name || sameObject(nountype,registeredNounType)) {
-        
-          // TODO: change this to a better check
+
+        if (sameObject(nountype,registeredNounType)) {
         
           thisNounTypeIsAlreadyRegistered = true;
-          dump("this noun type is already registered.");
+          //dump("this noun type is already registered.");
           // search no more. it's already registered.
           break;
         }
@@ -185,7 +181,7 @@ Parser.prototype = {
       // if it hasn't been registered yet, register it now.
       if (!thisNounTypeIsAlreadyRegistered) {
         this._nounTypes.push(nountype);
-        dump("just registered"+nountype._name+"\n");
+        //dump("just registered"+nountype._name+"\n");
       }
     }
     
@@ -914,7 +910,7 @@ Parser.prototype = {
 
             for each (suggestion in nounCache[argText]) {
 
-              if (suggestion.nountype._name == verbArg.nountype._name || sameNounType(suggestion.nountype,verbArg.nountype)) {
+              if (sameObject(suggestion.nountype,verbArg.nountype)) {
               
                 // TODO: real comparison of the nountypes
               
@@ -930,6 +926,11 @@ Parser.prototype = {
   
                   newreturn.push(parseCopy);
                 }
+              
+              } else {
+
+                if (suggestion.nountype._name == verbArg.nountype._name)
+                  dump('sameObject just said no, but the names are the same: '+suggestion.nountype._name+'\n');
               
               }
             }
@@ -1311,8 +1312,6 @@ Parser.Query.prototype = {
     this._times[this._step] = Date.now();
     this._step++;
 
-    dump('starting nountype detection\n');
-
     // STEP 7: do nountype detection + cache
     for each (parse in this._verbedParses) {
       this.parser.cacheNounTypes(parse.args);
@@ -1321,8 +1320,6 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
-
-    dump('finished nountype detection');
 
     // STEP 8: replace arguments with their nountype suggestions
     // TODO: make this async to support async nountypes!
@@ -1567,23 +1564,29 @@ function sameNounType(nountype1,nountype2) {
   return true;
 }
 
-function sameObject(a,b) {
-  if (typeof a != 'object' || typeof b != 'object') {
+function sameObject(a,b,print) {
+
+  // TODO: figure out a better way to compare functions?
+  
+  if ((typeof a) == 'function' && (typeof b) == 'function')
+    return (a.toString() == b.toString());
+
+  if ((typeof a) != 'object' || (typeof b) != 'object') {
+    if (print) dump('>returning typeof data: '+a+' ('+(typeof a)+')<>'+b+' ('+(typeof b)+') = '+(a == b)+'\n');
     return (a == b);
   }
+
   for (let i in a) {
-//    if (i != undefined) {
-//      dump('checking i:'+i+'\n');
-      if (!sameObject(a[i],b[i]))
+      if (!sameObject(a[i],b[i],print)) {
+        if (print) dump('>'+i+' was in a but not in b\n');
         return false;
-//    }
+      }
   }
   for (let j in b) {
-//    if (j != undefined) {
-//      dump('checking j:'+j+'\n');
-      if (!sameObject(a[j],b[j]))
+      if (!sameObject(a[j],b[j],print)) {
+        if (print) dump('>'+j+' was in b but not in a\n');
         return false;
-//    }
+      }
   }
   return true;
 }
