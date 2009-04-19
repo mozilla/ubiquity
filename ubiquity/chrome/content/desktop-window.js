@@ -57,7 +57,8 @@ function ubiquitySetup()
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
 
-  var nlParser = jsm.NLParser.makeParserForLanguage(
+  var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
+  var nlParser = NLParser.makeParserForLanguage(
     jsm.UbiquitySetup.languageCode,
     [],
     []

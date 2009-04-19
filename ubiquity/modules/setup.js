@@ -334,12 +334,10 @@ let UbiquitySetup = {
   },
 
   get parserVersion() {
-    //var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-    //            .getService(Components.interfaces.nsIPrefBranch);
-    //var version = prefs.getIntPref("extensions.ubiquity.parserVersion");
-    //return version;
-    var PARSER_VERSION_PREF = "extensions.ubiquity.parserVersion";
-    return Application.prefs.getValue(PARSER_VERSION_PREF, "");
+    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                          .getService(Components.interfaces.nsIPrefService);
+    prefs = prefs.getBranch("extensions.ubiquity.");
+    return prefs.getIntPref("parserVersion");
   },
 
   get version() {
