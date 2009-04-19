@@ -46,7 +46,7 @@ Components.utils.import("resource://ubiquity/modules/parser/tng/sv.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/ja.js");
 Components.utils.import("resource://ubiquity/modules/parser/tng/zh.js");
 
-Components.utils.import("resource://ubiquity/modules/parser/tng/verbs.js");
+//Components.utils.import("resource://ubiquity/modules/parser/tng/verbs.js");
 
 var NLParser2 = {
   // Namespace object

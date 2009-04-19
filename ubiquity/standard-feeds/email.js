@@ -140,8 +140,8 @@ CmdUtils.CreateCommand({
     ja: ['メールする','メールして','メールしろ','送信する','送信して','送信しろ','そうしんして','そうしんして','そうしんしろ']
   },
   arguments: [
-    {role: 'object', nountype: 'text'},
-    {role: 'source', nountype: 'contact'}
+    {role: 'object', nountype: noun_arb_text},
+    {role: 'source', nountype: noun_type_contact}
   ],
   synonyms: ["mail.yahoo.com", "gmail.com", "hotmail.com", "email.comcast"],
   takes: {"message": noun_arb_text},

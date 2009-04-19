@@ -154,7 +154,7 @@ CmdUtils.CreateCommand({
     ja: ['計算する','計算しろ','計算して','けいさんする','けいさんしろ','けいさんして']
   },
   arguments: [
-    {role: 'object', nountype: 'text'}
+    {role: 'object', nountype: noun_arb_text}
   ],
   takes: {"expression": noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/calculator.png",
@@ -473,9 +473,9 @@ CmdUtils.CreateCommand({
     pt: ['traduzir', 'traduza']
   },
   arguments: [
-    {role: 'source', nountype: 'language'},
-    {role: 'goal', nountype: 'language'},
-    {role: 'object', nountype: 'text'}
+    {role: 'source', nountype: noun_type_language},
+    {role: 'goal', nountype: noun_type_language},
+    {role: 'object', nountype: noun_arb_text}
   ],
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",

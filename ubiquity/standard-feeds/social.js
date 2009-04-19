@@ -18,8 +18,8 @@ CmdUtils.CreateCommand({
     ja: ['呟く','呟け','呟いて','つぶやく','つぶやけ','つぶやいて']
   },
   arguments: [
-    {role: 'object', nountype: 'text'},
-    {role: 'alias', nountype: 'twitter username'}
+    {role: 'object', nountype: noun_arb_text},
+    {role: 'alias', nountype: noun_type_twitter_user}
   ],
   synonyms: ["tweet"],
   icon: "http://assets3.twitter.com/images/favicon.ico",

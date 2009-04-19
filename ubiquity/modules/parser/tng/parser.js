@@ -1,4 +1,4 @@
-/* **** BEGIN LICENSE BLOCK *****
+/***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["Parser"];
+var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameNounType','sameObject'];
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -148,23 +148,49 @@ Parser.prototype = {
 
 
   // ** {{{Parser.setNounList()}}} **
+  //
+  // Accepts an array of nountype objects and registers a unique set of them.
+  // The nountypes registered go in the {{{Parser._nounTypes}}} object. There,
+  // the keys used become references to the actual nountype objects in the
+  // {{{_nounTypes}}}, which is used for comparison later with the nountype
+  // specified in the verbs.
+  //
+  // After the nountypes have been registered, {{{Parser.initialCache()}}} is
+  // called.
   setNounList: function( nounList ) {
 
-    let registeredNounTypes = [];
+    for each (nountype in nounList) {
 
-    // TODO: for some reason the nounList contains lots of duplicates now...
-    // this filter just reduces those
+      // if there's no _name, skip this nountype
+      if (nountype._name == undefined)
+        continue;
 
-    this._nounTypes = nounList.filter(function(type) {
-      if (type._name != undefined) {
-        if (registeredNounTypes[type._name] == undefined) {
-          registeredNounTypes[type._name] = true;
-          return true;
+      dump("checking"+nountype._name+"\n");
+
+      var thisNounTypeIsAlreadyRegistered = false;
+
+      for each (registeredNounType in this._nounTypes) {
+        dump(nountype._name+'<>'+registeredNounType._name+'\n');
+        if (nountype._name == registeredNounType._name || sameObject(nountype,registeredNounType)) {
+        
+          // TODO: change this to a better check
+        
+          thisNounTypeIsAlreadyRegistered = true;
+          dump("this noun type is already registered.");
+          // search no more. it's already registered.
+          break;
         }
       }
-      return false;
-    });
-
+      
+      // if it hasn't been registered yet, register it now.
+      if (!thisNounTypeIsAlreadyRegistered) {
+        this._nounTypes.push(nountype);
+        dump("just registered"+nountype._name+"\n");
+      }
+    }
+    
+    dump(this._nounTypes.length+' nountypes registered\n');
+    
     this.initialCache();
   },
 
@@ -876,30 +902,41 @@ Parser.prototype = {
 
             // At this point we assume that all of these values have already
             // been cached in nounCache.
-            
-            // If a score for this arg as this nountype is set...
-            if (nounCache[argText][verbArg.nountype] != undefined) {
 
-              let newreturn = [];
-              // make a copy using each of the suggestions in the nounCache
-              // as the replaced suggestion, and put all of the replacement
-              // parses into newreturn.
-              for each (argument in nounCache[argText][verbArg.nountype]) {
+            let newreturn = [];
+            // make a copy using each of the suggestions in the nounCache
+            // as the replaced suggestion, and put all of the replacement
+            // parses into newreturn.
+            //
+            // We'll loop through all of the suggestions for each text
+            // and just use the ones that came from the right nountype.
+            let thereWasASuggestionWithTheRightNounType = false;
+
+            for each (suggestion in nounCache[argText]) {
+
+              if (suggestion.nountype._name == verbArg.nountype._name || sameNounType(suggestion.nountype,verbArg.nountype)) {
+              
+                // TODO: real comparison of the nountypes
+              
+                thereWasASuggestionWithTheRightNounType = true;
+            
                 for each (let parse in returnArr) {
                   let parseCopy = cloneObject(parse);
                   // copy the attributes we want to copy from the nounCache
-                  parseCopy.args[role][i].text = argument.text;
-                  parseCopy.args[role][i].html = argument.html;
-                  parseCopy.args[role][i].score = argument.score;
-                  parseCopy.args[role][i].nountype = verbArg.nountype;
-
+                  parseCopy.args[role][i].text = suggestion.text;
+                  parseCopy.args[role][i].html = suggestion.html;
+                  parseCopy.args[role][i].score = suggestion.score;
+                  parseCopy.args[role][i].nountype = suggestion.nountype;
+  
                   newreturn.push(parseCopy);
                 }
+              
               }
+            }
+
+            if (thereWasASuggestionWithTheRightNounType) {
               returnArr = newreturn;
-
               thisVerbTakesThisRole = true;
-
             }
 
           }
@@ -1013,17 +1050,23 @@ Parser.prototype = {
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
   _protoDetectNounType: function (x) {
-    let returnObj = {};
+    //mylog('detecting:'+x+"\n");
 
-    for each (let nounType in this._nounTypes) {
-      var suggestions = nounType.suggest(x);
-      for each (suggestion in suggestions) {
-        suggestion.nountype = nounType._name;
+    let returnArray = [];
+
+    for each (let thisNounType in this._nounTypes) {
+//      mylog(thisNounType);
+      let suggestions = thisNounType.suggest(x);
+      for each (let suggestion in suggestions) {
+        // set the nountype that was used in each suggestion so that it can 
+        // later be compared with the nountype specified in the verb.
+        suggestion.nountype = thisNounType;
       }
-      if (suggestions.length > 0)
-        returnObj[nounType._name] = suggestions;
+      if (suggestions.length > 0) {
+        returnArray = returnArray.concat(suggestions);
+      }
     }
-    return returnObj;
+    return returnArray;
   },
   
   // ** {{{Parser.cacheNounTypes()}}} **
@@ -1033,8 +1076,9 @@ Parser.prototype = {
   // ({{{_substitutedInput}}}) to {{{Parser._detectNounType()}}}.
   cacheNounTypes: function (args) {
     for each (let arg in args) {
-      for each (let x in arg)
+      for each (let x in arg) {
         this._detectNounType(x._substitutedInput);
+      }
     }
     return true;
   }
@@ -1164,6 +1208,8 @@ Parser.Query.prototype = {
       doAsyncParse();
 
     dump("I am done running query.\n");
+    dump('step: '+this._step+"\n");
+    dump("There were "+this._scoredParses.length+" completed parses\n");
     return true;
   },
   
@@ -1265,6 +1311,8 @@ Parser.Query.prototype = {
     this._times[this._step] = Date.now();
     this._step++;
 
+    dump('starting nountype detection\n');
+
     // STEP 7: do nountype detection + cache
     for each (parse in this._verbedParses) {
       this.parser.cacheNounTypes(parse.args);
@@ -1273,6 +1321,8 @@ Parser.Query.prototype = {
 
     this._times[this._step] = Date.now();
     this._step++;
+
+    dump('finished nountype detection');
 
     // STEP 8: replace arguments with their nountype suggestions
     // TODO: make this async to support async nountypes!
@@ -1459,7 +1509,7 @@ if ((typeof window) == 'undefined') {// kick it chrome style
   }
 
 } else {
-//  mylog = console.log;
+  //mylog = console.log;
 }
 
 // **{{{cloneObject()}}}**
@@ -1487,4 +1537,53 @@ var cloneObject = function(o) {
   }
 
   return ret;
+}
+
+function sameNounType(nountype1,nountype2) {
+  dump(nountype1._name+'<>'+nountype2._name+'\n');
+  if (nountype1._name != nountype2._name) {
+    dump('different _name\n');
+    return false;
+  }
+  if (nountype1.list != undefined && nountype2.list != undefined) {
+    if (nountype1.list.length != nountype2.list.length) {
+      dump('different list length\n');
+      return false;
+    }
+    for (let i in nountype1.list) {
+      if (nountype1.list[i] != nountype2.list[i]) {
+        dump('different list item\n');
+        return false;
+      }
+    }
+  } else {
+    dump('different list status\n');
+    return false;
+  }
+  if (nountype1.suggest != nountype2.suggest) {
+    dump('different suggest function\n');
+    return false;
+  }
+  return true;
+}
+
+function sameObject(a,b) {
+  if (typeof a != 'object' || typeof b != 'object') {
+    return (a == b);
+  }
+  for (let i in a) {
+//    if (i != undefined) {
+//      dump('checking i:'+i+'\n');
+      if (!sameObject(a[i],b[i]))
+        return false;
+//    }
+  }
+  for (let j in b) {
+//    if (j != undefined) {
+//      dump('checking j:'+j+'\n');
+      if (!sameObject(a[j],b[j]))
+        return false;
+//    }
+  }
+  return true;
 }

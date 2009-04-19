@@ -57,7 +57,7 @@ function testParserTwo() {
       en: ["pet"]
     },
     arguments: [
-      {role: 'object', nountype: 'dog'}
+      {role: 'object', nountype: dog}
     ]
   };
 

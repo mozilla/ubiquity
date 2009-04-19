@@ -38,95 +38,71 @@
 
 var nounCache = {};
 
+// set up the NounType class
+
+function NounType(name) {
+  this._name = name;
+}
+
+NounType.prototype = {
+  _name: '',
+  list: [],
+  suggest: function(x) { 
+      let suggestions = [];
+      x = x.toLowerCase();
+      for each (let candidate in this.list) {
+        if (x == candidate.toLowerCase()) {
+          suggestions.push({ text:candidate, html:candidate, score:1 });
+          continue;
+        }
+        if (candidate.toLowerCase().indexOf(x) > -1) {
+          suggestions.push({ text:candidate, html:candidate, score:0.9 });
+          continue;
+        }
+      }
+      return suggestions;
+    }
+}
+
 // set up noun type detectors
 
-var nounTypes = [
-  { _name: 'text',
-    suggest: function(x) [ { text:x, html:x, score:0.7 } ] },
-  { _name: 'contact',
-    list: ['John','Mary','Bill'],
-    suggest: function(x) { 
-      let suggestions = [];
-      x = x.toLowerCase();
-      for each (let candidate in this.list) {
-        if (x == candidate.toLowerCase()) {
-          suggestions.push({ text:candidate, html:candidate, score:1 });
-          continue;
-        }
-        if (candidate.toLowerCase().indexOf(x) > -1) {
-          suggestions.push({ text:candidate, html:candidate, score:0.9 });
-          continue;
-        }
-      }
-      return suggestions;
-    }
-  },
-  { _name: 'city',
-    list: ['San Francisco', 'San Diego', 'Tokyo', 'Boston'],
-    suggest: function(x) { 
-      let suggestions = [];
-      x = x.toLowerCase();
-      for each (let candidate in this.list) {
-        if (x == candidate.toLowerCase()) {
-          suggestions.push({ text:candidate, html:candidate, score:1 });
-          continue;
-        }
-        if (candidate.toLowerCase().indexOf(x) > -1) {
-          suggestions.push({ text:candidate, html:candidate, score:0.9 });
-          continue;
-        }
-      }
-      return suggestions;
-    }
-  },
-  { _name: 'time',
-    suggest: function(x) {
+var fake_noun_text = new NounType('text');
+fake_noun_text.suggest = function(x) [ { text:x, html:x, score:0.7 } ];
+
+var fake_noun_contact = new NounType('contact');
+fake_noun_contact.list = ['John','Mary','Bill'];
+
+var fake_noun_city = new NounType('city');
+fake_noun_city.list = ['San Francisco', 'San Diego', 'Tokyo', 'Boston'];
+  
+var fake_noun_time = new NounType('time');
+fake_noun_time.suggest = function(x) {
     if (x.search(/^\d+ ?\w+$/i) >= 0) 
       return [ { text:x, html:x, score:1 } ];    
     else
       return [];
-  } },
-  { _name: 'number',
-    suggest: function(x) {
+  };
+
+var fake_noun_number = new NounType('number');
+fake_noun_number.suggest = function(x) {
     if (x.search(/^\d+$/) >= 0) 
       return [ { text:x, html:x, score:1 } ];    
     else
       return [];
-  } },
-  { _name: 'service',
-    list: ['Google', 'Yahoo', 'calendar'],
-    suggest: function(x) { 
-      let suggestions = [];
-      x = x.toLowerCase();
-      for each (let candidate in this.list) {
-        if (x == candidate.toLowerCase()) {
-          suggestions.push({ text:candidate, html:candidate, score:1 });
-          continue;
-        }
-        if (candidate.toLowerCase().indexOf(x) > -1) {
-          suggestions.push({ text:candidate, html:candidate, score:0.9 });
-          continue;
-        }
-      }
-      return suggestions;
-    }
-  },
-  { _name: 'language',
-    list: ['English','French','Japanese','Chinese'],
-    suggest: function(x) { 
-      let suggestions = [];
-      x = x.toLowerCase();
-      for each (let candidate in this.list) {
-        if (x == candidate.toLowerCase()) {
-          suggestions.push({ text:candidate, html:candidate, score:1 });
-          continue;
-        }
-        if (candidate.toLowerCase().indexOf(x) > -1) {
-          suggestions.push({ text:candidate, html:candidate, score:0.9 });
-          continue;
-        }
-      }
-      return suggestions;
-    }
-  }
+  };
+
+var fake_noun_service = new NounType('service');
+fake_noun_service.list = ['Google', 'Yahoo', 'calendar'];
+
+var fake_noun_language = new NounType('language');
+fake_noun_language.list = ['English','French','Japanese','Chinese'];
+
+var nounTypes = [
+  fake_noun_text,
+  fake_noun_contact,
+  fake_noun_city,
+  fake_noun_time,
+  fake_noun_number,
+  fake_noun_service,
+  fake_noun_language
 ];

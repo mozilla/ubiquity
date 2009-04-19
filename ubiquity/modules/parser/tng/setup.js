@@ -101,10 +101,8 @@ var demoParserInterface = {
             for (var text in nounCache) {
               var html = $('<li><code>'+text+'</code></li>');
               var list = $('<ul></ul>');
-              for (let type in nounCache[text]) {
-                for each (let suggestion in nounCache[text][type]) {
-                  $('<li>type: <code>'+type+'</code>, suggestion: '+suggestion.text+', score: '+suggestion.score+'</li>').appendTo(list);
-                }
+              for each (let suggestion in nounCache[text]) {
+                $('<li>type: <code>'+suggestion.nountype._name+'</code>, suggestion: '+suggestion.text+', score: '+suggestion.score+'</li>').appendTo(list);
               }
               list.appendTo(html);
               html.appendTo($('#nounCache'));

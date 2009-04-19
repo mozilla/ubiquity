@@ -51,9 +51,9 @@ var sampleVerbs = {
       pt: ['adicionar', 'incluir', 'marcar']
     },
     arguments: [
-      {role: 'object', nountype: 'text'},
-      {role: 'time', nountype: 'time'},
-      {role: 'goal', nountype: 'service'}
+      {role: 'object', nountype: fake_noun_text},
+      {role: 'time', nountype: fake_noun_time},
+      {role: 'goal', nountype: fake_noun_service}
     ]
   },
   buy: {
@@ -65,9 +65,9 @@ var sampleVerbs = {
       pt: ['comprar', 'compre']
     },
     arguments: [
-      {role: 'object', nountype: 'text'},
-      {role: 'source', nountype: 'service'},
-      {role: 'instrument', nountype: 'service'}
+      {role: 'object', nountype: fake_noun_text},
+      {role: 'source', nountype: fake_noun_service},
+      {role: 'instrument', nountype: fake_noun_service}
     ]
   },
   say: {
@@ -79,7 +79,7 @@ var sampleVerbs = {
       pt: ['dizer', 'diga']
     },
     arguments: [
-      {role: 'object', nountype: 'text'}
+      {role: 'object', nountype: fake_noun_text}
     ]
   },
   move: {
@@ -91,9 +91,9 @@ var sampleVerbs = {
       pt: ['ir', 'vá', 'vai']
     },
     arguments: [
-      {role: 'object', nountype: 'text'},
-      {role: 'source', nountype: 'city'},
-      {role: 'goal', nountype: 'city'}
+      {role: 'object', nountype: fake_noun_text},
+      {role: 'source', nountype: fake_noun_city},
+      {role: 'goal', nountype: fake_noun_city}
     ]
   },
   translate: {
@@ -105,9 +105,9 @@ var sampleVerbs = {
       pt: ['traduzir', 'traduza']
     },
     arguments: [
-      {role: 'source', nountype: 'language'},
-      {role: 'goal', nountype: 'language'},
-      {role: 'object', nountype: 'text'}
+      {role: 'source', nountype: fake_noun_language},
+      {role: 'goal', nountype: fake_noun_language},
+      {role: 'object', nountype: fake_noun_text}
     ]
   }
 };
