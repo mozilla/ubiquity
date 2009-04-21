@@ -137,6 +137,14 @@ Parser.prototype = {
   // only registering those which have the property {{{.names}}}.
   // This is in order to filter out verbs which have not been made to
   // work with Parser TNG.
+  //
+  // This function also now parses out all the nountypes used by each verb.
+  // The nountypes registered go in the {{{Parser._nounTypes}}} object, which
+  // are used for nountype detection as well as the comparison later with the 
+  // nountypes specified in the verbs for argument suggestion and scoring.
+  //
+  // After the nountypes have been registered, {{{Parser.initialCache()}}} is
+  // called.
   setCommandList: function( commandList ) {
 
     // First we'll register the verbs themselves.
@@ -149,25 +157,25 @@ Parser.prototype = {
     
     // Scrape the noun types up here.
     
-    // If a verb's target nountype is a regexp, we'll convert it to
-    // the standard nountype form here when registering it.
-    // We only need the NounUtils loaded in in chrome, as there are no regex
-    // nountypes in the parser-demo.
-    if ((typeof window) == 'undefined') { // kick it chrome style
-      var nu = {};
-      Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
-      nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
-    }
-    
     for each (let verb in this._verbList) {
-      dump(verb.names.en[0]+'\n');
       for each (let arg in verb.arguments) {
 
-        let thisNounType = arg.nountype;
+        let thisNounType = cloneObject(arg.nountype);
         
-        if (thisNounType.constructor.name == "RegExp") {
-          thisNounType = nounTypeFromRegExp(thisNounType);
-          dump('just converted '+thisNounType._name+'\n');
+        if (arg.nountype.constructor.name == "RegExp") {
+          // If a verb's target nountype is a regexp, we'll convert it to
+          // the standard nountype form here when registering it.
+          // We only need the NounUtils loaded in in chrome, as there are no regex
+          // nountypes in the parser-demo.
+          if ((typeof window) == 'undefined') { // kick it chrome style
+            var nu = {};
+            Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
+            var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
+            thisNounType = nounTypeFromRegExp(arg.nountype);
+          }
+
+          // returning the converted version of the nountype back into the verb
+          arg.nountype = thisNounType;
         }
 
         let thisNounTypeIsAlreadyRegistered = false;
@@ -180,7 +188,6 @@ Parser.prototype = {
         // if this nountype has not been registered yet, let's do that now.
         if (!thisNounTypeIsAlreadyRegistered) {
           this._nounTypes.push(thisNounType);
-          dump('registered '+thisNounType._name+'\n');
         }
         
       }
@@ -192,48 +199,10 @@ Parser.prototype = {
 
 
   // ** {{{Parser.setNounList()}}} **
-  //
-  // Accepts an array of nountype objects and registers a unique set of them.
-  // The nountypes registered go in the {{{Parser._nounTypes}}} object. There,
-  // the keys used become references to the actual nountype objects in the
-  // {{{_nounTypes}}}, which is used for comparison later with the nountype
-  // specified in the verbs.
-  //
-  // After the nountypes have been registered, {{{Parser.initialCache()}}} is
-  // called.
+  // This function is now a dummy function... its functionality has actually
+  // been subsumed by {{{Parser.setCommandList()}}}.
   setNounList: function( nounList ) {
-
-    /*for each (nountype in nounList) {
-
-      // if there's no _name, skip this nountype
-      if (nountype._name == undefined)
-        continue;
-
-      dump('checking '+nountype._name+'...\n');
-
-      var thisNounTypeIsAlreadyRegistered = false;
-
-      for each (registeredNounType in this._nounTypes) {
-
-        if (sameObject(nountype,registeredNounType)) {
-        
-          thisNounTypeIsAlreadyRegistered = true;
-          dump("  this noun type is already registered.\n");
-          // search no more. it's already registered.
-          break;
-        }
-      }
-      
-      // if it hasn't been registered yet, register it now.
-      if (!thisNounTypeIsAlreadyRegistered) {
-        this._nounTypes.push(nountype);
-        dump("  just registered "+nountype._name+"\n");
-      }
-    }
-    
-    dump(this._nounTypes.length+' nountypes registered\n');
-    
-    this.initialCache();*/
+    return true;
   },
 
   // ** {{{Parser.initialCache()}}} **
@@ -958,24 +927,7 @@ Parser.prototype = {
 
             for each (suggestion in nounCache[argText]) {
 
-//              mylog(suggestion);
-
               let targetNounType = verbArg.nountype;
-
-              // If a verb's target nountype is a regexp, we'll convert it to
-              // the form stored in the nounList for comparison.
-              // We only have to deal with regexp nountypes in chrome, not
-              // in the parser-demo, so we'll check for chrominess first.
-              if ((typeof window) == 'undefined') { // kick it chrome style
-                var nu = {};
-                Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
-                var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
-  
-                if (targetNounType.constructor.name == 'RegExp') {
-                  targetNounType = nounTypeFromRegExp(targetNounType);
-                  dump('just converted '+verbArg.nountype+' for comparison\n');
-                }
-              }
 
               if (sameObject(suggestion.nountype,verbArg.nountype)) {
               

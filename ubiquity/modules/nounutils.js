@@ -100,7 +100,7 @@ NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
   }
   
   // make the basic object:
-  var suggestion = {text: text, html: html, data:data, score:score};
+  var suggestion = {text: text, html: html, data:data, score: (score || 1) };
   // Fill in missing fields however we can:
   if (suggestion.data && !suggestion.text)
     suggestion.text = suggestion.data.toString();
@@ -110,9 +110,6 @@ NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
     // TODO: Any easy way to strip the text out of the HTML here? We
     // don't have immediate access to any HTML DOM objects...
     suggestion.text = suggestion.html;
-
-  if (!suggestion.score)
-    suggestion.score = 1;
 
   // Create a summary of the text:
 
@@ -160,12 +157,13 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
   var newNounType = {
     // This will show up if the noun type is the target of a modifier.
     _name: "text",
+    _regexp: regexp,
     rankLast: rankLast,
     suggest: function(text, html, callback, selectionIndices) {
-      var match = text.match(regexp);
+      var match = text.match(this._regexp);
       if (match) {
         var suggestion = NounUtils.makeSugg(text, html, match,
-                                            (rankLast ? 1 : 0.7),
+                                            (rankLast ? 0.7 : 1),
                                             selectionIndices);
         return [suggestion];
       } else
