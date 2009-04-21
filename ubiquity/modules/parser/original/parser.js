@@ -216,16 +216,18 @@ NLParser1.Parser.prototype = {
     let topGenerics = this._rankedVerbsThatUseGenericNouns
                           .slice(0, maxSuggestions);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
-    for each(var verb in verbsToTry) {
-      let newPPS = new NLParser1.PartiallyParsedSentence( verb,
-                                                         {},
-                                                         selObj,
-                                                         0,
-                                                         this._languagePlugin );
-      // TODO make a better way of having the parsing remember its source than
-      // this encapsulation breaking...
-      newPPS._cameFromNounFirstSuggestion = true;
-      suggs.push( newPPS );
+    for each(let verb in verbsToTry) {
+	  if(!verb.disabled){
+	      let newPPS = new NLParser1.PartiallyParsedSentence( verb,
+	                                                         {},
+	                                                         selObj,
+	                                                         0,
+	                                                         this._languagePlugin );
+	      // TODO make a better way of having the parsing remember its source than
+	      // this encapsulation breaking...
+	      newPPS._cameFromNounFirstSuggestion = true;
+	      suggs.push( newPPS );
+	  }
     }
     dump("nounFirstSuggestions returning suggestions.\n");
 
