@@ -138,12 +138,56 @@ Parser.prototype = {
   // This is in order to filter out verbs which have not been made to
   // work with Parser TNG.
   setCommandList: function( commandList ) {
+
+    // First we'll register the verbs themselves.
     for (let verb in commandList) {
       if (commandList[verb].names != undefined) {
         this._verbList.push(commandList[verb]);
         //dump("loaded verb: "+verb+"\n");
       }
     }
+    
+    // Scrape the noun types up here.
+    
+    // If a verb's target nountype is a regexp, we'll convert it to
+    // the standard nountype form here when registering it.
+    // We only need the NounUtils loaded in in chrome, as there are no regex
+    // nountypes in the parser-demo.
+    if ((typeof window) == 'undefined') { // kick it chrome style
+      var nu = {};
+      Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
+      nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
+    }
+    
+    for each (let verb in this._verbList) {
+      dump(verb.names.en[0]+'\n');
+      for each (let arg in verb.arguments) {
+
+        let thisNounType = arg.nountype;
+        
+        if (thisNounType.constructor.name == "RegExp") {
+          thisNounType = nounTypeFromRegExp(thisNounType);
+          dump('just converted '+thisNounType._name+'\n');
+        }
+
+        let thisNounTypeIsAlreadyRegistered = false;
+
+        for each (let registeredNounType in this._nounTypes) {
+          if (sameObject(arg.nountype,registeredNounType))
+            thisNounTypeIsAlreadyRegistered = true;
+        }
+
+        // if this nountype has not been registered yet, let's do that now.
+        if (!thisNounTypeIsAlreadyRegistered) {
+          this._nounTypes.push(thisNounType);
+          dump('registered '+thisNounType._name+'\n');
+        }
+        
+      }
+    }
+
+    this.initialCache();
+    
   },
 
 
@@ -159,7 +203,7 @@ Parser.prototype = {
   // called.
   setNounList: function( nounList ) {
 
-    for each (nountype in nounList) {
+    /*for each (nountype in nounList) {
 
       // if there's no _name, skip this nountype
       if (nountype._name == undefined)
@@ -189,7 +233,7 @@ Parser.prototype = {
     
     dump(this._nounTypes.length+' nountypes registered\n');
     
-    this.initialCache();
+    this.initialCache();*/
   },
 
   // ** {{{Parser.initialCache()}}} **
@@ -403,6 +447,8 @@ Parser.prototype = {
   //
   // Used by {{{Parser.argFinder()}}}
   splitWords: function(input) {
+    if (input.search(/^\s*$/) != -1)
+      return [];
     return input.match(/\S+/g);
   },
 
