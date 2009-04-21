@@ -118,7 +118,7 @@ SuggestionMemory.prototype = {
       let score = selStmt.getUTF8String(2);
       if (!this._table[input])
 	      this._table[input] = {};
-      this._table[input][suggestion] = score;
+      this._table[input][suggestion] =+ score;
     }
     selStmt.finalize();
   },
