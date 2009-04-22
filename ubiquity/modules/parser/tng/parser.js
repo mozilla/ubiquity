@@ -1063,7 +1063,7 @@ Parser.prototype = {
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
   _protoDetectNounType: function (x) {
-    mylog('detecting '+x+'\n');
+//    mylog('detecting '+x+'\n');
     
     let returnArray = [];
 
