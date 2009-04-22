@@ -8,8 +8,6 @@ Components.utils.import("resource://ubiquity/tests/framework.js");
 const LANG = "en";
 const MAX_SUGGESTIONS = 10;
 
-
-
 // Code duplicated with test_parser1... should be merged into
 // testing_stubs.js maybe?
 var fakeContextUtils = {
@@ -50,8 +48,8 @@ function testParserTwo() {
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
   var cmd_pet = {
-    execute: function(context, directObject, modifiers) {
-      dogGotPetted = directObject.text;
+    execute: function(context, arguments) {
+      dogGotPetted = arguments.object.text;
     },
     names: {
       en: ["pet"]
@@ -63,12 +61,14 @@ function testParserTwo() {
 
   var completions = getCompletions( "pet b", [cmd_pet], [dog], null );
   dump("Completions are: " + completions + "\n");
+  dump("First verb is " + completions[0]._verb + "\n");
+
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[0]._argSuggs.direct_object.text == "beagle",
+  this.assert( completions[0].args.object.text == "beagle",
 	       "obj should be beagle");
   this.assert( completions[1]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[1]._argSuggs.direct_object.text == "bulldog",
+  this.assert( completions[1]._args.object.text == "bulldog",
 	       "obj should be bulldog");
   completions[0].execute();
   this.assert( dogGotPetted == "beagle");
