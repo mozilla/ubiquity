@@ -160,8 +160,12 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
-  preview: function(previewBlock, directObject) {
-    var expression = directObject.text;
+  preview: function(previewBlock, arguments) {
+    var expression;
+    if (arguments.text != undefined) // parser version 1
+      expression = arguments.text;
+    else // version 2
+      expression = arguments.object.text;
 
     if(expression.length < 1) {
       previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";

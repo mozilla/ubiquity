@@ -47,6 +47,7 @@ function testParserTwo() {
   var dogGotPetted = false;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
+
   var cmd_pet = {
     execute: function(context, arguments) {
       dogGotPetted = arguments.object.text;
@@ -61,14 +62,14 @@ function testParserTwo() {
 
   var completions = getCompletions( "pet b", [cmd_pet], [dog], null );
   dump("Completions are: " + completions + "\n");
-  dump("First verb is " + completions[0]._verb + "\n");
+  dump("First verb is " + completions[0]._verb.text + "\n");
 
   this.assert( completions.length == 2, "should be 2 completions" );
-  this.assert( completions[0]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[0].args.object.text == "beagle",
+  this.assert( completions[0]._verb.text == "pet", "verb should be pet");
+  this.assert( completions[0].args.object[0].text == "beagle",
 	       "obj should be beagle");
-  this.assert( completions[1]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[1]._args.object.text == "bulldog",
+  this.assert( completions[1]._verb.text == "pet", "verb should be pet");
+  this.assert( completions[1].args.object[0].text == "bulldog",
 	       "obj should be bulldog");
   completions[0].execute();
   this.assert( dogGotPetted == "beagle");

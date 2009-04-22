@@ -1063,8 +1063,8 @@ Parser.prototype = {
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
   _protoDetectNounType: function (x) {
-    //mylog('detecting:'+x+"\n");
-
+    mylog('detecting '+x+'\n');
+    
     let returnArray = [];
 
     for each (let thisNounType in this._nounTypes) {
@@ -1474,18 +1474,27 @@ Parser.Parse.prototype = {
   },
   // **{{{Parser.Parse.execute()}}}**
   //
-  // Execute the verb.
-  //
-  // TODO: link up the arguments correctly for execute and preview.
+  // Execute the verb. Only the first argument in each role is returned.
+  // The others are thrown out.
   execute: function(context) {
-    return this._verb.execute( context, this._argSuggs );
+    let firstArgs = {};
+    for (let role in this.args) {
+      firstArgs[role] = this.args[role][0];
+    }
+    return this._verb.execute( context, firstArgs );
   },
   // **{{{Parser.Parse.preview()}}}**
   //
   // Returns the verb preview.
   preview: function(context, previewBlock) {
-    return '';
-    //this._verb.preview( context, this._argSuggs, previewBlock );
+    let firstArgs = {};
+    for (let role in this.args) {
+      firstArgs[role] = this.args[role][0];
+    }
+
+    dump('preview('+this._verb.names.en[0]+')\n');
+////    return this._verb.preview( context, firstArgs, previewBlock );
+//    return this._verb.preview( previewBlock, firstArgs );
   },
   // **{{{Parser.Parse.previewDelay}}} (read-only)**
   //
@@ -1539,7 +1548,7 @@ var cloneObject = function(o) {
   if (typeof o != 'object')
     return o;
 
-  var ret = (o instanceof Array) ? new Array() : new Object();
+  var ret = (o.constructor.name == 'Array') ? new Array() : new Object();
 
   for (var i in o) {
     ret[i] = cloneObject(o[i]);
