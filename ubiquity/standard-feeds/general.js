@@ -487,10 +487,10 @@ CmdUtils.CreateCommand({
   modifiers: {to: noun_type_language, from: noun_type_language},
 
   execute: function( arguments ) {
-    var toLangCode = arguments.goal.data || arguments.to.data
-                                         || this._getDefaultLang();
-    var fromLang = arguments.source.data || arguments.from.data
-                                         || "";
+    var goal = arguments.goal || arguments.to;
+    var source = arguments.source || arguments.from;
+    var toLangCode = goal.data || this._getDefaultLang();
+    var fromLang = source.data || "";
     translateTo( arguments.object.text, {to:toLangCode} );
   },
 
@@ -508,9 +508,9 @@ CmdUtils.CreateCommand({
   },
   preview: function( pblock, arguments ) {
     var defaultLang = this._getDefaultLang();
-    var toLang = arguments.goal.text || arguments.to.text
-                  || noun_type_language.getLangName(defaultLang);
-    var toLangCode = arguments.goal.data || arguments.to.data || defaultLang;
+    var goal = arguments.goal || arguments.to;
+    var toLang = goal.text || noun_type_language.getLangName(defaultLang);
+    var toLangCode = goal.data || defaultLang;
     var textToTranslate = arguments.object.text;
 
     var lang = toLang[0].toUpperCase() + toLang.substr(1);

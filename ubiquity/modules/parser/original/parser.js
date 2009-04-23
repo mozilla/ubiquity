@@ -958,12 +958,12 @@ NLParser1.Verb.prototype = {
     if (this._preview) {
       if (this._isNewStyle ) {
         argumentValues.object = argumentValues.direct_object;
-        this._preview( context, argumentValues, previewBlock );
+        this._preview( context, previewBlock, argumentValues );
       } else {
         let directObjectVal = null;
         if (argumentValues && argumentValues.direct_object)
           directObjectVal = argumentValues.direct_object;
-        this._preview( context, directObjectVal, argumentValues, previewBlock );
+        this._preview(context, previewBlock, directObjectVal, argumentValues);
       }
     } else {
       // Command exists, but has no preview; provide a default one.
