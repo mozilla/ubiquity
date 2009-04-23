@@ -24,7 +24,7 @@ function getGmailAppsDomain() {
   if (gmailAppsDomain.length > 0) {
     return gmailAppsDomain;
   }
-  
+
   // look in cookie
   var secure = false;
   var secCookie = Utils.getCookie("mail.google.com", "GXAS");
@@ -32,7 +32,7 @@ function getGmailAppsDomain() {
     secCookie = Utils.getCookie("mail.google.com", "GXAS_SEC");
     secure = true;
   }
-  
+
   if (secCookie != undefined) {
     // cookie is of the form hosted-domain.com=DQAAAH4AA....
     var domain = secCookie.split("=")[0];
@@ -52,7 +52,7 @@ function getGmailAppsDomain() {
       }
     }
   }
-  
+
   return gmailAppsDomain;
 }
 
@@ -83,27 +83,27 @@ function detectEmailProvider() {
     "mail.aol.com":0,
     "hotmail.com":0,
   }
-  
+
   var max = { domain: "", hits: 0 };
   totalHits = 0;
-  
+
   for(var domain in domains){
     hits = Utils.History.visitsToDomain( domain );
     domains[domain] = hits;
     totalHits += hits;
-    
+
     if( max.hits <= hits ) {
       max.domain = domain;
       max.hits = hits;
     }
-    
+
   }
-  
+
   max.ratio = max.hits / totalHits;
-  
+
   if( max.ratio > .75 )
     return max.domain;
-  return null;  
+  return null;
 }
 
 CmdUtils.CreateCommand({
@@ -152,21 +152,22 @@ CmdUtils.CreateCommand({
        " Try selecting part of a web page (including links, images, etc) and then issuing &quot;email this&quot;.  You can" +
        " also specify the recipient of the email using the word &quot;to&quot; and the name of someone from your contact list." +
        " For example, try issuing &quot;email hello to jono&quot; (assuming you have a friend named &quot;jono&quot;).",
-  preview: function(pblock, directObj, modifiers) {
+  preview: function(pblock, arguments) {
     var html = "Creates an email message ";
-    if (modifiers.to) {
-      html += "to " + modifiers.to.text + " ";
+    var goal = arguments.goal ? arguments.goal : arguments.to;
+    if (goal) {
+      html += "to " + goal.text + " ";
     }
-    if (directObj.html) {
-      html += "with these contents:" + directObj.html;
+    if (arguments.object.html) {
+      html += "with these contents:" + arguments.object.html;
     } else {
       html += "with a link to the current page.";
     }
     pblock.innerHTML = html;
   },
 
-  execute: function(directObj, headers) {
-    var html = directObj.html;
+  execute: function(arguments) {
+    var html = arguments.object.html;
     var document = context.focusedWindow.document;
     var title;
     var toAddress = "";
@@ -185,9 +186,11 @@ CmdUtils.CreateCommand({
     }
 
     title = "'" + title + "'";
-    if (headers.to)
-      if (headers.to.text)
-	toAddress = headers.to.text;
+
+    var goal = arguments.goal ? arguments.goal : arguments.to;
+    if (goal)
+      if (goal.text)
+	toAddress = goal.text;
 
     if (gmailTab) {
       // Note that this is technically insecure because we're
@@ -243,12 +246,12 @@ CmdUtils.CreateCommand({
 });
 
 function gmailChecker(callback, service) {
-  
+
   var url = "http://mail.google.com/mail/feed/atom";
   if(service == "googleapps"){
     url = "http://mail.google.com/a/" + getGmailAppsDomain() + "/feed/atom";
   }
-      
+
   Utils.ajaxGet(url, function(rss) {
     CmdUtils.loadJQuery(function(jQuery) {
       var emailDetails = {};

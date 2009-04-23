@@ -28,14 +28,16 @@ CmdUtils.CreateCommand({
   description: "Sets your Twitter status to a message of at most 160 characters.",
   help: "Sets your Twitter status to a message of at most 160 characters. You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
         " you'll be asked to log in.",
-  preview: function(previewBlock, directObj, mods) {
+  preview: function(previewBlock, arguments) {
     // these are converted in the Twitter database anyway, and counted as 4 characters
-    var statusText = directObj.text
+    var statusText = arguments.object.text
 	  .replace("<", "&lt;")
 	  .replace(">", "&gt;");
     var usernameText = null;
-    if (mods.as) {
-      usernameText = mods.as.text;
+    if (arguments.alias) {
+      usernameText = arguments.alias.text;
+    } else if (arguments.as) {
+      usernameText = arguments.as.text;
     }
 
     var previewTemplate = "Updates your Twitter status ${username} to: <br /><b>${status}</b> <br /><br />Characters remaining: <b>${chars}</b> <p style='font-size:11px'> tip: tweet @mozillaubiquity for help </p>";
@@ -58,8 +60,8 @@ CmdUtils.CreateCommand({
 
     previewBlock.innerHTML = previewHTML;
   },
-  execute: function(directObj, mods) {
-    var statusText = directObj.text;
+  execute: function(arguments) {
+    var statusText = arguments.object.text;
     if(statusText.length < 1) {
       displayMessage("Twitter requires a status to be entered");
       return;
@@ -94,14 +96,15 @@ CmdUtils.CreateCommand({
     }
 
     var login;
-    if (mods.as && mods.as.text && mods.as.data) {
-      login = mods.as.data;
+    var alias = arguments.alias ? arguments.alias : arguments.as;
+    if (alias && alias.text && alias.data) {
+      login = alias.data;
       sendMessage();
     } else {
       login = {username: null,
                password: null};
-      if (mods.as && mods.as.text)
-        login.username = mods.as.text;
+      if (alias && alias.text)
+        login.username = alias.text;
       sendMessage();
     }
   }

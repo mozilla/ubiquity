@@ -877,6 +877,16 @@ NLParser1.Verb.prototype = {
     this._name        = cmd.name;
     this._icon        = cmd.icon;
     this._synonyms    = cmd.synonyms;
+
+    /* Use the presence or absence of a 'names' dictionary
+     * to decide whether this is a version 1.0 or version 1.5 command.
+     */
+    if ( cmd.names ) {
+      this._isNewStyle = true;
+    } else {
+      this._isNewStyle = false;
+    }
+
     this.__defineGetter__("previewDelay", function() {
       return cmd.previewDelay;
     });
@@ -925,27 +935,36 @@ NLParser1.Verb.prototype = {
   },
 
   execute: function( context, argumentValues ) {
-    /* Once we convert all commands to using an arguments dictionary,
-     * this can just pass argumentValues to _execute().  But for now,
-     * commands expect the direct object to be separate, so pull it out
-     * to pass it in separately.
-     */
-    let directObjectVal = null;
-    if (argumentValues && argumentValues.direct_object) {
-      // TODO: when direct obj is not specified, we should use a
-      // nothingSugg, so argumentValues.direct_object should never be false.
-      directObjectVal = argumentValues.direct_object;
+    if ( this._isNewStyle ) {
+      /* New-style commands (api 1.5) expect a single dictionary with all
+       * arguments in it, and the object named 'object'*/
+      argumentValues.object = argumentValues.direct_object;
+      return this._execute( context, argumentValues );
+    } else {
+      /* Old-style commands (api 1.0) expect the direct object to be passed
+       * in separately: */
+      let directObjectVal = null;
+      if (argumentValues && argumentValues.direct_object) {
+        // TODO: when direct obj is not specified, we should use a
+        // nothingSugg, so argumentValues.direct_object should never be false.
+        directObjectVal = argumentValues.direct_object;
+      }
+      return this._execute( context, directObjectVal, argumentValues );
     }
-    return this._execute( context, directObjectVal, argumentValues );
   },
 
   preview: function( context, argumentValues, previewBlock ) {
     // Same logic as the execute command -- see comment above.
     if (this._preview) {
-      let directObjectVal = null;
-      if (argumentValues && argumentValues.direct_object)
-        directObjectVal = argumentValues.direct_object;
-      this._preview( context, directObjectVal, argumentValues, previewBlock );
+      if (this._isNewStyle ) {
+        argumentValues.object = argumentValues.direct_object;
+        this._preview( context, argumentValues, previewBlock );
+      } else {
+        let directObjectVal = null;
+        if (argumentValues && argumentValues.direct_object)
+          directObjectVal = argumentValues.direct_object;
+        this._preview( context, directObjectVal, argumentValues, previewBlock );
+      }
     } else {
       // Command exists, but has no preview; provide a default one.
       var template = "";
