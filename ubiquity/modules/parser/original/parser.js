@@ -456,7 +456,7 @@ NLParser1.ParsedSentence.prototype = {
   },
 
   preview: function(context, previewBlock) {
-    this._verb.preview( context, this._argSuggs, previewBlock );
+    this._verb.preview( context, previewBlock, this._argSuggs );
   },
 
   get previewDelay() {
@@ -953,7 +953,7 @@ NLParser1.Verb.prototype = {
     }
   },
 
-  preview: function( context, argumentValues, previewBlock ) {
+  preview: function( context, previewBlock, argumentValues ) {
     // Same logic as the execute command -- see comment above.
     if (this._preview) {
       if (this._isNewStyle ) {
