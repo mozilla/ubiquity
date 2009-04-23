@@ -545,7 +545,6 @@ Parser.prototype = {
     // for each set of delimiterIndices which are possible...
     // Note that the values in the delimiterIndices for each delimiter are the
     // indices which correspond to those delimiters.
-    
     for each (var delimiterIndices in possibleDelimiterCombinations) {
       // don't process invalid delimiter combinations
       // (where two delimiters are back to back)
@@ -674,7 +673,7 @@ Parser.prototype = {
 
               // thisParse is our local copy. We'll mess with it and
               // add it into newParses.
-              let thisParse = new cloneObject(theseParses[k]);
+              let thisParse = cloneParse(theseParses[k]);
 
               if (this.branching == 'left') {// find args right to left
 
@@ -810,7 +809,7 @@ Parser.prototype = {
                                            "$1"+selection+"$3");
 
         if (newArg != oldArg) {
-          let parseCopy = cloneObject(parse);
+          let parseCopy = cloneParse(parse);
           parseCopy.args[role][i]._substitutedInput = newArg;
           returnArr.push(parseCopy);
         }
@@ -826,8 +825,7 @@ Parser.prototype = {
   // suggests one based on its arguments. If one of the parse's argument's
   // roles is not used by a verb, that verb is not suggested.
   //
-  // If a verb was suggested, the {{{parse.score}}} is set to 0.5 as a penalty.
-  // {{{_suggested}}} is also set to true.
+  // If a verb was suggested, {{{_suggested}}} is set to true.
   //
   // An array of //new// parses is returned, so it should replace the original
   // list of parses (which may include parses without any verbs). If none of
@@ -866,9 +864,8 @@ Parser.prototype = {
         // TODO: for verb forms which clearly should be sentence-final,
         // change this value to -1
 
-        parseCopy.score = 0.5; // lowered because we had to suggest a verb
         parseCopy._suggested = true;
-        if (parseCopy.score > threshold)
+//        if (parseCopy.scoreMultiplier > threshold)
           returnArray.push(parseCopy);
       }
     }
@@ -970,69 +967,6 @@ Parser.prototype = {
     return returnArr;
   },
   
-  // ** {{{Parser.score()}}} **
-  //
-  // {{{score()}}} computes the score of the parse based on each argument's 
-  // nountype score and the number of matching arguments, etc. It returns the
-  // parse itself, not just the score float, with the {{{score}}} property
-  // set.
-  //
-  // Since the current algorithm is non-increasing, at many points we check
-  // to see if the score is less than the threshold. If it is less than the 
-  // threshold at one point, there's no way it will get back above, so we
-  // kill it, i.e. return [] right there.
-  // 
-  // TODO: Improve this algorithm, most likely in an additive (non-decreasing)
-  // way. See 
-  // [[http://mitcho.com/blog/observation/scoring-and-ranking-suggestions/|this article]]
-  // for some thoughts on scoring.
-  // 
-  // TODO: This might could be a method of Parser.Parse, rather than in Parser.
-  score: function(parse,threshold) {
-    let score = (parse.score || 1); // start with a perfect score
-
-    // for each of the roles parsed in the parse
-    for (let role in parse.args) {
-
-      // if there are multiple arguments of any role, mark this parse down.
-      if (parse.args[role].length > 1) {
-        score *= Math.pow(0.5,(parse.args[role].length - 1));
-        if (score < threshold)
-          return [];
-      }
-   
-      // multiply the score by each role's first argument's nountype match score
-      score *= parse.args[role][0].score;
-
-      if (score < threshold)
-        return [];
-
-    }
-
-    // Now we'll check to see if all of the arguments required by the verb
-    // have been set.
-    // We do this by preemptively lowering the score for each expected arg,
-    // and then raising it back up if we do end up finding that argument.
-    for each (var verbArg in this._verbList[parse._verb.id].arguments) {
-      score *= 0.8; // lower for each unset argument
-
-      for (var role in parse.args) {
-        if (role == verbArg.role) {
-          score *= (1/0.8); // repair this for set arguments
-          break;
-        }
-      }
-
-      if (score < threshold)
-        return [];
-
-    }
-
-    // if we made it this far, return this parse with the score set.
-    parse.score = score;
-    return [parse];
-  },
-
   // == Noun Type utilities ==
   //
   // In the future these methods of {{{Parser}}} probably ought to
@@ -1346,14 +1280,16 @@ Parser.Query.prototype = {
 
     // STEP 9: score + rank
     for each (parse in this._suggestedParses) {
-      this._scoredParses = this._scoredParses.concat(
-        this.parser.score(parse,this._threshold));
+      var parseCopy = cloneParse(parse);
+      parseCopy.complete = true;
+      parseCopy.getScore(); // compute the score
+      this._scoredParses.push(parseCopy);
       yield true;
     }
     
     // order the scored parses here.
     this._scoredParses = this._scoredParses.sort(
-      function(a,b) { return b.score - a.score; } );
+      function(a,b) { return b.__score - a.__score; } );
 
     this._times[this._step] = Date.now();
     this._step++;
@@ -1406,6 +1342,11 @@ Parser.Parse = function(branching, joindelimiter, verb, argString) {
   this._verb = verb;
   this.argString = argString;
   this.args = {};
+  // this is the internal score variable--use the getScore method
+  this.__score = 0;
+  this.scoreMultiplier = 1;
+  // complete == false means we're still parsing or waiting for async nountypes
+  this.complete = false;
 }
 
 // ** {{{Parser.Parse.getDisplayText()}}} **
@@ -1463,7 +1404,12 @@ Parser.Parse.prototype = {
     // return with score for the time being
     // DEBUG: score is being displayed here.
     return display + displayFinal + ' ('
-           + (Math.floor(this.score*100)/100 || '<i>no score</i>') + ')';
+           + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
+           + ', '
+//           + (Math.floor(this.getMaxScore() * 100)/100 || '<i>no maxScore</i>')
+//           + ', '
+           + (Math.floor(this.scoreMultiplier*100)/100 || '<i>no multiplier</i>')
+           + ')';
 
   },
   // **{{{Parser.Parse.getIcon()}}}**
@@ -1506,7 +1452,76 @@ Parser.Parse.prototype = {
   // Return the verb's {{{previewUrl}}} value.
   get previewUrl() {
     return this._verb.previewUrl;
+  },
+  // ** {{{Parser.Parse.getMaxScore()}}} **
+  //
+  // {{{getMaxScore()}}} computes the maximum possible score which a partial
+  // parse could possibly yield. It's used in cases where an async nountype
+  // has yet to return the nountype score for one or more arguments.
+  getMaxScore: function() {
+
+    if (this.complete)
+      return this.getScore();
+
+    let score = 0;
+
+    // first compute the scoreMultiplier
+    this.scoreMultiplier = 1;
+    if (this._suggested) // if the verb was suggested
+      this.scoreMultiplier *= 0.6;
+
+    if (!this._verb.text)
+      return false; // we still cannot determine the maxScore
+
+    for each (let verbArg in this._verb.arguments) {
+      if (this.args[verbArg.role] == undefined)
+        // in this case, no argument has been set for this role and never will.
+        score += 0;
+      else if (this.args[verbArg.role][0].score == undefined)
+        // in this case, the arg text was set for this role, but we haven't
+        // yet received an async score. Wait for it and assume good faith.
+        score += this.scoreMultiplier;
+      else 
+        // in this case, we've already received the score from the nountype
+        score += this.args[verbArg.role][0].score
+                 * this.scoreMultiplier;
+    }
+    
+    return score;
+  },
+  // ** {{{Parser.Parse.getScore()}}} **
+  //
+  // {{{getScore()}}} computes the score of the parse based on each argument's 
+  // nountype score and the number of matching arguments, etc. 
+  getScore: function() {
+    if (!this.complete)
+      return false;
+
+    let score = 0; // start with a zero
+
+    // first compute the scoreMultiplier
+    this.scoreMultiplier = 1;
+    if (this._suggested) // if the verb was suggested
+      this.scoreMultiplier *= 0.6;
+
+    // for each of the roles parsed in the parse
+    for (let role in this.args) {
+      // if there are multiple arguments of any role, mark this parse down.
+      if (this.args[role].length > 1) {
+        this.scoreMultiplier *= Math.pow(0.5,(this.args[role].length - 1));
+      }
+    }
+
+    // for each of the roles parsed in the parse
+    for (let role in this.args) {
+      // multiply the score by each role's first argument's nountype match score
+      score += this.args[role][0].score * this.scoreMultiplier;
+    }
+
+    this.__score = score;
+    return this.__score;
   }
+
 }
 
 // **{{{mylog()}}}**
@@ -1527,6 +1542,17 @@ if ((typeof window) == 'undefined') {// kick it chrome style
 
 } else {
   //mylog = console.log;
+}
+
+var cloneParse = function(p) {
+  let ret = new Parser.Parse(p._branching,
+                             p._delimiter,
+                             cloneObject(p._verb),
+                             p.argString);
+  ret.args = cloneObject(p.args);
+  ret.complete = p.complete;
+  ret._suggested = p._suggested;
+  return ret;
 }
 
 // **{{{cloneObject()}}}**
