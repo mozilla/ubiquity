@@ -1487,14 +1487,13 @@ Parser.Parse.prototype = {
   //
   // Returns the verb preview.
   preview: function(context, previewBlock) {
+    
     let firstArgs = {};
     for (let role in this.args) {
       firstArgs[role] = this.args[role][0];
     }
 
-    dump('preview('+this._verb.names.en[0]+')\n');
-////    return this._verb.preview( context, firstArgs, previewBlock );
-//    return this._verb.preview( previewBlock, firstArgs );
+    return this._verb.preview( context, previewBlock, firstArgs );
   },
   // **{{{Parser.Parse.previewDelay}}} (read-only)**
   //

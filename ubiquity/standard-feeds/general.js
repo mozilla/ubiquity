@@ -161,6 +161,9 @@ CmdUtils.CreateCommand({
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
   preview: function(previewBlock, arguments) {
+
+    dump('typeof:'+(typeof previewBlock)+'\n');
+
     var expression = arguments.object.text;
 
     if(expression.length < 1) {
