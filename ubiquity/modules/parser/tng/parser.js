@@ -1416,7 +1416,7 @@ Parser.Parse.prototype = {
   //
   // Return the verb's icon.
   getIcon: function() {
-    return this._verb._icon;
+    return this._verb.icon;
   },
   // **{{{Parser.Parse.execute()}}}**
   //
