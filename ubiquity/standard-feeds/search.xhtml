@@ -190,9 +190,9 @@ CmdUtils.CreateCommand({
   takes: {query: noun_arb_text},
   modifiers: {"with": noun_type_searchengine},
   preview: function(previewBlock, arguments) {
-    var searchEngine =  arguments.instrument? arguments.instrument: arguments.with;
-    if (searchEngine) {
-      searchEngine = searchEngine.data;
+    var instrument = arguments.instrument || arguments.with;
+    if (instrument && instrument.data) {
+      searchEngine = instrument.data;
     } else {
       searchEngine = noun_type_searchengine.getDefault();
     }
@@ -205,9 +205,9 @@ CmdUtils.CreateCommand({
     previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
   },
   execute: function(arguments) {
-    var searchEngine =  arguments.instrument? arguments.instrument: arguments.with;
-    if (searchEngine) {
-      searchEngine = searchEngine.data;
+    var instrument = arguments.instrument || arguments.with;
+    if (instrument && instrument.data) {
+      searchEngine = instrument.data;
     } else {
       searchEngine = noun_type_searchengine.getDefault();
     }
