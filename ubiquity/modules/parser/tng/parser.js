@@ -839,6 +839,7 @@ Parser.prototype = {
     // for parses WITHOUT a set verb:
     var returnArray = [];
     for (let verb in this._verbList) {
+
       let suggestThisVerb = true;
 
       // Check each role in our parse.
@@ -926,7 +927,7 @@ Parser.prototype = {
 
               let targetNounType = verbArg.nountype;
 
-              if (sameObject(suggestion.nountype,verbArg.nountype)) {
+              if (sameNounType(suggestion.nountype,targetNounType)) {
               
                 thereWasASuggestionWithTheRightNounType = true;
             
@@ -997,13 +998,14 @@ Parser.prototype = {
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
   _protoDetectNounType: function (x) {
-//    mylog('detecting '+x+'\n');
+    //mylog('detecting '+x+'\n');
     
     let returnArray = [];
 
     for each (let thisNounType in this._nounTypes) {
-//      mylog(thisNounType);
+      //mylog(thisNounType);
       let suggestions = thisNounType.suggest(x);
+      //mylog(suggestions);
       for each (let suggestion in suggestions) {
         // set the nountype that was used in each suggestion so that it can 
         // later be compared with the nountype specified in the verb.
@@ -1013,6 +1015,7 @@ Parser.prototype = {
         returnArray = returnArray.concat(suggestions);
       }
     }
+    
     return returnArray;
   },
   
@@ -1405,10 +1408,10 @@ Parser.Parse.prototype = {
     // DEBUG: score is being displayed here.
     return display + displayFinal + ' ('
            + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
-           + ', '
+//           + ', '
 //           + (Math.floor(this.getMaxScore() * 100)/100 || '<i>no maxScore</i>')
 //           + ', '
-           + (Math.floor(this.scoreMultiplier*100)/100 || '<i>no multiplier</i>')
+//           + (Math.floor(this.scoreMultiplier*100)/100 || '<i>no multiplier</i>')
            + ')';
 
   },
@@ -1582,6 +1585,37 @@ var cloneObject = function(o) {
   return ret;
 }
 
+function sameNounType(a,b,print) {
+
+  // TODO: figure out a better way to compare functions?
+  
+  if ((typeof a) == 'function' && (typeof b) == 'function')
+    return (a.toString() == b.toString());
+
+  if ((typeof a) != 'object' || (typeof b) != 'object') {
+    if (print) dump('>returning typeof data: '+a+' ('+(typeof a)+')<>'+b+' ('+(typeof b)+') = '+(a == b)+'\n');
+    return (a == b);
+  }
+
+  for (let i in a) {
+    if (i != 'contactList') {
+      if (!sameObject(a[i],b[i],print)) {
+        if (print) dump('>'+i+' was in a but not in b\n');
+        return false;
+      }
+    }
+  }
+  for (let j in b) {
+    if (j != 'contactList') {
+      if (!sameObject(a[j],b[j],print)) {
+        if (print) dump('>'+j+' was in b but not in a\n');
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function sameObject(a,b,print) {
 
   // TODO: figure out a better way to compare functions?
@@ -1595,16 +1629,16 @@ function sameObject(a,b,print) {
   }
 
   for (let i in a) {
-      if (!sameObject(a[i],b[i],print)) {
-        if (print) dump('>'+i+' was in a but not in b\n');
-        return false;
-      }
+    if (!sameObject(a[i],b[i],print)) {
+      if (print) dump('>'+i+' was in a but not in b\n');
+      return false;
+    }
   }
   for (let j in b) {
-      if (!sameObject(a[j],b[j],print)) {
-        if (print) dump('>'+j+' was in b but not in a\n');
-        return false;
-      }
+    if (!sameObject(a[j],b[j],print)) {
+      if (print) dump('>'+j+' was in b but not in a\n');
+      return false;
+    }
   }
   return true;
 }
