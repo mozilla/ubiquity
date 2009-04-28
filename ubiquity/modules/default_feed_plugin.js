@@ -168,7 +168,7 @@ function makeCmdForObj(sandbox, objName) {
       return cmdFunc(directObject, modifiers);
     }
   };
-
+  
   if (cmdFunc.preview) {
     cmd.preview = function CS_preview(context, previewBlock, directObject,
                                       modifiers) {
@@ -179,6 +179,13 @@ function makeCmdForObj(sandbox, objName) {
   }
 
   cmd.__proto__ = cmdFunc;
+
+  // if it doesn't take any arguments
+  if ((cmd.DOLabel == undefined) && (cmd.modifiers == undefined)) {
+    // enable use in parser 2
+    cmd.names = { en: [ cmdName ] };
+    cmd.arguments = [];
+  }
 
   return finishCommand(cmd);
 };

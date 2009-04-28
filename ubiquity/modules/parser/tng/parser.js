@@ -149,7 +149,8 @@ Parser.prototype = {
 
     // First we'll register the verbs themselves.
     for (let verb in commandList) {
-      if (commandList[verb].names != undefined) {
+      if (commandList[verb].names != undefined 
+          && commandList[verb].arguments != undefined) {
         this._verbList.push(commandList[verb]);
         //dump("loaded verb: "+verb+"\n");
       }
@@ -506,6 +507,16 @@ Parser.prototype = {
 
     // initialize possibleParses. This is the array that we're going to return.
     let possibleParses = [];
+
+    // if the argString is empty, return a parse with no args.
+    if (argString == '') {
+      defaultParse = new Parser.Parse(this.branching,
+                                            this.joindelimiter,
+                                            verb,
+                                            argString);
+      defaultParse.args = [];
+      return [defaultParse];
+    }
 
     // split words using the splitWords() method
     let words = this.splitWords(argString);
@@ -1471,7 +1482,7 @@ Parser.Parse.prototype = {
     // first compute the scoreMultiplier
     this.scoreMultiplier = 1;
     if (this._suggested) // if the verb was suggested
-      this.scoreMultiplier *= 0.6;
+      this.scoreMultiplier *= 0.3;
 
     if (!this._verb.text)
       return false; // we still cannot determine the maxScore
@@ -1505,7 +1516,7 @@ Parser.Parse.prototype = {
     // first compute the scoreMultiplier
     this.scoreMultiplier = 1;
     if (this._suggested) // if the verb was suggested
-      this.scoreMultiplier *= 0.6;
+      this.scoreMultiplier *= 0.3;
 
     // for each of the roles parsed in the parse
     for (let role in this.args) {
@@ -1514,6 +1525,10 @@ Parser.Parse.prototype = {
         this.scoreMultiplier *= Math.pow(0.5,(this.args[role].length - 1));
       }
     }
+
+    // get the scoreMultiplier amount just for the verb.
+    // i.e. a lower base score if the verb was suggested
+    score += this.scoreMultiplier;
 
     // for each of the roles parsed in the parse
     for (let role in this.args) {
