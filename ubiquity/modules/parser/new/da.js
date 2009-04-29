@@ -20,7 +20,7 @@
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
- *   Felipe Gomes <felipc@gmail.com>
+ *   Christian Sonne <cers@geeksbynature.dk>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,53 +36,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// set up our parsers
-var EXPORTED_SYMBOLS = ["makePtParser"];
+var EXPORTED_SYMBOLS = ["makeDaParser"];
 
 if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
-
-function makePtParser() {
-  var pt = new Parser('pt');
-  pt.roles = [
-    {role: 'goal', delimiter: 'à'},
-    {role: 'goal', delimiter: 'ao'},
-    {role: 'goal', delimiter: 'a'},
-    {role: 'goal', delimiter: 'até'},
-    {role: 'goal', delimiter: 'em'},
-    {role: 'goal', delimiter: 'no'},
-    {role: 'goal', delimiter: 'na'},
-    {role: 'goal', delimiter: 'pra'},
-    {role: 'goal', delimiter: 'para'},
-
-    {role: 'source', delimiter: 'de'},
-    {role: 'source', delimiter: 'des'},
-    {role: 'source', delimiter: 'do'},
-    {role: 'source', delimiter: 'da'},
-
-    {role: 'time', delimiter: 'às'},
-    {role: 'time', delimiter: 'de'},
-    {role: 'time', delimiter: 'a'},
-    {role: 'time', delimiter: 'as'},
-
-    {role: 'instrument', delimiter: 'com'},
-    {role: 'instrument', delimiter: 'usando'},
-    {role: 'instrument', delimiter: 'pela'},
-    {role: 'instrument', delimiter: 'pelo'},
-    {role: 'instrument', delimiter: 'na'},
-    {role: 'instrument', delimiter: 'no'}
+  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+  
+function makeDaParser() {
+  var da = new Parser('da');
+  da.roles = [
+    {role: 'goal', delimiter: 'til'},
+    {role: 'source', delimiter: 'fra'},
+    {role: 'time', delimiter: 'klokken'},
+    {role: 'time', delimiter: 'på'},
+    {role: 'time', delimiter: 'den'},
+    {role: 'instrument', delimiter: 'med'},
+    {role: 'instrument', delimiter: 'gennem'}
   ];
+  da.branching = 'right';
+  da.examples = ['k socks med google tilføj',
+  'tilføj meeting til calendar klokken 1 pm',
+  'fra Tokyo til San Francisco'];
 
-  pt.branching = 'right';
-
-  pt.anaphora = ['isto', 'isso', 'aquilo'];
-
-  pt.examples = ['marcar reunião às 2pm ao calendar',
-    'comprar meias pelo Google',
-    'traduza Olá Mundo de English pra French',
-    'ir de San Franscisco à Tokyo',
-    'diga Redescubra a web',
-    'diga isto'];
-
-  return pt;
+  return da;
 };

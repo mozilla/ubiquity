@@ -20,7 +20,6 @@
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
- *   Kim Ahlström <kim.ahlstrom@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,33 +35,40 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["makeSvParser"];
+var EXPORTED_SYMBOLS = ["makeJaParser"];
 
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+if ((typeof window) == 'undefined') { // kick it chrome style
+  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+  Components.utils.import("resource://ubiquity/modules/localeutils.js");
+} else {
+  loadLocaleJson = function loadLocaleJson(url) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url, false);
+    req.overrideMimeType("text/plain; charset=utf-8");
+    req.send(null);
+    return eval('(' + req.responseText + ')');
+  }
+}
+
+function makeJaParser() {
+  var ja = new Parser('ja');
+  ja.branching = 'left';
+  ja.usespaces = false;
+  ja.joindelimiter = '';
+
+  // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
+  if ((typeof window) == 'undefined')
+    japarts = loadLocaleJson("resource://ubiquity/modules/parser/tng/ja.json");
+  else 
+    japarts = loadLocaleJson('ja.json');
+  ja.anaphora = japarts.anaphora;
+  ja.roles = japarts.roles;
+  ja.examples = japarts.examples;
   
-function makeSvParser() {
-  var sv = new Parser('sv');
-  sv.anaphora = ["han", "honom", "hon", "henne", "den", "det", "de", "dem"];
-  sv.roles = [
-    {role: 'goal', delimiter: 'till'},
-    
-    {role: 'source', delimiter: 'från'},
-    {role: 'source', delimiter: 'av'},
-    
-    {role: 'time', delimiter: 'klockan'},
-    {role: 'time', delimiter: 'på'},
-    {role: 'time', delimiter: 'den'},
-    
-    {role: 'instrument', delimiter: 'med'},
-    {role: 'instrument', delimiter: 'från'},
-    {role: 'instrument', delimiter: 'hos'},
-    {role: 'instrument', delimiter: 'via'}
-  ];
-  sv.branching = 'right';
-  sv.examples = ['k strumpor med google',
-  'lägg till möte till calendar klockan 1pm', // 1, ett, ett på eftermiddagen, kalendern ...
-  'från Tokyo till San Francisco'];
+  ja._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in ja.roles)].join('|')+')','g');
+  ja.wordBreaker = function(input) {
+    return input.replace(this._patternCache.particleMatcher,' $1 ');
+  };
 
-  return sv;
+  return ja;
 };

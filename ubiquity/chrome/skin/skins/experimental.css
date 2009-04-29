@@ -93,7 +93,7 @@ div#ubiquity-preview #suggestions {
   height: 500px;
 }
 
-/* below are the only TNG debug changes*/
+/* below are the only Parser 2 debug changes*/
 div#ubiquity-preview #suggestions .verb {
   border-bottom: 2px blue solid;
 }
@@ -110,7 +110,7 @@ div#ubiquity-preview #suggestions .argument {
 div#ubiquity-preview #suggestions .object {
   border-bottom: 2px black solid;
 }
-/*end TNG version additions*/
+/*end Parser 2 version additions*/
 
 div#ubiquity-preview #preview-pane {
     position: absolute;

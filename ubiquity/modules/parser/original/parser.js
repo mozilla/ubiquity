@@ -901,7 +901,7 @@ NLParser1.Verb.prototype = {
     this._arguments = {};
 
     // New-style API: command defines arguments dictionary
-    // only do it if we're not using the old API (for compatibility with TNG)
+    // only do it if we're not using the old API (for compatibility with Parser 2)
     if (cmd.DOType == undefined && cmd.modifiers == undefined) {
       if (cmd.arguments) {
         this._arguments = cmd.arguments;

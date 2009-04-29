@@ -1,7 +1,7 @@
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/namespace.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
@@ -75,6 +75,46 @@ function testParserTwo() {
   this.assert( dogGotPetted == "beagle");
   completions[1].execute();
   this.assert( dogGotPetted == "bulldog" );
+}
+
+function testNounTypeSpeed() {
+  var slowme = new NounUtils.NounType('anything');
+  slownoun.suggest = function(text) {
+    dump('checking '+text+'\n');
+    var start = new Date();
+    var now = null;
+    do { now = new Date(); }
+    while(now - start < 1000);
+    return [ NounUtils.makeSugg(text) ];
+  };
+
+  var cmd_hit = {
+    execute: function(context, arguments) {
+      dogGotPetted = arguments.object.text;
+    },
+    names: {
+      en: ["hit"]
+    },
+    arguments: [
+      {role: 'object', nountype: slowme}
+    ]
+  };
+
+  var completions = getCompletions( "hit me", [cmd_hit], [slowme], null );
+  dump("Completions are: " + completions + "\n");
+  dump("First verb is " + completions[0]._verb.text + "\n");
+
+  this.assert( completions.length == 2, "should be 2 completions" );
+  /*this.assert( completions[0]._verb.text == "pet", "verb should be pet");
+  this.assert( completions[0].args.object[0].text == "beagle",
+	       "obj should be beagle");
+  this.assert( completions[1]._verb.text == "pet", "verb should be pet");
+  this.assert( completions[1].args.object[0].text == "bulldog",
+	       "obj should be bulldog");
+  completions[0].execute();
+  this.assert( dogGotPetted == "beagle");
+  completions[1].execute();
+  this.assert( dogGotPetted == "bulldog" );*/
 }
 
 exportTests(this);

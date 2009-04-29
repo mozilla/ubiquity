@@ -42,7 +42,7 @@ var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameObject'];
 //
 // This file, {{{parser.js}}}, is part of the implementation of Ubiquity's
 // new parser design, 
-// [[https://wiki.mozilla.org/User:Mitcho/ParserTNG|Parser TNG]].
+// [[https://wiki.mozilla.org/Labs/Ubiquity/Parser_2]].
 //
 // In this file, we will set up three different classes:
 // * {{{Parser}}}: each language parser will be an instance of this class
@@ -136,7 +136,7 @@ Parser.prototype = {
   // {{{setCommandList}}} takes the command list and filters it,
   // only registering those which have the property {{{.names}}}.
   // This is in order to filter out verbs which have not been made to
-  // work with Parser TNG.
+  // work with Parser 2.
   //
   // This function also now parses out all the nountypes used by each verb.
   // The nountypes registered go in the {{{Parser._nounTypes}}} object, which
@@ -466,7 +466,7 @@ Parser.prototype = {
   // here's a high level overview of the code in this method.
   // 
   // First take a look at an example of what is being done here:
-  // [[https://wiki.mozilla.org/User:Mitcho/ParserTNG#step_4:_group_into_arguments]].
+  // [[https://wiki.mozilla.org/Labs/Ubiquity/Parser_2#step_4:_group_into_arguments]].
   // 
   // {{{argFinder}}} first finds all the indices of the words in the string
   // which look like a possible delimiter ({{{possibleDelimiterIndices}}}). It
@@ -1170,6 +1170,11 @@ Parser.Query.prototype = {
 
     dump("I am done running query.\n");
     dump('step: '+this._step+"\n");
+    dump('times:\n');
+    for (let i in this._times) {
+      if (i > 0)
+        dump( 'step '+i+': '+(this._times[i] - this._times[i-1])+' ms\n' );
+    }
     dump("There were "+this._scoredParses.length+" completed parses\n");
     return true;
   },
@@ -1187,7 +1192,7 @@ Parser.Query.prototype = {
   // world.
   //
   // The steps here are as described in 
-  // [[https://wiki.mozilla.org/User:Mitcho/ParserTNG|the ParserTNG proposal]].
+  // [[https://wiki.mozilla.org/Labs/Ubiquity/Parser_2|the ParserTNG proposal]].
   // Notes that the first two steps are actually done outside of
   // {{{_yieldingParse()}}}.
   // 

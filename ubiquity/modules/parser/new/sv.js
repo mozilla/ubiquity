@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Kim Ahlström <kim.ahlstrom@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,28 +35,34 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
-var EXPORTED_SYMBOLS = ["makeEnParser"];
+
+var EXPORTED_SYMBOLS = ["makeSvParser"];
 
 if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
-
-function makeEnParser() {
-  var en = new Parser('en');
-  en.anaphora = ["this", "that", "it", "selection", "him", "her", "them"];
-  en.roles = [
-    {role: 'goal', delimiter: 'to'},
-    {role: 'source', delimiter: 'from'},
-    {role: 'position', delimiter: 'at'},
-    {role: 'position', delimiter: 'on'},
-    {role: 'alias', delimiter: 'as'},
-    {role: 'instrument', delimiter: 'using'},
-    {role: 'instrument', delimiter: 'with'}
+  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+  
+function makeSvParser() {
+  var sv = new Parser('sv');
+  sv.anaphora = ["han", "honom", "hon", "henne", "den", "det", "de", "dem"];
+  sv.roles = [
+    {role: 'goal', delimiter: 'till'},
+    
+    {role: 'source', delimiter: 'från'},
+    {role: 'source', delimiter: 'av'},
+    
+    {role: 'time', delimiter: 'klockan'},
+    {role: 'time', delimiter: 'på'},
+    {role: 'time', delimiter: 'den'},
+    
+    {role: 'instrument', delimiter: 'med'},
+    {role: 'instrument', delimiter: 'från'},
+    {role: 'instrument', delimiter: 'hos'},
+    {role: 'instrument', delimiter: 'via'}
   ];
-  en.branching = 'right';
-  en.examples = ['from Tokyo to San',
-  'b socks using google',
-  'add meeting to calendar at 1 pm'];
+  sv.branching = 'right';
+  sv.examples = ['k strumpor med google',
+  'lägg till möte till calendar klockan 1pm', // 1, ett, ett på eftermiddagen, kalendern ...
+  'från Tokyo till San Francisco'];
 
-  return en;
+  return sv;
 };
