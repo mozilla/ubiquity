@@ -42,7 +42,7 @@ var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameObject'];
 //
 // This file, {{{parser.js}}}, is part of the implementation of Ubiquity's
 // new parser design, 
-// [[https://wiki.mozilla.org/User:Mitcho/ParserTNG|Parser TNG]].
+// [[https://wiki.mozilla.org/Labs/Ubiquity/Parser_2]].
 //
 // In this file, we will set up three different classes:
 // * {{{Parser}}}: each language parser will be an instance of this class
@@ -136,7 +136,7 @@ Parser.prototype = {
   // {{{setCommandList}}} takes the command list and filters it,
   // only registering those which have the property {{{.names}}}.
   // This is in order to filter out verbs which have not been made to
-  // work with Parser TNG.
+  // work with Parser 2.
   //
   // This function also now parses out all the nountypes used by each verb.
   // The nountypes registered go in the {{{Parser._nounTypes}}} object, which
@@ -149,7 +149,8 @@ Parser.prototype = {
 
     // First we'll register the verbs themselves.
     for (let verb in commandList) {
-      if (commandList[verb].names != undefined) {
+      if (commandList[verb].names != undefined 
+          && commandList[verb].arguments != undefined) {
         this._verbList.push(commandList[verb]);
         //dump("loaded verb: "+verb+"\n");
       }
@@ -465,7 +466,7 @@ Parser.prototype = {
   // here's a high level overview of the code in this method.
   // 
   // First take a look at an example of what is being done here:
-  // [[https://wiki.mozilla.org/User:Mitcho/ParserTNG#step_4:_group_into_arguments]].
+  // [[https://wiki.mozilla.org/Labs/Ubiquity/Parser_2#step_4:_group_into_arguments]].
   // 
   // {{{argFinder}}} first finds all the indices of the words in the string
   // which look like a possible delimiter ({{{possibleDelimiterIndices}}}). It
@@ -506,6 +507,16 @@ Parser.prototype = {
 
     // initialize possibleParses. This is the array that we're going to return.
     let possibleParses = [];
+
+    // if the argString is empty, return a parse with no args.
+    if (argString == '') {
+      defaultParse = new Parser.Parse(this.branching,
+                                            this.joindelimiter,
+                                            verb,
+                                            argString);
+      defaultParse.args = [];
+      return [defaultParse];
+    }
 
     // split words using the splitWords() method
     let words = this.splitWords(argString);
@@ -839,6 +850,7 @@ Parser.prototype = {
     // for parses WITHOUT a set verb:
     var returnArray = [];
     for (let verb in this._verbList) {
+
       let suggestThisVerb = true;
 
       // Check each role in our parse.
@@ -926,7 +938,7 @@ Parser.prototype = {
 
               let targetNounType = verbArg.nountype;
 
-              if (sameObject(suggestion.nountype,verbArg.nountype)) {
+              if (sameNounType(suggestion.nountype,targetNounType)) {
               
                 thereWasASuggestionWithTheRightNounType = true;
             
@@ -997,13 +1009,14 @@ Parser.prototype = {
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
   _protoDetectNounType: function (x) {
-//    mylog('detecting '+x+'\n');
+    //mylog('detecting '+x+'\n');
     
     let returnArray = [];
 
     for each (let thisNounType in this._nounTypes) {
-//      mylog(thisNounType);
+      //mylog(thisNounType);
       let suggestions = thisNounType.suggest(x);
+      //mylog(suggestions);
       for each (let suggestion in suggestions) {
         // set the nountype that was used in each suggestion so that it can 
         // later be compared with the nountype specified in the verb.
@@ -1013,6 +1026,7 @@ Parser.prototype = {
         returnArray = returnArray.concat(suggestions);
       }
     }
+    
     return returnArray;
   },
   
@@ -1156,6 +1170,11 @@ Parser.Query.prototype = {
 
     dump("I am done running query.\n");
     dump('step: '+this._step+"\n");
+    dump('times:\n');
+    for (let i in this._times) {
+      if (i > 0)
+        dump( 'step '+i+': '+(this._times[i] - this._times[i-1])+' ms\n' );
+    }
     dump("There were "+this._scoredParses.length+" completed parses\n");
     return true;
   },
@@ -1173,7 +1192,7 @@ Parser.Query.prototype = {
   // world.
   //
   // The steps here are as described in 
-  // [[https://wiki.mozilla.org/User:Mitcho/ParserTNG|the ParserTNG proposal]].
+  // [[https://wiki.mozilla.org/Labs/Ubiquity/Parser_2|the ParserTNG proposal]].
   // Notes that the first two steps are actually done outside of
   // {{{_yieldingParse()}}}.
   // 
@@ -1405,10 +1424,10 @@ Parser.Parse.prototype = {
     // DEBUG: score is being displayed here.
     return display + displayFinal + ' ('
            + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
-           + ', '
+//           + ', '
 //           + (Math.floor(this.getMaxScore() * 100)/100 || '<i>no maxScore</i>')
 //           + ', '
-           + (Math.floor(this.scoreMultiplier*100)/100 || '<i>no multiplier</i>')
+//           + (Math.floor(this.scoreMultiplier*100)/100 || '<i>no multiplier</i>')
            + ')';
 
   },
@@ -1468,7 +1487,7 @@ Parser.Parse.prototype = {
     // first compute the scoreMultiplier
     this.scoreMultiplier = 1;
     if (this._suggested) // if the verb was suggested
-      this.scoreMultiplier *= 0.6;
+      this.scoreMultiplier *= 0.3;
 
     if (!this._verb.text)
       return false; // we still cannot determine the maxScore
@@ -1502,7 +1521,7 @@ Parser.Parse.prototype = {
     // first compute the scoreMultiplier
     this.scoreMultiplier = 1;
     if (this._suggested) // if the verb was suggested
-      this.scoreMultiplier *= 0.6;
+      this.scoreMultiplier *= 0.3;
 
     // for each of the roles parsed in the parse
     for (let role in this.args) {
@@ -1511,6 +1530,10 @@ Parser.Parse.prototype = {
         this.scoreMultiplier *= Math.pow(0.5,(this.args[role].length - 1));
       }
     }
+
+    // get the scoreMultiplier amount just for the verb.
+    // i.e. a lower base score if the verb was suggested
+    score += this.scoreMultiplier;
 
     // for each of the roles parsed in the parse
     for (let role in this.args) {
@@ -1582,6 +1605,37 @@ var cloneObject = function(o) {
   return ret;
 }
 
+function sameNounType(a,b,print) {
+
+  // TODO: figure out a better way to compare functions?
+  
+  if ((typeof a) == 'function' && (typeof b) == 'function')
+    return (a.toString() == b.toString());
+
+  if ((typeof a) != 'object' || (typeof b) != 'object') {
+    if (print) dump('>returning typeof data: '+a+' ('+(typeof a)+')<>'+b+' ('+(typeof b)+') = '+(a == b)+'\n');
+    return (a == b);
+  }
+
+  for (let i in a) {
+    if (i != 'contactList') {
+      if (!sameObject(a[i],b[i],print)) {
+        if (print) dump('>'+i+' was in a but not in b\n');
+        return false;
+      }
+    }
+  }
+  for (let j in b) {
+    if (j != 'contactList') {
+      if (!sameObject(a[j],b[j],print)) {
+        if (print) dump('>'+j+' was in b but not in a\n');
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function sameObject(a,b,print) {
 
   // TODO: figure out a better way to compare functions?
@@ -1595,16 +1649,16 @@ function sameObject(a,b,print) {
   }
 
   for (let i in a) {
-      if (!sameObject(a[i],b[i],print)) {
-        if (print) dump('>'+i+' was in a but not in b\n');
-        return false;
-      }
+    if (!sameObject(a[i],b[i],print)) {
+      if (print) dump('>'+i+' was in a but not in b\n');
+      return false;
+    }
   }
   for (let j in b) {
-      if (!sameObject(a[j],b[j],print)) {
-        if (print) dump('>'+j+' was in b but not in a\n');
-        return false;
-      }
+    if (!sameObject(a[j],b[j],print)) {
+      if (print) dump('>'+j+' was in b but not in a\n');
+      return false;
+    }
   }
   return true;
 }

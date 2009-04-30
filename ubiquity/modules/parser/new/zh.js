@@ -34,34 +34,43 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
-var EXPORTED_SYMBOLS = ["makeFrParser"];
 
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
+// set up our parsers
+var EXPORTED_SYMBOLS = ["makeZhParser"];
 
-function makeFrParser() {
-  var fr = new Parser('fr');
-  fr.roles = [
-    {role: 'goal', delimiter: 'à'},
-    {role: 'goal', delimiter: 'a'},
-    {role: 'goal', delimiter: 'à la'},
-    {role: 'goal', delimiter: 'au'},
-    {role: 'goal', delimiter: 'aux'},
-    {role: 'source', delimiter: 'de'},
-    {role: 'source', delimiter: 'des'},
-    {role: 'time', delimiter: 'à'},
-    {role: 'time', delimiter: 'a'},
-    {role: 'instrument', delimiter: 'avec'},
-    {role: 'instrument', delimiter: 'sur'}
-  ];
-  fr.branching = 'right';
-  fr.examples = ['b les chaussettes avec google',
-    'de Tokyo à San Francisco'];
-  fr.clitics = [
-    {clitic: 'le', role: 'object'},
-    {clitic: 'les', role: 'object'}
-  ];
+if ((typeof window) == 'undefined') { // kick it chrome style
+  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+  Components.utils.import("resource://ubiquity/modules/localeutils.js");
+} else {
+  loadLocaleJson = function loadLocaleJson(url) {
+    var req = new XMLHttpRequest();
+    req.open('GET', url, false);
+    req.overrideMimeType("text/plain; charset=utf-8");
+    req.send(null);
+    return eval('(' + req.responseText + ')');
+  }
+}
 
-  return fr;
+function makeZhParser() {
+  var zh = new Parser('zh');
+  zh.branching = 'right';
+  zh.usespaces = false;
+  zh.joindelimiter = '';
+
+  // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
+  if ((typeof window) == 'undefined')
+    zhparts = loadLocaleJson("resource://ubiquity/modules/parser/new/zh.json");
+  else 
+    zhparts = loadLocaleJson('zh.json');
+  zh.anaphora = zhparts.anaphora;
+  zh.roles = zhparts.roles;
+  zh.examples = zhparts.examples;
+  
+  zh._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
+  zh.wordBreaker = function(input) {
+    return input.replace(this._patternCache.particleMatcher,' $1 ');
+  };
+  
+  return zh;
+
 };

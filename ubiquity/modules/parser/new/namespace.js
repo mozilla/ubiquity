@@ -37,16 +37,16 @@
 var EXPORTED_SYMBOLS = ["NLParser2"];
 
 Components.utils.import("resource://ubiquity/modules/parser/parser.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/en.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/pt.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/fr.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/da.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/sv.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/ja.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/zh.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/en.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/pt.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/fr.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/da.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/sv.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/ja.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/zh.js");
 
-//Components.utils.import("resource://ubiquity/modules/parser/tng/verbs.js");
+//Components.utils.import("resource://ubiquity/modules/parser/new/verbs.js");
 
 var NLParser2 = {
   // Namespace object

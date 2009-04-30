@@ -1,7 +1,7 @@
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
-Components.utils.import("resource://ubiquity/modules/parser/tng/namespace.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
@@ -97,7 +97,7 @@ function testParserTwoParseWithModifier() {
     ]
   };
 
-  var inputWords = "wash pood with sp";
+ var inputWords = "wash pood with sp";
   var completions = getCompletions( inputWords, [cmd_wash],
 				    [dog, washingObj], null);
   this.assert( completions.length == 2, "Should be 2 completions" );
@@ -110,7 +110,37 @@ function testParserTwoParseWithModifier() {
 }
 
 function testParserTwoInternationalization() {
-  
+
 }
+
+/*function testNounTypeSpeed() {
+  var slownoun = new NounUtils.NounType('anything');
+  slownoun.suggest = function(text) {
+    dump('checking '+text+'\n');
+    var start = new Date();
+    var now = null;
+    do { now = new Date(); }
+    while(now - start < 1000);
+    return [ NounUtils.makeSugg(text) ];
+  };
+
+  var cmd_hit = {
+
+    execute: function(context, arguments) {
+      dogGotPetted = arguments.object.text;
+    },
+    names: {
+      en: ["hit"]
+    },
+    arguments: [
+      {role: 'object', nountype: slownoun}
+    ]
+  };
+  var completions = getCompletions( "hit me", [cmd_hit], [slownoun], null );
+  dump("Completions are: " + completions + "\n");
+  dump("First verb is " + completions[0]._verb.text + "\n");
+  this.assert( completions.length == 2, "should be 2 completions" );
+}*/
+
 
 exportTests(this);

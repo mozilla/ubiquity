@@ -10,7 +10,7 @@ var NLParserMaker = function(parserVersion) {
     Components.utils.import("resource://ubiquity/modules/parser/original/locale_jp.js");
     NLParser = NLParser1;
   } else {
-    Components.utils.import("resource://ubiquity/modules/parser/tng/namespace.js");
+    Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
     NLParser = NLParser2;
   }
   return NLParser;

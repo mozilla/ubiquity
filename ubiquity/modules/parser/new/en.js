@@ -34,43 +34,28 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+ 
+var EXPORTED_SYMBOLS = ["makeEnParser"];
 
-// set up our parsers
-var EXPORTED_SYMBOLS = ["makeZhParser"];
+if ((typeof window) == 'undefined') // kick it chrome style
+  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 
-if ((typeof window) == 'undefined') { // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/tng/parser.js");
-  Components.utils.import("resource://ubiquity/modules/localeutils.js");
-} else {
-  loadLocaleJson = function loadLocaleJson(url) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, false);
-    req.overrideMimeType("text/plain; charset=utf-8");
-    req.send(null);
-    return eval('(' + req.responseText + ')');
-  }
-}
+function makeEnParser() {
+  var en = new Parser('en');
+  en.anaphora = ["this", "that", "it", "selection", "him", "her", "them"];
+  en.roles = [
+    {role: 'goal', delimiter: 'to'},
+    {role: 'source', delimiter: 'from'},
+    {role: 'position', delimiter: 'at'},
+    {role: 'position', delimiter: 'on'},
+    {role: 'alias', delimiter: 'as'},
+    {role: 'instrument', delimiter: 'using'},
+    {role: 'instrument', delimiter: 'with'}
+  ];
+  en.branching = 'right';
+  en.examples = ['from Tokyo to San',
+  'b socks using google',
+  'add meeting to calendar at 1 pm'];
 
-function makeZhParser() {
-  var zh = new Parser('zh');
-  zh.branching = 'right';
-  zh.usespaces = false;
-  zh.joindelimiter = '';
-
-  // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
-  if ((typeof window) == 'undefined')
-    zhparts = loadLocaleJson("resource://ubiquity/modules/parser/tng/zh.json");
-  else 
-    zhparts = loadLocaleJson('zh.json');
-  zh.anaphora = zhparts.anaphora;
-  zh.roles = zhparts.roles;
-  zh.examples = zhparts.examples;
-  
-  zh._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
-  zh.wordBreaker = function(input) {
-    return input.replace(this._patternCache.particleMatcher,' $1 ');
-  };
-  
-  return zh;
-
+  return en;
 };
