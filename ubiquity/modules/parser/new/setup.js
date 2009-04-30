@@ -53,7 +53,7 @@ var demoParserInterface = {
     this.currentQuery.watch('_step',function(id,oldval,newval) {
       let timefactor = 4;
       if (oldval > 0)
-        $('#timeinfo div').eq(oldval).css('width',(this._times[oldval] - this._times[oldval-1]) * timefactor);
+        $('#timeinfo div').eq(oldval-1).css('width',(this._times[oldval] - this._times[oldval-1]) * timefactor);
 
       if ($('#displayparseinfo').attr('checked')) {
         switch (oldval) {
@@ -129,7 +129,7 @@ var demoParserInterface = {
       }
       
       if (oldval == 9) {
-        $('#timeinfo span').text((this._times[7] - this._times[0])+'ms');
+        $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
       }      
       
       return newval;
@@ -137,7 +137,7 @@ var demoParserInterface = {
     
     this.currentQuery.onResults = function() {
       $('#scoredParses').empty();
-      for each (var parse in this._scoredParses.slice(0,this.maxSuggestions)) {
+      for each (var parse in this.suggestionList) {
         $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
       }
     }

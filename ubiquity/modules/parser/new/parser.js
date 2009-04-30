@@ -502,6 +502,9 @@ Parser.prototype = {
   //
   // TODO: add better explanation/examples of {{{_order}}} in a blog post or
   // inline.
+  //
+  // The {{{scoreMultiplier}}} parameter is set at this point, making
+  // {{{getMaxScore()}}} valid for all returned parses.
   
   argFinder: function(argString,verb) {
 
@@ -514,6 +517,17 @@ Parser.prototype = {
                                             this.joindelimiter,
                                             verb,
                                             argString);
+
+      if (defaultParse._verb.id) {
+        defaultParse.scoreMultiplier = 1;
+      } else {
+        defaultParse.scoreMultiplier = 0.3;
+        defaultParse._suggested = true;
+      }
+
+      // start score off with one point for the verb.
+      defaultParse.__score = defaultParse.scoreMultiplier;
+
       defaultParse.args = [];
       return [defaultParse];
     }
@@ -581,10 +595,20 @@ Parser.prototype = {
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parser.Parse which doesn't
       // have any arguments set.
-      var theseParses = [new Parser.Parse(this.branching,
+      var seedParse = new Parser.Parse(this.branching,
                                           this.joindelimiter,
                                           verb,
-                                          argString)];
+                                          argString);
+
+      // get all parses started off with their scoreMultipier values
+      if (verb.id) {
+        seedParse.scoreMultiplier = 1;
+      } else {
+        seedParse.scoreMultiplier = 0.3;
+        seedParse._suggested = true;
+      }
+
+      var theseParses = [seedParse];
 
       // if there are no delimiters at all, put it all in the direct object
       if (delimiterIndices.length == 0) {
@@ -781,7 +805,19 @@ Parser.prototype = {
 
       // Put all of the different delimiterIndices combinations' parses into
       // possibleParses to return it.
-      possibleParses.push(theseParses);
+      possibleParses = possibleParses.concat(theseParses);
+    }
+
+    for each (let parse in possibleParses) {
+      for (let role in parse.args) {
+        // if there are multiple arguments of any role, mark this parse down.
+        if (parse.args[role].length > 1) {
+          parse.scoreMultiplier *= Math.pow(0.5,
+                                      (parse.args[role].length - 1));
+        }
+      }
+      // start score off with one point for the verb.
+      parse.__score = parse.scoreMultiplier;
     }
 
     return possibleParses;
@@ -841,11 +877,15 @@ Parser.prototype = {
   // An array of //new// parses is returned, so it should replace the original
   // list of parses (which may include parses without any verbs). If none of
   // the verbs match the arguments' roles in the parse, it will return [].
-  suggestVerb: function(parse,threshold) {
+  //
+  // All returning parses also get their {{{scoreMultiplier}}} property set
+  // here as well.
+  suggestVerb: function(parse) {
 
     // for parses which already have a verb
-    if (parse._verb.id != null)
+    if (parse._verb.id != null) {
       return [parse];
+    }
 
     // for parses WITHOUT a set verb:
     var returnArray = [];
@@ -876,9 +916,7 @@ Parser.prototype = {
         // TODO: for verb forms which clearly should be sentence-final,
         // change this value to -1
 
-        parseCopy._suggested = true;
-//        if (parseCopy.scoreMultiplier > threshold)
-          returnArray.push(parseCopy);
+        returnArray.push(parseCopy);
       }
     }
     return returnArray;
@@ -976,6 +1014,15 @@ Parser.prototype = {
         return [];
 
     }
+
+    for each (parse in returnArr) {
+      // for each of the roles parsed in the parse
+      for (let role in parse.args) {
+        // multiply the score by each role's first argument's nountype match score
+        parse.__score += parse.args[role][0].score * parse.scoreMultiplier;
+      }
+    }
+    
     return returnArr;
   },
   
@@ -1106,7 +1153,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions,
   this._verbedParses = [];
   this._suggestedParses = [];
   this._scoredParses = [];
-  this._threshold = 0.2;
+  this._topScores = [];
 
   dump("Making a new parser2 query.  String = " + queryString + "\n");
 
@@ -1175,6 +1222,7 @@ Parser.Query.prototype = {
       if (i > 0)
         dump( 'step '+i+': '+(this._times[i] - this._times[i-1])+' ms\n' );
     }
+    dump('total: '+(this._times[this._times.length-1] - this._times[0])+' ms\n' );
     dump("There were "+this._scoredParses.length+" completed parses\n");
     return true;
   },
@@ -1224,11 +1272,9 @@ Parser.Query.prototype = {
 
     // STEP 4: group into arguments
     for each (var pair in this._verbArgPairs) {
-      for each (var argParses in
-                this.parser.argFinder(pair.argString,pair._verb)) {
-        this._possibleParses = this._possibleParses.concat(argParses);
-        yield true;
-      }
+      let argParses = this.parser.argFinder(pair.argString,pair._verb);
+      this._possibleParses = this._possibleParses.concat(argParses);
+      yield true;
     }
 
     this._times[this._step] = Date.now();
@@ -1269,9 +1315,13 @@ Parser.Query.prototype = {
 
     // STEP 6: suggest verbs for parses which don't have one
     for each (parse in this._possibleParses) {
-      let newVerbedParses = this.parser.suggestVerb(parse,this._threshold);
-      this._verbedParses = this._verbedParses.concat(newVerbedParses);
-      yield true;
+      let newVerbedParses = this.parser.suggestVerb(parse);
+      for each (newVerbedParse in newVerbedParses) {
+        this._verbedParses = this.addIfGoodEnough(this._verbedParses,
+                                                  newVerbedParse);
+//        this._verbedParses.push(newVerbedParse);
+        yield true;
+      }
     }
 
     this._times[this._step] = Date.now();
@@ -1289,9 +1339,12 @@ Parser.Query.prototype = {
     // STEP 8: replace arguments with their nountype suggestions
     // TODO: make this async to support async nountypes!
     for each (parse in this._verbedParses) {
-      this._suggestedParses = this._suggestedParses.concat(
-        this.parser.suggestArgs(parse));
-      yield true;
+      for each (let newParse in this.parser.suggestArgs(parse)) {
+        this._suggestedParses = this.addIfGoodEnough(this._suggestedParses,
+                                                     newParse);
+//        this._suggestedParses.push(newParse);
+        yield true;
+      }
     }
 
     this._times[this._step] = Date.now();
@@ -1301,14 +1354,12 @@ Parser.Query.prototype = {
     for each (parse in this._suggestedParses) {
       var parseCopy = cloneParse(parse);
       parseCopy.complete = true;
-      parseCopy.getScore(); // compute the score
       this._scoredParses.push(parseCopy);
       yield true;
     }
     
     // order the scored parses here.
-    this._scoredParses = this._scoredParses.sort(
-      function(a,b) { return b.__score - a.__score; } );
+    this._scoredParses.sort( function(a,b) b.getScore() - a.getScore() );
 
     this._times[this._step] = Date.now();
     this._step++;
@@ -1326,7 +1377,9 @@ Parser.Query.prototype = {
   // ** {{{Parser.Query.suggestionList}}} (read-only) **
   //
   // A getter for the suggestion list.
-  get suggestionList() { return this._scoredParses; },
+  get suggestionList() {
+    return this._scoredParses.slice(0,this.maxSuggestions);
+  },
 
   // ** {{{Parser.Query.cancel()}}} **
   //
@@ -1340,7 +1393,57 @@ Parser.Query.prototype = {
   // ** {{{Parser.Query.onResults()}}} **
   //
   // A handler for the endgame. To be overridden.
-  onResults: function() {}
+  onResults: function() {},
+  
+  // ** {{{Parser.Query.addIfGoodEnough}}} **
+  addIfGoodEnough: function(parseCollection,newParse) {
+
+    if (parseCollection.length < this.maxSuggestions)
+      return parseCollection.concat([newParse]);
+
+    // reorder parseCollection so that it's in decreasing current score order
+    parseCollection.sort( function(a,b) b.getScore() - a.getScore() );
+
+    // "the bar" is the lowest current score among the top candidates
+    // New candidates must exhibit the *potential* (via maxScore) to beat
+    // this bar in order to get added.
+    let theBar = parseCollection[this.maxSuggestions - 1].getScore();
+    //mylog('theBar = '+theBar);
+      
+    // at this point we can already assume that there are enough suggestions
+    // (because if we had less, we would have already returned with newParse
+    // added). Thus, if the new parse's maxScore is less than the current bar
+    // we will not return it (effectively killing the parse).
+
+    if (newParse.getMaxScore() < theBar) {
+      //mylog(['not good enough:',newParse,newParse.getMaxScore()]);
+      return parseCollection;
+    }
+    
+    // add the new parse into the parse collection
+    parseCollection = parseCollection.concat([newParse]);
+    // sort again
+    parseCollection.sort( function(a,b) b.getScore() - a.getScore() );
+    
+    // if the bar changed...
+    if (parseCollection[this.maxSuggestions - 1].getScore() > theBar) {
+      theBar = parseCollection[this.maxSuggestions - 1].getScore();
+      //mylog('theBar is now '+theBar);
+      
+      // sort by ascending maxScore order
+      parseCollection.sort( function(a,b) a.getMaxScore() - b.getMaxScore() );
+      
+      while (parseCollection[0].getMaxScore() < theBar
+             && parseCollection.length > this.maxSuggestions) {
+        let throwAway = parseCollection.shift();
+        //mylog(['throwing away:',throwAway,throwAway.getMaxScore()]);
+      }
+    }
+    
+    return parseCollection;
+
+  }
+
 
 };
 
@@ -1363,7 +1466,7 @@ Parser.Parse = function(branching, joindelimiter, verb, argString) {
   this.args = {};
   // this is the internal score variable--use the getScore method
   this.__score = 0;
-  this.scoreMultiplier = 1;
+  this.scoreMultiplier = 0;
   // complete == false means we're still parsing or waiting for async nountypes
   this.complete = false;
 }
@@ -1484,10 +1587,8 @@ Parser.Parse.prototype = {
 
     let score = 0;
 
-    // first compute the scoreMultiplier
-    this.scoreMultiplier = 1;
-    if (this._suggested) // if the verb was suggested
-      this.scoreMultiplier *= 0.3;
+    // get one point for the verb
+    score += this.scoreMultiplier;
 
     if (!this._verb.text)
       return false; // we still cannot determine the maxScore
@@ -1510,38 +1611,8 @@ Parser.Parse.prototype = {
   },
   // ** {{{Parser.Parse.getScore()}}} **
   //
-  // {{{getScore()}}} computes the score of the parse based on each argument's 
-  // nountype score and the number of matching arguments, etc. 
+  // {{{getScore()}}} returns the current value of {{{__score}}}.
   getScore: function() {
-    if (!this.complete)
-      return false;
-
-    let score = 0; // start with a zero
-
-    // first compute the scoreMultiplier
-    this.scoreMultiplier = 1;
-    if (this._suggested) // if the verb was suggested
-      this.scoreMultiplier *= 0.3;
-
-    // for each of the roles parsed in the parse
-    for (let role in this.args) {
-      // if there are multiple arguments of any role, mark this parse down.
-      if (this.args[role].length > 1) {
-        this.scoreMultiplier *= Math.pow(0.5,(this.args[role].length - 1));
-      }
-    }
-
-    // get the scoreMultiplier amount just for the verb.
-    // i.e. a lower base score if the verb was suggested
-    score += this.scoreMultiplier;
-
-    // for each of the roles parsed in the parse
-    for (let role in this.args) {
-      // multiply the score by each role's first argument's nountype match score
-      score += this.args[role][0].score * this.scoreMultiplier;
-    }
-
-    this.__score = score;
     return this.__score;
   }
 
@@ -1575,6 +1646,8 @@ var cloneParse = function(p) {
   ret.args = cloneObject(p.args);
   ret.complete = p.complete;
   ret._suggested = p._suggested;
+  ret.scoreMultiplier = p.scoreMultiplier;
+  ret.__score = p.__score;
   return ret;
 }
 
