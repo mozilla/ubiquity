@@ -512,11 +512,12 @@ CmdUtils.CreateCommand({
   preview: function( pblock, arguments ) {
     var defaultLang = this._getDefaultLang();
     var goal = arguments.goal || arguments.to;
-    var toLang = goal.text || noun_type_language.getLangName(defaultLang);
-    var toLangCode = goal.data || defaultLang;
-    var textToTranslate = arguments.object.text;
+    var toLang = (goal ? goal.text : noun_type_language.getLangName(defaultLang));
+    var toLangCode = (goal ? goal.data : defaultLang);
+    var textToTranslate = (arguments.object ? arguments.object.text : '');
 
     var lang = toLang[0].toUpperCase() + toLang.substr(1);
+    dump(lang+'\n')
 
     pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
     translateTo( textToTranslate, {to:toLangCode}, function( translation ) {

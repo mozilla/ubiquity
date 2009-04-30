@@ -168,12 +168,10 @@ Parser.prototype = {
           // the standard nountype form here when registering it.
           // We only need the NounUtils loaded in in chrome, as there are no regex
           // nountypes in the parser-demo.
-          if ((typeof window) == 'undefined') { // kick it chrome style
-            var nu = {};
-            Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
-            var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
-            thisNounType = nounTypeFromRegExp(arg.nountype);
-          }
+          var nu = {};
+          Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
+          var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
+          thisNounType = nounTypeFromRegExp(arg.nountype);
 
           // returning the converted version of the nountype back into the verb
           arg.nountype = thisNounType;
@@ -1030,67 +1028,44 @@ Parser.prototype = {
   //
   // In the future these methods of {{{Parser}}} probably ought to
   // go into a separate class or something.
-  //
-  // The only method actually called elsewhere is 
-  // {{{cacheNounTypes()}}}... the other two are just used by that one.
-  
-  // ** {{{Parser._detectNounType()}}} **
   // 
-  // Takes an argument string and, if it is not in the {{{nounCache}}},
-  // calls {{{_protoDetectNounType}}} and caches it. It then also returns
-  // the result.
-  _detectNounType: function(x) {
-    if (nounCache[x] == undefined) {
-      nounCache[x] = this._protoDetectNounType(x);
-    }
-    return nounCache[x];
-  },
-  
-  // ** {{{Parser._protoDetectNounType()}}} **
+  // ** {{{Parser.detectNounType()}}} **
   //
-  // This method actually does the detecting.
+  // This method does the nountype detecting.
   // It takes an argument string and runs through all of the noun types in
   // {{{Parser._nounTypes}}} and gets their suggestions (via their 
   // {{{.suggest()}}} methods). It then takes each of those suggestions,
   // marks them with which noun type it came from (in {{{.nountype}}})
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
-  _protoDetectNounType: function (x) {
+  detectNounType: function (x,callback) {
     //mylog('detecting '+x+'\n');
     
-    let returnArray = [];
-
-    for each (let thisNounType in this._nounTypes) {
-      //mylog(thisNounType);
-      let suggestions = thisNounType.suggest(x);
-      //mylog(suggestions);
-      for each (let suggestion in suggestions) {
-        // set the nountype that was used in each suggestion so that it can 
-        // later be compared with the nountype specified in the verb.
-        suggestion.nountype = thisNounType;
+    if (!(x in nounCache)) {
+      let returnArray = [];
+  
+      for each (let thisNounType in this._nounTypes) {
+        //mylog(thisNounType);
+        let suggestions = thisNounType.suggest(x);
+        //mylog(suggestions);
+        for each (let suggestion in suggestions) {
+          // set the nountype that was used in each suggestion so that it can 
+          // later be compared with the nountype specified in the verb.
+          suggestion.nountype = thisNounType;
+        }
+        if (suggestions.length > 0) {
+          returnArray = returnArray.concat(suggestions);
+        }
       }
-      if (suggestions.length > 0) {
-        returnArray = returnArray.concat(suggestions);
-      }
+      
+      nounCache[x] = returnArray;
     }
     
-    return returnArray;
-  },
-  
-  // ** {{{Parser.cacheNounTypes()}}} **
-  //
-  // Takes an {{{args}}} property of a Parse and digs deep to find the actual
-  // argument strings. It then passes each argument string
-  // ({{{_substitutedInput}}}) to {{{Parser._detectNounType()}}}.
-  cacheNounTypes: function (args) {
-    for each (let arg in args) {
-      for each (let x in arg) {
-        this._detectNounType(x._substitutedInput);
-      }
-    }
-    return true;
+    if (typeof callback == 'function')
+      callback(x,nounCache[x]);
+    
+    return nounCache[x];
   }
-
 }
 
 // == {{{Parser.Query}}} prototype ==
@@ -1328,48 +1303,86 @@ Parser.Query.prototype = {
     this._step++;
 
     // STEP 7: do nountype detection + cache
-    for each (parse in this._verbedParses) {
-      this.parser.cacheNounTypes(parse.args);
-      yield true;
-    }
+    // STEP 8: suggest arguments with nountype suggestions
+    // STEP 9: score
 
-    this._times[this._step] = Date.now();
-    this._step++;
+    // Set up tryToCompleteParses()
+    // This function will be called at the end of each nountype detection.
+    // If it finds some parse that that is ready for scoring, it will then
+    // handle the scoring.
+    var thisQuery = this;
+    var completeParse = function(thisParse) {
+      //mylog('completing parse '+parseId+' now');
+      thisParse.complete = true;
 
-    // STEP 8: replace arguments with their nountype suggestions
-    // TODO: make this async to support async nountypes!
-    for each (parse in this._verbedParses) {
-      for each (let newParse in this.parser.suggestArgs(parse)) {
-        this._suggestedParses = this.addIfGoodEnough(this._suggestedParses,
+      // go through all the arguments in thisParse and suggest args
+      // based on the nountype suggestions.
+      // If they're good enough, add them to _scoredParses.
+      for each (let newParse in thisQuery.parser.suggestArgs(thisParse)) {
+        thisQuery._scoredParses = thisQuery.addIfGoodEnough(thisQuery._scoredParses,
                                                      newParse);
-//        this._suggestedParses.push(newParse);
-        yield true;
+      }
+    }
+    var tryToCompleteParses = function(argText,suggestions) {
+      //mylog('finished detecting nountypes for '+argText);
+      for each (parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
+        let thisParse = thisQuery._verbedParses[parseId];
+
+        //mylog(thisParse.allNounTypesDetectionHasCompleted());
+
+        if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
+          completeParse(thisParse);
+        }
+      }
+      
+      var isComplete = function(parse) {return parse.complete};
+      if (thisQuery._verbedParses.every(isComplete)) {    
+        thisQuery._times[this._step] = Date.now();
+        thisQuery._step++;
+        thisQuery.finished = true;
+        thisQuery.onResults();
       }
     }
 
-    this._times[this._step] = Date.now();
-    this._step++;
+    // first create a map from arg's to parses that use them.
+    this._parsesThatIncludeThisArg = {};
+    // and also a list of arguments we need to cache
+    this._argsToCache = {};
+    for (let parseId in this._verbedParses) {
+      let parse = this._verbedParses[parseId];
+      parse._verbedParseId = parseId;
+      
+      let foundArgs = false;
+      for each (let arg in parse.args) {
+        foundArgs = true;
+        for each (let x in arg) {
+          // this is the text we're going to cache
+          let argText = x._substitutedInput;
+          
+          if (!(argText in this._argsToCache)) {
+            this._argsToCache[argText] = 1;
+            this._parsesThatIncludeThisArg[argText] = [];
+          }
+          this._parsesThatIncludeThisArg[argText].push(parseId);
+        }
+      }
+  
+      // if this parse doesn't have any arguments, complete it now.
+      if (!foundArgs) {
+        completeParse(parse);        
+      }
+    }
 
-    // STEP 9: score + rank
-    for each (parse in this._suggestedParses) {
-      var parseCopy = cloneParse(parse);
-      parseCopy.complete = true;
-      this._scoredParses.push(parseCopy);
+    // now that we have a list of args to cache, let's go through and cache them.
+    for (let argText in this._argsToCache) {
+      
+      this.parser.detectNounType(argText,tryToCompleteParses);
       yield true;
     }
-    
-    // order the scored parses here.
-    this._scoredParses.sort( function(a,b) b.getScore() - a.getScore() );
 
-    this._times[this._step] = Date.now();
-    this._step++;
-
-    this.finished = true;
-
-    this.onResults();
   },
 
-  // ** {{{Parser.Query.hasResults}}} (read-only)**
+  // ** {{{Parser.Query.hasResults}}} (read-only) **
   //
   // A getter for whether there are any results yet or not.
   get hasResults() { return this._scoredParses.length > 0; },
@@ -1378,7 +1391,17 @@ Parser.Query.prototype = {
   //
   // A getter for the suggestion list.
   get suggestionList() {
-    return this._scoredParses.slice(0,this.maxSuggestions);
+    // We clone because we're going to sort the results but we don't want this
+    // to interfere with any sorting being done in the addIfGoodEnough
+    // routine.
+    //
+    // in other words...
+    //
+    // "We clone because we care." (TM)
+    let returnParses = cloneObject(this._scoredParses);
+    // order the scored parses here.
+    returnParses.sort( function(a,b) b.getScore() - a.getScore() );
+    return returnParses.slice(0,this.maxSuggestions);
   },
 
   // ** {{{Parser.Query.cancel()}}} **
@@ -1395,7 +1418,21 @@ Parser.Query.prototype = {
   // A handler for the endgame. To be overridden.
   onResults: function() {},
   
-  // ** {{{Parser.Query.addIfGoodEnough}}} **
+  // ** {{{Parser.Query.addIfGoodEnough()}}} **
+  //
+  // Takes a {{{parseCollection}}} (Array) and a {{{newParse}}}.
+  // 
+  // Looking at the {{{maxSuggestions}}} value (= m), defines "the bar" (the
+  // lowest current score of the top m parses in the {{{parseCollection}}}).
+  // Adds the {{{newParse}}} to the {{{parseCollection}}} if it has a chance
+  // at besting "the bar" in the future ({{{newParse.getMaxScore() > theBar}}}).
+  // If {{{newParse}}} was added and that "raised the bar", it will go through
+  // all parses in the {{{parseCollection}}} and kill off those which have
+  // no chance in hell of overtaking the new bar.
+  //
+  // A longer explanation of "Rising Sun" optimization strategy (and why it is
+  // applicable here, and with what caveats) can be found in the article
+  // [[http://mitcho.com/blog/observation/scoring-for-optimization/|Scoring for Optimization]].
   addIfGoodEnough: function(parseCollection,newParse) {
 
     if (parseCollection.length < this.maxSuggestions)
@@ -1574,6 +1611,26 @@ Parser.Parse.prototype = {
   // Return the verb's {{{previewUrl}}} value.
   get previewUrl() {
     return this._verb.previewUrl;
+  },
+  // **{{{Parser.Parse.allNounTypesDetectionHasCompleted()}}} (read-only)**
+  //
+  // If all of the arguments' nountype detection has completed, returns true.
+  // This means this parse can move onto Step 8
+  allNounTypesDetectionHasCompleted: function() {
+    i=0;
+    for (let role in this.args) {
+      // for each argument of this role...
+      for each (let arg in this.args[role]) {
+        // this is the argText to check
+        let argText = arg._substitutedInput;
+
+        if (!(argText in nounCache))
+          return false;
+      }
+    }
+
+    // if all the argText's are in the nounCache
+    return true;
   },
   // ** {{{Parser.Parse.getMaxScore()}}} **
   //

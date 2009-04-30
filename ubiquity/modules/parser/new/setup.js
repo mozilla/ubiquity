@@ -97,6 +97,8 @@ var demoParserInterface = {
             break;
 
           case 7:
+          case 8:
+          case 9:
             $('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
             for (var text in nounCache) {
               var html = $('<li><code>'+text+'</code></li>');
@@ -107,17 +109,15 @@ var demoParserInterface = {
               list.appendTo(html);
               html.appendTo($('#nounCache'));
             }
-            break;
 
-          case 8:
+
             $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._suggestedParses) {
               $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#suggestedParses'));
             }
             $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
-            break;
 
-          case 9:
+
             $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._scoredParses) {
               $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#debugScoredParses'));
@@ -128,10 +128,6 @@ var demoParserInterface = {
         }
       }
       
-      if (oldval == 9) {
-        $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
-      }      
-      
       return newval;
     });
     
@@ -140,6 +136,7 @@ var demoParserInterface = {
       for each (var parse in this.suggestionList) {
         $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
       }
+      $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
     }
     this.currentQuery.run();
 //    setTimeout(function(x){x.currentQuery.run()},0,this);
