@@ -42,8 +42,7 @@ function getCompletions( input, verbs, nountypes, context ) {
 
 // End duplicated code
 
-function testParserTwo() {
-  dump(" ******************************** test_parser2 test running **********************\n");
+function testParserTwoDirectOnly() {
   var dogGotPetted = false;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
 				  "beagle", "bulldog", "husky"]);
@@ -61,8 +60,6 @@ function testParserTwo() {
   };
 
   var completions = getCompletions( "pet b", [cmd_pet], [dog], null );
-  dump("Completions are: " + completions + "\n");
-  dump("First verb is " + completions[0]._verb.text + "\n");
 
   this.assert( completions.length == 2, "should be 2 completions" );
   this.assert( completions[0]._verb.text == "pet", "verb should be pet");
@@ -75,6 +72,45 @@ function testParserTwo() {
   this.assert( dogGotPetted == "beagle");
   completions[1].execute();
   this.assert( dogGotPetted == "bulldog" );
+}
+
+function testParserTwoParseWithModifier() {
+  // wash dog with sponge
+  var dogGotWashed = null;
+  var dogGotWashedWith = null;
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
+				"beagle", "bulldog", "husky"]);
+  var washingObj = new NounUtils.NounType( "washing object",
+					  ["sponge", "hose", "spork",
+					  "bathtub", "fire hose"]);
+  var cmd_wash = {
+    execute: function(context, arguments) {
+      dogGotWashed = arguments.object.text;
+      dogGotWashedWith = arguments.instrument.text;
+    },
+    names: {
+      en: ["wash"]
+    },
+    arguments: [
+      {role: 'object', nountype: dog },
+      {role: 'instrument', nountype: washingObj }
+    ]
+  };
+
+  var inputWords = "wash pood with sp";
+  var completions = getCompletions( inputWords, [cmd_wash],
+				    [dog, washingObj], null);
+  this.assert( completions.length == 2, "Should be 2 completions" );
+  completions[0].execute();
+  this.assert( dogGotWashed == "poodle");
+  this.assert( dogGotWashedWith == "sponge");
+  completions[1].execute();
+  this.assert( dogGotWashed == "poodle");
+  this.assert( dogGotWashedWith == "spork");
+}
+
+function testParserTwoInternationalization() {
+  
 }
 
 exportTests(this);
