@@ -1711,7 +1711,7 @@ if ((typeof window) == 'undefined') {// kick it chrome style
   }
 
 } else {
-  mylog = console.log;
+  //mylog = console.log;
 }
 
 var cloneParse = function(p) {
