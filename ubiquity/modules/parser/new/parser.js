@@ -58,10 +58,10 @@ var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameObject'];
 //
 // The noun cache is initialized here.
 // Perhaps this should be moved out into its own module in the future.
-// Nouns are cached in this cache in the {{{Parser.cacheNounTypes}}} method
+// Nouns are cached in this cache in the {{{Parser.detectNounTypes}}} method
 // and associated methods. Later in the parse process elements of {{{nounCache}}}
 // are accessed directly, assuming that the nouns were already cached
-// using {{{Parser.cacheNounTypes}}}.
+// using {{{Parser.detectNounType}}}.
 // 
 // TODO: better cleanup + management of {{{nounCache}}}
 
@@ -1042,29 +1042,47 @@ Parser.prototype = {
     //mylog('detecting '+x+'\n');
     
     if (!(x in nounCache)) {
-      let returnArray = [];
-  
-      for each (let thisNounType in this._nounTypes) {
-        //mylog(thisNounType);
-        let suggestions = thisNounType.suggest(x);
-        //mylog(suggestions);
-        for each (let suggestion in suggestions) {
-          // set the nountype that was used in each suggestion so that it can 
-          // later be compared with the nountype specified in the verb.
-          suggestion.nountype = thisNounType;
-        }
-        if (suggestions.length > 0) {
-          returnArray = returnArray.concat(suggestions);
-        }
-      }
+
+      /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
+
+      mylog(nounWorker);
+      nounWorker.onmessage = function(event) {
+        mylog(event.data);
+        
+        // the callback gets returned the original argText and the array of
+        // suggestions
+        //if (typeof callback == 'function')
+        //  callback(x,nounCache[x]);
+      };
+
+      mylog(this._nounTypes);
+      var self = this;
+      nounWorker.postMessage({self:self,input:x});*/
       
-      nounCache[x] = returnArray;
+      var nounWorker = {};
+      Components.utils.import(
+        'resource://ubiquity/modules/parser/new/noun_worker.js',
+        nounWorker);
+      Components.utils.import(
+        'resource://ubiquity/modules/utils.js');
+      nounWorker.setNounTypes(this._nounTypes);
+      var myCallback = function(suggestions) {
+        nounCache[x] = suggestions;
+        if (typeof callback == 'function')
+          callback(x,nounCache[x]);
+      }
+
+      // Uncommenting these lines here make nountype detection async
+      // but the current tests in test_parser2 are incompatible with this.
+      // See: getCompletions in test_parser2.js
+      
+      //Utils.setTimeout(function(){
+        nounWorker.detectNounType(x,myCallback);
+      //},0);
+      
     }
     
-    if (typeof callback == 'function')
-      callback(x,nounCache[x]);
-    
-    return nounCache[x];
+    //return nounCache[x];
   }
 }
 
@@ -1324,7 +1342,7 @@ Parser.Query.prototype = {
       }
     }
     var tryToCompleteParses = function(argText,suggestions) {
-      //mylog('finished detecting nountypes for '+argText);
+      dump('finished detecting nountypes for '+argText+'\n');
       for each (parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
 
@@ -1340,6 +1358,7 @@ Parser.Query.prototype = {
         thisQuery._times[this._step] = Date.now();
         thisQuery._step++;
         thisQuery.finished = true;
+        dump('done!!!\n');
         thisQuery.onResults();
       }
     }
@@ -1692,7 +1711,7 @@ if ((typeof window) == 'undefined') {// kick it chrome style
   }
 
 } else {
-  //mylog = console.log;
+  mylog = console.log;
 }
 
 var cloneParse = function(p) {
