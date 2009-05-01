@@ -14,7 +14,7 @@ EXT_SUBDIR = "ubiquity"
 
 # Full path to xpcshell; if it's not an absolute path, it's assumed
 # to be on the user's PATH.
-g_xpcshell_path = "xpcshell"
+g_xpcshell_path = "/Users/blair/Development/Taskfox/obj/browser-i386-apple-darwin9.6.2-release/dist/Minefield.app/Contents/MacOS/xpcshell"
 
 g_mydir = os.path.abspath(os.path.split(__import__("__main__").__file__)[0])
 
