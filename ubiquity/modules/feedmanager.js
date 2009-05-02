@@ -245,60 +245,10 @@ FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
 FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   var self = this;
 
-  function showNotification(plugin, targetDoc, commandsUrl, mimetype) {
-    var Cc = Components.classes;
-    var Ci = Components.interfaces;
-
-    // Find the <browser> which contains notifyWindow, by looking
-    // through all the open windows and all the <browsers> in each.
-    var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
-             getService(Ci.nsIWindowMediator);
-    var enumerator = wm.getEnumerator(Utils.appWindowType);
-    var tabbrowser = null;
-    var foundBrowser = null;
-
-    while (!foundBrowser && enumerator.hasMoreElements()) {
-      var win = enumerator.getNext();
-      tabbrowser = win.getBrowser();
-      foundBrowser = tabbrowser.getBrowserForDocument(targetDoc);
-    }
-
-    // Return the notificationBox associated with the browser.
-    if (foundBrowser) {
-      var box = tabbrowser.getNotificationBox(foundBrowser);
-      var BOX_NAME = "ubiquity_notify_commands_available";
-      var oldNotification = box.getNotificationWithValue(BOX_NAME);
-      if (oldNotification)
-        box.removeNotification(oldNotification);
-
-      function onSubscribeClick(notification, button) {
-        plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
-      }
-
-      var buttons = [
-        {accessKey: null,
-         callback: onSubscribeClick,
-         label: "Subscribe...",
-         popup: null}
-      ];
-      box.appendNotification(
-        ("This page contains Ubiquity commands.  " +
-         "If you'd like to subscribe to them, please " +
-         "click the button to the right."),
-        BOX_NAME,
-        "http://www.mozilla.com/favicon.ico",
-        box.PRIORITY_INFO_MEDIUM,
-        buttons
-      );
-    } else {
-      Components.utils.reportError("Couldn't find tab for document");
-    }
-  }
-
   function onPageWithCommands(plugin, pageUrl, commandsUrl, document,
                               mimetype) {
     if (!self.isSubscribedFeed(pageUrl))
-      showNotification(plugin, document, commandsUrl, mimetype);
+      self.showNotification(plugin, document, commandsUrl, mimetype);
   }
 
   // Watch for any tags of the form <link rel="commands">
@@ -327,6 +277,63 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
       plugin.installToWindow(window);
   }
 };
+
+// TODO: Add Documentation for this
+FMgrProto.showNotification = function showNotification(plugin, targetDoc, commandsUrl, mimetype, notify_message) {
+ 
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+
+  // Find the <browser> which contains notifyWindow, by looking
+  // through all the open windows and all the <browsers> in each.
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
+           getService(Ci.nsIWindowMediator);
+  var enumerator = wm.getEnumerator(Utils.appWindowType);
+  var tabbrowser = null;
+  var foundBrowser = null;
+
+  while (!foundBrowser && enumerator.hasMoreElements()) {
+    var win = enumerator.getNext();
+    tabbrowser = win.getBrowser();
+    foundBrowser = tabbrowser.getBrowserForDocument(targetDoc);
+  }
+
+  // Return the notificationBox associated with the browser.
+  if (foundBrowser) {
+    var box = tabbrowser.getNotificationBox(foundBrowser);
+    var BOX_NAME = "ubiquity_notify_commands_available";
+    var oldNotification = box.getNotificationWithValue(BOX_NAME);
+    if (oldNotification)
+      box.removeNotification(oldNotification);
+
+    function onSubscribeClick(notification, button) {
+      plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
+    }
+    
+    if(!notify_message){
+      var notify_message = ("This page contains Ubiquity commands.  " +
+       "If you'd like to subscribe to them, please " +
+       "click the button to the right.");
+    }
+    
+    var buttons = [
+      {accessKey: null,
+       callback: onSubscribeClick,
+       label: "Subscribe...",
+       popup: null}
+    ];
+    box.appendNotification(
+      notify_message,
+      BOX_NAME,
+      "http://www.mozilla.com/favicon.ico",
+      box.PRIORITY_INFO_MEDIUM,
+      buttons
+    );
+  } else {
+    Components.utils.reportError("Couldn't find tab for document");
+  }
+}
+
 
 // === {{{FeedManager.finalize()}}} ===
 //
