@@ -957,7 +957,6 @@ CmdUtils.previewGet = function previewGet(pblock,
                                dataType: type});
 };
 
-
 // ** {{{ CmdUtils.previewPost(pblock, url, data, callback, type) }}} **
 //
 // Does an asynchronous request to a remote web service.  It is used
@@ -985,8 +984,6 @@ CmdUtils.previewPost = function previewPost(pblock,
                                success: callback,
                                dataType: type});
 };
-
-
 
 // ** {{{ CmdUtils.previewCallback(pblock, callback, abortCallback) }}} **
 //
@@ -1031,6 +1028,41 @@ CmdUtils.previewCallback = function previewCallback(pblock,
   }
 
   return wrappedCallback;
+};
+
+// ** {{{ CmdUtils.absUrl(data, sourceUrl) }}} **
+//
+// Fixes relative urls in data (eg. as returned by AJAX call). Usefull for
+// displaying fetched content in command previews.
+//
+// {{{data}}}: The data containing relative urls - accepts HTML, jQuery objects 
+// and XML
+//
+// {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to 
+// which the relative paths are relative to)
+CmdUtils.absUrl = function absUrl(data, sourceUrl) { // improved by satyr
+  switch (typeof data) {
+    case "string":
+      return data.replace(
+        /\b(href|src|action)=([\"\']?)(?!https?:\/\/)(\S+)\2/ig,
+        function au_repl(_, a, q, path)(a + "=" 
+                                          + q 
+                                          + Utils.url({uri: path, 
+                                                       base: sourceUrl}).spec 
+                                          + q));
+    case "object":
+      jQuery(data).find("a, img, form, link").andSelf().each(function au_each(){
+        var attr, path = (this.getAttribute(attr = 'href') ||
+                          this.getAttribute(attr = 'src' ) ||
+                          this.getAttribute(attr = 'action'));
+        if(path !== null && /^(?!https?:\/\/)/.test(path))
+          this.setAttribute(attr, Utils.url({uri: path, base: sourceUrl}).spec);
+      });
+      return data;
+    case "xml":
+      return XML(arguments.callee(data.toXMLString(), sourceUrl));
+  }
+  return null;
 };
 
 // ** {{{ CmdUtils.makeSearchCommand(options) }}} **
