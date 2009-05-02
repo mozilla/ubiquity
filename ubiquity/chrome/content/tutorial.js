@@ -102,25 +102,16 @@ function ubiqSuggestionIs(text) {
 }
 
 function startUbiqTutorial() {
-  var platform = window.navigator.platform;
 
   hideOtherContent();
+  var keyCombo = PrefKeys.getKeyCombo();
+  
 
   var introHtml = "<p>Hi, I'm Jono from Mozilla Labs, one of the authors"
                   + " of Ubiquity.  Ubiquity makes the Internet do your bidding."
-    + " This is the absolute basics tutorial.  Let's get started.</p>";
-
-  var macIntroHtml = "<p><b>Hold down the option key and tap the spacebar.</b></p>";
-  var winIntroHtml = "<p><b>Hold down the control key and tap the spacebar.</b></p>";
-  var linIntroHtml = "<p><b>Hold down the alt key and tap the spacebar.</b></p>";
-
-  if (platform.indexOf( "Win" ) > -1 ) {
-    introHtml += winIntroHtml;
-  } else if (platform.indexOf( "Mac" ) > -1 ) {
-    introHtml += macIntroHtml;
-  } else if (platform.indexOf( "Linux" ) > -1 ) {
-    introHtml += linIntroHtml;
-  }
+    + " This is the absolute basics tutorial.  Let's get started.</p>"
+    + "<p><b>Hold down the " +  keyCombo[0] + " key and tap the " 
+    + keyCombo[1] + " key.</b></p>";
 
   fadeInText(introHtml);
 

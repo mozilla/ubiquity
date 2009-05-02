@@ -48,20 +48,9 @@ var PrefKeys = {
   },
   
   onLoad : function(){
-
-    var defaultKeyModifier = "ALT";
-    //default key modifier for windows is CTRL
-    var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
-                               .getService(Components.interfaces.nsIXULRuntime);
-    if(xulRuntime.OS == "WINNT"){
-      defaultKeyModifier = "CTRL";
-    }
-    
-    var keyCode = Application.prefs.getValue(this.KEYCODE_PREF, 32);
-    var keyModifier = Application.prefs.getValue(this.KEYMODIFIER_PREF, defaultKeyModifier);
-    
-    var keyText = keyModifier + "+" 
-                  + this._convertToText(keyCode) 
+    var keyCombo = this.getKeyCombo();
+    var keyText = keyCombo[0] + "+" 
+                  + keyCombo[1]
                   + " (Click here to change)";
     $("#keyInputBox").val(keyText);
   },
@@ -108,5 +97,19 @@ var PrefKeys = {
 	                        + keyModifier + "+" 
                           + this._convertToText(keyCode));                          
                           
+  },
+  
+  getKeyCombo : function(){
+    var defaultKeyModifier = "ALT";
+    //default key modifier for windows is CTRL
+    var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
+                               .getService(Components.interfaces.nsIXULRuntime);
+    if(xulRuntime.OS == "WINNT"){
+      defaultKeyModifier = "CTRL";
+    }
+    
+    var keyCode = Application.prefs.getValue(this.KEYCODE_PREF, 32);
+    var keyModifier = Application.prefs.getValue(this.KEYMODIFIER_PREF, defaultKeyModifier);
+    return [keyModifier, this._convertToText(keyCode)];
   }
 }
