@@ -7,7 +7,6 @@
   <link rel="stylesheet" type="text/css" media="all"
         href="web-content.css" />
   <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
-  <script type="text/javascript" src="prefkeys.js"></script>
   <script type="text/javascript" 
           src="resource://ubiquity/scripts/jsparser.js"></script>
   <script type="text/javascript"
@@ -20,62 +19,54 @@
     
   <div class="head">
     <span class="large">Ubiquity:&nbsp;</span>
-    Type What You Want To Do
+    Don't Surf the Web. Command it.
   </div>
     
 <div id="nav-container">
   <ul id="nav">
     <li><a href="about:ubiquity">Tutorial</a></li>
-    <li><a href="chrome://ubiquity/content/cmdlist.html">Commands</a></li>
-    <li><a href="chrome://ubiquity/content/skinlist.html">Skins</a></li>
+    <li><a href="chrome://ubiquity/content/skinlist.html">Settings</a></li>
+    <li><a href="chrome://ubiquity/content/cmdlist.html">Your Commands</a></li>
+    <li><a href="https://ubiquity.mozilla.com/herd/">Get New Commands</a></li>
+    <li><a href="chrome://ubiquity/content/report-bug.html">Report a Bug</a></li>
     <li><a href="chrome://ubiquity/content/editor.html">Command Editor</a></li>
     <li><a href="chrome://ubiquity/content/develop.html">Developer Center</a></li>
+
   </ul>  
 </div>
 
 <br clear="all"/>
+<div style="text-align:center;"><p>You can get to this page at any time using the "Help" command.</p></div>
 <br clear="all"/>
 
-
 <div class="col-five">
-  <h2 class="top">Using Ubiquity</h2>
-  
-  <strong>Invoke</strong> Ubiquity by pressing:</legend>
-  <div style="margin-left:10px;"><p>
-  <input id="keyInputBox" type="text" size="27"
-         style="cursor:pointer"
-         onkeydown="PrefKeys.onKeyChange(event)" 
-         onfocus="this.value = 'Press your combination'"
-         onblur="PrefKeys.onLoad()"/><br/>
-  Click above to <strong>Change</strong> the keyboard shortcut used to open Ubiquity. <br/></p>
-  <p id="keyNotify"></p>
-  </div>
-  
-  <p><strong>Take</strong> the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">Ubiquity tutorial</a> to master the basics.</p>
 
-  <p><strong>Help us</strong>. Subscribe to the <a href="https://ubiquity.mozilla.com/herd/command-feed/">Herd</a>, which will add your data to the <a href="https://ubiquity.mozilla.com/herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
-    
+  <h2 class="top">Learn How To Use Ubiquity</h2>
+<div id="interactive-tutorial-div" style="border-style:solid;   border-color:green; padding: 2em; font-size: 150%;">
+    <a onclick="startUbiqTutorial();">Click Here to Take the Interactive Tutorial</a>
+</div>
 
-  <h2>Troubleshooting Ubiquity</h2>
-
-  <p>Due to Ubiquity's unusual nature as a Labs experiment, you may
-  run into problems while using it.  If Ubiquity becomes completely
-  unresponsive to you, then it may be necessary to reset it to its
-  "factory defaults" in order to use it again.  To do this, click <a
-  href="reset.html">here</a>&mdash;and our apologies for the
-  inconvenience!</p>
 
 </div>
 
 
-<div class="col-four">
+<div class="col-four" id="not-the-tutorial">
+    
+  <h2 class="top">More On Using Ubiquity</h2>
+    
+  <p>After taking the basic tutorial on this page, you can learn more by reading the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">In-depth documentation page</a>.</p>
+
+  <p><strong>Help us</strong>. Subscribe to the <a href="https://ubiquity.mozilla.com/herd/command-feed/">Herd</a>, which will add your data to the <a href="https://ubiquity.mozilla.com/herd">dashboard</a></a>&mdash;it's completely anonymous and will help us make Ubiquity better and safer.</p>
+
+  <p>For information about the goals of the upcoming 0.2 release of Ubiquity, check out our <a href="https://wiki.mozilla.org/Labs/Ubiquity/0.2_Design:_UI_and_Security_Extensibility">design document</a>. It has diagrams!</p>
+  <p> Ubiquity is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Credits">credits</a> page.</p>
+
+  
   <!-- The empty version span below is automatically filled in later. -->
-  <h2 class="top">Thanks for trying out Ubiquity <span
+  <h2>Thanks for trying out Ubiquity <span
   class="version"></span>!</h2>
 
   <p>Version 0.1.8 of Ubiquity is a maintenance release that fixes a number of bugs.  To learn about what's new, check out the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1.8_Release_Notes">Ubiquity 0.1.8 Release Notes</a>.</p>
-  <p>For information about the goals of the upcoming 0.2 release of Ubiquity, check out our <a href="https://wiki.mozilla.org/Labs/Ubiquity/0.2_Design:_UI_and_Security_Extensibility">design document</a>. It has diagrams!</p>
-  <p> Ubiquity is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Credits">credits</a> page.
 
   
 </div>
@@ -88,4 +79,7 @@
 </body>
 <script type="application/javascript;version=1.7"
         src="chrome://ubiquity/content/about.js"></script>
+<script type="application/javascript;version=1.8"
+        src="chrome://ubiquity/content/tutorial.js"></script>
+
 </html>

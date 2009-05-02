@@ -98,6 +98,10 @@ Ubiquity.prototype = {
     return this.__textBox;
   },
 
+  get cmdManager() {
+    return this.__cmdManager;
+  },
+
   __onBlur: function __onBlur() {
     // Hackish fix for #330.
     var self = this;

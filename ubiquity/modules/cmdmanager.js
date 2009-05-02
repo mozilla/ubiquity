@@ -261,6 +261,13 @@ CommandManager.prototype = {
     return suggText;
   },
 
+  getHilitedSuggestionDisplayName: function CM_getHilitedSuggDisplayName() {
+    if(!this.hasSuggestions())
+      return "";
+    var sugg = this.__activeQuery.suggestionList[this.__hilitedSuggestion];
+    return sugg.getDisplayText();
+  },
+
   makeCommandSuggester : function CM_makeCommandSuggester() {
     var self = this;
 

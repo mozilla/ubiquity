@@ -13,25 +13,34 @@
   </style>
 </head>
 <body>
+<script type="text/javascript" src="prefkeys.js"></script>
 <script src="resource://ubiquity/scripts/jquery.js"></script>
 <script src="skinlist.js"></script>
 
 <div class="head">
-  <span class="large">Ubiquity:</span> Your skins</span>
+  <span class="large">Ubiquity:</span> Settings And Skins</span>
 </div>
 
 <div id="nav-container">
   <ul id="nav">
     <li><a href="about:ubiquity">Tutorial</a></li>
-    <li><a href="chrome://ubiquity/content/cmdlist.html">Commands</a></li>
-    <li><a href="chrome://ubiquity/content/skinlist.html">Skins</a></li>
+    <li><a href="chrome://ubiquity/content/skinlist.html">Settings</a></li>
+    <li><a href="chrome://ubiquity/content/cmdlist.html">Your Commands</a></li>
+    <li><a href="https://ubiquity.mozilla.com/herd/">Get New Commands</a></li>
+    <li><a href="chrome://ubiquity/content/report-bug.html">Report a Bug</a></li>
     <li><a href="chrome://ubiquity/content/editor.html">Command Editor</a></li>
     <li><a href="chrome://ubiquity/content/develop.html">Developer Center</a></li>
   </ul>  
 </div>
 
+
+<br clear="all"/>
+<div style="text-align:center;"><p>You can get to this page at any time using the "Skin-list" command.</p></div>
 <br clear="all"/>
 
+<div class="col-five">
+
+  <h2 class="top">Skins</h2>
 <ul id="skin-list"></ul>
 
 <ul class="button-list">
@@ -42,7 +51,41 @@
   </li>
 </ul>
 
+</div>
+
+<div class="col-four">
+  <h2 class="top">Key Combination</h2>
+  <strong>Invoke</strong> Ubiquity by pressing:</legend>
+  <div style="margin-left:10px;"><p>
+  <input id="keyInputBox" type="text" size="27"
+         style="cursor:pointer"
+         onkeydown="PrefKeys.onKeyChange(event)" 
+         onfocus="this.value = 'Press your combination'"
+         onblur="PrefKeys.onLoad()"/><br/>
+  Click above to <strong>Change</strong> the keyboard shortcut used to open Ubiquity. <br/></p>
+  <p id="keyNotify"></p>
+  </div>
+
+  <h2>Language Settings</h2>
+  <p>Coming soon.</p>
+
+
+  <h2>Troubleshooting Ubiquity</h2>
+
+  <p>Due to Ubiquity's unusual nature as a Labs experiment, you may
+  run into problems while using it.  If Ubiquity becomes completely
+  unresponsive to you, then it may be necessary to reset it to its
+  "factory defaults" in order to use it again.  To do this, click <a
+  href="reset.html">here</a>&mdash;and our apologies for the
+  inconvenience!</p>
+
+</div>
+
+<br clear="all"/>
+
 <div id="editor-div" style="display:none">
+
+  <h2>Custom Skin Editor</h2>
   <ul class="button-list">
     <li>
       <a type="button" class="button" href="javascript:saveCustomSkin();">Save</a>
