@@ -67,7 +67,7 @@ function makeJaParser() {
   
   ja._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in ja.roles)].join('|')+')','g');
   ja.wordBreaker = function(input) {
-    return input.replace(this._patternCache.particleMatcher,' $1 ');
+    return input.replace(this._patternCache.particleMatcher,'\u200b$1\u200b');
   };
 
   return ja;

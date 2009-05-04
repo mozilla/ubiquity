@@ -147,6 +147,10 @@ Parser.prototype = {
   // called.
   setCommandList: function( commandList ) {
 
+    Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
+
+    activeNounTypes = [];
+
     // First we'll register the verbs themselves.
     for (let verb in commandList) {
       if (commandList[verb].names != undefined 
@@ -187,6 +191,8 @@ Parser.prototype = {
         // if this nountype has not been registered yet, let's do that now.
         if (!thisNounTypeIsAlreadyRegistered) {
           this._nounTypes.push(thisNounType);
+          // activeNounTypes
+          activeNounTypes.push(thisNounType);
         }
         
       }
@@ -409,15 +415,47 @@ Parser.prototype = {
 
   // ** {{{Parser.splitWords()}}} **
   // 
-  // Takes an input string and returns an array of all the words.
-  // Words are returned in left to right order, split using \s as delimiter.
-  // If input is empty, it will return [].
+  // Takes an input string and returns an object with the words and their 
+  // delimiters. Words are returned in left to right order, split using 
+  // \s and \u200b (the no-width space) as delimiters.
+  //
+  // The return object is of the form {{{{ words: [], delimiters: [], all: [] }}}} .
+  // {{{words}}} and {{{delimiters}}} are just a copy of every other word in 
+  // {{{all}}}.
   //
   // Used by {{{Parser.argFinder()}}}
   splitWords: function(input) {
+    var returnObj = { words: [], delimiters: [], all: [],
+                      beforeSpace: '', afterSpace: '' };
+
+    // if it's all space, just return nothing. (note that \s includes \u200b)
     if (input.search(/^\s*$/) != -1)
-      return [];
-    return input.match(/\S+/g);
+      return returnObj;
+
+    // take all whitespace that is not of the very special no-width variety 
+    // (\u200b) nor a East Asian full-width space (\u3000) and 
+    // replace them with regular spaces.
+    input = input.replace(/[^\S\u200b\u3000]/,' ');
+    
+    // strip whitespace from the beginning and end to ensure 
+    if (match = input.match(/^(\s*)(.*)(\s*)$/)) {  
+      input = match[2];
+      returnObj.beforeSpace = match[1];
+      returnObj.afterSpace = match[3];
+    }
+    
+    // this regexp with the () in it matches words but also non-words
+    // (delimiters). The even numbered elements will be words and the odd
+    // numbered ones are delimiters.
+    let splitWithDelimiters = input.split(/(\s+)/g);
+    for (let i in splitWithDelimiters) {
+      returnObj.all.push(splitWithDelimiters[i]);
+      if (i % 2)
+        returnObj.delimiters.push(splitWithDelimiters[i]);
+      else
+        returnObj.words.push(splitWithDelimiters[i]);
+    }
+    return returnObj;
   },
 
   // ** {{{Parser.hasDelimiter()}}} **
@@ -531,7 +569,14 @@ Parser.prototype = {
     }
 
     // split words using the splitWords() method
-    let words = this.splitWords(argString);
+    let splitInput = this.splitWords(argString);
+    // for example, if the input is "rar rar   rar"
+    // then words = ['rar','rar','rar']
+    // delimiters = [' ','   ']
+    // allWords = ['rar',' ','rar','   ','rar']
+    let words = splitInput.words;
+    let delimiters = splitInput.delimiters;
+    let allWords = splitInput.all;
 
     // let's find all the possible delimiters
     let possibleDelimiterIndices = [];
@@ -613,7 +658,7 @@ Parser.prototype = {
         if (theseParses[0].args.object == undefined)
           theseParses[0].args.object = [];
         theseParses[0].args.object.push({ _order:1,
-                                          input:words.join(this.joindelimiter),
+                                          input:allWords.join(''),
                                           modifier:'' });
       }
 
@@ -627,9 +672,9 @@ Parser.prototype = {
             theseParses[0].args.object = [];
           theseParses[0].args.object.push(
             { _order: (2 * delimiterIndices.length + 2),
-              input: words.slice(
-                       delimiterIndices[delimiterIndices.length - 1] + 1,
-                       words.length).join(this.joindelimiter),
+              input: allWords.slice(
+                       2 * (delimiterIndices[delimiterIndices.length - 1] + 1)
+                     ).join(''),
               modifier:'' }
           );
 
@@ -641,7 +686,9 @@ Parser.prototype = {
             theseParses[0].args.object = [];
           theseParses[0].args.object.push(
             {_order: 1,
-             input: words.slice(0,delimiterIndices[0]).join(this.joindelimiter),
+             input: allWords.slice(0,
+                      (2 * delimiterIndices[0]) - 1
+                    ).join(''),
              modifier:'' });
 
         }
@@ -715,18 +762,22 @@ Parser.prototype = {
                 if (thisParse.args[role] == undefined)
                   thisParse.args[role] = [];
 
-                // our argument is words (j)...(jmax+1-1)
-                // note that Array.slice(i,j) returns *up to* j
-                var argument = words.slice(j,jmax + 1).
-                                             join(this.joindelimiter);
-                // our delimiter
+                // our argument is words (j)...(jmax)
+                // note that Array.slice(i,k) returns *up to* k
+                var argument = allWords.slice(2 * j, (2 * jmax) + 1)
+                                             .join('');
+                // our modifier, including the space after
                 var modifier = words[delimiterIndices[i]];
+                var innerSpace = delimiters[delimiterIndices[i] - 1];
+                var outerSpace = delimiters[delimiterIndices[i]];
 
                 // push it!
                 thisParse.args[role].push(
                   { _order: 1 + 2*(delimiterIndices.length - i),
-                    input:this.cleanArgument(argument),
-                    modifier:modifier
+                    input: argument,
+                    modifier: modifier,
+                    innerSpace: innerSpace,
+                    outerSpace: outerSpace
                   });
 
                 // put the extra words between the earlier delimiter and our
@@ -738,13 +789,18 @@ Parser.prototype = {
 
                   // our argument is words (jmin)...(j-1)
                   // note that Array.slice(i,j) returns *up to* j
-                  var argument = words.slice(jmin,j).join(this.joindelimiter);
+                  var argument = allWords.slice(2 * jmin, 2 * (j - 1) + 1)
+                                         .join('');
+                  var outerSpace = (2 * (j - 1) + 1 < allWords.length ? 
+                                    allWords[2 * (j - 1) + 1] : '');
 
                   // push it!
                   thisParse.args.object.push(
                     { _order: 2*(delimiterIndices.length - i),
-                      input:this.cleanArgument(argument),
-                      modifier:''
+                      input:argument,
+                      modifier:'',
+                      innerSpace: '',
+                      outerSpace: outerSpace
                     });
 
                 }
@@ -753,18 +809,24 @@ Parser.prototype = {
                 if (thisParse.args[role] == undefined)
                   thisParse.args[role] = [];
                   
-                // our argument is words (jmin)...(j+1-1)
+                // our argument is words (jmin)...(j)
                 // note that Array.slice(i,j) returns *up to* j
-                var argument = words.slice(jmin,j + 1).join(this.joindelimiter);
+                var argument = allWords.slice(2 * jmin, (2 * j) + 1)
+                                    .join('');
 
                 // our delimiter
                 var modifier = words[delimiterIndices[i]];
+                var innerSpace = delimiters[delimiterIndices[i]];
+                var outerSpace = delimiters[delimiterIndices[i] - 1];
 
                 // push it!
                 thisParse.args[role].push(
                   { _order: 1 + 2*(i)+2 - 1,
-                    input:this.cleanArgument(argument),
-                    modifier:modifier });
+                    input: argument,
+                    modifier: modifier,
+                    innerSpace: innerSpace,
+                    outerSpace: outerSpace
+                  });
 
                 // put the extra words between this delimiter and the next
                 // into the object role
@@ -773,16 +835,20 @@ Parser.prototype = {
                   if (thisParse.args.object == undefined)
                     thisParse.args.object = [];
 
-                  // our argument is words (j+1)...(jmax+1-1)
+                  // our argument is words (j+1)...(jmax)
                   // note that Array.slice(i,j) returns *up to* j
-                  var argument = words.slice(j + 1,jmax + 1).
-                                               join(this.joindelimiter);
+                  var argument = allWords.slice(2 * (j + 1),(2 * jmax) + 1)
+                                         .join('');
+                  var outerSpace = (2 * (j + 1) - 1 >= 0 ?
+                                    allWords[2 * (j + 1) - 1] : '');
 
                   // push it!
                   thisParse.args.object.push(
                     { _order: 1 + 2*(i)+2,
-                      input:this.cleanArgument(argument),
-                      modifier:''
+                      input: argument,
+                      modifier: '',
+                      innerSpace: '',
+                      outerSpace: outerSpace
                     });
 
                 }
@@ -1567,15 +1633,15 @@ Parser.Parse.prototype = {
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
       if (this._branching == 'right')
-        display += this._delimiter + "<span class='prefix' title='"
-          + arg.role+"'>" + arg.modifier + this._delimiter
-          + "</span><span class='" + className + "' title=''>"
+        display += (arg.outerSpace || '') + (arg.modifier ? "<span class='prefix' title='"
+          + arg.role+"'>" + arg.modifier + arg.innerSpace
+          + "</span>":'') + "<span class='" + className + "' title=''>"
           + (arg.text || arg._substitutedInput || arg.input) + "</span>";
       else
-        display += this._delimiter + "<span class='" + className
+        display += "<span class='" + className
           + "' title=''>" + (arg.text || arg._substitutedInput || arg.input)
-          + "</span><span class='prefix' title='" + arg.role + "'>"
-          + this._delimiter + arg.modifier + "</span>";
+          + "</span>" + (arg.modifier ? "<span class='prefix' title='" + arg.role + "'>"
+          + arg.innerSpace + arg.modifier + "</span>" : '') + (arg.outerSpace || '');
 
     }
 

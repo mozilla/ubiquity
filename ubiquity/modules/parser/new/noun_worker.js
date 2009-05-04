@@ -1,5 +1,9 @@
 var EXPORTED_SYMBOLS = ["detectNounType",'setNounTypes','callback'];
 
+Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
+
+//dump('in the worker now: there are '+activeNounTypes.length+' nountypes\n');
+
 nounTypes = [];
 
 setNounTypes = function(outsideNounTypes) {
