@@ -21,6 +21,7 @@
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -428,32 +429,29 @@ Parser.prototype = {
     var returnObj = { words: [], delimiters: [], all: [],
                       beforeSpace: '', afterSpace: '' };
 
-    // if it's all space, just return nothing. (note that \s includes \u200b)
-    if (input.search(/^\s*$/) != -1)
+    // if there is no non-space character, just return nothing.
+    // (note that \S doesn't include \u200b)
+    if (!/\S/.test(input))
       return returnObj;
 
     // take all whitespace that is not of the very special no-width variety 
     // (\u200b) nor a East Asian full-width space (\u3000) and 
     // replace them with regular spaces.
-    input = input.replace(/[^\S\u200b\u3000]/,' ');
-    
-    // strip whitespace from the beginning and end to ensure 
-    if (match = input.match(/^(\s*)(.*)(\s*)$/)) {  
-      input = match[2];
-      returnObj.beforeSpace = match[1];
-      returnObj.afterSpace = match[3];
-    }
-    
+    input = input.replace(/[^\S\u200b\u3000]/g, ' ');
+
     // this regexp with the () in it matches words but also non-words
     // (delimiters). The even numbered elements will be words and the odd
     // numbered ones are delimiters.
-    let splitWithDelimiters = input.split(/(\s+)/g);
-    for (let i in splitWithDelimiters) {
-      returnObj.all.push(splitWithDelimiters[i]);
+    let splitWithWords = input.split(/(\S+)/);
+    returnObj.afterSpace  = splitWithWords.pop();
+    returnObj.beforeSpace = splitWithWords.shift();
+    returnObj.all         = splitWithWords;
+    
+    for (let i in splitWithWords) {
       if (i % 2)
-        returnObj.delimiters.push(splitWithDelimiters[i]);
+        returnObj.delimiters.push(splitWithWords[i]);
       else
-        returnObj.words.push(splitWithDelimiters[i]);
+        returnObj.words.push(splitWithWords[i]);
     }
     return returnObj;
   },
