@@ -215,7 +215,7 @@ CommandManager.prototype = {
     // Called when we're notified of a newly incoming suggestion
     // TODO: Huh?
     // this.__nlParser.refreshSuggestionList(input);
-    this._previewAndSuggest(context);
+    this._renderSuggestions();
   },
 
   execute : function CM_execute(context) {
