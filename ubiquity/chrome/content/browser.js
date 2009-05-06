@@ -171,9 +171,6 @@ function ubiquityKeydown(aEvent)
   var UBIQUITY_KEYMODIFIER = null;
   var UBIQUITY_KEYCODE = null;
 
-  // This is a temporary workaround for #43.
-  var anchor = window.document.getElementById("content");
-
   //Default keys are different for diff platforms
   // Windows Vista, XP, 2000 & NT: CTRL+SPACE
   // Mac, Linux, Others : ALT+SPACE
@@ -188,16 +185,10 @@ function ubiquityKeydown(aEvent)
   UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
   UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
                                                     defaultKeyModifier);
-  anchor = anchor.selectedBrowser;
-
-  //Open Ubiquity if the key pressed matches the shortcut key
+  //Toggle Ubiquity if the key pressed matches the shortcut key
   if (aEvent.keyCode == UBIQUITY_KEYCODE &&
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
-    if(gUbiquity.isWindowOpen) {
-      gUbiquity.openWindow(anchor);
-    } else {
-      gUbiquity.closeWindow();
-    }
+    gUbiquity.toggleWindow();
     aEvent.preventDefault();
   }
 }

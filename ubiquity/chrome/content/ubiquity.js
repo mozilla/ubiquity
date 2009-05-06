@@ -50,7 +50,6 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__textBox = textBox;
   this.__cmdManager = cmdManager;
   this.__needsToExecute = false;
-  this.__showCount = 0;
   this.__lastValue = null;
   this.__previewTimerID = -1;
 
@@ -78,11 +77,11 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
                    .getService(Components.interfaces.nsIXULRuntime);
 
-  if(xulr.OS === "WINNT"){
-     textBox.addEventListener("blur",
-                           function(event) { self.__onBlur(event); },
-                           false);
-   }
+  if (xulr.OS === "WINNT") {
+    textBox.addEventListener("blur",
+                             function(event) { self.__onBlur(event); },
+                             false);
+  }
 }
 
 Ubiquity.prototype = {
@@ -107,7 +106,7 @@ Ubiquity.prototype = {
     var self = this;
 
     function refocusTextbox() {
-      if (self.__showCount) {
+      if (self.isWindowOpen) {
         var isTextBoxFocused = (document.commandDispatcher.focusedElement ==
                                 self.__textBox);
         if (!isTextBoxFocused)
@@ -116,7 +115,7 @@ Ubiquity.prototype = {
     }
 
     Utils.setTimeout(refocusTextbox, 100);
-   },
+  },
 
   __onMouseMove: function __onMouseMove(event) {
     this.__x = event.screenX;
@@ -141,9 +140,6 @@ Ubiquity.prototype = {
   },
 
   __onInput: function __onInput(event) {
-    if (this.__showCount == 0)
-      return;
-
     var keyCode = event.keyCode;
 
     if (keyCode == this.__KEYCODE_UP ||
@@ -220,12 +216,6 @@ Ubiquity.prototype = {
   },
 
   __onHidden: function __onHidden() {
-    this.__showCount -= 1;
-
-    if (this.__showCount > 0)
-      return;
-
-    this.__msgPanel.hidden = true;
     var context = this.__makeContext();
 
     if (this.__focusedElement)
@@ -245,14 +235,11 @@ Ubiquity.prototype = {
   },
 
   __onShown: function __onShown() {
-    if (this.__showCount == 0) {
-      this.__lastValue = null;
-      this.__textBox.focus();
-      this.__textBox.select();
-      this.__cmdManager.refresh();
-      this.__processInput();
-    }
-    this.__showCount += 1;
+    this.__lastValue = null;
+    this.__textBox.focus();
+    this.__textBox.select();
+    this.__cmdManager.refresh();
+    this.__processInput();
   },
 
   setLocalizedDefaults: function setLocalizedDefaults( langCode ) {
@@ -262,19 +249,31 @@ Ubiquity.prototype = {
     }
   },
 
-  openWindow: function openWindow(anchor) {
+  openWindow: function openWindow() {
     this.__focusedWindow = document.commandDispatcher.focusedWindow;
     this.__focusedElement = document.commandDispatcher.focusedElement;
 
-    this.__msgPanel.hidden = false;
+    // This is a temporary workaround for #43.
+    var anchor = window.document.getElementById("content").selectedBrowser;
     this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
   },
 
-  closeWindow: function closeWindow(){
+  closeWindow: function closeWindow() {
     this.__msgPanel.hidePopup();
   },
 
+  toggleWindow: function toggleWindow() {
+    switch(this.__msgPanel.state){
+      case "open":
+      case "hiding":
+      case "showing":
+      this.closeWindow();
+      return;
+    }
+    this.openWindow();
+  },
+
   get isWindowOpen() {
-    return this.__msgPanel.hidden;
+    return this.__msgPanel.state === "open";
   }
 };
