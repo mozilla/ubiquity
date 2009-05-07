@@ -19,6 +19,8 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Aza Raskin <aza@mozilla.com>
+ *   Abimanyu Raja <abimanyuraja@gmail.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Maria Emerson <memerson@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
@@ -43,6 +45,8 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 var escapeHtml = Utils.escapeHtml;
 
 function onDocumentLoad() {
+  onReady();
+
   function updateCommands() {
     var cmdSource = UbiquitySetup.createServices().commandSource;
 
@@ -206,6 +210,142 @@ function sortCommandsBy(key) {
   $.each(allCommands, function(cmdIndex, cmd) {
     cmdList.append(cmd);
   });
+}
+
+
+Components.utils.import("resource://ubiquity/modules/setup.js");
+
+function makeRemover(element, info) {
+  function onSlideDown() {
+    var newElement = makeFeedListElement(info,
+                                         "resubscribe",
+                                         makeUnremover);
+    $(newElement).hide();
+    $("#command-feed-graveyard").append(newElement);
+    $(newElement).fadeIn();
+  }
+  function onHidden() {
+    $(element).remove();
+    if (!$("#command-feeds").text())
+      $("#command-feeds-div").slideUp();
+    $("#command-feed-graveyard-div").slideDown("normal", onSlideDown);
+  }
+  function remove() {
+    info.remove();
+    $(element).slideUp(onHidden);
+  }
+  return remove;
+}
+
+function makeUnremover(element, info) {
+  function onSlideDown() {
+    var newElement = makeFeedListElement(info,
+                                         "unsubscribe",
+                                         makeRemover);
+    $(newElement).hide();
+    $("#command-feeds").append(newElement);
+    $(newElement).fadeIn();
+  }
+  function onHidden() {
+    $(element).remove();
+    if (!$("#command-feed-graveyard").text())
+      $("#command-feed-graveyard-div").slideUp();
+    $("#command-feeds-div").slideDown("normal", onSlideDown);
+  }
+  function unremove() {
+    info.unremove();
+    $(element).slideUp(onHidden);
+  }
+  return unremove;
+}
+
+function makeFeedListElement(info, label, clickMaker) {
+  var li = document.createElement("li");
+
+  function addLink(text, url, className) {
+    var linkToHtml = document.createElement("a");
+    $(linkToHtml).text(text);
+    if (className)
+      $(linkToHtml).addClass(className);
+    linkToHtml.href = url;
+    $(li).append(linkToHtml);
+    return linkToHtml;
+  }
+
+  function addLinkToAction(text, action) {
+    var linkToAction = document.createElement("span");
+    $(linkToAction).text(text);
+    $(linkToAction).click(action);
+    $(linkToAction).css({cursor: "pointer", color: "#aaa"});
+    $(li).append(linkToAction);
+  }
+
+  var titleLink = addLink(info.title, info.uri.spec);
+
+  if (label == "unsubscribe" && !info.canAutoUpdate) {
+    info.checkForManualUpdate(
+      function(isAvailable, href) {
+        if (isAvailable)
+          $(titleLink).after('<br><a class="feed-updated" href="' + href +
+                             '">An update for this feed is available.</a>');
+      });
+  }
+
+  var commandList = $("<ul></ul>");
+  for (var name in info.commands)
+    $(commandList).append($("<li></li>").text(name));
+  $(li).append(commandList);
+
+  addLinkToAction("[" + label + "]", clickMaker(li, info));
+
+  if (label == "resubscribe") {
+    $(li).append(" ");
+    addLinkToAction("[purge]",
+                    function() { $(li).slideUp("slow");
+                                 info.purge(); });
+  }
+
+  var sourceUrl;
+  var sourceName;
+
+  if (info.canAutoUpdate)
+    sourceName = "auto-updated source";
+  else
+    sourceName = "source";
+
+  $(li).append(" ");
+  addLink("[view " + sourceName + "]", "view-source:" + info.viewSourceUri.spec,
+          "feed-action");
+
+  return li;
+}
+
+function onReady() {
+  $(".version").text(UbiquitySetup.version);
+
+  let feedMgr = UbiquitySetup.createServices().feedManager;
+
+  function addSubscribedFeed(feed) {
+    if (!feed.isBuiltIn)
+      $("#command-feeds").append(makeFeedListElement(feed,
+                                                     "unsubscribe",
+                                                     makeRemover));
+  }
+  feedMgr.getSubscribedFeeds().forEach(addSubscribedFeed);
+
+  /*if (!$("#command-feeds").text())
+    $("#command-feeds-div").hide();*/
+
+  function addUnsubscribedFeed(feed) {
+    $("#command-feed-graveyard").append(makeFeedListElement(feed,
+                                                            "resubscribe",
+                                                            makeUnremover));
+  }
+  feedMgr.getUnsubscribedFeeds().forEach(addUnsubscribedFeed);
+
+  if (!$("#command-feed-graveyard").text())
+    $("#command-feed-graveyard-div").hide();
+
 }
 
 $(document).ready(onDocumentLoad);

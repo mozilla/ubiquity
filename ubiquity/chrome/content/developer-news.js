@@ -18,7 +18,9 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Atul Varma <atul@mozilla.com>
+ *   Aza Raskin <aza@mozilla.com>
+ *   Abimanyu Raja <abimanyuraja@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,35 +36,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// This contains the common header for all the about:ubiquity child pages.
-
-var navUrls = [
-  {name: "Tutorial", url: "about:ubiquity"},
-  {name: "Settings", url: "chrome://ubiquity/content/skinlist.html"},
-  {name: "Your Commands", url: "chrome://ubiquity/content/cmdlist.html"},
-  {name: "Get New Commands", url: "https://ubiquity.mozilla.com/herd/"},
-  {name: "Report a Bug", url: "chrome://ubiquity/content/report-bug.html"},
-  {name: "Hack Ubiquity", url: "chrome://ubiquity/content/editor.html"}
-];
+function loadNews( data ) {
+  $("item", data).each(function(){
+    var p = document.createElement("p");
+    var a = document.createElement("a");
 
 
-function createNavLinks() {
-  let containerElem = document.getElementById("nav-container");
-  if (!containerElem)
-    return;
+    $(a).attr("href", $("link", this).text() )
+        .text( $("title", this).text() +"..." );
 
-  let listElem = document.createElement("ul");
-  listElem.id = "nav";
-  containerElem.appendChild(listElem);
+    var author = $("author", this).text();
 
-  for (let i =0; i < navUrls.length; i++) {
-    let listItem = document.createElement("li");
-    listElem.appendChild(listItem);
-    let link = document.createElement("a");
-    link.href = navUrls[i].url;
-    link.innerHTML = navUrls[i].name;
-    listItem.appendChild(link);
-  }
+    $(p).append(a).append("<span class='light'><br/>by " + author + "</span>");
+    $("#news").append(p);
+  });
 }
 
-$(window).ready(createNavLinks);
+$(window).ready(
+  function() {
+    jQuery.get("http://ubiquity.mozilla.com/hg/ubiquity-firefox/rss-log",
+               loadNews);
+  }
+);
