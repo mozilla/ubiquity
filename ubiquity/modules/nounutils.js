@@ -93,12 +93,27 @@ NounUtils.NounType.prototype = {
   }
 };
 
+// ** {{{ NounUtils.makeSugg() }}} **
+//
+// ** FIXME **
+//
+// {{{ text }}}
+// {{{ html }}}
+// {{{ data }}}
+// {{{ score = 1 }}}
+// {{{ selectionIndices }}}
+
 NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
-  if (typeof text != "string" && typeof html != "string" && !data) {
+  if (typeof text !== "string" &&
+      typeof html !== "string" &&
+      arguments.length < 3) {
     // all inputs empty!  There is no suggestion to be made.
     return null;
   }
-  
+  if (typeof score === "object") {
+    selectionIndices = score;
+    score = null;
+  }
   // make the basic object:
   var suggestion = {text: text, html: html, data:data, score: (score || 1) };
   // Fill in missing fields however we can:
