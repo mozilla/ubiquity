@@ -23,30 +23,48 @@ corresponding feed is <a href="search.html">here</a>.</p>
 <small>Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time.</small>
 </div>
 <div id="amazon-search" style="display: none;">
-Found ${numitems} books on Amazon matching <b>${query}</b>
+<style>
+  ol, ul {list-style: none; margin: 0; padding: 0}
+  img {float: right; margin: 0 0 0.5em 0.5em}
+  kbd {vertical-align: middle; text-transform: uppercase}
+  kbd:after {content: ":"}
+  kbd, .price {font-weight: bolder}
+  .item {margin-top: 0.4em; clear: right}
+  .feature {margin-top: 0.2em}
+  .price, .author, .label, .feature {font-size: 88%}
+  .author:before {content: "by "}
+  .feature:before {content: "\2022  "}
+</style>
+Found <b>${numitems}</b> item{if numitems - 1}s{/if} on
+<a href="http://www.amazon.com/">Amazon.com</a> matching <b>${query}</b>.
+<ol>
 {for item in items}
-    <div style="clear: both; padding: 10px 0px;">
-        <a href="${item.url}">
-            {if item.image}
-                <img
-                    src="${item.image.src}"
-                    style="float: left; margin-right: 10px; height: ${item.image.height}px; width: ${item.image.width}px;"
-                    />
-            {/if}
-            
-            <u>${item.title}</u>
-        </a>
-        <small>
-            {if item.author}
-                <br />by ${item.author}
-            {/if}
-            
-            {if item.price}
-                <br />for ${item.price.amount} (${item.price.currency})
-            {/if}
-        </small>
-    </div>
+  <li class="item">
+    {if item.image}
+      <a href="${item.url}"><img src="${item.image.src}" border="0"
+        height="${item.image.height}" width="${item.image.width}"/></a>
+    {/if}
+    <kbd>${item.key}</kbd>
+    <a href="${item.url}" accesskey="${item.key}">${item.title}</a>
+    {if item.price}
+      <nobr class="price">
+        ${item.price.amount} (${item.price.currency})
+      </nobr>
+    {/if}
+    {if item.author}
+      <div class="author">${item.author}</div>
+    {/if}
+    {if item.label}
+      <div class="label">${item.label}</div>
+    {/if}
+    <ul>
+    {for feature in item.features}
+      <li class="feature">${feature}</li>
+    {/for}
+    </ul>
+  </li>
 {/for}
+</ol>
 </div>
 <div id="flickr-search" style="display: none;">
 <b>${nummatches} photos were found on Flickr.</b><br/><br/>
@@ -430,85 +448,150 @@ CmdUtils.makeSearchCommand({
   }
 });
 
-
-CmdUtils.makeSearchCommand({
-  name: "amazon-search",
-  icon: "http://www.amazon.com/favicon.ico",
-  description: "Searches <a href=\"http://www.amazon.com\">Amazon</a> for books matching your words.",
-  url: "http://www.amazon.com/s/ref=nb_ss_gw?url=search-alias%3Dstripbooks&field-keywords={QUERY}",
-  preview: function(previewBlock, directObject) {
-    if(!directObject.text || directObject.text.length < 1) {
-      previewBlock.innerHTML = "Searches for books on Amazon";
-        return;
+const noun_type_amazon_com_index = {
+  _name: "Amazon.com index",
+  list: [{text: s, data: d, summary: s} for ([s, d] in Iterator({
+    All: 0,
+    Apparel: 15683091,
+    Automotive: 15690151,
+    Baby: 3760931,
+    Beauty: 11055981,
+    Books: 1000,
+    Classical: 301668,
+    DigitalMusic: 301668,
+    DVD: 130,
+    Electronics: 493964,
+    GourmetFood: 3580501,
+    Grocery: 10746371,
+    HealthPersonalCare: 3760931,
+    HomeGarden: 1063498,
+    Industrial: 228013,
+    Jewelry: 3880591,
+    Kitchen: 1063498,
+    Magazines: 44264011,
+    Merchants: 493964,
+    Miscellaneous: 349028011,
+    Music: 301668,
+    MusicalInstruments: 12923151,
+    OfficeProducts: 1084128,
+    OutdoorLiving: 1063498,
+    PCHardware: 493964,
+    PetSupplies: 13900811,
+    Photo: 13900861,
+    Shoes: 3375301,
+    Software: 409488,
+    SportingGoods: 1036682,
+    Tools: 228013,
+    Toys: 130,
+    VHS: 404272,
+    Video: 130,
+    VideoGames: 44263011,
+    Watches: 378516011,
+    Wireless: 408234,
+    WirelessAccessories: 408234,
+  }))],
+  default: function() this.list[0],
+  suggest: function(txt, htm, cb, sx) {
+    if(sx || !txt) return [];
+    try { var {list} = this, sorter = [], re = RegExp(txt, "i") } catch (e) {}
+    // preferring earlier matches
+    // e.g. "Shoes" appears before "Classical" for an input "s"
+    if (re) for (var i = 0, l = list.length; i < l; ++i) {
+      var sg = list[i], x = sg.text.search(re);
+      if(x >= 0) sorter[x * l + i] = sg;
     }
-
-    previewBlock.innerHTML = "Searching Amazon for books matching <b>" + directObject.summary + "</b>";
-
-    var apiUrl = "http://ecs.amazonaws.com/onca/xml";
-    var apiParams = {
-      Service: "AWSECommerceService",
-      AWSAccessKeyId: "08WX39XKK81ZEWHZ52R2",
-      Version: "2008-08-19",
-      Operation: "ItemSearch",
-      Condition: "All",
-      ResponseGroup: "ItemAttributes,Images",
-      SearchIndex: "Books",
-      Title: directObject.text
-    };
-
+    if (sorter.length) {
+      var ss = sorter.filter(Boolean), [s] = ss;
+      this.default = function() s;
+      return ss;
+    }
+    return list;
+  }
+},
+Amazon = "http://www.amazon.com/",
+AmazLink = "Amazon.com".link(Amazon);
+CmdUtils.CreateCommand({
+  name: "amazon",
+  icon: Amazon + "favicon.ico",
+  description: "Searches " + AmazLink + " for items matching your words.",
+  help: (
+    <dl><dt>Available Indices</dt>
+    {noun_type_amazon_com_index.list.reduce(
+      function(dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>+''),
+  takes: {"search terms": noun_arb_text},
+  modifiers: {in: noun_type_amazon_com_index},
+  execute: function({text}, {in: {data}}) {
+    Utils.openUrlInBrowser(Amazon + "s/ref=nb_ss_gw" +
+                           Utils.paramsToString(
+                             { url: "node=" + data,
+                               "field-keywords": text}));
+  },
+  preview: function(previewBlock, {text, summary}, {in: {text: searchIndex}}) {
+    if (!text) {
+      previewBlock.innerHTML = this.description + this.help;
+      return;
+    }
+    var me = this;
+    previewBlock.innerHTML =
+      "Searching " + AmazLink + " for items matching <b>" + summary + "</b>.";
     CmdUtils.previewAjax(previewBlock, {
-      type: "GET",
-      url: apiUrl,
-      data: apiParams,
+      url: "http://ecs.amazonaws.com/onca/xml",
+      data: {
+        Service: "AWSECommerceService",
+        AWSAccessKeyId: "08WX39XKK81ZEWHZ52R2",
+        Version: "2008-08-19",
+        Operation: "ItemSearch",
+        Condition: "All",
+        Merchant: "All",
+        ResponseGroup: "ItemAttributes,Images",
+        SearchIndex: searchIndex,
+        Keywords: text,
+      },
       dataType: "xml",
-      error: function() {
-        previewBlock.innerHTML = "Error searching Amazon.";
+      error: function(xhr, info) {
+        previewBlock.innerHTML = (
+          "Error searching " + AmazLink + ".<br/><em>" +
+          xhr.status + " " + xhr.statusText + " (" + info + ")</em>");
       },
       success: function(responseData) {
-        const AMAZON_MAX_RESULTS = 5;
-
         responseData = jQuery(responseData);
-        var items = [];
-
-        responseData.find("Items Item").slice(0, AMAZON_MAX_RESULTS).each(function(itemIndex) {
-          var itemDetails = jQuery(this);
-
-          var newItem = {
-            title: itemDetails.find("ItemAttributes Title").text(),
-            url: itemDetails.find("DetailPageURL").text()
+        var errorMessage = responseData.find("Error > Message").text();
+        if (errorMessage) {
+          previewBlock.innerHTML = <em>{errorMessage}</em>.toXMLString();
+          return;
+        }
+        const MAX_RESULTS = 35; // 1 ~ 9, a ~ z
+        function iter(itemIndex) {
+          var itemDetails = jQuery(this),
+          itemAttrs = itemDetails.find("ItemAttributes"),
+          listPrice = itemAttrs.find("ListPrice"),
+          smallImage = itemDetails.find("SmallImage:first");
+          return {
+            title: itemAttrs.find("Title").text(),
+            url: itemDetails.find("DetailPageURL").text(),
+            key: (itemIndex + 1).toString(MAX_RESULTS + 1),
+            author: (itemAttrs.find("Author")
+                     .map(function() this.textContent).get().join(', ')),
+            features: (itemAttrs.find("Feature")
+                       .map(function() this.textContent).get()),
+            label: itemAttrs.find("Label").text(),
+            price: listPrice.length && {
+              amount: listPrice.find("FormattedPrice").text(),
+              currency: listPrice.find("CurrencyCode").text(),
+            },
+            image: smallImage.length && {
+              src: smallImage.find("URL").text(),
+              height: smallImage.find("Height").text(),
+              width: smallImage.find("Width").text(),
+            }
           };
-
-          if(itemDetails.find("ItemAttributes Author").length > 0) {
-            newItem.author = itemDetails.find("ItemAttributes Author").text();
-          }
-
-          if(itemDetails.find("ItemAttributes ListPrice").length > 0) {
-            newItem.price = {
-              amount: itemDetails.find("ItemAttributes ListPrice FormattedPrice").text(),
-              currency: itemDetails.find("ItemAttributes ListPrice CurrencyCode").text()
-            };
-          }
-
-          if(itemDetails.find("SmallImage").length > 0) {
-            newItem.image = {
-              src: itemDetails.find("SmallImage:first URL").text(),
-              height: itemDetails.find("SmallImage:first Height").text(),
-              width: itemDetails.find("SmallImage:first Width").text()
-            };
-          }
-
-          items.push(newItem);
-        });
-
-        var previewData = {
-          query: directObject.summary,
-          numitems: responseData.find("Items TotalResults").text(),
-          items: items
-        };
-
-	previewBlock.innerHTML = CmdUtils.renderTemplate(
-          jQuery("#amazon-search", feed.dom).html(),
-          previewData);
+        }
+        previewBlock.innerHTML = CmdUtils.renderTemplate(
+          feed.dom.getElementById("amazon-search").innerHTML,
+          { query: summary,
+            numitems: responseData.find("Items > TotalResults").text(),
+            items: (responseData.find("Items > Item").slice(0, MAX_RESULTS)
+                    .map(iter).get())});
       }
     });
   }
