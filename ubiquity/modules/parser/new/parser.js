@@ -350,6 +350,11 @@ Parser.prototype = {
         yield name;
       }
     }
+     
+    // We'll keep track of all the verb prefixes that we found as verb-only
+    // matches. If we find them as an initial match, we will rule them out 
+    // in the final matches.
+    let verbOnlyMatches = [];
     
     // let's see if there's a verb at the beginning of the string
     let initialMatches = input.match(this._patternCache.verbInitialTest);
@@ -358,6 +363,9 @@ Parser.prototype = {
 
       // initialMatches will return an array of strings in the following order
       let [ ,verbPrefix,argString] = initialMatches;
+
+      if (argString == '')
+        verbOnlyMatches.push(verbPrefix);
 
       // The match will only give us the prefix that it matched. For example,
       // if we have a verb "shoot" and had input "sho Fred", verbPrefix = "sho"
@@ -392,6 +400,11 @@ Parser.prototype = {
 
       // finalMatches will return an array of strings in the following order
       let [ ,argString,verbPrefix] = finalMatches;
+
+      // if we already saw this prefix as a sentence-initial verb-only match,
+      // skip it.
+      if (argString == '' && verbOnlyMatches.indexOf(verbPrefix) > -1)
+        return returnArray;
 
       for (verb in this._verbList) {
         // check each verb synonym in this language
