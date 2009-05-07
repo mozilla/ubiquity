@@ -42,9 +42,10 @@ var navUrls = [
   {name: "Your Commands", url: "chrome://ubiquity/content/cmdlist.html"},
   {name: "Get New Commands", url: "https://ubiquity.mozilla.com/herd/"},
   {name: "Report a Bug", url: "chrome://ubiquity/content/report-bug.html"},
-  {name: "Command Editor", url: "chrome://ubiquity/content/editor.html"},
-  {name: "Developer Center", url: "chrome://ubiquity/content/develop.html"}
+  {name: "Hack Ubiquity", url: "chrome://ubiquity/content/editor.html"}
 ];
+
+//  {name: "Developer Center", url: "chrome://ubiquity/content/develop.html"}
 
 
 function createNavLinks() {
