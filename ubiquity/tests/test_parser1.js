@@ -343,7 +343,7 @@ function testMakeSugg() {
   var thingy = NounUtils.makeSugg(null, "alksdf");
   this.assert( thingy.text == "alksdf", "thingy.text should be set.");
 
-  var thingy2 = NounUtils.makeSugg(null, null, null);
+  var thingy2 = NounUtils.makeSugg(null, null);
   this.assert( thingy2 == null, "should return null");
 }
 
