@@ -37,9 +37,6 @@
 Components.utils.import("resource://ubiquity/modules/setup.js");
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-// TODO: Move the div with the tutorial to the right so it's not
-// covered by ubiquity window.
-
 function waitForUserAction( conditionFunction, callback ) {
   var intervalId;
   intervalId = window.setInterval( function() {
@@ -105,12 +102,12 @@ function startUbiqTutorial() {
 
   hideOtherContent();
   var keyCombo = PrefKeys.getKeyCombo();
-  
+
 
   var introHtml = "<p>Hi, I'm Jono from Mozilla Labs, one of the authors"
                   + " of Ubiquity.  Ubiquity makes the Internet do your bidding."
     + " This is the absolute basics tutorial.  Let's get started.</p>"
-    + "<p><b>Hold down the " +  keyCombo[0] + " key and tap the " 
+    + "<p><b>Hold down the " +  keyCombo[0] + " key and tap the "
     + keyCombo[1] + " key.</b></p>";
 
   fadeInText(introHtml);
@@ -150,3 +147,20 @@ function ubiqTutorialStage5() {
     + " Notice that the <b>Weather</b> command took a guess at your location.";
   fadeInText(stage5Html);
 }
+
+/*
+ *
+"You'll see a weather report for your area.  "weather" is just one of dozens of that ubiquity already knows, and later i'll tell you how you can teach ubiquity hundreds more commands.  Let's try another command now.
+
+Hit escape, bring ubiquity up again, and type "wiki".
+
+The command is called wikipedia, but you don't have to type the full name -- ubiquity will usually guess based on the first few letters.  This command searches wikipedia for any word or phrase.
+
+So now type a space, and any word that you want to search for.  For example, 'wiki jupiter'.
+
+(arrow) This is called the "preview area". It shows a preview of the results -- in this case, the search results.  These are links here, so you can go straight to the article by clicking one of them.
+
+You can also "Execute" your command by tapping the Enter key.  If you do that now, it will take you to the Wikipedia page.
+
+Try doing a thing.
+ */
