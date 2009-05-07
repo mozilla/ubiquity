@@ -69,7 +69,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
                            function(event) { self.__onKeydown(event); },
                            true);
   textBox.addEventListener("keyup",
-                           function(event) { self.__onInput(event); },
+                           function(event) { self.__onKeyup(event); },
                            true);
   textBox.addEventListener("keypress",
                            function(event) { self.__onKeyPress(event); },
@@ -146,7 +146,7 @@ Ubiquity.prototype = {
     }
   },
 
-  __onInput: function __onInput(event) {
+  __onKeyup: function __onKeyup(event) {
     this.__lastKeyEvent = event;
     
     var keyCode = event.keyCode;
