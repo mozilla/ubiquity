@@ -3,49 +3,50 @@ From Abi:
 	I think the ones I most often use would be to check the current status
 	of a specific friend (or maybe, the last 3 statuses). The ability to
 	check your friends timeline as a whole would also be nice.
-
-
 */
 
-// max of 140 chars is recommended, but it really allows 160... but that gets truncated on some displays? grr
+// max of 140 chars is recommended, but it really allows 160...
+// but that gets truncated on some displays? grr
 const TWITTER_STATUS_MAXLEN = 140;
-
 
 CmdUtils.CreateCommand({
   name: "twitter",
   names: {
-    en: ['twitter','tweet'],
-    ja: ['呟く','呟け','呟いて','つぶやく','つぶやけ','つぶやいて']
+    en: ["twitter","tweet"],
+    ja: ["呟く","呟け","呟いて","つぶやく","つぶやけ","つぶやいて"]
   },
   arguments: [
-    {role: 'object', nountype: noun_arb_text},
-    {role: 'alias', nountype: noun_type_twitter_user}
+    {role: "object", nountype: noun_arb_text},
+    {role: "alias", nountype: noun_type_twitter_user}
   ],
   synonyms: ["tweet"],
-  icon: "http://assets3.twitter.com/images/favicon.ico",
+  icon: "http://twitter.com/favicon.ico",
   takes: {status: noun_arb_text},
-  modifiers: { "as" : noun_type_twitter_user },
-  description: "Sets your Twitter status to a message of at most 160 characters.",
-  help: "Sets your Twitter status to a message of at most 160 characters. You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in" +
-        " you'll be asked to log in.",
-  preview: function(previewBlock, arguments) {
-  
-    // these are converted in the Twitter database anyway, and counted as 4 characters
-    var statusText = arguments.object.text
-	  .replace("<", "&lt;")
-	  .replace(">", "&gt;");
-    var usernameText = null;
-    if (arguments.alias) {
-      usernameText = arguments.alias.text;
-    } else if (arguments.as) {
-      usernameText = arguments.as.text;
+  modifiers: {as: noun_type_twitter_user},
+  description:
+  "Sets your Twitter status to a message of at most 160 characters.",
+  help: ("You'll need a <a href=\"http://twitter.com\">Twitter account</a>," +
+         " obviously.  If you're not already logged in" +
+         " you'll be asked to log in."),
+  preview: function(previewBlock, args) {
+    var statusText = args.object.text;
+    var usernameText = "";
+    if (args.alias) {
+      usernameText = args.alias.text;
+    } else if (args.as) {
+      usernameText = args.as.text;
     }
-
-    var previewTemplate = "Updates your Twitter status ${username} to: <br /><b>${status}</b> <br /><br />Characters remaining: <b>${chars}</b> <p style='font-size:11px'> tip: tweet @mozillaubiquity for help </p>";
-    var truncateTemplate = "<span style='color: red;'><br />The last <b>${truncate}</b> characters will be truncated!</span>";
+    var previewTemplate = (
+      "<div class='twitter'>Updates your Twitter status ${username} to:<br/>" +
+      "<b class='status'>${status}</b><br/><br/>" +
+      "Characters remaining: <b>${chars}</b>" +
+      "<p><small>tip: tweet @mozillaubiquity for help</small></p></div>");
+    var truncateTemplate = (
+      "<strong>The last <b>${truncate}</b> characters" +
+      " will be truncated!</strong>");
     var previewData = {
-      status: statusText,
-      username: usernameText ? ("(For user <b>" + usernameText + "</b>)"):"",
+      status: <>{statusText}</>.toXMLString(),
+      username: usernameText && "(For user <b>" + usernameText + "</b>)",
       chars: TWITTER_STATUS_MAXLEN - statusText.length
     };
 
@@ -61,10 +62,10 @@ CmdUtils.CreateCommand({
 
     previewBlock.innerHTML = previewHTML;
   },
-  execute: function(arguments) {
-    var statusText = arguments.object.text;
+  execute: function(args) {
+    var statusText = args.object.text;
     if(statusText.length < 1) {
-      displayMessage("Twitter requires a status to be entered");
+      this._show("requires a status to be entered");
       return;
     }
 
@@ -72,10 +73,11 @@ CmdUtils.CreateCommand({
     var updateParams = {
       source: "ubiquity",
       status: statusText
-      //dont cut the input since sometimes, the user selects a big url, and the total lenght is more than 140, but
-      // tinyurl takes care of that
+      //dont cut the input since sometimes, the user selects a big url,
+      //and the total lenght is more than 140, but tinyurl takes care of that
     };
-
+    var me = this;
+    
     function sendMessage() {
       jQuery.ajax({
         type: "POST",
@@ -83,13 +85,12 @@ CmdUtils.CreateCommand({
         data: updateParams,
         dataType: "json",
         error: function() {
-          displayMessage("Twitter error - status not updated");
+          me._show("error - status not updated");
         },
         success: function() {
-          var msg = updateParams.status.match(/^d /) ?
-                    "Twitter direct message sent" :
-                    "Twitter status updated";
-          displayMessage(msg);
+          me._show(/^d /.test(statusText)
+                   ? "direct message sent"
+                   : "status updated");
         },
         username: login.username,
         password: login.password
@@ -97,7 +98,7 @@ CmdUtils.CreateCommand({
     }
 
     var login;
-    var alias = arguments.alias ? arguments.alias : arguments.as;
+    var alias = args.alias || args.as;
     if (alias && alias.text && alias.data) {
       login = alias.data;
       sendMessage();
@@ -108,6 +109,9 @@ CmdUtils.CreateCommand({
         login.username = alias.text;
       sendMessage();
     }
+  },
+  _show: function(txt){
+    displayMessage({icon: this.icon, title: this.name, text: txt});
   }
 });
 
