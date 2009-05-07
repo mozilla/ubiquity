@@ -52,6 +52,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__needsToExecute = false;
   this.__lastValue = null;
   this.__previewTimerID = -1;
+  this.__lastKeyEvent = {};
 
   var self = this;
 
@@ -101,6 +102,10 @@ Ubiquity.prototype = {
     return this.__cmdManager;
   },
 
+  get lastKeyEvent() {
+    return this.__lastKeyEvent;
+  },
+
   __onBlur: function __onBlur() {
     // Hackish fix for #330.
     var self = this;
@@ -123,6 +128,8 @@ Ubiquity.prototype = {
   },
 
   __onKeydown: function __onKeyDown(event) {
+    this.__lastKeyEvent = event;
+    
     if (event.keyCode == this.__KEYCODE_UP) {
       event.preventDefault();
       this.__cmdManager.moveIndicationUp(this.__makeContext());
@@ -140,11 +147,13 @@ Ubiquity.prototype = {
   },
 
   __onInput: function __onInput(event) {
+    this.__lastKeyEvent = event;
+    
     var keyCode = event.keyCode;
 
     if (keyCode == this.__KEYCODE_UP ||
-               keyCode == this.__KEYCODE_DOWN ||
-               keyCode == this.__KEYCODE_TAB) {
+        keyCode == this.__KEYCODE_DOWN ||
+        keyCode == this.__KEYCODE_TAB) {
     } else if (keyCode >= this.__KEYCODE_1 &&
                keyCode < this.__KEYCODE_1 + 10 &&
                event.altKey && event.ctrlKey) {

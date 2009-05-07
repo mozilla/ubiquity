@@ -326,8 +326,11 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   if(browser.mCurrentBrowser.currentURI.spec == "about:blank" &&
      !browser.webProgress.isLoadingDocument )
     browserWindow.loadURI(urlString, null, postInputStream, false);
-  else if(openPref == 3)
-    browser.loadOneTab(urlString, null, null, postInputStream, false, false);
+  else if(openPref == 3){
+    var ke = (Utils.currentChromeWindow.gUbiquity || 0).lastKeyEvent || 0;
+    browser[ke.shiftKey || ke.ctrlKey ? 'addTab' : 'loadOneTab'](
+      urlString, null, null, postInputStream, false, false);
+  }
   else if(openPref == 2)
     browserWindow.openDialog('chrome://browser/content', '_blank',
                              'all,dialog=no', urlString, null, null,
