@@ -10,6 +10,7 @@
 <script>
 // Just some sample code.
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js");
+Components.utils.import("resource://jetpack/modules/init.js");
 
 if (JetpackFeedManager) {
   var watcher = new EventHubWatcher(JetpackFeedManager);
@@ -24,7 +25,8 @@ function tick() {
   var urls = [];
   for (url in JetpackFeeds)
     urls.push(url);
-  $(document.body).text(urls.join(", "));
+  var numWeakRefs = getExtensionDebugInfo().weakRefs.length;
+  $(document.body).text(urls.join(", ") + " " + numWeakRefs);
 }
 
 $(window).ready(function() {
