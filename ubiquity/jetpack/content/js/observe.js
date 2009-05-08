@@ -1,3 +1,27 @@
+function EventHubWatcher(hub) {
+  var listeners = [];
+
+  this.add = function add(name, listener) {
+    function listenerWrapper(eventName, data) {
+      try {
+        listener(eventName, data);
+      } catch (e) {
+        console.log("listener", listener, "raised exception", e);
+      }
+    }
+    hub.addListener(name, listenerWrapper);
+    listeners.push({name: name, listener: listenerWrapper});
+  };
+
+  $(window).unload(
+    function() {
+      listeners.forEach(
+        function(info) {
+          hub.removeListener(info.name, info.listener);
+        });
+    });
+}
+
 function WindowWatcher() {
   const Cc = Components.classes;
   const Ci = Components.interfaces;

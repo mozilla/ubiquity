@@ -34,7 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let EXPORTED_SYMBOLS = ["JetpackFeedPlugin"];
+let EXPORTED_SYMBOLS = ["JetpackFeedPlugin", "JetpackFeeds",
+                        "JetpackFeedManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/codesource.js");
@@ -45,7 +46,16 @@ const TYPE = "jetpack";
 const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
 const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
 
+var JetpackFeeds = {};
+
+var JetpackFeedManager = null;
+
 function JetpackFeedPlugin(feedManager, messageService) {
+  if (!JetpackFeedManager)
+    JetpackFeedManager = feedManager;
+  else
+    Components.utils.reportError("JetpackFeedManager already defined.");
+
   this.type = TYPE;
 
   let Application = Components.classes["@mozilla.org/fuel/application;1"]
@@ -133,6 +143,8 @@ function makeCodeSource(feedInfo, timeoutInterval) {
 }
 
 function JetpackFeed(feedInfo, hub, messageService, timeoutInterval) {
+  JetpackFeeds[feedInfo.uri.spec] = this;
+
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
     this.canAutoUpdate = true;
 
@@ -150,8 +162,7 @@ function JetpackFeed(feedInfo, hub, messageService, timeoutInterval) {
     let code = codeSource.getCode();
     if (code != codeCache) {
       codeCache = code;
-
-      // TODO: Tell Jetpack.
+      hub.notifyListeners("feed-change", feedInfo.uri);
     }
   };
 
@@ -181,6 +192,9 @@ function JetpackFeed(feedInfo, hub, messageService, timeoutInterval) {
   };
 
   this.finalize = function finalize() {
+    var url = feedInfo.uri.spec;
+    if (url in JetpackFeeds)
+      delete JetpackFeeds[url];
   };
 
   this.__proto__ = feedInfo;

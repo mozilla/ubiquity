@@ -15,10 +15,13 @@
      const Ci = Components.interfaces;
 
      window.console = {
-       log: function log(msg) {
+       log: function log() {
+         var args = [];
+         for (var i = 0; i < arguments.length; i++)
+           args.push(arguments[i].toString());
          var consoleService = Cc["@mozilla.org/consoleservice;1"]
                               .getService(Ci.nsIConsoleService);
-         consoleService.logStringMessage(msg);
+         consoleService.logStringMessage(args.join(" "));
        }
      };
 
