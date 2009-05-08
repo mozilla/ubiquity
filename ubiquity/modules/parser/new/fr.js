@@ -45,7 +45,6 @@ function makeFrParser() {
   fr.roles = [
     {role: 'goal', delimiter: 'à'},
     {role: 'goal', delimiter: 'a'},
-    {role: 'goal', delimiter: 'à la'},
     {role: 'goal', delimiter: 'au'},
     {role: 'goal', delimiter: 'aux'},
     {role: 'source', delimiter: 'de'},
@@ -55,6 +54,15 @@ function makeFrParser() {
     {role: 'instrument', delimiter: 'avec'},
     {role: 'instrument', delimiter: 'sur'}
   ];
+
+  fr.argumentNormalizer = new RegExp('^(le\\s+|la\\s+|les\\s+|l\')(.+)()$','i');
+  fr.normalizeArgument = function(input) {
+    let matches = input.match(this.argumentNormalizer);
+    if (matches != null)
+      return [matches];
+    return [];
+  },
+
   fr.branching = 'right';
   fr.examples = ['b les chaussettes avec google',
     'de Tokyo à San Francisco'];

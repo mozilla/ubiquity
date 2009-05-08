@@ -157,7 +157,7 @@ Parser.prototype = {
       if (commandList[verb].names != undefined 
           && commandList[verb].arguments != undefined) {
         this._verbList.push(commandList[verb]);
-        //dump("loaded verb: "+verb+"\n");
+        dump("loaded verb: "+verb+"\n");
       }
     }
     
@@ -578,7 +578,15 @@ Parser.prototype = {
       defaultParse.args = [];
       return [defaultParse];
     }
-
+    
+    // if the verb doesn't take any arguments but the argString is not empty,
+    // kill this parse.
+    if (this._verbList[verb] != undefined) {
+      if (this._verbList[verb].arguments == undefined
+             || this._verbList[verb].arguments.length == 0)
+        return [];
+    }
+    
     // split words using the splitWords() method
     let splitInput = this.splitWords(argString);
     // for example, if the input is "rar rar   rar"
@@ -915,8 +923,7 @@ Parser.prototype = {
   // where that anaphor has been substituted with the selection string.
   //
   // The new string with the substitution is assigned to each arg's
-  // {{{_substitutedInput}}} property. The argument's {{{input}}} property is
-  // left unchanged.
+  // {{{input}}} property.
   // 
   // An array of //new// parses is returned, so it should then be 
   // {{{concat}}}'ed to the current running list of parses.
@@ -932,13 +939,64 @@ Parser.prototype = {
 
         if (newArg != oldArg) {
           let parseCopy = cloneParse(parse);
-          parseCopy.args[role][i]._substitutedInput = newArg;
+          parseCopy.args[role][i].input = newArg;
           returnArr.push(parseCopy);
         }
       }
     }
 
     return returnArr;
+  },
+  
+  // ** {{{Parser.substituteNormalizedArgs()}}} **
+  //
+  // {{{substituteNormalizedArgs()}}} takes a parse. It runs each argument's
+  // {{{input}}} through {{{normalizeArg}}}. If {{{normalizeArg}}} returns 
+  // matches, it is substituted into the parse.
+  // 
+  // An array of //new// parses is returned, so it should then be 
+  // {{{concat}}}'ed to the current running list of parses.
+  substituteNormalizedArgs: function(parse) {
+    
+    let returnArr = [];
+
+    for (let role in parse.args) {
+      let args = parse.args[role];
+      for (let i in args) {
+        let arg = args[i].input;
+
+        let baseParses = [parse];
+        baseParses = baseParses.concat(returnArr);
+
+        for each (substitute in this.normalizeArgument(arg)) {
+          for each (baseParse in baseParses) {
+            let parseCopy = cloneParse(baseParse);
+            parseCopy.args[role][i].inactivePrefix = substitute[1];
+            parseCopy.args[role][i].input = substitute[2];
+            parseCopy.args[role][i].inactiveSuffix = substitute[3];
+            returnArr.push(parseCopy);
+          }
+        }
+      }
+    }
+
+    return returnArr;
+  },
+  
+  // ** {{{Parser.normalizeArg}}} **
+  // 
+  // Returns an array of arrays of the form
+  // [[arg,prefix,new argument,suffix]]
+  //
+  // For example, if this is Catalan, we may strip off the article "el"
+  // so we'd return, on input "el google",
+  // [['el google','el ','google','']]
+  //
+  // The easiest way to do this is to just use a String.match(), like
+  // {{{return [input.match(/(el\s+|la\s+)(.+)()/i)]}}}
+  
+  normalizeArgument: function(input) {
+    return [];
   },
   
   // ** {{{Parser.suggestVerb()}}} **
@@ -965,7 +1023,6 @@ Parser.prototype = {
     // for parses WITHOUT a set verb:
     var returnArray = [];
     for (let verb in this._verbList) {
-
       let suggestThisVerb = true;
 
       // Check each role in our parse.
@@ -979,14 +1036,17 @@ Parser.prototype = {
         if (!thisRoleIsUsed)
           suggestThisVerb = false;
       }
-
       if (suggestThisVerb) {
         let parseCopy = cloneObject(parse);
         // same as before: the verb is copied from the verblist but also
         // gets some extra properties (id, text, _order) assigned.
         parseCopy._verb = cloneObject(this._verbList[verb]);
         parseCopy._verb.id = verb;
-        parseCopy._verb.text = this._verbList[verb].names[this.lang][0];
+
+        // by default, use the English name, or the verb's main name.
+        parseCopy._verb.text = (this._verbList[verb].names[this.lang] ?
+                                this._verbList[verb].names[this.lang][0]
+                                : this._verbList[verb].names['en'][0] || verb);
         parseCopy._verb._order = 0;
         // TODO: for verb forms which clearly should be sentence-final,
         // change this value to -1
@@ -1000,7 +1060,7 @@ Parser.prototype = {
   // ** {{{Parser.suggestArgs()}}} **
   //
   // {{{suggestArgs()}}} returns an array of copies of the given parse by 
-  // replacing each of the arguments' text (from {{{_substitutedInput}}}) with 
+  // replacing each of the arguments' text with 
   // the each nountype's suggestion. This suggested result goes in the
   // argument's {{{text}}} and {{{html}}} properties. We'll also take this
   // opportunity to set each arg's {{{score}}} property, also coming from
@@ -1016,6 +1076,8 @@ Parser.prototype = {
 
   suggestArgs: function(parse) {
 
+    //mylog('verb:'+parse._verb.name);
+
     // make sure we keep the anaphor-substituted input intact... we're
     // going to make changes to text, html, score, and nountype
 
@@ -1023,6 +1085,8 @@ Parser.prototype = {
     let returnArr = [initialCopy];
 
     for (let role in parse.args) {
+
+      //mylog(role);
 
       let thisVerbTakesThisRole = false;
 
@@ -1033,7 +1097,7 @@ Parser.prototype = {
           for (let i in parse.args[role]) {
 
             // this is the argText to check
-            let argText = parse.args[role][i]._substitutedInput;
+            let argText = parse.args[role][i].input;
 
             // At this point we assume that all of these values have already
             // been cached in nounCache.
@@ -1084,6 +1148,8 @@ Parser.prototype = {
             continue;
         }
       }
+
+      //mylog('finished role');
 
       if (!thisVerbTakesThisRole)
         return [];
@@ -1322,6 +1388,7 @@ Parser.Query.prototype = {
   // # pick possible clitics
   // # group into arguments
   // # substitute anaphora (aka "magic words")
+  // # suggest normalized arguments
   // # suggest verbs for parses without them
   // # do nountype detection + cache
   // # replace arguments with their nountype suggestions
@@ -1356,43 +1423,17 @@ Parser.Query.prototype = {
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     let selection;
-    if (this.context.getSelection != undefined)
+    if (this.context.getSelection != undefined) {
       selection = this.context.getSelection();
-    else
-      selection = '';
-
-    for each (let parse in this._possibleParses) {
-      // make sure we keep the original input intact... we're going to make
-      // changes to _substitutedInput
-      for each (let args in parse.args) {
-        for each (let arg in args) {
-          if (arg._substitutedInput == undefined)
-            arg._substitutedInput = arg.input;
+      for each (let parse in this._possibleParses) {
+        // if there is a selection and if we find some anaphora in the entire
+        // input...
+        if (selection.length &&
+            this.parser._patternCache.anaphora.test(this._input)) {
+          let newParses = this.parser.substitute(parse,selection);
+          if (newParses.length)
+            this._possibleParses = this._possibleParses.concat(newParses);
         }
-      }
-
-      // if there is a selection and if we find some anaphora in the entire
-      // input...
-      if (selection.length &&
-          this.parser._patternCache.anaphora.test(this._input)) {
-        let newParses = this.parser.substitute(parse,selection);
-        if (newParses.length)
-          this._possibleParses = this._possibleParses.concat(newParses);
-      }
-      yield true;
-
-    }
-
-    this._times[this._step] = Date.now();
-    this._step++;
-
-    // STEP 6: suggest verbs for parses which don't have one
-    for each (parse in this._possibleParses) {
-      let newVerbedParses = this.parser.suggestVerb(parse);
-      for each (newVerbedParse in newVerbedParses) {
-        this._verbedParses = this.addIfGoodEnough(this._verbedParses,
-                                                  newVerbedParse);
-//        this._verbedParses.push(newVerbedParse);
         yield true;
       }
     }
@@ -1400,9 +1441,34 @@ Parser.Query.prototype = {
     this._times[this._step] = Date.now();
     this._step++;
 
-    // STEP 7: do nountype detection + cache
-    // STEP 8: suggest arguments with nountype suggestions
-    // STEP 9: score
+    // STEP 6: substitute normalized forms
+    // check every parse for arguments that could be normalized.
+    for each (let parse in this._possibleParses) {
+      let newParses = this.parser.substituteNormalizedArgs(parse);
+      if (newParses.length)
+        this._possibleParses = this._possibleParses.concat(newParses);
+      yield true;
+    }
+
+    this._times[this._step] = Date.now();
+    this._step++;
+
+    // STEP 7: suggest verbs for parses which don't have one
+    for each (parse in this._possibleParses) {
+      let newVerbedParses = this.parser.suggestVerb(parse);
+      for each (newVerbedParse in newVerbedParses) {
+        this._verbedParses = this.addIfGoodEnough(this._verbedParses,
+                                                  newVerbedParse);
+        yield true;
+      }
+    }
+
+    this._times[this._step] = Date.now();
+    this._step++;
+
+    // STEP 8: do nountype detection + cache
+    // STEP 9: suggest arguments with nountype suggestions
+    // STEP 10: score
 
     // Set up tryToCompleteParses()
     // This function will be called at the end of each nountype detection.
@@ -1416,17 +1482,24 @@ Parser.Query.prototype = {
       // go through all the arguments in thisParse and suggest args
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
-      for each (let newParse in thisQuery.parser.suggestArgs(thisParse)) {
+      suggestions = thisQuery.parser.suggestArgs(thisParse);
+      //mylog(suggestions);
+      for each (let newParse in suggestions) {
         thisQuery._scoredParses = thisQuery.addIfGoodEnough(thisQuery._scoredParses,
                                                      newParse);
       }
     }
     var tryToCompleteParses = function(argText,suggestions) {
       dump('finished detecting nountypes for '+argText+'\n');
+      //mylog([argText,suggestions]);
+
+      if (thisQuery.finished) {
+        dump('this query has already finished\n');
+        return;
+      }
+      
       for each (parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
-
-        //mylog(thisParse.allNounTypesDetectionHasCompleted());
 
         if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
           completeParse(thisParse);
@@ -1456,7 +1529,7 @@ Parser.Query.prototype = {
         foundArgs = true;
         for each (let x in arg) {
           // this is the text we're going to cache
-          let argText = x._substitutedInput;
+          let argText = x.input;
           
           if (!(argText in this._argsToCache)) {
             this._argsToCache[argText] = 1;
@@ -1572,7 +1645,7 @@ Parser.Query.prototype = {
       while (parseCollection[0].getMaxScore() < theBar
              && parseCollection.length > this.maxSuggestions) {
         let throwAway = parseCollection.shift();
-        //mylog(['throwing away:',throwAway,throwAway.getMaxScore()]);
+        //mylog(['throwing away:',throwAway,throwAway.getMaxScore(),parseCollection.length+' remaining']);
       }
     }
     
@@ -1650,10 +1723,20 @@ Parser.Parse.prototype = {
         display += (arg.outerSpace || '') + (arg.modifier ? "<span class='prefix' title='"
           + arg.role+"'>" + arg.modifier + arg.innerSpace
           + "</span>":'') + "<span class='" + className + "' title=''>"
-          + (arg.text || arg._substitutedInput || arg.input) + "</span>";
+          + (arg.inactivePrefix ?
+             "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
+          + (arg.text || arg.input)
+          + (arg.inactiveSuffix ?
+             "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
+          + "</span>";
       else
         display += "<span class='" + className
-          + "' title=''>" + (arg.text || arg._substitutedInput || arg.input)
+          + "' title=''>"
+          + (arg.inactivePrefix ?
+             "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
+          + (arg.text || arg.input)
+          + (arg.inactiveSuffix ?
+             "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>" + (arg.modifier ? "<span class='prefix' title='" + arg.role + "'>"
           + arg.innerSpace + arg.modifier + "</span>" : '') + (arg.outerSpace || '');
 
@@ -1721,7 +1804,7 @@ Parser.Parse.prototype = {
       // for each argument of this role...
       for each (let arg in this.args[role]) {
         // this is the argText to check
-        let argText = arg._substitutedInput;
+        let argText = arg.input;
 
         if (!(argText in nounCache))
           return false;

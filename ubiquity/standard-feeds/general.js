@@ -472,6 +472,10 @@ CmdUtils.CreateCommand({
   names: {
     da: ['oversæt'],
     en: ['translate'],
+    fr: ['traduire','traduizez','traduis'],
+    ca: ['tradueix', 'traduïx'],
+    da: ['oversæt'],
+    sv: ['översätt'],
     ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
     pt: ['traduzir', 'traduza']
   },

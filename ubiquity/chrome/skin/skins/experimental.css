@@ -110,6 +110,11 @@ div#ubiquity-preview #suggestions .argument {
 div#ubiquity-preview #suggestions .object {
   border-bottom: 2px black solid;
 }
+
+div#ubiquity-preview #suggestions .inactive {
+  color: #666;
+}
+
 /*end Parser 2 version additions*/
 
 div#ubiquity-preview #preview-pane {

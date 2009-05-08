@@ -91,6 +91,14 @@ var demoParserInterface = {
             break;
           
           case 6:
+            $('<h3>step 6: substitute normalized arguments</h3><ul id="normalizedArgParses"></ul>').appendTo($('#parseinfo'));
+            for each (var parse in this._possibleParses) {
+              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#normalizedArgParses'));
+            }
+            $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
+            break;
+          
+          case 7:
             $('<h3>step 6: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
               $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#verbedParses'));
@@ -98,9 +106,9 @@ var demoParserInterface = {
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
 
-          case 7:
           case 8:
           case 9:
+          case 10:
             $('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
             for (var text in nounCache) {
               var html = $('<li><code>'+text+'</code></li>');

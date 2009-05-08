@@ -46,22 +46,22 @@ function makeCaParser() {
   ca.roles = [
     {role: 'goal', delimiter: 'a'},
     {role: 'goal', delimiter: 'al'},
-    {role: 'goal', delimiter: 'a la'},
     {role: 'goal', delimiter: 'als'},
-    {role: 'goal', delimiter: 'a les'},
-    {role: 'goal', delimiter: 'a l\''},
     {role: 'source', delimiter: 'de'},
     {role: 'source', delimiter: 'dels'},
-    {role: 'source', delimiter: 'de la'},
-    {role: 'source', delimiter: 'de les'}, 
-    {role: 'source', delimiter: 'de l\''},
     {role: 'alias', delimiter: 'com'},
     {role: 'time', delimiter: 'a'},
-    {role: 'time', delimiter: 'a les'},
-    {role: 'time', delimiter: 'a la'},
     {role: 'instrument', delimiter: 'amb'},
     {role: 'instrument', delimiter: 'sobre'}
   ];
+
+  ca.argumentNormalizer = new RegExp('^(el\\s+|la\\s+|les\\s+|l\')(.+)()$','i');
+  ca.normalizeArgument = function(input) {
+    let matches = input.match(this.argumentNormalizer);
+    if (matches != null)
+      return [matches];
+    return [];
+  },
 
   ca.anaphora = ["açò", "allò", "això", "la selecció"];
   
