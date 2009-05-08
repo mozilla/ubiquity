@@ -39,53 +39,55 @@ var EXPORTED_SYMBOLS = ["loadExtension", "setExtension"];
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-var extension = null;
+var extensions = {};
 
 function log(msg) {
   //Components.utils.reportError(msg);
 }
 
 function loadExtension(url, parentWindow) {
-  if (!extension) {
+  if (!extensions[url]) {
     if (!parentWindow)
       parentWindow = Cc["@mozilla.org/appshell/appShellService;1"]
                      .getService(Ci.nsIAppShellService)
                      .hiddenDOMWindow;
 
-    log("Creating a new iframe.");
+    log("Creating a new iframe for " + url + ".");
     var iframe = parentWindow.document.createElement("iframe");
     iframe.setAttribute("src", url);
     parentWindow.document.documentElement.appendChild(iframe);
-    extension = iframe.contentWindow;
+    extensions[url] = iframe.contentWindow;
   }
 }
 
 function onExtensionUnload(event) {
-  if (extension == event.originalTarget.defaultView) {
-    log("Current extension is unloading.");
-    extension = null;
-    loadExtension(event.originalTarget.location.href);
+  var url = event.originalTarget.location.href;
+  if (extensions[url] == event.originalTarget.defaultView) {
+    log("Extension at " + url + " is unloading.");
+    delete extensions[url];
+    loadExtension(url);
   } else
-    log("Old extension is unloading.");
+    log("Old extension is unloading at " + url + ".");
 }
 
 function setExtension(window) {
-  if (extension == window || window.frameElement)
+  var url = window.location.href;
+  if (extensions[url] == window || window.frameElement)
     return;
 
-  var oldExtension = extension;
-  extension = window;
+  var oldExtension = extensions[url];
+  extensions[url] = window;
   if (oldExtension) {
     var iframe = oldExtension.frameElement;
     if (iframe) {
-      log("Closing old extension iframe.");
+      log("Closing old extension iframe at " + url + ".");
       iframe.parentNode.removeChild(iframe);
     } else {
-      log("Closing old extension window.");
+      log("Closing old extension window at " + url + ".");
       oldExtension.close();
     }
   }
 
-  log("New extension window set.");
-  extension.addEventListener("unload", onExtensionUnload, false);
+  log("New extension window set for " + url + ".");
+  extensions[url].addEventListener("unload", onExtensionUnload, false);
 }
