@@ -22,6 +22,7 @@
  *   Christian Sonne <cers@geeksbynature.dk>
  *   Felipe Gomes <felipc@gmail.com>
  *   Kim Ahlström <kim.ahlstrom@gmail.com>
+ *   Toni Hermoso Pulido <toniher@softcatala.cat>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -44,6 +45,7 @@ var EXPORTED_SYMBOLS = ["sampleVerbs"];
 var sampleVerbs = {
   add: {
     names: {
+      ca: ['afegeix', 'afegix', 'afig', 'inclou'],
       da: ['tilføj', 'indsæt'],
       sv: ['lägg till', 'addera', 'plussa'],
       en: ['add'],
@@ -58,6 +60,7 @@ var sampleVerbs = {
   },
   buy: {
     names: {
+      ca: ['compra'],
       da: ['køb'],
       sv: ['köp', 'handla'],
       en: ['buy','purchase'],
@@ -72,6 +75,7 @@ var sampleVerbs = {
   },
   say: {
     names: {
+      ca: ['digues'],
       da: ['sig'],
       sv: ['säg'],
       en: ['say'],
@@ -84,6 +88,7 @@ var sampleVerbs = {
   },
   move: {
     names: {
+      ca: ['mou', 'vés'],
       da: ['flyt'],
       sv: ['flytta'],
       en: ['move'],
@@ -98,6 +103,7 @@ var sampleVerbs = {
   },
   translate: {
     names: {
+      ca: ['tradueix', 'traduïx'],
       da: ['oversæt'],
       sv: ['översätt'],
       en: ['translate'],

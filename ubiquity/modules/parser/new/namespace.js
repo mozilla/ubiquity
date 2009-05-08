@@ -45,6 +45,8 @@ Components.utils.import("resource://ubiquity/modules/parser/new/da.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/sv.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/ja.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/zh.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/ca.js");
+
 
 //Components.utils.import("resource://ubiquity/modules/parser/new/verbs.js");
 
@@ -57,7 +59,8 @@ var NLParser2 = {
     da: makeDaParser,
     sv: makeSvParser,
     ja: makeJaParser,
-    zh: makeZhParser
+    zh: makeZhParser,
+    ca: makeCaParser
   },
 
   makeParserForLanguage: function(languageCode, verbList, nounList,
