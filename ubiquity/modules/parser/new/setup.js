@@ -47,6 +47,8 @@ var demoParserInterface = {
 
     $('#parseinfo').empty();
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{getSelection:function() $('#selection').val()},$('#maxSuggestions').val()*1,true); // this last true is for dontRunImmediately
+    $('#scoredParses').empty();
+
     this.currentQuery._threshold = $('#threshold').val()*1;
     if (!$('#async').attr('checked'))
       this.currentQuery._async = false;
@@ -132,7 +134,6 @@ var demoParserInterface = {
     });
     
     this.currentQuery.onResults = function() {
-      $('#scoredParses').empty();
       for each (var parse in this.suggestionList) {
         $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
       }

@@ -1118,7 +1118,10 @@ Parser.prototype = {
   detectNounType: function (x,callback) {
     //mylog('detecting '+x+'\n');
     
-    if (!(x in nounCache)) {
+    if (x in nounCache) {
+      if (typeof callback == 'function')
+        callback(x,nounCache[x]);
+    } else {
 
       /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
 
