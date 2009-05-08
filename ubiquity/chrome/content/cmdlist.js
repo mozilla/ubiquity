@@ -64,8 +64,12 @@ function linkToAction(text, action) {
 function fillTableCellForFeed( cell, feed ) {
   cell.html(linkToHtml( feed.title, feed.uri.spec));
   cell.append("<br/>");
-  cell.append(linkToAction("[unsubscribe]", function() {}));
-  // above function should be a variant of makeRemover.
+  // TODO do not add unsubscribe link if it's a built-in
+
+  cell.append(linkToAction("[unsubscribe]", makeRemover(cell, feed) ));
+  // makeRemover needs to be modified so that it slides out the row or
+  // rows and not just the cell.
+
   let sourceName = feed.canAutoUpdate?"auto-updated source":"source";
   cell.append(" ");
   cell.append(linkToHtml("[view " + sourceName + "]",
@@ -528,21 +532,9 @@ function makeFeedListElement(info, label, clickMaker) {
   return li;
 }
 
-function onReady() {
-  $(".version").text(UbiquitySetup.version);
-
-  let feedMgr = UbiquitySetup.createServices().feedManager;
-
-  function addSubscribedFeed(feed) {
-    if (!feed.isBuiltIn)
-      $("#command-feeds").append(makeFeedListElement(feed,
-                                                     "unsubscribe",
-                                                     makeRemover));
-  }
-  feedMgr.getSubscribedFeeds().forEach(addSubscribedFeed);
-
-  /*if (!$("#command-feeds").text())
-    $("#command-feeds-div").hide();*/
+function addAllUnsubscribedFeeds() {
+  let svc = UbiquitySetup.createServices();
+  let feedMgr = svc.feedManager;
 
   function addUnsubscribedFeed(feed) {
     $("#command-feed-graveyard").append(makeFeedListElement(feed,
@@ -553,11 +545,16 @@ function onReady() {
 
   if (!$("#command-feed-graveyard").text())
     $("#command-feed-graveyard-div").hide();
-
 }
+
+// TODO the following code needs to make its way onto any page that has
+// a version string:
+//  $(".version").text(UbiquitySetup.version);
+
 
 function startYeDocumentLoad() {
   populateYeTable("cmd");
+  addAllUnsubscribedFeeds();
 }
 
 function changeSortMode( newSortMode ) {
@@ -565,4 +562,4 @@ function changeSortMode( newSortMode ) {
   populateYeTable(newSortMode);
 }
 
-$(document).ready(startYeDocumentLoad); //onDocumentLoad);
+$(document).ready(startYeDocumentLoad);
