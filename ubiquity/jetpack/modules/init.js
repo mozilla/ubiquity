@@ -96,7 +96,7 @@ function onExtensionUnload(event) {
 
 function setExtension(window) {
   var url = window.location.href;
-  if (extensions[url] == window || window.frameElement)
+  if (extensions[url] == window)
     return;
 
   var oldExtension = extensions[url];
