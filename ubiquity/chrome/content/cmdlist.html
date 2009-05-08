@@ -28,30 +28,23 @@
   </div>
   <br clear="all"/>
 
-<div id="sort-container">
-  Sort commands by
-  <select id="sortby" size="1">
-    <option value=".name">Name</option>
-    <option value=".author">Author</option>
-    <option value=".license">License</option>
-    <option value=".homepage">Homepage</option>
-    <option value=".active">Status</option>
-    <!--<option value=".subscribedate">Date Subscribed</option>
-    <option value=".updatedate">Date Updated</option>-->
-  </select>
+<div id="cmdlist-help-div" style="display:none">
   <span id="checkbox instructions">
     Check a checkbox to activate a command: uncheck it to disable that command.
   </span>
+  Click the title of any column to sort by that column.
 </div>
 
-
-<table id="commands-and-feeds-table" width="100%">
+<table width="100%">
   <tr><th width="30%" colspan="1">Subscribed Feeds</th>
       <th width="70%" colspan="2">Commands</th></tr>
 
-  <tr><td>Sort By: <a href="">Feed Name</a></td>
-      <td><a href="">Enabled</a></td>
-      <td><a href="">Command</a></td></tr>
+  <tr><td>Sort By: <a onclick="changeSortMode('feed');">Feed Name</a></td>
+      <td><a onclick="changeSortMode('cmd');">Enabled</a></td>
+      <td><a onclick="changeSortMode('cmd');">Command</a></td></tr>
+
+  <tbody id="commands-and-feeds-table">
+  </tbody>
 </table>
 
 <br clear="all"/>

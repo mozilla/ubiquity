@@ -74,6 +74,33 @@ function fillTableCellForFeed( cell, feed ) {
   cell.addClass("topcell");
 }
 
+function formatCommandAuthor(authorData) {
+  if(!authorData) return "";
+
+  if(typeof authorData == "string") return authorData;
+
+  var authorMarkup = '';
+  if(authorData.name && !authorData.email) {
+    authorMarkup += escapeHtml(authorData.name) + " ";
+  } else if(authorData.name && authorData.email) {
+    authorMarkup += ('<a href="mailto:' + escapeHtml(authorData.email) +
+                     '">' + escapeHtml(authorData.name) + '</a> ');
+  } else if(!authorData.name && authorData.email) {
+    authorMarkup += ('<a href="mailto:' + escapeHtml(authorData.email) +
+                     '">' + escapeHtml(authorData.email) + '</a> ');
+  }
+
+  if(authorData.homepage) {
+    authorMarkup += ('[<a href="' + escapeHtml(authorData.homepage) +
+                     '">Homepage</a>]');
+  }
+
+  if(authorMarkup.length == 0)
+    return '';
+
+  return 'by ' + authorMarkup;
+}
+
 function fillTableRowForCmd( row, cmd, className ) {
 
   var isEnabled = !cmd.disabled;
@@ -148,7 +175,7 @@ function fillTableRowForCmd( row, cmd, className ) {
   row.append( cmdElement );
 }
 
-function populateYeTable() {
+function populateYeTable( sortField ) {
   let table = $("#commands-and-feeds-table");
   let svc = UbiquitySetup.createServices();
   let feedMgr = svc.feedManager;
@@ -158,7 +185,6 @@ function populateYeTable() {
     if (feed.isBuiltIn)
       return; //handle these differently
 
-    //var titleLink = addLink(info.title, info.uri.spec);
     let cmdNames = [];
     for (let name in feed.commands) {
       cmdNames.push(name);
@@ -168,10 +194,6 @@ function populateYeTable() {
     if (cmdNames.length > 1 )
       feedCell.attr("rowspan", cmdNames.length);
     fillTableCellForFeed( feedCell, feed );
-
-    /*if (cmdCells.length > 0 ) {
-      cmdCells[0].css("border-top", "1px solid black");
-    }*/
 
     let firstRow = $("<tr></tr>");
     firstRow.append( feedCell );
@@ -191,15 +213,71 @@ function populateYeTable() {
       }
     }
   }
-  feedMgr.getSubscribedFeeds().forEach(addFeedToTable);
+
+  function addCmdToTable(cmd) {
+    let aRow = $("<tr></tr>");
+    let feedCell = $("<td></td>");
+    let feed = getFeedForCommand(feedMgr, cmd);
+    if (feed) {
+      fillTableCellForFeed( feedCell, feed );
+    }
+    aRow.append( feedCell );
+    fillTableRowForCmd(aRow, cmd);
+    table.append(aRow);
+  }
+
+  if (sortField == "feed") {
+    feedMgr.getSubscribedFeeds().forEach(addFeedToTable);
+  } else if (sortField == "cmd") {
+    let cmds = cmdSource.commandNames.slice();
+    cmds = sortCmdListBy(cmds, "name");
+    for (let i=0; i < cmds.length; i++) {
+      let cmd = cmdSource.getCommand(cmds[i].name);
+      addCmdToTable(cmd);
+    }
+  }
 
 }
 
+function getFeedForCommand( feedMgr, cmd ) {
+  // This is a really hacky implementation -- it involves going through
+  // all feeds looking for one containing a command with a matching name.
+  let feeds = feedMgr.getSubscribedFeeds();
+  for (let feed in feeds) {
+    // TODO is buggy here: these feeds seem to not have commands!
+    if (!feed.commands) {
+      continue;
+    }
+    if (feed.commands[ cmd.name ]) {
+      return feed;
+    }
+  }
+  return null;
+}
+
+// Broken features to fix:
+//  -- sort by whatever
+//  -- unsubscribe / resubscribe
+//  -- populate unsubscribed feeds area
+//  -- enable/disable command
+//  -- margins, fo readability
+
+// New features to add:
+// show/hide help at top of page
+// sort by using links instead of drop-down
+// show/hide help for individual command
+// jump directly to help for particular command
+
+// So I guess I'm gonna need page-wide variables (url get args?)
+// for:
+// sort feeds-first or cmnds-first
+// if feeds-first, feeds by name or by recently subscribed?
+// if cmds-first, by name, author, homepage, licence, or enabledness?
 
 /// Below this is ye old code.
 
 function onDocumentLoad() {
-  onReady();
+  //onReady();
 
   function updateCommands() {
     var cmdSource = UbiquitySetup.createServices().commandSource;
@@ -270,7 +348,7 @@ function onDocumentLoad() {
     }
 
     // TODO: Remove any entries that no longer exist.
-
+    // TODO: port onDisableOrEnableCmd up
     function onDisableOrEnableCmd() {
       // update the preferences, when the user toggles the active
       // status of a command
@@ -303,37 +381,10 @@ function onDocumentLoad() {
   doSort();
 }
 
-function formatCommandAuthor(authorData) {
-  if(!authorData) return "";
-
-  if(typeof authorData == "string") return authorData;
-
-  var authorMarkup = '';
-  if(authorData.name && !authorData.email) {
-    authorMarkup += escapeHtml(authorData.name) + " ";
-  } else if(authorData.name && authorData.email) {
-    authorMarkup += ('<a href="mailto:' + escapeHtml(authorData.email) +
-                     '">' + escapeHtml(authorData.name) + '</a> ');
-  } else if(!authorData.name && authorData.email) {
-    authorMarkup += ('<a href="mailto:' + escapeHtml(authorData.email) +
-                     '">' + escapeHtml(authorData.email) + '</a> ');
-  }
-
-  if(authorData.homepage) {
-    authorMarkup += ('[<a href="' + escapeHtml(authorData.homepage) +
-                     '">Homepage</a>]');
-  }
-
-  if(authorMarkup.length == 0)
-    return '';
-
-  return 'by ' + authorMarkup;
-}
-
-function sortCommandsBy(key) {
+function sortCmdListBy(cmdList, key) {
   function alphasort(a, b) {
-    var aKey = $(a).find(key).text().toLowerCase();
-    var bKey = $(b).find(key).text().toLowerCase();
+    var aKey = a[key].toLowerCase();
+    var bKey = b[key].toLowerCase();
 
     // ensure empty fields get given lower priority
     if(aKey.length > 0  && bKey.length == 0)
@@ -349,21 +400,20 @@ function sortCommandsBy(key) {
     return 0;
   }
   function checksort(a, b) {
-    var aKey = $(':checkbox',a).attr('checked'),
-        bKey = $(':checkbox',b).attr('checked');
+    var aKey = !a.disabled,
+        bKey = !b.disabled;
     if (aKey===bKey)
       return 0;
     if(aKey)
       return -1;
     return 1;
   }
-  var cmdList = $("#command-list");
-  var allCommands = cmdList.find(".command").get();
-  allCommands.sort( (key==='.active') ? checksort : alphasort);
-
-  $.each(allCommands, function(cmdIndex, cmd) {
-    cmdList.append(cmd);
-  });
+  if (key == "active") {
+    cmdList.sort(checksort);
+  } else {
+    cmdList.sort(alphasort);
+  }
+  return cmdList;
 }
 
 
@@ -506,4 +556,13 @@ function onReady() {
 
 }
 
-$(document).ready(populateYeTable); //onDocumentLoad);
+function startYeDocumentLoad() {
+  populateYeTable("cmd");
+}
+
+function changeSortMode( newSortMode ) {
+  $("#commands-and-feeds-table").empty();
+  populateYeTable(newSortMode);
+}
+
+$(document).ready(startYeDocumentLoad); //onDocumentLoad);
