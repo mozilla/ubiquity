@@ -1438,6 +1438,16 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCmd(options) {
   CmdUtils.CreateCommand(options);
 };
 
+// ** {{{ CmdUtils.maxSuggestions }}} **
+//
+// Current number of max suggestions.
+
+CmdUtils.__defineGetter__("maxSuggestions", function maxSuggestions(){
+  var m = {};
+  Components.utils.import("resource://ubiquity/modules/cmdmanager.js", m);
+  return m.CommandManager.prototype.maxSuggestions;
+});
+
 /* The following odd-looking syntax means that the anonymous function
  * will be defined and immediately called.  This allows us to import
  * NounType and makeSugg into CmdUtils without polluting the global

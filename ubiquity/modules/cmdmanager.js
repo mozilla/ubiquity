@@ -42,8 +42,8 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/preview_browser.js");
 
-// TODO make this a preference instead
-const MAX_SUGGESTIONS = 5;
+const DEFAULT_MAX_SUGGESTIONS = 5;
+const MAX_SUGGESTIONS_PREF = 'extensions.ubiquity.maxSuggestions';
 
 var DEFAULT_PREVIEW_URL = (
   ('data:text/html,' +
@@ -200,7 +200,8 @@ CommandManager.prototype = {
 
   updateInput : function CM_updateInput(input, context, asyncSuggestionCb) {
     this.__lastInput = input;
-    this.__activeQuery = this.__nlParser.newQuery(input, context, MAX_SUGGESTIONS);
+    this.__activeQuery = this.__nlParser.newQuery(input, context,
+                                                  this.maxSuggestions);
     this.__activeQuery.onResults = asyncSuggestionCb;
     this.__hilitedSuggestion = 0;
     var previewState = "no-suggestions";
@@ -226,7 +227,7 @@ CommandManager.prototype = {
                                        this.__lastInput + ".");
     else
       try {
-	this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
+        this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
         parsedSentence.execute(context);
       } catch (e) {
         this.__msgService.displayMessage(
@@ -243,7 +244,8 @@ CommandManager.prototype = {
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
                                                            asyncSuggestionCb) {
-    let noInputQuery = this.__nlParser.newQuery("", context, MAX_SUGGESTIONS);
+    let noInputQuery = this.__nlParser.newQuery("", context,
+                                                this.maxSuggestions);
     noInputQuery.onResults = asyncSuggestionCb;
     return noInputQuery.suggestionList;
   },
@@ -295,5 +297,12 @@ CommandManager.prototype = {
     }
 
     return getAvailableCommands;
+  },
+
+  get maxSuggestions(){
+    const Application = (Components.classes["@mozilla.org/fuel/application;1"]
+                         .getService(Components.interfaces.fuelIApplication));
+    return Application.prefs.getValue(MAX_SUGGESTIONS_PREF,
+                                      DEFAULT_MAX_SUGGESTIONS);
   }
 };
