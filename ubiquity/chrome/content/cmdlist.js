@@ -44,6 +44,160 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var escapeHtml = Utils.escapeHtml;
 
+function linkToHtml(text, url, className) {
+  var linkToHtml = document.createElement("a");
+  $(linkToHtml).text(text);
+  if (className)
+    $(linkToHtml).addClass(className);
+  linkToHtml.href = url;
+  return linkToHtml;
+}
+
+function linkToAction(text, action) {
+  var linkToAction = document.createElement("span");
+  $(linkToAction).text(text);
+  $(linkToAction).click(action);
+  $(linkToAction).css({cursor: "pointer", color: "#aaa"});
+  return linkToAction;
+}
+
+function fillTableCellForFeed( cell, feed ) {
+  cell.html(linkToHtml( feed.title, feed.uri.spec));
+  cell.append("<br/>");
+  cell.append(linkToAction("[unsubscribe]", function() {}));
+  // above function should be a variant of makeRemover.
+  let sourceName = feed.canAutoUpdate?"auto-updated source":"source";
+  cell.append(" ");
+  cell.append(linkToHtml("[view " + sourceName + "]",
+                             "view-source:" + feed.viewSourceUri.spec,
+                             "feed-action"));
+  cell.addClass("topcell");
+}
+
+function fillTableRowForCmd( row, cmd, className ) {
+
+  var isEnabled = !cmd.disabled;
+  var checkBoxCell = jQuery(
+    '<td><input type="checkbox" class="activebox"' +
+      (isEnabled ? ' checked="checked"' : '')+'/></td>'
+  );
+
+  var cmdElement = jQuery(
+    '<td class="command">' +
+    '<img class="favicon">' +
+    '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
+    '<span class="description"/>' +
+    '<div class="synonyms-container light">also called ' +
+    '<span class="synonyms"/></div>' +
+    '<div class="light"><span class="author"/>' +
+    '<span class="license"/></div>' +
+    '<div class="homepage light"/>' +
+    '<div class="help"/>' +
+    '</td>'
+  );
+
+  if (cmd.icon) {
+    cmdElement.find(".favicon").attr("src", escapeHtml(cmd.icon) );
+  } else {
+    cmdElement.find(".favicon").empty();
+  }
+  if (cmd.homepage) {
+    cmdElement.find(".homepage").html(
+      ('View more information at <a href="' +
+       escapeHtml(cmd.homepage) + '">' +
+       escapeHtml(cmd.homepage) + '</a>.')
+    );
+  } else cmdElement.find(".homepage").empty();
+
+  if (cmd.synonyms){
+    cmdElement.find(".synonyms").html(
+      escapeHtml(cmd.synonyms.join(", "))
+    );
+  } else cmdElement.find(".synonyms-container").empty();
+
+  if (cmd.description) {
+    cmdElement.find(".description").html(
+      cmd.description
+    );
+  } else cmdElement.find(".description").empty();
+
+  if (cmd.author) {
+    cmdElement.find(".author").html(
+      formatCommandAuthor(cmd.author)
+    );
+  } else cmdElement.find(".author").empty();
+
+  if(cmd.license) {
+    cmdElement.find(".license").html(
+      escapeHtml(' - licensed as ' + cmd.license)
+    );
+  } else cmdElement.find(".license").empty();
+
+  if(cmd.help) {
+    cmdElement.find(".help").html(cmd.help);
+  } else {
+    cmdElement.find(".help").empty();
+  }
+
+  if (className) {
+    checkBoxCell.addClass(className);
+    cmdElement.addClass(className);
+  }
+
+  row.append( checkBoxCell );
+  row.append( cmdElement );
+}
+
+function populateYeTable() {
+  let table = $("#commands-and-feeds-table");
+  let svc = UbiquitySetup.createServices();
+  let feedMgr = svc.feedManager;
+  let cmdSource = svc.commandSource;
+
+  function addFeedToTable(feed) {
+    if (feed.isBuiltIn)
+      return; //handle these differently
+
+    //var titleLink = addLink(info.title, info.uri.spec);
+    let cmdNames = [];
+    for (let name in feed.commands) {
+      cmdNames.push(name);
+    }
+
+    let feedCell = $("<td></td>");
+    if (cmdNames.length > 1 )
+      feedCell.attr("rowspan", cmdNames.length);
+    fillTableCellForFeed( feedCell, feed );
+
+    /*if (cmdCells.length > 0 ) {
+      cmdCells[0].css("border-top", "1px solid black");
+    }*/
+
+    let firstRow = $("<tr></tr>");
+    firstRow.append( feedCell );
+    if (cmdNames.length > 0) {
+      fillTableRowForCmd(firstRow, feed.commands[cmdNames[0]], "topcell");
+    } else {
+      firstRow.append($("<td class='topcell'></td><td class='topcell'></td>"));
+    }
+    table.append(firstRow);
+
+    if (cmdNames.length > 1 ) {
+      for (let i = 1; i < cmdNames.length; i++ ) {
+        // starting from 1 is on purpose
+        let aRow = $("<tr></tr>");
+        fillTableRowForCmd(aRow, feed.commands[cmdNames[i]]);
+        table.append(aRow);
+      }
+    }
+  }
+  feedMgr.getSubscribedFeeds().forEach(addFeedToTable);
+
+}
+
+
+/// Below this is ye old code.
+
 function onDocumentLoad() {
   onReady();
 
@@ -213,7 +367,7 @@ function sortCommandsBy(key) {
 }
 
 
-Components.utils.import("resource://ubiquity/modules/setup.js");
+// ------- where the old division was
 
 function makeRemover(element, info) {
   function onSlideDown() {
@@ -258,6 +412,10 @@ function makeUnremover(element, info) {
   }
   return unremove;
 }
+
+
+
+
 
 function makeFeedListElement(info, label, clickMaker) {
   var li = document.createElement("li");
@@ -348,4 +506,4 @@ function onReady() {
 
 }
 
-$(document).ready(onDocumentLoad);
+$(document).ready(populateYeTable); //onDocumentLoad);

@@ -131,32 +131,32 @@ em{
 	padding: 10px;
 }
 
-#command-list .command, #skin-list .command{
+.command, #skin-list .command{
   margin: 15px;
   margin-bottom: 20px;
 }
 
-#command-list .command .name, #skin-list .command .name{
+.command .name, #skin-list .command .name{
   font-size: 15pt;
 }
-#skin-list .command .name{
+.command .name{
   cursor: pointer;
 }
 
-#command-list .command .homepage, #skin-list .command .homepage{
+.command .homepage, #skin-list .command .homepage{
 }
 
-#command-list .command .author, #skin-list .command .author{
+.command .author, #skin-list .command .author{
   font-size: 90%;
 }
 
-#command-list .command .description, #skin-list .command .description{
+.command .description, #skin-list .command .description{
   display: inline;
   font-size: 12pt;
   margin-left: 10px;
   color:#BFBFBF;
 }
-#command-list .synonyms{
+.command .synonyms{
   color: black;
 }
 
@@ -165,7 +165,7 @@ em{
   font-weight: 800;
 }
 
-#command-list .command .help{
+.command .help{
   margin-top: 5px;
   color: #777;
 }
@@ -320,4 +320,13 @@ ul#command-feed-graveyard ul li:after {
 
 ul#command-feed-graveyard ul li:last-child:after {
   content: "";
+}
+
+th {
+  font-variant: small-caps;
+  font-size: 18pt;
+}
+
+td.topcell {
+  border-top: 1px solid black;
 }

@@ -16,7 +16,7 @@
         src="cmdlist.js"></script>
 
 <div class="head">
-  <span class="large">Ubiquity:</span> Your command list</span>
+  <span class="large">Ubiquity:</span> Wherein are listed the commands at your disposal.</span>
 </div>
 
 
@@ -27,22 +27,6 @@
     <p>You can get to this page at any time using the "Command-list" command.</p>
   </div>
   <br clear="all"/>
-
-
-  <div id="command-feeds-div">
-    <h2>Subscribed Feeds</h2>
-      <p id="command-feeds-header">You're currently subscribed to these command
-      feeds:</p>
-      <ul id="command-feeds"></ul>
-  </div>
-
-  <div id="command-feed-graveyard-div">
-    <h2>Feed Graveyard</h2>
-      <p id="command-feed-graveyard-header">You've recently unsubscribed to these command
-      feeds:</p>
-      <ul id="command-feed-graveyard"></ul>
-  </div>
-
 
 <div id="sort-container">
   Sort commands by
@@ -60,7 +44,24 @@
   </span>
 </div>
 
-<ul id="command-list"></ul>
+
+<table id="commands-and-feeds-table" width="100%">
+  <tr><th width="30%" colspan="1">Subscribed Feeds</th>
+      <th width="70%" colspan="2">Commands</th></tr>
+
+  <tr><td>Sort By: <a href="">Feed Name</a></td>
+      <td><a href="">Enabled</a></td>
+      <td><a href="">Command</a></td></tr>
+</table>
+
+<br clear="all"/>
+
+  <div id="command-feed-graveyard-div">
+      <p id="command-feed-graveyard-header">You've recently unsubscribed to these command
+      feeds:</p>
+      <ul id="command-feed-graveyard"></ul>
+  </div>
+
 
 </body>
 </html>
