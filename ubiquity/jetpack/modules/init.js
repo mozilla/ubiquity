@@ -45,17 +45,17 @@ function log(msg) {
   //Components.utils.reportError(msg);
 }
 
-function loadExtension(url, parentWindow) {
+function loadExtension(url, parentElement) {
   if (!extensions[url]) {
-    if (!parentWindow)
-      parentWindow = Cc["@mozilla.org/appshell/appShellService;1"]
-                     .getService(Ci.nsIAppShellService)
-                     .hiddenDOMWindow;
+    if (!parentElement)
+      parentElement = Cc["@mozilla.org/appshell/appShellService;1"]
+                      .getService(Ci.nsIAppShellService)
+                      .hiddenDOMWindow.document.documentElement;
 
     log("Creating a new iframe for " + url + ".");
-    var iframe = parentWindow.document.createElement("iframe");
+    var iframe = parentElement.ownerDocument.createElement("iframe");
     iframe.setAttribute("src", url);
-    parentWindow.document.documentElement.appendChild(iframe);
+    parentElement.appendChild(iframe);
     extensions[url] = iframe.contentWindow;
   }
 }
