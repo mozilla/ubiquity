@@ -1,0 +1,46 @@
+<html>
+<head>
+  <title>Extension</title>
+</head>
+<body>
+<!-- Load scripts, etc. for the extension here. -->
+<script src="js/init-extension.js"></script>
+<script src="js/jquery.js"></script>
+<script src="js/track.js"></script>
+<script src="js/observe.js"></script>
+<script>
+// Just some sample code.
+
+function SomeClass() {
+  this.id = SomeClass._id++;
+}
+
+SomeClass._id = 0;
+
+SomeClass.prototype = {
+  toString: function toString() {
+    return "[SomeClass " + this.id + "]";
+  }
+};
+
+function logTracked() {
+  MemoryTracking.track(new SomeClass(), "SomeClass");
+  $(document.body).text(MemoryTracking.getLiveObjects("SomeClass").join(", "));
+}
+
+$(window).ready(
+function() {
+  if (WindowWatcher.isSupported()) {
+    var ww = new WindowWatcher();
+    ww.onWindowOpened = function(win) {
+      console.log("Window opened.", win);
+    }
+    ww.onWindowClosed = function(window) {
+      console.log("Window closed.", window);
+    }
+  }
+  window.setInterval(logTracked, 1000);
+  });
+</script>
+</body>
+</html>
