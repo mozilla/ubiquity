@@ -58,11 +58,14 @@ function reloadAllJetpacks() {
     function(feed) {
       if (feed.type == "jetpack") {
         var codeSource = feed.getCodeSource();
+        var code = codeSource.getCode();
         var sandbox = sandboxFactory.makeSandbox(codeSource);
         try {
-          sandboxFactory.evalInSandbox(codeSource.getCode(),
-                                       sandbox,
-                                       codeSource.codeSections);
+          var codeSections = [{length: code.length,
+                               filename: codeSource.id,
+                               lineNumber: 1}];
+          console.log(codeSource.codeSections);
+          sandboxFactory.evalInSandbox(code, sandbox, codeSections);
         } catch (e) {
           console.log("Error ", e, "occurred while evaluating code for ",
                       feed.uri.spec);
