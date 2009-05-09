@@ -108,37 +108,21 @@ cmd_highlight.preview = function(pblock) {
 };
 
 CmdUtils.CreateCommand({
-  name : "link-to-wikipedia",
-  takes : {"text" : noun_arb_text},
+  name: "link-to-wikipedia",
+  takes: {phrase: noun_arb_text},
+  modifiers: {in: noun_type_language},
+  description: "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
-  description: "Turns a selected phrase into a link to the matching Wikipedia article.",
-  help: "Can only be used in a rich text-editing field.",
-  execute : function( directObj ){
-    var text = directObj.text;
-    var wikiText = text.replace(/ /g, "_");
-    var html = ("<a href=\"http://en.wikipedia.org/wiki/" +
-                "Special:Search/" + wikiText +
-                "\">" + text + "</a>");
-
-    var doc = context.focusedWindow.document;
-    if (doc.designMode == "on")
-      doc.execCommand("insertHTML", false, html);
-    else
-      displayMessage("You're not in a rich text editing field.");
+  _link: function({text, html}, {in: {data}})(
+    '<a href="http://' + (data || "en") +
+    ".wikipedia.org/wiki/Special%3ASearch/" +
+    encodeURIComponent(text.replace(/ /g, "_")) + '">' + html + "</a>"),
+  execute: function(dob, mod) {
+    var link = this._link(dob, mod);
+    CmdUtils.setSelection(link, {text: link});
   },
-
-  preview : function(pblock, directObj){
-    var text = directObj.text;
-    if (text.length < 1){
-      pblock.innerHTML = "Inserts a link to Wikipedia article on text";
-    }else{
-      var wikiText = text.replace(/ /g, "_");
-      var html = ("<a style=\"color: yellow;text-decoration: underline;\"" +
-                  "href=\"http://en.wikipedia.org/wiki/" +
-                  "Special:Search/" + wikiText +
-                  "\">" + text + "</a>");
-      pblock.innerHTML = "Inserts a link to Wikipedia article on " + text + " like this: " + html;
-    }
+  preview: function(pbl, dob, mod) {
+    pbl.innerHTML = this.description + "<p>"+ this._link(dob, mod) +"</p>";
   }
 });
 
