@@ -6,6 +6,7 @@ Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 if (JetpackFeedManager) {
   var watcher = new EventHubWatcher(JetpackFeedManager);
   var doReload = false;
+  // TODO: Watch more events.
   watcher.add(
     "feed-change",
     function(name, uri) {
