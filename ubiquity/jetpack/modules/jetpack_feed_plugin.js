@@ -158,6 +158,10 @@ function JetpackFeed(feedInfo, hub, messageService, timeoutInterval) {
   self.commands = [];
   self.pageLoadFuncs = [];
 
+  this.getCodeSource = function getCodeSource() {
+    return codeSource;
+  };
+
   this.refresh = function refresh() {
     let code = codeSource.getCode();
     if (code != codeCache) {
