@@ -51,7 +51,25 @@ function makeGlobals(codeSource) {
           $: jQuery};
 }
 
+var jetpacks = [];
+
+function Jetpack(sandbox) {
+  this.finalize = function finalize() {
+    delete sandbox['$'];
+  };
+}
+
+function finalizeJetpacks() {
+  jetpacks.forEach(
+    function(jetpack) {
+      jetpack.finalize();
+    });
+  jetpacks = [];
+}
+
 function reloadAllJetpacks() {
+  finalizeJetpacks();
+
   let sandboxFactory = new SandboxFactory(makeGlobals);
   var feeds = JetpackFeedManager.getSubscribedFeeds();
   feeds.forEach(
@@ -60,6 +78,7 @@ function reloadAllJetpacks() {
         var codeSource = feed.getCodeSource();
         var code = codeSource.getCode();
         var sandbox = sandboxFactory.makeSandbox(codeSource);
+        jetpacks.push(new Jetpack(sandbox));
         try {
           var codeSections = [{length: code.length,
                                filename: codeSource.id,
@@ -76,6 +95,7 @@ function reloadAllJetpacks() {
 $(window).ready(
   function() {
     reloadAllJetpacks();
+    window.addEventListener("unload", finalizeJetpacks, false);
     window.setInterval(tick, 1000);
     tick();
   });
