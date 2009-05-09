@@ -64,7 +64,6 @@ function reloadAllJetpacks() {
           var codeSections = [{length: code.length,
                                filename: codeSource.id,
                                lineNumber: 1}];
-          console.log(codeSource.codeSections);
           sandboxFactory.evalInSandbox(code, sandbox, codeSections);
         } catch (e) {
           console.log("Error ", e, "occurred while evaluating code for ",
