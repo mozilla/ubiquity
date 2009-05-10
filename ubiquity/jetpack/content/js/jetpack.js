@@ -3,9 +3,12 @@ if (!this.Cc)
 if (!this.Ci)
   this.Ci = Components.interfaces;
 
-Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js");
 Components.utils.import("resource://jetpack/modules/init.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
+
+var FeedPlugin = {};
+Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
+                        FeedPlugin);
 
 // This sets up jQuery when it's loaded in a hidden chrome window
 // that doesn't provide a user interface.
@@ -88,24 +91,24 @@ function forAllBrowsers(options) {
   };
 }
 
-if (JetpackFeedManager) {
-  var watcher = new EventHubWatcher(JetpackFeedManager);
+if (FeedPlugin.FeedManager) {
+  var watcher = new EventHubWatcher(FeedPlugin.FeedManager);
   var doReload = false;
   // TODO: Watch more events.
   watcher.add(
     "feed-change",
     function(name, uri) {
-      if (uri.spec in JetpackFeeds)
+      if (uri.spec in FeedPlugin.Feeds)
         doReload = true;
       if (doReload)
         window.location.reload();
     });
 } else
-  console.log("JetpackFeedManager is null");
+  console.log("FeedPlugin.FeedManager is null");
 
 function tick() {
   $("#jetpacks").empty();
-  for (url in JetpackFeeds)
+  for (url in FeedPlugin.Feeds)
     $("#jetpacks").append($('<div class="jetpack"></div>').text(url));
 
   var numWeakRefs = getExtensionDebugInfo().weakRefs.length;
@@ -208,7 +211,7 @@ function finalizeJetpacks() {
 
 function loadAllJetpacks() {
   let sandboxFactory = new SandboxFactory(makeGlobals);
-  var feeds = JetpackFeedManager.getSubscribedFeeds();
+  var feeds = FeedPlugin.FeedManager.getSubscribedFeeds();
   feeds.forEach(
     function(feed) {
       if (feed.type == "jetpack") {

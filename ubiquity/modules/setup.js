@@ -51,7 +51,10 @@ Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
 Components.utils.import("resource://ubiquity/modules/webjsm.js");
 Components.utils.import("resource://ubiquity/modules/prefcommands.js");
-Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js");
+
+var Jetpack = {};
+Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
+                        Jetpack);
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
@@ -279,7 +282,7 @@ let UbiquitySetup = {
                                      msgService,
                                      gWebJsModule);
 
-      var jpfp = new JetpackFeedPlugin(feedManager, msgService);
+      var jpfp = new Jetpack.FeedPlugin(feedManager, msgService);
 
       var cmdSource = new FeedAggregator(
         feedManager,
