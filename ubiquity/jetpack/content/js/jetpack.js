@@ -3,8 +3,10 @@ if (!this.Cc)
 if (!this.Ci)
   this.Ci = Components.interfaces;
 
-Components.utils.import("resource://jetpack/modules/init.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
+
+var Extension = {};
+Components.utils.import("resource://jetpack/modules/init.js", Extension);
 
 var FeedPlugin = {};
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
@@ -111,7 +113,7 @@ function tick() {
   for (url in FeedPlugin.Feeds)
     $("#jetpacks").append($('<div class="jetpack"></div>').text(url));
 
-  var numWeakRefs = getExtensionDebugInfo().weakRefs.length;
+  var numWeakRefs = Extension.getDebugInfo().weakRefs.length;
   $("#extension-weakrefs").text(numWeakRefs);
 }
 

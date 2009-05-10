@@ -11,10 +11,10 @@
    else
      host = window.location.host;
 
-   var jsm = {};
+   var Extension = {};
    var initUrl  = "resource://" + host + "/modules/init.js";
-   Components.utils.import(initUrl, jsm);
-   jsm.setExtension(window);
+   Components.utils.import(initUrl, Extension);
+   Extension.set(window);
 
    if (!window.console) {
      const Cc = Components.classes;

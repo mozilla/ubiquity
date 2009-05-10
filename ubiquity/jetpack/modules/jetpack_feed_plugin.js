@@ -39,7 +39,9 @@ let EXPORTED_SYMBOLS = ["FeedPlugin", "Feeds", "FeedManager"];
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/codesource.js");
 Components.utils.import("resource://ubiquity/modules/collection.js");
-Components.utils.import("resource://jetpack/modules/init.js");
+
+var Extension = {};
+Components.utils.import("resource://jetpack/modules/init.js", Extension);
 
 const CONFIRM_URL = "chrome://jetpack/content/confirm-add-jetpack.html";
 const TYPE = "jetpack";
@@ -56,7 +58,7 @@ function FeedPlugin(feedManager, messageService) {
   else
     Components.utils.reportError("FeedManager already defined.");
 
-  loadExtension("about:jetpack");
+  Extension.load("about:jetpack");
 
   this.type = TYPE;
 

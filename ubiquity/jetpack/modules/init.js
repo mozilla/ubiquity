@@ -34,8 +34,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["loadExtension", "setExtension",
-                        "getExtensionDebugInfo"];
+var EXPORTED_SYMBOLS = ["load", "set", "getDebugInfo"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -58,7 +57,7 @@ function trackExtension(extension) {
   extensionWeakRefs = weakRefs;
 }
 
-function getExtensionDebugInfo() {
+function getDebugInfo() {
   var weakRefs = [];
   extensionWeakRefs.forEach(
     function(weakRef) {
@@ -68,7 +67,7 @@ function getExtensionDebugInfo() {
   return {weakRefs: weakRefs};
 }
 
-function loadExtension(url, parentElement) {
+function load(url, parentElement) {
   if (!extensions[url]) {
     if (!parentElement)
       parentElement = Cc["@mozilla.org/appshell/appShellService;1"]
@@ -89,12 +88,12 @@ function onExtensionUnload(event) {
   if (extensions[url] == event.originalTarget.defaultView) {
     log("Extension at " + url + " is unloading.");
     delete extensions[url];
-    loadExtension(url);
+    load(url);
   } else
     log("Old extension is unloading at " + url + ".");
 }
 
-function setExtension(window) {
+function set(window) {
   var url = window.location.href;
   if (extensions[url] == window)
     return;
