@@ -244,17 +244,21 @@ function openJsErrorConsole() {
                 "status,toolbar");
 }
 
+function forceGC() {
+  Components.utils.forceGC();
+  tick();
+}
+
 $(window).ready(
   function() {
     loadAllJetpacks();
     window.addEventListener("unload", finalizeJetpacks, false);
     window.setInterval(tick, 1000);
 
-    $("#force-gc").click(function() { Components.utils.forceGC(); tick(); });
+    $("#force-gc").click(forceGC);
     $("#js-error-console").click(openJsErrorConsole);
 
     if (!window.console.isFirebug)
       $("#firebug-not-found").show();
-
-    tick();
+    forceGC();
   });
