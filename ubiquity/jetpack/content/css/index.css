@@ -6,3 +6,30 @@ body {
 .jetpack {
     padding-left: 1em;
 }
+
+.buttony {
+    cursor: pointer;
+    background-color: #eeeeee;
+}
+
+span.buttony:hover {
+    background-color: #aaaaaa;
+}
+
+span.buttony:active {
+    background-color: #666666;
+}
+
+a {
+    color: black;
+}
+
+.warning {
+    display: none;
+    background-color: orange;
+    padding: 0.5em;
+}
+
+.warning .buttony {
+    opacity: 0.6;
+}

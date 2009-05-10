@@ -3,18 +3,28 @@
   <link rel="stylesheet" type="text/css" media="all"
         href="css/index.css" />
   <title>I am Jetpack.</title>
+  <base target="_blank"/>
 </head>
 <body>
 <h1>I am Jetpack.</h1>
 <p>Here are the Jetpacks that are currently installed.</p>
 <div id="jetpacks"></div>
 <h2>Debugging Information</h2>
-<p>Extension page weak references: <span id="extension-weakrefs"></span></p>
-<p>Reloading this page will reload Jetpack. Any errors or logging
-messages made by Jetpacks will be shown in
-the <span id="firebug-console">Firebug Console</span>, assuming you have
-it installed. If you don't have Firebug, they will appear in
-the <span id="js-error-console">JS Error Console</span>.</p>
+<p>Extension page weak references: <span
+id="extension-weakrefs"></span> <span class="buttony"
+id="force-gc">force garbage collection</span></p>
+<p>If there's more than one weak reference in existence, then either
+some of them are waiting to be garbage collected, or a Jetpack has
+memory leaks.</p>
+<p>Reloading this page will reload Jetpack.</p>
+<p id="firebug-not-found" class="warning">You either don't have
+Firebug installed, or you don't have it enabled for this page, so all
+logging messages will appear in the <span class="buttony"
+id="js-error-console">JS Error Console</span>. If you <a
+href="http://www.getfirebug.com">get Firebug</a> and enable it for
+this page, and then reload this page, all logging messages will be
+logged to the Firebug Console, where it's much easier to debug
+problems and inspect live objects.</p>
 <!-- Load scripts, etc. for the extension here. -->
 <script src="js/init-extension.js"></script>
 <script src="js/jquery.js"></script>

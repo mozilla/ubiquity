@@ -93,10 +93,32 @@ function reloadAllJetpacks() {
     });
 }
 
+function openJsErrorConsole() {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+  var wm = Cc['@mozilla.org/appshell/window-mediator;1'].getService();
+  var wmInterface = wm.QueryInterface(Ci.nsIWindowMediator);
+  var topWindow = wmInterface.getMostRecentWindow("global:console");
+
+  if (topWindow)
+    topWindow.focus();
+  else
+    window.open("chrome://global/content/console.xul", "_blank",
+                "chrome,extrachrome,menubar,resizable,scrollbars," +
+                "status,toolbar");
+}
+
 $(window).ready(
   function() {
     reloadAllJetpacks();
     window.addEventListener("unload", finalizeJetpacks, false);
     window.setInterval(tick, 1000);
+
+    $("#force-gc").click(function() { Components.utils.forceGC(); });
+    $("#js-error-console").click(openJsErrorConsole);
+
+    if (!window.console.isFirebug)
+      $("#firebug-not-found").show();
+
     tick();
   });

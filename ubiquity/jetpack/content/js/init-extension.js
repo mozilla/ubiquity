@@ -38,6 +38,7 @@
          var context = browser.chrome.window.FirebugContext;
          var Firebug = browser.chrome.window.Firebug;
          window.console = {
+           isFirebug: true,
            log: function log() {
              Firebug.Console.logFormatted(arguments, context, "log");
            }
