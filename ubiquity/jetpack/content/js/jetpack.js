@@ -114,7 +114,7 @@ $(window).ready(
     window.addEventListener("unload", finalizeJetpacks, false);
     window.setInterval(tick, 1000);
 
-    $("#force-gc").click(function() { Components.utils.forceGC(); });
+    $("#force-gc").click(function() { Components.utils.forceGC(); tick(); });
     $("#js-error-console").click(openJsErrorConsole);
 
     if (!window.console.isFirebug)
