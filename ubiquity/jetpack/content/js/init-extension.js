@@ -5,8 +5,14 @@
      return;
    }
 
+   var host;
+   if (window.location.protocol == "about:")
+     host = window.location.href.slice(window.location.href.indexOf(":") + 1);
+   else
+     host = window.location.host;
+
    var jsm = {};
-   var initUrl = "resource://" + window.location.host + "/modules/init.js";
+   var initUrl  = "resource://" + host + "/modules/init.js";
    Components.utils.import(initUrl, jsm);
    jsm.setExtension(window);
 

@@ -57,7 +57,7 @@ function JetpackFeedPlugin(feedManager, messageService) {
   else
     Components.utils.reportError("JetpackFeedManager already defined.");
 
-  loadExtension("chrome://jetpack/content/index.html");
+  loadExtension("about:jetpack");
 
   this.type = TYPE;
 
