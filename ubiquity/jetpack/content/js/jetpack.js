@@ -98,7 +98,7 @@ if (JetpackFeedManager) {
       if (uri.spec in JetpackFeeds)
         doReload = true;
       if (doReload)
-        reloadAllJetpacks();
+        window.location.reload();
     });
 } else
   console.log("JetpackFeedManager is null");
@@ -153,9 +153,7 @@ function finalizeJetpacks() {
   jetpacks = [];
 }
 
-function reloadAllJetpacks() {
-  finalizeJetpacks();
-
+function loadAllJetpacks() {
   let sandboxFactory = new SandboxFactory(makeGlobals);
   var feeds = JetpackFeedManager.getSubscribedFeeds();
   feeds.forEach(
@@ -195,7 +193,7 @@ function openJsErrorConsole() {
 
 $(window).ready(
   function() {
-    reloadAllJetpacks();
+    loadAllJetpacks();
     window.addEventListener("unload", finalizeJetpacks, false);
     window.setInterval(tick, 1000);
 
