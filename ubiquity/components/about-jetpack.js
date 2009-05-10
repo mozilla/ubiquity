@@ -58,7 +58,7 @@ JetpackAboutHandler.prototype = {
     },
 
     getURIFlags: function(aURI) {
-        return Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT;
+        return Ci.nsIAboutModule.ALLOW_SCRIPT;
     },
 
     classDescription: "About Jetpack Page",
