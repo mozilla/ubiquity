@@ -207,13 +207,21 @@ $(window).ready(
 
     tick();
 
+    var dataUri = "data:text/html," + encodeURI("<blink>hi there!</blink>");
     forAllBrowsers(
       {onLoad: function(window) {
-         console.log("load", window);
+         var iframe = StatusBar.addPanel(window,
+                                         dataUri,
+                                         200);
+         window.__jetpackIframe = iframe;
        },
        onUnload: function(window) {
-         console.log("unload", window);
-         Components.utils.reportError("unloading " + window.location.href);
+         if (window.__jetpackIframe) {
+           var iframe = window.__jetpackIframe;
+           delete window.__jetpackIframe;
+           if (iframe.parentNode)
+             iframe.parentNode.removeChild(iframe);
+         }
        }
       });
   });
