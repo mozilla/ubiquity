@@ -136,16 +136,39 @@ function makeGlobals(codeSource) {
   var statusBarPanelWindows = [];
 
   function addStatusBarPanel(options) {
-    var url = options.url;
+    var url;
+
+    if (options.url)
+      url = options.url;
+    else if (options.html) {
+      url = "data:text/html," + encodeURI(options.html);
+    } else
+      url = "about:blank";
+
     var width = options.width ? options.width : 200;
 
     forAllBrowsers(
       {onLoad: function(window) {
+         var iframe = StatusBar.addPanel(window, url, width);
          statusBarPanelWindows.push(window);
-         statusBarPanels.push(
-           {url: url,
-            iframe: StatusBar.addPanel(window, url, width)
-           });
+         statusBarPanels.push({url: url,
+                               iframe: iframe});
+         if (options.onLoad) {
+           iframe.addEventListener(
+             "DOMContentLoaded",
+             function onPanelLoad(event) {
+               iframe.removeEventListener("DOMContentLoaded",
+                                          onPanelLoad,
+                                          false);
+               try {
+                 options.onLoad(iframe.contentWindow);
+               } catch (e) {
+                 newConsole.log(e);
+               }
+             },
+             false
+           );
+         }
        },
        onUnload: function(window) {
          var index = statusBarPanelWindows.indexOf(window);

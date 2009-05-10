@@ -76,6 +76,8 @@ var StatusBar = {
           self._injectPanelWindowFunctions(iframe);
           self._copyBackground(iframe.parentNode,
                                iframe.contentDocument.body);
+          iframe.contentDocument.body.style.padding = 0;
+          iframe.contentDocument.body.style.margin = 0;
         }
       },
       true
