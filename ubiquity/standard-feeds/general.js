@@ -113,16 +113,21 @@ CmdUtils.CreateCommand({
   modifiers: {in: noun_type_language},
   description: "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
-  _link: function({text, html}, {in: {data}})(
-    '<a href="http://' + (data || "en") +
-    ".wikipedia.org/wiki/Special%3ASearch/" +
-    encodeURIComponent(text.replace(/ /g, "_")) + '">' + html + "</a>"),
+  _link: function({text, html}, {in: {data}}){
+    var url = ("http://" + (data || "en") +
+               ".wikipedia.org/wiki/Special%3ASearch/" +
+               encodeURIComponent(text.replace(/ /g, "_")));
+    return ['<a href="' + url + '">' + html + "</a>", url];
+  },
   execute: function(dob, mod) {
-    var link = this._link(dob, mod);
-    CmdUtils.setSelection(link, {text: link});
+    var [htm, url] = this._link(dob, mod);
+    CmdUtils.setSelection(htm, {text: url});
   },
   preview: function(pbl, dob, mod) {
-    pbl.innerHTML = this.description + "<p>"+ this._link(dob, mod) +"</p>";
+    var [htm, url] = this._link(dob, mod);
+    pbl.innerHTML = (this.description +
+                     "<p>" + htm + "</p>" +
+                     <code>{url}</code>.toXMLString());
   }
 });
 
