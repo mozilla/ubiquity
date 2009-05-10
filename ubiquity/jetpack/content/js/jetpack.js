@@ -1,3 +1,8 @@
+if (!this.Cc)
+  this.Cc = Components.classes;
+if (!this.Ci)
+  this.Ci = Components.interfaces;
+
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js");
 Components.utils.import("resource://jetpack/modules/init.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
@@ -19,6 +24,69 @@ jQuery.ajaxSetup(
      return new window.XMLHttpRequest();
    }
   });
+
+// Call the given onLoad/onUnload() functions for all browser windows;
+// when this function is called, the onLoad() is called for all browser
+// windows, and subsequently for all newly-opened browser windows. When
+// a browser window closes, onUnload() is called.  onUnload() is also
+// called once for each browser window when the extension is unloaded.
+
+function forAllBrowsers(options) {
+  function makeSafeFunc(func) {
+    function safeFunc(window) {
+      try {
+        func(window);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    return safeFunc;
+  }
+
+  function addUnloader(chromeWindow, extensionWindow, func) {
+    function onUnload() {
+      chromeWindow.removeEventListener("unload", onUnload, false);
+      extensionWindow.removeEventListener("unload", onUnload, false);
+      func(chromeWindow);
+    }
+    chromeWindow.addEventListener("unload", onUnload, false);
+    extensionWindow.addEventListener("unload", onUnload, false);
+  }
+
+  function loadAndBind(chromeWindow) {
+    if (options.onLoad)
+      (makeSafeFunc(options.onLoad))(chromeWindow);
+    if (options.onUnload)
+      addUnloader(chromeWindow, window, makeSafeFunc(options.onUnload));
+  }
+
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+           .getService(Ci.nsIWindowMediator);
+
+  var enumerator = wm.getEnumerator("navigator:browser");
+
+  while (enumerator.hasMoreElements()) {
+    var chromeWindow = enumerator.getNext();
+    loadAndBind(chromeWindow);
+  }
+
+  var ww = new WindowWatcher();
+  ww.onWindowOpened = function(chromeWindow) {
+    chromeWindow.addEventListener(
+      "load",
+      function onLoad() {
+        chromeWindow.removeEventListener("load", onLoad, false);
+        if (!window.closed) {
+          var type = chromeWindow.document.documentElement
+                     .getAttribute("windowtype");
+          if (type == "navigator:browser")
+            loadAndBind(chromeWindow);
+        }
+      },
+      false
+    );
+  };
+}
 
 if (JetpackFeedManager) {
   var watcher = new EventHubWatcher(JetpackFeedManager);
@@ -45,8 +113,8 @@ function tick() {
 }
 
 function makeGlobals(codeSource) {
-  let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                    .getService(Components.interfaces.fuelIApplication);
+  let Application = Cc["@mozilla.org/fuel/application;1"]
+                    .getService(Ci.fuelIApplication);
 
   var me = {
     url: codeSource.id,
@@ -110,9 +178,9 @@ function reloadAllJetpacks() {
     });
 }
 
+// Open the JS error console.  This code was largely taken from
+// http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js
 function openJsErrorConsole() {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
   var wm = Cc['@mozilla.org/appshell/window-mediator;1'].getService();
   var wmInterface = wm.QueryInterface(Ci.nsIWindowMediator);
   var topWindow = wmInterface.getMostRecentWindow("global:console");
@@ -138,4 +206,14 @@ $(window).ready(
       $("#firebug-not-found").show();
 
     tick();
+
+    forAllBrowsers(
+      {onLoad: function(window) {
+         console.log("load", window);
+       },
+       onUnload: function(window) {
+         console.log("unload", window);
+         Components.utils.reportError("unloading " + window.location.href);
+       }
+      });
   });
