@@ -192,7 +192,8 @@ function makeGlobals(codeSource) {
           console: newConsole,
           Application: Application,
           addStatusBarPanel: addStatusBarPanel,
-          $: jQuery};
+          $: jQuery,
+          jQuery: jQuery};
 }
 
 var jetpacks = [];
@@ -200,6 +201,7 @@ var jetpacks = [];
 function Jetpack(sandbox) {
   this.finalize = function finalize() {
     delete sandbox['$'];
+    delete sandbox['jQuery'];
   };
 }
 
