@@ -131,9 +131,39 @@ function makeGlobals(codeSource) {
       console.log.apply(console, newArgs);
     }
   };
+
+  var statusBarPanels = [];
+  var statusBarPanelWindows = [];
+
+  function addStatusBarPanel(options) {
+    var url = options.url;
+    var width = options.width ? options.width : 200;
+
+    forAllBrowsers(
+      {onLoad: function(window) {
+         statusBarPanelWindows.push(window);
+         statusBarPanels.push(
+           {url: url,
+            iframe: StatusBar.addPanel(window, url, width)
+           });
+       },
+       onUnload: function(window) {
+         var index = statusBarPanelWindows.indexOf(window);
+         if (index != -1) {
+           var panel = statusBarPanels[index];
+           delete statusBarPanelWindows[index];
+           delete statusBarPanels[index];
+           if (panel.iframe.parentNode)
+             panel.iframe.parentNode.removeChild(panel.iframe);
+         }
+       }
+      });
+  }
+
   return {location: codeSource.id,
           console: newConsole,
           Application: Application,
+          addStatusBarPanel: addStatusBarPanel,
           $: jQuery};
 }
 
@@ -204,22 +234,4 @@ $(window).ready(
       $("#firebug-not-found").show();
 
     tick();
-
-    var dataUri = "data:text/html," + encodeURI("<blink>hi there!</blink>");
-    forAllBrowsers(
-      {onLoad: function(window) {
-         var iframe = StatusBar.addPanel(window,
-                                         dataUri,
-                                         200);
-         window.__jetpackIframe = iframe;
-       },
-       onUnload: function(window) {
-         if (window.__jetpackIframe) {
-           var iframe = window.__jetpackIframe;
-           delete window.__jetpackIframe;
-           if (iframe.parentNode)
-             iframe.parentNode.removeChild(iframe);
-         }
-       }
-      });
   });
