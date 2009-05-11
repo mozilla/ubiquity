@@ -297,3 +297,10 @@ th {
 td.topcell {
   border-top: 1px solid black;
 }
+
+.ubiq-tutorial {
+  border-style:solid;
+  border-color:green;
+  padding: 2em;
+  font-size: 150%;
+}

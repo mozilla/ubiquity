@@ -85,8 +85,11 @@ function fillTableCellForFeed( cell, feed, sortMode) {
                          '">An update for this feed is available.</a>');
       });
 
-  cell.addClass("topcell");
-  cell.addClass("command-feed-name");
+  // if sorting by feed, make feed name large and put a borderline
+  if (sortMode == "feed") {
+    cell.addClass("topcell");
+    cell.addClass("command-feed-name");
+  }
 }
 
 function formatCommandAuthor(authorData) {
@@ -120,6 +123,20 @@ function fillTableRowForCmd( row, cmd, className ) {
   // TODO bug here: when displaying sorted by feed, the check boxes
   // are all checked even if the command should be disabled.  When
   // displaying sorted by cmd, the check boxes all appear correctly.
+
+  // re-checking a box for a disabled command doesn't seem to re-enable it.
+
+  // un-checking a box when you're in sort-by-feed mode does disable it.
+  // (But then the box appears correctly unchecked in sort-by-cmd and
+  // incorrectly checked in sort-by-feed).
+
+  //               check      uncheck     display
+  // sort by feed   no          yes         no
+  // sort by cmd    no          yes         yes
+
+  // Difference has to be because of the command objects getting passed
+  // in are different...
+
   var isEnabled = !cmd.disabled;
   var checkBoxCell = jQuery(
     '<td><input type="checkbox" class="activebox"' +
@@ -204,6 +221,9 @@ function populateYeTable() {
   let feedMgr = svc.feedManager;
   let cmdSource = svc.commandSource;
   let sortField = getSortMode();
+
+  $("#num-commands").html( cmdSource.commandNames.length );
+  $("#num-subscribed-feeds").html( feedMgr.getSubscribedFeeds().length );
 
   function addFeedToTable(feed) {
     if (feed.isBuiltIn)
@@ -322,6 +342,9 @@ function onDisableOrEnableCmd() {
   var cmdSource = UbiquitySetup.createServices().commandSource;
   var cmd = cmdSource.getCommand(name);
 
+  // TODO: this.checked is ALWAYS UNDEFINED.  So re-enabling does not work!
+  alert("this.checked is " + this.hasAttribute("checked") );
+  //alert("cmd name is " + name);
   if (this.checked)
     // user has just made this command active.
     cmd.disabled = false;
@@ -370,15 +393,22 @@ function addAllUnsubscribedFeeds() {
   let svc = UbiquitySetup.createServices();
   let feedMgr = svc.feedManager;
   let sortMode = getSortMode();
+  let unscrFeeds = feedMgr.getUnsubscribedFeeds();
+
   // TODO sortMode could also be used to order the unsubscribed feeds?
   function addUnsubscribedFeed(feed) {
     $("#command-feed-graveyard").append(
       makeUnsubscribedFeedListElement(feed, sortMode));
   }
-  feedMgr.getUnsubscribedFeeds().forEach(addUnsubscribedFeed);
 
-  if (!$("#command-feed-graveyard").text())
+  if (unscrFeeds.length == 0) {
     $("#command-feed-graveyard-div").hide();
+    $("#unsubscribed-feeds-help").hide();
+  } else {
+    $("#num-unsubscribed-feeds").html(unscrFeeds.length);
+    unscrFeeds.forEach(addUnsubscribedFeed);
+  }
+
 }
 
 // TODO the following code needs to make its way onto any page that has
@@ -411,6 +441,14 @@ function changeSortMode( newSortMode ) {
   rebuildTable();
 }
 
+function showCmdListHelp( enabled ) {
+  if (enabled) {
+    $("#cmdlist-help-div").slideDown();
+  } else {
+    $("#cmdlist-help-div").slideUp();
+  }
+}
+
 $(document).ready(rebuildTable);
 
 
@@ -421,7 +459,7 @@ $(document).ready(rebuildTable);
 // How odd.
 
 // Broken features to fix:
-//  -- sort by whatever (needs pref, more options)
+//  -- sort by whatever (needs more options)
 //  -- unsubscribe / resubscribe (mostly fixed, one bug)
 //  -- populate unsubscribed feeds area (done)
 //  -- enable/disable command (mostly fixed, one bug)
@@ -429,7 +467,7 @@ $(document).ready(rebuildTable);
 //  -- margins, fo readability
 
 // New features to add:
-// show/hide help at top of page
+// show/hide help at top of page  (done)
 // sort by using links instead of drop-down (done)
 // show/hide help for individual command
 // jump directly to help for particular command

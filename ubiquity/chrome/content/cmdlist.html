@@ -25,14 +25,27 @@
   <br clear="all"/>
   <div style="text-align:center;">
     <p>You can get to this page at any time using the "Command-list" command.</p>
+    <p>
+      You have <span id="num-commands"></span> commands in
+      <span id="num-subscribed-feeds"></span> command feeds. |
+      <span id="unsubscribed-feeds-help">You have unsubscribed from <a href="#graveyard"><span id="num-unsubscribed-feeds"></span> command feeds</a>.
+      |</span>
+      <a id="show-hide-cmdlist-help" onclick="showCmdListHelp(true);">Learn How to Use This Page</a>
+    </p>
   </div>
-  <br clear="all"/>
+  
+<div id="cmdlist-help-div" class="ubiq-tutorial" style="display:none;font-size:100%">
+  <ul>
+  <li>All the commands that Ubiquity recognizes are listed in the right column.  The black text is the command's name (what you type into Ubiquity to use it).  The grey text explains what the command does.</li>
+  <li>The left column shows all the "feeds" that Ubiquity is subscribed to.  Each feed can contain multiple commands.  </li>
+  <li>You can view this page sorted by feeds or sorted by commands.  Click any of the links next to "sort by", below.</li>
+  <li>If there's a command you don't want, uncheck the box next to it.  You can get the command back by re-checking the box.</li>
+  <li>If there's a whole command feed you don't want, click the "[unsubscribe]"
+  link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.</li>
 
-<div id="cmdlist-help-div" style="display:none">
-  <span id="checkbox instructions">
-    Check a checkbox to activate a command: uncheck it to disable that command.
-  </span>
-  Click the title of any column to sort by that column.
+  </ul>
+  <a onclick="showCmdListHelp(false);">Hide Help</a>
+  
 </div>
 
 <table width="100%">
@@ -51,10 +64,10 @@
 <br clear="all"/>
 
   <div id="command-feed-graveyard-div">
+    <a name="graveyard"><h2>Unsubscribed Feeds</h2></a>
     <p id="command-feed-graveyard-header">
-      <a name="graveyard"
-        You've recently unsubscribed to these command feeds:
-      </a>
+      You used to be subscribed to these.
+      If you want one back, click the "[resubscribe]" link beneath it.
     </p>
     <ul id="command-feed-graveyard"></ul>
   </div>
