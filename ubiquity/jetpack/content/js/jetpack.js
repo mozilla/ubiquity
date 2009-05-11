@@ -121,7 +121,7 @@ var Jetpack = {
                                             onPanelLoad,
                                             false);
                  try {
-                   options.onLoad(iframe.contentWindow);
+                   options.onLoad(iframe.contentDocument);
                  } catch (e) {
                    console.error(e);
                  }
