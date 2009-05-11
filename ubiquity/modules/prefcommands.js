@@ -63,6 +63,9 @@ var PrefCommands = {
   },
 
   changeType : function(newType) {
+    if (newType == this.type)
+      return;
+
     var oldType = this.type;
     Application.prefs.setValue(
       this.FEED_TYPE_PREF,
