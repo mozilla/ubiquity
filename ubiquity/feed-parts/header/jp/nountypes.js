@@ -38,6 +38,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var noun_type_emailservice = {
+   _name: "E-mail サービス",
+   suggest: function(text, html) {
+
+     var providers = ["googleapps", "gmail", "yahoo"];
+     var suggestions = [];
+     //match based on input
+     for each (var provider in providers) {
+       if (provider.match(text, "i")){
+         suggestions.push(CmdUtils.makeSugg(provider, null, provider));
+       }
+     }
+     return suggestions;
+   },
+   default: function() {
+     //TODO: find a better way to pick the default
+     return CmdUtils.makeSugg("gmail", null, "gmail",0.9);
+   }
+};
+
 var JLanguageCodes = {
   'アラビア語' : 'ar',
   'ブルガリア語' : 'bg',
@@ -162,4 +182,304 @@ var noun_arb_text = {
     }
     return [suggestion];
   }
+};
+
+var noun_type_contact = {
+  _name: "連絡先",
+  contactList: null,
+  callback:function(contacts) {
+    noun_type_contact.contactList = noun_type_contact.contactList.concat(contacts);
+  },
+
+  suggest: function(text, html) {
+
+    if (noun_type_contact.contactList == null) {
+      noun_type_contact.contactList = [];
+      getContacts( noun_type_contact.callback);
+      var suggs = noun_type_email.suggest(text, html);
+      return suggs.length > 0 ? suggs : [];
+    }
+
+    if( text.length < 2 ) return [];
+
+    var suggestions  = [];
+    for ( var c in noun_type_contact.contactList ) {
+      var contact = noun_type_contact.contactList[c];
+
+      if ((contact["name"].match(text, "i")) || (contact["email"].match(text, "i"))){
+	      suggestions.push(CmdUtils.makeSugg(contact["email"]));
+	    }
+    }
+
+    var suggs = noun_type_email.suggest(text, html);
+    if (suggs.length > 0)
+      suggestions.push(suggs[0]);
+
+    return suggestions.splice(0, 5);
+  }
+};
+
+/*
+ * Noun that matches only emails based on the regexp
+ * found on http://iamcal.com/publish/articles/php/parsing_email by Cal Henderson
+ * This regexp is RFC822 compilant.
+ */
+var noun_type_email = {
+  _name: "メールアドレス",
+  _regexp: new RegExp('^([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+' +
+                      '|\\x22([^\\x0d\\x22\\x5c\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x22)(\\x2e([^\\x00-\\x20\\x22' +
+                      '\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x22([^\\x0d\\x22\\x5c' +
+                      '\\x80-\\xff]|\\x5c\\x00-\\x7f)*\\x22))*\\x40([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-' +
+                      '\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x5b([^\\x0d\\x5b-\\x5d\\x80-\\xff]|\\x5c[\\x00-' +
+                      '\\x7f])*\\x5d)(\\x2e([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\' +
+                      'x5d\\x7f-\\xff]+|\\x5b([^\\x0d\\x5b-\\x5d\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x5d))*$'),
+  suggest: function(text, html){
+    if(this._regexp.test(text)){
+      return [ CmdUtils.makeSugg(text) ];
+    }
+
+    return [];
+  }
+};
+
+
+var noun_type_date = {
+  _name: "日付",
+
+  default: function(){
+     var date = Date.parse("today");
+     var text = date.toString("dd MM, yyyy");
+     return CmdUtils.makeSugg(text, null, date, 0.9);
+   },
+
+  suggest: function( text, html )  {
+    if (typeof text != "string") {
+      return [];
+    }
+
+    var date = Date.parse( text );
+    if (!date) {
+      return [];
+    }
+    text = date.toString("dd MM, yyyy");
+    return [ CmdUtils.makeSugg(text, null, date) ];
+  }
+};
+
+var noun_type_time = {
+   _name: "時刻",
+
+   default: function(){
+     var time = Date.parse("now");
+     var text = time.toString("hh:mm tt");
+     return CmdUtils.makeSugg(text, null, time, 0.9);
+   },
+
+   suggest: function(text, html){
+     if (typeof text != "string"){
+       return [];
+     }
+
+     var time = Date.parse( text );
+     if(!time ){
+       return [];
+     }
+
+     text = time.toString("hh:mm tt");
+     return [ CmdUtils.makeSugg(text, null, time) ];
+   }
+};
+
+var noun_type_percentage = {
+  _name: "割合",
+  suggest: function( text, html ) {
+    if (!text)
+      return [ CmdUtils.makeSugg("100%", null, 1.0) ];
+    var number = parseFloat(text);
+    if (isNaN(number)) {
+      return [];
+    }
+    if (number > 1 && text.indexOf(".") == -1)
+      number = number / 100;
+    text = number*100 + "%";
+    return [ CmdUtils.makeSugg(text, null, number)];
+  }
+};
+
+var noun_type_async_address = {
+  _name: "住所(非同期)",
+  // TODO caching
+  suggest: function(text, html, callback) {
+    isAddress( text, function( truthiness ) {
+		 if (truthiness) {
+		   callback(CmdUtils.makeSugg(text));
+		 }
+	       });
+    return [];
+  }
+};
+
+var noun_type_tab = {
+  _name: "タブ名",
+
+  _tabCache: null,
+
+  // Returns all tabs from all windows.
+  getTabs: function(){
+    return Utils.tabs.get();
+  },
+
+  suggest: function( text, html ) {
+    var suggestions  = [];
+    var tabs = Utils.tabs.search(text, 5);
+
+    for ( var tabName in tabs ){
+      var tab = tabs[tabName];
+      suggestions.push( CmdUtils.makeSugg(tabName, tab.document.URL, tab) );
+    }
+
+    return suggestions;
+  }
+};
+
+
+var noun_type_searchengine = {
+  _name: "検索エンジン",
+  suggest: function(fragment, html) {
+    var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
+      .getService(Components.interfaces.nsIBrowserSearchService);
+    var engines = searchService.getVisibleEngines({});
+
+    if (!fragment) {
+      return engines.map(function(engine) {
+        return CmdUtils.makeSugg(engine.name, null, engine);
+      });
+    }
+
+    var fragment = fragment.toLowerCase();
+    var suggestions = [];
+
+    for(var i = 0; i < engines.length; i++) {
+      if(engines[i].name.toLowerCase().indexOf(fragment) > -1) {
+        suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i], 0.9));
+      }
+    }
+
+    return suggestions;
+  },
+  getDefault: function() {
+    return Components.classes["@mozilla.org/browser/search-service;1"]
+      .getService(Components.interfaces.nsIBrowserSearchService)
+      .defaultEngine;
+  }
+};
+
+var noun_type_tag = {
+  _name: "タグリスト",
+  suggest: function(fragment) {
+    var allTags = Components.classes["@mozilla.org/browser/tagging-service;1"]
+                    .getService(Components.interfaces.nsITaggingService)
+                    .allTags;
+
+    if(fragment.length < 1) {
+      return allTags.map(function(tag) {
+        return CmdUtils.makeSugg(tag, null, [tag]);
+      });
+    }
+
+    fragment = fragment.toLowerCase();
+    var numTags = allTags.length;
+    var suggestions = [];
+
+    // can accept multiple tags, seperated by a comma
+    // assume last tag is still being typed - suggest completions for that
+
+    var completedTags = fragment.split(",").map(function(tag) {
+      return Utils.trim(tag);
+    });;
+
+
+    // separate last tag in fragment, from the rest
+    var uncompletedTag = completedTags.pop();
+
+    completedTags = completedTags.filter(function(tagName) {
+      return tagName.length > 0;
+    });
+    var fragmentTags = "";
+    if(completedTags.length > 0)
+      fragmentTags = completedTags.join(",");
+
+    if(uncompletedTag.length > 0) {
+      if(fragmentTags.length > 0) {
+        suggestions.push(CmdUtils.makeSugg(
+          fragmentTags + "," + uncompletedTag,
+          null,
+          completedTags.concat([uncompletedTag])
+         ));
+       } else {
+         suggestions.push(CmdUtils.makeSugg(
+                             uncompletedTag,
+                             null,
+                             completedTags
+                          ));
+       }
+
+    } else {
+      suggestions.push(CmdUtils.makeSugg(
+                         fragmentTags,
+                         null,
+                         completedTags
+                       ));
+    }
+
+    for(var i = 0; i < numTags; i++) {
+      // handle cases where user has/hasn't typed anything for the current uncompleted tag in the fragment
+      // and only match from the begining of a tag name (not the middle)
+      if(uncompletedTag.length < 1 || allTags[i].indexOf(uncompletedTag) == 0) {
+        // only if its not in the list already
+        if(completedTags.indexOf(allTags[i]) == -1)
+          suggestions.push(CmdUtils.makeSugg(
+                             fragmentTags + "," + allTags[i],
+                             null,
+                             completedTags.concat([allTags[i]])
+         ));
+      }
+    }
+
+    return suggestions;
+  }
+};
+
+var noun_type_geolocation = {
+   _name : "地理位置情報",
+   rankLast: true,
+   default: function() {
+		var location = CmdUtils.getGeoLocation();
+		if (!location) {
+			// TODO: there needs to be a better way of doing this,
+			// as default() can't currently return null
+			return {text: "", html: "", data: null, summary: ""};
+		}
+		var fullLocation = location.city + ", " + location.country;
+		return CmdUtils.makeSugg(fullLocation,null,null,0.9);
+   },
+
+   suggest: function(fragment, html, callback) {
+      /* LONGTERM TODO: try to detect whether fragment is anything like a valid location or not,
+       * and don't suggest anything for input that's not a location.
+       */
+			function addAsyncGeoSuggestions(location) {
+				if(!location)
+					return;
+ 				var fullLocation = location.city + ", " + location.country;
+        callback(CmdUtils.makeSugg(fullLocation));
+				callback(CmdUtils.makeSugg(location.city));
+				callback(CmdUtils.makeSugg(location.country));
+			}
+      var regexpHere = /here(\s)?.*/;
+      if (regexpHere.test(fragment)) {
+         CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
+      }
+      return [CmdUtils.makeSugg(fragment)];
+   }
 };
