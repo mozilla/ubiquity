@@ -148,7 +148,8 @@ var Jetpack = {
             Application: Application,
             addStatusBarPanel: addStatusBarPanel,
             $: jQuery,
-            jQuery: jQuery};
+            jQuery: jQuery,
+            Jetpack: JetpackLibrary};
   },
 
   contexts: [],
