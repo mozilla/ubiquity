@@ -1,17 +1,3 @@
-if (!this.Cc)
-  this.Cc = Components.classes;
-if (!this.Ci)
-  this.Ci = Components.interfaces;
-
-Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
-
-var Extension = {};
-Components.utils.import("resource://jetpack/modules/init.js", Extension);
-
-var FeedPlugin = {};
-Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
-                        FeedPlugin);
-
 // This sets up jQuery when it's loaded in a hidden chrome window
 // that doesn't provide a user interface.
 
@@ -93,179 +79,142 @@ function forAllBrowsers(options) {
   };
 }
 
-if (FeedPlugin.FeedManager) {
-  var watcher = new EventHubWatcher(FeedPlugin.FeedManager);
-  var doReload = false;
-  // TODO: Watch more events.
-  watcher.add(
-    "feed-change",
-    function(name, uri) {
-      if (uri.spec in FeedPlugin.Feeds)
-        doReload = true;
-      if (doReload)
-        window.location.reload();
-    });
-} else
-  console.log("FeedPlugin.FeedManager is null");
+var Jetpack = {
+  _makeGlobals: function _makeGlobals(codeSource) {
+    var Application = Cc["@mozilla.org/fuel/application;1"]
+                      .getService(Ci.fuelIApplication);
 
-function tick() {
-  $("#jetpacks").empty();
-  for (url in FeedPlugin.Feeds)
-    $("#jetpacks").append($('<div class="jetpack"></div>').text(url));
+    var me = {
+      url: codeSource.id,
+      toString: function toString() {
+        var parts = codeSource.id.split("/");
+        return parts.slice(-1)[0];
+      }
+    };
+    var newConsole = {
+      log: function log() {
+        var newArgs = [me, ':'];
+        for (var i = 0; i < arguments.length; i++)
+          newArgs.push(arguments[i]);
+        console.log.apply(console, newArgs);
+      }
+    };
 
-  var numWeakRefs = Extension.getDebugInfo().weakRefs.length;
-  $("#extension-weakrefs").text(numWeakRefs);
-}
+    var statusBarPanels = [];
+    var statusBarPanelWindows = [];
 
-function makeGlobals(codeSource) {
-  let Application = Cc["@mozilla.org/fuel/application;1"]
-                    .getService(Ci.fuelIApplication);
+    function addStatusBarPanel(options) {
+      var url;
 
-  var me = {
-    url: codeSource.id,
-    toString: function toString() {
-      var parts = codeSource.id.split("/");
-      return parts.slice(-1)[0];
-   }
-  };
-  var newConsole = {
-    log: function log() {
-      var newArgs = [me, ':'];
-      for (var i = 0; i < arguments.length; i++)
-        newArgs.push(arguments[i]);
-      console.log.apply(console, newArgs);
+      if (options.url)
+        url = options.url;
+      else if (options.html) {
+        url = "data:text/html," + encodeURI(options.html);
+      } else
+        url = "about:blank";
+
+      var width = options.width ? options.width : 200;
+
+      forAllBrowsers(
+        {onLoad: function(window) {
+           var iframe = StatusBar.addPanel(window, url, width);
+           statusBarPanelWindows.push(window);
+           statusBarPanels.push({url: url,
+                                 iframe: iframe});
+           if (options.onLoad) {
+             iframe.addEventListener(
+               "DOMContentLoaded",
+               function onPanelLoad(event) {
+                 iframe.removeEventListener("DOMContentLoaded",
+                                            onPanelLoad,
+                                            false);
+                 try {
+                   options.onLoad(iframe.contentWindow);
+                 } catch (e) {
+                   newConsole.log(e);
+                 }
+               },
+               false
+             );
+           }
+         },
+         onUnload: function(window) {
+           var index = statusBarPanelWindows.indexOf(window);
+           if (index != -1) {
+             var panel = statusBarPanels[index];
+             delete statusBarPanelWindows[index];
+             delete statusBarPanels[index];
+             if (panel.iframe.parentNode)
+               panel.iframe.parentNode.removeChild(panel.iframe);
+           }
+         }
+        });
     }
-  };
 
-  var statusBarPanels = [];
-  var statusBarPanelWindows = [];
+    return {location: codeSource.id,
+            console: newConsole,
+            Application: Application,
+            addStatusBarPanel: addStatusBarPanel,
+            $: jQuery,
+            jQuery: jQuery};
+  },
 
-  function addStatusBarPanel(options) {
-    var url;
+  jetpacks: [],
 
-    if (options.url)
-      url = options.url;
-    else if (options.html) {
-      url = "data:text/html," + encodeURI(options.html);
-    } else
-      url = "about:blank";
+  Jetpack: function Jetpack(sandbox) {
+    this.finalize = function finalize() {
+      delete sandbox['$'];
+      delete sandbox['jQuery'];
+    };
+  },
 
-    var width = options.width ? options.width : 200;
+  finalize: function finalize() {
+    jetpacks.forEach(
+      function(jetpack) {
+        jetpack.finalize();
+      });
+    Jetpack.jetpacks = [];
+  },
 
-    forAllBrowsers(
-      {onLoad: function(window) {
-         var iframe = StatusBar.addPanel(window, url, width);
-         statusBarPanelWindows.push(window);
-         statusBarPanels.push({url: url,
-                               iframe: iframe});
-         if (options.onLoad) {
-           iframe.addEventListener(
-             "DOMContentLoaded",
-             function onPanelLoad(event) {
-               iframe.removeEventListener("DOMContentLoaded",
-                                          onPanelLoad,
-                                          false);
-               try {
-                 options.onLoad(iframe.contentWindow);
-               } catch (e) {
-                 newConsole.log(e);
-               }
-             },
-             false
-           );
-         }
-       },
-       onUnload: function(window) {
-         var index = statusBarPanelWindows.indexOf(window);
-         if (index != -1) {
-           var panel = statusBarPanels[index];
-           delete statusBarPanelWindows[index];
-           delete statusBarPanels[index];
-           if (panel.iframe.parentNode)
-             panel.iframe.parentNode.removeChild(panel.iframe);
-         }
-       }
+  loadAll: function loadAll() {
+    var jsm = {};
+    Components.utils.import("resource://ubiquity/modules/sandboxfactory.js",
+                            jsm);
+
+    var sandboxFactory = new jsm.SandboxFactory(this._makeGlobals);
+    var feeds = FeedPlugin.FeedManager.getSubscribedFeeds();
+    feeds.forEach(
+      function(feed) {
+        if (feed.type == "jetpack") {
+          var codeSource = feed.getCodeSource();
+          var code = codeSource.getCode();
+          var sandbox = sandboxFactory.makeSandbox(codeSource);
+          Jetpack.jetpacks.push(new Jetpack.Jetpack(sandbox));
+          try {
+            var codeSections = [{length: code.length,
+                                 filename: codeSource.id,
+                                 lineNumber: 1}];
+            sandboxFactory.evalInSandbox(code, sandbox, codeSections);
+          } catch (e) {
+            console.log("Error ", e, "occurred while evaluating code for ",
+                        feed.uri.spec);
+          }
+        }
       });
   }
-
-  return {location: codeSource.id,
-          console: newConsole,
-          Application: Application,
-          addStatusBarPanel: addStatusBarPanel,
-          $: jQuery,
-          jQuery: jQuery};
-}
-
-var jetpacks = [];
-
-function Jetpack(sandbox) {
-  this.finalize = function finalize() {
-    delete sandbox['$'];
-    delete sandbox['jQuery'];
-  };
-}
-
-function finalizeJetpacks() {
-  jetpacks.forEach(
-    function(jetpack) {
-      jetpack.finalize();
-    });
-  jetpacks = [];
-}
-
-function loadAllJetpacks() {
-  let sandboxFactory = new SandboxFactory(makeGlobals);
-  var feeds = FeedPlugin.FeedManager.getSubscribedFeeds();
-  feeds.forEach(
-    function(feed) {
-      if (feed.type == "jetpack") {
-        var codeSource = feed.getCodeSource();
-        var code = codeSource.getCode();
-        var sandbox = sandboxFactory.makeSandbox(codeSource);
-        jetpacks.push(new Jetpack(sandbox));
-        try {
-          var codeSections = [{length: code.length,
-                               filename: codeSource.id,
-                               lineNumber: 1}];
-          sandboxFactory.evalInSandbox(code, sandbox, codeSections);
-        } catch (e) {
-          console.log("Error ", e, "occurred while evaluating code for ",
-                      feed.uri.spec);
-        }
-      }
-    });
-}
-
-// Open the JS error console.  This code was largely taken from
-// http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js
-function openJsErrorConsole() {
-  var wm = Cc['@mozilla.org/appshell/window-mediator;1'].getService();
-  var wmInterface = wm.QueryInterface(Ci.nsIWindowMediator);
-  var topWindow = wmInterface.getMostRecentWindow("global:console");
-
-  if (topWindow)
-    topWindow.focus();
-  else
-    window.open("chrome://global/content/console.xul", "_blank",
-                "chrome,extrachrome,menubar,resizable,scrollbars," +
-                "status,toolbar");
-}
-
-function forceGC() {
-  Components.utils.forceGC();
-  tick();
-}
+};
 
 $(window).ready(
   function() {
-    loadAllJetpacks();
-    window.addEventListener("unload", finalizeJetpacks, false);
-    window.setInterval(tick, 1000);
+    Jetpack.loadAll();
+    window.addEventListener("unload", Jetpack.finalize, false);
 
-    $("#force-gc").click(forceGC);
-    $("#js-error-console").click(openJsErrorConsole);
-
-    if (!window.console.isFirebug)
-      $("#firebug-not-found").show();
-    forceGC();
+    var watcher = new EventHubWatcher(FeedPlugin.FeedManager);
+    // TODO: Watch more events.
+    watcher.add(
+      "feed-change",
+      function(name, uri) {
+        if (uri.spec in FeedPlugin.Feeds)
+          window.location.reload();
+      });
   });

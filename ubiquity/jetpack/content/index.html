@@ -27,12 +27,23 @@ this page, and then reload this page, all logging messages will be
 logged to the Firebug Console, where it's much easier to debug
 problems and inspect live objects.</p>
 <!-- Load scripts, etc. for the extension here. -->
+<script>
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+var Extension = {};
+Components.utils.import("resource://jetpack/modules/init.js", Extension);
+
+var FeedPlugin = {};
+Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
+                        FeedPlugin);
+</script>
 <script src="js/init-extension.js"></script>
 <script src="js/jquery.js"></script>
 <script src="js/track.js"></script>
 <script src="js/observe.js"></script>
 <script src="js/status-bar-panel.js"></script>
-<script type="application/javascript;version=1.7"
-        src="js/jetpack.js"></script>
+<script src="js/jetpack.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
