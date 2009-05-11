@@ -6,7 +6,7 @@ function EventHubWatcher(hub) {
       try {
         listener(eventName, data);
       } catch (e) {
-        console.log("listener", listener, "raised exception", e);
+        console.error("listener", listener, "raised exception", e);
       }
     }
     hub.addListener(name, listenerWrapper);

@@ -28,7 +28,7 @@ function forAllBrowsers(options) {
       try {
         func(window);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     };
     return safeFunc;
@@ -188,8 +188,8 @@ var Jetpack = {
                                  lineNumber: 1}];
             sandboxFactory.evalInSandbox(code, sandbox, codeSections);
           } catch (e) {
-            console.log("Error ", e, "occurred while evaluating code for ",
-                        feed.uri.spec);
+            console.error("Error ", e, "occurred while evaluating code for ",
+                          feed.uri.spec);
           }
         }
       });
