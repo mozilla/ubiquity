@@ -350,7 +350,8 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     new LocalUriCodeSource(basePartsUri + "header/utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
     new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/deprecated.js")
+    new LocalUriCodeSource(basePartsUri + "header/deprecated.js"),
+    new LocalUriCodeSource(basePartsUri + "header/shared.js"),    
   ];
   var feeds = [
     baseFeedsUri + "onstartup.js"
