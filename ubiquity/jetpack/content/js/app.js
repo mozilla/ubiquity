@@ -35,9 +35,8 @@ $(window).ready(
     $("#force-gc").click(App.forceGC);
     $("#js-error-console").click(App.openJsErrorConsole);
 
-    if (!window.console.isFirebug)
+    if (!window.console.isFirebug && !window.loadFirebugConsole)
       $("#firebug-not-found").show();
-
 
     App.forceGC();
   });

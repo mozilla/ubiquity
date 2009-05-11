@@ -169,7 +169,7 @@ var Jetpack = {
   },
 
   finalize: function finalize() {
-    jetpacks.forEach(
+    Jetpack.jetpacks.forEach(
       function(jetpack) {
         jetpack.finalize();
       });
