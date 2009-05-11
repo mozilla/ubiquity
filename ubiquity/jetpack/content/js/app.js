@@ -31,7 +31,7 @@ var App = {
         var objects = MemoryTracking.getLiveObjects(name);
         if (objects.length) {
           var row = $('<tr></tr>');
-          row.append($('<td></td>').text(name));
+          row.append($('<td class="code"></td>').text(name));
           row.append($('<td></td>').text(objects.length));
           table.append(row);
         }

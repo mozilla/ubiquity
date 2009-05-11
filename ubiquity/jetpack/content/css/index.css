@@ -42,3 +42,7 @@ td {
     padding-left: 1em;
     padding-right: 1em;
 }
+
+.code {
+    font-family: monaco, sans-serif;
+}
