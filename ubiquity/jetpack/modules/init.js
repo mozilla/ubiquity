@@ -34,37 +34,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["load", "set", "getDebugInfo"];
+var EXPORTED_SYMBOLS = ["load", "set", "persistentData"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 var extensions = {};
-var extensionWeakRefs = [];
+var persistentData = {};
 
 function log(msg) {
   //Components.utils.reportError(msg);
-}
-
-function trackExtension(extension) {
-  var weakRefs = [];
-  extensionWeakRefs.forEach(
-    function(weakRef) {
-      if (weakRef.get())
-        weakRefs.push(weakRef);
-    });
-  weakRefs.push(Components.utils.getWeakReference(extension));
-  extensionWeakRefs = weakRefs;
-}
-
-function getDebugInfo() {
-  var weakRefs = [];
-  extensionWeakRefs.forEach(
-    function(weakRef) {
-      if (weakRef.get())
-        weakRefs.push(weakRef);
-    });
-  return {weakRefs: weakRefs};
 }
 
 function load(url, parentElement) {
@@ -79,7 +58,6 @@ function load(url, parentElement) {
     iframe.setAttribute("src", url);
     parentElement.appendChild(iframe);
     extensions[url] = iframe.contentWindow;
-    trackExtension(extensions[url]);
   }
 }
 
@@ -100,7 +78,6 @@ function set(window) {
 
   var oldExtension = extensions[url];
   extensions[url] = window;
-  trackExtension(extensions[url]);
   if (oldExtension) {
     var iframe = oldExtension.frameElement;
     if (iframe) {

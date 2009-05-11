@@ -83,6 +83,7 @@ var StatusBar = {
       true
     );
     statusBar.appendChild(iframe);
+    MemoryTracking.track(iframe, "StatusBarPanel");
     return iframe;
   }
 };

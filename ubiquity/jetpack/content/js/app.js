@@ -24,8 +24,19 @@ var App = {
     for (url in Jetpack.FeedPlugin.Feeds)
       $("#jetpacks").append($('<div class="jetpack"></div>').text(url));
 
-    var numWeakRefs = Extension.Manager.getDebugInfo().weakRefs.length;
-    $("#extension-weakrefs").text(numWeakRefs);
+    var bins = MemoryTracking.getBins();
+    var table = $('<table></table>');
+    bins.forEach(
+      function(name) {
+        var objects = MemoryTracking.getLiveObjects(name);
+        if (objects.length) {
+          var row = $('<tr></tr>');
+          row.append($('<td></td>').text(name));
+          row.append($('<td></td>').text(objects.length));
+          table.append(row);
+        }
+      });
+    $("#extension-weakrefs").empty().append(table);
   }
 };
 

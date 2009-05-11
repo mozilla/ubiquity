@@ -20,6 +20,8 @@ function EventHubWatcher(hub) {
           hub.removeListener(info.name, info.listener);
         });
     });
+
+  MemoryTracking.track(this);
 }
 
 function WindowWatcher() {
@@ -48,19 +50,5 @@ function WindowWatcher() {
       ww.unregisterNotification(observer);
     });
 
-  MemoryTracking.track(this, "WindowWatcher");
+  MemoryTracking.track(this);
 }
-
-WindowWatcher.isSupported = function isSupported() {
-  try {
-    if (Components.classes["@mozilla.org/embedcomp/window-watcher;1"])
-      return true;
-  } catch (e) {}
-  return false;
-};
-
-WindowWatcher.prototype = {
-  toString: function toString() {
-    return "[WindowWatcher]";
-  }
-};

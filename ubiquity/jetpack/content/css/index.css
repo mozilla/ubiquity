@@ -33,3 +33,12 @@ a {
 .warning .buttony {
     opacity: 0.6;
 }
+
+table {
+    font: inherit;
+}
+
+td {
+    padding-left: 1em;
+    padding-right: 1em;
+}

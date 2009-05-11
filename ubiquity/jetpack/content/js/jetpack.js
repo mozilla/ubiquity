@@ -158,6 +158,8 @@ var Jetpack = {
       delete sandbox['$'];
       delete sandbox['jQuery'];
     };
+
+    MemoryTracking.track(this);
   },
 
   finalize: function finalize() {

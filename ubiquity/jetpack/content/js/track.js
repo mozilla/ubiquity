@@ -1,6 +1,13 @@
 var MemoryTracking = {
   COMPACT_INTERVAL: 1000,
-  _trackedObjects: {},
+  get _trackedObjects() {
+    if (!Extension.Manager.persistentData.trackedObjects)
+      Extension.Manager.persistentData.trackedObjects = {};
+    return Extension.Manager.persistentData.trackedObjects;
+  },
+  set _trackedObjects(object) {
+    Extension.Manager.persistentData.trackedObjects = object;
+  },
   track: function track(object, bin) {
     var weakref = Components.utils.getWeakReference(object);
     if (!bin)
@@ -21,12 +28,18 @@ var MemoryTracking = {
     }
     this._trackedObjects = newTrackedObjects;
   },
+  getBins: function getBins() {
+    var names = [];
+    for (name in this._trackedObjects)
+      names.push(name);
+    return names;
+  },
   getLiveObjects: function getLiveObjects(bin) {
     function getLiveObjectsInBin(bin, array) {
       for (var i = 0; i < bin.length; i++) {
         var object = bin[i].weakref.get();
         if (object)
-          array.push(object);
+          array.push(bin[i]);
       }
     }
 
@@ -40,6 +53,8 @@ var MemoryTracking = {
     return results;
   }
 };
+
+MemoryTracking.track(window, "ExtensionWindow");
 
 $(window).ready(
   function() {
