@@ -41,8 +41,6 @@
 
 var gUbiquity = null;
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-
 function ubiquitySetup()
 {
 

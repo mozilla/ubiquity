@@ -54,6 +54,8 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__previewTimerID = -1;
   this.__lastKeyEvent = {};
 
+  Components.utils.import("resource://ubiquity/modules/utils.js", this);
+
   var self = this;
 
   msgPanel.addEventListener( "popupshown",
@@ -119,7 +121,7 @@ Ubiquity.prototype = {
       }
     }
 
-    Utils.setTimeout(refocusTextbox, 100);
+    this.Utils.setTimeout(refocusTextbox, 100);
   },
 
   __onMouseMove: function __onMouseMove(event) {
@@ -199,17 +201,17 @@ Ubiquity.prototype = {
 
   __forceProcessInput: function __forceProcessInput() {
     if (this.__previewTimerID != -1) {
-      Utils.clearTimeout(this.__previewTimerID);
+      this.Utils.clearTimeout(this.__previewTimerID);
       this.__delayedProcessInput();
     }
   },
 
   __processInput: function __processInput() {
     if (this.__previewTimerID != -1)
-      Utils.clearTimeout(this.__previewTimerID);
+      this.Utils.clearTimeout(this.__previewTimerID);
 
     var self = this;
-    this.__previewTimerID = Utils.setTimeout(
+    this.__previewTimerID = this.Utils.setTimeout(
       function() { self.__delayedProcessInput(); },
       this.__PROCESS_INPUT_DELAY
     );
