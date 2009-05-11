@@ -198,11 +198,12 @@ function fillTableRowForCmd( row, cmd, className ) {
   row.append( cmdElement );
 }
 
-function populateYeTable( sortField ) {
+function populateYeTable() {
   let table = $("#commands-and-feeds-table");
   let svc = UbiquitySetup.createServices();
   let feedMgr = svc.feedManager;
   let cmdSource = svc.commandSource;
+  let sortField = getSortMode();
 
   function addFeedToTable(feed) {
     if (feed.isBuiltIn)
@@ -301,8 +302,7 @@ function getFeedForCommand( feedMgr, cmd ) {
   // This is a really hacky implementation -- it involves going through
   // all feeds looking for one containing a command with a matching name.
   let feeds = feedMgr.getSubscribedFeeds();
-  for (let feed in feeds) {
-    // TODO is buggy here: these feeds seem to not have commands!
+  for each (let feed in feeds) {
     if (!feed.commands) {
       continue;
     }
@@ -366,9 +366,10 @@ function makeUnsubscribedFeedListElement(info, sortMode) {
   return li;
 }
 
-function addAllUnsubscribedFeeds(sortMode) {
+function addAllUnsubscribedFeeds() {
   let svc = UbiquitySetup.createServices();
   let feedMgr = svc.feedManager;
+  let sortMode = getSortMode();
   // TODO sortMode could also be used to order the unsubscribed feeds?
   function addUnsubscribedFeed(feed) {
     $("#command-feed-graveyard").append(
@@ -385,21 +386,32 @@ function addAllUnsubscribedFeeds(sortMode) {
 //  $(".version").text(UbiquitySetup.version);
 
 
-function startYeDocumentLoad() {
-  populateYeTable("cmd");
-  addAllUnsubscribedFeeds("cmd");
+function rebuildTable() {
+  $("#commands-and-feeds-table").empty();
+  populateYeTable();
+  $("#command-feed-graveyard").empty();
+  addAllUnsubscribedFeeds();
+}
+
+function setSortMode( newSortMode ) {
+  Components.classes["@mozilla.org/preferences-service;1"]
+    .getService(Components.interfaces.nsIPrefBranch).setCharPref(
+      "extensions.ubiquity.commandList.sortMode",
+      newSortMode);
+}
+
+function getSortMode() {
+  return Components.classes["@mozilla.org/preferences-service;1"]
+    .getService(Components.interfaces.nsIPrefBranch).getCharPref(
+      "extensions.ubiquity.commandList.sortMode");
 }
 
 function changeSortMode( newSortMode ) {
-  // TODO sort mode should be stored in a preference so it will
-  // remain consistent.
-  $("#commands-and-feeds-table").empty();
-  populateYeTable(newSortMode);
-  $("#command-feed-graveyard").empty();
-  addAllUnsubscribedFeeds(newSortMode);
+  setSortMode( newSortMode );
+  rebuildTable();
 }
 
-$(document).ready(startYeDocumentLoad);
+$(document).ready(rebuildTable);
 
 
 
@@ -413,7 +425,7 @@ $(document).ready(startYeDocumentLoad);
 //  -- unsubscribe / resubscribe (mostly fixed, one bug)
 //  -- populate unsubscribed feeds area (done)
 //  -- enable/disable command (mostly fixed, one bug)
-//  -- Find feeds for commands so they can be displayed in cmd mode
+//  -- Find feeds for commands so they can be displayed in cmd mode (done)
 //  -- margins, fo readability
 
 // New features to add:
