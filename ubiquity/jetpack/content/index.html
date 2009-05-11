@@ -8,9 +8,22 @@
 </head>
 <body>
 <h1>I am Jetpack.</h1>
-<p>Here are the Jetpacks that are currently installed.</p>
-<div id="jetpacks"></div>
+<p>If you want to create a Jetpack feed, use the <a href="chrome://ubiquity/content/editor.html">Ubiquity Command Editor</a> and set the feed type to "Jetpack"; to effect your changes, just reload any webpage or activate and then dismiss the Ubiquity command prompt&mdash;no saving is necessary.</p>
+<p>Here's a sample Jetpack feed to get you started:</p>
+<div class="sample code">addStatusBarPanel({
+  html: "&lt;p&gt;kill flash&lt;/p&gt;",
+  onLoad: function(panel) {
+    var button = $(panel).find("p");
+    button.css({cursor: "pointer", fontFamily: "sans-serif"});
+    button.click(function() {
+      var doc = $(Application.activeWindow.activeTab.document);
+      doc.find("embed[type=application/x-shockwave-flash]").slideUp();
+    });
+  }});
+</div>
 <h2>Debugging Information</h2>
+<p>These are the Jetpacks that are currently installed.</p>
+<div id="jetpacks"></div>
 <p>Extension page weak references:</p>
 <div id="extension-weakrefs"></div>
 <p>

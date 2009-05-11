@@ -45,4 +45,9 @@ td {
 
 .code {
     font-family: monaco, sans-serif;
+    white-space: pre-wrap;
+}
+
+.sample {
+    padding-left: 1em;
 }

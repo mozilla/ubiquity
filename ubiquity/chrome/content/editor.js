@@ -126,6 +126,9 @@ function paste() {
       var url = ("http://ubiquity.mozilla.com/locked-down-feeds/" +
                  "?initial_content=" + encodeURIComponent(code));
       Utils.openUrlInBrowser(url);
+    } else if (feedType == "jetpack") {
+      window.alert("Sorry, sharing of Jetpack feeds hasn't yet been " +
+                   "implemented.");
     }
   } catch(e) {
     Components.utils.reportError(e);
