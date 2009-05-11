@@ -18,8 +18,14 @@
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Atul Varma <atul@mozilla.com>
+ *   Aza Raskin <aza@mozilla.com>
+ *   Maria Emerson <memerson@mozilla.com>
+ *   Abimanyu Raja <abimanyu@gmail.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <blair@theunfocused.net>
+ *   Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -118,9 +124,9 @@ CmdUtils.CreateCommand({
   name: "翻訳して",
   takes: {},
   modifiers: {
-    "を": jpArbText,
-    "に": jpLanguageNounType,
-    "から": jpLanguageNounType
+    "を": noun_arb_text,
+    "に": noun_type_language,
+    "から": noun_type_language
   },
   execute: function( unused, modifiers ) {
     var textToTranslate = modifiers["を"] || "";
