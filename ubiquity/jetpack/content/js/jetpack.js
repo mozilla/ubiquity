@@ -92,23 +92,6 @@ var Jetpack = {
       }
     };
 
-    function wrapConsole(level) {
-      function wrappedConsole() {
-        var newArgs = [me, ':'];
-        for (var i = 0; i < arguments.length; i++)
-          newArgs.push(arguments[i]);
-        console[level].apply(console, newArgs);
-      }
-      return wrappedConsole;
-    }
-
-    var newConsole = {
-      log: wrapConsole('log'),
-      info: wrapConsole('info'),
-      warn: wrapConsole('warn'),
-      error: wrapConsole('error')
-    };
-
     var statusBarPanels = [];
     var statusBarPanelWindows = [];
 
@@ -140,7 +123,7 @@ var Jetpack = {
                  try {
                    options.onLoad(iframe.contentWindow);
                  } catch (e) {
-                   newConsole.log(e);
+                   console.error(e);
                  }
                },
                false
@@ -161,7 +144,7 @@ var Jetpack = {
     }
 
     return {location: codeSource.id,
-            console: newConsole,
+            console: console,
             Application: Application,
             addStatusBarPanel: addStatusBarPanel,
             $: jQuery,
