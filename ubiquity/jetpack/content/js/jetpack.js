@@ -210,11 +210,24 @@ $(window).ready(
     window.addEventListener("unload", Jetpack.finalize, false);
 
     var watcher = new EventHubWatcher(Jetpack.FeedPlugin.FeedManager);
-    // TODO: Watch more events.
-    watcher.add(
-      "feed-change",
-      function(name, uri) {
-        if (uri.spec in Jetpack.FeedPlugin.Feeds)
-          window.location.reload();
-      });
+
+    function maybeReload(eventName, uri) {
+      if (eventName == "purge")
+        // TODO: There's a bug in Ubiquity's feed manager which makes it
+        // impossible for us to get metadata about the feed, because it's
+        // already purged. We need to fix this. For now, just play it
+        // safe and reload Jetpack.
+        window.location.reload();
+      else
+        Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
+          function(feed) {
+            if (feed.uri.spec == uri.spec && feed.type == "jetpack")
+              window.location.reload();
+          });
+    }
+
+    watcher.add("feed-change", maybeReload);
+    watcher.add("subscribe", maybeReload);
+    watcher.add("purge", maybeReload);
+    watcher.add("unsubscribe", maybeReload);
   });

@@ -20,12 +20,6 @@ var App = {
   },
 
   tick: function tick() {
-    $("#jetpacks").empty();
-    for (url in Jetpack.FeedPlugin.Feeds) {
-      var link = $('<a></a>').attr('href', url).text(url);
-      $("#jetpacks").append($('<div class="jetpack"></div>').append(link));
-    }
-
     var bins = MemoryTracking.getBins();
     var table = $('<table></table>');
     bins.forEach(
@@ -52,6 +46,15 @@ $(window).ready(
 
     if (!window.console.isFirebug && !window.loadFirebugConsole)
       $("#firebug-not-found").show();
+
+    Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
+      function(feed) {
+        if (feed.type == "jetpack") {
+          var url = feed.uri.spec;
+          var link = $('<a></a>').attr('href', url).text(url);
+          $("#jetpacks").append($('<div class="jetpack"></div>').append(link));
+        }
+      });
 
     App.forceGC();
   });
