@@ -1,3 +1,10 @@
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+
+var Extension = {
+  Manager: {}
+};
+
 (function() {
    var host;
    if (window.location.protocol == "about:")
@@ -5,10 +12,9 @@
    else
      host = window.location.host;
 
-   var Extension = {};
    var initUrl  = "resource://" + host + "/modules/init.js";
-   Components.utils.import(initUrl, Extension);
-   Extension.set(window);
+   Components.utils.import(initUrl, Extension.Manager);
+   Extension.Manager.set(window);
 
    if (!window.console) {
      function stringifyArgs(args) {

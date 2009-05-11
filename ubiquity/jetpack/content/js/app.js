@@ -21,10 +21,10 @@ var App = {
 
   tick: function tick() {
     $("#jetpacks").empty();
-    for (url in FeedPlugin.Feeds)
+    for (url in Jetpack.FeedPlugin.Feeds)
       $("#jetpacks").append($('<div class="jetpack"></div>').text(url));
 
-    var numWeakRefs = Extension.getDebugInfo().weakRefs.length;
+    var numWeakRefs = Extension.Manager.getDebugInfo().weakRefs.length;
     $("#extension-weakrefs").text(numWeakRefs);
   }
 };

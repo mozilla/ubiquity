@@ -91,13 +91,22 @@ var Jetpack = {
         return parts.slice(-1)[0];
       }
     };
-    var newConsole = {
-      log: function log() {
+
+    function wrapConsole(level) {
+      function wrappedConsole() {
         var newArgs = [me, ':'];
         for (var i = 0; i < arguments.length; i++)
           newArgs.push(arguments[i]);
-        console.log.apply(console, newArgs);
+        console[level].apply(console, newArgs);
       }
+      return wrappedConsole;
+    }
+
+    var newConsole = {
+      log: wrapConsole('log'),
+      info: wrapConsole('info'),
+      warn: wrapConsole('warn'),
+      error: wrapConsole('error')
     };
 
     var statusBarPanels = [];
@@ -182,7 +191,7 @@ var Jetpack = {
                             jsm);
 
     var sandboxFactory = new jsm.SandboxFactory(this._makeGlobals);
-    var feeds = FeedPlugin.FeedManager.getSubscribedFeeds();
+    var feeds = Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds();
     feeds.forEach(
       function(feed) {
         if (feed.type == "jetpack") {
@@ -201,20 +210,25 @@ var Jetpack = {
           }
         }
       });
-  }
+  },
+
+  FeedPlugin: {}
 };
+
+Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
+                        Jetpack.FeedPlugin);
 
 $(window).ready(
   function() {
     Jetpack.loadAll();
     window.addEventListener("unload", Jetpack.finalize, false);
 
-    var watcher = new EventHubWatcher(FeedPlugin.FeedManager);
+    var watcher = new EventHubWatcher(Jetpack.FeedPlugin.FeedManager);
     // TODO: Watch more events.
     watcher.add(
       "feed-change",
       function(name, uri) {
-        if (uri.spec in FeedPlugin.Feeds)
+        if (uri.spec in Jetpack.FeedPlugin.Feeds)
           window.location.reload();
       });
   });

@@ -28,15 +28,7 @@ logged to the Firebug Console, where it's much easier to debug
 problems and inspect live objects.</p>
 <!-- Load scripts, etc. for the extension here. -->
 <script>
-const Cc = Components.classes;
-const Ci = Components.interfaces;
 
-var Extension = {};
-Components.utils.import("resource://jetpack/modules/init.js", Extension);
-
-var FeedPlugin = {};
-Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
-                        FeedPlugin);
 </script>
 <script src="js/init-extension.js"></script>
 <script src="js/jquery.js"></script>
