@@ -1,5 +1,7 @@
 resource ubiquity ./
+resource jetpack jetpack/
 content ubiquity chrome/content/
+content jetpack jetpack/content/
 content parser-demo modules/parser/new/
 skin ubiquity skin chrome/skin/
 overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul

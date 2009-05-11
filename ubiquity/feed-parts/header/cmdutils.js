@@ -1161,10 +1161,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     var query = encodeURIComponent(directObject.text);
     if (options.postData) {
       var urlString = options.url;
-      for (var data in options.postData)
-        options.postData[data] = options.postData[data]
-                                        .replace(/%s|{QUERY}/g, query);
-      Utils.openUrlInBrowser(urlString, options.postData);
+      var postData = Utils.paramsToString(options.postData).replace(/%s|{QUERY}/g, query);
+      Utils.openUrlInBrowser(urlString, postData);
     }
     else {
       var urlString = options.url.replace(/%s|{QUERY}/g, query);
@@ -1175,6 +1173,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   var domainRe = /.*?\/\/[^?/]*/;
   var relRe = /:\/\//;
   var baseurl = "";
+  var postData = null;
   if (options.url) {
     baseurl = domainRe.exec(options.url);
     if (!options.icon) {
@@ -1198,9 +1197,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
         var query = encodeURIComponent(directObject.text);
         // check if we're using POST
         if (options.postData) {
-          for (var data in options.postData)
-            options.postData[data] = options.postData[data]
-                                            .replace(/%s|{QUERY}/g, query);
+          postData = Utils.paramsToString(options.postData).replace(/%s|{QUERY}/g, query);
         }
         // or GET
         else {
@@ -1377,14 +1374,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           }
           pblock.innerHTML += template;
         };
-        if (options.postData) {
-          CmdUtils.previewPost(pblock, urlString, options.postData,
-                               searchParser, options.parser.type || "html");
-        }
-        else {
-          CmdUtils.previewGet(pblock, urlString, null, searchParser,
-                              options.parser.type || "html");
-        }
+        CmdUtils.previewPost(pblock, urlString, postData,
+                             searchParser, options.parser.type || "html");
       }
       else {
         var content = "Searches "+options.name+" for your words";
@@ -1437,6 +1428,16 @@ CmdUtils.makeBookmarkletCommand = function makeBookmarkletCmd(options) {
 
   CmdUtils.CreateCommand(options);
 };
+
+// ** {{{ CmdUtils.maxSuggestions }}} **
+//
+// Current number of max suggestions.
+
+CmdUtils.__defineGetter__("maxSuggestions", function maxSuggestions(){
+  var m = {};
+  Components.utils.import("resource://ubiquity/modules/cmdmanager.js", m);
+  return m.CommandManager.prototype.maxSuggestions;
+});
 
 /* The following odd-looking syntax means that the anonymous function
  * will be defined and immediately called.  This allows us to import
