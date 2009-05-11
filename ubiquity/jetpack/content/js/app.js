@@ -46,6 +46,9 @@ $(window).ready(
     $("#force-gc").click(App.forceGC);
     $("#run-tests").click(function() { Tests.run(); });
     $("#js-error-console").click(App.openJsErrorConsole);
+    $("#display-sample").click(
+      function() { $("#sample-code").slideToggle(); }
+    );
 
     if (!window.console.isFirebug && !window.loadFirebugConsole)
       $("#firebug-not-found").show();

@@ -8,9 +8,15 @@
 </head>
 <body>
 <h1>I am Jetpack.</h1>
-<p>If you want to create a Jetpack feed, use the <a href="chrome://ubiquity/content/editor.html">Ubiquity Command Editor</a> and set the feed type to "Jetpack"; to effect your changes, just reload any webpage or activate and then dismiss the Ubiquity command prompt&mdash;no saving is necessary.</p>
-<p>Here's a sample Jetpack feed to get you started:</p>
-<div class="sample code">addStatusBarPanel({
+<p>If you want to create a Jetpack feed, use the <a
+href="chrome://ubiquity/content/editor.html">Ubiquity Command
+Editor</a> and set the feed type to "Jetpack"; to effect your changes,
+just reload any webpage or activate and then dismiss the Ubiquity
+command prompt&mdash;no saving is necessary.</p>
+<p>Here's a <span class="buttony" id="display-sample">sample Jetpack
+feed</span> to get you started.</p>
+<div id="sample-code" class="sample code"
+  style="display: none;">addStatusBarPanel({
   html: "&lt;p&gt;kill flash&lt;/p&gt;",
   onLoad: function(panel) {
     var button = $(panel).find("p");
