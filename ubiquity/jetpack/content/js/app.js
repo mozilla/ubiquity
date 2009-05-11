@@ -31,12 +31,10 @@ var App = {
     bins.forEach(
       function(name) {
         var objects = MemoryTracking.getLiveObjects(name);
-        if (objects.length) {
-          var row = $('<tr></tr>');
-          row.append($('<td class="code"></td>').text(name));
-          row.append($('<td></td>').text(objects.length));
-          table.append(row);
-        }
+        var row = $('<tr></tr>');
+        row.append($('<td class="code"></td>').text(name));
+        row.append($('<td></td>').text(objects.length));
+        table.append(row);
       });
     $("#extension-weakrefs").empty().append(table);
   }

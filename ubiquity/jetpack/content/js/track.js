@@ -21,10 +21,12 @@ var MemoryTracking = {
     var newTrackedObjects = {};
     for (name in this._trackedObjects) {
       var oldBin = this._trackedObjects[name];
-      var newBin = newTrackedObjects[name] = [];
+      var newBin = [];
       for (var i = 0; i < oldBin.length; i++)
         if (oldBin[i].weakref.get())
           newBin.push(oldBin[i]);
+      if (newBin.length)
+        newTrackedObjects[name] = newBin;
     }
     this._trackedObjects = newTrackedObjects;
   },
