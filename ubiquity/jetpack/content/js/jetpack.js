@@ -149,7 +149,7 @@ var Jetpack = {
             addStatusBarPanel: addStatusBarPanel,
             $: jQuery,
             jQuery: jQuery,
-            Jetpack: JetpackLibrary};
+            Jetpack: new JetpackLibrary()};
   },
 
   contexts: [],
