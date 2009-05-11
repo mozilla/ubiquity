@@ -151,7 +151,7 @@ var Jetpack = {
             jQuery: jQuery};
   },
 
-  jetpacks: [],
+  contexts: [],
 
   Context: function JetpackContext(sandbox) {
     this.finalize = function finalize() {
@@ -163,11 +163,11 @@ var Jetpack = {
   },
 
   finalize: function finalize() {
-    Jetpack.jetpacks.forEach(
+    Jetpack.contexts.forEach(
       function(jetpack) {
         jetpack.finalize();
       });
-    Jetpack.jetpacks = [];
+    Jetpack.contexts = [];
   },
 
   loadAll: function loadAll() {
@@ -183,7 +183,7 @@ var Jetpack = {
           var codeSource = feed.getCodeSource();
           var code = codeSource.getCode();
           var sandbox = sandboxFactory.makeSandbox(codeSource);
-          Jetpack.jetpacks.push(new Jetpack.Context(sandbox));
+          Jetpack.contexts.push(new Jetpack.Context(sandbox));
           try {
             var codeSections = [{length: code.length,
                                  filename: codeSource.id,
