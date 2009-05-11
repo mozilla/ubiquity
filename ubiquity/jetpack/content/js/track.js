@@ -1,32 +1,8 @@
 var MemoryTracking = {
   COMPACT_INTERVAL: 1000,
   _trackedObjects: {},
-  isSupported: function() {
-    try {
-      if (window.getWeakReference || Components.utils.getWeakReference)
-        return true;
-    } catch (e) {}
-    return false;
-  },
-  forceGC: function forceGC() {
-    if (window.forceGC)
-      window.forceGC();
-    else
-      Components.utils.forceGC();
-  },
   track: function track(object, bin) {
-    var weakref;
-    try {
-      if (window.getWeakReference)
-        weakref = window.getWeakReference(object);
-      else
-        weakref = Components.utils.getWeakReference(object);
-    } catch (e) {
-      throw new Error(e);
-      // Weakrefs aren't available, do nothing.
-      return;
-    }
-
+    var weakref = Components.utils.getWeakReference(object);
     if (!bin)
       bin = object.constructor.name;
     if (!(bin in this._trackedObjects))
@@ -67,7 +43,6 @@ var MemoryTracking = {
 
 $(window).ready(
   function() {
-    if (MemoryTracking.isSupported())
-      window.setInterval(function() { MemoryTracking.compact(); },
-                         MemoryTracking.COMPACT_INTERVAL);
+    window.setInterval(function() { MemoryTracking.compact(); },
+                       MemoryTracking.COMPACT_INTERVAL);
   });
