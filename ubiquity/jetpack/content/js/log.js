@@ -139,6 +139,12 @@ var Logging = {
 
 (function() {
    if (Extension.isVisible) {
+     // TODO: Use a Logging.ConsoleListener to report errors to
+     // Firebug/JS Error Console if Firebug.showChromeErrors is false or
+     // javascript.options.showInConsole is false. We don't want the user
+     // to have to manually enable any preferences if they're actually
+     // looking at the extension's page!
+
      var mainWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
                       .getInterface(Ci.nsIWebNavigation)
                       .QueryInterface(Ci.nsIDocShellTreeItem)
