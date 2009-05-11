@@ -153,7 +153,7 @@ var Jetpack = {
 
   jetpacks: [],
 
-  Jetpack: function Jetpack(sandbox) {
+  Context: function JetpackContext(sandbox) {
     this.finalize = function finalize() {
       delete sandbox['$'];
       delete sandbox['jQuery'];
@@ -183,7 +183,7 @@ var Jetpack = {
           var codeSource = feed.getCodeSource();
           var code = codeSource.getCode();
           var sandbox = sandboxFactory.makeSandbox(codeSource);
-          Jetpack.jetpacks.push(new Jetpack.Jetpack(sandbox));
+          Jetpack.jetpacks.push(new Jetpack.Context(sandbox));
           try {
             var codeSections = [{length: code.length,
                                  filename: codeSource.id,
