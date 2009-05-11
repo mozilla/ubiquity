@@ -61,21 +61,32 @@ function linkToAction(text, action) {
   return linkToAction;
 }
 
-function fillTableCellForFeed( cell, feed ) {
+function fillTableCellForFeed( cell, feed, sortMode) {
   cell.html(linkToHtml( feed.title, feed.uri.spec));
   cell.append("<br/>");
-  // TODO do not add unsubscribe link if it's a built-in
+  // add unsubscribe link (but not for built-in feeds)
+  if (!feed.isBuiltIn)
+    cell.append(linkToAction("[unsubscribe]", function() {
+                               feed.remove();
+                               changeSortMode( sortMode );
+                             }));
 
-  cell.append(linkToAction("[unsubscribe]", makeRemover(cell, feed) ));
-  // makeRemover needs to be modified so that it slides out the row or
-  // rows and not just the cell.
-
+  // Add link to source (auto-updated or not)
   let sourceName = feed.canAutoUpdate?"auto-updated source":"source";
   cell.append(" ");
   cell.append(linkToHtml("[view " + sourceName + "]",
                              "view-source:" + feed.viewSourceUri.spec,
                              "feed-action"));
+  // If not auto-updating, display link to any updates found
+  feed.checkForManualUpdate(
+      function(isAvailable, href) {
+        if (isAvailable)
+          $(cell).append('<br/><a class="feed-updated" href="' + href +
+                         '">An update for this feed is available.</a>');
+      });
+
   cell.addClass("topcell");
+  cell.addClass("command-feed-name");
 }
 
 function formatCommandAuthor(authorData) {
@@ -106,12 +117,20 @@ function formatCommandAuthor(authorData) {
 }
 
 function fillTableRowForCmd( row, cmd, className ) {
-
+  // TODO bug here: when displaying sorted by feed, the check boxes
+  // are all checked even if the command should be disabled.  When
+  // displaying sorted by cmd, the check boxes all appear correctly.
   var isEnabled = !cmd.disabled;
   var checkBoxCell = jQuery(
     '<td><input type="checkbox" class="activebox"' +
       (isEnabled ? ' checked="checked"' : '')+'/></td>'
   );
+
+  // For all commands in the table, unbind any 'change' method, bind to
+  // onDisableOrEnableCmd.
+  //checkBoxCell.unbind('change');
+  checkBoxCell.bind('change', onDisableOrEnableCmd);
+
 
   var cmdElement = jQuery(
     '<td class="command">' +
@@ -197,7 +216,7 @@ function populateYeTable( sortField ) {
     let feedCell = $("<td></td>");
     if (cmdNames.length > 1 )
       feedCell.attr("rowspan", cmdNames.length);
-    fillTableCellForFeed( feedCell, feed );
+    fillTableCellForFeed( feedCell, feed, sortField );
 
     let firstRow = $("<tr></tr>");
     firstRow.append( feedCell );
@@ -240,8 +259,43 @@ function populateYeTable( sortField ) {
       addCmdToTable(cmd);
     }
   }
-
 }
+
+function sortCmdListBy(cmdList, key) {
+  function alphasort(a, b) {
+    var aKey = a[key].toLowerCase();
+    var bKey = b[key].toLowerCase();
+
+    // ensure empty fields get given lower priority
+    if(aKey.length > 0  && bKey.length == 0)
+      return -1;
+    if(aKey.length == 0  && bKey.length > 0)
+      return 1;
+
+    if(aKey < bKey)
+      return -1;
+    if(aKey > bKey)
+      return 1;
+
+    return 0;
+  }
+  function checksort(a, b) {
+    var aKey = !a.disabled,
+        bKey = !b.disabled;
+    if (aKey===bKey)
+      return 0;
+    if(aKey)
+      return -1;
+    return 1;
+  }
+  if (key == "active") {
+    cmdList.sort(checksort);
+  } else {
+    cmdList.sort(alphasort);
+  }
+  return cmdList;
+}
+
 
 function getFeedForCommand( feedMgr, cmd ) {
   // This is a really hacky implementation -- it involves going through
@@ -259,16 +313,112 @@ function getFeedForCommand( feedMgr, cmd ) {
   return null;
 }
 
+function onDisableOrEnableCmd() {
+  // update the preferences, when the user toggles the active
+  // status of a command.
+  // Bind this to checkbox 'change'.
+
+  var name=$(this).parents('tr').find('span.name').text();
+  var cmdSource = UbiquitySetup.createServices().commandSource;
+  var cmd = cmdSource.getCommand(name);
+
+  if (this.checked)
+    // user has just made this command active.
+    cmd.disabled = false;
+  else
+    // user has just made this command inactive.
+    cmd.disabled = true;
+}
+
+// this was to make both subscribed and unsubscribed list entries, but is
+// now used only for unsubscribed ones.
+function makeUnsubscribedFeedListElement(info, sortMode) {
+  var li = document.createElement("li");
+  $(li).append(linkToHtml(info.title, info.uri.spec));
+
+  var commandList = $("<ul></ul>");
+  for (var name in info.commands)
+    $(commandList).append($("<li></li>").text(name));
+  $(li).append(commandList);
+
+  $(li).append(linkToAction("[resubscribe]", function() {
+                    info.unremove();
+                    changeSortMode(sortMode);
+                            }));
+
+  $(li).append(" ");
+  $(li).append(linkToAction("[purge]",
+                  function() { $(li).slideUp("slow");
+                               info.purge(); }));
+
+  var sourceUrl;
+  var sourceName;
+
+  if (info.canAutoUpdate)
+    sourceName = "auto-updated source";
+  else
+    sourceName = "source";
+
+  $(li).append(" ");
+  $(li).append(linkToHtml("[view " + sourceName + "]",
+                          "view-source:" + info.viewSourceUri.spec,
+                          "feed-action"));
+  return li;
+}
+
+function addAllUnsubscribedFeeds(sortMode) {
+  let svc = UbiquitySetup.createServices();
+  let feedMgr = svc.feedManager;
+  // TODO sortMode could also be used to order the unsubscribed feeds?
+  function addUnsubscribedFeed(feed) {
+    $("#command-feed-graveyard").append(
+      makeUnsubscribedFeedListElement(feed, sortMode));
+  }
+  feedMgr.getUnsubscribedFeeds().forEach(addUnsubscribedFeed);
+
+  if (!$("#command-feed-graveyard").text())
+    $("#command-feed-graveyard-div").hide();
+}
+
+// TODO the following code needs to make its way onto any page that has
+// a version string:
+//  $(".version").text(UbiquitySetup.version);
+
+
+function startYeDocumentLoad() {
+  populateYeTable("cmd");
+  addAllUnsubscribedFeeds("cmd");
+}
+
+function changeSortMode( newSortMode ) {
+  // TODO sort mode should be stored in a preference so it will
+  // remain consistent.
+  $("#commands-and-feeds-table").empty();
+  populateYeTable(newSortMode);
+  $("#command-feed-graveyard").empty();
+  addAllUnsubscribedFeeds(newSortMode);
+}
+
+$(document).ready(startYeDocumentLoad);
+
+
+
+// OK, resubscribing works, but the commands do not appear in the list on
+// the first try IFF you're in sort-by-command-name mode.  Everything
+// works fine if you're in sort-by-feed mode.
+// How odd.
+
 // Broken features to fix:
-//  -- sort by whatever
-//  -- unsubscribe / resubscribe
-//  -- populate unsubscribed feeds area
-//  -- enable/disable command
+//  -- sort by whatever (needs pref, more options)
+//  -- unsubscribe / resubscribe (mostly fixed, one bug)
+//  -- populate unsubscribed feeds area (done)
+//  -- enable/disable command (mostly fixed, one bug)
+//  -- Find feeds for commands so they can be displayed in cmd mode
 //  -- margins, fo readability
 
 // New features to add:
 // show/hide help at top of page
-// sort by using links instead of drop-down
+// sort by using links instead of drop-down (done)
 // show/hide help for individual command
 // jump directly to help for particular command
 
@@ -278,16 +428,22 @@ function getFeedForCommand( feedMgr, cmd ) {
 // if feeds-first, feeds by name or by recently subscribed?
 // if cmds-first, by name, author, homepage, licence, or enabledness?
 
+
+
+
+
+
+
 /// Below this is ye old code.
 
+/*
 function onDocumentLoad() {
-  //onReady();
 
   function updateCommands() {
     var cmdSource = UbiquitySetup.createServices().commandSource;
 
     var cmdList = $('#command-list');
-    cmdList.find('.activebox').unbind('change');
+
     for (var i = 0; i < cmdSource.commandNames.length; i++) {
       var cmd = cmdSource.getCommand(cmdSource.commandNames[i].name);
       var isEnabled = !cmd.disabled;
@@ -351,25 +507,6 @@ function onDocumentLoad() {
       cmdList.append(cmdElement);
     }
 
-    // TODO: Remove any entries that no longer exist.
-    // TODO: port onDisableOrEnableCmd up
-    function onDisableOrEnableCmd() {
-      // update the preferences, when the user toggles the active
-      // status of a command
-
-      var name=$(this).parents('li.command').find('span.name').text();
-      var cmdSource = UbiquitySetup.createServices().commandSource;
-      var cmd = cmdSource.getCommand(name);
-
-      if (this.checked)
-        // user has just made this command active.
-        cmd.disabled = false;
-      else
-        // user has just made this command inactive.
-        cmd.disabled = true;
-    }
-
-    cmdList.find('.activebox').bind('change', onDisableOrEnableCmd);
   }
 
   var sortKey = $("#sortby").val();
@@ -384,45 +521,12 @@ function onDocumentLoad() {
   updateCommands();
   doSort();
 }
+*/
 
-function sortCmdListBy(cmdList, key) {
-  function alphasort(a, b) {
-    var aKey = a[key].toLowerCase();
-    var bKey = b[key].toLowerCase();
-
-    // ensure empty fields get given lower priority
-    if(aKey.length > 0  && bKey.length == 0)
-      return -1;
-    if(aKey.length == 0  && bKey.length > 0)
-      return 1;
-
-    if(aKey < bKey)
-      return -1;
-    if(aKey > bKey)
-      return 1;
-
-    return 0;
-  }
-  function checksort(a, b) {
-    var aKey = !a.disabled,
-        bKey = !b.disabled;
-    if (aKey===bKey)
-      return 0;
-    if(aKey)
-      return -1;
-    return 1;
-  }
-  if (key == "active") {
-    cmdList.sort(checksort);
-  } else {
-    cmdList.sort(alphasort);
-  }
-  return cmdList;
-}
 
 
 // ------- where the old division was
-
+/*
 function makeRemover(element, info) {
   function onSlideDown() {
     var newElement = makeFeedListElement(info,
@@ -466,35 +570,12 @@ function makeUnremover(element, info) {
   }
   return unremove;
 }
+*/
 
-
-
-
-
-function makeFeedListElement(info, label, clickMaker) {
-  var li = document.createElement("li");
-
-  function addLink(text, url, className) {
-    var linkToHtml = document.createElement("a");
-    $(linkToHtml).text(text);
-    if (className)
-      $(linkToHtml).addClass(className);
-    linkToHtml.href = url;
-    $(li).append(linkToHtml);
-    return linkToHtml;
-  }
-
-  function addLinkToAction(text, action) {
-    var linkToAction = document.createElement("span");
-    $(linkToAction).text(text);
-    $(linkToAction).click(action);
-    $(linkToAction).css({cursor: "pointer", color: "#aaa"});
-    $(li).append(linkToAction);
-  }
-
-  var titleLink = addLink(info.title, info.uri.spec);
-
-  if (label == "unsubscribe" && !info.canAutoUpdate) {
+// TODO the following code needs to be applied to the subscribed feed
+// elements in the big table:
+/*
+ *   if (label == "unsubscribe" && !info.canAutoUpdate) {
     info.checkForManualUpdate(
       function(isAvailable, href) {
         if (isAvailable)
@@ -503,63 +584,4 @@ function makeFeedListElement(info, label, clickMaker) {
       });
   }
 
-  var commandList = $("<ul></ul>");
-  for (var name in info.commands)
-    $(commandList).append($("<li></li>").text(name));
-  $(li).append(commandList);
-
-  addLinkToAction("[" + label + "]", clickMaker(li, info));
-
-  if (label == "resubscribe") {
-    $(li).append(" ");
-    addLinkToAction("[purge]",
-                    function() { $(li).slideUp("slow");
-                                 info.purge(); });
-  }
-
-  var sourceUrl;
-  var sourceName;
-
-  if (info.canAutoUpdate)
-    sourceName = "auto-updated source";
-  else
-    sourceName = "source";
-
-  $(li).append(" ");
-  addLink("[view " + sourceName + "]", "view-source:" + info.viewSourceUri.spec,
-          "feed-action");
-
-  return li;
-}
-
-function addAllUnsubscribedFeeds() {
-  let svc = UbiquitySetup.createServices();
-  let feedMgr = svc.feedManager;
-
-  function addUnsubscribedFeed(feed) {
-    $("#command-feed-graveyard").append(makeFeedListElement(feed,
-                                                            "resubscribe",
-                                                            makeUnremover));
-  }
-  feedMgr.getUnsubscribedFeeds().forEach(addUnsubscribedFeed);
-
-  if (!$("#command-feed-graveyard").text())
-    $("#command-feed-graveyard-div").hide();
-}
-
-// TODO the following code needs to make its way onto any page that has
-// a version string:
-//  $(".version").text(UbiquitySetup.version);
-
-
-function startYeDocumentLoad() {
-  populateYeTable("cmd");
-  addAllUnsubscribedFeeds();
-}
-
-function changeSortMode( newSortMode ) {
-  $("#commands-and-feeds-table").empty();
-  populateYeTable(newSortMode);
-}
-
-$(document).ready(startYeDocumentLoad);
+ */

@@ -248,41 +248,8 @@ ul a:active.button {
   background-position: 0 -22px;
 }
 
-ul#command-feeds {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-ul#command-feeds li {
-  padding-bottom: .5em;
-}
-
-ul#command-feeds ul {
-  list-style: none;
-  padding-left: 20px;
-}
-
-ul#command-feeds ul:after {
-  content: ".";
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
-}
-
-ul#command-feeds ul li {
-  float: left;
-  white-space: nowrap;
-  padding-bottom: 0;
-}
-
-ul#command-feeds ul li:after {
-  content: ",";
-}
-
-ul#command-feeds ul li:last-child:after {
-  content: "";
+td.command-feed-name {
+  font-size: 18px;
 }
 
 ul#command-feed-graveyard {

@@ -39,8 +39,9 @@
   <tr><th width="30%" colspan="1">Subscribed Feeds</th>
       <th width="70%" colspan="2">Commands</th></tr>
 
-  <tr><td>Sort By: <a onclick="changeSortMode('feed');">Feed Name</a></td>
-      <td><a onclick="changeSortMode('cmd');">Enabled</a></td>
+  <tr><td>Sort By: <a onclick="changeSortMode('feed');">Feed Name</a> |
+          <a onclick="changeSortMode('feed-date');">Date Subscribed</a></td>
+      <td><a onclick="changeSortMode('enabled');">Enabled</a></td>
       <td><a onclick="changeSortMode('cmd');">Command</a></td></tr>
 
   <tbody id="commands-and-feeds-table">
@@ -50,9 +51,12 @@
 <br clear="all"/>
 
   <div id="command-feed-graveyard-div">
-      <p id="command-feed-graveyard-header">You've recently unsubscribed to these command
-      feeds:</p>
-      <ul id="command-feed-graveyard"></ul>
+    <p id="command-feed-graveyard-header">
+      <a name="graveyard"
+        You've recently unsubscribed to these command feeds:
+      </a>
+    </p>
+    <ul id="command-feed-graveyard"></ul>
   </div>
 
 
