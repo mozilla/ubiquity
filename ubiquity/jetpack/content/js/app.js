@@ -21,8 +21,10 @@ var App = {
 
   tick: function tick() {
     $("#jetpacks").empty();
-    for (url in Jetpack.FeedPlugin.Feeds)
-      $("#jetpacks").append($('<div class="jetpack"></div>').text(url));
+    for (url in Jetpack.FeedPlugin.Feeds) {
+      var link = $('<a></a>').attr('href', url).text(url);
+      $("#jetpacks").append($('<div class="jetpack"></div>').append(link));
+    }
 
     var bins = MemoryTracking.getBins();
     var table = $('<table></table>');
