@@ -1,4 +1,48 @@
 var Logging = {
+  ConsoleListener: function ConsoleListener() {
+    var self = this;
+
+    var consoleListener = {
+      observe: function(object) {
+        var newObj = new Object();
+        try {
+          var scriptError = object.QueryInterface(Ci.nsIScriptError);
+          newObj.isWarning = (scriptError.flags &
+                              Ci.nsIScriptError.warningFlag) != 0;
+          newObj.isStrictWarning = (scriptError.flags &
+                                    Ci.nsIScriptError.strictFlag) != 0;
+          newObj.isException = (scriptError.flags &
+                                Ci.nsIScriptError.exceptionFlag) != 0;
+          newObj.isError = (!(newObj.isWarning || newObj.isStrictWarning));
+          newObj.message = scriptError.errorMessage;
+          ["category", "lineNumber", "sourceName", "sourceLine",
+           "columnNumber"].forEach(
+             function(propName) {
+               newObj[propName] = scriptError[propName];
+             });
+        } catch (e) {
+          try {
+            newObj.message = object.QueryInterface(Ci.nsIConsoleMessage);
+          } catch (e) {
+            newObj.message = object.toString();
+          }
+        }
+        if (self.onMessage)
+          self.onMessage(newObj);
+      }
+    };
+
+    var cService = Cc['@mozilla.org/consoleservice;1'].getService()
+                   .QueryInterface(Ci.nsIConsoleService);
+    cService.registerListener(consoleListener);
+
+    $(window).unload(
+      function() {
+        cService.unregisterListener(consoleListener);
+      });
+
+    MemoryTracking.track(this);
+  },
   JsErrorConsoleLogger: function JsErrorConsoleLogger() {
     function stringifyArgs(args) {
       var stringArgs = [];
@@ -46,6 +90,8 @@ var Logging = {
     this.error = function error() {
       report(stringifyArgs(arguments), 'errorFlag', 1);
     };
+
+    MemoryTracking.track(this);
   },
 
   FirebugLogger: function FirebugLogger(chromeWindow) {
@@ -86,6 +132,8 @@ var Logging = {
     ["log", "info", "warn", "error"].forEach(
       function(className) { self[className] = wrapFirebugLogger(className); }
     );
+
+    MemoryTracking.track(this);
   }
 };
 

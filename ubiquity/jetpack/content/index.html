@@ -13,7 +13,10 @@
 <h2>Debugging Information</h2>
 <p>Extension page weak references:</p>
 <div id="extension-weakrefs"></div>
-<p><span class="buttony" id="force-gc">force garbage collection</span></p>
+<p>
+  <span class="buttony" id="force-gc">force garbage collection</span>
+  <span class="buttony" id="run-tests">run test suite</span>
+</p>
 <p>Reloading this page will reload Jetpack.</p>
 <p id="firebug-not-found" class="warning">You either don't have
 Firebug installed, or you don't have it enabled for this page, so all
@@ -25,12 +28,14 @@ logged to the Firebug Console, where it's much easier to debug
 problems and inspect live objects.</p>
 <!-- Load scripts, etc. for the extension here. -->
 <script src="js/init-extension.js"></script>
-<script src="js/log.js"></script>
 <script src="js/jquery.js"></script>
 <script src="js/track.js"></script>
+<script src="js/log.js"></script>
 <script src="js/observe.js"></script>
 <script src="js/status-bar-panel.js"></script>
 <script src="js/jetpack.js"></script>
+<script src="js/test.js"></script>
+<script src="js/tests/test_log.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

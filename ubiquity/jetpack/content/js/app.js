@@ -44,6 +44,7 @@ $(window).ready(
   function() {
     window.setInterval(App.tick, 1000);
     $("#force-gc").click(App.forceGC);
+    $("#run-tests").click(function() { Tests.run(); });
     $("#js-error-console").click(App.openJsErrorConsole);
 
     if (!window.console.isFirebug && !window.loadFirebugConsole)
