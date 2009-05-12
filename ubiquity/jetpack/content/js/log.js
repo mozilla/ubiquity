@@ -104,23 +104,9 @@ var Logging = {
                             jsm);
     var SandboxFactory = jsm.SandboxFactory;
 
-    function unmungeStackFrame(frame) {
-      var mungedPrefix = SandboxFactory.protectedFileUriPrefix;
-      if (SandboxFactory.isInitialized &&
-          SandboxFactory.isFilenameReported &&
-          frame.filename.indexOf(mungedPrefix) != -1) {
-        var newFrame = {
-          filename: frame.filename.slice(mungedPrefix.length)
-        };
-        newFrame.__proto__ = frame;
-        return newFrame;
-      }
-      return frame;
-    }
-
     function wrapFirebugLogger(className) {
       function wrappedFirebugLogger() {
-        var frame = unmungeStackFrame(Components.stack.caller);
+        var frame = Components.stack.caller;
         Firebug.Console.logFormatted(arguments, context, className, false,
                                      FBL.getFrameSourceLink(frame));
       }
@@ -132,6 +118,40 @@ var Logging = {
     ["log", "info", "warn", "error"].forEach(
       function(className) { self[className] = wrapFirebugLogger(className); }
     );
+
+    // Here we post-process all newly-added logging messages to un-munge any
+    // URLs coming from sandboxed code.
+    Firebug.chrome.selectPanel("console");
+    var consoleDocument = Firebug.chrome.getSelectedPanel().document;
+    var consoleElement = $(consoleDocument).find(".panelNode-console");
+    if (consoleElement.length) {
+      consoleElement = consoleElement.get(0);
+      function unmungeUrl(url) {
+        var mungedPrefix = SandboxFactory.protectedFileUriPrefix;
+        if (SandboxFactory.isInitialized &&
+            SandboxFactory.isFilenameReported &&
+            url.indexOf(mungedPrefix) != -1) {
+          return url.slice(mungedPrefix.length);
+        }
+        return url;
+      }
+
+      function onInsert(evt) {
+        var obj = $(evt.originalTarget).find(".objectLink-sourceLink");
+        if (obj.length) {
+          obj.each(
+            function() {
+              this.repObject.href = unmungeUrl(this.repObject.href);
+            });
+        }
+      }
+      consoleElement.addEventListener("DOMNodeInserted", onInsert, false);
+      $(window).unload(
+        function() {
+          consoleElement.removeEventListener("DOMNodeInserted", onInsert,
+                                             false);
+        });
+    }
 
     MemoryTracking.track(this);
   }
