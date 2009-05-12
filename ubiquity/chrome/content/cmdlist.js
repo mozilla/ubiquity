@@ -151,7 +151,7 @@ function fillTableRowForCmd( row, cmd, className ) {
 
   var cmdElement = jQuery(
     '<td class="command">' +
-    '<img class="favicon">' +
+    '<a><img class="favicon"></a>' +
     '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
     '<span class="description"/>' +
     '<div class="synonyms-container light">also called ' +
@@ -162,6 +162,8 @@ function fillTableRowForCmd( row, cmd, className ) {
     '<div class="help"/>' +
     '</td>'
   );
+
+  cmdElement.find("a").attr("name", escapeHtml(cmd.name));
 
   if (cmd.icon) {
     cmdElement.find(".favicon").attr("src", escapeHtml(cmd.icon) );
@@ -421,6 +423,17 @@ function rebuildTable() {
   populateYeTable(feedMgr, cmdSource);
   $("#command-feed-graveyard").empty();
   addAllUnsubscribedFeeds(feedMgr);
+
+  // If there are URL GET arguments, jump to the right place
+  let mainURL = window.location.search;
+  let arguments = mainURL.split("?")[1].split("&");
+  for (let i in arguments) {
+    let pair = arguments[i].split("=");
+    if (pair[0] == "cmdname") {
+      window.location.hash = pair[1];
+      break;
+    }
+  }
 }
 
 function setSortMode( newSortMode ) {
