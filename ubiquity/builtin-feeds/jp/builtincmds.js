@@ -46,8 +46,8 @@
 // -----------------------------------------------------------------
 
 CmdUtils.CreateCommand({
-  name: "ヘルプ",
-  synonyms: ["help", "about", "?", "説明"],
+  name: "help",
+  synonyms: ["ヘルプ", "about", "?", "説明"],
   icon: "chrome://ubiquity/skin/icons/help.png",
   preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
   description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",

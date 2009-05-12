@@ -52,13 +52,13 @@ var noun_type_emailservice = {
      }
      return suggestions;
    },
-   default: function() {
+   'default': function() {
      //TODO: find a better way to pick the default
      return CmdUtils.makeSugg("gmail", null, "gmail",0.9);
    }
 };
 
-var JLanguageCodes = {
+var LanguageCodes = {
   'アラビア語' : 'ar',
   'ブルガリア語' : 'bg',
   'カタルーニャ語' : 'ca',
@@ -93,7 +93,9 @@ var JLanguageCodes = {
   'スウェーデン語' : 'sv',
   'ウクライナ語' : 'uk',
   'ベトナム語' : 'vi',
-  
+  // Wikipedia-specific
+  'シンプル英語' : 'simple',
+
   'arabic' : 'ar',
   'bulgarian' : 'bg',
   'catalan' : 'ca',
@@ -132,33 +134,35 @@ var JLanguageCodes = {
   'spanish' : 'es',
   'swedish' : 'sv',
   'ukranian' : 'uk',
-  'vietnamese' : 'vi'
+  'vietnamese' : 'vi',
+  'simple english' : 'simple'
 };
 
 var noun_type_language =  {
   _name: "言語",
+
   suggest: function( text, html ) {
     var suggestions = [];
-    for ( var word in JLanguageCodes ) {
+    for ( var word in LanguageCodes ) {
       // Do the match in a non-case sensitive way
       if ( word.indexOf( text.toLowerCase() ) > -1 ) {
         // Use the 2-letter language code as the .data field of the suggestion
-        var sugg = CmdUtils.makeSugg(word, word, JLanguageCodes[word]);
+        var sugg = CmdUtils.makeSugg(word, word, LanguageCodes[word]);
         suggestions.push( sugg );
       }
     }
     return suggestions;
   },
-   
+
   // Returns the language name for the given lang code.
   getLangName: function(langCode) {
- 	var code = langCode.toLowerCase();
- 	for ( var word in JLanguageCodes ) {
- 		if (code == JLanguageCodes[word].toLowerCase()) {
- 			return word;
- 		}
- 	}
- 	return null;
+	var code = langCode.toLowerCase();
+	for ( var word in LanguageCodes ) {
+		if (code == LanguageCodes[word].toLowerCase()) {
+			return word;
+		}
+	}
+	return null;
   }
 };
 
@@ -166,20 +170,8 @@ var noun_arb_text = {
   _name: "テキスト",
   rankLast: true,
   suggest: function( text, html, callback, selectionIndices ) {
-    var suggestion = CmdUtils.makeSugg(text, html);
-    /* If the input comes all or in part from a text selection,
-     * we'll stick some html tags into the summary so that the part
-     * that comes from the text selection can be visually marked in
-     * the suggestion list.
-     */
-    if (selectionIndices) {
-      var pre = suggestion.summary.slice(0, selectionIndices[0]);
-      var middle = suggestion.summary.slice(selectionIndices[0],
-					    selectionIndices[1]);
-      var post = suggestion.summary.slice(selectionIndices[1]);
-      suggestion.summary = pre + "<span class='selection'>" +
-			     middle + "</span>" + post;
-    }
+    var suggestion = CmdUtils.makeSugg(text, html, null, 0.7,
+                                       selectionIndices);
     return [suggestion];
   }
 };
@@ -200,7 +192,7 @@ var noun_type_contact = {
       return suggs.length > 0 ? suggs : [];
     }
 
-    if( text.length < 2 ) return [];
+    if( text.length < 1 ) return [];
 
     var suggestions  = [];
     for ( var c in noun_type_contact.contactList ) {
@@ -242,11 +234,10 @@ var noun_type_email = {
   }
 };
 
-
 var noun_type_date = {
   _name: "日付",
 
-  default: function(){
+  'default': function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
      return CmdUtils.makeSugg(text, null, date, 0.9);
@@ -262,14 +253,14 @@ var noun_type_date = {
       return [];
     }
     text = date.toString("dd MM, yyyy");
-    return [ CmdUtils.makeSugg(text, null, date) ];
+    return [ CmdUtils.makeSugg(text, null, date, 0.9) ];
   }
 };
 
 var noun_type_time = {
    _name: "時刻",
 
-   default: function(){
+   'default': function(){
      var time = Date.parse("now");
      var text = time.toString("hh:mm tt");
      return CmdUtils.makeSugg(text, null, time, 0.9);
@@ -286,7 +277,7 @@ var noun_type_time = {
      }
 
      text = time.toString("hh:mm tt");
-     return [ CmdUtils.makeSugg(text, null, time) ];
+     return [ CmdUtils.makeSugg(text, null, time, 0.9) ];
    }
 };
 
@@ -306,8 +297,28 @@ var noun_type_percentage = {
   }
 };
 
+/*
+ * Noun type for searching links on the awesomebar database.
+ * Right now, the suggestion returned is:
+ *  -- text: title of the url
+ *  -- html: the link
+ *  -- data: the favicon
+ *
+ *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html)
+ */
+noun_type_awesomebar = {
+  name: "URL",
+
+  suggest: function(part, html, callback){
+     Utils.history.search(part, 5, function(result){
+        callback(CmdUtils.makeSugg(result.url, result.title, result.favicon))
+     })
+  }
+};
+
+
 var noun_type_async_address = {
-  _name: "住所(非同期)",
+  _name: "番地(非同期)",
   // TODO caching
   suggest: function(text, html, callback) {
     isAddress( text, function( truthiness ) {
@@ -333,7 +344,7 @@ var noun_type_tab = {
     var suggestions  = [];
     var tabs = Utils.tabs.search(text, 5);
 
-    for ( var tabName in tabs ){
+    for ( var tabName in tabs ) {
       var tab = tabs[tabName];
       suggestions.push( CmdUtils.makeSugg(tabName, tab.document.URL, tab) );
     }
@@ -453,7 +464,7 @@ var noun_type_tag = {
 var noun_type_geolocation = {
    _name : "地理位置情報",
    rankLast: true,
-   default: function() {
+   'default': function() {
 		var location = CmdUtils.getGeoLocation();
 		if (!location) {
 			// TODO: there needs to be a better way of doing this,
@@ -461,7 +472,7 @@ var noun_type_geolocation = {
 			return {text: "", html: "", data: null, summary: ""};
 		}
 		var fullLocation = location.city + ", " + location.country;
-		return CmdUtils.makeSugg(fullLocation,null,null,0.9);
+		return CmdUtils.makeSugg(fullLocation, null, null, 0.9);
    },
 
    suggest: function(fragment, html, callback) {
@@ -482,4 +493,191 @@ var noun_type_geolocation = {
       }
       return [CmdUtils.makeSugg(fragment)];
    }
+};
+
+var noun_type_url = {
+  /* TODO longterm, noun_type_url could suggest URLs you've visited before, by querying
+   * the awesomebar's data source
+   */
+  _name : "URL",
+  rankLast: true,
+  suggest: function(fragment) {
+    var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    // alternately: /[A-Za-z0-9_.-]+:\/\/([A-Za-z0-9_.-])/
+
+    // Magic words "page" or "url" result in the URL of the current page
+    if (fragment == "page" || fragment == "url") {
+      var url = Application.activeWindow.activeTab.document.URL;
+      return [CmdUtils.makeSugg(url)];
+    }
+    // If it's a valid URL, suggest it back
+    if (regexp.test(fragment)) {
+      return [CmdUtils.makeSugg(fragment)];
+    } else if (regexp.test( "http://" + fragment ) ) {
+      return [CmdUtils.makeSugg("http://" + fragment)];
+    }
+    return [];
+  }
+};
+
+
+
+var noun_type_livemark = {
+  _name: "ライブブックマーク",
+  rankLast: true,
+
+  /*
+  * text & html = Livemark Title (string)
+  * data = { itemIds : [] } - an array of itemIds(long long) 
+  * for the suggested livemarks.
+  * These values can be used to reference the livemark in bookmarks & livemark 
+  * services
+  */
+
+  getFeeds: function() {
+
+    //Find all bookmarks with livemark annotation
+     return Components.classes["@mozilla.org/browser/annotation-service;1"]
+        .getService(Components.interfaces.nsIAnnotationService)
+        .getItemsWithAnnotation("livemark/feedURI", {});
+  },
+
+  'default': function() {
+    var feeds = this.getFeeds();
+    if( feeds.length > 0 ) {
+       return CmdUtils.makeSugg("all livemarks", null, {itemIds: feeds});
+    }
+    return null;
+  },
+
+  suggest: function(fragment) {
+    fragment = fragment.toLowerCase();
+
+    var suggestions = [];
+    var allFeeds = this.getFeeds();
+
+    if(allFeeds.length > 0) {
+      var bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
+                                  .getService(Components.interfaces.nsINavBookmarksService);
+
+      for(var i = 0; i < allFeeds.length; ++i) {
+        var livemarkTitle = bookmarks.getItemTitle(allFeeds[i]).toLowerCase();
+        if(livemarkTitle.toLowerCase().indexOf(fragment) > -1) {
+          suggestions.push(CmdUtils.makeSugg(livemarkTitle , null,
+                                         { itemIds: [allFeeds[i]] } )); //data.itemIds[]
+        }
+      }
+
+      //option for all livemarks
+      var all = "all livemarks";
+      if(all.indexOf(fragment) > -1) {
+	suggestions.push(CmdUtils.makeSugg( all , null, {itemIds: allFeeds} ));
+      }
+      return suggestions;
+    }
+    return [];
+  }
+};
+
+Components.utils.import("resource://ubiquity/modules/setup.js");
+
+var noun_type_commands = {
+   _name: "コマンド",
+   __cmdSource : UbiquitySetup.createServices().commandSource,
+
+   suggest : function(fragment){
+      var cmds = [];
+      for each( var cmd in this.__cmdSource.commandNames){
+         if(cmd.name.match(fragment, "i")){
+            var cmdObj = this.__cmdSource.getCommand(cmd.name);
+
+            var help = cmdObj.help ? cmdObj.help : cmdObj.description;
+            cmds.push(CmdUtils.makeSugg(cmd.name, help, cmdObj));
+         }
+      }
+      return cmds;
+   }
+};
+
+var noun_type_twitter_user = {
+   _name: "twitter のユーザ名",
+   rankLast: true,
+   suggest: function(text, html){
+     // Twitter usernames can't contain spaces; reject input with spaces.
+     if (text.length && text.indexOf(" ") != -1)
+       return [];
+
+     var suggs = [];
+
+     // If we don't need to ask the user for their master password, let's
+     // see if we can suggest known users that the user has logged-in as
+     // before.
+     var tokenDB = Cc["@mozilla.org/security/pk11tokendb;1"].
+                   getService(Ci.nsIPK11TokenDB);
+     var token = tokenDB.getInternalKeyToken();
+
+     if (!token.needsLogin() || token.isLoggedIn()) {
+       // Look for twitter usernames stored in password manager
+       var usersFound = {};
+       var passwordManager = Cc["@mozilla.org/login-manager;1"]
+                             .getService(Ci.nsILoginManager);
+       var urls = ["https://twitter.com", "http://twitter.com"];
+       urls.forEach(
+         function(url) {
+           var logins = passwordManager.findLogins({}, url, "", "");
+
+           for (var x = 0; x < logins.length; x++) {
+             var login = logins[x];
+             if (login.username.indexOf(text) != -1 &&
+                 !usersFound[login.username]) {
+               usersFound[login.username] = true;
+               suggs.push(CmdUtils.makeSugg(login.username, null, login));
+             }
+           }
+         });
+     }
+
+     // If all else fails, treat the user's single-word input as a twitter
+     // username.
+     if (suggs.length == 0)
+       suggs.push(CmdUtils.makeSugg(text, null, null, 0.7));
+
+     return suggs;
+   }
+};
+
+var noun_type_number = {
+   _name: "整数値",
+   suggest : function(sugg){
+     return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : [];
+   },
+   "default" : function(){
+      return CmdUtils.makeSugg("1", null, null, 0.9);
+   }
+};
+
+var noun_type_bookmarklet = {
+  _name: "ブックマークレット",
+  bookmarkletList: null,
+  callback: function(bookmarklets){
+    noun_type_bookmarklet.bookmarkletList = bookmarklets;
+  },
+  suggest: function( text, html )  {
+    
+    if (noun_type_bookmarklet.bookmarkletList == null) {
+      getBookmarklets(noun_type_bookmarklet.callback);
+      return [];
+    }
+
+    bookmarklets = noun_type_bookmarklet.bookmarkletList;
+
+    var suggestions  = [];
+    for ( var c in bookmarklets) {
+      if (c.match(text, "i"))
+	      suggestions.push(CmdUtils.makeSugg(c, "", bookmarklets[c]));
+    }
+
+    return suggestions.splice(0, 5);
+
+  }
 };
