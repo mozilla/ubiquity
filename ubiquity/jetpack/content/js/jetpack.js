@@ -61,16 +61,22 @@ function forAllBrowsers(options) {
 
   while (enumerator.hasMoreElements()) {
     var chromeWindow = enumerator.getNext();
-    loadAndBind(chromeWindow);
+    if (chromeWindow.gBrowser)
+      loadAndBind(chromeWindow);
+    else
+      onWindowOpened(chromeWindow);
   }
 
-  var ww = new WindowWatcher();
-  ww.onWindowOpened = function(chromeWindow) {
+  function onWindowOpened(chromeWindow) {
+    var wasWindowUnloaded = false;
+    function onUnload() { wasWindowUnloaded = true; }
+    window.addEventListener("unload", onUnload, false);
     chromeWindow.addEventListener(
       "load",
       function onLoad() {
         chromeWindow.removeEventListener("load", onLoad, false);
-        if (!window.closed) {
+        if (!wasWindowUnloaded) {
+          window.removeEventListener("unload", onUnload, false);
           var type = chromeWindow.document.documentElement
                      .getAttribute("windowtype");
           if (type == "navigator:browser")
@@ -79,7 +85,10 @@ function forAllBrowsers(options) {
       },
       false
     );
-  };
+  }
+
+  var ww = new WindowWatcher();
+  ww.onWindowOpened = onWindowOpened;
 }
 
 var Jetpack = {
