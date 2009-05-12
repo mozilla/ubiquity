@@ -139,7 +139,6 @@ var Logging = {
       }
 
       function onInsert(evt) {
-        dump(evt.originalTarget.innerHTML);
         var obj = $(evt.originalTarget).find(".objectLink-sourceLink");
         if (obj.length) {
           obj.each(
