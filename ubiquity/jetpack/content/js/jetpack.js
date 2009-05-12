@@ -224,6 +224,10 @@ $(window).ready(
       else
         Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
           function(feed) {
+            // TODO: This logic means that we actually reload many
+            // times during Firefox startup, depending on how many
+            // Jetpack feeds exist, since a feed-change event is
+            // fired for every feed at startup!
             if (feed.uri.spec == uri.spec && feed.type == "jetpack")
               window.location.reload();
           });
