@@ -58,8 +58,5 @@ var MemoryTracking = {
 
 MemoryTracking.track(window, "ExtensionWindow");
 
-$(window).ready(
-  function() {
-    window.setInterval(function() { MemoryTracking.compact(); },
-                       MemoryTracking.COMPACT_INTERVAL);
-  });
+window.setInterval(function() { MemoryTracking.compact(); },
+                   MemoryTracking.COMPACT_INTERVAL);
