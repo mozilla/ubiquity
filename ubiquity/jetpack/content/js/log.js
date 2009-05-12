@@ -99,6 +99,8 @@ var Logging = {
     var Firebug = chromeWindow.Firebug;
     var FBL = chromeWindow.FBL;
 
+    Firebug.showChromeErrors = true;
+    
     var jsm = {};
     Components.utils.import("resource://ubiquity/modules/sandboxfactory.js",
                             jsm);
