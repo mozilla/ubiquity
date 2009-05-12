@@ -123,6 +123,9 @@ var Logging = {
 
     // Here we post-process all newly-added logging messages to un-munge any
     // URLs coming from sandboxed code.
+
+    // TODO: Firebug 1.3 doesn't have Firebug.chrome; we should at least
+    // fail gracefully here.
     Firebug.chrome.selectPanel("console");
     var consoleDocument = Firebug.chrome.getSelectedPanel().document;
     var consoleElement = $(consoleDocument).find(".panelNode-console");

@@ -71,6 +71,8 @@ var StatusBar = {
     iframe.addEventListener(
       "DOMContentLoaded",
       function onPanelLoad(evt) {
+        // TODO: This event fires even if the iframe isn't visible and
+        // doesn't have a defined contentWindow yet!
         if (evt.originalTarget.nodeName == "#document") {
           iframe.removeEventListener("DOMContentLoaded", onPanelLoad, true);
           self._injectPanelWindowFunctions(iframe);
