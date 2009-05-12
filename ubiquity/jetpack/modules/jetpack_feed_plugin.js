@@ -56,8 +56,6 @@ function FeedPlugin(feedManager, messageService) {
   else
     Components.utils.reportError("FeedManager already defined.");
 
-  Extension.load("about:jetpack");
-
   this.type = TYPE;
 
   let Application = Components.classes["@mozilla.org/fuel/application;1"]
@@ -117,7 +115,22 @@ function FeedPlugin(feedManager, messageService) {
       Utils.openUrlInBrowser(confirmUrl);
   };
 
+  var wasLoadExtensionCalled = false;
+  var extensionTimerID = null;
+  function loadExtension() {
+    Extension.load("about:jetpack");
+    wasLoadExtensionCalled = true;
+  }
+
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
+    if (!wasLoadExtensionCalled) {
+      // If we're just starting up, delay the loading of the extension
+      // by a bit, so that we don't thrash as lots of feed-change
+      // events are fired at startup.
+      if (extensionTimerID !== null)
+        Utils.clearTimeout(extensionTimerID);
+      extensionTimerID = Utils.setTimeout(loadExtension, 1000);
+    }
     var timeout = Application.prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
     return new Feed(baseFeedInfo, hub, messageService, timeout);
   };
