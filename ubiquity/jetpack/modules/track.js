@@ -1,12 +1,16 @@
+var EXPORTED_SYMBOLS = ["MemoryTracking"];
+
+var persistentData = {};
+
 var MemoryTracking = {
   COMPACT_INTERVAL: 1000,
   get _trackedObjects() {
-    if (!Extension.Manager.persistentData.trackedObjects)
-      Extension.Manager.persistentData.trackedObjects = {};
-    return Extension.Manager.persistentData.trackedObjects;
+    if (!persistentData.trackedObjects)
+      persistentData.trackedObjects = {};
+    return persistentData.trackedObjects;
   },
   set _trackedObjects(object) {
-    Extension.Manager.persistentData.trackedObjects = object;
+    persistentData.trackedObjects = object;
   },
   track: function track(object, bin) {
     var weakref = Components.utils.getWeakReference(object);
@@ -55,8 +59,3 @@ var MemoryTracking = {
     return results;
   }
 };
-
-MemoryTracking.track(window, "ExtensionWindow");
-
-window.setInterval(function() { MemoryTracking.compact(); },
-                   MemoryTracking.COMPACT_INTERVAL);

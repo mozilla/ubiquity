@@ -1,6 +1,8 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://jetpack/modules/track.js");
+
 var Extension = {
   // TODO: Eventually we may want to be able to put extensions in iframes
   // that are in visible windows, which these flags aren't compatible
@@ -22,4 +24,9 @@ var Extension = {
    var initUrl  = "resource://" + host + "/modules/init.js";
    Components.utils.import(initUrl, Extension.Manager);
    Extension.Manager.set(window);
+
+   MemoryTracking.track(window, "ExtensionWindow");
+
+   window.setInterval(function() { MemoryTracking.compact(); },
+                      MemoryTracking.COMPACT_INTERVAL);
  })();
