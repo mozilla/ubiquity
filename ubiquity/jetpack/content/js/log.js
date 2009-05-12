@@ -100,7 +100,7 @@ var Logging = {
     var FBL = chromeWindow.FBL;
 
     Firebug.showChromeErrors = true;
-    
+
     var jsm = {};
     Components.utils.import("resource://ubiquity/modules/sandboxfactory.js",
                             jsm);
@@ -139,11 +139,18 @@ var Logging = {
       }
 
       function onInsert(evt) {
+        dump(evt.originalTarget.innerHTML);
         var obj = $(evt.originalTarget).find(".objectLink-sourceLink");
         if (obj.length) {
           obj.each(
             function() {
-              this.repObject.href = unmungeUrl(this.repObject.href);
+              var href = unmungeUrl(this.repObject.href);
+              if (href != this.repObject.href) {
+                this.repObject.href = href;
+                // Firebug's source code excerpt is all wrong, just remove
+                // it for now.
+                $(this).prev(".errorSourceBox").remove();
+              }
             });
         }
       }
