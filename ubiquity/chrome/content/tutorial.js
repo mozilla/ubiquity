@@ -90,7 +90,7 @@ function getGUbiq() {
 }
 
 function ubiqWindowIsUp() {
-  return (!getGUbiq().isWindowOpen);
+  return (getGUbiq().isWindowOpen);
 }
 
 function ubiqSuggestionIs(text) {

@@ -466,10 +466,12 @@ $(document).ready(rebuildTable);
 
 
 
-// OK, resubscribing works, but the commands do not appear in the list on
-// the first try IFF you're in sort-by-command-name mode.  Everything
-// works fine if you're in sort-by-feed mode.
-// How odd.
+// OK, unsubscribe/resubscribe works, but IFF you are in sort-by-command-name
+// mode, the commands disappear but do not reappear in their new location
+// after a unsubscribe or resubscribe -- they only appear after a reastart.
+// Everything works fine if you're in sort-by-feed mode.
+// How odd.  It's not because cmd-sorted list is coming from a different
+// feed manager instance, is it?  (it's not)
 
 // Broken features to fix:
 //  -- sort by whatever (needs more options)
@@ -483,13 +485,13 @@ $(document).ready(rebuildTable);
 // show/hide help at top of page  (done)
 // sort by using links instead of drop-down (done)
 // show/hide help for individual command
-// jump directly to help for particular command (done, make help cmd use it)
-// sort-by enabledness
-// sort-by subscription date of feed (how to get this?)
+// jump directly to help for particular command (done)
+// sort by enabledness
+// sort by subscription date of feed (how to get this?)
 // actually sort feeds alphabetically when sorting by feed
+// Cool sliding animation
 
-// So I guess I'm gonna need page-wide variables (url get args?)
-// for:
+// Sort modes to implement:
 // sort feeds-first or cmnds-first
 // if feeds-first, feeds by name or by recently subscribed?
 // if cmds-first, by name, author, homepage, licence, or enabledness?
