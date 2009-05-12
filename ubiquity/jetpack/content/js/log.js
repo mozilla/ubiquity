@@ -47,7 +47,7 @@ var Logging = {
     function stringifyArgs(args) {
       var stringArgs = [];
       for (var i = 0; i < args.length; i++)
-        stringArgs.push(args[i].toString());
+        stringArgs.push(args[i]);
       return stringArgs.join(" ");
     }
 
