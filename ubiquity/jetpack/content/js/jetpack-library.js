@@ -44,7 +44,6 @@ function JetpackLibrary() {
       // different type of object than those stored in
       // Application.activeWindow.tabs[i]. Thus, we return the more
       // generic type.
-
       get tab() {
         var index = Application.activeWindow.activeTab.index;
         return new Tab(Application.activeWindow.tabs[index]);
@@ -160,13 +159,17 @@ function JetpackLibrary() {
   };
 
   var Tabs = function() {
-    for each (tab in Application.activeWindow.tabs) {
-      this.push(new Tab(tab));
+    for each (var win in Application.windows){
+      for each (var tab in win.tabs) {
+        this.push(new Tab(tab));
+      }
     }
   };
 
   Tabs.prototype = Utils.extend(
     new Array, {
-      todo: "todo"
+      ready: function(handlerFunc){
+        forAllTabs( "DOMContentLoaded", handlerFunc);
+      }
     });
 }
