@@ -64,27 +64,41 @@ var StatusBar = {
     var statusBar = document.getElementById("status-bar");
     var iframe = document.createElement("iframe");
     iframe.setAttribute("type", "content");
-    iframe.setAttribute("src", url);
-    iframe.setAttribute("width", width);
-    iframe.setAttribute("height", statusBar.boxObject.height);
-    iframe.style.overflow = "hidden";
-    iframe.addEventListener(
-      "DOMContentLoaded",
-      function onPanelLoad(evt) {
-        // TODO: This event fires even if the iframe isn't visible and
-        // doesn't have a defined contentWindow yet!
-        if (evt.originalTarget.nodeName == "#document") {
-          iframe.removeEventListener("DOMContentLoaded", onPanelLoad, true);
-          self._injectPanelWindowFunctions(iframe);
-          self._copyBackground(iframe.parentNode,
-                               iframe.contentDocument.body);
-          iframe.contentDocument.body.style.padding = 0;
-          iframe.contentDocument.body.style.margin = 0;
-        }
-      },
-      true
-    );
-    statusBar.appendChild(iframe);
+
+    if (statusBar.hidden) {
+      $(statusBar).bind(
+        "DOMAttrModified",
+        function onAttrModified(event) {
+          if (event.originalTarget == statusBar && !statusBar.hidden) {
+            $(statusBar).unbind("DOMAttrModified", onAttrModified);
+            embedIframe();
+          }
+        });
+    } else
+      embedIframe();
+
+    function embedIframe() {
+      iframe.setAttribute("width", width);
+      iframe.setAttribute("height", statusBar.boxObject.height);
+      iframe.setAttribute("src", url);
+      iframe.style.overflow = "hidden";
+      iframe.addEventListener(
+        "DOMContentLoaded",
+        function onPanelLoad(evt) {
+          if (evt.originalTarget.nodeName == "#document") {
+            iframe.removeEventListener("DOMContentLoaded", onPanelLoad, true);
+            self._injectPanelWindowFunctions(iframe);
+            self._copyBackground(iframe.parentNode,
+                                 iframe.contentDocument.body);
+            iframe.contentDocument.body.style.padding = 0;
+            iframe.contentDocument.body.style.margin = 0;
+          }
+        },
+        true
+      );
+      statusBar.appendChild(iframe);
+    }
+
     MemoryTracking.track(iframe, "StatusBarPanel");
     return iframe;
   }
