@@ -123,9 +123,6 @@ var Logging = {
 
     // Here we post-process all newly-added logging messages to un-munge any
     // URLs coming from sandboxed code.
-
-    // TODO: Firebug 1.3 doesn't have Firebug.chrome; we should at least
-    // fail gracefully here.
     Firebug.chrome.selectPanel("console");
     var consoleDocument = Firebug.chrome.getSelectedPanel().document;
     var consoleElement = $(consoleDocument).find(".panelNode-console");
@@ -169,6 +166,8 @@ var Logging = {
 };
 
 (function() {
+   var warnings = [];
+
    if (Extension.isVisible) {
      // TODO: Use a Logging.ConsoleListener to report errors to
      // Firebug/JS Error Console if Firebug.showChromeErrors is false or
@@ -185,14 +184,23 @@ var Logging = {
      var browser = mainWindow.getBrowserFromContentWindow(window);
      if (browser.chrome && browser.chrome.window &&
          browser.chrome.window.FirebugContext) {
-       var fbConsole = new Logging.FirebugLogger(browser.chrome.window);
-       if (window.console) {
-         fbConsole.__proto__ = window.console;
-         delete window.console;
+       try {
+         var fbConsole = new Logging.FirebugLogger(browser.chrome.window);
+         if (window.console) {
+           fbConsole.__proto__ = window.console;
+           delete window.console;
+         }
+         window.console = fbConsole;
+       } catch (e) {
+         warnings.push(["Installing Logging.FirebugLogger failed:", e]);
        }
-       window.console = fbConsole;
-     } else
-       window.console = new Logging.JsErrorConsoleLogger();
-   } else
+     }
+   }
+
+   if (!window.console)
      window.console = new Logging.JsErrorConsoleLogger();
+
+   warnings.forEach(
+     function(objects) { console.warn.apply(console, objects); }
+   );
  })();
