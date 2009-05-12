@@ -51,10 +51,21 @@ CmdUtils.CreateCommand({
   description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
   takes: { "command name": noun_type_commands },
   preview: function(pblock, input){
-    pblock.innerHTML = input.html; 
+    if (!input || !input.text) {
+      pblock.innerHTML = "Takes you to the Ubiquity tutorial page. " +
+        "Or, enter the name of a command to get help on that command.";
+    } else {
+      pblock.innerHTML = input.html;
+    }
   },
-  execute: function(){
-    Utils.openUrlInBrowser("about:ubiquity");
+  execute: function(input){
+    if (!input || !input.text) {
+      Utils.openUrlInBrowser("about:ubiquity");
+    } else {
+      let cmdName = input.text;
+      let url = "chrome://ubiquity/content/cmdlist.html?cmdname=" + cmdName;
+      Utils.openUrlInBrowser( url );
+    }
   }
 });
 

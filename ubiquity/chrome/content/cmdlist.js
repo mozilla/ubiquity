@@ -483,7 +483,10 @@ $(document).ready(rebuildTable);
 // show/hide help at top of page  (done)
 // sort by using links instead of drop-down (done)
 // show/hide help for individual command
-// jump directly to help for particular command
+// jump directly to help for particular command (done, make help cmd use it)
+// sort-by enabledness
+// sort-by subscription date of feed (how to get this?)
+// actually sort feeds alphabetically when sorting by feed
 
 // So I guess I'm gonna need page-wide variables (url get args?)
 // for:
