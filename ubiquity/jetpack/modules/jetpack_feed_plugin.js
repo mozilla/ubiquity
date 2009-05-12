@@ -50,6 +50,13 @@ const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
 
 var FeedManager = null;
 
+var wasLoadExtensionCalled = false;
+var extensionTimerID = null;
+function loadExtension() {
+  Extension.load("about:jetpack");
+  wasLoadExtensionCalled = true;
+}
+
 function FeedPlugin(feedManager, messageService) {
   if (!FeedManager)
     FeedManager = feedManager;
@@ -115,22 +122,7 @@ function FeedPlugin(feedManager, messageService) {
       Utils.openUrlInBrowser(confirmUrl);
   };
 
-  var wasLoadExtensionCalled = false;
-  var extensionTimerID = null;
-  function loadExtension() {
-    Extension.load("about:jetpack");
-    wasLoadExtensionCalled = true;
-  }
-
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
-    if (!wasLoadExtensionCalled) {
-      // If we're just starting up, delay the loading of the extension
-      // by a bit, so that we don't thrash as lots of feed-change
-      // events are fired at startup.
-      if (extensionTimerID !== null)
-        Utils.clearTimeout(extensionTimerID);
-      extensionTimerID = Utils.setTimeout(loadExtension, 1000);
-    }
     var timeout = Application.prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
     return new Feed(baseFeedInfo, hub, messageService, timeout);
   };
@@ -180,6 +172,14 @@ function Feed(feedInfo, hub, messageService, timeoutInterval) {
     if (code != codeCache) {
       codeCache = code;
       hub.notifyListeners("feed-change", feedInfo.uri);
+      if (!wasLoadExtensionCalled) {
+        // If we're just starting up, delay the loading of the extension
+        // by a bit, so that we don't thrash as lots of feed-change
+        // events are fired at startup.
+        if (extensionTimerID !== null)
+          Utils.clearTimeout(extensionTimerID);
+        extensionTimerID = Utils.setTimeout(loadExtension, 1000);
+      }
     }
   };
 

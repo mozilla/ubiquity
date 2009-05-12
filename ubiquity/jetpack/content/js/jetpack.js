@@ -221,21 +221,25 @@ $(window).ready(
     var watcher = new EventHubWatcher(Jetpack.FeedPlugin.FeedManager);
 
     function maybeReload(eventName, uri) {
-      if (eventName == "purge")
+      if (eventName == "purge") {
         // TODO: There's a bug in Ubiquity's feed manager which makes it
         // impossible for us to get metadata about the feed, because it's
         // already purged. We need to fix this. For now, just play it
         // safe and reload Jetpack.
+        console.log("Reloading Jetpack due to purge on", uri.spec);
         window.location.reload();
-      else
+      } else
         Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
           function(feed) {
             // TODO: This logic means that we actually reload many
             // times during Firefox startup, depending on how many
             // Jetpack feeds exist, since a feed-change event is
             // fired for every feed at startup!
-            if (feed.uri.spec == uri.spec && feed.type == "jetpack")
+            if (feed.uri.spec == uri.spec && feed.type == "jetpack") {
+              console.log("Reloading Jetpack due to", eventName, "on",
+                          uri.spec);
               window.location.reload();
+            }
           });
     }
 
