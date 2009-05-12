@@ -68,23 +68,20 @@ function forAllBrowsers(options) {
   }
 
   function onWindowOpened(chromeWindow) {
-    var wasWindowUnloaded = false;
-    function onUnload() { wasWindowUnloaded = true; }
-    window.addEventListener("unload", onUnload, false);
-    chromeWindow.addEventListener(
-      "load",
-      function onLoad() {
-        chromeWindow.removeEventListener("load", onLoad, false);
-        if (!wasWindowUnloaded) {
-          window.removeEventListener("unload", onUnload, false);
-          var type = chromeWindow.document.documentElement
-                     .getAttribute("windowtype");
-          if (type == "navigator:browser")
-            loadAndBind(chromeWindow);
-        }
-      },
-      false
-    );
+    function removeEventHandlers() {
+      chromeWindow.removeEventListener("load", onLoad, false);
+      window.removeEventListener("unload", onExtensionUnload, false);
+    }
+    function onLoad() {
+      removeEventHandlers();
+      var type = chromeWindow.document.documentElement
+                 .getAttribute("windowtype");
+      if (type == "navigator:browser")
+        loadAndBind(chromeWindow);
+    }
+    function onExtensionUnload() { removeEventHandlers(); }
+    window.addEventListener("unload", onExtensionUnload, false);
+    chromeWindow.addEventListener("load", onLoad, false);
   }
 
   var ww = new WindowWatcher();
