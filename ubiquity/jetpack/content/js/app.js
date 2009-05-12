@@ -44,7 +44,7 @@ $(window).ready(
       function() { $("#sample-code").slideToggle(); }
     );
 
-    if (!window.console.isFirebug && !window.loadFirebugConsole)
+    if (!window.console.isFirebug)
       $("#firebug-not-found").show();
 
     Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
