@@ -9,10 +9,13 @@ jQuery.ajaxSetup(
      // is shown to the user, rather than being invisible and locking
      // up the application.
 
-     var jsm = {};
-     Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
-     var window = jsm.Utils.currentChromeWindow;
-     return new window.XMLHttpRequest();
+     if (Extension.isHidden) {
+       var jsm = {};
+       Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
+       var currWindow = jsm.Utils.currentChromeWindow;
+       return new currWindow.XMLHttpRequest();
+     }
+     return new XMLHttpRequest();
    }
   });
 
