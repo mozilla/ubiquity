@@ -68,7 +68,7 @@ function fillTableCellForFeed( cell, feed, sortMode) {
   if (!feed.isBuiltIn)
     cell.append(linkToAction("[unsubscribe]", function() {
                                feed.remove();
-                               changeSortMode( sortMode );
+                               cell.slideUp(rebuildTable);
                              }));
 
   // Add link to source (auto-updated or not)
@@ -215,13 +215,12 @@ function fillTableRowForCmd( row, cmd, className ) {
   row.append( cmdElement );
 }
 
-function populateYeTable() {
+function populateYeTable(feedMgr, cmdSource) {
   let table = $("#commands-and-feeds-table");
-  let svc = UbiquitySetup.createServices();
-  let feedMgr = svc.feedManager;
-  let cmdSource = svc.commandSource;
   let sortField = getSortMode();
 
+  // TODO bug here: number of commands shown seems to include those from
+  // unsubscribed feeds.
   $("#num-commands").html( cmdSource.commandNames.length );
   $("#num-subscribed-feeds").html( feedMgr.getSubscribedFeeds().length );
 
@@ -365,8 +364,8 @@ function makeUnsubscribedFeedListElement(info, sortMode) {
   $(li).append(commandList);
 
   $(li).append(linkToAction("[resubscribe]", function() {
-                    info.unremove();
-                    changeSortMode(sortMode);
+                              info.unremove();
+                              $(li).slideUp(rebuildTable);
                             }));
 
   $(li).append(" ");
@@ -389,9 +388,7 @@ function makeUnsubscribedFeedListElement(info, sortMode) {
   return li;
 }
 
-function addAllUnsubscribedFeeds() {
-  let svc = UbiquitySetup.createServices();
-  let feedMgr = svc.feedManager;
+function addAllUnsubscribedFeeds(feedMgr) {
   let sortMode = getSortMode();
   let unscrFeeds = feedMgr.getUnsubscribedFeeds();
 
@@ -417,10 +414,13 @@ function addAllUnsubscribedFeeds() {
 
 
 function rebuildTable() {
+  let svc = UbiquitySetup.createServices();
+  let feedMgr = svc.feedManager;
+  let cmdSource = svc.commandSource;
   $("#commands-and-feeds-table").empty();
-  populateYeTable();
+  populateYeTable(feedMgr, cmdSource);
   $("#command-feed-graveyard").empty();
-  addAllUnsubscribedFeeds();
+  addAllUnsubscribedFeeds(feedMgr);
 }
 
 function setSortMode( newSortMode ) {
