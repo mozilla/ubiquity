@@ -92,7 +92,8 @@ function EventHub() {
       listener(eventName, data);
     }
 
-    listeners[eventName].forEach(notify);
+    var listenersCopy = listeners[eventName].slice();
+    listenersCopy.forEach(notify);
   };
 
   // === {{{EventHub.attachMethods()}}} ===
