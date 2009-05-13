@@ -1,6 +1,100 @@
-/*=skin=
-@name   empty
-@author satyr
-=/skin=*/
-/* Use Stylish, maybe? */
-#ubiquity-preview{}
+/*
+  =skin=
+  
+  @name Custom
+  @author You
+  @homepage http://www.yourpage.com
+  @email you@you.com
+  @license MPL/LGPL/GPL
+
+  =/skin=
+*/
+
+@-moz-document url(chrome://browser/content/browser.xul) {
+
+#ubiquity-panel {
+}
+
+#ubiquity-frame {
+}
+
+#ubiquity-entry-container {
+}
+
+/* Where text is entered */
+#ubiquity-entry {
+}
+
+#ubiquity-suggest-container {
+}
+
+/* iframe that suggests */
+#ubiquity-suggest {
+  border: none;
+  overflow: hidden;
+}
+
+#ubiquity-preview-container {
+}
+
+/* div that auto-adjusts its height to the preview block */
+#ubiquity-preview {
+  max-height: 500px;
+  overflow: hidden;
+}
+
+/* browser that previews */
+#ubiquity-browser {
+  width: 500px;
+  height: 500px;
+}
+
+/* div that helps */
+#ubiquity-help {
+}
+
+}
+
+/* Formatting for the Suggestions */
+@-moz-document url(chrome://ubiquity/content/suggest.html) {
+
+#suggestions {
+  margin: 0;
+}
+
+.suggested {
+}
+
+.hilited {
+}
+
+.cmdicon {
+  display: inline-block;
+  width: 16px;
+  margin-right: 0.3em;
+}
+.cmdicon img {
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+}
+
+.needarg {
+}
+
+.hilited .needarg {
+}
+
+.selection {
+}
+
+}
+
+/* Formatting for the Preview box */
+@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+
+body {
+  margin: 0;
+}
+
+}

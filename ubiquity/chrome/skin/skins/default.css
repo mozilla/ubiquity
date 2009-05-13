@@ -11,11 +11,9 @@
   =/skin=
 */
 
+@-moz-document url(chrome://browser/content/browser.xul) {
 
-/* Formatting for the Ubiquity Pop-Up */
-
-
-#cmd-panel {
+#ubiquity-panel {
   padding: 0px;
   margin: 10px;
   background: rgba(0%, 0%, 0%, 0.8);
@@ -23,7 +21,7 @@
   -moz-border-radius-topleft: 0px;
 }
 
-#cmd-entry-container {
+#ubiquity-entry-container {
   margin: 8px;
   padding: 3px;
   font-size: 14pt;
@@ -33,7 +31,7 @@
   font-family: Calibri, Helvetica, Verdana, Arial;
 }
 
-#cmd-entry {
+#ubiquity-entry {
   -moz-appearance: none;
   background: transparent;
   border: none;
@@ -44,72 +42,77 @@
   font-family: Calibri, Helvetica, Verdana, Arial;
 }
 
-#cmd-preview {
-  -moz-appearance: none;
+#ubiquity-suggest {
   border: none;
-  margin: 10px;
+  width: 500px;
+  min-height: 32px;
   overflow: hidden;
 }
 
-
-body#previewbody {
-    margin: 0;
-    padding: 0;
-    color: #BBB;
+#ubiquity-suggest-container, #ubiquity-preview-container {
+  margin: 10px;
 }
 
 #ubiquity-preview {
-    width: 500px;
+  border-top: 1px solid #333;
+  min-height: 0px;  
+  max-height: 600px;
+  overflow: hidden;
 }
 
-/* Formatting for the Preview Pane and Verb/Command suggestion list */
-
-div#ubiquity-preview #preview-pane {
-    padding-left: 15px;
-    padding: 7px;
-    border-top: 1px solid #333;
-    margin-top: 5px;
-} 
-
-
-div#ubiquity-preview .hilited-text {
-    color: #FFF;
-    font-family: Calibri, Helvetica, Verdana, Arial;
+#ubiquity-browser {
+  width: 500px;
+  height: 600px;
 }
 
-div#ubiquity-preview .hilited {
-    padding: 5px;
-    margin: 2px;
-    background: rgba(100%, 100%, 100%, 0.3);
-    -moz-border-radius: 5px;
-    color: #FFF;
+#ubiquity-help {
+  margin: 5px 15px;
+  font-family: Calibri, Helvetica, Verdana, Arial;
+  font-size: 11pt;
+  color: #FFF;
 }
 
-
-div#ubiquity-preview .suggested {
-    margin: 2px;
-    padding: 5px;
-    border-left: solid 10px transparent;
-    font-family: Calibri, Helvetica, Verdana, Arial;
-    color: #FFF;
 }
 
-div#ubiquity-preview .needarg {
-    font-style: oblique;
-    color: #999999;
+@-moz-document url(chrome://ubiquity/content/suggest.html) {
+
+#suggestions {
+  margin: 0;
 }
-div#ubiquity-preview .cmdicon {
-    display: inline-block;
-    width: 16px;
-}
-div#ubiquity-preview .cmdicon img {
-    vertical-align: middle;
-    width: 16px;
-    height: 16px;
+
+.hilited {
+  padding: 5px;
+  margin: 2px;
+  background: rgba(100%, 100%, 100%, 0.3);
+  -moz-border-radius: 5px;
+  color: #FFF;
+  font-family: Calibri, Helvetica, Verdana, Arial;
 }
 
 
-div#ubiquity-preview .selection {
+.suggested {
+  margin: 2px;
+  padding: 5px;
+  border-left: solid 10px transparent;
+  font-family: Calibri, Helvetica, Verdana, Arial;
+  color: #FFF;
+}
+
+.needarg {
+  font-style: oblique;
+  color: #999999;
+}
+.cmdicon {
+  display: inline-block;
+  width: 16px;
+}
+.cmdicon img {
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+}
+
+.selection {
   padding: 2px;
   -moz-border-radius: 3px;
   display: inline-block;
@@ -123,43 +126,41 @@ div#ubiquity-preview .selection {
   border: 1px solid #777;
 }
 
-/* Formatting for the Preview box */
-
-.ubiquity-preview-content {
-    color: #ffffff;
-    background: transparent;
-    font-family: Calibri, Helvetica, Verdana, Arial;
-    font-size: 11pt;    
 }
 
-.ubiquity-preview-content .help {
+/* Formatting for the Preview box */
+@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+
+body {
+  color: #ffffff;
+  background: transparent;
+  padding-left: 15px;
+  padding: 7px;
+  margin: 5px 0 0;
   font-family: Calibri, Helvetica, Verdana, Arial;
   font-size: 11pt;
-  color: #FFF;
 }
 
-.ubiquity-preview-content .gresult {
+.gresult {
   margin-bottom: 10px;
 }
 
-.ubiquity-preview-content .gresult a {
+.gresult a {
   color: #FFFFFF;
   text-decoration: underline;
   font-size: 14pt;
   font-family: Calibri, Helvetica, Verdana, Arial;
   cursor: pointer;
 }
-.ubiquity-preview-content .gresult-url {
+.gresult-url {
   font-size: x-small;
   font-family: Calibri, Helvetica, Verdana, Arial;
   color: #777;
 }
-.ubiquity-preview-content .gresult-content {
+.gresult-content {
   margin-right: 10px;
   font-family: Calibri, Helvetica, Verdana, Arial;
-  font-size: small;  
+  font-size: small;
 }
 
-.ubiquity-preview-content.img {
-    padding: 5px;
 }
