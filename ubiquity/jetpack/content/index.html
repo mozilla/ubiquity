@@ -7,6 +7,39 @@
   <title>I am Jetpack.</title>
 </head>
 <body>
+<p id="old-firefox-version" class="warning">You appear to be running
+Firefox 3 or earlier, which means that any logging messages or
+errors produced by your Jetpacks will reference the wrong line numbers.
+This makes debugging Jetpacks difficult; please consider using <a
+href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5
+Beta</a>.</p>
+<p id="firebug-not-found" class="warning">You either don't have the
+latest version of Firebug installed, or you don't have it enabled for
+this page, so all logging messages will appear in the <span
+class="logging-source"></span>. If you get <a
+href="http://getfirebug.com/releases/index.html">Firebug 1.4 Alpha</a>
+and enable it for this page, and then reload this page, all logging
+messages will be logged to the Firebug Console, where it's much easier
+to debug problems and inspect live objects.</p>
+<div class="sidebar">
+  <h2>This is a very special page.</h2>
+  <p>This page actually houses the Jetpack platform. All your Jetpacks
+  are loaded in this page, and you can even use Firebug to inspect
+  their current state.</p>
+  <p>As a result, the lifetime of your Jetpacks is tied to the
+  lifetime of this page. When you reload this page, for instance, all
+  your Jetpacks are reloaded. This means that the time between making
+  a change to a Jetpack and seeing its effects is as small as
+  possible&mdash;you never have to restart your browser.</p>
+  <p>Because it only makes sense for one instance of Jetpack to exist
+  at a time, this page is what developers call a <i>Singleton</i>:
+  only one instance of it can exist at once.  Try opening this URL in
+  two tabs at once and see what happens!</p>
+  <p>Finally, the Jetpack singleton always exists, since users
+  obviously need to be able to use their Jetpacks without having
+  Jetpack open in a tab.  If you close the Jetpack tab, it'll actually
+  re-open in a hidden browser that you can't see.</p>
+</div>
 <h1>I am Jetpack.</h1>
 <p>If you want to create a Jetpack feed, use the <a
 href="chrome://ubiquity/content/editor.html">Ubiquity Command
@@ -16,7 +49,7 @@ command prompt&mdash;no saving is necessary.</p>
 <p>Here's a <span class="buttony" id="display-sample">sample Jetpack
 feed</span> to get you started. We'll have a real tutorial up soon.</p>
 <div id="sample-code" class="sample code"
-  style="display: none;">addStatusBarPanel({
+  style="display: none;">Jetpack.statusBar.append({
   html: "&lt;p&gt;kill flash&lt;/p&gt;",
   onLoad: function(panel) {
     var button = $(panel).find("p");
@@ -31,24 +64,24 @@ feed</span> to get you started. We'll have a real tutorial up soon.</p>
 majority of it is contained in the source code for this page. Just
 make local changes to the file or one of the scripts it refers to and
 reload this page.</p>
-<h2>Debugging Information</h2>
+<h2>Installed Jetpacks</h2>
 <p>These are the Jetpacks that are currently installed.</p>
 <div id="jetpacks"></div>
-<p>Extension page weak references:</p>
+<h2>Memory Usage</h2>
+<p>Below is a list of all live objects being tracked by Jetpack. If
+one of these numbers never goes down, then your Jetpack either has a
+memory leak or isn't using memory very effectively.</p>
 <div id="extension-weakrefs"></div>
 <p>
   <span class="buttony" id="force-gc">force garbage collection</span>
-  <span class="buttony" id="run-tests">run test suite</span>
 </p>
-<p>Reloading this page will reload Jetpack.</p>
-<p id="firebug-not-found" class="warning">You either don't have
-Firebug installed, or you don't have it enabled for this page, so all
-logging messages will appear in the <span class="buttony"
-id="js-error-console">JS Error Console</span>. If you <a
-href="http://www.getfirebug.com">get Firebug</a> and enable it for
-this page, and then reload this page, all logging messages will be
-logged to the Firebug Console, where it's much easier to debug
-problems and inspect live objects.</p>
+<h2>Test Suites</h2>
+<p>At the moment, you can run the <span class="buttony"
+id="run-tests">Jetpack platform test suite</span>. In the future,
+you'll be able to run the test suites for individual Jetpacks
+here.</p>
+<p>All output for the suites is sent to the <span
+class="logging-source"></span>.</p>
 <!-- Load scripts, etc. for the extension here. -->
 <script src="js/init-extension.js"></script>
 <script src="js/jquery.js"></script>
@@ -56,6 +89,7 @@ problems and inspect live objects.</p>
 <script src="js/observe.js"></script>
 <script src="js/status-bar-panel.js"></script>
 <script src="js/jetpack-library.js"></script>
+<script src="js/twitter.js"></script>
 <script src="js/jetpack.js"></script>
 <script src="js/test.js"></script>
 <script src="js/tests/test_log.js"></script>

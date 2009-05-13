@@ -971,9 +971,9 @@ Parser.prototype = {
         for each (substitute in this.normalizeArgument(arg)) {
           for each (baseParse in baseParses) {
             let parseCopy = cloneParse(baseParse);
-            parseCopy.args[role][i].inactivePrefix = substitute[1];
-            parseCopy.args[role][i].input = substitute[2];
-            parseCopy.args[role][i].inactiveSuffix = substitute[3];
+            parseCopy.args[role][i].inactivePrefix = substitute.prefix;
+            parseCopy.args[role][i].input = substitute.newInput;
+            parseCopy.args[role][i].inactiveSuffix = substitute.suffix;
             returnArr.push(parseCopy);
           }
         }

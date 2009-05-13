@@ -59,7 +59,7 @@ function makeCaParser() {
   ca.normalizeArgument = function(input) {
     let matches = input.match(this.argumentNormalizer);
     if (matches != null)
-      return [matches];
+      return [{prefix:matches[1], newInput:matches[2], suffix:matches[3]}];
     return [];
   },
 
