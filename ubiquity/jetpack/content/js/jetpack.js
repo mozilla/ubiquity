@@ -152,13 +152,30 @@ var Jetpack = {
         });
     }
 
-    return {location: codeSource.id,
-            console: console,
-            Application: Application,
-            addStatusBarPanel: addStatusBarPanel,
-            $: jQuery,
-            jQuery: jQuery,
-            Jetpack: new JetpackLibrary()};
+    var Jetpack = new JetpackLibrary();
+
+    Jetpack.lib = {};
+    Jetpack.lib.twitter = Twitter;
+
+    Jetpack.statusBar = {};
+    Jetpack.statusBar.append = addStatusBarPanel;
+
+    var globals = {
+      location: codeSource.id,
+      console: console,
+      Application: Application,
+      $: jQuery,
+      jQuery: jQuery,
+      Jetpack: Jetpack
+    };
+
+    // Add stubs for deprecated/obsolete functions.
+    globals.addStatusBarPanel = function() {
+      throw new Error("addStatusBarPanel() has been moved to " +
+                      "Jetpack.statusBar.append().");
+    };
+
+    return globals;
   },
 
   contexts: [],
