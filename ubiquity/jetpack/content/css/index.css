@@ -51,3 +51,10 @@ td {
 .sample {
     padding-left: 1em;
 }
+
+.sidebar {
+    float: right;
+    background-color: #eeeeee;
+    padding: 0.5em;
+    width: 20em;
+}
