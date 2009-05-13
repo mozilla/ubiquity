@@ -55,6 +55,9 @@ td {
 .sidebar {
     float: right;
     background-color: #eeeeee;
-    padding: 0.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-left: 0.5em;
+    margin-bottom: 0.5em;
     width: 20em;
 }

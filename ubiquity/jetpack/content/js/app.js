@@ -39,13 +39,18 @@ $(window).ready(
     window.setInterval(App.tick, 1000);
     $("#force-gc").click(App.forceGC);
     $("#run-tests").click(function() { Tests.run(); });
-    $("#js-error-console").click(App.openJsErrorConsole);
     $("#display-sample").click(
       function() { $("#sample-code").slideToggle(); }
     );
 
-    if (!window.console.isFirebug)
+    if (window.console.isFirebug) {
+      $(".logging-source").text("Firebug Console");
+    } else {
       $("#firebug-not-found").show();
+      $(".logging-source").click(App.openJsErrorConsole);
+      $(".logging-source").addClass("buttony");
+      $(".logging-source").text("JS Error Console");
+    }
 
     Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
       function(feed) {

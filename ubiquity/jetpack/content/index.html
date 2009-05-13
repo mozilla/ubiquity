@@ -7,6 +7,13 @@
   <title>I am Jetpack.</title>
 </head>
 <body>
+<p id="firebug-not-found" class="warning">You either don't have
+Firebug installed, or you don't have it enabled for this page, so all
+logging messages will appear in the <span class="logging-source"></span>. If you <a
+href="http://www.getfirebug.com">get Firebug</a> and enable it for
+this page, and then reload this page, all logging messages will be
+logged to the Firebug Console, where it's much easier to debug
+problems and inspect live objects.</p>
 <div class="sidebar">
   <h2>This is a very special page.</h2>
   <p>This page actually houses the Jetpack platform. All your Jetpacks
@@ -50,23 +57,24 @@ feed</span> to get you started. We'll have a real tutorial up soon.</p>
 majority of it is contained in the source code for this page. Just
 make local changes to the file or one of the scripts it refers to and
 reload this page.</p>
-<h2>Debugging Information</h2>
+<h2>Installed Jetpacks</h2>
 <p>These are the Jetpacks that are currently installed.</p>
 <div id="jetpacks"></div>
-<p>Extension page weak references:</p>
+<h2>Memory Usage</h2>
+<p>Below is a list of all live objects being tracked by Jetpack. If
+one of these numbers never goes down, then your Jetpack either has a
+memory leak or isn't using memory very effectively.</p>
 <div id="extension-weakrefs"></div>
 <p>
   <span class="buttony" id="force-gc">force garbage collection</span>
-  <span class="buttony" id="run-tests">run test suite</span>
 </p>
-<p id="firebug-not-found" class="warning">You either don't have
-Firebug installed, or you don't have it enabled for this page, so all
-logging messages will appear in the <span class="buttony"
-id="js-error-console">JS Error Console</span>. If you <a
-href="http://www.getfirebug.com">get Firebug</a> and enable it for
-this page, and then reload this page, all logging messages will be
-logged to the Firebug Console, where it's much easier to debug
-problems and inspect live objects.</p>
+<h2>Test Suites</h2>
+<p>At the moment, you can run the <span class="buttony"
+id="run-tests">Jetpack platform test suite</span>. In the future,
+you'll be able to run the test suites for individual Jetpacks
+here.</p>
+<p>All output for the suites is sent to the <span
+class="logging-source"></span>.</p>
 <!-- Load scripts, etc. for the extension here. -->
 <script src="js/init-extension.js"></script>
 <script src="js/jquery.js"></script>
