@@ -18,128 +18,9 @@
  * Drew Willcoxon <adw@mozilla.com>
  */
 
-let Twitter = function ()
+var Twitter = function ()
 {
   // PRIVATE HELPERS //////////////////////////////////////////////////////////
-
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-
-  if (typeof(JSON) === "undefined")
-  {
-    var JSON =
-    {
-      parse: function JSON_parse(aJSON)
-      {
-        return Cc["@mozilla.org/dom/json;1"].
-               createInstance(Ci.nsIJSON).
-               decode(aJSON);
-      },
-      stringify: function JSON_stringify(aObj)
-      {
-        return Cc["@mozilla.org/dom/json;1"].
-               createInstance(Ci.nsIJSON).
-               encode(aObj);
-      }
-    };
-  }
-
-  /**
-   * Returns a URL param string constructed from given keys and values.
-   * aKeyValuePairs may be a regular JS object or a sequence of arguments,
-   * and in that case this method should be called like:
-   *
-   *   encodeParams("key1", "va11", "key2", "val2", ...);
-   *
-   * @param aKeyValPairs
-   *        A regular JS object or sequence of arguments
-   */
-  function encodeParams(aKeyValPairs)
-  {
-    let arr = [];
-    if (typeof(aKeyValPairs) === "object")
-    {
-      for (let [key, val] in Iterator(aKeyValPairs))
-      {
-        if (val !== undefined && val !== null)
-          arr.push(key + "=" + encodeURIComponent(val));
-      }
-    }
-    else
-    {
-      if (arguments.length % 2)
-        throw "Odd number of arguments given";
-
-      for (let i = 0; i < arguments.length; i++)
-      {
-        if (arguments[i] === undefined && arguments[i] === null)
-        {
-          if (i % 2)
-            continue;
-          throw "Key at argument " + i + " is undefined or null";
-        }
-
-        if (i % 2)
-          arr.push(arguments[i - 1] + "=" + encodeURIComponent(arguments[i]));
-      }
-    }
-
-    return arr.join("&");
-  }
-
-  /**
-   * XHR helper.
-   *
-   * @param aOptions
-   *        See request()
-   */
-  function GET(aOptions)
-  {
-    aOptions.method = "GET";
-    request(aOptions);
-  }
-
-  /**
-   * XHR helper.
-   *
-   * @param aOptions
-   *        See request()
-   */
-  function POST(aOptions)
-  {
-    aOptions.method = "POST";
-    request(aOptions);
-  }
-
-  /**
-   * XHR helper.
-   *
-   * @param aOptions
-   *        See code
-   */
-  function request(aOptions)
-  {
-    if (aOptions.method !== "GET" && aOptions.method !== "POST")
-      throw "Unknown request method '" + aOptions.method + "'";
-    if (aOptions.method === "POST" && typeof(aOptions.body) !== "object")
-      throw "Non-object body given for POST";
-
-    let xhr = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"].
-              createInstance(Ci.nsIXMLHttpRequest);
-    xhr.open(aOptions.method, aOptions.url, true, aOptions.user, aOptions.pass);
-    xhr.onreadystatechange = function ()
-    {
-      if (xhr.readyState === 4 && aOptions.callback)
-        aOptions.callback(JSON.parse(xhr.responseText), xhr.status !== 200);
-    };
-    if (aOptions.method === "POST")
-    {
-      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      xhr.send(encodeParams(aOptions.body));
-    }
-    else
-      xhr.send(null);
-  }
 
   /**
    * Returns either "user_id" if aScreenNameOrID is a number or "screen_name"
@@ -161,6 +42,20 @@ let Twitter = function ()
     }
     throw "Invalid screen name or ID type " + typeof(aScreenNameOrID);
     return null;
+  }
+
+  function doAjax(options) {
+    var callback = options.callback;
+    var jQueryOptions = {};
+    for (name in options)
+      if (name != "callback")
+        jQueryOptions[name] = options[name];
+
+    jQueryOptions.dataType = "json";
+    jQueryOptions.success = function(data) { callback(data, false); };
+    jQueryOptions.error = function() { callback(null, true); };
+
+    jQuery.ajax(jQueryOptions);
   }
 
   // TWITTER USER PROTOTYPE: Twitter.Twit /////////////////////////////////////
@@ -234,23 +129,25 @@ let Twitter = function ()
     tweet:
     function Twitter_Twit_proto_tweet(aTweet, aInReplyToStatusID, aCallback)
     {
+      var data = {status: aTweet};
+
+      if (aInReplyToStatusID)
+        data.in_reply_to_status_id = aInReplyToStatusID;
+
       //XXXadw Actually if this is called from browser chrome, Firefox will put
       // up a prompt asking for user and pass, so maybe we don't want this.
       if (typeof(this.password) !== "string")
         throw "Password required to tweet, yo.";
 
       const that = this;
-      POST({
-        url:     "http://twitter.com/statuses/update.json",
-        body:
-        {
-          status:                aTweet,
-          in_reply_to_status_id: aInReplyToStatusID
-        },
-        user:     that.screenName,
-        pass:     that.password,
-        callback: aCallback
-      });
+      doAjax(
+        {type: "POST",
+         url: "http://twitter.com/statuses/update.json",
+         data: data,
+         username: that.screenName,
+         password: that.password,
+         callback: aCallback
+        });
     }
   };
 
@@ -269,10 +166,8 @@ let Twitter = function ()
     getStatus:
     function Twitter_getStatus(aStatusID, aCallback)
     {
-      GET({
-        url:     "http://twitter.com/statuses/show/" + aStatusID + ".json",
-        callback: aCallback
-      });
+      doAjax({url: "http://twitter.com/statuses/show/" + aStatusID + ".json",
+              callback: aCallback});
     },
 
     /**
@@ -286,14 +181,13 @@ let Twitter = function ()
     getTwitFriends:
     function Twitter_getTwitFriends(aScreenNameOrID, aPage, aCallback)
     {
-      GET({
-        url: "http://twitter.com/statuses/friends.json?" +
-                encodeParams(resolveScreenNameOrID(aScreenNameOrID),
-                             aScreenNameOrID,
-                             "page",
-                             aPage),
-        callback: aCallback
-      });
+      var data = {};
+      data[resolveScreenNameOrID(aScreenNameOrID)] = aScreenNameOrID;
+      data.page = aPage;
+
+      doAjax({url: "http://twitter.com/statuses/friends.json",
+              data: data,
+              callback: aCallback});
     },
 
     /**
@@ -305,12 +199,13 @@ let Twitter = function ()
     getTwitInfo:
     function Twitter_getTwitInfo(aScreenNameOrID, aCallback)
     {
-      GET({
-        url: "http://twitter.com/users/show.json?" +
-                encodeParams(resolveScreenNameOrID(aScreenNameOrID),
-                             aScreenNameOrID),
-        callback: aCallback
-      });
+      var data = {};
+      data[resolveScreenNameOrID(aScreenNameOrID)] = aScreenNameOrID;
+
+      doAjax(
+        {url: "http://twitter.com/users/show.json",
+         data: data,
+         callback: aCallback});
     },
 
     /**
@@ -338,82 +233,12 @@ let Twitter = function ()
     getTwitTimeline:
     function Twitter_getTwitTimeline(aScreenNameOrID, aCallback)
     {
-      GET({
-        url: "http://twitter.com/statuses/user_timeline.json?" +
-                encodeParams(resolveScreenNameOrID(aScreenNameOrID),
-                             aScreenNameOrID),
-        callback: aCallback
-      });
+      var data = {};
+      data[resolveScreenNameOrID(aScreenNameOrID)] = aScreenNameOrID;
+
+      doAjax({url: "http://twitter.com/statuses/user_timeline.json",
+              data: data,
+              callback: aCallback});
     }
   };
 }();
-
-/* XPCShell test usage (a.k.a. usage examples!) */
-/*
-function run_test()
-{
-  do_test_pending();
-
-//   Twitter.getStatus(1769736664, function (obj, didErr)
-//   {
-//     if (didErr)
-//       dump("ERROR!\n");
-//     dump(JSON.stringify(obj) + "\n");
-//     do_throw("XXX");
-//     do_test_finished();
-//   });
-
-//   let twit = new Twitter.Twit("joi");
-//   twit.getTimeline(function (obj, didErr)
-//   {
-//     if (didErr)
-//       dump("ERROR!\n");
-//     dump(JSON.stringify(obj) + "\n");
-//     do_throw("XXX");
-//     do_test_finished();
-//   });
-
-//   let twit = new Twitter.Twit("joi");
-//   twit.getInfo(function (obj, didErr)
-//   {
-//     if (didErr)
-//       dump("ERROR!\n");
-//     dump(JSON.stringify(obj) + "\n");
-//     do_throw("XXX");
-//     do_test_finished();
-//   });
-
-//   let twit = new Twitter.Twit("joi");
-//   twit.getLatestStatus(function (obj, didErr)
-//   {
-//     if (didErr)
-//       dump("ERROR!\n");
-//     dump(JSON.stringify(obj) + "\n");
-//     do_throw("XXX");
-//     do_test_finished();
-//   });
-
-//   let twit = new Twitter.Twit("username", "password");
-//   twit.tweet("Oh, what a big man you are.  Let me buy you a pack of gum, " +
-//              "show you how to chew it.",
-//              null, function (obj, didErr)
-//   {
-//     if (didErr)
-//       dump("ERROR!\n");
-//     dump(JSON.stringify(obj) + "\n");
-//     do_throw("XXX");
-//     do_test_finished();
-//   });
-
-  let twit = new Twitter.Twit("joi");
-  twit.getFriends(null, function (obj, didErr)
-  {
-    if (didErr)
-      dump("ERROR!\n");
-    dump(JSON.stringify(obj) + "\n");
-    do_throw("XXX");
-    do_test_finished();
-  });
-}
-*/
-
