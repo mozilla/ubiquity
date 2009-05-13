@@ -38,81 +38,44 @@ var EXPORTED_SYMBOLS = ["PreviewBrowser"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-function makePreviewBrowser(unsafePblock, url, cb) {
-  var xulIframe = null;
-  var browser = null;
-
+function makePreviewBrowser(browser, url) {
+  var container = browser.parentNode;
   var width = 490;
   var height = 500;
 
-  function onXulLoaded(event) {
-    xulIframe.removeEventListener("load",
-                                  onXulLoaded,
-                                  true);
+  browser.setAttribute("src", url);
+  browser.setAttribute("disablesecurity", true);
+  browser.setAttribute("type", "content");
+  browser.setAttribute("width", width);
+  browser.setAttribute("height", height);
 
-    browser = xulIframe.contentDocument.createElement("browser");
+  browser.addEventListener(
+    "load",
+    function bindResize(e) {
+      for each (var h in ["load", "DOMSubtreeModified"])
+        this.contentDocument.addEventListener(h, resize, true);
+    },
+    true
+      );
 
-    // Possible fix for #633. At the very least, it allows this component to
-    // be used from within a chrome URL that's loaded in a browser tab, though
-    // I'm not sure why it's XPCNativeWrapped in the first place. -AV
-    if (browser.wrappedJSObject)
-      browser = browser.wrappedJSObject;
-
-    browser.setAttribute("src", url);
-    browser.setAttribute("disablesecurity", true);
-    browser.setAttribute("type", "content");
-    browser.setAttribute("width", width);
-    browser.setAttribute("height", height);
-
-    // Ensure that a vertical scroll bar is displayed when necessary.
-    browser.addEventListener(
-      "load",
-      function() {
-        this.contentDocument.body.style.overflowY = "auto";
-      },
-      true
-    );
-
-    browser.addEventListener("load",
-                             onPreviewLoaded,
-                             true);
-
-    xulIframe.contentDocument.documentElement.appendChild(browser);
+  function resize(e) {
+    var me = this;
+    Utils.clearTimeout(resize.tid);
+    resize.tid = Utils.setTimeout(function resizeDelayed() {
+      container.style.height = me.height + "px";
+    }, 42);
   }
 
-  function onPreviewLoaded() {
-    browser.removeEventListener("load",
-                                onPreviewLoaded,
-                                true);
-
-    cb(browser);
-    unsafePblock = null;
-    browser = null;
-    xulIframe = null;
-  }
-
-  xulIframe = unsafePblock.ownerDocument.createElement("iframe");
-  xulIframe.setAttribute("src",
-                         "chrome://ubiquity/content/content-preview.xul");
-  xulIframe.style.border = "none";
-  xulIframe.setAttribute("width", width);
-  xulIframe.setAttribute("height", height);
-
-  xulIframe.addEventListener("load",
-                             onXulLoaded,
-                             true);
-  unsafePblock.innerHTML = "";
-  unsafePblock.appendChild(xulIframe);
+  return browser;
 }
 
-function PreviewBrowser(previewPaneNode, defaultUrl) {
+function PreviewBrowser(browser, defaultUrl) {
   this.__isActive = false;
   this.__defaultUrl = defaultUrl;
   this.__queuedPreview = null;
-  this.__previewBrowser = null;
+  this.__previewBrowser = makePreviewBrowser(browser, defaultUrl);
   this.__previewBrowserCreatedCallback = null;
   this.__previewBrowserUrlLoadedCallback = null;
-  this.__containingNode = previewPaneNode;
 }
 
 PreviewBrowser.prototype = {

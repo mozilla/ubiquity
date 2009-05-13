@@ -63,19 +63,25 @@ function ubiquitySetup()
     []
   );
 
-  var previewIframe = document.getElementById("cmd-preview");
-  var previewDoc = previewIframe.contentDocument;
-  var previewBlock = previewDoc.getElementById("ubiquity-preview");
-  var previewSuggs = previewDoc.getElementById("suggestions");
-  var previewPane = previewDoc.getElementById("preview-pane");
-  var previewHelp = previewDoc.getElementById("help");
+  var suggsNode = document.getElementById("ubiquity-suggest-container");
+  var previewNode = document.getElementById("ubiquity-preview-container");
+  var helpNode = document.getElementById("ubiquity-help");
 
   var cmdMan = new jsm.CommandManager(services.commandSource,
                                       services.messageService,
                                       nlParser,
-                                      previewSuggs,
-                                      previewPane,
-                                      previewHelp);
+                                      suggsNode,
+                                      previewNode,
+                                      helpNode);
+
+  var suggsIframe = document.getElementById("ubiquity-suggest");
+
+  suggsIframe.contentDocument.addEventListener(
+    "DOMSubtreeModified",
+    function resizeSuggs() {
+      suggsIframe.height = this.height;
+    },
+    false);
 
   //Install skin detector
   var skinService = new jsm.SkinSvc(window);
@@ -104,26 +110,6 @@ function ubiquitySetup()
                             "The default skin will be loaded.");
   }
 
-  function resizePreview() {
-    previewIframe.height = previewIframe.contentDocument.height;
-    previewIframe.width = previewBlock.scrollWidth;
-  }
-
-  previewIframe.contentDocument.addEventListener(
-    "DOMSubtreeModified",
-    function() { resizePreview(); },
-    false
-  );
-
-  previewIframe.contentDocument.addEventListener(
-    "load",
-    function(aEvt) {
-      if (aEvt.originalTarget.nodeName == "IMG")
-        resizePreview();
-    },
-    true
-  );
-
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("contentAreaContextMenu"),
     document.getElementById("ubiquity-menupopup"),
@@ -133,8 +119,8 @@ function ubiquitySetup()
   );
 
   gUbiquity = new Ubiquity(
-    document.getElementById("transparent-msg-panel"),
-    document.getElementById("cmd-entry"),
+    document.getElementById("ubiquity-transparent-panel"),
+    document.getElementById("ubiquity-entry"),
     cmdMan
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
@@ -151,7 +137,7 @@ function ubiquitySetup()
   var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
                      .getService(Components.interfaces.nsIXULRuntime);
   if (xulr.OS == "Linux")
-    document.getElementById("transparent-msg-panel")
+    document.getElementById("ubiquity-transparent-panel")
             .style.backgroundColor = "#444";
 
   function ubiquityTeardown() {
@@ -198,7 +184,7 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
   return ((aEvent.shiftKey == (aModifier == 'SHIFT')) &&
           (aEvent.ctrlKey == (aModifier == 'CTRL')) &&
           (aEvent.altKey == (aModifier == 'ALT')) &&
-	  (aEvent.metaKey == (aModifier == 'META')));
+          (aEvent.metaKey == (aModifier == 'META')));
 }
 
 window.addEventListener(
@@ -208,8 +194,7 @@ window.addEventListener(
     Components.utils.import("resource://ubiquity/modules/setup.js",
                             jsm);
     jsm.UbiquitySetup.preload(ubiquitySetup);
+    window.addEventListener("keydown", ubiquityKeydown, true);
   },
   false
 );
-
-window.addEventListener("keydown", ubiquityKeydown, true);
