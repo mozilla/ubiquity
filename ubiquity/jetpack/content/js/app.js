@@ -1,4 +1,14 @@
 var App = {
+  get isFirefoxOld() {
+    var appInfo = Cc["@mozilla.org/xre/app-info;1"]
+                  .getService(Ci.nsIXULAppInfo);
+    var versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"]
+                         .getService(Ci.nsIVersionComparator);
+    if (versionChecker.compare(appInfo.version, "3.1b3") < 0)
+      return true;
+    return false;
+  },
+
   // Open the JS error console.  This code was largely taken from
   // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js
   openJsErrorConsole: function openJsErrorConsole() {
@@ -51,6 +61,9 @@ $(window).ready(
       $(".logging-source").addClass("buttony");
       $(".logging-source").text("JS Error Console");
     }
+
+    if (App.isFirefoxOld)
+      $("#old-firefox-version").show();
 
     Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
       function(feed) {
