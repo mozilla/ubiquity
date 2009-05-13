@@ -85,6 +85,20 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
                              function(event) { self.__onBlur(event); },
                              false);
   }
+
+  // middle: open link, right: close panel, left: both
+  msgPanel.addEventListener('click', function clickPanel(e) {
+    var {button, target} = e;
+    if(button !== 2) {
+      do var {href} = target; while(!href && (target = target.parentNode));
+      if(!/^(?:https?|ftp|chrome|about):/.test(href))
+        return;
+      self.Utils.openUrlInBrowser(href);
+    }
+    if(button !== 1)
+      self.closeWindow();
+    e.preventDefault();
+  }, true);
 }
 
 Ubiquity.prototype = {

@@ -118,8 +118,10 @@ function ubiquitySetup()
     cmdMan.makeCommandSuggester()
   );
 
+  var panel = document.getElementById("ubiquity-transparent-panel");
+
   gUbiquity = new Ubiquity(
-    document.getElementById("ubiquity-transparent-panel"),
+    panel,
     document.getElementById("ubiquity-entry"),
     cmdMan
   );
@@ -137,8 +139,7 @@ function ubiquitySetup()
   var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
                      .getService(Components.interfaces.nsIXULRuntime);
   if (xulr.OS == "Linux")
-    document.getElementById("ubiquity-transparent-panel")
-            .style.backgroundColor = "#444";
+    panel.style.backgroundColor = "#444";
 
   function ubiquityTeardown() {
     window.removeEventListener("unload", ubiquityTeardown, false);
