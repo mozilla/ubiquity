@@ -233,20 +233,21 @@ function testCmdManagerExecutesTwoCmds() {
       cmd_two: {execute:function() {twoWasCalled = true;}}
     });
 
-  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
-                                       makeTestParser());
+  makeCommandManager.call(this, fakeSource, mockMsgService,
+                          makeTestParser(), onCM);
+  function onCM(cmdMan){
+    var fakeContext = {focusedElement: null,
+                       focusedWindow: null};
 
-  var fakeContext = {focusedElement: null,
-                     focusedWindow: null};
-
-  cmdMan.updateInput("cmd_one", fakeContext);
-  this.assert(cmdMan.__activeQuery.suggestionList.length == 1, "should have 1");
-  cmdMan.execute(fakeContext);
-  cmdMan.updateInput("cmd_two", fakeContext);
-  this.assert(cmdMan.__activeQuery.suggestionList.length == 1, "should have 1");
-  cmdMan.execute(fakeContext);
-  this.assert(oneWasCalled, "cmd_one must be called.");
-  this.assert(twoWasCalled, "cmd_two must be called.");
+    cmdMan.updateInput("cmd_one", fakeContext);
+    this.assert(cmdMan.__activeQuery.suggestionList.length == 1, "should have 1");
+    cmdMan.execute(fakeContext);
+    cmdMan.updateInput("cmd_two", fakeContext);
+    this.assert(cmdMan.__activeQuery.suggestionList.length == 1, "should have 1");
+    cmdMan.execute(fakeContext);
+    this.assert(oneWasCalled, "cmd_one must be called.");
+    this.assert(twoWasCalled, "cmd_two must be called.");
+  }
 }
 
 function testCmdManagerExecutesCmd() {
@@ -263,11 +264,13 @@ function testCmdManagerExecutesCmd() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
-                                       makeTestParser());
-  cmdMan.updateInput("existentcommand", fakeContext);
-  cmdMan.execute(fakeContext);
-  this.assert(wasCalled, "command.execute() must be called.");
+  makeCommandManager.call(this, fakeSource, mockMsgService,
+                          makeTestParser(), onCM);
+  function onCM(cmdMan) {
+    cmdMan.updateInput("existentcommand", fakeContext);
+    cmdMan.execute(fakeContext);
+    this.assert(wasCalled, "command.execute() must be called.");
+  }
 }
 
 function testCmdManagerCatchesExceptionsInCmds() {
@@ -283,16 +286,17 @@ function testCmdManagerCatchesExceptionsInCmds() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
-                                       makeTestParser());
-
-  cmdMan.updateInput("existentcommand", fakeContext);
-  cmdMan.execute(fakeContext);
-  this.assert(
-    (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
-     mockMsgService.lastMsg.exception),
-    "Command manager must log exception."
-  );
+  makeCommandManager.call(this, fakeSource, mockMsgService,
+                          makeTestParser(), onCM);
+  function onCM(cmdMan) {
+    cmdMan.updateInput("existentcommand", fakeContext);
+    cmdMan.execute(fakeContext);
+    this.assert(
+      (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
+       mockMsgService.lastMsg.exception),
+      "Command manager must log exception."
+      );
+  }
 }
 
 function testCmdManagerDisplaysNoCmdError() {
@@ -303,13 +307,14 @@ function testCmdManagerDisplaysNoCmdError() {
   var fakeContext = {focusedElement: null,
                      focusedWindow: null};
 
-  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
-                                       makeTestParser());
-
-  cmdMan.updateInput("nonexistentcommand", fakeContext);
-  cmdMan.execute(fakeContext);
-  this.assertIsDefined(mockMsgService.lastMsg,
-                       "Command manager must display a message.");
+  makeCommandManager.call(this, fakeSource, mockMsgService,
+                          makeTestParser(), onCM);
+  function onCM(cmdMan) {
+    cmdMan.updateInput("nonexistentcommand", fakeContext);
+    cmdMan.execute(fakeContext);
+    this.assertIsDefined(mockMsgService.lastMsg,
+                         "Command manager must display a message.");
+  }
 }
 
 function testIterableCollectionWorks() {

@@ -57,8 +57,7 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
   this.__activeQuery = null;
   this.__domNodes = {
     suggs: suggsNode,
-    suggsBody: (suggsNode.getElementsByTagName("iframe")[0]
-                .contentDocument.body),
+    suggsIframe: suggsNode.getElementsByTagName("iframe")[0],
     preview: previewPaneNode,
     help: helpNode};
   this._previewer = new PreviewBrowser(
@@ -137,7 +136,7 @@ CommandManager.prototype = {
   _renderSuggestions : function CMD__renderSuggestions() {
     var content = "";
     var suggestionList = this.__activeQuery.suggestionList;
-    for (let x = 0; x < suggestionList.length; x++) {
+    for (let x = 0, l = suggestionList.length; x < l; ++x) {
       let suggText = suggestionList[x].getDisplayText();
       let suggIconUrl = suggestionList[x].getIcon();
       let suggIcon = "";
@@ -145,10 +144,10 @@ CommandManager.prototype = {
         suggIcon = '<img src="' + Utils.escapeHtml(suggIconUrl) + '"/>';
       suggText = '<div class="cmdicon">' + suggIcon + "</div>" + suggText;
       content += ('<div class="suggested' +
-                  (x === this.__hilitedSuggestion ? " hilited" : "")
-                  + '">' + suggText + "</div>");
+                  (x === this.__hilitedSuggestion ? " hilited" : "") +
+                  '">' + suggText + "</div>");
     }
-    this.__domNodes.suggsBody.innerHTML = content;
+    this.__domNodes.suggsIframe.contentDocument.body.innerHTML = content;
   },
 
   _renderPreview : function CM__renderPreview(context) {
