@@ -36,11 +36,73 @@ var App = {
     App.tick();
   },
 
+  functionStub: function functionStub() {},
+
+  // A constructor for creating a stub-like copy of an object, used because
+  // right now logging real objects to Firebug appears to create memory
+  // leaks.
+  ObjectCopy: function ObjectCopy(object) {
+    function makeObjectGetter(item) {
+      var originalToString = item.toString();
+      var weakref = Components.utils.getWeakReference(item);
+      item = null;
+      return function objectGetter() {
+        var retval = "[Object-deleted: " + originalToString + "]";
+        var ref = weakref.get();
+        if (ref) {
+          retval = new App.ObjectCopy(ref);
+          ref = null;
+        }
+        return retval;
+      };
+    }
+
+    var originalToString = object.toString();
+
+    this.toString = function toString() {
+      return "[Copy-of " + originalToString + "]";
+    };
+
+    function duplicate(obj, name, value) {
+      switch (typeof(value)) {
+      case "object":
+        if (value === null)
+          obj[name] = null;
+        else if (value.constructor &&
+                 value.constructor.name == "Array") {
+          obj[name] = [];
+          for (var i = 0; i < value.length; i++)
+            duplicate(obj[name], i, value[i]);
+          obj[name].length = value.length;
+        } else
+          obj.__defineGetter__(name, makeObjectGetter(value));
+        break;
+      case "function":
+        obj[name] = App.functionStub;
+        break;
+      default:
+        obj[name] = value;
+      }
+      value = null;
+      name = null;
+    }
+
+    for (name in object)
+      if (name != "toString") {
+        try {
+          duplicate(this, name, object[name]);
+        } catch (e) {
+          this[name] = "[Duplicate-failed: " + e + "]";
+        }
+      }
+    object = null;
+  },
+
   inspectTrackedObjects: function inspectTrackedObjects(objects) {
     var newObjects = [];
     objects.forEach(
       function(object) {
-        var newObject = { ref: object.weakref.get() };
+        var newObject = { copy: new App.ObjectCopy(object.weakref.get()) };
         newObject.__proto__ = object;
         newObjects.push(newObject);
       });
