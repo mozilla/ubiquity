@@ -160,6 +160,16 @@ var Jetpack = {
     Jetpack.statusBar = {};
     Jetpack.statusBar.append = addStatusBarPanel;
 
+    Jetpack.track = function() {
+      var newArgs = [];
+      for (var i = 0; i < 2; i++)
+        newArgs.push(arguments[i]);
+      // Make the memory tracker record the stack frame/line number of our
+      // caller, not us.
+      newArgs.push(1);
+      MemoryTracking.track.apply(MemoryTracking, newArgs);
+    };
+
     var globals = {
       location: codeSource.id,
       console: console,

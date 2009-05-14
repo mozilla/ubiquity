@@ -66,6 +66,14 @@ SandboxFactory.fileUri = "";
 SandboxFactory.isFilenameReported = false;
 SandboxFactory.isInitialized = false;
 
+SandboxFactory.unmungeUrl = function unmungeUrl(url) {
+  if (this.isInitialized &&
+      this.isFilenameReported &&
+      url.indexOf(this.protectedFileUriPrefix) == 0)
+    return url.slice(this.protectedFileUriPrefix.length);
+  return url;
+};
+
 function maybeInitialize() {
   if (!SandboxFactory.isInitialized) {
     var ioService = Cc["@mozilla.org/network/io-service;1"].

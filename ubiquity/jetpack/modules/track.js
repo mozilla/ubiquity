@@ -1,3 +1,5 @@
+Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
+
 var EXPORTED_SYMBOLS = ["MemoryTracking"];
 
 var persistentData = {};
@@ -12,7 +14,7 @@ var MemoryTracking = {
   set _trackedObjects(object) {
     persistentData.trackedObjects = object;
   },
-  track: function track(object, bin) {
+  track: function track(object, bin, stackFrameNumber) {
     var weakref = Components.utils.getWeakReference(object);
     if (!bin)
       bin = object.constructor.name;
@@ -20,10 +22,15 @@ var MemoryTracking = {
       this._trackedObjects[bin] = [];
     var frame = Components.stack.caller;
 
-    this._trackedObjects[bin].push({weakref: weakref,
-                                    created: new Date(),
-                                    fileName: frame.filename,
-                                    lineNumber: frame.lineNumber});
+    if (stackFrameNumber > 0)
+      for (var i = 0; i < stackFrameNumber; i++)
+        frame = frame.caller;
+
+    this._trackedObjects[bin].push(
+      {weakref: weakref,
+       created: new Date(),
+       fileName: SandboxFactory.unmungeUrl(frame.filename),
+       lineNumber: frame.lineNumber});
   },
   compact: function compact() {
     var newTrackedObjects = {};

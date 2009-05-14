@@ -153,22 +153,13 @@ var Logging = {
     var consoleElement = $(consoleDocument).find(".panelNode-console");
     if (consoleElement.length) {
       consoleElement = consoleElement.get(0);
-      function unmungeUrl(url) {
-        var mungedPrefix = SandboxFactory.protectedFileUriPrefix;
-        if (SandboxFactory.isInitialized &&
-            SandboxFactory.isFilenameReported &&
-            url.indexOf(mungedPrefix) != -1) {
-          return url.slice(mungedPrefix.length);
-        }
-        return url;
-      }
 
       function onInsert(evt) {
         var obj = $(evt.originalTarget).find(".objectLink-sourceLink");
         if (obj.length) {
           obj.each(
             function() {
-              var href = unmungeUrl(this.repObject.href);
+              var href = SandboxFactory.unmungeUrl(this.repObject.href);
               if (href != this.repObject.href) {
                 this.repObject.href = href;
                 // Firebug's source code excerpt is all wrong, just remove

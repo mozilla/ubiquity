@@ -10,9 +10,7 @@ function maybeFixUpUbiquityMessage(target) {
       // have XPConnect wrappers implicitly made for it; let's "un-munge" it
       // here so that it looks intelligible to end-users.
 
-      var prefix = SandboxFactory.protectedFileUriPrefix;
-      if (prefix && href.indexOf(prefix) == 0)
-        target.setAttribute("href", href.slice(prefix.length));
+      target.setAttribute("href", SandboxFactory.unmungeUrl(href));
     } else if (href == SandboxFactory.fileUri) {
       // We're in an older version of the platform that doesn't allow
       // code executed in a sandbox to have its file URI specified,
