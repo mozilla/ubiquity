@@ -38,6 +38,7 @@ var App = {
 
   tick: function tick() {
     var bins = MemoryTracking.getBins();
+    bins.sort();
     var table = $('<table></table>');
     bins.forEach(
       function(name) {
