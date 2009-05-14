@@ -36,6 +36,17 @@ var App = {
     App.tick();
   },
 
+  inspectTrackedObjects: function inspectTrackedObjects(objects) {
+    var newObjects = [];
+    objects.forEach(
+      function(object) {
+        var newObject = { ref: object.weakref.get() };
+        newObject.__proto__ = object;
+        newObjects.push(newObject);
+      });
+    console.log(newObjects);
+  },
+
   tick: function tick() {
     var bins = MemoryTracking.getBins();
     bins.sort();
@@ -54,6 +65,14 @@ var App = {
           });
         row.append(binName);
         row.append($('<td></td>').text(objects.length));
+        if (window.console.isFirebug) {
+          var inspectInFb = $('<span class="buttony"></span>');
+          inspectInFb.text('inspect');
+          inspectInFb.click(
+            function() { App.inspectTrackedObjects(objects); }
+          );
+          row.append($('<td></td>').append(inspectInFb));
+        }
         table.append(row);
       });
     $("#extension-weakrefs").empty().append(table);
