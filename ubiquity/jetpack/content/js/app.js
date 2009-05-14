@@ -9,6 +9,13 @@ var App = {
     return false;
   },
 
+  // Open the view-source window. This code was taken from Firebug's source code.
+  viewSource: function viewSource(url, lineNumber) {
+    window.openDialog("chrome://global/content/viewSource.xul",
+                      "_blank", "all,dialog=no",
+                      url, null, null, lineNumber);
+  },
+
   // Open the JS error console.  This code was largely taken from
   // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js
   openJsErrorConsole: function openJsErrorConsole() {
@@ -35,8 +42,16 @@ var App = {
     bins.forEach(
       function(name) {
         var objects = MemoryTracking.getLiveObjects(name);
+        if (objects.length == 0)
+          return;
         var row = $('<tr></tr>');
-        row.append($('<td class="code"></td>').text(name));
+        var binName = $('<td class="code"></td>').text(name);
+        binName.css({cursor: "pointer"});
+        binName.mouseup(
+          function() {
+            App.viewSource(objects[0].fileName, objects[0].lineNumber);
+          });
+        row.append(binName);
         row.append($('<td></td>').text(objects.length));
         table.append(row);
       });
@@ -47,6 +62,10 @@ var App = {
 $(window).ready(
   function() {
     window.setInterval(App.tick, 1000);
+    $("#this-page-source-code").click(
+      function() {
+        App.viewSource(window.location.href, null);
+      });
     $("#force-gc").click(App.forceGC);
     $("#run-tests").click(function() { Tests.run(); });
     $("#display-sample").click(

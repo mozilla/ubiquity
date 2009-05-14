@@ -18,8 +18,12 @@ var MemoryTracking = {
       bin = object.constructor.name;
     if (!(bin in this._trackedObjects))
       this._trackedObjects[bin] = [];
+    var frame = Components.stack.caller;
+
     this._trackedObjects[bin].push({weakref: weakref,
-                                    created: new Date()});
+                                    created: new Date(),
+                                    fileName: frame.filename,
+                                    lineNumber: frame.lineNumber});
   },
   compact: function compact() {
     var newTrackedObjects = {};
