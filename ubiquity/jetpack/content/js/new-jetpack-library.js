@@ -40,37 +40,42 @@ function Dictionary() {
   MemoryTracking.track(this);
 }
 
+function ImmutableArray(baseArray, additionalMethods) {
+  var self = this;
+  var UNSUPPORTED_MUTATOR_METHODS = ["pop", "push", "reverse", "shift",
+                                     "sort", "splice", "unshift"];
+  UNSUPPORTED_MUTATOR_METHODS.forEach(
+    function(methodName) {
+      self[methodName] = function() {
+        throw new Error("Mutator method '" + methodName + "()' is " +
+                        "unsupported on this object.");
+      };
+    });
+
+  self.__proto__ = additionalMethods;
+  additionalMethods.__proto__ = baseArray;
+}
+
 function NewJetpackLibrary() {
   var trackedWindows = new Dictionary();
   var trackedTabs = new Dictionary();
 
   var tabArray = new Array();
 
-  var UNSUPPORTED_MUTATOR_METHODS = ["pop", "push", "reverse", "shift",
-                                     "sort", "splice", "unshift"];
-  var tabs = {
-    get focused() {
-      var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-               .getService(Ci.nsIWindowMediator);
-      var chromeWindow = wm.getMostRecentWindow("navigator:browser");
-      if (chromeWindow) {
-        var browserWindow = trackedWindows.get(chromeWindow);
-        if (browserWindow)
-          return browserWindow.getFocusedTab();
-      }
-      return null;
-    }
-  };
-
-  UNSUPPORTED_MUTATOR_METHODS.forEach(
-    function(methodName) {
-      tabs[methodName] = function() {
-        throw new Error("Mutator method '" + methodName + "()' is " +
-                        "unsupported on this object.");
-      };
+  var tabs = new ImmutableArray(
+    tabArray,
+    {get focused() {
+       var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+                .getService(Ci.nsIWindowMediator);
+       var chromeWindow = wm.getMostRecentWindow("navigator:browser");
+       if (chromeWindow) {
+         var browserWindow = trackedWindows.get(chromeWindow);
+         if (browserWindow)
+           return browserWindow.getFocusedTab();
+       }
+       return null;
+     }
     });
-
-  tabs.__proto__ = tabArray;
 
   function newBrowserTab(browser) {
     var browserTab = new BrowserTab(browser);
