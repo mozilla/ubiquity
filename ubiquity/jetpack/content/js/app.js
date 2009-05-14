@@ -109,6 +109,36 @@ var App = {
     console.log(newObjects);
   },
 
+  modifyWeakrefTable: function modifyWeakrefTable(newRows) {
+    $("#extension-weakrefs div").each(
+      function() {
+        var id = $(this).attr("id");
+        if (id in newRows) {
+          if ($(".count", this).text() != $(".count", newRows[id]).text())
+            $(this).replaceWith(newRows[id]);
+          delete newRows[id];
+        } else {
+          $(this).attr("id", null);
+          $(this).slideUp("fast", function() { $(this).remove(); });
+        }
+      });
+    for (id in newRows) {
+      newRows[id].hide();
+      var lastBestRow = null;
+      $("#extension-weakrefs div").each(
+        function() {
+          if (newRows[id].attr("id") > $(this).attr("id"))
+            lastBestRow = this;
+        });
+      if (lastBestRow) {
+        $(lastBestRow).after(newRows[id]);
+        lastBestRow = null;
+      } else
+        $("#extension-weakrefs").prepend(newRows[id]);
+      newRows[id].slideDown("fast");
+    }
+  },
+
   tick: function tick() {
     const ID_PREFIX = "MemoryTracking-";
     var bins = MemoryTracking.getBins();
@@ -139,33 +169,7 @@ var App = {
         }
         newRows[row.attr("id")] = row;
       });
-    $("#extension-weakrefs div").each(
-      function() {
-        var id = $(this).attr("id");
-        if (id in newRows) {
-          if ($(".count", this).text() != $(".count", newRows[id]).text())
-            $(this).replaceWith(newRows[id]);
-          delete newRows[id];
-        } else {
-          $(this).attr("id", null);
-          $(this).slideUp("fast", function() { $(this).remove(); });
-        }
-      });
-    for (id in newRows) {
-      newRows[id].hide();
-      var lastBestRow = null;
-      $("#extension-weakrefs div").each(
-        function() {
-          if (newRows[id].attr("id") > $(this).attr("id"))
-            lastBestRow = this;
-        });
-      if (lastBestRow) {
-        $(lastBestRow).after(newRows[id]);
-        lastBestRow = null;
-      } else
-        $("#extension-weakrefs").prepend(newRows[id]);
-      newRows[id].slideDown("fast");
-    }
+    App.modifyWeakrefTable(newRows);
   }
 };
 
