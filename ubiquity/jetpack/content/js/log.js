@@ -1,5 +1,6 @@
 var Logging = {
   ConsoleListener: function ConsoleListener() {
+    MemoryTracking.track(this);
     var self = this;
 
     var consoleListener = {
@@ -40,10 +41,9 @@ var Logging = {
       function() {
         cService.unregisterListener(consoleListener);
       });
-
-    MemoryTracking.track(this);
   },
   JsErrorConsoleLogger: function JsErrorConsoleLogger() {
+    MemoryTracking.track(this);
     function stringifyArgs(args) {
       var stringArgs = [];
       for (var i = 0; i < args.length; i++)
@@ -99,11 +99,10 @@ var Logging = {
       } else
         this.report(e, 'errorFlag', 1);
     };
-
-    MemoryTracking.track(this);
   },
 
   FirebugLogger: function FirebugLogger(chromeWindow) {
+    MemoryTracking.track(this);
     var context = chromeWindow.FirebugContext;
     var Firebug = chromeWindow.Firebug;
     var FBL = chromeWindow.FBL;
@@ -186,8 +185,6 @@ var Logging = {
                                              false);
         });
     }
-
-    MemoryTracking.track(this);
   }
 };
 

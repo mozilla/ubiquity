@@ -1,4 +1,5 @@
 function EventHubWatcher(hub) {
+  MemoryTracking.track(this);
   var listeners = [];
 
   this.add = function add(name, listener) {
@@ -20,14 +21,10 @@ function EventHubWatcher(hub) {
           hub.removeListener(info.name, info.listener);
         });
     });
-
-  MemoryTracking.track(this);
 }
 
 function WindowWatcher() {
-  const Cc = Components.classes;
-  const Ci = Components.interfaces;
-
+  MemoryTracking.track(this);
   var self = this;
 
   var observer = {
@@ -49,6 +46,4 @@ function WindowWatcher() {
     function() {
       ww.unregisterNotification(observer);
     });
-
-  MemoryTracking.track(this);
 }

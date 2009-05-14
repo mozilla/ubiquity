@@ -1,4 +1,5 @@
 function Dictionary() {
+  MemoryTracking.track(this);
   var keys = [];
   var values = [];
 
@@ -34,7 +35,6 @@ function Dictionary() {
   this.__defineGetter__("keys", function() { return readOnlyKeys; });
   this.__defineGetter__("values", function() { return readOnlyValues; });
   this.__defineGetter__("length", function() { return keys.length; });
-  MemoryTracking.track(this);
 }
 
 function ImmutableArray(baseArray) {
@@ -98,6 +98,7 @@ function NewJetpackLibrary() {
   }
 
   function BrowserWindow(chromeWindow) {
+    MemoryTracking.track(this);
     var tabbrowser = chromeWindow.getBrowser();
 
     for (var i = 0; i < tabbrowser.tabContainer.itemCount; i++)
@@ -153,11 +154,10 @@ function NewJetpackLibrary() {
       for (var i = 0; i < tabbrowser.tabContainer.itemCount; i++)
         finalizeBrowserTab(tabbrowser.tabContainer.getItemAtIndex(i));
     };
-
-    MemoryTracking.track(this);
   }
 
   function BrowserTab(tabbrowser, chromeTab) {
+    MemoryTracking.track(this);
     var browser = chromeTab.linkedBrowser;
 
     this.__defineGetter__("isClosed",
@@ -212,8 +212,6 @@ function NewJetpackLibrary() {
       else
         return "[Browser Tab]";
     };
-
-    MemoryTracking.track(this);
   }
 
   forAllBrowsers(

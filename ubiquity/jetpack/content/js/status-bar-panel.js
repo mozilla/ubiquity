@@ -63,6 +63,7 @@ var StatusBar = {
     var document = window.document;
     var statusBar = document.getElementById("status-bar");
     var iframe = document.createElement("iframe");
+    MemoryTracking.track(iframe, "StatusBarPanel");
     iframe.setAttribute("type", "content");
 
     if (statusBar.hidden) {
@@ -99,7 +100,6 @@ var StatusBar = {
       statusBar.appendChild(iframe);
     }
 
-    MemoryTracking.track(iframe, "StatusBarPanel");
     return iframe;
   }
 };
