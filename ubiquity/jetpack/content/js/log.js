@@ -61,10 +61,10 @@ var Logging = {
       var stackFrame = Components.stack.caller;
 
       if (typeof(stackFrameNumber) != "number")
-        stackFrameNumber = 0;
-
-      for (var i = 0; i < stackFrameNumber; i++)
-        stackFrame = stackFrame.caller;
+        stackFrame = stackFrameNumber;
+      else
+        for (var i = 0; i < stackFrameNumber; i++)
+          stackFrame = stackFrame.caller;
 
       var consoleService = Cc["@mozilla.org/consoleservice;1"]
                            .getService(Ci.nsIConsoleService);
@@ -89,6 +89,15 @@ var Logging = {
     };
     this.error = function error() {
       report(stringifyArgs(arguments), 'errorFlag', 1);
+    };
+    this.exception = function exception(e) {
+      if (e.location) {
+        report(e, 'exceptionFlag', e.location);
+      } else if (e.fileName) {
+        report(e.message, 'exceptionFlag', {filename: e.fileName,
+                                            lineNumber: e.lineNumber});
+      } else
+        this.report(e, 'errorFlag', 1);
     };
 
     MemoryTracking.track(this);
@@ -120,6 +129,23 @@ var Logging = {
     ["log", "info", "warn", "error"].forEach(
       function(className) { self[className] = wrapFirebugLogger(className); }
     );
+
+    self.exception = function exception(e) {
+      if (e.location) {
+        Firebug.Console.logFormatted([e], context, "error",
+                                     false,
+                                     new FBL.SourceLink(e.location.filename,
+                                                        e.location.lineNumber,
+                                                        "js"));
+      } else if (e.fileName) {
+        Firebug.Console.logFormatted([e.name, e.message, "(", e, ")"],
+                                     context, "error", false,
+                                     new FBL.SourceLink(e.fileName,
+                                                        e.lineNumber,
+                                                        "js"));
+      } else
+        self.error(e);
+    };
 
     // Here we post-process all newly-added logging messages to un-munge any
     // URLs coming from sandboxed code.
