@@ -34,13 +34,21 @@ a {
     opacity: 0.6;
 }
 
-table {
-    font: inherit;
+#extension-weakrefs .row {
+    clear: left;
 }
 
-td {
+#extension-weakrefs .code {
+    display: block;
+    float: left;
     padding-left: 1em;
-    padding-right: 1em;
+    min-width: 20em;
+}
+
+#extension-weakrefs .count {
+    display: block;
+    float: left;
+    min-width: 5em;
 }
 
 .code {

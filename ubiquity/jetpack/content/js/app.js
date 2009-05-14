@@ -110,34 +110,62 @@ var App = {
   },
 
   tick: function tick() {
+    const ID_PREFIX = "MemoryTracking-";
     var bins = MemoryTracking.getBins();
     bins.sort();
-    var table = $('<table></table>');
+    var newRows = {};
     bins.forEach(
       function(name) {
         var objects = MemoryTracking.getLiveObjects(name);
         if (objects.length == 0)
           return;
-        var row = $('<tr></tr>');
-        var binName = $('<td class="code"></td>').text(name);
+        var row = $('<div class="row"></div>');
+        row.attr("id", ID_PREFIX + name);
+        var binName = $('<span class="code"></span>').text(name);
         binName.css({cursor: "pointer"});
         binName.mouseup(
           function() {
             App.viewSource(objects[0].fileName, objects[0].lineNumber);
           });
         row.append(binName);
-        row.append($('<td></td>').text(objects.length));
+        row.append($('<span class="count"></span>').text(objects.length));
         if (window.console.isFirebug) {
           var inspectInFb = $('<span class="buttony"></span>');
           inspectInFb.text('inspect');
           inspectInFb.click(
             function() { App.inspectTrackedObjects(objects); }
           );
-          row.append($('<td></td>').append(inspectInFb));
+          row.append(inspectInFb);
         }
-        table.append(row);
+        newRows[row.attr("id")] = row;
       });
-    $("#extension-weakrefs").empty().append(table);
+    $("#extension-weakrefs div").each(
+      function() {
+        var id = $(this).attr("id");
+        if (id in newRows) {
+          if ($(".count", this).text() != $(".count", newRows[id]).text())
+            $(this).replaceWith(newRows[id]);
+          delete newRows[id];
+        } else {
+          $(this).attr("id", null);
+          $(this).slideUp("fast", function() { $(this).remove(); });
+        }
+      });
+    for (id in newRows) {
+      newRows[id].hide();
+      var lastBestRow = null;
+      $("#extension-weakrefs div").each(
+        function() {
+          if (newRows[id].attr("id") > $(this).attr("id"))
+            lastBestRow = this;
+        });
+      if (lastBestRow) {
+        $(lastBestRow).after(newRows[id]);
+        lastBestRow = null;
+      } else
+        $("#extension-weakrefs").prepend(newRows[id]);
+      newRows[id].slideDown("fast");
+    }
   }
 };
 
