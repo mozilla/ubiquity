@@ -49,7 +49,17 @@ function NewJetpackLibrary() {
   var UNSUPPORTED_MUTATOR_METHODS = ["pop", "push", "reverse", "shift",
                                      "sort", "splice", "unshift"];
   var tabs = {
-      // TODO: Add 'focused' getter-property.
+    get focused() {
+      var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+               .getService(Ci.nsIWindowMediator);
+      var chromeWindow = wm.getMostRecentWindow("navigator:browser");
+      if (chromeWindow) {
+        var browserWindow = trackedWindows.get(chromeWindow);
+        if (browserWindow)
+          return browserWindow.getFocusedTab();
+      }
+      return null;
+    }
   };
 
   UNSUPPORTED_MUTATOR_METHODS.forEach(
@@ -113,6 +123,12 @@ function NewJetpackLibrary() {
       function(eventType) {
         tabbrowser.addEventListener(eventType, onEvent, true);
       });
+
+    this.getFocusedTab = function getFocusedTab() {
+      var chromeTab = tabbrowser.selectedTab;
+      var browser = chromeTab.linkedBrowser;
+      return trackedTabs.get(browser);
+    };
 
     this.finalize = function finalize() {
       EVENTS_TO_WATCH.forEach(
