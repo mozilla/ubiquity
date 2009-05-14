@@ -31,7 +31,7 @@ function forAllBrowsers(options) {
       try {
         func(window);
       } catch (e) {
-        console.error(e);
+        console.exception(e);
       }
     };
     return safeFunc;
@@ -132,7 +132,7 @@ var Jetpack = {
                  try {
                    options.onLoad(iframe.contentDocument);
                  } catch (e) {
-                   console.error(e);
+                   console.exception(e);
                  }
                },
                false
@@ -217,8 +217,7 @@ var Jetpack = {
                                  lineNumber: 1}];
             sandboxFactory.evalInSandbox(code, sandbox, codeSections);
           } catch (e) {
-            console.error("Error ", e, "occurred while evaluating code for ",
-                          feed.uri.spec);
+            console.exception(e);
           }
         }
       });
