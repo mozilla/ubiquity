@@ -51,6 +51,11 @@ a {
     min-width: 5em;
 }
 
+#memory-usage-actions {
+    padding-top: 1em;
+    clear: left;
+}
+
 .code {
     font-family: monaco, sans-serif;
     white-space: pre-wrap;
