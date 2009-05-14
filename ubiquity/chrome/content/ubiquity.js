@@ -114,6 +114,10 @@ Ubiquity.prototype = {
     return this.__textBox;
   },
 
+  get msgPanel() {
+    return this.__msgPanel;
+  },
+
   get cmdManager() {
     return this.__cmdManager;
   },
@@ -145,7 +149,7 @@ Ubiquity.prototype = {
 
   __onKeydown: function __onKeyDown(event) {
     this.__lastKeyEvent = event;
-    
+
     if (event.keyCode == this.__KEYCODE_UP) {
       event.preventDefault();
       this.__cmdManager.moveIndicationUp(this.__makeContext());
@@ -164,7 +168,7 @@ Ubiquity.prototype = {
 
   __onKeyup: function __onKeyup(event) {
     this.__lastKeyEvent = event;
-    
+
     var keyCode = event.keyCode;
 
     if (keyCode == this.__KEYCODE_UP ||
