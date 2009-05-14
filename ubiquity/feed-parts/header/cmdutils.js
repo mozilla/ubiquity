@@ -1374,8 +1374,13 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           }
           pblock.innerHTML += template;
         };
-        CmdUtils.previewPost(pblock, urlString, postData,
-                             searchParser, options.parser.type || "html");
+        if (options.postData) {
+            CmdUtils.previewPost(pblock, urlString, postData,
+                                 searchParser, options.parser.type || "html");
+        } else {
+            CmdUtils.previewGet(pblock, urlString, 
+                                searchParser, options.parser.type || "html");
+        }
       }
       else {
         var content = "Searches "+options.name+" for your words";
