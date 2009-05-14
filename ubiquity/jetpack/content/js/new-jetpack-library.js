@@ -160,6 +160,22 @@ function NewJetpackLibrary() {
       });
 
     this.__defineGetter__(
+      "contentWindow",
+      function() {
+        if (browser && browser.contentWindow)
+          return browser.contentWindow;
+        return null;
+        });
+
+    this.__defineGetter__(
+      "contentDocument",
+      function() {
+        if (browser && browser.contentDocument)
+          return browser.contentDocument;
+        return null;
+        });
+
+    this.__defineGetter__(
       "raw",
       function() {
         if (browser)
@@ -203,5 +219,5 @@ $(window).ready(
     // Just for debugging purposes, assign an instance of the
     // new library to a global so we can play around with it in the
     // Firebug console.
-    j = new NewJetpackLibrary();
+    njl = new NewJetpackLibrary();
   });
