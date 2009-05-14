@@ -37,9 +37,14 @@ var MemoryTracking = {
     for (name in this._trackedObjects) {
       var oldBin = this._trackedObjects[name];
       var newBin = [];
-      for (var i = 0; i < oldBin.length; i++)
-        if (oldBin[i].weakref.get())
+      var strongRefs = [];
+      for (var i = 0; i < oldBin.length; i++) {
+        var strongRef = oldBin[i].weakref.get();
+        if (strongRef && strongRefs.indexOf(strongRef) == -1) {
+          strongRefs.push(strongRef);
           newBin.push(oldBin[i]);
+        }
+      }
       if (newBin.length)
         newTrackedObjects[name] = newBin;
     }
