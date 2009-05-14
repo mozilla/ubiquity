@@ -28,19 +28,16 @@ function Dictionary() {
     values.splice(id, 1);
   };
 
-  this.keys = function keys() {
-    return keys.slice();
-  };
+  var readOnlyKeys = new ImmutableArray(keys);
+  var readOnlyValues = new ImmutableArray(values);
 
-  this.values = function values() {
-    return values.slice();
-  };
-
+  this.__defineGetter__("keys", function() { return readOnlyKeys; });
+  this.__defineGetter__("values", function() { return readOnlyValues; });
   this.__defineGetter__("length", function() { return keys.length; });
   MemoryTracking.track(this);
 }
 
-function ImmutableArray(baseArray, additionalMethods) {
+function ImmutableArray(baseArray) {
   var self = this;
   var UNSUPPORTED_MUTATOR_METHODS = ["pop", "push", "reverse", "shift",
                                      "sort", "splice", "unshift"];
@@ -52,34 +49,31 @@ function ImmutableArray(baseArray, additionalMethods) {
       };
     });
 
-  self.__proto__ = additionalMethods;
-  additionalMethods.__proto__ = baseArray;
+  self.__proto__ = baseArray;
 }
 
 function NewJetpackLibrary() {
   var trackedWindows = new Dictionary();
   var trackedTabs = new Dictionary();
 
-  var tabArray = new Array();
+  var tabs = {
+    get focused() {
+      var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
+               .getService(Ci.nsIWindowMediator);
+      var chromeWindow = wm.getMostRecentWindow("navigator:browser");
+      if (chromeWindow) {
+        var browserWindow = trackedWindows.get(chromeWindow);
+        if (browserWindow)
+          return browserWindow.getFocusedTab();
+      }
+      return null;
+    }
+  };
 
-  var tabs = new ImmutableArray(
-    tabArray,
-    {get focused() {
-       var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-                .getService(Ci.nsIWindowMediator);
-       var chromeWindow = wm.getMostRecentWindow("navigator:browser");
-       if (chromeWindow) {
-         var browserWindow = trackedWindows.get(chromeWindow);
-         if (browserWindow)
-           return browserWindow.getFocusedTab();
-       }
-       return null;
-     }
-    });
+  tabs.__proto__ = trackedTabs.values;
 
   function newBrowserTab(browser) {
     var browserTab = new BrowserTab(browser);
-    tabArray.push(browserTab);
     trackedTabs.set(browser, browserTab);
   }
 
@@ -87,7 +81,6 @@ function NewJetpackLibrary() {
     var browserTab = trackedTabs.get(browser);
     trackedTabs.remove(browser);
     browserTab._finalize();
-    tabArray.splice(tabArray.indexOf(browserTab), 1);
   }
 
   function BrowserWindow(chromeWindow) {
