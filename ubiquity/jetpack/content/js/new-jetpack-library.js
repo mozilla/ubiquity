@@ -74,27 +74,35 @@ function NewJetpackLibrary() {
       if (browserWindow)
         return browserWindow.getFocusedTab();
       return null;
+    },
+    open: function open(url) {
+      var browserWindow = windows.focused;
+      // TODO: What to do if we have no focused window?
+      // make a new one?
+      return browserWindow.addTab(url);
     }
   };
 
   tabs.__proto__ = trackedTabs.values;
 
-  function newBrowserTab(browser) {
-    var browserTab = new BrowserTab(browser);
-    trackedTabs.set(browser, browserTab);
+  function newBrowserTab(tabbrowser, chromeTab) {
+    var browserTab = new BrowserTab(tabbrowser, chromeTab);
+    trackedTabs.set(chromeTab, browserTab);
+    return browserTab;
   }
 
-  function finalizeBrowserTab(browser) {
-    var browserTab = trackedTabs.get(browser);
-    trackedTabs.remove(browser);
+  function finalizeBrowserTab(chromeTab) {
+    var browserTab = trackedTabs.get(chromeTab);
+    trackedTabs.remove(chromeTab);
     browserTab._finalize();
   }
 
   function BrowserWindow(chromeWindow) {
     var tabbrowser = chromeWindow.getBrowser();
 
-    for (var i = 0; i < tabbrowser.browsers.length; i++)
-      newBrowserTab(tabbrowser.browsers[i]);
+    for (var i = 0; i < tabbrowser.tabContainer.itemCount; i++)
+      newBrowserTab(tabbrowser,
+                    tabbrowser.tabContainer.getItemAtIndex(i));
 
     const EVENTS_TO_WATCH = ["TabOpen", "TabMove", "TabClose", "TabSelect"];
 
@@ -105,18 +113,17 @@ function NewJetpackLibrary() {
       try {
         // This is a XUL <tab> element of class tabbrowser-tab.
         var chromeTab = event.originalTarget;
-        var browser = chromeTab.linkedBrowser;
 
         switch (event.type) {
         case "TabSelect":
           break;
         case "TabOpen":
-          newBrowserTab(browser);
+          newBrowserTab(tabbrowser, chromeTab);
           break;
         case "TabMove":
           break;
         case "TabClose":
-          finalizeBrowserTab(browser);
+          finalizeBrowserTab(chromeTab);
           break;
         }
       } catch (e) {
@@ -129,10 +136,13 @@ function NewJetpackLibrary() {
         tabbrowser.addEventListener(eventType, onEvent, true);
       });
 
+    this.addTab = function addTab(url) {
+      var chromeTab = tabbrowser.addTab(url);
+      return newBrowserTab(tabbrowser, chromeTab);
+    };
+
     this.getFocusedTab = function getFocusedTab() {
-      var chromeTab = tabbrowser.selectedTab;
-      var browser = chromeTab.linkedBrowser;
-      return trackedTabs.get(browser);
+      return trackedTabs.get(tabbrowser.selectedTab);
     };
 
     this.finalize = function finalize() {
@@ -140,14 +150,16 @@ function NewJetpackLibrary() {
         function(eventType) {
           tabbrowser.removeEventListener(eventType, onEvent, true);
         });
-      for (var i = 0; i < tabbrowser.browsers.length; i++)
-        finalizeBrowserTab(tabbrowser.browsers[i]);
+      for (var i = 0; i < tabbrowser.tabContainer.itemCount; i++)
+        finalizeBrowserTab(tabbrowser.tabContainer.getItemAtIndex(i));
     };
 
     MemoryTracking.track(this);
   }
 
-  function BrowserTab(browser) {
+  function BrowserTab(tabbrowser, chromeTab) {
+    var browser = chromeTab.linkedBrowser;
+
     this.__defineGetter__("isClosed",
                           function() { return (browser == null); });
 
@@ -179,11 +191,18 @@ function NewJetpackLibrary() {
       "raw",
       function() {
         if (browser)
-          return browser;
+          return chromeTab;
         return null;
       });
 
+    this.focus = function focus() {
+      if (browser)
+        tabbrowser.selectedTab = chromeTab;
+    };
+
     this._finalize = function _finalize() {
+      tabbrowser = null;
+      chromeTab = null;
       browser = null;
     };
 
