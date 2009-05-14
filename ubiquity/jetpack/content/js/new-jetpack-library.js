@@ -56,16 +56,23 @@ function NewJetpackLibrary() {
   var trackedWindows = new Dictionary();
   var trackedTabs = new Dictionary();
 
-  var tabs = {
+  var windows = {
     get focused() {
       var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
                .getService(Ci.nsIWindowMediator);
       var chromeWindow = wm.getMostRecentWindow("navigator:browser");
-      if (chromeWindow) {
-        var browserWindow = trackedWindows.get(chromeWindow);
-        if (browserWindow)
-          return browserWindow.getFocusedTab();
-      }
+      if (chromeWindow)
+        return trackedWindows.get(chromeWindow);
+      return null;
+    }
+  };
+  windows.__proto__ = trackedWindows.values;
+
+  var tabs = {
+    get focused() {
+      var browserWindow = windows.focused;
+      if (browserWindow)
+        return browserWindow.getFocusedTab();
       return null;
     }
   };
