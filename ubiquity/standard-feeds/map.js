@@ -21,7 +21,7 @@ CmdUtils.CreateCommand({
   preview: function(pblock, dobj, modifers) {
       // TODO: This isn't terribly safe; ideally, we should be communicating
       // with the other page via DOM events, etc.
-      var previewWindow = pblock.ownerDocument.defaultView.wrappedJSObject;
+      var previewWindow = pblock.ownerDocument.defaultView;
       previewWindow = XPCSafeJSObjectWrapper(previewWindow);
       previewWindow.Ubiquity.context = context;
 

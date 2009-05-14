@@ -163,23 +163,26 @@ function testCmdManagerSuggestsForEmptyInput() {
     return [nounTypeOne, nounTypeTwo];
   };
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
-                                       makeTestParser( null,
-						       null,
-						       null,
-						       fakeContextUtils));
-  var getAC = cmdMan.makeCommandSuggester();
-  var suggDict = getAC({textSelection:"tree"});
-  this.assert( suggDict["Cmd_one"], "cmd one should be in" );
-  this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
-  var execute = suggDict["Cmd_one"];
-  execute();
-  this.assert( oneWasCalled == "tree", "should have been calld with tree" );
-  suggDict = getAC({textSelection:"mud"});
-  this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
-  this.assert( suggDict["Cmd_two"], "cmd two should be in" );
-  execute = suggDict["Cmd_two"];
-  execute();
-  this.assert( twoWasCalled == "mud", "should have been called with mud" );
+                                       makeTestParser(null,
+                                                      null,
+                                                      null,
+                                                      fakeContextUtils),
+                                       onCM);
+  function onCM(cmdMan) {
+    var getAC = cmdMan.makeCommandSuggester();
+    var suggDict = getAC({textSelection:"tree"});
+    this.assert( suggDict["Cmd_one"], "cmd one should be in" );
+    this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
+    var execute = suggDict["Cmd_one"];
+    execute();
+    this.assert( oneWasCalled == "tree", "should have been calld with tree" );
+    suggDict = getAC({textSelection:"mud"});
+    this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
+    this.assert( suggDict["Cmd_two"], "cmd two should be in" );
+    execute = suggDict["Cmd_two"];
+    execute();
+    this.assert( twoWasCalled == "mud", "should have been called with mud" );
+  }
 }
 
 function testVerbEatsSelection() {
@@ -848,13 +851,15 @@ function testAsyncNounSuggestions() {
     displayMessage: function(msg) {}
   };
   var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
-  var cmdMan = makeCommandManager.call(this, fakeSource, mockMsgService,
-                                       makeTestParser());
-  cmdMan.updateInput( "dostuff halifax", emptyContext, null );
-  this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
-  noun_type_slowness.triggerCallback();
-  cmdMan.onSuggestionsUpdated( "dostuff h", emptyContext, null );
-  this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
+  makeCommandManager.call(this, fakeSource, mockMsgService,
+                          makeTestParser(), onCM);
+  function onCM(cmdMan) {
+    cmdMan.updateInput( "dostuff halifax", emptyContext, null );
+    this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
+    noun_type_slowness.triggerCallback();
+    cmdMan.onSuggestionsUpdated( "dostuff h", emptyContext, null );
+    this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
+  }
 }
 
 

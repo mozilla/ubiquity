@@ -1,28 +1,28 @@
 /*
   =skin=
-//  @name 0.1 Skin
-//  @author Mozilla Labs
-//  @homepage http://labs.mozilla.com
+  @name 0.1 Skin
+  @author Mozilla Labs
+  @homepage http://labs.mozilla.com
 
   @email abimanyuraja@gmail.com
   @license MPL/LGPL/GPL
   =/skin=
 */
 
-/* formatting for ubiquity pop-up */
+@-moz-document url(chrome://browser/content/browser.xul) {
 
-#cmd-panel {
-  padding: 0px;
+#ubiquity-panel {
+  padding: 10px;
   margin: 0px;
   background: #272727;
 }
 
-#cmd-entry-container {
-  padding: 10px;
+#ubiquity-entry-container {
+  padding-bottom: 10px;
   font-size: 12pt;
 }
 
-#cmd-entry {
+#ubiquity-entry {
   -moz-appearance: none;
   border: none;
   font-size: 12pt;
@@ -31,61 +31,64 @@
   width: 100%;
 }
 
-#cmd-preview {
-  -moz-appearance: none;
+#ubiquity-suggest {
   border: none;
-  padding: 10px;
+  width: 501px;
+  min-height: 32px;
+  margin-bottom: -5px;
   overflow: hidden;
 }
 
-
-body#previewbody {
-    margin: 0;
-    padding: 0;
-    color: #BBB;
+#ubiquity-preview {
+  border-left: solid 1px #0066cc;
+  max-height: 500px;
+  margin-bottom: 10px;
+  overflow: hidden;
 }
 
-div#ubiquity-preview{
-    width: 500px;
+#ubiquity-browser {
+  width: 500px;
+  height: 500px;
 }
 
-/* formatting for suggestion list */
-
-div#ubiquity-preview #preview-pane {
-    padding-left: 15px;
-    padding: 7px;
-    border-left: solid 1px #0066cc;
 }
 
-div#ubiquity-preview .hilited-text {
-    /*border-left: solid 5px #0066cc;*/
-    padding: 5px;
-}
-div#ubiquity-preview .hilited {
-    background: #272750;
-    border-left: solid 1px #0066cc;
-    color: #ffffff;
-}
-div#ubiquity-preview .suggested {
-    padding: 5px;
-    border-left: solid 1px #272750;
+@-moz-document url(chrome://ubiquity/content/suggest.html) {
+
+body {
+  margin: 0;
+  color: #bbb;
 }
 
-div#ubiquity-preview .needarg {
-    font-style: oblique;
-    color: #999999;
-}
-div#ubiquity-preview .cmdicon {
-    display: inline-block;
-    width: 16px;
-}
-div#ubiquity-preview .cmdicon img {
-    vertical-align: middle;
-    width: 16px;
-    height: 16px;
+.suggested {
+  padding: 5px;
+  border-left: solid 1px #272750;
 }
 
-div#ubiquity-preview .selection {
+.hilited {
+  background-color: #272750;
+  border-left: solid 1px #0066cc;
+  color: #ffffff;
+}
+
+.needarg {
+  font-style: oblique;
+  color: #999999;
+}
+
+.cmdicon {
+  display: inline-block;
+  width: 16px;
+  margin-right: 0.3em;
+}
+
+.cmdicon img {
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+}
+
+.selection {
   padding: 2px;
   -moz-border-radius: 3px;
   display: inline-block;
@@ -99,27 +102,33 @@ div#ubiquity-preview .selection {
   border: 1px solid #777;
 }
 
-/* formatting for data inside preview */
-
-.ubiquity-preview-content {
-    color: #ffffff;
-    background: #272750;
 }
 
-.ubiquity-preview-content .gresult {
+@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+
+body {
+  margin: 0;
+  padding: 5px;
+  color: #ffffff;
+  background-color: #272750;
+}
+
+.gresult {
   margin-bottom: 10px;
 }
-.ubiquity-preview-content .gresult a {
+.gresult a {
   color: #0066cc;
   text-decoration: underline;
   font-size: small;
   cursor: pointer;
 }
-.ubiquity-preview-content .gresult-url {
+.gresult-url {
   font-size: x-small;
   /*color: #00aa00;*/
 }
-.ubiquity-preview-content .gresult-content {
+.gresult-content {
   margin-right: 10px;
   font-size: x-small;  
+}
+
 }

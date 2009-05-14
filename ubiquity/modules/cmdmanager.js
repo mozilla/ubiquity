@@ -43,14 +43,9 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/preview_browser.js");
 
 const DEFAULT_MAX_SUGGESTIONS = 5;
-const MAX_SUGGESTIONS_PREF = 'extensions.ubiquity.maxSuggestions';
+const MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
 
-var DEFAULT_PREVIEW_URL = (
-  ('data:text/html,' +
-   encodeURI('<html><body class="ubiquity-preview-content" ' +
-             'style="overflow: hidden; margin: 0; padding: 0;">' +
-             '</body></html>'))
-);
+const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
 
 function CommandManager(cmdSource, msgService, parser, suggsNode,
                         previewPaneNode, helpNode) {
@@ -60,11 +55,16 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
   this.__lastInput = "";
   this.__nlParser = parser;
   this.__activeQuery = null;
-  this.__domNodes = {suggs: suggsNode,
-                     preview: previewPaneNode,
-                     help: helpNode};
-  this._previewer = new PreviewBrowser(previewPaneNode,
-                                       DEFAULT_PREVIEW_URL);
+  this.__domNodes = {
+    suggs: suggsNode,
+    suggsIframe: suggsNode.getElementsByTagName("iframe")[0],
+    preview: previewPaneNode,
+    help: helpNode};
+  this._previewer = new PreviewBrowser(
+    previewPaneNode.getElementsByTagNameNS(
+      "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+      "browser")[0],
+    DEFAULT_PREVIEW_URL);
 
   var self = this;
 
@@ -135,23 +135,19 @@ CommandManager.prototype = {
 
   _renderSuggestions : function CMD__renderSuggestions() {
     var content = "";
-    let suggestionList = this.__activeQuery.suggestionList;
-    for (var x = 0; x < suggestionList.length; x++) {
-      var suggText = suggestionList[x].getDisplayText();
-      var suggIconUrl = suggestionList[x].getIcon();
-      var suggIcon = "";
-      if(suggIconUrl) {
-        suggIcon = "<img src=\"" + Utils.escapeHtml(suggIconUrl) + "\"/>";
-      }
-      suggText = "<div class=\"cmdicon\">" + suggIcon + "</div>&nbsp;" + suggText;
-      if ( x == this.__hilitedSuggestion ) {
-        content += "<div class=\"hilited\"><div class=\"hilited-text\">" + suggText + "</div>";
-        content += "</div>";
-      } else {
-        content += "<div class=\"suggested\">" + suggText + "</div>";
-      }
+    var suggestionList = this.__activeQuery.suggestionList;
+    for (let x = 0, l = suggestionList.length; x < l; ++x) {
+      let suggText = suggestionList[x].getDisplayText();
+      let suggIconUrl = suggestionList[x].getIcon();
+      let suggIcon = "";
+      if (suggIconUrl)
+        suggIcon = '<img src="' + Utils.escapeHtml(suggIconUrl) + '"/>';
+      suggText = '<div class="cmdicon">' + suggIcon + "</div>" + suggText;
+      content += ('<div class="suggested' +
+                  (x === this.__hilitedSuggestion ? " hilited" : "") +
+                  '">' + suggText + "</div>");
     }
-    this.__domNodes.suggs.innerHTML = content;
+    this.__domNodes.suggsIframe.contentDocument.body.innerHTML = content;
   },
 
   _renderPreview : function CM__renderPreview(context) {

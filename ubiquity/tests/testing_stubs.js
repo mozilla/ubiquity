@@ -24,19 +24,42 @@ FakeCommandSource.prototype = {
   }
 };
 
-function makeCommandManager(source, msgService, parser) {
+function makeCommandManager(source, msgService, parser, callback) {
   this.skipIfXPCShell();
 
+  var self = this;
   var Cc = Components.classes;
   var Ci = Components.interfaces;
-
   var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
                      .getService(Ci.nsIAppShellService)
                      .hiddenDOMWindow;
   var fakeDom = hiddenWindow.document;
+  var xulIframe = fakeDom.createElement("iframe");
+  var onload = this.makeCallback(function _onload() {
+    xulIframe.removeEventListener("load", onload, true);
+    var doc = xulIframe.contentDocument;
+    var suggNode = doc.createElement("div");
+    var suggFrame = doc.createElementNS("http://www.w3.org/1999/xhtml",
+                                        "iframe");
+    var prevNode = doc.createElement("div");
 
-  return new CommandManager(source, msgService, parser,
-                            fakeDom.createElement("div"),
-                            fakeDom.createElement("div"),
-                            fakeDom.createElement("div"));
+    suggNode.appendChild(suggFrame).src = "data:text/html,";
+    prevNode.appendChild(
+      doc.createElementNS(
+        "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+        "browser"));
+
+    callback.call(self,
+                  new CommandManager(source, msgService, parser,
+                                     doc.documentElement.appendChild(suggNode),
+                                     doc.documentElement.appendChild(prevNode),
+                                     doc.createElement("div")));
+    xulIframe.parentNode.removeChild(xulIframe);
+    callback = null;
+    xulIframe = null;
+  });
+  xulIframe.setAttribute("src",
+                         "chrome://ubiquity/content/content-preview.xul");
+  xulIframe.addEventListener("load", onload, true);
+  fakeDom.body.appendChild(xulIframe);
 }
