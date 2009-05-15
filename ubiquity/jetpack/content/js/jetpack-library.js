@@ -58,13 +58,16 @@ function EventListenerMixIn(options) {
 
   function onEvent(event) {
     if (listeners) {
-      var listenersCopy = listeners.slice();
-      for (var i = 0; i < listenersCopy.length; i++)
-        try {
-          listenersCopy[i](event.originalTarget);
-        } catch (e) {
-          console.exception(e);
-        }
+      event = options.filter.call(this, event);
+      if (event) {
+        var listenersCopy = listeners.slice();
+        for (var i = 0; i < listenersCopy.length; i++)
+          try {
+            listenersCopy[i](event);
+          } catch (e) {
+            console.exception(e);
+          }
+      }
     }
   };
 
@@ -204,11 +207,17 @@ function JetpackLibrary() {
 
     var mixIns = [];
 
-    mixIns.push(new EventListenerMixIn({name: "onPageLoad",
-                                        watch: browser,
-                                        eventName: "DOMContentLoaded",
-                                        useCapture: true,
-                                        mixInto: this}));
+    mixIns.push(
+      new EventListenerMixIn(
+        {name: "onPageLoad",
+         watch: browser,
+         eventName: "DOMContentLoaded",
+         useCapture: true,
+         mixInto: this,
+         filter: function(event) {
+           // Return the document that just loaded.
+           return event.originalTarget;
+         }}));
 
     this.__defineGetter__("isClosed",
                           function() { return (browser == null); });
