@@ -6,11 +6,10 @@ var JetpackLibraryTests ={
 
   testTabOpenFocusAndClose: function(self) {
     var Jetpack = new JetpackLibrary();
-    var numTabs = Jetpack.tabs.length;
+    var originalTabCount = Jetpack.tabs.length;
     var tab = Jetpack.tabs.open("data:text/html,hai2u");
-    self.assert(typeof(tab) == "object");
     self.assert(Jetpack.tabs.focused != tab);
-    self.assert(Jetpack.tabs.length == numTabs+1);
+    self.assert(Jetpack.tabs.length == originalTabCount+1);
     tab.focus();
     self.assert(Jetpack.tabs.focused == tab);
     tab.onPageLoad(
@@ -18,7 +17,7 @@ var JetpackLibraryTests ={
         tab.onPageLoad.unbind(onPageLoad);
         self.assert($(document).text() == "hai2u");
         tab.close();
-        self.assert(Jetpack.tabs.length == numTabs);
+        self.assert(Jetpack.tabs.length == originalTabCount);
         self.success();
       });
     self.setTimeout(1000);
