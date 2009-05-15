@@ -11,7 +11,18 @@ var Extension = {
   isVisible: (window.frameElement === null),
   isHidden: (window.frameElement !== null),
 
-  Manager: {}
+  Manager: {},
+
+  addUnloadMethod: function addUnloadMethod(obj, unloader) {
+    function unloadWrapper() {
+      window.removeEventListener("unload", unloadWrapper, true);
+      unloader.apply(obj, arguments);
+    }
+
+    window.addEventListener("unload", unloadWrapper, true);
+
+    obj.unload = unloadWrapper;
+  }
 };
 
 (function() {

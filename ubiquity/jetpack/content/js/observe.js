@@ -14,7 +14,8 @@ function EventHubWatcher(hub) {
     listeners.push({name: name, listener: listenerWrapper});
   };
 
-  $(window).unload(
+  Extension.addUnloadMethod(
+    this,
     function() {
       listeners.forEach(
         function(info) {
@@ -42,7 +43,8 @@ function WindowWatcher() {
            .getService(Ci.nsIWindowWatcher);
   ww.registerNotification(observer);
 
-  $(window).unload(
+  Extension.addUnloadMethod(
+    this,
     function() {
       ww.unregisterNotification(observer);
     });

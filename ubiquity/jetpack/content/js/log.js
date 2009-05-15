@@ -37,7 +37,8 @@ var Logging = {
                    .QueryInterface(Ci.nsIConsoleService);
     cService.registerListener(consoleListener);
 
-    $(window).unload(
+    Extension.addUnloadMethod(
+      this,
       function() {
         cService.unregisterListener(consoleListener);
       });
@@ -169,7 +170,8 @@ var Logging = {
         }
       }
       consoleElement.addEventListener("DOMNodeInserted", onInsert, false);
-      $(window).unload(
+      Extension.addUnloadMethod(
+        this,
         function() {
           consoleElement.removeEventListener("DOMNodeInserted", onInsert,
                                              false);

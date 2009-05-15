@@ -97,21 +97,22 @@ var JetpackRuntime = {
   contexts: [],
 
   Context: function JetpackContext(sandbox, url, srcUrl) {
-    this.finalize = function finalize() {
-      delete sandbox['$'];
-      delete sandbox['jQuery'];
-    };
+    MemoryTracking.track(this);
+    Extension.addUnloadMethod(
+      this,
+      function() {
+        delete sandbox['$'];
+        delete sandbox['jQuery'];
+      });
 
     this.url = url;
     this.srcUrl = srcUrl;
-
-    MemoryTracking.track(this);
   },
 
-  finalize: function finalize() {
+  unloadAllJetpacks: function unloadAllJetpacks() {
     this.contexts.forEach(
       function(jetpack) {
-        jetpack.finalize();
+        jetpack.unload();
       });
     this.contexts = [];
   },
@@ -172,15 +173,14 @@ var JetpackRuntime = {
   FeedPlugin: {}
 };
 
+Extension.addUnloadMethod(JetpackRuntime, JetpackRuntime.unloadAllJetpacks);
+
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
                         JetpackRuntime.FeedPlugin);
 
 $(window).ready(
   function() {
     JetpackRuntime.loadJetpacks();
-    window.addEventListener("unload",
-                            function() { JetpackRuntime.finalize(); },
-                            false);
 
     function maybeReload(eventName, uri) {
       var doReload = false;
