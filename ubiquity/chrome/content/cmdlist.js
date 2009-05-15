@@ -404,6 +404,8 @@ function addAllUnsubscribedFeeds(feedMgr) {
     $("#command-feed-graveyard-div").hide();
     $("#unsubscribed-feeds-help").hide();
   } else {
+    $("#command-feed-graveyard-div").show();
+    $("#unsubscribed-feeds-help").show();
     $("#num-unsubscribed-feeds").html(unscrFeeds.length);
     unscrFeeds.forEach(addUnsubscribedFeed);
   }
@@ -426,12 +428,15 @@ function rebuildTable() {
 
   // If there are URL GET arguments, jump to the right place
   let mainURL = window.location.search;
-  let arguments = mainURL.split("?")[1].split("&");
-  for (let i in arguments) {
-    let pair = arguments[i].split("=");
-    if (pair[0] == "cmdname") {
-      window.location.hash = pair[1];
-      break;
+  let arguments = mainURL.split("?");
+  if (arguments.length > 1) {
+    arguments = arguments[1].split("&");
+    for (let i in arguments) {
+      let pair = arguments[i].split("=");
+      if (pair[0] == "cmdname") {
+        window.location.hash = pair[1];
+        break;
+      }
     }
   }
 }
