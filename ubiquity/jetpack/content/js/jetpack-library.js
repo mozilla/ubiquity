@@ -219,64 +219,53 @@ function JetpackLibrary() {
            return event.originalTarget;
          }}));
 
-    this.__defineGetter__("isClosed",
-                          function() { return (browser == null); });
+    this.__proto__ = {
+      get isClosed() { return (browser == null); },
 
-    this.__defineGetter__(
-      "url",
-      function() {
+      get url() {
         if (browser && browser.currentURI)
           return browser.currentURI.spec;
         return null;
-      });
+      },
 
-    this.__defineGetter__(
-      "contentWindow",
-      function() {
+      get contentWindow() {
         if (browser && browser.contentWindow)
           return browser.contentWindow;
         return null;
-        });
+      },
 
-    this.__defineGetter__(
-      "contentDocument",
-      function() {
+      get contentDocument() {
         if (browser && browser.contentDocument)
           return browser.contentDocument;
         return null;
-        });
+      },
 
-    this.__defineGetter__(
-      "raw",
-      function() {
+      get raw() { return chromeTab; },
+
+      focus: function focus() {
         if (browser)
-          return chromeTab;
-        return null;
-      });
+          tabbrowser.selectedTab = chromeTab;
+      },
 
-    this.focus = function focus() {
-      if (browser)
-        tabbrowser.selectedTab = chromeTab;
-    };
+      close: function close() {
+        if (browser)
+          browser.contentWindow.close();
+      },
 
-    this.close = function close() {
-      if (browser)
-        browser.contentWindow.close();
-    };
+      toString: function toString() {
+        if (!browser)
+          return "[Closed Browser Tab]";
+        else
+          return "[Browser Tab]";
+      },
 
-    this._finalize = function _finalize() {
-      mixIns.forEach(function(mixIn) { mixIn.finalize(); });
-      mixIns = null;
-      tabbrowser = null;
-      chromeTab = null;
-      browser = null;
-    };
-
-    this.toString = function toString() {
-      if (!browser)
-        return "[Closed Browser Tab]";
-      else
-        return "[Browser Tab]";
+      _finalize: function _finalize() {
+        mixIns.forEach(function(mixIn) { mixIn.finalize(); });
+        mixIns = null;
+        tabbrowser = null;
+        chromeTab = null;
+        browser = null;
+      }
     };
   }
 
