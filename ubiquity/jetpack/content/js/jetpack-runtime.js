@@ -96,11 +96,14 @@ var JetpackRuntime = {
 
   contexts: [],
 
-  Context: function JetpackContext(sandbox) {
+  Context: function JetpackContext(sandbox, url, srcUrl) {
     this.finalize = function finalize() {
       delete sandbox['$'];
       delete sandbox['jQuery'];
     };
+
+    this.url = url;
+    this.srcUrl = srcUrl;
 
     MemoryTracking.track(this);
   },
@@ -149,7 +152,8 @@ var JetpackRuntime = {
           var codeSource = feed.getCodeSource();
           var code = codeSource.getCode();
           var sandbox = sandboxFactory.makeSandbox(codeSource);
-          self.contexts.push(new self.Context(sandbox));
+          self.contexts.push(new self.Context(sandbox, feed.uri.spec,
+                                              feed.srcUri.spec));
           try {
             var codeSections = [{length: code.length,
                                  filename: codeSource.id,
@@ -178,31 +182,36 @@ $(window).ready(
                             function() { JetpackRuntime.finalize(); },
                             false);
 
-    var watcher = new EventHubWatcher(JetpackRuntime.FeedPlugin.FeedManager);
-
     function maybeReload(eventName, uri) {
-      if (eventName == "purge") {
-        // TODO: There's a bug in Ubiquity's feed manager which makes it
-        // impossible for us to get metadata about the feed, because it's
-        // already purged. We need to fix this. For now, just play it
-        // safe and reload Jetpack.
-        console.log("Reloading Jetpack due to purge on", uri.spec);
-        window.location.reload();
-      } else
+      var doReload = false;
+
+      switch (eventName) {
+      case "feed-change":
+      case "purge":
+      case "unsubscribe":
+        var matches = [context for each (context in JetpackRuntime.contexts)
+                               if (context.url == uri.spec)];
+        if (matches.length)
+          doReload = true;
+        break;
+      case "subscribe":
         JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
           function(feed) {
-            // TODO: This logic means that we actually reload many
-            // times during Firefox startup, depending on how many
-            // Jetpack feeds exist, since a feed-change event is
-            // fired for every feed at startup!
             if (feed.uri.spec == uri.spec && feed.type == "jetpack") {
-              console.log("Reloading Jetpack due to", eventName, "on",
-                          uri.spec);
-              window.location.reload();
+              doReload = true;
             }
           });
+        break;
+      }
+
+      if (doReload) {
+        console.log("Reloading Jetpack due to", eventName, "on",
+                    uri.spec);
+        window.location.reload();
+      }
     }
 
+    var watcher = new EventHubWatcher(JetpackRuntime.FeedPlugin.FeedManager);
     watcher.add("feed-change", maybeReload);
     watcher.add("subscribe", maybeReload);
     watcher.add("purge", maybeReload);
