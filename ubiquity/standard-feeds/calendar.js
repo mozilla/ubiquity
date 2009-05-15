@@ -6,11 +6,11 @@ function reloadGoogleCalendarTabs() {
       var win = enumerator.getNext();
       var index = 0, numTabs = win.getBrowser().mPanelContainer.childNodes.length;
       while (index < numTabs) {
-      	var currentTab = win.getBrowser().getBrowserAtIndex(index);
-      	if(currentTab.currentURI.spec.indexOf("google.com/calendar") > -1) {
-      	  currentTab.reload();
-      	}
-      	index++;
+        var currentTab = win.getBrowser().getBrowserAtIndex(index);
+        if(currentTab.currentURI.spec.indexOf("google.com/calendar") > -1) {
+          currentTab.reload();
+        }
+        index++;
       }
     }
   } catch(e) {
@@ -65,15 +65,10 @@ CmdUtils.CreateCommand({
   }
 });
 
-
-// TODO: Don't do a whole-sale copy of the page ;)
-function checkCalendar(pblock, date) {
-  var url = "http://www.google.com/calendar/m";
-  var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
-
-  Utils.ajaxGet(url + params, function(html) {
-    pblock.innerHTML = html;
-  });
+function linkToButton() {
+  var txt = this.textContent;
+  jQuery(this).replaceWith(
+    <button value={this.href} accesskey={txt[0]}>{txt}</button>.toXMLString());
 }
 
 CmdUtils.CreateCommand({
@@ -81,22 +76,50 @@ CmdUtils.CreateCommand({
   takes: {"date to check": noun_type_date},
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
-  help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
-        "Google account to use it.  Try issuing &quot;check thursday&quot;.",
-  execute: function( directObj ) {
+  help: ("" + <>
+         Currently, only works with
+         <a href="http://calendar.google.com">Google Calendar</a>,
+         so you&#x27;ll need a Google account to use it.
+         Try issuing "check thursday".</>),
+  execute: function(directObj) {
     var date = directObj.data;
-    var url = "http://www.google.com/calendar/m";
+    var url = "http://www.google.com/calendar/";
     var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
 
     Utils.openUrlInBrowser( url + params );
   },
-  preview: function( pblock, directObj ) {
-    var date = directObj.data;
-    if (date) {
-      pblock.innerHTML = "Checks Google Calendar for events on " +
-                         date.toString("dddd, dS MMMM, yyyy") + ".";
-      checkCalendar( pblock, date );
-    } else
+  preview: function preview(pblock, {data: date, url}) {
+    if (!date) {
       pblock.innerHTML = "Checks Google Calendar for the date you specify.";
+      return;
+    }
+    pblock.innerHTML = ("Checking Google Calendar for events on " +
+                        date.toString("dddd, dS MMMM, yyyy") + ".");
+    CmdUtils.previewGet(
+      pblock,
+      url || "http://www.google.com/calendar/m",
+      {as_sdt: date.toString("yyyyMMdd")},
+      function(htm) {
+        var [cal] = /<div class[^]+$/(htm) || 0;
+        if (!cal) {
+          pblock.innerHTML =
+            <>Please <a href={this.url} accesskey="L">login</a>.</>;
+          return;
+        }
+        var $c = CmdUtils.absUrl(
+          (jQuery('<div class="calendar">' + cal).eq(0)
+           .find(".c1:nth(1), form, span").remove().end()),
+          this.url);
+        $c.find(".c1 > a").each(linkToButton);
+        $c.find("button").focus(function btn() {
+          this.blur();
+          this.disabled = true;
+          preview(pblock, {data: date, url: this.value});
+          return false;
+        });
+        pblock.innerHTML = "";
+        $c.appendTo(pblock);
+      },
+      "text");
   }
 });
