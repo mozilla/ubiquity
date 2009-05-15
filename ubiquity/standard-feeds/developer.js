@@ -121,26 +121,171 @@ function cmd_view_source() {
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
 cmd_view_source.icon = "chrome://ubiquity/skin/icons/page_code.png";
 
-function escape_html_entities(text) {
-  // TODO finish this?
-  text = text.replace(/</g, "&amp;lt;");
-  text = text.replace(/>/g, "&amp;gt;");
-  return text;
-}
-var escape_desc = "Replaces html entities (&lt;, &gt;, and &amp;) with their escape sequences.";
 CmdUtils.CreateCommand({
   name:"escape-html-entities",
   takes: {text: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/html_go.png",
-  description: escape_desc,
-  preview: function(pBlock, directObj) {
-   if (directObj.html)
-     pBlock.innerHTML = "Replaces your selection with " + escape_html_entities(directObj.html);
-   else
-     pBlock.innerHTML = escape_desc;
+  description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
+                                " with their escape sequences."),
+  preview: function(pBlock, {html}) {
+    pBlock.innerHTML = (html
+                        ? (<>Replaces your selection with:
+                           <pre>{Utils.escapeHtml(html)}</pre></>)
+                        : this.description);
   },
-  execute: function(directObj) {
-    if (directObj.html)
-      CmdUtils.setSelection(escape_html_entities(directObj.html));
+  execute: function({html}) {
+    if(!html) return;
+    var esch = Utils.escapeHtml(html);
+    CmdUtils.setSelection(esch, {text: esch});
   }
+});
+
+CmdUtils.CreateCommand({
+  name: 'selector-selector',
+  description: ''+ (
+    <ul style="list-style-image:none">
+    <li>Lets you type a jQuery selector and highlights matched elements.</li>
+    <li>Hovering on an element generates a matching selector.</li>
+    </ul>),
+  help: ''+ [
+    [<b>Left-click / Enter</b>,
+     'Copy and Quit'],
+    [<b>Middle-click / <u>C</u></b>,
+     'Copy'],
+    [<b>Right-click / Esc / <u>Q</u></b>,
+     'Quit'],
+    [<b><u>M</u></b>,
+     'Move'],
+    [<b>PageUp/Dn</b>,
+     'Scroll vertically'],
+    [<b>shift + PageUp/Dn</b>,
+     'Scroll horizontally'],
+    ].reduce(function(l, [t, d]) l.appendChild(<><dt>{t}</dt><dd>{d}</dd></>),
+             <dl/>),
+  author: [n.link('http://ubigist.appjet.net/?o='+ n)
+           for each(n in ['cers', 'satyr'])].join(', '),
+  license: 'MIT',
+  icon: 'http://jquery.com/favicon.ico',
+  execute: function ss_execute(){
+    const Me = this, Key = Me.name + Me._key, Doc = CmdUtils.getDocument();
+    if(Doc.getElementById(Key)) return;
+
+    XML.prettyPrinting = false;
+    var $i = jQuery(Doc.body).append(
+      <div><style>
+      {(Me._css +'').replace(/\$/g, Key)
+        .replace(/\s*\}/g, ';}').replace(/;+/g, ' !important;')}
+      </style><iframe id={Key} src={'data:text/html;charset=utf8,'+ Me._htm}
+      width="0" style="left:0; top:0"/></div>+'')
+      .find('#'+ Key).load(load);
+    XML.setSettings(XML.defaultSettings());
+    
+    function load(){
+      var {contentDocument: IDoc, style: IStyle} = this,
+      [ebox] = jQuery('#edit', IDoc).keypress(onkey);
+
+      ebox.style.width = Doc.defaultView.innerWidth * .7;
+      this.height = IDoc.height;
+      $i.animate({width: IDoc.width}, 333,
+                 function focus_delayed(){ Utils.setTimeout(focus) });
+      jQuery(Doc).mouseover(hover).click(click);
+      jQuery(IDoc).click(onbutton);
+
+      function copy(){ copydisp(ebox.value) }
+      function focus(){ ebox.focus() }
+      function onbutton({target}){
+        switch(target.id){
+          case 'quit': quit(); return;
+          case 'copy': copy(); break;
+          case 'move':
+          var props = ['top', 'bottom'], texts = ['\u2193', '\u2191'],
+          which = +/^0/.test(IStyle[props[0]]);
+          IStyle[props[which ^ 1]] = '';
+          IStyle[props[which ^ 0]] = 0;
+          target.textContent = texts[which];
+        }
+        focus();
+      }
+      function onkey(e){
+        switch(e.keyCode){
+          case 33: // PageUp
+          case 34: // PageDn
+          scroll(.8 * (e.keyCode * 2 - 67), e.shiftKey);
+          return false;
+          case 13: copy(); // Enter
+          case 27: quit(); // Escape
+          return false;
+        }
+        var me = this;
+        delay(function onkey_delayed(){
+          if(me.v !== (me.v = me.value))
+            me.style.fontStyle = hilite(me.value) ? '' : 'oblique';
+        }, 123);
+      }
+      function hover({target}){
+        if(target === $i[0]) return;
+        delay(function hilite_delayed(){
+          var path = breadcrumbs(target);
+          hilite(path);
+          ebox.value = path;
+        }, 42);
+      }
+      function click({button, target}){
+        if(button !== 2) copydisp(breadcrumbs(target));
+        if(button !== 1) quit();
+        return false;
+      }
+    }
+    function scroll(rate, horiz){
+      with(Doc.defaultView)
+        scrollBy(innerWidth * rate * horiz, innerHeight * rate * !horiz)
+    }
+    function delay(cb, ms){
+      Utils.clearTimeout(delay.tid);
+      delay.tid = Utils.setTimeout(cb, ms);
+    }
+    function breadcrumbs(it){
+      var doc = it.ownerDocument, htm = doc.documentElement, sels = [], i = -1;
+      do {
+        if(it.id){
+          sels[++i] = '#'+ it.id;
+          break;
+        }
+        var m = (it.className.replace(Key, '')
+                 .match(/[_a-zA-Z\u0080-\uffff][-\w\u0080-\uffff]{0,}/g));
+        sels[++i] = m ? '.'+ m.join('.') : it.nodeName.toLowerCase();
+      } while((it = it.parentNode) !== htm && it !== doc);
+      return sels.reverse().join(' > ');
+    }
+    function hilite(path) {
+      (hilite.cache || jQuery('.'+ Key, Doc)).removeClass(Key);
+      try { hilite.cache = jQuery(path, Doc).addClass(Key) }
+      catch(_){ return false }
+      return true;
+    }
+    function copydisp(txt){
+      if(!txt) return;
+      CmdUtils.copyToClipboard(txt);
+      displayMessage({icon: Me.icon, title: Me.name, text: txt});
+    }
+    function quit(){
+      jQuery(Doc).unbind();
+      $i.parent().remove();
+      hilite({});
+    }
+  },
+  _key: String.slice(Math.random(), 2),
+  _css: <><![CDATA[
+    .$ {outline:2px blue solid}
+    #$ {position:fixed; z-index:2147483647; border:none; opacity:0.9}
+    ]]></>,
+  _htm: <body><style><![CDATA[
+    body {display:inline-block; overflow:hidden; margin:0em; background:menu}
+    button {font-weight:bolder}
+    ]]></style><nobr
+    ><input id="edit"></input
+    ><button id="copy" title="Copy" accesskey="c"><u>C</u>opy</button
+    ><button id="move" title="Move" accesskey="m">&#x2193;</button
+    ><button id="quit" title="Quit" accesskey="q">&#xD7;</button
+    ></nobr></body>,
 });
