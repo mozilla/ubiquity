@@ -507,10 +507,12 @@ CmdUtils.CreateCommand({
     var goal = arguments.goal || arguments.to;
     var toLang = (goal ? goal.text : noun_type_language.getLangName(defaultLang));
     var toLangCode = (goal ? goal.data : defaultLang);
+    // TODO bug apparently goal is resolving to true even when there is no
+    // goal.data, so the above line comes out to null when it should be
+    // using defaultLang.
     var textToTranslate = (arguments.object ? arguments.object.text : '');
 
-    var lang = toLang[0].toUpperCase() + toLang.substr(1);
-    dump(lang+'\n')
+    var lang = "" + goal; //toLangCode; //toLang[0].toUpperCase() + toLang.substr(1);
 
     pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
     translateTo( textToTranslate, {to:toLangCode}, function( translation ) {

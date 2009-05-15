@@ -53,11 +53,11 @@ function fadeInText( text ) {
 
   function setTextColor( colorInt ) {
     let colorString = "rgb(" + colorInt + ", " + colorInt + ", " + colorInt + ")";
-    $("#interactive-tutorial-div").css( "color", colorString );
+    $("#tutorial-instructions-div").css( "color", colorString );
   }
 
   setTextColor(color);
-  $("#interactive-tutorial-div").html( text );
+  $("#tutorial-instructions-div").html( text );
 
   var intervalId;
   intervalId = window.setInterval( function() {
@@ -70,7 +70,7 @@ function fadeInText( text ) {
 }
 
 function hideOtherContent() {
-  $("#not-the-tutorial").css("display", "none");
+  $(".not-the-tutorial").css("display", "none");
 }
 
 function moveDivRight() {
@@ -195,17 +195,28 @@ function showArrowToPreview() {
   ctx.stroke();
 }
 
-
-
 function startUbiqTutorial() {
-
   hideOtherContent();
   destroyCanvas();
+
+  var html = "<p>Welcome to the Ubiquity Tutorial.</p>"
+    + "<p><a onclick='ubiqTutorialStage1();'>Click Here to Start"
+    + " From The Beginning</a><p>"
+    + "<p>Start from the middle:</p><ol>"
+    + "<li><a onclick='ubiqTutorialStage1();'>How to start Ubiquity</a></li>"
+    + "<li><a onclick='ubiqTutorialStage3();'>Weather command; previews</a></li>"
+    + "<li><a onclick='ubiqTutorialStage7();'>Calculate command; abbreviations</a></li>"
+    + "<li><a onclick='ubiqTutorialStage12();'>Wikipedia command; the suggestion list</a></li>"
+    + "<li><a onclick='ubiqTutorialStage16();'>Translate command; executing commands</a></li>"
+    + "</ol>";
+  fadeInText( html );
+}
+
+function ubiqTutorialStage1() {
+
   var keyCombo = PrefKeys.getKeyCombo();
-
-
-  var introHtml = "<p>Welcome to the Ubiquity tutorial.  Ubiquity is a "
-    + " Firefox add-on that makes the Internet do your bidding.</p>"
+  var introHtml = "<p>Ubiquity Tutorial, part 1 of 6: How to start Ubiquity"
+    + "<p>Welcome to the Ubiquity tutorial.  </p>"
     + "<p>Let's get started.  To summon Ubiquity, do this now:</p>"
     + "<p><b>Hold down the " +  keyCombo[0] + " key and tap the "
     + keyCombo[1] + " key.</b></p>";
@@ -230,9 +241,10 @@ function ubiqTutorialStage2() {
 
 function ubiqTutorialStage3() {
   var keyCombo = PrefKeys.getKeyCombo();
-  let stage3Html = "<p>OK, so now let's learn a command."
-    + " Summon Ubiquity again...</p>"
-    + " (Remember, <b>hold down the " + keyCombo[0] + " key and tap the "
+  let stage3Html = "<p>Ubiquity Tutorial, part 2 of 6: "
+    + " Weather command and Previews</p>"
+    + "<p>OK, so now let's learn a command. Summon Ubiquity again...</p>"
+    + "<p>(Remember, <b>hold down the " + keyCombo[0] + " key and tap the "
     + keyCombo[1] + " key.</b>)</p>";
   fadeInText(stage3Html);
   destroyCanvas();
@@ -241,6 +253,7 @@ function ubiqTutorialStage3() {
 }
 
 function ubiqTutorialStage4() {
+  moveDivRight();
   let stage4Html = "<p>Now type the word <b>weather</b>....</p>";
   fadeInText(stage4Html);
   showArrowToInputBox();
@@ -276,15 +289,19 @@ function ubiqTutorialStage6() {
 }
 
 function ubiqTutorialStage7() {
-  let stage7Html = "<p>Now summon Ubiquity again, and we'll learn some"
+  destroyCanvas();
+  let stage7Html = "<p>Ubiquity Tutorial, part 3 of 6: "
+    + " Calculate command and Abbreviations</p>"
+    + " <p>Summon Ubiquity again, and we'll learn some"
     + " more commands.</p>";
   fadeInText(stage7Html);
   waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage8 );
 }
 
 function ubiqTutorialStage8() {
-   let stage8Html = "<p>This time, <b>type just the letter 'C'</b> and "
-    + "see what happens.</p>";
+  moveDivRight();
+   let stage8Html = "<p>This time, <b>type just the letter 'c'</b>"
+     + " (lower-case) and see what happens.</p>";
   fadeInText(stage8Html);
   showArrowToInputBox();
   waitForUserAction( function() {return ubiqSuggestionIs("convert" );},
@@ -326,7 +343,9 @@ function ubiqTutorialStage11() {
 }
 
 function ubiqTutorialStage12() {
-  let stage12Html = "<p>Summon Ubiquity again...</p>";
+  let stage12Html = "<p>Ubiquity Tutorial, part 4 of 6:"
+    + " Wikipedia command and the suggestion list</p>"
+    + "<p>Summon Ubiquity again...</p>";
   fadeInText(stage12Html);
   destroyCanvas();
   moveDivRight();
@@ -335,6 +354,7 @@ function ubiqTutorialStage12() {
 }
 
 function ubiqTutorialStage13() {
+  moveDivRight();
   let stage13Html = "<p><b>Type the letter 'W', a space, and the word 'cheese'</b>.</b></p>"
     + "<p>(Like, 'w cheese').</p>";
   fadeInText(stage13Html);
@@ -343,6 +363,7 @@ function ubiqTutorialStage13() {
 }
 
 function ubiqTutorialStage14() {
+  // todo explain suggestion list, arrow keys
   let stage14Html = "<p>Now <b>tap the down-arrow key</b> until the " +
     "<i>wikipedia</i> command is hilighted.</p>";
   fadeInText(stage14Html);
@@ -365,15 +386,26 @@ function ubiqTutorialStage15() {
 }
 
 function ubiqTutorialStage16() {
-  let stage16Html = "<p>Some commands can transform part of the web page "
-  + "you are looking at.  Use the mouse to select the Japanese text below...</p>"
-  + "今日はいい天気ですね"
-  + "<p>...then <b>summon Ubiquity, give it the <i>translate</i> command, and "
-  + " then tap the enter key</b>.</p>";
-
-  // TODO break into two divs...
-  fadeInText(stage16Html);
+  moveDivRight();
   destroyCanvas();
+  let stage16Html = "<p>Ubiquity Tutorial, part 5 of 6:"
+  + " Translate command and execution</p>"
+  + "<p>Some commands can transform part of the web page "
+  + "you are looking at.  Use the mouse to <b>select the Japanese text</b> below."
+  + "Then <b>summon Ubiquity</b>.</p>";
+
+  fadeInText(stage16Html);
+
+  let jpDiv = $("#tutorial-contents-div");
+  jpDiv.addClass("ubiq-tutorial");
+  jpDiv.css("text-align", "center");
+  //jpDiv.html("古池や" + "<br/>" + "蛙飛び込む" + "<br/>" + "水の音");
+  jpDiv.html("年くれぬ傘着て草鞋はきながら");
+    //"toshi kurenu / kasa kite waraji / hakinagara");
+
+  // TODO break into two divs... put the jpDiv down below...
+
+
   /*waitForUserAction( ubiqWindowIsUp,
                      ubiqTutorialStage17 );*/
 }
@@ -408,22 +440,21 @@ function ubiqTutorialStage16() {
  *
  * keystroke combo puts focus up there
  *
- */
-
-
-/*
+ * Have the tutorial "follow" you when you move to another page during
+ * the tutorial!
  *
-"You'll see a weather report for your area.  "weather" is just one of dozens of that ubiquity already knows, and later i'll tell you how you can teach ubiquity hundreds more commands.  Let's try another command now.
-
-Hit escape, bring ubiquity up again, and type "wiki".
-
-The command is called wikipedia, but you don't have to type the full name -- ubiquity will usually guess based on the first few letters.  This command searches wikipedia for any word or phrase.
-
-So now type a space, and any word that you want to search for.  For example, 'wiki jupiter'.
-
-(arrow) This is called the "preview area". It shows a preview of the results -- in this case, the search results.  These are links here, so you can go straight to the article by clicking one of them.
-
-You can also "Execute" your command by tapping the Enter key.  If you do that now, it will take you to the Wikipedia page.
-
-Try doing a thing.
+ * Let's have sections of the tutorial:
+ *
+ * 1/5  Summoning and dismissing Ubiquity
+ * 2/5  Commands, arguments, preview
+ * 3/5  The suggestion list
+ * 4/5  Executing commands; transforming the page
+ * 5/5  Learning more commands
+ *
+ * Advanced tutorial:
+ *
+ * 1/5  Finding and installing more commands
+ * 2/5  Using "this" and other magic words
+ * 3/5  Advanced syntax
  */
+
