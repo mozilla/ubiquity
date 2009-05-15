@@ -52,6 +52,47 @@ function ImmutableArray(baseArray) {
   self.__proto__ = baseArray;
 }
 
+function EventListenerMixIn(options) {
+  MemoryTracking.track(this);
+  var listeners = [];
+
+  function onEvent(event) {
+    if (listeners) {
+      var listenersCopy = listeners.slice();
+      for (var i = 0; i < listenersCopy.length; i++)
+        try {
+          listenersCopy[i](event.originalTarget);
+        } catch (e) {
+          console.exception(e);
+        }
+    }
+  };
+
+  options.mixInto[options.name] = function bind(cb) {
+    if (listeners)
+      listeners.push(cb);
+  };
+
+  options.mixInto[options.name].unbind = function unbind(cb) {
+    if (listeners) {
+      var index = listeners.indexOf(cb);
+      if (index != -1)
+        listeners.splice(index, 1);
+    }
+  };
+
+  options.watch.addEventListener(options.eventName,
+                                 onEvent,
+                                 options.useCapture);
+
+  this.finalize = function finalize() {
+    listeners = null;
+    options.watch.removeEventListener(options.eventName,
+                                      onEvent,
+                                      options.useCapture);
+  };
+}
+
 function JetpackLibrary() {
   MemoryTracking.track(this);
   var trackedWindows = new Dictionary();
@@ -160,21 +201,14 @@ function JetpackLibrary() {
   function BrowserTab(tabbrowser, chromeTab) {
     MemoryTracking.track(this);
     var browser = chromeTab.linkedBrowser;
-    var pageLoadListeners = [];
 
-    function onPageLoad(event) {
-      if (pageLoadListeners) {
-        var listeners = pageLoadListeners.slice();
-        for (var i = 0; i < listeners.length; i++)
-          try {
-            listeners[i](event.originalTarget);
-          } catch (e) {
-            console.exception(e);
-          }
-      }
-    }
+    var mixIns = [];
 
-    browser.addEventListener("DOMContentLoaded", onPageLoad, true);
+    mixIns.push(new EventListenerMixIn({name: "onPageLoad",
+                                        watch: browser,
+                                        eventName: "DOMContentLoaded",
+                                        useCapture: true,
+                                        mixInto: this}));
 
     this.__defineGetter__("isClosed",
                           function() { return (browser == null); });
@@ -221,23 +255,9 @@ function JetpackLibrary() {
         browser.contentWindow.close();
     };
 
-    this.onPageLoad = function onPageLoad(cb) {
-      if (pageLoadListeners)
-        pageLoadListeners.push(cb);
-    };
-
-    this.onPageLoad.unbind = function unbind(cb) {
-      if (pageLoadListeners) {
-        var index = pageLoadListeners.indexOf(cb);
-        if (index != -1)
-          pageLoadListeners.splice(index, 1);
-      }
-    };
-
     this._finalize = function _finalize() {
-      if (browser)
-        browser.removeEventListener("DOMContentLoaded", onPageLoad, true);
-      pageLoadListeners = null;
+      mixIns.forEach(function(mixIn) { mixIn.finalize(); });
+      mixIns = null;
       tabbrowser = null;
       chromeTab = null;
       browser = null;
