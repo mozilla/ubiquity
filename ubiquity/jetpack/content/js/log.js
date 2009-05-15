@@ -101,9 +101,8 @@ var Logging = {
     };
   },
 
-  FirebugLogger: function FirebugLogger(chromeWindow) {
+  FirebugLogger: function FirebugLogger(chromeWindow, context) {
     MemoryTracking.track(this);
-    var context = chromeWindow.FirebugContext;
     var Firebug = chromeWindow.Firebug;
     var FBL = chromeWindow.FBL;
 
@@ -189,10 +188,6 @@ var Logging = {
      // to have to manually enable any preferences if they're actually
      // looking at the extension's page!
 
-     // TODO: This code actually appears to attach us to the
-     // currently-visible Firebug console in the current window,
-     // not necessarily the one running on this page's tab. This
-     // can make things really confusing for end-users.
      var mainWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
                       .getInterface(Ci.nsIWebNavigation)
                       .QueryInterface(Ci.nsIDocShellTreeItem)
@@ -201,14 +196,26 @@ var Logging = {
                       .getInterface(Ci.nsIDOMWindow);
      var browser = mainWindow.getBrowserFromContentWindow(window);
      if (browser.chrome && browser.chrome.window &&
-         browser.chrome.window.FirebugContext) {
+         browser.chrome.window.TabWatcher) {
        try {
-         var fbConsole = new Logging.FirebugLogger(browser.chrome.window);
-         if (window.console) {
-           fbConsole.__proto__ = window.console;
-           delete window.console;
+         // TODO: We're not detecting Firebug when we're not the currently
+         // focused tab in our window.
+         var TabWatcher = browser.chrome.window.TabWatcher;
+         var context;
+         TabWatcher.iterateContexts(
+           function(aContext) {
+             if (aContext.name == window.location.href)
+               context = aContext;
+           });
+         if (context) {
+           var fbConsole = new Logging.FirebugLogger(browser.chrome.window,
+                                                     context);
+           if (window.console) {
+             fbConsole.__proto__ = window.console;
+             delete window.console;
+           }
+           window.console = fbConsole;
          }
-         window.console = fbConsole;
        } catch (e) {
          warnings.push(["Installing Logging.FirebugLogger failed:", e]);
        }
