@@ -189,6 +189,10 @@ var Logging = {
      // to have to manually enable any preferences if they're actually
      // looking at the extension's page!
 
+     // TODO: This code actually appears to attach us to the
+     // currently-visible Firebug console in the current window,
+     // not necessarily the one running on this page's tab. This
+     // can make things really confusing for end-users.
      var mainWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
                       .getInterface(Ci.nsIWebNavigation)
                       .QueryInterface(Ci.nsIDocShellTreeItem)
