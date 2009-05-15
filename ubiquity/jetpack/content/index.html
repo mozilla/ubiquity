@@ -7,84 +7,160 @@
   <title>I am Jetpack.</title>
 </head>
 <body>
-<p id="old-firefox-version" class="warning">You appear to be running
-Firefox 3 or earlier, which means that any logging messages or
-errors produced by your Jetpacks will reference the wrong line numbers.
-This makes debugging Jetpacks difficult; please consider using <a
-href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5
-Beta</a>.</p>
-<p id="firebug-not-found" class="warning">You either don't have the
-latest version of Firebug installed, or you don't have it enabled for
-this page, so all logging messages will appear in the <span
-class="logging-source"></span>. If you get <a
-href="http://getfirebug.com/releases/index.html">Firebug 1.4 Alpha</a>
-and enable it for this page, and then reload this page, all logging
-messages will be logged to the Firebug Console, where it's much easier
-to debug problems and inspect live objects.</p>
-<div class="sidebar">
-  <h2>This is a very special page.</h2>
-  <p>This page actually houses the Jetpack platform. All your Jetpacks
-  are loaded in this page, and you can even use Firebug to inspect
-  their current state.</p>
-  <p>As a result, the lifetime of your Jetpacks is tied to the
-  lifetime of this page. When you reload this page, for instance, all
-  your Jetpacks are reloaded. This means that the time between making
-  a change to a Jetpack and seeing its effects is as small as
-  possible&mdash;you never have to restart your browser.</p>
-  <p>Because it only makes sense for one instance of Jetpack to exist
-  at a time, this page is what developers call a <i>singleton</i>:
-  only one instance of it can exist at once.  Try opening this URL in
-  two tabs at once and see what happens!</p>
-  <p>Finally, the Jetpack singleton always exists, since users
-  obviously need to be able to use their Jetpacks without having
-  Jetpack open in a tab.  If you close the Jetpack tab, it'll actually
-  re-open in a hidden browser that you can't see.</p>
+  
+<div id="content">
+<img src="gfx/jetpack.png"/><br/>  
+  
+<div id="container">
+  <ul>
+      <li><a href="#welcome"><span>Welcome</span></a></li>
+      <li><a href="#develop"><span>Develop</span></a></li>
+      <li><a href="#installed"><span>Installed Features</span></a></li>
+      <li><a href="#memory"><span>Memory Usage</span></a></li>
+      <li><a href="#tests"><span>Test Suite</span></a></li>      
+  </ul>
+  
+  <!-- WELCOME -->
+  <div id="welcome">
+    <h1>I am Jetpack. Welcome.</h1>
+    <p><i>Exploring new ways to extend &amp; personalize the Web.</i></p>
+    
+    <p>The <a href="https://addons.mozilla.org">add-ons community for Firefox</a>
+      is arguably one of the largest, most vibrant sources for innovation on the Web today.
+      If you want to affect people, to reach them and make a difference in their daily lives,
+      the Firefox <a href="https://developer.mozilla.org/En/Developing_add-ons">add-ons platform</a>
+      is hard to beat, with over
+      <a href="http://blog.mozilla.com/addons/2008/11/19/1-billion-add-on-downloads/">one billion installs
+      of Firefox add-ons to date</a>.
+    </p>
+
+    <p>However, we've only scratched the surface of its potential.</p>
+
+    <p>Jetpack lets you build Firefox (and more!) extensions with the same skill-set you already know
+      from building on the open Web: Javascript, HTML, and CSS. We've even got jQuery included by
+      default to ease you into it.</p>
+      
+    <h2>Demo Jetpack Features</h2>
+    
+    <p>Links to demos go here.</p>
+  
+  </div>
+  
+  
+  <!-- DEVELOP -->
+  
+  <div id="develop">    
+    <p id="old-firefox-version" class="warning">You appear to be running
+    Firefox 3 or earlier, which means that any logging messages or
+    errors produced by your Jetpacks will reference the wrong line numbers.
+    This makes debugging Jetpacks difficult; please consider using <a
+    href="http://www.mozilla.com/en-US/firefox/all-beta.html">Firefox 3.5
+    Beta</a>.</p>
+    <p id="firebug-not-found" class="warning">You either don't have the
+    latest version of Firebug installed, or you don't have it enabled for
+    this page, so all logging messages will appear in the <span
+    class="logging-source"></span>. If you get <a
+    href="http://getfirebug.com/releases/index.html">Firebug 1.4 Alpha</a>
+    and enable it for this page, and then reload this page, all logging
+    messages will be logged to the Firebug Console, where it's much easier
+    to debug problems and inspect live objects.</p>
+    
+    <div class="sidebar">
+      <h2>This is a very special page.</h2>
+      <p>This page actually houses the Jetpack platform. All your Jetpacks
+      are loaded in this page, and you can even use Firebug to inspect
+      their current state.</p>
+      <p>As a result, the lifetime of your Jetpacks is tied to the
+      lifetime of this page. When you reload this page, for instance, all
+      your Jetpacks are reloaded. This means that the time between making
+      a change to a Jetpack and seeing its effects is as small as
+      possible&mdash;you never have to restart your browser.</p>
+      <p>Because it only makes sense for one instance of Jetpack to exist
+      at a time, this page is what developers call a <i>singleton</i>:
+      only one instance of it can exist at once.  Try opening this URL in
+      two tabs at once and see what happens!</p>
+      <p>Finally, the Jetpack singleton always exists, since users
+      obviously need to be able to use their Jetpacks without having
+      Jetpack open in a tab.  If you close the Jetpack tab, it'll actually
+      re-open in a hidden browser that you can't see.</p>
+  
+      <h3>API Documentation</h3>
+      <p>Read the <a href="chrome://ubiquity/content/file.html#index.html#jetpack/content/js/jetpack-library-doc.js">Jetpack Library documentation</a>.</p>
+  
+    </div>
+        
+    <p>If you want to create a Jetpack feed, use the <a
+    href="chrome://ubiquity/content/editor.html">Ubiquity Command
+    Editor</a> and set the feed type to "Jetpack"; to effect your changes,
+    just reload any webpage or activate and then dismiss the Ubiquity
+    command prompt&mdash;no saving is necessary.</p>
+    <p>Here's a <span class="buttony" id="display-sample">sample Jetpack
+    feed</span> to get you started. We'll have a real tutorial up soon.</p>
+    <div id="sample-code" class="sample code"
+      style="display: none;">Jetpack.statusBar.append({
+      html: "&lt;p&gt;kill flash&lt;/p&gt;",
+      onLoad: function(panel) {
+        var button = $(panel).find("p");
+        button.css({cursor: "pointer", fontFamily: "sans-serif"});
+        button.click(function() {
+          var doc = $(Jetpack.tabs.focused.contentDocument);
+          doc.find("embed[type=application\\/x-shockwave-flash]").slideUp();
+        });
+      }});
+    </div>
+    
+    <p>If you want to hack on the Jetpack platform itself, the vast
+    majority of it is contained in the <span class="buttony"
+    id="this-page-source-code">source code for this page</span>. Just make
+    local changes to the file or one of the scripts it refers to and
+    reload this page.</p>
+        
+    
+  
+  </div>
+  
+  
+  
+  <!-- MEMORY -->
+  
+  <div id="memory">
+    <h2>Memory Usage</h2>
+    <p>Below is a list of all live objects being tracked by Jetpack. If
+    one of these numbers never goes down, then your Jetpack either has a
+    memory leak or isn't using memory very effectively.</p>
+    <div id="extension-weakrefs"></div>
+    <p id="memory-usage-actions"p>
+      <span class="buttony" id="force-gc">force garbage collection</span>
+    </p>
+  </div>
+  
+  <!-- INSTALLED -->
+  
+  <div id="installed">
+    <h2>Installed Jetpack Features</h2>
+    <p>These are the Jetpack Features that are currently installed.</p>
+    <div id="jetpacks"></div>
+    <p>You can manage these at <a
+    href="chrome://ubiquity/content/cmdlist.html">Ubiquity Commands</a>.</p>
+  </div>
+  
+  <!-- TESTS -->
+  
+  <div id="tests">
+    <h2>Test Suites</h2>
+    <p>At the moment, you can run the <span class="buttony"
+    id="run-tests">Jetpack platform test suite</span>. In the future,
+    you'll be able to run the test suites for individual Jetpacks
+    here.</p>
+    <p>All output for the suites is sent to the <span
+    class="logging-source"></span>.</p>    
+  </div>  
 </div>
-<h1>I am Jetpack.</h1>
-<p>If you want to create a Jetpack feed, use the <a
-href="chrome://ubiquity/content/editor.html">Ubiquity Command
-Editor</a> and set the feed type to "Jetpack"; to effect your changes,
-just reload any webpage or activate and then dismiss the Ubiquity
-command prompt&mdash;no saving is necessary.</p>
-<p>Here's a <span class="buttony" id="display-sample">sample Jetpack
-feed</span> to get you started. We'll have a real tutorial up soon.</p>
-<div id="sample-code" class="sample code"
-  style="display: none;">Jetpack.statusBar.append({
-  html: "&lt;p&gt;kill flash&lt;/p&gt;",
-  onLoad: function(panel) {
-    var button = $(panel).find("p");
-    button.css({cursor: "pointer", fontFamily: "sans-serif"});
-    button.click(function() {
-      var doc = $(Jetpack.tabs.focused.contentDocument);
-      doc.find("embed[type=application\\/x-shockwave-flash]").slideUp();
-    });
-  }});
+
+
+
 </div>
-<p>If you want to hack on the Jetpack platform itself, the vast
-majority of it is contained in the <span class="buttony"
-id="this-page-source-code">source code for this page</span>. Just make
-local changes to the file or one of the scripts it refers to and
-reload this page.</p>
-<h2>Installed Jetpacks</h2>
-<p>These are the Jetpacks that are currently installed.</p>
-<div id="jetpacks"></div>
-<p>You can manage these at <a
-href="chrome://ubiquity/content/cmdlist.html">Ubiquity Commands</a>.</p>
-<h2>Memory Usage</h2>
-<p>Below is a list of all live objects being tracked by Jetpack. If
-one of these numbers never goes down, then your Jetpack either has a
-memory leak or isn't using memory very effectively.</p>
-<div id="extension-weakrefs"></div>
-<p id="memory-usage-actions"p>
-  <span class="buttony" id="force-gc">force garbage collection</span>
-</p>
-<h2>Test Suites</h2>
-<p>At the moment, you can run the <span class="buttony"
-id="run-tests">Jetpack platform test suite</span>. In the future,
-you'll be able to run the test suites for individual Jetpacks
-here.</p>
-<p>All output for the suites is sent to the <span
-class="logging-source"></span>.</p>
+
 <!-- Jetpack Platform Foundation -->
 <script src="js/init-extension.js"></script>
 <script src="js/jquery.js"></script>
@@ -102,5 +178,9 @@ class="logging-source"></span>.</p>
 <script src="js/tests/test-jetpack-library.js"></script>
 <!-- Page Interaction -->
 <script src="js/app.js"></script>
+<script src="js/jquery.tabs.pack.js"></script>
+
+<script>jQuery("#container").tabs()</script>
+
 </body>
 </html>
