@@ -201,6 +201,11 @@ function JetpackLibrary() {
         tabbrowser.selectedTab = chromeTab;
     };
 
+    this.close = function close() {
+      if (browser)
+        browser.contentWindow.close();
+    };
+
     this._finalize = function _finalize() {
       tabbrowser = null;
       chromeTab = null;
