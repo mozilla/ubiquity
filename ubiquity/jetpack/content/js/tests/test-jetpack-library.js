@@ -13,7 +13,14 @@ var JetpackLibraryTests ={
     self.assert(Jetpack.tabs.length == numTabs+1);
     tab.focus();
     self.assert(Jetpack.tabs.focused == tab);
-    tab.close();
-    self.assert(Jetpack.tabs.length == numTabs);
+    tab.onPageLoad(
+      function onPageLoad(document) {
+        tab.onPageLoad.unbind(onPageLoad);
+        self.assert($(document).text() == "hai2u");
+        tab.close();
+        self.assert(Jetpack.tabs.length == numTabs);
+        self.success();
+      });
+    self.setTimeout(1000);
   }
 };

@@ -160,6 +160,21 @@ function JetpackLibrary() {
   function BrowserTab(tabbrowser, chromeTab) {
     MemoryTracking.track(this);
     var browser = chromeTab.linkedBrowser;
+    var pageLoadListeners = [];
+
+    function onPageLoad(event) {
+      if (pageLoadListeners) {
+        var listeners = pageLoadListeners.slice();
+        for (var i = 0; i < listeners.length; i++)
+          try {
+            listeners[i](event.originalTarget);
+          } catch (e) {
+            console.exception(e);
+          }
+      }
+    }
+
+    browser.addEventListener("DOMContentLoaded", onPageLoad, true);
 
     this.__defineGetter__("isClosed",
                           function() { return (browser == null); });
@@ -206,7 +221,23 @@ function JetpackLibrary() {
         browser.contentWindow.close();
     };
 
+    this.onPageLoad = function onPageLoad(cb) {
+      if (pageLoadListeners)
+        pageLoadListeners.push(cb);
+    };
+
+    this.onPageLoad.unbind = function unbind(cb) {
+      if (pageLoadListeners) {
+        var index = pageLoadListeners.indexOf(cb);
+        if (index != -1)
+          pageLoadListeners.splice(index, 1);
+      }
+    };
+
     this._finalize = function _finalize() {
+      if (browser)
+        browser.removeEventListener("DOMContentLoaded", onPageLoad, true);
+      pageLoadListeners = null;
       tabbrowser = null;
       chromeTab = null;
       browser = null;
