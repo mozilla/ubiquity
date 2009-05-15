@@ -20,18 +20,19 @@ JetpackLibrary.prototype = {
   tabs: new Tab();
   ui{ statusBar: new StatusBar(); },
   lib: new StandardLibrary();
+  notification: new Notification()
 } 
 
 
 // === {{{jetpack.tabs}}} ===  
-// {{{jetpack.tabs}} is an Array-like object with special tab-related
+// {{{jetpack.tabs}}} is an Array-like object with special tab-related
 // properties. For example, to get the first tab you get write
 // {{{jetpack.tabs[0]}}}. Similarly, you can find the number of tabs currently
 // open by writing {{{jetpack.tabs.length}}}. The list of tabs includes all
 // tabs from all windows, so {{{jetpack.tabs[i]}}} might live in window A, and
 // {{{jetpack.tabs[j]}}} might live in window B.
 function Tabs(){}
-Tabs.prototype.extend(new Array, {
+Tabs.prototype = {
 
   // ** {{{jetpack.tabs.focused}}} **
   // Returns the currently focused/active tab as a Tab object. 
@@ -48,21 +49,21 @@ Tabs.prototype.extend(new Array, {
   // functions receieve one paramater: an event object. The event handler's
   // {{{this}}} is set to the {{{Tab}}} that's had the event occur. 
 
-  // * ** {{{jetpack.onFocus( callback )}}} **
+  // * ** {{{jetpack.tabs.onFocus( callback )}}} **
   // The function callback is called when a tab becomes focused.
   onFocus: function( callback ){ /* ... */ }, 
   
-  // * ** {{{jetpack.onOpen( callback )}}} **
+  // * ** {{{jetpack.tabs.onOpen( callback )}}} **
   // The function callback is called when a new tab is opened. The event occurs
   // before the page begins to load.
   onOpen: function( callback ){ /* ... */ },   
 
-  // * ** {{{jetpack.onClose( callback )}}} **
+  // * ** {{{jetpack.tabs.onClose( callback )}}} **
   // The function callback is called when a tab is closed. The event occurs
   // just before the tab disappears.
   onClose: function( callback ){ /* ... */ },   
   
-  // * ** {{{jetpack.onReady( callback )}}} **
+  // * ** {{{jetpack.tabs.onReady( callback )}}} **
   // The function {{{callback}}} is called when a tab's DOM has finished
   // loading. Unlike the {{{jetpack.tabs.onLoad}}} event, {{{onReady}}} doesn't
   // wait until images, scripts, and iframes are loaded. This is particularly
@@ -70,12 +71,12 @@ Tabs.prototype.extend(new Array, {
   // displayed.
   onReady: function( callback ){ /* ... */ },   
   
-  // * ** {{{jetpack.onLoad( callback )}}} **
+  // * ** {{{jetpack.tabs.onLoad( callback )}}} **
   // The function callback is called when a tab's page has fully finished
   // loading, including images, scripts and iframes.
   onLoad: function( callback ){ /* ... */ },
   
-  // * ** {{{jetpack.on*.remove( callback )}}} **
+  // * ** {{{jetpack.tabs.on*.remove( callback )}}} **
   // To remove an event handler, you simply call {{{*.remove( callback )}}} on a
   // event binder, where callback is the instance of the event handler passed
   // into {{{jetpack.tabs.on*}}}. If you don't pass in {{{callback}}}, it
@@ -84,3 +85,43 @@ Tabs.prototype.extend(new Array, {
   // events.
   
 };
+
+// === {{{jetpack.notifications}}} ===
+// Eventually, this will be the end-all be-all of easy communication with your
+// users. Notification bars, transparent messages, Growls, doorknob messages, 
+// etc. will all go through here. For now, it just has simple notifications.
+
+function Notifications(){}
+Notifications.prototype = {
+  // * ** {{{jetpack.notifications.show( message )}}} **
+  // Shows a simple notification message. On Windows it's a toaster
+  // notification, and on OS X it's a Growl message (if Growl is installed).
+  // {{{message}}} is either a string, or an object with properties
+  // {{{title}}} and {{{body}}}.
+  show: function(){}
+}
+
+
+// === {{{[tab]}}} ===
+// A {{{tab}}} is the basic unit of interaction. From it, you can peek into the // content of a page, and control a tab. You can access a particular tab from
+// the {{{jetpack.tabs}}} array.
+function Tab(){}
+Tab.prototype = {
+  
+  // * ** {{{tab.contentWindow}}} **
+  // Like an iframe, {{{contentWindow}}} is the way to access the {{{window}}}
+  // object, as if you were the content of the web page living in the tab.
+  // Note that if the content of the page has changed the definition of a
+  // built-in function, you'll get the changed function. For example, if a page
+  // has defined a new {{{window.alert}}}) to open mozilla.com,
+  // {{{tab.contentWindow.alert()}}} will also open mozilla.com
+  contentWindow: null,
+  
+  contentDocument: null,
+  
+  pristine: {
+    contentWindow: null,
+    contentDocument: null
+  }
+  
+}
