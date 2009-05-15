@@ -312,3 +312,12 @@ td.topcell {
   padding: 2em;
   font-size: 150%;
 }
+
+div.ubiq-tutorial h2 {
+  color: black;
+  text-align: center;
+  font-variant: normal;
+  border: none;
+  margin: 0;
+  padding: 0;
+}

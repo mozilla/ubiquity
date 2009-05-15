@@ -144,35 +144,37 @@ function showArrowToSuggestionList() {
   /* TODO: for some skins, this arrow will have to approach from the
    * right instead of from the bottom.
    */
-  let ubiqBottom = $(getGUbiq().msgPanel).height();
+  let panel = getGUbiq().msgPanel;
+  let ubiqTop = panel.boxObject.y;
+  let ubiqHeight = panel.boxObject.height;
+  let ubiqBottom = ubiqTop + ubiqHeight;
   let theDiv = $("#interactive-tutorial-div");
   let divBottom = theDiv.offset().top + theDiv.height();
   let divRight = theDiv.offset().left + theDiv.width();
-  let canvas = createCanvas(0, divBotton, divRight, 300 );
+  let canvas = createCanvas(0, divBottom, divRight, 300 );
 
   var ctx = canvas.getContext("2d");
   ctx.strokeStyle = "green";
   ctx.lineWidth = 2.0;
   ctx.beginPath();
-  ctx.moveTo( theDiv.offset().left + 50, divBottom);
-  ctx.lineTo( theDiv.offset().left + 50, ubiqBottom + 50);
-  ctx.lineTo( 200, ubiqBottom + 50);
-  ctx.lineTo( 200, ubiqBottom );
-  ctx.lineTo( 175, ubiqBottom + 25);
-  ctx.lineTo( 200, ubiqBottom );
-  ctx.lineTo( 225, ubiqBottom + 25);
+  let bottomLevel = (ubiqBottom - divBottom);
+  ctx.moveTo( theDiv.offset().left + 50, 0);
+  ctx.lineTo( theDiv.offset().left + 50, bottomLevel);
+  ctx.lineTo( 200, bottomLevel );
+  ctx.lineTo( 200, bottomLevel - 50);
+  ctx.lineTo( 175, bottomLevel - 25);
+  ctx.lineTo( 200, bottomLevel - 50 );
+  ctx.lineTo( 225, bottomLevel - 25);
   ctx.stroke();
 }
 
 function showArrowToPreview() {
-  /* TODO: the bracket is much too tall.
-   *
-   */
+  /* TODO: the bracket is much too tall.*/
   let theDiv = $("#interactive-tutorial-div");
   // Note, msgpanel is XUL so don't try to use jQuery on it
   let panel = getGUbiq().msgPanel;
   let ubiqTop = panel.boxObject.y;
-  let ubiqHeight = 400; //panel.boxObject.height;
+  let ubiqHeight = panel.boxObject.height; // too high!
 
   let canvas = createCanvas( theDiv.offset().left, ubiqTop,
                              50, ubiqHeight);
@@ -199,7 +201,7 @@ function startUbiqTutorial() {
   hideOtherContent();
   destroyCanvas();
 
-  var html = "<p>Welcome to the Ubiquity Tutorial.</p>"
+  var html = "<h2>Welcome to the Ubiquity Tutorial.</h2>"
     + "<p><a onclick='ubiqTutorialStage1();'>Click Here to Start"
     + " From The Beginning</a><p>"
     + "<p>Start from the middle:</p><ol>"
@@ -215,7 +217,7 @@ function startUbiqTutorial() {
 function ubiqTutorialStage1() {
 
   var keyCombo = PrefKeys.getKeyCombo();
-  var introHtml = "<p>Ubiquity Tutorial, part 1 of 6: How to start Ubiquity"
+  var introHtml = "<h2>Ubiquity Tutorial, part 1 of 6: How to start Ubiquity</h2>"
     + "<p>Welcome to the Ubiquity tutorial.  </p>"
     + "<p>Let's get started.  To summon Ubiquity, do this now:</p>"
     + "<p><b>Hold down the " +  keyCombo[0] + " key and tap the "
@@ -241,8 +243,8 @@ function ubiqTutorialStage2() {
 
 function ubiqTutorialStage3() {
   var keyCombo = PrefKeys.getKeyCombo();
-  let stage3Html = "<p>Ubiquity Tutorial, part 2 of 6: "
-    + " Weather command and Previews</p>"
+  let stage3Html = "<h2>Ubiquity Tutorial, part 2 of 6: "
+    + " Weather command and Previews</h2>"
     + "<p>OK, so now let's learn a command. Summon Ubiquity again...</p>"
     + "<p>(Remember, <b>hold down the " + keyCombo[0] + " key and tap the "
     + keyCombo[1] + " key.</b>)</p>";
@@ -290,8 +292,8 @@ function ubiqTutorialStage6() {
 
 function ubiqTutorialStage7() {
   destroyCanvas();
-  let stage7Html = "<p>Ubiquity Tutorial, part 3 of 6: "
-    + " Calculate command and Abbreviations</p>"
+  let stage7Html = "<h2>Ubiquity Tutorial, part 3 of 6: "
+    + " Calculate command and Abbreviations</h2>"
     + " <p>Summon Ubiquity again, and we'll learn some"
     + " more commands.</p>";
   fadeInText(stage7Html);
@@ -316,7 +318,7 @@ function ubiqTutorialStage9() {
     + " (so that your input says <b>'ca'</b>).</p>";
   fadeInText(stage9Html);
   destroyCanvas();
-  // showArrowToSuggestionList();
+  showArrowToSuggestionList();
   waitForUserAction( function() {return ubiqSuggestionIs("calculate" );},
                      ubiqTutorialStage10 );
 }
@@ -325,6 +327,7 @@ function ubiqTutorialStage10() {
    let stage10Html = "<p>Now <b>type a space, and then type 22/7</b>"
     + " (so that your input says <b>'ca 22/7'</b>.)</p>";
   fadeInText(stage10Html);
+  destroyCanvas();
   showArrowToInputBox();
   waitForUserAction( function() {return ubiqSuggestionIs("22/7" );},
                      ubiqTutorialStage11 );
@@ -343,8 +346,8 @@ function ubiqTutorialStage11() {
 }
 
 function ubiqTutorialStage12() {
-  let stage12Html = "<p>Ubiquity Tutorial, part 4 of 6:"
-    + " Wikipedia command and the suggestion list</p>"
+  let stage12Html = "<h2>Ubiquity Tutorial, part 4 of 6:"
+    + " Wikipedia command and the suggestion list</h2>"
     + "<p>Summon Ubiquity again...</p>";
   fadeInText(stage12Html);
   destroyCanvas();
@@ -358,14 +361,17 @@ function ubiqTutorialStage13() {
   let stage13Html = "<p><b>Type the letter 'W', a space, and the word 'cheese'</b>.</b></p>"
     + "<p>(Like, 'w cheese').</p>";
   fadeInText(stage13Html);
+  showArrowToInputBox();
   waitForUserAction(  function() {return ubiqSuggestionIs("cheese" );},
                      ubiqTutorialStage14 );
 }
 
 function ubiqTutorialStage14() {
-  // todo explain suggestion list, arrow keys
+  // todo explain suggestion list, arrow keys!!
   let stage14Html = "<p>Now <b>tap the down-arrow key</b> until the " +
     "<i>wikipedia</i> command is hilighted.</p>";
+  destroyCanvas();
+  showArrowToSuggestionList();
   fadeInText(stage14Html);
   waitForUserAction(  function() {return ubiqSuggestionIs("wikipedia" );},
                      ubiqTutorialStage15 );
@@ -388,11 +394,11 @@ function ubiqTutorialStage15() {
 function ubiqTutorialStage16() {
   moveDivRight();
   destroyCanvas();
-  let stage16Html = "<p>Ubiquity Tutorial, part 5 of 6:"
-  + " Translate command and execution</p>"
-  + "<p>Some commands can transform part of the web page "
-  + "you are looking at.  Use the mouse to <b>select the Japanese text</b> below."
-  + "Then <b>summon Ubiquity</b>.</p>";
+  let stage16Html = "<h2>Ubiquity Tutorial, part 5 of 6:"
+  + " Translate command and execution</h2>"
+  + "<p>Some commands can transform part of the web page"
+  + " you are looking at.  Use the mouse to <b>select the Japanese text</b> below."
+  + " Then <b>summon Ubiquity</b>.</p>";
 
   fadeInText(stage16Html);
 
@@ -402,8 +408,6 @@ function ubiqTutorialStage16() {
   //jpDiv.html("古池や" + "<br/>" + "蛙飛び込む" + "<br/>" + "水の音");
   jpDiv.html("年くれぬ傘着て草鞋はきながら");
     //"toshi kurenu / kasa kite waraji / hakinagara");
-
-  // TODO break into two divs... put the jpDiv down below...
 
 
   /*waitForUserAction( ubiqWindowIsUp,
