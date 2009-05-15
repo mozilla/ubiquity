@@ -109,41 +109,11 @@ var App = {
     console.log(newObjects);
   },
 
-  modifyWeakrefTable: function modifyWeakrefTable(newRows) {
-    $("#extension-weakrefs div").each(
-      function() {
-        var id = $(this).attr("id");
-        if (id in newRows) {
-          if ($(".count", this).text() != $(".count", newRows[id]).text())
-            $(this).replaceWith(newRows[id]);
-          delete newRows[id];
-        } else {
-          $(this).attr("id", null);
-          $(this).slideUp("fast", function() { $(this).remove(); });
-        }
-      });
-    for (id in newRows) {
-      newRows[id].hide();
-      var lastBestRow = null;
-      $("#extension-weakrefs div").each(
-        function() {
-          if (newRows[id].attr("id") > $(this).attr("id"))
-            lastBestRow = this;
-        });
-      if (lastBestRow) {
-        $(lastBestRow).after(newRows[id]);
-        lastBestRow = null;
-      } else
-        $("#extension-weakrefs").prepend(newRows[id]);
-      newRows[id].slideDown("fast");
-    }
-  },
-
   tick: function tick() {
     const ID_PREFIX = "MemoryTracking-";
     var bins = MemoryTracking.getBins();
     bins.sort();
-    var newRows = {};
+    var newRows = $('<div></div>');
     bins.forEach(
       function(name) {
         var objects = MemoryTracking.getLiveObjects(name);
@@ -167,9 +137,11 @@ var App = {
           );
           row.append(inspectInFb);
         }
-        newRows[row.attr("id")] = row;
+        newRows.append(row);
       });
-    App.modifyWeakrefTable(newRows);
+    $("#extension-weakrefs").empty().append(newRows);
+    bins = null;
+    newRows = null;
   }
 };
 
