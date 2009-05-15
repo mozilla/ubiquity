@@ -88,12 +88,14 @@ function EventListenerMixIn(options) {
                                  onEvent,
                                  options.useCapture);
 
-  this.finalize = function finalize() {
-    listeners = null;
-    options.watch.removeEventListener(options.eventName,
-                                      onEvent,
-                                      options.useCapture);
-  };
+  Extension.addUnloadMethod(
+    this,
+    function() {
+      listeners = null;
+      options.watch.removeEventListener(options.eventName,
+                                        onEvent,
+                                        options.useCapture);
+    });
 }
 
 function JetpackLibrary() {
@@ -136,10 +138,10 @@ function JetpackLibrary() {
     return browserTab;
   }
 
-  function finalizeBrowserTab(chromeTab) {
+  function unloadBrowserTab(chromeTab) {
     var browserTab = trackedTabs.get(chromeTab);
     trackedTabs.remove(chromeTab);
-    browserTab._finalize();
+    browserTab._unload();
   }
 
   function BrowserWindow(chromeWindow) {
@@ -169,7 +171,7 @@ function JetpackLibrary() {
         case "TabMove":
           break;
         case "TabClose":
-          finalizeBrowserTab(chromeTab);
+          unloadBrowserTab(chromeTab);
           break;
         }
       } catch (e) {
@@ -191,14 +193,16 @@ function JetpackLibrary() {
       return trackedTabs.get(tabbrowser.selectedTab);
     };
 
-    this.finalize = function finalize() {
-      EVENTS_TO_WATCH.forEach(
-        function(eventType) {
-          tabbrowser.removeEventListener(eventType, onEvent, true);
-        });
-      for (var i = 0; i < tabbrowser.tabContainer.itemCount; i++)
-        finalizeBrowserTab(tabbrowser.tabContainer.getItemAtIndex(i));
-    };
+    Extension.addUnloadMethod(
+      this,
+      function() {
+        EVENTS_TO_WATCH.forEach(
+          function(eventType) {
+            tabbrowser.removeEventListener(eventType, onEvent, true);
+          });
+        for (var i = 0; i < tabbrowser.tabContainer.itemCount; i++)
+          unloadBrowserTab(tabbrowser.tabContainer.getItemAtIndex(i));
+      });
   }
 
   function BrowserTab(tabbrowser, chromeTab) {
@@ -259,8 +263,8 @@ function JetpackLibrary() {
           return "[Browser Tab]";
       },
 
-      _finalize: function _finalize() {
-        mixIns.forEach(function(mixIn) { mixIn.finalize(); });
+      _unload: function _unload() {
+        mixIns.forEach(function(mixIn) { mixIn.unload(); });
         mixIns = null;
         tabbrowser = null;
         chromeTab = null;
@@ -269,7 +273,7 @@ function JetpackLibrary() {
     };
   }
 
-  forAllBrowsers(
+  var browserWatcher = new BrowserWatcher(
     {onLoad: function(chromeWindow) {
        var trackedWindow = trackedWindows.get(chromeWindow);
        if (!trackedWindow)
@@ -279,9 +283,15 @@ function JetpackLibrary() {
      onUnload: function(chromeWindow) {
        var browserWindow = trackedWindows.get(chromeWindow);
        trackedWindows.remove(chromeWindow);
-       browserWindow.finalize();
+       browserWindow.unload();
      }
     });
 
   this.__defineGetter__("tabs", function() { return tabs; });
+
+  Extension.addUnloadMethod(
+    this,
+    function() {
+      browserWatcher.unload();
+    });
 }

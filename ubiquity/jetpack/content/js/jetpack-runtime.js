@@ -1,84 +1,32 @@
-// Call the given onLoad/onUnload() functions for all browser windows;
-// when this function is called, the onLoad() is called for all browser
-// windows, and subsequently for all newly-opened browser windows. When
-// a browser window closes, onUnload() is called.  onUnload() is also
-// called once for each browser window when the extension is unloaded.
-
-function forAllBrowsers(options) {
-  function makeSafeFunc(func) {
-    function safeFunc(window) {
-      try {
-        func(window);
-      } catch (e) {
-        console.exception(e);
-      }
-    };
-    return safeFunc;
-  }
-
-  function addUnloader(chromeWindow, extensionWindow, func) {
-    function onUnload() {
-      chromeWindow.removeEventListener("unload", onUnload, false);
-      extensionWindow.removeEventListener("unload", onUnload, false);
-      func(chromeWindow);
-    }
-    chromeWindow.addEventListener("unload", onUnload, false);
-    extensionWindow.addEventListener("unload", onUnload, false);
-  }
-
-  function loadAndBind(chromeWindow) {
-    if (options.onLoad)
-      (makeSafeFunc(options.onLoad))(chromeWindow);
-    if (options.onUnload)
-      addUnloader(chromeWindow, window, makeSafeFunc(options.onUnload));
-  }
-
-  var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Ci.nsIWindowMediator);
-
-  var enumerator = wm.getEnumerator("navigator:browser");
-
-  while (enumerator.hasMoreElements()) {
-    var chromeWindow = enumerator.getNext();
-    if (chromeWindow.gBrowser)
-      loadAndBind(chromeWindow);
-    else
-      onWindowOpened(chromeWindow);
-  }
-
-  function onWindowOpened(chromeWindow) {
-    function removeEventHandlers() {
-      chromeWindow.removeEventListener("load", onLoad, false);
-      window.removeEventListener("unload", onExtensionUnload, false);
-    }
-    function onLoad() {
-      removeEventHandlers();
-      var type = chromeWindow.document.documentElement
-                 .getAttribute("windowtype");
-      if (type == "navigator:browser")
-        loadAndBind(chromeWindow);
-    }
-    function onExtensionUnload() { removeEventHandlers(); }
-    window.addEventListener("unload", onExtensionUnload, false);
-    chromeWindow.addEventListener("load", onLoad, false);
-  }
-
-  var ww = new WindowWatcher();
-  ww.onWindowOpened = onWindowOpened;
-}
-
 var JetpackRuntime = {
+  _statusBarInstance: null,
   _jetpackNamespace: null,
 
+  _unloadJetpackNamespace: function _unloadJetpackNamespace() {
+    var Jetpack = this._jetpackNamespace;
+    var statusBar = this._statusBarInstance;
+
+    this._jetpackNamespace = null;
+    this._statusBarInstance = null;
+
+    Jetpack.lib = null;
+    Jetpack.statusBar = null;
+    Jetpack.unload();
+    statusBar.unload();
+  },
+
   _buildJetpackNamespace: function buildJetpackNamespace() {
+    var self = this;
     var Jetpack = new JetpackLibrary();
 
     Jetpack.lib = {};
     Jetpack.lib.twitter = Twitter;
 
+    self._statusBarInstance = new StatusBar();
+
     Jetpack.statusBar = {};
     Jetpack.statusBar.append = function append(options) {
-      return StatusBar.append(options);
+      return self._statusBarInstance.append(options);
     };
 
     Jetpack.track = function() {
@@ -173,7 +121,12 @@ var JetpackRuntime = {
   FeedPlugin: {}
 };
 
-Extension.addUnloadMethod(JetpackRuntime, JetpackRuntime.unloadAllJetpacks);
+Extension.addUnloadMethod(
+  JetpackRuntime,
+  function() {
+    JetpackRuntime.unloadAllJetpacks();
+    JetpackRuntime._unloadJetpackNamespace();
+  });
 
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
                         JetpackRuntime.FeedPlugin);

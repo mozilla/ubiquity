@@ -32,7 +32,24 @@ var WebContentFunctions = {
   }
 };
 
-var StatusBar = {
+function StatusBar() {
+  this._browserWatchers = [];
+  this._panels = [];
+  this._windows = [];
+
+  Extension.addUnloadMethod(
+    this,
+    function() {
+      this._browserWatchers.forEach(
+        function(watcher) {
+          watcher.unload();
+        });
+      this._browserWatchers = [];
+      // TODO: Assert that panel and window lists are empty?
+    });
+}
+
+StatusBar.prototype = {
   _BG_PROPS: ["backgroundImage",
               "backgroundPosition",
               "backgroundRepeat",
@@ -103,9 +120,6 @@ var StatusBar = {
     return iframe;
   },
 
-  _panels: [],
-  _windows: [],
-
   DEFAULT_PANEL_WIDTH: 200,
 
   append: function append(options) {
@@ -121,38 +135,39 @@ var StatusBar = {
 
     var width = options.width ? options.width : self.DEFAULT_PANEL_WIDTH;
 
-    forAllBrowsers(
-      {onLoad: function(window) {
-         var iframe = self._addPanelToWindow(window, url, width);
-         self._windows.push(window);
-         self._panels.push({url: url, iframe: iframe});
-         if (options.onLoad) {
-           iframe.addEventListener(
-             "DOMContentLoaded",
-             function onPanelLoad(event) {
-               iframe.removeEventListener("DOMContentLoaded",
-                                          onPanelLoad,
-                                          false);
-               try {
-                 options.onLoad(iframe.contentDocument);
-               } catch (e) {
-                 console.exception(e);
-               }
-             },
-             false
-           );
+    self._browserWatchers.push(
+      new BrowserWatcher(
+        {onLoad: function(window) {
+           var iframe = self._addPanelToWindow(window, url, width);
+           self._windows.push(window);
+           self._panels.push({url: url, iframe: iframe});
+           if (options.onLoad) {
+             iframe.addEventListener(
+               "DOMContentLoaded",
+               function onPanelLoad(event) {
+                 iframe.removeEventListener("DOMContentLoaded",
+                                            onPanelLoad,
+                                            false);
+                 try {
+                   options.onLoad(iframe.contentDocument);
+                 } catch (e) {
+                   console.exception(e);
+                 }
+               },
+               false
+             );
+           }
+         },
+         onUnload: function(window) {
+           var index = self._windows.indexOf(window);
+           if (index != -1) {
+             var panel = self._panels[index];
+             delete self._windows[index];
+             delete self._panels[index];
+             if (panel.iframe.parentNode)
+               panel.iframe.parentNode.removeChild(panel.iframe);
+           }
          }
-       },
-       onUnload: function(window) {
-         var index = self._windows.indexOf(window);
-         if (index != -1) {
-           var panel = self._panels[index];
-           delete self._windows[index];
-           delete self._panels[index];
-           if (panel.iframe.parentNode)
-             panel.iframe.parentNode.removeChild(panel.iframe);
-         }
-       }
-      });
-  }
+        }));
+    }
 };
