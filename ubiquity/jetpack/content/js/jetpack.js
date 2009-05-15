@@ -98,64 +98,15 @@ var Jetpack = {
       }
     };
 
-    var statusBarPanels = [];
-    var statusBarPanelWindows = [];
-
-    function addStatusBarPanel(options) {
-      var url;
-
-      if (options.url)
-        url = options.url;
-      else if (options.html) {
-        url = "data:text/html," + encodeURI(options.html);
-      } else
-        url = "about:blank";
-
-      var width = options.width ? options.width : 200;
-
-      forAllBrowsers(
-        {onLoad: function(window) {
-           var iframe = StatusBar.addPanel(window, url, width);
-           statusBarPanelWindows.push(window);
-           statusBarPanels.push({url: url,
-                                 iframe: iframe});
-           if (options.onLoad) {
-             iframe.addEventListener(
-               "DOMContentLoaded",
-               function onPanelLoad(event) {
-                 iframe.removeEventListener("DOMContentLoaded",
-                                            onPanelLoad,
-                                            false);
-                 try {
-                   options.onLoad(iframe.contentDocument);
-                 } catch (e) {
-                   console.exception(e);
-                 }
-               },
-               false
-             );
-           }
-         },
-         onUnload: function(window) {
-           var index = statusBarPanelWindows.indexOf(window);
-           if (index != -1) {
-             var panel = statusBarPanels[index];
-             delete statusBarPanelWindows[index];
-             delete statusBarPanels[index];
-             if (panel.iframe.parentNode)
-               panel.iframe.parentNode.removeChild(panel.iframe);
-           }
-         }
-        });
-    }
-
     var Jetpack = new JetpackLibrary();
 
     Jetpack.lib = {};
     Jetpack.lib.twitter = Twitter;
 
     Jetpack.statusBar = {};
-    Jetpack.statusBar.append = addStatusBarPanel;
+    Jetpack.statusBar.append = function append(options) {
+      return StatusBar.append(options);
+    };
 
     Jetpack.track = function() {
       var newArgs = [];

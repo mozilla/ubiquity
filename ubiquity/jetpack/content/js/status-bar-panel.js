@@ -58,7 +58,7 @@ var StatusBar = {
     WebContentFunctions.importIntoWindow(functions, iframe.contentWindow);
   },
 
-  addPanel: function addStatusBarPanel(window, url, width) {
+  _addPanelToWindow: function _addPanelToWindow(window, url, width) {
     var self = this;
     var document = window.document;
     var statusBar = document.getElementById("status-bar");
@@ -101,5 +101,58 @@ var StatusBar = {
     }
 
     return iframe;
+  },
+
+  _panels: [],
+  _windows: [],
+
+  DEFAULT_PANEL_WIDTH: 200,
+
+  append: function append(options) {
+    var self = this;
+    var url;
+
+    if (options.url)
+      url = options.url;
+    else if (options.html) {
+      url = "data:text/html," + encodeURI(options.html);
+    } else
+      url = "about:blank";
+
+    var width = options.width ? options.width : self.DEFAULT_PANEL_WIDTH;
+
+    forAllBrowsers(
+      {onLoad: function(window) {
+         var iframe = self._addPanelToWindow(window, url, width);
+         self._windows.push(window);
+         self._panels.push({url: url, iframe: iframe});
+         if (options.onLoad) {
+           iframe.addEventListener(
+             "DOMContentLoaded",
+             function onPanelLoad(event) {
+               iframe.removeEventListener("DOMContentLoaded",
+                                          onPanelLoad,
+                                          false);
+               try {
+                 options.onLoad(iframe.contentDocument);
+               } catch (e) {
+                 console.exception(e);
+               }
+             },
+             false
+           );
+         }
+       },
+       onUnload: function(window) {
+         var index = self._windows.indexOf(window);
+         if (index != -1) {
+           var panel = self._panels[index];
+           delete self._windows[index];
+           delete self._panels[index];
+           if (panel.iframe.parentNode)
+             panel.iframe.parentNode.removeChild(panel.iframe);
+         }
+       }
+      });
   }
 };
