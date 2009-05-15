@@ -4,6 +4,7 @@ var LoggingTests = {
     var wasSuccessful = false;
     listener.onMessage = function onMessage(msg) {
       if (msg.isWarning && msg.message == logText) {
+        listener.unload();
         self.success();
       }
     };

@@ -2,6 +2,7 @@ var JetpackLibraryTests ={
   testTabIsObject: function(self) {
     var Jetpack = new JetpackLibrary();
     self.assert(typeof(Jetpack.tabs.focused) == "object");
+    Jetpack.unload();
   },
 
   testTabOpenFocusAndClose: function(self) {
@@ -18,6 +19,7 @@ var JetpackLibraryTests ={
         self.assert($(document).text() == "hai2u");
         tab.close();
         self.assert(Jetpack.tabs.length == originalTabCount);
+        Jetpack.unload();
         self.success();
       });
     self.setTimeout(1000);
