@@ -49,14 +49,15 @@
 </div>
 
 <table width="100%">
-  <tr><th width="30%" colspan="1">Subscribed Feeds</th>
-      <th width="70%" colspan="2">Commands</th></tr>
+  <thead>
+    <tr><th width="30%" colspan="1">Subscribed Feeds</th>
+        <th width="70%" colspan="2">Commands</th></tr>
 
-  <tr><td>Sort By: <a onclick="changeSortMode('feed');">Feed Name</a> |
-          <a onclick="changeSortMode('feed-date');">Date Subscribed</a></td>
-      <td><a onclick="changeSortMode('enabled');">Enabled</a></td>
-      <td><a onclick="changeSortMode('cmd');">Command</a></td></tr>
-
+    <tr><td>Sort By: <a onclick="changeSortMode('feed');">Feed Name</a> |
+            <a onclick="changeSortMode('feed-date');">Date Subscribed</a></td>
+        <td><a onclick="changeSortMode('enabled');">Enabled</a></td>
+        <td><a onclick="changeSortMode('cmd');">Command</a></td></tr>
+  </thead>
   <tbody id="commands-and-feeds-table">
   </tbody>
 </table>

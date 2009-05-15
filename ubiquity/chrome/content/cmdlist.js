@@ -53,13 +53,11 @@ function linkToHtml(text, url, className) {
   return linkToHtml;
 }
 
-function linkToAction(text, action) {
-  var linkToAction = document.createElement("span");
-  $(linkToAction).text(text);
-  $(linkToAction).click(action);
-  $(linkToAction).css({cursor: "pointer", color: "#aaa"});
-  return linkToAction;
-}
+function linkToAction(text, action)(
+  $("<span></span>")
+  .text(text)
+  .click(action)
+  .css({cursor: "pointer", color: "#aaa"}));
 
 function fillTableCellForFeed( cell, feed, sortMode) {
   cell.html(linkToHtml( feed.title, feed.uri.spec));
@@ -75,20 +73,19 @@ function fillTableCellForFeed( cell, feed, sortMode) {
   let sourceName = feed.canAutoUpdate?"auto-updated source":"source";
   cell.append(" ");
   cell.append(linkToHtml("[view " + sourceName + "]",
-                             "view-source:" + feed.viewSourceUri.spec,
-                             "feed-action"));
+                         "view-source:" + feed.viewSourceUri.spec,
+                         "feed-action"));
   // If not auto-updating, display link to any updates found
   feed.checkForManualUpdate(
       function(isAvailable, href) {
         if (isAvailable)
-          $(cell).append('<br/><a class="feed-updated" href="' + href +
-                         '">An update for this feed is available.</a>');
+          cell.append('<br/><a class="feed-updated" href="' + href +
+                      '">An update for this feed is available.</a>');
       });
 
   // if sorting by feed, make feed name large and put a borderline
   if (sortMode == "feed") {
-    cell.addClass("topcell");
-    cell.addClass("command-feed-name");
+    cell.addClass("topcell command-feed-name");
   }
 }
 
@@ -120,23 +117,6 @@ function formatCommandAuthor(authorData) {
 }
 
 function fillTableRowForCmd( row, cmd, className ) {
-  // TODO bug here: when displaying sorted by feed, the check boxes
-  // are all checked even if the command should be disabled.  When
-  // displaying sorted by cmd, the check boxes all appear correctly.
-
-  // re-checking a box for a disabled command doesn't seem to re-enable it.
-
-  // un-checking a box when you're in sort-by-feed mode does disable it.
-  // (But then the box appears correctly unchecked in sort-by-cmd and
-  // incorrectly checked in sort-by-feed).
-
-  //               check      uncheck     display
-  // sort by feed   no          yes         no
-  // sort by cmd    no          yes         yes
-
-  // Difference has to be because of the command objects getting passed
-  // in are different...
-
   var isEnabled = !cmd.disabled;
   var checkBoxCell = jQuery(
     '<td><input type="checkbox" class="activebox"' +
@@ -146,7 +126,7 @@ function fillTableRowForCmd( row, cmd, className ) {
   // For all commands in the table, unbind any 'change' method, bind to
   // onDisableOrEnableCmd.
   //checkBoxCell.unbind('change');
-  checkBoxCell.bind('change', onDisableOrEnableCmd);
+  checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
 
   var cmdElement = jQuery(
@@ -220,6 +200,7 @@ function fillTableRowForCmd( row, cmd, className ) {
 function populateYeTable(feedMgr, cmdSource) {
   let table = $("#commands-and-feeds-table");
   let sortField = getSortMode();
+  let commands = cmdSource.getAllCommands();
 
   // TODO bug here: number of commands shown seems to include those from
   // unsubscribed feeds.
@@ -230,10 +211,7 @@ function populateYeTable(feedMgr, cmdSource) {
     if (feed.isBuiltIn)
       return; //handle these differently
 
-    let cmdNames = [];
-    for (let name in feed.commands) {
-      cmdNames.push(name);
-    }
+    let cmdNames = [name for (name in feed.commands)];
 
     let feedCell = $("<td></td>");
     if (cmdNames.length > 1 )
@@ -243,7 +221,7 @@ function populateYeTable(feedMgr, cmdSource) {
     let firstRow = $("<tr></tr>");
     firstRow.append( feedCell );
     if (cmdNames.length > 0) {
-      fillTableRowForCmd(firstRow, feed.commands[cmdNames[0]], "topcell");
+      fillTableRowForCmd(firstRow, commands[cmdNames[0]], "topcell");
     } else {
       firstRow.append($("<td class='topcell'></td><td class='topcell'></td>"));
     }
@@ -253,7 +231,7 @@ function populateYeTable(feedMgr, cmdSource) {
       for (let i = 1; i < cmdNames.length; i++ ) {
         // starting from 1 is on purpose
         let aRow = $("<tr></tr>");
-        fillTableRowForCmd(aRow, feed.commands[cmdNames[i]]);
+        fillTableRowForCmd(aRow, commands[cmdNames[i]]);
         table.append(aRow);
       }
     }
@@ -276,10 +254,8 @@ function populateYeTable(feedMgr, cmdSource) {
   } else if (sortField == "cmd") {
     let cmds = cmdSource.commandNames.slice();
     cmds = sortCmdListBy(cmds, "name");
-    for (let i=0; i < cmds.length; i++) {
-      let cmd = cmdSource.getCommand(cmds[i].name);
-      addCmdToTable(cmd);
-    }
+    for (let i = 0, l = cmds.length; i < l; ++i)
+      addCmdToTable(commands[cmds[i].name]);
   }
 }
 
@@ -339,19 +315,11 @@ function onDisableOrEnableCmd() {
   // status of a command.
   // Bind this to checkbox 'change'.
 
-  var name=$(this).parents('tr').find('span.name').text();
+  var name = $(this).parents('tr').find('.name').text();
   var cmdSource = UbiquitySetup.createServices().commandSource;
   var cmd = cmdSource.getCommand(name);
 
-  // TODO: this.checked is ALWAYS UNDEFINED.  So re-enabling does not work!
-  alert("this.checked is " + this.hasAttribute("checked") );
-  //alert("cmd name is " + name);
-  if (this.checked)
-    // user has just made this command active.
-    cmd.disabled = false;
-  else
-    // user has just made this command inactive.
-    cmd.disabled = true;
+  cmd.disabled = !this.checked;
 }
 
 // this was to make both subscribed and unsubscribed list entries, but is
