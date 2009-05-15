@@ -173,7 +173,6 @@ var Jetpack = {
     var globals = {
       location: codeSource.id,
       console: console,
-      Application: Application,
       $: jQuery,
       jQuery: jQuery,
       Jetpack: Jetpack

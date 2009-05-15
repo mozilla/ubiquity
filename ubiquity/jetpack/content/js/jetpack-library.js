@@ -52,7 +52,7 @@ function ImmutableArray(baseArray) {
   self.__proto__ = baseArray;
 }
 
-function NewJetpackLibrary() {
+function JetpackLibrary() {
   var trackedWindows = new Dictionary();
   var trackedTabs = new Dictionary();
 
@@ -230,11 +230,3 @@ function NewJetpackLibrary() {
 
   this.__defineGetter__("tabs", function() { return tabs; });
 }
-
-$(window).ready(
-  function() {
-    // Just for debugging purposes, assign an instance of the
-    // new library to a global so we can play around with it in the
-    // Firebug console.
-    njl = new NewJetpackLibrary();
-  });
