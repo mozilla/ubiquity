@@ -270,6 +270,7 @@ var LanguageCodes = {
   'greek' : 'el',
   'hebrew' : 'he',
   'hindi' : 'hi',
+  'hungarian' : 'hu',
   'indonesian' : 'id',
   'italian' : 'it',
   'japanese' : 'ja',
