@@ -198,13 +198,10 @@ $(window).ready(
     if (App.isFirefoxOld)
       $("#old-firefox-version").show();
 
-    JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
-      function(feed) {
-        if (feed.type == "jetpack") {
-          var url = feed.uri.spec;
-          var link = $('<a></a>').attr('href', url).text(url);
-          $("#jetpacks").append($('<div class="jetpack"></div>').append(link));
-        }
+    JetpackRuntime.contexts.forEach(
+      function(context) {
+        var link = $('<a></a>').attr('href', context.url).text(context.url);
+        $("#jetpacks").append($('<div class="jetpack"></div>').append(link));
       });
 
     App.forceGC();
