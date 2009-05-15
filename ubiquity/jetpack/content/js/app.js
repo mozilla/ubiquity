@@ -198,7 +198,7 @@ $(window).ready(
     if (App.isFirefoxOld)
       $("#old-firefox-version").show();
 
-    Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
+    JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
       function(feed) {
         if (feed.type == "jetpack") {
           var url = feed.uri.spec;

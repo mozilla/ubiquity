@@ -1,24 +1,3 @@
-// This sets up jQuery when it's loaded in a hidden chrome window
-// that doesn't provide a user interface.
-
-jQuery.ajaxSetup(
-  {xhr: function() {
-     // This is a fix for Ubiquity bug #470. We're going to create the
-     // XHR object from whatever current window the user's using, so
-     // that any UI that needs to be brought up as a result of the XHR
-     // is shown to the user, rather than being invisible and locking
-     // up the application.
-
-     if (Extension.isHidden) {
-       var jsm = {};
-       Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
-       var currWindow = jsm.Utils.currentChromeWindow;
-       return new currWindow.XMLHttpRequest();
-     }
-     return new XMLHttpRequest();
-   }
-  });
-
 // Call the given onLoad/onUnload() functions for all browser windows;
 // when this function is called, the onLoad() is called for all browser
 // windows, and subsequently for all newly-opened browser windows. When
@@ -88,7 +67,7 @@ function forAllBrowsers(options) {
   ww.onWindowOpened = onWindowOpened;
 }
 
-var Jetpack = {
+var JetpackRuntime = {
   _makeGlobals: function _makeGlobals(codeSource) {
     var me = {
       url: codeSource.id,
@@ -147,27 +126,27 @@ var Jetpack = {
   },
 
   finalize: function finalize() {
-    Jetpack.contexts.forEach(
+    JetpackRuntime.contexts.forEach(
       function(jetpack) {
         jetpack.finalize();
       });
-    Jetpack.contexts = [];
+    JetpackRuntime.contexts = [];
   },
 
-  loadAll: function loadAll() {
+  loadJetpacks: function loadJetpacks() {
     var jsm = {};
     Components.utils.import("resource://ubiquity/modules/sandboxfactory.js",
                             jsm);
 
     var sandboxFactory = new jsm.SandboxFactory(this._makeGlobals);
-    var feeds = Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds();
+    var feeds = JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds();
     feeds.forEach(
       function(feed) {
         if (feed.type == "jetpack") {
           var codeSource = feed.getCodeSource();
           var code = codeSource.getCode();
           var sandbox = sandboxFactory.makeSandbox(codeSource);
-          Jetpack.contexts.push(new Jetpack.Context(sandbox));
+          JetpackRuntime.contexts.push(new JetpackRuntime.Context(sandbox));
           try {
             var codeSections = [{length: code.length,
                                  filename: codeSource.id,
@@ -184,14 +163,14 @@ var Jetpack = {
 };
 
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
-                        Jetpack.FeedPlugin);
+                        JetpackRuntime.FeedPlugin);
 
 $(window).ready(
   function() {
-    Jetpack.loadAll();
-    window.addEventListener("unload", Jetpack.finalize, false);
+    JetpackRuntime.loadJetpacks();
+    window.addEventListener("unload", JetpackRuntime.finalize, false);
 
-    var watcher = new EventHubWatcher(Jetpack.FeedPlugin.FeedManager);
+    var watcher = new EventHubWatcher(JetpackRuntime.FeedPlugin.FeedManager);
 
     function maybeReload(eventName, uri) {
       if (eventName == "purge") {
@@ -202,7 +181,7 @@ $(window).ready(
         console.log("Reloading Jetpack due to purge on", uri.spec);
         window.location.reload();
       } else
-        Jetpack.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
+        JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
           function(feed) {
             // TODO: This logic means that we actually reload many
             // times during Firefox startup, depending on how many
