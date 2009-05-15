@@ -53,6 +53,7 @@ function ImmutableArray(baseArray) {
 }
 
 function JetpackLibrary() {
+  MemoryTracking.track(this);
   var trackedWindows = new Dictionary();
   var trackedTabs = new Dictionary();
 
