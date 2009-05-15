@@ -1040,24 +1040,26 @@ CmdUtils.previewCallback = function previewCallback(pblock,
 //
 // {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to 
 // which the relative paths are relative to)
-CmdUtils.absUrl = function absUrl(data, sourceUrl) { // improved by satyr
+CmdUtils.absUrl = function absUrl(data, sourceUrl) {
   switch (typeof data) {
     case "string":
       return data.replace(
-        /\b(href|src|action)=([\"\']?)(?!https?:\/\/)(\S+)\2/ig,
-        function au_repl(_, a, q, path)(a + "=" 
-                                          + q 
-                                          + Utils.url({uri: path, 
-                                                       base: sourceUrl}).spec 
+        /\b(href|src|action)=([\"\']?)(?!https?:\/\/)([^\s>]+)\2/ig,
+        function au_repl(_, a, q, path)(a + "="
+                                          + q
+                                          + Utils.url({uri: path,
+                                                       base: sourceUrl}).spec
                                           + q));
     case "object":
-      jQuery(data).find("a, img, form, link").andSelf().each(function au_each(){
-        var attr, path = (this.getAttribute(attr = 'href') ||
-                          this.getAttribute(attr = 'src' ) ||
-                          this.getAttribute(attr = 'action'));
-        if(path !== null && /^(?!https?:\/\/)/.test(path))
-          this.setAttribute(attr, Utils.url({uri: path, base: sourceUrl}).spec);
-      });
+      jQuery(data).find("*").andSelf().filter("a, img, form, link, embed")
+        .each(function au_each(){
+          var attr, path = (this.getAttribute(attr = "href") ||
+                            this.getAttribute(attr = "src" ) ||
+                            this.getAttribute(attr = "action"));
+          if(path !== null && /^(?!https?:\/\/)/.test(path))
+            this.setAttribute(attr,
+                              Utils.url({uri: path, base: sourceUrl}).spec);
+        });
       return data;
     case "xml":
       return XML(arguments.callee(data.toXMLString(), sourceUrl));
