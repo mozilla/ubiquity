@@ -425,14 +425,15 @@ function rebuildTable() {
   populateYeTable(feedMgr, cmdSource);
   $("#command-feed-graveyard").empty();
   addAllUnsubscribedFeeds(feedMgr);
+}
 
-  // If there are URL GET arguments, jump to the right place
-  let mainURL = window.location.search;
-  let arguments = mainURL.split("?");
-  if (arguments.length > 1) {
-    arguments = arguments[1].split("&");
-    for (let i in arguments) {
-      let pair = arguments[i].split("=");
+function jumpToCommand() {
+  // If there are URL GET args, jump to the right place
+  var {search} = window.location;
+  if (search) {
+    let args = search.slice(1).split("&");
+    for (let i in args) {
+      let pair = args[i].split("=");
       if (pair[0] == "cmdname") {
         window.location.hash = pair[1];
         break;
@@ -467,7 +468,7 @@ function showCmdListHelp( enabled ) {
   }
 }
 
-$(document).ready(rebuildTable);
+$(document).ready(rebuildTable).ready(jumpToCommand);
 
 
 
