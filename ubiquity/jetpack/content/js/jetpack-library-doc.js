@@ -91,7 +91,7 @@ Tabs.prototype = {
 // users. Notification bars, transparent messages, Growls, doorknob messages, 
 // etc. will all go through here. For now, it just has simple notifications.
 
-function Notifications(){}.
+function Notifications(){}
 Notifications.prototype = {
   // * ** {{{jetpack.notifications.show( message )}}} **
   // Shows a simple notification message. On Windows it's a toaster
@@ -99,4 +99,29 @@ Notifications.prototype = {
   // {{{message}}} is either a string, or an object with properties
   // {{{title}}} and {{{body}}}.
   show: function(){}
+}
+
+
+// === {{{[tab]}}} ===
+// A {{{tab}}} is the basic unit of interaction. From it, you can peek into the // content of a page, and control a tab. You can access a particular tab from
+// the {{{jetpack.tabs}}} array.
+function Tab(){}
+Tab.prototype = {
+  
+  // * ** {{{tab.contentWindow}}} **
+  // Like an iframe, {{{contentWindow}}} is the way to access the {{{window}}}
+  // object, as if you were the content of the web page living in the tab.
+  // Note that if the content of the page has changed the definition of a
+  // built-in function, you'll get the changed function. For example, if a page
+  // has defined a new {{{window.alert}}}) to open mozilla.com,
+  // {{{tab.contentWindow.alert()}}} will also open mozilla.com
+  contentWindow: null,
+  
+  contentDocument: null,
+  
+  pristine: {
+    contentWindow: null,
+    contentDocument: null
+  }
+  
 }
