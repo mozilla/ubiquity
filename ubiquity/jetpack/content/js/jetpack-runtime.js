@@ -1,4 +1,7 @@
 var JetpackRuntime = {
+  // Just so we show up as some class when introspected.
+  constructor: function JetpackRuntime() {},
+
   _statusBarInstance: null,
   _jetpackNamespace: null,
 

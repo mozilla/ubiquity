@@ -57,6 +57,7 @@ function WindowWatcher() {
 // extension is unloaded.
 
 function BrowserWatcher(options) {
+  MemoryTracking.track(this);
   var pendingHandlers = [];
 
   function makeSafeFunc(func) {
