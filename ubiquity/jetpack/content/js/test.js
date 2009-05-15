@@ -6,6 +6,10 @@ var Tests = {
     var finishedId = null;
     var timeoutId = null;
     var runner = {
+      assert: function assert(predicate, message) {
+        if (!predicate)
+          throw new Error("Assertion failed: " + message);
+      },
       setTimeout: function setTimeout(ms, message) {
         timeoutId = window.setTimeout(
           function() {
