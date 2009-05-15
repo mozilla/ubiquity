@@ -90,9 +90,6 @@ function forAllBrowsers(options) {
 
 var Jetpack = {
   _makeGlobals: function _makeGlobals(codeSource) {
-    var Application = Cc["@mozilla.org/fuel/application;1"]
-                      .getService(Ci.fuelIApplication);
-
     var me = {
       url: codeSource.id,
       toString: function toString() {
