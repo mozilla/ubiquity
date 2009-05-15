@@ -68,15 +68,9 @@ function forAllBrowsers(options) {
 }
 
 var JetpackRuntime = {
-  _makeGlobals: function _makeGlobals(codeSource) {
-    var me = {
-      url: codeSource.id,
-      toString: function toString() {
-        var parts = codeSource.id.split("/");
-        return parts.slice(-1)[0];
-      }
-    };
+  _jetpackNamespace: null,
 
+  _buildJetpackNamespace: function buildJetpackNamespace() {
     var Jetpack = new JetpackLibrary();
 
     Jetpack.lib = {};
@@ -97,21 +91,7 @@ var JetpackRuntime = {
       MemoryTracking.track.apply(MemoryTracking, newArgs);
     };
 
-    var globals = {
-      location: codeSource.id,
-      console: console,
-      $: jQuery,
-      jQuery: jQuery,
-      Jetpack: Jetpack
-    };
-
-    // Add stubs for deprecated/obsolete functions.
-    globals.addStatusBarPanel = function() {
-      throw new Error("addStatusBarPanel() has been moved to " +
-                      "Jetpack.statusBar.append().");
-    };
-
-    return globals;
+    this._jetpackNamespace = Jetpack;
   },
 
   contexts: [],
@@ -126,27 +106,50 @@ var JetpackRuntime = {
   },
 
   finalize: function finalize() {
-    JetpackRuntime.contexts.forEach(
+    this.contexts.forEach(
       function(jetpack) {
         jetpack.finalize();
       });
-    JetpackRuntime.contexts = [];
+    this.contexts = [];
   },
 
   loadJetpacks: function loadJetpacks() {
+    var self = this;
+
+    function makeGlobals(codeSource) {
+      if (!self._jetpackNamespace)
+        self._buildJetpackNamespace();
+
+      var globals = {
+        location: codeSource.id,
+        console: console,
+        $: jQuery,
+        jQuery: jQuery,
+        Jetpack: self._jetpackNamespace
+      };
+
+      // Add stubs for deprecated/obsolete functions.
+      globals.addStatusBarPanel = function() {
+        throw new Error("addStatusBarPanel() has been moved to " +
+                        "Jetpack.statusBar.append().");
+      };
+
+      return globals;
+    }
+
     var jsm = {};
     Components.utils.import("resource://ubiquity/modules/sandboxfactory.js",
                             jsm);
 
-    var sandboxFactory = new jsm.SandboxFactory(this._makeGlobals);
-    var feeds = JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds();
+    var sandboxFactory = new jsm.SandboxFactory(makeGlobals);
+    var feeds = self.FeedPlugin.FeedManager.getSubscribedFeeds();
     feeds.forEach(
       function(feed) {
         if (feed.type == "jetpack") {
           var codeSource = feed.getCodeSource();
           var code = codeSource.getCode();
           var sandbox = sandboxFactory.makeSandbox(codeSource);
-          JetpackRuntime.contexts.push(new JetpackRuntime.Context(sandbox));
+          self.contexts.push(new self.Context(sandbox));
           try {
             var codeSections = [{length: code.length,
                                  filename: codeSource.id,
@@ -157,6 +160,9 @@ var JetpackRuntime = {
           }
         }
       });
+    jsm = null;
+    sandboxFactory = null;
+    feeds = null;
   },
 
   FeedPlugin: {}
@@ -168,7 +174,9 @@ Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
 $(window).ready(
   function() {
     JetpackRuntime.loadJetpacks();
-    window.addEventListener("unload", JetpackRuntime.finalize, false);
+    window.addEventListener("unload",
+                            function() { JetpackRuntime.finalize(); },
+                            false);
 
     var watcher = new EventHubWatcher(JetpackRuntime.FeedPlugin.FeedManager);
 
