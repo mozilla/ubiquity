@@ -24,7 +24,7 @@ function Dictionary() {
   this.remove = function remove(key) {
     var id = keys.indexOf(key);
     if (id == -1)
-      throw new Error("object not in dictionary: ", key);
+      throw new Error("object not in dictionary: " + key);
     keys.splice(id, 1);
     values.splice(id, 1);
   };

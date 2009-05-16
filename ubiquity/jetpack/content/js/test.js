@@ -23,6 +23,19 @@ var Tests = {
     var finishedId = null;
     var timeoutId = null;
     var runner = {
+      assertRaises: function assertRaises(cb, exception, message) {
+        var wasExceptionThrown = false;
+        try {
+          cb();
+        } catch (e if e instanceof exception) {
+          wasExceptionThrown = true;
+        }
+        if (!wasExceptionThrown) {
+          if (!message)
+            message = "Assertion failed: exception not raised";
+          self._exceptionAtCaller(message);
+        }
+      },
       assertEqual: function assertEqual(a, b, message) {
         if (a != b) {
           console.error(a, "is not equal to", b);
@@ -67,7 +80,7 @@ var Tests = {
       }
     } catch (e) {
       if (!e.alreadyLogged)
-        console.error(test.name, "threw error ", e);
+        console.exception(e);
       if (timeoutId === null && finishedId === null)
         finishedId = window.setTimeout(reportFailure, 0);
     }
