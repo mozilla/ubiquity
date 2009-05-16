@@ -52,21 +52,55 @@ function ImmutableArray(baseArray) {
   self.__proto__ = baseArray;
 }
 
+function EventListenerMixIns(mixInto) {
+  MemoryTracking.track(this);
+  var mixIns = {};
+
+  this.add = function add(options) {
+    if (mixIns) {
+      if (options.name in mixIns)
+        throw new Error("mixIn for", options.name, "already exists.");
+      options.mixInto = mixInto;
+      mixIns[options.name] = new EventListenerMixIn(options);
+    }
+  };
+
+  this.bubble = function bubble(name, target, event) {
+    if (mixIns)
+      mixIns[name].trigger(target, event);
+  };
+
+  Extension.addUnloadMethod(
+    this,
+    function() {
+      for (name in mixIns) {
+        mixIns[name].unload();
+        delete mixIns[name];
+      }
+      mixIns = null;
+    });
+}
+
 function EventListenerMixIn(options) {
   MemoryTracking.track(this);
   var listeners = [];
 
-  function onEvent(event) {
+  function onEvent(event, target) {
     if (listeners) {
-      event = options.filter.call(this, event);
+      if (options.filter)
+        event = options.filter.call(this, event);
       if (event) {
+        if (!target)
+          target = options.mixInto;
         var listenersCopy = listeners.slice();
         for (var i = 0; i < listenersCopy.length; i++)
           try {
-            listenersCopy[i].call(options.mixInto, event);
+            listenersCopy[i].call(target, event);
           } catch (e) {
             console.exception(e);
           }
+        if (options.bubbleTo)
+          options.bubbleTo.bubble(options.name, target, event);
       }
     }
   };
@@ -84,17 +118,23 @@ function EventListenerMixIn(options) {
     }
   };
 
-  options.watch.addEventListener(options.eventName,
-                                 onEvent,
-                                 options.useCapture);
+  this.trigger = function trigger(target, event) {
+    onEvent(event, target);
+  };
+
+  if (options.observe)
+    options.observe.addEventListener(options.eventName,
+                                     onEvent,
+                                     options.useCapture);
 
   Extension.addUnloadMethod(
     this,
     function() {
       listeners = null;
-      options.watch.removeEventListener(options.eventName,
-                                        onEvent,
-                                        options.useCapture);
+      if (options.observe)
+        options.observe.removeEventListener(options.eventName,
+                                            onEvent,
+                                            options.useCapture);
     });
 }
 
@@ -129,6 +169,9 @@ function JetpackLibrary() {
       return browserWindow.addTab(url);
     }
   };
+
+  var tabsMixIns = new EventListenerMixIns(tabs);
+  tabsMixIns.add({name: "onPageLoad"});
 
   tabs.__proto__ = trackedTabs.values;
 
@@ -211,19 +254,18 @@ function JetpackLibrary() {
     MemoryTracking.track(this);
     var browser = chromeTab.linkedBrowser;
 
-    var mixIns = [];
+    var mixIns = new EventListenerMixIns(this);
 
-    mixIns.push(
-      new EventListenerMixIn(
-        {name: "onPageLoad",
-         watch: browser,
-         eventName: "DOMContentLoaded",
-         useCapture: true,
-         mixInto: this,
-         filter: function(event) {
-           // Return the document that just loaded.
-           return event.originalTarget;
-         }}));
+    mixIns.add(
+      {name: "onPageLoad",
+       observe: browser,
+       eventName: "DOMContentLoaded",
+       useCapture: true,
+       bubbleTo: tabsMixIns,
+       filter: function(event) {
+         // Return the document that just loaded.
+         return event.originalTarget;
+       }});
 
     this.__proto__ = {
       get isClosed() { return (browser == null); },
@@ -266,7 +308,7 @@ function JetpackLibrary() {
       },
 
       _unload: function _unload() {
-        mixIns.forEach(function(mixIn) { mixIn.unload(); });
+        mixIns.unload();
         mixIns = null;
         tabbrowser = null;
         chromeTab = null;
@@ -294,6 +336,7 @@ function JetpackLibrary() {
   Extension.addUnloadMethod(
     this,
     function() {
+      tabsMixIns.unload();
       browserWatcher.unload();
     });
 }

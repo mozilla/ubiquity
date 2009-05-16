@@ -5,6 +5,20 @@ var JetpackLibraryTests ={
     Jetpack.unload();
   },
 
+  testMixInEventsBubble: function(self) {
+    var Jetpack = new JetpackLibrary();
+    Jetpack.tabs.onPageLoad(
+      function onPageLoad(document) {
+        self.assert(this, tab);
+        self.assert($(document).text() == "hello");
+        tab.close();
+        Jetpack.unload();
+        self.success();
+      });
+    var tab = Jetpack.tabs.open("data:text/html,hello");
+    self.setTimeout(1000);
+  },
+
   testTabOpenFocusAndClose: function(self) {
     var Jetpack = new JetpackLibrary();
     var originalTabCount = Jetpack.tabs.length;
