@@ -68,12 +68,28 @@ var Tests = {
     var succeeded = 0;
     var failed = 0;
 
+    function recomputeCount() {
+      Components.utils.forceGC();
+      MemoryTracking.compact();
+      return MemoryTracking.getLiveObjects().length;
+    }
+
+    var lastCount = recomputeCount();
+
     function runNextTest(lastResult) {
-      if (lastResult == "success")
+      var currentCount = recomputeCount();
+      if (lastResult == "success") {
         succeeded += 1;
-      else if (lastResult == "failure") {
+        if (currentCount != lastCount)
+          console.warn("Object count was", lastCount, "but is now",
+                       currentCount, ". You may want to check for " +
+                       "memory leaks, though this could be a false " +
+                       "alarm.");
+      } else if (lastResult == "failure") {
         failed += 1;
       }
+
+      lastCount = currentCount;
 
       if (tests.length)
         self._runTest(tests.pop(), runNextTest);
