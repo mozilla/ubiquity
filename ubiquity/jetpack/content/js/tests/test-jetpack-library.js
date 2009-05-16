@@ -1,4 +1,20 @@
-var JetpackLibraryTests ={
+var DictionaryTests = {
+  testSetAndGet: function(self) {
+    var dict = new Dictionary();
+    var a = {foo: "bar"};
+    var b = {baz: "blah"};
+    var c = window;
+    dict.set("hi", "there");
+    dict.set(a, b);
+    self.assertEqual(dict.get("hi"), "there");
+    self.assertEqual(dict.get(a), b);
+    dict.set(a, c);
+    self.assertEqual(dict.get(a), c);
+    self.assertEqual(dict.length, 2);
+  }
+};
+
+var JetpackLibraryTests = {
   testTabIsObject: function(self) {
     var Jetpack = new JetpackLibrary();
     self.assert(typeof(Jetpack.tabs.focused) == "object");

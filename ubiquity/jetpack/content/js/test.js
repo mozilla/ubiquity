@@ -1,14 +1,42 @@
 var Tests = {
+  _TestFailedAndExceptionLogged: function _TestFailedAndExceptionLogged() {
+    this.message = "Test failed and exception logged.";
+    this.alreadyLogged = true;
+    this.__proto__ = new Error();
+  },
+
+  _exceptionAtCaller: function _exceptionAtCaller(message) {
+    var frame = Components.stack.caller.caller;
+    var e = new Error();
+    e.fileName = frame.filename;
+    e.lineNumber = frame.lineNumber;
+    e.message = message;
+    console.exception(e);
+    throw new this._TestFailedAndExceptionLogged();
+  },
+
   _runTest: function _runTest(test, onFinished) {
+    var self = this;
     function reportSuccess() { onFinished("success"); }
     function reportFailure() { onFinished("failure"); }
 
     var finishedId = null;
     var timeoutId = null;
     var runner = {
+      assertEqual: function assertEqual(a, b, message) {
+        if (a != b) {
+          console.error(a, "is not equal to", b);
+          if (!message)
+            message = "Assertion failed";
+          self._exceptionAtCaller(message);
+        }
+      },
       assert: function assert(predicate, message) {
-        if (!predicate)
-          throw new Error("Assertion failed: " + message);
+        if (!predicate) {
+          if (!message)
+            message = "Assertion failed";
+          self._exceptionAtCaller(message);
+        }
       },
       allowForMemoryError: function allowForMemoryError(margin) {
         test.memoryErrorMargin = margin;
@@ -38,7 +66,8 @@ var Tests = {
         finishedId = window.setTimeout(reportSuccess, 0);
       }
     } catch (e) {
-      console.error(test.name, "threw error ", e);
+      if (!e.alreadyLogged)
+        console.error(test.name, "threw error ", e);
       if (timeoutId === null && finishedId === null)
         finishedId = window.setTimeout(reportFailure, 0);
     }
