@@ -49,6 +49,9 @@ var App = {
   },
 
   addLinkForJetpack: function addLinkForJetpack(feed, eventName) {
+    if (feed.isBuiltIn)
+      return;
+
     var url = feed.uri.spec;
 
     // Assume that we're either switching subscribed/unsubscribed
