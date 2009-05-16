@@ -97,6 +97,28 @@ var JetpackRuntime = {
     this.srcUrl = feed.srcUri.spec;
   },
 
+  addJetpack: function addJetpack(url) {
+    var self = this;
+    JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
+      function(feed) {
+        if (feed.uri.spec == url) {
+          self.contexts.push(new self.Context(feed, console));
+        }
+      });
+  },
+
+  removeJetpack: function removeJetpack(context) {
+    var index = this.contexts.indexOf(context);
+    this.contexts.splice(index, 1);
+    context.unload();
+  },
+
+  reloadJetpack: function reloadJetpack(context) {
+    var url = context.url;
+    this.removeJetpack(context);
+    this.addJetpack(url);
+  },
+
   unloadAllJetpacks: function unloadAllJetpacks() {
     this.contexts.forEach(
       function(jetpack) {
@@ -131,31 +153,28 @@ $(window).ready(
     JetpackRuntime.loadJetpacks();
 
     function maybeReload(eventName, uri) {
-      var doReload = false;
-
       switch (eventName) {
       case "feed-change":
       case "purge":
       case "unsubscribe":
         var matches = [context for each (context in JetpackRuntime.contexts)
                                if (context.url == uri.spec)];
-        if (matches.length)
-          doReload = true;
+        if (matches.length) {
+          if (eventName == "feed-change")
+            // Reload the feed.
+            JetpackRuntime.reloadJetpack(matches[0]);
+          else
+            // Destroy the feed.
+            JetpackRuntime.removeJetpack(matches[0]);
+        }
         break;
       case "subscribe":
         JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
           function(feed) {
-            if (feed.uri.spec == uri.spec && feed.type == "jetpack") {
-              doReload = true;
-            }
+            if (feed.uri.spec == uri.spec && feed.type == "jetpack")
+              JetpackRuntime.addJetpack(uri.spec);
           });
         break;
-      }
-
-      if (doReload) {
-        console.log("Reloading Jetpack due to", eventName, "on",
-                    uri.spec);
-        window.location.reload();
       }
     }
 
