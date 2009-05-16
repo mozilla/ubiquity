@@ -10,6 +10,9 @@ var Tests = {
         if (!predicate)
           throw new Error("Assertion failed: " + message);
       },
+      allowForMemoryError: function allowForMemoryError(margin) {
+        test.memoryErrorMargin = margin;
+      },
       setTimeout: function setTimeout(ms, message) {
         timeoutId = window.setTimeout(
           function() {
@@ -62,7 +65,8 @@ var Tests = {
       for (testName in suite)
         tests.push({func: suite[testName],
                     suite: suite,
-                    name: name + "." + testName});
+                    name: name + "." + testName,
+                    memoryErrorMargin: 0});
     }
 
     var succeeded = 0;
@@ -75,12 +79,14 @@ var Tests = {
     }
 
     var lastCount = recomputeCount();
+    var currentTest = null;
 
     function runNextTest(lastResult) {
       var currentCount = recomputeCount();
       if (lastResult == "success") {
         succeeded += 1;
-        if (currentCount != lastCount)
+        var memoryDiff = Math.abs(currentCount - lastCount);
+        if (memoryDiff > currentTest.memoryErrorMargin)
           console.warn("Object count was", lastCount, "but is now",
                        currentCount, ". You may want to check for " +
                        "memory leaks, though this could be a false " +
@@ -90,9 +96,10 @@ var Tests = {
       }
 
       lastCount = currentCount;
+      currentTest = tests.pop();
 
-      if (tests.length)
-        self._runTest(tests.pop(), runNextTest);
+      if (currentTest)
+        self._runTest(currentTest, runNextTest);
       else
         console.log(succeeded, "out of", succeeded + failed,
                     "tests successful (", failed, "failed ).",
