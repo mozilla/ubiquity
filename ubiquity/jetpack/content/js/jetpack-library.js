@@ -171,7 +171,7 @@ function JetpackLibrary() {
   };
 
   var tabsMixIns = new EventListenerMixIns(tabs);
-  tabsMixIns.add({name: "onPageLoad"});
+  tabsMixIns.add({name: "onReady"});
 
   tabs.__proto__ = trackedTabs.values;
 
@@ -257,7 +257,7 @@ function JetpackLibrary() {
     var mixIns = new EventListenerMixIns(this);
 
     mixIns.add(
-      {name: "onPageLoad",
+      {name: "onReady",
        observe: browser,
        eventName: "DOMContentLoaded",
        useCapture: true,

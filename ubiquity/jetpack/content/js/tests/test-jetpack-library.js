@@ -7,8 +7,9 @@ var JetpackLibraryTests ={
 
   testMixInEventsBubble: function(self) {
     var Jetpack = new JetpackLibrary();
-    Jetpack.tabs.onPageLoad(
-      function onPageLoad(document) {
+    Jetpack.tabs.onReady(
+      function onReady(document) {
+        Jetpack.tabs.onReady.unbind(onReady);
         self.assert(this, tab);
         self.assert($(document).text() == "hello");
         tab.close();
@@ -27,10 +28,10 @@ var JetpackLibraryTests ={
     self.assert(Jetpack.tabs.length == originalTabCount+1);
     tab.focus();
     self.assert(Jetpack.tabs.focused == tab);
-    tab.onPageLoad(
-      function onPageLoad(document) {
+    tab.onReady(
+      function onReady(document) {
         self.assert(this, tab);
-        tab.onPageLoad.unbind(onPageLoad);
+        tab.onReady.unbind(onReady);
         self.assert($(document).text() == "hai2u");
         tab.close();
         self.assert(Jetpack.tabs.length == originalTabCount);
