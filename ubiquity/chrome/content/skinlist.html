@@ -27,7 +27,7 @@
 
   <br clear="all"/>
   <div style="text-align:center;">
-    <p>You can get to this page at any time using the "Skin-list" command.</p>
+    <p>You can get to this page at any time using the "skin-list" command.</p>
   </div>
   <br clear="all"/>
 
@@ -46,18 +46,21 @@
 
   <div class="col-four">
     <h2 class="top">Key Combination</h2>
-    <strong>Invoke</strong> Ubiquity by pressing:</legend>
+    <fieldset>
+    <legend><strong>Invoke</strong> Ubiquity by pressing:</legend>
     <div style="margin-left:10px;">
       <p>
-      <input id="keyInputBox" type="text" size="27"
+      <input id="keyInputBox" type="text" size="42"
              style="cursor:pointer"
              onkeydown="PrefKeys.onKeyChange(event)" 
              onfocus="this.value = 'Press your combination'"
              onblur="PrefKeys.onLoad()"/><br/>
-      Click above to <strong>Change</strong> the keyboard shortcut used to open
-      Ubiquity. <br/></p>
+      Click above to <strong>Change</strong> the keyboard shortcut used to
+      open/close Ubiquity. <br/></p>
     <p id="keyNotify"></p>
     </div>
+    </fieldset>
+    <script> PrefKeys.onLoad() </script>
 
     <h2>Language Settings</h2>
     <p>Coming soon.</p>

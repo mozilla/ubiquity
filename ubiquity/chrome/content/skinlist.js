@@ -48,7 +48,7 @@ var skinService = new SkinSvc();
 function onDocumentLoad() {
   var skinList = skinService.getSkinList()
   for(var i in skinList){
-    createSkinElement(skinList[i]["local_uri"], i);    
+    createSkinElement(skinList[i]["local_uri"], i);
   }
   //If current skin is custom skin, auto-open the editor
   var customSkin = "chrome://ubiquity/skin/skins/custom.css";
@@ -191,14 +191,20 @@ function saveCustomSkin(){
 
 function pasteToGist(){
   var data = $("#skin-editor").val();
-  var file = encodeURIComponent("[gistfile1]");
-  quickPaste = "file_ext" + file + "=.js&file_name" + file + "=x&file_contents" + file + "=" + encodeURIComponent(data) + "&x=27&y=27";
-  updateUrl = "http://gist.github.com/gists";
-  Utils.openUrlInBrowser(updateUrl, quickPaste);
+  var name = (/@name[ \t]+(.+)/(data) || 0)[1];
+  var ext = ".css";
+  Utils.openUrlInBrowser(
+    "http://gist.github.com/gists/",
+    ["file_" + key + "[gistfile1]=" + encodeURIComponent(val)
+     for each([key, val] in Iterator({
+       ext: ext,
+       name: (name || "ubiquity-skin") + ext,
+       contents: data,
+     }))].join("&"));
 }
 
 function openSkinEditor(){
-  $('#editor-div').show(); 
+  $('#editor-div').show();
   $('#skin-editor').focus();
   $('#edit-button').hide();
 }
