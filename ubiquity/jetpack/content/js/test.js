@@ -102,8 +102,7 @@ var Tests = {
         self._runTest(currentTest, runNextTest);
       else
         console.log(succeeded, "out of", succeeded + failed,
-                    "tests successful (", failed, "failed ).",
-                    "Please reload this page before running them again.");
+                    "tests successful (", failed, "failed ).");
     }
 
     runNextTest();
