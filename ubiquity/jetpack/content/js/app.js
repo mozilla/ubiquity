@@ -1,4 +1,24 @@
 var App = {
+  _jetpackLinks: {},
+
+  removeLinkForJetpack: function removeLinkForJetpack(url) {
+    if (url in this._jetpackLinks) {
+      this._jetpackLinks[url].slideUp(function() { $(this).remove(); });
+      delete this._jetpackLinks[url];
+    }
+  },
+
+  addLinkForJetpack: function addLinkForJetpack(feed) {
+    var url = feed.uri.spec;
+    var link = $('<a></a>').attr('href', url).text(feed.title);
+    var div = $('<div class="jetpack"></div>').append(link);
+    div.hide();
+    $("#jetpacks").append(div);
+    div.slideDown();
+    MemoryTracking.track(div, "JetpackLink");
+    this._jetpackLinks[url] = div;
+  },
+
   get isFirefoxOld() {
     var appInfo = Cc["@mozilla.org/xre/app-info;1"]
                   .getService(Ci.nsIXULAppInfo);
@@ -170,11 +190,29 @@ $(window).ready(
     if (App.isFirefoxOld)
       $("#old-firefox-version").show();
 
-    JetpackRuntime.contexts.forEach(
-      function(context) {
-        var link = $('<a></a>').attr('href', context.url).text(context.url);
-        $("#jetpacks").append($('<div class="jetpack"></div>').append(link));
+    JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
+      function(feed) {
+        if (feed.type == "jetpack")
+          App.addLinkForJetpack(feed);
       });
 
+    function onFeedEvent(eventName, uri) {
+      switch (eventName) {
+      case "purge":
+      case "unsubscribe":
+        App.removeLinkForJetpack(uri.spec);
+        break;
+      case "subscribe":
+        var feed = JetpackRuntime.FeedPlugin.FeedManager.getFeedForUrl(uri);
+        if (feed && feed.type == "jetpack")
+          App.addLinkForJetpack(feed);
+        break;
+      }
+    }
+
+    var watcher = new EventHubWatcher(JetpackRuntime.FeedPlugin.FeedManager);
+    watcher.add("subscribe", onFeedEvent);
+    watcher.add("unsubscribe", onFeedEvent);
+    watcher.add("purge", onFeedEvent);
     App.forceGC();
   });
