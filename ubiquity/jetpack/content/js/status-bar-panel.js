@@ -32,7 +32,19 @@ var WebContentFunctions = {
   }
 };
 
-function StatusBar() {
+function UrlFactory(baseUrl) {
+  MemoryTracking.track(this);
+  var ios = Cc["@mozilla.org/network/io-service;1"]
+            .getService(Ci.nsIIOService);
+  var base = ios.newURI(baseUrl, null, null);
+
+  this.makeUrl = function(url) {
+    return ios.newURI(url, null, base).spec;
+  };
+}
+
+function StatusBar(urlFactory) {
+  this._urlFactory = urlFactory;
   this._browserWatchers = [];
   this._panels = [];
   this._windows = [];
@@ -126,9 +138,9 @@ StatusBar.prototype = {
     var self = this;
     var url;
 
-    if (options.url)
-      url = options.url;
-    else if (options.html) {
+    if (options.url) {
+      url = self._urlFactory.makeUrl(options.url);
+    } else if (options.html) {
       url = "data:text/html," + encodeURI(options.html);
     } else
       url = "about:blank";
