@@ -92,16 +92,9 @@ function _connectToDatabase() {
   return _gDatabaseConnection;
 }
 
-function SkinSvc(window) {
+function SkinSvc(webJsm) {
   this._init();
-  if(window){
-    this._window = window;
-    
-    var webJsm =  new WebJsModule(function(){});
-    webJsm.importScript("resource://ubiquity/scripts/jquery.js");
-    this.webJsm = webJsm;
-    
-  }
+  this.webJsm = webJsm;
 }
 
 SkinSvc.reset = function reset() {
@@ -165,6 +158,7 @@ SkinSvc.prototype = {
     if (selStmt.executeStep()) {
       count = selStmt.getInt32(0);
     }
+    selStmt.finalize();
     return (count != 0);
   },
 
@@ -240,7 +234,8 @@ SkinSvc.prototype = {
       this.setCurrentSkin(this.DEFAULT_SKIN);
       Components.utils.reportError("Error applying Ubiquity skin from'" +
                                     newSkinPath + "': " + e);
-      this._msgService.displayMessage("Error applying Ubiquity skin from " + newSkinPath);
+      this._msgService.displayMessage("Error applying Ubiquity skin from " +
+                                      newSkinPath);
     }
   },
 
@@ -255,6 +250,7 @@ SkinSvc.prototype = {
       temp["download_uri"] = selStmt.getUTF8String(1);
       skinList.push(temp);
     }
+    selStmt.finalize();
     return skinList;
   },
 
@@ -271,9 +267,10 @@ SkinSvc.prototype = {
         self._writeToFile(file, data);
       }
 
-      this.webJsm.jQuery.ajax({url: download_uri,
-          dataType: "text",
-          success: onSuccess});
+      this.webJsm.jQuery.ajax({
+        url: download_uri,
+        dataType: "text",
+        success: onSuccess});
     } catch(e) {
       Components.utils.reportError("Error writing Ubiquity skin to file'" +
                                     local_uri + "': " + e);
@@ -295,10 +292,9 @@ SkinSvc.prototype = {
 }
 
 
-SkinSvc.prototype.installToWindow = function installToWindow() {
+SkinSvc.prototype.installToWindow = function installToWindow(window) {
 
   var self = this;
-  var window = this._window;
 
   function showNotification(targetDoc, skinUrl, mimetype) {
 
@@ -361,12 +357,11 @@ SkinSvc.prototype.installToWindow = function installToWindow() {
           }
       }
 
-      var buttons = [
-      {accessKey: null,
+      var buttons = [{
+        accessKey: "I",
         callback: onSubscribeClick,
         label: "Install...",
-        popup: null}
-        ];
+        popup: null}];
       box.appendNotification(
         ("This page contains a Ubiquity skin.  " +
         "If you'd like to install the skin, please " +

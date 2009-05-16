@@ -51,8 +51,6 @@ function ubiquitySetup()
                           jsm);
   Components.utils.import("resource://ubiquity/modules/cmdmanager.js",
                           jsm);
-  Components.utils.import("resource://ubiquity/modules/skinsvc.js",
-                          jsm);
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
 
@@ -82,33 +80,6 @@ function ubiquitySetup()
       suggsIframe.height = this.height;
     },
     false);
-
-  //Install skin detector
-  var skinService = new jsm.SkinSvc(window);
-  skinService.installToWindow();
-  skinService.updateAllSkins();
-
-  //Load current skin
-  var skinUrl = skinService.getCurrentSkin();
-  var defaultSkinUrl = skinService.DEFAULT_SKIN;
-
-  //For backwards compatibility since in 0.1.2
-  //The pref was "default" or "old"
-  //Now, we are storing the complete file path in the pref.
-  if(skinUrl == "default" || skinUrl == "old"){
-    skinUrl = defaultSkinUrl;
-    skinService.setCurrentSkin(skinUrl);
-  }
-  try{
-    skinService.loadSkin(skinUrl);
-  }catch(e){
-    //If there's any error loading the current skin,
-    //load the default and tell the user about the failure
-    skinService.loadSkin(defaultSkinUrl);
-    services.messageService
-            .displayMessage("Loading your current skin failed." +
-                            "The default skin will be loaded.");
-  }
 
   var popupMenu = UbiquityPopupMenu(
     document.getElementById("contentAreaContextMenu"),
@@ -190,7 +161,8 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 
 window.addEventListener(
   "load",
-  function() {
+  function onload() {
+    window.removeEventListener("load", onload, false);
     var jsm = {};
     Components.utils.import("resource://ubiquity/modules/setup.js",
                             jsm);

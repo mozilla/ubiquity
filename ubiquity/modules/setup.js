@@ -51,6 +51,7 @@ Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
 Components.utils.import("resource://ubiquity/modules/webjsm.js");
 Components.utils.import("resource://ubiquity/modules/prefcommands.js");
+Components.utils.import("resource://ubiquity/modules/skinsvc.js");
 
 var Jetpack = {};
 Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
@@ -153,7 +154,7 @@ let UbiquitySetup = {
   __setupFinalizer: function __setupFinalizer() {
     var observer = {
       observe: function(subject, topic, data) {
-	gServices.feedManager.finalize();
+        gServices.feedManager.finalize();
       }
     };
 
@@ -170,10 +171,7 @@ let UbiquitySetup = {
         annDb.remove(false);
 
       // Reset all skins.
-      let jsm = {};
-      Components.utils.import("resource://ubiquity/modules/skinsvc.js",
-                              jsm);
-      jsm.SkinSvc.reset();
+      SkinSvc.reset();
 
       // We'll reset the preferences for our extension here.  Unfortunately,
       // there doesn't seem to be an easy way to get this from FUEL, so
@@ -291,9 +289,33 @@ let UbiquitySetup = {
       );
       disabledStorage.attach(cmdSource);
 
+      var skinService = new SkinSvc(gWebJsModule);
+      skinService.updateAllSkins();
+      //Load current skin
+      var skinUrl = skinService.getCurrentSkin();
+      var defaultSkinUrl = skinService.DEFAULT_SKIN;
+      //For backwards compatibility since in 0.1.2
+      //The pref was "default" or "old"
+      //Now, we are storing the complete file path in the pref.
+      if (skinUrl == "default" || skinUrl == "old") {
+        skinUrl = defaultSkinUrl;
+        skinService.setCurrentSkin(skinUrl);
+      }
+      try {
+        skinService.loadSkin(skinUrl);
+      } catch (e) {
+        //If there's any error loading the current skin,
+        //load the default and tell the user about the failure
+        skinService.loadSkin(defaultSkinUrl);
+        gServices.messageService
+          .displayMessage("Loading your current skin failed." +
+                          " The default skin will be loaded.");
+      }
+
       gServices = {commandSource: cmdSource,
                    feedManager: feedManager,
-                   messageService: msgService};
+                   messageService: msgService,
+                   skinService: skinService};
 
       this.__setupFinalizer();
 
@@ -319,6 +341,7 @@ let UbiquitySetup = {
 
   setupWindow: function setupWindow(window) {
     gServices.feedManager.installToWindow(window);
+    gServices.skinService.installToWindow(window);
 
     var PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
 

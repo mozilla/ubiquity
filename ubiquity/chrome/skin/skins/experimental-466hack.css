@@ -1,4 +1,6 @@
+@-moz-document url(chrome://browser/content/browser.xul) {
 #ubiquity-panel {
   /* On Mac this is changed to white, due to a rendering bug. See bug #466. */
   background: white;
+}
 }
