@@ -27,6 +27,7 @@ var StatusBarPanelTests = {
       sb.append(
         {html: "<p>testing</p>",
          onLoad: function(document) {
+           self.assert($("p", document).text() == "testing");
            window.setTimeout(onDone, 0);
          }});
       self.setTimeout(5000);
