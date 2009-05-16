@@ -62,7 +62,7 @@ var Tests = {
       for (testName in suite)
         tests.push({func: suite[testName],
                     suite: suite,
-                    name: testName});
+                    name: name + "." + testName});
     }
 
     var succeeded = 0;

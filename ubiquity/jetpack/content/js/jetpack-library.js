@@ -63,7 +63,7 @@ function EventListenerMixIn(options) {
         var listenersCopy = listeners.slice();
         for (var i = 0; i < listenersCopy.length; i++)
           try {
-            listenersCopy[i](event);
+            listenersCopy[i].call(options.mixInto, event);
           } catch (e) {
             console.exception(e);
           }
@@ -186,7 +186,9 @@ function JetpackLibrary() {
 
     this.addTab = function addTab(url) {
       var chromeTab = tabbrowser.addTab(url);
-      return newBrowserTab(tabbrowser, chromeTab);
+      // The TabOpen event has just been triggered, so we
+      // just need to fetch it from our dictionary now.
+      return trackedTabs.get(chromeTab);
     };
 
     this.getFocusedTab = function getFocusedTab() {

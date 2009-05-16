@@ -15,6 +15,7 @@ var JetpackLibraryTests ={
     self.assert(Jetpack.tabs.focused == tab);
     tab.onPageLoad(
       function onPageLoad(document) {
+        self.assert(this, tab);
         tab.onPageLoad.unbind(onPageLoad);
         self.assert($(document).text() == "hai2u");
         tab.close();
