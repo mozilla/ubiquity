@@ -52,7 +52,7 @@ function onDocumentLoad() {
   }
   //If current skin is custom skin, auto-open the editor
   var customSkin = "chrome://ubiquity/skin/skins/custom.css";
-  if(skinService.getCurrentSkin() == customSkin){
+  if(skinService.currentSkin == customSkin){
     openSkinEditor();
   }
   //Readfile returns an array
@@ -142,7 +142,7 @@ function createSkinElement(filepath, id){
    skinEl.find('input').attr("onclick", "skinService.changeSkin('"+ skinMeta.filepath + "');");
    
    //Make the current skin distinct
-   var currentSkin = skinService.getCurrentSkin();
+   var currentSkin = skinService.currentSkin;
    if(skinMeta.filepath == currentSkin){
      skinEl.find('#rad_' + skinId).attr('checked','true');
    }
@@ -185,8 +185,7 @@ function saveCustomSkin(){
   var msgService = new AlertMessageService();
   msgService.displayMessage("Your skin has been saved!");
   
-  skinService.loadSkin(skinService.getCurrentSkin());
-    
+  skinService.loadCurrentSkin();
 }
 
 function pasteToGist(){
