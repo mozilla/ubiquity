@@ -107,12 +107,11 @@ var JetpackRuntime = {
 
   addJetpack: function addJetpack(url) {
     var self = this;
-    JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
-      function(feed) {
-        if (feed.uri.spec == url) {
-          self.contexts.push(new self.Context(feed, console));
-        }
-      });
+    var feed = JetpackRuntime.FeedPlugin.FeedManager.getFeedForUrl(url);
+    if (feed && feed.isSubscribed && feed.type == "jetpack")
+      self.contexts.push(new self.Context(feed, console));
+    else
+      throw new Error("Not a subscribed jetpack feed: " + uri);
   },
 
   removeJetpack: function removeJetpack(context) {
@@ -176,11 +175,9 @@ $(window).ready(
         }
         break;
       case "subscribe":
-        JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
-          function(feed) {
-            if (feed.uri.spec == uri.spec && feed.type == "jetpack")
-              JetpackRuntime.addJetpack(uri.spec);
-          });
+        var feed = JetpackRuntime.FeedPlugin.FeedManager.getFeedForUrl(uri);
+        if (feed && feed.type == "jetpack")
+          JetpackRuntime.addJetpack(uri.spec);
         break;
       }
     }

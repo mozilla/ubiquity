@@ -138,6 +138,25 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   return subscribedFeeds;
 };
 
+// === {{{FeedManager.getFeedForUrl()}}} ===
+//
+//
+// Returns the feed for the given URL, if it exists. If it doesn't,
+// this function returns null.
+
+FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
+  // TODO: This function is implemented terribly inefficiently.
+  var uri = Utils.url(url);
+  var feedLists = [this.getSubscribedFeeds(),
+                   this.getUnsubscribedFeeds()];
+
+  for each (feeds in feedLists)
+    for (var i = 0; i < feeds.length; i++)
+      if (feeds[i].uri.spec == uri.spec)
+        return feeds[i];
+  return null;
+};
+
 // === {{{FeedManager.addSubscribedFeed()}}} ===
 //
 // Adds a feed with the given information to the {{{FeedManager}}}. The
@@ -280,7 +299,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 
 // TODO: Add Documentation for this
 FMgrProto.showNotification = function showNotification(plugin, targetDoc, commandsUrl, mimetype, notify_message) {
- 
+
   var Cc = Components.classes;
   var Ci = Components.interfaces;
 
@@ -309,13 +328,13 @@ FMgrProto.showNotification = function showNotification(plugin, targetDoc, comman
     function onSubscribeClick(notification, button) {
       plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
     }
-    
+
     if(!notify_message){
       var notify_message = ("This page contains Ubiquity commands.  " +
        "If you'd like to subscribe to them, please " +
        "click the button to the right.");
     }
-    
+
     var buttons = [
       {accessKey: null,
        callback: onSubscribeClick,

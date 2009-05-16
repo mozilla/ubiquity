@@ -77,11 +77,9 @@ var PrefCommands = {
     // way if e.g. the user uses about:config to change the pref instead
     // of calling this method.
     var self = this;
-    self.__feedManager.getSubscribedFeeds().forEach(
-      function(feed) {
-        if (feed.uri.spec == self.id)
-          feed.purge();
-      });
+    var feed = self.__feedManager.getFeedForUrl(self.id);
+    if (feed)
+      feed.purge();
     self.__subscribeFeed();
   },
 
