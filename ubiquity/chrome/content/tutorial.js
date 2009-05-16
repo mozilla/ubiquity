@@ -95,8 +95,11 @@ function ubiqWindowIsUp() {
 
 function ubiqSuggestionIs(text) {
   let verb = getGUbiq().cmdManager.getHilitedSuggestionDisplayName();
-  //$("#debug").html(verb);
-  return (verb.indexOf(text) > -1);
+  return (verb.toLowerCase().indexOf(text.toLowerCase()) > -1);
+}
+
+function contentsDivHas(word) {
+  return ($("#tutorial-contents-div").text().indexOf(word) > -1 );
 }
 
 function createCanvas(left, top, width, height) {
@@ -129,7 +132,7 @@ function showArrowToInputBox() {
 
   var ctx = canvas.getContext("2d");
   ctx.strokeStyle = "green";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 3.0;
   ctx.beginPath();
   ctx.moveTo(150, divTop);
   ctx.lineTo(150, 25);
@@ -155,7 +158,7 @@ function showArrowToSuggestionList() {
 
   var ctx = canvas.getContext("2d");
   ctx.strokeStyle = "green";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 3.0;
   ctx.beginPath();
   let bottomLevel = (ubiqBottom - divBottom);
   ctx.moveTo( theDiv.offset().left + 50, 0);
@@ -184,7 +187,7 @@ function showArrowToPreview() {
 
   var ctx = canvas.getContext("2d");
   ctx.strokeStyle = "green";
-  ctx.lineWidth = 2.0;
+  ctx.lineWidth = 3.0;
   ctx.beginPath();
   ctx.moveTo(0, 0);
   ctx.lineTo(25, 25);
@@ -210,6 +213,7 @@ function startUbiqTutorial() {
     + "<li><a onclick='ubiqTutorialStage7();'>Calculate command; abbreviations</a></li>"
     + "<li><a onclick='ubiqTutorialStage12();'>Wikipedia command; the suggestion list</a></li>"
     + "<li><a onclick='ubiqTutorialStage16();'>Translate command; executing commands</a></li>"
+    + "<li><a onclick='ubiqTutorialStage23();'>How to get help and learn more commands</a></li>"
     + "</ol>";
   fadeInText( html );
 }
@@ -265,7 +269,7 @@ function ubiqTutorialStage4() {
 
 function ubiqTutorialStage5() {
   let stage5Html = "<p>Even before you're done typing, the <b>preview area</b>"
-    + " shows a preview of the results of your command -- in this case, a "
+    + " shows a preview of the results of your command &mdash; in this case, a "
     + " weather report.</p>"
     + "<p>If you don't enter a location, the <i>weather</i> command takes a"
     + " guess where you are.</p>"
@@ -380,7 +384,7 @@ function ubiqTutorialStage14() {
 function ubiqTutorialStage15() {
   let stage15Html = "<p>The <i>Wikipedia</i> command preview shows a snippet"
   + " from each article on Wikipedia matching your search term.</p>"
-  + "<p>Those article titles are links -- you can click on one of them to "
+  + "<p>Those article titles are links &mdash; you can click on one of them to "
   + "open the article in a new page.</p>"
   + "<p>When you're done, close that page and come back here, or just <b>tap"
   + " escape</b> to move on with the tutorial.</p>";
@@ -394,10 +398,11 @@ function ubiqTutorialStage15() {
 function ubiqTutorialStage16() {
   moveDivRight();
   destroyCanvas();
-  let stage16Html = "<h2>Ubiquity Tutorial, part 5 of 6:"
-  + " Translate command and execution</h2>"
-  + "<p>Some commands can transform part of the web page"
-  + " you are looking at.  Use the mouse to <b>select the Japanese text</b> below."
+  let stage16Html = "<h2>Part 5 of 6:"
+  + " Selecting and Executing</h2>"
+  + "<p>If you select text on a web page before summoning Ubiquity, then "
+  + "you can have your commands do things to the selected text.</p></p>Let's see"
+  + " an example. Use the mouse to <b>select the Japanese text</b> below."
   + " Then <b>summon Ubiquity</b>.</p>";
 
   fadeInText(stage16Html);
@@ -405,16 +410,139 @@ function ubiqTutorialStage16() {
   let jpDiv = $("#tutorial-contents-div");
   jpDiv.addClass("ubiq-tutorial");
   jpDiv.css("text-align", "center");
-  //jpDiv.html("古池や" + "<br/>" + "蛙飛び込む" + "<br/>" + "水の音");
-  jpDiv.html("年くれぬ傘着て草鞋はきながら");
-    //"toshi kurenu / kasa kite waraji / hakinagara");
+  jpDiv.html("アドオンを選んで、自分だけのブラウザをつくろう。");
+  //"二十一世紀にようこそ");
+  // TODO machine translation falls down on the line above.
 
-
-  /*waitForUserAction( ubiqWindowIsUp,
-                     ubiqTutorialStage17 );*/
+  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage17 );
 }
 
-/* Tutorial problems
+function ubiqTutorialStage17() {
+  let stage17Html = "<p>Now issue the <i>translate</i> command.</p>"
+    + "<p>(<b>type 'translate'</b>, or just 'tr').</p>";
+
+  fadeInText(stage17Html);
+
+  waitForUserAction( function() {return ubiqSuggestionIs("translate");},
+                     ubiqTutorialStage18);
+}
+
+function ubiqTutorialStage18() {
+  let stage18Html = "<p>At this point, you could type in some words that"
+    + " you want to have Ubiquity translate.  But as you can see in the preview"
+    + " area, Ubiquity is already translating the words that you have"
+    + " selected.</p>"
+    + "<p>Next, <b>tap the enter key</b> to execute the command.";
+
+  fadeInText(stage18Html);
+  waitForUserAction( function() { return contentsDivHas("browser"); },
+                     ubiqTutorialStage19 );
+}
+
+function ubiqTutorialStage19() {
+  let stage19Html = "<p>Notice how the Japanese text that you selected was"
+    + " <i>replaced</i> with the translation.  That's because you executed"
+    + " the command by pressing 'enter'.</p>"
+    + "<p>Each command does something different when you execute it.  Most"
+    + " often, it will open a new page, or change something on the current"
+    + " page.</p>"
+    + "<p><a onclick='ubiqTutorialStage20();'>Click here to continue</a></p>";
+
+  fadeInText(stage19Html);
+}
+
+function ubiqTutorialStage20() {
+  let stage20Html = "<p>Let's do one more example.  Say you're browsing the"
+    + " web and you come across an unfamiliar word, like the word 'aglet'."
+    + "</p><p><b>Select the word 'aglet' and then summon Ubiquity</b>.</p>";
+  let agDiv = $("#tutorial-contents-div");
+  agDiv.html("aglet");
+
+  fadeInText(stage20Html);
+
+  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage21 );
+}
+
+function ubiqTutorialStage21() {
+  let stage21Html = "<p>You don't want to translate this word, you want to"
+  + " look it up.  So <b>issue the <i>google</i> command</b> (type 'google'"
+  + " or just 'goo').</p>";
+
+  fadeInText(stage21Html);
+  waitForUserAction( function() {return ubiqSuggestionIs("google");},
+                     ubiqTutorialStage22);
+}
+
+function ubiqTutorialStage22() {
+  let stage22Html = "<p>Now, if the preview of the <i>google</i> command"
+    + " tells you what you want to know, then you're done &mdash; you can dismiss"
+    + " Ubiquity and go on your way.</p>"
+    + "<p>But if you want more information, you can tap the enter key to "
+    + " execute the <i>google</i> command, which will open the search results"
+    + " in a new page.</p>"
+    + "<p>It's up to you.</p>";
+  fadeInText(stage22Html);
+  waitForUserAction( function() {return !ubiqWindowIsUp();},
+                     ubiqTutorialStage23 );
+}
+
+function ubiqTutorialStage23() {
+  $("#tutorial-contents-div").slideUp();
+  moveDivRight();
+  let stage23Html = "<h2>Part 6 of 6: Getting Help and Learning"
+    + " More Commands</h2>"
+    + "<p>So far you've learned the <i>weather</i>, <i>calculate</i>, "
+    + "<i>wikipedia</i>, <i>translate</i>, and <i>google</i> commands."
+    + " That's a good start, but there are dozens more commands"
+    + " included with Ubiquity &mdash; plus you can find more on the Web.</p>"
+    + "<p>How will you find out what commands are available?</p>"
+    + "<p>One way is by using the <i>help</i> command.</p>"
+    + "<p><b>Summon Ubiquity...</b></p>";
+  fadeInText(stage23Html);
+  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage24 );
+}
+
+function ubiqTutorialStage24() {
+  let stage24Html = "<p>Suppose you want to know if there are any commands"
+    + " that deal with tabs.  You can use the <i>help</i> command like this:"
+    + "</p><p><b>type 'help tab'</b>.</p>";
+
+  fadeInText(stage24Html);
+  waitForUserAction( function() {return ubiqSuggestionIs("help") &&
+                                 ubiqSuggestionIs("tab");},
+                     ubiqTutorialStage25);
+}
+
+function ubiqTutorialStage25() {
+  let stage25Html = "<p>In the suggestion list, you can see all of the commands"
+    + " that have 'tab' in their names.</p>"
+    + "<p>Use the arrow keys to move through the suggestion list.  The preview"
+    + " area shows help information about each command that you highlight.</p>"
+    + "<p>When you're done, <b>tap escape</b>.</p>";
+
+  fadeInText(stage25Html);
+  waitForUserAction( function() {return !ubiqWindowIsUp();},
+                     ubiqTutorialStage26 );
+}
+
+function ubiqTutorialStage26() {
+  let stage26Html = "<p>Finally, there's the <i>command-list</i> command."
+  + " This command will take you to a page that shows every command Ubiquity"
+  + " has installed.  You can learn all sorts of useful things by browsing"
+  + " the command-list page!</p>"
+  + "<p>This is the end of the tutorial. Once you go to the command-list"
+  + " page, you are on your own to experiment and learn new commands at your own pace.</p>"
+  + "<p><b>Summon Ubiquity, issue 'command-list', and tap the enter key to"
+  + " execute.</b></p><p>Good-bye!</p>";
+
+  fadeInText(stage26Html);
+}
+
+
+  /* Tutorial problems
+ *
+ * Arrows don't point to the right places if you're not using the default
+ * skin.  (Everything's too far left, for one thing.)
  *
  * if user has to scroll to see the rest of the instructions, it breaks
  * everything.  (Maybe position the tutorial instructions div so that it's
@@ -434,6 +562,13 @@ function ubiqTutorialStage16() {
  *
  * Describe the benefit by saying "here's how you would have had to do this
  * before... see how much faster it is"
+ *
+ * Needs to be a way to get back to table of contents at any point -- maybe
+ * even keep it up and show progress through it.
+ *
+ * Instead of arrows, maybe blink an outline around the actual part of the
+ * actual ubiquity box.  OR show a little voodoo-doll and point to or circle
+ * part of that one.
  */
 
 
