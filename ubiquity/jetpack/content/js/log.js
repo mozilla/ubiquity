@@ -1,4 +1,6 @@
 var Logging = {
+  console: null,
+
   ConsoleListener: function ConsoleListener() {
     MemoryTracking.track(this);
     var self = this;
@@ -102,12 +104,17 @@ var Logging = {
     };
   },
 
+  _onFirebugConsoleInjected: function _onFirebugConsoleInjected() {
+    if (this.console != window.console) {
+      this.console = null;
+      this._init();
+    }
+  },
+
   FirebugLogger: function FirebugLogger(chromeWindow, context) {
     MemoryTracking.track(this);
     var Firebug = chromeWindow.Firebug;
     var FBL = chromeWindow.FBL;
-
-    Firebug.showChromeErrors = true;
 
     function wrapFirebugLogger(className) {
       function wrappedFirebugLogger() {
@@ -140,57 +147,55 @@ var Logging = {
       } else
         self.error(e);
     };
+  },
+
+  _init: function _init() {
+    var warnings = [];
+
+    if (Extension.isVisible) {
+      // TODO: Use a Logging.ConsoleListener to report errors to
+      // Firebug/JS Error Console if Firebug.showChromeErrors is false or
+      // javascript.options.showInConsole is false. We don't want the user
+      // to have to manually enable any preferences if they're actually
+      // looking at the extension's page!
+
+      var browser = Extension.visibleBrowser;
+      if (browser.chrome && browser.chrome.window &&
+          browser.chrome.window.TabWatcher) {
+        try {
+          // TODO: We're not detecting Firebug when we're not the currently
+          // focused tab in our window.
+          var TabWatcher = browser.chrome.window.TabWatcher;
+          var context;
+          TabWatcher.iterateContexts(
+            function(aContext) {
+              if (aContext.name == window.location.href)
+                context = aContext;
+            });
+          if (context) {
+            var fbConsole = new Logging.FirebugLogger(browser.chrome.window,
+                                                      context);
+            if (window.console)
+              fbConsole.__proto__ = window.console;
+            Logging.console = fbConsole;
+          }
+        } catch (e) {
+          warnings.push(["Installing Logging.FirebugLogger failed:", e]);
+        }
+      }
+    }
+
+    if (!Logging.console)
+      Logging.console = new Logging.JsErrorConsoleLogger();
+
+    if (window.console)
+      delete window.console;
+    window.console = Logging.console;
+
+    warnings.forEach(
+      function(objects) { console.warn.apply(console, objects); }
+    );
   }
 };
 
-(function() {
-   var warnings = [];
-
-   if (Extension.isVisible) {
-     // TODO: Use a Logging.ConsoleListener to report errors to
-     // Firebug/JS Error Console if Firebug.showChromeErrors is false or
-     // javascript.options.showInConsole is false. We don't want the user
-     // to have to manually enable any preferences if they're actually
-     // looking at the extension's page!
-
-     var mainWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
-                      .getInterface(Ci.nsIWebNavigation)
-                      .QueryInterface(Ci.nsIDocShellTreeItem)
-                      .rootTreeItem
-                      .QueryInterface(Ci.nsIInterfaceRequestor)
-                      .getInterface(Ci.nsIDOMWindow);
-     var browser = mainWindow.getBrowserFromContentWindow(window);
-     if (browser.chrome && browser.chrome.window &&
-         browser.chrome.window.TabWatcher) {
-       try {
-         // TODO: We're not detecting Firebug when we're not the currently
-         // focused tab in our window.
-         var TabWatcher = browser.chrome.window.TabWatcher;
-         var context;
-         TabWatcher.iterateContexts(
-           function(aContext) {
-             if (aContext.name == window.location.href)
-               context = aContext;
-           });
-         if (context) {
-           var fbConsole = new Logging.FirebugLogger(browser.chrome.window,
-                                                     context);
-           if (window.console) {
-             fbConsole.__proto__ = window.console;
-             delete window.console;
-           }
-           window.console = fbConsole;
-         }
-       } catch (e) {
-         warnings.push(["Installing Logging.FirebugLogger failed:", e]);
-       }
-     }
-   }
-
-   if (!window.console)
-     window.console = new Logging.JsErrorConsoleLogger();
-
-   warnings.forEach(
-     function(objects) { console.warn.apply(console, objects); }
-   );
- })();
+Logging._init();

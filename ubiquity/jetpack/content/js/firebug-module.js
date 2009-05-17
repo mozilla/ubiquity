@@ -9,14 +9,19 @@ FBL.ns(
 
       var JetpackTabWatcher = {
         shouldCreateContext: function(win, uri) {
-          if (uri == JETPACK_URL)
+          if (uri == JETPACK_URL) {
             return true;
+          }
         },
         shouldNotCreateContext: function(win, uri) {
         },
         initContext: function(context) {
         },
         showContext: function(browser, context) {
+          if (browser.contentWindow.location.href == JETPACK_URL) {
+            Firebug.showChromeErrors = true;
+            Firebug.toggleBar(true);
+          }
         },
         loadContext: function(context) {
         },
@@ -29,7 +34,8 @@ FBL.ns(
           // Not sure if we need to wrap this, but let's be safe.
           win = XPCNativeWrapper(win);
           if (win.location.href == JETPACK_URL) {
-            // TODO: reattach the .exception function to console, or something?
+            if (win.wrappedJSObject.Logging)
+              win.wrappedJSObject.Logging._onFirebugConsoleInjected();
           }
         },
         log: function(context, object, className, sourceLink) {
@@ -43,6 +49,10 @@ FBL.ns(
       JetpackModule = extend(
         Firebug.Module,
         {
+          loadedContext: function(context) {
+          },
+          watchWindow: function(context, win) {
+          },
           initialize: function() {
             Firebug.Module.initialize.apply(this, arguments);
             Firebug.Console.addListener(JetpackConsoleListener);

@@ -56,6 +56,25 @@
     and enable it for this page, and then reload this page, all logging
     messages will be logged to the Firebug Console, where it's much easier
     to debug problems and inspect live objects.</p>
+    <div id="firebug-caveats" class="warning">You appear to have Firebug
+    installed, which is great, because you'll be able to easily debug
+    problems and inspect live objects in the <span
+    class="logging-source"></span>. However, please note that there's
+    still a few rough edges in Jetpack's Firebug integration that you
+    should be aware of:
+    <ul>
+      <li>Firebug seems to get confused if you have this page and another
+      website with Firebug enabled in the same browser window. The safe
+      and easy way to get around this is to just have this page open
+      in its own browser window.</li>
+      <li>Whenever you inspect live objects in Firebug, Firebug appears
+      to hold on to those objects for the rest of your Firefox session,
+      which means that you'll see object reference counts go up in
+      the Memory Usage area.</li>
+    </ul>
+    We apologize for these inconveniences and will be working with the
+    Firebug team to resolve them soon.
+    </div>
     
     <div class="sidebar">
       <h2>This is a very special page.</h2>

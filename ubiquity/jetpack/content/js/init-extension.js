@@ -11,6 +11,9 @@ var Extension = {
   isVisible: (window.frameElement === null),
   isHidden: (window.frameElement !== null),
 
+  visibleMainWindow: null,
+  visibleBrowser: null,
+
   Manager: {},
 
   addUnloadMethod: function addUnloadMethod(obj, unloader) {
@@ -40,4 +43,17 @@ var Extension = {
 
    window.setInterval(function() { MemoryTracking.compact(); },
                       MemoryTracking.COMPACT_INTERVAL);
+
+   if (Extension.isVisible) {
+     var mainWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                      .getInterface(Ci.nsIWebNavigation)
+                      .QueryInterface(Ci.nsIDocShellTreeItem)
+                      .rootTreeItem
+                      .QueryInterface(Ci.nsIInterfaceRequestor)
+                      .getInterface(Ci.nsIDOMWindow);
+     var browser = mainWindow.getBrowserFromContentWindow(window);
+
+     Extension.visibleMainWindow = mainWindow;
+     Extension.visibleBrowser = browser;
+   }
  })();

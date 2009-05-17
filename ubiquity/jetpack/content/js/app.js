@@ -103,6 +103,11 @@ var App = {
                       url, null, null, lineNumber);
   },
 
+  openFirebugConsole: function openFirebugConsole() {
+    var browser = Extension.visibleBrowser;
+    browser.chrome.window.Firebug.toggleBar(true, "console");
+  },
+
   // Open the JS error console.  This code was largely taken from
   // http://mxr.mozilla.org/mozilla-central/source/browser/base/content/browser.js
   openJsErrorConsole: function openJsErrorConsole() {
@@ -246,7 +251,10 @@ $(window).ready(
     );
 
     if (window.console.isFirebug) {
+      $("#firebug-caveats").show();
       $(".logging-source").text("Firebug Console");
+      $(".logging-source").addClass("buttony");
+      $(".logging-source").click(App.openFirebugConsole);
     } else {
       $("#firebug-not-found").show();
       $(".logging-source").click(App.openJsErrorConsole);
