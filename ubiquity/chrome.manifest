@@ -5,5 +5,5 @@ content jetpack jetpack/content/
 content parser-demo modules/parser/new/
 skin ubiquity skin chrome/skin/
 overlay chrome://browser/content/browser.xul chrome://ubiquity/content/browser.xul
-overlay chrome://firebug/content/firebugOverlay.xul chrome://jetpack/content/firebug.xul
+overlay chrome://firebug/content/firebugOverlay.xul chrome://jetpack/content/firebugOverlay.xul
 overlay chrome://global/content/console.xul chrome://ubiquity/content/console.xul
