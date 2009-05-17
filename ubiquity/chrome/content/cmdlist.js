@@ -44,13 +44,12 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var escapeHtml = Utils.escapeHtml;
 
-function linkToHtml(text, url, className) {
-  var linkToHtml = document.createElement("a");
-  $(linkToHtml).text(text);
-  if (className)
-    $(linkToHtml).addClass(className);
-  linkToHtml.href = url;
-  return linkToHtml;
+function A(url, text, className) {
+  var a = document.createElement("a");
+  a.href = url;
+  a.textContent = text || url;
+  a.className = className || "";
+  return a;
 }
 
 function linkToAction(text, action)(
@@ -59,30 +58,26 @@ function linkToAction(text, action)(
   .click(action)
   .addClass("action"));
 
-function fillTableCellForFeed( cell, feed, sortMode) {
-  cell.html(linkToHtml( feed.title, feed.uri.spec));
-  cell.append("<br/>");
+function fillTableCellForFeed(cell, feed, sortMode) {
+  cell.append(A(feed.uri.spec, feed.title),
+              "<br/>");
   // add unsubscribe link (but not for built-in feeds)
   if (!feed.isBuiltIn)
     cell.append(linkToAction("[unsubscribe]", function() {
                                feed.remove();
                                cell.slideUp(rebuildTable);
                              }));
-
   // Add link to source (auto-updated or not)
-  let sourceName = feed.canAutoUpdate?"auto-updated source":"source";
-  cell.append(" ");
-  cell.append(linkToHtml("[view " + sourceName + "]",
-                         "view-source:" + feed.viewSourceUri.spec,
-                         "feed-action"));
+  cell.append(" ", viewSourceLink(feed));
   // If not auto-updating, display link to any updates found
   feed.checkForManualUpdate(
-      function(isAvailable, href) {
-        if (isAvailable)
-          cell.append('<br/><a class="feed-updated" href="' + href +
-                      '">An update for this feed is available.</a>');
-      });
-
+    function(isAvailable, href) {
+      if (isAvailable)
+        cell.append("<br/>",
+                    A(href,
+                      "An update for this feed is available.",
+                      "feed-updated"));
+    });
   // if sorting by feed, make feed name large and put a borderline
   if (sortMode == "feed") {
     cell.addClass("topcell command-feed-name");
@@ -120,72 +115,80 @@ function fillTableRowForCmd( row, cmd, className ) {
   var isEnabled = !cmd.disabled;
   var checkBoxCell = jQuery(
     '<td><input type="checkbox" class="activebox"' +
-      (isEnabled ? ' checked="checked"' : '')+'/></td>'
+    (isEnabled ? ' checked="checked"' : '') + '/></td>'
   );
 
   // For all commands in the table, unbind any 'change' method, bind to
   // onDisableOrEnableCmd.
-  //checkBoxCell.unbind('change');
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
-
 
   var cmdElement = jQuery(
     '<td class="command">' +
-    '<a><img class="favicon"></a>' +
+    '<a><img class="favicon"/></a>' +
     '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
-    '<span class="description"/>' +
+    '<span class="description"></span>' +
     '<div class="synonyms-container light">also called ' +
-    '<span class="synonyms"/></div>' +
-    '<div class="light"><span class="author"/>' +
-    '<span class="license"/></div>' +
-    '<div class="homepage light"/>' +
-    '<div class="help"/>' +
+    '<span class="synonyms"></span></div>' +
+    '<div class="light"><span class="author"></span>' +
+    '<span class="license"></span></div>' +
+    '<div class="contributors light"></div>' +
+    '<div class="homepage light"></div>' +
+    '<div class="help"></div>' +
     '</td>'
   );
 
-  cmdElement.find("a").attr("name", escapeHtml(cmd.name));
+  cmdElement.find("a").attr("name", cmd.name);
 
-  if (cmd.icon) {
-    cmdElement.find(".favicon").attr("src", escapeHtml(cmd.icon) );
-  } else {
-    cmdElement.find(".favicon").empty();
-  }
+  if (cmd.icon)
+    cmdElement.find(".favicon").attr("src", cmd.icon);
+  else
+    cmdElement.find(".favicon").remove();
+
   if (cmd.homepage) {
     cmdElement.find(".homepage").html(
       ('View more information at <a href="' +
        escapeHtml(cmd.homepage) + '">' +
        escapeHtml(cmd.homepage) + '</a>.')
     );
-  } else cmdElement.find(".homepage").empty();
+  } else cmdElement.find(".homepage").remove();
 
   if (cmd.synonyms){
     cmdElement.find(".synonyms").html(
       escapeHtml(cmd.synonyms.join(", "))
     );
-  } else cmdElement.find(".synonyms-container").empty();
+  } else cmdElement.find(".synonyms-container").remove();
 
   if (cmd.description) {
     cmdElement.find(".description").html(
       cmd.description
     );
-  } else cmdElement.find(".description").empty();
+  } else cmdElement.find(".description").remove();
 
   if (cmd.author) {
     cmdElement.find(".author").html(
       formatCommandAuthor(cmd.author)
     );
-  } else cmdElement.find(".author").empty();
+  } else cmdElement.find(".author").remove();
+
+  
+  if (cmd.contributors)
+    cmdElement.find(".contributors")
+      .append("contributed by ",
+              [formatCommandAuthor(c)
+               for each (c in cmd.contributors)].join(", "));
+  else
+    cmdElement.find(".contributors").remove();
 
   if(cmd.license) {
     cmdElement.find(".license").html(
-      escapeHtml(' - licensed as ' + cmd.license)
+      escapeHtml(" - licensed as " + cmd.license)
     );
-  } else cmdElement.find(".license").empty();
+  } else cmdElement.find(".license").remove();
 
   if(cmd.help) {
     cmdElement.find(".help").html(cmd.help);
   } else {
-    cmdElement.find(".help").empty();
+    cmdElement.find(".help").remove();
   }
 
   if (className) {
@@ -193,8 +196,8 @@ function fillTableRowForCmd( row, cmd, className ) {
     cmdElement.addClass(className);
   }
 
-  row.append( checkBoxCell );
-  row.append( cmdElement );
+  row.append(checkBoxCell,
+             cmdElement);
 }
 
 function populateYeTable(feedMgr, cmdSource) {
@@ -315,7 +318,7 @@ function onDisableOrEnableCmd() {
   // status of a command.
   // Bind this to checkbox 'change'.
 
-  var name = $(this).parents('tr').find('.name').text();
+  var name = $(this).closest("tr").find(".name").text();
   var cmdSource = UbiquitySetup.createServices().commandSource;
   var cmd = cmdSource.getCommand(name);
 
@@ -325,37 +328,33 @@ function onDisableOrEnableCmd() {
 // this was to make both subscribed and unsubscribed list entries, but is
 // now used only for unsubscribed ones.
 function makeUnsubscribedFeedListElement(info, sortMode) {
-  var li = document.createElement("li");
-  $(li).append(linkToHtml(info.title, info.uri.spec));
+  var $li = $("<li></li>");
+  $li.append(A(info.title, info.uri.spec));
 
   var commandList = $("<ul></ul>");
   for (var name in info.commands)
-    $(commandList).append($("<li></li>").text(name));
-  $(li).append(commandList);
+    commandList.append($("<li></li>").text(name));
 
-  $(li).append(linkToAction("[resubscribe]", function() {
-                              info.unremove();
-                              $(li).slideUp(rebuildTable);
-                            }));
+  $li.append(
+    commandList,
+    linkToAction("[resubscribe]",
+                 function() {
+                   info.unremove();
+                   $li.slideUp(function(){
+                     rebuildTable();
+                     location.hash = "graveyard";
+                   });
+                 }),
+    " ",
+    linkToAction("[purge]",
+                 function() {
+                   info.purge();
+                   $li.slideUp("slow");
+                 }),
+    " ",
+    viewSourceLink(info));
 
-  $(li).append(" ");
-  $(li).append(linkToAction("[purge]",
-                  function() { $(li).slideUp("slow");
-                               info.purge(); }));
-
-  var sourceUrl;
-  var sourceName;
-
-  if (info.canAutoUpdate)
-    sourceName = "auto-updated source";
-  else
-    sourceName = "source";
-
-  $(li).append(" ");
-  $(li).append(linkToHtml("[view " + sourceName + "]",
-                          "view-source:" + info.viewSourceUri.spec,
-                          "feed-action"));
-  return li;
+  return $li[0];
 }
 
 function addAllUnsubscribedFeeds(feedMgr) {
@@ -435,6 +434,13 @@ function showCmdListHelp( enabled ) {
     $("#cmdlist-help-div").slideUp();
   }
 }
+
+function viewSourceLink(feed)(
+  A("view-source:" + feed.viewSourceUri.spec,
+    ("[view " +
+     (feed.canAutoUpdate ? "auto-updated " : "") +
+     "source]"),
+    "feed-action"));
 
 $(document).ready(rebuildTable).ready(jumpToCommand);
 
