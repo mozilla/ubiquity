@@ -109,11 +109,6 @@ var Logging = {
 
     Firebug.showChromeErrors = true;
 
-    var jsm = {};
-    Components.utils.import("resource://ubiquity/modules/sandboxfactory.js",
-                            jsm);
-    var SandboxFactory = jsm.SandboxFactory;
-
     function wrapFirebugLogger(className) {
       function wrappedFirebugLogger() {
         var frame = Components.stack.caller;
@@ -145,38 +140,6 @@ var Logging = {
       } else
         self.error(e);
     };
-
-    // Here we post-process all newly-added logging messages to un-munge any
-    // URLs coming from sandboxed code.
-    Firebug.chrome.selectPanel("console");
-    var consoleDocument = Firebug.chrome.getSelectedPanel().document;
-    var consoleElement = $(consoleDocument).find(".panelNode-console");
-    if (consoleElement.length) {
-      consoleElement = consoleElement.get(0);
-
-      function onInsert(evt) {
-        var obj = $(evt.originalTarget).find(".objectLink-sourceLink");
-        if (obj.length) {
-          obj.each(
-            function() {
-              var href = SandboxFactory.unmungeUrl(this.repObject.href);
-              if (href != this.repObject.href) {
-                this.repObject.href = href;
-                // Firebug's source code excerpt is all wrong, just remove
-                // it for now.
-                $(this).prev(".errorSourceBox").remove();
-              }
-            });
-        }
-      }
-      consoleElement.addEventListener("DOMNodeInserted", onInsert, false);
-      Extension.addUnloadMethod(
-        this,
-        function() {
-          consoleElement.removeEventListener("DOMNodeInserted", onInsert,
-                                             false);
-        });
-    }
   }
 };
 
