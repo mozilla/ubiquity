@@ -71,7 +71,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
         if (disabledCommands[cmd.name] != value) {
           disabledCommands[cmd.name] = value;
           hub.notifyListeners("disabled-command-change",
-                              {name: name,
+                              {name: cmd.name,
                                value: value});
         }
       }
@@ -155,6 +155,6 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     if (feedsChanged)
       self.refresh();
 
-    return commands[name] ? commands[name] : null;
+    return commands[name] || null;
   };
 }
