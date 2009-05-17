@@ -168,3 +168,6 @@ a {
     background: url(loading.gif) no-repeat 0 50%;
 }
 
+.jetpack-list {
+    display: none;
+}

@@ -147,13 +147,18 @@ StatusBar.prototype = {
 
     var width = options.width ? options.width : self.DEFAULT_PANEL_WIDTH;
 
+    // Add a deprecation/not-implemented warning to be helpful.
+    if (options.onLoad)
+      console.warn("options.onLoad is not currently supported; please " +
+                   "consider using options.onReady instead.");
+
     self._browserWatchers.push(
       new BrowserWatcher(
         {onLoad: function(window) {
            var iframe = self._addPanelToWindow(window, url, width);
            self._windows.push(window);
            self._panels.push({url: url, iframe: iframe});
-           if (options.onLoad) {
+           if (options.onReady) {
              iframe.addEventListener(
                "DOMContentLoaded",
                function onPanelLoad(event) {
@@ -161,7 +166,9 @@ StatusBar.prototype = {
                                             onPanelLoad,
                                             false);
                  try {
-                   options.onLoad(iframe.contentDocument);
+                   // TODO: Do we want to use .call() or .apply() to
+                   // set the handler's 'this' variable?
+                   options.onReady(iframe.contentDocument);
                  } catch (e) {
                    console.exception(e);
                  }

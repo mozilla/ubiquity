@@ -97,14 +97,21 @@ var JetpackRuntime = {
     this.srcUrl = feed.srcUri.spec;
   },
 
+  getJetpack: function getJetpack(url) {
+    var matches = [context for each (context in JetpackRuntime.contexts)
+                           if (context.url == url)];
+    if (matches.length)
+      return matches[0];
+    return null;
+  },
+
   addJetpack: function addJetpack(url) {
     var self = this;
-    JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
-      function(feed) {
-        if (feed.uri.spec == url) {
-          self.contexts.push(new self.Context(feed, console));
-        }
-      });
+    var feed = JetpackRuntime.FeedPlugin.FeedManager.getFeedForUrl(url);
+    if (feed && feed.isSubscribed && feed.type == "jetpack")
+      self.contexts.push(new self.Context(feed, console));
+    else
+      throw new Error("Not a subscribed jetpack feed: " + uri);
   },
 
   removeJetpack: function removeJetpack(context) {
@@ -157,23 +164,20 @@ $(window).ready(
       case "feed-change":
       case "purge":
       case "unsubscribe":
-        var matches = [context for each (context in JetpackRuntime.contexts)
-                               if (context.url == uri.spec)];
-        if (matches.length) {
+        var context = JetpackRuntime.getJetpack(uri.spec);
+        if (context) {
           if (eventName == "feed-change")
             // Reload the feed.
-            JetpackRuntime.reloadJetpack(matches[0]);
+            JetpackRuntime.reloadJetpack(context);
           else
             // Destroy the feed.
-            JetpackRuntime.removeJetpack(matches[0]);
+            JetpackRuntime.removeJetpack(context);
         }
         break;
       case "subscribe":
-        JetpackRuntime.FeedPlugin.FeedManager.getSubscribedFeeds().forEach(
-          function(feed) {
-            if (feed.uri.spec == uri.spec && feed.type == "jetpack")
-              JetpackRuntime.addJetpack(uri.spec);
-          });
+        var feed = JetpackRuntime.FeedPlugin.FeedManager.getFeedForUrl(uri);
+        if (feed && feed.type == "jetpack")
+          JetpackRuntime.addJetpack(uri.spec);
         break;
       }
     }
