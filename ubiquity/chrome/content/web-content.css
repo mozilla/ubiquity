@@ -190,6 +190,11 @@ a[onclick] {
   cursor: pointer;
 }
 
+.action {
+  color: #aaa;
+  cursor: pointer;
+}
+
 .error {
   color:#FF0000;
 }

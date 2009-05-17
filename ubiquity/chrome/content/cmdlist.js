@@ -57,7 +57,7 @@ function linkToAction(text, action)(
   $("<span></span>")
   .text(text)
   .click(action)
-  .css({cursor: "pointer", color: "#aaa"}));
+  .addClass("action"));
 
 function fillTableCellForFeed( cell, feed, sortMode) {
   cell.html(linkToHtml( feed.title, feed.uri.spec));

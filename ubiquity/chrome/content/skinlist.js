@@ -46,17 +46,15 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 var skinService = new SkinSvc();
 
 function onDocumentLoad() {
-  var skinList = skinService.getSkinList()
-  for(var i in skinList){
-    createSkinElement(skinList[i]["local_uri"], i);
-  }
+  const {CUSTOM_SKIN} = skinService;
+  var skinList = skinService.getSkinList(), i = 0;
+  for each (let {local_uri, download_uri} in skinList)
+    if (local_uri !== CUSTOM_SKIN)
+      createSkinElement(local_uri, download_uri, i++);
+  createSkinElement(CUSTOM_SKIN, CUSTOM_SKIN, i);
   //If current skin is custom skin, auto-open the editor
-  var customSkin = "chrome://ubiquity/skin/skins/custom.css";
-  if(skinService.currentSkin == customSkin){
+  if(skinService.currentSkin === CUSTOM_SKIN)
     openSkinEditor();
-  }
-  //Readfile returns an array
-  $("#skin-editor").val(readFile(customSkin).join("\n"));
 }
 
 // Thanks to code by Torisugari at 
@@ -76,7 +74,7 @@ function readFile(url){
   return str.split("\n");
 }
 
-function createSkinElement(filepath, id){
+function createSkinElement(filepath, origpath, id){
   
   try{
     var lines = readFile(filepath);
@@ -86,7 +84,6 @@ function createSkinElement(filepath, id){
   }
   
   var skinMeta = {};
-  skinMeta.filepath = filepath;
     
   //look for =skin= indicating start of metadata
   var foundMetaData = false;
@@ -118,52 +115,73 @@ function createSkinElement(filepath, id){
     }
   }
   
-  if(!skinMeta.name){
-    skinMeta.name = skinMeta.filepath;
-  }
-  
+  if(!skinMeta.name)
+    skinMeta.name = filepath;
+  if(!skinMeta.homepage)
+    skinMeta.homepage = origpath;
 
   var skinId = "skin_" + id;
   
   $('#skin-list').append(
-     '<div class="command" id="' + skinId + '">'+
-     '<input type="radio" name="skins" id="rad_'+ skinId +'"></input>' +
-     '<label class="label light" for="rad_'+  skinId + '">' +
+     '<div class="command" id="' + skinId + '">' +
+     ('<input type="radio" name="skins" id="rad_' + skinId +
+      '" value="' + filepath + '"></input>') +
+     '<label class="label light" for="rad_'+ skinId + '">' +
      '<a class="name"/>' + 
      '<br/><span class="author"/><span class="license"/></label>' +  
      '<div class="email light"></div>' +
      '<div class="homepage light"></div></div>'
-   );
+    );
    
-   var skinEl = $('#skin-list').find('#' + skinId);
+  var skinEl = $('#' + skinId);
    
-   //Add the name and onclick event
-   skinEl.find('.name').text(skinMeta.name);
-   skinEl.find('input').attr("onclick", "skinService.changeSkin('"+ skinMeta.filepath + "');");
-   
-   //Make the current skin distinct
-   var currentSkin = skinService.currentSkin;
-   if(skinMeta.filepath == currentSkin){
-     skinEl.find('#rad_' + skinId).attr('checked','true');
-   }
-   
-   if(skinMeta.author) {
-     skinEl.find('.author').text("by " + skinMeta.author);
-   }
-   
-   if(skinMeta.email){
-     skinEl.find('.email').html("email: <a href='mailto:" + skinMeta.email  + 
-                                    "'>" + skinMeta.email + "</a>");
-   }
-   
-   if(skinMeta.license){
-     skinEl.find('.license').text(" licensed as " + skinMeta.license);
-   }
-   
-   if(skinMeta.homepage){
-     skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  + 
-                                    "'>" + skinMeta.homepage + "</a>");
-   }
+  //Add the name and onclick event
+  skinEl.find('.name').text(skinMeta.name);
+  skinEl.find('input').attr("onclick", ("skinService.changeSkin('" +
+                                        filepath + "');"));
+  
+  //Make the current skin distinct
+  var currentSkin = skinService.currentSkin;
+  if (filepath == currentSkin) {
+    skinEl.find('#rad_' + skinId).attr('checked','true');
+  }
+  
+  if(skinMeta.author) {
+    skinEl.find('.author').text("by " + skinMeta.author);
+  }
+  
+  if(skinMeta.email){
+    skinEl.find('.email').html("email: <a href='mailto:" + skinMeta.email  + 
+                               "'>" + skinMeta.email + "</a>");
+  }
+  
+  if(skinMeta.license){
+    skinEl.find('.license').text(" licensed as " + skinMeta.license);
+  }
+  
+  if(skinMeta.homepage){
+    skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  + 
+                                  "'>" + skinMeta.homepage + "</a>");
+  }
+  
+  skinEl.append(<a class="action" href={"view-source:" + filepath}
+                target="_blank">[view source]</a>.toXMLString());
+  filepath !== origpath && (
+    $("<a class='action'>[uninstall]</a>")
+    .click(function uninstall() {
+      var before = skinService.currentSkin;
+      skinService.uninstall(filepath);
+      var after = skinService.currentSkin;
+      if(before !== after)
+        $("#skin-list input:radio").each(function() {
+          if(this.value === after) {
+            this.checked = true;
+            return false;
+          }
+        });
+      skinEl.slideUp();
+    })
+    .appendTo(skinEl.append(" ")));
 }
 
 
@@ -184,8 +202,9 @@ function saveCustomSkin(){
   
   var msgService = new AlertMessageService();
   msgService.displayMessage("Your skin has been saved!");
-  
-  skinService.loadCurrentSkin();
+
+  if(skinService.currentSkin === skinService.CUSTOM_SKIN)
+     skinService.loadCurrentSkin();
 }
 
 function pasteToGist(){
@@ -203,7 +222,8 @@ function pasteToGist(){
 }
 
 function openSkinEditor(){
+  //Readfile returns an array
   $('#editor-div').show();
-  $('#skin-editor').focus();
+  $("#skin-editor").val(readFile(skinService.CUSTOM_SKIN).join("\n")).focus();
   $('#edit-button').hide();
 }

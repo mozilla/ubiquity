@@ -132,6 +132,7 @@ SkinSvc.prototype = {
 
   SKIN_PREF : "extensions.ubiquity.skin",
   DEFAULT_SKIN: "chrome://ubiquity/skin/skins/experimental.css",
+  CUSTOM_SKIN: "chrome://ubiquity/skin/skins/custom.css",
 
   _init: function _init(){
      this._connection = _connectToDatabase();
@@ -196,6 +197,16 @@ SkinSvc.prototype = {
     insStmt.bindUTF8StringParameter(1, localUri);
     insStmt.execute();
     insStmt.finalize();
+  },
+
+  deleteSkin: function deleteSkin(url) {
+    var deleteSql = ("DELETE FROM ubiquity_skin_memory " +
+                  "WHERE local_uri = ?1 OR download_uri = ?2");
+    var delStmt = this._createStatement(deleteSql);
+    delStmt.bindUTF8StringParameter(0, url);
+    delStmt.bindUTF8StringParameter(1, url);
+    delStmt.execute();
+    delStmt.finalize();
   },
 
   get currentSkin() {
@@ -297,8 +308,8 @@ SkinSvc.prototype = {
   updateAllSkins: function updateAllSkins(){
     //Only have to update/download remote skins
     //Local skins are pointed at directly
-    for each(var skin in this.getSkinList())
-      if(skin.local_uri !== skin.download_uri)
+    for each (var skin in this.getSkinList())
+      if (skin.local_uri !== skin.download_uri)
         this.updateSkin(skin.local_uri, skin.download_uri);
   },
 
@@ -313,8 +324,24 @@ SkinSvc.prototype = {
                                       " The default skin will be loaded.");
     }
   },
-}
 
+  uninstall: function uninstall(url) {
+    var skinList = this.getSkinList(), found = false;
+    for each (var {local_uri, download_uri} in skinList)
+      if(local_uri === url || download_uri === url) {
+        found = true;
+        break;
+      }
+    if(!found || local_uri === download_uri)
+      return;
+    this.deleteSkin(url);
+    var file = this._getSkinFolder();
+    file.append(/[^\/]+$/(local_uri)[0]);
+    file.remove(false);
+    if(local_uri === this.currentSkin)
+      this.changeSkin(this.DEFAULT_SKIN);
+  }
+}
 
 SkinSvc.prototype.installToWindow = function installToWindow(window) {
 
@@ -348,22 +375,17 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
         function onSuccess(data) {
           //Navigate to chrome://ubiquity/skin/skins/
           var file = self._getSkinFolder();
-
           //Select a random name for the file
-          var filename = ((/@name[ \t]+(.+)/(data) || 0)[1] +
-                          String.slice(-8, Math.random()) +
-                          ".css");
+          var filename = String.slice(Math.random(), 2) + ".css";
           //Create the new file
           file.append(filename);
           file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
-
           //Write the downloaded CSS to the file
           self._writeToFile(file, data);
 
           var ios = (Cc["@mozilla.org/network/io-service;1"]
                      .getService(Ci.nsIIOService));
           var url = ios.newFileURI(file);
-          
           //Add skin to DB and make it the current skin
           self.addSkin(skinUrl, url.spec);
           self.changeSkin(url.spec);
