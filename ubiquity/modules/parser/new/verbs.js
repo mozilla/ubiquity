@@ -23,6 +23,7 @@
  *   Felipe Gomes <felipc@gmail.com>
  *   Kim Ahlström <kim.ahlstrom@gmail.com>
  *   Toni Hermoso Pulido <toniher@softcatala.cat>
+ *   Sandro Della Giustina <sandrodll@yahoo.it>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -50,7 +51,8 @@ var sampleVerbs = {
       sv: ['lägg till', 'addera', 'plussa'],
       en: ['add'],
       ja: ['追加する','追加しろ','追加して','ついかする','ついかしろ','ついかして'],
-      pt: ['adicionar', 'incluir', 'marcar']
+      pt: ['adicionar', 'incluir', 'marcar'],
+      it: ['aggiungi']
     },
     arguments: [
       {role: 'object', nountype: fake_noun_text},
@@ -65,7 +67,8 @@ var sampleVerbs = {
       sv: ['köp', 'handla'],
       en: ['buy','purchase'],
       ja: ['買う','買え','買って','かう','かえ','かって'],
-      pt: ['comprar', 'compre']
+      pt: ['comprar', 'compre'],
+      it: ['cerca']
     },
     arguments: [
       {role: 'object', nountype: fake_noun_text},
@@ -93,7 +96,8 @@ var sampleVerbs = {
       sv: ['flytta'],
       en: ['move'],
       ja: ['動かす','動かせ','動かして','うごかす','うごかせ','うごかして','移す','移せ','移して','うつす','うつせ','うつして'],
-      pt: ['ir', 'vá', 'vai']
+      pt: ['ir', 'vá', 'vai'],
+      it: ['vai']
     },
     arguments: [
       {role: 'object', nountype: fake_noun_text},
@@ -108,7 +112,8 @@ var sampleVerbs = {
       sv: ['översätt'],
       en: ['translate'],
       ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
-      pt: ['traduzir', 'traduza']
+      pt: ['traduzir', 'traduza'],
+      it: ['traduci']
     },
     arguments: [
       {role: 'source', nountype: fake_noun_language},
