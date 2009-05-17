@@ -147,6 +147,11 @@ StatusBar.prototype = {
 
     var width = options.width ? options.width : self.DEFAULT_PANEL_WIDTH;
 
+    // Add a deprecation/not-implemented warning to be helpful.
+    if (options.onLoad)
+      console.warn("options.onLoad is not currently supported; please " +
+                   "consider using options.onReady instead.");
+
     self._browserWatchers.push(
       new BrowserWatcher(
         {onLoad: function(window) {
