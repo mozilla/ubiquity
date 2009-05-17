@@ -109,19 +109,32 @@ img {float: left; }
 </div>
 </div>
 <div id="wikipedia-search" style="display: none;">
+<style>
+.wikipedia { margin: 0 }
+.title { clear: left; margin-top: 0.4em }
+.title a { font-weight: bold }
+.key:after {content: ":"}
+.summary { margin: 0.2em 0 0 1em; font-size: smaller }
+.thumbnail {
+  float: left; max-width: 80px; max-height: 80px; background-color: white;
+  margin-right: 0.2em;
+}
+</style>
+<dl class="wikipedia">
 Wikipedia articles found matching <b>${query}</b>:
-<br/><br/>
 {for article in results}
-  <div style="clear: both;">
-    <b><a href="${article.title|wikilink}">${article.title}</a></b>
-    <br/>
-    <div style="margin-left: 20px; font-size: 80%;" wikiarticle="${article.title}">
-      <i>Retreiving article summary...</i>
-    </div>
-  </div>
+  <dt class="title">
+    <span class="key">${article.key}</span>
+    <a href="${article.title|wikilink}" accesskey="${article.key}"
+    >${article.title}</a>
+  </dt>
+  <dd class="summary" wikiarticle="${article.title}">
+    <i>Retreiving article summary...</i>
+  </dd>
 {forelse}
-  <b>No articles found</b>
+  <p><i>No articles found</i></p>
 {/for}
+</dl>
 </div>
 <div id="yahoo-search" style="display: none;">
 {for result in results}
@@ -160,7 +173,7 @@ Wikipedia articles found matching <b>${query}</b>:
 <div class="biz">
   <img src="${biz.photo_url_small}" height="40" width="40"/>
   {var phone = biz.phone.replace(/(\d\d\d)(\d\d\d)(\d\d\d\d)/, "$1.$2.$3")}
-  <span class="name"><a href="${biz.url}">${biz.name}</a></span> in ${biz.city} (${phone}) —
+  <span class="name"><a href="${biz.url}">${biz.name}</a></span> in ${biz.city} (${phone}) ?
   ${biz.avg_rating} stars.
 </div>
 {/for}
@@ -272,11 +285,6 @@ CmdUtils.makeSearchCommand({
 });
 
 function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
-  /* TODO
-   - apply CSS max-height & overflow-y to summary container
-  */
-  if (!langCode)
-    langCode = "en";
   var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
   var apiParams = {
     format: "json",
@@ -288,36 +296,29 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     type: "GET",
     url: apiUrl,
     data: apiParams,
-    datatype: "string",
+    dataType: "text",
     error: function() {
-      previewBlock.innerHTML = "<i>Error retreiving summary.</i>";
+      previewBlock.innerHTML = "<i>Error retreiving summary</i>";
     },
     success: function(responseData) {
       responseData = Utils.decodeJson(responseData);
 
-      var tempElement = previewBlock.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml", "div");
-      tempElement.innerHTML = responseData.parse.text["*"];
-
+      var parse = jQuery("<div>" + responseData.parse.text["*"]);
       //take only the text from summary because links won't work either way
-      var articleSummary = jQuery(tempElement).find('p').eq(0).text();
+      var articleSummary = parse.find("p:first").text();
       //remove citations [3], [citation needed], etc.
+      articleSummary = articleSummary.replace(/\[.+?\]/g, "");
       //TODO: also remove audio links (.audiolink & .audiolinkinfo)
-      articleSummary = articleSummary.replace(/\[([^\]]+)\]/g,"");
-
       //TODO: remove "may refer to" summaries
-
-      var articleImageSrc = jQuery(tempElement).find(".infobox img").attr("src") ||
-      jQuery(tempElement).find(".thumbimage").attr("src");
-
-      var previewTemplate = "<img src=\"${img}\" style=\"float: left; max-width: 80px; max-height: 80px; background-color: white;\" />" +
-      "<span class=\"wikisummary\">${summary}</span>";
-
-      var previewData = {
-        img: articleImageSrc,
-        summary: articleSummary
-      };
-
-      previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+      var articleImageSrc = (parse.find(".infobox img").attr("src") ||
+                             parse.find(".thumbimage") .attr("src"));
+      previewBlock.innerHTML =
+        <span>
+          {articleImageSrc
+           ? <img src={articleImageSrc} class="thumbnail"/>
+           : ""}
+          {articleSummary}
+        </span>.toXMLString();
     }
   });
 }
@@ -362,19 +363,21 @@ CmdUtils.CreateCommand({
       srsearch: searchText
     };
 
+    function onerror() {
+      previewBlock.innerHTML = "<i>Error searching Wikipedia</i>";
+    }
+
     CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
       datatype: "string",
-      error: function() {
-        previewBlock.innerHTML = "Error searching Wikipedia";
-      },
+      error: onerror,
       success: function(searchResponse) {
         searchResponse = Utils.decodeJson(searchResponse);
 
         if(!("query" in searchResponse && "search" in searchResponse.query)) {
-          previewBlock.innerHTML = "Error searching Wikipedia";
+          onerror();
           return;
         }
 
@@ -382,22 +385,19 @@ CmdUtils.CreateCommand({
           var wikipediaUrl = "http://" + langCode + ".wikipedia.org/wiki/";
           return wikipediaUrl + title.replace(/ /g, "_");
         }
-
-        previewData = {
-          query: searchText,
-          results: searchResponse.query.search,
-          _MODIFIERS: {wikilink: generateWikipediaLink}
-        };
+        
+        (previewData.results = searchResponse.query.search)
+          .forEach(function(o, i){ o.key = i + 1 });
+        previewData._MODIFIERS = {wikilink: generateWikipediaLink};
 
         previewBlock.innerHTML = CmdUtils.renderTemplate(
           jQuery("#wikipedia-search", feed.dom).html(),
           previewData);
 
-        jQuery(previewBlock).find("div[wikiarticle]").each(function() {
-          var article = jQuery(this).attr("wikiarticle");
+        jQuery("dd", previewBlock).each(function() {
+          var article = this.getAttribute("wikiarticle");
           fetchWikipediaArticle(this, article, langCode);
         });
-
       }
     });
   },
