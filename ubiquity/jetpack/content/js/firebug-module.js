@@ -23,7 +23,22 @@ FBL.ns(
             Firebug.toggleBar(true);
           }
         },
-        loadContext: function(context) {
+        loadedContext: function(context) {
+          // If the Jetpack page wasn't visible when it was loaded,
+          // then a FB context won't be created for it until the
+          // user navigates there. Here we detect if we're arriving at
+          // a Jetpack page that can't use Firebug because no
+          // context was created for it, and if it's the case, we
+          // tell the window to reload so that it can detect us
+          // when it reloads.
+          if (context &&
+              context.window &&
+              context.window.location.href == JETPACK_URL &&
+              context.window.wrappedJSObject &&
+              context.window.wrappedJSObject.console &&
+              !context.window.wrappedJSObject.console.isFirebug) {
+            context.window.location.reload();
+          }
         },
         destroyContext: function(context) {
         }

@@ -163,8 +163,10 @@ var Logging = {
       if (browser.chrome && browser.chrome.window &&
           browser.chrome.window.TabWatcher) {
         try {
-          // TODO: We're not detecting Firebug when we're not the currently
-          // focused tab in our window.
+          // We're not detecting Firebug when we're not the currently
+          // focused tab in our window. Right now, the Firebug extension side
+          // of Jetpack will force us to reload when the user selects our
+          // tab, if it detects that this is the case.
           var TabWatcher = browser.chrome.window.TabWatcher;
           var context;
           TabWatcher.iterateContexts(
