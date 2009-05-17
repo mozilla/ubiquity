@@ -92,7 +92,7 @@
     <div id="sample-code" class="sample code"
       style="display: none;">Jetpack.statusBar.append({
       html: "&lt;p&gt;kill flash&lt;/p&gt;",
-      onLoad: function(panel) {
+      onReady: function(panel) {
         var button = $(panel).find("p");
         button.css({cursor: "pointer", fontFamily: "sans-serif"});
         button.click(function() {
