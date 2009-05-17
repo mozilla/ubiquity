@@ -153,7 +153,7 @@ StatusBar.prototype = {
            var iframe = self._addPanelToWindow(window, url, width);
            self._windows.push(window);
            self._panels.push({url: url, iframe: iframe});
-           if (options.onLoad) {
+           if (options.onReady) {
              iframe.addEventListener(
                "DOMContentLoaded",
                function onPanelLoad(event) {
@@ -161,7 +161,9 @@ StatusBar.prototype = {
                                             onPanelLoad,
                                             false);
                  try {
-                   options.onLoad(iframe.contentDocument);
+                   // TODO: Do we want to use .call() or .apply() to
+                   // set the handler's 'this' variable?
+                   options.onReady(iframe.contentDocument);
                  } catch (e) {
                    console.exception(e);
                  }
