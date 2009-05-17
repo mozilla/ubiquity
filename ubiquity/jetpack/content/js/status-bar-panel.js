@@ -183,6 +183,23 @@ StatusBar.prototype = {
              var panel = self._panels[index];
              delete self._windows[index];
              delete self._panels[index];
+             if (options.onUnload) {
+               try {
+                 options.onUnload(panel.iframe.contentDocument);
+               } catch (e) {
+                 console.exception(e);
+               }
+             }
+
+             // Remove anything in jQuery's cache that's associated with
+             // the window we're closing.
+             for (var id in jQuery.cache)
+               if (jQuery.cache[id].handle) {
+                 var elem = jQuery.cache[id].handle.elem;
+                 if (elem.ownerDocument == panel.iframe.contentDocument)
+                   jQuery.event.remove(elem);
+               }
+
              if (panel.iframe.parentNode)
                panel.iframe.parentNode.removeChild(panel.iframe);
            }

@@ -25,11 +25,11 @@ function JetpackNamespace(urlFactory) {
   Extension.addUnloadMethod(
     self,
     function() {
+      statusBar.unload();
+      Jetpack.unload();
+      statusBar = null;
       Jetpack.lib = null;
       Jetpack.statusBar = null;
-      Jetpack.unload();
-      statusBar.unload();
-      statusBar = null;
     });
 
   self.Jetpack = Jetpack;
@@ -86,10 +86,13 @@ var JetpackRuntime = {
     Extension.addUnloadMethod(
       this,
       function() {
-        delete sandbox['$'];
-        delete sandbox['jQuery'];
+        // Some of this unloading will call code in the jetpack, so we want
+        // to be careful to make sure not to remove core components of
+        // the jetpack's environment until the last possible moment.
         jetpackNamespace.unload();
         jetpackNamespace = null;
+        delete sandbox['$'];
+        delete sandbox['jQuery'];
       });
 
     this.sandbox = sandbox;
