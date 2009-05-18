@@ -53,10 +53,6 @@ Components.utils.import("resource://ubiquity/modules/webjsm.js");
 Components.utils.import("resource://ubiquity/modules/prefcommands.js");
 Components.utils.import("resource://ubiquity/modules/skinsvc.js");
 
-var Jetpack = {};
-Components.utils.import("resource://jetpack/modules/jetpack_feed_plugin.js",
-                        Jetpack);
-
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
@@ -279,8 +275,6 @@ let UbiquitySetup = {
       var pfp = new PythonFeedPlugin(feedManager,
                                      msgService,
                                      gWebJsModule);
-
-      var jpfp = new Jetpack.FeedPlugin(feedManager, msgService);
 
       var cmdSource = new FeedAggregator(
         feedManager,
