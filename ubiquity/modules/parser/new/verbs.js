@@ -68,7 +68,7 @@ var sampleVerbs = {
       en: ['buy','purchase'],
       ja: ['買う','買え','買って','かう','かえ','かって'],
       pt: ['comprar', 'compre'],
-      it: ['cerca']
+      it: ['acquista']
     },
     arguments: [
       {role: 'object', nountype: fake_noun_text},
@@ -97,7 +97,7 @@ var sampleVerbs = {
       en: ['move'],
       ja: ['動かす','動かせ','動かして','うごかす','うごかせ','うごかして','移す','移せ','移して','うつす','うつせ','うつして'],
       pt: ['ir', 'vá', 'vai'],
-      it: ['vai']
+      it: ['sposta']
     },
     arguments: [
       {role: 'object', nountype: fake_noun_text},

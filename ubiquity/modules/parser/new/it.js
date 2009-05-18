@@ -49,32 +49,40 @@ function makeItParser() {
     {role: 'goal', delimiter: 'alla'},
     {role: 'goal', delimiter: 'all\''},
     {role: 'goal', delimiter: 'agli'},
+    {role: 'goal', delimiter: 'ai'},
+    {role: 'goal', delimiter: 'alle'},
     {role: 'goal', delimiter: 'in'},
     {role: 'source', delimiter: 'da'},
     {role: 'source', delimiter: 'dal'},
     {role: 'source', delimiter: 'dalla'},
     {role: 'source', delimiter: 'dall\''},
     {role: 'source', delimiter: 'dagli'},
+    {role: 'source', delimiter: 'dai'},
     {role: 'alias', delimiter: 'con'},
     {role: 'time', delimiter: 'alle'},
-    {role: 'instrument', delimiter: 'con'},
+    {role: 'instrument', delimiter: 'su'},
     {role: 'instrument', delimiter: 'su'}
   ];
 
-  it.argumentNormalizer = new RegExp('^(il\\s+|la\\s+|gli\\s+|l\')(.+)()$','i');
+  it._patternCache.contractionMatcher = new RegExp('(^| )(all\'|dall\')','g');
+  it.wordBreaker = function(input) {
+    return input.replace(this._patternCache.contractionMatcher,'$1$2\u200b');
+  };
+
+/*  it.argumentNormalizer = new RegExp('^(il\\s+|la\\s+|gli\\s+|l\')(.+)()$','i');
   it.normalizeArgument = function(input) {
     let matches = input.match(this.argumentNormalizer);
     if (matches != null)
       return [{prefix:matches[1], newInput:matches[2], suffix:matches[3]}];
     return [];
   },
-
+*/
   it.anaphora = ["questa", "questo", "la selezione","testo selezionato"];
   
   it.branching = 'right';
 
-  it.examples = ['Aggiungi la riunione all 2 pm al calendario',
-    'cerca calzini con Google',
+  it.examples = ['Aggiungi la riunione alle 2 pm al calendario',
+    'Acquista calzini su Google',
     'traduci Ciao dall\'italiano all\' inglese',
     'Vai da San Francisco a Tokyo'];
 

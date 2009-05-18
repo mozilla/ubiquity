@@ -95,7 +95,7 @@ var fake_noun_service = new NounType('service');
 fake_noun_service.list = ['Google', 'Yahoo', 'calendar'];
 
 var fake_noun_language = new NounType('language');
-fake_noun_language.list = ['English','French','Japanese','Chinese'];
+fake_noun_language.list = ['English','French','Japanese','Chinese','Italian'];
 
 var nounTypes = [
   fake_noun_text,
