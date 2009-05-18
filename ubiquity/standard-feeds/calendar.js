@@ -1,52 +1,23 @@
+const Apology = ("<p>" +
+                 "Currently, only works with " +
+                 "Google Calendar".link("http://calendar.google.com") +
+                 " so you'll need a Google account to use it." +
+                 "</p>");
+
 function reloadGoogleCalendarTabs() {
-  try {
-    var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator);
-    var enumerator = wm.getEnumerator(Utils.appWindowType);
-    while(enumerator.hasMoreElements()) {
-      var win = enumerator.getNext();
-      var index = 0, numTabs = win.getBrowser().mPanelContainer.childNodes.length;
-      while (index < numTabs) {
-        var currentTab = win.getBrowser().getBrowserAtIndex(index);
-        if(currentTab.currentURI.spec.indexOf("google.com/calendar") > -1) {
-          currentTab.reload();
-        }
-        index++;
-      }
+  var wm = (Components.classes["@mozilla.org/appshell/window-mediator;1"]
+            .getService(Components.interfaces.nsIWindowMediator));
+  var enumerator = wm.getEnumerator(Utils.appWindowType);
+  while(enumerator.hasMoreElements()) {
+    var win = enumerator.getNext();
+    var numTabs = win.getBrowser().mPanelContainer.childNodes.length;
+    for (var i = 0; i < numTabs; ++i) {
+      var tab = win.getBrowser().getBrowserAtIndex(i);
+      var uri = tab.currentURI;
+      if(/\bgoogle\.com$/.test(uri.host) && /^\/calendar/.test(uri.path))
+        tab.reload();
     }
-  } catch(e) {
-    displayMessage("Error reloading calendar tabs: " + e);
   }
-}
-
-
-function addToGoogleCalendar(eventString) {
-
-  var quickAddEntry = "<entry xmlns='http://www.w3.org/2005/Atom' xmlns:gCal='http://schemas.google.com/gCal/2005'>";
-  quickAddEntry += "    <content type=\"html\">" + eventString + "</content>";
-  quickAddEntry += "    <gCal:quickadd value=\"true\"/>";
-  quickAddEntry += "</entry>";
-
-  var authKey = Utils.getCookie(".www.google.com", "CAL");
-  if (authKey == "") {
-    displayMessage("Please make sure you are logged in to Google Calendar");
-    return;
-  }
-
-  var currentCalendar = "http://www.google.com/calendar/feeds/default/private/full";
-
-  var req = new XMLHttpRequest();
-  req.open('POST', currentCalendar, false);
-  req.setRequestHeader('Authorization', 'GoogleLogin auth=' + authKey);
-  req.setRequestHeader('Content-type', 'application/atom+xml');
-  req.send(quickAddEntry);
-  if (req.status == 401) {
-    displayMessage("Please make sure you are logged in to Google Calendar");
-    return;
-  } else if (req.status != 201) {
-    displayMessage("Error creating the event. Error code: " + req.status + " " + req.statusText);
-    return;
-  }
-
 }
 
 /* TODO this command just takes unstructured text right now and relies on
@@ -56,12 +27,56 @@ CmdUtils.CreateCommand({
   name: "add-to-calendar",
   takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
   icon : "chrome://ubiquity/skin/icons/calendar_add.png",
-  preview: "Adds the event to Google Calendar.<br/> Enter the event naturally e.g., \"3pm Lunch with Myk and Thunder\", or \"Jono's Birthday on Friday\".",
   description: "Adds an event to your calendar.",
-  help: "Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a>, so you'll need a " +
-        "Google account to use it.  Try issuing &quot;add lunch with dan tomorrow&quot;.",
-  execute: function( eventString ) {
-    addToGoogleCalendar( eventString.text );
+  help: (
+    <>
+    <a href="http://www.google.com/support/calendar/bin/answer.py?answer=36604"
+    title="Quick Add">Enter the event naturally</a>. e.g.:
+    <ul>
+    <li>3pm Lunch with Myk and Thunder</li>
+    <li>Jono&#39;s Birthday on Friday</li>
+    </ul>
+    </>) + Apology,
+  execute: function(eventString) {
+    var authKey = Utils.getCookie(".www.google.com", "CAL");
+    if (!authKey) {
+      this._needLogin();
+      return;
+    }
+    var req = new XMLHttpRequest;
+    req.open("POST",
+             "http://www.google.com/calendar/feeds/default/private/full",
+             false);
+    req.setRequestHeader("Authorization", "GoogleLogin auth=" + authKey);
+    req.setRequestHeader("Content-type", "application/atom+xml");
+    req.send(<entry xmlns="http://www.w3.org/2005/Atom"
+                    xmlns:gCal="http://schemas.google.com/gCal/2005">
+               <content type="text">{eventString.text}</content>
+               <gCal:quickadd value="true"/>
+             </entry>.toXMLString());
+    switch (req.status) {
+      case 201:
+      this._say("Event created",
+                req.responseXML.getElementsByTagName("title")[0].textContent);
+      try { reloadGoogleCalendarTabs() }
+      catch (e) { this._say("Error reloading calendar tabs", e + "") }
+      break;
+
+      case 401:
+      this._needLogin();
+      break;
+
+      default:
+      this._say("Error creating the event",
+                req.status + " " + req.statusText);
+    }
+  },
+  _say: function(title, text) {
+    displayMessage({icon: this.icon, title: title, text: text});
+  },
+  _needLogin: function() {
+    this._say("Authorization error",
+              "Please make sure you are logged in to Google Calendar");
   }
 });
 
@@ -76,21 +91,16 @@ CmdUtils.CreateCommand({
   takes: {"date to check": noun_type_date},
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
-  help: ("" + <>
-         Currently, only works with
-         <a href="http://calendar.google.com">Google Calendar</a>,
-         so you&#x27;ll need a Google account to use it.
-         Try issuing "check thursday".</>),
+  help: 'Try issuing "check thursday"' + Apology,
   execute: function(directObj) {
     var date = directObj.data;
     var url = "http://www.google.com/calendar/";
-    var params = Utils.paramsToString({ as_sdt: date.toString("yyyyMMdd") });
-
-    Utils.openUrlInBrowser( url + params );
+    var params = Utils.paramsToString({as_sdt: date.toString("yyyyMMdd")});
+    Utils.openUrlInBrowser(url + params);
   },
   preview: function preview(pblock, {data: date, url}) {
     if (!date) {
-      pblock.innerHTML = "Checks Google Calendar for the date you specify.";
+      pblock.innerHTML = this.description;
       return;
     }
     pblock.innerHTML = ("Checking Google Calendar for events on " +
@@ -103,7 +113,7 @@ CmdUtils.CreateCommand({
         var [cal] = /<div class[^]+$/(htm) || 0;
         if (!cal) {
           pblock.innerHTML =
-            <>Please <a href={this.url} accesskey="L">login</a>.</>;
+            <>Please <a href={this.url} accesskey="L"><u>l</u>ogin</a>.</>;
           return;
         }
         var $c = CmdUtils.absUrl(
