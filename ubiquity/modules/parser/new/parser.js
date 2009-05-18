@@ -337,7 +337,8 @@ Parser.prototype = {
     let returnArray = [
       { _verb: { id: null,
                  text: null,
-                 _order: null},
+                 _order: null,
+                 input: null},
         argString: input.replace(/^\s*(.*?)\s*$/,'$1')
       }
     ];
@@ -385,6 +386,7 @@ Parser.prototype = {
             // add some extra information specific to this parse
             thisParse._verb.id = verb;
             thisParse._verb.text = name;
+            thisParse._verb.input = verbPrefix;
             thisParse._verb._order = 0;
             returnArray.push(thisParse);
             break;
@@ -416,6 +418,7 @@ Parser.prototype = {
             // add some extra information specific to this parse
             thisParse._verb.id = verb;
             thisParse._verb.text = name;
+            thisParse._verb.input = verbPrefix;
             thisParse._verb._order = -1;
             returnArray.push(thisParse);
             break;
@@ -553,7 +556,7 @@ Parser.prototype = {
   // The {{{scoreMultiplier}}} parameter is set at this point, making
   // {{{getMaxScore()}}} valid for all returned parses.
   
-  argFinder: function(argString,verb) {
+  argFinder: function(argString, verb, input) {
 
     // initialize possibleParses. This is the array that we're going to return.
     let possibleParses = [];
@@ -562,6 +565,7 @@ Parser.prototype = {
     if (argString == '') {
       defaultParse = new Parser.Parse(this.branching,
                                             this.joindelimiter,
+                                            input,
                                             verb,
                                             argString);
 
@@ -659,6 +663,7 @@ Parser.prototype = {
       // have any arguments set.
       var seedParse = new Parser.Parse(this.branching,
                                           this.joindelimiter,
+                                          input,
                                           verb,
                                           argString);
 
@@ -1229,6 +1234,11 @@ Parser.prototype = {
     }
     
     //return nounCache[x];
+  },
+  getSelectionObject: function() {
+    // TODO: fake function stub because right now cmdmanager requires this
+    // for tab completion
+    return {};
   }
 }
 
@@ -1412,7 +1422,7 @@ Parser.Query.prototype = {
 
     // STEP 4: group into arguments
     for each (var pair in this._verbArgPairs) {
-      let argParses = this.parser.argFinder(pair.argString,pair._verb);
+      let argParses = this.parser.argFinder(pair.argString,pair._verb,this.input);
       this._possibleParses = this._possibleParses.concat(argParses);
       yield true;
     }
@@ -1667,9 +1677,10 @@ Parser.Query.prototype = {
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
-Parser.Parse = function(branching, joindelimiter, verb, argString) {
+Parser.Parse = function(branching, joindelimiter, input, verb, argString) {
   this._branching = branching;
-  this._delimiter = joindelimiter,
+  this._delimiter = joindelimiter;
+  this.input = input;
   this._verb = verb;
   this.argString = argString;
   this.args = {};
@@ -1753,6 +1764,15 @@ Parser.Parse.prototype = {
            + ')';
 
   },
+  getCompletionText: function() {
+    var originalText = this.getLastNode().input;
+    var newText = this.getLastNode().text;
+    var findOriginal = new RegExp(originalText+'$');
+    if (findOriginal.test(this.input))
+      return this.input.replace(findOriginal,newText) + this._delimiter;
+    
+    return this.input;
+  },
   // **{{{Parser.Parse.getIcon()}}}**
   //
   // Return the verb's icon.
@@ -1793,6 +1813,24 @@ Parser.Parse.prototype = {
   // Return the verb's {{{previewUrl}}} value.
   get previewUrl() {
     return this._verb.previewUrl;
+  },
+  // **{{{Parser.Parse.getLastNode()}}}**
+  //
+  // Return the parse's last node, whether a verb or an argument.
+  // This can be used to power something like tab-completion, by replacing
+  // {{{Parse.getLastNode().input}}} with {{{Parse.getLastNode().text}}}.
+  getLastNode: function() {
+    // default value if there are no arguments
+    let lastNode = this._verb;
+    if (this._verb._order != -1) {
+      for (let role in this.args) {
+        for each (let arg in this.args[role]) {
+          if (arg._order > lastNode._order)
+            lastNode = arg;
+        }
+      }
+    }
+    return lastNode;
   },
   // **{{{Parser.Parse.allNounTypesDetectionHasCompleted()}}} (read-only)**
   //
@@ -1880,6 +1918,7 @@ if ((typeof window) == 'undefined') {// kick it chrome style
 var cloneParse = function(p) {
   let ret = new Parser.Parse(p._branching,
                              p._delimiter,
+                             p.input,
                              cloneObject(p._verb),
                              p.argString);
   ret.args = cloneObject(p.args);
