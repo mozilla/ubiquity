@@ -1107,6 +1107,8 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 //
 // When this is done, the query will be substituted in as usual.
 //
+// {{{options.maxResults = 4}}} specifies the max number of results.
+//
 // An extra option {{{options.parser}}} can be passed, which will make
 // Ubiquity automatically generate a keyboard navigatable preview of
 // the results. It is passed as an object containing at the very least
@@ -1158,30 +1160,26 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 // }}}
 
 CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
+  function insertQuery (target, query) {
+    var re = /%s|{QUERY}/g;
+    if (typeof target === "object") {
+      var ret = {};
+      for (var key in target) ret[key] = target[key].replace(re, query);
+      return ret;
+    }
+    return target && target.replace(re, encodeURIComponent(query));
+  }
   options.takes = {"search term": noun_arb_text};
-  options.execute = function(directObject, modifiers) {
-    var query = encodeURIComponent(directObject.text);
-    if (options.postData) {
-      var urlString = options.url;
-      var postData = Utils.paramsToString(options.postData).replace(/%s|{QUERY}/g, query);
-      Utils.openUrlInBrowser(urlString, postData);
-    }
-    else {
-      var urlString = options.url.replace(/%s|{QUERY}/g, query);
-      Utils.openUrlInBrowser(urlString);
-    }
-    CmdUtils.setLastResult( urlString );
+  options.execute = function({text}) {
+    Utils.openUrlInBrowser(insertQuery(options.url, text),
+                           insertQuery(options.postData, text));
   };
-  var domainRe = /.*?\/\/[^?/]*/;
+  var domainRe = /^.*?:\/\/[^?/]+/;
   var relRe = /:\/\//;
-  var baseurl = "";
-  var postData = null;
-  if (options.url) {
-    baseurl = domainRe.exec(options.url);
-    if (!options.icon) {
-      // guess where the favicon is
-      options.icon = baseurl+"/favicon.ico";
-    }
+  var [baseurl] = domainRe.exec(options.url) || [""];
+  if (baseurl && !options.icon) {
+    // guess where the favicon is
+    options.icon = baseurl + "/favicon.ico";
   }
   if (!options.description && options.name) {
     // generate description from the name of the seach command
@@ -1191,20 +1189,15 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     options.parser.type = options.parser.type.toLowerCase();
   }
   if (!options.preview) {
-    options.preview = function searchPreview(pblock, directObject, modifiers) {
-      var urlString = (options.parser && options.parser.url) || options.url;
-      const MAX_RESULTS = 4;
-      if (options.parser && directObject.text.length > 0) {
-        var parser = options.parser;
-        var query = encodeURIComponent(directObject.text);
+    options.preview = function searchPreview(pblock, {text, html}) {
+      var {parser} = options;
+      var urlString = (parser && parser.url) || options.url;
+      if (parser && text) {
         // check if we're using POST
         if (options.postData) {
-          postData = Utils.paramsToString(options.postData).replace(/%s|{QUERY}/g, query);
+          var postData = insertQuery(options.postData, text);
         }
-        // or GET
-        else {
-          urlString = urlString.replace(/%s|{QUERY}/g, query);
-        }
+        urlString = insertQuery(urlString, text);
         pblock.innerHTML = "<p>Loading results...</p>";
         if (!parser.baseurl) {
           // use the calculated baseurl
@@ -1214,7 +1207,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           if (data) {
             var template = "";
             pblock.innerHTML = "<h2>Results for <em>"
-                             + directObject.text
+                             + html
                              + "</em>:</h2>";
             var results = [];
             switch (parser.type) {
@@ -1335,13 +1328,12 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                 break;
             }
             if (results.length == 0) {
-              template = "<p>No results<p>";
+              template = "<p>No results</p>";
             }
             else {
               template = "<dl>";
-              for (var cnt = 0;
-                   cnt < Math.min(results.length,MAX_RESULTS);
-                   cnt++) {
+              var max = Math.min(results.length, options.maxResults || 4);
+              for (var cnt = 0; cnt < max; ++cnt) {
                 var result = results[cnt];
                 template += ("<dt style='font-weight: bold; clear: both;'>" +
                              "[" + (cnt+1) + "] " +
@@ -1380,14 +1372,14 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             CmdUtils.previewPost(pblock, urlString, postData,
                                  searchParser, options.parser.type || "html");
         } else {
-            CmdUtils.previewGet(pblock, urlString, 
+            CmdUtils.previewGet(pblock, urlString, null,
                                 searchParser, options.parser.type || "html");
         }
       }
       else {
         var content = "Searches "+options.name+" for your words";
-        if(directObject.text.length > 0)
-          content += ": <b>" + directObject.text + "</b>";
+        if(text)
+          content += ": <b>" + text + "</b>";
         pblock.innerHTML = content;
       }
     };
