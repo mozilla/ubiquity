@@ -297,7 +297,7 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
       postInputStream = postData;
     } else {
       if(typeof postData == "object") // json -> string
-        postData = Utils.paramsToString(postData);
+        postData = Utils.paramsToString(postData, "");
 
       var stringStream = Cc["@mozilla.org/io/string-input-stream;1"]
         .createInstance(Ci.nsIStringInputStream);
@@ -383,27 +383,20 @@ Utils.getCookie = function getCookie(domain, name) {
 // This function takes the given Object containing keys and
 // values into a querystring suitable for inclusion in an HTTP
 // GET or POST request.
+//
+// {{{params}}} is the key-value pairs.
+//
+// {{{prefix = "?"}}} (optional) is prepended to the result.
 
-Utils.paramsToString = function paramsToString(params) {
+Utils.paramsToString = function paramsToString(params, prefix) {
   var stringPairs = [];
-  function valueTypeIsOk(val) {
-    if (typeof val == "function")
-      return false;
-    if (val === undefined)
-      return false;
-    if (val === null)
-      return false;
-    return true;
-  }
   function addPair(key, value) {
-    if (valueTypeIsOk(value)) {
+    // note: explicitly ignoring values that are functions/null/undefined!
+    if (typeof value !== "function" && value != null)
       stringPairs.push(
-        encodeURIComponent(key) + "=" + encodeURIComponent(value.toString())
-      );
-    }
+        encodeURIComponent(key) + "=" + encodeURIComponent(value));
   }
   for (var key in params) {
-    // note: explicitly ignoring values that are objects/functions/undefined!
     if (Utils.isArray(params[key])) {
       params[key].forEach(function(item) {
         addPair(key + "[]", item);
@@ -412,7 +405,7 @@ Utils.paramsToString = function paramsToString(params) {
       addPair(key, params[key]);
     };
   }
-  return "?" + stringPairs.join("&");
+  return (prefix == null ? "?" : prefix) + stringPairs.join("&");
 };
 
 // ** {{{ Utils.urlToParams() }}} **
