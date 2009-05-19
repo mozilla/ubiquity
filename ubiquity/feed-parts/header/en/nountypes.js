@@ -323,25 +323,10 @@ var noun_type_language =  {
 
 var noun_type_tab = {
   _name: "tab name",
-
-  _tabCache: null,
-
-  // Returns all tabs from all windows.
-  getTabs: function(){
-    return Utils.tabs.get();
-  },
-
-  suggest: function( text, html ) {
-    var suggestions  = [];
-    var tabs = Utils.tabs.search(text, 5);
-
-    for ( var tabName in tabs ){
-      var tab = tabs[tabName];
-      suggestions.push( CmdUtils.makeSugg(tabName, tab.document.URL, tab) );
-    }
-
-    return suggestions;
-  }
+  suggest: function(text, html, cb, selectedIndices)(
+    [CmdUtils.makeSugg(tab.document.title || tab.document.URL,
+                       null, tab, selectedIndices)
+     for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))]),
 };
 
 

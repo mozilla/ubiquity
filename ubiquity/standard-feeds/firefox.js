@@ -90,181 +90,104 @@ CmdUtils.CreateCommand({
 // TAB COMMANDS
 // -----------------------------------------------------------------
 
+function tabPreview(msg)(
+  function preview(pblock, {text, data: tab}) {
+    pblock.innerHTML = (
+      tab
+      ? <div class="tab">
+          {msg} <b>{text}</b>
+          <p><img src={CmdUtils.getTabSnapshot(tab, {width: 480})}/></p>
+        </div>
+      : this.description);
+  });
+
 CmdUtils.CreateCommand({
   name: "tab",
-  takes: {"tab name": noun_type_tab},
+  takes: {name: noun_type_tab},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
-  execute: function( tab ) {
-    var tabName = tab.text;
-    var tab = Utils.tabs.get(tabName);
-    if (tab) {
-      // TODO: window.focus() is missing on 1.9.2pre
-      if (tab._window && tab._window.focus) {
-        tab._window.focus();
-      }
-      tab.focus();
-      // Focus on tab content
-      // TODO: window.focus() is missing on 1.9.2pre
-      if (tab._window && tab._window.content) {
-        tab._window.content.focus();
-      }
+  execute: function({data: tab}) {
+    if (!tab) return;
+    // TODO: window.focus() is missing on 1.9.2pre
+    if (tab._window && tab._window.focus) {
+      tab._window.focus();
+    }
+    tab.focus();
+    // Focus on tab content
+    if (tab._window && tab._window.content) {
+      tab._window.content.focus();
     }
   },
-
-  preview: function(pblock, tab) {
-    var tabName = tab.text;
-
-    if (tabName == this._cacheKey) {
-      pblock.innerHTML = this._cacheValue;
-    }
-    else if (tabName.length > 1 && (tab = Utils.tabs.get(tabName))) {
-      var imgData = CmdUtils.getTabSnapshot(tab, {width:500});
-      pblock.innerHTML = "Changes to <b style=\"color:yellow\">%s</b> tab."
-                         .replace(/%s/, tabName);
-      pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData);
-    }
-    else {
-      pblock.innerHTML = "Switch to tab by name.";
-    }
-
-    this._cacheKey = tabName;
-    this._cacheValue = pblock.innerHTML;
-  }
+  preview: tabPreview("Changes to"),
 });
 
-// Closes a single tab
 CmdUtils.CreateCommand({
   name: "close-tab",
-  takes: {"tab name": noun_type_tab},
+  takes: {name: noun_type_tab},
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
-  description: "Closes the tab that matches the given name, "
-             + "or if current tab if no name is supplied",
-  execute: function(directObj) {
-    var tabName = directObj.text;
-    var tab = Utils.tabs.get(tabName);
-    if (tabName && tab) {
-      tab.close();
-    }
-    else {
-      Application.activeWindow.activeTab.close();
-    }
-    displayMessage(tabName + " tab closed");
+  description: ("Closes the tab that matches the given name, " +
+                "or the current tab if no name is supplied."),
+  execute: function({data: tab}) {
+    (tab || Application.activeWindow.activeTab).close();
   },
-
-  preview: function(pblock, tab) {
-    var tabName = tab.text;
-    if(tabName.length > 1 && (tab = Utils.tabs.get(tabName))) {
-      var imgData = CmdUtils.getTabSnapshot(tab, {width:500});
-      pblock.innerHTML = "Closes the <b style=\"color:yellow\">%s</b> tab."
-                         .replace(/%s/, tabName);
-      pblock.innerHTML += "<br/><img src='%s'>".replace(/%s/, imgData);
-    }
-    else {
-      pblock.innerHTML = "Closes the tab by name.";
-    }
-  }
+  preview: tabPreview("Closes"),
 });
 
-
-//Closes all tabs related to the specified word
 CmdUtils.CreateCommand({
   name: "close-related-tabs",
   takes: {"related word": noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
-  preview: function(pblock, directObj) {
-    var query = directObj.text;
-    var relatedWord = query.toLowerCase();
-    var html = null;
-    if(relatedWord.length != 0) {
-      html = "Closes the following tabs that are related to "
-           + "<b style=\"color:yellow\">\"" + relatedWord + "\"</b> : <ul>";
-      var numTabs = 0;
-
-      Application.activeWindow.tabs.forEach(function(tab) {
-        if (tab.uri.spec.toLowerCase().match(relatedWord) ||
-            tab.document.title.toLowerCase().match(relatedWord)) {
-      	  html += "<li>" + tab.document.title + "</li>";
-      	  numTabs++;
-        }
-      } );
-
-      if(numTabs == 0) {
-        html = "No tabs related to <b style=\"color:yellow\">\""
-             + relatedWord + "\"</b>";
-      }
-      else {
-        html += "</ul>";
-      }
-    }
-    else {
-      html = "Closes all tabs related to the word";
-    }
-    jQuery(pblock).html(html);
+  execute: function({text}) {
+    if (!text) return;
+    var tabs = Utils.tabs.search(text);
+    for each (let t in tabs) t.close();
+    displayMessage({
+      icon: this.icon,
+      title: this.name,
+      text: tabs.length + " tabs closed"});
   },
-
-  execute: function(directObj) {
-    var query = directObj.text;
-    var relatedWord = query.toLowerCase();
-    var numTabs = 0;
-
-    Application.activeWindow.tabs.forEach(function(tab) {
-      if (tab.uri.spec.toLowerCase().match(relatedWord) ||
-          tab.document.title.toLowerCase().match(relatedWord)) {
-        tab.close();
-        numTabs++;
-      }
-    });
-
-    displayMessage(numTabs + " tabs closed");
-  }
-
-});
-
-
-function countTabs(filter, noHtml) {
-  var count = 0;
-  if (filter.length < 1) {
-     count = Application.activeWindow.tabs.length;
-  }
-  else {
-    Application.activeWindow.tabs.forEach(function(tab) {
-      var title = tab.document.title;
-      if (title.toLowerCase().indexOf(filter.toLowerCase()) != -1)
-        count++;
-    });
-  }
-  var tabTemplate = "tab";
-  if (count > 1) {
-    tabTemplate += "s";
-  }
-  if (noHtml) {
-    var previewTemplate = "${count} "+tabTemplate
-                        + "{if filter} matching '${filter}'{else} total{/if}.";
+  preview: function(pblock, {text}) {
+    if (!text) {
+      pblock.innerHTML = this.description;
+      return;
     }
-  else {
-    var previewTemplate = "<b>${count}</b> "+tabTemplate
-                        + "{if filter} matching <i>${filter}</i>{else} total{/if}.";
-  }
-  var previewData = {
-    count:  count,
-    filter: filter
-  };
-  return CmdUtils.renderTemplate(previewTemplate, previewData);
-}
-
+    var tabs = Utils.tabs.search(text);
+    var div = this._div();
+    pblock.innerHTML = (
+      tabs.length
+      ? div.appendChild(
+        <>Closes tabs related to <b>{text}</b>:</> +
+          tabs.reduce(this._lister, <ul/>))
+      : div.appendChild(<>No tabs are related to <b>{text}</b>.</>));
+  },
+  _div: function() <div class={this.name}/>,
+  _lister: function(list, {document})(
+    list.appendChild(<li>{document.title}
+                     <code><small>{document.URL}</small></code></li>)),
+});
 
 CmdUtils.CreateCommand({
   name: "count-tabs",
-  license: "MPL",
-  description: "Counts the number of tabs you have open.",
-  takes: { filter: noun_arb_text },
-  preview: function(previewBlock, inputObject) {
-    previewBlock.innerHTML = countTabs(inputObject.text);
+  description: "Counts the number of opened tabs.",
+  takes: {filter: noun_arb_text},
+  icon: "chrome://ubiquity/skin/icons/tab_go.png",
+  execute: function({text}) {
+    displayMessage({
+      icon: this.icon,
+      title: this.name,
+      text: this._count(text, true)});
   },
-  execute: function(inputObject) {
-    displayMessage(countTabs(inputObject.text, true));
+  preview: function(pblock, {text}) {
+    pblock.innerHTML = this._count(text);
+  },
+  _count: function(text, plain) {
+    var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
+    var ord = count > 1 ? " tabs " : " tab ";
+    var msg = text ? "matching " + text : "total";
+    return (plain
+            ? count + ord + msg + "."
+            : <div class={this.name}><b>{count}</b>{ord}<b>{msg}</b>.</div>);
   }
 });
 

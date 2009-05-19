@@ -46,6 +46,8 @@ var EXPORTED_SYMBOLS = ["Utils"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Application = (Cc["@mozilla.org/fuel/application;1"]
+                     .getService(Ci.fuelIApplication));
 
 var Utils = {};
 
@@ -346,9 +348,6 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
 Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
-  let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                    .getService(Components.interfaces.fuelIApplication);
-
   var tabs = Application.activeWindow.tabs;
   for (var i = 0; i < tabs.length; i++)
     if (tabs[i].uri.spec == urlString) {
@@ -564,8 +563,8 @@ Utils.escapeHtml = function escapeHtml(str) {
   return str.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
+            .replace(/\"/g, "&quot;")
+            .replace(/\'/g, "&#39;");
 };
 
 
@@ -612,150 +611,48 @@ Utils.tabs = {
 
   // ** {{{ Utils.tabs.get() }}} **
   //
-  // Gets open tabs.
+  // Gets an array of open tabs.
   //
-  // {{{aName}}} is an optional string tab name.  If supplied, this
-  // function will return the named tab or null.
-  //
-  // This function returns a a hash of tab names to tab references; or,
-  // if a name parameter is passed, it returns the matching tab
-  // reference or null.
+  // {{{name}}} is an optional string tab name (title or URL).
+  // If supplied, this function returns exactly matched tabs with it.
 
-  get: function Utils_tabs_get(aName) {
-    if (aName)
-      return this._cache[aName] || null;
-
-    return this._cache;
+  get: function Utils_tabs_get(name) {
+    var tabs = [], {push} = tabs;
+    for each (let win in Application.windows)
+      push.apply(tabs, win.tabs);
+    return (name == null
+            ? tabs
+            : tabs.filter(function(t) t.title === name || t.URL === name));
   },
 
   // ** {{{ Utils.tabs.search() }}} **
   //
-  // This function searches for tabs by tab name and returns a hash of
-  // tab names to tab references.
+  // Searches for tabs by title or URL and returns an array of tab references.
   //
-  // {{{aSearchText}}} is a string specifying the text to search for.
+  // {{{matcher}}} is a string or RegExp object to match with.
   //
-  // {{{aMaxResults}}} is an integer specifying the maximum number of
-  // results to return.
+  // {{{maxResults = 2147483647}}} is an optinal integer specifying
+  // the maximum number of results to return.
 
-  search: function Utils_tabs_search(aSearchText, aMaxResults) {
-    var matches = {};
-    var matchCount = 0;
-    for (var name in this._cache) {
-       var tab = this._cache[name];
-      //TODO: implement a better match algorithm
-      if (name.match(aSearchText, "i") ||
-          (tab.document.URL && tab.document.URL.toString().match(aSearchText, "i"))) {
-        matches[name] = tab;
-        matchCount++;
-      }
-      if (aMaxResults && aMaxResults == matchCount)
-        break;
+  search: function Utils_tabs_search(matcher, maxResults) {
+    var matches = [], tester;
+    try {
+      tester = (typeof matcher.test === "function"
+                ? matcher
+                : RegExp(matcher, "i"));
+    } catch (e if e instanceof SyntaxError) {
+      matcher = matcher.toLowerCase();
+      tester = {test: function(str) ~str.toLowerCase().indexOf(matcher)};
     }
+    if (maxResults == null) maxResults = -1 >>> 1;
+    for each (let win in Application.windows)
+      for each (let tab in win.tabs) {
+        let {title, URL} = tab.document;
+        if (tester.test(title) || tester.test(URL))
+          if (matches.push(tab) >= maxResults)
+            break;
+      }
     return matches;
-  },
-
-  // Handles TabOpen, TabClose and load events; clears tab cache.
-
-  onTabEvent: function(aEvent, aTab) {
-    switch ( aEvent.type ) {
-      case "TabOpen":
-        // this is received before the page content has loaded.
-        // so need to find the new tab, and add a load
-        // listener to it, and only then add it to the cache.
-        // TODO: once bug 470163 is fixed, can move to a much
-        // cleaner way of doing this.
-        var self = this;
-        var windowCount = this.Application.windows.length;
-        for( var i=0; i < windowCount; i++ ) {
-          var window = this.Application.windows[i];
-          var tabCount = window.tabs.length;
-          for (var j = 0; j < tabCount; j++) {
-            let tab = window.tabs[j];
-            if (!this._cache[tab.document.title]) {
-              // add a load listener to the tab
-              // and add the tab to the cache after it has loaded.
-              tab.events.addListener("load", function(aEvent) {
-                self.onTabEvent(aEvent, tab);
-              });
-            }
-          }
-        }
-        break;
-      case "TabClose":
-        // for TabClose events, invalidate the cache.
-        // TODO: once bug 470163 is fixed, can just delete the tab from
-        // from the cache, instead of invalidating the entire thing.
-        this.__cache = null;
-        break;
-      case "load":
-        // handle new tab page loads, and reloads of existing tabs
-        if (aTab && aTab.document.title) {
-
-          // if a tab with this title is not cached, add it
-          if (!this._cache[aTab.document.title])
-            this._cache[aTab.document.title] = aTab;
-
-          // evict previous cache entries for the tab
-          for (var title in this._cache) {
-            if (this._cache[title] == aTab && title != aTab.document.title) {
-              // if the cache contains an entry for this tab, and the title
-              // differs from the tab's current title, then evict the entry.
-              delete this._cache[title];
-              break;
-            }
-          }
-        }
-        break;
-    }
-  },
-
-  // Smart-getter for FUEL.
-
-  get Application() {
-    delete this.Application;
-    return this.Application = Cc["@mozilla.org/fuel/application;1"]
-                              .getService(Ci.fuelIApplication);
-  },
-
-   // Getter for the tab cache; manages reloading the cache.
-
-  __cache: null,
-  get _cache() {
-    if (this.__cache)
-      return this.__cache;
-
-    this.__cache = {};
-    var windowCount = this.Application.windows.length;
-    for( var j=0; j < windowCount; j++ ) {
-
-      var win = this.Application.windows[j];
-      win.events.addListener(
-        "TabOpen",
-        function(aEvent) { self.onTabEvent(aEvent); }
-      );
-      win.events.addListener(
-        "TabClose",
-        function(aEvent) { self.onTabEvent(aEvent); }
-      );
-
-      var tabCount = win.tabs.length;
-      for (var i = 0; i < tabCount; i++) {
-
-        let tab = win.tabs[i];
-
-        // add load listener to tab
-        var self = this;
-        tab.events.addListener("load", function(aEvent) {
-          self.onTabEvent(aEvent, tab);
-        });
-
-        // add tab to cache
-        this.__cache[tab.document.title] = tab;
-      }
-    }
-
-    return this.__cache;
   }
 };
 
