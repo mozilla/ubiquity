@@ -251,11 +251,11 @@ Parser.prototype = {
     // this._patternCache.verbInitialTest matches a verb at the beginning
     this._patternCache.verbInitialTest = new RegExp(
       '^\\s*('+this._patternCache.verbMatcher+')'+
-        (this.usespaces?'(\\s+.*$|$)':'(.*$)'));
+        (this.usespaces?'(\\s+.*$|$)':'(.*$)'),'i');
     // this._patternCache.verbFinalTest matches a verb at the end of the string
     this._patternCache.verbFinalTest = new RegExp(
       (this.usespaces?'(^.*\\s+|^)':'(^.*)')+
-        '('+this._patternCache.verbMatcher+')\\s*$');
+        '('+this._patternCache.verbMatcher+')\\s*$','i');
 
     // this._patternCache.anaphora matches any of the anaphora ("magic words")
     // if usespaces = true, it will only look for anaphora as whole words,
@@ -282,14 +282,14 @@ Parser.prototype = {
       // each of these is a RegExp of the form (to|from|as|toward|...)
       this._patternCache.delimiters[verb] = new RegExp('^('
         +[role.delimiter for each (role in this._rolesCache[verb]) ].join('|')
-        +')$');
+        +')$','i');
     }
 
     // this is the RegExp to recognize delimiters for an as yet unspecified
     // verb... in other words, it's just a RegExp to recognize every
     // possible delimiter.
     this._patternCache.delimiters[null] = new RegExp(
-      '^('+[role.delimiter for each (role in this.roles) ].join('|')+')$');
+      '^('+[role.delimiter for each (role in this.roles) ].join('|')+')$','i');
 
   },
 
@@ -365,7 +365,7 @@ Parser.prototype = {
       // initialMatches will return an array of strings in the following order
       let [ ,verbPrefix,argString] = initialMatches;
 
-      if (argString == '')
+      if (/^\s*$/.test(argString))
         verbOnlyMatches.push(verbPrefix);
 
       // The match will only give us the prefix that it matched. For example,
@@ -380,7 +380,7 @@ Parser.prototype = {
         // check each verb synonym in this language
         for (name in names(this._verbList[verb],this.lang)) {
           // if it matched...
-          if (name.indexOf(verbPrefix) == 0) {
+          if (RegExp('^'+verbPrefix,'i').test(name)) {
             let thisParse = {_verb: cloneObject(this._verbList[verb]),
                              argString: argString};
             // add some extra information specific to this parse
@@ -412,7 +412,7 @@ Parser.prototype = {
         // check each verb synonym in this language
         for (name in names(this._verbList[verb],this.lang)) {
           // if it matched...
-          if (name.indexOf(verbPrefix) == 0) {
+          if (RegExp('^'+verbPrefix,'i').test(name)) {
             let thisParse = {_verb: cloneObject(this._verbList[verb]),
                              argString: argString};
             // add some extra information specific to this parse
@@ -490,8 +490,9 @@ Parser.prototype = {
   //
   // Used by {{{Parser.argFinder()}}}
   getRoleByDelimiter: function(delimiter,roles) {
+    delimiter = delimiter.toLowerCase();
     return [role.role for each (role in roles)
-                      if (role.delimiter == delimiter) ];
+                      if (role.delimiter.toLowerCase() == delimiter) ];
   },
 
   // ** {{{Parser.argFinder()}}} **
