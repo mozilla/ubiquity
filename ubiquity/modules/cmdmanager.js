@@ -250,9 +250,8 @@ CommandManager.prototype = {
     if(!this.hasSuggestions())
       return null;
 
-    var selObj = this.__nlParser.getSelectionObject(context);
     var suggText = this.__activeQuery.suggestionList[this.__hilitedSuggestion]
-                                  .getCompletionText(selObj);
+                                  .getCompletionText();
     this.updateInput(suggText,
                      context);
 

@@ -20,7 +20,10 @@ EXPORTED_SYMBOLS = ["makeTestParser"];
 
 var fakeContextUtils = {
   getHtmlSelection: function(context) { return context.htmlSelection; },
-  getSelection: function(context) { return context.textSelection; }
+  getSelection: function(context) { return context.textSelection; },
+  getSelectionObject: function(context) {return { text: context.textSelection,
+                                                  html: context.htmlSelection
+                                                };}
 };
 
 var emptyContext = {

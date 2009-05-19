@@ -199,35 +199,23 @@ NLParser1.Parser = function(verbList, nounList, languagePlugin,
 
 NLParser1.Parser.prototype = {
 
-  // TODO why is this function here?
-  getSelectionObject: function(context) {
-    var selection = this._ContextUtils.getSelection(context);
-    var htmlSelection = this._ContextUtils.getHtmlSelection(context);
-    if (!htmlSelection && selection)
-      htmlSelection = selection;
-    return {
-      text: selection,
-      html: htmlSelection
-    };
-  },
-
   _nounFirstSuggestions: function( selObj, maxSuggestions ) {
     let suggs = [];
     let topGenerics = this._rankedVerbsThatUseGenericNouns
                           .slice(0, maxSuggestions);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat( topGenerics );
     for each(let verb in verbsToTry) {
-	  if(!verb.disabled){
-	      let newPPS = new NLParser1.PartiallyParsedSentence( verb,
-	                                                         {},
-	                                                         selObj,
-	                                                         0,
-	                                                         this._languagePlugin );
-	      // TODO make a better way of having the parsing remember its source than
-	      // this encapsulation breaking...
-	      newPPS._cameFromNounFirstSuggestion = true;
-	      suggs.push( newPPS );
-	  }
+      if(!verb.disabled){
+        let newPPS = new NLParser1.PartiallyParsedSentence( verb,
+                                                            {},
+                                                            selObj,
+                                                            0,
+                                                            this._languagePlugin );
+         // TODO make a better way of having the parsing remember its source than
+         // this encapsulation breaking...
+         newPPS._cameFromNounFirstSuggestion = true;
+         suggs.push( newPPS );
+      }
     }
     dump("nounFirstSuggestions returning suggestions.\n");
 
@@ -263,7 +251,7 @@ NLParser1.Parser.prototype = {
                                                maxSuggestions);
     var nounType, verb;
     var newSuggs = [];
-    var selObj = this.getSelectionObject(context);
+    var selObj = this._ContextUtils.getSelectionObject(context);
     // selection, no input, noun-first suggestion on selection
     if (!query || query.length == 0) {
       if (selObj.text || selObj.html) {
@@ -352,14 +340,14 @@ NLParser1.Parser.prototype = {
   }
 };
 
-NLParser1.ParsedSentence = function( verb, arguments, verbMatchScore ) {
+NLParser1.ParsedSentence = function(verb, arguments, verbMatchScore, selObj) {
   /* DO and the values of modifiers should be NLParser1.EnInputData
    * objects.
    */
-  this._init( verb, arguments, verbMatchScore );
+  this._init( verb, arguments, verbMatchScore, selObj);
 }
 NLParser1.ParsedSentence.prototype = {
-  _init: function( verb, argumentSuggestions, verbMatchScore) {
+  _init: function( verb, argumentSuggestions, verbMatchScore, selObj) {
     var nu = {};
     Components.utils.import("resource://ubiquity/modules/nounutils.js",
                             nu);
@@ -370,6 +358,7 @@ NLParser1.ParsedSentence.prototype = {
       this._verb = verb;
       this._argSuggs = argumentSuggestions;
     }
+    this._selObj = selObj;
     this.verbMatchScore = verbMatchScore;
     this.duplicateDefaultMatchScore = 100;
     this.frequencyScore = 0;  // not yet tracked
@@ -385,7 +374,7 @@ NLParser1.ParsedSentence.prototype = {
 
   },
 
-  getCompletionText: function( selObj ) {
+  getCompletionText: function() {
     /* return plain text that we should set the input box to if user hits
      the key to autocomplete to this sentence. */
 
@@ -402,7 +391,8 @@ NLParser1.ParsedSentence.prototype = {
    	     if ( x == "direct_object" ) {
            /*Check for a valid text/html selection. We'll replace
               the text with a pronoun for readability */
-              if ( (selObj.text == argText) || (selObj.html == argText) ) {
+              if ( (this._selObj.text == argText) ||
+                   (this._selObj.html == argText) ) {
                 /*In future, the pronoun should be contextual to the
                 selection */
                 argText = "selection";
@@ -476,8 +466,9 @@ NLParser1.ParsedSentence.prototype = {
         newArgSuggs[x][y] = this._argSuggs[x][y];
     }
     let newSentence = new NLParser1.ParsedSentence(this._verb,
-						    newArgSuggs,
- 						    this.verbMatchScore);
+						   newArgSuggs,
+ 						   this.verbMatchScore,
+                                                   this._selObj);
     return newSentence;
   },
   setArgumentSuggestion: function( arg, sugg ) {
@@ -586,7 +577,7 @@ NLParser1.ParsedSentence.prototype = {
 };
 
 NLParser1.PartiallyParsedSentence = function(verb, argStrings, selObj,
-                                            matchScore, parserPlugin) {
+                                             matchScore, parserPlugin) {
   /*This is a partially parsed sentence.
    * What that means is that we've decided what the verb is,
    * and we've assigned all the words of the input to one of the arguments.
@@ -610,7 +601,10 @@ NLParser1.PartiallyParsedSentence = function(verb, argStrings, selObj,
    * If it does take arguments, this initializes the parsedSentence
    * list so that the algorithm in addArgumentSuggestion will work
    * correctly. */
-  let newSen = new NLParser1.ParsedSentence(this._verb, {}, this._matchScore);
+  let newSen = new NLParser1.ParsedSentence(this._verb,
+                                            {},
+                                            this._matchScore,
+                                            this._selObj);
   this._parsedSentences = [newSen];
   for (let argName in this._verb._arguments) {
     if (argStrings[argName] && argStrings[argName].length > 0) {

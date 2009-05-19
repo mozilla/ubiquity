@@ -168,3 +168,17 @@ ContextUtils.setSelection = function setSelection(context,
     }
   }
 };
+
+ContextUtils.getSelectionObject = function getSelectionObject(context) {
+  /* Return an object that bundles up both the plain-text and HTML
+   * selections.  If there is no html selection, the plain-text selection
+   * is used for both. */
+  var selection = ContextUtils.getSelection(context);
+  var htmlSelection = ContextUtils.getHtmlSelection(context);
+  if (!htmlSelection && selection)
+    htmlSelection = selection;
+  return {
+    text: selection,
+    html: htmlSelection
+  };
+};

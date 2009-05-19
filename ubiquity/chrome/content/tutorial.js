@@ -209,10 +209,9 @@ function startUbiqTutorial() {
     + " From The Beginning</a><p>"
     + "<p>Start from the middle:</p><ol>"
     + "<li><a onclick='ubiqTutorialStage1();'>How to start Ubiquity</a></li>"
-    + "<li><a onclick='ubiqTutorialStage3();'>Weather command; previews</a></li>"
-    + "<li><a onclick='ubiqTutorialStage7();'>Calculate command; abbreviations</a></li>"
-    + "<li><a onclick='ubiqTutorialStage12();'>Wikipedia command; the suggestion list</a></li>"
-    + "<li><a onclick='ubiqTutorialStage16();'>Translate command; executing commands</a></li>"
+    + "<li><a onclick='ubiqTutorialStage3();'>Previews (Weather command)</a></li>"
+    + "<li><a onclick='ubiqTutorialStage7();'>The Suggestion List (Calculate, Wikipedia)</a></li>"
+    + "<li><a onclick='ubiqTutorialStage16();'>Selecting, Executing (Translate, Google)</a></li>"
     + "<li><a onclick='ubiqTutorialStage23();'>How to get help and learn more commands</a></li>"
     + "</ol>";
   fadeInText( html );
@@ -411,8 +410,6 @@ function ubiqTutorialStage16() {
   jpDiv.addClass("ubiq-tutorial");
   jpDiv.css("text-align", "center");
   jpDiv.html("アドオンを選んで、自分だけのブラウザをつくろう。");
-  //"二十一世紀にようこそ");
-  // TODO machine translation falls down on the line above.
 
   waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage17 );
 }
@@ -453,8 +450,9 @@ function ubiqTutorialStage19() {
 
 function ubiqTutorialStage20() {
   let stage20Html = "<p>Let's do one more example.  Say you're browsing the"
-    + " web and you come across an unfamiliar word, like the word 'aglet'."
-    + "</p><p><b>Select the word 'aglet' and then summon Ubiquity</b>.</p>";
+    + " web and you come across an unfamiliar word... like the one in the box"
+    + "below."
+    + "</p><p><b>Select the word in the box below and then summon Ubiquity</b>.</p>";
   let agDiv = $("#tutorial-contents-div");
   agDiv.html("aglet");
 
