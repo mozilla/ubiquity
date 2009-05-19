@@ -39,11 +39,51 @@ function getCompletions( input, verbs, nountypes, context ) {
                                fakeContextUtils,
                                new TestSuggestionMemory() );
   var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
-  dump("Query step is " + query._step + "\n");
+  //dump("Query step is " + query._step + "\n");
   return query.suggestionList;
 }
 
 // End duplicated code
+
+// Infrastructure for asynchronous tests:
+function getCompletionsAsync( input, verbs, nountypes, context, callback) {
+  if (!context)
+  context = { textSelection: "", htmlSelection: "" };
+  var parser = makeTestParser( LANG,
+			       verbs,
+			       nountypes,
+                               fakeContextUtils,
+                               new TestSuggestionMemory() );
+  var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
+  query.onResults = function() { callback(query.suggestionList); };
+}
+
+/* TODO have some timeout so we don't hang forever if finishTest doesn't
+ * get called.
+ */
+function AsyncTestManager() {
+  this.init();
+}
+AsyncTestManager.prototype = {
+  init: function() {
+    this._testIsDone = false;
+  },
+
+  finishTest: function() {
+    this._testIsDone = true;
+  },
+
+  waitForTestToFinish: function() {
+    var threadManager = Components.classes["@mozilla.org/thread-manager;1"]
+                          .getService();
+    var thread = threadManager.currentThread;
+    while ( this._testIsDone == false ) {
+      thread.processNextEvent( true );
+    }
+  }
+
+};
+
 
 function testParserTwoDirectOnly() {
   var dogGotPetted = false;
@@ -62,19 +102,26 @@ function testParserTwoDirectOnly() {
     ]
   };
 
-  var completions = getCompletions( "pet b", [cmd_pet], [dog], null );
+  var _assert = this.assert;
+  var atm = new AsyncTestManager();
 
-  this.assert( completions.length == 2, "should be 2 completions" );
-  this.assert( completions[0]._verb.text == "pet", "verb should be pet");
-  this.assert( completions[0].args.object[0].text == "beagle",
-	       "obj should be beagle");
-  this.assert( completions[1]._verb.text == "pet", "verb should be pet");
-  this.assert( completions[1].args.object[0].text == "bulldog",
-	       "obj should be bulldog");
-  completions[0].execute();
-  this.assert( dogGotPetted == "beagle");
-  completions[1].execute();
-  this.assert( dogGotPetted == "bulldog" );
+  var testFunc = function(completions) {
+    _assert( completions.length == 2, "should be 2 completions" );
+    _assert( completions[0]._verb.text == "pet", "verb should be pet");
+    _assert( completions[0].args.object[0].text == "beagle",
+      "obj should be beagle");
+    _assert( completions[1]._verb.text == "pet", "verb should be pet");
+    _assert( completions[1].args.object[0].text == "bulldog",
+      "obj should be bulldog");
+    completions[0].execute();
+    _assert( dogGotPetted == "beagle");
+    completions[1].execute();
+    _assert( dogGotPetted == "bulldog" );
+    atm.finishTest();
+  };
+
+  getCompletionsAsync( "pet b", [cmd_pet], [dog], null, testFunc );
+  atm.waitForTestToFinish();
 }
 
 function testParserTwoParseWithModifier() {
@@ -100,23 +147,33 @@ function testParserTwoParseWithModifier() {
     ]
   };
 
- var inputWords = "wash pood with sp";
-  var completions = getCompletions( inputWords, [cmd_wash],
-				    [dog, washingObj], null);
-  this.assert( completions.length == 2, "Should be 2 completions" );
-  completions[0].execute();
-  this.assert( dogGotWashed == "poodle");
-  this.assert( dogGotWashedWith == "sponge");
-  completions[1].execute();
-  this.assert( dogGotWashed == "poodle");
-  this.assert( dogGotWashedWith == "spork");
+  var inputWords = "wash pood with sp";
+
+  var _assert = this.assert;
+  var atm = new AsyncTestManager();
+
+  var testFunc = function(completions) {
+    _assert( completions.length == 2, "Should be 2 completions" );
+    completions[0].execute();
+    _assert( dogGotWashed == "poodle");
+    _assert( dogGotWashedWith == "sponge");
+    completions[1].execute();
+    _assert( dogGotWashed == "poodle");
+    _assert( dogGotWashedWith == "spork");
+    atm.finishTest();
+  };
+
+  getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
+                       testFunc);
+  atm.waitForTestToFinish();
 }
 
-function testParserTwoInternationalization() {
+/*function testParserTwoInternationalization() {
 
-}
+}*/
 
-/*function testNounTypeSpeed() {
+/*
+function testNounTypeSpeed() {
   var slownoun = new NounUtils.NounType('anything');
   slownoun.suggest = function(text) {
     dump('checking '+text+'\n');
@@ -143,7 +200,7 @@ function testParserTwoInternationalization() {
   dump("Completions are: " + completions + "\n");
   dump("First verb is " + completions[0]._verb.text + "\n");
   this.assert( completions.length == 2, "should be 2 completions" );
-}*/
-
+}
+*/
 
 exportTests(this);
