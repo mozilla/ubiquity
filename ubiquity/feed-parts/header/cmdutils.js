@@ -262,29 +262,28 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
 // ** {{{ CmdUtils.injectCss(css) }}} **
 //
 // Injects CSS source code into the current tab's document.
+// Returns the injected style elment for later use.
 //
 // {{{ css }}} The CSS source code to inject, in plain text.
 
 CmdUtils.injectCss = function injectCss(css) {
-  var doc = CmdUtils.getDocumentInsecure();
+  var doc = CmdUtils.getDocument();
   var style = doc.createElement("style");
   style.innerHTML = css;
-  doc.body.appendChild(style);
+  return doc.body.appendChild(style);
 };
 
 
-// ** {{{ CmdUtils.injectHTML(html) }}} **
+// ** {{{ CmdUtils.injectHtml(html) }}} **
 //
-// Injects HTML source code into the current tab's document,
-// at the end of the document.
+// Injects HTML source code at the end of the current tab's document.
+// Returns the injected elements as a jQuery object.
 //
 // {{{ html }}} The HTML source code to inject, in plain text.
 
 CmdUtils.injectHtml = function injectHtml( html ) {
   var doc = CmdUtils.getDocument();
-  var div = doc.createElement("div");
-  div.innerHTML = html;
-  doc.body.appendChild(div.firstChild);
+  return jQuery("<div>" + html + "</div>").contents().appendTo(doc.body);
 };
 
 
