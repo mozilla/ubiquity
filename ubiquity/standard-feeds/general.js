@@ -469,9 +469,9 @@ CmdUtils.CreateCommand({
     pt: ['traduzir', 'traduza']
   },
   arguments: [
+    {role: 'object', nountype: noun_arb_text},
     {role: 'source', nountype: noun_type_language},
-    {role: 'goal', nountype: noun_type_language},
-    {role: 'object', nountype: noun_arb_text}
+    {role: 'goal', nountype: noun_type_language}
   ],
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",

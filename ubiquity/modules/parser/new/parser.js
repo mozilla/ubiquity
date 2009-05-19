@@ -76,6 +76,10 @@ var nounCache = {};
 
 function Parser(lang) {
   this.lang = lang;
+  var ctu = {};
+  Components.utils.import("resource://ubiquity/modules/contextutils.js",
+                          ctu);
+  this._ContextUtils = ctu.ContextUtils;
 }
 Parser.prototype = {
   lang: '',
@@ -298,11 +302,15 @@ Parser.prototype = {
   // This method returns a new {{{Parser.Query}}} object, as detailed in 
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
   newQuery: function(queryString,context,maxSuggestions,dontRunImmediately) {
-    return new Parser.Query(this,
+    var selObj = this._ContextUtils.getSelectionObject(context);
+    //mylog(selObj);
+    var theNewQuery = new Parser.Query(this,
                             queryString,
                             context,
                             maxSuggestions,
                             dontRunImmediately);
+    theNewQuery.selObj = selObj;
+    return theNewQuery;
   },
 
   // ** {{{Parser.wordBreaker()}}} **
@@ -564,11 +572,12 @@ Parser.prototype = {
 
     // if the argString is empty, return a parse with no args.
     if (argString == '') {
-      defaultParse = new Parser.Parse(this.branching,
-                                            this.joindelimiter,
-                                            input,
-                                            verb,
-                                            argString);
+      defaultParse = new Parser.Parse({ branching: this.branching,
+                                        joindelimiter: this.joindelimiter,
+                                        roles: this.roles},
+                                      input,
+                                      verb,
+                                      argString);
 
       if (defaultParse._verb.id) {
         defaultParse.scoreMultiplier = 1;
@@ -662,11 +671,12 @@ Parser.prototype = {
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parser.Parse which doesn't
       // have any arguments set.
-      var seedParse = new Parser.Parse(this.branching,
-                                          this.joindelimiter,
-                                          input,
-                                          verb,
-                                          argString);
+      var seedParse = new Parser.Parse({ branching: this.branching,
+                                         joindelimiter: this.joindelimiter,
+                                         roles: this.roles},
+                                       input,
+                                       verb,
+                                       argString);
 
       // get all parses started off with their scoreMultipier values
       if (verb.id) {
@@ -921,19 +931,20 @@ Parser.prototype = {
     return word;
   },
   
-  // ** {{{Parser.substitute()}}} **
+  // ** {{{Parser.substituteSelection()}}} **
   //
-  // {{{substitute()}}} takes a parse and a selection string. It should only
-  // be called if the {{{selection}}} is not empty. It looks for any of the
-  // anaphora set in {{{Parser.anaphora}}} and creates a copy of that parse
-  // where that anaphor has been substituted with the selection string.
+  // {{{substituteSelection()}}} takes a parse and a selection string. It
+  // should only be called if the {{{selection}}} is not empty. It looks for
+  // any of the anaphora set in {{{Parser.anaphora}}} and creates a copy of
+  // that parse where that anaphor has been substituted with the selection 
+  // string.
   //
   // The new string with the substitution is assigned to each arg's
   // {{{input}}} property.
   // 
   // An array of //new// parses is returned, so it should then be 
   // {{{concat}}}'ed to the current running list of parses.
-  substitute: function(parse,selection) {
+  substituteSelection: function(parse,selection) {
     let returnArr = [];
 
     for (let role in parse.args) {
@@ -1258,6 +1269,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions,
   this.input = queryString;
   this.context = context;
   this.maxSuggestions = maxSuggestions;
+  this.selObj = { text: '', html: '' };
 
   // code flow control stuff
   // used in async faux-thread contrl
@@ -1429,14 +1441,14 @@ Parser.Query.prototype = {
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     let selection;
-    if (this.context.getSelection != undefined) {
-      selection = this.context.getSelection();
+    if (this.selObj.text != '' || this.selObj.html != '') {
+      selection = this.selObj.html;
       for each (let parse in this._possibleParses) {
         // if there is a selection and if we find some anaphora in the entire
         // input...
         if (selection.length &&
             this.parser._patternCache.anaphora.test(this._input)) {
-          let newParses = this.parser.substitute(parse,selection);
+          let newParses = this.parser.substituteSelection(parse,selection);
           if (newParses.length)
             this._possibleParses = this._possibleParses.concat(newParses);
         }
@@ -1673,9 +1685,8 @@ Parser.Query.prototype = {
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
-Parser.Parse = function(branching, joindelimiter, input, verb, argString) {
-  this._branching = branching;
-  this._delimiter = joindelimiter;
+Parser.Parse = function(parser, input, verb, argString) {
+  this._partialParser = parser;
   this.input = input;
   this._verb = verb;
   this.argString = argString;
@@ -1704,9 +1715,9 @@ Parser.Parse.prototype = {
     if (this._verb._order != -1)
       display = "<span class='verb' title='"
         + (this._verb.id || 'null') + "'>" + (this._verb.text || '<i>null</i>')
-        + "</span>" + this._delimiter;
+        + "</span>" + this._partialParser.joindelimiter;
     else
-      displayFinal = this._delimiter + "<span class='verb' title='"
+      displayFinal = this._partialParser.joindelimiter + "<span class='verb' title='"
       + this._verb.id + "'>" + (this._verb.text || '<i>null</i>') + "</span>";
 
     // Copy all of the arguments into an ordered array called argsArray.
@@ -1726,7 +1737,7 @@ Parser.Parse.prototype = {
 
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
-      if (this._branching == 'right')
+      if (this._partialParser.branching == 'right')
         display += (arg.outerSpace || '') + (arg.modifier ? "<span class='prefix' title='"
           + arg.role+"'>" + arg.modifier + arg.innerSpace
           + "</span>":'') + "<span class='" + className + "' title=''>"
@@ -1749,6 +1760,27 @@ Parser.Parse.prototype = {
 
     }
 
+    for each (let neededArg in this._verb.arguments) {
+      if (!(neededArg.role in this.args)) {
+        let label;
+        label = neededArg.label || neededArg.nountype._name;
+        
+        for each (let parserRole in this._partialParser.roles) {
+          if (parserRole.role == neededArg.role) {
+            if (this._partialParser.branching == 'left')
+              label = label + this._partialParser.joindelimiter
+                            + parserRole.delimiter;
+            else
+              label = parserRole.delimiter
+                       + this._partialParser.joindelimiter + label;
+            break;
+          }
+        }
+
+        display += ' <span class="needarg">('+label+')</span>';
+      }
+    }
+
     // return with score for the time being
     // DEBUG: score is being displayed here.
     return display + displayFinal + ' ('
@@ -1765,7 +1797,7 @@ Parser.Parse.prototype = {
     var newText = this.getLastNode().text;
     var findOriginal = new RegExp(originalText+'$');
     if (findOriginal.test(this.input))
-      return this.input.replace(findOriginal,newText) + this._delimiter;
+      return this.input.replace(findOriginal,newText) + this._partialParser.joindelimiter;
     
     return this.input;
   },
@@ -1908,12 +1940,11 @@ if ((typeof window) == 'undefined') {// kick it chrome style
   }
 
 } else {
-  //mylog = console.log;
+  mylog = console.log;
 }
 
 var cloneParse = function(p) {
-  let ret = new Parser.Parse(p._branching,
-                             p._delimiter,
+  let ret = new Parser.Parse(p.partialParser,
                              p.input,
                              cloneObject(p._verb),
                              p.argString);
