@@ -49,8 +49,8 @@ function makeFrParser() {
     {role: 'goal', delimiter: 'aux'},
     {role: 'source', delimiter: 'de'},
     {role: 'source', delimiter: 'des'},
-    {role: 'time', delimiter: 'à'},
-    {role: 'time', delimiter: 'a'},
+    {role: 'position', delimiter: 'à'},
+    {role: 'position', delimiter: 'a'},
     {role: 'instrument', delimiter: 'avec'},
     {role: 'instrument', delimiter: 'sur'}
   ];

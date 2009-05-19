@@ -37,18 +37,8 @@
 
 var EXPORTED_SYMBOLS = ["makeJaParser"];
 
-if ((typeof window) == 'undefined') { // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-  Components.utils.import("resource://ubiquity/modules/localeutils.js");
-} else {
-  loadLocaleJson = function loadLocaleJson(url) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, false);
-    req.overrideMimeType("text/plain; charset=utf-8");
-    req.send(null);
-    return eval('(' + req.responseText + ')');
-  }
-}
+Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+Components.utils.import("resource://ubiquity/modules/localeutils.js");
 
 function makeJaParser() {
   var ja = new Parser('ja');
@@ -57,10 +47,10 @@ function makeJaParser() {
   ja.joindelimiter = '';
 
   // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
-  if ((typeof window) == 'undefined')
-    japarts = loadLocaleJson("resource://ubiquity/modules/parser/tng/ja.json");
-  else 
-    japarts = loadLocaleJson('ja.json');
+//  if ((typeof window) == 'undefined')
+    japarts = loadLocaleJson("resource://ubiquity/modules/parser/new/ja.json");
+//  else 
+//    japarts = loadLocaleJson('ja.json');
   ja.anaphora = japarts.anaphora;
   ja.roles = japarts.roles;
   ja.examples = japarts.examples;

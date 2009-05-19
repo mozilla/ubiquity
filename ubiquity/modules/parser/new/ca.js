@@ -50,7 +50,7 @@ function makeCaParser() {
     {role: 'source', delimiter: 'de'},
     {role: 'source', delimiter: 'dels'},
     {role: 'alias', delimiter: 'com'},
-    {role: 'time', delimiter: 'a'},
+    {role: 'position', delimiter: 'a'},
     {role: 'instrument', delimiter: 'amb'},
     {role: 'instrument', delimiter: 'sobre'}
   ];

@@ -38,18 +38,8 @@
 // set up our parsers
 var EXPORTED_SYMBOLS = ["makeZhParser"];
 
-if ((typeof window) == 'undefined') { // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-  Components.utils.import("resource://ubiquity/modules/localeutils.js");
-} else {
-  loadLocaleJson = function loadLocaleJson(url) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, false);
-    req.overrideMimeType("text/plain; charset=utf-8");
-    req.send(null);
-    return eval('(' + req.responseText + ')');
-  }
-}
+Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+Components.utils.import("resource://ubiquity/modules/localeutils.js");
 
 function makeZhParser() {
   var zh = new Parser('zh');
@@ -58,10 +48,7 @@ function makeZhParser() {
   zh.joindelimiter = '';
 
   // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
-  if ((typeof window) == 'undefined')
-    zhparts = loadLocaleJson("resource://ubiquity/modules/parser/new/zh.json");
-  else 
-    zhparts = loadLocaleJson('zh.json');
+  zhparts = loadLocaleJson("resource://ubiquity/modules/parser/new/zh.json");
   zh.anaphora = zhparts.anaphora;
   zh.roles = zhparts.roles;
   zh.examples = zhparts.examples;

@@ -122,7 +122,7 @@ var NLParser2 = {
             role = 'source';
           break;
           case 'at': case 'on':
-            role = 'time';
+            role = 'position';
           break;
           case 'with': case 'using':
             role = 'instrument';

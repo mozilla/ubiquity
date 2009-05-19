@@ -60,10 +60,10 @@ function makePtParser() {
     {role: 'source', delimiter: 'do'},
     {role: 'source', delimiter: 'da'},
 
-    {role: 'time', delimiter: 'às'},
-    {role: 'time', delimiter: 'de'},
-    {role: 'time', delimiter: 'a'},
-    {role: 'time', delimiter: 'as'},
+    {role: 'position', delimiter: 'às'},
+    {role: 'position', delimiter: 'de'},
+    {role: 'position', delimiter: 'a'},
+    {role: 'position', delimiter: 'as'},
 
     {role: 'instrument', delimiter: 'com'},
     {role: 'instrument', delimiter: 'usando'},

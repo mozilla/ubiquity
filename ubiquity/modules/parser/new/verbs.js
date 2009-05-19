@@ -56,7 +56,7 @@ var sampleVerbs = {
     },
     arguments: [
       {role: 'object', nountype: fake_noun_text},
-      {role: 'time', nountype: fake_noun_time},
+      {role: 'position', nountype: fake_noun_time},
       {role: 'goal', nountype: fake_noun_service}
     ]
   },

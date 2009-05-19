@@ -1828,7 +1828,12 @@ Parser.Parse.prototype = {
       firstArgs[role] = this.args[role][0];
     }
 
-    return this._verb.preview( context, previewBlock, firstArgs );
+    if (typeof this._verb.preview == 'function')
+      return this._verb.preview( context, previewBlock, firstArgs );
+    else {
+      dump(this._verb.names.en[0]+' didn\'t have a preview!\n');
+      return false;
+    }
   },
   // **{{{Parser.Parse.previewDelay}}} (read-only)**
   //
@@ -1940,7 +1945,7 @@ if ((typeof window) == 'undefined') {// kick it chrome style
   }
 
 } else {
-  mylog = console.log;
+  //mylog = console.log;
 }
 
 var cloneParse = function(p) {

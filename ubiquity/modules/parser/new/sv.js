@@ -50,9 +50,9 @@ function makeSvParser() {
     {role: 'source', delimiter: 'från'},
     {role: 'source', delimiter: 'av'},
     
-    {role: 'time', delimiter: 'klockan'},
-    {role: 'time', delimiter: 'på'},
-    {role: 'time', delimiter: 'den'},
+    {role: 'position', delimiter: 'klockan'},
+    {role: 'position', delimiter: 'på'},
+    {role: 'position', delimiter: 'den'},
     
     {role: 'instrument', delimiter: 'med'},
     {role: 'instrument', delimiter: 'från'},
