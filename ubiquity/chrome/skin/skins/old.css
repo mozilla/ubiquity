@@ -15,6 +15,7 @@
   padding: 10px;
   margin: 0px;
   background: #272727;
+  color: #fff;
 }
 
 #ubiquity-entry-container {
@@ -35,11 +36,12 @@
   border: none;
   width: 501px;
   min-height: 32px;
-  margin-bottom: -5px;
   overflow: hidden;
 }
 
 #ubiquity-preview {
+  position: relative;
+  top: -5px;
   border-left: solid 1px #0066cc;
   max-height: 500px;
   margin-bottom: 10px;
@@ -78,7 +80,7 @@ body {
 
 .cmdicon {
   display: inline-block;
-  width: 16px;
+  height: 16px;
   margin-right: 0.3em;
 }
 
