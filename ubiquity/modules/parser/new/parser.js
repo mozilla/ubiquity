@@ -1235,11 +1235,6 @@ Parser.prototype = {
     }
     
     //return nounCache[x];
-  },
-  getSelectionObject: function() {
-    // TODO: fake function stub because right now cmdmanager requires this
-    // for tab completion
-    return {};
   }
 }
 
