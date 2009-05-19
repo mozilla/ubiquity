@@ -46,10 +46,14 @@ var EXPORTED_SYMBOLS = ["Utils"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Application = (Cc["@mozilla.org/fuel/application;1"]
-                     .getService(Ci.fuelIApplication));
 
-var Utils = {};
+var Utils = {
+  get Application() {
+    delete this.Application;
+    return this.Application = (Cc["@mozilla.org/fuel/application;1"]
+                               .getService(Ci.fuelIApplication));
+  }
+};
 
 // Keep a reference to the global object, as certain utility functions
 // need it.
@@ -348,7 +352,7 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
 Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
-  var tabs = Application.activeWindow.tabs;
+  var tabs = Utils.Application.activeWindow.tabs;
   for (var i = 0; i < tabs.length; i++)
     if (tabs[i].uri.spec == urlString) {
       tabs[i].focus();
@@ -618,7 +622,7 @@ Utils.tabs = {
 
   get: function Utils_tabs_get(name) {
     var tabs = [], {push} = tabs;
-    for each (let win in Application.windows)
+    for each (let win in Utils.Application.windows)
       push.apply(tabs, win.tabs);
     return (name == null
             ? tabs
@@ -645,7 +649,7 @@ Utils.tabs = {
       tester = {test: function(str) ~str.toLowerCase().indexOf(matcher)};
     }
     if (maxResults == null) maxResults = -1 >>> 1;
-    for each (let win in Application.windows)
+    for each (let win in Utils.Application.windows)
       for each (let tab in win.tabs) {
         let {title, URL} = tab.document;
         if (tester.test(title) || tester.test(URL))
