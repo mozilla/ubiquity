@@ -302,7 +302,6 @@ Parser.prototype = {
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
   newQuery: function(queryString,context,maxSuggestions,dontRunImmediately) {
     var selObj = this._ContextUtils.getSelectionObject(context);
-    //mylog(selObj);
     var theNewQuery = new Parser.Query(this,
                             queryString,
                             context,
@@ -1434,7 +1433,6 @@ Parser.Query.prototype = {
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     let selection;
-    
     if (!!this.selObj.text || !!this.selObj.html) {
       selection = this.selObj.html;
       for each (let parse in this._possibleParses) {
@@ -1737,7 +1735,7 @@ Parser.Parse.prototype = {
           + "</span>":'') + "<span class='" + className + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.text || arg.input)
+          + (arg.html || arg.input)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>";
@@ -1746,7 +1744,7 @@ Parser.Parse.prototype = {
           + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.text || arg.input)
+          + (arg.html || arg.input)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>" + (arg.modifier ? "<span class='prefix' title='" + arg.role + "'>"
@@ -2026,12 +2024,18 @@ function sameObject(a,b,print) {
   }
 
   for (let i in a) {
+    if (!(i in b)) {
+      dump('>'+i+' was in a but not in b\n');
+    }
     if (!sameObject(a[i],b[i],print)) {
       if (print) dump('>'+i+' was in a but not in b\n');
       return false;
     }
   }
   for (let j in b) {
+    if (!(j in a)) {
+      dump('>'+j+' was in b but not in a\n');
+    }
     if (!sameObject(a[j],b[j],print)) {
       if (print) dump('>'+j+' was in b but not in a\n');
       return false;

@@ -46,7 +46,12 @@ var demoParserInterface = {
         this.currentQuery.cancel();
 
     $('#parseinfo').empty();
-    this.currentQuery = this.currentParser.newQuery($('.input').val(),{getSelection:function() $('#selection').val()},$('#maxSuggestions').val()*1,true); // this last true is for dontRunImmediately
+    this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val()*1,true); // this last true is for dontRunImmediately
+    
+    // override the selection object
+    this.currentQuery.selObj = {text: $('#selection').val(), 
+                                html: $('#selection').val()};
+    
     $('#scoredParses').empty();
 
     this.currentQuery._threshold = $('#threshold').val()*1;
