@@ -38,7 +38,10 @@
 // set up our parsers
 var EXPORTED_SYMBOLS = ["makeZhParser"];
 
-Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+if ((typeof window) == 'undefined') { // kick it chrome style
+  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+}
+
 Components.utils.import("resource://ubiquity/modules/localeutils.js");
 
 function makeZhParser() {

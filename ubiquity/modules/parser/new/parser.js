@@ -151,7 +151,6 @@ Parser.prototype = {
   // After the nountypes have been registered, {{{Parser.initialCache()}}} is
   // called.
   setCommandList: function( commandList ) {
-
     Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
 
     activeNounTypes = [];
@@ -1435,7 +1434,8 @@ Parser.Query.prototype = {
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     let selection;
-    if (this.selObj.text != '' || this.selObj.html != '') {
+    
+    if (!!this.selObj.text || !!this.selObj.html) {
       selection = this.selObj.html;
       for each (let parse in this._possibleParses) {
         // if there is a selection and if we find some anaphora in the entire

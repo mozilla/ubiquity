@@ -160,10 +160,10 @@ var demoParserInterface = {
   
     // this is just a hack to make the makeXxParser() functions work. :D
     this.currentParser = window['make'+lang.slice(0,1).toUpperCase().concat(lang.slice(1))+'Parser']();
-  
+    
     this.currentParser.setCommandList(sampleVerbs);
     this.currentParser.setNounList(nounTypes,true);
-  
+    
     $('#roles').empty();
     for each (role in this.currentParser.roles) {
       $('<li><code>'+role.role+'</code>, delimiter: <code>'+role.delimiter+'</code></li>').appendTo($('#roles'));
