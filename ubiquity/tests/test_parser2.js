@@ -54,23 +54,40 @@ function getCompletionsAsync( input, verbs, nountypes, context, callback) {
 			       nountypes,
                                fakeContextUtils,
                                new TestSuggestionMemory() );
-  var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
+
+  var query = parser.newQuery( input, context, MAX_SUGGESTIONS, true );
+  /* The true at the end tells it not to run immediately.  This is
+   * important because otherwise it would run before we assigned the
+   * callback. */
   query.onResults = function() { callback(query.suggestionList); };
+  query.run();
 }
 
-/* TODO have some timeout so we don't hang forever if finishTest doesn't
- * get called.
- */
+
 function AsyncTestManager() {
   this.init();
 }
 AsyncTestManager.prototype = {
   init: function() {
     this._testIsDone = false;
+    // TODO this timer doesn't seem to work?
+    //this._timerId = Utils.setTimeout( this.finishTest, 5000);
+
+    this.passed = true;
+    this.errorMsg = "";
   },
 
   finishTest: function() {
     this._testIsDone = true;
+    //Utils.clearTimeout(this._timerId);
+  },
+
+  assert: function( condition, message ) {
+    if (!condition) {
+      this.passed = false;
+      this.errorMsg = message;
+      this.finishTest();
+    }
   },
 
   waitForTestToFinish: function() {
@@ -78,6 +95,7 @@ AsyncTestManager.prototype = {
                           .getService();
     var thread = threadManager.currentThread;
     while ( this._testIsDone == false ) {
+      dump("Waiting for test to finish!\n");
       thread.processNextEvent( true );
     }
   }
@@ -102,27 +120,32 @@ function testParserTwoDirectOnly() {
     ]
   };
 
-  var _assert = this.assert;
   var atm = new AsyncTestManager();
 
   var testFunc = function(completions) {
-    _assert( completions.length == 2, "should be 2 completions" );
-    _assert( completions[0]._verb.text == "pet", "verb should be pet");
-    _assert( completions[0].args.object[0].text == "beagle",
+    atm.assert( completions.length == 2, "should be 2 completions" );
+    atm.assert( completions[0]._verb.text == "pet", "verb should be pet");
+    atm.assert( completions[0].args.object[0].text == "beagle",
       "obj should be beagle");
-    _assert( completions[1]._verb.text == "pet", "verb should be pet");
-    _assert( completions[1].args.object[0].text == "bulldog",
+    atm.assert( completions[1]._verb.text == "pet", "verb should be pet");
+    atm.assert( completions[1].args.object[0].text == "bulldog",
       "obj should be bulldog");
     completions[0].execute();
-    _assert( dogGotPetted == "beagle");
+    atm.assert( dogGotPetted == "beagle");
     completions[1].execute();
-    _assert( dogGotPetted == "bulldog" );
+    atm.assert( dogGotPetted == "bulldog" );
+    dump("Running testFunc!\n");
     atm.finishTest();
   };
 
+  dump("Starting the async test.\n");
   getCompletionsAsync( "pet b", [cmd_pet], [dog], null, testFunc );
+
   atm.waitForTestToFinish();
+
+  this.assert( atm.passed, atm.errorMsg );
 }
+
 
 function testParserTwoParseWithModifier() {
   // wash dog with sponge
@@ -148,24 +171,23 @@ function testParserTwoParseWithModifier() {
   };
 
   var inputWords = "wash pood with sp";
-
-  var _assert = this.assert;
   var atm = new AsyncTestManager();
 
   var testFunc = function(completions) {
-    _assert( completions.length == 2, "Should be 2 completions" );
+    atm.assert( completions.length == 2, "Should be 2 completions" );
     completions[0].execute();
-    _assert( dogGotWashed == "poodle");
-    _assert( dogGotWashedWith == "sponge");
+    atm.assert( dogGotWashed == "poodle");
+    atm.assert( dogGotWashedWith == "sponge");
     completions[1].execute();
-    _assert( dogGotWashed == "poodle");
-    _assert( dogGotWashedWith == "spork");
+    atm.assert( dogGotWashed == "poodle");
+    atm.assert( dogGotWashedWith == "spork");
     atm.finishTest();
   };
 
   getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
                        testFunc);
   atm.waitForTestToFinish();
+  this.assert( atm.passed, atm.errorMsg );
 }
 
 /*function testParserTwoInternationalization() {
