@@ -158,7 +158,7 @@ CmdUtils.CreateCommand({
     if (goal) {
       html += "to " + goal.text + " ";
     }
-    if (arguments.object.html) {
+    if (arguments.object) {
       html += "with these contents:" + arguments.object.html;
     } else {
       html += "with a link to the current page.";
@@ -167,7 +167,7 @@ CmdUtils.CreateCommand({
   },
 
   execute: function(arguments) {
-    var html = arguments.object.html;
+    var html = (arguments.object ? arguments.object.html : '');
     var document = context.focusedWindow.document;
     var title;
     var toAddress = "";

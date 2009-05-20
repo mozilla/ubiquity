@@ -54,9 +54,6 @@ var demoParserInterface = {
     
     $('#scoredParses').empty();
 
-    this.currentQuery._threshold = $('#threshold').val()*1;
-    if (!$('#async').attr('checked'))
-      this.currentQuery._async = false;
     this.currentQuery.watch('_step',function(id,oldval,newval) {
       let timefactor = 4;
       if (oldval > 0)
@@ -147,15 +144,13 @@ var demoParserInterface = {
     });
     
     this.currentQuery.onResults = function() {
+      $('#scoredParses').empty();
       for each (var parse in this.suggestionList) {
         $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
       }
       $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
     }
     this.currentQuery.run();
-//    setTimeout(function(x){x.currentQuery.run()},0,this);
-//    dump('finish');
-//    return false;
     
   },
   loadLang: function(lang) {

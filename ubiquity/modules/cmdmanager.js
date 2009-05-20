@@ -197,22 +197,22 @@ CommandManager.prototype = {
   updateInput : function CM_updateInput(input, context, asyncSuggestionCb) {
     this.__lastInput = input;
     this.__activeQuery = this.__nlParser.newQuery(input, context,
-                                                  this.maxSuggestions);
+                                                  this.maxSuggestions,true);
     this.__activeQuery.onResults = asyncSuggestionCb;
+    if ('run' in this.__activeQuery) 
+      this.__activeQuery.run();
     this.__hilitedSuggestion = 0;
-    var previewState = "no-suggestions";
-    if (this.__activeQuery.suggestionList.length > 0 &&
-        this._previewAndSuggest(context))
-      previewState = "with-suggestions";
-    this.setPreviewState(previewState);
+    this.onSuggestionsUpdated();
   },
 
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
                                                           context) {
-    // Called when we're notified of a newly incoming suggestion
-    // TODO: Huh?
-    // this.__nlParser.refreshSuggestionList(input);
-    this._renderSuggestions();
+    //dump('rendering suggestions now: '+this.__activeQuery.suggestionList.length+'\n');
+    var previewState = "no-suggestions";
+    if (this.__activeQuery.suggestionList.length > 0)// && this._previewAndSuggest(context)
+      previewState = "with-suggestions";
+    this.setPreviewState(previewState);
+    this._previewAndSuggest(context);
   },
 
   execute : function CM_execute(context) {

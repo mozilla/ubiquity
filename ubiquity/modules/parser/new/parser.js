@@ -1249,16 +1249,13 @@ Parser.prototype = {
 // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]].
 //
 // The constructor takes the Parser that's being used, the {{{queryString}}},
-// {{{context}}} object, {{{maxSuggestions}}}, and the {{{dontRunImmediately}}}
-// flag. When {{{dontRunImmediately}}} = true, you have to execute
-// {{{Parser.Query.run()}}} to actually start the query. Useful if you want to
+// {{{context}}} object, and {{{maxSuggestions}}}. Useful if you want to
 // set some more parameters or watches on the query.
 //
 // The {{{Parser.newQuery()}}} method is used to initiate
 // a query instead of calling {{{new Parser.Query()}}} directly.
 //
-Parser.Query = function(parser,queryString, context, maxSuggestions,
-                        dontRunImmediately) {
+Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImmediately) {
   this.parser = parser;
   this.input = queryString;
   this.context = context;
@@ -1294,7 +1291,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions,
   //
   // TODO: Think about putting some components into
   // [[https://developer.mozilla.org/En/DOM/Worker|Worker threads]].
-  this._async = true;
+  this._async = false;
 
   // Internal variables
   // These are filled in one by one as we go along.
@@ -1308,10 +1305,8 @@ Parser.Query = function(parser,queryString, context, maxSuggestions,
 
   dump("Making a new parser2 query.  String = " + queryString + "\n");
 
-  if (!dontRunImmediately) {
-    this._async = false;
+  if (!dontRunImmediately)
     this.run();
-  }
 }
 
 // ** {{{Parser.Query.run()}}} **
@@ -1361,20 +1356,14 @@ Parser.Query.prototype = {
         else
           doAsyncParse();
     }
+
+    dump("I have initiated the async query.\n");
+
     if (this._async)
       window.setTimeout(doAsyncParse, 0);
     else
       doAsyncParse();
 
-    dump("I am done running query.\n");
-    dump('step: '+this._step+"\n");
-    dump('times:\n');
-    for (let i in this._times) {
-      if (i > 0)
-        dump( 'step '+i+': '+(this._times[i] - this._times[i-1])+' ms\n' );
-    }
-    dump('total: '+(this._times[this._times.length-1] - this._times[0])+' ms\n' );
-    dump("There were "+this._scoredParses.length+" completed parses\n");
     return true;
   },
 
@@ -1487,8 +1476,8 @@ Parser.Query.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    var completeParse = function(thisParse) {
-      //mylog('completing parse '+parseId+' now');
+    completeParse = function(thisParse) {
+      dump('completing parse '+parseId+' now\n');
       thisParse.complete = true;
 
       // go through all the arguments in thisParse and suggest args
@@ -1497,9 +1486,11 @@ Parser.Query.prototype = {
       suggestions = thisQuery.parser.suggestArgs(thisParse);
       //mylog(suggestions);
       for each (let newParse in suggestions) {
-        thisQuery._scoredParses = thisQuery.addIfGoodEnough(thisQuery._scoredParses,
+        let newScoredParses = thisQuery.addIfGoodEnough(thisQuery._scoredParses,
                                                      newParse);
+        thisQuery._scoredParses = newScoredParses;
       }
+
     }
     var tryToCompleteParses = function(argText,suggestions) {
       dump('finished detecting nountypes for '+argText+'\n');
@@ -1518,13 +1509,24 @@ Parser.Query.prototype = {
         }
       }
 
+      thisQuery.onResults();
+
       var isComplete = function(parse) {return parse.complete};
       if (thisQuery._verbedParses.every(isComplete)) {
         thisQuery._times[this._step] = Date.now();
         thisQuery._step++;
         thisQuery.finished = true;
         dump('done!!!\n');
-        thisQuery.onResults();
+        
+        dump("I am done running query.\n");
+        dump('step: '+thisQuery._step+"\n");
+        dump('times:\n');
+        for (let i in thisQuery._times) {
+          if (i > 0)
+            dump('step '+i+': '+(thisQuery._times[i] - thisQuery._times[i-1])+' ms\n' );
+        }
+        dump('total: '+(thisQuery._times[thisQuery._times.length-1] - thisQuery._times[0])+' ms\n' );
+        dump("There were "+thisQuery._scoredParses.length+" completed parses\n");
       }
     }
 

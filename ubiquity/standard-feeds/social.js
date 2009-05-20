@@ -29,7 +29,7 @@ CmdUtils.CreateCommand({
          " obviously.  If you're not already logged in" +
          " you'll be asked to log in."),
   preview: function(previewBlock, args) {
-    var statusText = args.object.text;
+    var statusText = (args.object ? args.object.text : '');
     var usernameText = "";
     if (args.alias) {
       usernameText = args.alias.text;
