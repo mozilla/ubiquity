@@ -154,6 +154,8 @@ Parser.prototype = {
     Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
 
     activeNounTypes = [];
+    
+    this._verbList = [];
 
     // First we'll register the verbs themselves.
     for (let verb in commandList) {
@@ -1349,10 +1351,10 @@ Parser.Query.prototype = {
       } catch(e) {
         done = true;
       }
-      //console.log("self: ", self);
-      //console.log("ok: ", ok);
-      //console.log("done: ", done);
-      //console.log("keep working: ", self._keepworking);
+      //mylog("self: ", self);
+      //mylog("ok: ", ok);
+      //mylog("done: ", done);
+      //mylog("keep working: ", self._keepworking);
       if (ok && !done && self._keepworking)
         if (self._async)
           window.setTimeout(doAsyncParse, 0);
@@ -1941,7 +1943,7 @@ if ((typeof window) == 'undefined') {// kick it chrome style
 }
 
 var cloneParse = function(p) {
-  let ret = new Parser.Parse(p.partialParser,
+  let ret = new Parser.Parse(p._partialParser,
                              p.input,
                              cloneObject(p._verb),
                              p.argString);
