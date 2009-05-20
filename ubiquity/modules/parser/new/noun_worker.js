@@ -19,7 +19,14 @@ detectNounType = function (x,callback) {
   dump('detecting '+x+'\n');
   
   for each (thisNounType in nounTypes) {
-    var suggestions = thisNounType.suggest(x);
+
+    var completeAsyncSuggest = function(suggestion) {
+      suggestion.nountype = thisNounType;
+      if ((typeof callback) == 'function')
+        callback([suggestion]);
+    }
+
+    var suggestions = thisNounType.suggest(x,x,completeAsyncSuggest) || [];
     //mylog(suggestions);
     for each (suggestion in suggestions) {
       // set the nountype that was used in each suggestion so that it can 

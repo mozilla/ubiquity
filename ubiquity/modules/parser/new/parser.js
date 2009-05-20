@@ -1230,7 +1230,9 @@ Parser.prototype = {
         'resource://ubiquity/modules/utils.js');
       nounWorker.setNounTypes(this._nounTypes);
       var myCallback = function(suggestions) {
-        nounCache[x] = suggestions;
+        if (!(x in nounCache))
+          nounCache[x] = [];
+        nounCache[x] = nounCache[x].concat(suggestions);
         if (typeof callback == 'function')
           callback(x,nounCache[x]);
       };
