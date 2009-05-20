@@ -61,5 +61,12 @@ function makeCommandManager(source, msgService, parser, callback) {
   xulIframe.setAttribute("src",
                          "chrome://ubiquity/content/content-preview.xul");
   xulIframe.addEventListener("load", onload, true);
+  // Workaround to make this code work on platforms where the hidden
+  // window is XUL instead of HTML.
+  if (!fakeDom.body) {
+    var fakeDomBody = fakeDom.createElement("body");
+    fakeDom.documentElement.appendChild(fakeDomBody);
+    fakeDom.body = fakeDomBody;
+  }
   fakeDom.body.appendChild(xulIframe);
 }
