@@ -47,6 +47,7 @@ function getCompletions( input, verbs, nountypes, context ) {
 
 // Infrastructure for asynchronous tests:
 function getCompletionsAsync( input, verbs, nountypes, context, callback) {
+
   if (!context)
   context = { textSelection: "", htmlSelection: "" };
   var parser = makeTestParser( LANG,
@@ -59,7 +60,10 @@ function getCompletionsAsync( input, verbs, nountypes, context, callback) {
   /* The true at the end tells it not to run immediately.  This is
    * important because otherwise it would run before we assigned the
    * callback. */
-  query.onResults = function() { callback(query.suggestionList); };
+  query.onResults = function() {
+    if (query.finished)
+      callback(query.suggestionList);
+  };
   query.run();
 }
 

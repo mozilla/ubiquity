@@ -1521,8 +1521,6 @@ Parser.Query.prototype = {
         }
       }
 
-      thisQuery.onResults();
-
       var isComplete = function(parse) {return parse.complete};
       if (thisQuery._verbedParses.every(isComplete)) {
         thisQuery._times[this._step] = Date.now();
@@ -1540,6 +1538,10 @@ Parser.Query.prototype = {
         dump('total: '+(thisQuery._times[thisQuery._times.length-1] - thisQuery._times[0])+' ms\n' );
         dump("There were "+thisQuery._scoredParses.length+" completed parses\n");
       }
+      
+      if (thisQuery._scoredParses.length > 0)
+        thisQuery.onResults();
+
     }
 
     // first create a map from arg's to parses that use them.
@@ -2039,8 +2041,15 @@ function sameObject(a,b,print) {
     return (a == b);
   }
 
+  if (a == null || b == null) {
+    if (a == null && b == null)
+      return true;
+    else
+      return false;
+  }
+
   for (let i in a) {
-    if (!(i in b)) {
+    if (b[i] == undefined) {
       dump('>'+i+' was in a but not in b\n');
     }
     if (!sameObject(a[i],b[i],print)) {
@@ -2049,7 +2058,7 @@ function sameObject(a,b,print) {
     }
   }
   for (let j in b) {
-    if (!(j in a)) {
+    if (a[j] == undefined) {
       dump('>'+j+' was in b but not in a\n');
     }
     if (!sameObject(a[j],b[j],print)) {
