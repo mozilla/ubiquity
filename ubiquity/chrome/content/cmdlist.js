@@ -138,6 +138,13 @@ function fillTableRowForCmd( row, cmd, className ) {
   );
 
   cmdElement.find("a").attr("name", cmd.name);
+  
+  // if Parser 2
+  if (UbiquitySetup.parserVersion == 2 && (!cmd.names || !cmd.arguments)) {
+    cmdElement.addClass("not-loaded");
+    cmdElement.find(".name").attr("title",
+      "This command was not loaded as it is incompatible with Parser 2.");
+  }
 
   if (cmd.icon)
     cmdElement.find(".favicon").attr("src", cmd.icon);

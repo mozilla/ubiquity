@@ -143,6 +143,11 @@ em{
   cursor: pointer;
 }
 
+.command.not-loaded .name {
+  color: #bbb;
+  text-decoration: line-through;
+}
+
 .command .homepage, #skin-list .command .homepage{
 }
 

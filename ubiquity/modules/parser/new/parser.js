@@ -157,13 +157,23 @@ Parser.prototype = {
     
     this._verbList = [];
 
+    let skippedSomeVerbs = false;
+
     // First we'll register the verbs themselves.
     for (let verb in commandList) {
       if (commandList[verb].names != undefined
           && commandList[verb].arguments != undefined) {
         this._verbList.push(commandList[verb]);
         dump("loaded verb: "+verb+"\n");
+      } else {
+        skippedSomeVerbs = true;
       }
+    }
+
+    if (skippedSomeVerbs) {
+      Components.utils.import("resource://ubiquity/modules/msgservice.js");
+      var msgService = new AlertMessageService();
+      msgService.displayMessage('Some verbs were not loaded as they are not compatible with Parser 2.');
     }
 
     // Scrape the noun types up here.
