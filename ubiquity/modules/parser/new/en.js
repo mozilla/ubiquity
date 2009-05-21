@@ -35,12 +35,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-var EXPORTED_SYMBOLS = ["makeEnParser"];
+var EXPORTED_SYMBOLS = ["makeParser"];
 
 if ((typeof window) == 'undefined') // kick it chrome style
   Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 
-function makeEnParser() {
+function makeParser() {
   var en = new Parser('en');
   en.anaphora = ["this", "that", "it", "selection", "him", "her", "them"];
   en.roles = [

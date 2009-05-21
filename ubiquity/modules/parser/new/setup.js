@@ -34,6 +34,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// import NLParser2 and parserRegistry
+Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
+
 // set up the interface which will control the parser.
 
 var demoParserInterface = {
@@ -158,11 +161,7 @@ var demoParserInterface = {
 
     nounCache = [];
   
-    // this is just a hack to make the makeXxParser() functions work. :D
-    this.currentParser = window['make'+lang.slice(0,1).toUpperCase().concat(lang.slice(1))+'Parser']();
-    
-    this.currentParser.setCommandList(sampleVerbs);
-    this.currentParser.setNounList(nounTypes,true);
+    this.currentParser = NLParser2.makeParserForLanguage(lang,sampleVerbs,nounTypes);
     
     $('#roles').empty();
     for each (role in this.currentParser.roles) {
@@ -191,7 +190,15 @@ var demoParserInterface = {
 
 
 $(document).ready(function(){
-  
+    
+  for (let code in parserRegistry) {
+    $('#languages').append($("<input name='lang' value='"+code+"' type='radio'>"
+                              +parserRegistry[code]+'</input>'));
+  }
+
+  // if nothing is selected, select English
+  if ($('input[name=lang]:checked').val() == null)
+    $('input[value=en]').click();
   $('input[name=lang]').click(function(e){demoParserInterface.loadLang($('input[name=lang]:checked').val());});
   demoParserInterface.loadLang($('input[name=lang]:checked').val())
   

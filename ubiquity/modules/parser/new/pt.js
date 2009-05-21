@@ -37,12 +37,12 @@
  * ***** END LICENSE BLOCK ***** */
 
 // set up our parsers
-var EXPORTED_SYMBOLS = ["makePtParser"];
+var EXPORTED_SYMBOLS = ["makeParser"];
 
 if ((typeof window) == 'undefined') // kick it chrome style
   Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 
-function makePtParser() {
+function makeParser() {
   var pt = new Parser('pt');
   pt.roles = [
     {role: 'goal', delimiter: 'à'},

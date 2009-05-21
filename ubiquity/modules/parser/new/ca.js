@@ -36,12 +36,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-var EXPORTED_SYMBOLS = ["makeCaParser"];
+var EXPORTED_SYMBOLS = ["makeParser"];
 
 if ((typeof window) == 'undefined') // kick it chrome style
   Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 
-function makeCaParser() {
+function makeParser() {
   var ca = new Parser('ca');
   ca.roles = [
     {role: 'goal', delimiter: 'a'},

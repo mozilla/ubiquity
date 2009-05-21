@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["makeJaParser"];
+var EXPORTED_SYMBOLS = ["makeParser"];
 
 if ((typeof window) == 'undefined') { // kick it chrome style
   Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
@@ -43,7 +43,7 @@ if ((typeof window) == 'undefined') { // kick it chrome style
 
 Components.utils.import("resource://ubiquity/modules/localeutils.js");
 
-function makeJaParser() {
+function makeParser() {
   var ja = new Parser('ja');
   ja.branching = 'left';
   ja.usespaces = false;

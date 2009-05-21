@@ -34,36 +34,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["NLParser2"];
+var EXPORTED_SYMBOLS = ["NLParser2","parserRegistry"];
 
 Components.utils.import("resource://ubiquity/modules/parser/parser.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/en.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/pt.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/fr.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/da.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/sv.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/ja.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/zh.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/ca.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/it.js");
 
-//Components.utils.import("resource://ubiquity/modules/parser/new/verbs.js");
+// load the parserRegistry
+Components.utils.import("resource://ubiquity/modules/localeutils.js");
+var parserRegistry = loadLocaleJson('resource://ubiquity/modules/parser/new/parser_registry.json');
 
 var NLParser2 = {
   // Namespace object
-  parserFactories: {
-    en: makeEnParser,
-    pt: makePtParser,
-    fr: makeFrParser,
-    da: makeDaParser,
-    sv: makeSvParser,
-    ja: makeJaParser,
-    zh: makeZhParser,
-    ca: makeCaParser,
-    it: makeItParser
-  },
-
+  parserFactories: {},
   makeParserForLanguage: function(languageCode, verbList, nounList,
                                            ContextUtils, suggestionMemory) {
     if ( ! NLParser2.parserFactories[languageCode] ) {
@@ -78,7 +60,6 @@ var NLParser2 = {
 
       parser.setCommandList( verbList );
       parser.setNounList( nounList );
-      parser.initialCache();
 
       return parser;
     }
@@ -142,3 +123,10 @@ var NLParser2 = {
     return newVerb;
   }
 };
+
+// load the resources for all the languages.
+for (let code in parserRegistry) {
+  var localeJsm = {};
+  Components.utils.import("resource://ubiquity/modules/parser/new/"+code+".js",localeJsm);
+  NLParser2.parserFactories[code] = localeJsm.makeParser;
+}
