@@ -23,23 +23,6 @@ var Utils = {};
   Utils.__proto__ = jsm.Utils;
 })();
 
-// TODO: Make this deprecated and move this function to CmdUtils.
-Utils.safeWrapper = function safeWrapper(func) {
-  var wrappedFunc = function safeWrappedFunc() {
-    try {
-      func.apply(this, arguments);
-    } catch (e) {
-      displayMessage(
-        {text: ("An exception occurred while running " +
-                func.name + "()."),
-         exception: e}
-      );
-    }
-  };
-
-  return wrappedFunc;
-};
-
 Utils.ajaxGet = function ajaxGet(url, callbackFunction, failureFunction) {
   jQuery.ajax({
     url:url,
