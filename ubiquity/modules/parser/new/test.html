@@ -1,8 +1,8 @@
 <html>
   <head>
-    <title>Ubiquity Parser 2 Playpen</title>
+    <title>Ubiquity Parser 2 Profiler</title>
     <script type="text/javascript;version=1.8" charset='utf-8' src='jquery-1.3.2.js'></script>
-    <script type="text/javascript;version=1.8" charset='utf-8' src='setup.js'></script>
+    <script type="text/javascript;version=1.8" charset='utf-8' src='test-setup.js'></script>
     <style type="text/css">
 			body {
 				background-color: #ddd;
@@ -90,49 +90,21 @@
   <body>
   <div id='main'>
   
-    <h1>Ubiquity Parser 2 Playpen</h1>
+    <h1>Ubiquity Parser 2 Profiler</h1>
     
-    <p>This is a proof-of-concept demo and optimization playpen for the upcoming Ubiquity parser architecture, as laid out in the <a href='https://wiki.mozilla.org/User:Mitcho/ParserTNG'>Parser 2 design doc</a>.</p>
+    <p>This is a chrome page (accessible through <a href='chrome://parser-demo/content/test.html'>chrome://parser-demo/content/test.html</a>) for profiling parser queries with Parser 2. Choose a query, start profiling, hit run, and stop profiling.</p>
     
     <h2>Settings</h2>
     
     <div id='languages'></div>
-    <div>
-      <input type='button' name='clearnouncache' value='clear noun cache' id='clearnouncache'></input>
-      <label for='maxSuggestions'>max suggestions:</label><input id='maxSuggestions' value='5' size='2'/>
-      <input type='checkbox' name='displayparseinfo' id='displayparseinfo'></input><label title='this will slow things down considerably' for='displayparseinfo'>display parse info</label>
-    </div>
     
 		<div id='border'>
 			<input id='root' class='input'/>
 		</div>
+		<input type='button' id='run' value='run!'></input>
 		
 		<label for='selection'>selection text (for anaphora substitution):</label><input id='selection' name='selection'></input>
 		
-		<p>Example: <span id='examples'></span></p>
-
-    <div>
-    <h2 class='toggle'>Environment info <small>(click me to toggle)</small></h2>
-    <div class='envinfo' style='display:none;'>
-      <div>
-        <h3 class='toggle'>Active semantic roles:</h2>
-        <ul id='roles'></ul>
-        <p><small>(overlapping roles with the same delimiters indicate synonymous delimiters)</small></p>
-      </div>
-      
-      <div>
-        <h3 class='toggle'>Active noun types:</h2>
-        <ul id='nountypes'></ul>
-        <p><small>(see source for score functions)</small></p>
-      </div>
-
-      <div>
-        <h3 class='toggle'>Active verbs:</h2>
-        <ul id='verblist'></ul>
-      </div>
-    </div>
-    </div>
-
     <h2>Suggestions</h2>
     <p>KEY: <span class="verb">verb</span> <span class="object">object</span> <span class="prefix">prefix </span><span class="argument">argument</span> (hover over the verb to see the actual verb and over prefixes to see the associated semantic role)</p>
     <table id="scoredParses"></table>

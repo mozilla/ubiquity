@@ -34,6 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+var EXPORTED_SYMBOLS = ["nounCache",'nounTypes','sampleVerbs'];
+
 // set up noun type cache
 
 var nounCache = {};
@@ -106,3 +108,83 @@ var nounTypes = [
   fake_noun_service,
   fake_noun_language
 ];
+
+var sampleVerbs = {
+  add: {
+    names: {
+      ca: ['afegeix', 'afegix', 'afig', 'inclou'],
+      da: ['tilføj', 'indsæt'],
+      sv: ['lägg till', 'addera', 'plussa'],
+      en: ['add'],
+      ja: ['追加する','追加しろ','追加して','ついかする','ついかしろ','ついかして'],
+      pt: ['adicionar', 'incluir', 'marcar'],
+      it: ['aggiungi']
+    },
+    arguments: [
+      {role: 'object', nountype: fake_noun_text},
+      {role: 'position', nountype: fake_noun_time},
+      {role: 'goal', nountype: fake_noun_service}
+    ]
+  },
+  buy: {
+    names: {
+      ca: ['compra'],
+      da: ['køb'],
+      sv: ['köp', 'handla'],
+      en: ['buy','purchase'],
+      ja: ['買う','買え','買って','かう','かえ','かって'],
+      pt: ['comprar', 'compre'],
+      it: ['acquista']
+    },
+    arguments: [
+      {role: 'object', nountype: fake_noun_text},
+      {role: 'source', nountype: fake_noun_service},
+      {role: 'instrument', nountype: fake_noun_service}
+    ]
+  },
+  say: {
+    names: {
+      ca: ['digues'],
+      da: ['sig'],
+      sv: ['säg'],
+      en: ['say'],
+      ja: ['言う','言え','言って','いう','いえ','いって'],
+      pt: ['dizer', 'diga']
+    },
+    arguments: [
+      {role: 'object', nountype: fake_noun_text}
+    ]
+  },
+  move: {
+    names: {
+      ca: ['mou', 'vés'],
+      da: ['flyt'],
+      sv: ['flytta'],
+      en: ['move'],
+      ja: ['動かす','動かせ','動かして','うごかす','うごかせ','うごかして','移す','移せ','移して','うつす','うつせ','うつして'],
+      pt: ['ir', 'vá', 'vai'],
+      it: ['sposta']
+    },
+    arguments: [
+      {role: 'object', nountype: fake_noun_text},
+      {role: 'source', nountype: fake_noun_city},
+      {role: 'goal', nountype: fake_noun_city}
+    ]
+  },
+  translate: {
+    names: {
+      ca: ['tradueix', 'traduïx'],
+      da: ['oversæt'],
+      sv: ['översätt'],
+      en: ['translate'],
+      ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
+      pt: ['traduzir', 'traduza'],
+      it: ['traduci']
+    },
+    arguments: [
+      {role: 'source', nountype: fake_noun_language},
+      {role: 'goal', nountype: fake_noun_language},
+      {role: 'object', nountype: fake_noun_text}
+    ]
+  }
+};

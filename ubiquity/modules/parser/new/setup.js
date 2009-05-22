@@ -160,8 +160,11 @@ var demoParserInterface = {
     this.currentLang = lang;
 
     nounCache = [];
+    
+    var jsm = {};
+    Components.utils.import("resource://ubiquity/modules/parser/new/fake_verbs_and_nountypes.js",jsm);
   
-    this.currentParser = NLParser2.makeParserForLanguage(lang,sampleVerbs,nounTypes);
+    this.currentParser = NLParser2.makeParserForLanguage(lang,jsm.sampleVerbs,jsm.nounTypes);
     
     $('#roles').empty();
     for each (role in this.currentParser.roles) {
@@ -174,10 +177,10 @@ var demoParserInterface = {
     }
   
     $('#verblist').empty();
-    for (verb in sampleVerbs) {
-      var li = $('<li><code>'+verb+'</code> (<code>'+(sampleVerbs[verb].names[lang] || sampleVerbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
+    for (verb in jsm.sampleVerbs) {
+      var li = $('<li><code>'+verb+'</code> (<code>'+(jsm.sampleVerbs[verb].names[lang] || jsm.sampleVerbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
       var ul = $('<ul></ul>');
-      for each (arg in sampleVerbs[verb].arguments)
+      for each (arg in jsm.sampleVerbs[verb].arguments)
         $('<li><code>'+arg.role+'</code>: <code>'+arg.nountype+'</code>').appendTo(ul);
       ul.appendTo(li);
       li.appendTo($('#verblist'));

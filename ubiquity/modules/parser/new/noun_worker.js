@@ -6,21 +6,21 @@ Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_type
 
 nounTypes = [];
 
-setNounTypes = function(outsideNounTypes) {
+setNounTypes = function setNounTypes(outsideNounTypes) {
   nounTypes = outsideNounTypes;
 }
 
 //if ((typeof postMessage) != 'function')
 //  postMessage = function(){ dump('default function :p\n') };
 
-detectNounType = function (x,callback) {
+detectNounType = function detectNounType(x,callback) {
   var returnArray = [];
   
   dump('detecting '+x+'\n');
   
   for each (thisNounType in nounTypes) {
 
-    var completeAsyncSuggest = function(suggestion) {
+    var completeAsyncSuggest = function completeAsyncSuggest(suggestion) {
       suggestion.nountype = thisNounType;
       if ((typeof callback) == 'function')
         callback([suggestion]);
@@ -43,7 +43,7 @@ detectNounType = function (x,callback) {
   //postMessage(returnArray);
 }
 
-onmessage = function(event) {
+onmessage = function onmessage(event) {
   if (event.data) {
     nounTypes = event.data.nounTypes;
     //dump('received '+nounTypes.length+' nountypes\n');
