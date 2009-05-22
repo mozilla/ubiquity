@@ -1268,6 +1268,8 @@ Parser.prototype = {
 // a query instead of calling {{{new Parser.Query()}}} directly.
 //
 Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImmediately) {
+  this.__date = new Date();
+  this.__idTime = this.__date.getTime();
   this.parser = parser;
   this.input = queryString;
   this.context = context;
@@ -1292,18 +1294,8 @@ Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImme
   // so you can check later to see how far the query went.
   this._step = 0;
 
-  // ** {{{Parser.Query._async}}} **
-  //
-  // If {{{_async}}} is true, we will use {{{setTimeout}}} to make it
-  // asynchronous and thus cancellable with {{{Parser.Query.cancel()}}},
-  // as described in the
-  // [[http://ubiquity.mozilla.com/trac/ticket/532|proposal (trac #532)]].
-  //
-  // TODO: Make async work in chrome.
-  //
   // TODO: Think about putting some components into
   // [[https://developer.mozilla.org/En/DOM/Worker|Worker threads]].
-  this._async = false;
 
   // Internal variables
   // These are filled in one by one as we go along.
@@ -1315,7 +1307,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImme
   this._scoredParses = [];
   this._topScores = [];
 
-  dump("Making a new parser2 query.  String = " + queryString + "\n");
+  this.dump("Making a new parser2 query.  String = " + queryString);
 
   if (!dontRunImmediately)
     this.run();
@@ -1333,48 +1325,50 @@ Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImme
 //
 // Most of this async code is by Blair.
 Parser.Query.prototype = {
+  dump: function(msg) {
+    dump(this.__idTime + ':' + (this.__date.getTime()) + ' ' + msg + '\n');
+  },
   run: function() {
 
-    dump("run: "+this.input+"\n");
+    this.dump("run: "+this.input);
 
     this._keepworking = true;
 
-    this._times = [Date.now()];
+    this._times = [this.__date.getTime()];
     this._step++;
 
     this._input = this.parser.wordBreaker(this.input);
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     var parseGenerator = this._yieldingParse();
     var self = this;
 
-    function doAsyncParse() {
+    Components.utils.import(
+      'resource://ubiquity/modules/utils.js');
+
+    var doAsyncParse = function doAsyncParse() {
+      //self.dump('async ping!');
       var done = false;
       var ok = true;
       try {
         ok = parseGenerator.next();
       } catch(e) {
         done = true;
+        self.dump('done!!?');
       }
-      //mylog("self: ", self);
-      //mylog("ok: ", ok);
-      //mylog("done: ", done);
-      //mylog("keep working: ", self._keepworking);
+      //mylog(["self: ", self]);
+      //mylog(["ok: ", ok]);
+      //mylog(["done: ", done]);
+      //mylog(["keep working: ", self._keepworking]);
       if (ok && !done && self._keepworking)
-        if (self._async)
-          window.setTimeout(doAsyncParse, 0);
-        else
-          doAsyncParse();
+        Utils.setTimeout(doAsyncParse, 0);
     }
 
-    dump("I have initiated the async query.\n");
+    this.dump("I have initiated the async query.");
 
-    if (this._async)
-      window.setTimeout(doAsyncParse, 0);
-    else
-      doAsyncParse();
+    Utils.setTimeout(doAsyncParse, 0);
 
     return true;
   },
@@ -1413,14 +1407,14 @@ Parser.Query.prototype = {
     this._verbArgPairs = this.parser.verbFinder(this._input);
     yield true;
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     // STEP 3: pick possible clitics
     // TODO: find clitics
     yield true;
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     // STEP 4: group into arguments
@@ -1430,7 +1424,7 @@ Parser.Query.prototype = {
       yield true;
     }
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     // STEP 5: substitute anaphora
@@ -1451,7 +1445,7 @@ Parser.Query.prototype = {
       }
     }
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     // STEP 6: substitute normalized forms
@@ -1463,7 +1457,7 @@ Parser.Query.prototype = {
       yield true;
     }
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     // STEP 7: suggest verbs for parses which don't have one
@@ -1476,7 +1470,7 @@ Parser.Query.prototype = {
       }
     }
 
-    this._times[this._step] = Date.now();
+    this._times[this._step] = this.__date.getTime();
     this._step++;
 
     // STEP 8: do nountype detection + cache
@@ -1489,7 +1483,6 @@ Parser.Query.prototype = {
     // handle the scoring.
     var thisQuery = this;
     completeParse = function(thisParse) {
-      dump('completing parse '+parseId+' now\n');
       thisParse.complete = true;
 
       // go through all the arguments in thisParse and suggest args
@@ -1505,11 +1498,11 @@ Parser.Query.prototype = {
 
     }
     var tryToCompleteParses = function(argText,suggestions) {
-      dump('finished detecting nountypes for '+argText+'\n');
+      thisQuery.dump('finished detecting nountypes for '+argText);
       //mylog([argText,suggestions]);
 
       if (thisQuery.finished) {
-        dump('this query has already finished\n');
+        thisQuery.dump('this query has already finished');
         return;
       }
 
@@ -1517,26 +1510,27 @@ Parser.Query.prototype = {
         let thisParse = thisQuery._verbedParses[parseId];
 
         if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
+          thisQuery.dump('completing parse '+parseId+' now');
           completeParse(thisParse);
         }
       }
 
       var isComplete = function(parse) {return parse.complete};
       if (thisQuery._verbedParses.every(isComplete)) {
-        thisQuery._times[this._step] = Date.now();
+        thisQuery._times[this._step] = thisQuery.__date.getTime();
         thisQuery._step++;
         thisQuery.finished = true;
-        dump('done!!!\n');
+        thisQuery.dump('done!!!');
         
-        dump("I am done running query.\n");
-        dump('step: '+thisQuery._step+"\n");
-        dump('times:\n');
+        thisQuery.dump("I am done running query.");
+        thisQuery.dump('step: '+thisQuery._step);
+        thisQuery.dump('times:');
         for (let i in thisQuery._times) {
           if (i > 0)
-            dump('step '+i+': '+(thisQuery._times[i] - thisQuery._times[i-1])+' ms\n' );
+            thisQuery.dump('step '+i+': '+(thisQuery._times[i] - thisQuery._times[i-1])+' ms');
         }
-        dump('total: '+(thisQuery._times[thisQuery._times.length-1] - thisQuery._times[0])+' ms\n' );
-        dump("There were "+thisQuery._scoredParses.length+" completed parses\n");
+        thisQuery.dump('total: '+(thisQuery._times[thisQuery._times.length-1] - thisQuery._times[0])+' ms' );
+        thisQuery.dump("There were "+thisQuery._scoredParses.length+" completed parses");
       }
       
       if (thisQuery._scoredParses.length > 0)
@@ -1609,7 +1603,7 @@ Parser.Query.prototype = {
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function() {
-    dump("cancelled!\n");
+    this.dump("cancelled!\n");
     this._keepworking = false;
   },
 
@@ -1841,7 +1835,7 @@ Parser.Parse.prototype = {
     if (typeof this._verb.preview == 'function')
       return this._verb.preview( context, previewBlock, firstArgs );
     else {
-      dump(this._verb.names.en[0]+' didn\'t have a preview!\n');
+      this.dump(this._verb.names.en[0]+' didn\'t have a preview!');
       return false;
     }
   },

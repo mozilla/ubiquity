@@ -190,12 +190,20 @@ CommandManager.prototype = {
 
   reset : function CM_reset() {
     // TODO: I think?
-    if (this.__activeQuery)
+    if (!this.__activeQuery.finished)
       this.__activeQuery.cancel();
   },
 
   updateInput : function CM_updateInput(input, context, asyncSuggestionCb) {
     this.__lastInput = input;
+
+    if (this.__activeQuery) {
+      if (!this.__activeQuery.finished) {
+        dump("last query isn't done yet -- kill it!\n");
+        this.reset();
+      }
+    }
+    
     this.__activeQuery = this.__nlParser.newQuery(input, context,
                                                   this.maxSuggestions,true);
     this.__activeQuery.onResults = asyncSuggestionCb;
