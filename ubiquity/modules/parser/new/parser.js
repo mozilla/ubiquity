@@ -2007,6 +2007,8 @@ function sameNounType(a,b,print) {
     return (a == b);
   }
 
+  // TODO: a better way to avoid the contactList?
+
   for (let i in a) {
     if (i != 'contactList') {
       if (!sameObject(a[i],b[i],print)) {
