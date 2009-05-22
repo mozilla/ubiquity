@@ -1107,12 +1107,13 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 // {{{CmdUtils.CreateCommand()}}}.  You can also override the auto-generated
 // {{{preview()}}} function by providing your own as {{{options.preview}}}.
 //
-// {{{options.postData}}} if passed will make ubiquity use POST instead of
-// GET, and the key:value pairs in it are all passed to the url passed in
+// {{{options.postData}}} will make the command use POST instead of GET,
+// and the data (key:value pairs or string) are all passed to the url passed in
 // {{{options.url}}}. Instead of passing the search params in the url, pass
 // it (along with any other params) like so:
 //
 //   {{{postData: {"q": "{QUERY}", "hl": "en"}}}}
+//   {{{postData: "q={QUERY}&hl=en"}}}
 //
 // When this is done, the query will be substituted in as usual.
 //
@@ -1193,13 +1194,14 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   }
   if (!options.description && options.name) {
     // generate description from the name of the seach command
-    options.description = "Searches "+options.name+" for your words.";
+    options.description = "Searches " + options.name + " for your words.";
   }
   if (options.parser && options.parser.type) {
     options.parser.type = options.parser.type.toLowerCase();
   }
   if (!options.preview) {
     options.preview = function searchPreview(pblock, {text, html}) {
+      const Klass = "search-command";
       var {parser} = options;
       var urlString = (parser && parser.url) || options.url;
       if (parser && text) {
@@ -1208,7 +1210,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
           var postData = insertQuery(options.postData, text);
         }
         urlString = insertQuery(urlString, text);
-        pblock.innerHTML = "<p>Loading results...</p>";
+        pblock.innerHTML = <div class={Klass}><p>Loading results...</p></div>;
         if (!parser.baseurl) {
           // use the calculated baseurl
           parser.baseurl = baseurl;
@@ -1216,9 +1218,6 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
         function searchParser(data) {
           if (data) {
             var template = "";
-            pblock.innerHTML = "<h2>Results for <em>"
-                             + html
-                             + "</em>:</h2>";
             var results = [];
             switch (parser.type) {
               case "json":
@@ -1344,11 +1343,11 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
               template = "<dl>";
               var max = Math.min(results.length, options.maxResults || 4);
               for (var cnt = 0; cnt < max; ++cnt) {
-                var result = results[cnt];
+                var result = results[cnt], key = (cnt+1).toString(36);
                 template += ("<dt style='font-weight: bold; clear: both;'>" +
-                             "[" + (cnt+1) + "] " +
+                             "[" + key + "] " +
                              "<a style='border-bottom: 1px solid;' href='" +
-                             result.href + "' accesskey='" + (cnt+1) + "'>" +
+                             result.href + "' accesskey='" + key + "'>" +
                              result.title+"</a>" +
                              "</dt>");
                 if (result.thumbnail) {
@@ -1373,21 +1372,27 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
             }
           }
           else {
-            template = "<p>Error parsing search results.</p>"
-                     + "<p>Press return to go directly to search results</p>";
+            template = ("<p>Error parsing search results.</p>" +
+                        "<p>Press return to go directly to search results</p>");
           }
-          pblock.innerHTML += template;
+          pblock.innerHTML = ("<div class='" + Klass + "'>" +
+                              "<p>Results for <b>" + html + "</b>:</p>" +
+                              template +
+                              "</div>");
         };
-        if (options.postData) {
-            CU.previewPost(pblock, urlString, postData,
-                                 searchParser, options.parser.type || "html");
-        } else {
-            CU.previewGet(pblock, urlString, null,
-                                searchParser, options.parser.type || "html");
+        var params = {
+          url: urlString,
+          success: searchParser,
+          dataType: parser.type || "html",
+        };
+        if (postData) {
+          params.type = "POST";
+          params.data = postData;
         }
+        CU.previewAjax(pblock, params);
       }
       else {
-        var content = "Searches "+options.name+" for your words";
+        var content = "Searches " + options.name + " for your words";
         if(text)
           content += ": <b>" + text + "</b>";
         pblock.innerHTML = content;
