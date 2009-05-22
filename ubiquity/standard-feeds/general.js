@@ -552,147 +552,84 @@ CmdUtils.CreateCommand({
   }
 });
 
-
 CmdUtils.CreateCommand({
-  description: "Creates a new Ubiquity command from a search-box.",
-  help: "1. Select a searchbox 2. Execute this command to create the new search command.",
   name: "create-new-search-command",
+  description: "Creates a new Ubiquity command from a search-box.",
+  help: (<ol style="list-style-image:none">
+         <li>Select a searchbox.</li>
+         <li>Execute this command to create the new search command.</li>
+         </ol>) + "",
   author: {name: "Marcello Herreshoff",
            homepage: "http://stanford.edu/~marce110/"},
-  contributors: ["Abimanyu Raja"],
+  contributors: ["Abimanyu Raja", "satyr"],
   icon: "chrome://ubiquity/skin/icons/search.png",
   license: "GPL/LGPL/MPL",
-  homepage: "http://stanford.edu/~marce110/verbs/new-command-from-search-box.html",
+  homepage:
+  "http://stanford.edu/~marce110/verbs/new-command-from-search-box.html",
   takes: {"command name": noun_arb_text},
-
-  _makeURI : function(aURL, aOriginCharset, aBaseURI){
-    var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                              .getService(Components.interfaces.nsIIOService);
-    return ioService.newURI(aURL, aOriginCharset, aBaseURI);
+  preview: function(pblock, {text}) {
+    pblock.innerHTML = (
+      text
+      ? "Creates a new search command called <b>" + text + "</b>"
+      : this.description + this.help);
   },
-
-  _escapeNameValuePair: function(aName, aValue, aIsFormUrlEncoded){
-    if (aIsFormUrlEncoded)
-      return escape(aName + "=" + aValue);
-    else
-      return escape(aName) + "=" + escape(aValue);
-  },
-
-  preview: function(pblock, input) {
-    if(input.text.length < 1){
-      pblock.innerHTML = "1. Select a searchbox 2. Execute this command to create the new search command. ";
-    }else{
-      pblock.innerHTML = "Creates a new search command called <b>" + input.text + "</b>";
+  execute: function({text: name}) {
+    var node = context.focusedElement || 0;
+    var {form} = node;
+    if (!node || !form) {
+      displayMessage(
+        "You need to focus a searchbox before running this command.");
+      return;
     }
-  },
-
-  execute: function(name){
-    //1. Figure out what this search-bar does.
-    var node = context.focusedElement;
-    if(!node || !node.form){
-      displayMessage("You need to click on a searchbox before running this command."); return;
-    }
-
-    //Copied from chrome://browser/content/browser.js, function AddKeywordForSearchField()
-    //Comments starting with MMH: indicates that something has been changed by me.
-    PLACEHOLDER = "{QUERY}"; //MMH: Note also: I have globally replaced "%s" with PLACEHOLDER
-    //COPY STARTS
-    var charset = node.ownerDocument.characterSet;
-
-    var docURI = this._makeURI(node.ownerDocument.URL,
-                         charset);
-
-    var formURI = this._makeURI(node.form.getAttribute("action"),
-                          charset,
-                          docURI);
-
-    var spec = formURI.spec;
-
-    var isURLEncoded =
-                 (node.form.method.toUpperCase() == "POST"
-                  && (node.form.enctype == "application/x-www-form-urlencoded" ||
-                      node.form.enctype == ""));
-
-    var el, type;
+    //1. Figure out what this searchbox does.
+    const PLACEHOLDER = "{QUERY}";
     var formData = [];
-
-    for (var i=0; i < node.form.elements.length; i++) {
-      el = node.form.elements[i];
-
-      if (!el.type) // happens with fieldsets
-        continue;
-
+    Array.forEach(form.elements, function(el) {
+      if (!el.type) return; // happens with fieldsets
       if (el == node) {
-        formData.push((isURLEncoded) ? this._escapeNameValuePair(el.name, PLACEHOLDER, true) :
-                                       // Don't escape PLACEHOLDER, just append
-                                       this._escapeNameValuePair(el.name, "", false) + PLACEHOLDER);
-        continue;
+        formData.push(this._encodePair(el.name, "") + PLACEHOLDER);
+        return;
       }
+      var type = el.type.toLowerCase();
+      if (/^(?:text(?:area)?|hidden)$/.test(type) ||
+          /^(?:checkbox|radio)$/.test(type) && el.checked)
+        formData.push(this._encodePair(el.name, el.value));
+      else if (/^select-(?:one|multiple)$/.test(type))
+        Array.forEach(el.options, function(o) {
+          if (o.selected)
+            formData.push(this._encodePair(el.name, o.value));
+        }, this);
+    }, this);
+    var doc = node.ownerDocument;
+    var uri = Utils.url({uri: form.getAttribute("action"), base: doc.URL});
+    var url = uri.spec;
+    var data = formData.join("&");
+    var post = form.method.toUpperCase() === "POST";
+    if (!post) url += "?" + data;
 
-      type = el.type.toLowerCase();
+    //2. Generate the name if not specified.
+    if (!name) name = uri.host || doc.title;
 
-      if ((type == "text" || type == "hidden" || type == "textarea") ||
-          ((type == "checkbox" || type == "radio") && el.checked)) {
-        formData.push(this._escapeNameValuePair(el.name, el.value, isURLEncoded));
-      //} else if (el instanceof HTMLSelectElement && el.selectedIndex >= 0) {
-      } else if (el.selectedIndex && el.name == "select" && el.selectedIndex >= 0){
-           //MMH: HTMLSelectElement was undefined.
-        for (var j=0; j < el.options.length; j++) {
-          if (el.options[j].selected)
-            formData.push(this._escapeNameValuePair(el.name, el.options[j].value,
-                                              isURLEncoded));
-        }
-      }
-    }
+    //3. Build the piece of code that creates the command
+    var codes = [];
+    codes.push(
+      '// generated by ' + this.name,
+      'CmdUtils.makeSearchCommand({',
+      '  name: ' + uneval(name) + ',',
+      '  url: ' + uneval(url) + ',');
+    post && codes.push(
+      '  postData: ' + uneval(data) + ',');
+    codes.push(
+      '});\n\n');
 
-    var postData;
-
-    if (isURLEncoded)
-      postData = formData.join("&");
-    else
-      spec += "?" + formData.join("&");
-
-    //COPY ENDS
-
-    var url = spec;
-
-    //2. Now that we have the form's URL, figure out the name, description and favicon for the command
-    currentLocation = String(Application.activeWindow.activeTab.document.location);
-    domain = currentLocation.replace(/^(.*):\/\//, '').split('/')[0];
-    name = name.text;
-    if(!name){ var parts = domain.split('.'); name = parts[parts.length-2] + "-search";}
-    var icon = "http://"+domain+"/favicon.ico";
-    var description = "Searches " + domain;
-    var code;
-
-    if(!postData){
-      //3. Build the piece of code that creates the command
-      code =  '\n\n//Note: This command was automatically generated by the create-new-search-command command.\n'
-      code += 'CmdUtils.makeSearchCommand({\n'
-      code += '  name: "'+name+'",\n';4
-      code += '  url: "'+url+'",\n';
-      code += '  icon: "'+icon+'",\n';
-      code += '  description: "'+description+'"\n';
-      code += '});\n';
-    }else{
-       code =  '\n\n//Note: This command was automatically generated by the create-new-search-command command.\n'
-       code += 'CmdUtils.CreateCommand({\n'
-       code += '  name: "'+name+'",\n';4
-       code += '  url: "'+url+'",\n';
-       code += '  icon: "'+icon+'",\n';
-       code += '  description: "'+description+'",\n';
-       code += '  takes: {"search term": noun_arb_text},\n';
-       code += '  execute: function(input){ var query = encodeURIComponent(input.text);\n';
-       code += 'var postData =  \"' + decodeURIComponent(String(postData)) + '\".replace(/%s|{QUERY}/g, query);\nUtils.openUrlInBrowser(\"' + formURI.spec+ '\", postData);}\n';
-       code += '});\n';
-    }
-
-
-    //4. Append the code to Ubiqity's code
-    CmdUtils.UserCode.appendCode(code);
+    //4. Prepend the code to command-editor
+    CmdUtils.UserCode.prependCode(codes.join("\n"));
 
     //5. Tell the user we finished
     displayMessage("You have created the command: " + name +
-                   ".  You can edit its source-code with the command-editor command.");
-  }
+                   ".  You can edit its source-code " +
+                   "with the command-editor command.");
+  },
+  _encodePair: function(key, val)(encodeURIComponent(key) + "=" +
+                                  encodeURIComponent(val)),
 });
