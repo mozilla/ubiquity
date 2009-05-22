@@ -312,6 +312,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
   webJsm.importScript("resource://ubiquity/scripts/jquery_setup.js");
   webJsm.importScript("resource://ubiquity/scripts/template.js");
+  webJsm.importScript("resource://ubiquity/scripts/date.js");
 
   var globalObjects = {};
 
@@ -327,6 +328,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       jQuery: webJsm.jQuery,
       Template: webJsm.TrimPath,
       Application: webJsm.Application,
+      Date: webJsm.Date,
       Components: Components,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
@@ -351,7 +353,7 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
     new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js"),
-    new LocalUriCodeSource(basePartsUri + "header/shared.js"),    
+    new LocalUriCodeSource(basePartsUri + "header/shared.js"),
   ];
   var feeds = [
     baseFeedsUri + "onstartup.js"
@@ -364,20 +366,13 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   // and keep english as a default, etc.
   // mitcho's guess: we should keep nountypes separate but verbs together... :/
   if (languageCode == "jp" && parserVersion < 2) {
-    headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js")
-    ]);
-    feeds = feeds.concat([
-      baseFeedsUri + "jp/builtincmds.js"
-    ]);
+    headerCodeSources.push(
+      new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js"));
+    feeds.push(baseFeedsUri + "jp/builtincmds.js");
   } else if (languageCode == "en" || parserVersion == 2) {
-    headerCodeSources = headerCodeSources.concat([
-      new LocalUriCodeSource(baseScriptsUri + "date.js"),
-      new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js")
-    ]);
-    feeds = feeds.concat([
-      baseFeedsUri + "en/builtincmds.js"
-    ]);
+    headerCodeSources.push(
+      new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js"));
+    feeds.push(baseFeedsUri + "en/builtincmds.js");
   }
 
   return {
