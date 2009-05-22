@@ -466,8 +466,7 @@ CmdUtils.CreateCommand({
     <>You can specify the language to translate to,
     and the language to translate from.
     For example, try issuing "translate mother from english to chinese".
-    If you leave out the the languages,
-    Ubiquity will try to guess what you want.
+    If you leave out the languages, it will try to guess what you want.
     It works on selected text in any web page,
     but there&#39;s a limit (a couple of paragraphs)
     to how much it can translate at once.</>),
@@ -493,12 +492,12 @@ CmdUtils.CreateCommand({
     var toLang = goal.text || noun_type_language.getLangName(defaultLang);
     var toLangCode = goal.data || defaultLang;
     var html = pblock.innerHTML =
-      "Replaces the selected text with the " + toLang + " translation:<br/>";
+      "Replaces the selected text with the " + toLang + " translation:";
     translateTo(
       textToTranslate,
       {from: (source || from).data, to: toLangCode},
       function(translation) {
-        pblock.innerHTML = html + "<p><b>" + translation + "</b></p>";
+        pblock.innerHTML = html + <p><b>{translation}</b></p>;
       },
       pblock);
   },
