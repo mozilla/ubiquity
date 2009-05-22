@@ -60,22 +60,33 @@ function makeParser() {
     {role: 'source', delimiter: 'do'},
     {role: 'source', delimiter: 'da'},
 
-    {role: 'position', delimiter: 'às'},
-    {role: 'position', delimiter: 'de'},
-    {role: 'position', delimiter: 'a'},
-    {role: 'position', delimiter: 'as'},
+    {role: 'time', delimiter: 'às'},
+    {role: 'time', delimiter: 'de'},
+    {role: 'time', delimiter: 'a'},
+    {role: 'time', delimiter: 'as'},
 
     {role: 'instrument', delimiter: 'com'},
     {role: 'instrument', delimiter: 'usando'},
-    {role: 'instrument', delimiter: 'pela'},
     {role: 'instrument', delimiter: 'pelo'},
-    {role: 'instrument', delimiter: 'na'},
-    {role: 'instrument', delimiter: 'no'}
+    {role: 'instrument', delimiter: 'pela'},
+    {role: 'instrument', delimiter: 'no'},
+    {role: 'instrument', delimiter: 'na'}
   ];
 
   pt.branching = 'right';
 
   pt.anaphora = ['isto', 'isso', 'aquilo'];
+
+
+  /* this removes the definite article (all gender and number variations),
+     removing it from the argument and putting it on the prefix */
+  pt.argumentNormalizer = new RegExp("(^(o|a|os|as)\\s+)(.*)$", "i");
+  pt.normalizeArgument = function(input) {
+    let matches = input.match(this.argumentNormalizer);
+    if (matches != null)
+      return [{prefix:matches[1], newInput:matches[3], suffix:''}];
+    return [];
+  };
 
   pt.examples = ['marcar reunião às 2pm ao calendar',
     'comprar meias pelo Google',
