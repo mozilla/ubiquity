@@ -156,6 +156,7 @@ Parser.prototype = {
     activeNounTypes = [];
     
     this._verbList = [];
+    this._nounTypes = [];
 
     let skippedSomeVerbs = false;
 
@@ -1101,7 +1102,7 @@ Parser.prototype = {
   // There may be multiple returned as each argument may have multiple possible
   // nountypes or multiple suggestions for each nountype.
 
-  suggestArgs: function(parse) {
+  suggestArgs: function suggestArgs(parse) {
 
     //mylog('verb:'+parse._verb.name);
 
@@ -1208,7 +1209,7 @@ Parser.prototype = {
   // marks them with which noun type it came from (in {{{.nountype}}})
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
-  detectNounType: function (x,callback) {
+  detectNounType: function detectNounType(x,callback) {
     //mylog('detecting '+x+'\n');
 
     if (x in nounCache) {
@@ -1239,7 +1240,8 @@ Parser.prototype = {
       Components.utils.import(
         'resource://ubiquity/modules/utils.js');
       nounWorker.setNounTypes(this._nounTypes);
-      var myCallback = function(suggestions) {
+      
+      var myCallback = function detectNounType_myCallback(suggestions) {
         if (!(x in nounCache))
           nounCache[x] = [];
         nounCache[x] = nounCache[x].concat(suggestions);
@@ -1247,7 +1249,7 @@ Parser.prototype = {
           callback(x,nounCache[x]);
       };
 
-      Utils.setTimeout(function(){
+      Utils.setTimeout(function detectNounType_runNounWorker(){
         nounWorker.detectNounType(x,myCallback);
       },0);
 
@@ -1325,7 +1327,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImme
 //
 // Most of this async code is by Blair.
 Parser.Query.prototype = {
-  dump: function(msg) {
+  dump: function PQ_dump(msg) {
     dump(this.__idTime + ':' + (this.__date.getTime()) + ' ' + msg + '\n');
   },
   run: function() {
@@ -1348,21 +1350,19 @@ Parser.Query.prototype = {
     Components.utils.import(
       'resource://ubiquity/modules/utils.js');
 
-    var doAsyncParse = function doAsyncParse() {
+    var doAsyncParse = function async_doAsyncParse() {
       //self.dump('async ping!');
-      var done = false;
       var ok = true;
       try {
         ok = parseGenerator.next();
       } catch(e) {
-        done = true;
         self.dump('done!!?');
       }
       //mylog(["self: ", self]);
       //mylog(["ok: ", ok]);
       //mylog(["done: ", done]);
       //mylog(["keep working: ", self._keepworking]);
-      if (ok && !done && self._keepworking)
+      if (ok && !self.finished && self._keepworking)
         Utils.setTimeout(doAsyncParse, 0);
     }
 
@@ -1482,7 +1482,7 @@ Parser.Query.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    completeParse = function(thisParse) {
+    completeParse = function async_completeParse(thisParse) {
       thisParse.complete = true;
 
       // go through all the arguments in thisParse and suggest args
@@ -1497,7 +1497,8 @@ Parser.Query.prototype = {
       }
 
     }
-    var tryToCompleteParses = function(argText,suggestions) {
+    var tryToCompleteParses =
+    function async_tryToCompleteParses(argText,suggestions) {
       thisQuery.dump('finished detecting nountypes for '+argText);
       //mylog([argText,suggestions]);
 
@@ -1515,7 +1516,7 @@ Parser.Query.prototype = {
         }
       }
 
-      var isComplete = function(parse) {return parse.complete};
+      var isComplete = function isComplete(parse) {return parse.complete};
       if (thisQuery._verbedParses.every(isComplete)) {
         thisQuery._times[this._step] = thisQuery.__date.getTime();
         thisQuery._step++;
@@ -1560,10 +1561,12 @@ Parser.Query.prototype = {
           this._parsesThatIncludeThisArg[argText].push(parseId);
         }
       }
-
+      
       // if this parse doesn't have any arguments, complete it now.
       if (!foundArgs) {
-        completeParse(parse);
+        Utils.setTimeout(function() {
+          completeParse(parse);
+        },0);
       }
     }
 
@@ -1974,7 +1977,7 @@ var cloneParse = function(p) {
 // NOTE: if you put this function in a different file and import it as
 // a module, it won't be able to correctly identify whether the input is
 // {{{instanceof Array}}} or not! Ask mitcho for details.
-var cloneObject = function(o) {
+var cloneObject = function cloneObject(o) {
   if (o == null)
     return null;
   if (o == undefined)
