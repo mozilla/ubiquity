@@ -179,10 +179,12 @@ Parser.prototype = {
 
     // Scrape the noun types up here.
 
+    let nounTypeId = 0;
+
     for each (let verb in this._verbList) {
       for each (let arg in verb.arguments) {
 
-        let thisNounType = cloneObject(arg.nountype);
+        let thisNounType;
 
         if (arg.nountype.constructor.name == "RegExp") {
           // If a verb's target nountype is a regexp, we'll convert it to
@@ -196,21 +198,35 @@ Parser.prototype = {
 
           // returning the converted version of the nountype back into the verb
           arg.nountype = thisNounType;
+        } else {
+          thisNounType = cloneObject(arg.nountype);
         }
 
         let thisNounTypeIsAlreadyRegistered = false;
 
-        for each (let registeredNounType in this._nounTypes) {
-          if (sameObject(arg.nountype,registeredNounType))
+        for (let thisNounTypeId in this._nounTypes) {
+          if (sameObject(arg.nountype,this._nounTypes[thisNounTypeId])) {
             thisNounTypeIsAlreadyRegistered = true;
+            arg.nountypeId = thisNounTypeId;
+          }
         }
 
         // if this nountype has not been registered yet, let's do that now.
         if (!thisNounTypeIsAlreadyRegistered) {
-          this._nounTypes.push(thisNounType);
-          // activeNounTypes
-          activeNounTypes.push(thisNounType);
+          thisNounType.__id = nounTypeId;
+          this._nounTypes[nounTypeId] = thisNounType;
+          activeNounTypes[nounTypeId] = thisNounType;
+
+          arg.nountypeId = nounTypeId;
+          
+          nounTypeId++;
         }
+
+        //delete(arg.nountype);
+        // clear up some memory... we'll be cloning these verb objects
+        // as part of parses for a long while still, so let's remove the actual
+        // nountypes, only leaving a copy in this._nounTypes and the 
+        // activeNounTypes, and keeping the nountypeId in the verb arg.
 
       }
     }
@@ -402,6 +418,10 @@ Parser.prototype = {
           if (RegExp('^'+verbPrefix,'i').test(name)) {
             let thisParse = {_verb: cloneObject(this._verbList[verb]),
                              argString: argString};
+            for each (let arg in thisParse._verb.arguments) {
+              delete(arg.nountype);
+              // save some memory.
+            }
             // add some extra information specific to this parse
             thisParse._verb.id = verb;
             thisParse._verb.text = name;
@@ -1141,9 +1161,9 @@ Parser.prototype = {
 
             for each (suggestion in nounCache[argText]) {
 
-              let targetNounType = verbArg.nountype;
+              let targetNounTypeId = verbArg.nountypeId;
 
-              if (sameNounType(suggestion.nountype,targetNounType)) {
+              if (suggestion.nountypeId == targetNounTypeId) {
 
                 thereWasASuggestionWithTheRightNounType = true;
 
@@ -1153,7 +1173,7 @@ Parser.prototype = {
                   parseCopy.args[role][i].text = suggestion.text;
                   parseCopy.args[role][i].html = suggestion.html;
                   parseCopy.args[role][i].score = suggestion.score;
-                  parseCopy.args[role][i].nountype = suggestion.nountype;
+                  parseCopy.args[role][i].nountypeId = suggestion.nountypeId;
 
                   newreturn.push(parseCopy);
                 }
@@ -1770,7 +1790,8 @@ Parser.Parse.prototype = {
     for each (let neededArg in this._verb.arguments) {
       if (!(neededArg.role in this.args)) {
         let label;
-        label = neededArg.label || neededArg.nountype._name;
+        // TODO: actually fall back to the nountype's name, not the ID.
+        label = neededArg.label || neededArg.nountypeId;
 
         for each (let parserRole in this._partialParser.roles) {
           if (parserRole.role == neededArg.role) {
@@ -1995,39 +2016,6 @@ var cloneObject = function cloneObject(o) {
   return ret;
 }
 
-function sameNounType(a,b,print) {
-
-  // TODO: figure out a better way to compare functions?
-
-  if ((typeof a) == 'function' && (typeof b) == 'function')
-    return (a.toString() == b.toString());
-
-  if ((typeof a) != 'object' || (typeof b) != 'object') {
-    if (print) dump('>returning typeof data: '+a+' ('+(typeof a)+')<>'+b+' ('+(typeof b)+') = '+(a == b)+'\n');
-    return (a == b);
-  }
-
-  // TODO: a better way to avoid the contactList?
-
-  for (let i in a) {
-    if (i != 'contactList') {
-      if (!sameObject(a[i],b[i],print)) {
-        if (print) dump('>'+i+' was in a but not in b\n');
-        return false;
-      }
-    }
-  }
-  for (let j in b) {
-    if (j != 'contactList') {
-      if (!sameObject(a[j],b[j],print)) {
-        if (print) dump('>'+j+' was in b but not in a\n');
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 function sameObject(a,b,print) {
 
   // TODO: figure out a better way to compare functions?
@@ -2048,21 +2036,25 @@ function sameObject(a,b,print) {
   }
 
   for (let i in a) {
-    if (b[i] == undefined) {
-      dump('>'+i+' was in a but not in b\n');
-    }
-    if (!sameObject(a[i],b[i],print)) {
-      if (print) dump('>'+i+' was in a but not in b\n');
-      return false;
+    if (i != 'contactList' && i != '__id') {
+      if (b[i] == undefined) {
+        dump('>'+i+' was in a but not in b\n');
+      }
+      if (!sameObject(a[i],b[i],print)) {
+        if (print) dump('>'+i+' was in a but not in b\n');
+        return false;
+      }
     }
   }
   for (let j in b) {
-    if (a[j] == undefined) {
-      dump('>'+j+' was in b but not in a\n');
-    }
-    if (!sameObject(a[j],b[j],print)) {
-      if (print) dump('>'+j+' was in b but not in a\n');
-      return false;
+    if (j != 'contactList' && j != '__id') {
+      if (a[j] == undefined) {
+        dump('>'+j+' was in b but not in a\n');
+      }
+      if (!sameObject(a[j],b[j],print)) {
+        if (print) dump('>'+j+' was in b but not in a\n');
+        return false;
+      }
     }
   }
   return true;

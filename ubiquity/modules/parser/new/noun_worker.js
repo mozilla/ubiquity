@@ -18,20 +18,21 @@ detectNounType = function detectNounType(x,callback) {
   
   dump('detecting '+x+'\n');
   
-  for each (thisNounType in nounTypes) {
+  for (let thisNounTypeId in nounTypes) {
 
     var completeAsyncSuggest = function completeAsyncSuggest(suggestion) {
-      suggestion.nountype = thisNounType;
+      suggestion.nountypeId = thisNounTypeId;
       if ((typeof callback) == 'function')
         callback([suggestion]);
     }
 
-    var suggestions = thisNounType.suggest(x,x,completeAsyncSuggest) || [];
+    var suggestions = nounTypes[thisNounTypeId]
+                        .suggest(x,x,completeAsyncSuggest) || [];
     //mylog(suggestions);
     for each (suggestion in suggestions) {
       // set the nountype that was used in each suggestion so that it can 
       // later be compared with the nountype specified in the verb.
-      suggestion.nountype = thisNounType;
+      suggestion.nountypeId = thisNounTypeId;
     }
     if (suggestions.length > 0) {
       returnArray = returnArray.concat(suggestions);
