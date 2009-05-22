@@ -402,31 +402,22 @@ CmdUtils.CreateCommand({
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
 
-function translateTo( text, langCodePair, callback ) {
+function translateTo(text, langCodePair, callback, pblock) {
   var url = "http://ajax.googleapis.com/ajax/services/language/translate";
-
-  if( typeof(langCodePair.from) == "undefined" ) langCodePair.from = "";
-  if( typeof(langCodePair.to) == "undefined" ) langCodePair.to = "";
-
   var params = {
     v: "1.0",
     q: text,
-    langpair: langCodePair.from + "|" + langCodePair.to
+    langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
   };
-
-  jQuery.get(url, params, function(data){
-    //var data = Utils.decodeJson(jsonData);
-
+  function onsuccess(data) {
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
     // this would be to split up the request into multiple chunks.
     // The other method is to contact Google and get a special
     // account.
-
     try {
-      var translatedText = data.responseData.translatedText;
+      var {translatedText} = data.responseData;
     } catch(e) {
-
       // If we get either of these error messages, that means Google wasn't
       // able to guess the originating language. Let's assume it was English.
       // TODO: Localize this.
@@ -437,34 +428,30 @@ function translateTo( text, langCodePair, callback ) {
         // Don't do infinite loops. If we already have a guess language
         // that matches the current forced from language, abort!
         if( langCodePair.from != "en" )
-          translateTo( text, {from:"en", to:langCodePair.to}, callback );
-        return;
+          translateTo(text, {from: "en", to: langCodePair.to},
+                      callback, pblock);
       }
       else {
         displayMessage( "Translation Error: " + data.responseDetails );
       }
       return;
     }
-
-    if( typeof callback == "function" )
-      callback( translatedText );
-    else
-      CmdUtils.setSelection( translatedText );
-
-    CmdUtils.setLastResult( translatedText );
-  }, "json");
+    callback(translatedText);
+  }
+  if (pblock) CmdUtils.previewGet(pblock, url, params, onsuccess, "json");
+  else jQuery.get(url, params, onsuccess, "json");
 }
 
 CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
   name: "translate",
   names: {
-    da: ['oversæt'],
+    da: ['oversat'],
     en: ['translate'],
     fr: ['traduire','traduizez','traduis'],
-    ca: ['tradueix', 'traduïx'],
-    da: ['oversæt'],
-    sv: ['översätt'],
+    ca: ['tradueix', 'traduix'],
+    da: ['oversat'],
+    sv: ['oversatt'],
     ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
     pt: ['traduzir', 'traduza']
   },
@@ -475,50 +462,58 @@ CmdUtils.CreateCommand({
   ],
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",
-  help: "You can specify the language to translate to, and the language to translate from.  For example," +
-	" try issuing &quot;translate mother from english to chinese&quot;. If you leave out the the" +
-	" languages, Ubiquity will try to guess what you want. It works on selected text in any web page, but" +
-        " there's a limit to how much it can translate at once (a couple of paragraphs.)",
-  takes: {"text to translate": noun_arb_text},
+  help: "" + (
+    <>You can specify the language to translate to,
+    and the language to translate from.
+    For example, try issuing "translate mother from english to chinese".
+    If you leave out the the languages,
+    Ubiquity will try to guess what you want.
+    It works on selected text in any web page,
+    but there&#39;s a limit (a couple of paragraphs)
+    to how much it can translate at once.</>),
+  takes: {text: noun_arb_text},
   modifiers: {to: noun_type_language, from: noun_type_language},
-
-  execute: function( arguments ) {
-    var goal = arguments.goal || arguments.to;
-    var source = arguments.source || arguments.from;
-    var toLangCode = goal.data || this._getDefaultLang();
-    var fromLang = source.data || "";
-    translateTo( arguments.object.text, {to:toLangCode} );
+  execute: function({object, to, from, goal, source}) {
+    if (object.text)
+      translateTo(object.text,
+                  { from: (source || from).data,
+                    to: (goal || to).data || this._getDefaultLang()},
+                  function(translation) {
+                    CmdUtils.setSelection(translation);
+                  });
   },
-
+  preview: function(pblock, {object, to, from, goal, source}) {
+    var textToTranslate = object.text;
+    if (!textToTranslate) {
+      pblock.innerHTML = this.description;
+      return;
+    }
+    if (!goal) goal = to;
+    var defaultLang = this._getDefaultLang();
+    var toLang = goal.text || noun_type_language.getLangName(defaultLang);
+    var toLangCode = goal.data || defaultLang;
+    var html = pblock.innerHTML =
+      "Replaces the selected text with the " + toLang + " translation:<br/>";
+    translateTo(
+      textToTranslate,
+      {from: (source || from).data, to: toLangCode},
+      function(translation) {
+        pblock.innerHTML = html + "<p><b>" + translation + "</b></p>";
+      },
+      pblock);
+  },
   // Returns the default language for translation.  order of defaults:
   // extensions.ubiquity.default_translation_lang > general.useragent.locale > "en"
-  // And also, if there unknown language code is found any of these preference, we fall back to English.
+  // And also, if there unknown language code is found any of these preference,
+  // we fall back to English.
   _getDefaultLang: function() {
-      var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
-      var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
-      // If defaultLang is invalid lang code, fall back to english.
-	  if (noun_type_language.getLangName(defaultLang) == null)  {
-	       return "en";
-	  }
-	  return defaultLang;
-  },
-  preview: function( pblock, arguments ) {
-    var defaultLang = this._getDefaultLang();
-    var goal = arguments.goal || arguments.to;
-    var toLang = (goal ? goal.text : noun_type_language.getLangName(defaultLang));
-    var toLangCode = (goal ? goal.data : defaultLang);
-    // TODO bug apparently goal is resolving to true even when there is no
-    // goal.data, so the above line comes out to null when it should be
-    // using defaultLang.
-    var textToTranslate = (arguments.object ? arguments.object.text : '');
-
-    var lang = "" + goal; //toLangCode; //toLang[0].toUpperCase() + toLang.substr(1);
-
-    pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
-    translateTo( textToTranslate, {to:toLangCode}, function( translation ) {
-      pblock.innerHTML = "Replaces the selected text with the " + lang + " translation:<br/>";
-      pblock.innerHTML += "<i style='padding:10px;color: #CCC;display:block;'>" + translation + "</i>";
-      });
+    var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
+    var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
+    // If defaultLang is invalid lang code, fall back to english.
+    if (noun_type_language.getLangName(defaultLang) == null)  {
+      return "en";
+    }
+    return defaultLang;
   }
 });
 
