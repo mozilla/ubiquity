@@ -470,8 +470,13 @@ Utils.getLocalUrl = function getLocalUrl(url) {
 // This function removes all whitespace surrounding a string and
 // returns the result.
 
+// See http://blog.stevenlevithan.com/archives/faster-trim-javascript
 Utils.trim = function trim(str) {
-  return str.replace(/^\s+|\s+$/g,"");
+  var i = str.search(/\S/);
+  if (i < 0) return "";
+  var j = str.length;
+  while (/\s/.test(str[--j]));
+  return str.slice(i, j + 1);
 };
 
 // ** {{{ Utils.isArray() }}} **

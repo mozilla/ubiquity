@@ -315,15 +315,6 @@ CmdUtils.CreateCommand({
 // TAGGING COMMANDS
 // -----------------------------------------------------------------
 
-// http://blog.stevenlevithan.com/archives/faster-trim-javascript
-function trim (str) {
-  var str = str.replace(/^\s\s*/, ''),
-      ws  = /\s/,
-      i   = str.length;
-  while (ws.test(str.charAt(--i)));
-  return str.slice(0, i + 1);
-}
-
 // command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
   name: "tag",
@@ -365,7 +356,7 @@ CmdUtils.CreateCommand({
     var tags = aTagsString.text.split(splitChar);
 
     // trim leading/trailing spaces
-    tags = tags.map(function(a) { return trim(a); });
+    tags = tags.map(Utils.trim);
 
     var tagging = Cc["@mozilla.org/browser/tagging-service;1"].
                   getService(Ci.nsITaggingService);
@@ -380,6 +371,6 @@ CmdUtils.CreateCommand({
   name: "report-bug",
   description: "Reports a Ubiquity bug.",
   execute: function() {
-    Utils.openUrlInBrowser("chrome://ubiquity/content/report-bug.html");
+    Utils.focusUrlInBrowser("chrome://ubiquity/content/report-bug.html");
   }
 });
