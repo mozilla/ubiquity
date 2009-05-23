@@ -41,7 +41,7 @@
  // **Shared functions for localized nountypes**
  //
 
-var getGmailContacts = function ( callback ) {
+function getGmailContacts( callback ) {
   // TODO: It's not really a security hazard since we're evaluating the
   // Vcard data in a sandbox, but I'm not sure how accurate this
   // algorithm is; we might want to consider using a third-party
@@ -75,7 +75,7 @@ var getGmailContacts = function ( callback ) {
     "text");
 }
 
-var getYahooContacts = function ( callback ){
+function getYahooContacts( callback ){
   var url = "http://us.mg1.mail.yahoo.com/yab";
   //TODO: I have no idea what these params mean
   var params = {
@@ -105,12 +105,12 @@ var getYahooContacts = function ( callback ){
 
 }
 
-var getContacts = function (callback){
+function getContacts(callback){
   getGmailContacts(callback);
   getYahooContacts(callback);
 }
 
-var isAddress = function ( query, callback ) {
+function isAddress( query, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = Utils.paramsToString({
     location: query,
@@ -163,50 +163,4 @@ var isAddress = function ( query, callback ) {
         callback( false );
     }
   });
-}
-
-var getBookmarklets = function (callback) {
-
-  var bookmarklets = {};
-
-  var Ci = Components.interfaces;
-  var Cc = Components.classes;
-
-  var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-                  .getService(Ci.nsINavBookmarksService);
-  var history = Cc["@mozilla.org/browser/nav-history-service;1"]
-                .getService(Ci.nsINavHistoryService);
-
-  var query = history.getNewQuery();
-
-  // Specify folders to be searched
-  var folders = [bookmarks.toolbarFolder, bookmarks.bookmarksMenuFolder,
-                 bookmarks.unfiledBookmarksFolder];
-  query.setFolders(folders, folders.length);
-
-  var options = history.getNewQueryOptions();
-  options.queryType = options.QUERY_TYPE_BOOKMARKS
-
-  // Specify terms to search for, matches against title, URL and tags
-  query.searchTerms = "javascript";
-
-  var result = history.executeQuery(query, options);
-
-  // The root property of a query result is an object representing the folder you specified above.
-  var resultContainerNode = result.root;
-  // Open the folder, and iterate over it's contents.
-  resultContainerNode.containerOpen = true;
-  for (var i=0; i < resultContainerNode.childCount; ++i) {
-    var childNode = resultContainerNode.getChild(i);
-
-    // Accessing properties of matching bookmarks
-    var title = childNode.title;
-    var uri = childNode.uri;
-
-    if(uri.substring(0,11) == "javascript:") {
-      bookmarklets[title.toLowerCase().replace(/ /g,'-')] = uri;
-    }
-  }
-
-  callback(bookmarklets);
 }
