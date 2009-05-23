@@ -48,22 +48,16 @@ var Cc = Components.classes;
 var SQLITE_FILE = "ubiquity_skin_memory.sqlite";
 
 //Create database with default skins
-var SQLITE_SCHEMA =
-    "CREATE TABLE ubiquity_skin_memory(" +
-    "  download_uri VARCHAR(256)," +
-    "  local_uri VARCHAR(256));"+
-    "INSERT INTO ubiquity_skin_memory " +
-    "VALUES ('chrome://ubiquity/skin/skins/default.css'," +
-    "'chrome://ubiquity/skin/skins/default.css');" +
-    "INSERT INTO ubiquity_skin_memory " +
-    "VALUES ('chrome://ubiquity/skin/skins/experimental.css'," +
-    "'chrome://ubiquity/skin/skins/experimental.css');" +
-    "INSERT INTO ubiquity_skin_memory " +
-    "VALUES ('chrome://ubiquity/skin/skins/old.css'," +
-    "'chrome://ubiquity/skin/skins/old.css');" +
-    "INSERT INTO ubiquity_skin_memory " +
-    "VALUES ('chrome://ubiquity/skin/skins/custom.css'," +
-    "'chrome://ubiquity/skin/skins/custom.css')";
+var SQLITE_SCHEMA = (
+  ("CREATE TABLE ubiquity_skin_memory(" +
+   "  download_uri VARCHAR(256)," +
+   "     local_uri VARCHAR(256));") +
+  ["default", "experimental", "old", "custom"]
+  .map(function(name) {
+    var path = "chrome://ubiquity/skin/skins/" + name + ".css";
+    return ("INSERT INTO ubiquity_skin_memory VALUES ('" +
+            path + "', '" + path + "');");
+  }).join(''));
 
 var _gDatabaseConnection = null;
 
@@ -115,9 +109,8 @@ SkinSvc.openDatabase = function openDatabase(file) {
       connection.executeSimpleSQL(SQLITE_SCHEMA);
     }
   } catch(e) {
-    Components.utils.reportError(
-      "Ubiquity's SkinMemory database appears to have been corrupted - resetting it."
-      );
+    Components.utils.reportError("Ubiquity's SkinMemory database appears to " +
+                                 "have been corrupted - resetting it.");
     if (file.exists()) {
       // remove corrupted database
       file.remove(false);
@@ -141,8 +134,7 @@ SkinSvc.prototype = {
 
   _createStatement: function _createStatement(sql) {
      try {
-       var stmt = this._connection.createStatement(sql);
-       return stmt;
+       return this._connection.createStatement(sql);
      } catch (e) {
        throw new Error(this._connection.lastErrorString);
      }
@@ -150,9 +142,7 @@ SkinSvc.prototype = {
 
   _isLocalUrl : function _isLocalUrl(skinUrl) {
     var url = Utils.url(skinUrl);
-    if (url.scheme == "file" || url.scheme == "chrome")
-      return true;
-    return false;
+    return url.scheme === "file" || url.scheme === "chrome";
   },
   //Navigate to chrome://ubiquity/skin/skins/ and get the folder
   _getSkinFolder: function _getSkinFolder(){
@@ -169,10 +159,12 @@ SkinSvc.prototype = {
   _writeToFile: function _writeToFile(file, data){
     var foStream = (Cc["@mozilla.org/network/file-output-stream;1"]
                     .createInstance(Ci.nsIFileOutputStream));
-    foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
+    foStream.init(file, 0x02 | 0x08 | 0x20, 0644, 0);
     foStream.write(data, data.length);
     foStream.close();
   },
+
+  _randomKey: function _randomKey() Math.random().toString(36).slice(-8),
 
   //Check if the skin from this URL has already been installed
   isInstalled: function isInstalled(url){
@@ -190,8 +182,7 @@ SkinSvc.prototype = {
 
   //Add a new skin record into the database
   addSkin: function addSkin(downloadUri, localUri){
-    var insertSql = "INSERT INTO ubiquity_skin_memory " +
-                     "VALUES (?1, ?2)";
+    var insertSql = "INSERT INTO ubiquity_skin_memory VALUES (?1, ?2)";
     var insStmt = this._createStatement(insertSql);
     insStmt.bindUTF8StringParameter(0, downloadUri);
     insStmt.bindUTF8StringParameter(1, localUri);
@@ -201,7 +192,7 @@ SkinSvc.prototype = {
 
   deleteSkin: function deleteSkin(url) {
     var deleteSql = ("DELETE FROM ubiquity_skin_memory " +
-                  "WHERE local_uri = ?1 OR download_uri = ?2");
+                     "WHERE local_uri = ?1 OR download_uri = ?2");
     var delStmt = this._createStatement(deleteSql);
     delStmt.bindUTF8StringParameter(0, url);
     delStmt.bindUTF8StringParameter(1, url);
@@ -235,9 +226,8 @@ SkinSvc.prototype = {
   //Unregister any current skins
   //And load this new skin
   loadSkin: function loadSkin(newSkinPath){
-    var sss = Cc["@mozilla.org/content/style-sheet-service;1"]
-      .getService(Ci.nsIStyleSheetService);
-
+    var sss = (Cc["@mozilla.org/content/style-sheet-service;1"]
+               .getService(Ci.nsIStyleSheetService));
     try {
       // Remove the previous skin CSS
       var oldCss = Utils.url(this.currentSkin);
@@ -262,10 +252,9 @@ SkinSvc.prototype = {
       this._msgService.displayMessage("Your Ubiquity skin has been changed!");
     } catch(e) {
       this.loadSkin(this.DEFAULT_SKIN);
-      Components.utils.reportError("Error applying Ubiquity skin from'" +
-                                    newSkinPath + "': " + e);
-      this._msgService.displayMessage("Error applying Ubiquity skin from " +
-                                      newSkinPath);
+      var msg = "Error applying Ubiquity skin from " + newSkinPath;
+      this._msgService.displayMessage(msg);
+      Components.utils.reportError(msg + " : " + e);
     }
   },
 
@@ -305,7 +294,7 @@ SkinSvc.prototype = {
     }
   },
 
-  updateAllSkins: function updateAllSkins(){
+  updateAllSkins: function updateAllSkins() {
     //Only have to update/download remote skins
     //Local skins are pointed at directly
     for each (var skin in this.getSkinList())
@@ -335,20 +324,40 @@ SkinSvc.prototype = {
     if(!found || local_uri === download_uri)
       return;
     this.deleteSkin(url);
-    var file = this._getSkinFolder();
-    file.append(/[^\/]+$/(local_uri)[0]);
+    var fph = (Cc["@mozilla.org/network/protocol;1?name=file"]
+               .createInstance(Ci.nsIFileProtocolHandler));
+    var file = fph.getFileFromURLSpec(url);
     file.remove(false);
     if(local_uri === this.currentSkin)
       this.changeSkin(this.DEFAULT_SKIN);
+  },
+
+  saveAs: function saveAs(cssText, defaultName) {
+    const {nsIFilePicker} = Ci;
+    var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+    fp.init(Utils.currentChromeWindow,
+            "Save your skin",
+            nsIFilePicker.modeSave);
+    fp.defaultString = defaultName || "";
+    fp.appendFilter("CSS (*.css)", "*.css");
+    var rv = fp.show();
+    if (rv !== nsIFilePicker.returnOK &&
+        rv !== nsIFilePicker.returnReplace)
+      return null;
+    var fos = (Cc["@mozilla.org/network/file-output-stream;1"]
+               .createInstance(Ci.nsIFileOutputStream));
+    this._writeToFile(fp.file, cssText);
+    var {spec} = fp.fileURL;
+    this.addSkin("data:,dev/null/" + this._randomKey(), spec);
+    this.changeSkin(spec);
+    return fp.file.path;
   }
 }
 
 SkinSvc.prototype.installToWindow = function installToWindow(window) {
-
   var self = this;
 
   function showNotification(targetDoc, skinUrl, mimetype) {
-
     // Find the <browser> which contains notifyWindow, by looking
     // through all the open windows and all the <browsers> in each.
     var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
@@ -376,10 +385,10 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
           //Navigate to chrome://ubiquity/skin/skins/
           var file = self._getSkinFolder();
           //Select a random name for the file
-          var filename = String.slice(Math.random(), 2) + ".css";
+          var filename = self._randomKey() + ".css";
           //Create the new file
           file.append(filename);
-          file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
+          file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
           //Write the downloaded CSS to the file
           self._writeToFile(file, data);
 
@@ -419,28 +428,19 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
         box.PRIORITY_INFO_MEDIUM,
         buttons
       );
-
     } else {
       Components.utils.reportError("Couldn't find tab for document");
     }
   }
 
-  function onPageWithSkin(pageUrl, skinUrl, document, mimetype) {
-    showNotification(document, skinUrl, mimetype);
-  }
-
   // Watch for any tags of the form <link rel="ubiquity-skin">
   // on pages and install the skin for them if they exist.
-  function onLinkAdded(event) {
-    if (event.target.rel != "ubiquity-skin"
-        || self.isInstalled(event.target.href))
-      return;
-
-    onPageWithSkin(event.target.baseURI,
-                   event.target.href,
-                   event.target.ownerDocument,
-                   event.target.type);
+  function onLinkAdded({target}) {
+    if (target.rel === "ubiquity-skin" &&
+        !self.isInstalled(target.href))
+    showNotification(target.ownerDocument,
+                     target.href,
+                     target.type);
   }
-
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
 };

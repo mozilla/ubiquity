@@ -35,28 +35,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
 
+Cu.import("resource://ubiquity/modules/msgservice.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/setup.js");
 
-Components.utils.import("resource://ubiquity/modules/skinsvc.js");
-Components.utils.import("resource://ubiquity/modules/msgservice.js");
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/setup.js");
-
-var skinService = new SkinSvc();
+var {skinService} = UbiquitySetup.createServices();
+var msgService = new AlertMessageService();
 
 function onDocumentLoad() {
-  const {CUSTOM_SKIN} = skinService;
-  var skinList = skinService.getSkinList(), i = 0;
-  for each (let {local_uri, download_uri} in skinList)
-    if (local_uri !== CUSTOM_SKIN)
-      createSkinElement(local_uri, download_uri, i++);
-  createSkinElement(CUSTOM_SKIN, CUSTOM_SKIN, i);
-  //If current skin is custom skin, auto-open the editor
-  if(skinService.currentSkin === CUSTOM_SKIN)
-    openSkinEditor();
-
+  loadSkinList();
   // set the language option controls to the correct values:
   var parserVersion = UbiquitySetup.parserVersion;
   $("#use-new-parser-checkbox").attr('checked', ( parserVersion == 2 ));
@@ -70,7 +61,6 @@ function onDocumentLoad() {
     );
   }
 }
-
 
 function changeLanguageSettings() {
   var changed = false;
@@ -99,6 +89,18 @@ function changeLanguageSettings() {
   }
 }
 
+function loadSkinList() {
+  const {CUSTOM_SKIN} = skinService;
+  var skinList = skinService.getSkinList(), i = 0;
+  $("#skin-list").empty();
+  for each (let {local_uri, download_uri} in skinList)
+    if (local_uri !== CUSTOM_SKIN)
+      createSkinElement(local_uri, download_uri, i++);
+  createSkinElement(CUSTOM_SKIN, CUSTOM_SKIN, i);
+  //If current skin is custom skin, auto-open the editor
+  if(skinService.currentSkin === CUSTOM_SKIN)
+    openSkinEditor();
+}
 
 // Thanks to code by Torisugari at
 // http://forums.mozillazine.org/viewtopic.php?p=921150#921150
@@ -114,13 +116,12 @@ function readFile(url){
   var str = scriptableStream.read(input.available());
   scriptableStream.close();
   input.close();
-  return str.split("\n");
+  return str;
 }
 
 function createSkinElement(filepath, origpath, id){
-
   try{
-    var lines = readFile(filepath);
+    var lines = readFile(filepath).split("\n");
   }catch(e){
     //If file cannot be read, just move on to the next skin
     return;
@@ -243,7 +244,6 @@ function saveCustomSkin(){
   foStream.write(data, data.length);
   foStream.close();
 
-  var msgService = new AlertMessageService();
   msgService.displayMessage("Your skin has been saved!");
 
   if(skinService.currentSkin === skinService.CUSTOM_SKIN)
@@ -265,8 +265,17 @@ function pasteToGist(){
 }
 
 function openSkinEditor(){
-  //Readfile returns an array
   $('#editor-div').show();
-  $("#skin-editor").val(readFile(skinService.CUSTOM_SKIN).join("\n")).focus();
+  $("#skin-editor").val(readFile(skinService.CUSTOM_SKIN)).focus();
   $('#edit-button').hide();
+}
+
+function saveAs() {
+  try {
+    skinService.saveAs($("#skin-editor").val(), "custom");
+    loadSkinList();
+  } catch(e) {
+    msgService.displayMessage("Error saving your skin");
+    Cu.reportError(e);
+  }
 }
