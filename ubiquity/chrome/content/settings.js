@@ -33,8 +33,8 @@
  * the provisions above, a recipient may use your version of this file under
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
- * ***** END LICENSE BLOCK ***** */ 
- 
+ * ***** END LICENSE BLOCK ***** */
+
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
@@ -42,6 +42,7 @@ var Ci = Components.interfaces;
 Components.utils.import("resource://ubiquity/modules/skinsvc.js");
 Components.utils.import("resource://ubiquity/modules/msgservice.js");
 Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/setup.js");
 
 var skinService = new SkinSvc();
 
@@ -55,9 +56,51 @@ function onDocumentLoad() {
   //If current skin is custom skin, auto-open the editor
   if(skinService.currentSkin === CUSTOM_SKIN)
     openSkinEditor();
+
+  // set the language option controls to the correct values:
+  var parserVersion = UbiquitySetup.parserVersion;
+  $("#use-new-parser-checkbox").attr('checked', ( parserVersion == 2 ));
+  if (parserVersion == 2) {
+    $("#language-select").removeAttr("disabled");
+    var langCode = UbiquitySetup.languageCode;
+    $("#language-select").find("option").each(
+      function() {
+        $(this).attr("selected", ($(this).attr("value") == langCode));
+      }
+    );
+  }
 }
 
-// Thanks to code by Torisugari at 
+
+function changeLanguageSettings() {
+  var changed = false;
+  var prefs = Cc["@mozilla.org/preferences-service;1"]
+                          .getService(Ci.nsIPrefService);
+  prefs = prefs.getBranch("extensions.ubiquity.");
+
+  var useParserVersion = $("#use-new-parser-checkbox").attr('checked') ?2:1;
+  if ( useParserVersion != prefs.getIntPref("parserVersion") ) {
+    changed = true;
+    prefs.setIntPref("parserVersion", useParserVersion);
+  }
+
+  var useLanguage = $("#language-select").val();
+  if ( useLanguage != prefs.getCharPref("language")) {
+    changed = true;
+    prefs.setCharPref("language", useLanguage);
+  }
+
+  if (changed) {
+    $("#lang-settings-changed-info").html(
+      "<i>This change will take effect when you restart Firefox.</i>"
+    );
+  } else {
+    $("#lang-settings-changed-info").empty();
+  }
+}
+
+
+// Thanks to code by Torisugari at
 // http://forums.mozillazine.org/viewtopic.php?p=921150#921150
 function readFile(url){
   var ioService=Cc["@mozilla.org/network/io-service;1"]
@@ -75,16 +118,16 @@ function readFile(url){
 }
 
 function createSkinElement(filepath, origpath, id){
-  
+
   try{
     var lines = readFile(filepath);
   }catch(e){
     //If file cannot be read, just move on to the next skin
     return;
   }
-  
+
   var skinMeta = {};
-    
+
   //look for =skin= indicating start of metadata
   var foundMetaData = false;
   var l = 0;
@@ -96,13 +139,13 @@ function createSkinElement(filepath, origpath, id){
       break;
     }
   }
-    
+
   //extract the metadata
   if(foundMetaData){
     for(var i=l; i<lines.length; i++){
       var line = jQuery.trim(lines[i]);
       if(line.indexOf("@") != -1){
-        
+
         var temp = line.substring(line.indexOf("@") + 1);
         var field = jQuery.trim(temp.substring( 0 , temp.indexOf(" ")));
         var value = jQuery.trim(temp.substring(temp.indexOf(" ") + 1));
@@ -114,56 +157,56 @@ function createSkinElement(filepath, origpath, id){
       }
     }
   }
-  
+
   if(!skinMeta.name)
     skinMeta.name = filepath;
   if(!skinMeta.homepage)
     skinMeta.homepage = origpath;
 
   var skinId = "skin_" + id;
-  
+
   $('#skin-list').append(
      '<div class="command" id="' + skinId + '">' +
      ('<input type="radio" name="skins" id="rad_' + skinId +
       '" value="' + filepath + '"></input>') +
      '<label class="label light" for="rad_'+ skinId + '">' +
-     '<a class="name"/>' + 
-     '<br/><span class="author"/><span class="license"/></label>' +  
+     '<a class="name"/>' +
+     '<br/><span class="author"/><span class="license"/></label>' +
      '<div class="email light"></div>' +
      '<div class="homepage light"></div></div>'
     );
-   
+
   var skinEl = $('#' + skinId);
-   
+
   //Add the name and onclick event
   skinEl.find('.name').text(skinMeta.name);
   skinEl.find('input').attr("onclick", ("skinService.changeSkin('" +
                                         filepath + "');"));
-  
+
   //Make the current skin distinct
   var currentSkin = skinService.currentSkin;
   if (filepath == currentSkin) {
     skinEl.find('#rad_' + skinId).attr('checked','true');
   }
-  
+
   if(skinMeta.author) {
     skinEl.find('.author').text("by " + skinMeta.author);
   }
-  
+
   if(skinMeta.email){
-    skinEl.find('.email').html("email: <a href='mailto:" + skinMeta.email  + 
+    skinEl.find('.email').html("email: <a href='mailto:" + skinMeta.email  +
                                "'>" + skinMeta.email + "</a>");
   }
-  
+
   if(skinMeta.license){
     skinEl.find('.license').text(" licensed as " + skinMeta.license);
   }
-  
+
   if(skinMeta.homepage){
-    skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  + 
+    skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  +
                                   "'>" + skinMeta.homepage + "</a>");
   }
-  
+
   skinEl.append(<a class="action" href={"view-source:" + filepath}
                 target="_blank">[view source]</a>.toXMLString());
   filepath !== origpath && (
@@ -187,19 +230,19 @@ function createSkinElement(filepath, origpath, id){
 
 function saveCustomSkin(){
   var data = $("#skin-editor").val();
-  
+
   var MY_ID = "ubiquity@labs.mozilla.com";
   var em = Cc["@mozilla.org/extensions/manager;1"]
                      .getService(Ci.nsIExtensionManager);
   var file = em.getInstallLocation(MY_ID)
                 .getItemFile(MY_ID, "chrome/skin/skins/custom.css");
-                
+
   var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
   .createInstance(Ci.nsIFileOutputStream);
-  foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
+  foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
   foStream.write(data, data.length);
   foStream.close();
-  
+
   var msgService = new AlertMessageService();
   msgService.displayMessage("Your skin has been saved!");
 

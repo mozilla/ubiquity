@@ -66,7 +66,27 @@
     <script> PrefKeys.onLoad() </script>
 
     <h2>Language Settings</h2>
-    <p>Coming soon.</p>
+    <p>The Next Generation parser is experimental and will not work with all
+    commands.  However, it supports multiple languages.</p>
+    <p><input type="checkbox" id="use-new-parser-checkbox"
+               onchange="changeLanguageSettings();">
+    <strong>Use the Next Generation Parser</strong></p>
+    <p><span id="lang-settings-changed-info"></span></p>
+    <p>Language:
+      <select id="language-select" disabled="true"
+               onchange="changeLanguageSettings();">
+        <option value="ca">Catalan</option>
+        <option value="da">Danish</option>
+        <option value="en" selected="true">English</option>
+        <option value="fr">French</option>
+        <option value="it">Italian</option>
+        <option value="ja">Japanese</option>
+        <option value="fr">Portugese</option>
+        <option value="sv">Swedish</option>
+        <option value="zh">Chinese</option>
+      </select>
+    </p>
+
 
     <h2>Troubleshooting Ubiquity</h2>
     <p>Due to Ubiquity's unusual nature as a Labs experiment, you may
