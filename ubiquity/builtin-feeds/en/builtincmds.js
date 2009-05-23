@@ -43,60 +43,66 @@
 // SYSTEM COMMANDS
 // -----------------------------------------------------------------
 
+XML.prettyPrinting = XML.ignoreWhitespace = false;
+
+const Help = "about:ubiquity";
 CmdUtils.CreateCommand({
   name: "help",
   synonyms: ["about", "?"],
   icon: "chrome://ubiquity/skin/icons/help.png",
-  preview: "Provides help on using Ubiquity, as well as access to preferences, etc.",
-  description: "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.",
-  takes: { "command name": noun_type_commands },
-  preview: function(pblock, input){
-    if (!input || !input.text) {
-      pblock.innerHTML = "Takes you to the Ubiquity tutorial page. " +
-        "Or, enter the name of a command to get help on that command.";
-    } else {
-      pblock.innerHTML = input.html;
-    }
+  description: "" + (
+    <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
+      Or, enter the name of a command to get help on that command.</>),
+  takes: {"command name": noun_type_commands},
+  preview: function(pblock, input) {
+    pblock.innerHTML = (!input || !input.text
+                        ? this.description
+                        : input.html);
   },
-  execute: function(input){
+  execute: function(input) {
     if (!input || !input.text) {
-      Utils.openUrlInBrowser("about:ubiquity");
+      Utils.focusUrlInBrowser(Help);
     } else {
-      let cmdName = input.text;
-      let url = "chrome://ubiquity/content/cmdlist.html?cmdname=" + cmdName;
-      Utils.openUrlInBrowser( url );
+      var cmdName = input.text;
+      var url = "chrome://ubiquity/content/cmdlist.html?cmdname=" + cmdName;
+      Utils.openUrlInBrowser(url);
     }
   }
 });
 
+const Editor = "chrome://ubiquity/content/editor.html";
 CmdUtils.CreateCommand({
   name: "command-editor",
   icon : "chrome://ubiquity/skin/icons/plugin_edit.png",
-  preview: "Opens the editor for writing Ubiquity commands",
-  description: "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page.",
-  execute: function(){
-    Utils.openUrlInBrowser("chrome://ubiquity/content/editor.html");
+  description: "" + (
+    <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
+  execute: function() {
+    Utils.focusUrlInBrowser(Editor);
   }
 });
 
+const CmdList = "chrome://ubiquity/content/cmdlist.html";
 CmdUtils.CreateCommand({
   name: "command-list",
   icon : "chrome://ubiquity/skin/icons/application_view_list.png",
-  preview: "Opens the list of all Ubiquity commands available and what they all do.",
-  description: "Takes you to the page you're on right now.",
-  execute: function(){
-    Utils.openUrlInBrowser("chrome://ubiquity/content/cmdlist.html");
+  description: "" + (
+    <>Opens <a href={CmdList}>the list</a>
+      of all Ubiquity commands available and what they all do.</>),
+  execute: function() {
+    Utils.focusUrlInBrowser(CmdList);
   }
 });
 
+const Settings = "chrome://ubiquity/content/settings.html";
 CmdUtils.CreateCommand({
-  name: "skin-list",
-  synonyms: ["change-skin", "skin-editor"],
+  name: "settings",
+  synonyms: ["skin-list"],
   icon : "chrome://ubiquity/skin/icons/favicon.ico",
-  preview: "Opens the 'Your Skins' page where you can view, change and edit skins",
-  description: "Takes you to the <a href=\"chrome://ubiquity/content/skinlist.html\">Your Skins</a> page.",
-  execute: function(){
-    Utils.openUrlInBrowser("chrome://ubiquity/content/skinlist.html");
+  description: "" + (
+    <>Takes you to the <a href={Settings}>Settings</a> page,
+    where you can change your skin, key combinations, etc.</>),
+  execute: function() {
+    Utils.focusUrlInBrowser(Settings);
   }
 });
 
