@@ -374,3 +374,28 @@ CmdUtils.CreateCommand({
     Utils.focusUrlInBrowser("chrome://ubiquity/content/report-bug.html");
   }
 });
+
+CmdUtils.CreateCommand({
+  name: "bookmarklet",
+  synonyms: ["bml", "js"],
+  description: "Runs a bookmarklet from your favorites.",
+  help: "Enter nothing to reload the list.",
+  author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  license: "MIT",
+  icon: "chrome://ubiquity/skin/icons/application_view_list.png",
+  takes: {title: noun_type_bookmarklet},
+  execute: function({data}) {
+    if (data) CmdUtils.getWindow().location = data;
+    else {
+      noun_type_bookmarklet.load();
+      displayMessage({icon: this.icon, title: this.name, text: "Reloaded"});
+    }
+  },
+  preview: function(pbl, {data}) {
+    pbl.innerHTML = (
+      data
+      ? (<pre class={this.name}
+         style="white-space:pre-wrap">{decodeURI(data)}</pre>)
+      : this.description + "<p>" + this.help + "</p>");
+  }
+});
