@@ -146,14 +146,14 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
 
 FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
   // TODO: This function is implemented terribly inefficiently.
-  var uri = Utils.url(url);
+  var {spec} = Utils.url(url);
   var feedLists = [this.getSubscribedFeeds(),
                    this.getUnsubscribedFeeds()];
 
-  for each (feeds in feedLists)
-    for (var i = 0; i < feeds.length; i++)
-      if (feeds[i].uri.spec == uri.spec)
-        return feeds[i];
+  for each (let feeds in feedLists)
+    for each (let feed in feeds)
+      if (feed.uri.spec === spec)
+        return feed;
   return null;
 };
 
