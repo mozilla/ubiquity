@@ -47,6 +47,13 @@ var noun_arb_text = {
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.7, selectionIndices)];
+  },
+  // hack to import feed-specific globals into this module
+  loadGlobals: function(source) {
+    var target = (function() this)();
+    for each (let p in ["Utils", "CmdUtils", "jQuery", "Date"])
+      target[p] = source[p];
+    this.loadGlobals = function(){};
   }
 };
 
@@ -505,5 +512,279 @@ var noun_type_bookmarklet = {
     return this;
   }
 }.load();
+
+var noun_type_date = {
+  _name: "date",
+  'default': function(){
+     var date = Date.parse("today");
+     var text = date.toString("dd MM, yyyy");
+     return CmdUtils.makeSugg(text, null, date, 0.9);
+   },
+  suggest: function( text, html )  {
+    if (typeof text != "string") {
+      return [];
+    }
+
+    var date = Date.parse( text );
+    if (!date) {
+      return [];
+    }
+    text = date.toString("dd MM, yyyy");
+    return [ CmdUtils.makeSugg(text, null, date) ];
+  }
+};
+
+var noun_type_time = {
+   _name: "time",
+   'default': function(){
+     var time = Date.parse("now");
+     var text = time.toString("hh:mm tt");
+     return CmdUtils.makeSugg(text, null, time, 0.9);
+   },
+   suggest: function(text, html){
+     if (typeof text != "string"){
+       return [];
+     }
+
+     var time = Date.parse( text );
+     if(!time ){
+       return [];
+     }
+
+     return [CmdUtils.makeSugg(time.toString("hh:mm tt"), null, time)];
+   }
+};
+
+// TODO this is going on obsolete, and will be replaced entirely by
+// noun_type_async_address.
+var noun_type_address = {
+  _name: "address",
+  knownAddresses: [],
+  maybeAddress: null,
+  callback: function( isAnAddress ) {
+    if (isAnAddress) {
+      noun_type_address.knownAddresses.push( noun_type_address.maybeAddress );
+    }
+    noun_type_address.maybeAddress = null;
+  },
+  suggest: function( text, html ) {
+    isAddress( text, noun_type_address.callback );
+    for(var x in noun_type_address.knownAddresses) {
+      if (noun_type_address.knownAddresses[x] == text) {
+        return [CmdUtils.makeSugg(text)];
+      }
+    }
+    noun_type_address.maybeAddress = text;
+    isAddress( text, noun_type_address.callback );
+    return [];
+  }
+};
+
+// commenting out until this actually works (#619)
+/*
+var noun_type_async_address = {
+  _name: "address(async)",
+  // TODO caching
+  suggest: function(text, html, callback) {
+    isAddress( text, function( truthiness ) {
+      if (truthiness) {
+       callback(CmdUtils.makeSugg(text));
+      }
+    });
+    return [];
+  }
+};
+*/
+
+var noun_type_contact = {
+  _name: "contact",
+  contactList: null,
+  callback: function(contacts) {
+    Array.prototype.push.apply(noun_type_contact.contactList,
+                               contacts);
+  },
+  suggest: function(text, html) {
+    if (noun_type_contact.contactList == null) {
+      noun_type_contact.contactList = [];
+      getContacts(noun_type_contact.callback);
+      var suggs = noun_type_email.suggest(text, html);
+      return suggs.length > 0 ? suggs : [];
+    }
+
+    if( text.length < 1 ) return [];
+
+    var suggestions  = [];
+    for ( var c in noun_type_contact.contactList ) {
+      var contact = noun_type_contact.contactList[c];
+
+      if ((contact["name"].match(text, "i")) || (contact["email"].match(text, "i"))){
+	      suggestions.push(CmdUtils.makeSugg(contact["email"]));
+	    }
+    }
+
+    var suggs = noun_type_email.suggest(text, html);
+    if (suggs.length > 0)
+      suggestions.push(suggs[0]);
+
+    return suggestions.slice(0, CmdUtils.maxSuggestions);
+  }
+};
+
+var noun_type_geolocation = {
+   _name : "geolocation",
+   rankLast: true,
+   'default': function() {
+     var location = CmdUtils.getGeoLocation();
+     if (!location) {
+       // TODO: there needs to be a better way of doing this,
+       // as default() can't currently return null
+       return {text: "", html: "", data: null, summary: ""};
+     }
+     var fullLocation = location.city + ", " + location.country;
+     return CmdUtils.makeSugg(fullLocation,null,null,0.9);
+   },
+
+   suggest: function(fragment, html, callback) {
+      /* LONGTERM TODO: try to detect whether fragment is anything like a valid location or not,
+       * and don't suggest anything for input that's not a location.
+       */
+     function addAsyncGeoSuggestions(location) {
+       if(!location)
+         return;
+       var fullLocation = location.city + ", " + location.country;
+       callback([CmdUtils.makeSugg(fullLocation),
+                 CmdUtils.makeSugg(location.city),
+                 CmdUtils.makeSugg(location.country)]);
+     }
+     if (/\bhere\b/.test(fragment)) {
+       CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
+     }
+     return [CmdUtils.makeSugg(fragment)];
+   }
+};
+
+function getGmailContacts( callback ) {
+  // TODO: It's not really a security hazard since we're evaluating the
+  // Vcard data in a sandbox, but I'm not sure how accurate this
+  // algorithm is; we might want to consider using a third-party
+  // VCard parser instead, e.g.: git://github.com/mattt/vcard.js.git
+  // -AV
+
+  var sandbox = Components.utils.Sandbox("data:text/html,");
+  jQuery.get(
+    "http://mail.google.com/mail/contacts/data/export",
+    {exportType: "ALL", out: "VCARD"},
+    function(data) {
+      function unescapeBS(m) {
+        var result =  Components.utils.evalInSandbox("'"+ m +"'", sandbox);
+        if (typeof(result) == "string")
+          return result;
+        else
+          return "";
+      }
+      var contacts = [], name = '';
+      for each(var line in data.replace(/\r\n /g, '').split(/\r\n/))
+        if(/^(FN|EMAIL).*?:(.*)/.test(line)){
+          var {$1: key, $2: val} = RegExp;
+          var val = val.replace(/\\./g, unescapeBS);
+          if(key === "FN")
+            name = val;
+          else
+            contacts.push({name: name, email: val});
+        }
+      callback(contacts);
+    },
+    "text");
+}
+
+function getYahooContacts( callback ){
+  var url = "http://us.mg1.mail.yahoo.com/yab";
+  //TODO: I have no idea what these params mean
+  var params = {
+    v: "XM",
+    prog: "ymdc",
+    tags: "short",
+    attrs: "1",
+    xf: "sf,mf"
+  };
+
+  jQuery.get(url, params, function(data) {
+
+    var contacts = [];
+    for each( var line in jQuery(data).find("ct") ){
+      var name = jQuery(line).attr("yi");
+      //accept it as as long as it is not undefined
+      if(name){
+        var contact = {};
+        contact["name"] = name;
+        contact["email"] = name + "@yahoo.com"; //TODO: what about yahoo.co.uk or ymail?
+        contacts.push(contact);
+      }
+    }
+
+    callback(contacts);
+  }, "text");
+
+}
+
+function getContacts(callback){
+  getGmailContacts(callback);
+  getYahooContacts(callback);
+}
+
+function isAddress( query, callback ) {
+  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
+  var params = Utils.paramsToString({
+    location: query,
+    appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
+  });
+
+
+  jQuery.ajax({
+    url: url+params,
+    dataType: "xml",
+    error: function() {
+      callback( false );
+    },
+    success:function(data) {
+      var results = jQuery(data).find("Result");
+      var allText = jQuery.makeArray(
+                      jQuery(data)
+                        .find(":contains()")
+                        .map( function(){ return jQuery(this).text().toLowerCase(); } )
+                      );
+
+      // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
+
+      if( results.length == 0 ){
+        callback( false );
+        return;
+      }
+
+      function existsMatch( text ){
+        var joinedText = allText.join(" ");
+        return joinedText.indexOf( text.toLowerCase() ) != -1;
+      }
+
+      var missCount = 0;
+
+      var queryWords = query.match(/\w+/g);
+      for( var i=0; i < queryWords.length; i++ ){
+        if( existsMatch( queryWords[i] ) == false ) {
+          missCount += 1;
+          //displayMessage( queryWords[i] );
+        }
+      }
+
+      var missRatio = missCount / queryWords.length;
+      //displayMessage( missRatio );
+
+      if( missRatio < .5 )
+        callback( true );
+      else
+        callback( false );
+    }
+  });
+}
 
 var EXPORTED_SYMBOLS = [sym for (sym in this) if (/^noun_/.test(sym))];

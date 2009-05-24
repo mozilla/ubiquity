@@ -351,9 +351,8 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   var headerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "header/utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
+    //new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js"),
-    new LocalUriCodeSource(basePartsUri + "header/shared.js"),
   ];
   var feeds = [
     baseFeedsUri + "onstartup.js"
@@ -367,6 +366,7 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   // mitcho's guess: we should keep nountypes separate but verbs together... :/
   if (languageCode == "jp" && parserVersion < 2) {
     headerCodeSources.push(
+      new LocalUriCodeSource(basePartsUri + "header/shared.js"),
       new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js"));
     feeds.push(baseFeedsUri + "jp/builtincmds.js");
   } else if (languageCode == "en" || parserVersion == 2) {
