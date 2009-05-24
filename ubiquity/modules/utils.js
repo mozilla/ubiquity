@@ -47,6 +47,8 @@ var EXPORTED_SYMBOLS = ["Utils"];
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+
 var Utils = {
   get Application() {
     delete this.Application;
@@ -181,23 +183,26 @@ Utils.ellipsify = function ellipsify(node, chars) {
 // {{{delay}}} is the delay, in milliseconds, after which the callback
 // will be called once.
 //
+// {{arg1, arg2 ...}} are optional arguments that will be passed to
+// the callback.
+//
 // This function returns a timer ID, which can later be given to
 // {{{Utils.clearTimeout()}}} if the client decides that it wants to
 // cancel the callback from being triggered.
 
 // TODO: Allow strings for the first argument like DOM setTimeout() does.
 
-Utils.setTimeout = function setTimeout(callback, delay) {
-  var classObj = Cc["@mozilla.org/timer;1"];
-  var timer = classObj.createInstance(Ci.nsITimer);
-  var timerID = Utils.__timerData.nextID;
-  // emulate window.setTimeout() by incrementing next ID by random amount
-  Utils.__timerData.nextID += Math.floor(Math.random() * 100) + 1;
+Utils.setTimeout = function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
+  var timerClass = Cc["@mozilla.org/timer;1"];
+  var timer = timerClass.createInstance(Ci.nsITimer);
+  // emulate window.setTimeout() by incrementing next ID
+  var timerID = Utils.__timerData.nextID++;
   Utils.__timerData.timers[timerID] = timer;
 
-  timer.initWithCallback(new Utils.__TimerCallback(callback),
+  timer.initWithCallback(new Utils.__TimerCallback(callback,
+                                                   Array.slice(arguments, 2)),
                          delay,
-                         classObj.TYPE_ONE_SHOT);
+                         timerClass.TYPE_ONE_SHOT);
   return timerID;
 };
 
@@ -208,37 +213,36 @@ Utils.setTimeout = function setTimeout(callback, delay) {
 // from ever being called.
 
 Utils.clearTimeout = function clearTimeout(timerID) {
-  if(!(timerID in Utils.__timerData.timers))
-    return;
-
-  var timer = Utils.__timerData.timers[timerID];
-  timer.cancel();
-  delete Utils.__timerData.timers[timerID];
+  var {timers} = Utils.__timerData;
+  var timer = timers[timerID];
+  if (timer) {
+    timer.cancel();
+    delete timers[timerID];
+  }
 };
 
 // Support infrastructure for the timeout-related functions.
 
-Utils.__TimerCallback = function __TimerCallback(callback) {
-  Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-
+Utils.__TimerCallback = function __TimerCallback(callback, args) {
   this._callback = callback;
+  this._args = args;
   this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
 };
 
 Utils.__TimerCallback.prototype = {
   notify : function notify(timer) {
-    for(var timerID in Utils.__timerData.timers) {
-      if(Utils.__timerData.timers[timerID] == timer) {
-        delete Utils.__timerData.timers[timerID];
+    var {timers} = Utils.__timerData;
+    for (let timerID in timers)
+      if (timers[timerID] === timer) {
+        delete timers[timerID];
         break;
       }
-    }
-    this._callback();
+    this._callback.apply(null, this._args);
   }
 };
 
 Utils.__timerData = {
-  nextID: Math.floor(Math.random() * 100) + 1,
+  nextID: 1,
   timers: {}
 };
 
