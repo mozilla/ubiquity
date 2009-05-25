@@ -136,20 +136,18 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "calculate",
   names: {
-    en: ['calculate'],
-    ja: ['險育ｮ励☆繧・,'險育ｮ励＠繧・,'險育ｮ励＠縺ｦ','縺代＞縺輔ｓ縺吶ｋ','縺代＞縺輔ｓ縺励ｍ','縺代＞縺輔ｓ縺励※']
+    en: ["calculate"],
+    ja: ["計算する", "計算しろ", "計算して",
+         "けいさんする", "けいさんしろ","けいさんして"],
   },
   arguments: [
-    {role: 'object', nountype: /^[\d\.\+\-\*\/\^%~(, )]+$/}
+    {role: "object", nountype: /^[\d.+\-*\/^%~(, )]+$/}
   ],
-  takes: {"expression": /^[\d\.\+\-\*\/\^%~(, )]*$/},
+  takes: {"expression": /^[\d.+\-*\/^%~(, )]+$/},
   icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
   preview: function(previewBlock, args) {
-
-    dump('typeof:'+(typeof previewBlock)+'\n');
-
     var expression = args.object.text;
 
     if(expression.length < 1) {
@@ -445,19 +443,19 @@ CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
   name: "translate",
   names: {
-    da: ['oversat'],
-    en: ['translate'],
-    fr: ['traduire','traduizez','traduis'],
-    ca: ['tradueix', 'traduix'],
-    da: ['oversat'],
-    sv: ['oversatt'],
-    ja: ['險ｳ縺・,'險ｳ縺・,'險ｳ縺励※','繧・￥縺・,'繧・￥縺・,'繧・￥縺励※'],
-    pt: ['traduzir', 'traduza']
+    da: ["oversat"],
+    en: ["translate"],
+    fr: ["traduire","traduizez","traduis"],
+    ca: ["tradueix", "traduix"],
+    da: ["oversat"],
+    sv: ["oversatt"],
+    ja: ["訳す", "訳せ", "訳して", "やくす", "やくせ", "やくして"],
+    pt: ["traduzir", "traduza"],
   },
   arguments: [
-    {role: 'object', nountype: noun_arb_text},
-    {role: 'source', nountype: noun_type_lang_google},
-    {role: 'goal', nountype: noun_type_lang_google}
+    {role: "object", nountype: noun_arb_text},
+    {role: "source", nountype: noun_type_lang_google},
+    {role: "goal", nountype: noun_type_lang_google}
   ],
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",
