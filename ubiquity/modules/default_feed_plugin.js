@@ -316,7 +316,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
 
   var globalObjects = {};
 
-  function makeGlobals(codeSource) {
+  return function makeGlobals(codeSource) {
     var id = codeSource.id;
 
     if (!(id in globalObjects))
@@ -326,10 +326,15 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       XPathResult: webJsm.XPathResult,
       XMLHttpRequest: webJsm.XMLHttpRequest,
       jQuery: webJsm.jQuery,
+      $: webJsm.jQuery,
       Template: webJsm.TrimPath,
       Application: webJsm.Application,
       Date: webJsm.Date,
       Components: Components,
+      Cc: Components.classes,
+      Ci: Components.interfaces,
+      Cu: Components.utils,
+      Cr: Components.results,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
       pageLoadFuncs: [],
@@ -339,8 +344,6 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       }
     };
   }
-
-  return makeGlobals;
 }
 
 function makeBuiltins(languageCode, baseUri, parserVersion) {
