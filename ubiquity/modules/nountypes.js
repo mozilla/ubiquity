@@ -301,23 +301,20 @@ var noun_type_livemark = {
   }
 };
 
-var noun_type_commands = {
-   _name: "command",
-   __cmdSource : UbiquitySetup.createServices().commandSource,
-
-   suggest : function(fragment){
-      var cmds = [];
-      for each( var cmd in this.__cmdSource.commandNames){
-         if(cmd.name.match(fragment, "i")){
-            var cmdObj = this.__cmdSource.getCommand(cmd.name);
-
-            var help = cmdObj.help ? cmdObj.help : cmdObj.description;
-            cmds.push(CmdUtils.makeSugg(cmd.name, help, cmdObj));
-         }
-      }
-      return cmds;
-   }
-}
+var noun_type_command = noun_type_commands = {
+  _name: "command",
+  _cmdSource: UbiquitySetup.createServices().commandSource,
+  suggest: function(text, html, cb, selected) {
+    if (selected || !text) return [];
+    var suggs = [CmdUtils.makeSugg(cmd.name,
+                                   ((cmd.description || "") +
+                                    ("<p>" + (cmd.help || "") + "</p>")),
+                                   cmd)
+                 for each (cmd in this._cmdSource.getAllCommands())
+                 if (!cmd.disabled)];
+    return CmdUtils.grepSuggs(text, suggs);
+  },
+};
 
 var noun_type_twitter_user = {
    _name: "twitter username",
