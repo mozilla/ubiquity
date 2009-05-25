@@ -144,24 +144,26 @@ NounUtils.makeSugg = function(text, html, data, score, selectionIndices) {
 // and returns it. The {{{data}}} attribute of the noun type is
 // the {{{match}}} object resulting from the regular expression
 // match.
+//
+// {{{regexp}}} is the RegExp object that checks inputs.
+//
+// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
 
-NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
-  var rankLast = regexp.source === ".*";
+NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
   return {
-    // This will show up if the noun type is the target of a modifier.
-    _name: "text",
+    _name: name || "?",
     _regexp: regexp,
-    rankLast: rankLast,
+    rankLast: regexp.test(""),
     suggest: function(text, html, callback, selectionIndices) {
       var match = text.match(this._regexp);
-      if (match) {
-        var suggestion = NounUtils.makeSugg(text, html, match,
-                                            (rankLast ? 0.7 : 1),
-                                            selectionIndices);
-        return [suggestion];
-      } else
-        return [];
-    }
+      return (match
+              ? NounUtils.makeSugg(text, html, match,
+                                   this.rankLast ? 0.7 : 1,
+                                   // ^why is this needed, being rankLast
+                                   // not enough for grading it down?
+                                   selectionIndices)
+              : []);
+    },
   };
 };
 
@@ -197,18 +199,18 @@ NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
 // Creates a noun type from the given key:value pairs, the key being
 // the {{{text}}} attribute of its suggest and the value {{{data}}}.
 //
-// {{{name}}} is the name of the new nountype.
-//
 // {{{dict}}} is an object of text:data pairs.
+//
+// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
 //
 // {{{defaults}}} is an optional array or space-separated string
 // of default keys.
 
-NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(name,
-                                                                   dict,
+NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(dict,
+                                                                   name,
                                                                    defaults) {
   var noun = {
-    _name: name,
+    _name: name || "?",
     _list: [NounUtils.makeSugg(key, null, val)
             for each ([key, val] in Iterator(dict))],
     suggest: function(text, html, cb, selected) {
