@@ -454,6 +454,10 @@ Parser.prototype = {
           if (RegExp('^'+verbPrefix,'i').test(name)) {
             let thisParse = {_verb: cloneObject(this._verbList[verb]),
                              argString: argString};
+            for each (let arg in thisParse._verb.arguments) {
+              delete(arg.nountype);
+              // save some memory.
+            }
             // add some extra information specific to this parse
             thisParse._verb.id = verb;
             thisParse._verb.text = name;
@@ -620,7 +624,7 @@ Parser.prototype = {
       // start score off with one point for the verb.
       defaultParse.__score = defaultParse.scoreMultiplier;
 
-      defaultParse.args = [];
+      defaultParse.args = {};
       return [defaultParse];
     }
 
@@ -1841,24 +1845,14 @@ Parser.Parse.prototype = {
   // Execute the verb. Only the first argument in each role is returned.
   // The others are thrown out.
   execute: function(context) {
-    let firstArgs = {};
-    for (let role in this.args) {
-      firstArgs[role] = this.args[role][0];
-    }
-    return this._verb.execute( context, firstArgs );
+    return this._verb.execute( context, this.getFirstArgs() );
   },
   // **{{{Parser.Parse.preview()}}}**
   //
   // Returns the verb preview.
   preview: function(context, previewBlock) {
-
-    let firstArgs = {};
-    for (let role in this.args) {
-      firstArgs[role] = this.args[role][0];
-    }
-
     if (typeof this._verb.preview == 'function')
-      return this._verb.preview( context, previewBlock, firstArgs );
+      return this._verb.preview( context, previewBlock, this.getFirstArgs() );
     else {
       this.dump(this._verb.names.en[0]+' didn\'t have a preview!');
       return false;
@@ -1875,6 +1869,13 @@ Parser.Parse.prototype = {
   // Return the verb's {{{previewUrl}}} value.
   get previewUrl() {
     return this._verb.previewUrl;
+  },
+  getFirstArgs: function() {
+    let firstArgs = {};
+    for (let role in this.args) {
+      firstArgs[role] = this.args[role][0];
+    }
+    return firstArgs;
   },
   // **{{{Parser.Parse.getLastNode()}}}**
   //

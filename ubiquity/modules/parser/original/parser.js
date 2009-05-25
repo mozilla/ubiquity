@@ -504,7 +504,7 @@ NLParser1.ParsedSentence.prototype = {
     return true;
   },
 
-  fillMissingArgsWithDefaults: function ps_fwamd() {
+  fillMissingArgsWithDefaults: function ps_fmawd() {
     let newSentences = [this.copy()];
     let defaultValue;
     let defaultsArray = [];
@@ -756,17 +756,15 @@ NLParser1.PartiallyParsedSentence.prototype = {
       	  let filledSen = sen.fillMissingArgsWithDefaults();
 
       	  for each (let oneSen in filledSen) {
-              oneSen._cameFromNounFirstSuggestion = true;
-              parsedSentences.push(oneSen);
-           }
+            oneSen._cameFromNounFirstSuggestion = true;
+            parsedSentences.push(oneSen);
+          }
       	}
       }
     } else {
       for each( let sen in this._parsedSentences) {
 	      let filledSen = sen.fillMissingArgsWithDefaults();
-         for each (let oneSen in filledSen) {
-            parsedSentences.push(oneSen);
-         }
+        parsedSentences = parsedSentences.concat(filledSen);
       }
     }
 
