@@ -38,9 +38,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/cmdutils.js");
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/setup.js");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/cmdutils.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/setup.js");
 
 var noun_arb_text = {
   _name: "text",
@@ -490,7 +494,7 @@ var noun_type_bookmarklet = {
   list: null,
   load: function(reload) {
     var jsm = {};
-    Components.utils.import("resource://gre/modules/utils.js", jsm);
+    Cu.import("resource://gre/modules/utils.js", jsm);
     var list = [];
     var {bookmarks, history} = jsm.PlacesUtils;
     var query = history.getNewQuery();
@@ -670,13 +674,13 @@ function getGmailContacts( callback ) {
   // VCard parser instead, e.g.: git://github.com/mattt/vcard.js.git
   // -AV
 
-  var sandbox = Components.utils.Sandbox("data:text/html,");
+  var sandbox = Cu.Sandbox("data:text/html,");
   jQuery.get(
     "http://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
     function(data) {
       function unescapeBS(m) {
-        var result =  Components.utils.evalInSandbox("'"+ m +"'", sandbox);
+        var result =  Cu.evalInSandbox("'"+ m +"'", sandbox);
         if (typeof(result) == "string")
           return result;
         else
