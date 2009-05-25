@@ -497,35 +497,23 @@ var noun_type_async_address = {
 
 var noun_type_contact = {
   _name: "contact",
-  contactList: null,
-  callback: function(contacts) {
-    Array.prototype.push.apply(noun_type_contact.contactList,
-                               contacts);
+  _list: null,
+  _callback: function(contacts) {
+    Array.prototype.push.apply(
+      noun_type_contact._list,
+      [{text: c.name, data: c.email, key: c.name + "\n" + c.email, score: 0.9,
+        summary: <>{c.name} &lt;{c.email}&gt;</>.toXMLString()}
+        for each (c in contacts)]);
   },
-  suggest: function(text, html) {
-    if (noun_type_contact.contactList == null) {
-      noun_type_contact.contactList = [];
-      getContacts(noun_type_contact.callback);
-      var suggs = noun_type_email.suggest(text, html);
-      return suggs.length > 0 ? suggs : [];
+  suggest: function(text) {
+    if (!this._list) {
+      this._list = [];
+      getContacts(this._callback);
+      return CmdUtils.makeSugg(text);
     }
-
-    if( text.length < 1 ) return [];
-
-    var suggestions  = [];
-    for ( var c in noun_type_contact.contactList ) {
-      var contact = noun_type_contact.contactList[c];
-
-      if ((contact["name"].match(text, "i")) || (contact["email"].match(text, "i"))){
-	      suggestions.push(CmdUtils.makeSugg(contact["email"]));
-	    }
-    }
-
-    var suggs = noun_type_email.suggest(text, html);
-    if (suggs.length > 0)
-      suggestions.push(suggs[0]);
-
-    return suggestions.slice(0, CmdUtils.maxSuggestions);
+    return (CmdUtils.grepSuggs(text, this._list, "key")
+            .concat(noun_type_email.suggest.apply(noun_type_email,
+                                                  arguments)));
   }
 };
 
@@ -793,30 +781,15 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
 }
 
-function getGmailContacts( callback ) {
-  // TODO: It's not really a security hazard since we're evaluating the
-  // Vcard data in a sandbox, but I'm not sure how accurate this
-  // algorithm is; we might want to consider using a third-party
-  // VCard parser instead, e.g.: git://github.com/mattt/vcard.js.git
-  // -AV
-
-  var sandbox = Cu.Sandbox("data:text/html,");
+function getGmailContacts(callback) {
   jQuery.get(
     "http://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
     function(data) {
-      function unescapeBS(m) {
-        var result =  Cu.evalInSandbox("'"+ m +"'", sandbox);
-        if (typeof(result) == "string")
-          return result;
-        else
-          return "";
-      }
-      var contacts = [], name = '';
+      var contacts = [], name = "";
       for each(var line in data.replace(/\r\n /g, '').split(/\r\n/))
         if(/^(FN|EMAIL).*?:(.*)/.test(line)){
           var {$1: key, $2: val} = RegExp;
-          var val = val.replace(/\\./g, unescapeBS);
           if(key === "FN")
             name = val;
           else
