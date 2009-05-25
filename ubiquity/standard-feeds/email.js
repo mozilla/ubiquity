@@ -1,9 +1,8 @@
-
-var gmailAppsDomain="";
+var gmailAppsDomain = "";
 
 CmdUtils.CreateCommand({
   name: "detect-gmail-apps-domain",
-  execute: function (){
+  execute: function() {
     if (gmailAppsDomain.length == 0) {
       getGmailAppsDomain();
     }
@@ -115,46 +114,45 @@ CmdUtils.CreateCommand({
 
 
 function findGmailTab() {
-  var window = Application.activeWindow;
-
-  var gmailURL = "://mail.google.com";
-  var currentLocation = String(Application.activeWindow.activeTab.document.location);
-  if(currentLocation.indexOf(gmailURL) != -1) {
-    return Application.activeWindow.activeTab;
-  }
-
-  for (var i = 0; i < window.tabs.length; i++) {
-    var tab = window.tabs[i];
-    var location = String(tab.document.location);
-    if (location.indexOf(gmailURL) != -1) {
+  var win = Application.activeWindow;
+  for each (var tab in [win.activeTab].concat(win.tabs))
+    if (/^https?:\/\/mail\.google\.com\/mail\/(?:[?#]|$)/
+        .test(tab.document.URL))
       return tab;
-    }
-  }
   return null;
 }
 
 CmdUtils.CreateCommand({
   name: "email",
   names: {
-    en: ['email','email','mail'],
-    ja: ['メールする','メールして','メールしろ','送信する','送信して','送信しろ','そうしんして','そうしんして','そうしんしろ']
+    en: ["email", "email", "mail"], 
+    ja: ["メールする", "メールして", "メールしろ",
+         "送信する", "送信して", "送信しろ",
+         "そうしんして", "そうしんして", "そうしんしろ"],
   },
   arguments: [
-    {role: 'object', nountype: noun_arb_text},
-    {role: 'goal', nountype: noun_type_contact}
+    {role: "object", nountype: noun_arb_text},
+    {role: "goal", nountype: noun_type_contact}
   ],
-  synonyms: ["mail.yahoo.com", "gmail.com", "hotmail.com", "email.comcast"],
-  takes: {"message": noun_arb_text},
+  synonyms: ["gmail.com",
+             //"mail.yahoo.com", "hotmail.com", "email.comcast"
+             ],
+  takes: {message: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/email.png",
   modifiers: {to: noun_type_contact},
-  description:"Begins composing an email to a person from your contact list.",
-  help:"Currently only works with <a href=\"http://mail.google.com\">Google Mail</a>, so you'll need a Gmail account to use it." +
-       " Try selecting part of a web page (including links, images, etc) and then issuing &quot;email this&quot;.  You can" +
-       " also specify the recipient of the email using the word &quot;to&quot; and the name of someone from your contact list." +
-       " For example, try issuing &quot;email hello to jono&quot; (assuming you have a friend named &quot;jono&quot;).",
+  description: "Begins composing an email to a person from your contact list.",
+  help: "" + (
+    <>Currently only works with <a href="http://mail.google.com">Google Mail</a>,
+    so you&#39;ll need a Gmail account to use it.<br/>
+    Try selecting part of a web page (including links, images, etc)
+    and then issuing "email this".<br/>
+    You can also specify the recipient of the email using the word "to"
+    and the name of someone from your contact list.
+    For example, try issuing "email hello to jono"
+    (assuming you have a friend named "jono").</>),
   preview: function(pblock, args) {
     var html = "Creates an email message ";
-    var goal = args.goal ? args.goal : args.to;
+    var goal = args.goal || args.to;
     if (goal) {
       html += "to " + goal.text + " ";
     }
@@ -167,127 +165,107 @@ CmdUtils.CreateCommand({
   },
 
   execute: function(args) {
-    var html = (args.object ? args.object.html : '');
-    var document = context.focusedWindow.document;
-    var title;
-    var toAddress = "";
-    if (document.title)
-      title = document.title;
-    else
-      title = html;
-    var location = document.location;
-    var gmailTab = findGmailTab();
-    var pageLink = "<a href=\"" + location + "\">" + title + "</a>";
-    if (html) {
-      html = ("<p>From the page " + pageLink + ":</p>" + html);
-    } else {
-      // If there's no selection, just send the current page.
-      html = "<p>You might be interested in " + pageLink + ".</p>";
-    }
-
+    var {title, URL} = context.focusedWindow.document;
+    // #574: no one I tested liked the stock "You might be interested in"
+    //       just offer a link and the selected text.
+    var html = ((<p><a href={URL}>{title}</a></p> + "\n") +
+                ((args.object || 0).html || ""));
     title = "'" + title + "'";
 
-    var goal = args.goal ? args.goal : args.to;
-    if (goal)
-      if (goal.text)
-	toAddress = goal.text;
+    var goal = args.goal || args.to;
+    var toAddress = goal ? goal.text : "";
 
-    if (gmailTab) {
-      // Note that this is technically insecure because we're
-      // accessing wrappedJSObject, but we're only executing this
-      // in a Gmail tab, and Gmail is trusted code.
-      var console = gmailTab.document.defaultView.wrappedJSObject.console;
-      var gmonkey = gmailTab.document.defaultView.wrappedJSObject.gmonkey;
-
-      var continuer = function() {
-        // For some reason continuer.apply() won't work--we get
-        // a security violation on Function.__parent__--so we'll
-        // manually safety-wrap this.
-	try {
-          var gmail = gmonkey.get("1.0");
-          var sidebar = gmail.getNavPaneElement();
-          var composeMail = sidebar.getElementsByTagName("span")[0];
-	  //var composeMail = sidebar.getElementById(":qw");
-          var event = composeMail.ownerDocument.createEvent("Events");
-          event.initEvent("click", true, false);
-          composeMail.dispatchEvent(event);
-          var active = gmail.getActiveViewElement();
-	  var toField = composeMail.ownerDocument.getElementsByName("to")[0];
-	  toField.value = toAddress;
-          var subject = active.getElementsByTagName("input")[0];
-          if (subject) subject.value = title;
-          var iframe = active.getElementsByTagName("iframe")[0];
-          if (iframe)
-            iframe.contentDocument.execCommand("insertHTML", false, html);
-          else {
-            var body = composeMail.ownerDocument.getElementsByName("body")[0];
-            html = ("Note: the following probably looks strange because " +
-                    "you don't have rich formatting enabled.  Please " +
-                    "click the 'Rich formatting' link above, discard " +
-                    "this message, and try " +
-                    "the email command again.\n\n" + html);
-            body.value = html;
-          }
-          gmailTab.focus();
-        } catch (e) {
-          displayMessage({text: "A gmonkey exception occurred.",
-                          exception: e});
-        }
-      };
-
-      gmonkey.load("1.0", continuer);
-    } else {
-      // No Gmail tab open?  Open a new one:
+    var gmailTab = findGmailTab() || 0;
+    // Note that this is technically insecure because we're
+    // accessing wrappedJSObject, but we're only executing this
+    // in a Gmail tab, and Gmail is trusted code.
+    var {gmonkey} = gmailTab && gmailTab.document.defaultView.wrappedJSObject;
+    if (!gmonkey) {
+      // No Gmail  tab open?  Open a new one:
       var params = {fs:1, tf:1, view:"cm", su:title, to:toAddress, body:html};
-      Utils.openUrlInBrowser("http://mail.google.com/mail/?" +
-			     Utils.paramsToString(params));
+      Utils.openUrlInBrowser("http://mail.google.com/mail/" +
+                             Utils.paramsToString(params));
+      return;
     }
+    gmonkey.load("1.0", function continuer(gmail) {
+      // For some reason continuer.apply() won't work--we get
+      // a security violation on Function.__parent__--so we'll
+      // manually safety-wrap this.
+      try {
+        var sidebar = gmail.getNavPaneElement();
+        var composeMail = sidebar.getElementsByTagName("span")[0];
+        //var composeMail = sidebar.getElementById(":qw");
+        var event = composeMail.ownerDocument.createEvent("Events");
+        event.initEvent("click", true, false);
+        composeMail.dispatchEvent(event);
+        var active = gmail.getActiveViewElement();
+        var toField = composeMail.ownerDocument.getElementsByName("to")[0];
+        toField.value = toAddress;
+        var subject = active.getElementsByTagName("input")[0];
+        if (subject) subject.value = title;
+        var iframe = active.getElementsByTagName("iframe")[0];
+        if (iframe)
+          iframe.contentDocument.execCommand("insertHTML", false, html);
+        else {
+          var body = composeMail.ownerDocument.getElementsByName("body")[0];
+          html = ("Note: the following probably looks strange because " +
+                  "you don't have rich formatting enabled.  Please " +
+                  "click the 'Rich formatting' link above, discard " +
+                  "this message, and try " +
+                  "the email command again.\n\n" + html);
+          body.value = html;
+        }
+        gmailTab.focus();
+      } catch (e) {
+        displayMessage({
+          text: "A gmonkey exception occurred.",
+          exception: e});
+      }
+    });
   }
 });
 
 function gmailChecker(callback, service) {
-
-  var url = "http://mail.google.com/mail/feed/atom";
+  var url = "https://mail.google.com/mail/feed/atom";
   if(service == "googleapps"){
-    url = "http://mail.google.com/a/" + getGmailAppsDomain() + "/feed/atom";
+    url = "https://mail.google.com/a/" + getGmailAppsDomain() + "/feed/atom";
   }
-
-  Utils.ajaxGet(url, function(rss) {
-    CmdUtils.loadJQuery(function(jQuery) {
-      var emailDetails = {};
-      var firstEntry = jQuery(rss).find("entry").get(0);
-      if (firstEntry) {
-        emailDetails.lastEmail = {
-          author: jQuery(firstEntry).find("author > name").text(),
-          subject: subject = jQuery(firstEntry).find("title").text(),
-          summary: jQuery(firstEntry).find("summary").text(),
-          href: jQuery(firstEntry).find("link").attr("href")
-        };
-      }
-      callback(emailDetails);
-    });
-  });
+  jQuery.get(url, null, function(atom) {
+    var emailDetails = {};
+    var firstEntry = jQuery("entry:first", atom);
+    if (firstEntry.length)
+      emailDetails.lastEmail = {
+        author: firstEntry.find("author > name").text(),
+        subject: firstEntry.find("title").text(),
+        summary: firstEntry.find("summary").text(),
+        href: firstEntry.find("link").attr("href"),
+      };
+    callback(emailDetails);
+  }, "xml");
 }
 
 CmdUtils.CreateCommand({
   name: "last-email-from",
   takes: {"email service": noun_type_emailservice},
   icon: "chrome://ubiquity/skin/icons/email_open.png",
-  description: "Displays your most recent incoming email.  Requires a <a href=\"http://mail.google.com\">Google Mail</a> account.",
-  preview: function( pBlock , arg) {
+  description: ("Displays your most recent incoming email. Requires a " +
+                '<a href="http://mail.google.com">Gmail</a> account.'),
+  preview: function(pBlock, arg) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
-    // Checks if user is authenticated first - if not, do not ajaxGet, as this triggers authentication prompt
-    if (Utils.getCookie("mail.google.com", "S") != undefined) {
+    // Checks if user is authenticated first
+    // if not, do not ajaxGet, as this triggers authentication prompt
+    if (Utils.getCookie(".mail.google.com", "GX")) {
       gmailChecker(function(emailDetails) {
-        var previewTemplate = "<b>You have no new mail!</b>";
-        if (emailDetails.lastEmail) {
-          var previewTemplate = "Last unread e-mail:" +
-            "<a href=\"${lastEmail.href}\">" +
-            "<p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p>" +
-            "<p>${lastEmail.summary}</p>" +
-            "</a>";
-        }
-        pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, emailDetails);
+        var previewTemplate = (
+          emailDetails.lastEmail
+          ? ("Last unread e-mail: <a href=\"${lastEmail.href}\">" +
+             "<p><b>${lastEmail.author}</b> says: " +
+             "<b>${lastEmail.subject}</b></p>" +
+             "<p>${lastEmail.summary}</p>" +
+             "</a>")
+          : "<b>You have no new mail!</b>");
+        pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate,
+                                                   emailDetails);
       }, arg.text);
     } else {
       pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
@@ -297,7 +275,8 @@ CmdUtils.CreateCommand({
     gmailChecker(function(emailDetails) {
       var msgTemplate = "You have no new mail.";
       if (emailDetails.lastEmail) {
-        msgTemplate = "You have new email! ${lastEmail.author} says: ${lastEmail.subject}";
+        msgTemplate = ("You have new email! ${lastEmail.author} says: " +
+                       "${lastEmail.subject}");
       }
       displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
     }, arg.text);
@@ -307,15 +286,15 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   name: "get-email-address",
   icon: "chrome://ubiquity/skin/icons/email.png",
-  description: "Looks up the email address of a person from your contacts list given their name.",
+  description: ("Looks up the email address of a person " +
+                "from your contacts list given their name. " +
+                "Execute to copy the address."),
   takes: {name: noun_type_contact},
-  preview: function( pBlock, name ) {
-    if (name.text)
-      pBlock.innerHTML = name.text;
-    else
-      pBlock.innerHTML = "Looks up an email address from your contacts list.";
+  execute: function({text}) {
+    CmdUtils.copyToClipboard(text);
+    displayMessage({icon: this.icon, title: this.name, text: text});
   },
-  execute: function( name ) {
-    displayMessage(name.text);
-  }
+  preview: function(pbl, {html}) {
+    pbl.innerHTML = html || this.description;
+  },
 });

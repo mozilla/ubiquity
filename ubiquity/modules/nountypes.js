@@ -511,7 +511,7 @@ var noun_type_contact = {
     if (!this._list) {
       this._list = [];
       getContacts(this._callback);
-      return CmdUtils.makeSugg(text);
+      return noun_arb_text.suggest.apply(noun_arb_text, arguments);
     }
     return (CmdUtils.grepSuggs(text, this._list, "key")
             .concat(noun_type_email.suggest.apply(noun_type_email,
