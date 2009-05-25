@@ -407,6 +407,7 @@ function translateTo(text, langCodePair, callback, pblock) {
     langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
   };
   function onsuccess(data) {
+  
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
     // this would be to split up the request into multiple chunks.
@@ -435,6 +436,7 @@ function translateTo(text, langCodePair, callback, pblock) {
     }
     callback(translatedText);
   }
+  
   if (pblock) CmdUtils.previewGet(pblock, url, params, onsuccess, "json");
   else jQuery.get(url, params, onsuccess, "json");
 }
@@ -472,27 +474,31 @@ CmdUtils.CreateCommand({
   execute: function({object, to, from, goal, source}) {
     if (object.text)
       translateTo(object.text,
-                  { from: (source || from).data,
-                    to: (goal || to).data || this._getDefaultLang()},
+                  { from: source ? source.data : from ? from.data : '',
+                    to: goal ? goal.data : to ? to.data : 
+                      this._getDefaultLang()},
                   function(translation) {
                     CmdUtils.setSelection(translation);
                   });
   },
   preview: function(pblock, {object, to, from, goal, source}) {
-    var textToTranslate = object.text;
+    var textToTranslate;
+    if (object)
+      textToTranslate = object.text;
     if (!textToTranslate) {
       pblock.innerHTML = this.description;
       return;
     }
-    if (!goal) goal = to;
     var defaultLang = this._getDefaultLang();
-    var toLang = goal.text || noun_type_language.getLangName(defaultLang);
-    var toLangCode = goal.data || defaultLang;
+    var toLang = goal ? goal.text : to ? to.text : 
+                 noun_type_language.getLangName(defaultLang);
+    var toLangCode = goal ? goal.data : to ? to.data : defaultLang;
+    var fromLangCode = source ? source.data : from ? from.data : '';
     var html = pblock.innerHTML =
       "Replaces the selected text with the " + toLang + " translation:";
     translateTo(
       textToTranslate,
-      {from: (source || from).data, to: toLangCode},
+      {from: fromLangCode, to: toLangCode},
       function(translation) {
         pblock.innerHTML = html + <p><b>{translation}</b></p>;
       },

@@ -1172,6 +1172,7 @@ Parser.prototype = {
                   // copy the attributes we want to copy from the nounCache
                   parseCopy.args[role][i].text = suggestion.text;
                   parseCopy.args[role][i].html = suggestion.html;
+                  parseCopy.args[role][i].data = suggestion.data;
                   parseCopy.args[role][i].score = suggestion.score;
                   parseCopy.args[role][i].nountypeId = suggestion.nountypeId;
 
@@ -1376,7 +1377,7 @@ Parser.Query.prototype = {
       try {
         ok = parseGenerator.next();
       } catch(e) {
-        self.dump('done!!?');
+        //self.dump('done!!?');
       }
       //mylog(["self: ", self]);
       //mylog(["ok: ", ok]);
