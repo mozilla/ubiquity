@@ -946,8 +946,8 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
 }
 
 function testParseWithComplexQuery() {
-  // the "?" should be dropped off for the direct_object (#571)
-  var inputWords = "tw might as well as b ?";
+  // the "!" should be dropped off for the direct_object (#571)
+  var inputWords = "tw might as well as b !";
   var stat = null;
   var user = null;
   var noun_stat = {

@@ -46,94 +46,74 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var NounUtils = {};
 
-NounUtils.NounType = function(name, expectedWords, defaultWord) {
-  this._init(name, expectedWords, defaultWord);
+// ** {{{ NounUtils.NounType() }}} **
+//
+// Constructor of a noun type that accepts a finite list of specific words
+// as the only valid values.
+//
+// {{{name}}} is the name of the new nountype.
+//
+// {{{expectedWords}}} is an array or space-separated string of expected words.
+//
+// {{{defaultWords}}} is an optional array or space-separated string
+// of default words.
+
+NounUtils.NounType = function NounType(name, expectedWords, defaultWords) {
+  if (!(this instanceof NounType))
+    return new NounType(name, expectedWords, defaultWords);
+  this._name = name;
+  if (typeof expectedWords === "string")
+    expectedWords = expectedWords.match(/\S+/g);
+  this._words = [NounUtils.makeSugg(w) for each (w in expectedWords)];
+  if (typeof defaultWords === "string")
+    defaultWords = defaultWords.match(/\S+/g);
+  if (defaultWords) {
+    this._defaults = [NounUtils.makeSugg(w, null, null, 0.9)
+                      for each (w in defaultWords)];
+    this.default = function() this._defaults;
+  }
 };
 
 NounUtils.NounType.prototype = {
-  /* A NounType that accepts a finite list of specific words as the only valid
-   * values.  Instantiate it with an array giving all allowed words.
-   */
-  _init: function(name, expectedWords, defaultWord) {
-    this._name = name;
-    this._wordList = expectedWords; // an array
-    if(typeof defaultWord == "string") {
-      this.default = function() {
-        return NounUtils.makeSugg(defaultWord);
-      };
-    }
-  },
-  suggest: function(text) {
-    // returns array of suggestions where each suggestion is object
-    // with .text and .html properties.
-    if (typeof text != "string") {
-      // Input undefined or not a string
-      return [];
-    }
-
-    text = text.toLowerCase();
-
-    var possibleWords = [];
-    if(typeof this._wordList == "function") {
-      possibleWords = this._wordList();
-    } else {
-      possibleWords = this._wordList;
-    }
-
-    var suggestions = [];
-    possibleWords.forEach(function(word) {
-      // Do the match in a non-case sensitive way
-      if ( word.toLowerCase().indexOf(text) > -1 ) {
-      	suggestions.push( NounUtils.makeSugg(word) );//xxx
-      	// TODO if text input is multiple words, search for each of them
-      	// separately within the expected word.
-      }
-    });
-    return suggestions;
-  }
+  suggest: function(text) NounUtils.grepSuggs(text, this._words),
 };
 
 // ** {{{ NounUtils.makeSugg() }}} **
 //
-// ** FIXME **
+// ** FIXME: documentation **
 //
-// {{{ text }}}
-// {{{ html }}}
-// {{{ data }}}
-// {{{ score = 1 }}}
-// {{{ selectionIndices }}}
+// {{{text}}}
+// {{{html}}}
+// {{{data}}}
+// {{{score = 1}}}
+// {{{selectionIndices}}}
 
-NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
+NounUtils.makeSugg = function(text, html, data, score, selectionIndices) {
   if (typeof text !== "string" &&
       typeof html !== "string" &&
-      arguments.length < 3) {
+      arguments.length < 3)
     // all inputs empty!  There is no suggestion to be made.
     return null;
-  }
+
+  // Shift the argument if appropriate:
   if (typeof score === "object") {
     selectionIndices = score;
     score = null;
   }
-  // make the basic object:
-  var suggestion = {text: text, html: html, data:data, score: (score || 1) };
+
   // Fill in missing fields however we can:
-  if (suggestion.data && !suggestion.text)
-    suggestion.text = suggestion.data.toString();
-  if (suggestion.text && !suggestion.html)
-    suggestion.html = Utils.escapeHtml(suggestion.text);
-  if (suggestion.html && !suggestion.text)
-    // TODO: Any easy way to strip the text out of the HTML here? We
-    // don't have immediate access to any HTML DOM objects...
-    suggestion.text = suggestion.html;
+  if (!text && data != null)
+    text = data.toString();
+  if (!html && text >= "")
+    html = Utils.escapeHtml(text);
+  if (!text && html >= "")
+    text = html.replace(/<[^>]*>/g, "");
 
   // Create a summary of the text:
-
   var snippetLength = 35;
-  var summary;
-  if( text && text.length > snippetLength )
-    summary = text.substring(0, snippetLength-1) + "\u2026";
-  else
-    summary = suggestion.text;
+  var summary = (text.length > snippetLength
+                 ? text.slice(0, snippetLength-1) + "\u2026"
+                 : text);
 
   /* If the input comes all or in part from a text selection,
    * we'll stick some html tags into the summary so that the part
@@ -153,9 +133,9 @@ NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
   } else
     summary = Utils.escapeHtml(summary);
 
-  suggestion.summary = summary;
-
-  return suggestion;
+  return {
+    text: text, html: html, data: data,
+    summary: summary, score: score || 1};
 };
 
 // ** {{{ NounUtils.nounTypeFromRegExp() }}} **
@@ -166,10 +146,8 @@ NounUtils.makeSugg = function( text, html, data, score, selectionIndices ) {
 // match.
 
 NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
-  var rankLast = false;
-  if (regexp.source == ".*")
-    rankLast = true;
-  var newNounType = {
+  var rankLast = regexp.source === ".*";
+  return {
     // This will show up if the noun type is the target of a modifier.
     _name: "text",
     _regexp: regexp,
@@ -185,6 +163,31 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
         return [];
     }
   };
-
-  return newNounType;
 };
+
+// == {{{ NounUtils.grepSuggs() }}} ==
+//
+// A helper function to grep a list of suggestion objects by user input.
+// Returns an array of filtered suggetions sorted by matched indices.
+//
+// {{{input}}} is a string that filters the list.
+//
+// {{{suggs}}} is an array or dictionary of suggestion objects.
+//
+// {{{key = "text"}}} is an optional string to specify the target property
+// to match with.
+
+NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
+  if (!input) return [];
+  if (key == null) key = "text";
+  try { var re = RegExp(input, "i") }
+  catch (e if e instanceof SyntaxError) {
+    re = RegExp(input.replace(/./g, "\\$&"), "i");
+  }
+  var results = [], count = suggs.__count__, i = -1;
+  for each (let sugg in suggs) {
+    let index = sugg[key].search(re);
+    if (~index) results[++i + index * count] = sugg;
+  }
+  return results.filter(Boolean);
+}
