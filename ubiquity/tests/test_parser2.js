@@ -113,8 +113,8 @@ function testParserTwoDirectOnly() {
 				  "beagle", "bulldog", "husky"]);
 
   var cmd_pet = {
-    execute: function(context, arguments) {
-      dogGotPetted = arguments.object.text;
+    execute: function(context, args) {
+      dogGotPetted = args.object.text;
     },
     names: {
       en: ["pet"]
@@ -161,9 +161,9 @@ function testParserTwoParseWithModifier() {
 					  ["sponge", "hose", "spork",
 					  "bathtub", "fire hose"]);
   var cmd_wash = {
-    execute: function(context, arguments) {
-      dogGotWashed = arguments.object.text;
-      dogGotWashedWith = arguments.instrument.text;
+    execute: function(context, args) {
+      dogGotWashed = args.object.text;
+      dogGotWashedWith = args.instrument.text;
     },
     names: {
       en: ["wash"]
@@ -212,8 +212,8 @@ function testNounTypeSpeed() {
 
   var cmd_hit = {
 
-    execute: function(context, arguments) {
-      dogGotPetted = arguments.object.text;
+    execute: function(context, args) {
+      dogGotPetted = args.object.text;
     },
     names: {
       en: ["hit"]

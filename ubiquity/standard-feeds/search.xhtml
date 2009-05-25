@@ -220,8 +220,8 @@ CmdUtils.CreateCommand({
   description: "Search using your installed search engines",
   takes: {query: noun_arb_text},
   modifiers: {"with": noun_type_searchengine},
-  preview: function(previewBlock, arguments) {
-    var instrument = arguments.instrument || arguments.with;
+  preview: function(previewBlock, args) {
+    var instrument = args.instrument || args.with;
     if (instrument && instrument.data) {
       searchEngine = instrument.data;
     } else {
@@ -231,18 +231,18 @@ CmdUtils.CreateCommand({
     var previewTemplate = "Search using <b>${engine}</b> for:<br /><b>${query}</b>";
     var previewData = {
       engine: searchEngine.name,
-      query: arguments.object.text
+      query: args.object.text
     };
     previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
   },
-  execute: function(arguments) {
-    var instrument = arguments.instrument || arguments.with;
+  execute: function(args) {
+    var instrument = args.instrument || args.with;
     if (instrument && instrument.data) {
       searchEngine = instrument.data;
     } else {
       searchEngine = noun_type_searchengine.getDefault();
     }
-    var searchSubmission = searchEngine.getSubmission(arguments.object.text, 
+    var searchSubmission = searchEngine.getSubmission(args.object.text, 
                                                       null);
     Utils.openUrlInBrowser(searchSubmission.uri.spec, searchSubmission.postData);
   }

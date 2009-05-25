@@ -152,22 +152,22 @@ CmdUtils.CreateCommand({
        " Try selecting part of a web page (including links, images, etc) and then issuing &quot;email this&quot;.  You can" +
        " also specify the recipient of the email using the word &quot;to&quot; and the name of someone from your contact list." +
        " For example, try issuing &quot;email hello to jono&quot; (assuming you have a friend named &quot;jono&quot;).",
-  preview: function(pblock, arguments) {
+  preview: function(pblock, args) {
     var html = "Creates an email message ";
-    var goal = arguments.goal ? arguments.goal : arguments.to;
+    var goal = args.goal ? args.goal : args.to;
     if (goal) {
       html += "to " + goal.text + " ";
     }
-    if (arguments.object) {
-      html += "with these contents:" + arguments.object.html;
+    if (args.object) {
+      html += "with these contents:" + args.object.html;
     } else {
       html += "with a link to the current page.";
     }
     pblock.innerHTML = html;
   },
 
-  execute: function(arguments) {
-    var html = (arguments.object ? arguments.object.html : '');
+  execute: function(args) {
+    var html = (args.object ? args.object.html : '');
     var document = context.focusedWindow.document;
     var title;
     var toAddress = "";
@@ -187,7 +187,7 @@ CmdUtils.CreateCommand({
 
     title = "'" + title + "'";
 
-    var goal = arguments.goal ? arguments.goal : arguments.to;
+    var goal = args.goal ? args.goal : args.to;
     if (goal)
       if (goal.text)
 	toAddress = goal.text;
