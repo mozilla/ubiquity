@@ -40,15 +40,19 @@ Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
 // set up the interface which will control the parser.
 
 var demoParserInterface = {
+  startTime: 0,
+  endTime: 0,
   currentLang: 'en',
   currentParser: {},
   currentQuery: {},
+  runtimes: 0,
   parse: function() {
 
     nounCache = [];
     
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{},5,true);
     // this last true is for dontRunImmediately
+    this.currentQuery.dump = function(){}; // override the debug printout
     
     // override the selection object
     this.currentQuery.selObj = {text: $('#selection').val(), 
@@ -58,11 +62,28 @@ var demoParserInterface = {
     
     this.currentQuery.onResults = function() {
       if (this.finished) {
-        $('#scoredParses').empty();
-        for each (var parse in this.suggestionList) {
-          $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
+        demoParserInterface.runtimes++;
+        $('.current').text(demoParserInterface.runtimes);
+        dump(demoParserInterface.runtimes+' done\n');
+        if (demoParserInterface.runtimes < $('#times').val())
+          demoParserInterface.parse();
+        else {
+          $('#scoredParses').empty();
+          for each (var parse in this.suggestionList) {
+            $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
+          }
+          $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
+
+          demoParserInterface.endTime = new Date().getTime();
+
+          dump('DURATION: '+(demoParserInterface.endTime - demoParserInterface.startTime)+'\n');
+          $('.total').text(demoParserInterface.endTime - demoParserInterface.startTime);
+
+          dump('AVG: '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
+          $('.avg').text(Math.round((demoParserInterface.endTime - demoParserInterface.startTime) * 100/demoParserInterface.runtimes)/100);
+
+          
         }
-        $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
       }
     }
     
@@ -92,6 +113,10 @@ $(document).ready(function(){
   $('input[name=lang]').click(function(e){demoParserInterface.loadLang($('input[name=lang]:checked').val());});
   demoParserInterface.loadLang($('input[name=lang]:checked').val())
   
-  $('#run').click(function(){demoParserInterface.parse()});
+  $('#run').click(function(){demoParserInterface.startTime = new Date().getTime();
+  dump($('#times').val() + ' times\n');
+  $('.runtimes').text($('#times').val());
+  demoParserInterface.runtimes = 0;
+  demoParserInterface.parse()});
   
 });

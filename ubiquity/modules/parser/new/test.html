@@ -101,19 +101,15 @@
 		<div id='border'>
 			<input id='root' class='input'/>
 		</div>
-		<input type='button' id='run' value='run!'></input>
+		<input type='button' id='run' value='run!'></input><input id='times' size='4' name='times' value='100'/> times 
 		
-		<label for='selection'>selection text (for anaphora substitution):</label><input id='selection' name='selection'></input>
+    <br/><label for='selection'>selection text (for anaphora substitution):</label><input id='selection' name='selection'></input>
 		
     <h2>Suggestions</h2>
     <p>KEY: <span class="verb">verb</span> <span class="object">object</span> <span class="prefix">prefix </span><span class="argument">argument</span> (hover over the verb to see the actual verb and over prefixes to see the associated semantic role)</p>
     <table id="scoredParses"></table>
-
-    <h2>Current parse:</h2>
     
-    <div id='timeinfo'><div title='split words'></div><div title='pick possible verbs'></div><div title='pick possible clitics'></div><div title='group into arguments'></div><div title='anaphora substitution'></div><div title='suggest verbs'></div><div title='noun type detection'></div><div title='fill in noun suggestions'></div><div title='scoring/ranking'></div> <span class='total'></span></div>
-    
-    <div id='parseinfo'></div>
+    <span class='current'></span>/<span class='runtimes'></span> = <span class='total'></span> ms (avg: <span class='avg'></span> ms)
 
   </div>
   </body>
