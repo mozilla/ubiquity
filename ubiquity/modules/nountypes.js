@@ -499,11 +499,13 @@ var noun_type_contact = {
   _name: "contact",
   _list: null,
   _callback: function(contacts) {
-    Array.prototype.push.apply(
-      noun_type_contact._list,
-      [{text: c.name, data: c.email, key: c.name + "\n" + c.email, score: 0.9,
-        summary: <>{c.name} &lt;{c.email}&gt;</>.toXMLString()}
-        for each (c in contacts)]);
+    var {_list} = noun_type_contact;
+    for each (var {name, email} in contacts) {
+      var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
+      _list.push({
+        text: email, html: htm, data: name, summary: htm, score: 0.9,
+        key: name + "\n" + email});
+    }
   },
   suggest: function(text) {
     if (!this._list) {
