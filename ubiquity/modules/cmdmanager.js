@@ -206,7 +206,13 @@ CommandManager.prototype = {
     
     this.__activeQuery = this.__nlParser.newQuery(input, context,
                                                   this.maxSuggestions,true);
-    this.__activeQuery.onResults = asyncSuggestionCb;
+
+    this.__activeQuery.onResults = asyncSuggestionCb ||
+                                     this.__defaultAsyncSuggestionCb;
+
+    if (asyncSuggestionCb)
+      this.__defaultAsyncSuggestionCb = asyncSuggestionCb;
+      
     if ('run' in this.__activeQuery) 
       this.__activeQuery.run();
     this.__hilitedSuggestion = 0;
