@@ -107,7 +107,7 @@ cmd_highlight.icon = "chrome://ubiquity/skin/icons/textfield_rename.png";
 CmdUtils.CreateCommand({
   name: "link-to-wikipedia",
   takes: {phrase: noun_arb_text},
-  modifiers: {in: noun_type_language},
+  modifiers: {in: noun_type_lang_wikipedia},
   description: "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
   _link: function({text, html}, {in: {data}}){
@@ -137,7 +137,7 @@ CmdUtils.CreateCommand({
   name: "calculate",
   names: {
     en: ['calculate'],
-    ja: ['計算する','計算しろ','計算して','けいさんする','けいさんしろ','けいさんして']
+    ja: ['險育ｮ励☆繧・,'險育ｮ励＠繧・,'險育ｮ励＠縺ｦ','縺代＞縺輔ｓ縺吶ｋ','縺代＞縺輔ｓ縺励ｍ','縺代＞縺輔ｓ縺励※']
   },
   arguments: [
     {role: 'object', nountype: /^[\d\.\+\-\*\/\^%~(, )]+$/}
@@ -451,13 +451,13 @@ CmdUtils.CreateCommand({
     ca: ['tradueix', 'traduix'],
     da: ['oversat'],
     sv: ['oversatt'],
-    ja: ['訳す','訳せ','訳して','やくす','やくせ','やくして'],
+    ja: ['險ｳ縺・,'險ｳ縺・,'險ｳ縺励※','繧・￥縺・,'繧・￥縺・,'繧・￥縺励※'],
     pt: ['traduzir', 'traduza']
   },
   arguments: [
     {role: 'object', nountype: noun_arb_text},
-    {role: 'source', nountype: noun_type_language},
-    {role: 'goal', nountype: noun_type_language}
+    {role: 'source', nountype: noun_type_lang_google},
+    {role: 'goal', nountype: noun_type_lang_google}
   ],
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",
@@ -470,7 +470,7 @@ CmdUtils.CreateCommand({
     but there&#39;s a limit (a couple of paragraphs)
     to how much it can translate at once.</>),
   takes: {text: noun_arb_text},
-  modifiers: {to: noun_type_language, from: noun_type_language},
+  modifiers: {to: noun_type_lang_google, from: noun_type_lang_google},
   execute: function({object, to, from, goal, source}) {
     if (object.text)
       translateTo(object.text,
@@ -491,7 +491,7 @@ CmdUtils.CreateCommand({
     }
     var defaultLang = this._getDefaultLang();
     var toLang = goal ? goal.text : to ? to.text : 
-                 noun_type_language.getLangName(defaultLang);
+                 noun_type_lang_google.getLangName(defaultLang);
     var toLangCode = goal ? goal.data : to ? to.data : defaultLang;
     var fromLangCode = source ? source.data : from ? from.data : '';
     var html = pblock.innerHTML =
@@ -512,7 +512,7 @@ CmdUtils.CreateCommand({
     var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
     var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
     // If defaultLang is invalid lang code, fall back to english.
-    if (noun_type_language.getLangName(defaultLang) == null)  {
+    if (noun_type_lang_google.getLangName(defaultLang) == null)  {
       return "en";
     }
     return defaultLang;

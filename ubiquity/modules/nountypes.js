@@ -61,24 +61,9 @@ var noun_arb_text = {
   }
 };
 
-var noun_type_emailservice = {
-  _name: "email service",
-  suggest: function(text, html) {
-    var providers = ["googleapps", "gmail", "yahoo"];
-    var suggestions = [];
-    //match based on input
-    for each (var provider in providers) {
-      if (provider.match(text, "i")){
-        suggestions.push(CmdUtils.makeSugg(provider, null, provider));
-      }
-    }
-    return suggestions;
-  },
-  'default': function() {
-    //TODO: find a better way to pick the default
-    return CmdUtils.makeSugg("gmail", null, "gmail", 0.9);
-  }
-};
+var noun_type_emailservice = CmdUtils.NounType("email service",
+                                               "googleapps gmail yahoo",
+                                               "gmail");
 
 /*
  * Noun that matches only emails based on the regexp
@@ -135,76 +120,6 @@ var noun_type_awesomebar = {
      Utils.history.search(part, CmdUtils.maxSuggestions, function(result){
        callback(CmdUtils.makeSugg(result.url, result.title, result.favicon));
      });
-  }
-};
-
-var LanguageCodes = {
-  'arabic' : 'ar',
-  'bulgarian' : 'bg',
-  'catalan' : 'ca',
-  'chinese' : 'zh',
-  'chinese_traditional' : 'zh-TW',
-  'croatian': 'hr',
-  'czech': 'cs',
-  'danish' : 'da',
-  'dutch': 'nl',
-  'english' : 'en',
-  // Filipino should be 'fil', however Google
-  // improperly uses 'tl', which is actually
-  // the language code for tagalog. Using 'tl'
-  // for now so that filipino translations work.
-  'filipino' : 'tl',
-  'finnish' : 'fi',
-  'french' : 'fr',
-  'german' : 'de',
-  'greek' : 'el',
-  'hebrew' : 'he',
-  'hindi' : 'hi',
-  'hungarian' : 'hu',
-  'indonesian' : 'id',
-  'italian' : 'it',
-  'japanese' : 'ja',
-  'korean' : 'ko',
-  'latvian' : 'lv',
-  'lithuanian' : 'lt',
-  'norwegian' : 'no',
-  'polish' : 'pl',
-  'portuguese' : 'pt',
-  'romanian' : 'ro',
-  'russian' : 'ru',
-  'serbian' : 'sr',
-  'slovak' : 'sk',
-  'slovenian' : 'sl',
-  'spanish' : 'es',
-  'swedish' : 'sv',
-  'ukranian' : 'uk',
-  'vietnamese' : 'vi',
-  'simple english' : 'simple'
-};
-
-var noun_type_language =  {
-  _name: "language",
-
-  suggest: function( text, html ) {
-    var suggestions = [];
-    for ( var word in LanguageCodes ) {
-      // Do the match in a non-case sensitive way
-      if ( word.indexOf( text.toLowerCase() ) > -1 ) {
-        // Use the 2-letter language code as the .data field of the suggestion
-        var sugg = CmdUtils.makeSugg(word, word, LanguageCodes[word]);
-      	suggestions.push( sugg );
-      }
-    }
-    return suggestions;
-  },
-
-  // Returns the language name for the given lang code.
-  getLangName: function(langCode) {
-    var code = langCode.toLowerCase();
-    for (var word in LanguageCodes)
-      if (code === LanguageCodes[word])
-        return word;
-    return null;
   }
 };
 
@@ -666,6 +581,239 @@ var noun_type_geolocation = {
      return [CmdUtils.makeSugg(fragment)];
    }
 };
+
+var noun_type_lang_google = CmdUtils.nounTypeFromDictionary(
+  "language google", {
+    Arabic: "ar",
+    Bulgarian: "bg",
+    Catalan: "ca",
+    "Chinese Simplified": "zh-CN",
+    "Chinese Traditional": "zh-TW",
+    Croatian: "hr",
+    Czech: "cs",
+    Danish: "da",
+    Dutch: "nl",
+    English: "en",
+    Estonian: "et",
+    Filipino: "tl",
+    Finnish: "fi",
+    French: "fr",
+    German: "de",
+    Greek: "el",
+    Hebrew: "iw",
+    Hindi: "hi",
+    Hungarian: "hu",
+    Icelandic: "is",
+    Indonesian: "id",
+    Italian: "it",
+    Japanese: "ja",
+    Korean: "ko",
+    Latvian: "lv",
+    Lithuanian: "lt",
+    Norwegian: "no",
+    Polish: "pl",
+    Portuguese: "pt",
+    Romanian: "ro",
+    Russian: "ru",
+    Serbian: "sr",
+    Slovak: "sk",
+    Slovenian: "sl",
+    Spanish: "es",
+    Swedish: "sv",
+    Thai: "th",
+    Turkish: "tr",
+    Ukrainian: "uk",
+    Urdu: "ur",
+    Vietnamese: "vi",
+  });
+
+// for backward compatibility
+var noun_type_language = noun_type_lang_google;
+
+// from http://meta.wikimedia.org/wiki/List_of_Wikipedias
+// omitting ones with 100+ articles
+var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary(
+  "language wikipedia", {
+    "English": "en",
+    "German": "de",
+    "French": "fr",
+    "Polish": "pl",
+    "Japanese": "ja",
+    "Italian": "it",
+    "Dutch": "nl",
+    "Portuguese": "pt",
+    "Spanish": "es",
+    "Russian": "ru",
+    "Swedish": "sv",
+    "Chinese": "zh",
+    "Norwegian (Bokmal)": "no",
+    "Finnish": "fi",
+    "Catalan": "ca",
+    "Ukrainian": "uk",
+    "Turkish": "tr",
+    "Czech": "cs",
+    "Hungarian": "hu",
+    "Romanian": "ro",
+    "Volapuk": "vo",
+    "Esperanto": "eo",
+    "Danish": "da",
+    "Slovak": "sk",
+    "Indonesian": "id",
+    "Arabic": "ar",
+    "Korean": "ko",
+    "Hebrew": "he",
+    "Lithuanian": "lt",
+    "Vietnamese": "vi",
+    "Slovenian": "sl",
+    "Serbian": "sr",
+    "Bulgarian": "bg",
+    "Estonian": "et",
+    "Persian": "fa",
+    "Croatian": "hr",
+    "Simple English": "simple",
+    "Newar / Nepal Bhasa": "new",
+    "Haitian": "ht",
+    "Norwegian (Nynorsk)": "nn",
+    "Galician": "gl",
+    "Thai": "th",
+    "Telugu": "te",
+    "Greek": "el",
+    "Malay": "ms",
+    "Basque": "eu",
+    "Cebuano": "ceb",
+    "Hindi": "hi",
+    "Macedonian": "mk",
+    "Georgian": "ka",
+    "Latin": "la",
+    "Bosnian": "bs",
+    "Luxembourgish": "lb",
+    "Breton": "br",
+    "Icelandic": "is",
+    "Bishnupriya Manipuri": "bpy",
+    "Marathi": "mr",
+    "Albanian": "sq",
+    "Welsh": "cy",
+    "Azeri": "az",
+    "Serbo-Croatian": "sh",
+    "Tagalog": "tl",
+    "Latvian": "lv",
+    "Piedmontese": "pms",
+    "Bengali": "bn",
+    "Belarusian (Tarashkevitsa)": "be-x-old",
+    "Javanese": "jv",
+    "Tamil": "ta",
+    "Occitan": "oc",
+    "Ido": "io",
+    "Belarusian": "be",
+    "Aragonese": "an",
+    "Low Saxon": "nds",
+    "Sundanese": "su",
+    "Sicilian": "scn",
+    "Neapolitan": "nap",
+    "Kurdish": "ku",
+    "Asturian": "ast",
+    "Afrikaans": "af",
+    "West Frisian": "fy",
+    "Swahili": "sw",
+    "Walloon": "wa",
+    "Cantonese": "zh-yue",
+    "Samogitian": "bat-smg",
+    "Quechua": "qu",
+    "Urdu": "ur",
+    "Chuvash": "cv",
+    "Ripuarian": "ksh",
+    "Malayalam": "ml",
+    "Tajik": "tg",
+    "Irish": "ga",
+    "Venetian": "vec",
+    "Tarantino": "roa-tara",
+    "Waray-Waray": "war",
+    "Uzbek": "uz",
+    "Scottish Gaelic": "gd",
+    "Kapampangan": "pam",
+    "Kannada": "kn",
+    "Maori": "mi",
+    "Yiddish": "yi",
+    "Yoruba": "yo",
+    "Gujarati": "gu",
+    "Nahuatl": "nah",
+    "Lombard": "lmo",
+    "Corsican": "co",
+    "Gilaki": "glk",
+    "Upper Sorbian": "hsb",
+    "Min Nan": "zh-min-nan",
+    "Aromanian": "roa-rup",
+    "Alemannic": "als",
+    "Interlingua": "ia",
+    "Limburgian": "li",
+    "Armenian": "hy",
+    "Sakha": "sah",
+    "Kazakh": "kk",
+    "Tatar": "tt",
+    "Gan": "gan",
+    "Sanskrit": "sa",
+    "Turkmen": "tk",
+    "Wu": "wuu",
+    "Dutch Low Saxon": "nds-nl",
+    "Faroese": "fo",
+    "West Flemish": "vls",
+    "Norman": "nrm",
+    "Ossetian": "os",
+    "Voro": "fiu-vro",
+    "Amharic": "am",
+    "Romansh": "rm",
+    "Banyumasan": "map-bms",
+    "Pangasinan": "pag",
+    "Divehi": "dv",
+    "Mongolian": "mn",
+    "Egyptian Arabic": "arz",
+    "Northern Sami": "se",
+    "Zazaki": "diq",
+    "Nepali": "ne",
+    "Friulian": "fur",
+    "Manx": "gv",
+    "Scots": "sco",
+    "Ligurian": "lij",
+    "Novial": "nov",
+    "Bavarian": "bar",
+    "Bihari": "bh",
+    "Maltese": "mt",
+    "Ilokano": "ilo",
+    "Pali": "pi",
+    "Classical Chinese": "zh-classical",
+    "Khmer": "km",
+    "Franco-Provencal/Arpitan": "frp",
+    "Mazandarani": "mzn",
+    "Kashubian": "csb",
+    "Ladino": "lad",
+    "Pennsylvania German": "pdc",
+    "Uyghur": "ug",
+    "Cornish": "kw",
+    "Sinhalese": "si",
+    "Anglo-Saxon": "ang",
+    "Hawaiian": "haw",
+    "Tongan": "to",
+    "Sardinian": "sc",
+    "Central_Bicolano": "bcl",
+    "Komi": "kv",
+    "Punjabi": "pa",
+    "Pashto": "ps",
+    "Silesian": "szl",
+    "Interlingue": "ie",
+    "Malagasy": "mg",
+    "Guarani": "gn",
+    "Lingala": "ln",
+    "Burmese": "my",
+    "Fiji Hindi": "hif",
+  });
+
+for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
+  ntl._code2name = ntl._list.reduce(function(o, s) {
+    o[s.data] = o[s.text];
+    return o;
+  }, {});
+  ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
+}
 
 function getGmailContacts( callback ) {
   // TODO: It's not really a security hazard since we're evaluating the

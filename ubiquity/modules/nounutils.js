@@ -165,7 +165,7 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp) {
   };
 };
 
-// == {{{ NounUtils.grepSuggs() }}} ==
+// ** {{{ NounUtils.grepSuggs() }}} **
 //
 // A helper function to grep a list of suggestion objects by user input.
 // Returns an array of filtered suggetions sorted by matched indices.
@@ -190,4 +190,36 @@ NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
     if (~index) results[++i + index * count] = sugg;
   }
   return results.filter(Boolean);
-}
+};
+
+// ** {{{ NounUtils.nounTypeFromDictionary() }}} **
+//
+// Creates a noun type from the given key:value pairs, the key being
+// the {{{text}}} attribute of its suggest and the value {{{data}}}.
+//
+// {{{name}}} is the name of the new nountype.
+//
+// {{{dict}}} is an object of text:data pairs.
+//
+// {{{defaults}}} is an optional array or space-separated string
+// of default keys.
+
+NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(name,
+                                                                   dict,
+                                                                   defaults) {
+  var noun = {
+    _name: name,
+    _list: [NounUtils.makeSugg(key, null, val)
+            for each ([key, val] in Iterator(dict))],
+    suggest: function(text, html, cb, selected) {
+      return selected ? [] : NounUtils.grepSuggs(text, this._list);
+    },
+  };
+  if (typeof defaults === "string")
+    defaults = defaults.match(/\S+/g);
+  if (defaults) {
+    noun._defaults = defaults;
+    noun.default = function() this._defaults;
+  }
+  return noun;
+};
