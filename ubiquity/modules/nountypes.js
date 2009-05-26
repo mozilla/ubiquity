@@ -777,7 +777,7 @@ var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary({
 
 for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl._code2name = ntl._list.reduce(function(o, s) {
-    o[s.data] = o[s.text];
+    o[s.data] = s.text;
     return o;
   }, {});
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];

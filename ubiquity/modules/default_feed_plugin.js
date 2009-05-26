@@ -162,8 +162,8 @@ function makeCmdForObj(sandbox, objName) {
 
   var cmd = {
     __proto__: cmdFunc,
-    name : cmdName,
-    execute : function CS_execute(context, directObject, modifiers) {
+    name: cmdName,
+    execute: function CS_execute(context, directObject, modifiers) {
       sandbox.context = context;
       return cmdFunc.call(cmd, directObject, modifiers);
     }
@@ -173,8 +173,8 @@ function makeCmdForObj(sandbox, objName) {
     cmd.preview = function CS_preview(context, previewBlock, directObject,
                                       modifiers) {
       sandbox.context = context;
-      return cmdFunc.preview(previewBlock, directObject,
-                             modifiers);
+      return cmdFunc.preview.call(cmd, previewBlock, directObject,
+                                  modifiers);
     };
   }
 

@@ -466,34 +466,45 @@ CmdUtils.CreateCommand({
     If you leave out the languages, it will try to guess what you want.
     It works on selected text in any web page,
     but there&#39;s a limit (a couple of paragraphs)
-    to how much it can translate at once.</>),
+    to how much it can translate a selection at once.
+    If you want to translate a lot of text, leave out the input and
+    it will translate the whole page.</>),
   takes: {text: noun_arb_text},
   modifiers: {to: noun_type_lang_google, from: noun_type_lang_google},
   execute: function({object, to, from, goal, source}) {
+    var sl = source ? source.data : from ? from.data : '';
+    var tl = goal && goal.data || to && to.data || this._getDefaultLang();
     if (object.text)
       translateTo(object.text,
-                  { from: source ? source.data : from ? from.data : '',
-                    to: goal ? goal.data : to ? to.data : 
-                      this._getDefaultLang()},
+                  {from: sl, to: tl},
                   function(translation) {
                     CmdUtils.setSelection(translation);
                   });
+    else
+      Utils.openUrlInBrowser(
+        "http://translate.google.com/translate" +
+        Utils.paramsToString({
+          u: context.focusedWindow.location.href,
+          sl: sl,
+          tl: tl,
+        }));
   },
   preview: function(pblock, {object, to, from, goal, source}) {
-    var textToTranslate;
-    if (object)
-      textToTranslate = object.text;
+    var textToTranslate = object && object.text;
+    var defaultLang = this._getDefaultLang();
+    var toLang = (goal && goal.text || to && to.text ||
+                  noun_type_lang_google.getLangName(defaultLang));
+    var toLangCode = goal && goal.data || to && to.data || defaultLang;
+    var fromLangCode = source ? source.data : from ? from.data : '';
     if (!textToTranslate) {
-      pblock.innerHTML = this.description;
+      var {href} = context.focusedWindow.location;
+      pblock.innerHTML = (<>Translates <a href={href}
+                          >{href}</a> to <b>{toLang}</b> translation.</>);
       return;
     }
-    var defaultLang = this._getDefaultLang();
-    var toLang = goal ? goal.text : to ? to.text : 
-                 noun_type_lang_google.getLangName(defaultLang);
-    var toLangCode = goal ? goal.data : to ? to.data : defaultLang;
-    var fromLangCode = source ? source.data : from ? from.data : '';
-    var html = pblock.innerHTML =
-      "Replaces the selected text with the " + toLang + " translation:";
+    var html = ("Replaces the selected text with the <b>" + toLang +
+                "</b> translation:");
+    pblock.innerHTML = html;
     translateTo(
       textToTranslate,
       {from: fromLangCode, to: toLangCode},
@@ -507,10 +518,11 @@ CmdUtils.CreateCommand({
   // And also, if there unknown language code is found any of these preference,
   // we fall back to English.
   _getDefaultLang: function() {
-    var userLocale = Application.prefs.getValue("general.useragent.locale", "en");
-    var defaultLang = Application.prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
+    var {prefs} = Application;
+    var userLocale = prefs.getValue("general.useragent.locale", "en");
+    var defaultLang = prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
     // If defaultLang is invalid lang code, fall back to english.
-    if (noun_type_lang_google.getLangName(defaultLang) == null)  {
+    if (!noun_type_lang_google.getLangName(defaultLang)) {
       return "en";
     }
     return defaultLang;

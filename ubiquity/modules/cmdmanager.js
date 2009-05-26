@@ -216,7 +216,7 @@ CommandManager.prototype = {
     if ('run' in this.__activeQuery) 
       this.__activeQuery.run();
     this.__hilitedSuggestion = 0;
-    this.onSuggestionsUpdated();
+    this.onSuggestionsUpdated(input, context);
   },
 
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
