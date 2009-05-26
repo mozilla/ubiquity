@@ -366,17 +366,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// TODO: Move this to developer.js on the next release of Ubiq.
-// I'm leaving it here so that it gets pushed out to users
-// now. -Aza
-CmdUtils.CreateCommand({
-  name: "report-bug",
-  description: "Reports a Ubiquity bug.",
-  execute: function() {
-    Utils.focusUrlInBrowser("chrome://ubiquity/content/report-bug.html");
-  }
-});
-
 CmdUtils.CreateCommand({
   name: "bookmarklet",
   synonyms: ["bml", "js"],

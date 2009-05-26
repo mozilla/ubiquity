@@ -73,7 +73,7 @@ CmdUtils.CreateCommand({
 const Editor = "chrome://ubiquity/content/editor.html";
 CmdUtils.CreateCommand({
   name: "command-editor",
-  icon : "chrome://ubiquity/skin/icons/plugin_edit.png",
+  icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
   execute: function() {
@@ -84,7 +84,7 @@ CmdUtils.CreateCommand({
 const CmdList = "chrome://ubiquity/content/cmdlist.html";
 CmdUtils.CreateCommand({
   name: "command-list",
-  icon : "chrome://ubiquity/skin/icons/application_view_list.png",
+  icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "" + (
     <>Opens <a href={CmdList}>the list</a>
       of all Ubiquity commands available and what they all do.</>),
@@ -97,7 +97,7 @@ const Settings = "chrome://ubiquity/content/settings.html";
 CmdUtils.CreateCommand({
   name: "settings",
   synonyms: ["skin-list"],
-  icon : "chrome://ubiquity/skin/icons/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={Settings}>Settings</a> page,
     where you can change your skin, key combinations, etc.</>),
@@ -106,9 +106,16 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  name: "report-bug",
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  description: "Reports a Ubiquity bug.",
+  execute: function() {
+    Utils.focusUrlInBrowser("chrome://ubiquity/content/report-bug.html");
+  }
+});
 
-function startup_openUbiquityWelcomePage()
-{
+function startup_openUbiquityWelcomePage() {
   var jsm = {};
   Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
 

@@ -218,11 +218,7 @@ function populateYeTable(feedMgr, cmdSource) {
   $("#num-subscribed-feeds").html( feedMgr.getSubscribedFeeds().length );
 
   function addFeedToTable(feed) {
-    if (feed.isBuiltIn)
-      return; //handle these differently
-
     let cmdNames = [name for (name in feed.commands)];
-
     let feedCell = $("<td></td>");
     if (cmdNames.length > 1 )
       feedCell.attr("rowspan", cmdNames.length);

@@ -3,19 +3,19 @@
  */
 
 body{
-	background: #FFF;
-	font-size:13px;
-	font-family: "Helvetica", Verdana, Arial, sans-serif;
-	max-width: 900px;
-	margin-left: auto;
-	margin-right: auto;	
-	margin-top: 0px;
-	color: #000;
+  background: #FFF;
+  font-size:13px;
+  font-family: "Helvetica", Verdana, Arial, sans-serif;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 0px;
+  color: #000;
 }
 
 #nav-container{
   margin-left: -40px;
-  float: left;  
+  float: left;
 }
 
 li {
@@ -30,10 +30,10 @@ li {
 
   margin:0px;
   padding:0pt;
-    
+
   float:left;
   height:45px;
-  text-align:left;  
+  text-align:left;
   list-style-image:none;
   list-style-position:outside;
   list-style-type:none;
@@ -46,7 +46,7 @@ li {
   display: block;
   width: auto;
   height: 100%;
-  text-decoration: none;  
+  text-decoration: none;
 }
 
 #nav li:hover{
@@ -128,7 +128,7 @@ em{
 }
 
 #sort-container {
-	padding: 10px;
+  padding: 10px;
 }
 
 .command, #skin-list .command{
@@ -243,13 +243,13 @@ ul.button-list li{
 }
 
 ul a.button {
-  border: 1px #aaa solid; 
-  -moz-border-radius: 12px; 
-  background: #ddd url('chrome://ubiquity/skin/buttons/grad.png') 0 0 repeat-x; 
-  display: block; 
-  float: left; 
+  border: 1px #aaa solid;
+  -moz-border-radius: 12px;
+  background: #ddd url('chrome://ubiquity/skin/buttons/grad.png') 0 0 repeat-x;
+  display: block;
+  float: left;
   padding: 0 2em;
-  height: 22px; 
+  height: 22px;
   color: black;
   text-decoration: none;
   text-align: center;
@@ -258,7 +258,7 @@ ul a.button {
   outline: none;
 }
 ul a:active.button {
-  background-color: #cdcdcd; 
+  background-color: #cdcdcd;
   background-position: 0 -22px;
 }
 
@@ -301,6 +301,10 @@ ul#command-feed-graveyard ul li:after {
 
 ul#command-feed-graveyard ul li:last-child:after {
   content: "";
+}
+
+#commands-and-feeds-table td {
+  vertical-align: top;
 }
 
 table {
