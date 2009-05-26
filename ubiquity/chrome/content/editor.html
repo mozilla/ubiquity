@@ -9,8 +9,6 @@
   <script type="text/javascript"
           src="resource://ubiquity/scripts/jquery.js"></script>
   <script type="application/javascript;version=1.8"
-        src="chrome://ubiquity/content/header.js"></script>
-  <script type="application/javascript;version=1.8"
         src="chrome://ubiquity/content/developer-news.js"></script>
   <script type="application/javascript;version=1.7"
           src="editor.js"></script>
@@ -91,7 +89,7 @@
       } catch (e) { // Setup matching API for the normal textarea
         Components.utils.reportError("CodeMirror failed to load: "+e);
         displayMessage("Error: CodeMirror failed to load: " + e);
-        
+
         setupTextarea();
       }
     }
@@ -113,29 +111,28 @@
 </head>
 
 <body onload="initialize(); Editor.onLoad(); highlight();">
-  <div class="head">
-    <span class="large">Ubiquity:&nbsp;</span>
-    Hack It
-  </div>
-  
+  <div class="head">Hack It</div>
+  <script type="application/javascript;version=1.8"
+        src="chrome://ubiquity/content/header.js"></script>
+
   <div id="nav-container"></div>
 
   <br clear="all"/>
   <div style="text-align:center;">
-    <p>You can get to this page at any time using the "Command-editor" command.</p>
+    <p>You can get to this page at any time using the "command-editor" command.</p>
   </div>
   <br clear="all"/>
-    
+
   <h1>Ubiquity Command Editor</h1>
   <p id="notification-bar" class="notification" style="display:none"></p>
-  
+
   <div class="col-three">
     <p>
       <strong>Enter new commands</strong> in the area below.
       They will automatically be saved as you type, and will be able to be instantly used from the command entry mode.
-    </p>  
-  </div>  
-  
+    </p>
+  </div>
+
   <div class="col-three">
     <p>
       <strong>Read the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command authoring tutorial</a></strong> to learn more.
@@ -145,14 +142,14 @@
       <strong>New</strong>: Documentation for the <a href="file.html#index.html">command APIs</a>.
     </p>
   </div>
-  
+
   <div class="col-two">
     <p>
       <b>Get involved</b>.
       Learn how by visiting the <a href="http://wiki.mozilla.org/Labs/Ubiquity">Ubiquity Wiki</a>.
-    </p> 
+    </p>
   </div>
-  
+
   <div id="editor-actions">
     <br clear="all"/>
     <div id="external-editor-pref">
@@ -160,7 +157,7 @@
       <input id="editorInputBox"
              type="file"
              size="20"
-             style="cursor:pointer" 
+             style="cursor:pointer"
              onchange="Editor.onSave()"/>
     </div>
     <br/>
@@ -206,7 +203,7 @@
       </label>
     </div>
   </div>
-  
+
   <div id="editor-div">
     <textarea id="editor"
               rows="40"
@@ -216,31 +213,31 @@
 
   <br clear="all"/>
 
-  
+
   <div class="col-five">
   <h2>Developing Ubiquity</h2>
-  
+
   <p style="background-color: #F2E78B; padding:8px;">
   <strong>New</strong>: read the documentation for the <strong><a href="file.html#index.html">command APIs</a></strong>.
   </p>
-  
+
   <p>
   <strong>Learn</strong> how to develop for Ubiquity by reading the <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial">command author tutorial</a>.
   </p>
-    
+
   <p>Use the <a href="editor.html">command editor</a> to play around
   with <strong>creating new</strong> Ubiquity commands.  This isn't just a fun way to
   experiment with Ubiquity&mdash;it's actually a really easy way to
   experiment with Firefox development in general, because writing and
   changing commands doesn't require restarting Firefox, or even
   manually reloading anything.</p>
-  
+
   <p><strong>Get involved!</strong> Learn how by visiting the
   <a href="http://wiki.mozilla.org/Labs/Ubiquity">Ubiquity Wiki</a>.</p>
-  
+
   <p><strong>Share</strong> your commands. Post it on the
   <a href="http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">commands in the wild</a> wiki page. Also, sign up for the the <a href="https://ubiquity.mozilla.com/herd/command-feed/">herd command</a> which will then display your command on the <a href="https://ubiquity.mozilla.com/herd/">dashboard</a>.</p>
-  
+
   <p>Run the <a href="test.html">unit tests</a>.</p>
 
   <p>Help us test our <a href="feed.html#experimental-commands.html">

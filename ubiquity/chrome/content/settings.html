@@ -12,6 +12,8 @@
   </style>
 </head>
 <body>
+  <div class="head">Settings and Skins</div>
+
   <script type="text/javascript" src="prefkeys.js"></script>
   <script src="resource://ubiquity/scripts/jquery.js"></script>
   <script type="application/javascript;version=1.8"
@@ -21,10 +23,6 @@
   <script type="application/javascript;version=1.8"
           src="prefkeys.js"></script>
 
-  <div class="head">
-    <span class="large">Ubiquity:&nbsp;</span>
-    Settings And Skins
-  </div>
 
   <div id="nav-container"></div>
 
@@ -40,7 +38,7 @@
 
     <ul class="button-list">
       <li>
-        <a class="button" id="edit-button" 
+        <a class="button" id="edit-button"
            href="javascript:openSkinEditor();">
            Edit Custom Skin</a>
       </li>
@@ -55,7 +53,7 @@
       <p>
       <input id="keyInputBox" type="text" size="42"
              style="cursor:pointer"
-             onkeydown="PrefKeys.onKeyChange(event)" 
+             onkeydown="PrefKeys.onKeyChange(event)"
              onfocus="this.value = 'Press your combination'"
              onblur="PrefKeys.onLoad()"/><br/>
       Click above to <strong>Change</strong> the keyboard shortcut used to
@@ -114,9 +112,9 @@
       <li>
         <textarea rows="30" style="width:750px" id="skin-editor"></textarea>
       </li>
-    </ul>  
+    </ul>
   </div>
-  
+
   <script>
     Components.utils.import("resource://ubiquity/modules/utils.js");
     $(document).ready(onDocumentLoad);

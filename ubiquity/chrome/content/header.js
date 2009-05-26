@@ -45,24 +45,29 @@ var navUrls = [
   {name: "Hack Ubiquity", url: "chrome://ubiquity/content/editor.html"}
 ];
 
-
 function createNavLinks() {
   let containerElem = document.getElementById("nav-container");
   if (!containerElem)
     return;
 
+  var U = document.createElement("span");
+  U.textContent = "Ubiquity: ";
+  U.className = "large";
+  var [head] = document.getElementsByClassName("head");
+  head.insertBefore(U, head.firstChild);
+
   let listElem = document.createElement("ul");
   listElem.id = "nav";
   containerElem.appendChild(listElem);
 
-  for (let i =0; i < navUrls.length; i++) {
+  for each (let {url, name} in navUrls) {
     let listItem = document.createElement("li");
     listElem.appendChild(listItem);
     let link = document.createElement("a");
-    link.href = navUrls[i].url;
-    link.innerHTML = navUrls[i].name;
+    link.href = url;
+    link.innerHTML = name;
     listItem.appendChild(link);
   }
 }
 
-$(window).ready(createNavLinks);
+$(createNavLinks);
