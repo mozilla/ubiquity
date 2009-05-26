@@ -161,11 +161,11 @@ function makeCmdForObj(sandbox, objName) {
   var cmdFunc = sandbox[objName];
 
   var cmd = {
+    __proto__: cmdFunc,
     name : cmdName,
-    icon : cmdFunc.icon,
     execute : function CS_execute(context, directObject, modifiers) {
       sandbox.context = context;
-      return cmdFunc(directObject, modifiers);
+      return cmdFunc.call(cmd, directObject, modifiers);
     }
   };
   
@@ -176,15 +176,6 @@ function makeCmdForObj(sandbox, objName) {
       return cmdFunc.preview(previewBlock, directObject,
                              modifiers);
     };
-  }
-
-  cmd.__proto__ = cmdFunc;
-
-  // if it doesn't take any arguments
-  if ((cmd.DOLabel == undefined) && (cmd.modifiers == undefined)) {
-    // enable use in parser 2
-    cmd.names = { en: [ cmdName ] };
-    cmd.arguments = [];
   }
 
   return finishCommand(cmd);

@@ -36,14 +36,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let EXPORTED_SYMBOLS = ["finishCommand"];
+var EXPORTED_SYMBOLS = ["finishCommand"];
+
+// Default delay to wait before calling a preview function, in ms.
+const DEFAULT_PREVIEW_DELAY = 150;
 
 function finishCommand(srcCommand) {
-  var cmd = new Object();
+  var cmd = {};
 
-  // Default delay to wait before calling a preview function, in ms.
-  var DEFAULT_PREVIEW_DELAY = 150;
-
+  // what are these for? -satyr
+  /*
   var propsToInherit = [
     "DOLabel",
     "DOType",
@@ -62,8 +64,9 @@ function finishCommand(srcCommand) {
       if (!srcCommand[prop])
         cmd[prop] = null;
     });
+   */
 
-  if (!srcCommand.previewDelay && srcCommand.previewDelay != 0)
+  if (srcCommand.previewDelay == null)
     cmd.previewDelay = DEFAULT_PREVIEW_DELAY;
 
   if (!srcCommand.modifiers)
@@ -71,6 +74,13 @@ function finishCommand(srcCommand) {
 
   if (!srcCommand.modifierDefaults)
     cmd.modifierDefaults = {};
+
+  // if it doesn't take any arguments
+  if (!srcCommand.DOType && !srcCommand.modifiers) {
+    // enable use in parser 2
+    cmd.names = {en: [srcCommand.name]};
+    cmd.arguments = [];
+  }
 
   cmd.__proto__ = srcCommand;
 
