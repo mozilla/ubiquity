@@ -214,7 +214,7 @@ Parser.prototype = {
 
         // if this nountype has not been registered yet, let's do that now.
         if (!thisNounTypeIsAlreadyRegistered) {
-          thisNounType.__id = nounTypeId;
+          thisNounType._id = nounTypeId;
           this._nounTypes[nounTypeId] = thisNounType;
           ant.activeNounTypes[nounTypeId] = thisNounType;
 
@@ -623,7 +623,7 @@ Parser.prototype = {
       }
 
       // start score off with one point for the verb.
-      defaultParse.__score = defaultParse.scoreMultiplier;
+      defaultParse._score = defaultParse.scoreMultiplier;
 
       defaultParse.args = {};
       return [defaultParse];
@@ -726,9 +726,7 @@ Parser.prototype = {
 
       // if there are no delimiters at all, put it all in the direct object
       if (delimiterIndices.length == 0) {
-        if (theseParses[0].args.object == undefined)
-          theseParses[0].args.object = [];
-        theseParses[0].args.object.push({ _order:1,
+        theseParses[0].setArgumentSuggestion('object',{ _order:1,
                                           input:allWords.join(''),
                                           modifier:'' });
       }
@@ -739,9 +737,7 @@ Parser.prototype = {
         if (delimiterIndices[delimiterIndices.length - 1] < words.length - 1 &&
             delimiterIndices[delimiterIndices.length - 1] != undefined) {
 
-          if (theseParses[0].args.object == undefined)
-            theseParses[0].args.object = [];
-          theseParses[0].args.object.push(
+          theseParses[0].setArgumentSuggestion('object',
             { _order: (2 * delimiterIndices.length + 2),
               input: allWords.slice(
                        2 * (delimiterIndices[delimiterIndices.length - 1] + 1)
@@ -753,9 +749,7 @@ Parser.prototype = {
       } else {
         if (delimiterIndices[0] > 0 && delimiterIndices[0] != undefined) {
 
-          if (theseParses[0].args.object == undefined)
-            theseParses[0].args.object = [];
-          theseParses[0].args.object.push(
+          theseParses[0].setArgumentSuggestion('object',
             {_order: 1,
              input: allWords.slice(0,
                       (2 * delimiterIndices[0]) - 1
@@ -828,11 +822,6 @@ Parser.prototype = {
 
               if (this.branching == 'left') {// find args right to left
 
-                // put the selected argument in its proper role
-
-                if (thisParse.args[role] == undefined)
-                  thisParse.args[role] = [];
-
                 // our argument is words (j)...(jmax)
                 // note that Array.slice(i,k) returns *up to* k
                 var argument = allWords.slice(2 * j, (2 * jmax) + 1)
@@ -842,8 +831,8 @@ Parser.prototype = {
                 var innerSpace = delimiters[delimiterIndices[i] - 1];
                 var outerSpace = delimiters[delimiterIndices[i]];
 
-                // push it!
-                thisParse.args[role].push(
+                // put the selected argument in its proper role
+                thisParse.setArgumentSuggestion(role,
                   { _order: 1 + 2*(delimiterIndices.length - i),
                     input: argument,
                     modifier: modifier,
@@ -855,9 +844,6 @@ Parser.prototype = {
                 // arguments into the object role
                 if (j != jmin) {
 
-                  if (thisParse.args.object == undefined)
-                    thisParse.args.object = [];
-
                   // our argument is words (jmin)...(j-1)
                   // note that Array.slice(i,j) returns *up to* j
                   var argument = allWords.slice(2 * jmin, 2 * (j - 1) + 1)
@@ -866,7 +852,7 @@ Parser.prototype = {
                                     allWords[2 * (j - 1) + 1] : '');
 
                   // push it!
-                  thisParse.args.object.push(
+                  thisParse.setArgumentSuggestion('object',
                     { _order: 2*(delimiterIndices.length - i),
                       input:argument,
                       modifier:'',
@@ -876,9 +862,6 @@ Parser.prototype = {
 
                 }
               } else {
-                // put the selected argument in its proper role
-                if (thisParse.args[role] == undefined)
-                  thisParse.args[role] = [];
 
                 // our argument is words (jmin)...(j)
                 // note that Array.slice(i,j) returns *up to* j
@@ -890,8 +873,8 @@ Parser.prototype = {
                 var innerSpace = delimiters[delimiterIndices[i]];
                 var outerSpace = delimiters[delimiterIndices[i] - 1];
 
-                // push it!
-                thisParse.args[role].push(
+                // put the selected argument in its proper role
+                thisParse.setArgumentSuggestion(role,
                   { _order: 1 + 2*(i)+2 - 1,
                     input: argument,
                     modifier: modifier,
@@ -903,9 +886,6 @@ Parser.prototype = {
                 // into the object role
                 if (j != jmax) {
 
-                  if (thisParse.args.object == undefined)
-                    thisParse.args.object = [];
-
                   // our argument is words (j+1)...(jmax)
                   // note that Array.slice(i,j) returns *up to* j
                   var argument = allWords.slice(2 * (j + 1),(2 * jmax) + 1)
@@ -914,7 +894,7 @@ Parser.prototype = {
                                     allWords[2 * (j + 1) - 1] : '');
 
                   // push it!
-                  thisParse.args.object.push(
+                  thisParse.setArgumentSuggestion('object',
                     { _order: 1 + 2*(i)+2,
                       input: argument,
                       modifier: '',
@@ -952,7 +932,7 @@ Parser.prototype = {
         }
       }
       // start score off with one point for the verb.
-      parse.__score = parse.scoreMultiplier;
+      parse._score = parse.scoreMultiplier;
     }
 
     return possibleParses;
@@ -1113,9 +1093,9 @@ Parser.prototype = {
   // ** {{{Parser.suggestArgs()}}} **
   //
   // {{{suggestArgs()}}} returns an array of copies of the given parse by
-  // replacing each of the arguments' text with
-  // the each nountype's suggestion. This suggested result goes in the
-  // argument's {{{text}}} and {{{html}}} properties. We'll also take this
+  // replacing each of the arguments' text with the each nountype's suggestion.
+  // This suggested result goes in the argument's {{{text}}}, {{{html}}}, 
+  // and {{{data}}} properties. We'll also take this
   // opportunity to set each arg's {{{score}}} property, also coming from
   // the nountype's {{{suggest()}}} result, to be used in computing the
   // parse's overall score.
@@ -1214,7 +1194,7 @@ Parser.prototype = {
       // for each of the roles parsed in the parse
       for (let role in parse.args) {
         // multiply the score by each role's first argument's nountype match score
-        parse.__score += parse.args[role][0].score * parse.scoreMultiplier;
+        parse._score += parse.args[role][0].score * parse.scoreMultiplier;
       }
     }
 
@@ -1295,8 +1275,8 @@ Parser.prototype = {
 // a query instead of calling {{{new Parser.Query()}}} directly.
 //
 Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImmediately) {
-  this.__date = new Date();
-  this.__idTime = this.__date.getTime();
+  this._date = new Date();
+  this._idTime = this._date.getTime();
   this.parser = parser;
   this.input = queryString;
   this.context = context;
@@ -1353,7 +1333,7 @@ Parser.Query = function(parser,queryString, context, maxSuggestions, dontRunImme
 // Most of this async code is by Blair.
 Parser.Query.prototype = {
   dump: function PQ_dump(msg) {
-    dump(this.__idTime + ':' + (this.__date.getTime()) + ' ' + msg + '\n');
+    dump(this._idTime + ':' + (this._date.getTime()) + ' ' + msg + '\n');
   },
   run: function() {
 
@@ -1361,12 +1341,12 @@ Parser.Query.prototype = {
 
     this._keepworking = true;
 
-    this._times = [this.__date.getTime()];
+    this._times = [this._date.getTime()];
     this._step++;
 
     this._input = this.parser.wordBreaker(this.input);
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     var parseGenerator = this._yieldingParse();
@@ -1432,14 +1412,14 @@ Parser.Query.prototype = {
     this._verbArgPairs = this.parser.verbFinder(this._input);
     yield true;
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     // STEP 3: pick possible clitics
     // TODO: find clitics
     yield true;
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     // STEP 4: group into arguments
@@ -1449,7 +1429,7 @@ Parser.Query.prototype = {
       yield true;
     }
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     // STEP 5: substitute anaphora
@@ -1470,7 +1450,7 @@ Parser.Query.prototype = {
       }
     }
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     // STEP 6: substitute normalized forms
@@ -1482,7 +1462,7 @@ Parser.Query.prototype = {
       yield true;
     }
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     // STEP 7: suggest verbs for parses which don't have one
@@ -1495,7 +1475,7 @@ Parser.Query.prototype = {
       }
     }
 
-    this._times[this._step] = this.__date.getTime();
+    this._times[this._step] = this._date.getTime();
     this._step++;
 
     // STEP 8: do nountype detection + cache
@@ -1543,7 +1523,7 @@ Parser.Query.prototype = {
 
       var isComplete = function isComplete(parse) {return parse.complete};
       if (thisQuery._verbedParses.every(isComplete)) {
-        thisQuery._times[this._step] = thisQuery.__date.getTime();
+        thisQuery._times[this._step] = thisQuery._date.getTime();
         thisQuery._step++;
         thisQuery.finished = true;
         thisQuery.dump('done!!!');
@@ -1724,13 +1704,13 @@ Parser.Parse = function(parser, input, verb, argString, parentId) {
   this.argString = argString;
   this.args = {};
   // this is the internal score variable--use the getScore method
-  this.__score = 0;
+  this._score = 0;
   this.scoreMultiplier = 0;
   // complete == false means we're still parsing or waiting for async nountypes
   this.complete = false;
-  this.__id = Math.random();
+  this._id = Math.random();
   if (parentId)
-    this.__parentId = parentId;
+    this._parentId = parentId;
 }
 
 // ** {{{Parser.Parse.getDisplayText()}}} **
@@ -1957,9 +1937,17 @@ Parser.Parse.prototype = {
   },
   // ** {{{Parser.Parse.getScore()}}} **
   //
-  // {{{getScore()}}} returns the current value of {{{__score}}}.
+  // {{{getScore()}}} returns the current value of {{{_score}}}.
   getScore: function() {
-    return this.__score;
+    return this._score;
+  },
+  // ** {{{Parser.Parse.setArgumentSuggestion()}}} **
+  //
+  // Accepts a {{{role}}} and a suggestion and sets that argument properly.
+  setArgumentSuggestion: function( role, sugg ) {
+    if (this.args[role] == undefined)
+      this.args[role] = [];
+    this.args[role].push(sugg);
   }
 
 }
@@ -1989,12 +1977,12 @@ var cloneParse = function(p) {
                              p.input,
                              cloneObject(p._verb),
                              p.argString,
-                             p.__id);
+                             p._id);
   ret.args = cloneObject(p.args);
   ret.complete = p.complete;
   ret._suggested = p._suggested;
   ret.scoreMultiplier = p.scoreMultiplier;
-  ret.__score = p.__score;
+  ret._score = p._score;
   return ret;
 }
 
@@ -2045,7 +2033,7 @@ function sameObject(a,b,print) {
   }
 
   for (let i in a) {
-    if (i != 'contactList' && i != '__id') {
+    if (i != 'contactList' && i != '_id') {
       if (b[i] == undefined) {
         dump('>'+i+' was in a but not in b\n');
       }
@@ -2056,7 +2044,7 @@ function sameObject(a,b,print) {
     }
   }
   for (let j in b) {
-    if (j != 'contactList' && j != '__id') {
+    if (j != 'contactList' && j != '_id') {
       if (a[j] == undefined) {
         dump('>'+j+' was in b but not in a\n');
       }
