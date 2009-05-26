@@ -99,10 +99,10 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
     suggest: function(text, html, callback, selectionIndices) {
       var match = text.match(this._regexp);
       return (match
-              ? NounUtils.makeSugg(text, html, match,
-                                   this.rankLast ? 0.7 : 1,
-                                   // rankLast is obsolete in parser2
-                                   selectionIndices)
+              ? [NounUtils.makeSugg(text, html, match,
+                                    // rankLast is obsolete in Parser2
+                                    this.rankLast ? 0.7 : 1,
+                                    selectionIndices)]
               : []);
     },
   };

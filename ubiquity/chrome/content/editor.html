@@ -178,16 +178,24 @@
     <br clear="all"/>
     <ul class="button-list">
       <li>
-        <a class="button" href="javascript:importTemplate();"><b>Import Command Template</b></a>
+        <a class="button"
+           onclick="importTemplate();return false"
+         ><b>Import Command Template</b></a>
       </li>
       <li>
-        <a class="button" href="javascript:launch();"><b>Launch an external editor</b></a>
+        <a class="button"
+           onclick="launch();return false"
+         ><b>Launch an external editor</b></a>
       </li>
       <li>
-        <a class="button" href="javascript:paste();"><b>Share</b></a>
+        <a class="button"
+           onclick="paste();return false"
+         ><b>Share</b></a>
       </li>
       <li>
-        <a class="button" href="javascript:saveAs();"><b>Save to file</b></a>
+        <a class="button"
+           onclick="saveAs();return false"
+         ><b>Save to file</b></a>
       </li>
     </ul>
     <br clear="all"/>
@@ -202,7 +210,7 @@
   <div id="editor-div">
     <textarea id="editor"
               rows="40"
-              style="width:900px"
+              style="width:99%"
               onkeyup="PrefCommands.setCode(this.value);"></textarea>
   </div>
 
