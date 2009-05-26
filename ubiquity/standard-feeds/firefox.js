@@ -290,20 +290,22 @@ function setFullPageZoom(level) {
 
 CmdUtils.CreateCommand({
   name: "zoom",
+  names: {en: ['zoom']},
   takes: {"percentage": noun_type_percentage},
+  arguments: [{role: 'object', nountype: noun_type_percentage}],
   icon: "chrome://ubiquity/skin/icons/magnifier.png",
   description: "Zooms the Firefox window in or out.",
-  preview: function(pBlock, directObj) {
+  preview: function(pBlock, args) {
     var replacement = "a given percentage";
-    if (directObj.text) {
-      replacement = directObj.text;
+    if (args.object) {
+      replacement = args.object.text;
     }
     pBlock.innerHTML = "Zooms the Firefox window to " + replacement
                        + " of its normal size.";
   },
-  execute: function(directObj) {
-    if (directObj.data) {
-      setFullPageZoom(directObj.data);
+  execute: function(args) {
+    if (args.object.data) {
+      setFullPageZoom(args.object.data);
     }
     else {
       displayMessage("You must provide a percentage to zoom to.");

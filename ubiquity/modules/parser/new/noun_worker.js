@@ -19,7 +19,10 @@ detectNounType = function detectNounType(x,callback) {
       if ((typeof callback) == 'function')
         callback([suggestion]);
     }
-    var suggestions = activeNounTypes[thisNounTypeId]
+
+    var suggestions = [];
+    if (typeof activeNounTypes[thisNounTypeId].suggest == 'function')
+      suggestions = activeNounTypes[thisNounTypeId]
                         .suggest(x,x,completeAsyncSuggest) || [];
     //mylog(suggestions);
     for each (suggestion in suggestions) {

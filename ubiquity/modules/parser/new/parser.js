@@ -1106,6 +1106,9 @@ Parser.prototype = {
   //
   // There may be multiple returned as each argument may have multiple possible
   // nountypes or multiple suggestions for each nountype.
+  //
+  // This function *also* takes care of filling in unfilled arguments with
+  // the nountypes' and verbs' default values (if available).
 
   suggestArgs: function suggestArgs(parse) {
 
@@ -1146,9 +1149,9 @@ Parser.prototype = {
 
             for each (suggestion in nounCache[argText]) {
 
-              let targetNounTypeId = verbArg.nountypeId;
+              let targetNountypeId = verbArg.nountypeId;
 
-              if (suggestion.nountypeId == targetNounTypeId) {
+              if (suggestion.nountypeId == targetNountypeId) {
 
                 thereWasASuggestionWithTheRightNounType = true;
 
@@ -1190,11 +1193,52 @@ Parser.prototype = {
 
     }
 
+    // now check for unfilled arguments so we can fill them with defaults
+    let unfilledRoles = parse.getUnfilledRoles();
+    let defaultsCache = {};
+    
+    let ant = {};    Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",ant);
+
+    for each (let role in unfilledRoles) {
+      let defaultValue;
+      let missingArg;
+      for each (let arg in parse._verb.arguments) {
+        if (arg.role == role) {
+          missingArg = arg;
+          break;
+        }
+      }
+      if (missingArg.default) {
+        defaultValue = missingArg.default;
+      } else if (ant.activeNounTypes[missingArg.nountypeId].default) {
+        defaultValue = ant.activeNounTypes[missingArg.nountypeId].default();
+      } else {
+        defaultValue = {text:"", html:"", data:null, summary:""};
+      }
+      
+      if (defaultValue.constructor.name != 'Array')
+        defaultValue = [defaultValue];
+      
+      defaultsCache[role] = defaultValue;
+    }
+        
+    for each (let role in unfilledRoles) {
+      let newreturn = [];
+      for each (let defaultValue in defaultsCache[role]) {
+        for each (let parseToReturn in returnArr) {
+          let newParse = parseToReturn.copy();
+          newParse.setArgumentSuggestion(role,defaultValue);
+          newreturn.push(newParse);
+        }
+      }
+      returnArr = newreturn;
+    }
+
     for each (parse in returnArr) {
       // for each of the roles parsed in the parse
       for (let role in parse.args) {
         // multiply the score by each role's first argument's nountype match score
-        parse._score += parse.args[role][0].score * parse.scoreMultiplier;
+        parse._score += (parse.args[role][0].score || 0) * parse.scoreMultiplier;
       }
     }
 
@@ -1501,6 +1545,11 @@ Parser.Query.prototype = {
         thisQuery._scoredParses = newScoredParses;
       }
 
+      var isComplete = function isComplete(parse) {return parse.complete};
+      if (thisQuery._verbedParses.every(isComplete)) {
+        thisQuery.finishQuery();
+      }
+
     }
     var tryToCompleteParses =
     function async_tryToCompleteParses(argText,suggestions) {
@@ -1521,24 +1570,6 @@ Parser.Query.prototype = {
         }
       }
 
-      var isComplete = function isComplete(parse) {return parse.complete};
-      if (thisQuery._verbedParses.every(isComplete)) {
-        thisQuery._times[this._step] = thisQuery._date.getTime();
-        thisQuery._step++;
-        thisQuery.finished = true;
-        thisQuery.dump('done!!!');
-        
-        thisQuery.dump("I am done running query.");
-        thisQuery.dump('step: '+thisQuery._step);
-        thisQuery.dump('times:');
-        for (let i in thisQuery._times) {
-          if (i > 0)
-            thisQuery.dump('step '+i+': '+(thisQuery._times[i] - thisQuery._times[i-1])+' ms');
-        }
-        thisQuery.dump('total: '+(thisQuery._times[thisQuery._times.length-1] - thisQuery._times[0])+' ms' );
-        thisQuery.dump("There were "+thisQuery._scoredParses.length+" completed parses");
-      }
-      
       if (thisQuery._scoredParses.length > 0)
         thisQuery.onResults();
 
@@ -1583,6 +1614,23 @@ Parser.Query.prototype = {
     }
 
   },
+  finishQuery: function() {
+    this._times[this._step] = this._date.getTime();
+    this._step++;
+    this.finished = true;
+    this.dump('done!!!');
+    
+    this.dump("I am done running query.");
+    this.dump('step: '+this._step);
+    this.dump('times:');
+    for (let i in this._times) {
+      if (i > 0)
+        this.dump('step '+i+': '+(this._times[i] - this._times[i-1])+' ms');
+    }
+    this.dump('total: '+(this._times[this._times.length-1] - this._times[0])+' ms' );
+    this.dump("There were "+this._scoredParses.length+" completed parses");
+    this.onResults();
+  },
 
   // ** {{{Parser.Query.hasResults}}} (read-only) **
   //
@@ -1611,6 +1659,7 @@ Parser.Query.prototype = {
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function() {
+    mylog(this);
     this.dump("cancelled!\n");
     this._keepworking = false;
   },
@@ -1740,8 +1789,10 @@ Parser.Parse.prototype = {
     let argsArray = [];
     for (let role in this.args) {
       for each (let argument in this.args[role]) {
-        argsArray[argument._order] = argument;
-        argsArray[argument._order].role = role;
+        if (argument.text) {
+          argsArray[argument._order] = argument;
+          argsArray[argument._order].role = role;
+        }
       }
     }
 
@@ -1776,7 +1827,7 @@ Parser.Parse.prototype = {
     }
 
     for each (let neededArg in this._verb.arguments) {
-      if (!(neededArg.role in this.args)) {
+      if (!this.args[neededArg.role][0].text) {
         let label;
 
         let ant = {};
@@ -1840,7 +1891,7 @@ Parser.Parse.prototype = {
     if (typeof this._verb.preview == 'function')
       return this._verb.preview( context, previewBlock, this.getFirstArgs() );
     else {
-      this.dump(this._verb.names.en[0]+' didn\'t have a preview!');
+      dump(this._verb.names.en[0]+' didn\'t have a preview!');
       return false;
     }
   },
@@ -1874,7 +1925,9 @@ Parser.Parse.prototype = {
     if (this._verb._order != -1) {
       for (let role in this.args) {
         for each (let arg in this.args[role]) {
-          if (arg._order > lastNode._order)
+          if (arg._order == undefined) // if it was a default, it's last
+            lastNode = arg;
+          else if (arg._order > lastNode._order)
             lastNode = arg;
         }
       }
@@ -1944,10 +1997,24 @@ Parser.Parse.prototype = {
   // ** {{{Parser.Parse.setArgumentSuggestion()}}} **
   //
   // Accepts a {{{role}}} and a suggestion and sets that argument properly.
-  setArgumentSuggestion: function PP_setARgumentSuggestion( role, sugg ) {
+  // If there is already an argument for that role, this method will *not*
+  // overwrite it, but rather add an additional argument for that role.
+  setArgumentSuggestion: function PP_setArgumentSuggestion( role, sugg ) {
     if (this.args[role] == undefined)
       this.args[role] = [];
     this.args[role].push(sugg);
+  },
+
+  // ** {{{Parser.Parse.getUnfilledRoles()}}} **
+  //
+  // Returns a list of roles which the parse's verb accepts but 
+  getUnfilledRoles: function PP_getUnfilledRoles() {
+    if (!this._verb.id)
+      return [];
+    return [ verbArg.role
+             for each (verbArg in this._verb.arguments)
+             if (!(verbArg.role in this.args))
+           ];
   },
   
   copy: function PP_copy() {
