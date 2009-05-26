@@ -47,7 +47,7 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 
 var noun_arb_text = {
-  _name: "text",
+  name: "text",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.7, selectionIndices)];
@@ -71,7 +71,7 @@ var noun_type_email = CmdUtils.nounTypeFromRegExp(
 "email");
 
 var noun_type_percentage = {
-  _name: "percentage",
+  name: "percentage",
   _default: CmdUtils.makeSugg("100%", null, 1.0),
   "default": function() this._default,
   suggest: function(text, html) {
@@ -98,7 +98,7 @@ var noun_type_percentage = {
  */
 
 var noun_type_awesomebar = {
-  _name: "url",
+  name: "url",
   suggest: function(part, html, callback){
      Utils.history.search(part, CmdUtils.maxSuggestions, function(result){
        callback(CmdUtils.makeSugg(result.url, result.title, result.favicon));
@@ -107,7 +107,7 @@ var noun_type_awesomebar = {
 };
 
 var noun_type_tab = {
-  _name: "tab name",
+  name: "tab name",
   suggest: function(text, html, cb, selectedIndices)(
     [CmdUtils.makeSugg(tab.document.title || tab.document.URL,
                         null, tab, selectedIndices)
@@ -115,7 +115,7 @@ var noun_type_tab = {
 };
 
 var noun_type_searchengine = {
-  _name: "search engine",
+  name: "search engine",
   suggest: function(fragment, html) {
     var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
       .getService(Components.interfaces.nsIBrowserSearchService);
@@ -146,7 +146,7 @@ var noun_type_searchengine = {
 };
 
 var noun_type_tag = {
-  _name: "tag-list",
+  name: "tag-list",
   suggest: function(fragment) {
     var allTags = (Components.classes["@mozilla.org/browser/tagging-service;1"]
                    .getService(Components.interfaces.nsITaggingService)
@@ -245,7 +245,7 @@ var noun_type_url = {
 };
 
 var noun_type_livemark = {
-  _name: "livemark",
+  name: "livemark",
   rankLast: true,
 
   /*
@@ -302,7 +302,7 @@ var noun_type_livemark = {
 };
 
 var noun_type_command = noun_type_commands = {
-  _name: "command",
+  name: "command",
   _cmdSource: UbiquitySetup.createServices().commandSource,
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
@@ -317,56 +317,51 @@ var noun_type_command = noun_type_commands = {
 };
 
 var noun_type_twitter_user = {
-   _name: "twitter username",
-   rankLast: true,
-   suggest: function(text, html, cb, selected){
-     if(selected) return [];
-     
-     // Twitter usernames can't contain spaces; reject input with spaces.
-     if (text.length && text.indexOf(" ") != -1)
-       return [];
+  name: "twitter username",
+  rankLast: true,
+  suggest: function(text, html, cb, selected){
+    // Twitter usernames can't contain spaces; reject input with spaces.
+    // Also reject text from selection.
+    if (!text || / /.test(text) || selected)
+      return [];
+    
+    var suggs = [];
 
-     var suggs = [];
+    // If we don't need to ask the user for their master password, let's
+    // see if we can suggest known users that the user has logged-in as
+    // before.
+    var tokenDB = (Cc["@mozilla.org/security/pk11tokendb;1"].
+                   getService(Ci.nsIPK11TokenDB));
+    var token = tokenDB.getInternalKeyToken();
 
-     // If we don't need to ask the user for their master password, let's
-     // see if we can suggest known users that the user has logged-in as
-     // before.
-     var tokenDB = Cc["@mozilla.org/security/pk11tokendb;1"].
-                   getService(Ci.nsIPK11TokenDB);
-     var token = tokenDB.getInternalKeyToken();
+    if (!token.needsLogin() || token.isLoggedIn()) {
+      // Look for twitter usernames stored in password manager
+      var usersFound = {};
+      var passwordManager = (Cc["@mozilla.org/login-manager;1"]
+                             .getService(Ci.nsILoginManager));
+      var urls = ["https://twitter.com", "http://twitter.com"];
+      urls.forEach(
+        function(url) {
+          var logins = passwordManager.findLogins({}, url, "", "");
+          
+          for (var x = 0; x < logins.length; x++) {
+            var login = logins[x];
+            if (login.username.indexOf(text) != -1 &&
+                !usersFound[login.username]) {
+              usersFound[login.username] = true;
+              suggs.push(CmdUtils.makeSugg(login.username, null, login));
+            }
+          }
+        });
+    }
 
-     if (!token.needsLogin() || token.isLoggedIn()) {
-       // Look for twitter usernames stored in password manager
-       var usersFound = {};
-       var passwordManager = Cc["@mozilla.org/login-manager;1"]
-                             .getService(Ci.nsILoginManager);
-       var urls = ["https://twitter.com", "http://twitter.com"];
-       urls.forEach(
-         function(url) {
-           var logins = passwordManager.findLogins({}, url, "", "");
-
-           for (var x = 0; x < logins.length; x++) {
-             var login = logins[x];
-             if (login.username.indexOf(text) != -1 &&
-                 !usersFound[login.username]) {
-               usersFound[login.username] = true;
-               suggs.push(CmdUtils.makeSugg(login.username, null, login));
-             }
-           }
-         });
-     }
-
-     // If all else fails, treat the user's single-word input as a twitter
-     // username.
-     if (suggs.length == 0)
-       suggs.push(CmdUtils.makeSugg(text, null, null, 0.7));
-
-     return suggs;
-   }
+    suggs.push(CmdUtils.makeSugg(text, null, null, 0.7));
+    return suggs;
+  }
 };
 
 var noun_type_number = {
-  _name: "number",
+  name: "number",
   suggest: function(text) {
     return /^\d+$/.test(text) ? [CmdUtils.makeSugg(text, null, +text)] : [];
   },
@@ -376,7 +371,7 @@ var noun_type_number = {
 };
 
 var noun_type_bookmarklet = {
-  _name: "bookmarklet",
+  name: "bookmarklet",
   suggest: function(txt, htm, cb, selected) {
     if (selected || !txt) return [];
     try { var tester = RegExp(txt, "i") }
@@ -413,7 +408,7 @@ var noun_type_bookmarklet = {
 }.load();
 
 var noun_type_date = {
-  _name: "date",
+  name: "date",
   'default': function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
@@ -434,30 +429,24 @@ var noun_type_date = {
 };
 
 var noun_type_time = {
-   _name: "time",
-   'default': function(){
-     var time = Date.parse("now");
-     var text = time.toString("hh:mm tt");
-     return CmdUtils.makeSugg(text, null, time, 0.9);
-   },
-   suggest: function(text, html){
-     if (typeof text != "string"){
-       return [];
-     }
-
-     var time = Date.parse( text );
-     if(!time ){
-       return [];
-     }
-
-     return [CmdUtils.makeSugg(time.toString("hh:mm tt"), null, time)];
+  name: "time",
+  "default": function() {
+    var time = Date.parse("now");
+    var text = time.toString("hh:mm tt");
+    return CmdUtils.makeSugg(text, null, time, 0.9);
+  },
+  suggest: function(text, html) {
+    var time = Date.parse(text);
+    return !time ? [] : [CmdUtils.makeSugg(time.toString("hh:mm tt"),
+                                           null,
+                                           time)];
    }
 };
 
 // TODO this is going on obsolete, and will be replaced entirely by
 // noun_type_async_address.
 var noun_type_address = {
-  _name: "address",
+  name: "address",
   knownAddresses: [],
   maybeAddress: null,
   callback: function( isAnAddress ) {
@@ -482,7 +471,7 @@ var noun_type_address = {
 // commenting out until this actually works (#619)
 /*
 var noun_type_async_address = {
-  _name: "address(async)",
+  name: "address(async)",
   // TODO caching
   suggest: function(text, html, callback) {
     isAddress( text, function( truthiness ) {
@@ -496,7 +485,7 @@ var noun_type_async_address = {
 */
 
 var noun_type_contact = {
-  _name: "contact",
+  name: "contact",
   _list: null,
   _callback: function(contacts) {
     var {_list} = noun_type_contact;
@@ -520,36 +509,35 @@ var noun_type_contact = {
 };
 
 var noun_type_geolocation = {
-   _name : "geolocation",
-   rankLast: true,
-   'default': function() {
-     var location = CmdUtils.getGeoLocation();
-     if (!location) {
-       // TODO: there needs to be a better way of doing this,
-       // as default() can't currently return null
-       return {text: "", html: "", data: null, summary: ""};
-     }
-     var fullLocation = location.city + ", " + location.country;
-     return CmdUtils.makeSugg(fullLocation,null,null,0.9);
-   },
-
-   suggest: function(fragment, html, callback) {
-      /* LONGTERM TODO: try to detect whether fragment is anything like a valid location or not,
-       * and don't suggest anything for input that's not a location.
-       */
-     function addAsyncGeoSuggestions(location) {
-       if(!location)
-         return;
-       var fullLocation = location.city + ", " + location.country;
-       callback([CmdUtils.makeSugg(fullLocation),
-                 CmdUtils.makeSugg(location.city),
-                 CmdUtils.makeSugg(location.country)]);
-     }
-     if (/\bhere\b/.test(fragment)) {
-       CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
-     }
-     return [CmdUtils.makeSugg(fragment)];
-   }
+  name : "geolocation",
+  rankLast: true,
+  'default': function() {
+    var location = CmdUtils.getGeoLocation();
+    if (!location) {
+      // TODO: there needs to be a better way of doing this,
+      // as default() can't currently return null
+      return CmdUtils.makeSugg("", "", null, 0.9);
+    }
+    var fullLocation = location.city + ", " + location.country;
+    return CmdUtils.makeSugg(fullLocation, null, null, 0.9);
+  },
+  suggest: function(fragment, html, callback) {
+    // LONGTERM TODO: try to detect whether fragment is anything like
+    // a valid location or not, and don't suggest anything
+    // for input that's not a location.
+    function addAsyncGeoSuggestions(location) {
+      if(!location)
+        return;
+      var fullLocation = location.city + ", " + location.country;
+      callback([CmdUtils.makeSugg(fullLocation),
+                CmdUtils.makeSugg(location.city),
+                CmdUtils.makeSugg(location.country)]);
+    }
+    if (/\bhere\b/.test(fragment)) {
+      CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
+    }
+    return [CmdUtils.makeSugg(fragment)];
+  }
 };
 
 var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
