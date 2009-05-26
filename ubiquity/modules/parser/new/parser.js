@@ -37,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["Parser",'nounCache','sameObject'];
+var EXPORTED_SYMBOLS = ["Parser",'nounCache'];
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -818,7 +818,7 @@ Parser.prototype = {
 
               // thisParse is our local copy. We'll mess with it and
               // add it into newParses.
-              let thisParse = cloneParse(theseParses[k]);
+              let thisParse = theseParses[k].copy();
 
               if (this.branching == 'left') {// find args right to left
 
@@ -971,7 +971,7 @@ Parser.prototype = {
                                            "$1"+selection+"$3");
 
         if (newArg != oldArg) {
-          let parseCopy = cloneParse(parse);
+          let parseCopy = parse.copy();
           parseCopy.args[role][i].input = newArg;
           returnArr.push(parseCopy);
         }
@@ -1003,7 +1003,7 @@ Parser.prototype = {
 
         for each (substitute in this.normalizeArgument(arg)) {
           for each (baseParse in baseParses) {
-            let parseCopy = cloneParse(baseParse);
+            let parseCopy = baseParse.copy();
             parseCopy.args[role][i].inactivePrefix = substitute.prefix;
             parseCopy.args[role][i].input = substitute.newInput;
             parseCopy.args[role][i].inactiveSuffix = substitute.suffix;
@@ -1938,16 +1938,30 @@ Parser.Parse.prototype = {
   // ** {{{Parser.Parse.getScore()}}} **
   //
   // {{{getScore()}}} returns the current value of {{{_score}}}.
-  getScore: function() {
+  getScore: function PP_getScore() {
     return this._score;
   },
   // ** {{{Parser.Parse.setArgumentSuggestion()}}} **
   //
   // Accepts a {{{role}}} and a suggestion and sets that argument properly.
-  setArgumentSuggestion: function( role, sugg ) {
+  setArgumentSuggestion: function PP_setARgumentSuggestion( role, sugg ) {
     if (this.args[role] == undefined)
       this.args[role] = [];
     this.args[role].push(sugg);
+  },
+  
+  copy: function PP_copy() {
+    let ret = new Parser.Parse(this._partialParser,
+                               this.input,
+                               cloneObject(this._verb),
+                               this.argString,
+                               this._id);
+    ret.args = cloneObject(this.args);
+    ret.complete = this.complete;
+    ret._suggested = this._suggested;
+    ret.scoreMultiplier = this.scoreMultiplier;
+    ret._score = this._score;
+    return ret;
   }
 
 }
@@ -1970,20 +1984,6 @@ if ((typeof window) == 'undefined') {// kick it chrome style
 
 } else {
   //mylog = console.log;
-}
-
-var cloneParse = function(p) {
-  let ret = new Parser.Parse(p._partialParser,
-                             p.input,
-                             cloneObject(p._verb),
-                             p.argString,
-                             p._id);
-  ret.args = cloneObject(p.args);
-  ret.complete = p.complete;
-  ret._suggested = p._suggested;
-  ret.scoreMultiplier = p.scoreMultiplier;
-  ret._score = p._score;
-  return ret;
 }
 
 // **{{{cloneObject()}}}**
