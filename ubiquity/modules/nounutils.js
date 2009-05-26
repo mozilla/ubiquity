@@ -46,6 +46,8 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var NounUtils = {};
 
+const DEFAULT_SCORE = 0.9;
+
 // ** {{{ NounUtils.NounType() }}} **
 //
 // Constructor of a noun type that accepts a finite list of specific words
@@ -68,7 +70,7 @@ NounUtils.NounType = function NounType(name, expectedWords, defaultWords) {
   if (typeof defaultWords === "string")
     defaultWords = defaultWords.match(/\S+/g);
   if (defaultWords) {
-    this._defaults = [NounUtils.makeSugg(w, null, null, 0.9)
+    this._defaults = [NounUtils.makeSugg(w, null, null, DEFAULT_SCORE)
                       for each (w in defaultWords)];
     this.default = function() this._defaults;
   }
@@ -78,9 +80,70 @@ NounUtils.NounType.prototype = {
   suggest: function(text) NounUtils.grepSuggs(text, this._words),
 };
 
+// ** {{{ NounUtils.nounTypeFromRegExp() }}} **
+//
+// Creates a noun type from the given regular expression object
+// and returns it. The {{{data}}} attribute of the noun type is
+// the {{{match}}} object resulting from the regular expression
+// match.
+//
+// {{{regexp}}} is the RegExp object that checks inputs.
+//
+// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
+
+NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
+  return {
+    _name: name || "?",
+    _regexp: regexp,
+    rankLast: regexp.test(""),
+    suggest: function(text, html, callback, selectionIndices) {
+      var match = text.match(this._regexp);
+      return (match
+              ? NounUtils.makeSugg(text, html, match,
+                                   this.rankLast ? 0.7 : 1,
+                                   // rankLast is obsolete in parser2
+                                   selectionIndices)
+              : []);
+    },
+  };
+};
+
+// ** {{{ NounUtils.nounTypeFromDictionary() }}} **
+//
+// Creates a noun type from the given key:value pairs, the key being
+// the {{{text}}} attribute of its suggest and the value {{{data}}}.
+//
+// {{{dict}}} is an object of text:data pairs.
+//
+// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
+//
+// {{{defaults}}} is an optional array or space-separated string
+// of default keys.
+
+NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(dict,
+                                                                   name,
+                                                                   defaults) {
+  var noun = {
+    _name: name || "?",
+    _list: [NounUtils.makeSugg(key, null, val)
+            for ([key, val] in Iterator(dict))],
+    suggest: function(text, html, cb, selected) {
+      return selected ? [] : NounUtils.grepSuggs(text, this._list);
+    },
+  };
+  if (typeof defaults === "string")
+    defaults = defaults.match(/\S+/g);
+  if (defaults) {
+    noun._defaults = [NounUtils.makeSugg(k, null, dict[k], DEFAULT_SCORE)
+                      for each (k in defaults)];
+    noun.default = function() this._defaults;
+  }
+  return noun;
+};
+
 // ** {{{ NounUtils.makeSugg() }}} **
 //
-// ** FIXME: documentation **
+// A helper function to create a suggestion object.
 //
 // {{{text}}}
 // {{{html}}}
@@ -88,7 +151,8 @@ NounUtils.NounType.prototype = {
 // {{{score = 1}}}
 // {{{selectionIndices}}}
 
-NounUtils.makeSugg = function(text, html, data, score, selectionIndices) {
+NounUtils.makeSugg = function makeSugg(text, html, data, score,
+                                       selectionIndices) {
   if (typeof text !== "string" &&
       typeof html !== "string" &&
       arguments.length < 3)
@@ -115,11 +179,10 @@ NounUtils.makeSugg = function(text, html, data, score, selectionIndices) {
                  ? text.slice(0, snippetLength-1) + "\u2026"
                  : text);
 
-  /* If the input comes all or in part from a text selection,
-   * we'll stick some html tags into the summary so that the part
-   * that comes from the text selection can be visually marked in
-   * the suggestion list.
-   */
+  // If the input comes all or in part from a text selection,
+  // we'll stick some html tags into the summary so that the part
+  // that comes from the text selection can be visually marked in
+  // the suggestion list.
   if (selectionIndices) {
     var pre = summary.slice(0, selectionIndices[0]);
     var middle = summary.slice(selectionIndices[0],
@@ -136,35 +199,6 @@ NounUtils.makeSugg = function(text, html, data, score, selectionIndices) {
   return {
     text: text, html: html, data: data,
     summary: summary, score: score || 1};
-};
-
-// ** {{{ NounUtils.nounTypeFromRegExp() }}} **
-//
-// Creates a noun type from the given regular expression object
-// and returns it. The {{{data}}} attribute of the noun type is
-// the {{{match}}} object resulting from the regular expression
-// match.
-//
-// {{{regexp}}} is the RegExp object that checks inputs.
-//
-// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
-
-NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
-  return {
-    _name: name || "?",
-    _regexp: regexp,
-    rankLast: regexp.test(""),
-    suggest: function(text, html, callback, selectionIndices) {
-      var match = text.match(this._regexp);
-      return (match
-              ? NounUtils.makeSugg(text, html, match,
-                                   this.rankLast ? 0.7 : 1,
-                                   // ^why is this needed, being rankLast
-                                   // not enough for grading it down?
-                                   selectionIndices)
-              : []);
-    },
-  };
 };
 
 // ** {{{ NounUtils.grepSuggs() }}} **
@@ -184,7 +218,7 @@ NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
   if (key == null) key = "text";
   try { var re = RegExp(input, "i") }
   catch (e if e instanceof SyntaxError) {
-    re = RegExp(input.replace(/./g, "\\$&"), "i");
+    re = RegExp(input.replace(/\W/g, "\\$&"), "i");
   }
   var results = [], count = suggs.__count__, i = -1;
   for each (let sugg in suggs) {
@@ -192,36 +226,4 @@ NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
     if (~index) results[++i + index * count] = sugg;
   }
   return results.filter(Boolean);
-};
-
-// ** {{{ NounUtils.nounTypeFromDictionary() }}} **
-//
-// Creates a noun type from the given key:value pairs, the key being
-// the {{{text}}} attribute of its suggest and the value {{{data}}}.
-//
-// {{{dict}}} is an object of text:data pairs.
-//
-// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
-//
-// {{{defaults}}} is an optional array or space-separated string
-// of default keys.
-
-NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(dict,
-                                                                   name,
-                                                                   defaults) {
-  var noun = {
-    _name: name || "?",
-    _list: [NounUtils.makeSugg(key, null, val)
-            for each ([key, val] in Iterator(dict))],
-    suggest: function(text, html, cb, selected) {
-      return selected ? [] : NounUtils.grepSuggs(text, this._list);
-    },
-  };
-  if (typeof defaults === "string")
-    defaults = defaults.match(/\S+/g);
-  if (defaults) {
-    noun._defaults = defaults;
-    noun.default = function() this._defaults;
-  }
-  return noun;
 };
