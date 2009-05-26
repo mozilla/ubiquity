@@ -1828,18 +1828,20 @@ Parser.Parse.prototype = {
 
     for each (let neededArg in this._verb.arguments) {
       if (!this.args[neededArg.role][0].text) {
-        let label;
-
-        let ant = {};
-        Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",ant);
-
-        label = neededArg.label || ant.activeNounTypes[neededArg.nountypeId]._name;
-
+        let {label} = neededArg;
+        if (!label) {
+          let ant = {};
+          Components.utils.import(
+            "resource://ubiquity/modules/parser/new/active_noun_types.js",
+            ant);
+          let nt = ant.activeNounTypes[neededArg.nountypeId];
+          label = nt.name || nt._name || "?";
+        }
         for each (let parserRole in this._partialParser.roles) {
           if (parserRole.role == neededArg.role) {
             if (this._partialParser.branching == 'left')
-              label = label + this._partialParser.joindelimiter
-                            + parserRole.delimiter;
+              label += this._partialParser.joindelimiter
+                        + parserRole.delimiter;
             else
               label = parserRole.delimiter
                        + this._partialParser.joindelimiter + label;
@@ -1847,7 +1849,7 @@ Parser.Parse.prototype = {
           }
         }
 
-        display += ' <span class="needarg">('+label+')</span>';
+        display += ' <span class="needarg">' + label + '</span>';
       }
     }
 

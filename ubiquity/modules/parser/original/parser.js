@@ -414,24 +414,25 @@ NLParser1.ParsedSentence.prototype = {
 
   getDisplayText: function() {
     // returns html formatted sentence for display in suggestion list
-    let sentence = Utils.escapeHtml(this._verb._name);
-    let label;
-    for ( var x in this._verb._arguments ) {
-      if ( this._argSuggs[ x ] && (this._argSuggs[x].text != "") ) {
-        if (x == "direct_object")
-          label = "";
-        else
-          label = x;
-        sentence += (" <b>" + Utils.escapeHtml(label) + " " +
-                     this._argSuggs[x].summary + "</b>");
+    var sentence = Utils.escapeHtml(this._verb._name);
+    var obj, label, klass;
+    for (let x in this._verb._arguments) {
+      obj = x === "direct_object";
+      if (this._argSuggs[x] && this._argSuggs[x].text) {
+        label = obj ? "" : x;
+        klass = obj ? "object" : "argument";
+        sentence += (' <span class="' + klass + '">' +
+                     Utils.escapeHtml(label) + " " +
+                     this._argSuggs[x].summary + "</span>");
       } else {
-        if (x == "direct_object") {
+        if (obj)
           label = this._verb._arguments[x].label;
-        } else {
-          label = x + " " + this._verb._arguments[x].type._name;
+        else {
+          let {type} = this._verb._arguments[x];
+          label = x + " " + (type.name || type._name || "?");
         }
-        sentence += (" <span class=\"needarg\">(" +
-                     Utils.escapeHtml(label) + ")</span>");
+        sentence += (' <span class="needarg">' +
+                     Utils.escapeHtml(label) + "</span>");
       }
     }
     return sentence;

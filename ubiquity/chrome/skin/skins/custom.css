@@ -79,7 +79,21 @@
   height: 16px;
 }
 
+.object {
+
+}
+
+.argument {
+
+}
+
 .needarg {
+}
+.needarg:before {
+  content: "(";
+}
+.needarg:after {
+  content: ")";
 }
 
 .hilited .needarg {

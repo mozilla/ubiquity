@@ -98,10 +98,21 @@
   color: #FFF;
 }
 
+.object, .argument {
+  font-weight: bold;
+}
+
 .needarg {
   font-style: oblique;
   color: #999999;
 }
+.needarg:before {
+  content: "(";
+}
+.needarg:after {
+  content: ")";
+}
+
 .cmdicon {
   display: inline-block;
   width: 16px;
