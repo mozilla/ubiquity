@@ -1,5 +1,3 @@
 var EXPORTED_SYMBOLS = ["activeNounTypes"];
 
-activeNounTypes = [];
-
-
+var activeNounTypes = [];

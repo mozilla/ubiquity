@@ -1,14 +1,8 @@
-var EXPORTED_SYMBOLS = ["detectNounType",'setNounTypes','callback'];
+var EXPORTED_SYMBOLS = ["detectNounType",'callback'];
 
 Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
 
 //dump('in the worker now: there are '+activeNounTypes.length+' nountypes\n');
-
-nounTypes = [];
-
-setNounTypes = function setNounTypes(outsideNounTypes) {
-  nounTypes = outsideNounTypes;
-}
 
 //if ((typeof postMessage) != 'function')
 //  postMessage = function(){ dump('default function :p\n') };
@@ -18,15 +12,14 @@ detectNounType = function detectNounType(x,callback) {
   
   dump('detecting '+x+'\n');
   
-  for (let thisNounTypeId in nounTypes) {
+  for (let thisNounTypeId in activeNounTypes) {
 
     var completeAsyncSuggest = function completeAsyncSuggest(suggestion) {
       suggestion.nountypeId = thisNounTypeId;
       if ((typeof callback) == 'function')
         callback([suggestion]);
     }
-
-    var suggestions = nounTypes[thisNounTypeId]
+    var suggestions = activeNounTypes[thisNounTypeId]
                         .suggest(x,x,completeAsyncSuggest) || [];
     //mylog(suggestions);
     for each (suggestion in suggestions) {
@@ -46,7 +39,7 @@ detectNounType = function detectNounType(x,callback) {
 
 onmessage = function onmessage(event) {
   if (event.data) {
-    nounTypes = event.data.nounTypes;
+    //nounTypes = event.data.nounTypes;
     //dump('received '+nounTypes.length+' nountypes\n');
     //postMessage(nounTypes);
     detectNounType(event.data.input);

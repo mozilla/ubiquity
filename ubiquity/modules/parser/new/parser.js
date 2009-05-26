@@ -150,11 +150,12 @@ Parser.prototype = {
   //
   // After the nountypes have been registered, {{{Parser.initialCache()}}} is
   // called.
-  setCommandList: function( commandList ) {
-    Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
-
-    activeNounTypes = [];
+  setCommandList: function setCommandList( commandList ) {
     
+    let ant = Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",null);
+   
+    ant.activeNounTypes = [];
+   
     this._verbList = [];
     this._nounTypes = [];
 
@@ -215,7 +216,7 @@ Parser.prototype = {
         if (!thisNounTypeIsAlreadyRegistered) {
           thisNounType.__id = nounTypeId;
           this._nounTypes[nounTypeId] = thisNounType;
-          activeNounTypes[nounTypeId] = thisNounType;
+          ant.activeNounTypes[nounTypeId] = thisNounType;
 
           arg.nountypeId = nounTypeId;
           
@@ -1264,7 +1265,6 @@ Parser.prototype = {
         nounWorker);
       Components.utils.import(
         'resource://ubiquity/modules/utils.js');
-      nounWorker.setNounTypes(this._nounTypes);
       
       var myCallback = function detectNounType_myCallback(suggestions) {
         if (!(x in nounCache))
@@ -1717,7 +1717,7 @@ Parser.Query.prototype = {
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
-Parser.Parse = function(parser, input, verb, argString) {
+Parser.Parse = function(parser, input, verb, argString, parentId) {
   this._partialParser = parser;
   this.input = input;
   this._verb = verb;
@@ -1728,6 +1728,9 @@ Parser.Parse = function(parser, input, verb, argString) {
   this.scoreMultiplier = 0;
   // complete == false means we're still parsing or waiting for async nountypes
   this.complete = false;
+  this.__id = Math.random();
+  if (parentId)
+    this.__parentId = parentId;
 }
 
 // ** {{{Parser.Parse.getDisplayText()}}} **
@@ -1795,8 +1798,11 @@ Parser.Parse.prototype = {
     for each (let neededArg in this._verb.arguments) {
       if (!(neededArg.role in this.args)) {
         let label;
-        // TODO: actually fall back to the nountype's name, not the ID.
-        label = neededArg.label || neededArg.nountypeId;
+
+        let ant = {};
+        Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",ant);
+
+        label = neededArg.label || ant.activeNounTypes[neededArg.nountypeId]._name;
 
         for each (let parserRole in this._partialParser.roles) {
           if (parserRole.role == neededArg.role) {
@@ -1982,7 +1988,8 @@ var cloneParse = function(p) {
   let ret = new Parser.Parse(p._partialParser,
                              p.input,
                              cloneObject(p._verb),
-                             p.argString);
+                             p.argString,
+                             p.__id);
   ret.args = cloneObject(p.args);
   ret.complete = p.complete;
   ret._suggested = p._suggested;
