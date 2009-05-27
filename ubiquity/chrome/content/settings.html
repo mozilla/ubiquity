@@ -39,7 +39,7 @@
     <ul class="button-list">
       <li>
         <a class="button" id="edit-button"
-           href="javascript:openSkinEditor();">
+           onclick="openSkinEditor()">
            Edit Custom Skin</a>
       </li>
     </ul>
@@ -118,15 +118,9 @@
       <div class="warning">If you are using Windows, then any changes you make to a custom skin can only be seen after a browser restart. This is a <a href="http://ubiquity.mozilla.com/trac/ticket/449">known bug</a>.</div>
       <br/><br/>
       <li>
-        <textarea rows="30" style="width:750px" id="skin-editor"></textarea>
+        <textarea rows="30" style="width:92%" id="skin-editor"></textarea>
       </li>
     </ul>
   </div>
-
-  <script>
-    Components.utils.import("resource://ubiquity/modules/utils.js");
-    $(document).ready(onDocumentLoad);
-  </script>
-
 </body>
 </html>

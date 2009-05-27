@@ -259,7 +259,7 @@ SkinSvc.prototype = {
   },
 
   //Get all installed skins
-  getSkinList: function getSkinList(){
+  get skinList() {
     var selectSql = "SELECT local_uri, download_uri FROM ubiquity_skin_memory";
     var selStmt = this._createStatement(selectSql);
     var skinList = [];
@@ -297,7 +297,7 @@ SkinSvc.prototype = {
   updateAllSkins: function updateAllSkins() {
     //Only have to update/download remote skins
     //Local skins are pointed at directly
-    for each (var skin in this.getSkinList())
+    for each (var skin in this.skinList)
       if (skin.local_uri !== skin.download_uri)
         this.updateSkin(skin.local_uri, skin.download_uri);
   },
@@ -315,7 +315,7 @@ SkinSvc.prototype = {
   },
 
   uninstall: function uninstall(url) {
-    var skinList = this.getSkinList(), found = false;
+    var {skinList} = this, found = false;
     for each (var {local_uri, download_uri} in skinList)
       if(local_uri === url || download_uri === url) {
         found = true;

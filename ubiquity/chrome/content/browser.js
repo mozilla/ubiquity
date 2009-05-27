@@ -137,6 +137,7 @@ function ubiquityKeydown(aEvent) {
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
     gUbiquity.toggleWindow();
     aEvent.preventDefault();
+    aEvent.stopPropagation();
   }
 }
 

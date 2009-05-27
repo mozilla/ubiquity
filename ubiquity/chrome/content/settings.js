@@ -46,6 +46,8 @@ Cu.import("resource://ubiquity/modules/setup.js");
 var {skinService} = UbiquitySetup.createServices();
 var msgService = new AlertMessageService();
 
+$(onDocumentLoad);
+
 function onDocumentLoad() {
   loadSkinList();
   // set the language option controls to the correct values:
@@ -104,26 +106,26 @@ function changeLanguageSettings() {
 }
 
 function loadSkinList() {
-  const {CUSTOM_SKIN} = skinService;
-  var skinList = skinService.getSkinList(), i = 0;
+  var {CUSTOM_SKIN, currentSkin, skinList} = skinService;
+  var i = 0;
   $("#skin-list").empty();
   for each (let {local_uri, download_uri} in skinList)
     if (local_uri !== CUSTOM_SKIN)
       createSkinElement(local_uri, download_uri, i++);
   createSkinElement(CUSTOM_SKIN, CUSTOM_SKIN, i);
+  checkSkin(currentSkin);
   //If current skin is custom skin, auto-open the editor
-  if(skinService.currentSkin === CUSTOM_SKIN)
+  if (currentSkin === CUSTOM_SKIN)
     openSkinEditor();
 }
 
 // Thanks to code by Torisugari at
 // http://forums.mozillazine.org/viewtopic.php?p=921150#921150
-function readFile(url){
-  var ioService=Cc["@mozilla.org/network/io-service;1"]
-    .getService(Ci.nsIIOService);
-  var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"]
-    .getService(Ci.nsIScriptableInputStream);
-
+function readFile(url) {
+  var ioService = (Cc["@mozilla.org/network/io-service;1"]
+                   .getService(Ci.nsIIOService));
+  var scriptableStream = (Cc["@mozilla.org/scriptableinputstream;1"]
+                          .getService(Ci.nsIScriptableInputStream));
   var channel = ioService.newChannel(url,null,null);
   var input = channel.open();
   scriptableStream.init(input);
@@ -133,50 +135,23 @@ function readFile(url){
   return str;
 }
 
-function createSkinElement(filepath, origpath, id){
-  try{
-    var lines = readFile(filepath).split("\n");
-  }catch(e){
+function createSkinElement(filepath, origpath, id) {
+  try {
+    var css = readFile(filepath);
+  } catch(e) {
     //If file cannot be read, just move on to the next skin
     return;
   }
 
-  var skinMeta = {};
-
-  //look for =skin= indicating start of metadata
-  var foundMetaData = false;
-  var l = 0;
-  for(var x in lines){
-    l = x;
-    var line = lines[x];
-    if(line.indexOf("=skin=") != -1){
-      foundMetaData = true;
-      break;
-    }
-  }
-
-  //extract the metadata
-  if(foundMetaData){
-    for(var i=l; i<lines.length; i++){
-      var line = jQuery.trim(lines[i]);
-      if(line.indexOf("@") != -1){
-
-        var temp = line.substring(line.indexOf("@") + 1);
-        var field = jQuery.trim(temp.substring( 0 , temp.indexOf(" ")));
-        var value = jQuery.trim(temp.substring(temp.indexOf(" ") + 1));
-        skinMeta[field] = value;
-      }
-
-      if(line.indexOf("=/skin=") != -1){
-        break;
-      }
-    }
-  }
-
-  if(!skinMeta.name)
-    skinMeta.name = filepath;
-  if(!skinMeta.homepage)
-    skinMeta.homepage = origpath;
+  var skinMeta = {
+    name: filepath,
+    homepage: origpath,
+  };
+  //look for =skin= ~ =/skin= indicating metadata
+  var [, metaData] = /=skin=\s+([^]+)\s+=\/skin=/(css) || 0;
+  if (metaData)
+    while(/^\s*@(\S+)\s+(.+)/mg.test(metaData))
+      skinMeta[RegExp.$1] = RegExp.$2;
 
   var skinId = "skin_" + id;
 
@@ -185,86 +160,78 @@ function createSkinElement(filepath, origpath, id){
      ('<input type="radio" name="skins" id="rad_' + skinId +
       '" value="' + filepath + '"></input>') +
      '<label class="label light" for="rad_'+ skinId + '">' +
-     '<a class="name"/>' +
-     '<br/><span class="author"/><span class="license"/></label>' +
+     '<a class="name"/><br/>' +
+     '<span class="author"/><span class="license"/></label>' +
      '<div class="email light"></div>' +
      '<div class="homepage light"></div></div>'
     );
 
-  var skinEl = $('#' + skinId);
+  var skinEl = $("#" + skinId);
 
   //Add the name and onclick event
-  skinEl.find('.name').text(skinMeta.name);
-  skinEl.find('input').attr("onclick", ("skinService.changeSkin('" +
-                                        filepath + "');"));
+  skinEl.find(".name").text(skinMeta.name);
+  skinEl.find("input").attr("onclick",
+                            "skinService.changeSkin('" + filepath + "')");
 
-  //Make the current skin distinct
-  var currentSkin = skinService.currentSkin;
-  if (filepath == currentSkin) {
-    skinEl.find('#rad_' + skinId).attr('checked','true');
-  }
+  if (skinMeta.author)
+    skinEl.find(".author").text("by " + skinMeta.author);
 
-  if(skinMeta.author) {
-    skinEl.find('.author').text("by " + skinMeta.author);
-  }
+  if (skinMeta.email)
+    skinEl.find(".email")[0].innerHTML = (
+      <>email: <a href={'mailto:' + skinMeta.email}
+      >{skinMeta.email}</a></>);
 
-  if(skinMeta.email){
-    skinEl.find('.email').html("email: <a href='mailto:" + skinMeta.email  +
-                               "'>" + skinMeta.email + "</a>");
-  }
+  if (skinMeta.license)
+    skinEl.find(".license").text(" licensed as " + skinMeta.license);
 
-  if(skinMeta.license){
-    skinEl.find('.license').text(" licensed as " + skinMeta.license);
-  }
-
-  if(skinMeta.homepage){
-    skinEl.find('.homepage').html("<a href='" + skinMeta.homepage  +
-                                  "'>" + skinMeta.homepage + "</a>");
-  }
+  if (skinMeta.homepage)
+    skinEl.find(".homepage")[0].innerHTML =
+      <a href={skinMeta.homepage}>{skinMeta.homepage}</a>.toXMLString();
 
   skinEl.append(<a class="action" href={"view-source:" + filepath}
                 target="_blank">[view source]</a>.toXMLString());
-  filepath !== origpath && (
+
+  if (filepath !== origpath) (
     $("<a class='action'>[uninstall]</a>")
     .click(function uninstall() {
       var before = skinService.currentSkin;
       skinService.uninstall(filepath);
       var after = skinService.currentSkin;
-      if(before !== after)
-        $("#skin-list input:radio").each(function() {
-          if(this.value === after) {
-            this.checked = true;
-            return false;
-          }
-        });
+      if (before !== after) checkSkin(after);
       skinEl.slideUp();
     })
     .appendTo(skinEl.append(" ")));
 }
 
+function checkSkin(url) {
+  $("#skin-list input:radio").each(function() {
+    if (this.value === url) {
+      this.checked = true;
+      return false;
+    }
+  });
+}
 
-function saveCustomSkin(){
+function saveCustomSkin() {
   var data = $("#skin-editor").val();
-
   var MY_ID = "ubiquity@labs.mozilla.com";
-  var em = Cc["@mozilla.org/extensions/manager;1"]
-                     .getService(Ci.nsIExtensionManager);
-  var file = em.getInstallLocation(MY_ID)
-                .getItemFile(MY_ID, "chrome/skin/skins/custom.css");
-
-  var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
-  .createInstance(Ci.nsIFileOutputStream);
+  var file = (Cc["@mozilla.org/extensions/manager;1"]
+              .getService(Ci.nsIExtensionManager)
+              .getInstallLocation(MY_ID)
+              .getItemFile(MY_ID, "chrome/skin/skins/custom.css"));
+  var foStream = (Cc["@mozilla.org/network/file-output-stream;1"]
+                  .createInstance(Ci.nsIFileOutputStream));
   foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
   foStream.write(data, data.length);
   foStream.close();
 
   msgService.displayMessage("Your skin has been saved!");
-
-  if(skinService.currentSkin === skinService.CUSTOM_SKIN)
-     skinService.loadCurrentSkin();
+  loadSkinList();
+  if (skinService.currentSkin === skinService.CUSTOM_SKIN)
+    skinService.loadCurrentSkin();
 }
 
-function pasteToGist(){
+function pasteToGist() {
   var data = $("#skin-editor").val();
   var name = (/@name[ \t]+(.+)/(data) || 0)[1];
   var ext = ".css";
@@ -278,7 +245,7 @@ function pasteToGist(){
      }))].join("&"));
 }
 
-function openSkinEditor(){
+function openSkinEditor() {
   $('#editor-div').show();
   $("#skin-editor").val(readFile(skinService.CUSTOM_SKIN)).focus();
   $('#edit-button').hide();
