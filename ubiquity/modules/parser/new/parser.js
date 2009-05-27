@@ -1303,7 +1303,12 @@ Parser.prototype = {
       },0);
 
     }
-  }
+  },
+  // ** {{{Parser.strengthenMemory}}} **
+  //
+  // This is a dummy function stub in order to match the interface that
+  // cmdmanager expects. TODO: rethink this.
+  strengthenMemory: function() {}
 }
 
 // == {{{Parser.Query}}} prototype ==
