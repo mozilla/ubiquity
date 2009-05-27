@@ -60,6 +60,20 @@ function onDocumentLoad() {
       }
     );
   }
+  // set the usage-data-collection option to the correct value:
+  var prefs = Cc["@mozilla.org/preferences-service;1"]
+                          .getService(Ci.nsIPrefService);
+  prefs = prefs.getBranch("extensions.ubiquity.");
+  var collect = prefs.getBoolPref("collectUsageData");
+  $("#allow-data-collection-checkbox").attr('checked', collect);
+}
+
+function changeDataCollectionSettings() {
+  var prefs = Cc["@mozilla.org/preferences-service;1"]
+                          .getService(Ci.nsIPrefService);
+  prefs = prefs.getBranch("extensions.ubiquity.");
+  var collect = $("#allow-data-collection-checkbox").attr('checked');
+  prefs.setBoolPref("collectUsageData", collect);
 }
 
 function changeLanguageSettings() {
