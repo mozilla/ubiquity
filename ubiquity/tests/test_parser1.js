@@ -57,7 +57,7 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
 }
 
 var noun_arb_text = {
-  _name: "text",
+  name: "text",
   rankLast: true,
   suggest: function( text, html ) {
     return [ NounUtils.makeSugg(text, html) ];
@@ -623,19 +623,19 @@ function testPartiallyParsedSentence() {
 
 
   var noun_type_foo = {
-    _name: "foo",
+    name: "foo",
     suggest: function( text, html ) {
       return [ NounUtils.makeSugg("foo_a"), NounUtils.makeSugg("foo_b") ];
     }
   };
   var noun_type_bar = {
-    _name: "bar",
+    name: "bar",
     suggest: function( text, html ) {
       return [ NounUtils.makeSugg("bar_a"), NounUtils.makeSugg("bar_b") ];
     }
   };
   var noun_type_baz = {
-    _name: "baz",
+    name: "baz",
     suggest: function( text, html ) {
       return [];
     }
@@ -727,7 +727,7 @@ function testTextAndHtmlDifferent() {
     textSelection: "Pants", htmlSelection:"<blink>Pants</blink>"
   };
   var noun_type_different = {
-    _name: "different",
+    name: "different",
     suggest: function( text, html ) {
       if (text.indexOf("Pant") == 0)
         return [ NounUtils.makeSugg(text, html) ];
@@ -782,7 +782,7 @@ function testTextAndHtmlDifferent() {
 
 function testAsyncNounSuggestions() {
   var noun_type_slowness = {
-    _name: "slowness",
+    name: "slowness",
     suggest: function( text, html, callback ) {
       this._callback = callback;
       if (text.indexOf("hello")== 0) {
@@ -951,7 +951,7 @@ function testParseWithComplexQuery() {
   var stat = null;
   var user = null;
   var noun_stat = {
-    _name: "stat",
+    name: "stat",
     suggest: function(txt) [NounUtils.makeSugg(txt)],
   };
   var noun_user = new NounUtils.NounType("user", ["alice", "bob", "cindy"]);

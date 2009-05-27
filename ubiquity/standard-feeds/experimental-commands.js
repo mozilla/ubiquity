@@ -94,7 +94,7 @@ makeSearchCommand({
 //TODO: use the lyricswiki API to get lyrics and add to the preview
 
 var noun_type_song = {
-  _name: "song name",
+  name: "song name",
   suggest: function( text, html ) {
     var suggestions  = [CmdUtils.makeSugg(text)];
     if(window.foxytunesGetCurrentTrackTitle){

@@ -63,7 +63,7 @@ const DEFAULT_SCORE = 0.9;
 NounUtils.NounType = function NounType(name, expectedWords, defaultWords) {
   if (!(this instanceof NounType))
     return new NounType(name, expectedWords, defaultWords);
-  this._name = name;
+  this.name = name;
   if (typeof expectedWords === "string")
     expectedWords = expectedWords.match(/\S+/g);
   this._words = [NounUtils.makeSugg(w) for each (w in expectedWords)];
@@ -89,11 +89,11 @@ NounUtils.NounType.prototype = {
 //
 // {{{regexp}}} is the RegExp object that checks inputs.
 //
-// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
+// {{{name}}} is an optional string specifying {{{name}}} of the nountype.
 
 NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
   return {
-    _name: name || "?",
+    name: name || "?",
     _regexp: regexp,
     rankLast: regexp.test(""),
     suggest: function(text, html, callback, selectionIndices) {
@@ -115,7 +115,7 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
 //
 // {{{dict}}} is an object of text:data pairs.
 //
-// {{{name}}} is an optional string specifying {{{_name}}} of the nountype.
+// {{{name}}} is an optional string specifying {{{name}}} of the nountype.
 //
 // {{{defaults}}} is an optional array or space-separated string
 // of default keys.
@@ -124,7 +124,7 @@ NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(dict,
                                                                    name,
                                                                    defaults) {
   var noun = {
-    _name: name || "?",
+    name: name || "?",
     _list: [NounUtils.makeSugg(key, null, val)
             for ([key, val] in Iterator(dict))],
     suggest: function(text, html, cb, selected) {

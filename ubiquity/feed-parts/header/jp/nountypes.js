@@ -39,7 +39,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var noun_type_emailservice = {
-   _name: "E-mail サービス",
+   name: "E-mail サービス",
    suggest: function(text, html) {
 
      var providers = ["googleapps", "gmail", "yahoo"];
@@ -139,7 +139,7 @@ var LanguageCodes = {
 };
 
 var noun_type_language =  {
-  _name: "言語",
+  name: "言語",
 
   suggest: function( text, html ) {
     var suggestions = [];
@@ -167,7 +167,7 @@ var noun_type_language =  {
 };
 
 var noun_arb_text = {
-  _name: "テキスト",
+  name: "テキスト",
   rankLast: true,
   suggest: function( text, html, callback, selectionIndices ) {
     var suggestion = CmdUtils.makeSugg(text, html, null, 0.7,
@@ -177,7 +177,7 @@ var noun_arb_text = {
 };
 
 var noun_type_contact = {
-  _name: "連絡先",
+  name: "連絡先",
   contactList: null,
   callback:function(contacts) {
     noun_type_contact.contactList = noun_type_contact.contactList.concat(contacts);
@@ -217,7 +217,7 @@ var noun_type_contact = {
  * This regexp is RFC822 compilant.
  */
 var noun_type_email = {
-  _name: "メールアドレス",
+  name: "メールアドレス",
   _regexp: new RegExp('^([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+' +
                       '|\\x22([^\\x0d\\x22\\x5c\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x22)(\\x2e([^\\x00-\\x20\\x22' +
                       '\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x22([^\\x0d\\x22\\x5c' +
@@ -235,7 +235,7 @@ var noun_type_email = {
 };
 
 var noun_type_date = {
-  _name: "日付",
+  name: "日付",
 
   'default': function(){
      var date = Date.parse("today");
@@ -258,7 +258,7 @@ var noun_type_date = {
 };
 
 var noun_type_time = {
-   _name: "時刻",
+   name: "時刻",
 
    'default': function(){
      var time = Date.parse("now");
@@ -282,7 +282,7 @@ var noun_type_time = {
 };
 
 var noun_type_percentage = {
-  _name: "割合",
+  name: "割合",
   suggest: function( text, html ) {
     if (!text)
       return [ CmdUtils.makeSugg("100%", null, 1.0) ];
@@ -318,7 +318,7 @@ noun_type_awesomebar = {
 
 
 var noun_type_async_address = {
-  _name: "番地(非同期)",
+  name: "番地(非同期)",
   // TODO caching
   suggest: function(text, html, callback) {
     isAddress( text, function( truthiness ) {
@@ -331,7 +331,7 @@ var noun_type_async_address = {
 };
 
 var noun_type_tab = {
-  _name: "タブ名",
+  name: "タブ名",
 
   _tabCache: null,
 
@@ -355,7 +355,7 @@ var noun_type_tab = {
 
 
 var noun_type_searchengine = {
-  _name: "検索エンジン",
+  name: "検索エンジン",
   suggest: function(fragment, html) {
     var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
       .getService(Components.interfaces.nsIBrowserSearchService);
@@ -386,7 +386,7 @@ var noun_type_searchengine = {
 };
 
 var noun_type_tag = {
-  _name: "タグリスト",
+  name: "タグリスト",
   suggest: function(fragment) {
     var allTags = Components.classes["@mozilla.org/browser/tagging-service;1"]
                     .getService(Components.interfaces.nsITaggingService)
@@ -462,7 +462,7 @@ var noun_type_tag = {
 };
 
 var noun_type_geolocation = {
-   _name : "地理位置情報",
+   name : "地理位置情報",
    rankLast: true,
    'default': function() {
 		var location = CmdUtils.getGeoLocation();
@@ -499,7 +499,7 @@ var noun_type_url = {
   /* TODO longterm, noun_type_url could suggest URLs you've visited before, by querying
    * the awesomebar's data source
    */
-  _name : "URL",
+  name : "URL",
   rankLast: true,
   suggest: function(fragment) {
     var regexp = /(ftp|http|https):\/\/(\w+:{01}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
@@ -523,7 +523,7 @@ var noun_type_url = {
 
 
 var noun_type_livemark = {
-  _name: "ライブブックマーク",
+  name: "ライブブックマーク",
   rankLast: true,
 
   /*
@@ -582,7 +582,7 @@ var noun_type_livemark = {
 Components.utils.import("resource://ubiquity/modules/setup.js");
 
 var noun_type_commands = {
-   _name: "コマンド",
+   name: "コマンド",
    __cmdSource : UbiquitySetup.createServices().commandSource,
 
    suggest : function(fragment){
@@ -600,7 +600,7 @@ var noun_type_commands = {
 };
 
 var noun_type_twitter_user = {
-   _name: "twitter のユーザ名",
+   name: "twitter のユーザ名",
    rankLast: true,
    suggest: function(text, html){
      // Twitter usernames can't contain spaces; reject input with spaces.
@@ -647,7 +647,7 @@ var noun_type_twitter_user = {
 };
 
 var noun_type_number = {
-   _name: "整数値",
+   name: "整数値",
    suggest : function(sugg){
      return sugg.match("^[0-9]{1,}$") ? [CmdUtils.makeSugg(sugg)] : [];
    },
@@ -657,7 +657,7 @@ var noun_type_number = {
 };
 
 var noun_type_bookmarklet = {
-  _name: "ブックマークレット",
+  name: "ブックマークレット",
   bookmarkletList: null,
   callback: function(bookmarklets){
     noun_type_bookmarklet.bookmarkletList = bookmarklets;

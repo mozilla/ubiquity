@@ -43,11 +43,11 @@ var nounCache = {};
 // set up the NounType class
 
 function NounType(name) {
-  this._name = name;
+  this.name = name;
 }
 
 NounType.prototype = {
-  _name: '',
+  name: '',
   list: [],
   suggest: function(x) { 
       let suggestions = [];

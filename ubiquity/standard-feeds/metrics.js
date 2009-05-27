@@ -357,7 +357,7 @@ function startup_metricsInit() {
 
 
 var noun_type_command = {
-  _name: "command name",
+  name: "command name",
   suggest: function(input) {
     var suggestions = [];
     var window = Metrics.getChromeWindow();

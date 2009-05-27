@@ -225,7 +225,7 @@ var noun_type_url = {
   /* TODO longterm, noun_type_url could suggest URLs you've visited before, by querying
    * the awesomebar's data source
    */
-  _name : "url",
+  name : "url",
   rankLast: true,
   suggest: function(fragment) {
     var regexp = /^[A-Za-z][A-Za-z\d.+-]:\/\/(?:\w+:?\w*@)?(\S+)(?::\d+)?\/?/;

@@ -262,7 +262,7 @@ function Command(div, jQuery, htmlSanitize) {
 }
 
 var noun_arb_text = {
-  _name: "text",
+  name: "text",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
     var suggestion = NounUtils.makeSugg(text, html, null, 0.7,

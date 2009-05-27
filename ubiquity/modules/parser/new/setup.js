@@ -119,7 +119,7 @@ var demoParserInterface = {
               var html = $('<li><code>'+text+'</code></li>');
               var list = $('<ul></ul>');
               for each (let suggestion in nounCache[text]) {
-                $('<li>type: <code>'+suggestion.nountype._name+'</code>, suggestion: '+suggestion.text+', score: '+suggestion.score+'</li>').appendTo(list);
+                $('<li>type: <code>'+suggestion.nountype.name+'</code>, suggestion: '+suggestion.text+', score: '+suggestion.score+'</li>').appendTo(list);
               }
               list.appendTo(html);
               html.appendTo($('#nounCache'));
