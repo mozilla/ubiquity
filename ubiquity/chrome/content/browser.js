@@ -119,8 +119,8 @@ function ubiquitySetup()
 
   window.addEventListener("unload", ubiquityTeardown, false);
 
-  const MAIN_LOAD_PREF = "extensions.ubiquity.enableMainLoadHandlers";
-  if (Application.prefs.getValue(MAIN_LOAD_PREF, true))
+  const UBIQ_LOAD_PREF = "extensions.ubiquity.enableUbiquityLoadHandlers";
+  if (Application.prefs.getValue(UBIQ_LOAD_PREF, true))
     services.commandSource.onUbiquityLoad(window);
 }
 
