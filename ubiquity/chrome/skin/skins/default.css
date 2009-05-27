@@ -96,6 +96,7 @@
   border-left: solid 10px transparent;
   font-family: Calibri, Helvetica, Verdana, Arial;
   color: #FFF;
+  cursor: pointer;
 }
 
 .object, .argument {

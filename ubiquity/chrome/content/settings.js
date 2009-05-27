@@ -168,9 +168,9 @@ function createSkinElement(filepath, origpath, id) {
 
   var skinEl = $("#" + skinId);
 
-  //Add the name and onclick event
+  //Add the name and onchange event
   skinEl.find(".name").text(skinMeta.name);
-  skinEl.find("input").attr("onclick",
+  skinEl.find("input").attr("onchange",
                             "skinService.changeSkin('" + filepath + "')");
 
   if (skinMeta.author)

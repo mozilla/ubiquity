@@ -148,6 +148,8 @@
   background-color: rgba(128,128,128,1);
   min-height: 22px;
   overflow: hidden;
+
+  cursor: pointer;
 }
 
 .hilited {

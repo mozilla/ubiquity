@@ -65,6 +65,7 @@ body {
 .suggested {
   padding: 5px;
   border-left: solid 1px #272750;
+  cursor: pointer;
 }
 
 .hilited {

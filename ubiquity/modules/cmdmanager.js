@@ -44,7 +44,6 @@ Components.utils.import("resource://ubiquity/modules/preview_browser.js");
 
 const DEFAULT_MAX_SUGGESTIONS = 5;
 const MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
-
 const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
 
 function CommandManager(cmdSource, msgService, parser, suggsNode,
@@ -80,25 +79,38 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
 
   this.finalize = function CM_finalize() {
     cmdSource.removeListener("feeds-reloaded", onCommandsReloaded);
-    this.__cmdSource = null;
-    this.__msgService = null;
-    this.__nlParser = null;
-    this.__domNodes = null;
+    for (let key in this) delete this[key];
   };
+
+  this.__domNodes.suggsIframe.addEventListener(
+    "click",
+    function suggClick(ev) {
+      var cb = self.__lastAsyncSuggestionCb;
+      if (!cb) return;
+      var {target} = ev;
+      while (!target.hasAttribute("index"))
+        if (!(target = target.parentNode)) return;
+      self.__hilitedSuggestion = +target.getAttribute("index");
+      cb();
+      ev.preventDefault();
+      ev.stopPropagation();
+    },
+    true);
 }
 
 CommandManager.prototype = {
   setPreviewState: function CM_setPreviewState(state) {
+    var nodes = this.__domNodes;
     switch (state) {
     case "with-suggestions":
-      this.__domNodes.suggs.style.display = "block";
-      this.__domNodes.preview.style.display = "block";
-      this.__domNodes.help.style.display = "none";
+      nodes.suggs.style.display = "block";
+      nodes.preview.style.display = "block";
+      nodes.help.style.display = "none";
       break;
     case "no-suggestions":
-      this.__domNodes.suggs.style.display = "none";
-      this.__domNodes.preview.style.display = "none";
-      this.__domNodes.help.style.display = "block";
+      nodes.suggs.style.display = "none";
+      nodes.preview.style.display = "none";
+      nodes.help.style.display = "block";
       if (this._previewer.isActive)
         this._previewer.queuePreview(
           null,
@@ -145,7 +157,7 @@ CommandManager.prototype = {
       suggText = '<div class="cmdicon">' + suggIcon + "</div>" + suggText;
       content += ('<div class="suggested' +
                   (x === this.__hilitedSuggestion ? " hilited" : "") +
-                  '">' + suggText + "</div>");
+                  '" index="' + x + '">' + suggText + "</div>");
     }
     this.__domNodes.suggsIframe.contentDocument.body.innerHTML = content;
   },
@@ -208,11 +220,11 @@ CommandManager.prototype = {
                                                   this.maxSuggestions,true);
 
     this.__activeQuery.onResults = asyncSuggestionCb ||
-                                     this.__defaultAsyncSuggestionCb;
+                                     this.__lastAsyncSuggestionCb;
 
     if (asyncSuggestionCb)
-      this.__defaultAsyncSuggestionCb = asyncSuggestionCb;
-      
+      this.__lastAsyncSuggestionCb = asyncSuggestionCb;
+
     if ('run' in this.__activeQuery) 
       this.__activeQuery.run();
     this.__hilitedSuggestion = 0;
@@ -264,10 +276,9 @@ CommandManager.prototype = {
     if(!this.hasSuggestions())
       return null;
 
-    var suggText = this.__activeQuery.suggestionList[this.__hilitedSuggestion]
-                                  .getCompletionText();
-    this.updateInput(suggText,
-                     context);
+    var suggText = (this.__activeQuery.suggestionList[this.__hilitedSuggestion]
+                    .getCompletionText());
+    this.updateInput(suggText, context);
 
     return suggText;
   },
@@ -281,34 +292,25 @@ CommandManager.prototype = {
 
   makeCommandSuggester : function CM_makeCommandSuggester() {
     var self = this;
-
-    function getAvailableCommands(context) {
+    return function getAvailableCommands(context) {
       self.refresh();
-      var suggestions = self.getSuggestionListNoInput( context );
-
+      var suggestions = self.getSuggestionListNoInput(context);
       var retVal = {};
       for each (let parsedSentence in suggestions) {
-        let sentenceClosure = parsedSentence;
-        let titleCasedName = parsedSentence._verb._name;
-        titleCasedName = (titleCasedName[0].toUpperCase() +
-                          titleCasedName.slice(1));
+        let name = parsedSentence._verb._name;
+        let titleCasedName = name[0].toUpperCase() + name.slice(1);
         retVal[titleCasedName] = function execute() {
-	  sentenceClosure.execute(context);
+          parsedSentence.execute(context);
         };
-
-        let suggestedCommand = self.__cmdSource.getCommand(
-          parsedSentence._verb._name
-        );
-        if(suggestedCommand.icon)
+        let suggestedCommand = self.__cmdSource.getCommand(name);
+        if (suggestedCommand.icon)
           retVal[titleCasedName].icon = suggestedCommand.icon;
       }
       return retVal;
     }
-
-    return getAvailableCommands;
   },
 
-  get maxSuggestions(){
+  get maxSuggestions() {
     const Application = (Components.classes["@mozilla.org/fuel/application;1"]
                          .getService(Components.interfaces.fuelIApplication));
     return Application.prefs.getValue(MAX_SUGGESTIONS_PREF,
