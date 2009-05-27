@@ -365,7 +365,7 @@ function testUtilsParamsToString() {
   data = {
     multiple: ["one", "two", "three"]
   };
-  expected = "?multiple%5B%5D=one&multiple%5B%5D=two&multiple%5B%5D=three";
+  expected = "?multiple=one&multiple=two&multiple=three";
   this.assert(Utils.paramsToString(data) == expected);
 
   data = {
@@ -376,6 +376,7 @@ function testUtilsParamsToString() {
   };
   expected = "?obj=hello_world";
   this.assert(Utils.paramsToString(data) == expected);
+  this.assert(Utils.paramsToString(data, "") == expected.slice(1));
 }
 
 function testUtilsIsArray() {

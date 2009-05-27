@@ -310,12 +310,12 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
       if(typeof postData == "object") // json -> string
         postData = Utils.paramsToString(postData, "");
 
-      var stringStream = Cc["@mozilla.org/io/string-input-stream;1"]
-        .createInstance(Ci.nsIStringInputStream);
+      var stringStream = (Cc["@mozilla.org/io/string-input-stream;1"]
+                          .createInstance(Ci.nsIStringInputStream));
       stringStream.data = postData;
 
-      postInputStream = Cc["@mozilla.org/network/mime-input-stream;1"]
-        .createInstance(Ci.nsIMIMEInputStream);
+      postInputStream = (Cc["@mozilla.org/network/mime-input-stream;1"]
+                         .createInstance(Ci.nsIMIMEInputStream));
       postInputStream.addHeader("Content-Type",
                                 "application/x-www-form-urlencoded");
       postInputStream.addContentLength = true;
@@ -326,8 +326,8 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   var browserWindow = Utils.currentChromeWindow;
   var browser = browserWindow.getBrowser();
 
-  var prefService = Cc["@mozilla.org/preferences-service;1"]
-    .getService(Ci.nsIPrefBranch);
+  var prefService = (Cc["@mozilla.org/preferences-service;1"]
+                     .getService(Ci.nsIPrefBranch));
   var openPref = prefService.getIntPref("browser.link.open_newwindow");
 
   //2 (default in SeaMonkey and Firefox 1.5): In a new window
@@ -357,10 +357,9 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
 Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
-  var tabs = Utils.Application.activeWindow.tabs;
-  for (var i = 0; i < tabs.length; i++)
-    if (tabs[i].uri.spec == urlString) {
-      tabs[i].focus();
+  for each (let tab in Utils.Application.activeWindow.tabs)
+    if (tab.uri.spec === urlString) {
+      tab.focus();
       return;
     }
   Utils.openUrlInBrowser(urlString);
@@ -394,7 +393,7 @@ Utils.getCookie = function getCookie(domain, name) {
 //
 // {{{params}}} is the key-value pairs.
 //
-// {{{prefix = "?"}}} (optional) is prepended to the result.
+// {{{prefix = "?"}}} is an optional string prepended to the result.
 
 Utils.paramsToString = function paramsToString(params, prefix) {
   var stringPairs = [];
@@ -407,7 +406,7 @@ Utils.paramsToString = function paramsToString(params, prefix) {
   for (var key in params) {
     if (Utils.isArray(params[key])) {
       params[key].forEach(function(item) {
-        addPair(key + "[]", item);
+        addPair(key, item);
       });
     } else {
       addPair(key, params[key]);
@@ -419,35 +418,17 @@ Utils.paramsToString = function paramsToString(params, prefix) {
 // ** {{{ Utils.urlToParams() }}} **
 //
 // This function takes the given url and returns an Object containing keys and
-// values retrieved from its query-part
+// values retrieved from its query-part.
 
 Utils.urlToParams = function urlToParams(url) {
-  function isArray(key) {
-    return (key.substring(key.length-2)=="[]");
-  }
   var params = {};
-  var paramList = url.substring(url.indexOf("?")+1).split("&");
-  for (var param in paramList) {
-    var key="",
-        value="";
-    var kv = paramList[param].split("=");
-    try {
-      key = kv[0];
-      value = decodeURIComponent(kv[1]).replace(/\+/g," ");
-    }
-    catch (e){};
-    if (isArray(key)) {
-      key = key.substring(0,key.length-2);
-      if (params[key]) {
-        params[key].push(value);
-      }
-      else {
-        params[key]=[value];
-      }
-    }
-    else {
-      params[key] = value;
-    }
+  for each (let param in url.slice(url.indexOf("?") + 1).split("&")) {
+    var [key, val] = param.split("=");
+    val = val ? val.replace(/\+/g, " ") : "";
+    try { val = decodeURIComponent(val) } catch (e) {};
+    params[key] = (key in params
+                   ? [].concat(params[key], val)
+                   : val);
   }
   return params;
 }
@@ -461,7 +442,7 @@ Utils.urlToParams = function urlToParams(url) {
 Utils.getLocalUrl = function getLocalUrl(url) {
   var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
-  req.open('GET', url, false);
+  req.open("GET", url, false);
   req.overrideMimeType("text/plain");
   req.send(null);
   if (req.status == 0)
@@ -490,13 +471,9 @@ Utils.trim = function trim(str) {
 // of a JavaScript Array object.
 
 Utils.isArray = function isArray(val) {
-  if (typeof val != "object")
-    return false;
-  if (val == null)
-    return false;
-  if (!val.constructor || val.constructor.name != "Array")
-    return false;
-  return true;
+  return (val != null &&
+          typeof val === "object" &&
+          (val.constructor || 0).name === "Array");
 }
 
 // == {{{ Utils.History }}} ==
