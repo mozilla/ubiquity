@@ -41,16 +41,15 @@
 
 var gUbiquity = null;
 
-function ubiquitySetup()
-{
+(function() {{}
+var jsm = {};
+const Cu = Components.utils;
+Cu.import("resource://ubiquity/modules/setup.js", jsm);
+Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
+Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
+Cu.import("resource://ubiquity/modules/utils.js", jsm);
 
-  var jsm = {};
-  Components.utils.import("resource://ubiquity/modules/setup.js",
-                          jsm);
-  Components.utils.import("resource://ubiquity/modules/parser/parser.js",
-                          jsm);
-  Components.utils.import("resource://ubiquity/modules/cmdmanager.js",
-                          jsm);
+function ubiquitySetup() {
   var services = jsm.UbiquitySetup.createServices();
   jsm.UbiquitySetup.setupWindow(window);
 
@@ -98,34 +97,27 @@ function ubiquitySetup()
   );
   gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
 
-  function refreshUbiquityOnReload(evt) {
+  window.addEventListener("command", function refreshUbiquityOnReload(evt) {
     if (evt.target.id == "Browser:Reload")
       cmdMan.refresh();
-  }
-
-  window.addEventListener("command", refreshUbiquityOnReload, false);
+  }, false);
 
   // Hack to get the default skin to work on Linux, which we don't
   // support per-pixel alpha transparency on.
-  var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
-                     .getService(Components.interfaces.nsIXULRuntime);
-  if (xulr.OS == "Linux")
+  if (jsm.Utils.OS === "Linux")
     panel.style.backgroundColor = "#444";
 
-  function ubiquityTeardown() {
+  window.addEventListener("unload", function ubiquityTeardown() {
     window.removeEventListener("unload", ubiquityTeardown, false);
     cmdMan.finalize();
-  }
-
-  window.addEventListener("unload", ubiquityTeardown, false);
+  }, false);
 
   const UBIQ_LOAD_PREF = "extensions.ubiquity.enableUbiquityLoadHandlers";
   if (Application.prefs.getValue(UBIQ_LOAD_PREF, true))
     services.commandSource.onUbiquityLoad(window);
 }
 
-function ubiquityKeydown(aEvent)
-{
+function ubiquityKeydown(aEvent) {
   const KEYCODE_PREF ="extensions.ubiquity.keycode";
   const KEYMODIFIER_PREF = "extensions.ubiquity.keymodifier";
   var UBIQUITY_KEYMODIFIER = null;
@@ -134,19 +126,14 @@ function ubiquityKeydown(aEvent)
   //Default keys are different for diff platforms
   // Windows Vista, XP, 2000 & NT: CTRL+SPACE
   // Mac, Linux, Others : ALT+SPACE
-  var defaultKeyModifier = "ALT";
-  var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
-                             .getService(Components.interfaces.nsIXULRuntime);
-  if(xulRuntime.OS == "WINNT"){
-    defaultKeyModifier = "CTRL";
-  }
+  var defaultKeyModifier = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
 
   //The space character
   UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
   UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
                                                     defaultKeyModifier);
   //Toggle Ubiquity if the key pressed matches the shortcut key
-  if (aEvent.keyCode == UBIQUITY_KEYCODE &&
+  if (aEvent.keyCode === UBIQUITY_KEYCODE &&
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
     gUbiquity.toggleWindow();
     aEvent.preventDefault();
@@ -157,21 +144,15 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
   /* Match only if the user is holding down the modifier key set for
    * ubiquity AND NO OTHER modifier keys.
    **/
-  return ((aEvent.shiftKey == (aModifier == 'SHIFT')) &&
-          (aEvent.ctrlKey == (aModifier == 'CTRL')) &&
-          (aEvent.altKey == (aModifier == 'ALT')) &&
-          (aEvent.metaKey == (aModifier == 'META')));
+  return ((aEvent.shiftKey === (aModifier === "SHIFT")) &&
+          (aEvent.ctrlKey  === (aModifier === "CTRL" )) &&
+          (aEvent.altKey   === (aModifier === "ALT"  )) &&
+          (aEvent.metaKey  === (aModifier === "META" )));
 }
 
-window.addEventListener(
-  "load",
-  function onload() {
-    window.removeEventListener("load", onload, false);
-    var jsm = {};
-    Components.utils.import("resource://ubiquity/modules/setup.js",
-                            jsm);
-    jsm.UbiquitySetup.preload(ubiquitySetup);
-    window.addEventListener("keydown", ubiquityKeydown, true);
-  },
-  false
-);
+window.addEventListener("load", function onload() {
+  window.removeEventListener("load", onload, false);
+  jsm.UbiquitySetup.preload(ubiquitySetup);
+  window.addEventListener("keydown", ubiquityKeydown, true);
+}, false);
+})();

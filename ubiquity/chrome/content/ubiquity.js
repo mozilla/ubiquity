@@ -77,10 +77,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
                            function(event) { self.__onKeyPress(event); },
                            true);
 
-  var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
-                   .getService(Components.interfaces.nsIXULRuntime);
-
-  if (xulr.OS === "WINNT") {
+  if (this.Utils.OS === "WINNT") {
     textBox.addEventListener("blur",
                              function(event) { self.__onBlur(event); },
                              false);

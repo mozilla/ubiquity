@@ -50,6 +50,7 @@ const Ci = Components.interfaces;
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Utils = {
+  // xpcshell workaround
   get Application() {
     delete this.Application;
     return this.Application = (Cc["@mozilla.org/fuel/application;1"]
@@ -635,7 +636,8 @@ Utils.tabs = {
       push.apply(tabs, win.tabs);
     return (name == null
             ? tabs
-            : tabs.filter(function(t) t.title === name || t.URL === name));
+            : tabs.filter(function({document: d})(d.title === name ||
+                                                  d.URL   === name)));
   },
 
   // ** {{{ Utils.tabs.search() }}} **
@@ -750,15 +752,15 @@ Utils.history = {
 
 // ** {{{ Utils.appName }}} **
 //
-// This property provides the chrome application name found in nsIXULAppInfo.name.
+// This property provides the chrome application name
+// found in {{{nsIXULAppInfo.name}}}.
 // Examples values are "Firefox", "Songbird", "Thunderbird".
-//
-// TODO: cache the value since it won't change for the life of the application.
 
 Utils.__defineGetter__("appName", function() {
-  return Cc["@mozilla.org/xre/app-info;1"].
-         getService(Ci.nsIXULAppInfo).
-         name;
+  delete this.appName;
+  return this.appName = (Cc["@mozilla.org/xre/app-info;1"].
+                         getService(Ci.nsIXULAppInfo).
+                         name);
 });
 
 // ** {{{ Utils.appWindowType }}} **
@@ -769,7 +771,7 @@ Utils.__defineGetter__("appName", function() {
 // "Songbird:Main" for Songbird.
 
 Utils.__defineGetter__("appWindowType", function() {
-  switch(Utils.appName) {
+  switch (Utils.appName) {
     case "Songbird":
       return "Songbird:Main";
     default:
@@ -786,4 +788,16 @@ Utils.__defineGetter__("currentChromeWindow", function() {
   var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
            getService(Ci.nsIWindowMediator);
   return wm.getMostRecentWindow(Utils.appWindowType);
+});
+
+// ** {{{ Utils.OS }}} **
+//
+// This property provides the platform name found in {{{nsIXULRuntime.OS}}}.
+// See: https://developer.mozilla.org/en/OS_TARGET
+
+Utils.__defineGetter__("OS", function() {
+  delete this.OS;
+  return this.OS = (Cc["@mozilla.org/xre/app-info;1"].
+                    getService(Ci.nsIXULRuntime).
+                    OS);
 });
