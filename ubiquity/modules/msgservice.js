@@ -57,11 +57,15 @@
 //
 // {{{msg.exception}}} is an exception object corresponding to the
 // exception that the message represents, if any.
+//
+// {{{msg.onclick}}} is a function called when the text is clicked.
+//
+// {{{msg.onfinished}}} is a function called when the alert goes away.
 
-EXPORTED_SYMBOLS = ["ExceptionUtils",
-                    "ErrorConsoleMessageService",
-                    "AlertMessageService",
-                    "CompositeMessageService"];
+var EXPORTED_SYMBOLS = ["ExceptionUtils",
+                        "ErrorConsoleMessageService",
+                        "AlertMessageService",
+                        "CompositeMessageService"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
@@ -98,18 +102,16 @@ function AlertMessageService() {
   this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
 
   this.displayMessage = function(msg) {
-    var text = msg;
+    var text;
     var title = "Ubiquity Notification";
     var icon = this.ALERT_IMG;
+    var textClickable = false;
+    var cookie = "";
+    var alertListener = null;
+    var name = "Ubiquity";
 
-    if (typeof(msg) == "object") {
-      text = msg.text;
-
-      if (msg.title)
-        title = msg.title;
-
-      if (msg.icon)
-        icon = msg.icon;
+    if (typeof msg === "object") {
+      text = String(msg.text);
 
       if (msg.exception) {
         let Application = Cc["@mozilla.org/fuel/application;1"]
@@ -117,19 +119,38 @@ function AlertMessageService() {
         let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
         let showErr = Application.prefs.getValue(SHOW_ERR_PREF, false);
 
-        if (showErr) {
-          title = text;
-          text = msg.exception + "";
-        } else
+        if (showErr)
+          text += " (" + msg.exception + ")";
+        else
           return;
       }
-    }
+
+      if (msg.title)
+        title = String(msg.title);
+
+      if (msg.icon)
+        icon = String(msg.icon);
+
+      let {onclick, onfinished} = msg;
+      if (onclick || onfinished) {
+        textClickable = true;
+        alertListener = {
+          observe: function alertObserver(subject, topic, data) {
+            if (topic === "alertclickcallback" && onclick)
+              onclick();
+            else if (topic === "alertfinished" && onfinished)
+              onfinished();
+          }
+        };
+      }
+    } else
+      text = String(msg);
 
     try {
-      var classObj = Components.classes["@mozilla.org/alerts-service;1"];
-      var alertService = classObj.getService(Ci.nsIAlertsService);
-
-      alertService.showAlertNotification(icon, title, text);
+      var alertService = (Cc["@mozilla.org/alerts-service;1"]
+                          .getService(Ci.nsIAlertsService));
+      alertService.showAlertNotification(icon, title, text, textClickable,
+                                         cookie, alertListener, name);
     } catch (e) {
       Components.utils.reportError(e);
       Utils.focusUrlInBrowser("chrome://ubiquity/content/bug19warning.html");
@@ -154,8 +175,8 @@ CompositeMessageService.prototype = {
   },
 
   displayMessage: function CMS_displayMessage(msg) {
-    for (var i = 0; i < this._services.length; i++)
-      this._services[i].displayMessage(msg);
+    for each (let service in this._services)
+      service.displayMessage(msg);
   }
 }
 
