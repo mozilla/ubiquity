@@ -117,9 +117,10 @@ function AlertMessageService() {
         let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
         let showErr = Application.prefs.getValue(SHOW_ERR_PREF, false);
 
-        if (showErr)
-          text += "\n" + msg.exception;
-        else
+        if (showErr) {
+          title = text;
+          text = msg.exception + "";
+        } else
           return;
       }
     }

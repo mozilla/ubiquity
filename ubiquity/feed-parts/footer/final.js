@@ -39,23 +39,20 @@
 // necessary post-processing and other finalization on the
 // contents of the sandbox.
 
-(function()
-{
+(function() {
   function findFunctionsWithPrefix(prefix) {
-    var funcs = [];
-
-    for (var name in this)
-      if (name.indexOf(prefix) == 0 && typeof(this[name]) == "function")
-        funcs.push(this[name]);
-
-    return funcs;
+    var re = RegExp("^" + prefix);
+    return [this[name]
+            for (name in this)
+            if (re.test(name) && typeof this[name] === "function")];
   }
-
   // Configure all functions starting with "pageLoad_" to be called
   // whenever a page is loaded.
-  var funcs = findFunctionsWithPrefix("pageLoad_");
-  for (var i = 0; i < funcs.length; i++)
-    CmdUtils.onPageLoad(funcs[i]);
+  for each (let func in findFunctionsWithPrefix("pageLoad_"))
+    pageLoadFuncs.push(func);
+
+  for each (let func in findFunctionsWithPrefix("ubiquityLoad_"))
+    ubiquityLoadFuncs.push(func);
 
   function callRunOnceFunctions(scopeObj, prefix) {
     if (!scopeObj.hasRunOnce) {

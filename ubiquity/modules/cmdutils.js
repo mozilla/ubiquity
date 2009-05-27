@@ -366,18 +366,29 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 
 // ** {{{ CmdUtils.onPageLoad(callback) }}} **
 //
-// Sets up a function to be run whenever a page is loaded in
-// the window that this Ubiquity sandbox is associated with.
+// Sets up a function to be run whenever a page is loaded.
 //
 // {{{ callback }}} Non-optional callback function.  Each time a new
 // page or tab is loaded in the window, the callback function will be
 // called; it is passed a single argument, which is the window's document
 // object.
 
-CmdUtils.onPageLoad = function onPageLoad( callback ) {
-  this.__globalObject.pageLoadFuncs.push(CmdUtils.safeWrapper(callback));
+CmdUtils.onPageLoad = function onPageLoad(callback) {
+  this.__globalObject.pageLoadFuncs.push(callback);
 };
 
+// ** {{{ CmdUtils.onUbiquityLoad(callback) }}} **
+//
+// Sets up a function to be run whenever a Ubiqutiy instance is created.
+//
+// {{{ callback }}} Non-optional callback function. Each time a new
+// Ubiquity instance is created, the callback function will be
+// called; it is passed two arguments, which is the Ubiquity instance and
+// the chromeWindow associated with it.
+
+CmdUtils.onUbiquityLoad = function onUbiquityLoad(callback) {
+  this.__globalObject.ubiqLoadFuncs.push(callback);
+};
 
 // ** {{{ CmdUtils.setLastResult(result) }}} **
 //

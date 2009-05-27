@@ -224,6 +224,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
     self.nounTypes = [];
     self.commands = [];
     self.pageLoadFuncs = [];
+    self.ubiquityLoadFuncs = [];
   }
 
   reset();
@@ -256,6 +257,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       }
 
       this.pageLoadFuncs = sandbox.pageLoadFuncs;
+      this.ubiquityLoadFuncs = sandbox.ubiquityLoadFuncs;
 
       hub.notifyListeners("feed-change", feedInfo.uri);
     }
@@ -329,6 +331,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       feed: {id: codeSource.id,
              dom: codeSource.dom},
       pageLoadFuncs: [],
+      ubiquityLoadFuncs: [],
       globals: globalObjects[id],
       displayMessage: function() {
         msgService.displayMessage.apply(msgService, arguments);

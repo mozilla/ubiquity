@@ -45,6 +45,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   var commandNames = [];
   var nounTypes = [];
   var pageLoadFuncLists = [];
+  var ubiquityLoadFuncLists = [];
   var feedsChanged = true;
 
   let hub = new EventHub();
@@ -81,24 +82,37 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     return newCmd;
   }
 
-  self.onPageLoad = function FA_onPageLoad(window) {
+  self.onPageLoad = function FA_onPageLoad(document) {
     if (feedsChanged)
       self.refresh();
 
-    for (let i = 0; i < pageLoadFuncLists.length; i++)
-      for (let j = 0; j < pageLoadFuncLists[i].length; j++) {
-        let pageLoadFunc = pageLoadFuncLists[i][j];
+    for each (let pageLoadFuncList in pageLoadFuncLists)
+      for each (let pageLoadFunc in pageLoadFuncList)
         try {
-          pageLoadFunc(window);
+          pageLoadFunc(document);
         } catch (e) {
-          messageService.displayMessage(
-            {text: "An exception occurred while running page-load code.",
-             exception: e}
-          );
+          messageService.displayMessage({
+            text: ("An exception occurred while running " +
+                   pageLoadFunc.name + "()"),
+            exception: e});
         }
-      }
   };
 
+  self.onUbiquityLoad = function FA_onUbiquityLoad(window) {
+    if (feedsChanged)
+      self.refresh();
+
+    for each (let ubiquityLoadFuncList in ubiquityLoadFuncLists)
+      for each (let ubiquityLoadFunc in ubiquityLoadFuncList)
+        try {
+          ubiquityLoadFunc(window.gUbiquity, window);
+        } catch (e) {
+          messageService.displayMessage({
+            text: ("An exception occurred while running " +
+                   ubiquityLoadFunc.name + "()"),
+            exception: e});
+        }
+  };
 
   self.refresh = function FA_refresh() {
     let feeds = feedManager.getSubscribedFeeds();
@@ -110,6 +124,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
       commandNames = [];
       nounTypes = [];
       pageLoadFuncLists = [];
+      ubiquityLoadFuncLists = [];
 
       feedsChanged = false;
       feeds.forEach(
@@ -128,6 +143,8 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
           }
           if (feed.pageLoadFuncs.length > 0)
             pageLoadFuncLists.push(feed.pageLoadFuncs);
+          if ((feed.ubiquityLoadFuncs || 0).length)
+            ubiquityLoadFuncLists.push(feed.ubiquityLoadFuncs);
         }
       );
       hub.notifyListeners("feeds-reloaded", null);
