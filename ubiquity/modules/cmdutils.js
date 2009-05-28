@@ -787,60 +787,71 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // document. This can also be a relative URL, in which case it will be
 // based off the URL from which the feed is being retrieved.
 
-CmdUtils.CreateCommand = function CreateCommand( options ) {
+CmdUtils.CreateCommand = function CreateCommand(options) {
   var globalObj = this.__globalObject;
   var {displayMessage} = globalObj;
   var execute;
 
   // Returns the first key in a dictionary.
-  function getKey( dict ) {
-    for( var key in dict ) return key;
+  function getKey(dict) {
+    for (var key in dict) return key;
     // if no keys in dict:
     return null;
   }
 
   if (options.execute)
-    execute = function() {
+    execute = function execute() {
       options.execute.apply(options, arguments);
     };
   else
-    execute = function() {
+    execute = function execute() {
       displayMessage("No action defined.");
     };
 
   var {nounTypeFromRegExp} = this;
+  var {toString} = Object.prototype;
 
-  if( options.takes ) {
-    execute.DOLabel = getKey( options.takes );
+  function re2nt(obj, key) {
+    if (toString.call(obj[key]) === "[object RegExp]")
+      obj[key] = nounTypeFromRegExp(obj[key]);
+  }
+
+  if (options.takes) {
+    execute.DOLabel = getKey(options.takes);
     if (execute.DOLabel) {
       execute.DOType = options.takes[execute.DOLabel];
-
-      if (execute.DOType.constructor.name == "RegExp")
-        execute.DOType = nounTypeFromRegExp(execute.DOType);
+      re2nt(execute, "DOType");
     }
   }
 
-  if( options.modifiers ) {
-    for (var label in options.modifiers) {
-      var modNounType = options.modifiers[label];
-      if (modNounType.constructor.name == "RegExp")
-        options.modifiers[label] = nounTypeFromRegExp(modNounType);
-    }
+  if (options.modifiers) {
+    let {modifiers} = options;
+    for (let label in modifiers)
+      re2nt(modifiers, label);
+  }
+
+  if (options.arguments) {
+    let args = options.arguments;
+    for (let key in args)
+      if ("nountype" in args[key])
+        re2nt(args[key], "nountype");
+      else
+        re2nt(args, key);
   }
 
   // Reserved keywords that shouldn't be added to the cmd function.
   var RESERVED = ["takes", "execute", "name"];
   // Add all other attributes of options to the cmd function.
-  for( var key in options ) {
-    if( RESERVED.indexOf(key) == -1 )
+  for (var key in options) {
+    if (RESERVED.indexOf(key) == -1)
       execute[key] = options[key];
   }
 
   // If preview is a string, wrap it in a function that does
   // what you'd expect it to.
-  if( typeof execute["preview"] == "string" ) {
-    var previewString = execute["preview"];
-    execute["preview"] = function( pblock ){
+  if (typeof execute.preview === "string") {
+    var previewString = execute.preview;
+    execute.preview = function preview(pblock) {
       pblock.innerHTML = previewString;
     };
   }
@@ -1076,7 +1087,7 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
           var attr, path = (this.getAttribute(attr = "href") ||
                             this.getAttribute(attr = "src" ) ||
                             this.getAttribute(attr = "action"));
-          if(path !== null && /^(?!https?:\/\/)/.test(path))
+          if (path !== null && /^(?!https?:\/\/)/.test(path))
             this.setAttribute(attr,
                               Utils.url({uri: path, base: sourceUrl}).spec);
         });
@@ -1404,7 +1415,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
       }
       else {
         var content = "Searches " + options.name + " for your words";
-        if(text)
+        if (text)
           content += ": <b>" + text + "</b>";
         pblock.innerHTML = content;
       }

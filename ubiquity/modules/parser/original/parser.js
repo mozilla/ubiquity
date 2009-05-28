@@ -48,7 +48,7 @@ NLParser1.makeParserForLanguage = function(languageCode, verbList, nounList,
 
   let parserPlugin = NLParser1.getPluginForLanguage(languageCode);
   return new NLParser1.Parser(verbList, nounList, parserPlugin, ContextUtils,
-                             suggestionMemory);
+                              suggestionMemory);
 };
 
 (function() {
@@ -926,15 +926,19 @@ NLParser1.Verb.prototype = {
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
       if (cmd.arguments && !isEmpty(cmd.arguments)) {
-        for each (let newArg in cmd.arguments) {
-          let label = roleMappings[newArg.role];
+        let args = cmd.arguments;
+        for (let key in args) {
+          let val = args[key];
+          let role = val.role || key;
+          let noun = val.nountype || val;
+          let label = roleMappings[role];
           this._arguments[label] = {
-            type:    newArg.nountype,
-            label:   newArg.label || label,
-            flag:    (label == 'direct_object' ? null : label)
-          }
-          if (newArg.default) {
-            this._arguments[label].default = newArg.default;
+            type : noun,
+            label: val.label || noun.name,
+            flag : (label === "direct_object" ? null : label)
+          };
+          if (val.default) {
+            this._arguments[label].default = val.default;
           }
         }
       }
