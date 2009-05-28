@@ -91,9 +91,7 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 function tabPreview(msg)(
-  function preview(pblock, args) {
-    tab = (args.goal || args.object).data;
-    text = (args.goal || args.object).text;
+  function preview(pblock, {object: {text, data: tab}}) {
     pblock.innerHTML = (
       tab
       ? <div class="tab">
@@ -104,12 +102,12 @@ function tabPreview(msg)(
   });
 
 CmdUtils.CreateCommand({
-  names: {en: ["tab"]},
-  arguments: [{role: 'goal', label: 'tab', nountype: noun_type_tab}],
+  names: {en: ["switch-tab"]},
+  arguments: [{role: 'object', label: 'name', nountype: noun_type_tab}],
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
   execute: function(args) {
-    var tab = args.to.data;
+    var tab = args.object.data;
     if (!tab) return;
     // TODO: window.focus() is missing on 1.9.2pre
     if (tab._window && tab._window.focus) {
@@ -126,7 +124,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: {en: ["close-tab"]},
-  arguments: [{role: 'object', label: 'tab', nountype: noun_type_tab}],
+  arguments: [{role: 'object', label: 'name', nountype: noun_type_tab}],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: ("Closes the tab that matches the given name, " +
                 "or the current tab if no name is supplied."),

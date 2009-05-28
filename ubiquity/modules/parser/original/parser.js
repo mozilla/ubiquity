@@ -44,7 +44,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 var NLParser1 = {};
 
 NLParser1.makeParserForLanguage = function(languageCode, verbList, nounList,
-                                          ContextUtils, suggestionMemory) {
+                                           ContextUtils, suggestionMemory) {
 
   let parserPlugin = NLParser1.getPluginForLanguage(languageCode);
   return new NLParser1.Parser(verbList, nounList, parserPlugin, ContextUtils,
@@ -145,7 +145,7 @@ NLParser1.ParserQuery.prototype = {
         // TODO suggestion memory belongs to the parser...
         freqScore = this._parser.getSuggestionMemoryScore("", suggVerb);
       } else {
-	freqScore = this._parser.getSuggestionMemoryScore(inputVerb, suggVerb);
+        freqScore = this._parser.getSuggestionMemoryScore(inputVerb, suggVerb);
       }
       sugg.setFrequencyScore(freqScore);
     }
@@ -310,9 +310,9 @@ NLParser1.Parser.prototype = {
     this._rankedVerbsThatUseGenericNouns = [];
     for each ( let verb in this._verbList) {
       if (verb.usesAnySpecificNounType()) {
-	this._verbsThatUseSpecificNouns.push(verb);
+        this._verbsThatUseSpecificNouns.push(verb);
       } else {
-	this._rankedVerbsThatUseGenericNouns.push(verb);
+        this._rankedVerbsThatUseGenericNouns.push(verb);
       }
     }
     if (this._suggestionMemory) {
@@ -386,9 +386,9 @@ NLParser1.ParsedSentence.prototype = {
      var directObjPresent = false;
      for ( var x in this._verb._arguments ) {
        if ( this._argSuggs[x] && this._argSuggs[x].text != "" ) {
-   	     let preposition = "";
+         let preposition = "";
          let argText = this._argSuggs[x].text;
-   	     if ( x == "direct_object" ) {
+         if ( x == "direct_object" ) {
            /*Check for a valid text/html selection. We'll replace
               the text with a pronoun for readability */
               if ( (this._selObj.text == argText) ||
@@ -467,8 +467,8 @@ NLParser1.ParsedSentence.prototype = {
         newArgSuggs[x][y] = this._argSuggs[x][y];
     }
     let newSentence = new NLParser1.ParsedSentence(this._verb,
-						   newArgSuggs,
- 						   this.verbMatchScore,
+                                                   newArgSuggs,
+                                                   this.verbMatchScore,
                                                    this._selObj);
     return newSentence;
   },
@@ -489,7 +489,7 @@ NLParser1.ParsedSentence.prototype = {
      none of them are filled. */
     for (var x in this._argSuggs) {
       if (this._argSuggs[x] != undefined ) {
-	return true;
+        return true;
       }
     }
     return false;
@@ -500,7 +500,7 @@ NLParser1.ParsedSentence.prototype = {
       return false;
     for (var x in this._argSuggs) {
       if (this._argSuggs[x].text != other._argSuggs[x].text)
-	return false;
+        return false;
     }
     return true;
   },
@@ -517,10 +517,10 @@ NLParser1.ParsedSentence.prototype = {
         if (missingArg.default) {
           defaultValue = this._makeSugg(missingArg.default);
         }
-	else if (missingArg.type.default) { // Argument value from nountype default
+        else if (missingArg.type.default) { // Argument value from nountype default
           defaultValue = missingArg.type.default();
         }
-	else { // No argument
+        else { // No argument
           defaultValue = {text:"", html:"", data:null, summary:""};
         }
 
@@ -616,10 +616,10 @@ NLParser1.PartiallyParsedSentence = function(verb, argStrings, selObj,
       // and on not substituting pronoun...
       let gotSuggsDirect = this._argSuggest(argName, text, text, null);
       if (!gotSuggs && !gotSuggsDirect) {
-	/* One of the arguments is supplied by the user, but produces
-	 * no suggestions, meaning it's an invalid argument for this
-	 * command -- that makes the whole parsing invalid!! */
-	this._invalidArgs[argName] = true;
+        /* One of the arguments is supplied by the user, but produces
+         * no suggestions, meaning it's an invalid argument for this
+         * command -- that makes the whole parsing invalid!! */
+        this._invalidArgs[argName] = true;
       }
     }
     /* Otherwise, this argument will simply be left blank (or filled in with
@@ -662,7 +662,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
       };
       // This is where the suggestion is actually built.
       let suggestions = argument.type.suggest(text, html, callback,
-					     selectionIndices);
+                                              selectionIndices);
       for each( let argSugg in suggestions) {
         if (argSugg) { // strip out null suggestions -- TODO not needed?
           this.addArgumentSuggestion(argName, argSugg);
@@ -693,11 +693,11 @@ NLParser1.PartiallyParsedSentence.prototype = {
       let regexp = new RegExp("\\b" + pronoun + "\\b");
       let index = words.search(regexp);
       if ( index > -1 ) {
-	let selectionIndices = [index, index + selection.length];
-	let textArg = words.replace(regexp, selection);
-	let htmlArg = words.replace(regexp, htmlSelection);
-	dump("Suggesting " + textArg + "/" + htmlArg + "\n");
-	if (this._argSuggest(argName, textArg, htmlArg,
+        let selectionIndices = [index, index + selection.length];
+        let textArg = words.replace(regexp, selection);
+        let htmlArg = words.replace(regexp, htmlSelection);
+        dump("Suggesting " + textArg + "/" + htmlArg + "\n");
+        if (this._argSuggest(argName, textArg, htmlArg,
                              selectionIndices)) {
           gotAnySuggestions = true;
         }
@@ -750,13 +750,13 @@ NLParser1.PartiallyParsedSentence.prototype = {
     if (this._cameFromNounFirstSuggestion) {
       for each( let sen in this._parsedSentences) {
 	      if (sen.hasFilledArgs()) {
-      	  /* When doing noun-first suggestion, we only want matches that put the
-      	   * input or selection into an argument of the verb; therefore, explicitly
-      	   * filter out suggestions that fill no arguments.
-      	   */
-      	  let filledSen = sen.fillMissingArgsWithDefaults();
+          /* When doing noun-first suggestion, we only want matches that put the
+           * input or selection into an argument of the verb; therefore, explicitly
+           * filter out suggestions that fill no arguments.
+           */
+          let filledSen = sen.fillMissingArgsWithDefaults();
 
-      	  for each (let oneSen in filledSen) {
+          for each (let oneSen in filledSen) {
             oneSen._cameFromNounFirstSuggestion = true;
             parsedSentences.push(oneSen);
           }
@@ -764,7 +764,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
       }
     } else {
       for each( let sen in this._parsedSentences) {
-	      let filledSen = sen.fillMissingArgsWithDefaults();
+        let filledSen = sen.fillMissingArgsWithDefaults();
         parsedSentences = parsedSentences.concat(filledSen);
       }
     }
@@ -829,19 +829,20 @@ NLParser1.PartiallyParsedSentence.prototype = {
       return [this];
     if (unfilledArgs.length == 1) {
       this._argSuggest(unfilledArgs[0],
-		       this._selObj.text,
-		       this._selObj.html,
-		       [0, this._selObj.text.length]);
+                       this._selObj.text,
+                       this._selObj.html,
+                       [0, this._selObj.text.length]);
       return [this];
     }
 
     let alternates = [];
     for each(let arg in unfilledArgs) {
       let newParsing = this.copy();
-      let canUseSelection = newParsing._argSuggest(arg,
-                                                   this._selObj.text,
-                                                   this._selObj.html,
-						   [0, this._selObj.text.length]);
+      let canUseSelection =
+        newParsing._argSuggest(arg,
+                               this._selObj.text,
+                               this._selObj.html,
+                               [0, this._selObj.text.length]);
       if (canUseSelection)
         alternates.push(newParsing);
     }
@@ -861,23 +862,11 @@ var roleMappings = {object: 'direct_object',
                     position: 'on',
                     instrument: 'with',
                     alias: 'as' };
-                    
+
 var mapModifierArgsToRoles = function(args) {
-  let newArgs = {};
-  for (let preposition in args) {
-    convertedThisArg = false;
-    for (let role in roleMappings) {
-      if (roleMappings[role] == preposition) {
-        newArgs[role] = args[preposition];
-        convertedThisArg = true;
-        break;
-      }
-    }
-    if (!convertedThisArg)
-      dump('The '+preposition+' arg couldn\'t be converted... '
-           +'this is a problem.\n');
-  }
-  return newArgs;
+  for (let role in roleMappings)
+    args[role] = args[roleMappings[role]];
+  return args;
 }
 
 NLParser1.Verb = function( cmd ) {
@@ -915,7 +904,7 @@ NLParser1.Verb.prototype = {
       return cmd.previewDelay;
     });
     this.__defineGetter__("previewUrl", function() {
-      return cmd.previewUrl ? cmd.previewUrl : null;
+      return cmd.previewUrl || null;
     });
     this.__defineGetter__("disabled", function() {
       if("disabled" in cmd)
@@ -932,7 +921,7 @@ NLParser1.Verb.prototype = {
              +' apparently follows the (now defunct) Parser 1.5 format\n');
 
       // copy over the extra names
-      this._synonyms = cmd.names.en.splice(1);
+      this._synonyms = cmd.names.en.slice(1);
       
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition

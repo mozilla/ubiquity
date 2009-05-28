@@ -173,14 +173,7 @@ CmdUtils.CreateCommand({
       return;
     }
     pbl.innerHTML = this._css + ol;
-    jQuery("button", pbl).focus(function() {
-      this.blur();
-      this.disabled = true;
-      var {gUbiquity} = context.chromeWindow;
-      gUbiquity.__textBox.value = this.value;
-      gUbiquity.__delayedProcessInput();
-      return false;
-    });
+    jQuery("ol", pbl)[0].addEventListener("focus", reclaim, true);
   },
   _say: function(txt, cb) {
     displayMessage({
@@ -209,6 +202,15 @@ CmdUtils.CreateCommand({
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
 });
+function reclaim(e) {
+  var {target} = e;
+  if (target.nodeName !== "BUTTON") return;
+  target.blur();
+  target.disabled = true;
+  var {gUbiquity} = context.chromeWindow;
+  gUbiquity.__textBox.value = target.value;
+  gUbiquity.__delayedProcessInput();
+}
 return function UL_commandHistory(U) {
   U.__msgPanel.addEventListener("popuphidden", function saveEntry() {
     var ent = Utils.trim(U.__textBox.value);
