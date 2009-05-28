@@ -271,26 +271,26 @@ SkinSvc.prototype = {
     return skinList;
   },
 
-  updateSkin: function updateSkin(local_uri, download_uri){
+  updateSkin: function updateSkin(downloadUri, localUri){
     var self = this;
     try {
       function onSuccess(data) {
         //Navigate to chrome://ubiquity/skin/skins
         var file = self._getSkinFolder();
         //Select the local file for the skin
-        var filename = local_uri.substr(local_uri.lastIndexOf("/") + 1);
+        var filename = localUri.substr(localUri.lastIndexOf("/") + 1);
         file.append(filename);
         //Write the updated CSS to the file
         self._writeToFile(file, data);
       }
 
       this.webJsm.jQuery.ajax({
-        url: download_uri,
+        url: downloadUri,
         dataType: "text",
         success: onSuccess});
     } catch(e) {
       Components.utils.reportError("Error writing Ubiquity skin to file'" +
-                                    local_uri + "': " + e);
+                                    localUri + "': " + e);
     }
   },
 
@@ -299,7 +299,7 @@ SkinSvc.prototype = {
     //Local skins are pointed at directly
     for each (var skin in this.skinList)
       if (skin.local_uri !== skin.download_uri)
-        this.updateSkin(skin.local_uri, skin.download_uri);
+        this.updateSkin(skin.download_uri, skin.local_uri);
   },
 
   loadCurrentSkin: function loadCurrentSkin() {
@@ -312,6 +312,12 @@ SkinSvc.prototype = {
       this._msgService.displayMessage("Loading your current skin failed." +
                                       " The default skin will be loaded.");
     }
+  },
+
+  install: function install(remote, local) {
+    this.addSkin(remote, local);
+    this.changeSkin(local);
+    Utils.tabs.reload(/^chrome:\/\/ubiquity\/content\/settings\b/);
   },
 
   uninstall: function uninstall(url) {
@@ -379,41 +385,6 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
       var oldNotification = box.getNotificationWithValue(BOX_NAME);
       if (oldNotification)
         box.removeNotification(oldNotification);
-
-      function onSubscribeClick(notification, button) {
-        function onSuccess(data) {
-          //Navigate to chrome://ubiquity/skin/skins/
-          var file = self._getSkinFolder();
-          //Select a random name for the file
-          var filename = self._randomKey() + ".css";
-          //Create the new file
-          file.append(filename);
-          file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
-          //Write the downloaded CSS to the file
-          self._writeToFile(file, data);
-
-          var ios = (Cc["@mozilla.org/network/io-service;1"]
-                     .getService(Ci.nsIIOService));
-          var url = ios.newFileURI(file);
-          //Add skin to DB and make it the current skin
-          self.addSkin(skinUrl, url.spec);
-          self.changeSkin(url.spec);
-        }
-
-        //Only file:// is considered a local url
-        if (self._isLocalUrl(skinUrl)) {
-          //Add skin to DB and make it the current skin
-          self.addSkin(skinUrl, skinUrl);
-          self.changeSkin(skinUrl);
-        } else {
-          //Get the CSS from the remote file
-          self.webJsm.jQuery.ajax({
-            url: skinUrl,
-            dataType: "text",
-            success: onSuccess});
-        }
-      }
-
       var buttons = [{
         accessKey: "I",
         callback: onSubscribeClick,
@@ -431,16 +402,46 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
     } else {
       Components.utils.reportError("Couldn't find tab for document");
     }
+
+    function onSubscribeClick(notification, button) {
+      function onSuccess(data) {
+        //Navigate to chrome://ubiquity/skin/skins/
+        var file = self._getSkinFolder();
+        //Select a random name for the file
+        var filename = self._randomKey() + ".css";
+        //Create the new file
+        file.append(filename);
+        file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0644);
+        //Write the downloaded CSS to the file
+        self._writeToFile(file, data);
+        
+        var ios = (Cc["@mozilla.org/network/io-service;1"]
+                   .getService(Ci.nsIIOService));
+        var url = ios.newFileURI(file);
+        //Add skin to DB and make it the current skin
+        self.install(skinUrl, url.spec);
+      }
+      
+      //Only file:// is considered a local url
+      if (self._isLocalUrl(skinUrl))
+        self.install(skinUrl, skinUrl);
+      else {
+        //Get the CSS from the remote file
+        self.webJsm.jQuery.ajax({
+          url: skinUrl,
+          dataType: "text",
+          success: onSuccess});
+      }
+    }
   }
 
   // Watch for any tags of the form <link rel="ubiquity-skin">
   // on pages and install the skin for them if they exist.
-  function onLinkAdded({target}) {
+  window.addEventListener("DOMLinkAdded", function onLinkAdded({target}) {
     if (target.rel === "ubiquity-skin" &&
         !self.isInstalled(target.href))
     showNotification(target.ownerDocument,
                      target.href,
                      target.type);
-  }
-  window.addEventListener("DOMLinkAdded", onLinkAdded, false);
+  }, false);
 };

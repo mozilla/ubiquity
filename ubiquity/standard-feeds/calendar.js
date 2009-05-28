@@ -4,22 +4,6 @@ const Apology = ("<p>" +
                  " so you'll need a Google account to use it." +
                  "</p>");
 
-function reloadGoogleCalendarTabs() {
-  var wm = (Components.classes["@mozilla.org/appshell/window-mediator;1"]
-            .getService(Components.interfaces.nsIWindowMediator));
-  var enumerator = wm.getEnumerator(Utils.appWindowType);
-  while(enumerator.hasMoreElements()) {
-    var win = enumerator.getNext();
-    var numTabs = win.getBrowser().mPanelContainer.childNodes.length;
-    for (var i = 0; i < numTabs; ++i) {
-      var tab = win.getBrowser().getBrowserAtIndex(i);
-      var uri = tab.currentURI;
-      if(/\bgoogle\.com$/.test(uri.host) && /^\/calendar/.test(uri.path))
-        tab.reload();
-    }
-  }
-}
-
 /* TODO this command just takes unstructured text right now and relies on
  Google Calendar to figure it out.  So we're not using the DateNounType
  here.  Should we be; is there a better name for this command? */
@@ -58,8 +42,7 @@ CmdUtils.CreateCommand({
       case 201:
       this._say("Event created",
                 req.responseXML.getElementsByTagName("title")[0].textContent);
-      try { reloadGoogleCalendarTabs() }
-      catch (e) { this._say("Error reloading calendar tabs", e + "") }
+      Utils.tabs.reload(/^https?:\/\/www\.google\.com\/calendar\b/);
       break;
 
       case 401:

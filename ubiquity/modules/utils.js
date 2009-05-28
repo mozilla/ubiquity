@@ -599,7 +599,6 @@ Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
 // This Object contains functions related to Firefox tabs.
 
 Utils.tabs = {
-
   // ** {{{ Utils.tabs.get() }}} **
   //
   // Gets an array of open tabs.
@@ -607,7 +606,7 @@ Utils.tabs = {
   // {{{name}}} is an optional string tab name (title or URL).
   // If supplied, this function returns exactly matched tabs with it.
 
-  get: function Utils_tabs_get(name) {
+  get: function tabs_get(name) {
     var tabs = [], {push} = tabs;
     for each (let win in Utils.Application.windows)
       push.apply(tabs, win.tabs);
@@ -621,12 +620,12 @@ Utils.tabs = {
   //
   // Searches for tabs by title or URL and returns an array of tab references.
   //
-  // {{{matcher}}} is a string or RegExp object to match with.
+  // {{{matcher}}} is a string or {{{RegExp}}} object to match with.
   //
   // {{{maxResults = 2147483647}}} is an optinal integer specifying
   // the maximum number of results to return.
 
-  search: function Utils_tabs_search(matcher, maxResults) {
+  search: function tabs_search(matcher, maxResults) {
     var matches = [], tester;
     try {
       tester = (typeof matcher.test === "function"
@@ -645,7 +644,18 @@ Utils.tabs = {
             break;
       }
     return matches;
-  }
+  },
+
+  // ** {{{ Utils.tabs.reload() }}} **
+  //
+  // Reloads all matched tabs.
+  //
+  // {{{matcher}}} is a string or {{{RegExp}}} object to match with.
+
+  reload: function tabs_reload(matcher) {
+    for each (let tab in Utils.tabs.search(matcher))
+      tab._browser.reload();
+  },
 };
 
 function AutoCompleteInput(aSearches) {
