@@ -264,12 +264,10 @@ function populateYeTable(feedMgr, cmdSource) {
     (feedMgr.getSubscribedFeeds()
      .sort(/date$/.test(sortField) ? byDate : byTitle)
      .forEach(addFeedToTable));
-  else if (sortField === "cmd") {
-    let cmds = cmdSource.commandNames.slice();
-    cmds = sortCmdListBy(cmds, "name");
-    for (let i = 0, l = cmds.length; i < l; ++i)
-      addCmdToTable(commands[cmds[i].name]);
-  }
+  else
+    (sortCmdListBy([cmd for each (cmd in cmdSource.getAllCommands())],
+                   sortField === "cmd" ? "name" : "enabled")
+     .forEach(addCmdToTable));
 }
 
 function byTitle(a, b) !(a.title <= b.title);
@@ -294,21 +292,9 @@ function sortCmdListBy(cmdList, key) {
 
     return 0;
   }
-  function checksort(a, b) {
-    var aKey = !a.disabled,
-        bKey = !b.disabled;
-    if (aKey===bKey)
-      return 0;
-    if(aKey)
-      return -1;
-    return 1;
-  }
-  if (key == "active") {
-    cmdList.sort(checksort);
-  } else {
-    cmdList.sort(alphasort);
-  }
-  return cmdList;
+  function checksort(a, b) a.disabled - b.disabled;
+
+  return cmdList.sort(key === "enabled" ? checksort : alphasort);
 }
 
 
