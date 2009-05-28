@@ -2078,6 +2078,9 @@ var cloneObject = function cloneObject(o) {
   if (typeof o != 'object')
     return o;
 
+//  if (o.constructor == undefined)
+//    return o; // and cross our fingers
+  
   var ret = (o.constructor.name == 'Array') ? new Array() : new Object();
 
   for (var i in o) {

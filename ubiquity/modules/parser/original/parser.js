@@ -867,14 +867,17 @@ NLParser1.Verb.prototype = {
     this._preview     = cmd.preview;
     this._description = cmd.description;
     this._help        = cmd.help;
-    this._name        = cmd.name;
+    this._name        = cmd.name || cmd.names.en[0];
     this._icon        = cmd.icon;
     this._synonyms    = cmd.synonyms;
 
     /* Use the presence or absence of a 'names' dictionary
      * to decide whether this is a version 1.0 or version 1.5 command.
      */
-    if ( cmd.names ) {
+    function isEmpty(obj) !obj.__count__;
+    
+    if ( cmd.names && !isEmpty(cmd.names) ) {
+      dump('converting 2 > 1: '+this._name+'\n');
       this._isNewStyle = true;
     } else {
       this._isNewStyle = false;
@@ -892,36 +895,64 @@ NLParser1.Verb.prototype = {
       return false;
     });
     this._arguments = {};
-
+    
     // New-style API: command defines arguments dictionary
     // only do it if we're not using the old API (for compatibility with Parser 2)
-    if (cmd.DOType == undefined && cmd.modifiers == undefined) {
-      if (cmd.arguments) {
-        this._arguments = cmd.arguments;
+    if (this._isNewStyle) {
+      if (cmd.takes || cmd.modifiers)
+        dump('WARNING: '+this._name
+             +' apparently follows the (now defunct) Parser 1.5 format\n');
+
+      // copy over the extra names
+      this._synonyms = cmd.names.en.splice(1);
+      
+      // if there are arguments, copy them over using a (semi-arbitrary) choice
+      // of preposition
+      if (cmd.arguments && !isEmpty(cmd.arguments)) {
+        let roleMappings = {object: 'direct_object',
+                            source: 'from',
+                            goal: 'to',
+                            position: 'on',
+                            instrument: 'with',
+                            alias: 'as' };
+        
+        for each (let newArg in cmd.arguments) {
+          let label = roleMappings[newArg.role];
+          this._arguments[label] = {
+            type:    newArg.nountype,
+            label:   newArg.label || label,
+            flag:    (label == 'direct_object' ? null : label)
+          }
+          if (newArg.default) {
+            this._arguments[label].default = newArg.default;
+          }
+        }
       }
     }
 
     /* Old-style API for backwards compatibility: command
        defines DirectObject and modifiers dictionary.  Convert
        this to argument dictionary. */
-    if (cmd.DOType) {
-      this._arguments.direct_object = {
-        type: cmd.DOType,
-        label: cmd.DOLabel,
-        flag: null,
-        'default': cmd.DODefault
-      };
-    }
-
-    if (cmd.modifiers) {
-      for (let x in cmd.modifiers) {
-        this._arguments[x] = {
-          type: cmd.modifiers[x],
-          label: x,
-          flag: x
+    if (!this._isNewStyle) {
+      if (cmd.DOType) {
+        this._arguments.direct_object = {
+          type: cmd.DOType,
+          label: cmd.DOLabel,
+          flag: null,
+          'default': cmd.DODefault
         };
-        if (cmd.modifierDefaults) {
-          this._arguments[x].default = cmd.modifierDefaults[x];
+      }
+  
+      if (cmd.modifiers && !isEmpty(cmd.modifiers)) {
+        for (let x in cmd.modifiers) {
+          this._arguments[x] = {
+            type: cmd.modifiers[x],
+            label: x,
+            flag: x
+          };
+          if (cmd.modifierDefaults) {
+            this._arguments[x].default = cmd.modifierDefaults[x];
+          }
         }
       }
     }

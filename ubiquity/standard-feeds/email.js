@@ -123,23 +123,17 @@ function findGmailTab() {
 }
 
 CmdUtils.CreateCommand({
-  name: "email",
   names: {
-    en: ["email", "email", "mail"], 
+    en: ["email", "mail"], 
     ja: ["メールする", "メールして", "メールしろ",
          "送信する", "送信して", "送信しろ",
          "そうしんして", "そうしんして", "そうしんしろ"],
   },
   arguments: [
-    {role: "object", nountype: noun_arb_text},
+    {role: "object", label: "message", nountype: noun_arb_text},
     {role: "goal", nountype: noun_type_contact}
   ],
-  synonyms: ["gmail.com",
-             //"mail.yahoo.com", "hotmail.com", "email.comcast"
-             ],
-  takes: {message: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/email.png",
-  modifiers: {to: noun_type_contact},
   description: "Begins composing an email to a person from your contact list.",
   help: "" + (
     <>Currently only works with <a href="http://mail.google.com">Google Mail</a>,

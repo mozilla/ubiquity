@@ -69,19 +69,28 @@ function finishCommand(srcCommand) {
   if (srcCommand.previewDelay == null)
     cmd.previewDelay = DEFAULT_PREVIEW_DELAY;
 
-  if (!srcCommand.modifiers)
-    cmd.modifiers = {};
+//  if (!srcCommand.modifiers)
+//    cmd.modifiers = {};
+//  if (!srcCommand.modifierDefaults)
+//    cmd.modifierDefaults = {};
 
-  if (!srcCommand.modifierDefaults)
-    cmd.modifierDefaults = {};
+  function isEmpty(obj) !obj.__count__;
+
+  Components.utils.import("resource://ubiquity/modules/setup.js");
 
   // if it doesn't take any arguments
-  if (!srcCommand.DOType && !srcCommand.modifiers) {
+  if (!srcCommand.DOType
+       && !srcCommand.modifiers
+       && (!srcCommand.arguments || isEmpty(srcCommand.arguments))
+       && (!cmd.names || isEmpty(cmd.names)) 
+       && UbiquitySetup.parserVersion == 2
+     ) {
     // enable use in parser 2
+    dump('converting 1 > 2: '+srcCommand.name+'\n');
     cmd.names = {en: [srcCommand.name]};
-    cmd.arguments = [];
   }
 
+  cmd.arguments = srcCommand.arguments || [];
   cmd.__proto__ = srcCommand;
 
   return cmd;

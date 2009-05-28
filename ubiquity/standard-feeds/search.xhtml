@@ -207,19 +207,16 @@ Wikipedia articles found matching <b>${query}</b>:
 </div>
 <script class="commands"><![CDATA[
 CmdUtils.CreateCommand({
-  name: "search",
   names: {
     en: ['search','find','look for'],
     ja: ['検索する','検索して','検索しろ','探す','探して','探せ','けんさくする','けんさくして','けんさくしろ','さがす','さがして','さがせ']
   },
   arguments: [
-    {role: 'object', nountype: noun_arb_text},
+    {role: 'object', label: 'query', nountype: noun_arb_text},
     {role: 'instrument', nountype: noun_type_searchengine}
   ],
   icon: "chrome://ubiquity/skin/icons/search.png",
   description: "Search using your installed search engines",
-  takes: {query: noun_arb_text},
-  modifiers: {"with": noun_type_searchengine},
   preview: function(previewBlock, args) {
     var instrument = args.instrument || args.with;
     if (instrument && instrument.data) {

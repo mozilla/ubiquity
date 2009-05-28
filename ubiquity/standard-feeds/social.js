@@ -10,19 +10,15 @@ From Abi:
 const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
-  name: "twitter",
   names: {
     en: ["twitter","tweet"],
     ja: ["呟く","呟け","呟いて","つぶやく","つぶやけ","つぶやいて"]
   },
   arguments: [
-    {role: "object", nountype: noun_arb_text},
+    {role: "object", label: 'status', nountype: noun_arb_text},
     {role: "alias", nountype: noun_type_twitter_user}
   ],
-  synonyms: ["tweet"],
   icon: "http://twitter.com/favicon.ico",
-  takes: {status: noun_arb_text},
-  modifiers: {as: noun_type_twitter_user},
   description:
   "Sets your Twitter status to a message of at most 160 characters.",
   help: ("You'll need a <a href=\"http://twitter.com\">Twitter account</a>," +

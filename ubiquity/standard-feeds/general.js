@@ -441,7 +441,6 @@ function translateTo(text, langCodePair, callback, pblock) {
 
 CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
-  name: "translate",
   names: {
     da: ["oversat"],
     en: ["translate"],
@@ -469,8 +468,8 @@ CmdUtils.CreateCommand({
     to how much it can translate a selection at once.
     If you want to translate a lot of text, leave out the input and
     it will translate the whole page.</>),
-  takes: {text: noun_arb_text},
-  modifiers: {to: noun_type_lang_google, from: noun_type_lang_google},
+//  takes: {text: noun_arb_text},
+//  modifiers: {to: noun_type_lang_google, from: noun_type_lang_google},
   execute: function({object, to, from, goal, source}) {
     var sl = source ? source.data : from ? from.data : '';
     var tl = goal && goal.data || to && to.data || this._getDefaultLang();
