@@ -56,15 +56,9 @@ const FEED_SUBSCRIBED_ANNO = "ubiquity/confirmed";
 const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
 const FEED_SRC_URL_ANNO = "ubiquity/commands";
 const FEED_TITLE_ANNO = "ubiquity/title";
+const FEED_DATE_ANNO = "ubiquity/date";
 
-const FEED_ANNOS = [FEED_SRC_ANNO,
-                    FEED_TYPE_ANNO,
-                    FEED_AUTOUPDATE_ANNO,
-                    FEED_BUILTIN_ANNO,
-                    FEED_SUBSCRIBED_ANNO,
-                    FEED_UNSUBSCRIBED_ANNO,
-                    FEED_SRC_URL_ANNO,
-                    FEED_TITLE_ANNO];
+const FEED_ANNOS = [v for (v in this) if (/^FEED_/.test(v))];
 
 const DEFAULT_FEED_TYPE = "commands";
 
@@ -219,6 +213,9 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
                              expiration);
   if (info.isBuiltIn)
     annSvc.setPageAnnotation(uri, FEED_BUILTIN_ANNO, "true", 0,
+                             expiration);
+  else
+    annSvc.setPageAnnotation(uri, FEED_DATE_ANNO, new Date().toUTCString(), 0,
                              expiration);
 
   this._hub.notifyListeners("subscribe", uri);
@@ -499,6 +496,14 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
   feedInfo.srcUri = Utils.url(val, "data:text/plain,");
+
+  // === {{{Feed.date}}} ===
+  //
+  // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
+  // Read-only.
+
+  var val = annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0);
+  feedInfo.date = new Date(val);
 
   // === {{{Feed.canAutoUpdate}}} ===
   //
