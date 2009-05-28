@@ -146,7 +146,7 @@ CmdUtils.CreateCommand({
     (assuming you have a friend named "jono").</>),
   preview: function(pblock, args) {
     var html = "Creates an email message ";
-    var goal = args.goal || args.to;
+    var goal = args.goal;
     if (goal) {
       html += "to " + goal.text + " ";
     }
@@ -166,7 +166,7 @@ CmdUtils.CreateCommand({
                 ((args.object || 0).html || ""));
     title = "'" + title + "'";
 
-    var goal = args.goal || args.to;
+    var goal = args.goal;
     var toAddress = goal ? goal.text : "";
 
     var gmailTab = findGmailTab() || 0;

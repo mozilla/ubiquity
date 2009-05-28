@@ -851,6 +851,34 @@ NLParser1.PartiallyParsedSentence.prototype = {
   }
 };
 
+//
+// This mapping and function are used to convert Parser 2 commands for use
+// with Parser 1.
+//
+var roleMappings = {object: 'direct_object',
+                    source: 'from',
+                    goal: 'to',
+                    position: 'on',
+                    instrument: 'with',
+                    alias: 'as' };
+                    
+var mapModifierArgsToRoles = function(args) {
+  let newArgs = {};
+  for (let preposition in args) {
+    convertedThisArg = false;
+    for (let role in roleMappings) {
+      if (roleMappings[role] == preposition) {
+        newArgs[role] = args[preposition];
+        convertedThisArg = true;
+        break;
+      }
+    }
+    if (!convertedThisArg)
+      dump('The '+preposition+' arg couldn\'t be converted... '
+           +'this is a problem.\n');
+  }
+  return newArgs;
+}
 
 NLParser1.Verb = function( cmd ) {
   if (cmd)
@@ -909,13 +937,6 @@ NLParser1.Verb.prototype = {
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
       if (cmd.arguments && !isEmpty(cmd.arguments)) {
-        let roleMappings = {object: 'direct_object',
-                            source: 'from',
-                            goal: 'to',
-                            position: 'on',
-                            instrument: 'with',
-                            alias: 'as' };
-        
         for each (let newArg in cmd.arguments) {
           let label = roleMappings[newArg.role];
           this._arguments[label] = {
@@ -963,7 +984,7 @@ NLParser1.Verb.prototype = {
       /* New-style commands (api 1.5) expect a single dictionary with all
        * arguments in it, and the object named 'object'*/
       argumentValues.object = argumentValues.direct_object;
-      return this._execute( context, argumentValues );
+      return this._execute( context, mapModifierArgsToRoles(argumentValues) );
     } else {
       /* Old-style commands (api 1.0) expect the direct object to be passed
        * in separately: */
@@ -982,7 +1003,8 @@ NLParser1.Verb.prototype = {
     if (this._preview) {
       if (this._isNewStyle ) {
         argumentValues.object = argumentValues.direct_object;
-        this._preview( context, previewBlock, argumentValues );
+        this._preview( context, previewBlock, 
+                       mapModifierArgsToRoles(argumentValues) );
       } else {
         let directObjectVal = null;
         if (argumentValues && argumentValues.direct_object)

@@ -94,7 +94,7 @@ CmdUtils.CreateCommand({
     }
 
     var login;
-    var alias = args.alias || args.as;
+    var alias = args.alias;
     if (alias && alias.text && alias.data) {
       login = alias.data;
       sendMessage();

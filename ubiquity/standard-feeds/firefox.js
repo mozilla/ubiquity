@@ -92,8 +92,8 @@ CmdUtils.CreateCommand({
 
 function tabPreview(msg)(
   function preview(pblock, args) {
-    tab = (args.to || args.goal || args.object).data;
-    text = (args.to || args.goal || args.object).text;
+    tab = (args.goal || args.object).data;
+    text = (args.goal || args.object).text;
     pblock.innerHTML = (
       tab
       ? <div class="tab">
@@ -109,7 +109,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
   execute: function(args) {
-    var tab = (args.to || args.goal).data;
+    var tab = args.to.data;
     if (!tab) return;
     // TODO: window.focus() is missing on 1.9.2pre
     if (tab._window && tab._window.focus) {
@@ -179,14 +179,14 @@ CmdUtils.CreateCommand({
   arguments: [{role: 'instrument', label: 'filter', nountype: noun_arb_text}],
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {
-    var {text} = args.with || args.instrument || {text: null};
+    var {text} = args.instrument || {text: null};
     displayMessage({
       icon: this.icon,
       title: this.name,
       text: this._count(text, true)});
   },
   preview: function(pblock, args) {
-    var {text} = args.with || args.instrument || {text: null};
+    var {text} = args.instrument || {text: null};
     pblock.innerHTML = this._count(text);
   },
   _count: function(text, plain) {

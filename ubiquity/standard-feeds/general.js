@@ -470,9 +470,9 @@ CmdUtils.CreateCommand({
     it will translate the whole page.</>),
 //  takes: {text: noun_arb_text},
 //  modifiers: {to: noun_type_lang_google, from: noun_type_lang_google},
-  execute: function({object, to, from, goal, source}) {
-    var sl = source ? source.data : from ? from.data : '';
-    var tl = goal && goal.data || to && to.data || this._getDefaultLang();
+  execute: function({object, goal, source}) {
+    var sl = source ? source.data : '';
+    var tl = goal && goal.data || this._getDefaultLang();
     if (object.text)
       translateTo(object.text,
                   {from: sl, to: tl},
@@ -488,13 +488,14 @@ CmdUtils.CreateCommand({
           tl: tl,
         }));
   },
-  preview: function(pblock, {object, to, from, goal, source}) {
+  preview: function(pblock, args) {
+    var {object, goal, source} = args
     var textToTranslate = object && object.text;
     var defaultLang = this._getDefaultLang();
-    var toLang = (goal && goal.text || to && to.text ||
+    var toLang = (goal && goal.text ||
                   noun_type_lang_google.getLangName(defaultLang));
-    var toLangCode = goal && goal.data || to && to.data || defaultLang;
-    var fromLangCode = source ? source.data : from ? from.data : '';
+    var toLangCode = goal && goal.data || defaultLang;
+    var fromLangCode = source ? source.data : '';
     if (!textToTranslate) {
       var {href} = context.focusedWindow.location;
       pblock.innerHTML = (<>Translates <a href={href}

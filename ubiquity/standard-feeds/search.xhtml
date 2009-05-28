@@ -218,7 +218,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/search.png",
   description: "Search using your installed search engines",
   preview: function(previewBlock, args) {
-    var instrument = args.instrument || args.with;
+    var instrument = args.instrument;
     if (instrument && instrument.data) {
       searchEngine = instrument.data;
     } else {
@@ -233,7 +233,7 @@ CmdUtils.CreateCommand({
     previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
   },
   execute: function(args) {
-    var instrument = args.instrument || args.with;
+    var instrument = args.instrument;
     if (instrument && instrument.data) {
       searchEngine = instrument.data;
     } else {
