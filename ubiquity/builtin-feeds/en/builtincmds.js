@@ -123,6 +123,11 @@ function startup_openUbiquityWelcomePage() {
     cmd_help();
 }
 
+function startup_setBasicPreferences() {
+  // Allow JS chrome errors to show up in the error console.
+  Application.prefs.setValue("javascript.options.showInConsole", true);
+}
+
 var ubiquityLoad_commandHistory = (function() {{}
 const
 Name = "command-history",

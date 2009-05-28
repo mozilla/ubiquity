@@ -61,14 +61,14 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
                                                     webJsm);
   let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
 
-  builtins.feeds.forEach(
-    function addFeed(url) {
-      feedManager.addSubscribedFeed({url: url,
-                                     sourceUrl: url,
-                                     canAutoUpdate: true,
-                                     isBuiltIn: true});
-    }
-  );
+  for (let [title, url] in Iterator(builtins.feeds))
+    feedManager.addSubscribedFeed({
+      url: url,
+      sourceUrl: url,
+      canAutoUpdate: true,
+      isBuiltIn: true,
+      title: title,
+    });
 
   this.installDefaults = function DFP_installDefaults(baseUri,
                                                       baseLocalUri,
@@ -351,9 +351,7 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     //new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js"),
   ];
-  var feeds = [
-    baseFeedsUri + "onstartup.js"
-  ];
+  var feeds = {};
   var footerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "footer/final.js")
   ];
@@ -365,11 +363,11 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     headerCodeSources.push(
       new LocalUriCodeSource(basePartsUri + "header/shared.js"),
       new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js"));
-    feeds.push(baseFeedsUri + "jp/builtincmds.js");
+    feeds["Builtin Commands (jp)"] = baseFeedsUri + "jp/builtincmds.js";
   } else if (languageCode == "en" || parserVersion == 2) {
     headerCodeSources.push(
       new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js"));
-    feeds.push(baseFeedsUri + "en/builtincmds.js");
+    feeds["Builtin Commands"] = baseFeedsUri + "en/builtincmds.js";
   }
 
   return {
