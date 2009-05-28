@@ -14,3 +14,4 @@ pref("extensions.ubiquity.bugReportUri",
      "https://ubiquity.mozilla.com/report-bug/new/");
 pref("extensions.ubiquity.commandList.sortMode", "feed");
 pref("extensions.ubiquity.collectUsageData", false);
+pref("extensions.ubiquity.history.max", 42);
