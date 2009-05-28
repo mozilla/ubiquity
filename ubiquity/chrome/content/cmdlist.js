@@ -39,10 +39,31 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/setup.js");
-Components.utils.import("resource://ubiquity/modules/utils.js");
+// Broken features to fix:
+//  -- sort by whatever (needs more options)
+//  -- margins, for readability
+
+// New features to add:
+// show/hide help at top of page
+// show/hide help for individual command
+// sort by enabledness
+// Cool sliding animation
+
+// Sort modes to implement:
+// sort feeds-first or cmnds-first
+// if feeds-first, feeds by name or by recently subscribed?
+// if cmds-first, by name, author, homepage, licence, or enabledness?
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/utils.js");
 
 var escapeHtml = Utils.escapeHtml;
+
+const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
 
 function A(url, text, className) {
   var a = document.createElement("a");
@@ -61,9 +82,14 @@ function linkToAction(text, action)(
 function fillTableCellForFeed(cell, feed, sortMode) {
   cell.append(A(feed.uri.spec, feed.title),
               "<br/>");
+  if (+feed.date)
+    cell.append('<span class="feed-date">' +
+                feed.date.toLocaleString() +
+                '</span><br/>')
   // add unsubscribe link (but not for built-in feeds)
   if (!feed.isBuiltIn)
-    cell.append(linkToAction("[unsubscribe]", function() {
+    cell.append(linkToAction("[unsubscribe]",
+                             function() {
                                feed.remove();
                                cell.slideUp(rebuildTable);
                              }));
@@ -79,7 +105,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
                       "feed-updated"));
     });
   // if sorting by feed, make feed name large and put a borderline
-  if (sortMode == "feed") {
+  if (/^feed/.test(sortMode)) {
     cell.addClass("topcell command-feed-name");
   }
 }
@@ -87,9 +113,9 @@ function fillTableCellForFeed(cell, feed, sortMode) {
 function formatCommandAuthor(authorData) {
   if(!authorData) return "";
 
-  if(typeof authorData == "string") return authorData;
+  if(typeof authorData === "string") return authorData;
 
-  var authorMarkup = '';
+  var authorMarkup = "";
   if(authorData.name && !authorData.email) {
     authorMarkup += escapeHtml(authorData.name) + " ";
   } else if(authorData.name && authorData.email) {
@@ -106,16 +132,15 @@ function formatCommandAuthor(authorData) {
   }
 
   if(authorMarkup.length == 0)
-    return '';
+    return "";
 
-  return 'by ' + authorMarkup;
+  return "by " + authorMarkup;
 }
 
-function fillTableRowForCmd( row, cmd, className ) {
-  var isEnabled = !cmd.disabled;
+function fillTableRowForCmd(row, cmd, className) {
   var checkBoxCell = jQuery(
     '<td><input type="checkbox" class="activebox"' +
-    (isEnabled ? ' checked="checked"' : '') + '/></td>'
+    (cmd.disabled ? '' : ' checked="checked"') + '/></td>'
   );
 
   // For all commands in the table, unbind any 'change' method, bind to
@@ -127,7 +152,7 @@ function fillTableRowForCmd( row, cmd, className ) {
     '<a><img class="favicon"/></a>' +
     '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
     '<span class="description"></span>' +
-    '<div class="synonyms-container light">also called ' +
+    '<div class="synonyms-container light">' +
     '<span class="synonyms"></span></div>' +
     '<div class="light"><span class="author"></span>' +
     '<span class="license"></span></div>' +
@@ -151,60 +176,40 @@ function fillTableRowForCmd( row, cmd, className ) {
   else
     cmdElement.find(".favicon").remove();
 
-  if (cmd.homepage) {
-    cmdElement.find(".homepage").html(
-      ('View more information at <a href="' +
-       escapeHtml(cmd.homepage) + '">' +
-       escapeHtml(cmd.homepage) + '</a>.')
-    );
-  } else cmdElement.find(".homepage").remove();
+  if (cmd.homepage)
+    cmdElement.find(".homepage")[0].innerHTML = (
+      'View more information at <a href="' +
+      escapeHtml(cmd.homepage) + '">' +
+      escapeHtml(cmd.homepage) + '</a>.');
 
-  if (cmd.synonyms){
-    cmdElement.find(".synonyms").html(
-      escapeHtml(cmd.synonyms.join(", "))
-    );
-  } else cmdElement.find(".synonyms-container").remove();
+  if (cmd.synonyms)
+    cmdElement.find(".synonyms")
+      .before("also called ").text(cmd.synonyms.join(", "));
 
-  if (cmd.description) {
-    cmdElement.find(".description").html(
-      cmd.description
-    );
-  } else cmdElement.find(".description").remove();
+  if (cmd.description)
+    cmdElement.find(".description")[0].innerHTML = cmd.description;
 
-  if (cmd.author) {
-    cmdElement.find(".author").html(
-      formatCommandAuthor(cmd.author)
-    );
-  } else cmdElement.find(".author").remove();
+  if (cmd.author)
+    cmdElement.find(".author")[0].innerHTML = formatCommandAuthor(cmd.author);
 
-  
   if (cmd.contributors)
     cmdElement.find(".contributors")
       .append("contributed by ",
               [formatCommandAuthor(c)
                for each (c in cmd.contributors)].join(", "));
-  else
-    cmdElement.find(".contributors").remove();
 
-  if(cmd.license) {
-    cmdElement.find(".license").html(
-      escapeHtml(" - licensed as " + cmd.license)
-    );
-  } else cmdElement.find(".license").remove();
+  if(cmd.license)
+    cmdElement.find(".license").text(" - licensed as " + cmd.license);
 
-  if(cmd.help) {
-    cmdElement.find(".help").html(cmd.help);
-  } else {
-    cmdElement.find(".help").remove();
-  }
+  if(cmd.help)
+    cmdElement.find(".help")[0].innerHTML = cmd.help;
 
   if (className) {
     checkBoxCell.addClass(className);
     cmdElement.addClass(className);
   }
 
-  row.append(checkBoxCell,
-             cmdElement);
+  row.append(checkBoxCell, cmdElement);
 }
 
 function populateYeTable(feedMgr, cmdSource) {
@@ -214,18 +219,18 @@ function populateYeTable(feedMgr, cmdSource) {
 
   // TODO bug here: number of commands shown seems to include those from
   // unsubscribed feeds.
-  $("#num-commands").html( cmdSource.commandNames.length );
-  $("#num-subscribed-feeds").html( feedMgr.getSubscribedFeeds().length );
+  $("#num-commands").html(cmdSource.commandNames.length);
+  $("#num-subscribed-feeds").html(feedMgr.getSubscribedFeeds().length);
 
   function addFeedToTable(feed) {
     let cmdNames = [name for (name in feed.commands)];
     let feedCell = $("<td></td>");
-    if (cmdNames.length > 1 )
+    if (cmdNames.length > 1)
       feedCell.attr("rowspan", cmdNames.length);
-    fillTableCellForFeed( feedCell, feed, sortField );
+    fillTableCellForFeed(feedCell, feed, sortField);
 
     let firstRow = $("<tr></tr>");
-    firstRow.append( feedCell );
+    firstRow.append(feedCell);
     if (cmdNames.length > 0) {
       fillTableRowForCmd(firstRow, commands[cmdNames[0]], "topcell");
     } else {
@@ -233,8 +238,8 @@ function populateYeTable(feedMgr, cmdSource) {
     }
     table.append(firstRow);
 
-    if (cmdNames.length > 1 ) {
-      for (let i = 1; i < cmdNames.length; i++ ) {
+    if (cmdNames.length > 1) {
+      for (let i = 1; i < cmdNames.length; i++) {
         // starting from 1 is on purpose
         let aRow = $("<tr></tr>");
         fillTableRowForCmd(aRow, commands[cmdNames[i]]);
@@ -248,22 +253,28 @@ function populateYeTable(feedMgr, cmdSource) {
     let feedCell = $("<td></td>");
     let feed = getFeedForCommand(feedMgr, cmd);
     if (feed) {
-      fillTableCellForFeed( feedCell, feed );
+      fillTableCellForFeed(feedCell, feed);
     }
-    aRow.append( feedCell );
+    aRow.append(feedCell);
     fillTableRowForCmd(aRow, cmd);
     table.append(aRow);
   }
 
-  if (sortField == "feed") {
-    feedMgr.getSubscribedFeeds().forEach(addFeedToTable);
-  } else if (sortField == "cmd") {
+  if (/^feed/.test(sortField))
+    (feedMgr.getSubscribedFeeds()
+     .sort(/date$/.test(sortField) ? byDate : byTitle)
+     .forEach(addFeedToTable));
+  else if (sortField === "cmd") {
     let cmds = cmdSource.commandNames.slice();
     cmds = sortCmdListBy(cmds, "name");
     for (let i = 0, l = cmds.length; i < l; ++i)
       addCmdToTable(commands[cmds[i].name]);
   }
 }
+
+function byTitle(a, b) !(a.title <= b.title);
+
+function byDate(a, b) b.date - a.date;
 
 function sortCmdListBy(cmdList, key) {
   function alphasort(a, b) {
@@ -301,7 +312,7 @@ function sortCmdListBy(cmdList, key) {
 }
 
 
-function getFeedForCommand( feedMgr, cmd ) {
+function getFeedForCommand(feedMgr, cmd) {
   // This is a really hacky implementation -- it involves going through
   // all feeds looking for one containing a command with a matching name.
   let feeds = feedMgr.getSubscribedFeeds();
@@ -412,25 +423,19 @@ function jumpToCommand() {
   }
 }
 
-function setSortMode( newSortMode ) {
-  Components.classes["@mozilla.org/preferences-service;1"]
-    .getService(Components.interfaces.nsIPrefBranch).setCharPref(
-      "extensions.ubiquity.commandList.sortMode",
-      newSortMode);
+function setSortMode(newSortMode) {
+  Application.prefs.setValue(SORT_MODE_PREF, newSortMode);
 }
 
-function getSortMode() {
-  return Components.classes["@mozilla.org/preferences-service;1"]
-    .getService(Components.interfaces.nsIPrefBranch).getCharPref(
-      "extensions.ubiquity.commandList.sortMode");
-}
+function getSortMode()(
+  Application.prefs.getValue(SORT_MODE_PREF, "feed"));
 
-function changeSortMode( newSortMode ) {
-  setSortMode( newSortMode );
+function changeSortMode(newSortMode) {
+  setSortMode(newSortMode);
   rebuildTable();
 }
 
-function showCmdListHelp( enabled ) {
+function showCmdListHelp(enabled) {
   if (enabled) {
     $("#cmdlist-help-div").slideDown();
   } else {
@@ -446,193 +451,3 @@ function viewSourceLink(feed)(
     "feed-action"));
 
 $(document).ready(rebuildTable).ready(jumpToCommand);
-
-
-
-// OK, unsubscribe/resubscribe works, but IFF you are in sort-by-command-name
-// mode, the commands disappear but do not reappear in their new location
-// after a unsubscribe or resubscribe -- they only appear after a reastart.
-// Everything works fine if you're in sort-by-feed mode.
-// How odd.  It's not because cmd-sorted list is coming from a different
-// feed manager instance, is it?  (it's not)
-
-// Broken features to fix:
-//  -- sort by whatever (needs more options)
-//  -- unsubscribe / resubscribe (mostly fixed, one bug)
-//  -- populate unsubscribed feeds area (done)
-//  -- enable/disable command (mostly fixed, one bug)
-//  -- Find feeds for commands so they can be displayed in cmd mode (done)
-//  -- margins, fo readability
-
-// New features to add:
-// show/hide help at top of page  (done)
-// sort by using links instead of drop-down (done)
-// show/hide help for individual command
-// jump directly to help for particular command (done)
-// sort by enabledness
-// sort by subscription date of feed (how to get this?)
-// actually sort feeds alphabetically when sorting by feed
-// Cool sliding animation
-
-// Sort modes to implement:
-// sort feeds-first or cmnds-first
-// if feeds-first, feeds by name or by recently subscribed?
-// if cmds-first, by name, author, homepage, licence, or enabledness?
-
-
-
-
-
-
-
-/// Below this is ye old code.
-
-/*
-function onDocumentLoad() {
-
-  function updateCommands() {
-    var cmdSource = UbiquitySetup.createServices().commandSource;
-
-    var cmdList = $('#command-list');
-
-    for (var i = 0; i < cmdSource.commandNames.length; i++) {
-      var cmd = cmdSource.getCommand(cmdSource.commandNames[i].name);
-      var isEnabled = !cmd.disabled;
-
-      var cmdElement = jQuery(
-        '<li class="command">' +
-          '<input type="checkbox" class="activebox"' +
-          (isEnabled ? ' checked="checked"' : '')+'/>'+
-          '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
-          '<span class="description"/>' +
-          '<div class="synonyms-container light">also called ' +
-          '<span class="synonyms"/></div>' +
-          '<div class="light"><span class="author"/>' +
-          '<span class="license"/></div>' +
-          '<div class="homepage light"/>' +
-          '<div class="help"/>' +
-          '</li>'
-      );
-
-      if(cmd.icon) {
-        // TODO: Is this how we escape inside a url() in CSS?
-        cmdElement.css('list-style-image', "url('" +
-                       escapeHtml(cmd.icon) + "')");
-      } else {
-        cmdElement.css('list-style-type', 'none');
-      }
-      if(cmd.homepage) {
-        cmdElement.find(".homepage").html(
-          ('View more information at <a href="' +
-           escapeHtml(cmd.homepage) + '">' +
-           escapeHtml(cmd.homepage) + '</a>.')
-        );
-      } else cmdElement.find(".homepage").empty();
-
-      if(cmd.synonyms){
-        cmdElement.find(".synonyms").html(
-          escapeHtml(cmd.synonyms.join(", "))
-        );
-      } else cmdElement.find(".synonyms-container").empty();
-
-      if(cmd.description) cmdElement.find(".description").html(
-        cmd.description
-      );
-      else cmdElement.find(".description").empty();
-
-      if(cmd.author) cmdElement.find(".author").html(
-        formatCommandAuthor(cmd.author)
-      );
-
-      else cmdElement.find(".author").empty();
-
-      if(cmd.license) cmdElement.find(".license").html(
-        escapeHtml(' - licensed as ' + cmd.license)
-      );
-      else cmdElement.find(".license").empty();
-
-      if(cmd.help) cmdElement.find(".help").html(cmd.help);
-
-      else cmdElement.find(".help").empty();
-
-      cmdList.append(cmdElement);
-    }
-
-  }
-
-  var sortKey = $("#sortby").val();
-
-  function doSort() {
-    sortKey = $("#sortby").val();
-    sortCommandsBy(sortKey);
-  }
-
-  $("#sortby").change(doSort);
-
-  updateCommands();
-  doSort();
-}
-*/
-
-
-
-// ------- where the old division was
-/*
-function makeRemover(element, info) {
-  function onSlideDown() {
-    var newElement = makeFeedListElement(info,
-                                         "resubscribe",
-                                         makeUnremover);
-    $(newElement).hide();
-    $("#command-feed-graveyard").append(newElement);
-    $(newElement).fadeIn();
-  }
-  function onHidden() {
-    $(element).remove();
-    if (!$("#command-feeds").text())
-      $("#command-feeds-div").slideUp();
-    $("#command-feed-graveyard-div").slideDown("normal", onSlideDown);
-  }
-  function remove() {
-    info.remove();
-    $(element).slideUp(onHidden);
-  }
-  return remove;
-}
-
-function makeUnremover(element, info) {
-  function onSlideDown() {
-    var newElement = makeFeedListElement(info,
-                                         "unsubscribe",
-                                         makeRemover);
-    $(newElement).hide();
-    $("#command-feeds").append(newElement);
-    $(newElement).fadeIn();
-  }
-  function onHidden() {
-    $(element).remove();
-    if (!$("#command-feed-graveyard").text())
-      $("#command-feed-graveyard-div").slideUp();
-    $("#command-feeds-div").slideDown("normal", onSlideDown);
-  }
-  function unremove() {
-    info.unremove();
-    $(element).slideUp(onHidden);
-  }
-  return unremove;
-}
-*/
-
-// TODO the following code needs to be applied to the subscribed feed
-// elements in the big table:
-/*
- *   if (label == "unsubscribe" && !info.canAutoUpdate) {
-    info.checkForManualUpdate(
-      function(isAvailable, href) {
-        if (isAvailable)
-          $(titleLink).after('<br><a class="feed-updated" href="' + href +
-                             '">An update for this feed is available.</a>');
-      });
-  }
-
- */

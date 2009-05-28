@@ -224,6 +224,10 @@ a[onclick] {
   color: #009900;
 }
 
+.feed-date {
+  font-size: 80%;
+}
+
 .notification {
   color: blue;
   font-variant: small-caps;
