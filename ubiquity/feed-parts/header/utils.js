@@ -1,10 +1,14 @@
 var Utils = {};
 
-(function()
-{
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+var Cr = Components.results;
+
+(function() {
   // Let's "subclass" the Utils JS module.
   var jsm = {};
-  Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
+  Cu.import("resource://ubiquity/modules/utils.js", jsm);
 
   // Just like the standard Utils.url, only if we get a malformed URI
   // error, we'll try re-evaluating the string using a base URI of the
@@ -112,5 +116,4 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl, postParams, 
   }
 
   jQuery.ajax(ajaxOptions);
-
 };

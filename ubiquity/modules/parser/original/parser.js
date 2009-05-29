@@ -984,10 +984,9 @@ NLParser1.Verb.prototype = {
   preview: function( context, previewBlock, argumentValues ) {
     // Same logic as the execute command -- see comment above.
     if (this._preview) {
-      if (this._isNewStyle ) {
+      if (this._isNewStyle) {
         argumentValues.object = argumentValues.direct_object;
-        this._preview( context, previewBlock, 
-                       mapModifierArgsToRoles(argumentValues) );
+        this._preview(context, previewBlock, argumentValues);
       } else {
         let directObjectVal = null;
         if (argumentValues && argumentValues.direct_object)
