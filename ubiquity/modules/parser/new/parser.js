@@ -37,7 +37,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["Parser",'nounCache'];
+var EXPORTED_SYMBOLS = ["Parser", "nounCache"];
+
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -254,8 +256,8 @@ Parser.prototype = {
     // all the verbs for a given language. If a verb's name is not set for
     // the target language, it will fall back on English.
     function allNames(verbs,lang) {
-      for each (verb in verbs) {
-        for each (name in verb.names) {
+      for each (var verb in verbs) {
+        for each (var name in verb.names) {
           yield name;
         }
       }
@@ -375,15 +377,15 @@ Parser.prototype = {
                  text: null,
                  _order: null,
                  input: null},
-        argString: input.replace(/^\s*(.*?)\s*$/,'$1')
+        argString: Utils.trim(input)
       }
     ];
 
     // just a little utility generator
     // Yields all the synonymous names of the verb in a given language
     // If no names for this language is specified, it falls back onto English.
-    function names(verb,lang) {
-      for each (name in verb.names[lang]) {
+    function names(verb, lang) {
+      for each (var name in verb.names) {
         yield name;
       }
     }
@@ -412,9 +414,9 @@ Parser.prototype = {
       //
       // TODO: write a unit test for this possibility.
 
-      for (verb in this._verbList) {
+      for (let verb in this._verbList) {
         // check each verb synonym in this language
-        for (name in names(this._verbList[verb],this.lang)) {
+        for (let name in names(this._verbList[verb],this.lang)) {
           // if it matched...
           if (RegExp('^'+verbPrefix,'i').test(name)) {
             let thisParse = {_verb: cloneObject(this._verbList[verb]),
@@ -448,9 +450,9 @@ Parser.prototype = {
       if (argString == '' && verbOnlyMatches.indexOf(verbPrefix) > -1)
         return returnArray;
 
-      for (verb in this._verbList) {
+      for (let verb in this._verbList) {
         // check each verb synonym in this language
-        for (name in names(this._verbList[verb],this.lang)) {
+        for (let name in names(this._verbList[verb],this.lang)) {
           // if it matched...
           if (RegExp('^'+verbPrefix,'i').test(name)) {
             let thisParse = {_verb: cloneObject(this._verbList[verb]),
@@ -1232,7 +1234,7 @@ Parser.prototype = {
       returnArr = newreturn;
     }
 
-    for each (parse in returnArr) {
+    for each (let parse in returnArr) {
       // for each of the roles parsed in the parse
       for (let role in parse.args) {
         // multiply the score by each role's first argument's nountype match score
@@ -1285,9 +1287,7 @@ Parser.prototype = {
       Components.utils.import(
         'resource://ubiquity/modules/parser/new/noun_worker.js',
         nounWorker);
-      Components.utils.import(
-        'resource://ubiquity/modules/utils.js');
-      
+
       var myCallback = function detectNounType_myCallback(suggestions) {
         if (!(x in nounCache))
           nounCache[x] = [];
@@ -1513,9 +1513,9 @@ Parser.Query.prototype = {
     this._step++;
 
     // STEP 7: suggest verbs for parses which don't have one
-    for each (parse in this._possibleParses) {
+    for each (let parse in this._possibleParses) {
       let newVerbedParses = this.parser.suggestVerb(parse);
-      for each (newVerbedParse in newVerbedParses) {
+      for each (let newVerbedParse in newVerbedParses) {
         this._verbedParses = this.addIfGoodEnough(this._verbedParses,
                                                   newVerbedParse);
         yield true;
@@ -1564,7 +1564,7 @@ Parser.Query.prototype = {
         return;
       }
 
-      for each (parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
+      for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
 
         if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
@@ -1944,7 +1944,6 @@ Parser.Parse.prototype = {
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
   allNounTypesDetectionHasCompleted: function() {
-    i=0;
     for (let role in this.args) {
       // for each argument of this role...
       for each (let arg in this.args[role]) {

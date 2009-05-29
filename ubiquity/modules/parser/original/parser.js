@@ -371,7 +371,6 @@ NLParser1.ParsedSentence.prototype = {
         if (!this._verb._arguments[argName].type.rankLast)
           this.argMatchScore++;
     }
-
   },
 
   getCompletionText: function() {
@@ -415,21 +414,20 @@ NLParser1.ParsedSentence.prototype = {
   getDisplayText: function() {
     // returns html formatted sentence for display in suggestion list
     var sentence = Utils.escapeHtml(this._verb._name);
-    var obj, label, klass;
-    for (let x in this._verb._arguments) {
-      obj = x === "direct_object";
-      if (this._argSuggs[x] && this._argSuggs[x].text) {
-        label = obj ? "" : x;
-        klass = obj ? "object" : "argument";
-        sentence += (' <span class="' + klass + '">' +
-                     Utils.escapeHtml(label) + " " +
-                     this._argSuggs[x].summary + "</span>");
+    var args = this._verb._arguments;
+    var label;
+    for (let x in args) {
+      let obj = x === "direct_object";
+      if ((this._argSuggs[x] || 0).summary) {
+        label = obj ? "" : Utils.escapeHtml(args[x].flag) + " ";
+        sentence += (' <span class="' + (obj ? "object" : "argument") + '">' +
+                     label + this._argSuggs[x].summary + "</span>");
       } else {
         if (obj)
-          label = this._verb._arguments[x].label;
+          label = args[x].label;
         else {
           let {type} = this._verb._arguments[x];
-          label = x + " " + (type.name || type._name || "?");
+          label = args[x].flag + " " + (type.name || type._name || "?");
         }
         sentence += (' <span class="needarg">' +
                      Utils.escapeHtml(label) + "</span>");
@@ -856,18 +854,13 @@ NLParser1.PartiallyParsedSentence.prototype = {
 // This mapping and function are used to convert Parser 2 commands for use
 // with Parser 1.
 //
-var roleMappings = {object: 'direct_object',
-                    source: 'from',
-                    goal: 'to',
-                    position: 'on',
-                    instrument: 'with',
-                    alias: 'as' };
-
-var mapModifierArgsToRoles = function(args) {
-  for (let role in roleMappings)
-    args[role] = args[roleMappings[role]];
-  return args;
-}
+var roleToPrep = {
+  source: 'from',
+  goal: 'to',
+  position: 'on',
+  instrument: 'with',
+  alias: 'as',
+};
 
 NLParser1.Verb = function( cmd ) {
   if (cmd)
@@ -921,9 +914,7 @@ NLParser1.Verb.prototype = {
              +' apparently follows the (now defunct) Parser 1.5 format\n');
 
       // copy over the extra names
-      try {
       this._synonyms = cmd.names.slice(1);
-      } catch(e){Utils.reportInfo(uneval(cmd.names))}
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
       if (cmd.arguments && !isEmpty(cmd.arguments)) {
@@ -932,15 +923,13 @@ NLParser1.Verb.prototype = {
           let val = args[key];
           let role = val.role || key;
           let noun = val.nountype || val;
-          let label = roleMappings[role];
-          this._arguments[label] = {
+          let obj = role === "object";
+          this._arguments[obj ? "direct_object" : role] = {
             type : noun,
             label: val.label || noun.name,
-            flag : (label === "direct_object" ? null : label)
+            flag : obj ? null : roleToPrep[role],
+            "default": val.default,
           };
-          if (val.default) {
-            this._arguments[label].default = val.default;
-          }
         }
       }
     }
@@ -978,7 +967,7 @@ NLParser1.Verb.prototype = {
       /* New-style commands (api 1.5) expect a single dictionary with all
        * arguments in it, and the object named 'object'*/
       argumentValues.object = argumentValues.direct_object;
-      return this._execute( context, mapModifierArgsToRoles(argumentValues) );
+      return this._execute( context, argumentValues );
     } else {
       /* Old-style commands (api 1.0) expect the direct object to be passed
        * in separately: */

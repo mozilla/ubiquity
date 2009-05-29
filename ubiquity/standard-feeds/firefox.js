@@ -347,12 +347,9 @@ CmdUtils.CreateCommand({
     if (!doc)
       return;
 
-    Utils.reportInfo("URI: " + doc.location);
-
     var iosvc = Cc["@mozilla.org/network/io-service;1"].
                 getService(Ci.nsIIOService);
     var currentURI = iosvc.newURI(doc.location, null, null);
-
     var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].
                     getService(Ci.nsINavBookmarksService);
     if (!bookmarks.isBookmarked(currentURI)) {

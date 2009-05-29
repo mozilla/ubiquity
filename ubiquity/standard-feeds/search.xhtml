@@ -207,10 +207,7 @@ Wikipedia articles found matching <b>${query}</b>:
 </div>
 <script class="commands"><![CDATA[
 CmdUtils.CreateCommand({
-  names: {
-    en: ['search','find','look for'],
-    ja: ['検索する','検索して','検索しろ','探す','探して','探せ','けんさくする','けんさくして','けんさくしろ','さがす','さがして','さがせ']
-  },
+  names: ['search','find','look for'],
   arguments: [
     {role: 'object', label: 'query', nountype: noun_arb_text},
     {role: 'instrument', nountype: noun_type_searchengine}
