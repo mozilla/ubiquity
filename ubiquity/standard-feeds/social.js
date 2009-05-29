@@ -10,10 +10,8 @@ From Abi:
 const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
-  names: {
-    en: ["twitter","tweet"],
-    ja: ["呟く","呟け","呟いて","つぶやく","つぶやけ","つぶやいて"]
-  },
+  names: ["twitter", "tweet"],
+  //ja: ["呟く","呟け","呟いて","つぶやく","つぶやけ","つぶやいて"]
   arguments: [
     {role: "object", label: 'status', nountype: noun_arb_text},
     {role: "alias", nountype: noun_type_twitter_user}

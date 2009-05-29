@@ -255,7 +255,7 @@ Parser.prototype = {
     // the target language, it will fall back on English.
     function allNames(verbs,lang) {
       for each (verb in verbs) {
-        for each (name in (verb.names[lang] || verb.names.en)) {
+        for each (name in verb.names) {
           yield name;
         }
       }
@@ -383,7 +383,7 @@ Parser.prototype = {
     // Yields all the synonymous names of the verb in a given language
     // If no names for this language is specified, it falls back onto English.
     function names(verb,lang) {
-      for each (name in (verb.names[lang] || verb.names.en)) {
+      for each (name in verb.names[lang]) {
         yield name;
       }
     }
@@ -1077,9 +1077,7 @@ Parser.prototype = {
         parseCopy._verb.id = verb;
 
         // by default, use the English name, or the verb's main name.
-        parseCopy._verb.text = (this._verbList[verb].names[this.lang] ?
-                                this._verbList[verb].names[this.lang][0]
-                                : this._verbList[verb].names['en'][0] || verb);
+        parseCopy._verb.text = this._verbList[verb].names[0] || verb;
         parseCopy._verb._order = 0;
         // TODO: for verb forms which clearly should be sentence-final,
         // change this value to -1
@@ -1898,7 +1896,7 @@ Parser.Parse.prototype = {
     if (typeof this._verb.preview == 'function')
       return this._verb.preview( context, previewBlock, this.getFirstArgs() );
     else {
-      dump(this._verb.names.en[0]+' didn\'t have a preview!');
+      dump(this._verb.names[0]+' didn\'t have a preview!');
       return false;
     }
   },

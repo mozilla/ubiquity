@@ -884,7 +884,7 @@ NLParser1.Verb.prototype = {
     this._preview     = cmd.preview;
     this._description = cmd.description;
     this._help        = cmd.help;
-    this._name        = cmd.name || cmd.names.en[0];
+    this._name        = cmd.name || cmd.names[0];
     this._icon        = cmd.icon;
     this._synonyms    = cmd.synonyms;
 
@@ -921,8 +921,9 @@ NLParser1.Verb.prototype = {
              +' apparently follows the (now defunct) Parser 1.5 format\n');
 
       // copy over the extra names
-      this._synonyms = cmd.names.en.slice(1);
-      
+      try {
+      this._synonyms = cmd.names.slice(1);
+      } catch(e){Utils.reportInfo(uneval(cmd.names))}
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
       if (cmd.arguments && !isEmpty(cmd.arguments)) {

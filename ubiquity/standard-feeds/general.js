@@ -134,16 +134,8 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 CmdUtils.CreateCommand({
-  name: "calculate",
-  names: {
-    en: ["calculate"],
-    ja: ["計算する", "計算しろ", "計算して",
-         "けいさんする", "けいさんしろ","けいさんして"],
-  },
-  arguments: [
-    {role: "object", nountype: /^[\d.+\-*\/^%~(, )]+$/}
-  ],
-  takes: {"expression": /^[\d.+\-*\/^%~(, )]+$/},
+  names: ["calculate"],
+  arguments: {object: /^[\d.+\-*\/^%~(, )]+$/},
   icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
@@ -441,16 +433,16 @@ function translateTo(text, langCodePair, callback, pblock) {
 
 CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
-  names: {
+  names: ["translate"],
+  /*
     da: ["oversat"],
-    en: ["translate"],
     fr: ["traduire","traduizez","traduis"],
     ca: ["tradueix", "traduix"],
     da: ["oversat"],
     sv: ["oversatt"],
     ja: ["訳す", "訳せ", "訳して", "やくす", "やくせ", "やくして"],
     pt: ["traduzir", "traduza"],
-  },
+   */
   arguments: [
     {role: "object", nountype: noun_arb_text},
     {role: "source", nountype: noun_type_lang_google},

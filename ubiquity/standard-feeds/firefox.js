@@ -50,7 +50,7 @@ var extApplication = { // helper method for correct quitting/restarting
 
 // exit firefox entirely
 CmdUtils.CreateCommand({
-  names: {en: ["exit-firefox"]},
+  names: ["exit-firefox"],
   description: "Exits firefox",
   execute: function() {
     extApplication.quit();
@@ -59,7 +59,7 @@ CmdUtils.CreateCommand({
 
 // restarts firefox
 CmdUtils.CreateCommand({
-  names: {en: ["restart-firefox"]},
+  names: ["restart-firefox"],
   description: "Restarts firefox",
   execute: function() {
     extApplication.restart();
@@ -69,7 +69,7 @@ CmdUtils.CreateCommand({
 // closes current firefox window
 // TODO: if last window is closed, we should offer to save session
 CmdUtils.CreateCommand({
-  names: {en: ["close-window"]},
+  names: ["close-window"],
   description: "Close current window",
   execute: function() {
     extApplication.close();
@@ -78,7 +78,7 @@ CmdUtils.CreateCommand({
 
 // toggles fullscreen
 CmdUtils.CreateCommand({
-  names: {en: ["fullscreen"]},
+  names: ["fullscreen"],
   description: "Toggles fullscreen mode",
   execute: function() {
     var win = CmdUtils.getWindow();
@@ -102,7 +102,7 @@ function tabPreview(msg)(
   });
 
 CmdUtils.CreateCommand({
-  names: {en: ["switch-tab"]},
+  names: ["switch-tab"],
   arguments: [{role: 'object', label: 'name', nountype: noun_type_tab}],
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
@@ -123,7 +123,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: {en: ["close-tab"]},
+  names: ["close-tab"],
   arguments: [{role: 'object', label: 'name', nountype: noun_type_tab}],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: ("Closes the tab that matches the given name, " +
@@ -136,7 +136,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: {en: ["close-related-tabs"]},
+  names: ["close-related-tabs"],
   arguments: [{role: 'object', label: 'related word', nountype: noun_arb_text}],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
@@ -172,7 +172,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: {en: ["count-tabs"]},
+  names: ["count-tabs"],
   description: "Counts the number of opened tabs.",
   arguments: [{role: 'instrument', label: 'filter', nountype: noun_arb_text}],
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
@@ -200,7 +200,7 @@ CmdUtils.CreateCommand({
 
 // refreshes current tab
 CmdUtils.CreateCommand({
-  names: {en: ["refresh","reload"]},
+  names: ["refresh","reload"],
   description: "Refresh current document",
   execute: function() {
     var win = CmdUtils.getWindow();
@@ -210,7 +210,7 @@ CmdUtils.CreateCommand({
 
 // bookmark current tab
 CmdUtils.CreateCommand({
-  names: {en: ["bookmark"]},
+  names: ["bookmark"],
   description: "Add current document to bookmarks",
   execute: function() {
     var win = CmdUtils.getWindowInsecure();
@@ -226,7 +226,7 @@ CmdUtils.CreateCommand({
 
 // print current tab
 CmdUtils.CreateCommand({
-  names: {en: ["print"]},
+  names: ["print"],
   description: "Print current page",
   execute: function() {
     var win = CmdUtils.getWindow();
@@ -236,7 +236,7 @@ CmdUtils.CreateCommand({
 
 // goes back in history
 CmdUtils.CreateCommand({
-  names: {en: ["back"]},
+  names: ["back"],
   description: "Go back in history",
   arguments: [{role: 'object', label: 'steps', nountype: noun_type_number}],
   preview: function(pblock, args) {
@@ -254,7 +254,7 @@ CmdUtils.CreateCommand({
 
 // goes forward in history
 CmdUtils.CreateCommand({
-  names: {en: ["forward"]},
+  names: ["forward"],
   description: "Go forward in history",
   arguments: [{role: 'object', label: 'steps', nountype: noun_type_number}],
   preview: function(pblock, args) {
@@ -272,7 +272,7 @@ CmdUtils.CreateCommand({
 
 // go to home page
 CmdUtils.CreateCommand({
-  names: {en: ["home"]},
+  names: ["home"],
   description: "Go to home page",
   execute: function() {
     var win = CmdUtils.getWindow();
@@ -297,8 +297,8 @@ function setFullPageZoom(level) {
 }
 
 CmdUtils.CreateCommand({
-  names: {en: ['zoom']},
-  arguments: [{role: 'object', nountype: noun_type_percentage}],
+  names: ["zoom"],
+  arguments: [{role: "object", nountype: noun_type_percentage}],
   icon: "chrome://ubiquity/skin/icons/magnifier.png",
   description: "Zooms the Firefox window in or out.",
   preview: function(pBlock, args) {
@@ -325,7 +325,7 @@ CmdUtils.CreateCommand({
 
 // command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
-  names: {en: ["tag"]},
+  names: ["tag"],
   homepage: "http://autonome.wordpress.com/",
   author: {name: "Dietrich Ayala", email: "dietrich@mozilla.com"},
   license: "MPL/GPL/LGPL",

@@ -87,7 +87,7 @@ function finishCommand(srcCommand) {
      ) {
     // enable use in parser 2
     dump('converting 1 > 2: '+srcCommand.name+'\n');
-    cmd.names = {en: [srcCommand.name]};
+    cmd.names = [srcCommand.name];
   }
 
   cmd.arguments = srcCommand.arguments || [];

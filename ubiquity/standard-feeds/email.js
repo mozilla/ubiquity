@@ -123,12 +123,7 @@ function findGmailTab() {
 }
 
 CmdUtils.CreateCommand({
-  names: {
-    en: ["email", "mail"], 
-    ja: ["メールする", "メールして", "メールしろ",
-         "送信する", "送信して", "送信しろ",
-         "そうしんして", "そうしんして", "そうしんしろ"],
-  },
+  names: ["email", "mail"], 
   arguments: [
     {role: "object", label: "message", nountype: noun_arb_text},
     {role: "goal", nountype: noun_type_contact}

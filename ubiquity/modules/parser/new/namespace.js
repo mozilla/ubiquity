@@ -70,18 +70,16 @@ var NLParser2 = {
     // into new-style verbs.  The correct solution is to add the needed
     // new metadata directly to all verbs.
     let newVerb = {
-      names: {
-        en: []
-      },
+      names: [],
       arguments: []
     };
 
     // TODO actually this should work from the NLParser.Verb object
-    newVerb.names.en.push( oldVerb.name );
+    newVerb.names.push( oldVerb.name );
 
     if (oldVerb.synonyms) {
       for (let i = 0; i < oldVerb.synonyms.length; i++) {
-        newVerb.names.en.push( oldVerb.synonyms[i] );
+        newVerb.names.push( oldVerb.synonyms[i] );
       }
     }
 

@@ -116,9 +116,7 @@ function testParserTwoDirectOnly() {
     execute: function(context, args) {
       dogGotPetted = args.object.text;
     },
-    names: {
-      en: ["pet"]
-    },
+    names: ["pet"],
     arguments: [
       {role: 'object', nountype: dog}
     ]
@@ -165,9 +163,7 @@ function testParserTwoParseWithModifier() {
       dogGotWashed = args.object.text;
       dogGotWashedWith = args.instrument.text;
     },
-    names: {
-      en: ["wash"]
-    },
+    names: ["wash"],
     arguments: [
       {role: 'object', nountype: dog },
       {role: 'instrument', nountype: washingObj }
