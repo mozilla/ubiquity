@@ -47,7 +47,7 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 
 var noun_arb_text = {
-  name: "text",
+  name: "?",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.7, selectionIndices)];

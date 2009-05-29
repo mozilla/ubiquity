@@ -138,46 +138,49 @@ DefaultMax = 42,
 Sep = "\n",
 {prefs} = Application;
 CmdUtils.CreateCommand({
-  name: Name,
-  synonyms: ["vita"],
-  icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  takes: {filter: noun_arb_text},
+  names: [Name, "vita"],
+  arguments: {object: noun_arb_text},
   description: "Accesses your command history.",
   help: "" + (
-    <ul style='list-style-image:none'>
+    <ul style="list-style-image:none">
     <li>Use accesskey or click to reclaim.</li>
     <li>Type to filter.</li>
     <li>Execute to delete all matched histories.</li>
-    <li>Edit <a href='about:config'><code>{PMax}</code></a> to
+    <li>Edit <a href="about:config"><code>{PMax}</code></a> to
       set max number of histories.</li></ul>),
-  execute: function({text}) {
+  author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  license: "MIT",
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  execute: function(args) {
     var bin = Utils.trim(prefs.getValue(PBin, ""));
     if (!bin) return;
     if (text) {
-      var rem = this._get(text, true).join(Sep);
+      var rem = this._get(args.object.text, true).join(Sep);
       if (rem.length === bin.length) return;
       prefs.setValue(PBin, rem);
-      this._say("Matched commands deleted. Click here to undo.",
+      this._say("Deleted matched histories. Click here to undo.",
                 function() { prefs.setValue(PBin, bin) });
-    } else this._say('Type "^" to delete all.');
+    } else
+      this._say('Type "^" to delete all.');
   },
-  preview: function(pbl, {text}) {
-    var ol = this._get(text).reduce(function(ol, h, i) {
-      var k = i < 36 ? (i+1).toString(36) : "-^@;:[],./\\"[i - 36] || "_";
-      return ol.appendChild(
-        <li><label for={i}><button id={i} accesskey={k} value={h}
-        >{k}</button><code>{h}</code></label></li>);
-    }, <ol class={Name}/>);
-    if (!("li" in ol)) {
-      pbl.innerHTML = this.description + this.help;
+  preview: function(pbl, args) {
+    var his = this._get(args.object.text);
+    if (!his[0]) {
+      pbl.innerHTML = "<i>No histories match.</i>" + this.help;
       return;
     }
-    pbl.innerHTML = this._css + ol;
-    jQuery("ol", pbl)[0].addEventListener("focus", reclaim, true);
+    pbl.innerHTML = this._css + his.reduce(this._acc, <ol class={Name}/>);
+    jQuery("ol", pbl)[0].addEventListener("focus", this._recall, true);
+  },
+  _acc: function(ol, h, i) {
+    var k = i < 36 ? (i+1).toString(36) : "-^@;:[],./\\"[i - 36] || "_";
+    return ol.appendChild(
+      <li><label for={i}><button id={i} accesskey={k} value={h}
+      >{k}</button><code>{h}</code></label></li>);
   },
   _say: function(txt, cb) {
     displayMessage({
-      icon: this.icon, title: this.name, text: txt, onclick: cb});
+      icon: this.icon, title: Name, text: txt, onclick: cb});
   },
   _get: function(txt, rev) {
     var bin = Utils.trim(prefs.getValue(PBin, ""));
@@ -190,27 +193,25 @@ CmdUtils.CreateCommand({
     }
     return his;
   },
+  _recall: function reclaim(ev) {
+    var {target} = ev;
+    if (target.nodeName !== "BUTTON") return;
+    target.blur();
+    target.disabled = true;
+    var {gUbiquity} = context.chromeWindow;
+    gUbiquity.__textBox.value = target.value;
+    gUbiquity.__delayedProcessInput();
+  },
   _css: <style><![CDATA[
     ol {margin: 0; padding: 2px}
     li {list-style-type: none}
     label:hover {cursor: pointer; font-weight: bold}
     button {
       margin-right: 0.4em; padding: 0; border-width: 1px;
-      font: bold 108% 'Consolas',monospace; text-transform: uppercase;
+      font: bold 108% "Consolas",monospace; text-transform: uppercase;
     }
     ]]></style>,
-  author: {name: "satyr", email: "murky.satyr@gmail.com"},
-  license: "MIT",
 });
-function reclaim(e) {
-  var {target} = e;
-  if (target.nodeName !== "BUTTON") return;
-  target.blur();
-  target.disabled = true;
-  var {gUbiquity} = context.chromeWindow;
-  gUbiquity.__textBox.value = target.value;
-  gUbiquity.__delayedProcessInput();
-}
 return function UL_commandHistory(U) {
   U.__msgPanel.addEventListener("popuphidden", function saveEntry() {
     var ent = Utils.trim(U.__textBox.value);

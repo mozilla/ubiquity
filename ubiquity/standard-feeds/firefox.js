@@ -2,6 +2,8 @@
 // HELPER OBJECT FOR CLOSING WINDOWS
 // -----------------------------------------------------------------
 
+XML.prettyPrinting = XML.ignoreWhitespace = false;
+
 var extApplication = { // helper method for correct quitting/restarting
   _warnOnClose: function app__warnOnClose( event ) {
     var prefs = {
@@ -375,7 +377,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: {en:["bookmarklet","bml","js"]},
+  names: "bookmarklet|bml|js",
   description: "Runs a bookmarklet from your favorites.",
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
@@ -397,4 +399,90 @@ CmdUtils.CreateCommand({
          style="white-space:pre-wrap">{decodeURI(args.object.data)}</pre>)
       : this.description + "<p>" + this.help + "</p>");
   }
+});
+
+const UCT = "undo-closed-tabs";
+CmdUtils.CreateCommand({
+  names: [UCT, "uct"],
+  description: "Reopens tabs you've closed recently.",
+  help: "" + (
+    <ul style="list-style-image:none">
+    <li>Use accesskey or click to undo.</li>
+    <li>Type to filter, then execute to undo all.</li>
+    </ul>),
+  author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  contributors: [{name: "powchin", homepage: "http://friendfeed.com/powchin"}],
+  license: "MIT",
+  icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
+  arguments: {object: noun_arb_text},
+  execute: function(args) {
+    for each(var {id} in this._find(args.object.text)) this._undo(id);
+  },
+  preview: function(pbl, args) {
+    var me = this;
+    if (!me._SS.getClosedTabCount(Utils.currentChromeWindow)) {
+      me._puts(pbl, "No closed tabs.");
+      return;
+    }
+    var tabs = me._find(args.object.text);
+    if (!tabs[0]) {
+      me._puts(pbl, "No matched tabs.");
+      return;
+    }
+    pbl.innerHTML =
+      me._css + tabs.reduce(me._lay, <ol class={UCT}/>);
+    $("ol", pbl)[0].addEventListener("focus", function(ev) {
+      var {target} = ev;
+      if (target.nodeName !== "BUTTON") return;
+      target.disabled = true;
+      $(target).closest("li").remove();
+      me._undo(+target.id);
+    }, true);
+  },
+  previewDelay: 256,
+  _lay: function(ol, {id, title, image, url}, i) {
+    var k = i < 36 ? (i+1).toString(36) : "-^@;:[],./\\"[i - 36] || "_";
+    return ol.appendChild(
+      <li><nobr><label for={id}><button id={id} accesskey={k}
+      >{k}</button><img class="icon" src={image}/><span class="title">{title}
+      </span><code class="url">{url}</code></label></nobr></li>);
+  },
+  _puts: function(pbl, msg) {
+    pbl.innerHTML = <i>{msg}</i>.toXMLString() + this.help;
+  },
+  _find: function(txt) {
+    var list = this._list =
+      eval(this._SS.getClosedTabData(context.chromeWindow));
+    list.forEach(this._mark);
+    if (txt) {
+      try { var re = RegExp(txt, "i") }
+      catch(e){ re = RegExp(txt.replace(/\W/g, "\\$&"), "i") }
+      list = list.filter(function(t) re.test(t.title) || re.test(t.url));
+    }
+    return list;
+  },
+  _mark: function(tab, i) {
+    tab.id = i;
+    tab.url = tab.state.entries[0].url;
+  },
+  _undo: function(id) {
+    this._list.every(function(tab, i, list) {
+      if (id !== tab.id) return true;
+      this._SS.undoCloseTab(context.chromeWindow, i);
+      list.splice(i, 1);
+    }, this);
+  },
+  _SS: (Cc["@mozilla.org/browser/sessionstore;1"]
+        .getService(Ci.nsISessionStore)),
+  _css: <style><![CDATA[
+    ol {margin: 0; padding: 0; list-style-type: none}
+    li:hover {outline: 1px solid; -moz-outline-radius: 8px}
+    label {cursor: pointer}
+    button {
+      margin-right: 0.2em; padding: 0; border-width: 1px;
+      font: bold 108% "Consolas",monospace; text-transform: uppercase;
+    }
+    .icon {width: 16px; height: 16px; vertical-align: middle}
+    .url {font-size: smaller}
+    ]]></style>,
 });
