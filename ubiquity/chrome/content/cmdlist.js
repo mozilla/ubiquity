@@ -134,7 +134,7 @@ function formatCommandAuthor(authorData) {
   if(authorMarkup.length == 0)
     return "";
 
-  return "by " + authorMarkup;
+  return authorMarkup;
 }
 
 function fillTableRowForCmd(row, cmd, className) {
@@ -190,7 +190,7 @@ function fillTableRowForCmd(row, cmd, className) {
     cmdElement.find(".description")[0].innerHTML = cmd.description;
 
   if (cmd.author)
-    cmdElement.find(".author")[0].innerHTML = formatCommandAuthor(cmd.author);
+    cmdElement.find(".author").append("by ", formatCommandAuthor(cmd.author));
 
   if (cmd.contributors)
     cmdElement.find(".contributors")
@@ -421,14 +421,6 @@ function changeSortMode(newSortMode) {
   rebuildTable();
 }
 
-function showCmdListHelp(enabled) {
-  if (enabled) {
-    $("#cmdlist-help-div").slideDown();
-  } else {
-    $("#cmdlist-help-div").slideUp();
-  }
-}
-
 function viewSourceLink(feed)(
   A("view-source:" + feed.viewSourceUri.spec,
     ("[view " +
@@ -436,4 +428,18 @@ function viewSourceLink(feed)(
      "source]"),
     "feed-action"));
 
-$(document).ready(rebuildTable).ready(jumpToCommand);
+function setupHelp() {
+  var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
+    $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
+    [this.textContent, this.bin] = [this.bin, this.textContent];
+  });
+  toggler.textContent = "Learn How to Use This Page";
+  toggler.bin = "Hide Help";
+  toggler.off = true;
+}
+
+$(function(){
+  setupHelp();
+  rebuildTable();
+  jumpToCommand();
+});
