@@ -832,20 +832,26 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
 
   if (options.arguments) {
     let args = options.arguments;
-    for (let key in args)
-      if ("nountype" in args[key])
-        re2nt(args[key], "nountype");
-      else
-        re2nt(args, key);
+    // handle simplified syntax
+    // arguments: noun
+    // arguments: {object: noun, ...}
+    if (typeof args.suggest === "function")
+      args = [{role: "object", nountype: args}];
+    else if (!Utils.isArray(args))
+      args = [{role: r, nountype: args[r]} for (r in args)];
+
+    for (let arg in args)
+      re2nt(arg, "nountype");
+
+    options.arguments = args;
   }
 
   // Reserved keywords that shouldn't be added to the cmd function.
-  var RESERVED = ["takes", "execute", "name"];
+  var RESERVED = {takes: 1, execute: 1, name: 1};
   // Add all other attributes of options to the cmd function.
-  for (var key in options) {
-    if (RESERVED.indexOf(key) == -1)
+  for (var key in options)
+    if (!(key in RESERVED))
       execute[key] = options[key];
-  }
 
   // If preview is a string, wrap it in a function that does
   // what you'd expect it to.

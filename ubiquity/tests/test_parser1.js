@@ -639,16 +639,14 @@ function testPartiallyParsedSentence() {
     suggest: function( text, html ) {
       return [];
     },
-    default: "super pants",
+    default: function() NounUtils.makeSugg("super pants"),
   };
 
   var verb = new NLParser1.Verb({
     names: ["frobnitz"],
-    arguments: {
-      source: noun_type_foo,
-      instrument: noun_type_bar,
-      position: noun_type_baz,
-    }
+    arguments: [{role: "source", nountype: noun_type_foo},
+                {role: "instrument", nountype: noun_type_bar},
+                {role: "position", nountype: noun_type_baz}],
   });
 
   var argStrings = {

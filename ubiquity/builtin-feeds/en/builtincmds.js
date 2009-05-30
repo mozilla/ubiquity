@@ -128,7 +128,7 @@ function startup_setBasicPreferences() {
   Application.prefs.setValue("javascript.options.showInConsole", true);
 }
 
-/*var ubiquityLoad_commandHistory = (function() {{}
+var ubiquityLoad_commandHistory = (function() {{}
 const
 Name = "command-history",
 PHistory = "extensions.ubiquity.history.",
@@ -225,4 +225,4 @@ return function UL_commandHistory(U) {
     prefs.setValue(PBin, his.join(Sep));
   }, false);
 };
-})();*/
+})();

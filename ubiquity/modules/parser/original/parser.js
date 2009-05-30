@@ -850,10 +850,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
   }
 };
 
-//
-// This mapping and function are used to convert Parser 2 commands for use
-// with Parser 1.
-//
+// This mapping is used to convert Parser 2 commands for use with Parser 1.
 var roleToPrep = {
   source: 'from',
   goal: 'to',
@@ -881,17 +878,12 @@ NLParser1.Verb.prototype = {
     this._icon        = cmd.icon;
     this._synonyms    = cmd.synonyms;
 
-    /* Use the presence or absence of a 'names' dictionary
-     * to decide whether this is a version 1.0 or version 1.5 command.
-     */
-    function isEmpty(obj) !obj.__count__;
-    
-    if ( cmd.names && !isEmpty(cmd.names) ) {
-      dump('converting 2 > 1: '+this._name+'\n');
-      this._isNewStyle = true;
-    } else {
-      this._isNewStyle = false;
-    }
+    // Determines if an object has one or more keys
+    function hasKey(obj) !!(obj || 0).__count__;
+
+    // Use the presence or absence of a 'names' array
+    // to decide whether this is a version 1 or version 2 command.
+    this._isNewStyle = hasKey(cmd.names);
 
     this.__defineGetter__("previewDelay", function() {
       return cmd.previewDelay;
@@ -909,45 +901,41 @@ NLParser1.Verb.prototype = {
     // New-style API: command defines arguments dictionary
     // only do it if we're not using the old API (for compatibility with Parser 2)
     if (this._isNewStyle) {
+      dump("converting 2 > 1: " + this._name + "\n");
       if (cmd.takes || cmd.modifiers)
-        dump('WARNING: '+this._name
-             +' apparently follows the (now defunct) Parser 1.5 format\n');
+        dump("WARNING: " + this._name +
+             " apparently follows the (now defunct) Parser 1.5 format\n");
 
       // copy over the extra names
       this._synonyms = cmd.names.slice(1);
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
-      if (cmd.arguments && !isEmpty(cmd.arguments)) {
-        let args = cmd.arguments;
-        for (let key in args) {
-          let val = args[key];
-          let role = val.role || key;
-          let noun = val.nountype || val;
+      if (hasKey(cmd.arguments)) {
+        for each (let arg in cmd.arguments) {
+          let {role, nountype} = arg;
           let obj = role === "object";
           this._arguments[obj ? "direct_object" : role] = {
-            type : noun,
-            label: val.label || noun.name,
+            type : nountype,
+            label: arg.label || nountype.name,
             flag : obj ? null : roleToPrep[role],
-            "default": val.default,
+            "default": arg.default,
           };
         }
       }
-    }
-
-    /* Old-style API for backwards compatibility: command
-       defines DirectObject and modifiers dictionary.  Convert
-       this to argument dictionary. */
-    if (!this._isNewStyle) {
+    } else {
+      // Old-style API for backwards compatibility: command
+      // defines DirectObject and modifiers dictionary.  Convert
+      // this to argument dictionary.
       if (cmd.DOType) {
         this._arguments.direct_object = {
           type: cmd.DOType,
           label: cmd.DOLabel,
           flag: null,
-          'default': cmd.DODefault
+          "default": cmd.DODefault
         };
       }
-  
-      if (cmd.modifiers && !isEmpty(cmd.modifiers)) {
+
+      if (hasKey(cmd.modifiers)) {
         for (let x in cmd.modifiers) {
           this._arguments[x] = {
             type: cmd.modifiers[x],

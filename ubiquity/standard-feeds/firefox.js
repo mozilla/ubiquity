@@ -398,7 +398,7 @@ CmdUtils.CreateCommand({
   }
 });
 
-/*const UCT = "undo-closed-tabs";
+const UCT = "undo-closed-tabs";
 CmdUtils.CreateCommand({
   names: [UCT, "uct"],
   description: "Reopens tabs you've closed recently.",
@@ -482,4 +482,4 @@ CmdUtils.CreateCommand({
     .icon {width: 16px; height: 16px; vertical-align: middle}
     .url {font-size: smaller}
     ]]></style>,
-});*/
+});
