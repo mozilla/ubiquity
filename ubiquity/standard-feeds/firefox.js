@@ -438,11 +438,14 @@ CmdUtils.CreateCommand({
   },
   previewDelay: 256,
   _lay: function(ol, {id, title, image, url}, i) {
-    var k = i < 36 ? (i+1).toString(36) : "-^@;:[],./\\"[i - 36] || "_";
+    var k = i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
     return ol.appendChild(
-      <li><nobr><label for={id}><button id={id} accesskey={k}
-      >{k}</button><img class="icon" src={image}/><span class="title">{title}
-      </span><code class="url">{url}</code></label></nobr></li>);
+      <li><nobr><label for={id}>
+        <button id={id} accesskey={k}>{k}</button>
+        <img class="icon" src={image}/>
+        <span class="title">{title}</span>
+        <code class="url">{url}</code>
+      </label></nobr></li>);
   },
   _puts: function(pbl, msg) {
     pbl.innerHTML = <i>{msg}</i>.toXMLString() + this.help;
@@ -476,7 +479,7 @@ CmdUtils.CreateCommand({
     li:hover {outline: 1px solid; -moz-outline-radius: 8px}
     label {cursor: pointer}
     button {
-      margin-right: 0.2em; padding: 0; border-width: 1px;
+      padding: 0; border-width: 1px;
       font: bold 108% "Consolas",monospace; text-transform: uppercase;
     }
     .icon {width: 16px; height: 16px; vertical-align: middle}

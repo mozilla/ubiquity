@@ -169,14 +169,16 @@ CmdUtils.CreateCommand({
       pbl.innerHTML = "<i>No histories match.</i>" + this.help;
       return;
     }
-    pbl.innerHTML = this._css + his.reduce(this._acc, <ol class={Name}/>);
+    pbl.innerHTML = this._css + his.reduce(this._lay, <ol class={Name}/>);
     jQuery("ol", pbl)[0].addEventListener("focus", this._recall, true);
   },
-  _acc: function(ol, h, i) {
-    var k = i < 36 ? (i+1).toString(36) : "-^@;:[],./\\"[i - 36] || "_";
+  _lay: function(ol, h, i) {
+    var k = i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
     return ol.appendChild(
-      <li><label for={i}><button id={i} accesskey={k} value={h}
-      >{k}</button><code>{h}</code></label></li>);
+      <li><nobr><label for={i}>
+        <button id={i} accesskey={k} value={h}>{k}</button>
+        <code>{h}</code>
+      </label></nobr></li>);
   },
   _say: function(txt, cb) {
     displayMessage({
@@ -207,7 +209,7 @@ CmdUtils.CreateCommand({
     li {list-style-type: none}
     label:hover {cursor: pointer; font-weight: bold}
     button {
-      margin-right: 0.4em; padding: 0; border-width: 1px;
+      padding: 0; border-width: 1px;
       font: bold 108% "Consolas",monospace; text-transform: uppercase;
     }
     ]]></style>,
