@@ -188,6 +188,8 @@ Parser.prototype = {
       for each (let arg in verb.arguments) {
 
         let thisNounType;
+        
+        mylog(arg);
 
         if (arg.nountype.constructor.name == "RegExp") {
           // If a verb's target nountype is a regexp, we'll convert it to
@@ -1858,13 +1860,11 @@ Parser.Parse.prototype = {
 
     // return with score for the time being
     // DEBUG: score is being displayed here.
-    return display + displayFinal + ' ('
-           + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
-//           + ', '
-//           + (Math.floor(this.getMaxScore() * 100)/100 || '<i>no maxScore</i>')
-//           + ', '
-//           + (Math.floor(this.scoreMultiplier*100)/100 || '<i>no multiplier</i>')
-           + ')';
+    return display + displayFinal 
+//           + ' ('
+//           + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
+//           + ')'
+    ;
 
   },
   getCompletionText: function() {
