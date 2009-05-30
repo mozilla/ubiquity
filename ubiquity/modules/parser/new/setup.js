@@ -178,7 +178,7 @@ var demoParserInterface = {
   
     $('#verblist').empty();
     for (verb in jsm.sampleVerbs) {
-      var li = $('<li><code>'+verb+'</code> (<code>'+(jsm.sampleVerbs[verb].names[lang] || jsm.sampleVerbs[verb].names['en']).join('</code>, <code>')+'</code>)</li>');
+      var li = $('<li><code>'+verb+'</code> (<code>'+jsm.sampleVerbs[verb].names.join('</code>, <code>')+'</code>)</li>');
       var ul = $('<ul></ul>');
       for each (arg in jsm.sampleVerbs[verb].arguments)
         $('<li><code>'+arg.role+'</code>: <code>'+arg.nountype+'</code>').appendTo(ul);
