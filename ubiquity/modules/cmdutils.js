@@ -1153,10 +1153,12 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 // a jQuery selector that will match an element that groups
 // result-data.  If this is not passed, Ubiquity will fall back to a
 // fragile method of pairing titles, previews and thumbnails, which
-// might not always work.  {{{options.parser.preview}}}, a jQuery
-// selector that will match the preview returned by the search
-// provider; {{{options.parser.baseurl}}}, a string that will be
-// prefixed to relative links, such that relative paths will still
+// might not always work.  {{{options.parser.preview}}} can either be a 
+// jQuery selector that will match the preview returned by the search 
+// provider or a function that will receive a single argument (the 
+// container grouping the result-data) and must return a string that will 
+// be used as preview; {{{options.parser.baseurl}}}, a string that will 
+// be prefixed to relative links, such that relative paths will still
 // work out of context. If not passed, it will be auto-generated from
 // {{{options.url}}} (and thus //may// be incorrect)
 // {{{options.parser.thumbnail}}}, a jQuery selector that will match a
@@ -1252,17 +1254,18 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                 }
                 for (var d in data) {
                   var res = {};
-                  var title = data[d][parser.title];
-                  res.title = title;
-                  var href = data[d][parser.href];
-                  res.href = href;
+                  res.title = data[d][parser.title];
+                  res.href = data[d][parser.href];
                   if (parser.preview) {
-                    var preview = data[d][parser.preview];
-                    res.preview = preview;
+                    if (typeof(parser.preview) == "function") {
+                      res.preview = parser.preview(d);
+                    }
+                    else {
+                      res.preview = data[d][parser.preview];
+                    }
                   }
                   if (parser.thumbnail) {
-                    var thumbnail = data[d][parser.thumbnail];
-                    res.thumbnail = thumbnail;
+                    res.thumbnail = data[d][parser.thumbnail];
                   }
                   results.push(res);
                 }
@@ -1276,7 +1279,12 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                     var result = {};
                     result.title = jQuery(this).find(parser.title);
                     if (parser.preview) {
-                      result.preview = jQuery(this).find(parser.preview);
+                      if (typeof(parser.preview) == "function") {
+                        result.preview = parser.preview(this);
+                      }
+                      else {
+                        result.preview = jQuery(this).find(parser.preview);
+                      }
                     }
                     if (parser.thumbnail) {
                       result.thumbnail = jQuery(this).find(parser.thumbnail);
