@@ -213,15 +213,16 @@ CmdUtils.CreateCommand({
 // bookmark current tab
 CmdUtils.CreateCommand({
   names: ["bookmark"],
-  description: "Add current document to bookmarks",
+  description: "Adds current document to bookmarks.",
   execute: function() {
-    var win = CmdUtils.getWindowInsecure();
-    var doc = CmdUtils.getDocument();
+    var {title, URL} = CmdUtils.getDocument();
     try {
-      win.sidebar.addPanel(doc.title, win.location.href, "");
-    }
-    catch (e) {
-      displayMessage("Page could not be bookmarked!" + ((e) ? " - "+e : "" ));
+      Application.bookmarks.unfiled.addBookmark(title, Utils.url(URL));
+    } catch (e) {
+      displayMessage({
+        text: "Page could not be bookmarked!",
+        exception: e,
+      });
     }
   }
 });
@@ -229,7 +230,7 @@ CmdUtils.CreateCommand({
 // print current tab
 CmdUtils.CreateCommand({
   names: ["print"],
-  description: "Print current page",
+  description: "Prints the current page.",
   execute: function() {
     var win = CmdUtils.getWindow();
     win.print();
@@ -374,13 +375,13 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: "bookmarklet|bml|js",
+  names: "bookmarklet | bml | js",
   description: "Runs a bookmarklet from your favorites.",
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
-  arguments: [{role: 'object', label: 'title', nountype: noun_type_bookmarklet}],
+  arguments: {object_title: noun_type_bookmarklet},
   execute: function(args) {
     if (args.object.data) CmdUtils.getWindow().location = args.object.data;
     else {
@@ -408,7 +409,7 @@ CmdUtils.CreateCommand({
     <li>Type to filter, then execute to undo all.</li>
     </ul>),
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
-  contributors: [{name: "powchin", homepage: "http://friendfeed.com/powchin"}],
+  contributor: {name: "powchin", homepage: "http://friendfeed.com/powchin"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
   arguments: {object: noun_arb_text},

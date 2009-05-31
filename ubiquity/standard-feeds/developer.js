@@ -113,10 +113,7 @@ CmdUtils.CreateCommand({
 
 function cmd_view_source() {
   var url = Application.activeWindow.activeTab.document.location.href;
-  url = "view-source:" + url;
-  // TODO: Should do it this way:
-  // Utils.openUrlInBrowser( "http://www.google.com" );
-  CmdUtils.getWindowInsecure().location = url;
+  Utils.openUrlInBrowser("view-source:" + url);
 }
 cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
 cmd_view_source.icon = "chrome://ubiquity/skin/icons/page_code.png";
@@ -162,15 +159,15 @@ CmdUtils.CreateCommand({
      'Scroll horizontally'],
     ].reduce(function(l, [t, d]) l.appendChild(<><dt>{t}</dt><dd>{d}</dd></>),
              <dl/>),
-  author: [n.link('http://ubigist.appjet.net/?o='+ n)
-           for each(n in ['cers', 'satyr'])].join(', '),
+  authors: [n.link('http://ubigist.appjet.net/?o='+ n)
+            for each(n in ['cers', 'satyr'])],
   license: 'MIT',
   icon: 'http://jquery.com/favicon.ico',
   execute: function ss_execute(){
     const Me = this, Key = Me.name + Me._key, Doc = CmdUtils.getDocument();
     if(Doc.getElementById(Key)) return;
 
-    XML.prettyPrinting = false;
+    XML.prettyPrinting = XML.ignoreWhitespace = false;
     var $i = jQuery(Doc.body).append(
       <div><style>
       {(Me._css +'').replace(/\$/g, Key)
@@ -178,8 +175,7 @@ CmdUtils.CreateCommand({
       </style><iframe id={Key} src={'data:text/html;charset=utf8,'+ Me._htm}
       width="0" style="left:0; top:0"/></div>+'')
       .find('#'+ Key).load(load);
-    XML.setSettings(XML.defaultSettings());
-    
+
     function load(){
       var {contentDocument: IDoc, style: IStyle} = this,
       [ebox] = jQuery('#edit', IDoc).keypress(onkey);

@@ -835,10 +835,17 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     // handle simplified syntax
     // arguments: noun
     // arguments: {object: noun, ...}
+    // arguments: {"object label": noun, ...}
     if (typeof args.suggest === "function")
       args = [{role: "object", nountype: args}];
-    else if (!Utils.isArray(args))
-      args = [{role: r, nountype: args[r]} for (r in args)];
+    else if (!Utils.isArray(args)) {
+      let a = [];
+      for (let key in args) {
+        let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
+        if (role) a.push({role: role, label: label, nountype: args[key]});
+      }
+      args = a;
+    }
 
     for (let arg in args)
       re2nt(arg, "nountype");
@@ -867,8 +874,8 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     // to base a relative URL on the current feed's URL.
     execute.previewUrl = globalObj.Utils.url(execute.previewUrl);
 
-  if (typeof options.name === "string")
-    options.name = options.name.split(/\s*\|\s{0,}/);
+  if (typeof options.names === "string")
+    options.names = options.names.split(/\s*\|\s{0,}/);
 
   globalObj["cmd_" + (options.name || options.names[0])] = execute;
 };

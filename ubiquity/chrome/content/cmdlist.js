@@ -189,14 +189,19 @@ function fillTableRowForCmd(row, cmd, className) {
   if (cmd.description)
     cmdElement.find(".description")[0].innerHTML = cmd.description;
 
-  if (cmd.author)
-    cmdElement.find(".author").append("by ", formatCommandAuthor(cmd.author));
+  var authors = cmd.author || cmd.authors;
+  if (authors)
+    cmdElement.find(".author")
+      .append("by ",
+              [formatCommandAuthor(a)
+               for each (a in [].concat(authors))].join(", "));
 
-  if (cmd.contributors)
+  var contributors = cmd.contributor || cmd.contributors;
+  if (contributors)
     cmdElement.find(".contributors")
       .append("contributed by ",
               [formatCommandAuthor(c)
-               for each (c in cmd.contributors)].join(", "));
+               for each (c in [].concat(contributors))].join(", "));
 
   if(cmd.license)
     cmdElement.find(".license").text(" - licensed as " + cmd.license);
