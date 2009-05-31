@@ -166,28 +166,26 @@ Ubiquity.prototype = {
   __onKeyup: function __onKeyup(event) {
     this.__lastKeyEvent = event;
 
-    var keyCode = event.keyCode;
+    var {keyCode} = event;
 
-    if (keyCode == this.__KEYCODE_UP ||
-        keyCode == this.__KEYCODE_DOWN ||
-        keyCode == this.__KEYCODE_TAB) {
-    } else if (keyCode >= this.__KEYCODE_1 &&
-               keyCode < this.__KEYCODE_1 + 10 &&
-               event.altKey && event.ctrlKey) {
-      this.__cmdManager.activateAccessKey(keyCode - this.__KEYCODE_1 + 1);
-    } else
+    if (keyCode !== this.__KEYCODE_UP &&
+        keyCode !== this.__KEYCODE_DOWN &&
+        keyCode !== this.__KEYCODE_TAB &&
+        !(event.ctrlKey && event.altKey))
       this.__processInput();
   },
 
    __onKeyPress: function(event) {
-     var keyCode = event.keyCode;
-
-     if (keyCode == this.__KEYCODE_ENTER) {
+     if (event.keyCode === this.__KEYCODE_ENTER) {
        this.__forceProcessInput();
        if (this.__cmdManager.hasSuggestions()) {
          this.__needsToExecute = true;
        }
        this.__msgPanel.hidePopup();
+     } else if (event.ctrlKey && event.altKey) {
+       this.__cmdManager.activateAccessKey(event.which);
+       event.preventDefault();
+       event.stopPropagation();
      }
    },
 

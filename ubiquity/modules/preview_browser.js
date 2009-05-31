@@ -38,44 +38,25 @@ var EXPORTED_SYMBOLS = ["PreviewBrowser"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-function makePreviewBrowser(browser, url) {
-  var container = browser.parentNode;
-  var width = 490;
-  var height = 500;
-
-  browser.setAttribute("src", url);
-  browser.setAttribute("disablesecurity", true);
-  browser.setAttribute("type", "content");
-  browser.setAttribute("width", width);
-  browser.setAttribute("height", height);
-
-  browser.addEventListener(
-    "load",
-    function bindResize(e) {
-      for each (var h in ["load", "DOMSubtreeModified"])
-        this.contentDocument.addEventListener(h, resize, true);
-    },
-    true
-      );
-
-  function resize(e) {
-    var me = this;
-    Utils.clearTimeout(resize.tid);
-    resize.tid = Utils.setTimeout(function resizeDelayed() {
-      container.style.height = me.height + "px";
-    }, 42);
-  }
-
-  return browser;
-}
-
 function PreviewBrowser(browser, defaultUrl) {
   this.__isActive = false;
   this.__defaultUrl = defaultUrl;
   this.__queuedPreview = null;
-  this.__previewBrowser = makePreviewBrowser(browser, defaultUrl);
+  this.__previewBrowser = browser;
   this.__previewBrowserCreatedCallback = null;
   this.__previewBrowserUrlLoadedCallback = null;
+
+  function resizeContainer(e) {
+    Utils.clearTimeout(resizeContainer.tid);
+    resizeContainer.tid = Utils.setTimeout(function resizeDelayed(me) {
+      browser.parentNode.style.height = me.height + "px";
+    }, 16, this);
+  }
+  browser.addEventListener("load", function bindResize(e) {
+    for each (var h in ["load", "DOMSubtreeModified"])
+      this.contentDocument.addEventListener(h, resizeContainer, true);
+  }, true);
+  browser.setAttribute("src", defaultUrl);
 }
 
 PreviewBrowser.prototype = {
@@ -139,21 +120,24 @@ PreviewBrowser.prototype = {
     }
   },
 
-  activateAccessKey: function PB_activateAccessKey(number) {
-    if (this.__previewBrowser &&
-        this.__previewBrowser.contentDocument) {
-      var doc = this.__previewBrowser.contentDocument;
-      for (var i = 0; i < doc.links.length; i++) {
-        var elem = doc.links[i];
-        if (elem.getAttribute("accesskey") == number) {
-          var evt = doc.createEvent("MouseEvents");
-          evt.initMouseEvent("click", true, true, doc.defaultView,
-                             0, 0, 0, 0, 0, false, false, false, false, 0,
-                             null);
-          elem.dispatchEvent(evt);
-          return;
-        }
-      }
+  activateAccessKey: function PB_activateAccessKey(code) {
+    var doc = this.__previewBrowser.contentDocument;
+    if (!doc) return;
+    var win = doc.defaultView;
+    var key = String.fromCharCode(code).toLowerCase();
+    var xpr = doc.evaluate('/html/body//*[@accesskey]', doc, null,
+                           win.XPathResult.ORDERED_NODE_ITERATOR_TYPE , null);
+    for (let lmn; (lmn = xpr.iterateNext());) {
+      if (lmn.getAttribute("accesskey").toLowerCase() !== key) continue;
+      if (/^a$/i.test(lmn.nodeName)) {
+        let evt = doc.createEvent("MouseEvents");
+        evt.initMouseEvent("click", true, true, win,
+                           0, 0, 0, 0, 0, false, false, false, false, 0,
+                           null);
+        lmn.dispatchEvent(evt);
+      } else
+        lmn.focus();
+      break;
     }
   },
 
@@ -202,10 +186,6 @@ PreviewBrowser.prototype = {
   },
 
   finalize: function finalize() {
-    this.__queuedPreview = null;
-    this.__previewBrowser = null;
-    this.__previewBrowserCreatedCallback = null;
-    this.__previewBrowserUrlLoadedCallback = null;
-    this.__containingNode = null;
+    for (var key in this) delete this[key];
   }
 };
