@@ -715,8 +715,9 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // of the primary argument.  The value of the property must be either a
 // noun type (see
 // https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Nountypes_Reference
-// ) which defines what type of values are valid for the argument, or
-// a regular expression that filters what the argument can consist of.
+// ) which defines what type of values are valid for the argument,
+// a regular expression that filters what the argument can consist of,
+// , a dictionary of keys and values, or simply an array of strings.
 //
 // {{{ options.modifiers }}} Defines any number of secondary arguments
 // of the command, a.k.a. indirect objects of the verb.  A dictionary
@@ -788,6 +789,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // based off the URL from which the feed is being retrieved.
 
 CmdUtils.CreateCommand = function CreateCommand(options) {
+  var me = this;
   var globalObj = this.__globalObject;
   var {displayMessage} = globalObj;
   var execute;
@@ -808,34 +810,46 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       displayMessage("No action defined.");
     };
 
-  var {nounTypeFromRegExp} = this;
-  var {toString} = Object.prototype;
-
-  function re2nt(obj, key) {
-    if (toString.call(obj[key]) === "[object RegExp]")
-      obj[key] = nounTypeFromRegExp(obj[key]);
+  function toNounType(obj, key) {
+    var val = obj[key];
+    if (typeof val !== "object") return;
+    obj[key] = (
+      Object.prototype.toString.call(val) === "[object RegExp]"
+      ? me.nounTypeFromRegExp(val) :
+      typeof val.suggest !== "function"
+      ? me.nounTypeFromDictionary(val) :
+      Utils.isArray(val)
+      ? me.NounType(val) :
+      val);
   }
 
   if (options.takes) {
     execute.DOLabel = getKey(options.takes);
     if (execute.DOLabel) {
       execute.DOType = options.takes[execute.DOLabel];
-      re2nt(execute, "DOType");
+      toNounType(execute, "DOType");
     }
   }
 
   if (options.modifiers) {
     let {modifiers} = options;
     for (let label in modifiers)
-      re2nt(modifiers, label);
+      toNounType(modifiers, label);
   }
 
-  if (options.arguments) {
-    let args = options.arguments;
+  // Reserved keywords that shouldn't be added to the cmd function.
+  var RESERVED = {takes: 1, execute: 1, name: 1};
+  // Add all other attributes of options to the cmd function.
+  for (var key in options)
+    if (!(key in RESERVED))
+      execute[key] = options[key];
+
+  if (execute.arguments) {
+    let args = execute.arguments;
     // handle simplified syntax
     // arguments: noun
-    // arguments: {object: noun, ...}
-    // arguments: {"object label": noun, ...}
+    // arguments: {role: noun, ...}
+    // arguments: {"role label": noun, ...}
     if (typeof args.suggest === "function")
       args = [{role: "object", nountype: args}];
     else if (!Utils.isArray(args)) {
@@ -847,18 +861,11 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       args = a;
     }
 
-    for (let arg in args)
-      re2nt(arg, "nountype");
+    for each (let arg in args)
+      toNounType(arg, "nountype");
 
-    options.arguments = args;
+    execute.arguments = args;
   }
-
-  // Reserved keywords that shouldn't be added to the cmd function.
-  var RESERVED = {takes: 1, execute: 1, name: 1};
-  // Add all other attributes of options to the cmd function.
-  for (var key in options)
-    if (!(key in RESERVED))
-      execute[key] = options[key];
 
   // If preview is a string, wrap it in a function that does
   // what you'd expect it to.
@@ -874,10 +881,13 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     // to base a relative URL on the current feed's URL.
     execute.previewUrl = globalObj.Utils.url(execute.previewUrl);
 
-  if (typeof options.names === "string")
-    options.names = options.names.split(/\s*\|\s{0,}/);
+  if (typeof execute.names === "string")
+    execute.names = execute.names.split(/\s*\|\s{0,}/);
 
-  globalObj["cmd_" + (options.name || options.names[0])] = execute;
+  if (Utils.isArray(execute.names))
+    execute.synonyms = execute.names.slice(1);
+
+  globalObj["cmd_" + (options.name || execute.names[0])] = execute;
 };
 
 // -----------------------------------------------------------------

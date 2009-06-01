@@ -906,8 +906,6 @@ NLParser1.Verb.prototype = {
         dump("WARNING: " + this._name +
              " apparently follows the (now defunct) Parser 1.5 format\n");
 
-      // copy over the extra names
-      this._synonyms = cmd.names.slice(1);
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
       if (hasKey(cmd.arguments)) {
