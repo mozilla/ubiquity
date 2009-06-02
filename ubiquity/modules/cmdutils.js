@@ -75,35 +75,8 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 //
 // {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
 
-CmdUtils.log = function log(what) {
-  var args = Array.prototype.slice.call(arguments);
-  if(args.length == 0)
-    return;
-
-  var logPrefix = "Ubiquity: ";
-  var browserWindow = Utils.currentChromeWindow;
-
-  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
-    args.unshift(logPrefix);
-    browserWindow.Firebug.Console.logFormatted(args);
-  } else {
-    var logMessage = "";
-    if(typeof args[0] == "string") {
-      var formatStr = args.shift();
-      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
-        formatStr = formatStr.replace("%s", "" + args.shift());
-      }
-      args.unshift(formatStr);
-    }
-    args.forEach(function(arg) {
-      if(typeof arg == "object") {
-        logMessage += " " + Utils.encodeJson(arg) + " ";
-      } else {
-        logMessage += arg;
-      }
-    });
-    Application.console.log(logPrefix + logMessage);
-  }
+CmdUtils.log = function log() {
+  Utils.log.apply(Utils, arguments);
 };
 
 // ** {{{ CmdUtils.getHtmlSelection(context) }}} **
@@ -302,21 +275,10 @@ CmdUtils.injectHtml = function injectHtml( html ) {
 // This function places the passed-in text into the OS's clipboard.
 //
 // {{{text}}} is a plaintext string that will be put into the clipboard.
-//
-// Function based on:
-// http://ntt.cc/2008/01/19/copy-paste-javascript-codes-ie-firefox-opera.html
+
 CmdUtils.copyToClipboard = function copyToClipboard(text){
-   var clipboard = Cc['@mozilla.org/widget/clipboard;1'].
-                   createInstance(Ci.nsIClipboard);
-   var transferArea = Cc['@mozilla.org/widget/transferable;1'].
-                      createInstance(Ci.nsITransferable);
-   var string = Cc["@mozilla.org/supports-string;1"].
-                createInstance(Ci.nsISupportsString);
-   transferArea.addDataFlavor('text/unicode');
-   string.data = text;
-   transferArea.setTransferData("text/unicode", string, text.length * 2);
-   clipboard.setData(transferArea, null, Ci.nsIClipboard.kGlobalClipboard);
-}
+  Utils.clipboard.text = text;
+};
 
 
 // ** {{{ CmdUtils.injectJavascript(src, callback) }}} **
@@ -387,7 +349,7 @@ CmdUtils.onPageLoad = function onPageLoad(callback) {
 // the chromeWindow associated with it.
 
 CmdUtils.onUbiquityLoad = function onUbiquityLoad(callback) {
-  this.__globalObject.ubiqLoadFuncs.push(callback);
+  this.__globalObject.ubiquityLoadFuncs.push(callback);
 };
 
 // ** {{{ CmdUtils.setLastResult(result) }}} **
@@ -560,9 +522,7 @@ CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
 
   var data = thumbnail.toDataURL("image/jpeg", "quality=80");
   if (options.callback) {
-    // TODO: imgData appears not to be defined anywhere.  Should this
-    // say 'data' instead?
-    options.callback( imgData );
+    options.callback(data);
   } else {
     return data;
   }

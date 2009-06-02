@@ -58,6 +58,51 @@ var Utils = {
   }
 };
 
+// ** {{{ Utils.log(a, b, c, ...) }}} **
+//
+// One of the most useful functions to know both for development
+// and debugging. This logging function takes
+// an arbitrary number of arguments and will log them to the most
+// appropriate output. If you have Firebug, the output will go to its
+// console. Otherwise, the output will be routed to the Javascript
+// Console.
+//
+// {{{Utils.log}}} implements smart pretty print, so you
+// can use it for inspecting arrays and objects.
+//
+// {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
+
+Utils.log = function log(what) {
+  var args = Array.prototype.slice.call(arguments);
+  if(args.length == 0)
+    return;
+
+  var logPrefix = "Ubiquity: ";
+  var browserWindow = Utils.currentChromeWindow;
+
+  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
+    args.unshift(logPrefix);
+    browserWindow.Firebug.Console.logFormatted(args);
+  } else {
+    var logMessage = "";
+    if(typeof args[0] == "string") {
+      var formatStr = args.shift();
+      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
+        formatStr = formatStr.replace("%s", "" + args.shift());
+      }
+      args.unshift(formatStr);
+    }
+    args.forEach(function(arg) {
+      if(typeof arg == "object") {
+        logMessage += " " + Utils.encodeJson(arg) + " ";
+      } else {
+        logMessage += arg;
+      }
+    });
+    Application.console.log(logPrefix + logMessage);
+  }
+};
+
 // Keep a reference to the global object, as certain utility functions
 // need it.
 Utils.__globalObject = this;
@@ -655,6 +700,33 @@ Utils.tabs = {
   reload: function tabs_reload(matcher) {
     for each (let tab in Utils.tabs.search(matcher))
       tab._browser.reload();
+  },
+};
+
+// == {{{ Utils.clipboard }}} ==
+//
+// This object contains functions related to clipboard.
+
+Utils.clipboard = {
+  // ** {{{ Utils.clipboard.text }}} **
+  //
+  // Gets or sets the clipboard text.
+
+  get text() {
+    var clip = (Cc["@mozilla.org/widget/clipboard;1"]
+                .getService(Ci.nsIClipboard));
+    var trans = (Cc["@mozilla.org/widget/transferable;1"]
+                 .createInstance(Ci.nsITransferable));
+    trans.addDataFlavor("text/unicode");
+    clip.getData(trans, clip.kGlobalClipboard);
+    var ss = {};
+    trans.getTransferData("text/unicode", ss, {});
+    return ss.value.QueryInterface(Ci.nsISupportsString).toString();
+  },
+  set text(str) {
+    (Cc["@mozilla.org/widget/clipboardhelper;1"]
+     .getService(Ci.nsIClipboardHelper)
+     .copyString(str));
   },
 };
 
