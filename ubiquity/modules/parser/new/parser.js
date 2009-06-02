@@ -189,7 +189,7 @@ Parser.prototype = {
 
         let thisNounType;
         
-        mylog(arg);
+        //mylog(arg);
 
         if (arg.nountype.constructor.name == "RegExp") {
           // If a verb's target nountype is a regexp, we'll convert it to
