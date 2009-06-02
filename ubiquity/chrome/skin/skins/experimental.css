@@ -111,6 +111,8 @@
 }
 
 /* below are the only Parser 2 debug changes*/
+
+/*
 .verb {
   border-bottom: 2px blue solid;
 }
@@ -130,6 +132,12 @@
 
 .inactive {
   color: #666;
+}*/
+
+
+/* parser 2 update */
+.prefix, .verb {
+  font-weight: bold;
 }
 
 /*end Parser 2 version additions*/
@@ -174,9 +182,9 @@
   height: 16px;
 }
 
-.object, .argument {
+/*.object, .argument {
   font-weight: bold;
-}
+}*/
 
 .needarg {
   font-style: oblique;
