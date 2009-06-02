@@ -157,14 +157,23 @@ const NOUN_PREFIX = "noun_";
 
 function makeCmdForObj(sandbox, objName) {
   var cmdName = objName.substr(CMD_PREFIX.length);
+  var originalCmdName = cmdName;
   cmdName = cmdName.replace(/_/g, "-");
   var cmdFunc = sandbox[objName];
 
+  var setCommandContext;
+
+  (function(){
+    Components.utils.import("resource://ubiquity/modules/localization_utils.js");
+    setCommandContext = LocalizationUtils.setCommandContext;
+  })()
+    
   var cmd = {
     __proto__: cmdFunc,
     name: cmdName,
     execute: function CS_execute(context, directObject, modifiers) {
       sandbox.context = context;
+      setCommandContext(originalCmdName);
       return cmdFunc.call(cmd, directObject, modifiers);
     }
   };
@@ -173,6 +182,7 @@ function makeCmdForObj(sandbox, objName) {
     cmd.preview = function CS_preview(context, previewBlock, directObject,
                                       modifiers) {
       sandbox.context = context;
+      setCommandContext(originalCmdName);
       return cmdFunc.preview.call(cmd, previewBlock, directObject,
                                   modifiers);
     };
@@ -248,7 +258,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
       for (var objName in sandbox) {
         if (objName.indexOf(CMD_PREFIX) == 0) {
-          var cmd = makeCmdForObj(sandbox, objName);
+          var cmd = makeCmdForObj(sandbox, objName, feedInfo.uri);
 
           this.commands[cmd.name] = cmd;
         }
@@ -344,6 +354,7 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   var headerCodeSources = [
     new LocalUriCodeSource(basePartsUri + "header/utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/localization_utils.js"),
     //new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
     new LocalUriCodeSource(basePartsUri + "header/deprecated.js"),
   ];
