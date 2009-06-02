@@ -400,7 +400,7 @@ function ubiqTutorialStage16() {
   let stage16Html = "<h2>Part 5 of 6:"
   + " Selecting and Executing</h2>"
   + "<p>If you select text on a web page before summoning Ubiquity, then "
-  + "you can have your commands do things to the selected text.</p></p>Let's see"
+  + "you can have your commands do things to the selected text.</p><p>Let's see"
   + " an example. Use the mouse to <b>select the Japanese text</b> below."
   + " Then <b>summon Ubiquity</b>.</p>";
 
