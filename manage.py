@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+# TODO: We need to re-add the 'build-components' target, so we can build
+# the optional xpcom binary components.
+
 import os
 import sys
 
