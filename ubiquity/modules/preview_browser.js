@@ -39,6 +39,9 @@ var EXPORTED_SYMBOLS = ["PreviewBrowser"];
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function PreviewBrowser(browser, defaultUrl) {
+
+  browser.setAttribute("type", "content");
+
   this.__isActive = false;
   this.__defaultUrl = defaultUrl;
   this.__queuedPreview = null;
