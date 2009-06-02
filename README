@@ -11,7 +11,7 @@ If you have a separate profile that you'd prefer to install the
 extension under, such as 'testing', you can add that as an optional
 parameter:
 
-  python manage.py install testing
+  python manage.py install --profile=testing
 
 Using Ubiquity
 --------------
@@ -35,7 +35,7 @@ Building an XPI
 
 To build an XPI for Ubiquity, just run:
 
-  python manage.py build-xpi
+  python manage.py xpi
 
 This will create an XPI with the name "ubiquity-<version>.xpi", where
 "<version>" is taken from the contents of the "em:version" element in the
