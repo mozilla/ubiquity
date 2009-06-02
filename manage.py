@@ -230,4 +230,36 @@ def run(options):
 def test(options):
     """Run test suite."""
 
-    raise NotImplementedError("Need to implement this!")
+    remote = start_jsbridge(options)
+    
+    import jsbridge
+
+    MAX_TIMEOUT = 25.0
+
+    result = {'is_successful' : False}
+    is_done = threading.Event()
+
+    def listener(event_name, obj):
+        if event_name == 'ubiquity:success':
+            result['is_successful'] = obj
+            is_done.set()
+        
+    remote.back_channel.add_global_listener(listener)
+
+    uri = 'resource://ubiquity/tests/systemtests.js'
+    tests = jsbridge.JSObject(
+        remote.bridge,
+        "Components.utils.import('%s')" % uri
+        )
+    tests.start()
+
+    is_done.wait(MAX_TIMEOUT)
+    remote.runner.stop()
+
+    if result['is_successful']:
+        print "Success!"
+    else:
+        print "Failure."
+        if not is_done.isSet():
+            print "Timeout occurred."
+        sys.exit(-1)
