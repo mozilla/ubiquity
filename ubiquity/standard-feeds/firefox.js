@@ -309,8 +309,7 @@ CmdUtils.CreateCommand({
     if (args.object.text) {
       replacement = args.object.text;
     }
-    pBlock.innerHTML = "Zooms the Firefox window to " + replacement
-                       + " of its normal size.";
+    pBlock.innerHTML = _("Zooms the Firefox window to %S of its normal size.",[replacement]);
   },
   execute: function(args) {
     if (args.object.data) {
