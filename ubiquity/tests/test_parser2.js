@@ -190,6 +190,44 @@ function testParserTwoParseWithModifier() {
   this.assert( atm.passed, atm.errorMsg );
 }
 
+function testSimplifiedParserTwoApi() {
+  var dogGotWashed = null;
+  var dogGotWashedWith = null;
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
+				"beagle", "bulldog", "husky"]);
+  var washingObj = new NounUtils.NounType( "washing object",
+					  ["sponge", "hose", "spork",
+					  "bathtub", "fire hose"]);
+  var cmd_wash = {
+    execute: function(context, args) {
+      dogGotWashed = args.object.text;
+      dogGotWashedWith = args.instrument.text;
+    },
+    names: ["wash"],
+    arguments: { object: dog, instrument: washingObj }
+  };
+
+  var inputWords = "wash pood with sp";
+  var atm = new AsyncTestManager();
+
+  var testFunc = function(completions) {
+    atm.assert( completions.length == 2, "Should be 2 completions" );
+    completions[0].execute();
+    atm.assert( dogGotWashed == "poodle");
+    atm.assert( dogGotWashedWith == "sponge");
+    completions[1].execute();
+    atm.assert( dogGotWashed == "poodle");
+    atm.assert( dogGotWashedWith == "spork");
+    atm.finishTest();
+  };
+
+  getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
+                       testFunc);
+  atm.waitForTestToFinish();
+  this.assert( atm.passed, atm.errorMsg );
+
+}
+
 /*function testParserTwoInternationalization() {
 
 }*/

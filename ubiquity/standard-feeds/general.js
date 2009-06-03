@@ -135,7 +135,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["calculate"],
-  arguments: /^[\d.+\-*\/^%~(, )]+$/,
+  arguments: [{ role: "object", nountype: /^[\d.+\-*\/^%~(, )]+$/}],
   icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
@@ -397,7 +397,7 @@ function translateTo(text, langCodePair, callback, pblock) {
     langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
   };
   function onsuccess(data) {
-  
+
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
     // this would be to split up the request into multiple chunks.
@@ -426,7 +426,7 @@ function translateTo(text, langCodePair, callback, pblock) {
     }
     callback(translatedText);
   }
-  
+
   if (pblock) CmdUtils.previewGet(pblock, url, params, onsuccess, "json");
   else jQuery.get(url, params, onsuccess, "json");
 }
