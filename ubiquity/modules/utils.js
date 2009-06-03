@@ -521,42 +521,6 @@ Utils.isArray = function isArray(val) {
           (val.constructor || 0).name === "Array");
 }
 
-// == {{{ Utils.History }}} ==
-//
-// This object contains functions that make it easy to access
-// information about the user's browsing history.
-
-Utils.History = {
-
-  // ** {{{ Utils.History.visitsToDomain() }}} **
-  //
-  // This function returns the number of times the user has visited
-  // the given domain name.
-
-  visitsToDomain : function visitsToDomain( domain ) {
-
-      var hs = Cc["@mozilla.org/browser/nav-history-service;1"].
-               getService(Ci.nsINavHistoryService);
-
-      var query = hs.getNewQuery();
-      var options = hs.getNewQueryOptions();
-
-      options.maxResults = 10;
-      query.domain = domain;
-
-      // execute query
-      var result = hs.executeQuery(query, options );
-      var root = result.root;
-      root.containerOpen = true;
-      var count = 0;
-      for( var i=0; i < root.childCount; ++i ) {
-        place = root.getChild( i );
-        count += place.accessCount;
-      }
-    return count;
-  }
-};
-
 // ** {{{ Utils.computeCryptoHash() }}} **
 //
 // Computes and returns a cryptographic hash for a string given an
@@ -730,83 +694,119 @@ Utils.clipboard = {
   },
 };
 
+// == {{{ Utils.history }}} ==
+//
+// This object contains functions that make it easy to access
+// information about the user's browsing history.
+
+Utils.history = {
+  // ** {{{ Utils.history.visitsToDomain() }}} **
+  //
+  // This function returns the number of times the user has visited
+  // the given domain name.
+  //
+  // {domain} is the domain string.
+
+  visitsToDomain: function history_visitsToDomain(domain) {
+    var hs = (Cc["@mozilla.org/browser/nav-history-service;1"]
+              .getService(Ci.nsINavHistoryService));
+    var query = hs.getNewQuery();
+    var options = hs.getNewQueryOptions();
+    query.domain = domain;
+    options.maxResults = 10;
+    // execute query
+    var count = 0;
+    var {root} = hs.executeQuery(query, options);
+    root.containerOpen = true;
+    for (let i = root.childCount; i--;)
+      count += root.getChild(i).accessCount;
+    root.containerOpen = false;
+    return count;
+  },
+
+  // ** {{{ Utils.history.search() }}} **
+  //
+  // Searches the pages the user has visited.
+  // Given a query string and a callback function, passes an array of results
+  // (objects with {{{url}}}, {{{title}}} and {{{favicon}}} properties)
+  // to the callback.
+  //
+  // {{{query}}} is the query string.
+  //
+  // {{{callback}}} is the function called when the search is complete.
+  //
+  // {{{maxResults = 2147483647}}} is an optinal integer specifying
+  // the maximum number of results to return.
+
+  search: function history_search(query, callback, maxResults) {
+    var ctrlr = this.__createController(function onComplete() {
+      var results = [];
+      var max = Math.min(ctrlr.matchCount, maxResults || -1 >>> 1);
+      for (let i = 0; i < max; ++i) {
+        let url = ctrlr.getValueAt(i);
+        results.push({
+          url: url,
+          title: ctrlr.getCommentAt(i) || url,
+          favicon: ctrlr.getImageAt(i),
+        });
+      }
+      callback(results);
+    });
+    ctrlr.startSearch(query);
+  },
+
+  __createController: function createController(onSearchComplete) {
+    var controller = (Cc["@mozilla.org/autocomplete/controller;1"]
+                      .getService(Ci.nsIAutoCompleteController));
+    var input = new AutoCompleteInput(["history"]);
+    input.onSearchComplete = onSearchComplete;
+    controller.input = input;
+    return controller;
+  },
+};
+
 function AutoCompleteInput(aSearches) {
-    this.searches = aSearches;
+  this.searches = aSearches;
 }
 
 AutoCompleteInput.prototype = {
-    constructor: AutoCompleteInput,
+  constructor: AutoCompleteInput,
 
-    searches: null,
+  searches: null,
 
-    minResultsForPopup: 0,
-    timeout: 10,
-    searchParam: "",
-    textValue: "",
-    disableAutoComplete: false,
-    completeDefaultIndex: false,
+  minResultsForPopup: 0,
+  timeout: 10,
+  searchParam: "",
+  textValue: "",
+  disableAutoComplete: false,
+  completeDefaultIndex: false,
 
-    get searchCount() {
-        return this.searches.length;
-    },
+  get searchCount() {
+    return this.searches.length;
+  },
 
-    getSearchAt: function(aIndex) {
-        return this.searches[aIndex];
-    },
+  getSearchAt: function(aIndex) {
+    return this.searches[aIndex];
+  },
 
-    onSearchBegin: function() {},
-    onSearchComplete: function() {},
+  onSearchBegin: function() {},
+  onSearchComplete: function() {},
 
-    popupOpen: false,
-
-    popup: {
-        setSelectedIndex: function(aIndex) {},
-        invalidate: function() {},
-
-        // nsISupports implementation
-        QueryInterface: function(iid) {
-            if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompletePopup)) return this;
-
-            throw Components.results.NS_ERROR_NO_INTERFACE;
-        }
-    },
-
-    // nsISupports implementation
-    QueryInterface: function(iid) {
-        if (iid.equals(Ci.nsISupports) || iid.equals(Ci.nsIAutoCompleteInput)) return this;
-
-        throw Components.results.NS_ERROR_NO_INTERFACE;
-    }
+  popupOpen: false,
+  
+  popup: {
+    setSelectedIndex: function(aIndex) {},
+    invalidate: function() {},
+  },
 };
 
-Utils.history = {
-
-     __createController : function createController(onSearchComplete){
-          var controller = Components.classes["@mozilla.org/autocomplete/controller;1"].getService(Components.interfaces.nsIAutoCompleteController);
-
-          var input = new AutoCompleteInput(["history"]);
-          input.onSearchComplete = function(){
-             onSearchComplete(controller);
-          };
-          controller.input = input;
-          return controller;
-     },
-
-     search : function searchHistory(query, maxResults, callback){
-
-        var ctrlr = this.__createController(function(controller){
-           for (var i = 0; i < controller.matchCount; i++) {
-              var url = controller.getValueAt(i);
-              var title = controller.getCommentAt(i);
-              if (title.length == 0) { title = url; }
-              var favicon = controller.getImageAt(i);
-
-              callback({url : url, title : title, favicon : favicon })
-           }
-        });
-
-        ctrlr.startSearch(query);
-     }
+// nsISupports implementation
+AutoCompleteInput.prototype.popup.QueryInterface =
+AutoCompleteInput.prototype.QueryInterface = function(iid) {
+  if (iid.equals(Ci.nsISupports) ||
+      iid.equals(Ci.nsIAutoCompleteInput))
+    return this;
+  throw Components.results.NS_ERROR_NO_INTERFACE;
 };
 
 // ** {{{ Utils.appName }}} **

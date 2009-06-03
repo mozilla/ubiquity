@@ -55,7 +55,8 @@ var noun_arb_text = {
   // hack to import feed-specific globals into this module
   loadGlobals: function(source) {
     var target = (function() this)();
-    for each (let p in ["Utils", "CmdUtils", "jQuery", "Date"])
+    for each (let p in ["Utils", "CmdUtils",
+                        "Application", "jQuery", "Date"])
       target[p] = source[p];
     this.loadGlobals = function(){};
   }
@@ -183,26 +184,46 @@ var noun_type_tag = {
   }
 };
 
+var noun_type_awesomebar = {
+  name: "query",
+  rankLast: true,
+  suggest: function(text, html, callback, selectedIndices) {
+    if (!text) return [];
+    Utils.history.search(text, function(results) {
+      if (results.length)
+        callback([CmdUtils.makeSugg(r.title, null, r, .9)
+                  for each (r in results)]);
+    }, CmdUtils.maxSuggestions);
+    return [CmdUtils.makeSugg(text, html,
+                              {url: text, title: text, favicon: ""},
+                              .7, selectedIndices)];
+  }
+};
+
 var noun_type_url = {
   /* TODO longterm, noun_type_url could suggest URLs you've visited before, by querying
    * the awesomebar's data source
    */
-  name : "url",
+  name: "url",
   rankLast: true,
-  suggest: function(fragment) {
-    var regexp = /^[A-Za-z][A-Za-z\d.+-]:\/\/(?:\w+:?\w*@)?(\S+)(?::\d+)?\/?/;
+  default: function()(
+    CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec)),
+  suggest: function(text, html, callback, selectionIndices) {
     // Magic words "page" or "url" result in the URL of the current page
-    if (fragment == "page" || fragment == "url") {
-      var url = Application.activeWindow.activeTab.document.URL;
-      return [CmdUtils.makeSugg(url)];
+    //if (!selectionIndices && /^\s*(?:page|url)\s*$/.test(text))
+    //  return [this.default()];
+    var url = text;
+    if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
+      url = "http://" + url;
+      if (selectionIndices)
+        selectionIndices = [7, 7 + url.length];
     }
-    // If it's a valid URL, suggest it back
-    if (regexp.test(fragment)) {
-      return [CmdUtils.makeSugg(fragment)];
-    } else if (regexp.test( "http://" + fragment ) ) {
-      return [CmdUtils.makeSugg("http://" + fragment)];
-    }
-    return [];
+    Utils.history.search(text, function(results) {
+      if (results.length)
+        callback([CmdUtils.makeSugg(r.url, null, null, .9)
+                  for each (r in results)]);
+    }, CmdUtils.maxSuggestions);
+    return [CmdUtils.makeSugg(url, null, null, .7, selectionIndices)];
   }
 };
 
@@ -445,24 +466,6 @@ var noun_type_async_address = {
   }
 };
 */
-/*
- * Noun type for searching links on the awesomebar database.
- * Right now, the suggestion returned is:
- *  -- text: title of the url
- *  -- html: the link
- *  -- data: the favicon
- *
- *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html)
-
-var noun_type_awesomebar = {
-  name: "url",
-  suggest: function(part, html, callback){
-     Utils.history.search(part, CmdUtils.maxSuggestions, function(result){
-       callback(CmdUtils.makeSugg(result.url, result.title, result.favicon));
-     });
-  }
-};
- */
 
 var noun_type_contact = {
   name: "contact",

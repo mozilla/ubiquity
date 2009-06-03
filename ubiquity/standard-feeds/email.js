@@ -81,26 +81,20 @@ function detectEmailProvider() {
     "mail.yahoo.com":0,
     "mail.aol.com":0,
     "hotmail.com":0,
-  }
-
-  var max = { domain: "", hits: 0 };
-  totalHits = 0;
-
-  for(var domain in domains){
-    hits = Utils.History.visitsToDomain( domain );
+  };
+  var max = {domain: "", hits: 0};
+  var totalHits = 0;
+  for (var domain in domains) {
+    var hits = Utils.history.visitsToDomain(domain);
     domains[domain] = hits;
     totalHits += hits;
-
     if( max.hits <= hits ) {
       max.domain = domain;
       max.hits = hits;
     }
-
   }
 
-  max.ratio = max.hits / totalHits;
-
-  if( max.ratio > .75 )
+  if (max.hits / totalHits > .75)
     return max.domain;
   return null;
 }
@@ -123,7 +117,7 @@ function findGmailTab() {
 }
 
 CmdUtils.CreateCommand({
-  names: ["email", "mail"], 
+  names: ["email", "mail", "gmail.com"],
   arguments: [
     {role: "object", label: "message", nountype: noun_arb_text},
     {role: "goal", nountype: noun_type_contact}

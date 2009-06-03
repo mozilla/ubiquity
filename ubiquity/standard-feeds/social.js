@@ -118,30 +118,24 @@ CmdUtils.CreateCommand({
   author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
   license: "MPL,GPL",
   execute: function() {
-    var doc = CmdUtils.getDocument();
-    var sel = doc.getSelection().substring(0,375);
-
-
-    var params = Utils.paramsToString({
-      phase: "2",
-      url: doc.location,
-      title: doc.title,
-      bodytext: sel
-    });
-
-    story_url='http://digg.com/submit' + params;
-    Utils.openUrlInBrowser(story_url);
-
+    var win = CmdUtils.getWindow();
+    var sel = win.getSelection().toString().slice(0, 375);
+    Utils.openUrlInBrowser("http://digg.com/submit" +
+                           Utils.paramsToString({
+                             phase: "2",
+                             url: win.location.href,
+                             title: win.document.title,
+                             bodytext: sel,
+                           }));
   },
   preview: function(pblock) {
-
-    var doc = CmdUtils.getDocument();
-    var selected_text= doc.getSelection();
+    var win = CmdUtils.getWindow();
+    var selected_text = win.getSelection() + "";
     var api_url='http://services.digg.com/stories';
 
     var params = Utils.paramsToString({
       appkey: "http://www.gialloporpora.netsons.org",
-      link: doc.location
+      link: win.location.href,
     });
 
     var html= 'Submit or digg this page. Checking if this page has already been submitted...';
@@ -177,27 +171,37 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "tinyurl",
-  takes: {"url to shorten": noun_type_url},
+  names: ["tinyurl"],
+  arguments: noun_type_url,
   icon: "http://tinyurl.com/favicon.ico",
-  description: "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyUrl</a>",
-  preview: function( pblock, urlToShorten ){
-    pblock.innerHTML = "Replaces the selected URL with a TinyUrl.";
-    var baseUrl = "http://tinyurl.com/api-create.php?url=";
-    pblock.innerHTML = "Replaces the selected URL with ",
-    jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
-      if(tinyUrl != "Error") pblock.innerHTML += tinyUrl;
+  description: ("Replaces the selected URL with a " +
+                "<a href=\"http://www.tinyurl.com\">TinyURL</a>."),
+  preview: function(pblock, {object: {text}}){
+    if (!text) {
+      pblock.innerHTML = this.description;
+      return;
+    }
+    var me = this, tmpl = "Replaces the selected URL with ";
+    pblock.innerHTML = tmpl + "...";
+    CmdUtils.previewGet(pblock, this._api(text), function(tinyUrl) {
+      if(tinyUrl !== "Error")
+        pblock.innerHTML = tmpl + me._link(tinyUrl).bold() + ".";
     });
   },
-  execute: function( urlToShorten ) {
-    //escaping urlToShorten will not create the right tinyurl
-    var baseUrl = "http://tinyurl.com/api-create.php?url=";
-    jQuery.get( baseUrl + urlToShorten.text, function( tinyUrl ) {
-      CmdUtils.setSelection( tinyUrl );
+  execute: function(args) {
+    var me = this;
+    jQuery.get(this._api(args.object.text), function(tinyUrl) {
+      CmdUtils.setSelection(me._link(tinyUrl), {text: tinyUrl});
+      Utils.clipboard.text = tinyUrl;
     });
-  }
+  },
+  _api: function(url)("http://tinyurl.com/api-create.php?url=" +
+                      encodeURIComponent(url)),
+  _link: function(url) {
+    var eu = Utils.escapeHtml(url);
+    return eu.link(eu);
+  },
 });
-
 
 /**
  * share-on-delicious - an Ubiquity command for sharing bookmarks on
