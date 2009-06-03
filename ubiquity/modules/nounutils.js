@@ -166,6 +166,8 @@ NounUtils.makeSugg = function makeSugg(text, html, data, score,
   }
 
   // Fill in missing fields however we can:
+  if (text != null) text += "";
+  if (html != null) html += "";
   if (!text && data != null)
     text = data.toString();
   if (!html && text >= "")

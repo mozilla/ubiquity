@@ -776,10 +776,10 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     obj[key] = (
       Object.prototype.toString.call(val) === "[object RegExp]"
       ? me.nounTypeFromRegExp(val) :
+      Utils.isArray(val)
+      ? me.NounType("?", val) :
       typeof val.suggest !== "function"
       ? me.nounTypeFromDictionary(val) :
-      Utils.isArray(val)
-      ? me.NounType(val) :
       val);
   }
 
