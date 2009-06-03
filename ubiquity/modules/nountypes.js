@@ -87,66 +87,28 @@ var noun_type_percentage = {
   }
 };
 
-/*
- * Noun type for searching links on the awesomebar database.
- * Right now, the suggestion returned is:
- *  -- text: title of the url
- *  -- html: the link
- *  -- data: the favicon
- *
- *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html)
- */
-
-var noun_type_awesomebar = {
-  name: "url",
-  suggest: function(part, html, callback){
-     Utils.history.search(part, CmdUtils.maxSuggestions, function(result){
-       callback(CmdUtils.makeSugg(result.url, result.title, result.favicon));
-     });
-  }
-};
-
 var noun_type_tab = {
-  name: "tab name",
+  name: "title or URL",
   suggest: function(text, html, cb, selectedIndices)(
     [CmdUtils.makeSugg(tab.document.title || tab.document.URL,
-                        null, tab, selectedIndices)
+                       null, tab, selectedIndices)
      for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))]),
 };
 
 var noun_type_searchengine = {
   name: "search engine",
-  suggest: function(fragment, html) {
-    var searchService = Components.classes["@mozilla.org/browser/search-service;1"]
-      .getService(Components.interfaces.nsIBrowserSearchService);
-    var engines = searchService.getVisibleEngines({});
-
-    if (!fragment) {
-      return engines.map(function(engine) {
-        return CmdUtils.makeSugg(engine.name, null, engine);
-      });
-    }
-
-    var fragment = fragment.toLowerCase();
-    var suggestions = [];
-
-    for(var i = 0; i < engines.length; i++) {
-      if(engines[i].name.toLowerCase().indexOf(fragment) > -1) {
-        suggestions.push(CmdUtils.makeSugg(engines[i].name, null, engines[i], 0.9));
-      }
-    }
-
-    return suggestions;
+  default: function() this._makeSugg(this._BSS.defaultEngine),
+  suggest: function(text) {
+    var suggs = this._BSS.getVisibleEngines({}).map(this._makeSugg);
+    return CmdUtils.grepSuggs(text, suggs);
   },
-  getDefault: function() {
-    return (Components.classes["@mozilla.org/browser/search-service;1"]
-            .getService(Components.interfaces.nsIBrowserSearchService)
-            .defaultEngine);
-  }
+  _BSS: (Cc["@mozilla.org/browser/search-service;1"]
+         .getService(Ci.nsIBrowserSearchService)),
+  _makeSugg: function(engine) CmdUtils.makeSugg(engine.name, null, engine),
 };
 
 var noun_type_tag = {
-  name: "tag-list",
+  name: "tag1[,tag2 ...]",
   suggest: function(fragment) {
     var allTags = (Components.classes["@mozilla.org/browser/tagging-service;1"]
                    .getService(Components.interfaces.nsITaggingService)
@@ -317,7 +279,7 @@ var noun_type_command = noun_type_commands = {
 };
 
 var noun_type_twitter_user = {
-  name: "twitter username",
+  name: "user",
   rankLast: true,
   suggest: function(text, html, cb, selected){
     // Twitter usernames can't contain spaces; reject input with spaces.
@@ -468,7 +430,7 @@ var noun_type_address = {
   }
 };
 
-// commenting out until this actually works (#619)
+// commenting out until these actually work (#619)
 /*
 var noun_type_async_address = {
   name: "address(async)",
@@ -483,6 +445,24 @@ var noun_type_async_address = {
   }
 };
 */
+/*
+ * Noun type for searching links on the awesomebar database.
+ * Right now, the suggestion returned is:
+ *  -- text: title of the url
+ *  -- html: the link
+ *  -- data: the favicon
+ *
+ *  The code is totally based on Julien Couvreur's insert-link command (http://blog.monstuff.com/archives/000343.html)
+
+var noun_type_awesomebar = {
+  name: "url",
+  suggest: function(part, html, callback){
+     Utils.history.search(part, CmdUtils.maxSuggestions, function(result){
+       callback(CmdUtils.makeSugg(result.url, result.title, result.favicon));
+     });
+  }
+};
+ */
 
 var noun_type_contact = {
   name: "contact",
@@ -582,7 +562,7 @@ var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
   Ukrainian: "uk",
   Urdu: "ur",
   Vietnamese: "vi",
-}, "language google");
+}, "language");
 
 // for backward compatibility
 var noun_type_language = noun_type_lang_google;
@@ -761,7 +741,7 @@ var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary({
   Lingala: "ln",
   Burmese: "my",
   "Fiji Hindi": "hif",
-}, "language wikipedia");
+}, "language");
 
 for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl._code2name = ntl._list.reduce(function(o, s) {
