@@ -290,13 +290,14 @@ CommandManager.prototype = {
     return sugg.getDisplayText();
   },
 
-  makeCommandSuggester : function CM_makeCommandSuggester() {
+  makeCommandSuggester: function CM_makeCommandSuggester() {
     var self = this;
     return function getAvailableCommands(context) {
       self.refresh();
       var suggestions = self.getSuggestionListNoInput(context);
       var retVal = {};
-      for each (let parsedSentence in suggestions) {
+      for each (var sugg in suggestions) {
+        let parsedSentence = sugg;
         let name = parsedSentence._verb._name;
         let titleCasedName = name[0].toUpperCase() + name.slice(1);
         retVal[titleCasedName] = function execute() {
