@@ -1386,7 +1386,7 @@ Parser.Query.prototype = {
   dump: function PQ_dump(msg) {
     dump(this._idTime + ':' + (this._date.getTime()) + ' ' + msg + '\n');
   },
-  run: function() {
+  run: function PQ_run() {
 
     this.dump("run: "+this.input);
 

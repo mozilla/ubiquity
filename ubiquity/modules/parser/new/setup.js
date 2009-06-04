@@ -42,14 +42,12 @@ Components.utils.import("resource://ubiquity/modules/setup.js");
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
-var gUbiquity = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").gUbiquity;
-
 var demoParserInterface = {
   startTime: 0,
   endTime: 0,
   runtimes: 0,
   currentLang: UbiquitySetup.languageCode,
-  currentParser: gUbiquity.__cmdManager.__nlParser,
+  currentParser: null,
   currentQuery: {},
   parse: function() {
     if (this.currentQuery.cancel != undefined)
@@ -190,7 +188,18 @@ var demoParserInterface = {
 
 
 $(document).ready(function(){
-      
+
+  try {  
+    var gUbiquity = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").gUbiquity;
+    demoParserInterface.currentParser = gUbiquity.__cmdManager.__nlParser;
+  } catch (e) {
+    $('#gubiquity').show();
+  }
+
+  if (UbiquitySetup.parserVersion != 2) {
+    $('#parser2').show();
+  }
+  
   function run() {
     demoParserInterface.startTime = new Date().getTime();
     $('.runtimes').text($('#times').val());
