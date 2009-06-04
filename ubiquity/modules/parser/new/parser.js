@@ -1778,7 +1778,7 @@ Parser.Parse = function(parser, input, verb, argString, parentId) {
 // ordering all of the arguments (and verb) by their {{{_order}}} properties
 // and displaying them with nice {{{<span class='...'></span>}}} wrappers.
 Parser.Parse.prototype = {
-  getDisplayText: function() {
+  getDisplayText: function(printDebugInfo) {
     // This is the main string to be returned.
     let display = '';
     // This string is built in case there's a verb at the end of the sentence,
@@ -1868,10 +1868,10 @@ Parser.Parse.prototype = {
     // return with score for the time being
     // DEBUG: score is being displayed here.
     return display + displayFinal 
-//           + ' ('
-//           + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
-//           + ')'
-    ;
+           + ( printDebugInfo ? ' ('
+               + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
+               + ')'
+             :'');
 
   },
   getCompletionText: function() {

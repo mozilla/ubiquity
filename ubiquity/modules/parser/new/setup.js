@@ -34,7 +34,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// import NLParser2 and parserRegistry
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/setup.js");
 
@@ -46,6 +45,9 @@ var Ci = Components.interfaces;
 var gUbiquity = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").gUbiquity;
 
 var demoParserInterface = {
+  startTime: 0,
+  endTime: 0,
+  runtimes: 0,
   currentLang: UbiquitySetup.languageCode,
   currentParser: gUbiquity.__cmdManager.__nlParser,
   currentQuery: {},
@@ -57,6 +59,9 @@ var demoParserInterface = {
     $('#parseinfo').empty();
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val(),true); // this last true is for dontRunImmediately
     
+    // custom flag to make sure we don't onResults multiple times per query.
+    this.currentQuery.resulted = false;
+    
     // override the selection object
     this.currentQuery.selObj = {text: $('#selection').val(), 
                                 html: $('#selection').val()};
@@ -66,7 +71,7 @@ var demoParserInterface = {
     this.currentQuery.watch('_step',function(id,oldval,newval) {
       let timefactor = 4;
       if (oldval > 0)
-        $('#timeinfo div').eq(oldval-1).css('width',(this._times[oldval] - this._times[oldval-1]) * timefactor);
+        //$('#timeinfo div').eq(oldval-1).css('width',(this._times[oldval] - this._times[oldval-1]) * timefactor);
 
       if ($('#displayparseinfo').attr('checked')) {
         switch (oldval) {
@@ -104,7 +109,7 @@ var demoParserInterface = {
           case 6:
             $('<h3>step 6: substitute normalized arguments</h3><ul id="normalizedArgParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#normalizedArgParses'));
+              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#normalizedArgParses'));
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -112,7 +117,7 @@ var demoParserInterface = {
           case 7:
             $('<h3>step 6: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
-              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#verbedParses'));
+              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#verbedParses'));
             }
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
@@ -134,14 +139,14 @@ var demoParserInterface = {
 
             $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._suggestedParses) {
-              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#suggestedParses'));
+              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#suggestedParses'));
             }
             $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
 
 
             $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._scoredParses) {
-              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#debugScoredParses'));
+              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#debugScoredParses'));
             }
             $('<p><small>'+this._scoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -153,11 +158,30 @@ var demoParserInterface = {
     });
     
     this.currentQuery.onResults = function() {
-      $('#scoredParses').empty();
-      for each (var parse in this.suggestionList) {
-        $('<tr><td>'+parse.getDisplayText()+'</td></tr>').appendTo($('#scoredParses'));
+      if (this.finished && !this.resulted) {
+        this.resulted = true;
+        demoParserInterface.runtimes++;
+        $('.current').text(demoParserInterface.runtimes);
+        dump(demoParserInterface.runtimes+' done\n');
+        if (demoParserInterface.runtimes < $('.runtimes').text())
+          demoParserInterface.parse();
+        else {
+          $('#scoredParses').empty();
+          for each (var parse in this.suggestionList) {
+            $('<tr><td>'+parse.getDisplayText(true)+'</td></tr>').appendTo($('#scoredParses'));
+          }
+
+          demoParserInterface.endTime = new Date().getTime();
+
+          dump('DURATION: '+(demoParserInterface.endTime - demoParserInterface.startTime)+'\n');
+          $('.total').text(demoParserInterface.endTime - demoParserInterface.startTime);
+
+          dump('AVG: '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
+          $('.avg').text(Math.round((demoParserInterface.endTime - demoParserInterface.startTime) * 100/demoParserInterface.runtimes)/100);
+
+          
+        }
       }
-      $('#timeinfo span').text((this._times[this._times.length-1] - this._times[0])+'ms');
     }
     this.currentQuery.run();
     
@@ -167,7 +191,16 @@ var demoParserInterface = {
 
 $(document).ready(function(){
       
-  $('.input').keyup(function(){demoParserInterface.parse()});
+  function run() {
+    demoParserInterface.startTime = new Date().getTime();
+    $('.runtimes').text($('#times').val());
+    demoParserInterface.runtimes = 0;
+    demoParserInterface.parse();
+  }
+  
+  $('.input').keyup(function(){ if ($('#autoparse')[0].checked) run()});
+  $('#run').click(run);
+
   //$('#clearnouncache').click(function() { nounCache = []; });
   
   $('.toggle').click(function(e){$(e.currentTarget).siblings().toggle();});
