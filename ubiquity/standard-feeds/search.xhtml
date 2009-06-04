@@ -790,7 +790,7 @@ CmdUtils.makeSearchCommand({
 
 CmdUtils.CreateCommand({
   name: "yelp",
-  takes: { "restaurant":noun_arb_text },
+  takes: { "restaurant":noun_type_async_restaurant },
   // TODO: Should be noun_type_address, which is currently broken.
   // See http://ubiquity.mozilla.com/trac/ticket/44
   modifiers: { near:noun_arb_text },

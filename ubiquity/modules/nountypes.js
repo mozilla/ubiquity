@@ -467,6 +467,20 @@ var noun_type_async_address = {
 };
 */
 
+var noun_type_async_restaurant = {
+  name: "restaurant(async)",
+  suggest: function(text, html, callback) {
+    getRestaurants( text, function( truthiness, suggestions ) {
+      if (truthiness) {
+	for each (var sugg in suggestions){
+          callback(CmdUtils.makeSugg(sugg));
+        }
+      }
+    });
+    return [];
+  }
+};
+
 var noun_type_contact = {
   name: "contact",
   _list: null,
@@ -806,6 +820,42 @@ function getYahooContacts( callback ){
 function getContacts(callback){
   getGmailContacts(callback);
   getYahooContacts(callback);
+}
+
+function getRestaurants(query, callback){
+  if (query.length == 0) return;
+
+  var baseUrl = "http://api.yelp.com/business_review_search";
+  var near = "";
+  var loc = CmdUtils.getGeoLocation();
+  if (loc)
+    near = loc.city + "," + loc.state;
+
+  var params = Utils.paramsToString({
+    term: query,
+    num_biz_requested: 4,
+    location: near,
+    category: "restaurants",
+    ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
+  });
+  
+  jQuery.ajax({
+    url: baseUrl+params,
+    dataType: "json",
+    error: function() {
+      callback( false, null );
+    },
+    success: function(data) {
+      var allBusinesses = data.businesses.map(function(business)
+                                              { return business.name });
+      if (allBusinesses.length > 0){
+        callback( true, allBusinesses );
+      }
+      else{
+        callback( false, allBusinesses );
+      }
+    }
+  });
 }
 
 function isAddress( query, callback ) {
