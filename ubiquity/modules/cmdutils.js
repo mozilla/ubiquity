@@ -49,7 +49,10 @@
 
 var EXPORTED_SYMBOLS = ["CmdUtils"];
 
-var CmdUtils = {__globalObject: this};
+var CmdUtils = {
+  __globalObject: null,
+  __nextId: null,
+};
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
@@ -773,14 +776,15 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
   function toNounType(obj, key) {
     var val = obj[key];
     if (typeof val !== "object") return;
-    obj[key] = (
+    var noun = obj[key] = (
       Object.prototype.toString.call(val) === "[object RegExp]"
       ? me.nounTypeFromRegExp(val) :
       Utils.isArray(val)
       ? me.NounType("?", val) :
       typeof val.suggest !== "function"
-      ? me.nounTypeFromDictionary(val) :
-      val);
+      ? me.nounTypeFromDictionary(val)
+      : val);
+    if (!noun.id) noun.id = globalObj.feed.id + "#n" + me.__nextId++;
   }
 
   if (options.takes) {

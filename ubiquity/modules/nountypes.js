@@ -912,3 +912,5 @@ function isAddress( query, callback ) {
 }
 
 var EXPORTED_SYMBOLS = [sym for (sym in this) if (/^noun_/.test(sym))];
+
+EXPORTED_SYMBOLS.forEach(function(sym, i) { this[sym].id = "#n" + i }, this);

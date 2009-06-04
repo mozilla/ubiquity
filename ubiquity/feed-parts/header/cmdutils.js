@@ -1,7 +1,6 @@
-var CmdUtils = (function(jsm){
-  Cu.import("resource://ubiquity/modules/cmdutils.js", jsm);
-  return {
-    __proto__: jsm.CmdUtils,
-    __globalObject: this,
-  };
-}({}));
+var CmdUtils = {
+  __proto__: Cu.import("resource://ubiquity/modules/cmdutils.js",
+                         null).CmdUtils,
+  __globalObject: this,
+  __nextId: 0,
+};
