@@ -1121,11 +1121,12 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 // it (along with any other params) like so:
 //
 //   {{{postData: {"q": "{QUERY}", "hl": "en"}}}}
+//
 //   {{{postData: "q={QUERY}&hl=en"}}}
 //
 // When this is done, the query will be substituted in as usual.
 //
-// {{{options.maxResults = 4}}} specifies the max number of results.
+// {{{options.maxResults = 4}}} specifies the max number of result previews.
 //
 // An extra option {{{options.parser}}} can be passed, which will make
 // Ubiquity automatically generate a keyboard navigatable preview of

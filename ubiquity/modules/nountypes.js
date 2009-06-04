@@ -201,9 +201,6 @@ var noun_type_awesomebar = {
 };
 
 var noun_type_url = {
-  /* TODO longterm, noun_type_url could suggest URLs you've visited before, by querying
-   * the awesomebar's data source
-   */
   name: "url",
   rankLast: true,
   default: function()(

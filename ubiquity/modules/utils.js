@@ -229,7 +229,7 @@ Utils.ellipsify = function ellipsify(node, chars) {
 // {{{delay}}} is the delay, in milliseconds, after which the callback
 // will be called once.
 //
-// {{arg1, arg2 ...}} are optional arguments that will be passed to
+// {{{arg1, arg2 ...}}} are optional arguments that will be passed to
 // the callback.
 //
 // This function returns a timer ID, which can later be given to
@@ -613,7 +613,7 @@ Utils.tabs = {
   // Gets an array of open tabs.
   //
   // {{{name}}} is an optional string tab name (title or URL).
-  // If supplied, this function returns exactly matched tabs with it.
+  // If supplied, this function returns tabs that exactly match with it.
 
   get: function tabs_get(name) {
     var tabs = [], {push} = tabs;
@@ -631,7 +631,7 @@ Utils.tabs = {
   //
   // {{{matcher}}} is a string or {{{RegExp}}} object to match with.
   //
-  // {{{maxResults = 2147483647}}} is an optinal integer specifying
+  // {{{maxResults}}} is an optinal integer specifying
   // the maximum number of results to return.
 
   search: function tabs_search(matcher, maxResults) {
@@ -703,9 +703,7 @@ Utils.history = {
   // ** {{{ Utils.history.visitsToDomain() }}} **
   //
   // This function returns the number of times the user has visited
-  // the given domain name.
-  //
-  // {domain} is the domain string.
+  // the given {{{domain}}} string.
 
   visitsToDomain: function history_visitsToDomain(domain) {
     var hs = (Cc["@mozilla.org/browser/nav-history-service;1"]
@@ -735,7 +733,7 @@ Utils.history = {
   //
   // {{{callback}}} is the function called when the search is complete.
   //
-  // {{{maxResults = 2147483647}}} is an optinal integer specifying
+  // {{{maxResults}}} is an optinal integer specifying
   // the maximum number of results to return.
 
   search: function history_search(query, callback, maxResults) {
@@ -812,7 +810,7 @@ AutoCompleteInput.prototype.QueryInterface = function(iid) {
 // ** {{{ Utils.appName }}} **
 //
 // This property provides the chrome application name
-// found in {{{nsIXULAppInfo.name}}}.
+// found in {{{nsIXULAppInfo}}}.
 // Examples values are "Firefox", "Songbird", "Thunderbird".
 
 Utils.__defineGetter__("appName", function() {
@@ -851,7 +849,7 @@ Utils.__defineGetter__("currentChromeWindow", function() {
 
 // ** {{{ Utils.OS }}} **
 //
-// This property provides the platform name found in {{{nsIXULRuntime.OS}}}.
+// This property provides the platform name found in {{{nsIXULRuntime}}}.
 // See: https://developer.mozilla.org/en/OS_TARGET
 
 Utils.__defineGetter__("OS", function() {
