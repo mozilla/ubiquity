@@ -122,9 +122,17 @@ var NLParser2 = {
   }
 };
 
+var self = this;
+
 // load the resources for all the languages.
+var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                    .createInstance(Components.interfaces.nsIXMLHttpRequest);
 for (let code in parserRegistry) {
-  var localeJsm = {};
-  Components.utils.import("resource://ubiquity/modules/parser/new/"+code+".js",localeJsm);
-  NLParser2.parserFactories[code] = localeJsm.makeParser;
+  req.open('GET', "resource://ubiquity/modules/parser/new/"+code+".js", false);
+  req.overrideMimeType("text/plain; charset=utf-8");
+  req.send(null);
+  
+  eval(req.responseText);
+  
+  NLParser2.parserFactories[code] = makeParser;
 }

@@ -36,11 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-  
 function makeParser() {
   var sv = new Parser('sv');
   sv.anaphora = ["han", "honom", "hon", "henne", "den", "det", "de", "dem"];
@@ -60,9 +55,6 @@ function makeParser() {
     {role: 'instrument', delimiter: 'via'}
   ];
   sv.branching = 'right';
-  sv.examples = ['k strumpor med google',
-  'lägg till möte till calendar klockan 1pm', // 1, ett, ett på eftermiddagen, kalendern ...
-  'från Tokyo till San Francisco'];
 
   return sv;
 };

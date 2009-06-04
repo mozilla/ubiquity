@@ -34,11 +34,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 
 function makeParser() {
   var fr = new Parser('fr');
@@ -64,8 +59,6 @@ function makeParser() {
   },
 
   fr.branching = 'right';
-  fr.examples = ['b les chaussettes avec google',
-    'de Tokyo à San Francisco'];
   fr.clitics = [
     {clitic: 'le', role: 'object'},
     {clitic: 'les', role: 'object'}

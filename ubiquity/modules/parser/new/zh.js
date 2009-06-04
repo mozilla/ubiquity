@@ -35,15 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// set up our parsers
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') { // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-}
-
-Components.utils.import("resource://ubiquity/modules/localeutils.js");
-
 function makeParser() {
   var zh = new Parser('zh');
   zh.branching = 'right';
@@ -52,9 +43,19 @@ function makeParser() {
 
   // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
   zhparts = loadLocaleJson("resource://ubiquity/modules/parser/new/zh.json");
-  zh.anaphora = zhparts.anaphora;
-  zh.roles = zhparts.roles;
-  zh.examples = zhparts.examples;
+  zh.anaphora = ["这个","那个","這個","那個"];
+  zh.roles = [
+      {role: 'goal', delimiter: '到'},
+      {role: 'goal', delimiter: '成'},
+      {role: 'goal', delimiter: '为'},
+      {role: 'goal', delimiter: '為'},
+      {role: 'goal', delimiter: '给'},
+      {role: 'goal', delimiter: '給'},
+      {role: 'source', delimiter: '从'},
+      {role: 'source', delimiter: '從'},
+      {role: 'position', delimiter: '在'},
+      {role: 'instrument', delimiter: '用'}
+  ];
   
   zh._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
   zh.wordBreaker = function(input) {

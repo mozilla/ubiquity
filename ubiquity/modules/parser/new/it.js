@@ -36,11 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-
 function makeParser() {
   var it = new Parser('it');
   it.roles = [
@@ -80,11 +75,6 @@ function makeParser() {
   it.anaphora = ["questa", "questo", "la selezione","testo selezionato"];
   
   it.branching = 'right';
-
-  it.examples = ['Aggiungi la riunione alle 2 pm al calendario',
-    'Acquista calzini su Google',
-    'traduci Ciao dall\'italiano all\' inglese',
-    'Vai da San Francisco a Tokyo'];
 
   it.clitics = [
     {clitic: 'el', role: 'object'},

@@ -35,11 +35,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-
 function makeParser() {
   var en = new Parser('en');
   en.anaphora = ["this", "that", "it", "selection", "him", "her", "them"];
@@ -53,9 +48,6 @@ function makeParser() {
     {role: 'instrument', delimiter: 'with'}
   ];
   en.branching = 'right';
-  en.examples = ['from Tokyo to San',
-  'b socks using google',
-  'add meeting to calendar at 1 pm'];
 
   return en;
 };

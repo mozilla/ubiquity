@@ -36,12 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// set up our parsers
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-
 function makeParser() {
   var pt = new Parser('pt');
   pt.roles = [
@@ -72,11 +66,8 @@ function makeParser() {
     {role: 'instrument', delimiter: 'no'},
     {role: 'instrument', delimiter: 'na'}
   ];
-
   pt.branching = 'right';
-
   pt.anaphora = ['isto', 'isso', 'aquilo'];
-
 
   /* this removes the definite article (all gender and number variations),
      removing it from the argument and putting it on the prefix */
@@ -87,13 +78,6 @@ function makeParser() {
       return [{prefix:matches[1], newInput:matches[3], suffix:''}];
     return [];
   };
-
-  pt.examples = ['marcar reunião às 2pm ao calendar',
-    'comprar meias pelo Google',
-    'traduza Olá Mundo de English pra French',
-    'ir de San Franscisco à Tokyo',
-    'diga Redescubra a web',
-    'diga isto'];
 
   return pt;
 };

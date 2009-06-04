@@ -36,11 +36,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-
 function makeParser() {
   var ca = new Parser('ca');
   ca.roles = [
@@ -67,19 +62,10 @@ function makeParser() {
   
   ca.branching = 'right';
 
-  ca.examples = ['marca la reunió a les 2pm al calendari',
-    'compra mitjons amb el Google',
-    'tradueix Hola món de l\'anglès al francès',
-    'vés de San Franscisco a Tokyo',
-    'digues Torneu a descobrir la Web',
-    'digues açò'];
-
-
   ca.clitics = [
     {clitic: 'el', role: 'object'},
     {clitic: 'els', role: 'object'}
   ];
-
 
   return ca;
 };

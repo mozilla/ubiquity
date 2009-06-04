@@ -35,28 +35,26 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["makeParser"];
-
-if ((typeof window) == 'undefined') { // kick it chrome style
-  Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-}
-
-Components.utils.import("resource://ubiquity/modules/localeutils.js");
-
 function makeParser() {
   var ja = new Parser('ja');
   ja.branching = 'left';
   ja.usespaces = false;
   ja.joindelimiter = '';
-
-  // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
-//  if ((typeof window) == 'undefined')
-    japarts = loadLocaleJson("resource://ubiquity/modules/parser/new/ja.json");
-//  else 
-//    japarts = loadLocaleJson('ja.json');
-  ja.anaphora = japarts.anaphora;
-  ja.roles = japarts.roles;
-  ja.examples = japarts.examples;
+  ja.anaphora = ["これ", "それ", "あれ"];
+  ja.roles = [
+    {role: 'object', delimiter: 'を'},
+    {role: 'goal', delimiter: 'に'},
+    {role: 'source', delimiter: 'から'},
+    {role: 'position', delimiter: 'で'},
+    {role: 'position', delimiter: 'に'},
+    {role: 'instrument', delimiter: 'で'},
+    {role: 'alias', delimiter: 'として'},
+    // 「の」は何でもOK
+    {role: 'goal', delimiter: 'の'},
+    {role: 'source', delimiter: 'の'},
+    {role: 'position', delimiter: 'の'},
+    {role: 'object', delimiter: 'の'}
+  ];
   
   ja._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in ja.roles)].join('|')+')','g');
   ja.wordBreaker = function(input) {
