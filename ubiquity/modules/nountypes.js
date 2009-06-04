@@ -343,7 +343,8 @@ var noun_type_twitter_user = {
 var noun_type_number = {
   name: "number",
   suggest: function(text) {
-    return /^\d+$/.test(text) ? [CmdUtils.makeSugg(text, null, +text)] : [];
+    var num = +text;
+    return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
   },
   "default": function() {
     return CmdUtils.makeSugg("1", null, 1, 0.9);

@@ -53,7 +53,7 @@ var extApplication = { // helper method for correct quitting/restarting
 // exit firefox entirely
 CmdUtils.CreateCommand({
   names: ["exit-firefox"],
-  description: "Exits firefox",
+  description: "Exits Firefox.",
   execute: function() {
     extApplication.quit();
   }
@@ -62,7 +62,7 @@ CmdUtils.CreateCommand({
 // restarts firefox
 CmdUtils.CreateCommand({
   names: ["restart-firefox"],
-  description: "Restarts firefox",
+  description: "Restarts Firefox.",
   execute: function() {
     extApplication.restart();
   }
@@ -72,7 +72,7 @@ CmdUtils.CreateCommand({
 // TODO: if last window is closed, we should offer to save session
 CmdUtils.CreateCommand({
   names: ["close-window"],
-  description: "Close current window",
+  description: "Closes current window.",
   execute: function() {
     extApplication.close();
   }
@@ -81,10 +81,9 @@ CmdUtils.CreateCommand({
 // toggles fullscreen
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
-  description: "Toggles fullscreen mode",
+  description: "Toggles fullscreen mode.",
   execute: function() {
-    var win = CmdUtils.getWindow();
-    win.fullScreen = win.fullScreen ? false : true;
+    CmdUtils.getWindow().fullScreen ^= 1;
   }
 });
 
@@ -153,21 +152,19 @@ CmdUtils.CreateCommand({
       text: tabs.length + " tabs closed"});
   },
   preview: function(pblock, args) {
-    if (!args.object) {
+    var {text} = args.object;
+    if (!text) {
       pblock.innerHTML = this.description;
       return;
     }
-    var text = args.object.text;
     var tabs = Utils.tabs.search(text);
-    var div = this._div();
-    pblock.innerHTML = (
-      tabs.length
-      ? div.appendChild(
-        <>Closes tabs related to <b>{text}</b>:</> +
-          tabs.reduce(this._lister, <ul/>))
-      : div.appendChild(<>No tabs are related to <b>{text}</b>.</>));
+    pblock.innerHTML =
+      <div class={this.names[0]}/>.appendChild(
+        tabs.length
+        ? (<>Closes tabs related to
+           <b>{text}</b>:</> + tabs.reduce(this._lister, <ul/>))
+        : <>No tabs are related to <b>{text}</b>.</>);
   },
-  _div: function() <div class={this.name}/>,
   _lister: function(list, {document})(
     list.appendChild(<li>{document.title}
                      <code><small>{document.URL}</small></code></li>)),
@@ -237,49 +234,30 @@ CmdUtils.CreateCommand({
   }
 });
 
-// goes back in history
-CmdUtils.CreateCommand({
-  names: ["back"],
-  description: "Go back in history",
-  arguments: [{role: 'object', label: 'steps', nountype: noun_type_number}],
-  preview: function(pblock, args) {
-    var steps = args.object;
-    var template = "Go back ${steps} {if steps == '1'} "
-                 + "step {else} steps {/if} in history";
-    pblock.innerHTML = CmdUtils.renderTemplate(template, {"steps": steps.text});
-  },
-  execute: function(args) {
-    var steps = args.object;
-    var win = CmdUtils.getWindow();
-    win.history.go(-Math.abs(parseInt(steps.text)));
-  }
-});
-
-// goes forward in history
-CmdUtils.CreateCommand({
-  names: ["forward"],
-  description: "Go forward in history",
-  arguments: [{role: 'object', label: 'steps', nountype: noun_type_number}],
-  preview: function(pblock, args) {
-    var steps = args.object;
-    var template = "Go forward ${steps} {if steps == '1'} "
-                 + "step {else} steps {/if} in history";
-    pblock.innerHTML = CmdUtils.renderTemplate(template, {"steps": steps.text});
-  },
-  execute: function(steps) {
-    var steps = args.object;
-    var win = CmdUtils.getWindow();
-    win.history.go(Math.abs(parseInt(steps.text)));
-  }
-});
+// goes back/forward in history
+(function historyCommand(way, sign) {
+  CmdUtils.CreateCommand({
+    names: ["go-" + way],
+    description: "Go " + way + " in history.",
+    arguments: [{role: "object", label: "steps", nountype: noun_type_number}],
+    preview: function(pblock, args) {
+      var num = args.object.data;
+      pblock.innerHTML =
+        <>Go {way} <b>{num}</b> step{num > 1 ? "s" : ""} in history.</>;
+    },
+    execute: function(args) {
+      CmdUtils.getWindow().history.go(args.object.data * sign | 0);
+    }
+  });
+  return arguments.callee;
+})("back", -1)("forward", 1);
 
 // go to home page
 CmdUtils.CreateCommand({
-  names: ["home"],
-  description: "Go to home page",
+  names: ["go-home"],
+  description: "Go to home page.",
   execute: function() {
-    var win = CmdUtils.getWindow();
-    win.home();
+    CmdUtils.getWindow().home();
   }
 });
 
@@ -289,7 +267,7 @@ CmdUtils.CreateCommand({
 
 
 function setFullPageZoom(level) {
-  var navigator1 = window.
+  var navigator1 = context.chromeWindow.
                    QueryInterface(Ci.nsIInterfaceRequestor).
                    getInterface(Ci.nsIWebNavigation);
   var docShell = navigator1.QueryInterface(Ci.nsIDocShell);
@@ -305,11 +283,9 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/magnifier.png",
   description: "Zooms the Firefox window in or out.",
   preview: function(pBlock, args) {
-    var replacement = "a given percentage";
-    if (args.object.text) {
-      replacement = args.object.text;
-    }
-    pBlock.innerHTML = _("Zooms the Firefox window to %S of its normal size.",[replacement]);
+    var replacement = args.object.text || "a given percentage";
+    pBlock.innerHTML = _("Zooms the Firefox window to %S of its normal size.",
+                         [replacement]);
   },
   execute: function(args) {
     if (args.object.data) {
@@ -381,19 +357,18 @@ CmdUtils.CreateCommand({
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   arguments: {object_title: noun_type_bookmarklet},
-  execute: function(args) {
-    if (args.object.data) CmdUtils.getWindow().location = args.object.data;
+  execute: function({object}) {
+    if (object.data) CmdUtils.getWindow().location = object.data;
     else {
       noun_type_bookmarklet.load();
       displayMessage({icon: this.icon, title: this.name, text: "Reloaded"});
     }
   },
-  preview: function(pbl, args) {
-    CmdUtils.log(args);
+  preview: function(pbl, {object}) {
     pbl.innerHTML = (
-      args.object.data
+      object.data
       ? (<pre class={this.name}
-         style="white-space:pre-wrap">{decodeURI(args.object.data)}</pre>)
+         style="white-space:pre-wrap">{decodeURI(object.data)}</pre>)
       : this.description + "<p>" + this.help + "</p>");
   }
 });
