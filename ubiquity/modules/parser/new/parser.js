@@ -1219,6 +1219,26 @@ Parser.prototype = {
       } else {
         defaultValue = {text:"", html:"", data:null, summary:""};
       }
+
+      // default-suggested arguments should be ranked lower
+      if (defaultValue.score)
+        defaultValue.score *= 0.5;
+
+      // if a default value was set, let's make sure it has its modifier.      
+      if (defaultValue.text != '') {
+        defaultValue.outerSpace = this.joindelimiter;
+        
+        for each (let roleDesc in this.roles) {
+          if (roleDesc.role == role) {
+            defaultValue.modifier = roleDesc.delimiter;
+            if (roleDesc.delimiter == '')
+              defaultValue.innerSpace = '';
+            else
+              defaultValue.innerSpace = this.joindelimiter;
+            break;
+          }
+        }
+      }
       
       if (defaultValue.constructor.name != 'Array')
         defaultValue = [defaultValue];
@@ -1797,14 +1817,20 @@ Parser.Parse.prototype = {
     // Copy all of the arguments into an ordered array called argsArray.
     // This will then be in the right order for display.
     let argsArray = [];
+    let unfilledArgs = []; // unfilled args are displayed at the end
     for (let role in this.args) {
       for each (let argument in this.args[role]) {
         if (argument.text) {
-          argsArray[argument._order] = argument;
-          argsArray[argument._order].role = role;
+          if ("_order" in argument) {
+            argsArray[argument._order] = argument;
+            argsArray[argument._order].role = role;
+          } else
+            unfilledArgs.push(argument);
         }
       }
     }
+
+    argsArray = argsArray.concat(unfilledArgs);
 
     for each (let arg in argsArray) {
       let className = 'argument';
@@ -1937,10 +1963,12 @@ Parser.Parse.prototype = {
     if (this._verb._order != -1) {
       for (let role in this.args) {
         for each (let arg in this.args[role]) {
-          if (arg._order == undefined) // if it was a default, it's last
-            lastNode = arg;
-          else if (arg._order > lastNode._order)
-            lastNode = arg;
+          if (arg.text != '') {
+            if (arg._order == undefined) // if it was a default, it's last
+              lastNode = arg;
+            else if (arg._order > lastNode._order)
+              lastNode = arg;
+          }
         }
       }
     }
