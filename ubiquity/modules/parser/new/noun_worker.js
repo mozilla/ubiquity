@@ -24,7 +24,7 @@ detectNounType = function detectNounType(x,callback) {
     if (typeof activeNounTypes[thisNounTypeId].suggest == 'function')
       suggestions = activeNounTypes[thisNounTypeId]
                         .suggest(x,x,completeAsyncSuggest) || [];
-    //mylog(suggestions);
+    //Utils.log(suggestions);
     for each (suggestion in suggestions) {
       // set the nountype that was used in each suggestion so that it can 
       // later be compared with the nountype specified in the verb.

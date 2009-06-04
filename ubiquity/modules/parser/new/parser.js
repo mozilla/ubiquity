@@ -188,8 +188,6 @@ Parser.prototype = {
       for each (let arg in verb.arguments) {
 
         let thisNounType;
-        
-        //mylog(arg);
 
         if (arg.nountype.constructor.name == "RegExp") {
           // If a verb's target nountype is a regexp, we'll convert it to
@@ -204,13 +202,13 @@ Parser.prototype = {
           // returning the converted version of the nountype back into the verb
           arg.nountype = thisNounType;
         } else {
-          thisNounType = cloneObject(arg.nountype);
+          thisNounType = (arg.nountype); // cloneObject
         }
 
         let thisNounTypeIsAlreadyRegistered = false;
 
         for (let thisNounTypeId in this._nounTypes) {
-          if (sameObject(arg.nountype,this._nounTypes[thisNounTypeId])) {
+          if (sameObject(thisNounType,this._nounTypes[thisNounTypeId])) {
             thisNounTypeIsAlreadyRegistered = true;
             arg.nountypeId = thisNounTypeId;
           }
@@ -221,13 +219,14 @@ Parser.prototype = {
           thisNounType._id = nounTypeId;
           this._nounTypes[nounTypeId] = thisNounType;
           ant.activeNounTypes[nounTypeId] = thisNounType;
-
+          
+          dump("loaded nountype: "+nounTypeId+": "+(thisNounType.name || '')+"\n");
           arg.nountypeId = nounTypeId;
           
           nounTypeId++;
         }
 
-        //delete(arg.nountype);
+        delete(arg.nountype);
         // clear up some memory... we'll be cloning these verb objects
         // as part of parses for a long while still, so let's remove the actual
         // nountypes, only leaving a copy in this._nounTypes and the 
@@ -416,19 +415,20 @@ Parser.prototype = {
       //
       // TODO: write a unit test for this possibility.
 
-      for (let verb in this._verbList) {
+      for (let verbId in this._verbList) {
+        let verb = this._verbList[verbId];
         // check each verb synonym in this language
-        for (let name in names(this._verbList[verb],this.lang)) {
+        for (let name in names(verb,this.lang)) {
           // if it matched...
           if (RegExp('^'+verbPrefix,'i').test(name)) {
-            let thisParse = {_verb: cloneObject(this._verbList[verb]),
+            let thisParse = {_verb: cloneObject(verb),
                              argString: argString};
             for each (let arg in thisParse._verb.arguments) {
               delete(arg.nountype);
               // save some memory.
             }
             // add some extra information specific to this parse
-            thisParse._verb.id = verb;
+            thisParse._verb.id = verbId;
             thisParse._verb.text = name;
             thisParse._verb.input = verbPrefix;
             thisParse._verb._order = 0;
@@ -452,19 +452,20 @@ Parser.prototype = {
       if (argString == '' && verbOnlyMatches.indexOf(verbPrefix) > -1)
         return returnArray;
 
-      for (let verb in this._verbList) {
+      for (let verbId in this._verbList) {
+        let verb = this._verbList[verbId];
         // check each verb synonym in this language
-        for (let name in names(this._verbList[verb],this.lang)) {
+        for (let name in names(verb,this.lang)) {
           // if it matched...
           if (RegExp('^'+verbPrefix,'i').test(name)) {
-            let thisParse = {_verb: cloneObject(this._verbList[verb]),
+            let thisParse = {_verb: cloneObject(verb),
                              argString: argString};
             for each (let arg in thisParse._verb.arguments) {
               delete(arg.nountype);
               // save some memory.
             }
             // add some extra information specific to this parse
-            thisParse._verb.id = verb;
+            thisParse._verb.id = verbId;
             thisParse._verb.text = name;
             thisParse._verb.input = verbPrefix;
             thisParse._verb._order = -1;
@@ -1059,7 +1060,8 @@ Parser.prototype = {
 
     // for parses WITHOUT a set verb:
     var returnArray = [];
-    for (let verb in this._verbList) {
+    for (let verbId in this._verbList) {
+      let verb = this._verbList[verbId];
       let suggestThisVerb = true;
 
       // Check each role in our parse.
@@ -1068,20 +1070,20 @@ Parser.prototype = {
       // If none of the verb's arguments make thisRoleIsUsed true, we set
       // suggestThisVerb = false.
       for (let role in parse.args) {
-        let thisRoleIsUsed = this._verbList[verb].arguments.some(
+        let thisRoleIsUsed = verb.arguments.some(
           function(arg) arg.role == role);
         if (!thisRoleIsUsed)
           suggestThisVerb = false;
       }
       if (suggestThisVerb) {
-        let parseCopy = cloneObject(parse);
+        let parseCopy = parse.copy(); // cloneObject(parse)
         // same as before: the verb is copied from the verblist but also
         // gets some extra properties (id, text, _order) assigned.
-        parseCopy._verb = cloneObject(this._verbList[verb]);
-        parseCopy._verb.id = verb;
+        parseCopy._verb = cloneObject(verb);
+        parseCopy._verb.id = verbId;
 
         // by default, use the English name, or the verb's main name.
-        parseCopy._verb.text = this._verbList[verb].names[0] || verb;
+        parseCopy._verb.text = verb.names[0] || verbId;
         parseCopy._verb._order = 0;
         // TODO: for verb forms which clearly should be sentence-final,
         // change this value to -1
@@ -1114,7 +1116,7 @@ Parser.prototype = {
 
   suggestArgs: function suggestArgs(parse) {
 
-    //mylog('verb:'+parse._verb.name);
+    //Utils.log('verb:'+parse._verb.name);
 
     // make sure we keep the anaphor-substituted input intact... we're
     // going to make changes to text, html, score, and nountype
@@ -1124,7 +1126,7 @@ Parser.prototype = {
 
     for (let role in parse.args) {
 
-      //mylog(role);
+      //Utils.log(role);
 
       let thisVerbTakesThisRole = false;
 
@@ -1188,7 +1190,7 @@ Parser.prototype = {
         }
       }
 
-      //mylog('finished role');
+      //Utils.log('finished role');
 
       if (!thisVerbTakesThisRole)
         return [];
@@ -1262,7 +1264,7 @@ Parser.prototype = {
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
   detectNounType: function detectNounType(x,callback) {
-    //mylog('detecting '+x+'\n');
+    //Utils.log('detecting '+x+'\n');
 
     if (x in nounCache) {
       if (typeof callback == 'function')
@@ -1271,9 +1273,9 @@ Parser.prototype = {
 
       /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
 
-      mylog(nounWorker);
+      Utils.log(nounWorker);
       nounWorker.onmessage = function(event) {
-        mylog(event.data);
+        Utils.log(event.data);
 
         // the callback gets returned the original argText and the array of
         // suggestions
@@ -1281,7 +1283,7 @@ Parser.prototype = {
         //  callback(x,nounCache[x]);
       };
 
-      mylog(this._nounTypes);
+      Utils.log(this._nounTypes);
       var self = this;
       nounWorker.postMessage({self:self,input:x});*/
 
@@ -1412,10 +1414,10 @@ Parser.Query.prototype = {
       } catch(e) {
         //self.dump('done!!?');
       }
-      //mylog(["self: ", self]);
-      //mylog(["ok: ", ok]);
-      //mylog(["done: ", done]);
-      //mylog(["keep working: ", self._keepworking]);
+      //Utils.log(["self: ", self]);
+      //Utils.log(["ok: ", ok]);
+      //Utils.log(["done: ", done]);
+      //Utils.log(["keep working: ", self._keepworking]);
       if (ok && !self.finished && self._keepworking)
         Utils.setTimeout(doAsyncParse, 0);
     }
@@ -1543,7 +1545,7 @@ Parser.Query.prototype = {
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
       suggestions = thisQuery.parser.suggestArgs(thisParse);
-      //mylog(suggestions);
+      //Utils.log(suggestions);
       for each (let newParse in suggestions) {
         let newScoredParses = thisQuery.addIfGoodEnough(thisQuery._scoredParses,
                                                      newParse);
@@ -1559,7 +1561,7 @@ Parser.Query.prototype = {
     var tryToCompleteParses =
     function async_tryToCompleteParses(argText,suggestions) {
       thisQuery.dump('finished detecting nountypes for '+argText);
-      //mylog([argText,suggestions]);
+      //Utils.log([argText,suggestions]);
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -1653,7 +1655,10 @@ Parser.Query.prototype = {
     // in other words...
     //
     // "We clone because we care." (TM)
-    let returnParses = cloneObject(this._scoredParses);
+    let returnParses = [];
+    for each (let parse in this._scoredParses) {
+      returnParses.push(parse.copy());
+    }
     // order the scored parses here.
     returnParses.sort( function(a,b) b.getScore() - a.getScore() );
     return returnParses.slice(0,this.maxSuggestions);
@@ -1664,7 +1669,7 @@ Parser.Query.prototype = {
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function() {
-    mylog(this);
+    //Utils.log(this);
     this.dump("cancelled!\n");
     this._keepworking = false;
   },
@@ -1701,7 +1706,7 @@ Parser.Query.prototype = {
     // New candidates must exhibit the *potential* (via maxScore) to beat
     // this bar in order to get added.
     let theBar = parseCollection[this.maxSuggestions - 1].getScore();
-    //mylog('theBar = '+theBar);
+    //Utils.log('theBar = '+theBar);
 
     // at this point we can already assume that there are enough suggestions
     // (because if we had less, we would have already returned with newParse
@@ -1709,7 +1714,7 @@ Parser.Query.prototype = {
     // we will not return it (effectively killing the parse).
 
     if (newParse.getMaxScore() < theBar) {
-      //mylog(['not good enough:',newParse,newParse.getMaxScore()]);
+      //Utils.log(['not good enough:',newParse,newParse.getMaxScore()]);
       return parseCollection;
     }
 
@@ -1721,7 +1726,7 @@ Parser.Query.prototype = {
     // if the bar changed...
     if (parseCollection[this.maxSuggestions - 1].getScore() > theBar) {
       theBar = parseCollection[this.maxSuggestions - 1].getScore();
-      //mylog('theBar is now '+theBar);
+      //Utils.log('theBar is now '+theBar);
 
       // sort by ascending maxScore order
       parseCollection.sort( function(a,b) a.getMaxScore() - b.getMaxScore() );
@@ -1729,7 +1734,7 @@ Parser.Query.prototype = {
       while (parseCollection[0].getMaxScore() < theBar
              && parseCollection.length > this.maxSuggestions) {
         let throwAway = parseCollection.shift();
-        //mylog(['throwing away:',throwAway,throwAway.getMaxScore(),parseCollection.length+' remaining']);
+        //Utils.log(['throwing away:',throwAway,throwAway.getMaxScore(),parseCollection.length+' remaining']);
       }
     }
 
@@ -1832,7 +1837,9 @@ Parser.Parse.prototype = {
     }
 
     for each (let neededArg in this._verb.arguments) {
-      if (!this.args[neededArg.role][0].text) {
+      if (!this.args[neededArg.role]
+          || !this.args[neededArg.role][0]
+          || !this.args[neededArg.role][0].text) {
         let {label} = neededArg;
         if (!label) {
           let ant = {};
@@ -2027,7 +2034,7 @@ Parser.Parse.prototype = {
                                cloneObject(this._verb),
                                this.argString,
                                this._id);
-    ret.args = cloneObject(this.args);
+    ret.args = {__proto__: this.args};
     ret.complete = this.complete;
     ret._suggested = this._suggested;
     ret.scoreMultiplier = this.scoreMultiplier;
@@ -2035,26 +2042,6 @@ Parser.Parse.prototype = {
     return ret;
   }
 
-}
-
-// **{{{mylog()}}}**
-//
-// {{{mylog}}} is a function to display stuff nicely in FireBug' console
-// from chrome... it's a hack!
-if ((typeof window) == 'undefined') {// kick it chrome style
-
-  // mitcho just uses this function for debug purposes:
-  mylog = function mylog(what) {
-    const Cc = Components.classes;
-    const Ci = Components.interfaces;
-    Cc["@mozilla.org/appshell/window-mediator;1"].
-      getService(Ci.nsIWindowMediator).
-        getMostRecentWindow("navigator:browser").Firebug.Console.
-          logFormatted([what]);
-  }
-
-} else {
-  //mylog = console.log;
 }
 
 // **{{{cloneObject()}}}**
@@ -2081,7 +2068,11 @@ var cloneObject = function cloneObject(o) {
   var ret = (o.constructor.name == 'Array') ? new Array() : new Object();
 
   for (var i in o) {
-    ret[i] = cloneObject(o[i]);
+    try {
+      ret[i] = cloneObject(o[i]);
+    } catch(e) {
+      Utils.log(e);
+    }
   }
 
   return ret;
@@ -2110,6 +2101,7 @@ function sameObject(a,b,print) {
     if (i != 'contactList' && i != '_id') {
       if (b[i] == undefined) {
         dump('>'+i+' was in a but not in b\n');
+        return false;
       }
       if (!sameObject(a[i],b[i],print)) {
         if (print) dump('>'+i+' was in a but not in b\n');
@@ -2121,6 +2113,7 @@ function sameObject(a,b,print) {
     if (j != 'contactList' && j != '_id') {
       if (a[j] == undefined) {
         dump('>'+j+' was in b but not in a\n');
+        return false;
       }
       if (!sameObject(a[j],b[j],print)) {
         if (print) dump('>'+j+' was in b but not in a\n');

@@ -35,13 +35,19 @@
  * ***** END LICENSE BLOCK ***** */
 
 // import NLParser2 and parserRegistry
-Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/setup.js");
 
 // set up the interface which will control the parser.
 
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+
+var gUbiquity = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").gUbiquity;
+
 var demoParserInterface = {
-  currentLang: 'en',
-  currentParser: {},
+  currentLang: UbiquitySetup.languageCode,
+  currentParser: gUbiquity.__cmdManager.__nlParser,
   currentQuery: {},
   parse: function() {
     if (this.currentQuery.cancel != undefined)
@@ -49,7 +55,7 @@ var demoParserInterface = {
         this.currentQuery.cancel();
 
     $('#parseinfo').empty();
-    this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val()*1,true); // this last true is for dontRunImmediately
+    this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val(),true); // this last true is for dontRunImmediately
     
     // override the selection object
     this.currentQuery.selObj = {text: $('#selection').val(), 
@@ -114,7 +120,7 @@ var demoParserInterface = {
           case 8:
           case 9:
           case 10:
-            $('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
+            /*$('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
             for (var text in nounCache) {
               var html = $('<li><code>'+text+'</code></li>');
               var list = $('<ul></ul>');
@@ -123,7 +129,7 @@ var demoParserInterface = {
               }
               list.appendTo(html);
               html.appendTo($('#nounCache'));
-            }
+            }*/
 
 
             $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
@@ -155,58 +161,14 @@ var demoParserInterface = {
     }
     this.currentQuery.run();
     
-  },
-  loadLang: function(lang) {
-    this.currentLang = lang;
-
-    nounCache = [];
-    
-    var jsm = {};
-    Components.utils.import("resource://ubiquity/modules/parser/new/fake_verbs_and_nountypes.js",jsm);
-  
-    this.currentParser = NLParser2.makeParserForLanguage(lang,jsm.sampleVerbs,jsm.nounTypes);
-    
-    $('#roles').empty();
-    for each (role in this.currentParser.roles) {
-      $('<li><code>'+role.role+'</code>, delimiter: <code>'+role.delimiter+'</code></li>').appendTo($('#roles'));
-    }
-  
-    $('#nountypes').empty();
-    for (let type in this.currentParser._nounTypes) {
-      $('<li><code>'+type+'</code>'+(this.currentParser._nounTypes[type].list != undefined ? ': {<code>'+this.currentParser._nounTypes[type].list.join('</code>, <code>')+'</code>}':'')+'</li>').appendTo($('#nountypes'));
-    }
-  
-    $('#verblist').empty();
-    for (verb in jsm.sampleVerbs) {
-      var li = $('<li><code>'+verb+'</code> (<code>'+jsm.sampleVerbs[verb].names.join('</code>, <code>')+'</code>)</li>');
-      var ul = $('<ul></ul>');
-      for each (arg in jsm.sampleVerbs[verb].arguments)
-        $('<li><code>'+arg.role+'</code>: <code>'+arg.nountype+'</code>').appendTo(ul);
-      ul.appendTo(li);
-      li.appendTo($('#verblist'));
-    }
-    
-    $('#examples').html(this.currentParser.examples.map(function(code){return '<code>'+code+'</code>'}).join(', '));
-    
   }
 }
 
 
 $(document).ready(function(){
-    
-  for (let code in parserRegistry) {
-    $('#languages').append($("<input name='lang' value='"+code+"' type='radio'>"
-                              +parserRegistry[code]+'</input>'));
-  }
-
-  // if nothing is selected, select English
-  if ($('input[name=lang]:checked').val() == null)
-    $('input[value=en]').click();
-  $('input[name=lang]').click(function(e){demoParserInterface.loadLang($('input[name=lang]:checked').val());});
-  demoParserInterface.loadLang($('input[name=lang]:checked').val())
-  
+      
   $('.input').keyup(function(){demoParserInterface.parse()});
-  $('#clearnouncache').click(function() { nounCache = []; });
+  //$('#clearnouncache').click(function() { nounCache = []; });
   
   $('.toggle').click(function(e){$(e.currentTarget).siblings().toggle();});
 
