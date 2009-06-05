@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -155,17 +156,19 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 const CMD_PREFIX = "cmd_";
 const NOUN_PREFIX = "noun_";
 
-function makeCmdForObj(sandbox, objName) {
+function makeCmdForObj(sandbox, objName, feedUri) {
   var cmdName = objName.substr(CMD_PREFIX.length);
   var originalCmdName = cmdName;
   cmdName = cmdName.replace(/_/g, "-");
   var cmdFunc = sandbox[objName];
 
   var setCommandContext;
+  var setFeedContext;
 
   (function(){
     Components.utils.import("resource://ubiquity/modules/localization_utils.js");
     setCommandContext = LocalizationUtils.setCommandContext;
+    setFeedContext = LocalizationUtils.setFeedContext;
   })()
     
   var cmd = {
@@ -174,8 +177,10 @@ function makeCmdForObj(sandbox, objName) {
     execute: function CS_execute(context, directObject, modifiers) {
       sandbox.context = context;
       setCommandContext(originalCmdName);
+      setFeedContext(feedUri);
       return cmdFunc.call(cmd, directObject, modifiers);
-    }
+    },
+    feedUri: feedUri
   };
   
   if (cmdFunc.preview) {
@@ -183,6 +188,7 @@ function makeCmdForObj(sandbox, objName) {
                                       modifiers) {
       sandbox.context = context;
       setCommandContext(originalCmdName);
+      setFeedContext(feedUri);
       return cmdFunc.preview.call(cmd, previewBlock, directObject,
                                   modifiers);
     };

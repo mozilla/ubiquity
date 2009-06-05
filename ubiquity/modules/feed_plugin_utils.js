@@ -93,5 +93,10 @@ function finishCommand(srcCommand) {
   cmd.arguments = srcCommand.arguments || [];
   cmd.__proto__ = srcCommand;
 
-  return cmd;
+  if (UbiquitySetup.parserVersion < 2 || !cmd.names)
+    return cmd;
+  else {
+    Components.utils.import("resource://ubiquity/modules/localization_utils.js");
+    return localizeCommand(cmd);
+  }
 }

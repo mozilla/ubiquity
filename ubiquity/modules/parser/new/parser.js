@@ -174,11 +174,25 @@ Parser.prototype = {
         skippedSomeVerbs = true;
       }
     }
-
+    
     if (skippedSomeVerbs) {
       Components.utils.import("resource://ubiquity/modules/msgservice.js");
       var msgService = new AlertMessageService();
       msgService.displayMessage('Some verbs were not loaded as they are not compatible with Parser 2.');
+    }
+    
+    // now we'll load the localization properties files if they exist
+    var LU = {};
+    (function(){
+      Components.utils.import("resource://ubiquity/modules/localization_utils.js");
+      LU = LocalizationUtils;
+    })();
+    
+    for each (let verb in this._verbList) {
+      if (verb.feedUri.scheme == 'file') {
+        let feedKey = LU.getLocalFeedKey(verb.feedUri.path);
+        LU.loadLocalStringBundle(feedKey);
+      }
     }
 
     // Scrape the noun types up here.

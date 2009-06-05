@@ -40,10 +40,12 @@
  // for use by command code.  Everything clients need is contained within
  // the {{{CmdUtils}}} namespace.
 
-var EXPORTED_SYMBOLS = ["LocalizationUtils"];
+var EXPORTED_SYMBOLS = ["LocalizationUtils","localizeCommand"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/setup.js");
 
+const languageCode = UbiquitySetup.languageCode;
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Application = (Cc["@mozilla.org/fuel/application;1"]
@@ -52,23 +54,47 @@ const Application = (Cc["@mozilla.org/fuel/application;1"]
 const BUNDLE_SVC = Components.classes['@mozilla.org/intl/stringbundle;1']
                    .getService(Components.interfaces.nsIStringBundleService);
 
+var commandContext = null;
+var feedContext = null;
+var localStringBundles = {};
+
 var LocalizationUtils = {
-  __lastCommand: null,
-  __stringBundle : null,
+
+  // this command only works with local standard-feeds commands
+  loadLocalStringBundle: function LU_loadLocalStringBundle (feedKey) {
+    if (!localStringBundles[feedKey]) {
+      try {
+        localStringBundles[feedKey] = BUNDLE_SVC.createBundle("resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties");
+      } catch(e) {
+        dump("couldn't find or parse resource://ubiquity/standard-feeds/localization/firefox."+languageCode+".properties\n");
+        return false;
+      }
+      dump("loaded resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties\n")
+    }
+    return true;
+  },
+
+  getLocalFeedKey: function LU_getLocalFeedKey(path) {
+    return path.replace(/^.*\/(\w+)\.\w+$/g,'$1');
+  },
+  
+  getStringBundleForFeed: function LU_getStringBundleForFeed (feedKey) {
+    if (!localStringBundles[feedKey])
+      this.loadLocalStringBundle(feedKey);
+    return localStringBundles[feedKey];
+  },
 
   // getLocalizedString code from http://www.xuldev.org/blog/?p=45
   // TODO: there is only one stringbundle available right now.
-  getLocalizedString: function LU_getLocalizedString (key, string, replacements) {
-    if ( !this._stringBundle ) {
-      this.__stringBundle = BUNDLE_SVC.createBundle("resource://ubiquity/standard-feeds/localization/firefox.properties");
-    }
+  getLocalizedString: function LU_getLocalizedString (feedKey, key, string, replacements) {
+    let stringBundle = this.getStringBundleForFeed(feedKey);
     try {
       if ( !replacements ) {
         dump('getstringfromname\n') ;
-        return this.__stringBundle.GetStringFromName(key);
+        return stringBundle.GetStringFromName(key);
       }else
         dump('formatStringFromName\n') ;
-        return this.__stringBundle.formatStringFromName(key, replacements, replacements.length);
+        return stringBundle.formatStringFromName(key, replacements, replacements.length);
     } catch(ex) {
       dump('key '+key+' not found\n');
       return string;
@@ -76,11 +102,21 @@ var LocalizationUtils = {
   },
   
   setCommandContext: function LU_setCommandContext (cmdName) {
-    this.__lastCommand = cmdName;
+    commandContext = cmdName;
+    dump('setCommandContext: '+cmdName+'\n');
   },
   
   getCommandContext: function LU_getCommandContext () {
-    return this.__lastCommand;
+    return commandContext;
+  },
+  
+  setFeedContext: function LU_setFeedContext (feedUri) {
+    feedContext = feedUri;
+    dump('setFeedContext: '+feedUri.asciiSpec+'\n');
+  },
+  
+  getFeedContext: function LU_getFeedContext () {
+    return feedContext;
   },
   
   getLocalized: function LU_getLocalized(string, replacements) {
@@ -96,16 +132,28 @@ var LocalizationUtils = {
   
     let key = this.getCommandContext() + '.' + (context ? context+'.' : '') + (string.toUpperCase().replace(/\s+/g,'_'));
     
-    if (!replacements)
-      return this.getLocalizedString(key, string);
-    else
-      return this.getLocalizedString(key, string, replacements);
+    let feedKey = this.getLocalFeedKey(feedContext.asciiSpec);
+    
+    return this.getLocalizedString(feedKey, key, string, replacements);
   }
-
 
 };
 
-// TODO: make set/getCommandContext actually work
-// i.e. make this not hard-coded to 'zoom'
-LocalizationUtils.__lastCommand = 'zoom';
+// localizeCommand only works with Parser 2 commands.
+// It might magically work with Parser 1, but it's not built to, and not
+// tested that way.
+var localizeCommand = function(cmd) {
 
+  dump('localizing cmd '+cmd.names[0]+' now\n');
+
+  let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
+  cmd.names = getLocalizedProperty(feedKey, cmd, 'names');
+  if (typeof cmd.names === "string")
+    cmd.names = cmd.names.split(/\s*\|\s{0,}/);
+  return cmd;
+}
+
+var getLocalizedProperty = function(feedKey, cmd, property) {
+  let key = cmd.names[0] + '.' + property;
+  return LocalizationUtils.getLocalizedString(feedKey, key, cmd[property]);
+}
