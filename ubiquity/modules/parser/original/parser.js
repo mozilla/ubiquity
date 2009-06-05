@@ -93,14 +93,16 @@ NLParser1.ParserQuery.prototype = {
   // Client code should set onResults to a function!!
 
   cancel: function() {
-    for (let x = 0; x < this._outstandingRequests.length; x++) {
-      // TODO implement something like:
-      // this._outstandingRequets[x].cancel();
+    for (var x = 0; x < this._outstandingRequests.length; x++) {
+      // abort outstanding ajax requests
+      this._outstandingRequests[x].abort();
     }
+    //reset outstanding requests
+    this._outstandingRequests = [];
   },
 
   // Read-only properties:
-  get finished() { return this._outstandingRequests.length == 0; },
+  get finished() { this._refreshOutstandingRequests(); return this._outstandingRequests.length == 0; },
   get hasResults() { return this._suggestionList.length > 0; },
   get suggestionList() { return this._suggestionList; },
 
@@ -114,11 +116,21 @@ NLParser1.ParserQuery.prototype = {
 
   // This method should be called by parser code only, not client code.
   _addPartiallyParsedSentence: function( partiallyParsedSentence ) {
+    var argStrings = partiallyParsedSentence._argStrings;
     partiallyParsedSentence.addListener( this );
     this._parsingsList.push( partiallyParsedSentence );
   },
 
   // Internal methods:
+  
+  _refreshOutstandingRequests: function() {
+    //check the ajax requests of each parsing to see which are still open
+    this._outstandingRequests = [];
+    for each (let parsing in this._parsingsList) {
+      this._outstandingRequests = this._outstandingRequests.concat(parsing._ajaxRequests);
+    }
+  },
+
   _refreshSuggestionList: function() {
     // get completions from parsings -- the completions may have changed
     // since the parsing list was first generated.
@@ -595,6 +607,7 @@ NLParser1.PartiallyParsedSentence = function(verb, argStrings, selObj,
   this._matchScore = matchScore;
   this._invalidArgs = {};
   this._validArgs = {};
+  this._ajaxRequests = [];
   /* Create fully parsed sentence with empty arguments:
    * If this command takes no arguments, this is all we need.
    * If it does take arguments, this initializes the parsedSentence
@@ -641,6 +654,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
     /* For the given argument of the verb, sends (text,html) to the nounType
      * gets back suggestions for the argument, and adds each suggestion.
      * Return true if at least one arg suggestion was added in this way. */
+
     let argument = this._verb._arguments[argName];
     try {
       let self = this;
@@ -653,6 +667,14 @@ NLParser1.PartiallyParsedSentence.prototype = {
         } else {
            self.addArgumentSuggestion(argName, newSugg);
         }
+
+	// Remove this request from list of open ajax requests
+        if (argument.type.ajaxRequest){
+	  if(self._ajaxRequests.indexOf(argument.type.ajaxRequest) != -1){
+	    self._ajaxRequests.splice(self._ajaxRequests.indexOf(argument.type.ajaxRequest), 1);
+	  }
+	}
+
         // Notify our listeners!!
         for (let i = 0; i < self._listeners.length; i++) {
           self._listeners[i].onNewParseGenerated();
@@ -661,6 +683,12 @@ NLParser1.PartiallyParsedSentence.prototype = {
       // This is where the suggestion is actually built.
       let suggestions = argument.type.suggest(text, html, callback,
                                               selectionIndices);
+
+      // Add ajax request from argument to ajax requests array
+      if(argument.type.ajaxRequest){
+	this._ajaxRequests.push(argument.type.ajaxRequest);
+      }
+
       for each( let argSugg in suggestions) {
         if (argSugg) { // strip out null suggestions -- TODO not needed?
           this.addArgumentSuggestion(argName, argSugg);

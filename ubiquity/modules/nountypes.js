@@ -467,8 +467,9 @@ var noun_type_async_address = {
 
 var noun_type_async_restaurant = {
   name: "restaurant(async)",
+  ajaxRequest: null,
   suggest: function(text, html, callback) {
-    getRestaurants( text, function( truthiness, suggestions ) {
+    this.ajaxRequest = getRestaurants( text, function( truthiness, suggestions ) {
       if (truthiness) {
 	for each (var sugg in suggestions){
           callback(CmdUtils.makeSugg(sugg));
@@ -837,7 +838,7 @@ function getRestaurants(query, callback){
     ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
   });
   
-  jQuery.ajax({
+  var ajaxRequest = jQuery.ajax({
     url: baseUrl+params,
     dataType: "json",
     error: function() {
@@ -854,6 +855,7 @@ function getRestaurants(query, callback){
       }
     }
   });
+  return ajaxRequest;
 }
 
 function isAddress( query, callback ) {
