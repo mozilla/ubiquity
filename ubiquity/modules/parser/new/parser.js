@@ -1076,7 +1076,7 @@ Parser.prototype = {
           suggestThisVerb = false;
       }
       if (suggestThisVerb) {
-        let parseCopy = parse.copy(); // cloneObject(parse)
+        let parseCopy = parse.copy();
         // same as before: the verb is copied from the verblist but also
         // gets some extra properties (id, text, _order) assigned.
         parseCopy._verb = cloneObject(verb);
@@ -1121,7 +1121,7 @@ Parser.prototype = {
     // make sure we keep the anaphor-substituted input intact... we're
     // going to make changes to text, html, score, and nountype
 
-    let initialCopy = cloneObject(parse);
+    let initialCopy = parse.copy();
     let returnArr = [initialCopy];
 
     for (let role in parse.args) {
@@ -1160,7 +1160,7 @@ Parser.prototype = {
                 thereWasASuggestionWithTheRightNounType = true;
 
                 for each (let parse in returnArr) {
-                  let parseCopy = cloneObject(parse);
+                  let parseCopy = parse.copy();
                   // copy the attributes we want to copy from the nounCache
                   parseCopy.args[role][i].text = suggestion.text;
                   parseCopy.args[role][i].html = suggestion.html;
@@ -2081,7 +2081,11 @@ Parser.Parse.prototype = {
 // NOTE: if you put this function in a different file and import it as
 // a module, it won't be able to correctly identify whether the input is
 // {{{instanceof Array}}} or not! Ask mitcho for details.
-var cloneObject = function cloneObject(o) {
+var cloneObject = function cloneObject(o,recursiveFlag) {
+
+  //if (!recursiveFlag)
+  //  Utils.log('cloning this:',o);
+
   if (o == null)
     return null;
   if (o == undefined)
@@ -2097,7 +2101,7 @@ var cloneObject = function cloneObject(o) {
 
   for (var i in o) {
     try {
-      ret[i] = cloneObject(o[i]);
+      ret[i] = cloneObject(o[i],true);
     } catch(e) {
       Utils.log(e);
     }
