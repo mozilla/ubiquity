@@ -49,7 +49,7 @@ function getCompletions( input, verbs, nountypes, context ) {
 function getCompletionsAsync( input, verbs, nountypes, context, callback) {
 
   if (!context)
-  context = { textSelection: "", htmlSelection: "" };
+    context = { textSelection: "", htmlSelection: "" };
   var parser = makeTestParser( LANG,
 			       verbs,
 			       nountypes,
@@ -106,6 +106,40 @@ AsyncTestManager.prototype = {
 
 };
 
+function testSmokeTestParserTwo() {
+  // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
+  // nountypes; ensure that it doesn't break.
+
+  try {
+    var jsm = {};
+    Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
+    Components.utils.import("resource://ubiquity/modules/parser/parser.js", jsm);
+
+    var services = jsm.UbiquitySetup.createServices();
+    // but don't set up windows or chrome or anything... just use this to
+    // get installed feeds.
+    var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
+    var nlParser = NLParser.makeParserForLanguage(
+      jsm.UbiquitySetup.languageCode,
+      [],
+      []
+    );
+    // now do what CommandManager does using services.commandSource
+    nlParser.setCommandList(services.commandSource.getAllCommands());
+    nlParser.setNounList(services.commandSource.getAllNounTypes());
+    // Do a query here and make sure one of the builtin commands is
+    // suggested...
+    var fakeContext = { textSelection: "", htmlSelection: "" };
+    nlParser.newQuery("help", fakeContext);
+    // OK, this test is *passing* even though gUbiquity is null when I try
+    // to actually run parser 2.  How can that be??
+  } catch (e) {
+    this.assert(false, "Error caught in smoke test: " + e );
+  }
+
+}
+
+/* TODO: test to make context menu work with parser 2 */
 
 function testParserTwoDirectOnly() {
   var dogGotPetted = false;

@@ -662,7 +662,8 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 //
 // {{{ options.name }}} The name of your command, which the user will
 // type into the command line, or choose from the context menu, to
-// activate it.  Cannot contain spaces.
+// activate it.  Cannot contain spaces.  DEPRECATED; use {{{ options.names }}}
+// for Parser2 compatibility.
 //
 // {{{ options.execute }}} The function which gets run when the user
 // executes your command.  If your command takes arguments (see below),
@@ -681,6 +682,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // ) which defines what type of values are valid for the argument,
 // a regular expression that filters what the argument can consist of,
 // , a dictionary of keys and values, or simply an array of strings.
+// DEPRECATED!  Use {{{ options.arguments }}} for Parser2 compatibility.
 //
 // {{{ options.modifiers }}} Defines any number of secondary arguments
 // of the command, a.k.a. indirect objects of the verb.  A dictionary
@@ -690,6 +692,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // argument.  The name of the property is the word that the user will
 // type on the command line to invoke the modifier, and the noun type
 // or regular expression determines the range of valid values.
+// DEPRECATED!  Use {{{ options.arguments }}} for Parser2 compatibility.
 //
 // For more about the use of arguments in your command, see
 // https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial#Commands_with_Arguments
@@ -1055,10 +1058,10 @@ CmdUtils.previewCallback = function previewCallback(pblock,
 // Fixes relative urls in data (eg. as returned by AJAX call). Usefull for
 // displaying fetched content in command previews.
 //
-// {{{data}}}: The data containing relative urls - accepts HTML, jQuery objects 
+// {{{data}}}: The data containing relative urls - accepts HTML, jQuery objects
 // and XML
 //
-// {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to 
+// {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to
 // which the relative paths are relative to)
 CmdUtils.absUrl = function absUrl(data, sourceUrl) {
   const {jQuery} = this.__globalObject;
@@ -1141,11 +1144,11 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 // a jQuery selector that will match an element that groups
 // result-data.  If this is not passed, Ubiquity will fall back to a
 // fragile method of pairing titles, previews and thumbnails, which
-// might not always work.  {{{options.parser.preview}}} can either be a 
-// jQuery selector that will match the preview returned by the search 
-// provider or a function that will receive a single argument (the 
-// container grouping the result-data) and must return a string that will 
-// be used as preview; {{{options.parser.baseurl}}}, a string that will 
+// might not always work.  {{{options.parser.preview}}} can either be a
+// jQuery selector that will match the preview returned by the search
+// provider or a function that will receive a single argument (the
+// container grouping the result-data) and must return a string that will
+// be used as preview; {{{options.parser.baseurl}}}, a string that will
 // be prefixed to relative links, such that relative paths will still
 // work out of context. If not passed, it will be auto-generated from
 // {{{options.url}}} (and thus //may// be incorrect)

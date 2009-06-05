@@ -7,7 +7,6 @@ Components.utils.import("resource://ubiquity/tests/framework.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
 
-//FLAGRANTLY_INCORRECT;
 
 const Ci = Components.interfaces;
 const Cc = Components.classes;
