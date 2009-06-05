@@ -50,6 +50,18 @@ $(onDocumentLoad);
 
 function onDocumentLoad() {
   loadSkinList();
+  
+  // add the language options
+  var ParserJSM = {};
+  Cu.import("resource://ubiquity/modules/parser/new/namespace.js",ParserJSM);
+  var parserRegistry = ParserJSM.parserRegistry;
+  
+  for (let code in parserRegistry) {
+    $('#language-select').append($("<option value='"+code+"' "+
+                              (code=='en'?" selected='true'":'')+">"
+                              +parserRegistry[code]+'</input>'));
+  }
+  
   // set the language option controls to the correct values:
   var parserVersion = UbiquitySetup.parserVersion;
   $("#use-new-parser-checkbox").attr('checked', ( parserVersion == 2 ));
