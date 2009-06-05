@@ -154,11 +154,11 @@ Parser.prototype = {
   // After the nountypes have been registered, {{{Parser.initialCache()}}} is
   // called.
   setCommandList: function setCommandList( commandList ) {
-    
+
     let ant = Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",null);
-   
+
     ant.activeNounTypes = [];
-   
+
     this._verbList = [];
     this._nounTypes = {};
 
@@ -174,24 +174,26 @@ Parser.prototype = {
         skippedSomeVerbs = true;
       }
     }
-    
+
     if (skippedSomeVerbs) {
       Components.utils.import("resource://ubiquity/modules/msgservice.js");
       var msgService = new AlertMessageService();
       msgService.displayMessage('Some verbs were not loaded as they are not compatible with Parser 2.');
     }
-    
+
     // now we'll load the localization properties files if they exist
     var LU = {};
     (function(){
       Components.utils.import("resource://ubiquity/modules/localization_utils.js");
       LU = LocalizationUtils;
     })();
-    
+
     for each (let verb in this._verbList) {
-      if (verb.feedUri.scheme == 'file') {
-        let feedKey = LU.getLocalFeedKey(verb.feedUri.path);
-        LU.loadLocalStringBundle(feedKey);
+      if (verb.feedUri) {
+        if (verb.feedUri.scheme == 'file') {
+          let feedKey = LU.getLocalFeedKey(verb.feedUri.path);
+          LU.loadLocalStringBundle(feedKey);
+        }
       }
     }
 
@@ -212,7 +214,7 @@ Parser.prototype = {
         delete(arg.nountype);
         // clear up some memory... we'll be cloning these verb objects
         // as part of parses for a long while still, so let's remove the actual
-        // nountypes, only leaving a copy in this._nounTypes and the 
+        // nountypes, only leaving a copy in this._nounTypes and the
         // activeNounTypes, and keeping the nountypeId in the verb arg.
 
       }
@@ -1054,7 +1056,7 @@ Parser.prototype = {
         if (!thisRoleIsUsed)
           suggestThisVerb = false;
       }
-      
+
       if (suggestThisVerb) {
         let parseCopy = parse.copy();
         // same as before: the verb is copied from the verblist but also
@@ -1077,7 +1079,7 @@ Parser.prototype = {
   //
   // {{{suggestArgs()}}} returns an array of copies of the given parse by
   // replacing each of the arguments' text with the each nountype's suggestion.
-  // This suggested result goes in the argument's {{{text}}}, {{{html}}}, 
+  // This suggested result goes in the argument's {{{text}}}, {{{html}}},
   // and {{{data}}} properties. We'll also take this
   // opportunity to set each arg's {{{score}}} property, also coming from
   // the nountype's {{{suggest()}}} result, to be used in computing the
@@ -1179,7 +1181,7 @@ Parser.prototype = {
     // now check for unfilled arguments so we can fill them with defaults
     let unfilledRoles = parse.getUnfilledRoles();
     let defaultsCache = {};
-    
+
     let ant = {};    Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",ant);
 
     for each (let role in unfilledRoles) {
@@ -1203,10 +1205,10 @@ Parser.prototype = {
       if (defaultValue.score)
         defaultValue.score *= 0.5;
 
-      // if a default value was set, let's make sure it has its modifier.      
+      // if a default value was set, let's make sure it has its modifier.
       if (defaultValue.text != '') {
         defaultValue.outerSpace = this.joindelimiter;
-        
+
         for each (let roleDesc in this.roles) {
           if (roleDesc.role == role) {
             defaultValue.modifier = roleDesc.delimiter;
@@ -1218,13 +1220,13 @@ Parser.prototype = {
           }
         }
       }
-      
+
       if (defaultValue.constructor.name != 'Array')
         defaultValue = [defaultValue];
-      
+
       defaultsCache[role] = defaultValue;
     }
-        
+
     for each (let role in unfilledRoles) {
       let newreturn = [];
       for each (let defaultValue in defaultsCache[role]) {
@@ -1604,7 +1606,7 @@ Parser.Query.prototype = {
           this._parsesThatIncludeThisArg[argText].push(parseId);
         }
       }
-      
+
       // if this parse doesn't have any arguments, complete it now.
       if (!foundArgs) {
         Utils.setTimeout(function() {
@@ -1626,7 +1628,7 @@ Parser.Query.prototype = {
     this._step++;
     this.finished = true;
     this.dump('done!!!');
-    
+
     this.dump("I am done running query.");
     this.dump('step: '+this._step);
     this.dump('times:');
@@ -1873,7 +1875,7 @@ Parser.Parse.prototype = {
 
     // return with score for the time being
     // DEBUG: score is being displayed here.
-    return display + displayFinal 
+    return display + displayFinal
            + ( printDebugInfo ? ' ('
                + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
                + ')'
@@ -2026,7 +2028,7 @@ Parser.Parse.prototype = {
 
   // ** {{{Parser.Parse.getUnfilledRoles()}}} **
   //
-  // Returns a list of roles which the parse's verb accepts but 
+  // Returns a list of roles which the parse's verb accepts but
   getUnfilledRoles: function PP_getUnfilledRoles() {
     if (!this._verb.id)
       return [];
@@ -2035,7 +2037,7 @@ Parser.Parse.prototype = {
              if (!(verbArg.role in this.args))
            ];
   },
-  
+
   copy: function PP_copy() {
     let ret = new Parser.Parse(this._parser,
                                this.input,
@@ -2055,7 +2057,7 @@ Parser.Parse.prototype = {
         ret.args[role].push({__proto__: eachArg});
       }
     }
-    
+
     ret.complete = this.complete;
     ret._suggested = this._suggested;
     ret.scoreMultiplier = this.scoreMultiplier;
@@ -2089,7 +2091,7 @@ var cloneObject = function cloneObject(o,recursiveFlag) {
 
 //  if (o.constructor == undefined)
 //    return o; // and cross our fingers
-  
+
   var ret = (o.constructor.name == 'Array') ? new Array() : new Object();
 
   for (var i in o) {
