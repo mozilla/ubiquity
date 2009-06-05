@@ -53,6 +53,7 @@ var demoParserInterface = {
     if (this.currentQuery.cancel != undefined)
       if (!this.currentQuery.finished)
         this.currentQuery.cancel();
+    this.currentParser._nounCache = {};
 
     $('#parseinfo').empty();
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val(),true); // this last true is for dontRunImmediately
@@ -66,17 +67,14 @@ var demoParserInterface = {
     
     $('#scoredParses').empty();
 
-    this.currentQuery.watch('_step',function(id,oldval,newval) {
-      let timefactor = 4;
-      if (oldval > 0)
-        //$('#timeinfo div').eq(oldval-1).css('width',(this._times[oldval] - this._times[oldval-1]) * timefactor);
-
-      if ($('#displayparseinfo').attr('checked')) {
+    if ($('#displayparseinfo').attr('checked') 
+        && this.runtimes + 2 > $('.runtimes').text()) {
+      this.currentQuery.watch('_step',function(id,oldval,newval) {
         switch (oldval) {
           case 1:
             $('<h3>step 1: split words</h3><code>'+this._input+'</code>').appendTo($('#parseinfo'));
             break;
-
+  
           case 2:
             $('<h3>step 2: pick possible verbs</h3><ul id="verbArgPairs"></ul>').appendTo($('#parseinfo'));
             for each (pair in this._verbArgPairs) {
@@ -87,7 +85,7 @@ var demoParserInterface = {
           case 3:
             $('<h3>step 3: pick possible clitics (TODO)</h3>').appendTo($('#parseinfo'));
             break;
-
+  
           case 4: 
             $('<h3>step 4: group into arguments</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
@@ -95,7 +93,7 @@ var demoParserInterface = {
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
-
+  
           case 5:
             $('<h3>step 5: anaphora substitution</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
@@ -119,7 +117,7 @@ var demoParserInterface = {
             }
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
-
+  
           case 8:
           case 9:
           case 10:
@@ -133,27 +131,27 @@ var demoParserInterface = {
               list.appendTo(html);
               html.appendTo($('#nounCache'));
             }*/
-
-
+  
+  
             $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._suggestedParses) {
               $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#suggestedParses'));
             }
             $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
-
-
+  
+  
             $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._scoredParses) {
               $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#debugScoredParses'));
             }
             $('<p><small>'+this._scoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
             break;
-
+  
         }
-      }
-      
-      return newval;
-    });
+        
+        return newval;
+      });
+    }
     
     this.currentQuery.onResults = function() {
       if (this.finished && !this.resulted) {
