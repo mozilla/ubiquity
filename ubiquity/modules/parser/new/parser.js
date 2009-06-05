@@ -187,23 +187,7 @@ Parser.prototype = {
     for each (let verb in this._verbList) {
       for each (let arg in verb.arguments) {
 
-        let thisNounType;
-
-        if (arg.nountype.constructor.name == "RegExp") {
-          // If a verb's target nountype is a regexp, we'll convert it to
-          // the standard nountype form here when registering it.
-          // We only need the NounUtils loaded in in chrome, as there are no regex
-          // nountypes in the parser-demo.
-          var nu = {};
-          Components.utils.import("resource://ubiquity/modules/nounutils.js", nu);
-          var nounTypeFromRegExp = nu.NounUtils.nounTypeFromRegExp;
-          thisNounType = nounTypeFromRegExp(arg.nountype);
-
-          // returning the converted version of the nountype back into the verb
-          arg.nountype = thisNounType;
-        } else {
-          thisNounType = (arg.nountype); // cloneObject
-        }
+        let thisNounType = arg.nountype;
 
         let thisNounTypeIsAlreadyRegistered = false;
 
@@ -220,7 +204,7 @@ Parser.prototype = {
           this._nounTypes[nounTypeId] = thisNounType;
           ant.activeNounTypes[nounTypeId] = thisNounType;
           
-          dump("loaded nountype: "+nounTypeId+": "+(thisNounType.name || '')+"\n");
+          dump("loaded nountype: "+thisNounType.id+": "+(thisNounType.name || '')+"\n");
           arg.nountypeId = nounTypeId;
           
           nounTypeId++;
