@@ -37,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["Parser", "nounCache"];
+var EXPORTED_SYMBOLS = ["Parser"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
@@ -57,19 +57,6 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 // At the end of the file is a {{{cloneObject}}} function which is used
 // throughout the parsing process.
 
-// ** {{{nounCache}}} **
-//
-// The noun cache is initialized here.
-// Perhaps this should be moved out into its own module in the future.
-// Nouns are cached in this cache in the {{{Parser.detectNounTypes}}} method
-// and associated methods. Later in the parse process elements of {{{nounCache}}}
-// are accessed directly, assuming that the nouns were already cached
-// using {{{Parser.detectNounType}}}.
-//
-// TODO: better cleanup + management of {{{nounCache}}}
-
-var nounCache = {};
-
 // == {{{Parser}}} prototype ==
 //
 // {{{Parser}}} object initialization takes place in each individual language
@@ -79,6 +66,7 @@ var nounCache = {};
 function Parser(lang) {
   this.lang = lang;
   var ctu = {};
+  this._nounCache = {};
   Components.utils.import("resource://ubiquity/modules/contextutils.js",
                           ctu);
   this._ContextUtils = ctu.ContextUtils;
@@ -134,6 +122,19 @@ Parser.prototype = {
   // during parser creation. This way, commonly used regular expressions
   // need only be constructed once.
   _patternCache: {},
+
+  // ** {{{Parser._nounCache}}} **
+  //
+  // The noun cache is initialized here.
+  // Perhaps this should be moved out into its own module in the future.
+  // Nouns are cached in this cache in the {{{Parser.detectNounTypes}}} method
+  // and associated methods. Later in the parse process elements of {{{_nounCache}}}
+  // are accessed directly, assuming that the nouns were already cached
+  // using {{{Parser.detectNounType}}}.
+  //
+  // TODO: better cleanup + management of {{{_nounCache}}}
+
+  _nounCache: {},
 
   _verbList: [],
   _nounTypes: [],
@@ -581,9 +582,7 @@ Parser.prototype = {
 
     // if the argString is empty, return a parse with no args.
     if (argString == '') {
-      defaultParse = new Parser.Parse({ branching: this.branching,
-                                        joindelimiter: this.joindelimiter,
-                                        roles: this.roles},
+      defaultParse = new Parser.Parse(this,
                                       input,
                                       verb,
                                       argString);
@@ -680,9 +679,7 @@ Parser.prototype = {
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parser.Parse which doesn't
       // have any arguments set.
-      var seedParse = new Parser.Parse({ branching: this.branching,
-                                         joindelimiter: this.joindelimiter,
-                                         roles: this.roles},
+      var seedParse = new Parser.Parse(this,
                                        input,
                                        verb,
                                        argString);
@@ -1043,6 +1040,7 @@ Parser.prototype = {
         if (!thisRoleIsUsed)
           suggestThisVerb = false;
       }
+      
       if (suggestThisVerb) {
         let parseCopy = parse.copy();
         // same as before: the verb is copied from the verblist but also
@@ -1055,7 +1053,6 @@ Parser.prototype = {
         parseCopy._verb._order = 0;
         // TODO: for verb forms which clearly should be sentence-final,
         // change this value to -1
-
         returnArray.push(parseCopy);
       }
     }
@@ -1108,7 +1105,7 @@ Parser.prototype = {
             let argText = parse.args[role][i].input;
 
             // At this point we assume that all of these values have already
-            // been cached in nounCache.
+            // been cached in Parser._nounCache.
 
             let newreturn = [];
             // make a copy using each of the suggestions in the nounCache
@@ -1119,7 +1116,7 @@ Parser.prototype = {
             // and just use the ones that came from the right nountype.
             let thereWasASuggestionWithTheRightNounType = false;
 
-            for each (suggestion in nounCache[argText]) {
+            for each (suggestion in this._nounCache[argText]) {
 
               let targetNountypeId = verbArg.nountypeId;
 
@@ -1254,9 +1251,9 @@ Parser.prototype = {
   detectNounType: function detectNounType(x,callback) {
     //Utils.log('detecting '+x+'\n');
 
-    if (x in nounCache) {
+    if (x in this._nounCache) {
       if (typeof callback == 'function')
-        callback(x,nounCache[x]);
+        callback(x,this._nounCache[x]);
     } else {
 
       /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
@@ -1268,7 +1265,7 @@ Parser.prototype = {
         // the callback gets returned the original argText and the array of
         // suggestions
         //if (typeof callback == 'function')
-        //  callback(x,nounCache[x]);
+        //  callback(x,this._nounCache[x]);
       };
 
       Utils.log(this._nounTypes);
@@ -1280,12 +1277,13 @@ Parser.prototype = {
         'resource://ubiquity/modules/parser/new/noun_worker.js',
         nounWorker);
 
+      var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions) {
-        if (!(x in nounCache))
-          nounCache[x] = [];
-        nounCache[x] = nounCache[x].concat(suggestions);
+        if (!(x in thisParser._nounCache))
+          thisParser._nounCache[x] = [];
+        thisParser._nounCache[x] = thisParser._nounCache[x].concat(suggestions);
         if (typeof callback == 'function')
-          callback(x,nounCache[x]);
+          callback(x,thisParser._nounCache[x]);
       };
 
       Utils.setTimeout(function detectNounType_runNounWorker(){
@@ -1745,7 +1743,7 @@ Parser.Query.prototype = {
 // the property {{{args}}} should be set individually afterwards.
 
 Parser.Parse = function(parser, input, verb, argString, parentId) {
-  this._partialParser = parser;
+  this._parser = parser;
   this.input = input;
   this._verb = verb;
   this.argString = argString;
@@ -1777,9 +1775,9 @@ Parser.Parse.prototype = {
     if (this._verb._order != -1)
       display = "<span class='verb' title='"
         + (this._verb.id || 'null') + "'>" + (this._verb.text || '<i>null</i>')
-        + "</span>" + this._partialParser.joindelimiter;
+        + "</span>" + this._parser.joindelimiter;
     else
-      displayFinal = this._partialParser.joindelimiter + "<span class='verb' title='"
+      displayFinal = this._parser.joindelimiter + "<span class='verb' title='"
       + this._verb.id + "'>" + (this._verb.text || '<i>null</i>') + "</span>";
 
     // Copy all of the arguments into an ordered array called argsArray.
@@ -1807,7 +1805,7 @@ Parser.Parse.prototype = {
 
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
-      if (this._partialParser.branching == 'right')
+      if (this._parser.branching == 'right')
         display += (arg.outerSpace || '') + (arg.modifier ? "<span class='prefix' title='"
           + arg.role+"'>" + arg.modifier + arg.innerSpace
           + "</span>":'') + "<span class='" + className + "' title=''>"
@@ -1843,14 +1841,14 @@ Parser.Parse.prototype = {
           let nt = ant.activeNounTypes[neededArg.nountypeId];
           label = nt.name || nt._name || "?";
         }
-        for each (let parserRole in this._partialParser.roles) {
+        for each (let parserRole in this._parser.roles) {
           if (parserRole.role == neededArg.role) {
-            if (this._partialParser.branching == 'left')
-              label += this._partialParser.joindelimiter
+            if (this._parser.branching == 'left')
+              label += this._parser.joindelimiter
                         + parserRole.delimiter;
             else
               label = parserRole.delimiter
-                       + this._partialParser.joindelimiter + label;
+                       + this._parser.joindelimiter + label;
             break;
           }
         }
@@ -1873,7 +1871,7 @@ Parser.Parse.prototype = {
     var newText = this.getLastNode().text;
     var findOriginal = new RegExp(originalText+'$');
     if (findOriginal.test(this.input))
-      return this.input.replace(findOriginal,newText) + this._partialParser.joindelimiter;
+      return this.input.replace(findOriginal,newText) + this._parser.joindelimiter;
 
     return this.input;
   },
@@ -1953,7 +1951,7 @@ Parser.Parse.prototype = {
         // this is the argText to check
         let argText = arg.input;
 
-        if (!(argText in nounCache))
+        if (!(argText in this._parser._nounCache))
           return false;
       }
     }
@@ -2025,12 +2023,25 @@ Parser.Parse.prototype = {
   },
   
   copy: function PP_copy() {
-    let ret = new Parser.Parse(this._partialParser,
+    let ret = new Parser.Parse(this._parser,
                                this.input,
                                cloneObject(this._verb),
                                this.argString,
                                this._id);
-    ret.args = {__proto__: this.args};
+
+    // NOTE: at one point we copied these args by
+    // ret.args = {__proto__: this.args}
+    // This, however, created duplicate parses (or, rather, the prototype copies
+    // got touched) when substituteNormalizedArgs is enacted. We must prototype
+    // each actual argument, not the collection of arguments, so this is what
+    // we did.
+    for (let role in this.args) {
+      ret.args[role] = [];
+      for each (let eachArg in this.args[role]) {
+        ret.args[role].push({__proto__: eachArg});
+      }
+    }
+    
     ret.complete = this.complete;
     ret._suggested = this._suggested;
     ret.scoreMultiplier = this.scoreMultiplier;
