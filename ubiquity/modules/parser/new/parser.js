@@ -159,7 +159,7 @@ Parser.prototype = {
     ant.activeNounTypes = [];
    
     this._verbList = [];
-    this._nounTypes = [];
+    this._nounTypes = {};
 
     let skippedSomeVerbs = false;
 
@@ -187,29 +187,13 @@ Parser.prototype = {
     for each (let verb in this._verbList) {
       for each (let arg in verb.arguments) {
 
-        let thisNounType = arg.nountype;
-
-        let thisNounTypeIsAlreadyRegistered = false;
-
-        for (let thisNounTypeId in this._nounTypes) {
-          if (sameObject(thisNounType,this._nounTypes[thisNounTypeId])) {
-            thisNounTypeIsAlreadyRegistered = true;
-            arg.nountypeId = thisNounTypeId;
-          }
+        if (!(arg.nountype.id in this._nounTypes)) {
+          this._nounTypes[arg.nountype.id] = arg.nountype;
+          ant.activeNounTypes[arg.nountype.id] = arg.nountype;
+          dump("loaded nountype: "+arg.nountype.id+": "+(arg.nountype.name || '')+"\n");
         }
 
-        // if this nountype has not been registered yet, let's do that now.
-        if (!thisNounTypeIsAlreadyRegistered) {
-          thisNounType._id = nounTypeId;
-          this._nounTypes[nounTypeId] = thisNounType;
-          ant.activeNounTypes[nounTypeId] = thisNounType;
-          
-          dump("loaded nountype: "+thisNounType.id+": "+(thisNounType.name || '')+"\n");
-          arg.nountypeId = nounTypeId;
-          
-          nounTypeId++;
-        }
-
+        arg.nountypeId = arg.nountype.id;
         delete(arg.nountype);
         // clear up some memory... we'll be cloning these verb objects
         // as part of parses for a long while still, so let's remove the actual
