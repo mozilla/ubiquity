@@ -5,6 +5,7 @@ Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
+const VER = 2;
 const LANG = "en";
 const MAX_SUGGESTIONS = 10;
 
@@ -19,25 +20,22 @@ var fakeContextUtils = {
 };
 
 function makeTestParser(lang, verbs, nouns, contextUtils) {
-  lang = lang ? lang : LANG;
-  verbs = verbs ? verbs : [];
-  nouns = nouns ? nouns : [];
-
-  if (!contextUtils)
-    contextUtils = fakeContextUtils;
-
-  return NLParser2.makeParserForLanguage(lang, verbs, nouns, contextUtils,
-                                        new TestSuggestionMemory());
+  return NLParser2.makeParserForLanguage(
+    lang || LANG,
+    verbs || [],
+    nouns || [],
+    contextUtils || fakeContextUtils,
+    new TestSuggestionMemory());
 }
 
 function getCompletions( input, verbs, nountypes, context ) {
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser( LANG,
-			       verbs,
-			       nountypes,
-                               fakeContextUtils,
-                               new TestSuggestionMemory() );
+  var parser = makeTestParser(LANG,
+                              verbs,
+                              nountypes,
+                              fakeContextUtils,
+                              new TestSuggestionMemory() );
   var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
   //dump("Query step is " + query._step + "\n");
   return query.suggestionList;
@@ -50,11 +48,11 @@ function getCompletionsAsync( input, verbs, nountypes, context, callback) {
 
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser( LANG,
-			       verbs,
-			       nountypes,
-                               fakeContextUtils,
-                               new TestSuggestionMemory() );
+  var parser = makeTestParser(LANG,
+                              verbs,
+                              nountypes,
+                              fakeContextUtils,
+                              new TestSuggestionMemory());
 
   var query = parser.newQuery( input, context, MAX_SUGGESTIONS, true );
   /* The true at the end tells it not to run immediately.  This is
@@ -118,9 +116,9 @@ function testSmokeTestParserTwo() {
     var services = jsm.UbiquitySetup.createServices();
     // but don't set up windows or chrome or anything... just use this to
     // get installed feeds.
-    var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
+    var NLParser = jsm.NLParserMaker(VER);
     var nlParser = NLParser.makeParserForLanguage(
-      jsm.UbiquitySetup.languageCode,
+      LANG,
       [],
       []
     );
@@ -130,13 +128,12 @@ function testSmokeTestParserTwo() {
     // Do a query here and make sure one of the builtin commands is
     // suggested...
     var fakeContext = { textSelection: "", htmlSelection: "" };
-    nlParser.newQuery("help", fakeContext);
+    nlParser.newQuery("help", fakeContext, MAX_SUGGESTIONS);
     // OK, this test is *passing* even though gUbiquity is null when I try
     // to actually run parser 2.  How can that be??
   } catch (e) {
     this.assert(false, "Error caught in smoke test: " + e );
   }
-
 }
 
 /* TODO: test to make context menu work with parser 2 */
@@ -144,7 +141,7 @@ function testSmokeTestParserTwo() {
 function testParserTwoDirectOnly() {
   var dogGotPetted = false;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				  "beagle", "bulldog", "husky"]);
+                                            "beagle", "bulldog", "husky"]);
 
   var cmd_pet = {
     execute: function(context, args) {
@@ -188,10 +185,10 @@ function testParserTwoParseWithModifier() {
   var dogGotWashed = null;
   var dogGotWashedWith = null;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				"beagle", "bulldog", "husky"]);
+                                            "beagle", "bulldog", "husky"]);
   var washingObj = new NounUtils.NounType( "washing object",
-					  ["sponge", "hose", "spork",
-					  "bathtub", "fire hose"]);
+                                           ["sponge", "hose", "spork",
+                                            "bathtub", "fire hose"]);
   var cmd_wash = {
     execute: function(context, args) {
       dogGotWashed = args.object.text;
@@ -223,78 +220,5 @@ function testParserTwoParseWithModifier() {
   atm.waitForTestToFinish();
   this.assert( atm.passed, atm.errorMsg );
 }
-
-function testSimplifiedParserTwoApi() {
-  var dogGotWashed = null;
-  var dogGotWashedWith = null;
-  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				"beagle", "bulldog", "husky"]);
-  var washingObj = new NounUtils.NounType( "washing object",
-					  ["sponge", "hose", "spork",
-					  "bathtub", "fire hose"]);
-  var cmd_wash = {
-    execute: function(context, args) {
-      dogGotWashed = args.object.text;
-      dogGotWashedWith = args.instrument.text;
-    },
-    names: ["wash"],
-    arguments: { object: dog, instrument: washingObj }
-  };
-
-  var inputWords = "wash pood with sp";
-  var atm = new AsyncTestManager();
-
-  var testFunc = function(completions) {
-    atm.assert( completions.length == 2, "Should be 2 completions" );
-    completions[0].execute();
-    atm.assert( dogGotWashed == "poodle");
-    atm.assert( dogGotWashedWith == "sponge");
-    completions[1].execute();
-    atm.assert( dogGotWashed == "poodle");
-    atm.assert( dogGotWashedWith == "spork");
-    atm.finishTest();
-  };
-
-  getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
-                       testFunc);
-  atm.waitForTestToFinish();
-  this.assert( atm.passed, atm.errorMsg );
-
-}
-
-/*function testParserTwoInternationalization() {
-
-}*/
-
-/*
-function testNounTypeSpeed() {
-  var slownoun = new NounUtils.NounType('anything');
-  slownoun.suggest = function(text) {
-    dump('checking '+text+'\n');
-    var start = new Date();
-    var now = null;
-    do { now = new Date(); }
-    while(now - start < 1000);
-    return [ NounUtils.makeSugg(text) ];
-  };
-
-  var cmd_hit = {
-
-    execute: function(context, args) {
-      dogGotPetted = args.object.text;
-    },
-    names: {
-      en: ["hit"]
-    },
-    arguments: [
-      {role: 'object', nountype: slownoun}
-    ]
-  };
-  var completions = getCompletions( "hit me", [cmd_hit], [slownoun], null );
-  dump("Completions are: " + completions + "\n");
-  dump("First verb is " + completions[0]._verb.text + "\n");
-  this.assert( completions.length == 2, "should be 2 completions" );
-}
-*/
 
 exportTests(this);
