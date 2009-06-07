@@ -199,7 +199,7 @@ CommandManager.prototype = {
   activateAccessKey: function CM_activateAccessKey(number) {
     this._previewer.activateAccessKey(number);
   },
-
+  
   reset : function CM_reset() {
     // TODO: I think?
     if (!this.__activeQuery.finished)

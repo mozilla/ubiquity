@@ -63,6 +63,9 @@ const DEFAULT_SCORE = 0.9;
 NounUtils.NounType = function NounType(name, expectedWords, defaultWords) {
   if (!(this instanceof NounType))
     return new NounType(name, expectedWords, defaultWords);
+
+  this.id = "#n_" + Utils.computeCryptoHash("MD5", (uneval(expectedWords) +
+                                                    uneval(defaultWords)));
   this.name = name;
   if (typeof expectedWords === "string")
     expectedWords = expectedWords.match(/\S+/g);
@@ -92,16 +95,18 @@ NounUtils.NounType.prototype = {
 // {{{name}}} is an optional string specifying {{{name}}} of the nountype.
 
 NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
+  var isGeneric = regexp.test("");
+  // rankLast is obsolete in Parser2
+  var score = isGeneric ? 0.7 : 1;
   return {
+    id: "#n" + regexp,
     name: name || "?",
     _regexp: regexp,
-    rankLast: regexp.test(""),
+    rankLast: isGeneric,
     suggest: function(text, html, callback, selectionIndices) {
       var match = text.match(this._regexp);
       return (match
-              ? [NounUtils.makeSugg(text, html, match,
-                                    // rankLast is obsolete in Parser2
-                                    this.rankLast ? 0.7 : 1,
+              ? [NounUtils.makeSugg(text, html, match, score,
                                     selectionIndices)]
               : []);
     },
