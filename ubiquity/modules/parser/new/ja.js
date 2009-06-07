@@ -55,6 +55,9 @@ function makeParser() {
     {role: 'position', delimiter: 'の'},
     {role: 'object', delimiter: 'の'}
   ];
+
+  // Japanese verbs are always sentence-final.
+  ja.suggestedVerbOrder = -1;
   
   ja._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in ja.roles)].join('|')+')','g');
   ja.wordBreaker = function(input) {
