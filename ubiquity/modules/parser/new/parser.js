@@ -172,7 +172,8 @@ Parser.prototype = {
 
     // First we'll register the verbs themselves.
     for (let verb in commandList) {
-      if (commandList[verb].names != undefined
+      if (!commandList[verb].disabled
+          && commandList[verb].names != undefined
           && commandList[verb].arguments != undefined) {
         this._verbList.push(commandList[verb]);
         dump("loaded verb: "+verb+"\n");
