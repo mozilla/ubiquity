@@ -96,6 +96,12 @@ Parser.prototype = {
   // TODO: {{{joindelimiter}}} and {{{usespaces}}} may or may not be
   // redundant.
   joindelimiter: ' ',
+  // ** {{{Parser.verbSuggestionPosition}}} **
+  // For verb-final languages, this should be -1.
+  // For languages where some verb forms are sentence-initial, some are
+  // sentence-final (e.g. German, Dutch), suggestedVerbOrder can be a function
+  // which takes the verb name and returns either 0 or -1.
+  suggestedVerbOrder: 0,
   examples: [],
   clitics: [],
   anaphora: ['this'],
@@ -1062,11 +1068,11 @@ Parser.prototype = {
         parseCopy._verb = cloneObject(verb);
         parseCopy._verb.id = verbId;
 
-        // by default, use the English name, or the verb's main name.
-        parseCopy._verb.text = verb.names[0] || verbId;
-        parseCopy._verb._order = 0;
-        // TODO: for verb forms which clearly should be sentence-final,
-        // change this value to -1
+        // by default, use the first name.
+        parseCopy._verb.text = verb.names[0];
+        parseCopy._verb._order = (typeof this.suggestedVerbOrder == "function")
+                                  ? this.suggestedVerbOrder(verb.names[0])
+                                  : this.suggestedVerbOrder ;
         returnArray.push(parseCopy);
       }
     }
