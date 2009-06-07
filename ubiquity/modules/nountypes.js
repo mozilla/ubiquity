@@ -299,45 +299,38 @@ var noun_type_command = noun_type_commands = {
 var noun_type_twitter_user = {
   name: "user",
   rankLast: true,
-  suggest: function(text, html, cb, selected){
-    // Twitter usernames can't contain spaces; reject input with spaces.
-    // Also reject text from selection.
-    if (!text || / /.test(text) || selected)
+  suggest: function(text, html, cb, selected) {
+    // reject text from selection.
+    if (!text || selected)
       return [];
-    
-    var suggs = [];
 
-    // If we don't need to ask the user for their master password, let's
-    // see if we can suggest known users that the user has logged-in as
-    // before.
-    var tokenDB = (Cc["@mozilla.org/security/pk11tokendb;1"].
-                   getService(Ci.nsIPK11TokenDB));
-    var token = tokenDB.getInternalKeyToken();
-
+    var suggs = CmdUtils.grepSuggs(text, this.logins());
+    suggs.push(CmdUtils.makeSugg(text, null, {}, 0.7));
+    return suggs;
+  },
+  logins: function(reload) {
+    if (this._list && !reload) return this._list;
+    var list = [];
+    var token = (Cc["@mozilla.org/security/pk11tokendb;1"]
+                 .getService(Ci.nsIPK11TokenDB)
+                 .getInternalKeyToken());
     if (!token.needsLogin() || token.isLoggedIn()) {
       // Look for twitter usernames stored in password manager
       var usersFound = {};
       var passwordManager = (Cc["@mozilla.org/login-manager;1"]
                              .getService(Ci.nsILoginManager));
-      var urls = ["https://twitter.com", "http://twitter.com"];
-      urls.forEach(
-        function(url) {
-          var logins = passwordManager.findLogins({}, url, "", "");
-          
-          for (var x = 0; x < logins.length; x++) {
-            var login = logins[x];
-            if (login.username.indexOf(text) != -1 &&
-                !usersFound[login.username]) {
-              usersFound[login.username] = true;
-              suggs.push(CmdUtils.makeSugg(login.username, null, login));
-            }
-          }
-        });
+      for each (let url in ["https://twitter.com", "http://twitter.com"]) {
+        for each (let login in passwordManager.findLogins({}, url, "", "")) {
+          let {username} = login;
+          if (username in usersFound) continue;
+          usersFound[username] = true;
+          list.push(CmdUtils.makeSugg(username, null, login));
+        }
+      }
     }
-
-    suggs.push(CmdUtils.makeSugg(text, null, null, 0.7));
-    return suggs;
-  }
+    return this._list = list;
+  },
+  _list: null,
 };
 
 var noun_type_number = {
