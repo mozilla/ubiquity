@@ -37,13 +37,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
+var EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/codesource.js");
-Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity/modules/collection.js");
-Components.utils.import("resource://ubiquity/modules/feed_plugin_utils.js");
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/codesource.js");
+Cu.import("resource://ubiquity/modules/sandboxfactory.js");
+Cu.import("resource://ubiquity/modules/collection.js");
+Cu.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
 const DEFAULT_FEED_TYPE = "commands";
@@ -162,22 +164,18 @@ function makeCmdForObj(sandbox, objName, feedUri) {
   cmdName = cmdName.replace(/_/g, "-");
   var cmdFunc = sandbox[objName];
 
-  var setCommandContext;
-  var setFeedContext;
+  Cu.import("resource://ubiquity/modules/localization_utils.js");
 
-  (function(){
-    Components.utils.import("resource://ubiquity/modules/localization_utils.js");
-    setCommandContext = LocalizationUtils.setCommandContext;
-    setFeedContext = LocalizationUtils.setFeedContext;
-  })()
-    
   var cmd = {
     __proto__: cmdFunc,
+    toString: function CS_toString() {
+      return "[object UbiquityCommand " + this.name + "]";
+    },
     name: cmdName,
     execute: function CS_execute(context, directObject, modifiers) {
       sandbox.context = context;
-      setCommandContext(originalCmdName);
-      setFeedContext(feedUri);
+      LocalizationUtils.setCommandContext(originalCmdName);
+      LocalizationUtils.setFeedContext(feedUri);
       return cmdFunc.call(cmd, directObject, modifiers);
     },
     feedUri: feedUri
@@ -187,8 +185,8 @@ function makeCmdForObj(sandbox, objName, feedUri) {
     cmd.preview = function CS_preview(context, previewBlock, directObject,
                                       modifiers) {
       sandbox.context = context;
-      setCommandContext(originalCmdName);
-      setFeedContext(feedUri);
+      LocalizationUtils.setCommandContext(originalCmdName);
+      LocalizationUtils.setFeedContext(feedUri);
       return cmdFunc.preview.call(cmd, previewBlock, directObject,
                                   modifiers);
     };
