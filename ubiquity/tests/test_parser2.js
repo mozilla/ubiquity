@@ -221,4 +221,80 @@ function testParserTwoParseWithModifier() {
   this.assert( atm.passed, atm.errorMsg );
 }
 
+function testSimplifiedParserTwoApi() {
+  var dogGotWashed = null;
+  var dogGotWashedWith = null;
+  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
+				"beagle", "bulldog", "husky"]);
+  var washingObj = new NounUtils.NounType( "washing object",
+					  ["sponge", "hose", "spork",
+					  "bathtub", "fire hose"]);
+
+  // This test is currently failing....it gets a feedKey.nountype undefined
+  // in new/parser.js line 207.
+  var cmd_wash = {
+    execute: function(context, args) {
+      dogGotWashed = args.object.text;
+      dogGotWashedWith = args.instrument.text;
+    },
+    names: ["wash"],
+    arguments: { object: dog, instrument: washingObj }
+  };
+
+  var inputWords = "wash pood with sp";
+  var atm = new AsyncTestManager();
+
+  var testFunc = function(completions) {
+    atm.assert( completions.length == 2, "Should be 2 completions" );
+    completions[0].execute();
+    atm.assert( dogGotWashed == "poodle");
+    atm.assert( dogGotWashedWith == "sponge");
+    completions[1].execute();
+    atm.assert( dogGotWashed == "poodle");
+    atm.assert( dogGotWashedWith == "spork");
+    atm.finishTest();
+  };
+
+  getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
+                       testFunc);
+  atm.waitForTestToFinish();
+  this.assert( atm.passed, atm.errorMsg );
+
+}
+
+/*function testParserTwoInternationalization() {
+
+}*/
+
+/*
+function testNounTypeSpeed() {
+  var slownoun = new NounUtils.NounType('anything');
+  slownoun.suggest = function(text) {
+    dump('checking '+text+'\n');
+    var start = new Date();
+    var now = null;
+    do { now = new Date(); }
+    while(now - start < 1000);
+    return [ NounUtils.makeSugg(text) ];
+  };
+
+  var cmd_hit = {
+
+    execute: function(context, args) {
+      dogGotPetted = args.object.text;
+    },
+    names: {
+      en: ["hit"]
+    },
+    arguments: [
+      {role: 'object', nountype: slownoun}
+    ]
+  };
+  var completions = getCompletions( "hit me", [cmd_hit], [slownoun], null );
+  dump("Completions are: " + completions + "\n");
+  dump("First verb is " + completions[0]._verb.text + "\n");
+  this.assert( completions.length == 2, "should be 2 completions" );
+}
+*/
+
 exportTests(this);
