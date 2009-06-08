@@ -182,7 +182,7 @@ function fillTableRowForCmd(row, cmd, className) {
       escapeHtml(cmd.homepage) + '">' +
       escapeHtml(cmd.homepage) + '</a>.');
 
-  if (cmd.synonyms)
+  if ((cmd.synonyms || 0).length)
     cmdElement.find(".synonyms")
       .before("also called ").text(cmd.synonyms.join(", "));
 

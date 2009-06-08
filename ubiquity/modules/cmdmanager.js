@@ -149,8 +149,8 @@ CommandManager.prototype = {
     var content = "";
     var suggestionList = this.__activeQuery.suggestionList;
     for (let x = 0, l = suggestionList.length; x < l; ++x) {
-      let suggText = suggestionList[x].getDisplayText();
-      let suggIconUrl = suggestionList[x].getIcon();
+      let suggText = suggestionList[x].displayText;
+      let suggIconUrl = suggestionList[x].icon;
       let suggIcon = "";
       if (suggIconUrl)
         suggIcon = '<img src="' + Utils.escapeHtml(suggIconUrl) + '"/>';
@@ -276,8 +276,9 @@ CommandManager.prototype = {
     if(!this.hasSuggestions())
       return null;
 
-    var suggText = (this.__activeQuery.suggestionList[this.__hilitedSuggestion]
-                    .getCompletionText());
+    var suggText = (this.__activeQuery
+                    .suggestionList[this.__hilitedSuggestion]
+                    .completionText);
     this.updateInput(suggText, context);
 
     return suggText;
@@ -287,7 +288,7 @@ CommandManager.prototype = {
     if(!this.hasSuggestions())
       return "";
     var sugg = this.__activeQuery.suggestionList[this.__hilitedSuggestion];
-    return sugg.getDisplayText();
+    return sugg.displayText;
   },
 
   makeCommandSuggester: function CM_makeCommandSuggester() {

@@ -385,7 +385,7 @@ NLParser1.ParsedSentence.prototype = {
     }
   },
 
-  getCompletionText: function() {
+  get completionText() {
     /* return plain text that we should set the input box to if user hits
      the key to autocomplete to this sentence. */
 
@@ -395,35 +395,33 @@ NLParser1.ParsedSentence.prototype = {
      * rewrite to make sense! -- JONO */
      var sentence = this._verb._name;
      var directObjPresent = false;
-     for ( var x in this._verb._arguments ) {
-       if ( this._argSuggs[x] && this._argSuggs[x].text != "" ) {
-         let preposition = "";
-         let argText = this._argSuggs[x].text;
-         if ( x == "direct_object" ) {
+     for (var x in this._verb._arguments) {
+       let argText = (this._argSuggs[x] || 0).text;
+       let preposition = "";
+       if (argText) {
+         if (x == "direct_object") {
            /*Check for a valid text/html selection. We'll replace
               the text with a pronoun for readability */
-              if ( (this._selObj.text == argText) ||
-                   (this._selObj.html == argText) ) {
-                /*In future, the pronoun should be contextual to the
-                selection */
-                argText = "selection";
-              }
-              if ( argText )
-                directObjPresent = true;
-              preposition = " ";
-        } else{
-          //only append the modifiers if we have a valid direct-object
-          if ( argText && directObjPresent )
-            preposition = " " + x + " ";
-        }
-          //Concatenate sentence pieces
-          sentence += preposition + argText;
+           if (this._selObj.text == argText ||
+               this._selObj.html == argText) {
+             //In future, the pronoun should be contextual to the selection
+             argText = "selection";
+           }
+           directObjPresent = true;
+           preposition = " ";
+         } else {
+           //only append the modifiers if we have a valid direct-object
+           if (argText && directObjPresent)
+             preposition = " " + x + " ";
+         }
+         //Concatenate sentence pieces
+         sentence += preposition + argText;
       }
     }
     return sentence + " ";
   },
 
-  getDisplayText: function() {
+  get displayText() {
     // returns html formatted sentence for display in suggestion list
     var sentence = Utils.escapeHtml(this._verb._name);
     var args = this._verb._arguments;
@@ -448,7 +446,7 @@ NLParser1.ParsedSentence.prototype = {
     return sentence;
   },
 
-  getIcon: function() {
+  get icon() {
     return this._verb._icon;
   },
 

@@ -40,6 +40,8 @@
 var EXPORTED_SYMBOLS = ["Parser"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
+Components.utils.import("resource://ubiquity/modules/msgservice.js");
+Components.utils.import("resource://ubiquity/modules/localization_utils.js");
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -91,7 +93,7 @@ Parser.prototype = {
   // The {{{joindelimiter}}} parameter is the delimiter that gets inserted
   // when gluing arguments and their delimiters back together in display.
   // In the case of most languages, the space (' ') is fine.
-  // See how it's used in {{{Parser.Parse.getDisplayText()}}}.
+  // See how it's used in {{{Parser.Parse.displayText}}}.
   //
   // TODO: {{{joindelimiter}}} and {{{usespaces}}} may or may not be
   // redundant.
@@ -111,7 +113,6 @@ Parser.prototype = {
   // a list of semantic roles and their delimiters
   roles: [{role: 'object', delimiter: ''}],
 
-
   // ** {{{Parser._rolesCache}}} **
   //
   // The {{{_rolesCache}}} is a cache of the different subsets of the
@@ -124,7 +125,7 @@ Parser.prototype = {
   // ** {{{Parser._patternCache}}} **
   //
   // The {{{_patternCache}}} keeps various regular expressions for use by the
-  // parser. Most are created by {{{Parser.initialCache()}}}, which is called
+  // parser. Most are created by {{{Parser.initializeCache()}}}, which is called
   // during parser creation. This way, commonly used regular expressions
   // need only be constructed once.
   _patternCache: {},
@@ -139,11 +140,10 @@ Parser.prototype = {
   // using {{{Parser.detectNounType}}}.
   //
   // TODO: better cleanup + management of {{{_nounCache}}}
-
   _nounCache: {},
 
   _verbList: [],
-  _nounTypes: [],
+  _nounTypes: {},
 
   // ** {{{Parser.setCommandList()}}} **
   //
@@ -157,7 +157,7 @@ Parser.prototype = {
   // are used for nountype detection as well as the comparison later with the
   // nountypes specified in the verbs for argument suggestion and scoring.
   //
-  // After the nountypes have been registered, {{{Parser.initialCache()}}} is
+  // After the nountypes have been registered, {{{Parser.initializeCache()}}} is
   // called.
   setCommandList: function setCommandList( commandList ) {
 
@@ -171,36 +171,25 @@ Parser.prototype = {
     let skippedSomeVerbs = false;
 
     // First we'll register the verbs themselves.
-    for (let verb in commandList) {
-      if (!commandList[verb].disabled
-          && commandList[verb].names != undefined
-          && commandList[verb].arguments != undefined) {
-        this._verbList.push(commandList[verb]);
-        dump("loaded verb: "+verb+"\n");
-      } else {
+    for each (let verb in commandList) {
+      if (!verb.disabled && verb.names && verb.arguments)
+        this._verbList.push(verb);
+      else
         skippedSomeVerbs = true;
-      }
     }
+    dump("loaded verbs:\n" +
+         this._verbList.map(function(v) v.names[0]).join("\n") + "\n");
 
     if (skippedSomeVerbs) {
-      Components.utils.import("resource://ubiquity/modules/msgservice.js");
       var msgService = new AlertMessageService();
-      msgService.displayMessage('Some verbs were not loaded as they are not compatible with Parser 2.');
+      msgService.displayMessage("Some verbs were not loaded " +
+                                "as they are not compatible with Parser 2.");
     }
 
-    // now we'll load the localization properties files if they exist
-    var LU = {};
-    (function(){
-      Components.utils.import("resource://ubiquity/modules/localization_utils.js");
-      LU = LocalizationUtils;
-    })();
-
     for each (let verb in this._verbList) {
-      if (verb.feedUri) {
-        if (verb.feedUri.scheme == 'file') {
-          let feedKey = LU.getLocalFeedKey(verb.feedUri.path);
-          LU.loadLocalStringBundle(feedKey);
-        }
+      if ((verb.feedUri || 0).scheme === "file") {
+        let feedKey = LocalizationUtils.getLocalFeedKey(verb.feedUri.path);
+        LocalizationUtils.loadLocalStringBundle(feedKey);
       }
     }
 
@@ -210,11 +199,10 @@ Parser.prototype = {
 
     for each (let verb in this._verbList) {
       for each (let arg in verb.arguments) {
-
-        if (!(arg.nountype.id in this._nounTypes)) {
-          this._nounTypes[arg.nountype.id] = arg.nountype;
-          ant.activeNounTypes[arg.nountype.id] = arg.nountype;
-          dump("loaded nountype: "+arg.nountype.id+": "+(arg.nountype.name || '')+"\n");
+        let {id} = arg.nountype;
+        if (!(id in this._nounTypes)) {
+          this._nounTypes[id] = arg.nountype;
+          ant.activeNounTypes[id] = arg.nountype;
         }
 
         arg.nountypeId = arg.nountype.id;
@@ -226,8 +214,11 @@ Parser.prototype = {
         // activeNounTypes, and keeping the nountypeId in the verb arg.
       }
     }
+    dump("loaded nouns:\n" +
+         [n.id + " " + n.name for each (n in this._nounTypes)].join("\n") +
+         "\n");
 
-    this.initialCache();
+    this.initializeCache();
   },
 
 
@@ -238,40 +229,26 @@ Parser.prototype = {
     return true;
   },
 
-  // ** {{{Parser.initialCache()}}} **
+  // ** {{{Parser.initializeCache()}}} **
   //
   // This method is initialized when the language is loaded.
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
-  initialCache: function() {
-
-    // Just a little utility generator to loop through all the names of
-    // all the verbs.
-    function allNames(verbs) {
-      for each (var verb in verbs) {
-        for each (var name in verb.names) {
-          yield name;
-        }
-      }
-    }
-
-    // a little utility function to create a RegExp which matches any prefix
-    // of a set of strings
-    // it was only being used in one place so I moved it here
-    // TODO: order by descending order of length of prefixes
+  initializeCache: function() {
+    // a little utility function to create a regex string
+    // which matches any prefix of a set of strings.
     function matchString(arr) {
-      var prefixes = [];
-      for each (var a in arr) {
-        for (var i=1;i<=a.length;i++) {
-          prefixes.push(a.slice(0,i));
-        }
-      }
-      return prefixes.reverse().join('|');
+      var prefixes = {}; // removing duplicates
+      for each (let s in arr) for (let i in s)
+        prefixes[s.slice(0, +i + 1)] = 1;
+      return ([p for (p in prefixes)]
+              .sort(function(a, b) b.length - a.length)
+              .join('|'));
     }
 
     // this._patternCache.verbMatcher matches any active verb or prefix
     // thereof.
     this._patternCache.verbMatcher = matchString(
-      [name for (name in allNames(this._verbList))]);
+      [n for each (verb in this._verbList) for each (n in verb.names)]);
 
     // this._patternCache.verbInitialTest matches a verb at the beginning
     this._patternCache.verbInitialTest = new RegExp(
@@ -290,21 +267,19 @@ Parser.prototype = {
         '('+(this.anaphora.join('|'))+')'+
         (this.usespaces?'(\\s+.*$|$)':'(.*$)'));
 
-    // cache the roles used in each verb
+    // cache the roles used in each verb and a regex
+    // which recognizes the delimiters appropriate for each verb
+    var rolesCache = this._rolesCache = {};
+    var delimPatterns = this._patternCache.delimiters = {};
     for (let verbId in this._verbList) {
       // _rolesCache[verbId] is the subset of roles such that
       // there is at least one argument in verb which matches that role
-      this._rolesCache[verbId] =
+      rolesCache[verbId] =
         [role for each (role in this.roles)
          if (this._verbList[verbId].arguments.some(
-               function(arg) arg.role == role.role ) ) ];
+               function(arg) arg.role === role.role ) ) ];
+      delimPatterns[verbId] = regexFromDelimeters(rolesCache[verbId]);
     }
-
-    // also cache a regex for recognizing the delimiters appropriate for
-    // each verb
-    var delimPatterns = this._patternCache.delimiters = {};
-    for (let verbId in this._verbList)
-      delimPatterns[verbId] = regexFromDelimeters(this._rolesCache[verbId]);
 
     // this is the RegExp to recognize delimiters for an as yet unspecified
     // verb... in other words, it's just a RegExp to recognize every
@@ -588,7 +563,7 @@ Parser.prototype = {
   // {{{theseParses}}} to become the basis for the next loop. It's //intense//.
   //
   // Each argument that's set gets a property called {{{_order}}}. This is used
-  // by {{{Parser.Parse.getDisplayText()}}} in order to reconstruct the input
+  // by {{{Parser.Parse.displayText}}} in order to reconstruct the input
   // for display. The _order values become left-to-right placement values.
   // Each argument gets one _order value for both the argument and the delimiter
   // as we can reconstruct the order of the delimiter wrt the argument using
@@ -598,7 +573,7 @@ Parser.prototype = {
   // inline.
   //
   // The {{{scoreMultiplier}}} parameter is set at this point, making
-  // {{{getMaxScore()}}} valid for all returned parses.
+  // {{{maxScore}}} valid for all returned parses.
 
   argFinder: function(argString, verb, input) {
 
@@ -1187,7 +1162,7 @@ Parser.prototype = {
     }
 
     // now check for unfilled arguments so we can fill them with defaults
-    let unfilledRoles = parse.getUnfilledRoles();
+    let {unfilledRoles} = parse;
     let defaultsCache = {};
 
     let ant = {};    Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js",ant);
@@ -1642,7 +1617,7 @@ Parser.Query.prototype = {
   get suggestionList() {
     return (this._scoredParses
             .slice()
-            .sort(function(a,b) b.getScore() - a.getScore())
+            .sort(function(a,b) b.score - a.score)
             .slice(0, this.maxSuggestions));
   },
 
@@ -1668,7 +1643,7 @@ Parser.Query.prototype = {
   // Looking at the {{{maxSuggestions}}} value (= m), defines "the bar" (the
   // lowest current score of the top m parses in the {{{parseCollection}}}).
   // Adds the {{{newParse}}} to the {{{parseCollection}}} if it has a chance
-  // at besting "the bar" in the future ({{{newParse.getMaxScore() > theBar}}}).
+  // at besting "the bar" in the future ({{{newParse.maxScore > theBar}}}).
   // If {{{newParse}}} was added and that "raised the bar", it will go through
   // all parses in the {{{parseCollection}}} and kill off those which have
   // no chance in hell of overtaking the new bar.
@@ -1679,15 +1654,15 @@ Parser.Query.prototype = {
   addIfGoodEnough: function(parseCollection,newParse) {
 
     if (parseCollection.length < this.maxSuggestions)
-      return parseCollection.concat([newParse]);
+      return parseCollection.concat(newParse);
 
     // reorder parseCollection so that it's in decreasing current score order
-    parseCollection.sort( function(a,b) b.getScore() - a.getScore() );
+    parseCollection.sort(function(a, b) b.score - a.score);
 
     // "the bar" is the lowest current score among the top candidates
     // New candidates must exhibit the *potential* (via maxScore) to beat
     // this bar in order to get added.
-    let theBar = parseCollection[this.maxSuggestions - 1].getScore();
+    let theBar = parseCollection[this.maxSuggestions - 1].score;
     //Utils.log('theBar = '+theBar);
 
     // at this point we can already assume that there are enough suggestions
@@ -1695,36 +1670,33 @@ Parser.Query.prototype = {
     // added). Thus, if the new parse's maxScore is less than the current bar
     // we will not return it (effectively killing the parse).
 
-    if (newParse.getMaxScore() < theBar) {
-      //Utils.log(['not good enough:',newParse,newParse.getMaxScore()]);
+    if (newParse.maxScore < theBar) {
+      //Utils.log(['not good enough:',newParse,newParse.maxScore]);
       return parseCollection;
     }
 
     // add the new parse into the parse collection
     parseCollection = parseCollection.concat([newParse]);
     // sort again
-    parseCollection.sort( function(a,b) b.getScore() - a.getScore() );
+    parseCollection.sort( function(a,b) b.score - a.score );
 
     // if the bar changed...
-    if (parseCollection[this.maxSuggestions - 1].getScore() > theBar) {
-      theBar = parseCollection[this.maxSuggestions - 1].getScore();
+    if (parseCollection[this.maxSuggestions - 1].score > theBar) {
+      theBar = parseCollection[this.maxSuggestions - 1].score;
       //Utils.log('theBar is now '+theBar);
 
       // sort by ascending maxScore order
-      parseCollection.sort( function(a,b) a.getMaxScore() - b.getMaxScore() );
+      parseCollection.sort(function(a, b) a.maxScore - b.maxScore);
 
-      while (parseCollection[0].getMaxScore() < theBar
+      while (parseCollection[0].maxScore < theBar
              && parseCollection.length > this.maxSuggestions) {
         let throwAway = parseCollection.shift();
-        //Utils.log(['throwing away:',throwAway,throwAway.getMaxScore(),parseCollection.length+' remaining']);
+        //Utils.log(['throwing away:',throwAway,throwAway.maxScore,parseCollection.length+' remaining']);
       }
     }
 
     return parseCollection;
-
   }
-
-
 };
 
 // == {{{Parser.Parse}}} prototype ==
@@ -1734,7 +1706,7 @@ Parser.Query.prototype = {
 // throughout the parse process.
 //
 // The constructor takes the {{{branching}}} and {{{joindelimiter}}} parameters
-// from the {{{Parser}}} (which are used for the {{{getDisplayText()}}}
+// from the {{{Parser}}} (which are used for the {{{displayText}}}
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
@@ -1744,23 +1716,23 @@ Parser.Parse = function(parser, input, verb, argString, parentId) {
   this._verb = verb;
   this.argString = argString;
   this.args = {};
-  // this is the internal score variable--use the getScore method
+  // this is the internal score variable--use the score property
   this._score = 0;
   this.scoreMultiplier = 0;
-  // complete == false means we're still parsing or waiting for async nountypes
+  // !complete means we're still parsing or waiting for async nountypes
   this.complete = false;
   this._id = Math.random();
   if (parentId)
     this._parentId = parentId;
 }
 
-// ** {{{Parser.Parse.getDisplayText()}}} **
+// ** {{{Parser.Parse.displayText}}} **
 //
-// {{{getDisplayText()}}} prints the verb and arguments in the parse by
+// {{{displayText}}} prints the verb and arguments in the parse by
 // ordering all of the arguments (and verb) by their {{{_order}}} properties
 // and displaying them with nice {{{<span class='...'></span>}}} wrappers.
 Parser.Parse.prototype = {
-  getDisplayText: function(printDebugInfo) {
+  get displayText() {
     // This is the main string to be returned.
     let display = '';
     // This string is built in case there's a verb at the end of the sentence,
@@ -1855,16 +1827,17 @@ Parser.Parse.prototype = {
 
     // return with score for the time being
     // DEBUG: score is being displayed here.
-    return display + displayFinal
-           + ( printDebugInfo ? ' ('
-               + (Math.floor(this.getScore() * 100)/100 || '<i>no score</i>')
-               + ')'
-             :'');
+    return display + displayFinal;
 
   },
-  getCompletionText: function() {
-    var originalText = this.getLastNode().input;
-    var newText = this.getLastNode().text;
+  get displayTextDebug()(
+    this.displayText + " (" +
+    ((this.score * 100 | 0) / 100 || "<i>no score</i>") +
+    ")"),
+  get completionText() {
+    var {lastNode} = this;
+    var originalText = lastNode.input;
+    var newText = lastNode.text;
     var findOriginal = new RegExp(originalText+'$');
     if (findOriginal.test(this.input))
       return this.input.replace(findOriginal,newText) + this._parser.joindelimiter;
@@ -1873,25 +1846,23 @@ Parser.Parse.prototype = {
   },
   // **{{{Parser.Parse.getIcon()}}}**
   //
-  // Return the verb's icon.
-  getIcon: function() {
-    return this._verb.icon;
-  },
+  // Gets the verb's icon.
+  get icon() this._verb.icon,
   // **{{{Parser.Parse.execute()}}}**
   //
   // Execute the verb. Only the first argument in each role is returned.
   // The others are thrown out.
   execute: function(context) {
-    return this._verb.execute( context, this.getFirstArgs() );
+    return this._verb.execute(context, this.firstArgs);
   },
   // **{{{Parser.Parse.preview()}}}**
   //
   // Returns the verb preview.
   preview: function(context, previewBlock) {
-    if (typeof this._verb.preview == 'function')
-      return this._verb.preview( context, previewBlock, this.getFirstArgs() );
+    if (typeof this._verb.preview === "function")
+      return this._verb.preview(context, previewBlock, this.firstArgs);
     else {
-      dump(this._verb.names[0]+' didn\'t have a preview!');
+      dump(this._verb.names[0] + " didn't have a preview!");
       return false;
     }
   },
@@ -1907,19 +1878,19 @@ Parser.Parse.prototype = {
   get previewUrl() {
     return this._verb.previewUrl;
   },
-  getFirstArgs: function() {
+  get firstArgs() {
     let firstArgs = {};
     for (let role in this.args) {
       firstArgs[role] = this.args[role][0];
     }
     return firstArgs;
   },
-  // **{{{Parser.Parse.getLastNode()}}}**
+  // **{{{Parser.Parse.lastNode}}}**
   //
   // Return the parse's last node, whether a verb or an argument.
   // This can be used to power something like tab-completion, by replacing
-  // {{{Parse.getLastNode().input}}} with {{{Parse.getLastNode().text}}}.
-  getLastNode: function() {
+  // {{{parse.lastNode.input}}} with {{{parse.lastNode.text}}}.
+  get lastNode() {
     // default value if there are no arguments
     let lastNode = this._verb;
     if (this._verb._order != -1) {
@@ -1955,73 +1926,57 @@ Parser.Parse.prototype = {
     // if all the argText's are in the nounCache
     return true;
   },
-  // ** {{{Parser.Parse.getMaxScore()}}} **
+  // ** {{{Parser.Parse.maxScore}}} **
   //
-  // {{{getMaxScore()}}} computes the maximum possible score which a partial
+  // {{{maxScore}}} computes the maximum possible score which a partial
   // parse could possibly yield. It's used in cases where an async nountype
   // has yet to return the nountype score for one or more arguments.
-  getMaxScore: function() {
-
+  get maxScore() {
     if (this.complete)
-      return this.getScore();
-
-    let score = 0;
-
-    // get one point for the verb
-    score += this.scoreMultiplier;
+      return this.score;
 
     if (!this._verb.text)
-      return false; // we still cannot determine the maxScore
+      return 0; // we still cannot determine the maxScore
+
+    // get one point for the verb
+    var score = this.scoreMultiplier;
 
     for each (let verbArg in this._verb.arguments) {
-      if (this.args[verbArg.role] == undefined)
+      if (!this.args[verbArg.role])
         // in this case, no argument has been set for this role and never will.
-        score += 0;
-      else if (this.args[verbArg.role][0].score == undefined)
-        // in this case, the arg text was set for this role, but we haven't
-        // yet received an async score. Wait for it and assume good faith.
-        score += this.scoreMultiplier;
-      else
-        // in this case, we've already received the score from the nountype
-        score += this.args[verbArg.role][0].score
-                 * this.scoreMultiplier;
+        continue;
+      // in this case, we've already received the score from the nountype.
+      // or, the arg text was set for this role, but we haven't
+      // yet received an async score. Wait for it and assume good faith.
+      score += (this.args[verbArg.role][0].score || 1) * this.scoreMultiplier;
     }
 
     return score;
   },
-  // ** {{{Parser.Parse.getScore()}}} **
+  // ** {{{Parser.Parse.score}}} **
   //
-  // {{{getScore()}}} returns the current value of {{{_score}}}.
-  getScore: function PP_getScore() {
-    return this._score;
-  },
+  // {{{score}}} returns the current value of {{{_score}}}.
+  get score() this._score,
   // ** {{{Parser.Parse.setArgumentSuggestion()}}} **
   //
   // Accepts a {{{role}}} and a suggestion and sets that argument properly.
   // If there is already an argument for that role, this method will *not*
   // overwrite it, but rather add an additional argument for that role.
   setArgumentSuggestion: function PP_setArgumentSuggestion( role, sugg ) {
-    if (this.args[role] == undefined)
-      this.args[role] = [];
-    this.args[role].push(sugg);
+    (this.args[role] || (this.args[role] = [])).push(sugg);
   },
-
-  // ** {{{Parser.Parse.getUnfilledRoles()}}} **
+  // ** {{{Parser.Parse.unfilledRoles}}} **
   //
-  // Returns a list of roles which the parse's verb accepts but
-  getUnfilledRoles: function PP_getUnfilledRoles() {
-    if (!this._verb.id)
-      return [];
-    return [ verbArg.role
-             for each (verbArg in this._verb.arguments)
-             if (!(verbArg.role in this.args))
-           ];
-  },
-
+  // Gets a list of roles which the parse's verb accepts but
+  get unfilledRoles()(this._verb.id
+                      ? [verbArg.role
+                         for each (verbArg in this._verb.arguments)
+                         if (!(verbArg.role in this.args))]
+                      : []),
   copy: function PP_copy() {
     let ret = new Parser.Parse(this._parser,
                                this.input,
-                               cloneObject(this._verb),
+                               this._verb,
                                this.argString,
                                this._id);
 
@@ -2044,7 +1999,6 @@ Parser.Parse.prototype = {
     ret._score = this._score;
     return ret;
   }
-
 }
 
 // **{{{cloneObject()}}}**

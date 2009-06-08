@@ -89,7 +89,7 @@ var demoParserInterface = {
           case 4: 
             $('<h3>step 4: group into arguments</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#argParses'));
+              $('#argParses').append('<li>' + parse.displayText + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -97,7 +97,8 @@ var demoParserInterface = {
           case 5:
             $('<h3>step 5: anaphora substitution</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('<li>'+parse.getDisplayText()+'</li>').appendTo($('#newPossibleParses'));
+              $('#newPossibleParses')
+                .append('<li>' + parse.displayText + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -105,7 +106,8 @@ var demoParserInterface = {
           case 6:
             $('<h3>step 6: substitute normalized arguments</h3><ul id="normalizedArgParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#normalizedArgParses'));
+              $('#normalizedArgParses')
+                .append('<li>' + parse.displayTextDebug + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -113,7 +115,8 @@ var demoParserInterface = {
           case 7:
             $('<h3>step 6: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
-              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#verbedParses'));
+              $('#verbedParses')
+                .append('<li>' + parse.displayTextDebug + '</li>');
             }
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
@@ -135,14 +138,16 @@ var demoParserInterface = {
   
             $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._suggestedParses) {
-              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#suggestedParses'));
+              $('#suggestedParses')
+                .append('<li>' + parse.displayTextDebug + '</li>');
             }
             $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
   
   
             $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._scoredParses) {
-              $('<li>'+parse.getDisplayText(true)+'</li>').appendTo($('#debugScoredParses'));
+              $('#debugScoredParses')
+                .append('<li>' + parse.displayTextDebug + '</li>');
             }
             $('<p><small>'+this._scoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -164,7 +169,8 @@ var demoParserInterface = {
         else {
           $('#scoredParses').empty();
           for each (var parse in this.suggestionList) {
-            $('<tr><td>'+parse.getDisplayText(true)+'</td></tr>').appendTo($('#scoredParses'));
+            $('#scoredParses')
+              .append('<tr><td>' + parse.displayTextDebug + '</td></tr>');
           }
 
           demoParserInterface.endTime = new Date().getTime();
