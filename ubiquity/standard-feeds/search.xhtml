@@ -789,15 +789,17 @@ CmdUtils.makeSearchCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "yelp",
-  takes: { "restaurant":noun_type_async_restaurant },
-  // TODO: Should be noun_type_address, which is currently broken.
+  names: ["yelp"],
+   // TODO: location should use noun_type_address, which is currently broken.
   // See http://ubiquity.mozilla.com/trac/ticket/44
-  modifiers: { near:noun_arb_text },
+  arguments: [
+    {role: "object", label: "restaurant", nountype: noun_type_async_restaurant},
+    {role: "location", nountype: noun_arb_text}
+  ],
   icon: "http://www.yelp.com/favicon.ico",
   description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.",
   help: "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;.",
-  execute: function( directObject, info ) {
+  execute: function({object, location}) {
     var doc = context.focusedWindow.document;
     var focused = context.focusedElement;
 
@@ -826,23 +828,24 @@ CmdUtils.CreateCommand({
       return;
     }
 
-    var query = directObject.text;
+    var query = object.text;
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
-    url = url.replace( /{NEAR}/g, info.near.text);
+    url = url.replace( /{NEAR}/g, location.text);
 
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function( pblock, directObject, info ) {
-    var query = directObject.text;
+  preview: function( pblock, args ) {
+    var {object, location} = args;
+    var query = object.text;
     var url = "http://api.yelp.com/business_review_search?";
 
     if (query.length == 0) return;
 
     var near = "";
-    if (info.near.text) {
-      near = info.near.text ;
+    if (location.text) {
+      near = location.text ;
     } else {
       var loc = CmdUtils.getGeoLocation();
       if (loc)

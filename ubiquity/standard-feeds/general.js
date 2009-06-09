@@ -481,7 +481,7 @@ CmdUtils.CreateCommand({
         }));
   },
   preview: function(pblock, args) {
-    var {object, goal, source} = args
+    var {object, goal, source} = args;
     var textToTranslate = object && object.text;
     var defaultLang = this._getDefaultLang();
     var toLang = (goal && goal.text ||

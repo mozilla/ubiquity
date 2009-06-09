@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Brandon Pung <brandonpung@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -43,6 +44,7 @@ function makeParser() {
     {role: 'source', delimiter: 'from'},
     {role: 'position', delimiter: 'at'},
     {role: 'position', delimiter: 'on'},
+    {role: 'location', delimiter: 'near'},
     {role: 'alias', delimiter: 'as'},
     {role: 'instrument', delimiter: 'using'},
     {role: 'instrument', delimiter: 'with'}

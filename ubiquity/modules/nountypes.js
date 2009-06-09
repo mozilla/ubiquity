@@ -23,6 +23,7 @@
  *   Abimanyu Raja <abimanyuraja@gmail.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Satoshi Murakami <murky.satyr@gmail.com>
+ *   Brandon Pung <brandonpung@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or

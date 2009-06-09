@@ -21,6 +21,7 @@
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Atul Varma <atul@mozilla.com>
+ *   Brandon Pung <brandonpung@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
