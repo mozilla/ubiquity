@@ -1,46 +1,45 @@
-var EXPORTED_SYMBOLS = ["detectNounType",'callback'];
+var EXPORTED_SYMBOLS = ["detectNounType"];
 
-Components.utils.import("resource://ubiquity/modules/parser/new/active_noun_types.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 
 //dump('in the worker now: there are '+activeNounTypes.length+' nountypes\n');
 
 //if ((typeof postMessage) != 'function')
 //  postMessage = function(){ dump('default function :p\n') };
 
-detectNounType = function detectNounType(x,callback) {
+function detectNounType(x, callback) {
   var returnArray = [];
-  
-  dump('detecting '+x+'\n');
-  
+  var {activeNounTypes} =
+    Components.utils.import(
+      "resource://ubiquity/modules/parser/new/active_noun_types.js",
+      null);
+
+  dump("detecting: " + x + "\n");
+
   for (let thisNounTypeId in activeNounTypes) {
-
-    var completeAsyncSuggest = function completeAsyncSuggest(suggestion) {
-      suggestion.nountypeId = thisNounTypeId;
-      if ((typeof callback) == 'function')
-        callback([suggestion]);
+    let id = thisNounTypeId;
+    let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
+      suggs = handleSuggs(suggs, id);
+      if (suggs.length) callback(suggs);
     }
-
-    var suggestions = [];
-    if (typeof activeNounTypes[thisNounTypeId].suggest == 'function')
-      suggestions = activeNounTypes[thisNounTypeId]
-                        .suggest(x,x,completeAsyncSuggest) || [];
-    //Utils.log(suggestions);
-    for each (suggestion in suggestions) {
-      // set the nountype that was used in each suggestion so that it can 
-      // later be compared with the nountype specified in the verb.
-      suggestion.nountypeId = thisNounTypeId;
-    }
-    if (suggestions.length > 0) {
-      returnArray = returnArray.concat(suggestions);
-    }
+    returnArray.push.apply(
+      returnArray,
+      handleSuggs(
+        activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
   }
-  
-  if ((typeof callback) == 'function')
-    callback(returnArray);
-  //postMessage(returnArray);
+
+  callback(returnArray);
 }
 
-onmessage = function onmessage(event) {
+function handleSuggs(suggs, id) {
+  if (!suggs || !suggs.length)
+    return [];
+  if (!Utils.isArray(suggs)) suggs = [suggs];
+  for each (let s in suggs) s.nountypeId = id;
+  return suggs;
+}
+
+function onmessage(event) {
   if (event.data) {
     //nounTypes = event.data.nounTypes;
     //dump('received '+nounTypes.length+' nountypes\n');
@@ -48,4 +47,3 @@ onmessage = function onmessage(event) {
     detectNounType(event.data.input);
   }
 }
-
