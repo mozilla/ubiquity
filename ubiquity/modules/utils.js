@@ -55,7 +55,8 @@ var Utils = {
     delete this.Application;
     return this.Application = (Cc["@mozilla.org/fuel/application;1"]
                                .getService(Ci.fuelIApplication));
-  }
+  },
+  __globalObject: this,
 };
 
 // ** {{{ Utils.log(a, b, c, ...) }}} **
@@ -69,43 +70,45 @@ var Utils = {
 //
 // {{{Utils.log}}} implements smart pretty print, so you
 // can use it for inspecting arrays and objects.
+// For details, see: http://getfirebug.com/console.html
 //
 // {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
 
 Utils.log = function log(what) {
-  var args = Array.prototype.slice.call(arguments);
-  if(args.length == 0)
+  if (!arguments.length)
     return;
-
-  var logPrefix = "Ubiquity: ";
+  var args = Array.slice(arguments);
+  var logPrefix = "Ubiquity:";
   var browserWindow = Utils.currentChromeWindow;
 
-  if("Firebug" in browserWindow && "Console" in browserWindow.Firebug) {
+  if (typeof what === "string")
+    logPrefix += " " + args.shift();
+  if ("Console" in (browserWindow.Firebug || {})) {
     args.unshift(logPrefix);
     browserWindow.Firebug.Console.logFormatted(args);
-  } else {
-    var logMessage = "";
-    if(typeof args[0] == "string") {
-      var formatStr = args.shift();
-      while(args.length > 0 && formatStr.indexOf("%s") > -1) {
-        formatStr = formatStr.replace("%s", "" + args.shift());
-      }
-      args.unshift(formatStr);
+    return;
+  }
+  Utils.Application.console.log(
+    args.reduce(
+      function(msg, arg) msg + " " + pp(arg),
+      logPrefix.replace(/%[sdifo]/g, function format($) {
+        if (!args.length) return $;
+        var a = args.shift();
+        switch ($) {
+          case "%s": return a;
+          case "%d":
+          case "%i": return parseInt(a);
+          case "%f": return parseFloat(a);
+        }
+        return pp(a);
+      })));
+  function pp(o) {
+    try { return uneval(o) } catch (e) {
+      try { return Utils.encodeJson(o) }
+      catch (e) { return o }
     }
-    args.forEach(function(arg) {
-      if(typeof arg == "object") {
-        logMessage += " " + Utils.encodeJson(arg) + " ";
-      } else {
-        logMessage += arg;
-      }
-    });
-    Application.console.log(logPrefix + logMessage);
   }
 };
-
-// Keep a reference to the global object, as certain utility functions
-// need it.
-Utils.__globalObject = this;
 
 // ** {{{ Utils.reportWarning() }}} **
 //
@@ -348,11 +351,11 @@ Utils.url = function url(spec, defaultUri) {
 
 Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   var postInputStream = null;
-  if(postData) {
-    if(postData instanceof Ci.nsIInputStream) {
+  if (postData) {
+    if (postData instanceof Ci.nsIInputStream) {
       postInputStream = postData;
     } else {
-      if(typeof postData == "object") // json -> string
+      if (typeof postData === "object") // json -> string
         postData = Utils.paramsToString(postData, "");
 
       var stringStream = (Cc["@mozilla.org/io/string-input-stream;1"]
@@ -379,15 +382,15 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
   //3 (default in Firefox 2 and above): In a new tab
   //1 (or anything else): In the current tab or window
 
-  if(browser.mCurrentBrowser.currentURI.spec == "about:blank" &&
-     !browser.webProgress.isLoadingDocument )
+  if (browser.mCurrentBrowser.currentURI.spec === "about:blank" &&
+     !browser.webProgress.isLoadingDocument)
     browserWindow.loadURI(urlString, null, postInputStream, false);
-  else if(openPref == 3){
-    var ke = (Utils.currentChromeWindow.gUbiquity || 0).lastKeyEvent || 0;
+  else if (openPref == 3) {
+    var ke = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
     browser[ke.shiftKey || ke.ctrlKey ? 'addTab' : 'loadOneTab'](
       urlString, null, null, postInputStream, false, false);
   }
-  else if(openPref == 2)
+  else if (openPref == 2)
     browserWindow.openDialog('chrome://browser/content', '_blank',
                              'all,dialog=no', urlString, null, null,
                              postInputStream);
@@ -501,8 +504,8 @@ Utils.getLocalUrl = function getLocalUrl(url) {
 // This function removes all whitespace surrounding a string and
 // returns the result.
 
-// See http://blog.stevenlevithan.com/archives/faster-trim-javascript
-Utils.trim = function trim(str) {
+Utils.trim = String.trim || function trim(str) {
+  http://blog.stevenlevithan.com/archives/faster-trim-javascript
   var i = str.search(/\S/);
   if (i < 0) return "";
   var j = str.length;
