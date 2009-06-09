@@ -36,20 +36,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
  
-function makeParser() {
-  var en = new Parser('en');
-  en.anaphora = ["this", "that", "it", "selection", "him", "her", "them"];
-  en.roles = [
-    {role: 'goal', delimiter: 'to'},
-    {role: 'source', delimiter: 'from'},
-    {role: 'position', delimiter: 'at'},
-    {role: 'position', delimiter: 'on'},
+function makeParser() new Parser({
+  lang: "en",
+  anaphora: ["this", "that", "it", "selection", "him", "her", "them"],
+  roles: [
+    {role: "goal", delimiter: "to"},
+    {role: "source", delimiter: "from"},
+    {role: "position", delimiter: "at"},
+    {role: "position", delimiter: "on"},
     {role: 'location', delimiter: 'near'},
-    {role: 'alias', delimiter: 'as'},
-    {role: 'instrument', delimiter: 'using'},
-    {role: 'instrument', delimiter: 'with'}
-  ];
-  en.branching = 'right';
-
-  return en;
-};
+    {role: "instrument", delimiter: "with"},
+    {role: "instrument", delimiter: "using"},
+  ],
+  branching: "right",
+});

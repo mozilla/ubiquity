@@ -43,6 +43,7 @@ const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/msgservice.js");
+Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 // = Ubiquity Parser: The Next Generation =
@@ -64,12 +65,12 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 // file--this, in turn, is controlled by a {{{makeXxParser}}} factory function;
 // take a look at en.js for an example.
 
-function Parser(lang) {
-  this.lang = lang;
-  var ctu = {};
+function Parser(props) {
+  if (typeof props === "string")
+    this.lang = props;
+  else
+    for (var key in props) this[key] = props[key];
   this._nounCache = {};
-  Cu.import("resource://ubiquity/modules/contextutils.js", ctu);
-  this._ContextUtils = ctu.ContextUtils;
 }
 Parser.prototype = {
   lang: '',
@@ -96,7 +97,7 @@ Parser.prototype = {
   // TODO: {{{joindelimiter}}} and {{{usespaces}}} may or may not be
   // redundant.
   joindelimiter: ' ',
-  // ** {{{Parser.verbSuggestionPosition}}} **
+  // ** {{{Parser.suggestedVerbOrder}}} **
   // For verb-final languages, this should be -1.
   // For languages where some verb forms are sentence-initial, some are
   // sentence-final (e.g. German, Dutch), suggestedVerbOrder can be a function
@@ -158,7 +159,6 @@ Parser.prototype = {
   // After the nountypes have been registered, {{{Parser.initializeCache()}}} is
   // called.
   setCommandList: function setCommandList( commandList ) {
-
     let ant = Cu.import(
       "resource://ubiquity/modules/parser/new/active_noun_types.js", null);
 
@@ -193,9 +193,6 @@ Parser.prototype = {
     }
 
     // Scrape the noun types up here.
-
-    let nounTypeId = 0;
-
     for each (let verb in this._verbList) {
       for each (let arg in verb.arguments) {
         let {id} = arg.nountype;
@@ -212,7 +209,6 @@ Parser.prototype = {
     this.initializeCache();
   },
 
-
   // ** {{{Parser.setNounList()}}} **
   // This function is now a dummy function... its functionality has actually
   // been subsumed by {{{Parser.setCommandList()}}}.
@@ -225,6 +221,7 @@ Parser.prototype = {
   // This method is initialized when the language is loaded.
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function() {
+    var patternCache = this._patternCache = {};
     // a little utility function to create a regex string
     // which matches any prefix of a set of strings.
     function matchString(arr) {
@@ -235,68 +232,67 @@ Parser.prototype = {
               .sort(function(a, b) b.length - a.length)
               .join('|'));
     }
+    // creates a regex of the form (to|from|as|toward|...)
+    function regexFromDelimeters(roles)
+      RegExp("^(?:" +
+             [role.delimiter for each (role in roles)].join("|") +
+             ")$",
+             "i");
 
-    // this._patternCache.verbMatcher matches any active verb or prefix
-    // thereof.
-    this._patternCache.verbMatcher = matchString(
+    // verbMatcher matches any active verb or prefix thereof
+    patternCache.verbMatcher = matchString(
       [n for each (verb in this._verbList) for each (n in verb.names)]);
 
-    // this._patternCache.verbInitialTest matches a verb at the beginning
-    this._patternCache.verbInitialTest = new RegExp(
-      '^\\s*('+this._patternCache.verbMatcher+')'+
-        (this.usespaces?'(\\s+.*$|$)':'(.*$)'),'i');
-    // this._patternCache.verbFinalTest matches a verb at the end of the string
-    this._patternCache.verbFinalTest = new RegExp(
-      (this.usespaces?'(^.*\\s+|^)':'(^.*)')+
-        '('+this._patternCache.verbMatcher+')\\s*$','i');
+    // verbInitialTest matches a verb at the beginning
+    patternCache.verbInitialTest =
+      RegExp(("^\\s*(" + this._patternCache.verbMatcher + ")" +
+              (this.usespaces ? "(\\s+.*$|$)" : "(.*$)")),
+             'i');
+    // verbFinalTest matches a verb at the end of the string
+    patternCache.verbFinalTest =
+      RegExp(((this.usespaces ? "(^.*\\s+|^)" : "(^.*)") +
+              "(" + this._patternCache.verbMatcher + ")\\s*$"),
+             "i");
 
-    // this._patternCache.anaphora matches any of the anaphora ("magic words")
+    // anaphora matches any of the anaphora ("magic words")
     // if usespaces = true, it will only look for anaphora as whole words,
     // but if usespaces = false, it will look for anaphora in words as well.
-    this._patternCache.anaphora = new RegExp(
-      (this.usespaces?'(^.*\\s+|^)':'(^.*)')+
-        '('+(this.anaphora.join('|'))+')'+
-        (this.usespaces?'(\\s+.*$|$)':'(.*$)'));
+    var boundary = this.usespaces ? "\\b" : "";
+    patternCache.anaphora =
+      RegExp(boundary + "(?:" + this.anaphora.join("|") + ")" + boundary);
 
     // cache the roles used in each verb and a regex
     // which recognizes the delimiters appropriate for each verb
     var rolesCache = this._rolesCache = {};
-    var delimPatterns = this._patternCache.delimiters = {};
+    var delimPatterns = patternCache.delimiters = {};
     for (let verbId in this._verbList) {
       // _rolesCache[verbId] is the subset of roles such that
       // there is at least one argument in verb which matches that role
       rolesCache[verbId] =
         [role for each (role in this.roles)
-         if (this._verbList[verbId].arguments.some(
-               function(arg) arg.role === role.role ) ) ];
+         if (this._verbList[verbId].arguments
+             .some(function(arg) arg.role === role.role))];
       delimPatterns[verbId] = regexFromDelimeters(rolesCache[verbId]);
     }
 
     // this is the RegExp to recognize delimiters for an as yet unspecified
     // verb... in other words, it's just a RegExp to recognize every
     // possible delimiter.
-
     delimPatterns[""] = regexFromDelimeters(this.roles);
-
-    // a RegExp of the form (to|from|as|toward|...)
-    function regexFromDelimeters(roles)
-      RegExp("^(?:" +
-             [role.delimiter for each (role in roles)].join("|") +
-             ")$",
-             "i");
   },
 
   // ** {{{Parser.newQuery()}}} **
   //
   // This method returns a new {{{Parser.Query}}} object, as detailed in
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
-  newQuery: function(queryString,context,maxSuggestions,dontRunImmediately) {
-    var selObj = this._ContextUtils.getSelectionObject(context);
+  newQuery: function(queryString, context, maxSuggestions,
+                     dontRunImmediately) {
+    var selObj = ContextUtils.getSelectionObject(context);
     var theNewQuery = new Parser.Query(this,
-                            queryString,
-                            context,
-                            maxSuggestions,
-                            dontRunImmediately);
+                                       queryString,
+                                       context,
+                                       maxSuggestions,
+                                       dontRunImmediately);
     theNewQuery.selObj = selObj;
     return theNewQuery;
   },
@@ -402,11 +398,11 @@ Parser.prototype = {
   //
   // The return object is of the form {{{{ words: [], delimiters: [], all: [] }}}} .
   // {{{words}}} and {{{delimiters}}} are just a copy of every other word in
-  // {{{all}}}.
+  // {{{allWords}}}.
   //
   // Used by {{{Parser.argFinder()}}}
   splitWords: function(input) {
-    var returnObj = { words: [], delimiters: [], all: [],
+    var returnObj = { words: [], delimiters: [], allWords: [],
                       beforeSpace: '', afterSpace: '' };
 
     // if there is no non-space character, just return nothing.
@@ -425,7 +421,7 @@ Parser.prototype = {
     let splitWithWords = input.split(/(\S+)/);
     returnObj.afterSpace  = splitWithWords.pop();
     returnObj.beforeSpace = splitWithWords.shift();
-    returnObj.all         = splitWithWords;
+    returnObj.allWords    = splitWithWords;
 
     for (let i in splitWithWords) {
       if (i % 2)
@@ -441,11 +437,11 @@ Parser.prototype = {
   // Checks to see whether a certain delimiter is compatible with a certain
   // verb, i.e., whether that verb has a role which takes that delimiter.
   // This is done using the regex of delimiters of all roles of {{{verb}}} in
-  // {{{Parser._patternCache.delimiters[verb]}}}. Returns true/false.
+  // {{{_patternCache.delimiters[verbId]}}}. Returns true/false.
   //
   // Used by {{{Parser.argFinder()}}}
-  hasDelimiter: function(delimiter,verb) {
-    return this._patternCache.delimiters[verb].test(delimiter);
+  hasDelimiter: function(delimiter, verbId) {
+    return this._patternCache.delimiters[verbId].test(delimiter);
   },
 
   // ** {{{Parser.getRoleByDelimiter()}}} **
@@ -453,7 +449,7 @@ Parser.prototype = {
   // Returns all semantic roles which may be represented by a given delimiter.
   //
   // Used by {{{Parser.argFinder()}}}
-  getRoleByDelimiter: function(delimiter,roles) {
+  getRoleByDelimiter: function(delimiter, roles) {
     delimiter = delimiter.toLowerCase();
     return [role.role for each (role in roles)
                       if (role.delimiter.toLowerCase() == delimiter) ];
@@ -523,7 +519,7 @@ Parser.prototype = {
 
   argFinder: function(argString, verb, input) {
     // initialize possibleParses. This is the array that we're going to return.
-    let possibleParses = [];
+    var possibleParses = [];
 
     // if the argString is empty, return a parse with no args.
     if (!argString) {
@@ -556,20 +552,14 @@ Parser.prototype = {
     // then words = ['rar','rar','rar']
     // delimiters = [' ','   ']
     // allWords = ['rar',' ','rar','   ','rar']
-    let words = splitInput.words;
-    let delimiters = splitInput.delimiters;
-    let allWords = splitInput.all;
+    let {words, delimiters, allWords} = splitInput;
 
     // let's find all the possible delimiters
-    let possibleDelimiterIndices = [];
+    let possibleDelimiterIndices =
+      [+i for (i in words) if (this.hasDelimiter(words[i], verb.id))];
 
     // if the verb is set, only look for delimiters which are available
-    let roles = ( verb.id ? this._rolesCache[verb.id] : this.roles );
-
-    for (var i=0; i < words.length; ++i) {
-      if (this.hasDelimiter(words[i], verb.id))
-        possibleDelimiterIndices.push(i);
-    }
+    let roles = verb.id ? this._rolesCache[verb.id] : this.roles;
 
     // this is a cache of the possible roles for each delimiter word encountered
     let rolesForEachDelimiterCache = {};
@@ -604,18 +594,6 @@ Parser.prototype = {
           continue EACH_DI;
       }
 
-      // Check for a delimiter at the end (if right-
-      // branching) or at the beginning (if left-branching)
-      // These are bad because then they will never find an associated
-      // argument.
-      if (this.branching == 'right' &&
-        delimiterIndices[delimiterIndices.length - 1] == words.length-1)
-        dump('maybe this is why I\'m dead.\n');
-      if (this.branching == 'left' && delimiterIndices[0] == 0)
-        dump('maybe this is why I\'m dead.\n');
-      // TODO check if this breaks things and, if it does, kill these
-      // delimiter combinations right here.
-
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parser.Parse which doesn't
       // have any arguments set.
@@ -623,7 +601,6 @@ Parser.prototype = {
                                        input,
                                        verb,
                                        argString);
-
       // get all parses started off with their scoreMultipier values
       if (verb.id) {
         seedParse.scoreMultiplier = 1;
@@ -631,43 +608,51 @@ Parser.prototype = {
         seedParse.scoreMultiplier = 0.3;
         seedParse._suggested = true;
       }
-
-      var theseParses = [seedParse];
-
       // if there are no delimiters at all, put it all in the direct object
-      if (delimiterIndices.length == 0) {
-        theseParses[0].setArgumentSuggestion('object',{ _order:1,
-                                          input:allWords.join(''),
-                                          modifier:'' });
+      if (!delimiterIndices.length) {
+        seedParse.setArgumentSuggestion(
+          "object",
+          { _order: 1,
+            input: allWords.join(""),
+            modifier: ""});
+        possibleParses.push(seedParse);
+        continue;
       }
+
+      let lastIndex = delimiterIndices[delimiterIndices.length - 1];
+      // Check for a delimiter at the end (if right-
+      // branching) or at the beginning (if left-branching)
+      // These are bad because then they will never find an associated
+      // argument.
+      if (this.branching === "right" && lastIndex === words.length - 1 ||
+          this.branching === "left" && delimiterIndices[0] === 0)
+        dump('maybe this is why I\'m dead.\n');
+      // TODO check if this breaks things and, if it does, kill these
+      // delimiter combinations right here.
 
       // if there are extra words at the beginning or end, make them a
       // direct object
-      if (this.branching == 'left') {
-        if (delimiterIndices[delimiterIndices.length - 1] < words.length - 1 &&
-            delimiterIndices[delimiterIndices.length - 1] != undefined) {
-
-          theseParses[0].setArgumentSuggestion('object',
-            { _order: (2 * delimiterIndices.length + 2),
-              input: allWords.slice(
-                       2 * (delimiterIndices[delimiterIndices.length - 1] + 1)
-                     ).join(''),
-              modifier:'' }
-          );
-
+      if (this.branching === "left") {
+        if (lastIndex < words.length - 1) {
+          seedParse.setArgumentSuggestion(
+            "object",
+            { _order: 2 * delimiterIndices.length + 2,
+              input: allWords.slice(2 * lastIndex + 2).join(''),
+              modifier: ""}
+            );
         }
       } else {
-        if (delimiterIndices[0] > 0 && delimiterIndices[0] != undefined) {
-
-          theseParses[0].setArgumentSuggestion('object',
-            {_order: 1,
-             input: allWords.slice(0,
-                      (2 * delimiterIndices[0]) - 1
-                    ).join(''),
-             modifier:'' });
-
+        if (delimiterIndices[0] > 0) {
+          seedParse.setArgumentSuggestion(
+            "object",
+            { _order: 1,
+              input: (allWords.slice(0, 2 * delimiterIndices[0] - 1)
+                      .join('')),
+              modifier: ""});
         }
       }
+
+      var theseParses = [seedParse];
 
       // If we're right branching, we'll just go through left to right.
       // If we're left branching, however, we want to reverse the order of
@@ -675,8 +660,7 @@ Parser.prototype = {
       //
       // (It actually doesn't matter and could be done the other way, but this
       // is the way I set it up and set the _order based on this.)
-      if (this.branching == 'left')
-        delimiterIndices = delimiterIndices.reverse();
+      if (this.branching === "left") delimiterIndices.reverse();
 
       // Loop over each delimiter
       //
@@ -685,8 +669,8 @@ Parser.prototype = {
       // end of the loop, we'll set theseParses = newParses. This way, at any
       // point throughout the loop, theseParses will be all the possible
       // parses of the arguments *up to* this point.
-      for (let i=0; i<delimiterIndices.length; i++) {
-        var newParses = [];
+      for (let i = 0, l = delimiterIndices.length; i < l; ++i) {
+        let newParses = [];
 
         // j will be used as an iterator for how far out from the delimiter we
         // want to reach to get an argument. For example, if we have
@@ -697,44 +681,39 @@ Parser.prototype = {
         // the other. Thus we set jmin to be the position of WORD1 and jmax
         // to be the position of WORD3. (And inside out and vice versa for
         // left-branching languages, but you get the idea.)
-        if (this.branching == 'left') {// find args right to left
-          var jmin = ((delimiterIndices[(i*1) + 1] == undefined) ?
-                      0 : delimiterIndices[(i*1) + 1] + 1);
-          var jmax = delimiterIndices[(i*1)] - 1;
+        if (this.branching === "left") {// find args right to left
+          var jmin = ((delimiterIndices[i + 1] == null) ?
+                      0 : delimiterIndices[i + 1] + 1);
+          var jmax = delimiterIndices[i] - 1;
         } else {
           var jmin = delimiterIndices[i] + 1;
-          var jmax = ((delimiterIndices[(i*1) + 1] == undefined) ?
-                      words.length - 1 : delimiterIndices[(i*1)+1] - 1);
+          var jmax = ((delimiterIndices[i + 1] == null) ?
+                      words.length - 1 : delimiterIndices[i + 1] - 1);
         }
 
         // Compute the possible roles for this delimiter
         // We'll keep these in a cache so we don't have to look it up
         // using Parser.getRoleByDelimiter() each time.
-        if (rolesForEachDelimiterCache[words[delimiterIndices[i]]] == undefined)
-          rolesForEachDelimiterCache[words[delimiterIndices[i]]] =
-            this.getRoleByDelimiter(words[delimiterIndices[i]],roles);
+        let delim = words[delimiterIndices[i]];
+        if (!rolesForEachDelimiterCache[delim])
+          rolesForEachDelimiterCache[delim] =
+            this.getRoleByDelimiter(delim, roles);
 
         // For each scope of arguments... for example,
         // WORD1, WORD1 WORD2, or WORD1 WORD2 WORD3...
         for (var j = jmin; j <= jmax; j++) {
-
           // for each delimiter's possible role
-          for each (var role in rolesForEachDelimiterCache[
-                      words[delimiterIndices[i]]]) {
-
+          for each (var role in rolesForEachDelimiterCache[delim]) {
             // for each of the current parses
             for (var k in theseParses) {
-
               // thisParse is our local copy. We'll mess with it and
               // add it into newParses.
               let thisParse = theseParses[k].copy();
 
-              if (this.branching == 'left') {// find args right to left
-
+              if (this.branching === "left") {// find args right to left
                 // our argument is words (j)...(jmax)
                 // note that Array.slice(i,k) returns *up to* k
-                var argument = allWords.slice(2 * j, (2 * jmax) + 1)
-                                             .join('');
+                var argument = allWords.slice(2 * j, (2 * jmax) + 1).join('');
                 // our modifier, including the space after
                 var modifier = words[delimiterIndices[i]];
                 var innerSpace = delimiters[delimiterIndices[i] - 1];
@@ -771,7 +750,6 @@ Parser.prototype = {
 
                 }
               } else {
-
                 // our argument is words (jmin)...(j)
                 // note that Array.slice(i,j) returns *up to* j
                 var argument = allWords.slice(2 * jmin, (2 * j) + 1)
@@ -810,7 +788,6 @@ Parser.prototype = {
                       innerSpace: '',
                       outerSpace: outerSpace
                     });
-
                 }
               }
 
@@ -819,7 +796,6 @@ Parser.prototype = {
             }
           }
         }
-
         // we went through the loop once (through one delimiter) so
         // now we'll make theseParses = parses of all arguments through the
         // current delimiter and use it as the basis for the next delimiter's
@@ -874,8 +850,7 @@ Parser.prototype = {
       let args = parse.args[role];
       for (let i in args) {
         let oldArg = args[i].input;
-        let newArg = oldArg.replace(this._patternCache.anaphora,
-                                    "$1" + selection + "$3");
+        let newArg = oldArg.replace(this._patternCache.anaphora, selection);
 
         if (newArg != oldArg) {
           let parseCopy = parse.copy();
@@ -1004,27 +979,20 @@ Parser.prototype = {
   // the nountypes' and verbs' default values (if available).
 
   suggestArgs: function suggestArgs(parse) {
-
     //Utils.log('verb:'+parse._verb.name);
 
     // make sure we keep the anaphor-substituted input intact... we're
     // going to make changes to text, html, score, and nountype
-
-    let initialCopy = parse.copy();
-    let returnArr = [initialCopy];
+    let returnArr = [parse.copy()];
 
     for (let role in parse.args) {
-
       //Utils.log(role);
-
       let thisVerbTakesThisRole = false;
 
       for each (let verbArg in parse._verb.arguments) {
         if (role == verbArg.role) {
-
           // for each argument of this role...
           for (let i in parse.args[role]) {
-
             // this is the argText to check
             let argText = parse.args[role][i].input;
 
@@ -1042,21 +1010,16 @@ Parser.prototype = {
 
             for each (let suggestion in this._nounCache[argText]) {
               if (suggestion.nountypeId === verbArg.nountype.id) {
-
                 thereWasASuggestionWithTheRightNounType = true;
 
                 for each (let parse in returnArr) {
                   let parseCopy = parse.copy();
                   // copy the attributes we want to copy from the nounCache
-                  parseCopy.args[role][i].text = suggestion.text;
-                  parseCopy.args[role][i].html = suggestion.html;
-                  parseCopy.args[role][i].data = suggestion.data;
-                  parseCopy.args[role][i].score = suggestion.score;
-                  parseCopy.args[role][i].nountypeId = suggestion.nountypeId;
-
+                  let newSugg = parseCopy.args[role][i];
+                  for(let key in suggestion)
+                    newSugg[key] = suggestion[key];
                   newreturn.push(parseCopy);
                 }
-
               }
             }
 
@@ -1064,7 +1027,6 @@ Parser.prototype = {
               returnArr = newreturn;
               thisVerbTakesThisRole = true;
             }
-
           }
 
           // If thisVerbTakesThisRole, it means that we've already found the
@@ -1075,21 +1037,14 @@ Parser.prototype = {
             continue;
         }
       }
-
       //Utils.log('finished role');
-
       if (!thisVerbTakesThisRole)
         return [];
-
     }
 
     // now check for unfilled arguments so we can fill them with defaults
     let {unfilledRoles} = parse;
     let defaultsCache = {};
-
-    let ant = {};
-    Cu.import("resource://ubiquity/modules/parser/new/active_noun_types.js",
-              ant);
 
     for each (let role in unfilledRoles) {
       let defaultValue;
@@ -1103,7 +1058,7 @@ Parser.prototype = {
       if (missingArg.default) {
         defaultValue = missingArg.default;
       } else {
-        let noun = ant.activeNounTypes[missingArg.nountype.id];
+        let noun = missingArg.nountype;
         defaultValue = (noun.default
                         ? (typeof noun.default === "function"
                            ? noun.default()
@@ -1174,12 +1129,10 @@ Parser.prototype = {
   // noun type name.
   detectNounType: function detectNounType(x,callback) {
     //Utils.log('detecting '+x+'\n');
-
     if (x in this._nounCache) {
       if (typeof callback == 'function')
         callback(x,this._nounCache[x]);
     } else {
-
       /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
 
       Utils.log(nounWorker);
@@ -1212,7 +1165,6 @@ Parser.prototype = {
       Utils.setTimeout(function detectNounType_runNounWorker(){
         nounWorker.detectNounType(x,myCallback);
       },0);
-
     }
   },
   // ** {{{Parser.strengthenMemory}}} **
@@ -1708,11 +1660,7 @@ Parser.Parse.prototype = {
           || !this.args[neededArg.role][0].text) {
         let {label} = neededArg;
         if (!label) {
-          let ant = {};
-          Cu.import(
-            "resource://ubiquity/modules/parser/new/active_noun_types.js",
-            ant);
-          let nt = ant.activeNounTypes[neededArg.nountype.id];
+          let nt = neededArg.nountype;
           label = nt.name || nt._name || "?";
         }
         for each (let parserRole in this._parser.roles) {
@@ -1731,10 +1679,7 @@ Parser.Parse.prototype = {
       }
     }
 
-    // return with score for the time being
-    // DEBUG: score is being displayed here.
     return display + displayFinal;
-
   },
   get displayTextDebug()(
     this.displayText + " (" +
@@ -1880,25 +1825,20 @@ Parser.Parse.prototype = {
                          if (!(verbArg.role in this.args))]
                       : []),
   copy: function PP_copy() {
-    let ret = new Parser.Parse(this._parser,
+    var ret = new Parser.Parse(this._parser,
                                this.input,
                                this._verb,
                                this.argString,
                                this._id);
-
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
     // got touched) when substituteNormalizedArgs is enacted. We must prototype
     // each actual argument, not the collection of arguments, so this is what
     // we did.
-    for (let role in this.args) {
-      ret.args[role] = [];
-      for each (let eachArg in this.args[role]) {
-        ret.args[role].push({__proto__: eachArg});
-      }
-    }
-
+    for (let role in this.args)
+      ret.args[role] = [{__proto__: sugg}
+                        for each (sugg in this.args[role])];
     ret.complete = this.complete;
     ret._suggested = this._suggested;
     ret.scoreMultiplier = this.scoreMultiplier;

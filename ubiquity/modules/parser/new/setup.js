@@ -211,7 +211,12 @@ $(document).ready(function(){
     demoParserInterface.parse();
   }
   
-  $('.input').keyup(function(){ if ($('#autoparse')[0].checked) run()});
+  $('.input').keyup(function autoParse(){
+    if (!$('#autoparse')[0].checked) return;
+    var input = $('.input').val();
+    if (input && autoParse.lastInput !== (autoParse.lastInput = input))
+      run();
+  });
   $('#run').click(run);
 
   //$('#clearnouncache').click(function() { nounCache = []; });
