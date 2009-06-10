@@ -790,11 +790,9 @@ CmdUtils.makeSearchCommand({
 
 CmdUtils.CreateCommand({
   names: ["yelp"],
-   // TODO: location should use noun_type_address, which is currently broken.
-  // See http://ubiquity.mozilla.com/trac/ticket/44
   arguments: [
     {role: "object", label: "restaurant", nountype: noun_type_async_restaurant},
-    {role: "location", nountype: noun_arb_text}
+    {role: "location", nountype: noun_type_async_address}
   ],
   icon: "http://www.yelp.com/favicon.ico",
   description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.",

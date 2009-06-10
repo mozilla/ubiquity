@@ -1422,7 +1422,7 @@ Parser.Query.prototype = {
     var thisQuery = this;
     function completeParse(thisParse, ajaxRequests) {
       if(ajaxRequests.length == 0) {
-        dump("parse completed\n");
+        //dump("parse completed\n");
         thisParse.complete = true;
       }
       
@@ -1442,7 +1442,7 @@ Parser.Query.prototype = {
     // TODO: looks like suggestions isn't actually being used in this callback.
     // Maybe we could/should take it out?
     function tryToCompleteParses(argText, suggestions, ajaxRequests) {
-      thisQuery.dump('finished detecting nountypes for '+argText + '\n');
+      thisQuery.dump('finished detecting nountypes for ' + argText);
       //Utils.log([argText,suggestions]);
 
       thisQuery._outstandingRequests = ajaxRequests;
@@ -1456,7 +1456,7 @@ Parser.Query.prototype = {
         let thisParse = thisQuery._verbedParses[parseId];
 
         if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
-          thisQuery.dump('completing parse '+parseId+' now');
+          //thisQuery.dump('completing parse '+parseId+' now');
           completeParse(thisParse, ajaxRequests);
         }
       }
@@ -1500,6 +1500,7 @@ Parser.Query.prototype = {
     this._next();
     this.finished = true;
     this.dump("done!!!");
+    /*
     var steps = this._step;
     for (let i = 1; i < steps; ++i)
       this.dump("step " + i + ": " +
@@ -1507,6 +1508,7 @@ Parser.Query.prototype = {
     this.dump("total: " +
               (this._times[steps-1] - this._times[0]) + " ms");
     this.dump("There were " + this._scoredParses.length + " completed parses");
+    */
     this.onResults();
   },
 

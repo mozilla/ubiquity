@@ -418,46 +418,18 @@ var noun_type_time = {
    }
 };
 
-// TODO this is going on obsolete, and will be replaced entirely by
-// noun_type_async_address.
-var noun_type_address = {
-  name: "address",
-  knownAddresses: [],
-  maybeAddress: null,
-  callback: function( isAnAddress ) {
-    if (isAnAddress) {
-      noun_type_address.knownAddresses.push( noun_type_address.maybeAddress );
-    }
-    noun_type_address.maybeAddress = null;
-  },
-  suggest: function( text, html ) {
-    isAddress( text, noun_type_address.callback );
-    for(var x in noun_type_address.knownAddresses) {
-      if (noun_type_address.knownAddresses[x] == text) {
-        return [CmdUtils.makeSugg(text)];
-      }
-    }
-    noun_type_address.maybeAddress = text;
-    isAddress( text, noun_type_address.callback );
-    return [];
-  }
-};
-
-// commenting out until these actually work (#619)
-/*
 var noun_type_async_address = {
   name: "address(async)",
-  // TODO caching
+  ajaxRequest: null,
   suggest: function(text, html, callback) {
-    isAddress( text, function( truthiness ) {
+    this.ajaxRequest = getAddress( text, function( truthiness ) {
       if (truthiness) {
-       callback(CmdUtils.makeSugg(text));
+        callback([CmdUtils.makeSugg(text)]);
       }
     });
     return [];
   }
 };
-*/
 
 var noun_type_async_restaurant = {
   name: "restaurant(async)",
@@ -465,7 +437,7 @@ var noun_type_async_restaurant = {
   suggest: function(text, html, callback) {
     this.ajaxRequest = getRestaurants( text, function( truthiness, suggestion ) {
       if (truthiness) {
-        callback([CmdUtils.makeSugg(suggestion)]);
+        callback([CmdUtils.makeSugg(text)]);
       }
     });
     return [];
@@ -850,7 +822,7 @@ function getRestaurants(query, callback){
   return ajaxRequest;
 }
 
-function isAddress( query, callback ) {
+function getAddress( query, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = Utils.paramsToString({
     location: query,
@@ -858,7 +830,7 @@ function isAddress( query, callback ) {
   });
 
 
-  jQuery.ajax({
+  var ajaxRequest = jQuery.ajax({
     url: url+params,
     dataType: "xml",
     error: function() {
@@ -868,9 +840,9 @@ function isAddress( query, callback ) {
       var results = jQuery(data).find("Result");
       var allText = jQuery.makeArray(
                       jQuery(data)
-                        .find(":contains()")
+                        .find(":contains('')")
                         .map( function(){ return jQuery(this).text().toLowerCase(); } )
-                      );
+                    );
 
       // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
 
@@ -896,13 +868,14 @@ function isAddress( query, callback ) {
 
       var missRatio = missCount / queryWords.length;
       //displayMessage( missRatio );
-
+      
       if( missRatio < .5 )
         callback( true );
       else
         callback( false );
     }
   });
+  return ajaxRequest;
 }
 
 var EXPORTED_SYMBOLS = [sym for (sym in this) if (/^noun_/.test(sym))];
