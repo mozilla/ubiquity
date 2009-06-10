@@ -160,7 +160,6 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 DefaultFeedPlugin.makeCmdForObj = makeCmdForObj;
 function makeCmdForObj(sandbox, commandObject, feedUri) {
   Cu.import("resource://ubiquity/modules/localization_utils.js");
-
   var cmd = {
     __proto__: commandObject,
     toString: function CS_toString() {
@@ -169,6 +168,9 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
     id: feedUri.spec + "#" + commandObject.name,
     name: commandObject.name,
     execute: function CS_execute(context) {
+      /* Any additional arguments passed in after context will be passed along
+       * as-is to the commandObject.execute() method.
+       */
       sandbox.context = context;
       LocalizationUtils.setCommandContext(cmd.name);
       LocalizationUtils.setFeedContext(feedUri);
@@ -179,6 +181,9 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
 
   if (commandObject.preview)
     cmd.preview = function CS_preview(context) {
+      /* Any additional arguments passed in after context will be passed along
+       * as-is to the commandObject.preview() method.
+       */
       sandbox.context = context;
       LocalizationUtils.setCommandContext(cmd.name);
       LocalizationUtils.setFeedContext(feedUri);

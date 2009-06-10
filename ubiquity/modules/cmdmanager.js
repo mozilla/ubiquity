@@ -198,7 +198,7 @@ CommandManager.prototype = {
   activateAccessKey: function CM_activateAccessKey(number) {
     this._previewer.activateAccessKey(number);
   },
-  
+
   reset : function CM_reset() {
     // TODO: I think?
     if (!this.__activeQuery.finished)
@@ -214,7 +214,7 @@ CommandManager.prototype = {
         this.reset();
       }
     }
-    
+
     this.__activeQuery = this.__nlParser.newQuery(input, context,
                                                   this.maxSuggestions,true);
 
@@ -224,7 +224,7 @@ CommandManager.prototype = {
     if (asyncSuggestionCb)
       this.__lastAsyncSuggestionCb = asyncSuggestionCb;
 
-    if ('run' in this.__activeQuery) 
+    if ('run' in this.__activeQuery)
       this.__activeQuery.run();
     this.__hilitedSuggestion = 0;
     this.onSuggestionsUpdated(input, context);
@@ -267,7 +267,11 @@ CommandManager.prototype = {
                                                            asyncSuggestionCb) {
     let noInputQuery = this.__nlParser.newQuery("", context,
                                                 this.maxSuggestions);
-    noInputQuery.onResults = asyncSuggestionCb;
+    noInputQuery.onResults = function() {
+      if (noInputQuery.finished) {
+        asyncSuggestionCb( noInputQuery.suggestionList );
+      }
+    };
     return noInputQuery.suggestionList;
   },
 
@@ -278,6 +282,10 @@ CommandManager.prototype = {
     var suggText = (this.__activeQuery
                     .suggestionList[this.__hilitedSuggestion]
                     .completionText);
+    // TODO why is this updating input???? the user's input hasn't changed,
+    // all we've done is requested the hilighted suggestion -- this function
+    // should not have side effects.  If it's part of the autocomplete
+    // feature then it should not have a name starting with 'get'. (--Jono)
     this.updateInput(suggText, context);
 
     return suggText;
@@ -291,6 +299,8 @@ CommandManager.prototype = {
   },
 
   makeCommandSuggester: function CM_makeCommandSuggester() {
+    // This needs to be completely rewritten to be asynchronous  -- must
+    // pass callback into getSuggestionListNoInput.
     var self = this;
     return function getAvailableCommands(context) {
       self.refresh();

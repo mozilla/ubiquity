@@ -16,15 +16,6 @@ const MAX_SUGGESTIONS = 10;
 EXPORTED_SYMBOLS = ["makeTestParser"];
 
 // Utility functions:
-
-var fakeContextUtils = {
-  getHtmlSelection: function(context) { return context.htmlSelection; },
-  getSelection: function(context) { return context.textSelection; },
-  getSelectionObject: function(context) {return { text: context.textSelection,
-                                                  html: context.htmlSelection
-                                                };}
-};
-
 var emptyContext = {
   textSelection: "",
   htmlSelection: ""

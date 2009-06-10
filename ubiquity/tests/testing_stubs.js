@@ -1,7 +1,16 @@
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 
-EXPORTED_SYMBOLS = ["FakeCommandSource", "makeCommandManager"];
+EXPORTED_SYMBOLS = ["FakeCommandSource", "makeCommandManager",
+                   "fakeContextUtils"];
+
+var fakeContextUtils = {
+  getHtmlSelection: function(context) { return context.htmlSelection; },
+  getSelection: function(context) { return context.textSelection; },
+  getSelectionObject: function(context) {return { text: context.textSelection,
+                                                  html: context.htmlSelection
+                                                };}
+};
 
 function FakeCommandSource( cmdList ) {
   this._cmdList = cmdList;

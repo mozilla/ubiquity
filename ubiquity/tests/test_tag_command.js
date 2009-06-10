@@ -42,43 +42,43 @@ function testTagCommand() {
         return tags.indexOf(aTag) > -1;
       }, module);
     }
-    
+
     let Application = Components.classes["@mozilla.org/fuel/application;1"]
       .getService(Components.interfaces.fuelIApplication);
-    
+
     var testURI = Application.activeWindow.activeTab.uri;
-    
+
     // for cleanup
     var isBookmarked = bmsvc.isBookmarked(testURI);
-    
+
     var cmd = cmdSource.getCommand(UbiquitySetup.getBaseUri() +
                                    "standard-feeds/firefox.html#tag");
-    this.assert(cmd);
-    
+    this.assert(cmd, "There should be a tag command here");
+
     var context = {focusedElement: null,
       focusedWindow: null};
-    
+
     // test add tag
     cmdManager.updateInput("tag foo", context);
     cmdManager.execute(context);
     this.assert(uriHasTags(testURI, ["foo"]));
-    
+
     // test tag appended to existing tags
     cmdManager.updateInput("tag bar", context);
     cmdManager.execute(context);
     this.assert(uriHasTags(testURI, ["foo", "bar"]));
-    
+
     // test add tags separated by spaces
     cmdManager.updateInput("tag baz bot", context);
     cmdManager.execute(context);
     this.assert(uriHasTags(testURI, ["foo", "bar", "baz", "bot"]));
-    
+
     // test add tags separated by commas
     cmdManager.updateInput("tag bom, la bamba", context);
     cmdManager.execute(context);
     this.assert(uriHasTags(testURI, ["foo", "bar", "baz", "bot", "bom",
                                      "la bamba"]));
-    
+
     // cleanup
     tagsvc.untagURI(testURI, null);
     if (!isBookmarked)

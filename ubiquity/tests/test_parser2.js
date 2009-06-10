@@ -5,41 +5,47 @@ Components.utils.import("resource://ubiquity/modules/nounutils.js");
 Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
+Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
 const VER = 2;
 const LANG = "en";
 const MAX_SUGGESTIONS = 10;
 
-// Code duplicated with test_parser1... should be merged into
-// testing_stubs.js maybe?
-var fakeContextUtils = {
-  getHtmlSelection: function(context) { return context.htmlSelection; },
-  getSelection: function(context) { return context.textSelection; },
-  getSelectionObject: function(context) {return { text: context.textSelection,
-                                                  html: context.htmlSelection
-                                                };}
-};
 
-function makeTestParser(lang, verbs, nouns, contextUtils) {
+function makeTestParser2(lang, verbs, contextUtils) {
   return NLParser2.makeParserForLanguage(
     lang || LANG,
     verbs || [],
-    nouns || [],
+    [],
     contextUtils || fakeContextUtils,
     new TestSuggestionMemory());
 }
 
-// End duplicated code
+function BetterFakeCommandSource( cmdList ) {
+  var cmd;
+  this._cmdList = [ makeCommand( cmd ) for each (cmd in cmdList ) ];
+}
+BetterFakeCommandSource.prototype = {
+  addListener: function() {},
+  getCommand: function(name) {
+    return this._cmdList[name];
+  },
+  getAllCommands: function(name) {
+    return this._cmdList;
+  },
+  refresh: function() {
+  }
+};
+
 
 // Infrastructure for asynchronous tests:
-function getCompletionsAsync( input, verbs, nountypes, context, callback) {
+function getCompletionsAsync( input, verbs, context, callback) {
 
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser(LANG,
+  var parser = makeTestParser2(LANG,
                               verbs,
-                              nountypes,
                               fakeContextUtils,
                               new TestSuggestionMemory());
 
@@ -70,6 +76,8 @@ function makeCommand(options) {
     Utils.url("chrome://ubiquity/content/test.html"));
 }
 
+// Actual test cases begin here:
+
 function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
   // nountypes; ensure that it doesn't break.
@@ -92,8 +100,8 @@ function testSmokeTestParserTwo() {
     nlParser.setCommandList(services.commandSource.getAllCommands());
     // Do a query here and make sure one of the builtin commands is
     // suggested...
-    var fakeContext = { textSelection: "", htmlSelection: "" };
-    nlParser.newQuery("help", fakeContext, MAX_SUGGESTIONS);
+    //var fakeContext = { textSelection: "", htmlSelection: "" };
+    //nlParser.newQuery("help", fakeContext, MAX_SUGGESTIONS);
     // OK, this test is *passing* even though gUbiquity is null when I try
     // to actually run parser 2.  How can that be??
   } catch (e) {
@@ -223,9 +231,132 @@ function testSimplifiedParserTwoApi() {
                        this.makeCallback(testFunc));
 }
 
-/*function testParserTwoInternationalization() {
+function testCmdManagerSuggestsForNounFirstInput() {
+  var oneWasCalled = false;
+  var twoWasCalled = false;
+  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
+  var nounTypeTwo = new NounUtils.NounType( "stuffType", ["mud"] );
 
-}*/
+  var fakeSource = new BetterFakeCommandSource({
+    cmd_one: {
+      names: ["one"],
+      execute: function(args) {
+        if (args.object)
+          oneWasCalled = args.object.text;
+      },
+      arguments: { object: nounTypeOne }
+    },
+    cmd_two: {
+      names: ["two"],
+      execute: function(args) {
+        if (args.object)
+          twoWasCalled = args.object.text;
+      },
+      arguments: { object: nounTypeTwo }
+    }
+  });
+
+  var cmdMan = makeCommandManager.call(this, fakeSource, null,
+                                       makeTestParser2(null,
+                                                      fakeContextUtils),
+                                       onCM);
+  var noSelection = { textSelection: null, htmlSelection: null };
+  var self = this;
+  function onCM(cmdMan) {
+    cmdMan.updateInput(
+      "tree",
+      noSelection,
+      self.makeCallback(
+        function() {
+          self.assert( cmdMan.hasSuggestions() );
+          cmdMan.execute(noSelection);
+          self.assert( oneWasCalled == "tree",
+                       "Should have called cmdOne with text selection tree.");
+        }
+      )
+    );
+    // TODO I want to put a second test using input "mud", but if they
+    // run at the same time the second one will cancel the first one.
+  }
+}
+
+// TODO a test like above, but update input twice and make sure the second
+// one cancels the first one!
+
+/* TODO one like above but only goint through parser, should be able to run
+ * two queries at once and not have them interfere with each other...
+ */
+
+function testCmdManagerSuggestsForEmptyInputWithSelection() {
+  var oneWasCalled = false;
+  var twoWasCalled = false;
+  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
+  var nounTypeTwo = new NounUtils.NounType( "stuffType", ["mud"] );
+
+  var fakeSource = new BetterFakeCommandSource({
+    cmd_one: {
+      names: ["one"],
+      execute: function(args) {
+        oneWasCalled = args.object.text;
+      },
+      arguments: { object: nounTypeOne }
+    },
+    cmd_two: {
+      names: ["two"],
+      execute: function(args) {
+        twoWasCalled = args.object.text;
+      },
+      arguments: { object: nounTypeTwo }
+    }
+  });
+
+  var cmdMan = makeCommandManager.call(this, fakeSource, null,
+                                       makeTestParser2(null,
+                                                      fakeContextUtils),
+                                       onCM);
+  // The commented-out stuff can be un-commented once implicit
+  // selection interpolation is hapening: see #732 (and #722)
+  var self = this;
+  function onCM(cmdMan) {
+    cmdMan.getSuggestionListNoInput(
+      {textSelection:"tree"},
+      self.makeCallback(
+        function( suggestionList ) {
+          /*self.assert( suggestionList.length == 1,
+                        "Should be only one suggestion." ) */
+          dump("SuggestionList[0].name is " + suggestionList[0]._verb.name + "\n");
+          self.assert( suggestionList[0]._verb.name == "one",
+                      "cmd one should be it" );
+          //suggestionList[0].execute();
+          /*self.assert( oneWasCalled == "tree",
+                       "Should have been called with text selection tree.");*/
+        }
+      )
+    );
+    cmdMan.getSuggestionListNoInput(
+      {textSelection:"mud"},
+      self.makeCallback(
+        function( suggestionList ) {
+          /*self.assert( suggestionList.length == 1,
+                        "Should be only one suggestion." ) */
+          /*self.assert( suggestionList[0].name == "two",
+                      "cmd two should be it" );*/
+          //suggestionList[0].execute();
+          /*self.assert( twoWasCalled == "mud",
+                       "Should have been called with text selection mud.");*/
+        }
+      )
+    );
+  }
+}
+
+
+/* More tests that should be written:
+ *   -- For the context menu bug (use cmdmanager.makeCommandSuggester())
+ *   -- For the overlord verbs
+ *   -- For internationalization
+ *   -- Bring over all the unit tests from parser 1 and modify them to work!
+ */
 
 /*
 function testNounTypeSpeed() {
