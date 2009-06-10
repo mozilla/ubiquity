@@ -832,7 +832,7 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       let uri;
       try { uri = global.Utils.url(execute) } catch(e) {}
       command.execute = uri ? function execute_open() {
-        Utils.openUrlInBrowser(uri.spec);
+        Utils.focusUrlInBrowser(uri.spec);
       } : function execute_display() {
         global.displayMessage(execute || "No action defined.");
       };

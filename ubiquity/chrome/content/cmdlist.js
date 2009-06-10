@@ -162,7 +162,7 @@ function fillTableRowForCmd(row, cmd, className) {
     '</td>'
   );
 
-  cmdElement.find("a").attr("name", cmd.name);
+  cmdElement.find("a").attr("name", "#" + cmd.name);
   
   // if Parser 2
   if (UbiquitySetup.parserVersion == 2 && (!cmd.names || !cmd.arguments)) {
@@ -399,21 +399,6 @@ function rebuildTable() {
   addAllUnsubscribedFeeds(feedMgr);
 }
 
-function jumpToCommand() {
-  // If there are URL GET args, jump to the right place
-  var {search} = window.location;
-  if (search) {
-    let args = search.slice(1).split("&");
-    for (let i in args) {
-      let pair = args[i].split("=");
-      if (pair[0] == "cmdname") {
-        window.location.hash = pair[1];
-        break;
-      }
-    }
-  }
-}
-
 function setSortMode(newSortMode) {
   Application.prefs.setValue(SORT_MODE_PREF, newSortMode);
 }
@@ -446,5 +431,6 @@ function setupHelp() {
 $(function(){
   setupHelp();
   rebuildTable();
-  jumpToCommand();
+  // jump to the right anchor
+  location.hash += "";
 });

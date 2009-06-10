@@ -43,90 +43,65 @@
 // SYSTEM COMMANDS
 // -----------------------------------------------------------------
 
+const Help = "about:ubiquity";
+const Editor = "chrome://ubiquity/content/editor.html";
+const CmdList = "chrome://ubiquity/content/cmdlist.html";
+const Settings = "chrome://ubiquity/content/settings.html";
+const BugReport = "chrome://ubiquity/content/report-bug.html";
+
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
-const Help = "about:ubiquity";
 CmdUtils.CreateCommand({
-  name: "help",
-  synonyms: ["about", "?"],
+  names: ["help", "about", "?"],
   icon: "chrome://ubiquity/skin/icons/help.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
       Or, enter the name of a command to get help on that command.</>),
-  takes: {"command name": noun_type_commands},
-  preview: function(pblock, input) {
-    pblock.innerHTML = (!input || !input.text
-                        ? this.description
-                        : input.html);
+  arguments: noun_type_commands,
+  preview: function(pblock, {object}) {
+    pblock.innerHTML = object.html || this.description;
   },
-  execute: function(input) {
-    if (!input || !input.text) {
+  execute: function({object: {text}}) {
+    if (text)
+      Utils.openUrlInBrowser(CmdList + "##" + text);
+    else
       Utils.focusUrlInBrowser(Help);
-    } else {
-      var cmdName = input.text;
-      var url = "chrome://ubiquity/content/cmdlist.html?cmdname=" + cmdName;
-      Utils.openUrlInBrowser(url);
-    }
   }
 });
 
-const Editor = "chrome://ubiquity/content/editor.html";
 CmdUtils.CreateCommand({
   name: "command-editor",
   icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
-  execute: function() {
-    Utils.focusUrlInBrowser(Editor);
-  }
+  execute: Editor,
 });
 
-const CmdList = "chrome://ubiquity/content/cmdlist.html";
 CmdUtils.CreateCommand({
   name: "command-list",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "" + (
     <>Opens <a href={CmdList}>the list</a>
       of all Ubiquity commands available and what they all do.</>),
-  execute: function() {
-    Utils.focusUrlInBrowser(CmdList);
-  }
+  execute: CmdList,
 });
 
-const Settings = "chrome://ubiquity/content/settings.html";
 CmdUtils.CreateCommand({
-  name: "settings",
-  synonyms: ["skin-list"],
+  names: ["settings", "skin-list"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={Settings}>Settings</a> page,
-    where you can change your skin, key combinations, etc.</>),
-  execute: function() {
-    Utils.focusUrlInBrowser(Settings);
-  }
+      where you can change your skin, key combinations, etc.</>),
+  execute: Settings,
 });
 
 CmdUtils.CreateCommand({
   name: "report-bug",
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "Reports a Ubiquity bug.",
-  execute: function() {
-    Utils.focusUrlInBrowser("chrome://ubiquity/content/report-bug.html");
-  }
+  description: "" + (
+    <>Takes you to the <a href={BugReport}>Bug Report</a> page.</>),
+  execute: BugReport,
 });
-
-function startup_openUbiquityWelcomePage() {
-  var jsm = {};
-  Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
-
-  if (jsm.UbiquitySetup.isNewlyInstalledOrUpgraded)
-    cmd_help();
-}
-
-function startup_setBasicPreferences() {
-  // Allow JS chrome errors to show up in the error console.
-  Application.prefs.setValue("javascript.options.showInConsole", true);
-}
 
 var ubiquityLoad_commandHistory = (function() {{}
 const
@@ -228,3 +203,14 @@ return function UL_commandHistory(U) {
   }, false);
 };
 })();
+
+function startup_openUbiquityWelcomePage() {
+  if (Components.utils.import("resource://ubiquity/modules/setup.js", null)
+      .UbiquitySetup.isNewlyInstalledOrUpgraded)
+    Utils.focusUrlInBrowser(Help);
+}
+
+function startup_setBasicPreferences() {
+  // Allow JS chrome errors to show up in the error console.
+  Application.prefs.setValue("javascript.options.showInConsole", true);
+}

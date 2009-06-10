@@ -213,7 +213,7 @@ Parser.prototype = {
       var prefixes = {}; // removing duplicates
       for each (let s in arr) for (let i in s)
         prefixes[s.slice(0, +i + 1)] = 1;
-      return ([p for (p in prefixes)]
+      return ([p.replace(/\W/g, "\\$&") for (p in prefixes)]
               .sort(function(a, b) b.length - a.length)
               .join('|'));
     }
@@ -1686,7 +1686,7 @@ Parser.Parse.prototype = {
           + "</span>":'') + "<span class='" + className + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.html || arg.input)
+          + (arg.summary || arg.input)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>";
@@ -1695,7 +1695,7 @@ Parser.Parse.prototype = {
           + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.html || arg.input)
+          + (arg.summary || arg.input)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>" + (arg.modifier ? "<span class='prefix' title='" + arg.role + "'>"
