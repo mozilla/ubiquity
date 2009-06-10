@@ -162,33 +162,38 @@ function makeCmdForObj(sandbox, objName, feedUri) {
   var cmdName = objName.substr(CMD_PREFIX.length);
   var originalCmdName = cmdName;
   cmdName = cmdName.replace(/_/g, "-");
-  var cmdFunc = sandbox[objName];
+  var commandObject = sandbox[objName];
 
   Cu.import("resource://ubiquity/modules/localization_utils.js");
 
   var cmd = {
-    __proto__: cmdFunc,
+    __proto__: commandObject,
     toString: function CS_toString() {
       return "[object UbiquityCommand " + this.name + "]";
     },
     name: cmdName,
+    /* TODO if this is a parser2 API command then there is no directObject
+     * and modifiers, just an 'arguments' object.  The code here will still
+     * work, because 'arguments' gets passed in to directObject, and modifiers
+     * is undefined.  So it works, but the code as written is misleading.
+     */
     execute: function CS_execute(context, directObject, modifiers) {
       sandbox.context = context;
       LocalizationUtils.setCommandContext(originalCmdName);
       LocalizationUtils.setFeedContext(feedUri);
-      return cmdFunc.call(cmd, directObject, modifiers);
+      return commandObject.execute.call(cmd, directObject, modifiers);
     },
     feedUri: feedUri
   };
 
-  if (cmdFunc.preview) {
+  if (commandObject.preview) {
     cmd.preview = function CS_preview(context, previewBlock, directObject,
                                       modifiers) {
       sandbox.context = context;
       LocalizationUtils.setCommandContext(originalCmdName);
       LocalizationUtils.setFeedContext(feedUri);
-      return cmdFunc.preview.call(cmd, previewBlock, directObject,
-                                  modifiers);
+      return commandObject.preview.call(cmd, previewBlock, directObject,
+                                        modifiers);
     };
   }
 

@@ -667,8 +667,10 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 //
 // {{{ options.execute }}} The function which gets run when the user
 // executes your command.  If your command takes arguments (see below),
-// your execute method will be passed the direct object as its first
-// argument, and a modifiers dictionary as its second argument.
+// your execute method will be passed an dictionary object containing
+// the arguments assigned by the parser.
+// (The older API, which involved taking the direct object and the modifiers
+// as separate arguments, is deprecated.)
 //
 // ** The following properties are used if you want your command to
 // accept arguments: **
@@ -758,7 +760,7 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
   var me = this;
   var globalObj = this.__globalObject;
   var {displayMessage} = globalObj;
-  var execute;
+  var commandObject = {};
 
   // Returns the first key in a dictionary.
   function getKey(dict) {
@@ -767,14 +769,20 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     return null;
   }
 
-  if (options.execute)
-    execute = function execute() {
-      options.execute.apply(options, arguments);
-    };
-  else
-    execute = function execute() {
+  // Reserved keywords that shouldn't be added to the cmd function.
+  var RESERVED = {takes: 1, execute: 1, name: 1, arguments: 1, preview: 1};
+  // Add all other attributes of options to the cmd function.
+  for (var key in options)
+    if (!(key in RESERVED))
+      commandObject[key] = options[key];
+
+  if (options.execute) {
+    commandObject.execute = options.execute;
+  } else {
+    commandObject.execute = function execute() {
       displayMessage("No action defined.");
     };
+  }
 
   function toNounType(obj, key) {
     var val = obj[key];
@@ -790,29 +798,23 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     if (!noun.id) noun.id = globalObj.feed.id + "#n" + me.__nextId++;
   }
 
+  /* OLD DEPRECATED ARGUMENT API */
   if (options.takes) {
-    execute.DOLabel = getKey(options.takes);
-    if (execute.DOLabel) {
-      execute.DOType = options.takes[execute.DOLabel];
-      toNounType(execute, "DOType");
+    commandObject.DOLabel = getKey(options.takes);
+    if (commandObject.DOLabel) {
+      commandObject.DOType = options.takes[commandObject.DOLabel];
+      toNounType(commandObject, "DOType");
     }
   }
-
   if (options.modifiers) {
     let {modifiers} = options;
     for (let label in modifiers)
       toNounType(modifiers, label);
   }
 
-  // Reserved keywords that shouldn't be added to the cmd function.
-  var RESERVED = {takes: 1, execute: 1, name: 1};
-  // Add all other attributes of options to the cmd function.
-  for (var key in options)
-    if (!(key in RESERVED))
-      execute[key] = options[key];
-
-  if (execute.arguments) {
-    let args = execute.arguments;
+  /* NEW IMPROVED ARGUMENT API */
+  if (options.arguments) {
+    let args = options.arguments;
     // handle simplified syntax
     // arguments: noun
     // arguments: {role: noun, ...}
@@ -831,30 +833,33 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     for each (let arg in args)
       toNounType(arg, "nountype");
 
-    execute.arguments = args;
+    commandObject.arguments = args;
   }
 
   // If preview is a string, wrap it in a function that does
   // what you'd expect it to.
-  if (typeof execute.preview === "string") {
-    var previewString = execute.preview;
-    execute.preview = function preview(pblock) {
+  if (typeof options.preview === "string") {
+    var previewString = options.preview;
+    commandObject.preview = function preview(pblock) {
       pblock.innerHTML = previewString;
     };
+  } else {
+    commandObject.preview = options.preview;
   }
 
-  if (execute.previewUrl)
+  if (commandObject.previewUrl)
     // Call our "patched' Utils.url(), which has the ability
     // to base a relative URL on the current feed's URL.
-    execute.previewUrl = globalObj.Utils.url(execute.previewUrl);
+    commandObject.previewUrl = globalObj.Utils.url(commandObject.previewUrl);
 
-  if (typeof execute.names === "string")
-    execute.names = execute.names.split(/\s*\|\s{0,}/);
+  if (typeof commandObject.names === "string")
+    commandObject.names = commandObject.names.split(/\s*\|\s{0,}/);
 
-  if (Utils.isArray(execute.names))
-    execute.synonyms = execute.names.slice(1);
+  if (Utils.isArray(commandObject.names))
+    commandObject.synonyms = commandObject.names.slice(1);
 
-  globalObj["cmd_" + (options.name || execute.names[0])] = execute;
+  var identifier = "cmd_" + (options.name || commandObject.names[0]);
+  globalObj[identifier] = commandObject;
 };
 
 // -----------------------------------------------------------------
