@@ -998,11 +998,29 @@ Parser.prototype = {
             // make a copy using each of the suggestions in the nounCache
             // as the replaced suggestion, and put all of the replacement
             // parses into newreturn.
-            //
-            // We'll loop through all of the suggestions for each text
-            // and just use the ones that came from the right nountype.
-            let thereWasASuggestionWithTheRightNounType = false;
 
+            // BEGIN NEW NOUNCACHE STRUCTURE
+            /*let nountypeId = verbArg.nountype.id;
+            if (nountypeId in this._nounCache[argText]) {
+              
+              for each (let suggestion in this._nounCache[argText][nountypeId]) {
+                for each (let parse in returnArr) {
+                  let parseCopy = parse.copy();
+                  // copy the attributes we want to copy from the nounCache
+                  let newSugg = parseCopy.args[role][i];
+                  for(let key in suggestion)
+                    newSugg[key] = suggestion[key];
+                  newreturn.push(parseCopy);
+                }
+              }
+            } else {
+              returnArr = newreturn;
+              thisVerbTakesThisRole = true;
+            }*/
+            // END NEW NOUNCACHE STRUCTURE
+
+            // BEGIN OLD NOUNCACHE STRUCTURE
+            let thereWasASuggestionWithTheRightNounType = false;
             for each (let suggestion in this._nounCache[argText]) {
               if (suggestion.nountypeId === verbArg.nountype.id) {
                 thereWasASuggestionWithTheRightNounType = true;
@@ -1017,11 +1035,12 @@ Parser.prototype = {
                 }
               }
             }
-
             if (thereWasASuggestionWithTheRightNounType) {
               returnArr = newreturn;
               thisVerbTakesThisRole = true;
             }
+            // END OLD NOUNCACHE STRUCTURE
+            
           }
 
           // If thisVerbTakesThisRole, it means that we've already found the
@@ -1139,9 +1158,24 @@ Parser.prototype = {
 
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, ajaxRequests) {
+
+        // BEGIN NEW NOUNCACHE STRUCTURE
+        /*if (!(x in thisParser._nounCache))
+          thisParser._nounCache[x] = {};
+        for each (let newSugg in suggestions) {
+          let nountypeId = newSugg.nountypeId;
+          if (!(nountypeId in thisParser._nounCache[x]))
+            thisParser._nounCache[x][nountypeId] = [];
+          thisParser._nounCache[x][nountypeId].push(newSugg);
+        }*/
+        // END NEW NOUNCACHE STRUCTURE
+        
+        // BEGIN OLD NOUNCACHE STRUCTURE
         if (!(x in thisParser._nounCache))
           thisParser._nounCache[x] = [];
         thisParser._nounCache[x] = thisParser._nounCache[x].concat(suggestions);
+        // END OLD NOUNCACHE STRUCTURE
+
         if (typeof callback == 'function')
           callback(x,thisParser._nounCache[x], ajaxRequests);
       };
@@ -1390,9 +1424,9 @@ Parser.Query.prototype = {
     // handle the scoring.
     var thisQuery = this;
     function completeParse(thisParse, ajaxRequests) {
-      if(ajaxRequests.length == 0){
+      if(ajaxRequests.length == 0) {
         dump("parse completed\n");
-	thisParse.complete = true;
+        thisParse.complete = true;
       }
       
       // go through all the arguments in thisParse and suggest args
@@ -1407,7 +1441,10 @@ Parser.Query.prototype = {
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
     }
-    function tryToCompleteParses(argText,suggestions, ajaxRequests) {
+    
+    // TODO: looks like suggestions isn't actually being used in this callback.
+    // Maybe we could/should take it out?
+    function tryToCompleteParses(argText, suggestions, ajaxRequests) {
       thisQuery.dump('finished detecting nountypes for '+argText + '\n');
       //Utils.log([argText,suggestions]);
 
@@ -1439,7 +1476,7 @@ Parser.Query.prototype = {
 
       if (!parse.args.__count__)
         // This parse doesn't have any arguments. Complete it now.
-        Utils.setTimeout(completeParse, 0, parse);
+        Utils.setTimeout(completeParse, 0, parse, []);
       else for each (let arg in parse.args) {
         for each (let x in arg) {
           // this is the text we're going to cache
@@ -1772,6 +1809,9 @@ Parser.Parse.prototype = {
   //
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
+  // 
+  // TODO: This may not actually be correct... it may return true before some
+  // ajax requests complete. Needs testing.
   allNounTypesDetectionHasCompleted: function() {
     for (let role in this.args) {
       // for each argument of this role...
