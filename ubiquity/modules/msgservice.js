@@ -108,7 +108,7 @@ function AlertMessageService() {
     var textClickable = false;
     var cookie = "";
     var alertListener = null;
-    var name = "Ubiquity";
+    var name = null;
 
     if (typeof msg === "object") {
       text = String(msg.text);
