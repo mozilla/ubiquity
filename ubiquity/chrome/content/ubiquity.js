@@ -24,6 +24,7 @@
  *   Maria Emerson <memerson@mozilla.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
  *   Blair McBride <unfocused@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -50,7 +51,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__textBox = textBox;
   this.__cmdManager = cmdManager;
   this.__needsToExecute = false;
-  this.__lastValue = null;
+  this.__lastValue = "";
   this.__previewTimerID = -1;
   this.__lastKeyEvent = {};
 
@@ -58,12 +59,12 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 
   var self = this;
 
-  msgPanel.addEventListener( "popupshown",
-                             function() { self.__onShown(); },
-                             false );
-  msgPanel.addEventListener( "popuphidden",
-                             function() { self.__onHidden(); },
-                             false );
+  msgPanel.addEventListener("popupshown",
+                            function() { self.__onShown(); },
+                            false);
+  msgPanel.addEventListener("popuphidden",
+                            function() { self.__onHidden(); },
+                            false);
   window.addEventListener("mousemove",
                           function(event) { self.__onMouseMove(event); },
                           false);
@@ -84,28 +85,27 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   }
 
   // middle: open link, right: close panel, left: both
-  msgPanel.addEventListener('click', function clickPanel(e) {
-    var {button, target} = e;
-    if(button !== 2) {
-      do var {href} = target; while(!href && (target = target.parentNode));
-      if(!/^(?:https?|ftp|chrome|about):/.test(href))
-        return;
-      self.Utils.openUrlInBrowser(href);
+  msgPanel.addEventListener("click", function clickPanel(ev) {
+    var {button, target} = ev;
+    if (button !== 2) {
+      do var {href} = target;
+      while (!href && (target = target.parentNode));
+      if (!href || /^(?:javascript:|#)/.test(href)) return;
+      if (/^\w+:/.test(href)) self.Utils.openUrlInBrowser(href);
     }
-    if(button !== 1)
-      self.closeWindow();
-    e.preventDefault();
+    if (button !== 1) self.closeWindow();
+    ev.preventDefault();
   }, true);
 }
 
 Ubiquity.prototype = {
   __PROCESS_INPUT_DELAY: 50,
-  __KEYCODE_ENTER: 13,
-  __KEYCODE_UP: 38,
-  __KEYCODE_DOWN: 40,
-  __KEYCODE_TAB:  9,
   __MIN_CMD_PREVIEW_LENGTH: 0,
-  __KEYCODE_1: 49,
+
+  __KEYCODE_ENTER: KeyEvent.DOM_VK_RETURN,
+  __KEYCODE_UP   : KeyEvent.DOM_VK_UP,
+  __KEYCODE_DOWN : KeyEvent.DOM_VK_DOWN,
+  __KEYCODE_TAB  : KeyEvent.DOM_VK_TAB,
 
   get textBox() {
     return this.__textBox;
@@ -125,18 +125,9 @@ Ubiquity.prototype = {
 
   __onBlur: function __onBlur() {
     // Hackish fix for #330.
-    var self = this;
-
-    function refocusTextbox() {
-      if (self.isWindowOpen) {
-        var isTextBoxFocused = (document.commandDispatcher.focusedElement ==
-                                self.__textBox);
-        if (!isTextBoxFocused)
-          self.__textBox.focus();
-      }
-    }
-
-    this.Utils.setTimeout(refocusTextbox, 100);
+    this.Utils.setTimeout(function refocusTextbox(self) {
+      if (self.isWindowOpen) self.__textBox.focus();
+    }, 100, this);
   },
 
   __onMouseMove: function __onMouseMove(event) {
@@ -145,39 +136,35 @@ Ubiquity.prototype = {
   },
 
   __onKeydown: function __onKeyDown(event) {
-    this.__lastKeyEvent = event;
+    var {keyCode} = this.__lastKeyEvent = event;
 
-    if (event.keyCode == this.__KEYCODE_UP) {
+    if (keyCode === this.__KEYCODE_UP) {
       event.preventDefault();
       this.__cmdManager.moveIndicationUp(this.__makeContext());
-    } else if (event.keyCode == this.__KEYCODE_DOWN) {
+    } else if (keyCode === this.__KEYCODE_DOWN) {
       event.preventDefault();
       this.__cmdManager.moveIndicationDown(this.__makeContext());
-    } else if (event.keyCode == this.__KEYCODE_TAB) {
+    } else if (keyCode === this.__KEYCODE_TAB) {
       event.preventDefault();
-      var suggestionText = this.__cmdManager.getHilitedSuggestionText(
-        this.__makeContext()
-      );
-      if(suggestionText)
+      var suggestionText =
+        this.__cmdManager.getHilitedSuggestionText(this.__makeContext());
+      if (suggestionText)
         this.__textBox.value = suggestionText;
     }
   },
 
   __onKeyup: function __onKeyup(event) {
-    this.__lastKeyEvent = event;
-
-    var {keyCode} = event;
+    var {keyCode} = this.__lastKeyEvent = event;
 
     if (keyCode !== this.__KEYCODE_UP &&
         keyCode !== this.__KEYCODE_DOWN &&
-        keyCode !== this.__KEYCODE_TAB &&
-        !(event.ctrlKey && event.altKey))
+        keyCode !== this.__KEYCODE_TAB)
       this.__processInput();
   },
 
    __onKeyPress: function(event) {
      if (event.keyCode === this.__KEYCODE_ENTER) {
-       this.__forceProcessInput();
+       this.__processInput(true);
        if (this.__cmdManager.hasSuggestions()) {
          this.__needsToExecute = true;
        }
@@ -195,82 +182,60 @@ Ubiquity.prototype = {
   },
 
   __delayedProcessInput: function __delayedProcessInput() {
-    this.__previewTimerID = -1;
     var self = this;
-
     var input = this.__textBox.value;
-    if (input != this.__lastValue) {
-
+    if (input !== this.__lastValue) {
       this.__lastValue = input;
-
       if (input.length >= this.__MIN_CMD_PREVIEW_LENGTH)
         this.__cmdManager.updateInput(
           input,
           this.__makeContext(),
-          function() {self.__onSuggestionsUpdated();}
-        );
+          function() { self.__onSuggestionsUpdated(); });
     }
   },
 
-  __forceProcessInput: function __forceProcessInput() {
-    if (this.__previewTimerID != -1) {
-      this.Utils.clearTimeout(this.__previewTimerID);
+  __processInput: function __processInput(forcing) {
+    this.Utils.clearTimeout(this.__previewTimerID);
+    if (forcing)
       this.__delayedProcessInput();
-    }
-  },
-
-  __processInput: function __processInput() {
-    if (this.__previewTimerID != -1)
-      this.Utils.clearTimeout(this.__previewTimerID);
-
-    var self = this;
-    this.__previewTimerID = this.Utils.setTimeout(
-      function() { self.__delayedProcessInput(); },
-      this.__PROCESS_INPUT_DELAY
-    );
+    else
+      this.__previewTimerID = this.Utils.setTimeout(function(self) {
+        self.__delayedProcessInput();
+      }, this.__PROCESS_INPUT_DELAY, this);
   },
 
   __makeContext: function __makeContext() {
-    var context = {focusedWindow : this.__focusedWindow,
-                   focusedElement : this.__focusedElement,
-                   chromeWindow : window,
-                   screenX : this.__x,
-                   screenY : this.__y};
-    return context;
+    return {
+      screenX: this.__x,
+      screenY: this.__y,
+      chromeWindow: window,
+      focusedWindow : this.__focusedWindow,
+      focusedElement: this.__focusedElement,
+    };
   },
 
   __onHidden: function __onHidden() {
-    var context = this.__makeContext();
-
-    if (this.__focusedElement)
-      this.__focusedElement.focus();
-    else
-      if (this.__focusedWindow)
-        this.__focusedWindow.focus();
+    if (this.__needsToExecute) {
+      this.__needsToExecute = false;
+      this.__cmdManager.execute(this.__makeContext());
+    }
+    var unfocused = this.__focusedElement || this.__focusedWindow;
+    if (unfocused) unfocused.focus();
 
     this.__focusedWindow = null;
     this.__focusedElement = null;
-
-    if (this.__needsToExecute) {
-      this.__cmdManager.execute(context);
-      this.__needsToExecute = false;
-    }
     this.__cmdManager.reset();
   },
 
   __onShown: function __onShown() {
-    this.__lastValue = null;
+    this.__lastValue = "";
     this.__textBox.focus();
     this.__textBox.select();
     this.__cmdManager.refresh();
     this.__processInput();
   },
 
-  setLocalizedDefaults: function setLocalizedDefaults( langCode ) {
-    if (langCode == "jp") {
-      this.__DEFAULT_PREVIEW = jpGetDefaultPreview();
-      this.__KEYCODE_ENTER = 39;
-    }
+  setLocalizedDefaults: function setLocalizedDefaults(langCode) {
   },
 
   openWindow: function openWindow() {
@@ -278,7 +243,7 @@ Ubiquity.prototype = {
     this.__focusedElement = document.commandDispatcher.focusedElement;
 
     // This is a temporary workaround for #43.
-    var anchor = window.document.getElementById("content").selectedBrowser;
+    var anchor = document.getElementById("content").selectedBrowser;
     this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
   },
 
@@ -287,7 +252,7 @@ Ubiquity.prototype = {
   },
 
   toggleWindow: function toggleWindow() {
-    switch(this.__msgPanel.state){
+    switch (this.__msgPanel.state) {
       case "open":
       case "hiding":
       case "showing":
