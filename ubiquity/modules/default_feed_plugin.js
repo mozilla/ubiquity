@@ -37,7 +37,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
+var EXPORTED_SYMBOLS = ["DefaultFeedPlugin", "makeCmdForObj"];
 
 const Cu = Components.utils;
 
@@ -180,7 +180,7 @@ function makeCmdForObj(sandbox, objName, feedUri) {
     },
     feedUri: feedUri
   };
-  
+
   if (cmdFunc.preview) {
     cmd.preview = function CS_preview(context, previewBlock, directObject,
                                       modifiers) {

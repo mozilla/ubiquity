@@ -1,6 +1,9 @@
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
+Components.utils.import("resource://ubiquity/modules/cmdutils.js");
+Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
+Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
@@ -28,19 +31,6 @@ function makeTestParser(lang, verbs, nouns, contextUtils) {
     new TestSuggestionMemory());
 }
 
-function getCompletions( input, verbs, nountypes, context ) {
-  if (!context)
-    context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser(LANG,
-                              verbs,
-                              nountypes,
-                              fakeContextUtils,
-                              new TestSuggestionMemory() );
-  var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
-  //dump("Query step is " + query._step + "\n");
-  return query.suggestionList;
-}
-
 // End duplicated code
 
 // Infrastructure for asynchronous tests:
@@ -59,50 +49,27 @@ function getCompletionsAsync( input, verbs, nountypes, context, callback) {
    * important because otherwise it would run before we assigned the
    * callback. */
   query.onResults = function() {
-    if (query.finished)
+    if (query.finished) {
       callback(query.suggestionList);
+    }
   };
   query.run();
 }
 
-
-function AsyncTestManager() {
-  this.init();
+function createCommandAndGetObj(options) {
+  // Calls cmdUtils.CreateCommand, but returns the object instead of just
+  // dumping it in a global namespace.
+  CmdUtils.__globalObject = {
+    feed: { id: "this_is_a_test_case_not_really_a_feed"},
+    Utils: Utils
+                           };
+  CmdUtils.CreateCommand(options);
+  var cmdName = "cmd_" + (options.name || options.names[0]);
+  return makeCmdForObj(CmdUtils.__globalObject,
+                       cmdName,
+                       Utils.url("chrome://ubiquity/content/test.html"));
 }
-AsyncTestManager.prototype = {
-  init: function() {
-    this._testIsDone = false;
-    // TODO this timer doesn't seem to work?
-    //this._timerId = Utils.setTimeout( this.finishTest, 5000);
 
-    this.passed = true;
-    this.errorMsg = "";
-  },
-
-  finishTest: function() {
-    this._testIsDone = true;
-    //Utils.clearTimeout(this._timerId);
-  },
-
-  assert: function( condition, message ) {
-    if (!condition) {
-      this.passed = false;
-      this.errorMsg = message;
-      this.finishTest();
-    }
-  },
-
-  waitForTestToFinish: function() {
-    var threadManager = Components.classes["@mozilla.org/thread-manager;1"]
-                          .getService();
-    var thread = threadManager.currentThread;
-    while ( this._testIsDone == false ) {
-      dump("Waiting for test to finish!\n");
-      thread.processNextEvent( true );
-    }
-  }
-
-};
 
 function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
@@ -153,30 +120,23 @@ function testParserTwoDirectOnly() {
     ]
   };
 
-  var atm = new AsyncTestManager();
-
+  var self = this;
   var testFunc = function(completions) {
-    atm.assert( completions.length == 2, "should be 2 completions" );
-    atm.assert( completions[0]._verb.text == "pet", "verb should be pet");
-    atm.assert( completions[0].args.object[0].text == "beagle",
+    self.assert( completions.length == 2, "should be 2 completions" );
+    self.assert( completions[0]._verb.text == "pet", "verb should be pet");
+    self.assert( completions[0].args.object[0].text == "beagle",
       "obj should be beagle");
-    atm.assert( completions[1]._verb.text == "pet", "verb should be pet");
-    atm.assert( completions[1].args.object[0].text == "bulldog",
+    self.assert( completions[1]._verb.text == "pet", "verb should be pet");
+    self.assert( completions[1].args.object[0].text == "bulldog",
       "obj should be bulldog");
     completions[0].execute();
-    atm.assert( dogGotPetted == "beagle");
+    self.assert( dogGotPetted == "beagle");
     completions[1].execute();
-    atm.assert( dogGotPetted == "bulldog" );
-    dump("Running testFunc!\n");
-    atm.finishTest();
+    self.assert( dogGotPetted == "bulldog" );
   };
 
-  dump("Starting the async test.\n");
-  getCompletionsAsync( "pet b", [cmd_pet], [dog], null, testFunc );
-
-  atm.waitForTestToFinish();
-
-  this.assert( atm.passed, atm.errorMsg );
+  getCompletionsAsync( "pet b", [cmd_pet], [dog], null,
+                       self.makeCallback(testFunc) );
 }
 
 
@@ -202,26 +162,26 @@ function testParserTwoParseWithModifier() {
   };
 
   var inputWords = "wash pood with sp";
-  var atm = new AsyncTestManager();
 
+  var self = this;
   var testFunc = function(completions) {
-    atm.assert( completions.length == 2, "Should be 2 completions" );
+    self.assert( completions.length == 2, "Should be 2 completions" );
     completions[0].execute();
-    atm.assert( dogGotWashed == "poodle");
-    atm.assert( dogGotWashedWith == "sponge");
+    self.assert( dogGotWashed == "poodle");
+    self.assert( dogGotWashedWith == "sponge");
     completions[1].execute();
-    atm.assert( dogGotWashed == "poodle");
-    atm.assert( dogGotWashedWith == "spork");
-    atm.finishTest();
+    self.assert( dogGotWashed == "poodle");
+    self.assert( dogGotWashedWith == "spork");
   };
 
   getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
-                       testFunc);
-  atm.waitForTestToFinish();
-  this.assert( atm.passed, atm.errorMsg );
+                       self.makeCallback(testFunc));
 }
 
 function testSimplifiedParserTwoApi() {
+  /* TODO this works from command line, but exceeds maximum test
+   * execution time when run in page... why?
+   */
   var dogGotWashed = null;
   var dogGotWashedWith = null;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
@@ -230,36 +190,41 @@ function testSimplifiedParserTwoApi() {
 					  ["sponge", "hose", "spork",
 					  "bathtub", "fire hose"]);
 
-  // This test is currently failing....it gets a feedKey.nountype undefined
-  // in new/parser.js line 207.
-  var cmd_wash = {
-    execute: function(context, args) {
+  var cmd_wash = createCommandAndGetObj(
+   {
+    execute: function(args) {
       dogGotWashed = args.object.text;
       dogGotWashedWith = args.instrument.text;
     },
     names: ["wash"],
     arguments: { object: dog, instrument: washingObj }
-  };
+   });
 
   var inputWords = "wash pood with sp";
-  var atm = new AsyncTestManager();
-
+  var self = this;
   var testFunc = function(completions) {
-    atm.assert( completions.length == 2, "Should be 2 completions" );
+    self.assert( completions.length == 2, "Should be 2 completions" );
+    self.assert( completions[0]._verb.name == "wash", "Should be named wash");
+    self.assert( completions[0].args["object"][0].text == "poodle",
+                "Object should be poodle");
+    self.assert( completions[0].args["instrument"][0].text == "sponge",
+                "Instrument should be sponge");
+    self.assert( completions[1]._verb.name == "wash", "Should be named wash");
+    self.assert( completions[1].args["object"][0].text == "poodle",
+                "Object should be poodle");
+    self.assert( completions[1].args["instrument"][0].text == "spork",
+                "Instrument should be spork");
+
     completions[0].execute();
-    atm.assert( dogGotWashed == "poodle");
-    atm.assert( dogGotWashedWith == "sponge");
+    self.assert( dogGotWashed == "poodle");
+    self.assert( dogGotWashedWith == "sponge");
     completions[1].execute();
-    atm.assert( dogGotWashed == "poodle");
-    atm.assert( dogGotWashedWith == "spork");
-    atm.finishTest();
+    self.assert( dogGotWashed == "poodle");
+    self.assert( dogGotWashedWith == "spork");
   };
 
   getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
-                       testFunc);
-  atm.waitForTestToFinish();
-  this.assert( atm.passed, atm.errorMsg );
-
+                       this.makeCallback(testFunc));
 }
 
 /*function testParserTwoInternationalization() {
