@@ -9,6 +9,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function detectNounType(x, callback) {
   var returnArray = [];
+  var ajaxRequests = [];
   var {activeNounTypes} =
     Components.utils.import(
       "resource://ubiquity/modules/parser/new/active_noun_types.js",
@@ -20,19 +21,24 @@ function detectNounType(x, callback) {
     let id = thisNounTypeId;
     let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
       suggs = handleSuggs(suggs, id);
-      if (suggs.length) callback(suggs);
+      if(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest) != -1)
+        ajaxRequests.splice(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest), 1);
+      if (suggs.length) callback(suggs, ajaxRequests);
     }
     returnArray.push.apply(
       returnArray,
       handleSuggs(
         activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
+
+    if(activeNounTypes[id].ajaxRequest)
+      ajaxRequests.push(activeNounTypes[id].ajaxRequest);
   }
 
-  callback(returnArray);
+  callback(returnArray, ajaxRequests);
 }
 
 function handleSuggs(suggs, id) {
-  if (!suggs || !suggs.length)
+  if (!suggs && !suggs.length)
     return [];
   if (!Utils.isArray(suggs)) suggs = [suggs];
   for each (let s in suggs) s.nountypeId = id;

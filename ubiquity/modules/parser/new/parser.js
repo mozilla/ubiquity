@@ -1131,7 +1131,7 @@ Parser.prototype = {
     //Utils.log('detecting '+x+'\n');
     if (x in this._nounCache) {
       if (typeof callback == 'function')
-        callback(x,this._nounCache[x]);
+        callback(x,this._nounCache[x], []);
     } else {
       /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
 
@@ -1154,12 +1154,12 @@ Parser.prototype = {
                 nounWorker);
 
       var thisParser = this;
-      var myCallback = function detectNounType_myCallback(suggestions) {
+      var myCallback = function detectNounType_myCallback(suggestions, ajaxRequests) {
         if (!(x in thisParser._nounCache))
           thisParser._nounCache[x] = [];
         thisParser._nounCache[x] = thisParser._nounCache[x].concat(suggestions);
         if (typeof callback == 'function')
-          callback(x,thisParser._nounCache[x]);
+          callback(x,thisParser._nounCache[x], ajaxRequests);
       };
 
       Utils.setTimeout(function detectNounType_runNounWorker(){
@@ -1382,9 +1382,12 @@ Parser.Query.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    function completeParse(thisParse) {
-      thisParse.complete = true;
-
+    function completeParse(thisParse, ajaxRequests) {
+      if(ajaxRequests.length == 0){
+        dump("parse completed\n");
+	thisParse.complete = true;
+      }
+      
       // go through all the arguments in thisParse and suggest args
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
@@ -1397,8 +1400,8 @@ Parser.Query.prototype = {
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
     }
-    function tryToCompleteParses(argText,suggestions) {
-      thisQuery.dump('finished detecting nountypes for '+argText);
+    function tryToCompleteParses(argText,suggestions, ajaxRequests) {
+      thisQuery.dump('finished detecting nountypes for '+argText + '\n');
       //Utils.log([argText,suggestions]);
 
       if (thisQuery.finished) {
@@ -1411,7 +1414,7 @@ Parser.Query.prototype = {
 
         if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
           thisQuery.dump('completing parse '+parseId+' now');
-          completeParse(thisParse);
+          completeParse(thisParse, ajaxRequests);
         }
       }
 
