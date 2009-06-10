@@ -345,7 +345,6 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
     new LocalUriCodeSource(basePartsUri + "header/localization_utils.js"),
     //new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/deprecated.js"),
   ];
   var feeds = {};
   var footerCodeSources = [
