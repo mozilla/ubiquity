@@ -7,13 +7,14 @@
 // at chrome://parser-demo/content/index.html
 
 {
-  en: 'English',
-  pt: 'Português',
-  fr: 'Français',
-  da: 'Dansk',
-  sv: 'Svenska',
-  ja: '日本語',
-  zh: '中文',
-  ca: 'Català',
-  it: 'Italiano'
+  en: "English",
+  pt: "Português",
+  fr: "Français",
+  da: "Dansk",
+  sv: "Svenska",
+  ja: "日本語",
+  zh: "中文",
+  ca: "Català",
+  it: "Italiano",
+  $: "$"
 }
