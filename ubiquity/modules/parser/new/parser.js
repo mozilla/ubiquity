@@ -22,6 +22,7 @@
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Satoshi Murakami <murky.satyr@gmail.com>
+ *   Brandon Pung <brandonpung@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -1226,6 +1227,9 @@ Parser.Query = function(parser, queryString, context, maxSuggestions,
   this.maxSuggestions = maxSuggestions;
   this.selObj = { text: '', html: '' };
 
+  //_oustandingRequests are open ajax calls that have not yet returned
+  this._outstandingRequests = [];
+
   // code flow control stuff
   // used in async faux-thread contrl
   this.finished = false;
@@ -1437,6 +1441,8 @@ Parser.Query.prototype = {
       thisQuery.dump('finished detecting nountypes for '+argText + '\n');
       //Utils.log([argText,suggestions]);
 
+      thisQuery._outstandingRequests = ajaxRequests;
+
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
         return;
@@ -1521,7 +1527,14 @@ Parser.Query.prototype = {
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function() {
     //Utils.log(this);
-    this.dump("cancelled!\n");
+    this.dump("cancelled! " + this._outstandingRequests.length +
+              " outstanding request(s) being canceled\n");
+    //abort any ajax requests that are running
+    for each (let ajaxReq in this._outstandingRequests)
+      ajaxReq.abort();
+    //reset outstanding requests
+    this._outstandingRequests = [];
+
     this._keepworking = false;
   },
 
