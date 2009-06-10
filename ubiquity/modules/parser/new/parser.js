@@ -159,10 +159,6 @@ Parser.prototype = {
   // After the nountypes have been registered, {{{Parser.initializeCache()}}} is
   // called.
   setCommandList: function setCommandList( commandList ) {
-    let ant = Cu.import(
-      "resource://ubiquity/modules/parser/new/active_noun_types.js", null);
-
-    ant.activeNounTypes = [];
 
     this._verbList = [];
     this._nounTypes = {};
@@ -198,7 +194,6 @@ Parser.prototype = {
         let {id} = arg.nountype;
         if (!(id in this._nounTypes)) {
           this._nounTypes[id] = arg.nountype;
-          ant.activeNounTypes[id] = arg.nountype;
         }
       }
     }
@@ -1133,25 +1128,14 @@ Parser.prototype = {
       if (typeof callback == 'function')
         callback(x,this._nounCache[x], []);
     } else {
-      /*let nounWorker = new Worker('resource://ubiquity/modules/parser/new/noun_worker.js');
-
-      Utils.log(nounWorker);
-      nounWorker.onmessage = function(event) {
-        Utils.log(event.data);
-
-        // the callback gets returned the original argText and the array of
-        // suggestions
-        //if (typeof callback == 'function')
-        //  callback(x,this._nounCache[x]);
-      };
-
-      Utils.log(this._nounTypes);
-      var self = this;
-      nounWorker.postMessage({self:self,input:x});*/
-
-      var nounWorker = {};
-      Cu.import("resource://ubiquity/modules/parser/new/noun_worker.js",
-                nounWorker);
+      
+      var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
+        if (!suggs && !suggs.length)
+          return [];
+        if (!Utils.isArray(suggs)) suggs = [suggs];
+        for each (let s in suggs) s.nountypeId = id;
+        return suggs;
+      }
 
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, ajaxRequests) {
@@ -1161,9 +1145,32 @@ Parser.prototype = {
         if (typeof callback == 'function')
           callback(x,thisParser._nounCache[x], ajaxRequests);
       };
+      var activeNounTypes = this._nounTypes;
 
-      Utils.setTimeout(function detectNounType_runNounWorker(){
-        nounWorker.detectNounType(x,myCallback);
+      Utils.setTimeout(function detectNounType_asyncDetect(){
+        var returnArray = [];
+        var ajaxRequests = [];
+      
+        dump("detecting: " + x + "\n");
+      
+        for (let thisNounTypeId in activeNounTypes) {
+          let id = thisNounTypeId;
+          let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
+            suggs = handleSuggs(suggs, id);
+            if(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest) != -1)
+              ajaxRequests.splice(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest), 1);
+            if (suggs.length) myCallback(suggs, ajaxRequests);
+          }
+          returnArray.push.apply(
+            returnArray,
+            handleSuggs(
+              activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
+      
+          if(activeNounTypes[id].ajaxRequest)
+            ajaxRequests.push(activeNounTypes[id].ajaxRequest);
+        }
+      
+        myCallback(returnArray, ajaxRequests);
       },0);
     }
   },
