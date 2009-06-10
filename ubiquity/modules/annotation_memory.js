@@ -153,7 +153,7 @@ function AnnotationService(connection) {
     return false;
   };
 
-  // === {{{AnnotationService.getPageAnnotation()}}} ===
+  // === {{{AnnotationService#getPageAnnotation()}}} ===
   //
   // This method behaves just like its {{{nsIAnnotationService}}}
   // counterpart, with the exception that it can optionally take a

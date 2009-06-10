@@ -43,7 +43,7 @@
 // An object that implements the {{{MessageService}}} interface must
 // expose the following method:
 //
-// === {{{MessageService.displayMessage(msg)}}} ===
+// === {{{MessageService#displayMessage(msg)}}} ===
 //
 // Displays the given message. {{{msg}}} may be a simple string, but it
 // can also be a JavaScript object with the following keys, all of them

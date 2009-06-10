@@ -64,7 +64,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 // feed manager that's passed to it.
 
 function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
-  // === {{{LDFP.type}}} ===
+  // === {{{LDFP#type}}} ===
   //
   // Ubiquity uses the value of the {{{rel}}} attribute contained in a
   // HTML page's {{{<link>}}} tag to determine what, if any, the feed
@@ -75,7 +75,7 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
 
   this.type = "locked-down-commands";
 
-  // === {{{LDFP.onSubscribeClick()}}} ===
+  // === {{{LDFP#onSubscribeClick()}}} ===
   //
   // This method is called by the feed manager whenever the user clicks
   // the "Subscribe..." button for any LDFP feed that they're presented
@@ -106,7 +106,7 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
     messageService.displayMessage("Subscription successful!");
   };
 
-  // === {{{LDFP.makeFeed()}}} ===
+  // === {{{LDFP#makeFeed()}}} ===
   //
   // This factory method is called by the feed manager whenever it
   // needs to instantiate a feed that the user is subscribing to.
@@ -135,7 +135,7 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
 
 // == The Feed Subclass ==
 //
-// This private class is created by {{{LDFP.makeFeed()}}}. Its
+// This private class is created by {{{LDFP#makeFeed()}}}. Its
 // constructor takes the base {{{Feed}}} object that it will use as
 // its prototype.
 //
@@ -165,7 +165,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
     self.commands = {};
   }
 
-  // === {{{LDFPFeed.pageLoadFuncs}}} ===
+  // === {{{LDFPFeed#pageLoadFuncs}}} ===
   //
   // This public property is an array of page-load functions that are called
   // whenever a web page has finished loading. Each page-load function is
@@ -176,24 +176,14 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
   self.pageLoadFuncs = [];
 
-  // === {{{LDFPFeed.nounTypes}}} ===
-  //
-  // This public property is an array of noun types defined by the
-  // feed.
-  //
-  // LDFP feeds can't define their own noun-types, so this property will
-  // always be empty.
-
-  self.nounTypes = [];
-
-  // === {{{LDFPFeed.commands}}} ===
+  // === {{{LDFPFeed#commands}}} ===
   //
   // This public property is an object that maps command names to command
   // objects, for each command defined by the feed.
 
   self.commands = {};
 
-  // === {{{LDFPFeed.refresh()}}} ===
+  // === {{{LDFPFeed#refresh()}}} ===
   //
   // This public method is called whenever Ubiquity would like the feed
   // to check for any changes in itself. It has no return value.

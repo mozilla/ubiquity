@@ -39,7 +39,7 @@
 // This is a simple class that can be used to provide an Observer pattern
 // to any functionality that needs it.
 
-let EXPORTED_SYMBOLS = ['EventHub'];
+var EXPORTED_SYMBOLS = ['EventHub'];
 
 // == The EventHub Class ==
 //
@@ -54,7 +54,7 @@ function EventHub() {
       listeners[eventName] = [];
   };
 
-  // === {{{EventHub.addListener()}}} ===
+  // === {{{EventHub#addListener()}}} ===
   //
   // Adds a listener which will be called back whenever an event
   // of the given name occurs.
@@ -67,7 +67,7 @@ function EventHub() {
     listeners[eventName].push(listener);
   };
 
-  // === {{{EventHub.removeListener()}}} ===
+  // === {{{EventHub#removeListener()}}} ===
   //
   // Removes the given listener from being called back whenever the
   // event of the given name occurs.
@@ -81,7 +81,7 @@ function EventHub() {
     listeners[eventName].splice(index, 1);
   };
 
-  // === {{{EventHub.notifyListeners()}}} ===
+  // === {{{EventHub#notifyListeners()}}} ===
   //
   // Calls all registered listeners of the given event name, passing
   // them the event name and the given data as arguments.
@@ -96,7 +96,7 @@ function EventHub() {
     listenersCopy.forEach(notify);
   };
 
-  // === {{{EventHub.attachMethods()}}} ===
+  // === {{{EventHub#attachMethods()}}} ===
   //
   // This function attaches its {{{addListener()}}} and
   // {{{removeListener()}}} methods to the given object. It's useful

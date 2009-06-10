@@ -60,7 +60,7 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 // * {{{Parser.Parse}}}: parses constructed and returned by parser queries
 //   are of this class.
 
-// == {{{Parser}}} prototype ==
+// == {{{Parser}}} ==
 //
 // {{{Parser}}} object initialization takes place in each individual language
 // file--this, in turn, is controlled by a {{{makeXxParser}}} factory function;
@@ -71,12 +71,12 @@ function Parser(props) {
     this.lang = props;
   else
     for (var key in props) this[key] = props[key];
-  this._nounCache = {};
 }
 Parser.prototype = {
-  lang: '',
+  // ** {{{Parser#lang}}} **
+  lang: "",
 
-  // ** {{{Parser.branching}}} **
+  // ** {{{Parser#branching}}} **
   //
   // The "branching" parameter refers to which direction arguments are found.
   // For example, English is a "right-braching" language. This is because the
@@ -85,10 +85,10 @@ Parser.prototype = {
   // tree: if at a particular node, most of the "content" goes to the right,
   // it's "right-branching". See also
   // [[http://en.wikipedia.org/wiki/Left-branching|branching on wikipedia]].
-  branching: '', // left or right
+  branching: "left" || "right",
   usespaces: true,
 
-  // ** {{{Parser.joindelimiter}}} **
+  // ** {{{Parser#joindelimiter}}} **
   //
   // The {{{joindelimiter}}} parameter is the delimiter that gets inserted
   // when gluing arguments and their delimiters back together in display.
@@ -97,8 +97,8 @@ Parser.prototype = {
   //
   // TODO: {{{joindelimiter}}} and {{{usespaces}}} may or may not be
   // redundant.
-  joindelimiter: ' ',
-  // ** {{{Parser.suggestedVerbOrder}}} **
+  joindelimiter: " ",
+  // ** {{{Parser#suggestedVerbOrder}}} **
   // For verb-final languages, this should be -1.
   // For languages where some verb forms are sentence-initial, some are
   // sentence-final (e.g. German, Dutch), suggestedVerbOrder can be a function
@@ -106,14 +106,14 @@ Parser.prototype = {
   suggestedVerbOrder: 0,
   examples: [],
   clitics: [],
-  anaphora: ['this'],
+  anaphora: ["this"],
 
-  // ** {{{Parser.roles}}} **
+  // ** {{{Parser#roles}}} **
   //
   // a list of semantic roles and their delimiters
-  roles: [{role: 'object', delimiter: ''}],
+  roles: [{role: "object", delimiter: ""}],
 
-  // ** {{{Parser._rolesCache}}} **
+  // ** {{{Parser#_rolesCache}}} **
   //
   // The {{{_rolesCache}}} is a cache of the different subsets of the
   // parser's roles (semantic roles and their associated delimiters)
@@ -122,30 +122,29 @@ Parser.prototype = {
   // {{{add}}} verb.
   _rolesCache: {},
 
-  // ** {{{Parser._patternCache}}} **
+  // ** {{{Parser#_patternCache}}} **
   //
   // The {{{_patternCache}}} keeps various regular expressions for use by the
-  // parser. Most are created by {{{Parser.initializeCache()}}}, which is called
+  // parser. Most are created by {{{Parser#initializeCache()}}}, which is called
   // during parser creation. This way, commonly used regular expressions
   // need only be constructed once.
   _patternCache: {},
 
-  // ** {{{Parser._nounCache}}} **
+  // ** {{{Parser#_nounCache}}} **
   //
-  // The noun cache is initialized here.
   // Perhaps this should be moved out into its own module in the future.
-  // Nouns are cached in this cache in the {{{Parser.detectNounTypes}}} method
+  // Nouns are cached in this cache in the {{{Parser#detectNounTypes}}} method
   // and associated methods. Later in the parse process elements of {{{_nounCache}}}
   // are accessed directly, assuming that the nouns were already cached
-  // using {{{Parser.detectNounType}}}.
+  // using {{{Parser#detectNounType}}}.
   //
   // TODO: better cleanup + management of {{{_nounCache}}}
-  _nounCache: {},
+  _nounCache: null,
 
-  _verbList: [],
-  _nounTypes: {},
+  _verbList: null,
+  _nounTypes: null,
 
-  // ** {{{Parser.setCommandList()}}} **
+  // ** {{{Parser#setCommandList()}}} **
   //
   // {{{setCommandList}}} takes the command list and filters it,
   // only registering those which have the property {{{.names}}}.
@@ -153,11 +152,11 @@ Parser.prototype = {
   // work with Parser 2.
   //
   // This function also now parses out all the nountypes used by each verb.
-  // The nountypes registered go in the {{{Parser._nounTypes}}} object, which
+  // The nountypes registered go in the {{{Parser#_nounTypes}}} object, which
   // are used for nountype detection as well as the comparison later with the
   // nountypes specified in the verbs for argument suggestion and scoring.
   //
-  // After the nountypes have been registered, {{{Parser.initializeCache()}}} is
+  // After the nountypes have been registered, {{{Parser#initializeCache()}}} is
   // called.
   setCommandList: function setCommandList(commandList) {
     // First we'll register the verbs themselves.
@@ -186,6 +185,7 @@ Parser.prototype = {
     }
 
     // Scrape the noun types up here.
+    this._nounTypes = {};
     for each (let verb in this._verbList) {
       for each (let arg in verb.arguments) {
         let {id} = arg.nountype;
@@ -201,32 +201,36 @@ Parser.prototype = {
     this.initializeCache();
   },
 
-  // ** {{{Parser.initializeCache()}}} **
+  // ** {{{Parser#initializeCache()}}} **
   //
   // This method is initialized when the language is loaded.
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function() {
+    this._nounCache = {};
+
     var patternCache = this._patternCache = {};
-    // a little utility function to create a regex string
-    // which matches any prefix of a set of strings.
-    function matchString(arr) {
-      var prefixes = {}; // removing duplicates
-      for each (let s in arr) for (let i in s)
-        prefixes[s.slice(0, +i + 1)] = 1;
-      return ([p.replace(/\W/g, "\\$&") for (p in prefixes)]
-              .sort(function(a, b) b.length - a.length)
-              .join('|'));
+
+    // creates a list of prefixs from a set of strings,
+    // removing duplicates and sorting in descending order.
+    function prefixes(strs) {
+      var dic = {};
+      for each (let s in strs) for (let i in s) dic[s.slice(0, +i + 1)] = 1;
+      return [p for (p in dic)].sort(function(a, b) b.length - a.length);
     }
-    // creates a regex of the form (to|from|as|toward|...)
+    // creates a regex fragment that matches a set of strings,
+    // escaping them properly.
+    function pipedFragment(strs)
+      strs.map(function(s) s.replace(/\W/g, "\\$&")).join("|");
     function regexFromDelimeters(roles)
       RegExp("^(?:" +
-             [role.delimiter for each (role in roles)].join("|") +
+             pipedFragment([role.delimiter for each (role in roles)]) +
              ")$",
              "i");
 
     // verbMatcher matches any active verb or prefix thereof
-    patternCache.verbMatcher = matchString(
-      [n for each (verb in this._verbList) for each (n in verb.names)]);
+    patternCache.verbMatcher =
+      pipedFragment(prefixes([n for each (verb in this._verbList)
+                                for each (n in verb.names)]));
 
     // verbInitialTest matches a verb at the beginning
     patternCache.verbInitialTest =
@@ -244,7 +248,7 @@ Parser.prototype = {
     // but if usespaces = false, it will look for anaphora in words as well.
     var boundary = this.usespaces ? "\\b" : "";
     patternCache.anaphora =
-      RegExp(boundary + "(?:" + this.anaphora.join("|") + ")" + boundary);
+      RegExp(boundary + "(?:" + pipedFragment(this.anaphora) + ")" + boundary);
 
     // cache the roles used in each verb and a regex
     // which recognizes the delimiters appropriate for each verb
@@ -266,7 +270,7 @@ Parser.prototype = {
     delimPatterns[""] = regexFromDelimeters(this.roles);
   },
 
-  // ** {{{Parser.newQuery()}}} **
+  // ** {{{Parser#newQuery()}}} **
   //
   // This method returns a new {{{Parser.Query}}} object, as detailed in
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
@@ -282,7 +286,7 @@ Parser.prototype = {
     return theNewQuery;
   },
 
-  // ** {{{Parser.wordBreaker()}}} **
+  // ** {{{Parser#wordBreaker()}}} **
   //
   // Takes an input string and returns a string with some words split up
   // by default only spaces in the input are presevered, but this method
@@ -294,7 +298,7 @@ Parser.prototype = {
     return input;
   },
 
-  // ** {{{Parser.verbFinder()}}} **
+  // ** {{{Parser#verbFinder()}}} **
   //
   // Takes an input string and returns an array of pairs of verbs and
   // argument strings, in the form of {{{{_verb:..., argString:...}}}}.
@@ -375,7 +379,7 @@ Parser.prototype = {
     return returnArray;
   },
 
-  // ** {{{Parser.splitWords()}}} **
+  // ** {{{Parser#splitWords()}}} **
   //
   // Takes an input string and returns an object with the words and their
   // delimiters. Words are returned in left to right order, split using
@@ -385,7 +389,7 @@ Parser.prototype = {
   // {{{words}}} and {{{delimiters}}} are just a copy of every other word in
   // {{{allWords}}}.
   //
-  // Used by {{{Parser.argFinder()}}}
+  // Used by {{{Parser#argFinder()}}}
   splitWords: function(input) {
     var returnObj = { words: [], delimiters: [], allWords: [],
                       beforeSpace: '', afterSpace: '' };
@@ -417,30 +421,30 @@ Parser.prototype = {
     return returnObj;
   },
 
-  // ** {{{Parser.hasDelimiter()}}} **
+  // ** {{{Parser#hasDelimiter()}}} **
   //
   // Checks to see whether a certain delimiter is compatible with a certain
   // verb, i.e., whether that verb has a role which takes that delimiter.
   // This is done using the regex of delimiters of all roles of {{{verb}}} in
   // {{{_patternCache.delimiters[verbId]}}}. Returns true/false.
   //
-  // Used by {{{Parser.argFinder()}}}
+  // Used by {{{Parser#argFinder()}}}
   hasDelimiter: function(delimiter, verbId) {
     return this._patternCache.delimiters[verbId].test(delimiter);
   },
 
-  // ** {{{Parser.getRoleByDelimiter()}}} **
+  // ** {{{Parser#getRoleByDelimiter()}}} **
   //
   // Returns all semantic roles which may be represented by a given delimiter.
   //
-  // Used by {{{Parser.argFinder()}}}
+  // Used by {{{Parser#argFinder()}}}
   getRoleByDelimiter: function(delimiter, roles) {
     delimiter = delimiter.toLowerCase();
     return [role.role for each (role in roles)
                       if (role.delimiter.toLowerCase() == delimiter) ];
   },
 
-  // ** {{{Parser.argFinder()}}} **
+  // ** {{{Parser#argFinder()}}} **
   //
   // {{{argFinder()}}} takes an {{{argString}}} and a verb object (ie. each
   // pair of outputs from {{{verbFinder()}}} and attempts to find all of the
@@ -453,12 +457,12 @@ Parser.prototype = {
   // speeding things up a little bit.
   //
   // {{{argFinder()}}} is where the {{{branching}}} parameter is incredibly
-  // important. It also uses {{{Parser.splitWords()}}} to split the words up
+  // important. It also uses {{{Parser#splitWords()}}} to split the words up
   // in the beginning.
   //
-  // ** //A high level overview of {{{Parser.argFinder()}}}// **
+  // ** //A high level overview of {{{Parser#argFinder()}}}// **
   //
-  // Since {{{Parser.argFinder()}}} is arguably the //meat// of the parser,
+  // Since {{{Parser#argFinder()}}} is arguably the //meat// of the parser,
   // here's a high level overview of the code in this method.
   //
   // First take a look at an example of what is being done here:
@@ -806,7 +810,7 @@ Parser.prototype = {
     return possibleParses;
   },
 
-  // ** {{{Parser.cleanArgument()}}} **
+  // ** {{{Parser#cleanArgument()}}} **
   //
   // {{{cleanArgument}}} is run on each argument when being assigned to a role.
   // {{{cleanArgument}}} is the place to do things like strip off articles like
@@ -815,11 +819,11 @@ Parser.prototype = {
     return word;
   },
 
-  // ** {{{Parser.substituteSelection()}}} **
+  // ** {{{Parser#substituteSelection()}}} **
   //
   // {{{substituteSelection()}}} takes a parse and a selection string. It
   // should only be called if the {{{selection}}} is not empty. It looks for
-  // any of the anaphora set in {{{Parser.anaphora}}} and creates a copy of
+  // any of the anaphora set in {{{Parser#anaphora}}} and creates a copy of
   // that parse where that anaphor has been substituted with the selection
   // string.
   //
@@ -848,7 +852,7 @@ Parser.prototype = {
     return returnArr;
   },
 
-  // ** {{{Parser.substituteNormalizedArgs()}}} **
+  // ** {{{Parser#substituteNormalizedArgs()}}} **
   //
   // {{{substituteNormalizedArgs()}}} takes a parse. It runs each argument's
   // {{{input}}} through {{{normalizeArg}}}. If {{{normalizeArg}}} returns
@@ -881,7 +885,7 @@ Parser.prototype = {
     return returnArr;
   },
 
-  // ** {{{Parser.normalizeArg}}} **
+  // ** {{{Parser#normalizeArg}}} **
   //
   // Returns an array of arrays of the form
   // [[arg,prefix,new argument,suffix]]
@@ -897,7 +901,7 @@ Parser.prototype = {
     return [];
   },
 
-  // ** {{{Parser.suggestVerb()}}} **
+  // ** {{{Parser#suggestVerb()}}} **
   //
   // {{{suggestVerb()}}} takes a parse and, if it doesn't yet have a verb,
   // suggests one based on its arguments. If one of the parse's argument's
@@ -943,7 +947,7 @@ Parser.prototype = {
     return returnArray;
   },
 
-  // ** {{{Parser.suggestArgs()}}} **
+  // ** {{{Parser#suggestArgs()}}} **
   //
   // {{{suggestArgs()}}} returns an array of copies of the given parse by
   // replacing each of the arguments' text with the each nountype's suggestion.
@@ -1122,11 +1126,11 @@ Parser.prototype = {
   // In the future these methods of {{{Parser}}} probably ought to
   // go into a separate class or something.
   //
-  // ** {{{Parser.detectNounType()}}} **
+  // ** {{{Parser#detectNounType()}}} **
   //
   // This method does the nountype detecting.
   // It takes an argument string and runs through all of the noun types in
-  // {{{Parser._nounTypes}}} and gets their suggestions (via their
+  // {{{Parser#_nounTypes}}} and gets their suggestions (via their
   // {{{.suggest()}}} methods). It then takes each of those suggestions,
   // marks them with which noun type it came from (in {{{.nountype}}})
   // and puts all of those suggestions in an object (hash) keyed by
@@ -1198,14 +1202,14 @@ Parser.prototype = {
       },0);
     }
   },
-  // ** {{{Parser.strengthenMemory}}} **
+  // ** {{{Parser#strengthenMemory}}} **
   //
   // This is a dummy function stub in order to match the interface that
   // cmdmanager expects. TODO: rethink this.
   strengthenMemory: function() {}
 }
 
-// == {{{Parser.Query}}} prototype ==
+// == {{{Parser.Query}}} ==
 //
 // The {{{Parser.Query}}} interface is described in
 // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]].
@@ -1214,7 +1218,7 @@ Parser.prototype = {
 // {{{context}}} object, and {{{maxSuggestions}}}. Useful if you want to
 // set some more parameters or watches on the query.
 //
-// The {{{Parser.newQuery()}}} method is used to initiate
+// The {{{Parser#newQuery()}}} method is used to initiate
 // a query instead of calling {{{new Parser.Query()}}} directly.
 //
 Parser.Query = function(parser, queryString, context, maxSuggestions,
@@ -1235,14 +1239,14 @@ Parser.Query = function(parser, queryString, context, maxSuggestions,
   this.finished = false;
   this._keepworking = true;
 
-  // ** {{{Parser.Query._times}}} **
+  // ** {{{Parser.Query#_times}}} **
   //
   // {{{_times}}} is an array of post-UNIX epoch timestamps for each step
   // of the derivation. You can check it later to see how long different
   // steps took.
   this._times = [];
 
-  // ** {{{Parser.Query._step}}} **
+  // ** {{{Parser.Query#_step}}} **
   //
   // This {{{_step}}} property is increased throughout {{{_yieldParse()}}}
   // so you can check later to see how far the query went.
@@ -1267,22 +1271,23 @@ Parser.Query = function(parser, queryString, context, maxSuggestions,
     this.run();
 }
 
-// ** {{{Parser.Query.run()}}} **
-//
-// {{{run()}}} actually starts the query. As a {{{yield}}}-ing model
-// of faux-threads is used right now, the code looks a little bizarre.
-//
-// Basically in every run of {{{doAsyncParse()}}}, it will move the
-// {{{parseGenerator = Parser.Query._yieldingParse()}}} generator
-// one step, meaning we progress in the parse from one {{{yield}}}
-// breakpoint to the next.
-//
-// Most of this async code is by Blair.
 Parser.Query.prototype = {
   dump: function PQ_dump(msg) {
     var it = this._idTime;
     dump(it + ":" + (new Date - it) + " " + msg + "\n");
   },
+
+  // ** {{{Parser.Query#run()}}} **
+  //
+  // {{{run()}}} actually starts the query. As a {{{yield}}}-ing model
+  // of faux-threads is used right now, the code looks a little bizarre.
+  //
+  // Basically in every run of {{{doAsyncParse()}}}, it will move the
+  // {{{parseGenerator = Parser.Query._yieldingParse()}}} generator
+  // one step, meaning we progress in the parse from one {{{yield}}}
+  // breakpoint to the next.
+  //
+  // Most of this async code is by Blair.
   run: function PQ_run() {
     this._keepworking = true;
     this._next();
@@ -1293,7 +1298,7 @@ Parser.Query.prototype = {
     var parseGenerator = this._yieldingParse();
     var self = this;
 
-    var doAsyncParse = function async_doAsyncParse() {
+    function doAsyncParse() {
       try {
         var ok = parseGenerator.next();
       } catch(e) {
@@ -1317,12 +1322,12 @@ Parser.Query.prototype = {
     this._times[this._step++] = new Date;
   },
 
-  // ** {{{Parser.Query._yieldingParse()}}} **
+  // ** {{{Parser.Query#_yieldingParse()}}} **
   //
   // {{{_yieldingParse()}}} is not really a normal function but
   // a [[https://developer.mozilla.org/en/New_in_JavaScript_1.7|generator]].
   // This has to do with the {{{doAsyncParse()}}} asynchronous parsing
-  // system described above in {{{Parser.Query.run()}}}.
+  // system described above in {{{Parser.Query#run()}}}.
   //
   // The bottom line, though, is that this function defines the flow of the
   // parse derivation with {{{yield true}}} thrown in at different points
@@ -1369,15 +1374,14 @@ Parser.Query.prototype = {
 
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
-    let selection;
-    if (!!this.selObj.text || !!this.selObj.html) {
-      selection = this.selObj.html;
+    if (this.selObj.text || this.selObj.html) {
+      let selection = this.selObj.html;
       for each (let parse in this._possibleParses) {
         // if there is a selection and if we find some anaphora in the entire
         // input...
         if (selection.length &&
             this.parser._patternCache.anaphora.test(this._input)) {
-          let newParses = this.parser.substituteSelection(parse,selection);
+          let newParses = this.parser.substituteSelection(parse, selection);
           if (newParses.length)
             this._possibleParses = this._possibleParses.concat(newParses);
         }
@@ -1506,12 +1510,12 @@ Parser.Query.prototype = {
     this.onResults();
   },
 
-  // ** {{{Parser.Query.hasResults}}} (read-only) **
+  // ** {{{Parser.Query#hasResults}}} (read-only) **
   //
   // A getter for whether there are any results yet or not.
   get hasResults() { return this._scoredParses.length > 0; },
 
-  // ** {{{Parser.Query.suggestionList}}} (read-only) **
+  // ** {{{Parser.Query#suggestionList}}} (read-only) **
   //
   // A getter for the suggestion list.
   get suggestionList() {
@@ -1521,7 +1525,7 @@ Parser.Query.prototype = {
             .slice(0, this.maxSuggestions));
   },
 
-  // ** {{{Parser.Query.cancel()}}} **
+  // ** {{{Parser.Query#cancel()}}} **
   //
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
@@ -1538,12 +1542,12 @@ Parser.Query.prototype = {
     this._keepworking = false;
   },
 
-  // ** {{{Parser.Query.onResults()}}} **
+  // ** {{{Parser.Query#onResults()}}} **
   //
   // A handler for the endgame. To be overridden.
   onResults: function() {},
 
-  // ** {{{Parser.Query.addIfGoodEnough()}}} **
+  // ** {{{Parser.Query#addIfGoodEnough()}}} **
   //
   // Takes a {{{parseCollection}}} (Array) and a {{{newParse}}}.
   //
@@ -1606,10 +1610,10 @@ Parser.Query.prototype = {
   }
 };
 
-// == {{{Parser.Parse}}} prototype ==
+// == {{{Parser.Parse}}} ==
 //
 // {{{Parser.Parse}}} is the class for all of the parses which will be returned
-// in an array by the {{{Parser.Query.suggestionList}}}. It is also used
+// in an array by the {{{Parser.Query#suggestionList}}}. It is also used
 // throughout the parse process.
 //
 // The constructor takes the {{{branching}}} and {{{joindelimiter}}} parameters
@@ -1633,12 +1637,12 @@ Parser.Parse = function(parser, input, verb, argString, parentId) {
     this._parentId = parentId;
 }
 
-// ** {{{Parser.Parse.displayText}}} **
-//
-// {{{displayText}}} prints the verb and arguments in the parse by
-// ordering all of the arguments (and verb) by their {{{_order}}} properties
-// and displaying them with nice {{{<span class='...'></span>}}} wrappers.
 Parser.Parse.prototype = {
+  // ** {{{Parser.Parse#displayText}}} **
+  //
+  // {{{displayText}}} prints the verb and arguments in the parse by
+  // ordering all of the arguments (and verb) by their {{{_order}}} properties
+  // and displaying them with nice {{{<span class='...'></span>}}} wrappers.
   get displayText() {
     // This is the main string to be returned.
     let display = '';
@@ -1730,10 +1734,12 @@ Parser.Parse.prototype = {
 
     return display + displayFinal;
   },
+
   get displayTextDebug()(
     this.displayText + " (" +
     ((this.score * 100 | 0) / 100 || "<i>no score</i>") +
     ")"),
+
   get completionText() {
     var {lastNode} = this;
     var originalText = lastNode.input;
@@ -1744,18 +1750,21 @@ Parser.Parse.prototype = {
 
     return this.input;
   },
-  // **{{{Parser.Parse.getIcon()}}}**
+
+  // **{{{Parser.Parse#icon}}}**
   //
   // Gets the verb's icon.
   get icon() this._verb.icon,
-  // **{{{Parser.Parse.execute()}}}**
+
+  // **{{{Parser.Parse#execute()}}}**
   //
   // Execute the verb. Only the first argument in each role is returned.
   // The others are thrown out.
   execute: function(context) {
     return this._verb.execute(context, this.firstArgs);
   },
-  // **{{{Parser.Parse.preview()}}}**
+
+  // **{{{Parser.Parse#preview()}}}**
   //
   // Returns the verb preview.
   preview: function(context, previewBlock) {
@@ -1766,18 +1775,22 @@ Parser.Parse.prototype = {
       return false;
     }
   },
-  // **{{{Parser.Parse.previewDelay}}} (read-only)**
+
+  // **{{{Parser.Parse#previewDelay}}} (read-only)**
   //
   // Return the verb's {{{previewDelay}}} value.
   get previewDelay() {
     return this._verb.previewDelay;
   },
-  // **{{{Parser.Parse.previewUrl}}} (read-only)**
+
+  // **{{{Parser.Parse#previewUrl}}} (read-only)**
   //
   // Return the verb's {{{previewUrl}}} value.
   get previewUrl() {
     return this._verb.previewUrl;
   },
+
+  // **{{{Parser.Parse#firstArgs}}} (read-only)**
   get firstArgs() {
     let firstArgs = {};
     for (let role in this.args) {
@@ -1785,7 +1798,8 @@ Parser.Parse.prototype = {
     }
     return firstArgs;
   },
-  // **{{{Parser.Parse.lastNode}}}**
+
+  // **{{{Parser.Parse#lastNode}}}**
   //
   // Return the parse's last node, whether a verb or an argument.
   // This can be used to power something like tab-completion, by replacing
@@ -1807,7 +1821,8 @@ Parser.Parse.prototype = {
     }
     return lastNode;
   },
-  // **{{{Parser.Parse.allNounTypesDetectionHasCompleted()}}} (read-only)**
+
+  // **{{{Parser.Parse#allNounTypesDetectionHasCompleted()}}} (read-only)**
   //
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
@@ -1829,7 +1844,8 @@ Parser.Parse.prototype = {
     // if all the argText's are in the nounCache
     return true;
   },
-  // ** {{{Parser.Parse.maxScore}}} **
+
+  // ** {{{Parser.Parse#maxScore}}} **
   //
   // {{{maxScore}}} computes the maximum possible score which a partial
   // parse could possibly yield. It's used in cases where an async nountype
@@ -1856,11 +1872,13 @@ Parser.Parse.prototype = {
 
     return score;
   },
-  // ** {{{Parser.Parse.score}}} **
+
+  // ** {{{Parser.Parse#score}}} **
   //
   // {{{score}}} returns the current value of {{{_score}}}.
   get score() this._score,
-  // ** {{{Parser.Parse.setArgumentSuggestion()}}} **
+
+  // ** {{{Parser.Parse#setArgumentSuggestion()}}} **
   //
   // Accepts a {{{role}}} and a suggestion and sets that argument properly.
   // If there is already an argument for that role, this method will *not*
@@ -1868,7 +1886,8 @@ Parser.Parse.prototype = {
   setArgumentSuggestion: function PP_setArgumentSuggestion( role, sugg ) {
     (this.args[role] || (this.args[role] = [])).push(sugg);
   },
-  // ** {{{Parser.Parse.unfilledRoles}}} **
+
+  // ** {{{Parser.Parse#unfilledRoles}}} **
   //
   // Gets a list of roles which the parse's verb accepts but
   get unfilledRoles()(this._verb.id
@@ -1876,6 +1895,10 @@ Parser.Parse.prototype = {
                          for each (verbArg in this._verb.arguments)
                          if (!(verbArg.role in this.args))]
                       : []),
+
+  // ** {{{Parser.Parse#copy()}}} **
+  //
+  // Returns a copy of this parse.
   copy: function PP_copy() {
     var ret = new Parser.Parse(this._parser,
                                this.input,

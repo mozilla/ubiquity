@@ -43,7 +43,7 @@
 // feed plugins to reload feeds when they change and expose the
 // functionality of all feeds to client code as {{{Feed}}} objects.
 
-let EXPORTED_SYMBOLS = ["FeedManager"];
+var EXPORTED_SYMBOLS = ["FeedManager"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/eventhub.js");
@@ -77,9 +77,9 @@ function FeedManager(annSvc) {
   this._hub.attachMethods(this);
 }
 
-FeedManager.prototype = FMgrProto = {};
+var FMgrProto = FeedManager.prototype = {};
 
-// === {{{FeedManager.registerPlugin()}}} ===
+// === {{{FeedManager#registerPlugin()}}} ===
 //
 // Registers a feed plugin with the feed manager. For an example feed
 // plugin, see {{{LockedDownFeedPlugin}}}.
@@ -92,7 +92,7 @@ FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   this._plugins[plugin.type] = plugin;
 };
 
-// === {{{FeedManager.getUnsubscribedFeeds()}}} ===
+// === {{{FeedManager#getUnsubscribedFeeds()}}} ===
 //
 // Returns an Array of {{{Feed}}} objects that represent all feeds
 // that were once subscribed, but are currently unsubscribed.
@@ -108,7 +108,7 @@ FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
   return unsubscribedFeeds;
 };
 
-// === {{{FeedManager.getSubscribedFeeds()}}} ===
+// === {{{FeedManager#getSubscribedFeeds()}}} ===
 //
 // Returns an Array of {{{Feed}}} objects that represent all feeds
 // that are currently subscribed.
@@ -132,7 +132,7 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
   return subscribedFeeds;
 };
 
-// === {{{FeedManager.getFeedForUrl()}}} ===
+// === {{{FeedManager#getFeedForUrl()}}} ===
 //
 //
 // Returns the feed for the given URL, if it exists. If it doesn't,
@@ -151,7 +151,7 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
   return null;
 };
 
-// === {{{FeedManager.addSubscribedFeed()}}} ===
+// === {{{FeedManager#addSubscribedFeed()}}} ===
 //
 // Adds a feed with the given information to the {{{FeedManager}}}. The
 // information should be passed as a single Object with keys that
@@ -221,7 +221,7 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
   this._hub.notifyListeners("subscribe", uri);
 };
 
-// === {{{FeedManager.isSubscribedFeed()}}} ===
+// === {{{FeedManager#isSubscribedFeed()}}} ===
 //
 // Returns whether or not the given feed URL is currently being
 // subscribed to.
@@ -232,7 +232,7 @@ FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   return annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO);
 };
 
-// === {{{FeedManager.isSubscribedFeed()}}} ===
+// === {{{FeedManager#isSubscribedFeed()}}} ===
 //
 // Returns whether or not the given feed URL was once subscribed
 // to, but is no longer.
@@ -243,7 +243,7 @@ FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
   return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 };
 
-// === {{{FeedManager.installToWindow()}}} ===
+// === {{{FeedManager#installToWindow()}}} ===
 //
 // This function installs the feed manager user interface to the
 // given chrome window that represents a web browser.
@@ -351,7 +351,7 @@ FMgrProto.showNotification = function showNotification(plugin, targetDoc, comman
 }
 
 
-// === {{{FeedManager.finalize()}}} ===
+// === {{{FeedManager#finalize()}}} ===
 //
 // Performs any necessary cleanup on the feed manager. Should be
 // called when the feed manager no longer needs to be used.
@@ -388,7 +388,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   let annSvc = this._annSvc;
   let hub = this._hub;
 
-  // === {{{Feed.title}}} ===
+  // === {{{Feed#title}}} ===
   //
   // The human-readable name for the feed. Read-only.
 
@@ -396,7 +396,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
     title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO);
 
-  // === {{{Feed.type}}} ===
+  // === {{{Feed#type}}} ===
   //
   // A string identifying the type of the feed. This is usually the
   // same as the {{{rel}}} attribute contained in a HTML page's
@@ -405,7 +405,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   let type = annSvc.getPageAnnotation(uri, FEED_TYPE_ANNO, DEFAULT_FEED_TYPE);
 
-  // === {{{Feed.uri}}} ===
+  // === {{{Feed#uri}}} ===
   //
   // A {{{nsIURI}}} corresponding to the feed's URL. This is the
   // human-readable page that the end-user clicked the "Subscribe..."
@@ -416,11 +416,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                   uri: uri,
                   type: type};
 
-  // === {{{Feed.isBuiltIn}}} ===
+  // === {{{Feed#isBuiltIn}}} ===
   //
   // This is a boolean that indicates whether the feed is to be treated
   // as a built-in feed. See the documentation for
-  // {{{FeedManager.addSubscribedFeed()}}} for more
+  // {{{FeedManager#addSubscribedFeed()}}} for more
   // information. Read-only.
 
   feedInfo.__defineGetter__(
@@ -430,7 +430,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     }
   );
 
-  // === {{{Feed.isSubscribed}}} ===
+  // === {{{Feed#isSubscribed}}} ===
   //
   // Whether the feed is currently being subscribed to or not. Read-only.
 
@@ -448,7 +448,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   else
     expiration = annSvc.EXPIRE_NEVER;
 
-  // === {{{Feed.purge()}}} ===
+  // === {{{Feed#purge()}}} ===
   //
   // Permanently deletes the feed.
 
@@ -461,11 +461,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     hub.notifyListeners("purge", uri);
   };
 
-  // === {{{Feed.remove()}}} ===
+  // === {{{Feed#remove()}}} ===
   //
   // If the feed is currently being subscribed to, unsubscribes
   // it. This isn't permanent; the feed can be resubscribed-to later
-  // with {{{Feed.unremove()}}}.
+  // with {{{Feed#unremove()}}}.
 
   feedInfo.remove = function feedInfo_remove() {
     if (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)) {
@@ -476,7 +476,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     }
   };
 
-  // === {{{Feed.unremove()}}} ===
+  // === {{{Feed#unremove()}}} ===
   //
   // If the feed is currently unsubscribed, re-subscribes it.
 
@@ -489,7 +489,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     }
   };
 
-  // === {{{Feed.srcUri}}} ===
+  // === {{{Feed#srcUri}}} ===
   //
   // An {{{nsIURI}}} corresponding to the URL for the feed's source code.
   // Read-only.
@@ -497,7 +497,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
   feedInfo.srcUri = Utils.url(val, "data:text/plain,");
 
-  // === {{{Feed.date}}} ===
+  // === {{{Feed#date}}} ===
   //
   // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
   // Read-only.
@@ -505,11 +505,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   var val = annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0);
   feedInfo.date = new Date(val);
 
-  // === {{{Feed.canAutoUpdate}}} ===
+  // === {{{Feed#canAutoUpdate}}} ===
   //
   // Whether or not the latest version of the feed's source code should
   // be fetched from the network. See
-  // {{{FeedManager.addSubscribedFeed()}}} for more
+  // {{{FeedManager#addSubscribedFeed()}}} for more
   // information. Read-only.
 
   if (annSvc.pageHasAnnotation(uri, FEED_AUTOUPDATE_ANNO))
@@ -520,7 +520,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   else
     feedInfo.canAutoUpdate = false;
 
-  // === {{{Feed.getCode()}}} ===
+  // === {{{Feed#getCode()}}} ===
   //
   // Returns the cached source code for the feed, if any.
 
@@ -531,7 +531,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
       return "";
   };
 
-  // === {{{Feed.setCode()}}} ===
+  // === {{{Feed#setCode()}}} ===
   //
   // Sets the cached source code for the feed.
 
@@ -540,7 +540,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                              expiration);
   };
 
-  // === {{{Feed.checkForManualUpdate()}}} ===
+  // === {{{Feed#checkForManualUpdate()}}} ===
   //
   // Checks to see whether an update for the feed is available; if it
   // is, then the given callback is called and passed {{{true}}} as an
@@ -551,7 +551,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     cb(false);
   };
 
-  // === {{{Feed.viewSourceUri}}} ===
+  // === {{{Feed#viewSourceUri}}} ===
   //
   // Returns the {{{nsIURI}}} for the feed's source code. If the source
   // code only exists as cached data, this may be a data URI.
@@ -569,7 +569,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     }
   );
 
-  // === {{{Feed.finalize()}}} ===
+  // === {{{Feed#finalize()}}} ===
   //
   // Performs any needed cleanup on the feed before it's destroyed.
   feedInfo.finalize = function feedInfo_finalize() {

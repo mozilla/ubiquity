@@ -49,7 +49,7 @@
 // care must be taken to ensure that any JS libraries loaded don't load
 // remote code from untrusted sources.
 
-let EXPORTED_SYMBOLS = ["WebJsModule"];
+var EXPORTED_SYMBOLS = ["WebJsModule"];
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -87,7 +87,7 @@ function WebJsModule(callback, window) {
   );
   window.document.documentElement.appendChild(iframe);
 
-  // === {{{WebJsModule.importScript()}}} ===
+  // === {{{WebJsModule#importScript()}}} ===
   //
   // This method is passed a URL that specifies the content-space JS
   // library to load. If the library is already loaded, this method
