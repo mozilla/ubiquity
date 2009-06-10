@@ -328,8 +328,13 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       pageLoadFuncs: [],
       ubiquityLoadFuncs: [],
       globals: globalObjects[id],
-      displayMessage: function displayMessage() {
-        msgService.displayMessage.apply(msgService, arguments);
+      displayMessage: function displayMessage(msg, cmd) {
+        if (cmd) {
+          if (typeof msg === "string") msg = {text: msg};
+          msg.icon  = cmd.icon;
+          msg.title = cmd.name;
+        }
+        msgService.displayMessage(msg);
       }
     };
   }
