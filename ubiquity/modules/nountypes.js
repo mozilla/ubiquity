@@ -463,11 +463,9 @@ var noun_type_async_restaurant = {
   name: "restaurant(async)",
   ajaxRequest: null,
   suggest: function(text, html, callback) {
-    this.ajaxRequest = getRestaurants( text, function( truthiness, suggestions ) {
+    this.ajaxRequest = getRestaurants( text, function( truthiness, suggestion ) {
       if (truthiness) {
-	for each (var sugg in suggestions){
-          callback(CmdUtils.makeSugg(sugg));
-        }
+        callback([CmdUtils.makeSugg(suggestion)]);
       }
     });
     return [];
@@ -826,7 +824,7 @@ function getRestaurants(query, callback){
 
   var params = Utils.paramsToString({
     term: query,
-    num_biz_requested: 4,
+    num_biz_requested: 1,
     location: near,
     category: "restaurants",
     ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
@@ -842,10 +840,10 @@ function getRestaurants(query, callback){
       var allBusinesses = data.businesses.map(function(business)
                                               { return business.name });
       if (allBusinesses.length > 0){
-        callback( true, allBusinesses );
+        callback( true, allBusinesses[0] );
       }
       else{
-        callback( false, allBusinesses );
+        callback( false, allBusinesses[0] );
       }
     }
   });
