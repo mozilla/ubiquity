@@ -135,7 +135,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["calculate"],
-  arguments: [{ role: "object", nountype: /^[\d.+\-*\/^%~(, )]+$/}],
+  arguments: {object: /^[\d.+\-*\/^%~(, )]+$/},
   icon: "chrome://ubiquity/skin/icons/calculator.png",
   description: "Calculates the value of a mathematical expression.",
   help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
