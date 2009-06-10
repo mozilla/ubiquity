@@ -38,7 +38,6 @@ BetterFakeCommandSource.prototype = {
   }
 };
 
-
 // Infrastructure for asynchronous tests:
 function getCompletionsAsync( input, verbs, context, callback) {
 
@@ -141,7 +140,7 @@ function testParserTwoDirectOnly() {
     self.assert( dogGotPetted == "bulldog" );
   };
 
-  getCompletionsAsync( "pet b", [cmd_pet], [dog], null,
+  getCompletionsAsync( "pet b", [cmd_pet], null,
                        self.makeCallback(testFunc) );
 }
 
@@ -180,7 +179,7 @@ function testParserTwoParseWithModifier() {
     self.assert( dogGotWashedWith == "spork");
   };
 
-  getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
+  getCompletionsAsync( inputWords, [cmd_wash], null,
                        self.makeCallback(testFunc));
 }
 
@@ -227,7 +226,7 @@ function testSimplifiedParserTwoApi() {
     self.assert( dogGotWashedWith == "spork");
   };
 
-  getCompletionsAsync( inputWords, [cmd_wash], [dog, washingObj], null,
+  getCompletionsAsync( inputWords, [cmd_wash], null,
                        this.makeCallback(testFunc));
 }
 
