@@ -302,19 +302,11 @@ function sortCmdListBy(cmdList, key) {
   return cmdList.sort(key === "enabled" ? checksort : alphasort);
 }
 
-
 function getFeedForCommand(feedMgr, cmd) {
   // This is a really hacky implementation -- it involves going through
   // all feeds looking for one containing a command with a matching name.
-  let feeds = feedMgr.getSubscribedFeeds();
-  for each (let feed in feeds) {
-    if (!feed.commands) {
-      continue;
-    }
-    if (feed.commands[ cmd.name ]) {
-      return feed;
-    }
-  }
+  for each (let feed in feedMgr.getSubscribedFeeds())
+    if (cmd.id in (feed.commands || {})) return feed;
   return null;
 }
 
@@ -322,7 +314,6 @@ function onDisableOrEnableCmd() {
   // update the preferences, when the user toggles the active
   // status of a command.
   // Bind this to checkbox 'change'.
-
   var name = $(this).closest("tr").find(".name").text();
   var cmdSource = UbiquitySetup.createServices().commandSource;
   var cmd = cmdSource.getCommand(name);
