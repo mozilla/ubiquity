@@ -46,20 +46,15 @@ var parserRegistry = loadLocaleJson('resource://ubiquity/modules/parser/new/pars
 var NLParser2 = {
   // Namespace object
   parserFactories: {},
-  makeParserForLanguage: function(languageCode, verbList, nounList,
-                                           ContextUtils, suggestionMemory) {
+  makeParserForLanguage: function(languageCode, verbList,
+                                  ContextUtils, suggestionMemory) {
     if ( ! NLParser2.parserFactories[languageCode] ) {
       throw "No parser is defined for " + languageCode;
     } else {
       let parser = NLParser2.parserFactories[languageCode]();
       // todo set contextutils, and suggestionmemory on the
       // new parser object.
-
-      // test by just using the sample verbs from verbs.js.
-      //parser.setCommandList( sampleVerbs );
-
-      parser.setCommandList( verbList );
-      parser.setNounList( nounList );
+      parser.setCommandList(verbList);
 
       return parser;
     }

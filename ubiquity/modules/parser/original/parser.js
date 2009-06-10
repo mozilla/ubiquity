@@ -44,11 +44,11 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 
 var NLParser1 = {};
 
-NLParser1.makeParserForLanguage = function(languageCode, verbList, nounList,
+NLParser1.makeParserForLanguage = function(languageCode, verbList,
                                            ContextUtils, suggestionMemory) {
 
   let parserPlugin = NLParser1.getPluginForLanguage(languageCode);
-  return new NLParser1.Parser(verbList, nounList, parserPlugin, ContextUtils,
+  return new NLParser1.Parser(verbList, parserPlugin, ContextUtils,
                               suggestionMemory);
 };
 
@@ -186,10 +186,9 @@ NLParser1.ParserQuery.prototype = {
 
 };
 
-NLParser1.Parser = function(verbList, nounList, languagePlugin,
-                           ContextUtils, suggestionMemory) {
-  this.setCommandList( verbList );
-  this._nounTypeList = nounList;
+NLParser1.Parser = function(verbList, languagePlugin,
+                            ContextUtils, suggestionMemory) {
+  this.setCommandList(verbList);
   this._languagePlugin = languagePlugin;
 
   if (!ContextUtils) {
@@ -257,11 +256,11 @@ NLParser1.Parser.prototype = {
 
   // TODO reset is gone
 
-  newQuery: function( query, context, maxSuggestions ) {
+  newQuery: function(query, context, maxSuggestions) {
     var theNewQuery = new NLParser1.ParserQuery(this,
-                                               query,
-                                               context,
-                                               maxSuggestions);
+                                                query,
+                                                context,
+                                                maxSuggestions);
     var nounType, verb;
     var newSuggs = [];
     var selObj = this._ContextUtils.getSelectionObject(context);
@@ -276,7 +275,6 @@ NLParser1.Parser.prototype = {
       // Language-specific full-sentence suggestions:
       newSuggs = this._languagePlugin.parseSentence(
         query,
-        this._nounTypeList,
         this._verbList,
         selObj
       );
@@ -347,10 +345,6 @@ NLParser1.Parser.prototype = {
     };
     this._rankedVerbsThatUseGenericNouns.sort(sortFunction);
   },
-
-  setNounList: function( nounList ) {
-    this._nounTypeList = nounList;
-  }
 };
 
 NLParser1.ParsedSentence = function(verb, arguments, verbMatchScore, selObj) {
@@ -901,7 +895,7 @@ NLParser1.Verb.prototype = {
     this._preview     = cmd.preview;
     this._description = cmd.description;
     this._help        = cmd.help;
-    this._name        = cmd.name || cmd.names[0];
+    this._name        = cmd.name;
     this._icon        = cmd.icon;
     this._synonyms    = cmd.synonyms;
 
@@ -910,7 +904,7 @@ NLParser1.Verb.prototype = {
 
     // Use the presence or absence of a 'names' array
     // to decide whether this is a version 1 or version 2 command.
-    this._isNewStyle = hasKey(cmd.names);
+    this._isNewStyle = hasKey(cmd.arguments);
 
     this.__defineGetter__("previewDelay", function() {
       return cmd.previewDelay;
@@ -924,28 +918,25 @@ NLParser1.Verb.prototype = {
       return false;
     });
     this._arguments = {};
-    
+
     // New-style API: command defines arguments dictionary
     // only do it if we're not using the old API (for compatibility with Parser 2)
     if (this._isNewStyle) {
-      dump("converting 2 > 1: " + this._name + "\n");
       if (cmd.takes || cmd.modifiers)
         dump("WARNING: " + this._name +
              " apparently follows the (now defunct) Parser 1.5 format\n");
 
       // if there are arguments, copy them over using a (semi-arbitrary) choice
       // of preposition
-      if (hasKey(cmd.arguments)) {
-        for each (let arg in cmd.arguments) {
-          let {role, nountype} = arg;
-          let obj = role === "object";
-          this._arguments[obj ? "direct_object" : role] = {
-            type : nountype,
-            label: arg.label || nountype.name,
-            flag : obj ? null : roleToPrep[role],
-            "default": arg.default,
-          };
-        }
+      for each (let arg in cmd.arguments) {
+        let {role, nountype} = arg;
+        let obj = role === "object";
+        this._arguments[obj ? "direct_object" : role] = {
+          type : nountype,
+          label: arg.label || nountype.name,
+          flag : obj ? null : roleToPrep[role],
+          "default": arg.default,
+        };
       }
     } else {
       // Old-style API for backwards compatibility: command

@@ -41,62 +41,28 @@ var EXPORTED_SYMBOLS = ["finishCommand"];
 // Default delay to wait before calling a preview function, in ms.
 const DEFAULT_PREVIEW_DELAY = 150;
 
-function finishCommand(srcCommand) {
-  var cmd = {};
-
-  // what are these for? -satyr
-  /*
-  var propsToInherit = [
-    "DOLabel",
-    "DOType",
-    "DODefault",
-    "author",
-    "homepage",
-    "contributors",
-    "license",
-    "description",
-    "help",
-    "synonyms"
-  ];
-
-  propsToInherit.forEach(
-    function CS_copyProp(prop) {
-      if (!srcCommand[prop])
-        cmd[prop] = null;
-    });
-   */
-
-  if (srcCommand.previewDelay == null)
-    cmd.previewDelay = DEFAULT_PREVIEW_DELAY;
-
-//  if (!srcCommand.modifiers)
-//    cmd.modifiers = {};
-//  if (!srcCommand.modifierDefaults)
-//    cmd.modifierDefaults = {};
-
-  function isEmpty(obj) !obj.__count__;
-
+function finishCommand(cmd) {
   Components.utils.import("resource://ubiquity/modules/setup.js");
 
-  // if it doesn't take any arguments
-  if (!srcCommand.DOType
-       && !srcCommand.modifiers
-       && (!srcCommand.arguments || isEmpty(srcCommand.arguments))
-       && (!cmd.names || isEmpty(cmd.names)) 
-       && UbiquitySetup.parserVersion == 2
-     ) {
-    // enable use in parser 2
-    dump('converting 1 > 2: '+srcCommand.name+'\n');
-    cmd.names = [srcCommand.name];
+  if (UbiquitySetup.parserVersion === 2) {
+    // Convert for Parser 2 if it takes no arguments.
+    if (!cmd.DOType && !cmd.modifiers && isEmpty(cmd.arguments)) {
+      dump("converting 1 > 2: " + cmd.name + "\n");
+      let clone = {__proto__: cmd, arguments: []};
+      if (!cmd.names) clone.names = [cmd.name];
+      cmd = clone;
+    }
+    if (cmd.arguments) {
+      Components.utils.import(
+        "resource://ubiquity/modules/localization_utils.js");
+      cmd = localizeCommand(cmd);
+    }
   }
 
-  cmd.arguments = srcCommand.arguments || [];
-  cmd.__proto__ = srcCommand;
+  if (cmd.previewDelay == null)
+    cmd.previewDelay = DEFAULT_PREVIEW_DELAY;
 
-  if (UbiquitySetup.parserVersion < 2 || !cmd.names)
-    return cmd;
-  else {
-    Components.utils.import("resource://ubiquity/modules/localization_utils.js");
-    return localizeCommand(cmd);
-  }
+  return cmd;
 }
+
+function isEmpty(obj) !obj || !obj.__count__;

@@ -159,9 +159,9 @@ function testFeedManagerWorks() {
 
       feedInfo.refresh = function refresh() {
         this.commandNames = [];
-        this.nounTypes = [];
         this.commands = [];
         this.pageLoadFuncs = [];
+        this.ubiquityLoadFuncs = [];
       };
 
       feedInfo.__proto__ = baseFeedInfo;

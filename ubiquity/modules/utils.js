@@ -563,13 +563,13 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
 // and ensure that everything's escaped properly.
 
 Utils.escapeHtml = function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/\"/g, "&quot;")
-            .replace(/\'/g, "&#39;");
+  return (String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/\'/g, "&#39;"));
 };
-
 
 // ** {{{ Utils.convertFromUnicode() }}} **
 //

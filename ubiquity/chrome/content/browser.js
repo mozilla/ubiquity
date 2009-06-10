@@ -56,9 +56,7 @@ function ubiquitySetup() {
   var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
   var nlParser = NLParser.makeParserForLanguage(
     jsm.UbiquitySetup.languageCode,
-    [],
-    []
-  );
+    []);
 
   var suggsNode = document.getElementById("ubiquity-suggest-container");
   var previewNode = document.getElementById("ubiquity-preview-container");

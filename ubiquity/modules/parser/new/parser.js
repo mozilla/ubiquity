@@ -158,16 +158,12 @@ Parser.prototype = {
   //
   // After the nountypes have been registered, {{{Parser.initializeCache()}}} is
   // called.
-  setCommandList: function setCommandList( commandList ) {
-
-    this._verbList = [];
-    this._nounTypes = {};
-
-    let skippedSomeVerbs = false;
-
+  setCommandList: function setCommandList(commandList) {
     // First we'll register the verbs themselves.
-    for each (let verb in commandList) {
-      if (!verb.disabled && verb.names && verb.arguments)
+    this._verbList = [];
+    var skippedSomeVerbs = false;
+    for each (let verb in commandList) if (!verb.disabled) {
+      if (verb.arguments)
         this._verbList.push(verb);
       else
         skippedSomeVerbs = true;
@@ -202,13 +198,6 @@ Parser.prototype = {
          "\n");
 
     this.initializeCache();
-  },
-
-  // ** {{{Parser.setNounList()}}} **
-  // This function is now a dummy function... its functionality has actually
-  // been subsumed by {{{Parser.setCommandList()}}}.
-  setNounList: function( nounList ) {
-    return true;
   },
 
   // ** {{{Parser.initializeCache()}}} **

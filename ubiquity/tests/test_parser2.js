@@ -1,7 +1,6 @@
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
 Components.utils.import("resource://ubiquity/modules/cmdutils.js");
-Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
 Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
@@ -56,20 +55,20 @@ function getCompletionsAsync( input, verbs, nountypes, context, callback) {
   query.run();
 }
 
-function createCommandAndGetObj(options) {
+function makeCommand(options) {
   // Calls cmdUtils.CreateCommand, but returns the object instead of just
   // dumping it in a global namespace.
-  CmdUtils.__globalObject = {
-    feed: { id: "this_is_a_test_case_not_really_a_feed"},
-    Utils: Utils
-                           };
-  CmdUtils.CreateCommand(options);
-  var cmdName = "cmd_" + (options.name || options.names[0]);
-  return makeCmdForObj(CmdUtils.__globalObject,
-                       cmdName,
-                       Utils.url("chrome://ubiquity/content/test.html"));
+  var fakeGlobal = {
+    commands: [],
+    feed: {id: "this_is_a_test_case_not_really_a_feed"},
+    Utils: Utils,
+  };
+  ({__proto__: CmdUtils, __globalObject: fakeGlobal}).CreateCommand(options);
+  return DefaultFeedPlugin.makeCmdForObj(
+    fakeGlobal,
+    fakeGlobal.commands[0],
+    Utils.url("chrome://ubiquity/content/test.html"));
 }
-
 
 function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
@@ -91,7 +90,6 @@ function testSmokeTestParserTwo() {
     );
     // now do what CommandManager does using services.commandSource
     nlParser.setCommandList(services.commandSource.getAllCommands());
-    nlParser.setNounList(services.commandSource.getAllNounTypes());
     // Do a query here and make sure one of the builtin commands is
     // suggested...
     var fakeContext = { textSelection: "", htmlSelection: "" };
@@ -156,8 +154,8 @@ function testParserTwoParseWithModifier() {
     },
     names: ["wash"],
     arguments: [
-      {role: 'object', nountype: dog },
-      {role: 'instrument', nountype: washingObj }
+      {role: "object", nountype: dog},
+      {role: "instrument", nountype: washingObj}
     ]
   };
 
@@ -185,20 +183,18 @@ function testSimplifiedParserTwoApi() {
   var dogGotWashed = null;
   var dogGotWashedWith = null;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				"beagle", "bulldog", "husky"]);
+                                            "beagle", "bulldog", "husky"]);
   var washingObj = new NounUtils.NounType( "washing object",
-					  ["sponge", "hose", "spork",
-					  "bathtub", "fire hose"]);
-
-  var cmd_wash = createCommandAndGetObj(
-   {
+                                           ["sponge", "hose", "spork",
+                                            "bathtub", "fire hose"]);
+  var cmd_wash = makeCommand({
     execute: function(args) {
       dogGotWashed = args.object.text;
       dogGotWashedWith = args.instrument.text;
     },
     names: ["wash"],
     arguments: { object: dog, instrument: washingObj }
-   });
+  });
 
   var inputWords = "wash pood with sp";
   var self = this;

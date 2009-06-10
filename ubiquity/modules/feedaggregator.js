@@ -43,7 +43,6 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   let self = this;
   var commands = {};
   var commandNames = [];
-  var nounTypes = [];
   var pageLoadFuncLists = [];
   var ubiquityLoadFuncLists = [];
   var feedsChanged = true;
@@ -122,14 +121,12 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     if (feedsChanged) {
       commands = {};
       commandNames = [];
-      nounTypes = [];
       pageLoadFuncLists = [];
       ubiquityLoadFuncLists = [];
 
       feedsChanged = false;
       feeds.forEach(
         function processFeed(feed) {
-          nounTypes = nounTypes.concat(feed.nounTypes);
           for (var name in feed.commands) {
             var cmd = makeCmdWithDisabler(feed.commands[name]);
             // if the command specifies limited application compatibility,
@@ -159,13 +156,6 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
       self.refresh();
 
     return commands;
-  };
-
-  self.getAllNounTypes = function FA_getAllNounTypes() {
-    if (feedsChanged)
-      self.refresh();
-
-    return nounTypes;
   };
 
   self.getCommand = function FA_getCommand(name) {

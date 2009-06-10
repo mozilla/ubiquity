@@ -31,28 +31,25 @@ var emptyContext = {
 };
 
 
-function getCompletions( input, verbs, nountypes, context ) {
+function getCompletions(input, verbs, context) {
   if (!context)
-    context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser( LANG,
-			       verbs,
-			       nountypes,
-                               fakeContextUtils,
-                               new TestSuggestionMemory() );
-  var query = parser.newQuery( input, context, MAX_SUGGESTIONS );
+    context = {textSelection: "", htmlSelection: ""};
+  var parser = makeTestParser(LANG,
+                              verbs,
+                              fakeContextUtils);
+  var query = parser.newQuery(input, context, MAX_SUGGESTIONS);
   return query.suggestionList;
 }
 
-function makeTestParser(lang, verbs, nouns, contextUtils) {
-  lang = lang ? lang : LANG;
-  verbs = verbs ? verbs : [];
-  nouns = nouns ? nouns : [];
+function makeTestParser(lang, verbs, contextUtils) {
+  lang = lang || LANG;
+  verbs = verbs || [];
 
   if (!contextUtils)
     contextUtils = fakeContextUtils;
 
-  return NLParser1.makeParserForLanguage(lang, verbs, nouns, contextUtils,
-                                        new TestSuggestionMemory());
+  return NLParser1.makeParserForLanguage(lang, verbs, contextUtils,
+                                         new TestSuggestionMemory());
 }
 
 var noun_arb_text = {
@@ -79,8 +76,8 @@ function makeSearchCommand(name) {
 
 function testParseDirectOnly() {
   var dogGotPetted = false;
-  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				  "beagle", "bulldog", "husky"]);
+  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                           "beagle", "bulldog", "husky"]);
   var cmd_pet = {
     execute: function(context, directObject, modifiers) {
       dogGotPetted = directObject.text;
@@ -91,18 +88,18 @@ function testParseDirectOnly() {
     modifiers: {}
   };
 
-  var completions = getCompletions( "pet b", [cmd_pet], [dog], null );
-  this.assert( completions.length == 2, "should be 2 completions" );
-  this.assert( completions[0]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[0]._argSuggs.direct_object.text == "beagle",
-	       "obj should be beagle");
-  this.assert( completions[1]._verb._name == "pet", "verb should be pet");
-  this.assert( completions[1]._argSuggs.direct_object.text == "bulldog",
-	       "obj should be bulldog");
+  var completions = getCompletions("pet b", [cmd_pet], null);
+  this.assert(completions.length == 2, "should be 2 completions");
+  this.assert(completions[0]._verb._name == "pet", "verb should be pet");
+  this.assert(completions[0]._argSuggs.direct_object.text == "beagle",
+              "obj should be beagle");
+  this.assert(completions[1]._verb._name == "pet", "verb should be pet");
+  this.assert(completions[1]._argSuggs.direct_object.text == "bulldog",
+              "obj should be bulldog");
   completions[0].execute();
-  this.assert( dogGotPetted == "beagle");
+  this.assert(dogGotPetted == "beagle");
   completions[1].execute();
-  this.assert( dogGotPetted == "bulldog" );
+  this.assert(dogGotPetted == "bulldog");
 }
 
 function testParseWithModifier() {
@@ -110,10 +107,10 @@ function testParseWithModifier() {
   var dogGotWashed = null;
   var dogGotWashedWith = null;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				"beagle", "bulldog", "husky"]);
+                                            "beagle", "bulldog", "husky"]);
   var washingObj = new NounUtils.NounType( "washing object",
-					  ["sponge", "hose", "spork",
-					  "bathtub", "fire hose"]);
+                                           ["sponge", "hose", "spork",
+                                            "bathtub", "fire hose"]);
   var cmd_wash = {
     execute: function(context, directObject, modifiers) {
       dogGotWashed = directObject.text;
@@ -126,8 +123,7 @@ function testParseWithModifier() {
   };
 
   var inputWords = "wash pood with sp";
-  var completions = getCompletions( inputWords, [cmd_wash],
-				    [dog, washingObj], null);
+  var completions = getCompletions(inputWords, [cmd_wash], null);
   this.assert( completions.length == 2, "Should be 2 completions" );
   this.assert( completions[0]._verb._name == "wash");
   this.assert( completions[0]._argSuggs.direct_object.text == "poodle");
@@ -148,25 +144,24 @@ function testCmdManagerSuggestsForEmptyInput() {
   var twoWasCalled = false;
   var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
   var nounTypeTwo = new NounUtils.NounType( "stuffType", ["mud"] );
-  var fakeSource = new FakeCommandSource(
-  {
-    cmd_one: {execute:function(context, directObj) {
-		oneWasCalled = directObj.text;
-	      },
-              DOLabel:"thing",
-	      DOType:nounTypeOne},
-    cmd_two: {execute:function(context, directObj) {
-		twoWasCalled = directObj.text;
-	      },
-	      DOLabel:"stuff",
-	      DOType:nounTypeTwo}
+  var fakeSource = new FakeCommandSource({
+    cmd_one: {
+      execute: function(context, directObj) {
+        oneWasCalled = directObj.text;
+      },
+      DOLabel: "thing",
+      DOType: nounTypeOne,
+    },
+    cmd_two: {
+      execute: function(context, directObj) {
+        twoWasCalled = directObj.text;
+      },
+      DOLabel: "stuff",
+      DOType: nounTypeTwo,
+    }
   });
-  fakeSource.getAllNounTypes = function() {
-    return [nounTypeOne, nounTypeTwo];
-  };
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
                                        makeTestParser(null,
-                                                      null,
                                                       null,
                                                       fakeContextUtils),
                                        onCM);
@@ -196,17 +191,16 @@ function testVerbEatsSelection() {
     name: "eat",
     execute: function(context, directObject, modifiers) {
       if (directObject.text)
-	foodGotEaten = directObject.text;
+        foodGotEaten = directObject.text;
       if (modifiers["at"].text)
-	foodGotEatenAt = modifiers["at"].text;
+        foodGotEatenAt = modifiers["at"].text;
     },
     DOLabel:"food",
     DOType: food,
     modifiers: {"at": place}
   };
   var fakeContext = { textSelection: "lunch", htmlSelection:"lunch" };
-  var completions = getCompletions("eat this", [cmd_eat], [food, place],
-				   fakeContext);
+  var completions = getCompletions("eat this", [cmd_eat], fakeContext);
   this.assert( completions.length == 1,
                "Should be one completion for 'eat this'" );
   completions[0].execute();
@@ -215,8 +209,7 @@ function testVerbEatsSelection() {
 
   fakeContext.textSelection = "grill";
   fakeContext.htmlSelection = "grill";
-  completions = getCompletions("eat breakfast at it", [cmd_eat], [food, place],
-			       fakeContext);
+  completions = getCompletions("eat breakfast at it", [cmd_eat], fakeContext);
   this.assert( completions.length == 1, "should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "breakfast", "food should be breakfast");
@@ -224,8 +217,7 @@ function testVerbEatsSelection() {
 
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
-  completions = getCompletions("eat at home this", [cmd_eat], [food, place],
-			       fakeContext);
+  completions = getCompletions("eat at home this", [cmd_eat], fakeContext);
   this.assert( completions.length == 1, "second should be one completion" );
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
@@ -241,9 +233,9 @@ function testImplicitPronoun() {
     name: "eat",
     execute: function(context, directObject, modifiers) {
       if (directObject.text)
-	foodGotEaten = directObject.text;
+        foodGotEaten = directObject.text;
       if (modifiers["at"].text)
-	foodGotEatenAt = modifiers["at"].text;
+        foodGotEatenAt = modifiers["at"].text;
     },
     DOLabel:"food",
     DOType: food,
@@ -251,8 +243,7 @@ function testImplicitPronoun() {
   };
   var fakeContext = { textSelection: "lunch", htmlSelection:"lunch" };
 
-  var completions = getCompletions("eat", [cmd_eat], [food, place],
-				   fakeContext);
+  var completions = getCompletions("eat", [cmd_eat], fakeContext);
   this.assert( (completions.length == 1), "Should have 1 completion.");
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
@@ -261,8 +252,7 @@ function testImplicitPronoun() {
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
-  completions = getCompletions("eat", [cmd_eat], [food, place],
-			       fakeContext);
+  completions = getCompletions("eat", [cmd_eat], fakeContext);
 
   this.assert( completions.length == 2, "Should have 3 completions.");
   // first completion should be directObject is dinner
@@ -280,8 +270,7 @@ function testImplicitPronoun() {
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
-  completions = getCompletions("eat lunch at selection", [cmd_eat],
-			       [food, place], fakeContext);
+  completions = getCompletions("eat lunch at selection", [cmd_eat], fakeContext);
   this.assert( completions.length == 1, "Sould have 1 completion");
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
@@ -291,8 +280,7 @@ function testImplicitPronoun() {
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
-  completions = getCompletions("eat at grill", [cmd_eat], [food, place],
-			       fakeContext);
+  completions = getCompletions("eat at grill", [cmd_eat], fakeContext);
   this.assert( completions.length == 1, "Should have 1 completion");
   completions[0].execute();
   this.assert((foodGotEaten == "dinner"), "DO should be dinner.");
@@ -302,8 +290,7 @@ function testImplicitPronoun() {
   foodGotEatenAt = null;
   fakeContext.textSelection = "pants";
   fakeContext.htmlSelection = "pants";
-  completions = getCompletions("eat lunch at selection", [cmd_eat], [food, place],
-			       fakeContext);
+  completions = getCompletions("eat lunch at selection", [cmd_eat], fakeContext);
 
   // This now gets an empty list, but I'm not sure that's wrong, given the
   // new behavior, since there is no valid way to use the "at selection"
@@ -318,8 +305,7 @@ function testImplicitPronoun() {
 
   fakeContext.textSelection = null;
   fakeContext.htmlSelection = null;
-  completions = getCompletions("eat this", [cmd_eat], [food, place],
-			       fakeContext);
+  completions = getCompletions("eat this", [cmd_eat], fakeContext);
   this.assert( completions.length == 0, "should have no completions");
 }
 
@@ -329,17 +315,17 @@ function testDontInterpolateInTheMiddleOfAWord() {
   var cmd_google = makeSearchCommand("google");
   var fakeContext = { textSelection: "flab", htmlSelection:"flab" };
   var completions = getCompletions("google iterate", [cmd_google],
-				   [noun_arb_text], fakeContext);
-  this.assert( completions.length == 1, "Should have 1 completion");
-  this.assert( completions[0]._argSuggs.direct_object.text == "iterate",
-	       "Should not interpolate for the 'it' in 'iterate'.");
+                                   fakeContext);
+  this.assert(completions.length == 1, "Should have 1 completion");
+  this.assert(completions[0]._argSuggs.direct_object.text == "iterate",
+              "Should not interpolate for the 'it' in 'iterate'.");
   completions = getCompletions("google it erate", [cmd_google],
-				   [noun_arb_text], fakeContext);
-  this.assert( completions.length == 2, "Should have 2 completions.");
-  this.assert( completions[0]._argSuggs.direct_object.text == "flab erate",
-	       "Should interpolate 'flab' for 'it'.");
-  this.assert( completions[1]._argSuggs.direct_object.text == "it erate",
-	       "input without interpolation should also be suggested.");
+                               fakeContext);
+  this.assert(completions.length == 2, "Should have 2 completions.");
+  this.assert(completions[0]._argSuggs.direct_object.text == "flab erate",
+              "Should interpolate 'flab' for 'it'.");
+  this.assert(completions[1]._argSuggs.direct_object.text == "it erate",
+              "input without interpolation should also be suggested.");
 }
 
 function testMakeSugg() {
@@ -357,33 +343,32 @@ function testModifiersTakeMultipleWords() {
   var wishFoundIn = null;
   var wish = new NounUtils.NounType( "wish", ["apartment", "significant other", "job"]);
   var city = new NounUtils.NounType( "city", ["chicago",
-					     "new york",
-					     "los angeles",
-					     "san francisco"]);
+                                              "new york",
+                                              "los angeles",
+                                              "san francisco"]);
   var cmd_find = {
     name: "find",
     execute: function(context, directObject, modifiers) {
       if (directObject.text)
-	wishFound = directObject.text;
+        wishFound = directObject.text;
       if (modifiers["in"].text)
-	wishFoundIn = modifiers["in"].text;
+        wishFoundIn = modifiers["in"].text;
     },
     DOLabel:"wish",
     DOType: wish,
     modifiers: {"in": city}
   };
   var completions = getCompletions("find job in chicago", [cmd_find],
-				   [wish, city], null);
+                                   null);
   this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
   this.assert(completions[0]._argSuggs["in"].text == "chicago", "should be chicago");
 
   completions = getCompletions("find significant other in chicago",
-				     [cmd_find], [wish, city], null);
+                               [cmd_find], null);
   this.assert(completions[0]._argSuggs["in"].text == "chicago", "should be chicago");
   this.assert(completions[0]._argSuggs.direct_object.text == "significant other", "should be SO.");
 
-  completions = getCompletions("find job in new york", [cmd_find],
-			       [wish, city], null);
+  completions = getCompletions("find job in new york", [cmd_find], null);
   this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
   this.assert(completions[0]._argSuggs["in"].text == "new york", "should be NY");
 }
@@ -433,15 +418,14 @@ function testSuggestionMemory() {
 }
 
 function testSortedBySuggestionMemory() {
-  var nounList = [];
   var verbList = [{name: "clock", execute: function(){}},
-		  {name: "calendar", execute: function(){}},
-		  {name: "couch", execute: function(){}},
-		  {name: "conch", execute: function(){}},
-		  {name: "crouch", execute: function(){}},
-		  {name: "coelecanth", execute: function(){}},
-		  {name: "crab", execute: function(){}} ];
-  var nlParser = makeTestParser(LANG, verbList, nounList);
+                  {name: "calendar", execute: function(){}},
+                  {name: "couch", execute: function(){}},
+                  {name: "conch", execute: function(){}},
+                  {name: "crouch", execute: function(){}},
+                  {name: "coelecanth", execute: function(){}},
+                  {name: "crab", execute: function(){}} ];
+  var nlParser = makeTestParser(LANG, verbList);
   var fakeContext = {textSelection:"", htmlSelection:""};
   var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS);
   var suggestions = query.suggestionList;
@@ -468,14 +452,14 @@ function testSortedBySuggestionMemory() {
 function testNounFirstSortedByGeneralFrequency() {
   var pantsContext = { htmlSelection: "<b>Pants</b>", textSelection: "Pants" };
 
-  var verbList = [{name: "foo", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
-		 {name: "bar", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
-		  {name: "baz", DOType: noun_arb_text, DOLabel:"it", execute: function(){}}
-		 ];
+  var verbList = [
+    {name: "foo", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+    {name: "bar", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+    {name: "baz", DOType: noun_arb_text, DOLabel:"it", execute: function(){}}];
 
   // Note: Create the parser ourself instead of using getCompletion() because
   // we need the suggestion memory in the parser state.
-  var parser = makeTestParser( LANG, verbList, [noun_arb_text], fakeContextUtils);
+  var parser = makeTestParser(LANG, verbList, fakeContextUtils);
   var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS);
   var suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
@@ -504,16 +488,14 @@ function testNounFirstSortedByGeneralFrequency() {
 }
 
 function testSortedByMatchQuality() {
-  var nounList = [];
   var verbList = [{name: "frobnicate"},
-		  {name: "glurgle"},
-		  {name: "nonihilf"},
-		  {name: "bnurgle"},
-		  {name: "fangoriously"}];
-
+                  {name: "glurgle"},
+                  {name: "nonihilf"},
+                  {name: "bnurgle"},
+                  {name: "fangoriously"}];
   var assert = this.assert;
   function testSortedSuggestions( input, expectedList ) {
-    var suggs = getCompletions( input, verbList, nounList, emptyContext );
+    var suggs = getCompletions(input, verbList, emptyContext);
     assert( suggs.length == expectedList.length, "Should have " + expectedList.length + " suggestions.");
     for (var x in suggs) {
       assert( suggs[x]._verb._name == expectedList[x], expectedList[x] + " should be " + x);
@@ -528,23 +510,23 @@ function testSortedByMatchQuality() {
   testSortedSuggestions( "urgle", ["glurgle", "bnurgle"]);
 
   verbList = [{name: "google"},
-	      {name: "tag"},
-	      {name: "digg"},
-	      {name: "bugzilla"},
-	      {name: "get-email-address"},
-	      {name: "highlight"}];
+              {name: "tag"},
+              {name: "digg"},
+              {name: "bugzilla"},
+              {name: "get-email-address"},
+              {name: "highlight"}];
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
 
 function testSortSpecificNounsBeforeArbText() {
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				  "beagle", "bulldog", "husky"]);
+                                            "beagle", "bulldog", "husky"]);
 
   var verbList = [{name: "mumble", DOType: noun_arb_text, DOLabel:"stuff"},
                   {name: "wash", DOType: dog, DOLabel: "dog"}];
 
   var beagleContext = {textSelection:"beagle", htmlSelection:"beagle"};
-  var suggs = getCompletions( "", verbList, [noun_arb_text, dog], beagleContext );
+  var suggs = getCompletions("", verbList, beagleContext);
 
   this.assert( suggs.length == 2, "Should be two suggestions.");
   this.assert( suggs[0]._verb._name == "wash", "First suggestion should be wash");
@@ -555,23 +537,24 @@ function testSortSpecificNounsBeforeArbText() {
 
 function testVerbUsesDefaultIfNoArgProvided() {
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-				  "beagle", "bulldog", "husky"]);
+                                            "beagle", "bulldog", "husky"]);
   dog.default = function() {
     return NounUtils.makeSugg( "husky" );
   };
-  var verbList = [{name:"wash", DOType: dog, DOLabel: "dog"},
-		  {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
-  var suggs = getCompletions( "wash", verbList, [dog], emptyContext );
+  var verbList = [
+    {name:"wash", DOType: dog, DOLabel: "dog"},
+    {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
+  var suggs = getCompletions("wash", verbList, emptyContext);
   this.assert( suggs.length == 1, "Should be 1 suggestion (A).");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
-  suggs = getCompletions( "play", verbList, [dog], emptyContext );
+  suggs = getCompletions("play", verbList, emptyContext);
   this.assert( suggs.length == 1, "Should be 1 suggestion (B).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
-  suggs = getCompletions( "play retr", verbList, [dog], emptyContext );
+  suggs = getCompletions("play retr", verbList, emptyContext);
   this.assert( suggs.length == 1, "Should be 1 suggestion (C).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
@@ -581,19 +564,19 @@ function testVerbUsesDefaultIfNoArgProvided() {
 
 function testSynonyms() {
   var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
-		  {name: "frobnitz"},
-		  {name: "frobnicate"}];
-  var suggs = getCompletions( "frob", verbList, [], emptyContext);
+                  {name: "frobnitz"},
+                  {name: "frobnicate"}];
+  var suggs = getCompletions("frob", verbList, emptyContext);
   this.assert( suggs.length == 3, "Should be 3 suggs.");
   this.assert( suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
   this.assert( suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
   this.assert( suggs[2]._verb._name == "twiddle", "twiddle should be third");
 
-  suggs = getCompletions( "twid", verbList, [], emptyContext);
+  suggs = getCompletions( "twid", verbList, emptyContext);
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 
-  suggs = getCompletions( "twirl", verbList, [], emptyContext);
+  suggs = getCompletions( "twirl", verbList, emptyContext);
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 }
@@ -701,7 +684,7 @@ function testVerbGetCompletions() {
       grumbleCalled = true;
     }
   };
-  var comps = getCompletions( "grum", [cmd_grumble], [], null);
+  var comps = getCompletions("grum", [cmd_grumble], null);
   this.assert( comps.length == 1, "Should be one suggestion." );
   this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
 }
@@ -718,7 +701,7 @@ function testTextAndHtmlDifferent() {
       if (text.indexOf("Pant") == 0)
         return [ NounUtils.makeSugg(text, html) ];
       else
-	return [];
+        return [];
     }
   };
   var cmd_different = {
@@ -730,8 +713,7 @@ function testTextAndHtmlDifferent() {
       executedHtml = directObject.html;
     }
   };
-  var comps = getCompletions("dostuff this", [cmd_different],
-			     [noun_type_different], pantsContext);
+  var comps = getCompletions("dostuff this", [cmd_different], pantsContext);
   this.assert(comps.length == 1, "There should be one completion.");
   comps[0].execute();
   this.assert( executedText == "Pants", "text should be pants.");
@@ -740,8 +722,7 @@ function testTextAndHtmlDifferent() {
   executedText = null;
   executedHtml = null;
   //without any explicit 'this', should still work...
-  comps = getCompletions("dostuff", [cmd_different],
-			     [noun_type_different], pantsContext);
+  comps = getCompletions("dostuff", [cmd_different], pantsContext);
   this.assert(comps.length == 1, "There should be one completions (2)");
   comps[0].execute();
   this.assert( executedText == "Pants", "text should be pants.");
@@ -750,7 +731,7 @@ function testTextAndHtmlDifferent() {
   // when it's a noun-first suggestion from the parser, should still work...
   executedText = null;
   executedHtml = null;
-  var nlParser = makeTestParser(LANG, [cmd_different], [noun_type_different]);
+  var nlParser = makeTestParser(LANG, [cmd_different]);
   var selObj = {
     text: "Pantalones", html: "<blink>Pantalones</blink>"
   };
@@ -774,7 +755,7 @@ function testAsyncNounSuggestions() {
       if (text.indexOf("hello")== 0) {
         return [ NounUtils.makeSugg("Robert E. Lee") ];
       } else
-	return [];
+        return [];
     },
     triggerCallback: function() {
       this._callback( NounUtils.makeSugg("slothitude") );
@@ -792,8 +773,7 @@ function testAsyncNounSuggestions() {
 
   // We make the parser ourself instead of calling getCompletions() because
   // we need to do stuff with the query callback.
-  var parser = makeTestParser(LANG, [cmd_slow],
-			      [noun_type_slowness]);
+  var parser = makeTestParser(LANG, [cmd_slow]);
   var query = parser.newQuery("dostuff hello", emptyContext, MAX_SUGGESTIONS);
   // register a handler to make sure it gets notified when the
   // noun produces suggestions asynchronously.
@@ -802,7 +782,7 @@ function testAsyncNounSuggestions() {
   var assert = this.assert;
   var assertDirObj = function( completion, expected) {
     assert( completion._argSuggs.direct_object.text == expected,
-		 "Expected " + expected );
+            "Expected " + expected );
   };
   this.assert( comps.length == 1, "there should be 1 completions.");
   assertDirObj(comps[0], "Robert E. Lee");
@@ -854,10 +834,11 @@ function testAsyncNounSuggestions() {
 
 function testListOfVerbsThatUseSpecificNounType() {
   var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
-  var verbUsingNounTypeOne = { name: "doStuff",
-			       execute:function(context, directObj) {},
-			       DOLabel:"thing",
-			       DOType:nounTypeOne};
+  var verbUsingNounTypeOne = {
+    name: "doStuff",
+    execute: function(context, directObj) {},
+    DOLabel: "thing",
+    DOType: nounTypeOne};
   var verbs = [makeSearchCommand("IMDB"), makeSearchCommand("amazon-search"), verbUsingNounTypeOne];
   var parser = makeTestParser("en", verbs);
   this.assert( parser._verbsThatUseSpecificNouns.length == 1, "Too many or not enough" );
@@ -867,15 +848,15 @@ function testListOfVerbsThatUseSpecificNounType() {
 function testWeirdCompletionsThatDontMakeSense() {
   var cmd_imdb = makeSearchCommand("IMDB");
   var cmd_amazon = makeSearchCommand("amazon-search");
-  var comps = getCompletions("ac", [cmd_imdb, cmd_amazon], [noun_arb_text]);
+  var comps = getCompletions("ac", [cmd_imdb, cmd_amazon]);
   // Should be no verb-first suggestions, but since both commands take
   // arb text, both of them should prodcue a suggestion with ac as the
   // argument.
-  this.assert( comps.length == 2, "Should have 2 suggestions.");
-  this.assert( comps[0]._argSuggs.direct_object.text == "ac",
-	       "object should be ac.");
-  this.assert( comps[1]._argSuggs.direct_object.text == "ac",
-	       "this object should be ac too.");
+  this.assert(comps.length == 2, "Should have 2 suggestions.");
+  this.assert(comps[0]._argSuggs.direct_object.text == "ac",
+              "object should be ac.");
+  this.assert(comps[1]._argSuggs.direct_object.text == "ac",
+              "this object should be ac too.");
 }
 
 function testSynonymsGetDownrankedEvenWithArguments() {
@@ -888,16 +869,16 @@ function testSynonymsGetDownrankedEvenWithArguments() {
     exectue: function() {}
   };
   var cmd_define = makeSearchCommand("define");
-  var comps = getCompletions("de m", [cmd_youtube, cmd_define], [noun_arb_text]);
+  var comps = getCompletions("de m", [cmd_youtube, cmd_define]);
   // "define m" should be the first suggestion, while
   // "youtube m" is the second suggestion (due to its synonym "video").
-  this.assert( comps.length == 2, "Should have 2 suggestions.");
-  this.assert( comps[0]._verb._name == "define", "Should be define.");
-  this.assert( comps[0]._argSuggs.direct_object.text == "m",
-	       "object should be m.");
-  this.assert( comps[1]._verb._name == "youtube", "Should be youtube.");
-  this.assert( comps[1]._argSuggs.direct_object.text == "m",
-	       "object should be m.");
+  this.assert(comps.length == 2, "Should have 2 suggestions.");
+  this.assert(comps[0]._verb._name == "define", "Should be define.");
+  this.assert(comps[0]._argSuggs.direct_object.text == "m",
+              "object should be m.");
+  this.assert(comps[1]._verb._name == "youtube", "Should be youtube.");
+  this.assert(comps[1]._argSuggs.direct_object.text == "m",
+              "object should be m.");
 }
 
 function testModifierWordsCanAlsoBeInArbTextDirectObj() {
@@ -911,7 +892,7 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
   };
 
   var comps = getCompletions("twitter i am happy as a clam as fern",
-                             [cmd_twitter], [noun_arb_text]);
+                             [cmd_twitter]);
   // There are two places where we could make the division between status
   // and "as" argument.  Make sure both get generated.
   this.assert( comps.length == 6, "Should have 6 suggestions.");
@@ -951,8 +932,7 @@ function testParseWithComplexQuery() {
     DOType: noun_stat,
     modifiers: {as: noun_user, to: noun_user},
   };
-  var completions = getCompletions(inputWords, [cmd_tweet],
-                                   [noun_stat, noun_user], null);
+  var completions = getCompletions(inputWords, [cmd_tweet], null);
   this.assert(completions.length == 2, "Should be 2 completions" );
   completions[0].execute();
   this.assert(stat === "might as well", uneval(stat));

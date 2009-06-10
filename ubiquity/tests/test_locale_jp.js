@@ -52,9 +52,7 @@ function testJapaneseParserBasic() {
     DOType: null,
     modifiers: {"を": tekiType }
   };
-  var parser = makeTestParser( "jp",
-				[cmd_sasu],
-				[tekiType] );
+  var parser = makeTestParser("jp", [cmd_sasu]);
   var input = "敵を刺す";
   var query = parser.newQuery(input, emptyContext, MAX_SUGGESTIONS);
   var suggList = query.suggestionList;
@@ -88,10 +86,8 @@ function testJapaneseParserSomeMore() {
     }
   };
 
-  var parser = makeTestParser( "jp",
-			       [cmd_suru],
-			       [noun_type_mono] );
-  var query = parser.newQuery( "", emptyContext, MAX_SUGGESTIONS);
+  var parser = makeTestParser("jp", [cmd_suru]);
+  var query = parser.newQuery("", emptyContext, MAX_SUGGESTIONS);
   var suggestionList = query.suggestionList;
   // TODO tests here that advanced features still work in japanese parser
   // version: synonyms, defaults, suggestion ranking, async suggestions, etc.

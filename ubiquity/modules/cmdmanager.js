@@ -69,7 +69,6 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
 
   function onCommandsReloaded() {
     parser.setCommandList(cmdSource.getAllCommands());
-    parser.setNounList(cmdSource.getAllNounTypes());
   }
 
   cmdSource.addListener("feeds-reloaded", onCommandsReloaded);

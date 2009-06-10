@@ -17,9 +17,6 @@ FakeCommandSource.prototype = {
   getAllCommands: function(name) {
     return this._cmdList;
   },
-  getAllNounTypes: function() {
-    return [];
-  },
   refresh: function() {
   }
 };

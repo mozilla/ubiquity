@@ -37,8 +37,10 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["DefaultFeedPlugin", "makeCmdForObj"];
+var EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
@@ -155,15 +157,8 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   feedManager.registerPlugin(this);
 }
 
-const CMD_PREFIX = "cmd_";
-const NOUN_PREFIX = "noun_";
-
-function makeCmdForObj(sandbox, objName, feedUri) {
-  var cmdName = objName.substr(CMD_PREFIX.length);
-  var originalCmdName = cmdName;
-  cmdName = cmdName.replace(/_/g, "-");
-  var commandObject = sandbox[objName];
-
+DefaultFeedPlugin.makeCmdForObj = makeCmdForObj;
+function makeCmdForObj(sandbox, commandObject, feedUri) {
   Cu.import("resource://ubiquity/modules/localization_utils.js");
 
   var cmd = {
@@ -171,31 +166,24 @@ function makeCmdForObj(sandbox, objName, feedUri) {
     toString: function CS_toString() {
       return "[object UbiquityCommand " + this.name + "]";
     },
-    name: cmdName,
-    /* TODO if this is a parser2 API command then there is no directObject
-     * and modifiers, just an 'arguments' object.  The code here will still
-     * work, because 'arguments' gets passed in to directObject, and modifiers
-     * is undefined.  So it works, but the code as written is misleading.
-     */
-    execute: function CS_execute(context, directObject, modifiers) {
+    id: feedUri.spec + "#" + commandObject.name,
+    name: commandObject.name,
+    execute: function CS_execute(context) {
       sandbox.context = context;
-      LocalizationUtils.setCommandContext(originalCmdName);
+      LocalizationUtils.setCommandContext(cmd.name);
       LocalizationUtils.setFeedContext(feedUri);
-      return commandObject.execute.call(cmd, directObject, modifiers);
+      return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
     },
     feedUri: feedUri
   };
 
-  if (commandObject.preview) {
-    cmd.preview = function CS_preview(context, previewBlock, directObject,
-                                      modifiers) {
+  if (commandObject.preview)
+    cmd.preview = function CS_preview(context) {
       sandbox.context = context;
-      LocalizationUtils.setCommandContext(originalCmdName);
+      LocalizationUtils.setCommandContext(cmd.name);
       LocalizationUtils.setFeedContext(feedUri);
-      return commandObject.preview.call(cmd, previewBlock, directObject,
-                                        modifiers);
+      return commandObject.preview.apply(cmd, Array.slice(arguments, 1));
     };
-  }
 
   return finishCommand(cmd);
 };
@@ -240,8 +228,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   let self = this;
 
   function reset() {
-    self.nounTypes = [];
-    self.commands = [];
+    self.commands = {};
     self.pageLoadFuncs = [];
     self.ubiquityLoadFuncs = [];
   }
@@ -249,8 +236,8 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   reset();
 
   this.refresh = function refresh() {
-    let code = codeSource.getCode();
-    if (code != codeCache) {
+    var code = codeSource.getCode();
+    if (code !== codeCache) {
       reset();
       codeCache = code;
       sandbox = sandboxFactory.makeSandbox(codeSource);
@@ -265,18 +252,13 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
         );
       }
 
-      for (var objName in sandbox) {
-        if (objName.indexOf(CMD_PREFIX) == 0) {
-          var cmd = makeCmdForObj(sandbox, objName, feedInfo.uri);
-
-          this.commands[cmd.name] = cmd;
-        }
-        if (objName.indexOf(NOUN_PREFIX) == 0)
-          this.nounTypes.push(sandbox[objName]);
+      for each (let cmd in sandbox.commands) {
+        cmd = makeCmdForObj(sandbox, cmd, feedInfo.uri);
+        this.commands[cmd.id] = cmd;
       }
 
-      this.pageLoadFuncs = sandbox.pageLoadFuncs;
-      this.ubiquityLoadFuncs = sandbox.ubiquityLoadFuncs;
+      for each (let p in ["pageLoadFuncs", "ubiquityLoadFuncs"])
+        this[p] = sandbox[p];
 
       hub.notifyListeners("feed-change", feedInfo.uri);
     }
@@ -318,9 +300,6 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 }
 
 function makeBuiltinGlobalsMaker(msgService, webJsm) {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-
   webJsm.importScript("resource://ubiquity/scripts/jquery.js");
   webJsm.importScript("resource://ubiquity/scripts/jquery_setup.js");
   webJsm.importScript("resource://ubiquity/scripts/template.js");
@@ -345,10 +324,11 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       Components: Components,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
+      commands: [],
       pageLoadFuncs: [],
       ubiquityLoadFuncs: [],
       globals: globalObjects[id],
-      displayMessage: function() {
+      displayMessage: function displayMessage() {
         msgService.displayMessage.apply(msgService, arguments);
       }
     };

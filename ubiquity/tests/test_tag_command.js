@@ -29,7 +29,7 @@ function testTagCommand() {
   var cmdSource = services.commandSource;
   var NLParser = NLParserMaker(0);
   var nlParser = NLParser.makeParserForLanguage(UbiquitySetup.languageCode,
-                                                [], []);
+                                                []);
   makeCommandManager.call(this,
                           cmdSource,
                           services.messageService,
@@ -51,7 +51,8 @@ function testTagCommand() {
     // for cleanup
     var isBookmarked = bmsvc.isBookmarked(testURI);
     
-    var cmd = cmdSource.getCommand("tag");
+    var cmd = cmdSource.getCommand(UbiquitySetup.getBaseUri() +
+                                   "standard-feeds/firefox.html#tag");
     this.assert(cmd);
     
     var context = {focusedElement: null,

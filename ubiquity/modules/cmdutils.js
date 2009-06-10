@@ -666,11 +666,10 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // for Parser2 compatibility.
 //
 // {{{ options.execute }}} The function which gets run when the user
-// executes your command.  If your command takes arguments (see below),
+// executes your command, or the string which is notified or opened (if URL).
+// If your command takes arguments (see below),
 // your execute method will be passed an dictionary object containing
 // the arguments assigned by the parser.
-// (The older API, which involved taking the direct object and the modifiers
-// as separate arguments, is deprecated.)
 //
 // ** The following properties are used if you want your command to
 // accept arguments: **
@@ -758,30 +757,14 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 
 CmdUtils.CreateCommand = function CreateCommand(options) {
   var me = this;
-  var globalObj = this.__globalObject;
-  var {displayMessage} = globalObj;
-  var commandObject = {};
+  var global = this.__globalObject;
+  var command = {__proto__: options};
 
   // Returns the first key in a dictionary.
   function getKey(dict) {
     for (var key in dict) return key;
     // if no keys in dict:
     return null;
-  }
-
-  // Reserved keywords that shouldn't be added to the cmd function.
-  var RESERVED = {takes: 1, execute: 1, name: 1, arguments: 1, preview: 1};
-  // Add all other attributes of options to the cmd function.
-  for (var key in options)
-    if (!(key in RESERVED))
-      commandObject[key] = options[key];
-
-  if (options.execute) {
-    commandObject.execute = options.execute;
-  } else {
-    commandObject.execute = function execute() {
-      displayMessage("No action defined.");
-    };
   }
 
   function toNounType(obj, key) {
@@ -795,71 +778,79 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       typeof val.suggest !== "function"
       ? me.nounTypeFromDictionary(val)
       : val);
-    if (!noun.id) noun.id = globalObj.feed.id + "#n" + me.__nextId++;
+    if (!noun.id) noun.id = global.feed.id + "#n" + me.__nextId++;
   }
 
-  /* OLD DEPRECATED ARGUMENT API */
-  if (options.takes) {
-    commandObject.DOLabel = getKey(options.takes);
-    if (commandObject.DOLabel) {
-      commandObject.DOType = options.takes[commandObject.DOLabel];
-      toNounType(commandObject, "DOType");
-    }
+  // ensure name, names and synonyms
+  { let names = options.names || options.name;
+    if (!names)
+      throw Error("CreateCommand: name or names is required.");
+    if (!Utils.isArray(names))
+      names = (names + "").split(/\s{0,}\|\s{0,}/);
+    if (names.length > 1)
+      command.synonyms = names.slice(1);
+    command.name = names[0]
+    command.names = names;
   }
-  if (options.modifiers) {
-    let {modifiers} = options;
-    for (let label in modifiers)
-      toNounType(modifiers, label);
-  }
-
-  /* NEW IMPROVED ARGUMENT API */
-  if (options.arguments) {
-    let args = options.arguments;
-    // handle simplified syntax
-    // arguments: noun
-    // arguments: {role: noun, ...}
-    // arguments: {"role label": noun, ...}
-    if (typeof args.suggest === "function")
-      args = [{role: "object", nountype: args}];
-    else if (!Utils.isArray(args)) {
-      let a = [];
-      for (let key in args) {
-        let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
-        if (role) a.push({role: role, label: label, nountype: args[key]});
+  { let {takes, modifiers, arguments: args} = options;
+    /* OLD DEPRECATED ARGUMENT API */
+    if (takes) {
+      let label = getKey(takes);
+      if (label) {
+        command.DOLabel = label;
+        command.DOType = takes[label];
+        toNounType(command, "DOType");
       }
-      args = a;
+    }
+    if (modifiers) {
+      for (let label in modifiers)
+        toNounType(modifiers, label);
     }
 
-    for each (let arg in args)
-      toNounType(arg, "nountype");
-
-    commandObject.arguments = args;
+    /* NEW IMPROVED ARGUMENT API */
+    if (args) {
+      // handle simplified syntax
+      if (typeof args.suggest === "function")
+        // arguments: noun
+        args = [{role: "object", nountype: args}];
+      else if (!Utils.isArray(args)) {
+        // arguments: {role: noun, ...}
+        // arguments: {"role label": noun, ...}
+        let a = [];
+        for (let key in args) {
+          let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
+          if (role) a.push({role: role, label: label, nountype: args[key]});
+        }
+        args = a;
+      }
+      for each (let arg in args) toNounType(arg, "nountype");
+      command.arguments = args;
+    }
+  }
+  { let {execute, preview} = options;
+    if (typeof execute !== "function") {
+      let uri;
+      try { uri = global.Utils.url(execute) } catch(e) {}
+      command.execute = uri ? function execute_open() {
+        Utils.openUrlInBrowser(uri.spec);
+      } : function execute_display() {
+        global.displayMessage(execute || "No action defined.");
+      };
+    }
+    // If preview is not a function, wrap it in a function that does
+    // what you'd expect it to.
+    if (preview != null && typeof preview !== "function")
+      command.preview = function preview_html(pblock) {
+        pblock.innerHTML = preview;
+      };
   }
 
-  // If preview is a string, wrap it in a function that does
-  // what you'd expect it to.
-  if (typeof options.preview === "string") {
-    var previewString = options.preview;
-    commandObject.preview = function preview(pblock) {
-      pblock.innerHTML = previewString;
-    };
-  } else {
-    commandObject.preview = options.preview;
-  }
-
-  if (commandObject.previewUrl)
-    // Call our "patched' Utils.url(), which has the ability
+  if (options.previewUrl)
+    // Call our "patched" Utils.url(), which has the ability
     // to base a relative URL on the current feed's URL.
-    commandObject.previewUrl = globalObj.Utils.url(commandObject.previewUrl);
+    command.previewUrl = global.Utils.url(options.previewUrl);
 
-  if (typeof commandObject.names === "string")
-    commandObject.names = commandObject.names.split(/\s*\|\s{0,}/);
-
-  if (Utils.isArray(commandObject.names))
-    commandObject.synonyms = commandObject.names.slice(1);
-
-  var identifier = "cmd_" + (options.name || commandObject.names[0]);
-  globalObj[identifier] = commandObject;
+  global.commands.push(command);
 };
 
 // -----------------------------------------------------------------

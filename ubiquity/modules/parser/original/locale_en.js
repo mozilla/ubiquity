@@ -118,7 +118,7 @@ function _recursiveParse(unusedWords,
   return completions;
 }
 
-EnParser.parseSentence = function(inputString, nounList, verbList, selObj ){
+EnParser.parseSentence = function(inputString, verbList, selObj) {
   // Returns a list of PartiallyParsedSentences.
   // Language-specific.  This one is for English.
   let parsings = [];
