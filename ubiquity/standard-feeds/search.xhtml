@@ -792,7 +792,7 @@ CmdUtils.CreateCommand({
   names: ["yelp"],
   arguments: [
     {role: "object", label: "restaurant", nountype: noun_type_async_restaurant},
-    {role: "location", nountype: noun_type_async_address}
+    {role: "position", nountype: noun_type_async_address}
   ],
   icon: "http://www.yelp.com/favicon.ico",
   description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.",
@@ -882,7 +882,7 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 
 CmdUtils.CreateCommand({
   name: "weather",
-  takes: {"location": noun_type_geolocation},
+  takes: {"position": noun_type_geolocation},
   modifiers: {"in": noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",

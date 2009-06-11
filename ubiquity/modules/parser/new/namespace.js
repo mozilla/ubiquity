@@ -95,20 +95,17 @@ var NLParser2 = {
           case 'from':
             role = 'source';
           break;
-          case 'at': case 'on':
+          case 'at': case 'on': case 'near':
             role = 'position';
           break;
           case 'with': case 'using':
             role = 'instrument';
           break;
           case 'in':
-            // language, in the case of wikipedia.
-          break;
-          case 'near':
-            role = 'location';
+            role = 'format';
           break;
           case 'as':
-            role = 'user';
+            role = 'alias';
           break;
         }
       }
