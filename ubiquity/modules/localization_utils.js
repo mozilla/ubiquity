@@ -56,6 +56,7 @@ const BUNDLE_SVC = Components.classes['@mozilla.org/intl/stringbundle;1']
 
 var commandContext = null;
 var feedContext = null;
+var displayContext = null;
 var localStringBundles = {};
 
 var LocalizationUtils = {
@@ -101,38 +102,37 @@ var LocalizationUtils = {
     }
   },
   
-  setCommandContext: function LU_setCommandContext (cmdName) {
-    commandContext = cmdName;
-    dump('setCommandContext: '+cmdName+'\n');
-  },
-  
-  getCommandContext: function LU_getCommandContext () {
-    return commandContext;
-  },
-  
-  setFeedContext: function LU_setFeedContext (feedUri) {
+  // ** {{{setLocalizationContext}}} **
+  //
+  // This is used to set the feed and command context for _().
+  // {{{displayMode}}} is either "execute" or "preview" depending
+  // on the context. These settings are used in constructing the
+  // appropriate localization keys.
+  setLocalizationContext: function LU_setLocalizationContext
+                          (feedUri, cmdName, displayMode) {
     feedContext = feedUri;
-    dump('setFeedContext: '+feedUri.asciiSpec+'\n');
+    commandContext = cmdName;
+    if (displayMode == 'execute' || displayMode == 'preview')
+      displayContext = displayMode;
+    else
+      displayContext = null;
+    dump('setLocalizationContext:\n'
+         +' feed:    '+(feedUri.asciiSpec || feedUri)+'\n'
+         +' command: '+cmdName+'\n'
+         +' display: '+displayMode+'\n');
   },
   
-  getFeedContext: function LU_getFeedContext () {
-    return feedContext;
-  },
+  get commandContext() { return commandContext; },
+  get feedContext() { return feedContext; },
+  get displayContext() { return displayContext; },
   
   getLocalized: function LU_getLocalized(string, replacements) {
-  
-    // check if we're in an execute context, preview context, or neither.
-    // TODO: there must be a better way of doing this...
-    myCSCaller = LocalizationUtils.getLocalized.caller.caller.caller;
-    let context = null;
-    if (myCSCaller.name.indexOf('preview') > -1)
-      context = 'preview';
-    if (myCSCaller.name.indexOf('execute') > -1)
-      context = 'execute';
-  
-    let key = this.getCommandContext() + '.' + (context ? context+'.' : '') + (string.toUpperCase().replace(/\s+/g,'_'));
     
-    let feedKey = this.getLocalFeedKey(feedContext.asciiSpec);
+    let key = this.commandContext + '.'
+              + (this.displayContext ? displayContext+'.' : '') 
+              + (string.toUpperCase().replace(/\s+/g,'_'));
+    
+    let feedKey = this.getLocalFeedKey(this.feedContext.asciiSpec);
     
     return this.getLocalizedString(feedKey, key, string, replacements);
   }
