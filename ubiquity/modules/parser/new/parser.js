@@ -55,9 +55,9 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 //
 // In this file, we will set up three different classes:
 // * {{{Parser}}}: each language parser will be an instance of this class
-// * {{{Parser.Query}}}: this is a parser query class, as described in
+// * {{{ParseQuery}}}: this is a parser query class, as described in
 //   [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
-// * {{{Parser.Parse}}}: parses constructed and returned by parser queries
+// * {{{Parse}}}: parses constructed and returned by parser queries
 //   are of this class.
 
 // == {{{Parser}}} ==
@@ -93,7 +93,7 @@ Parser.prototype = {
   // The {{{joindelimiter}}} parameter is the delimiter that gets inserted
   // when gluing arguments and their delimiters back together in display.
   // In the case of most languages, the space (' ') is fine.
-  // See how it's used in {{{Parser.Parse.displayText}}}.
+  // See how it's used in {{{Parse.displayText}}}.
   //
   // TODO: {{{joindelimiter}}} and {{{usespaces}}} may or may not be
   // redundant.
@@ -272,16 +272,16 @@ Parser.prototype = {
 
   // ** {{{Parser#newQuery()}}} **
   //
-  // This method returns a new {{{Parser.Query}}} object, as detailed in
+  // This method returns a new {{{ParseQuery}}} object, as detailed in
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
   newQuery: function(queryString, context, maxSuggestions,
                      dontRunImmediately) {
     var selObj = ContextUtils.getSelectionObject(context);
-    var theNewQuery = new Parser.Query(this,
-                                       queryString,
-                                       context,
-                                       maxSuggestions,
-                                       dontRunImmediately);
+    var theNewQuery = new ParseQuery(this,
+                                     queryString,
+                                     context,
+                                     maxSuggestions,
+                                     dontRunImmediately);
     theNewQuery.selObj = selObj;
     return theNewQuery;
   },
@@ -450,7 +450,7 @@ Parser.prototype = {
   // pair of outputs from {{{verbFinder()}}} and attempts to find all of the
   // delimiters in the {{{argString}}} and then find different parse
   // combinations of arguments in different roles. It returns an array of
-  // {{{Parser.Parse}}} objects with its arguments and verb set.
+  // {{{Parse}}} objects with its arguments and verb set.
   //
   // If the {{{verb}}} argument is set, it will only look for delimiters which
   // are appropriate for the given verb (using {{{_patternCache.delimiters}}}),
@@ -494,7 +494,7 @@ Parser.prototype = {
   // {{{theseParses}}} to become the basis for the next loop. It's //intense//.
   //
   // Each argument that's set gets a property called {{{_order}}}. This is used
-  // by {{{Parser.Parse.displayText}}} in order to reconstruct the input
+  // by {{{Parse.displayText}}} in order to reconstruct the input
   // for display. The _order values become left-to-right placement values.
   // Each argument gets one _order value for both the argument and the delimiter
   // as we can reconstruct the order of the delimiter wrt the argument using
@@ -512,10 +512,10 @@ Parser.prototype = {
 
     // if the argString is empty, return a parse with no args.
     if (!argString) {
-      let defaultParse = new Parser.Parse(this,
-                                          input,
-                                          verb,
-                                          argString);
+      let defaultParse = new Parse(this,
+                                    input,
+                                    verb,
+                                    argString);
       if (defaultParse._verb.id) {
         defaultParse.scoreMultiplier = 1;
       } else {
@@ -584,12 +584,12 @@ Parser.prototype = {
       }
 
       // theseParses will be the set of new parses based on this delimiter
-      // index combination. We'll seed it with a Parser.Parse which doesn't
+      // index combination. We'll seed it with a Parse which doesn't
       // have any arguments set.
-      var seedParse = new Parser.Parse(this,
-                                       input,
-                                       verb,
-                                       argString);
+      var seedParse = new Parse(this,
+                                 input,
+                                 verb,
+                                 argString);
       // get all parses started off with their scoreMultipier values
       if (verb.id) {
         seedParse.scoreMultiplier = 1;
@@ -1209,9 +1209,9 @@ Parser.prototype = {
   strengthenMemory: function() {}
 }
 
-// == {{{Parser.Query}}} ==
+// == {{{ParseQuery}}} ==
 //
-// The {{{Parser.Query}}} interface is described in
+// The {{{ParseQuery}}} interface is described in
 // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]].
 //
 // The constructor takes the Parser that's being used, the {{{queryString}}},
@@ -1219,9 +1219,9 @@ Parser.prototype = {
 // set some more parameters or watches on the query.
 //
 // The {{{Parser#newQuery()}}} method is used to initiate
-// a query instead of calling {{{new Parser.Query()}}} directly.
+// a query instead of calling {{{new ParseQuery()}}} directly.
 //
-Parser.Query = function(parser, queryString, context, maxSuggestions,
+var ParseQuery = function(parser, queryString, context, maxSuggestions,
                         dontRunImmediately) {
   this._date = new Date();
   this._idTime = this._date.getTime();
@@ -1239,14 +1239,14 @@ Parser.Query = function(parser, queryString, context, maxSuggestions,
   this.finished = false;
   this._keepworking = true;
 
-  // ** {{{Parser.Query#_times}}} **
+  // ** {{{ParseQuery#_times}}} **
   //
   // {{{_times}}} is an array of post-UNIX epoch timestamps for each step
   // of the derivation. You can check it later to see how long different
   // steps took.
   this._times = [];
 
-  // ** {{{Parser.Query#_step}}} **
+  // ** {{{ParseQuery#_step}}} **
   //
   // This {{{_step}}} property is increased throughout {{{_yieldParse()}}}
   // so you can check later to see how far the query went.
@@ -1271,19 +1271,19 @@ Parser.Query = function(parser, queryString, context, maxSuggestions,
     this.run();
 }
 
-Parser.Query.prototype = {
+ParseQuery.prototype = {
   dump: function PQ_dump(msg) {
     var it = this._idTime;
     dump(it + ":" + (new Date - it) + " " + msg + "\n");
   },
 
-  // ** {{{Parser.Query#run()}}} **
+  // ** {{{ParseQuery#run()}}} **
   //
   // {{{run()}}} actually starts the query. As a {{{yield}}}-ing model
   // of faux-threads is used right now, the code looks a little bizarre.
   //
   // Basically in every run of {{{doAsyncParse()}}}, it will move the
-  // {{{parseGenerator = Parser.Query._yieldingParse()}}} generator
+  // {{{parseGenerator = ParseQuery._yieldingParse()}}} generator
   // one step, meaning we progress in the parse from one {{{yield}}}
   // breakpoint to the next.
   //
@@ -1322,12 +1322,12 @@ Parser.Query.prototype = {
     this._times[this._step++] = new Date;
   },
 
-  // ** {{{Parser.Query#_yieldingParse()}}} **
+  // ** {{{ParseQuery#_yieldingParse()}}} **
   //
   // {{{_yieldingParse()}}} is not really a normal function but
   // a [[https://developer.mozilla.org/en/New_in_JavaScript_1.7|generator]].
   // This has to do with the {{{doAsyncParse()}}} asynchronous parsing
-  // system described above in {{{Parser.Query#run()}}}.
+  // system described above in {{{ParseQuery#run()}}}.
   //
   // The bottom line, though, is that this function defines the flow of the
   // parse derivation with {{{yield true}}} thrown in at different points
@@ -1512,12 +1512,12 @@ Parser.Query.prototype = {
     this.onResults();
   },
 
-  // ** {{{Parser.Query#hasResults}}} (read-only) **
+  // ** {{{ParseQuery#hasResults}}} (read-only) **
   //
   // A getter for whether there are any results yet or not.
   get hasResults() { return this._scoredParses.length > 0; },
 
-  // ** {{{Parser.Query#suggestionList}}} (read-only) **
+  // ** {{{ParseQuery#suggestionList}}} (read-only) **
   //
   // A getter for the suggestion list.
   get suggestionList() {
@@ -1527,7 +1527,7 @@ Parser.Query.prototype = {
             .slice(0, this.maxSuggestions));
   },
 
-  // ** {{{Parser.Query#cancel()}}} **
+  // ** {{{ParseQuery#cancel()}}} **
   //
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
@@ -1544,12 +1544,12 @@ Parser.Query.prototype = {
     this._keepworking = false;
   },
 
-  // ** {{{Parser.Query#onResults()}}} **
+  // ** {{{ParseQuery#onResults()}}} **
   //
   // A handler for the endgame. To be overridden.
   onResults: function() {},
 
-  // ** {{{Parser.Query#addIfGoodEnough()}}} **
+  // ** {{{ParseQuery#addIfGoodEnough()}}} **
   //
   // Takes a {{{parseCollection}}} (Array) and a {{{newParse}}}.
   //
@@ -1612,10 +1612,10 @@ Parser.Query.prototype = {
   }
 };
 
-// == {{{Parser.Parse}}} ==
+// == {{{Parse}}} ==
 //
-// {{{Parser.Parse}}} is the class for all of the parses which will be returned
-// in an array by the {{{Parser.Query#suggestionList}}}. It is also used
+// {{{Parse}}} is the class for all of the parses which will be returned
+// in an array by the {{{ParseQuery#suggestionList}}}. It is also used
 // throughout the parse process.
 //
 // The constructor takes the {{{branching}}} and {{{joindelimiter}}} parameters
@@ -1623,7 +1623,7 @@ Parser.Query.prototype = {
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
-Parser.Parse = function(parser, input, verb, argString, parentId) {
+var Parse = function(parser, input, verb, argString, parentId) {
   this._parser = parser;
   this.input = input;
   this._verb = verb;
@@ -1639,8 +1639,8 @@ Parser.Parse = function(parser, input, verb, argString, parentId) {
     this._parentId = parentId;
 }
 
-Parser.Parse.prototype = {
-  // ** {{{Parser.Parse#displayText}}} **
+Parse.prototype = {
+  // ** {{{Parse#displayText}}} **
   //
   // {{{displayText}}} prints the verb and arguments in the parse by
   // ordering all of the arguments (and verb) by their {{{_order}}} properties
@@ -1753,12 +1753,12 @@ Parser.Parse.prototype = {
     return this.input;
   },
 
-  // **{{{Parser.Parse#icon}}}**
+  // **{{{Parse#icon}}}**
   //
   // Gets the verb's icon.
   get icon() this._verb.icon,
 
-  // **{{{Parser.Parse#execute()}}}**
+  // **{{{Parse#execute()}}}**
   //
   // Execute the verb. Only the first argument in each role is returned.
   // The others are thrown out.
@@ -1766,7 +1766,7 @@ Parser.Parse.prototype = {
     return this._verb.execute(context, this.firstArgs);
   },
 
-  // **{{{Parser.Parse#preview()}}}**
+  // **{{{Parse#preview()}}}**
   //
   // creates the verb preview.
   preview: function(context, previewBlock) {
@@ -1787,21 +1787,21 @@ Parser.Parse.prototype = {
     }
   },
 
-  // **{{{Parser.Parse#previewDelay}}} (read-only)**
+  // **{{{Parse#previewDelay}}} (read-only)**
   //
   // Return the verb's {{{previewDelay}}} value.
   get previewDelay() {
     return this._verb.previewDelay;
   },
 
-  // **{{{Parser.Parse#previewUrl}}} (read-only)**
+  // **{{{Parse#previewUrl}}} (read-only)**
   //
   // Return the verb's {{{previewUrl}}} value.
   get previewUrl() {
     return this._verb.previewUrl;
   },
 
-  // **{{{Parser.Parse#firstArgs}}} (read-only)**
+  // **{{{Parse#firstArgs}}} (read-only)**
   get firstArgs() {
     let firstArgs = {};
     for (let role in this.args) {
@@ -1810,7 +1810,7 @@ Parser.Parse.prototype = {
     return firstArgs;
   },
 
-  // **{{{Parser.Parse#lastNode}}}**
+  // **{{{Parse#lastNode}}}**
   //
   // Return the parse's last node, whether a verb or an argument.
   // This can be used to power something like tab-completion, by replacing
@@ -1833,7 +1833,7 @@ Parser.Parse.prototype = {
     return lastNode;
   },
 
-  // **{{{Parser.Parse#allNounTypesDetectionHasCompleted()}}} (read-only)**
+  // **{{{Parse#allNounTypesDetectionHasCompleted()}}} (read-only)**
   //
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
@@ -1856,7 +1856,7 @@ Parser.Parse.prototype = {
     return true;
   },
 
-  // ** {{{Parser.Parse#maxScore}}} **
+  // ** {{{Parse#maxScore}}} **
   //
   // {{{maxScore}}} computes the maximum possible score which a partial
   // parse could possibly yield. It's used in cases where an async nountype
@@ -1884,12 +1884,12 @@ Parser.Parse.prototype = {
     return score;
   },
 
-  // ** {{{Parser.Parse#score}}} **
+  // ** {{{Parse#score}}} **
   //
   // {{{score}}} returns the current value of {{{_score}}}.
   get score() this._score,
 
-  // ** {{{Parser.Parse#setArgumentSuggestion()}}} **
+  // ** {{{Parse#setArgumentSuggestion()}}} **
   //
   // Accepts a {{{role}}} and a suggestion and sets that argument properly.
   // If there is already an argument for that role, this method will *not*
@@ -1898,7 +1898,7 @@ Parser.Parse.prototype = {
     (this.args[role] || (this.args[role] = [])).push(sugg);
   },
 
-  // ** {{{Parser.Parse#unfilledRoles}}} **
+  // ** {{{Parse#unfilledRoles}}} **
   //
   // Gets a list of roles which the parse's verb accepts but
   get unfilledRoles()(this._verb.id
@@ -1907,15 +1907,15 @@ Parser.Parse.prototype = {
                          if (!(verbArg.role in this.args))]
                       : []),
 
-  // ** {{{Parser.Parse#copy()}}} **
+  // ** {{{Parse#copy()}}} **
   //
   // Returns a copy of this parse.
   copy: function PP_copy() {
-    var ret = new Parser.Parse(this._parser,
-                               this.input,
-                               this._verb,
-                               this.argString,
-                               this._id);
+    var ret = new Parse(this._parser,
+                         this.input,
+                         this._verb,
+                         this.argString,
+                         this._id);
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
