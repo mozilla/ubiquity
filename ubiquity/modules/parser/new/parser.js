@@ -993,8 +993,7 @@ Parser.prototype = {
             // as the replaced suggestion, and put all of the replacement
             // parses into newreturn.
 
-            // BEGIN NEW NOUNCACHE STRUCTURE
-            /*let nountypeId = verbArg.nountype.id;
+            let nountypeId = verbArg.nountype.id;
             if (nountypeId in this._nounCache[argText]) {
               
               for each (let suggestion in this._nounCache[argText][nountypeId]) {
@@ -1007,33 +1006,10 @@ Parser.prototype = {
                   newreturn.push(parseCopy);
                 }
               }
-            } else {
-              returnArr = newreturn;
-              thisVerbTakesThisRole = true;
-            }*/
-            // END NEW NOUNCACHE STRUCTURE
 
-            // BEGIN OLD NOUNCACHE STRUCTURE
-            let thereWasASuggestionWithTheRightNounType = false;
-            for each (let suggestion in this._nounCache[argText]) {
-              if (suggestion.nountypeId === verbArg.nountype.id) {
-                thereWasASuggestionWithTheRightNounType = true;
-
-                for each (let parse in returnArr) {
-                  let parseCopy = parse.copy();
-                  // copy the attributes we want to copy from the nounCache
-                  let newSugg = parseCopy.args[role][i];
-                  for(let key in suggestion)
-                    newSugg[key] = suggestion[key];
-                  newreturn.push(parseCopy);
-                }
-              }
-            }
-            if (thereWasASuggestionWithTheRightNounType) {
               returnArr = newreturn;
-              thisVerbTakesThisRole = true;
+              thisVerbTakesThisRole = true;              
             }
-            // END OLD NOUNCACHE STRUCTURE
             
           }
 
@@ -1153,22 +1129,14 @@ Parser.prototype = {
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, ajaxRequests) {
 
-        // BEGIN NEW NOUNCACHE STRUCTURE
-        /*if (!(x in thisParser._nounCache))
+        if (!(x in thisParser._nounCache))
           thisParser._nounCache[x] = {};
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
           if (!(nountypeId in thisParser._nounCache[x]))
             thisParser._nounCache[x][nountypeId] = [];
           thisParser._nounCache[x][nountypeId].push(newSugg);
-        }*/
-        // END NEW NOUNCACHE STRUCTURE
-        
-        // BEGIN OLD NOUNCACHE STRUCTURE
-        if (!(x in thisParser._nounCache))
-          thisParser._nounCache[x] = [];
-        thisParser._nounCache[x] = thisParser._nounCache[x].concat(suggestions);
-        // END OLD NOUNCACHE STRUCTURE
+        }
 
         if (typeof callback == 'function')
           callback(x,thisParser._nounCache[x], ajaxRequests);
