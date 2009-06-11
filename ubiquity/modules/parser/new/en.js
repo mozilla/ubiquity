@@ -47,6 +47,7 @@ function makeParser() new Parser({
     {role: 'location', delimiter: 'near'},
     {role: "instrument", delimiter: "with"},
     {role: "instrument", delimiter: "using"},
+    {role: "date", delimiter: "on"}
   ],
   branching: "right",
 });

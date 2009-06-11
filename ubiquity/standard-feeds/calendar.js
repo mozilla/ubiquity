@@ -8,8 +8,8 @@ const Apology = ("<p>" +
  Google Calendar to figure it out.  So we're not using the DateNounType
  here.  Should we be; is there a better name for this command? */
 CmdUtils.CreateCommand({
-  name: "add-to-calendar",
-  takes: {"event": noun_arb_text}, // TODO: use DateNounType or EventNounType?
+  names: ["add-to-calendar"],
+  arguments: {object: noun_arb_text}, // TODO: use DateNounType or EventNounType?
   icon : "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (
@@ -21,7 +21,8 @@ CmdUtils.CreateCommand({
     <li>Jono&#39;s Birthday on Friday</li>
     </ul>
     </>) + Apology,
-  execute: function(eventString) {
+  execute: function( args ) {
+    var event = args.object;
     var authKey = Utils.getCookie(".www.google.com", "CAL");
     if (!authKey) {
       this._needLogin();
@@ -35,7 +36,7 @@ CmdUtils.CreateCommand({
     req.setRequestHeader("Content-type", "application/atom+xml");
     req.send(<entry xmlns="http://www.w3.org/2005/Atom"
                     xmlns:gCal="http://schemas.google.com/gCal/2005">
-               <content type="text">{eventString.text}</content>
+               <content type="text">{event.text}</content>
                <gCal:quickadd value="true"/>
              </entry>.toXMLString());
     switch (req.status) {
@@ -70,18 +71,21 @@ function linkToButton() {
 }
 
 CmdUtils.CreateCommand({
-  name: "check-calendar",
-  takes: {"date to check": noun_type_date},
+  names: ["check-calendar"],
+  arguments: {object: noun_type_date},
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check thursday"' + Apology,
-  execute: function(directObj) {
-    var date = directObj.data;
+  execute: function( args ) {
+    var date = args.object.text;
     var url = "http://www.google.com/calendar/";
     var params = Utils.paramsToString({as_sdt: date.toString("yyyyMMdd")});
     Utils.openUrlInBrowser(url + params);
   },
-  preview: function preview(pblock, {data: date, url}) {
+  preview: function preview(pblock, args) {
+    var date = args.object.text;
+    var url = args.url;
+
     if (!date) {
       pblock.innerHTML = this.description;
       return;
@@ -107,7 +111,8 @@ CmdUtils.CreateCommand({
         $c.find("button").focus(function btn() {
           this.blur();
           this.disabled = true;
-          preview(pblock, {data: date, url: this.value});
+          args.url = this.value;
+          preview(pblock, args);
           return false;
         });
         pblock.innerHTML = "";

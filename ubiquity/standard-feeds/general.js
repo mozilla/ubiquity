@@ -71,19 +71,21 @@ function wordCount(text){
 }
 
 CmdUtils.CreateCommand({
-  name: "word-count",
-  takes: {text: noun_arb_text},
+  names: ["word-count"],
+  arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/sum.png",
   description: "Displays the number of words in a selection.",
-  execute: function( directObj ) {
-    if (directObj.text)
-      displayMessage(wordCount(directObj.text) + " words");
+  execute: function( args ) {
+    var object = args.object;
+    if (object.text)
+      displayMessage(wordCount(object.text) + " words");
     else
       displayMessage("No words selected.");
   },
-  preview: function(pBlock, directObj) {
-    if (directObj.text)
-      pBlock.innerHTML = wordCount(directObj.text) + " words";
+  preview: function(pBlock, args) {
+    var object = args.object;
+    if (object.text)
+      pBlock.innerHTML = wordCount(object.text) + " words";
     else
       pBlock.innerHTML = "Displays the number of words in a selection.";
   }

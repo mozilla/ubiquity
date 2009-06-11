@@ -1768,13 +1768,22 @@ Parser.Parse.prototype = {
 
   // **{{{Parser.Parse#preview()}}}**
   //
-  // Returns the verb preview.
+  // creates the verb preview.
   preview: function(context, previewBlock) {
     if (typeof this._verb.preview === "function")
-      return this._verb.preview(context, previewBlock, this.firstArgs);
+      this._verb.preview(context, previewBlock, this.firstArgs);
     else {
       dump(this._verb.names[0] + " didn't have a preview!");
-      return false;
+      // Command exists, but has no preview; provide a default one.
+      var template = "";
+      if (this._verb.description)
+        template += "<p>"+this._verb.description+"</p>";
+      if (this._verb.help)
+        template += "<h3>How to use it:</h3><p>"+this._verb.help+"</p>";
+      // No description or help available, fall back to old defualt
+      if (template == "")
+        template = "Executes the <b>" + this._verb.name + "</b> command.";;
+      previewBlock.innerHTML = template;
     }
   },
 
