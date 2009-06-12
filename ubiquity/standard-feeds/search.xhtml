@@ -797,7 +797,9 @@ CmdUtils.CreateCommand({
   icon: "http://www.yelp.com/favicon.ico",
   description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.",
   help: "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;.",
-  execute: function({object, location}) {
+  execute: function( args ) {
+    var object = args.object;
+    var position = args.position;
     var doc = context.focusedWindow.document;
     var focused = context.focusedElement;
 
@@ -829,21 +831,21 @@ CmdUtils.CreateCommand({
     var query = object.text;
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
-    url = url.replace( /{NEAR}/g, location.text);
+    url = url.replace( /{NEAR}/g, position.text);
 
     Utils.openUrlInBrowser( url );
   },
 
   preview: function( pblock, args ) {
-    var {object, location} = args;
+    var {object, position} = args;
     var query = object.text;
     var url = "http://api.yelp.com/business_review_search?";
 
     if (query.length == 0) return;
 
     var near = "";
-    if (location.text) {
-      near = location.text ;
+    if (position.text) {
+      near = position.text ;
     } else {
       var loc = CmdUtils.getGeoLocation();
       if (loc)
