@@ -39,6 +39,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = Builtin Noun Types =
+//
+// **//FIXME//**
+// \\Explain:
+// * how nouns work.
+// * common properties.
+// ** {{{suggest}}}
+// ** {{{default}}}
+// ** {{{label}}} (, {{{name}}}, {{{id}}})
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -46,6 +56,12 @@ const Cu = Components.utils;
 Cu.import("resource://ubiquity/modules/cmdutils.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
+
+// ** {{{ noun_arb_text }}} **
+//
+// Suggests the user's input as is.
+//
+// {{{text, html}}} : The user input.
 
 var noun_arb_text = {
   label: "?",
@@ -63,14 +79,44 @@ var noun_arb_text = {
   }
 };
 
-var noun_type_emailservice = CmdUtils.NounType("email service",
-                                               "googleapps gmail yahoo",
-                                               "gmail");
+// ** {{{ noun_type_email_service }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
+var noun_type_email_service = CmdUtils.NounType("email service",
+                                                "googleapps gmail yahoo",
+                                                "gmail");
+
+// ** {{{ noun_type_email }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 // from http://blog.livedoor.jp/dankogai/archives/51190099.html
 var noun_type_email = CmdUtils.nounTypeFromRegExp(
   /^(?:(?:(?:(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+)(?:\.(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+))*)|(?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@(?:(?:(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+)(?:\.(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+))*))$/,
 "email");
+
+// ** {{{ noun_type_percentage }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_percentage = {
   label: "percentage",
@@ -89,6 +135,16 @@ var noun_type_percentage = {
   }
 };
 
+// ** {{{ noun_type_tab }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_tab = {
   label: "title or URL",
   suggest: function(text, html, cb, selectedIndices)(
@@ -97,7 +153,17 @@ var noun_type_tab = {
      for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))]),
 };
 
-var noun_type_searchengine = {
+// ** {{{ noun_type_search_engine }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
+var noun_type_search_engine = {
   label: "search engine",
   default: function() this._makeSugg(this._BSS.defaultEngine),
   suggest: function(text) {
@@ -108,6 +174,16 @@ var noun_type_searchengine = {
          .getService(Ci.nsIBrowserSearchService)),
   _makeSugg: function(engine) CmdUtils.makeSugg(engine.name, null, engine),
 };
+
+// ** {{{ noun_type_tag }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_tag = {
   label: "tag1[,tag2 ...]",
@@ -185,6 +261,16 @@ var noun_type_tag = {
   }
 };
 
+// ** {{{ noun_type_awesomebar }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_awesomebar = {
   label: "query",
   rankLast: true,
@@ -200,6 +286,16 @@ var noun_type_awesomebar = {
                               .7, selectedIndices)];
   }
 };
+
+// ** {{{ noun_type_url }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_url = {
   label: "url",
@@ -224,6 +320,16 @@ var noun_type_url = {
     return [CmdUtils.makeSugg(url, null, null, .7, selectionIndices)];
   }
 };
+
+// ** {{{ noun_type_livemark }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_livemark = {
   label: "livemark",
@@ -280,6 +386,16 @@ var noun_type_livemark = {
   }
 };
 
+// ** {{{ noun_type_command }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_command = {
   label: "command",
   _cmdSource: UbiquitySetup.createServices().commandSource,
@@ -294,6 +410,16 @@ var noun_type_command = {
     return CmdUtils.grepSuggs(text, suggs);
   },
 };
+
+// ** {{{ noun_type_twitter_user }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_twitter_user = {
   label: "user",
@@ -332,6 +458,16 @@ var noun_type_twitter_user = {
   _list: null,
 };
 
+// ** {{{ noun_type_number }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_number = {
   label: "number",
   suggest: function(text) {
@@ -342,6 +478,16 @@ var noun_type_number = {
     return CmdUtils.makeSugg("1", null, 1, 0.9);
   }
 };
+
+// ** {{{ noun_type_bookmarklet }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_bookmarklet = {
   label: "bookmarklet",
@@ -380,6 +526,16 @@ var noun_type_bookmarklet = {
   }
 }.load();
 
+// ** {{{ noun_type_date }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_date = {
   label: "date",
   'default': function(){
@@ -401,6 +557,16 @@ var noun_type_date = {
   }
 };
 
+// ** {{{ noun_type_time }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_time = {
   label: "time",
   "default": function() {
@@ -416,6 +582,16 @@ var noun_type_time = {
   }
 };
 
+// ** {{{ noun_type_async_address }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_async_address = {
   label: "address",
   ajaxRequest: null,
@@ -428,6 +604,16 @@ var noun_type_async_address = {
     return [];
   }
 };
+
+// ** {{{ noun_type_async_restaurant }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_async_restaurant = {
   label: "restaurant",
@@ -442,8 +628,18 @@ var noun_type_async_restaurant = {
   }
 };
 
+// ** {{{ noun_type_contact }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_contact = {
-  label: "contact",
+  label: "name or email",
   _list: null,
   _callback: function(contacts) {
     var {_list} = noun_type_contact;
@@ -465,6 +661,16 @@ var noun_type_contact = {
                                                   arguments)));
   }
 };
+
+// ** {{{ noun_type_geolocation }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_geolocation = {
   label: "geolocation",
@@ -497,6 +703,16 @@ var noun_type_geolocation = {
     return [CmdUtils.makeSugg(fragment)];
   }
 };
+
+// ** {{{ noun_type_lang_google }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
   Arabic: "ar",
@@ -542,8 +758,15 @@ var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
   Vietnamese: "vi",
 }, "language");
 
-// for backward compatibility
-var noun_type_language = noun_type_lang_google;
+// ** {{{ noun_type_lang_wikipedia }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
 // omitting ones with 100+ articles
@@ -731,7 +954,7 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
 
 function getGmailContacts(callback) {
   jQuery.get(
-    "http://mail.google.com/mail/contacts/data/export",
+    "https://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
     function(data) {
       var contacts = [], name = "";
@@ -775,12 +998,11 @@ function getYahooContacts( callback ){
 
     callback(contacts);
   }, "text");
-
 }
 
-function getContacts(callback){
+function getContacts(callback) {
   getGmailContacts(callback);
-  getYahooContacts(callback);
+  //getYahooContacts(callback);
 }
 
 function getRestaurants(query, callback){
@@ -874,10 +1096,26 @@ function getAddress( query, callback ) {
   return ajaxRequest;
 }
 
-var EXPORTED_SYMBOLS =
-[it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
-.map(function([sym, noun], i) {
-  noun.id = "#n" + i;
-  noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
-  return sym;
-}, this);
+var EXPORTED_SYMBOLS = (
+  [it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
+  .map(function([sym, noun], i) {
+    noun.id = "#" + sym;
+    noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
+    return sym;
+  }, this));
+
+// ** DEPRECATED ** \\
+// {{{noun_type_language}}}\\
+// {{{noun_type_commands}}}\\
+// {{{noun_type_emailservice}}}\\
+// {{{noun_type_searchengine}}}
+for (let [old, now] in Iterator({
+  language: noun_type_lang_google,
+  commands: noun_type_command,
+  emailservice: noun_type_email_service,
+  searchengine: noun_type_search_engine,
+})) {
+  let sym = "noun_type_" + old;
+  this[sym] = now;
+  EXPORTED_SYMBOLS.push(sym);
+}
