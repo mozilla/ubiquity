@@ -25,6 +25,7 @@
  *   Blair McBride <unfocused@gmail.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -42,31 +43,34 @@
 
 var EXPORTED_SYMBOLS = ["NounUtils"];
 
+var NounUtils = ([f for each (f in this) if (typeof f === "function")]
+                 .reduce(function(o, f)(o[f.name] = f, o), {}));
+
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-var NounUtils = {};
-
 const DEFAULT_SCORE = 0.9;
+const DEFAULT_SUGGESTER = function default() this._defaults;
 
 // ** {{{ NounUtils.NounType() }}} **
 //
 // Constructor of a noun type that accepts a finite list of specific words
 // as the only valid values.
 //
-// {{{name}}} is the name of the new nountype.
+// {{{label}}} is the default label of the new nountype.
 //
 // {{{expectedWords}}} is an array or space-separated string of expected words.
 //
 // {{{defaultWords}}} is an optional array or space-separated string
 // of default words.
 
-NounUtils.NounType = function NounType(name, expectedWords, defaultWords) {
+function NounType(label, expectedWords, defaultWords) {
   if (!(this instanceof NounType))
-    return new NounType(name, expectedWords, defaultWords);
+    return new NounType(label, expectedWords, defaultWords);
 
   this.id = "#n_" + Utils.computeCryptoHash("MD5", (uneval(expectedWords) +
                                                     uneval(defaultWords)));
-  this.name = name;
+  this.name = expectedWords.slice(0, 2) + ",...";
+  this.label = label;
   if (typeof expectedWords === "string")
     expectedWords = expectedWords.match(/\S+/g);
   this._words = [NounUtils.makeSugg(w) for each (w in expectedWords)];
@@ -75,11 +79,11 @@ NounUtils.NounType = function NounType(name, expectedWords, defaultWords) {
   if (defaultWords) {
     this._defaults = [NounUtils.makeSugg(w, null, null, DEFAULT_SCORE)
                       for each (w in defaultWords)];
-    this.default = function() this._defaults;
+    this.default = DEFAULT_SUGGESTER;
   }
-};
-
-NounUtils.NounType.prototype = {
+}
+NounType.prototype = {
+  constructor: NounType,
   suggest: function(text) NounUtils.grepSuggs(text, this._words),
 };
 
@@ -92,25 +96,25 @@ NounUtils.NounType.prototype = {
 //
 // {{{regexp}}} is the RegExp object that checks inputs.
 //
-// {{{name}}} is an optional string specifying {{{name}}} of the nountype.
+// {{{label}}} is an optional string specifying default label of the nountype.
 
-NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
-  var isGeneric = regexp.test("");
-  // rankLast is obsolete in Parser2
-  var score = isGeneric ? 0.7 : 1;
-  return {
-    id: "#n" + regexp,
-    name: name || "?",
-    _regexp: regexp,
-    rankLast: isGeneric,
-    suggest: function(text, html, callback, selectionIndices) {
-      var match = text.match(this._regexp);
-      return (match
-              ? [NounUtils.makeSugg(text, html, match, score,
-                                    selectionIndices)]
-              : []);
-    },
-  };
+function nounTypeFromRegExp(regexp, label)({
+  constructor: nounTypeFromRegExp,
+  id: "#n" + regexp,
+  name: regexp.source,
+  label: label || "?",
+  _regexp: regexp,
+  rankLast: regexp.test(""),
+  suggest: nounTypeFromRegExp.suggest,
+});
+nounTypeFromRegExp.suggest = function suggest(text, html, cb,
+                                              selectionIndices) {
+  var match = text.match(this._regexp);
+  return (match
+          ? [NounUtils.makeSugg(text, html, match,
+                                this.rankLast ? .7 : 1,
+                                selectionIndices)]
+          : []);
 };
 
 // ** {{{ NounUtils.nounTypeFromDictionary() }}} **
@@ -120,30 +124,31 @@ NounUtils.nounTypeFromRegExp = function nounTypeFromRegExp(regexp, name) {
 //
 // {{{dict}}} is an object of text:data pairs.
 //
-// {{{name}}} is an optional string specifying {{{name}}} of the nountype.
+// {{{label}}} is an optional string specifying default label of the nountype.
 //
 // {{{defaults}}} is an optional array or space-separated string
 // of default keys.
 
-NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(dict,
-                                                                   name,
-                                                                   defaults) {
+function nounTypeFromDictionary(dict, label, defaults) {
   var noun = {
-    name: name || "?",
+    constructor: nounTypeFromDictionary,
+    name: [key for (key in dict)].slice(0, 2) + ",...",
+    label: label || "?",
     _list: [NounUtils.makeSugg(key, null, val)
             for ([key, val] in Iterator(dict))],
-    suggest: function(text, html, cb, selected) {
-      return selected ? [] : NounUtils.grepSuggs(text, this._list);
-    },
+    suggest: nounTypeFromDictionary.suggest,
   };
   if (typeof defaults === "string")
     defaults = defaults.match(/\S+/g);
   if (defaults) {
     noun._defaults = [NounUtils.makeSugg(k, null, dict[k], DEFAULT_SCORE)
                       for each (k in defaults)];
-    noun.default = function() this._defaults;
+    noun.default = DEFAULT_SUGGESTER;
   }
   return noun;
+}
+nounTypeFromDictionary.suggest = function suggest(text, html, cb, selected) {
+  return selected ? [] : NounUtils.grepSuggs(text, this._list);
 };
 
 // ** {{{ NounUtils.makeSugg() }}} **
@@ -156,8 +161,7 @@ NounUtils.nounTypeFromDictionary = function nounTypeFromDictionary(dict,
 // {{{score = 1}}}
 // {{{selectionIndices}}}
 
-NounUtils.makeSugg = function makeSugg(text, html, data, score,
-                                       selectionIndices) {
+function makeSugg(text, html, data, score, selectionIndices) {
   if (typeof text !== "string" &&
       typeof html !== "string" &&
       arguments.length < 3)
@@ -206,7 +210,7 @@ NounUtils.makeSugg = function makeSugg(text, html, data, score,
   return {
     text: text, html: html, data: data,
     summary: summary, score: score || 1};
-};
+}
 
 // ** {{{ NounUtils.grepSuggs() }}} **
 //
@@ -220,7 +224,7 @@ NounUtils.makeSugg = function makeSugg(text, html, data, score,
 // {{{key = "text"}}} is an optional string to specify the target property
 // to match with.
 
-NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
+function grepSuggs(input, suggs, key) {
   if (!input) return [];
   if (key == null) key = "text";
   try { var re = RegExp(input, "i") }
@@ -233,4 +237,4 @@ NounUtils.grepSuggs = function grepSuggs(input, suggs, key) {
     if (~index) results[++i + index * count] = sugg;
   }
   return results.filter(Boolean);
-};
+}

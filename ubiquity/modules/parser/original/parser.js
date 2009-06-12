@@ -934,7 +934,7 @@ NLParser1.Verb.prototype = {
         let obj = role === "object";
         this._arguments[obj ? "direct_object" : role] = {
           type : nountype,
-          label: arg.label || nountype.name,
+          label: arg.label || nountype.label || nountype._name,
           flag : obj ? null : roleToPrep[role],
           "default": arg.default,
         };
