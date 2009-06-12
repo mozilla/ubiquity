@@ -432,7 +432,8 @@ NLParser1.ParsedSentence.prototype = {
           label = args[x].label;
         else {
           let {type} = this._verb._arguments[x];
-          label = args[x].flag + " " + (type.name || type._name || "?");
+          // _name is for backward compatiblity
+          label = args[x].flag + " " + (type.label || type._name || "?");
         }
         sentence += (' <span class="needarg">' +
                      Utils.escapeHtml(label) + "</span>");

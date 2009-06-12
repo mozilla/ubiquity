@@ -1684,7 +1684,8 @@ Parse.prototype = {
         let {label} = neededArg;
         if (!label) {
           let nt = neededArg.nountype;
-          label = nt.name || nt._name || "?";
+          // _name is for backward compatiblity
+          label = nt.label || nt._name || "?";
         }
         for each (let parserRole in this._parser.roles) {
           if (parserRole.role == neededArg.role) {

@@ -48,7 +48,7 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 
 var noun_arb_text = {
-  name: "?",
+  label: "?",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.7, selectionIndices)];
@@ -73,7 +73,7 @@ var noun_type_email = CmdUtils.nounTypeFromRegExp(
 "email");
 
 var noun_type_percentage = {
-  name: "percentage",
+  label: "percentage",
   _default: CmdUtils.makeSugg("100%", null, 1.0),
   "default": function() this._default,
   suggest: function(text, html) {
@@ -90,7 +90,7 @@ var noun_type_percentage = {
 };
 
 var noun_type_tab = {
-  name: "title or URL",
+  label: "title or URL",
   suggest: function(text, html, cb, selectedIndices)(
     [CmdUtils.makeSugg(tab.document.title || tab.document.URL,
                        null, tab, selectedIndices)
@@ -98,7 +98,7 @@ var noun_type_tab = {
 };
 
 var noun_type_searchengine = {
-  name: "search engine",
+  label: "search engine",
   default: function() this._makeSugg(this._BSS.defaultEngine),
   suggest: function(text) {
     var suggs = this._BSS.getVisibleEngines({}).map(this._makeSugg);
@@ -110,7 +110,7 @@ var noun_type_searchengine = {
 };
 
 var noun_type_tag = {
-  name: "tag1[,tag2 ...]",
+  label: "tag1[,tag2 ...]",
   suggest: function(fragment) {
     var allTags = (Components.classes["@mozilla.org/browser/tagging-service;1"]
                    .getService(Components.interfaces.nsITaggingService)
@@ -186,7 +186,7 @@ var noun_type_tag = {
 };
 
 var noun_type_awesomebar = {
-  name: "query",
+  label: "query",
   rankLast: true,
   suggest: function(text, html, callback, selectedIndices) {
     if (!text) return [];
@@ -202,7 +202,7 @@ var noun_type_awesomebar = {
 };
 
 var noun_type_url = {
-  name: "url",
+  label: "url",
   rankLast: true,
   default: function()(
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec)),
@@ -212,9 +212,9 @@ var noun_type_url = {
     //  return [this.default()];
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
-      url = "http://" + url;
-      if (selectionIndices)
-        selectionIndices = [7, 7 + url.length];
+      let p = "http://", n = p.length;
+      url = p + url;
+      if (selectionIndices) selectionIndices = [n, n + url.length];
     }
     Utils.history.search(text, function(results) {
       if (results.length)
@@ -226,7 +226,7 @@ var noun_type_url = {
 };
 
 var noun_type_livemark = {
-  name: "livemark",
+  label: "livemark",
   rankLast: true,
 
   /*
@@ -236,9 +236,7 @@ var noun_type_livemark = {
   * These values can be used to reference the livemark in bookmarks & livemark
   * services
   */
-
   getFeeds: function() {
-
     //Find all bookmarks with livemark annotation
      return Components.classes["@mozilla.org/browser/annotation-service;1"]
         .getService(Components.interfaces.nsIAnnotationService)
@@ -282,8 +280,8 @@ var noun_type_livemark = {
   }
 };
 
-var noun_type_command = noun_type_commands = {
-  name: "command",
+var noun_type_command = {
+  label: "command",
   _cmdSource: UbiquitySetup.createServices().commandSource,
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
@@ -298,7 +296,7 @@ var noun_type_command = noun_type_commands = {
 };
 
 var noun_type_twitter_user = {
-  name: "user",
+  label: "user",
   rankLast: true,
   suggest: function(text, html, cb, selected) {
     // reject text from selection.
@@ -335,7 +333,7 @@ var noun_type_twitter_user = {
 };
 
 var noun_type_number = {
-  name: "number",
+  label: "number",
   suggest: function(text) {
     var num = +text;
     return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
@@ -346,7 +344,7 @@ var noun_type_number = {
 };
 
 var noun_type_bookmarklet = {
-  name: "bookmarklet",
+  label: "bookmarklet",
   suggest: function(txt, htm, cb, selected) {
     if (selected || !txt) return [];
     try { var tester = RegExp(txt, "i") }
@@ -383,7 +381,7 @@ var noun_type_bookmarklet = {
 }.load();
 
 var noun_type_date = {
-  name: "date",
+  label: "date",
   'default': function(){
      var date = Date.parse("today");
      var text = date.toString("dd MM, yyyy");
@@ -404,7 +402,7 @@ var noun_type_date = {
 };
 
 var noun_type_time = {
-  name: "time",
+  label: "time",
   "default": function() {
     var time = Date.parse("now");
     var text = time.toString("hh:mm tt");
@@ -415,11 +413,11 @@ var noun_type_time = {
     return !time ? [] : [CmdUtils.makeSugg(time.toString("hh:mm tt"),
                                            null,
                                            time)];
-   }
+  }
 };
 
 var noun_type_async_address = {
-  name: "address(async)",
+  label: "address",
   ajaxRequest: null,
   suggest: function(text, html, callback) {
     this.ajaxRequest = getAddress( text, function( truthiness ) {
@@ -432,7 +430,7 @@ var noun_type_async_address = {
 };
 
 var noun_type_async_restaurant = {
-  name: "restaurant(async)",
+  label: "restaurant",
   ajaxRequest: null,
   suggest: function(text, html, callback) {
     this.ajaxRequest = getRestaurants( text, function( truthiness, suggestion ) {
@@ -445,7 +443,7 @@ var noun_type_async_restaurant = {
 };
 
 var noun_type_contact = {
-  name: "contact",
+  label: "contact",
   _list: null,
   _callback: function(contacts) {
     var {_list} = noun_type_contact;
@@ -469,7 +467,7 @@ var noun_type_contact = {
 };
 
 var noun_type_geolocation = {
-  name : "geolocation",
+  label: "geolocation",
   rankLast: true,
   'default': function() {
     var location = CmdUtils.getGeoLocation();
@@ -828,8 +826,6 @@ function getAddress( query, callback ) {
     location: query,
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
   });
-
-
   var ajaxRequest = jQuery.ajax({
     url: url+params,
     dataType: "xml",
@@ -878,6 +874,10 @@ function getAddress( query, callback ) {
   return ajaxRequest;
 }
 
-var EXPORTED_SYMBOLS = [sym for (sym in this) if (/^noun_/.test(sym))];
-
-EXPORTED_SYMBOLS.forEach(function(sym, i) { this[sym].id = "#n" + i }, this);
+var EXPORTED_SYMBOLS =
+[it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
+.map(function([sym, noun], i) {
+  noun.id = "#n" + i;
+  noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
+  return sym;
+}, this);

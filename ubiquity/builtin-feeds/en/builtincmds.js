@@ -57,7 +57,7 @@ CmdUtils.CreateCommand({
   description: "" + (
     <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
       Or, enter the name of a command to get help on that command.</>),
-  arguments: noun_type_commands,
+  arguments: noun_type_command,
   preview: function(pblock, {object}) {
     pblock.innerHTML = object.html || this.description;
   },
