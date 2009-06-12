@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <link rel="stylesheet" type="text/css" media="all"
+        href="web-content.css" />
+  <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
+  <title>Ubiquity Commands - Localization Templates</title>
+</head>
+<body>
+<div class="head">We must localize to globalize.</div>
+
+<script src="resource://ubiquity/scripts/jquery.js"></script>
+<script type="application/javascript;version=1.8"
+        src="chrome://ubiquity/content/header.js"></script>
+<script type="application/javascript;version=1.7"
+        src="localization-template.js"></script>
+
+<div id="nav-container"></div>
+
+  <br clear="all"/>
+  <div style="text-align:center;">
+    <!--<p>You can get to this page at any time using the "command-list" command.</p>-->
+    <p>
+      You have <span id="num-commands"></span> commands in
+      <span id="num-subscribed-feeds"></span> command feeds. |
+      <span id="unsubscribed-feeds-help">You have unsubscribed from <a href="#graveyard"><span id="num-unsubscribed-feeds"></span> command feeds</a>.
+      |</span>
+      <a id="show-hide-cmdlist-help" onclick=""></a>
+    </p>
+  </div>
+
+<div id="cmdlist-help-div" class="ubiq-tutorial" style="display:none;font-size:100%">
+  <ul>
+  <li>All the commands that Ubiquity recognizes are listed in the right column.  The black text is the command's name (what you type into Ubiquity to use it).  The grey text explains what the command does.</li>
+  <li>The left column shows all the "feeds" that Ubiquity is subscribed to.  Each feed can contain multiple commands.  </li>
+  <li>You can view this page sorted by feeds or sorted by commands.  Click any of the links next to "sort by", below.</li>
+  <li>If there's a command you don't want, uncheck the box next to it.  You can get the command back by re-checking the box.</li>
+  <li>If there's a whole command feed you don't want, click the "[unsubscribe]"
+  link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.</li>
+
+  </ul>
+</div>
+
+<div>
+<textarea id="template" rows='30' style='width:100%'></textarea>
+</div>
+
+</body>
+</html>

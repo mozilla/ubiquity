@@ -95,6 +95,11 @@ function fillTableCellForFeed(cell, feed, sortMode) {
                              }));
   // Add link to source (auto-updated or not)
   cell.append(" ", viewSourceLink(feed));
+
+  // if it's one of the builtin or standard feeds, add l10n template link
+  if (/(builtin|standard)-feeds/.test(feed.srcUri.spec) && feed.srcUri.scheme == 'file')
+    cell.append(" ", viewLocalizationTemplate(feed));
+    
   // If not auto-updating, display link to any updates found
   feed.checkForManualUpdate(
     function(isAvailable, href) {
@@ -407,6 +412,11 @@ function viewSourceLink(feed)(
     ("[view " +
      (feed.canAutoUpdate ? "auto-updated " : "") +
      "source]"),
+    "feed-action"));
+    
+function viewLocalizationTemplate(feed)(
+  A("chrome://ubiquity/content/localization-template.html#" + feed.viewSourceUri.spec,
+    ("[get localization template]"),
     "feed-action"));
 
 function setupHelp() {

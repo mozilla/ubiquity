@@ -86,7 +86,6 @@ var LocalizationUtils = {
   },
 
   // getLocalizedString code from http://www.xuldev.org/blog/?p=45
-  // TODO: there is only one stringbundle available right now.
   getLocalizedString: function LU_getLocalizedString (feedKey, key, string, replacements) {
     let stringBundle = this.getStringBundleForFeed(feedKey);
     try {
@@ -155,7 +154,7 @@ var localizeCommand = function(cmd) {
       cmd[key] = cmd[key].split(/\s*\|\s{0,}/);
   }
       
-  var stringProperties = ['author','help']
+  var stringProperties = ['help']
   for (let key in stringProperties)
     cmd[key] = getLocalizedProperty(feedKey, cmd, key);    
 

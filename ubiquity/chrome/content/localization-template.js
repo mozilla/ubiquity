@@ -1,0 +1,121 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Ubiquity.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2007
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+
+var escapeHtml = Utils.escapeHtml;
+
+// TODO the following code needs to make its way onto any page that has
+// a version string:
+//  $(".version").text(UbiquitySetup.version);
+
+function displayTemplate(feedUri) {
+  $('#template').val('');
+  let svc = UbiquitySetup.createServices();
+  let feedMgr = svc.feedManager;
+  let cmdSource = svc.commandSource;
+  let commands = cmdSource.getAllCommands();
+  
+  let foundFeed = false;
+  for each (let feed in feedMgr.getSubscribedFeeds()) {
+    if (feed.srcUri.asciiSpec == feedUri) {
+      foundFeed = true;
+      for (let cmdId in feed.commands) {
+        addCmdTemplate(commands[cmdId]);
+        $('#template').val($('#template').val()+'\n');
+      }
+    }
+  }
+  //populateYeTable(feedMgr, cmdSource);
+}
+
+var localizableProperties = ['names','contributors','help'];
+
+function addCmdTemplate(cmd) {
+  let template = $('#template');
+  let value = template.val();
+  let name = cmd.names[0];
+  value += '# '+name+' command:\n';
+  for each (let key in localizableProperties)  
+    value += cmdPropertyLine(cmd,key) + '\n';
+  template.val(value);
+}
+
+function cmdPropertyLine(cmd,property) {
+  let name = cmd.names[0];
+  let ret  = name+'.'+property+'=';
+  let value = cmd[property];
+  if (value) {
+    if (value.join != undefined)
+      ret += value.join('|');
+    else {
+      ret += value;
+    }
+  }
+  return ret;
+}
+
+function viewSourceLink(feed)(
+  A("view-source:" + feed.viewSourceUri.spec,
+    ("[view " +
+     (feed.canAutoUpdate ? "auto-updated " : "") +
+     "source]"),
+    "feed-action"));
+
+function setupHelp() {
+  var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
+    $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
+    [this.textContent, this.bin] = [this.bin, this.textContent];
+  });
+  toggler.textContent = "Learn How to Use This Page";
+  toggler.bin = "Hide Help";
+  toggler.off = true;
+}
+
+$(function(){
+  setupHelp();
+  if (window.location.hash) {
+    feedUri = window.location.hash.slice(1);
+    displayTemplate(feedUri);
+  } else {
+    // no feed was given.
+  }
+});
