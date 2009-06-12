@@ -147,9 +147,18 @@ var localizeCommand = function(cmd) {
   dump('localizing cmd '+cmd.names[0]+' now\n');
 
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
-  cmd.names = getLocalizedProperty(feedKey, cmd, 'names');
-  if (typeof cmd.names === "string")
-    cmd.names = cmd.names.split(/\s*\|\s{0,}/);
+
+  var arrayProperties = ['names','contributors'];
+  for (let key in arrayProperties) {
+    cmd[key] = getLocalizedProperty(feedKey, cmd, key);
+    if (typeof cmd[key] === "string")
+      cmd[key] = cmd[key].split(/\s*\|\s{0,}/);
+  }
+      
+  var stringProperties = ['author','help']
+  for (let key in stringProperties)
+    cmd[key] = getLocalizedProperty(feedKey, cmd, key);    
+
   return cmd;
 }
 
