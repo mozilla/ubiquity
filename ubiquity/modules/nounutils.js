@@ -48,46 +48,66 @@ var NounUtils = ([f for each (f in this) if (typeof f === "function")]
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-const DEFAULT_SCORE = 0.9;
-const DEFAULT_SUGGESTER = function default() this._defaults;
-
 // ** {{{ NounUtils.NounType() }}} **
 //
-// Constructor of a noun type that accepts a finite list of specific words
-// as the only valid values.
+// Constructor of a noun type that accepts a specific set of inputs.
+// See {{{NounType._from*}}} methods for details
+// (but do not use them directly).
 //
-// {{{label}}} is the default label of the new nountype.
+// {{{label}}} is an optional string specifying default label of the nountype.
 //
-// {{{expectedWords}}} is an array or space-separated string of expected words.
+// {{{expected}}} is an instance of {{{Array}}} {{{RegExp}}}, or {{{Object}}}.
+// The array can optionally be a space-separeted string.
 //
-// {{{defaultWords}}} is an optional array or space-separated string
-// of default words.
+// {{{defaults}}} is an optional array or space-separated string
+// of default inputs.
 
-function NounType(label, expectedWords, defaultWords) {
+function NounType(label, expected, defaults) {
   if (!(this instanceof NounType))
-    return new NounType(label, expectedWords, defaultWords);
+    return new NounType(label, expected, defaults);
 
-  this.id = "#n_" + Utils.computeCryptoHash("MD5", (uneval(expectedWords) +
-                                                    uneval(defaultWords)));
-  this.name = expectedWords.slice(0, 2) + ",...";
+  if (typeof label !== "string")
+    [label, expected, defaults] = ["?", label, expected];
+
+  if (typeof expected.suggest === "function") return expected;
+
+  function maybe_qw(o) typeof o === "string" ? o.match(/\S+/g) || [] : o;
+  expected = maybe_qw(expected);
+  defaults = maybe_qw(defaults);
+
+  http://bit.ly/CkhjS#instanceof-considered-harmful
+  var maker = NounType["_from" +
+                       Object.prototype.toString.call(expected).slice(8, -1)];
+  for (let [k, v] in Iterator(maker(expected))) this[k] = v;
+  this.suggest = maker.suggest;
   this.label = label;
-  if (typeof expectedWords === "string")
-    expectedWords = expectedWords.match(/\S+/g);
-  this._words = [NounUtils.makeSugg(w) for each (w in expectedWords)];
-  if (typeof defaultWords === "string")
-    defaultWords = defaultWords.match(/\S+/g);
-  if (defaultWords) {
-    this._defaults = [NounUtils.makeSugg(w, null, null, DEFAULT_SCORE)
-                      for each (w in defaultWords)];
-    this.default = DEFAULT_SUGGESTER;
+  if (this.id) this.id += Utils.computeCryptoHash("MD5", (uneval(expected) +
+                                                          uneval(defaults)));
+  if (defaults) {
+    // [[a], [b, c], ...] => [a].concat([b, c], ...) => [a, b, c, ...]
+    this._defaults =
+      Array.concat.apply(0, [this.suggest(d) for each (d in defaults)]);
+    this.default = NounType.default;
   }
 }
-NounType.prototype = {
-  constructor: NounType,
-  suggest: function(text) NounUtils.grepSuggs(text, this._words),
-};
+NounType.default = function default() this._defaults;
 
-// ** {{{ NounUtils.nounTypeFromRegExp() }}} **
+// ** {{{ NounUtils.NounType._fromArray() }}} **
+//
+// Creates a noun type that accepts a finite list of specific words
+// as the only valid inputs. Those words will be suggested as {{{text}}}s.
+//
+// {{{words}}} is the array of words.
+
+NounType._fromArray = function NT_Array(words)({
+  id: "#na_",
+  name: words.slice(0, 2) + ",...",
+  _list: [NounUtils.makeSugg(w) for each (w in words)],
+});
+NounType._fromArray.suggest = (
+  function suggest(text) NounUtils.grepSuggs(text, this._list));
+
+// ** {{{ NounUtils.NounType._fromRegExp() }}} **
 //
 // Creates a noun type from the given regular expression object
 // and returns it. The {{{data}}} attribute of the noun type is
@@ -95,61 +115,38 @@ NounType.prototype = {
 // match.
 //
 // {{{regexp}}} is the RegExp object that checks inputs.
-//
-// {{{label}}} is an optional string specifying default label of the nountype.
 
-function nounTypeFromRegExp(regexp, label)({
-  constructor: nounTypeFromRegExp,
-  id: "#n" + regexp,
+NounType._fromRegExp = function NT_RegExp(regexp)({
+  id: "#nr_",
   name: regexp.source,
-  label: label || "?",
-  _regexp: regexp,
   rankLast: regexp.test(""),
-  suggest: nounTypeFromRegExp.suggest,
+  suggest: arguments.callee.suggest,
+  _regexp: regexp,
 });
-nounTypeFromRegExp.suggest = function suggest(text, html, cb,
-                                              selectionIndices) {
-  var match = text.match(this._regexp);
-  return (match
-          ? [NounUtils.makeSugg(text, html, match,
-                                this.rankLast ? .7 : 1,
-                                selectionIndices)]
-          : []);
-};
 
-// ** {{{ NounUtils.nounTypeFromDictionary() }}} **
+NounType._fromRegExp.suggest = (
+  function suggest(text, html, cb, selectionIndices)(
+    let (match = text.match(this._regexp))(
+      match
+      ? [NounUtils.makeSugg(text, html, match, this.rankLast ? .7 : 1,
+                            selectionIndices)]
+      : [])));
+
+// ** {{{ NounUtils.NounType._fromObject() }}} **
 //
 // Creates a noun type from the given key:value pairs, the key being
 // the {{{text}}} attribute of its suggest and the value {{{data}}}.
 //
 // {{{dict}}} is an object of text:data pairs.
-//
-// {{{label}}} is an optional string specifying default label of the nountype.
-//
-// {{{defaults}}} is an optional array or space-separated string
-// of default keys.
 
-function nounTypeFromDictionary(dict, label, defaults) {
-  var noun = {
-    constructor: nounTypeFromDictionary,
-    name: [key for (key in dict)].slice(0, 2) + ",...",
-    label: label || "?",
-    _list: [NounUtils.makeSugg(key, null, val)
-            for ([key, val] in Iterator(dict))],
-    suggest: nounTypeFromDictionary.suggest,
-  };
-  if (typeof defaults === "string")
-    defaults = defaults.match(/\S+/g);
-  if (defaults) {
-    noun._defaults = [NounUtils.makeSugg(k, null, dict[k], DEFAULT_SCORE)
-                      for each (k in defaults)];
-    noun.default = DEFAULT_SUGGESTER;
-  }
-  return noun;
-}
-nounTypeFromDictionary.suggest = function suggest(text, html, cb, selected) {
-  return selected ? [] : NounUtils.grepSuggs(text, this._list);
-};
+NounType._fromObject = function NT_Object(dict)({
+  name: [key for (key in dict)].slice(0, 2) + ",...",
+  _list: [NounUtils.makeSugg(key, null, val)
+          for ([key, val] in Iterator(dict))],
+});
+NounType._fromObject.suggest = (
+  function suggest(text, html, cb, selected)(
+    selected ? [] : NounUtils.grepSuggs(text, this._list)));
 
 // ** {{{ NounUtils.makeSugg() }}} **
 //
@@ -162,9 +159,7 @@ nounTypeFromDictionary.suggest = function suggest(text, html, cb, selected) {
 // {{{selectionIndices}}}
 
 function makeSugg(text, html, data, score, selectionIndices) {
-  if (typeof text !== "string" &&
-      typeof html !== "string" &&
-      arguments.length < 3)
+  if (text == null && html == null && arguments.length < 3)
     // all inputs empty!  There is no suggestion to be made.
     return null;
 

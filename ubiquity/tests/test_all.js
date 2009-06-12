@@ -463,6 +463,28 @@ function testUtilsSetTimeoutWorks() {
   foo = "foo";
 }
 
+function testNounType() {
+  var {NounType} = NounUtils;
+
+  var nounWords = new NounType("words", ["foo", "bar", "buz"]);
+  this.assertEquals(nounWords.label, "words");
+  this.assertEquals([s.text for each (s in nounWords.suggest("b"))] + "",
+                    "bar,buz");
+  this.assertEquals(nounWords.id, NounType(["foo", "bar", "buz"]).id);
+
+  var nounRegex = NounType(/(.)_(.)/, ["foo_bar"]);
+  this.assertEquals(nounRegex.default().pop().data + "",
+                    "o_b,o,b");
+
+  var nounDict = NounType({
+    foooo: 123,
+    barrr: 456,
+    buzzz: 789,
+  }, "o r z");
+  this.assertEquals([s.data for each (s in nounDict.default())] + "",
+                    "123,456,789");
+}
+
 function getLocalFileAsUtf8(url) {
   var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
                       .createInstance(Components.interfaces.nsIXMLHttpRequest);

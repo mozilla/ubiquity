@@ -39,7 +39,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// = Builtin Noun Types =
+// = Built-in Noun Types =
 //
 // **//FIXME//**
 // \\Explain:
@@ -95,18 +95,18 @@ var noun_type_email_service = CmdUtils.NounType("email service",
 
 // ** {{{ noun_type_email }}} **
 //
-// **//FIXME//**
+// Suggests an email address (RFC2822 minus domain-lit).
+// The regex is taken from:
+// http://blog.livedoor.jp/dankogai/archives/51190099.html
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// {{{text, html, data}}} : The email address.
 
-// from http://blog.livedoor.jp/dankogai/archives/51190099.html
-var noun_type_email = CmdUtils.nounTypeFromRegExp(
-  /^(?:(?:(?:(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+)(?:\.(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+))*)|(?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@(?:(?:(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+)(?:\.(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+))*))$/,
-"email");
+var noun_type_email = CmdUtils.NounType(
+  "email",
+  let (atom = "[\\w!#$%&'*+/=?^`{}~|-]+") RegExp(
+    "^(?:(?:(?:(?:" + atom + ")(?:\\.(?:" + atom +
+    '))*)|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\")))@(?:(?:(?:' +
+    atom + ")(?:\\.(?:" + atom + "))*))$"));
 
 // ** {{{ noun_type_percentage }}} **
 //
@@ -714,7 +714,7 @@ var noun_type_geolocation = {
 //
 // {{{data}}}
 
-var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
+var noun_type_lang_google = CmdUtils.NounType("language", {
   Arabic: "ar",
   Bulgarian: "bg",
   Catalan: "ca",
@@ -756,7 +756,7 @@ var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
   Ukrainian: "uk",
   Urdu: "ur",
   Vietnamese: "vi",
-}, "language");
+});
 
 // ** {{{ noun_type_lang_wikipedia }}} **
 //
@@ -770,7 +770,7 @@ var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
 // omitting ones with 100+ articles
-var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary({
+var noun_type_lang_wikipedia = CmdUtils.NounType("language", {
   English: "en",
   German: "de",
   French: "fr",
@@ -942,7 +942,7 @@ var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary({
   Lingala: "ln",
   Burmese: "my",
   "Fiji Hindi": "hif",
-}, "language");
+});
 
 for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl._code2name = ntl._list.reduce(function(o, s) {

@@ -769,15 +769,8 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
 
   function toNounType(obj, key) {
     var val = obj[key];
-    if (typeof val !== "object") return;
-    var noun = obj[key] = (
-      Object.prototype.toString.call(val) === "[object RegExp]"
-      ? me.nounTypeFromRegExp(val) :
-      Utils.isArray(val)
-      ? me.NounType("?", val) :
-      typeof val.suggest !== "function"
-      ? me.nounTypeFromDictionary(val)
-      : val);
+    if (!val) return;
+    var noun = obj[key] = me.NounType(val);
     if (!noun.id) noun.id = global.feed.id + "#n" + me.__nextId++;
   }
 
