@@ -785,7 +785,7 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     command.name = names[0]
     command.names = names;
   }
-  { let {takes, modifiers, arguments: args} = options;
+  { let {takes, modifiers} = options;
     /* OLD DEPRECATED ARGUMENT API */
     if (takes) {
       let label = getKey(takes);
@@ -799,12 +799,13 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       for (let label in modifiers)
         toNounType(modifiers, label);
     }
-
+  }
+  { let args = options.arguments || options.argument;
     /* NEW IMPROVED ARGUMENT API */
     if (args) {
       // handle simplified syntax
       if (typeof args.suggest === "function")
-        // arguments: noun
+        // argument: noun
         args = [{role: "object", nountype: args}];
       else if (!Utils.isArray(args)) {
         // arguments: {role: noun, ...}
