@@ -97,7 +97,7 @@ var Editor = {
       fstream.init(file, -1, 0, 0);
       sstream.init(fstream);
 
-      value = "";
+      var value = "";
       var str = sstream.read(4096);
       while (str.length > 0) {
         value += str;
@@ -118,8 +118,8 @@ function paste() {
     if (feedType == "commands") {
       var file = encodeURIComponent("[gistfile1]");
       var quickPaste = ("file_ext" + file + "=.js&file_name" +
-                        file + "=x&file_contents" + file +
-                        "=" + encodeURIComponent(code) + "&x=27&y=27");
+                        file + "=x.js&file_contents" + file +
+                        "=" + encodeURIComponent(code));
       var updateUrl = "http://gist.github.com/gists";
       Utils.openUrlInBrowser(updateUrl, quickPaste);
     } else if (feedType == "locked-down-commands") {
@@ -134,10 +134,11 @@ function paste() {
 }
 
 function importTemplate() {
-  editor = document.getElementById("editor");
-  var template = Utils.getLocalUrl("command-template.js");
-  editor.editor.setCode(editor.editor.getCode()+template);
-  PrefCommands.setCode(editor.editor.getCode());
+  var {editor} = document.getElementById("editor");
+  var code = (Utils.getLocalUrl("command-template.js") +
+              editor.getCode());
+  editor.setCode(code);
+  PrefCommands.setCode(code);
 }
 
 function saveAs() {
