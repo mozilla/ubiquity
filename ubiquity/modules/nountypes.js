@@ -56,6 +56,7 @@ const Cu = Components.utils;
 Cu.import("resource://ubiquity/modules/cmdutils.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://gre/modules/utils.js");
 
 // ** {{{ noun_arb_text }}} **
 //
@@ -289,7 +290,8 @@ var noun_type_awesomebar = {
 
 // ** {{{ noun_type_url }}} **
 //
-// **//FIXME//**
+// Suggests a URL from the user's input and/or history.
+// Defaults to the current page's URL if no input is given.
 //
 // {{{text}}}
 //
@@ -303,9 +305,6 @@ var noun_type_url = {
   default: function()(
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec)),
   suggest: function(text, html, callback, selectionIndices) {
-    // Magic words "page" or "url" result in the URL of the current page
-    //if (!selectionIndices && /^\s*(?:page|url)\s*$/.test(text))
-    //  return [this.default()];
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
       let p = "http://", n = p.length;
@@ -323,67 +322,32 @@ var noun_type_url = {
 
 // ** {{{ noun_type_livemark }}} **
 //
-// **//FIXME//**
+// Suggests each livemark whose title matching the user's input.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text, html}}} : title
+// * {{{data.id}}} : id
+// * {{{data.feed}}} : feed URL
+// * {{{data.site}}} : site URL
 
 var noun_type_livemark = {
-  label: "livemark",
-  rankLast: true,
+  label: "title",
+  suggest: function(text, html, cb, selected) {
+    if (selected || !text) return [];
 
-  /*
-  * text & html = Livemark Title (string)
-  * data = { itemIds : [] } - an array of itemIds(long long)
-  * for the suggested livemarks.
-  * These values can be used to reference the livemark in bookmarks & livemark
-  * services
-  */
-  getFeeds: function() {
-    //Find all bookmarks with livemark annotation
-     return Components.classes["@mozilla.org/browser/annotation-service;1"]
-        .getService(Components.interfaces.nsIAnnotationService)
-        .getItemsWithAnnotation("livemark/feedURI", {});
+    var {feeds} = this;
+    if (!feeds.length) return [];
+
+    var {bookmarks, livemarks} = PlacesUtils;
+    var suggs =  [CmdUtils.makeSugg(bookmarks.getItemTitle(id), null,
+                                    { id: id,
+                                      feed: livemarks.getFeedURI(id).spec,
+                                      site: livemarks.getSiteURI(id).spec })
+                  for each (id in feeds)];
+    return CmdUtils.grepSuggs(text, suggs);
   },
-
-  'default': function() {
-    var feeds = this.getFeeds();
-    if( feeds.length > 0 ) {
-       return CmdUtils.makeSugg("all livemarks", null, {itemIds: feeds});
-    }
-    return null;
-  },
-
-  suggest: function(fragment) {
-    fragment = fragment.toLowerCase();
-
-    var suggestions = [];
-    var allFeeds = this.getFeeds();
-
-    if(allFeeds.length > 0) {
-      var bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
-                                  .getService(Components.interfaces.nsINavBookmarksService);
-
-      for(var i = 0; i < allFeeds.length; ++i) {
-        var livemarkTitle = bookmarks.getItemTitle(allFeeds[i]).toLowerCase();
-        if(livemarkTitle.toLowerCase().indexOf(fragment) > -1) {
-          suggestions.push(CmdUtils.makeSugg(livemarkTitle , null,
-                                         { itemIds: [allFeeds[i]] } )); //data.itemIds[]
-        }
-      }
-
-      //option for all livemarks
-      var all = "all livemarks";
-      if(all.indexOf(fragment) > -1) {
-        suggestions.push(CmdUtils.makeSugg( all , null, {itemIds: allFeeds} ));
-      }
-      return suggestions;
-    }
-    return [];
-  }
+  get feeds()(Cc["@mozilla.org/browser/annotation-service;1"]
+              .getService(Ci.nsIAnnotationService)
+              .getItemsWithAnnotation("livemark/feedURI", {})),
 };
 
 // ** {{{ noun_type_command }}} **
@@ -481,31 +445,21 @@ var noun_type_number = {
 
 // ** {{{ noun_type_bookmarklet }}} **
 //
-// **//FIXME//**
+// Suggests each bookmarklet whose title matching the user's input.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text, html}}} : bookmarklet title
+// * {{{data}}} : bookmarklet (pseudo) url
 
 var noun_type_bookmarklet = {
-  label: "bookmarklet",
-  suggest: function(txt, htm, cb, selected) {
-    if (selected || !txt) return [];
-    try { var tester = RegExp(txt, "i") }
-    catch (e) {
-      txt = txt.toLowerCase();
-      tester = {test: function(x) ~x.toLowerCase().indexOf(txt)};
-    }
-    return [s for each (s in this.list) if(tester.test(s.text))];
+  label: "title",
+  suggest: function(text, html, cb, selected) {
+    if (selected || !text) return [];
+    return CmdUtils.grepSuggs(text, this.list);
   },
   list: null,
   load: function(reload) {
-    var jsm = {};
-    Cu.import("resource://gre/modules/utils.js", jsm);
     var list = [];
-    var {bookmarks, history} = jsm.PlacesUtils;
+    var {bookmarks, history} = PlacesUtils;
     var query = history.getNewQuery();
     var options = history.getNewQueryOptions();
     query.onlyBookmarked = true;
