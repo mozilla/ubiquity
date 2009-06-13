@@ -57,6 +57,7 @@ const FEED_UNSUBSCRIBED_ANNO = "ubiquity/removed";
 const FEED_SRC_URL_ANNO = "ubiquity/commands";
 const FEED_TITLE_ANNO = "ubiquity/title";
 const FEED_DATE_ANNO = "ubiquity/date";
+const FEED_BIN_ANNO = "ubiquity/bin";
 
 const FEED_ANNOS = [v for (v in this) if (/^FEED_/.test(v))];
 
@@ -538,6 +539,29 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   feedInfo.setCode = function feedInfo_setCode(code) {
     annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0,
                              expiration);
+  };
+
+  // === {{{Feed#getBin}}} ===
+  //
+  // Gets the persistent json storage for the feed.
+
+  // === {{{Feed#setBin}}} ===
+  //
+  // Sets the persistent json storage for the feed and
+  // returns the stored result as a new object.
+  //
+  // {bin} should be a json-encodable object.
+
+  var {json} = Utils;
+  feedInfo.getBin = function feedInfo_getBin() {
+    return (annSvc.pageHasAnnotation(uri, FEED_BIN_ANNO)
+            ? json.decode(annSvc.getPageAnnotation(uri, FEED_BIN_ANNO))
+            : {});
+  };
+  feedInfo.setBin = function feedInfo_setBin(bin) {
+    var data = json.encode(bin);
+    annSvc.setPageAnnotation(uri, FEED_BIN_ANNO, data, 0, expiration);
+    return json.decode(data);
   };
 
   // === {{{Feed#checkForManualUpdate()}}} ===
