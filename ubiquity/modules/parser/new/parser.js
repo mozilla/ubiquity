@@ -210,33 +210,46 @@ Parser.prototype = {
 
     var patternCache = this._patternCache = {};
 
-    // creates a list of prefixs from a set of strings,
-    // removing duplicates and sorting in descending order.
-    function prefixes(strs) {
+    // creates a list of unique substrings that are two or more characters
+    // from given words, sorting in descending order.
+    function pieces(words) {
       var dic = {};
-      for each (let s in strs) for (let i in s) dic[s.slice(0, +i + 1)] = 1;
-      return [p for (p in dic)].sort(function(a, b) b.length - a.length);
+      for each (let w in words)
+        for (let i = w.length; i > 1; --i)
+          for (let j = 0, max = w.length - i; j <= max; ++j)
+            dic[w.substr(j, i)] = 1;
+      return [k for (k in dic)].sort(function(a, b) b.length - a.length);
+    }
+    // creates a regex fragment that matches
+    // every first character of given words.
+    function firstsFragment(words) {
+      var klass = [w[0] for each (w in words)].join("");
+      return "[" + klass.replace(/[-\\^]/g, "\\$&") + "]";
     }
     // creates a regex fragment that matches a set of strings,
     // escaping them properly.
-    function pipedFragment(strs)
-      strs.map(function(s) s.replace(/\W/g, "\\$&")).join("|");
+    function pipedFragment(strs) strs.map(escapeMetas).join("|");
+    function escapeMetas(str) str.replace(/\W/g, "\\$&");
+    // creates a regex that matches any delimiter of given roles
     function regexFromDelimeters(roles)
       RegExp("^(?:" +
              pipedFragment([role.delimiter for each (role in roles)]) +
              ")$",
              "i");
 
-    // verbMatcher matches any active verb or prefix thereof
+    var names = [n for each (verb in this._verbList)
+                 for each (n in verb.names)];
+    var words = Array.concat.apply(0, [n.split(/[-_\s]+/)
+                                       for each (n in names)]);
+    // verbMatcher matches any substring of active verbs
     patternCache.verbMatcher =
-      pipedFragment(prefixes([n for each (verb in this._verbList)
-                                for each (n in verb.names)]));
+      pipedFragment(pieces(words)) + "|" + firstsFragment(words);
 
     // verbInitialTest matches a verb at the beginning
     patternCache.verbInitialTest =
       RegExp(("^\\s*(" + this._patternCache.verbMatcher + ")" +
               (this.usespaces ? "(\\s+.*$|$)" : "(.*$)")),
-             'i');
+             "i");
     // verbFinalTest matches a verb at the end of the string
     patternCache.verbFinalTest =
       RegExp(((this.usespaces ? "(^.*\\s+|^)" : "(^.*)") +
@@ -332,18 +345,19 @@ Parser.prototype = {
     //
     // TODO: write a unit test for this possibility.
     var verbs = this._verbList;
-    function addParses(verbPrefix, argString, order) {
+    function addParses(verbPiece, argString, order) {
+      var vpl = verbPiece.toLowerCase();
       for (var verbId in verbs) {
         var verb = verbs[verbId];
         // check each verb synonym in this language
         for each (let name in verb.names) {
-          if (RegExp("^" + verbPrefix, "i").test(name)) {
+          if (~name.toLowerCase().indexOf(vpl)) {
             returnArray.push({
               _verb: {
                 id: verbId,
                 text: name,
                 _order: order,
-                input: verbPrefix,
+                input: verbPiece,
                 __proto__: verb,
               },
               argString: argString,
@@ -360,20 +374,20 @@ Parser.prototype = {
     // let's see if there's a verb at the beginning of the string
     var initialMatches = input.match(this._patternCache.verbInitialTest);
     if (initialMatches) {
-      let [, verbPrefix, argString] = initialMatches;
+      let [, verbPiece, argString] = initialMatches;
       if (/^\s*$/.test(argString))
-        verbOnlyMatch = verbPrefix;
-      addParses(verbPrefix, argString, 0);
+        verbOnlyMatch = verbPiece;
+      addParses(verbPiece, argString, 0);
     }
 
     // let's see if there's a verb at the end of the string
     var finalMatches = input.match(this._patternCache.verbFinalTest);
     if (finalMatches) {
-      let [, argString, verbPrefix] = finalMatches;
-      if (argString || verbOnlyMatch !== verbPrefix)
+      let [, argString, verbPiece] = finalMatches;
+      if (argString || verbOnlyMatch !== verbPiece)
         // we didn't already see this prefix
         // as a sentence-initial verb-only match
-        addParses(verbPrefix, argString, -1);
+        addParses(verbPiece, argString, -1);
     }
 
     return returnArray;
@@ -392,7 +406,7 @@ Parser.prototype = {
   // Used by {{{Parser#argFinder()}}}
   splitWords: function(input) {
     var returnObj = { words: [], delimiters: [], allWords: [],
-                      beforeSpace: '', afterSpace: '' };
+                      beforeSpace: "", afterSpace: "" };
 
     // if there is no non-space character, just return nothing.
     // (note that \S doesn't include \u200b)
@@ -509,13 +523,12 @@ Parser.prototype = {
   argFinder: function(argString, verb, input) {
     // initialize possibleParses. This is the array that we're going to return.
     var possibleParses = [];
+    // { push.apply(x, y) } is better than { x = x.concat(y) }
+    var {push} = possibleParses;
 
     // if the argString is empty, return a parse with no args.
     if (!argString) {
-      let defaultParse = new Parse(this,
-                                    input,
-                                    verb,
-                                    argString);
+      let defaultParse = new Parse(this, input, verb, argString);
       if (defaultParse._verb.id) {
         defaultParse.scoreMultiplier = 1;
       } else {
@@ -586,10 +599,7 @@ Parser.prototype = {
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parse which doesn't
       // have any arguments set.
-      var seedParse = new Parse(this,
-                                 input,
-                                 verb,
-                                 argString);
+      var seedParse = new Parse(this, input, verb, argString);
       // get all parses started off with their scoreMultipier values
       if (verb.id) {
         seedParse.scoreMultiplier = 1;
@@ -793,7 +803,7 @@ Parser.prototype = {
       }
       // Put all of the different delimiterIndices combinations' parses into
       // possibleParses to return it.
-      possibleParses = possibleParses.concat(theseParses);
+      push.apply(possibleParses, theseParses);
     }
     for each (let parse in possibleParses) {
       for (let role in parse.args) {
@@ -1491,7 +1501,7 @@ ParseQuery.prototype = {
   get suggestionList() {
     return (this._scoredParses
             .slice()
-            .sort(function(a,b) b.score - a.score)
+            .sort(byScoreDescending)
             .slice(0, this.maxSuggestions));
   },
 
@@ -1532,48 +1542,37 @@ ParseQuery.prototype = {
   // A longer explanation of "Rising Sun" optimization strategy (and why it is
   // applicable here, and with what caveats) can be found in the article
   // [[http://mitcho.com/blog/observation/scoring-for-optimization/|Scoring for Optimization]].
-  addIfGoodEnough: function(parseCollection,newParse) {
+  addIfGoodEnough: function(parseCollection, newParse) {
+    var maxIndex = this.maxSuggestions - 1;
 
-    if (parseCollection.length < this.maxSuggestions)
+    if (!parseCollection[maxIndex])
       return parseCollection.concat(newParse);
 
-    // reorder parseCollection so that it's in decreasing current score order
-    parseCollection.sort(function(a, b) b.score - a.score);
+    parseCollection.sort(byScoreDescending);
 
     // "the bar" is the lowest current score among the top candidates
     // New candidates must exhibit the *potential* (via maxScore) to beat
     // this bar in order to get added.
-    let theBar = parseCollection[this.maxSuggestions - 1].score;
-    //Utils.log('theBar = '+theBar);
+    var theBar = parseCollection[maxIndex].score;
 
     // at this point we can already assume that there are enough suggestions
     // (because if we had less, we would have already returned with newParse
     // added). Thus, if the new parse's maxScore is less than the current bar
     // we will not return it (effectively killing the parse).
-
-    if (newParse.maxScore < theBar) {
-      //Utils.log(['not good enough:',newParse,newParse.maxScore]);
+    if (newParse.maxScore < theBar)
       return parseCollection;
-    }
 
-    // add the new parse into the parse collection
-    parseCollection = parseCollection.concat([newParse]);
-    // sort again
-    parseCollection.sort( function(a,b) b.score - a.score );
+    // add the new parse and sort again
+    parseCollection.push(newParse);
+    parseCollection.sort(byScoreDescending);
 
-    // if the bar changed...
-    if (parseCollection[this.maxSuggestions - 1].score > theBar) {
-      theBar = parseCollection[this.maxSuggestions - 1].score;
-      //Utils.log('theBar is now '+theBar);
-
-      // sort by ascending maxScore order
-      parseCollection.sort(function(a, b) a.maxScore - b.maxScore);
-
-      while (parseCollection[0].maxScore < theBar
-             && parseCollection.length > this.maxSuggestions) {
-        let throwAway = parseCollection.shift();
-        //Utils.log(['throwing away:',throwAway,throwAway.maxScore,parseCollection.length+' remaining']);
-      }
+    var newBar = parseCollection[maxIndex].score;
+    if (newBar > theBar) {
+      // sort by descending maxScore order
+      parseCollection.sort(function(a, b) b.maxScore - a.maxScore);
+      let i = parseCollection.length;
+      while (--i > maxIndex && parseCollection[i].maxScore < theBar)
+        parseCollection.pop();
     }
 
     return parseCollection;
@@ -1900,4 +1899,6 @@ Parse.prototype = {
     ret._score = this._score;
     return ret;
   }
-}
+};
+
+function byScoreDescending(a, b) b.score - a.score;

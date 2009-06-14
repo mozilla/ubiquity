@@ -457,10 +457,10 @@ CmdUtils.CreateCommand({
     root.containerOpen = true;
     for (var i = 0, c = root.childCount; i < c; ++i) {
       var node = root.getChild(i);
-      dict[node.uri] = <a href={node.uri}>{node.title}</a>.toXMLString();
+      dict[node.uri] = <span> <a href={node.uri}>{node.title}</a> </span>;
     }
     root.containerOpen = false;
     CmdUtils.previewList(pbl, dict, this._open);
   },
-  _open: function(u) Utils.openUrlInBrowser(u),
+  _open: function(u) { Utils.openUrlInBrowser(u) },
 });
