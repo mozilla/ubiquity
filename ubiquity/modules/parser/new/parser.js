@@ -205,7 +205,7 @@ Parser.prototype = {
   //
   // This method is initialized when the language is loaded.
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
-  initializeCache: function() {
+  initializeCache: function initializeCache() {
     this._nounCache = {};
 
     var patternCache = this._patternCache = {};
@@ -243,7 +243,7 @@ Parser.prototype = {
                                        for each (n in names)]);
     // verbMatcher matches any substring of active verbs
     patternCache.verbMatcher =
-      pipedFragment(pieces(words)) + "|" + firstsFragment(words);
+      pipedFragment(pieces(names)) + "|" + firstsFragment(words);
 
     // verbInitialTest matches a verb at the beginning
     patternCache.verbInitialTest =

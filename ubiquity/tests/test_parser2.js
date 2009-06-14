@@ -4,6 +4,7 @@ Components.utils.import("resource://ubiquity/modules/cmdutils.js");
 Components.utils.import("resource://ubiquity/modules/nounutils.js");
 Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
+Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
@@ -349,6 +350,26 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
   }
 }
 
+function testVerbMatcher() {
+  var testParser = new Parser;
+  testParser._verbList =
+    [{names: ["google"], arguments: []},
+     {names: ["check-livemark"], arguments: []},
+     {names: ["undo-closed-tabs"], arguments: []}];
+  testParser.initializeCache();
+
+  var {verbInitialTest} = testParser._patternCache;
+  this.assert(verbInitialTest.test("google"), "whole");
+  this.assert(!verbInitialTest.test("gooooogle"), "wrong");
+  this.assert(verbInitialTest.test("l"),
+              "should match a initial-char of a word");
+  this.assert(!verbInitialTest.test("k"),
+              "shouldn't match a single char if non-initial");
+  this.assert(verbInitialTest.test("goog"), "head-partial");
+  this.assert(verbInitialTest.test("heck"), "middle-partial");
+  this.assert(verbInitialTest.test("mark"), "final-partial");
+  this.assert(verbInitialTest.test("do-close"), "middle-partial again");
+}
 
 /* More tests that should be written:
  *   -- For the context menu bug (use cmdmanager.makeCommandSuggester())
