@@ -68,7 +68,7 @@ var localizableProperties = ['names','contributors','help','description'];
 function addCmdTemplate(cmd,cmdCode) {
   let template = $('#template');
   let value = template.val();
-  let name = cmd.names[0];
+  let name = cmd.originalName;
   value += '#. '+name+' command:\n';
   for each (let key in localizableProperties)  
     value += cmdPropertyLine(cmd,key) + '\n';
@@ -78,7 +78,7 @@ function addCmdTemplate(cmd,cmdCode) {
 }
 
 function cmdPropertyLine(cmd,property) {
-  let name = cmd.names[0];
+  let name = cmd.originalName;
   let ret  = 'msgid "'+name+'.'+property+'"\n';
   let value = cmd[property];
   if (value) {
@@ -94,7 +94,7 @@ function cmdPropertyLine(cmd,property) {
 
 var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
 function cmdInlineLine(cmd,cmdCode,context) {
-  let name = cmd.names[0];
+  let name = cmd.originalName;
   let ret  = '';
   let script = cmdCode[context];
 //  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
