@@ -69,7 +69,7 @@ function addCmdTemplate(cmd,cmdCode) {
   let template = $('#template');
   let value = template.val();
   let name = cmd.names[0];
-  value += '# '+name+' command:\n';
+  value += '#. '+name+' command:\n';
   for each (let key in localizableProperties)  
     value += cmdPropertyLine(cmd,key) + '\n';
   value += cmdInlineLine(cmd,cmdCode,'preview');
@@ -79,32 +79,33 @@ function addCmdTemplate(cmd,cmdCode) {
 
 function cmdPropertyLine(cmd,property) {
   let name = cmd.names[0];
-  let ret  = name+'.'+property+'=';
+  let ret  = 'msgid "'+name+'.'+property+'"\n';
   let value = cmd[property];
   if (value) {
     if (value.join != undefined)
-      ret += value.join('|');
+      ret += 'msgstr "'+value.join('|')+'"\n';
     else {
-      ret += value;
+      ret += 'msgstr "'+value+'"\n';
     }
-  }
+  } else 
+    ret += 'msgstr ""\n';
   return ret;
 }
 
-var inlineChecker = /(?:_\()\s*(["'])((?:[^\1]|\\\1)+?)(?:\1)[,)]/gim;
-
+var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
 function cmdInlineLine(cmd,cmdCode,context) {
   let name = cmd.names[0];
-  let ret  = name+'.'+context+'=';
+  let ret  = '';
   let script = cmdCode[context];
 //  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
   let match;
   while (match = inlineChecker.exec(script)) {
 //    Utils.log(match[2]);
 //    Utils.log(inlineChecker.lastIndex);
-    ret += match[2]+'\n';
+    ret += 'msgctxt "'+name+'.'+context+'"\n';
+    ret += 'msgid "'+match[2]+'"\n';
+    ret += 'msgstr ""\n\n';
   }
-  ret += "\n";
   return ret;
 }
 
