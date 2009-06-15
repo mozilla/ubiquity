@@ -39,6 +39,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = Built-in Noun Types =
+//
+// **//FIXME//**
+// \\Explain:
+// * how nouns work.
+// * common properties.
+// ** {{{suggest}}}
+// ** {{{default}}}
+// ** {{{label}}} (, {{{name}}}, {{{id}}})
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -46,6 +56,13 @@ const Cu = Components.utils;
 Cu.import("resource://ubiquity/modules/cmdutils.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://gre/modules/utils.js");
+
+// ** {{{ noun_arb_text }}} **
+//
+// Suggests the user's input as is.
+//
+// {{{text, html}}} : The user input.
 
 var noun_arb_text = {
   label: "?",
@@ -63,14 +80,44 @@ var noun_arb_text = {
   }
 };
 
-var noun_type_emailservice = CmdUtils.NounType("email service",
-                                               "googleapps gmail yahoo",
-                                               "gmail");
+// ** {{{ noun_type_email_service }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
-// from http://blog.livedoor.jp/dankogai/archives/51190099.html
-var noun_type_email = CmdUtils.nounTypeFromRegExp(
-  /^(?:(?:(?:(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+)(?:\.(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+))*)|(?:\"(?:\\[^\r\n]|[^\\\"])*\")))\@(?:(?:(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+)(?:\.(?:[a-zA-Z0-9_!#$%&\'*+/=?^`{}~|-]+))*))$/,
-"email");
+var noun_type_email_service = CmdUtils.NounType("email service",
+                                                "googleapps gmail yahoo",
+                                                "gmail");
+
+// ** {{{ noun_type_email }}} **
+//
+// Suggests an email address (RFC2822 minus domain-lit).
+// The regex is taken from:
+// http://blog.livedoor.jp/dankogai/archives/51190099.html
+//
+// {{{text, html, data}}} : The email address.
+
+var noun_type_email = CmdUtils.NounType(
+  "email",
+  let (atom = "[\\w!#$%&'*+/=?^`{}~|-]+") RegExp(
+    "^(?:(?:(?:(?:" + atom + ")(?:\\.(?:" + atom +
+    '))*)|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\")))@(?:(?:(?:' +
+    atom + ")(?:\\.(?:" + atom + "))*))$"));
+
+// ** {{{ noun_type_percentage }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_percentage = {
   label: "percentage",
@@ -89,6 +136,16 @@ var noun_type_percentage = {
   }
 };
 
+// ** {{{ noun_type_tab }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_tab = {
   label: "title or URL",
   suggest: function(text, html, cb, selectedIndices)(
@@ -97,7 +154,17 @@ var noun_type_tab = {
      for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))]),
 };
 
-var noun_type_searchengine = {
+// ** {{{ noun_type_search_engine }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
+var noun_type_search_engine = {
   label: "search engine",
   default: function() this._makeSugg(this._BSS.defaultEngine),
   suggest: function(text) {
@@ -108,6 +175,16 @@ var noun_type_searchengine = {
          .getService(Ci.nsIBrowserSearchService)),
   _makeSugg: function(engine) CmdUtils.makeSugg(engine.name, null, engine),
 };
+
+// ** {{{ noun_type_tag }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_tag = {
   label: "tag1[,tag2 ...]",
@@ -185,6 +262,16 @@ var noun_type_tag = {
   }
 };
 
+// ** {{{ noun_type_awesomebar }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_awesomebar = {
   label: "query",
   rankLast: true,
@@ -201,15 +288,23 @@ var noun_type_awesomebar = {
   }
 };
 
+// ** {{{ noun_type_url }}} **
+//
+// Suggests a URL from the user's input and/or history.
+// Defaults to the current page's URL if no input is given.
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_url = {
   label: "url",
   rankLast: true,
   default: function()(
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec)),
   suggest: function(text, html, callback, selectionIndices) {
-    // Magic words "page" or "url" result in the URL of the current page
-    //if (!selectionIndices && /^\s*(?:page|url)\s*$/.test(text))
-    //  return [this.default()];
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
       let p = "http://", n = p.length;
@@ -225,60 +320,45 @@ var noun_type_url = {
   }
 };
 
+// ** {{{ noun_type_livemark }}} **
+//
+// Suggests each livemark whose title matching the user's input.
+//
+// * {{{text, html}}} : title
+// * {{{data.id}}} : id
+// * {{{data.feed}}} : feed URL
+// * {{{data.site}}} : site URL
+
 var noun_type_livemark = {
-  label: "livemark",
-  rankLast: true,
+  label: "title",
+  suggest: function(text, html, cb, selected) {
+    if (selected || !text) return [];
 
-  /*
-  * text & html = Livemark Title (string)
-  * data = { itemIds : [] } - an array of itemIds(long long)
-  * for the suggested livemarks.
-  * These values can be used to reference the livemark in bookmarks & livemark
-  * services
-  */
-  getFeeds: function() {
-    //Find all bookmarks with livemark annotation
-     return Components.classes["@mozilla.org/browser/annotation-service;1"]
-        .getService(Components.interfaces.nsIAnnotationService)
-        .getItemsWithAnnotation("livemark/feedURI", {});
+    var {feeds} = this;
+    if (!feeds.length) return [];
+
+    var {bookmarks, livemarks} = PlacesUtils;
+    var suggs =  [CmdUtils.makeSugg(bookmarks.getItemTitle(id), null,
+                                    { id: id,
+                                      feed: livemarks.getFeedURI(id).spec,
+                                      site: livemarks.getSiteURI(id).spec })
+                  for each (id in feeds)];
+    return CmdUtils.grepSuggs(text, suggs);
   },
-
-  'default': function() {
-    var feeds = this.getFeeds();
-    if( feeds.length > 0 ) {
-       return CmdUtils.makeSugg("all livemarks", null, {itemIds: feeds});
-    }
-    return null;
-  },
-
-  suggest: function(fragment) {
-    fragment = fragment.toLowerCase();
-
-    var suggestions = [];
-    var allFeeds = this.getFeeds();
-
-    if(allFeeds.length > 0) {
-      var bookmarks = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
-                                  .getService(Components.interfaces.nsINavBookmarksService);
-
-      for(var i = 0; i < allFeeds.length; ++i) {
-        var livemarkTitle = bookmarks.getItemTitle(allFeeds[i]).toLowerCase();
-        if(livemarkTitle.toLowerCase().indexOf(fragment) > -1) {
-          suggestions.push(CmdUtils.makeSugg(livemarkTitle , null,
-                                         { itemIds: [allFeeds[i]] } )); //data.itemIds[]
-        }
-      }
-
-      //option for all livemarks
-      var all = "all livemarks";
-      if(all.indexOf(fragment) > -1) {
-        suggestions.push(CmdUtils.makeSugg( all , null, {itemIds: allFeeds} ));
-      }
-      return suggestions;
-    }
-    return [];
-  }
+  get feeds()(Cc["@mozilla.org/browser/annotation-service;1"]
+              .getService(Ci.nsIAnnotationService)
+              .getItemsWithAnnotation("livemark/feedURI", {})),
 };
+
+// ** {{{ noun_type_command }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_command = {
   label: "command",
@@ -294,6 +374,16 @@ var noun_type_command = {
     return CmdUtils.grepSuggs(text, suggs);
   },
 };
+
+// ** {{{ noun_type_twitter_user }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_twitter_user = {
   label: "user",
@@ -332,6 +422,16 @@ var noun_type_twitter_user = {
   _list: null,
 };
 
+// ** {{{ noun_type_number }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_number = {
   label: "number",
   suggest: function(text) {
@@ -343,23 +443,23 @@ var noun_type_number = {
   }
 };
 
+// ** {{{ noun_type_bookmarklet }}} **
+//
+// Suggests each bookmarklet whose title matching the user's input.
+//
+// * {{{text, html}}} : bookmarklet title
+// * {{{data}}} : bookmarklet (pseudo) url
+
 var noun_type_bookmarklet = {
-  label: "bookmarklet",
-  suggest: function(txt, htm, cb, selected) {
-    if (selected || !txt) return [];
-    try { var tester = RegExp(txt, "i") }
-    catch (e) {
-      txt = txt.toLowerCase();
-      tester = {test: function(x) ~x.toLowerCase().indexOf(txt)};
-    }
-    return [s for each (s in this.list) if(tester.test(s.text))];
+  label: "title",
+  suggest: function(text, html, cb, selected) {
+    if (selected || !text) return [];
+    return CmdUtils.grepSuggs(text, this.list);
   },
   list: null,
   load: function(reload) {
-    var jsm = {};
-    Cu.import("resource://gre/modules/utils.js", jsm);
     var list = [];
-    var {bookmarks, history} = jsm.PlacesUtils;
+    var {bookmarks, history} = PlacesUtils;
     var query = history.getNewQuery();
     var options = history.getNewQueryOptions();
     query.onlyBookmarked = true;
@@ -379,6 +479,16 @@ var noun_type_bookmarklet = {
     return this;
   }
 }.load();
+
+// ** {{{ noun_type_date }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_date = {
   label: "date",
@@ -401,6 +511,16 @@ var noun_type_date = {
   }
 };
 
+// ** {{{ noun_type_time }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_time = {
   label: "time",
   "default": function() {
@@ -416,6 +536,16 @@ var noun_type_time = {
   }
 };
 
+// ** {{{ noun_type_async_address }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_async_address = {
   label: "address",
   ajaxRequest: null,
@@ -428,6 +558,16 @@ var noun_type_async_address = {
     return [];
   }
 };
+
+// ** {{{ noun_type_async_restaurant }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_async_restaurant = {
   label: "restaurant",
@@ -442,8 +582,18 @@ var noun_type_async_restaurant = {
   }
 };
 
+// ** {{{ noun_type_contact }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
 var noun_type_contact = {
-  label: "contact",
+  label: "name or email",
   _list: null,
   _callback: function(contacts) {
     var {_list} = noun_type_contact;
@@ -465,6 +615,16 @@ var noun_type_contact = {
                                                   arguments)));
   }
 };
+
+// ** {{{ noun_type_geolocation }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 var noun_type_geolocation = {
   label: "geolocation",
@@ -498,7 +658,17 @@ var noun_type_geolocation = {
   }
 };
 
-var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
+// ** {{{ noun_type_lang_google }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
+
+var noun_type_lang_google = CmdUtils.NounType("language", {
   Arabic: "ar",
   Bulgarian: "bg",
   Catalan: "ca",
@@ -540,14 +710,21 @@ var noun_type_lang_google = CmdUtils.nounTypeFromDictionary({
   Ukrainian: "uk",
   Urdu: "ur",
   Vietnamese: "vi",
-}, "language");
+});
 
-// for backward compatibility
-var noun_type_language = noun_type_lang_google;
+// ** {{{ noun_type_lang_wikipedia }}} **
+//
+// **//FIXME//**
+//
+// {{{text}}}
+//
+// {{{html}}}
+//
+// {{{data}}}
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
 // omitting ones with 100+ articles
-var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary({
+var noun_type_lang_wikipedia = CmdUtils.NounType("language", {
   English: "en",
   German: "de",
   French: "fr",
@@ -719,7 +896,7 @@ var noun_type_lang_wikipedia = CmdUtils.nounTypeFromDictionary({
   Lingala: "ln",
   Burmese: "my",
   "Fiji Hindi": "hif",
-}, "language");
+});
 
 for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl._code2name = ntl._list.reduce(function(o, s) {
@@ -731,7 +908,7 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
 
 function getGmailContacts(callback) {
   jQuery.get(
-    "http://mail.google.com/mail/contacts/data/export",
+    "https://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
     function(data) {
       var contacts = [], name = "";
@@ -775,12 +952,11 @@ function getYahooContacts( callback ){
 
     callback(contacts);
   }, "text");
-
 }
 
-function getContacts(callback){
+function getContacts(callback) {
   getGmailContacts(callback);
-  getYahooContacts(callback);
+  //getYahooContacts(callback);
 }
 
 function getRestaurants(query, callback){
@@ -874,10 +1050,26 @@ function getAddress( query, callback ) {
   return ajaxRequest;
 }
 
-var EXPORTED_SYMBOLS =
-[it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
-.map(function([sym, noun], i) {
-  noun.id = "#n" + i;
-  noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
-  return sym;
-}, this);
+var EXPORTED_SYMBOLS = (
+  [it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
+  .map(function([sym, noun], i) {
+    noun.id = "#" + sym;
+    noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
+    return sym;
+  }, this));
+
+// ** DEPRECATED ** \\
+// {{{noun_type_language}}}\\
+// {{{noun_type_commands}}}\\
+// {{{noun_type_emailservice}}}\\
+// {{{noun_type_searchengine}}}
+for (let [old, now] in Iterator({
+  language: noun_type_lang_google,
+  commands: noun_type_command,
+  emailservice: noun_type_email_service,
+  searchengine: noun_type_search_engine,
+})) {
+  let sym = "noun_type_" + old;
+  this[sym] = now;
+  EXPORTED_SYMBOLS.push(sym);
+}

@@ -1,5 +1,5 @@
 var gmailAppsDomain = "";
-
+/*
 CmdUtils.CreateCommand({
   name: "detect-gmail-apps-domain",
   execute: function() {
@@ -13,7 +13,7 @@ CmdUtils.CreateCommand({
     }
   }
 });
-
+*/
 function getGmailAppsDomain() {
   // looks for and returns the gmail-for-apps domain
   // as well as caches it for next time
@@ -72,7 +72,6 @@ function extractGmailAppsDomain(URL) {
   return "none";
 }
 
-
 // TODO: Should also use the mailto application mapping.
 // TODO: support Google Apps
 function detectEmailProvider() {
@@ -98,23 +97,17 @@ function detectEmailProvider() {
     return max.domain;
   return null;
 }
-
+/*
 CmdUtils.CreateCommand({
   name: "detect-email-provider",
   execute: function (){
     displayMessage( detectEmailProvider() );
   }
 });
+*/
 
-
-function findGmailTab() {
-  var win = Application.activeWindow;
-  for each (var tab in [win.activeTab].concat(win.tabs))
-    if (/^https?:\/\/mail\.google\.com\/mail\/(?:[?#]|$)/
-        .test(tab.document.URL))
-      return tab;
-  return null;
-}
+function findGmailTab()(
+  Utils.tabs.search(/^https?:\/\/mail\.google\.com\/mail\/(?:[?#]|$)/)[0]);
 
 CmdUtils.CreateCommand({
   names: ["email", "mail", "gmail.com"],
@@ -133,30 +126,20 @@ CmdUtils.CreateCommand({
     and the name of someone from your contact list.
     For example, try issuing "email hello to jono"
     (assuming you have a friend named "jono").</>),
-  preview: function(pblock, args) {
-    var html = "Creates an email message ";
-    var goal = args.goal;
-    if (goal) {
-      html += "to " + goal.text + " ";
-    }
-    if (args.object) {
-      html += "with these contents:" + args.object.html;
-    } else {
-      html += "with a link to the current page.";
-    }
-    pblock.innerHTML = html;
+  preview: function(pblock, {object, goal}) {
+    pblock.innerHTML = "".concat(
+      "Creates an email message",
+      goal.text && " to " + goal.text,
+      " with a link to the current page",
+      object.html ? " and these contents:<br/><br/>" + object.html : ".");
   },
-
-  execute: function(args) {
+  execute: function({object: {text, html}, goal: {text: toAddress}}) {
     var {title, URL} = context.focusedWindow.document;
     // #574: no one I tested liked the stock "You might be interested in"
     //       just offer a link and the selected text.
-    var html = ((<p><a href={URL}>{title}</a></p> + "\n") +
-                ((args.object || 0).html || ""));
+    text = [title, URL, "", text].join("\n");
+    html = <p><a href={URL}>{title}</a></p> + "\n" + html;
     title = "'" + title + "'";
-
-    var goal = args.goal;
-    var toAddress = goal ? goal.text : "";
 
     var gmailTab = findGmailTab() || 0;
     // Note that this is technically insecure because we're
@@ -165,11 +148,15 @@ CmdUtils.CreateCommand({
     var {gmonkey} = gmailTab && gmailTab.document.defaultView.wrappedJSObject;
     if (!gmonkey) {
       // No Gmail  tab open?  Open a new one:
-      var params = {fs:1, tf:1, view:"cm", su:title, to:toAddress, body:html};
-      Utils.openUrlInBrowser("http://mail.google.com/mail/" +
-                             Utils.paramsToString(params));
+      Utils.openUrlInBrowser(
+        "http://mail.google.com/mail/" +
+        Utils.paramsToString({
+          fs: 1, tf: 1, view: "cm",
+          su: title, to: toAddress, body: text,
+        }));
       return;
     }
+    var me = this;
     gmonkey.load("1.0", function continuer(gmail) {
       // For some reason continuer.apply() won't work--we get
       // a security violation on Function.__parent__--so we'll
@@ -191,18 +178,13 @@ CmdUtils.CreateCommand({
           iframe.contentDocument.execCommand("insertHTML", false, html);
         else {
           var body = composeMail.ownerDocument.getElementsByName("body")[0];
-          html = ("Note: the following probably looks strange because " +
-                  "you don't have rich formatting enabled.  Please " +
-                  "click the 'Rich formatting' link above, discard " +
-                  "this message, and try " +
-                  "the email command again.\n\n" + html);
-          body.value = html;
+          body.value = text + body.value;
         }
         gmailTab.focus();
       } catch (e) {
         displayMessage({
           text: "A gmonkey exception occurred.",
-          exception: e});
+          exception: e}, me);
       }
     });
   }
@@ -228,12 +210,12 @@ function gmailChecker(callback, service) {
 }
 
 CmdUtils.CreateCommand({
-  name: "last-email-from",
-  takes: {"email service": noun_type_emailservice},
+  name: "get-last-email-from",
+  arguments: noun_type_email_service,
   icon: "chrome://ubiquity/skin/icons/email_open.png",
   description: ("Displays your most recent incoming email. Requires a " +
                 '<a href="http://mail.google.com">Gmail</a> account.'),
-  preview: function(pBlock, arg) {
+  preview: function(pBlock, {object}) {
     pBlock.innerHTML = "Displays your most recent incoming email...";
     // Checks if user is authenticated first
     // if not, do not ajaxGet, as this triggers authentication prompt
@@ -249,35 +231,38 @@ CmdUtils.CreateCommand({
           : "<b>You have no new mail!</b>");
         pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate,
                                                    emailDetails);
-      }, arg.text);
+      }, object.text);
     } else {
       pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
     }
   },
-  execute: function(arg) {
+  execute: function({object}) {
+    var me = this;
     gmailChecker(function(emailDetails) {
       var msgTemplate = "You have no new mail.";
       if (emailDetails.lastEmail) {
         msgTemplate = ("You have new email! ${lastEmail.author} says: " +
                        "${lastEmail.subject}");
       }
-      displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails));
-    }, arg.text);
+      displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails), me);
+    }, object.text);
   }
 });
 
 CmdUtils.CreateCommand({
-  name: "get-email-address",
+  name: "get-email-address-for",
   icon: "chrome://ubiquity/skin/icons/email.png",
   description: ("Looks up the email address of a person " +
-                "from your contacts list given their name. " +
-                "Execute to copy the address."),
-  takes: {name: noun_type_contact},
-  execute: function({text}) {
-    CmdUtils.copyToClipboard(text);
-    displayMessage({icon: this.icon, title: this.name, text: text});
+                "from your contacts list given their name. "),
+  help: "Execute to copy the address.",
+  arguments: noun_type_contact,
+  execute: function({object: {text}}) {
+    if (!text) return;
+    Utils.clipboard.text = text;
+    displayMessage(text, this);
   },
-  preview: function(pbl, {html}) {
-    pbl.innerHTML = html || this.description;
+  preview: function(pbl, args) {
+    pbl.innerHTML = (args.object.html ||
+                     this.description + "<p>" + this.help + "</p>");
   },
 });

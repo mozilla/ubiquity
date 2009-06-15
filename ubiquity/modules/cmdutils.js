@@ -769,15 +769,8 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
 
   function toNounType(obj, key) {
     var val = obj[key];
-    if (typeof val !== "object") return;
-    var noun = obj[key] = (
-      Object.prototype.toString.call(val) === "[object RegExp]"
-      ? me.nounTypeFromRegExp(val) :
-      Utils.isArray(val)
-      ? me.NounType("?", val) :
-      typeof val.suggest !== "function"
-      ? me.nounTypeFromDictionary(val)
-      : val);
+    if (!val) return;
+    var noun = obj[key] = me.NounType(val);
     if (!noun.id) noun.id = global.feed.id + "#n" + me.__nextId++;
   }
 
@@ -792,7 +785,7 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     command.name = names[0]
     command.names = names;
   }
-  { let {takes, modifiers, arguments: args} = options;
+  { let {takes, modifiers} = options;
     /* OLD DEPRECATED ARGUMENT API */
     if (takes) {
       let label = getKey(takes);
@@ -806,12 +799,13 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       for (let label in modifiers)
         toNounType(modifiers, label);
     }
-
+  }
+  { let args = options.arguments || options.argument;
     /* NEW IMPROVED ARGUMENT API */
     if (args) {
       // handle simplified syntax
       if (typeof args.suggest === "function")
-        // arguments: noun
+        // argument: noun
         args = [{role: "object", nountype: args}];
       else if (!Utils.isArray(args)) {
         // arguments: {role: noun, ...}
@@ -1473,9 +1467,9 @@ CmdUtils.__defineGetter__("maxSuggestions", function maxSuggestions(){
   return m.CommandManager.prototype.maxSuggestions;
 });
 
-// ** {{{ CmdUtils.safeWrapper }}} **
+// ** {{{ CmdUtils.safeWrapper() }}} **
 //
-//
+// Wraps a function so that exceptions from it are suppressed and notified.
 
 CmdUtils.safeWrapper = function safeWrapper(func) {
   var {displayMessage} = this.__globalObject;
@@ -1491,3 +1485,48 @@ CmdUtils.safeWrapper = function safeWrapper(func) {
     }
   };
 };
+
+// ** {{{ CmdUtils.previewList() }}} **
+//
+// Creates a simple clickable list in the preview.
+//
+// {{{block}}} is the DOM element the list will be placed into.
+//
+// {{{htmls}}} is the array/dictionary of HTML string to be listed.
+//
+// {{{callback(id, ev)}}} is the function called
+// when one of the list item becomes focused.
+// * {{{id}}} : one of the key of {{{htmls}}}
+// * {{{ev}}} : the event object
+//
+// {{{css}}} is an optional CSS string inserted along with the list.
+
+CmdUtils.previewList = function previewList(block, htmls, callback, css) {
+  var list = [], i = -1;
+  for (let id in htmls) {
+    let k = ++i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
+    list.push('<li><label for="', i, '"><button id="', i, '" accesskey="',
+              k, '" value="' + id + '">', k, '</button>',
+              htmls[id], '</label></li>');
+  }
+  block.innerHTML = ('<style>' + previewList.CSS + (css || "") +
+                     '</style><ol class="preview-list">' +
+                     list.join("") + '</ol>');
+  if (typeof callback !== "function") return;
+  block.getElementsByTagName("ol")[0]
+    .addEventListener("focus", function previewListFocus(ev) {
+      var {target} = ev;
+      if (!/^button$/i.test(target.nodeName)) return;
+      target.blur();
+      target.disabled = true;
+      callback(target.value, ev);
+    }, true);
+};
+CmdUtils.previewList.CSS = <><![CDATA[
+  .preview-list {margin: 0; padding: 0; list-style-type: none}
+  .preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
+  .preview-list label {display: block; cursor: pointer}
+  .preview-list button {
+    padding: 0; border-width: 1px;
+    font: bold 108% "Consolas",monospace; text-transform: uppercase}
+  ]]></>;

@@ -245,6 +245,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       reset();
       codeCache = code;
       sandbox = sandboxFactory.makeSandbox(codeSource);
+      sandbox.Bin = makeBin(feedInfo);
       try {
         sandboxFactory.evalInSandbox(code,
                                      sandbox,
@@ -384,5 +385,23 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     feeds: feeds,
     headers: new IterableCollection(headerCodeSources),
     footers: new IterableCollection(footerCodeSources)
+  };
+}
+
+function makeBin(feedInfo) {
+  var bin = null;
+  return {
+    __noSuchMethod__: function ____(key, [val]) {
+      bin || (bin = feedInfo.getBin());
+      if (val === void 0) return bin[key];
+      if (val === null) {
+        val = bin[key];
+        delete bin[key];
+      } else
+        bin[key] = val;
+      bin = feedInfo.setBin(bin);
+      return val;
+    },
+    "": function secret() bin,
   };
 }

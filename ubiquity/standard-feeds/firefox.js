@@ -2,6 +2,8 @@
 // HELPER OBJECT FOR CLOSING WINDOWS
 // -----------------------------------------------------------------
 
+Cu.import("resource://gre/modules/utils.js");
+
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
 var extApplication = { // helper method for correct quitting/restarting
@@ -50,7 +52,6 @@ var extApplication = { // helper method for correct quitting/restarting
 // WINDOW COMMANDS
 // -----------------------------------------------------------------
 
-// exit firefox entirely
 CmdUtils.CreateCommand({
   names: ["exit-firefox"],
   description: "Exits Firefox.",
@@ -59,7 +60,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// restarts firefox
 CmdUtils.CreateCommand({
   names: ["restart-firefox"],
   description: "Restarts Firefox.",
@@ -68,7 +68,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// closes current firefox window
 // TODO: if last window is closed, we should offer to save session
 CmdUtils.CreateCommand({
   names: ["close-window"],
@@ -78,7 +77,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// toggles fullscreen
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
   description: "Toggles fullscreen mode.",
@@ -138,12 +136,10 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["close-related-tabs"],
-  arguments: [{role: 'object', label: 'related word', nountype: noun_arb_text}],
+  arguments: {"object related word": noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
-  execute: function(args) {
-    if (!args.object) return;
-    var text = args.object.text;
+  execute: function({object: {text}}) {
     var tabs = Utils.tabs.search(text);
     for each (let t in tabs) t.close();
     displayMessage({
@@ -197,20 +193,18 @@ CmdUtils.CreateCommand({
 });
 
 
-// refreshes current tab
 CmdUtils.CreateCommand({
-  names: ["refresh","reload"],
-  description: "Refresh current document",
+  names: ["refresh", "reload"],
+  description: "Refreshes the current page.",
   execute: function() {
     var win = CmdUtils.getWindow();
     win.location.reload(true);
   }
 });
 
-// bookmark current tab
 CmdUtils.CreateCommand({
   names: ["bookmark"],
-  description: "Adds current document to bookmarks.",
+  description: "Adds the current page to bookmarks.",
   execute: function() {
     var {title, URL} = CmdUtils.getDocument();
     try {
@@ -224,7 +218,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// print current tab
 CmdUtils.CreateCommand({
   names: ["print"],
   description: "Prints the current page.",
@@ -238,7 +231,7 @@ CmdUtils.CreateCommand({
 (function historyCommand(way, sign) {
   CmdUtils.CreateCommand({
     names: ["go-" + way],
-    description: "Go " + way + " in history.",
+    description: "Goes " + way + " in history.",
     arguments: [{role: "object", label: "steps", nountype: noun_type_number}],
     preview: function(pblock, args) {
       var num = args.object.data;
@@ -252,10 +245,9 @@ CmdUtils.CreateCommand({
   return arguments.callee;
 })("back", -1)("forward", 1);
 
-// go to home page
 CmdUtils.CreateCommand({
   names: ["go-home"],
-  description: "Go to home page.",
+  description: "Goes to home page.",
   execute: function() {
     CmdUtils.getWindow().home();
   }
@@ -309,7 +301,7 @@ CmdUtils.CreateCommand({
   license: "MPL/GPL/LGPL",
   arguments: [{role: 'object', nountype: noun_arb_text}],
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
-  description: "Adds a tag to describe the current page",
+  description: "Adds a tag to describe the current page.",
   preview: function(aEl, args) {
     var aTagsString = args.object || {text: ''};
     aEl.innerHTML = ("Describe the current page with tags" +
@@ -386,13 +378,13 @@ CmdUtils.CreateCommand({
   contributor: {name: "powchin", homepage: "http://friendfeed.com/powchin"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
-  arguments: {object: noun_arb_text},
+  arguments: {"object title or URL": noun_arb_text},
   execute: function(args) {
     for each(var {id} in this._find(args.object.text)) this._undo(id);
   },
   preview: function(pbl, args) {
     var me = this;
-    if (!me._SS.getClosedTabCount(Utils.currentChromeWindow)) {
+    if (!me._SS.getClosedTabCount(context.chromeWindow)) {
       me._puts(pbl, "No closed tabs.");
       return;
     }
@@ -401,27 +393,16 @@ CmdUtils.CreateCommand({
       me._puts(pbl, "No matched tabs.");
       return;
     }
-    pbl.innerHTML =
-      me._css + tabs.reduce(me._lay, <ol class={UCT}/>);
-    $("ol", pbl)[0].addEventListener("focus", function(ev) {
-      var {target} = ev;
-      if (target.nodeName !== "BUTTON") return;
-      target.disabled = true;
-      $(target).closest("li").remove();
-      me._undo(+target.id);
-    }, true);
+    CmdUtils.previewList(pbl, tabs.map(me._html), function(i, ev) {
+      $(ev.target).closest("li").remove();
+      me._undo(tabs[i].id);
+    }, me._css);
   },
   previewDelay: 256,
-  _lay: function(ol, {id, title, image, url}, i) {
-    var k = i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
-    return ol.appendChild(
-      <li><nobr><label for={id}>
-        <button id={id} accesskey={k}>{k}</button>
-        <img class="icon" src={image}/>
-        <span class="title">{title}</span>
-        <code class="url">{url}</code>
-      </label></nobr></li>);
-  },
+  _list: null,
+  _html: function({title, image, url})(
+    <> <img class="icon" src={image}/> <span class="title">{title}</span>
+       <code class="url">{url}</code></>),
   _puts: function(pbl, msg) {
     pbl.innerHTML = <i>{msg}</i>.toXMLString() + this.help;
   },
@@ -445,19 +426,41 @@ CmdUtils.CreateCommand({
       if (id !== tab.id) return true;
       this._SS.undoCloseTab(context.chromeWindow, i);
       list.splice(i, 1);
+      return false;
     }, this);
   },
-  _SS: (Cc["@mozilla.org/browser/sessionstore;1"]
-        .getService(Ci.nsISessionStore)),
-  _css: <style><![CDATA[
-    ol {margin: 0; padding: 0; list-style-type: none}
-    li:hover {outline: 1px solid; -moz-outline-radius: 8px}
-    label {cursor: pointer}
-    button {
-      padding: 0; border-width: 1px;
-      font: bold 108% "Consolas",monospace; text-transform: uppercase;
-    }
+  _css: <><![CDATA[
+    li {white-space: nowrap}
     .icon {width: 16px; height: 16px; vertical-align: middle}
     .url {font-size: smaller}
-    ]]></style>,
+    ]]></>,
+  _SS: (Cc["@mozilla.org/browser/sessionstore;1"]
+        .getService(Ci.nsISessionStore)),
+});
+
+CmdUtils.CreateCommand({
+  name: "check-livemark",
+  description: "Checks your livemarks.",
+  help: "Execute to open the site.",
+  author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  icon: "chrome://browser/skin/livemark-folder.png",
+  argument: noun_type_livemark,
+  execute: function({object: {data}}) {
+    if (data) this._open(data.site);
+  },
+  preview: function(pbl, {object: {data}}) {
+    if (!data) {
+      pbl.innerHTML = this.description;
+      return;
+    }
+    var dict = {}, {root} = PlacesUtils.getFolderContents(data.id);
+    root.containerOpen = true;
+    for (var i = 0, c = root.childCount; i < c; ++i) {
+      var node = root.getChild(i);
+      dict[node.uri] = <span> <a href={node.uri}>{node.title}</a> </span>;
+    }
+    root.containerOpen = false;
+    CmdUtils.previewList(pbl, dict, this._open);
+  },
+  _open: function(u) { Utils.openUrlInBrowser(u) },
 });

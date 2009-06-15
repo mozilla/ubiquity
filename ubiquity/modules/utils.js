@@ -50,12 +50,27 @@ const Ci = Components.interfaces;
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Utils = {
-  // xpcshell workaround
+  // ** {{{ Utils.Application }}} **
+  //
+  // Shortcut to {{{Application}}}.
+  // https://developer.mozilla.org/en/FUEL/Application
+
   get Application() {
     delete this.Application;
     return this.Application = (Cc["@mozilla.org/fuel/application;1"]
                                .getService(Ci.fuelIApplication));
   },
+
+  // ** {{{ Utils.json }}} **
+  //
+  // Shortcut to {{{nsIJSON}}}.
+
+  get json() {
+    delete this.json;
+    return this.json = (Cc["@mozilla.org/dom/json;1"]
+                        .createInstance(Ci.nsIJSON));
+  },
+
   __globalObject: this,
 };
 
@@ -168,10 +183,8 @@ Utils.reportInfo = function reportInfo(aMessage) {
 // This function serializes the given object using JavaScript Object
 // Notation (JSON).
 
-Utils.encodeJson = function encodeJson(object) {
-  var json = Cc["@mozilla.org/dom/json;1"]
-             .createInstance(Ci.nsIJSON);
-  return json.encode(object);
+Utils.encodeJson = function encodeJson(value, whitelist) {
+  return Utils.json.encode(value, whitelist);
 };
 
 // ** {{{ Utils.decodeJson() }}} **
@@ -179,10 +192,8 @@ Utils.encodeJson = function encodeJson(object) {
 // This function unserializes the given string in JavaScript Object
 // Notation (JSON) format and returns the result.
 
-Utils.decodeJson = function decodeJson(string) {
-  var json = Cc["@mozilla.org/dom/json;1"]
-             .createInstance(Ci.nsIJSON);
-  return json.decode(string);
+Utils.decodeJson = function decodeJson(string, whitelist) {
+  return Utils.json.decode(string, whitelist);
 };
 
 // ** {{{Utils.ellipsify()}}} **

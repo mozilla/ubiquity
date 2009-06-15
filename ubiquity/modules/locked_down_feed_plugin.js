@@ -362,7 +362,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
                               directObjLabel);
             var regExp = safeConvertRegExp(info.takes[directObjLabel]);
             cmd.DOLabel = directObjLabel;
-            cmd.DOType = NounUtils.nounTypeFromRegExp(regExp);
+            cmd.DOType = NounUtils.NounType(regExp);
             break;
           }
         if (info.modifiers) {
@@ -372,7 +372,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
               throw new Error("Modifier label is not a string: " +
                               directObjLabel);
             var regExp = safeConvertRegExp(info.modifiers[modLabel]);
-            cmd.modifiers[modLabel] = NounUtils.nounTypeFromRegExp(regExp);
+            cmd.modifiers[modLabel] = NounUtils.NounType(regExp);
           }
         }
         let preview = info.preview;

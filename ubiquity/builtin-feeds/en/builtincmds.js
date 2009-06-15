@@ -24,6 +24,7 @@
  *   Abimanyu Raja <abimanyu@gmail.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <blair@theunfocused.net>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -114,7 +115,7 @@ Sep = "\n",
 {prefs} = Application;
 CmdUtils.CreateCommand({
   names: [Name, "vita"],
-  arguments: {object: noun_arb_text},
+  arguments: {"object filter": noun_arb_text},
   description: "Accesses your command history.",
   help: "" + (
     <ul style="list-style-image:none">
@@ -126,11 +127,11 @@ CmdUtils.CreateCommand({
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  execute: function(args) {
+  execute: function({object: {text}}) {
     var bin = Utils.trim(prefs.getValue(PBin, ""));
     if (!bin) return;
     if (text) {
-      var rem = this._get(args.object.text, true).join(Sep);
+      var rem = this._get(text, true).join(Sep);
       if (rem.length === bin.length) return;
       prefs.setValue(PBin, rem);
       this._say("Deleted matched histories. Click here to undo.",
@@ -144,20 +145,17 @@ CmdUtils.CreateCommand({
       pbl.innerHTML = "<i>No histories match.</i>" + this.help;
       return;
     }
-    pbl.innerHTML = this._css + his.reduce(this._lay, <ol class={Name}/>);
-    jQuery("ol", pbl)[0].addEventListener("focus", this._recall, true);
-  },
-  _lay: function(ol, h, i) {
-    var k = i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
-    return ol.appendChild(
-      <li><nobr><label for={i}>
-        <button id={i} accesskey={k} value={h}>{k}</button>
-        <code>{h}</code>
-      </label></nobr></li>);
+    CmdUtils.previewList(
+      pbl,
+      [<span> <code>{h}</code> </span> for each (h in his)],
+      function(i) {
+        var {gUbiquity} = context.chromeWindow;
+        gUbiquity.__textBox.value = his[i];
+        gUbiquity.__delayedProcessInput();
+      });
   },
   _say: function(txt, cb) {
-    displayMessage({
-      icon: this.icon, title: Name, text: txt, onclick: cb});
+    displayMessage({text: txt, onclick: cb}, this);
   },
   _get: function(txt, rev) {
     var bin = Utils.trim(prefs.getValue(PBin, ""));
@@ -170,24 +168,6 @@ CmdUtils.CreateCommand({
     }
     return his;
   },
-  _recall: function reclaim(ev) {
-    var {target} = ev;
-    if (target.nodeName !== "BUTTON") return;
-    target.blur();
-    target.disabled = true;
-    var {gUbiquity} = context.chromeWindow;
-    gUbiquity.__textBox.value = target.value;
-    gUbiquity.__delayedProcessInput();
-  },
-  _css: <style><![CDATA[
-    ol {margin: 0; padding: 2px}
-    li {list-style-type: none}
-    label:hover {cursor: pointer; font-weight: bold}
-    button {
-      padding: 0; border-width: 1px;
-      font: bold 108% "Consolas",monospace; text-transform: uppercase;
-    }
-    ]]></style>,
 });
 return function UL_commandHistory(U) {
   U.__msgPanel.addEventListener("popuphidden", function saveEntry() {
