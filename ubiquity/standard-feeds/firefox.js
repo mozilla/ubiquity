@@ -53,7 +53,7 @@ var extApplication = { // helper method for correct quitting/restarting
 // -----------------------------------------------------------------
 
 CmdUtils.CreateCommand({
-  names: ["exit-firefox"],
+  names: ["exit firefox"],
   description: "Exits Firefox.",
   execute: function() {
     extApplication.quit();
@@ -61,7 +61,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["restart-firefox"],
+  names: ["restart firefox"],
   description: "Restarts Firefox.",
   execute: function() {
     extApplication.restart();
@@ -70,13 +70,15 @@ CmdUtils.CreateCommand({
 
 // TODO: if last window is closed, we should offer to save session
 CmdUtils.CreateCommand({
-  names: ["close-window"],
+  names: ["close window"],
   description: "Closes current window.",
   execute: function() {
     extApplication.close();
   }
 });
 
+// TODO this should maybe become a 'toggle' command, i.e. the verb is
+// 'turn on' or 'turn off'.
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
   description: "Toggles fullscreen mode.",
@@ -101,8 +103,10 @@ function tabPreview(msg)(
   });
 
 CmdUtils.CreateCommand({
-  names: ["switch-tab"],
-  argument: noun_type_tab,
+  names: ["switch (to tab)"],
+  arguments: [{ role: "goal",
+                nountype: noun_type_tab,
+                label: "tab" }],
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
   execute: function(args) {
@@ -122,8 +126,10 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["close-tab"],
-  argument: noun_type_tab,
+  names: ["close (tab)"],
+  arguments: [{role: "goal",
+               nountype: noun_type_tab,
+               label: "tab" }],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: ("Closes the tab that matches the given title or URL " +
                 "or the current tab if no tab matches."),
@@ -134,7 +140,9 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["close-related-tabs"],
+  names: ["close all tabs that match",
+          "close all matching tabs",
+          "close all tabs with the word"],
   arguments: {"object related word": noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
@@ -166,7 +174,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["count-tabs"],
+  names: ["count tabs"],
   description: "Counts the number of opened tabs.",
   arguments: {object_filter: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
@@ -225,7 +233,7 @@ CmdUtils.CreateCommand({
 // goes back/forward in history
 (function historyCommand(way, sign) {
   CmdUtils.CreateCommand({
-    names: ["go-" + way],
+    names: ["go " + way],
     description: "Goes " + way + " in history.",
     arguments: [{role: "object", label: "steps", nountype: noun_type_number}],
     preview: function(pblock, args) {
@@ -241,7 +249,7 @@ CmdUtils.CreateCommand({
 })("back", -1)("forward", 1);
 
 CmdUtils.CreateCommand({
-  names: ["go-home"],
+  names: ["go home"],
   description: "Goes to home page.",
   execute: function() {
     CmdUtils.getWindow().home();
@@ -318,13 +326,15 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: "run-bookmarklet | bml | js",
+  names: ["run (bookmarklet)", "rbml"],
   description: "Runs a bookmarklet from your favorites.",
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
-  argument: noun_type_bookmarklet,
+  arguments: [{role: "object",
+               nountype: noun_type_bookmarklet,
+               label: "bookmarklet"}],
   execute: function({object}) {
     if (object.data) CmdUtils.getWindow().location = object.data;
     else {
@@ -341,9 +351,8 @@ CmdUtils.CreateCommand({
   }
 });
 
-const UCT = "undo-closed-tabs";
 CmdUtils.CreateCommand({
-  names: [UCT, "uct"],
+  names: ["undo close tab", "uct"],
   description: "Reopens tabs you've closed recently.",
   help: "" + (
     <ul style="list-style-image:none">
@@ -415,12 +424,14 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "check-livemark",
+  names: ["check (livemark)"],
   description: "Checks your livemarks.",
   help: "Execute to open the site.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   icon: "chrome://browser/skin/livemark-folder.png",
-  argument: noun_type_livemark,
+  arguments: [{role: "object",
+               nountype: noun_type_livemark,
+               label: "livemark"}],
   execute: function({object: {data}}) {
     if (data) this._open(data.site);
   },
