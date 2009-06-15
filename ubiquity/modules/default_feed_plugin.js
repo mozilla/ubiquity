@@ -232,6 +232,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
   function reset() {
     self.commands = {};
+    self.commandCode = {};
     self.pageLoadFuncs = [];
     self.ubiquityLoadFuncs = [];
   }
@@ -256,8 +257,14 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       }
 
       for each (let cmd in sandbox.commands) {
-        cmd = makeCmdForObj(sandbox, cmd, feedInfo.uri);
-        this.commands[cmd.id] = cmd;
+        let newCmd = makeCmdForObj(sandbox, cmd, feedInfo.uri);
+        this.commands[newCmd.id] = newCmd;
+        
+        this.commandCode[newCmd.id] = {execute: cmd.execute.toString()};
+        if (cmd.preview)
+          this.commandCode[newCmd.id].preview = cmd.preview.toString();
+        
+        cmd = newCmd;
       }
 
       for each (let p in ["pageLoadFuncs", "ubiquityLoadFuncs"])
