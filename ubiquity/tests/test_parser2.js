@@ -81,7 +81,7 @@ function makeCommand(options) {
 function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
   // nountypes; ensure that it doesn't break.
-
+  var self = this;
   try {
     var jsm = {};
     Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
@@ -98,18 +98,30 @@ function testSmokeTestParserTwo() {
     );
     // now do what CommandManager does using services.commandSource
     nlParser.setCommandList(services.commandSource.getAllCommands());
-    // Do a query here and make sure one of the builtin commands is
-    // suggested...
-    //var fakeContext = { textSelection: "", htmlSelection: "" };
-    //nlParser.newQuery("help", fakeContext, MAX_SUGGESTIONS);
-    // OK, this test is *passing* even though gUbiquity is null when I try
-    // to actually run parser 2.  How can that be??
   } catch (e) {
     this.assert(false, "Error caught in smoke test: " + e );
   }
-}
 
-/* TODO: test to make context menu work with parser 2 */
+
+  // Do a query here and make sure one of the builtin commands is
+  // suggested...
+ /* var fakeContext = { textSelection: "", htmlSelection: "" };
+  var q = nlParser.newQuery("help", fakeContext, MAX_SUGGESTIONS, true);
+
+
+  var testFunc = self.makeCallback(
+    function(suggestionList) {
+      // TODO for some reason the test is not waiting for this to be called.
+      self.assert( suggestionList[0]._verb.name == "help",
+                   "Should be help command!");
+    });
+
+  q.onResults = function() {
+    testFunc(q.suggestionList);
+  };
+  q.run();*/
+
+}
 
 function testParserTwoDirectOnly() {
   var dogGotPetted = false;

@@ -70,8 +70,58 @@ CmdUtils.CreateCommand({
   }
 });
 
+
 CmdUtils.CreateCommand({
-  name: "command-editor",
+  names: ["open (ubiquity settings page)",
+          "show (ubiquity settings page)"],
+  arguments: [{ role: "object",
+                nountype: ["help",
+                           "command editor",
+                           "command list",
+                           "settings",
+                           "bug report"],
+                label: "ubiquity settings page" }],
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  description: "" + (
+      <>Opens one of the Ubiquity documentation/settings pages.</>),
+  preview: function( pBlock, args ){
+    if (args.object && args.object.text) {
+      pBlock.innerHTML = "Opens the Ubiquity " + args.object.text + " page.";
+    } else {
+      pBlock.innerHtml = this.description;
+    }
+  },
+  execute: function( args ) {
+    var targetPage;
+    if (!args.object || !args.object.text) {
+      targetPage = Help;
+    } else {
+      switch( args.object.text) {
+      case "help":
+        targetPage = Help;
+        break;
+      case "command editor":
+        targetPage = Editor;
+        break;
+      case "command list":
+        targetPage = CmdList;
+        break;
+      case "settings":
+        targetPage = Settings;
+        break;
+      case "bug report":
+        targetPage = BugReport;
+        break;
+      }
+    }
+    Utils.openUrlInBrowser( targetPage );
+  }
+});
+
+CmdUtils.CreateCommand({
+                         names: ["write ubiquity commands",
+                                 "edit ubiquity commands",
+                                 "ubiquity command editor"],
   icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
@@ -79,7 +129,8 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "command-list",
+                         names: ["list ubiquity commands",
+                                 "ubiquity command list"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "" + (
     <>Opens <a href={CmdList}>the list</a>
@@ -88,7 +139,9 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["settings", "skin-list"],
+  names: ["change ubiquity settings",
+          "change ubiquity preferences",
+          "change ubiquity skin"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={Settings}>settings</a> page,
@@ -97,7 +150,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "report-bug",
+  name: ["report a bug", "report bug"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
@@ -105,26 +158,53 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "toggle-command",
+  name: "enable (ubiquity command)",
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "Disables or enables a command.",
-  argument: noun_type_command,
+  description: "Re-enables a Ubiquity command that you disabled.",
+  arguments: [{ role: "object",
+                nountype: noun_type_command,
+                label: "ubiquity command" }],
   execute: function({object: {data: cmd}}) {
-    if (cmd) displayMessage((((cmd.disabled = !cmd.disabled) ? "Dis" : "En") +
-                             "abled : " + cmd.name),
-                            this);
+    if (cmd) {
+      cmd.disabled = false;
+      displayMessage("Enabled command : " + cmd.name);
+    }
   },
   preview: function(pb, {object: {html, data: cmd}}) {
-    pb.innerHTML = (
-      cmd
-      ? <>{cmd.disabled ? "En" : "Dis"}ables <b>{cmd.name}</b>.<hr/></> + html
-      : this.description);
+    if (cmd) {
+      pb.innerHTML = (<>Enables <b>{cmd.name}</b>.<hr/></> + html);
+    } else {
+      pb.innerHTML = this.description;
+    }
+  }
+});
+
+CmdUtils.CreateCommand({
+  name: "disable (ubiquity command)",
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  description: "Disables a Ubiquity command, so that it will no longer show up"
+               + " in the suggestion list.",
+  arguments: [{ role: "object",
+                nountype: noun_type_command,
+                label: "ubiquity command" }],
+  execute: function({object: {data: cmd}}) {
+    if (cmd) {
+      cmd.disabled = true;
+      displayMessage("Disabled command : " + cmd.name);
+    }
   },
+  preview: function(pb, {object: {html, data: cmd}}) {
+    if (cmd) {
+      pb.innerHTML = (<>Disables <b>{cmd.name}</b>.<hr/></> + html);
+    } else {
+      pb.innerHTML = this.description;
+    }
+  }
 });
 
 var ubiquityLoad_commandHistory = (function() {{}
 const
-Name = "command-history",
+Name = "command history",
 PHistory = "extensions.ubiquity.history.",
 PBin = PHistory + "bin",
 PMax = PHistory + "max",
