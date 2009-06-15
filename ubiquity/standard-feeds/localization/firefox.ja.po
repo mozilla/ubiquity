@@ -1,0 +1,273 @@
+#. exit-firefox command:
+msgid "exit-firefox.names"
+msgstr "Firefoxを終了|終了|しゅうりょう"
+
+msgid "exit-firefox.contributors"
+msgstr ""
+
+msgid "exit-firefox.help"
+msgstr ""
+
+msgid "exit-firefox.description"
+msgstr "Firefoxを終了する。"
+
+
+#. restart-firefox command:
+msgid "restart-firefox.names"
+msgstr "Firefoxを再起動|再起動|さいきどう|Firefoxをリスタート|リスタート"
+
+msgid "restart-firefox.contributors"
+msgstr ""
+
+msgid "restart-firefox.help"
+msgstr ""
+
+msgid "restart-firefox.description"
+msgstr "Firefoxを再起動する。"
+
+
+#. close-window command:
+msgid "close-window.names"
+msgstr "ウインドウを閉じる|ウインドウを閉じて|ウインドウを閉じろ"
+
+msgid "close-window.contributors"
+msgstr ""
+
+msgid "close-window.help"
+msgstr ""
+
+msgid "close-window.description"
+msgstr "ウインドウを閉じる。"
+
+
+#. fullscreen command:
+msgid "fullscreen.names"
+msgstr "fullscreen"
+
+msgid "fullscreen.contributors"
+msgstr ""
+
+msgid "fullscreen.help"
+msgstr ""
+
+msgid "fullscreen.description"
+msgstr "Toggles fullscreen mode."
+
+
+#. switch-tab command:
+msgid "switch-tab.names"
+msgstr "switch-tab"
+
+msgid "switch-tab.contributors"
+msgstr ""
+
+msgid "switch-tab.help"
+msgstr ""
+
+msgid "switch-tab.description"
+msgstr "Switches to the tab that matches the given name."
+
+
+#. close-tab command:
+msgid "close-tab.names"
+msgstr "close-tab"
+
+msgid "close-tab.contributors"
+msgstr ""
+
+msgid "close-tab.help"
+msgstr ""
+
+msgid "close-tab.description"
+msgstr "Closes the tab that matches the given name, or the current tab if no name is supplied."
+
+
+#. close-related-tabs command:
+msgid "close-related-tabs.names"
+msgstr "close-related-tabs"
+
+msgid "close-related-tabs.contributors"
+msgstr ""
+
+msgid "close-related-tabs.help"
+msgstr ""
+
+msgid "close-related-tabs.description"
+msgstr "Closes all open tabs that have the given word in common."
+
+
+#. count-tabs command:
+msgid "count-tabs.names"
+msgstr "count-tabs"
+
+msgid "count-tabs.contributors"
+msgstr ""
+
+msgid "count-tabs.help"
+msgstr ""
+
+msgid "count-tabs.description"
+msgstr "Counts the number of opened tabs."
+
+
+#. refresh command:
+msgid "refresh.names"
+msgstr "refresh|reload"
+
+msgid "refresh.contributors"
+msgstr ""
+
+msgid "refresh.help"
+msgstr ""
+
+msgid "refresh.description"
+msgstr "Refreshes the current page."
+
+
+#. bookmark command:
+msgid "bookmark.names"
+msgstr "bookmark"
+
+msgid "bookmark.contributors"
+msgstr ""
+
+msgid "bookmark.help"
+msgstr ""
+
+msgid "bookmark.description"
+msgstr "Adds the current page to bookmarks."
+
+
+#. print command:
+msgid "print.names"
+msgstr "print"
+
+msgid "print.contributors"
+msgstr ""
+
+msgid "print.help"
+msgstr ""
+
+msgid "print.description"
+msgstr "Prints the current page."
+
+
+#. go-back command:
+msgid "go-back.names"
+msgstr "go-back"
+
+msgid "go-back.contributors"
+msgstr ""
+
+msgid "go-back.help"
+msgstr ""
+
+msgid "go-back.description"
+msgstr "Goes back in history."
+
+
+#. go-forward command:
+msgid "go-forward.names"
+msgstr "go-forward"
+
+msgid "go-forward.contributors"
+msgstr ""
+
+msgid "go-forward.help"
+msgstr ""
+
+msgid "go-forward.description"
+msgstr "Goes forward in history."
+
+
+#. go-home command:
+msgid "go-home.names"
+msgstr "go-home"
+
+msgid "go-home.contributors"
+msgstr ""
+
+msgid "go-home.help"
+msgstr ""
+
+msgid "go-home.description"
+msgstr "Goes to home page."
+
+
+#. zoom command:
+msgid "zoom.names"
+msgstr "ズーム|ズームして|ズームする|ズームしろ"
+
+msgid "zoom.contributors"
+msgstr ""
+
+msgid "zoom.help"
+msgstr ""
+
+msgid "zoom.description"
+msgstr "Firefoxウインドウを拡大／縮小。"
+
+msgctxt "zombie.preview"
+msgid "Zooms the Firefox window to ${replacement} of its normal size."
+msgstr "ウインドウを通常の${replacement}のサイズで表示。"
+
+
+#. tag command:
+msgid "tag.names"
+msgstr "tag"
+
+msgid "tag.contributors"
+msgstr ""
+
+msgid "tag.help"
+msgstr ""
+
+msgid "tag.description"
+msgstr "Adds a tag to describe the current page."
+
+
+#. bookmarklet command:
+msgid "bookmarklet.names"
+msgstr "bookmarklet|bml|js"
+
+msgid "bookmarklet.contributors"
+msgstr ""
+
+msgid "bookmarklet.help"
+msgstr "Enter nothing to reload the list."
+
+msgid "bookmarklet.description"
+msgstr "Runs a bookmarklet from your favorites."
+
+
+#. undo-closed-tabs command:
+msgid "undo-closed-tabs.names"
+msgstr "undo-closed-tabs|uct"
+
+msgid "undo-closed-tabs.contributors"
+msgstr ""
+
+msgid "undo-closed-tabs.help"
+msgstr "<ul style="list-style-image:none">
+    <li>Use accesskey or click to undo.</li>
+    <li>Type to filter, then execute to undo all.</li>
+    </ul>"
+
+msgid "undo-closed-tabs.description"
+msgstr "Reopens tabs you've closed recently."
+
+
+#. check-livemark command:
+msgid "check-livemark.names"
+msgstr "check-livemark"
+
+msgid "check-livemark.contributors"
+msgstr ""
+
+msgid "check-livemark.help"
+msgstr "Execute to open the site."
+
+msgid "check-livemark.description"
+msgstr "Checks your livemarks."
+
+
