@@ -104,6 +104,24 @@ CmdUtils.CreateCommand({
   execute: BugReport,
 });
 
+CmdUtils.CreateCommand({
+  name: "toggle-command",
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  description: "Disables or enables a command.",
+  argument: noun_type_command,
+  execute: function({object: {data: cmd}}) {
+    if (cmd) displayMessage((((cmd.disabled = !cmd.disabled) ? "Dis" : "En") +
+                             "abled : " + cmd.name),
+                            this);
+  },
+  preview: function(pb, {object: {html, data: cmd}}) {
+    pb.innerHTML = (
+      cmd
+      ? <>{cmd.disabled ? "En" : "Dis"}ables <b>{cmd.name}</b>.<hr/></> + html
+      : this.description);
+  },
+});
+
 var ubiquityLoad_commandHistory = (function() {{}
 const
 Name = "command-history",

@@ -60,7 +60,7 @@ Cu.import("resource://gre/modules/utils.js");
 
 // ** {{{ noun_arb_text }}} **
 //
-// Suggests the user's input as is.
+// Suggests the input as is.
 //
 // {{{text, html}}} : The user input.
 
@@ -322,7 +322,7 @@ var noun_type_url = {
 
 // ** {{{ noun_type_livemark }}} **
 //
-// Suggests each livemark whose title matching the user's input.
+// Suggests each livemark whose title matches the input.
 //
 // * {{{text, html}}} : title
 // * {{{data.id}}} : id
@@ -352,27 +352,26 @@ var noun_type_livemark = {
 
 // ** {{{ noun_type_command }}} **
 //
-// **//FIXME//**
+// Suggests each installed command whose name matches the input.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text, html}}} : command name
+// * {{{data}}} : command object
 
 var noun_type_command = {
-  label: "command",
-  _cmdSource: UbiquitySetup.createServices().commandSource,
+  label: "name",
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
-    var suggs = [CmdUtils.makeSugg(cmd.name,
-                                   ((cmd.description || "") +
-                                    ("<p>" + (cmd.help || "") + "</p>")),
-                                   cmd)
-                 for each (cmd in this._cmdSource.getAllCommands())
-                 if (!cmd.disabled)];
-    return CmdUtils.grepSuggs(text, suggs);
+    return (CmdUtils.grepSuggs(text,
+                               this._cmdSource.getAllCommands(),
+                               "name")
+            .map(this._makeSugg));
   },
+  _cmdSource: UbiquitySetup.createServices().commandSource,
+  _makeSugg: function(cmd)
+    CmdUtils.makeSugg(cmd.name,
+                      ((cmd.description || "") +
+                       ("<p>" + (cmd.help || "") + "</p>")),
+                      cmd),
 };
 
 // ** {{{ noun_type_twitter_user }}} **
@@ -445,7 +444,7 @@ var noun_type_number = {
 
 // ** {{{ noun_type_bookmarklet }}} **
 //
-// Suggests each bookmarklet whose title matching the user's input.
+// Suggests each bookmarklet whose title matches the input.
 //
 // * {{{text, html}}} : bookmarklet title
 // * {{{data}}} : bookmarklet (pseudo) url
