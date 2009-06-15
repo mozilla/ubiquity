@@ -1,0 +1,32 @@
+2009-01-17      v0.06
+- BUGFIX: If translation existed, but was zero legnth, untranslated
+-         text was not falling through. BUG # 15063
+
+2009-01-05      v0.05
+- DOCS: Typo's in documentation fixed (including po's via <link> tags
+-       must use href= not url= nor uri=).
+- DOCS: Added build of po2json docs to project and website.
+- DOCS: Added more documentation covering all the *gettext() methods.
+- FEATURE: Added "strargs" method to Gettext.js (along with tests, and
+-          examples update).
+- BUGFIX: Fixed abiguity between usage of undefined and null in json
+-         data structures and throughout the codebase. (was using
+-         undefined in json data, which violates the json standard).
+
+2008-12-16      v0.04
+- TEST FIX: Fix for IE5.5 and IE6. There was some odd interaction between
+-           .html tests, JSAN, and using JSAN.use('Test.More').
+-           Updated to statically include Test.Builder and Test.More.
+-           IE6 now completes all tests. Tests confirmed passing on:
+-               FF1.5, FF2, FF3, IE6, IE7, Opera9, Opera10, Chrome
+
+2008-12-15      v0.03
+- TEST FIX: Fixed improperly formatted json data in test datasets.
+-           This caused IE to fail some tests.
+
+2008-12-15      v0.02
+- BUGFIX: IE broke while trying to create plural functions.
+-         Updated to use "new Function" instead of eval'ing the code.
+
+2008-11-13      v0.01
+- Initial version.

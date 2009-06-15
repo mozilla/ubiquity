@@ -44,30 +44,38 @@ var EXPORTED_SYMBOLS = ["LocalizationUtils","localizeCommand"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/setup.js");
+Components.utils.import("resource://ubiquity/scripts/gettext/lib/Gettext.js");
 
 const languageCode = UbiquitySetup.languageCode;
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Application = (Cc["@mozilla.org/fuel/application;1"]
-                     .getService(Ci.fuelIApplication));
-
-const BUNDLE_SVC = Components.classes['@mozilla.org/intl/stringbundle;1']
-                   .getService(Components.interfaces.nsIStringBundleService);
 
 var commandContext = null;
 var feedContext = null;
 var displayContext = null;
 var localStringBundles = {};
+var loadedPo = {};
+
+//var document = {getElementsByTagName: function()[]};
+Gettext.prototype.get_lang_refs = function()[];
+
+var myGettext = new Gettext();
 
 var LocalizationUtils = {
+  GETTEXT: myGettext,
+/*  _initGettext: function() {
+    this.GETTEXT.get_lang_refs = function() [];
+  },*/
+  BUNDLE_SVC: Components.classes['@mozilla.org/intl/stringbundle;1']
+                   .getService(Components.interfaces.nsIStringBundleService),
 
   // this command only works with local standard-feeds commands
   loadLocalStringBundle: function LU_loadLocalStringBundle (feedKey) {
     if (!localStringBundles[feedKey]) {
       try {
-        localStringBundles[feedKey] = BUNDLE_SVC.createBundle("resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties");
+        localStringBundles[feedKey] = this.BUNDLE_SVC.createBundle("resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties");
       } catch(e) {
-        dump("couldn't find or parse resource://ubiquity/standard-feeds/localization/firefox."+languageCode+".properties\n");
+        dump("couldn't find or parse resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties\n");
         return false;
       }
       dump("loaded resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties\n")
@@ -75,13 +83,47 @@ var LocalizationUtils = {
     return true;
   },
 
+  // this command only works with local standard-feeds commands
+  loadLocalPo: function LU_loadLocalPo (feedKey) {
+    if (!loadedPo[feedKey]) {
+      try {
+        var url = "resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po";
+        
+        var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                            .createInstance(Components.interfaces.nsIXMLHttpRequest);
+        req.open('GET', url, false);
+        req.overrideMimeType("text/plain; charset=utf-8");
+        req.send(null);
+        if (!req.responseText)
+          return false;
+
+        var parsed = this.GETTEXT.parse_po(req.responseText);
+            
+        rv = {};
+        rv[feedKey] = parsed;
+
+        this.GETTEXT.parse_locale_data(rv);
+        
+        loadedPo[feedKey] = parsed;
+      } catch(e) {
+        dump("couldn't find or parse resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po\n");
+        return false;
+      }
+      dump("loaded resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po\n")
+    }
+    return true;
+  },
+  
   getLocalFeedKey: function LU_getLocalFeedKey(path) {
     return path.replace(/^.*\/(\w+)\.\w+$/g,'$1');
   },
   
   getStringBundleForFeed: function LU_getStringBundleForFeed (feedKey) {
-    if (!localStringBundles[feedKey])
+    if (!localStringBundles[feedKey]) 
       this.loadLocalStringBundle(feedKey);
+    if (!loadedPo[feedKey]) {
+      this.loadLocalPo(feedKey);
+    }
     return localStringBundles[feedKey];
   },
 
@@ -148,14 +190,14 @@ var localizeCommand = function(cmd) {
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
 
   var arrayProperties = ['names','contributors'];
-  for (let key in arrayProperties) {
+  for each (let key in arrayProperties) {
     cmd[key] = getLocalizedProperty(feedKey, cmd, key);
     if (typeof cmd[key] === "string")
       cmd[key] = cmd[key].split(/\s*\|\s{0,}/);
   }
       
-  var stringProperties = ['help']
-  for (let key in stringProperties)
+  var stringProperties = ['help', 'description'];
+  for each (let key in stringProperties)
     cmd[key] = getLocalizedProperty(feedKey, cmd, key);    
 
   return cmd;
