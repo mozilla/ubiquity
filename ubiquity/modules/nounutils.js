@@ -43,6 +43,14 @@
 
 var EXPORTED_SYMBOLS = ["NounUtils"];
 
+/* Make a namespace object called NounUtils, to export,
+ * which contains each function in this file.
+ * TODO: Why not just say:
+ *
+ * NounUtils = { NounType: NounType, makeSugg: makeSugg };
+ *
+ * the set of functions we expose isn't going to change much or at all, and
+ * it would be easier to read than this obfuscated syntax. - Jono*/
 var NounUtils = ([f for each (f in this) if (typeof f === "function")]
                  .reduce(function(o, f)(o[f.name] = f, o), {}));
 
@@ -75,7 +83,7 @@ function NounType(label, expected, defaults) {
   expected = maybe_qw(expected);
   defaults = maybe_qw(defaults);
 
-  http://bit.ly/CkhjS#instanceof-considered-harmful
+ //http://bit.ly/CkhjS#instanceof-considered-harmful
   var maker = NounType["_from" +
                        Object.prototype.toString.call(expected).slice(8, -1)];
   for (let [k, v] in Iterator(maker(expected))) this[k] = v;
