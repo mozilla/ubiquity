@@ -178,87 +178,42 @@ var noun_type_search_engine = {
 
 // ** {{{ noun_type_tag }}} **
 //
-// **//FIXME//**
+// Suggests the input as comma separated tags,
+// plus completions based on existing tags.
+// Defaults to all tags.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text, html}}} : comma separated tags
+// * {{{data}}} : an array of tags
 
 var noun_type_tag = {
   label: "tag1[,tag2 ...]",
-  suggest: function(fragment) {
-    var allTags = (Components.classes["@mozilla.org/browser/tagging-service;1"]
-                   .getService(Components.interfaces.nsITaggingService)
-                   .allTags);
+  default: function() [CmdUtils.makeSugg(tag, null, [tag])
+                       for each (tag in PlacesUtils.tagging.allTags)],
+  suggest: function(text) {
+    text = Utils.trim(text);
+    if (!text) return [];
 
-    if(fragment.length < 1) {
-      return allTags.map(function(tag) {
-        return CmdUtils.makeSugg(tag, null, [tag]);
-      });
-    }
-
-    fragment = fragment.toLowerCase();
-    var numTags = allTags.length;
-    var suggestions = [];
-
+    var {allTags} = PlacesUtils.tagging;
     // can accept multiple tags, seperated by a comma
     // assume last tag is still being typed - suggest completions for that
-
-    var completedTags = fragment.split(",").map(function(tag) {
-      return Utils.trim(tag);
-    });;
-
-
+    var completedTags = text.split(/\s{0,},\s{0,}/);
     // separate last tag in fragment, from the rest
     var uncompletedTag = completedTags.pop();
+    completedTags = completedTags.filter(Boolean);
 
-    completedTags = completedTags.filter(function(tagName) {
-      return tagName.length > 0;
-    });
-    var fragmentTags = "";
-    if(completedTags.length > 0)
-      fragmentTags = completedTags.join(",");
-
-    if(uncompletedTag.length > 0) {
-      if(fragmentTags.length > 0) {
-        suggestions.push(CmdUtils.makeSugg(
-          fragmentTags + "," + uncompletedTag,
-          null,
-          completedTags.concat([uncompletedTag])
-         ));
-       } else {
-         suggestions.push(CmdUtils.makeSugg(
-                             uncompletedTag,
-                             null,
-                             completedTags
-                          ));
-       }
-
-    } else {
-      suggestions.push(CmdUtils.makeSugg(
-                         fragmentTags,
-                         null,
-                         completedTags
-                       ));
+    var suggs = [CmdUtils.makeSugg(null, null,
+                                   (uncompletedTag
+                                    ? completedTags.concat(uncompletedTag)
+                                    : completedTags))];
+    if (uncompletedTag) {
+      let utag = uncompletedTag.toLowerCase();
+      for each (let tag in allTags)
+        // only match from the beginning of a tag name (not the middle)
+        if (tag.length > utag.length &&
+            tag.toLowerCase().indexOf(utag) === 0)
+          suggs.push(CmdUtils.makeSugg(null, null, completedTags.concat(tag)));
     }
-
-    for(var i = 0; i < numTags; i++) {
-      // handle cases where user has/hasn't typed anything for the current uncompleted tag in the fragment
-      // and only match from the begining of a tag name (not the middle)
-      if(uncompletedTag.length < 1 || allTags[i].indexOf(uncompletedTag) == 0) {
-        // only if its not in the list already
-        if(completedTags.indexOf(allTags[i]) == -1)
-          suggestions.push(CmdUtils.makeSugg(
-                             fragmentTags + "," + allTags[i],
-                             null,
-                             completedTags.concat([allTags[i]])
-         ));
-      }
-    }
-
-    return suggestions;
+    return suggs;
   }
 };
 

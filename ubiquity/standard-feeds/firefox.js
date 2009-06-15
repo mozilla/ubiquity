@@ -2,6 +2,8 @@
 // HELPER OBJECT FOR CLOSING WINDOWS
 // -----------------------------------------------------------------
 
+Cu.import("resource://gre/modules/utils.js");
+
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
 var extApplication = { // helper method for correct quitting/restarting
@@ -100,7 +102,7 @@ function tabPreview(msg)(
 
 CmdUtils.CreateCommand({
   names: ["switch-tab"],
-  arguments: [{role: 'object', label: 'name', nountype: noun_type_tab}],
+  argument: noun_type_tab,
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
   execute: function(args) {
@@ -121,13 +123,12 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["close-tab"],
-  arguments: [{role: 'object', label: 'name', nountype: noun_type_tab}],
+  argument: noun_type_tab,
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
-  description: ("Closes the tab that matches the given name, " +
-                "or the current tab if no name is supplied."),
+  description: ("Closes the tab that matches the given title or URL " +
+                "or the current tab if no tab matches."),
   execute: function(args) {
-    var tab = args.object.data;
-    (tab || Application.activeWindow.activeTab).close();
+    (args.object.data || Application.activeWindow.activeTab).close();
   },
   preview: tabPreview("Closes"),
 });
@@ -167,18 +168,14 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["count-tabs"],
   description: "Counts the number of opened tabs.",
-  arguments: [{role: 'instrument', label: 'filter', nountype: noun_arb_text}],
+  arguments: {object_filter: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {
-    var {text} = args.instrument || {text: null};
-    displayMessage({
-      icon: this.icon,
-      title: this.name,
-      text: this._count(text, true)});
+    var {text} = args.object || {text: null};
+    displayMessage(this._count(text, true), this);
   },
   preview: function(pblock, args) {
-    var {text} = args.instrument || {text: null};
-    pblock.innerHTML = this._count(text);
+    pblock.innerHTML = this._count(args.object.text);
   },
   _count: function(text, plain) {
     var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
@@ -293,59 +290,41 @@ CmdUtils.CreateCommand({
 // command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
   names: ["tag"],
-  homepage: "http://autonome.wordpress.com/",
-  author: {name: "Dietrich Ayala", email: "dietrich@mozilla.com"},
+  description: "Adds tags to the current page.",
+  help: "Use commas to separate multiple tags.",
+  author: {
+    name: "Dietrich Ayala",
+    email: "dietrich@mozilla.com",
+    homepage: "http://autonome.wordpress.com/"},
   license: "MPL/GPL/LGPL",
-  arguments: [{role: 'object', nountype: noun_arb_text}],
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
-  description: "Adds a tag to describe the current page.",
-  preview: function(aEl, args) {
-    var aTagsString = args.object || {text: ''};
-    aEl.innerHTML = ("Describe the current page with tags" +
-                     (aTagsString.text.length ? " (" +
-                      aTagsString.text + ")" : "."));
+  argument: noun_type_tag,
+  preview: function(aEl, {object: {html}}) {
+    aEl.innerHTML = ("Describes the current page with" +
+                     (html ? ": <p><b>" + html + "</b></p>" : " tags."));
   },
-  execute: function(args) {
-    var aTagsString = args.object || {text: ''};
-    var recentWindow = Utils.currentChromeWindow;
-    var doc = recentWindow.content.document;
-    if (!doc)
-      return;
+  execute: function({object: {text, data}}) {
+    var doc = CmdUtils.getDocument();
+    var {tagging, bookmarks} = PlacesUtils;
+    var currentURI = Utils.url(doc.URL);
 
-    var iosvc = Cc["@mozilla.org/network/io-service;1"].
-                getService(Ci.nsIIOService);
-    var currentURI = iosvc.newURI(doc.location, null, null);
-    var bookmarks = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].
-                    getService(Ci.nsINavBookmarksService);
     if (!bookmarks.isBookmarked(currentURI)) {
       // create unfiled bookmark
       bookmarks.insertBookmark(bookmarks.unfiledBookmarksFolder, currentURI,
                                bookmarks.DEFAULT_INDEX, doc.title);
     }
-
-    // if there's a comma, split on commas, otherwise use spaces
-    var splitChar = " ";
-    if (aTagsString.text.indexOf(",") != -1)
-      splitChar = ",";
-    var tags = aTagsString.text.split(splitChar);
-
-    // trim leading/trailing spaces
-    tags = tags.map(Utils.trim);
-
-    var tagging = Cc["@mozilla.org/browser/tagging-service;1"].
-                  getService(Ci.nsITaggingService);
-    tagging.tagURI(currentURI, tags);
+    tagging.tagURI(currentURI, data);
   }
 });
 
 CmdUtils.CreateCommand({
-  names: "bookmarklet | bml | js",
+  names: "run-bookmarklet | bml | js",
   description: "Runs a bookmarklet from your favorites.",
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
-  arguments: {object_title: noun_type_bookmarklet},
+  argument: noun_type_bookmarklet,
   execute: function({object}) {
     if (object.data) CmdUtils.getWindow().location = object.data;
     else {
