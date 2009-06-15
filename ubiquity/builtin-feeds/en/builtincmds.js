@@ -58,13 +58,13 @@ CmdUtils.CreateCommand({
   description: "" + (
     <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
       Or, enter the name of a command to get help on that command.</>),
-  arguments: noun_type_command,
+  argument: noun_type_command,
   preview: function(pblock, {object}) {
     pblock.innerHTML = object.html || this.description;
   },
-  execute: function({object: {text}}) {
-    if (text)
-      Utils.openUrlInBrowser(CmdList + "##" + text);
+  execute: function({object: {data}}) {
+    if (data)
+      Utils.openUrlInBrowser(CmdList + "#" + data.id);
     else
       Utils.focusUrlInBrowser(Help);
   }
@@ -91,7 +91,7 @@ CmdUtils.CreateCommand({
   names: ["settings", "skin-list"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
-    <>Takes you to the <a href={Settings}>Settings</a> page,
+    <>Takes you to the <a href={Settings}>settings</a> page,
       where you can change your skin, key combinations, etc.</>),
   execute: Settings,
 });
@@ -100,7 +100,7 @@ CmdUtils.CreateCommand({
   name: "report-bug",
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
-    <>Takes you to the <a href={BugReport}>Bug Report</a> page.</>),
+    <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
   execute: BugReport,
 });
 

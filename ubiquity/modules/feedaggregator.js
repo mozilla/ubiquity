@@ -60,25 +60,17 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   feedManager.addListener("feed-change", onFeedManagerChange);
 
   function makeCmdWithDisabler(cmd) {
-    let newCmd = {
-      get disabled() {
-        if (cmd.name in disabledCommands)
-          return disabledCommands[cmd.name];
-        else
-          return null;
-      },
+    return {
+      __proto__: cmd,
+      get disabled() this.id in disabledCommands,
       set disabled(value) {
-        if (disabledCommands[cmd.name] != value) {
-          disabledCommands[cmd.name] = value;
-          hub.notifyListeners("disabled-command-change",
-                              {name: cmd.name,
-                               value: value});
-        }
+        if (value)
+          disabledCommands[this.id] = 1;
+        else
+          delete disabledCommands[this.id];
+        hub.notifyListeners("disabled-command-change");
       }
     };
-
-    newCmd.__proto__ = cmd;
-    return newCmd;
   }
 
   self.onPageLoad = function FA_onPageLoad(document) {

@@ -173,7 +173,8 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
        */
       sandbox.context = context;
       LocalizationUtils.setLocalizationContext(feedUri, cmd.name, 'execute');
-      return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
+      return commandObject.execute.apply(commandObject,
+                                         Array.slice(arguments, 1));
     },
     feedUri: feedUri
   };
@@ -185,7 +186,8 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
        */
       sandbox.context = context;
       LocalizationUtils.setLocalizationContext(feedUri, cmd.name, 'preview');
-      return commandObject.preview.apply(cmd, Array.slice(arguments, 1));
+      return commandObject.preview.apply(commandObject,
+                                         Array.slice(arguments, 1));
     };
 
   return finishCommand(cmd);

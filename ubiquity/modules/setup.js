@@ -362,20 +362,18 @@ let UbiquitySetup = {
 };
 
 function DisabledCmdStorage(prefName) {
-  let str = Application.prefs.getValue(prefName, '{}');
-  let disabledCommands = Utils.decodeJson(str);
+  var disabledCommands =
+    Utils.json.decode(Application.prefs.getValue(prefName, "{}"));
 
   this.getDisabledCommands = function getDisabledCommands() {
     return disabledCommands;
   };
 
-  function onDisableChange(eventName, value) {
-    disabledCommands[value.name] = value.value;
-    Application.prefs.setValue(prefName,
-                               Utils.encodeJson(disabledCommands));
-  };
+  function onDisableChange(eventName) {
+    Application.prefs.setValue(prefName, Utils.json.encode(disabledCommands));
+  }
 
   this.attach = function attach(cmdSource) {
-    cmdSource.addListener('disabled-command-change', onDisableChange);
+    cmdSource.addListener("disabled-command-change", onDisableChange);
   };
 }

@@ -148,13 +148,11 @@ function fillTableRowForCmd(row, cmd, className) {
     (cmd.disabled ? '' : ' checked="checked"') + '/></td>'
   );
 
-  // For all commands in the table, unbind any 'change' method, bind to
-  // onDisableOrEnableCmd.
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
   var cmdElement = jQuery(
     '<td class="command">' +
-    '<a><img class="favicon"/></a>' +
+    '<a class="id"><img class="favicon"/></a>' +
     '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
     '<span class="description"></span>' +
     '<div class="synonyms-container light">' +
@@ -167,12 +165,12 @@ function fillTableRowForCmd(row, cmd, className) {
     '</td>'
   );
 
-  cmdElement.find("a").attr("name", "#" + cmd.name);
-  
-  // if Parser 2
-  if (UbiquitySetup.parserVersion == 2 && (!cmd.names || !cmd.arguments)) {
+  cmdElement.find(".id").attr("name", cmd.id);
+
+  if (UbiquitySetup.parserVersion === 2 && !cmd.arguments) {
     cmdElement.addClass("not-loaded");
-    cmdElement.find(".name").attr("title",
+    cmdElement.find(".name").attr(
+      "title",
       "This command was not loaded as it is incompatible with Parser 2.");
   }
 
@@ -181,11 +179,10 @@ function fillTableRowForCmd(row, cmd, className) {
   else
     cmdElement.find(".favicon").remove();
 
-  if (cmd.homepage)
-    cmdElement.find(".homepage")[0].innerHTML = (
-      'View more information at <a href="' +
-      escapeHtml(cmd.homepage) + '">' +
-      escapeHtml(cmd.homepage) + '</a>.');
+  var {homepage} = cmd;
+  if (homepage)
+    cmdElement.find(".homepage")[0].innerHTML =
+      <>View more information at <a href={homepage}>{homepage}</a></>;
 
   if ((cmd.synonyms || 0).length)
     cmdElement.find(".synonyms")
@@ -194,14 +191,14 @@ function fillTableRowForCmd(row, cmd, className) {
   if (cmd.description)
     cmdElement.find(".description")[0].innerHTML = cmd.description;
 
-  var authors = cmd.author || cmd.authors;
+  var authors = cmd.authors || cmd.author;
   if (authors)
     cmdElement.find(".author")
       .append("by ",
               [formatCommandAuthor(a)
                for each (a in [].concat(authors))].join(", "));
 
-  var contributors = cmd.contributor || cmd.contributors;
+  var contributors = cmd.contributors || cmd.contributor;
   if (contributors)
     cmdElement.find(".contributors")
       .append("contributed by ",
@@ -315,15 +312,14 @@ function getFeedForCommand(feedMgr, cmd) {
   return null;
 }
 
+// Bind this to checkbox "change".
 function onDisableOrEnableCmd() {
   // update the preferences, when the user toggles the active
   // status of a command.
-  // Bind this to checkbox 'change'.
-  var name = $(this).closest("tr").find(".name").text();
-  var cmdSource = UbiquitySetup.createServices().commandSource;
-  var cmd = cmdSource.getCommand(name);
+  var id = $(this).closest("tr").find(".id").attr("name");
+  var {commandSource} = UbiquitySetup.createServices();
 
-  cmd.disabled = !this.checked;
+  commandSource.getCommand(id).disabled = !this.checked;
 }
 
 // this was to make both subscribed and unsubscribed list entries, but is
