@@ -328,6 +328,9 @@ var noun_type_url = {
 // * {{{data.id}}} : id
 // * {{{data.feed}}} : feed URL
 // * {{{data.site}}} : site URL
+// * {{{data.items}}} : an array of items loaded in the livemark
+//
+// {{{feeds} is the getter for all livemarks.
 
 var noun_type_livemark = {
   label: "title",
@@ -337,17 +340,27 @@ var noun_type_livemark = {
     var {feeds} = this;
     if (!feeds.length) return [];
 
-    var {bookmarks, livemarks} = PlacesUtils;
+    var {bookmarks} = PlacesUtils;
     var suggs =  [CmdUtils.makeSugg(bookmarks.getItemTitle(id), null,
-                                    { id: id,
-                                      feed: livemarks.getFeedURI(id).spec,
-                                      site: livemarks.getSiteURI(id).spec })
+                                    {id: id, __proto__: this._proto_})
                   for each (id in feeds)];
     return CmdUtils.grepSuggs(text, suggs);
   },
   get feeds()(Cc["@mozilla.org/browser/annotation-service;1"]
               .getService(Ci.nsIAnnotationService)
               .getItemsWithAnnotation("livemark/feedURI", {})),
+  _proto_: {
+    get feed() PlacesUtils.livemarks.getFeedURI(this.id).spec,
+    get site() PlacesUtils.livemarks.getSiteURI(this.id).spec,
+    get items() {
+      var list = [], {root} = PlacesUtils.getFolderContents(this.id);
+      root.containerOpen = true;
+      for (let i = 0, c = root.childCount; i < c; ++i)
+        list[i] = root.getChild(i);
+      root.containerOpen = false;
+      return list;
+    },
+  },
 };
 
 // ** {{{ noun_type_command }}} **

@@ -2,8 +2,6 @@
 // HELPER OBJECT FOR CLOSING WINDOWS
 // -----------------------------------------------------------------
 
-Cu.import("resource://gre/modules/utils.js");
-
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
 var extApplication = { // helper method for correct quitting/restarting
@@ -447,19 +445,15 @@ CmdUtils.CreateCommand({
   execute: function({object: {data}}) {
     if (data) this._open(data.site);
   },
-  preview: function(pbl, {object: {data}}) {
+  preview: function(pb, {object: {data}}) {
     if (!data) {
-      pbl.innerHTML = this.description;
+      pb.innerHTML = this.description;
       return;
     }
-    var dict = {}, {root} = PlacesUtils.getFolderContents(data.id);
-    root.containerOpen = true;
-    for (var i = 0, c = root.childCount; i < c; ++i) {
-      var node = root.getChild(i);
-      dict[node.uri] = <span> <a href={node.uri}>{node.title}</a> </span>;
-    }
-    root.containerOpen = false;
-    CmdUtils.previewList(pbl, dict, this._open);
+    var dict = {};
+    for each (var it in data.items)
+      dict[it.uri] = <span> <a href={it.uri}>{it.title}</a> </span>;
+    CmdUtils.previewList(pb, dict, this._open);
   },
   _open: function(u) { Utils.openUrlInBrowser(u) },
 });
