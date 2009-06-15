@@ -180,7 +180,7 @@ Parser.prototype = {
     for each (let verb in this._verbList) {
       if ((verb.feedUri || 0).scheme === "file") {
         let feedKey = LocalizationUtils.getLocalFeedKey(verb.feedUri.path);
-        LocalizationUtils.loadLocalStringBundle(feedKey);
+        LocalizationUtils.loadLocalPo(feedKey);
       }
     }
 

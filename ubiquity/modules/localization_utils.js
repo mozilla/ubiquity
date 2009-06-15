@@ -70,33 +70,27 @@ var LocalizationUtils = {
                    .getService(Components.interfaces.nsIStringBundleService),
 
   // this command only works with local standard-feeds commands
-  loadLocalStringBundle: function LU_loadLocalStringBundle (feedKey) {
-    if (!localStringBundles[feedKey]) {
-      try {
-        localStringBundles[feedKey] = this.BUNDLE_SVC.createBundle("resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties");
-      } catch(e) {
-        dump("couldn't find or parse resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties\n");
-        return false;
-      }
-      dump("loaded resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".properties\n")
-    }
-    return true;
-  },
-
-  // this command only works with local standard-feeds commands
   loadLocalPo: function LU_loadLocalPo (feedKey) {
     if (!loadedPo[feedKey]) {
+      var data;
+      var url = "resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po";
       try {
-        var url = "resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po";
         
         var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
                             .createInstance(Components.interfaces.nsIXMLHttpRequest);
         req.open('GET', url, false);
         req.overrideMimeType("text/plain; charset=utf-8");
         req.send(null);
-        if (!req.responseText)
-          return false;
+        data = req.responseText;
+      } catch(e) {
+//        dump("there was a problem loading "+url+"\n");
+        return false;
+      }
+      
+      if (!data)
+        return false;
 
+      try {
         var parsed = this.GETTEXT.parse_po(req.responseText);
             
         rv = {};
@@ -105,41 +99,46 @@ var LocalizationUtils = {
         this.GETTEXT.parse_locale_data(rv);
         
         loadedPo[feedKey] = parsed;
+        dump(parsed);
       } catch(e) {
-        dump("couldn't find or parse resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po\n");
+        dump("couldn't parse "+url+"\n");
         return false;
       }
-      dump("loaded resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po\n")
+      dump("loaded "+url+"\n");
     }
     return true;
+  },
+  
+  getLoadedPo: function LU_getLoadedPo() {
+    return loadedPo;
   },
   
   getLocalFeedKey: function LU_getLocalFeedKey(path) {
     return path.replace(/^.*\/(\w+)\.\w+$/g,'$1');
   },
   
-  getStringBundleForFeed: function LU_getStringBundleForFeed (feedKey) {
-    if (!localStringBundles[feedKey]) 
-      this.loadLocalStringBundle(feedKey);
-    if (!loadedPo[feedKey]) {
-      this.loadLocalPo(feedKey);
-    }
-    return localStringBundles[feedKey];
-  },
-
-  // getLocalizedString code from http://www.xuldev.org/blog/?p=45
-  getLocalizedString: function LU_getLocalizedString (feedKey, key, string, replacements) {
-    let stringBundle = this.getStringBundleForFeed(feedKey);
+  getLocalizedString: function LU_getLocalizedString (feedKey, key) {
     try {
-      if ( !replacements ) {
-        dump('getstringfromname\n') ;
-        return stringBundle.GetStringFromName(key);
-      }else
-        dump('formatStringFromName\n') ;
-        return stringBundle.formatStringFromName(key, replacements, replacements.length);
+      dump('gettext('+key+')\n');
+      dump('return: '+this.GETTEXT.dgettext(feedKey,key)+'\n');
+      return this.GETTEXT.dgettext(feedKey,key);
+    } catch(ex) {
+      return key;
+    }
+  },
+  
+  getLocalizedStringFromContext: function LU_getLocalizedStringFromContext
+                                 (feedKey, context, key) {
+    try {
+      dump('gettext('+context+','+key+')\n');
+      let rv = this.GETTEXT.dpgettext(feedKey,context, key);
+      if (rv == key) // if nothing was found in this context, try the general context
+        rv = this.GETTEXT.dgettext(feedKey,key);
+      dump('return: '+rv+'\n');
+      return rv;
     } catch(ex) {
       dump('key '+key+' not found\n');
-      return string;
+      return key;
     }
   },
   
@@ -167,15 +166,16 @@ var LocalizationUtils = {
   get feedContext() { return feedContext; },
   get displayContext() { return displayContext; },
   
-  getLocalized: function LU_getLocalized(string, replacements) {
+  getLocalized: function LU_getLocalized(string) {
     
-    let key = this.commandContext + '.'
-              + (this.displayContext ? displayContext+'.' : '') 
-              + (string.toUpperCase().replace(/\s+/g,'_'));
+    let context = this.commandContext
+              + (this.displayContext ? '.' + displayContext : '');
     
     let feedKey = this.getLocalFeedKey(this.feedContext.asciiSpec);
     
-    return this.getLocalizedString(feedKey, key, string, replacements);
+    this.loadLocalPo(feedKey);
+    
+    return this.getLocalizedStringFromContext(feedKey, context, string);
   }
 
 };
@@ -188,6 +188,8 @@ var localizeCommand = function(cmd) {
   dump('localizing cmd '+cmd.names[0]+' now\n');
 
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
+
+  LocalizationUtils.loadLocalPo(feedKey);
 
   var arrayProperties = ['names','contributors'];
   for each (let key in arrayProperties) {
@@ -205,5 +207,8 @@ var localizeCommand = function(cmd) {
 
 var getLocalizedProperty = function(feedKey, cmd, property) {
   let key = cmd.names[0] + '.' + property;
-  return LocalizationUtils.getLocalizedString(feedKey, key, cmd[property]);
+  let rv = LocalizationUtils.getLocalizedString(feedKey, key);
+  if (rv == key)
+    rv = cmd[property];
+  return rv;
 }

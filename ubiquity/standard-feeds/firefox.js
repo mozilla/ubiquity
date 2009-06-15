@@ -276,8 +276,7 @@ CmdUtils.CreateCommand({
   description: "Zooms the Firefox window in or out.",
   preview: function(pBlock, args) {
     var replacement = args.object.text || "a given percentage";
-    pBlock.innerHTML = _("Zooms the Firefox window to %S of its normal size.",
-                         [replacement]);
+    pBlock.innerHTML = CmdUtils.renderTemplate(_("Zooms the Firefox window to ${replacement} of its normal size."),{replacement: replacement});
   },
   execute: function(args) {
     if (args.object.data) {
