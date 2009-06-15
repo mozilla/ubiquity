@@ -31,16 +31,15 @@ CmdUtils.CreateCommand({
       usernameText = args.as.text;
     }
     var previewTemplate = (
-      "<div class='twitter'>Updates your Twitter status ${username} to:<br/>" +
+      "<div class='twitter'>"+_("Updates your Twitter status ${username} to:")+"<br/>" +
       "<b class='status'>${status}</b><br/><br/>" +
-      "Characters remaining: <b>${chars}</b>" +
-      "<p><small>tip: tweet @mozillaubiquity for help</small></p></div>");
+      _("Characters remaining: <b>${chars}</b>") +
+      "<p><small>"+_("tip: tweet @mozillaubiquity for help")+"</small></p></div>");
     var truncateTemplate = (
-      "<strong>The last <b>${truncate}</b> characters" +
-      " will be truncated!</strong>");
+      "<strong>"+_("The last <b>${truncate}</b> characters will be truncated!")+"</strong>");
     var previewData = {
       status: <>{statusText}</>.toXMLString(),
-      username: usernameText && "(For user <b>" + usernameText + "</b>)",
+      username: usernameText && _("(For user <b>%S</b>)",[usernameText]),
       chars: TWITTER_STATUS_MAXLEN - statusText.length
     };
 
@@ -59,7 +58,7 @@ CmdUtils.CreateCommand({
   execute: function(args) {
     var statusText = args.object.text;
     if(statusText.length < 1) {
-      this._show("requires a status to be entered");
+      this._show(_("requires a status to be entered"));
       return;
     }
 
@@ -79,12 +78,12 @@ CmdUtils.CreateCommand({
         data: updateParams,
         dataType: "json",
         error: function() {
-          me._show("error - status not updated");
+          me._show(_("error - status not updated"));
         },
         success: function() {
           me._show(/^d /.test(statusText)
-                   ? "direct message sent"
-                   : "status updated");
+                   ? _("direct message sent")
+                   : _("status updated"));
         },
         username: login.username,
         password: login.password
@@ -110,8 +109,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "digg",
-  synonyms: ["share-on-digg"],
+  names: ["digg","share-on-digg"],
   icon: "http://digg.com/favicon.ico",
   homepage: "http://www.gialloporpora.netsons.org",
   description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
@@ -138,7 +136,7 @@ CmdUtils.CreateCommand({
       link: win.location.href,
     });
 
-    var html= 'Submit or digg this page. Checking if this page has already been submitted...';
+    var html= _('Submit or digg this page. Checking if this page has already been submitted...');
     pblock.innerHTML = html;
 
     CmdUtils.previewAjax(pblock, {
@@ -152,9 +150,9 @@ CmdUtils.CreateCommand({
         var diggs = el.attr("diggs");
 
         if (diggs == null){
-          html = 'Submit this page to Digg';
+          html = _('Submit this page to Digg');
           if (selected_text.length > 0) {
-            html += " with the description:<br/> <i style='padding:10px;color: #CCC;display:block;'>" + selected_text + "</i>";
+            html += _(" with the description:")+"<br/> <i style='padding:10px;color: #CCC;display:block;'>" + selected_text + "</i>";
             if (selected_text.length > 375){
               html +='<br/> Description can only be 375 characters. The last <b>'
               + (selected_text.length - 375) + '</b> characters will be truncated.';
