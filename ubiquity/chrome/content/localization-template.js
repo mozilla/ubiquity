@@ -40,12 +40,9 @@ var Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 var escapeHtml = Utils.escapeHtml;
-
-// TODO the following code needs to make its way onto any page that has
-// a version string:
-//  $(".version").text(UbiquitySetup.version);
 
 function displayTemplate(feedUri) {
   $('#template').val('');
@@ -59,23 +56,24 @@ function displayTemplate(feedUri) {
     if (feed.srcUri.asciiSpec == feedUri) {
       foundFeed = true;
       for (let cmdId in feed.commands) {
-        addCmdTemplate(commands[cmdId]);
+        addCmdTemplate(commands[cmdId],feed.commandCode[cmdId]);
         $('#template').val($('#template').val()+'\n');
       }
     }
   }
-  //populateYeTable(feedMgr, cmdSource);
 }
 
-var localizableProperties = ['names','contributors','help'];
+var localizableProperties = ['names','contributors','help','description'];
 
-function addCmdTemplate(cmd) {
+function addCmdTemplate(cmd,cmdCode) {
   let template = $('#template');
   let value = template.val();
   let name = cmd.names[0];
   value += '# '+name+' command:\n';
   for each (let key in localizableProperties)  
     value += cmdPropertyLine(cmd,key) + '\n';
+  value += cmdInlineLine(cmd,cmdCode,'preview');
+  value += cmdInlineLine(cmd,cmdCode,'execute');
   template.val(value);
 }
 
@@ -93,12 +91,22 @@ function cmdPropertyLine(cmd,property) {
   return ret;
 }
 
-function viewSourceLink(feed)(
-  A("view-source:" + feed.viewSourceUri.spec,
-    ("[view " +
-     (feed.canAutoUpdate ? "auto-updated " : "") +
-     "source]"),
-    "feed-action"));
+var inlineChecker = /(?:_\()\s*(["'])((?:[^\1]|\\\1)+?)(?:\1)[,)]/gim;
+
+function cmdInlineLine(cmd,cmdCode,context) {
+  let name = cmd.names[0];
+  let ret  = name+'.'+context+'=';
+  let script = cmdCode[context];
+//  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
+  let match;
+  while (match = inlineChecker.exec(script)) {
+//    Utils.log(match[2]);
+//    Utils.log(inlineChecker.lastIndex);
+    ret += match[2]+'\n';
+  }
+  ret += "\n";
+  return ret;
+}
 
 function setupHelp() {
   var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
