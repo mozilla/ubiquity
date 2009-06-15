@@ -189,9 +189,6 @@ var localizeCommand = function(cmd) {
 
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
   
-  // let's keep the original reference name for posterity
-  cmd.originalName = cmd.names[0];
-  
   if (!LocalizationUtils.loadLocalPo(feedKey))
     return cmd;
 
@@ -210,7 +207,7 @@ var localizeCommand = function(cmd) {
 }
 
 var getLocalizedProperty = function(feedKey, cmd, property) {
-  let key = cmd.originalName + '.' + property;
+  let key = cmd.name + '.' + property;
   let rv = LocalizationUtils.getLocalizedString(feedKey, key);
   if (rv == key)
     rv = cmd[property];

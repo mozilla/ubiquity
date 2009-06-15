@@ -68,7 +68,7 @@ var localizableProperties = ['names','contributors','help','description'];
 function addCmdTemplate(cmd,cmdCode) {
   let template = $('#template');
   let value = template.val();
-  let name = cmd.originalName;
+  let name = cmd.name;
   value += '#. '+name+' command:\n';
   for each (let key in localizableProperties)  
     value += cmdPropertyLine(cmd,key) + '\n';
@@ -78,7 +78,7 @@ function addCmdTemplate(cmd,cmdCode) {
 }
 
 function cmdPropertyLine(cmd,property) {
-  let name = cmd.originalName;
+  let name = cmd.name;
   let ret  = 'msgid "'+name+'.'+property+'"\n';
   let value = cmd[property];
   if (value) {
@@ -94,7 +94,7 @@ function cmdPropertyLine(cmd,property) {
 
 var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
 function cmdInlineLine(cmd,cmdCode,context) {
-  let name = cmd.originalName;
+  let name = cmd.name;
   let ret  = '';
   let script = cmdCode[context];
 //  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
@@ -123,6 +123,8 @@ $(function(){
   setupHelp();
   if (window.location.hash) {
     feedUri = window.location.hash.slice(1);
+    $('.feedKey').html(feedUri.replace(/^.*\/(\w+)\.\w+$/g,'$1'));
+    $('.localization-dir').html(feedUri.replace(/^(\w+ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1')+'standard-feeds/localization/');
     displayTemplate(feedUri);
   } else {
     // no feed was given.
