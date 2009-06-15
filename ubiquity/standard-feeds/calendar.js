@@ -9,8 +9,12 @@ const Apology = ("<p>" +
  here.  Should we be? */
 CmdUtils.CreateCommand({
   names: ["add (to calendar)"],
-  arguments: {object: noun_arb_text,
-              goal: ["calendar"]},   // NounUtils not in the namespace??
+  arguments: [{ role: "object",
+                nountype: noun_arb_text,
+                label: "event"},
+              { role: "goal",
+                nountype: ["calendar"],
+                label: "calendar"} ],   // NounUtils not in the namespace??
   icon : "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (
