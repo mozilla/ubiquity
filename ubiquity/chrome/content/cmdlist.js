@@ -85,7 +85,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   if (+feed.date)
     cell.append('<span class="feed-date">' +
                 feed.date.toLocaleString() +
-                '</span><br/>')
+                '</span><br/>');
   // add unsubscribe link (but not for built-in feeds)
   if (!feed.isBuiltIn)
     cell.append(linkToAction("[unsubscribe]",
@@ -99,7 +99,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   // if it's one of the builtin or standard feeds, add l10n template link
   if (/(builtin|standard)-feeds/.test(feed.srcUri.spec) && feed.srcUri.scheme == 'file')
     cell.append(" ", viewLocalizationTemplate(feed));
-    
+
   // If not auto-updating, display link to any updates found
   feed.checkForManualUpdate(
     function(isAvailable, href) {
@@ -150,10 +150,15 @@ function fillTableRowForCmd(row, cmd, className) {
 
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
+  var cmdDisplayName = escapeHtml(cmd.name);
+  if (cmd.nameSuffix) {
+    cmdDisplayName += " " + escapeHtml(cmd.nameSuffix);
+  }
+
   var cmdElement = jQuery(
     '<td class="command">' +
     '<a class="id"><img class="favicon"/></a>' +
-    '<span class="name">' + escapeHtml(cmd.name) + '</span>' +
+    '<span class="name">' + cmdDisplayName + '</span>' +
     '<span class="description"></span>' +
     '<div class="synonyms-container light">' +
     '<span class="synonyms"></span></div>' +
@@ -409,7 +414,7 @@ function viewSourceLink(feed)(
      (feed.canAutoUpdate ? "auto-updated " : "") +
      "source]"),
     "feed-action"));
-    
+
 function viewLocalizationTemplate(feed)(
   A("chrome://ubiquity/content/localization-template.html#" + feed.viewSourceUri.spec,
     ("[get localization template]"),

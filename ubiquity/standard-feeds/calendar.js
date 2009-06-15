@@ -6,10 +6,11 @@ const Apology = ("<p>" +
 
 /* TODO this command just takes unstructured text right now and relies on
  Google Calendar to figure it out.  So we're not using the DateNounType
- here.  Should we be; is there a better name for this command? */
+ here.  Should we be? */
 CmdUtils.CreateCommand({
-  names: ["add-to-calendar"],
-  arguments: {object: noun_arb_text}, // TODO: use DateNounType or EventNounType?
+  names: ["add (to calendar)"],
+  arguments: {object: noun_arb_text,
+              goal: ["calendar"]},   // NounUtils not in the namespace??
   icon : "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (

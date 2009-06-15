@@ -780,9 +780,25 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
       throw Error("CreateCommand: name or names is required.");
     if (!Utils.isArray(names))
       names = (names + "").split(/\s{0,}\|\s{0,}/);
+
+    /* If there are parenthesis in any name, separate the part in the
+     * parens and store it separately... this is to support multiple distinct
+     * commands with the same verb.*/
+    let parensPattern = /^([^\(\)]+) \((.+)\)$/;
+    let suffices = [];
+    for ( let x = 0; x < names.length; x++) {
+      let aName = names[x];
+      let matches = parensPattern.exec( aName );
+      if ( matches ) {
+        names[x] = matches[1];
+        suffices[x] = matches[2];
+      }
+    }
+    if (suffices.length > 0)
+      command.nameSuffix = suffices[0]; // other suffices not used
     if (names.length > 1)
       command.synonyms = names.slice(1);
-    command.name = names[0]
+    command.name = names[0];
     command.names = names;
   }
   { let {takes, modifiers} = options;
@@ -833,10 +849,11 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     }
     // If preview is not a function, wrap it in a function that does
     // what you'd expect it to.
-    if (preview != null && typeof preview !== "function")
+    if (preview != null && typeof preview !== "function") {
       command.preview = function preview_html(pblock) {
         pblock.innerHTML = preview;
       };
+    }
   }
 
   if (options.previewUrl)
