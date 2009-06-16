@@ -3,24 +3,32 @@ var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtG
 
 CmdUtils.CreateCommand({
   name: "map",
-  takes: {"address": noun_arb_text},
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "address"}],
   icon: "chrome://ubiquity/skin/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
   help:"Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a" +
        " larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot;" +
        " (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email, " +
        " select it, issue &quot;map&quot;, click on the preview, and then insert the map.",
-  execute: function( directObj ) {
-    var location = directObj.text;
-    var url = "http://maps.google.com/?q=";
-    url += encodeURIComponent(location);
+  execute: function( arguments ) {
+    if (arguments.object && arguments.object.text) {
+      var location = arguments.object.text;
+      var url = "http://maps.google.com/?q=";
+      url += encodeURIComponent(location);
 
-    Utils.openUrlInBrowser( url );
+      Utils.openUrlInBrowser( url );
+    } else {
+      Utils.openUrlInBrowser( "http://maps.google.com" );
+    }
   },
   previewUrl: "templates/map.html",
-  preview: function(pblock, dobj, modifers) {
+  preview: function(pblock, arguments) {
       // TODO: This isn't terribly safe; ideally, we should be communicating
       // with the other page via DOM events, etc.
+    if (arguments.object && arguments.object.text ){
+      var dobj = arguments.object;
       var previewWindow = pblock.ownerDocument.defaultView;
       previewWindow = XPCSafeJSObjectWrapper(previewWindow);
       previewWindow.Ubiquity.context = context;
@@ -49,9 +57,11 @@ CmdUtils.CreateCommand({
                          "'edit page' for an editable page.");
       	}
       };
-
       previewWindow.Ubiquity.onPreview(dobj);
+    } else {
+      pblock.innerHTML = this.description;
     }
+  }
 });
 
 

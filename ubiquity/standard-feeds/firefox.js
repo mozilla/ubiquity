@@ -92,6 +92,7 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 function tabPreview(msg)(
+  // TODO this gets a "(void 0) is undefined" error when used in the "close (tab)" cmd.
   function preview(pblock, {object: {text, data: tab}}) {
     pblock.innerHTML = (
       tab
