@@ -155,6 +155,9 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
     codeSource = new RemoteUriCodeSource(baseFeedInfo);
   else
     codeSource = new LocalUriCodeSource(baseFeedInfo.srcUri.spec);
+
+  let feedUri = baseFeedInfo.srcUri;
+
   var codeCache;
   var sandboxFactory = new SandboxFactory({}, "http://www.mozilla.com",
                                           true);
@@ -163,6 +166,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
   // Private methods.
   function reset() {
     self.commands = {};
+    self.commandCode = {};
   }
 
   // === {{{LDFPFeed#pageLoadFuncs}}} ===
@@ -182,6 +186,13 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
   // objects, for each command defined by the feed.
 
   self.commands = {};
+  
+  // === {{{LDFPFeed#commandCode}}} ===
+  //
+  // A collection of toString'ed versions of the excecute and preview
+  // methods of each command in the feed. Used by the localization template
+  // tool.
+  self.commandCode = {};
 
   // === {{{LDFPFeed#refresh()}}} ===
   //
@@ -339,22 +350,59 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       //
       // This function has no return value.
 
-      function CmdUtils_CreateCommand(info) {
-        info = new XPCSafeJSObjectWrapper(info);
+      function CmdUtils_CreateCommand(originalInfo) {
 
-        if (!info.name)
-          throw new Error("Command name not provided.");
+        Components.utils.import("resource://ubiquity/modules/localization_utils.js");
+
+        let originalNames = [];
+        if (originalInfo.names) {
+          for each (let n in originalInfo.names)
+            if (typeof n == 'string')
+              originalNames.push(n);
+        } else {
+          originalNames = [originalInfo.name];
+        }
+
+        // For some reason the XPCSafeJSObjectWrapper would take some 
+        // string properties in info (for example some of the names)
+        // and give them the constructor Array, rather than String,
+        // so they wouldn't behave correctly later.
+        // We're keeping a copy of info so we can replace the names
+        // out later.
+        let info = new XPCSafeJSObjectWrapper(originalInfo);
+
         if (!info.execute)
           throw new Error("Command execute function not provided.");
-
+      
         let cmd = {
-          execute: function execute(context, directObject, modifiers) {
+          feedUri: feedUri,
+          execute: function LDFP_execute(context, directObject, modifiers) {
+            LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'execute');
             currentContext = context;
             info.execute(safeDirectObj(directObject),
                          safeModifiers(modifiers));
             currentContext = null;
           }
         };
+      
+        // ensure name, names and synonyms
+        { let names = originalNames;
+          if (!names)
+            throw Error("CreateCommand: name or names is required.");
+          if (!Utils.isArray(names))
+            names = (names + "").split(/\s{0,}\|\s{0,}/);
+      
+          // we must keep the first name from the original feed around as an
+          // identifier. This is used in the command id and in localizations
+          cmd.referenceName = names[0];
+          cmd.id = feedUri.spec + "#" + cmd.referenceName;
+      
+          if (names.length > 1)
+            cmd.synonyms = names.slice(1);
+          cmd.name = names[0];
+          cmd.names = names;
+        }
+
         if (info.takes)
           for (var directObjLabel in info.takes) {
             if (typeof(directObjLabel) != "string")
@@ -375,16 +423,21 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
             cmd.modifiers[modLabel] = NounUtils.NounType(regExp);
           }
         }
+        
+        
+        
         let preview = info.preview;
         if (typeof(preview) == "string") {
           preview = htmlSanitize(preview);
-          cmd.preview = function cmd_preview(context, directObject,
+          cmd.preview = function LDFP_preview(context, directObject,
                                              modifiers, previewBlock) {
+            LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'preview');
             previewBlock.innerHTML = preview;
           };
         } else if (typeof(preview) == "function") {
-          cmd.preview = function cmd_preview(context, directObject,
+          cmd.preview = function LDFP_preview(context, directObject,
                                              modifiers, previewBlock) {
+            LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'preview');
             var fakePreviewBlock = safe({innerHTML: ""});
             info.preview(fakePreviewBlock,
                          safeDirectObj(directObject),
@@ -409,9 +462,11 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
         setMetadata(info, cmd, CMD_METADATA_SCHEMA, htmlSanitize);
 
-        cmd = finishCommand(cmd);
-
-        self.commands[cmd.name] = cmd;
+        self.commandCode[cmd.id] = {execute: info.execute.toString()};
+        if (info.preview)
+          self.commandCode[cmd.id].preview = info.preview.toString();
+          
+        self.commands[cmd.id] = finishCommand(cmd);
       }
       sandbox.importFunction(CmdUtils_CreateCommand);
 
