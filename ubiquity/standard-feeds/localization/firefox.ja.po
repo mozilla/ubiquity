@@ -207,7 +207,7 @@ msgstr ""
 msgid "zoom.description"
 msgstr "Firefoxウインドウを拡大／縮小。"
 
-msgctxt "zombie.preview"
+msgctxt "zoom.preview"
 msgid "Zooms the Firefox window to ${replacement} of its normal size."
 msgstr "ウインドウを通常の${replacement}のサイズで表示。"
 
