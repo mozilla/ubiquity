@@ -68,16 +68,15 @@ function testTagCommand() {
     cmdManager.execute(context);
     this.assert(uriHasTags(testURI, ["foo", "bar"]));
 
-    // test add tags separated by spaces
-    cmdManager.updateInput("tag baz bot", context);
+    // test tag appended again to existing tags
+    cmdManager.updateInput("tag bar", context);
     cmdManager.execute(context);
-    this.assert(uriHasTags(testURI, ["foo", "bar", "baz", "bot"]));
+    this.assert(uriHasTags(testURI, ["foo", "bar"]));
 
     // test add tags separated by commas
     cmdManager.updateInput("tag bom, la bamba", context);
     cmdManager.execute(context);
-    this.assert(uriHasTags(testURI, ["foo", "bar", "baz", "bot", "bom",
-                                     "la bamba"]));
+    this.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
 
     // cleanup
     tagsvc.untagURI(testURI, null);
