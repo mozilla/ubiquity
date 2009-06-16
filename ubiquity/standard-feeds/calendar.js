@@ -5,8 +5,12 @@ const Apology = ("<p>" +
                  "</p>");
 
 /* TODO this command just takes unstructured text right now and relies on
- Google Calendar to figure it out.  So we're not using the DateNounType
- here.  Should we be? */
+ * Google Calendar to figure it out.  So we're not using the DateNounType
+ * here.  Should we be?
+ *
+ * Also, the goal argument, which is currently a dummy argument, should
+ * become a plugin argument so that this can use different calendars --
+ * "add to google calendar", "add to zimbra calendar", etc etc.*/
 CmdUtils.CreateCommand({
   names: ["add (to calendar)"],
   arguments: [{ role: "object",
@@ -75,21 +79,29 @@ function linkToButton() {
     <button value={this.href} accesskey={txt[0]}>{txt}</button>.toXMLString());
 }
 
+/* TODO this calendar argument, currently a dummy argument, should become
+ * a plugin argument (see "add (to calendar)" above.)
+ */
 CmdUtils.CreateCommand({
-  names: ["check-calendar"],
-  arguments: {object: noun_type_date},
+  names: ["check (calendar)"],
+  arguments: [{role: "object",
+               nountype: ["calendar"],
+               label: "calendar"},
+              {role: "date",
+               nountype: noun_type_date,
+               label: "date"}],
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
-  help: 'Try issuing "check thursday"' + Apology,
+  help: 'Try issuing "check on thursday"' + Apology,
   execute: function( args ) {
-    var date = args.object.text;
+    var date = args.date.text;
     var url = "http://www.google.com/calendar/";
     var params = Utils.paramsToString({as_sdt: date.toString("yyyyMMdd")});
     Utils.openUrlInBrowser(url + params);
   },
   preview: function preview(pblock, args) {
-    var date = args.object.text;
-    var url = args.url;
+    var date = args.date.text;
+    var url = args.url;  // TODO: what's this? args.url does not exist
 
     if (!date) {
       pblock.innerHTML = this.description;
