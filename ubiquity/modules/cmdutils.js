@@ -787,19 +787,29 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
 
     /* If there are parenthesis in any name, separate the part in the
      * parens and store it separately... this is to support multiple distinct
-     * commands with the same verb.*/
-    let parensPattern = /^([^\(\)]+) \((.+)\)$/;
-    let suffices = [];
+     * commands with the same verb.
+     * For the time being, attempt both verb-initial and verb-final variants.*/
+
+    let verbInitialParensPattern = /^([^\(\)]+)\s*\((.+)\)$/;
+    let verbFinalParensPattern = /^\((.+)\)\s*([^\(\)]+)$/;
+    let nameArgs = [];
     for ( let x = 0; x < names.length; x++) {
       let aName = names[x];
-      let matches = parensPattern.exec( aName );
-      if ( matches ) {
-        names[x] = matches[1];
-        suffices[x] = matches[2];
+      let viMatches;
+      if ( viMatches = verbInitialParensPattern( aName ) ) {
+        names[x] = viMatches[1];
+        nameArgs[x] = viMatches[2];
       }
+      
+      let vfMatches;
+      if ( vfMatches = verbFinalParensPattern( aName ) ) {
+        names[x] = vfMatches[2];
+        nameArgs[x] = vfMatches[1];
+      }
+
     }
-    if (suffices.length > 0)
-      command.nameSuffix = suffices[0]; // other suffices not used
+    if (nameArgs.length > 0)
+      command.nameArg = nameArgs[0]; // other nameArgs not used
     if (names.length > 1)
       command.synonyms = names.slice(1);
     command.name = names[0];

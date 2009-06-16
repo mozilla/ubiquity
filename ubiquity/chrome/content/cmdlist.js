@@ -151,8 +151,12 @@ function fillTableRowForCmd(row, cmd, className) {
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
   var cmdDisplayName = escapeHtml(cmd.name);
-  if (cmd.nameSuffix) {
-    cmdDisplayName += " " + escapeHtml(cmd.nameSuffix);
+  if (cmd.nameArg) {
+    // TODO: we need some sort of flag to check whether the nameArg
+    // was a prefix or a suffix.
+    // Alternatively, we could display the referenceName after stripping
+    // parentheses... should get the same effect.
+    cmdDisplayName += " " + escapeHtml(cmd.nameArg);
   }
 
   var cmdElement = jQuery(
