@@ -50,7 +50,7 @@
   for each (var func in findFunctionsWithPrefix(CMD_PREFIX))
     CmdUtils.CreateCommand({
       __proto__: func,
-      name: func.name.slice(CMD_PREFIX.length).replace(/_/g, "-"),
+      name: func.name.slice(CMD_PREFIX.length).replace(/_/g, " "),
       execute: func,
     });
   for each (var func in findFunctionsWithPrefix("pageLoad_"))
