@@ -109,8 +109,11 @@ CmdUtils.CreateCommand({
 function findGmailTab()(
   Utils.tabs.search(/^https?:\/\/mail\.google\.com\/mail\/(?:[?#]|$)/)[0]);
 
+/* TODO: should take a plugin "instrument" argument so that it can take
+ * "email using google", "email using yahoo", etc.
+ */
 CmdUtils.CreateCommand({
-  names: ["email", "mail", "gmail.com"],
+  names: ["email", "mail", "send email", "gmail.com"],
   arguments: [
     {role: "object", label: "message", nountype: noun_arb_text},
     {role: "goal", nountype: noun_type_contact}
@@ -210,12 +213,16 @@ function gmailChecker(callback, service) {
 }
 
 CmdUtils.CreateCommand({
-  name: "get-last-email-from",
-  arguments: noun_type_email_service,
+  names: ["get last email"],
+  arguments: [{role: "goal",
+               nountype: noun_type_email_service,
+               label: "email service provier"}],
   icon: "chrome://ubiquity/skin/icons/email_open.png",
   description: ("Displays your most recent incoming email. Requires a " +
                 '<a href="http://mail.google.com">Gmail</a> account.'),
-  preview: function(pBlock, {object}) {
+  preview: function(pBlock, arguments) {
+    var provider = (arguments.source && arguments.source.text) ?
+                     arguments.source.text : "";
     pBlock.innerHTML = "Displays your most recent incoming email...";
     // Checks if user is authenticated first
     // if not, do not ajaxGet, as this triggers authentication prompt
@@ -231,12 +238,14 @@ CmdUtils.CreateCommand({
           : "<b>You have no new mail!</b>");
         pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate,
                                                    emailDetails);
-      }, object.text);
+      }, provider);
     } else {
       pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
     }
   },
-  execute: function({object}) {
+  execute: function(arguments) {
+    var provider = (arguments.source && arguments.source.text) ?
+                     arguments.source.text : "";
     var me = this;
     gmailChecker(function(emailDetails) {
       var msgTemplate = "You have no new mail.";
@@ -245,12 +254,14 @@ CmdUtils.CreateCommand({
                        "${lastEmail.subject}");
       }
       displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails), me);
-    }, object.text);
+    }, provider);
   }
 });
 
+/* TODO: the argument should have semantic role corresponding to
+ * "for" or "of", once we figure out what that is... */
 CmdUtils.CreateCommand({
-  name: "get-email-address-for",
+  names: ["get email address"],
   icon: "chrome://ubiquity/skin/icons/email.png",
   description: ("Looks up the email address of a person " +
                 "from your contacts list given their name. "),
