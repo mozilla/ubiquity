@@ -361,7 +361,10 @@ var noun_type_twitter_user = {
       return [];
 
     var suggs = CmdUtils.grepSuggs(text, this.logins());
-    suggs.push(CmdUtils.makeSugg(text, null, {}, 0.7));
+    // only letters, numbers, and underscores are allowed in twitter
+    // usernames.
+    if (/^[a-z0-9_]+$/i.test(suggs))
+      suggs.push(CmdUtils.makeSugg(text, null, {}, 0.7));
     return suggs;
   },
   logins: function(reload) {

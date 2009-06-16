@@ -351,14 +351,25 @@ Parser.prototype = {
         var verb = verbs[verbId];
         // check each verb synonym in this language
         for each (let name in verb.names) {
-          if (~name.toLowerCase().indexOf(vpl)) {
+          let vplPos = name.toLowerCase().indexOf(vpl);
+          if (~vplPos) {
             returnArray.push({
               _verb: {
                 id: verbId,
                 text: name,
                 _order: order,
                 input: verbPiece,
-                __proto__: verb,
+                       // if the verb was found at the beginning, use sqrt.
+                       // the sqrt ensures that this grows quickly with 
+                       // longer verb prefixes at first, and additional letters
+                       // are only "bonus". Also discriminates against longer
+                       // command names a little less.
+                       //
+                       // This vplPos switch essentially encourages verb-initial
+                       // (proper) prefix matches
+                score: (!vplPos ? Math.sqrt(vpl.length/name.length)
+                         : vpl.length/name.length),
+                __proto__: verb
               },
               argString: argString,
             });
@@ -536,6 +547,11 @@ Parser.prototype = {
         defaultParse._suggested = true;
       }
 
+      // The verb match's score affects the scoreMultiplier.
+      // If the verb is not set yet, it gets a 1, but that's fine, because by
+      // virtue of having to suggest a verb, the scoreMultiplier has already
+      // been *=0.3 elsewhere.
+      defaultParse.scoreMultiplier *= (defaultParse._verb.score || 1);
       // start score off with one point for the verb.
       defaultParse._score = defaultParse.scoreMultiplier;
 
@@ -813,6 +829,11 @@ Parser.prototype = {
                                             parse.args[role].length - 1);
         }
       }
+      // The verb match's score affects the scoreMultiplier.
+      // If the verb is not set yet, it gets a 1, but that's fine, because by
+      // virtue of having to suggest a verb, the scoreMultiplier has already
+      // been *=0.3 elsewhere.
+      parse.scoreMultiplier *= (parse._verb.score || 1);
       // start score off with one point for the verb.
       parse._score = parse.scoreMultiplier;
     }
@@ -1707,7 +1728,8 @@ Parse.prototype = {
 
   get displayTextDebug()(
     this.displayText + " (" +
-    ((this.score * 100 | 0) / 100 || "<i>no score</i>") +
+    ((this.score * 100 | 0) / 100 || "<i>no score</i>") + ',' +
+    ((this.scoreMultiplier * 100 | 0) / 100 || "<i>no score</i>") +
     ")"),
 
   get completionText() {
