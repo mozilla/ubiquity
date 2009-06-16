@@ -1132,7 +1132,7 @@ Parser.prototype = {
     //Utils.log('detecting '+x+'\n');
     if (x in this._nounCache) {
       if (typeof callback == 'function')
-        callback(x,this._nounCache[x], []);
+        callback(x, []);
     } else {
       
       var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
@@ -1145,18 +1145,13 @@ Parser.prototype = {
 
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, ajaxRequests) {
-
-        if (!(x in thisParser._nounCache))
-          thisParser._nounCache[x] = {};
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
-          if (!(nountypeId in thisParser._nounCache[x]))
-            thisParser._nounCache[x][nountypeId] = [];
           thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
         if (typeof callback == 'function')
-          callback(x,thisParser._nounCache[x], ajaxRequests);
+          callback(x, ajaxRequests);
       };
       var activeNounTypes = this._nounTypes;
 
@@ -1172,8 +1167,14 @@ Parser.prototype = {
             suggs = handleSuggs(suggs, id);
             if(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest) != -1)
               ajaxRequests.splice(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest), 1);
-            if (suggs.length) myCallback(suggs, ajaxRequests);
+            myCallback(suggs, ajaxRequests);
           }
+
+          if (!(x in thisParser._nounCache))
+            thisParser._nounCache[x] = {};
+          if (!(id in thisParser._nounCache[x]))
+            thisParser._nounCache[x][id] = [];
+
           returnArray.push.apply(
             returnArray,
             handleSuggs(
@@ -1182,7 +1183,6 @@ Parser.prototype = {
           if(activeNounTypes[id].ajaxRequest)
             ajaxRequests.push(activeNounTypes[id].ajaxRequest);
         }
-      
         myCallback(returnArray, ajaxRequests);
       },0);
     }
@@ -1247,8 +1247,16 @@ var ParseQuery = function(parser, queryString, context, maxSuggestions,
   this._possibleParses = [];
   this._verbedParses = [];
   this._suggestedParses = [];
-  this._scoredParses = [];
   this._topScores = [];
+
+  // ** {{{ParseQuery#_scoredParses}}} **
+  //
+  // {{{_scoredParses}}} is an object made up of scored parse objects
+  // (hash) keyed on the argText that was used to generate the parse.
+  // It is structured this way so that returning async calls result in the
+  // creation and updating of the correct scored parses.
+  this._scoredParses = {};
+
 
   this.dump("Making a new parser2 query: " + queryString);
 
@@ -1405,7 +1413,7 @@ ParseQuery.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    function completeParse(thisParse, ajaxRequests) {
+    function completeParse(thisParse, argText, ajaxRequests) {
       if(ajaxRequests.length == 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
@@ -1416,20 +1424,21 @@ ParseQuery.prototype = {
       // If they're good enough, add them to _scoredParses.
       var suggestions = thisQuery.parser.suggestArgs(thisParse);
       //Utils.log(suggestions);
-      for each (let newParse in suggestions)
-        thisQuery._scoredParses =
-          thisQuery.addIfGoodEnough(thisQuery._scoredParses, newParse);
+
+      if(!thisQuery._scoredParses[argText])
+	thisQuery._scoredParses[argText] = [];
+
+      for each (let newParse in suggestions){
+        thisQuery.addScoredParseIfGoodEnough(argText, newParse);
+      }
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
     }
-    
-    // TODO: looks like suggestions isn't actually being used in this callback.
-    // Maybe we could/should take it out?
-    function tryToCompleteParses(argText, suggestions, ajaxRequests) {
-      thisQuery.dump('finished detecting nountypes for ' + argText);
-      //Utils.log([argText,suggestions]);
 
+    function tryToCompleteParses(argText, ajaxRequests) {
+      thisQuery.dump('finished detecting nountypes for ' + argText);
+      
       thisQuery._outstandingRequests = ajaxRequests;
 
       if (thisQuery.finished) {
@@ -1437,16 +1446,17 @@ ParseQuery.prototype = {
         return;
       }
 
+      thisQuery._scoredParses[argText] = [];
+
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
-
-        if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
+        if (thisParse.allNounTypesDetectionHasCompleted()) {
           //thisQuery.dump('completing parse '+parseId+' now');
-          completeParse(thisParse, ajaxRequests);
-        }
+          completeParse(thisParse, argText, ajaxRequests);
+	}
       }
 
-      if (thisQuery._scoredParses.length > 0)
+      if (thisQuery.aggregateScoredParses().length > 0)
         thisQuery.onResults();
     }
 
@@ -1460,7 +1470,7 @@ ParseQuery.prototype = {
 
       if (!parse.args.__count__)
         // This parse doesn't have any arguments. Complete it now.
-        Utils.setTimeout(completeParse, 0, parse, []);
+        Utils.setTimeout(completeParse, 0, parse, "no args", []);
       else for each (let arg in parse.args) {
         for each (let x in arg) {
           // this is the text we're going to cache
@@ -1492,21 +1502,26 @@ ParseQuery.prototype = {
                 (this._times[i] - this._times[i-1]) + " ms");
     this.dump("total: " +
               (this._times[steps-1] - this._times[0]) + " ms");
-    this.dump("There were " + this._scoredParses.length + " completed parses");
+    this.dump("There were " + this.aggregateScoredParses().length + " completed parses");
     */
     this.onResults();
   },
-
+  aggregateScoredParses: function() {
+    let allScoredParses = [];
+    for each (let parses in this._scoredParses)
+      allScoredParses = allScoredParses.concat(parses);
+    return allScoredParses;
+  },
   // ** {{{ParseQuery#hasResults}}} (read-only) **
   //
   // A getter for whether there are any results yet or not.
-  get hasResults() { return this._scoredParses.length > 0; },
+  get hasResults() { return this.aggregateScoredParses().length > 0; },
 
   // ** {{{ParseQuery#suggestionList}}} (read-only) **
   //
   // A getter for the suggestion list.
   get suggestionList() {
-    return (this._scoredParses
+    return (this.aggregateScoredParses()
             .slice()
             .sort(byScoreDescending)
             .slice(0, this.maxSuggestions));
@@ -1534,6 +1549,17 @@ ParseQuery.prototype = {
   // A handler for the endgame. To be overridden.
   onResults: function() {},
 
+  removeLowestScoredParse: function(){
+    let lowestScoredParse = this.aggregateScoredParses()
+                                .sort(byScoreDescending).pop();
+    for (let argText in this._scoredParses){
+      if (this._scoredParses[argText].indexOf(lowestScoredParse) != -1){
+	this._scoredParses[argText].splice(
+              this._scoredParses[argText].indexOf(lowestScoredParse), 1);
+	break;
+      }
+    }
+  },
   // ** {{{ParseQuery#addIfGoodEnough()}}} **
   //
   // Takes a {{{parseCollection}}} (Array) and a {{{newParse}}}.
@@ -1583,6 +1609,51 @@ ParseQuery.prototype = {
     }
 
     return parseCollection;
+  },
+  // ** {{{ParseQuery#addScoredParseIfGoodEnough()}}} **
+  //
+  // Takes a {{{argText}}} (String) and a {{{newParse}}}.
+  //
+  // Uses the same optimization strategy as ParseQuery#addIfGoodEnough(),
+  // but operates specially on this ParserQuery's scored parses to add
+  // a new parse to the scored parses object. See ParseQuery#addIfGoodEnough()
+  // for the logic behind the optimization strategy.
+  addScoredParseIfGoodEnough: function(argText, newParse) {
+    var allScoredParses = this.aggregateScoredParses().slice();
+    var parsesToAddTo = this._scoredParses[argText];
+
+    if (allScoredParses.indexOf(newParse) != -1)
+      dump("already contains this one!\n");
+    
+    var maxIndex = this.maxSuggestions - 1;
+
+    if (!allScoredParses[maxIndex]){
+      parsesToAddTo.push(newParse);
+      return;
+    }
+
+    allScoredParses.sort(byScoreDescending);
+    var theBar = allScoredParses[maxIndex].score;
+
+    if (newParse.maxScore < theBar){
+      return;
+    }
+    // add the new parse and sort again
+    allScoredParses.push(newParse);
+    allScoredParses.sort(byScoreDescending);
+    parsesToAddTo.push(newParse);
+    
+    var newBar = allScoredParses[maxIndex].score;
+    if (newBar > theBar) {
+      // sort by descending maxScore order
+      allScoredParses.sort(function(a, b) b.maxScore - a.maxScore);
+      let i = allScoredParses.length;
+      while (--i > maxIndex && allScoredParses[i].maxScore < theBar){
+	allScoredParses.pop();
+        this.removeLowestScoredParse();
+      }
+    }
+    return;
   }
 };
 
@@ -1817,6 +1888,7 @@ Parse.prototype = {
   // TODO: This may not actually be correct... it may return true before some
   // ajax requests complete. Needs testing.
   allNounTypesDetectionHasCompleted: function() {
+    var activeNounTypes = this._parser._nounTypes;
     for (let role in this.args) {
       // for each argument of this role...
       for each (let arg in this.args[role]) {
@@ -1825,6 +1897,11 @@ Parse.prototype = {
 
         if (!(argText in this._parser._nounCache))
           return false;
+	
+	for (let nounTypeId in activeNounTypes){
+	  if(!(nounTypeId in this._parser._nounCache[argText]))
+            return false;
+	}
       }
     }
 

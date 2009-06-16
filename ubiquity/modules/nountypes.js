@@ -524,6 +524,9 @@ var noun_type_async_address = {
       if (truthiness) {
         callback([CmdUtils.makeSugg(text)]);
       }
+      else{
+	callback([]);
+      }
     });
     return [];
   }
@@ -546,6 +549,9 @@ var noun_type_async_restaurant = {
     this.ajaxRequest = getRestaurants( text, function( truthiness, suggestion ) {
       if (truthiness) {
         callback([CmdUtils.makeSugg(text)]);
+      }
+      else{
+        callback([]);
       }
     });
     return [];
