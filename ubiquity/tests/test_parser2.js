@@ -366,21 +366,16 @@ function testVerbMatcher() {
   var testParser = new Parser;
   testParser._verbList =
     [{names: ["google"], arguments: []},
-     {names: ["check-livemark"], arguments: []},
-     {names: ["undo-closed-tabs"], arguments: []}];
+     {names: ["check livemark"], arguments: []},
+     {names: ["undo closed tabs"], arguments: []}];
   testParser.initializeCache();
 
   var {verbInitialTest} = testParser._patternCache;
-  this.assert(verbInitialTest.test("google"), "whole");
+  this.assert(verbInitialTest.test("undo closed tabs"), "whole");
   this.assert(!verbInitialTest.test("gooooogle"), "wrong");
-  this.assert(verbInitialTest.test("l"),
-              "should match a initial-char of a word");
-  this.assert(!verbInitialTest.test("k"),
-              "shouldn't match a single char if non-initial");
-  this.assert(verbInitialTest.test("goog"), "head-partial");
-  this.assert(verbInitialTest.test("heck"), "middle-partial");
-  this.assert(verbInitialTest.test("mark"), "final-partial");
-  this.assert(verbInitialTest.test("do-close"), "middle-partial again");
+  this.assert(verbInitialTest.test("goog"), "head-prefix");
+  this.assert(verbInitialTest.test("live"), "middle-prefix");
+  this.assert(verbInitialTest.test("tab"), "middle-prefix again");
 }
 
 /* More tests that should be written:

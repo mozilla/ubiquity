@@ -207,61 +207,39 @@ Parser.prototype = {
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function initializeCache() {
     this._nounCache = {};
-
     var patternCache = this._patternCache = {};
 
-    // creates a list of unique substrings that are two or more characters
-    // from given words, sorting in descending order.
-    function pieces(words) {
-      var dic = {};
-      for each (let w in words)
-        for (let i = w.length; i > 1; --i)
-          for (let j = 0, max = w.length - i; j <= max; ++j)
-            dic[w.substr(j, i)] = 1;
-      return [k for (k in dic)].sort(function(a, b) b.length - a.length);
-    }
-    // creates a regex fragment that matches
-    // every first character of given words.
-    function firstsFragment(words) {
-      let firstChars = [w[0] for each (w in words)];
-      // return the unique first characters only
-      firstChars = firstChars 
-                   .reduce( function(last,current) {
-                     if (last.indexOf(current)<0)
-                       last.push(current);
-                     return last;
-                   },[]);
-      let klass = firstChars.join("");
-      return "[" + klass.replace(/[-\\^]/g, "\\$&") + "]";
-    }
-    // creates a regex fragment that matches a set of strings,
-    // escaping them properly.
-    function pipedFragment(strs) strs.map(escapeMetas).join("|");
-    function escapeMetas(str) str.replace(/\W/g, "\\$&");
     // creates a regex that matches any delimiter of given roles
-    function regexFromDelimeters(roles)
-      RegExp("^(?:" +
-             pipedFragment([role.delimiter for each (role in roles)]) +
-             ")$",
-             "i");
+    function regexFromDelimeters(roles) {
+      var {source} = RegexpTrie([role.delimiter for each (role in roles)]);
+      return RegExp("^" + source + "$", "i");
+    }
 
-    var names = [n for each (verb in this._verbList)
-                 for each (n in verb.names)];
-    var words = Array.concat.apply(0, [n.split(/[-_\s]+/)
-                                       for each (n in names)]);
+    var names = [name
+                 for each (verb in this._verbList)
+                 for each (name in verb.names)];
+    // ["cogit ergo sum"] => ["cogit ergo sum", "ergo sum", "sum"]
+    for each (let name in names) {
+      let sep = /[-_\s]/g;
+      sep.lastIndex = 1;
+      while (sep.test(name)) {
+        let sub = name.slice(sep.lastIndex);
+        if (sub) names.push(sub);
+      }
+    }
+
     // verbMatcher matches any substring of active verbs
-    patternCache.verbMatcher =
-      pipedFragment(pieces(names)) + "|" + firstsFragment(words);
+    var verbMatcher = patternCache.verbMatcher = RegexpTrie(names, 1).source;
 
     // verbInitialTest matches a verb at the beginning
     patternCache.verbInitialTest =
-      RegExp(("^\\s*(" + this._patternCache.verbMatcher + ")" +
+      RegExp(("^\\s*(" + verbMatcher + ")" +
               (this.usespaces ? "(\\s+.*$|$)" : "(.*$)")),
              "i");
     // verbFinalTest matches a verb at the end of the string
     patternCache.verbFinalTest =
       RegExp(((this.usespaces ? "(^.*\\s+|^)" : "(^.*)") +
-              "(" + this._patternCache.verbMatcher + ")\\s*$"),
+              "(" + verbMatcher + ")\\s*$"),
              "i");
 
     // anaphora matches any of the anaphora ("magic words")
@@ -269,7 +247,7 @@ Parser.prototype = {
     // but if usespaces = false, it will look for anaphora in words as well.
     var boundary = this.usespaces ? "\\b" : "";
     patternCache.anaphora =
-      RegExp(boundary + "(?:" + pipedFragment(this.anaphora) + ")" + boundary);
+      RegExp(boundary + RegexpTrie(this.anaphora).source + boundary);
 
     // cache the roles used in each verb and a regex
     // which recognizes the delimiters appropriate for each verb
@@ -1932,3 +1910,56 @@ Parse.prototype = {
 };
 
 function byScoreDescending(a, b) b.score - a.score;
+
+// http://search.cpan.org/~dankogai/Regexp-Trie-0.02/lib/Regexp/Trie.pm
+function RegexpTrie(strs, prefixes) {
+  var me = {$: {}, __proto__: RegexpTrie};
+  if (strs) {
+    let add = prefixes ? "addPrefixes" : "add";
+    for each (let str in strs) me[add](str);
+  }
+  return me;
+}
+[function RegexpTrie_add(str) {
+  var ref = this.$;
+  for each (let char in str) ref = ref[char] || (ref[char] = {});
+  ref[""] = 1; // {"": 1} as terminator
+  return this;
+}
+// adds every prefixes of str.
+// i.e. rt.addPrefixes("str") => rt.add("s").add("st").add("str")
+,function RegexpTrie_addPrefixes(str) {
+  var ref = this.$;
+  for each (let char in str) ref = ref[char] || (ref[char] = {"": 1});
+  return this;
+}
+,function RegexpTrie__regexp($) {
+  if ("" in $ && $.__count__ === 1) return "";
+  var alt = [], cc = [], q;
+  for (let char in $) {
+    if ($[char] !== 1) {
+      let qchar = char.replace(/[.?*+^$|()\{\[\]\\]/, "\\$&");
+      let recurse = arguments.callee($[char]);
+      (recurse ? alt : cc).push(qchar + recurse);
+    } else
+      q = 1;
+  }
+  var cconly = !alt.length;
+  if (cc.length) alt.push(1 in cc ?  "[" + cc.join("") + "]" : cc[0]);
+  var result = 1 in alt ? "(?:" + alt.join("|") + ")" : alt[0];
+  if (q) result = cconly ? result + "?" : "(?:" + result + ")?";
+  return result;
+}
+,function RegexpTrie_source_Get() {
+  return this._regexp(this.$);
+}
+,function RegexpTrie_regexp_Get() {
+  return RegExp(this.source);
+}
+].forEach(function(fn){
+  var [proto, method, GSet] = /^\w+?(?=_(\w+?)(?:_([GS]et))?$)/(fn.name);
+  if (GSet)
+    this[proto]["__define" + GSet + "ter__"](method, fn);
+  else
+    this[proto][method] = fn;
+}, this);
