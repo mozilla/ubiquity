@@ -223,7 +223,15 @@ Parser.prototype = {
     // creates a regex fragment that matches
     // every first character of given words.
     function firstsFragment(words) {
-      var klass = [w[0] for each (w in words)].join("");
+      let firstChars = [w[0] for each (w in words)];
+      // return the unique first characters only
+      firstChars = firstChars 
+                   .reduce( function(last,current) {
+                     if (last.indexOf(current)<0)
+                       last.push(current);
+                     return last;
+                   },[]);
+      let klass = firstChars.join("");
       return "[" + klass.replace(/[-\\^]/g, "\\$&") + "]";
     }
     // creates a regex fragment that matches a set of strings,
