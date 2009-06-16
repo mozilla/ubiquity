@@ -99,7 +99,6 @@ var LocalizationUtils = {
         this.GETTEXT.parse_locale_data(rv);
         
         loadedPo[feedKey] = parsed;
-        dump(parsed);
       } catch(e) {
         dump("couldn't parse "+url+"\n");
         return false;
@@ -119,8 +118,8 @@ var LocalizationUtils = {
   
   getLocalizedString: function LU_getLocalizedString (feedKey, key) {
     try {
-      dump('gettext('+key+')\n');
-      dump('return: '+this.GETTEXT.dgettext(feedKey,key)+'\n');
+      //dump('gettext('+key+')\n');
+      //dump('return: '+this.GETTEXT.dgettext(feedKey,key)+'\n');
       return this.GETTEXT.dgettext(feedKey,key);
     } catch(ex) {
       return key;
