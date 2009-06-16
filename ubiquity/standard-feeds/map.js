@@ -2,7 +2,7 @@ var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtG
 // This API key is for https://people.mozilla.com only."
 
 CmdUtils.CreateCommand({
-  name: "map",
+  names: ["map"],
   arguments: [{role: "object",
                nountype: noun_arb_text,
                label: "address"}],
@@ -66,8 +66,8 @@ CmdUtils.CreateCommand({
 
 
 CmdUtils.CreateCommand({
-  name:"map-these",
-  takes: {"selection": noun_arb_text },
+  names: ["map these"],
+  arguments: {object: noun_arb_text },
   icon : "chrome://ubiquity/skin/icons/map_add.png",
   description: "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)",
   preview: function( pblock, directObject ) {
