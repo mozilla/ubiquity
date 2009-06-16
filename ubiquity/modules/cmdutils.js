@@ -781,6 +781,10 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     if (!Utils.isArray(names))
       names = (names + "").split(/\s{0,}\|\s{0,}/);
 
+    // we must keep the first name from the original feed around as an
+    // identifier. This is used in the command id and in localizations
+    command.referenceName = names[0];
+
     /* If there are parenthesis in any name, separate the part in the
      * parens and store it separately... this is to support multiple distinct
      * commands with the same verb.*/

@@ -68,8 +68,7 @@ var localizableProperties = ['names','contributors','help','description'];
 function addCmdTemplate(cmd,cmdCode) {
   let template = $('#template');
   let value = template.val();
-  let name = cmd.name;
-  value += '#. '+name+' command:\n';
+  value += '#. '+cmd.referenceName+' command:\n';
   for each (let key in localizableProperties)  
     value += cmdPropertyLine(cmd,key) + '\n';
   value += cmdInlineLine(cmd,cmdCode,'preview');
@@ -78,14 +77,13 @@ function addCmdTemplate(cmd,cmdCode) {
 }
 
 function cmdPropertyLine(cmd,property) {
-  let name = cmd.name;
-  let ret  = 'msgid "'+name+'.'+property+'"\n';
+  let ret  = 'msgid "'+cmd.referenceName+'.'+property+'"\n';
   let value = cmd[property];
   if (value) {
     if (value.join != undefined)
-      ret += 'msgstr "'+value.join('|')+'"\n';
+      ret += 'msgstr "'+value.join('|').replace(/"/g,'\\"')+'"\n';
     else {
-      ret += 'msgstr "'+value+'"\n';
+      ret += 'msgstr "'+value.replace(/"/g,'\\"')+'"\n';
     }
   } else 
     ret += 'msgstr ""\n';
@@ -94,7 +92,6 @@ function cmdPropertyLine(cmd,property) {
 
 var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
 function cmdInlineLine(cmd,cmdCode,context) {
-  let name = cmd.name;
   let ret  = '';
   let script = cmdCode[context];
 //  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
@@ -102,8 +99,8 @@ function cmdInlineLine(cmd,cmdCode,context) {
   while (match = inlineChecker.exec(script)) {
 //    Utils.log(match[2]);
 //    Utils.log(inlineChecker.lastIndex);
-    ret += 'msgctxt "'+name+'.'+context+'"\n';
-    ret += 'msgid "'+match[2]+'"\n';
+    ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n';
+    ret += 'msgid "'+match[2].replace(/"/g,'\\"')+'"\n';
     ret += 'msgstr ""\n\n';
   }
   return ret;
@@ -124,9 +121,7 @@ $(function(){
   if (window.location.hash) {
     feedUri = window.location.hash.slice(1);
     $('.feedKey').html(feedUri.replace(/^.*\/(\w+)\.\w+$/g,'$1'));
-    
-    Utils.log(feedUri.replace(/^(.*ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1'));
-    $('.localization-dir').html(feedUri.replace(/^(\w+ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1')+'standard-feeds/localization/');
+    $('.localization-dir').html(feedUri.replace(/^(.*ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1')+'standard-feeds/localization/');
     displayTemplate(feedUri);
   } else {
     // no feed was given.

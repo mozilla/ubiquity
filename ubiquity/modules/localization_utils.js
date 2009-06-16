@@ -185,7 +185,7 @@ var LocalizationUtils = {
 // tested that way.
 var localizeCommand = function(cmd) {
 
-  dump('localizing cmd '+cmd.names[0]+' now\n');
+  dump('localizing cmd '+cmd.referenceName+' now\n');
 
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
   
@@ -207,7 +207,7 @@ var localizeCommand = function(cmd) {
 }
 
 var getLocalizedProperty = function(feedKey, cmd, property) {
-  let key = cmd.name + '.' + property;
+  let key = cmd.referenceName + '.' + property;
   let rv = LocalizationUtils.getLocalizedString(feedKey, key);
   if (rv == key)
     rv = cmd[property];

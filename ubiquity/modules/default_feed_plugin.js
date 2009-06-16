@@ -160,19 +160,25 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 DefaultFeedPlugin.makeCmdForObj = makeCmdForObj;
 function makeCmdForObj(sandbox, commandObject, feedUri) {
   Cu.import("resource://ubiquity/modules/localization_utils.js");
+  
+  // referenceName is set by CreateCommand, so this command must have
+  // bypassed CreateCommand. Let's set the referenceName here.
+  if (!commandObject.referenceName)
+    commandObject.referenceName = commandObject.name;
+  
   var cmd = {
     __proto__: commandObject,
     toString: function CS_toString() {
       return "[object UbiquityCommand " + this.name + "]";
     },
-    id: feedUri.spec + "#" + commandObject.name,
+    id: feedUri.spec + "#" + commandObject.referenceName,
     name: commandObject.name,
     execute: function CS_execute(context) {
       /* Any additional arguments passed in after context will be passed along
        * as-is to the commandObject.execute() method.
        */
       sandbox.context = context;
-      LocalizationUtils.setLocalizationContext(feedUri, cmd.name, 'execute');
+      LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'execute');
       return commandObject.execute.apply(commandObject,
                                          Array.slice(arguments, 1));
     },
@@ -185,7 +191,7 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
        * as-is to the commandObject.preview() method.
        */
       sandbox.context = context;
-      LocalizationUtils.setLocalizationContext(feedUri, cmd.name, 'preview');
+      LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'preview');
       return commandObject.preview.apply(commandObject,
                                          Array.slice(arguments, 1));
     };
