@@ -5,23 +5,31 @@
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.
 CmdUtils.CreateCommand({
-  name: "syntax-highlight",
-  takes: {"code": noun_arb_text},
+  names: ["highlight syntax", "hilite syntax",
+          "syntax highlight", "syntax hilite"],
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "code"}],
   icon: "chrome://ubiquity/skin/icons/color_wheel.png",
   description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
-  execute: function( directObj ) {
-    var code = directObj.text;
-    var url = "http://azarask.in/services/syntaxhighlight/color.py";
-    var params = {
-      code: code,
-      style: "native"
-    };
+  execute: function( arguments ) {
+    if (arguments.object && arguments.object.text) {
+      var code = arguments.object.text;
+      var url = "http://azarask.in/services/syntaxhighlight/color.py";
+      var params = {
+        code: code,
+        style: "native"
+      };
 
-    jQuery.post( url, params, function( html ) {
-      html = html.replace( /class="highlight"/, "style='background-color:#222;padding:3px'");
-      CmdUtils.setSelection( html );
-    });
-  },
+      jQuery.post( url, params, function( html ) {
+                     html = html.replace( /class="highlight"/,
+                     "style='background-color:#222;padding:3px'");
+                     CmdUtils.setSelection( html );
+                   });
+    } else {
+      displayMessage("You must select some code to syntax-hilight.");
+    }
+    },
   preview: "Syntax highlights your code."
 });
 
@@ -69,33 +77,37 @@ function convert_to_html( html ) {
 }
 
 CmdUtils.CreateCommand({
-  name:"convert",
-  takes:{text:noun_arb_text},
-  modifiers:{to:noun_conversion_options},
+  names:["convert (text to format)"],
+  arguments: [{role: "object",
+               nountype:noun_arb_text,
+               label: "text"},
+              {role: "goal",
+               nountype:noun_conversion_options,
+               label: "format"}],
   icon: "chrome://ubiquity/skin/icons/convert.png",
   description:"Converts a selection to a PDF, to rich text, or to html.",
-  preview: function(pBlock, directObj, modifiers) {
-    if (modifiers.to && modifiers.to.text) {
-      pBlock.innerHTML = "Converts your selection to " + modifiers.to.text;
+  preview: function(pBlock, arguments) {
+    if (arguments.goal && arguments.goal.text) {
+      pBlock.innerHTML = "Converts your selection to " + arguments.goal.text;
     } else {
       pBlock.innerHTML = "Converts a selection to a PDF, to rich text, or to html.";
     }
   },
-  execute: function(directObj, modifiers) {
-    if (modifiers.to && modifiers.to.text) {
-      switch( modifiers.to.text) {
+  execute: function(arguments) {
+    if (arguments.goal && arguments.goal.text) {
+      switch( arguments.goal.text) {
       case "pdf":
         convert_page_to_pdf();
 	break;
       case "html":
-	if (directObj.html)
-          convert_to_html(directObj.html);
+	if (arguments.object.html)
+          convert_to_html(arguments.object.html);
 	else
 	  displayMessage("There is nothing to convert!");
 	break;
       case "rich-text":
-	if (directObj.html)
-          convert_to_rich_text(directObj.html);
+	if (arguments.object.html)
+          convert_to_rich_text(arguments.object.html);
 	else
 	  displayMessage("There is nothing to convert!");
 	break;
@@ -111,34 +123,43 @@ CmdUtils.CreateCommand({
 // MISC COMMANDS
 // -----------------------------------------------------------------
 
-function cmd_view_source() {
-  var url = Application.activeWindow.activeTab.document.location.href;
-  Utils.openUrlInBrowser("view-source:" + url);
-}
-cmd_view_source.description = "Shows you the source-code of the web page you're looking at.";
-cmd_view_source.icon = "chrome://ubiquity/skin/icons/page_code.png";
-
 CmdUtils.CreateCommand({
-  name:"escape-html-entities",
-  takes: {text: noun_arb_text},
-  icon: "chrome://ubiquity/skin/icons/html_go.png",
-  description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
-                                " with their escape sequences."),
-  preview: function(pBlock, {html}) {
-    pBlock.innerHTML = (html
-                        ? (<>Replaces your selection with:
-                           <pre>{Utils.escapeHtml(html)}</pre></>)
-                        : this.description);
-  },
-  execute: function({html}) {
-    if(!html) return;
-    var esch = Utils.escapeHtml(html);
-    CmdUtils.setSelection(esch, {text: esch});
+  names: ["view source", "view page source"],
+  description: "Shows you the source-code of the web page you're looking at.",
+  icon: "chrome://ubiquity/skin/icons/page_code.png",
+  execute: function(args) {
+    var url = Application.activeWindow.activeTab.document.location.href;
+    Utils.openUrlInBrowser("view-source:" + url);
+
   }
 });
 
 CmdUtils.CreateCommand({
-  name: 'selector-selector',
+  names: ["escape html entities"],
+  arguments: {object: noun_arb_text},
+  icon: "chrome://ubiquity/skin/icons/html_go.png",
+  description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
+                                " with their escape sequences."),
+  preview: function(pBlock, arguments) {
+    if (arguments.object && arguments.object.html) {
+      pBlock.innerHTML = (<>Replaces your selection with:
+                          <pre>{Utils.escapeHtml(html)}</pre></>);
+    } else {
+      pBlock.innerHTML = this.description;
+    }
+  },
+  execute: function(arguments) {
+    if (arguments.object && arguments.object.html) {
+      var esch = Utils.escapeHtml(html);
+      CmdUtils.setSelection(esch, {text: esch});
+    } else {
+      displayMessage("No text selected.");
+    }
+  }
+});
+
+CmdUtils.CreateCommand({
+  names: ["select jquery selectors"],
   description: ''+ (
     <ul style="list-style-image:none">
     <li>Lets you type a jQuery selector and highlights matched elements.</li>

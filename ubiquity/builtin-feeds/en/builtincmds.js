@@ -119,23 +119,23 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-                         names: ["write ubiquity commands",
-                                 "edit ubiquity commands",
-                                 "ubiquity command editor"],
+  names: ["write ubiquity commands",
+          "edit ubiquity commands",
+          "ubiquity command editor"],
   icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
-  execute: Editor,
+  execute: Editor
 });
 
 CmdUtils.CreateCommand({
-                         names: ["list ubiquity commands",
-                                 "ubiquity command list"],
+  names: ["list ubiquity commands",
+          "ubiquity command list"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "" + (
     <>Opens <a href={CmdList}>the list</a>
       of all Ubiquity commands available and what they all do.</>),
-  execute: CmdList,
+  execute: CmdList
 });
 
 CmdUtils.CreateCommand({
@@ -146,7 +146,7 @@ CmdUtils.CreateCommand({
   description: "" + (
     <>Takes you to the <a href={Settings}>settings</a> page,
       where you can change your skin, key combinations, etc.</>),
-  execute: Settings,
+  execute: Settings
 });
 
 CmdUtils.CreateCommand({
@@ -154,7 +154,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
-  execute: BugReport,
+  execute: BugReport
 });
 
 CmdUtils.CreateCommand({
