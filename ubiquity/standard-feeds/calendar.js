@@ -18,8 +18,8 @@ CmdUtils.CreateCommand({
                 label: "event"},
               { role: "goal",
                 nountype: ["calendar"],
-                label: "calendar"} ],   // NounUtils not in the namespace??
-  icon : "chrome://ubiquity/skin/icons/calendar_add.png",
+                label: "calendar"} ],
+  icon: "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (
     <>
@@ -93,16 +93,12 @@ CmdUtils.CreateCommand({
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check on thursday"' + Apology,
-  execute: function( args ) {
-    var date = args.date.text;
-    var url = "http://www.google.com/calendar/";
-    var params = Utils.paramsToString({as_sdt: date.toString("yyyyMMdd")});
-    Utils.openUrlInBrowser(url + params);
+  execute: function({date: {data: date}}) {
+    Utils.openUrlInBrowser("http://www.google.com/calendar/" +
+                           Utils.paramsToString(this._param(date)));
   },
-  preview: function preview(pblock, args) {
-    var date = args.date.text;
-    var url = args.url;  // TODO: what's this? args.url does not exist
-
+  preview: function preview(pblock, args, url) {
+    var date = args.date.data;
     if (!date) {
       pblock.innerHTML = this.description;
       return;
@@ -112,7 +108,7 @@ CmdUtils.CreateCommand({
     CmdUtils.previewGet(
       pblock,
       url || "http://www.google.com/calendar/m",
-      {as_sdt: date.toString("yyyyMMdd")},
+      this._param(date),
       function(htm) {
         var [cal] = /<div class[^]+$/(htm) || 0;
         if (!cal) {
@@ -128,13 +124,13 @@ CmdUtils.CreateCommand({
         $c.find("button").focus(function btn() {
           this.blur();
           this.disabled = true;
-          args.url = this.value;
-          preview(pblock, args);
+          preview(pblock, args, url);
           return false;
         });
         pblock.innerHTML = "";
         $c.appendTo(pblock);
       },
       "text");
-  }
+  },
+  _param: function(date)({as_sdt: date.toString("yyyyMMdd")}),
 });

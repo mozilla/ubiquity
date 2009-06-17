@@ -456,33 +456,21 @@ var noun_type_bookmarklet = {
 
 // ** {{{ noun_type_date }}} **
 //
-// **//FIXME//**
+// Suggests a date for input, using the mighty Date.parse().
+// Defaults to today.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text, html}}} : date text
+// * {{{data}}} : date object
 
 var noun_type_date = {
   label: "date",
-  'default': function(){
-     var date = Date.parse("today");
-     var text = date.toString("dd MM, yyyy");
-     return CmdUtils.makeSugg(text, null, date, 0.9);
-   },
-  suggest: function( text, html )  {
-    if (typeof text != "string") {
-      return [];
-    }
-
-    var date = Date.parse( text );
-    if (!date) {
-      return [];
-    }
-    text = date.toString("dd MM, yyyy");
-    return [ CmdUtils.makeSugg(text, null, date) ];
-  }
+  "default": function() this._sugg(Date.parse("today")),
+  suggest: function(text) {
+    var date = Date.parse(text);
+    return date ? [this._sugg(date)] : [];
+  },
+  _sugg: function(date)
+    CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date),
 };
 
 // ** {{{ noun_type_time }}} **
