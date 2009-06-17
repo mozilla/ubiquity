@@ -425,7 +425,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["check (livemark)", "livemark"],
+  names: ["check livemark"],
   description: "Checks your livemarks.",
   help: "Execute to open the site.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
