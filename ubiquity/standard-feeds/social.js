@@ -230,7 +230,7 @@ var cookie_mgr = Components.classes["@mozilla.org/cookiemanager;1"]
 
 CmdUtils.CreateCommand(
   {
-    name: "share-on-delicious",
+    names: ["share (on delicious)", "delicious"],
     icon:
         'http://delicious.com/favicon.ico',
     description:
@@ -251,12 +251,15 @@ CmdUtils.CreateCommand(
     },
     license:
         'MPL/GPL/LGPL',
-
-    takes: { notes: noun_arb_text },
-    modifiers: {
-        tagged:   noun_arb_text,
-        entitled: noun_arb_text
-    },
+    arguments: [{role: "object",
+                 nountype: noun_arb_text,
+                 label: "notes"},
+                {role: "alias",
+                 nountype: noun_arb_text,
+                 label: "title"},
+                {role: "instrument",
+                 nountype: noun_arb_text,
+                 label: "tags"}],
 
     /**
      * Command configuration settings.
@@ -274,9 +277,9 @@ CmdUtils.CreateCommand(
      * Present a preview of the bookmark under construction during the course
      * of composing the command.
      */
-    preview: function(pblock, input_obj, mods) {
+    preview: function(pblock, arguments) {
 
-        var bm          = this._extractBookmarkData(input_obj, mods);
+        var bm          = this._extractBookmarkData(arguments);
         var user_cookie = this._getUserCookie();
         var user_name   = (user_cookie) ? user_cookie.split(' ')[0] : '';
 
@@ -339,8 +342,8 @@ CmdUtils.CreateCommand(
      * Attempt to use the delicious v1 API to post a bookmark using the
      * command input
      */
-    execute: function(input_obj, mods) {
-        var bm          = this._extractBookmarkData(input_obj, mods);
+    execute: function(arguments) {
+        var bm          = this._extractBookmarkData(arguments);
         var user_cookie = this._getUserCookie();
         var user_name   = (user_cookie) ? user_cookie.split(' ')[0] : '';
 
@@ -398,18 +401,18 @@ CmdUtils.CreateCommand(
      * Given input data and modifiers, attempt to assemble data necessary to
      * post a bookmark.
      */
-    _extractBookmarkData: function(input_obj, mods) {
+    _extractBookmarkData: function(args) {
         return {
             _user:
                 this._getUserCookie(),
             url:
                 context.focusedWindow.location,
             description:
-                mods.entitled.text || context.focusedWindow.document.title,
+                args.alias.text || context.focusedWindow.document.title,
             extended:
-                input_obj.text ? '"' + input_obj.text + '"' : '',
+                args.object.text ? '"' + args.object.text + '"' : '',
             tags:
-                mods.tagged.text
+               args.instrument.text
         };
     },
 
@@ -443,14 +446,16 @@ CmdUtils.CreateCommand(
 
 });
 
+
 // max 100 chars for question
 const RYPPLE_QUESTION_MAXLEN = 100;
 const RYPPLE_ATTRIBUTE_MAX = 3;
 
 CmdUtils.CreateCommand({
-  name: "rypple-ask",
-  synonym: "ask-rypple",
-  takes: {"question": noun_arb_text},
+  names: ["ask rypple", "rypple"],
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "question"}],
   icon: "https://www.rypple.com/feedback/images/favicon.ico",
   description: "Asks a question on Rypple",
   help: "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in",
@@ -491,9 +496,9 @@ CmdUtils.CreateCommand({
     return parsed;
   },
 
-  preview: function( previewBlock, entry ) {
+  preview: function( previewBlock, {object} ) {
     // parse entry text
-    var parsedContacts = this._parse('@', entry.text);
+    var parsedContacts = this._parse('@', object.text);
     var parsedAttr = this._parse('#', parsedContacts.textLeft);
     var question = parsedAttr.textLeft;
 
@@ -535,9 +540,9 @@ CmdUtils.CreateCommand({
   },
 
   //TODO email format validation, tags w/ spaces, msg format: @ character, advice/rated
-  execute: function(entry) {
+  execute: function({object}) {
     // parse entry text
-    var parsedContacts = this._parse('@', entry.text);
+    var parsedContacts = this._parse('@', object.text);
     var parsedAttr = this._parse('#', parsedContacts.textLeft);
     var question = parsedAttr.textLeft;
 
@@ -584,3 +589,4 @@ CmdUtils.CreateCommand({
     });
   }
 });
+
