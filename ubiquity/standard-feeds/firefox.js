@@ -424,10 +424,8 @@ CmdUtils.CreateCommand({
         .getService(Ci.nsISessionStore)),
 });
 
-// TODO: this command doesn't seem to work in parser 2.  Check livemark
-// nountype.
 CmdUtils.CreateCommand({
-  names: ["check (livemark)"],
+  names: ["check (livemark)", "livemark"],
   description: "Checks your livemarks.",
   help: "Execute to open the site.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
