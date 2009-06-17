@@ -418,15 +418,17 @@ NLParser1.ParsedSentence.prototype = {
 
   get displayText() {
     // returns html formatted sentence for display in suggestion list
-    var sentence = Utils.escapeHtml(this._verb._name);
+    var sentence = '<span class="verb">' + Utils.escapeHtml(this._verb._name)
+                    + '</span>';
     var args = this._verb._arguments;
     var label;
     for (let x in args) {
       let obj = x === "direct_object";
       if ((this._argSuggs[x] || 0).summary) {
         label = obj ? "" : Utils.escapeHtml(args[x].flag) + " ";
-        sentence += (' <span class="' + (obj ? "object" : "argument") + '">' +
-                     label + this._argSuggs[x].summary + "</span>");
+        sentence += (' ' + (obj ? '' : '<span class="delimiter">' + label + '</span>') + 
+                     '<span class="' + (obj ? "object" : "argument") + '">' +
+                     this._argSuggs[x].summary + "</span>");
       } else {
         if (obj)
           label = args[x].label;
