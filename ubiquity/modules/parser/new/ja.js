@@ -43,17 +43,16 @@ function makeParser() {
   ja.anaphora = ["これ", "それ", "あれ"];
   ja.roles = [
     {role: 'object', delimiter: 'を'},
+    {role: 'object', delimiter: 'と'}, // this is actually a quotative marker
     {role: 'goal', delimiter: 'に'},
+    {role: 'goal', delimiter: 'へ'},
     {role: 'source', delimiter: 'から'},
     {role: 'position', delimiter: 'で'},
     {role: 'position', delimiter: 'に'},
     {role: 'instrument', delimiter: 'で'},
     {role: 'alias', delimiter: 'として'},
-    // 「の」は何でもOK
-    {role: 'goal', delimiter: 'の'},
-    {role: 'source', delimiter: 'の'},
-    {role: 'position', delimiter: 'の'},
-    {role: 'object', delimiter: 'の'}
+    {role: 'modifier', delimiter: 'の'},
+    {role: 'format', delimiter: 'で'}
   ];
 
   // Japanese verbs are always sentence-final.

@@ -19,6 +19,8 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -376,11 +378,10 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
       
         let cmd = {
           feedUri: feedUri,
-          execute: function LDFP_execute(context, directObject, modifiers) {
+          execute: function LDFP_execute(context, args) {
             LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'execute');
             currentContext = context;
-            info.execute(safeDirectObj(directObject),
-                         safeModifiers(modifiers));
+            info.execute(safeModifiers(args));
             currentContext = null;
           }
         };
@@ -403,6 +404,29 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           cmd.names = names;
         }
 
+        // Returns the first key in a dictionary.
+        function getKey(dict) {
+          for (var key in dict) return key;
+          // if no keys in dict:
+          return null;
+        }
+
+        { let {takes, modifiers} = info;
+          /* OLD DEPRECATED ARGUMENT API */
+          if (takes) {
+            let label = getKey(takes);
+            if (label) {
+              command.DOLabel = label;
+              command.DOType = takes[label];
+              toSafeNounType(command, "DOType");
+            }
+          }
+          if (modifiers) {
+            for (let label in modifiers)
+              toSafeNounType(modifiers, label);
+          }
+        }
+
         if (info.takes)
           for (var directObjLabel in info.takes) {
             if (typeof(directObjLabel) != "string")
@@ -419,29 +443,62 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
             if (typeof(modLabel) != "string")
               throw new Error("Modifier label is not a string: " +
                               directObjLabel);
-            var regExp = safeConvertRegExp(info.modifiers[modLabel]);
-            cmd.modifiers[modLabel] = NounUtils.NounType(regExp);
+            cmd.modifiers[modLabel] = toSafeNounType(info.modifiers[modLabel]);
           }
         }
         
+        { let args = info.arguments || info.argument;
+          /* NEW IMPROVED ARGUMENT API */
+          if (args) {
+            // handle simplified syntax
+            if (typeof args.suggest === "function")
+              // argument: noun
+              args = [{role: "object", nountype: args}];
+            else if (!Utils.isArray(args)) {
+              // arguments: {role: noun, ...}
+              // arguments: {"role label": noun, ...}
+              let a = [];
+              for (let key in args) {
+                let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
+                if (role) a.push({role: role, label: label, nountype: args[key]});
+              }
+              args = a;
+            }
+            // we have to go pick these one by one by key, as 
+            // XPCSafeJSObjectWrapper makes them inaccessible directly
+            // via "for each". Ask satyr or mitcho for details.
+            for (let key in args) toSafeNounType(args[key], "nountype");
+          }
+
+          // This extra step here which admittedly looks redundant is to
+          // "fix" arrays to enable proper enumeration. This is due to some
+          // weird behavior which has to do with XPCSafeJSObjectWrapper.
+          // Ask satyr or mitcho for details.
+          cmd.arguments = [args[key] for (key in args)];
+          
+        }
         
+        function toSafeNounType(obj, key) {
+          var val = obj[key];
+          if (!val) return;
+          val = safeConvertRegExp(val);
+          var noun = obj[key] = NounUtils.NounType(val);
+          return noun;
+        }
         
         let preview = info.preview;
         if (typeof(preview) == "string") {
           preview = htmlSanitize(preview);
-          cmd.preview = function LDFP_preview(context, directObject,
-                                             modifiers, previewBlock) {
+          cmd.preview = function LDFP_preview(context, previewBlock) {
             LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'preview');
             previewBlock.innerHTML = preview;
           };
         } else if (typeof(preview) == "function") {
-          cmd.preview = function LDFP_preview(context, directObject,
-                                             modifiers, previewBlock) {
+          cmd.preview = function LDFP_preview(context, previewBlock, args) {
             LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'preview');
             var fakePreviewBlock = safe({innerHTML: ""});
             info.preview(fakePreviewBlock,
-                         safeDirectObj(directObject),
-                         safeModifiers(modifiers));
+                         safeModifiers(args));
             var html = fakePreviewBlock.innerHTML;
             if (typeof(html) == "string")
               previewBlock.innerHTML = htmlSanitize(html);
