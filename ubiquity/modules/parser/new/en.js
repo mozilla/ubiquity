@@ -35,7 +35,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
- 
+
 function makeParser() new Parser({
   lang: "en",
   anaphora: ["this", "that", "it", "selection", "him", "her", "them"],
@@ -47,7 +47,12 @@ function makeParser() new Parser({
     {role: "position", delimiter: 'near'},
     {role: "instrument", delimiter: "with"},
     {role: "instrument", delimiter: "using"},
-    {role: "date", delimiter: "on"}
+    {role: "date", delimiter: "on"},
+    {role: "format", delimiter: "in"},
+    {role: "modifier", delimiter: "of"},
+    {role: "modifier", delimiter: "for"},
+    {role: "alias", delimiter: "as"},
+    {role: "alias", delimiter: "named"}
   ],
   branching: "right",
 });
