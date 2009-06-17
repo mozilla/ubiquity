@@ -60,8 +60,34 @@ function getRotationFromMatrix(matrix) {
   return a;
 }
 
+
 CmdUtils.CreateCommand({
-  name: "rotate-image",
+  names: ["rotate page"],
+  arguments: [{role: "object",
+               nountype: /^\d*$/,
+               label: "number of degrees" }],
+  preview: function(pblock, {object}) {
+    if (object.text == "")
+      rot = "180";
+    else
+      rot = object.text;
+    var preview = "<p>Rotates entire page ${angle} degrees</p>";
+    pblock.innerHTML = CmdUtils.renderTemplate(preview,{"angle": rot});
+  },
+  execute: function({object}) {
+    if (object.text == "")
+      rot = Math.PI; // default rotation
+    else
+      rot = 2*Math.PI*object.text/360;
+    var document = CmdUtils.getDocument();
+    var matrix = jQuery(document.body).css("-moz-transform");
+    jQuery(document.body).
+    css("-moz-transform", "rotate("+(getRotationFromMatrix(matrix)+rot)+"rad)");
+  }
+});
+
+CmdUtils.CreateCommand({
+  names: ["rotate image"],
   _rotate: function(elems, deg) {
     jQuery.each(elems, function() {
       jQuery(this).css("-moz-transform", "rotate(%sdeg)".replace(/%s/, deg));
@@ -108,32 +134,10 @@ CmdUtils.CreateCommand({
   execute: function() {}
 });
 
-CmdUtils.CreateCommand({
-  name: "rotate-page",
-  takes: {"rot": noun_arb_text},
-  preview: function(pblock, rot) {
-    if (rot.text == "")
-      rot = "180";
-    else
-      rot = rot.text;
-    var preview = "<p>Rotates entire page ${angle} degrees</p>";
-    pblock.innerHTML = CmdUtils.renderTemplate(preview,{"angle": rot});
-  },
-  execute: function(rot) {
-    if (rot.text == "")
-      rot = Math.PI; // default rotation
-    else
-      rot = 2*Math.PI*rot.text/360;
-    var document = CmdUtils.getDocument();
-    var matrix = jQuery(document.body).css("-moz-transform");
-    jQuery(document.body).
-    css("-moz-transform", "rotate("+(getRotationFromMatrix(matrix)+rot)+"rad)");
-  }
-});
 
 
 CmdUtils.CreateCommand({
-  name: "flip-page",
+  names: ["flip page"],
   preview: "Flips the entire page upside down. "
          + "<span style='-moz-transform:rotate(180deg)'>"
          + "Useful for bats</span>.",
@@ -176,7 +180,7 @@ function sanatizeImage(img) {
 // TODO: Make these into a factory, and add controls into the previews.
 
 CmdUtils.CreateCommand({
-  name: "desaturate-image",
+  names: ["desaturate image"],
   execute: function() {
     injectPixastic(context, function() {
       var imgs = getImgsFromSelection(context);
@@ -193,7 +197,7 @@ CmdUtils.CreateCommand({
 
 
 CmdUtils.CreateCommand({
-  name: "invert-image",
+  names: ["invert image"],
   execute: function() {
     injectPixastic(context, function() {
       var imgs = getImgsFromSelection(context);
@@ -208,7 +212,7 @@ CmdUtils.CreateCommand({
 
 
 CmdUtils.CreateCommand({
-  name: "edge-detect-image",
+  names: ["edge-detect image", "detect edges in image"],
   execute: function() {
     injectPixastic(context, function() {
       var imgs = getImgsFromSelection(context);
