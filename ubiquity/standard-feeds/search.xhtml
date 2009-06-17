@@ -319,7 +319,6 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   });
 }
 
-        
 CmdUtils.CreateCommand({
   names: ["wikipedia", "lookup"],
   arguments: [{role: "object",
@@ -411,23 +410,21 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  name: "IMDB",
-  synonyms: ["movie", "actor"],
+  names: ["IMDB", "internet movie database", "movie", "actor"],
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
   icon: "http://i.imdb.com/favicon.ico",
   description: "Searches the Internet Movie Database for your words."
 });
 
-
 CmdUtils.makeSearchCommand({
-  name: "yahoo-search",
+  names: ["yahoo"],
   url: "http://search.yahoo.com/search?p={QUERY}&ei=UTF-8",
   icon: "http://search.yahoo.com/favicon.ico",
   description: "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words.",
-  preview: function(pblock, directObject){
+  preview: function(pblock, {object}){
     //TODO: Figure out some way around rate limits
     //Currently, Yahoo rate limits to 5000 queries per IP per day
-    var searchTerm = directObject.text;
+    var searchTerm = object.text;
     var pTemplate = "Searches Yahoo for <b>${query}</b>";
     var pData = {query: searchTerm};
     pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
@@ -512,22 +509,25 @@ const noun_type_amazon_com_index = {
 Amazon = "http://www.amazon.com/",
 AmazLink = "Amazon.com".link(Amazon);
 CmdUtils.CreateCommand({
-  name: "amazon",
+  names: ["amazon"],
   icon: Amazon + "favicon.ico",
   description: "Searches " + AmazLink + " for items matching your words.",
   help: (
     <dl><dt>Available Indices</dt>
     {noun_type_amazon_com_index.list.reduce(
       function(dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>+''),
-  takes: {"search terms": noun_arb_text},
-  modifiers: {in: noun_type_amazon_com_index},
-  execute: function({text}, {in: {data}}) {
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "search terms"},
+              {role: "format",
+               nountype: noun_type_amazon_com_index}],
+  execute: function({object: {text}, format: {data}}) {
     Utils.openUrlInBrowser(Amazon + "s/ref=nb_ss_gw" +
                            Utils.paramsToString(
                              { url: "node=" + data,
                                "field-keywords": text}));
   },
-  preview: function(previewBlock, {text, summary}, {in: {text: searchIndex}}) {
+  preview: function(previewBlock, {object: {text, summary}, format: {text: searchIndex}}) {
     if (!text) {
       previewBlock.innerHTML = this.description + this.help;
       return;
@@ -599,14 +599,15 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "VideoSurf",
-  synonyms: ["video", "videos", "videosurf"],
+  names: ["VideoSurf", "video", "videos", "videosurf"],
   homepage: "http://www.videosurf.com/",
   author: { name: "Udi Falkson", email: "udi@videosurf.com"},
   description: "Performs a VideoSurf video search with advanced preview.",
   help: "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!",
   icon: "http://www.videosurf.com/favicon.ico",
-  takes: {"Search Term": noun_arb_text},
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "Search Term"}],
   _fetchResults: function(pblock, query){  
     var url = "http://www.videosurf.com/api/ext/services/ubiquityService.php";
     var params = {'query': query};
@@ -628,32 +629,32 @@ CmdUtils.CreateCommand({
       });      
     })
   },
-  preview: function( pblock, query ) {
+  preview: function( pblock, {object} ) {
      pblock.innerHTML = "Loading Videos...";
-     this._fetchResults(pblock, query.text);
+     this._fetchResults(pblock, object.text);
    },
-  execute: function(query) {
-     query = query.text.replace(/^ +/,'').replace(/ +$/,'').replace(/ +/g,'+').replace(/[\/]/g,'%2f');
+  execute: function({object}) {
+     query = object.text.replace(/^ +/,'').replace(/ +$/,'').replace(/ +/g,'+').replace(/[\/]/g,'%2f');
      var url = "http://www.videosurf.com/videos/" + query + "?vlt=ubiquity"; 
      Utils.openUrlInBrowser( url );
    }
 });
 
 CmdUtils.makeSearchCommand({
-  name: "YouTube",
+  names: ["YouTube"],
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
   icon: "http://www.youtube.com/favicon.ico",
   description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words.",
-  preview: function(pblock, directObject){
-    var searchTerm = directObject.text;
-    pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
+  preview: function(pblock, {object}){
+    var searchTerm = object.text;
+    pblock.innerHTML = "Searches Youtube for <b>" + object.summary + "</b>";
 
     if(searchTerm.length < 1) {
       pblock.innerHTML = "Searches for videos on Youtube";
       return;
     }
 
-    pblock.innerHTML = "Searches Youtube for <b>" + directObject.summary + "</b>";
+    pblock.innerHTML = "Searches Youtube for <b>" + object.summary + "</b>";
     
     var url = "http://gdata.youtube.com/feeds/api/videos";
     var params = {
@@ -679,13 +680,12 @@ CmdUtils.makeSearchCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  name: "Flickr",
-  synonyms: ["images"],
+  names: ["Flickr", "images"],
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
   icon: "http://www.flickr.com/favicon.ico",
   description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your words.",
-  preview : function(previewBlock, inputObject){
-    var inputText = inputObject.text;
+  preview : function(previewBlock, {object}){
+    var inputText = object.text;
 
     if(inputText.length < 1) {
       previewBlock.innerHTML = "Searches for photos on Flickr.";
@@ -737,59 +737,59 @@ CmdUtils.makeSearchCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  name: "Bugzilla",
+  names: ["Bugzilla"],
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
   icon: "http://www.mozilla.org/favicon.ico",
   description: "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
 });
 
 CmdUtils.makeSearchCommand({
-  name: "msn-search",
+  names: ["msn"],
   url: "http://search.msn.com/results.aspx?q={QUERY}",
   icon: "http://search.msn.com/favicon.ico",
   description: "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words.",
-  preview: function(pBlock, directObj) {
-    if (directObj.text)
-      pBlock.innerHTML = "Searches MSN for " + directObj.text;
+  preview: function(pBlock, {object}) {
+    if (object.text)
+      pBlock.innerHTML = "Searches MSN for " + object.text;
     else
       pBlock.innerHTML = "Searches MSN for the given words.";
   }
 });
 
 CmdUtils.makeSearchCommand({
-  name: "ebay-search",
+  names: ["ebay"],
   url: "http://search.ebay.com/search/search.dll?satitle={QUERY}",
   icon: "http://search.ebay.com/favicon.ico",
   description: "Searches <a href=\"http://search.ebay.com\">EBay</a> for auctions matching the given words.",
-  preview: function(pBlock, directObj) {
-    if (directObj.text)
-      pBlock.innerHTML = "Searches EBay for " + directObj.text;
+  preview: function(pBlock, {object}) {
+    if (object.text)
+      pBlock.innerHTML = "Searches EBay for " + object.text;
     else
       pBlock.innerHTML = "Searches EBay for the given words.";
   }
 });
 
 CmdUtils.makeSearchCommand({
-  name: "ask-search",
+  names: ["ask"],
   url: "http://www.ask.com/web?q={QUERY}",
   icon: "http://www.ask.com/favicon.ico",
   description: "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words.",
-  preview: function(pBlock, directObj) {
-    if (directObj.text)
-      pBlock.innerHTML = "Searches Ask.com for " + directObj.text;
+  preview: function(pBlock, {object}) {
+    if (object.text)
+      pBlock.innerHTML = "Searches Ask.com for " + object.text;
     else
       pBlock.innerHTML = "Searches Ask.com for the given words.";
   }
 });
 
 CmdUtils.makeSearchCommand({
-  name: "answers-search",
+  names: ["answers"],
   url: "http://www.answers.com/{QUERY}",
   icon: "http://www.answers.com/favicon.ico",
   description: "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words.",
-  preview: function(pBlock, directObj) {
-    if (directObj.text)
-      pBlock.innerHTML = "Searches Answers.com for " + directObj.text;
+  preview: function(pBlock, {object}) {
+    if (object.text)
+      pBlock.innerHTML = "Searches Answers.com for " + object.text;
     else
       pBlock.innerHTML = "Searches Answers.com for the given words.";
   }
@@ -1013,8 +1013,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.makeSearchCommand({
-    name: "image-search",
-	synonyms: ["getimages"],
+    names: ["google image search", "get images"],
     version: "0.2.5",
     author: {
         name: "Federico Parodi",
@@ -1025,16 +1024,13 @@ CmdUtils.makeSearchCommand({
     icon: "http://www.google.com/favicon.ico",
     description: "Browse and embed pictures from Google Images",
     help: "Press return to show the Google Images results, left click on a picture to watch it, right click to insert it in a text or rich text area",
-    takes: {
-        "description": noun_arb_text
-    },
     url: "http://images.google.com/images?hl=en&q={QUERY}",
     pageCounter: 0,
     imgsPerPage: 8,
     previewDelay: 500,
-    preview: function(pblock, name) {
+    preview: function(pblock, {object}) {
 
-        var nameText = name.text;
+        var nameText = object.text;
         // user's query
         if (nameText.length < 1) {
             pblock.innerHTML = "Search on Google Images.";
