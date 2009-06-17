@@ -801,7 +801,7 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
         names[x] = viMatches[1];
         nameArgs[x] = viMatches[2];
       }
-      
+
       let vfMatches;
       if ( vfMatches = verbFinalParensPattern( aName ) ) {
         names[x] = vfMatches[2];
@@ -1220,8 +1220,16 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     }
     return target && target.replace(re, encodeURIComponent(query));
   }
-  options.takes = {"search term": this.__globalObject.noun_arb_text};
-  options.execute = function({text}) {
+  if (options.name && ! options.names) {
+    options.names = [ options.name ];
+  }
+  if (! options.arguments) {
+    options.arguments = [];
+  }
+  options.arguments.push({role: "object",
+                        nountype: this.__globalObject.noun_arb_text,
+                          label: "search term"});
+  options.execute = function({object: {text}}) {
     Utils.openUrlInBrowser(insertQuery(options.url, text),
                            insertQuery(options.postData, text));
   };
@@ -1232,15 +1240,15 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     // guess where the favicon is
     options.icon = baseurl + "/favicon.ico";
   }
-  if (!options.description && options.name) {
+  if (!options.description && options.names) {
     // generate description from the name of the seach command
-    options.description = "Searches " + options.name + " for your words.";
+    options.description = "Searches " + options.names[0] + " for your words.";
   }
   if (options.parser && options.parser.type) {
     options.parser.type = options.parser.type.toLowerCase();
   }
   if (!options.preview) {
-    options.preview = function searchPreview(pblock, {text, html}) {
+    options.preview = function searchPreview(pblock, {object:{text, html}}) {
       const Klass = "search-command";
       var {parser} = options;
       var urlString = (parser && parser.url) || options.url;
@@ -1306,14 +1314,14 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                   });
                 }
                 else {
-                  Utils.reportWarning(options.name + " : " +
+                  Utils.reportWarning(options.names[0] + " : " +
                                       "falling back to fragile parsing");
                   var titles = doc.find(parser.title);
                   var sane = true;
                   if (parser.preview) {
                     var previews = doc.find(parser.preview);
                     if (titles.length != previews.length) {
-                      CmdUtils.log("ERROR from "+options.name+": "
+                      CmdUtils.log("ERROR from "+options.names[0]+": "
                                   +"unequal number of titles and previews - "
                                   +"previews might be mixed up");
                       sane = false;
@@ -1322,7 +1330,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
                   if (parser.thumbnail) {
                     var thumbnails = doc.find(parser.thumbnail);
                     if (titles.length != thumbnails.length) {
-                      CmdUtils.log("ERROR from "+options.name+": "
+                      CmdUtils.log("ERROR from "+options.names[0]+": "
                                   +"unequal number of titles and thumbnails - "
                                   +"thumbnails might be mixed up");
                       sane = false;
@@ -1438,7 +1446,7 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
         CU.previewAjax(pblock, params);
       }
       else {
-        var content = "Searches " + options.name + " for your words";
+        var content = "Searches " + options.names[0] + " for your words";
         if (text)
           content += ": <b>" + text + "</b>";
         pblock.innerHTML = content;
@@ -1446,7 +1454,9 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     };
   }
 
-  options.name = options.name.toLowerCase();
+  for (let x = 0; x < options.names.length; x++ ) {
+    options.names[x] = options.names[x].toLowerCase();
+  }
 
   this.CreateCommand(options);
 };

@@ -139,9 +139,6 @@ CmdUtils.CreateCommand({
 /* TODO the dummy argument "wikipedia" could become a plugin argument
  * and this command could become a general purpose "insert link"
  * command.
- *
- * TODO the language command should be of a semantic role corresponding
- * to "in (language)", which doesn't currently exist...
  */
 CmdUtils.CreateCommand(
 {
@@ -154,12 +151,12 @@ CmdUtils.CreateCommand(
               {role: "goal",
                nountype: ["wikipedia"],
                label: "wikipedia"},
-              {role: "instrument",
+              {role: "format",
                nountype:noun_type_lang_wikipedia,
                label: "language"}],
   description: "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
-  _link: function({object: {text, html}, goal: {data}}){
+  _link: function({object: {text, html}, format: {data}}){
     var url = ("http://" + (data || "en") +
                ".wikipedia.org/wiki/Special%3ASearch/" +
                encodeURIComponent(text.replace(/ /g, "_")));

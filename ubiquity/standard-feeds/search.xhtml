@@ -206,6 +206,8 @@ Wikipedia articles found matching <b>${query}</b>:
   <br/><br/>
 </div>
 <script class="commands"><![CDATA[
+
+// TODO this should use a provider plugin
 CmdUtils.CreateCommand({
   names: ['search','find','look for'],
   arguments: [
@@ -244,12 +246,12 @@ CmdUtils.CreateCommand({
 
 
 CmdUtils.makeSearchCommand({
-  name: "Google",
+  names: ["Google"],
   url: "http://www.google.com/search?q={QUERY}",
   icon: "http://www.google.com/favicon.ico",
   description: "Searches Google for your words.",
-  preview: function(pblock, directObject) {
-    var searchTerm = directObject.text;
+  preview: function(pblock, {object}) {
+    var searchTerm = object.text;
     // Don't even display any text before fetching search results,
     // since the results come back nearly instantaneously. In the
     // future, we can display a throbber.
@@ -318,10 +320,10 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
 }
 
 CmdUtils.CreateCommand({
-  name: "wikipedia",
-  synonyms: ["lookup"],
-  takes: {search: noun_arb_text},
-  modifiers: {in: noun_type_lang_wikipedia},
+  names: ["wikipedia", "lookup"],
+  arguments: [{role: "format",
+               nountype: noun_type_lang_wikipedia,
+               label: "language"}],
   locale: "en-US",
   homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
@@ -329,15 +331,16 @@ CmdUtils.CreateCommand({
   license: "MPL",
   icon: "http://en.wikipedia.org/favicon.ico",
   description: "Searches Wikipedia for your words, in a given language.",
-  preview: function(previewBlock, directObject, mods) {
-    var langCode = mods.in.data || "en";
+  preview: function(previewBlock, arguments) {
+    var langCode = arguments.format.data || "en";
     var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
 
-    var searchText = jQuery.trim(directObject.text);
+    var searchText = jQuery.trim(arguments.object.text);
     if(searchText.length < 1) {
       var previewStr = "Searches Wikipedia";
-      if (mods.in.text) {
-        var language = mods.in.text[0].toUpperCase() + mods.in.text.slice(1);
+      var langName = arguments.format.text;
+      if (langName) {
+        var language = langName[0].toUpperCase() + langName.slice(1);
 	previewStr = previewStr + " in " + language;
       }
       previewBlock.innerHTML = previewStr;
@@ -395,10 +398,10 @@ CmdUtils.CreateCommand({
       }
     });
   },
-  execute: function(directObject, mods) {
-    var lang = mods.in.data || "en";
+  execute: function(arguments) {
+    var lang = arguments.format.data || "en";
     var searchUrl = "http://" + lang + ".wikipedia.org/wiki/Special:Search";
-    var searchParams = {search: directObject.text};
+    var searchParams = {search: arguments.object.text};
     Utils.openUrlInBrowser(searchUrl + Utils.paramsToString(searchParams));
   }
 });
@@ -883,22 +886,22 @@ var noun_type_temperature_units = new CmdUtils.NounType( "temperature units", Te
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
 CmdUtils.CreateCommand({
-  name: "weather",
-  takes: {"position": noun_type_geolocation},
-  modifiers: {"in": noun_type_temperature_units},
+  names: ["check weather", "get weather", "weather"],
+  arguments: {position: noun_type_geolocation,
+              instrument: noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
-  help: "Try issuing &quot;weather chicago&quot;.  It works with zip-codes, too.",
-  execute: function( directObj ) {
-    var location = directObj.text;
+  help: "Try issuing &quot;weather near chicago&quot;.  It works with zip-codes, too.",
+  execute: function( {position} ) {
+    var location = position.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
 
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function(pblock, directObj, modifiers) {
-    var location = directObj.text;
+  preview: function(pblock, {position, instrument}) {
+    var location = position.text;
     if (location.length < 1) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;
@@ -909,12 +912,12 @@ CmdUtils.CreateCommand({
     var user_location = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
     var temp_units = 'celsius';
-    if (!modifiers["in"].text) {
+    if (!instrument.text) {
       if (user_location && ["US","UM","BZ"].indexOf(user_location.country_code) != -1) {
         temp_units = 'fahrenheit';
       }
     } else {
-      temp_units = modifiers["in"].text;
+      temp_units = instrument.text;
     }
 
     var url = "http://www.google.com/ig/api";
@@ -977,17 +980,19 @@ function defineWord(word, callback) {
 }
 
 CmdUtils.CreateCommand({
-  name: "define",
+  names: ["define", "get definition"],
   description: "Gives the meaning of a word.",
   help: "Try issuing &quot;define aglet&quot;",
   icon: "http://www.answers.com/favicon.ico",
-  takes: {"word": noun_arb_text},
-  execute: function(directObj) {
-    var word = directObj.text;
+  arguments: [{role: "object",
+               nountype:noun_arb_text,
+               label: "word"}],
+  execute: function({object}) {
+    var word = object.text;
     Utils.openUrlInBrowser( "http://www.answers.com/" + escape(word) );
   },
-  preview: function(pblock, directObj) {
-    var word = directObj.text;
+  preview: function(pblock, {object}) {
+    var word = object.text;
     if (word.length < 2) {
       pblock.innerHTML = "Gives the definition of a word.";
     } else {

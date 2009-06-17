@@ -9,8 +9,11 @@ From Abi:
 // but that gets truncated on some displays? grr
 const TWITTER_STATUS_MAXLEN = 140;
 
+// TODO should there also be a "share" overlord verb with
+// providers "using twitter", "using digg", etc.
+
 CmdUtils.CreateCommand({
-  names: ["twitter", "tweet"],
+  names: ["twitter", "tweet", "share using twitter"],
   //ja: ["呟く","呟け","呟いて","つぶやく","つぶやけ","つぶやいて"]
   arguments: [
     {role: "object", label: 'status', nountype: noun_arb_text},
@@ -72,7 +75,7 @@ CmdUtils.CreateCommand({
       //and the total lenght is more than 140, but tinyurl takes care of that
     };
     var me = this;
-    
+
     function sendMessage() {
       jQuery.ajax({
         type: "POST",
@@ -110,8 +113,10 @@ CmdUtils.CreateCommand({
   }
 });
 
+// TODO this should take arguments -- url (defaulting to current page)
+// optional commentary, and alias?
 CmdUtils.CreateCommand({
-  names: ["digg","share-on-digg"],
+  names: ["digg","share using digg"],
   icon: "http://digg.com/favicon.ico",
   homepage: "http://www.gialloporpora.netsons.org",
   description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
@@ -223,10 +228,9 @@ var uext = Application.extensions.get('ubiquity@labs.mozilla.com');
 var cookie_mgr = Components.classes["@mozilla.org/cookiemanager;1"]
     .getService(Components.interfaces.nsICookieManager);
 
-CmdUtils.CreateCommand({
-
-    name:
-        'share-on-delicious',
+CmdUtils.CreateCommand(
+  {
+    name: "share-on-delicious",
     icon:
         'http://delicious.com/favicon.ico',
     description:

@@ -258,16 +258,14 @@ CmdUtils.CreateCommand({
   }
 });
 
-/* TODO: the argument should have semantic role corresponding to
- * "for" or "of", once we figure out what that is... */
 CmdUtils.CreateCommand({
   names: ["get email address"],
   icon: "chrome://ubiquity/skin/icons/email.png",
   description: ("Looks up the email address of a person " +
                 "from your contacts list given their name. "),
   help: "Execute to copy the address.",
-  arguments: noun_type_contact,
-  execute: function({object: {text}}) {
+  arguments: {modifier: noun_type_contact},
+  execute: function({modifier: {text}}) {
     if (!text) return;
     Utils.clipboard.text = text;
     displayMessage(text, this);
