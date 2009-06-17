@@ -183,6 +183,11 @@ function fillTableRowForCmd(row, cmd, className) {
       "This command was not loaded as it is incompatible with Parser 2.");
   }
 
+  if (UbiquitySetup.parserVersion === 2 && cmd.oldAPI) {
+    cmdElement.addClass("oldAPI");
+    cmdElement.prepend($("<span class='badge'><a href='https://wiki.mozilla.org/Labs/Ubiquity/Parser_2_API_Conversion_Tutorial' target='new'><img src='resource://ubiquity/chrome/skin/icons/oldapi.png'></a></span>"))
+  }
+
   if (cmd.icon)
     cmdElement.find(".favicon").attr("src", cmd.icon);
   else

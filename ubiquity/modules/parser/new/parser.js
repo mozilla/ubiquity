@@ -163,13 +163,13 @@ Parser.prototype = {
     this._verbList = [];
     var skippedSomeVerbs = false;
     for each (let verb in commandList) if (!verb.disabled) {
-      if (verb.arguments)
+      if (!verb.oldAPI || verb.arguments)
         this._verbList.push(verb);
       else
         skippedSomeVerbs = true;
     }
-    dump("loaded verbs:\n" +
-         this._verbList.map(function(v) v.names[0]).join("\n") + "\n");
+    //dump("loaded verbs:\n" +
+    //     this._verbList.map(function(v) v.names[0]).join("\n") + "\n");
 
     if (skippedSomeVerbs) {
       var msgService = new AlertMessageService();
@@ -194,9 +194,9 @@ Parser.prototype = {
         }
       }
     }
-    dump("loaded nouns:\n" +
-         [n.id + " " + n.name for each (n in this._nounTypes)].join("\n") +
-         "\n");
+    //dump("loaded nouns:\n" +
+    //     [n.id + " " + n.name for each (n in this._nounTypes)].join("\n") +
+    //     "\n");
 
     this.initializeCache();
   },

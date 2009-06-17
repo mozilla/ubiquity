@@ -339,3 +339,15 @@ div.ubiq-tutorial h2 {
   margin: 0;
   padding: 0;
 }
+
+.badge {
+  border-width: 0;
+  float: right;
+/*  position: absolute;*/
+  top: 0px;
+  right: 0px;
+}
+
+.badge a img {
+  border: none;
+}

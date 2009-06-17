@@ -150,7 +150,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: ["report a bug", "report bug"],
+  names: ["report a bug", "report bug"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
@@ -158,7 +158,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "enable (ubiquity command)",
+  names: ["enable (ubiquity command)"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "Re-enables a Ubiquity command that you disabled.",
   arguments: [{ role: "object",
@@ -180,7 +180,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  name: "disable (ubiquity command)",
+  names: ["disable (ubiquity command)"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "Disables a Ubiquity command, so that it will no longer show up"
                + " in the suggestion list.",

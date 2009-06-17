@@ -47,12 +47,14 @@ function finishCommand(cmd) {
 
   if (UbiquitySetup.parserVersion === 2) {
     // Convert for Parser 2 if it takes no arguments.
-    if (!cmd.DOType && !cmd.modifiers && isEmpty(cmd.arguments)) {
+    if (cmd.oldAPI && !cmd.DOType && !cmd.modifiers && isEmpty(cmd.arguments)) {
       dump("converting 1 > 2: " + cmd.name + "\n");
       let clone = {__proto__: cmd, arguments: []};
       if (!cmd.names) clone.names = [cmd.name];
       cmd = clone;
     }
+    if (!cmd.oldAPI && !cmd.arguments)
+      cmd.arguments = [];
     if (cmd.arguments) {
       Components.utils.import(
         "resource://ubiquity/modules/localization_utils.js");

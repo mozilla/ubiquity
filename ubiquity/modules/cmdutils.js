@@ -775,6 +775,9 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     if (!noun.id) noun.id = global.feed.id + "#n" + me.__nextId++;
   }
 
+  if (!options.names)
+    command.oldAPI = true;
+
   // ensure name, names and synonyms
   { let names = options.names || options.name;
     if (!names)
