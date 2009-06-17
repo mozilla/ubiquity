@@ -50,18 +50,18 @@ $(onDocumentLoad);
 
 function onDocumentLoad() {
   loadSkinList();
-  
+
   // add the language options
   var ParserJSM = {};
   Cu.import("resource://ubiquity/modules/parser/new/namespace.js",ParserJSM);
   var parserRegistry = ParserJSM.parserRegistry;
-  
+
   for (let code in parserRegistry) {
     $('#language-select').append($("<option value='"+code+"' "+
                               (code=='en'?" selected='true'":'')+">"
                               +parserRegistry[code]+'</input>'));
   }
-  
+
   // set the language option controls to the correct values:
   var parserVersion = UbiquitySetup.parserVersion;
   $("#use-new-parser-checkbox").attr('checked', ( parserVersion == 2 ));
@@ -74,20 +74,6 @@ function onDocumentLoad() {
       }
     );
   }
-  // set the usage-data-collection option to the correct value:
-  var prefs = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService);
-  prefs = prefs.getBranch("extensions.ubiquity.");
-  var collect = prefs.getBoolPref("collectUsageData");
-  $("#allow-data-collection-checkbox").attr('checked', collect);
-}
-
-function changeDataCollectionSettings() {
-  var prefs = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService);
-  prefs = prefs.getBranch("extensions.ubiquity.");
-  var collect = $("#allow-data-collection-checkbox").attr('checked');
-  prefs.setBoolPref("collectUsageData", collect);
 }
 
 function changeLanguageSettings() {
