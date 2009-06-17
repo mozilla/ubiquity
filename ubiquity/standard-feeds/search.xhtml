@@ -904,7 +904,7 @@ CmdUtils.CreateCommand({
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function(pblock, {position, instrument}) {
+  preview: function(pblock, {position, format}) {
     var location = position.text;
     if (location.length < 1) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
@@ -916,12 +916,12 @@ CmdUtils.CreateCommand({
     var user_location = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
     var temp_units = 'celsius';
-    if (!instrument.text) {
+    if (!format.text) {
       if (user_location && ["US","UM","BZ"].indexOf(user_location.country_code) != -1) {
         temp_units = 'fahrenheit';
       }
     } else {
-      temp_units = instrument.text;
+      temp_units = format.text;
     }
 
     var url = "http://www.google.com/ig/api";
