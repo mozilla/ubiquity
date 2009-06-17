@@ -5,6 +5,16 @@ CmdUtils.CreateCommand(
 );
 
 CmdUtils.CreateCommand(
+  {names: ["locked down echo"],
+   help: "Echoes your input",
+   arguments: [{nountype: /.*/, role: 'object'},
+               {nountype: /.*/, role: 'goal'}],
+   execute: function execute(args) {
+     displayMessage(args.object.text + " to " + args.goal.text);
+   }}
+);
+
+CmdUtils.CreateCommand(
   {names: ["locked down evil components"],
    preview: "Tries to access <tt>Components.classes</tt> but fails.",
    execute: function execute() {

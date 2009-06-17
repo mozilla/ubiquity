@@ -1128,13 +1128,19 @@ Parser.prototype = {
         if (!suggs && !suggs.length)
           return [];
         if (!Utils.isArray(suggs)) suggs = [suggs];
+        // This extra step here which admittedly looks redundant is to
+        // "fix" arrays which were the product of a nountype from a locked
+        // down feed plugin, to enable proper enumeration. This is due to some
+        // weird behavior which has to do with XPCSafeJSObjectWrapper.
+        // Ask satyr or mitcho for details.
+        suggs = [suggs[key] for (key in suggs)];
         for each (let s in suggs) s.nountypeId = id;
         return suggs;
       };
       var asyncReqsToArray = function detectNounType_asyncReqsToArray(asyncs){
         let retArray = [];
         for each (let async in asyncs){
-	  if(async)
+	        if(async)
             retArray.push(async);
         }
         return retArray;
@@ -1143,6 +1149,12 @@ Parser.prototype = {
       var myCallback = function detectNounType_myCallback(suggestions, asyncRequests) {
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
+
+          if (!(x in thisParser._nounCache))
+            thisParser._nounCache[x] = {};
+          if (!(nountypeId in thisParser._nounCache[x]))
+            thisParser._nounCache[x][nountypeId] = [];
+            
           thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
@@ -1177,10 +1189,10 @@ Parser.prototype = {
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
       
           if(activeNounTypes[id].asyncRequest){
-	    dump("asyncRequest: " + activeNounTypes[id].asyncRequest + "\n");
+	          dump("asyncRequest: " + activeNounTypes[id].asyncRequest + "\n");
             asyncRequests[id] = activeNounTypes[id].asyncRequest;
-	    dump("sending: " + activeNounTypes[id].label + "\n");
-	  }
+	          dump("sending: " + activeNounTypes[id].label + "\n");
+	        }
         }
         myCallback(returnArray, asyncRequests);
       },0);
