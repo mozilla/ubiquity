@@ -337,7 +337,14 @@ Parser.prototype = {
               text: name,
               _order: order,
               input: verbPiece,
-              score: 1 + match.length / verbPiece.length,
+              // the sqrt makes it so the score reflects the fact that 
+              // initial letters in the verb prefix are more informative, 
+              // and that later letters add less to the overall confidence
+              // of the verb match. The 0.3 flooring was added so that these
+              // verb prefix matches, even if they're only one or two
+              // characters, will get higher scoreMultipliers than noun-first
+              // suggestions, which get scoreMultiplier of 0.3. (trac #750)
+              score: 0.3 + 0.7 * Math.sqrt(match.length / verbPiece.length),
               __proto__: verb,
             },
             argString: argString,
@@ -1152,10 +1159,10 @@ Parser.prototype = {
         for (let thisNounTypeId in activeNounTypes) {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
-	    dump("returning: " + activeNounTypes[id].label + "\n");
+	          dump("returning: " + activeNounTypes[id].label + "\n");
             suggs = handleSuggs(suggs, id);
-	    if(asyncRequests[id])
-	      asyncRequests[id] = null;
+            if(asyncRequests[id])
+	            asyncRequests[id] = null;
             myCallback(suggs, asyncRequests);
           }
 
