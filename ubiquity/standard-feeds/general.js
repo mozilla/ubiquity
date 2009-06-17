@@ -2,60 +2,102 @@
 // TEXT COMMANDS
 // -----------------------------------------------------------------
 
-function cmd_bold() {
-  var doc = context.focusedWindow.document;
+/* TODO there is a lot of duplicated code between these formatting
+ * commands... could they be combined?
+ */
 
-  if (doc.designMode == "on")
-    doc.execCommand("bold", false, null);
-  else
-    displayMessage("You're not in a rich text editing field.");
-}
-cmd_bold.description = "If you're in a rich-text-edit area, makes the selected text bold.";
-cmd_bold.icon = "chrome://ubiquity/skin/icons/text_bold.png";
+/* Note that these text formatting commands are a little weird in that
+ * they operate on a selection, but they don't take the selection as
+ * an argument.  This is as intended, because if there is no text
+ * selection, there is nothing for any of these commands to do.
+ */
+CmdUtils.CreateCommand({
+  names: ["bold"],
+  description:"If you're in a rich-text-edit area, makes the selected text bold.",
+  icon: "chrome://ubiquity/skin/icons/text_bold.png",
+  execute: function() {
+    var doc = context.focusedWindow.document;
 
-function cmd_italic() {
-  var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+      doc.execCommand("bold", false, null);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  }
+});
 
-  if (doc.designMode == "on")
-    doc.execCommand("italic", false, null);
-  else
-    displayMessage("You're not in a rich text editing field.");
-}
-cmd_italic.description = "If you're in a rich-text-edit area, makes the selected text italic.";
-cmd_italic.icon = "chrome://ubiquity/skin/icons/text_italic.png";
+CmdUtils.CreateCommand({
+  names: ["italicize"],
+  description:"If you're in a rich-text-edit area, makes the selected text italic.",
+  icon: "chrome://ubiquity/skin/icons/text_italic.png",
+  execute: function() {
+    var doc = context.focusedWindow.document;
 
-function cmd_underline() {
-  var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+      doc.execCommand("italic", false, null);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  }
+});
 
-  if (doc.designMode == "on")
-    doc.execCommand("underline", false, null);
-  else
-    displayMessage("You're not in a rich text editing field.");
-}
-cmd_underline.description = "If you're in a rich-text-edit area, underlines the selected text.";
-cmd_underline.icon = "chrome://ubiquity/skin/icons/text_underline.png";
+CmdUtils.CreateCommand({
+  names: ["underline"],
+  description:"If you're in a rich-text-edit area, underlines the selected text.",
+  icon: "chrome://ubiquity/skin/icons/text_underline.png",
+  execute: function() {
+    var doc = context.focusedWindow.document;
 
-function cmd_undo() {
-  var doc = context.focusedWindow.document;
+    if (doc.designMode == "on")
+      doc.execCommand("underline", false, null);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  }
+});
 
-  if (doc.designMode == "on")
-    doc.execCommand("undo", false, null);
-  else
-    displayMessage("You're not in a rich text editing field.");
-}
-cmd_undo.description = "Undoes your latest style/formatting or page-editing changes.";
-cmd_undo.icon = "chrome://ubiquity/skin/icons/arrow_undo.png";
+CmdUtils.CreateCommand({
+  names: ["highlight", "hilite"],
+  description:'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.',
+  icon: "chrome://ubiquity/skin/icons/textfield_rename.png",
+  execute: function() {
+    var sel = context.focusedWindow.getSelection();
+    var document = context.focusedWindow.document;
 
-function cmd_redo() {
-  var doc = context.focusedWindow.document;
+    if (sel.rangeCount >= 1) {
+      var range = sel.getRangeAt(0);
+      var newNode = document.createElement("span");
+      newNode.style.background = "yellow";
+      range.surroundContents(newNode);
+    }
+  }
+});
 
-  if (doc.designMode == "on")
-    doc.execCommand("redo", false, null);
-  else
-    displayMessage("You're not in a rich text editing field.");
-}
-cmd_redo.description = "Redoes your latest style/formatting or page-editing changes.";
-cmd_redo.icon = "chrome://ubiquity/skin/icons/arrow_redo.png";
+
+CmdUtils.CreateCommand({
+  names: ["undo (text edit)"],
+  description:"Undoes your latest style/formatting or page-editing changes.",
+  icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
+  execute: function() {
+    var doc = context.focusedWindow.document;
+
+    if (doc.designMode == "on")
+      doc.execCommand("undo", false, null);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  }
+});
+
+CmdUtils.CreateCommand({
+  names: ["redo (text edit)"],
+  description:"Redoes your latest style/formatting or page-editing changes.",
+  icon: "chrome://ubiquity/skin/icons/arrow_redo.png",
+  execute: function() {
+    var doc = context.focusedWindow.document;
+
+    if (doc.designMode == "on")
+      doc.execCommand("redo", false, null);
+    else
+      displayMessage("You're not in a rich text editing field.");
+  }
+});
 
 
 function wordCount(text){
@@ -70,8 +112,11 @@ function wordCount(text){
   return wordCount;
 }
 
+/* TODO should the object text instead be an "in" argument, as in
+ * "count words in this" ?
+ */
 CmdUtils.CreateCommand({
-  names: ["word-count"],
+  names: ["count words", "word count"],
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/sum.png",
   description: "Displays the number of words in a selection.",
@@ -91,39 +136,41 @@ CmdUtils.CreateCommand({
   }
 });
 
-
-function cmd_highlight() {
-  var sel = context.focusedWindow.getSelection();
-  var document = context.focusedWindow.document;
-
-  if (sel.rangeCount >= 1) {
-    var range = sel.getRangeAt(0);
-    var newNode = document.createElement("span");
-    newNode.style.background = "yellow";
-    range.surroundContents(newNode);
-  }
-}
-cmd_highlight.description = 'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.';
-cmd_highlight.icon = "chrome://ubiquity/skin/icons/textfield_rename.png";
-
-CmdUtils.CreateCommand({
-  name: "link-to-wikipedia",
-  takes: {phrase: noun_arb_text},
-  modifiers: {in: noun_type_lang_wikipedia},
+/* TODO the dummy argument "wikipedia" could become a plugin argument
+ * and this command could become a general purpose "insert link"
+ * command.
+ *
+ * TODO the language command should be of a semantic role corresponding
+ * to "in (language)", which doesn't currently exist...
+ */
+CmdUtils.CreateCommand(
+{
+  names: ["link (to wikipedia)",
+          "insert link (to wikipedia)",
+          "linkify (to wikipedia)"],
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "phrase"},
+              {role: "goal",
+               nountype: ["wikipedia"],
+               label: "wikipedia"},
+              {role: "instrument",
+               nountype:noun_type_lang_wikipedia,
+               label: "language"}],
   description: "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
-  _link: function({text, html}, {in: {data}}){
+  _link: function({object: {text, html}, goal: {data}}){
     var url = ("http://" + (data || "en") +
                ".wikipedia.org/wiki/Special%3ASearch/" +
                encodeURIComponent(text.replace(/ /g, "_")));
     return ['<a href="' + url + '">' + html + "</a>", url];
   },
-  execute: function(dob, mod) {
-    var [htm, url] = this._link(dob, mod);
+  execute: function(args) {
+    var [htm, url] = this._link(args);
     CmdUtils.setSelection(htm, {text: url});
   },
-  preview: function(pbl, dob, mod) {
-    var [htm, url] = this._link(dob, mod);
+  preview: function(pbl, args) {
+    var [htm, url] = this._link(args);
     pbl.innerHTML = (this.description +
                      "<p>" + htm + "</p>" +
                      <code>{url}</code>.toXMLString());
@@ -241,10 +288,12 @@ MathParser.prototype.parse = function(e){
   return o.eval(e);
 };
 
-CmdUtils.CreateCommand({
-    name: "gcalculate",
-    takes: {"expression": noun_arb_text},
-
+CmdUtils.CreateCommand(
+  {
+    names: ["gcalculate"],
+    arguments: [{role: "object",
+                 nountype: noun_arb_text,
+                 label: "expression"}],
     description: "Calculate knows many functions, constants, units, currencies, etc.",
     help: "Try 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal.",
 
@@ -264,15 +313,15 @@ CmdUtils.CreateCommand({
     // Link to calculator command help:
     _calc_help: "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\"http://www.googleguide.com/calculator.html\">(Command List)</a></u>",
 
-    execute: function( directObj ) {
-      var expression = directObj.text;
+    execute: function( {object} ) {
+      var expression = object.text;
       var url = this._google_url + encodeURIComponent(expression);
       Utils.openUrlInBrowser( url );
     },
 
-    preview: function( pblock, directObj ) {
+    preview: function( pblock, {object} ) {
 
-      var expression = directObj.text;
+      var expression = object.text;
       var cmd = this;
 
       pblock.innerHTML = this._calc_help;
@@ -343,10 +392,11 @@ function sparkline(data) {
 }
 
 CmdUtils.CreateCommand({
-  name: "sparkline",
-  synonyms: ["graph"],
+  names: ["sparkline", "graph", "insert sparkline"],
   description: "Graphs the current selection, turning it into a sparkline.",
-  takes: {"data": noun_arb_text},
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "data"}],
   author: {name: "Aza Raskin", email:"aza@mozilla.com"},
   license: "MIT",
   help: "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them.",
@@ -372,8 +422,8 @@ CmdUtils.CreateCommand({
     return img = "<img src='%'/>".replace(/%/, dataUrl);
   },
 
-  preview: function(pblock, input) {
-    var img = this._dataToSparkline( input.text );
+  preview: function(pblock, {object}) {
+    var img = this._dataToSparkline( object.text );
 
     if( !img )
       jQuery(pblock).text( "Requires numbers to graph." );
@@ -381,8 +431,8 @@ CmdUtils.CreateCommand({
       jQuery(pblock).empty().append( img ).height( "15px" );
   },
 
-  execute: function( input ) {
-    var img = this._dataToSparkline( input.text );
+  execute: function( {object} ) {
+    var img = this._dataToSparkline( object.text );
     if( img ) CmdUtils.setSelection( img );
   }
 });
@@ -446,7 +496,7 @@ CmdUtils.CreateCommand({
     pt: ["traduzir", "traduza"],
    */
   arguments: [
-    {role: "object", nountype: noun_arb_text},
+    {role: "object", nountype: noun_arb_text, label: "text"},
     {role: "source", nountype: noun_type_lang_google},
     {role: "goal", nountype: noun_type_lang_google}
   ],
@@ -527,13 +577,22 @@ CmdUtils.CreateCommand({
 // COMMANDS THAT CREATE NEW COMMANDS
 // -----------------------------------------------------------------
 
+/* TODO: This command should take another optional argument to
+ * provides an alternate name for the new command. */
+
+/* TODO combine both of these into a single command with a provider
+ * plugin?  i.e. "create command using/with/from bookmarklet",
+ * "create command using/with/from search box"
+ */
 CmdUtils.CreateCommand({
-  name: "create-bookmarklet-command-from",
-  takes: {"bookmarklet name": noun_type_bookmarklet},
+  names: ["create bookmarklet command"],
+  arguments: [{role: "source",
+               nountype: noun_type_bookmarklet,
+               label: "bookmarklet name"}],
   description: "Creates a new command from a bookmarklet.",
   author: {name: "Abimanyu Raja", email: "abimanyuraja@gmail.com"},
   license: "MPL",
-  preview: function(previewBlock, {text, data}) {
+  preview: function(previewBlock, {source: {text, data}}) {
     previewBlock.innerHTML = (
       data
       ? (<>Creates a new command called
@@ -541,9 +600,9 @@ CmdUtils.CreateCommand({
          <pre style="white-space:pre-wrap">{decodeURI(data)}</pre></>)
       : this.description);
   },
-  execute: function(directObj) {
-    var name = this._formatName(directObj.text);
-    var url = directObj.data;
+  execute: function({source}) {
+    var name = this._formatName(source.text);
+    var url = source.data;
 
     //build the piece of code that creates the command
     var code =  [
@@ -559,12 +618,13 @@ CmdUtils.CreateCommand({
 
     tellTheUserWeFinished(name);
   },
-  _formatName: function(n) n.toLowerCase().replace(/[\s_]+/g, "-"),
+  _formatName: function(n) n.toLowerCase(),
 });
 
-CmdUtils.CreateCommand({
-  name: "create-new-search-command",
-  description: "Creates a new Ubiquity command from a search-box.",
+CmdUtils.CreateCommand(
+{
+  names: ["create search command"],
+  description: "Creates a new Ubiquity command from a focused search-box.",
   help: (<ol style="list-style-image:none">
          <li>Select a searchbox.</li>
          <li>Execute this command to create the new search command.</li>
@@ -576,14 +636,16 @@ CmdUtils.CreateCommand({
   license: "GPL/LGPL/MPL",
   homepage:
   "http://stanford.edu/~marce110/verbs/new-command-from-search-box.html",
-  takes: {"command name": noun_arb_text},
-  preview: function(pblock, {text}) {
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "command name"}],
+  preview: function(pblock, {object: {text}}) {
     pblock.innerHTML = (
       text
       ? "Creates a new search command called <b>" + text + "</b>"
       : this.description + this.help);
   },
-  execute: function({text: name}) {
+  execute: function({object: {text: name}}) {
     var node = context.focusedElement || 0;
     var {form} = node;
     if (!node || !form) {
