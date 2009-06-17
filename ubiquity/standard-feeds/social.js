@@ -39,11 +39,13 @@ CmdUtils.CreateCommand({
       "<strong>"+_("The last <b>${truncate}</b> characters will be truncated!")+"</strong>");
     var previewData = {
       status: <>{statusText}</>.toXMLString(),
-      username: usernameText && _("(For user <b>%S</b>)",[usernameText]),
+      username: usernameText && _("(For user <b>${usernameText}</b>)"),
       chars: TWITTER_STATUS_MAXLEN - statusText.length
     };
 
-    var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+    var previewHTML = CmdUtils.renderTemplate(
+                        CmdUtils.renderTemplate(previewTemplate, previewData),
+                        {usernameText:usernameText});
 
     if (previewData.chars < 0) {
       var truncateData = {
