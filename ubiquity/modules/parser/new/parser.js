@@ -1733,7 +1733,7 @@ Parse.prototype = {
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
       if (this._parser.branching == 'right')
-        display += (arg.outerSpace || '') + (arg.modifier ? "<span class='prefix' title='"
+        display += (arg.outerSpace || '') + (arg.modifier ? "<span class='delimiter' title='"
           + arg.role+"'>" + arg.modifier + arg.innerSpace
           + "</span>":'') + "<span class='" + className + "' title=''>"
           + (arg.inactivePrefix ?
@@ -1750,7 +1750,7 @@ Parse.prototype = {
           + (arg.summary || arg.input)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
-          + "</span>" + (arg.modifier ? "<span class='prefix' title='" + arg.role + "'>"
+          + "</span>" + (arg.modifier ? "<span class='delimiter' title='" + arg.role + "'>"
           + arg.innerSpace + arg.modifier + "</span>" : '') + (arg.outerSpace || '');
 
     }
