@@ -145,11 +145,12 @@ var demoParserInterface = {
   
   
             $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
-            for each (let parse in this._scoredParses) {
+            var allScoredParses = this.aggregateScoredParses();
+	    for each (let parse in allScoredParses) {
               $('#debugScoredParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
             }
-            $('<p><small>'+this._scoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+allScoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
             break;
   
         }
@@ -164,11 +165,12 @@ var demoParserInterface = {
         demoParserInterface.runtimes++;
         $('.current').text(demoParserInterface.runtimes);
         dump(demoParserInterface.runtimes+' done\n');
+        var suggestionList = this.suggestionList;
         if (demoParserInterface.runtimes < $('.runtimes').text())
           demoParserInterface.parse();
         else {
-          $('#scoredParses').empty();
-          for each (var parse in this.suggestionList) {
+	  $('#scoredParses').empty();
+          for each (var parse in suggestionList) {
             $('#scoredParses')
               .append('<tr><td>' + parse.displayTextDebug + '</td></tr>');
           }

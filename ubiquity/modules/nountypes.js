@@ -47,6 +47,7 @@
 // * common properties.
 // ** {{{suggest}}}
 // ** {{{default}}}
+// ** {{{asyncRequest}}}
 // ** {{{label}}} (, {{{name}}}, {{{id}}})
 
 const Cc = Components.classes;
@@ -256,6 +257,7 @@ var noun_type_awesomebar = {
 
 var noun_type_url = {
   label: "url",
+  asyncRequest: null,
   rankLast: true,
   default: function()(
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec)),
@@ -270,6 +272,8 @@ var noun_type_url = {
       if (results.length)
         callback([CmdUtils.makeSugg(r.url, null, null, .9)
                   for each (r in results)]);
+      else
+        callback([]);
     }, CmdUtils.maxSuggestions);
     return [CmdUtils.makeSugg(url, null, null, .7, selectionIndices)];
   }
@@ -518,9 +522,9 @@ var noun_type_time = {
 
 var noun_type_async_address = {
   label: "address",
-  ajaxRequest: null,
+  asyncRequest: null,
   suggest: function(text, html, callback) {
-    this.ajaxRequest = getAddress( text, function( truthiness ) {
+    this.asyncRequest = getAddress( text, function( truthiness ) {
       if (truthiness) {
         callback([CmdUtils.makeSugg(text)]);
       }
@@ -544,9 +548,9 @@ var noun_type_async_address = {
 
 var noun_type_async_restaurant = {
   label: "restaurant",
-  ajaxRequest: null,
+  asyncRequest: null,
   suggest: function(text, html, callback) {
-    this.ajaxRequest = getRestaurants( text, function( truthiness, suggestion ) {
+    this.asyncRequest = getRestaurants( text, function( truthiness, suggestion ) {
       if (truthiness) {
         callback([CmdUtils.makeSugg(text)]);
       }
@@ -567,9 +571,12 @@ var noun_type_async_restaurant = {
 // {{{html}}}
 //
 // {{{data}}}
-
+// TODO: noun_type_contact never returns its async suggestions from getContacts.
+// I'm disabling it's async request attribute until this is fixed, so that
+// queries aren't kept open waiting for this noun type to return its async req.
 var noun_type_contact = {
   label: "name or email",
+  //asyncRequest: null,
   _list: null,
   _callback: function(contacts) {
     var {_list} = noun_type_contact;
@@ -583,6 +590,7 @@ var noun_type_contact = {
   suggest: function(text) {
     if (!this._list) {
       this._list = [];
+      //this.asyncRequest = getContacts(this._callback);
       getContacts(this._callback);
       return noun_arb_text.suggest.apply(noun_arb_text, arguments);
     }
@@ -615,6 +623,7 @@ var noun_type_geolocation = {
     var fullLocation = location.city + ", " + location.country;
     return CmdUtils.makeSugg(fullLocation, null, null, 0.9);
   },
+  asyncRequest: null,
   suggest: function(fragment, html, callback) {
     // LONGTERM TODO: try to detect whether fragment is anything like
     // a valid location or not, and don't suggest anything
@@ -628,7 +637,7 @@ var noun_type_geolocation = {
                 CmdUtils.makeSugg(location.country)]);
     }
     if (/\bhere\b/.test(fragment)) {
-      CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
+      this.asyncRequest = CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
     }
     return [CmdUtils.makeSugg(fragment)];
   }
@@ -883,7 +892,7 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
 }
 
 function getGmailContacts(callback) {
-  jQuery.get(
+  var asyncRequest = jQuery.get(
     "https://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
     function(data) {
@@ -899,6 +908,7 @@ function getGmailContacts(callback) {
       callback(contacts);
     },
     "text");
+  return asyncRequest;
 }
 
 function getYahooContacts( callback ){
@@ -912,7 +922,7 @@ function getYahooContacts( callback ){
     xf: "sf,mf"
   };
 
-  jQuery.get(url, params, function(data) {
+  var asyncRequest = jQuery.get(url, params, function(data) {
 
     var contacts = [];
     for each( var line in jQuery(data).find("ct") ){
@@ -928,11 +938,13 @@ function getYahooContacts( callback ){
 
     callback(contacts);
   }, "text");
+
+  return asyncRequest;
 }
 
 function getContacts(callback) {
-  getGmailContacts(callback);
   //getYahooContacts(callback);
+  return getGmailContacts(callback);
 }
 
 function getRestaurants(query, callback){
@@ -952,7 +964,7 @@ function getRestaurants(query, callback){
     ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
   });
   
-  var ajaxRequest = jQuery.ajax({
+  var asyncRequest = jQuery.ajax({
     url: baseUrl+params,
     dataType: "json",
     error: function() {
@@ -969,7 +981,7 @@ function getRestaurants(query, callback){
       }
     }
   });
-  return ajaxRequest;
+  return asyncRequest;
 }
 
 function getAddress( query, callback ) {
@@ -978,7 +990,7 @@ function getAddress( query, callback ) {
     location: query,
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
   });
-  var ajaxRequest = jQuery.ajax({
+  var asyncRequest = jQuery.ajax({
     url: url+params,
     dataType: "xml",
     error: function() {
@@ -1023,7 +1035,7 @@ function getAddress( query, callback ) {
         callback( false );
     }
   });
-  return ajaxRequest;
+  return asyncRequest;
 }
 
 var EXPORTED_SYMBOLS = (

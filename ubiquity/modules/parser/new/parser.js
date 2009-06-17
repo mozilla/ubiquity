@@ -1123,33 +1123,40 @@ Parser.prototype = {
         if (!Utils.isArray(suggs)) suggs = [suggs];
         for each (let s in suggs) s.nountypeId = id;
         return suggs;
-      }
-
+      };
+      var asyncReqsToArray = function detectNounType_asyncReqsToArray(asyncs){
+        let retArray = [];
+        for each (let async in asyncs){
+	  if(async)
+            retArray.push(async);
+        }
+        return retArray;
+      };
       var thisParser = this;
-      var myCallback = function detectNounType_myCallback(suggestions, ajaxRequests) {
+      var myCallback = function detectNounType_myCallback(suggestions, asyncRequests) {
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
           thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
         if (typeof callback == 'function')
-          callback(x, ajaxRequests);
+          callback(x, asyncReqsToArray(asyncRequests));
       };
       var activeNounTypes = this._nounTypes;
-
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
-        var ajaxRequests = [];
+        var asyncRequests = {};
       
         dump("detecting: " + x + "\n");
-      
+				    
         for (let thisNounTypeId in activeNounTypes) {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
+	    dump("returning: " + activeNounTypes[id].label + "\n");
             suggs = handleSuggs(suggs, id);
-            if(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest) != -1)
-              ajaxRequests.splice(ajaxRequests.indexOf(activeNounTypes[id].ajaxRequest), 1);
-            myCallback(suggs, ajaxRequests);
+	    if(asyncRequests[id])
+	      asyncRequests[id] = null;
+            myCallback(suggs, asyncRequests);
           }
 
           if (!(x in thisParser._nounCache))
@@ -1162,10 +1169,13 @@ Parser.prototype = {
             handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
       
-          if(activeNounTypes[id].ajaxRequest)
-            ajaxRequests.push(activeNounTypes[id].ajaxRequest);
+          if(activeNounTypes[id].asyncRequest){
+	    dump("asyncRequest: " + activeNounTypes[id].asyncRequest + "\n");
+            asyncRequests[id] = activeNounTypes[id].asyncRequest;
+	    dump("sending: " + activeNounTypes[id].label + "\n");
+	  }
         }
-        myCallback(returnArray, ajaxRequests);
+        myCallback(returnArray, asyncRequests);
       },0);
     }
   },
@@ -1198,7 +1208,7 @@ var ParseQuery = function(parser, queryString, context, maxSuggestions,
   this.maxSuggestions = maxSuggestions;
   this.selObj = { text: '', html: '' };
 
-  //_oustandingRequests are open ajax calls that have not yet returned
+  //_oustandingRequests are open async calls that have not yet returned
   this._outstandingRequests = [];
 
   // code flow control stuff
@@ -1395,8 +1405,8 @@ ParseQuery.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    function completeParse(thisParse, argText, ajaxRequests) {
-      if(ajaxRequests.length == 0) {
+    function completeParse(thisParse, argText, asyncRequests) {
+      if(asyncRequests.length == 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
       }
@@ -1418,10 +1428,10 @@ ParseQuery.prototype = {
         thisQuery.finishQuery();
     }
 
-    function tryToCompleteParses(argText, ajaxRequests) {
+    function tryToCompleteParses(argText, asyncRequests) {
       thisQuery.dump('finished detecting nountypes for ' + argText);
-      
-      thisQuery._outstandingRequests = ajaxRequests;
+      dump("number of async reqs: " + asyncRequests.length + "\n");
+      thisQuery._outstandingRequests = asyncRequests;
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -1432,9 +1442,9 @@ ParseQuery.prototype = {
 
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
-        if (thisParse.allNounTypesDetectionHasCompleted()) {
+        if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
           //thisQuery.dump('completing parse '+parseId+' now');
-          completeParse(thisParse, argText, ajaxRequests);
+          completeParse(thisParse, argText, asyncRequests);
 	}
       }
 
@@ -1517,9 +1527,11 @@ ParseQuery.prototype = {
     //Utils.log(this);
     this.dump("cancelled! " + this._outstandingRequests.length +
               " outstanding request(s) being canceled\n");
-    //abort any ajax requests that are running
-    for each (let ajaxReq in this._outstandingRequests)
-      ajaxReq.abort();
+    //abort any async requests that are running
+    for each (let asyncReq in this._outstandingRequests){
+      if(asyncReq.abort)
+        asyncReq.abort();
+    }
     //reset outstanding requests
     this._outstandingRequests = [];
 
@@ -1866,9 +1878,6 @@ Parse.prototype = {
   //
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
-  // 
-  // TODO: This may not actually be correct... it may return true before some
-  // ajax requests complete. Needs testing.
   allNounTypesDetectionHasCompleted: function() {
     var activeNounTypes = this._parser._nounTypes;
     for (let role in this.args) {
