@@ -892,7 +892,7 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
   arguments: {position: noun_type_geolocation,
-              instrument: noun_type_temperature_units},
+              format: noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather near chicago&quot;.  It works with zip-codes, too.",
