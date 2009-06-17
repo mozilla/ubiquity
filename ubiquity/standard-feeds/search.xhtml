@@ -273,9 +273,9 @@ CmdUtils.makeSearchCommand({
         result.key = i+1;
       }
       
-      pblock.innerHTML = CmdUtils.renderTemplate( jQuery("#google-search", feed.dom).html(),
-						  {results:results, searchTerm:searchTerm}
-						);
+      pblock.innerHTML = CmdUtils.renderTemplate(
+        jQuery("#google-search", feed.dom).html(),
+	{results:results, searchTerm:searchTerm});
       }, "json");
   }
 });
@@ -319,9 +319,13 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   });
 }
 
+        
 CmdUtils.CreateCommand({
   names: ["wikipedia", "lookup"],
-  arguments: [{role: "format",
+  arguments: [{role: "object",
+               nountype: noun_arb_text,
+               label: "search term"},
+              {role: "format",
                nountype: noun_type_lang_wikipedia,
                label: "language"}],
   locale: "en-US",

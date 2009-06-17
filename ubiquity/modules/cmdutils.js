@@ -1223,12 +1223,9 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
   if (options.name && ! options.names) {
     options.names = [ options.name ];
   }
-  if (! options.arguments) {
-    options.arguments = [];
-  }
-  options.arguments.push({role: "object",
+  options.arguments = [{role: "object",
                         nountype: this.__globalObject.noun_arb_text,
-                          label: "search term"});
+                        label: "search term"}];
   options.execute = function({object: {text}}) {
     Utils.openUrlInBrowser(insertQuery(options.url, text),
                            insertQuery(options.postData, text));
