@@ -1,5 +1,6 @@
 var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtGJjaVMeVURIpTa3cD1qNfA";
 // This API key is for https://people.mozilla.com only."
+// TODO: Update to use Google Maps API V3, which doesn't require a key
 
 CmdUtils.CreateCommand({
   names: ["map"],
@@ -53,8 +54,7 @@ CmdUtils.CreateCommand({
 	  CmdUtils.setSelection(html);
       	}
       	else {
-      	  displayMessage("Cannot insert in a non-editable space. Use " +
-                         "'edit page' for an editable page.");
+      	  displayMessage(_("Cannot insert in a non-editable space. Use 'edit page' for an editable page."));
       	}
       };
       previewWindow.Ubiquity.onPreview(dobj);
