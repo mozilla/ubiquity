@@ -120,8 +120,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["write ubiquity commands",
-          "edit ubiquity commands",
-          "ubiquity command editor"],
+          "edit ubiquity commands"],
   icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
@@ -129,8 +128,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["list ubiquity commands",
-          "ubiquity command list"],
+  names: ["list ubiquity commands"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "" + (
     <>Opens <a href={CmdList}>the list</a>
@@ -150,57 +148,47 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["report a bug", "report bug"],
+  names: ["report bug"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
   execute: BugReport
 });
 
-CmdUtils.CreateCommand({
-  names: ["enable (ubiquity command)"],
-  icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "Re-enables a Ubiquity command that you disabled.",
-  arguments: [{ role: "object",
-                nountype: noun_type_command,
-                label: "ubiquity command" }],
-  execute: function({object: {data: cmd}}) {
-    if (cmd) {
-      cmd.disabled = false;
-      displayMessage("Enabled command : " + cmd.name);
+(function toggleCommand(names, desc, nt, disabled, tmpl) {
+  CmdUtils.CreateCommand({
+    names: names,
+    icon: "chrome://ubiquity/skin/icons/favicon.ico",
+    description: desc,
+    argument: nt,
+    execute: function({object: {text, data: cmd}}) {
+      if (cmd) {
+        cmd.disabled = disabled;
+        displayMessage(text, this);
+      }
+    },
+    preview: function(pb, {object: {text, html, data: cmd}}) {
+      pb.innerHTML = (
+        cmd
+        ? CmdUtils.renderTemplate(tmpl,
+                                  { name: <b>{text}</b>.toXMLString(),
+                                    help: html })
+        : this.description);
     }
-  },
-  preview: function(pb, {object: {html, data: cmd}}) {
-    if (cmd) {
-      pb.innerHTML = (<>Enables <b>{cmd.name}</b>.<hr/></> + html);
-    } else {
-      pb.innerHTML = this.description;
-    }
-  }
-});
-
-CmdUtils.CreateCommand({
-  names: ["disable (ubiquity command)"],
-  icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  description: "Disables a Ubiquity command, so that it will no longer show up"
-               + " in the suggestion list.",
-  arguments: [{ role: "object",
-                nountype: noun_type_command,
-                label: "ubiquity command" }],
-  execute: function({object: {data: cmd}}) {
-    if (cmd) {
-      cmd.disabled = true;
-      displayMessage("Disabled command : " + cmd.name);
-    }
-  },
-  preview: function(pb, {object: {html, data: cmd}}) {
-    if (cmd) {
-      pb.innerHTML = (<>Disables <b>{cmd.name}</b>.<hr/></> + html);
-    } else {
-      pb.innerHTML = this.description;
-    }
-  }
-});
+  });
+  return arguments.callee;
+})
+(["disable command"],
+ ("Disables a Ubiquity command, so that it will no longer " +
+  "show up in the suggestion list."),
+ noun_type_enabled_command,
+ true,
+ "Disables ${name}.<hr/>${help}")
+(["enable command"],
+ "Re-enables a Ubiquity command that you disabled.",
+ noun_type_disabled_command,
+ false,
+ "Enables ${name}.<hr/>${help}");
 
 var ubiquityLoad_commandHistory = (function() {{}
 const

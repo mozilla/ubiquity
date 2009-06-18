@@ -141,15 +141,13 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["close all tabs that match",
-          "close all matching tabs",
-          "close all tabs with the word"],
+  names: ["close all tabs with"],
   arguments: {"object related word": noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   execute: function({object: {text}}) {
     var tabs = Utils.tabs.search(text);
-    for each (let t in tabs) t.close();
+    for each (var t in tabs) t.close();
     displayMessage({
       icon: this.icon,
       title: this.name,

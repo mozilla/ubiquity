@@ -323,6 +323,8 @@ var noun_type_livemark = {
 };
 
 // ** {{{ noun_type_command }}} **
+// ** {{{ noun_type_enabled_command }}} **
+// ** {{{ noun_type_disabled_command }}} **
 //
 // Suggests each installed command whose name matches the input.
 //
@@ -333,9 +335,7 @@ var noun_type_command = {
   label: "name",
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
-    return (CmdUtils.grepSuggs(text,
-                               this._cmdSource.getAllCommands(),
-                               "name")
+    return (CmdUtils.grepSuggs(text, this._get(), "name")
             .map(this._makeSugg));
   },
   _cmdSource: UbiquitySetup.createServices().commandSource,
@@ -344,6 +344,22 @@ var noun_type_command = {
                       ((cmd.description || "") +
                        ("<p>" + (cmd.help || "") + "</p>")),
                       cmd),
+  _get: function() {
+    var cmds = this._cmdSource.getAllCommands();
+    if (this.hasOwnProperty("suggest")) return cmds;
+    var {disabled} = this;
+    return [cmd for each (cmd in cmds) if (cmd.disabled === disabled)];
+  },
+};
+
+var noun_type_enabled_command = {
+  __proto__: noun_type_command,
+  disabled: false,
+};
+
+var noun_type_disabled_command = {
+  __proto__: noun_type_command,
+  disabled: true,
 };
 
 // ** {{{ noun_type_twitter_user }}} **
@@ -367,7 +383,7 @@ var noun_type_twitter_user = {
     var suggs = CmdUtils.grepSuggs(text, this.logins());
     // only letters, numbers, and underscores are allowed in twitter
     // usernames.
-    if (/^[a-z0-9_]+$/i.test(text))
+    if (/^\w+$/.test(text))
       suggs.push(CmdUtils.makeSugg(text, null, {}, 0.7));
     return suggs;
   },
