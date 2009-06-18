@@ -113,7 +113,16 @@ var demoParserInterface = {
             break;
           
           case 7:
-            $('<h3>step 6: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>step 7: apply objects to other roles for parses with no verb</h3><ul id="otherRoleParses"></ul>').appendTo($('#parseinfo'));
+            for each (var parse in this._possibleParses) {
+              $('#otherRoleParses')
+                .append('<li>' + parse.displayTextDebug + '</li>');
+            }
+            $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
+            break;
+          
+          case 8:
+            $('<h3>step 8: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
               $('#verbedParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
@@ -121,9 +130,9 @@ var demoParserInterface = {
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
   
-          case 8:
           case 9:
           case 10:
+          case 11:
             /*$('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
             for (var text in nounCache) {
               var html = $('<li><code>'+text+'</code></li>');
@@ -136,7 +145,7 @@ var demoParserInterface = {
             }*/
   
   
-            $('<h3>step 8: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>step 9: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in this._suggestedParses) {
               $('#suggestedParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
@@ -144,9 +153,9 @@ var demoParserInterface = {
             $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
   
   
-            $('<h3>step 9: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>step 11: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             var allScoredParses = this.aggregateScoredParses();
-	    for each (let parse in allScoredParses) {
+	          for each (let parse in allScoredParses) {
               $('#debugScoredParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
             }

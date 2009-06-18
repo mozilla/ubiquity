@@ -130,6 +130,13 @@ Parser.prototype = {
   // need only be constructed once.
   _patternCache: {},
 
+  // ** {{{Parser#_otherRolesCache}}} **
+  //
+  // {{{_otherRolesCache}}} is simply a subset of {{{Parser#roles}}} whose roles
+  // are not "object" nor have a blank delimiter (currently unsupported).
+  // It is used later by {{{Parser#applyObjectsToOtherRoles}}}.
+  _otherRolesCache: [],
+
   // ** {{{Parser#_nounCache}}} **
   //
   // Perhaps this should be moved out into its own module in the future.
@@ -213,6 +220,26 @@ Parser.prototype = {
     // cache the roles used in each verb and a regex
     // which recognizes the delimiters appropriate for each verb
     var rolesCache = this._rolesCache = {};
+
+    // pick each "other role" and its first delimiter.
+    let otherRolesHash = {};
+    for each (let roleSpec in this.roles) {
+      let {role, delimiter} = roleSpec;
+      if (role != 'object' && !otherRolesHash[role])
+        otherRolesHash[role] = delimiter;
+      // if there is another role besides object which doesn't
+      // require a modifier (currently unsupported) this arg will
+      // already have a parse where it is this role, so don't try to
+      // make the object this role.
+      if (delimiter == '')
+        otherRolesHash[role] = null;
+    }
+    for (let role in otherRolesHash) {
+      if (otherRolesHash[role] == null)
+        delete(otherRolesHash[role]);
+    }
+    
+    this._otherRolesCache = otherRolesHash;
 
     // creates a regex that matches any delimiter of given roles
     function regexFromDelimeters(roles)
@@ -907,6 +934,60 @@ Parser.prototype = {
     return [];
   },
 
+  // ** {{{Parser#applyObjectsToOtherRoles()}}} **
+  //
+  // {{{applyObjectsToOtherRoles()}}} takes a parse. It looks for
+  // each argument with role "object" and didn't have a modifier
+  // and returns new copies of the parse with this object applied
+  // to other args with modifiers.
+  //
+  // An array of //new// parses is returned, so it should then be
+  // {{{concat}}}'ed to the current running list of parses.
+  applyObjectsToOtherRoles: function(parse) {
+    var returnArr = [];
+
+    // if nothing had the role "object", return nothing.
+    if (!parse.args.object) return [];
+
+    //return [];
+
+    let baseParses = [parse];
+    let returnArr = [];
+    for (let key in parse.args.object) {
+      let object = parse.args.object[key];
+      Utils.log(key,object,parse.args.object);
+      let newParses = [];
+      for (let role in this._otherRolesCache) {
+        let delimiter = this._otherRolesCache[role];
+        for each (let baseParse in baseParses) {
+          let parseCopy = baseParse.copy();
+          let objectCopy = {__proto__: object,
+                            modifier: delimiter,
+                            innerSpace: this.joindelimiter};
+          delete(parseCopy.args.object[key]);
+          if (!parseCopy.args[role])
+            parseCopy.args[role] = [];
+          parseCopy.args[role].push(objectCopy);
+
+          newParses.push(parseCopy);
+        }
+      }
+      baseParses = baseParses.concat(newParses);
+      returnArr = returnArr.concat(newParses);
+    }
+
+    for each (parse in returnArr) {
+      Utils.log(parse.args,parse.args.object.length);
+      if (!parse.args.object.length || 
+           (parse.args.object.length === 1
+            && parse.args.object[0] == undefined) )
+        delete(parse.args.object);
+      Utils.log(parse.args);
+    }
+
+    return returnArr;
+  },
+
   // ** {{{Parser#suggestVerb()}}} **
   //
   // {{{suggestVerb()}}} takes a parse and, if it doesn't yet have a verb,
@@ -1349,6 +1430,7 @@ ParseQuery.prototype = {
   // # group into arguments
   // # substitute anaphora (aka "magic words")
   // # suggest normalized arguments
+  // # attempt to apply objects to other roles for parses w/o verbs
   // # suggest verbs for parses without them
   // # do nountype detection + cache
   // # replace arguments with their nountype suggestions
@@ -1404,7 +1486,23 @@ ParseQuery.prototype = {
     }
     this._next();
 
-    // STEP 7: suggest verbs for parses which don't have one
+    // STEP 7: for arg-first parses, attempt to apply objects to other roles
+    // For parses which don't have a set verb, attempt to apply any args
+    // with role "object" to other roles. This is so that parses like
+    // "calendar" => "add to calendar" (role: goal) or "google" => 
+    // "search with google" (role: instrument). This adds new usability to
+    // overlord verbs by being able to just enter the provider name.
+    for each (let parse in this._possibleParses) {
+      // if there's a set verb, skip this parse
+      if (parse._verb.id) continue;
+      let newParses = this.parser.applyObjectsToOtherRoles(parse);
+      if (newParses.length)
+        this._possibleParses = this._possibleParses.concat(newParses);
+      yield true;
+    }
+    this._next();
+
+    // STEP 8: suggest verbs for parses which don't have one
     for each (let parse in this._possibleParses) {
       let newVerbedParses = this.parser.suggestVerb(parse);
       for each (let newVerbedParse in newVerbedParses) {
@@ -1415,9 +1513,9 @@ ParseQuery.prototype = {
     }
     this._next();
 
-    // STEP 8: do nountype detection + cache
-    // STEP 9: suggest arguments with nountype suggestions
-    // STEP 10: score
+    // STEP 9: do nountype detection + cache
+    // STEP 10: suggest arguments with nountype suggestions
+    // STEP 11: score
 
     // Set up tryToCompleteParses()
     // This function will be called at the end of each nountype detection.
