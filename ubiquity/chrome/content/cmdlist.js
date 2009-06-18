@@ -442,5 +442,5 @@ $(function(){
   setupHelp();
   rebuildTable();
   // jump to the right anchor
-  location.hash += "";
+  if (location.hash) location.hash += "";
 });
