@@ -55,6 +55,16 @@ function displayTemplate(feedUri) {
   for each (let feed in feedMgr.getSubscribedFeeds()) {
     if (feed.srcUri.asciiSpec == feedUri) {
       foundFeed = true;
+      
+      // print header metadata
+      $('#template').val('msgid ""\n'
+                         + 'msgstr ""\n'
+                         + '"Project-Id-Version: Ubiquity 0.5\\n"\n'
+                         + '"POT-Creation-Date: '
+                           + new Date().toLocaleFormat('%Y-%m-%d %H:%M%z')
+                           +'\\n"\n'
+                         + '\n');
+      
       for (let cmdId in feed.commands) {
         addCmdTemplate(commands[cmdId],feed.commandCode[cmdId]);
         $('#template').val($('#template').val()+'\n');
@@ -82,7 +92,8 @@ function cmdPropertyLine(cmd,property) {
   if (value) {
     if (value.join != undefined)
       value = value.join('|');
-    ret += 'msgstr "' + value.replace(/"/g,'\\"')
+    ret += 'msgstr "' + value.replace(/\\/g,'\\\\')
+                             .replace(/"/g,'\\"')
                              .replace(/\n/g,'"\n       "')+'"\n';
   } else 
     ret += 'msgstr ""\n';
@@ -103,7 +114,8 @@ function cmdInlineLine(cmd,cmdCode,context) {
 //    Utils.log(match[2]);
 //    Utils.log(inlineChecker.lastIndex);
     ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n'
-         + 'msgid "'+match[2].replace(/"/g,'\\"')
+         + 'msgid "'+match[2].replace(/\\/g,'\\\\')
+                             .replace(/"/g,'\\"')
                              .replace(/\n/g,'"\n      "')+'"\n'
          + 'msgstr ""\n\n';
   }
@@ -112,7 +124,9 @@ function cmdInlineLine(cmd,cmdCode,context) {
 
 function cmdPreviewString(cmd) (
    'msgid "'+cmd.referenceName+'.preview"\n'
- + 'msgstr "'+cmd._previewString.replace(/\n/g,'"\n      "')+'"\n\n'
+ + 'msgstr "'+cmd._previewString.replace(/\\/g,'\\\\')
+                                .replace(/"/g,'\\"')
+                                .replace(/\n/g,'"\n      "')+'"\n\n'
 )
 
 function setupHelp() {
