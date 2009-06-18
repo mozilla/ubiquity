@@ -13,7 +13,7 @@
  */
 CmdUtils.CreateCommand({
   names: ["bold"],
-  description:"If you're in a rich-text-edit area, makes the selected text bold.",
+  description: "If you're in a rich-text-edit area, makes the selected text bold.",
   icon: "chrome://ubiquity/skin/icons/text_bold.png",
   execute: function() {
     var doc = context.focusedWindow.document;
@@ -21,7 +21,7 @@ CmdUtils.CreateCommand({
     if (doc.designMode == "on")
       doc.execCommand("bold", false, null);
     else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 });
 
@@ -35,7 +35,7 @@ CmdUtils.CreateCommand({
     if (doc.designMode == "on")
       doc.execCommand("italic", false, null);
     else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 });
 
@@ -49,7 +49,7 @@ CmdUtils.CreateCommand({
     if (doc.designMode == "on")
       doc.execCommand("underline", false, null);
     else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 });
 
@@ -81,7 +81,7 @@ CmdUtils.CreateCommand({
     if (doc.designMode == "on")
       doc.execCommand("undo", false, null);
     else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 });
 
@@ -95,7 +95,7 @@ CmdUtils.CreateCommand({
     if (doc.designMode == "on")
       doc.execCommand("redo", false, null);
     else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 });
 
@@ -123,16 +123,16 @@ CmdUtils.CreateCommand({
   execute: function( args ) {
     var object = args.object;
     if (object.text)
-      displayMessage(wordCount(object.text) + " words");
+      displayMessage(_("${num} words",{num:wordCount(object.text)}));
     else
-      displayMessage("No words selected.");
+      displayMessage(_("No words selected."));
   },
   preview: function(pBlock, args) {
     var object = args.object;
     if (object.text)
-      pBlock.innerHTML = wordCount(object.text) + " words";
+      pBlock.innerHTML = _("${num} words",{num:wordCount(object.text)});
     else
-      pBlock.innerHTML = "Displays the number of words in a selection.";
+      pBlock.innerHTML = _("Displays the number of words in a selection.");
   }
 });
 
@@ -189,12 +189,9 @@ CmdUtils.CreateCommand({
     var expression = args.object.text;
 
     if(expression.length < 1) {
-      previewBlock.innerHTML = "Calculates an expression. E.g., 22/7.";
+      previewBlock.innerHTML = _("Calculates an expression. E.g., 22/7.");
       return;
     }
-
-    var previewTemplate = "${expression} = <b>${result}</b>" +
-      "{if error}<p><b>Error:</b> ${error}</p>{/if}";
 
     var result = "?";
     var error = null;
@@ -214,14 +211,14 @@ CmdUtils.CreateCommand({
       "result": result,
       "error": error
     };
-    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+    previewBlock.innerHTML = _("${expression} = <b>${result}</b>{if error}<p><b>Error:</b> ${error}</p>{/if}", previewData);
   },
 
   execute: function( args ) {
     var expression = args.object.text;
 
     if(expression.length < 1) {
-      displayMessage("Requires a expression.");
+      displayMessage(_("Requires a expression."));
       return;
     }
 
@@ -230,12 +227,12 @@ CmdUtils.CreateCommand({
       var result = parser.parse(expression) + "";
 
       if(isNaN(result))
-        throw new Error("Invalid expression");
+        throw new Error(_("Invalid expression"));
 
       CmdUtils.setSelection(result);
       CmdUtils.setLastResult(result);
     } catch(e) {
-      displayMessage("Error calculating expression: " + expression);
+      displayMessage(_("Error calculating expression: ${expression}",{expression:expression}));
     }
   }
 });
@@ -307,9 +304,6 @@ CmdUtils.CreateCommand(
     // first subexpression matches the actual result
     _calc_regexp: /\/calc_img\.gif.*?<b>(.*?)<\/b>/i,
 
-    // Link to calculator command help:
-    _calc_help: "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\"http://www.googleguide.com/calculator.html\">(Command List)</a></u>",
-
     execute: function( {object} ) {
       var expression = object.text;
       var url = this._google_url + encodeURIComponent(expression);
@@ -318,18 +312,21 @@ CmdUtils.CreateCommand(
 
     preview: function( pblock, {object} ) {
 
+      // link to calculator help
+      var calc_help = _("Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\"http://www.googleguide.com/calculator.html\">(Command List)</a></u>");
+
       var expression = object.text;
       var cmd = this;
 
-      pblock.innerHTML = this._calc_help;
+      pblock.innerHTML = calc_help;
 
       jQuery.get( this._google_url + encodeURIComponent(expression), {},
          function( result_page ) {
            var matchresult = result_page.match(cmd._calc_regexp);
            if (matchresult) {
-              pblock.innerHTML = "<h2>" + matchresult[1] + "</h2>" + cmd._calc_help;
+              pblock.innerHTML = "<h2>" + matchresult[1] + "</h2>" + calc_help;
            } else {
-              pblock.innerHTML = cmd._calc_help;
+              pblock.innerHTML = calc_help;
            }
        });
       }
@@ -423,7 +420,7 @@ CmdUtils.CreateCommand({
     var img = this._dataToSparkline( object.text );
 
     if( !img )
-      jQuery(pblock).text( "Requires numbers to graph." );
+      jQuery(pblock).text( _("Requires numbers to graph.") );
     else
       jQuery(pblock).empty().append( img ).height( "15px" );
   },
@@ -458,8 +455,8 @@ function translateTo(text, langCodePair, callback, pblock) {
       // If we get either of these error messages, that means Google wasn't
       // able to guess the originating language. Let's assume it was English.
       // TODO: Localize this.
-      var BAD_FROM_LANG_1 = "invalid translation language pair";
-      var BAD_FROM_LANG_2 = "could not reliably detect source language";
+      var BAD_FROM_LANG_1 = _("invalid translation language pair");
+      var BAD_FROM_LANG_2 = _("could not reliably detect source language");
       var errMsg = data.responseDetails;
       if( errMsg == BAD_FROM_LANG_1 || errMsg == BAD_FROM_LANG_2 ) {
         // Don't do infinite loops. If we already have a guess language
@@ -469,7 +466,8 @@ function translateTo(text, langCodePair, callback, pblock) {
                       callback, pblock);
       }
       else {
-        displayMessage( "Translation Error: " + data.responseDetails );
+        displayMessage( _("Translation Error: ${error}",
+                          {error:data.responseDetails}) );
       }
       return;
     }
@@ -543,8 +541,8 @@ CmdUtils.CreateCommand({
                           >{href}</a> to <b>{toLang}</b> translation.</>);
       return;
     }
-    var html = ("Replaces the selected text with the <b>" + toLang +
-                "</b> translation:");
+    var html = (_("Replaces the selected text with the <b>${toLang}</b> translation:",
+                 {toLang:toLang}) );
     pblock.innerHTML = html;
     translateTo(
       textToTranslate,
@@ -639,7 +637,7 @@ CmdUtils.CreateCommand(
   preview: function(pblock, {object: {text}}) {
     pblock.innerHTML = (
       text
-      ? "Creates a new search command called <b>" + text + "</b>"
+      ? _("Creates a new search command called <b>${text}</b>",{text:text})
       : this.description + this.help);
   },
   execute: function({object: {text: name}}) {
@@ -647,7 +645,7 @@ CmdUtils.CreateCommand(
     var {form} = node;
     if (!node || !form) {
       displayMessage(
-        "You need to focus a searchbox before running this command.");
+        _("You need to focus a searchbox before running this command."));
       return;
     }
     //1. Figure out what this searchbox does.
@@ -702,7 +700,5 @@ CmdUtils.CreateCommand(
 });
 
 function tellTheUserWeFinished(name) {
-  displayMessage("You have created the command: " + name +
-                 ". You can edit its source-code " +
-                 "with the command-editor command.");
+  displayMessage(_("You have created the command: ${name}. You can edit its source-code with the command-editor command.",{name:name}));
 }
