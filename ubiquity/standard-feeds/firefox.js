@@ -93,12 +93,11 @@ CmdUtils.CreateCommand({
 
 function tabPreview(msg)(
   function preview(pblock, {object: {text, data: tab}}) {
-    // _("Closes <b>${text}</b>") or _("Changes to <b>${text}</b>")
-    msg = _(msg + ' <b>${text}</b>',{text:text});
+    msg = _(msg); // "Changes to" / "Closes"
     pblock.innerHTML = (
       tab
       ? <div class="tab">
-          {msg}
+          {msg} <b>{text}</b>
           <p><img src={CmdUtils.getTabSnapshot(tab, {width: 480})}/></p>
         </div>
       : this.description);
@@ -139,46 +138,52 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   execute: function({object: {text}}) {
+    if (!text) return;
     var tabs = Utils.tabs.search(text);
     for each (var t in tabs) t.close();
-    displayMessage(_("${num} tabs closed",{num:tabs.length}), this);
+    displayMessage(_("${num} tabs closed.", {num: tabs.length}), this);
   },
-  preview: function(pblock, args) {
-    var {text} = args.object;
+  preview: function(pblock, {object: {text, html}}) {
     if (!text) {
       pblock.innerHTML = this.description;
       return;
     }
-    var tabs = Utils.tabs.search(text);
-    pblock.innerHTML =
-      <div class={this.names[0]}/>.appendChild(
-        tabs.length
-        ? (<>Closes tabs related to
-           <b>{text}</b>:</> + tabs.reduce(this._lister, <ul/>))
-        : <>No tabs are related to <b>{text}</b>.</>);
+    pblock.innerHTML = _(
+      <><![CDATA[
+        <div class="close-all-tabs">
+        {if tabs.length}
+          Closes tabs related to <b>${html}</b> :
+          <ul>{for tab in tabs}${tab|asList}{/for}</ul>
+        {else}
+          No tabs are related to <b>${html}</b>.
+        {/if}
+        </div>
+        ]]></> + "",
+      { tabs: Utils.tabs.search(text),
+        html: html,
+        _MODIFIERS: {asList: this._lister} });
   },
-  _lister: function(list, {document})(
-    list.appendChild(<li>{document.title}
-                     <code><small>{document.URL}</small></code></li>)),
+  _lister: function({document}) "" + (
+    <li>{document.title}<code><small>{document.URL}</small></code></li>),
 });
 
 CmdUtils.CreateCommand({
   names: ["count tabs"],
   description: "Counts the number of opened tabs.",
-  arguments: {modifier: noun_arb_text},
+  arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {
-    displayMessage(this._count(args.modifier.text, true), this);
+    displayMessage($(this._count(args)).text(), this);
   },
   preview: function(pblock, args) {
-    pblock.innerHTML = this._count(args.modifier.text);
+    pblock.innerHTML = this._count(args);
   },
-  _count: function(text, plain) {
+  _count: function({object: {text, html}}) {
     var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
-    if (plain)
-      return _("${count} {if count > 1} tabs{else} tab{/if} {if text}matching ${text}{else}total{/if}.",{count:count, text: text});
-    else
-      return _("<div class='${name}'><b>${count}</b> {if count > 1} tabs{else} tab{/if} <b>{if text}matching ${text}{else}total{/if}</b>.</div>",{count:count, text: text, name: this.name});
+    return _('<div class="count-tabs"><b>${count}</b> ' +
+             'tab{if count > 1}s{/if} ' +
+             '{if html}matching <b>${html}</b>{else}total{/if}</b>.</div>',
+             {count: count, html: html});
   }
 });
 
@@ -290,8 +295,10 @@ CmdUtils.CreateCommand({
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   argument: noun_type_tag,
   preview: function(aEl, args) {
-    aEl.innerHTML = _("Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}",
-                      args.object);
+    aEl.innerHTML = _(
+      ("Describes the current page with" +
+       "{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"),
+      args.object);
   },
   execute: function({object: {text, data}}) {
     var doc = CmdUtils.getDocument();
@@ -325,7 +332,8 @@ CmdUtils.CreateCommand({
   preview: function(pbl, {object}) {
     pbl.innerHTML = (
       object.data
-      ? _('<pre class="bookmarklet" style="white-space:pre-wrap">${data}</pre>',
+      ? _(('<pre class="bookmarklet" style="white-space:pre-wrap">' +
+           '"${data}</pre>'),
           object)
       : this.description + "<p>" + this.help + "</p>");
   }

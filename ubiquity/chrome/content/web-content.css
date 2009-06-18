@@ -139,9 +139,6 @@ em{
 .command .name, #skin-list .command .name{
   font-size: 15pt;
 }
-.command .name{
-  cursor: pointer;
-}
 
 .command.not-loaded .name {
   color: #bbb;
