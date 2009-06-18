@@ -955,7 +955,6 @@ Parser.prototype = {
     let returnArr = [];
     for (let key in parse.args.object) {
       let object = parse.args.object[key];
-      Utils.log(key,object,parse.args.object);
       let newParses = [];
       for (let role in this._otherRolesCache) {
         let delimiter = this._otherRolesCache[role];
@@ -977,12 +976,10 @@ Parser.prototype = {
     }
 
     for each (parse in returnArr) {
-      Utils.log(parse.args,parse.args.object.length);
       if (!parse.args.object.length || 
            (parse.args.object.length === 1
             && parse.args.object[0] == undefined) )
         delete(parse.args.object);
-      Utils.log(parse.args);
     }
 
     return returnArr;
