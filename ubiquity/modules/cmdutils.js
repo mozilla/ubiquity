@@ -775,9 +775,6 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     if (!noun.id) noun.id = global.feed.id + "#n" + me.__nextId++;
   }
 
-  if (!options.names)
-    command.oldAPI = true;
-
   // ensure name, names and synonyms
   { let names = options.names || options.name;
     if (!names)
@@ -819,8 +816,9 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     command.name = names[0];
     command.names = names;
   }
+  OLD_DEPRECATED_ARGUMENT_API:
   { let {takes, modifiers} = options;
-    /* OLD DEPRECATED ARGUMENT API */
+    if (takes || modifiers) command.oldAPI = true;
     if (takes) {
       let label = getKey(takes);
       if (label) {
@@ -834,26 +832,25 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
         toNounType(modifiers, label);
     }
   }
+  NEW_IMPROVED_ARGUMENT_API:
   { let args = options.arguments || options.argument;
-    /* NEW IMPROVED ARGUMENT API */
-    if (args) {
-      // handle simplified syntax
-      if (typeof args.suggest === "function")
-        // argument: noun
-        args = [{role: "object", nountype: args}];
-      else if (!Utils.isArray(args)) {
-        // arguments: {role: noun, ...}
-        // arguments: {"role label": noun, ...}
-        let a = [];
-        for (let key in args) {
-          let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
-          if (role) a.push({role: role, label: label, nountype: args[key]});
-        }
-        args = a;
+    if (!args) break NEW_IMPROVED_ARGUMENT_API;
+    // handle simplified syntax
+    if (typeof args.suggest === "function")
+      // argument: noun
+      args = [{role: "object", nountype: args}];
+    else if (!Utils.isArray(args)) {
+      // arguments: {role: noun, ...}
+      // arguments: {"role label": noun, ...}
+      let a = [];
+      for (let key in args) {
+        let [role, label] = /^[a-z]+(?=(?:[$_:\s]([^]+))?)/(key) || 0;
+        if (role) a.push({role: role, label: label, nountype: args[key]});
       }
-      for each (let arg in args) toNounType(arg, "nountype");
-      command.arguments = args;
+      args = a;
     }
+    for each (let arg in args) toNounType(arg, "nountype");
+    command.arguments = args;
   }
   { let {execute, preview} = options;
     if (typeof execute !== "function") {
