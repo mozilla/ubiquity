@@ -197,9 +197,6 @@ function testParserTwoParseWithModifier() {
 }
 
 function testSimplifiedParserTwoApi() {
-  /* TODO this works from command line, but exceeds maximum test
-   * execution time when run in page... why?
-   */
   var dogGotWashed = null;
   var dogGotWashedWith = null;
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
@@ -299,6 +296,10 @@ function testCmdManagerSuggestsForNounFirstInput() {
  * two queries at once and not have them interfere with each other...
  */
 
+
+// TODO this test currently failing because verb.names undefined on
+// line 230 of parser.js.  Could this be because it's trying to localize
+// and failing?
 function testCmdManagerSuggestsForEmptyInputWithSelection() {
   var oneWasCalled = false;
   var twoWasCalled = false;
@@ -378,9 +379,68 @@ function testVerbMatcher() {
   this.assert(verbInitialTest.test("tab"), "middle-prefix again");
 }
 
+
+function testPluginRegistry() {
+  var executedPlugin = null;
+
+  var cmdSharify = makeCommand({
+    names: ["sharify"],
+    arguments: [{role: "object",
+                 nountype: /.*/,
+                 label: "message"},
+               {role: "instrument",
+                nountype: CmdUtils.pluginNoun("sharify"),
+                label: "sharify service provider"}],
+    preview: function(pblock, args) {
+      if (args.object)
+        pblock.innerHTML = "Sharifies <b>" + args.object.text + "</b> using the selected service provider.";
+      else
+        pblock.innerHTML = "Adds a thing to your notes.";
+    },
+    execute: CmdUtils.executeBasedOnPlugin("sharify", "instrument")
+  });
+
+  CmdUtils.registerPlugin( "sharify", "twitter",
+                           function(args) {
+                             executedPlugin = "twitter";});
+  CmdUtils.registerPlugin( "sharify", "digg",
+                           function(args) {
+                             executedPlugin = "digg";});
+  CmdUtils.registerPlugin( "sharify", "delicious",
+                           function(args) {
+                             executedPlugin = "delicious";});
+
+  var self = this;
+  var testFunc = function(completions) {
+    self.assert( completions.length == 2, "Should be 2 completions" );
+    self.assert( completions[0]._verb.name == "sharify", "Should be named sharify");
+    self.assert( completions[0].args["instrument"][0].text == "digg",
+                "Instrument should be digg");
+    self.assert( completions[1].args["object"][0].text == "stuff",
+                "Object should be stuff.");
+
+    self.assert( completions[1]._verb.name == "sharify", "Should be named sharify");
+    self.assert( completions[1].args["instrument"][0].text == "delicious",
+                "Instrument should be delicious");
+    self.assert( completions[1].args["object"][0].text == "stuff",
+                "Object should be stuff.");
+
+    completions[0].execute();
+    self.assert( executedPlugin == "digg");
+    completions[1].execute();
+    self.assert( executedPlugin == "delicious");
+  };
+
+  getCompletionsAsync( "sharify stuff with d", [cmdSharify], null,
+                       this.makeCallback(testFunc));
+
+  // TODO this test is timing out, I think because of e[key] is undefined
+  // on line 233 of nounutils.js.
+}
+
 /* More tests that should be written:
  *   -- For the context menu bug (use cmdmanager.makeCommandSuggester())
- *   -- For the overlord verbs
+ *   -- Coexistence of two verbs with the same name (modulo parens)
  *   -- For internationalization
  *   -- Bring over all the unit tests from parser 1 and modify them to work!
  */

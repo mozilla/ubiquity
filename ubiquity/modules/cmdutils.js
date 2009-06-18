@@ -1572,3 +1572,58 @@ CmdUtils.previewList.CSS = <><![CDATA[
     padding: 0; border-width: 1px;
     font: bold 108% "Consolas",monospace; text-transform: uppercase}
   ]]></>;
+
+
+// CmdUtils.pluginRegistry
+// A registry of provider plugins for overlord verbs
+// Tricky part is that it must work even if the plugin is registered
+// after the pluginNoun is created.
+CmdUtils._pluginRegistry = {};
+
+CmdUtils._getPluginsForCmd = function(cmdId) {
+  return CmdUtils._pluginRegistry[cmdId];
+};
+
+CmdUtils.registerPlugin = function( cmdId,
+                                    argumentName,
+                                    executeFunction ) {
+  if (!CmdUtils._pluginRegistry[cmdId]) {
+    CmdUtils._pluginRegistry[cmdId] = {};
+  }
+  CmdUtils._pluginRegistry[cmdId][argumentName] = executeFunction;
+};
+
+/* TODO: make this rank super high. */
+CmdUtils.pluginNoun = function(cmdId) {
+  var newNoun = {
+    _cmdId: cmdId,
+    _getPlugins: function() {
+      var plugins = CmdUtils._getPluginsForCmd( newNoun._cmdId );
+      // suggestion.data will contain the execute function.
+      var name;
+      return [CmdUtils.makeSugg(name, null, plugins[name])
+              for (name in plugins)];
+    },
+
+    suggest: function(text, html, callback, selectionIndices) {
+      return CmdUtils.grepSuggs(text, newNoun._getPlugins);
+    },
+    default: function() {
+      // Default to returning all.
+      return newNoun._getPlugins();
+    }
+  };
+  return newNoun;
+};
+
+CmdUtils.executeBasedOnPlugin = function( cmdId, argRole ) {
+  return (function(args) {
+    if (args.argRole.text) {
+      var plugins = CmdUtils._getPluginsForCmd(cmdId);
+      var pluginFunction = plugins[args.argRole.text];
+      if (pluginFunction) {
+        return pluginFunction(args);
+      }
+    }
+  });
+}
