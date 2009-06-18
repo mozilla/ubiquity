@@ -238,10 +238,6 @@ function testSimplifiedParserTwoApi() {
                        this.makeCallback(testFunc));
 }
 
-// TODO this test currently failing because verb.names undefined on
-// line 230 of parser.js.  Could this be because it's trying to localize
-// and failing?  Note both commands that use BetterFakeCommandSource are
-// failing in the same way.
 function testCmdManagerSuggestsForNounFirstInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
@@ -297,10 +293,6 @@ function testCmdManagerSuggestsForNounFirstInput() {
  * two queries at once and not have them interfere with each other...
  */
 
-
-// TODO this test currently failing because verb.names undefined on
-// line 230 of parser.js.  Could this be because it's trying to localize
-// and failing?
 function testCmdManagerSuggestsForEmptyInputWithSelection() {
   var oneWasCalled = false;
   var twoWasCalled = false;
@@ -381,13 +373,16 @@ function testVerbMatcher() {
 
 
 function testPluginRegistry() {
+  var twitterGotShared = null;
+  var diggGotShared = null;
+  var deliciousGotShared = null;
   var executedPlugin = null;
 
   var cmdSharify = makeCommand({
     names: ["sharify"],
-    arguments: [{role: "object",
-                 nountype: /.*/,
-                 label: "message"},
+    arguments: [ {role: "object",
+                  nountype: /.*/,
+                  label: "message"},
                {role: "instrument",
                 nountype: CmdUtils.pluginNoun("sharify"),
                 label: "sharify service provider"}],
@@ -402,16 +397,26 @@ function testPluginRegistry() {
 
   CmdUtils.registerPlugin( "sharify", "twitter",
                            function(args) {
-                             executedPlugin = "twitter";});
+                             executedPlugin = "twitter";
+                             twitterGotShared = args.object.text;
+                           });
   CmdUtils.registerPlugin( "sharify", "digg",
                            function(args) {
-                             executedPlugin = "digg";});
+                             executedPlugin = "digg";
+                             diggGotShared = args.object.text;
+                           });
   CmdUtils.registerPlugin( "sharify", "delicious",
                            function(args) {
-                             executedPlugin = "delicious";});
+                             executedPlugin = "delicious";
+                             deliciousGotShared = args.object.text;
+                          });
 
   var self = this;
   var testFunc = function(completions) {
+    for each ( var comp in completions ) {
+      dump("Completion is " + comp.displayText + "\n");
+    }
+    // What? Getting 10 suggestions here instead of 2.  TODO!
     self.assert( completions.length == 2, "Should be 2 completions" );
     self.assert( completions[0]._verb.name == "sharify", "Should be named sharify");
     self.assert( completions[0].args["instrument"][0].text == "digg",
@@ -427,8 +432,10 @@ function testPluginRegistry() {
 
     completions[0].execute();
     self.assert( executedPlugin == "digg");
+    self.assert( diggGotShared == "stuff");
     completions[1].execute();
     self.assert( executedPlugin == "delicious");
+    self.assert( deliciousGotShared == "stuff");
   };
 
   getCompletionsAsync( "sharify stuff with d", [cmdSharify], null,

@@ -1606,7 +1606,7 @@ CmdUtils.pluginNoun = function(cmdId) {
     },
 
     suggest: function(text, html, callback, selectionIndices) {
-      return CmdUtils.grepSuggs(text, newNoun._getPlugins);
+      return CmdUtils.grepSuggs(text, newNoun._getPlugins());
     },
     default: function() {
       // Default to returning all.
