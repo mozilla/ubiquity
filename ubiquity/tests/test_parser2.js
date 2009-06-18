@@ -18,7 +18,6 @@ function makeTestParser2(lang, verbs, contextUtils) {
   return NLParser2.makeParserForLanguage(
     lang || LANG,
     verbs || [],
-    [],
     contextUtils || fakeContextUtils,
     new TestSuggestionMemory());
 }
@@ -26,6 +25,9 @@ function makeTestParser2(lang, verbs, contextUtils) {
 function BetterFakeCommandSource( cmdList ) {
   var cmd;
   this._cmdList = [ makeCommand( cmd ) for each (cmd in cmdList ) ];
+  for each (var c in this._cmdList) {
+    dump("BetterFakeCommandSource has verb named " + c.names + ".\n");
+  }
 }
 BetterFakeCommandSource.prototype = {
   addListener: function() {},
@@ -44,11 +46,7 @@ function getCompletionsAsync( input, verbs, context, callback) {
 
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser2(LANG,
-                              verbs,
-                              fakeContextUtils,
-                              new TestSuggestionMemory());
-
+  var parser = makeTestParser2(LANG, verbs );
   var query = parser.newQuery( input, context, MAX_SUGGESTIONS, true );
   /* The true at the end tells it not to run immediately.  This is
    * important because otherwise it would run before we assigned the
@@ -240,6 +238,10 @@ function testSimplifiedParserTwoApi() {
                        this.makeCallback(testFunc));
 }
 
+// TODO this test currently failing because verb.names undefined on
+// line 230 of parser.js.  Could this be because it's trying to localize
+// and failing?  Note both commands that use BetterFakeCommandSource are
+// failing in the same way.
 function testCmdManagerSuggestsForNounFirstInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
@@ -266,8 +268,7 @@ function testCmdManagerSuggestsForNounFirstInput() {
   });
 
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
-                                       makeTestParser2(null,
-                                                      fakeContextUtils),
+                                       makeTestParser2(),
                                        onCM);
   var noSelection = { textSelection: null, htmlSelection: null };
   var self = this;
@@ -324,8 +325,7 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
   });
 
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
-                                       makeTestParser2(null,
-                                                      fakeContextUtils),
+                                       makeTestParser2(),
                                        onCM);
   // The commented-out stuff can be un-commented once implicit
   // selection interpolation is hapening: see #732 (and #722)
