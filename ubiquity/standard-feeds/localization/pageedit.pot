@@ -1,0 +1,89 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-18 21:40+0900\n"
+
+#. delete command:
+msgid "delete.names"
+msgstr "delete"
+
+msgid "delete.contributors"
+msgstr ""
+
+msgid "delete.help"
+msgstr ""
+
+msgid "delete.description"
+msgstr "Deletes the selected chunk of HTML from the page."
+
+
+#. undelete command:
+msgid "undelete.names"
+msgstr "undelete"
+
+msgid "undelete.contributors"
+msgstr ""
+
+msgid "undelete.help"
+msgstr ""
+
+msgid "undelete.description"
+msgstr "Restores the HTML deleted by the delete command."
+
+
+#. edit page command:
+msgid "edit page.names"
+msgstr "edit page|turn on edit mode"
+
+msgid "edit page.contributors"
+msgstr ""
+
+msgid "edit page.help"
+msgstr "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue 'bold', 'italic', or 'underline' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode."
+
+msgid "edit page.description"
+msgstr "Puts the web page into a mode where you can edit the contents."
+
+
+#. stop editing page command:
+msgid "stop editing page.names"
+msgstr "stop editing page|turn off edit mode"
+
+msgid "stop editing page.contributors"
+msgstr ""
+
+msgid "stop editing page.help"
+msgstr ""
+
+msgid "stop editing page.description"
+msgstr "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing."
+
+
+#. save page edits command:
+msgid "save page edits.names"
+msgstr "save page edits"
+
+msgid "save page edits.contributors"
+msgstr ""
+
+msgid "save page edits.help"
+msgstr ""
+
+msgid "save page edits.description"
+msgstr "Saves edits you've made to this page in an annotation. Undo with the 'undo page edits' command."
+
+
+#. undo page edits command:
+msgid "undo page edits.names"
+msgstr "undo page edits|remove annotations"
+
+msgid "undo page edits.contributors"
+msgstr ""
+
+msgid "undo page edits.help"
+msgstr ""
+
+msgid "undo page edits.description"
+msgstr "Resets any annotation changes you've made to this page."
+
+
