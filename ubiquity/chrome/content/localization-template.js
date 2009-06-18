@@ -81,10 +81,9 @@ function cmdPropertyLine(cmd,property) {
   let value = cmd[property];
   if (value) {
     if (value.join != undefined)
-      ret += 'msgstr "'+value.join('|').replace(/"/g,'\\"')+'"\n';
-    else {
-      ret += 'msgstr "'+value.replace(/"/g,'\\"')+'"\n';
-    }
+      value = value.join('|');
+    ret += 'msgstr "' + value.replace(/"/g,'\\"')
+                             .replace(/\n/g,'"\n       "')+'"\n';
   } else 
     ret += 'msgstr ""\n';
   return ret;
@@ -100,7 +99,8 @@ function cmdInlineLine(cmd,cmdCode,context) {
 //    Utils.log(match[2]);
 //    Utils.log(inlineChecker.lastIndex);
     ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n';
-    ret += 'msgid "'+match[2].replace(/"/g,'\\"')+'"\n';
+    ret += 'msgid "'+match[2].replace(/"/g,'\\"')
+                             .replace(/\n/g,'"\n      "')+'"\n';
     ret += 'msgstr ""\n\n';
   }
   return ret;
