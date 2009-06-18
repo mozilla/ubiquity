@@ -1,0 +1,50 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-18 20:54+0900\n"
+
+#. add (to calendar) command:
+msgid "add (to calendar).names"
+msgstr "add "
+
+msgid "add (to calendar).contributors"
+msgstr ""
+
+msgid "add (to calendar).help"
+msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>"
+       ". e.g.:"
+       "<ul>"
+       "  <li>3pm Lunch with Myk and Thunder</li>"
+       "  <li>Jono's Birthday on Friday</li>"
+       "</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+
+msgid "add (to calendar).description"
+msgstr "Adds an event to your calendar."
+
+msgctxt "add (to calendar).execute"
+msgid "Event created"
+msgstr ""
+
+msgctxt "add (to calendar).execute"
+msgid "Error creating the event"
+msgstr ""
+
+
+#. check google calendar command:
+msgid "check google calendar.names"
+msgstr "check google calendar|check gcalendar"
+
+msgid "check google calendar.contributors"
+msgstr ""
+
+msgid "check google calendar.help"
+msgstr "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+
+msgid "check google calendar.description"
+msgstr "Checks what events are on your calendar for a given date."
+
+msgctxt "check google calendar.preview"
+msgid "Checking Google Calendar for events on ${date}."
+msgstr ""
+
+

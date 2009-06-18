@@ -93,12 +93,12 @@ CmdUtils.CreateCommand({
 
 function tabPreview(msg)(
   function preview(pblock, {object: {text, data: tab}}) {
-    // _("Closes") or _("Changes to")
-    msg = _(msg);
+    // _("Closes <b>${text}</b>") or _("Changes to <b>${text}</b>")
+    msg = _(msg + ' <b>${text}</b>',{text:text});
     pblock.innerHTML = (
       tab
       ? <div class="tab">
-          {msg} <b>{text}</b>
+          {msg}
           <p><img src={CmdUtils.getTabSnapshot(tab, {width: 480})}/></p>
         </div>
       : this.description);
@@ -141,7 +141,7 @@ CmdUtils.CreateCommand({
   execute: function({object: {text}}) {
     var tabs = Utils.tabs.search(text);
     for each (var t in tabs) t.close();
-    displayMessage(tabs.length + _(" tabs closed"), this);
+    displayMessage(_("${num} tabs closed",{num:tabs.length}), this);
   },
   preview: function(pblock, args) {
     var {text} = args.object;
@@ -165,23 +165,20 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["count tabs"],
   description: "Counts the number of opened tabs.",
-  arguments: {object_filter: noun_arb_text},
+  arguments: {modifier: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {
-    displayMessage(this._count(args.object.text, true), this);
+    displayMessage(this._count(args.modifier.text, true), this);
   },
   preview: function(pblock, args) {
-    pblock.innerHTML = this._count(args.object.text);
+    pblock.innerHTML = this._count(args.modifier.text);
   },
   _count: function(text, plain) {
     var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
-    var ord = count > 1 ? _(" tabs ") : _(" tab ");
-    // TODO is this next line the right way to _()-wrap or should I use
-    // a formatted string replacement?
-    var msg = text ? _("matching ") + text : _("total");
-    return (plain
-            ? count + ord + msg + "."
-            : <div class={this.name}><b>{count}</b>{ord}<b>{msg}</b>.</div>);
+    if (plain)
+      return _("${count} {if count > 1} tabs{else} tab{/if} {if text}matching ${text}{else}total{/if}.",{count:count, text: text});
+    else
+      return _("<div class='${name}'><b>${count}</b> {if count > 1} tabs{else} tab{/if} <b>{if text}matching ${text}{else}total{/if}</b>.</div>",{count:count, text: text, name: this.name});
   }
 });
 
@@ -228,8 +225,8 @@ CmdUtils.CreateCommand({
     arguments: {object_steps: noun_type_number},
     preview: function(pblock, args) {
       pblock.innerHTML = _(
-        "Go ${way} ${num} step{if num > 1}s{/if} in history.",
-        {way: way, num: args.object.data});
+        "Go " + way + " ${num} step{if num > 1}s{/if} in history.",
+        {num: args.object.data});
     },
     execute: function(args) {
       CmdUtils.getWindow().history.go(args.object.data * sign);
@@ -293,9 +290,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   argument: noun_type_tag,
   preview: function(aEl, args) {
-    aEl.innerHTML = _(("Describes the current page with" +
-                       "{if html} these tags:<p><b>${html}</b></p>" +
-                       "{else} tags.{/if}"),
+    aEl.innerHTML = _("Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}",
                       args.object);
   },
   execute: function({object: {text, data}}) {
@@ -330,8 +325,7 @@ CmdUtils.CreateCommand({
   preview: function(pbl, {object}) {
     pbl.innerHTML = (
       object.data
-      ? _(('<pre class="bookmarklet" style="white-space:pre-wrap">' +
-           '${data}</pre>'),
+      ? _('<pre class="bookmarklet" style="white-space:pre-wrap">${data}</pre>',
           object)
       : this.description + "<p>" + this.help + "</p>");
   }

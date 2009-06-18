@@ -1,0 +1,299 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-18 21:14+0900\n"
+
+#. exit firefox command:
+msgid "exit firefox.names"
+msgstr "exit firefox"
+
+msgid "exit firefox.contributors"
+msgstr ""
+
+msgid "exit firefox.help"
+msgstr ""
+
+msgid "exit firefox.description"
+msgstr ""
+
+
+#. restart firefox command:
+msgid "restart firefox.names"
+msgstr "restart firefox"
+
+msgid "restart firefox.contributors"
+msgstr ""
+
+msgid "restart firefox.help"
+msgstr ""
+
+msgid "restart firefox.description"
+msgstr ""
+
+
+#. close window command:
+msgid "close window.names"
+msgstr "close window"
+
+msgid "close window.contributors"
+msgstr ""
+
+msgid "close window.help"
+msgstr ""
+
+msgid "close window.description"
+msgstr ""
+
+
+#. fullscreen command:
+msgid "fullscreen.names"
+msgstr "fullscreen"
+
+msgid "fullscreen.contributors"
+msgstr ""
+
+msgid "fullscreen.help"
+msgstr ""
+
+msgid "fullscreen.description"
+msgstr ""
+
+
+#. switch to tab command:
+msgid "switch to tab.names"
+msgstr "switch to tab"
+
+msgid "switch to tab.contributors"
+msgstr ""
+
+msgid "switch to tab.help"
+msgstr ""
+
+msgid "switch to tab.description"
+msgstr ""
+
+
+#. close tab command:
+msgid "close tab.names"
+msgstr "close tab"
+
+msgid "close tab.contributors"
+msgstr ""
+
+msgid "close tab.help"
+msgstr ""
+
+msgid "close tab.description"
+msgstr ""
+
+
+#. close all tabs with command:
+msgid "close all tabs with.names"
+msgstr "close all tabs with"
+
+msgid "close all tabs with.contributors"
+msgstr ""
+
+msgid "close all tabs with.help"
+msgstr ""
+
+msgid "close all tabs with.description"
+msgstr ""
+
+msgctxt "close all tabs with.execute"
+msgid "${num} tabs closed"
+msgstr ""
+
+
+#. count tabs command:
+msgid "count tabs.names"
+msgstr "count tabs"
+
+msgid "count tabs.contributors"
+msgstr ""
+
+msgid "count tabs.help"
+msgstr ""
+
+msgid "count tabs.description"
+msgstr ""
+
+
+#. refresh command:
+msgid "refresh.names"
+msgstr "refresh|reload"
+
+msgid "refresh.contributors"
+msgstr ""
+
+msgid "refresh.help"
+msgstr ""
+
+msgid "refresh.description"
+msgstr ""
+
+
+#. bookmark command:
+msgid "bookmark.names"
+msgstr "bookmark"
+
+msgid "bookmark.contributors"
+msgstr ""
+
+msgid "bookmark.help"
+msgstr ""
+
+msgid "bookmark.description"
+msgstr ""
+
+msgctxt "bookmark.execute"
+msgid "Page could not be bookmarked!"
+msgstr ""
+
+
+#. print command:
+msgid "print.names"
+msgstr "print"
+
+msgid "print.contributors"
+msgstr ""
+
+msgid "print.help"
+msgstr ""
+
+msgid "print.description"
+msgstr ""
+
+
+#. go back command:
+msgid "go back.names"
+msgstr "go back"
+
+msgid "go back.contributors"
+msgstr ""
+
+msgid "go back.help"
+msgstr ""
+
+msgid "go back.description"
+msgstr ""
+
+
+#. go forward command:
+msgid "go forward.names"
+msgstr "go forward"
+
+msgid "go forward.contributors"
+msgstr ""
+
+msgid "go forward.help"
+msgstr ""
+
+msgid "go forward.description"
+msgstr ""
+
+
+#. go home command:
+msgid "go home.names"
+msgstr "go home"
+
+msgid "go home.contributors"
+msgstr ""
+
+msgid "go home.help"
+msgstr ""
+
+msgid "go home.description"
+msgstr ""
+
+
+#. zoom command:
+msgid "zoom.names"
+msgstr "zombie"
+
+msgid "zoom.contributors"
+msgstr ""
+
+msgid "zoom.help"
+msgstr ""
+
+msgid "zoom.description"
+msgstr ""
+
+msgctxt "zoom.preview"
+msgid "Zooms the Firefox window to ${text} of its normal size."
+msgstr ""
+
+
+#. tag command:
+msgid "tag.names"
+msgstr "tag"
+
+msgid "tag.contributors"
+msgstr ""
+
+msgid "tag.help"
+msgstr ""
+
+msgid "tag.description"
+msgstr ""
+
+msgctxt "tag.preview"
+msgid "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
+msgstr ""
+
+
+#. run bookmarklet command:
+msgid "run bookmarklet.names"
+msgstr "run bookmarklet|bml"
+
+msgid "run bookmarklet.contributors"
+msgstr ""
+
+msgid "run bookmarklet.help"
+msgstr ""
+
+msgid "run bookmarklet.description"
+msgstr ""
+
+msgctxt "run bookmarklet.preview"
+msgid "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
+msgstr ""
+
+
+#. undo closed tabs command:
+msgid "undo closed tabs.names"
+msgstr "undo closed tabs|uct"
+
+msgid "undo closed tabs.contributors"
+msgstr ""
+
+msgid "undo closed tabs.help"
+msgstr ""
+
+msgid "undo closed tabs.description"
+msgstr ""
+
+msgctxt "undo closed tabs.preview"
+msgid "No closed tabs."
+msgstr ""
+
+msgctxt "undo closed tabs.preview"
+msgid "No matched tabs."
+msgstr ""
+
+
+#. check livemark command:
+msgid "check livemark.names"
+msgstr "check livemark"
+
+msgid "check livemark.contributors"
+msgstr ""
+
+msgid "check livemark.help"
+msgstr ""
+
+msgid "check livemark.description"
+msgstr ""
+
+

@@ -1,0 +1,50 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Michael 芳貴 Erlewine <mitcho@mitcho.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#. add (to calendar) command:
+msgid "add (to calendar).names"
+msgstr "加える|加えて|加えろ|くわえる|くわえて|くわえろ|追加する|追加して|追加しろ|追加|ついかする|ついかして|ついかしろ|ついか"
+
+msgid "add (to calendar).contributors"
+msgstr ""
+
+msgid "add (to calendar).help"
+msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">自然な言葉でイベントを詳細を入力してください。</a> 例:<ul>  <li>3pm Lunch with Myk and Thunder</li>  <li>Jono's Birthday on Friday</li></ul><p>現在このコマンドは <a href=\"http://calendar.google.com\">Google カレンダー</a> のみ対応です。</p>"
+
+msgid "add (to calendar).description"
+msgstr "カレンダーにイベントを追加。"
+
+msgctxt "add (to calendar).execute"
+msgid "Event created"
+msgstr "イベントを追加しました。"
+
+msgctxt "add (to calendar).execute"
+msgid "Error creating the event"
+msgstr "エラーのためイベントが追加出来ませんでした。"
+
+#. check google calendar command:
+msgid "check google calendar.names"
+msgstr "カレンダーを確認する|カレンダーを確認して|カレンダーを確認しろ|カレンダーを確認|カレンダーを確認|カレンダー確認しろ|カレンダーをかくにんする|カレンダーをかくにんして|カレンダーをかくにんしろ|カレンダーをかくにん"
+
+msgid "check google calendar.contributors"
+msgstr ""
+
+msgid "check google calendar.help"
+msgstr "例: \"Thursday のカレンダーを確認\"<p>このコマンドは <a href=\"http://calendar.google.com\">Google カレンダー</a> のアカウントが必要です。</p>"
+
+msgid "check google calendar.description"
+msgstr "Google カレンダーで日程を確認。"
+
+msgctxt "check google calendar.preview"
+msgid "Checking Google Calendar for events on ${date}."
+msgstr "Google カレンダーで ${date} の日程を確認。"
+
