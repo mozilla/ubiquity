@@ -25,9 +25,9 @@ CmdUtils.CreateCommand({
                      CmdUtils.setSelection( html );
                    });
     } else {
-      displayMessage("You must select some code to syntax-hilight.");
+      displayMessage(_("You must select some code to syntax-hilight."));
     }
-    },
+  },
   preview: "Syntax highlights your code."
 });
 
@@ -57,7 +57,7 @@ function convert_to_rich_text( html ) {
     if (doc.designMode == "on")
       doc.execCommand("insertHTML", false, html);
     else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 }
 
@@ -70,7 +70,7 @@ function convert_to_html( html ) {
       html = html.replace(/</g, "&lt;");
       doc.execCommand("insertHTML", false, html);
     } else
-      displayMessage("You're not in a rich text editing field.");
+      displayMessage(_("You're not in a rich text editing field."));
   }
 }
 
@@ -96,22 +96,23 @@ CmdUtils.CreateCommand({
       switch( arguments.goal.text) {
       case "pdf":
         convert_page_to_pdf();
-	break;
+        break;
       case "html":
-	if (arguments.object.html)
+        if (arguments.object.html)
           convert_to_html(arguments.object.html);
-	else
-	  displayMessage("There is nothing to convert!");
-	break;
+        else
+          displayMessage(_("There is nothing to convert!"));
+        break;
       case "rich-text":
-	if (arguments.object.html)
+        if (arguments.object.html)
           convert_to_rich_text(arguments.object.html);
-	else
-	  displayMessage("There is nothing to convert!");
-	break;
+          // _("You're not in a rich text editing field.")
+        else
+          displayMessage(_("There is nothing to convert!"));
+        break;
       }
     } else {
-      displayMessage("You must specify what you want to convert to: pdf, html, or rich-text.");
+      displayMessage(_("You must specify what you want to convert to: pdf, html, or rich-text."));
     }
   }
 });
@@ -148,7 +149,7 @@ CmdUtils.CreateCommand({
       var esch = Utils.escapeHtml(html);
       CmdUtils.setSelection(esch, {text: esch});
     } else {
-      displayMessage("No text selected.");
+      displayMessage(_("No text selected."));
     }
   }
 });
