@@ -159,15 +159,13 @@ CmdUtils.CreateCommand({
         if (diggs == null){
           html = _('Submit this page to Digg');
           if (selected_text.length > 0) {
-            html += _(" with the description:")+"<br/> <i style='padding:10px;color: #CCC;display:block;'>" + selected_text + "</i>";
+            html = _("Submit this page to Digg with the description:")+"<br/> <i style='padding:10px;color: #CCC;display:block;'>" + selected_text + "</i>";
             if (selected_text.length > 375){
-              html +='<br/> Description can only be 375 characters. The last <b>'
-              + (selected_text.length - 375) + '</b> characters will be truncated.';
+              html +='<br/> '+_('Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated.',{chars:(selected_text.length - 375)});
             }
           }
-        }
-        else{
-          html = 'Digg this page. This page already has <b>'+diggs+'</b> diggs.';
+        } else {
+          html = _('Digg this page. This page already has <b>${diggs}</b> diggs.',{diggs:diggs});
         }
         pblock.innerHTML = html;
       }
@@ -186,11 +184,12 @@ CmdUtils.CreateCommand({
       pblock.innerHTML = this.description;
       return;
     }
-    var me = this, tmpl = "Replaces the selected URL with ";
-    pblock.innerHTML = tmpl + "...";
+    var me = this;
+    pblock.innerHTML = _("Replaces the selected URL with...");
     CmdUtils.previewGet(pblock, this._api(text), function(tinyUrl) {
       if(tinyUrl !== "Error")
-        pblock.innerHTML = tmpl + me._link(tinyUrl).bold() + ".";
+        pblock.innerHTML = _("Replaces the selected URL with <b>${tinyurl}</b>.",
+                             {tinyurl:me._link(tinyUrl)});
     });
   },
   execute: function(args) {
@@ -288,25 +287,28 @@ CmdUtils.CreateCommand(
         var tmpl;
 
         if (!user_name) {
-
+     
+            var delicious = '<img src="http://delicious.com/favicon.ico"> '
+                            +'<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b>';
+            
             // If there's no user name, there's no login, so this command won't work.
-            tmpl = [
-                '<p style="color: #d44">No active user found - log in at ',
-                '<img src="http://delicious.com/favicon.ico"> ',
-                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ',
-                'to use this command.</p>'
-            ].join('');
+            tmpl = '<p style="color: #d44">' +
+                   _("No active user found - log in at ${delicious} to use this command.",
+                     {delicious:delicious})
+                   + '</p>';
 
         } else if (!bm.description) {
 
             // If there's no title, somehow, then this is an error too.
-            tmpl = [
-                '<p style="color: #d44">A title is required for bookmarks on ',
-                '<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b> ',
-                '</p>'
-            ].join('');
+            tmpl = '<p style="color: #d44">'
+                   + _("A title is required for bookmarks on ${delicious}",
+                       {delicious:'<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b>'})
+                   + '</p>';
 
         } else {
+
+            var delicious = '<img src="http://delicious.com/favicon.ico"> '
+                            +'<b><a href="http://delicious.com/${user_name}">delicious.com/${user_name}</a></b>';
 
             // Attempt to construct a vaguely delicious-esque preview of a bookmark.
             tmpl = [
@@ -319,8 +321,7 @@ CmdUtils.CreateCommand(
                     '.del-bookmark .tags { color: #787878; padding-top: 0.25em; text-align: right }',
                 '</style>',
                 '<div class="preview">',
-                    '<p>Share a bookmark at <img src="http://delicious.com/favicon.ico"> ',
-                        '<b><a href="http://delicious.com/${user_name}">delicious.com/${user_name}</a></b>:</p>',
+                    '<p>'+_('Share a bookmark at ${delicious}:')+'</p>',
                     '<div class="del-bookmark">',
                         '<div style="padding: 1em;">',
                         '<a class="title" href="${bm.url}">${bm.description}</a>',
@@ -349,14 +350,13 @@ CmdUtils.CreateCommand(
 
         if (!user_name) {
             // If there's no user name, there's no login, so this command won't work.
-            displayMessage('No active user found - log in at delicious.com ' +
-                'to use this command.');
+            displayMessage(_('No active user found - log in at delicious.com to use this command.'));
             return false;
         }
 
         if (!bm.description) {
             // If there's no title, somehow, then this is an error too.
-            displayMessage("A title is required for bookmarks at delicious.com");
+            displayMessage(_("A title is required for bookmarks at delicious.com"));
             return false;
         }
 
@@ -372,14 +372,12 @@ CmdUtils.CreateCommand(
         var onload, onerror;
 
         req.onload  = onload  = function(ev) {
-            displayMessage('Bookmark "' + bm.description + '" ' +
-                'shared at delicious.com/' + user_name);
+            displayMessage(_('Bookmark "${description}" shared at delicious.com/${user_name}',{description:bm.description,user_name:user_name}));
         }
 
         req.onerror = onerror = function(ev) {
             // TODO: more informative reporting on errors
-            displayMessage('ERROR: Bookmark "' + bm.description + '" ' +
-                ' NOT shared on delicious.com/' + user_name);
+            displayMessage(_('ERROR: Bookmark "${description}" NOT shared on delicious.com/${user_name}',{description:bm.description,user_name:user_name}));
         }
 
         // TODO: implement timeout here, in case requests take too long.
@@ -504,29 +502,40 @@ CmdUtils.CreateCommand({
 
     // output preview
     var template = '{if errorMsg}<span style="color: red;"><br />${errorMsg}<br/></span>{/if}';
-    template +=    '<b>Asks the following question (${charsLeft} characters left):</b><br/>';
-    template +=    '{if question != ""}${question}{else}NO QUESTION. PLEASE ENTER A QUESTION.{/if}<br/>';
+    template +=    '<b>';
+    template +=    _('Asks the following question (${charsLeft} characters left):');
+    template +=    '</b><br/>';
+    template +=    '{if question != ""}${question}{else}';
+    template +=      _('NO QUESTION. PLEASE ENTER A QUESTION.');
+    template +=    '{/if}<br/>';
     template +=    '<br/>';
-    template +=    '<b>To:</b><br/>';
-    template +=    '{for c in contacts}${c}, {forelse}NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE.{/for}<br/>';
+    template +=    '<b>'+_('To:')+'</b><br/>';
+    template +=    '{for c in contacts}${c}, {forelse}';
+    template +=    _('NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE.');
+    template +=    '{/for}<br/>';
     template +=    '<br/>';
-    template +=     '<b>Attributes:</b><br/>';
-    template +=    '{for a in attributes}${a}, {forelse}NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE.{/for}<br/>';
+    template +=     '<b>'+_('Attributes:')+'</b><br/>';
+    template +=    '{for a in attributes}${a}, {forelse}';
+    template +=    _('NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE.');
+    template +=    '{/for}<br/>';
     template +=    '<br/>';
     template +=    '<br/>';
     template +=    '<hr/>';
-    template +=    '<b>Usage:</b><br/>';
-    template +=    'rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;<br/>';
-    template +=    'Recipients must start with \'@\' and at least one recipient is required.<br/>';
-    template +=    'Attributes must start with \'#\' and at least one attribute is required.<br/>';
+    template +=    '<b>'+_('Usage:')+'</b><br/>';
+    template +=    _('rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;');
+    template +=    '<br/>';
+    template +=    _('Recipients must start with \'@\' and at least one recipient is required.');
+    template +=    '<br/>';
+    template +=    _('Attributes must start with \'#\' and at least one attribute is required.');
+    template +=    '<br/>';
 
     var charsLeft = RYPPLE_QUESTION_MAXLEN - question.length;
     var errorMsg = "";
     if (charsLeft < 0) {
-        errorMsg += "The last <b>" + charsLeft * -1 + "</b> character(s) of your question will be truncated!<br/>";
+        errorMsg += _("The last ${chars} character(s) of your question will be truncated!<br/>",{chars:"<b>" + charsLeft * -1 + "</b>"});
     }
     if (parsedAttr.values.length > RYPPLE_ATTRIBUTE_MAX) {
-        errorMsg += "The last <b>" + (parsedAttr.values.length - RYPPLE_ATTRIBUTE_MAX) + "</b> attributes(s) will not be used!<br/>";
+        errorMsg += _("The last <b>${num}</b> attributes{if num > 1}s{/if} will not be used!",{num:(parsedAttr.values.length - RYPPLE_ATTRIBUTE_MAX)})+"<br/>";
     }
     var data = {
       question : question,
@@ -548,15 +557,15 @@ CmdUtils.CreateCommand({
 
     // validation
     if (parsedContacts.values.length < 1) {
-      displayMessage("At least one recipient is required");
+      displayMessage(_("At least one recipient is required"));
       return;
     }
     if (parsedAttr.values.length < 1) {
-      displayMessage("At least one attribute is required");
+      displayMessage(_("At least one attribute is required"));
       return;
     }
     if (question.length < 1) {
-      displayMessage("No question specified");
+      displayMessage(_("No question specified"));
       return;
     }
 
@@ -569,6 +578,8 @@ CmdUtils.CreateCommand({
       type: "ADVICE"
     };
 
+    var areYouLoggedIn = _("Rypple error - are you logged in?");
+
     jQuery.ajax({
       type: "POST",
       processData: false,
@@ -577,13 +588,13 @@ CmdUtils.CreateCommand({
       data: Utils.encodeJson(updateParams),
       dataType: "json",
       error: function() {
-          displayMessage("Rypple error - are you logged in?");
+          displayMessage(areYouLoggedIn);
       },
       success: function(returnValue ) {
         if (returnValue.success) {
-          displayMessage("Asked Question Successfully on Rypple");
+          displayMessage(_("Asked Question Successfully on Rypple"));
         } else {
-          displayMessage("Rypple error - are you logged in?");
+          displayMessage(areYouLoggedIn);
         }
       }
     });

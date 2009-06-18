@@ -1,0 +1,235 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-18 22:37+0900\n"
+
+#. twitter command:
+msgid "twitter.names"
+msgstr "twitter|tweet|share using twitter"
+
+msgid "twitter.contributors"
+msgstr ""
+
+msgid "twitter.help"
+msgstr "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
+
+msgid "twitter.description"
+msgstr "Sets your Twitter status to a message of at most 160 characters."
+
+msgctxt "twitter.preview"
+msgid "Updates your Twitter status ${username} to:"
+msgstr ""
+
+msgctxt "twitter.preview"
+msgid "Characters remaining: <b>${chars}</b>"
+msgstr ""
+
+msgctxt "twitter.preview"
+msgid "tip: tweet @mozillaubiquity for help"
+msgstr ""
+
+msgctxt "twitter.preview"
+msgid "The last <b>${truncate}</b> characters will be truncated!"
+msgstr ""
+
+msgctxt "twitter.preview"
+msgid "(For user <b>${usernameText}</b>)"
+msgstr ""
+
+msgctxt "twitter.execute"
+msgid "requires a status to be entered"
+msgstr ""
+
+msgctxt "twitter.execute"
+msgid "error - status not updated"
+msgstr ""
+
+msgctxt "twitter.execute"
+msgid "direct message sent"
+msgstr ""
+
+msgctxt "twitter.execute"
+msgid "status updated"
+msgstr ""
+
+
+#. digg command:
+msgid "digg.names"
+msgstr "digg|share using digg"
+
+msgid "digg.contributors"
+msgstr ""
+
+msgid "digg.help"
+msgstr ""
+
+msgid "digg.description"
+msgstr "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
+
+msgctxt "digg.preview"
+msgid "Submit or digg this page. Checking if this page has already been submitted..."
+msgstr ""
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg"
+msgstr ""
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg with the description:"
+msgstr ""
+
+msgctxt "digg.preview"
+msgid "Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated."
+msgstr ""
+
+msgctxt "digg.preview"
+msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
+msgstr ""
+
+
+#. tinyurl command:
+msgid "tinyurl.names"
+msgstr "tinyurl"
+
+msgid "tinyurl.contributors"
+msgstr ""
+
+msgid "tinyurl.help"
+msgstr ""
+
+msgid "tinyurl.description"
+msgstr "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with..."
+msgstr ""
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with <b>${tinyurl}</b>."
+msgstr ""
+
+
+#. share (on delicious) command:
+msgid "share (on delicious).names"
+msgstr "share |delicious"
+
+msgid "share (on delicious).contributors"
+msgstr ""
+
+msgid "share (on delicious).help"
+msgstr "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."
+
+msgid "share (on delicious).description"
+msgstr "Share the current page as a bookmark on delicious.com"
+
+msgctxt "share (on delicious).preview"
+msgid "No active user found - log in at ${delicious} to use this command."
+msgstr ""
+
+msgctxt "share (on delicious).preview"
+msgid "A title is required for bookmarks on ${delicious}"
+msgstr ""
+
+msgctxt "share (on delicious).preview"
+msgid "Share a bookmark at ${delicious}:"
+msgstr ""
+
+msgctxt "share (on delicious).execute"
+msgid "No active user found - log in at delicious.com to use this command."
+msgstr ""
+
+msgctxt "share (on delicious).execute"
+msgid "A title is required for bookmarks at delicious.com"
+msgstr ""
+
+msgctxt "share (on delicious).execute"
+msgid "Bookmark \\\"${description}\\\" shared at delicious.com/${user_name}"
+msgstr ""
+
+msgctxt "share (on delicious).execute"
+msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
+msgstr ""
+
+
+#. ask rypple command:
+msgid "ask rypple.names"
+msgstr "ask rypple|rypple"
+
+msgid "ask rypple.contributors"
+msgstr ""
+
+msgid "ask rypple.help"
+msgstr "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in"
+
+msgid "ask rypple.description"
+msgstr "Asks a question on Rypple"
+
+msgctxt "ask rypple.preview"
+msgid "Asks the following question (${charsLeft} characters left):"
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "NO QUESTION. PLEASE ENTER A QUESTION."
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "To:"
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE."
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "Attributes:"
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE."
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "Usage:"
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;"
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "Recipients must start with '@' and at least one recipient is required."
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "Attributes must start with '#' and at least one attribute is required."
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "The last ${chars} character(s) of your question will be truncated!<br/>"
+msgstr ""
+
+msgctxt "ask rypple.preview"
+msgid "The last <b>${num}</b> attributes{if num > 1}s{/if} will not be used!"
+msgstr ""
+
+msgctxt "ask rypple.execute"
+msgid "At least one recipient is required"
+msgstr ""
+
+msgctxt "ask rypple.execute"
+msgid "At least one attribute is required"
+msgstr ""
+
+msgctxt "ask rypple.execute"
+msgid "No question specified"
+msgstr ""
+
+msgctxt "ask rypple.execute"
+msgid "Rypple error - are you logged in?"
+msgstr ""
+
+msgctxt "ask rypple.execute"
+msgid "Asked Question Successfully on Rypple"
+msgstr ""
+
+
