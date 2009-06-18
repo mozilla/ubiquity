@@ -69,7 +69,7 @@ var noun_arb_text = {
   label: "?",
   rankLast: true,
   suggest: function(text, html, callback, selectionIndices) {
-    return [CmdUtils.makeSugg(text, html, null, 0.7, selectionIndices)];
+    return [CmdUtils.makeSugg(text, html, null, 0.5, selectionIndices)];
   },
   // hack to import feed-specific globals into this module
   loadGlobals: function(source) {
@@ -122,7 +122,7 @@ var noun_type_email = CmdUtils.NounType(
 
 var noun_type_percentage = {
   label: "percentage",
-  _default: CmdUtils.makeSugg("100%", null, 1.0),
+  _default: CmdUtils.makeSugg("100%", null, 0.3),
   "default": function() this._default,
   suggest: function(text, html) {
     if (!text)
@@ -167,14 +167,18 @@ var noun_type_tab = {
 
 var noun_type_search_engine = {
   label: "search engine",
-  default: function() this._makeSugg(this._BSS.defaultEngine),
+  // the default search engine should just get 0.3 or so...
+  // if it's actually entered, it can get a higher score.
+  default: function() this._makeSugg(this._BSS.defaultEngine, 0.3),
   suggest: function(text) {
     var suggs = this._BSS.getVisibleEngines({}).map(this._makeSugg);
     return CmdUtils.grepSuggs(text, suggs);
   },
   _BSS: (Cc["@mozilla.org/browser/search-service;1"]
          .getService(Ci.nsIBrowserSearchService)),
-  _makeSugg: function(engine) CmdUtils.makeSugg(engine.name, null, engine),
+  _makeSugg: function(engine, score) (
+               CmdUtils.makeSugg(engine.name, null, engine, (score || 1))
+             ),
 };
 
 // ** {{{ noun_type_tag }}} **
@@ -188,7 +192,7 @@ var noun_type_search_engine = {
 
 var noun_type_tag = {
   label: "tag1[,tag2 ...]",
-  default: function() [CmdUtils.makeSugg(tag, null, [tag])
+  default: function() [CmdUtils.makeSugg(tag, null, [tag], 0.3)
                        for each (tag in PlacesUtils.tagging.allTags)],
   suggest: function(text) {
     text = Utils.trim(text);
@@ -205,14 +209,14 @@ var noun_type_tag = {
     var suggs = [CmdUtils.makeSugg(null, null,
                                    (uncompletedTag
                                     ? completedTags.concat(uncompletedTag)
-                                    : completedTags))];
+                                    : completedTags), 0.7)];
     if (uncompletedTag) {
       let utag = uncompletedTag.toLowerCase();
       for each (let tag in allTags)
         // only match from the beginning of a tag name (not the middle)
         if (tag.length > utag.length &&
             tag.toLowerCase().indexOf(utag) === 0)
-          suggs.push(CmdUtils.makeSugg(null, null, completedTags.concat(tag)));
+          suggs.push(CmdUtils.makeSugg(null, null, completedTags.concat(tag), 0.7));
     }
     return suggs;
   }
@@ -260,7 +264,7 @@ var noun_type_url = {
   asyncRequest: null,
   rankLast: true,
   default: function()(
-    CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec)),
+    CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,null,null,0.5)),
   suggest: function(text, html, callback, selectionIndices) {
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
@@ -429,7 +433,7 @@ var noun_type_number = {
     return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
   },
   "default": function() {
-    return CmdUtils.makeSugg("1", null, 1, 0.9);
+    return CmdUtils.makeSugg("1", null, 1, 0.5);
   }
 };
 
@@ -504,7 +508,7 @@ var noun_type_time = {
   "default": function() {
     var time = Date.parse("now");
     var text = time.toString("hh:mm tt");
-    return CmdUtils.makeSugg(text, null, time, 0.9);
+    return CmdUtils.makeSugg(text, null, time, 0.5);
   },
   suggest: function(text, html) {
     var time = Date.parse(text);
@@ -622,10 +626,11 @@ var noun_type_geolocation = {
     if (!location) {
       // TODO: there needs to be a better way of doing this,
       // as default() can't currently return null
-      return CmdUtils.makeSugg("", "", null, 0.9);
+      return CmdUtils.makeSugg("", "", null, 0.5);
     }
-    var fullLocation = location.city + ", " + location.country;
-    return CmdUtils.makeSugg(fullLocation, null, null, 0.9);
+    var fullLocation = (location.city ? location.city + ", " : '') 
+                       + location.country;
+    return CmdUtils.makeSugg(fullLocation, null, null, 0.5);
   },
   asyncRequest: null,
   suggest: function(fragment, html, callback) {
@@ -640,10 +645,12 @@ var noun_type_geolocation = {
                 CmdUtils.makeSugg(location.city),
                 CmdUtils.makeSugg(location.country)]);
     }
+    // TODO: we should try to build this "here" handling into something like
+    // magic words (anaphora) handling in Parser 2: make it localizable.
     if (/\bhere\b/.test(fragment)) {
       this.asyncRequest = CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
     }
-    return [CmdUtils.makeSugg(fragment)];
+    return [CmdUtils.makeSugg(fragment, '', null, 0.5)];
   }
 };
 

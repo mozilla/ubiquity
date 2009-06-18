@@ -130,7 +130,7 @@ NounType._fromRegExp.suggest = (
   function suggest(text, html, cb, selectionIndices)(
     let (match = text.match(this._regexp))(
       match
-      ? [NounUtils.makeSugg(text, html, match, this.rankLast ? .7 : 1,
+      ? [NounUtils.makeSugg(text, html, match, this.rankLast ? .5 : 1,
                             selectionIndices)]
       : [])));
 
