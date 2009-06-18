@@ -441,8 +441,46 @@ function testPluginRegistry() {
   getCompletionsAsync( "sharify stuff with d", [cmdSharify], null,
                        this.makeCallback(testFunc));
 
-  // TODO this test is timing out, I think because of e[key] is undefined
-  // on line 233 of nounutils.js.
+}
+
+
+function testNounsWithDefaults() {
+  var nounValues = ["home", "work", "school"];
+  var nounWithDefaults = {
+    suggest: function(text, html, callback, selectionIndices) {
+      return CmdUtils.grepSuggs(text, [CmdUtils.makeSugg(x) for each (x in nounValues)]);
+    },
+    default: function() {
+      return [CmdUtils.makeSugg("home")];
+    }
+  };
+  var cmdDrive = makeCommand({
+    names: ["drive"],
+    arguments: [ {role: "goal",
+                  nountype: nounWithDefaults,
+                  label: "message"}],
+    preview: function(pblock, args) {
+    },
+    execute: function(args) {
+    }
+  });
+
+
+  var self = this;
+  var testFunc = function(completions) {
+    for each ( var comp in completions ) {
+      dump("Completion is " + comp.displayText + "\n");
+    }
+
+    self.assert( completions.length == 1, "Should be 1 completion" );
+    self.assert( completions[0]._verb.name == "drive", "Should be named drive");
+    self.assert( completions[0].args["goal"][0].text == "home",
+                "goal should be home.");
+  };
+
+  getCompletionsAsync( "drive", [cmdDrive], null,
+                       this.makeCallback(testFunc));
+
 }
 
 /* More tests that should be written:
@@ -450,6 +488,12 @@ function testPluginRegistry() {
  *   -- Coexistence of two verbs with the same name (modulo parens)
  *   -- For internationalization
  *   -- Bring over all the unit tests from parser 1 and modify them to work!
+ *   -- Nountypes with defaults (these seem to behave strangely in parser2)
+ *   -- For makeSearchCommand (before turning it into plugin)
+ *   -- For variable noun weighting
+ *   -- For async noun suggestion
+ *   -- For suggestion memory
+ *   -- Test that basic nountype from array uses whole array as defaults
  */
 
 /*
