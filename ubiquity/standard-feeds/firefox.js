@@ -92,7 +92,6 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 function tabPreview(msg)(
-  // TODO this gets a "(void 0) is undefined" error when used in the "close (tab)" cmd.
   function preview(pblock, {object: {text, data: tab}}) {
     // _("Closes") or _("Changes to")
     msg = _(msg);
@@ -106,40 +105,32 @@ function tabPreview(msg)(
   });
 
 CmdUtils.CreateCommand({
-  names: ["switch (to tab)"],
-  arguments: [{ role: "goal",
-                nountype: noun_type_tab,
-                label: "tab" }],
+  name: "switch to tab",
+  argument: noun_type_tab,
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
-  description: "Switches to the tab that matches the given name.",
-  execute: function(args) {
-    var tab = args.goal.data;
+  description: "Switches to the tab whose title or URL matches the input.",
+  execute: function({object: {data: tab}}) {
     if (!tab) return;
     // TODO: window.focus() is missing on 1.9.2pre
-    if (tab._window && tab._window.focus) {
-      tab._window.focus();
-    }
+    var win = tab._window;
+    if (win && win.focus) win.focus();
     tab.focus();
     // Focus on tab content
-    if (tab._window && tab._window.content) {
-      tab._window.content.focus();
-    }
+    if (win && win.content) win.content.focus();
   },
-  preview: tabPreview("Changes to")
+  preview: tabPreview("Changes to"),
 });
 
 CmdUtils.CreateCommand({
-  names: ["close (tab)"],
-  arguments: [{role: "object",
-               nountype: noun_type_tab,
-               label: "tab" }],
+  name: "close tab",
+  argument: noun_type_tab,
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
-  description: ("Closes the tab that matches the given title or URL " +
+  description: ("Closes the tab whose title or URL matches the input " +
                 "or the current tab if no tab matches."),
   execute: function(args) {
     (args.object.data || Application.activeWindow.activeTab).close();
   },
-  preview: tabPreview("Closes")
+  preview: tabPreview("Closes"),
 });
 
 CmdUtils.CreateCommand({
@@ -150,10 +141,7 @@ CmdUtils.CreateCommand({
   execute: function({object: {text}}) {
     var tabs = Utils.tabs.search(text);
     for each (var t in tabs) t.close();
-    displayMessage({
-      icon: this.icon,
-      title: this.name,
-      text: tabs.length + _(" tabs closed")});
+    displayMessage(tabs.length + _(" tabs closed"), this);
   },
   preview: function(pblock, args) {
     var {text} = args.object;
@@ -180,8 +168,7 @@ CmdUtils.CreateCommand({
   arguments: {object_filter: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {
-    var {text} = args.object || {text: null};
-    displayMessage(this._count(text, true), this);
+    displayMessage(this._count(args.object.text, true), this);
   },
   preview: function(pblock, args) {
     pblock.innerHTML = this._count(args.object.text);
@@ -219,7 +206,7 @@ CmdUtils.CreateCommand({
       displayMessage({
         text: _("Page could not be bookmarked!"),
         exception: e,
-      });
+      }, this);
     }
   }
 });
@@ -238,15 +225,14 @@ CmdUtils.CreateCommand({
   CmdUtils.CreateCommand({
     names: ["go " + way],
     description: "Goes " + way + " in history.",
-    arguments: [{role: "object", label: "steps", nountype: noun_type_number}],
+    arguments: {object_steps: noun_type_number},
     preview: function(pblock, args) {
-      var num = args.object.data;
-      // TODO how to internationalize lines like this one?
-      pblock.innerHTML =
-        <>Go {way} <b>{num}</b> step{num > 1 ? "s" : ""} in history.</>;
+      pblock.innerHTML = _(
+        "Go ${way} ${num} step{if num > 1}s{/if} in history.",
+        {way: way, num: args.object.data});
     },
     execute: function(args) {
-      CmdUtils.getWindow().history.go(args.object.data * sign | 0);
+      CmdUtils.getWindow().history.go(args.object.data * sign);
     }
   });
   return arguments.callee;
@@ -264,7 +250,6 @@ CmdUtils.CreateCommand({
 // ZOOM RELATED
 // -----------------------------------------------------------------
 
-
 function setFullPageZoom(level) {
   var navigator1 = context.chromeWindow.
                    QueryInterface(Ci.nsIInterfaceRequestor).
@@ -278,20 +263,16 @@ function setFullPageZoom(level) {
 
 CmdUtils.CreateCommand({
   names: ["zoom"],
-  arguments: [{role: "object", nountype: noun_type_percentage}],
+  argument: noun_type_percentage,
   icon: "chrome://ubiquity/skin/icons/magnifier.png",
   description: "Zooms the Firefox window in or out.",
   preview: function(pBlock, args) {
-    var replacement = args.object.text || "a given percentage";
-    pBlock.innerHTML = CmdUtils.renderTemplate(_("Zooms the Firefox window to ${replacement} of its normal size."),{replacement: replacement});
+    pBlock.innerHTML = _(
+      "Zooms the Firefox window to ${text} of its normal size.",
+      args.object);
   },
   execute: function(args) {
-    if (args.object.data) {
-      setFullPageZoom(args.object.data);
-    }
-    else {
-      displayMessage(_("You must provide a percentage to zoom to."));
-    }
+    setFullPageZoom(args.object.data);
   }
 });
 
@@ -311,9 +292,11 @@ CmdUtils.CreateCommand({
   license: "MPL/GPL/LGPL",
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   argument: noun_type_tag,
-  preview: function(aEl, {object: {html}}) {
-    aEl.innerHTML = ("Describes the current page with" +
-                     (html ? ": <p><b>" + html + "</b></p>" : " tags."));
+  preview: function(aEl, args) {
+    aEl.innerHTML = _(("Describes the current page with" +
+                       "{if html} these tags:<p><b>${html}</b></p>" +
+                       "{else} tags.{/if}"),
+                      args.object);
   },
   execute: function({object: {text, data}}) {
     var doc = CmdUtils.getDocument();
@@ -330,33 +313,32 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["run (bookmarklet)", "rbml"],
+  names: ["run bookmarklet", "bml"],
   description: "Runs a bookmarklet from your favorites.",
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
-  arguments: [{role: "object",
-               nountype: noun_type_bookmarklet,
-               label: "bookmarklet"}],
+  argument: noun_type_bookmarklet,
   execute: function({object}) {
     if (object.data) CmdUtils.getWindow().location = object.data;
     else {
       noun_type_bookmarklet.load();
-      displayMessage({icon: this.icon, title: this.name, text: "Reloaded"});
+      displayMessage("Reloaded", this);
     }
   },
   preview: function(pbl, {object}) {
     pbl.innerHTML = (
       object.data
-      ? (<pre class={this.name}
-         style="white-space:pre-wrap">{decodeURI(object.data)}</pre>)
+      ? _(('<pre class="bookmarklet" style="white-space:pre-wrap">' +
+           '${data}</pre>'),
+          object)
       : this.description + "<p>" + this.help + "</p>");
   }
 });
 
 CmdUtils.CreateCommand({
-  names: ["undo close tab", "uct"],
+  names: ["undo closed tabs", "uct"],
   description: "Reopens tabs you've closed recently.",
   help: "" + (
     <ul style="list-style-image:none">
@@ -433,9 +415,7 @@ CmdUtils.CreateCommand({
   help: "Execute to open the site.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   icon: "chrome://browser/skin/livemark-folder.png",
-  arguments: [{role: "object",
-               nountype: noun_type_livemark,
-               label: "livemark"}],
+  argument: noun_type_livemark,
   execute: function({object: {data}}) {
     if (data) this._open(data.site);
   },

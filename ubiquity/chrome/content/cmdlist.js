@@ -343,8 +343,8 @@ function makeUnsubscribedFeedListElement(info, sortMode) {
   $li.append(A(info.title, info.uri.spec));
 
   var commandList = $("<ul></ul>");
-  for (var name in info.commands)
-    commandList.append($("<li></li>").text(name));
+  for (var id in info.commands)
+    commandList.append($("<li></li>").text(id.split("#").pop()));
 
   $li.append(
     commandList,
@@ -387,7 +387,6 @@ function addAllUnsubscribedFeeds(feedMgr) {
     $("#num-unsubscribed-feeds").html(unscrFeeds.length);
     unscrFeeds.forEach(addUnsubscribedFeed);
   }
-
 }
 
 // TODO the following code needs to make its way onto any page that has
