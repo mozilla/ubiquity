@@ -50,7 +50,7 @@ CmdUtils.CreateCommand({
              </entry>.toXMLString());
     switch (req.status) {
       case 201:
-      this._say("Event created",
+      this._say(_("Event created"),
                 req.responseXML.getElementsByTagName("title")[0].textContent);
       Utils.tabs.reload(/^https?:\/\/www\.google\.com\/calendar\b/);
       break;
@@ -60,7 +60,7 @@ CmdUtils.CreateCommand({
       break;
 
       default:
-      this._say("Error creating the event",
+      this._say(_("Error creating the event"),
                 req.status + " " + req.statusText);
     }
   },
@@ -68,8 +68,8 @@ CmdUtils.CreateCommand({
     displayMessage({icon: this.icon, title: title, text: text});
   },
   _needLogin: function() {
-    this._say("Authorization error",
-              "Please make sure you are logged in to Google Calendar");
+    this._say(_("Authorization error"),
+              _("Please make sure you are logged in to Google Calendar"));
   }
 });
 
@@ -79,15 +79,11 @@ function linkToButton() {
     <button value={this.href} accesskey={txt[0]}>{txt}</button>.toXMLString());
 }
 
-/* TODO this calendar argument, currently a dummy argument, should become
- * a plugin argument (see "add (to calendar)" above.)
+/* TODO this should take a plugin argument specifying the calendar provider.
  */
 CmdUtils.CreateCommand({
-  names: ["check (calendar)"],
-  arguments: [{role: "object",
-               nountype: ["calendar"],
-               label: "calendar"},
-              {role: "date",
+  names: ["check google calendar", "check gcalendar"],
+  arguments: [{role: "date",
                nountype: noun_type_date,
                label: "date"}],
   icon : "chrome://ubiquity/skin/icons/calendar.png",
@@ -97,14 +93,15 @@ CmdUtils.CreateCommand({
     Utils.openUrlInBrowser("http://www.google.com/calendar/" +
                            Utils.paramsToString(this._param(date)));
   },
+  // todo what is this url argument?
   preview: function preview(pblock, args, url) {
     var date = args.date.data;
     if (!date) {
       pblock.innerHTML = this.description;
       return;
     }
-    pblock.innerHTML = ("Checking Google Calendar for events on " +
-                        date.toString("dddd, dS MMMM, yyyy") + ".");
+    pblock.innerHTML = (_("Checking Google Calendar for events on ") +
+                        date.toString("dddd, dS MMMM, yyyy") + _("."));
     CmdUtils.previewGet(
       pblock,
       url || "http://www.google.com/calendar/m",
