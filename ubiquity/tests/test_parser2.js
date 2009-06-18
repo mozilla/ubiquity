@@ -443,7 +443,7 @@ function testPluginRegistry() {
 
 }
 
-
+// TODO: failing -- see bug 756
 function testNounsWithDefaults() {
   var nounValues = ["home", "work", "school"];
   var nounWithDefaults = {
@@ -458,7 +458,7 @@ function testNounsWithDefaults() {
     names: ["drive"],
     arguments: [ {role: "goal",
                   nountype: nounWithDefaults,
-                  label: "message"}],
+                  label: "location"}],
     preview: function(pblock, args) {
     },
     execute: function(args) {
@@ -483,6 +483,77 @@ function testNounsWithDefaults() {
 
 }
 
+// TODO: Failing -- gets weak- medium-strong instead of
+// expected strong - medium - weak.  Also all the arguments are 'dentist'
+// which is very weird.
+function testVariableNounWeights() {
+  var weakNoun = {
+    suggest: function(text, html, cb, selectionIndices) {
+      if (text.indexOf("de") != -1) {
+        return [CmdUtils.makeSugg("dentist", null, null, 0.5)];
+      } else {
+        return [];
+      }
+    }
+  };
+
+  var mediumNoun = {
+    suggest: function(text, html, cb, selectionIndices) {
+      if (text.indexOf("de") != -1) {
+        return [CmdUtils.makeSugg("deloused", null, null, 1.0)];
+      } else {
+        return [];
+      }
+    }
+  };
+
+  var strongNoun = {
+    suggest: function(text, html, cb, selectionIndices) {
+      if (text.indexOf("de") != -1) {
+        return [CmdUtils.makeSugg("decapitation", null, null, 2.0)];
+      } else {
+        return [];
+      }
+    }
+  };
+
+  var weakVerb = makeCommand({
+    names: ["weak verb"],
+    arguments: {object: weakNoun},
+    execute: function(args) {}
+  });
+  var mediumVerb = makeCommand({
+    names: ["medium verb"],
+    arguments: {object: mediumNoun},
+    execute: function(args) {}
+  });
+  var strongVerb = makeCommand({
+    names: ["strong verb"],
+    arguments: {object: strongNoun},
+    execute: function(args) {}
+  });
+
+
+  var self = this;
+  var testFunc = function(completions) {
+    for each ( var comp in completions ) {
+      dump("Completion is " + comp.displayText + "\n");
+    }
+
+    self.assert( completions.length == 3, "Should be 3 completions" );
+    self.assert( completions[0]._verb.name == "strong verb",
+                 "Should be named strong verb");
+    self.assert( completions[1]._verb.name == "medium verb",
+                 "Should be named medium verb");
+    self.assert( completions[2]._verb.name == "weak verb",
+                 "Should be named weak verb");
+  };
+
+  getCompletionsAsync( "de", [weakVerb, mediumVerb, strongVerb], null,
+                       this.makeCallback(testFunc));
+
+}
+
 /* More tests that should be written:
  *   -- For the context menu bug (use cmdmanager.makeCommandSuggester())
  *   -- Coexistence of two verbs with the same name (modulo parens)
@@ -490,7 +561,6 @@ function testNounsWithDefaults() {
  *   -- Bring over all the unit tests from parser 1 and modify them to work!
  *   -- Nountypes with defaults (these seem to behave strangely in parser2)
  *   -- For makeSearchCommand (before turning it into plugin)
- *   -- For variable noun weighting
  *   -- For async noun suggestion
  *   -- For suggestion memory
  *   -- Test that basic nountype from array uses whole array as defaults
