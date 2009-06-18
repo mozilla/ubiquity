@@ -869,8 +869,9 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     // what you'd expect it to.
     if (preview != null && typeof preview !== "function") {
       command.preview = function preview_html(pblock) {
-        pblock.innerHTML = preview;
+        pblock.innerHTML = this._previewString;
       };
+      command._previewString = preview;
     }
   }
 

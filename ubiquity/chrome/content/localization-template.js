@@ -91,6 +91,10 @@ function cmdPropertyLine(cmd,property) {
 
 var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
 function cmdInlineLine(cmd,cmdCode,context) {
+
+  if (context == 'preview' && cmd._previewString)
+    return cmdPreviewString(cmd);
+
   let ret  = '';
   let script = cmdCode[context];
 //  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
@@ -98,13 +102,18 @@ function cmdInlineLine(cmd,cmdCode,context) {
   while (match = inlineChecker.exec(script)) {
 //    Utils.log(match[2]);
 //    Utils.log(inlineChecker.lastIndex);
-    ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n';
-    ret += 'msgid "'+match[2].replace(/"/g,'\\"')
-                             .replace(/\n/g,'"\n      "')+'"\n';
-    ret += 'msgstr ""\n\n';
+    ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n'
+         + 'msgid "'+match[2].replace(/"/g,'\\"')
+                             .replace(/\n/g,'"\n      "')+'"\n'
+         + 'msgstr ""\n\n';
   }
   return ret;
 }
+
+function cmdPreviewString(cmd) (
+   'msgid "'+cmd.referenceName+'.preview"\n'
+ + 'msgstr "'+cmd._previewString.replace(/\n/g,'"\n      "')+'"\n\n'
+)
 
 function setupHelp() {
   var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {

@@ -186,6 +186,22 @@ var LocalizationUtils = {
 // tested that way.
 var localizeCommand = function(cmd) {
 
+  // cmdWatch + cmdUnwatch are just some debug introspection utilities
+  // that mitcho wrote. They work okay, except in the interaction 
+  // with names (see below).
+
+  function cmdWatch(key) {
+    cmd.watch(key,
+      function(id, oldval, newval) {
+        if (oldval != newval)
+          dump('changed '+id+':\n<<<'+oldval+'\n>>>'+newval+'\n');
+      });
+  }
+  
+  function cmdUnwatch(key) {
+    cmd.unwatch(key);
+  }
+
   dump('localizing cmd '+cmd.referenceName+' now\n');
 
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
@@ -195,14 +211,32 @@ var localizeCommand = function(cmd) {
 
   var arrayProperties = ['names','contributors'];
   for each (let key in arrayProperties) {
-    cmd[key] = getLocalizedProperty(feedKey, cmd, key);
-    if (typeof cmd[key] === "string")
-      cmd[key] = cmd[key].split(/\s*\|\s{0,}/);
+    // Disable these watches as the introspection messes up 
+    // names in a weird and (as yet) unrecoverable way.
+    //cmdWatch(key);
+    let newval = getLocalizedProperty(feedKey, cmd, key) || null;
+    if (newval && newval.split)
+      newval = newval.split(/\s*\|\s{0,}/);
+    if (newval != cmd[key])
+      cmd[key] = newval;
+    //cmdUnwatch(key);
   }
-      
+
   var stringProperties = ['help', 'description'];
-  for each (let key in stringProperties)
-    cmd[key] = getLocalizedProperty(feedKey, cmd, key);    
+  for each (let key in stringProperties) {
+    cmdWatch(key);
+    cmd[key] = getLocalizedProperty(feedKey, cmd, key);
+    cmdUnwatch(key);
+  }
+
+  if (cmd._previewString) {
+    cmdWatch('_previewString');
+    let key = cmd.referenceName + '.preview';
+    let rv = LocalizationUtils.getLocalizedString(feedKey, key);
+    if (rv != key)
+      cmd._previewString = rv;
+    cmdUnwatch('_previewString');
+  }
 
   return cmd;
 }
