@@ -5,16 +5,14 @@
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.
 CmdUtils.CreateCommand({
-  names: ["highlight syntax", "hilite syntax",
-          "syntax highlight", "syntax hilite"],
+  names: ["highlight syntax", "hilite syntax"],
   arguments: [{role: "object",
                nountype: noun_arb_text,
                label: "code"}],
   icon: "chrome://ubiquity/skin/icons/color_wheel.png",
   description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
-  execute: function( arguments ) {
-    if (arguments.object && arguments.object.text) {
-      var code = arguments.object.text;
+  execute: function({object: {text: code}}) {
+    if (code) {
       var url = "http://azarask.in/services/syntaxhighlight/color.py";
       var params = {
         code: code,
@@ -37,9 +35,9 @@ CmdUtils.CreateCommand({
 // CONVERSION COMMANDS
 // -----------------------------------------------------------------
 var noun_conversion_options = new CmdUtils.NounType( "conversion-options",
-						     ["pdf",
-						      "html",
-						      "rich-text"]);
+                                                     ["pdf",
+                                                      "html",
+                                                      "rich-text"]);
 
 function convert_page_to_pdf() {
   var url = "http://www.htm2pdf.co.uk/?url=";
@@ -130,26 +128,23 @@ CmdUtils.CreateCommand({
   execute: function(args) {
     var url = Application.activeWindow.activeTab.document.location.href;
     Utils.openUrlInBrowser("view-source:" + url);
-
   }
 });
 
 CmdUtils.CreateCommand({
-  names: ["escape html entities"],
+  names: ["escape HTML entities"],
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/html_go.png",
   description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
                                 " with their escape sequences."),
-  preview: function(pBlock, arguments) {
-    if (arguments.object && arguments.object.html) {
-      pBlock.innerHTML = (<>Replaces your selection with:
-                          <pre>{Utils.escapeHtml(html)}</pre></>);
-    } else {
-      pBlock.innerHTML = this.description;
-    }
+  preview: function(pb, {object: {html}}) {
+    pb.innerHTML = (html
+                    ? (<>Replaces your selection with:
+                       <pre>{Utils.escapeHtml(html)}</pre></>)
+                    : this.description);
   },
-  execute: function(arguments) {
-    if (arguments.object && arguments.object.html) {
+  execute: function({object: {html}}) {
+    if (html) {
       var esch = Utils.escapeHtml(html);
       CmdUtils.setSelection(esch, {text: esch});
     } else {
@@ -159,7 +154,7 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["select jquery selectors"],
+  names: ['run selector-selector'],
   description: ''+ (
     <ul style="list-style-image:none">
     <li>Lets you type a jQuery selector and highlights matched elements.</li>
@@ -180,12 +175,12 @@ CmdUtils.CreateCommand({
      'Scroll horizontally'],
     ].reduce(function(l, [t, d]) l.appendChild(<><dt>{t}</dt><dd>{d}</dd></>),
              <dl/>),
-  authors: [n.link('http://ubigist.appjet.net/?o='+ n)
-            for each(n in ['cers', 'satyr'])],
+  authors: [{name: 'cers',  email: 'cers@geeksbynature.dk'},
+            {name: 'satyr', email: 'murky.satyr@gmail.com'}],
   license: 'MIT',
   icon: 'http://jquery.com/favicon.ico',
   execute: function ss_execute(){
-    const Me = this, Key = Me.name + Me._key, Doc = CmdUtils.getDocument();
+    const Me = this, Key = "_" + Me._key, Doc = CmdUtils.getDocument();
     if(Doc.getElementById(Key)) return;
 
     XML.prettyPrinting = XML.ignoreWhitespace = false;
