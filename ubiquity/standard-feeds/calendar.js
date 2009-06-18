@@ -100,8 +100,8 @@ CmdUtils.CreateCommand({
       pblock.innerHTML = this.description;
       return;
     }
-    pblock.innerHTML = (_("Checking Google Calendar for events on ") +
-                        date.toString("dddd, dS MMMM, yyyy") + _("."));
+    pblock.innerHTML = (_("Checking Google Calendar for events on ${date}.",
+                          {date: date.toString("dddd, dS MMMM, yyyy")}));
     CmdUtils.previewGet(
       pblock,
       url || "http://www.google.com/calendar/m",

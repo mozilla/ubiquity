@@ -35,10 +35,6 @@
  * ***** END LICENSE BLOCK ***** */
 
  // = LocalizationUtils =
- //
- // This is a small library of general utility functions
- // for use by command code.  Everything clients need is contained within
- // the {{{CmdUtils}}} namespace.
 
 var EXPORTED_SYMBOLS = ["LocalizationUtils","localizeCommand"];
 
@@ -165,16 +161,22 @@ var LocalizationUtils = {
   get feedContext() { return feedContext; },
   get displayContext() { return displayContext; },
   
-  getLocalized: function LU_getLocalized(string) {
+  getLocalized: function LU_getLocalized(string, replacements) {
     
     let context = this.commandContext
               + (this.displayContext ? '.' + displayContext : '');
     
     let feedKey = this.getLocalFeedKey(this.feedContext.asciiSpec);
     
+    // try to load the po again here, just in case.
     this.loadLocalPo(feedKey);
     
-    return this.getLocalizedStringFromContext(feedKey, context, string);
+    let localized = this.getLocalizedStringFromContext(feedKey, context, string);
+    
+    if (replacements && this.CmdUtils)
+      return this.CmdUtils.renderTemplate(localized, replacements);
+    else
+      return localized;
   }
 
 };
