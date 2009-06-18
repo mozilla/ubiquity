@@ -8,6 +8,9 @@
 <p>This xhtml source contains commands for searching the Web.  Its
 corresponding feed is <a href="search.html">here</a>.</p>
 <script src="fake-infrastructure.js"></script>
+
+
+
 <div id="google-search" style="display: none;">
 {for result in results}
 <div class="gresult">
@@ -18,10 +21,13 @@ corresponding feed is <a href="search.html">here</a>.</p>
   <div class="gresult-url">${result.visibleUrl}</div>
 </div>
 {forelse}
-  <b>Your search - ${searchTerm} - did not match any documents. </b>
+  <b>${noResultsMessage}</b>
 {/for}
-<small>Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time.</small>
+<small>${tipsMessage}</small>
 </div>
+
+
+
 <div id="amazon-search" style="display: none;">
 <style>
   ol, ul {list-style: none; margin: 0; padding: 0}
@@ -66,6 +72,9 @@ Found <b>${numitems}</b> item{if numitems - 1}s{/if} on
 {/for}
 </ol>
 </div>
+
+
+
 <div id="flickr-search" style="display: none;">
 <b>${nummatches} photos were found on Flickr.</b><br/><br/>
 <table style="border-width: 0px;">
@@ -84,6 +93,9 @@ Found <b>${numitems}</b> item{if numitems - 1}s{/if} on
 {/for}
 </table>
 </div>
+
+
+
 <div id="weather-search" style="display: none;">
 <style>
 img {float: left; }
@@ -108,6 +120,9 @@ img {float: left; }
   </div>
 </div>
 </div>
+
+
+
 <div id="wikipedia-search" style="display: none;">
 <style>
 .wikipedia { margin: 0 }
@@ -146,6 +161,9 @@ Wikipedia articles found matching <b>${query}</b>:
 </div>
 {/for}
 </div>
+
+
+
 <div id="yelp-search" style="display: none;">
 <style>
 .biz {
@@ -256,7 +274,7 @@ CmdUtils.makeSearchCommand({
     // since the results come back nearly instantaneously. In the
     // future, we can display a throbber.
     if(searchTerm.length < 1) {
-      pblock.innerHTML = "Searches Google for your words.";
+      pblock.innerHTML = _("Searches Google for your words.");
       return;
     }
 
@@ -273,9 +291,17 @@ CmdUtils.makeSearchCommand({
         result.key = i+1;
       }
       
+      var noResultsMessage = _("Your search - ${searchTerm} - did not match any documents.",
+                              {searchTerm:searchTerm});
+      var tipsMessage = _("Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time.");
+      
       pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#google-search", feed.dom).html(),
-	{results:results, searchTerm:searchTerm});
+	        { results:results,
+	          searchTerm:searchTerm,
+	          noResultsMessage:noResultsMessage,
+	          tipsMessage:tipsMessage
+	        });
       }, "json");
   }
 });
