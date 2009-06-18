@@ -71,8 +71,8 @@ CmdUtils.CreateCommand({
       rot = "180";
     else
       rot = object.text;
-    var preview = "<p>Rotates entire page ${angle} degrees</p>";
-    pblock.innerHTML = CmdUtils.renderTemplate(preview,{"angle": rot});
+    pblock.innerHTML = "<p>" + _("Rotates entire page ${angle} degrees",
+                                 {"angle": rot}) + "</p>";
   },
   execute: function({object}) {
     if (object.text == "")
