@@ -94,6 +94,8 @@ CmdUtils.CreateCommand({
 function tabPreview(msg)(
   // TODO this gets a "(void 0) is undefined" error when used in the "close (tab)" cmd.
   function preview(pblock, {object: {text, data: tab}}) {
+    // _("Closes") or _("Changes to")
+    msg = _(msg);
     pblock.innerHTML = (
       tab
       ? <div class="tab">
@@ -123,7 +125,7 @@ CmdUtils.CreateCommand({
       tab._window.content.focus();
     }
   },
-  preview: tabPreview(_("Changes to"))
+  preview: tabPreview("Changes to")
 });
 
 CmdUtils.CreateCommand({
@@ -137,7 +139,7 @@ CmdUtils.CreateCommand({
   execute: function(args) {
     (args.object.data || Application.activeWindow.activeTab).close();
   },
-  preview: tabPreview(_("Closes"))
+  preview: tabPreview("Closes")
 });
 
 CmdUtils.CreateCommand({
