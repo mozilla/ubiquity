@@ -201,7 +201,7 @@ CommandManager.prototype = {
 
   reset : function CM_reset() {
     // TODO: I think?
-    if (!this.__activeQuery.finished)
+    if (this.__activeQuery && !this.__activeQuery.finished)
       this.__activeQuery.cancel();
   },
 
