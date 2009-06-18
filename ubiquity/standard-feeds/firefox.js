@@ -111,7 +111,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab that matches the given name.",
   execute: function(args) {
-    var tab = args.object.data;
+    var tab = args.goal.data;
     if (!tab) return;
     // TODO: window.focus() is missing on 1.9.2pre
     if (tab._window && tab._window.focus) {
@@ -123,12 +123,12 @@ CmdUtils.CreateCommand({
       tab._window.content.focus();
     }
   },
-  preview: tabPreview("Changes to"),
+  preview: tabPreview(_("Changes to"))
 });
 
 CmdUtils.CreateCommand({
   names: ["close (tab)"],
-  arguments: [{role: "goal",
+  arguments: [{role: "object",
                nountype: noun_type_tab,
                label: "tab" }],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
@@ -137,7 +137,7 @@ CmdUtils.CreateCommand({
   execute: function(args) {
     (args.object.data || Application.activeWindow.activeTab).close();
   },
-  preview: tabPreview("Closes"),
+  preview: tabPreview(_("Closes"))
 });
 
 CmdUtils.CreateCommand({
@@ -151,7 +151,7 @@ CmdUtils.CreateCommand({
     displayMessage({
       icon: this.icon,
       title: this.name,
-      text: tabs.length + " tabs closed"});
+      text: tabs.length + _(" tabs closed")});
   },
   preview: function(pblock, args) {
     var {text} = args.object;
@@ -186,8 +186,10 @@ CmdUtils.CreateCommand({
   },
   _count: function(text, plain) {
     var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
-    var ord = count > 1 ? " tabs " : " tab ";
-    var msg = text ? "matching " + text : "total";
+    var ord = count > 1 ? _(" tabs ") : _(" tab ");
+    // TODO is this next line the right way to _()-wrap or should I use
+    // a formatted string replacement?
+    var msg = text ? _("matching ") + text : _("total");
     return (plain
             ? count + ord + msg + "."
             : <div class={this.name}><b>{count}</b>{ord}<b>{msg}</b>.</div>);
@@ -213,7 +215,7 @@ CmdUtils.CreateCommand({
       Application.bookmarks.unfiled.addBookmark(title, Utils.url(URL));
     } catch (e) {
       displayMessage({
-        text: "Page could not be bookmarked!",
+        text: _("Page could not be bookmarked!"),
         exception: e,
       });
     }
@@ -237,6 +239,7 @@ CmdUtils.CreateCommand({
     arguments: [{role: "object", label: "steps", nountype: noun_type_number}],
     preview: function(pblock, args) {
       var num = args.object.data;
+      // TODO how to internationalize lines like this one?
       pblock.innerHTML =
         <>Go {way} <b>{num}</b> step{num > 1 ? "s" : ""} in history.</>;
     },
@@ -285,7 +288,7 @@ CmdUtils.CreateCommand({
       setFullPageZoom(args.object.data);
     }
     else {
-      displayMessage("You must provide a percentage to zoom to.");
+      displayMessage(_("You must provide a percentage to zoom to."));
     }
   }
 });
@@ -369,12 +372,12 @@ CmdUtils.CreateCommand({
   preview: function(pbl, args) {
     var me = this;
     if (!me._SS.getClosedTabCount(context.chromeWindow)) {
-      me._puts(pbl, "No closed tabs.");
+      me._puts(pbl, _("No closed tabs."));
       return;
     }
     var tabs = me._find(args.object.text);
     if (!tabs[0]) {
-      me._puts(pbl, "No matched tabs.");
+      me._puts(pbl, _("No matched tabs."));
       return;
     }
     CmdUtils.previewList(pbl, tabs.map(me._html), function(i, ev) {
