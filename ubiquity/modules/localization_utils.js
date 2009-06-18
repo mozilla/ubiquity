@@ -224,18 +224,18 @@ var localizeCommand = function(cmd) {
 
   var stringProperties = ['help', 'description'];
   for each (let key in stringProperties) {
-    cmdWatch(key);
+    //cmdWatch(key);
     cmd[key] = getLocalizedProperty(feedKey, cmd, key);
-    cmdUnwatch(key);
+    //cmdUnwatch(key);
   }
 
   if (cmd._previewString) {
-    cmdWatch('_previewString');
+    //cmdWatch('_previewString');
     let key = cmd.referenceName + '.preview';
     let rv = LocalizationUtils.getLocalizedString(feedKey, key);
     if (rv != key)
       cmd._previewString = rv;
-    cmdUnwatch('_previewString');
+    //cmdUnwatch('_previewString');
   }
 
   return cmd;
