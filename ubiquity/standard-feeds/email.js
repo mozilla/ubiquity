@@ -130,11 +130,8 @@ CmdUtils.CreateCommand({
     For example, try issuing "email hello to jono"
     (assuming you have a friend named "jono").</>),
   preview: function(pblock, {object, goal}) {
-    pblock.innerHTML = "".concat(
-      "Creates an email message",
-      goal.text && " to " + goal.text,
-      " with a link to the current page",
-      object.html ? " and these contents:<br/><br/>" + object.html : ".");
+    pblock.innerHTML = _("Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}.",
+        {recipient: goal.text, content: object.html});
   },
   execute: function({object: {text, html}, goal: {text: toAddress}}) {
     var {title, URL} = context.focusedWindow.document;
@@ -186,7 +183,7 @@ CmdUtils.CreateCommand({
         gmailTab.focus();
       } catch (e) {
         displayMessage({
-          text: "A gmonkey exception occurred.",
+          text: _("A gmonkey exception occurred."),
           exception: e}, me);
       }
     });
@@ -223,24 +220,18 @@ CmdUtils.CreateCommand({
   preview: function(pBlock, arguments) {
     var provider = (arguments.source && arguments.source.text) ?
                      arguments.source.text : "";
-    pBlock.innerHTML = "Displays your most recent incoming email...";
+    pBlock.innerHTML = _("Displays your most recent incoming email...");
     // Checks if user is authenticated first
     // if not, do not ajaxGet, as this triggers authentication prompt
     if (Utils.getCookie(".mail.google.com", "GX")) {
       gmailChecker(function(emailDetails) {
-        var previewTemplate = (
-          emailDetails.lastEmail
-          ? ("Last unread e-mail: <a href=\"${lastEmail.href}\">" +
-             "<p><b>${lastEmail.author}</b> says: " +
-             "<b>${lastEmail.subject}</b></p>" +
-             "<p>${lastEmail.summary}</p>" +
-             "</a>")
-          : "<b>You have no new mail!</b>");
-        pBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate,
-                                                   emailDetails);
+        if (emailDetails.lastEmail) 
+          pBlock.innerHTML = _("Last unread e-mail: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>",emailDetails);
+        else
+          pBlock.innerHTML = _("<b>You have no new mail!</b>");
       }, provider);
     } else {
-      pBlock.innerHTML = "You are not logged in!<br />Press enter to log in.";
+      pBlock.innerHTML = _("You are not logged in!<br />Press enter to log in.");
     }
   },
   execute: function(arguments) {
@@ -248,12 +239,10 @@ CmdUtils.CreateCommand({
                      arguments.source.text : "";
     var me = this;
     gmailChecker(function(emailDetails) {
-      var msgTemplate = "You have no new mail.";
-      if (emailDetails.lastEmail) {
-        msgTemplate = ("You have new email! ${lastEmail.author} says: " +
-                       "${lastEmail.subject}");
-      }
-      displayMessage(CmdUtils.renderTemplate(msgTemplate, emailDetails), me);
+      if (emailDetails.lastEmail)
+        displayMessage(_("You have new email! ${lastEmail.author} says: ${lastEmail.subject}",emailDetails), me);
+      else 
+        displayMessage(_("You have no new mail."), me);
     }, provider);
   }
 });

@@ -92,6 +92,8 @@ CmdUtils.CreateCommand({
     }
   },
   execute: function(arguments) {
+    // Just putting the shared text here so it is localizable.
+    _("You're not in a rich text editing field.");
     if (arguments.goal && arguments.goal.text) {
       switch( arguments.goal.text) {
       case "pdf":
@@ -106,7 +108,6 @@ CmdUtils.CreateCommand({
       case "rich-text":
         if (arguments.object.html)
           convert_to_rich_text(arguments.object.html);
-          // _("You're not in a rich text editing field.")
         else
           displayMessage(_("There is nothing to convert!"));
         break;
