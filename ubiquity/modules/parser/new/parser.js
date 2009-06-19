@@ -1597,10 +1597,13 @@ ParseQuery.prototype = {
         if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
           //thisQuery.dump('completing parse '+parseId+' now');
           completeParse(thisParse, argText, asyncRequests);
-	}
+	      }
       }
 
-      if (thisQuery.aggregateScoredParses().length > 0)
+      // don't run onResults here if thisQuery.finished,
+      // as if the finished flag was just turned on, it would have independently
+      // called onResults.
+      if (thisQuery.aggregateScoredParses().length > 0 && !thisQuery.finished)
         thisQuery.onResults();
     }
 
