@@ -43,10 +43,15 @@ BetterFakeCommandSource.prototype = {
 
 // Infrastructure for asynchronous tests:
 function getCompletionsAsync( input, verbs, context, callback) {
-
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
   var parser = makeTestParser2(LANG, verbs );
+  getCompletionsAsyncFromParser(input, parser, context, callback);
+}
+
+function getCompletionsAsyncFromParser(input, parser, context, callback) {
+  if (!context)
+    context = { textSelection: "", htmlSelection: "" };
   var query = parser.newQuery( input, context, MAX_SUGGESTIONS, true );
   /* The true at the end tells it not to run immediately.  This is
    * important because otherwise it would run before we assigned the
@@ -371,7 +376,8 @@ function testVerbMatcher() {
   this.assert(verbInitialTest.test("tab"), "middle-prefix again");
 }
 
-
+// TODO: Failing, but I think it's failing for the same reason as
+// testNounsWithDefaults is failing.
 function testPluginRegistry() {
   var twitterGotShared = null;
   var diggGotShared = null;
@@ -465,7 +471,6 @@ function testNounsWithDefaults() {
     }
   });
 
-
   var self = this;
   var testFunc = function(completions) {
     for each ( var comp in completions ) {
@@ -554,15 +559,62 @@ function testVariableNounWeights() {
 
 }
 
+// Work in progress:
+function testSortedBySuggestionMemoryParser2Version() {
+  var fakeSource = new BetterFakeCommandSource({
+    clock: {names: ["clock"], execute: function(){}},
+    calendar: {names: ["calendar"], execute: function(){}},
+    couch: {names: ["couch"], execute: function(){}},
+    conch: {names: ["conch"], execute: function(){}},
+    crouch: {names: ["crouch"], execute: function(){}},
+    coelecanth: {names: ["coelecanth"], execute: function(){}},
+    crab: {names: ["crab"], execute: function(){}}
+    });
+
+  var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
+
+  var self = this;
+  
+  var testFunc2 = function(completions) {
+    // This time around, coelecanth should be top hit because
+    // of suggestion memory.  Clock should be #2.
+    self.assert( completions[0].displayText.indexOf("coelecanth") > -1,
+                "0th suggestion should be coelecanth" );
+    self.assert( completions[1].displayText.indexOf("clock") > -1,
+                "1st suggestion should be clock" );
+  };
+
+  var testFunc = function(completions) {
+    self.assert( completions[0].displayText.indexOf("clock") > -1,
+                "0th suggestion should be clock" );
+    self.assert( completions[5].displayText.indexOf("coelecanth") > -1,
+                "5th suggestion should be coelecanth" );
+
+    // Now strengthen suggestion memory on "c" -> coelecanth...
+    parser.strengthenMemory("c", completions[5]);
+    // Now try a new completion...
+    getCompletionsAsyncFromParser("c", parser, null,
+                                  self.makeCallback(testFunc2));
+  };
+
+
+  getCompletionsAsyncFromParser("c", parser, null,
+                                self.makeCallback(testFunc));
+
+
+}
+// TODO could also do the above test through command manager and
+// BetterFakeCommandSource, using cmdMan.execute and ensuring that
+// the memory is strengthenend.
+
+
 /* More tests that should be written:
  *   -- For the context menu bug (use cmdmanager.makeCommandSuggester())
  *   -- Coexistence of two verbs with the same name (modulo parens)
  *   -- For internationalization
  *   -- Bring over all the unit tests from parser 1 and modify them to work!
- *   -- Nountypes with defaults (these seem to behave strangely in parser2)
  *   -- For makeSearchCommand (before turning it into plugin)
  *   -- For async noun suggestion
- *   -- For suggestion memory
  *   -- Test that basic nountype from array uses whole array as defaults
  */
 
