@@ -1,0 +1,269 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: \n"
+"Last-Translator: Michael 芳貴 Erlewine <mitcho@mitcho.com>\n"
+"Language-Team: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
+
+#. bold command:
+msgid "bold.names"
+msgstr "太字|ボールド体|ボールド|太字にする|ボールド体にする|ボールドにする|太字にして|ボールド体にして|ボールドにして|太字にしろ|ボールド体にしろ|ボールドにしろ"
+
+msgid "bold.contributors"
+msgstr "marsf"
+
+msgid "bold.help"
+msgstr "リッチテキスト編集フィールドで選択したテキストを太字にします。"
+
+msgid "bold.description"
+msgstr "リッチテキスト編集フィールドで選択したテキストを太字にします。"
+
+msgctxt "bold.execute"
+msgid "You're not in a rich text editing field."
+msgstr "リッチテキスト編集フィールドではありません。"
+
+#. italicize command:
+msgid "italicize.names"
+msgstr "斜体|イタリック体|イタリック|斜体にする|イタリック体にする|イタリックにする|斜体にして|イタリック体にして|イタリックにして|斜体にしろ|イタリック体にしろ|イタリックにしろ"
+
+msgid "italicize.contributors"
+msgstr "marsf"
+
+msgid "italicize.help"
+msgstr "リッチテキスト編集フィールドで選択したテキストを斜体にします。"
+
+msgid "italicize.description"
+msgstr "リッチテキスト編集フィールドで選択したテキストを斜体にします。"
+
+msgctxt "italicize.execute"
+msgid "You're not in a rich text editing field."
+msgstr "リッチテキスト編集フィールドではありません。"
+
+#. underline command:
+msgid "underline.names"
+msgstr "下線|アンダーライン|下線をひく|アンダーラインをひく|下線をひいて|アンダーラインをひいて|下線をひけ|アンダーラインをひけ"
+
+msgid "underline.contributors"
+msgstr "marsf"
+
+msgid "underline.help"
+msgstr "リッチテキスト編集フィールドで選択したテキストに下線を引きます。"
+
+msgid "underline.description"
+msgstr "リッチテキスト編集フィールドで選択したテキストに下線を引きます。"
+
+msgctxt "underline.execute"
+msgid "You're not in a rich text editing field."
+msgstr "リッチテキスト編集フィールドではありません。"
+
+#. highlight command:
+msgid "highlight.names"
+msgstr "強調|ハイライト|強調する|ハイライトする|強調して|ハイライトして|強調しろ|ハイライトしろ"
+
+msgid "highlight.contributors"
+msgstr "marsf"
+
+msgid "highlight.help"
+msgstr "現在の選択テキストを<span style="background: yellow; color: black;">このように強調</span>します。"
+
+msgid "highlight.description"
+msgstr "現在の選択テキストを<span style="background: yellow; color: black;">このように強調</span>します。"
+
+#. undo (text edit) command:
+msgid "undo (text edit).names"
+msgstr "元に戻す|元に戻して|元に戻せ|取り消す|取り消して|取り消せ"
+
+msgid "undo (text edit).contributors"
+msgstr "marsf"
+
+msgid "undo (text edit).help"
+msgstr "最後に行ったスタイル/書式変更またはページ編集を元に戻します。"
+
+msgid "undo (text edit).description"
+msgstr "最後に行ったスタイル/書式変更またはページ編集を元に戻します。"
+
+msgctxt "undo (text edit).execute"
+msgid "You're not in a rich text editing field."
+msgstr "リッチテキスト編集フィールドではありません。"
+
+#. redo (text edit) command:
+msgid "redo (text edit).names"
+msgstr "やり直し|やり直す|やり直して|やり直せ"
+
+msgid "redo (text edit).contributors"
+msgstr "marsf"
+
+msgid "redo (text edit).help"
+msgstr "最後に行ったスタイル/書式変更またはページ編集をやり直します。"
+
+msgid "redo (text edit).description"
+msgstr "最後に行ったスタイル/書式変更またはページ編集をやり直します。"
+
+msgctxt "redo (text edit).execute"
+msgid "You're not in a rich text editing field."
+msgstr "リッチテキスト編集フィールドではありません。"
+
+#. count words command:
+msgid "count words.names"
+msgstr "単語数カウント|数える|数えて|数えろ"
+
+msgid "count words.contributors"
+msgstr "marsf"
+
+msgid "count words.help"
+msgstr "選択したテキストの単語数を表示します。"
+
+msgid "count words.description"
+msgstr "選択したテキストの単語数を表示します。"
+
+msgctxt "count words.preview"
+msgid "${num} words"
+msgstr "${num} 単語"
+
+msgctxt "count words.preview"
+msgid "Displays the number of words in a selection."
+msgstr "選択したテキストの単語数を表示します。"
+
+msgctxt "count words.execute"
+msgid "${num} words"
+msgstr "${num} 単語"
+
+msgctxt "count words.execute"
+msgid "No words selected."
+msgstr "テキストが選択されていません。"
+
+#. link (to wikipedia) command:
+msgid "link (to wikipedia).names"
+msgstr "リンク|リンクを挿入|リンクを挿入する|リンクを挿入して|リンクを挿入しろ|Wikipediaにリンク|Wikipediaリンク|Wikipediaリンクを挿入|Wikipediaリンクを挿入する|Wikipediaリンクを挿入して|Wikipediaリンクを挿入しろ|ウィキペディアにリンク|ウィキペディアリンク|ウィキペディアリンクを挿入|ウィキペディアリンクを挿入する|ウィキペディアリンクを挿入して|ウィキペディアリンクを挿入しろ"
+
+msgid "link (to wikipedia).contributors"
+msgstr "marsf"
+
+msgid "link (to wikipedia).help"
+msgstr "選択したフレーズを、マッチする Wikipedia の記事にリンクします。"
+
+msgid "link (to wikipedia).description"
+msgstr "選択したフレーズを、マッチする Wikipedia の記事にリンクします。"
+
+#. calculate command:
+msgid "calculate.names"
+msgstr "計算|けいさん|答え|こたえ|計算する|計算して|計算しろ|けいさんする|けいさんして|けいさんしろ"
+
+msgid "calculate.contributors"
+msgstr "marsf"
+
+msgid "calculate.help"
+msgstr "入力例: 22/7-1の答え"
+
+msgid "calculate.description"
+msgstr "簡単な数式を計算します。"
+
+msgctxt "calculate.preview"
+msgid "Calculates an expression. E.g., 22/7."
+msgstr "簡単な数式を計算します。例: 22/7-1"
+
+msgctxt "calculate.preview"
+msgid "${expression} = <b>${result}</b>{if error}<p><b>Error:</b> ${error}</p>{/if}"
+msgstr "${expression} = <b>${result}</b>{if error}<p><b>エラー:</b> ${error}</p>{/if}"
+
+msgctxt "calculate.execute"
+msgid "Requires a expression."
+msgstr "式が必要です。"
+
+msgctxt "calculate.execute"
+msgid "Invalid expression"
+msgstr "無効な式です。"
+
+msgctxt "calculate.execute"
+msgid "Error calculating expression: ${expression}"
+msgstr "計算エラー: ${expression}"
+
+#. gcalculate command:
+msgid "gcalculate.names"
+msgstr "計算|関数計算|gcalculate|計算する|計算して|計算しろ|関数計算する|関数計算して|関数計算しろ"
+
+msgid "gcalculate.contributors"
+msgstr "marsf"
+
+msgid "gcalculate.help"
+msgstr "式の例: 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal."
+
+msgid "gcalculate.description"
+msgstr "Google で計算します。様々な関数や定数、単位、通貨等をサポートしています。"
+
+msgctxt "gcalculate.preview"
+msgid "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(Command List)</a></u>"
+msgstr "例: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(コマンドリスト)</a></u>"
+
+#. sparkline command:
+msgid "sparkline.names"
+msgstr "sparkline|グラフ|グラフする|グラフして|グラフしろ|グラフ変換|グラフ変換する|グラフ変換して|グラフ変換しろ|スパークライン|スパークライン表示|スパークラインで表示|スパークラインで表示する|スパークラインで表示して|スパークラインで表示しろ"
+
+msgid "sparkline.contributors"
+msgstr "marsf"
+
+msgid "sparkline.help"
+msgstr "数値の表を選択してください。sparkline でグラフに表示します。数値以外の値も自動的に扱われます。"
+
+msgid "sparkline.description"
+msgstr "現在の選択を sparkline でグラフに変換します。"
+
+msgctxt "sparkline.preview"
+msgid "Requires numbers to graph."
+msgstr "グラフにする数値が必要です。"
+
+#. translate command:
+msgid "translate.names"
+msgstr "翻訳|翻訳する|翻訳して|翻訳しろ|訳す|訳して|訳せ|やくす|やくして|やくせ"
+
+msgid "translate.contributors"
+msgstr "marsf"
+
+msgid "translate.help"
+msgstr "翻訳先の言語 (～に) と翻訳元の言語 (～から) を指定してください。例えば、「motherを英語から中国語に翻訳」と入力してください。 言語を省略すると補完されます。Web ページ上のテキストを選択して翻訳することもできますが、一度に多くのテキストは翻訳できません(多くても 2 段落程度まで)。一度に多くのテキストを翻訳をしたい場合はテキストを入力しないで実行してください。ページ全体が翻訳されます。"
+
+msgid "translate.description"
+msgstr "テキストを他の言語へ翻訳します。"
+
+msgctxt "translate.preview"
+msgid "Replaces the selected text with the <b>${toLang}</b> translation:"
+msgstr "選択したテキストを <b>${toLang}</b> の翻訳で置き換えます:"
+
+#. create bookmarklet command command:
+msgid "create bookmarklet command.names"
+msgstr "ブックマークレットコマンド生成|ブックマークレットからコマンド生成|ブックマークレットからコマンド化|ブックマークレットからコマンド化する|ブックマークレットからコマンド化して|ブックマークレットからコマンド化しろ"
+
+msgid "create bookmarklet command.contributors"
+msgstr "marsf"
+
+msgid "create bookmarklet command.help"
+msgstr "ブックマークレットから新しいコマンドを生成します。"
+
+msgid "create bookmarklet command.description"
+msgstr "ブックマークレットから新しいコマンドを生成します。"
+
+#. create search command command:
+msgid "create search command.names"
+msgstr "検索コマンド生成"
+
+msgid "create search command.contributors"
+msgstr "Abimanyu Raja|satyr|marsf"
+
+msgid "create search command.help"
+msgstr "<ol style=\"list-style-image:none\">  <li>検索ボックスを選択します。</li>  <li>このコマンドを実行すると検索コマンドを生成します。</li></ol>"
+
+msgid "create search command.description"
+msgstr "フォーカスした検索ボックスから新しい Ubiquity コマンドを生成します。"
+
+msgctxt "create search command.preview"
+msgid "Creates a new search command called <b>${text}</b>"
+msgstr "新しい検索コマンドの <b>" + text + "検索</b> を生成します。"
+
+msgctxt "create search command.execute"
+msgid "You need to focus a searchbox before running this command."
+msgstr "このコマンドを実行する前に検索ボックスをクリックしてください。"
+
