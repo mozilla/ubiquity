@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-18 21:14+0900\n"
+"POT-Creation-Date: 2009-06-19 10:57+0900\n"
 
 #. exit firefox command:
 msgid "exit firefox.names"
@@ -14,7 +14,7 @@ msgid "exit firefox.help"
 msgstr ""
 
 msgid "exit firefox.description"
-msgstr ""
+msgstr "Exits Firefox."
 
 
 #. restart firefox command:
@@ -28,7 +28,7 @@ msgid "restart firefox.help"
 msgstr ""
 
 msgid "restart firefox.description"
-msgstr ""
+msgstr "Restarts Firefox."
 
 
 #. close window command:
@@ -42,7 +42,7 @@ msgid "close window.help"
 msgstr ""
 
 msgid "close window.description"
-msgstr ""
+msgstr "Closes current window."
 
 
 #. fullscreen command:
@@ -56,7 +56,7 @@ msgid "fullscreen.help"
 msgstr ""
 
 msgid "fullscreen.description"
-msgstr ""
+msgstr "Toggles fullscreen mode."
 
 
 #. switch to tab command:
@@ -70,7 +70,7 @@ msgid "switch to tab.help"
 msgstr ""
 
 msgid "switch to tab.description"
-msgstr ""
+msgstr "Switches to the tab whose title or URL matches the input."
 
 
 #. close tab command:
@@ -84,7 +84,7 @@ msgid "close tab.help"
 msgstr ""
 
 msgid "close tab.description"
-msgstr ""
+msgstr "Closes the tab whose title or URL matches the input or the current tab if no tab matches."
 
 
 #. close all tabs with command:
@@ -98,10 +98,10 @@ msgid "close all tabs with.help"
 msgstr ""
 
 msgid "close all tabs with.description"
-msgstr ""
+msgstr "Closes all open tabs that have the given word in common."
 
 msgctxt "close all tabs with.execute"
-msgid "${num} tabs closed"
+msgid "${num} tabs closed."
 msgstr ""
 
 
@@ -116,7 +116,7 @@ msgid "count tabs.help"
 msgstr ""
 
 msgid "count tabs.description"
-msgstr ""
+msgstr "Counts the number of opened tabs."
 
 
 #. refresh command:
@@ -130,7 +130,7 @@ msgid "refresh.help"
 msgstr ""
 
 msgid "refresh.description"
-msgstr ""
+msgstr "Refreshes the current page."
 
 
 #. bookmark command:
@@ -144,7 +144,7 @@ msgid "bookmark.help"
 msgstr ""
 
 msgid "bookmark.description"
-msgstr ""
+msgstr "Adds the current page to bookmarks."
 
 msgctxt "bookmark.execute"
 msgid "Page could not be bookmarked!"
@@ -162,7 +162,7 @@ msgid "print.help"
 msgstr ""
 
 msgid "print.description"
-msgstr ""
+msgstr "Prints the current page."
 
 
 #. go back command:
@@ -176,7 +176,7 @@ msgid "go back.help"
 msgstr ""
 
 msgid "go back.description"
-msgstr ""
+msgstr "Goes back in history."
 
 
 #. go forward command:
@@ -190,7 +190,7 @@ msgid "go forward.help"
 msgstr ""
 
 msgid "go forward.description"
-msgstr ""
+msgstr "Goes forward in history."
 
 
 #. go home command:
@@ -204,7 +204,7 @@ msgid "go home.help"
 msgstr ""
 
 msgid "go home.description"
-msgstr ""
+msgstr "Goes to home page."
 
 
 #. zoom command:
@@ -218,7 +218,7 @@ msgid "zoom.help"
 msgstr ""
 
 msgid "zoom.description"
-msgstr ""
+msgstr "Zooms the Firefox window in or out."
 
 msgctxt "zoom.preview"
 msgid "Zooms the Firefox window to ${text} of its normal size."
@@ -233,10 +233,10 @@ msgid "tag.contributors"
 msgstr ""
 
 msgid "tag.help"
-msgstr ""
+msgstr "Use commas to separate multiple tags."
 
 msgid "tag.description"
-msgstr ""
+msgstr "Adds tags to the current page."
 
 msgctxt "tag.preview"
 msgid "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
@@ -251,13 +251,13 @@ msgid "run bookmarklet.contributors"
 msgstr ""
 
 msgid "run bookmarklet.help"
-msgstr ""
+msgstr "Enter nothing to reload the list."
 
 msgid "run bookmarklet.description"
-msgstr ""
+msgstr "Runs a bookmarklet from your favorites."
 
 msgctxt "run bookmarklet.preview"
-msgid "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
+msgid "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">\\\"${data}</pre>"
 msgstr ""
 
 
@@ -269,10 +269,13 @@ msgid "undo closed tabs.contributors"
 msgstr ""
 
 msgid "undo closed tabs.help"
-msgstr ""
+msgstr "<ul style=\"list-style-image:none\">"
+       "    <li>Use accesskey or click to undo.</li>"
+       "    <li>Type to filter, then execute to undo all.</li>"
+       "    </ul>"
 
 msgid "undo closed tabs.description"
-msgstr ""
+msgstr "Reopens tabs you've closed recently."
 
 msgctxt "undo closed tabs.preview"
 msgid "No closed tabs."
@@ -291,9 +294,9 @@ msgid "check livemark.contributors"
 msgstr ""
 
 msgid "check livemark.help"
-msgstr ""
+msgstr "Execute to open the site."
 
 msgid "check livemark.description"
-msgstr ""
+msgstr "Checks your livemarks."
 
 
