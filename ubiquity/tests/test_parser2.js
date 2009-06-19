@@ -518,9 +518,6 @@ function testNounsWithDefaults() {
 
 }
 
-// TODO: Failing -- gets weak- medium-strong instead of
-// expected strong - medium - weak.  Also all the arguments are 'dentist'
-// which is very weird.
 function testVariableNounWeights() {
   var weakNoun = {
     suggest: function(text, html, cb, selectionIndices) {
@@ -566,9 +563,9 @@ function testVariableNounWeights() {
 
   var self = this;
   var testFunc = function(completions) {
-    for each ( var comp in completions ) {
+    /*for each ( var comp in completions ) {
       dump("Completion is " + comp.displayTextDebug + "\n");
-    }
+    }*/
 
     self.assert( completions.length == 3, "Should be 3 completions" );
     self.assert( completions[0]._verb.name == "strong verb",
