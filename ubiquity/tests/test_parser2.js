@@ -324,22 +324,27 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
                                        makeTestParser2(),
                                        onCM);
-  // The commented-out stuff can be un-commented once implicit
-  // selection interpolation is hapening: see #732 (and #722)
+  // These tests failing because we're getting back too many suggestions.
+  // Should be filtered down to only the one that matches the selection,
+  // but it's not.
   var self = this;
   function onCM(cmdMan) {
     cmdMan.getSuggestionListNoInput(
       {textSelection:"tree"},
       self.makeCallback(
         function( suggestionList ) {
-          /*self.assert( suggestionList.length == 1,
-                        "Should be only one suggestion." ) */
+          for each ( var comp in suggestionList ) {
+            dump("Completion is " + comp.displayText + "\n");
+          }
+
+          self.assert( suggestionList.length == 1,
+                       "Should be only one suggestion." );
           dump("SuggestionList[0].name is " + suggestionList[0]._verb.name + "\n");
           self.assert( suggestionList[0]._verb.name == "one",
                       "cmd one should be it" );
-          //suggestionList[0].execute();
-          /*self.assert( oneWasCalled == "tree",
-                       "Should have been called with text selection tree.");*/
+          suggestionList[0].execute();
+          self.assert( oneWasCalled == "tree",
+                       "Should have been called with text selection tree.");
         }
       )
     );
@@ -347,13 +352,13 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
       {textSelection:"mud"},
       self.makeCallback(
         function( suggestionList ) {
-          /*self.assert( suggestionList.length == 1,
-                        "Should be only one suggestion." ) */
-          /*self.assert( suggestionList[0].name == "two",
-                      "cmd two should be it" );*/
-          //suggestionList[0].execute();
-          /*self.assert( twoWasCalled == "mud",
-                       "Should have been called with text selection mud.");*/
+          self.assert( suggestionList.length == 1,
+                       "Should be only one suggestion." );
+          self.assert( suggestionList[0].name == "two",
+                      "cmd two should be it" );
+          suggestionList[0].execute();
+          self.assert( twoWasCalled == "mud",
+                       "Should have been called with text selection mud.");
         }
       )
     );
@@ -473,9 +478,9 @@ function testNounsWithDefaults() {
 
   var self = this;
   var testFunc = function(completions) {
-    for each ( var comp in completions ) {
+    /*for each ( var comp in completions ) {
       dump("Completion is " + comp.displayText + "\n");
-    }
+    }*/
 
     self.assert( completions.length == 1, "Should be 1 completion" );
     self.assert( completions[0]._verb.name == "drive", "Should be named drive");
@@ -541,9 +546,9 @@ function testVariableNounWeights() {
 
   var self = this;
   var testFunc = function(completions) {
-    for each ( var comp in completions ) {
+    /*for each ( var comp in completions ) {
       dump("Completion is " + comp.displayText + "\n");
-    }
+    }*/
 
     self.assert( completions.length == 3, "Should be 3 completions" );
     self.assert( completions[0]._verb.name == "strong verb",
@@ -574,17 +579,11 @@ function testSortedBySuggestionMemoryParser2Version() {
   var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
 
   var self = this;
-  
-  var testFunc2 = function(completions) {
-    // This time around, coelecanth should be top hit because
-    // of suggestion memory.  Clock should be #2.
-    self.assert( completions[0].displayText.indexOf("coelecanth") > -1,
-                "0th suggestion should be coelecanth" );
-    self.assert( completions[1].displayText.indexOf("clock") > -1,
-                "1st suggestion should be clock" );
-  };
 
-  var testFunc = function(completions) {
+  getCompletionsAsyncFromParser("c", parser, null,
+                                self.makeCallback(suggMemoryTestFunc1));
+
+  function suggMemoryTestFunc1(completions) {
     self.assert( completions[0].displayText.indexOf("clock") > -1,
                 "0th suggestion should be clock" );
     self.assert( completions[5].displayText.indexOf("coelecanth") > -1,
@@ -594,12 +593,18 @@ function testSortedBySuggestionMemoryParser2Version() {
     parser.strengthenMemory("c", completions[5]);
     // Now try a new completion...
     getCompletionsAsyncFromParser("c", parser, null,
-                                  self.makeCallback(testFunc2));
-  };
+                                  self.makeCallback(suggMemoryTestFunc2));
+  }
 
+  function suggMemoryTestFunc2(completions) {
+    // This time around, coelecanth should be top hit because
+    // of suggestion memory.  Clock should be #2.
+    self.assert( completions[0].displayText.indexOf("coelecanth") > -1,
+                "0th suggestion should be coelecanth" );
+    self.assert( completions[1].displayText.indexOf("clock") > -1,
+                "1st suggestion should be clock" );
+  }
 
-  getCompletionsAsyncFromParser("c", parser, null,
-                                self.makeCallback(testFunc));
 
 
 }
