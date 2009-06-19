@@ -505,11 +505,6 @@ function testNounsWithDefaults() {
 
   var self = this;
   var testFunc = function(completions) {
-    /*dump(completions.length+' completions:\n');
-    for each ( var comp in completions ) {
-      dump("Completion is " + comp.displayTextDebug + "\n");
-    }*/
-
     self.assert( completions.length == 1, "Should be 1 completion" );
     self.assert( completions[0]._verb.name == "drive", "Should be named drive");
     self.assert( completions[0].args["goal"][0].text == "home",
@@ -566,10 +561,6 @@ function testVariableNounWeights() {
 
   var self = this;
   var testFunc = function(completions) {
-    /*for each ( var comp in completions ) {
-      dump("Completion is " + comp.displayTextDebug + "\n");
-    }*/
-
     self.assert( completions.length == 3, "Should be 3 completions" );
     self.assert( completions[0]._verb.name == "strong verb",
                  "Should be named strong verb");
@@ -584,8 +575,7 @@ function testVariableNounWeights() {
 
 }
 
-// Test commented out because SuggestionMemory feature bumped to
-// 0.5.1.
+// Test disabled because SuggestionMemory feature bumped to 0.5.1.
 function DONOTtestSortedBySuggestionMemoryParser2Version() {
   var fakeSource = new BetterFakeCommandSource({
     clock: {names: ["clock"], execute: function(){}},
@@ -627,7 +617,7 @@ function DONOTtestSortedBySuggestionMemoryParser2Version() {
   }
 
 }
-*/
+
 // TODO could also do the above test through command manager and
 // BetterFakeCommandSource, using cmdMan.execute and ensuring that
 // the memory is strengthenend.
