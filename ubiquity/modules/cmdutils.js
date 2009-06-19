@@ -791,8 +791,8 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
      * commands with the same verb.
      * For the time being, attempt both verb-initial and verb-final variants.*/
 
-    let verbInitialParensPattern = /^([^\(\)]+)\s*\((.+)\)$/;
-    let verbFinalParensPattern = /^\((.+)\)\s*([^\(\)]+)$/;
+    let verbInitialParensPattern = /^([^\(\)]+?)\s*\((.+)\)$/;
+    let verbFinalParensPattern = /^\((.+)\)\s*([^\(\)]+?)$/;
     let nameArgs = [];
     for ( let x = 0; x < names.length; x++) {
       let aName = names[x];
