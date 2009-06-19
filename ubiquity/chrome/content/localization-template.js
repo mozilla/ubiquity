@@ -94,7 +94,7 @@ function cmdPropertyLine(cmd,property) {
       value = value.join('|');
     ret += 'msgstr "' + value.replace(/\\/g,'\\\\')
                              .replace(/"/g,'\\"')
-                             .replace(/\n/g,'"\n       "')+'"\n';
+                             .replace(/\n/g,'\\n"\n"')+'"\n';
   } else 
     ret += 'msgstr ""\n';
   return ret;
@@ -116,7 +116,7 @@ function cmdInlineLine(cmd,cmdCode,context) {
     ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n'
          + 'msgid "'+match[2].replace(/\\/g,'\\\\')
                              .replace(/"/g,'\\"')
-                             .replace(/\n/g,'"\n      "')+'"\n'
+                             .replace(/\n/g,'\\n"\n"')+'"\n'
          + 'msgstr ""\n\n';
   }
   return ret;
@@ -126,7 +126,7 @@ function cmdPreviewString(cmd) (
    'msgid "'+cmd.referenceName+'.preview"\n'
  + 'msgstr "'+cmd._previewString.replace(/\\/g,'\\\\')
                                 .replace(/"/g,'\\"')
-                                .replace(/\n/g,'"\n      "')+'"\n\n'
+                                .replace(/\n/g,'\\n"\n"')+'"\n\n'
 )
 
 function setupHelp() {

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-18 20:54+0900\n"
+"POT-Creation-Date: 2009-06-19 11:06+0900\n"
 
 #. add (to calendar) command:
 msgid "add (to calendar).names"
@@ -11,12 +11,12 @@ msgid "add (to calendar).contributors"
 msgstr ""
 
 msgid "add (to calendar).help"
-msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>"
-       ". e.g.:"
-       "<ul>"
-       "  <li>3pm Lunch with Myk and Thunder</li>"
-       "  <li>Jono's Birthday on Friday</li>"
-       "</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
+". e.g.:\n"
+"<ul>\n"
+"  <li>3pm Lunch with Myk and Thunder</li>\n"
+"  <li>Jono's Birthday on Friday</li>\n"
+"</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
 
 msgid "add (to calendar).description"
 msgstr "Adds an event to your calendar."

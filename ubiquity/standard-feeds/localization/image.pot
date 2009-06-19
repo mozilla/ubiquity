@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-18 21:37+0900\n"
+"POT-Creation-Date: 2009-06-19 11:07+0900\n"
 
 #. rotate page command:
 msgid "rotate page.names"

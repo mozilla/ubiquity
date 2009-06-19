@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-18 21:40+0900\n"
+"POT-Creation-Date: 2009-06-19 11:07+0900\n"
 
 #. delete command:
 msgid "delete.names"

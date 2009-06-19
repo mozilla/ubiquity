@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-19 10:57+0900\n"
+"POT-Creation-Date: 2009-06-19 11:06+0900\n"
 
 #. exit firefox command:
 msgid "exit firefox.names"
@@ -269,10 +269,10 @@ msgid "undo closed tabs.contributors"
 msgstr ""
 
 msgid "undo closed tabs.help"
-msgstr "<ul style=\"list-style-image:none\">"
-       "    <li>Use accesskey or click to undo.</li>"
-       "    <li>Type to filter, then execute to undo all.</li>"
-       "    </ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to undo.</li>\n"
+"    <li>Type to filter, then execute to undo all.</li>\n"
+"    </ul>"
 
 msgid "undo closed tabs.description"
 msgstr "Reopens tabs you've closed recently."
