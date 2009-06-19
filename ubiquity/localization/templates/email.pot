@@ -1,0 +1,94 @@
+# email.po
+# 
+# Localizers:
+# LOCALIZER <EMAIL>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+
+#. email command:
+#. use | to separate multiple name values:
+msgctxt "email.names"
+msgid "email|mail|send email|gmail.com"
+msgstr ""
+
+msgctxt "email.help"
+msgid "Currently only works with\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    so you'll need a Gmail account to use it.\n"
+"<br/>\n"
+"Try selecting part of a web page (including links, images, etc)\n"
+"    and then issuing \"email this\".\n"
+"<br/>\n"
+"You can also specify the recipient of the email using the word \"to\"\n"
+"    and the name of someone from your contact list.\n"
+"    For example, try issuing \"email hello to jono\"\n"
+"    (assuming you have a friend named \"jono\")."
+msgstr ""
+
+msgctxt "email.description"
+msgid "Begins composing an email to a person from your contact list."
+msgstr ""
+
+msgctxt "email.preview"
+msgid "Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}."
+msgstr ""
+
+msgctxt "email.execute"
+msgid "A gmonkey exception occurred."
+msgstr ""
+
+
+#. get last email command:
+#. use | to separate multiple name values:
+msgctxt "get last email.names"
+msgid "get last email"
+msgstr ""
+
+msgctxt "get last email.description"
+msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
+msgstr ""
+
+msgctxt "get last email.preview"
+msgid "Displays your most recent incoming email..."
+msgstr ""
+
+msgctxt "get last email.preview"
+msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgstr ""
+
+msgctxt "get last email.preview"
+msgid "<b>You have no new mail!</b>"
+msgstr ""
+
+msgctxt "get last email.preview"
+msgid "You are not logged in!<br />Press enter to log in."
+msgstr ""
+
+msgctxt "get last email.execute"
+msgid "You have new email! ${lastEmail.author} says: ${lastEmail.subject}"
+msgstr ""
+
+msgctxt "get last email.execute"
+msgid "You have no new mail."
+msgstr ""
+
+
+#. get email address command:
+#. use | to separate multiple name values:
+msgctxt "get email address.names"
+msgid "get email address"
+msgstr ""
+
+msgctxt "get email address.help"
+msgid "Execute to copy the address."
+msgstr ""
+
+msgctxt "get email address.description"
+msgid "Looks up the email address of a person from your contacts list given their name. "
+msgstr ""
+
+

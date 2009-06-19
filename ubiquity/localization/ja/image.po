@@ -1,3 +1,8 @@
+# image.po
+# 
+# Localizers:
+# Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
@@ -10,87 +15,64 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. rotate page command:
-msgid "rotate page.names"
+#. use | to separate multiple name values:
+msgctxt "rotate page.names"
+msgid "rotate page"
 msgstr "ページ回転|ページを回転する|ページを回転して|ページを回転しろ"
 
-msgid "rotate page.contributors"
-msgstr "marsf"
-
-msgid "rotate page.help"
-msgstr ""
-
-msgid "rotate page.description"
-msgstr "ページ全体を時計回りに回転します。"
+# msgid "rotate page.description"
+# msgstr "ページ全体を時計回りに回転します。"
 
 msgctxt "rotate page.preview"
 msgid "Rotates entire page ${angle} degrees"
 msgstr "ページ全体を時計回りに ${angle} 度回転します。"
 
 #. rotate image command:
-msgid "rotate image.names"
+#. use | to separate multiple name values:
+msgctxt "rotate image.names"
+msgid "rotate image"
 msgstr "画像回転|イメージ回転|画像を回転する|画像を回転して|画像を回転しろ|イメージを回転する|イメージを回転して|イメージを回転しろ"
 
-msgid "rotate image.contributors"
-msgstr "marsf"
-
-msgid "rotate image.help"
-msgstr ""
-
-msgid "rotate image.description"
-msgstr "選択した画像を回転します。"
+# msgid "rotate image.description"
+# msgstr "選択した画像を回転します。"
 
 #. flip page command:
-msgid "flip page.names"
+#. use | to separate multiple name values:
+msgctxt "flip page.names"
+msgid "flip page"
 msgstr "ページ反転|ページを反転する|ページを反転して|ページを反転しろ"
-
-msgid "flip page.contributors"
-msgstr "marsf"
-
-msgid "flip page.help"
-msgstr ""
 
 msgid "flip page.description"
 msgstr "ページ全体を上下逆さまにします。"
 
-msgid "flip page.preview"
+msgctxt "flip page.preview"
+msgid "Flips the entire page upside down. <span style='-moz-transform:rotate(180deg)'>Useful for bats</span>."
 msgstr "ページ全体を <span style='-moz-transform:rotate(180deg)'>コウモリのように</span> 上下逆さまにします。"
 
 #. desaturate image command:
-msgid "desaturate image.names"
+#. use | to separate multiple name values:
+msgctxt "desaturate image.names"
+msgid "desaturate image"
 msgstr "モノクロ化|モノクロ化する|モノクロ化して|モノクロ化しろ"
 
-msgid "desaturate image.contributors"
-msgstr "marsf"
-
-msgid "desaturate image.help"
-msgstr ""
-
-msgid "desaturate image.description"
-msgstr "選択した画像の彩度を下げてモノクロ化します。"
+# msgid "desaturate image.description"
+# msgstr "選択した画像の彩度を下げてモノクロ化します。"
 
 #. invert image command:
-msgid "invert image.names"
+#. use | to separate multiple name values:
+msgctxt "invert image.names"
+msgid "invert image"
 msgstr "画像反転|イメージ反転|画像を反転する|画像を反転して|画像を反転しろ|イメージを反転する|イメージを反転して|イメージを反転しろ"
 
-msgid "invert image.contributors"
-msgstr "marsf"
-
-msgid "invert image.help"
-msgstr ""
-
-msgid "invert image.description"
-msgstr "選択した画像の色を反転します。"
+# msgid "invert image.description"
+# msgstr "選択した画像の色を反転します。"
 
 #. edge-detect image command:
-msgid "edge-detect image.names"
+#. use | to separate multiple name values:
+msgctxt "edge-detect image.names"
+msgid "edge-detect image|detect edges in image"
 msgstr "輪郭抽出|エッジ抽出|輪郭を抽出する|輪郭を抽出して|輪郭を抽出しろ|エッジを抽出する|エッジを抽出して|エッジを抽出しろ|画像の輪郭抽出|イメージの輪郭抽出"
 
-msgid "edge-detect image.contributors"
-msgstr "marsf"
-
-msgid "edge-detect image.help"
-msgstr ""
-
-msgid "edge-detect image.description"
-msgstr "選択した画像の輪郭を抽出します。"
+# msgid "edge-detect image.description"
+# msgstr "選択した画像の輪郭を抽出します。"
 

@@ -1,0 +1,60 @@
+# image.po
+# 
+# Localizers:
+# LOCALIZER <EMAIL>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+
+#. rotate page command:
+#. use | to separate multiple name values:
+msgctxt "rotate page.names"
+msgid "rotate page"
+msgstr ""
+
+msgctxt "rotate page.preview"
+msgid "Rotates entire page ${angle} degrees"
+msgstr ""
+
+
+#. rotate image command:
+#. use | to separate multiple name values:
+msgctxt "rotate image.names"
+msgid "rotate image"
+msgstr ""
+
+
+#. flip page command:
+#. use | to separate multiple name values:
+msgctxt "flip page.names"
+msgid "flip page"
+msgstr ""
+
+msgctxt "flip page.preview"
+msgid "Flips the entire page upside down. <span style='-moz-transform:rotate(180deg)'>Useful for bats</span>."
+msgstr ""
+
+
+#. desaturate image command:
+#. use | to separate multiple name values:
+msgctxt "desaturate image.names"
+msgid "desaturate image"
+msgstr ""
+
+
+#. invert image command:
+#. use | to separate multiple name values:
+msgctxt "invert image.names"
+msgid "invert image"
+msgstr ""
+
+
+#. edge-detect image command:
+#. use | to separate multiple name values:
+msgctxt "edge-detect image.names"
+msgid "edge-detect image|detect edges in image"
+msgstr ""
+
+

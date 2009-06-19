@@ -1,3 +1,9 @@
+# calendar.po
+# 
+# Localizers:
+# Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+# Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity\n"
@@ -11,16 +17,21 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 
 #. add (to calendar) command:
-msgid "add (to calendar).names"
+msgctxt "add (to calendar).names"
+msgid "add"
 msgstr "追加する|追加して|追加しろ|追加|ついかする|ついかして|ついかしろ|ついか"
 
-msgid "add (to calendar).contributors"
-msgstr "mitcho|marsf"
-
-msgid "add (to calendar).help"
+msgctxt "add (to calendar).help"
+msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
+". e.g.:\n"
+"<ul>\n"
+"  <li>3pm Lunch with Myk and Thunder</li>\n"
+"  <li>Jono's Birthday on Friday</li>\n"
+"</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
 msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">自然な言葉でイベントの詳細を入力してください。</a> 例:<ul>  <li>3pm Lunch with Myk and Thunder</li>  <li>Jono's Birthday on Friday</li></ul><p>現在このコマンドは <a href=\"http://calendar.google.com\">Google カレンダー</a> のみ対応です。</p>"
 
-msgid "add (to calendar).description"
+msgctxt "add (to calendar).description"
+msgid "Adds an event to your calendar."
 msgstr "カレンダーにイベントを追加します。"
 
 msgctxt "add (to calendar).execute"
@@ -32,16 +43,16 @@ msgid "Error creating the event"
 msgstr "エラーのためイベントが追加できませんでした。"
 
 #. check google calendar command:
-msgid "check google calendar.names"
+msgctxt "check google calendar.names"
+msgid "check google calendar|check gcalendar"
 msgstr "カレンダーを確認する|カレンダーを確認して|カレンダーを確認しろ|カレンダーを確認|カレンダーを確認|カレンダー確認しろ|カレンダーをかくにんする|カレンダーをかくにんして|カレンダーをかくにんしろ|カレンダーをかくにん"
 
-msgid "check google calendar.contributors"
-msgstr "mitcho|marsf"
-
-msgid "check google calendar.help"
+msgctxt "check google calendar.help"
+msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
 msgstr "例: \"Thursday のカレンダーを確認\"<p>このコマンドは <a href=\"http://calendar.google.com\">Google カレンダー</a> のアカウントが必要です。</p>"
 
-msgid "check google calendar.description"
+msgctxt "check google calendar.description"
+msgid "Checks what events are on your calendar for a given date."
 msgstr "Google カレンダーで日程を確認します。"
 
 msgctxt "check google calendar.preview"
