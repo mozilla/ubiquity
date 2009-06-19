@@ -41,7 +41,7 @@ var navUrls = [
   {name: "Settings", url: "chrome://ubiquity/content/settings.html"},
   {name: "Your Commands", url: "chrome://ubiquity/content/cmdlist.html"},
   {name: "Get New Commands", url: "https://ubiquity.mozilla.com/herd/"},
-  {name: "Report a Bug", url: "chrome://ubiquity/content/report-bug.html"},
+  {name: "Support", url: "chrome://ubiquity/content/support.html"},
   {name: "Hack Ubiquity", url: "chrome://ubiquity/content/editor.html"}
 ];
 
