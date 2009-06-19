@@ -516,6 +516,48 @@ function testNounsWithDefaults() {
 
 }
 
+function testNounsWithMultipleDefaults() {
+  var nounValues = ["home", "work", "school"];
+  var nounWithMultiDefaults = {
+    suggest: function(text, html, callback, selectionIndices) {
+      return CmdUtils.grepSuggs(text, [CmdUtils.makeSugg(x) for each (x in nounValues)]);
+    },
+    default: function() {
+      return  [CmdUtils.makeSugg(x) for each (x in nounValues)];
+    }
+  };
+  var cmdDrive = makeCommand({
+    names: ["drive"],
+    arguments: [ {role: "goal",
+                  nountype: nounWithMultiDefaults,
+                  label: "location"}],
+    preview: function(pblock, args) {
+    },
+    execute: function(args) {
+    }
+  });
+
+  var self = this;
+  var testFunc = function(completions) {
+    self.assert( completions.length == 3, "Should be 3 completion" );
+    self.assert( completions[0]._verb.name == "drive", "Should be named drive");
+    self.assert( completions[0].args["goal"][0].text == "home",
+                "goal should be home.");
+    self.assert( completions[1]._verb.name == "drive", "Should be named drive");
+    self.assert( completions[1].args["goal"][0].text == "work",
+                "goal should be work.");
+    self.assert( completions[2]._verb.name == "drive", "Should be named drive");
+    self.assert( completions[2].args["goal"][0].text == "school",
+                "goal should be school.");
+  };
+
+  getCompletionsAsync( "drive", [cmdDrive], null,
+                       this.makeCallback(testFunc));
+}
+
+// TODO test where noun returns multiple suggestions with different
+// weights on them; test that suggestions are ranked appropriately.
+
 function testVariableNounWeights() {
   var weakNoun = {
     suggest: function(text, html, cb, selectionIndices) {
