@@ -1,0 +1,94 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: \n"
+"Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
+"Language-Team: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. delete command:
+msgid "delete.names"
+msgstr "削除"
+
+msgid "delete.contributors"
+msgstr "marsf"
+
+msgid "delete.help"
+msgstr "選択した HTML のチャンクをページから削除します。"
+
+msgid "delete.description"
+msgstr "選択した HTML のチャンクをページから削除します。"
+
+
+#. undelete command:
+msgid "undelete.names"
+msgstr "復元"
+
+msgid "undelete.contributors"
+msgstr "marsf"
+
+msgid "undelete.help"
+msgstr "削除コマンドで削除した HTML を元に戻します。"
+
+msgid "undelete.description"
+msgstr "削除コマンドで削除した HTML を元に戻します。"
+
+
+#. edit page command:
+msgid "edit page.names"
+msgstr "ページ編集|編集開始|編集モードオン|編集モード開始"
+
+msgid "edit page.contributors"
+msgstr "marsf"
+
+msgid "edit page.help"
+msgstr "編集モードでは通常のエディタのようにページを編集できます (テキスト選択、削除、追加、コピー、貼り付け)。'太字' や '斜体'、'下線' コマンドは書式を追加します。'ページ保存' コマンドはページを更新するまで変更を維持します。'ページ編集中止' コマンドは通常のページ表示モードに戻ります。"
+
+msgid "edit page.description"
+msgstr "ページの内容を編集できるページ編集モードに移行します。"
+
+
+#. stop editing page command:
+msgid "stop editing page.names"
+msgstr "ページ編集中止|編集中止|編集モードオフ|編集モード終了"
+
+msgid "stop editing page.contributors"
+msgstr "marsf"
+
+msgid "stop editing page.help"
+msgstr ""
+
+msgid "stop editing page.description"
+msgstr "'ページ編集' コマンドで編集モードがオンになっているときに使用します。このコマンドを使用すると、通常のページ表示モードに戻ります。"
+
+
+#. save page edits command:
+msgid "save page edits.names"
+msgstr "ページ保存|編集保存"
+
+msgid "save page edits.contributors"
+msgstr "marsf"
+
+msgid "save page edits.help"
+msgstr ""
+
+msgid "save page edits.description"
+msgstr "このページに追加した注釈を保存します。'注釈削除' コマンドで編集を元に戻せます。"
+
+
+#. undo page edits command:
+msgid "undo page edits.names"
+msgstr "ページ編集を戻す|注釈削除"
+
+msgid "undo page edits.contributors"
+msgstr "marsf"
+
+msgid "undo page edits.help"
+msgstr ""
+
+msgid "undo page edits.description"
+msgstr "このページの変更をリセットします。"
+
+

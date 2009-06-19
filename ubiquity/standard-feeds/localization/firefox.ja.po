@@ -1,146 +1,169 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: \n"
+"Last-Translator: Michael 芳貴 Erlewine <mitcho@mitcho.com>, Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
+"Language-Team: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
 #. exit-firefox command:
-msgid "exit-firefox.names"
-msgstr "Firefoxを終了|終了|しゅうりょう"
+msgid "exit firefox.names"
+msgstr "Firefox を終了|終了|しゅうりょう"
 
-msgid "exit-firefox.contributors"
-msgstr ""
+msgid "exit firefox.contributors"
+msgstr "marsf"
 
-msgid "exit-firefox.help"
-msgstr ""
+msgid "exit firefox.help"
+msgstr "Firefox を終了します。"
 
-msgid "exit-firefox.description"
-msgstr "Firefoxを終了する。"
+msgid "exit firefox.description"
+msgstr "Firefox を終了します。"
 
 
 #. restart-firefox command:
-msgid "restart-firefox.names"
+msgid "restart firefox.names"
 msgstr "Firefoxを再起動|再起動|さいきどう|Firefoxをリスタート|リスタート"
 
-msgid "restart-firefox.contributors"
+msgid "restart firefox.contributors"
+msgstr "marsf"
+
+msgid "restart firefox.help"
 msgstr ""
 
-msgid "restart-firefox.help"
-msgstr ""
-
-msgid "restart-firefox.description"
-msgstr "Firefoxを再起動する。"
+msgid "restart firefox.description"
+msgstr "Firefox を再起動します。"
 
 
 #. close-window command:
-msgid "close-window.names"
-msgstr "ウインドウを閉じる|ウインドウを閉じて|ウインドウを閉じろ"
+msgid "close window.names"
+msgstr "ウィンドウを閉じる|ウインドウを閉じる|ウインドウを閉じて|ウインドウを閉じろ"
 
-msgid "close-window.contributors"
-msgstr ""
+msgid "close window.contributors"
+msgstr "marsf"
 
-msgid "close-window.help"
-msgstr ""
+msgid "close window.help"
+msgstr "現在のウィンドウを閉じます。"
 
-msgid "close-window.description"
-msgstr "ウインドウを閉じる。"
+msgid "close window.description"
+msgstr "現在のウィンドウを閉じます。"
 
 
 #. fullscreen command:
 msgid "fullscreen.names"
-msgstr "fullscreen"
+msgstr "全画面表示|フルスクリーン"
 
 msgid "fullscreen.contributors"
-msgstr ""
+msgstr "marsf"
 
 msgid "fullscreen.help"
-msgstr ""
+msgstr "フルスクリーンモードに切り替えます。"
 
 msgid "fullscreen.description"
-msgstr "Toggles fullscreen mode."
+msgstr "フルスクリーンモードに切り替えます。"
 
 
-#. switch-tab command:
-msgid "switch-tab.names"
-msgstr "switch-tab"
+#. switch-to-tab command:
+msgid "switch to tab.names"
+msgstr "タブ切り替え"
 
-msgid "switch-tab.contributors"
+msgid "switch to tab.contributors"
+msgstr "marsf"
+
+msgid "switch to tab.help"
 msgstr ""
 
-msgid "switch-tab.help"
-msgstr ""
-
-msgid "switch-tab.description"
-msgstr "Switches to the tab that matches the given name."
+msgid "switch to tab.description"
+msgstr "指定したタイトルまたは URL にマッチするタブに切り替えます。"
 
 
 #. close-tab command:
-msgid "close-tab.names"
-msgstr "close-tab"
+msgid "close tab.names"
+msgstr "タブを閉じる"
 
-msgid "close-tab.contributors"
+msgid "close tab.contributors"
+msgstr "marsf"
+
+msgid "close tab.help"
 msgstr ""
 
-msgid "close-tab.help"
+msgid "close tab.description"
+msgstr "指定したタイトルまたは URL にマッチするタブを閉じます。指定が無ければ現在のタブを閉じます。"
+
+
+#. close-all-tabs-with command:
+msgid "close all tabs with.names"
+msgstr "関連タブを閉じる"
+
+msgid "close all tabs with.contributors"
+msgstr "marsf"
+
+msgid "close all tabs with.help"
 msgstr ""
 
-msgid "close-tab.description"
-msgstr "Closes the tab that matches the given name, or the current tab if no name is supplied."
+msgid "close all tabs with.description"
+msgstr "指定した単語を含むタブをすべて閉じます。"
 
-
-#. close-related-tabs command:
-msgid "close-related-tabs.names"
-msgstr "close-related-tabs"
-
-msgid "close-related-tabs.contributors"
-msgstr ""
-
-msgid "close-related-tabs.help"
-msgstr ""
-
-msgid "close-related-tabs.description"
-msgstr "Closes all open tabs that have the given word in common."
+msgctxt "close all tabs with.execute"
+msgid "${num} tabs closed."
+msgstr "${num} のタブを閉じました。"
 
 
 #. count-tabs command:
-msgid "count-tabs.names"
-msgstr "count-tabs"
+msgid "count tabs.names"
+msgstr "タブ数カウント"
 
-msgid "count-tabs.contributors"
+msgid "count tabs.contributors"
+msgstr "marsf"
+
+msgid "count tabs.help"
 msgstr ""
 
-msgid "count-tabs.help"
-msgstr ""
+msgid "count tabs.description"
+msgstr "開いているタブの数を数えます。"
 
-msgid "count-tabs.description"
-msgstr "Counts the number of opened tabs."
+msgctxt "count tabs._count"
+msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgstr "<div class="count-tabs"><b>${count}</b> のタブ{if html}がマッチしました: <b>${html}</b>{else}が開いています。{/if}</b>.</div>"
 
 
 #. refresh command:
 msgid "refresh.names"
-msgstr "refresh|reload"
+msgstr "更新|再読み込み|ページ更新"
 
 msgid "refresh.contributors"
-msgstr ""
+msgstr "marsf"
 
 msgid "refresh.help"
 msgstr ""
 
 msgid "refresh.description"
-msgstr "Refreshes the current page."
+msgstr "現在のページを再度読み込みます。"
 
 
 #. bookmark command:
 msgid "bookmark.names"
-msgstr "bookmark"
+msgstr "ブックマーク|ブックマーク追加"
 
 msgid "bookmark.contributors"
-msgstr ""
+msgstr "marsf"
 
 msgid "bookmark.help"
 msgstr ""
 
 msgid "bookmark.description"
-msgstr "Adds the current page to bookmarks."
+msgstr "現在のページをブックマークに追加します。"
+
+msgctxt "bookmark.execute"
+msgid "Page could not be bookmarked!"
+msgstr "ブックマークに追加できませんでした！"
 
 
 #. print command:
 msgid "print.names"
-msgstr "print"
+msgstr "印刷|プリント"
 
 msgid "print.contributors"
 msgstr ""
@@ -149,125 +172,141 @@ msgid "print.help"
 msgstr ""
 
 msgid "print.description"
-msgstr "Prints the current page."
+msgstr "現在のページを印刷します。"
 
 
 #. go-back command:
-msgid "go-back.names"
-msgstr "go-back"
+msgid "go back.names"
+msgstr "戻る"
 
-msgid "go-back.contributors"
+msgid "go back.contributors"
+msgstr "marsf"
+
+msgid "go back.help"
 msgstr ""
 
-msgid "go-back.help"
-msgstr ""
-
-msgid "go-back.description"
-msgstr "Goes back in history."
+msgid "go back.description"
+msgstr "履歴を前へ戻ります。"
 
 
 #. go-forward command:
-msgid "go-forward.names"
+msgid "go forward.names"
 msgstr "go-forward"
 
-msgid "go-forward.contributors"
+msgid "go forward.contributors"
+msgstr "marsf"
+
+msgid "go forward.help"
 msgstr ""
 
-msgid "go-forward.help"
-msgstr ""
-
-msgid "go-forward.description"
-msgstr "Goes forward in history."
+msgid "go forward.description"
+msgstr "履歴を次へ進みます。"
 
 
 #. go-home command:
-msgid "go-home.names"
-msgstr "go-home"
+msgid "go home.names"
+msgstr "ホームページ|ホームページへ移動"
 
-msgid "go-home.contributors"
+msgid "go home.contributors"
+msgstr "marsf"
+
+msgid "go home.help"
 msgstr ""
 
-msgid "go-home.help"
-msgstr ""
-
-msgid "go-home.description"
-msgstr "Goes to home page."
+msgid "go home.description"
+msgstr "ホームページへ移動します。"
 
 
 #. zoom command:
 msgid "zoom.names"
-msgstr "ズーム|ズームして|ズームする|ズームしろ"
+msgstr "ズーム|ズームして|ズームする|ズームしろ|拡大表示|縮小表示"
 
 msgid "zoom.contributors"
-msgstr ""
+msgstr "marsf"
 
 msgid "zoom.help"
 msgstr ""
 
 msgid "zoom.description"
-msgstr "Firefoxウインドウを拡大／縮小。"
+msgstr "Firefox ウィンドウを拡大表示または縮小表示します。"
 
 msgctxt "zoom.preview"
-msgid "Zooms the Firefox window to ${replacement} of its normal size."
-msgstr "ウインドウを通常の${replacement}のサイズで表示。"
+msgid "Zooms the Firefox window to ${text} of its normal size."
+msgstr "Firefox ウィンドウを通常の${text}のサイズにズームします。"
 
 
 #. tag command:
 msgid "tag.names"
-msgstr "tag"
+msgstr "タグ|タグ追加|タグを追加して|タグを追加しろ"
 
 msgid "tag.contributors"
-msgstr ""
+msgstr "marsf"
 
 msgid "tag.help"
-msgstr ""
+msgstr "複数のタグはカンマで区切ってください。"
 
 msgid "tag.description"
-msgstr "Adds a tag to describe the current page."
+msgstr "現在のページにタグを追加します。"
+
+msgctxt "tag.preview"
+msgid "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
+msgstr "現在のページに{if html}次の{if}タグを追加します{if html}:<p><b>${html}</b></p>{else}。"
 
 
-#. bookmarklet command:
-msgid "bookmarklet.names"
-msgstr "bookmarklet|bml|js"
+#. run-bookmarklet command:
+msgid "run bookmarklet.names"
+msgstr "ブックマークレット実行|bml|js"
 
-msgid "bookmarklet.contributors"
-msgstr ""
+msgid "run bookmarklet.contributors"
+msgstr "marsf"
 
-msgid "bookmarklet.help"
-msgstr "Enter nothing to reload the list."
+msgid "run bookmarklet.help"
+msgstr "リストを更新するには何も入力しないでください。"
 
-msgid "bookmarklet.description"
-msgstr "Runs a bookmarklet from your favorites."
+msgid "run bookmarklet.description"
+msgstr "ブックマークからブックマークレットを実行します。"
+
+msgctxt "run bookmarklet.preview"
+msgid "<pre class=\"bookmarklet\" style=\"white-space:pre-wrap\">\"${data}</pre>"
+msgstr "<pre class=\"bookmarklet\" style=\"white-space:pre-wrap\">${data}</pre>"
 
 
 #. undo-closed-tabs command:
-msgid "undo-closed-tabs.names"
-msgstr "undo-closed-tabs|uct"
+msgid "undo closed tabs.names"
+msgstr "タブ復元|閉じたタブを復元|閉じたタブを開く|uct"
 
-msgid "undo-closed-tabs.contributors"
-msgstr ""
+msgid "undo closed tabs.contributors"
+msgstr "marsf"
 
-msgid "undo-closed-tabs.help"
-msgstr "<ul style="list-style-image:none">
-    <li>Use accesskey or click to undo.</li>
-    <li>Type to filter, then execute to undo all.</li>
+msgid "undo closed tabs.help"
+msgstr "<ul style=\"list-style-image:none\">\n
+    <li>アクセスキーを入力するかクリックしてください。</li>\n
+    <li>フィルタを入力して実行すると、すべてのタブを復元します。</li>\n
     </ul>"
 
-msgid "undo-closed-tabs.description"
-msgstr "Reopens tabs you've closed recently."
+msgid "undo closed tabs.description"
+msgstr "最近閉じたタブを開きます。"
+
+msgctxt "undo closed tabs.preview"
+msgid "No closed tabs."
+msgstr "閉じたタブはありません。"
+
+msgctxt "undo closed tabs.preview"
+msgid "No matched tabs."
+msgstr "マッチするタブはありません。"
 
 
 #. check-livemark command:
-msgid "check-livemark.names"
-msgstr "check-livemark"
+msgid "check livemark.names"
+msgstr "ライブブックマーク|フィード|ライブブックマークを確認|フィードを確認|"
 
-msgid "check-livemark.contributors"
-msgstr ""
+msgid "check livemark.contributors"
+msgstr "marsf"
 
-msgid "check-livemark.help"
-msgstr "Execute to open the site."
+msgid "check livemark.help"
+msgstr "実行するとそのサイトを開きます。"
 
-msgid "check-livemark.description"
-msgstr "Checks your livemarks."
+msgid "check livemark.description"
+msgstr "ライブブックマーク (フィード) の更新を確認します。"
 
 

@@ -2,12 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
 "POT-Creation-Date: \n"
-"Last-Translator: Michael 芳貴 Erlewine <mitcho@mitcho.com>\n"
+"Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
 "Language-Team: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: \n"
+"X-Poedit-Language: Japanese\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
 #. bold command:
 msgid "bold.names"
@@ -45,7 +47,7 @@ msgstr "リッチテキスト編集フィールドではありません。"
 
 #. underline command:
 msgid "underline.names"
-msgstr "下線|アンダーライン|下線をひく|アンダーラインをひく|下線をひいて|アンダーラインをひいて|下線をひけ|アンダーラインをひけ"
+msgstr "下線|アンダーライン|下線を引く|アンダーラインを引く|下線を引いて|アンダーラインを引いて|下線を引け|アンダーラインを引け"
 
 msgid "underline.contributors"
 msgstr "marsf"
@@ -68,10 +70,10 @@ msgid "highlight.contributors"
 msgstr "marsf"
 
 msgid "highlight.help"
-msgstr "現在の選択テキストを<span style="background: yellow; color: black;">このように強調</span>します。"
+msgstr "現在の選択テキストを<span style=\"background: yellow; color: black;\">このように強調</span>します。"
 
 msgid "highlight.description"
-msgstr "現在の選択テキストを<span style="background: yellow; color: black;">このように強調</span>します。"
+msgstr "現在の選択テキストを<span style=\"background: yellow; color: black;\">このように強調</span>します。"
 
 #. undo (text edit) command:
 msgid "undo (text edit).names"
@@ -109,7 +111,7 @@ msgstr "リッチテキスト編集フィールドではありません。"
 
 #. count words command:
 msgid "count words.names"
-msgstr "単語数カウント|数える|数えて|数えろ"
+msgstr "単語数|単語数カウント|数える|数えて|数えろ"
 
 msgid "count words.contributors"
 msgstr "marsf"
@@ -151,7 +153,7 @@ msgstr "選択したフレーズを、マッチする Wikipedia の記事にリ�
 
 #. calculate command:
 msgid "calculate.names"
-msgstr "計算|けいさん|答え|こたえ|計算する|計算して|計算しろ|けいさんする|けいさんして|けいさんしろ"
+msgstr "けいさん|答え|こたえ"
 
 msgid "calculate.contributors"
 msgstr "marsf"
@@ -196,12 +198,12 @@ msgid "gcalculate.description"
 msgstr "Google で計算します。様々な関数や定数、単位、通貨等をサポートしています。"
 
 msgctxt "gcalculate.preview"
-msgid "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(Command List)</a></u>"
-msgstr "例: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(コマンドリスト)</a></u>"
+msgid "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\"http://www.googleguide.com/calculator.html\">(Command List)</a></u>"
+msgstr "例: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\"http://www.googleguide.com/calculator.html\">(コマンドリスト)</a></u>"
 
 #. sparkline command:
 msgid "sparkline.names"
-msgstr "sparkline|グラフ|グラフする|グラフして|グラフしろ|グラフ変換|グラフ変換する|グラフ変換して|グラフ変換しろ|スパークライン|スパークライン表示|スパークラインで表示|スパークラインで表示する|スパークラインで表示して|スパークラインで表示しろ"
+msgstr "sparkline|グラフ化|グラフにする|グラフにして|グラフにしろ|グラフ変換|グラフ変換する|グラフ変換して|グラフ変換しろ|スパークライン|スパークライン表示|スパークラインで表示|スパークラインで表示する|スパークラインで表示して|スパークラインで表示しろ"
 
 msgid "sparkline.contributors"
 msgstr "marsf"
@@ -248,7 +250,7 @@ msgstr "ブックマークレットから新しいコマンドを生成します
 
 #. create search command command:
 msgid "create search command.names"
-msgstr "検索コマンド生成"
+msgstr "検索コマンド生成|検索バーからコマンド生成|検索バーからコマンド生成する|検索バーからコマンド生成して|検索バーからコマンド生成しろ|検索バーからコマンド化|検索バーからコマンド化する|検索バーからコマンド化して|検索バーからコマンド化しろ"
 
 msgid "create search command.contributors"
 msgstr "Abimanyu Raja|satyr|marsf"
@@ -261,7 +263,7 @@ msgstr "フォーカスした検索ボックスから新しい Ubiquity コマ�
 
 msgctxt "create search command.preview"
 msgid "Creates a new search command called <b>${text}</b>"
-msgstr "新しい検索コマンドの <b>" + text + "検索</b> を生成します。"
+msgstr "新しい検索コマンドの <b>${text}</b> を生成します。"
 
 msgctxt "create search command.execute"
 msgid "You need to focus a searchbox before running this command."
