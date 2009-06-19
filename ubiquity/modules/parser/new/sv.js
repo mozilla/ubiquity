@@ -45,7 +45,6 @@ function makeParser() {
     {role: 'source', delimiter: 'från'},
     {role: 'source', delimiter: 'av'},
     
-    {role: 'location', delimiter: 'klockan'},
     {role: 'location', delimiter: 'på'},
     {role: 'location', delimiter: 'den'},
 
