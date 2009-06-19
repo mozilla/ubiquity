@@ -202,37 +202,42 @@ var localizeCommand = function(cmd) {
     cmd.unwatch(key);
   }
 
-  dump('localizing cmd '+cmd.referenceName+' now\n');
-
   let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
   
   if (!LocalizationUtils.loadLocalPo(feedKey))
     return cmd;
 
+  dump('localizing cmd '+cmd.referenceName+' now\n');
+
   var arrayProperties = ['names','contributors'];
   for each (let key in arrayProperties) {
-    // Disable these watches as the introspection messes up 
-    // names in a weird and (as yet) unrecoverable way.
-    //cmdWatch(key);
-    let newval = getLocalizedProperty(feedKey, cmd, key) || null;
-    if (newval && newval.split)
-      newval = newval.split(/\s*\|\s{0,}/);
-    if (newval != cmd[key])
-      cmd[key] = newval;
-    //cmdUnwatch(key);
+    if (cmd[key]) {
+      // Disable these watches as the introspection messes up 
+      // names in a weird and (as yet) unrecoverable way.
+      //cmdWatch(key);
+      let newval = getLocalizedProperty(feedKey, cmd, key) || null;
+      if (newval && newval.split)
+        newval = newval.split(/\s*\|\s{0,}/);
+      if (newval != cmd[key])
+        cmd[key] = newval;
+      //cmdUnwatch(key);
+    }
   }
 
   var stringProperties = ['help', 'description'];
   for each (let key in stringProperties) {
-    //cmdWatch(key);
-    cmd[key] = getLocalizedProperty(feedKey, cmd, key);
-    //cmdUnwatch(key);
+    if (cmd[key]) {
+      //cmdWatch(key);
+      cmd[key] = getLocalizedProperty(feedKey, cmd, key);
+      //cmdUnwatch(key);
+    }
   }
 
   if (cmd._previewString) {
     //cmdWatch('_previewString');
-    let key = cmd.referenceName + '.preview';
-    let rv = LocalizationUtils.getLocalizedString(feedKey, key);
+    let context = cmd.referenceName + '.preview';
+    let key = cmd._previewString;
+    let rv = LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
     if (rv != key)
       cmd._previewString = rv;
     //cmdUnwatch('_previewString');
@@ -242,8 +247,11 @@ var localizeCommand = function(cmd) {
 }
 
 var getLocalizedProperty = function(feedKey, cmd, property) {
-  let key = cmd.referenceName + '.' + property;
-  let rv = LocalizationUtils.getLocalizedString(feedKey, key);
+  let context = cmd.referenceName + '.' + property;
+  let key = cmd[property];
+  if (Utils.isArray(key))
+    key = key.join('|');
+  let rv = LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
   if (rv == key)
     rv = cmd[property];
   return rv;

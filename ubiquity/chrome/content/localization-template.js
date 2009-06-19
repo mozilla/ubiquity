@@ -57,7 +57,11 @@ function displayTemplate(feedUri) {
       foundFeed = true;
       
       // print header metadata
-      $('#template').val('msgid ""\n'
+      $('#template').val('# '+feedUri.replace(/^.*\/(\w+)\.\w+$/g,'$1')+'.po\n'
+                         + '# \n'
+                         + '# Localizers:\n'
+                         + '# LOCALIZER <EMAIL>\n\n'
+                         + 'msgid ""\n'
                          + 'msgstr ""\n'
                          + '"Project-Id-Version: Ubiquity 0.5\\n"\n'
                          + '"POT-Creation-Date: '
@@ -73,31 +77,35 @@ function displayTemplate(feedUri) {
   }
 }
 
-var localizableProperties = ['names','contributors','help','description'];
+var localizableProperties = ['names','help','description'];
 
 function addCmdTemplate(cmd,cmdCode) {
   let template = $('#template');
   let value = template.val();
   value += '#. '+cmd.referenceName+' command:\n';
   for each (let key in localizableProperties)  
-    value += cmdPropertyLine(cmd,key) + '\n';
+    value += cmdPropertyLine(cmd,key);
   value += cmdInlineLine(cmd,cmdCode,'preview');
   value += cmdInlineLine(cmd,cmdCode,'execute');
   template.val(value);
 }
 
 function cmdPropertyLine(cmd,property) {
-  let ret  = 'msgid "'+cmd.referenceName+'.'+property+'"\n';
-  let value = cmd[property];
-  if (value) {
+  if (cmd[property]) {
+    let ret = '';
+    if (property == 'names')
+      ret += '#. use | to separate multiple name values:\n';
+    ret += 'msgctxt "'+cmd.referenceName+'.'+property+'"\n';
+    let value = cmd[property];
     if (value.join != undefined)
       value = value.join('|');
-    ret += 'msgstr "' + value.replace(/\\/g,'\\\\')
+    ret += 'msgid "' + value.replace(/\\/g,'\\\\')
                              .replace(/"/g,'\\"')
                              .replace(/\n/g,'\\n"\n"')+'"\n';
-  } else 
-    ret += 'msgstr ""\n';
-  return ret;
+    ret += 'msgstr ""\n\n';
+    return ret;
+  }
+  return '';
 }
 
 var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
@@ -123,10 +131,11 @@ function cmdInlineLine(cmd,cmdCode,context) {
 }
 
 function cmdPreviewString(cmd) (
-   'msgid "'+cmd.referenceName+'.preview"\n'
- + 'msgstr "'+cmd._previewString.replace(/\\/g,'\\\\')
+   'msgctxt "'+cmd.referenceName+'.preview"\n'
+ + 'msgid "'+cmd._previewString.replace(/\\/g,'\\\\')
                                 .replace(/"/g,'\\"')
-                                .replace(/\n/g,'\\n"\n"')+'"\n\n'
+                                .replace(/\n/g,'\\n"\n"')+'"\n'
+ + 'msgstr ""\n\n'
 )
 
 function setupHelp() {
