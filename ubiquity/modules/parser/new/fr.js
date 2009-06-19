@@ -44,10 +44,20 @@ function makeParser() {
     {role: 'goal', delimiter: 'aux'},
     {role: 'source', delimiter: 'de'},
     {role: 'source', delimiter: 'des'},
-    {role: 'position', delimiter: 'à'},
-    {role: 'position', delimiter: 'a'},
+    {role: 'modifier', delimiter: 'de'},
+    {role: 'modifier', delimiter: 'des'},
+    {role: 'location', delimiter: 'en'},
+    {role: 'location', delimiter: 'sur'},
+    {role: 'location', delimiter: 'à'},
+    {role: 'location', delimiter: 'a'},
+    {role: 'time', delimiter: 'à'},
+    {role: 'time', delimiter: 'a'},
     {role: 'instrument', delimiter: 'avec'},
-    {role: 'instrument', delimiter: 'sur'}
+    {role: 'instrument', delimiter: 'utilisant'},
+    // multiword delimiter: currently unsupported
+    {role: 'instrument', delimiter: 'en utilisant'},
+    {role: 'alias', delimiter: 'comme'},
+    {role: 'format', delimiter: 'en'}
   ];
 
   fr.argumentNormalizer = new RegExp('^(le\\s+|la\\s+|les\\s+|l\')(.+)()$','i');

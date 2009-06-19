@@ -45,7 +45,8 @@ function makeParser() {
     {role: 'source', delimiter: 'de'},
     {role: 'source', delimiter: 'dels'},
     {role: 'alias', delimiter: 'com'},
-    {role: 'position', delimiter: 'a'},
+    {role: 'time', delimiter: 'a'},
+    {role: 'location', delimiter: 'a'},
     {role: 'instrument', delimiter: 'amb'},
     {role: 'instrument', delimiter: 'sobre'}
   ];

@@ -40,8 +40,11 @@ function makeParser() new Parser({
   roles: [{role: r, delimiter: d} for ([r, d] in Iterator({
     goal       : ">",
     source     : "<",
-    position   : "@",
+    location   : "@",
+    time       : "@",
     instrument : "+",
+    alias      : "#",
+    format     : "|",
   }))],
   branching: "right",
   usespaces: true,

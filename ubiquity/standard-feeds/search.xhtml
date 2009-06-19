@@ -825,14 +825,14 @@ CmdUtils.CreateCommand({
   names: ["yelp"],
   arguments: [
     {role: "object", label: "restaurant", nountype: noun_type_async_restaurant},
-    {role: "position", nountype: noun_type_async_address}
+    {role: "location", nountype: noun_type_async_address}
   ],
   icon: "http://www.yelp.com/favicon.ico",
   description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.",
   help: "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;.",
   execute: function( args ) {
     var object = args.object;
-    var position = args.position;
+    var location = args.location;
     var doc = context.focusedWindow.document;
     var focused = context.focusedElement;
 
@@ -864,21 +864,21 @@ CmdUtils.CreateCommand({
     var query = object.text;
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
-    url = url.replace( /{NEAR}/g, position.text);
+    url = url.replace( /{NEAR}/g, location.text);
 
     Utils.openUrlInBrowser( url );
   },
 
   preview: function( pblock, args ) {
-    var {object, position} = args;
+    var {object, location} = args;
     var query = object.text;
     var url = "http://api.yelp.com/business_review_search?";
 
     if (query.length == 0) return;
 
     var near = "";
-    if (position.text) {
-      near = position.text ;
+    if (location.text) {
+      near = location.text ;
     } else {
       var loc = CmdUtils.getGeoLocation();
       if (loc)
@@ -917,21 +917,21 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 
 CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
-  arguments: {position: noun_type_geolocation,
+  arguments: {location: noun_type_geolocation,
               format: noun_type_temperature_units},
   icon: "http://www.wunderground.com/favicon.ico",
   description: "Checks the weather for a given location.",
   help: "Try issuing &quot;weather near chicago&quot;.  It works with zip-codes, too.",
-  execute: function( {position} ) {
-    var location = position.text;
+  execute: function( {location} ) {
+    location = location.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
 
     Utils.openUrlInBrowser( url );
   },
 
-  preview: function(pblock, {position, format}) {
-    var location = position.text;
+  preview: function(pblock, {location, format}) {
+    location = location.text;
     if (location.length < 1) {
       pblock.innerHTML = "Gets the weather for a zip code/city.";
       return;

@@ -878,9 +878,11 @@ NLParser1.PartiallyParsedSentence.prototype = {
 var roleToPrep = {
   source: 'from',
   goal: 'to',
-  position: 'on',
+  location: 'on',
+  time: 'at',
   instrument: 'with',
   alias: 'as',
+  format: 'in'
 };
 
 NLParser1.Verb = function( cmd ) {

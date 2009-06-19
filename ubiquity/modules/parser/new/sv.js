@@ -45,9 +45,13 @@ function makeParser() {
     {role: 'source', delimiter: 'från'},
     {role: 'source', delimiter: 'av'},
     
-    {role: 'position', delimiter: 'klockan'},
-    {role: 'position', delimiter: 'på'},
-    {role: 'position', delimiter: 'den'},
+    {role: 'location', delimiter: 'klockan'},
+    {role: 'location', delimiter: 'på'},
+    {role: 'location', delimiter: 'den'},
+
+    {role: 'time', delimiter: 'klockan'},
+    {role: 'time', delimiter: 'på'},
+    {role: 'time', delimiter: 'den'},
     
     {role: 'instrument', delimiter: 'med'},
     {role: 'instrument', delimiter: 'från'},

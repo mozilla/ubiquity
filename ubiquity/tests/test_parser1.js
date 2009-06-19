@@ -619,13 +619,13 @@ function testPartiallyParsedSentence() {
     names: ["frobnitz"],
     arguments: [{role: "source", nountype: noun_type_foo},
                 {role: "instrument", nountype: noun_type_bar},
-                {role: "position", nountype: noun_type_baz}],
+                {role: "location", nountype: noun_type_baz}],
   });
 
   var argStrings = {
     source: ["nonihilf"],
     instrument: ["rocinante"] };
-  // "position" purposefully left out -- partiallyParsedSentence
+  // "location" purposefully left out -- partiallyParsedSentence
   // must be tolerant of missing args.
 
   var selObj = {
@@ -652,10 +652,10 @@ function testPartiallyParsedSentence() {
 
   // All six should have the default for bazArg since we dind't provide any
   for each (var p in parsed)
-    this.assert( p.getArgText("position") === "super pants", "must use default.");
+    this.assert( p.getArgText("location") === "super pants", "must use default.");
 
   // Now provide an actual argument for baz:
-  partiallyParsed.addArgumentSuggestion("position",
+  partiallyParsed.addArgumentSuggestion("location",
                                         NounUtils.makeSugg("baz_a"));
   parsed  = partiallyParsed.getParsedSentences();
   // Should still have six
@@ -663,7 +663,7 @@ function testPartiallyParsedSentence() {
 
   // All six should have the new value for bazArg.
   for each (var p in parsed)
-    this.assert(p.getArgText("position") === "baz_a", "should be baz_a.");
+    this.assert(p.getArgText("location") === "baz_a", "should be baz_a.");
 
 }
 

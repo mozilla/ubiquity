@@ -41,9 +41,12 @@ function makeParser() {
   da.roles = [
     {role: 'goal', delimiter: 'til'},
     {role: 'source', delimiter: 'fra'},
-    {role: 'position', delimiter: 'klokken'},
-    {role: 'position', delimiter: 'på'},
-    {role: 'position', delimiter: 'den'},
+    {role: 'time', delimiter: 'klokken'},
+    {role: 'time', delimiter: 'på'},
+    {role: 'time', delimiter: 'den'},
+    {role: 'location', delimiter: 'klokken'},
+    {role: 'location', delimiter: 'på'},
+    {role: 'location', delimiter: 'den'},
     {role: 'instrument', delimiter: 'med'},
     {role: 'instrument', delimiter: 'gennem'}
   ];

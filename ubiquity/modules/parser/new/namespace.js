@@ -95,8 +95,11 @@ var NLParser2 = {
           case 'from':
             role = 'source';
           break;
-          case 'at': case 'on': case 'near':
-            role = 'position';
+          case 'at':
+            role = 'time';
+          break;
+          case 'on': case 'near':
+            role = 'location';
           break;
           case 'with': case 'using':
             role = 'instrument';

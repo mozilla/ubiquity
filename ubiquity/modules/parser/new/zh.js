@@ -45,6 +45,7 @@ function makeParser() {
   zhparts = loadLocaleJson("resource://ubiquity/modules/parser/new/zh.json");
   zh.anaphora = ["这个","那个","這個","那個"];
   zh.roles = [
+      {role: 'object', delimiter: '把'},
       {role: 'goal', delimiter: '到'},
       {role: 'goal', delimiter: '成'},
       {role: 'goal', delimiter: '为'},
@@ -53,8 +54,14 @@ function makeParser() {
       {role: 'goal', delimiter: '給'},
       {role: 'source', delimiter: '从'},
       {role: 'source', delimiter: '從'},
-      {role: 'position', delimiter: '在'},
-      {role: 'instrument', delimiter: '用'}
+      {role: 'location', delimiter: '在'},
+      // blank markers are not currently supported
+      // {role: 'time', delimiter: ''},
+      {role: 'instrument', delimiter: '用'},
+      {role: 'alias', delimiter: '用'},
+      {role: 'format', delimiter: '成'},
+      {role: 'format', delimiter: '为'},
+      {role: 'format', delimiter: '為'}
   ];
   
   zh._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
