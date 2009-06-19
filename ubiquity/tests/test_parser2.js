@@ -56,9 +56,11 @@ function getCompletionsAsyncFromParser(input, parser, context, callback) {
   /* The true at the end tells it not to run immediately.  This is
    * important because otherwise it would run before we assigned the
    * callback. */
+  //Utils.log(parser._verbList,parser._nounTypes);
 
   query.onResults = function() {
     if (query.finished) {
+      //Utils.log(parser._nounCache);
       callback(query.suggestionList);
     }
   };
@@ -450,7 +452,7 @@ function testPluginRegistry() {
   var self = this;
   var testFunc = function(completions) {
     for each ( var comp in completions ) {
-      dump("Completion is " + comp.displayText + "\n");
+      dump("Completion is " + comp.displayTextDebug + "\n");
     }
     // What? Getting 10 suggestions here instead of 2.  TODO!
     self.assert( completions.length == 2, "Should be 2 completions" );
@@ -479,7 +481,6 @@ function testPluginRegistry() {
 
 }
 
-// TODO: failing -- see bug 756
 function testNounsWithDefaults() {
   var nounValues = ["home", "work", "school"];
   var nounWithDefaults = {
@@ -503,8 +504,9 @@ function testNounsWithDefaults() {
 
   var self = this;
   var testFunc = function(completions) {
-    /*for each ( var comp in completions ) {
-      dump("Completion is " + comp.displayText + "\n");
+    /*dump(completions.length+' completions:\n');
+    for each ( var comp in completions ) {
+      dump("Completion is " + comp.displayTextDebug + "\n");
     }*/
 
     self.assert( completions.length == 1, "Should be 1 completion" );

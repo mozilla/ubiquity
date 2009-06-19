@@ -1143,7 +1143,7 @@ Parser.prototype = {
     let defaultsCache = {};
 
     for each (let role in unfilledRoles) {
-      let defaultValue;
+      let defaultValues;
       let missingArg;
       for each (let arg in parse._verb.arguments) {
         if (arg.role === role) {
@@ -1151,39 +1151,47 @@ Parser.prototype = {
           break;
         }
       }
+      
       if (missingArg.default) {
-        defaultValue = missingArg.default;
+        defaultValues = Utils.isArray(missingArg.default) ?
+                          missingArg.default : [missingArg.default];
       } else {
         let noun = missingArg.nountype;
-        defaultValue = (noun.default
-                        ? (typeof noun.default === "function"
-                           ? noun.default()
-                           : noun.default)
-                        : {text: "", html: "", data: null, summary: ""});
+        let defaultValue = (noun.default
+                            ? (typeof noun.default === "function"
+                               ? noun.default()
+                               : noun.default)
+                            : {text: "", html: "", data: null, summary: ""});
+        defaultValues = Utils.isArray(defaultValue) ?
+                          defaultValue : [defaultValue];
+        //Utils.log(defaultValues);
       }
 
-      // default-suggested arguments should be ranked lower
-      defaultValue.score = (defaultValue.score || 1) / 2;
-
-      // if a default value was set, let's make sure it has its modifier.
-      if (defaultValue.text) {
-        defaultValue.outerSpace = this.joindelimiter;
-
-        for each (let roleDesc in this.roles) {
-          if (roleDesc.role == role) {
-            defaultValue.modifier = roleDesc.delimiter;
-            if (roleDesc.delimiter == '')
-              defaultValue.innerSpace = '';
-            else
-              defaultValue.innerSpace = this.joindelimiter;
-            break;
+      for each (let defaultValue in defaultValues) {
+        // default-suggested arguments should be ranked lower
+        defaultValue.score = (defaultValue.score || 1) / 2;
+  
+        // if a default value was set, let's make sure it has its modifier.
+        if (defaultValue.text) {
+          //Utils.log('text = '+defaultValue.text);
+          defaultValue.outerSpace = this.joindelimiter;
+  
+          for each (let roleDesc in this.roles) {
+            if (roleDesc.role == role) {
+              //Utils.log('found the right role');
+              defaultValue.modifier = roleDesc.delimiter;
+              //Utils.log('delimiter: '+roleDesc.delimiter);
+              if (roleDesc.delimiter == '')
+                defaultValue.innerSpace = '';
+              else
+                defaultValue.innerSpace = this.joindelimiter;
+              break;
+            }
           }
         }
       }
 
-      defaultsCache[role] = (Utils.isArray(defaultValue)
-                             ? defaultValue
-                             : [defaultValue]);
+      defaultsCache[role] = defaultValues;
     }
 
     for each (let role in unfilledRoles) {
