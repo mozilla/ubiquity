@@ -42,9 +42,9 @@ function makeParser() new Parser({
   roles: [
     {role: "goal", delimiter: "to"},
     {role: "source", delimiter: "from"},
-    {role: "location", delimiter: "at"},
-    {role: "location", delimiter: "on"},
     {role: "location", delimiter: "near"},
+    {role: "location", delimiter: "on"},
+    {role: "location", delimiter: "at"},
     {role: "time", delimiter: "at"},
     {role: "time", delimiter: "on"},
     {role: "instrument", delimiter: "with"},
