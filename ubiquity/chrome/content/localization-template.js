@@ -144,7 +144,7 @@ $(function(){
   if (window.location.hash) {
     feedUri = window.location.hash.slice(1);
     $('.feedKey').html(feedUri.replace(/^.*\/(\w+)\.\w+$/g,'$1'));
-    $('.localization-dir').html(feedUri.replace(/^(.*ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1')+'standard-feeds/localization/');
+    $('.localization-dir').html(feedUri.replace(/^(.*ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1')+'localization/xx/');
     displayTemplate(feedUri);
   } else {
     // no feed was given.

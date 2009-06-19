@@ -69,7 +69,7 @@ var LocalizationUtils = {
   loadLocalPo: function LU_loadLocalPo (feedKey) {
     if (!loadedPo[feedKey]) {
       var data;
-      var url = "resource://ubiquity/standard-feeds/localization/"+feedKey+"."+languageCode+".po";
+      var url = "resource://ubiquity/localization/"+languageCode+"/"+feedKey+".po";
       try {
         
         var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
