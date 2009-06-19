@@ -409,8 +409,9 @@ function testVerbMatcher() {
 }
 
 // TODO: Failing, but I think it's failing for the same reason as
-// testNounsWithDefaults is failing.
-function testPluginRegistry() {
+// testNounsWithDefaults is failing.  Disabled because Plugin
+// feature has been bumped to ubiquity 0.5.1.
+function DONOTtestPluginRegistry() {
   var twitterGotShared = null;
   var diggGotShared = null;
   var deliciousGotShared = null;
@@ -583,8 +584,9 @@ function testVariableNounWeights() {
 
 }
 
-// Work in progress:
-function testSortedBySuggestionMemoryParser2Version() {
+// Test commented out because SuggestionMemory feature bumped to
+// 0.5.1.
+function DONOTtestSortedBySuggestionMemoryParser2Version() {
   var fakeSource = new BetterFakeCommandSource({
     clock: {names: ["clock"], execute: function(){}},
     calendar: {names: ["calendar"], execute: function(){}},
@@ -624,9 +626,8 @@ function testSortedBySuggestionMemoryParser2Version() {
                 "1st suggestion should be clock" );
   }
 
-
-
 }
+*/
 // TODO could also do the above test through command manager and
 // BetterFakeCommandSource, using cmdMan.execute and ensuring that
 // the memory is strengthenend.
@@ -637,7 +638,7 @@ function testSortedBySuggestionMemoryParser2Version() {
  *   -- Coexistence of two verbs with the same name (modulo parens)
  *   -- For internationalization
  *   -- Bring over all the unit tests from parser 1 and modify them to work!
- *   -- For makeSearchCommand (before turning it into plugin)
+ *   -- For makeSearchCommand
  *   -- For async noun suggestion
  *   -- Test that basic nountype from array uses whole array as defaults
  */
