@@ -56,6 +56,7 @@ function getCompletionsAsyncFromParser(input, parser, context, callback) {
   /* The true at the end tells it not to run immediately.  This is
    * important because otherwise it would run before we assigned the
    * callback. */
+
   query.onResults = function() {
     if (query.finished) {
       callback(query.suggestionList);
@@ -77,6 +78,30 @@ function makeCommand(options) {
     fakeGlobal,
     fakeGlobal.commands[0],
     Utils.url("chrome://ubiquity/content/test.html"));
+}
+
+// this takes an array of options (command primitives) and makes them all
+// commands in one simulated namespace... the sharing of that namespace
+// during construction is crucial for properly ID'ing distinct nountypes!
+// (This fixes testVariableNounWeights--see #746.)
+function makeCommands(arrayOfOptions) {
+  // Calls cmdUtils.CreateCommand, but returns the object instead of just
+  // dumping it in a global namespace.
+  var fakeGlobal = {
+    commands: [],
+    feed: {id: "this_is_a_test_case_not_really_a_feed"},
+    Utils: Utils,
+  };
+  var myCmdUtils = ({__proto__: CmdUtils, __globalObject: fakeGlobal});
+  for each (options in arrayOfOptions) {
+    myCmdUtils.CreateCommand(options);
+  }
+  return [ DefaultFeedPlugin.makeCmdForObj(
+                   fakeGlobal,
+                   command,
+                   Utils.url("chrome://ubiquity/content/test.html"))
+           for each (command in fakeGlobal.commands) ];
+
 }
 
 // Actual test cases begin here:
@@ -527,28 +552,23 @@ function testVariableNounWeights() {
     }
   };
 
-  var weakVerb = makeCommand({
-    names: ["weak verb"],
-    arguments: {object: weakNoun},
-    execute: function(args) {}
-  });
-  var mediumVerb = makeCommand({
-    names: ["medium verb"],
-    arguments: {object: mediumNoun},
-    execute: function(args) {}
-  });
-  var strongVerb = makeCommand({
-    names: ["strong verb"],
-    arguments: {object: strongNoun},
-    execute: function(args) {}
-  });
-
+  var verbs = makeCommands([
+    { names: ["weak verb"],
+      arguments: {object: weakNoun},
+      execute: function(args) {} },
+    { names: ["medium verb"],
+      arguments: {object: mediumNoun},
+      execute: function(args) {} },
+    { names: ["strong verb"],
+      arguments: {object: strongNoun},
+      execute: function(args) {} }
+  ]);
 
   var self = this;
   var testFunc = function(completions) {
-    /*for each ( var comp in completions ) {
-      dump("Completion is " + comp.displayText + "\n");
-    }*/
+    for each ( var comp in completions ) {
+      dump("Completion is " + comp.displayTextDebug + "\n");
+    }
 
     self.assert( completions.length == 3, "Should be 3 completions" );
     self.assert( completions[0]._verb.name == "strong verb",
@@ -559,7 +579,7 @@ function testVariableNounWeights() {
                  "Should be named weak verb");
   };
 
-  getCompletionsAsync( "de", [weakVerb, mediumVerb, strongVerb], null,
+  getCompletionsAsync( "de", verbs, null,
                        this.makeCallback(testFunc));
 
 }
