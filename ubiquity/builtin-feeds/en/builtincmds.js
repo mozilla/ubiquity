@@ -120,7 +120,8 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["write ubiquity commands",
-          "edit ubiquity commands"],
+          "edit ubiquity commands",
+          "hack ubiquity"],
   icon: "chrome://ubiquity/skin/icons/plugin_edit.png",
   description: "" + (
     <>Takes you to the Ubiquity <a href={Editor}>command editor</a> page.</>),
