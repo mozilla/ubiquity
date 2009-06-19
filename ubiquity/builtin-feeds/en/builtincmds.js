@@ -49,6 +49,7 @@ const Editor = "chrome://ubiquity/content/editor.html";
 const CmdList = "chrome://ubiquity/content/cmdlist.html";
 const Settings = "chrome://ubiquity/content/settings.html";
 const BugReport = "chrome://ubiquity/content/report-bug.html";
+const Support = "chrome://ubiquity/content/support.html";
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
@@ -79,6 +80,7 @@ CmdUtils.CreateCommand({
                            "command editor",
                            "command list",
                            "settings",
+                           "support",
                            "bug report"],
                 label: "ubiquity settings page" }],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
@@ -108,6 +110,9 @@ CmdUtils.CreateCommand({
         break;
       case "settings":
         targetPage = Settings;
+        break;
+      case "support":
+        targetPage = Support;
         break;
       case "bug report":
         targetPage = BugReport;
@@ -146,6 +151,15 @@ CmdUtils.CreateCommand({
     <>Takes you to the <a href={Settings}>settings</a> page,
       where you can change your skin, key combinations, etc.</>),
   execute: Settings
+});
+
+CmdUtils.CreateCommand({
+  names: ["get support"],
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  description: "" + (
+    <>Takes you to the <a href={Support}>support</a> page,
+    where you can report bugs, get troubleshooting help, etc.</>),
+  execute: Support
 });
 
 CmdUtils.CreateCommand({
