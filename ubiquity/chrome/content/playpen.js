@@ -155,7 +155,7 @@ var demoParserInterface = {
   
             $('<h3>step 11: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             var allScoredParses = this.aggregateScoredParses();
-	    for each (let parse in allScoredParses) {
+	          for each (let parse in allScoredParses) {
               $('#debugScoredParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
             }

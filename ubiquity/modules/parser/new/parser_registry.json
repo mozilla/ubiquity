@@ -2,9 +2,6 @@
 //
 // If your language has code xy, make sure the file xy.js is in
 // ubiquity/modules/parser/new/.
-//
-// This registry is used by both Ubiquity proper and the Parser 2 playpen
-// at chrome://parser-demo/content/index.html
 
 {
   en: "English",
