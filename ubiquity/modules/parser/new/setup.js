@@ -143,19 +143,19 @@ var demoParserInterface = {
               list.appendTo(html);
               html.appendTo($('#nounCache'));
             }*/
-  
-  
+
+	    let suggestionList = this.suggestionList;
             $('<h3>step 9: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
-            for each (let parse in this._suggestedParses) {
+            for each (let parse in suggestionList) {
               $('#suggestedParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
             }
-            $('<p><small>'+this._suggestedParses.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+suggestionList.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
   
   
             $('<h3>step 11: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             var allScoredParses = this.aggregateScoredParses();
-	          for each (let parse in allScoredParses) {
+	    for each (let parse in allScoredParses) {
               $('#debugScoredParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
             }

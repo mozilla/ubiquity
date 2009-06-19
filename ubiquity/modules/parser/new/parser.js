@@ -299,10 +299,10 @@ Parser.prototype = {
     var selObj = ContextUtils.getSelectionObject(context);
     var theNewQuery = new ParseQuery(this,
                                      queryString,
+                                     selObj,
                                      context,
                                      maxSuggestions,
                                      dontRunImmediately);
-    theNewQuery.selObj = selObj;
     return theNewQuery;
   },
 
@@ -852,6 +852,34 @@ Parser.prototype = {
     return word;
   },
 
+  // ** {{{Parser#interpolateSelection()}}} **
+  //
+  // {{{interpolateSelection}}} is taking the selected text and applying it to all
+  // roles of all verbs being considered for the provided parse.
+  interpolateSelection: function(parse, selection) {
+    let returnArr = [];
+    if(!parse._verb || !parse._verb.id)
+      return returnArr;
+    let verbId = parse._verb.id;
+    let roles = this._rolesCache[verbId].slice();
+    //TODO: why don't we have object in the roles cache of our verbs?
+    //There may be some reason for this, which is why I'm going to use this
+    //workaround for now
+    roles.push({role: "object", delimiter: ""});
+
+    for each (let role in roles){
+      let delimiter = role.delimiter;
+      let parseCopy = parse.copy();
+      let objectCopy = {_order: 1,
+			  input: selection,
+                          modifier: delimiter,
+                          innerSpace: this.joindelimiter};
+      parseCopy.setArgumentSuggestion(role.role, objectCopy);
+      returnArr.push(parseCopy);
+    }
+    return returnArr;
+  },
+
   // ** {{{Parser#substituteSelection()}}} **
   //
   // {{{substituteSelection()}}} takes a parse and a selection string. It
@@ -1225,14 +1253,14 @@ Parser.prototype = {
       };
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, asyncRequests) {
+        if (!(x in thisParser._nounCache))
+          thisParser._nounCache[x] = {};
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
 
-          if (!(x in thisParser._nounCache))
-            thisParser._nounCache[x] = {};
           if (!(nountypeId in thisParser._nounCache[x]))
             thisParser._nounCache[x][nountypeId] = [];
-            
+
           thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
@@ -1249,7 +1277,6 @@ Parser.prototype = {
         for (let thisNounTypeId in activeNounTypes) {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
-	          dump("returning: " + activeNounTypes[id].label + "\n");
             suggs = handleSuggs(suggs, id);
             if(asyncRequests[id])
 	            asyncRequests[id] = null;
@@ -1266,11 +1293,8 @@ Parser.prototype = {
             handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
       
-          if(activeNounTypes[id].asyncRequest){
-	          dump("asyncRequest: " + activeNounTypes[id].asyncRequest + "\n");
+          if(activeNounTypes[id].asyncRequest)
             asyncRequests[id] = activeNounTypes[id].asyncRequest;
-	          dump("sending: " + activeNounTypes[id].label + "\n");
-	        }
         }
         myCallback(returnArray, asyncRequests);
       },0);
@@ -1295,15 +1319,15 @@ Parser.prototype = {
 // The {{{Parser#newQuery()}}} method is used to initiate
 // a query instead of calling {{{new ParseQuery()}}} directly.
 //
-var ParseQuery = function(parser, queryString, context, maxSuggestions,
-                        dontRunImmediately) {
+  var ParseQuery = function(parser, queryString, selObj, context,
+                            maxSuggestions, dontRunImmediately) {
   this._date = new Date();
   this._idTime = this._date.getTime();
   this.parser = parser;
   this.input = queryString;
   this.context = context;
   this.maxSuggestions = maxSuggestions;
-  this.selObj = { text: '', html: '' };
+  this.selObj = selObj;
 
   //_oustandingRequests are open async calls that have not yet returned
   this._outstandingRequests = [];
@@ -1335,7 +1359,6 @@ var ParseQuery = function(parser, queryString, context, maxSuggestions,
   this._verbArgPairs = [];
   this._possibleParses = [];
   this._verbedParses = [];
-  this._suggestedParses = [];
   this._topScores = [];
 
   // ** {{{ParseQuery#_scoredParses}}} **
@@ -1347,7 +1370,7 @@ var ParseQuery = function(parser, queryString, context, maxSuggestions,
   this._scoredParses = {};
 
 
-  this.dump("Making a new parser2 query: " + queryString);
+  this.dump("Making a new parser2 query: " + this.input);
 
   if (!dontRunImmediately)
     this.run();
@@ -1445,7 +1468,7 @@ ParseQuery.prototype = {
     yield true;
     this._next();
 
-    // STEP 4: group into arguments
+    // STEP 4: group into arguments and apply selection interpolation
     for each (var pair in this._verbArgPairs) {
       let argParses = this.parser.argFinder(pair.argString,
                                             pair._verb,
@@ -1453,17 +1476,26 @@ ParseQuery.prototype = {
       this._possibleParses = this._possibleParses.concat(argParses);
       yield true;
     }
+    //if we have a selection, apply the selection interpolation
+    if(this.selObj.text && this.selObj.text.length) {
+      let selection = this.selObj.text;
+      for each (let parse in this._possibleParses) {
+        let newParses = this.parser.interpolateSelection(parse, selection);
+	if (newParses.length)
+          this._possibleParses = this._possibleParses.concat(newParses);
+        yield true;
+      }
+    }
     this._next();
 
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
-    if (this.selObj.text || this.selObj.html) {
-      let selection = this.selObj.html;
+    if (this.selObj.text && this.selObj.text.length) {
+      let selection = this.selObj.text;
       for each (let parse in this._possibleParses) {
         // if there is a selection and if we find some anaphora in the entire
         // input...
-        if (selection.length &&
-            this.parser._patternCache.anaphora.test(this._input)) {
+        if (this.parser._patternCache.anaphora.test(this._input)) {
           let newParses = this.parser.substituteSelection(parse, selection);
           if (newParses.length)
             this._possibleParses = this._possibleParses.concat(newParses);
@@ -1534,9 +1566,8 @@ ParseQuery.prototype = {
       if(!thisQuery._scoredParses[argText])
 	thisQuery._scoredParses[argText] = [];
 
-      for each (let newParse in suggestions){
+      for each (let newParse in suggestions)
         thisQuery.addScoredParseIfGoodEnough(argText, newParse);
-      }
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
@@ -1544,7 +1575,6 @@ ParseQuery.prototype = {
 
     function tryToCompleteParses(argText, asyncRequests) {
       thisQuery.dump('finished detecting nountypes for ' + argText);
-      dump("number of async reqs: " + asyncRequests.length + "\n");
       thisQuery._outstandingRequests = asyncRequests;
 
       if (thisQuery.finished) {
@@ -1616,7 +1646,7 @@ ParseQuery.prototype = {
     let allScoredParses = [];
     for each (let parses in this._scoredParses)
       allScoredParses = allScoredParses.concat(parses);
-    return allScoredParses;
+    return allScoredParses.slice();
   },
   // ** {{{ParseQuery#hasResults}}} (read-only) **
   //
@@ -1628,7 +1658,6 @@ ParseQuery.prototype = {
   // A getter for the suggestion list.
   get suggestionList() {
     return (this.aggregateScoredParses()
-            .slice()
             .sort(byScoreDescending)
             .slice(0, this.maxSuggestions));
   },
@@ -1727,7 +1756,7 @@ ParseQuery.prototype = {
   // a new parse to the scored parses object. See ParseQuery#addIfGoodEnough()
   // for the logic behind the optimization strategy.
   addScoredParseIfGoodEnough: function(argText, newParse) {
-    var allScoredParses = this.aggregateScoredParses().slice();
+    var allScoredParses = this.aggregateScoredParses();
     var parsesToAddTo = this._scoredParses[argText];
 
     if (allScoredParses.indexOf(newParse) != -1)
@@ -1928,7 +1957,6 @@ Parse.prototype = {
     if (typeof this._verb.preview === "function")
       this._verb.preview(context, previewBlock, this.firstArgs);
     else {
-      dump(this._verb.names[0] + " didn't have a preview!");
       // Command exists, but has no preview; provide a default one.
       var template = "";
       if (this._verb.description)
@@ -1941,7 +1969,7 @@ Parse.prototype = {
       previewBlock.innerHTML = template;
     }
   },
-
+  
   // **{{{Parse#previewDelay}}} (read-only)**
   //
   // Return the verb's {{{previewDelay}}} value.
@@ -2059,6 +2087,7 @@ Parse.prototype = {
   // ** {{{Parse#unfilledRoles}}} **
   //
   // Gets a list of roles which the parse's verb accepts but
+  // have not been filled yet
   get unfilledRoles()(this._verb.id
                       ? [verbArg.role
                          for each (verbArg in this._verb.arguments)
