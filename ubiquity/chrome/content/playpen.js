@@ -76,9 +76,9 @@ var demoParserInterface = {
             break;
   
           case 2:
-            $('<h3>step 2: pick possible verbs</h3><ul id="verbArgPairs"></ul>').appendTo($('#parseinfo'));
-            for each (pair in this._verbArgPairs) {
-              $('<li>V: <code title="'+(pair._verb.id || 'null')+'">'+(pair._verb.text || '<i>null</i>')+'</code>, argString: <code>'+pair.argString+'</code></li>').appendTo($('#verbArgPairs'));
+            $('<h3>step 2: pick possible verbs</h3><ul id="preParses"></ul>').appendTo($('#parseinfo'));
+            for each (preParse in this._preParses) {
+              $('<li>V: <code title="'+(preParse._verb.id || 'null')+'">'+(preParse._verb.text || '<i>null</i>')+'</code>, argString: <code>'+preParse.argString+'</code></li>').appendTo($('#preParses'));
             }
             break;
         

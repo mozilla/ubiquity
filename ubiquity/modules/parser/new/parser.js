@@ -297,6 +297,8 @@ Parser.prototype = {
   newQuery: function(queryString, context, maxSuggestions,
                      dontRunImmediately) {
     var selObj = ContextUtils.getSelectionObject(context);
+    if(!selObj.text)
+      selObj.text = "";
     var theNewQuery = new ParseQuery(this,
                                      queryString,
                                      selObj,
@@ -320,10 +322,12 @@ Parser.prototype = {
 
   // ** {{{Parser#verbFinder()}}} **
   //
-  // Takes an input string and returns an array of pairs of verbs and
-  // argument strings, in the form of {{{{_verb:..., argString:...}}}}.
+  // Takes an input string and a selection and returns an array of objects in
+  // the form of {{{{_verb:..., argString:..., sel:....}}}}.
+  // sel is a string of the text that is currently selected on the page.
+  // If no text is selected, sel is an empty string.
   // It will return at least one possible pair, the trivial pair, which is
-  // {{{{_verb: null, argString: input}}}}.
+  // {{{{_verb: null, argString: input, sel: selection}}}}.
   //
   // The verb in {{{_verb}}} is actually a copy of the verb object with
   // some useful parse-specific additions:
@@ -332,7 +336,7 @@ Parser.prototype = {
   // * {{{_verb._order}}} is a reference to where in the input string the verb
   //   was found: 0 if it was sentence-initial, -1 if sentence-final
   // {{{argString}}} is a string with the rest of the input.
-  verbFinder: function(input) {
+  verbFinder: function(input, selection) {
     // initialize the returnArray with the trivial pair.
     var returnArray = [{
       _verb: {
@@ -342,6 +346,7 @@ Parser.prototype = {
         input: null,
       },
       argString: Utils.trim(input),
+      sel: selection
     }];
 
     // The match will only give us the prefix that it matched. For example,
@@ -375,6 +380,7 @@ Parser.prototype = {
               __proto__: verb,
             },
             argString: argString,
+            sel: selection
           });
           break;
         }
@@ -473,11 +479,13 @@ Parser.prototype = {
 
   // ** {{{Parser#argFinder()}}} **
   //
-  // {{{argFinder()}}} takes an {{{argString}}} and a verb object (ie. each
-  // pair of outputs from {{{verbFinder()}}} and attempts to find all of the
-  // delimiters in the {{{argString}}} and then find different parse
-  // combinations of arguments in different roles. It returns an array of
-  // {{{Parse}}} objects with its arguments and verb set.
+  // {{{argFinder()}}} takes a {{{{_verb:..., argString:..., sel:....}}}}
+  // object (ie. each object of outputs from {{{verbFinder()}}}
+  // and attempts to find all of the delimiters in the {{{argString}}}
+  // and then find different parse combinations of arguments
+  // in different roles. It also interpolates the selection in sel into
+  // all possible roles for each parse being constructed. It returns an
+  // array of {{{Parse}}} objects with its arguments and verb set.
   //
   // If the {{{verb}}} argument is set, it will only look for delimiters which
   // are appropriate for the given verb (using {{{_patternCache.delimiters}}}),
@@ -1364,7 +1372,7 @@ Parser.prototype = {
   // Internal variables
   // These are filled in one by one as we go along.
   this._input = '';
-  this._verbArgPairs = [];
+  this._preParses = [];
   this._possibleParses = [];
   this._verbedParses = [];
   this._topScores = [];
@@ -1467,7 +1475,7 @@ ParseQuery.prototype = {
   _yieldingParse: function() {
 
     // STEP 2: pick possible verbs
-    this._verbArgPairs = this.parser.verbFinder(this._input);
+    this._preParses = this.parser.verbFinder(this._input, this.selObj.text);
     yield true;
     this._next();
 
@@ -1477,9 +1485,9 @@ ParseQuery.prototype = {
     this._next();
 
     // STEP 4: group into arguments and apply selection interpolation
-    for each (var pair in this._verbArgPairs) {
-      let argParses = this.parser.argFinder(pair.argString,
-                                            pair._verb,
+    for each (var preParse in this._preParses) {
+      let argParses = this.parser.argFinder(preParse.argString,
+                                            preParse._verb,
                                             this.input);
       this._possibleParses = this._possibleParses.concat(argParses);
       yield true;
