@@ -872,23 +872,25 @@ Parser.prototype = {
   // roles of all verbs being considered for the provided parse.
   interpolateSelection: function(parse, selection) {
     let returnArr = [];
-    if(!parse._verb || !parse._verb.id)
+    if(!parse._verb || !parse._verb.arguments)
       return returnArr;
-    let verbId = parse._verb.id;
-    let roles = this._rolesCache[verbId].slice();
-    //TODO: why don't we have object in the roles cache of our verbs?
-    //There may be some reason for this, which is why I'm going to use this
-    //workaround for now
-    roles.push({role: "object", delimiter: ""});
 
-    for each (let role in roles){
-      let delimiter = role.delimiter;
+    let args = parse._verb.arguments;
+    for each (let arg in args){
+      let role = arg.role;
+      let delimiter = "";
+      for each (let storedRole in this.roles){
+        if(storedRole.role == role){
+          delimiter = storedRole.delimiter;
+          break;
+        }
+      }
       let parseCopy = parse.copy();
       let objectCopy = {_order: 1,
 			  input: selection,
                           modifier: delimiter,
                           innerSpace: this.joindelimiter};
-      parseCopy.setArgumentSuggestion(role.role, objectCopy);
+      parseCopy.setArgumentSuggestion(role, objectCopy);
       returnArr.push(parseCopy);
     }
     return returnArr;
