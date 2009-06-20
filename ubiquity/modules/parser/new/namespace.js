@@ -47,14 +47,22 @@ var NLParser2 = {
   // Namespace object
   parserFactories: {},
   makeParserForLanguage: function(languageCode, verbList,
-                                  ContextUtils, suggestionMemory) {
+                                  ContextUtils, SuggestionMemory) {
     if ( ! NLParser2.parserFactories[languageCode] ) {
       throw "No parser is defined for " + languageCode;
     } else {
       let parser = NLParser2.parserFactories[languageCode]();
-      // todo set contextutils, and suggestionmemory on the
-      // new parser object.
       parser.setCommandList(verbList);
+      /* If ContextUtils and/or SuggestionMemory were provided, they are
+       * stub objects for testing purposes.  Set them on the new parser
+       * object; it will use them instead of the real modules.
+       * Normally I would do this in the constructor, but because we use
+       * parserFactories[]() it's easier to do it here:
+       */
+      if (ContextUtils)
+        parser._contextUtils = ContextUtils;
+      if (SuggestionMemory)
+        parser._suggestionMemory = SuggestionMemory;
 
       return parser;
     }
@@ -126,8 +134,8 @@ for (let code in parserRegistry) {
   req.open('GET', "resource://ubiquity/modules/parser/new/"+code+".js", false);
   req.overrideMimeType("text/plain; charset=utf-8");
   req.send(null);
-  
+
   eval(req.responseText);
-  
+
   NLParser2.parserFactories[code] = makeParser;
 }

@@ -45,6 +45,7 @@ const Cu = Components.utils;
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
+Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 // = Ubiquity Parser: The Next Generation =
@@ -73,6 +74,11 @@ function Parser(props) {
     for (var key in props) this[key] = props[key];
 }
 Parser.prototype = {
+  // References to contextUtils and suggestionMemory modules; these
+  // can be replaced with stub modules (see makeParserForLanguage in
+  // namespace.js.)
+  _contextUtils: ContextUtils,
+  _suggestionMemory: SuggestionMemory,
   // ** {{{Parser#lang}}} **
   lang: "",
 
@@ -238,7 +244,7 @@ Parser.prototype = {
       if (otherRolesHash[role] == null)
         delete(otherRolesHash[role]);
     }
-    
+
     this._otherRolesCache = otherRolesHash;
 
     // creates a regex that matches any delimiter of given roles
@@ -296,7 +302,7 @@ Parser.prototype = {
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
   newQuery: function(queryString, context, maxSuggestions,
                      dontRunImmediately) {
-    var selObj = ContextUtils.getSelectionObject(context);
+    var selObj = this._contextUtils.getSelectionObject(context);
     if(!selObj.text)
       selObj.text = "";
     var theNewQuery = new ParseQuery(this,
@@ -369,8 +375,8 @@ Parser.prototype = {
               text: name,
               _order: order,
               input: verbPiece,
-              // the sqrt makes it so the score reflects the fact that 
-              // initial letters in the verb prefix are more informative, 
+              // the sqrt makes it so the score reflects the fact that
+              // initial letters in the verb prefix are more informative,
               // and that later letters add less to the overall confidence
               // of the verb match. The 0.3 flooring was added so that these
               // verb prefix matches, even if they're only one or two
@@ -1012,7 +1018,7 @@ Parser.prototype = {
     }
 
     for each (parse in returnArr) {
-      if (!parse.args.object.length || 
+      if (!parse.args.object.length ||
            (parse.args.object.length === 1
             && parse.args.object[0] == undefined) )
         delete(parse.args.object);
@@ -1115,7 +1121,7 @@ Parser.prototype = {
 
             let nountypeId = verbArg.nountype.id;
             if (nountypeId in this._nounCache[argText]) {
-              
+
               for each (let suggestion in this._nounCache[argText][nountypeId]) {
                 for each (let parse in returnArr) {
                   let parseCopy = parse.copy();
@@ -1128,9 +1134,9 @@ Parser.prototype = {
               }
 
               returnArr = newreturn;
-              thisVerbTakesThisRole = true;              
+              thisVerbTakesThisRole = true;
             }
-            
+
           }
 
           // If thisVerbTakesThisRole, it means that we've already found the
@@ -1159,7 +1165,7 @@ Parser.prototype = {
           break;
         }
       }
-      
+
       if (missingArg.default) {
         defaultValues = Utils.isArray(missingArg.default) ?
                           missingArg.default : [missingArg.default];
@@ -1178,12 +1184,12 @@ Parser.prototype = {
       for each (let defaultValue in defaultValues) {
         // default-suggested arguments should be ranked lower
         defaultValue.score = (defaultValue.score || 1) / 2;
-  
+
         // if a default value was set, let's make sure it has its modifier.
         if (defaultValue.text) {
           //Utils.log('text = '+defaultValue.text);
           defaultValue.outerSpace = this.joindelimiter;
-  
+
           for each (let roleDesc in this.roles) {
             if (roleDesc.role == role) {
               //Utils.log('found the right role');
@@ -1245,7 +1251,7 @@ Parser.prototype = {
       if (typeof callback == 'function')
         callback(x, []);
     } else {
-      
+
       var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
         if (!suggs && !suggs.length)
           return [];
@@ -1287,9 +1293,9 @@ Parser.prototype = {
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
         var asyncRequests = {};
-      
+
         dump("detecting: " + x + "\n");
-				    
+
         for (let thisNounTypeId in activeNounTypes) {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
@@ -1308,7 +1314,7 @@ Parser.prototype = {
             returnArray,
             handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
-      
+
           if(activeNounTypes[id].asyncRequest)
             asyncRequests[id] = activeNounTypes[id].asyncRequest;
         }
@@ -1534,7 +1540,7 @@ ParseQuery.prototype = {
     // STEP 7: for arg-first parses, attempt to apply objects to other roles
     // For parses which don't have a set verb, attempt to apply any args
     // with role "object" to other roles. This is so that parses like
-    // "calendar" => "add to calendar" (role: goal) or "google" => 
+    // "calendar" => "add to calendar" (role: goal) or "google" =>
     // "search with google" (role: instrument). This adds new usability to
     // overlord verbs by being able to just enter the provider name.
     for each (let parse in this._possibleParses) {
@@ -1572,7 +1578,7 @@ ParseQuery.prototype = {
         //dump("parse completed\n");
         thisParse.complete = true;
       }
-      
+
       // go through all the arguments in thisParse and suggest args
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
@@ -1780,7 +1786,7 @@ ParseQuery.prototype = {
 
     if (allScoredParses.indexOf(newParse) != -1)
       dump("already contains this one!\n");
-    
+
     var maxIndex = this.maxSuggestions - 1;
 
     if (!allScoredParses[maxIndex]){
@@ -1798,7 +1804,7 @@ ParseQuery.prototype = {
     allScoredParses.push(newParse);
     allScoredParses.sort(byScoreDescending);
     parsesToAddTo.push(newParse);
-    
+
     var newBar = allScoredParses[maxIndex].score;
     if (newBar > theBar) {
       // sort by descending maxScore order
@@ -1988,7 +1994,7 @@ Parse.prototype = {
       previewBlock.innerHTML = template;
     }
   },
-  
+
   // **{{{Parse#previewDelay}}} (read-only)**
   //
   // Return the verb's {{{previewDelay}}} value.
@@ -2049,7 +2055,7 @@ Parse.prototype = {
 
         if (!(argText in this._parser._nounCache))
           return false;
-	
+
 	for (let nounTypeId in activeNounTypes){
 	  if(!(nounTypeId in this._parser._nounCache[argText]))
             return false;
