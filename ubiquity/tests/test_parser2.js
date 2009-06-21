@@ -42,16 +42,17 @@ BetterFakeCommandSource.prototype = {
 };
 
 function debugCompletions(completions) {
+  dump('There are '+completions.length+' completions.\n');
   for each ( var comp in completions ) {
     dump("Completion is " + comp.displayTextDebug + "\n");
   }
 }
 
 // Infrastructure for asynchronous tests:
-function getCompletionsAsync( input, verbs, context, callback) {
+function getCompletionsAsync( input, verbs, context, callback, lang) {
   if (!context)
     context = { textSelection: "", htmlSelection: "" };
-  var parser = makeTestParser2(LANG, verbs );
+  var parser = makeTestParser2(lang || LANG, verbs );
   getCompletionsAsyncFromParser(input, parser, context, callback);
 }
 
@@ -195,6 +196,44 @@ function testParserTwoDirectOnly() {
                        self.makeCallback(testFunc) );
 }
 
+function testParserTwoBasicJaParse() {
+  // 
+  var ateHorse = null;
+  var ateHorseWith = null;
+  // ラーメン, ごはん, 馬刺
+  var food = new NounUtils.NounType( "food", ["ラーメン","ごはん","馬刺"]);
+  var tool = new NounUtils.NounType( "eating utensil",
+                                           ["手", "はし", "フォーク",
+                                            "スプーン", "スポーク"]);
+
+  var cmd_eat = {
+    execute: function(context, args) {
+      ateFood = args.object.text;
+      ateFoodWith = args.instrument.text;
+    },
+    names: ["食べる"],
+    arguments: [
+      {role: "object", nountype: food},
+      {role: "instrument", nountype: tool}
+    ]
+  };
+
+  var inputWords = "馬刺をはしで食べる";
+
+  var self = this;
+  var testFunc = function(completions) {
+    debugCompletions(completions);
+    // 馬刺 を はし で 食べる
+    self.assert( completions.length == 1, "Should be 1 completion" );
+    completions[0].execute();
+    self.assert( ateFood == "馬刺");
+    self.assert( ateFoodWith == "はし");
+  };
+
+  getCompletionsAsync( inputWords, [cmd_eat], null,
+                       self.makeCallback(testFunc), 'ja' );
+
+}
 
 function testParserTwoParseWithModifier() {
   // wash dog with sponge
