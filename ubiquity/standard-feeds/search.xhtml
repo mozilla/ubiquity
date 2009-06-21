@@ -558,14 +558,72 @@ CmdUtils.CreateCommand({
       previewBlock.innerHTML = this.description + this.help;
       return;
     }
+    const AWS_ENDPOINT = "ecs.amazonaws.com";
+    const AWS_REQUESTURI = "/onca/xml";
+    // This key is linked to Blair McBride's AWS account - and only free services are enabled.
+    // Please don't re-use it or abuse it. Instead, get your own AWS key - its free.
+    const AWS_KEY = "08WX39XKK81ZEWHZ52R2";
+    const AWS_SECRET = "w0WOQNS+GZcJWjrAmlK885tFi6rcrr9WOgeu6eK3";
+    function generateTimestamp() {
+      // must be in the following format (Z meaning UTC): 2009-01-01T12:00:00Z
+      function zeroPad(aNum, aSize) {
+        var size = aSize || 2;
+        var str = aNum + "";
+        while (str.length < size)
+          str = "0" + str;
+        return str;
+      }
+      var now = new Date();
+      var timestamp = "";
+      timestamp += now.getUTCFullYear();
+      timestamp += "-";
+      timestamp += zeroPad(now.getUTCMonth() + 1);
+      timestamp += "-";
+      timestamp += zeroPad(now.getUTCDate());
+      timestamp += "T";
+      timestamp += zeroPad(now.getUTCHours());
+      timestamp += ":";
+      timestamp += zeroPad(now.getUTCMinutes());
+      timestamp += ":";
+      timestamp += zeroPad(now.getUTCSeconds());
+      timestamp += "Z";
+      return timestamp;
+    }
+    function doEscape(aString) {
+      var charMap = {
+        "!": "%21",
+        "*": "%2A",
+        "'": "%27",
+        "(": "%28",
+        ")": "%29"
+      };
+      var result = encodeURIComponent(aString);
+      for (let c in charMap)
+        result = result.replace(c, charMap[c]);
+      return result;
+    }
+    function signRequest(aParams) {
+      var params = {};
+      for (let key in aParams)
+        params[key] = aParams[key];
+      params.Timestamp = generateTimestamp();
+      params.AWSAccessKeyId = AWS_KEY;
+      var paramArray = [];
+      for (let key in params)
+        paramArray.push(doEscape(key) + "=" + doEscape(params[key]));
+      paramArray.sort();
+      var paramString = paramArray.join("&");
+      var sigBaseString = "GET\n" + AWS_ENDPOINT + "\n" + AWS_REQUESTURI + "\n" + paramString;
+      var signature = Utils.signHMAC("SHA256", AWS_SECRET, sigBaseString);
+      return "http://" + AWS_ENDPOINT + AWS_REQUESTURI + "?" + paramString + "&Signature=" + doEscape(signature);
+    }
+    
     var me = this;
     previewBlock.innerHTML =
       "Searching " + AmazLink + " for items matching <b>" + summary + "</b>.";
     CmdUtils.previewAjax(previewBlock, {
-      url: "http://ecs.amazonaws.com/onca/xml",
-      data: {
+      url: signRequest({
         Service: "AWSECommerceService",
-        AWSAccessKeyId: "08WX39XKK81ZEWHZ52R2",
         Version: "2008-08-19",
         Operation: "ItemSearch",
         Condition: "All",
@@ -573,7 +631,7 @@ CmdUtils.CreateCommand({
         ResponseGroup: "ItemAttributes,Images",
         SearchIndex: searchIndex,
         Keywords: text,
-      },
+      }),
       dataType: "xml",
       error: function(xhr, info) {
         previewBlock.innerHTML = (
