@@ -566,6 +566,35 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   return hashString;
 };
 
+// ** {{{ Utils.signHMAC() }}} **
+//
+// Computes and returns a cryptographicly signed hash for a string given an
+// algorithm. It is derived from a given key.
+//
+// {{{algo}}} is a string corresponding to a valid hash algorithm.  It
+// can be any one of {{{MD2}}}, {{{MD5}}}, {{{SHA1}}}, {{{SHA256}}},
+// {{{SHA384}}}, or {{{SHA512}}}.
+//
+// {{{key}}} is a key (string) to use to sign
+//
+// {{{str}}} is the string to be hashed.
+Utils.signHMAC = function signHMAC(algo, key, str) {
+  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                    .createInstance(Ci.nsIScriptableUnicodeConverter);
+  converter.charset = "UTF-8";
+  var data = converter.convertToByteArray(str, {});
+  var crypto = Cc["@mozilla.org/security/hmac;1"]
+                 .createInstance(Ci.nsICryptoHMAC);
+  var keyObject = Cc["@mozilla.org/security/keyobjectfactory;1"]
+                    .getService(Ci.nsIKeyObjectFactory)
+                    .keyFromString(Ci.nsIKeyObject.HMAC, key);
+  crypto.init(Ci.nsICryptoHMAC[algo], keyObject);
+  crypto.update(data, data.length);
+  var hash = crypto.finish(true);
+  return hash;
+};
+
+
 // ** {{{ Utils.escapeHtml() }}} **
 //
 // This function returns a version of the string safe for
