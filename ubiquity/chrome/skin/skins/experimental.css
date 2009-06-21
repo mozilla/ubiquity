@@ -78,17 +78,17 @@
 #ubiquity-preview-container {
   position: absolute;
   left: 300px;
-  top: 55px;
+  top: 60px;
   border-top: 1px solid #333;
 }
 
 #ubiquity-preview {
-  max-height: 500px;
+  max-height: 495px;
 }
 
 #ubiquity-browser {
   width: 510px;
-  height: 500px;
+  height: 495px;
 }
 
 #ubiquity-help {
@@ -229,6 +229,7 @@
 body {
   margin: 0;
   padding: 5px;
+  background-color: rgba(43,43,43,1);
   color: #ffffff;
   font-family: Geneva, Tahoma, Verdana;
   text-shadow: #000 1px 1px .5px;
