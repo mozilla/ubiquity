@@ -222,6 +222,29 @@ SkinSvc.prototype = {
       }
     }
   },
+  
+  _hackCssForBug717: function hackCssForBug717(cssPath, sss,
+                                               action) {
+    var xulr = Components.classes["@mozilla.org/xre/app-info;1"]
+                         .getService(Components.interfaces.nsIXULRuntime);
+    var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+                            .getService(Components.interfaces.nsIXULAppInfo);
+    var versionChecker = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+                               .getService(Components.interfaces.nsIVersionComparator);
+
+    cssPath = cssPath.spec;
+    if (cssPath == "chrome://ubiquity/skin/skins/default.css" &&
+        xulr.OS == "Darwin" && versionChecker.compare(appInfo.version, "3.1") < 0) {
+      let hackCss = "chrome://ubiquity/skin/skins/default-717hack.css";
+      hackCss = Utils.url(hackCss);
+      if (action == "register") {
+        sss.loadAndRegisterSheet(hackCss, sss.USER_SHEET);
+      } else {
+        if(sss.sheetRegistered(hackCss, sss.USER_SHEET))
+          sss.unregisterSheet(hackCss, sss.USER_SHEET);
+      }
+    }
+  },
 
   //Unregister any current skins
   //And load this new skin
@@ -234,6 +257,7 @@ SkinSvc.prototype = {
       if(sss.sheetRegistered(oldCss, sss.USER_SHEET))
         sss.unregisterSheet(oldCss, sss.USER_SHEET);
       this._hackCssForBug466(oldCss, sss, "unregister");
+      this._hackCssForBug717(oldCss, sss, "unregister");
     } catch(e) {
       // do nothing
     }
@@ -243,6 +267,7 @@ SkinSvc.prototype = {
     sss.loadAndRegisterSheet(newCss, sss.USER_SHEET);
     Application.prefs.setValue(this.SKIN_PREF, newSkinPath);
     this._hackCssForBug466(newCss, sss, "register");
+    this._hackCssForBug717(newCss, sss, "register");
   },
 
   //Change the skin and notify
