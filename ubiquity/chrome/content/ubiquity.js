@@ -220,7 +220,7 @@ Ubiquity.prototype = {
       this.__cmdManager.execute(this.__makeContext());
     }
     var unfocused = this.__focusedElement || this.__focusedWindow;
-    if (unfocused) unfocused.focus();
+    if (unfocused) unfocused.focus(); // focus() === unblair()
 
     this.__focusedWindow = null;
     this.__focusedElement = null;
