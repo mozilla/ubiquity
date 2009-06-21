@@ -1,0 +1,109 @@
+# email.po
+#
+# Localizers:
+# Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
+"Language-Team: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Japanese\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#. email command:
+#. use | to separate multiple name values:
+msgctxt "email.names"
+msgid "email|mail|send email|gmail.com"
+msgstr "メール|メールする|メールして|メールしろ|メール送信|メールを送信|gmail.com"
+
+msgctxt "email.help"
+msgid ""
+"Currently only works with\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    so you'll need a Gmail account to use it.\n"
+"<br/>\n"
+"Try selecting part of a web page (including links, images, etc)\n"
+"    and then issuing \"email this\".\n"
+"<br/>\n"
+"You can also specify the recipient of the email using the word \"to\"\n"
+"    and the name of someone from your contact list.\n"
+"    For example, try issuing \"email hello to jono\"\n"
+"    (assuming you have a friend named \"jono\")."
+msgstr ""
+"現在は <a href=\"http://mail.google.com\">Google Mail</a> でのみ動作するため、\n"
+"このコマンドを使用するには Gmail のアカウントが必要です。\n"
+"<br/>\n"
+"Web ページの一部 (リンクや画像も含む) を選択して\n"
+"「これをメールする」と入力してみてください。\n"
+"<br/>\n"
+"メールの宛先を指定するには、「mitchoに」のように、\n"
+"連絡先に登録された名前を指定します。\n"
+"例えば、「これをmitchoにメールする」のようにします。"
+
+msgctxt "email.description"
+msgid "Begins composing an email to a person from your contact list."
+msgstr "連絡先に登録された相手にメールを送信します。"
+
+msgctxt "email.preview"
+msgid "Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}."
+msgstr "{if recipient}${recipient}宛に、{/if}現在のページへのリンク{if content}と次の内容{/if}を含んだメッセージを作成します{if content}:<br/><br/>${content}{else}。{/if}"
+
+msgctxt "email.execute"
+msgid "A gmonkey exception occurred."
+msgstr "gmonkey 例外エラーが発生しました。"
+
+#. get last email command:
+#. use | to separate multiple name values:
+msgctxt "get last email.names"
+msgid "get last email"
+msgstr "新着メール|メール確認|新着メールを確認する|新着メールを確認して|新着メールを確認しろ|メールを確認する|メールを確認して|メールを確認しろ"
+
+msgctxt "get last email.description"
+msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
+msgstr "新着メールを表示します。このコマンドは <a href=\"http://mail.google.com\">Gmail</a> が必要です。"
+
+msgctxt "get last email.preview"
+msgid "Displays your most recent incoming email..."
+msgstr "新着メールを表示します..."
+
+msgctxt "get last email.preview"
+msgid "Last unread e-mail: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgstr "未読のメール: <a href=\"${lastEmail.href}\"><p><b>${lastEmail.author}</b> より: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+
+msgctxt "get last email.preview"
+msgid "<b>You have no new mail!</b>"
+msgstr "<b>新着メールはありません。</b>"
+
+msgctxt "get last email.preview"
+msgid "You are not logged in!<br />Press enter to log in."
+msgstr "ログインしていません！<br />Enter キーを押してログインしてください。"
+
+msgctxt "get last email.execute"
+msgid "You have new email! ${lastEmail.author} says: ${lastEmail.subject}"
+msgstr "新着メールがあります！ ${lastEmail.author} より: ${lastEmail.subject}"
+
+msgctxt "get last email.execute"
+msgid "You have no new mail."
+msgstr "新着メールはありません。"
+
+#. get email address command:
+#. use | to separate multiple name values:
+msgctxt "get email address.names"
+msgid "get email address"
+msgstr "メールアドレス|連絡先|アドレス"
+
+msgctxt "get email address.help"
+msgid "Execute to copy the address."
+msgstr "実行するとメールアドレスをクリップボードにコピーします。"
+
+msgctxt "get email address.description"
+msgid "Looks up the email address of a person from your contacts list given their name. "
+msgstr "名前を指定して連絡先からメールアドレスを検索します。"
+
