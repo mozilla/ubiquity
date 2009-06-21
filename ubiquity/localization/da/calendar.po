@@ -1,0 +1,63 @@
+# calendar.po
+# 
+# Localizers:
+# Christian Sonne <cers@geeksbynature.dk>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:46+0900\n"
+
+#. add (to calendar) command:
+#. use | to separate multiple name values:
+msgctxt "add (to calendar).names"
+msgid "add"
+msgstr "tilføj"
+
+msgctxt "add (to calendar).help"
+msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
+". e.g.:\n"
+"<ul>\n"
+"  <li>3pm Lunch with Myk and Thunder</li>\n"
+"  <li>Jono's Birthday on Friday</li>\n"
+"</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Tilføj hurtigt\">Indtast aftalen i naturligt sprog</a>\n"
+". f.eks.:\n"
+"<ul>\n"
+"  <li>15:00 frokost med Myk og Thunder</li>\n"
+"  <li>Jonos fødselsdag på fredag</li>\n"
+"</ul><p>Virker på nuværende tidspunkt kun med <a href=\"http://calendar.google.com\">Google Kalender</a>, så du skal bruge en Google konto for at benytte servicen.</p>"
+
+
+msgctxt "add (to calendar).description"
+msgid "Adds an event to your calendar."
+msgstr "Tilføjer en aftale til din kalender."
+
+msgctxt "add (to calendar).execute"
+msgid "Event created"
+msgstr "Aftale oprettet"
+
+msgctxt "add (to calendar).execute"
+msgid "Error creating the event"
+msgstr "Der opstod en fejl ved oprettelsen af aftalen"
+
+
+#. check google calendar command:
+#. use | to separate multiple name values:
+msgctxt "check google calendar.names"
+msgid "check google calendar|check gcalendar"
+msgstr "tjek google kalender|tjek gkalender"
+
+msgctxt "check google calendar.help"
+msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "Prøv at indtaste kommandoen \"tjek på torsdag\"<p>Virker på nuværende tidspunkt kun med <a href=\"http://calendar.google.com\">Google Kalender</a>, så du skal bruge en Google konto for at benytte servicen.</p>"
+
+msgctxt "check google calendar.description"
+msgid "Checks what events are on your calendar for a given date."
+msgstr "Tjekker hvilke aftaler du har i din kalender på den pågældende dato."
+
+msgctxt "check google calendar.preview"
+msgid "Checking Google Calendar for events on ${date}."
+msgstr "Tjekker Google Kalender for aftaler på ${date}."
+
+
