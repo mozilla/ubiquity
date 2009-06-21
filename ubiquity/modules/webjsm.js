@@ -81,7 +81,7 @@ function WebJsModule(callback, window) {
       // Have our instance dynamically inherit the properties of the
       // hidden window.
       self.__proto__ = iframe.contentWindow;
-      callback();
+      callback(dump);
     },
     false
   );

@@ -49,25 +49,51 @@ Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
 Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
 Cu.import("resource://ubiquity/modules/utils.js", jsm);
 
-function ubiquitySetup() {
-  var services = jsm.UbiquitySetup.createServices();
-  jsm.UbiquitySetup.setupWindow(window);
+function ubiquitySetup(log) {
+  let mylog = function (x, fail) {
+    // comment this line to disable setup logging
+    log('UBIQUITY SETUP'+(fail ? ' FAIL' : '')+': '+x+'\n');
+  }
+  
+  mylog('createServices');
+  try {
+    var services = jsm.UbiquitySetup.createServices();
+  } catch(e) {
+    mylog('createServices',true);
+  }
 
-  var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
-  var nlParser = NLParser.makeParserForLanguage(
-    jsm.UbiquitySetup.languageCode,
-    []);
+  mylog('setupWindow');
+  try {
+    jsm.UbiquitySetup.setupWindow(window);
+  } catch(e) {
+    mylog('setupWindow');
+  }
+
+  mylog('nlParser');
+  try {
+    var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
+    var nlParser = NLParser.makeParserForLanguage(
+      jsm.UbiquitySetup.languageCode,
+      []);
+  } catch(e) {
+    mylog('nlParser',true);
+  }
 
   var suggsNode = document.getElementById("ubiquity-suggest-container");
   var previewNode = document.getElementById("ubiquity-preview-container");
   var helpNode = document.getElementById("ubiquity-help");
 
-  var cmdMan = new jsm.CommandManager(services.commandSource,
-                                      services.messageService,
-                                      nlParser,
-                                      suggsNode,
-                                      previewNode,
-                                      helpNode);
+  mylog('cmdMan');
+  try {
+    var cmdMan = new jsm.CommandManager(services.commandSource,
+                                        services.messageService,
+                                        nlParser,
+                                        suggsNode,
+                                        previewNode,
+                                        helpNode);
+  } catch(e) {
+    mylog('cmdMan',true);
+  }
 
   var suggsIframe = document.getElementById("ubiquity-suggest");
 
@@ -88,12 +114,17 @@ function ubiquitySetup() {
 
   var panel = document.getElementById("ubiquity-transparent-panel");
 
-  gUbiquity = new Ubiquity(
-    panel,
-    document.getElementById("ubiquity-entry"),
-    cmdMan
-  );
-  gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
+  mylog('gUbiquity');
+  try {
+    gUbiquity = new Ubiquity(
+      panel,
+      document.getElementById("ubiquity-entry"),
+      cmdMan
+    );
+    gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
+  } catch(e) {
+    mylog('gUbiquity',true);
+  }
 
   window.addEventListener("command", function refreshUbiquityOnReload(evt) {
     if (evt.target.id == "Browser:Reload")
