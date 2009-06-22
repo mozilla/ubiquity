@@ -1,0 +1,237 @@
+# social.po
+# 
+# Localizers:
+# Christian Sonne <cers@geeksbynature.dk>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
+
+#. twitter command:
+#. use | to separate multiple name values:
+msgctxt "twitter.names"
+msgid "twitter|tweet|share using twitter"
+msgstr "twitter|tweet|del via twitter"
+
+msgctxt "twitter.help"
+msgid "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
+msgstr "Denne service kræver at du har en <a href=\"http://twitter.com\">Twitter konto</a>. Hvis du ikke allerede er logget ind, vil du blive bedt om at gøre det."
+
+msgctxt "twitter.description"
+msgid "Sets your Twitter status to a message of at most 160 characters."
+msgstr "Sætter din Twitter status til en besked på maksimum 160 tegn."
+
+msgctxt "twitter.preview"
+msgid "Updates your Twitter status ${username} to:"
+msgstr "Opdaterer din Twitter status ${username} til:"
+
+msgctxt "twitter.preview"
+msgid "Characters remaining: <b>${chars}</b>"
+msgstr "Tegn tilbage: <b>${chars}</b>"
+
+msgctxt "twitter.preview"
+msgid "tip: tweet @mozillaubiquity for help"
+msgstr "tip: tweet @mozillaubiquity for hjælp"
+
+msgctxt "twitter.preview"
+msgid "The last <b>${truncate}</b> characters will be truncated!"
+msgstr "De sidste <b>${truncate}</b> tegn vil blive trunkeret!"
+
+msgctxt "twitter.preview"
+msgid "(For user <b>${usernameText}</b>)"
+msgstr "(For bruger <b>${usernameText}</b>)"
+
+msgctxt "twitter.execute"
+msgid "requires a status to be entered"
+msgstr "kræver at der indtastes en status"
+
+msgctxt "twitter.execute"
+msgid "error - status not updated"
+msgstr "fejl - status ikke opdateret"
+
+msgctxt "twitter.execute"
+msgid "direct message sent"
+msgstr "direkte besked sendt"
+
+msgctxt "twitter.execute"
+msgid "status updated"
+msgstr "status opdateret"
+
+
+#. digg command:
+#. use | to separate multiple name values:
+msgctxt "digg.names"
+msgid "digg|share using digg"
+msgstr "digg|del via digg"
+
+msgctxt "digg.description"
+msgid "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
+msgstr "Hvis det endnu ikke er insendt, indsendes siden til Digg. Ellers bliver du bragt til historiens Digg side."
+
+msgctxt "digg.preview"
+msgid "Submit or digg this page. Checking if this page has already been submitted..."
+msgstr "Indsend eller digg denne side. Tjekker som siden allerede er blevet indsendt..."
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg"
+msgstr "Indsend denne side til Digg"
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg with the description:"
+msgstr "Indsend denne side til Digg med beskrivelsen:"
+
+msgctxt "digg.preview"
+msgid "Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated."
+msgstr "Beskrivelsen kan kun være 375 tegn. De sidste <b>${chars}</b> tegn vil blive trunkeret."
+
+msgctxt "digg.preview"
+msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
+msgstr "Digg denne side. Denne side har allerede <b>${diggs}</b> diggs."
+
+
+#. tinyurl command:
+#. use | to separate multiple name values:
+msgctxt "tinyurl.names"
+msgid "tinyurl"
+msgstr "tinyurl"
+
+msgctxt "tinyurl.description"
+msgid "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+msgstr "Erstatter den markedere URL med en <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with..."
+msgstr "Erstatter den markerede URL med..."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with <b>${tinyurl}</b>."
+msgstr "Erstatter den markerede URL med <b>${tinyurl}</b>."
+
+
+#. share (on delicious) command:
+#. use | to separate multiple name values:
+msgctxt "share (on delicious).names"
+msgid "share|delicious"
+msgstr "del|delicious"
+
+msgctxt "share (on delicious).help"
+msgid "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."
+msgstr "Marker tekst på siden som skal bruges til noter, eller indtast din egen tekst efter kommandoen. Du kan også tildele mærkater til bogmærket med \"med\" modifikatoren, og ændre bogmærkets standard side-titel med \"som\" modifikatoren. Bemærk at du skal være logget ind på din delicious.com konto for at bruge denne service."
+
+msgctxt "share (on delicious).description"
+msgid "Share the current page as a bookmark on delicious.com"
+msgstr "Del den aktuelle side som et bogmærke på delicious.com"
+
+msgctxt "share (on delicious).preview"
+msgid "No active user found - log in at ${delicious} to use this command."
+msgstr "Ingen aktiv bruger fundet - log ind på ${delicious} for at bruge denne kommando"
+
+msgctxt "share (on delicious).preview"
+msgid "A title is required for bookmarks on ${delicious}"
+msgstr "En titel er påkrævet for at bogmærke på ${delicious}"
+
+msgctxt "share (on delicious).preview"
+msgid "Share a bookmark at ${delicious}:"
+msgstr "Del et bogmærke på ${delicious}:"
+
+msgctxt "share (on delicious).execute"
+msgid "No active user found - log in at delicious.com to use this command."
+msgstr "Ingen aktiv bruger fundet - log ind på delicious.com for at bruge denne kommando."
+
+msgctxt "share (on delicious).execute"
+msgid "A title is required for bookmarks at delicious.com"
+msgstr "En titel er påkrævet for at bogmærke på delicious.com"
+
+msgctxt "share (on delicious).execute"
+msgid "Bookmark \\\"${description}\\\" shared at delicious.com/${user_name}"
+msgstr "Bogmærk \\\"${description}\\\" delt på delicious.com/${user_name}"
+
+msgctxt "share (on delicious).execute"
+msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
+msgstr "FEJL: Bogmærk \\\"${description}\\\" IKKE delt på delicious.com/${user_name}"
+
+
+#. ask rypple command:
+#. use | to separate multiple name values:
+msgctxt "ask rypple.names"
+msgid "ask rypple|rypple"
+msgstr "spørg rypple|rypple"
+
+msgctxt "ask rypple.help"
+msgid "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in"
+msgstr "Denne service kræver at du har en <a href=\"http://rypple.com\">Rypple konto</a> og at du er logget ind"
+
+msgctxt "ask rypple.description"
+msgid "Asks a question on Rypple"
+msgstr "Stiller et spørgsmål på Rypple"
+
+msgctxt "ask rypple.preview"
+msgid "Asks the following question (${charsLeft} characters left):"
+msgstr "Stiller det følgende spørgsmål (${charsLeft} tegn tilbage):"
+
+msgctxt "ask rypple.preview"
+msgid "NO QUESTION. PLEASE ENTER A QUESTION."
+msgstr "INTET SPØRGSMÅL. INDTAST VENLIGST ET SPØRGSMÅL."
+
+msgctxt "ask rypple.preview"
+msgid "To:"
+msgstr "Til:"
+
+msgctxt "ask rypple.preview"
+msgid "NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE."
+msgstr "INGEN MODTAGERE. DU SKAL INDTASTE MINDST ÈN."
+
+msgctxt "ask rypple.preview"
+msgid "Attributes:"
+msgstr "Attributter:"
+
+msgctxt "ask rypple.preview"
+msgid "NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE."
+msgstr "INGEN ATTRIBUTTER. DU SKAL INDTASTE MINDST ÉN."
+
+msgctxt "ask rypple.preview"
+msgid "Usage:"
+msgstr "Brug:"
+
+msgctxt "ask rypple.preview"
+msgid "rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;"
+msgstr "spørg rypple \"spørgsmål\" \"modtager(e)\" \"attribut(ter)\""
+
+msgctxt "ask rypple.preview"
+msgid "Recipients must start with '@' and at least one recipient is required."
+msgstr "Modtager skal starte med '@' og mindst én modtager er påkrævet."
+
+msgctxt "ask rypple.preview"
+msgid "Attributes must start with '#' and at least one attribute is required."
+msgstr "Attributter skal starte med '#' og mindst én attribut er påkrævet."
+
+msgctxt "ask rypple.preview"
+msgid "The last ${chars} character(s) of your question will be truncated!<br/>"
+msgstr "De sidste ${chars} tegn af dit spørgsmål bliver trunkeret!<br />"
+
+msgctxt "ask rypple.preview"
+msgid "The last <b>${num}</b> attributes{if num > 1}s{/if} will not be used!"
+msgstr "De sidste <b>${num}</b> attributter vil ikke blive brugt!"
+
+msgctxt "ask rypple.execute"
+msgid "At least one recipient is required"
+msgstr "Mindst en modtager er påkrævet"
+
+msgctxt "ask rypple.execute"
+msgid "At least one attribute is required"
+msgstr "Mindst en attribut er påkrævet"
+
+msgctxt "ask rypple.execute"
+msgid "No question specified"
+msgstr "Intet spørgsmål specificeret"
+
+msgctxt "ask rypple.execute"
+msgid "Rypple error - are you logged in?"
+msgstr "Rypple fejl - er du logget ind?"
+
+msgctxt "ask rypple.execute"
+msgid "Asked Question Successfully on Rypple"
+msgstr "Spørgsmål succesfyldt stillet på Rypple"
+
+

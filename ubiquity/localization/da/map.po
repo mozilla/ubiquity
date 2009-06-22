@@ -1,0 +1,40 @@
+# map.po
+# 
+# Localizers:
+# Christian Sonne <cers@geeksbynature.dk>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "kortlæg"
+
+msgctxt "map.help"
+msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+msgstr "Prøv at udstede kommandoen \"kortlæg kalamazoo\". Du kan klikke på kortet i forhåndsvisnings-fanen for at få et større, interaktivt kort hvori du kan zoome og panorere rundt. Du kan da klikke på henvisningen \"insert map in page\" (hvis du befinder dig i et redigerbart tekst-felt) for at indsætte kortet. Dvs. at du for eksempel skrive en adresse i en e-mail, markere den, og udstede kommandoen \"kortlæg\", klikke på forhåndsvisningen og indsætte kortet."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Forvandler en adresse eller lokation til et Google Kort."
+
+msgctxt "map.preview"
+msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr "Kan ikke indsætte i et ikke-redigerbart område. Brug 'rediger side' for at gøre siden rediger-bar."
+
+
+#. map these command:
+#. use | to separate multiple name values:
+msgctxt "map these.names"
+msgid "map these"
+msgstr "kortlæg disse"
+
+msgctxt "map these.description"
+msgid "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)"
+msgstr "Kortlægger adskillige adresser eller henvisninger ti let enkelt Google Kort. (Eksperimentalt!)"
+
+

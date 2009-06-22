@@ -1,0 +1,275 @@
+# firefox.po
+# 
+# Localizers:
+# Christian Sonne <cers@geeksbynature.dk>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:45+0900\n"
+
+#. exit firefox command:
+#. use | to separate multiple name values:
+msgctxt "exit firefox.names"
+msgid "exit firefox"
+msgstr "Luk firefox"
+
+msgctxt "exit firefox.description"
+msgid "Exits Firefox."
+msgstr "Lukker firefox."
+
+
+#. restart firefox command:
+#. use | to separate multiple name values:
+msgctxt "restart firefox.names"
+msgid "restart firefox"
+msgstr "genstart firefox"
+
+msgctxt "restart firefox.description"
+msgid "Restarts Firefox."
+msgstr "Genstarter firefox."
+
+
+#. close window command:
+#. use | to separate multiple name values:
+msgctxt "close window.names"
+msgid "close window"
+msgstr "Luk vindue"
+
+msgctxt "close window.description"
+msgid "Closes current window."
+msgstr "Lukker aktuelle vindue."
+
+
+#. fullscreen command:
+#. use | to separate multiple name values:
+msgctxt "fullscreen.names"
+msgid "fullscreen"
+msgstr "Fuld skærm"
+
+msgctxt "fullscreen.description"
+msgid "Toggles fullscreen mode."
+msgstr "Skifter mellem fuld skærm og almindelig visning."
+
+
+#. switch to tab command:
+#. use | to separate multiple name values:
+msgctxt "switch to tab.names"
+msgid "switch to tab"
+msgstr "Skift til faneblad"
+
+msgctxt "switch to tab.description"
+msgid "Switches to the tab whose title or URL matches the input."
+msgstr "Skifter til fanebladet hvis titel eller URL tilsvarer indtastningen."
+
+
+#. close tab command:
+#. use | to separate multiple name values:
+msgctxt "close tab.names"
+msgid "close tab"
+msgstr "luk faneblad"
+
+msgctxt "close tab.description"
+msgid "Closes the tab whose title or URL matches the input or the current tab if no tab matches."
+msgstr "Lukker fanebladet hvis titel eller URL tilsvarer indtastningen, eller det aktuelle faneblad hvis ingen andre faneblade matcher."
+
+
+#. close all tabs with command:
+#. use | to separate multiple name values:
+msgctxt "close all tabs with.names"
+msgid "close all tabs with"
+msgstr "Luk alle faneblade med"
+
+msgctxt "close all tabs with.description"
+msgid "Closes all open tabs that have the given word in common."
+msgstr "Lukker alle faneblade der har det indtastede or til fælles."
+
+msgctxt "close all tabs with.execute"
+msgid "${num} tabs closed."
+msgstr "${num} faneblade blev lukket."
+
+
+#. count tabs command:
+#. use | to separate multiple name values:
+msgctxt "count tabs.names"
+msgid "count tabs"
+msgstr "Tæl faneblade"
+
+msgctxt "count tabs.description"
+msgid "Counts the number of opened tabs."
+msgstr "Tæller antallet af åbne faneblade"
+
+# added manually by mitcho
+# template in _count: no msgctxt as it is shared between preview + execute
+msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgstr "<div class="count-tabs"><b>${count}</b> faneblad{if count != 1}e{/if} {if html}matching <b>${html}</b>{else}sammenlagt{/if}</b>.</div>"
+
+
+#. refresh command:
+#. use | to separate multiple name values:
+msgctxt "refresh.names"
+msgid "refresh|reload"
+msgstr "opdater|genindlæs"
+
+msgctxt "refresh.description"
+msgid "Refreshes the current page."
+msgstr "Opdaterer den aktuelle side."
+
+
+#. bookmark command:
+#. use | to separate multiple name values:
+msgctxt "bookmark.names"
+msgid "bookmark"
+msgstr "bogmærk"
+
+msgctxt "bookmark.description"
+msgid "Adds the current page to bookmarks."
+msgstr "Tilføjer aktuelle side til bogmærker."
+
+msgctxt "bookmark.execute"
+msgid "Page could not be bookmarked!"
+msgstr "Siden kunne ikke bogmærkes!"
+
+
+#. print command:
+#. use | to separate multiple name values:
+msgctxt "print.names"
+msgid "print"
+msgstr "udskriv"
+
+msgctxt "print.description"
+msgid "Prints the current page."
+msgstr "Udskriver den aktuelle side."
+
+
+#. go back command:
+#. use | to separate multiple name values:
+msgctxt "go back.names"
+msgid "go back"
+msgstr "gå tilbage"
+
+msgctxt "go back.description"
+msgid "Goes back in history."
+msgstr "Går en side tilbage i din historik"
+
+
+#. go forward command:
+#. use | to separate multiple name values:
+msgctxt "go forward.names"
+msgid "go forward"
+msgstr "gå fremad"
+
+msgctxt "go forward.description"
+msgid "Goes forward in history."
+msgstr "Går en side fremad i din historik."
+
+
+#. go home command:
+#. use | to separate multiple name values:
+msgctxt "go home.names"
+msgid "go home"
+msgstr "gå hjem"
+
+msgctxt "go home.description"
+msgid "Goes to home page."
+msgstr "Går til din startside."
+
+
+#. zoom command:
+#. use | to separate multiple name values:
+msgctxt "zoom.names"
+msgid "zoom"
+msgstr "zoom"
+
+msgctxt "zoom.description"
+msgid "Zooms the Firefox window in or out."
+msgstr "Zoomer firefox vinduet ind eller ud."
+
+msgctxt "zoom.preview"
+msgid "Zooms the Firefox window to ${text} of its normal size."
+msgstr "Zoomer firefox vinduet til ${text} af dets normale størrelse."
+
+
+#. tag command:
+#. use | to separate multiple name values:
+msgctxt "tag.names"
+msgid "tag"
+msgstr "mærk"
+
+msgctxt "tag.help"
+msgid "Use commas to separate multiple tags."
+msgstr "Brug kommaer til at adskille forskellige mærkater."
+
+msgctxt "tag.description"
+msgid "Adds tags to the current page."
+msgstr "Tilføjer mærkater til den aktuelle side."
+
+msgctxt "tag.preview"
+msgid "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
+msgstr "Beskriver den aktuelle side med{if html} disse mærkater:<p><b>${html}</b></p>{else} mærkater.{/if}"
+
+
+#. run bookmarklet command:
+#. use | to separate multiple name values:
+msgctxt "run bookmarklet.names"
+msgid "run bookmarklet|bml"
+msgstr "kør bookmarklet|bml"
+
+msgctxt "run bookmarklet.help"
+msgid "Enter nothing to reload the list."
+msgstr "Hvis du intet indtaster genindlæses listen."
+
+msgctxt "run bookmarklet.description"
+msgid "Runs a bookmarklet from your favorites."
+msgstr "Kører et bookmarklet fra dine favoritter."
+
+msgctxt "run bookmarklet.preview"
+msgid "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
+msgstr "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
+
+
+#. undo closed tabs command:
+#. use | to separate multiple name values:
+msgctxt "undo closed tabs.names"
+msgid "undo closed tabs|uct"
+msgstr "Fortryd lukning af faneblad"
+
+msgctxt "undo closed tabs.help"
+msgid "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to undo.</li>\n"
+"    <li>Type to filter, then execute to undo all.</li>\n"
+"    </ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"    <li>Use tastatur-genvej eller klike for at fortryde.</li>\n"
+"    <li>Indtast søgeord for at filtrere, udfør derefter kommandoen for at fortryde alle.</li>\n"
+"    </ul>"
+
+
+msgctxt "undo closed tabs.description"
+msgid "Reopens tabs you've closed recently."
+msgstr "Genåbner faneblade du for nyligt har lukket."
+
+msgctxt "undo closed tabs.preview"
+msgid "No closed tabs."
+msgstr "Ingen lukkede faneblade."
+
+msgctxt "undo closed tabs.preview"
+msgid "No matched tabs."
+msgstr "Ingen matchende faneblade."
+
+
+#. check livemark command:
+#. use | to separate multiple name values:
+msgctxt "check livemark.names"
+msgid "check livemark"
+msgstr "Tjek live bogmærke"
+
+msgctxt "check livemark.help"
+msgid "Execute to open the site."
+msgstr "Udfør for at åbne siden."
+
+msgctxt "check livemark.description"
+msgid "Checks your livemarks."
+msgstr "Tjekker dine live bogmærker."
+
+

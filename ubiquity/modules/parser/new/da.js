@@ -44,11 +44,21 @@ function makeParser() {
     {role: 'time', delimiter: 'klokken'},
     {role: 'time', delimiter: 'på'},
     {role: 'time', delimiter: 'den'},
-    {role: 'location', delimiter: 'klokken'},
+    {role: 'time', delimiter: 'omkring'},
     {role: 'location', delimiter: 'på'},
-    {role: 'location', delimiter: 'den'},
+    {role: 'location', delimiter: 'i'},
+    {role: 'location', delimiter: 'ved'},
+    {role: 'location', delimiter: 'nær'},
+    {role: 'location', delimiter: 'omkring'},
+    {role: 'location', delimiter: 'hos'},
     {role: 'instrument', delimiter: 'med'},
-    {role: 'instrument', delimiter: 'gennem'}
+    {role: 'instrument', delimiter: 'gennem'},
+    {role: 'instrument', delimiter: 'via'},
+    {role: 'instrument', delimiter: 'kva'},
+    {role: 'format', delimiter: 'i'},
+    {role: 'format', delimiter: 'på'},
+    {role: 'alias', delimiter: 'som'},
+    {role: 'alias', delimiter: 'navngivet'} // "ved navn" when spaces are allowed
   ];
   da.branching = 'right';
 
