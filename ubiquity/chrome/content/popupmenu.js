@@ -41,14 +41,6 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
     
     if (event.target.id != popupElement.id)
       return;
-      
-    /* Remove previously added submenus */
-    for(let i=popupElement.childNodes.length - 1; i >= 0; i--) {
-      // TODO: openURL() isn't defined... Is this code ever called?
-      popupElement.removeEventListener("command", openURL, true);
-      // popupElement.removeEventListener("click", executeClick, true);
-      popupElement.removeChild(popupElement.childNodes.item(i));
-    }
     
     var context = {
       screenX: 0,
@@ -61,9 +53,12 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
       context.focusedElement = document.commandDispatcher.focusedElement;
     }
 
-    if (context.focusedWindow) {
-      
-      var results = cmdSuggester(context);
+    function callback(results){
+      /* Remove previously added submenus */
+      for(let i=popupElement.childNodes.length - 1; i >= 0; i--) {
+	popupElement.removeChild(popupElement.childNodes.item(i));
+      }
+
       for (var i in results) {
         var tempMenu = document.createElement("menuitem");
 		tempMenu.setAttribute("label", i);
@@ -74,6 +69,10 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
         tempMenu.addEventListener("command", results[i], true);
         event.target.appendChild(tempMenu);
       }
+    }
+
+    if (context.focusedWindow) {
+      cmdSuggester(context, callback);
     }
   }
   function toggleUbiquityMenu(event){

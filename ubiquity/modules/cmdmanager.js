@@ -272,7 +272,7 @@ CommandManager.prototype = {
         asyncSuggestionCb( noInputQuery.suggestionList );
       }
     };
-    return noInputQuery.suggestionList;
+    return;
   },
 
   getHilitedSuggestionText : function CM_getHilitedSuggestionText(context) {
@@ -302,22 +302,25 @@ CommandManager.prototype = {
     // This needs to be completely rewritten to be asynchronous  -- must
     // pass callback into getSuggestionListNoInput.
     var self = this;
-    return function getAvailableCommands(context) {
+    return function getAvailableCommands(context, popupCb) {
       self.refresh();
-      var suggestions = self.getSuggestionListNoInput(context);
-      var retVal = {};
-      for each (var sugg in suggestions) {
-        let parsedSentence = sugg;
-        let name = parsedSentence._verb._name;
-        let titleCasedName = name[0].toUpperCase() + name.slice(1);
-        retVal[titleCasedName] = function execute() {
-          parsedSentence.execute(context);
-        };
-        let suggestedCommand = self.__cmdSource.getCommand(name);
-        if (suggestedCommand.icon)
-          retVal[titleCasedName].icon = suggestedCommand.icon;
+      function cmdSuggCb (suggestions){
+        let retVal = {};
+        for each (var sugg in suggestions) {
+          let parsedSentence = sugg;
+          let name = parsedSentence._verb.name;
+	  let titleCasedName = name[0].toUpperCase() + name.slice(1);
+          retVal[titleCasedName] = function execute() {
+            parsedSentence.execute(context);
+          };
+          let suggestedCommand = sugg._verb;
+          if (suggestedCommand.icon)
+            retVal[titleCasedName].icon = suggestedCommand.icon;
+        }
+        popupCb(retVal);
       }
-      return retVal;
+      self.getSuggestionListNoInput(context, cmdSuggCb);
+      return;
     }
   },
 
