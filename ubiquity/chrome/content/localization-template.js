@@ -34,109 +34,87 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
 var Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
-var escapeHtml = Utils.escapeHtml;
-
 function displayTemplate(feedUri) {
-  $('#template').val('');
-  let svc = UbiquitySetup.createServices();
-  let feedMgr = svc.feedManager;
-  let cmdSource = svc.commandSource;
-  let commands = cmdSource.getAllCommands();
-  
-  let foundFeed = false;
-  for each (let feed in feedMgr.getSubscribedFeeds()) {
-    if (feed.srcUri.asciiSpec == feedUri) {
-      foundFeed = true;
-      
-      // print header metadata
-      $('#template').val('# '+feedUri.replace(/^.*\/(\w+)\.\w+$/g,'$1')+'.po\n'
-                         + '# \n'
-                         + '# Localizers:\n'
-                         + '# LOCALIZER <EMAIL>\n\n'
-                         + 'msgid ""\n'
-                         + 'msgstr ""\n'
-                         + '"Project-Id-Version: Ubiquity 0.5\\n"\n'
-                         + '"POT-Creation-Date: '
-                           + new Date().toLocaleFormat('%Y-%m-%d %H:%M%z')
-                           +'\\n"\n'
-                         + '\n');
-      
-      for (let cmdId in feed.commands) {
-        addCmdTemplate(commands[cmdId],feed.commandCode[cmdId]);
-        $('#template').val($('#template').val()+'\n');
-      }
-    }
+  var {feedManager} = UbiquitySetup.createServices();
+  for each (let feed in feedManager.getSubscribedFeeds()) {
+    if (feed.srcUri.asciiSpec !== feedUri) continue;
+    // print header metadata
+    var po = (
+      "# " + feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1") + ".po\n" +
+      "# \n" +
+      "# Localizers:\n" +
+      "# LOCALIZER <EMAIL>\n\n" +
+      'msgid ""\n' +
+      'msgstr ""\n' +
+      '"Project-Id-Version: Ubiquity 0.5\\n"\n' +
+      '"POT-Creation-Date: ' + potCreationDate(new Date) + '\\n"\n\n');
+
+    let {commands, commandCode} = feed;
+    for (let cmdId in commands)
+      po += cmdTemplate(commands[cmdId], commandCode[cmdId]) + "\n";
+    $("#template").val(po);
+    break;
   }
 }
 
-var localizableProperties = ['names','help','description'];
+var localizableProperties = ["names", "help", "description"];
+var contexts = ["preview", "execute"];
 
-function addCmdTemplate(cmd,cmdCode) {
-  let template = $('#template');
-  let value = template.val();
-  value += '#. '+cmd.referenceName+' command:\n';
-  for each (let key in localizableProperties)  
-    value += cmdPropertyLine(cmd,key);
-  value += cmdInlineLine(cmd,cmdCode,'preview');
-  value += cmdInlineLine(cmd,cmdCode,'execute');
-  template.val(value);
+function cmdTemplate(cmd, cmdCode) {
+  var po = "#. " + cmd.referenceName + " command:\n";
+  for each (let key in localizableProperties)
+    po += cmdPropertyLine(cmd, key);
+  for each (let key in contexts)
+    po += cmdInlineLine(cmd, cmdCode, key);
+  return po;
 }
 
-function cmdPropertyLine(cmd,property) {
-  if (cmd[property]) {
-    let ret = '';
-    if (property == 'names')
-      ret += '#. use | to separate multiple name values:\n';
-    ret += 'msgctxt "'+cmd.referenceName+'.'+property+'"\n';
-    let value = cmd[property];
-    if (value.join != undefined)
-      value = value.join('|');
-    ret += 'msgid "' + value.replace(/\\/g,'\\\\')
-                             .replace(/"/g,'\\"')
-                             .replace(/\n/g,'\\n"\n"')+'"\n';
-    ret += 'msgstr ""\n\n';
-    return ret;
-  }
-  return '';
+function cmdPropertyLine(cmd, property) {
+  if (!(property in cmd)) return "";
+  var help = (property === "names"
+              ? "#. use | to separate multiple name values:\n"
+              : "");
+  var value = cmd[property];
+  if (typeof value.join === "function") value = value.join("|");
+  return help + potMsgs(cmd.referenceName + "." + property, value);
 }
 
-var inlineChecker = /(?:_\()\s*("((?:[^\\"]|\\.)+?)"|'((?:[^\\']|\\.)+?)')[,)]/gim;
-function cmdInlineLine(cmd,cmdCode,context) {
-
-  if (context == 'preview' && cmd._previewString)
+function cmdInlineLine(cmd, cmdCode, context) {
+  if (context === "preview" && "_previewString" in cmd)
     return cmdPreviewString(cmd);
 
-  let ret  = '';
-  let script = cmdCode[context];
-//  Utils.log(script.match(/_\(/g) && script.match(/_\(/g).length);
-  let match;
-  while (match = inlineChecker.exec(script)) {
-//    Utils.log(match[2]);
-//    Utils.log(inlineChecker.lastIndex);
-    ret += 'msgctxt "'+cmd.referenceName+'.'+context+'"\n'
-         + 'msgid "'+match[2].replace(/\\/g,'\\\\')
-                             .replace(/"/g,'\\"')
-                             .replace(/\n/g,'\\n"\n"')+'"\n'
-         + 'msgstr ""\n\n';
-  }
-  return ret;
+  var inlineChecker = / _\("([^\\\"]*(?:\\.[^\\\"]*)*)"/g;
+  inlineChecker.lastIndex = 0;
+  var po = "";
+  var script = cmdCode[context];
+  while (inlineChecker.test(script))
+    po += potMsgs(cmd.referenceName + "." + context, RegExp.$1, true);
+  return po;
 }
 
-function cmdPreviewString(cmd) (
-   'msgctxt "'+cmd.referenceName+'.preview"\n'
- + 'msgid "'+cmd._previewString.replace(/\\/g,'\\\\')
-                                .replace(/"/g,'\\"')
-                                .replace(/\n/g,'\\n"\n"')+'"\n'
- + 'msgstr ""\n\n'
-)
+function cmdPreviewString(cmd) potMsgs(cmd.referenceName + ".preview",
+                                       cmd._previewString);
+
+function potMsgs(context, id, idq)(
+  'msgctxt "' + quoteString(context) + '"\n' +
+  'msgid "'+ (idq ? id : quoteString(id)).replace(/\n/g, '\\n"\n"') + '"\n' +
+  'msgstr ""\n\n');
+
+function quoteString(str) str.replace(/[\\\"]/g, "\\$&");
+
+function potCreationDate(date) {
+  var to = date.getTimezoneOffset(), ato = Math.abs(to);
+  return (date.toLocaleFormat("%Y-%m-%d %H:%M") + (to < 0 ? "+" : "-") +
+          zeroPadLeft(ato / 60 | 0, 2) + zeroPadLeft(ato % 60, 2));
+}
+
+function zeroPadLeft(str, num) (Array(num + 1).join(0) + str).slice(-num);
 
 function setupHelp() {
   var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
@@ -150,12 +128,12 @@ function setupHelp() {
 
 $(function(){
   setupHelp();
-  if (window.location.hash) {
-    feedUri = window.location.hash.slice(1);
-    $('.feedKey').html(feedUri.replace(/^.*\/(\w+)\.\w+$/g,'$1'));
-    $('.localization-dir').html(feedUri.replace(/^(.*ubiquity\/)(standard|builtin)-feeds\/.*$/g,'$1')+'localization/xx/');
+  var feedUri = location.hash.slice(1);
+  if (feedUri) {
+    $(".feedKey").html(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));
+    $(".localization-dir").html(
+      feedUri.replace(/^(.*ubiquity\/)(?:standard|builtin)-feeds\/.*$/g, "$1") +
+      "localization/xx/");
     displayTemplate(feedUri);
-  } else {
-    // no feed was given.
   }
 });

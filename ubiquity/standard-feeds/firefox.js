@@ -329,12 +329,10 @@ CmdUtils.CreateCommand({
       displayMessage("Reloaded", this);
     }
   },
-  preview: function(pbl, {object}) {
+  preview: function(pbl, {object: {data}}) {
     pbl.innerHTML = (
-      object.data
-      ? _(('<pre class="bookmarklet" style="white-space:pre-wrap">' +
-           '"${data}</pre>'),
-          object)
+      data
+      ? (<pre class="bookmarklet" style="white-space:pre-wrap">{data}</pre>)
       : this.description + "<p>" + this.help + "</p>");
   }
 });
