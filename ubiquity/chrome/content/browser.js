@@ -48,52 +48,28 @@ Cu.import("resource://ubiquity/modules/setup.js", jsm);
 Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
 Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
 Cu.import("resource://ubiquity/modules/utils.js", jsm);
+Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
 
-function ubiquitySetup(log) {
-  let mylog = function (x, fail) {
-    // comment this line to disable setup logging
-    log('UBIQUITY SETUP'+(fail ? ' FAIL' : '')+': '+x+'\n');
-  }
-  
-  mylog('createServices');
-  try {
-    var services = jsm.UbiquitySetup.createServices();
-  } catch(e) {
-    mylog('createServices',true);
-  }
+function ubiquitySetup() {
+  var services = jsm.UbiquitySetup.createServices();
 
-  mylog('setupWindow');
-  try {
-    jsm.UbiquitySetup.setupWindow(window);
-  } catch(e) {
-    mylog('setupWindow');
-  }
+  jsm.UbiquitySetup.setupWindow(window);
 
-  mylog('nlParser');
-  try {
-    var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
-    var nlParser = NLParser.makeParserForLanguage(
-      jsm.UbiquitySetup.languageCode,
-      []);
-  } catch(e) {
-    mylog('nlParser',true);
-  }
+  var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
+  var nlParser = NLParser.makeParserForLanguage(
+    jsm.UbiquitySetup.languageCode,
+    []);
 
   var suggsNode = document.getElementById("ubiquity-suggest-container");
   var previewNode = document.getElementById("ubiquity-preview-container");
   var helpNode = document.getElementById("ubiquity-help");
 
-  mylog('cmdMan');
-  try {
-    var cmdMan = new jsm.CommandManager(services.commandSource,
-                                        services.messageService,
-                                        nlParser,
-                                        suggsNode,
-                                        previewNode,
-                                        helpNode);
-  } catch(e) {
-    mylog('cmdMan',true);
-  }
+  var cmdMan = new jsm.CommandManager(services.commandSource,
+                                      services.messageService,
+                                      nlParser,
+                                      suggsNode,
+                                      previewNode,
+                                      helpNode);
 
   var suggsIframe = document.getElementById("ubiquity-suggest");
 
@@ -114,17 +90,10 @@ function ubiquitySetup(log) {
 
   var panel = document.getElementById("ubiquity-transparent-panel");
 
-  mylog('gUbiquity');
-  try {
-    gUbiquity = new Ubiquity(
-      panel,
-      document.getElementById("ubiquity-entry"),
-      cmdMan
-    );
-    gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
-  } catch(e) {
-    mylog('gUbiquity',true);
-  }
+  gUbiquity = new Ubiquity(panel,
+                           document.getElementById("ubiquity-entry"),
+                           cmdMan);
+  gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
 
   window.addEventListener("command", function refreshUbiquityOnReload(evt) {
     if (evt.target.id == "Browser:Reload")
@@ -149,8 +118,6 @@ function ubiquitySetup(log) {
 function ubiquityKeydown(aEvent) {
   const KEYCODE_PREF ="extensions.ubiquity.keycode";
   const KEYMODIFIER_PREF = "extensions.ubiquity.keymodifier";
-  var UBIQUITY_KEYMODIFIER = null;
-  var UBIQUITY_KEYCODE = null;
 
   //Default keys are different for diff platforms
   // Windows Vista, XP, 2000 & NT: CTRL+SPACE
@@ -158,9 +125,9 @@ function ubiquityKeydown(aEvent) {
   var defaultKeyModifier = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
 
   //The space character
-  UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
-  UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
-                                                    defaultKeyModifier);
+  var UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
+  var UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
+                                                        defaultKeyModifier);
   //Toggle Ubiquity if the key pressed matches the shortcut key
   if (aEvent.keyCode === UBIQUITY_KEYCODE &&
       ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
@@ -182,7 +149,17 @@ function ubiquityEventMatchesModifier(aEvent, aModifier) {
 
 window.addEventListener("load", function onload() {
   window.removeEventListener("load", onload, false);
-  jsm.UbiquitySetup.preload(ubiquitySetup);
-  window.addEventListener("keydown", ubiquityKeydown, true);
+  jsm.UbiquitySetup.preload(function ubiquitySetupWrapper() {
+    try { ubiquitySetup() } catch (e) {
+      var msg = ("Ubiquity Setup: " + e + "\n" +
+                 jsm.ExceptionUtils.stackTrace(e));
+      Cu.reportError(msg);
+      // in case it doesn't show up in the error console
+      jsm.Utils.reportInfo(msg);
+      new jsm.AlertMessageService().displayMessage("Setup failed.");
+      return;
+    }
+    window.addEventListener("keydown", ubiquityKeydown, true);
+  });
 }, false);
 })();

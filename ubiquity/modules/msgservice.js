@@ -99,7 +99,7 @@ function ErrorConsoleMessageService() {
 // [[http://en.wikipedia.org/wiki/Growl_%28software%29|Growl]].
 
 function AlertMessageService() {
-  this.ALERT_IMG = "http://www.mozilla.com/favicon.ico";
+  this.ALERT_IMG = "chrome://ubiquity/skin/icons/favicon.ico";
 
   this.displayMessage = function(msg) {
     var text;
