@@ -184,12 +184,18 @@ Ubiquity.prototype = {
   __delayedProcessInput: function __delayedProcessInput() {
     var self = this;
     var input = this.__textBox.value;
-    if (input !== this.__lastValue) {
+    var context = this.__makeContext();
+    var selObj = this.__cmdManager.__nlParser.
+                   _contextUtils.getSelectionObject(context);
+    if(!selObj.text)
+      selObj.text = "";
+    if ((input !== this.__lastValue) ||
+	(input.length == 0 && selObj.text.length > 0)) {
       this.__lastValue = input;
       if (input.length >= this.__MIN_CMD_PREVIEW_LENGTH)
         this.__cmdManager.updateInput(
           input,
-          this.__makeContext(),
+          context,
           function() { self.__onSuggestionsUpdated(); });
     }
   },
