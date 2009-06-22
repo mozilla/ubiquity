@@ -553,7 +553,10 @@ CmdUtils.CreateCommand({
                              { url: "node=" + data,
                                "field-keywords": text}));
   },
-  preview: function(previewBlock, {object: {text, summary}, format: {text: searchIndex}}) {
+  preview: function(previewBlock, inputMods) {
+    // {object: {text, summary}, format: {text: searchIndex}}
+    var text = inputMods.object.text;
+    var searchIndex = inputMods.format.text;
     if (!text) {
       previewBlock.innerHTML = this.description + this.help;
       return;
@@ -1113,8 +1116,8 @@ CmdUtils.makeSearchCommand({
     pageCounter: 0,
     imgsPerPage: 8,
     previewDelay: 500,
-    preview: function(pblock, {object}) {
-
+    preview: function(pblock, input) {
+      var object = input.object;
         var nameText = object.text;
         // user's query
         if (nameText.length < 1) {
