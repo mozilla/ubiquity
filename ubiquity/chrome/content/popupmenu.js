@@ -54,6 +54,9 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
     }
 
     function callback(results){
+      /* Sort the results by their scores in descending order */
+      if(results && results.length)
+        results.sort(byScoreDescending);
       /* Remove previously added submenus */
       for(let i=popupElement.childNodes.length - 1; i >= 0; i--) {
 	popupElement.removeChild(popupElement.childNodes.item(i));
@@ -84,3 +87,5 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
   contextMenu.addEventListener("popupshowing", toggleUbiquityMenu, false);
   popupElement.addEventListener("popupshowing", contextPopupShowing, false);
 }
+
+function byScoreDescending(a, b) b.score - a.score;

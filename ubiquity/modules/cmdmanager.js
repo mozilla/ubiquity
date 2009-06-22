@@ -266,7 +266,7 @@ CommandManager.prototype = {
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
                                                            asyncSuggestionCb) {
     let noInputQuery = this.__nlParser.newQuery("", context,
-                                                this.maxSuggestions);
+                                                20);
     noInputQuery.onResults = function() {
       if (noInputQuery.finished) {
         asyncSuggestionCb( noInputQuery.suggestionList );
@@ -313,6 +313,7 @@ CommandManager.prototype = {
           retVal[titleCasedName] = function execute() {
             parsedSentence.execute(context);
           };
+	  retVal[titleCasedName].score = parsedSentence.score;
           let suggestedCommand = sugg._verb;
           if (suggestedCommand.icon)
             retVal[titleCasedName].icon = suggestedCommand.icon;
