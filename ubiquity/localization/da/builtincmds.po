@@ -101,7 +101,7 @@ msgstr "deaktiver kommando"
 
 msgctxt "disable command.description"
 msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
-msgstr "Deaktivere en Ubiquity kommando, så den ikke længere vil dukke op i foreslags-listen."
+msgstr "Deaktiverer en Ubiquity kommando, så den ikke længere vil dukke op i foreslags-listen."
 
 
 #. enable command command:
@@ -112,7 +112,7 @@ msgstr "aktiver kommando"
 
 msgctxt "enable command.description"
 msgid "Re-enables a Ubiquity command that you disabled."
-msgstr "Gen-aktivere en kommando du tidligere har deaktiveret."
+msgstr "Gen-aktiverer en kommando du tidligere har deaktiveret."
 
 
 #. command history command:
