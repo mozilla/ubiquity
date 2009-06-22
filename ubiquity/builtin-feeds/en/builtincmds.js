@@ -220,7 +220,7 @@ CmdUtils.CreateCommand({
   description: "Accesses your command history.",
   help: "" + (
     <ul style="list-style-image:none">
-    <li>Use accesskey or click to reclaim.</li>
+    <li>Use accesskey or click to reuse.</li>
     <li>Type to filter.</li>
     <li>Execute to delete all matched histories.</li>
     <li>Edit <a href="about:config"><code>{PMax}</code></a> to
