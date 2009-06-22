@@ -220,7 +220,7 @@ Parser.prototype = {
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function initializeCache() {
     this._nounCache = {};
-    var patternCache = this._patternCache = {};
+    var patternCache = this._patternCache; // = {}
     var verbPatterns = patternCache.verbs = {};
     var delimPatterns = patternCache.delimiters = {};
     // cache the roles used in each verb and a regex
