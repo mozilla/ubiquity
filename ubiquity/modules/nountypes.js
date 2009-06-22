@@ -534,7 +534,7 @@ var noun_type_async_address = {
   suggest: function(text, html, callback) {
     this.asyncRequest = getAddress( text, function( truthiness ) {
       if (truthiness) {
-        callback([CmdUtils.makeSugg(text)]);
+        callback([CmdUtils.makeSugg(text, null, null, 2, null)]);
       }
       else{
 	callback([]);
@@ -560,7 +560,7 @@ var noun_type_async_restaurant = {
   suggest: function(text, html, callback) {
     this.asyncRequest = getRestaurants( text, function( truthiness, suggestion ) {
       if (truthiness) {
-        callback([CmdUtils.makeSugg(text)]);
+        callback([CmdUtils.makeSugg(text, null, null, 2, null)]);
       }
       else{
         callback([]);
