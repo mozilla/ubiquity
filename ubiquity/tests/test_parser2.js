@@ -578,10 +578,6 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
           for each ( var comp in suggestionList ) {
             dump("Completion is " + comp.displayText + "\n");
           }
-
-          self.assert( suggestionList.length == 1,
-                       "Should be only one suggestion." );
-          dump("SuggestionList[0].name is " + suggestionList[0]._verb.name + "\n");
           self.assert( suggestionList[0]._verb.name == "one",
                       "cmd one should be it" );
           suggestionList[0].execute();
@@ -594,9 +590,10 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
       {textSelection:"mud"},
       self.makeCallback(
         function( suggestionList ) {
-          self.assert( suggestionList.length == 1,
-                       "Should be only one suggestion." );
-          self.assert( suggestionList[0].name == "two",
+          for each ( var comp in suggestionList ) {
+            dump("Completion is " + comp.displayText + "\n");
+          }
+          self.assert( suggestionList[0]._verb.name == "two",
                       "cmd two should be it" );
           suggestionList[0].execute();
           self.assert( twoWasCalled == "mud",
