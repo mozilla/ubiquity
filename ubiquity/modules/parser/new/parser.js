@@ -883,8 +883,29 @@ Parser.prototype = {
   // roles of all verbs being considered for the provided parse.
   interpolateSelection: function(parse, selection) {
     let returnArr = [];
-    if(!parse._verb || !parse._verb.arguments)
+    if(!selection.length)
       return returnArr;
+
+    // If the parse has no declared verb, then we cannot
+    // assign the interpolation to specific roles, because
+    // no roles are known yet. So we will assign the whole
+    // selection to the direct object of the yet to be decided verb.
+    // Then, in step 7, object -> other roles interpolation will
+    // make sure that the selection gets tried in all roles of
+    // the verb that is chosen.
+    if(!parse._verb || !parse._verb.arguments){
+      let parseCopy = parse.copy();
+      parseCopy.setArgumentSuggestion(
+          "object",
+          { _order: 1,
+            input: selection,
+            modifier: ""});
+      if(!parse.input.length)
+        parseCopy.scoreMultiplier *= 1.2;
+      parseCopy._score = parseCopy.scoreMultiplier;
+      returnArr.push(parseCopy);
+      return returnArr;
+    }
 
     let args = parse._verb.arguments;
     for each (let arg in args){
