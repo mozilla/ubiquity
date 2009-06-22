@@ -64,7 +64,10 @@ function makeParser() {
       {role: 'format', delimiter: '為'}
   ];
   
-  zh._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in zh.roles)].join('|')+')','g');
+  zh.initializeLanguage = function() {
+    this._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in this.roles)].join('|')+')','g');
+  }
+  
   zh.wordBreaker = function(input) {
     return input.replace(this._patternCache.particleMatcher,'\u200b$1\u200b');
   };

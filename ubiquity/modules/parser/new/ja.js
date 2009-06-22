@@ -56,10 +56,13 @@ function makeParser() {
     {role: 'format', delimiter: 'で'}
   ];
 
+  ja.initializeLanguage = function() {
+    this._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in this.roles)].join('|')+')','g');
+  }
+
   // Japanese verbs are always sentence-final.
   ja.suggestedVerbOrder = -1;
   
-  ja._patternCache.particleMatcher = new RegExp('('+[role.delimiter for each (role in ja.roles)].join('|')+')','g');
   ja.wordBreaker = function(input) {
     return input.replace(this._patternCache.particleMatcher,'\u200b$1\u200b');
   };

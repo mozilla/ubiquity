@@ -220,7 +220,7 @@ Parser.prototype = {
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function initializeCache() {
     this._nounCache = {};
-    var patternCache = this._patternCache; // = {}
+    var patternCache = this._patternCache = {};
     var verbPatterns = patternCache.verbs = {};
     var delimPatterns = patternCache.delimiters = {};
     // cache the roles used in each verb and a regex
@@ -294,6 +294,17 @@ Parser.prototype = {
     var boundary = this.usespaces ? "\\b" : "";
     patternCache.anaphora =
       RegExp(boundary + RegexpTrie(this.anaphora) + boundary);
+    
+    // run language-specific setup code
+    this.initializeLanguage();
+  },
+  
+  // ** {{{Parser#initializeLanguage}}} **
+  //
+  // Run custom language-specific setup code here. This is called at the
+  // end of initializeCache. See ja for an example of its use.
+  
+  initializeLanguage: function() {
   },
 
   // ** {{{Parser#newQuery()}}} **
