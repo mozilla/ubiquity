@@ -590,13 +590,21 @@ Gettext.prototype.parse_po = function(data) {
 };
 
 
+// Gettext.prototype.parse_po_dequote = function(str) {
+//     var match;
+//     if (match = str.match(/^"(.*)"/)) {
+//         str = match[1];
+//     }
+//     str = str.replace(/\\"/, "");
+//     return str;
+// };
+// 2009-06-23 satyr: ^wrong in many ways
 Gettext.prototype.parse_po_dequote = function(str) {
-    var match;
-    if (match = str.match(/^"(.*)"/)) {
-        str = match[1];
-    }
-    str = str.replace(/\\"/, "");
-    return str;
+    var match = /^"(.*)"/.exec(str);
+    if (match) str = match[1];
+    // This is satisfactory for our use in Ubiquity.
+    // Should handle other escape sequences also for a real implementation.
+    return str.replace(/\\([\\\"])/g, "$1").replace(/\\n/g, "\n");
 };
 
 
