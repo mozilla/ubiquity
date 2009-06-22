@@ -28,8 +28,7 @@ function testTagCommand() {
   var services = UbiquitySetup.createServices();
   var cmdSource = services.commandSource;
   var NLParser = NLParserMaker(0);
-  var nlParser = NLParser.makeParserForLanguage(UbiquitySetup.languageCode,
-                                                []);
+  var nlParser = NLParser.makeParserForLanguage("en");
   makeCommandManager.call(this,
                           cmdSource,
                           services.messageService,
