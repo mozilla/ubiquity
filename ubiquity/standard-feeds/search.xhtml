@@ -936,7 +936,10 @@ CmdUtils.CreateCommand({
     var query = object.text;
     var url = "http://api.yelp.com/business_review_search?";
 
-    if (query.length == 0) return;
+    if(!query.length && !location.text){
+      pblock.innerHTML = "Searches yelp for restaurants in your area";
+      return;
+    }
 
     var near = "";
     if (location.text) {
@@ -946,7 +949,7 @@ CmdUtils.CreateCommand({
       if (loc)
         var near = loc.city + ", " + loc.state;
     }
-    
+
     var params = {
       term: query,
       num_biz_requested: 4,
