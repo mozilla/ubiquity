@@ -168,7 +168,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
   // Private methods.
   function reset() {
     self.commands = {};
-    self.commandCode = {};
   }
 
   // === {{{LDFPFeed#pageLoadFuncs}}} ===
@@ -189,13 +188,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
   self.commands = {};
   
-  // === {{{LDFPFeed#commandCode}}} ===
-  //
-  // A collection of toString'ed versions of the excecute and preview
-  // methods of each command in the feed. Used by the localization template
-  // tool.
-  self.commandCode = {};
-
   // === {{{LDFPFeed#refresh()}}} ===
   //
   // This public method is called whenever Ubiquity would like the feed
@@ -385,7 +377,8 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
             currentContext = null;
           }
         };
-      
+
+        // TODO: This might not be *safe*.
         // ensure name, names and synonyms
         { let names = originalNames;
           if (!names)
@@ -411,22 +404,6 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           return null;
         }
 
-        { let {takes, modifiers} = info;
-          /* OLD DEPRECATED ARGUMENT API */
-          if (takes) {
-            let label = getKey(takes);
-            if (label) {
-              command.DOLabel = label;
-              command.DOType = takes[label];
-              toSafeNounType(command, "DOType");
-            }
-          }
-          if (modifiers) {
-            for (let label in modifiers)
-              toSafeNounType(modifiers, label);
-          }
-        }
-
         if (info.takes)
           for (var directObjLabel in info.takes) {
             if (typeof(directObjLabel) != "string")
@@ -447,6 +424,7 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
           }
         }
         
+        // TODO: This might not be *safe*.
         { let args = info.arguments || info.argument;
           /* NEW IMPROVED ARGUMENT API */
           if (args) {
@@ -519,10 +497,8 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
         setMetadata(info, cmd, CMD_METADATA_SCHEMA, htmlSanitize);
 
-        self.commandCode[cmd.id] = {execute: info.execute.toString()};
-        if (info.preview)
-          self.commandCode[cmd.id].preview = info.preview.toString();
-          
+        cmd.proto = info;
+
         self.commands[cmd.id] = finishCommand(cmd);
       }
       sandbox.importFunction(CmdUtils_CreateCommand);

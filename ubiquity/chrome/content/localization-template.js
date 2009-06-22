@@ -55,9 +55,8 @@ function displayTemplate(feedUri) {
       '"Project-Id-Version: Ubiquity 0.5\\n"\n' +
       '"POT-Creation-Date: ' + potCreationDate(new Date) + '\\n"\n\n');
 
-    let {commands, commandCode} = feed;
-    for (let cmdId in commands)
-      po += cmdTemplate(commands[cmdId], commandCode[cmdId]) + "\n";
+    for each (let cmd in feed.commands)
+      po += cmdTemplate(cmd) + "\n";
     $("#template").val(po);
     break;
   }
@@ -66,12 +65,15 @@ function displayTemplate(feedUri) {
 var localizableProperties = ["names", "help", "description"];
 var contexts = ["preview", "execute"];
 
-function cmdTemplate(cmd, cmdCode) {
+function cmdTemplate(cmd) {
   var po = "#. " + cmd.referenceName + " command:\n";
   for each (let key in localizableProperties)
     po += cmdPropertyLine(cmd, key);
-  for each (let key in contexts)
-    po += cmdInlineLine(cmd, cmdCode, key);
+  for each (let key in contexts) {
+    var fn = cmd.proto[key];
+    if (typeof fn === "function")
+      po += cmdInlineLine(cmd, fn + "", key);
+  }
   return po;
 }
 

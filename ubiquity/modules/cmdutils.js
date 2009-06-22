@@ -759,7 +759,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 CmdUtils.CreateCommand = function CreateCommand(options) {
   var me = this;
   var global = this.__globalObject;
-  var command = {__proto__: options};
+  var command = {proto: options, __proto__: options};
 
   // Returns the first key in a dictionary.
   function getKey(dict) {
