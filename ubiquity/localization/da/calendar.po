@@ -50,7 +50,7 @@ msgstr "tjek google kalender|tjek gkalender"
 
 msgctxt "check google calendar.help"
 msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
-msgstr "Prøv at indtaste kommandoen \"tjek på torsdag\"<p>Virker på nuværende tidspunkt kun med <a href=\"http://calendar.google.com\">Google Kalender</a>, så du skal bruge en Google konto for at benytte servicen.</p>"
+msgstr "Prøv at udstede kommandoen \"tjek på torsdag\"<p>Virker på nuværende tidspunkt kun med <a href=\"http://calendar.google.com\">Google Kalender</a>, så du skal bruge en Google konto for at benytte servicen.</p>"
 
 msgctxt "check google calendar.description"
 msgid "Checks what events are on your calendar for a given date."

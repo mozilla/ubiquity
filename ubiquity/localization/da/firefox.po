@@ -82,7 +82,7 @@ msgstr "Luk alle faneblade med"
 
 msgctxt "close all tabs with.description"
 msgid "Closes all open tabs that have the given word in common."
-msgstr "Lukker alle faneblade der har det indtastede or til fælles."
+msgstr "Lukker alle faneblade der har det indtastede ord til fælles."
 
 msgctxt "close all tabs with.execute"
 msgid "${num} tabs closed."
@@ -102,7 +102,7 @@ msgstr "Tæller antallet af åbne faneblade"
 # added manually by mitcho
 # template in _count: no msgctxt as it is shared between preview + execute
 msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
-msgstr "<div class="count-tabs"><b>${count}</b> faneblad{if count != 1}e{/if} {if html}matching <b>${html}</b>{else}sammenlagt{/if}</b>.</div>"
+msgstr "<div class="count-tabs"><b>${count}</b> faneblad{if count != 1}e{/if} {if html}der matcher <b>${html}</b>{else}sammenlagt{/if}</b>.</div>"
 
 
 #. refresh command:
@@ -135,7 +135,7 @@ msgstr "Siden kunne ikke bogmærkes!"
 #. use | to separate multiple name values:
 msgctxt "print.names"
 msgid "print"
-msgstr "udskriv"
+msgstr "print|udskriv"
 
 msgctxt "print.description"
 msgid "Prints the current page."

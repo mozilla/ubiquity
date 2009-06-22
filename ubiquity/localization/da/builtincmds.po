@@ -17,8 +17,8 @@ msgstr "hjælp|om|?"
 msgctxt "help.description"
 msgid "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
 "      Or, enter the name of a command to get help on that command."
-msgstr "Fører dig til Ubiquity's <a href=\"about:ubiquity\">hoved hjælp side</a>.<br/>\n"
-"      Eller, indtast navnet på den kommando du ønsker hjælp til."
+msgstr "Fører dig til Ubiquitys <a href=\"about:ubiquity\">hoved hjælp side</a>,<br/>\n"
+"      eller indtast navnet på den kommando, du ønsker hjælp til."
 
 
 #. open (ubiquity settings page) command:
@@ -29,7 +29,7 @@ msgstr "åbn|vis"
 
 msgctxt "open (ubiquity settings page).description"
 msgid "Opens one of the Ubiquity documentation/settings pages."
-msgstr "Åbner en af Ubiquity's dokumantations- eller indstillingssider"
+msgstr "Åbner en af Ubiquitys dokumentations- eller indstillingssider"
 
 
 #. write ubiquity commands command:
@@ -40,7 +40,7 @@ msgstr "skriv ubiquity kommandoer|rediger ubiquity kommandoer|hack ubiquity"
 
 msgctxt "write ubiquity commands.description"
 msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
-msgstr "Fører dig til Ubiquity's <a href=\"chrome://ubiquity/content/editor.html\">kommando editor</a> side."
+msgstr "Fører dig til Ubiquitys <a href=\"chrome://ubiquity/content/editor.html\">kommando editor</a> side."
 
 
 #. list ubiquity commands command:

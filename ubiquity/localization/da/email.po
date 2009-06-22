@@ -58,7 +58,7 @@ msgstr "Der skete en fejl med gmonkey."
 #. use | to separate multiple name values:
 msgctxt "get last email.names"
 msgid "get last email"
-msgstr "hent sidste e-mail"
+msgstr "hent seneste e-mail"
 
 msgctxt "get last email.description"
 msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
@@ -70,7 +70,7 @@ msgstr "Fremviser din senest modtagne e-mail..."
 
 msgctxt "get last email.preview"
 msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
-msgstr "Senest modtaget e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> skriver: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgstr "Senest modtagne e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> skriver: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
 
 msgctxt "get last email.preview"
 msgid "<b>You have no new mail!</b>"
@@ -97,7 +97,7 @@ msgstr "hent e-mail-adresse"
 
 msgctxt "get email address.help"
 msgid "Execute to copy the address."
-msgstr "Udfør for at kopiere e-mail-adressen"
+msgstr "Eksekver for at kopiere e-mail-adressen"
 
 msgctxt "get email address.description"
 msgid "Looks up the email address of a person from your contacts list given their name. "
