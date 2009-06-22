@@ -878,7 +878,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
 var roleToPrep = {
   source: 'from',
   goal: 'to',
-  location: 'on',
+  location: 'near',
   time: 'at',
   instrument: 'with',
   alias: 'as',

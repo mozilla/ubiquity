@@ -1,0 +1,146 @@
+# builtincmds.po
+# 
+# Localizers:
+# Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
+"Language-Team: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Japanese\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#. help command:
+#. use | to separate multiple name values:
+msgctxt "help.names"
+msgid "help|about|?"
+msgstr "ヘルプ|情報|？|?"
+
+msgctxt "help.description"
+msgid ""
+"Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
+"      Or, enter the name of a command to get help on that command."
+msgstr ""
+"Ubiquity の<a href=\"about:ubiquity\">ヘルプページ</a>を開きます。<br/>\n"
+"コマンド名を入力するとコマンドのヘルプが表示されます。"
+
+#. open (ubiquity settings page) command:
+#. use | to separate multiple name values:
+msgctxt "open (ubiquity settings page).names"
+msgid "open|show"
+msgstr "開く|表示"
+
+msgctxt "open (ubiquity settings page).description"
+msgid "Opens one of the Ubiquity documentation/settings pages."
+msgstr "Ubiquityのドキュメント/設定ページを開きます。"
+
+#. write ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "write ubiquity commands.names"
+msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
+msgstr "コマンドエディタ|コマンドを書く|コマンドを編集する"
+
+msgctxt "write ubiquity commands.description"
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
+msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/editor.html\">コマンドエディタ</a>ページを開きます。"
+
+#. list ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "list ubiquity commands.names"
+msgid "list ubiquity commands"
+msgstr "コマンドリスト|コマンド一覧"
+
+msgctxt "list ubiquity commands.description"
+msgid ""
+"Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
+"      of all Ubiquity commands available and what they all do."
+msgstr "Ubiquity の利用可能な<a href=\"chrome://ubiquity/content/cmdlist.html\">コマンドのリスト</a>を開きます。"
+
+#. change ubiquity settings command:
+#. use | to separate multiple name values:
+msgctxt "change ubiquity settings.names"
+msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin"
+msgstr "設定|設定変更|スキン変更|スキンを変更"
+
+msgctxt "change ubiquity settings.description"
+msgid ""
+"Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
+"      where you can change your skin, key combinations, etc."
+msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/settings.html\">設定</a>ページを開きます。スキンやキー設定などを変更できます。"
+
+#. get support command:
+#. use | to separate multiple name values:
+msgctxt "get support.names"
+msgid "get support"
+msgstr "サポート"
+
+msgctxt "get support.description"
+msgid ""
+"Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
+"    where you can report bugs, get troubleshooting help, etc."
+msgstr ""
+"Ubiquity の<a href=\"chrome://ubiquity/content/support.html\">サポート</a>ページを開きます。\n"
+"バグ報告やトラブルシューティング等のヘルプがあります。"
+
+#. report bug command:
+#. use | to separate multiple name values:
+msgctxt "report bug.names"
+msgid "report bug"
+msgstr "バグ報告"
+
+msgctxt "report bug.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/report-bug.html\">bug report</a> page."
+msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/report-bug.html\">バグ報告</a>ページを開きます。"
+
+#. disable command command:
+#. use | to separate multiple name values:
+msgctxt "disable command.names"
+msgid "disable command"
+msgstr "コマンド無効化|コマンドを無効化|コマンドを無効化する"
+
+msgctxt "disable command.description"
+msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
+msgstr "Ubiquity コマンドを無効にします。無効にしたコマンドは候補に表示されません。"
+
+#. enable command command:
+#. use | to separate multiple name values:
+msgctxt "enable command.names"
+msgid "enable command"
+msgstr "コマンド有効化|コマンドを有効化|コマンドを有効化する"
+
+msgctxt "enable command.description"
+msgid "Re-enables a Ubiquity command that you disabled."
+msgstr "無効にした Ubiquity コマンドを再び有効にします。"
+
+#. command history command:
+#. use | to separate multiple name values:
+msgctxt "command history.names"
+msgid "command history|vita"
+msgstr "コマンド履歴"
+
+msgctxt "command history.help"
+msgid ""
+"<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to reuse.</li>\n"
+"    <li>Type to filter.</li>\n"
+"    <li>Execute to delete all matched histories.</li>\n"
+"    <li>Edit <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> to\n"
+"      set max number of histories.</li></ul>"
+msgstr ""
+"<ul style=\"list-style-image:none\">\n"
+"    <li>履歴から実行するにはアクセスキーを押すかリストの項目をクリックします。</li>\n"
+"    <li>入力した文字にマッチした履歴を表示します。</li>\n"
+"    <li>単に実行するとマッチした履歴を削除します。</li>\n"
+"    <li>記憶する履歴の最大数は <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a>\n"
+"      に値を設定してください。</li></ul>"
+
+msgctxt "command history.description"
+msgid "Accesses your command history."
+msgstr "コマンド履歴にアクセスします。"
+

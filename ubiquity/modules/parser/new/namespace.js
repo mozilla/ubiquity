@@ -66,62 +66,6 @@ var NLParser2 = {
 
       return parser;
     }
-  },
-
-  _convertVerb: function( oldVerb ) {
-    // TODO: this code is temporary scaffolding: it turns old-style verbs
-    // into new-style verbs.  The correct solution is to add the needed
-    // new metadata directly to all verbs.
-    let newVerb = {
-      names: [],
-      arguments: []
-    };
-
-    // TODO actually this should work from the NLParser.Verb object
-    newVerb.names.push( oldVerb.name );
-
-    if (oldVerb.synonyms) {
-      for (let i = 0; i < oldVerb.synonyms.length; i++) {
-        newVerb.names.push( oldVerb.synonyms[i] );
-      }
-    }
-
-    if (oldVerb.DOType) {
-      newVerb.arguments.push( { role: 'object', nountype: oldVerb.DOType } );
-    }
-
-    if (oldVerb.arguments) {
-    }
-
-    if (oldVerb.modifiers) {
-      for (let preposition in oldVerb.modifiers) {
-        let role;
-        switch (preposition) {
-          case 'to':
-            role = 'goal';
-          break;
-          case 'from':
-            role = 'source';
-          break;
-          case 'at':
-            role = 'time';
-          break;
-          case 'on': case 'near':
-            role = 'location';
-          break;
-          case 'with': case 'using':
-            role = 'instrument';
-          break;
-          case 'in':
-            role = 'format';
-          break;
-          case 'as':
-            role = 'alias';
-          break;
-        }
-      }
-    }
-    return newVerb;
   }
 };
 
