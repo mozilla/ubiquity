@@ -1381,6 +1381,8 @@ Parser.prototype = {
   this._idTime = this._date.getTime();
   this.parser = parser;
   this.input = queryString;
+  //chop off leading and trailing whitespace from input
+  this.input = this.input.replace(/^\s+|\s+$/g, '');
   this.context = context;
   this.maxSuggestions = maxSuggestions;
   this.selObj = selObj;
@@ -1811,7 +1813,7 @@ ParseQuery.prototype = {
   // Takes a {{{argText}}} (String) and a {{{newParse}}}.
   //
   // Uses the same optimization strategy as ParseQuery#addIfGoodEnough(),
-  // but operates specially on this ParserQuery's scored parses to add
+  // but operates specially on this ParseQuery's scored parses to add
   // a new parse to the scored parses object. See ParseQuery#addIfGoodEnough()
   // for the logic behind the optimization strategy.
   addScoredParseIfGoodEnough: function(argText, newParse) {
