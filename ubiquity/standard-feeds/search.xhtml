@@ -598,18 +598,19 @@ CmdUtils.CreateCommand({
         ")": "%29"
       };
       var result = encodeURIComponent(aString);
-      for (let c in charMap)
+      for (var c in charMap)
         result = result.replace(c, charMap[c]);
       return result;
     }
     function signRequest(aParams) {
+      var key;
       var params = {};
-      for (let key in aParams)
+      for (key in aParams)
         params[key] = aParams[key];
       params.Timestamp = generateTimestamp();
       params.AWSAccessKeyId = AWS_KEY;
       var paramArray = [];
-      for (let key in params)
+      for (key in params)
         paramArray.push(doEscape(key) + "=" + doEscape(params[key]));
       paramArray.sort();
       var paramString = paramArray.join("&");
