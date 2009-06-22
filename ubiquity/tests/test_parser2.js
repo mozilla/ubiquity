@@ -69,7 +69,6 @@ function getCompletionsAsyncFromParser(input, parser, context, callback) {
 
   query.onResults = function() {
     if (query.finished) {
-      //Utils.log(parser._nounCache);
       callback(query.suggestionList);
     }
   };
@@ -201,24 +200,25 @@ function testParserTwoBasicJaParse() {
   var ateHorse = null;
   var ateHorseWith = null;
   // ラーメン, ごはん, 馬刺
-  var food = new NounUtils.NounType( "food", ["ラーメン","ごはん","馬刺"]);
+  var food = new NounUtils.NounType( "food", ["\u30E9\u30FC\u30E1\u30F3","\u3054\u306F\u3093","\u99AC\u523A"]);
+  // 手, はし, フォーク
   var tool = new NounUtils.NounType( "eating utensil",
-                                           ["手", "はし", "フォーク",
-                                            "スプーン", "スポーク"]);
+                                           ["\u624B", "\u306F\u3057", "\u30D5\u30A9\u30FC\u30AF"]);
 
   var cmd_eat = {
     execute: function(context, args) {
       ateFood = args.object.text;
       ateFoodWith = args.instrument.text;
     },
-    names: ["食べる"],
+    names: ["\u98DF\u3079\u308B"], // 食べる
     arguments: [
       {role: "object", nountype: food},
       {role: "instrument", nountype: tool}
     ]
   };
 
-  var inputWords = "馬刺をはしで食べる";
+  // 馬刺をはしで食べる
+  var inputWords = "\u99AC\u523A\u3092\u306F\u3057\u3067\u98DF\u3079\u308B";
 
   var self = this;
   var testFunc = function(completions) {
@@ -226,8 +226,8 @@ function testParserTwoBasicJaParse() {
     // 馬刺 を はし で 食べる
     self.assert( completions.length == 1, "Should be 1 completion" );
     completions[0].execute();
-    self.assert( ateFood == "馬刺");
-    self.assert( ateFoodWith == "はし");
+    self.assert( ateFood == "\u99AC\u523A"); // 馬刺
+    self.assert( ateFoodWith == "\u306F\u3057"); // はし
   };
 
   getCompletionsAsync( inputWords, [cmd_eat], null,
