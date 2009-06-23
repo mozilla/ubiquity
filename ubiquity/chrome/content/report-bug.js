@@ -152,7 +152,7 @@ function doSubmit(info) {
     {contentType: "application/json",
      type: "POST",
      url: Application.prefs.getValue(BUG_REPORT_PREF, ""),
-     data: Utils.encodeJson(info),
+     data: {'data': Utils.encodeJson(info)},
      dataType: "json",
      success: function(data, textStatus) {
        doFinish("<p>Bug submitted with report id <tt>" + data.report_id +
