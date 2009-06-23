@@ -95,7 +95,7 @@ function ubiqWindowIsUp() {
 
 function ubiqInputIs(text) {
   let input = getGUbiq().cmdManager.getLastInput();
-  return (input.toLowerCase().indexOf(text.toLowerCase()) > -1);
+  return (input.toLowerCase() == text.toLowerCase());
 }
 
 function ubiqSuggestionIs(text) {
@@ -215,8 +215,8 @@ function startUbiqTutorial() {
     + "<p>Start from the middle:</p><ol>"
     + "<li><a onclick='ubiqTutorialStage1();'>How to start Ubiquity</a></li>"
     + "<li><a onclick='ubiqTutorialStage3();'>Previews (Weather command)</a></li>"
-    + "<li><a onclick='ubiqTutorialStage7();'>The Suggestion List (Calculate, Wikipedia)</a></li>"
-    + "<li><a onclick='ubiqTutorialStage16();'>Selecting, Executing (Translate, Google)</a></li>"
+    + "<li><a onclick='ubiqTutorialStage7();'>The Suggestion List (Calculate, Google)</a></li>"
+    + "<li><a onclick='ubiqTutorialStage16();'>Selecting, Executing (Translate, Map)</a></li>"
     + "<li><a onclick='ubiqTutorialStage23();'>How to get help and learn more commands</a></li>"
     + "</ol>";
   fadeInText( html );
@@ -356,7 +356,7 @@ function ubiqTutorialStage11() {
 
 function ubiqTutorialStage12() {
   let stage12Html = "<h2>Ubiquity Tutorial, part 4 of 6:"
-    + " Wikipedia command and the suggestion list</h2>"
+    + " Google command and the suggestion list</h2>"
     + "<p>Summon Ubiquity again...</p>";
   fadeInText(stage12Html);
   destroyCanvas();
@@ -367,8 +367,9 @@ function ubiqTutorialStage12() {
 
 function ubiqTutorialStage13() {
   moveDivRight();
-  let stage13Html = "<p><b>Type the letter 'W', a space, and the word 'cheese'</b>.</b></p>"
-    + "<p>(Like, 'w cheese').</p>";
+  let stage13Html = "<p>Let's say you want to search Google for cheese.</p>"
+    + "<b>Type the letter 'g', a space, and the word 'cheese'</b>.</b></p>"
+    + "<p>(Like, 'g cheese').</p>";
   fadeInText(stage13Html);
   showArrowToInputBox();
   waitForUserAction(  function() {return ubiqSuggestionIs("cheese" );},
@@ -376,21 +377,23 @@ function ubiqTutorialStage13() {
 }
 
 function ubiqTutorialStage14() {
-  // todo explain suggestion list, arrow keys!!
-  let stage14Html = "<p>Now <b>tap the down-arrow key</b> until the " +
-    "<i>wikipedia</i> command is hilighted.</p>";
+  let stage14Html = "<p>In the suggestion list, you can see several commands"
+    + " that start with 'g'.  You can use the up-arrow and down-arrow keys"
+    + " to move through the suggestion list.  Try it now:</p>"
+    + "<p><b>tap the down-arrow key</b> until the "
+    + "<i>google</i> command is hilighted.</p>";
   destroyCanvas();
   showArrowToSuggestionList();
   fadeInText(stage14Html);
-  waitForUserAction(  function() {return ubiqSuggestionIs("wikipedia" );},
+  waitForUserAction(  function() {return ubiqSuggestionIs("google" );},
                      ubiqTutorialStage15 );
 }
 
 function ubiqTutorialStage15() {
-  let stage15Html = "<p>The <i>Wikipedia</i> command preview shows a snippet"
-  + " from each article on Wikipedia matching your search term.</p>"
-  + "<p>Those article titles are links &mdash; you can click on one of them to "
-  + "open the article in a new page.</p>"
+  let stage15Html = "<p>The <i>Google</i> command preview shows a snippet"
+  + " from each search result matching your search term.</p>"
+  + "<p>Those titles are links &mdash; you can click on one of them to "
+  + "open the page in a new tab.</p>"
   + "<p>When you're done, close that page and come back here, or just <b>tap"
   + " escape</b> to move on with the tutorial.</p>";
   fadeInText(stage15Html);
@@ -404,25 +407,56 @@ function ubiqTutorialStage16() {
   moveDivRight();
   destroyCanvas();
   let stage16Html = "<h2>Part 5 of 6:"
-  + " Selecting and Executing</h2>"
-  + "<p>If you select text on a web page before summoning Ubiquity, then "
-  + "you can have your commands do things to the selected text.</p><p>Let's see"
-  + " an example. Use the mouse to <b>select the Japanese text</b> below."
+  + " Selecting and Executing</h2><p>Say you're browsing the"
+  + " web and you come across an address &mdash; like the one in the box"
+  + " below &mdash; and you'd like to see it on a map.</p>"
+  + " Ubiquity commands can work on your text selection.  Try it out: "
+  + " Use the mouse to <b>select the address</b> below."
   + " Then <b>summon Ubiquity</b>.</p>";
 
   fadeInText(stage16Html);
+
+  let agDiv = $("#tutorial-contents-div");
+  agDiv.addClass("ubiq-tutorial");
+  agDiv.css("text-align", "center");
+
+  agDiv.html("1981 Landings Drive, Mountain View, CA");
+
+  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage16b );
+}
+
+function ubiqTutorialStage16b() {
+   let stage16bhtml = "<p>Now <b>type 'map'</b>.</p>";
+   fadeInText(stage16bhtml);
+   waitForUserAction( function() {return ubiqSuggestionIs("map");},
+                      ubiqTutorialStage16c);
+}
+
+function ubiqTutorialStage16c() {
+  let stage16chtml = "<p>The preview shows a Google Map of the address."
+  + " You can click on this map to make it bigger; then you can scroll"
+  + " around on the map by dragging it.  Try that now.</p>"
+  + "<p>When you're done trying out the map, <b>hit escape</b>.</p>";
+  fadeInText(stage16chtml);
+
+  waitForUserAction( function() {return !ubiqWindowIsUp();},
+                     ubiqTutorialStage17 );
+}
+
+function ubiqTutorialStage17() {
+
+  let stage17Html = "<p>As another example, say you're browsing the web"
+  + " and you come across something written in a language you can't read"
+  + " &mdash; like the Japanese text below.  You can use Ubiquity to get"
+  + " a translation.</p>"
+  + "<p>First <b>select the Japanese text below</b>, then bring up Ubiquity"
+  + " and <b>use the <i>translate</i> command</b>.</p>"
+  + "<p>(type 'translate', or just 'tr').</p>";
 
   let jpDiv = $("#tutorial-contents-div");
   jpDiv.addClass("ubiq-tutorial");
   jpDiv.css("text-align", "center");
   jpDiv.html("アドオンを選んで、自分だけのブラウザをつくろう。");
-
-  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage17 );
-}
-
-function ubiqTutorialStage17() {
-  let stage17Html = "<p>Now issue the <i>translate</i> command.</p>"
-    + "<p>(<b>type 'translate'</b>, or just 'tr').</p>";
 
   fadeInText(stage17Html);
 
@@ -456,9 +490,9 @@ function ubiqTutorialStage19() {
 
 function ubiqTutorialStage20() {
   let stage20Html = "<p>Let's do one more example.  Say you're browsing the"
-    + " web and you come across an unfamiliar word... like the one in the box"
-    + "below."
-    + "</p><p><b>Select the word in the box below and then summon Ubiquity</b>.</p>";
+    + " web and you come across an unfamiliar word &mdash; like the one in the box"
+    + "below &mdash; and you'd like to look it up.</p>"
+    + "<p><b>Select the word in the box below and then summon Ubiquity</b>.</p>";
   let agDiv = $("#tutorial-contents-div");
   agDiv.html("aglet");
 
@@ -468,9 +502,8 @@ function ubiqTutorialStage20() {
 }
 
 function ubiqTutorialStage21() {
-  let stage21Html = "<p>You don't want to translate this word, you want to"
-  + " look it up.  So <b>issue the <i>google</i> command</b> (type 'google'"
-  + " or just 'goo').</p>";
+  let stage21Html = "<p>Now <b>use the google command</b> "
+    + "(type 'google' or just 'goo').</p>";
 
   fadeInText(stage21Html);
   waitForUserAction( function() {return ubiqSuggestionIs("google");},
