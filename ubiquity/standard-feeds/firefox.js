@@ -164,7 +164,7 @@ CmdUtils.CreateCommand({
         _MODIFIERS: {asList: this._lister} });
   },
   _lister: function({document}) "" + (
-    <li>{document.title}<code><small>{document.URL}</small></code></li>),
+    <li>{document.title}<br/><code><small>{document.URL}</small></code></li>),
 });
 
 CmdUtils.CreateCommand({
