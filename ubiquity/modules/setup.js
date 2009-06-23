@@ -104,11 +104,7 @@ let UbiquitySetup = {
 
                    {page: "search.html",
                     source: "search.xhtml",
-                    title: "Mozilla Web Search Commands"},
-
-                   {page: "image.html",
-                    source: "image.xhtml",
-                    title: "Mozilla Image-Related Commands"}],
+                    title: "Mozilla Web Search Commands"}],
 
   __getExtDir: function __getExtDir() {
     let extMgr = Cc["@mozilla.org/extensions/manager;1"]
