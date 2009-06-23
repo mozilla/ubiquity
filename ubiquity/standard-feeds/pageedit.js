@@ -45,7 +45,10 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["stop editing page", "turn off edit mode"],
-  description: "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing.",
+  description: "If you used the 'edit page' command to put the page into " +
+               "editable mode, use this command to end that mode and go " +
+                "back to normal page viewing. If you want the changes to " +
+                "persist on page reload, issue the 'save' command first.",
   icon: "chrome://ubiquity/skin/icons/page_refresh.png",
   execute: function() {
     CmdUtils.getDocumentInsecure().body.contentEditable = 'false';
@@ -55,8 +58,9 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["save page edits"],
-  description: "Saves edits you've made to this page in an annotation. "
-    + "Undo with the 'undo page edits' command.",
+  description: "Saves edits you've made to this page in an annotation. " +
+               "They will persist on page reload. You can remove them " +
+               "with the 'undo page edits' command.",
   icon: "chrome://ubiquity/skin/icons/page_save.png",
   execute: function() {
     // TODO: works w/o wrappedJSObject in CmdUtils.getDocumentInsecure() call- fix this

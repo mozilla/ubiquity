@@ -169,7 +169,8 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["count tabs"],
-  description: "Counts the number of opened tabs.",
+  description: "Counts the number of opened tabs. Takes an optional " +
+                "filter term to count number of tabs matching filter term. ",
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {
@@ -285,8 +286,11 @@ CmdUtils.CreateCommand({
 // command to tag the currently loaded URI via the humane prompt
 CmdUtils.CreateCommand({
   names: ["tag"],
-  description: "Adds tags to the current page.",
-  help: "Use commas to separate multiple tags.",
+  description: "Adds tags to describe the current page.",
+  help: "If the page is currently bookmarked, adds a tag or tags " +
+        "(separated by spaces) to the current bookmark.  If the page " +
+        "is not bookmarked, adds a bookmark to 'Unsorted bookmarks' and " +
+        "also adds the tag or tags to that bookmark.",
   author: {
     name: "Dietrich Ayala",
     email: "dietrich@mozilla.com",

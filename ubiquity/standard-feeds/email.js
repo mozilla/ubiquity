@@ -211,7 +211,7 @@ function gmailChecker(callback, service) {
 
 CmdUtils.CreateCommand({
   names: ["get last email"],
-  arguments: [{role: "goal",
+  arguments: [{role: "source",
                nountype: noun_type_email_service,
                label: "email service provier"}],
   icon: "chrome://ubiquity/skin/icons/email_open.png",
@@ -225,7 +225,7 @@ CmdUtils.CreateCommand({
     // if not, do not ajaxGet, as this triggers authentication prompt
     if (Utils.getCookie(".mail.google.com", "GX")) {
       gmailChecker(function(emailDetails) {
-        if (emailDetails.lastEmail) 
+        if (emailDetails.lastEmail)
           pBlock.innerHTML = _("Last unread e-mail: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>",emailDetails);
         else
           pBlock.innerHTML = _("<b>You have no new mail!</b>");
@@ -241,7 +241,7 @@ CmdUtils.CreateCommand({
     gmailChecker(function(emailDetails) {
       if (emailDetails.lastEmail)
         displayMessage(_("You have new email! ${lastEmail.author} says: ${lastEmail.subject}",emailDetails), me);
-      else 
+      else
         displayMessage(_("You have no new mail."), me);
     }, provider);
   }
@@ -252,7 +252,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/email.png",
   description: ("Looks up the email address of a person " +
                 "from your contacts list given their name. "),
-  help: "Execute to copy the address.",
+  help: "Execute the command to copy the address to your clipboard.",
   arguments: {modifier: noun_type_contact},
   execute: function({modifier: {text}}) {
     if (!text) return;

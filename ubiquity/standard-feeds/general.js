@@ -154,7 +154,8 @@ CmdUtils.CreateCommand(
               {role: "format",
                nountype:noun_type_lang_wikipedia,
                label: "language"}],
-  description: "Turns a phrase into a link to the matching Wikipedia article.",
+  description: "Turns a phrase into a link to the matching Wikipedia " +
+               "article. You must be in a rich-text editable field.",
   icon: "http://www.wikipedia.org/favicon.ico",
   _link: function({object: {text, html}, format: {data}}){
     var url = ("http://" + (data || "en") +
@@ -288,7 +289,9 @@ CmdUtils.CreateCommand(
     arguments: [{role: "object",
                  nountype: noun_arb_text,
                  label: "expression"}],
-    description: "Calculate knows many functions, constants, units, currencies, etc.",
+    description: "Calculate using Google's calculator. Has all the features " +
+                 "of a scientific calculator, knows constants such as the " +
+                 "speed of light, and can convert between units and currencies.",
     help: "Try 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal.",
 
     icon: "chrome://ubiquity/skin/icons/calculator.png",
@@ -487,7 +490,9 @@ CmdUtils.CreateCommand({
   arguments: [{role: "source",
                nountype: noun_type_bookmarklet,
                label: "bookmarklet name"}],
-  description: "Creates a new command from a bookmarklet.",
+  description: "Creates a new Ubiquity command from a bookmarklet.",
+  help: "For instance, if you have a bookmarklet called 'press this', " +
+        "you can say 'create bookmarklet command from press this'.",
   author: {name: "Abimanyu Raja", email: "abimanyuraja@gmail.com"},
   license: "MPL",
   preview: function(previewBlock, {source: {text, data}}) {
@@ -522,10 +527,13 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand(
 {
   names: ["create search command"],
-  description: "Creates a new Ubiquity command from a focused search-box.",
+  description: "Creates a new Ubiquity command from a focused search-box " +
+               "and lets you set the command name.",
   help: (<ol style="list-style-image:none">
          <li>Select a searchbox.</li>
-         <li>Execute this command to create the new search command.</li>
+         <li>Say 'create search command mysearch'.</li>
+         <li>Execute.</li>
+         <li>You now have a command called 'mysearch'.</li>
          </ol>) + "",
   author: {name: "Marcello Herreshoff",
            homepage: "http://stanford.edu/~marce110/"},
