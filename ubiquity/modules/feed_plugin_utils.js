@@ -60,6 +60,11 @@ function finishCommand(cmd) {
         "resource://ubiquity/modules/localization_utils.js");
       cmd = localizeCommand(cmd);
     }
+  } else {
+    cmd.name = hyphenize(cmd.name);
+    let {synonyms} = cmd;
+    if (synonyms) for (let i in synonyms)
+      synonyms[i] = hyphenize(synonyms[i]);
   }
 
   if (cmd.previewDelay == null)
@@ -69,3 +74,5 @@ function finishCommand(cmd) {
 }
 
 function isEmpty(obj) !obj || !obj.__count__;
+
+function hyphenize(name) name.replace(/ /g, "-");

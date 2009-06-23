@@ -55,7 +55,9 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__previewTimerID = -1;
   this.__lastKeyEvent = {};
 
-  Components.utils.import("resource://ubiquity/modules/utils.js", this);
+  const Cu = Components.utils;
+  Cu.import("resource://ubiquity/modules/utils.js", this);
+  Cu.import("resource://ubiquity/modules/contextutils.js", this);
 
   var self = this;
 
@@ -185,12 +187,8 @@ Ubiquity.prototype = {
     var self = this;
     var input = this.__textBox.value;
     var context = this.__makeContext();
-    var selObj = this.__cmdManager.__nlParser.
-                   _contextUtils.getSelectionObject(context);
-    if(!selObj.text)
-      selObj.text = "";
     if ((input !== this.__lastValue) ||
-	(input.length == 0 && selObj.text.length > 0)) {
+        (!input && this.ContextUtils.getSelection(context))) {
       this.__lastValue = input;
       if (input.length >= this.__MIN_CMD_PREVIEW_LENGTH)
         this.__cmdManager.updateInput(
