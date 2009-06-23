@@ -558,7 +558,7 @@ var noun_type_async_restaurant = {
   label: "restaurant",
   asyncRequest: null,
   suggest: function(text, html, callback) {
-    this.asyncRequest = getRestaurants( text, function( truthiness, suggestion ) {
+    this.asyncRequest = getRestaurants( text, function( truthiness ) {
       if (truthiness) {
         callback([CmdUtils.makeSugg(text, null, null, 2, null)]);
       }
@@ -962,6 +962,7 @@ function getRestaurants(query, callback){
   if (query.length == 0) return;
 
   var baseUrl = "http://api.yelp.com/business_review_search";
+  var queryToMatch = query.toLowerCase().replace(/\s+/g, '');
   var near = "";
   var loc = CmdUtils.getGeoLocation();
   if (loc)
@@ -982,14 +983,30 @@ function getRestaurants(query, callback){
       callback( false, null );
     },
     success: function(data) {
-      var allBusinesses = data.businesses.map(function(business)
-                                              { return business.name });
-      if (allBusinesses.length > 0){
-        callback( true, allBusinesses[0] );
+      var allBusinesses = data.businesses.map(
+        function(business){
+          return {name: business.name.toLowerCase().replace(/\s+/g, ''),
+	          categories: business.categories};
+        });
+      // if the business's name or category overlaps with the query
+      // then consider it a restaurant match
+      for each (business in allBusinesses){
+        if(business.name.indexOf(queryToMatch) != -1 ||
+	   queryToMatch.indexOf(business.name) != -1){
+              callback( true );
+              return;
+        }
+        else{
+          for each (category in business.categories){
+     	    if(category.name.indexOf(queryToMatch) != -1 ||
+              queryToMatch.indexOf(category.name) != -1){
+	        callback( true );
+	        return;
+	    }
+	  }
+        }
       }
-      else{
-        callback( false, allBusinesses[0] );
-      }
+      callback( false );
     }
   });
   return asyncRequest;
