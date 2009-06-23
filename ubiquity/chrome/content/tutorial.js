@@ -272,8 +272,9 @@ function ubiqTutorialStage5() {
     + " weather report.</p>"
     + "<p>If you don't enter a location, the <i>weather</i> command takes a"
     + " guess where you are.</p>"
-    + "<p>Now let's give it a location: <b>type a space, and then the word"
-    + " Chicago</b>.";
+    + "<p>Now let's give it a location: <b>type a space, and then type '"
+    + "near chicago'</b>.  (So your whole input will say: 'weather near "
+    + "chicago'.)";
 
   fadeInText(stage5Html);
   destroyCanvas();
@@ -309,6 +310,9 @@ function ubiqTutorialStage8() {
      + " (lower-case) and see what happens.</p>";
   fadeInText(stage8Html);
   showArrowToInputBox();
+  // TODO this next line can't trigger on 'convert' -- the top suggestion
+  // is now something else.  It would be better to have it trigger on the
+  // input being 'c' rather than waiting for a certain suggestion.
   waitForUserAction( function() {return ubiqSuggestionIs("convert" );},
                      ubiqTutorialStage9 );
 }
