@@ -93,6 +93,11 @@ function ubiqWindowIsUp() {
   return (getGUbiq().isWindowOpen);
 }
 
+function ubiqInputIs(text) {
+  let input = getGUbiq().cmdManager.getLastInput();
+  return (input.toLowerCase().indexOf(text.toLowerCase()) > -1);
+}
+
 function ubiqSuggestionIs(text) {
   let verb = getGUbiq().cmdManager.getHilitedSuggestionDisplayName();
   return (verb.toLowerCase().indexOf(text.toLowerCase()) > -1);
@@ -310,19 +315,16 @@ function ubiqTutorialStage8() {
      + " (lower-case) and see what happens.</p>";
   fadeInText(stage8Html);
   showArrowToInputBox();
-  // TODO this next line can't trigger on 'convert' -- the top suggestion
-  // is now something else.  It would be better to have it trigger on the
-  // input being 'c' rather than waiting for a certain suggestion.
-  waitForUserAction( function() {return ubiqSuggestionIs("convert" );},
+  waitForUserAction( function() {return ubiqInputIs("c" );},
                      ubiqTutorialStage9 );
 }
 
 function ubiqTutorialStage9() {
-   let stage9Html = "<p>The Ubiquity <b>suggestion list</b> displays all of"
-    + " the commands that start with the letter 'C'.</p>"
+   let stage9Html = "<p>The Ubiquity <b>suggestion list</b> displays"
+    + " commands that start with the letter 'C'.</p>"
     + " <p>Let's say you want the <i>calculate</i> command.  You don't have"
-    + " to type the whole command name.  Just <b>type the letter 'A'</b>"
-    + " (so that your input says <b>'ca'</b>).</p>";
+    + " to type the whole command name.  Just <b>type the letters 'al'</b>"
+    + " (so that your input says <b>'cal'</b>).</p>";
   fadeInText(stage9Html);
   destroyCanvas();
   showArrowToSuggestionList();
@@ -528,13 +530,13 @@ function ubiqTutorialStage25() {
 }
 
 function ubiqTutorialStage26() {
-  let stage26Html = "<p>Finally, there's the <i>command-list</i> command."
+  let stage26Html = "<p>Finally, there's the <i>list ubiquity command</i> command."
   + " This command will take you to a page that shows every command Ubiquity"
   + " has installed.  You can learn all sorts of useful things by browsing"
   + " the command-list page!</p>"
   + "<p>This is the end of the tutorial. Once you go to the command-list"
   + " page, you are on your own to experiment and learn new commands at your own pace.</p>"
-  + "<p><b>Summon Ubiquity, issue 'command-list', and tap the enter key to"
+  + "<p><b>Summon Ubiquity, type 'list', and tap the enter key to"
   + " execute.</b></p><p>Good-bye!</p>";
 
   fadeInText(stage26Html);

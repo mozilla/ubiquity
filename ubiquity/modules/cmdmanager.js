@@ -230,6 +230,10 @@ CommandManager.prototype = {
     this.onSuggestionsUpdated(input, context);
   },
 
+  getLastInput: function CM_getLastInput() {
+    return this.__lastInput;
+  },
+
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
                                                           context) {
     //dump('rendering suggestions now: '+this.__activeQuery.suggestionList.length+'\n');
