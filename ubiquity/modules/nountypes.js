@@ -72,6 +72,7 @@ var noun_arb_text = {
     return [CmdUtils.makeSugg(text, html, null, 0.5, selectionIndices)];
   },
   // hack to import feed-specific globals into this module
+  // TODO: What is this here for?  -- Jono
   loadGlobals: function(source) {
     var target = (function() this)();
     for each (let p in ["Utils", "CmdUtils",
@@ -628,7 +629,7 @@ var noun_type_geolocation = {
       // as default() can't currently return null
       return CmdUtils.makeSugg("", "", null, 0.5);
     }
-    var fullLocation = (location.city ? location.city + ", " : '') 
+    var fullLocation = (location.city ? location.city + ", " : '')
                        + location.country;
     return CmdUtils.makeSugg(fullLocation, null, null, 0.5);
   },
@@ -975,7 +976,7 @@ function getRestaurants(query, callback){
     category: "restaurants",
     ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
   });
-  
+
   var asyncRequest = jQuery.ajax({
     url: baseUrl+params,
     dataType: "json",
@@ -1056,7 +1057,7 @@ function getAddress( query, callback ) {
 
       var missRatio = missCount / queryWords.length;
       //displayMessage( missRatio );
-      
+
       if( missRatio < .5 )
         callback( true );
       else

@@ -41,6 +41,14 @@ BetterFakeCommandSource.prototype = {
   }
 };
 
+var noun_arb_text = {
+  label: "?",
+  rankLast: true,
+  suggest: function( text, html ) {
+    return [ CmdUtils.makeSugg(text, html) ];
+  }
+};
+
 function debugCompletions(completions) {
   dump('There are '+completions.length+' completions.\n');
   for each ( var comp in completions ) {
@@ -196,7 +204,7 @@ function testParserTwoDirectOnly() {
 }
 
 function testParserTwoBasicJaParse() {
-  // 
+  //
   var ateHorse = null;
   var ateHorseWith = null;
   // ラーメン, ごはん, 馬刺
@@ -436,6 +444,9 @@ function testImplicitPronounParser2() {
 
   }
   function implicitTestFuncThree(completions) {
+    // TODO failing here.... expecting "eat lunch at diner" but getting:
+    // "eat lunch at diner" (expected), "eat dinner at diner"
+    // (unexpected), and "eat near diner at diner" (bizzare)
     debugCompletions(completions);
     completions[0].execute();
     self.assert(foodGotEaten == "lunch", "Should have eaten lunch");
@@ -481,6 +492,45 @@ function testImplicitPronounParser2() {
 
 }
 
+
+function testDontInterpolateInTheMiddleOfAWord() {
+  // a word like "iterate" contains "it", but the selection should not
+  // be interpolated in place of that "it".
+  var cmd_google = makeCommand({
+    names: ["find"],
+    arguments: {object: noun_arb_text},
+    execute: function(args) {}
+    });
+  // Very interesting -- if I make the above say:
+  // argument: /*./
+  // then it times out... but arguments: {object: noun_arb_text} works
+  // great.  Is the regexp the problem?
+  var self = this;
+  var fakeContext = { textSelection: "flab", htmlSelection:"flab" };
+  getCompletionsAsync("find iterate", [cmd_google], fakeContext,
+                      self.makeCallback(dontInterpolateFuncOne));
+  function dontInterpolateFuncOne(completions) {
+    debugCompletions(completions);
+    // Getting three suggestions:
+    // "find iterate" (expected),
+    // "find flab" (unexpected)
+    // "find find iterate" (weird)
+    self.assert(completions.length == 1, "Should have 1 completion");
+    self.assert(completions[0].args.object[0].text == "iterate",
+              "Should not interpolate for the 'it' in 'iterate'.");
+    getCompletionsAsync("find it erate", [cmd_google], fakeContext,
+                        self.makeCallback(dontInterpolateFuncTwo));
+
+  }
+  function dontInterpolateFuncTwo(completions) {
+    debugCompletions(completions);
+    self.assert(completions.length == 2, "Should have 2 completions.");
+    self.assert(completions[0].args.object[0].text == "flab erate",
+              "Should interpolate 'flab' for 'it'.");
+    self.assert(completions[1].args.object[0].text == "it erate",
+              "input without interpolation should also be suggested.");
+  }
+}
 
 
 
