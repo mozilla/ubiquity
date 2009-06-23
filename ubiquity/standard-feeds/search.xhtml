@@ -900,6 +900,17 @@ CmdUtils.CreateCommand({
   execute: function( args ) {
     var object = args.object;
     var location = args.location;
+
+    // if no location was specified, use geolocation
+    var near = "";
+    if (location.text) {
+      near = location.text;
+    } else {
+      var loc = CmdUtils.getGeoLocation();
+      if (loc)
+        near = loc.city + ", " + loc.state;
+    }
+
     var doc = context.focusedWindow.document;
     var focused = context.focusedElement;
 
@@ -931,7 +942,7 @@ CmdUtils.CreateCommand({
     var query = object.text;
     var url = "http://www.yelp.com/search?find_desc={QUERY}&find_loc={NEAR}";
     url = url.replace( /{QUERY}/g, query);
-    url = url.replace( /{NEAR}/g, location.text);
+    url = url.replace( /{NEAR}/g, near);
 
     Utils.openUrlInBrowser( url );
   },
@@ -948,11 +959,11 @@ CmdUtils.CreateCommand({
 
     var near = "";
     if (location.text) {
-      near = location.text ;
+      near = location.text;
     } else {
       var loc = CmdUtils.getGeoLocation();
       if (loc)
-        var near = loc.city + ", " + loc.state;
+        near = loc.city + ", " + loc.state;
     }
 
     var params = {
