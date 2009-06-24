@@ -183,7 +183,7 @@ CmdUtils.CreateCommand({
     var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
     return _('<div class="count-tabs"><b>${count}</b> ' +
              'tab{if count > 1}s{/if} ' +
-             '{if html}matching <b>${html}</b>{else}total{/if}</b>.</div>',
+             '{if html}matching <b>${html}</b>{else}total{/if}.</div>',
              {count: count, html: html});
   }
 });

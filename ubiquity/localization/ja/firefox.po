@@ -106,8 +106,8 @@ msgctxt "count tabs.description"
 msgid "Counts the number of opened tabs."
 msgstr "開いているタブの数を数えます。"
 
-msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
-msgstr "<div class="count-tabs"><b>${count}</b> のタブ{if html}がマッチしました: <b>${html}</b>{else}が開いています。{/if}</b>.</div>"
+msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}.</div>"
+msgstr "<div class="count-tabs"><b>${count}</b>個のタブ{if html}に一致しました: <b>${html}</b>{else}が開いています。{/if}</div>"
 
 
 #. refresh command:
@@ -125,7 +125,7 @@ msgstr "現在のページを再度読み込みます。"
 #. use | to separate multiple name values:
 msgctxt "bookmark.names"
 msgid "bookmark"
-msgstr "ブックマーク|ブックマーク追加"
+msgstr "ブックマーク追加"
 
 msgctxt "bookmark.description"
 msgid "Adds the current page to bookmarks."
@@ -173,7 +173,7 @@ msgstr "履歴を次へ進みます。"
 #. use | to separate multiple name values:
 msgctxt "go home.names"
 msgid "go home"
-msgstr "ホームページ|ホームページへ移動"
+msgstr "ホームページへ移動"
 
 msgctxt "go home.description"
 msgid "Goes to home page."
@@ -211,7 +211,7 @@ msgstr "現在のページにタグを追加します。"
 
 msgctxt "tag.preview"
 msgid "Describes the current page with{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"
-msgstr "現在のページに{if html}次の{if}タグを追加します{if html}:<p><b>${html}</b></p>{else}。"
+msgstr "現在のページに{if html}次の{/if}タグを追加します{if html}:<p><b>${html}</b></p>{else}。{/if}"
 
 
 #. run bookmarklet command:
@@ -227,10 +227,6 @@ msgstr "リストを更新するには何も入力しないでください。"
 msgctxt "run bookmarklet.description"
 msgid "Runs a bookmarklet from your favorites."
 msgstr "ブックマークからブックマークレットを実行します。"
-
-msgctxt "run bookmarklet.preview"
-msgid "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
-msgstr "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
 
 
 #. undo closed tabs command:
@@ -266,7 +262,7 @@ msgstr "マッチするタブはありません。"
 #. use | to separate multiple name values:
 msgctxt "check livemark.names"
 msgid "check livemark"
-msgstr "ライブブックマーク|フィード|ライブブックマークを確認|フィードを確認|"
+msgstr "ライブブックマークを確認|フィードを確認"
 
 msgctxt "check livemark.help"
 msgid "Execute to open the site."
