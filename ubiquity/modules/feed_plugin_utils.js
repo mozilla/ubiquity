@@ -62,9 +62,10 @@ function finishCommand(cmd) {
     }
   } else {
     cmd.name = hyphenize(cmd.name);
-    let {synonyms} = cmd;
-    if (synonyms) for (let i in synonyms)
-      synonyms[i] = hyphenize(synonyms[i]);
+    for each (let key in ["names", "synonyms"]) {
+      let names = cmd[key];
+      for (let i in names) names[i] = hyphenize(names[i]);
+    }
   }
 
   if (cmd.previewDelay == null)
