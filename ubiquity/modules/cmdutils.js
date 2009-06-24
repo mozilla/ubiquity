@@ -42,11 +42,11 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
- // = CmdUtils =
- //
- // This is a small library of general utility functions
- // for use by command code.  Everything clients need is contained within
- // the {{{CmdUtils}}} namespace.
+// = CmdUtils =
+//
+// This is a small library of general utility functions
+// for use by command code.  Everything clients need is contained within
+// the {{{CmdUtils}}} namespace.
 
 var EXPORTED_SYMBOLS = ["CmdUtils"];
 
@@ -55,145 +55,78 @@ var CmdUtils = {
   __nextId: null,
 };
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/nounutils.js");
+for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Application = (Cc["@mozilla.org/fuel/application;1"]
-                     .getService(Ci.fuelIApplication));
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/nounutils.js");
+Cu.import("resource://ubiquity/modules/contextutils.js");
+
+const {Application} = Utils;
 
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
-// ** {{{ CmdUtils.log(a, b, c, ...) }}} **
+// === {{{ CmdUtils.log(a, b, c, ...) }}} ===
 //
-// One of the most useful functions to know both for development
-// and debugging. This logging function takes
-// an arbitrary number of arguments and will log them to the most
-// appropriate output. If you have Firebug, the output will go to its
-// console. Otherwise, the output will be routed to the Javascript
-// Console.
-//
-// {{{CmdUtils.log}}} implements smart pretty print, so you
-// can use it for inspecting arrays and objects.
-//
-// {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
+// See [[#modules/utils.js|Utils]]{{{.log}}}.
 
-CmdUtils.log = function log() {
+function log() {
   Utils.log.apply(Utils, arguments);
-};
+}
 
-// ** {{{ CmdUtils.getHtmlSelection(context) }}} **
+// === {{{ CmdUtils.getHtmlSelection() }}} ===
 //
-// Returns a string containing the the html representation of the
+// Returns a string containing the html representation of the
 // user's current selection, i.e. text including tags.
 //
-// {{{context}}} is an optional argument that contains the execution
-// context (which is automatically generated inside of command code).
-
-CmdUtils.getHtmlSelection = function getHtmlSelection(context) {
-  var ctu = {};
-  Components.utils.import("resource://ubiquity/modules/contextutils.js",
-                          ctu);
-
-  if (typeof(context) == "undefined")
-    context = this.__globalObject.context;
-
-  return ctu.ContextUtils.getHtmlSelection(context);
-};
-
-// ** {{{ CmdUtils.getSelection(context) }}} **
+// === {{{ CmdUtils.getSelection() }}} ===
 //
 // Returns a string containing the text and just the text of the user's
 // current selection, i.e. with html tags stripped out.
 //
-// {{{context}}} is an optional argument that contains the execution
-// context (which is automatically generated inside of command code).
-
-
-CmdUtils.getSelection = function getSelection(context) {
-  var ctu = {};
-  Components.utils.import("resource://ubiquity/modules/contextutils.js",
-                          ctu);
-
-  if (typeof(context) == "undefined")
-    context = this.__globalObject.context;
-
-  return ctu.ContextUtils.getSelection(context);
-};
-
-// ** {{{ CmdUtils.setSelection(content, options) }}} **
+// === {{{ CmdUtils.setSelection(content, options) }}} ===
 //
 // Replaces the current selection with new content.
-// See {{{ ContextUtils.setSelection }}}
 //
 // {{{content}}} The text (or html) to set as the selection.
 //
-// {{{options}}} options is a dictionary; if it has a "text" property then
+// {{{options}}} is a dictionary; if it has a "text" property then
 // that value will be used in place of the html if we're in
 // a plain-text-only editable field.
 
-CmdUtils.setSelection = function setSelection(content, options) {
-  var ctu = {};
-  Components.utils.import("resource://ubiquity/modules/contextutils.js",
-                          ctu);
+["getHtmlSelection", "getSelection", "setSelection"].forEach(function (m) {
+  CmdUtils[m] = function xSelection() {
+    var args = Array.slice(arguments);
+    args.unshift(this.__globalObject.context);
+    return ContextUtils[m].apply(ContextUtils, args);
+  };
+});
 
-  var context = this.__globalObject.context;
-
-  ctu.ContextUtils.setSelection(context, content, options);
-};
-
-
-// ** {{{ CmdUtils.getDocument() }}} **
+// === {{{ CmdUtils.getDocument() }}} ===
+// === {{{ CmdUtils.getWindow() }}} ===
 //
-// This gets the document of the current tab in a secure way
+// Gets the document/window of the current tab in a secure way.
 
-CmdUtils.getDocument = function getDocument(){
-  return CmdUtils.getWindow().document;
-};
+function getDocument() Application.activeWindow.activeTab.document;
 
+function getWindow() CmdUtils.getDocument().defaultView;
 
-// ** {{{ CmdUtils.getWindow() }}} **
+// === {{{ CmdUtils.getDocumentInsecure() }}} ===
+// === {{{ CmdUtils.getWindowInsecure() }}} ===
 //
-// This gets the window object of the current tab in a secure way.
-
-CmdUtils.getWindow = function getWindow() {
-  return Application.activeWindow
-                    .activeTab
-                    .document
-                    .defaultView;
-};
-
-
-// ** {{{ CmdUtis.getWindowInsecure() }}} **
-//
-// This gets the window object of the current tab, without the
+// Gets the document/window object of the current tab, without the
 // safe XPCNativeWrapper. While this allows access to scripts in the content,
-// it is potentially **unsafe** and {{{ CmdUtils.getWindow( ) }}} should
+// it is potentially **unsafe** and {{{CmdUtils.getWindow()}}} should
 // be used in place of this whenever possible.
 
-CmdUtils.getWindowInsecure = function getWindowInsecure() {
-  return Application.activeWindow
-                    .activeTab
-                    .document
-                    .defaultView
-                    .wrappedJSObject;
-};
+function getDocumentInsecure() CmdUtils.getDocument().wrappedJSObject;
 
+function getWindowInsecure() CmdUtils.getWindow().wrappedJSObject;
 
-// ** {{{ CmdUtis.getDocumentInsecure() }}} **
-//
-// This gets the document of the current tab, without the
-// safe XPCNativeWrapper. While this allows access to scripts in the content,
-// it is potentially **unsafe** and {{{ CmdUtils.getDocument( ) }}} should
-// be used in place of this whenever possible.
-
-CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
-  return CmdUtils.getWindowInsecure().document;
-};
-
-
-// ** {{{ CmdUtils.geocodeAddress(address, callback) }}} **
+// === {{{ CmdUtils.geocodeAddress(address, callback) }}} ===
 //
 // This function uses the Yahoo geocoding service to take a text
 // string of an address/location and turn it into a structured
@@ -209,7 +142,7 @@ CmdUtils.getDocumentInsecure = function getDocumentInsecure() {
 // an object that includes {{{Latitude}}}, {{{Longitude}}},
 // {{{Address}}}, {{{City}}}, {{{State}}}, {{{Zip}}}, and {{{Country}}}.
 
-CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
+function geocodeAddress(address, callback) {
   const {jQuery} = this.__globalObject;
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = {
@@ -244,48 +177,44 @@ CmdUtils.geocodeAddress = function geocodeAddress( address, callback ) {
   }, "xml");
 }
 
-
-// ** {{{ CmdUtils.injectCss(css) }}} **
+// === {{{ CmdUtils.injectCss(css) }}} ===
 //
 // Injects CSS source code into the current tab's document.
 // Returns the injected style elment for later use.
 //
 // {{{ css }}} The CSS source code to inject, in plain text.
 
-CmdUtils.injectCss = function injectCss(css) {
+function injectCss(css) {
   var doc = CmdUtils.getDocument();
   var style = doc.createElement("style");
   style.innerHTML = css;
   return doc.body.appendChild(style);
-};
+}
 
-
-// ** {{{ CmdUtils.injectHtml(html) }}} **
+// === {{{ CmdUtils.injectHtml(html) }}} ===
 //
 // Injects HTML source code at the end of the current tab's document.
 // Returns the injected elements as a jQuery object.
 //
 // {{{ html }}} The HTML source code to inject, in plain text.
 
-CmdUtils.injectHtml = function injectHtml( html ) {
+function injectHtml(html) {
   const {jQuery} = this.__globalObject;
   var doc = CmdUtils.getDocument();
   return jQuery("<div>" + html + "</div>").contents().appendTo(doc.body);
-};
+}
 
-
-// ** {{{ CmdUtils.copyToClipboard(text) }}} **
+// === {{{ CmdUtils.copyToClipboard(text) }}} ===
 //
 // This function places the passed-in text into the OS's clipboard.
 //
 // {{{text}}} is a plaintext string that will be put into the clipboard.
 
-CmdUtils.copyToClipboard = function copyToClipboard(text){
+function copyToClipboard(text) {
   Utils.clipboard.text = text;
-};
+}
 
-
-// ** {{{ CmdUtils.injectJavascript(src, callback) }}} **
+// === {{{ CmdUtils.injectJavascript(src, callback) }}} ===
 //
 // Injects Javascript from a URL into the current tab's document,
 // and calls an optional callback function once the script has loaded.
@@ -298,7 +227,7 @@ CmdUtils.copyToClipboard = function copyToClipboard(text){
 // {{{ callback }}} Optional callback function to call once the script
 // has loaded in the document.
 
-CmdUtils.injectJavascript = function injectJavascript(src, callback) {
+function injectJavascript(src, callback) {
   var doc = CmdUtils.getDocument();
 
   var script = doc.createElement("script");
@@ -311,16 +240,15 @@ CmdUtils.injectJavascript = function injectJavascript(src, callback) {
       callback();
     }
   }, true);
-};
+}
 
-
-// ** {{{ CmdUtils.loadJQuery(func) }}} **
+// === {{{ CmdUtils.loadJQuery(func) }}} ===
 //
 // Injects the jQuery javascript library into the current tab's document.
 //
 // {{{ func }}} Non-optional callback function to call once jQuery has loaded.
 
-CmdUtils.loadJQuery = function loadJQuery(func) {
+function loadJQuery(func) {
   CmdUtils.injectJavascript(
     "resource://ubiquity/scripts/jquery.js",
     CmdUtils.safeWrapper( function() {
@@ -328,9 +256,9 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
       func(contentJQuery);
     })
   );
-};
+}
 
-// ** {{{ CmdUtils.onPageLoad(callback) }}} **
+// === {{{ CmdUtils.onPageLoad(callback) }}} ===
 //
 // Sets up a function to be run whenever a page is loaded.
 //
@@ -339,11 +267,11 @@ CmdUtils.loadJQuery = function loadJQuery(func) {
 // called; it is passed a single argument, which is the window's document
 // object.
 
-CmdUtils.onPageLoad = function onPageLoad(callback) {
+function onPageLoad(callback) {
   this.__globalObject.pageLoadFuncs.push(callback);
-};
+}
 
-// ** {{{ CmdUtils.onUbiquityLoad(callback) }}} **
+// === {{{ CmdUtils.onUbiquityLoad(callback) }}} ===
 //
 // Sets up a function to be run whenever a Ubiqutiy instance is created.
 //
@@ -352,24 +280,24 @@ CmdUtils.onPageLoad = function onPageLoad(callback) {
 // called; it is passed two arguments, which is the Ubiquity instance and
 // the chromeWindow associated with it.
 
-CmdUtils.onUbiquityLoad = function onUbiquityLoad(callback) {
+function onUbiquityLoad(callback) {
   this.__globalObject.ubiquityLoadFuncs.push(callback);
-};
+}
 
 // ** {{{ CmdUtils.setLastResult(result) }}} **
 //
-// **Deprecated.  Do not use.**
+// **//Deprecated. Do not use.//**
 //
 // Sets the last result of a command's execution, for use in command piping.
 
-CmdUtils.setLastResult = function setLastResult( result ) {
+function setLastResult(result) {
   // TODO: This function was used for command piping, which has been
   // removed for the time being; we should probably consider removing this
   // function and anything that uses it.
   //globals.lastCmdResult = result;
-};
+}
 
-// ** {{{ CmdUtils.getGeoLocation(callback) }}} **
+// === {{{ CmdUtils.getGeoLocation(callback) }}} ===
 //
 // Uses Geo-IP lookup to get the user's physical location. Will cache the result.
 // If a result is already in the cache, this function works both
@@ -388,7 +316,7 @@ CmdUtils.setLastResult = function setLastResult( result ) {
 // callback, and the geolocation object will instead be returned
 // directly.
 
-CmdUtils.getGeoLocation = function getGeoLocation(callback) {
+function getGeoLocation(callback) {
   const {jQuery, globals} = this.__globalObject;
   if (globals.geoLocation) {
     if (callback)
@@ -423,8 +351,7 @@ CmdUtils.getGeoLocation = function getGeoLocation(callback) {
   });
 
   return null;
-};
-
+}
 
 // TODO: UserCode is only used by experimental-commands.js.  Does it still
 // need to be included here?
@@ -461,35 +388,31 @@ CmdUtils.UserCode = {
   }
 };
 
-// -----------------------------------------------------------------
-// SNAPSHOT RELATED
-// -----------------------------------------------------------------
+// == SNAPSHOT ==
 
-// ** {{{ CmdUtils.getHiddenWindow() }}} **
+// === {{{ CmdUtils.getHiddenWindow() }}} ===
 //
 // Returns the application's hidden window.  (Every Mozilla
 // application has a global singleton hidden window.  This is used by
 // {{{ CmdUtils.getWindowSnapshot() }}}, but probably doesn't need
 // to be used directly by command feeds.
 
-CmdUtils.getHiddenWindow = function getHiddenWindow() {
-  return Cc["@mozilla.org/appshell/appShellService;1"]
-                   .getService(Ci.nsIAppShellService)
-                   .hiddenDOMWindow;
-}
+function getHiddenWindow()(Cc["@mozilla.org/appshell/appShellService;1"]
+                           .getService(Ci.nsIAppShellService)
+                           .hiddenDOMWindow);
 
-// ** {{{ CmdUtils.getTabSnapshot(tab, options) }}} **
+// === {{{ CmdUtils.getTabSnapshot(tab, options) }}} ===
 //
 // Creates a thumbnail image of the contents of a given tab.
 // {{{ tab }}} a tab object.
 // {{{ options }}} see getWindowSnapshot().
 
-CmdUtils.getTabSnapshot = function getTabSnapshot( tab, options ) {
+function getTabSnapshot(tab, options) {
   var win = tab.document.defaultView;
   return CmdUtils.getWindowSnapshot( win, options );
 }
 
-// ** {{{ CmdUtils.getWindowSnapshot(win, options) }}} **
+// === {{{ CmdUtils.getWindowSnapshot(win, options) }}} ===
 //
 // Creates a thumbnail image of the contents of the given window.
 // {{{ window }}} a window object.
@@ -504,12 +427,12 @@ CmdUtils.getTabSnapshot = function getTabSnapshot( tab, options ) {
 // If a callback is not provided, this function will return a URL
 // pointing to a JPEG of the image data.
 
-CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
-  if( !options ) options = {};
+function getWindowSnapshot(win, options) {
+  if(!options) options = {};
 
   var hiddenWindow = CmdUtils.getHiddenWindow();
   var thumbnail = hiddenWindow.document.createElementNS(
-    "http://www.w3.org/1999/xhtml", "canvas" );
+    "http://www.w3.org/1999/xhtml", "canvas");
 
   var width = options.width || 200; // Default to 200px width
 
@@ -532,8 +455,7 @@ CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
   }
 }
 
-
-// ** {{{ CmdUtils.getImageSnapshot(url, callback) }}} **
+// === {{{ CmdUtils.getImageSnapshot(url, callback) }}} ===
 //
 // Takes a snapshot of an image residing at the passed-in URL. This
 // is useful for when you want to get the bits of an image when it
@@ -544,7 +466,8 @@ CmdUtils.getWindowSnapshot = function getWindowSnapshot( win, options ) {
 //
 // {{{callback}}} A function that get's passed back the bits of the
 // image, in DataUrl form.
-CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
+
+function getImageSnapshot(url, callback) {
   var hiddenWindow = CmdUtils.getHiddenWindow();
   var body = hiddenWindow.document.body;
 
@@ -564,11 +487,9 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 	}, true);
 }
 
-// ---------------------------
-// FUNCTIONS FOR STORING AND RETRIEVING PASSWORDS AND OTHER SENSITIVE INFORMATION
-// ---------------------------
+// == PASSWORDS AND OTHER SENSITIVE INFORMATION ==
 
-// ** {{{ CmdUtils.savePassword(opts) }}} **
+// === {{{ CmdUtils.savePassword(opts) }}} ===
 //
 // Saves a pair of username/password (or username/api key) to the password
 // manager.
@@ -580,7 +501,7 @@ CmdUtils.getImageSnapshot = function getImageSnapshot( url, callback ) {
 // {{{opts.password}}} the password (or other private data, such as an API key)
 // corresponding to the username
 
-CmdUtils.savePassword = function savePassword( opts ){
+function savePassword(opts) {
   var passwordManager = Cc["@mozilla.org/login-manager;1"].
                         getService(Ci.nsILoginManager);
   var nsLoginInfo = new Components.
@@ -620,7 +541,7 @@ CmdUtils.savePassword = function savePassword( opts ){
   }
 }
 
-// ** {{{ CmdUtils.retrieveLogins(name) }}} **
+// === {{{ CmdUtils.retrieveLogins(name) }}} ===
 //
 // Retrieves one or more username/password saved with CmdUtils.savePassword.
 //
@@ -630,7 +551,7 @@ CmdUtils.savePassword = function savePassword( opts ){
 // Returns: an array of objects, each of which takes the form
 // { username: '', password: '' }
 
-CmdUtils.retrieveLogins = function retrieveLogins( name ){
+function retrieveLogins(name) {
   var passwordManager = Cc["@mozilla.org/login-manager;1"].
                         getService(Ci.nsILoginManager);
 
@@ -650,11 +571,9 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
   return returnedLogins;
 }
 
-// -----------------------------------------------------------------
-// COMMAND CREATION FUNCTIONS
-// -----------------------------------------------------------------
+// == COMMAND CREATION ==
 
-// ** {{{ CmdUtils.CreateCommand(options) }}} **
+// === {{{ CmdUtils.CreateCommand(options) }}} ===
 //
 // Creates and registers a Ubiquity command.
 //
@@ -711,7 +630,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // into more depth, include examples of usage, etc. Can include HTML
 // tags.
 //
-// ** The following properties are optional: **
+// === The following properties are optional: ===
 //
 // {{{ options.icon }}} A string containing the URL of a small image (favicon-sized) to
 // be displayed alongside the name of your command in the interface.
@@ -756,7 +675,7 @@ CmdUtils.retrieveLogins = function retrieveLogins( name ){
 // document. This can also be a relative URL, in which case it will be
 // based off the URL from which the feed is being retrieved.
 
-CmdUtils.CreateCommand = function CreateCommand(options) {
+function CreateCommand(options) {
   var me = this;
   var global = this.__globalObject;
   var command = {proto: options, __proto__: options};
@@ -878,243 +797,9 @@ CmdUtils.CreateCommand = function CreateCommand(options) {
     command.previewUrl = global.Utils.url(options.previewUrl);
 
   global.commands.push(command);
-};
+}
 
-// -----------------------------------------------------------------
-// TEMPLATING FUNCTIONS
-// -----------------------------------------------------------------
-
-// ** {{{ CmdUtils.renderTemplate(template, data) }}} **
-//
-// Renders a template by substituting values from a dictionary into
-// a template string or file. The templating language used is
-// trimpath, which is defined here:
-// http://code.google.com/p/trimpath/wiki/JavaScriptTemplates
-//
-// {{{template}}} can be either a string, in which case the string is used
-// for the template, or else it can be {file: "filename"}, in which
-// case the following happens:
-//    * If the feed is on the user's local filesystem, the file's path
-//      is assumed to be relative and the file's contents are read and
-//      used as the template.
-//
-//      * Otherwise, the file's path is assumed to be a key into a global
-//      object called Attachments, which is defined by the feed.  The
-//      value of this key is used as the template.
-//
-// The reason this is done is so that a command feed can be developed
-// locally and then easily deployed to a remote server as a single
-// human-readable file without requiring any manual code
-// modifications; with this system, it becomes straightforward to
-// construct a post-processing tool for feed deployment that
-// automatically generates the Attachments object and appends it to
-// the command feed's code.
-//
-// {{{data}}} is a dictionary of values to be substituted.
-//
-// Returns a string containing the result of processing the template.
-
-CmdUtils.renderTemplate = function renderTemplate( template, data ) {
-  var templStr;
-  if (typeof template == "string")
-    templStr = template;
-  else if (template.file) {
-    if (Utils.url(feed.id).scheme == "file") {
-      var url = Utils.url({uri: template.file, base: feed.id});
-      templStr = Utils.getLocalUrl(url.spec);
-    } else {
-      templStr = Attachments[template.file];
-    }
-  }
-
-  var templateObject = this.__globalObject.Template.parseTemplate( templStr );
-  return templateObject.process( data );
-};
-
-// ** {{{ CmdUtils.previewAjax(pblock, options) }}} **
-//
-// Does an asynchronous request to a remote web service.  It is used
-// just like {{{jQuery.ajax()}}}, which is documented at
-// http://docs.jquery.com/Ajax/jQuery.ajax.
-// The difference is that {{{CmdUtils.previewAjax()}}} is designed to handle
-// command previews, which can be canceled by the user between the
-// time that it's requested and the time it displays.  If the preview
-// is canceled, no callbacks in the options object will be called.
-
-CmdUtils.previewAjax = function previewAjax(pblock, options) {
-  const {jQuery} = this.__globalObject;
-  var xhr;
-  var newOptions = {};
-  function abort() {
-    if (xhr)
-      xhr.abort();
-  }
-  for (var key in options) {
-    if (typeof(options[key]) == 'function')
-      newOptions[key] = CmdUtils.previewCallback(pblock,
-                                                 options[key],
-                                                 abort);
-    else
-      newOptions[key] = options[key];
-  }
-
-  var wrappedXhr;
-  if (newOptions.xhr)
-    wrappedXhr = newOptions.xhr;
-  else
-    wrappedXhr = jQuery.ajaxSettings.xhr; // see: scripts/jquery_setup.js
-
-  function backgroundXhr() {
-    var newXhr = wrappedXhr.apply(this, arguments);
-    newXhr.mozBackgroundRequest = true;
-    return newXhr;
-  }
-  newOptions.xhr = backgroundXhr;
-
-  xhr = jQuery.ajax(newOptions);
-  return xhr;
-};
-
-// ** {{{ CmdUtils.previewGet(pblock, url, data, callback, type) }}} **
-//
-// Does an asynchronous request to a remote web service.  It is used
-// just like {{{jQuery.get()}}}, which is documented at
-// http://docs.jquery.com/Ajax/jQuery.get.
-// The difference is that {{{CmdUtils.previewGet()}}} is designed to handle
-// command previews, which can be canceled by the user between the
-// time that it's requested and the time it displays.  If the preview
-// is canceled, the given callback will not be called.
-
-CmdUtils.previewGet = function previewGet(pblock,
-                                          url,
-                                          data,
-                                          callback,
-                                          type) {
-  if (typeof data === "function") {
-    callback = data;
-    data = null;
-  }
-
-  return this.previewAjax(pblock,
-                          { type: "GET",
-                            url: url,
-                            data: data,
-                            success: callback,
-                            dataType: type});
-};
-
-// ** {{{ CmdUtils.previewPost(pblock, url, data, callback, type) }}} **
-//
-// Does an asynchronous request to a remote web service.  It is used
-// just like {{{jQuery.post()}}}, which is documented at
-// http://docs.jquery.com/Ajax/jQuery.post.
-// The difference is that {{{CmdUtils.previewPost()}}} is designed to handle
-// command previews, which can be canceled by the user between the
-// time that it's requested and the time it displays.  If the preview
-// is canceled, the given callback will not be called.
-
-CmdUtils.previewPost = function previewPost(pblock,
-                                            url,
-                                            data,
-                                            callback,
-                                            type) {
-  if (typeof data === "function") {
-    callback = data;
-    data = {};
-  }
-
-  return this.previewAjax(pblock,
-                          { type: "POST",
-                            url: url,
-                            data: data,
-                            success: callback,
-                            dataType: type});
-};
-
-// ** {{{ CmdUtils.previewCallback(pblock, callback, abortCallback) }}} **
-//
-// Creates a 'preview callback': a wrapper for a function which
-// first checks to see if the current preview has been canceled,
-// and if not, calls the real callback.
-//
-// {{{pblock}}}: the preview display element (the same one which is
-// passed in as the first argument to the {{{preview()}}} method of every
-// command.
-//
-// {{{callback}}}: the function to be called if the preview is not
-// cancelled.
-//
-// {{{abortCallback}}}: (optional) a function that will be called instead
-// if the preview is cancelled.
-
-CmdUtils.previewCallback = function previewCallback(pblock,
-                                                    callback,
-                                                    abortCallback) {
-  var previewChanged = false;
-
-  function onPreviewChange() {
-    pblock.removeEventListener("preview-change",
-                               onPreviewChange,
-                               false);
-    previewChanged = true;
-    if (abortCallback)
-      abortCallback();
-  }
-
-  pblock.addEventListener("preview-change", onPreviewChange, false);
-
-  function wrappedCallback() {
-    if (!previewChanged) {
-      pblock.removeEventListener("preview-change",
-                                 onPreviewChange,
-                                 false);
-      return callback.apply(this, arguments);
-    }
-    return null;
-  }
-
-  return wrappedCallback;
-};
-
-// ** {{{ CmdUtils.absUrl(data, sourceUrl) }}} **
-//
-// Fixes relative urls in data (eg. as returned by AJAX call). Usefull for
-// displaying fetched content in command previews.
-//
-// {{{data}}}: The data containing relative urls - accepts HTML, jQuery objects
-// and XML
-//
-// {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to
-// which the relative paths are relative to)
-CmdUtils.absUrl = function absUrl(data, sourceUrl) {
-  const {jQuery} = this.__globalObject;
-  switch (typeof data) {
-    case "string":
-      return data.replace(
-        /\b(href|src|action)=([\"\']?)(?!https?:\/\/)([^\s>]+)\2/ig,
-        function au_repl(_, a, q, path)(a + "="
-                                          + q
-                                          + Utils.url({uri: path,
-                                                       base: sourceUrl}).spec
-                                          + q));
-    case "object":
-      jQuery(data).find("*").andSelf().filter("a, img, form, link, embed")
-        .each(function au_each(){
-          var attr, path = (this.getAttribute(attr = "href") ||
-                            this.getAttribute(attr = "src" ) ||
-                            this.getAttribute(attr = "action"));
-          if (path !== null && /^(?!https?:\/\/)/.test(path))
-            this.setAttribute(attr,
-                              Utils.url({uri: path, base: sourceUrl}).spec);
-        });
-      return data;
-    case "xml":
-      return XML(arguments.callee(data.toXMLString(), sourceUrl));
-  }
-  return null;
-};
-
-// ** {{{ CmdUtils.makeSearchCommand(options) }}} **
+// === {{{ CmdUtils.makeSearchCommand(options) }}} ===
 //
 // A specialized version of {{{CmdUtils.CreateCommand()}}}, this lets
 // you make commands that interface with search engines, without
@@ -1210,8 +895,8 @@ CmdUtils.absUrl = function absUrl(data, sourceUrl) {
 // });
 // }}}
 
-CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
-  const {jQuery} = this.__globalObject, CU = this;
+function makeSearchCommand(options) {
+  const {jQuery, noun_arb_text} = this.__globalObject, CU = this;
   function insertQuery (target, query) {
     var re = /%s|{QUERY}/g;
     if (typeof target === "object") {
@@ -1221,13 +906,8 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     }
     return target && target.replace(re, encodeURIComponent(query));
   }
-  if (options.name && ! options.names) {
-    options.names = [ options.name ];
-  }
-  options.arguments = [{role: "object",
-                        nountype: this.__globalObject.noun_arb_text,
-                        label: "search term"}];
-  options.execute = function({object: {text}}) {
+  options.arguments = {"object search term": noun_arb_text};
+  options.execute = function execute_search({object: {text}}) {
     Utils.openUrlInBrowser(insertQuery(options.url, text),
                            insertQuery(options.postData, text));
   };
@@ -1452,14 +1132,10 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
     };
   }
 
-  for (let x = 0; x < options.names.length; x++ ) {
-    options.names[x] = options.names[x].toLowerCase();
-  }
-
   this.CreateCommand(options);
-};
+}
 
-// ** {{{ CmdUtils.makeBookmarkletCommand(options) }}} **
+// === {{{ CmdUtils.makeBookmarkletCommand(options) }}} ===
 //
 // Creates and registers a Ubiquity command based on a bookmarklet.
 // When the command is run, it will invoke the bookmarklet.
@@ -1477,56 +1153,206 @@ CmdUtils.makeSearchCommand = function makeSearchCommand( options ) {
 // You can choose to provide other optional properties, which work the
 // same way as they do for {{{CmdUtils.CreateCommand}}}, except that
 // since bookmarklets can't take arguments, there's no reason to provide
-// {{{options.takes}}} or {{{options.modifiers}}}.
+// {{{options.arguments}}}.
 
-CmdUtils.makeBookmarkletCommand = function makeBookmarkletCmd(options) {
-  options.name = options.name.toLowerCase().replace(/ /g,'-');
-
-  options.execute = function(directObject, modifiers) {
-    var code = options.url;
-    CmdUtils.getDocument().location = code;
+function makeBookmarkletCommand(options) {
+  options.execute = function execute_bookmarklet() {
+    CmdUtils.getWindow().location = options.url;
   };
 
-  if (! options.preview ){
-    options.preview = function(pblock) {
-      var content = "Executes the <b>" + options.name + "</b> bookmarklet";
-      pblock.innerHTML = content;
+  if (!options.preview)
+    options.preview = function preview_bookmarklet(pblock) {
+      pblock.innerHTML = "Executes the <b>" + this.name + "</b> bookmarklet.";
     };
-  }
 
   this.CreateCommand(options);
-};
+}
 
-// ** {{{ CmdUtils.maxSuggestions }}} **
+// == TEMPLATING ==
+
+// === {{{ CmdUtils.renderTemplate(template, data) }}} ===
 //
-// Current number of max suggestions.
-
-CmdUtils.__defineGetter__("maxSuggestions", function maxSuggestions(){
-  var m = {};
-  Components.utils.import("resource://ubiquity/modules/cmdmanager.js", m);
-  return m.CommandManager.prototype.maxSuggestions;
-});
-
-// ** {{{ CmdUtils.safeWrapper() }}} **
+// Renders a template by substituting values from a dictionary into
+// a template string or file. The templating language used is
+// trimpath, which is defined here:
+// http://code.google.com/p/trimpath/wiki/JavaScriptTemplates
 //
-// Wraps a function so that exceptions from it are suppressed and notified.
+// {{{template}}} can be either a string, in which case the string is used
+// for the template, or else it can be {file: "filename"}, in which
+// case the following happens:
+//    * If the feed is on the user's local filesystem, the file's path
+//      is assumed to be relative and the file's contents are read and
+//      used as the template.
+//
+//    * Otherwise, the file's path is assumed to be a key into a global
+//      object called Attachments, which is defined by the feed.  The
+//      value of this key is used as the template.
+//
+// The reason this is done is so that a command feed can be developed
+// locally and then easily deployed to a remote server as a single
+// human-readable file without requiring any manual code
+// modifications; with this system, it becomes straightforward to
+// construct a post-processing tool for feed deployment that
+// automatically generates the Attachments object and appends it to
+// the command feed's code.
+//
+// {{{data}}} is a dictionary of values to be substituted.
+//
+// Returns a string containing the result of processing the template.
 
-CmdUtils.safeWrapper = function safeWrapper(func) {
-  var {displayMessage} = this.__globalObject;
-  return function safeWrappedFunc() {
-    try {
-      func.apply(this, arguments);
-    } catch (e) {
-      displayMessage(
-        {text: ("An exception occurred while running " +
-                func.name + "()."),
-         exception: e}
-      );
+function renderTemplate(template, data) {
+  var templStr;
+  if (typeof template == "string")
+    templStr = template;
+  else if (template.file) {
+    if (Utils.url(feed.id).scheme == "file") {
+      var url = Utils.url({uri: template.file, base: feed.id});
+      templStr = Utils.getLocalUrl(url.spec);
+    } else {
+      templStr = Attachments[template.file];
     }
-  };
-};
+  }
 
-// ** {{{ CmdUtils.previewList() }}} **
+  var templateObject = this.__globalObject.Template.parseTemplate(templStr);
+  return templateObject.process(data);
+}
+
+// == PREVIEW ==
+
+// === {{{ CmdUtils.previewAjax(pblock, options) }}} ===
+//
+// Does an asynchronous request to a remote web service.  It is used
+// just like {{{jQuery.ajax()}}}, which is documented at
+// http://docs.jquery.com/Ajax/jQuery.ajax.
+// The difference is that {{{CmdUtils.previewAjax()}}} is designed to handle
+// command previews, which can be canceled by the user between the
+// time that it's requested and the time it displays.  If the preview
+// is canceled, no callbacks in the options object will be called.
+
+function previewAjax(pblock, options) {
+  const {jQuery} = this.__globalObject;
+  var xhr;
+  var newOptions = {};
+  function abort() {
+    if (xhr)
+      xhr.abort();
+  }
+  for (var key in options) {
+    if (typeof options[key] === "function")
+      newOptions[key] = CmdUtils.previewCallback(pblock,
+                                                 options[key],
+                                                 abort);
+    else
+      newOptions[key] = options[key];
+  }
+
+  var wrappedXhr;
+  if (newOptions.xhr)
+    wrappedXhr = newOptions.xhr;
+  else
+    wrappedXhr = jQuery.ajaxSettings.xhr; // see: scripts/jquery_setup.js
+
+  function backgroundXhr() {
+    var newXhr = wrappedXhr.apply(this, arguments);
+    newXhr.mozBackgroundRequest = true;
+    return newXhr;
+  }
+  newOptions.xhr = backgroundXhr;
+
+  xhr = jQuery.ajax(newOptions);
+  return xhr;
+}
+
+// === {{{ CmdUtils.previewGet(pblock, url, data, callback, type) }}} ===
+//
+// Does an asynchronous request to a remote web service.  It is used
+// just like {{{jQuery.get()}}}, which is documented at
+// http://docs.jquery.com/Ajax/jQuery.get.
+// The difference is that {{{CmdUtils.previewGet()}}} is designed to handle
+// command previews, which can be canceled by the user between the
+// time that it's requested and the time it displays.  If the preview
+// is canceled, the given callback will not be called.
+
+function previewGet(pblock, url, data, callback, type) {
+  if (typeof data === "function") {
+    callback = data;
+    data = null;
+  }
+
+  return this.previewAjax(pblock,
+                          { type: "GET",
+                            url: url,
+                            data: data,
+                            success: callback,
+                            dataType: type});
+}
+
+// === {{{ CmdUtils.previewPost(pblock, url, data, callback, type) }}} ===
+//
+// Does an asynchronous request to a remote web service.  It is used
+// just like {{{jQuery.post()}}}, which is documented at
+// http://docs.jquery.com/Ajax/jQuery.post.
+// The difference is that {{{CmdUtils.previewPost()}}} is designed to handle
+// command previews, which can be canceled by the user between the
+// time that it's requested and the time it displays.  If the preview
+// is canceled, the given callback will not be called.
+
+function previewPost(pblock, url, data, callback, type) {
+  if (typeof data === "function") {
+    callback = data;
+    data = {};
+  }
+
+  return this.previewAjax(pblock,
+                          { type: "POST",
+                            url: url,
+                            data: data,
+                            success: callback,
+                            dataType: type});
+}
+
+// === {{{ CmdUtils.previewCallback(pblock, callback, abortCallback) }}} ===
+//
+// Creates a 'preview callback': a wrapper for a function which
+// first checks to see if the current preview has been canceled,
+// and if not, calls the real callback.
+//
+// {{{pblock}}}: the preview display element (the same one which is
+// passed in as the first argument to the {{{preview()}}} method of every
+// command.
+//
+// {{{callback}}}: the function to be called if the preview is not
+// cancelled.
+//
+// {{{abortCallback}}}: (optional) a function that will be called instead
+// if the preview is cancelled.
+
+function previewCallback(pblock, callback, abortCallback) {
+  var previewChanged = false;
+
+  function onPreviewChange() {
+    pblock.removeEventListener("preview-change",
+                               onPreviewChange,
+                               false);
+    previewChanged = true;
+    if (abortCallback)
+      abortCallback();
+  }
+
+  pblock.addEventListener("preview-change", onPreviewChange, false);
+
+  return function wrappedCallback() {
+    if (!previewChanged) {
+      pblock.removeEventListener("preview-change",
+                                 onPreviewChange,
+                                 false);
+      return callback.apply(this, arguments);
+    }
+    return null;
+  };
+}
+
+// === {{{ CmdUtils.previewList() }}} ===
 //
 // Creates a simple clickable list in the preview.
 //
@@ -1541,7 +1367,7 @@ CmdUtils.safeWrapper = function safeWrapper(func) {
 //
 // {{{css}}} is an optional CSS string inserted along with the list.
 
-CmdUtils.previewList = function previewList(block, htmls, callback, css) {
+function previewList(block, htmls, callback, css) {
   var list = [], i = -1;
   for (let id in htmls) {
     let k = ++i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
@@ -1561,8 +1387,8 @@ CmdUtils.previewList = function previewList(block, htmls, callback, css) {
       target.disabled = true;
       callback(target.value, ev);
     }, true);
-};
-CmdUtils.previewList.CSS = <><![CDATA[
+}
+previewList.CSS = <><![CDATA[
   .preview-list {margin: 0; padding: 0; list-style-type: none}
   .preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
   .preview-list label {display: block; cursor: pointer}
@@ -1571,6 +1397,71 @@ CmdUtils.previewList.CSS = <><![CDATA[
     font: bold 108% "Consolas",monospace; text-transform: uppercase}
   ]]></>;
 
+// === {{{ CmdUtils.absUrl(data, sourceUrl) }}} ===
+//
+// Fixes relative urls in data (eg. as returned by AJAX call). Usefull for
+// displaying fetched content in command previews.
+//
+// {{{data}}}: The data containing relative urls - accepts HTML, jQuery objects
+// and XML
+//
+// {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to
+// which the relative paths are relative to)
+function absUrl(data, sourceUrl) {
+  const {jQuery} = this.__globalObject;
+  switch (typeof data) {
+    case "string":
+      return data.replace(
+        /\b(href|src|action)=([\"\']?)(?!https?:\/\/)([^\s>]+)\2/ig,
+        function au_repl(_, a, q, path)(a + "="
+                                          + q
+                                          + Utils.url({uri: path,
+                                                       base: sourceUrl}).spec
+                                          + q));
+    case "object":
+      jQuery(data).find("*").andSelf().filter("a, img, form, link, embed")
+        .each(function au_each(){
+          var attr, path = (this.getAttribute(attr = "href") ||
+                            this.getAttribute(attr = "src" ) ||
+                            this.getAttribute(attr = "action"));
+          if (path !== null && /^(?!https?:\/\/)/.test(path))
+            this.setAttribute(attr,
+                              Utils.url({uri: path, base: sourceUrl}).spec);
+        });
+      return data;
+    case "xml":
+      return XML(arguments.callee(data.toXMLString(), sourceUrl));
+  }
+  return null;
+}
+
+// === {{{ CmdUtils.safeWrapper() }}} ===
+//
+// Wraps a function so that exceptions from it are suppressed and notified.
+
+function safeWrapper(func) {
+  var {displayMessage} = this.__globalObject;
+  return function safeWrappedFunc() {
+    try {
+      func.apply(this, arguments);
+    } catch (e) {
+      displayMessage(
+        {text: ("An exception occurred while running " +
+                func.name + "()."),
+         exception: e}
+      );
+    }
+  };
+}
+
+// === {{{ CmdUtils.maxSuggestions }}} ===
+//
+// Gets the current number of max suggestions.
+
+CmdUtils.__defineGetter__("maxSuggestions", function maxSuggestions() {
+  return (Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
+          .CommandManager.maxSuggestions);
+});
 
 // CmdUtils.pluginRegistry
 // A registry of provider plugins for overlord verbs
@@ -1624,4 +1515,4 @@ CmdUtils.executeBasedOnPlugin = function( cmdId, argRole ) {
       }
     }
   });
-}
+};
