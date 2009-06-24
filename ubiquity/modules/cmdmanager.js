@@ -325,19 +325,17 @@ CommandManager.prototype = {
     var self = this;
     return function getAvailableCommands(context, popupCb) {
       self.refresh();
-      function cmdSuggCb (suggestions){
-        let retVal = {};
-        for each (var sugg in suggestions) {
+      function cmdSuggCb(suggestions) {
+        var retVal = {};
+        for each (let sugg in suggestions) {
+          let {_verb, score} = sugg;
+          let {name, icon} = _verb.cmd || _verb;
           let parsedSentence = sugg;
-          let name = parsedSentence._verb.name;
-	  let titleCasedName = name[0].toUpperCase() + name.slice(1);
-          retVal[titleCasedName] = function execute() {
+          let exec = retVal[name] = function execute() {
             parsedSentence.execute(context);
           };
-	  retVal[titleCasedName].score = parsedSentence.score;
-          let suggestedCommand = sugg._verb;
-          if (suggestedCommand.icon)
-            retVal[titleCasedName].icon = suggestedCommand.icon;
+          if (score) exec.score = score;
+          if (icon) exec.icon = icon;
         }
         popupCb(retVal);
       }

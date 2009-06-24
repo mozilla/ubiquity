@@ -896,6 +896,7 @@ NLParser1.Verb.prototype = {
        keys are prepositions
        values are NounTypes.
        example:  { "from" : City, "to" : City, "on" : Day } */
+    this.cmd = cmd;
     this._execute     = cmd.execute;
     this._preview     = cmd.preview;
     this._description = cmd.description;
