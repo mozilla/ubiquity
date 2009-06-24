@@ -46,7 +46,6 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
-Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -188,13 +187,6 @@ Parser.prototype = {
       var msgService = new AlertMessageService();
       msgService.displayMessage("Some verbs were not loaded " +
                                 "as they are not compatible with Parser 2.");
-    }
-
-    for each (let verb in verbs) {
-      if ((verb.feedUri || 0).scheme === "file") {
-        let feedKey = LocalizationUtils.getLocalFeedKey(verb.feedUri.path);
-        LocalizationUtils.loadLocalPo(feedKey);
-      }
     }
 
     // Scrape the noun types up here.

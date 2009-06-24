@@ -36,223 +36,154 @@
 
  // = LocalizationUtils =
 
-var EXPORTED_SYMBOLS = ["LocalizationUtils","localizeCommand"];
+var EXPORTED_SYMBOLS = ["LocalizationUtils", "localizeCommand"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/setup.js");
-Components.utils.import("resource://ubiquity/scripts/gettext/lib/Gettext.js");
-
-const languageCode = UbiquitySetup.languageCode;
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/scripts/gettext/lib/Gettext.js");
+
+const Localizable = RegExp("^" + UbiquitySetup.getBaseUri() +
+                           "(?:standard|builtin)-feeds/");
+const LocalizableProperties = ["names", "help", "description"];
 var commandContext = null;
 var feedContext = null;
 var displayContext = null;
-var localStringBundles = {};
+//var localStringBundles = {};
 var loadedPo = {};
 
-//var document = {getElementsByTagName: function()[]};
-Gettext.prototype.get_lang_refs = function()[];
-
-var myGettext = new Gettext();
+//var document = {getElementsByTagName: function () []};
+Gettext.prototype.get_lang_refs = function () [];
 
 var LocalizationUtils = {
-  GETTEXT: myGettext,
-/*  _initGettext: function() {
-    this.GETTEXT.get_lang_refs = function() [];
-  },*/
-  BUNDLE_SVC: Components.classes['@mozilla.org/intl/stringbundle;1']
-                   .getService(Components.interfaces.nsIStringBundleService),
+  GETTEXT: new Gettext(),
+  //BUNDLE_SVC: (Cc['@mozilla.org/intl/stringbundle;1']
+  //             .getService(Ci.nsIStringBundleService)),
 
-  // this command only works with local standard-feeds commands
-  loadLocalPo: function LU_loadLocalPo (feedKey) {
-    if (!loadedPo[feedKey]) {
-      var data;
-      var url = "resource://ubiquity/localization/"+languageCode+"/"+feedKey+".po";
-      try {
-        
-        var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-                            .createInstance(Components.interfaces.nsIXMLHttpRequest);
-        req.open('GET', url, false);
-        req.overrideMimeType("text/plain; charset=utf-8");
-        req.send(null);
-        data = req.responseText;
-      } catch(e) {
-//        dump("there was a problem loading "+url+"\n");
-        return false;
-      }
-      
-      if (!data)
-        return false;
+  isLocalizable: function LU_isLocalizable(feedUrl) Localizable.test(feedUrl),
+  // only works with local (builtin|standard)-feeds
+  loadLocalPo: function LU_loadLocalPo(url) {
+    var feedKey = this.getLocalFeedKey(url);
+    if (feedKey in loadedPo) return true;
 
-      try {
-        var parsed = this.GETTEXT.parse_po(req.responseText);
-            
-        rv = {};
-        rv[feedKey] = parsed;
+    var poUrl = ("resource://ubiquity/localization/" +
+                 UbiquitySetup.languageCode + "/" +
+                 feedKey + ".po");
+    try { var po = Utils.getLocalUrl(poUrl, "utf-8"); } catch (e) {}
+    if (!po) return false;
 
-        this.GETTEXT.parse_locale_data(rv);
-        
-        loadedPo[feedKey] = parsed;
-      } catch(e) {
-        dump("couldn't parse "+url+"\n");
-        return false;
-      }
-      dump("loaded "+url+"\n");
+    try {
+      let parsed = this.GETTEXT.parse_po(po);
+      let rv = {};
+      rv[feedKey] = parsed;
+      this.GETTEXT.parse_locale_data(rv);
+      loadedPo[feedKey] = parsed;
+    } catch (e) {
+      Utils.dump("couldn't parse " + poUrl);
+      return false;
     }
+    Utils.dump("loaded " + poUrl);
     return true;
   },
-  
+
   getLoadedPo: function LU_getLoadedPo() {
     return loadedPo;
   },
-  
+
   getLocalFeedKey: function LU_getLocalFeedKey(path) {
-    return path.replace(/^.*\/(\w+)\.\w+$/g,'$1');
+    return path.replace(/^.*\/(\w+)\.\w+$/g, "$1");
   },
-  
+
   getLocalizedString: function LU_getLocalizedString (feedKey, key) {
     try {
       //dump('gettext('+key+')\n');
       //dump('return: '+this.GETTEXT.dgettext(feedKey,key)+'\n');
       return this.GETTEXT.dgettext(feedKey,key);
-    } catch(ex) {
+    } catch (ex) {
       return key;
     }
   },
-  
-  getLocalizedStringFromContext: function LU_getLocalizedStringFromContext
-                                 (feedKey, context, key) {
+
+  getLocalizedStringFromContext:
+  function LU_getLocalizedStringFromContext(feedKey, context, key) {
     try {
-      dump('gettext('+context+','+key+')\n');
+      //dump('gettext('+context+','+key+')\n');
       let rv = this.GETTEXT.dpgettext(feedKey,context, key);
-      if (rv == key) // if nothing was found in this context, try the general context
+      if (rv == key)
+        // nothing was found in this context. try the general context
         rv = this.GETTEXT.dgettext(feedKey,key);
-      dump('return: '+rv+'\n');
+      //dump('return: '+rv+'\n');
       return rv;
-    } catch(ex) {
-      dump('key '+key+' not found\n');
+    } catch (ex) {
+      //dump('key '+key+' not found\n');
       return key;
     }
   },
-  
+
   // ** {{{setLocalizationContext}}} **
   //
   // This is used to set the feed and command context for _().
   // {{{displayMode}}} is either "execute" or "preview" depending
   // on the context. These settings are used in constructing the
   // appropriate localization keys.
-  setLocalizationContext: function LU_setLocalizationContext
-                          (feedUri, cmdName, displayMode) {
+  setLocalizationContext:
+  function LU_setLocalizationContext(feedUri, cmdName, displayMode) {
     feedContext = feedUri;
     commandContext = cmdName;
-    if (displayMode == 'execute' || displayMode == 'preview')
+    if (displayMode === "execute" || displayMode === "preview")
       displayContext = displayMode;
     else
       displayContext = null;
-    dump('setLocalizationContext:\n'
-         +' feed:    '+(feedUri.asciiSpec || feedUri)+'\n'
-         +' command: '+cmdName+'\n'
-         +' display: '+displayMode+'\n');
+    Utils.dump("\n feed   : " + (feedUri.asciiSpec || feedUri),
+               "\n command: " + cmdName,
+               "\n display: " + displayMode);
   },
-  
+
   get commandContext() { return commandContext; },
   get feedContext() { return feedContext; },
   get displayContext() { return displayContext; },
-  
-  getLocalized: function LU_getLocalized(string, replacements) {
-    
-    let context = this.commandContext
-              + (this.displayContext ? '.' + displayContext : '');
-    
-    let feedKey = this.getLocalFeedKey(this.feedContext.asciiSpec);
-    
-    // try to load the po again here, just in case.
-    this.loadLocalPo(feedKey);
-    
-    let localized = this.getLocalizedStringFromContext(feedKey, context, string);
-    
-    if (replacements && this.CmdUtils)
-      return this.CmdUtils.renderTemplate(localized, replacements);
-    else
-      return localized;
-  }
 
+  getLocalized: function LU_getLocalized(string) {
+    var context = (this.commandContext +
+                   (this.displayContext ? "." + displayContext : ""));
+    var feedKey = this.getLocalFeedKey(this.feedContext.asciiSpec);
+    return this.getLocalizedStringFromContext(feedKey, context, string);
+  }
 };
 
 // localizeCommand only works with Parser 2 commands.
 // It might magically work with Parser 1, but it's not built to, and not
 // tested that way.
-var localizeCommand = function(cmd) {
+function localizeCommand(cmd) {
+  var url = cmd.feedUri.spec;
+  if (!LocalizationUtils.isLocalizable(url)) return cmd;
+  var feedKey = LocalizationUtils.getLocalFeedKey(url);
 
-  // cmdWatch + cmdUnwatch are just some debug introspection utilities
-  // that mitcho wrote. They work okay, except in the interaction 
-  // with names (see below).
-
-  function cmdWatch(key) {
-    cmd.watch(key,
-      function(id, oldval, newval) {
-        if (oldval != newval)
-          dump('changed '+id+':\n<<<'+oldval+'\n>>>'+newval+'\n');
-      });
-  }
-  
-  function cmdUnwatch(key) {
-    cmd.unwatch(key);
-  }
-
-  let feedKey = LocalizationUtils.getLocalFeedKey(cmd.feedUri.asciiSpec);
-  
-  if (!LocalizationUtils.loadLocalPo(feedKey))
-    return cmd;
-
-  dump('localizing cmd '+cmd.referenceName+' now\n');
-
-  var arrayProperties = ['names','contributors'];
-  for each (let key in arrayProperties) {
-    if (cmd[key]) {
-      // Disable these watches as the introspection messes up 
-      // names in a weird and (as yet) unrecoverable way.
-      //cmdWatch(key);
-      let newval = getLocalizedProperty(feedKey, cmd, key) || null;
-      if (newval && newval.split)
-        newval = newval.split(/\s*\|\s{0,}/);
-      if (newval != cmd[key])
-        cmd[key] = newval;
-      //cmdUnwatch(key);
-    }
-  }
-
-  var stringProperties = ['help', 'description'];
-  for each (let key in stringProperties) {
-    if (cmd[key]) {
-      //cmdWatch(key);
-      cmd[key] = getLocalizedProperty(feedKey, cmd, key);
-      //cmdUnwatch(key);
-    }
+  for each (let key in LocalizableProperties) if (cmd[key]) {
+    let val = getLocalizedProperty(feedKey, cmd, key);
+    if (val) cmd[key] = val;
   }
 
   if (cmd._previewString) {
-    //cmdWatch('_previewString');
-    let context = cmd.referenceName + '.preview';
+    let context = cmd.referenceName + ".preview";
     let key = cmd._previewString;
-    let rv = LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
-    if (rv != key)
-      cmd._previewString = rv;
-    //cmdUnwatch('_previewString');
+    let rv =
+      LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
+    if (rv !== key) cmd._previewString = rv;
   }
 
   return cmd;
 }
 
-var getLocalizedProperty = function(feedKey, cmd, property) {
-  let context = cmd.referenceName + '.' + property;
-  let key = cmd[property];
-  if (Utils.isArray(key))
-    key = key.join('|');
-  let rv = LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
-  if (rv == key)
-    rv = cmd[property];
-  return rv;
+function getLocalizedProperty(feedKey, cmd, property) {
+  var context = cmd.referenceName + "." + property;
+  var key = cmd[property];
+  var propIsArray = Utils.isArray(key);
+  if (propIsArray) key = key.join("|");
+  var rv =
+    LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
+  return rv !== key && (propIsArray ? rv.split(/\s{0,}\|\s{0,}/) : rv);
 }
