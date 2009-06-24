@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -497,14 +498,18 @@ Utils.urlToParams = function urlToParams(url) {
 // This function synchronously retrieves the content of the given
 // local URL, such as a {{{file:}}} or {{{chrome:}}} URL, and returns
 // it.
+//
+// {{{url}}} is the URL to retrieve.
+//
+// {{{charset}}} is an optional string to specify the character set.
 
-Utils.getLocalUrl = function getLocalUrl(url) {
+Utils.getLocalUrl = function getLocalUrl(url, charset) {
   var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
   req.open("GET", url, false);
-  req.overrideMimeType("text/plain");
+  req.overrideMimeType("text/plain" + (charset ? ";charset=" + charset : ""));
   req.send(null);
-  if (req.status == 0)
+  if (req.status === 0)
     return req.responseText;
   else
     throw new Error("Failed to get " + url);
@@ -644,6 +649,17 @@ Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
                   .getService(Ci.nsIScriptableUnicodeConverter);
   converter.charset = fromCharset;
   return converter.ConvertToUnicode(text);
+};
+
+// == {{{ Utils.dump() }}} ==
+//
+// A nicer {{{dump()}}} that
+// displays caller's name and appends a line feed.
+
+Utils.dump = function dump() {
+  var {caller} = arguments.callee;
+  Utils.__globalObject.dump(
+    (caller ? caller.name + ": " : "") + Array.join(arguments, " ") + "\n");
 };
 
 // == {{{ Utils.tabs }}} ==
