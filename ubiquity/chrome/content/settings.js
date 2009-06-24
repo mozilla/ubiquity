@@ -42,6 +42,7 @@ const Cu = Components.utils;
 Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/cmdmanager.js");
 
 var {skinService} = UbiquitySetup.createServices();
 var msgService = new AlertMessageService();
@@ -74,6 +75,12 @@ function onDocumentLoad() {
       }
     );
   }
+
+  $("#max-suggestions").keyup(function changeMaxSuggestions() {
+    if (!this.value || this.value === this.lastValue) return;
+    CommandManager.maxSuggestions = this.value;
+    this.value = this.lastValue = CommandManager.maxSuggestions;
+  }).val(CommandManager.maxSuggestions);
 }
 
 function changeLanguageSettings() {
@@ -82,14 +89,15 @@ function changeLanguageSettings() {
                           .getService(Ci.nsIPrefService);
   prefs = prefs.getBranch("extensions.ubiquity.");
 
-  var useParserVersion = $("#use-new-parser-checkbox").attr('checked') ?2:1;
-  if ( useParserVersion != prefs.getIntPref("parserVersion") ) {
+  var useParserVersion = $("#use-new-parser-checkbox").attr("checked") ? 2 : 1;
+  if (useParserVersion !== prefs.getIntPref("parserVersion")) {
     changed = true;
     prefs.setIntPref("parserVersion", useParserVersion);
   }
+  $("#language-select")[0].disabled = useParserVersion < 2;
 
   var useLanguage = $("#language-select").val();
-  if ( useLanguage != prefs.getCharPref("language")) {
+  if (useLanguage !== prefs.getCharPref("language")) {
     changed = true;
     prefs.setCharPref("language", useLanguage);
   }

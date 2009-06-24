@@ -39,12 +39,29 @@
 
 var EXPORTED_SYMBOLS = ["CommandManager"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/preview_browser.js");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+const Application = (Cc["@mozilla.org/fuel/application;1"]
+                     .getService(Ci.fuelIApplication));
 
-const DEFAULT_MAX_SUGGESTIONS = 5;
-const MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/preview_browser.js");
+
 const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
+const MIN_MAX_SUGGS = 1;
+const MAX_MAX_SUGGS = 42;
+
+CommandManager.DEFAULT_MAX_SUGGESTIONS = 5;
+CommandManager.MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
+CommandManager.__defineGetter__("maxSuggestions", function () {
+  return Application.prefs.getValue(this.MAX_SUGGESTIONS_PREF,
+                                    this.DEFAULT_MAX_SUGGESTIONS);
+});
+CommandManager.__defineSetter__("maxSuggestions", function (value) {
+  var num = Math.max(MIN_MAX_SUGGS, Math.min(value | 0, MAX_MAX_SUGGS));
+  Application.prefs.setValue(this.MAX_SUGGESTIONS_PREF, num);
+});
 
 function CommandManager(cmdSource, msgService, parser, suggsNode,
                         previewPaneNode, helpNode) {
@@ -329,10 +346,5 @@ CommandManager.prototype = {
     }
   },
 
-  get maxSuggestions() {
-    const Application = (Components.classes["@mozilla.org/fuel/application;1"]
-                         .getService(Components.interfaces.fuelIApplication));
-    return Application.prefs.getValue(MAX_SUGGESTIONS_PREF,
-                                      DEFAULT_MAX_SUGGESTIONS);
-  }
+  get maxSuggestions() CommandManager.maxSuggestions,
 };
