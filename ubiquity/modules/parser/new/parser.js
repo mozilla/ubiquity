@@ -173,11 +173,11 @@ Parser.prototype = {
   // called.
   setCommandList: function setCommandList(commandList) {
     // First we'll register the verbs themselves.
-    this._verbList = [];
+    var verbs = this._verbList = [];
     var skippedSomeVerbs = false;
-    for each (let verb in commandList) if (!verb.disabled) {
+    for each (let verb in commandList) {
       if (!verb.oldAPI || verb.arguments)
-        this._verbList.push(verb);
+        verbs.push(verb);
       else
         skippedSomeVerbs = true;
     }
@@ -190,7 +190,7 @@ Parser.prototype = {
                                 "as they are not compatible with Parser 2.");
     }
 
-    for each (let verb in this._verbList) {
+    for each (let verb in verbs) {
       if ((verb.feedUri || 0).scheme === "file") {
         let feedKey = LocalizationUtils.getLocalFeedKey(verb.feedUri.path);
         LocalizationUtils.loadLocalPo(feedKey);
@@ -198,13 +198,11 @@ Parser.prototype = {
     }
 
     // Scrape the noun types up here.
-    this._nounTypes = {};
-    for each (let verb in this._verbList) {
+    var nouns = this._nounTypes = {};
+    for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
-        let {id} = arg.nountype;
-        if (!(id in this._nounTypes)) {
-          this._nounTypes[id] = arg.nountype;
-        }
+        let nt = arg.nountype;
+        nouns[nt.id] = nt;
       }
     }
     //dump("loaded nouns:\n" +
@@ -212,6 +210,8 @@ Parser.prototype = {
     //     "\n");
 
     this.initializeCache();
+    // run language-specific setup code
+    this.initializeLanguage();
   },
 
   // ** {{{Parser#initializeCache()}}} **
@@ -228,24 +228,14 @@ Parser.prototype = {
     var rolesCache = this._rolesCache = {};
 
     // pick each "other role" and its first delimiter.
-    let otherRolesHash = {};
-    for each (let roleSpec in this.roles) {
-      let {role, delimiter} = roleSpec;
-      if (role != 'object' && !otherRolesHash[role])
-        otherRolesHash[role] = delimiter;
+    var otherRolesCache = this._otherRolesCache = {};
+    for each (let {role, delimiter} in this.roles)
       // if there is another role besides object which doesn't
       // require a modifier (currently unsupported) this arg will
       // already have a parse where it is this role, so don't try to
       // make the object this role.
-      if (delimiter == '')
-        otherRolesHash[role] = null;
-    }
-    for (let role in otherRolesHash) {
-      if (otherRolesHash[role] == null)
-        delete(otherRolesHash[role]);
-    }
-
-    this._otherRolesCache = otherRolesHash;
+      if (role !== "object" && !(role in otherRolesCache) && delimiter)
+        otherRolesCache[role] = delimiter;
 
     // creates a regex that matches any delimiter of given roles
     function regexFromDelimeters(roles)
@@ -294,16 +284,13 @@ Parser.prototype = {
     var boundary = this.usespaces ? "\\b" : "";
     patternCache.anaphora =
       RegExp(boundary + RegexpTrie(this.anaphora) + boundary);
-    
-    // run language-specific setup code
-    this.initializeLanguage();
   },
-  
+
   // ** {{{Parser#initializeLanguage}}} **
   //
   // Run custom language-specific setup code here. This is called at the
   // end of initializeCache. See ja for an example of its use.
-  
+
   initializeLanguage: function() {
   },
 
@@ -314,7 +301,7 @@ Parser.prototype = {
   newQuery: function(queryString, context, maxSuggestions,
                      dontRunImmediately) {
     var selObj = this._contextUtils.getSelectionObject(context);
-    if(!selObj.text)
+    if (!selObj.text)
       selObj.text = "";
     var theNewQuery = new ParseQuery(this,
                                      queryString,
@@ -376,7 +363,8 @@ Parser.prototype = {
     var verbs = this._verbList;
     var verbPatterns = this._patternCache.verbs;
     function addParses(verbPiece, argString, order) {
-      for (var verbId in verbs) if (verbPatterns[verbId].test(verbPiece)) {
+      for (var verbId in verbs) if (!verbs[verbId].disabled &&
+                                    verbPatterns[verbId].test(verbPiece)) {
         let match = RegExp.lastMatch;
         let verb = verbs[verbId];
         for each (let name in verb.names) if (~name.indexOf(verbPiece)) {
@@ -631,7 +619,7 @@ Parser.prototype = {
     // Note that the values in the delimiterIndices for each delimiter are the
     // indices which correspond to those delimiters.
     EACH_DI:
-    for each (var delimiterIndices in possibleDelimiterCombinations) {
+    for each (let delimiterIndices in possibleDelimiterCombinations) {
       // don't process invalid delimiter combinations
       // (where two delimiters are back to back)
       for (let i = delimiterIndices.length; --i > 0;) {
@@ -642,7 +630,7 @@ Parser.prototype = {
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parse which doesn't
       // have any arguments set.
-      var seedParse = new Parse(this, input, verb, argString);
+      let seedParse = new Parse(this, input, verb, argString);
       // get all parses started off with their scoreMultipier values
       if (verb.id) {
         seedParse.scoreMultiplier = 1;
@@ -883,7 +871,7 @@ Parser.prototype = {
   // roles of all verbs being considered for the provided parse.
   interpolateSelection: function(parse, selection) {
     let returnArr = [];
-    if(!selection.length)
+    if (!selection.length)
       return returnArr;
 
     // If the parse has no declared verb, then we cannot
@@ -893,14 +881,14 @@ Parser.prototype = {
     // Then, in step 7, object -> other roles interpolation will
     // make sure that the selection gets tried in all roles of
     // the verb that is chosen.
-    if(!parse._verb || !parse._verb.arguments){
+    if (!parse._verb || !parse._verb.arguments){
       let parseCopy = parse.copy();
       parseCopy.setArgumentSuggestion(
           "object",
           { _order: 1,
             input: selection,
             modifier: ""});
-      if(!parse.input.length)
+      if (!parse.input.length)
         parseCopy.scoreMultiplier *= 1.2;
       parseCopy._score = parseCopy.scoreMultiplier;
       returnArr.push(parseCopy);
@@ -912,16 +900,17 @@ Parser.prototype = {
       let role = arg.role;
       let delimiter = "";
       for each (let storedRole in this.roles){
-        if(storedRole.role == role){
+        if (storedRole.role == role){
           delimiter = storedRole.delimiter;
           break;
         }
       }
       let parseCopy = parse.copy();
-      let objectCopy = {_order: 1,
-			  input: selection,
-                          modifier: delimiter,
-                          innerSpace: this.joindelimiter};
+      let objectCopy = {
+        _order: 1,
+        input: selection,
+        modifier: delimiter,
+        innerSpace: this.joindelimiter};
       parseCopy.setArgumentSuggestion(role, objectCopy);
       returnArr.push(parseCopy);
     }
@@ -1081,9 +1070,11 @@ Parser.prototype = {
 
     // for parses WITHOUT a set verb:
     var returnArray = [];
+    var verbs = this._verbList;
     VERBS:
-    for (let verbId in this._verbList) {
-      let verb = this._verbList[verbId];
+    for (let verbId in verbs) {
+      let verb = verbs[verbId];
+      if (verb.disabled) continue;
       // Check each role in our parse.
       // If none of the role is used by the arguments of the verb,
       // skip to next verb.
@@ -1302,7 +1293,7 @@ Parser.prototype = {
       var asyncReqsToArray = function detectNounType_asyncReqsToArray(asyncs){
         let retArray = [];
         for each (let async in asyncs){
-	        if(async)
+          if (async)
             retArray.push(async);
         }
         return retArray;
@@ -1334,8 +1325,8 @@ Parser.prototype = {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
             suggs = handleSuggs(suggs, id);
-            if(asyncRequests[id])
-	            asyncRequests[id] = null;
+            if (asyncRequests[id])
+              asyncRequests[id] = null;
             myCallback(suggs, asyncRequests);
           }
 
@@ -1349,7 +1340,7 @@ Parser.prototype = {
             handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
 
-          if(activeNounTypes[id].asyncRequest)
+          if (activeNounTypes[id].asyncRequest)
             asyncRequests[id] = activeNounTypes[id].asyncRequest;
         }
         myCallback(returnArray, asyncRequests);
@@ -1535,11 +1526,11 @@ ParseQuery.prototype = {
       yield true;
     }
     //if we have a selection, apply the selection interpolation
-    if(this.selObj.text && this.selObj.text.length) {
+    if (this.selObj.text && this.selObj.text.length) {
       let selection = this.selObj.text;
       for each (let parse in this._possibleParses) {
         let newParses = this.parser.interpolateSelection(parse, selection);
-	if (newParses.length)
+        if (newParses.length)
           this._possibleParses = this._possibleParses.concat(newParses);
         yield true;
       }
@@ -1610,7 +1601,7 @@ ParseQuery.prototype = {
     // handle the scoring.
     var thisQuery = this;
     function completeParse(thisParse, argText, asyncRequests) {
-      if(asyncRequests.length == 0) {
+      if (asyncRequests.length == 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
       }
@@ -1621,8 +1612,8 @@ ParseQuery.prototype = {
       var suggestions = thisQuery.parser.suggestArgs(thisParse);
       //Utils.log(suggestions);
 
-      if(!thisQuery._scoredParses[argText])
-	thisQuery._scoredParses[argText] = [];
+      if (!thisQuery._scoredParses[argText])
+        thisQuery._scoredParses[argText] = [];
 
       for each (let newParse in suggestions)
         thisQuery.addScoredParseIfGoodEnough(argText, newParse);
@@ -1644,10 +1635,11 @@ ParseQuery.prototype = {
 
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
-        if (thisParse.allNounTypesDetectionHasCompleted() && !thisParse.complete) {
+        if (thisParse.allNounTypesDetectionHasCompleted() &&
+            !thisParse.complete) {
           //thisQuery.dump('completing parse '+parseId+' now');
           completeParse(thisParse, argText, asyncRequests);
-	      }
+        }
       }
 
       // don't run onResults here if thisQuery.finished,
@@ -1733,7 +1725,7 @@ ParseQuery.prototype = {
               " outstanding request(s) being canceled\n");
     //abort any async requests that are running
     for each (let asyncReq in this._outstandingRequests){
-      if(asyncReq.abort)
+      if (asyncReq.abort)
         asyncReq.abort();
     }
     //reset outstanding requests
@@ -1752,9 +1744,9 @@ ParseQuery.prototype = {
                                 .sort(byScoreDescending).pop();
     for (let argText in this._scoredParses){
       if (this._scoredParses[argText].indexOf(lowestScoredParse) != -1){
-	this._scoredParses[argText].splice(
+        this._scoredParses[argText].splice(
               this._scoredParses[argText].indexOf(lowestScoredParse), 1);
-	break;
+        break;
       }
     }
   },
@@ -1847,7 +1839,7 @@ ParseQuery.prototype = {
       allScoredParses.sort(function(a, b) b.maxScore - a.maxScore);
       let i = allScoredParses.length;
       while (--i > maxIndex && allScoredParses[i].maxScore < theBar){
-	allScoredParses.pop();
+        allScoredParses.pop();
         this.removeLowestScoredParse();
       }
     }
@@ -1953,29 +1945,24 @@ Parse.prototype = {
     }
 
     for each (let neededArg in this._verb.arguments) {
-      if (!this.args[neededArg.role]
-          || !this.args[neededArg.role][0]
-          || !this.args[neededArg.role][0].text) {
-        let {label} = neededArg;
-        if (!label) {
-          let nt = neededArg.nountype;
-          // _name is for backward compatiblity
-          label = nt.label || nt._name || "?";
-        }
-        for each (let parserRole in this._parser.roles) {
-          if (parserRole.role == neededArg.role) {
-            if (this._parser.branching == 'left')
-              label += this._parser.joindelimiter
-                        + parserRole.delimiter;
-            else
-              label = parserRole.delimiter
-                       + this._parser.joindelimiter + label;
-            break;
-          }
-        }
-
-        display += ' <span class="needarg">' + label + '</span>';
+      let arg = this.args[neededArg.role];
+      if (arg && (arg[0] || 0).text) continue;
+      let {label} = neededArg;
+      if (!label) {
+        let nt = neededArg.nountype;
+        // _name is for backward compatiblity
+        label = nt.label || nt._name || "?";
       }
+      for each (let parserRole in this._parser.roles) {
+        if (parserRole.role === neededArg.role) {
+          if (this._parser.branching === "left")
+            label += this._parser.joindelimiter + parserRole.delimiter;
+          else
+            label = parserRole.delimiter + this._parser.joindelimiter + label;
+          break;
+        }
+      }
+      display += ' <span class="needarg">' + label + '</span>';
     }
 
     return display + displayFinal;
@@ -2092,10 +2079,10 @@ Parse.prototype = {
         if (!(argText in this._parser._nounCache))
           return false;
 
-	for (let nounTypeId in activeNounTypes){
-	  if(!(nounTypeId in this._parser._nounCache[argText]))
+        for (let nounTypeId in activeNounTypes){
+          if (!(nounTypeId in this._parser._nounCache[argText]))
             return false;
-	}
+        }
       }
     }
 
@@ -2160,10 +2147,10 @@ Parse.prototype = {
   // Returns a copy of this parse.
   copy: function PP_copy() {
     var ret = new Parse(this._parser,
-                         this.input,
-                         this._verb,
-                         this.argString,
-                         this._id);
+                        this.input,
+                        this._verb,
+                        this.argString,
+                        this._id);
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
