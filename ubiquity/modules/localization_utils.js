@@ -64,9 +64,10 @@ var LocalizationUtils = {
   //             .getService(Ci.nsIStringBundleService)),
 
   isLocalizable: function LU_isLocalizable(feedUrl) Localizable.test(feedUrl),
-  // only works with local (builtin|standard)-feeds
-  loadLocalPo: function LU_loadLocalPo(url) {
-    var feedKey = this.getLocalFeedKey(url);
+  loadLocalPo: function LU_loadLocalPo(feedUrl) {
+    if (!this.isLocalizable(feedUrl)) return false;
+
+    var feedKey = this.getLocalFeedKey(feedUrl);
     if (feedKey in loadedPo) return true;
 
     var poUrl = ("resource://ubiquity/localization/" +
