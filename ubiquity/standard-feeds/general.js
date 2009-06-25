@@ -443,12 +443,12 @@ CmdUtils.CreateCommand({
     var fromLangCode = source ? source.data : '';
     if (!textToTranslate) {
       var {href} = context.focusedWindow.location;
-      pblock.innerHTML = (<>Translates <a href={href}
-                          >{href}</a> to <b>{toLang}</b> translation.</>);
+      pblock.innerHTML = _("Translates ${url} into <b>${toLang}</b>.",
+                          { url: <><a href={href}>{href}</a></>, toLang: toLang });
       return;
     }
-    var html = (_("Replaces the selected text with the <b>${toLang}</b> translation:",
-                 {toLang:toLang}) );
+    var html = _("Replaces the selected text with the <b>${toLang}</b> translation:",
+                 {toLang:toLang});
     pblock.innerHTML = html;
     translateTo(
       textToTranslate,
