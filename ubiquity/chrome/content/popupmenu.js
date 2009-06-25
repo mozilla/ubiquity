@@ -54,22 +54,30 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
     }
 
     function callback(results){
+      // turn the results object into a list for score-based sorting and
+      // display
+      var resultsList = [];
+      for (var i in results){
+	results[i].label = i;
+        resultsList.push(results[i]);
+      }
       /* Sort the results by their scores in descending order */
-      if(results && results.length)
-        results.sort(byScoreDescending);
+      if(resultsList.length)
+        resultsList.sort(byScoreDescending);
+
       /* Remove previously added submenus */
       for(let i=popupElement.childNodes.length - 1; i >= 0; i--) {
 	popupElement.removeChild(popupElement.childNodes.item(i));
       }
 
-      for (var i in results) {
+      for (var i=0; i < resultsList.length; i++) {
         var tempMenu = document.createElement("menuitem");
-		tempMenu.setAttribute("label", i);
-		if(results[i].icon) {
+		tempMenu.setAttribute("label", resultsList[i].label);
+		if(resultsList[i].icon) {
 			tempMenu.setAttribute("class", "menuitem-iconic");
-			tempMenu.setAttribute("image", results[i].icon);
+			tempMenu.setAttribute("image", resultsList[i].icon);
 		}
-        tempMenu.addEventListener("command", results[i], true);
+        tempMenu.addEventListener("command", resultsList[i], true);
         event.target.appendChild(tempMenu);
       }
     }
