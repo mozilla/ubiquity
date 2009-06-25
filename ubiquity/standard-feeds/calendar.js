@@ -4,21 +4,9 @@ const Apology = ("<p>" +
                  " so you'll need a Google account to use it." +
                  "</p>");
 
-/* TODO this command just takes unstructured text right now and relies on
- * Google Calendar to figure it out.  So we're not using the DateNounType
- * here.  Should we be?
- *
- * Also, the goal argument, which is currently a dummy argument, should
- * become a plugin argument so that this can use different calendars --
- * "add to google calendar", "add to zimbra calendar", etc etc.*/
 CmdUtils.CreateCommand({
-  names: ["add (to calendar)"],
-  arguments: [{ role: "object",
-                nountype: noun_arb_text,
-                label: "event"},
-              { role: "goal",
-                nountype: ["calendar"],
-                label: "calendar"} ],
+  names: ["add to google calendar", "quick add"],
+  argument: {object_event: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (
@@ -30,8 +18,8 @@ CmdUtils.CreateCommand({
     <li>Jono&#39;s Birthday on Friday</li>
     </ul>
     </>) + Apology,
-  execute: function( args ) {
-    var event = args.object;
+  execute: function (args) {
+    var event = args.object.text;
     var authKey = Utils.getCookie(".www.google.com", "CAL");
     if (!authKey) {
       this._needLogin();
@@ -45,7 +33,7 @@ CmdUtils.CreateCommand({
     req.setRequestHeader("Content-type", "application/atom+xml");
     req.send(<entry xmlns="http://www.w3.org/2005/Atom"
                     xmlns:gCal="http://schemas.google.com/gCal/2005">
-               <content type="text">{event.text}</content>
+               <content type="text">{event}</content>
                <gCal:quickadd value="true"/>
              </entry>.toXMLString());
     switch (req.status) {
@@ -64,8 +52,15 @@ CmdUtils.CreateCommand({
                 req.status + " " + req.statusText);
     }
   },
+  preview: function (pb, {object: {html}}) {
+    pb.innerHTML = (html && "<b>" + html + "</b><br/><br/>") + this.help;
+  },
   _say: function(title, text) {
-    displayMessage({icon: this.icon, title: title, text: text});
+    displayMessage({
+      icon: this.icon,
+      title: this.name + ": " +  title,
+      text: text,
+    });
   },
   _needLogin: function() {
     this._say(_("Authorization error"),
@@ -79,23 +74,20 @@ function linkToButton() {
     <button value={this.href} accesskey={txt[0]}>{txt}</button>.toXMLString());
 }
 
-/* TODO this should take a plugin argument specifying the calendar provider.
- */
+// TODO this should take a plugin argument specifying the calendar provider.
 CmdUtils.CreateCommand({
-  names: ["check google calendar", "check gcalendar"],
-  arguments: [{role: "date",
-               nountype: noun_type_date,
-               label: "date"}],
+  names: ["check google calendar"],
+  argument: {object: noun_type_date},
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check on thursday"' + Apology,
-  execute: function({date: {data: date}}) {
+  execute: function({object: {data}}) {
     Utils.openUrlInBrowser("http://www.google.com/calendar/" +
-                           Utils.paramsToString(this._param(date)));
+                           Utils.paramsToString(this._param(data)));
   },
-  // todo what is this url argument?
+  // url is for recursing pagination
   preview: function preview(pblock, args, url) {
-    var date = args.date.data;
+    var date = args.object.data, me = this;
     if (!date) {
       pblock.innerHTML = this.description;
       return;
@@ -121,7 +113,7 @@ CmdUtils.CreateCommand({
         $c.find("button").focus(function btn() {
           this.blur();
           this.disabled = true;
-          preview(pblock, args, url);
+          me.preview(pblock, args, this.value);
           return false;
         });
         pblock.innerHTML = "";
