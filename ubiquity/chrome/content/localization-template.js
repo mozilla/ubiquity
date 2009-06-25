@@ -91,21 +91,21 @@ function cmdInlineLine(cmd, cmdCode, context) {
   if (context === "preview" && "_previewString" in cmd)
     return cmdPreviewString(cmd);
 
-  var inlineChecker = / _\("([^\\\"]*(?:\\.[^\\\"]*)*)"/g;
+  var inlineChecker = /\W_\(("[^\\\"]*(?:\\.[^\\\"]*)*")/g;
   inlineChecker.lastIndex = 0;
   var po = "";
-  var script = cmdCode[context];
-  while (inlineChecker.test(script))
-    po += potMsgs(cmd.referenceName + "." + context, RegExp.$1, true);
+  while (inlineChecker.test(cmdCode))
+    po += potMsgs(cmd.referenceName + "." + context,
+                  Utils.json.decode(RegExp.$1));
   return po;
 }
 
 function cmdPreviewString(cmd) potMsgs(cmd.referenceName + ".preview",
                                        cmd._previewString);
 
-function potMsgs(context, id, idq)(
+function potMsgs(context, id)(
   'msgctxt "' + quoteString(context) + '"\n' +
-  'msgid "'+ (idq ? id : quoteString(id)).replace(/\n/g, '\\n"\n"') + '"\n' +
+  'msgid "'+ quoteString(id).replace(/\n/g, '\\n"\n"') + '"\n' +
   'msgstr ""\n\n');
 
 function quoteString(str) str.replace(/[\\\"]/g, "\\$&");
