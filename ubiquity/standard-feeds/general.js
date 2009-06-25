@@ -2,137 +2,77 @@
 // TEXT COMMANDS
 // -----------------------------------------------------------------
 
-/* TODO there is a lot of duplicated code between these formatting
- * commands... could they be combined?
- */
-
 /* Note that these text formatting commands are a little weird in that
  * they operate on a selection, but they don't take the selection as
  * an argument.  This is as intended, because if there is no text
  * selection, there is nothing for any of these commands to do.
  */
-CmdUtils.CreateCommand({
-  names: ["bold"],
-  description: "If you're in a rich-text-edit area, makes the selected text bold.",
-  icon: "chrome://ubiquity/skin/icons/text_bold.png",
-  execute: function() {
-    var doc = context.focusedWindow.document;
-
-    if (doc.designMode == "on")
-      doc.execCommand("bold", false, null);
-    else
-      displayMessage(_("You're not in a rich text editing field."));
-  }
-});
-
-CmdUtils.CreateCommand({
-  names: ["italicize"],
-  description:"If you're in a rich-text-edit area, makes the selected text italic.",
-  icon: "chrome://ubiquity/skin/icons/text_italic.png",
-  execute: function() {
-    var doc = context.focusedWindow.document;
-
-    if (doc.designMode == "on")
-      doc.execCommand("italic", false, null);
-    else
-      displayMessage(_("You're not in a rich text editing field."));
-  }
-});
-
-CmdUtils.CreateCommand({
-  names: ["underline"],
-  description:"If you're in a rich-text-edit area, underlines the selected text.",
-  icon: "chrome://ubiquity/skin/icons/text_underline.png",
-  execute: function() {
-    var doc = context.focusedWindow.document;
-
-    if (doc.designMode == "on")
-      doc.execCommand("underline", false, null);
-    else
-      displayMessage(_("You're not in a rich text editing field."));
-  }
-});
+(function textFormattingCommand(format, desc, icon, name) {
+  CmdUtils.CreateCommand({
+    names: [name || format],
+    description:
+    "If you're in a rich-text-edit area, " + desc + ".",
+    icon: "chrome://ubiquity/skin/icons/" + icon + ".png",
+    execute: function () {
+      var doc = context.focusedWindow.document;
+      if (doc.designMode === "on")
+        doc.execCommand(format, false, null);
+      else
+        displayMessage(_("You're not in a rich text editing field."), this);
+    }
+  });
+  return arguments.callee;
+})
+("bold", "makes the selected text bold", "text_bold")
+("italic", "makes the selected text italic", "text_italic", "italicize")
+("underline", "underlines the selected text", "text_underline")
+("undo", "undoes your latest style/formatting or page-editing changes",
+ "arrow_undo", "undo text edit")
+("redo", "redoes your latest style/formatting or page-editing changes",
+ "arrow_redo", "redo text edit")
+;
 
 CmdUtils.CreateCommand({
   names: ["highlight", "hilite"],
-  description:'Highlights your current selection, like <span style="background: yellow; color: black;">this</span>.',
+  description: (
+    'Highlights your current selection, ' +
+    'like <span style="background: yellow; color: black;">this</span>.'),
   icon: "chrome://ubiquity/skin/icons/textfield_rename.png",
-  execute: function() {
-    var sel = context.focusedWindow.getSelection();
-    var document = context.focusedWindow.document;
-
-    if (sel.rangeCount >= 1) {
-      var range = sel.getRangeAt(0);
-      var newNode = document.createElement("span");
-      newNode.style.background = "yellow";
+  execute: function () {
+    var win = context.focusedWindow;
+    var doc = win.document;
+    var sel = win.getSelection();
+    for (var i = sel.rangeCount; i--;) {
+      var range = sel.getRangeAt(i);
+      var newNode = doc.createElement("span");
+      var {style} = newNode;
+      style.background = "yellow";
+      style.color = "black";
       range.surroundContents(newNode);
     }
   }
 });
 
-
-CmdUtils.CreateCommand({
-  names: ["undo (text edit)"],
-  description:"Undoes your latest style/formatting or page-editing changes.",
-  icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
-  execute: function() {
-    var doc = context.focusedWindow.document;
-
-    if (doc.designMode == "on")
-      doc.execCommand("undo", false, null);
-    else
-      displayMessage(_("You're not in a rich text editing field."));
-  }
-});
-
-CmdUtils.CreateCommand({
-  names: ["redo (text edit)"],
-  description:"Redoes your latest style/formatting or page-editing changes.",
-  icon: "chrome://ubiquity/skin/icons/arrow_redo.png",
-  execute: function() {
-    var doc = context.focusedWindow.document;
-
-    if (doc.designMode == "on")
-      doc.execCommand("redo", false, null);
-    else
-      displayMessage(_("You're not in a rich text editing field."));
-  }
-});
-
-
-function wordCount(text){
-  var words = text.split(" ");
-  var wordCount = 0;
-
-  for(var i=0; i<words.length; i++){
-    if (words[i].length > 0)
-      wordCount++;
-  }
-
-  return wordCount;
-}
-
 /* TODO should the object text instead be an "in" argument, as in
  * "count words in this" ?
  */
+function wordCount(t) (t.match(/\S+/g) || "").length;
+
 CmdUtils.CreateCommand({
   names: ["count words", "word count"],
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/sum.png",
   description: "Displays the number of words in a selection.",
-  execute: function( args ) {
-    var object = args.object;
-    if (object.text)
-      displayMessage(_("${num} words",{num:wordCount(object.text)}));
-    else
-      displayMessage(_("No words selected."));
+  execute: function ({object: {text}}) {
+    displayMessage((text
+                    ? _("${num} words", {num: wordCount(text)})
+                    : _("No words selected.")),
+                   this);
   },
-  preview: function(pBlock, args) {
-    var object = args.object;
-    if (object.text)
-      pBlock.innerHTML = _("${num} words",{num:wordCount(object.text)});
-    else
-      pBlock.innerHTML = _("Displays the number of words in a selection.");
+  preview: function (pb, {object: {text}}) {
+    pb.innerHTML = (text
+                    ? _("<b>${num}</b> words", {num: wordCount(text)})
+                    : this.description);
   }
 });
 
@@ -140,34 +80,26 @@ CmdUtils.CreateCommand({
  * and this command could become a general purpose "insert link"
  * command.
  */
-CmdUtils.CreateCommand(
-{
-  names: ["link (to wikipedia)",
-          "insert link (to wikipedia)",
-          "linkify (to wikipedia)"],
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: "phrase"},
-              {role: "goal",
-               nountype: ["wikipedia"],
-               label: "wikipedia"},
-              {role: "format",
-               nountype:noun_type_lang_wikipedia,
-               label: "language"}],
-  description: "Turns a phrase into a link to the matching Wikipedia " +
-               "article. You must be in a rich-text editable field.",
+CmdUtils.CreateCommand({
+  names: ["link to wikipedia"],
+  arguments: {
+    object_phrase: noun_arb_text,
+    format: noun_type_lang_wikipedia,
+  },
+  description:
+  "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
   _link: function({object: {text, html}, format: {data}}){
     var url = ("http://" + (data || "en") +
                ".wikipedia.org/wiki/Special%3ASearch/" +
                encodeURIComponent(text.replace(/ /g, "_")));
-    return ['<a href="' + url + '">' + html + "</a>", url];
+    return ['<a href="' + Utils.escapeHtml(url) + '">' + html + "</a>", url];
   },
-  execute: function(args) {
+  execute: function (args) {
     var [htm, url] = this._link(args);
     CmdUtils.setSelection(htm, {text: url});
   },
-  preview: function(pbl, args) {
+  preview: function (pbl, args) {
     var [htm, url] = this._link(args);
     pbl.innerHTML = (this.description +
                      "<p>" + htm + "</p>" +
@@ -349,7 +281,6 @@ function translateTo(text, langCodePair, callback, pblock) {
     langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
   };
   function onsuccess(data) {
-
     // The usefulness of this command is limited because of the
     // length restriction enforced by Google. A better way to do
     // this would be to split up the request into multiple chunks.
@@ -387,20 +318,11 @@ function translateTo(text, langCodePair, callback, pblock) {
 CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
   names: ["translate"],
-  /*
-    da: ["oversat"],
-    fr: ["traduire","traduizez","traduis"],
-    ca: ["tradueix", "traduix"],
-    da: ["oversat"],
-    sv: ["oversatt"],
-    ja: ["訳す", "訳せ", "訳して", "やくす", "やくせ", "やくして"],
-    pt: ["traduzir", "traduza"],
-   */
-  arguments: [
-    {role: "object", nountype: noun_arb_text, label: "text"},
-    {role: "source", nountype: noun_type_lang_google},
-    {role: "goal", nountype: noun_type_lang_google}
-  ],
+  arguments: {
+    object_text: noun_arb_text,
+    source: noun_type_lang_google,
+    goal: noun_type_lang_google,
+  },
   description: "Translates from one language to another.",
   icon: "http://www.google.com/favicon.ico",
   help: "" + (
@@ -413,11 +335,9 @@ CmdUtils.CreateCommand({
     to how much it can translate a selection at once.
     If you want to translate a lot of text, leave out the input and
     it will translate the whole page.</>),
-//  takes: {text: noun_arb_text},
-//  modifiers: {to: noun_type_lang_google, from: noun_type_lang_google},
-  execute: function({object, goal, source}) {
-    var sl = source ? source.data : '';
-    var tl = goal && goal.data || this._getDefaultLang();
+  execute: function ({object, goal, source}) {
+    var sl = source.data || "";
+    var tl = goal.data || this._getDefaultLang();
     if (object.text)
       translateTo(object.text,
                   {from: sl, to: tl},
@@ -433,22 +353,22 @@ CmdUtils.CreateCommand({
           tl: tl,
         }));
   },
-  preview: function(pblock, args) {
-    var {object, goal, source} = args;
+  preview: function (pblock, {object, goal, source}) {
     var textToTranslate = object && object.text;
     var defaultLang = this._getDefaultLang();
-    var toLang = (goal && goal.text ||
-                  noun_type_lang_google.getLangName(defaultLang));
-    var toLangCode = goal && goal.data || defaultLang;
-    var fromLangCode = source ? source.data : '';
+    var toLang = goal.text || noun_type_lang_google.getLangName(defaultLang);
+    var toLangCode = goal.data || defaultLang;
+    var fromLangCode = source.data || "";
     if (!textToTranslate) {
       var {href} = context.focusedWindow.location;
       pblock.innerHTML = _("Translates ${url} into <b>${toLang}</b>.",
-                          { url: <><a href={href}>{href}</a></>, toLang: toLang });
+                           { url: <a href={href}>{href}</a>.toXMLString(),
+                             toLang: toLang });
       return;
     }
-    var html = _("Replaces the selected text with the <b>${toLang}</b> translation:",
-                 {toLang:toLang});
+    var html = _(
+      "Replaces the selected text with the <b>${toLang}</b> translation:",
+      {toLang: toLang});
     pblock.innerHTML = html;
     translateTo(
       textToTranslate,
@@ -519,13 +439,12 @@ CmdUtils.CreateCommand({
     //prepend the code to Ubiqity's command editor
     CmdUtils.UserCode.prependCode(code);
 
-    tellTheUserWeFinished(name);
+    tellTheUserWeFinished(name, this);
   },
   _formatName: function(n) n.toLowerCase(),
 });
 
-CmdUtils.CreateCommand(
-{
+CmdUtils.CreateCommand({
   names: ["create search command"],
   description: "Creates a new Ubiquity command from a focused search-box " +
                "and lets you set the command name.",
@@ -548,7 +467,7 @@ CmdUtils.CreateCommand(
   preview: function(pblock, {object: {text}}) {
     pblock.innerHTML = (
       text
-      ? _("Creates a new search command called <b>${text}</b>",{text:text})
+      ? _("Creates a new search command called <b>${text}</b>", {text: text})
       : this.description + this.help);
   },
   execute: function({object: {text: name}}) {
@@ -604,12 +523,15 @@ CmdUtils.CreateCommand(
     CmdUtils.UserCode.prependCode(codes.join("\n"));
 
     //5. Tell the user we finished
-    tellTheUserWeFinished(name);
+    tellTheUserWeFinished(name, this);
   },
   _encodePair: function(key, val)(encodeURIComponent(key) + "=" +
                                   encodeURIComponent(val)),
 });
 
-function tellTheUserWeFinished(name) {
-  displayMessage(_("You have created the command: ${name}. You can edit its source-code with the command-editor command.",{name:name}));
+function tellTheUserWeFinished(name, cmd) {
+  displayMessage(_(("You have created the command: ${name}. " +
+                    "You can edit its source-code with the command editor."),
+                   {name: name}),
+                 cmd);
 }
