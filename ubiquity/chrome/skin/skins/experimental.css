@@ -274,4 +274,8 @@ a:active {
   font-size: small;  
 }
 
+.error {
+  color: #d44;
+}
+
 }

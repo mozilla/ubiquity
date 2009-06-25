@@ -112,4 +112,8 @@ body {
   margin: 0;
 }
 
+.error {
+  color: #d44;
+}
+
 }
