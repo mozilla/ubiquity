@@ -1,0 +1,94 @@
+# developer.po
+# 
+# Localizers:
+# LOCALIZER <EMAIL>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-25 19:44+0900\n"
+
+#. highlight syntax command:
+#. use | to separate multiple name values:
+msgctxt "highlight syntax.names"
+msgid "highlight syntax|hilite syntax"
+msgstr ""
+
+msgctxt "highlight syntax.description"
+msgid "Treats your selection as program source code, guesses its language, and colors it based on syntax."
+msgstr ""
+
+
+#. view source command:
+#. use | to separate multiple name values:
+msgctxt "view source.names"
+msgid "view source|view page source"
+msgstr ""
+
+msgctxt "view source.description"
+msgid "Shows you the source-code of the web page you're looking at."
+msgstr ""
+
+
+#. escape HTML entities command:
+#. use | to separate multiple name values:
+msgctxt "escape HTML entities.names"
+msgid "escape HTML entities"
+msgstr ""
+
+msgctxt "escape HTML entities.description"
+msgid "Replaces html entities (&lt;, &gt;, &amp;, &quot; and &#39;) with their escape sequences."
+msgstr ""
+
+
+#. run selector-selector command:
+#. use | to separate multiple name values:
+msgctxt "run selector-selector.names"
+msgid "run selector-selector"
+msgstr ""
+
+msgctxt "run selector-selector.help"
+msgid "<dl>\n"
+"  <dt>\n"
+"    <b>Left-click / Enter</b>\n"
+"  </dt>\n"
+"  <dd>Copy and Quit</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Middle-click /\n"
+"      <u>C</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Copy</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Right-click / Esc /\n"
+"      <u>Q</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Quit</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      <u>M</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Move</dd>\n"
+"  <dt>\n"
+"    <b>PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Scroll vertically</dd>\n"
+"  <dt>\n"
+"    <b>shift + PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Scroll horizontally</dd>\n"
+"</dl>"
+msgstr ""
+
+msgctxt "run selector-selector.description"
+msgid "<ul style=\"list-style-image:none\">\n"
+"  <li>Lets you type a jQuery selector and highlights matched elements.</li>\n"
+"  <li>Hovering on an element generates a matching selector.</li>\n"
+"</ul>"
+msgstr ""
+
+
