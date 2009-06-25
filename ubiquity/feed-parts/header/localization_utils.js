@@ -10,9 +10,7 @@ var _ = (function () {
 
   return (
     UbiquitySetup.parserVersion === 2 && LocalizationUtils.loadLocalPo(feed.id)
-    ? function _(x, data) {
-        let localized = LocalizationUtils.getLocalized(x);
-        return (data) ? renderTemplate(localized, data) : localized;
-      }
+    ? function _(x, data) renderTemplate(LocalizationUtils.getLocalized(x),
+                                         data)
     : renderTemplate);
 }());
