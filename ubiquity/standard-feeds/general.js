@@ -107,72 +107,13 @@ CmdUtils.CreateCommand({
   }
 });
 
-
 // -----------------------------------------------------------------
 // CALCULATE COMMANDS
 // -----------------------------------------------------------------
 
-CmdUtils.CreateCommand({
-  names: ["calculate"],
-  arguments: {object: /^[\d.+\-*\/^%~(, )]+$/},
-  icon: "chrome://ubiquity/skin/icons/calculator.png",
-  description: "Calculates the value of a mathematical expression.",
-  help: "Try it out: issue &quot;calc 22/7 - 1&quot;.",
-  preview: function(previewBlock, args) {
-    var expression = args.object.text;
-
-    if(expression.length < 1) {
-      previewBlock.innerHTML = _("Calculates an expression. E.g., 22/7.");
-      return;
-    }
-
-    var result = "?";
-    var error = null;
-    try {
-      var parser = new MathParser();
-
-      result = parser.parse(expression);
-
-      if(isNaN(result))
-        throw new Error("Invalid expression");
-    } catch(e) {
-      error = e.message;
-      result = "?";
-    }
-    var previewData = {
-      "expression": expression,
-      "result": result,
-      "error": error
-    };
-    previewBlock.innerHTML = _("${expression} = <b>${result}</b>{if error}<p><b>Error:</b> ${error}</p>{/if}", previewData);
-  },
-
-  execute: function( args ) {
-    var expression = args.object.text;
-
-    if(expression.length < 1) {
-      displayMessage(_("Requires a expression."));
-      return;
-    }
-
-    try {
-      var parser = new MathParser();
-      var result = parser.parse(expression) + "";
-
-      if(isNaN(result))
-        throw new Error(_("Invalid expression"));
-
-      CmdUtils.setSelection(result);
-      CmdUtils.setLastResult(result);
-    } catch(e) {
-      displayMessage(_("Error calculating expression: ${expression}",{expression:expression}));
-    }
-  }
-});
-
 //+ Carlos R. L. Rodrigues
 //@ http://jsfromhell.com/classes/math-parser [rev. #2]
-MathParser = function(){
+function MathParser(){
   var o = this, p = o.operator = {};
   p["+"] = function(n, m){return n + m;};
   p["-"] = function(n, m){return n - m;};
@@ -215,59 +156,65 @@ MathParser.prototype.parse = function(e){
   return o.eval(e);
 };
 
-CmdUtils.CreateCommand(
-  {
-    names: ["gcalculate"],
-    arguments: [{role: "object",
-                 nountype: noun_arb_text,
-                 label: "expression"}],
-    description: "Calculate using Google's calculator. Has all the features " +
-                 "of a scientific calculator, knows constants such as the " +
-                 "speed of light, and can convert between units and currencies.",
-    help: "Try 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal.",
+const GCalcHelp = "http://www.googleguide.com/help/calculator.html";
 
-    icon: "chrome://ubiquity/skin/icons/calculator.png",
-
-    author: { name: "Axel Boldt", email: "axelboldt@yahoo.com"},
-    homepage: "http://math-www.uni-paderborn.de/~axel/",
-    license: "Public domain",
-
-    // URL of Google page to which expression is to be appended. We want only 1 result.
-    _google_url: "http://www.google.com/search?hl=en&num=1&q=",
-
-    // Regular expression that matches a Google result page iff it is a calculator result;
-    // first subexpression matches the actual result
-    _calc_regexp: /\/calc_img\.gif.*?<b>(.*?)<\/b>/i,
-
-    execute: function( {object} ) {
-      var expression = object.text;
-      var url = this._google_url + encodeURIComponent(expression);
-      Utils.openUrlInBrowser( url );
-    },
-
-    preview: function( pblock, {object} ) {
-
-      // link to calculator help
-      var calc_help = _("Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\"http://www.googleguide.com/calculator.html\">(Command List)</a></u>");
-
-      var expression = object.text;
-      var cmd = this;
-
-      pblock.innerHTML = calc_help;
-
-      jQuery.get( this._google_url + encodeURIComponent(expression), {},
-         function( result_page ) {
-           var matchresult = result_page.match(cmd._calc_regexp);
-           if (matchresult) {
-              pblock.innerHTML = "<h2>" + matchresult[1] + "</h2>" + calc_help;
-           } else {
-              pblock.innerHTML = calc_help;
-           }
-       });
+CmdUtils.CreateCommand({
+  names: ["calculate", "gcalculate"],
+  arguments: {object_expression: noun_arb_text},
+  description: "" + (
+    <>Calculates using <a href={GCalcHelp}>Google Calculator</a>
+    which has all the features of a scientific calculator,
+    knows constants such as the speed of light,
+    and can convert between units and currencies.<br/>
+    Uses <a href="http://jsfromhell.com/classes/math-parser">MathParser</a>
+    instead for simple expressions like <code>22/7</code>.</>),
+  help: ("Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, " +
+         "15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, " +
+         "3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."),
+  icon: "chrome://ubiquity/skin/icons/calculator.png",
+  author: {name: "Axel Boldt", email: "axelboldt@yahoo.com"},
+  contributor: {name: "satyr", email: "murky.satyr@gmail.com"},
+  homepage: "http://math-www.uni-paderborn.de/~axel/",
+  license: "Public domain",
+  _math_parser: new MathParser,
+  // URL of Google page to which expression is to be appended.
+  // We want only 1 result.
+  _google_url: function (q) ("http://www.google.com/search?hl=en&num=1&q=" +
+                             encodeURIComponent(q)),
+  _calc: function (exp, cb) {
+    if (/^[\d.+\-*\/^%~(, )]+$/.test(exp)) {
+      try { var result = this._math_parser.parse(exp) } catch (e) {}
+      if (result != null) {
+        cb(result);
+        return;
       }
-  });
-
-
+    }
+    var cmd = this;
+    jQuery.get(this._google_url(exp), function (result_page) {
+      cb((/\/calc_img\.gif.*?<b>(.*?)<\/b>/i(result_page) || ",?")[1]);
+    });
+  },
+  execute: function ({object: {text}}) {
+    this._calc(text, function (result) {
+      CmdUtils.setSelection(result);
+    });
+  },
+  preview: function (pb, {object: {text}}) {
+    if (!text) {
+      pb.innerHTML = this.description + "<p>" + this.help + "</p>";
+      return;
+    }
+    this._calc(text, function (result) {
+      pb.innerHTML = (
+        '<div class="calculate">' +
+        '<b style="font-size:larger">' + result + '</b>' +
+        (typeof result === "string"
+         ? '<p><a href="' + GCalcHelp + '">Quick Reference</a></p>'
+         : "") +
+        '</div>');
+    });
+  }
+});
 
 // -----------------------------------------------------------------
 // TRANSLATE COMMANDS
