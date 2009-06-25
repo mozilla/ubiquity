@@ -829,23 +829,31 @@ Parser.prototype = {
       push.apply(possibleParses, theseParses);
     }
     for each (let parse in possibleParses) {
-      for (let role in parse.args) {
-        // if there are multiple arguments of any role, mark this parse down.
-        if (parse.args[role].length > 1) {
-          parse.scoreMultiplier *= Math.pow(0.5,
-                                            parse.args[role].length - 1);
-        }
-      }
-      // The verb match's score affects the scoreMultiplier.
-      // If the verb is not set yet, it gets a 1, but that's fine, because by
-      // virtue of having to suggest a verb, the scoreMultiplier has already
-      // been *=0.3 elsewhere.
-      parse.scoreMultiplier *= (parse._verb.score || 1);
-      // start score off with one point for the verb.
-      parse._score = parse.scoreMultiplier;
+      parse = this.updateScoreMultiplierWithArgs(parse);
     }
 
     return possibleParses;
+  },
+
+  // ** {{{Parser#updateScoreMultiplierWithArgs}}} **
+  // alter the score of a parse based on the number of arguments it has for
+  // each of its roles
+  updateScoreMultiplierWithArgs: function(parse) {
+    for (let role in parse.args) {
+      // if there are multiple arguments of any role, mark this parse down.
+      if (parse.args[role].length > 1) {
+        parse.scoreMultiplier *= Math.pow(0.5,
+                                          parse.args[role].length - 1);
+      }
+    }
+    // The verb match's score affects the scoreMultiplier.
+    // If the verb is not set yet, it gets a 1, but that's fine, because by
+    // virtue of having to suggest a verb, the scoreMultiplier has already
+    // been *=0.3 elsewhere.
+    parse.scoreMultiplier *= (parse._verb.score || 1);
+    // start score off with one point for the verb.
+    parse._score = parse.scoreMultiplier;
+    return parse;
   },
 
   // ** {{{Parser#cleanArgument()}}} **
@@ -876,12 +884,12 @@ Parser.prototype = {
     // the verb that is chosen.
     if (!parse._verb.id){
       let parseCopy = parse.copy();
-      let currentObj = parseCopy.args['object'];
-      if(!currentObj || !currentObj.input || (currentObj.input == "")){
+      if(!parseCopy.input.length){
         parseCopy.args['object'] = [{ _order: 1,
               input: selection,
               modifier: ""}];
         parseCopy.scoreMultiplier *= 1.2;
+        parseCopy._score = parseCopy.scoreMultiplier;
         returnArr.push(parseCopy);
       }
       return returnArr;
@@ -906,6 +914,10 @@ Parser.prototype = {
       parseCopy.scoreMultiplier *= 1.2;
       parseCopy.args[role] =  [objectCopy];
       returnArr.push(parseCopy);
+    }
+
+    for each (let parse in returnArr) {
+      parse = this.updateScoreMultiplierWithArgs(parse);
     }
     return returnArr;
   },

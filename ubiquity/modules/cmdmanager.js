@@ -289,9 +289,7 @@ CommandManager.prototype = {
     let noInputQuery = this.__nlParser.newQuery("", context,
                                                 20);
     noInputQuery.onResults = function() {
-      if (noInputQuery.finished) {
         asyncSuggestionCb( noInputQuery.suggestionList );
-      }
     };
     return;
   },

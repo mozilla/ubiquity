@@ -438,8 +438,8 @@ function testImplicitPronounParser2() {
     self.assert((foodGotEatenAt == "diner"), "Place should be diner.");
     foodGotEaten = null;
     foodGotEatenAt = null;
-    fakeContext.textSelection = "din";
-    fakeContext.htmlSelection = "din";
+    fakeContext.textSelection = "dine";
+    fakeContext.htmlSelection = "dine";
     getCompletionsAsync("eat lunch at selection", [cmd_eat], fakeContext,
                         self.makeCallback(implicitTestFuncThree));
 

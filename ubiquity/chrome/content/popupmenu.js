@@ -54,6 +54,7 @@ function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySepa
     }
 
     function callback(results){
+      dump("refreshing context menu\n");
       // turn the results object into a list for score-based sorting and
       // display
       var resultsList = [];
