@@ -286,53 +286,57 @@ CmdUtils.CreateCommand(
 
         var tmpl;
 
-        if (!user_name) {
+        var delicious = '<img src="http://delicious.com/favicon.ico"> '
+                        +'<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b>';
 
-            var delicious = '<img src="http://delicious.com/favicon.ico"> '
-                            +'<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b>';
+        if (!bm.bookmarkable) {
+          tmpl = '<p class="error">'
+                 + _('This URL cannot be shared on ${delicious}.',{delicious:delicious})
+                 + '</p>';
+        } else if (!user_name) {
 
-            // If there's no user name, there's no login, so this command won't work.
-            tmpl = '<p style="color: #d44">' +
-                   _("No active user found - log in at ${delicious} to use this command.",
-                     {delicious:delicious})
-                   + '</p>';
+          // If there's no user name, there's no login, so this command won't work.
+          tmpl = '<p class="error">' +
+                 _("No active user found - log in at ${delicious} to use this command.",
+                   {delicious:delicious})
+                 + '</p>';
 
         } else if (!bm.description) {
 
-            // If there's no title, somehow, then this is an error too.
-            tmpl = '<p style="color: #d44">'
-                   + _("A title is required for bookmarks on ${delicious}",
-                       {delicious:'<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b>'})
-                   + '</p>';
+          // If there's no title, somehow, then this is an error too.
+          tmpl = '<p style="color: #d44">'
+                 + _("A title is required for bookmarks on ${delicious}",
+                     {delicious:'<b><a style="color: #3774D0" href="http://delicious.com">delicious.com</a></b>'})
+                 + '</p>';
 
         } else {
 
-            var delicious = '<img src="http://delicious.com/favicon.ico"> '
-                            +'<b><a href="http://delicious.com/${user_name}">delicious.com/${user_name}</a></b>';
+          delicious = '<img src="http://delicious.com/favicon.ico"> '
+                         +'<b><a href="http://delicious.com/${user_name}">delicious.com/${user_name}</a></b>';
 
-            // Attempt to construct a vaguely delicious-esque preview of a bookmark.
-            tmpl = [
-                '<style type="text/css">',
-                    '.preview a { color: #3774D0 }',
-                    '.del-bookmark { font: 12px arial; color: #ddd; background: #eee; line-height: 1.25em }',
-                    '.del-bookmark a.title { color: #1259C7 }',
-                    '.del-bookmark .full-url { color: #396C9B; font-size: 12px; display: block; padding: 0.25em 0 }',
-                    '.del-bookmark .notes { color: #4D4D4D }',
-                    '.del-bookmark .tags { color: #787878; padding-top: 0.25em; text-align: right }',
-                '</style>',
-                '<div class="preview">',
-                    '<p>'+_('Share a bookmark at ${delicious}:')+'</p>',
-                    '<div class="del-bookmark">',
-                        '<div style="padding: 1em;">',
-                        '<a class="title" href="${bm.url}">${bm.description}</a>',
-                        '<a class="full-url" href="${bm.url}">${bm.url}</a>',
-                        bm.extended ?
-                            '<div class="notes">${bm.extended}</div>' : '',
-                        bm.tags ?
-                            '<div class="tags"><span>tags:</span> ${bm.tags}</div>' : '',
-                    '</div>',
-                '</div>'
-            ].join("\n");
+          // Attempt to construct a vaguely delicious-esque preview of a bookmark.
+          tmpl = [
+            '<style type="text/css">',
+              '.preview a { color: #3774D0 }',
+              '.del-bookmark { font: 12px arial; color: #ddd; background: #eee; line-height: 1.25em }',
+              '.del-bookmark a.title { color: #1259C7 }',
+              '.del-bookmark .full-url { color: #396C9B; font-size: 12px; display: block; padding: 0.25em 0 }',
+              '.del-bookmark .notes { color: #4D4D4D }',
+              '.del-bookmark .tags { color: #787878; padding-top: 0.25em; text-align: right }',
+            '</style>',
+            '<div class="preview">',
+              '<p>'+_('Share a bookmark at ${delicious}:', {delicious:delicious})+'</p>',
+              '<div class="del-bookmark">',
+                '<div style="padding: 1em;">',
+                '<a class="title" href="${bm.url}">${bm.description}</a>',
+                '<a class="full-url" href="${bm.url}">${bm.url}</a>',
+                bm.extended ?
+                  '<div class="notes">${bm.extended}</div>' : '',
+                bm.tags ?
+                  '<div class="tags"><span>tags:</span> ${bm.tags}</div>' : '',
+              '</div>',
+            '</div>'
+          ].join("\n");
 
         }
 
@@ -348,23 +352,28 @@ CmdUtils.CreateCommand(
         var user_cookie = this._getUserCookie();
         var user_name   = (user_cookie) ? user_cookie.split(' ')[0] : '';
 
+        if (!bm.bookmarkable) {
+          displayMessage(_('This URL cannot be shared on delicious.'));
+          return false;
+        }
+
         if (!user_name) {
-            // If there's no user name, there's no login, so this command won't work.
-            displayMessage(_('No active user found - log in at delicious.com to use this command.'));
-            return false;
+          // If there's no user name, there's no login, so this command won't work.
+          displayMessage(_('No active user found - log in at delicious.com to use this command.'));
+          return false;
         }
 
         if (!bm.description) {
-            // If there's no title, somehow, then this is an error too.
-            displayMessage(_("A title is required for bookmarks at delicious.com"));
-            return false;
+          // If there's no title, somehow, then this is an error too.
+          displayMessage(_("A title is required for bookmarks at delicious.com"));
+          return false;
         }
 
         var path = '/v1/posts/add';
         var url  = this._config.api_base + path;
 
         var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"].
-            createInstance();
+                   createInstance();
 
         req.open('POST', url, true);
 
@@ -372,12 +381,12 @@ CmdUtils.CreateCommand(
         var onload, onerror;
 
         req.onload  = onload  = function(ev) {
-            displayMessage(_('Bookmark "${description}" shared at delicious.com/${user_name}',{description:bm.description,user_name:user_name}));
+          displayMessage(_('Bookmark "${description}" shared at delicious.com/${user_name}',{description:bm.description,user_name:user_name}));
         }
 
         req.onerror = onerror = function(ev) {
-            // TODO: more informative reporting on errors
-            displayMessage(_('ERROR: Bookmark "${description}" NOT shared on delicious.com/${user_name}',{description:bm.description,user_name:user_name}));
+          // TODO: more informative reporting on errors
+          displayMessage(_('ERROR: Bookmark "${description}" NOT shared on delicious.com/${user_name}',{description:bm.description,user_name:user_name}));
         }
 
         // TODO: implement timeout here, in case requests take too long.
@@ -399,12 +408,15 @@ CmdUtils.CreateCommand(
      * Given input data and modifiers, attempt to assemble data necessary to
      * post a bookmark.
      */
+    _checkBookmarkable: new RegExp('^https?://'),
     _extractBookmarkData: function(args) {
         return {
             _user:
                 this._getUserCookie(),
             url:
                 context.focusedWindow.location,
+            bookmarkable:
+                this._checkBookmarkable.test(context.focusedWindow.location),
             description:
                 args.alias.text || context.focusedWindow.document.title,
             extended:
