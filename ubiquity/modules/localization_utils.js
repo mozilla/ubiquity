@@ -52,16 +52,12 @@ const LocalizableProperties = ["names", "help", "description"];
 var commandContext = null;
 var feedContext = null;
 var displayContext = null;
-//var localStringBundles = {};
 var loadedPo = {};
 
-//var document = {getElementsByTagName: function () []};
 Gettext.prototype.get_lang_refs = function () [];
 
 var LocalizationUtils = {
   GETTEXT: new Gettext(),
-  //BUNDLE_SVC: (Cc['@mozilla.org/intl/stringbundle;1']
-  //             .getService(Ci.nsIStringBundleService)),
 
   isLocalizable: function LU_isLocalizable(feedUrl) Localizable.test(feedUrl),
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
