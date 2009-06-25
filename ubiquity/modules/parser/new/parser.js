@@ -869,21 +869,21 @@ Parser.prototype = {
     // If the parse has no declared verb, then we cannot
     // assign the interpolation to specific roles, because
     // no roles are known yet. So we will assign the whole
-    // selection to the direct object of the yet to be decided verb.
+    // selection to the direct object of the yet to be decided verb,
+    // so long as there is not currently a direct object assigned.
     // Then, in step 7, object -> other roles interpolation will
     // make sure that the selection gets tried in all roles of
     // the verb that is chosen.
-    if (!parse._verb || !parse._verb.arguments){
+    if (!parse._verb.id){
       let parseCopy = parse.copy();
-      parseCopy.setArgumentSuggestion(
-          "object",
-          { _order: 1,
-            input: selection,
-            modifier: ""});
-      if (!parse.input.length)
+      let currentObj = parseCopy.args['object'];
+      if(!currentObj || !currentObj.input || (currentObj.input == "")){
+        parseCopy.args['object'] = [{ _order: 1,
+              input: selection,
+              modifier: ""}];
         parseCopy.scoreMultiplier *= 1.2;
-      parseCopy._score = parseCopy.scoreMultiplier;
-      returnArr.push(parseCopy);
+        returnArr.push(parseCopy);
+      }
       return returnArr;
     }
 
@@ -903,7 +903,8 @@ Parser.prototype = {
         input: selection,
         modifier: delimiter,
         innerSpace: this.joindelimiter};
-      parseCopy.setArgumentSuggestion(role, objectCopy);
+      parseCopy.scoreMultiplier *= 1.2;
+      parseCopy.args[role] =  [objectCopy];
       returnArr.push(parseCopy);
     }
     return returnArr;
@@ -1085,6 +1086,7 @@ Parser.prototype = {
                  ? this.suggestedVerbOrder(verb.names[0])
                  : this.suggestedVerbOrder),
       };
+
       returnArray.push(parseCopy);
     }
     return returnArray;

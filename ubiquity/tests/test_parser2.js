@@ -374,8 +374,8 @@ function testVerbEatsSelectionParserTwo() {
     self.assert(foodGotEaten == "breakfast", "food should be breakfast");
     self.assert(foodGotEatenAt == "grill", "place should be grill");
 
-    fakeContext.textSelection = "din";
-    fakeContext.htmlSelection = "din";
+    fakeContext.textSelection = "dinne";
+    fakeContext.htmlSelection = "dinne";
     getCompletionsAsync("eat at home this", [cmd_eat], fakeContext,
                         self.makeCallback(testEatFuncThree));
 
@@ -413,6 +413,7 @@ function testImplicitPronounParser2() {
 
   function implicitTestFuncOne(completions) {
     // Should have "eat lunch" and "eat ?"
+    debugCompletions(completions);
     self.assert( (completions.length == 2), "Should have 2 completions.");
     completions[0].execute();
     self.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
@@ -424,7 +425,7 @@ function testImplicitPronounParser2() {
                         self.makeCallback(implicitTestFuncTwo));
   }
   function implicitTestFuncTwo(completions) {
-    debugCompletions(completions);
+    //debugCompletions(completions);
     // first completion should be directObject is dinner
     completions[0].execute();
     self.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
@@ -447,7 +448,7 @@ function testImplicitPronounParser2() {
     // TODO failing here.... expecting "eat lunch at diner" but getting:
     // "eat lunch at diner" (expected), "eat dinner at diner"
     // (unexpected), and "eat near diner at diner" (bizzare)
-    debugCompletions(completions);
+    //debugCompletions(completions);
     completions[0].execute();
     self.assert(foodGotEaten == "lunch", "Should have eaten lunch");
     self.assert(foodGotEatenAt == "diner", "Should have eaten it at diner");
@@ -459,7 +460,7 @@ function testImplicitPronounParser2() {
                         self.makeCallback(implicitTestFuncFour));
   }
   function implicitTestFuncFour(completions) {
-    debugCompletions(completions);
+    //debugCompletions(completions);
     completions[0].execute();
     self.assert((foodGotEaten == "dinner"), "DO should be dinner.");
     self.assert((foodGotEatenAt == "grill"), "ate at grill.");
@@ -510,7 +511,7 @@ function testDontInterpolateInTheMiddleOfAWord() {
   getCompletionsAsync("find iterate", [cmd_google], fakeContext,
                       self.makeCallback(dontInterpolateFuncOne));
   function dontInterpolateFuncOne(completions) {
-    debugCompletions(completions);
+    //debugCompletions(completions);
     // Getting three suggestions:
     // "find iterate" (expected),
     // "find flab" (unexpected)
@@ -523,7 +524,7 @@ function testDontInterpolateInTheMiddleOfAWord() {
 
   }
   function dontInterpolateFuncTwo(completions) {
-    debugCompletions(completions);
+    //debugCompletions(completions);
     self.assert(completions.length == 2, "Should have 2 completions.");
     self.assert(completions[0].args.object[0].text == "flab erate",
               "Should interpolate 'flab' for 'it'.");
