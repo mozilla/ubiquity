@@ -27,14 +27,3 @@ msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable pa
 msgstr ""
 
 
-#. map these command:
-#. use | to separate multiple name values:
-msgctxt "map these.names"
-msgid "map these"
-msgstr ""
-
-msgctxt "map these.description"
-msgid "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)"
-msgstr ""
-
-
