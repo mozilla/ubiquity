@@ -22,6 +22,10 @@ msgctxt "search.description"
 msgid "Search using your installed search engines"
 msgstr ""
 
+msgctxt "search.preview"
+msgid "Search using <b>${engine}</b> for:<br /><b>${query}</b>"
+msgstr ""
+
 
 #. Google command:
 #. use | to separate multiple name values:
@@ -37,6 +41,18 @@ msgctxt "Google.description"
 msgid "Searches Google for your words."
 msgstr ""
 
+msgctxt "Google.preview"
+msgid "Searches Google for your words."
+msgstr ""
+
+msgctxt "Google.preview"
+msgid "Your search - ${searchTerm} - did not match any documents."
+msgstr ""
+
+msgctxt "Google.preview"
+msgid "Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time."
+msgstr ""
+
 
 #. wikipedia command:
 #. use | to separate multiple name values:
@@ -46,6 +62,26 @@ msgstr ""
 
 msgctxt "wikipedia.description"
 msgid "Searches Wikipedia for your words, in a given language."
+msgstr ""
+
+msgctxt "wikipedia.preview"
+msgid "Searching Wikipedia for <b>${query}</b> ..."
+msgstr ""
+
+msgctxt "wikipedia.preview"
+msgid "Error searching Wikipedia"
+msgstr ""
+
+msgctxt "wikipedia.preview"
+msgid "Wikipedia articles found matching <b>${query}</b>:"
+msgstr ""
+
+msgctxt "wikipedia.preview"
+msgid "Retreiving article summary..."
+msgstr ""
+
+msgctxt "wikipedia.preview"
+msgid "No articles found."
 msgstr ""
 
 
@@ -127,6 +163,18 @@ msgctxt "amazon.description"
 msgid "Searches <a href=\"http://www.amazon.com/\">Amazon.com</a> for items matching your words."
 msgstr ""
 
+msgctxt "amazon.preview"
+msgid "Searching ${AmazLink} for items matching <b>${query}</b>."
+msgstr ""
+
+msgctxt "amazon.preview"
+msgid "Error searching ${AmazLink}."
+msgstr ""
+
+msgctxt "amazon.preview"
+msgid "Found <b>${numitems}</b> item{if numitems - 1}s{/if} on <a href='http://www.amazon.com/'>Amazon.com</a> matching <b>${query}</b>."
+msgstr ""
+
 
 #. VideoSurf command:
 #. use | to separate multiple name values:
@@ -140,6 +188,10 @@ msgstr ""
 
 msgctxt "VideoSurf.description"
 msgid "Performs a VideoSurf video search with advanced preview."
+msgstr ""
+
+msgctxt "VideoSurf.preview"
+msgid "Loading videos..."
 msgstr ""
 
 
@@ -164,6 +216,26 @@ msgctxt "Flickr.description"
 msgid "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your keywords. Previews the top pictures."
 msgstr ""
 
+msgctxt "Flickr.preview"
+msgid "Searches for photos on Flickr."
+msgstr ""
+
+msgctxt "Flickr.preview"
+msgid "Searching for photos on Flickr..."
+msgstr ""
+
+msgctxt "Flickr.preview"
+msgid "Error searching Flickr"
+msgstr ""
+
+msgctxt "Flickr.preview"
+msgid "Error searching Flickr."
+msgstr ""
+
+msgctxt "Flickr.preview"
+msgid "${nummatches} photos were found on Flickr."
+msgstr ""
+
 
 #. Bugzilla command:
 #. use | to separate multiple name values:
@@ -186,6 +258,14 @@ msgctxt "msn.description"
 msgid "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words."
 msgstr ""
 
+msgctxt "msn.preview"
+msgid "Searches MSN for ${query}"
+msgstr ""
+
+msgctxt "msn.preview"
+msgid "Searches MSN for the given words."
+msgstr ""
+
 
 #. ebay command:
 #. use | to separate multiple name values:
@@ -197,6 +277,14 @@ msgctxt "ebay.description"
 msgid "Searches <a href=\"http://search.ebay.com\">eBay</a> for auctions matching the given words."
 msgstr ""
 
+msgctxt "ebay.preview"
+msgid "Searches eBay for ${query}"
+msgstr ""
+
+msgctxt "ebay.preview"
+msgid "Searches eBay for the given words."
+msgstr ""
+
 
 #. ask command:
 #. use | to separate multiple name values:
@@ -206,6 +294,14 @@ msgstr ""
 
 msgctxt "ask.description"
 msgid "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words."
+msgstr ""
+
+msgctxt "ask.preview"
+msgid "Searches Ask.com for ${query}"
+msgstr ""
+
+msgctxt "ask.preview"
+msgid "Searches Ask.com for the given words."
 msgstr ""
 
 
@@ -234,6 +330,18 @@ msgctxt "yelp.description"
 msgid "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.  Previews the top results."
 msgstr ""
 
+msgctxt "yelp.preview"
+msgid "Searches yelp for restaurants in your area"
+msgstr ""
+
+msgctxt "yelp.execute"
+msgid "${name} is a ${stars} restaurant in{if defined('where')} <a href='${whereUrl}'>${where},</a>{/if} ${city}."
+msgstr ""
+
+msgctxt "yelp.execute"
+msgid "It's been reviewed ${times} times."
+msgstr ""
+
 
 #. check weather command:
 #. use | to separate multiple name values:
@@ -247,6 +355,18 @@ msgstr ""
 
 msgctxt "check weather.description"
 msgid "Checks the weather for a given location. It detects your current location as a default."
+msgstr ""
+
+msgctxt "check weather.preview"
+msgid "Gets the weather for a zip code/city."
+msgstr ""
+
+msgctxt "check weather.preview"
+msgid "Weather for ${location}"
+msgstr ""
+
+msgctxt "check weather.preview"
+msgid "Weather for ${location}"
 msgstr ""
 
 
@@ -264,6 +384,14 @@ msgctxt "define.description"
 msgid "Gives the meaning of a word, using answers.com."
 msgstr ""
 
+msgctxt "define.preview"
+msgid "Gives the definition of a word."
+msgstr ""
+
+msgctxt "define.preview"
+msgid "Gives the definition of the word ${word}."
+msgstr ""
+
 
 #. google image search command:
 #. use | to separate multiple name values:
@@ -277,6 +405,38 @@ msgstr ""
 
 msgctxt "google image search.description"
 msgid "Browse and embed pictures from Google Images"
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Search on Google Images."
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Searching on Google Images..."
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Connection error."
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Server error"
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Server error"
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Sorry, this function can be used in an editable box only"
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Image Search results for ${query}"
+msgstr ""
+
+msgctxt "google image search.preview"
+msgid "Sorry, there are no results"
 msgstr ""
 
 
