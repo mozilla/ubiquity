@@ -88,7 +88,7 @@ CmdUtils.CreateCommand({
       <>Opens one of the Ubiquity documentation/settings pages.</>),
   preview: function( pBlock, args ){
     if (args.object && args.object.text) {
-      pBlock.innerHTML = "Opens the Ubiquity " + args.object.text + " page.";
+      pBlock.innerHTML = _("Opens the Ubiquity ${goal} page.",{goal: args.object.text});
     } else {
       pBlock.innerHtml = this.description;
     }
@@ -99,6 +99,8 @@ CmdUtils.CreateCommand({
       targetPage = Help;
     } else {
       switch( args.object.text) {
+      // we won't localize these for the time being, as they're
+      // dependent on the nountype being localized
       case "help":
         targetPage = Help;
         break;
@@ -235,7 +237,7 @@ CmdUtils.CreateCommand({
       var rem = this._get(text, true).join(Sep);
       if (rem.length === bin.length) return;
       prefs.setValue(PBin, rem);
-      this._say("Deleted matched histories. Click here to undo.",
+      this._say(_("Deleted matched histories. Click here to undo."),
                 function() { prefs.setValue(PBin, bin) });
     } else
       this._say('Type "^" to delete all.');
@@ -243,7 +245,7 @@ CmdUtils.CreateCommand({
   preview: function(pbl, args) {
     var his = this._get(args.object.text);
     if (!his[0]) {
-      pbl.innerHTML = "<i>No histories match.</i>" + this.help;
+      pbl.innerHTML = "<i>"+_("No histories match.")+"</i>" + this.help;
       return;
     }
     CmdUtils.previewList(
