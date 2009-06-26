@@ -124,6 +124,10 @@ msgid "Share the current page as a bookmark on delicious.com"
 msgstr ""
 
 msgctxt "share (on delicious).preview"
+msgid "This URL cannot be shared on ${delicious}."
+msgstr ""
+
+msgctxt "share (on delicious).preview"
 msgid "No active user found - log in at ${delicious} to use this command."
 msgstr ""
 
@@ -133,6 +137,10 @@ msgstr ""
 
 msgctxt "share (on delicious).preview"
 msgid "Share a bookmark at ${delicious}:"
+msgstr ""
+
+msgctxt "share (on delicious).execute"
+msgid "This URL cannot be shared on delicious."
 msgstr ""
 
 msgctxt "share (on delicious).execute"
@@ -149,89 +157,6 @@ msgstr ""
 
 msgctxt "share (on delicious).execute"
 msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
-msgstr ""
-
-
-#. ask rypple command:
-#. use | to separate multiple name values:
-msgctxt "ask rypple.names"
-msgid "ask rypple|rypple"
-msgstr ""
-
-msgctxt "ask rypple.help"
-msgid "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in"
-msgstr ""
-
-msgctxt "ask rypple.description"
-msgid "Asks a question on Rypple"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "Asks the following question (${charsLeft} characters left):"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "NO QUESTION. PLEASE ENTER A QUESTION."
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "To:"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE."
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "Attributes:"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE."
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "Usage:"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "Recipients must start with '@' and at least one recipient is required."
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "Attributes must start with '#' and at least one attribute is required."
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "The last ${chars} character(s) of your question will be truncated!<br/>"
-msgstr ""
-
-msgctxt "ask rypple.preview"
-msgid "The last <b>${num}</b> attributes{if num > 1}s{/if} will not be used!"
-msgstr ""
-
-msgctxt "ask rypple.execute"
-msgid "At least one recipient is required"
-msgstr ""
-
-msgctxt "ask rypple.execute"
-msgid "At least one attribute is required"
-msgstr ""
-
-msgctxt "ask rypple.execute"
-msgid "No question specified"
-msgstr ""
-
-msgctxt "ask rypple.execute"
-msgid "Rypple error - are you logged in?"
-msgstr ""
-
-msgctxt "ask rypple.execute"
-msgid "Asked Question Successfully on Rypple"
 msgstr ""
 
 
