@@ -84,7 +84,7 @@ msgid "get email address"
 msgstr ""
 
 msgctxt "get email address.help"
-msgid "Execute to copy the address."
+msgid "Execute the command to copy the address to your clipboard."
 msgstr ""
 
 msgctxt "get email address.description"
