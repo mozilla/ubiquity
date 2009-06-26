@@ -1025,6 +1025,11 @@ Parser.prototype = {
     let returnArr = [];
     for (let key in parse.args.object) {
       let object = parse.args.object[key];
+      // if the object has a modifier, we don't want to override that
+      // so we won't apply this object to other roles.
+      if (object.modifier)
+        continue; // goes to the next parse.args.object key
+        
       let newParses = [];
       for (let role in this._otherRolesCache) {
         let delimiter = this._otherRolesCache[role];
@@ -2157,6 +2162,7 @@ Parse.prototype = {
                         this._verb,
                         this.argString,
                         this._id);
+    dump('copying '+this._id+' > '+ret._id+'\n');
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
