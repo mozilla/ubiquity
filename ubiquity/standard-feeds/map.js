@@ -5,7 +5,7 @@ var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtG
 CmdUtils.CreateCommand({
   names: ["map"],
   arguments: [{role: "object",
-               nountype: noun_arb_text,
+               nountype: noun_type_async_address,
                label: "address"}],
   icon: "chrome://ubiquity/skin/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
