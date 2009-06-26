@@ -64,32 +64,32 @@ msgid "Highlights your current selection, like <span style=\"background: yellow;
 msgstr ""
 
 
-#. undo (text edit) command:
+#. undo text edit command:
 #. use | to separate multiple name values:
-msgctxt "undo (text edit).names"
-msgid "undo"
+msgctxt "undo text edit.names"
+msgid "undo text edit"
 msgstr ""
 
-msgctxt "undo (text edit).description"
-msgid "Undoes your latest style/formatting or page-editing changes."
+msgctxt "undo text edit.description"
+msgid "If you're in a rich-text-edit area, undoes your latest style/formatting or page-editing changes."
 msgstr ""
 
-msgctxt "undo (text edit).execute"
+msgctxt "undo text edit.execute"
 msgid "You're not in a rich text editing field."
 msgstr ""
 
 
-#. redo (text edit) command:
+#. redo text edit command:
 #. use | to separate multiple name values:
-msgctxt "redo (text edit).names"
-msgid "redo"
+msgctxt "redo text edit.names"
+msgid "redo text edit"
 msgstr ""
 
-msgctxt "redo (text edit).description"
-msgid "Redoes your latest style/formatting or page-editing changes."
+msgctxt "redo text edit.description"
+msgid "If you're in a rich-text-edit area, redoes your latest style/formatting or page-editing changes."
 msgstr ""
 
-msgctxt "redo (text edit).execute"
+msgctxt "redo text edit.execute"
 msgid "You're not in a rich text editing field."
 msgstr ""
 
@@ -105,7 +105,7 @@ msgid "Displays the number of words in a selection."
 msgstr ""
 
 msgctxt "count words.preview"
-msgid "${num} words"
+msgid "<b>${num}</b> words"
 msgstr ""
 
 msgctxt "count words.preview"
@@ -121,13 +121,13 @@ msgid "No words selected."
 msgstr ""
 
 
-#. link (to wikipedia) command:
+#. link to wikipedia command:
 #. use | to separate multiple name values:
-msgctxt "link (to wikipedia).names"
-msgid "link|insert link|linkify"
+msgctxt "link to wikipedia.names"
+msgid "link to wikipedia"
 msgstr ""
 
-msgctxt "link (to wikipedia).description"
+msgctxt "link to wikipedia.description"
 msgid "Turns a phrase into a link to the matching Wikipedia article."
 msgstr ""
 
@@ -135,73 +135,25 @@ msgstr ""
 #. calculate command:
 #. use | to separate multiple name values:
 msgctxt "calculate.names"
-msgid "calculate"
+msgid "calculate|gcalculate"
 msgstr ""
 
 msgctxt "calculate.help"
-msgid "Try it out: issue &quot;calc 22/7 - 1&quot;."
+msgid "Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
 msgstr ""
 
 msgctxt "calculate.description"
-msgid "Calculates the value of a mathematical expression."
-msgstr ""
-
-msgctxt "calculate.preview"
-msgid "Calculates an expression. E.g., 22/7."
-msgstr ""
-
-msgctxt "calculate.preview"
-msgid "${expression} = <b>${result}</b>{if error}<p><b>Error:</b> ${error}</p>{/if}"
-msgstr ""
-
-msgctxt "calculate.execute"
-msgid "Requires a expression."
-msgstr ""
-
-msgctxt "calculate.execute"
-msgid "Invalid expression"
-msgstr ""
-
-msgctxt "calculate.execute"
-msgid "Error calculating expression: ${expression}"
-msgstr ""
-
-
-#. gcalculate command:
-#. use | to separate multiple name values:
-msgctxt "gcalculate.names"
-msgid "gcalculate"
-msgstr ""
-
-msgctxt "gcalculate.help"
-msgid "Try 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal."
-msgstr ""
-
-msgctxt "gcalculate.description"
-msgid "Calculate knows many functions, constants, units, currencies, etc."
-msgstr ""
-
-msgctxt "gcalculate.preview"
-msgid "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(Command List)</a></u>"
-msgstr ""
-
-
-#. sparkline command:
-#. use | to separate multiple name values:
-msgctxt "sparkline.names"
-msgid "sparkline|graph|insert sparkline"
-msgstr ""
-
-msgctxt "sparkline.help"
-msgid "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them."
-msgstr ""
-
-msgctxt "sparkline.description"
-msgid "Graphs the current selection, turning it into a sparkline."
-msgstr ""
-
-msgctxt "sparkline.preview"
-msgid "Requires numbers to graph."
+msgid "Calculates using\n"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a>\n"
+"which has all the features of a scientific calculator,\n"
+"    knows constants such as the speed of light,\n"
+"    and can convert between units and currencies.\n"
+"<br/>\n"
+"Uses\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"instead for simple expressions like\n"
+"<code>22/7</code>\n"
+"."
 msgstr ""
 
 
@@ -228,7 +180,22 @@ msgid "Translates from one language to another."
 msgstr ""
 
 msgctxt "translate.preview"
+msgid "Translates ${url} into <b>${toLang}</b>."
+msgstr ""
+
+msgctxt "translate.preview"
 msgid "Replaces the selected text with the <b>${toLang}</b> translation:"
+msgstr ""
+
+# shared strings in the function translateTo
+# manually added by mitcho
+msgid "Translation error: ${error}"
+msgstr ""
+
+msgid "invalid translation language pair"
+msgstr ""
+
+msgid "could not reliably detect source language"
 msgstr ""
 
 
@@ -238,8 +205,12 @@ msgctxt "create bookmarklet command.names"
 msgid "create bookmarklet command"
 msgstr ""
 
+msgctxt "create bookmarklet command.help"
+msgid "For instance, if you have a bookmarklet called 'press this', you can say 'create bookmarklet command from press this'."
+msgstr ""
+
 msgctxt "create bookmarklet command.description"
-msgid "Creates a new command from a bookmarklet."
+msgid "Creates a new Ubiquity command from a bookmarklet."
 msgstr ""
 
 
@@ -252,12 +223,14 @@ msgstr ""
 msgctxt "create search command.help"
 msgid "<ol style=\"list-style-image:none\">\n"
 "  <li>Select a searchbox.</li>\n"
-"  <li>Execute this command to create the new search command.</li>\n"
+"  <li>Say 'create search command mysearch'.</li>\n"
+"  <li>Execute.</li>\n"
+"  <li>You now have a command called 'mysearch'.</li>\n"
 "</ol>"
 msgstr ""
 
 msgctxt "create search command.description"
-msgid "Creates a new Ubiquity command from a focused search-box."
+msgid "Creates a new Ubiquity command from a focused search-box and lets you set the command name."
 msgstr ""
 
 msgctxt "create search command.preview"

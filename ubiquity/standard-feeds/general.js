@@ -250,7 +250,7 @@ function translateTo(text, langCodePair, callback, pblock) {
                       callback, pblock);
       }
       else {
-        displayMessage( _("Translation Error: ${error}",
+        displayMessage( _("Translation error: ${error}",
                           {error:data.responseDetails}) );
       }
       return;
