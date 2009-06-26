@@ -170,7 +170,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["count tabs"],
   description: "Counts the number of opened tabs. Takes an optional " +
-                "filter term to count number of tabs matching filter term. ",
+                "filter term to count number of tabs matching filter term.",
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function(args) {

@@ -96,7 +96,7 @@ msgid "count tabs"
 msgstr ""
 
 msgctxt "count tabs.description"
-msgid "Counts the number of opened tabs."
+msgid "Counts the number of opened tabs. Takes an optional filter term to count number of tabs matching filter term."
 msgstr ""
 
 # added manually by mitcho
@@ -152,6 +152,10 @@ msgctxt "go back.description"
 msgid "Goes back in history."
 msgstr ""
 
+# added manually by mitcho
+msgctxt "go back.preview"
+msgid "Go back ${num} step{if num > 1}s{/if} in history."
+msgstr ""
 
 #. go forward command:
 #. use | to separate multiple name values:
@@ -161,6 +165,11 @@ msgstr ""
 
 msgctxt "go forward.description"
 msgid "Goes forward in history."
+msgstr ""
+
+# added manually by mitcho
+msgctxt "go forward.preview"
+msgid "Go forward ${num} step{if num > 1}s{/if} in history."
 msgstr ""
 
 
