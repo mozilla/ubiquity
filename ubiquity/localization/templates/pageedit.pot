@@ -52,7 +52,7 @@ msgid "stop editing page|turn off edit mode"
 msgstr ""
 
 msgctxt "stop editing page.description"
-msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing."
+msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing. If you want the changes to persist on page reload, issue the 'save' command first."
 msgstr ""
 
 
@@ -63,7 +63,7 @@ msgid "save page edits"
 msgstr ""
 
 msgctxt "save page edits.description"
-msgid "Saves edits you've made to this page in an annotation. Undo with the 'undo page edits' command."
+msgid "Saves edits you've made to this page in an annotation. They will persist on page reload. You can remove them with the 'undo page edits' command."
 msgstr ""
 
 
