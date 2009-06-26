@@ -18,6 +18,14 @@ msgctxt "highlight syntax.description"
 msgid "Treats your selection as program source code, guesses its language, and colors it based on syntax."
 msgstr ""
 
+msgctxt "highlight syntax.execute"
+msgid "You must select some code to syntax-hilight."
+msgstr ""
+
+msgctxt "highlight syntax.preview"
+msgid "Syntax highlights your code."
+msgstr ""
+
 
 #. view source command:
 #. use | to separate multiple name values:
@@ -38,6 +46,10 @@ msgstr ""
 
 msgctxt "escape HTML entities.description"
 msgid "Replaces html entities (&lt;, &gt;, &amp;, &quot; and &#39;) with their escape sequences."
+msgstr ""
+
+msgctxt "escape HTML entities.execute"
+msgid "No text selected."
 msgstr ""
 
 
