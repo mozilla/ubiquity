@@ -16,12 +16,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#. add (to calendar) command:
-msgctxt "add (to calendar).names"
+#. add to google calendar command:
+msgctxt "add to google calendar.names"
 msgid "add"
 msgstr "追加する|追加して|追加しろ|追加|ついかする|ついかして|ついかしろ|ついか"
 
-msgctxt "add (to calendar).help"
+msgctxt "add to google calendar.help"
 msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
 ". e.g.:\n"
 "<ul>\n"
@@ -30,15 +30,15 @@ msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=366
 "</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
 msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">自然な言葉でイベントの詳細を入力してください。</a> 例:<ul>  <li>3pm Lunch with Myk and Thunder</li>  <li>Jono's Birthday on Friday</li></ul><p>現在このコマンドは <a href=\"http://calendar.google.com\">Google カレンダー</a> のみ対応です。</p>"
 
-msgctxt "add (to calendar).description"
+msgctxt "add to google calendar.description"
 msgid "Adds an event to your calendar."
 msgstr "カレンダーにイベントを追加します。"
 
-msgctxt "add (to calendar).execute"
+msgctxt "add to google calendar.execute"
 msgid "Event created"
 msgstr "イベントを追加しました。"
 
-msgctxt "add (to calendar).execute"
+msgctxt "add to google calendar.execute"
 msgid "Error creating the event"
 msgstr "エラーのためイベントが追加できませんでした。"
 

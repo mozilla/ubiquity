@@ -6,15 +6,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-20 00:46+0900\n"
+"POT-Creation-Date: 2009-06-26 14:21+0900\n"
 
-#. add (to calendar) command:
+#. add to google calendar command:
 #. use | to separate multiple name values:
-msgctxt "add (to calendar).names"
-msgid "add"
+msgctxt "add to google calendar.names"
+msgid "add to google calendar|quick add"
 msgstr ""
 
-msgctxt "add (to calendar).help"
+msgctxt "add to google calendar.help"
 msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
 ". e.g.:\n"
 "<ul>\n"
@@ -23,15 +23,23 @@ msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=366
 "</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
 msgstr ""
 
-msgctxt "add (to calendar).description"
+msgctxt "add to google calendar.description"
 msgid "Adds an event to your calendar."
 msgstr ""
 
-msgctxt "add (to calendar).execute"
+msgctxt "add to google calendar.execute"
+msgid "Authorization error"
+msgstr ""
+
+msgctxt "add to google calendar.execute"
+msgid "Please make sure you are logged in to Google Calendar"
+msgstr ""
+
+msgctxt "add to google calendar.execute"
 msgid "Event created"
 msgstr ""
 
-msgctxt "add (to calendar).execute"
+msgctxt "add to google calendar.execute"
 msgid "Error creating the event"
 msgstr ""
 
@@ -39,7 +47,7 @@ msgstr ""
 #. check google calendar command:
 #. use | to separate multiple name values:
 msgctxt "check google calendar.names"
-msgid "check google calendar|check gcalendar"
+msgid "check google calendar"
 msgstr ""
 
 msgctxt "check google calendar.help"

@@ -19,10 +19,15 @@ CmdUtils.CreateCommand({
     </ul>
     </>) + Apology,
   execute: function (args) {
+    function needLogin() {
+      this._say(_("Authorization error"),
+              _("Please make sure you are logged in to Google Calendar"));
+    }
+  
     var event = args.object.text;
     var authKey = Utils.getCookie(".www.google.com", "CAL");
     if (!authKey) {
-      this._needLogin();
+      needLogin();
       return;
     }
     var req = new XMLHttpRequest;
@@ -44,7 +49,7 @@ CmdUtils.CreateCommand({
       break;
 
       case 401:
-      this._needLogin();
+      needLogin();
       break;
 
       default:
@@ -61,10 +66,6 @@ CmdUtils.CreateCommand({
       title: this.name + ": " +  title,
       text: text,
     });
-  },
-  _needLogin: function() {
-    this._say(_("Authorization error"),
-              _("Please make sure you are logged in to Google Calendar"));
   }
 });
 
