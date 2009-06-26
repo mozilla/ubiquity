@@ -1132,6 +1132,10 @@ function makeSearchCommand(options) {
     };
   }
 
+  for (var x = 0; x < options.names.length; x++) {
+    options.names[x] = options.names[x].toLowerCase();
+  }
+
   this.CreateCommand(options);
 }
 

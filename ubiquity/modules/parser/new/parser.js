@@ -2162,7 +2162,7 @@ Parse.prototype = {
                         this._verb,
                         this.argString,
                         this._id);
-    dump('copying '+this._id+' > '+ret._id+'\n');
+    //dump('copying '+this._id+' > '+ret._id+'\n');
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
