@@ -480,66 +480,46 @@ CmdUtils.makeSearchCommand({
   }
 });
 
-const noun_type_amazon_com_index = {
-  name: "Amazon.com index",
-  list: [{text: s, data: d, summary: s} for ([s, d] in Iterator({
-    All: 0,
-    Apparel: 15683091,
-    Automotive: 15690151,
-    Baby: 3760931,
-    Beauty: 11055981,
-    Books: 1000,
-    Classical: 301668,
-    DigitalMusic: 301668,
-    DVD: 130,
-    Electronics: 493964,
-    GourmetFood: 3580501,
-    Grocery: 10746371,
-    HealthPersonalCare: 3760931,
-    HomeGarden: 1063498,
-    Industrial: 228013,
-    Jewelry: 3880591,
-    Kitchen: 1063498,
-    Magazines: 44264011,
-    Merchants: 493964,
-    Miscellaneous: 349028011,
-    Music: 301668,
-    MusicalInstruments: 12923151,
-    OfficeProducts: 1084128,
-    OutdoorLiving: 1063498,
-    PCHardware: 493964,
-    PetSupplies: 13900811,
-    Photo: 13900861,
-    Shoes: 3375301,
-    Software: 409488,
-    SportingGoods: 1036682,
-    Tools: 228013,
-    Toys: 130,
-    VHS: 404272,
-    Video: 130,
-    VideoGames: 44263011,
-    Watches: 378516011,
-    Wireless: 408234,
-    WirelessAccessories: 408234,
-  }))],
-  default: function() this.list[0],
-  suggest: function(txt, htm, cb, sx) {
-    if(sx || !txt) return [];
-    try { var {list} = this, sorter = [], re = RegExp(txt, "i") } catch (e) {}
-    // preferring earlier matches
-    // e.g. "Shoes" appears before "Classical" for an input "s"
-    if (re) for (var i = 0, l = list.length; i < l; ++i) {
-      var sg = list[i], x = sg.text.search(re);
-      if(x >= 0) sorter[x * l + i] = sg;
-    }
-    if (sorter.length) {
-      var ss = sorter.filter(Boolean), [s] = ss;
-      this.default = function() s;
-      return ss;
-    }
-    return list;
-  }
-},
+const noun_type_amazon_com_index = CmdUtils.NounType("index", {
+  All: 0,
+  Apparel: 15683091,
+  Automotive: 15690151,
+  Baby: 3760931,
+  Beauty: 11055981,
+  Books: 1000,
+  Classical: 301668,
+  DigitalMusic: 301668,
+  DVD: 130,
+  Electronics: 493964,
+  GourmetFood: 3580501,
+  Grocery: 10746371,
+  HealthPersonalCare: 3760931,
+  HomeGarden: 1063498,
+  Industrial: 228013,
+  Jewelry: 3880591,
+  Kitchen: 1063498,
+  Magazines: 44264011,
+  Merchants: 493964,
+  Miscellaneous: 349028011,
+  Music: 301668,
+  MusicalInstruments: 12923151,
+  OfficeProducts: 1084128,
+  OutdoorLiving: 1063498,
+  PCHardware: 493964,
+  PetSupplies: 13900811,
+  Photo: 13900861,
+  Shoes: 3375301,
+  Software: 409488,
+  SportingGoods: 1036682,
+  Tools: 228013,
+  Toys: 130,
+  VHS: 404272,
+  Video: 130,
+  VideoGames: 44263011,
+  Watches: 378516011,
+  Wireless: 408234,
+  WirelessAccessories: 408234,
+}, "All"),
 Amazon = "http://www.amazon.com/",
 AmazLink = "Amazon.com".link(Amazon);
 CmdUtils.CreateCommand({
@@ -548,7 +528,7 @@ CmdUtils.CreateCommand({
   description: "Searches " + AmazLink + " for items matching your words.",
   help: (
     <dl><dt>Available Indices</dt>
-    {noun_type_amazon_com_index.list.reduce(
+    {noun_type_amazon_com_index._list.reduce(
       function(dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>+''),
   arguments: [{role: "object",
                nountype: noun_arb_text,
@@ -561,9 +541,8 @@ CmdUtils.CreateCommand({
                              { url: "node=" + data,
                                "field-keywords": text}));
   },
-  preview: function(previewBlock, inputMods) {
-    var text = inputMods.object.text;
-    var searchIndex = inputMods.format.text;
+  preview: function(previewBlock,
+                    {object: {text, html}, format: {text: searchIndex}}) {
     if (!text) {
       previewBlock.innerHTML = this.description + this.help;
       return;
@@ -632,7 +611,7 @@ CmdUtils.CreateCommand({
     var me = this;
     previewBlock.innerHTML =
       _("Searching ${AmazLink} for items matching <b>${query}</b>.",
-        {AmazLink: AmazLink, query: text});
+        {AmazLink: AmazLink, query: html});
     CmdUtils.previewAjax(previewBlock, {
       url: signRequest({
         Service: "AWSECommerceService",
@@ -651,7 +630,7 @@ CmdUtils.CreateCommand({
         else
           info = "";
         previewBlock.innerHTML = "<p class='error'>"
-          + _("Error searching ${AmazLink}.", {AmazLink:AmazLink})
+          + _("Error searching ${AmazLink}.", {AmazLink: AmazLink})
           + "<br/><em>"
           + xhr.status + " " + xhr.statusText + info + "</em></p>";
           // Note: this info could be anything...
@@ -661,7 +640,8 @@ CmdUtils.CreateCommand({
         responseData = jQuery(responseData);
         var errorMessage = responseData.find("Error > Message").text();
         if (errorMessage) {
-          previewBlock.innerHTML = "<p class='error'>" + _(errorMessage) + "</p>";
+          previewBlock.innerHTML =
+            "<p class='error'>" + _(errorMessage) + "</p>";
           return;
         }
         const MAX_RESULTS = 35; // 1 ~ 9, a ~ z
@@ -694,10 +674,12 @@ CmdUtils.CreateCommand({
           feed.dom.getElementById("amazon-search").innerHTML,
           { items: (responseData.find("Items > Item").slice(0, MAX_RESULTS)
                     .map(iter).get()),
-            matchMessage: _("Found <b>${numitems}</b> item{if numitems - 1}s{/if} on <a href='http://www.amazon.com/'>Amazon.com</a> matching <b>${query}</b>.",
-                          {numitems: responseData.find("Items > TotalResults").text(),
-                           query: text})
-           });
+            matchMessage: _(
+              ("Found <b>${numitems}</b> item{if numitems > 1}s{/if} on " +
+               "<a href='http://www.amazon.com/'>Amazon.com</a> " +
+               "matching <b>${query}</b>."),
+              { numitems: responseData.find("Items > TotalResults").text(),
+                query: text }) });
       }
     });
   }
