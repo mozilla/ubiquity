@@ -355,11 +355,13 @@ Parser.prototype = {
     var verbs = this._verbList;
     var verbPatterns = this._patternCache.verbs;
     function addParses(verbPiece, argString, order) {
+      var vplc = verbPiece.toLowerCase();
       for (var verbId in verbs) if (!verbs[verbId].disabled &&
                                     verbPatterns[verbId].test(verbPiece)) {
         let match = RegExp.lastMatch;
         let verb = verbs[verbId];
-        for each (let name in verb.names) if (~name.indexOf(verbPiece)) {
+        for each (let name in verb.names) {
+          if (name.toLowerCase().indexOf(vplc) < 0) continue;
           returnArray.push({
             _verb: {
               id: verbId,

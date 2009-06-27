@@ -912,7 +912,6 @@ function makeSearchCommand(options) {
                            insertQuery(options.postData, text));
   };
   var domainRe = /^.*?:\/\/[^?/]+/;
-  var relRe = /:\/\//;
   var [baseurl] = domainRe.exec(options.url) || [""];
   if (baseurl && !options.icon) {
     // guess where the favicon is
@@ -1036,8 +1035,8 @@ function makeSearchCommand(options) {
                     else {
                       href = results[result].title.find("A").eq(0).attr("href");
                     }
-                    if (!relRe.exec(href)) {
-                      href = parser.baseurl+href;
+                    if (!domainRe.test(href)) {
+                      href = parser.baseurl + href;
                     }
                     results[result].href = href;
                     results[result].title = results[result].title.text();
@@ -1054,8 +1053,8 @@ function makeSearchCommand(options) {
                                              .eq(0)
                                              .attr("src");
                       }
-                      if (!relRe.exec(src)) {
-                        src = parser.baseurl+src;
+                      if (!domainRe.test(src)) {
+                        src = parser.baseurl + src;
                       }
                       results[result].thumbnail = src;
                     }
@@ -1104,14 +1103,15 @@ function makeSearchCommand(options) {
             }
           }
           else {
-            template = ("<p>Error parsing search results.</p>" +
-                        "<p>Press return to go directly to search results</p>");
+            template = (
+              "<p>Error parsing search results.</p>" +
+              "<p>Press return to go directly to search results.</p>");
           }
           pblock.innerHTML = ("<div class='" + Klass + "'>" +
                               "<p>Results for <b>" + html + "</b>:</p>" +
                               template +
                               "</div>");
-        };
+        }
         var params = {
           url: urlString,
           success: searchParser,
@@ -1131,11 +1131,6 @@ function makeSearchCommand(options) {
       }
     };
   }
-
-  for (var x = 0; x < options.names.length; x++) {
-    options.names[x] = options.names[x].toLowerCase();
-  }
-
   this.CreateCommand(options);
 }
 
