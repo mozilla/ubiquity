@@ -6,12 +6,12 @@ CmdUtils.CreateCommand({
   help: "How to use your command.",
   author: {name: "Your Name", email: "you@mozilla.com"},
   license: "GPL",
-  homepage: "http://www.mozilla.com/",
+  homepage: "http://labs.mozilla.com/",
   arguments: {object: noun_arb_text},
-  preview: function(pblock, args) {
+  preview: function preview(pblock, args) {
     pblock.innerHTML = "Your input is <b>" + args.object.html + "</b>.";
   },
-  execute: function(args) {
+  execute: function execute(args) {
     displayMessage("You selected: " + args.object.text, this);
   }
 });
