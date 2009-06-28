@@ -144,7 +144,7 @@ var demoParserInterface = {
               html.appendTo($('#nounCache'));
             }*/
 
-	    let suggestionList = this.suggestionList;
+	          let suggestionList = this.suggestionList;
             $('<h3>step 9: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
             for each (let parse in suggestionList) {
               $('#suggestedParses')
@@ -178,7 +178,7 @@ var demoParserInterface = {
         if (demoParserInterface.runtimes < $('.runtimes').text())
           demoParserInterface.parse();
         else {
-	  $('#scoredParses').empty();
+	        $('#scoredParses').empty();
           for each (var parse in suggestionList) {
             $('#scoredParses')
               .append('<tr><td>' + parse.displayTextDebug + '</td></tr>');
@@ -207,6 +207,34 @@ $(document).ready(function(){
   try {  
     var gUbiquity = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").gUbiquity;
     demoParserInterface.currentParser = gUbiquity.__cmdManager.__nlParser;
+
+    let parser = demoParserInterface.currentParser;
+
+    for each (let {role, delimiter} in parser.roles) {
+      $('<li><code>'+role+'</code>: &quot;'+delimiter+'&quot;</li>').appendTo($('#roles'));
+    }
+
+    for (let id in parser._nounTypes) {
+      let nountype = parser._nounTypes[id];
+      $('<li><code>'+id+'</code>: {label: <code>'+nountype.label+'</code>, '
+                                 +'name: <code>'+nountype.name+'</code>,...}</li>')
+                          .appendTo($('#nountypes'));
+    }
+    
+    for each (let verb in parser._verbList) {
+      let {names, help, description} = verb;
+      let args = $('<ul></ul>');
+      for each (let {nountype, role, label} in verb.arguments) {
+        $('<li>role: <code>'+role+'</code>, nountype: <code>'+nountype.id+'</code></li>').appendTo(args);
+      }
+      let item = $('<li><b><code>'+names[0]+'</code></b></li>');
+      if (verb.arguments.length) {
+        $(':<br/>').appendTo(item);
+        args.appendTo(item);
+      }
+      item.appendTo($('#verblist'));
+    }
+
   } catch (e) {
     $('#gubiquity').show();
   }
