@@ -65,5 +65,7 @@ function makeParser() {
 		return [];
 	};
 
+  es.verbFinalMultiplier = 0.3;
+
   return es;
 };

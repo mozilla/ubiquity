@@ -74,5 +74,7 @@ function makeParser() {
     {clitic: 'les', role: 'object'}
   ];
 
+  fr.verbFinalMultiplier = 0.3;
+
   return fr;
 };

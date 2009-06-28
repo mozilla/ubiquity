@@ -62,6 +62,7 @@ function makeParser() {
 
   // Japanese verbs are always sentence-final.
   ja.suggestedVerbOrder = -1;
+  ja.verbInitialMultiplier = 0.6;
   
   ja.wordBreaker = function(input) {
     return input.replace(this._patternCache.particleMatcher,'\u200b$1\u200b');

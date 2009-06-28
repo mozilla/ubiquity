@@ -68,5 +68,7 @@ function makeParser() {
     {clitic: 'els', role: 'object'}
   ];
 
+  ca.verbFinalMultiplier = 0.3;
+
   return ca;
 };

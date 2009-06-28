@@ -55,5 +55,6 @@ function makeParser() new Parser({
     {role: "alias", delimiter: "as"},
     {role: "alias", delimiter: "named"}
   ],
-  branching: "right"
+  branching: "right",
+  verbFinalMultiplier: 0.3
 });

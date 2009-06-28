@@ -71,6 +71,8 @@ function makeParser() {
   zh.wordBreaker = function(input) {
     return input.replace(this._patternCache.particleMatcher,'\u200b$1\u200b');
   };
+
+  zh.verbFinalMultiplier = 0.3;
   
   return zh;
 

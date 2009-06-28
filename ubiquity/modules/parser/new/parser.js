@@ -109,6 +109,8 @@ Parser.prototype = {
   // sentence-final (e.g. German, Dutch), suggestedVerbOrder can be a function
   // which takes the verb name and returns either 0 or -1.
   suggestedVerbOrder: 0,
+  verbFinalMultiplier: 1,
+  verbInitialMultiplier: 1,
   examples: [],
   clitics: [],
   anaphora: ["this"],
@@ -354,6 +356,8 @@ Parser.prototype = {
     // TODO: write a unit test for this possibility.
     var verbs = this._verbList;
     var verbPatterns = this._patternCache.verbs;
+    var verbFinalMultiplier = this.verbFinalMultiplier;
+    var verbInitialMultiplier = this.verbInitialMultiplier;
     function addParses(verbPiece, argString, order) {
       var vplc = verbPiece.toLowerCase();
       for (var verbId in verbs) if (!verbs[verbId].disabled &&
@@ -362,6 +366,8 @@ Parser.prototype = {
         let verb = verbs[verbId];
         for each (let name in verb.names) {
           if (name.toLowerCase().indexOf(vplc) < 0) continue;
+          Utils.log((order ? verbFinalMultiplier
+                              : verbInitialMultiplier));
           returnArray.push({
             _verb: {
               id: verbId,
@@ -375,7 +381,9 @@ Parser.prototype = {
               // verb prefix matches, even if they're only one or two
               // characters, will get higher scoreMultipliers than noun-first
               // suggestions, which get scoreMultiplier of 0.3. (trac #750)
-              score: 0.3 + 0.7 * Math.sqrt(verbPiece.length / name.length),
+              score: (0.3 + 0.7 * Math.sqrt(verbPiece.length / name.length))
+                     * (order ? verbFinalMultiplier
+                              : verbInitialMultiplier),
               __proto__: verb,
             },
             argString: argString,
@@ -1379,7 +1387,7 @@ Parser.prototype = {
 // The {{{Parser#newQuery()}}} method is used to initiate
 // a query instead of calling {{{new ParseQuery()}}} directly.
 //
-  var ParseQuery = function(parser, queryString, selObj, context,
+var ParseQuery = function(parser, queryString, selObj, context,
                             maxSuggestions, dontRunImmediately) {
   this._date = new Date();
   this._idTime = this._date.getTime();
@@ -1882,12 +1890,15 @@ var Parse = function(parser, input, verb, argString, parentId) {
   this.scoreMultiplier = 0;
   // !complete means we're still parsing or waiting for async nountypes
   this.complete = false;
-  this._id = Math.random();
+  this._id = Math.floor(Math.random() * 1000);
   if (parentId)
     this._parentId = parentId;
 }
 
 Parse.prototype = {
+  // ** {{{Parse#parseId}}} **
+  // Gives a 
+  
   // ** {{{Parse#displayText}}} **
   //
   // {{{displayText}}} prints the verb and arguments in the parse by
