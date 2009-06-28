@@ -903,7 +903,6 @@ NLParser1.Verb.prototype = {
     this._help        = cmd.help;
     this._name        = cmd.name;
     this._icon        = cmd.icon;
-    this._synonyms    = cmd.synonyms;
 
     // Determines if an object has one or more keys
     function hasKey(obj) !!(obj || 0).__count__;
@@ -1013,46 +1012,26 @@ NLParser1.Verb.prototype = {
     return false;
   },
 
-  match: function( inputWord ) {
+  match: function(input) {
     /* returns a float from 0 to 1 telling how good of a match the input
        is to this verb.  Return value will be used for sorting.
        The current heuristic is extremely ad-hoc but produces the ordering
        we want... so far.*/
     if (this.disabled) return 0.0; // verb is disabled, so can't be a match
-    if (this._name == inputWord)
-      // Perfect match always gets maximum rating!
-      return 1.0;
-
-    let index = this._name.indexOf( inputWord );
-    if ( index == 0 ) {
-      // verb starts with the input! A good match.
-      // The more letters of the verb that have been typed, the better the
-      // match is. (Note this privileges short verbs over longer ones)
-      return 0.75 + 0.25 * (inputWord.length / this._name.length);
+    // score = .75 + .25 * lengthRatio - .5 * indexRatio - .25 * namePosition
+    // Perfect match: 1.0 = .75 + .25 * 1 - .5 * 0 - .25 * 0
+    var {names} = this.cmd;
+    for (let i = 0, l = names.length; i < l; ++i) {
+      let name = names[i];
+      let index = name.indexOf(input);
+      if (index < 0) continue;
+      return (.75
+              + .25 * input.length / name.length
+              - .5  * index / input.length
+              - .25 * i / l);
     }
-
-    if ( index > 0 ) {
-      // The input matches the middle of the verb.  Not such a good match but
-      // still a match.
-      return 0.5 + 0.25 * (inputWord.length / this._name.length);
-    }
-
-    // Look for a match on synonyms:
-    if ( this._synonyms && this._synonyms.length > 0) {
-      for each( let syn in this._synonyms) {
-        index = syn.indexOf( inputWord );
-        if (index == 0) {
-          return 0.25 + 0.25 * (inputWord.length / syn.length);
-        }
-        if (index > 0 ) {
-          return 0.25 * (inputWord.length / syn.length);
-        }
-      }
-    }
-
     // No match at all!
     return 0.0;
-
     // TODO: disjoint matches, e.g. matching "atc" to "add-to-calendar"
   }
 };

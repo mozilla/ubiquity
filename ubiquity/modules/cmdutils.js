@@ -694,12 +694,14 @@ function CreateCommand(options) {
     if (!noun.id) noun.id = global.feed.id + "#n" + me.__nextId++;
   }
 
-  // ensure name, names and synonyms
+  // ensure name and names
   { let names = options.names || options.name;
     if (!names)
       throw Error("CreateCommand: name or names is required.");
     if (!Utils.isArray(names))
       names = (names + "").split(/\s{0,}\|\s{0,}/);
+    if (Utils.isArray(options.synonyms)) // for old API
+      names.push.apply(names, options.synonyms);
 
     // we must keep the first name from the original feed around as an
     // identifier. This is used in the command id and in localizations
@@ -726,12 +728,9 @@ function CreateCommand(options) {
         names[x] = vfMatches[2];
         nameArgs[x] = vfMatches[1];
       }
-
     }
     if (nameArgs.length > 0)
       command.nameArg = nameArgs[0]; // other nameArgs not used
-    if (names.length > 1)
-      command.synonyms = names.slice(1);
     command.name = names[0];
     command.names = names;
   }
