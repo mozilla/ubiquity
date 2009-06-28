@@ -546,7 +546,7 @@ Parser.prototype = {
   // The {{{scoreMultiplier}}} parameter is set at this point, making
   // {{{maxScore}}} valid for all returned parses.
 
-  argFinder: function(argString, verb, input, thisQuery) {
+  argFinder: function argFinder(argString, verb, input, thisQuery) {
     // initialize possibleParses. This is the array that we're going to return.
     var possibleParses = [];
     // { push.apply(x, y) } is better than { x = x.concat(y) }
@@ -877,7 +877,7 @@ Parser.prototype = {
   //
   // {{{interpolateSelection}}} is taking the selected text and applying it to all
   // roles of all verbs being considered for the provided parse.
-  interpolateSelection: function(parse, selection) {
+  interpolateSelection: function interpolateSelection(parse, selection) {
     let returnArr = [];
     if (!selection.length)
       return returnArr;
@@ -943,7 +943,7 @@ Parser.prototype = {
   //
   // An array of //new// parses is returned, so it should then be
   // {{{concat}}}'ed to the current running list of parses.
-  substituteSelection: function(parse, selection) {
+  substituteSelection: function substituteSelection(parse, selection) {
     var returnArr = [];
 
     for (let role in parse.args) {
@@ -971,7 +971,7 @@ Parser.prototype = {
   //
   // An array of //new// parses is returned, so it should then be
   // {{{concat}}}'ed to the current running list of parses.
-  substituteNormalizedArgs: function(parse) {
+  substituteNormalizedArgs: function substituteNormalizedArgs(parse) {
     var returnArr = [];
 
     for (let role in parse.args) {
@@ -1021,7 +1021,7 @@ Parser.prototype = {
   //
   // An array of //new// parses is returned, so it should then be
   // {{{concat}}}'ed to the current running list of parses.
-  applyObjectsToOtherRoles: function(parse) {
+  applyObjectsToOtherRoles: function applyObjectsToOtherRoles(parse) {
     var returnArr = [];
 
     // if nothing had the role "object", return nothing.
@@ -1082,7 +1082,7 @@ Parser.prototype = {
   //
   // All returning parses also get their {{{scoreMultiplier}}} property set
   // here as well.
-  suggestVerb: function(parse) {
+  suggestVerb: function suggestVerb(parse) {
     // for parses which already have a verb
     if (parse._verb.id) return [parse];
 
