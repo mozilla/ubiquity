@@ -45,6 +45,7 @@ function makeParser() new Parser({
     {role: "location", delimiter: "near"},
     {role: "location", delimiter: "on"},
     {role: "location", delimiter: "at"},
+    {role: "location", delimiter: "in"},
     {role: "time", delimiter: "at"},
     {role: "time", delimiter: "on"},
     {role: "instrument", delimiter: "with"},
