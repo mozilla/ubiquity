@@ -80,6 +80,7 @@ Parser.prototype = {
   _suggestionMemory: SuggestionMemory,
   // ** {{{Parser#lang}}} **
   lang: "",
+  lastParseId: 0,
 
   // ** {{{Parser#branching}}} **
   //
@@ -1462,6 +1463,9 @@ ParseQuery.prototype = {
   //
   // Most of this async code is by Blair.
   run: function PQ_run() {
+    // reset lastParseId now
+    this.parser.lastParseId = 0;
+    
     this._keepworking = true;
     this._next();
 
@@ -1877,7 +1881,7 @@ ParseQuery.prototype = {
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
-var Parse = function(parser, input, verb, argString, parentId) {
+var Parse = function(parser, input, verb, argString, parent) {
   this._parser = parser;
   this.input = input;
   this._verb = verb;
@@ -1888,9 +1892,11 @@ var Parse = function(parser, input, verb, argString, parentId) {
   this.scoreMultiplier = 0;
   // !complete means we're still parsing or waiting for async nountypes
   this.complete = false;
-  this._id = Math.floor(Math.random() * 1000);
-  if (parentId)
-    this._parentId = parentId;
+  this._id = (parser.lastParseId ++);
+  if (parent)
+    this._parent = parent;
+//  if (parentId)
+//    this._parentId = parentId;
 }
 
 Parse.prototype = {
@@ -1991,7 +1997,7 @@ Parse.prototype = {
   },
 
   get displayTextDebug()(
-    this.displayText + " (" +
+    this._id + ": " + this.displayText + " (" +
     ((this.score * 100 | 0) / 100 || "<i>no score</i>") + ',' +
     ((this.scoreMultiplier * 100 | 0) / 100 || "<i>no score</i>") +
     ")"),
@@ -2159,7 +2165,7 @@ Parse.prototype = {
                         this.input,
                         this._verb,
                         this.argString,
-                        this._id);
+                        this);
     //dump('copying '+this._id+' > '+ret._id+'\n');
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
