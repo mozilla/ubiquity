@@ -65,6 +65,7 @@ msgctxt "twitter.execute"
 msgid "status updated"
 msgstr "あなたの呟きを書き込みました。"
 
+
 #. digg command:
 #. use | to separate multiple name values:
 msgctxt "digg.names"
@@ -95,6 +96,7 @@ msgctxt "digg.preview"
 msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
 msgstr "このページはすでに <b>${diggs}</b> digg たれこまれています。"
 
+
 #. tinyurl command:
 #. use | to separate multiple name values:
 msgctxt "tinyurl.names"
@@ -113,6 +115,7 @@ msgctxt "tinyurl.preview"
 msgid "Replaces the selected URL with <b>${tinyurl}</b>."
 msgstr "選択した URL を <b>${tinyurl}</b> に置き換えます。"
 
+
 #. share (on delicious) command:
 #. use | to separate multiple name values:
 msgctxt "share (on delicious).names"
@@ -128,6 +131,10 @@ msgid "Share the current page as a bookmark on delicious.com"
 msgstr "現在のページを delicous.com のブックマークで共有します。"
 
 msgctxt "share (on delicious).preview"
+msgid "This URL cannot be shared on ${delicious}."
+msgstr "この URL は ${delicious} で共有できません。"
+
+msgctxt "share (on delicious).preview"
 msgid "No active user found - log in at ${delicious} to use this command."
 msgstr "アクティブなユーザが見つかりませんでした。このコマンドを使用するには ${delicious} でログインしてください。"
 
@@ -140,6 +147,10 @@ msgid "Share a bookmark at ${delicious}:"
 msgstr "${delicious} でブックマークを共有します:"
 
 msgctxt "share (on delicious).execute"
+msgid "This URL cannot be shared on delicious."
+msgstr "この URL は ${delicious} で共有できません。"
+
+msgctxt "share (on delicious).execute"
 msgid "No active user found - log in at delicious.com to use this command."
 msgstr "アクティブなユーザが見つかりませんでした。このコマンドを使用するには delicious.com でログインしてください。"
 
@@ -148,92 +159,11 @@ msgid "A title is required for bookmarks at delicious.com"
 msgstr "delicious.com 用ブックマークのタイトルが必要です。"
 
 msgctxt "share (on delicious).execute"
-msgid "Bookmark \"${description}\" shared at delicious.com/${user_name}"
-msgstr "${description} を delicious.com/${user_name} のブックマークに追加しました。"
+msgid "Bookmark \\\"${description}\\\" shared at delicious.com/${user_name}"
+msgstr "「${description}」を delicious.com/${user_name} のブックマークに追加しました。"
 
 msgctxt "share (on delicious).execute"
-msgid "ERROR: Bookmark \"${description}\" NOT shared on delicious.com/${user_name}"
-msgstr "エラー: ${description} を delicious.com/${user_name} のブックマークに追加できませんでした。"
+msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
+msgstr "エラー:「 ${description}」を delicious.com/${user_name} のブックマークに追加できませんでした。"
 
-#. ask rypple command:
-#. use | to separate multiple name values:
-msgctxt "ask rypple.names"
-msgid "ask rypple|rypple"
-msgstr "ryppleで質問する|rypple"
-
-msgctxt "ask rypple.help"
-msgid "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in"
-msgstr "このコマンドを使用するには <a href=\"http://rypple.com\">Rypple アカウント</a> でログインしておく必要があります。"
-
-msgctxt "ask rypple.description"
-msgid "Asks a question on Rypple"
-msgstr "Rypple で質問します。"
-
-msgctxt "ask rypple.preview"
-msgid "Asks the following question (${charsLeft} characters left):"
-msgstr "次の内容を質問します (残り ${charsLeft} 字):"
-
-msgctxt "ask rypple.preview"
-msgid "NO QUESTION. PLEASE ENTER A QUESTION."
-msgstr "質問がありません。質問内容を入力してください。"
-
-msgctxt "ask rypple.preview"
-msgid "To:"
-msgstr "質問先:"
-
-msgctxt "ask rypple.preview"
-msgid "NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE."
-msgstr "質問先がありません。少なくとも一つの質問先が必要です。"
-
-msgctxt "ask rypple.preview"
-msgid "Attributes:"
-msgstr "属性:"
-
-msgctxt "ask rypple.preview"
-msgid "NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE."
-msgstr "属性がありません。少なくとも一つの属性が必要です。"
-
-msgctxt "ask rypple.preview"
-msgid "Usage:"
-msgstr "使用方法:"
-
-msgctxt "ask rypple.preview"
-msgid "rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;"
-msgstr "&lt;質問内容&gt; @&lt;質問先&gt; #&lt;属性&gt;をryppleで質問する"
-
-msgctxt "ask rypple.preview"
-msgid "Recipients must start with '@' and at least one recipient is required."
-msgstr "質問先を指定するには先頭に '@' を追加してください。"
-
-msgctxt "ask rypple.preview"
-msgid "Attributes must start with '#' and at least one attribute is required."
-msgstr "属性を指定するには先頭に '#' を追加してください。"
-
-msgctxt "ask rypple.preview"
-msgid "The last ${chars} character(s) of your question will be truncated!<br/>"
-msgstr "質問の最後の ${chars} 字は字数制限のため切り捨てられます！<br/>"
-
-msgctxt "ask rypple.preview"
-msgid "The last <b>${num}</b> attributes{if num > 1}s{/if} will not be used!"
-msgstr "最後の <b>${num}</b> の属性は使用されません！"
-
-msgctxt "ask rypple.execute"
-msgid "At least one recipient is required"
-msgstr "少なくとも一つの質問先が必要です。"
-
-msgctxt "ask rypple.execute"
-msgid "At least one attribute is required"
-msgstr "少なくとも一つの属性が必要です。"
-
-msgctxt "ask rypple.execute"
-msgid "No question specified"
-msgstr "質問内容を入力してください。"
-
-msgctxt "ask rypple.execute"
-msgid "Rypple error - are you logged in?"
-msgstr "Rypple エラー - Rypple にログインしてください"
-
-msgctxt "ask rypple.execute"
-msgid "Asked Question Successfully on Rypple"
-msgstr "Rypple に質問が投稿されました。"
 

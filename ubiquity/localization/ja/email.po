@@ -23,8 +23,7 @@ msgid "email|mail|send email|gmail.com"
 msgstr "メール|メールする|メールして|メールしろ|メール送信|メールを送信|gmail.com"
 
 msgctxt "email.help"
-msgid ""
-"Currently only works with\n"
+msgid "Currently only works with\n"
 "<a href=\"http://mail.google.com\">Google Mail</a>\n"
 ",\n"
 "    so you'll need a Gmail account to use it.\n"
@@ -36,8 +35,7 @@ msgid ""
 "    and the name of someone from your contact list.\n"
 "    For example, try issuing \"email hello to jono\"\n"
 "    (assuming you have a friend named \"jono\")."
-msgstr ""
-"現在は <a href=\"http://mail.google.com\">Google Mail</a> でのみ動作するため、\n"
+msgstr "現在は <a href=\"http://mail.google.com\">Google Mail</a> でのみ動作するため、\n"
 "このコマンドを使用するには Gmail のアカウントが必要です。\n"
 "<br/>\n"
 "Web ページの一部 (リンクや画像も含む) を選択して\n"
@@ -59,6 +57,7 @@ msgctxt "email.execute"
 msgid "A gmonkey exception occurred."
 msgstr "gmonkey 例外エラーが発生しました。"
 
+
 #. get last email command:
 #. use | to separate multiple name values:
 msgctxt "get last email.names"
@@ -67,14 +66,14 @@ msgstr "新着メール|メール確認|新着メールを確認する|新着メ
 
 msgctxt "get last email.description"
 msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
-msgstr "新着メールを表示します。このコマンドは <a href=\"http://mail.google.com\">Gmail</a> が必要です。"
+msgstr "新着メールを表示します。このコマンドを使用するには <a href=\"http://mail.google.com\">Gmail</a> アカウントが必要です。"
 
 msgctxt "get last email.preview"
 msgid "Displays your most recent incoming email..."
 msgstr "新着メールを表示します..."
 
 msgctxt "get last email.preview"
-msgid "Last unread e-mail: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
 msgstr "未読のメール: <a href=\"${lastEmail.href}\"><p><b>${lastEmail.author}</b> より: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
 
 msgctxt "get last email.preview"
@@ -93,6 +92,7 @@ msgctxt "get last email.execute"
 msgid "You have no new mail."
 msgstr "新着メールはありません。"
 
+
 #. get email address command:
 #. use | to separate multiple name values:
 msgctxt "get email address.names"
@@ -100,7 +100,7 @@ msgid "get email address"
 msgstr "メールアドレス|連絡先|アドレス"
 
 msgctxt "get email address.help"
-msgid "Execute to copy the address."
+msgid "Execute the command to copy the address to your clipboard."
 msgstr "実行するとメールアドレスをクリップボードにコピーします。"
 
 msgctxt "get email address.description"

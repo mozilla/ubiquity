@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
 "Language-Team: \n"
@@ -32,13 +32,4 @@ msgctxt "map.preview"
 msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
 msgstr "編集できない場所に地図を挿入することはできません。編集可能なページで &quot;ページ編集&quot; コマンドを実行してください。"
 
-#. map these command:
-#. use | to separate multiple name values:
-msgctxt "map these.names"
-msgid "map these"
-msgstr "地図表示|すべての場所"
-
-msgctxt "map these.description"
-msgid "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)"
-msgstr "選択した複数の所番地またはリンクを一つの Google Map 上に表示します。(実験段階です!)"
 

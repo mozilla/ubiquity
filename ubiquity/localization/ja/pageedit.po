@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
 "Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
 "Language-Team: ja\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr "削除"
 
 msgctxt "delete.description"
 msgid "Deletes the selected chunk of HTML from the page."
-msgstr "選択した HTML のチャンクをページから削除します。"
+msgstr "選択した HTML の断片をページから削除します。"
 
 
 #. undelete command:
@@ -43,7 +43,7 @@ msgstr "ページ編集|編集開始|編集モードオン|編集モード開始
 
 msgctxt "edit page.help"
 msgid "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue 'bold', 'italic', or 'underline' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode."
-msgstr "編集モードでは通常のエディタのようにページを編集できます (テキスト選択、削除、追加、コピー、貼り付け)。'太字' や '斜体'、'下線' コマンドは書式を追加します。'ページ保存' コマンドはページを更新するまで変更を維持します。'ページ編集中止' コマンドは通常のページ表示モードに戻ります。"
+msgstr "編集モードでは通常のエディタのようにページを編集できます (テキスト選択、削除、追加、コピー、貼り付け)。「太字」「斜体」「下線」コマンドは書式を追加します。「ページ保存」コマンドはページを更新するまで変更を維持します。「ページ編集中止」コマンドは通常のページ表示モードに戻ります。"
 
 msgctxt "edit page.description"
 msgid "Puts the web page into a mode where you can edit the contents."
@@ -57,8 +57,8 @@ msgid "stop editing page|turn off edit mode"
 msgstr "ページ編集中止|編集中止|編集モードオフ|編集モード終了"
 
 msgctxt "stop editing page.description"
-msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing."
-msgstr "'ページ編集' コマンドで編集モードがオンになっているときに使用します。このコマンドを使用すると、通常のページ表示モードに戻ります。"
+msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing. If you want the changes to persist on page reload, issue the 'save' command first."
+msgstr "「ページ編集」コマンドで編集モードがオンになっているときに使用します。このコマンドを使用すると、通常のページ表示モードに戻ります。"
 
 
 #. save page edits command:
@@ -68,8 +68,8 @@ msgid "save page edits"
 msgstr "ページ保存|編集保存"
 
 msgctxt "save page edits.description"
-msgid "Saves edits you've made to this page in an annotation. Undo with the 'undo page edits' command."
-msgstr "このページに追加した注釈を保存します。'注釈削除' コマンドで編集を元に戻せます。"
+msgid "Saves edits you've made to this page in an annotation. They will persist on page reload. You can remove them with the 'undo page edits' command."
+msgstr "このページに追加した注釈を保存します。「注釈削除」コマンドで編集を元に戻せます。"
 
 
 #. undo page edits command:

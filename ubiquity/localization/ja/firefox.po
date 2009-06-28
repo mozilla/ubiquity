@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: \n"
-"Last-Translator: Michael 芳貴 Erlewine <mitcho@mitcho.com>, Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
+"POT-Creation-Date: 2009-06-20 00:45+0900\n"
+"Last-Translator: Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>\n"
 "Language-Team: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -19,7 +19,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "exit firefox.names"
 msgid "exit firefox"
-msgstr "Firefox を終了|終了|しゅうりょう"
+msgstr "Firefoxを終了|終了|しゅうりょう"
 
 msgctxt "exit firefox.description"
 msgid "Exits Firefox."
@@ -41,7 +41,7 @@ msgstr "Firefox を再起動します。"
 #. use | to separate multiple name values:
 msgctxt "close window.names"
 msgid "close window"
-msgstr "ウィンドウを閉じる|ウインドウを閉じる|ウインドウを閉じて|ウインドウを閉じろ"
+msgstr "ウィンドウを閉じる|ウィンドウを閉じて|ウィンドウを閉じろ|ウインドウを閉じる|ウインドウを閉じて|ウインドウを閉じろ"
 
 msgctxt "close window.description"
 msgid "Closes current window."
@@ -74,7 +74,7 @@ msgstr "指定したタイトルまたは URL にマッチするタブに切り�
 #. use | to separate multiple name values:
 msgctxt "close tab.names"
 msgid "close tab"
-msgstr "タブを閉じる"
+msgstr "タブを閉じる|タブを閉じて|タブを閉じろ"
 
 msgctxt "close tab.description"
 msgid "Closes the tab whose title or URL matches the input or the current tab if no tab matches."
@@ -85,7 +85,7 @@ msgstr "指定したタイトルまたは URL にマッチするタブを閉じ�
 #. use | to separate multiple name values:
 msgctxt "close all tabs with.names"
 msgid "close all tabs with"
-msgstr "関連タブを閉じる"
+msgstr "関連タブを閉じる|関連タブを閉じて|関連タブを閉じろ"
 
 msgctxt "close all tabs with.description"
 msgid "Closes all open tabs that have the given word in common."
@@ -93,7 +93,7 @@ msgstr "指定した単語を含むタブをすべて閉じます。"
 
 msgctxt "close all tabs with.execute"
 msgid "${num} tabs closed."
-msgstr "${num} のタブを閉じました。"
+msgstr "${num} 個のタブを閉じました。"
 
 
 #. count tabs command:
@@ -103,11 +103,13 @@ msgid "count tabs"
 msgstr "タブ数カウント"
 
 msgctxt "count tabs.description"
-msgid "Counts the number of opened tabs."
-msgstr "開いているタブの数を数えます。"
+msgid "Counts the number of opened tabs. Takes an optional filter term to count number of tabs matching filter term."
+msgstr "開いているタブの数を数えます。または指定した単語を含むタブの数を数えます。"
 
-msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}.</div>"
-msgstr "<div class="count-tabs"><b>${count}</b>個のタブ{if html}に一致しました: <b>${html}</b>{else}が開いています。{/if}</div>"
+# added manually by mitcho
+# template in _count: no msgctxt as it is shared between preview + execute
+msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgstr "<div class=\"count-tabs\"><b>${count}</b>個のタブ{if html}に一致しました: <b>${html}</b>{else}が開いています。{/if}</div>"
 
 
 #. refresh command:
@@ -125,7 +127,7 @@ msgstr "現在のページを再度読み込みます。"
 #. use | to separate multiple name values:
 msgctxt "bookmark.names"
 msgid "bookmark"
-msgstr "ブックマーク追加"
+msgstr "ブックマーク追加|ブックマークに追加|お気に入りに追加"
 
 msgctxt "bookmark.description"
 msgid "Adds the current page to bookmarks."
@@ -157,6 +159,10 @@ msgctxt "go back.description"
 msgid "Goes back in history."
 msgstr "履歴を前へ戻ります。"
 
+# added manually by mitcho
+msgctxt "go back.preview"
+msgid "Go back ${num} step{if num > 1}s{/if} in history."
+msgstr "履歴を ${num} ステップ戻ります。"
 
 #. go forward command:
 #. use | to separate multiple name values:
@@ -167,6 +173,11 @@ msgstr "go-forward"
 msgctxt "go forward.description"
 msgid "Goes forward in history."
 msgstr "履歴を次へ進みます。"
+
+# added manually by mitcho
+msgctxt "go forward.preview"
+msgid "Go forward ${num} step{if num > 1}s{/if} in history."
+msgstr "履歴を ${num} ステップ進みます。"
 
 
 #. go home command:
@@ -199,7 +210,7 @@ msgstr "Firefox ウィンドウを通常の${text}のサイズにズームしま
 #. use | to separate multiple name values:
 msgctxt "tag.names"
 msgid "tag"
-msgstr "タグ|タグ追加|タグを追加して|タグを追加しろ"
+msgstr "タグ|タグ追加|タグを追加する|タグを追加して|タグを追加しろ"
 
 msgctxt "tag.help"
 msgid "Use commas to separate multiple tags."
@@ -218,7 +229,7 @@ msgstr "現在のページに{if html}次の{/if}タグを追加します{if htm
 #. use | to separate multiple name values:
 msgctxt "run bookmarklet.names"
 msgid "run bookmarklet|bml"
-msgstr "ブックマークレット実行"
+msgstr "ブックマークレット実行|ブックマークレットを実行|実行|実行する|実行して|実行しろ"
 
 msgctxt "run bookmarklet.help"
 msgid "Enter nothing to reload the list."
@@ -262,7 +273,7 @@ msgstr "マッチするタブはありません。"
 #. use | to separate multiple name values:
 msgctxt "check livemark.names"
 msgid "check livemark"
-msgstr "ライブブックマークを確認|フィードを確認"
+msgstr "ライブブックマークを確認|フィードを確認|フィード更新"
 
 msgctxt "check livemark.help"
 msgid "Execute to open the site."
