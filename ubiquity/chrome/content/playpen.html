@@ -75,6 +75,35 @@
         padding: 10px;
       }
       
+      #parsetree {
+        overflow: auto;
+        width: 10000px;
+      }
+      
+      .treeleaf {
+        vertical-align: top;
+        display: inline-block;
+        padding: 5px;
+        margin: 5px;
+        padding-left: 20px;
+        border: 1px gray solid;
+      }
+      
+      .treewrap > .children {
+        margin-left: 10px;
+        display: inline-block;
+      }
+      
+      .badge {
+        border: 2px yellow solid;
+        width: 1em;
+        text-align: center;
+        -moz-border-radius: .7em;
+        z-index: 2;
+        position: absolute;
+        background-color: yellow;
+      }
+      
     </style>
   </head>
   <body>
@@ -94,7 +123,7 @@
     <div>
       <!--<input type='button' name='clearnouncache' value='clear noun cache' id='clearnouncache'></input>-->
       <label for='maxSuggestions'>max suggestions:</label><input id='maxSuggestions' value='5' size='2'/>
-      <input type='checkbox' name='displayparseinfo' id='displayparseinfo'></input><label title='this will slow things down considerably' for='displayparseinfo'>display parse info</label><input type='checkbox' name='autoparse' id='autoparse'></input><label title='this will slow things down considerably' for='autoparse'>automatically parse on update</label>
+      <input type='checkbox' name='displayparseinfo' id='displayparseinfo'></input><label title='this will slow things down considerably' for='displayparseinfo'>display parse info</label><input type='checkbox' name='displayparsetree' id='displayparsetree'></input><label title='this will *not* affect performance' for='displayparsetree'>display parse lineage</label><input type='checkbox' name='autoparse' id='autoparse'></input><label title='this will slow things down considerably' for='autoparse'>automatically parse on update</label>
     </div>
     
 		<div id='border'>
@@ -136,6 +165,10 @@
     <span class='current'></span>/<span class='runtimes'></span> = <span class='total'></span> ms (avg: <span class='avg'></span> ms)
     
     <div id='parseinfo'></div>
+
+    <h2>Current query's parse tree:</h2>
+    
+    <div id='parsetree'></div>
 
   </div>
   </body>

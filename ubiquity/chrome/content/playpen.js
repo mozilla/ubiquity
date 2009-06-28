@@ -56,6 +56,7 @@ var demoParserInterface = {
     this.currentParser._nounCache = {};
 
     $('#parseinfo').empty();
+    $('#parsetree').empty();
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val(),true); // this last true is for dontRunImmediately
     
     // custom flag to make sure we don't onResults multiple times per query.
@@ -131,8 +132,6 @@ var demoParserInterface = {
             break;
   
           case 9:
-          case 10:
-          case 11:
             /*$('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
             for (var text in nounCache) {
               var html = $('<li><code>'+text+'</code></li>');
@@ -143,23 +142,14 @@ var demoParserInterface = {
               list.appendTo(html);
               html.appendTo($('#nounCache'));
             }*/
-
-	          let suggestionList = this.suggestionList;
-            $('<h3>step 9: fill in noun suggestions</h3><ul id="suggestedParses"></ul>').appendTo($('#parseinfo'));
-            for each (let parse in suggestionList) {
-              $('#suggestedParses')
-                .append('<li>' + parse.displayTextDebug + '</li>');
-            }
-            $('<p><small>'+suggestionList.length+' parses with noun suggestions swapped in</small></p>').appendTo($('#parseinfo'));
   
-  
-            $('<h3>step 11: ranking</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>step 9-11: completion</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             var allScoredParses = this.aggregateScoredParses();
 	          for each (let parse in allScoredParses) {
               $('#debugScoredParses')
                 .append('<li>' + parse.displayTextDebug + '</li>');
             }
-            $('<p><small>'+allScoredParses.length+' scored parses</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+allScoredParses.length+' parses with noun suggestions swapped in, and scored</small></p>').appendTo($('#parseinfo'));
             break;
   
         }
@@ -168,7 +158,38 @@ var demoParserInterface = {
       });
     }
     
+    if ($('#displayparsetree').attr('checked')) {
+      this.currentQuery.watch('_step',function(id,oldval,newval) {
+        switch (oldval) {
+          //case 3: TODO
+          case 4: 
+          case 5:
+          case 6:
+          case 7:
+            for each (let parse in this._possibleParses) 
+              if (!parse._step)
+                parse._step = oldval;
+            break;
+                    
+          case 8:
+            for each (let parse in this._verbedParses)
+              if (!parse._step)
+                parse._step = oldval;
+            break;
+  
+          case 9:
+	          for each (let parse in this.aggregateScoredParses())
+              if (!parse._step)
+                parse._step = oldval;
+            break;
+        }
+        
+        return newval;
+      });
+    }
+    
     this.currentQuery.onResults = function() {
+     
       if (this.finished && !this.resulted) {
         this.resulted = true;
         demoParserInterface.runtimes++;
@@ -191,9 +212,25 @@ var demoParserInterface = {
 
           dump('AVG: '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
           $('.avg').text(Math.round((demoParserInterface.endTime - demoParserInterface.startTime) * 100/demoParserInterface.runtimes)/100);
-
-          
+ 
         }
+        
+        if ($('#displayparsetree').attr('checked')) {
+          for each (let parse in demoParserInterface.currentQuery._allParses) {
+
+            let host = $('#parsetree');
+            if (parse._parent && $('#wrap'+parse._parent._id).length)
+              host = $('#wrap'+parse._parent._id+' > .children');
+              
+            $("<div class='treewrap"+(parse._step ? ' step'+parse._step : '')+"' id='wrap"+parse._id+"'>"
+                +(parse._step ? "<div class='badge'>"+parse._step+"</div>" : '')
+                +"<div class='treeleaf' id='leaf"+parse._id+"'>"
+                +parse.displayTextDebug+"</div>"
+                +"<div class='children'></div>"
+              +"</div>").appendTo(host);
+          }
+        }
+        
       }
     }
     this.currentQuery.run();
