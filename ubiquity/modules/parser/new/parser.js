@@ -80,7 +80,6 @@ Parser.prototype = {
   _suggestionMemory: SuggestionMemory,
   // ** {{{Parser#lang}}} **
   lang: "",
-  lastParseId: 0,
 
   // ** {{{Parser#branching}}} **
   //
@@ -547,7 +546,7 @@ Parser.prototype = {
   // The {{{scoreMultiplier}}} parameter is set at this point, making
   // {{{maxScore}}} valid for all returned parses.
 
-  argFinder: function(argString, verb, input) {
+  argFinder: function(argString, verb, input, thisQuery) {
     // initialize possibleParses. This is the array that we're going to return.
     var possibleParses = [];
     // { push.apply(x, y) } is better than { x = x.concat(y) }
@@ -555,7 +554,7 @@ Parser.prototype = {
 
     // if the argString is empty, return a parse with no args.
     if (!argString) {
-      let defaultParse = new Parse(this, input, verb, argString);
+      let defaultParse = new Parse(thisQuery, input, verb, argString);
       if (defaultParse._verb.id) {
         defaultParse.scoreMultiplier = 1;
       } else {
@@ -631,7 +630,7 @@ Parser.prototype = {
       // theseParses will be the set of new parses based on this delimiter
       // index combination. We'll seed it with a Parse which doesn't
       // have any arguments set.
-      let seedParse = new Parse(this, input, verb, argString);
+      let seedParse = new Parse(thisQuery, input, verb, argString);
       // get all parses started off with their scoreMultipier values
       if (verb.id) {
         seedParse.scoreMultiplier = 1;
@@ -1418,6 +1417,11 @@ var ParseQuery = function(parser, queryString, selObj, context,
   // This {{{_step}}} property is increased throughout {{{_yieldParse()}}}
   // so you can check later to see how far the query went.
   this._step = 0;
+  
+  // ** {{{ParseQuery#lastParseId}}} **
+  // This is a counter of the number of "parses" (including intermediate
+  // parses) created during the parse query. Used to ID parses.
+  this.lastParseId = 0;
 
   // TODO: Think about putting some components into
   // [[https://developer.mozilla.org/En/DOM/Worker|Worker threads]].
@@ -1429,6 +1433,9 @@ var ParseQuery = function(parser, queryString, selObj, context,
   this._possibleParses = [];
   this._verbedParses = [];
   this._topScores = [];
+
+  // this is a list of all Parse's as created.
+  this._allParses = {};
 
   // ** {{{ParseQuery#_scoredParses}}} **
   //
@@ -1462,10 +1469,7 @@ ParseQuery.prototype = {
   // breakpoint to the next.
   //
   // Most of this async code is by Blair.
-  run: function PQ_run() {
-    // reset lastParseId now
-    this.parser.lastParseId = 0;
-    
+  run: function PQ_run() {    
     this._keepworking = true;
     this._next();
 
@@ -1544,7 +1548,8 @@ ParseQuery.prototype = {
     for each (var preParse in this._preParses) {
       let argParses = this.parser.argFinder(preParse.argString,
                                             preParse._verb,
-                                            this.input);
+                                            this.input,
+                                            this);
       this._possibleParses = this._possibleParses.concat(argParses);
       yield true;
     }
@@ -1881,8 +1886,8 @@ ParseQuery.prototype = {
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
-var Parse = function(parser, input, verb, argString, parent) {
-  this._parser = parser;
+var Parse = function(query, input, verb, argString, parent) {
+  this._query = query;
   this.input = input;
   this._verb = verb;
   this.argString = argString;
@@ -1892,11 +1897,10 @@ var Parse = function(parser, input, verb, argString, parent) {
   this.scoreMultiplier = 0;
   // !complete means we're still parsing or waiting for async nountypes
   this.complete = false;
-  this._id = (parser.lastParseId ++);
+  this._id = (query.lastParseId ++);
   if (parent)
     this._parent = parent;
-//  if (parentId)
-//    this._parentId = parentId;
+  this._query._allParses[this._id] = this;
 }
 
 Parse.prototype = {
@@ -1919,9 +1923,9 @@ Parse.prototype = {
     if (this._verb._order != -1)
       display = "<span class='verb' title='"
         + (this._verb.id || 'null') + "'>" + (this._verb.text || '<i>null</i>')
-        + "</span>" + this._parser.joindelimiter;
+        + "</span>" + this._query.parser.joindelimiter;
     else
-      displayFinal = this._parser.joindelimiter + "<span class='verb' title='"
+      displayFinal = this._query.parser.joindelimiter + "<span class='verb' title='"
       + this._verb.id + "'>" + (this._verb.text || '<i>null</i>') + "</span>";
 
     // Copy all of the arguments into an ordered array called argsArray.
@@ -1949,7 +1953,7 @@ Parse.prototype = {
 
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
-      if (this._parser.branching == 'right')
+      if (this._query.parser.branching == 'right')
         display += (arg.outerSpace || '') + (arg.modifier ? "<span class='delimiter' title='"
           + arg.role+"'>" + arg.modifier + arg.innerSpace
           + "</span>":'') + "<span class='" + className + "' title=''>"
@@ -1981,12 +1985,12 @@ Parse.prototype = {
         // _name is for backward compatiblity
         label = nt.label || nt._name || "?";
       }
-      for each (let parserRole in this._parser.roles) {
+      for each (let parserRole in this._query.parser.roles) {
         if (parserRole.role === neededArg.role) {
-          if (this._parser.branching === "left")
-            label += this._parser.joindelimiter + parserRole.delimiter;
+          if (this._query.parser.branching === "left")
+            label += this._query.parser.joindelimiter + parserRole.delimiter;
           else
-            label = parserRole.delimiter + this._parser.joindelimiter + label;
+            label = parserRole.delimiter + this._query.parser.joindelimiter + label;
           break;
         }
       }
@@ -2008,7 +2012,7 @@ Parse.prototype = {
     var newText = lastNode.text;
     var findOriginal = new RegExp(originalText+'$');
     if (findOriginal.test(this.input))
-      return this.input.replace(findOriginal,newText) + this._parser.joindelimiter;
+      return this.input.replace(findOriginal,newText) + this._query.parser.joindelimiter;
 
     return this.input;
   },
@@ -2084,18 +2088,18 @@ Parse.prototype = {
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
   allNounTypesDetectionHasCompleted: function() {
-    var activeNounTypes = this._parser._nounTypes;
+    var activeNounTypes = this._query.parser._nounTypes;
     for (let role in this.args) {
       // for each argument of this role...
       for each (let arg in this.args[role]) {
         // this is the argText to check
         let argText = arg.input;
 
-        if (!(argText in this._parser._nounCache))
+        if (!(argText in this._query.parser._nounCache))
           return false;
 
         for (let nounTypeId in activeNounTypes){
-          if (!(nounTypeId in this._parser._nounCache[argText]))
+          if (!(nounTypeId in this._query.parser._nounCache[argText]))
             return false;
         }
       }
@@ -2161,7 +2165,7 @@ Parse.prototype = {
   //
   // Returns a copy of this parse.
   copy: function PP_copy() {
-    var ret = new Parse(this._parser,
+    var ret = new Parse(this._query,
                         this.input,
                         this._verb,
                         this.argString,
