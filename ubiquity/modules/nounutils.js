@@ -103,7 +103,7 @@ NounType.default = function default() this._defaults;
 
 NounType._fromArray = function NT_Array(words)({
   id: "#na_",
-  name: words.slice(0, 2) + ",...",
+  name: words.slice(0, 2) + (words.length > 2 ? ",...":''),
   _list: [NounUtils.makeSugg(w) for each (w in words)],
 });
 NounType._fromArray.suggest = (
