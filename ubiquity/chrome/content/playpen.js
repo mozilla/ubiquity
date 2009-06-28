@@ -42,6 +42,18 @@ Components.utils.import("resource://ubiquity/modules/setup.js");
 var Cc = Components.classes;
 var Ci = Components.interfaces;
 
+var displayParse = function(parse, labels) (
+  parse._id + ": " + parse.displayText 
+  + (labels && parse._caller ? '<br/>caller: '+parse._caller : '') 
+  + (labels ? '<br/>argString: '+parse.argString : '') 
+  + (labels ? '<br/>' : ' (') 
+  + (labels ? 'score: ' : '') 
+    + ((parse.score * 100 | 0) / 100 || "<i>no score</i>") + ', '
+  + (labels ? 'multiplier: ' : '') 
+    + ((parse.scoreMultiplier * 100 | 0) / 100 || "<i>no score</i>")
+  + (labels ? '' : ')') 
+)
+
 var demoParserInterface = {
   startTime: 0,
   endTime: 0,
@@ -108,7 +120,7 @@ var demoParserInterface = {
             $('<h3>step 6: substitute normalized arguments</h3><ul id="normalizedArgParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#normalizedArgParses')
-                .append('<li>' + parse.displayTextDebug + '</li>');
+                .append('<li>' + displayParse(parse) + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -117,7 +129,7 @@ var demoParserInterface = {
             $('<h3>step 7: apply objects to other roles for parses with no verb</h3><ul id="otherRoleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#otherRoleParses')
-                .append('<li>' + parse.displayTextDebug + '</li>');
+                .append('<li>' + displayParse(parse) + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -126,7 +138,7 @@ var demoParserInterface = {
             $('<h3>step 8: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
               $('#verbedParses')
-                .append('<li>' + parse.displayTextDebug + '</li>');
+                .append('<li>' + displayParse(parse) + '</li>');
             }
             $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
             break;
@@ -147,7 +159,7 @@ var demoParserInterface = {
             var allScoredParses = this.aggregateScoredParses();
 	          for each (let parse in allScoredParses) {
               $('#debugScoredParses')
-                .append('<li>' + parse.displayTextDebug + '</li>');
+                .append('<li>' + displayParse(parse) + '</li>');
             }
             $('<p><small>'+allScoredParses.length+' parses with noun suggestions swapped in, and scored</small></p>').appendTo($('#parseinfo'));
             break;
@@ -202,7 +214,7 @@ var demoParserInterface = {
 	        $('#scoredParses').empty();
           for each (var parse in suggestionList) {
             $('#scoredParses')
-              .append('<tr><td>' + parse.displayTextDebug + '</td></tr>');
+              .append('<tr><td>' + displayParse(parse) + '</td></tr>');
           }
 
           demoParserInterface.endTime = new Date().getTime();
@@ -225,7 +237,7 @@ var demoParserInterface = {
             $("<div class='treewrap"+(parse._step ? ' step'+parse._step : '')+"' id='wrap"+parse._id+"'>"
                 +(parse._step ? "<div class='badge'>"+parse._step+"</div>" : '')
                 +"<div class='treeleaf' id='leaf"+parse._id+"'>"
-                +parse.displayTextDebug+"</div>"
+                +displayParse(parse,true)+"</div>"
                 +"<div class='children'></div>"
               +"</div>").appendTo(host);
           }

@@ -2184,6 +2184,8 @@ Parse.prototype = {
     ret._suggested = this._suggested;
     ret.scoreMultiplier = this.scoreMultiplier;
     ret._score = this._score;
+    // for debug purposes
+    ret._caller = this.copy.caller.name;
     return ret;
   }
 };
