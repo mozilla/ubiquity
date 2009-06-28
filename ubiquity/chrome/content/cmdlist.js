@@ -150,12 +150,10 @@ function fillTableRowForCmd(row, cmd, className) {
 
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
-  var cmdDisplayName = escapeHtml(cmd.name);
+  var cmdDisplayName = escapeHtml(cmd.names[0] || cmd.name);
   if (cmd.nameArg) {
     // TODO: we need some sort of flag to check whether the nameArg
     // was a prefix or a suffix.
-    // Alternatively, we could display the referenceName after stripping
-    // parentheses... should get the same effect.
     cmdDisplayName += " " + escapeHtml(cmd.nameArg);
   }
 
@@ -198,9 +196,11 @@ function fillTableRowForCmd(row, cmd, className) {
     cmdElement.find(".homepage")[0].innerHTML =
       <>View more information at <a href={homepage}>{homepage}</a></>;
 
-  if ((cmd.synonyms || 0).length)
+  var synonyms = Utils.isArray(cmd.names) ? cmd.names.slice(1) : cmd.synonyms;
+
+  if ((synonyms || 0).length)
     cmdElement.find(".synonyms")
-      .before("also called ").text(cmd.synonyms.join(", "));
+      .before("also called ").text(synonyms.join(", "));
 
   if (cmd.description)
     cmdElement.find(".description")[0].innerHTML = cmd.description;
