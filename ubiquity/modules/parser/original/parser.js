@@ -885,12 +885,12 @@ var roleToPrep = {
   format: 'in'
 };
 
-NLParser1.Verb = function( cmd ) {
+NLParser1.Verb = function Verb(cmd) {
   if (cmd)
-    this._init( cmd );
+    this._init(cmd);
 }
 NLParser1.Verb.prototype = {
-  _init: function( cmd ) {
+  _init: function(cmd) {
     /* cmd.DOType must be a NounType, if provided.
        cmd.modifiers should be a dictionary
        keys are prepositions
@@ -901,7 +901,7 @@ NLParser1.Verb.prototype = {
     this._preview     = cmd.preview;
     this._description = cmd.description;
     this._help        = cmd.help;
-    this._name        = cmd.name;
+    this._name        = cmd.names[0];
     this._icon        = cmd.icon;
 
     // Determines if an object has one or more keys

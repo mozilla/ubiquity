@@ -16,10 +16,10 @@ var fakeContextUtils = {
 };
 
 function FakeCommandSource( cmdList ) {
-  this._cmdList = cmdList;
   for ( var x in cmdList ) {
-    this._cmdList[x].name = x;
+    cmdList[x].names = [x];
   }
+  this._cmdList = cmdList;
 }
 FakeCommandSource.prototype = {
   addListener: function() {},

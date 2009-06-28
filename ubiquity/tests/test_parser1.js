@@ -53,7 +53,7 @@ var noun_arb_text = {
 
 function makeSearchCommand(name) {
   return {
-    name: name,
+    names: [name],
     DOLabel: "string",
     DOType: noun_arb_text,
     preview: function() {},
@@ -67,13 +67,13 @@ function makeSearchCommand(name) {
 
 function testParseDirectOnly() {
   var dogGotPetted = false;
-  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
-                                           "beagle", "bulldog", "husky"]);
+  var dog = NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                       "beagle", "bulldog", "husky"]);
   var cmd_pet = {
     execute: function(context, directObject, modifiers) {
       dogGotPetted = directObject.text;
     },
-    name: "pet",
+    names: ["pet"],
     DOLabel: "kind of dog",
     DOType: dog,
     modifiers: {}
@@ -97,18 +97,18 @@ function testParseWithModifier() {
   // wash dog with sponge
   var dogGotWashed = null;
   var dogGotWashedWith = null;
-  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-                                            "beagle", "bulldog", "husky"]);
-  var washingObj = new NounUtils.NounType( "washing object",
-                                           ["sponge", "hose", "spork",
-                                            "bathtub", "fire hose"]);
+  var dog = NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                       "beagle", "bulldog", "husky"]);
+  var washingObj = NounUtils.NounType("washing object",
+                                      ["sponge", "hose", "spork",
+                                       "bathtub", "fire hose"]);
   var cmd_wash = {
     execute: function(context, directObject, modifiers) {
       dogGotWashed = directObject.text;
       dogGotWashedWith = modifiers["with"].text;
     },
-    name:"wash",
-    DOLabel:"kind of dog",
+    names: ["wash"],
+    DOLabel: "kind of dog",
     DOType: dog,
     modifiers: {"with": washingObj}
   };
@@ -133,8 +133,8 @@ function testParseWithModifier() {
 function testCmdManagerSuggestsForEmptyInput() {
   var oneWasCalled = false;
   var twoWasCalled = false;
-  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
-  var nounTypeTwo = new NounUtils.NounType( "stuffType", ["mud"] );
+  var nounTypeOne = NounUtils.NounType("thingType", ["tree"]);
+  var nounTypeTwo = NounUtils.NounType("stuffType", ["mud"]);
   var fakeSource = new FakeCommandSource({
     cmd_one: {
       execute: function(context, directObj) {
@@ -179,7 +179,7 @@ function testVerbEatsSelection() {
   var food = new NounUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
   var place = new NounUtils.NounType( "place", ["grill", "diner", "home"]);
   var cmd_eat = {
-    name: "eat",
+    names: ["eat"],
     execute: function(context, directObject, modifiers) {
       if (directObject.text)
         foodGotEaten = directObject.text;
@@ -221,7 +221,7 @@ function testImplicitPronoun() {
   var food = new NounUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
   var place = new NounUtils.NounType( "place", ["grill", "diner", "home"]);
   var cmd_eat = {
-    name: "eat",
+    names: ["eat"],
     execute: function(context, directObject, modifiers) {
       if (directObject.text)
         foodGotEaten = directObject.text;
@@ -338,7 +338,7 @@ function testModifiersTakeMultipleWords() {
                                               "los angeles",
                                               "san francisco"]);
   var cmd_find = {
-    name: "find",
+    names: ["find"],
     execute: function(context, directObject, modifiers) {
       if (directObject.text)
         wishFound = directObject.text;
@@ -409,13 +409,13 @@ function testSuggestionMemory() {
 }
 
 function testSortedBySuggestionMemory() {
-  var verbList = [{name: "clock", execute: function(){}},
-                  {name: "calendar", execute: function(){}},
-                  {name: "couch", execute: function(){}},
-                  {name: "conch", execute: function(){}},
-                  {name: "crouch", execute: function(){}},
-                  {name: "coelecanth", execute: function(){}},
-                  {name: "crab", execute: function(){}} ];
+  var verbList = [{names: ["clock"], execute: function(){}},
+                  {names: ["calendar"], execute: function(){}},
+                  {names: ["couch"], execute: function(){}},
+                  {names: ["conch"], execute: function(){}},
+                  {names: ["crouch"], execute: function(){}},
+                  {names: ["coelecanth"], execute: function(){}},
+                  {names: ["crab"], execute: function(){}} ];
   var nlParser = makeTestParser(LANG, verbList);
   var fakeContext = {textSelection:"", htmlSelection:""};
   var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS);
@@ -444,9 +444,9 @@ function testNounFirstSortedByGeneralFrequency() {
   var pantsContext = { htmlSelection: "<b>Pants</b>", textSelection: "Pants" };
 
   var verbList = [
-    {name: "foo", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
-    {name: "bar", DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
-    {name: "baz", DOType: noun_arb_text, DOLabel:"it", execute: function(){}}];
+    {names: ["foo"], DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+    {names: ["bar"], DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
+    {names: ["baz"], DOType: noun_arb_text, DOLabel:"it", execute: function(){}}];
 
   // Note: Create the parser ourself instead of using getCompletion() because
   // we need the suggestion memory in the parser state.
@@ -479,33 +479,37 @@ function testNounFirstSortedByGeneralFrequency() {
 }
 
 function testSortedByMatchQuality() {
-  var verbList = [{name: "frobnicate"},
-                  {name: "glurgle"},
-                  {name: "nonihilf"},
-                  {name: "bnurgle"},
-                  {name: "fangoriously"}];
+  var verbList = [{names: ["frobnicate"]},
+                  {names: ["glurgle"]},
+                  {names: ["nonihilf"]},
+                  {names: ["bnurgle"]},
+                  {names: ["fangoriously"]}];
   var assert = this.assert;
   function testSortedSuggestions( input, expectedList ) {
     var suggs = getCompletions(input, verbList, emptyContext);
-    assert( suggs.length == expectedList.length, "Should have " + expectedList.length + " suggestions.");
-    for (var x in suggs) {
-      assert( suggs[x]._verb._name == expectedList[x], expectedList[x] + " should be " + x);
-    }
+    assert(suggs.length == expectedList.length,
+           "Should have " + expectedList.length + " suggestions.");
+    suggs.forEach(function (sugg, x) {
+      assert(sugg._verb._name === expectedList[x],
+             ("for " + uneval(input) + ", " +
+              sugg._verb._name + " should be " + expectedList[x]));
+    });
   }
-  testSortedSuggestions( "g", ["glurgle", "bnurgle", "fangoriously"]);
-  testSortedSuggestions( "n", ["nonihilf", "bnurgle", "frobnicate", "fangoriously"]);
-  testSortedSuggestions( "ni", ["nonihilf", "frobnicate"]);
-  testSortedSuggestions( "bn", ["bnurgle", "frobnicate"]);
-  testSortedSuggestions( "f", ["frobnicate", "fangoriously", "nonihilf"]);
-  testSortedSuggestions( "frob", ["frobnicate"]);
-  testSortedSuggestions( "urgle", ["glurgle", "bnurgle"]);
+  testSortedSuggestions("g", ["glurgle", "fangoriously", "bnurgle"]);
+  testSortedSuggestions("n", ["nonihilf", "bnurgle", "fangoriously",
+                              "frobnicate"]);
+  testSortedSuggestions("ni", ["nonihilf", "frobnicate"]);
+  testSortedSuggestions("bn", ["bnurgle", "frobnicate"]);
+  testSortedSuggestions("f", ["frobnicate", "fangoriously", "nonihilf"]);
+  testSortedSuggestions("frob", ["frobnicate"]);
+  testSortedSuggestions("urgle", ["glurgle", "bnurgle"]);
 
-  verbList = [{name: "google"},
-              {name: "tag"},
-              {name: "digg"},
-              {name: "bugzilla"},
-              {name: "get-email-address"},
-              {name: "highlight"}];
+  verbList = [{names: ["google"]},
+              {names: ["tag"]},
+              {names: ["digg"]},
+              {names: ["bugzilla"]},
+              {names: ["get-email-address"]},
+              {names: ["highlight"]}];
   testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
 }
 
@@ -513,8 +517,8 @@ function testSortSpecificNounsBeforeArbText() {
   var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
                                             "beagle", "bulldog", "husky"]);
 
-  var verbList = [{name: "mumble", DOType: noun_arb_text, DOLabel:"stuff"},
-                  {name: "wash", DOType: dog, DOLabel: "dog"}];
+  var verbList = [{names: ["mumble"], DOType: noun_arb_text, DOLabel:"stuff"},
+                  {names: ["wash"], DOType: dog, DOLabel: "dog"}];
 
   var beagleContext = {textSelection:"beagle", htmlSelection:"beagle"};
   var suggs = getCompletions("", verbList, beagleContext);
@@ -527,14 +531,14 @@ function testSortSpecificNounsBeforeArbText() {
 }
 
 function testVerbUsesDefaultIfNoArgProvided() {
-  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-                                            "beagle", "bulldog", "husky"]);
+  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                           "beagle", "bulldog", "husky"]);
   dog.default = function() {
-    return NounUtils.makeSugg( "husky" );
+    return NounUtils.makeSugg("husky");
   };
   var verbList = [
-    {name:"wash", DOType: dog, DOLabel: "dog"},
-    {name:"play-fetch", DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
+    {names: ["wash"], DOType: dog, DOLabel: "dog"},
+    {names: ["play-fetch"], DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
   var suggs = getCompletions("wash", verbList, emptyContext);
   this.assert( suggs.length == 1, "Should be 1 suggestion (A).");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
@@ -554,9 +558,9 @@ function testVerbUsesDefaultIfNoArgProvided() {
 }
 
 function testSynonyms() {
-  var verbList = [{name: "twiddle", synonyms: ["frobnitz", "twirl"]},
-                  {name: "frobnitz"},
-                  {name: "frobnicate"}];
+  var verbList = [{names: ["twiddle", "frobnitz", "twirl"]},
+                  {names: ["frobnitz"]},
+                  {names: ["frobnicate"]}];
   var suggs = getCompletions("frob", verbList, emptyContext);
   this.assert( suggs.length == 3, "Should be 3 suggs.");
   this.assert( suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
@@ -577,7 +581,7 @@ function testPartiallyParsedSentence() {
   // to not exist.
   // make sure it also works with a no-arg command:
   var cmd_grumble = {
-    name: "grumble",
+    names: ["grumble"],
     execute: function(context, directObject, modifiers) {
     }
   };
@@ -596,19 +600,19 @@ function testPartiallyParsedSentence() {
 
 
   var noun_type_foo = {
-    name: "foo",
+    names: ["foo"],
     suggest: function( text, html ) {
       return [ NounUtils.makeSugg("foo_a"), NounUtils.makeSugg("foo_b") ];
     }
   };
   var noun_type_bar = {
-    name: "bar",
+    names: ["bar"],
     suggest: function( text, html ) {
       return [ NounUtils.makeSugg("bar_a"), NounUtils.makeSugg("bar_b") ];
     }
   };
   var noun_type_baz = {
-    name: "baz",
+    names: ["baz"],
     suggest: function( text, html ) {
       return [];
     },
@@ -670,7 +674,7 @@ function testPartiallyParsedSentence() {
 function testVerbGetCompletions() {
   var grumbleCalled = false;
   var cmd_grumble = {
-    name: "grumble",
+    names: ["grumble"],
     execute: function(context, directObject, modifiers) {
       grumbleCalled = true;
     }
@@ -687,7 +691,7 @@ function testTextAndHtmlDifferent() {
     textSelection: "Pants", htmlSelection:"<blink>Pants</blink>"
   };
   var noun_type_different = {
-    name: "different",
+    names: ["different"],
     suggest: function( text, html ) {
       if (text.indexOf("Pant") == 0)
         return [ NounUtils.makeSugg(text, html) ];
@@ -696,7 +700,7 @@ function testTextAndHtmlDifferent() {
     }
   };
   var cmd_different = {
-    name: "dostuff",
+    names: ["dostuff"],
     DOLabel: "thing",
     DOType: noun_type_different,
     execute: function( context, directObject, modifiers) {
@@ -740,7 +744,7 @@ function testTextAndHtmlDifferent() {
 
 function testAsyncNounSuggestions() {
   var noun_type_slowness = {
-    name: "slowness",
+    names: ["slowness"],
     suggest: function( text, html, callback ) {
       this._callback = callback;
       if (text.indexOf("hello")== 0) {
@@ -754,7 +758,7 @@ function testAsyncNounSuggestions() {
     }
   };
   var cmd_slow = {
-    name: "dostuff",
+    names: ["dostuff"],
     DOLabel: "thing",
     DOType: noun_type_slowness,
     execute: function(context, directObject) {
@@ -810,7 +814,7 @@ function testAsyncNounSuggestions() {
   var mockMsgService = {
     displayMessage: function(msg) {}
   };
-  var fakeSource = new FakeCommandSource ({dostuff: cmd_slow});
+  var fakeSource = new FakeCommandSource({dostuff: cmd_slow});
   makeCommandManager.call(this, fakeSource, mockMsgService,
                           makeTestParser(), onCM);
   function onCM(cmdMan) {
@@ -826,7 +830,7 @@ function testAsyncNounSuggestions() {
 function testListOfVerbsThatUseSpecificNounType() {
   var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
   var verbUsingNounTypeOne = {
-    name: "doStuff",
+    names: ["doStuff"],
     execute: function(context, directObj) {},
     DOLabel: "thing",
     DOType: nounTypeOne};
@@ -852,10 +856,9 @@ function testWeirdCompletionsThatDontMakeSense() {
 
 function testSynonymsGetDownrankedEvenWithArguments() {
   var cmd_youtube = {
-    name: "youtube",
+    names: ["youtube", "video"],
     DOLabel: "string",
     DOType: noun_arb_text,
-    synonyms: ["video"],
     preview: function() {},
     exectue: function() {}
   };
@@ -874,7 +877,7 @@ function testSynonymsGetDownrankedEvenWithArguments() {
 
 function testModifierWordsCanAlsoBeInArbTextDirectObj() {
   var cmd_twitter = {
-    name: "twitter",
+    names: ["twitter"],
     DOLabel: "status",
     DOType: noun_arb_text,
     modifiers: { as: noun_arb_text },
@@ -909,7 +912,7 @@ function testParseWithComplexQuery() {
   var stat = null;
   var user = null;
   var noun_stat = {
-    name: "stat",
+    names: ["stat"],
     suggest: function(txt) [NounUtils.makeSugg(txt)],
   };
   var noun_user = new NounUtils.NounType("user", ["alice", "bob", "cindy"]);
@@ -918,7 +921,7 @@ function testParseWithComplexQuery() {
       stat = directObject.text;
       user = modifiers.as.text;
     },
-    name: "tweet",
+    names: ["tweet"],
     DOLabel:"status",
     DOType: noun_stat,
     modifiers: {as: noun_user, to: noun_user},

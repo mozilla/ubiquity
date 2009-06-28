@@ -38,16 +38,16 @@ function testJapaneseParserBasic() {
   var tekiType = {
     suggest: function(text,html) {
       if (text == "敵") {
-	return [NounUtils.makeSugg("敵")];
+        return [NounUtils.makeSugg("敵")];
       } else
-	return [];
+        return [];
     }
   };
   var cmd_sasu = {
     execute: function(context, dobj, modifiers) {
       dareGaSasareta = modifiers["を"].text;
     },
-    name:"刺す",
+    names: ["刺す"],
     DOLabel: null,
     DOType: null,
     modifiers: {"を": tekiType }
@@ -78,7 +78,7 @@ function testJapaneseParserSomeMore() {
     }
   };
   var cmd_suru = {
-    name: "する",
+    names: ["する"],
     DOLabel: "thing",
     DOType: noun_type_mono,
     execute: function(context, directObject) {
