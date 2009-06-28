@@ -222,6 +222,9 @@ $(document).ready(function(){
     }
     
     for each (let verb in parser._verbList) {
+      // skip if disabled
+      if (verb.disabled) continue;
+      
       let {names, help, description} = verb;
       let args = $('<ul></ul>');
       for each (let {nountype, role, label} in verb.arguments) {
