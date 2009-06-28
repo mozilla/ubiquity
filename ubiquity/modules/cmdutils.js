@@ -222,24 +222,22 @@ function copyToClipboard(text) {
 // Note that this is **not** intended to be used as a
 // way of importing Javascript into the command's sandbox.
 //
-// {{{ src }}} Source URL of the Javascript to inject.
+// {{{src}}} is the source URL of the Javascript to inject.
 //
-// {{{ callback }}} Optional callback function to call once the script
-// has loaded in the document.
+// {{{callback}}} is an optional callback function to be called once the script
+// has loaded in the document. The 1st argument will be the global object
+// of the document (i.e. window).
 
 function injectJavascript(src, callback) {
   var doc = CmdUtils.getDocument();
-
   var script = doc.createElement("script");
   script.src = src;
-  doc.body.appendChild(script);
-
-  script.addEventListener("load", function() {
-    doc.body.removeChild( script );
-    if (typeof(callback) == "function") {
-      callback();
-    }
+  script.addEventListener("load", function onInjected() {
+    doc.body.removeChild(script);
+    if (typeof callback === "function")
+      callback(doc.defaultView);
   }, true);
+  doc.body.appendChild(script);
 }
 
 // === {{{ CmdUtils.loadJQuery(func) }}} ===
@@ -251,11 +249,9 @@ function injectJavascript(src, callback) {
 function loadJQuery(func) {
   CmdUtils.injectJavascript(
     "resource://ubiquity/scripts/jquery.js",
-    CmdUtils.safeWrapper( function() {
-      var contentJQuery = CmdUtils.getWindowInsecure().jQuery;
-      func(contentJQuery);
-    })
-  );
+    this.safeWrapper(function onJQuery(win) {
+      func(win.wrappedJSObject.jQuery);
+    }));
 }
 
 // === {{{ CmdUtils.onPageLoad(callback) }}} ===
