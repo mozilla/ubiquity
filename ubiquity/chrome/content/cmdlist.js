@@ -115,29 +115,30 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   }
 }
 
-function formatCommandAuthor(authorData) {
-  if(!authorData) return "";
+function formatAuthors(authors)(
+  [formatCommandAuthor(a)
+   for each (a in [].concat(authors))].join(", "));
 
-  if(typeof authorData === "string") return authorData;
+function formatCommandAuthor(authorData) {
+  if (!authorData) return "";
+
+  if (typeof authorData === "string") return authorData;
 
   var authorMarkup = "";
-  if(authorData.name && !authorData.email) {
+  if ("name" in authorData && !("email" in authorData)) {
     authorMarkup += escapeHtml(authorData.name) + " ";
-  } else if(authorData.name && authorData.email) {
-    authorMarkup += ('<a href="mailto:' + escapeHtml(authorData.email) +
-                     '">' + escapeHtml(authorData.name) + '</a> ');
-  } else if(!authorData.name && authorData.email) {
-    authorMarkup += ('<a href="mailto:' + escapeHtml(authorData.email) +
-                     '">' + escapeHtml(authorData.email) + '</a> ');
+  } else if ("email" in authorData) {
+    var ee = escapeHtml(authorData.email);
+    authorMarkup += (
+      '<a href="mailto:' + ee + '">' +
+      ("name" in authorData ? escapeHtml(authorData.name) : ee) +
+      '</a> ');
   }
 
-  if(authorData.homepage) {
+  if ("homepage" in authorData) {
     authorMarkup += ('[<a href="' + escapeHtml(authorData.homepage) +
                      '">Homepage</a>]');
   }
-
-  if(authorMarkup.length == 0)
-    return "";
 
   return authorMarkup;
 }
@@ -150,42 +151,57 @@ function fillTableRowForCmd(row, cmd, className) {
 
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
-  var cmdDisplayName = escapeHtml(cmd.names[0] || cmd.name);
-  if (cmd.nameArg) {
+  var {name, names, nameArg, homepage} = cmd;
+  if (nameArg)
     // TODO: we need some sort of flag to check whether the nameArg
     // was a prefix or a suffix.
-    cmdDisplayName += " " + escapeHtml(cmd.nameArg);
-  }
+    name += " " + nameArg;
+
+  var authors = cmd.authors || cmd.author;
+  var contributors = cmd.contributors || cmd.contributor;
 
   var cmdElement = jQuery(
     '<td class="command">' +
-    '<a class="id"><img class="favicon"/></a>' +
-    '<span class="name">' + cmdDisplayName + '</span>' +
-    '<span class="description"></span>' +
-    '<div class="synonyms-container light">' +
-    '<span class="synonyms"></span></div>' +
-    '<div class="light"><span class="author"></span>' +
-    '<span class="license"></span></div>' +
-    '<div class="contributors light"></div>' +
-    '<div class="homepage light"></div>' +
-    '<div class="help"></div>' +
-    '</td>'
-  );
+    ("icon" in cmd ?
+     <img class="favicon" src={cmd.icon}/>.toXMLString() : "") +
+    (<><a class={cmd.id}/><span class="name">{name}</span></>) +
+    ("description" in cmd ?
+     '<span class="description">' + cmd.description + '</span>' : "") +
+    (names.length > 1 ?
+     (<div class="synonyms-container light"
+      >also called <span class="synonyms">{names.slice(1).join(", ")}
+      </span></div>) : "") +
+    '<div class="light">' +
+    (authors ?
+     '<span class="autor">by ' + formatAuthors(authors) + '</span>' : "") +
+    ("license" in cmd ?
+     ('<span class="license"> - licensed as ' +
+      escapeHtml(cmd.license) + '</span>') : "") +
+    '</div>' +
+    (contributors ?
+     ('<div class="contributors light">contributed by ' +
+      formatAuthors(contributors) + '</div>') : "") +
+    (homepage ?
+     (<div class="homepage">View more information at
+      <a href={homepage}>{homepage}</a></div>) : "") +
+    ("help" in cmd ? '<div class="help">' + cmd.help + '</div>' : "") +
+    '</td>');
 
-  cmdElement.find(".id").attr("name", cmd.id);
-
-  if (UbiquitySetup.parserVersion === 2 && !cmd.arguments) {
-    cmdElement.addClass("not-loaded");
-    cmdElement.find(".name").attr(
-      "title",
-      "This command was not loaded as it is incompatible with Parser 2.");
+  if (UbiquitySetup.parserVersion === 2) {
+    if (!("arguments" in cmd)) {
+      cmdElement.addClass("not-loaded").find(".name").attr(
+        "title",
+        "This command was not loaded as it is incompatible with Parser 2.");
+    }
+    if (cmd.oldAPI) {
+      cmdElement.addClass("oldAPI").prepend(
+        '<span class="badge"><a href="https://wiki.mozilla.org/Labs/Ubiquity/' +
+        'Parser_2_API_Conversion_Tutorial" target="new">' +
+        '<img src="resource://ubiquity/chrome/skin/icons/oldapi.png">' +
+        '</a></span>');
+    }
   }
-
-  if (UbiquitySetup.parserVersion === 2 && cmd.oldAPI) {
-    cmdElement.addClass("oldAPI");
-    cmdElement.prepend($("<span class='badge'><a href='https://wiki.mozilla.org/Labs/Ubiquity/Parser_2_API_Conversion_Tutorial' target='new'><img src='resource://ubiquity/chrome/skin/icons/oldapi.png'></a></span>"))
-  }
-
+/*
   if (cmd.icon)
     cmdElement.find(".favicon").attr("src", cmd.icon);
   else
@@ -224,7 +240,7 @@ function fillTableRowForCmd(row, cmd, className) {
 
   if(cmd.help)
     cmdElement.find(".help")[0].innerHTML = cmd.help;
-
+*/
   if (className) {
     checkBoxCell.addClass(className);
     cmdElement.addClass(className);

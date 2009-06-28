@@ -76,7 +76,7 @@ li {
 }
 
 .light{
-  color: #ccc;
+  color: #999;
   font-style: italic;
 }
 
@@ -156,7 +156,7 @@ em{
   display: inline;
   font-size: 12pt;
   margin-left: 10px;
-  color:#BFBFBF;
+  color: #a7a7a7;
 }
 .command .synonyms{
   color: black;
