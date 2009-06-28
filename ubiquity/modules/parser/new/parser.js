@@ -375,7 +375,7 @@ Parser.prototype = {
               // verb prefix matches, even if they're only one or two
               // characters, will get higher scoreMultipliers than noun-first
               // suggestions, which get scoreMultiplier of 0.3. (trac #750)
-              score: 0.3 + 0.7 * Math.sqrt(match.length / verbPiece.length),
+              score: 0.3 + 0.7 * Math.sqrt(verbPiece.length / name.length),
               __proto__: verb,
             },
             argString: argString,
