@@ -993,27 +993,14 @@ NLParser1.Verb.prototype = {
 
   preview: function( context, previewBlock, argumentValues ) {
     // Same logic as the execute command -- see comment above.
-    if (this._preview) {
-      if (this._isNewStyle) {
-        argumentValues.object = argumentValues.direct_object;
-        this._preview(context, previewBlock, argumentValues);
-      } else {
-        let directObjectVal = null;
-        if (argumentValues && argumentValues.direct_object)
-          directObjectVal = argumentValues.direct_object;
-        this._preview(context, previewBlock, directObjectVal, argumentValues);
-      }
+    if (this._isNewStyle) {
+      argumentValues.object = argumentValues.direct_object;
+      this._preview(context, previewBlock, argumentValues);
     } else {
-      // Command exists, but has no preview; provide a default one.
-      var template = "";
-      if (this._description)
-        template += "<p>"+this._description+"</p>";
-      if (this._help)
-        template += "<h3>How to use it:</h3><p>"+this._help+"</p>";
-      // No description or help available, fall back to old defualt
-      if (template == "")
-        template = "Executes the <b>" + this._name + "</b> command.";;
-      previewBlock.innerHTML = template;
+      let directObjectVal = null;
+      if (argumentValues && argumentValues.direct_object)
+        directObjectVal = argumentValues.direct_object;
+      this._preview(context, previewBlock, directObjectVal, argumentValues);
     }
   },
 

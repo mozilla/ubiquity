@@ -775,16 +775,17 @@ function CreateCommand(options) {
     if (typeof execute !== "function") {
       let uri;
       try { uri = global.Utils.url(execute) } catch(e) {}
-      command.execute = uri ? function execute_open() {
+      command.execute = uri ? function executeOpen() {
         Utils.focusUrlInBrowser(uri.spec);
-      } : function execute_display() {
+      } : function executeDisplay() {
         global.displayMessage(execute || "No action defined.");
       };
     }
-    // If preview is not a function, wrap it in a function that does
-    // what you'd expect it to.
-    if (preview != null && typeof preview !== "function") {
-      command.preview = function preview_html(pblock) {
+    if (preview == null)
+      command.preview = CreateCommand.previewDefault;
+    else if (typeof preview !== "function") {
+      // wrap it in a function that does what you'd expect it to.
+      command.preview = function previewHtml(pblock) {
         pblock.innerHTML = this._previewString;
       };
       command._previewString = preview;
@@ -798,6 +799,18 @@ function CreateCommand(options) {
 
   global.commands.push(command);
 }
+CreateCommand.previewDefault = function previewDefault(pb) {
+  var html = "";
+  if ("description" in this)
+    html += '<div class="description">' + this.description + '</div>';
+  if ("help" in this)
+    html += '<p class="help">' + this.help + '</p>';
+  if (!html)
+    html = ('Executes the <b class="name">' +
+            Utils.escapeHtml(this.name) + '</b> command.');
+  pb.innerHTML = '<div class="default">' + html + '</div>';
+  this.preview = function previewFixed(pb) { pb.innerHTML = html; };
+};
 
 // === {{{ CmdUtils.makeSearchCommand(options) }}} ===
 //

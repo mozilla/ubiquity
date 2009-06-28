@@ -2015,20 +2015,7 @@ Parse.prototype = {
   //
   // creates the verb preview.
   preview: function(context, previewBlock) {
-    if (typeof this._verb.preview === "function")
-      this._verb.preview(context, previewBlock, this.firstArgs);
-    else {
-      // Command exists, but has no preview; provide a default one.
-      var template = "";
-      if (this._verb.description)
-        template += "<p>"+this._verb.description+"</p>";
-      if (this._verb.help)
-        template += "<h3>How to use it:</h3><p>"+this._verb.help+"</p>";
-      // No description or help available, fall back to old defualt
-      if (template == "")
-        template = "Executes the <b>" + this._verb.name + "</b> command.";;
-      previewBlock.innerHTML = template;
-    }
+    this._verb.preview(context, previewBlock, this.firstArgs);
   },
 
   // **{{{Parse#previewDelay}}} (read-only)**
