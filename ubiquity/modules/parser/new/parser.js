@@ -366,8 +366,6 @@ Parser.prototype = {
         let verb = verbs[verbId];
         for each (let name in verb.names) {
           if (name.toLowerCase().indexOf(vplc) < 0) continue;
-          Utils.log((order ? verbFinalMultiplier
-                              : verbInitialMultiplier));
           returnArray.push({
             _verb: {
               id: verbId,
