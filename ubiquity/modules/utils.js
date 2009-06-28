@@ -51,31 +51,72 @@ const Ci = Components.interfaces;
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Utils = {
-  // ** {{{ Utils.Application }}} **
+  // === {{{ Utils.currentChromeWindow }}} ===
   //
-  // Shortcut to {{{Application}}}.
-  // https://developer.mozilla.org/en/FUEL/Application
+  // This property is a reference to the application chrome window
+  // that currently has focus.
 
-  get Application() {
-    delete this.Application;
-    return this.Application = (Cc["@mozilla.org/fuel/application;1"]
-                               .getService(Ci.fuelIApplication));
-  },
-
-  // ** {{{ Utils.json }}} **
-  //
-  // Shortcut to {{{nsIJSON}}}.
-
-  get json() {
-    delete this.json;
-    return this.json = (Cc["@mozilla.org/dom/json;1"]
-                        .createInstance(Ci.nsIJSON));
-  },
+  get currentChromeWindow() (Cc["@mozilla.org/appshell/window-mediator;1"]
+                             .getService(Ci.nsIWindowMediator)
+                             .getMostRecentWindow(Utils.appWindowType)),
 
   __globalObject: this,
 };
 
-// ** {{{ Utils.log(a, b, c, ...) }}} **
+[
+  // === {{{ Utils.Application }}} ===
+  //
+  // Shortcut to
+  // [[https://developer.mozilla.org/en/FUEL/Application|Application]].
+  function Application() (Cc["@mozilla.org/fuel/application;1"]
+                          .getService(Ci.fuelIApplication)),
+
+  // === {{{ Utils.json }}} ===
+  //
+  // Shortcut to {{{nsIJSON}}}.
+
+  function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
+
+  // === {{{ Utils.appName }}} ===
+  //
+  // This property provides the chrome application name
+  // found in {{{nsIXULAppInfo}}}.
+  // Examples values are "Firefox", "Songbird", "Thunderbird".
+
+  function appName() (Cc["@mozilla.org/xre/app-info;1"]
+                      .getService(Ci.nsIXULAppInfo)
+                      .name),
+
+  // === {{{ Utils.appWindowType }}} ===
+  //
+  // This property provides the name of "main" application windows for the chrome
+  // application.
+  // Examples values are "navigator:browser" for Firefox", and
+  // "Songbird:Main" for Songbird.
+
+  function appWindowType() ({
+    Songbird: "Songbird:Main",
+  })[Utils.appName] || "navigator:browser",
+
+  // === {{{ Utils.OS }}} ===
+  //
+  // This property provides the platform name found in {{{nsIXULRuntime}}}.
+  // See: https://developer.mozilla.org/en/OS_TARGET
+  
+  function OS() (Cc["@mozilla.org/xre/app-info;1"]
+                 .getService(Ci.nsIXULRuntime)
+                 .OS),
+
+  ].forEach(function eachGetter(func) {
+    Utils.__defineGetter__(func.name, function lazyGetter() {
+      delete Utils[func.name];
+      return Utils[func.name] = func();
+    });
+  });
+
+for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
+
+// === {{{ Utils.log(a, b, c, ...) }}} ===
 //
 // One of the most useful functions to know both for development
 // and debugging. This logging function takes
@@ -90,7 +131,7 @@ var Utils = {
 //
 // {{{a, b, c, ...}}} is an arbitrary list of things to be logged.
 
-Utils.log = function log(what) {
+function log(what) {
   if (!arguments.length)
     return;
   var args = Array.slice(arguments);
@@ -124,9 +165,9 @@ Utils.log = function log(what) {
       catch (e) { return o }
     }
   }
-};
+}
 
-// ** {{{ Utils.reportWarning() }}} **
+// === {{{ Utils.reportWarning() }}} ===
 //
 // This function can be used to report a warning to the JS Error Console,
 // which can be displayed in Firefox by choosing "Error Console" from
@@ -141,7 +182,7 @@ Utils.log = function log(what) {
 // number of the caller is shown in the JS Error Console.  If it's 1,
 // then the line number of the caller's caller is shown.
 
-Utils.reportWarning = function reportWarning(aMessage, stackFrameNumber) {
+function reportWarning(aMessage, stackFrameNumber) {
   var stackFrame = Components.stack.caller;
 
   if (typeof(stackFrameNumber) != "number")
@@ -163,48 +204,48 @@ Utils.reportWarning = function reportWarning(aMessage, stackFrameNumber) {
   scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
                    aColumnNumber, aFlags, aCategory);
   consoleService.logMessage(scriptError);
-};
+}
 
-// ** {{{ Utils.reportInfo() }}} **
+// === {{{ Utils.reportInfo() }}} ===
 //
 // Reports a purely informational message to the JS Error Console.
 // Source code links aren't provided for informational messages, so
 // unlike {{{Utils.reportWarning()}}}, a stack frame can't be passed
 // in to this function.
 
-Utils.reportInfo = function reportInfo(aMessage) {
+function reportInfo(aMessage) {
   var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
                        .getService(Components.interfaces.nsIConsoleService);
   var aCategory = "ubiquity javascript: ";
   consoleService.logStringMessage(aCategory + aMessage);
-};
+}
 
-// ** {{{ Utils.encodeJson() }}} **
+// === {{{ Utils.encodeJson() }}} ===
 //
 // This function serializes the given object using JavaScript Object
 // Notation (JSON).
 
-Utils.encodeJson = function encodeJson(value, whitelist) {
+function encodeJson(value, whitelist) {
   return Utils.json.encode(value, whitelist);
-};
+}
 
-// ** {{{ Utils.decodeJson() }}} **
+// === {{{ Utils.decodeJson() }}} ===
 //
 // This function unserializes the given string in JavaScript Object
 // Notation (JSON) format and returns the result.
 
-Utils.decodeJson = function decodeJson(string, whitelist) {
+function decodeJson(string, whitelist) {
   return Utils.json.decode(string, whitelist);
-};
+}
 
-// ** {{{Utils.ellipsify()}}} **
+// === {{{Utils.ellipsify()}}} ===
 //
 // Given a DOM node and a maximum number of characters, returns a
 // new DOM node that has the same contents truncated to that number of
 // characters. If any truncation was performed, an ellipsis is placed
 // at the end of the content.
 
-Utils.ellipsify = function ellipsify(node, chars) {
+function ellipsify(node, chars) {
   var doc = node.ownerDocument;
   var copy = node.cloneNode(false);
   if (node.hasChildNodes()) {
@@ -231,7 +272,7 @@ Utils.ellipsify = function ellipsify(node, chars) {
   return copy;
 }
 
-// ** {{{ Utils.setTimeout() }}} **
+// === {{{ Utils.setTimeout() }}} ===
 //
 // This function works just like the {{{window.setTimeout()}}} method
 // in content space, but it can only accept a function (not a string)
@@ -253,7 +294,7 @@ Utils.ellipsify = function ellipsify(node, chars) {
 
 // TODO: Allow strings for the first argument like DOM setTimeout() does.
 
-Utils.setTimeout = function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
+function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
   var timerClass = Cc["@mozilla.org/timer;1"];
   var timer = timerClass.createInstance(Ci.nsITimer);
   // emulate window.setTimeout() by incrementing next ID
@@ -265,22 +306,22 @@ Utils.setTimeout = function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
                          delay,
                          timerClass.TYPE_ONE_SHOT);
   return timerID;
-};
+}
 
-// ** {{{ Utils.clearTimeout() }}} **
+// === {{{ Utils.clearTimeout() }}} ===
 //
 // This function behaves like the {{{window.clearTimeout()}}} function
 // in content space, and cancels the callback with the given timer ID
 // from ever being called.
 
-Utils.clearTimeout = function clearTimeout(timerID) {
+function clearTimeout(timerID) {
   var {timers} = Utils.__timerData;
   var timer = timers[timerID];
   if (timer) {
     timer.cancel();
     delete timers[timerID];
   }
-};
+}
 
 // Support infrastructure for the timeout-related functions.
 
@@ -307,7 +348,8 @@ Utils.__timerData = {
   timers: {}
 };
 
-// ** {{{ Utils.url() }}} **
+// === {{{ Utils.uri() }}} ===
+// === {{{ Utils.url() }}} ===
 //
 // Given a string representing an absolute URL or a {{{nsIURI}}}
 // object, returns an equivalent {{{nsIURI}}} object.  Alternatively,
@@ -324,30 +366,30 @@ Utils.__timerData = {
 // An optional second argument may also be passed in, which specifies
 // a default URL to return if the given URL can't be parsed.
 
-Utils.url = function url(spec, defaultUri) {
+function uri(spec, defaultUri) {
   var base = null;
-  if (typeof(spec) == "object") {
+  if (typeof spec === "object") {
     if (spec instanceof Ci.nsIURI)
-      // nsIURL object was passed in, so just return it back
+      // nsIURI object was passed in, so just return it back
       return spec;
 
     // Assume jQuery-style dictionary with keyword args was passed in.
-    base = spec.base ? Utils.url(spec.base, defaultUri) : null;
-    spec = spec.uri ? spec.uri : null;
+    base = spec.base ? uri(spec.base, defaultUri) : null;
+    spec = spec.uri || null;
   }
 
-  var ios = Cc["@mozilla.org/network/io-service;1"]
-    .getService(Ci.nsIIOService);
-
+  var ios = (Cc["@mozilla.org/network/io-service;1"]
+             .getService(Ci.nsIIOService));
   try {
     return ios.newURI(spec, null, base);
-  } catch (e if (e.result == Components.results.NS_ERROR_MALFORMED_URI) &&
-           defaultUri) {
+  } catch (e if (e.result === Components.results.NS_ERROR_MALFORMED_URI &&
+                 defaultUri)) {
     return Utils.url(defaultUri);
   }
-};
+}
+Utils.url = uri;
 
-// ** {{{ Utils.openUrlInBrowser() }}} **
+// === {{{ Utils.openUrlInBrowser() }}} ===
 //
 // This function opens the given URL in the user's browser, using
 // their current preferences for how new URLs should be opened (e.g.,
@@ -361,7 +403,7 @@ Utils.url = function url(spec, defaultUri) {
 // with keys and values corresponding to their POST analogues, or an
 // {{{nsIInputStream}}}.
 
-Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
+function openUrlInBrowser(urlString, postData) {
   var postInputStream = null;
   if (postData) {
     if (postData instanceof Ci.nsIInputStream) {
@@ -408,29 +450,29 @@ Utils.openUrlInBrowser = function openUrlInBrowser(urlString, postData) {
                              postInputStream);
   else
     browserWindow.loadURI(urlString, null, postInputStream, false);
-};
+}
 
-// ** {{{ Utils.focusUrlInBrowser() }}} **
+// === {{{ Utils.focusUrlInBrowser() }}} ===
 //
 // This function focuses a tab with the given URL if one exists in the
 // current window; otherwise, it delegates the opening of the URL in a
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
-Utils.focusUrlInBrowser = function focusUrlInBrowser(urlString) {
+function focusUrlInBrowser(urlString) {
   for each (let tab in Utils.Application.activeWindow.tabs)
     if (tab.uri.spec === urlString) {
       tab.focus();
       return;
     }
   Utils.openUrlInBrowser(urlString);
-};
+}
 
-// ** {{{ Utils.getCookie() }}} **
+// === {{{ Utils.getCookie() }}} ===
 //
 // This function returns the cookie for the given domain and with the
 // given name.  If no matching cookie exists, {{{null}}} is returned.
 
-Utils.getCookie = function getCookie(domain, name) {
+function getCookie(domain, name) {
   var cookieManager = Cc["@mozilla.org/cookiemanager;1"].
                       getService(Ci.nsICookieManager);
 
@@ -443,9 +485,9 @@ Utils.getCookie = function getCookie(domain, name) {
   }
   // if no matching cookie:
   return null;
-};
+}
 
-// ** {{{ Utils.paramsToString() }}} **
+// === {{{ Utils.paramsToString() }}} ===
 //
 // This function takes the given Object containing keys and
 // values into a querystring suitable for inclusion in an HTTP
@@ -455,7 +497,7 @@ Utils.getCookie = function getCookie(domain, name) {
 //
 // {{{prefix = "?"}}} is an optional string prepended to the result.
 
-Utils.paramsToString = function paramsToString(params, prefix) {
+function paramsToString(params, prefix) {
   var stringPairs = [];
   function addPair(key, value) {
     // note: explicitly ignoring values that are functions/null/undefined!
@@ -473,14 +515,14 @@ Utils.paramsToString = function paramsToString(params, prefix) {
     };
   }
   return (prefix == null ? "?" : prefix) + stringPairs.join("&");
-};
+}
 
-// ** {{{ Utils.urlToParams() }}} **
+// === {{{ Utils.urlToParams() }}} ===
 //
 // This function takes the given url and returns an Object containing keys and
 // values retrieved from its query-part.
 
-Utils.urlToParams = function urlToParams(url) {
+function urlToParams(url) {
   var params = {};
   for each (let param in url.slice(url.indexOf("?") + 1).split("&")) {
     var [key, val] = param.split("=");
@@ -493,7 +535,7 @@ Utils.urlToParams = function urlToParams(url) {
   return params;
 }
 
-// ** {{{ Utils.getLocalUrl() }}} **
+// === {{{ Utils.getLocalUrl() }}} ===
 //
 // This function synchronously retrieves the content of the given
 // local URL, such as a {{{file:}}} or {{{chrome:}}} URL, and returns
@@ -503,7 +545,7 @@ Utils.urlToParams = function urlToParams(url) {
 //
 // {{{charset}}} is an optional string to specify the character set.
 
-Utils.getLocalUrl = function getLocalUrl(url, charset) {
+function getLocalUrl(url, charset) {
   var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
             .createInstance(Ci.nsIXMLHttpRequest);
   req.open("GET", url, false);
@@ -513,9 +555,9 @@ Utils.getLocalUrl = function getLocalUrl(url, charset) {
     return req.responseText;
   else
     throw new Error("Failed to get " + url);
-};
+}
 
-// ** {{{ Utils.trim() }}} **
+// === {{{ Utils.trim() }}} ===
 //
 // This function removes all whitespace surrounding a string and
 // returns the result.
@@ -529,18 +571,18 @@ Utils.trim = String.trim || function trim(str) {
   return str.slice(i, j + 1);
 };
 
-// ** {{{ Utils.isArray() }}} **
+// === {{{ Utils.isArray() }}} ===
 //
 // This function returns whether or not its parameter is an instance
 // of a JavaScript Array object.
 
-Utils.isArray = function isArray(val) {
+function isArray(val) {
   return (val != null &&
           typeof val === "object" &&
           (val.constructor || 0).name === "Array");
 }
 
-// ** {{{ Utils.computeCryptoHash() }}} **
+// === {{{ Utils.computeCryptoHash() }}} ===
 //
 // Computes and returns a cryptographic hash for a string given an
 // algorithm.
@@ -551,7 +593,7 @@ Utils.isArray = function isArray(val) {
 //
 // {{{str}}} is the string to be hashed.
 
-Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
+function computeCryptoHash(algo, str) {
   var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                   .createInstance(Ci.nsIScriptableUnicodeConverter);
   converter.charset = "UTF-8";
@@ -569,9 +611,9 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
   var hashString = [toHexString(hash.charCodeAt(i))
                     for (i in hash)].join("");
   return hashString;
-};
+}
 
-// ** {{{ Utils.signHMAC() }}} **
+// === {{{ Utils.signHMAC() }}} ===
 //
 // Computes and returns a cryptographicly signed hash for a string given an
 // algorithm. It is derived from a given key.
@@ -583,7 +625,7 @@ Utils.computeCryptoHash = function computeCryptoHash(algo, str) {
 // {{{key}}} is a key (string) to use to sign
 //
 // {{{str}}} is the string to be hashed.
-Utils.signHMAC = function signHMAC(algo, key, str) {
+function signHMAC(algo, key, str) {
   var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                     .createInstance(Ci.nsIScriptableUnicodeConverter);
   converter.charset = "UTF-8";
@@ -597,26 +639,26 @@ Utils.signHMAC = function signHMAC(algo, key, str) {
   crypto.update(data, data.length);
   var hash = crypto.finish(true);
   return hash;
-};
+}
 
 
-// ** {{{ Utils.escapeHtml() }}} **
+// === {{{ Utils.escapeHtml() }}} ===
 //
 // This function returns a version of the string safe for
 // insertion into HTML. Useful when you just want to
 // concatenate a bunch of strings into an HTML fragment
 // and ensure that everything's escaped properly.
 
-Utils.escapeHtml = function escapeHtml(str) {
+function escapeHtml(str) {
   return (String(str)
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
           .replace(/\"/g, "&quot;")
           .replace(/\'/g, "&#39;"));
-};
+}
 
-// ** {{{ Utils.convertFromUnicode() }}} **
+// === {{{ Utils.convertFromUnicode() }}} ===
 //
 // Encodes the given unicode text to a given character set and
 // returns the result.
@@ -626,14 +668,14 @@ Utils.escapeHtml = function escapeHtml(str) {
 //
 // {{{text}}} is a unicode string.
 
-Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
+function convertFromUnicode(toCharset, text) {
   var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                   .getService(Ci.nsIScriptableUnicodeConverter);
   converter.charset = toCharset;
   return converter.ConvertFromUnicode(text);
-};
+}
 
-// ** {{{ Utils.convertToUnicode() }}} **
+// === {{{ Utils.convertToUnicode() }}} ===
 //
 // Decodes the given text from a character set to unicode and returns
 // the result.
@@ -644,22 +686,22 @@ Utils.convertFromUnicode = function convertFromUnicode(toCharset, text) {
 // {{{text}}} is a string encoded in the character set
 // {{{fromCharset}}}.
 
-Utils.convertToUnicode = function convertToUnicode(fromCharset, text) {
+function convertToUnicode(fromCharset, text) {
   var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                   .getService(Ci.nsIScriptableUnicodeConverter);
   converter.charset = fromCharset;
   return converter.ConvertToUnicode(text);
-};
+}
 
 // == {{{ Utils.dump() }}} ==
 //
 // A nicer {{{dump()}}} that
-// displays caller's name and appends a line feed.
+// displays caller's name, concats arguments and appends a line feed.
 
-Utils.dump = function dump() {
+Utils.dump = function niceDump() {
   var {caller} = arguments.callee;
-  Utils.__globalObject.dump(
-    (caller ? caller.name + ": " : "") + Array.join(arguments, " ") + "\n");
+  dump((caller ? caller.name + ": " : "") +
+       Array.join(arguments, " ") + "\n");
 };
 
 // == {{{ Utils.tabs }}} ==
@@ -667,7 +709,7 @@ Utils.dump = function dump() {
 // This Object contains functions related to Firefox tabs.
 
 Utils.tabs = {
-  // ** {{{ Utils.tabs.get() }}} **
+  // === {{{ Utils.tabs.get() }}} ===
   //
   // Gets an array of open tabs.
   //
@@ -684,7 +726,7 @@ Utils.tabs = {
                                                   d.URL   === name)));
   },
 
-  // ** {{{ Utils.tabs.search() }}} **
+  // === {{{ Utils.tabs.search() }}} ===
   //
   // Searches for tabs by title or URL and returns an array of tab references.
   //
@@ -714,7 +756,7 @@ Utils.tabs = {
     return matches;
   },
 
-  // ** {{{ Utils.tabs.reload() }}} **
+  // === {{{ Utils.tabs.reload() }}} ===
   //
   // Reloads all matched tabs.
   //
@@ -731,7 +773,7 @@ Utils.tabs = {
 // This object contains functions related to clipboard.
 
 Utils.clipboard = {
-  // ** {{{ Utils.clipboard.text }}} **
+  // === {{{ Utils.clipboard.text }}} ===
   //
   // Gets or sets the clipboard text.
 
@@ -759,7 +801,7 @@ Utils.clipboard = {
 // information about the user's browsing history.
 
 Utils.history = {
-  // ** {{{ Utils.history.visitsToDomain() }}} **
+  // === {{{ Utils.history.visitsToDomain() }}} ===
   //
   // This function returns the number of times the user has visited
   // the given {{{domain}}} string.
@@ -781,7 +823,7 @@ Utils.history = {
     return count;
   },
 
-  // ** {{{ Utils.history.search() }}} **
+  // === {{{ Utils.history.search() }}} ===
   //
   // Searches the pages the user has visited.
   // Given a query string and a callback function, passes an array of results
@@ -865,55 +907,3 @@ AutoCompleteInput.prototype.QueryInterface = function(iid) {
     return this;
   throw Components.results.NS_ERROR_NO_INTERFACE;
 };
-
-// ** {{{ Utils.appName }}} **
-//
-// This property provides the chrome application name
-// found in {{{nsIXULAppInfo}}}.
-// Examples values are "Firefox", "Songbird", "Thunderbird".
-
-Utils.__defineGetter__("appName", function() {
-  delete this.appName;
-  return this.appName = (Cc["@mozilla.org/xre/app-info;1"].
-                         getService(Ci.nsIXULAppInfo).
-                         name);
-});
-
-// ** {{{ Utils.appWindowType }}} **
-//
-// This property provides the name of "main" application windows for the chrome
-// application.
-// Examples values are "navigator:browser" for Firefox", and
-// "Songbird:Main" for Songbird.
-
-Utils.__defineGetter__("appWindowType", function() {
-  switch (Utils.appName) {
-    case "Songbird":
-      return "Songbird:Main";
-    default:
-      return "navigator:browser";
-  }
-});
-
-// ** {{{ Utils.currentChromeWindow }}} **
-//
-// This property is a reference to the application chrome window
-// that currently has focus.
-
-Utils.__defineGetter__("currentChromeWindow", function() {
-  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
-           getService(Ci.nsIWindowMediator);
-  return wm.getMostRecentWindow(Utils.appWindowType);
-});
-
-// ** {{{ Utils.OS }}} **
-//
-// This property provides the platform name found in {{{nsIXULRuntime}}}.
-// See: https://developer.mozilla.org/en/OS_TARGET
-
-Utils.__defineGetter__("OS", function() {
-  delete this.OS;
-  return this.OS = (Cc["@mozilla.org/xre/app-info;1"].
-                    getService(Ci.nsIXULRuntime).
-                    OS);
-});
