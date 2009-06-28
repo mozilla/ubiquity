@@ -76,4 +76,4 @@ function finishCommand(cmd) {
 
 function isEmpty(obj) !obj || !obj.__count__;
 
-function hyphenize(name) name.toLowerCase().replace(/ /g, "-");
+function hyphenize(name) name.replace(/ /g, "-");
