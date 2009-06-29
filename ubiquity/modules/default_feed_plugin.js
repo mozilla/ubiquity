@@ -392,17 +392,19 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
 function makeBin(feedInfo) {
   var bin = null;
   return {
-    __noSuchMethod__: function ____(key, [val]) {
+    toString: function toString() "[object Bin]",
+    valueOf: function valueOf() bin.__count__,
+    __iterator__: function iter() Iterator(bin),
+    __noSuchMethod__: function pass(key, [val]) {
       bin || (bin = feedInfo.getBin());
       if (val === void 0) return bin[key];
       if (val === null) {
-        val = bin[key];
+        var old = bin[key];
         delete bin[key];
-      } else
-        bin[key] = val;
+      }
+      else bin[key] = val;
       bin = feedInfo.setBin(bin);
-      return val;
+      return old || bin[key];
     },
-    "": function secret() bin,
   };
 }
