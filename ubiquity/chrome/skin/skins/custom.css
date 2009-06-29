@@ -106,14 +106,22 @@
 }
 
 /* Formatting for the Preview box */
-@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+@-moz-document url(chrome://ubiquity/content/preview.html) {
 
 body {
   margin: 0;
 }
 
 .error {
-  color: #d44;
+  font-style: oblique;
 }
+
+.default > .name {}
+.default > .help {}
+.default > .description {}
+
+.search-command .title {}
+.search-command .preview {}
+.search-command .thumbnail {}
 
 }

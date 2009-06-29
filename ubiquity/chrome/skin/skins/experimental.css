@@ -224,7 +224,7 @@
 
 
 /* Formatting for the Preview box */
-@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+@-moz-document url(chrome://ubiquity/content/preview.html) {
 
 body {
   margin: 0;
@@ -271,11 +271,25 @@ a:active {
 }
 .gresult-content {
   margin-right: 10px;
-  font-size: small;  
+  font-size: small;
 }
 
 .error {
   color: #d44;
+}
+
+.default > .help:before {
+  content: "How to use:";
+  display: block;
+  font-size: larger;
+  font-weight: bolder;
+}
+
+.search-command kbd:before {
+  content: "[";
+}
+.search-command kbd:after {
+  content: "]";
 }
 
 }
