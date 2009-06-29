@@ -1,0 +1,59 @@
+# map.po
+#
+# Localizers:
+# Toni Hermoso Pulido <toniher@softcatala.org>
+ 
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "mapa"
+
+msgctxt "map.help"
+msgid ""
+"Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the "
+"preview pane to get a larger, interactive map that you can zoom and pan "
+"around.  You can then click the &quot;insert map in page&quot; (if you're in "
+"an editable text area) to insert the map.  So you can, for example, type an "
+"address in an email,  select it, issue &quot;map&quot;, click on the "
+"preview, and then insert the map."
+msgstr ""
+"Proveu-ho amb «mapa kalamazoo».  Podeu clicar al mapa en la subfinestra de "
+"previsualització per a obtenir un mapa més gran i interactiu per tal de "
+"poder-hi fer zoom i desplaçar-vos-hi. Podeu llavors fer clic a «insereix el "
+"mapa en la pàgina» (si sou en una àrea de text editable) per a editar-hi el "
+"mapa. Així doncs podeu, per exemple, escriure una adreça en un correu, "
+"seleccionar-go, i executar «mapa», llavors clicar a la previsualització i "
+"inserir-hi el mapa."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Transforma una adreça o un nom d'ubicació en un Google Map."
+
+msgctxt "map.preview"
+msgid ""
+"Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr ""
+"No es pot inserir en un espai que no es pot editar. Utilitzeu «edita la "
+"pàgina» per a una pàgina que es pugui editar."
+
+#~ msgctxt "map these.names"
+#~ msgid "map these"
+#~ msgstr "posa'ls al mapa|col·loca'ls al mapa"
+
+#~ msgctxt "map these.description"
+#~ msgid ""
+#~ "Maps multiple selected addresses or links onto a single Google Map. "
+#~ "(Experimental!)"
+#~ msgstr ""
+#~ "Col·loca al mapa diferents adreces seleccionades o enllaçps en única "
+#~ "pantalla de Google Map. (Experimental!)"

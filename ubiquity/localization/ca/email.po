@@ -1,0 +1,108 @@
+# email.po
+#
+# Localizers:
+# Toni Hermoso Pulido <toniher@softcatala.org>
+ 
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. email command:
+#. use | to separate multiple name values:
+msgctxt "email.names"
+msgid "email|mail|send email|gmail.com"
+msgstr "email|correu|envia per correu|gmail.com"
+
+msgctxt "email.help"
+msgid ""
+"Currently only works with\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    so you'll need a Gmail account to use it.\n"
+"<br/>\n"
+"Try selecting part of a web page (including links, images, etc)\n"
+"    and then issuing \"email this\".\n"
+"<br/>\n"
+"You can also specify the recipient of the email using the word \"to\"\n"
+"    and the name of someone from your contact list.\n"
+"    For example, try issuing \"email hello to jono\"\n"
+"    (assuming you have a friend named \"jono\")."
+msgstr ""
+"Actualment només funciona amb\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    per tant, us caldrà un compte de Gmail per a utilitzar-lo.\n"
+"<br/>\n"
+"Proveu de seleccionar part d'una pàgina web (incloent-hi enllaços, imatges, etc)\n"
+"    i llavors executeu «envia per correu açò».\n"
+"<br/>\n"
+"Podeu especificar el destinatari del missatge amb la partícula «per a»\n"
+"   i el nom d'algú de la vostra llista de contactes.\n"
+"    Per exemple, executeu «envia per correu \"Hola\" a Tomàs»\n"
+"    (sempre que tingueu un amic que es digui «Tomàs»)."
+
+msgctxt "email.description"
+msgid "Begins composing an email to a person from your contact list."
+msgstr "S'inicia la redacció d'un missatge de correu per a una persona de la vostra llista de contactes."
+
+msgctxt "email.preview"
+msgid "Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}."
+msgstr "Crea un missatge de correu {if recipient} per a ${recipient}{/if} amb un enllaç a la pàgina actual{if content} i aquests continguts:<br/><br/>${content}{/if}."
+
+msgctxt "email.execute"
+msgid "A gmonkey exception occurred."
+msgstr "S'ha produït una excepció de gmonkey."
+
+#. get last email command:
+#. use | to separate multiple name values:
+msgctxt "get last email.names"
+msgid "get last email"
+msgstr "obtén el darrer correu|aconsegueix el darrer correu|aconseguix el darrer correu|recupera el darrer correu"
+
+msgctxt "get last email.description"
+msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
+msgstr "Mostra el vostre correu entrant més recent… Cal un compte de <a href=\"http://mail.google.com\">Gmail</a>."
+
+msgctxt "get last email.preview"
+msgid "Displays your most recent incoming email..."
+msgstr "Mostra el vostre correu entrant més recent…"
+
+msgctxt "get last email.preview"
+msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgstr "Darrer correu per lleigr: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> diu: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+
+msgctxt "get last email.preview"
+msgid "<b>You have no new mail!</b>"
+msgstr "<b>No teniu cap missatge noul!</b>"
+
+msgctxt "get last email.preview"
+msgid "You are not logged in!<br />Press enter to log in."
+msgstr "No heu iniciat cap sessió!<br />Premeu Retorn per a iniciar-ne una."
+
+msgctxt "get last email.execute"
+msgid "You have new email! ${lastEmail.author} says: ${lastEmail.subject}"
+msgstr "Teniu correu nou! ${lastEmail.author} diu: ${lastEmail.subject}"
+
+msgctxt "get last email.execute"
+msgid "You have no new mail."
+msgstr "No teniu cap missatge nou."
+
+#. get email address command:
+#. use | to separate multiple name values:
+msgctxt "get email address.names"
+msgid "get email address"
+msgstr "obtén l'adreça electrònica|aconsegueix l'adreça electrònica|aconseguix l'adreça electrònica"
+
+msgctxt "get email address.help"
+msgid "Execute the command to copy the address to your clipboard."
+msgstr "Executa l'ordre per a copiar l'adreça al vostre porta-retalls."
+
+msgctxt "get email address.description"
+msgid "Looks up the email address of a person from your contacts list given their name. "
+msgstr "Consulta l'adreça electrònica d'una persona de la llista dels vostres contactes a partir del seu nom."
+

@@ -1,0 +1,78 @@
+# calendar.po
+#
+# Localizers:
+# Toni Hermoso Pulido <toniher@softcatala.org>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. add to google calendar command:
+#. use | to separate multiple name values:
+msgctxt "add to google calendar.names"
+msgid "add to google calendar|quick add"
+msgstr "afegeix al google calendar|afegix al google calendar|afig al google calendar|afegeix ràpidament|afegix ràpidament|afig ràpidament"
+
+msgctxt "add to google calendar.help"
+msgid ""
+"<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
+". e.g.:\n"
+"<ul>\n"
+"  <li>3pm Lunch with Myk and Thunder</li>\n"
+"  <li>Jono's Birthday on Friday</li>\n"
+"</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr ""
+"<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Afegeix ràpidament\">Introduïu la cita naturalment</a>\n"
+". p.ex.:\n"
+"<ul>\n"
+"  <li>Dinar a les 3 PM amb en Pep i na Júlia</li>\n"
+"  <li>L'aniversari de n'Eduard el divendres</li>\n"
+"</ul><p>Actualment només funciona amb el <a href=\"http://calendar.google.com\">Google Calendar</a>, per tant, us caldrà un compte de Google per a utilitzar-lo.</p>"
+
+msgctxt "add to google calendar.description"
+msgid "Adds an event to your calendar."
+msgstr "Afegeix una cita al vostre calendari."
+
+msgctxt "add to google calendar.execute"
+msgid "Authorization error"
+msgstr "Error d'autorització"
+
+msgctxt "add to google calendar.execute"
+msgid "Please make sure you are logged in to Google Calendar"
+msgstr "Assegureu-vos que heu iniciat una sessió del Google Calendar"
+
+msgctxt "add to google calendar.execute"
+msgid "Event created"
+msgstr "S'ha creat una cita."
+
+msgctxt "add to google calendar.execute"
+msgid "Error creating the event"
+msgstr "S'ha produït un error en crear la cita."
+
+#. check google calendar command:
+#. use | to separate multiple name values:
+msgctxt "check google calendar.names"
+msgid "check google calendar"
+msgstr "comprova al google calendar"
+
+msgctxt "check google calendar.help"
+msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "Proveu-ho amb «comprova el dijous»<p>Actualment només funciona amb el <a href=\"http://calendar.google.com\">Google Calendar</a>, per tant, us caldrà un compte de Google per a utilitzar-ho.</p>"
+
+msgctxt "check google calendar.description"
+msgid "Checks what events are on your calendar for a given date."
+msgstr "Comprova quines cites hi ha en el vostre calendari per a una data donada."
+
+msgctxt "check google calendar.preview"
+msgid "Checking Google Calendar for events on ${date}."
+msgstr "Comprova al Google Calendar les cites del ${date}."
+
+#~ msgctxt "add (to calendar).names"
+#~ msgid "add"
+#~ msgstr "afegeix|afegix|afig"
+
