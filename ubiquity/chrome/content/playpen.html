@@ -95,13 +95,22 @@
       }
       
       .badge {
-        border: 2px yellow solid;
+        border: 2px #ccc solid;
         width: 1em;
         text-align: center;
         -moz-border-radius: .7em;
         z-index: 2;
         position: absolute;
+        background-color: #ccc;
+      }
+
+      .badge.winner {
+        border: 2px yellow solid;
         background-color: yellow;
+      }
+
+      .badge.winner.badge9 {
+        border: 2px red solid;
       }
       
     </style>

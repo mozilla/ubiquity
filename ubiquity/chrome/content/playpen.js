@@ -179,20 +179,20 @@ var demoParserInterface = {
           case 6:
           case 7:
             for each (let parse in this._possibleParses) 
-              if (!parse._step)
-                parse._step = oldval;
+              if (!parse._survivedStep)
+                parse._survivedStep = oldval;
             break;
                     
           case 8:
             for each (let parse in this._verbedParses)
-              if (!parse._step)
-                parse._step = oldval;
+              if (!parse._survivedStep)
+                parse._survivedStep = oldval;
             break;
   
           case 9:
 	          for each (let parse in this.aggregateScoredParses())
-              if (!parse._step)
-                parse._step = oldval;
+              if (!parse._survivedStep)
+                parse._survivedStep = oldval;
             break;
         }
         
@@ -234,8 +234,11 @@ var demoParserInterface = {
             if (parse._parent && $('#wrap'+parse._parent._id).length)
               host = $('#wrap'+parse._parent._id+' > .children');
               
+            let displayStep = (parse._survivedStep || parse._step);
             $("<div class='treewrap"+(parse._step ? ' step'+parse._step : '')+"' id='wrap"+parse._id+"'>"
-                +(parse._step ? "<div class='badge'>"+parse._step+"</div>" : '')
+                +(parse._step ? "<div class='badge"+(parse._survivedStep?' winner':'')+" badge"+displayStep+"'>"
+                  +displayStep
+                +"</div>" : '')
                 +"<div class='treeleaf' id='leaf"+parse._id+"'>"
                 +displayParse(parse,true)+"</div>"
                 +"<div class='children'></div>"

@@ -2182,6 +2182,7 @@ Parse.prototype = {
                         for each (sugg in this.args[role])];
     ret.complete = this.complete;
     ret._suggested = this._suggested;
+    ret._step = this._query._step;
     ret.scoreMultiplier = this.scoreMultiplier;
     ret._score = this._score;
     // for debug purposes
