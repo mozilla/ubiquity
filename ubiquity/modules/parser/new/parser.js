@@ -154,6 +154,7 @@ Parser.prototype = {
   //
   // TODO: better cleanup + management of {{{_nounCache}}}
   _nounCache: null,
+  _defaultsCache: null,
 
   _verbList: null,
   _nounTypes: null,
@@ -214,6 +215,7 @@ Parser.prototype = {
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function initializeCache() {
     this._nounCache = {};
+    this._defaultsCache = {};
     var patternCache = this._patternCache = {};
     var verbPatterns = patternCache.verbs = {};
     var delimPatterns = patternCache.delimiters = {};
@@ -1089,6 +1091,15 @@ Parser.prototype = {
     // for parses WITHOUT a set verb:
     var returnArray = [];
     var verbs = this._verbList;
+    // For the time being... kill parses which have multiple arguments
+    // of the same role, as we have no real way of dealing with them and
+    // their scores are so low anyway...
+    
+    for each (let roleArgArray in parse.args) {
+      if (roleArgArray.length > 1)
+        return [];
+    }
+    
     VERBS:
     for (let verbId in verbs) {
       let verb = verbs[verbId];
@@ -1220,7 +1231,7 @@ Parser.prototype = {
 
     // now check for unfilled arguments so we can fill them with defaults
     let {unfilledRoles} = parse;
-    let defaultsCache = {};
+    let myDefaultsCache = {};
 
     for each (let role in unfilledRoles) {
       let defaultValues;
@@ -1237,11 +1248,13 @@ Parser.prototype = {
                           missingArg.default : [missingArg.default];
       } else {
         let noun = missingArg.nountype;
-        let defaultValue = (noun.default
+        if (!(noun.id in this._defaultsCache))
+          this._defaultsCache[noun.id] = (noun.default
                             ? (typeof noun.default === "function"
                                ? noun.default()
                                : noun.default)
-                            : {text: "", html: "", data: null, summary: ""});
+                            : {text: "", html: "", data: null, summary: ""})
+        let defaultValue = this._defaultsCache[noun.id];
         defaultValues = Utils.isArray(defaultValue) ?
                           defaultValue : [defaultValue];
         //Utils.log(defaultValues);
@@ -1271,12 +1284,12 @@ Parser.prototype = {
         }
       }
 
-      defaultsCache[role] = defaultValues;
+      myDefaultsCache[role] = defaultValues;
     }
 
     for each (let role in unfilledRoles) {
       let newreturn = [];
-      for each (let defaultValue in defaultsCache[role]) {
+      for each (let defaultValue in myDefaultsCache[role]) {
         for each (let parseToReturn in returnArr) {
           let newParse = parseToReturn.copy();
           newParse.setArgumentSuggestion(role, defaultValue);
