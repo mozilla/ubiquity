@@ -337,7 +337,7 @@ CmdUtils.CreateCommand({
     pbl.innerHTML = (
       data
       ? (<pre class="bookmarklet" style="white-space:pre-wrap">{data}</pre>)
-      : this.description + "<p>" + this.help + "</p>");
+      : this.previewDefault());
   }
 });
 

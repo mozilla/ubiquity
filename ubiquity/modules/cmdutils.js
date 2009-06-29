@@ -674,14 +674,11 @@ function retrieveLogins(name) {
 function CreateCommand(options) {
   var me = this;
   var global = this.__globalObject;
-  var command = {proto: options, __proto__: options};
-
-  // Returns the first key in a dictionary.
-  function getKey(dict) {
-    for (var key in dict) return key;
-    // if no keys in dict:
-    return null;
-  }
+  var command = {
+    __proto__: options,
+    proto: options,
+    previewDefault: CreateCommand.previewDefault,
+  };
 
   function toNounType(obj, key) {
     var val = obj[key];
@@ -733,18 +730,13 @@ function CreateCommand(options) {
   OLD_DEPRECATED_ARGUMENT_API:
   { let {takes, modifiers} = options;
     if (takes || modifiers) command.oldAPI = true;
-    if (takes) {
-      let label = getKey(takes);
-      if (label) {
-        command.DOLabel = label;
-        command.DOType = takes[label];
-        toNounType(command, "DOType");
-      }
+    for (let label in takes) {
+      command.DOLabel = label;
+      command.DOType = takes[label];
+      toNounType(command, "DOType");
+      break;
     }
-    if (modifiers) {
-      for (let label in modifiers)
-        toNounType(modifiers, label);
-    }
+    for (let label in modifiers) toNounType(modifiers, label);
   }
   NEW_IMPROVED_ARGUMENT_API:
   { let args = options.arguments || options.argument;
@@ -803,8 +795,13 @@ CreateCommand.previewDefault = function previewDefault(pb) {
   if (!html)
     html = ('Executes the <b class="name">' +
             Utils.escapeHtml(this.name) + '</b> command.');
-  pb.innerHTML = '<div class="default">' + html + '</div>';
-  this.preview = function previewFixed(pb) { pb.innerHTML = html; };
+  html = '<div class="default">' + html + '</div>';
+  if (pb) pb.innerHTML = html;
+  this.previewDefault = function previewDefaultFixed(pb) {
+    if (pb) pb.innerHTML = html;
+    return html;
+  };
+  return html;
 };
 
 // === {{{ CmdUtils.makeSearchCommand(options) }}} ===

@@ -253,14 +253,13 @@ CmdUtils.CreateCommand({
   description: ("Looks up the email address of a person " +
                 "from your contacts list given their name. "),
   help: "Execute the command to copy the address to your clipboard.",
-  arguments: {modifier: noun_type_contact},
-  execute: function({modifier: {text}}) {
+  argument: noun_type_contact,
+  execute: function({object: {text}}) {
     if (!text) return;
     Utils.clipboard.text = text;
     displayMessage(text, this);
   },
   preview: function(pbl, args) {
-    pbl.innerHTML = (args.object.html ||
-                     this.description + "<p>" + this.help + "</p>");
+    pbl.innerHTML = args.object.html || this.previewDefault();
   },
 });

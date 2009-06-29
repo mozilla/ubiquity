@@ -201,7 +201,7 @@ CmdUtils.CreateCommand({
   },
   preview: function (pb, {object: {text}}) {
     if (!text) {
-      pb.innerHTML = this.description + "<p>" + this.help + "</p>";
+      this.previewDefault(pb);
       return;
     }
     this._calc(text, function (result) {

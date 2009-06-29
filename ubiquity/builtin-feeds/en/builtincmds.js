@@ -60,8 +60,8 @@ CmdUtils.CreateCommand({
     <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
       Or, enter the name of a command to get help on that command.</>),
   argument: noun_type_command,
-  preview: function(pblock, {object}) {
-    pblock.innerHTML = object.html || this.description;
+  preview: function(pblock, {object: {data}}) {
+    pblock.innerHTML = data ? data.previewDefault() : this.description;
   },
   execute: function({object: {data}}) {
     if (data)
@@ -70,7 +70,6 @@ CmdUtils.CreateCommand({
       Utils.focusUrlInBrowser(Help);
   }
 });
-
 
 CmdUtils.CreateCommand({
   names: ["open (ubiquity settings page)",
@@ -87,9 +86,11 @@ CmdUtils.CreateCommand({
   description: "" + (
       <>Opens one of the Ubiquity documentation/settings pages.</>),
   preview: function( pBlock, args ){
-    if (args.object && args.object.text) {
-      pBlock.innerHTML = _("Opens the Ubiquity ${goal} page.",{goal: args.object.text});
-    } else {
+    if (args.object.text) {
+      pBlock.innerHTML = _("Opens the Ubiquity ${goal} page.",
+                           {goal: args.object.text});
+    }
+    else {
       pBlock.innerHtml = this.description;
     }
   },
@@ -97,8 +98,9 @@ CmdUtils.CreateCommand({
     var targetPage;
     if (!args.object || !args.object.text) {
       targetPage = Help;
-    } else {
-      switch( args.object.text) {
+    }
+    else {
+      switch (args.object.text) {
       // we won't localize these for the time being, as they're
       // dependent on the nountype being localized
       case "help":
@@ -184,12 +186,12 @@ CmdUtils.CreateCommand({
         displayMessage(text, this);
       }
     },
-    preview: function(pb, {object: {text, html, data: cmd}}) {
+    preview: function(pb, {object: {html, data: cmd}}) {
       pb.innerHTML = (
         cmd
         ? CmdUtils.renderTemplate(tmpl,
-                                  { name: <b>{text}</b>.toXMLString(),
-                                    help: html })
+                                  { name: "<b>" + html + "</b>",
+                                    help: cmd.previewDefault() })
         : this.description);
     }
   });

@@ -177,9 +177,8 @@ var noun_type_search_engine = {
   },
   _BSS: (Cc["@mozilla.org/browser/search-service;1"]
          .getService(Ci.nsIBrowserSearchService)),
-  _makeSugg: function(engine, score) (
-               CmdUtils.makeSugg(engine.name, null, engine, (score || 1))
-             ),
+  _sugg: function(engine, score) (
+    CmdUtils.makeSugg(engine.name, null, engine, score || 1)),
 };
 
 // ** {{{ noun_type_tag }}} **
@@ -264,8 +263,9 @@ var noun_type_url = {
   label: "url",
   asyncRequest: null,
   rankLast: true,
-  default: function()(
-    CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,null,null,0.5)),
+  default: function() (
+    CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
+                      null, null, 0.5)),
   suggest: function(text, html, callback, selectionIndices) {
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
@@ -340,18 +340,13 @@ var noun_type_command = {
   label: "name",
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
-    return (CmdUtils.grepSuggs(text, this._get(), "name")
-            .map(this._makeSugg));
+    return CmdUtils.grepSuggs(text, this._get(), "name").map(this._sugg);
   },
   _cmdSource: UbiquitySetup.createServices().commandSource,
-  _makeSugg: function(cmd)
-    CmdUtils.makeSugg(cmd.name,
-                      ((cmd.description || "") +
-                       ("<p>" + (cmd.help || "") + "</p>")),
-                      cmd),
+  _sugg: function(cmd) CmdUtils.makeSugg(cmd.name, null, cmd),
   _get: function() {
     var cmds = this._cmdSource.getAllCommands();
-    if (this.hasOwnProperty("suggest")) return cmds;
+    if (!("disabled" in this)) return cmds;
     var {disabled} = this;
     return [cmd for each (cmd in cmds) if (cmd.disabled === disabled)];
   },
@@ -359,12 +354,12 @@ var noun_type_command = {
 
 var noun_type_enabled_command = {
   __proto__: noun_type_command,
-  disabled: false,
+  get disabled() false,
 };
 
 var noun_type_disabled_command = {
   __proto__: noun_type_command,
-  disabled: true,
+  get disabled() true,
 };
 
 // ** {{{ noun_type_twitter_user }}} **
