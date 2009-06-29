@@ -1046,7 +1046,7 @@ Parser.prototype = {
           let objectCopy = {__proto__: object,
                             modifier: delimiter,
                             innerSpace: this.joindelimiter};
-          delete(parseCopy.args.object[key]);
+          parseCopy.args.object.splice(key,1);
           if (!parseCopy.args[role])
             parseCopy.args[role] = [];
           parseCopy.args[role].push(objectCopy);
