@@ -1140,12 +1140,11 @@ Parser.prototype = {
   suggestArgs: function suggestArgs(parse) {
     //Utils.log('verb:'+parse._verb.name);
 
-    // make sure we keep the anaphor-substituted input intact... we're
-    // going to make changes to text, html, score, and nountype
-    let returnArr = [parse.copy()];
+    // the combination is the combination of which suggestions of which
+    // nountype we put in which arguments.
+    let combinations = [[]];
 
     for (let role in parse.args) {
-      //Utils.log(role);
       let thisVerbTakesThisRole = false;
 
       for each (let verbArg in parse._verb.arguments) {
@@ -1155,32 +1154,24 @@ Parser.prototype = {
             // this is the argText to check
             let argText = parse.args[role][i].input;
 
-            // At this point we assume that all of these values have already
-            // been cached in Parser._nounCache.
-
-            let newreturn = [];
-            // make a copy using each of the suggestions in the nounCache
-            // as the replaced suggestion, and put all of the replacement
-            // parses into newreturn.
+            let newOrders = [];
+            // we'll put all the new orders, based on the previous combinations,
+            // here.
 
             let nountypeId = verbArg.nountype.id;
             if (nountypeId in this._nounCache[argText]) {
-
-              for each (let suggestion in this._nounCache[argText][nountypeId]) {
-                for each (let parse in returnArr) {
-                  let parseCopy = parse.copy();
-                  // copy the attributes we want to copy from the nounCache
-                  let newSugg = parseCopy.args[role][i];
-                  for(let key in suggestion)
-                    newSugg[key] = suggestion[key];
-                  newreturn.push(parseCopy);
+              for (let suggestionId in this._nounCache[argText][nountypeId]) {
+                for each (let baseOrder in combinations) {
+                  let newOrder = baseOrder.concat([{role:role,
+                                            argText:argText,
+                                            nountypeId:nountypeId,
+                                            suggestionId:suggestionId}]);
+                  newOrders.push(newOrder);
                 }
               }
-
-              returnArr = newreturn;
+              combinations = newOrders;
               thisVerbTakesThisRole = true;
             }
-
           }
 
           // If thisVerbTakesThisRole, it means that we've already found the
@@ -1192,8 +1183,39 @@ Parser.prototype = {
         }
       }
       //Utils.log('finished role');
-      if (!thisVerbTakesThisRole)
+      if (!thisVerbTakesThisRole) {
+        Utils.log('killing parse because it doesnt take the role:',parse._id);
         return [];
+      }
+    }
+
+    let returnArr = [];
+
+    for each (let combination in combinations) {
+      let combinationJson = Utils.encodeJson(combination);
+      // if we've already completed this combination of suggestions
+      // before, don't do it again.
+      if (parse._suggestionCombinationsThatHaveBeenCompleted[combinationJson])
+        continue;
+      
+      let combinationParse = parse.copy();
+      for each (let argOrder in combination) {
+        let {role,argText,nountypeId,suggestionId} = argOrder;
+        let suggestion = this._nounCache[argText][nountypeId][suggestionId];
+        for each (let arg in combinationParse.args[role]) {
+          if (arg.input == argText) {
+            for(let key in suggestion)
+              arg[key] = suggestion[key];
+            break;
+          }
+        }
+      }
+      
+      // we use this array to check whether we've used this before.
+      parse._suggestionCombinationsThatHaveBeenCompleted[combinationJson]
+                                                                  = true;
+      combinationParse._combination = combinationJson;
+      returnArr.push(combinationParse);
     }
 
     // now check for unfilled arguments so we can fill them with defaults
@@ -1438,12 +1460,7 @@ var ParseQuery = function(parser, queryString, selObj, context,
   this._allParses = {};
 
   // ** {{{ParseQuery#_scoredParses}}} **
-  //
-  // {{{_scoredParses}}} is an object made up of scored parse objects
-  // (hash) keyed on the argText that was used to generate the parse.
-  // It is structured this way so that returning async calls result in the
-  // creation and updating of the correct scored parses.
-  this._scoredParses = {};
+  this._scoredParses = [];
 
 
   this.dump("Making a new parser2 query: " + this.input);
@@ -1612,6 +1629,7 @@ ParseQuery.prototype = {
     for each (let parse in this._possibleParses) {
       let newVerbedParses = this.parser.suggestVerb(parse);
       for each (let newVerbedParse in newVerbedParses) {
+        newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
         this._verbedParses = this.addIfGoodEnough(this._verbedParses,
                                                   newVerbedParse);
         yield true;
@@ -1640,26 +1658,25 @@ ParseQuery.prototype = {
       var suggestions = thisQuery.parser.suggestArgs(thisParse);
       //Utils.log(suggestions);
 
-      if (!thisQuery._scoredParses[argText])
-        thisQuery._scoredParses[argText] = [];
+      thisQuery.dump('finished '+argText+' ('+asyncRequests.length+' async requests remaining), so completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
 
       for each (let newParse in suggestions)
-        thisQuery.addScoredParseIfGoodEnough(argText, newParse);
+        thisQuery.addScoredParseIfGoodEnough(newParse);
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
     }
 
     function tryToCompleteParses(argText, asyncRequests) {
-      thisQuery.dump('finished detecting nountypes for ' + argText);
+      thisQuery.dump('detecting nountypes for ' + argText 
+                     + ' with ' + asyncRequests.length 
+                     + ' asyncRequests remaining');
       thisQuery._outstandingRequests = asyncRequests;
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
         return;
       }
-
-      thisQuery._scoredParses[argText] = [];
 
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
@@ -1724,10 +1741,11 @@ ParseQuery.prototype = {
     this.onResults();
   },
   aggregateScoredParses: function() {
-    let allScoredParses = [];
+    return this._scoredParses;
+    /*let allScoredParses = [];
     for each (let parses in this._scoredParses)
       allScoredParses = allScoredParses.concat(parses);
-    return allScoredParses.slice();
+    return allScoredParses.slice();*/
   },
   // ** {{{ParseQuery#hasResults}}} (read-only) **
   //
@@ -1770,13 +1788,8 @@ ParseQuery.prototype = {
   removeLowestScoredParse: function(){
     let lowestScoredParse = this.aggregateScoredParses()
                                 .sort(byScoreDescending).pop();
-    for (let argText in this._scoredParses){
-      if (this._scoredParses[argText].indexOf(lowestScoredParse) != -1){
-        this._scoredParses[argText].splice(
-              this._scoredParses[argText].indexOf(lowestScoredParse), 1);
-        break;
-      }
-    }
+    this._scoredParses.splice(
+            this._scoredParses.indexOf(lowestScoredParse), 1);
   },
   // ** {{{ParseQuery#addIfGoodEnough()}}} **
   //
@@ -1795,6 +1808,12 @@ ParseQuery.prototype = {
   // [[http://mitcho.com/blog/observation/scoring-for-optimization/|Scoring for Optimization]].
   addIfGoodEnough: function(parseCollection, newParse) {
     var maxIndex = this.maxSuggestions - 1;
+
+    let parseIds = [parse._id for each (parse in parseCollection)];
+    if (parseIds.indexOf(newParse._id) != -1) {
+      this.dump("already contains parse #"+newParse._id+"!");
+      return parseCollection;
+    }
 
     if (!parseCollection[maxIndex])
       return parseCollection.concat(newParse);
@@ -1836,39 +1855,39 @@ ParseQuery.prototype = {
   // but operates specially on this ParseQuery's scored parses to add
   // a new parse to the scored parses object. See ParseQuery#addIfGoodEnough()
   // for the logic behind the optimization strategy.
-  addScoredParseIfGoodEnough: function(argText, newParse) {
-    var allScoredParses = this.aggregateScoredParses();
-    var parsesToAddTo = this._scoredParses[argText];
+  addScoredParseIfGoodEnough: function(newParse) {
+    var parseCollection = this._scoredParses;
 
-    if (allScoredParses.indexOf(newParse) != -1)
-      dump("already contains this one!\n");
-
+    let parseIds = [parse._id for each (parse in parseCollection)];
+    if (parseIds.indexOf(newParse._id) != -1) {
+      this.dump("already contains parse #"+newParse._id+"!");
+      return;
+    }
+    
     var maxIndex = this.maxSuggestions - 1;
 
-    if (!allScoredParses[maxIndex]){
-      parsesToAddTo.push(newParse);
+    if (!parseCollection[maxIndex]){
+      parseCollection.push(newParse);
       return;
     }
 
-    allScoredParses.sort(byScoreDescending);
-    var theBar = allScoredParses[maxIndex].score;
+    parseCollection.sort(byScoreDescending);
+    var theBar = parseCollection[maxIndex].score;
 
     if (newParse.maxScore < theBar){
       return;
     }
     // add the new parse and sort again
-    allScoredParses.push(newParse);
-    allScoredParses.sort(byScoreDescending);
-    parsesToAddTo.push(newParse);
+    parseCollection.push(newParse);
+    parseCollection.sort(byScoreDescending);
 
-    var newBar = allScoredParses[maxIndex].score;
+    var newBar = parseCollection[maxIndex].score;
     if (newBar > theBar) {
       // sort by descending maxScore order
-      allScoredParses.sort(function(a, b) b.maxScore - a.maxScore);
-      let i = allScoredParses.length;
-      while (--i > maxIndex && allScoredParses[i].maxScore < theBar){
-        allScoredParses.pop();
-        this.removeLowestScoredParse();
+      parseCollection.sort(function(a, b) b.maxScore - a.maxScore);
+      let i = parseCollection.length;
+      while (--i > maxIndex && parseCollection[i].maxScore < theBar){
+        parseCollection.pop();
       }
     }
     return;

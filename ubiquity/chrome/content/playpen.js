@@ -45,6 +45,8 @@ var Ci = Components.interfaces;
 var displayParse = function(parse, labels) (
   parse._id + ": " + parse.displayText 
   + (labels && parse._caller ? '<br/>caller: '+parse._caller : '') 
+  + (labels && parse._combination ? '<br/>combination: <code>'
+    +parse._combination.replace(/},/g,'},<br/>') + '</code>' : '') 
   + (labels ? '<br/>argString: '+parse.argString : '') 
   + (labels ? '<br/>' : ' (') 
   + (labels ? 'score: ' : '') 
@@ -170,7 +172,8 @@ var demoParserInterface = {
       });
     }
     
-    if ($('#displayparsetree').attr('checked')) {
+    if ($('#displayparsetree').attr('checked') 
+        && this.runtimes + 2 > $('.runtimes').text()) {
       this.currentQuery.watch('_step',function(id,oldval,newval) {
         switch (oldval) {
           //case 3: TODO
@@ -201,22 +204,16 @@ var demoParserInterface = {
     }
     
     this.currentQuery.onResults = function() {
-     
+      Utils.log(this.finished, this.resulted);
       if (this.finished && !this.resulted) {
         this.resulted = true;
         demoParserInterface.runtimes++;
         $('.current').text(demoParserInterface.runtimes);
         dump(demoParserInterface.runtimes+' done\n');
-        var suggestionList = this.suggestionList;
+        Utils.log(demoParserInterface.runtimes, $('.runtimes').text());
         if (demoParserInterface.runtimes < $('.runtimes').text())
           demoParserInterface.parse();
         else {
-	        $('#scoredParses').empty();
-          for each (var parse in suggestionList) {
-            $('#scoredParses')
-              .append('<tr><td>' + displayParse(parse) + '</td></tr>');
-          }
-
           demoParserInterface.endTime = new Date().getTime();
 
           dump('DURATION: '+(demoParserInterface.endTime - demoParserInterface.startTime)+'\n');
@@ -225,9 +222,17 @@ var demoParserInterface = {
           dump('AVG: '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
           $('.avg').text(Math.round((demoParserInterface.endTime - demoParserInterface.startTime) * 100/demoParserInterface.runtimes)/100);
  
+          var suggestionList = this.suggestionList;
+ 	        $('#scoredParses').empty();
+          for each (var parse in suggestionList) {
+            $('#scoredParses')
+              .append('<tr><td>' + displayParse(parse) + '</td></tr>');
+          }
+ 
         }
         
-        if ($('#displayparsetree').attr('checked')) {
+        if ($('#displayparsetree').attr('checked') 
+            && this.runtimes + 2 > $('.runtimes').text()) {
           for each (let parse in demoParserInterface.currentQuery._allParses) {
 
             let host = $('#parsetree');
