@@ -1184,7 +1184,7 @@ Parser.prototype = {
       }
       //Utils.log('finished role');
       if (!thisVerbTakesThisRole) {
-        Utils.log('killing parse because it doesnt take the role:',parse._id);
+        //Utils.log('killing parse because it doesnt take the role:',parse._id);
         return [];
       }
     }
@@ -1311,12 +1311,14 @@ Parser.prototype = {
   // marks them with which noun type it came from (in {{{.nountype}}})
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
-  detectNounType: function detectNounType(x,callback) {
-    //Utils.log('detecting '+x+'\n');
-    if (x in this._nounCache) {
+  detectNounType: function detectNounType(currentQuery,x,callback) {
+    //Utils.log('detecting '+x);
+    if (!Utils.isEmpty(this._nounCache[x])) {
+      //Utils.log('found cached values for '+x,this._nounCache[x]);
       if (typeof callback == 'function')
         callback(x, []);
     } else {
+      this._nounCache[x] = {};
 
       var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
         if (!suggs && !suggs.length)
@@ -1341,12 +1343,16 @@ Parser.prototype = {
       };
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, asyncRequests) {
-        if (!(x in thisParser._nounCache))
+        if (currentQuery.finished) {
+          currentQuery.dump("this query is already finished... so don't suggest this noun!");
+          return;
+        }
+        if (Utils.isEmpty(thisParser._nounCache[x]))
           thisParser._nounCache[x] = {};
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
 
-          if (!(nountypeId in thisParser._nounCache[x]))
+          if (Utils.isEmpty(thisParser._nounCache[x][nountypeId]))
             thisParser._nounCache[x][nountypeId] = [];
 
           thisParser._nounCache[x][nountypeId].push(newSugg);
@@ -1700,7 +1706,6 @@ ParseQuery.prototype = {
     this._argsToCache = {};
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
-      parse._verbedParseId = parseId;
 
       if (!parse.args.__count__)
         // This parse doesn't have any arguments. Complete it now.
@@ -1721,7 +1726,7 @@ ParseQuery.prototype = {
 
     // now that we have a list of args to cache, let's go through and cache them.
     for (let argText in this._argsToCache) {
-      this.parser.detectNounType(argText, tryToCompleteParses);
+      this.parser.detectNounType(thisQuery, argText, tryToCompleteParses);
       yield true;
     }
   },

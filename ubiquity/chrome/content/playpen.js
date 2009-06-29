@@ -204,13 +204,11 @@ var demoParserInterface = {
     }
     
     this.currentQuery.onResults = function() {
-      Utils.log(this.finished, this.resulted);
       if (this.finished && !this.resulted) {
         this.resulted = true;
         demoParserInterface.runtimes++;
         $('.current').text(demoParserInterface.runtimes);
         dump(demoParserInterface.runtimes+' done\n');
-        Utils.log(demoParserInterface.runtimes, $('.runtimes').text());
         if (demoParserInterface.runtimes < $('.runtimes').text())
           demoParserInterface.parse();
         else {

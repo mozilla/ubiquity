@@ -582,6 +582,13 @@ function isArray(val) {
           (val.constructor || 0).name === "Array");
 }
 
+// === {{{ Utils.isEmpty }}} ===
+//
+// Will return true if the refered object doesn't exist or has no
+// properties.
+
+function isEmpty(obj) !obj || !obj.__count__;
+
 // === {{{ Utils.computeCryptoHash() }}} ===
 //
 // Computes and returns a cryptographic hash for a string given an
