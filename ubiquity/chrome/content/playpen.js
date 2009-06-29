@@ -230,7 +230,7 @@ var demoParserInterface = {
         }
         
         if ($('#displayparsetree').attr('checked') 
-            && this.runtimes + 2 > $('.runtimes').text()) {
+            && demoParserInterface.runtimes + 2 > $('.runtimes').text()) {
           for each (let parse in demoParserInterface.currentQuery._allParses) {
 
             let host = $('#parsetree');
