@@ -256,45 +256,40 @@ var demoParserInterface = {
   }
 }
 
-
 $(document).ready(function(){
+  eval(Utils.getLocalUrl("resource://ubiquity/modules/parser/new/"+
+                         UbiquitySetup.languageCode + ".js"), "utf-8");
+  var parser = makeParser();
+  parser.setCommandList(UbiquitySetup.createServices()
+                        .commandSource.getAllCommands());
+  demoParserInterface.currentParser = parser;
 
-  try {  
-    var gUbiquity = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser").gUbiquity;
-    demoParserInterface.currentParser = gUbiquity.__cmdManager.__nlParser;
+  for each (let {role, delimiter} in parser.roles) {
+    $('<li><code>'+role+'</code>: &quot;'+delimiter+'&quot;</li>').appendTo($('#roles'));
+  }
 
-    let parser = demoParserInterface.currentParser;
+  for (let id in parser._nounTypes) {
+    let nountype = parser._nounTypes[id];
+    $('<li><code>'+id+'</code>: {label: <code>'+nountype.label+'</code>, '
+      +'name: <code>'+nountype.name+'</code>}</li>')
+      .appendTo($('#nountypes'));
+  }
 
-    for each (let {role, delimiter} in parser.roles) {
-      $('<li><code>'+role+'</code>: &quot;'+delimiter+'&quot;</li>').appendTo($('#roles'));
-    }
-
-    for (let id in parser._nounTypes) {
-      let nountype = parser._nounTypes[id];
-      $('<li><code>'+id+'</code>: {label: <code>'+nountype.label+'</code>, '
-                                 +'name: <code>'+nountype.name+'</code>,...}</li>')
-                          .appendTo($('#nountypes'));
-    }
+  for each (let verb in parser._verbList) {
+    // skip if disabled
+    if (verb.disabled) continue;
     
-    for each (let verb in parser._verbList) {
-      // skip if disabled
-      if (verb.disabled) continue;
-      
-      let {names, help, description} = verb;
-      let args = $('<ul></ul>');
-      for each (let {nountype, role, label} in verb.arguments) {
-        $('<li>role: <code>'+role+'</code>, nountype: <code>'+nountype.id+'</code></li>').appendTo(args);
-      }
-      let item = $('<li><b><code>'+names[0]+'</code></b></li>');
-      if (verb.arguments.length) {
-        $(':<br/>').appendTo(item);
-        args.appendTo(item);
-      }
-      item.appendTo($('#verblist'));
+    let {names, help, description} = verb;
+    let args = $('<ul></ul>');
+    for each (let {nountype, role, label} in verb.arguments) {
+      $('<li>role: <code>'+role+'</code>, nountype: <code>'+nountype.id+'</code></li>').appendTo(args);
     }
-
-  } catch (e) {
-    $('#gubiquity').show();
+    let item = $('<li><b><code>'+names[0]+'</code></b></li>');
+    if (verb.arguments.length) {
+      $(':<br/>').appendTo(item);
+      args.appendTo(item);
+    }
+    item.appendTo($('#verblist'));
   }
 
   if (UbiquitySetup.parserVersion != 2) {
@@ -308,11 +303,13 @@ $(document).ready(function(){
     demoParserInterface.parse();
   }
   
-  $('.input').keyup(function autoParse(){
-    if (!$('#autoparse')[0].checked) return;
-    var input = $('.input').val();
-    if (input && autoParse.lastInput !== (autoParse.lastInput = input))
-      run();
+  $('.input').keyup(function autoParse(e){
+    if ($('#autoparse')[0].checked) {
+      var input = $('.input').val();
+      if (input && autoParse.lastInput !== (autoParse.lastInput = input))
+        run();
+    }
+    else if (e.keyCode === KeyEvent.DOM_VK_RETURN) run();
   });
   $('#run').click(run);
 
