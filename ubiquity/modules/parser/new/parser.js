@@ -1786,7 +1786,8 @@ ParseQuery.prototype = {
     }
 
     for each (let parse in this._verbedParses) {
-      for each (let {argText,nounTypeIds} in parse.argsAndNounTypeIdsToCheck()) {
+      for each (let {argText,nounTypeIds} in 
+                                        parse.getArgsAndNounTypeIdsToCheck()) {
         this.parser.detectNounType(thisQuery, argText, nounTypeIds, 
                                    tryToCompleteParses);
       }
@@ -2183,12 +2184,15 @@ Parse.prototype = {
     return lastNode;
   },
 
-  // **{{{Parse#argsAndNounTypeIdsToCheck}}} (read-only)**
+  // **{{{Parse#getArgsAndNounTypeIdsToCheck}}} (read-only)**
   // 
   // This returns an array of pairs of argument strings and the nountypes
   // they must be checked against.
-  argsAndNounTypeIdsToCheck: function() {
-    var returnArr = [];
+  getArgsAndNounTypeIdsToCheck: function() {
+    if (this._argsAndNounTypeIdsToCheck)
+      return this._argsAndNounTypeIdsToCheck;
+
+    var returnArr = this._argsAndNounTypeIdsToCheck = [];
     var nounTypeIdsWithNoExternalCalls = 
                        this._query.parser._nounTypeIdsWithNoExternalCalls;
     for (let role in this.args) {
@@ -2219,7 +2223,7 @@ Parse.prototype = {
   // If all of the arguments' nountype detection has completed, returns true.
   // This means this parse can move onto Step 8
   allNounTypesDetectionHasCompleted: function() {
-    var argsAndNounTypeIdsToCheck = this.argsAndNounTypeIdsToCheck();
+    var argsAndNounTypeIdsToCheck = this.getArgsAndNounTypeIdsToCheck();
     for each (let {argText, nounTypeIds} in argsAndNounTypeIdsToCheck) {
       if (!(argText in this._query.parser._nounCache))
         return false;
