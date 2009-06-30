@@ -104,6 +104,7 @@ NounType.default = function default() this._defaults;
 NounType._fromArray = function NT_Array(words)({
   id: "#na_",
   name: words.slice(0, 2) + (words.length > 2 ? ",...":''),
+  noExternalCalls: true,
   _list: [NounUtils.makeSugg(w) for each (w in words)],
 });
 NounType._fromArray.suggest = (
@@ -122,6 +123,7 @@ NounType._fromRegExp = function NT_RegExp(regexp)({
   id: "#nr_",
   name: regexp.source,
   rankLast: regexp.test(""),
+  noExternalCalls: true,
   suggest: arguments.callee.suggest,
   _regexp: regexp,
 });
@@ -142,7 +144,9 @@ NounType._fromRegExp.suggest = (
 // {{{dict}}} is an object of text:data pairs.
 
 NounType._fromObject = function NT_Object(dict)({
-  name: [key for (key in dict)].slice(0, 2) + ",...",
+  name: [key for (key in dict)].slice(0, 2) 
+        + ([key for (key in dict)].length > 2 ? ",...":''),
+  noExternalCalls: true,
   _list: [NounUtils.makeSugg(key, null, val)
           for ([key, val] in Iterator(dict))],
 });
