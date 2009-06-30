@@ -1074,14 +1074,22 @@ Parser.prototype = {
       returnArr = returnArr.concat(newParses);
     }
 
-    for each (parse in returnArr) {
+    let realReturnArr = [];
+    for each (let parse in returnArr) {
       if (!parse.args.object.length ||
            (parse.args.object.length === 1
             && parse.args.object[0] == undefined) )
-        delete(parse.args.object);
+      delete(parse.args.object);
+
+      // for parses with an impossible combination of roles
+      let signature = [role for (role in parse.args)];
+      if (this._roleSignatures[signature.sort().join()]) {
+        realReturnArr.push(parse);
+      }
+
     }
 
-    return returnArr;
+    return realReturnArr;
   },
 
   // ** {{{Parser#suggestVerb()}}} **
@@ -1101,12 +1109,6 @@ Parser.prototype = {
   suggestVerb: function suggestVerb(parse) {
     // for parses which already have a verb
     if (parse._verb.id) return [parse];
-    
-    // for parses with an impossible combination of roles
-    let signature = [role for (role in parse.args)];
-    //[arg.role for each (arg in verb.arguments)]
-    if (!this._roleSignatures[signature.sort().join()])
-      return [];
 
     // for parses WITHOUT a set verb:
     var returnArray = [];
