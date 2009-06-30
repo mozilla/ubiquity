@@ -903,10 +903,13 @@ Parser.prototype = {
     if (!parse._verb.id){
       let parseCopy = parse.copy();
       if(!parseCopy.input.length){
-        parseCopy.args['object'] = [{ _order: 1,
+        if (!('object' in parseCopy.args)) 
+          parseCopy.args.object = [];
+        // TODO: is 1 really the position?
+        parseCopy.args['object'].push({ _order: 1,
               input: selection,
-              modifier: ""}];
-        parseCopy.scoreMultiplier *= 1.2;
+              modifier: ""});
+        parseCopy.scoreMultiplier *= 1.2; // TODO: do we really want this?
         parseCopy._score = parseCopy.scoreMultiplier;
         returnArr.push(parseCopy);
       }
@@ -929,8 +932,10 @@ Parser.prototype = {
         input: selection,
         modifier: delimiter,
         innerSpace: this.joindelimiter};
-      parseCopy.scoreMultiplier *= 1.2;
-      parseCopy.args[role] =  [objectCopy];
+      parseCopy.scoreMultiplier *= 1.2; // TODO: again, unsure.
+      if (!(role in parseCopy.args)) 
+        parseCopy.args[role] = [];
+      parseCopy.args[role].push(objectCopy);
       returnArr.push(parseCopy);
     }
 
@@ -1105,6 +1110,7 @@ Parser.prototype = {
     // for parses WITHOUT a set verb:
     var returnArray = [];
     var verbs = this._verbList;
+
     // For the time being... kill parses which have multiple arguments
     // of the same role, as we have no real way of dealing with them and
     // their scores are so low anyway...
@@ -1171,6 +1177,13 @@ Parser.prototype = {
 
     for (let role in parse.args) {
       let thisVerbTakesThisRole = false;
+
+      // For the time being... kill parses which have multiple arguments
+      // of the same role, as we have no real way of dealing with them and
+      // their scores are so low anyway...
+      // This helps fix testDontInterpolateInTheMiddleOfAWord
+      if (parse.args[role].length > 1)
+        return [];
 
       for each (let verbArg in parse._verb.arguments) {
         if (role == verbArg.role) {

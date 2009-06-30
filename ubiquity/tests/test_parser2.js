@@ -499,23 +499,25 @@ function testDontInterpolateInTheMiddleOfAWord() {
   // be interpolated in place of that "it".
   var cmd_google = makeCommand({
     names: ["find"],
-    arguments: {object: noun_arb_text},
+    arguments: {object: /^((?!find).)*$/}, // anything but "find"
     execute: function(args) {}
     });
-  // Very interesting -- if I make the above say:
-  // argument: /*./
-  // then it times out... but arguments: {object: noun_arb_text} works
-  // great.  Is the regexp the problem?
+
   var self = this;
-  var fakeContext = { textSelection: "flab", htmlSelection:"flab" };
+  var fakeContext = { textSelection: "flab", htmlSelection: "flab" };
   getCompletionsAsync("find iterate", [cmd_google], fakeContext,
                       self.makeCallback(dontInterpolateFuncOne));
   function dontInterpolateFuncOne(completions) {
-    //debugCompletions(completions);
+    debugCompletions(completions);
+    // JONO:
     // Getting three suggestions:
-    // "find iterate" (expected),
-    // "find flab" (unexpected)
-    // "find find iterate" (weird)
+    // 1. "find iterate" (expected),
+    // 2. "find flab" (unexpected)
+    // 3. "find find iterate" (weird) <-- NOT WEIRD. see below
+    // mitcho:
+    // Fixed so it passes and only (1) and (3) parse are given. Note that
+    // (3) was not weird given the free nountype, so I made the nountype
+    // more restrictive so anything with "find" in it is not accepted.
     self.assert(completions.length == 1, "Should have 1 completion");
     self.assert(completions[0].args.object[0].text == "iterate",
               "Should not interpolate for the 'it' in 'iterate'.");
@@ -524,12 +526,12 @@ function testDontInterpolateInTheMiddleOfAWord() {
 
   }
   function dontInterpolateFuncTwo(completions) {
-    //debugCompletions(completions);
+    debugCompletions(completions);
     self.assert(completions.length == 2, "Should have 2 completions.");
-    self.assert(completions[0].args.object[0].text == "flab erate",
-              "Should interpolate 'flab' for 'it'.");
-    self.assert(completions[1].args.object[0].text == "it erate",
+    self.assert(completions[0].args.object[0].text == "it erate",
               "input without interpolation should also be suggested.");
+    self.assert(completions[1].args.object[0].text == "flab erate",
+              "Should interpolate 'flab' for 'it'.");
   }
 }
 
