@@ -810,6 +810,7 @@ function testNounsWithMultipleDefaults() {
 
 function testVariableNounWeights() {
   var weakNoun = {
+    noExternalCalls: true,
     suggest: function(text, html, cb, selectionIndices) {
       if (text.indexOf("de") != -1) {
         return [CmdUtils.makeSugg("dentist", null, null, 0.5)];
@@ -820,6 +821,7 @@ function testVariableNounWeights() {
   };
 
   var mediumNoun = {
+    noExternalCalls: true,
     suggest: function(text, html, cb, selectionIndices) {
       if (text.indexOf("de") != -1) {
         return [CmdUtils.makeSugg("deloused", null, null, 1.0)];
@@ -830,6 +832,7 @@ function testVariableNounWeights() {
   };
 
   var strongNoun = {
+    noExternalCalls: true,
     suggest: function(text, html, cb, selectionIndices) {
       if (text.indexOf("de") != -1) {
         return [CmdUtils.makeSugg("decapitation", null, null, 2.0)];
