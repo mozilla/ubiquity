@@ -535,7 +535,31 @@ function testDontInterpolateInTheMiddleOfAWord() {
   }
 }
 
+function testDisplayInterpolatedArguments() {
+  // a word like "iterate" contains "it", but the selection should not
+  // be interpolated in place of that "it".
+  var cmd_steal = makeCommand({
+    names: ["steal"],
+    arguments: {object: /^((?!steal).)*$/,
+                source: /^((?!steal).)*$/}, // anything but "steal"
+    execute: function(args) {}
+    });
 
+  var self = this;
+  var fakeContext = { textSelection: "the bank", htmlSelection: "the bank" };
+  getCompletionsAsync("steal money", [cmd_steal], fakeContext,
+                      self.makeCallback(displayInterpolatedFunc));
+  function displayInterpolatedFunc(completions) {
+    debugCompletions(completions);
+    self.assert(completions.length == 2, "Should have 2 completions");
+    self.assert(completions[0].displayText.indexOf('the bank'),
+              "The input should be in every parse.");
+    self.assert(completions[1].displayText.indexOf('the bank')
+                && completions[1].displayText.indexOf('the bank'),
+    "Both the input argument and the interpolated argument should be displayed.");
+
+  }
+}
 
 
 function testCmdManagerSuggestsForNounFirstInput() {

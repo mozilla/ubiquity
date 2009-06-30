@@ -891,6 +891,7 @@ Parser.prototype = {
     let returnArr = [];
     if (!selection.length)
       return returnArr;
+    let count = 0;
 
     // If the parse has no declared verb, then we cannot
     // assign the interpolation to specific roles, because
@@ -905,8 +906,7 @@ Parser.prototype = {
       if(!parseCopy.input.length){
         if (!('object' in parseCopy.args)) 
           parseCopy.args.object = [];
-        // TODO: is 1 really the position?
-        parseCopy.args['object'].push({ _order: 1,
+        parseCopy.args['object'].push({ _order: --count,
               input: selection,
               modifier: ""});
         parseCopy.scoreMultiplier *= 1.2; // TODO: do we really want this?
@@ -928,10 +928,11 @@ Parser.prototype = {
       }
       let parseCopy = parse.copy();
       let objectCopy = {
-        _order: 1,
+        _order: --count,
         input: selection,
         modifier: delimiter,
-        innerSpace: this.joindelimiter};
+        innerSpace: this.joindelimiter,
+        outerSpace: this.joindelimiter};
       parseCopy.scoreMultiplier *= 1.2; // TODO: again, unsure.
       if (!(role in parseCopy.args)) 
         parseCopy.args[role] = [];
@@ -2021,20 +2022,27 @@ Parse.prototype = {
     // Copy all of the arguments into an ordered array called argsArray.
     // This will then be in the right order for display.
     let argsArray = [];
+    let maxArgsNumber = 100; // HACK
+    let negativeArgsArray = [];
     let unfilledArgs = []; // unfilled args are displayed at the end
     for (let role in this.args) {
       for each (let argument in this.args[role]) {
         if (argument.text) {
           if ("_order" in argument) {
-            argsArray[argument._order] = argument;
-            argsArray[argument._order].role = role;
+            if (argument._order > 0) {
+              argsArray[argument._order] = argument;
+              argsArray[argument._order].role = role;
+            } else {
+              negativeArgsArray[maxArgsNumber + argument._order] = argument;
+              negativeArgsArray[maxArgsNumber + argument._order].role = role;
+            }
           } else
             unfilledArgs.push(argument);
         }
       }
     }
 
-    argsArray = argsArray.concat(unfilledArgs);
+    argsArray = argsArray.concat(negativeArgsArray).concat(unfilledArgs);
 
     for each (let arg in argsArray) {
       let className = 'argument';
