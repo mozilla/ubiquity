@@ -3,8 +3,6 @@ pref("extensions.ubiquity.parserVersion", 2);
 pref("extensions.ubiquity.trustedDomains",
      "ubiquity.mozilla.com");
 pref("extensions.ubiquity.skin", "old");
-pref("extensions.ubiquity.standardFeedsUri",
-     "https://ubiquity.mozilla.com/standard-feeds/");
 pref("extensions.ubiquity.enablePageLoadHandlers", true);
 pref("extensions.ubiquity.enableUbiquityLoadHandlers", true);
 pref("extensions.ubiquity.displayAlertOnError", false);

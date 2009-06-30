@@ -225,6 +225,17 @@ let UbiquitySetup = {
     Application.prefs.setValue(RESET_SCHEDULED_PREF, value);
   },
 
+  __removeExtinctStandardFeeds: function __rmExtinctStdFeeds(feedManager) {
+    var OLD_STD_FEED_URI = "https://ubiquity.mozilla.com/standard-feeds/";
+
+    feedManager.getSubscribedFeeds().forEach(
+      function removeExtinct(feed) {
+        if (feed.uri.spec.indexOf(OLD_STD_FEED_URI) == 0 ||
+            feed.title == "Mozilla Image-Related Commands")
+          feed.remove();
+      });
+  },
+
   createServices: function createServices() {
     if (!gServices) {
       // Compare the version in our preferences from our version in the
@@ -292,7 +303,9 @@ let UbiquitySetup = {
 
       PrefCommands.init(feedManager);
 
-      if (this.isNewlyInstalledOrUpgraded)
+      if (this.isNewlyInstalledOrUpgraded) {
+        this.__removeExtinctStandardFeeds(feedManager);
+
         // For some reason, the following function isn't executed
         // atomically by Javascript; perhaps something being called is
         // getting the '@mozilla.org/thread-manager;1' service and
@@ -303,6 +316,7 @@ let UbiquitySetup = {
           this.getBaseUri() + "standard-feeds/",
           this.STANDARD_FEEDS
         );
+      }
 
       cmdSource.refresh();
     }
@@ -349,11 +363,7 @@ let UbiquitySetup = {
   },
 
   get standardFeedsUri() {
-    if (this.isInstalledAsXpi()) {
-      var STANDARD_FEEDS_PREF = "extensions.ubiquity.standardFeedsUri";
-      return Application.prefs.getValue(STANDARD_FEEDS_PREF, "");
-    } else
-      return this.getBaseUri() + "standard-feeds/";
+    return this.getBaseUri() + "standard-feeds/";
   }
 };
 
