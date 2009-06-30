@@ -129,6 +129,11 @@ Parser.prototype = {
   // {{{add}}} verb.
   _rolesCache: {},
 
+  // ** {{{Parser#_roleSignatures}}} **
+  //
+  // The {{{_roleSignatures}}} is a hash to keep track of different role
+  _roleSignatures: {},
+
   // ** {{{Parser#_patternCache}}} **
   //
   // The {{{_patternCache}}} keeps various regular expressions for use by the
@@ -232,6 +237,17 @@ Parser.prototype = {
       // make the object this role.
       if (role !== "object" && !(role in otherRolesCache) && delimiter)
         otherRolesCache[role] = delimiter;
+    
+    var verbs = this._verbList;
+    var roleSignatures = this._roleSignatures = {};
+    for each (let verb in verbs) {
+      let subsets = Utils.powerSet([arg.role for each (arg in verb.arguments)]);
+      for each (let subset in subsets) {
+        if (subset.length) {
+          roleSignatures[subset.sort().join()] = true;
+        }
+      }
+    }
 
     // creates a regex that matches any delimiter of given roles
     function regexFromDelimeters(roles)
@@ -243,7 +259,6 @@ Parser.prototype = {
     delimPatterns[""] = regexFromDelimeters(this.roles);
 
     var allNames = [], {push} = allNames;
-    var verbs = this._verbList;
     for (let verbId in verbs) {
       let verb = verbs[verbId];
       let names = verb.names.slice();
@@ -600,22 +615,11 @@ Parser.prototype = {
     let rolesForEachDelimiterCache = {};
 
     // Find all the possible combinations of delimiters.
-    // This method uses .reduce to return a power set. The "power set" of a set
+    // The "power set" of a set
     // is a set of all the subsets of the original set.
     // For example: a power set of [1,2] is [[],[1],[2],[1,2]]
-    //
-    // This works by a reduce operation... it starts by setting last = [[]],
-    // then recursively looking through all of the elements of the original
-    // set. For each element e_n (current), it takes each set in the power set
-    // of e_{n-1} and makes a copy of each with e_n added in (that's the
-    // .concat[current]). It then adds those copies to last (hence last.concat)
-    // It starts with last = [[]] because the power set of [] is [[]]. ^^
-    //
-    // code from http://twitter.com/mitchoyoshitaka/status/1489386225
-    var possibleDelimiterCombinations = possibleDelimiterIndices.reduce(
-      function(last, current) last.concat([a.concat(current)
-                                           for each (a in last)]),
-      [[]]);
+    var possibleDelimiterCombinations = Utils.powerSet(
+                                                possibleDelimiterIndices);
 
     // for each set of delimiterIndices which are possible...
     // Note that the values in the delimiterIndices for each delimiter are the
@@ -1087,6 +1091,12 @@ Parser.prototype = {
   suggestVerb: function suggestVerb(parse) {
     // for parses which already have a verb
     if (parse._verb.id) return [parse];
+    
+    // for parses with an impossible combination of roles
+    let signature = [role for (role in parse.args)];
+    //[arg.role for each (arg in verb.arguments)]
+    if (!this._roleSignatures[signature.sort().join()])
+      return [];
 
     // for parses WITHOUT a set verb:
     var returnArray = [];
@@ -1677,7 +1687,7 @@ ParseQuery.prototype = {
       var suggestions = thisQuery.parser.suggestArgs(thisParse);
       //Utils.log(suggestions);
 
-      thisQuery.dump('finished '+argText+' ('+asyncRequests.length+' async requests remaining), so completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
+      //thisQuery.dump('finished '+argText+' ('+asyncRequests.length+' async requests remaining), so completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
 
       for each (let newParse in suggestions)
         thisQuery.addScoredParseIfGoodEnough(newParse);

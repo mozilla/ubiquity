@@ -589,6 +589,28 @@ function isArray(val) {
 
 function isEmpty(obj) !obj || !obj.__count__;
 
+// === {{{ Utils.powerSet }}} ===
+// 
+// The "power set" of a set
+// is a set of all the subsets of the original set.
+// For example: a power set of [1,2] is [[],[1],[2],[1,2]]
+//
+// This works by a reduce operation... it starts by setting last = [[]],
+// then recursively looking through all of the elements of the original
+// set. For each element e_n (current), it takes each set in the power set
+// of e_{n-1} and makes a copy of each with e_n added in (that's the
+// .concat[current]). It then adds those copies to last (hence last.concat)
+// It starts with last = [[]] because the power set of [] is [[]]. ^^
+//
+// code from http://twitter.com/mitchoyoshitaka/status/1489386225
+
+function powerSet(arr) (
+  arr.reduce(
+    function(last, current) last.concat([a.concat(current)
+                                       for each (a in last)]),
+  [[]])
+);
+
 // === {{{ Utils.computeCryptoHash() }}} ===
 //
 // Computes and returns a cryptographic hash for a string given an
