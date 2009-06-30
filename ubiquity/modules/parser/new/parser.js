@@ -163,6 +163,7 @@ Parser.prototype = {
 
   _verbList: null,
   _nounTypes: null,
+  _nounTypeIdsWithNoExternalCalls: null,
 
   // ** {{{Parser#setCommandList()}}} **
   //
@@ -199,10 +200,13 @@ Parser.prototype = {
 
     // Scrape the noun types up here.
     var nouns = this._nounTypes = {};
+    var localNounIds = this._nounTypeIdsWithNoExternalCalls = {};
     for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;
         nouns[nt.id] = nt;
+        if (nt.noExternalCalls)
+          localNounIds[nt.id] = true;
       }
     }
     //dump("loaded nouns:\n" +
@@ -1334,14 +1338,28 @@ Parser.prototype = {
   // marks them with which noun type it came from (in {{{.nountype}}})
   // and puts all of those suggestions in an object (hash) keyed by
   // noun type name.
-  detectNounType: function detectNounType(currentQuery,x,callback) {
-    //Utils.log('detecting '+x);
+  detectNounType: function detectNounType(currentQuery,x,nounTypeIds,callback) {
+
+    let alreadyCached = true;
     if (!Utils.isEmpty(this._nounCache[x])) {
-      //Utils.log('found cached values for '+x,this._nounCache[x]);
+      for (let nounTypeId in nounTypeIds) {
+        if (!(nounTypeId in this._nounCache[x]))
+          alreadyCached = false;
+      }
+    } else {
+      alreadyCached = false;
+    }
+
+    if (alreadyCached) {
+      //Utils.log('found all required values for '+x+' in cache');
       if (typeof callback == 'function')
         callback(x, []);
     } else {
-      this._nounCache[x] = {};
+    
+      //Utils.log('detecting '+x,nounTypeIds);
+    
+      if (Utils.isEmpty(this._nounCache[x]))
+        this._nounCache[x] = {};
 
       var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
         if (!suggs && !suggs.length)
@@ -1365,7 +1383,9 @@ Parser.prototype = {
         return retArray;
       };
       var thisParser = this;
-      var myCallback = function detectNounType_myCallback(suggestions, asyncRequests) {
+      var myCallback = function detectNounType_myCallback(suggestions, asyncRequests, id) {
+        let ids = [id for (id in nounTypeIds)]
+        currentQuery.dump("finished detecting "+x+" for "+(id || ids));
         if (currentQuery.finished) {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
@@ -1389,15 +1409,18 @@ Parser.prototype = {
         var returnArray = [];
         var asyncRequests = {};
 
-        dump("detecting: " + x + "\n");
+        let ids = [id for (id in nounTypeIds)]
+        currentQuery.dump("detecting: " + x + " for " + ids);
 
-        for (let thisNounTypeId in activeNounTypes) {
+        for (let thisNounTypeId in nounTypeIds) {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
-            suggs = handleSuggs(suggs, id);
-            if (asyncRequests[id])
-              asyncRequests[id] = null;
-            myCallback(suggs, asyncRequests);
+            if (suggs.length) {
+              suggs = handleSuggs(suggs, id);
+              if (asyncRequests[id])
+                asyncRequests[id] = null;
+              myCallback(suggs, asyncRequests, id);
+            }
           }
 
           if (!(x in thisParser._nounCache))
@@ -1675,7 +1698,7 @@ ParseQuery.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    function completeParse(thisParse, argText, asyncRequests) {
+    function completeParse(thisParse, asyncRequests) {
       if (asyncRequests.length == 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
@@ -1687,7 +1710,7 @@ ParseQuery.prototype = {
       var suggestions = thisQuery.parser.suggestArgs(thisParse);
       //Utils.log(suggestions);
 
-      //thisQuery.dump('finished '+argText+' ('+asyncRequests.length+' async requests remaining), so completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
+      //thisQuery.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
 
       for each (let newParse in suggestions)
         thisQuery.addScoredParseIfGoodEnough(newParse);
@@ -1697,9 +1720,8 @@ ParseQuery.prototype = {
     }
 
     function tryToCompleteParses(argText, asyncRequests) {
-      thisQuery.dump('detecting nountypes for ' + argText 
-                     + ' with ' + asyncRequests.length 
-                     + ' asyncRequests remaining');
+      //thisQuery.dump('tryToCompleteParses('+argText+')');
+      //Utils.log(thisQuery._outstandingRequests,asyncRequests);
       thisQuery._outstandingRequests = asyncRequests;
 
       if (thisQuery.finished) {
@@ -1712,7 +1734,7 @@ ParseQuery.prototype = {
         if (thisParse.allNounTypesDetectionHasCompleted() &&
             !thisParse.complete) {
           //thisQuery.dump('completing parse '+parseId+' now');
-          completeParse(thisParse, argText, asyncRequests);
+          completeParse(thisParse, asyncRequests);
         }
       }
 
@@ -1732,7 +1754,7 @@ ParseQuery.prototype = {
 
       if (!parse.args.__count__)
         // This parse doesn't have any arguments. Complete it now.
-        Utils.setTimeout(completeParse, 0, parse, "no args", []);
+        Utils.setTimeout(completeParse, 0, parse, []);
       else for each (let arg in parse.args) {
         for each (let x in arg) {
           // this is the text we're going to cache
@@ -1747,11 +1769,19 @@ ParseQuery.prototype = {
       }
     }
 
-    // now that we have a list of args to cache, let's go through and cache them.
-    for (let argText in this._argsToCache) {
-      this.parser.detectNounType(thisQuery, argText, tryToCompleteParses);
+    for each (let parse in this._verbedParses) {
+      for each (let {argText,nounTypeIds} in parse.argsAndNounTypeIdsToCheck()) {
+        this.parser.detectNounType(thisQuery, argText, nounTypeIds, 
+                                   tryToCompleteParses);
+      }
       yield true;
     }
+
+    // now that we have a list of args to cache, let's go through and cache them.
+    /*for (let argText in this._argsToCache) {
+      this.parser.detectNounType(thisQuery, argText, tryToCompleteParses);
+      yield true;
+    }*/
   },
   finishQuery: function() {
     this._next();
@@ -2130,29 +2160,52 @@ Parse.prototype = {
     return lastNode;
   },
 
-  // **{{{Parse#allNounTypesDetectionHasCompleted()}}} (read-only)**
-  //
-  // If all of the arguments' nountype detection has completed, returns true.
-  // This means this parse can move onto Step 8
-  allNounTypesDetectionHasCompleted: function() {
-    var activeNounTypes = this._query.parser._nounTypes;
+  // **{{{Parse#argsAndNounTypeIdsToCheck}}} (read-only)**
+  // 
+  // This returns an array of pairs of argument strings and the nountypes
+  // they must be checked against.
+  argsAndNounTypeIdsToCheck: function() {
+    var returnArr = [];
+    var nounTypeIdsWithNoExternalCalls = 
+                       this._query.parser._nounTypeIdsWithNoExternalCalls;
     for (let role in this.args) {
       // for each argument of this role...
       for each (let arg in this.args[role]) {
         // this is the argText to check
         let argText = arg.input;
-
-        if (!(argText in this._query.parser._nounCache))
-          return false;
-
-        for (let nounTypeId in activeNounTypes){
-          if (!(nounTypeId in this._query.parser._nounCache[argText]))
-            return false;
+        let nounTypeIds = nounTypeIdsWithNoExternalCalls;
+        // verb was not suggested
+        if (!this._suggested) {
+          nounTypeIds = {};
+          for each (let verbArg in this._verb.arguments) {
+            if (verbArg.role == role)
+              nounTypeIds[verbArg.nountype.id] = true;
+          }
         }
+
+        returnArr.push({argText:argText,
+                        nounTypeIds:nounTypeIds});
+        
       }
     }
+    return returnArr;
+  },
 
-    // if all the argText's are in the nounCache
+  // **{{{Parse#allNounTypesDetectionHasCompleted()}}} (read-only)**
+  //
+  // If all of the arguments' nountype detection has completed, returns true.
+  // This means this parse can move onto Step 8
+  allNounTypesDetectionHasCompleted: function() {
+    var argsAndNounTypeIdsToCheck = this.argsAndNounTypeIdsToCheck();
+    for each (let {argText, nounTypeIds} in argsAndNounTypeIdsToCheck) {
+      if (!(argText in this._query.parser._nounCache))
+        return false;
+      for (let nounTypeId in nounTypeIds){
+        if (!(nounTypeId in this._query.parser._nounCache[argText]))
+          return false;
+      }
+    }
+    // if all is in the nounCache
     return true;
   },
 
