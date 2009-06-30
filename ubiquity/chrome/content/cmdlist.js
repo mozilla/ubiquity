@@ -355,32 +355,28 @@ function onDisableOrEnableCmd() {
 // this was to make both subscribed and unsubscribed list entries, but is
 // now used only for unsubscribed ones.
 function makeUnsubscribedFeedListElement(info, sortMode) {
-  var $li = $("<li></li>");
-  $li.append(A(info.title, info.uri.spec));
-
-  var commandList = $("<ul></ul>");
-  for (var id in info.commands)
-    commandList.append($("<li></li>").text(id.split("#").pop()));
-
-  $li.append(
-    commandList,
+  var $li = $("<li></li>").append(
+    A(info.uri.spec, info.title),
+    ("<ul>" +
+     ["<li>" + escapeHtml(id.split("#").pop()) + "</li>"
+      for (id in info.commands)].join("") +
+     "</ul>"),
     linkToAction("[resubscribe]",
-                 function() {
+                 function resubscribe() {
                    info.unremove();
-                   $li.slideUp(function(){
+                   $li.slideUp(function onHidden(){
                      rebuildTable();
                      location.hash = "graveyard";
                    });
                  }),
     " ",
     linkToAction("[purge]",
-                 function() {
+                 function purge() {
                    info.purge();
                    $li.slideUp("slow");
                  }),
     " ",
     viewSourceLink(info));
-
   return $li[0];
 }
 
