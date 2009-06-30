@@ -241,11 +241,13 @@ Parser.prototype = {
       // make the object this role.
       if (role !== "object" && !(role in otherRolesCache) && delimiter)
         otherRolesCache[role] = delimiter;
-    
+
     var verbs = this._verbList;
+
     var roleSignatures = this._roleSignatures = {};
     for each (let verb in verbs) {
-      let subsets = Utils.powerSet([arg.role for each (arg in verb.arguments)]);
+      let subsets = Utils.powerSet([arg.role
+                                    for each (arg in verb.arguments)]);
       for each (let subset in subsets) {
         if (subset.length) {
           roleSignatures[subset.sort().join()] = true;
@@ -262,18 +264,26 @@ Parser.prototype = {
     // possible delimiter.
     delimPatterns[""] = regexFromDelimeters(this.roles);
 
-    var allNames = [], {push} = allNames;
+    var wordSep = /[-_\s](?!$)/g;
+    var trieSubnames = RegexpTrie();
     for (let verbId in verbs) {
       let verb = verbs[verbId];
-      let names = verb.names.slice();
-      // ["cogit ergo sum"] => ["cogit ergo sum", "ergo sum", "sum"]
-      for each (let name in names) {
-        let sep = /[-_\s](?!$)/g;
-        sep.lastIndex = 1;
-        while (sep.test(name)) names.push(name.slice(sep.lastIndex));
+      // ["cogit ergo sum", "thought being"]
+      // => ["cogit ergo sum", "thought being", "ergo sum", "being", "sum"]
+      let subnames = [], {names} = verb;
+      for (let i = 0, l = names.length; i < l; ++i) {
+        let name = names[i];
+        wordSep.lastIndex = 0;
+        do {
+          let {lastIndex} = wordSep;
+          let subname = name.slice(lastIndex);
+          trieSubnames.addPrefixes(subname);
+          let snlc = new String(subname.toLowerCase());
+          snlc.name = name;
+          subnames[i + l * lastIndex] = snlc;
+        } while (wordSep.test(name));
       }
-      verbPatterns[verbId] = RegExp("^" + RegexpTrie(names, 1), "i");
-      push.apply(allNames, names);
+      verbPatterns[verbId] = subnames.filter(Boolean); // compact
       // _rolesCache[verbId] is the subset of roles such that
       // there is at least one argument in verb which matches that role
       rolesCache[verbId] =
@@ -281,7 +291,7 @@ Parser.prototype = {
          if (verb.arguments.some(function(arg) arg.role === role.role))];
       delimPatterns[verbId] = regexFromDelimeters(rolesCache[verbId]);
     }
-    var verbMatcher = RegexpTrie(allNames, 1) + "";
+    var verbMatcher = trieSubnames.toString();
     // verbInitialTest matches a verb at the beginning
     patternCache.verbInitialTest =
       RegExp(("^\\s*(" + verbMatcher + ")" +
@@ -377,18 +387,18 @@ Parser.prototype = {
     // TODO: write a unit test for this possibility.
     var verbs = this._verbList;
     var verbPatterns = this._patternCache.verbs;
-    var verbFinalMultiplier = this.verbFinalMultiplier;
-    var verbInitialMultiplier = this.verbInitialMultiplier;
+    var {verbFinalMultiplier, verbInitialMultiplier} = this;
     function addParses(verbPiece, argString, order) {
       var vplc = verbPiece.toLowerCase();
-      for (var verbId in verbs) if (!verbs[verbId].disabled &&
-                                    verbPatterns[verbId].test(verbPiece)) {
-        let match = RegExp.lastMatch;
+      for (var verbId in verbs) {
         let verb = verbs[verbId];
-        for each (let name in verb.names) {
-          if (name.toLowerCase().indexOf(vplc) < 0) continue;
+        if (verb.disabled) continue;
+        for each (let subname in verbPatterns[verbId]) {
+          if (subname.indexOf(vplc) !== 0) continue;
+          let {name} = subname;
           returnArray.push({
             _verb: {
+              __proto__: verb,
               id: verbId,
               text: name,
               _order: order,
@@ -400,10 +410,8 @@ Parser.prototype = {
               // verb prefix matches, even if they're only one or two
               // characters, will get higher scoreMultipliers than noun-first
               // suggestions, which get scoreMultiplier of 0.3. (trac #750)
-              score: (0.3 + 0.7 * Math.sqrt(verbPiece.length / name.length))
-                     * (order ? verbFinalMultiplier
-                              : verbInitialMultiplier),
-              __proto__: verb,
+              score: ((0.3 + 0.7 * Math.sqrt(verbPiece.length / name.length))
+                      * (order ? verbFinalMultiplier : verbInitialMultiplier)),
             },
             argString: argString,
             sel: selection
