@@ -160,19 +160,17 @@ var noun_type_tab = {
 //
 // **//FIXME//**
 //
-// {{{text}}}
+// {{{text, html}}} : The name of the engine
 //
-// {{{html}}}
-//
-// {{{data}}}
+// {{{data}}} : The engine (See nsIBrowserSearchService)
 
 var noun_type_search_engine = {
   label: "search engine",
   // the default search engine should just get 0.3 or so...
   // if it's actually entered, it can get a higher score.
-  default: function() this._makeSugg(this._BSS.defaultEngine, 0.3),
+  default: function() this._sugg(this._BSS.defaultEngine, 0.3),
   suggest: function(text) {
-    var suggs = this._BSS.getVisibleEngines({}).map(this._makeSugg);
+    var suggs = this._BSS.getVisibleEngines({}).map(this._sugg);
     return CmdUtils.grepSuggs(text, suggs);
   },
   _BSS: (Cc["@mozilla.org/browser/search-service;1"]
