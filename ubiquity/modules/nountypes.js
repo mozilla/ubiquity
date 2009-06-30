@@ -48,6 +48,7 @@
 // ** {{{suggest}}}
 // ** {{{default}}}
 // ** {{{asyncRequest}}}
+// ** {{{noExternalCalls}}}
 // ** {{{label}}} (, {{{name}}}, {{{id}}})
 
 const Cc = Components.classes;
@@ -68,6 +69,7 @@ Cu.import("resource://gre/modules/utils.js");
 var noun_arb_text = {
   label: "?",
   rankLast: true,
+  noExternalCalls: true,
   suggest: function(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.5, selectionIndices)];
   },
@@ -123,6 +125,7 @@ var noun_type_email = CmdUtils.NounType(
 
 var noun_type_percentage = {
   label: "percentage",
+  noExternalCalls: true,
   _default: CmdUtils.makeSugg("100%", null, 0.3),
   "default": function() this._default,
   suggest: function(text, html) {
@@ -150,6 +153,7 @@ var noun_type_percentage = {
 
 var noun_type_tab = {
   label: "title or URL",
+  noExternalCalls: true,
   suggest: function(text, html, cb, selectedIndices)(
     [CmdUtils.makeSugg(tab.document.title || tab.document.URL,
                        null, tab, selectedIndices)
@@ -166,6 +170,7 @@ var noun_type_tab = {
 
 var noun_type_search_engine = {
   label: "search engine",
+  noExternalCalls: true,
   // the default search engine should just get 0.3 or so...
   // if it's actually entered, it can get a higher score.
   default: function() this._sugg(this._BSS.defaultEngine, 0.3),
@@ -190,6 +195,7 @@ var noun_type_search_engine = {
 
 var noun_type_tag = {
   label: "tag1[,tag2 ...]",
+  noExternalCalls: true,
   default: function() [CmdUtils.makeSugg(tag, null, [tag], 0.3)
                        for each (tag in PlacesUtils.tagging.allTags)],
   suggest: function(text) {
@@ -232,6 +238,7 @@ var noun_type_tag = {
 
 var noun_type_awesomebar = {
   label: "query",
+  noExternalCalls: true,
   rankLast: true,
   suggest: function(text, html, callback, selectedIndices) {
     if (!text) return [];
@@ -260,6 +267,7 @@ var noun_type_awesomebar = {
 var noun_type_url = {
   label: "url",
   asyncRequest: null,
+  noExternalCalls: true,
   rankLast: true,
   default: function() (
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
@@ -336,6 +344,7 @@ var noun_type_livemark = {
 
 var noun_type_command = {
   label: "name",
+  noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
     return CmdUtils.grepSuggs(text, this._get(), "name").map(this._sugg);
@@ -373,6 +382,7 @@ var noun_type_disabled_command = {
 var noun_type_twitter_user = {
   label: "user",
   rankLast: true,
+  noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
     // reject text from selection.
     if (!text || selected)
@@ -422,6 +432,7 @@ var noun_type_twitter_user = {
 
 var noun_type_number = {
   label: "number",
+  noExternalCalls: true,
   suggest: function(text) {
     var num = +text;
     return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
@@ -440,6 +451,7 @@ var noun_type_number = {
 
 var noun_type_bookmarklet = {
   label: "title",
+  noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
     return CmdUtils.grepSuggs(text, this.list);
@@ -478,6 +490,7 @@ var noun_type_bookmarklet = {
 
 var noun_type_date = {
   label: "date",
+  noExternalCalls: true,
   "default": function() this._sugg(Date.parse("today")),
   suggest: function(text) {
     var date = Date.parse(text);
@@ -499,6 +512,7 @@ var noun_type_date = {
 
 var noun_type_time = {
   label: "time",
+  noExternalCalls: true,
   "default": function() {
     var time = Date.parse("now");
     var text = time.toString("hh:mm tt");
