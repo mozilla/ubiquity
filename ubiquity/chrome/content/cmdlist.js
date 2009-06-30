@@ -164,7 +164,7 @@ function fillTableRowForCmd(row, cmd, className) {
     '<td class="command">' +
     ("icon" in cmd ?
      <img class="favicon" src={cmd.icon}/>.toXMLString() : "") +
-    (<><a class={cmd.id}/><span class="name">{name}</span></>) +
+    (<><a class="id" name={cmd.id}/><span class="name">{name}</span></>) +
     ("description" in cmd ?
      '<span class="description">' + cmd.description + '</span>' : "") +
     (names.length > 1 ?
@@ -348,7 +348,6 @@ function onDisableOrEnableCmd() {
   // status of a command.
   var id = $(this).closest("tr").find(".id").attr("name");
   var {commandSource} = UbiquitySetup.createServices();
-
   commandSource.getCommand(id).disabled = !this.checked;
 }
 
