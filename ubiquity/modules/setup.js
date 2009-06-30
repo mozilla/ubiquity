@@ -232,7 +232,7 @@ let UbiquitySetup = {
       function removeExtinct(feed) {
         if (feed.uri.spec.indexOf(OLD_STD_FEED_URI) == 0 ||
             feed.title == "Mozilla Image-Related Commands")
-          feed.remove();
+          feed.purge();
       });
   },
 

@@ -45,8 +45,10 @@
 
 var EXPORTED_SYMBOLS = ["FeedManager"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/eventhub.js");
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/eventhub.js");
 
 const FEED_SRC_ANNO = "ubiquity/source";
 const FEED_TYPE_ANNO = "ubiquity/type";
@@ -59,7 +61,7 @@ const FEED_TITLE_ANNO = "ubiquity/title";
 const FEED_DATE_ANNO = "ubiquity/date";
 const FEED_BIN_ANNO = "ubiquity/bin";
 
-const FEED_ANNOS = [v for (v in this) if (/^FEED_/.test(v))];
+const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_/.test(v))];
 
 const DEFAULT_FEED_TYPE = "commands";
 
@@ -123,7 +125,7 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
     try {
       subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
     } catch (e) {
-      Components.utils.reportError(
+      Cu.reportError(
         ("An error occurred when retrieving the feed for " +
          confirmedPages[i].spec + ": " + e)
       );
@@ -296,7 +298,11 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 };
 
 // TODO: Add Documentation for this
-FMgrProto.showNotification = function showNotification(plugin, targetDoc, commandsUrl, mimetype, notify_message) {
+FMgrProto.showNotification = function showNotification(plugin,
+                                                       targetDoc,
+                                                       commandsUrl,
+                                                       mimetype,
+                                                       notify_message) {
 
   var Cc = Components.classes;
   var Ci = Components.interfaces;
@@ -334,7 +340,7 @@ FMgrProto.showNotification = function showNotification(plugin, targetDoc, comman
     }
 
     var buttons = [
-      {accessKey: null,
+      {accessKey: "S",
        callback: onSubscribeClick,
        label: "Subscribe...",
        popup: null}
@@ -347,10 +353,9 @@ FMgrProto.showNotification = function showNotification(plugin, targetDoc, comman
       buttons
     );
   } else {
-    Components.utils.reportError("Couldn't find tab for document");
+    Cu.reportError("Couldn't find tab for document");
   }
-}
-
+};
 
 // === {{{FeedManager#finalize()}}} ===
 //
