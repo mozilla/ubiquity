@@ -157,10 +157,19 @@ MathParser.prototype.parse = function(e){
 };
 
 const GCalcHelp = "http://www.googleguide.com/help/calculator.html";
+const noun_calc = {
+  name: "calc",
+  label: "expression",
+  suggest: function suggest(text) {
+    var simple = this._simple.test(text);
+    return [CmdUtils.makeSugg(text, "", simple, simple ? 1 : .5)];
+  },
+  _simple: /^[\d.+\-*\/^%~(, )]+$/,
+};
 
 CmdUtils.CreateCommand({
   names: ["calculate", "gcalculate"],
-  arguments: {object_expression: noun_arb_text},
+  argument: noun_calc,
   description: "" + (
     <>Calculates using <a href={GCalcHelp}>Google Calculator</a>
     which has all the features of a scientific calculator,
@@ -181,30 +190,30 @@ CmdUtils.CreateCommand({
   // We want only 1 result.
   _google_url: function (q) ("http://www.google.com/search?hl=en&num=1&q=" +
                              encodeURIComponent(q)),
-  _calc: function (exp, cb) {
-    if (/^[\d.+\-*\/^%~(, )]+$/.test(exp)) {
+  _calc: function ({text: exp, data: simple}, cb, pb) {
+    if (simple) {
       try { var result = this._math_parser.parse(exp) } catch (e) {}
       if (result != null) {
         cb(result);
         return;
       }
     }
-    var cmd = this;
-    jQuery.get(this._google_url(exp), function (result_page) {
+    var url = this._google_url(exp), fn = function gcalc(result_page) {
       cb((/\/calc_img\.gif.*?<b>(.*?)<\/b>/i(result_page) || ",?")[1]);
-    });
+    };
+    pb ? CmdUtils.previewGet(pb, url, fn) : $.get(url, fn);
   },
-  execute: function ({object: {text}}) {
-    this._calc(text, function (result) {
+  execute: function ({object}) {
+    this._calc(object, function (result) {
       CmdUtils.setSelection(result);
     });
   },
-  preview: function (pb, {object: {text}}) {
-    if (!text) {
+  preview: function (pb, {object}) {
+    if (!object.text) {
       this.previewDefault(pb);
       return;
     }
-    this._calc(text, function (result) {
+    this._calc(object, function (result) {
       pb.innerHTML = (
         '<div class="calculate">' +
         '<b style="font-size:larger">' + result + '</b>' +
@@ -212,7 +221,7 @@ CmdUtils.CreateCommand({
          ? '<p><a href="' + GCalcHelp + '">Quick Reference</a></p>'
          : "") +
         '</div>');
-    });
+    }, pb);
   }
 });
 
