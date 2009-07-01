@@ -58,11 +58,6 @@ var matchScore = function matchScore(text, match) (
   + SCORE_LENGTH * Math.sqrt(match[0].length / text.length)
   + SCORE_INDEX  * (1 - match.index / text.length));
 
-var classOf = function classOf(x) {
-  //http://bit.ly/CkhjS#instanceof-considered-harmful
-  return Object.prototype.toString.call(x).slice(8, -1);
-};
-
 // ** {{{ NounUtils.NounType() }}} **
 //
 // Constructor of a noun type that accepts a specific set of inputs.
@@ -90,7 +85,7 @@ function NounType(label, expected, defaults) {
   expected = maybe_qw(expected);
   defaults = maybe_qw(defaults);
 
-  var maker = NounType["_from" + classOf(expected)];
+  var maker = NounType["_from" + Utils.classOf(expected)];
   for (let [k, v] in Iterator(maker(expected))) this[k] = v;
   this.suggest = maker.suggest;
   this.label = label;

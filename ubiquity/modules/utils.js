@@ -573,7 +573,7 @@ Utils.trim = String.trim || function trim(str) {
 
 // === {{{ Utils.isArray() }}} ===
 //
-// This function returns whether or not its parameter is an instance
+// This function returns whether or not the argument is an instance
 // of a JavaScript Array object.
 
 function isArray(val) {
@@ -582,12 +582,18 @@ function isArray(val) {
           (val.constructor || 0).name === "Array");
 }
 
-// === {{{ Utils.isEmpty }}} ===
+// === {{{ Utils.isEmpty() }}} ===
 //
-// Will return true if the refered object doesn't exist or has no
-// properties.
+// This function returns whether or not the argument has no own properties.
 
-function isEmpty(obj) !obj || !obj.__count__;
+function isEmpty(val) val == null || !val.__count__;
+
+// === {{{ Utils.classOf() }}} ===
+//
+// This function returns the internal {{{[[Class]]}}} property of the argument.
+// ref. http://bit.ly/CkhjS#instanceof-considered-harmful
+
+function classOf(val) Object.prototype.toString.call(val).slice(8, -1);
 
 // === {{{ Utils.powerSet }}} ===
 // 
