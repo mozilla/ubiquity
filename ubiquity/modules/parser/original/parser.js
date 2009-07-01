@@ -79,7 +79,6 @@ NLParser1.ParserQuery.prototype = {
   _init: function PQ__init(parser, queryString, context, maxSuggestions) {
     this._parser = parser;
     this._suggestionList = [];
-    this._outstandingRequests = [];
     this.onResults = null;
     this._queryString = queryString;
     this._context = context;
@@ -87,6 +86,7 @@ NLParser1.ParserQuery.prototype = {
 
     // temporary
     this._parsingsList = [];
+    this._aborters = [];
   },
 
   // TODO: Does query need some kind of destructor?  If this has a ref to the
@@ -96,16 +96,14 @@ NLParser1.ParserQuery.prototype = {
   // Client code should set onResults to a function!!
 
   cancel: function PQ_cancel() {
-    for (var x = 0; x < this._outstandingRequests.length; x++) {
-      // abort outstanding ajax requests
-      this._outstandingRequests[x].abort();
-    }
-    //reset outstanding requests
-    this._outstandingRequests = [];
+    for each (let parse in this._parsingsList)
+      for each (let aborter in parse._aborters)
+        if (aborter && typeof aborter.abort === "function")
+          aborter.abort();
   },
 
   // Read-only properties:
-  get finished() { this._refreshOutstandingRequests(); return this._outstandingRequests.length == 0; },
+  get finished() false,
   get hasResults() { return this._suggestionList.length > 0; },
   get suggestionList() { return this._suggestionList; },
 
@@ -123,14 +121,6 @@ NLParser1.ParserQuery.prototype = {
     var argStrings = partiallyParsedSentence._argStrings;
     partiallyParsedSentence.addListener( this );
     this._parsingsList.push( partiallyParsedSentence );
-  },
-
-  _refreshOutstandingRequests: function PQ__refreshOutstandingRequests() {
-    //check the ajax requests of each parsing to see which are still open
-    this._outstandingRequests = [];
-    for each (let parsing in this._parsingsList) {
-      this._outstandingRequests = this._outstandingRequests.concat(parsing._ajaxRequests);
-    }
   },
 
   _refreshSuggestionList: function PQ__refreshSuggestionList() {
@@ -569,7 +559,7 @@ NLParser1.PartiallyParsedSentence = function PartiallyParsedSentence(
   this._matchScore = matchScore;
   this._invalidArgs = {};
   this._validArgs = {};
-  this._ajaxRequests = [];
+  this._aborters = [];
   /* Create fully parsed sentence with empty arguments:
    * If this command takes no arguments, this is all we need.
    * If it does take arguments, this initializes the parsedSentence
@@ -618,51 +608,26 @@ NLParser1.PartiallyParsedSentence.prototype = {
      * gets back suggestions for the argument, and adds each suggestion.
      * Return true if at least one arg suggestion was added in this way. */
     let argument = this._verb._arguments[argName];
+    let self = this;
+    // Callback function for asynchronously generated suggestions:
+    let callback = function suggestBack(suggs) {
+      self.handleSuggestions(suggs);
+      // Notify our listeners!!
+      for each (let listener in self._listeners)
+        listener.onNewParseGenerated();
+    };
     try {
-      let self = this;
-      // Callback function for asynchronously generated suggestions:
-      let callback = function(newSugg) {
-        var suggLen = newSugg.length;
-        if (suggLen) {
-           for (let i=0; i < suggLen; i++)
-             self.addArgumentSuggestion(argName, newSugg[i]);
-        } else {
-           self.addArgumentSuggestion(argName, newSugg);
-        }
-
-	// Remove this request from list of open ajax requests
-        if (argument.type.ajaxRequest){
-	  if(self._ajaxRequests.indexOf(argument.type.ajaxRequest) != -1){
-	    self._ajaxRequests.splice(self._ajaxRequests.indexOf(argument.type.ajaxRequest), 1);
-	  }
-	}
-
-        // Notify our listeners!!
-        for (let i = 0; i < self._listeners.length; i++) {
-          self._listeners[i].onNewParseGenerated();
-        }
-      };
       // This is where the suggestion is actually built.
-      let suggestions = argument.type.suggest(text, html, callback,
+      var suggestions = argument.type.suggest(text, html, callback,
                                               selectionIndices);
-
-      // Add ajax request from argument to ajax requests array
-      if(argument.type.ajaxRequest){
-        this._ajaxRequests.push(argument.type.ajaxRequest);
-      }
-
-      for each( let argSugg in suggestions) {
-        if (argSugg) { // strip out null suggestions -- TODO not needed?
-          this.addArgumentSuggestion(argName, argSugg);
-        }
-      }
-      return (suggestions.length > 0);
     } catch (e) {
       Cu.reportError(
         'Exception occured while getting suggestions for "' +
-        this._verb._name + '" with noun "' + argument.label + '": ' + e);
+        this._verb._name + '" with noun "' +
+        (argument.name || argument.id) + '"\n' + e.stack);
       return false;
     }
+    return this.handleSuggestions(argName, suggestions);
   },
 
   _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words) {
@@ -689,6 +654,19 @@ NLParser1.PartiallyParsedSentence.prototype = {
       }
     }
     return gotAnySuggestions;
+  },
+
+  handleSuggestions: function PPS_handleSuggestions(argName, suggs) {
+    var any = false;
+    if (!Utils.isArray(suggs)) suggs = [suggs];
+    for each (let sugg in suggs) if (sugg) {
+      if (sugg.summary >= "") {
+        this.addArgumentSuggestion(argName, sugg);
+        any = true;
+      }
+      else this._aborters.push(sugg);
+    }
+    return any;
   },
 
   addArgumentSuggestion: function PPS_addArgumentSuggestion(arg, sugg) {
