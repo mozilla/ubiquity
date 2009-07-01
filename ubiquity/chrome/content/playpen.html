@@ -2,6 +2,8 @@
   <head>
     <title>Ubiquity Parser 2 Playpen</title>
     <script type="text/javascript;version=1.8" charset='utf-8' src='resource://ubiquity/scripts/jquery.js'></script>
+    <script type="text/javascript;version=1.8" 
+     src="resource://ubiquity/modules/parser/new/parser.js"></script>
     <script type="text/javascript;version=1.8" charset='utf-8' src='playpen.js'></script>
     <style type="text/css">
 			body {
@@ -133,6 +135,12 @@
       <!--<input type='button' name='clearnouncache' value='clear noun cache' id='clearnouncache'></input>-->
       <label for='maxSuggestions'>max suggestions:</label><input id='maxSuggestions' value='5' size='2'/>
       <input type='checkbox' name='displayparseinfo' id='displayparseinfo'></input><label title='this will slow things down considerably' for='displayparseinfo'>display parse info</label><input type='checkbox' name='displayparsetree' id='displayparsetree'></input><label title='this will *not* affect performance' for='displayparsetree'>display parse lineage</label><input type='checkbox' name='autoparse' id='autoparse'></input><label title='this will slow things down considerably' for='autoparse'>automatically parse on update</label>
+      <br/>
+      <label for='gu-sync'
+       title="uses the same parser as the current Ubiquity instance">
+       <input type='checkbox' id='gu-sync' checked='checked'/>
+       sync with <code>gUbiquity</code>
+      </label>
     </div>
     
 		<div id='border'>
