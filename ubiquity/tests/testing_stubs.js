@@ -8,7 +8,6 @@ var fakeContextUtils = {
   getHtmlSelection: function(context) { return context.htmlSelection; },
   getSelection: function(context) { return context.textSelection; },
   getSelectionObject: function(context) {
-    dump("In fakeContextUtils, text is " + context.textSelection + "\n");
     return { text: context.textSelection,
              html: context.htmlSelection
            };
