@@ -271,10 +271,10 @@ function testParserTwoParseWithModifier() {
     self.assert( completions.length == 2, "Should be 2 completions" );
     completions[0].execute();
     self.assert( dogGotWashed == "poodle");
-    self.assert( dogGotWashedWith == "sponge");
+    self.assert( dogGotWashedWith == "spork");
     completions[1].execute();
     self.assert( dogGotWashed == "poodle");
-    self.assert( dogGotWashedWith == "spork");
+    self.assert( dogGotWashedWith == "sponge");
   };
 
   getCompletionsAsync( inputWords, [cmd_wash], null,
@@ -301,24 +301,25 @@ function testSimplifiedParserTwoApi() {
   var inputWords = "wash pood with sp";
   var self = this;
   var testFunc = function(completions) {
+    //debugCompletions(completions);
     self.assert( completions.length == 2, "Should be 2 completions" );
     self.assert( completions[0]._verb.name == "wash", "Should be named wash");
     self.assert( completions[0].args["object"][0].text == "poodle",
                 "Object should be poodle");
-    self.assert( completions[0].args["instrument"][0].text == "sponge",
-                "Instrument should be sponge");
+    self.assert( completions[0].args["instrument"][0].text == "spork",
+                "Instrument should be spork");
     self.assert( completions[1]._verb.name == "wash", "Should be named wash");
     self.assert( completions[1].args["object"][0].text == "poodle",
                 "Object should be poodle");
-    self.assert( completions[1].args["instrument"][0].text == "spork",
-                "Instrument should be spork");
+    self.assert( completions[1].args["instrument"][0].text == "sponge",
+                "Instrument should be sponge");
 
     completions[0].execute();
     self.assert( dogGotWashed == "poodle");
-    self.assert( dogGotWashedWith == "sponge");
+    self.assert( dogGotWashedWith == "spork");
     completions[1].execute();
     self.assert( dogGotWashed == "poodle");
-    self.assert( dogGotWashedWith == "spork");
+    self.assert( dogGotWashedWith == "sponge");
   };
 
   getCompletionsAsync( inputWords, [cmd_wash], null,
@@ -413,7 +414,7 @@ function testImplicitPronounParser2() {
 
   function implicitTestFuncOne(completions) {
     // Should have "eat lunch" and "eat ?"
-    debugCompletions(completions);
+    //debugCompletions(completions);
     self.assert( (completions.length == 2), "Should have 2 completions.");
     completions[0].execute();
     self.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
@@ -426,14 +427,14 @@ function testImplicitPronounParser2() {
   }
   function implicitTestFuncTwo(completions) {
     //debugCompletions(completions);
-    // first completion should be directObject is dinner
-    completions[0].execute();
+    // second completion should be directObject is dinner
+    completions[1].execute();
     self.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
     self.assert((foodGotEatenAt == null), "IndirectObjs shouldn't be set.");
     foodGotEaten = null;
     foodGotEatenAt = null;
-    // second completion should be direct object null, place is diner
-    completions[1].execute();
+    // first completion should be direct object null, place is diner
+    completions[0].execute();
     self.assert((foodGotEaten == null), "DO should be null.");
     self.assert((foodGotEatenAt == "diner"), "Place should be diner.");
     foodGotEaten = null;
