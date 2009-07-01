@@ -50,7 +50,13 @@ var NounUtils = ([f for each (f in this) if (typeof f === "function")]
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-const SCORE_SUBTRACTOR = 0.3;
+const SCORE_BASE = 0;
+const SCORE_LENGTH = 0.7;
+const SCORE_INDEX = 1 - SCORE_LENGTH;
+var matchScore = function matchScore(text, match) (
+  SCORE_BASE
+  + SCORE_LENGTH * Math.sqrt(match[0].length / text.length)
+  + SCORE_INDEX  * (1 - match.index / text.length));
 
 var classOf = function classOf(x) {
   //http://bit.ly/CkhjS#instanceof-considered-harmful
@@ -129,14 +135,14 @@ NounType._fromRegExp = function NT_RegExp(regexp)({
   suggest: arguments.callee.suggest,
   _regexp: regexp,
 });
-NounType._fromRegExp.suggest = (
-  function NT_RE_suggest(text, html, cb, selectionIndices) (
-    let (match = text.match(this._regexp)) (
-      match
-      ? [NounUtils.makeSugg(text, html, match,
-                            1 - (match.index / text.length) * SCORE_SUBTRACTOR,
-                            selectionIndices)]
-      : [])));
+NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
+                                                      selectionIndices) {
+  var match = text.match(this._regexp);
+  if (!match) return [];
+  // ToDo: how to score global match
+  var score = "index" in match ? matchScore(text, match) : 1;
+  return [NounUtils.makeSugg(text, html, match, score, selectionIndices)];
+};
 
 // ** {{{ NounUtils.NounType._fromObject() }}} **
 //
@@ -235,13 +241,11 @@ function grepSuggs(input, suggs, key) {
   }
   var results = [], count = suggs.__count__, i = -1;
   for each (let sugg in suggs) {
-    let target = sugg[key];
-    let index = target.search(re);
-    if (index < 0) continue;
-    let found = target.match(re)[0];
-    sugg.score = 0.2 + 0.8 * Math.sqrt(found.length / target.length)
-                 - (index / target.length) * SCORE_SUBTRACTOR;
-    results[++i + index * count] = sugg;
+    let text = sugg[key];
+    let match = re(text);
+    if (!match) continue;
+    sugg.score = matchScore(text, match);
+    results[++i + match.index * count] = sugg;
   }
   return results.filter(Boolean);
 }
