@@ -59,11 +59,11 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://gre/modules/utils.js");
 
-// ** {{{ noun_arb_text }}} **
+// === {{{ noun_arb_text }}} ===
 //
 // Suggests the input as is.
 //
-// {{{text, html}}} : The user input.
+// * {{{text, html}}} : user input
 
 var noun_arb_text = {
   label: "?",
@@ -83,27 +83,26 @@ var noun_arb_text = {
   }
 };
 
-// ** {{{ noun_type_email_service }}} **
+// === {{{ noun_type_email_service }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_email_service = CmdUtils.NounType("email service",
                                                 "googleapps gmail yahoo",
                                                 "gmail");
 
-// ** {{{ noun_type_email }}} **
+// === {{{ noun_type_email }}} ===
 //
 // Suggests an email address (RFC2822 minus domain-lit).
 // The regex is taken from:
 // http://blog.livedoor.jp/dankogai/archives/51190099.html
 //
-// {{{text, html, data}}} : The email address.
+// {{{text, html}}} : email address
+// {{{data}}} : match array
 
 var noun_type_email = CmdUtils.NounType(
   "email",
@@ -112,15 +111,13 @@ var noun_type_email = CmdUtils.NounType(
     '))*)|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\")))@(?:(?:(?:' +
     atom + ")(?:\\.(?:" + atom + "))*))$"));
 
-// ** {{{ noun_type_percentage }}} **
+// === {{{ noun_type_percentage }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_percentage = {
   label: "percentage",
@@ -140,32 +137,29 @@ var noun_type_percentage = {
   }
 };
 
-// ** {{{ noun_type_tab }}} **
+// === {{{ noun_type_tab }}} ===
 //
-// **//FIXME//**
+// Suggests currently opened tabs.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text, html}}} : tab title or URL
+// * {{{data}}} : one of 
+//   [[https://developer.mozilla.org/en/FUEL/Window|fuelIWindow]]#{{{tabs}}}
 
 var noun_type_tab = {
   label: "title or URL",
   noExternalCalls: true,
-  suggest: function(text, html, cb, selectedIndices)(
-    [CmdUtils.makeSugg(tab.document.title || tab.document.URL, null, 
-                       tab, 0.3 + 0.7 * Math.sqrt(tab.score), selectedIndices)
-     for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))]),
+  suggest: function nt_tab_suggest(text, html, cb, selectedIndices)
+    [CmdUtils.makeSugg(tab.document.title || tab.document.URL, null, tab,
+                       CmdUtils.matchScore(text, tab.match), selectedIndices)
+     for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))],
 };
 
-// ** {{{ noun_type_search_engine }}} **
+// === {{{ noun_type_search_engine }}} ===
 //
 // **//FIXME//**
 //
-// {{{text, html}}} : The name of the engine
-//
-// {{{data}}} : The engine (See nsIBrowserSearchService)
+// * {{{text, html}}} : name of the engine
+// * {{{data}}} : engine object (see {{{nsIBrowserSearchService}}})
 
 var noun_type_search_engine = {
   label: "search engine",
@@ -183,7 +177,7 @@ var noun_type_search_engine = {
     CmdUtils.makeSugg(engine.name, null, engine, score || 1)),
 };
 
-// ** {{{ noun_type_tag }}} **
+// === {{{ noun_type_tag }}} ===
 //
 // Suggests the input as comma separated tags,
 // plus completions based on existing tags.
@@ -225,15 +219,13 @@ var noun_type_tag = {
   }
 };
 
-// ** {{{ noun_type_awesomebar }}} **
+// === {{{ noun_type_awesomebar }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_awesomebar = {
   label: "query",
@@ -252,16 +244,14 @@ var noun_type_awesomebar = {
   }
 };
 
-// ** {{{ noun_type_url }}} **
+// === {{{ noun_type_url }}} ===
 //
 // Suggests a URL from the user's input and/or history.
 // Defaults to the current page's URL if no input is given.
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_url = {
   label: "url",
@@ -288,7 +278,7 @@ var noun_type_url = {
   }
 };
 
-// ** {{{ noun_type_livemark }}} **
+// === {{{ noun_type_livemark }}} ===
 //
 // Suggests each livemark whose title matches the input.
 //
@@ -331,7 +321,7 @@ var noun_type_livemark = {
   },
 };
 
-// ** {{{ noun_type_command }}} **
+// === {{{ noun_type_command }}} ===
 //
 // Suggests each installed command whose name matches the input.
 //
@@ -365,8 +355,8 @@ var noun_type_command = {
   },
 };
 
-// ** {{{ noun_type_enabled_command }}} **
-// ** {{{ noun_type_disabled_command }}} **
+// === {{{ noun_type_enabled_command }}} ===
+// === {{{ noun_type_disabled_command }}} ===
 //
 // Same as {{{noun_type_command}}}, but with only enabled/disabled commands.
 
@@ -380,15 +370,13 @@ var noun_type_disabled_command = {
   get disabled() true,
 };
 
-// ** {{{ noun_type_twitter_user }}} **
+// === {{{ noun_type_twitter_user }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_twitter_user = {
   label: "user",
@@ -431,15 +419,13 @@ var noun_type_twitter_user = {
   _list: null,
 };
 
-// ** {{{ noun_type_number }}} **
+// === {{{ noun_type_number }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_number = {
   label: "number",
@@ -453,7 +439,7 @@ var noun_type_number = {
   }
 };
 
-// ** {{{ noun_type_bookmarklet }}} **
+// === {{{ noun_type_bookmarklet }}} ===
 //
 // Suggests each bookmarklet whose title matches the input.
 //
@@ -491,7 +477,7 @@ var noun_type_bookmarklet = {
   }
 }.load();
 
-// ** {{{ noun_type_date }}} **
+// === {{{ noun_type_date }}} ===
 //
 // Suggests a date for input, using the mighty Date.parse().
 // Defaults to today.
@@ -511,15 +497,13 @@ var noun_type_date = {
     CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date),
 };
 
-// ** {{{ noun_type_time }}} **
+// === {{{ noun_type_time }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_time = {
   label: "time",
@@ -537,15 +521,13 @@ var noun_type_time = {
   }
 };
 
-// ** {{{ noun_type_async_address }}} **
+// === {{{ noun_type_async_address }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_async_address = {
   label: "address",
@@ -562,15 +544,13 @@ var noun_type_async_address = {
   }
 };
 
-// ** {{{ noun_type_async_restaurant }}} **
+// === {{{ noun_type_async_restaurant }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_async_restaurant = {
   label: "restaurant",
@@ -587,15 +567,14 @@ var noun_type_async_restaurant = {
   }
 };
 
-// ** {{{ noun_type_contact }}} **
+// === {{{ noun_type_contact }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
+
 // TODO: noun_type_contact never returns its async suggestions from getContacts.
 // I'm disabling it's async request attribute until this is fixed, so that
 // queries aren't kept open waiting for this noun type to return its async req.
@@ -623,15 +602,13 @@ var noun_type_contact = {
   }
 };
 
-// ** {{{ noun_type_geolocation }}} **
+// === {{{ noun_type_geolocation }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_geolocation = {
   label: "geolocation",
@@ -670,15 +647,13 @@ var noun_type_geolocation = {
   }
 };
 
-// ** {{{ noun_type_lang_google }}} **
+// === {{{ noun_type_lang_google }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 var noun_type_lang_google = CmdUtils.NounType("language", {
   Arabic: "ar",
@@ -724,15 +699,13 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Vietnamese: "vi",
 });
 
-// ** {{{ noun_type_lang_wikipedia }}} **
+// === {{{ noun_type_lang_wikipedia }}} ===
 //
 // **//FIXME//**
 //
-// {{{text}}}
-//
-// {{{html}}}
-//
-// {{{data}}}
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
 // omitting ones with 100+ articles

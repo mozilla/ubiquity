@@ -41,6 +41,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = NounUtils =
+
 var EXPORTED_SYMBOLS = ["NounUtils"];
 
 /* Make a namespace object called NounUtils, to export,
@@ -50,15 +52,7 @@ var NounUtils = ([f for each (f in this) if (typeof f === "function")]
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-const SCORE_BASE = 0;
-const SCORE_LENGTH = 0.7;
-const SCORE_INDEX = 1 - SCORE_LENGTH;
-var matchScore = function matchScore(text, match) (
-  SCORE_BASE
-  + SCORE_LENGTH * Math.sqrt(match[0].length / text.length)
-  + SCORE_INDEX  * (1 - match.index / text.length));
-
-// ** {{{ NounUtils.NounType() }}} **
+// === {{{ NounUtils.NounType() }}} ===
 //
 // Constructor of a noun type that accepts a specific set of inputs.
 // See {{{NounType._from*}}} methods for details
@@ -156,7 +150,21 @@ NounType._fromObject = function NT_Object(dict)({
 NounType._fromArray.suggest = NounType._fromObject.suggest = (
   function NT_suggest(text) NounUtils.grepSuggs(text, this._list));
 
-// ** {{{ NounUtils.makeSugg() }}} **
+// === {{{ NounUtils.matchScore() }}} ===
+//
+// Calculates the score for use in suggestions from a {{{text}}} and
+// a result array ({{{match}}}) of {{{RegExp#exec}}} corresponding it.
+
+const SCORE_BASE = 0;
+const SCORE_LENGTH = 0.7;
+const SCORE_INDEX = 1 - SCORE_LENGTH;
+
+function matchScore(text, match) (
+  SCORE_BASE
+  + SCORE_LENGTH * Math.sqrt(match[0].length / text.length)
+  + SCORE_INDEX  * (1 - match.index / text.length));
+
+// === {{{ NounUtils.makeSugg() }}} ===
 //
 // A helper function to create a suggestion object.
 //
@@ -215,7 +223,7 @@ function makeSugg(text, html, data, score, selectionIndices) {
     summary: summary, score: score || 1};
 }
 
-// ** {{{ NounUtils.grepSuggs() }}} **
+// === {{{ NounUtils.grepSuggs() }}} ===
 //
 // A helper function to grep a list of suggestion objects by user input.
 // Returns an array of filtered suggetions sorted/scored by matched indices.

@@ -764,6 +764,7 @@ Utils.tabs = {
   // === {{{ Utils.tabs.search() }}} ===
   //
   // Searches for tabs by title or URL and returns an array of tab references.
+  // The match result is set to {{{tab.match}}}.
   //
   // {{{matcher}}} is a string or {{{RegExp}}} object to match with.
   //
@@ -771,31 +772,25 @@ Utils.tabs = {
   // the maximum number of results to return.
 
   search: function tabs_search(matcher, maxResults) {
-    var matches = [], tester;
-    try {
-      tester = (typeof matcher.test === "function"
-                ? matcher
-                : RegExp(matcher, "i"));
+    var results = [];
+    if (classOf(matcher) !== "RegExp") try {
+      matcher = RegExp(matcher, "i");
     } catch (e if e instanceof SyntaxError) {
-      matcher = matcher.toLowerCase();
-      tester = {test: function(str) ~str.toLowerCase().indexOf(matcher),
-                exec: function()([matcher]) };
+      matcher = RegExp(String(matcher).replace(/\W/g, "\\$&"), "i");
     }
-    if (maxResults == null) maxResults = -1 >>> 1;
+    if (maxResults == null) maxResults = 1/0;
+    var keys = ["title", "URL"];
     for each (let win in Utils.Application.windows)
       for each (let tab in win.tabs) {
-        let {title, URL} = tab.document;
-        if (tester.test(title)) {
-          tab.score = (tester.exec(title)[0].length / title.length);
-          if (matches.push(tab) >= maxResults)
-            break;
-        } else if (tester.test(URL)) {
-          tab.score = (tester.exec(URL)[0].length / URL.length);
-          if (matches.push(tab) >= maxResults)
-            break;
+        for each (let key in keys) {
+          let match = matcher(tab.document[key]);
+          if (!match) continue;
+          tab.match = match;
+          if (results.push(tab) >= maxResults) return results;
+          break;
         }
       }
-    return matches;
+    return results;
   },
 
   // === {{{ Utils.tabs.reload() }}} ===
