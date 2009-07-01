@@ -50,6 +50,13 @@ var NounUtils = ([f for each (f in this) if (typeof f === "function")]
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
+const SCORE_SUBTRACTOR = 0.3;
+
+var classOf = function classOf(x) {
+  //http://bit.ly/CkhjS#instanceof-considered-harmful
+  return Object.prototype.toString.call(x).slice(8, -1);
+};
+
 // ** {{{ NounUtils.NounType() }}} **
 //
 // Constructor of a noun type that accepts a specific set of inputs.
@@ -77,12 +84,11 @@ function NounType(label, expected, defaults) {
   expected = maybe_qw(expected);
   defaults = maybe_qw(defaults);
 
- //http://bit.ly/CkhjS#instanceof-considered-harmful
-  var maker = NounType["_from" +
-                       Object.prototype.toString.call(expected).slice(8, -1)];
+  var maker = NounType["_from" + classOf(expected)];
   for (let [k, v] in Iterator(maker(expected))) this[k] = v;
   this.suggest = maker.suggest;
   this.label = label;
+  this.noExternalCalls = true;
   if (this.id) this.id += Utils.computeCryptoHash("MD5", (uneval(expected) +
                                                           uneval(defaults)));
   if (defaults) {
@@ -103,12 +109,9 @@ NounType.default = function default() this._defaults;
 
 NounType._fromArray = function NT_Array(words)({
   id: "#na_",
-  name: words.slice(0, 2) + (words.length > 2 ? ",...":''),
-  noExternalCalls: true,
+  name: words.slice(0, 2) + (words.length > 2 ? ",..." : ""),
   _list: [NounUtils.makeSugg(w) for each (w in words)],
 });
-NounType._fromArray.suggest = (
-  function suggest(text) NounUtils.grepSuggs(text, this._list));
 
 // ** {{{ NounUtils.NounType._fromRegExp() }}} **
 //
@@ -123,16 +126,15 @@ NounType._fromRegExp = function NT_RegExp(regexp)({
   id: "#nr_",
   name: regexp.source,
   rankLast: regexp.test(""),
-  noExternalCalls: true,
   suggest: arguments.callee.suggest,
   _regexp: regexp,
 });
-
 NounType._fromRegExp.suggest = (
-  function suggest(text, html, cb, selectionIndices)(
-    let (match = text.match(this._regexp))(
+  function NT_RE_suggest(text, html, cb, selectionIndices) (
+    let (match = text.match(this._regexp)) (
       match
-      ? [NounUtils.makeSugg(text, html, match, this.rankLast ? .5 : 1,
+      ? [NounUtils.makeSugg(text, html, match,
+                            1 - (match.index / text.length) * SCORE_SUBTRACTOR,
                             selectionIndices)]
       : [])));
 
@@ -144,15 +146,14 @@ NounType._fromRegExp.suggest = (
 // {{{dict}}} is an object of text:data pairs.
 
 NounType._fromObject = function NT_Object(dict)({
-  name: [key for (key in dict)].slice(0, 2) 
-        + ([key for (key in dict)].length > 2 ? ",...":''),
-  noExternalCalls: true,
+  name: ([key for (key in dict)].slice(0, 2) +
+         (dict.__count__ > 2 ? ",..." : "")),
   _list: [NounUtils.makeSugg(key, null, val)
           for ([key, val] in Iterator(dict))],
 });
-NounType._fromObject.suggest = (
-  function suggest(text, html, cb, selected)(
-    selected ? [] : NounUtils.grepSuggs(text, this._list)));
+
+NounType._fromArray.suggest = NounType._fromObject.suggest = (
+  function NT_suggest(text) NounUtils.grepSuggs(text, this._list));
 
 // ** {{{ NounUtils.makeSugg() }}} **
 //
@@ -216,7 +217,7 @@ function makeSugg(text, html, data, score, selectionIndices) {
 // ** {{{ NounUtils.grepSuggs() }}} **
 //
 // A helper function to grep a list of suggestion objects by user input.
-// Returns an array of filtered suggetions sorted by matched indices.
+// Returns an array of filtered suggetions sorted/scored by matched indices.
 //
 // {{{input}}} is a string that filters the list.
 //
@@ -234,8 +235,11 @@ function grepSuggs(input, suggs, key) {
   }
   var results = [], count = suggs.__count__, i = -1;
   for each (let sugg in suggs) {
-    let index = sugg[key].search(re);
-    if (~index) results[++i + index * count] = sugg;
+    let target = sugg[key];
+    let index = target.search(re);
+    if (index < 0) continue;
+    sugg.score = 1 - (index / target.length) * SCORE_SUBTRACTOR;
+    results[++i + index * count] = sugg;
   }
   return results.filter(Boolean);
 }

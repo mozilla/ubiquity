@@ -345,10 +345,10 @@ var noun_type_command = {
   noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
-    return CmdUtils.grepSuggs(text, this._get(), "name").map(this._sugg);
+    return CmdUtils.grepSuggs(text, [CmdUtils.makeSugg(cmd.name, null, cmd)
+                                     for each (cmd in this._get())]);
   },
   _cmdSource: UbiquitySetup.createServices().commandSource,
-  _sugg: function(cmd) CmdUtils.makeSugg(cmd.name, null, cmd),
   _get: function() {
     var cmds = this._cmdSource.getAllCommands();
     if (!("disabled" in this)) return cmds;
