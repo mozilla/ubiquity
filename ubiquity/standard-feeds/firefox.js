@@ -134,7 +134,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["close all tabs with"],
-  arguments: {"object related word": noun_arb_text},
+  arguments: [{ role: 'object', nountype: noun_arb_text, label: 'related word'}],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   execute: function({object: {text}}) {
