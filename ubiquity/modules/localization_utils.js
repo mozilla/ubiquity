@@ -172,6 +172,8 @@ function localizeCommand(cmd) {
     if (rv !== key) cmd._previewString = rv;
   }
 
+  cmd.name = cmd.names[0];
+
   return cmd;
 }
 
