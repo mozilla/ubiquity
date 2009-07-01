@@ -238,7 +238,7 @@ function grepSuggs(input, suggs, key) {
     let target = sugg[key];
     let index = target.search(re);
     if (index < 0) continue;
-    let found = target.match(re);
+    let found = target.match(re)[0];
     sugg.score = 0.2 + 0.8 * Math.sqrt(found.length / target.length)
                  - (index / target.length) * SCORE_SUBTRACTOR;
     results[++i + index * count] = sugg;
