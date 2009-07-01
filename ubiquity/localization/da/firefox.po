@@ -101,8 +101,8 @@ msgstr "Tæller antallet af åbne faneblade"
 
 # added manually by mitcho
 # template in _count: no msgctxt as it is shared between preview + execute
-msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}.</div>"
-msgstr "<div class="count-tabs"><b>${count}</b> faneblad{if count != 1}e{/if} {if html}der matcher <b>${html}</b>{else}sammenlagt{/if}.</div>"
+msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}.</div>"
+msgstr "<div class=\"count-tabs\"><b>${count}</b> faneblad{if count != 1}e{/if} {if html}der matcher <b>${html}</b>{else}sammenlagt{/if}.</div>"
 
 
 #. refresh command:

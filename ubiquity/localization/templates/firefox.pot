@@ -101,7 +101,7 @@ msgstr ""
 
 # added manually by mitcho
 # template in _count: no msgctxt as it is shared between preview + execute
-msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
 msgstr ""
 
 

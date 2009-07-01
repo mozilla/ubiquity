@@ -98,8 +98,8 @@ msgstr "Compta el nombre de pestanyes obertes. Pren un terme de filtre opcional 
 
 # added manually by mitcho
 # template in _count: no msgctxt as it is shared between preview + execute
-msgid "<div class="count-tabs"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
-msgstr "<div class="count-tabs"><b>${count}</b> pestany{if count == 1}a{/if}{if count > 1}es{/if} {if html}coincident{if count > 1}s{/if} amb <b>${html}</b>{else}del total{/if}</b>.</div>"
+msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgstr "<div class=\"count-tabs\"><b>${count}</b> pestany{if count == 1}a{/if}{if count > 1}es{/if} {if html}coincident{if count > 1}s{/if} amb <b>${html}</b>{else}del total{/if}</b>.</div>"
 
 #. refresh command:
 #. use | to separate multiple name values:
