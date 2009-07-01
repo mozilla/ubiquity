@@ -1377,7 +1377,7 @@ Parser.prototype = {
     if (alreadyCached) {
       //Utils.log('found all required values for '+x+' in cache');
       if (typeof callback == 'function')
-        callback(x, []);
+        callback(x);
     } else {
     
       //Utils.log('detecting '+x,nounTypeIds);
@@ -1398,16 +1398,8 @@ Parser.prototype = {
         for each (let s in suggs) s.nountypeId = id;
         return suggs;
       };
-      var asyncReqsToArray = function detectNounType_asyncReqsToArray(asyncs){
-        let retArray = [];
-        for each (let async in asyncs){
-          if (async)
-            retArray.push(async);
-        }
-        return retArray;
-      };
       var thisParser = this;
-      var myCallback = function detectNounType_myCallback(suggestions, asyncRequests, id) {
+      var myCallback = function detectNounType_myCallback(suggestions, id) {
         let ids = [id for (id in nounTypeIds)]
         currentQuery.dump("finished detecting "+x+" for "+(id || ids));
         if (currentQuery.finished) {
@@ -1426,12 +1418,11 @@ Parser.prototype = {
         }
 
         if (typeof callback == 'function')
-          callback(x, asyncReqsToArray(asyncRequests));
+          callback(x);
       };
       var activeNounTypes = this._nounTypes;
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
-        var asyncRequests = {};
 
         let ids = [id for (id in nounTypeIds)]
         currentQuery.dump("detecting: " + x + " for " + ids);
@@ -1439,11 +1430,10 @@ Parser.prototype = {
         for (let thisNounTypeId in nounTypeIds) {
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
+            currentQuery._requestCount--;
             if (suggs.length) {
               suggs = handleSuggs(suggs, id);
-              if (asyncRequests[id])
-                asyncRequests[id] = null;
-              myCallback(suggs, asyncRequests, id);
+              myCallback(suggs, id);
             }
           }
 
@@ -1452,15 +1442,20 @@ Parser.prototype = {
           if (!(id in thisParser._nounCache[x]))
             thisParser._nounCache[x][id] = [];
 
-          returnArray.push.apply(
-            returnArray,
-            handleSuggs(
-              activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id));
+	  var resultsFromSuggest = handleSuggs(
+              activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
-          if (activeNounTypes[id].asyncRequest)
-            asyncRequests[id] = activeNounTypes[id].asyncRequest;
+          for each (result in resultsFromSuggest){
+	    if(result.text || result.html){
+              returnArray.push(result);
+	    }
+            else{
+	      currentQuery._requestCount++;
+              currentQuery._outstandingRequests.push(result);
+	    }
+          }
         }
-        myCallback(returnArray, asyncRequests);
+        myCallback(returnArray);
       },0);
     }
   },
@@ -1495,8 +1490,11 @@ var ParseQuery = function(parser, queryString, selObj, context,
   this.maxSuggestions = maxSuggestions;
   this.selObj = selObj;
 
-  //_oustandingRequests are open async calls that have not yet returned
+  //_oustandingRequests are all async calls made for this query
   this._outstandingRequests = [];
+  //_requestCount is the number of open async requests
+  //i.e. the number of requests that have not yet performed a callback
+  this._requestCount = 0;
 
   // code flow control stuff
   // used in async faux-thread contrl
@@ -1722,8 +1720,8 @@ ParseQuery.prototype = {
     // If it finds some parse that that is ready for scoring, it will then
     // handle the scoring.
     var thisQuery = this;
-    function completeParse(thisParse, asyncRequests) {
-      if (asyncRequests.length == 0) {
+    function completeParse(thisParse) {
+      if (thisQuery._requestCount <= 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
       }
@@ -1743,10 +1741,8 @@ ParseQuery.prototype = {
         thisQuery.finishQuery();
     }
 
-    function tryToCompleteParses(argText, asyncRequests) {
+    function tryToCompleteParses(argText) {
       //thisQuery.dump('tryToCompleteParses('+argText+')');
-      //Utils.log(thisQuery._outstandingRequests,asyncRequests);
-      thisQuery._outstandingRequests = asyncRequests;
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -1758,7 +1754,7 @@ ParseQuery.prototype = {
         if (thisParse.allNounTypesDetectionHasCompleted() &&
             !thisParse.complete) {
           //thisQuery.dump('completing parse '+parseId+' now');
-          completeParse(thisParse, asyncRequests);
+          completeParse(thisParse);
         }
       }
 
@@ -1850,7 +1846,7 @@ ParseQuery.prototype = {
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function() {
     //Utils.log(this);
-    this.dump("cancelled! " + this._outstandingRequests.length +
+    this.dump("cancelled! " + this._requestCount +
               " outstanding request(s) being canceled\n");
     //abort any async requests that are running
     for each (let asyncReq in this._outstandingRequests){
@@ -1859,6 +1855,7 @@ ParseQuery.prototype = {
     }
     //reset outstanding requests
     this._outstandingRequests = [];
+    this._requestCount = 0;
 
     this._keepworking = false;
   },
