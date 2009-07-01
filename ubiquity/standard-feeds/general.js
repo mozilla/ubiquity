@@ -83,7 +83,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["link to wikipedia"],
   arguments: {
-    object_phrase: noun_arb_text,
+    object: noun_arb_text,
     format: noun_type_lang_wikipedia,
   },
   description:
