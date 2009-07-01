@@ -158,18 +158,22 @@ function testCmdManagerSuggestsForEmptyInput() {
                                        onCM);
   function onCM(cmdMan) {
     var getAC = cmdMan.makeCommandSuggester();
-    var suggDict = getAC({textSelection:"tree"});
-    this.assert( suggDict["Cmd_one"], "cmd one should be in" );
-    this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
-    var execute = suggDict["Cmd_one"];
-    execute();
-    this.assert( oneWasCalled == "tree", "should have been calld with tree" );
-    suggDict = getAC({textSelection:"mud"});
-    this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
-    this.assert( suggDict["Cmd_two"], "cmd two should be in" );
-    execute = suggDict["Cmd_two"];
-    execute();
-    this.assert( twoWasCalled == "mud", "should have been called with mud" );
+    getAC({textSelection:"tree"}, test1Callback);
+    getAC({textSelection:"mud"}, test2Callback);
+    function test1Callback(suggDict){
+      this.assert( suggDict["Cmd_one"], "cmd one should be in" );
+      this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
+      var execute = suggDict["Cmd_one"];
+      execute();
+      this.assert( oneWasCalled == "tree", "should have been calld with tree" );
+    }
+    function test2Callback(suggDict){
+      this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
+      this.assert( suggDict["Cmd_two"], "cmd two should be in" );
+      execute = suggDict["Cmd_two"];
+      execute();
+      this.assert( twoWasCalled == "mud", "should have been called with mud" );
+    }
   }
 }
 
