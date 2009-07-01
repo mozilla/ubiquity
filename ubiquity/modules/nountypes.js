@@ -154,8 +154,8 @@ var noun_type_tab = {
   label: "title or URL",
   noExternalCalls: true,
   suggest: function(text, html, cb, selectedIndices)(
-    [CmdUtils.makeSugg(tab.document.title || tab.document.URL,
-                       null, tab, selectedIndices)
+    [CmdUtils.makeSugg(tab.document.title || tab.document.URL, null, 
+                       tab, 0.3 + 0.7 * Math.sqrt(tab.score), selectedIndices)
      for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))]),
 };
 
