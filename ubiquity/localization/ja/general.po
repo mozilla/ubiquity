@@ -2,6 +2,7 @@
 # 
 # Localizers:
 # Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+# Michael Yoshitaka Erlewine <mitcho@mitcho.com>
 
 msgid ""
 msgstr ""
@@ -104,7 +105,7 @@ msgstr "リッチテキスト編集フィールドではありません。"
 #. use | to separate multiple name values:
 msgctxt "count words.names"
 msgid "count words|word count"
-msgstr "単語数|単語数カウント|数える|数えて|数えろ"
+msgstr "単語数計算する|単語数計算して|単語数計算しろ|単語数カウント|数える|数えて|数えろ"
 
 msgctxt "count words.description"
 msgid "Displays the number of words in a selection."
@@ -140,7 +141,7 @@ msgstr "選択したフレーズを、マッチする Wikipedia の記事にリ�
 #. use | to separate multiple name values:
 msgctxt "calculate.names"
 msgid "calculate|gcalculate"
-msgstr "計算|関数計算|計算する|計算して|計算しろ|関数計算する|関数計算して|関数計算しろ|gcalculate"
+msgstr "計算する|計算して|計算しろ|関数計算する|関数計算して|関数計算しろ"
 
 msgctxt "calculate.help"
 msgid "Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
@@ -169,7 +170,7 @@ msgstr "科学計算の機能をすべて備えた <a href=\"http://www.googlegu
 #. use | to separate multiple name values:
 msgctxt "translate.names"
 msgid "translate"
-msgstr "翻訳|翻訳する|翻訳して|翻訳しろ|訳す|訳して|訳せ|やくす|やくして|やくせ"
+msgstr "翻訳する|翻訳して|翻訳しろ|訳す|訳して|訳せ|やくす|やくして|やくせ"
 
 msgctxt "translate.help"
 msgid "You can specify the language to translate to,\n"

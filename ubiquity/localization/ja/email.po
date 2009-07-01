@@ -20,7 +20,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "email.names"
 msgid "email|mail|send email|gmail.com"
-msgstr "メール|メールする|メールして|メールしろ|メール送信|メールを送信|gmail.com"
+msgstr "メールする|メールして|メールしろ|メールで送信する|メールで送信して|メールで送信しろ"
 
 msgctxt "email.help"
 msgid "Currently only works with\n"
@@ -62,7 +62,7 @@ msgstr "gmonkey 例外エラーが発生しました。"
 #. use | to separate multiple name values:
 msgctxt "get last email.names"
 msgid "get last email"
-msgstr "新着メール|メール確認|新着メールを確認する|新着メールを確認して|新着メールを確認しろ|メールを確認する|メールを確認して|メールを確認しろ"
+msgstr "新着メールを確認する|新着メールを確認して|新着メールを確認しろ|メール確認|メールを確認する|メールを確認して|メールを確認しろ"
 
 msgctxt "get last email.description"
 msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."

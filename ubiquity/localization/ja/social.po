@@ -2,6 +2,8 @@
 #
 # Localizers:
 # Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+# Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
@@ -19,7 +21,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "twitter.names"
 msgid "twitter|tweet|share using twitter"
-msgstr "呟く|呟いて|呟け|つぶやく|つぶやいて|つぶやけ|twitter|tweet"
+msgstr "呟く|呟いて|呟け|twitterで呟く|twitterで呟いて|twitterで呟け"
 
 msgctxt "twitter.help"
 msgid "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
@@ -70,7 +72,7 @@ msgstr "あなたの呟きを書き込みました。"
 #. use | to separate multiple name values:
 msgctxt "digg.names"
 msgid "digg|share using digg"
-msgstr "diggる|diggれ|タレコむ|垂れ込む|たれこむ|たれこめ|diggにたれこむ|たれこんで|digg"
+msgstr "diggる|diggれ|タレコむ|垂れ込む|たれこむ|たれこめ|diggにたれこむ|たれこんで"
 
 msgctxt "digg.description"
 msgid "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
@@ -101,7 +103,7 @@ msgstr "このページはすでに <b>${diggs}</b> digg たれこまれてい�
 #. use | to separate multiple name values:
 msgctxt "tinyurl.names"
 msgid "tinyurl"
-msgstr "tinyurl|短縮|URLを短縮|短縮する|短縮して|短縮しろ|"
+msgstr "tinyurlで短縮する|tinyurlで短縮して|tinyurlで短縮しろ|短縮する|短縮して|短縮しろ"
 
 msgctxt "tinyurl.description"
 msgid "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
@@ -120,7 +122,7 @@ msgstr "選択した URL を <b>${tinyurl}</b> に置き換えます。"
 #. use | to separate multiple name values:
 msgctxt "share (on delicious).names"
 msgid "share|delicious"
-msgstr "共有|ブックマーク共有|共有する|共有して|共有しろ|delicous"
+msgstr "共有する|共有して|共有しろ|deliciousで共有する|deliciousで共有して|deliciousで共有しろ"
 
 msgctxt "share (on delicious).help"
 msgid "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."

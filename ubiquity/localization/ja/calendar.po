@@ -20,7 +20,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "add to google calendar.names"
 msgid "add to google calendar|quick add"
-msgstr "予定追加|カレンダーに追加|追加する|追加して|追加しろ|追加|ついかする|ついかして|ついかしろ|ついか"
+msgstr "カレンダーに追加する|カレンダーに追加して|カレンダーに追加して|追加する|追加して|追加しろ|ついかする|ついかして|ついかしろ|ついか|予定追加"
 
 msgctxt "add to google calendar.help"
 msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
@@ -61,7 +61,7 @@ msgstr "エラーのためイベントが追加できませんでした。"
 #. use | to separate multiple name values:
 msgctxt "check google calendar.names"
 msgid "check google calendar"
-msgstr "カレンダー確認|カレンダーを確認|カレンダーを確認する|カレンダーを確認して|カレンダーを確認しろ|カレンダー確認しろ|カレンダーをかくにんする|カレンダーをかくにんして|カレンダーをかくにんしろ|カレンダーをかくにん"
+msgstr "カレンダーで確認する|カレンダーで確認して|カレンダーで確認しろ|カレンダー確認しろ|カレンダーでかくにんする|カレンダーでかくにんして|カレンダーでかくにんしろ"
 
 msgctxt "check google calendar.help"
 msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"

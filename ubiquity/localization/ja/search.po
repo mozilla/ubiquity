@@ -2,6 +2,8 @@
 #
 # Localizers:
 # Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+# Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
@@ -19,7 +21,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "search.names"
 msgid "search|find|look for"
-msgstr "検索|検索する|検索して|検索しろ"
+msgstr "検索する|検索して|検索しろ"
 
 msgctxt "search.help"
 msgid "Specify any Open Search engine you have installed by entering e.g. 'search with google', 'search with yahoo', etc."
@@ -37,7 +39,7 @@ msgstr "<b>${engine}</b> での検索結果: <br /><b>${query}</b>"
 #. use | to separate multiple name values:
 msgctxt "Google.names"
 msgid "Google"
-msgstr "Google|google|グーグル"
+msgstr "Googleで検索する|Googleで検索して|Googleで検索しろ|グーグルで検索する|グーグルで検索して|グーグルで検索しろ|ググる|ググって|ググれ|ぐぐる|ぐぐって|ぐぐれ"
 
 msgctxt "Google.help"
 msgid "You can use the keyboard shortcut ctrl + alt + number to open one of the Google results shown in the preview."
@@ -59,11 +61,12 @@ msgctxt "Google.preview"
 msgid "Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time."
 msgstr "ヒント: プレビューに表示された検索結果のリンク先は、Ctrl キーと Alt キーを押しながらリストの数字を押すと開くことができます。"
 
+
 #. wikipedia command:
 #. use | to separate multiple name values:
 msgctxt "wikipedia.names"
 msgid "wikipedia|lookup"
-msgstr "wikipedia|Wikipedia|ウィキペディア|調べる|調べて|調べろ"
+msgstr "Wikipediaで調べる|Wikipediaで調べて|Wikipediaで調べろ|Wikipediaで検索する|Wikipediaで検索して|Wikipediaで検索しろ|ウィキペディアで調べる|ウィキペディアで調べて|ウィキペディアで調べろ|ウィキペディアで検索する|ウィキペディアで検索して|ウィキペディアで検索しろ|調べる|調べて|調べろ"
 
 msgctxt "wikipedia.description"
 msgid "Searches Wikipedia for your words, in a given language."
@@ -89,11 +92,12 @@ msgctxt "wikipedia.preview"
 msgid "No articles found."
 msgstr "一致する記事は見つかりませんでした。"
 
+
 #. IMDB command:
 #. use | to separate multiple name values:
 msgctxt "IMDB.names"
 msgid "IMDB|internet movie database|movie|actor"
-msgstr "IMDB|映画|俳優|映画データベース"
+msgstr "IMDBで調べる|IMDBで調べて|IMDBで調べろ|IMDBで検索する|IMDBで検索して|IMDBで検索しろ"
 
 msgctxt "IMDB.description"
 msgid "Searches the Internet Movie Database (www.imdb.com) for your words."
@@ -103,7 +107,7 @@ msgstr "指定した単語を Internet Movie Database (www.imdb.com) で検索�
 #. use | to separate multiple name values:
 msgctxt "yahoo.names"
 msgid "yahoo"
-msgstr "Yahoo|yahoo|ヤフー|Yahoo!|yahoo!"
+msgstr "Yahoo!で検索する|Yahoo!で検索して|Yahoo!で検索しろ|Yahooで検索する|Yahooで検索して|Yahooで検索しろ"
 
 msgctxt "yahoo.description"
 msgid "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words."
@@ -113,7 +117,7 @@ msgstr "指定した単語を <a href=\"http://search.yahoo.com\">Yahoo</a> で�
 #. use | to separate multiple name values:
 msgctxt "amazon.names"
 msgid "amazon"
-msgstr "Amazon|amazon|アマゾン"
+msgstr "Amazonで検索する|Amazonで検索して|Amazonで検索しろ|アマゾンで検索する|アマゾンで検索して|アマゾンで検索して"
 
 msgctxt "amazon.help"
 msgid ""
@@ -225,7 +229,7 @@ msgstr "<a href='http://www.amazon.com/'>Amazon.com</a> で <b>${query}</b> に�
 #. use | to separate multiple name values:
 msgctxt "VideoSurf.names"
 msgid "VideoSurf|video|videos"
-msgstr "VideoSurf|ビデオ|ビデオサーフ"
+msgstr "VideoSurfで検索する|VideoSurfで検索して|VideoSurfで検索しろ|ビデオサーフで検索する|ビデオサーフで検索して|ビデオサーフで検索しろ"
 
 msgctxt "VideoSurf.help"
 msgid "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!"
@@ -243,7 +247,7 @@ msgstr "ビデオを読み込んでいます..."
 #. use | to separate multiple name values:
 msgctxt "YouTube.names"
 msgid "YouTube"
-msgstr "YouTube|youtube|ユーチューブ|ようつべ"
+msgstr "YouTubeで検索する|YouTubeで検索して|YouTubeで検索しろ|ユーチューブで検索する|ユーチューブで検索して|ユーチューブで検索しろ|ようつべで検索する|ようつべで検索して|ようつべで検索しろ"
 
 msgctxt "YouTube.description"
 msgid "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words. Previews the top results."
@@ -253,7 +257,7 @@ msgstr "指定した単語に一致するビデオを <a href=\"http://www.youtu
 #. use | to separate multiple name values:
 msgctxt "Flickr.names"
 msgid "Flickr|images"
-msgstr "Flickr|flickr|イメージ|写真|フリッカー"
+msgstr "Flickrで検索する|Flickrで検索して|Flickrで検索しろ|フリッカーで検索する|フリッカーで検索して|フリッカーで検索しろ"
 
 msgctxt "Flickr.description"
 msgid "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your keywords. Previews the top pictures."
@@ -283,7 +287,7 @@ msgstr "Flickr で ${nummatches} 枚の写真が見つかりました。"
 #. use | to separate multiple name values:
 msgctxt "Bugzilla.names"
 msgid "Bugzilla"
-msgstr "Bugzilla|bugzilla|バグジラ|バグ"
+msgstr "Bugzillaで検索する|Bugzillaで検索しろ|Bugzillaで検索して|バグジラで検索する|バグジラで検索して|バグジラで検索しろ"
 
 msgctxt "Bugzilla.description"
 msgid "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
@@ -293,7 +297,7 @@ msgstr "指定した単語に一致する Mozilla のバグを <a href=\"http://
 #. use | to separate multiple name values:
 msgctxt "msn.names"
 msgid "msn"
-msgstr "msn|MSN"
+msgstr "MSNで検索する|MSNで検索して|MSNで検索しろ"
 
 msgctxt "msn.description"
 msgid "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words."
@@ -311,7 +315,7 @@ msgstr "指定した単語を MSN で検索します。"
 #. use | to separate multiple name values:
 msgctxt "ebay.names"
 msgid "ebay"
-msgstr "eBay|ebay|イーベイ|オークション"
+msgstr "eBayで検索する|eBayで検索して|eBayで検索しろ|イーベイで検索する|イーベイで検索しろ|イーベイで検索して"
 
 msgctxt "ebay.description"
 msgid "Searches <a href=\"http://search.ebay.com\">eBay</a> for auctions matching the given words."
@@ -329,7 +333,7 @@ msgstr "指定した単語を eBay で検索します。"
 #. use | to separate multiple name values:
 msgctxt "ask.names"
 msgid "ask"
-msgstr "Ask|ask|アスク"
+msgstr "Askで検索する|Askで検索して|Askで検索して"
 
 msgctxt "ask.description"
 msgid "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words."
@@ -357,7 +361,7 @@ msgstr "指定した単語を <a href=\"http://www.answers.com\">Answers.com</a>
 #. use | to separate multiple name values:
 msgctxt "yelp.names"
 msgid "yelp"
-msgstr "Yelp|yelp|レストラン"
+msgstr "Yelpで検索する|Yelpで検索して|Yelpで検索しろ|Yelpで調べる|Yelpで調べて|Yelpで調べろ"
 
 msgctxt "yelp.help"
 msgid "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;."
@@ -383,7 +387,7 @@ msgstr "${times} 回レビューされています。"
 #. use | to separate multiple name values:
 msgctxt "check weather.names"
 msgid "check weather|get weather|weather"
-msgstr "天気|ウェザー"
+msgstr "天気を確認する|天気を確認して|天気を確認しろ|天気を表示する|天気を表示して|天気を表示しろ"
 
 msgctxt "check weather.help"
 msgid "Try issuing &quot;weather near chicago&quot;.  It works with zip-codes, too.  You can add 'in celsius' or 'in farenheit' to specify the temperature scale."
@@ -405,11 +409,11 @@ msgstr "${location} の天気"
 #. use | to separate multiple name values:
 msgctxt "define.names"
 msgid "define|get definition"
-msgstr "意味|定義"
+msgstr "辞書で調べる|辞書で調べて|辞書で調べろ|辞書で引く|辞書でひいて|辞書で引け|定義する|定義して|定義しろ"
 
 msgctxt "define.help"
 msgid "Try issuing &quot;define aglet&quot;"
-msgstr "例:「agletの意味」"
+msgstr "例:「agletを辞書で調べる」"
 
 msgctxt "define.description"
 msgid "Gives the meaning of a word, using answers.com."
@@ -427,7 +431,7 @@ msgstr "${word} の定義を調べます。"
 #. use | to separate multiple name values:
 msgctxt "google image search.names"
 msgid "google image search|get images"
-msgstr "画像|google image|画像検索"
+msgstr "Googleで画像検索する|Googleで画像検索して|Googleで画像検索しろ|グーグルで画像検索する|グーグルで画像検索して|グーグルで画像検索しろ"
 
 msgctxt "google image search.help"
 msgid "Press return to show the Google Images results, left click on a picture to watch it, right click to insert it in a text or rich text area"

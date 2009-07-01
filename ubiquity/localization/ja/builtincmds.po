@@ -2,6 +2,7 @@
 # 
 # Localizers:
 # Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+# Michael Yoshitaka Erlewine <mitcho@mitcho.com>
 
 msgid ""
 msgstr ""
@@ -20,7 +21,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "help.names"
 msgid "help|about|?"
-msgstr "ヘルプ|情報|？|?"
+msgstr "教えて|教えろ|ヘルプ|？|?"
 
 msgctxt "help.description"
 msgid "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
@@ -33,7 +34,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "open (ubiquity settings page).names"
 msgid "open|show"
-msgstr "開く|開いて|開け|表示|表示して|表示しろ"
+msgstr "開く|開いて|開け|表示する|表示して|表示しろ"
 
 msgctxt "open (ubiquity settings page).description"
 msgid "Opens one of the Ubiquity documentation/settings pages."
@@ -43,7 +44,7 @@ msgstr "Ubiquityのドキュメント/設定ページを開きます。"
 #. use | to separate multiple name values:
 msgctxt "write ubiquity commands.names"
 msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
-msgstr "コマンドエディタ|コマンドを書く|コマンドを編集する"
+msgstr "コマンドを編集する|コマンドエディタ|コマンドを書く"
 
 msgctxt "write ubiquity commands.description"
 msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
@@ -53,7 +54,7 @@ msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/editor.html\">コマン�
 #. use | to separate multiple name values:
 msgctxt "list ubiquity commands.names"
 msgid "list ubiquity commands"
-msgstr "コマンドリスト|コマンド一覧"
+msgstr "コマンドリストを表示する|コマンドリストを表示して|コマンドリストを表示しろ|コマンド一覧"
 
 msgctxt "list ubiquity commands.description"
 msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
@@ -64,7 +65,7 @@ msgstr "Ubiquity の利用可能な<a href=\"chrome://ubiquity/content/cmdlist.h
 #. use | to separate multiple name values:
 msgctxt "change ubiquity settings.names"
 msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin"
-msgstr "設定|設定変更|スキン変更|スキンを変更"
+msgstr "設定を変更する|設定変更|スキンを変更する|スキン変更"
 
 msgctxt "change ubiquity settings.description"
 msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
@@ -75,7 +76,7 @@ msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/settings.html\">設定</
 #. use | to separate multiple name values:
 msgctxt "get support.names"
 msgid "get support"
-msgstr "サポート"
+msgstr "サポートページ|サポート情報"
 
 msgctxt "get support.description"
 msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
@@ -87,7 +88,7 @@ msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/support.html\">サポー
 #. use | to separate multiple name values:
 msgctxt "report bug.names"
 msgid "report bug"
-msgstr "バグ報告"
+msgstr "バグ報告|バグを報告する"
 
 msgctxt "report bug.description"
 msgid "Takes you to the <a href=\"chrome://ubiquity/content/report-bug.html\">bug report</a> page."
@@ -97,7 +98,7 @@ msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/report-bug.html\">バグ
 #. use | to separate multiple name values:
 msgctxt "disable command.names"
 msgid "disable command"
-msgstr "コマンド無効化|コマンドを無効化|コマンドを無効化する"
+msgstr "無効にする|コマンドを無効にする"
 
 msgctxt "disable command.description"
 msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
@@ -107,7 +108,7 @@ msgstr "Ubiquity コマンドを無効にします。無効にしたコマンド
 #. use | to separate multiple name values:
 msgctxt "enable command.names"
 msgid "enable command"
-msgstr "コマンド有効化|コマンドを有効化|コマンドを有効化する"
+msgstr "有効にする|コマンドを有効にする"
 
 msgctxt "enable command.description"
 msgid "Re-enables a Ubiquity command that you disabled."
@@ -117,7 +118,7 @@ msgstr "無効にした Ubiquity コマンドを再び有効にします。"
 #. use | to separate multiple name values:
 msgctxt "command history.names"
 msgid "command history|vita"
-msgstr "コマンド履歴"
+msgstr "履歴から実行する|履歴から実行して|履歴から実行しろ|コマンド履歴"
 
 msgctxt "command history.help"
 msgid "<ul style=\"list-style-image:none\">\n"

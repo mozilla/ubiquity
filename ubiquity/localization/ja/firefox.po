@@ -100,7 +100,7 @@ msgstr "${num} 個のタブを閉じました。"
 #. use | to separate multiple name values:
 msgctxt "count tabs.names"
 msgid "count tabs"
-msgstr "タブ数カウント"
+msgstr "タブ数をカウントする|タブ数をカウントして|タブ数をカウントしろ|タブ数カウント"
 
 msgctxt "count tabs.description"
 msgid "Counts the number of opened tabs. Takes an optional filter term to count number of tabs matching filter term."
@@ -116,7 +116,7 @@ msgstr "<div class=\"count-tabs\"><b>${count}</b>個のタブ{if html}に一致�
 #. use | to separate multiple name values:
 msgctxt "refresh.names"
 msgid "refresh|reload"
-msgstr "更新|再読み込み|ページ更新"
+msgstr "更新|再読み込み|ページを更新する|ページを更新して|ページを更新しろ"
 
 msgctxt "refresh.description"
 msgid "Refreshes the current page."
@@ -127,7 +127,7 @@ msgstr "現在のページを再度読み込みます。"
 #. use | to separate multiple name values:
 msgctxt "bookmark.names"
 msgid "bookmark"
-msgstr "ブックマーク追加|ブックマークに追加|お気に入りに追加"
+msgstr "ブックマークに追加する|ブックマークに追加して|ブックマークに追加しろ|お気に入りに追加する|お気に入りに追加して|お気に入りに追加しろ"
 
 msgctxt "bookmark.description"
 msgid "Adds the current page to bookmarks."
@@ -142,7 +142,7 @@ msgstr "ブックマークに追加できませんでした！"
 #. use | to separate multiple name values:
 msgctxt "print.names"
 msgid "print"
-msgstr "印刷|プリント"
+msgstr "印刷する|印刷して|印刷しろ|プリントする|プリントして|プリントしろ"
 
 msgctxt "print.description"
 msgid "Prints the current page."
@@ -153,7 +153,7 @@ msgstr "現在のページを印刷します。"
 #. use | to separate multiple name values:
 msgctxt "go back.names"
 msgid "go back"
-msgstr "戻る"
+msgstr "戻る|戻って|戻れ"
 
 msgctxt "go back.description"
 msgid "Goes back in history."
@@ -168,7 +168,7 @@ msgstr "履歴を ${num} ステップ戻ります。"
 #. use | to separate multiple name values:
 msgctxt "go forward.names"
 msgid "go forward"
-msgstr "go-forward"
+msgstr "進む|進める|進んで|進めて|進め|進めろ"
 
 msgctxt "go forward.description"
 msgid "Goes forward in history."
@@ -210,7 +210,7 @@ msgstr "Firefox ウィンドウを通常の${text}のサイズにズームしま
 #. use | to separate multiple name values:
 msgctxt "tag.names"
 msgid "tag"
-msgstr "タグ|タグ追加|タグを追加する|タグを追加して|タグを追加しろ"
+msgstr "タグする|タグして|タグしろ|タグを追加する|タグを追加して|タグを追加しろ"
 
 msgctxt "tag.help"
 msgid "Use commas to separate multiple tags."
@@ -229,7 +229,7 @@ msgstr "現在のページに{if html}次の{/if}タグを追加します{if htm
 #. use | to separate multiple name values:
 msgctxt "run bookmarklet.names"
 msgid "run bookmarklet|bml"
-msgstr "ブックマークレット実行|ブックマークレットを実行|実行|実行する|実行して|実行しろ"
+msgstr "ブックマークレットを実行する|ブックマークレットを実行して|ブックマークレットを実行しろ|実行する|実行して|実行しろ"
 
 msgctxt "run bookmarklet.help"
 msgid "Enter nothing to reload the list."
@@ -244,7 +244,7 @@ msgstr "ブックマークからブックマークレットを実行します。
 #. use | to separate multiple name values:
 msgctxt "undo closed tabs.names"
 msgid "undo closed tabs|uct"
-msgstr "タブ復元|閉じたタブを復元|閉じたタブを開く"
+msgstr "閉じたタブを開く|閉じたタブを開け|閉じたタブを開け|タブを復元する|タブを復元して|タブを復元しろ|閉じたタブを復元する|閉じたタブを復元して|閉じたタブを復元しろ"
 
 msgctxt "undo closed tabs.help"
 msgid "<ul style=\"list-style-image:none\">\n"

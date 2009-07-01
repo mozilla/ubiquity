@@ -2,6 +2,7 @@
 # 
 # Localizers:
 # Masahiko Imanaka <chimantaea_mirabilis@yahoo.co.jp>
+# Michael Yoshitaka Erlewine <mitcho@mitcho.com>
 
 msgid ""
 msgstr ""
@@ -18,7 +19,7 @@ msgstr ""
 #. use | to separate multiple name values:
 msgctxt "map.names"
 msgid "map"
-msgstr "地図|場所|マップ"
+msgstr "地図で表示する|地図で表示して|地図で表示しろ|地図表示する|地図表示して|地図表示しろ|マップする|マップしろ|マップすて|マップで表示する|マップで表示して|マップで表示しろ"
 
 msgctxt "map.help"
 msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
