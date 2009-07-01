@@ -332,8 +332,6 @@ var noun_type_livemark = {
 };
 
 // ** {{{ noun_type_command }}} **
-// ** {{{ noun_type_enabled_command }}} **
-// ** {{{ noun_type_disabled_command }}} **
 //
 // Suggests each installed command whose name matches the input.
 //
@@ -345,17 +343,32 @@ var noun_type_command = {
   noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
     if (selected || !text) return [];
-    return CmdUtils.grepSuggs(text, [CmdUtils.makeSugg(cmd.name, null, cmd)
-                                     for each (cmd in this._get())]);
+    var res = CmdUtils.grepSuggs(text, this._get());
+    if (!res.length) return [];
+    var dic = {};
+    for each (let r in res) let ({id} = r.cmd) {
+      if (!(id in dic) || dic[id].score < r.score) dic[id] = r;
+    }
+    return [CmdUtils.makeSugg(r.text, null, r.cmd, r.score)
+            for each (r in dic)];
   },
   _cmdSource: UbiquitySetup.createServices().commandSource,
   _get: function() {
     var cmds = this._cmdSource.getAllCommands();
-    if (!("disabled" in this)) return cmds;
-    var {disabled} = this;
-    return [cmd for each (cmd in cmds) if (cmd.disabled === disabled)];
+    if ("disabled" in this) {
+      var {disabled} = this;
+      cmds = [cmd for each (cmd in cmds) if (cmd.disabled === disabled)];
+    }
+    var cmdNames = [{cmd: cmd, text: name}
+                    for each (cmd in cmds) for each (name in cmd.names)];
+    return Array.concat.apply(0, cmdNames); // flatten
   },
 };
+
+// ** {{{ noun_type_enabled_command }}} **
+// ** {{{ noun_type_disabled_command }}} **
+//
+// Same as {{{noun_type_command}}}, but with only enabled/disabled commands.
 
 var noun_type_enabled_command = {
   __proto__: noun_type_command,
