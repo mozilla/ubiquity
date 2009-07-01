@@ -152,10 +152,11 @@ function fillTableRowForCmd(row, cmd, className) {
   checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
 
   var {name, names, nameArg, homepage} = cmd;
+  var cmdDisplayName = (names[0] || name);
   if (nameArg)
     // TODO: we need some sort of flag to check whether the nameArg
     // was a prefix or a suffix.
-    name += " " + nameArg;
+    cmdDisplayName += " " + nameArg;
 
   var authors = cmd.authors || cmd.author;
   var contributors = cmd.contributors || cmd.contributor;
@@ -164,7 +165,7 @@ function fillTableRowForCmd(row, cmd, className) {
     '<td class="command">' +
     ("icon" in cmd ?
      <img class="favicon" src={cmd.icon}/>.toXMLString() : "") +
-    (<><a class="id" name={cmd.id}/><span class="name">{name}</span></>) +
+    (<><a class="id" name={cmd.id}/><span class="name">{cmdDisplayName}</span></>) +
     ("description" in cmd ?
      '<span class="description">' + cmd.description + '</span>' : "") +
     (names.length > 1 ?
