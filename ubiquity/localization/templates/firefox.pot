@@ -232,10 +232,6 @@ msgctxt "run bookmarklet.description"
 msgid "Runs a bookmarklet from your favorites."
 msgstr ""
 
-msgctxt "run bookmarklet.preview"
-msgid "<pre class=\\\"bookmarklet\\\" style=\\\"white-space:pre-wrap\\\">${data}</pre>"
-msgstr ""
-
 
 #. undo closed tabs command:
 #. use | to separate multiple name values:
