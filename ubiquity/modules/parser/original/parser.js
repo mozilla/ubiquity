@@ -611,7 +611,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
     let self = this;
     // Callback function for asynchronously generated suggestions:
     let callback = function suggestBack(suggs) {
-      self.handleSuggestions(suggs);
+      self.handleSuggestions(argName, suggs);
       // Notify our listeners!!
       for each (let listener in self._listeners)
         listener.onNewParseGenerated();
