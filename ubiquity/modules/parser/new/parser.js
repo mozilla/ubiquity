@@ -995,6 +995,7 @@ Parser.prototype = {
         if (newArg != oldArg) {
           let parseCopy = parse.copy();
           parseCopy.args[role][i].input = newArg;
+          parseCopy.scoreMultiplier *= 1.2;
           returnArr.push(parseCopy);
         }
       }
