@@ -347,6 +347,9 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   });
 }
 
+Components.utils.import("resource://ubiquity/modules/setup.js");
+const defaultLang = UbiquitySetup.languageCode;
+
 CmdUtils.CreateCommand({
   names: ["wikipedia", "lookup"],
   arguments: [{role: "object",
@@ -363,7 +366,7 @@ CmdUtils.CreateCommand({
   icon: "http://en.wikipedia.org/favicon.ico",
   description: "Searches Wikipedia for your words, in a given language.",
   preview: function(previewBlock, arguments) {
-    var langCode = arguments.format.data || "en";
+    var langCode = arguments.format.data || defaultLang;
     var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
 
     var searchText = jQuery.trim(arguments.object.text);

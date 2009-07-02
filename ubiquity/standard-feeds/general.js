@@ -76,6 +76,9 @@ CmdUtils.CreateCommand({
   }
 });
 
+Components.utils.import("resource://ubiquity/modules/setup.js");
+const defaultLang = UbiquitySetup.languageCode;
+
 /* TODO the dummy argument "wikipedia" could become a plugin argument
  * and this command could become a general purpose "insert link"
  * command.
@@ -90,7 +93,7 @@ CmdUtils.CreateCommand({
   "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "http://www.wikipedia.org/favicon.ico",
   _link: function({object: {text, html}, format: {data}}){
-    var url = ("http://" + (data || "en") +
+    var url = ("http://" + (data || defaultLang) +
                ".wikipedia.org/wiki/Special%3ASearch/" +
                encodeURIComponent(text.replace(/ /g, "_")));
     return ['<a href="' + Utils.escapeHtml(url) + '">' + html + "</a>", url];
