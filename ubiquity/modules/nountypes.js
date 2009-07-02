@@ -535,7 +535,7 @@ var noun_type_async_address = {
     [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
      getAddress(text, function addressBack(truthiness) {
        callback(truthiness
-                ? [CmdUtils.makeSugg(text, html, null, 2, selectionIndices)]
+                ? [CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]
                 : []);
      })],
 };
@@ -553,7 +553,7 @@ var noun_type_async_restaurant = {
   suggest: function(text, html, callback) {
     var asyncRequest = getRestaurants( text, function( truthiness ) {
       if (truthiness) {
-        callback([CmdUtils.makeSugg(text, null, null, 2, null)]);
+        callback([CmdUtils.makeSugg(text, null, null, .9, null)]);
       }
       else{
         callback([]);
