@@ -438,7 +438,7 @@ CmdUtils.CreateCommand({
     });
   },
   execute: function(arguments) {
-    var lang = arguments.format.data || "en";
+    var lang = arguments.format.data || defaultLang;
     var searchUrl = "http://" + lang + ".wikipedia.org/wiki/Special:Search";
     var searchParams = {search: arguments.object.text};
     Utils.openUrlInBrowser(searchUrl + Utils.paramsToString(searchParams));
