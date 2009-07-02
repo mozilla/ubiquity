@@ -299,7 +299,7 @@ Parser.prototype = {
              "i");
     // verbFinalTest matches a verb at the end of the string
     patternCache.verbFinalTest =
-      RegExp(((this.usespaces ? "(^.*\\s+|^)" : "(^.*)") +
+      RegExp(((this.usespaces ? "(^.*?\\s+|^)" : "(^.*?)") +
               "(" + verbMatcher + ")\\s*$"),
              "i");
 
