@@ -1,0 +1,29 @@
+# map.po
+# 
+# Localizers:
+# Felipe Gomes <felipc@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "mapa"
+
+msgctxt "map.help"
+msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+msgstr "Tente &quot;mapa de São Paulo&quot;. Você pode clicar no mapa para ampliá-lo e mexer nele. Você pode também inserir esse mapa em um e-mail clicando em &quot;inserir mapa na página&quot;."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Abre o Google Maps com um endereço desejado."
+
+msgctxt "map.preview"
+msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr "Você não está num campo de texto onde é possível inserir o mapa."
+
+

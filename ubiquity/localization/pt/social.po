@@ -1,0 +1,162 @@
+# social.po
+# 
+# Localizers:
+# Felipe Gomes <felipc@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
+
+#. twitter command:
+#. use | to separate multiple name values:
+msgctxt "twitter.names"
+msgid "twitter|tweet|share using twitter"
+msgstr "twitter|tweet|postar no twitter"
+
+msgctxt "twitter.help"
+msgid "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
+msgstr "Você precisa de uma conta no <a href=\"http://twitter.com\">."
+
+msgctxt "twitter.description"
+msgid "Sets your Twitter status to a message of at most 160 characters."
+msgstr "Posta uma mensagem de até 160 caracteres no Twitter."
+
+msgctxt "twitter.preview"
+msgid "Updates your Twitter status ${username} to:"
+msgstr "Atualiza seu status ${username} para:"
+
+msgctxt "twitter.preview"
+msgid "Characters remaining: <b>${chars}</b>"
+msgstr "Caracteres restantes: <b>${chars}</b>"
+
+msgctxt "twitter.preview"
+msgid "tip: tweet @mozillaubiquity for help"
+msgstr "dica: tweet @mozillaubiquity para ajuda"
+
+msgctxt "twitter.preview"
+msgid "The last <b>${truncate}</b> characters will be truncated!"
+msgstr "Os últimos <b>${truncate}</b> caracteres serão truncados!"
+
+msgctxt "twitter.preview"
+msgid "(For user <b>${usernameText}</b>)"
+msgstr "Para o usuário <b>${usernameText}</b>)"
+
+msgctxt "twitter.execute"
+msgid "requires a status to be entered"
+msgstr "É necessário digitar uma mensagem"
+
+msgctxt "twitter.execute"
+msgid "error - status not updated"
+msgstr "erro - mensagem não enviada"
+
+msgctxt "twitter.execute"
+msgid "direct message sent"
+msgstr "mensagem direta enviada"
+
+msgctxt "twitter.execute"
+msgid "status updated"
+msgstr "status atualizado"
+
+
+#. digg command:
+#. use | to separate multiple name values:
+msgctxt "digg.names"
+msgid "digg|share using digg"
+msgstr "digg|compartilhar no digg"
+
+msgctxt "digg.description"
+msgid "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
+msgstr "Envia página para o Digg. Se ela já existir no Digg, abre a entrada correspondente"
+
+msgctxt "digg.preview"
+msgid "Submit or digg this page. Checking if this page has already been submitted..."
+msgstr "Envia ou acrescenta um digg para esta página. Verificando se ela já existe no Digg..."
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg"
+msgstr "Envia ou acrescenta um digg para esta página."
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg with the description:"
+msgstr "Envia a página para o Digg com a descrição:"
+
+msgctxt "digg.preview"
+msgid "Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated."
+msgstr "A descrição pode conter até 375 caracteres. Os últimos <b>${chars}</b> caracteres serão truncados."
+
+msgctxt "digg.preview"
+msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
+msgstr "Acrescenta um digg para esta página. Ela já possui <b>${diggs}</b> diggs."
+
+
+#. tinyurl command:
+#. use | to separate multiple name values:
+msgctxt "tinyurl.names"
+msgid "tinyurl"
+msgstr "tinyurl"
+
+msgctxt "tinyurl.description"
+msgid "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+msgstr "Substitui a URL selecionada com uma url curta do <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with..."
+msgstr "Troca a URL selecionada por..."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with <b>${tinyurl}</b>."
+msgstr "Troca a URL selecionada por <b>${tinyurl}</b>."
+
+
+#. share (on delicious) command:
+#. use | to separate multiple name values:
+msgctxt "share (on delicious).names"
+msgid "share|delicious"
+msgstr "compartilhar|delicious"
+
+msgctxt "share (on delicious).help"
+msgid "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."
+msgstr "Selecione texto nessa página para usá-lo como a descrição, ou entre com sua própria descrição. Entre tags com o paramêtro <i>tagged</i> e um título com o parâmetro <i>entitled</i>."
+
+msgctxt "share (on delicious).description"
+msgid "Share the current page as a bookmark on delicious.com"
+msgstr "Compartilha a página atual como um Favorito no delicious.com"
+
+msgctxt "share (on delicious).preview"
+msgid "This URL cannot be shared on ${delicious}."
+msgstr "Esta URL não pode ser compartilhada no ${delicious}."
+
+msgctxt "share (on delicious).preview"
+msgid "No active user found - log in at ${delicious} to use this command."
+msgstr "Você não está logado. Entre no ${delicious} para poder utilizar este comando."
+
+msgctxt "share (on delicious).preview"
+msgid "A title is required for bookmarks on ${delicious}"
+msgstr "É necessário um título para Favoritos no ${delicious}"
+
+msgctxt "share (on delicious).preview"
+msgid "Share a bookmark at ${delicious}:"
+msgstr "Compartilha um Favorito no ${delicious}:"
+
+msgctxt "share (on delicious).execute"
+msgid "This URL cannot be shared on delicious."
+msgstr "Esta URL não pode ser compartilhada no delicious."
+
+msgctxt "share (on delicious).execute"
+msgid "No active user found - log in at delicious.com to use this command."
+msgstr "Você não está logado. Entre no delicious para poder utilizar este comando."
+
+msgctxt "share (on delicious).execute"
+msgid "A title is required for bookmarks at delicious.com"
+msgstr "É necessário um título para Favoritos no delicious"
+
+msgctxt "share (on delicious).execute"
+msgid "Bookmark \\\"${description}\\\" shared at delicious.com/${user_name}"
+msgstr "\\\"${description}\\\" enviado para delicious.com/${user_name}"
+
+msgctxt "share (on delicious).execute"
+msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
+msgstr "ERRO: \\\"${description}\\\" não pode ser enviado para delicious.com/${user_name}"
+
+

@@ -1,0 +1,143 @@
+# developer.po
+# 
+# Localizers:
+# Felipe Gomes <felipc@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-25 19:44+0900\n"
+
+#. highlight syntax command:
+#. use | to separate multiple name values:
+msgctxt "highlight syntax.names"
+msgid "highlight syntax|hilite syntax"
+msgstr "colorir sintaxe"
+
+msgctxt "highlight syntax.description"
+msgid "Treats your selection as program source code, guesses its language, and colors it based on syntax."
+msgstr "Colore a sintaxe do texto selecionado. A linguagem do código será automaticamente identificado."
+
+msgctxt "highlight syntax.execute"
+msgid "You must select some code to syntax-hilight."
+msgstr "Você precisa ter algum código selecionado."
+
+msgctxt "highlight syntax.preview"
+msgid "Syntax highlights your code."
+msgstr "Colore a sintaxe do seu código selecionado."
+
+
+#. view source command:
+#. use | to separate multiple name values:
+msgctxt "view source.names"
+msgid "view source|view page source"
+msgstr "Ver fonte|Ver código-fonte"
+
+msgctxt "view source.description"
+msgid "Shows you the source-code of the web page you're looking at."
+msgstr "Exibe o código fonte HTML da página que está sendo exibida no momento."
+
+
+#. escape HTML entities command:
+#. use | to separate multiple name values:
+msgctxt "escape HTML entities.names"
+msgid "escape HTML entities"
+msgstr "Converter entidades HTML|Converter HTML"
+
+msgctxt "escape HTML entities.description"
+msgid "Replaces html entities (&lt;, &gt;, &amp;, &quot; and &#39;) with their escape sequences."
+msgstr "Troca entidades HTML (&lt;, &gt;, &amp;, &quot; e &#39;) com suas sequências correspondentes."
+
+msgctxt "escape HTML entities.execute"
+msgid "No text selected."
+msgstr "Nenhum texto selecionado."
+
+
+#. run selector-selector command:
+#. use | to separate multiple name values:
+msgctxt "run selector-selector.names"
+msgid "run selector-selector"
+msgstr "Rodar seletor jQuery"
+
+msgctxt "run selector-selector.help"
+msgid "<dl>\n"
+"  <dt>\n"
+"    <b>Left-click / Enter</b>\n"
+"  </dt>\n"
+"  <dd>Copy and Quit</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Middle-click /\n"
+"      <u>C</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Copy</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Right-click / Esc /\n"
+"      <u>Q</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Quit</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      <u>M</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Move</dd>\n"
+"  <dt>\n"
+"    <b>PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Scroll vertically</dd>\n"
+"  <dt>\n"
+"    <b>shift + PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Scroll horizontally</dd>\n"
+"</dl>"
+msgsrt "<dl>\n"
+"  <dt>\n"
+"    <b>Botão esquerdo / Enter</b>\n"
+"  </dt>\n"
+"  <dd>Copiar e fechar</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Botão do meio /\n"
+"      <u>C</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Copiar</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Botão Direito / Esc /\n"
+"      <u>Q</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Fechar</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      <u>M</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Mover</dd>\n"
+"  <dt>\n"
+"    <b>PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Rolar verticalmente</dd>\n"
+"  <dt>\n"
+"    <b>Shift + PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Rolar horizontalmente</dd>\n"
+"</dl>"
+
+
+msgctxt "run selector-selector.description"
+msgid "<ul style=\"list-style-image:none\">\n"
+"  <li>Lets you type a jQuery selector and highlights matched elements.</li>\n"
+"  <li>Hovering on an element generates a matching selector.</li>\n"
+"</ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"  <li>Permite digitar um seletor jQuery e destaca os elementos encontrados.</li>\n"
+"  <li>Passando o mouse em cima de um elemento gera um seletor para ele.</li>\n"
+"</ul>"
+
+
