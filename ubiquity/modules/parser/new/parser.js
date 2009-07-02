@@ -133,6 +133,15 @@ Parser.prototype = {
   //
   // The {{{_roleSignatures}}} is a hash to keep track of different role
   _roleSignatures: {},
+  
+  // ** {{{Parser#_hasObjectsWithDelimiters}}} **
+  //
+  // This is a boolean set on initialization to be true if the language has
+  // a delimiter set for the object role besides "". If there is, objects
+  // which *don't* have a modifier will be lowered in score.
+  //
+  // Example: think Japanese.
+  _hasObjectsWithDelimiters: false,
 
   // ** {{{Parser#_patternCache}}} **
   //
@@ -241,6 +250,13 @@ Parser.prototype = {
       // make the object this role.
       if (role !== "object" && !(role in otherRolesCache) && delimiter)
         otherRolesCache[role] = delimiter;
+
+    for each (let {role, delimiter} in this.roles) {
+      if (role == 'object' && delimiter != '') {
+        this._hasObjectsWithDelimiters = true;
+        break;
+      }
+    }
 
     var verbs = this._verbList;
 
@@ -1255,6 +1271,11 @@ Parser.prototype = {
           if (arg.input == argText) {
             for(let key in suggestion)
               arg[key] = suggestion[key];
+
+            if (role == 'object' && this._hasObjectsWithDelimiters
+                && !(arg.modifier))
+              arg.score *= 0.6;
+
             break;
           }
         }
