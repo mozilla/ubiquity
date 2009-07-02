@@ -531,17 +531,13 @@ var noun_type_time = {
 
 var noun_type_async_address = {
   label: "address",
-  suggest: function(text, html, callback) {
-    var asyncRequest = getAddress( text, function( truthiness ) {
-      if (truthiness) {
-        callback([CmdUtils.makeSugg(text, null, null, 2, null)]);
-      }
-      else{
-	callback([]);
-      }
-    });
-    return [asyncRequest];
-  }
+  suggest: function(text, html, callback, selectionIndices)
+    [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
+     getAddress(text, function addressBack(truthiness) {
+       callback(truthiness
+                ? [CmdUtils.makeSugg(text, html, null, 2, selectionIndices)]
+                : []);
+     })],
 };
 
 // === {{{ noun_type_async_restaurant }}} ===
@@ -931,7 +927,8 @@ function getYahooContacts( callback ){
       if(name){
         var contact = {};
         contact["name"] = name;
-        contact["email"] = name + "@yahoo.com"; //TODO: what about yahoo.co.uk or ymail?
+        //TODO: what about yahoo.co.uk or ymail?
+        contact["email"] = name + "@yahoo.com";
         contacts.push(contact);
       }
     }
@@ -975,24 +972,24 @@ function getRestaurants(query, callback){
       var allBusinesses = data.businesses.map(
         function(business){
           return {name: business.name.toLowerCase().replace(/\s+/g, ''),
-	          categories: business.categories};
+            categories: business.categories};
         });
       // if the business's name or category overlaps with the query
       // then consider it a restaurant match
       for each (business in allBusinesses){
         if(business.name.indexOf(queryToMatch) != -1 ||
-	   queryToMatch.indexOf(business.name) != -1){
+           queryToMatch.indexOf(business.name) != -1){
               callback( true );
               return;
         }
         else{
           for each (category in business.categories){
-     	    if(category.name.indexOf(queryToMatch) != -1 ||
+            if(category.name.indexOf(queryToMatch) != -1 ||
               queryToMatch.indexOf(category.name) != -1){
-	        callback( true );
-	        return;
-	    }
-	  }
+              callback( true );
+              return;
+            }
+          }
         }
       }
       callback( false );
