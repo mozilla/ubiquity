@@ -36,16 +36,17 @@
  
 function makeParser() new Parser({
   lang: "$",
-  anaphora: ["$", "*"],
-  roles: [{role: r, delimiter: d} for ([r, d] in Iterator({
+  anaphora: ["$"],
+  roles: [{role: r, delimiter: d} for ([r, ds] in Iterator({
     goal       : ">",
     source     : "<",
     location   : "@",
-    time       : "@",
+    time       : ":",
     instrument : "+",
-    alias      : "#",
-    format     : "|",
-  }))],
+    alias      : "=",
+    format     : "%",
+    modifier   : "*",
+  })) for each (d in ds.split(" "))],
   branching: "right",
   usespaces: true,
 });
