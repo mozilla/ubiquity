@@ -52,8 +52,8 @@ msgid "stop editing page|turn off edit mode"
 msgstr "stop redigering af side"
 
 msgctxt "stop editing page.description"
-msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing."
-msgstr "Hvis du har brugt kommandoen \"rediger side\" for at skifte siden til et redigerbart stadie, kan du bruge denne kommando til at returnere til normal visnings-stadie."
+msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing. If you want the changes to persist on page reload, issue the 'save' command first."
+msgstr "Hvis du har brugt kommandoen \"rediger side\" for at skifte siden til et redigerbart stadie, kan du bruge denne kommando til at returnere til normal visnings-stadie. Hvis du vil gemme æringerne såe bevares selv efer genindlæing af siden, skal du udstede kommandoen \"gem\" først."
 
 
 #. save page edits command:
@@ -63,7 +63,7 @@ msgid "save page edits"
 msgstr "Gem side ændringer"
 
 msgctxt "save page edits.description"
-msgid "Saves edits you've made to this page in an annotation. Undo with the 'undo page edits' command."
+msgid "Saves edits you've made to this page in an annotation. They will persist on page reload. You can remove them with the 'undo page edits' command."
 msgstr "Gemmer ændringer du har gjort til siden i en note. Fortryd ændriner med \"fortryd side-ænringer\"."
 
 

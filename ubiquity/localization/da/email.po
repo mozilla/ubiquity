@@ -96,8 +96,8 @@ msgid "get email address"
 msgstr "hent e-mail-adresse"
 
 msgctxt "get email address.help"
-msgid "Execute to copy the address."
-msgstr "Eksekver for at kopiere e-mail-adressen"
+msgid "Execute the command to copy the address to your clipboard."
+msgstr "Eksekver for at kopiere e-mail-adressen til dit clipboard."
 
 msgctxt "get email address.description"
 msgid "Looks up the email address of a person from your contacts list given their name. "
