@@ -410,7 +410,7 @@ Parser.prototype = {
               // verb prefix matches, even if they're only one or two
               // characters, will get higher scoreMultipliers than noun-first
               // suggestions, which get scoreMultiplier of 0.3. (trac #750)
-              score: ((0.3 + 0.7 * Math.sqrt(verbPiece.length / name.length))
+              score: ((0.4 + 0.6 * Math.sqrt(verbPiece.length / name.length))
                       * (order ? verbFinalMultiplier : verbInitialMultiplier)),
             },
             argString: argString,
@@ -1560,7 +1560,9 @@ ParseQuery.prototype = {
   // breakpoint to the next.
   //
   // Most of this async code is by Blair.
-  run: function PQ_run() {    
+  run: function PQ_run() {
+    // clear the nounCache... for 0.5
+    this.parser._nounCache = {};
     this._keepworking = true;
     this._next();
 
