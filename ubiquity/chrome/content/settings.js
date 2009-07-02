@@ -64,16 +64,17 @@ function onDocumentLoad() {
   }
 
   // set the language option controls to the correct values:
-  var parserVersion = UbiquitySetup.parserVersion;
-  $("#use-new-parser-checkbox").attr('checked', ( parserVersion == 2 ));
-  if (parserVersion == 2) {
+  var isNewParser = UbiquitySetup.parserVersion === 2;
+  $("#use-new-parser-checkbox")[0].checked = isNewParser;
+  if (isNewParser) {
     $("#language-select").removeAttr("disabled");
-    var langCode = UbiquitySetup.languageCode;
-    $("#language-select").find("option").each(
-      function() {
-        $(this).attr("selected", ($(this).attr("value") == langCode));
+    let langCode = UbiquitySetup.languageCode;
+    $("#language-select > options").each(function eachOption() {
+      if (this.value === langCode) {
+        this.selected = true;
+        return false;
       }
-    );
+    });
   }
 
   $("#max-suggestions").keyup(function changeMaxSuggestions() {
@@ -94,9 +95,11 @@ function changeLanguageSettings() {
     changed = true;
     prefs.setIntPref("parserVersion", useParserVersion);
   }
-  $("#language-select")[0].disabled = useParserVersion < 2;
+  var [langSelect] = $("#language-select");
+  if ((langSelect.disabled = useParserVersion < 2))
+    langSelect.options[0].selected = true;
 
-  var useLanguage = $("#language-select").val();
+  var useLanguage = langSelect.value;
   if (useLanguage !== prefs.getCharPref("language")) {
     changed = true;
     prefs.setCharPref("language", useLanguage);
