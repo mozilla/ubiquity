@@ -351,7 +351,7 @@ msgstr "指定した単語を Ask.com で検索します。"
 #. use | to separate multiple name values:
 msgctxt "answers.names"
 msgid "answers"
-msgstr "Answers|answers|アンサーズ"
+msgstr "Answersで検索する|Answersで検索して|Answersで検索しろ|Answersで調べる|Answersで調べて|Answersで調べろ"
 
 msgctxt "answers.description"
 msgid "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words."

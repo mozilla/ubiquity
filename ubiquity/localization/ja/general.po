@@ -131,7 +131,7 @@ msgstr "テキストが選択されていません。"
 #. use | to separate multiple name values:
 msgctxt "link to wikipedia.names"
 msgid "link to wikipedia"
-msgstr "リンク|リンクを挿入|リンクを挿入する|リンクを挿入して|リンクを挿入しろ|wikipediaにリンク|wikipediaリンク|wikipediaリンクを挿入|wikipediaリンクを挿入する|wikipediaリンクを挿入して|wikipediaリンクを挿入しろ|ウィキペディアにリンク|ウィキペディアリンク|ウィキペディアリンクを挿入|ウィキペディアリンクを挿入する|ウィキペディアリンクを挿入して|ウィキペディアリンクを挿入しろ"
+msgstr "リンクを挿入する|リンクを挿入して|リンクを挿入しろ|Wikipediaリンクを挿入する|Wikipediaリンクを挿入して|Wikipediaリンクを挿入しろ|ウィキペディアリンクを挿入する|ウィキペディアリンクを挿入して|ウィキペディアリンクを挿入しろ"
 
 msgctxt "link to wikipedia.description"
 msgid "Turns a phrase into a link to the matching Wikipedia article."
