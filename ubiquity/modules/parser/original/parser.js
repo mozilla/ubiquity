@@ -825,6 +825,7 @@ var roleToPrep = {
   instrument: "with",
   alias: "as",
   format: "in",
+  modifier: "of",
 };
 
 // Picks up noun's label. "_name" is for backward compatiblity
