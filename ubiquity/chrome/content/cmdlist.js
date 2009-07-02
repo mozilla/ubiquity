@@ -165,7 +165,8 @@ function fillTableRowForCmd(row, cmd, className) {
     '<td class="command">' +
     ("icon" in cmd ?
      <img class="favicon" src={cmd.icon}/>.toXMLString() : "") +
-    (<><a class="id" name={cmd.id}/><span class="name">{cmdDisplayName}</span></>) +
+    (<><a class="id" name={cmd.id}
+     /><span class="name">{cmdDisplayName}</span></>) +
     ("description" in cmd ?
      '<span class="description">' + cmd.description + '</span>' : "") +
     (names.length > 1 ?
@@ -202,46 +203,7 @@ function fillTableRowForCmd(row, cmd, className) {
         '</a></span>');
     }
   }
-/*
-  if (cmd.icon)
-    cmdElement.find(".favicon").attr("src", cmd.icon);
-  else
-    cmdElement.find(".favicon").remove();
 
-  var {homepage} = cmd;
-  if (homepage)
-    cmdElement.find(".homepage")[0].innerHTML =
-      <>View more information at <a href={homepage}>{homepage}</a></>;
-
-  var synonyms = Utils.isArray(cmd.names) ? cmd.names.slice(1) : cmd.synonyms;
-
-  if ((synonyms || 0).length)
-    cmdElement.find(".synonyms")
-      .before("also called ").text(synonyms.join(", "));
-
-  if (cmd.description)
-    cmdElement.find(".description")[0].innerHTML = cmd.description;
-
-  var authors = cmd.authors || cmd.author;
-  if (authors)
-    cmdElement.find(".author")
-      .append("by ",
-              [formatCommandAuthor(a)
-               for each (a in [].concat(authors))].join(", "));
-
-  var contributors = cmd.contributors || cmd.contributor;
-  if (contributors)
-    cmdElement.find(".contributors")
-      .append("contributed by ",
-              [formatCommandAuthor(c)
-               for each (c in [].concat(contributors))].join(", "));
-
-  if(cmd.license)
-    cmdElement.find(".license").text(" - licensed as " + cmd.license);
-
-  if(cmd.help)
-    cmdElement.find(".help")[0].innerHTML = cmd.help;
-*/
   if (className) {
     checkBoxCell.addClass(className);
     cmdElement.addClass(className);
@@ -358,8 +320,8 @@ function makeUnsubscribedFeedListElement(info, sortMode) {
   var $li = $("<li></li>").append(
     A(info.uri.spec, info.title),
     ("<ul>" +
-     ["<li>" + escapeHtml(id.split("#").pop()) + "</li>"
-      for (id in info.commands)].join("") +
+     ["<li>" + escapeHtml(cmd.name) + "</li>"
+      for each (cmd in info.commands)].join("") +
      "</ul>"),
     linkToAction("[resubscribe]",
                  function resubscribe() {
@@ -404,7 +366,6 @@ function addAllUnsubscribedFeeds(feedMgr) {
 // TODO the following code needs to make its way onto any page that has
 // a version string:
 //  $(".version").text(UbiquitySetup.version);
-
 
 function rebuildTable() {
   let svc = UbiquitySetup.createServices();
