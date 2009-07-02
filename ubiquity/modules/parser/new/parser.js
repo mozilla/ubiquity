@@ -1202,6 +1202,11 @@ Parser.prototype = {
     // the combination is the combination of which suggestions of which
     // nountype we put in which arguments.
     let combinations = [[]];
+    
+    let maxSuggestions = parse._query.maxSuggestions;
+
+    // sort an array of suggestions by score.
+    var byReverseScore = function(a,b)(b.score - a.score);
 
     for (let role in parse.args) {
       let thisVerbTakesThisRole = false;
@@ -1226,7 +1231,12 @@ Parser.prototype = {
 
             let nountypeId = verbArg.nountype.id;
             if (nountypeId in this._nounCache[argText]) {
-              for (let suggestionId in this._nounCache[argText][nountypeId]) {
+              
+              let suggestions = this._nounCache[argText][nountypeId];
+              suggestions.sort(byReverseScore);
+              suggestions = suggestions.slice(0,maxSuggestions);
+            
+              for (let suggestionId in suggestions) {
                 for each (let baseOrder in combinations) {
                   let newOrder = baseOrder.concat([{role:role,
                                             argText:argText,
