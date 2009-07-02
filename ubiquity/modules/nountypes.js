@@ -150,7 +150,7 @@ var noun_type_tab = {
   noExternalCalls: true,
   suggest: function nt_tab_suggest(text, html, cb, selectedIndices)
     [CmdUtils.makeSugg(tab.document.title || tab.document.URL, null, tab,
-                       CmdUtils.matchScore(text, tab.match), selectedIndices)
+                       CmdUtils.matchScore(tab.match), selectedIndices)
      for each (tab in Utils.tabs.search(text, CmdUtils.maxSuggestions))],
 };
 

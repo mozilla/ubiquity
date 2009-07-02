@@ -129,7 +129,7 @@ NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
   var match = text.match(this._regexp);
   if (!match) return [];
   // ToDo: how to score global match
-  var score = "index" in match ? matchScore(text, match) : 1;
+  var score = "index" in match ? matchScore(match) : 1;
   return [NounUtils.makeSugg(text, html, match, score, selectionIndices)];
 };
 
@@ -152,17 +152,19 @@ NounType._fromArray.suggest = NounType._fromObject.suggest = (
 
 // === {{{ NounUtils.matchScore() }}} ===
 //
-// Calculates the score for use in suggestions from a {{{text}}} and
-// a result array ({{{match}}}) of {{{RegExp#exec}}} corresponding it.
+// Calculates the score for use in suggestions from
+// a result array ({{{match}}}) of {{{RegExp#exec}}}.
 
-const SCORE_BASE = 0;
-const SCORE_LENGTH = 0.7;
-const SCORE_INDEX = 1 - SCORE_LENGTH;
+const SCORE_BASE = 0.5;
+const SCORE_LENGTH = 0.3;
+const SCORE_INDEX = 1 - SCORE_BASE - SCORE_LENGTH;
 
-function matchScore(text, match) (
-  SCORE_BASE
-  + SCORE_LENGTH * Math.sqrt(match[0].length / text.length)
-  + SCORE_INDEX  * (1 - match.index / text.length));
+function matchScore(match) {
+  var inLen = match.input.length;
+  return (SCORE_BASE
+          + SCORE_LENGTH * Math.pow(match[0].length / inLen, 2)
+          + SCORE_INDEX  * (1 - match.index / inLen));
+}
 
 // === {{{ NounUtils.makeSugg() }}} ===
 //
@@ -247,7 +249,7 @@ function grepSuggs(input, suggs, key) {
     let text = sugg[key];
     let match = re(text);
     if (!match) continue;
-    sugg.score = matchScore(text, match);
+    sugg.score = matchScore(match);
     results[++i + match.index * count] = sugg;
   }
   return results.filter(Boolean);
