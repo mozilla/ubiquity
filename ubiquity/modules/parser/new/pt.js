@@ -21,6 +21,7 @@
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Felipe Gomes <felipc@gmail.com>
+ *   Fernando Takai <fernando.takai@gmail.com>    
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -54,6 +55,8 @@ function makeParser() {
     {role: 'source', delimiter: 'do'},
     {role: 'source', delimiter: 'da'},
 
+    {role: 'location', delimiter: 'em'},
+
     {role: 'time', delimiter: 'às'},
     {role: 'time', delimiter: 'de'},
     {role: 'time', delimiter: 'a'},
@@ -64,7 +67,15 @@ function makeParser() {
     {role: 'instrument', delimiter: 'pelo'},
     {role: 'instrument', delimiter: 'pela'},
     {role: 'instrument', delimiter: 'no'},
-    {role: 'instrument', delimiter: 'na'}
+    {role: 'instrument', delimiter: 'na'},
+    
+    {role: 'format', delimiter: 'em'},
+
+    {role: 'modifier', delimiter: 'de'},
+    {role: 'modifier', delimiter: 'para'},
+
+    {role: 'alias', delimiter: 'como'}
+
   ];
   pt.branching = 'right';
   pt.anaphora = ['isto', 'isso', 'aquilo'];
