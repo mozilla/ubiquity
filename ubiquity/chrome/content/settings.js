@@ -57,7 +57,12 @@ function onDocumentLoad() {
   Cu.import("resource://ubiquity/modules/parser/new/namespace.js",ParserJSM);
   var parserRegistry = ParserJSM.parserRegistry;
 
-  for (let code in parserRegistry) {
+  /* Don't display every code in parserRegistry; only the ones that have
+   * had command localization done.  For now this is a hardcoded list.
+   * TODO kep this list updated when new localizations are done; eventually
+   * replace with something that detects command localizations automatically.
+   */
+  for each (let code in ["da", "en", "ja", "pt"]) {
     $('#language-select').append($("<option value='"+code+"' "+
                               (code=='en'?" selected='true'":'')+">"
                               +parserRegistry[code]+'</input>'));
