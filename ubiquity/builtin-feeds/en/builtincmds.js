@@ -48,7 +48,7 @@ const Help = "about:ubiquity";
 const Editor = "chrome://ubiquity/content/editor.html";
 const CmdList = "chrome://ubiquity/content/cmdlist.html";
 const Settings = "chrome://ubiquity/content/settings.html";
-const BugReport = "chrome://ubiquity/content/report-bug.html";
+const BugReport = "http://getsatisfaction.com/mozilla/products/mozilla_ubiquity";
 const Support = "chrome://ubiquity/content/support.html";
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
