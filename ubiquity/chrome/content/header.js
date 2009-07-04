@@ -40,7 +40,7 @@ var navUrls = [
   {name: "Tutorial", url: "about:ubiquity"},
   {name: "Settings", url: "chrome://ubiquity/content/settings.html"},
   {name: "Your Commands", url: "chrome://ubiquity/content/cmdlist.html"},
-  {name: "Get New Commands", url: "https://ubiquity.mozilla.com/herd/"},
+  {name: "Get New Commands", url: "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"},
   {name: "Support", url: "chrome://ubiquity/content/support.html"},
   {name: "Hack Ubiquity", url: "chrome://ubiquity/content/editor.html"}
 ];
