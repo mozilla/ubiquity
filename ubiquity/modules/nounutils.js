@@ -42,6 +42,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = NounUtils =
+//
+// A library of noun related utilities.
+// [[#modules/cmdutils.js|CmdUtils]] inherits them all.
 
 var EXPORTED_SYMBOLS = ["NounUtils"];
 
@@ -60,7 +63,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 //
 // {{{label}}} is an optional string specifying default label of the nountype.
 //
-// {{{expected}}} is an instance of {{{Array}}} {{{RegExp}}}, or {{{Object}}}.
+// {{{expected}}} is the instance of {{{Array}}}, {{{Object}}} or {{{RegExp}}}.
 // The array can optionally be a space-separeted string.
 //
 // {{{defaults}}} is an optional array or space-separated string
@@ -105,8 +108,27 @@ NounType.default = function default() this._defaults;
 NounType._fromArray = function NT_Array(words)({
   id: "#na_",
   name: words.slice(0, 2) + (words.length > 2 ? ",..." : ""),
-  _list: [NounUtils.makeSugg(w) for each (w in words)],
+  _list: [makeSugg(w) for each (w in words)],
 });
+
+// ** {{{ NounUtils.NounType._fromObject() }}} **
+//
+// Creates a noun type from the given key:value pairs, the key being
+// the {{{text}}} attribute of its suggest and the value {{{data}}}.
+//
+// {{{dict}}} is the object of text:data pairs.
+
+NounType._fromObject = function NT_Object(dict) {
+  var list = [makeSugg(key, null, dict[key]) for (key in dict)];
+  return {
+    name: ([s.text for each (s in list.slice(0, 2))] +
+           (list.length > 2 ? ",..." : "")),
+    _list: list,
+  };
+};
+
+NounType._fromArray.suggest = NounType._fromObject.suggest = (
+  function NT_suggest(text) grepSuggs(text, this._list));
 
 // ** {{{ NounUtils.NounType._fromRegExp() }}} **
 //
@@ -117,11 +139,10 @@ NounType._fromArray = function NT_Array(words)({
 //
 // {{{regexp}}} is the RegExp object that checks inputs.
 
-NounType._fromRegExp = function NT_RegExp(regexp)({
+NounType._fromRegExp = function NT_RegExp(regexp) ({
   id: "#nr_",
-  name: regexp.source,
+  name: regexp + "",
   rankLast: regexp.test(""),
-  suggest: arguments.callee.suggest,
   _regexp: regexp,
 });
 NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
@@ -130,25 +151,8 @@ NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
   if (!match) return [];
   // ToDo: how to score global match
   var score = "index" in match ? matchScore(match) : 1;
-  return [NounUtils.makeSugg(text, html, match, score, selectionIndices)];
+  return [makeSugg(text, html, match, score, selectionIndices)];
 };
-
-// ** {{{ NounUtils.NounType._fromObject() }}} **
-//
-// Creates a noun type from the given key:value pairs, the key being
-// the {{{text}}} attribute of its suggest and the value {{{data}}}.
-//
-// {{{dict}}} is an object of text:data pairs.
-
-NounType._fromObject = function NT_Object(dict)({
-  name: ([key for (key in dict)].slice(0, 2) +
-         (dict.__count__ > 2 ? ",..." : "")),
-  _list: [NounUtils.makeSugg(key, null, val)
-          for ([key, val] in Iterator(dict))],
-});
-
-NounType._fromArray.suggest = NounType._fromObject.suggest = (
-  function NT_suggest(text) NounUtils.grepSuggs(text, this._list));
 
 // === {{{ NounUtils.matchScore() }}} ===
 //
@@ -168,13 +172,21 @@ function matchScore(match) {
 
 // === {{{ NounUtils.makeSugg() }}} ===
 //
-// A helper function to create a suggestion object.
+// Creates a suggestion object, filling in {{{text}}} and {{{html}}} if missing
+// and constructing {{{summary}}} from {{{text}}} and {{{selectionIndices}}}.
+// At least one of {{{text}}}, {{{html}}} or {{{data}}} is required.
 //
-// {{{text}}}
-// {{{html}}}
-// {{{data}}}
+// {{{text}}} can be any string.
+//
+// {{{html}}} must be a valid HTML string.
+//
+// {{{data}}} can be any value.
+//
 // {{{score = 1}}}
-// {{{selectionIndices}}}
+// is an optional float number representing the score of the suggestion.
+//
+// {{{selectionIndices}}} is an optional array containing the start and end
+// indices of selection within {{{text}}}.
 
 function makeSugg(text, html, data, score, selectionIndices) {
   if (text == null && html == null && arguments.length < 3)
@@ -217,8 +229,8 @@ function makeSugg(text, html, data, score, selectionIndices) {
                Utils.escapeHtml(middle) +
                "</span>" +
                Utils.escapeHtml(post));
-  } else
-    summary = Utils.escapeHtml(summary);
+  }
+  else summary = Utils.escapeHtml(summary);
 
   return {
     text: text, html: html, data: data,
@@ -246,8 +258,7 @@ function grepSuggs(input, suggs, key) {
   }
   var results = [], count = suggs.__count__, i = -1;
   for each (let sugg in suggs) {
-    let text = sugg[key];
-    let match = re(text);
+    let match = re(sugg[key]);
     if (!match) continue;
     sugg.score = matchScore(match);
     results[++i + match.index * count] = sugg;
