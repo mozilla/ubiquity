@@ -102,7 +102,7 @@ function changeLanguageSettings() {
   }
   var [langSelect] = $("#language-select");
   if ((langSelect.disabled = useParserVersion < 2))
-    langSelect.options[0].selected = true;
+    langSelect.value = "en";
 
   var useLanguage = langSelect.value;
   if (useLanguage !== prefs.getCharPref("language")) {
@@ -110,13 +110,9 @@ function changeLanguageSettings() {
     prefs.setCharPref("language", useLanguage);
   }
 
-  if (changed) {
+  if (changed)
     $("#lang-settings-changed-info").html(
-      "<i>This change will take effect when you restart Firefox.</i>"
-    );
-  } else {
-    $("#lang-settings-changed-info").empty();
-  }
+      "<i>This change will take effect when you restart Firefox.</i>");
 }
 
 function loadSkinList() {
