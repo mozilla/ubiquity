@@ -130,18 +130,17 @@ PreviewBrowser.prototype = {
     var key = String.fromCharCode(code).toLowerCase();
     var xpr = doc.evaluate('/html/body//*[@accesskey]', doc, null,
                            win.XPathResult.ORDERED_NODE_ITERATOR_TYPE , null);
-    for (let lmn; (lmn = xpr.iterateNext());) {
-      if (lmn.getAttribute("accesskey").toLowerCase() !== key) continue;
-      if (/^a$/i.test(lmn.nodeName)) {
-        let evt = doc.createEvent("MouseEvents");
-        evt.initMouseEvent("click", true, true, win,
-                           0, 0, 0, 0, 0, false, false, false, false, 0,
-                           null);
-        lmn.dispatchEvent(evt);
-      } else
-        lmn.focus();
-      break;
-    }
+    for (let lmn; (lmn = xpr.iterateNext());)
+      if (lmn.getAttribute("accesskey").toLowerCase() === key) {
+        if (/^a$/i.test(lmn.nodeName)) {
+          let evt = doc.createEvent("MouseEvents");
+          evt.initMouseEvent("click", true, true, win, 0, 0, 0, 0, 0,
+                             false, false, false, false, 0, null);
+          lmn.dispatchEvent(evt);
+        }
+        else lmn.focus();
+        break;
+      }
   },
 
   queuePreview : function PB__queuePreview(url, delay, cb) {

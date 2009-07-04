@@ -437,14 +437,14 @@ function openUrlInBrowser(urlString, postData) {
   //1 (or anything else): In the current tab or window
 
   if (browser.mCurrentBrowser.currentURI.spec === "about:blank" &&
-     !browser.webProgress.isLoadingDocument)
+      !browser.webProgress.isLoadingDocument)
     browserWindow.loadURI(urlString, null, postInputStream, false);
-  else if (openPref == 3) {
-    var ke = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
-    browser[ke.shiftKey || ke.ctrlKey ? 'addTab' : 'loadOneTab'](
+  else if (openPref === 3) {
+    let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
+    browser[shiftKey ? 'addTab' : 'loadOneTab'](
       urlString, null, null, postInputStream, false, false);
   }
-  else if (openPref == 2)
+  else if (openPref === 2)
     browserWindow.openDialog('chrome://browser/content', '_blank',
                              'all,dialog=no', urlString, null, null,
                              postInputStream);

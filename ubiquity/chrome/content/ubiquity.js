@@ -158,25 +158,29 @@ Ubiquity.prototype = {
   __onKeyup: function __onKeyup(event) {
     var {keyCode} = this.__lastKeyEvent = event;
 
-    if (keyCode !== this.__KEYCODE_UP &&
-        keyCode !== this.__KEYCODE_DOWN &&
-        keyCode !== this.__KEYCODE_TAB)
+    if (event.ctrlKey && event.altKey &&
+        KeyEvent.DOM_VK_0 <= keyCode && keyCode <= KeyEvent.DOM_VK_Z) {
+      this.__cmdManager.activateAccessKey(keyCode);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    if (keyCode >= KeyEvent.DOM_VK_DELETE ||
+        keyCode === KeyEvent.DOM_VK_SPACE ||
+        keyCode === KeyEvent.DOM_VK_BACK_SPACE)
+      // keys that would change input
+      // https://developer.mozilla.org/En/DOM/Event/UIEvent/KeyEvent
       this.__processInput();
   },
 
-   __onKeyPress: function(event) {
-     if (event.keyCode === this.__KEYCODE_ENTER) {
-       this.__processInput(true);
-       if (this.__cmdManager.hasSuggestions()) {
-         this.__needsToExecute = true;
-       }
-       this.__msgPanel.hidePopup();
-     } else if (event.ctrlKey && event.altKey) {
-       this.__cmdManager.activateAccessKey(event.which);
-       event.preventDefault();
-       event.stopPropagation();
-     }
-   },
+  __onKeyPress: function __onKeyPress(event) {
+    if (event.keyCode === this.__KEYCODE_ENTER) {
+      this.__processInput(true);
+      this.__needsToExecute = this.__cmdManager.hasSuggestions();
+      this.__msgPanel.hidePopup();
+    }
+  },
 
   __onSuggestionsUpdated: function __onSuggestionsUpdated() {
     var input = this.__textBox.value;
@@ -243,9 +247,8 @@ Ubiquity.prototype = {
   },
 
   openWindow: function openWindow() {
-    this.__focusedWindow = document.commandDispatcher.focusedWindow;
-    this.__focusedElement = document.commandDispatcher.focusedElement;
-
+    ({focusedWindow : this.__focusedWindow,
+      focusedElement: this.__focusedElement}) = document.commandDispatcher;
     // This is a temporary workaround for #43.
     var anchor = document.getElementById("content").selectedBrowser;
     this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
