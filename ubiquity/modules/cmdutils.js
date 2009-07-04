@@ -67,6 +67,10 @@ Cu.import("resource://ubiquity/modules/contextutils.js");
 
 const {Application} = Utils;
 
+// == From NounUtils ==
+//
+// {{{CmdUtils}}} inherits [[#modules/nounutils.js|NounUtils]].
+
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
@@ -1304,7 +1308,7 @@ function previewCallback(pblock, callback, abortCallback) {
 //
 // {{{callback(id, ev)}}} is the function called
 // when one of the list item becomes focused.
-// * {{{id}}} : one of the key of {{{htmls}}}
+// * {{{id}}} : one of the keys of {{{htmls}}}
 // * {{{ev}}} : the event object
 //
 // {{{css}}} is an optional CSS string inserted along with the list.
