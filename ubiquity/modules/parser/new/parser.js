@@ -444,9 +444,16 @@ Parser.prototype = {
     var initialMatches = input.match(this._patternCache.verbInitialTest);
     if (initialMatches) {
       let [, verbPiece, argString] = initialMatches;
-      if (/^\s*$/.test(argString))
+      let position = 0;
+      if (/^\s*$/.test(argString)) {
+        // this was a verb-only match which was interpreted as verb-initial
         verbOnlyMatch = verbPiece;
-      addParses(verbPiece, argString, 0);
+        // if we prefer verb-final parses to verb-initial ones...
+        if (verbFinalMultiplier > verbInitialMultiplier)
+          // add this verb-only parse as verb-final.
+          position = -1;
+      }
+      addParses(verbPiece, argString, position);
     }
 
     // let's see if there's a verb at the end of the string
