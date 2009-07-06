@@ -382,7 +382,7 @@ Gettext.prototype.parse_locale_data = function(locale_data) {
                 Gettext._locale_data[domain].head.plural_func = new Function("n", code);
             } else {
                 throw new Error("Syntax error in language file. Plural-Forms header is invalid ["+plural_forms+"]");
-            }   
+            }
 
         // default to english plural form
         } else if (typeof(Gettext._locale_data[domain].head.plural_func) == 'undefined') {
@@ -685,7 +685,7 @@ If domainname is undefined, null, or empty string, the function returns
 the current message domain.
 
 If  successful,  the  textdomain  function  returns the current message
-domain, after possibly changing it. (ie. if you set a new domain, the 
+domain, after possibly changing it. (ie. if you set a new domain, the
 value returned will NOT be the previous domain).
 
 =cut
@@ -712,7 +712,7 @@ One common mistake is to interpolate a variable into the string like this:
 
   var translated = gt.gettext("Hello " + full_name);
 
-The interpolation will happen before it's passed to gettext, and it's 
+The interpolation will happen before it's passed to gettext, and it's
 unlikely you'll have a translation for every "Hello Tom" and "Hello Dick"
 and "Hellow Harry" that may arise.
 
@@ -720,7 +720,7 @@ Use C<strargs()> (see below) to solve this problem:
 
   var translated = Gettext.strargs( gt.gettext("Hello %1"), [full_name] );
 
-This is espeically useful when multiple replacements are needed, as they 
+This is espeically useful when multiple replacements are needed, as they
 may not appear in the same order within the translation. As an English to
 French example:
 
@@ -734,7 +734,7 @@ translated here ...).
 
 =head2 dgettext( TEXTDOMAIN, MSGID )
 
-Like gettext(), but retrieves the message for the specified 
+Like gettext(), but retrieves the message for the specified
 B<TEXTDOMAIN> instead of the default domain.  In case you wonder what
 a textdomain is, see above section on the textdomain() call.
 
@@ -838,7 +838,7 @@ In English, or if no translation can be found, the second argument
 
 =head2 dpgettext( TEXTDOMAIN, MSGCTXT, MSGID )
 
-Like pgettext(), but retrieves the message for the specified 
+Like pgettext(), but retrieves the message for the specified
 B<TEXTDOMAIN> instead of the default domain.
 
 =head2 dcpgettext( TEXTDOMAIN, MSGCTXT, MSGID, CATEGORY )
@@ -959,6 +959,7 @@ Gettext.prototype.dcnpgettext = function (domain, msgctxt, msgid, msgid_plural, 
 
     var locale_data = new Array();
     if (typeof(Gettext._locale_data) != 'undefined' &&
+        typeof(Gettext._locale_data[domainname]) != 'undefined' &&
         this.isValidObject(Gettext._locale_data[domainname])) {
         locale_data.push( Gettext._locale_data[domainname] );
 

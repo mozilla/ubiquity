@@ -179,7 +179,8 @@ function AnnotationService(connection) {
       urls[uri.spec] = uri;
     }
 
-    if (ann[uri.spec][name] != value) {
+    if (typeof(ann[uri.spec][name]) == "undefined" ||
+        ann[uri.spec][name] != value) {
       // Only write out to the database if our actual contents have
       // changed.
       ann[uri.spec][name] = value;
