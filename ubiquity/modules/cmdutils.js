@@ -779,7 +779,7 @@ function CreateCommand(options) {
       command.preview = function previewHtml(pblock) {
         pblock.innerHTML = this._previewString;
       };
-      command._previewString = preview;
+      command._previewString = String(preview);
     }
   }
 
@@ -801,10 +801,6 @@ CreateCommand.previewDefault = function previewDefault(pb) {
             Utils.escapeHtml(this.name) + '</b> command.');
   html = '<div class="default">' + html + '</div>';
   if (pb) pb.innerHTML = html;
-  this.previewDefault = function previewDefaultFixed(pb) {
-    if (pb) pb.innerHTML = html;
-    return html;
-  };
   return html;
 };
 

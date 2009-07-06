@@ -159,45 +159,47 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 
 DefaultFeedPlugin.makeCmdForObj = makeCmdForObj;
 function makeCmdForObj(sandbox, commandObject, feedUri) {
-  Cu.import("resource://ubiquity/modules/localization_utils.js");
-  
+  const {LocalizationUtils} =
+    Cu.import("resource://ubiquity/modules/localization_utils.js", null);
+
   // referenceName is set by CreateCommand, so this command must have
   // bypassed CreateCommand. Let's set the referenceName here.
-  if (!commandObject.referenceName)
+  if (!("referenceName" in commandObject))
     commandObject.referenceName = commandObject.name;
-  
+
   var cmd = {
     __proto__: commandObject,
     toString: function CS_toString() {
       return "[object UbiquityCommand " + this.name + "]";
     },
     id: feedUri.spec + "#" + commandObject.referenceName,
-    name: commandObject.name,
     execute: function CS_execute(context) {
       /* Any additional arguments passed in after context will be passed along
        * as-is to the commandObject.execute() method.
        */
       sandbox.context = context;
-      LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'execute');
-      return commandObject.execute.apply(commandObject,
-                                         Array.slice(arguments, 1));
+      LocalizationUtils.setLocalizationContext(feedUri,
+                                               commandObject.referenceName,
+                                               "execute");
+      return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
     },
     feedUri: feedUri
   };
 
-  if (commandObject.preview)
+  if ("preview" in commandObject)
     cmd.preview = function CS_preview(context) {
       /* Any additional arguments passed in after context will be passed along
        * as-is to the commandObject.preview() method.
        */
       sandbox.context = context;
-      LocalizationUtils.setLocalizationContext(feedUri, cmd.referenceName, 'preview');
-      return commandObject.preview.apply(commandObject,
-                                         Array.slice(arguments, 1));
+      LocalizationUtils.setLocalizationContext(feedUri,
+                                               commandObject.referenceName,
+                                               "preview");
+      return commandObject.preview.apply(cmd, Array.slice(arguments, 1));
     };
 
   return finishCommand(cmd);
-};
+}
 
 function makeCodeSource(feedInfo, headerSources, footerSources,
                         timeoutInterval) {
