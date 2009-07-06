@@ -133,7 +133,7 @@ Parser.prototype = {
   //
   // The {{{_roleSignatures}}} is a hash to keep track of different role
   _roleSignatures: {},
-  
+
   // ** {{{Parser#_hasObjectsWithDelimiters}}} **
   //
   // This is a boolean set on initialization to be true if the language has
@@ -935,7 +935,7 @@ Parser.prototype = {
     if (!parse._verb.id){
       let parseCopy = parse.copy();
       if(!parseCopy.input.length){
-        if (!('object' in parseCopy.args)) 
+        if (!('object' in parseCopy.args))
           parseCopy.args.object = [];
         parseCopy.args['object'].push({ _order: --count,
               input: selection,
@@ -965,7 +965,7 @@ Parser.prototype = {
         innerSpace: this.joindelimiter,
         outerSpace: this.joindelimiter};
       parseCopy.scoreMultiplier *= 1.2; // TODO: again, unsure.
-      if (!(role in parseCopy.args)) 
+      if (!(role in parseCopy.args))
         parseCopy.args[role] = [];
       parseCopy.args[role].push(objectCopy);
       returnArr.push(parseCopy);
@@ -1085,7 +1085,7 @@ Parser.prototype = {
       // so we won't apply this object to other roles.
       if (object.modifier)
         continue; // goes to the next parse.args.object key
-        
+
       let newParses = [];
       for (let role in this._otherRolesCache) {
         let delimiter = this._otherRolesCache[role];
@@ -1149,12 +1149,12 @@ Parser.prototype = {
     // For the time being... kill parses which have multiple arguments
     // of the same role, as we have no real way of dealing with them and
     // their scores are so low anyway...
-    
+
     for each (let roleArgArray in parse.args) {
       if (roleArgArray.length > 1)
         return [];
     }
-    
+
     VERBS:
     for (let verbId in verbs) {
       let verb = verbs[verbId];
@@ -1209,7 +1209,7 @@ Parser.prototype = {
     // the combination is the combination of which suggestions of which
     // nountype we put in which arguments.
     let combinations = [[]];
-    
+
     let maxSuggestions = parse._query.maxSuggestions;
 
     // sort an array of suggestions by score.
@@ -1238,11 +1238,11 @@ Parser.prototype = {
 
             let nountypeId = verbArg.nountype.id;
             if (nountypeId in this._nounCache[argText]) {
-              
+
               let suggestions = this._nounCache[argText][nountypeId];
               suggestions.sort(byReverseScore);
               suggestions = suggestions.slice(0,maxSuggestions);
-            
+
               for (let suggestionId in suggestions) {
                 for each (let baseOrder in combinations) {
                   let newOrder = baseOrder.concat([{role:role,
@@ -1280,7 +1280,7 @@ Parser.prototype = {
       // before, don't do it again.
       if (parse._suggestionCombinationsThatHaveBeenCompleted[combinationJson])
         continue;
-      
+
       let combinationParse = parse.copy();
       for each (let argOrder in combination) {
         let {role,argText,nountypeId,suggestionId} = argOrder;
@@ -1298,7 +1298,7 @@ Parser.prototype = {
           }
         }
       }
-      
+
       // we use this array to check whether we've used this before.
       parse._suggestionCombinationsThatHaveBeenCompleted[combinationJson]
                                                                   = true;
@@ -1418,9 +1418,9 @@ Parser.prototype = {
       if (typeof callback == 'function')
         callback(x);
     } else {
-    
+
       //Utils.log('detecting '+x,nounTypeIds);
-    
+
       if (Utils.isEmpty(this._nounCache[x]))
         this._nounCache[x] = {};
 
@@ -1552,7 +1552,7 @@ var ParseQuery = function(parser, queryString, selObj, context,
   // This {{{_step}}} property is increased throughout {{{_yieldParse()}}}
   // so you can check later to see how far the query went.
   this._step = 0;
-  
+
   // ** {{{ParseQuery#lastParseId}}} **
   // This is a counter of the number of "parses" (including intermediate
   // parses) created during the parse query. Used to ID parses.
@@ -1813,7 +1813,7 @@ ParseQuery.prototype = {
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
 
-      if (!parse.args.__count__)
+      if (parse.args.__count__ == 0)
         // This parse doesn't have any arguments. Complete it now.
         Utils.setTimeout(completeParse, 0, parse, []);
       else for each (let arg in parse.args) {
@@ -1831,9 +1831,9 @@ ParseQuery.prototype = {
     }
 
     for each (let parse in this._verbedParses) {
-      for each (let {argText,nounTypeIds} in 
+      for each (let {argText,nounTypeIds} in
                                         parse.getArgsAndNounTypeIdsToCheck()) {
-        this.parser.detectNounType(thisQuery, argText, nounTypeIds, 
+        this.parser.detectNounType(thisQuery, argText, nounTypeIds,
                                    tryToCompleteParses);
       }
       yield true;
@@ -1984,7 +1984,7 @@ ParseQuery.prototype = {
       this.dump("already contains parse #"+newParse._id+"!");
       return;
     }
-    
+
     var maxIndex = this.maxSuggestions - 1;
 
     if (!parseCollection[maxIndex]){
@@ -2045,8 +2045,8 @@ var Parse = function(query, input, verb, argString, parent) {
 
 Parse.prototype = {
   // ** {{{Parse#parseId}}} **
-  // Gives a 
-  
+  // Gives a
+
   // ** {{{Parse#displayText}}} **
   //
   // {{{displayText}}} prints the verb and arguments in the parse by
@@ -2231,7 +2231,7 @@ Parse.prototype = {
   },
 
   // **{{{Parse#getArgsAndNounTypeIdsToCheck}}} (read-only)**
-  // 
+  //
   // This returns an array of pairs of argument strings and the nountypes
   // they must be checked against.
   getArgsAndNounTypeIdsToCheck: function() {
@@ -2239,7 +2239,7 @@ Parse.prototype = {
       return this._argsAndNounTypeIdsToCheck;
 
     var returnArr = this._argsAndNounTypeIdsToCheck = [];
-    var nounTypeIdsWithNoExternalCalls = 
+    var nounTypeIdsWithNoExternalCalls =
                        this._query.parser._nounTypeIdsWithNoExternalCalls;
     for (let role in this.args) {
       // for each argument of this role...
@@ -2258,7 +2258,7 @@ Parse.prototype = {
 
         returnArr.push({argText:argText,
                         nounTypeIds:nounTypeIds});
-        
+
       }
     }
     return returnArr;
@@ -2383,7 +2383,11 @@ RegexpTrie.fn = {
     return this;
   },
   _regexp: function _regexp($) {
-    if ("" in $ && $.__count__ === 1) return "";
+    // TODO: We would use __count__ here, but JS keeps raising a
+    // strict warning about its deprecated use; see #795.
+    var count = [name for (name in $)
+                 if ($.hasOwnProperty(name))].length;
+    if (("" in $) && (count == 1)) return "";
     var alt = [], cc = [], q;
     for (let char in $) {
       if ($[char] !== 1) {
