@@ -5,14 +5,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-22 06:33+0100\n"
-"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.cat>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"PO-Revision-Date: \n"
-"Language-Team: \n"
-"MIME-Version: 1.0\n"
 
 #. twitter command:
 #. use | to separate multiple name values:
@@ -72,11 +72,11 @@ msgstr "digg|comparteix amb el digg"
 
 msgctxt "digg.description"
 msgid "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
-msgstr ""
+msgstr "Si no s'hagués enviat encara, envia la pàgina al Digg. Alternativament, us envia a la pàgina del Digg de la història."
 
 msgctxt "digg.preview"
 msgid "Submit or digg this page. Checking if this page has already been submitted..."
-msgstr ""
+msgstr "Envia al Digg la pàgina. Es comprova si ja s'ha enviat abans la pàgina..."
 
 msgctxt "digg.preview"
 msgid "Submit this page to Digg"
@@ -84,7 +84,7 @@ msgstr "Envia la pàgina al Digg"
 
 msgctxt "digg.preview"
 msgid "Submit this page to Digg with the description:"
-msgstr ""
+msgstr "Envia la pàgina al Digg amb la descripció:"
 
 msgctxt "digg.preview"
 msgid "Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated."
@@ -92,7 +92,7 @@ msgstr "La descripció només pot tenir 375 caràcters. Es truncaran els darrers
 
 msgctxt "digg.preview"
 msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
-msgstr ""
+msgstr "Envia la pàgina al Digg. Aquesta pàgina ja té <b>${diggs}</b> enviaments fets."
 
 #. tinyurl command:
 #. use | to separate multiple name values:
@@ -102,15 +102,15 @@ msgstr "tinyurl"
 
 msgctxt "tinyurl.description"
 msgid "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
-msgstr ""
+msgstr "Reemplaça l'URL seleccionat amb <a href=\"http://www.tinyurl.com\">TinyURL</a>."
 
 msgctxt "tinyurl.preview"
 msgid "Replaces the selected URL with..."
-msgstr ""
+msgstr "Reemplaça l'URL seleccionat amb..."
 
 msgctxt "tinyurl.preview"
 msgid "Replaces the selected URL with <b>${tinyurl}</b>."
-msgstr ""
+msgstr "Reemplaça l'URL seleccionat amb <b>${tinyurl}</b>."
 
 #. share (on delicious) command:
 #. use | to separate multiple name values:
@@ -120,11 +120,11 @@ msgstr "comparteix|compartix|delicious"
 
 msgctxt "share (on delicious).help"
 msgid "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."
-msgstr ""
+msgstr "Seleccioneu el text de la pàgina que voleu emprar com a notes, o bé introduïu el vostre propi text després de la paraula de l'ordre. També podeu assignar etiquetes a l'adreça d'interès amb el modificador «tagged», i alterar el tiol de la pàgina per defecte de l'adreça d'interès amb el modificador amb «entitled».  Tingueu en compte que heu de tenir una sessió oberta al delicious.com per a utilitzar aquesta ordre."
 
 msgctxt "share (on delicious).description"
 msgid "Share the current page as a bookmark on delicious.com"
-msgstr ""
+msgstr "Comparteix la pàgina actual com a adreça d'interès al delicious.com"
 
 msgctxt "share (on delicious).preview"
 msgid "This URL cannot be shared on ${delicious}."
@@ -132,7 +132,7 @@ msgstr "No es pot compartir l'URL a ${delicious}."
 
 msgctxt "share (on delicious).preview"
 msgid "No active user found - log in at ${delicious} to use this command."
-msgstr ""
+msgstr "No s'ha trobat cap usuari actiu - inicieu una sessió al ${delicious} per a utilitzar aquesta ordre."
 
 msgctxt "share (on delicious).preview"
 msgid "A title is required for bookmarks on ${delicious}"
@@ -160,7 +160,7 @@ msgstr "S'ha compartit l'adreça d'interès «${description}» a delicious.com/$
 
 msgctxt "share (on delicious).execute"
 msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
-msgstr ""
+msgstr "Error: L'adreça d'interès «${description}» NO s'ha compartit a delicious.com/${user_name}"
 
 #~ msgctxt "ask rypple.names"
 #~ msgid "ask rypple|rypple"

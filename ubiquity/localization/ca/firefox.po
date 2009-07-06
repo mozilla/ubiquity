@@ -2,11 +2,10 @@
 #
 # Localizers:
 # Toni Hermoso Pulido <toniher@softcatala.org>
- 
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"POT-Creation-Date: 2009-06-20 00:45+0900\n"
 "Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -60,7 +59,8 @@ msgstr "canvia a la pestanya|vés a la pestanya"
 
 msgctxt "switch to tab.description"
 msgid "Switches to the tab whose title or URL matches the input."
-msgstr "Es canvia a la pestanya el títol o l'URL de la qual coincideix amb l'entrada."
+msgstr ""
+"Es canvia a la pestanya el títol o l'URL de la qual coincideix amb l'entrada."
 
 #. close tab command:
 #. use | to separate multiple name values:
@@ -183,11 +183,13 @@ msgstr "zoom"
 
 msgctxt "zoom.description"
 msgid "Zooms the Firefox window in or out."
-msgstr "S'augmenta o redueix el zoom de la finestra del Firefox."
+msgstr "S'augmenta o es redueix el zoom de la finestra del Firefox."
 
 msgctxt "zoom.preview"
 msgid "Zooms the Firefox window to ${text} of its normal size."
-msgstr "Estableix la mida del contingut de la finestra del Firefox al ${text} de la seva mida normal."
+msgstr ""
+"Estableix la mida del contingut de la finestra del Firefox al ${text} de la "
+"seva mida normal."
 
 #. tag command:
 #. use | to separate multiple name values:
@@ -228,15 +230,14 @@ msgid "undo closed tabs|uct"
 msgstr "desfés les pestanyes tancades|dpt"
 
 msgctxt "undo closed tabs.help"
-msgid ""
-"<ul style=\"list-style-image:none\">\n"
+msgid "<ul style=\"list-style-image:none\">\n"
 "    <li>Use accesskey or click to undo.</li>\n"
 "    <li>Type to filter, then execute to undo all.</li>\n"
 "    </ul>"
-msgstr ""
-"<ul style=\"list-style-image:none\">\n"
+msgstr "<ul style=\"list-style-image:none\">\n"
 "    <li>Feu servir una drecera de teclat o feu clic per a desfer.</li>\n"
-"    <li>Escriviu per a filtrar, llavors executeu-ho per a desfer-ho tot.</li>\n"
+"    <li>Escriviu per a filtrar, llavors executeu-ho per a desfer-ho tot.</"
+"li>\n"
 "    </ul>"
 
 msgctxt "undo closed tabs.description"
@@ -268,4 +269,3 @@ msgstr "Comprova les vostres adreces d'interès actives"
 #~ msgctxt "count tabs.description"
 #~ msgid "Counts the number of opened tabs."
 #~ msgstr "Compta el nombre de pestanyes obertes,"
-

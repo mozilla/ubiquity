@@ -2,7 +2,6 @@
 #
 # Localizers:
 # Toni Hermoso Pulido <toniher@softcatala.org>
- 
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
@@ -19,11 +18,9 @@ msgid "help|about|?"
 msgstr "ajuda|sobre|quant a|?"
 
 msgctxt "help.description"
-msgid ""
-"Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
+msgid "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
 "      Or, enter the name of a command to get help on that command."
-msgstr ""
-"Us porta a la <a href=\"about:ubiquity\">pàgina principal d'ajuda</a> de l'Ubiquity.<br/>\n"
+msgstr "Us porta a la <a href=\"about:ubiquity\">pàgina principal d'ajuda</a> de l'Ubiquity.<br/>\n"
 "      O bé, introduïu el nom de l'ordre de la qual voleu obtenir ajuda."
 
 #. open (ubiquity settings page) command:
@@ -48,7 +45,7 @@ msgstr "escriu ordres de l'Ubiquity|edita ordres de l'Ubiquity"
 
 msgctxt "write ubiquity commands.description"
 msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
-msgstr "Us porta a la pàgina <a href=\"chrome://ubiquity/content/editor.html\">d'edició d'ordres</a> de l'Ubiquity."
+msgstr "Us porta a la pàgina <a href=\"chrome://ubiquity/content/editor.html"\">d'edició d'ordres</a> de l'Ubiquity."
 
 #. list ubiquity commands command:
 #. use | to separate multiple name values:
@@ -57,25 +54,22 @@ msgid "list ubiquity commands"
 msgstr "llista les ordres de l'Ubiquity"
 
 msgctxt "list ubiquity commands.description"
-msgid ""
-"Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
+msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
 "      of all Ubiquity commands available and what they all do."
-msgstr ""
-"Obre <a href=\"chrome://ubiquity/content/cmdlist.html\">la llista</a>\n"
+msgstr "Obre <a href=\"chrome://ubiquity/content/cmdlist.html\">la llista</a>\n"
 "      de totes les ordres de l'Ubiquity disponibles i què fan."
 
 #. change ubiquity settings command:
 #. use | to separate multiple name values:
 msgctxt "change ubiquity settings.names"
 msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin"
-msgstr "canvia els paràmetres de l'Ubiquity|canvia la configuració de l'Ubiquity|canvia l'aparença de l'Ubiquity"
+msgstr "canvia els paràmetres de l'Ubiquity|canvia la configuració de l'Ubiquity|"
+"canvia l'aparença de l'Ubiquity"
 
 msgctxt "change ubiquity settings.description"
-msgid ""
-"Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
 "      where you can change your skin, key combinations, etc."
-msgstr ""
-"Us porta a la pàgina de <a href=\"chrome://ubiquity/content/settings.html\">configuració</a> de l'Ubiquity,\n"
+msgstr "Us porta a la pàgina de <a href=\"chrome://ubiquity/content/settings.html\">configuració</a> de l'Ubiquity,\n"
 "      on podeu canviar-ne l'aparença, les combinacions de tecles, etc."
 
 #. get support command:
@@ -85,12 +79,11 @@ msgid "get support"
 msgstr "demana ajuda"
 
 msgctxt "get support.description"
-msgid ""
-"Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
 "    where you can report bugs, get troubleshooting help, etc."
-msgstr ""
-"Us porta a la pàgina <a href=\"chrome://ubiquity/content/support.html\">d'assistència</a>,\n"
-"    on podeu informar d'errors, aconseguir ajuda en la resolució de problemes, etc."
+msgstr "Us porta a la pàgina <a href=\"chrome://ubiquity/content/support.html\">d'assistència</a>,\n"
+"    on podeu informar d'errors, aconseguir ajuda en la resolució de "
+"problemes, etc."
 
 #. report bug command:
 #. use | to separate multiple name values:
@@ -100,7 +93,7 @@ msgstr "informa d'un error"
 
 msgctxt "report bug.description"
 msgid "Takes you to the <a href=\"chrome://ubiquity/content/report-bug.html\">bug report</a> page."
-msgstr "Us porta a la pàgina <a href=\"chrome://ubiquity/content/report-bug.html\">d'informe d'errors</a>."
+msgstr "Us porta a la pàgina <a href=\"chrome://ubiquity/content/report-bug.html\"> d'informe d'errors</a>."
 
 #. disable command command:
 #. use | to separate multiple name values:
@@ -110,7 +103,8 @@ msgstr "inhabilita l'ordre"
 
 msgctxt "disable command.description"
 msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
-msgstr "Inhabilita una ordre de l'Ubiquity, per tal que no aparegui més a la llista de suggeriments."
+msgstr "Inhabilita una ordre de l'Ubiquity, per tal que no aparegui més a la llista "
+"de suggeriments."
 
 #. enable command command:
 #. use | to separate multiple name values:
@@ -129,19 +123,19 @@ msgid "command history|vita"
 msgstr "historial d'ordres"
 
 msgctxt "command history.help"
-msgid ""
-"<ul style=\"list-style-image:none\">\n"
+msgid "<ul style=\"list-style-image:none\">\n"
 "    <li>Use accesskey or click to reuse.</li>\n"
 "    <li>Type to filter.</li>\n"
 "    <li>Execute to delete all matched histories.</li>\n"
 "    <li>Edit <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> to\n"
 "      set max number of histories.</li></ul>"
-msgstr ""
-"<ul style=\"list-style-image:none\">\n"
-"    <li>Feu servir una drecera de teclat o feu clic per a reutilitzar-ho.</li>\n"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"    <li>Feu servir una drecera de teclat o feu clic per a reutilitzar-ho.</"
+"li>\n"
 "    <li>Escriviu-hi per a filtrar.</li>\n"
 "    <li>Executeu-ho per a suprimir els historials coincidents.</li>\n"
-"    <li>Editeu <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> per a\n"
+"    <li>Editeu <a href=\"about:config\"><code>extensions.ubiquity.history."
+"max</code></a> per a\n"
 "      definir el nombre màxim d'historials.</li></ul>"
 
 msgctxt "command history.description"
@@ -154,5 +148,5 @@ msgstr "No coincideix cap historial"
 
 msgctxt "command history.execute"
 msgid "Deleted matched histories. Click here to undo."
-msgstr "Suprimeix els historials que coincideixen. Feu clic aquí per a desfer-ho."
-
+msgstr ""
+"Suprimeix els historials que coincideixen. Feu clic aquí per a desfer-ho."

@@ -2,11 +2,10 @@
 #
 # Localizers:
 # Toni Hermoso Pulido <toniher@softcatala.org>
- 
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
-"POT-Creation-Date: 2009-06-22 06:33+0100\n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
 "Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -40,7 +39,12 @@ msgstr "edita la pàgina|activa el mode d'edició"
 
 msgctxt "edit page.help"
 msgid "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue 'bold', 'italic', or 'underline' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode."
-msgstr "En mode d'edició, podeu editar la pàgina com amb qualsevol document: seleccionar text, suprimir-lo, afegir-lo, copiar-lo i enganxar-lo.  Executeu les ordres «negreta», «cursiva», «subratlla» per a donar format.  Executeu l'ordre «desa» per a desar els vostres canvis, per tal que persisteixin fins i tot quan recarregueu la pàgina. Executeu «atura l'edició de la pàgina» quan hàgiu acabat i torneu al mode de visualització de la pàgina normal."
+msgstr "En mode d'edició, podeu editar la pàgina com amb qualsevol document: "
+"seleccionar text, suprimir-lo, afegir-lo, copiar-lo i enganxar-lo.  Executeu "
+"les ordres «negreta», «cursiva», «subratlla» per a donar format.  Executeu "
+"l'ordre «desa» per a desar els vostres canvis, per tal que persisteixin fins "
+"i tot quan recarregueu la pàgina. Executeu «atura l'edició de la pàgina» "
+"quan hàgiu acabat i torneu al mode de visualització de la pàgina normal."
 
 msgctxt "edit page.description"
 msgid "Puts the web page into a mode where you can edit the contents."
@@ -54,7 +58,10 @@ msgstr "atura l'edició de la pàgina|desactiva el mode d'edició"
 
 msgctxt "stop editing page.description"
 msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing. If you want the changes to persist on page reload, issue the 'save' command first."
-msgstr "Si heu fet servir l'ordre «edita la pàgina» per a posar la pàgina en mode d'edició, utilitzeu aquesta ordre per a finalitzar aqueix mode i tornar a la visualització de pàgina normal. Si voleu que els canvis persisiteixin després que es recarregui la pàgina, cal executar l'ordre «desa» abans."
+msgstr "Si heu fet servir l'ordre «edita la pàgina» per a posar la pàgina en mode "
+"d'edició, utilitzeu aquesta ordre per a finalitzar aqueix mode i tornar a la "
+"visualització de pàgina normal. Si voleu que els canvis persisiteixin "
+"després que es recarregui la pàgina, cal executar l'ordre «desa» abans."
 
 #. save page edits command:
 #. use | to separate multiple name values:
@@ -64,15 +71,18 @@ msgstr "desa de les edicions de la pàgina|alça les edicions de la pàgina"
 
 msgctxt "save page edits.description"
 msgid "Saves edits you've made to this page in an annotation. They will persist on page reload. You can remove them with the 'undo page edits' command."
-msgstr "Desa les edicions que hàgiu fet a la pàgina en una anotació. Aquestes persistiran després de recarregar la pàgina. Ho podeu desfer amb l'ordre «desfés les edicions de la pàgina»."
+msgstr "Desa les edicions que hàgiu fet a la pàgina en una anotació. Aquestes "
+"persistiran després de recarregar la pàgina. Ho podeu desfer amb l'ordre "
+"«desfés les edicions de la pàgina»."
 
 #. undo page edits command:
 #. use | to separate multiple name values:
 msgctxt "undo page edits.names"
 msgid "undo page edits|remove annotations"
-msgstr "desfés les edicions de la pàgina|suprimeix les anotacions|suprimix les anotacions|elimina les anotacions"
+msgstr ""
+"desfés les edicions de la pàgina|suprimeix les anotacions|suprimix les "
+"anotacions|elimina les anotacions"
 
 msgctxt "undo page edits.description"
 msgid "Resets any annotation changes you've made to this page."
 msgstr "Reinicia tots els canvis d'anotació que hàgiu fet a la pàgina."
-

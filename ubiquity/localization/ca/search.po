@@ -2,15 +2,17 @@
 #
 # Localizers:
 # Toni Hermoso Pulido <toniher@softcatala.org>
- 
 msgid ""
 msgstr ""
 "Project-Id-Version: Ubiquity 0.5\n"
 "POT-Creation-Date: 2009-06-22 06:33+0100\n"
-"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.org>\n"
+"Last-Translator: Toni Hermoso Pulido <toniher@softcatala.cat>\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
 
 #. search command:
 #. use | to separate multiple name values:
@@ -28,7 +30,7 @@ msgstr "Cerca utilitzant els vostres connectors de cerca instal·lats"
 
 msgctxt "search.preview"
 msgid "Search using <b>${engine}</b> for:<br /><b>${query}</b>"
-msgstr ""
+msgstr "Cerca fent servir <b>${engine}</b>:<br /><b>${query}</b>"
 
 #. Google command:
 #. use | to separate multiple name values:
@@ -54,7 +56,7 @@ msgstr "La vostra cerca - ${searchTerm} - no ha coincidit amb cap document."
 
 msgctxt "Google.preview"
 msgid "Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time."
-msgstr ""
+msgstr "Consell: Podeu anar a qualsevol resultat d'aquesta previsualització prement Control, Alt i el número del resultat al mateix temps."
 
 #. wikipedia command:
 #. use | to separate multiple name values:
@@ -104,7 +106,7 @@ msgstr "yahoo"
 
 msgctxt "yahoo.description"
 msgid "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words."
-msgstr ""
+msgstr "Cerca al <a href=\"http://search.yahoo.com\">Yahoo</a> les pàgines que coincideixen amb les vostres paraules."
 
 #. amazon command:
 #. use | to separate multiple name values:
@@ -113,8 +115,7 @@ msgid "amazon"
 msgstr "amazon"
 
 msgctxt "amazon.help"
-msgid ""
-"<dl>\n"
+msgid "<dl>\n"
 "  <dt>Available Indices</dt>\n"
 "  <dd>\n"
 "    <b>All</b>\n"
@@ -157,23 +158,107 @@ msgid ""
 "    <b>WirelessAccessories</b>\n"
 "  </dd>\n"
 "</dl>"
-msgstr ""
+msgstr "<dl>\n"
+"  <dt>Índexs disponibles</dt>\n"
+"  <dd>\n"
+"    <b>All</b>\n"
+"    <b>Apparel</b>\n"
+"    <b>Automotive</b>\n"
+"    <b>Baby</b>\n"
+"    <b>Beauty</b>\n"
+"    <b>Books</b>\n"
+"<dl>\n"
+"  <dt>Índex disponibles</dt>\n"
+"  <dd>\n"
+"    <b>All</b>\n"
+"    <b>Apparel</b>\n"
+"    <b>Automotive</b>\n"
+"    <b>Baby</b>\n"
+"    <b>Beauty</b>\n"
+"    <b>Books</b>\n"
+"    <b>Classical</b>\n"
+"    <b>DigitalMusic</b>\n"
+"    <b>DVD</b>\n"
+"    <b>Electronics</b>\n"
+"    <b>GourmetFood</b>\n"
+"    <b>Grocery</b>\n"
+"    <b>HealthPersonalCare</b>\n"
+"    <b>HomeGarden</b>\n"
+"    <b>Industrial</b>\n"
+"    <b>Jewelry</b>\n"
+"    <b>Kitchen</b>\n"
+"    <b>Magazines</b>\n"
+"    <b>Merchants</b>\n"
+"    <b>Miscellaneous</b>\n"
+"    <b>Music</b>\n"
+"    <b>MusicalInstruments</b>\n"
+"    <b>OfficeProducts</b>\n"
+"    <b>OutdoorLiving</b>\n"
+"    <b>PCHardware</b>\n"
+"    <b>PetSupplies</b>\n"
+"    <b>Photo</b>\n"
+"    <b>Shoes</b>\n"
+"    <b>Software</b>\n"
+"    <b>SportingGoods</b>\n"
+"    <b>Tools</b>\n"
+"    <b>Toys</b>\n"
+"    <b>VHS</b>\n"
+"    <b>Video</b>\n"
+"    <b>VideoGames</b>\n"
+"    <b>Watches</b>\n"
+"    <b>Wireless</b>\n"
+"    <b>WirelessAccessories</b>\n"
+"  </dd>\n"
+"</dl>    <b>Classical</b>\n"
+"    <b>DigitalMusic</b>\n"
+"    <b>DVD</b>\n"
+"    <b>Electronics</b>\n"
+"    <b>GourmetFood</b>\n"
+"    <b>Grocery</b>\n"
+"    <b>HealthPersonalCare</b>\n"
+"    <b>HomeGarden</b>\n"
+"    <b>Industrial</b>\n"
+"    <b>Jewelry</b>\n"
+"    <b>Kitchen</b>\n"
+"    <b>Magazines</b>\n"
+"    <b>Merchants</b>\n"
+"    <b>Miscellaneous</b>\n"
+"    <b>Music</b>\n"
+"    <b>MusicalInstruments</b>\n"
+"    <b>OfficeProducts</b>\n"
+"    <b>OutdoorLiving</b>\n"
+"    <b>PCHardware</b>\n"
+"    <b>PetSupplies</b>\n"
+"    <b>Photo</b>\n"
+"    <b>Shoes</b>\n"
+"    <b>Software</b>\n"
+"    <b>SportingGoods</b>\n"
+"    <b>Tools</b>\n"
+"    <b>Toys</b>\n"
+"    <b>VHS</b>\n"
+"    <b>Video</b>\n"
+"    <b>VideoGames</b>\n"
+"    <b>Watches</b>\n"
+"    <b>Wireless</b>\n"
+"    <b>WirelessAccessories</b>\n"
+"  </dd>\n"
+"</dl>"
 
 msgctxt "amazon.description"
 msgid "Searches <a href=\"http://www.amazon.com/\">Amazon.com</a> for items matching your words."
-msgstr ""
+msgstr "Cerca a l'<a href=\"http://www.amazon.com/\">Amazon.com</a> articles que coincideixen amb les vostres paraules."
 
 msgctxt "amazon.preview"
 msgid "Searching ${AmazLink} for items matching <b>${query}</b>."
-msgstr ""
+msgstr "Cerca a l'${AmazLink} articles que coincideixen amb <b>${query}</b>."
 
 msgctxt "amazon.preview"
 msgid "Error searching ${AmazLink}."
-msgstr ""
+msgstr "S'ha produït un error en cercar a ${AmazLink}."
 
 msgctxt "amazon.preview"
 msgid "Found <b>${numitems}</b> item{if numitems - 1}s{/if} on <a href='http://www.amazon.com/'>Amazon.com</a> matching <b>${query}</b>."
-msgstr ""
+msgstr "S'ha trobat <b>${numitems}</b> article{if numitems - 1}s{/if} a <a href='http://www.amazon.com/'>Amazon.com</a> que coincideixen amb <b>${query}</b>."
 
 #. VideoSurf command:
 #. use | to separate multiple name values:
@@ -183,11 +268,11 @@ msgstr "VideoSurf|vídeo|vídeos"
 
 msgctxt "VideoSurf.help"
 msgid "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!"
-msgstr ""
+msgstr "Envieu un missatge a feedback@videosurf.com si teniu cap problema o idees per implementar."
 
 msgctxt "VideoSurf.description"
 msgid "Performs a VideoSurf video search with advanced preview."
-msgstr ""
+msgstr "Realitza una cerca al VideoSurf amb previsualització avançada."
 
 msgctxt "VideoSurf.preview"
 msgid "Loading videos..."
@@ -201,7 +286,7 @@ msgstr "YouTube"
 
 msgctxt "YouTube.description"
 msgid "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words. Previews the top results."
-msgstr ""
+msgstr "Cerca al <a href=\"http://www.youtube.com\">YouTube</a> els vídeos que coincideixen amb les vostres paraules. Es previsualitzen els primers resultats."
 
 #. Flickr command:
 #. use | to separate multiple name values:
@@ -211,7 +296,7 @@ msgstr "Flickr|imatges"
 
 msgctxt "Flickr.description"
 msgid "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your keywords. Previews the top pictures."
-msgstr ""
+msgstr "Cerca al <a href=\"http://www.flickr.com\">Flickr</a> les imatges que coincideixen amb les vostres paraules . Es previsualitzen les primeres imatges."
 
 msgctxt "Flickr.preview"
 msgid "Searches for photos on Flickr."
@@ -241,7 +326,7 @@ msgstr "Bugzilla"
 
 msgctxt "Bugzilla.description"
 msgid "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
-msgstr ""
+msgstr "Cerca al <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> els informes d'error de Mozilla que coincideixen amb les paraules donades."
 
 #. msn command:
 #. use | to separate multiple name values:
@@ -251,11 +336,11 @@ msgstr "msn"
 
 msgctxt "msn.description"
 msgid "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words."
-msgstr ""
+msgstr "Cerca a l'<a href=\"http://search.msn.com\">MSN</a> les paraules donades."
 
 msgctxt "msn.preview"
 msgid "Searches MSN for ${query}"
-msgstr ""
+msgstr "Cerca ${query} al MSN."
 
 msgctxt "msn.preview"
 msgid "Searches MSN for the given words."
@@ -269,11 +354,11 @@ msgstr "ebay"
 
 msgctxt "ebay.description"
 msgid "Searches <a href=\"http://search.ebay.com\">eBay</a> for auctions matching the given words."
-msgstr ""
+msgstr "Cerca a l'<a href=\"http://search.ebay.com\">eBay</a> les subhastes que coincideixen amb les paraules donades."
 
 msgctxt "ebay.preview"
 msgid "Searches eBay for ${query}"
-msgstr ""
+msgstr "Cerca ${query} a l'eBay"
 
 msgctxt "ebay.preview"
 msgid "Searches eBay for the given words."
@@ -287,11 +372,11 @@ msgstr "ask"
 
 msgctxt "ask.description"
 msgid "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words."
-msgstr ""
+msgstr "Cerca a l'<a href=\"http://www.ask.com\">Ask.com</a> les paraules donades."
 
 msgctxt "ask.preview"
 msgid "Searches Ask.com for ${query}"
-msgstr ""
+msgstr "Cerca ${query} a l'Ask.com"
 
 msgctxt "ask.preview"
 msgid "Searches Ask.com for the given words."
@@ -305,7 +390,7 @@ msgstr "answers"
 
 msgctxt "answers.description"
 msgid "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words."
-msgstr ""
+msgstr "Cerca a l'<a href=\"http://www.answers.com\">Answers.com</a> les paraules donades."
 
 #. yelp command:
 #. use | to separate multiple name values:
@@ -315,19 +400,19 @@ msgstr "yelp"
 
 msgctxt "yelp.help"
 msgid "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;."
-msgstr ""
+msgstr "Podeu cercar restaurants prop d'una ubicació fent servir el modificador <i>prop de</i>. Per exemple, proveu «yelp pizza prop de Boston»."
 
 msgctxt "yelp.description"
 msgid "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.  Previews the top results."
-msgstr ""
+msgstr "Cerca al <a href=\"http://www.yelp.com\">Yelp</a> restaurants que coincideixen amb les vostres paraules.  Es previsualitzar els primers resultats."
 
 msgctxt "yelp.preview"
 msgid "Searches yelp for restaurants in your area"
-msgstr ""
+msgstr "Cerca al yelp els restaurants en la vostra àrea."
 
 msgctxt "yelp.execute"
 msgid "${name} is a ${stars} restaurant in{if defined('where')} <a href='${whereUrl}'>${where},</a>{/if} ${city}."
-msgstr ""
+msgstr "${name} és un restaurant de ${stars} a {if defined('where')} <a href='${whereUrl}'>${where},</a>{/if} ${city}."
 
 msgctxt "yelp.execute"
 msgid "It's been reviewed ${times} times."
@@ -385,7 +470,7 @@ msgstr "cerca imatges amb google|aconsegueix imatges"
 
 msgctxt "google image search.help"
 msgid "Press return to show the Google Images results, left click on a picture to watch it, right click to insert it in a text or rich text area"
-msgstr ""
+msgstr "Premeu Retorn per a mostrar els resultats de Google Images, boto esquerre sobre una imatge per a visualitzar-la, i botó dret per a inserir-la en un text o en una àrea de text enriquit."
 
 msgctxt "google image search.description"
 msgid "Browse and embed pictures from Google Images"
