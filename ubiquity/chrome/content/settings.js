@@ -62,7 +62,7 @@ function onDocumentLoad() {
    * TODO kep this list updated when new localizations are done; eventually
    * replace with something that detects command localizations automatically.
    */
-  for each (let code in ["da", "en", "ja", "pt"]) {
+  for each (let code in ["da", "en", "ja", "pt", "ca"]) {
     $('#language-select').append($("<option value='"+code+"' "+
                               (code=='en'?" selected='true'":'')+">"
                               +parserRegistry[code]+'</input>'));
