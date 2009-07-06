@@ -69,11 +69,18 @@ CmdUtils.CreateCommand({
   }
 });
 
-function linkToButton() {
-  var txt = this.textContent;
-  jQuery(this).replaceWith(
-    <button value={this.href} accesskey={txt[0]}>{txt}</button>.toXMLString());
+function linksToButtons($links) {
+  var keys = ["P", "N"];
+  if ($links.length > 2) keys.splice(1, 0, "T");
+  $links.each(function eachLink(i) {
+    var txt = this.textContent, key = keys[i];
+    if (txt[0] !== key) txt += " (" + key + ")";
+    jQuery(this).replaceWith(<button value={this.href} accesskey={key}
+                             >{txt}</button>.toXMLString());
+  });
 }
+
+function dateParam(date) ({as_sdt: date.toString("yyyyMMdd")});
 
 // TODO this should take a plugin argument specifying the calendar provider.
 CmdUtils.CreateCommand({
@@ -82,9 +89,9 @@ CmdUtils.CreateCommand({
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check on thursday"' + Apology,
-  execute: function({object: {data}}) {
+  execute: function execute({object: {data}}) {
     Utils.openUrlInBrowser("http://www.google.com/calendar/" +
-                           Utils.paramsToString(this._param(data)));
+                           Utils.paramsToString(dateParam(data)));
   },
   // url is for recursing pagination
   preview: function preview(pblock, args, url) {
@@ -93,28 +100,28 @@ CmdUtils.CreateCommand({
       pblock.innerHTML = this.description;
       return;
     }
-    pblock.innerHTML = (_("Checking Google Calendar for events on ${date}.",
-                          {date: date.toString("dddd, dS MMMM, yyyy")}));
+    pblock.innerHTML = _("Checking Google Calendar for events on ${date}.",
+                         {date: date.toString("dddd, dS MMMM, yyyy")});
     CmdUtils.previewGet(
       pblock,
       url || "http://www.google.com/calendar/m",
-      this._param(date),
-      function(htm) {
+      dateParam(date),
+      function getCalendar(htm) {
         var [cal] = /<div class[^]+$/(htm) || 0;
         if (!cal) {
-          pblock.innerHTML =
-            <>Please <a href={this.url} accesskey="L"><u>l</u>ogin</a>.</>;
+          pblock.innerHTML = _(
+            'Please <a href="${url}" accesskey="L">Login</a>.', this);
           return;
         }
         var $c = CmdUtils.absUrl(
           (jQuery('<div class="calendar">' + cal).eq(0)
            .find(".c1:nth(1), form, span").remove().end()),
           this.url);
-        $c.find(".c1 > a").each(linkToButton);
+        linksToButtons($c.find(".c1 > a"));
         $c.find("button").focus(function btn() {
           this.blur();
           this.disabled = true;
-          me.preview(pblock, args, this.value);
+          preview.call(me, pblock, args, this.value);
           return false;
         });
         pblock.innerHTML = "";
@@ -122,5 +129,4 @@ CmdUtils.CreateCommand({
       },
       "text");
   },
-  _param: function(date)({as_sdt: date.toString("yyyyMMdd")}),
 });
