@@ -582,6 +582,37 @@ function isArray(val) {
           (val.constructor || 0).name === "Array");
 }
 
+// === {{{ Utils.isEqual() }}} ===
+//
+// This function returns whether the two objects are the same. It does
+// this recursively.
+//
+// "Bad things" probably happen if we try to use this on xpconnect objects.
+//
+// TODO: there must be a better way of doing this.
+
+function isEqual(a,b) {
+  if (classOf(a) != classOf(b))
+    return false;
+  if (classOf(a) == 'String' || classOf(a) == 'Number')
+    return a == b;
+
+  for (let i in a) {
+    if (!(i in b))
+      return false;
+    if (!isEqual(a[i],b[i]))
+      return false;
+  }
+
+  for (let j in b) {
+    if (!(j in a))
+      return false;
+  }
+  
+  return true;
+
+}
+
 // === {{{ Utils.isEmpty() }}} ===
 //
 // This function returns whether or not the argument has no own properties.
