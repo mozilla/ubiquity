@@ -1740,9 +1740,8 @@ ParseQuery.prototype = {
     // "search with google" (role: instrument). This adds new usability to
     // overlord verbs by being able to just enter the provider name.
     for each (let parse in this._possibleParses) {
-      // before, if there was a set verb, we wouldn't try this.
-      // but now this is a good idea.
-      // if (parse._verb.id) continue;
+      // if there is a set verb, don't try this.
+      if (parse._verb.id) continue;
       let newParses = this.parser.applyObjectsToOtherRoles(parse);
       if (newParses.length)
         this._possibleParses = this._possibleParses.concat(newParses);
