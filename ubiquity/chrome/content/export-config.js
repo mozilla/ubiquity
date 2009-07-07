@@ -13,7 +13,7 @@ function exportConfiguration() {
     config.annotations = jsm.Utils.decodeJson(annSvc.toJSON());
   }
 
-  config.skins = (new jsm.SkinSvc()).getSkinList();
+  config.skins = (new jsm.SkinSvc()).skinList;
 
   // Iterate through all preferences and write them out.
   config.prefs = {};
