@@ -19,6 +19,9 @@ made to Ubiquity, including but not limited to:</p>
 </ul>
 </body>
 <input type="button"
+       value="Export my current Ubiquity configuration to a new tab."
+       onclick="exportConfiguration();">
+<input type="button"
        value="Yes, I know what I'm doing. Reset Ubiquity and restart Firefox."
        onclick="confirmReset();">
 <script type="application/javascript;version=1.7">
@@ -59,5 +62,7 @@ function confirmReset() {
   UbiquitySetup.isResetScheduled = true;
   extApplication.restart();
 }
+</script>
+<script src="export-config.js" type="application/javascript;version=1.7">
 </script>
 </html>
