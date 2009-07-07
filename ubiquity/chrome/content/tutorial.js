@@ -334,7 +334,7 @@ function ubiqTutorialStage9() {
 
 function ubiqTutorialStage10() {
    let stage10Html = "<p>Now <b>type a space, and then type 22/7</b>"
-    + " (so that your input says <b>'ca 22/7'</b>.)</p>";
+    + " (so that your input says <b>'cal 22/7'</b>.)</p>";
   fadeInText(stage10Html);
   destroyCanvas();
   showArrowToInputBox();
@@ -491,7 +491,7 @@ function ubiqTutorialStage19() {
 function ubiqTutorialStage20() {
   let stage20Html = "<p>Let's do one more example.  Say you're browsing the"
     + " web and you come across an unfamiliar word &mdash; like the one in the box"
-    + "below &mdash; and you'd like to look it up.</p>"
+    + " below &mdash; and you'd like to look it up.</p>"
     + "<p><b>Select the word in the box below and then summon Ubiquity</b>.</p>";
   let agDiv = $("#tutorial-contents-div");
   agDiv.html("aglet");
@@ -529,7 +529,7 @@ function ubiqTutorialStage23() {
   let stage23Html = "<h2>Part 6 of 6: Getting Help and Learning"
     + " More Commands</h2>"
     + "<p>So far you've learned the <i>weather</i>, <i>calculate</i>, "
-    + "<i>wikipedia</i>, <i>translate</i>, and <i>google</i> commands."
+    + "<i>google</i>, <i>translate</i>, and <i>map</i> commands."
     + " That's a good start, but there are dozens more commands"
     + " included with Ubiquity &mdash; plus you can find more on the Web.</p>"
     + "<p>How will you find out what commands are available?</p>"
@@ -563,11 +563,11 @@ function ubiqTutorialStage25() {
 }
 
 function ubiqTutorialStage26() {
-  let stage26Html = "<p>Finally, there's the <i>list ubiquity command</i> command."
+  let stage26Html = "<p>Finally, there's the <i>list ubiquity commands</i> command."
   + " This command will take you to a page that shows every command Ubiquity"
   + " has installed.  You can learn all sorts of useful things by browsing"
-  + " the command-list page!</p>"
-  + "<p>This is the end of the tutorial. Once you go to the command-list"
+  + " the command list page!</p>"
+  + "<p>This is the end of the tutorial. Once you go to the command list"
   + " page, you are on your own to experiment and learn new commands at your own pace.</p>"
   + "<p><b>Summon Ubiquity, type 'list', and tap the enter key to"
   + " execute.</b></p><p>Good-bye!</p>";
