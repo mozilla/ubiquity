@@ -40,6 +40,10 @@ msgctxt "open (ubiquity settings page).description"
 msgid "Opens one of the Ubiquity documentation/settings pages."
 msgstr "Ubiquityのドキュメント/設定ページを開きます。"
 
+msgctxt "open (ubiquity settings page).preview"
+msgid "Opens the Ubiquity ${goal} page."
+msgstr "Ubiquityのドキュメント/設定ページを開きます： ${goal}"
+
 #. write ubiquity commands command:
 #. use | to separate multiple name values:
 msgctxt "write ubiquity commands.names"

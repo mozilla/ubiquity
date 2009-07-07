@@ -1,0 +1,143 @@
+# developer.po
+# 
+# Localizers:
+# Christian Sonne <cers@geeksbynature.dk>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-25 19:44+0900\n"
+
+#. highlight syntax command:
+#. use | to separate multiple name values:
+msgctxt "highlight syntax.names"
+msgid "highlight syntax|hilite syntax"
+msgstr "fremhæv syntaks"
+
+msgctxt "highlight syntax.description"
+msgid "Treats your selection as program source code, guesses its language, and colors it based on syntax."
+msgstr "Behandler din markering som program kildekode, gætter dets sprog, og farvelægger det baseret på dets syntaks."
+
+msgctxt "highlight syntax.execute"
+msgid "You must select some code to syntax-hilight."
+msgstr "Du skal markere noget kode der skal fremhæves"
+
+msgctxt "highlight syntax.preview"
+msgid "Syntax highlights your code."
+msgstr "Fremæver syntaksen i din kode."
+
+
+#. view source command:
+#. use | to separate multiple name values:
+msgctxt "view source.names"
+msgid "view source|view page source"
+msgstr "vis kilde"
+
+msgctxt "view source.description"
+msgid "Shows you the source-code of the web page you're looking at."
+msgstr "Viser dig kildekoden til den side du kigger på."
+
+
+#. escape HTML entities command:
+#. use | to separate multiple name values:
+msgctxt "escape HTML entities.names"
+msgid "escape HTML entities"
+msgstr "erstat HTML enheder"
+
+msgctxt "escape HTML entities.description"
+msgid "Replaces html entities (&lt;, &gt;, &amp;, &quot; and &#39;) with their escape sequences."
+msgstr "Erstatter html enheder (&lt;, &gt;, &amp;, &quot; and &#39;) med deres undvigesekvenser"
+
+msgctxt "escape HTML entities.execute"
+msgid "No text selected."
+msgstr "Ingen tekst valgt."
+
+
+#. run selector-selector command:
+#. use | to separate multiple name values:
+msgctxt "run selector-selector.names"
+msgid "run selector-selector"
+msgstr "kør selector-vælger"
+
+msgctxt "run selector-selector.help"
+msgid "<dl>\n"
+"  <dt>\n"
+"    <b>Left-click / Enter</b>\n"
+"  </dt>\n"
+"  <dd>Copy and Quit</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Middle-click /\n"
+"      <u>C</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Copy</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Right-click / Esc /\n"
+"      <u>Q</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Quit</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      <u>M</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Move</dd>\n"
+"  <dt>\n"
+"    <b>PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Scroll vertically</dd>\n"
+"  <dt>\n"
+"    <b>shift + PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Scroll horizontally</dd>\n"
+"</dl>"
+msgstr "<dl>\n"
+"  <dt>\n"
+"    <b>venstre-klik / Enter</b>\n"
+"  </dt>\n"
+"  <dd>Kopier og luk</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Midter-klik /\n"
+"      <u>C</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Kopier</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      Højre-klik / Esc /\n"
+"      <u>Q</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Luk</dd>\n"
+"  <dt>\n"
+"    <b>\n"
+"      <u>M</u>\n"
+"    </b>\n"
+"  </dt>\n"
+"  <dd>Flyt</dd>\n"
+"  <dt>\n"
+"    <b>PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Rul vertikalt</dd>\n"
+"  <dt>\n"
+"    <b>shift + PageUp/Dn</b>\n"
+"  </dt>\n"
+"  <dd>Rul horisontalt</dd>\n"
+"</dl>"
+
+
+msgctxt "run selector-selector.description"
+msgid "<ul style=\"list-style-image:none\">\n"
+"  <li>Lets you type a jQuery selector and highlights matched elements.</li>\n"
+"  <li>Hovering on an element generates a matching selector.</li>\n"
+"</ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"  <li>Lader dig indtaste en jQuery selector og fremhæver matchende elementer.</li>\n"
+"  <li>Peger du på et element med musen, genereres en matchende selector.</li>\n"
+"</ul>"
+
+

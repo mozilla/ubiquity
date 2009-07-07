@@ -61,7 +61,7 @@ msgstr "Ver último email"
 
 msgctxt "get last email.description"
 msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
-msgstr "Mostra o seu e-mail maus atual. Funciona só com o <a href=\"http://mail.google.com\">Gmail</a>."
+msgstr "Mostra o seu e-mail mais atual. Funciona só com o <a href=\"http://mail.google.com\">Gmail</a>."
 
 msgctxt "get last email.preview"
 msgid "Displays your most recent incoming email..."

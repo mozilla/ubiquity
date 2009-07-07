@@ -153,6 +153,17 @@ function AnnotationService(connection) {
     return false;
   };
 
+  // === {{{AnnotationService.toJSON()}}} ===
+  //
+  // This method returns the annotation service's data as a
+  // JSON object.
+
+  self.toJSON = function() {
+    var json = Cc["@mozilla.org/dom/json;1"]
+      .createInstance(Ci.nsIJSON);
+    return json.encode(ann);
+  };
+
   // === {{{AnnotationService#getPageAnnotation()}}} ===
   //
   // This method behaves just like its {{{nsIAnnotationService}}}

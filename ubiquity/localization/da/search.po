@@ -1,0 +1,484 @@
+# search.po
+# 
+# Localizers:
+# Christian Sonne <cers@geeksbynature.dk>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-25 19:38+0900\n"
+
+#. search command:
+#. use | to separate multiple name values:
+msgctxt "search.names"
+msgid "search|find|look for"
+msgstr "find|led|led efter"
+
+msgctxt "search.help"
+msgid "Specify any Open Search engine you have installed by entering e.g. 'search with google', 'search with yahoo', etc."
+msgstr "Specificer et Open Search plugin du har installeret ved at skrive f.eks. 'find med google', 'find med yahoo', etc."
+
+msgctxt "search.description"
+msgid "Search using your installed search engines"
+msgstr "Søger ved hjælp af dine installerede søgemaskiner"
+
+msgctxt "search.preview"
+msgid "Search using <b>${engine}</b> for:<br /><b>${query}</b>"
+msgstr "Søg via <b>${engine}</b> for:<br /><b>${query}</b>"
+
+
+#. Google command:
+#. use | to separate multiple name values:
+msgctxt "Google.names"
+msgid "Google"
+msgstr "Google"
+
+msgctxt "Google.help"
+msgid "You can use the keyboard shortcut ctrl + alt + number to open one of the Google results shown in the preview."
+msgstr "Du kan bruge tastatur genvenjen ctrl + alt + tal, til at åbne et af Googles resultater vist i forhåndsvisningen."
+
+msgctxt "Google.description"
+msgid "Searches Google for your words."
+msgstr "Søger efter dine søgeord via Google."
+
+msgctxt "Google.preview"
+msgid "Searches Google for your words."
+msgstr "Søger efter dine søgeord via Google."
+
+msgctxt "Google.preview"
+msgid "Your search - ${searchTerm} - did not match any documents."
+msgstr "Din søgning - ${searchTerm} - matchede ingen dokumenter."
+
+msgctxt "Google.preview"
+msgid "Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time."
+msgstr "Tip: Du kan gå direkte til et specifikt resultat, ved at trykke ctrl, alt og resultatnummeret på samme tid."
+
+
+#. wikipedia command:
+#. use | to separate multiple name values:
+msgctxt "wikipedia.names"
+msgid "wikipedia|lookup"
+msgstr "wikipedia|opslå"
+
+msgctxt "wikipedia.description"
+msgid "Searches Wikipedia for your words, in a given language."
+msgstr "Søger efter dine søgeord via Wikipedia, i et givent sprog."
+
+msgctxt "wikipedia.preview"
+msgid "Searching Wikipedia for <b>${query}</b> ..."
+msgstr "Søger via Wikipedia for <b>${query}</b> ..."
+
+msgctxt "wikipedia.preview"
+msgid "Error searching Wikipedia"
+msgstr "Der skete en fejl i søgningen via Wikipedia"
+
+msgctxt "wikipedia.preview"
+msgid "Wikipedia articles found matching <b>${query}</b>:"
+msgstr "Wikipedia artikler fundet der matcher <b>${query}</b>:"
+
+msgctxt "wikipedia.preview"
+msgid "Retreiving article summary..."
+msgstr "Henter sammendrag af artiklen..."
+
+msgctxt "wikipedia.preview"
+msgid "No articles found."
+msgstr "Ingen artikler fundet."
+
+
+#. IMDB command:
+#. use | to separate multiple name values:
+msgctxt "IMDB.names"
+msgid "IMDB|internet movie database|movie|actor"
+msgstr "IMDB|film|skuespiller"
+
+msgctxt "IMDB.description"
+msgid "Searches the Internet Movie Database (www.imdb.com) for your words."
+msgstr "Søger i Internet Movie Database (www.imdb.com) efter dine søgeord."
+
+
+#. yahoo command:
+#. use | to separate multiple name values:
+msgctxt "yahoo.names"
+msgid "yahoo"
+msgstr "yahoo"
+
+msgctxt "yahoo.description"
+msgid "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words."
+msgstr "Søger via <a href=\"http://search.yahoo.com\">Yahoo</a> efter sider der matcher dine søgeord."
+
+
+#. amazon command:
+#. use | to separate multiple name values:
+msgctxt "amazon.names"
+msgid "amazon"
+msgstr "amazon"
+
+msgctxt "amazon.help"
+msgid "<dl>\n"
+"  <dt>Available Indices</dt>\n"
+"  <dd>\n"
+"    <b>All</b>\n"
+"    <b>Apparel</b>\n"
+"    <b>Automotive</b>\n"
+"    <b>Baby</b>\n"
+"    <b>Beauty</b>\n"
+"    <b>Books</b>\n"
+"    <b>Classical</b>\n"
+"    <b>DigitalMusic</b>\n"
+"    <b>DVD</b>\n"
+"    <b>Electronics</b>\n"
+"    <b>GourmetFood</b>\n"
+"    <b>Grocery</b>\n"
+"    <b>HealthPersonalCare</b>\n"
+"    <b>HomeGarden</b>\n"
+"    <b>Industrial</b>\n"
+"    <b>Jewelry</b>\n"
+"    <b>Kitchen</b>\n"
+"    <b>Magazines</b>\n"
+"    <b>Merchants</b>\n"
+"    <b>Miscellaneous</b>\n"
+"    <b>Music</b>\n"
+"    <b>MusicalInstruments</b>\n"
+"    <b>OfficeProducts</b>\n"
+"    <b>OutdoorLiving</b>\n"
+"    <b>PCHardware</b>\n"
+"    <b>PetSupplies</b>\n"
+"    <b>Photo</b>\n"
+"    <b>Shoes</b>\n"
+"    <b>Software</b>\n"
+"    <b>SportingGoods</b>\n"
+"    <b>Tools</b>\n"
+"    <b>Toys</b>\n"
+"    <b>VHS</b>\n"
+"    <b>Video</b>\n"
+"    <b>VideoGames</b>\n"
+"    <b>Watches</b>\n"
+"    <b>Wireless</b>\n"
+"    <b>WirelessAccessories</b>\n"
+"  </dd>\n"
+"</dl>"
+msgstr "<dl>\n"
+"  <dt>Tilgængelige undergrupper</dt>\n"
+"  <dd>\n"
+"    <b>All</b>\n"
+"    <b>Apparel</b>\n"
+"    <b>Automotive</b>\n"
+"    <b>Baby</b>\n"
+"    <b>Beauty</b>\n"
+"    <b>Books</b>\n"
+"    <b>Classical</b>\n"
+"    <b>DigitalMusic</b>\n"
+"    <b>DVD</b>\n"
+"    <b>Electronics</b>\n"
+"    <b>GourmetFood</b>\n"
+"    <b>Grocery</b>\n"
+"    <b>HealthPersonalCare</b>\n"
+"    <b>HomeGarden</b>\n"
+"    <b>Industrial</b>\n"
+"    <b>Jewelry</b>\n"
+"    <b>Kitchen</b>\n"
+"    <b>Magazines</b>\n"
+"    <b>Merchants</b>\n"
+"    <b>Miscellaneous</b>\n"
+"    <b>Music</b>\n"
+"    <b>MusicalInstruments</b>\n"
+"    <b>OfficeProducts</b>\n"
+"    <b>OutdoorLiving</b>\n"
+"    <b>PCHardware</b>\n"
+"    <b>PetSupplies</b>\n"
+"    <b>Photo</b>\n"
+"    <b>Shoes</b>\n"
+"    <b>Software</b>\n"
+"    <b>SportingGoods</b>\n"
+"    <b>Tools</b>\n"
+"    <b>Toys</b>\n"
+"    <b>VHS</b>\n"
+"    <b>Video</b>\n"
+"    <b>VideoGames</b>\n"
+"    <b>Watches</b>\n"
+"    <b>Wireless</b>\n"
+"    <b>WirelessAccessories</b>\n"
+"  </dd>\n"
+"</dl>"
+
+msgctxt "amazon.description"
+msgid "Searches <a href=\"http://www.amazon.com/\">Amazon.com</a> for items matching your words."
+msgstr "Søger via <a href=\"http://www.amazon.com/\">Amazon.com</a> efter dine søgeord."
+
+msgctxt "amazon.preview"
+msgid "Searching ${AmazLink} for items matching <b>${query}</b>."
+msgstr "Søger via ${AmazLink} efter vare der matcher <b>${query}</b>."
+
+msgctxt "amazon.preview"
+msgid "Error searching ${AmazLink}."
+msgstr "Der skete en fejl i søgning via ${AmazLink}."
+
+msgctxt "amazon.preview"
+msgid "Found <b>${numitems}</b> item{if numitems - 1}s{/if} on <a href='http://www.amazon.com/'>Amazon.com</a> matching <b>${query}</b>."
+msgstr "Fandt <b>${numitems}</b> vare på <a href='http://www.amazon.com/'>Amazon.com</a> der matcher <b>${query}</b>."
+
+
+#. VideoSurf command:
+#. use | to separate multiple name values:
+msgctxt "VideoSurf.names"
+msgid "VideoSurf|video|videos"
+msgstr "Videosurf|video|videoer"
+
+msgctxt "VideoSurf.help"
+msgid "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!"
+msgstr "Kontakt os venligst på feedback@videosurf.com hvis du har problemer eller ideer til ny funktionalitet (skriv på engelsk)"
+
+msgctxt "VideoSurf.description"
+msgid "Performs a VideoSurf video search with advanced preview."
+msgstr "Søger via VideoSurf med avanceret forhåndsvisning."
+
+msgctxt "VideoSurf.preview"
+msgid "Loading videos..."
+msgstr "Henter videoer..."
+
+
+#. YouTube command:
+#. use | to separate multiple name values:
+msgctxt "YouTube.names"
+msgid "YouTube"
+msgstr "YouTube"
+
+msgctxt "YouTube.description"
+msgid "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words. Previews the top results."
+msgstr "Søger via <a href=\"http://www.youtube.com\">YouTube</a> efter videoer der matcher dine søgeord. Forhåndsvisning af de øverste resultater."
+
+
+#. Flickr command:
+#. use | to separate multiple name values:
+msgctxt "Flickr.names"
+msgid "Flickr|images"
+msgstr "Flickr|billeder"
+
+msgctxt "Flickr.description"
+msgid "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your keywords. Previews the top pictures."
+msgstr "Søger via <a href=\"http://www.flickr.com\">Flickr</a> efter billeder der matcher dine søgeord. Forhåndsvisning af de øverste resultater. "
+
+msgctxt "Flickr.preview"
+msgid "Searches for photos on Flickr."
+msgstr "Søger efter billeder på Flickr."
+
+msgctxt "Flickr.preview"
+msgid "Searching for photos on Flickr..."
+msgstr "Søger efter billeder på Flickr..."
+
+msgctxt "Flickr.preview"
+msgid "Error searching Flickr"
+msgstr "Der skete en fejl i søgningen via Flickr."
+
+msgctxt "Flickr.preview"
+msgid "Error searching Flickr."
+msgstr "Der skete en fejl i søgningen via Flickr."
+
+msgctxt "Flickr.preview"
+msgid "${nummatches} photos were found on Flickr."
+msgstr "${nummatches} billeder blev fundet hos Flickr."
+
+
+#. Bugzilla command:
+#. use | to separate multiple name values:
+msgctxt "Bugzilla.names"
+msgid "Bugzilla"
+msgstr "Bugzilla"
+
+msgctxt "Bugzilla.description"
+msgid "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
+msgstr "Søger via <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs der matcher dine søgeord."
+
+
+#. msn command:
+#. use | to separate multiple name values:
+msgctxt "msn.names"
+msgid "msn"
+msgstr "msn"
+
+msgctxt "msn.description"
+msgid "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words."
+msgstr "Søger via <a href=\"http://search.msn.com\">MSN</a> efter dine søgeord."
+
+msgctxt "msn.preview"
+msgid "Searches MSN for ${query}"
+msgstr "Søger via MSN efter ${query}"
+
+msgctxt "msn.preview"
+msgid "Searches MSN for the given words."
+msgstr "Søger via MSN efter givne søgeord."
+
+
+#. ebay command:
+#. use | to separate multiple name values:
+msgctxt "ebay.names"
+msgid "ebay"
+msgstr "ebay"
+
+msgctxt "ebay.description"
+msgid "Searches <a href=\"http://search.ebay.com\">eBay</a> for auctions matching the given words."
+msgstr "Søger via <a href=\"http://search.ebay.com\">eBay</a>  efter auktioner der matcher dine søgeord."
+
+msgctxt "ebay.preview"
+msgid "Searches eBay for ${query}"
+msgstr "Søger via eBay efter ${query}"
+
+msgctxt "ebay.preview"
+msgid "Searches eBay for the given words."
+msgstr "Søger via eBay efter givne søgeord."
+
+
+#. ask command:
+#. use | to separate multiple name values:
+msgctxt "ask.names"
+msgid "ask"
+msgstr "ask|spørg"
+
+msgctxt "ask.description"
+msgid "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words."
+msgstr "Søger via <a href=\"http://www.ask.com\">Ask.com</a> efter dine søgeord."
+
+msgctxt "ask.preview"
+msgid "Searches Ask.com for ${query}"
+msgstr "Søger via Ask.com efter ${query}"
+
+msgctxt "ask.preview"
+msgid "Searches Ask.com for the given words."
+msgstr "Søger via Ask.com efter givne søgeord."
+
+
+#. answers command:
+#. use | to separate multiple name values:
+msgctxt "answers.names"
+msgid "answers"
+msgstr "answers|svar"
+
+msgctxt "answers.description"
+msgid "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words."
+msgstr "Søger via <a href=\"http://www.answers.com\">Answers.com</a> efter dine søgeord."
+
+
+#. yelp command:
+#. use | to separate multiple name values:
+msgctxt "yelp.names"
+msgid "yelp"
+msgstr "yelp"
+
+msgctxt "yelp.help"
+msgid "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;."
+msgstr "Du kan søge efter restauranter i nærheden af en specifik lokation ved hjælp af <i>nær</i> modifikatoren. Prøv eksempelvis \"yelp pizza nær boston\"."
+
+msgctxt "yelp.description"
+msgid "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.  Previews the top results."
+msgstr "Søger via <a href=\"http://www.yelp.com\">Yelp</a> efter restauranter der matcher dine søgeord. Forhåndsvisning af de øverste resultater."
+
+msgctxt "yelp.preview"
+msgid "Searches yelp for restaurants in your area"
+msgstr "Søger via yelp efter restauranter i dit område"
+
+msgctxt "yelp.execute"
+msgid "${name} is a ${stars} restaurant in{if defined('where')} <a href='${whereUrl}'>${where},</a>{/if} ${city}."
+msgstr "${name} er en ${stars} restaurant i{if defined('where')} <a href='${whereUrl}'>${where},</a>{/if} ${city}."
+
+msgctxt "yelp.execute"
+msgid "It's been reviewed ${times} times."
+msgstr "Den er blevet reviewet ${times} gange."
+
+
+#. check weather command:
+#. use | to separate multiple name values:
+msgctxt "check weather.names"
+msgid "check weather|get weather|weather"
+msgstr "Tjek vejret|vejr|vejret"
+
+msgctxt "check weather.help"
+msgid "Try issuing &quot;weather near chicago&quot;.  It works with zip-codes, too.  You can add 'in celsius' or 'in farenheit' to specify the temperature scale."
+msgstr "Prøv at udstede kommandoen \"vejret nær chicago\". Det virker også med postnumre. Du kan tilføje 'i celcius' eller 'i farenheit for at specificere temeraturskalaen."
+
+msgctxt "check weather.description"
+msgid "Checks the weather for a given location. It detects your current location as a default."
+msgstr "Tjekker vejret i en given lokation. Den bruger som udgangspunkt din nuværende lokation."
+
+msgctxt "check weather.preview"
+msgid "Gets the weather for a zip code/city."
+msgstr "Viser vejret for en by eller postnummer."
+
+msgctxt "check weather.preview"
+msgid "Weather for ${location}"
+msgstr "Vejret i ${location}"
+
+msgctxt "check weather.preview"
+msgid "Weather for ${location}"
+msgstr "Vejret i ${location}"
+
+
+#. define command:
+#. use | to separate multiple name values:
+msgctxt "define.names"
+msgid "define|get definition"
+msgstr "definer"
+
+msgctxt "define.help"
+msgid "Try issuing &quot;define aglet&quot;"
+msgstr "Prøv at udstede kommandoen \"definer aglet\""
+
+msgctxt "define.description"
+msgid "Gives the meaning of a word, using answers.com."
+msgstr "Viser betydningen af et ord, via answers.com."
+
+msgctxt "define.preview"
+msgid "Gives the definition of a word."
+msgstr "Viser definitionen af et ord."
+
+msgctxt "define.preview"
+msgid "Gives the definition of the word ${word}."
+msgstr "Viser definitionen af ordet ${word}."
+
+
+#. google image search command:
+#. use | to separate multiple name values:
+msgctxt "google image search.names"
+msgid "google image search|get images"
+msgstr "google billedsøgning"
+
+msgctxt "google image search.help"
+msgid "Press return to show the Google Images results, left click on a picture to watch it, right click to insert it in a text or rich text area"
+msgstr "Tryk enter for at se resultaterne fra Google Billeder, venstreklik på et billede for at se det, højreklik for at indsætte det i et tekst- eller formateret tekstområde"
+
+msgctxt "google image search.description"
+msgid "Browse and embed pictures from Google Images"
+msgstr "Find og indsæt billeder fra Google Billeder"
+
+msgctxt "google image search.preview"
+msgid "Search on Google Images."
+msgstr "Søg via Google Billeder"
+
+msgctxt "google image search.preview"
+msgid "Searching on Google Images..."
+msgstr "Søger via Google Billeder..."
+
+msgctxt "google image search.preview"
+msgid "Connection error."
+msgstr "Der opstod en fejl i forbindelsen."
+
+msgctxt "google image search.preview"
+msgid "Server error"
+msgstr "Der skete en fejl på serveren"
+
+msgctxt "google image search.preview"
+msgid "Server error"
+msgstr "Der skete en fejl på serveren"
+
+msgctxt "google image search.preview"
+msgid "Sorry, this function can be used in an editable box only"
+msgstr "Beklager, denne funktion kan kun bruges i et redigerbart område."
+
+msgctxt "google image search.preview"
+msgid "Image Search results for ${query}"
+msgstr "Resultat af billedsøgning efter ${query}"
+
+msgctxt "google image search.preview"
+msgid "Sorry, there are no results"
+msgstr "Beklager, der er ingen resultater"
+
+

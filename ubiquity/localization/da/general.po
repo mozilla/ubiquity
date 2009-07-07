@@ -64,32 +64,32 @@ msgid "Highlights your current selection, like <span style=\"background: yellow;
 msgstr "Fremhæver din nuværende markering, således <span style=\"background: yellow; color: black;\">som dette</span>."
 
 
-#. undo (text edit) command:
+#. undo text edit command:
 #. use | to separate multiple name values:
-msgctxt "undo (text edit).names"
-msgid "undo"
-msgstr "fortryd"
+msgctxt "undo text edit.names"
+msgid "undo text edit"
+msgstr "fortryd tekst redigering"
 
-msgctxt "undo (text edit).description"
-msgid "Undoes your latest style/formatting or page-editing changes."
+msgctxt "undo text edit.description"
+msgid "If you're in a rich-text-edit area, undoes your latest style/formatting or page-editing changes."
 msgstr "Fortryder din seneste stil/formaterings- eller side-redigerings ændringer."
 
-msgctxt "undo (text edit).execute"
+msgctxt "undo text edit.execute"
 msgid "You're not in a rich text editing field."
 msgstr "Du befinder dig ikke i et formateret tekstredigerings-område."
 
 
-#. redo (text edit) command:
+#. redo text edit command:
 #. use | to separate multiple name values:
-msgctxt "redo (text edit).names"
-msgid "redo"
-msgstr "gendan"
+msgctxt "redo text edit.names"
+msgid "redo text edit"
+msgstr "gendan tekst redigering"
 
-msgctxt "redo (text edit).description"
-msgid "Redoes your latest style/formatting or page-editing changes."
+msgctxt "redo text edit.description"
+msgid "If you're in a rich-text-edit area, redoes your latest style/formatting or page-editing changes."
 msgstr "Gendanner din seneste stil/formaterings- eller side-redigerings ændringer."
 
-msgctxt "redo (text edit).execute"
+msgctxt "redo text edit.execute"
 msgid "You're not in a rich text editing field."
 msgstr "Du befinder dig ikke i et formateret tekstredigerings-område."
 
@@ -105,7 +105,7 @@ msgid "Displays the number of words in a selection."
 msgstr "Viser antallet af ord i en markering"
 
 msgctxt "count words.preview"
-msgid "${num} words"
+msgid "<b>${num}</b> words"
 msgstr "${num} ord"
 
 msgctxt "count words.preview"
@@ -121,13 +121,13 @@ msgid "No words selected."
 msgstr "Ingen ord markeret"
 
 
-#. link (to wikipedia) command:
+#. link to wikipedia command:
 #. use | to separate multiple name values:
-msgctxt "link (to wikipedia).names"
-msgid "link|insert link|linkify"
-msgstr "link|indsæt link"
+msgctxt "link to wikipedia.names"
+msgid "link to wikipedia"
+msgstr "link til wikipedia"
 
-msgctxt "link (to wikipedia).description"
+msgctxt "link to wikipedia.description"
 msgid "Turns a phrase into a link to the matching Wikipedia article."
 msgstr "Forvandler en markering til et link til den tilsvarende Wikipedia artikel."
 
@@ -135,74 +135,37 @@ msgstr "Forvandler en markering til et link til den tilsvarende Wikipedia artike
 #. calculate command:
 #. use | to separate multiple name values:
 msgctxt "calculate.names"
-msgid "calculate"
+msgid "calculate|gcalculate"
 msgstr "Udregn"
 
 msgctxt "calculate.help"
-msgid "Try it out: issue &quot;calc 22/7 - 1&quot;."
-msgstr "Prøv den: udsted kommandoen \"udregn 22/7-1\"."
+msgid "Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
+msgstr "Prøv <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
+"Bemærk: Udregn genkender kun engelsk input"
 
 msgctxt "calculate.description"
-msgid "Calculates the value of a mathematical expression."
-msgstr "Udregner værdien af et matematisk udtryk."
-
-msgctxt "calculate.preview"
-msgid "Calculates an expression. E.g., 22/7."
-msgstr "Udregner et udtryk, f.eks.: 22/7."
-
-msgctxt "calculate.preview"
-msgid "${expression} = <b>${result}</b>{if error}<p><b>Error:</b> ${error}</p>{/if}"
-msgstr "${expression} = <b>${result}</b>{if error}<p><b>Fejl:</b> ${error}</p>{/if}"
-
-msgctxt "calculate.execute"
-msgid "Requires a expression."
-msgstr "Kræver et udtryk."
-
-msgctxt "calculate.execute"
-msgid "Invalid expression"
-msgstr "Ugyldigt udtryk"
-
-msgctxt "calculate.execute"
-msgid "Error calculating expression: ${expression}"
-msgstr "Der skete en fejl ved udregningen af udtrykket: ${expression}"
-
-
-#. gcalculate command:
-#. use | to separate multiple name values:
-msgctxt "gcalculate.names"
-msgid "gcalculate"
-msgstr "g-udreng"
-
-msgctxt "gcalculate.help"
-msgid "Try 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal."
-msgstr "Prøv 5% of 700,  sin( sqrt( ln(pi))),  (1+i)^3,  15 mod 9, (5 choose 2) / 3!,  speed of light in miles per hour,  3 dollars in euros,  242 in hex, MCMXVI in decimal.<br />OBS: Google Udregner bruger engelske udtryk."
-
-msgctxt "gcalculate.description"
-msgid "Calculate knows many functions, constants, units, currencies, etc."
-msgstr "g-udregn kender mange funktioner, konstanter, enheder, møntenheder, etc."
-
-msgctxt "gcalculate.preview"
-msgid "Examples: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(Command List)</a></u>"
-msgstr "Eksempler: 3^4/sqrt(2)-pi,&nbsp;&nbsp;3 inch in cm,&nbsp;&nbsp; speed of light,&nbsp;&nbsp; 0xAF in decimal<br><u><a href=\\\"http://www.googleguide.com/calculator.html\\\">(Kommando Liste)</a></u>"
-
-
-#. sparkline command:
-#. use | to separate multiple name values:
-msgctxt "sparkline.names"
-msgid "sparkline|graph|insert sparkline"
-msgstr "sparkline|graf"
-
-msgctxt "sparkline.help"
-msgid "Select a set of numbers -- in a table or otherwise -- and use this command to graph them as a sparkline. Don't worry about non-numbers getting in there. It'll handle them."
-msgstr "Marker et sæt tal -- i en tabel eller andetsteds -- og brug denne kommando til at generere en graf. Du skal ikke bekymre dig om at tekst bliver markeret med; det håndteres automatisk."
-
-msgctxt "sparkline.description"
-msgid "Graphs the current selection, turning it into a sparkline."
-msgstr "Genererer en graf af den aktuelle markering."
-
-msgctxt "sparkline.preview"
-msgid "Requires numbers to graph."
-msgstr "Kræver markerede tal."
+msgid "Calculates using\n"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a>\n"
+"which has all the features of a scientific calculator,\n"
+"    knows constants such as the speed of light,\n"
+"    and can convert between units and currencies.\n"
+"<br/>\n"
+"Uses\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"instead for simple expressions like\n"
+"<code>22/7</code>\n"
+"."
+msgstr "Udregner ved hjælp af"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google Lommeregner</a>\n"
+"    som har indeholder alle egenskaber en videnskabelig lommeregner ville,\n"
+"    kender konstanter som f.eks. lysets hastighed,\n"
+"    og kan konvertere mellem enheder og møntenheder.\n"
+"<br/>\n"
+"Bruger\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"i stedet for simple udregninger, såsom\n"
+"<code>22/7</code>\n"
+"."
 
 
 #. translate command:
@@ -237,8 +200,23 @@ msgid "Translates from one language to another."
 msgstr "Oversætter fra et sprog til et andet."
 
 msgctxt "translate.preview"
+msgid "Translates ${url} into <b>${toLang}</b>."
+msgstr "Oversætter ${url} til <b>${toLang}</b>."
+
+msgctxt "translate.preview"
 msgid "Replaces the selected text with the <b>${toLang}</b> translation:"
 msgstr "Erstatter den markerede tekst med den <b>${toLang}</b> oversættelse:"
+
+# shared strings in the function translateTo
+# manually added by mitcho
+msgid "Translation error: ${error}"
+msgstr "Fejl i oversættelse: ${error}"
+
+msgid "invalid translation language pair"
+msgstr "ugyldige sprogvalg til oversættelse"
+
+msgid "could not reliably detect source language"
+msgstr "Kunne ikke bestemme kilde-sprog"
 
 
 #. create bookmarklet command command:
@@ -247,9 +225,13 @@ msgctxt "create bookmarklet command.names"
 msgid "create bookmarklet command"
 msgstr "opret bookmarklet kommando"
 
+msgctxt "create bookmarklet command.help"
+msgid "For instance, if you have a bookmarklet called 'press this', you can say 'create bookmarklet command from press this'."
+msgstr "Hvis du f.eks. har et bookmarklet kaldet 'klik dette', kan du udstede kommandoen 'opret bookmarklet kommando fra klik dette'."
+
 msgctxt "create bookmarklet command.description"
-msgid "Creates a new command from a bookmarklet."
-msgstr "Opretter en ny kommando ud fra et bookmarklet."
+msgid "Creates a new Ubiquity command from a bookmarklet."
+msgstr "Opretter en ny Ubiquity kommando ud fra et bookmarklet."
 
 
 #. create search command command:
@@ -261,16 +243,19 @@ msgstr "Opret søge kommando"
 msgctxt "create search command.help"
 msgid "<ol style=\"list-style-image:none\">\n"
 "  <li>Select a searchbox.</li>\n"
-"  <li>Execute this command to create the new search command.</li>\n"
+"  <li>Say 'create search command mysearch'.</li>\n"
+"  <li>Execute.</li>\n"
+"  <li>You now have a command called 'mysearch'.</li>\n"
 "</ol>"
 msgstr "<ol style=\"list-style-image:none\">\n"
 "  <li>Vælg et søgefelt.</li>\n"
-"  <li>Eksekver denne kommando for at oprette en ny søge-kommando.</li>\n"
+"  <li>Udsted kommandoen 'opret søge kommando minsøgning'.</li>\n
+"  <li>Du har nu en kommando kaldet 'minsøgning'</li>\n"
 "</ol>"
 
 msgctxt "create search command.description"
-msgid "Creates a new Ubiquity command from a focused search-box."
-msgstr "Opretter en ny søge-kommando ud fra det valgte søge-felt."
+msgid "Creates a new Ubiquity command from a focused search-box and lets you set the command name."
+msgstr "Opretter en ny søge-kommando ud fra det valgte søge-felt og lader dig vælge et kommando-navn."
 
 msgctxt "create search command.preview"
 msgid "Creates a new search command called <b>${text}</b>"

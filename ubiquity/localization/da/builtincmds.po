@@ -31,6 +31,9 @@ msgctxt "open (ubiquity settings page).description"
 msgid "Opens one of the Ubiquity documentation/settings pages."
 msgstr "Åbner en af Ubiquitys dokumentations- eller indstillingssider"
 
+msgctxt "open (ubiquity settings page).preview"
+msgid "Opens the Ubiquity ${goal} page."
+msgstr "Åbner Ubiquitys ${goal}-side."
 
 #. write ubiquity commands command:
 #. use | to separate multiple name values:
@@ -140,5 +143,12 @@ msgctxt "command history.description"
 msgid "Accesses your command history."
 msgstr "Tilgår din kommando-historik."
 
+msgctxt "command history.preview"
+msgid "No histories match."
+msgstr "Ingen historik matcher."
+
+msgctxt "command history.execute"
+msgid "Deleted matched histories. Click here to undo."
+msgstr "Matchende historik slettet. Klik her for at fortryde."
 
 
