@@ -134,14 +134,16 @@ Parser.prototype = {
   // The {{{_roleSignatures}}} is a hash to keep track of different role
   _roleSignatures: {},
 
-  // ** {{{Parser#_hasObjectsWithDelimiters}}} **
+  // ** {{{Parser#_objectDelimiter}}} **
   //
-  // This is a boolean set on initialization to be true if the language has
+  // This is a value set on initialization if the language has
   // a delimiter set for the object role besides "". If there is, objects
   // which *don't* have a modifier will be lowered in score.
   //
+  // If set, the value is the default non-"" delimiter.
+  // 
   // Example: think Japanese.
-  _hasObjectsWithDelimiters: false,
+  _objectDelimiter: false,
 
   // ** {{{Parser#_patternCache}}} **
   //
@@ -253,7 +255,7 @@ Parser.prototype = {
 
     for each (let {role, delimiter} in this.roles) {
       if (role == 'object' && delimiter != '') {
-        this._hasObjectsWithDelimiters = true;
+        this._objectDelimiter = delimiter;
         break;
       }
     }
@@ -924,57 +926,26 @@ Parser.prototype = {
       return returnArr;
     let count = 0;
 
-    // If the parse has no declared verb, then we cannot
-    // assign the interpolation to specific roles, because
-    // no roles are known yet. So we will assign the whole
-    // selection to the direct object of the yet to be decided verb,
-    // so long as there is not currently a direct object assigned.
+    // We will assign the whole selection to the direct object.
     // Then, in step 7, object -> other roles interpolation will
     // make sure that the selection gets tried in all roles of
     // the verb that is chosen.
-    if (!parse._verb.id){
-      let parseCopy = parse.copy();
-      if(!parseCopy.input.length){
-        if (!('object' in parseCopy.args))
-          parseCopy.args.object = [];
-        parseCopy.args['object'].push({ _order: --count,
-              input: selection,
-              modifier: ""});
-        parseCopy.scoreMultiplier *= 1.2; // TODO: do we really want this?
-        parseCopy._score = parseCopy.scoreMultiplier;
-        returnArr.push(parseCopy);
-      }
-      return returnArr;
-    }
-
-    let args = parse._verb.arguments;
-    for each (let arg in args){
-      let role = arg.role;
-      let delimiter = "";
-      for each (let storedRole in this.roles){
-        if (storedRole.role == role){
-          delimiter = storedRole.delimiter;
-          break;
-        }
-      }
-      let parseCopy = parse.copy();
-      let objectCopy = {
-        _order: --count,
-        input: selection,
-        modifier: delimiter,
-        innerSpace: this.joindelimiter,
-        outerSpace: this.joindelimiter};
-      parseCopy.scoreMultiplier *= 1.2; // TODO: again, unsure.
-      if (!(role in parseCopy.args))
-        parseCopy.args[role] = [];
-      parseCopy.args[role].push(objectCopy);
+    
+    let parseCopy = parse.copy();
+//    if(!parseCopy.input.length){
+      if (!('object' in parseCopy.args))
+        parseCopy.args.object = [];
+      parseCopy.args['object'].push({ _order: --count,
+            input: selection,
+            modifier: this._objectDelimiter || "",
+            outerSpace: this.joindelimiter,
+            fromSelection: true});
+      parseCopy.scoreMultiplier *= 1.2; // TODO: do we really want this?
+//      parseCopy._score = parseCopy.scoreMultiplier;
       returnArr.push(parseCopy);
-    }
-
-    for each (let parse in returnArr) {
-      parse = this.updateScoreMultiplierWithArgs(parse);
-    }
+//    }
     return returnArr;
+    // TODO: create differential updateScoreMultiplierWithArgs
   },
 
   // ** {{{Parser#substituteSelection()}}} **
@@ -1075,15 +1046,13 @@ Parser.prototype = {
     // if nothing had the role "object", return nothing.
     if (!parse.args.object) return [];
 
-    //return [];
-
     let baseParses = [parse];
     let returnArr = [];
     let rolesToTry = this._otherRolesCache;
     if (parse._verb.id) {
-      rolesToTry = [];
-      for each (arg in parse._verb.arguments) {
-        if (arg.role != 'object');
+      rolesToTry = {};
+      for each (let arg in parse._verb.arguments) {
+        if (arg.role != 'object')
           rolesToTry[arg.role] = this._otherRolesCache[arg.role];
       }
     }
@@ -1094,6 +1063,16 @@ Parser.prototype = {
       // so we won't apply this object to other roles.
       if (object.modifier)
         continue; // goes to the next parse.args.object key
+      
+      // If the argument was not from a selection context (ie., it was from
+      // the input (argString)) and the known verb *does* have an object,
+      // don't apply. In other words, "weather chicago" > "weather near chicago"
+      // but not "twitter hello" > "twitter as hello".
+      if (!object.fromSelection && parse._verb.id) {
+        let roles = [arg.role for each (arg in parse._verb.arguments)];
+        if (roles.indexOf('object') != -1)
+          continue;
+      }
 
       let newParses = [];
       for (let role in rolesToTry) {
@@ -1299,7 +1278,7 @@ Parser.prototype = {
             for(let key in suggestion)
               arg[key] = suggestion[key];
 
-            if (role == 'object' && this._hasObjectsWithDelimiters
+            if (role == 'object' && this._objectDelimiter
                 && !(arg.modifier))
               arg.score *= 0.6;
 
@@ -1461,8 +1440,15 @@ Parser.prototype = {
 
           if (Utils.isEmpty(thisParser._nounCache[x][nountypeId]))
             thisParser._nounCache[x][nountypeId] = [];
+          
+          let thisSuggIsNew = true;
+          for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
+            if (Utils.isEqual(newSugg,oldSugg))
+              thisSuggIsNew = false;
+          }
 
-          thisParser._nounCache[x][nountypeId].push(newSugg);
+          if (thisSuggIsNew)
+            thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
         if (typeof callback == 'function')
@@ -1740,8 +1726,6 @@ ParseQuery.prototype = {
     // "search with google" (role: instrument). This adds new usability to
     // overlord verbs by being able to just enter the provider name.
     for each (let parse in this._possibleParses) {
-      // if there is a set verb, don't try this.
-      if (parse._verb.id) continue;
       let newParses = this.parser.applyObjectsToOtherRoles(parse);
       if (newParses.length)
         this._possibleParses = this._possibleParses.concat(newParses);
