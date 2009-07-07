@@ -1434,7 +1434,7 @@ Parser.prototype = {
         this._nounCache[x] = {};
 
       var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
-        if (!suggs && !suggs.length)
+        if (!suggs || !suggs.length)
           return [];
         if (!Utils.isArray(suggs)) suggs = [suggs];
         // This extra step here which admittedly looks redundant is to
