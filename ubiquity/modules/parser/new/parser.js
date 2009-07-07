@@ -1079,6 +1079,15 @@ Parser.prototype = {
 
     let baseParses = [parse];
     let returnArr = [];
+    let rolesToTry = this._otherRolesCache;
+    if (parse._verb.id) {
+      rolesToTry = [];
+      for each (arg in parse._verb.arguments) {
+        if (arg.role != 'object');
+          rolesToTry[arg.role] = this._otherRolesCache[arg.role];
+      }
+    }
+    
     for (let key in parse.args.object) {
       let object = parse.args.object[key];
       // if the object has a modifier, we don't want to override that
@@ -1087,8 +1096,8 @@ Parser.prototype = {
         continue; // goes to the next parse.args.object key
 
       let newParses = [];
-      for (let role in this._otherRolesCache) {
-        let delimiter = this._otherRolesCache[role];
+      for (let role in rolesToTry) {
+        let delimiter = rolesToTry[role];
         for each (let baseParse in baseParses) {
           let parseCopy = baseParse.copy();
           let objectCopy = {__proto__: object,
@@ -1724,15 +1733,16 @@ ParseQuery.prototype = {
     }
     this._next();
 
-    // STEP 7: for arg-first parses, attempt to apply objects to other roles
-    // For parses which don't have a set verb, attempt to apply any args
+    // STEP 7: attempt to apply objects to other roles
+    // Attempt to apply any args
     // with role "object" to other roles. This is so that parses like
     // "calendar" => "add to calendar" (role: goal) or "google" =>
     // "search with google" (role: instrument). This adds new usability to
     // overlord verbs by being able to just enter the provider name.
     for each (let parse in this._possibleParses) {
-      // if there's a set verb, skip this parse
-      if (parse._verb.id) continue;
+      // before, if there was a set verb, we wouldn't try this.
+      // but now this is a good idea.
+      // if (parse._verb.id) continue;
       let newParses = this.parser.applyObjectsToOtherRoles(parse);
       if (newParses.length)
         this._possibleParses = this._possibleParses.concat(newParses);
