@@ -124,6 +124,10 @@ msgid "Share the current page as a bookmark on delicious.com"
 msgstr "Del den aktuelle side som et bogmærke på delicious.com"
 
 msgctxt "share (on delicious).preview"
+msgid "This URL cannot be shared on ${delicious}."
+msgstr "Denne URL kan ikke deles på ${delicious}."
+
+msgctxt "share (on delicious).preview"
 msgid "No active user found - log in at ${delicious} to use this command."
 msgstr "Ingen aktiv bruger fundet - log ind på ${delicious} for at bruge denne kommando"
 
@@ -134,6 +138,10 @@ msgstr "En titel er påkrævet for at bogmærke på ${delicious}"
 msgctxt "share (on delicious).preview"
 msgid "Share a bookmark at ${delicious}:"
 msgstr "Del et bogmærke på ${delicious}:"
+
+msgctxt "share (on delicious).execute"
+msgid "This URL cannot be shared on delicious."
+msgstr "Denne UEL kan ikke deles på delicious."
 
 msgctxt "share (on delicious).execute"
 msgid "No active user found - log in at delicious.com to use this command."
@@ -150,88 +158,5 @@ msgstr "Bogmærk \\\"${description}\\\" delt på delicious.com/${user_name}"
 msgctxt "share (on delicious).execute"
 msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
 msgstr "FEJL: Bogmærk \\\"${description}\\\" IKKE delt på delicious.com/${user_name}"
-
-
-#. ask rypple command:
-#. use | to separate multiple name values:
-msgctxt "ask rypple.names"
-msgid "ask rypple|rypple"
-msgstr "spørg rypple|rypple"
-
-msgctxt "ask rypple.help"
-msgid "You'll need a <a href=\"http://rypple.com\">Rypple account</a> and be logged in"
-msgstr "Denne service kræver at du har en <a href=\"http://rypple.com\">Rypple konto</a> og at du er logget ind"
-
-msgctxt "ask rypple.description"
-msgid "Asks a question on Rypple"
-msgstr "Stiller et spørgsmål på Rypple"
-
-msgctxt "ask rypple.preview"
-msgid "Asks the following question (${charsLeft} characters left):"
-msgstr "Stiller det følgende spørgsmål (${charsLeft} tegn tilbage):"
-
-msgctxt "ask rypple.preview"
-msgid "NO QUESTION. PLEASE ENTER A QUESTION."
-msgstr "INTET SPØRGSMÅL. INDTAST VENLIGST ET SPØRGSMÅL."
-
-msgctxt "ask rypple.preview"
-msgid "To:"
-msgstr "Til:"
-
-msgctxt "ask rypple.preview"
-msgid "NO RECIPIENTS. YOU MUST ENTER AT LEAST ONE."
-msgstr "INGEN MODTAGERE. DU SKAL INDTASTE MINDST ÈN."
-
-msgctxt "ask rypple.preview"
-msgid "Attributes:"
-msgstr "Attributter:"
-
-msgctxt "ask rypple.preview"
-msgid "NO ATTRIBUTES. YOU MUST ENTER AT LEAST ONE."
-msgstr "INGEN ATTRIBUTTER. DU SKAL INDTASTE MINDST ÉN."
-
-msgctxt "ask rypple.preview"
-msgid "Usage:"
-msgstr "Brug:"
-
-msgctxt "ask rypple.preview"
-msgid "rypple-ask &lt;question&gt; &lt;recipient(s)&gt; &lt;attribute(s)&gt;"
-msgstr "spørg rypple \"spørgsmål\" \"modtager(e)\" \"attribut(ter)\""
-
-msgctxt "ask rypple.preview"
-msgid "Recipients must start with '@' and at least one recipient is required."
-msgstr "Modtager skal starte med '@' og mindst én modtager er påkrævet."
-
-msgctxt "ask rypple.preview"
-msgid "Attributes must start with '#' and at least one attribute is required."
-msgstr "Attributter skal starte med '#' og mindst én attribut er påkrævet."
-
-msgctxt "ask rypple.preview"
-msgid "The last ${chars} character(s) of your question will be truncated!<br/>"
-msgstr "De sidste ${chars} tegn af dit spørgsmål bliver trunkeret!<br />"
-
-msgctxt "ask rypple.preview"
-msgid "The last <b>${num}</b> attributes{if num > 1}s{/if} will not be used!"
-msgstr "De sidste <b>${num}</b> attributter vil ikke blive brugt!"
-
-msgctxt "ask rypple.execute"
-msgid "At least one recipient is required"
-msgstr "Mindst en modtager er påkrævet"
-
-msgctxt "ask rypple.execute"
-msgid "At least one attribute is required"
-msgstr "Mindst en attribut er påkrævet"
-
-msgctxt "ask rypple.execute"
-msgid "No question specified"
-msgstr "Intet spørgsmål specificeret"
-
-msgctxt "ask rypple.execute"
-msgid "Rypple error - are you logged in?"
-msgstr "Rypple fejl - er du logget ind?"
-
-msgctxt "ask rypple.execute"
-msgid "Asked Question Successfully on Rypple"
-msgstr "Spørgsmål succesfyldt stillet på Rypple"
 
 

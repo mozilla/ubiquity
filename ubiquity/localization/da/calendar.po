@@ -11,7 +11,7 @@ msgstr ""
 #. add to google calendar command:
 #. use | to separate multiple name values:
 msgctxt "add to google calendar.names"
-msgid "add"
+msgid "add to google calendar|quick add"
 msgstr "tilføj"
 
 msgctxt "add to google calendar.help"
@@ -34,6 +34,14 @@ msgid "Adds an event to your calendar."
 msgstr "Tilføjer en aftale til din kalender."
 
 msgctxt "add to google calendar.execute"
+msgid "Authorization error"
+msgstr "Fejl i adgangstilladelse"
+
+msgctxt "add to google calendar.execute"
+msgid "Please make sure you are logged in to Google Calendar"
+msgstr "Bekræft venligst at du er logget ind i Google Kalender"
+
+msgctxt "add to google calendar.execute"
 msgid "Event created"
 msgstr "Aftale oprettet"
 
@@ -45,7 +53,7 @@ msgstr "Der opstod en fejl ved oprettelsen af aftalen"
 #. check google calendar command:
 #. use | to separate multiple name values:
 msgctxt "check google calendar.names"
-msgid "check google calendar|check gcalendar"
+msgid "check google calendar"
 msgstr "tjek google kalender|tjek gkalender"
 
 msgctxt "check google calendar.help"

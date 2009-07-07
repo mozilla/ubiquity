@@ -96,13 +96,13 @@ msgid "count tabs"
 msgstr "Tæl faneblade"
 
 msgctxt "count tabs.description"
-msgid "Counts the number of opened tabs."
-msgstr "Tæller antallet af åbne faneblade"
+msgid "Counts the number of opened tabs. Takes an optional filter term to count number of tabs matching filter term."
+msgstr "Tæller antallet af åbne faneblade. Accepterer et valgfrit filter så kun faneblade der matcher filtret tælles."
 
 # added manually by mitcho
 # template in _count: no msgctxt as it is shared between preview + execute
-msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}.</div>"
-msgstr "<div class=\"count-tabs\"><b>${count}</b> faneblad{if count != 1}e{/if} {if html}der matcher <b>${html}</b>{else}sammenlagt{/if}.</div>"
+msgid "<div class=\"count-tabs\"><b>${count}</b> tab{if count > 1}s{/if} {if html}matching <b>${html}</b>{else}total{/if}</b>.</div>"
+msgstr "<div class=\"count-tabs\"><b>${count}</b> faneblad{if count > 1}e{/if} {if html}der matcher <b>${html}</b>{else}sammenlagt{/if}.</div>"
 
 
 #. refresh command:
@@ -152,6 +152,10 @@ msgctxt "go back.description"
 msgid "Goes back in history."
 msgstr "Går en side tilbage i din historik"
 
+# added manually by mitcho
+msgctxt "go back.preview"
+msgid "Go back ${num} step{if num > 1}s{/if} in history."
+msgstr "Gå ${num} skridt tilbage i din historik."
 
 #. go forward command:
 #. use | to separate multiple name values:
@@ -162,6 +166,11 @@ msgstr "gå fremad"
 msgctxt "go forward.description"
 msgid "Goes forward in history."
 msgstr "Går en side fremad i din historik."
+
+# added manually by mitcho
+msgctxt "go forward.preview"
+msgid "Go forward ${num} step{if num > 1}s{/if} in history."
+msgstr "Gå ${num} skridt fremad i din historik."
 
 
 #. go home command:

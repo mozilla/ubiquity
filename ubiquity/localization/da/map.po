@@ -27,14 +27,3 @@ msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable pa
 msgstr "Kan ikke indsætte i et ikke-redigerbart område. Brug 'rediger side' for at gøre siden rediger-bar."
 
 
-#. map these command:
-#. use | to separate multiple name values:
-msgctxt "map these.names"
-msgid "map these"
-msgstr "kortlæg disse"
-
-msgctxt "map these.description"
-msgid "Maps multiple selected addresses or links onto a single Google Map. (Experimental!)"
-msgstr "Kortlægger adskillige adresser eller henvisninger ti let enkelt Google Kort. (Eksperimentalt!)"
-
-
