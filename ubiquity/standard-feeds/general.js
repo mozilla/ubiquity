@@ -91,7 +91,7 @@ CmdUtils.CreateCommand({
   },
   description:
   "Turns a phrase into a link to the matching Wikipedia article.",
-  icon: "http://www.wikipedia.org/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/wikipedia.ico",
   _link: function({object: {text, html}, format: {data}}){
     var url = ("http://" + (data || defaultLang) +
                ".wikipedia.org/wiki/Special%3ASearch/" +
@@ -283,7 +283,7 @@ CmdUtils.CreateCommand({
     goal: noun_type_lang_google,
   },
   description: "Translates from one language to another.",
-  icon: "http://www.google.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/google.ico",
   help: "" + (
     <>You can specify the language to translate to,
     and the language to translate from.

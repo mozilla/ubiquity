@@ -93,7 +93,7 @@ CmdUtils.CreateCommand({
   authors: [{name: 'cers',  email: 'cers@geeksbynature.dk'},
             {name: 'satyr', email: 'murky.satyr@gmail.com'}],
   license: 'MIT',
-  icon: 'http://jquery.com/favicon.ico',
+  icon: "chrome://ubiquity/skin/icons/jquery.ico",
   execute: function ss_execute(){
     const Me = this, Key = "_" + Me._key, Doc = CmdUtils.getDocument();
     if(Doc.getElementById(Key)) return;

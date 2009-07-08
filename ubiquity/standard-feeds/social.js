@@ -19,7 +19,7 @@ CmdUtils.CreateCommand({
     {role: "object", label: 'status', nountype: noun_arb_text},
     {role: "alias", nountype: noun_type_twitter_user}
   ],
-  icon: "http://twitter.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/twitter.ico",
   description:
   "Sets your Twitter status to a message of at most 160 characters.",
   help: ("You'll need a <a href=\"http://twitter.com\">Twitter account</a>," +
@@ -117,7 +117,7 @@ CmdUtils.CreateCommand({
 // optional commentary, and alias?
 CmdUtils.CreateCommand({
   names: ["digg","share using digg"],
-  icon: "http://digg.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/digg.ico",
   homepage: "http://www.gialloporpora.netsons.org",
   description: "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page.",
   author: { name: "Sandro Della Giustina", email: "sandrodll@yahoo.it"},
@@ -176,7 +176,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["tinyurl"],
   arguments: noun_type_url,
-  icon: "http://tinyurl.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/tinyurl.ico",
   description: ("Replaces the selected URL with a " +
                 "<a href=\"http://www.tinyurl.com\">TinyURL</a>."),
   preview: function(pblock, {object: {text}}){
@@ -230,8 +230,7 @@ var cookie_mgr = Components.classes["@mozilla.org/cookiemanager;1"]
 CmdUtils.CreateCommand(
   {
     names: ["share (on delicious)", "delicious"],
-    icon:
-        'http://delicious.com/favicon.ico',
+    icon: "chrome://ubiquity/skin/icons/delicious.ico",
     description:
         'Share the current page as a bookmark on delicious.com',
     help:
