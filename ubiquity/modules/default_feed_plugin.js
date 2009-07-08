@@ -373,16 +373,9 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   // TODO: think of a better way to switch nountypes files for different languages
   // and keep english as a default, etc.
   // mitcho's guess: we should keep nountypes separate but verbs together... :/
-  if (languageCode == "jp" && parserVersion < 2) {
-    headerCodeSources.push(
-      new LocalUriCodeSource(basePartsUri + "header/shared.js"),
-      new LocalUriCodeSource(basePartsUri + "header/jp/nountypes.js"));
-    feeds["Builtin Commands (jp)"] = baseFeedsUri + "jp/builtincmds.js";
-  } else if (languageCode == "en" || parserVersion == 2) {
-    headerCodeSources.push(
-      new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js"));
-    feeds["Builtin Commands"] = baseFeedsUri + "en/builtincmds.js";
-  }
+  headerCodeSources.push(
+    new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js"));
+  feeds["Builtin Commands"] = baseFeedsUri + "en/builtincmds.js";
 
   return {
     feeds: feeds,

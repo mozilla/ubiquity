@@ -1,17 +1,15 @@
 var EXPORTED_SYMBOLS = ["NLParserMaker"];
 
-var NLParserMaker = function(parserVersion) {
-  dump('loading parser version: '+parserVersion+"\n");
+const Cu = Components.utils;
 
-  var NLParser;
-  if (parserVersion < 2 ) {
-    Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
-    Components.utils.import("resource://ubiquity/modules/parser/original/locale_en.js");
-    Components.utils.import("resource://ubiquity/modules/parser/original/locale_jp.js");
-    NLParser = NLParser1;
-  } else {
-    Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
-    NLParser = NLParser2;
+function NLParserMaker(parserVersion) {
+  var jsm = {};
+  if (parserVersion < 2) {
+    Cu.import("resource://ubiquity/modules/parser/original/parser.js", jsm);
+    Cu.import("resource://ubiquity/modules/parser/original/locale_en.js", jsm);
+    jsm.NLParser1.registerPluginForLanguage("en", jsm.EnParser);
+    return jsm.NLParser1;
   }
-  return NLParser;
+  Cu.import("resource://ubiquity/modules/parser/new/namespace.js", jsm);
+  return jsm.NLParser2;
 }
