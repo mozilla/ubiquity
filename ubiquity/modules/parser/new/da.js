@@ -38,6 +38,7 @@
 
 function makeParser() {
   var da = new Parser('da');
+  da.anaphora = ["det","dette", "den", "denne", "han", "hun", "dem", "de", "markering", "markeringen"];
   da.roles = [
     {role: 'goal', delimiter: 'til'},
     {role: 'source', delimiter: 'fra'},
