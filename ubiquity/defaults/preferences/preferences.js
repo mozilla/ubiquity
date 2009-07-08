@@ -13,3 +13,4 @@ pref("extensions.ubiquity.bugReportUri",
 pref("extensions.ubiquity.commandList.sortMode", "feed");
 pref("extensions.ubiquity.collectUsageData", false);
 pref("extensions.ubiquity.history.max", 42);
+pref("extensions.ubiquity.doNounFirstExternals", 0);

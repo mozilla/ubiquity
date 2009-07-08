@@ -47,6 +47,10 @@ Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
+var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                          .getService(Components.interfaces.nsIPrefService);
+prefs = prefs.getBranch("extensions.ubiquity.");
+
 // = Ubiquity Parser: The Next Generation =
 //
 // This file, {{{parser.js}}}, is part of the implementation of Ubiquity's
@@ -212,11 +216,12 @@ Parser.prototype = {
     // Scrape the noun types up here.
     var nouns = this._nounTypes = {};
     var localNounIds = this._nounTypeIdsWithNoExternalCalls = {};
+    var doNounFirstExternals = prefs.getIntPref("doNounFirstExternals");
     for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;
         nouns[nt.id] = nt;
-        if (nt.noExternalCalls)
+        if (nt.noExternalCalls || doNounFirstExternals)
           localNounIds[nt.id] = true;
       }
     }

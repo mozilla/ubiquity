@@ -81,6 +81,14 @@
      <input type="text" id="max-suggestions" size="2"
       style="text-align:center"/>
     </p>
+    <p>Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.
+    </p>
+    <p>
+      <input type="checkbox" id="external-calls-on-all-queries"
+                 onchange="changeExternalCallSettings();">
+      <strong>Enable external calls for all Parser 2 queries</strong>
+    </p>
+    <p><span id="external-calls-settings-changed-info"></span></p>
   </div>
   <br clear="all"/>
   <div id="editor-div" style="display:none">

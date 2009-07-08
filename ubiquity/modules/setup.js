@@ -364,9 +364,15 @@ let UbiquitySetup = {
 
   get standardFeedsUri() {
     return this.getBaseUri() + "standard-feeds/";
+  },
+
+  get doNounFirstExternals() {
+    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                          .getService(Components.interfaces.nsIPrefService);
+    prefs = prefs.getBranch("extensions.ubiquity.");
+    return prefs.getIntPref("doNounFirstExternals");
   }
 };
-
 function DisabledCmdStorage(prefName) {
   var disabledCommands =
     Utils.json.decode(Application.prefs.getValue(prefName, "{}"));

@@ -81,7 +81,9 @@ function onDocumentLoad() {
       }
     });
   }
-
+  // set the external calls control to the correct value:
+  $("#external-calls-on-all-queries")[0].checked =
+                                         UbiquitySetup.doNounFirstExternals;
   $("#max-suggestions").keyup(function changeMaxSuggestions() {
     if (!this.value || this.value === this.lastValue) return;
     CommandManager.maxSuggestions = this.value;
@@ -114,6 +116,24 @@ function changeLanguageSettings() {
     $("#lang-settings-changed-info").html(
       "<i>This change will take effect when you restart Firefox.</i>");
 }
+
+function changeExternalCallSettings() {
+  var changed = false;
+  var prefs = Cc["@mozilla.org/preferences-service;1"]
+                          .getService(Ci.nsIPrefService);
+  prefs = prefs.getBranch("extensions.ubiquity.");
+
+  var externalCallsOnAllQueries = $("#external-calls-on-all-queries").attr("checked") ? true : false;
+  if(externalCallsOnAllQueries != prefs.getIntPref("doNounFirstExternals")){
+    changed = true;
+    prefs.setIntPref("doNounFirstExternals", externalCallsOnAllQueries);
+  }
+  
+  if (changed)
+    $("#external-calls-settings-changed-info").html(
+      "<i>This change will take effect when you restart Firefox.</i>");
+}
+
 
 function loadSkinList() {
   var {CUSTOM_SKIN, currentSkin, skinList} = skinService;
