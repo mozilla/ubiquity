@@ -53,6 +53,24 @@ var EXPORTED_SYMBOLS = ["CmdUtils"];
 var CmdUtils = {
   __globalObject: null,
   __nextId: null,
+
+  // ** {{{ CmdUtils.parserVersion }}} **
+  //
+  // This attribute contains the parser version that Ubiquity is
+  // using. A command can provide different options to
+  // {{{CmdUtils.CreateCommand()}}} and behave differently
+  // depending on this value, allowing a single command feed to
+  // cater to whatever parser the user is using.
+  //
+  // Ubiquity 0.1.x only supports parser version 1, while
+  // Ubiquity 0.2.x supports parser versions 1 and 2.
+
+  get parserVersion() {
+    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                .getService(Components.interfaces.nsIPrefService);
+    var branch = prefs.getBranch("extensions.ubiquity.");
+    return branch.getIntPref("parserVersion");
+  }
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
