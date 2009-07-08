@@ -265,7 +265,7 @@ CmdUtils.CreateCommand({
 CmdUtils.makeSearchCommand({
   names: ["Google"],
   url: "http://www.google.com/search?q={QUERY}",
-  icon: "http://www.google.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/google.ico",
   description: "Searches Google for your words.",
   help: "You can use the keyboard shortcut ctrl + alt + number to open one " +
         "of the Google results shown in the preview.",
@@ -363,7 +363,7 @@ CmdUtils.CreateCommand({
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
   contributors: ["Viktor Pyatkovka"],
   license: "MPL",
-  icon: "http://en.wikipedia.org/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/wikipedia.ico",
   description: "Searches Wikipedia for your words, in a given language.",
   preview: function(previewBlock, arguments) {
     var langCode = arguments.format.data || defaultLang;
@@ -448,7 +448,7 @@ CmdUtils.CreateCommand({
 CmdUtils.makeSearchCommand({
   names: ["IMDB", "internet movie database", "movie", "actor"],
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
-  icon: "http://i.imdb.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/imdb.ico",
   description: "Searches the Internet Movie Database (www.imdb.com) for " + 
                "your words."
 });
@@ -456,7 +456,7 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
   names: ["yahoo"],
   url: "http://search.yahoo.com/search?p={QUERY}&ei=UTF-8",
-  icon: "http://search.yahoo.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/yahoo.ico",
   description: "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words.",
   preview: function(pblock, {object}){
     //TODO: Figure out some way around rate limits
@@ -527,7 +527,7 @@ Amazon = "http://www.amazon.com/",
 AmazLink = "Amazon.com".link(Amazon);
 CmdUtils.CreateCommand({
   names: ["amazon"],
-  icon: Amazon + "favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/amazon.ico",
   description: "Searches " + AmazLink + " for items matching your words.",
   help: (
     <dl><dt>Available Indices</dt>
@@ -694,7 +694,7 @@ CmdUtils.CreateCommand({
   author: { name: "Udi Falkson", email: "udi@videosurf.com"},
   description: "Performs a VideoSurf video search with advanced preview.",
   help: "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!",
-  icon: "http://www.videosurf.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/videosurf.ico",
   arguments: [{role: "object",
                nountype: noun_arb_text,
                label: "Search Term"}],
@@ -733,7 +733,7 @@ CmdUtils.CreateCommand({
 CmdUtils.makeSearchCommand({
   names: ["YouTube"],
   url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
-  icon: "http://www.youtube.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/youtube.ico",
   description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words. Previews the top results.",
   preview: function(pblock, {object}){
     var searchTerm = object.text;
@@ -772,7 +772,7 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
   names: ["Flickr", "images"],
   url: "http://www.flickr.com/search/?q={QUERY}&w=all",
-  icon: "http://www.flickr.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/flickr.ico",
   description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your keywords. Previews the top pictures.",
   preview : function(previewBlock, {object}){
     var inputText = object.text;
@@ -831,14 +831,14 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
   names: ["Bugzilla"],
   url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
-  icon: "http://www.mozilla.org/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/mozilla.ico",
   description: "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
 });
 
 CmdUtils.makeSearchCommand({
   names: ["msn"],
   url: "http://search.msn.com/results.aspx?q={QUERY}",
-  icon: "http://search.msn.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/bing.ico",
   description: "Searches <a href=\"http://search.msn.com\">MSN</a> for the given words.",
   preview: function(pBlock, {object}) {
     if (object.text)
@@ -851,7 +851,7 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
   names: ["ebay"],
   url: "http://search.ebay.com/search/search.dll?satitle={QUERY}",
-  icon: "http://search.ebay.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/ebay.ico",
   description: "Searches <a href=\"http://search.ebay.com\">eBay</a> for auctions matching the given words.",
   preview: function(pBlock, {object}) {
     if (object.text)
@@ -864,7 +864,7 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
   names: ["ask"],
   url: "http://www.ask.com/web?q={QUERY}",
-  icon: "http://www.ask.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/ask.ico",
   description: "Searches <a href=\"http://www.ask.com\">Ask.com</a> for the given words.",
   preview: function(pBlock, {object}) {
     if (object.text)
@@ -877,7 +877,7 @@ CmdUtils.makeSearchCommand({
 CmdUtils.makeSearchCommand({
   names: ["answers"],
   url: "http://www.answers.com/{QUERY}",
-  icon: "http://www.answers.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/answers.ico",
   description: "Searches <a href=\"http://www.answers.com\">Answers.com</a> for the given words.",
   preview: function(pBlock, {object}) {
     if (object.text)
@@ -900,7 +900,7 @@ CmdUtils.CreateCommand({
     {role: "object", label: "restaurant", nountype: noun_type_async_restaurant},
     {role: "location", nountype: noun_type_async_address}
   ],
-  icon: "http://www.yelp.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/yelp.ico",
   description: "Searches <a href=\"http://www.yelp.com\">Yelp</a> for restaurants matching your words.  Previews the top results.",
   help: "You can search for restaurants near a certain location using the <i>near</i> modifier.  For example, try &quot;yelp pizza near boston&quot;.",
   execute: function( args ) {
@@ -1011,7 +1011,7 @@ CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
   arguments: {location: noun_type_geolocation,
               format: noun_type_temperature_units},
-  icon: "http://www.wunderground.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/wunderground.ico",
   description: "Checks the weather for a given location. It detects your " +
                "current location as a default.",
   help: "Try issuing &quot;weather near chicago&quot;.  It works with " +
@@ -1109,7 +1109,7 @@ CmdUtils.CreateCommand({
   names: ["define", "get definition"],
   description: "Gives the meaning of a word, using answers.com.",
   help: "Try issuing &quot;define aglet&quot;",
-  icon: "http://www.answers.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/answers.ico",
   arguments: [{role: "object",
                nountype: noun_arb_text,
                label: "word"}],
@@ -1144,7 +1144,7 @@ CmdUtils.makeSearchCommand({
   },
   homepage: "http://www.jimmy2k.it/getimagescommand",
   license: "MPL",
-  icon: "http://www.google.com/favicon.ico",
+  icon: "chrome://ubiquity/skin/icons/google.ico",
   description: "Browse and embed pictures from Google Images",
   help: "Press return to show the Google Images results, left click on a picture to watch it, right click to insert it in a text or rich text area",
   url: "http://images.google.com/images?hl=en&q={QUERY}",
