@@ -1443,8 +1443,11 @@ Parser.prototype = {
           
           let thisSuggIsNew = true;
           for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
-            if (Utils.isEqual(newSugg,oldSugg))
+            if (Utils.isEqual({__proto__:newSugg, score:0},
+                              {__proto__:oldSugg, score:0})) {
               thisSuggIsNew = false;
+              oldSugg.score = Math.max(oldSugg.score,newSugg.score);
+            }
           }
 
           if (thisSuggIsNew)
