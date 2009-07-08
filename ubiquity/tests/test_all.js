@@ -485,18 +485,4 @@ function testNounType() {
                     "123,456,789");
 }
 
-function getLocalFileAsUtf8(url) {
-  var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-                      .createInstance(Components.interfaces.nsIXMLHttpRequest);
-  req.open('GET', url, false);
-  req.overrideMimeType("text/plain; charset=utf-8");
-  req.send(null);
-  return req.responseText;
-}
-
-// TODO: This is a horrible workaround; modifying the tests to use
-// localeutils.js makes them unreadable and hard to maintain, but there
-// doesn't seem to be any way of loading utf-8 JS from xpcshell.
-eval(getLocalFileAsUtf8("resource://ubiquity/tests/test_locale_jp.js"));
-
 exportTests(this);
