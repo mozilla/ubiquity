@@ -45,26 +45,22 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
-var NLParser1 = {};
+var NLParser1 = ([f for each (f in this) if (typeof f === "function")]
+                 .reduce(function addMethod(o, f) (o[f.name] = f, o), {}));
 
-NLParser1.makeParserForLanguage = function(languageCode, verbList,
-                                           ContextUtils, suggestionMemory) {
-  let parserPlugin = NLParser1.getPluginForLanguage(languageCode);
-  return new NLParser1.Parser(verbList, parserPlugin, ContextUtils,
-                              suggestionMemory);
-};
+function makeParserForLanguage(languageCode, verbList,
+                               ContextUtils, suggestionMemory) {
+  return new Parser(verbList, getPluginForLanguage(languageCode),
+                    ContextUtils, suggestionMemory);
+}
 
-(function() {
-   var plugins = {};
+var plugins = {};
 
-   NLParser1.registerPluginForLanguage = function(languageCode, plugin) {
-     plugins[languageCode] = plugin;
-   };
+function registerPluginForLanguage(languageCode, plugin) {
+  plugins[languageCode] = plugin;
+}
 
-   NLParser1.getPluginForLanguage = function(languageCode) {
-     return plugins[languageCode];
-   };
-})();
+function getPluginForLanguage(languageCode) plugins[languageCode];
 
 /* ParserQuery: An object that wraps a request to the parser for suggestions
  * based on a given query string.  Multiple ParserQueries may be in action at
@@ -72,10 +68,10 @@ NLParser1.makeParserForLanguage = function(languageCode, verbList,
  * asynchronously, producing a suggestion list that changes over time as the
  * results of network calls come in.
  */
-NLParser1.ParserQuery = function(parser, queryString, context, maxSuggestions) {
-  this._init(parser, queryString, context, maxSuggestions);
-};
-NLParser1.ParserQuery.prototype = {
+function ParserQuery(parser, queryString, context, maxSuggestions) {
+  this._init.apply(this, arguments);
+}
+ParserQuery.prototype = {
   _init: function PQ__init(parser, queryString, context, maxSuggestions) {
     this._parser = parser;
     this._suggestionList = [];
@@ -83,10 +79,13 @@ NLParser1.ParserQuery.prototype = {
     this._queryString = queryString;
     this._context = context;
     this._maxSuggestions = maxSuggestions;
-
+    this.cache = {
+      suggestions: {},
+      aborters: [],
+      maxSuggestions: maxSuggestions,
+    };
     // temporary
     this._parsingsList = [];
-    this._aborters = [];
   },
 
   // TODO: Does query need some kind of destructor?  If this has a ref to the
@@ -96,31 +95,30 @@ NLParser1.ParserQuery.prototype = {
   // Client code should set onResults to a function!!
 
   cancel: function PQ_cancel() {
-    for each (let parse in this._parsingsList)
-      for each (let aborter in parse._aborters)
-        if (aborter && typeof aborter.abort === "function")
-          aborter.abort();
+    for each (let aborter in this.cache.aborters)
+      if (aborter && typeof aborter.abort === "function")
+        aborter.abort();
+    this.onResults = this._parsingsList = null;
   },
 
   // Read-only properties:
   get finished() false,
-  get hasResults() { return this._suggestionList.length > 0; },
-  get suggestionList() { return this._suggestionList; },
+  get hasResults() this._suggestionList.length > 0,
+  get suggestionList() this._suggestionList,
 
   // The handler that makes this a listener for partiallyParsedSentences.
   onNewParseGenerated: function PQ_onNewParseGenerated() {
     this._refreshSuggestionList();
     if (this.onResults) {
-      this.onResults( this._suggestionList, this.finished );
+      this.onResults(this._suggestionList, this.finished);
     }
   },
 
   // This method should be called by parser code only, not client code.
   _addPartiallyParsedSentence:
-  function PQ__addPartiallyParsedSentence( partiallyParsedSentence ) {
-    var argStrings = partiallyParsedSentence._argStrings;
-    partiallyParsedSentence.addListener( this );
-    this._parsingsList.push( partiallyParsedSentence );
+  function PQ__addPartiallyParsedSentence(partiallyParsedSentence) {
+    partiallyParsedSentence.addListener(this);
+    this._parsingsList.push(partiallyParsedSentence);
   },
 
   _refreshSuggestionList: function PQ__refreshSuggestionList() {
@@ -156,15 +154,11 @@ NLParser1.ParserQuery.prototype = {
     let xMatchScores = x.getMatchScores();
     let yMatchScores = y.getMatchScores();
     for (let z in xMatchScores) {
-      if (xMatchScores[z] > yMatchScores[z]) {
-        return -1;
-      }
-      else if (yMatchScores[z] > xMatchScores[z]) {
-        return 1;
-      }
-      /* if they are equal, then continue on to the
-       * next loop iteration to compare them based on
-       * the next most important score. */
+      let diff = yMatchScores[z] - xMatchScores[z];
+      if (diff) return diff;
+      // if they are equal, then continue on to the
+      // next loop iteration to compare them based on
+      // the next most important score.
     }
     // Got all the way through the lists and found
     // no tiebreaker... they are truly tied.
@@ -172,8 +166,7 @@ NLParser1.ParserQuery.prototype = {
   },
 };
 
-NLParser1.Parser = function Parser(verbList, languagePlugin,
-                                   ContextUtils, suggestionMemory) {
+function Parser(verbList, languagePlugin, ContextUtils, suggestionMemory) {
   this.setCommandList(verbList);
   this._languagePlugin = languagePlugin;
 
@@ -191,21 +184,16 @@ NLParser1.Parser = function Parser(verbList, languagePlugin,
   }
   this._suggestionMemory = suggestionMemory;
   this._sortGenericVerbCache();
-};
-
-NLParser1.Parser.prototype = {
+}
+Parser.prototype = {
   _nounFirstSuggestions:
-  function P__nounFirstSuggestions(selObj, maxSuggestions) {
+  function P__nounFirstSuggestions(selObj, maxSuggestions, cache) {
     let suggs = [];
     let topGenerics =
       this._rankedVerbsThatUseGenericNouns.slice(0, maxSuggestions);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat(topGenerics);
-    for each (let verb in verbsToTry) if(!verb.disabled) {
-      let newPPS = new NLParser1.PartiallyParsedSentence(verb,
-                                                         {},
-                                                         selObj,
-                                                         0,
-                                                         this._languagePlugin);
+    for each (let verb in verbsToTry) if (!verb.disabled) {
+      let newPPS = new PartiallyParsedSentence(verb, {}, selObj, 0, cache);
       // TODO make a better way of having the parsing remember its source than
       // this encapsulation breaking...
       newPPS._cameFromNounFirstSuggestion = true;
@@ -223,7 +211,7 @@ NLParser1.Parser.prototype = {
       this._suggestionMemory.remember("", chosenVerb);
       this._sortGenericVerbCache();
     }
-    if (!chosenSuggestion._cameFromNounFirstSuggestion ) {
+    if (!chosenSuggestion._cameFromNounFirstSuggestion) {
       let inputVerb = query.split(" ", 1)[0];
       /* TODO English-specific! */
       this._suggestionMemory.remember(inputVerb, chosenVerb);
@@ -238,42 +226,45 @@ NLParser1.Parser.prototype = {
   // TODO reset is gone
 
   newQuery: function P_newQuery(query, context, maxSuggestions) {
-    var theNewQuery = new NLParser1.ParserQuery(this,
-                                                query,
-                                                context,
-                                                maxSuggestions);
-    var nounType, verb;
+    var theNewQuery = new ParserQuery(this, query, context, maxSuggestions);
+    var {cache} = theNewQuery;
     var newSuggs = [], {push} = newSuggs;
     var selObj = this._ContextUtils.getSelectionObject(context);
-    // selection, no input, noun-first suggestion on selection
-    if (!query) {
-      if (selObj.text || selObj.html) {
-        let nounSuggs = this._nounFirstSuggestions(selObj, maxSuggestions);
-        push.apply(newSuggs, nounSuggs);
-      }
-    }
+    var selected = selObj.text || selObj.html;
+    if (!query && selected)
+      // selection, no input, noun-first suggestion on selection
+      push.apply(newSuggs, this._nounFirstSuggestions(selObj,
+                                                      maxSuggestions,
+                                                      cache));
     else {
+      let plugin = this._languagePlugin;
+      if (selected) cache.pronouns = [RegExp("\\b" + pn + "\\b")
+                                      for each (pn in plugin.PRONOUNS)];
       // Language-specific full-sentence suggestions:
-      newSuggs = this._languagePlugin.parseSentence(
+      newSuggs = plugin.parseSentence(
         query,
         this._verbList,
-        selObj
-      );
+        selObj,
+        function makePPS(verb, argStrings, selObj, matchScore) (
+          new PartiallyParsedSentence(
+            verb, argStrings, selObj, matchScore, cache)));
       // noun-first matches on input
       if (newSuggs.length === 0) {
-        selObj = {
+        let selObj = {
           text: query,
           html: Utils.escapeHtml(query),
         };
-        let nounSuggs = this._nounFirstSuggestions(selObj, maxSuggestions);
-        push.apply(newSuggs, nounSuggs);
+        selected = true;
+        push.apply(newSuggs, this._nounFirstSuggestions(selObj,
+                                                        maxSuggestions,
+                                                        cache));
       }
     }
 
     // partials is now a list of PartiallyParsedSentences; if there's a
     // selection, try using it for any missing arguments...
-    if (selObj.text || selObj.html) {
-      for each (var part in newSuggs) {
+    if (selected) {
+      for each (let part in newSuggs) {
         let withSel = part.getAlternateSelectionInterpolations();
         for each (let sugg in withSel) {
           theNewQuery._addPartiallyParsedSentence(sugg);
@@ -294,9 +285,8 @@ NLParser1.Parser.prototype = {
   // instead of getNumSuggestions, use query.suggestionList.length.
   // instead of getSentence, use query.suggestionList[index].
 
-  setCommandList: function P_setCommandList( commandList ) {
-    this._verbList = [new NLParser1.Verb(cmd)
-                      for each (cmd in commandList)];
+  setCommandList: function P_setCommandList(commandList) {
+    this._verbList = [new Verb(cmd) for each (cmd in commandList)];
     this._verbsThatUseSpecificNouns = [];
     this._rankedVerbsThatUseGenericNouns = [];
     for each (let verb in this._verbList) {
@@ -322,30 +312,24 @@ NLParser1.Parser.prototype = {
   },
 };
 
-NLParser1.ParsedSentence = function ParsedSentence(verb, args, verbMatchScore,
-                                                   selObj) {
+function ParsedSentence(verb, args, verbMatchScore, selObj) {
   this._init.apply(this, arguments);
 }
-NLParser1.ParsedSentence.prototype = {
+ParsedSentence.prototype = {
   _init: function PS__init(verb, argumentSuggestions, verbMatchScore, selObj) {
-    /* modifiers is dictionary of preposition: noun */
-    if (verb) {
-      this._verb = verb;
-      this._argSuggs = argumentSuggestions;
-    }
+    this._verb = verb;
+    this._argSuggs = argumentSuggestions;
     this._selObj = selObj;
     this.verbMatchScore = verbMatchScore;
     this.duplicateDefaultMatchScore = 100;
     this.frequencyScore = 0;  // not yet tracked
     this.argMatchScore = 0;
-    /* argument match score starts at 0 and gets +1 for each
-     argument where a specific nountype (i.e. non-arbitrary-text)
-     matches user input.  */
-    for (let argName in this._argSuggs) {
-      if (this._argSuggs[argName])
-        if (!this._verb._arguments[argName].type.rankLast)
-          this.argMatchScore++;
-    }
+    // argument match score starts at 0 and gets +1 for each
+    // argument where a specific nountype (i.e. non-arbitrary-text)
+    // matches user input.
+    for (let argName in argumentSuggestions)
+      if (!verb._arguments[argName].type.rankLast)
+        ++this.argMatchScore;
   },
 
   get completionText() {
@@ -422,18 +406,11 @@ NLParser1.ParsedSentence.prototype = {
   },
 
   copy: function PS_copy() {
-    // Deep copy!
     let newArgSuggs = {};
-    for (let x in this._argSuggs) {
-      newArgSuggs[x] = {};
-      for (let y in this._argSuggs[x])
-        newArgSuggs[x][y] = this._argSuggs[x][y];
-    }
-    let newSentence = new NLParser1.ParsedSentence(this._verb,
-                                                   newArgSuggs,
-                                                   this.verbMatchScore,
-                                                   this._selObj);
-    return newSentence;
+    let argSuggs = this._argSuggs;
+    for (let x in argSuggs) newArgSuggs[x] = argSuggs[x];
+    return new ParsedSentence(this._verb, newArgSuggs,
+                              this.verbMatchScore, this._selObj);
   },
 
   setArgumentSuggestion: function PS_setArgumentSuggestion(arg, sugg) {
@@ -444,7 +421,7 @@ NLParser1.ParsedSentence.prototype = {
     return this._argSuggs[arg].text;
   },
 
-  argumentIsFilled: function PS_argumentIsFilled( arg ) {
+  argumentIsFilled: function PS_argumentIsFilled(arg) {
     return this._argSuggs[arg] != null;
   },
 
@@ -452,17 +429,16 @@ NLParser1.ParsedSentence.prototype = {
     /* True if suggestion has at least one filled argument.
      False if verb has no arguments to fill, or if it has arguments but
      none of them are filled. */
-    for (var x in this._argSuggs)
-      if (this._argSuggs[x] != null)
-        return true;
+    for (var x in this._argSuggs) return true;
     return false;
   },
 
   equals: function PS_equals(other) {
     if (this._verb.cmd !== other._verb.cmd)
       return false;
-    for (var x in this._argSuggs) {
-      if (this._argSuggs[x].text !== other._argSuggs[x].text)
+    let argSuggs = this._argSuggs;
+    for (var x in argSuggs) {
+      if (argSuggs[x].summary !== other._argSuggs[x].summary)
         return false;
     }
     return true;
@@ -480,7 +456,8 @@ NLParser1.ParsedSentence.prototype = {
         if (missingArg.default) {
           defaultValue = NounUtils.makeSugg(missingArg.default);
         }
-        else if (missingArg.type.default) { // Argument value from nountype default
+        else if (missingArg.type.default) {
+          // Argument value from nountype default
           defaultValue = missingArg.type.default();
         }
         else { // No argument
@@ -488,7 +465,7 @@ NLParser1.ParsedSentence.prototype = {
         }
 
         let numDefaults = defaultValue.length;
-        if (numDefaults === 1 || (numDefaults > 1 && gotArrayOfDefaults) ) {
+        if (numDefaults === 1 || (numDefaults > 1 && gotArrayOfDefaults)) {
           // either this is a single-item array, or
           // we've already used an array of values for a previous modifier,
           // so just use first default for this modifier
@@ -497,7 +474,8 @@ NLParser1.ParsedSentence.prototype = {
         }
 
         if (numDefaults) {
-          // first time we've seen multiple defaults, so create an array of sentences
+          // first time we've seen multiple defaults,
+          // so create an array of sentences
           gotArrayOfDefaults = true;
           for (let i = 0; i < numDefaults; i++) {
             if (i) {
@@ -508,7 +486,7 @@ NLParser1.ParsedSentence.prototype = {
               // reduce the match score so that multiple entries with the
               //   same verb are only shown if there are no other verbs
               newSentences[i].duplicateDefaultMatchScore=
-                                      this.duplicateDefaultMatchScore / (i + 1);
+                this.duplicateDefaultMatchScore / (i + 1);
             }
             newSentences[i].setArgumentSuggestion(argName, defaultValue[i]);
           }
@@ -518,7 +496,6 @@ NLParser1.ParsedSentence.prototype = {
             newSentences[sen].setArgumentSuggestion(argName, defaultValue);
           defaultsSoFar[argName] = defaultValue;
         }
-
       }
     }
     return newSentences;
@@ -539,8 +516,8 @@ NLParser1.ParsedSentence.prototype = {
   }
 };
 
-NLParser1.PartiallyParsedSentence = function PartiallyParsedSentence(
-  verb, argStrings, selObj, matchScore, parserPlugin) {
+function PartiallyParsedSentence(
+  verb, argStrings, selObj, matchScore, cache, copying) {
   /*This is a partially parsed sentence.
    * What that means is that we've decided what the verb is,
    * and we've assigned all the words of the input to one of the arguments.
@@ -551,33 +528,35 @@ NLParser1.PartiallyParsedSentence = function PartiallyParsedSentence(
    * final values for all arguments are specified.
    */
   this._listeners = [];
-  this._parserPlugin = parserPlugin;
   this._verb = verb;
   this._argStrings = argStrings;
   this._selObj = selObj;
-  this._parsedSentences = [];
   this._matchScore = matchScore;
   this._invalidArgs = {};
   this._validArgs = {};
-  this._aborters = [];
+  this._cache = cache;
+
+  if (copying) return;
   /* Create fully parsed sentence with empty arguments:
    * If this command takes no arguments, this is all we need.
    * If it does take arguments, this initializes the parsedSentence
    * list so that the algorithm in addArgumentSuggestion will work
    * correctly. */
-  let newSen = new NLParser1.ParsedSentence(this._verb,
-                                            {},
-                                            this._matchScore,
-                                            this._selObj);
-  this._parsedSentences = [newSen];
+  this._parsedSentences = [new NLParser1.ParsedSentence(this._verb,
+                                                        {},
+                                                        this._matchScore,
+                                                        this._selObj)];
+  var {pronouns} = cache;
   for (let argName in this._verb._arguments) {
     if (argStrings[argName] && argStrings[argName].length > 0) {
       // If argument is present, try the noun suggestions based both on
       // substituting pronoun...
       let text = argStrings[argName].join(" ");
-      let gotSuggs = this._suggestWithPronounSub(argName, text);
+      let html = Utils.escapeHtml(text);
+      let gotSuggs = pronouns && this._suggestWithPronounSub(argName, text,
+                                                             pronouns);
       // and on not substituting pronoun...
-      let gotSuggsDirect = this._argSuggest(argName, text, text, null);
+      let gotSuggsDirect = this._argSuggest(argName, text, html, null);
       if (!gotSuggs && !gotSuggsDirect) {
         /* One of the arguments is supplied by the user, but produces
          * no suggestions, meaning it's an invalid argument for this
@@ -592,9 +571,8 @@ NLParser1.PartiallyParsedSentence = function PartiallyParsedSentence(
    * the verb, and the values are each a ["list", "of", "words"] that have
    * been assigned to that argument
    */
-};
-
-NLParser1.PartiallyParsedSentence.prototype = {
+}
+PartiallyParsedSentence.prototype = {
   addListener: function PPS_addListener(listener) {
     // Listener must be an object with an onNewParseGenerated function.
     // onNewParseGenerated will be called whenever new parsings are
@@ -607,66 +585,78 @@ NLParser1.PartiallyParsedSentence.prototype = {
     /* For the given argument of the verb, sends (text,html) to the nounType
      * gets back suggestions for the argument, and adds each suggestion.
      * Return true if at least one arg suggestion was added in this way. */
-    let argument = this._verb._arguments[argName];
-    let self = this;
+    var self = this;
     // Callback function for asynchronously generated suggestions:
-    let callback = function suggestBack(suggs) {
-      self.handleSuggestions(argName, suggs);
+    function callback(suggs) {
+      var suggestions = self._handleSuggestions(argName, suggs);
+      var {length} = suggestions;
+      if (!length) return;
       // Notify our listeners!!
       for each (let listener in self._listeners)
         listener.onNewParseGenerated();
-    };
-    try {
-      // This is where the suggestion is actually built.
-      var suggestions = argument.type.suggest(text, html, callback,
-                                              selectionIndices);
-    } catch (e) {
-      Cu.reportError(
-        'Exception occured while getting suggestions for "' +
-        this._verb._name + '" with noun "' +
-        (argument.name || argument.id) + '"\n' + e.stack);
-      return false;
+      for each (let [pps, arg] in callback.otherSentences) {
+        for (let i = 0; i < length; ++i)
+          pps.addArgumentSuggestion(arg, suggestions[i]);
+        for each (let listener in pps._listeners)
+          listener.onNewParseGenerated();
+      }
     }
-    return this.handleSuggestions(argName, suggestions);
+    var noun = this._verb._arguments[argName].type;
+    var suggCache = this._cache.suggestions;
+    var key = text + "\n" + noun.id;
+    var suggestions = suggCache[key];
+    if (suggestions) {
+      suggestions.callback.otherSentences.push([this, argName]);
+      for (let i = 0, l = suggestions.length; i < l; ++i)
+        this.addArgumentSuggestion(argName, suggestions[i]);
+    }
+    else {
+      try {
+        // This is where the suggestion is actually built.
+        suggestions = noun.suggest(text, html, callback, selectionIndices);
+      } catch (e) {
+        Cu.reportError(
+          'Exception occured while getting suggestions for "' +
+          this._verb._name + '" with noun "' + (noun.name || noun.id) + '"\n' +
+          (e.stack || e));
+        return false;
+      }
+      suggestions = this._handleSuggestions(argName, suggestions);
+      callback.otherSentences = [];
+      suggestions.callback = callback;
+      suggCache[key] = suggestions;
+    }
+    return suggestions.length > 0;
   },
 
-  _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words) {
-    let gotAnySuggestions = false;
-    /* No selection to interpolate. */
-    if ((!this._selObj.text) && (!this._selObj.html)) {
-      return false;
-    }
-    let selection = this._selObj.text;
-    let htmlSelection = this._selObj.html;
+  _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words,
+                                                              pronounREs) {
+    var {text, html} = this._selObj;
+    if (!text && !html) return false; // No selection to interpolate.
 
-    for each (var pronoun in this._parserPlugin.PRONOUNS ) {
-      let regexp = new RegExp("\\b" + pronoun + "\\b");
+    var gotAnySuggestions = false;
+    for each (let regexp in pronounREs) {
       let index = words.search(regexp);
-      if ( index > -1 ) {
-        let selectionIndices = [index, index + selection.length];
-        let textArg = words.replace(regexp, selection);
-        let htmlArg = words.replace(regexp, htmlSelection);
-        dump("Suggesting " + textArg + "/" + htmlArg + "\n");
-        if (this._argSuggest(argName, textArg, htmlArg,
-                             selectionIndices)) {
-          gotAnySuggestions = true;
-        }
-      }
+      if (index < 0) continue;
+      let selectionIndices = [index, index + text.length];
+      let textArg = words.replace(regexp, text);
+      let htmlArg = words.replace(regexp, html);
+      if (this._argSuggest(argName, textArg, htmlArg, selectionIndices))
+        gotAnySuggestions = true;
     }
     return gotAnySuggestions;
   },
 
-  handleSuggestions: function PPS_handleSuggestions(argName, suggs) {
-    var any = false;
+  _handleSuggestions: function PPS__handleSuggestions(argName, suggs) {
+    var filtered = [], {aborters, maxSuggestions} = this._cache;
     if (!Utils.isArray(suggs)) suggs = [suggs];
     for each (let sugg in suggs) if (sugg) {
-      if (sugg.summary >= "") {
-        this.addArgumentSuggestion(argName, sugg);
-        any = true;
-      }
-      else this._aborters.push(sugg);
+      if (sugg.summary >= "") filtered.push(sugg);
+      else aborters.push(sugg);
     }
-    return any;
+    if (maxSuggestions) filtered.splice(maxSuggestions);
+    for each (let sugg in filtered) this.addArgumentSuggestion(argName, sugg);
+    return filtered;
   },
 
   addArgumentSuggestion: function PPS_addArgumentSuggestion(arg, sugg) {
@@ -721,7 +711,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
             oneSen._cameFromNounFirstSuggestion = true;
             parsedSentences.push(oneSen);
           }
-      	}
+        }
       }
     }
     else {
@@ -736,31 +726,22 @@ NLParser1.PartiallyParsedSentence.prototype = {
 
   copy: function PPS_copy() {
     // Deep copy constructor
-    let newPPSentence = new NLParser1.PartiallyParsedSentence(
-        this._verb,
-        {},
-        this._selObj,
-        this._matchScore,
-        this._parserPlugin
-    );
-    newPPSentence._parsedSentences = [];
-    for each(let parsedSen in this._parsedSentences) {
-      newPPSentence._parsedSentences.push( parsedSen.copy() );
+    let newPPSentence = new PartiallyParsedSentence(
+      this._verb,
+      {},
+      this._selObj,
+      this._matchScore,
+      this._cache,
+      true);
+    newPPSentence._parsedSentences =
+      [parsedSen.copy() for each (parsedSen in this._parsedSentences)];
+    for each (let key in ["_argStrings", "_invalidArgs", "_validArgs"]) {
+      let dest = newPPSentence[key];
+      let from = this[key];
+      for (let x in from) dest[x] = from[x];
     }
-    for (let argName in this._argStrings) {
-      newPPSentence._argStrings[argName] = this._argStrings[argName].slice();
-    }
-    newPPSentence._invalidArgs = {};
-    for (let invalidArg in this._invalidArgs) {
-      newPPSentence._invalidArgs[invalidArg] = this._invalidArgs[invalidArg];
-    }
-    newPPSentence._validArgs = {};
-    for (let validArg in this._validArgs) {
-      newPPSentence._validArgs[validArg] = this._validArgs[validArg];
-    }
-    for each(let listener in this._listeners) {
+    for each (let listener in this._listeners)
       newPPSentence.addListener(listener);
-    }
     return newPPSentence;
   },
 
@@ -789,7 +770,7 @@ NLParser1.PartiallyParsedSentence.prototype = {
     if (!selObj.text)
       return [this];
     let unfilledArgs = this._getUnfilledArguments();
-    if (unfilledArgs.length == 0)
+    if (unfilledArgs.length === 0)
       return [this];
     if (unfilledArgs.length === 1) {
       this._argSuggest(unfilledArgs[0],
@@ -828,16 +809,15 @@ var roleToPrep = {
   modifier: "of",
 };
 
-// Picks up noun's label. "_name" is for backward compatiblity
-function pluckLabel(noun) noun.label || noun._name || "?";
-// Determines if an object has one or more keys
-function hasKey(obj) !!(obj || 0).__count__;
-
-NLParser1.Verb = function Verb(cmd) {
+function Verb(cmd) {
   if (cmd) this._init(cmd);
-};
-NLParser1.Verb.prototype = {
+}
+Verb.prototype = {
   _init: function V__init(cmd) {
+    // Picks up noun's label. "_name" is for backward compatiblity
+    function pluckLabel(noun) noun.label || noun._name || "?";
+    // Determines if an object has one or more own keys
+    function hasKey(obj) !!(obj || 0).__count__;
     /* cmd.DOType must be a NounType, if provided.
        cmd.modifiers should be a dictionary
        keys are prepositions
@@ -942,10 +922,8 @@ NLParser1.Verb.prototype = {
        is to this verb.  Return value will be used for sorting.
        The current heuristic is extremely ad-hoc but produces the ordering
        we want... so far.*/
-    if (this.disabled) return 0.0; // verb is disabled, so can't be a match
     // score = .75 + .25 * lengthRatio - .5 * indexRatio - .25 * namePosition
     // Perfect match: 1.0 = .75 + .25 * 1 - .5 * 0 - .25 * 0
-    input = input.toLowerCase();
     var {names} = this.cmd;
     for (let i = 0, l = names.length; i < l; ++i) {
       let name = names[i];

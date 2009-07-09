@@ -34,13 +34,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["EnParser"];
+var EXPORTED_SYMBOLS = ["EnParser"];
 
-Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
-
-var EnParser = {};
-
-EnParser.PRONOUNS = ["this", "that", "it", "selection", "him", "her", "them"];
+var EnParser = {
+  parseSentence: parseSentence,
+  PRONOUNS: ["this", "that", "it", "selection", "him", "her", "them"],
+};
 
 function _recursiveParse(unusedWords,
                          filledArgs,
@@ -53,13 +52,12 @@ function _recursiveParse(unusedWords,
   }
 
   // separate names of prepositions and direct_object
-  var unfilledNames = [], directName, name;
-  for(var name in unfilledArgs) {
-    if(unfilledArgs[name].flag === null) {
+  var unfilledNames = [], directName;
+  for (var name in unfilledArgs) {
+    if (unfilledArgs[name].flag === null)
       directName = name;
-    } else {
+    else
       unfilledNames.push(name);
-    }
   }
   if (!name) {
     // We've used up all arguments, so we can't continue parsing, but
@@ -67,7 +65,7 @@ function _recursiveParse(unusedWords,
     return [];
   }
 
-  if(!unfilledNames.length && directName) {
+  if (!unfilledNames.length && directName) {
     // If only direct_object remains, give it all and we're done.
     let newFilledArgs = {};
     newFilledArgs[directName] = unusedWords;
@@ -80,7 +78,7 @@ function _recursiveParse(unusedWords,
   // "pop" off the LAST unfilled argument in the sentence and try to fill it
   // newUnfilledArgs is the same as unfilledArgs without argName
   var argName, newUnfilledArgs = {};
-  for (var argName in unfilledArgs)  {
+  for (var argName in unfilledArgs) {
     newUnfilledArgs[argName] = unfilledArgs[argName];
   }
   delete newUnfilledArgs[argName];
@@ -100,8 +98,8 @@ function _recursiveParse(unusedWords,
         Check every possibility starting from "all remaining words" and
         working backwards down to "just the word after the preposition."
       */
-    let lastWordEnd = x + 1;
-    for (let lastWord = unusedWords.length; lastWord > lastWordEnd; --lastWord) {
+    let lastWord = unusedWords.length, lastWordEnd = x + 1;
+    for (; lastWord > lastWordEnd; --lastWord) {
       let newFilledArgs = {};
       for (let key in filledArgs) newFilledArgs[key] = filledArgs[key];
       // copy words from preposition up to lastWord, as nounWords:
@@ -118,54 +116,42 @@ function _recursiveParse(unusedWords,
   return completions;
 }
 
-EnParser.parseSentence = function(inputString, verbList, selObj) {
+function parseSentence(inputString, verbList, selObj, newPPS) {
   // Returns a list of PartiallyParsedSentences.
   // Language-specific.  This one is for English.
   let parsings = [];
 
   // English uses spaces between words:
-  let words = inputString.split(" ");
-  /* If input is "dostuff " (note space) then splitting on space will
-   *  produce ["dostuff", ""].  We don't want the empty string, so drop
-   *  all zero-length strings: */
-  words = [ word for each(word in words) if (word.length > 0)];
+  // If input is "dostuff " (note space) then splitting on space will
+  //  produce ["dostuff", ""].  We don't want the empty string, so drop
+  //  all zero-length strings:
+  let words = [word for each (word in inputString.split(" ")) if (word)];
+  if (!words.length) return parsings;
   // English puts verb at the beginning of the sentence:
-  let inputVerb = words[0];
+  let inputVerb = words.shift();
   // And the arguments after it:
-  let inputArguments = words.slice(1);
+  let inputArguments = words;
 
   // Try matching the verb against all the words we know:
+  let {push} = parsings;
+  // Verb#match() uses lower-case
+  inputVerb = inputVerb.toLowerCase();
   for each (let verb in verbList) if (!verb.disabled) {
-    let matchScore = verb.match( inputVerb );
+    let matchScore = verb.match(inputVerb);
+    if (matchScore === 0) continue;
 
-    if (matchScore == 0)
-      continue;
-    let newParsings = [];
-    if (inputArguments.length == 0) {
-      // No arguments
-      newParsings = [new NLParser1.PartiallyParsedSentence(verb,
-                                                          {},
-                                                          selObj,
-                                                          matchScore,
-                                                          EnParser)];
-    } else {
+    function makeParse(argStrings)
+      newPPS(verb, argStrings, selObj, matchScore);
+    if (inputArguments.length)
       // Recursively parse to assign arguments
-      let makeNewParsing = function( argStrings ) {
-        return new NLParser1.PartiallyParsedSentence(verb,
-                                                    argStrings,
-                                                    selObj,
-                                                    matchScore,
-                                                    EnParser);
-      };
-      newParsings = _recursiveParse( inputArguments,
-                                     {},
-                                     verb._arguments,
-                                     makeNewParsing);
-    }
-    parsings = parsings.concat( newParsings );
+      push.apply(parsings, _recursiveParse(inputArguments,
+                                           {},
+                                           verb._arguments,
+                                           makeParse));
+    else
+      // No arguments
+      parsings.push(makeParse({}));
   }
 
   return parsings;
 }
-
-NLParser1.registerPluginForLanguage("en", EnParser);

@@ -584,6 +584,7 @@ function testPartiallyParsedSentence() {
   // TODO this test will need rewriting, because NLParser1.Verb is about
   // to not exist.
   // make sure it also works with a no-arg command:
+  var cache = {suggestions: {}};
   var cmd_grumble = {
     names: ["grumble"],
     execute: function(context, directObject, modifiers) {
@@ -595,8 +596,7 @@ function testPartiallyParsedSentence() {
     {},
     selObj,
     0,
-    NLParser1.getPluginForLanguage(LANG)
-    );
+    cache);
 
   var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
   this.assert( parsedNoArgs.length == 1, "Should have 1 parsing.");
@@ -604,19 +604,19 @@ function testPartiallyParsedSentence() {
 
 
   var noun_type_foo = {
-    names: ["foo"],
+    id: "foo",
     suggest: function( text, html ) {
       return [ NounUtils.makeSugg("foo_a"), NounUtils.makeSugg("foo_b") ];
     }
   };
   var noun_type_bar = {
-    names: ["bar"],
+    id: "bar",
     suggest: function( text, html ) {
       return [ NounUtils.makeSugg("bar_a"), NounUtils.makeSugg("bar_b") ];
     }
   };
   var noun_type_baz = {
-    names: ["baz"],
+    id: "baz",
     suggest: function( text, html ) {
       return [];
     },
@@ -636,16 +636,13 @@ function testPartiallyParsedSentence() {
   // "location" purposefully left out -- partiallyParsedSentence
   // must be tolerant of missing args.
 
-  var selObj = {
-    text: "", html: ""
-  };
+  var selObj = {text: "", html: ""};
   var partiallyParsed = new NLParser1.PartiallyParsedSentence(
     verb,
     argStrings,
     selObj,
     0,
-    NLParser1.getPluginForLanguage(LANG)
-    );
+    cache);
 
   var parsed  = partiallyParsed.getParsedSentences();
   // two suggestions for foo, two suggestions for bar: should be four
@@ -695,7 +692,7 @@ function testTextAndHtmlDifferent() {
     textSelection: "Pants", htmlSelection:"<blink>Pants</blink>"
   };
   var noun_type_different = {
-    names: ["different"],
+    id: "different",
     suggest: function( text, html ) {
       if (text.indexOf("Pant") == 0)
         return [ NounUtils.makeSugg(text, html) ];
@@ -734,21 +731,21 @@ function testTextAndHtmlDifferent() {
   var selObj = {
     text: "Pantalones", html: "<blink>Pantalones</blink>"
   };
-  comps = nlParser._nounFirstSuggestions( selObj );
+  comps = nlParser._nounFirstSuggestions(selObj, MAX_SUGGESTIONS,
+                                         {suggestions: {}});
   this.assert(comps.length == 1, "There should be one partial completion");
   comps = comps[0].getAlternateSelectionInterpolations();
   this.assert(comps.length == 1, "There should still be one partial completion");
   comps = comps[0].getParsedSentences();
   this.assert(comps.length == 1, "There should be one completion (3)");
   comps[0].execute();
-  this.assert( executedText == "Pantalones", "text should be pantalones.");
-  this.assert( executedHtml == "<blink>Pantalones</blink>", "html should blink!");
-
+  this.assert(executedText == "Pantalones", "text should be pantalones.");
+  this.assert(executedHtml == "<blink>Pantalones</blink>", "html should blink!");
 }
 
 function testAsyncNounSuggestions() {
   var noun_type_slowness = {
-    names: ["slowness"],
+    id: "slowness",
     suggest: function( text, html, callback ) {
       this._callback = callback;
       if (text.indexOf("hello")== 0) {
