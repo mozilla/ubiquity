@@ -742,19 +742,17 @@ PartiallyParsedSentence.prototype = {
     }
     for each (let listener in this._listeners)
       newPPSentence.addListener(listener);
+    newPPSentence._cameFromNounFirstSuggestion =
+      this._cameFromNounFirstSuggestion;
     return newPPSentence;
   },
 
   _getUnfilledArguments: function PPS__getUnfilledArguments() {
     /* Returns list of the names of all arguments the verb expects for which
      no argument was provided in this partially parsed sentence. */
-    let unfilledArguments = [];
-    for (let argName in this._verb._arguments) {
-      if (!this._argStrings[argName] || this._argStrings[argName].length == 0) {
-        unfilledArguments.push(argName);
-      }
-    }
-    return unfilledArguments;
+    return [argName
+            for (argName in this._verb._arguments)
+            if (!(this._argStrings[argName] || "").length)];
   },
 
   getAlternateSelectionInterpolations:
