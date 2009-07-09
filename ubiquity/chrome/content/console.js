@@ -34,19 +34,15 @@ function maybeFixUpUbiquityMessage(target) {
 
 window.addEventListener(
   "load",
-  function() {
+  function consoleLoad() {
     var box = document.getElementById("ConsoleBox");
     box.addEventListener(
       "DOMNodeInserted",
       function(aEvt) { maybeFixUpUbiquityMessage(aEvt.originalTarget); },
       true
     );
-
-    var child = box.mConsoleRowBox.firstChild;
-    while (child) {
-      maybeFixUpUbiquityMessage(child);
-      child = child.nextSibling;
-    }
+    Array.forEach(box.getElementsByClassName("console-row"),
+                  maybeFixUpUbiquityMessage);
   },
   false
 );
