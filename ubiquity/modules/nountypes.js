@@ -293,7 +293,7 @@ var noun_type_url = {
 var noun_type_livemark = {
   label: "title",
   suggest: function(text, html, cb, selected) {
-    if (selected || !text) return [];
+    if (!text) return [];
 
     var {feeds} = this;
     if (!feeds.length) return [];
@@ -332,7 +332,7 @@ var noun_type_command = {
   label: "name",
   noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
-    if (selected || !text) return [];
+    if (!text) return [];
     var res = CmdUtils.grepSuggs(text, this._get());
     if (!res.length) return [];
     var dic = {};
@@ -450,7 +450,7 @@ var noun_type_bookmarklet = {
   label: "title",
   noExternalCalls: true,
   suggest: function(text, html, cb, selected) {
-    if (selected || !text) return [];
+    if (!text) return [];
     return CmdUtils.grepSuggs(text, this.list);
   },
   list: null,
@@ -529,16 +529,7 @@ var noun_type_time = {
 // * {{{html}}} :
 // * {{{data}}} :
 
-var noun_type_async_address = {
-  label: "address",
-  suggest: function(text, html, callback, selectionIndices)
-    [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
-     getAddress(text, function addressBack(truthiness) {
-       callback(truthiness
-                ? [CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]
-                : []);
-     })],
-};
+var noun_type_async_address = NounAsync("address", getAddress);
 
 // === {{{ noun_type_async_restaurant }}} ===
 //
@@ -548,20 +539,7 @@ var noun_type_async_address = {
 // * {{{html}}} :
 // * {{{data}}} :
 
-var noun_type_async_restaurant = {
-  label: "restaurant",
-  suggest: function(text, html, callback) {
-    var asyncRequest = getRestaurants( text, function( truthiness ) {
-      if (truthiness) {
-        callback([CmdUtils.makeSugg(text, null, null, .9, null)]);
-      }
-      else{
-        callback([]);
-      }
-    });
-    return [asyncRequest];
-  }
-};
+var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants);
 
 // === {{{ noun_type_contact }}} ===
 //
@@ -620,12 +598,12 @@ var noun_type_geolocation = {
                        + location.country;
     return CmdUtils.makeSugg(fullLocation, null, null, 0.5);
   },
-  suggest: function(fragment, html, callback) {
+  suggest: function(fragment, html, callback, selectionIndices) {
     // LONGTERM TODO: try to detect whether fragment is anything like
     // a valid location or not, and don't suggest anything
     // for input that's not a location.
     function addAsyncGeoSuggestions(location) {
-      if(!location)
+      if (!location)
         return;
       var fullLocation = location.city + ", " + location.country;
       callback([CmdUtils.makeSugg(fullLocation),
@@ -634,7 +612,8 @@ var noun_type_geolocation = {
     }
     // TODO: we should try to build this "here" handling into something like
     // magic words (anaphora) handling in Parser 2: make it localizable.
-    var retArray = [CmdUtils.makeSugg(fragment, '', null, 0.5)];
+    var retArray = [CmdUtils.makeSugg(fragment, null, null, 0.5,
+                                      selectionIndices)];
     if (/\bhere\b/.test(fragment)) {
       var asyncRequest = CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
       retArray.push(asyncRequest);
@@ -1050,6 +1029,23 @@ function getAddress( query, callback ) {
     }
   });
   return asyncRequest;
+}
+
+function NounAsync(label, checker) {
+  function asyncSuggest(text, html, callback, selectionIndices) (
+    [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
+     checker(text, function asyncBack(truthiness) {
+       callback(truthiness
+                ? [CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]
+                : []);
+     })]);
+  return {
+    label: label,
+    rankLast: true,
+    suggest: (CmdUtils.parserVersion > 1
+              ? asyncSuggest
+              : noun_arb_text.suggest),
+  };
 }
 
 var EXPORTED_SYMBOLS = (
