@@ -50,11 +50,21 @@
 
 var EXPORTED_SYMBOLS = ["CmdUtils"];
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/nounutils.js");
+Cu.import("resource://ubiquity/modules/contextutils.js");
+
+const {Application} = Utils;
+
 var CmdUtils = {
   __globalObject: null,
   __nextId: null,
 
-  // ** {{{ CmdUtils.parserVersion }}} **
+  // === {{{ CmdUtils.parserVersion }}} ===
   //
   // This attribute contains the parser version that Ubiquity is
   // using. A command can provide different options to
@@ -66,24 +76,11 @@ var CmdUtils = {
   // Ubiquity 0.2.x supports parser versions 1 and 2.
 
   get parserVersion() {
-    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                .getService(Components.interfaces.nsIPrefService);
-    var branch = prefs.getBranch("extensions.ubiquity.");
-    return branch.getIntPref("parserVersion");
+    return Application.prefs.getValue("extensions.ubiquity.parserVersion", 1);
   }
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
-
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
-
-Cu.import("resource://ubiquity/modules/utils.js");
-Cu.import("resource://ubiquity/modules/nounutils.js");
-Cu.import("resource://ubiquity/modules/contextutils.js");
-
-const {Application} = Utils;
 
 // == From NounUtils ==
 //
