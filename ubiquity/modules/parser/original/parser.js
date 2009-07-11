@@ -615,10 +615,11 @@ PartiallyParsedSentence.prototype = {
         // This is where the suggestion is actually built.
         suggestions = noun.suggest(text, html, callback, selectionIndices);
       } catch (e) {
+        if (e && e.stack) e += "\n" + /[^\n]+/(e.stack);
         Cu.reportError(
           'Exception occured while getting suggestions for "' +
-          this._verb._name + '" with noun "' + (noun.name || noun.id) + '"\n' +
-          (e.stack || e));
+          this._verb._name + '" with noun "' + (noun.name || noun.id) +
+          '"\n' + e);
         return false;
       }
       suggestions = this._handleSuggestions(argName, suggestions);
@@ -700,7 +701,7 @@ PartiallyParsedSentence.prototype = {
 
     if (this._cameFromNounFirstSuggestion) {
       for each (let sen in this._parsedSentences) {
-	      if (sen.hasFilledArgs()) {
+        if (sen.hasFilledArgs()) {
           /* When doing noun-first suggestion, we only want matches that put the
            * input or selection into an argument of the verb; therefore, explicitly
            * filter out suggestions that fill no arguments.
