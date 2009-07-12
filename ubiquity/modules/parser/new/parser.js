@@ -47,9 +47,7 @@ Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
-var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                          .getService(Components.interfaces.nsIPrefService);
-prefs = prefs.getBranch("extensions.ubiquity.");
+var gOldAlerted = false;
 
 // = Ubiquity Parser: The Next Generation =
 //
@@ -207,16 +205,19 @@ Parser.prototype = {
     //dump("loaded verbs:\n" +
     //     this._verbList.map(function(v) v.names[0]).join("\n") + "\n");
 
-    if (skippedSomeVerbs) {
+    if (skippedSomeVerbs && !gOldAlerted) {
       var msgService = new AlertMessageService();
       msgService.displayMessage("Some verbs were not loaded " +
                                 "as they are not compatible with Parser 2.");
+      gOldAlerted = true;
     }
 
     // Scrape the noun types up here.
     var nouns = this._nounTypes = {};
     var localNounIds = this._nounTypeIdsWithNoExternalCalls = {};
-    var doNounFirstExternals = prefs.getIntPref("doNounFirstExternals");
+    var doNounFirstExternals =
+      Utils.Application.prefs.getValue(
+        "extensions.ubiquity.doNounFirstExternals", 0);
     for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;
@@ -2384,11 +2385,10 @@ RegexpTrie.fn = {
     return this;
   },
   _regexp: function _regexp($) {
-    // TODO: We would use __count__ here, but JS keeps raising a
-    // strict warning about its deprecated use; see #795.
-    var count = [name for (name in $)
-                 if ($.hasOwnProperty(name))].length;
-    if (("" in $) && (count == 1)) return "";
+    I_MISS___count__: if ("" in $) {
+      for (let k in $) if (k) break I_MISS___count__;
+      return "";
+    }
     var alt = [], cc = [], q;
     for (let char in $) {
       if ($[char] !== 1) {
