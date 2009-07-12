@@ -118,20 +118,15 @@ function changeLanguageSettings() {
 }
 
 function changeExternalCallSettings() {
-  var changed = false;
-  var prefs = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService);
-  prefs = prefs.getBranch("extensions.ubiquity.");
-
-  var externalCallsOnAllQueries = $("#external-calls-on-all-queries").attr("checked") ? true : false;
-  if(externalCallsOnAllQueries != prefs.getIntPref("doNounFirstExternals")){
-    changed = true;
-    prefs.setIntPref("doNounFirstExternals", externalCallsOnAllQueries);
-  }
-  
-  if (changed)
+  const PREF_NFE = "extensions.ubiquity.doNounFirstExternals";
+  var {prefs} = Application;
+  var externalCallsOnAllQueries =
+    +$("#external-calls-on-all-queries")[0].checked;
+  if (externalCallsOnAllQueries !== prefs.getValue(PREF_NFE, 0)) {
+    prefs.setValue(PREF_NFE, externalCallsOnAllQueries);
     $("#external-calls-settings-changed-info").html(
-      "<i>This change will take effect when you restart Firefox.</i>");
+      "<em>This change will take effect when you open new windows.</em>");
+  }
 }
 
 

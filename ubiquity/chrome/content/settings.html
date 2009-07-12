@@ -65,9 +65,11 @@
     <h2>Language Settings</h2>
     <p>Parser 2 is Ubiquity's experimental next-generation parser and will not work with all
     commands.  However, it supports multiple languages.</p>
-    <p><input type="checkbox" id="use-new-parser-checkbox"
-               onchange="changeLanguageSettings();">
-    <strong>Use Parser 2 (the next generation parser)</strong></p>
+    <p><label for="use-new-parser-checkbox">
+      <input type="checkbox" id="use-new-parser-checkbox"
+             onchange="changeLanguageSettings();">
+      <strong>Use Parser 2 (the next generation parser)</strong>
+    </label></p>
     <p><span id="lang-settings-changed-info"></span></p>
     <p>Language:
       <select id="language-select" disabled="true"
@@ -83,11 +85,11 @@
     </p>
     <p>Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.
     </p>
-    <p>
+    <p><label for="external-calls-on-all-queries"
       <input type="checkbox" id="external-calls-on-all-queries"
-                 onchange="changeExternalCallSettings();">
+             onchange="changeExternalCallSettings();">
       <strong>Enable external calls for all Parser 2 queries</strong>
-    </p>
+    </label></p>
     <p><span id="external-calls-settings-changed-info"></span></p>
   </div>
   <br clear="all"/>
