@@ -27,7 +27,7 @@ CmdUtils.CreateCommand({
     Ubiquity.resizePreview = function map_resizePreview(height) {
       // TODO: Do something to change height of iframe?
     };
-    Ubiquity.insertHtml = function map_insertHtml(html) {
+    Ubiquity.insertHtml = function map_insertHtml(html, text) {
       if (typeof html !== "string")
         return;
       var doc = context.focusedWindow.document;
@@ -39,11 +39,14 @@ CmdUtils.CreateCommand({
         // specific and should be factored out. -- Aza
         doc.execCommand("insertHTML", false, object.html + "<br/>" + html);
       }
-      else if (CmdUtils.getSelection())
-        CmdUtils.setSelection(html);
-      else
+      else if (CmdUtils.getSelection() ||
+               $(context.focusedElement).is("input:text, textarea"))
+        CmdUtils.setSelection(html, {text: text});
+      else {
+        Utils.clipboard.text = text;
         displayMessage(_("Cannot insert in a non-editable space. " +
                          "Use 'edit page' for an editable page."));
+      }
     };
     Ubiquity.onPreview(object);
   }
