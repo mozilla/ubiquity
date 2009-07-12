@@ -222,8 +222,8 @@ function testVerbEatsSelection() {
 function testImplicitPronoun() {
   var foodGotEaten = null;
   var foodGotEatenAt = null;
-  var food = new NounUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
-  var place = new NounUtils.NounType( "place", ["grill", "diner", "home"]);
+  var food = new NounUtils.NounType("food", ["breakfast", "lunch", "dinner"]);
+  var place = new NounUtils.NounType("place", ["grill", "diner", "home"]);
   var cmd_eat = {
     names: ["eat"],
     execute: function(context, directObject, modifiers) {
@@ -249,24 +249,24 @@ function testImplicitPronoun() {
   fakeContext.textSelection = "din";
   completions = getCompletions("eat", [cmd_eat], fakeContext);
 
-  this.assert( completions.length == 2, "Should have 3 completions.");
-  // first completion should be directObject is dinner
+  this.assert(completions.length == 2, "Should have 3 completions.");
+  // first completion should be direct object null, place is diner
   completions[0].execute();
-  this.assert((foodGotEaten == "dinner"), "DO should have been dinner.");
-  this.assert((foodGotEatenAt == null), "IndirectObjs shouldn't be set.");
+  this.assert(foodGotEaten == null, "DO should be null.");
+  this.assert(foodGotEatenAt == "diner", "Place should be diner.");
+  // second completion should be directObject is dinner
   foodGotEaten = null;
   foodGotEatenAt = null;
-  // second completion should be direct object null, place is diner
   completions[1].execute();
-  this.assert((foodGotEaten == null), "DO should be null.");
-  this.assert((foodGotEatenAt == "diner"), "Place should be diner.");
+  this.assert(foodGotEaten == "dinner", "DO should have been dinner.");
+  this.assert(foodGotEatenAt == null, "IndirectObjs shouldn't be set.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
   completions = getCompletions("eat lunch at selection", [cmd_eat], fakeContext);
-  this.assert( completions.length == 1, "Sould have 1 completion");
+  this.assert(completions.length == 1, "Sould have 1 completion");
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
   this.assert(foodGotEatenAt == "diner", "Should have eaten it at diner");
@@ -276,10 +276,10 @@ function testImplicitPronoun() {
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
   completions = getCompletions("eat at grill", [cmd_eat], fakeContext);
-  this.assert( completions.length == 1, "Should have 1 completion");
+  this.assert(completions.length == 1, "Should have 1 completion");
   completions[0].execute();
-  this.assert((foodGotEaten == "dinner"), "DO should be dinner.");
-  this.assert((foodGotEatenAt == "grill"), "ate at grill.");
+  this.assert(foodGotEaten == "dinner", "DO should be dinner.");
+  this.assert(foodGotEatenAt == "grill", "ate at grill.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
@@ -584,7 +584,7 @@ function testPartiallyParsedSentence() {
   // TODO this test will need rewriting, because NLParser1.Verb is about
   // to not exist.
   // make sure it also works with a no-arg command:
-  var cache = {suggestions: {}};
+  var fakeQuery = {nounCache: {}};
   var cmd_grumble = {
     names: ["grumble"],
     execute: function(context, directObject, modifiers) {
@@ -596,11 +596,11 @@ function testPartiallyParsedSentence() {
     {},
     selObj,
     0,
-    cache);
+    fakeQuery);
 
   var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
-  this.assert( parsedNoArgs.length == 1, "Should have 1 parsing.");
-  this.assert( parsedNoArgs[0]._verb._name == "grumble");
+  this.assert(parsedNoArgs.length == 1, "Should have 1 parsing.");
+  this.assert(parsedNoArgs[0]._verb._name == "grumble");
 
 
   var noun_type_foo = {
@@ -642,7 +642,7 @@ function testPartiallyParsedSentence() {
     argStrings,
     selObj,
     0,
-    cache);
+    fakeQuery);
 
   var parsed  = partiallyParsed.getParsedSentences();
   // two suggestions for foo, two suggestions for bar: should be four
@@ -732,7 +732,7 @@ function testTextAndHtmlDifferent() {
     text: "Pantalones", html: "<blink>Pantalones</blink>"
   };
   comps = nlParser._nounFirstSuggestions(selObj, MAX_SUGGESTIONS,
-                                         {suggestions: {}});
+                                         {nounCache: {}});
   this.assert(comps.length == 1, "There should be one partial completion");
   comps = comps[0].getAlternateSelectionInterpolations();
   this.assert(comps.length == 1, "There should still be one partial completion");
@@ -890,21 +890,23 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
                              [cmd_twitter]);
   // There are two places where we could make the division between status
   // and "as" argument.  Make sure both get generated.
-  this.assert( comps.length == 6, "Should have 6 suggestions.");
-  this.assert( comps[0]._argSuggs.direct_object.text == "i am happy as a clam as fern",
-               "First suggestion direct obj should be 'i am happy as a clam as fern'.");
-  this.assert( !comps[0]._argSuggs.as.text,
-               "First suggestion AS should be empty.");
-  this.assert( comps[1]._argSuggs.direct_object.text == "i am happy as a clam",
-               "Second suggestion direct obj should be 'i am happy as a clam'.");
-  this.assert( comps[1]._argSuggs.as.text == "fern",
-               "Second suggestion AS should be 'fern'.");
-  this.assert( comps[2]._argSuggs.direct_object.text == "i am happy",
-               "Third suggestion direct obj should be 'i am happy'.");
-  this.assert( comps[2]._argSuggs.as.text == "a clam as fern",
-               "Third suggestion AS should be 'a clam as fern'.");
-
-
+  this.assert(comps.length === 6, "Should have 6 suggestions.");
+  var expected;
+  this.assert(comps[0]._argSuggs.direct_object.text ===
+              (expected = "i am happy as a clam"),
+              "First suggestion direct obj should be " + uneval(expected));
+  this.assert(comps[0]._argSuggs.as.text === (expected = "fern"),
+              "First suggestion AS should be " + uneval(expected));
+  this.assert(comps[1]._argSuggs.direct_object.text ===
+              (expected = "i am happy"),
+              "Second suggestion direct obj should be " + uneval(expected));
+  this.assert(comps[1]._argSuggs.as.text === (expected = "a clam as fern"),
+              "Second suggestion AS should be " + uneval(expected));
+  this.assert(comps[5]._argSuggs.direct_object.text ===
+              (expected = "i am happy as a clam as fern"),
+              "Last suggestion direct obj should be " + uneval(expected));
+  this.assert(!comps[5]._argSuggs.as.text,
+              "Last suggestion AS should be empty.");
 }
 
 function testParseWithComplexQuery() {
