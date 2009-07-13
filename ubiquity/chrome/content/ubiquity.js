@@ -109,6 +109,11 @@ Ubiquity.prototype = {
   __KEYCODE_DOWN : KeyEvent.DOM_VK_DOWN,
   __KEYCODE_TAB  : KeyEvent.DOM_VK_TAB,
 
+  __KEYMAP_SCROLL_RATE: {
+    33: -.8, // page up
+    34: +.8, // page dn
+  },
+  
   get textBox() {
     return this.__textBox;
   },
@@ -160,7 +165,7 @@ Ubiquity.prototype = {
 
     if (event.ctrlKey && event.altKey &&
         KeyEvent.DOM_VK_0 <= keyCode && keyCode <= KeyEvent.DOM_VK_Z) {
-      this.__cmdManager.activateAccessKey(keyCode);
+      this.__cmdManager.previewBrowser.activateAccessKey(keyCode);
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -175,10 +180,18 @@ Ubiquity.prototype = {
   },
 
   __onKeyPress: function __onKeyPress(event) {
-    if (event.keyCode === this.__KEYCODE_ENTER) {
+    var {keyCode} = event;
+    if (keyCode === this.__KEYCODE_ENTER) {
       this.__processInput(true);
       this.__needsToExecute = this.__cmdManager.hasSuggestions();
       this.__msgPanel.hidePopup();
+      return;
+    }
+    var rate = this.__KEYMAP_SCROLL_RATE[keyCode];
+    if (rate) {
+      let [x, y] = event.shiftKey ? [rate, 0] : [0, rate];
+      this.__cmdManager.previewBrowser.scroll(x, y);
+      return;
     }
   },
 

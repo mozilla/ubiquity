@@ -39,9 +39,6 @@ var EXPORTED_SYMBOLS = ["PreviewBrowser"];
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
 function PreviewBrowser(browser, defaultUrl) {
-
-  browser.setAttribute("type", "content");
-
   this.__isActive = false;
   this.__defaultUrl = defaultUrl;
   this.__queuedPreview = null;
@@ -49,16 +46,19 @@ function PreviewBrowser(browser, defaultUrl) {
   this.__previewBrowserCreatedCallback = null;
   this.__previewBrowserUrlLoadedCallback = null;
 
-  function resizeContainer(e) {
+  function resizeContainer(ev) {
     Utils.clearTimeout(resizeContainer.tid);
-    resizeContainer.tid = Utils.setTimeout(function resizeDelayed(me) {
-      browser.parentNode.style.height = me.height + "px";
-    }, 16, this);
+    resizeContainer.tid = Utils.setTimeout(resizeDelayed, 16, this);
+  }
+  function resizeDelayed(doc) {
+    browser.parentNode.style.height = doc.height + "px";
   }
   browser.addEventListener("load", function bindResize(e) {
     for each (var h in ["load", "DOMSubtreeModified"])
       this.contentDocument.addEventListener(h, resizeContainer, true);
   }, true);
+
+  browser.setAttribute("type", "content");
   browser.setAttribute("src", defaultUrl);
 }
 
@@ -78,9 +78,9 @@ PreviewBrowser.prototype = {
     if (this.__previewBrowser)
       cb();
     else {
-      if (this.__previewBrowserCreatedCallback) {
+      if (this.__previewBrowserCreatedCallback)
         this.__previewBrowserCreatedCallback = cb;
-      } else {
+      else {
         var self = this;
         this.__previewBrowserCreatedCallback = cb;
         makePreviewBrowser(this.__containingNode,
@@ -100,14 +100,15 @@ PreviewBrowser.prototype = {
 
   _ensurePreviewBrowserUrlLoaded : function PB__EPBUL(url, cb) {
     var currUrl = this.__previewBrowser.getAttribute("src");
-    if (url == currUrl) {
+    if (url === currUrl) {
       if (this.__previewBrowserUrlLoadedCallback)
         // The URL is still loading.
         this.__previewBrowserUrlLoadedCallback = cb;
       else
         // The URL is already loaded.
         cb();
-    } else {
+    }
+    else {
       var self = this;
       function onLoad() {
         self.__previewBrowser.removeEventListener("load", onLoad, true);
@@ -187,7 +188,12 @@ PreviewBrowser.prototype = {
       showPreview();
   },
 
-  finalize: function finalize() {
+  scroll: function PB_scroll(xRate, yRate) {
+    var win = this.__previewBrowser.contentWindow;
+    if (win) win.scrollBy(win.innerWidth * xRate, win.innerHeight * yRate);
+  },
+
+  finalize: function PB_finalize() {
     for (var key in this) delete this[key];
   }
 };

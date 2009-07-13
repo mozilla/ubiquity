@@ -212,10 +212,6 @@ CommandManager.prototype = {
     return this._renderPreview(context);
   },
 
-  activateAccessKey: function CM_activateAccessKey(number) {
-    this._previewer.activateAccessKey(number);
-  },
-
   reset : function CM_reset() {
     // TODO: I think?
     if (this.__activeQuery && !this.__activeQuery.finished)
@@ -343,4 +339,5 @@ CommandManager.prototype = {
   },
 
   get maxSuggestions() CommandManager.maxSuggestions,
+  get previewBrowser() this._previewer,
 };
