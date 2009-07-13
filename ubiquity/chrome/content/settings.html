@@ -80,17 +80,20 @@
     <h2>Miscellaneous Settings</h2>
     <p>
      Maximum number of suggestions:
-     <input type="text" id="max-suggestions" size="2"
+     <input type="text" id="max-suggestions" size="3"
       style="text-align:center"/>
     </p>
-    <p>Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.
-    </p>
-    <p><label for="external-calls-on-all-queries"
-      <input type="checkbox" id="external-calls-on-all-queries"
+    <fieldset class="parser2" style="display:none">
+      <legend>Parser 2</legend>
+      <p>Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.
+      </p>
+      <label for="external-calls-on-all-queries">
+        <input type="checkbox" id="external-calls-on-all-queries"
              onchange="changeExternalCallSettings();">
-      <strong>Enable external calls for all Parser 2 queries</strong>
-    </label></p>
-    <p><span id="external-calls-settings-changed-info"></span></p>
+        <strong>Enable external calls for all Parser 2 queries</strong>
+      </label>
+      <p id="external-calls-settings-changed-info"></p>
+    </fieldset>
   </div>
   <br clear="all"/>
   <div id="editor-div" style="display:none">

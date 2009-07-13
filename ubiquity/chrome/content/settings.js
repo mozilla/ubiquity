@@ -53,37 +53,34 @@ function onDocumentLoad() {
   loadSkinList();
 
   // add the language options
-  var ParserJSM = {};
-  Cu.import("resource://ubiquity/modules/parser/new/namespace.js",ParserJSM);
-  var parserRegistry = ParserJSM.parserRegistry;
-
+  var {parserRegistry} =
+    Cu.import("resource://ubiquity/modules/parser/new/namespace.js", null);
   /* Don't display every code in parserRegistry; only the ones that have
    * had command localization done.  For now this is a hardcoded list.
    * TODO kep this list updated when new localizations are done; eventually
    * replace with something that detects command localizations automatically.
    */
-  for each (let code in ["da", "en", "ja", "pt", "ca"]) {
-    $('#language-select').append($("<option value='"+code+"' "+
-                              (code=='en'?" selected='true'":'')+">"
-                              +parserRegistry[code]+'</input>'));
-  }
-
-  // set the language option controls to the correct values:
+  var $langSelect = $("#language-select");
+  var langCode = "en";
   var isNewParser = UbiquitySetup.parserVersion === 2;
   $("#use-new-parser-checkbox")[0].checked = isNewParser;
   if (isNewParser) {
-    $("#language-select").removeAttr("disabled");
-    let langCode = UbiquitySetup.languageCode;
-    $("#language-select > options").each(function eachOption() {
-      if (this.value === langCode) {
-        this.selected = true;
-        return false;
-      }
-    });
+    $langSelect[0].disabled = false;
+    langCode = UbiquitySetup.languageCode;
+    $(".parser2").show();
   }
+  for each (let code in ["da", "en", "ja", "pt", "ca", "$"]) {
+    $langSelect.append(
+      "<option value='" + code + "' " +
+      (code === langCode ? " selected='selected'" : "") + ">" +
+      parserRegistry[code] +
+      "</option>");
+  }
+
   // set the external calls control to the correct value:
   $("#external-calls-on-all-queries")[0].checked =
-                                         UbiquitySetup.doNounFirstExternals;
+    UbiquitySetup.doNounFirstExternals;
+
   $("#max-suggestions").keyup(function changeMaxSuggestions() {
     if (!this.value || this.value === this.lastValue) return;
     CommandManager.maxSuggestions = this.value;
@@ -93,9 +90,9 @@ function onDocumentLoad() {
 
 function changeLanguageSettings() {
   var changed = false;
-  var prefs = Cc["@mozilla.org/preferences-service;1"]
-                          .getService(Ci.nsIPrefService);
-  prefs = prefs.getBranch("extensions.ubiquity.");
+  var prefs = (Cc["@mozilla.org/preferences-service;1"]
+               .getService(Ci.nsIPrefService)
+               .getBranch("extensions.ubiquity."));
 
   var useParserVersion = $("#use-new-parser-checkbox").attr("checked") ? 2 : 1;
   if (useParserVersion !== prefs.getIntPref("parserVersion")) {
@@ -112,9 +109,11 @@ function changeLanguageSettings() {
     prefs.setCharPref("language", useLanguage);
   }
 
-  if (changed)
+  if (changed) {
     $("#lang-settings-changed-info").html(
       "<i>This change will take effect when you restart Firefox.</i>");
+    $(".parser2")[useParserVersion < 2 ? "slideUp": "slideDown"]();
+  }
 }
 
 function changeExternalCallSettings() {
