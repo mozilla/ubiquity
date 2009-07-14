@@ -1913,14 +1913,8 @@ ParseQuery.prototype = {
   // ** {{{ParseQuery#onResults()}}} **
   //
   // A handler for the endgame. To be overridden.
-  onResults: function() {},
+  onResults: function PQ_default_onResults() {},
 
-  removeLowestScoredParse: function PQ_removeLowestScoredParse(){
-    let lowestScoredParse = this.aggregateScoredParses()
-                                .sort(byScoreDescending).pop();
-    this._scoredParses.splice(
-            this._scoredParses.indexOf(lowestScoredParse), 1);
-  },
   // ** {{{ParseQuery#addIfGoodEnough()}}} **
   //
   // Takes a {{{parseClass}}} ("verbed" or "scored") and a {{{newParse}}}.
