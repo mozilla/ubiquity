@@ -1468,9 +1468,10 @@ Parser.prototype = {
         var returnArray = [];
 
         let ids = [id for (id in nounTypeIds)]
-        currentQuery.dump("detecting: " + x + " for " + ids);
+//        currentQuery.dump("detecting: " + x + " for " + ids);
 
         for (let thisNounTypeId in nounTypeIds) {
+          currentQuery.dump(x+','+thisNounTypeId+','+currentQuery._requestCount);
           let id = thisNounTypeId;
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
             currentQuery._requestCount--;
@@ -1485,7 +1486,7 @@ Parser.prototype = {
           if (!(id in thisParser._nounCache[x]))
             thisParser._nounCache[x][id] = [];
 
-	  var resultsFromSuggest = handleSuggs(
+          var resultsFromSuggest = handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
           for each (result in resultsFromSuggest){
@@ -1637,6 +1638,7 @@ ParseQuery.prototype = {
 
   _next: function() {
     this._times[this._step++] = new Date;
+    this.dump('STEP '+this._step);
   },
 
   // ** {{{ParseQuery#_yieldingParse()}}} **
@@ -1747,8 +1749,7 @@ ParseQuery.prototype = {
       let newVerbedParses = this.parser.suggestVerb(parse);
       for each (let newVerbedParse in newVerbedParses) {
         newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
-        this._verbedParses = this.addIfGoodEnough(this._verbedParses,
-                                                  newVerbedParse);
+        this.addIfGoodEnough('verbed', newVerbedParse);
         yield true;
       }
     }
@@ -1777,11 +1778,16 @@ ParseQuery.prototype = {
 
       //thisQuery.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
 
-      for each (let newParse in suggestions)
-        thisQuery.addScoredParseIfGoodEnough(newParse);
+      var addedAny = false;
+      for each (let newParse in suggestions) {
+        addedAny = thisQuery.addIfGoodEnough('scored',newParse)
+                     || addedAny;
+      }
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
+        
+      return addedAny;
     }
 
     function tryToCompleteParses(argText) {
@@ -1792,20 +1798,25 @@ ParseQuery.prototype = {
         return;
       }
 
+      var addedAny = false;
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
         if (thisParse.allNounTypesDetectionHasCompleted() &&
             !thisParse.complete) {
           //thisQuery.dump('completing parse '+parseId+' now');
-          completeParse(thisParse);
+          addedAny = completeParse(thisParse) || addedAny;
         }
       }
 
-      // don't run onResults here if thisQuery.finished,
+      // Only call onResults if we added any parses.
+      // 
+      // Also, don't run onResults here if thisQuery.finished,
       // as if the finished flag was just turned on, it would have independently
       // called onResults.
-      if (thisQuery.aggregateScoredParses().length > 0 && !thisQuery.finished)
+      if (addedAny && thisQuery.aggregateScoredParses().length > 0
+           && !thisQuery.finished) {
         thisQuery.onResults();
+      }
     }
 
     // first create a map from arg's to parses that use them.
@@ -1862,12 +1873,8 @@ ParseQuery.prototype = {
     */
     this.onResults();
   },
-  aggregateScoredParses: function() {
+  aggregateScoredParses: function PQ_aggregateScoredParses() {
     return this._scoredParses;
-    /*let allScoredParses = [];
-    for each (let parses in this._scoredParses)
-      allScoredParses = allScoredParses.concat(parses);
-    return allScoredParses.slice();*/
   },
   // ** {{{ParseQuery#hasResults}}} (read-only) **
   //
@@ -1887,7 +1894,7 @@ ParseQuery.prototype = {
   //
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
-  cancel: function() {
+  cancel: function PQ_cancel() {
     //Utils.log(this);
     this.dump("cancelled! " + this._requestCount +
               " outstanding request(s) being canceled\n");
@@ -1908,7 +1915,7 @@ ParseQuery.prototype = {
   // A handler for the endgame. To be overridden.
   onResults: function() {},
 
-  removeLowestScoredParse: function(){
+  removeLowestScoredParse: function PQ_removeLowestScoredParse(){
     let lowestScoredParse = this.aggregateScoredParses()
                                 .sort(byScoreDescending).pop();
     this._scoredParses.splice(
@@ -1916,7 +1923,7 @@ ParseQuery.prototype = {
   },
   // ** {{{ParseQuery#addIfGoodEnough()}}} **
   //
-  // Takes a {{{parseCollection}}} (Array) and a {{{newParse}}}.
+  // Takes a {{{parseClass}}} ("verbed" or "scored") and a {{{newParse}}}.
   //
   // Looking at the {{{maxSuggestions}}} value (= m), defines "the bar" (the
   // lowest current score of the top m parses in the {{{parseCollection}}}).
@@ -1929,17 +1936,26 @@ ParseQuery.prototype = {
   // A longer explanation of "Rising Sun" optimization strategy (and why it is
   // applicable here, and with what caveats) can be found in the article
   // [[http://mitcho.com/blog/observation/scoring-for-optimization/|Scoring for Optimization]].
-  addIfGoodEnough: function(parseCollection, newParse) {
-    var maxIndex = this.maxSuggestions - 1;
+  //
+  // Returns true if the parse was added, false if not.
+  addIfGoodEnough: function PQ_addIfGoodEnough(parseClass, newParse) {
+    if (parseClass != 'verbed' && parseClass != 'scored')
+      throw new Error('#addIfGoodEnough\'s parseClass arg must either be '
+                     +'"scored" or "verbed".');
+    
+    var parseCollection = this['_'+parseClass+'Parses'];
 
     let parseIds = [parse._id for each (parse in parseCollection)];
     if (parseIds.indexOf(newParse._id) != -1) {
       this.dump("already contains parse #"+newParse._id+"!");
-      return parseCollection;
+      return false;
     }
 
-    if (!parseCollection[maxIndex])
-      return parseCollection.concat(newParse);
+    var maxIndex = this.maxSuggestions - 1;
+    if (!parseCollection[maxIndex]){
+      parseCollection.push(newParse);
+      return true;
+    }
 
     parseCollection.sort(byScoreDescending);
 
@@ -1953,7 +1969,7 @@ ParseQuery.prototype = {
     // added). Thus, if the new parse's maxScore is less than the current bar
     // we will not return it (effectively killing the parse).
     if (newParse.maxScore < theBar)
-      return parseCollection;
+      return false;
 
     // add the new parse and sort again
     parseCollection.push(newParse);
@@ -1968,52 +1984,7 @@ ParseQuery.prototype = {
         parseCollection.pop();
     }
 
-    return parseCollection;
-  },
-  // ** {{{ParseQuery#addScoredParseIfGoodEnough()}}} **
-  //
-  // Takes a {{{argText}}} (String) and a {{{newParse}}}.
-  //
-  // Uses the same optimization strategy as ParseQuery#addIfGoodEnough(),
-  // but operates specially on this ParseQuery's scored parses to add
-  // a new parse to the scored parses object. See ParseQuery#addIfGoodEnough()
-  // for the logic behind the optimization strategy.
-  addScoredParseIfGoodEnough: function(newParse) {
-    var parseCollection = this._scoredParses;
-
-    let parseIds = [parse._id for each (parse in parseCollection)];
-    if (parseIds.indexOf(newParse._id) != -1) {
-      this.dump("already contains parse #"+newParse._id+"!");
-      return;
-    }
-
-    var maxIndex = this.maxSuggestions - 1;
-
-    if (!parseCollection[maxIndex]){
-      parseCollection.push(newParse);
-      return;
-    }
-
-    parseCollection.sort(byScoreDescending);
-    var theBar = parseCollection[maxIndex].score;
-
-    if (newParse.maxScore < theBar){
-      return;
-    }
-    // add the new parse and sort again
-    parseCollection.push(newParse);
-    parseCollection.sort(byScoreDescending);
-
-    var newBar = parseCollection[maxIndex].score;
-    if (newBar > theBar) {
-      // sort by descending maxScore order
-      parseCollection.sort(function(a, b) b.maxScore - a.maxScore);
-      let i = parseCollection.length;
-      while (--i > maxIndex && parseCollection[i].maxScore < theBar){
-        parseCollection.pop();
-      }
-    }
-    return;
+    return true;
   }
 };
 
