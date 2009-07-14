@@ -1463,16 +1463,31 @@ Parser.prototype = {
         if (typeof callback == 'function')
           callback(x);
       };
+
+      if (!(x in currentQuery._checkedArgsAndNounTypeIds))
+        currentQuery._checkedArgsAndNounTypeIds[x] = {};
       var activeNounTypes = this._nounTypes;
+
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
 
         let ids = [id for (id in nounTypeIds)]
 //        currentQuery.dump("detecting: " + x + " for " + ids);
 
-        for (let thisNounTypeId in nounTypeIds) {
-          currentQuery.dump(x+','+thisNounTypeId+','+currentQuery._requestCount);
-          let id = thisNounTypeId;
+        var alreadyChecked = currentQuery._checkedArgsAndNounTypeIds;
+        
+        for (let id in nounTypeIds) {
+          currentQuery.dump(x+','+id+','+currentQuery._requestCount);
+
+          if (alreadyChecked[x][id]) {
+            currentQuery.dump('detection of this combination has already begun.');
+            continue;
+          }
+          
+          // let's mark this x, id pair as checked, meaning detection has
+          // already begun for this pair.
+          alreadyChecked[x][id] = true;
+
           let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
             currentQuery._requestCount--;
             if (suggs.length) {
@@ -1819,10 +1834,15 @@ ParseQuery.prototype = {
       }
     }
 
-    // first create a map from arg's to parses that use them.
+    // First create a map from arg's to parses that use them.
     this._parsesThatIncludeThisArg = {};
     // and also a list of arguments we need to cache
     this._argsToCache = {};
+    // Also initialize a hash to keep track of argText + nountype combinations
+    // we've already started detecting.
+    this._checkedArgsAndNounTypeIds = {};
+    // {_checkedArgsAndNounTypeIds[argText][nounTypeId] = true} is the format
+    
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
 
