@@ -118,6 +118,7 @@ CommandManager.prototype = {
   setPreviewState: function CM_setPreviewState(state) {
     var nodes = this.__domNodes;
     switch (state) {
+    case "computing-suggestions":
     case "with-suggestions":
       nodes.suggs.style.display = "block";
       nodes.preview.style.display = "block";
@@ -237,10 +238,11 @@ CommandManager.prototype = {
     if (asyncSuggestionCb)
       this.__lastAsyncSuggestionCb = asyncSuggestionCb;
 
+    this.__hilitedSuggestion = 0;
     if ('run' in this.__activeQuery)
       this.__activeQuery.run();
-    this.__hilitedSuggestion = 0;
-    this.onSuggestionsUpdated(input, context);
+    else
+      this.onSuggestionsUpdated(input, context);
   },
 
   getLastInput: function CM_getLastInput() {
@@ -249,10 +251,15 @@ CommandManager.prototype = {
 
   onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
                                                           context) {
-    //dump('rendering suggestions now: '+this.__activeQuery.suggestionList.length+'\n');
+    dump('rendering suggestions now: '+this.__activeQuery.suggestionList.length+'\n');
+
     var previewState = "no-suggestions";
     if (this.__activeQuery.suggestionList.length > 0)// && this._previewAndSuggest(context)
       previewState = "with-suggestions";
+
+    if (!this.__activeQuery.finished)
+      previewState = "computing-suggestions";
+
     this.setPreviewState(previewState);
     this._previewAndSuggest(context);
   },
