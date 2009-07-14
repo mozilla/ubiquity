@@ -1477,12 +1477,13 @@ Parser.prototype = {
         var alreadyChecked = currentQuery._checkedArgsAndNounTypeIds;
         
         for (let id in nounTypeIds) {
-          currentQuery.dump(x+','+id+','+currentQuery._requestCount);
 
           if (alreadyChecked[x][id]) {
-            currentQuery.dump('detection of this combination has already begun.');
+            //currentQuery.dump('detection of this combination has already begun.');
             continue;
           }
+          
+          currentQuery.dump(x+','+id+','+currentQuery._requestCount);
           
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
