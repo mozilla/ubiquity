@@ -1234,8 +1234,8 @@ Parser.prototype = {
             if (nountypeId in this._nounCache[argText]) {
 
               let suggestions = this._nounCache[argText][nountypeId];
-              suggestions.sort(byReverseScore);
-              suggestions = suggestions.slice(0,maxSuggestions);
+              //suggestions.sort(byReverseScore);
+              //suggestions = suggestions.slice(0,maxSuggestions);
 
               for (let suggestionId in suggestions) {
                 for each (let baseOrder in combinations) {
@@ -1409,8 +1409,10 @@ Parser.prototype = {
 
     if (alreadyCached) {
       //Utils.log('found all required values for '+x+' in cache');
-      if (typeof callback == 'function')
+      if (typeof callback == 'function') {
+        currentQuery.dump("running callback ("+callback.name+") now");
         callback(x);
+      }
     } else {
 
       //Utils.log('detecting '+x,nounTypeIds);
@@ -1439,18 +1441,30 @@ Parser.prototype = {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
         }
-        if (Utils.isEmpty(thisParser._nounCache[x]))
-          thisParser._nounCache[x] = {};
+        
         for each (let newSugg in suggestions) {
-          let nountypeId = newSugg.nountypeId;
+          let {nountypeId} = newSugg;
 
           if (Utils.isEmpty(thisParser._nounCache[x][nountypeId]))
             thisParser._nounCache[x][nountypeId] = [];
           
           let thisSuggIsNew = true;
           for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
-            if (Utils.isEqual({__proto__:newSugg, score:0},
-                              {__proto__:oldSugg, score:0})) {
+            // Here, we only compare the input, text, and html properies.
+            // There are a few reasons for this:
+            // 1. We want to avoid suggestions which only differ in score
+            // 2. If the text/html are not different, then the data should
+            //    be different, as then the user is forced to choose between
+            //    identical suggestions.
+            // 3. Checking data is dangerous as isEqual is not made to 
+            //    handle xpconnect objects, which are often in data.
+            //    (This was, I suspect, the problem with #829.)
+            if (Utils.isEqual({ input: newSugg.input,
+                                text:  newSugg.text,
+                                html:  newSugg.html },
+                              { input: oldSugg.input,
+                                text:  oldSugg.text,
+                                html:  oldSugg.html })) {
               thisSuggIsNew = false;
               oldSugg.score = Math.max(oldSugg.score,newSugg.score);
             }
@@ -1460,43 +1474,62 @@ Parser.prototype = {
             thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
-        if (typeof callback == 'function')
+        if (typeof callback == 'function') {
+          currentQuery.dump("running callback ("+callback.name+") now");
           callback(x);
+        }
       };
+
+      if (!(x in currentQuery._checkedArgsAndNounTypeIds))
+        currentQuery._checkedArgsAndNounTypeIds[x] = {};
       var activeNounTypes = this._nounTypes;
+
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
 
         let ids = [id for (id in nounTypeIds)]
 //        currentQuery.dump("detecting: " + x + " for " + ids);
 
-        for (let thisNounTypeId in nounTypeIds) {
-          currentQuery.dump(x+','+thisNounTypeId+','+currentQuery._requestCount);
-          let id = thisNounTypeId;
-          let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
-            currentQuery._requestCount--;
-            if (suggs.length) {
-              suggs = handleSuggs(suggs, id);
-              myCallback(suggs, id);
-            }
+        var alreadyChecked = currentQuery._checkedArgsAndNounTypeIds;
+        
+        for (let id in nounTypeIds) {
+
+          if (alreadyChecked[x][id]) {
+            //currentQuery.dump('detection of this combination has already begun.');
+            continue;
           }
+          
+          currentQuery.dump(x+','+id+','+currentQuery._requestCount);
+          
+          // let's mark this x, id pair as checked, meaning detection has
+          // already begun for this pair.
+          alreadyChecked[x][id] = true;
 
           if (!(x in thisParser._nounCache))
             thisParser._nounCache[x] = {};
           if (!(id in thisParser._nounCache[x]))
             thisParser._nounCache[x][id] = [];
 
+          let thisId = id;
+          var completeAsyncSuggest = function
+            detectNounType_completeAsyncSuggest(suggs) {
+            currentQuery._requestCount--;
+            if (suggs.length) {
+              suggs = handleSuggs(suggs, thisId);
+              myCallback(suggs, thisId);
+            }
+          };
+
           var resultsFromSuggest = handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
           for each (result in resultsFromSuggest){
-	    if(result.text || result.html){
+            if(result.text || result.html){
               returnArray.push(result);
-	    }
-            else{
-	      currentQuery._requestCount++;
+            } else {
+              currentQuery._requestCount++;
               currentQuery._outstandingRequests.push(result);
-	    }
+            }
           }
         }
         myCallback(returnArray);
@@ -1765,11 +1798,19 @@ ParseQuery.prototype = {
     // handle the scoring.
     var thisQuery = this;
     function completeParse(thisParse) {
+
+      if (!(thisParse._requestCountLastCompletedWith == undefined)
+          && thisParse._requestCountLastCompletedWith == thisQuery._requestCount) {
+        return false;
+      }
+      thisQuery.dump('completing parse '+thisParse._id+' now');
+      thisParse._requestCountLastCompletedWith = thisQuery._requestCount;
+
       if (thisQuery._requestCount <= 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
       }
-
+      
       // go through all the arguments in thisParse and suggest args
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
@@ -1791,7 +1832,6 @@ ParseQuery.prototype = {
     }
 
     function tryToCompleteParses(argText) {
-      //thisQuery.dump('tryToCompleteParses('+argText+')');
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -1801,9 +1841,8 @@ ParseQuery.prototype = {
       var addedAny = false;
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
-        if (thisParse.allNounTypesDetectionHasCompleted() &&
-            !thisParse.complete) {
-          //thisQuery.dump('completing parse '+parseId+' now');
+        if (!thisParse.complete &&
+            thisParse.allNounTypesDetectionHasCompleted()) {
           addedAny = completeParse(thisParse) || addedAny;
         }
       }
@@ -1815,14 +1854,20 @@ ParseQuery.prototype = {
       // called onResults.
       if (addedAny && thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
+        thisQuery.dump('calling onResults now');
         thisQuery.onResults();
       }
     }
 
-    // first create a map from arg's to parses that use them.
+    // First create a map from arg's to parses that use them.
     this._parsesThatIncludeThisArg = {};
     // and also a list of arguments we need to cache
     this._argsToCache = {};
+    // Also initialize a hash to keep track of argText + nountype combinations
+    // we've already started detecting.
+    this._checkedArgsAndNounTypeIds = {};
+    // {_checkedArgsAndNounTypeIds[argText][nounTypeId] = true} is the format
+    
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
 

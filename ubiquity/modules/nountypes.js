@@ -331,10 +331,13 @@ var noun_type_livemark = {
 var noun_type_command = {
   label: "name",
   noExternalCalls: true,
-  suggest: function(text, html, cb, selected) {
+  suggest: function nt_command_suggest(text, html, cb, selected) {
     if (!text) return [];
-    var res = CmdUtils.grepSuggs(text, this._get());
+    var grepee = this._get();
+    if (!grepee.length) return [];
+    var res = CmdUtils.grepSuggs(text, grepee);
     if (!res.length) return [];
+    // removing duplicates
     var dic = {};
     for each (let r in res) let ({id} = r.cmd) {
       if (!(id in dic) || dic[id].score < r.score) dic[id] = r;
@@ -343,15 +346,14 @@ var noun_type_command = {
             for each (r in dic)];
   },
   _cmdSource: UbiquitySetup.createServices().commandSource,
-  _get: function() {
+  _get: function nt_command__get() {
     var cmds = this._cmdSource.getAllCommands();
     if ("disabled" in this) {
-      var {disabled} = this;
+      let {disabled} = this;
       cmds = [cmd for each (cmd in cmds) if (cmd.disabled === disabled)];
     }
-    var cmdNames = [{cmd: cmd, text: name}
-                    for each (cmd in cmds) for each (name in cmd.names)];
-    return Array.concat.apply(0, cmdNames); // flatten
+    return [{cmd: cmd, text: name}
+            for each (cmd in cmds) for each (name in cmd.names)];
   },
 };
 
