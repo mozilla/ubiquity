@@ -1409,8 +1409,10 @@ Parser.prototype = {
 
     if (alreadyCached) {
       //Utils.log('found all required values for '+x+' in cache');
-      if (typeof callback == 'function')
+      if (typeof callback == 'function') {
+        currentQuery.dump("running callback ("+callback.name+") now");
         callback(x);
+      }
     } else {
 
       //Utils.log('detecting '+x,nounTypeIds);
@@ -1433,8 +1435,6 @@ Parser.prototype = {
       };
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, id) {
-        if (id)
-          currentQuery.dump('id:'+id);
         let ids = [id for (id in nounTypeIds)]
         currentQuery.dump("finished detecting "+x+" for "+(id || ids));
         if (currentQuery.finished) {
@@ -1443,7 +1443,7 @@ Parser.prototype = {
         }
         
         for each (let newSugg in suggestions) {
-          let nountypeId = newSugg.nountypeId;
+          let {nountypeId} = newSugg;
 
           if (Utils.isEmpty(thisParser._nounCache[x][nountypeId]))
             thisParser._nounCache[x][nountypeId] = [];
@@ -1798,11 +1798,19 @@ ParseQuery.prototype = {
     // handle the scoring.
     var thisQuery = this;
     function completeParse(thisParse) {
+
+      if (!(thisParse._requestCountLastCompletedWith == undefined)
+          && thisParse._requestCountLastCompletedWith == thisQuery._requestCount) {
+        return false;
+      }
+      thisQuery.dump('completing parse '+thisParse._id+' now');
+      thisParse._requestCountLastCompletedWith = thisQuery._requestCount;
+
       if (thisQuery._requestCount <= 0) {
         //dump("parse completed\n");
         thisParse.complete = true;
       }
-
+      
       // go through all the arguments in thisParse and suggest args
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
@@ -1824,7 +1832,6 @@ ParseQuery.prototype = {
     }
 
     function tryToCompleteParses(argText) {
-      //thisQuery.dump('tryToCompleteParses('+argText+')');
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -1834,9 +1841,8 @@ ParseQuery.prototype = {
       var addedAny = false;
       for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
         let thisParse = thisQuery._verbedParses[parseId];
-        if (thisParse.allNounTypesDetectionHasCompleted() &&
-            !thisParse.complete) {
-          //thisQuery.dump('completing parse '+parseId+' now');
+        if (!thisParse.complete &&
+            thisParse.allNounTypesDetectionHasCompleted()) {
           addedAny = completeParse(thisParse) || addedAny;
         }
       }
@@ -1848,6 +1854,7 @@ ParseQuery.prototype = {
       // called onResults.
       if (addedAny && thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
+        thisQuery.dump('calling onResults now');
         thisQuery.onResults();
       }
     }
