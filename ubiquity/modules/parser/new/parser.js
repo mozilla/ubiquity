@@ -1480,8 +1480,6 @@ Parser.prototype = {
         }
       };
 
-      if (!(x in currentQuery._checkedArgsAndNounTypeIds))
-        currentQuery._checkedArgsAndNounTypeIds[x] = {};
       var activeNounTypes = this._nounTypes;
 
       Utils.setTimeout(function detectNounType_asyncDetect(){
@@ -1490,11 +1488,9 @@ Parser.prototype = {
         let ids = [id for (id in nounTypeIds)]
 //        currentQuery.dump("detecting: " + x + " for " + ids);
 
-        var alreadyChecked = currentQuery._checkedArgsAndNounTypeIds;
-        
         for (let id in nounTypeIds) {
 
-          if (alreadyChecked[x][id]) {
+          if (currentQuery._detectionTracker.getStarted(x,id)) {
             //currentQuery.dump('detection of this combination has already begun.');
             continue;
           }
@@ -1503,7 +1499,7 @@ Parser.prototype = {
           
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
-          alreadyChecked[x][id] = true;
+          currentQuery._detectionTracker.setStarted(x,id,true);
 
           if (!(x in thisParser._nounCache))
             thisParser._nounCache[x] = {};
@@ -1565,8 +1561,11 @@ var ParseQuery = function(parser, queryString, selObj, context,
   this.maxSuggestions = maxSuggestions;
   this.selObj = selObj;
 
-  //_oustandingRequests are all async calls made for this query
+  // _oustandingRequests are all async calls made for this query
   this._outstandingRequests = [];
+  // _detectionTracker is an instance of NounTypeDetectionTracker which
+  // keeps track of all the nountype detections.
+  this._detectionTracker = new NounTypeDetectionTracker(this);
 
   // code flow control stuff
   // used in async faux-thread contrl
@@ -1860,10 +1859,6 @@ ParseQuery.prototype = {
     this._parsesThatIncludeThisArg = {};
     // and also a list of arguments we need to cache
     this._argsToCache = {};
-    // Also initialize a hash to keep track of argText + nountype combinations
-    // we've already started detecting.
-    this._checkedArgsAndNounTypeIds = {};
-    // {_checkedArgsAndNounTypeIds[argText][nounTypeId] = true} is the format
     
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
@@ -2035,6 +2030,62 @@ ParseQuery.prototype = {
     return true;
   }
 };
+
+// == {{{NounTypeDetectionTracker}}} ==
+//
+// {{{NounTypeDetectionTracker}}} is the class for 
+// {{{ParseQuery#_detectionTracker}}} which is used to keep track of which 
+// (argText,nountypeId) pairs have been started or completed
+
+var NounTypeDetectionTracker = function(query) {
+  this._query = query;
+  this.detectionSpace = {};
+}
+NounTypeDetectionTracker.prototype = {
+  _query: null,
+  detectionSpace: {},
+  _ensureNode: function(arg,id) {
+    if (!(arg in this.detectionSpace))
+      this.detectionSpace[arg] = {};
+    if (!(id in this.detectionSpace[arg]))
+      this.detectionSpace[arg][id] = { started: false, complete: false };
+  },
+  
+  getStarted: function(arg,id) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].started;
+  },
+  setStarted: function(arg,id,bool) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].started = bool;
+  }
+}
+
+var NounCache = function() {
+  this.cacheSpace = {};
+}
+NounCache.prototype = {
+  cacheSpace: {},
+  _ensureNode: function(arg,id) {
+    if (!(arg in this.cacheSpace))
+      this.cacheSpace[arg] = {};
+    if (!(id in this.cacheSpace[arg]))
+      this.cacheSpace[arg][id] = [];
+  },
+  
+  getSuggs: function(arg,id) {
+    this._ensureNode(arg,id);
+    return this.cacheSpace[arg][id]
+  },
+  setSuggs: function(arg,id,suggs) {
+    this._ensureNode(arg,id);
+    this.cacheSpace[arg][id] = suggs;
+  },
+  addSuggs: function(arg,id,sugg) {
+    this._ensureNode(arg,id);
+    this.cacheSpace[arg][id].push(sugg);
+  }
+}
 
 // == {{{Parse}}} ==
 //
