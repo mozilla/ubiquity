@@ -1234,8 +1234,8 @@ Parser.prototype = {
             if (nountypeId in this._nounCache[argText]) {
 
               let suggestions = this._nounCache[argText][nountypeId];
-              suggestions.sort(byReverseScore);
-              suggestions = suggestions.slice(0,maxSuggestions);
+              //suggestions.sort(byReverseScore);
+              //suggestions = suggestions.slice(0,maxSuggestions);
 
               for (let suggestionId in suggestions) {
                 for each (let baseOrder in combinations) {
