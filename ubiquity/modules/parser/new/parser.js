@@ -1499,7 +1499,7 @@ Parser.prototype = {
             continue;
           }
           
-          currentQuery.dump(x+','+id+','+currentQuery._requestCount);
+          currentQuery.dump(x+','+id);
           
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
@@ -1513,7 +1513,6 @@ Parser.prototype = {
           let thisId = id;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
-            currentQuery._requestCount--;
             if (suggs.length) {
               suggs = handleSuggs(suggs, thisId);
               myCallback(suggs, thisId);
@@ -1527,7 +1526,6 @@ Parser.prototype = {
             if(result.text || result.html){
               returnArray.push(result);
             } else {
-              currentQuery._requestCount++;
               currentQuery._outstandingRequests.push(result);
             }
           }
@@ -1569,9 +1567,6 @@ var ParseQuery = function(parser, queryString, selObj, context,
 
   //_oustandingRequests are all async calls made for this query
   this._outstandingRequests = [];
-  //_requestCount is the number of open async requests
-  //i.e. the number of requests that have not yet performed a callback
-  this._requestCount = 0;
 
   // code flow control stuff
   // used in async faux-thread contrl
@@ -1798,16 +1793,18 @@ ParseQuery.prototype = {
     // handle the scoring.
     var thisQuery = this;
     function completeParse(thisParse) {
+      var requestCount = thisQuery.requestCount;
 
       if (!(thisParse._requestCountLastCompletedWith == undefined)
-          && thisParse._requestCountLastCompletedWith == thisQuery._requestCount) {
+          && thisParse._requestCountLastCompletedWith == requestCount) {
         return false;
       }
-      thisQuery.dump('completing parse '+thisParse._id+' now');
-      thisParse._requestCountLastCompletedWith = thisQuery._requestCount;
 
-      if (thisQuery._requestCount <= 0) {
-        //dump("parse completed\n");
+      //dump("request count: " + requestCount + "\n");
+      thisQuery.dump('completing parse '+thisParse._id+' now');
+      thisParse._requestCountLastCompletedWith = requestCount;
+
+      if (requestCount == 0){
         thisParse.complete = true;
       }
       
@@ -1935,13 +1932,26 @@ ParseQuery.prototype = {
             .slice(0, this.maxSuggestions));
   },
 
+  // ** {{{ParseQuery#requestCount}}} (read-only) **
+  //
+  // A getter for the number of open requests
+  get requestCount() {
+    let numRequests = 0;
+    for each (let req in this._outstandingRequests){
+      if (req.readyState != undefined && req.readyState != 4)
+        numRequests++;
+    }
+    return numRequests;
+  },
+
   // ** {{{ParseQuery#cancel()}}} **
   //
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function PQ_cancel() {
     //Utils.log(this);
-    this.dump("cancelled! " + this._requestCount +
+    let reqCount = this.requestCount;
+    this.dump("cancelled! " + reqCount +
               " outstanding request(s) being canceled\n");
     //abort any async requests that are running
     for each (let asyncReq in this._outstandingRequests){
@@ -1950,7 +1960,6 @@ ParseQuery.prototype = {
     }
     //reset outstanding requests
     this._outstandingRequests = [];
-    this._requestCount = 0;
 
     this._keepworking = false;
   },
