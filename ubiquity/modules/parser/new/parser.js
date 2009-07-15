@@ -1433,14 +1433,14 @@ Parser.prototype = {
       };
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, id) {
+
         let ids = [id for (id in nounTypeIds)]
         currentQuery.dump("finished detecting "+x+" for "+(id || ids));
         if (currentQuery.finished) {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
         }
-        if (Utils.isEmpty(thisParser._nounCache[x]))
-          thisParser._nounCache[x] = {};
+        
         for each (let newSugg in suggestions) {
           let nountypeId = newSugg.nountypeId;
 
@@ -1460,9 +1460,20 @@ Parser.prototype = {
             thisParser._nounCache[x][nountypeId].push(newSugg);
         }
 
-        if (typeof callback == 'function')
+        if (typeof callback == 'function') {
+          currentQuery.dump("running callback ("+callback.name+") now");
           callback(x);
+        }
       };
+      var completeAsyncSuggest = function
+        detectNounType_completeAsyncSuggest(suggs) {
+        currentQuery._requestCount--;
+        if (suggs.length) {
+          let {nountypeId} = suggs[0];
+          suggs = handleSuggs(suggs, nountypeId);
+          myCallback(suggs, nountypeId);
+        }
+      }
 
       if (!(x in currentQuery._checkedArgsAndNounTypeIds))
         currentQuery._checkedArgsAndNounTypeIds[x] = {};
@@ -1489,14 +1500,6 @@ Parser.prototype = {
           // already begun for this pair.
           alreadyChecked[x][id] = true;
 
-          let completeAsyncSuggest = function completeAsyncSuggest(suggs) {
-            currentQuery._requestCount--;
-            if (suggs.length) {
-              suggs = handleSuggs(suggs, id);
-              myCallback(suggs, id);
-            }
-          }
-
           if (!(x in thisParser._nounCache))
             thisParser._nounCache[x] = {};
           if (!(id in thisParser._nounCache[x]))
@@ -1506,13 +1509,12 @@ Parser.prototype = {
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
           for each (result in resultsFromSuggest){
-	    if(result.text || result.html){
+            if(result.text || result.html){
               returnArray.push(result);
-	    }
-            else{
-	      currentQuery._requestCount++;
+            } else {
+              currentQuery._requestCount++;
               currentQuery._outstandingRequests.push(result);
-	    }
+            }
           }
         }
         myCallback(returnArray);
