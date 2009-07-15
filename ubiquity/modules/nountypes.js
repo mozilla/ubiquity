@@ -240,7 +240,7 @@ var noun_type_awesomebar = {
     }, 1);
     return [CmdUtils.makeSugg(text, html,
                               {url: text, title: text, favicon: ""},
-                              .7, selectedIndices), {}];
+                              .7, selectedIndices)];
   }
 };
 
@@ -271,10 +271,8 @@ var noun_type_url = {
       if (results.length)
         callback([CmdUtils.makeSugg(r.url, null, null, .9)
                   for each (r in results)]);
-      else
-        callback([]);
     }, 1);
-    return [CmdUtils.makeSugg(url, null, null, .7, selectionIndices), {}];
+    return [CmdUtils.makeSugg(url, null, null, .7, selectionIndices)];
   }
 };
 
@@ -1037,9 +1035,8 @@ function NounAsync(label, checker) {
   function asyncSuggest(text, html, callback, selectionIndices) (
     [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
      checker(text, function asyncBack(truthiness) {
-       callback(truthiness
-                ? [CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]
-                : []);
+       if(truthiness)
+         callback([CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]);
      })]);
   return {
     label: label,
