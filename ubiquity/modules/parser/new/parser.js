@@ -1433,7 +1433,8 @@ Parser.prototype = {
       };
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, id) {
-
+        if (id)
+          currentQuery.dump('id:'+id);
         let ids = [id for (id in nounTypeIds)]
         currentQuery.dump("finished detecting "+x+" for "+(id || ids));
         if (currentQuery.finished) {
@@ -1478,15 +1479,6 @@ Parser.prototype = {
           callback(x);
         }
       };
-      var completeAsyncSuggest = function
-        detectNounType_completeAsyncSuggest(suggs) {
-        currentQuery._requestCount--;
-        if (suggs.length) {
-          let {nountypeId} = suggs[0];
-          suggs = handleSuggs(suggs, nountypeId);
-          myCallback(suggs, nountypeId);
-        }
-      }
 
       if (!(x in currentQuery._checkedArgsAndNounTypeIds))
         currentQuery._checkedArgsAndNounTypeIds[x] = {};
@@ -1517,6 +1509,16 @@ Parser.prototype = {
             thisParser._nounCache[x] = {};
           if (!(id in thisParser._nounCache[x]))
             thisParser._nounCache[x][id] = [];
+
+          let thisId = id;
+          var completeAsyncSuggest = function
+            detectNounType_completeAsyncSuggest(suggs) {
+            currentQuery._requestCount--;
+            if (suggs.length) {
+              suggs = handleSuggs(suggs, thisId);
+              myCallback(suggs, thisId);
+            }
+          };
 
           var resultsFromSuggest = handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
