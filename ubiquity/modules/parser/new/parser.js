@@ -1449,8 +1449,21 @@ Parser.prototype = {
           
           let thisSuggIsNew = true;
           for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
-            if (Utils.isEqual({__proto__:newSugg, score:0},
-                              {__proto__:oldSugg, score:0})) {
+            // Here, we only compare the input, text, and html properies.
+            // There are a few reasons for this:
+            // 1. We want to avoid suggestions which only differ in score
+            // 2. If the text/html are not different, then the data should
+            //    be different, as then the user is forced to choose between
+            //    identical suggestions.
+            // 3. Checking data is dangerous as isEqual is not made to 
+            //    handle xpconnect objects, which are often in data.
+            //    (This was, I suspect, the problem with #829.)
+            if (Utils.isEqual({ input: newSugg.input,
+                                text:  newSugg.text,
+                                html:  newSugg.html },
+                              { input: oldSugg.input,
+                                text:  oldSugg.text,
+                                html:  oldSugg.html })) {
               thisSuggIsNew = false;
               oldSugg.score = Math.max(oldSugg.score,newSugg.score);
             }
