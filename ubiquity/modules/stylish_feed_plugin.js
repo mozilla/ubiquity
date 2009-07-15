@@ -34,81 +34,97 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-let EXPORTED_SYMBOLS = ["GreaseMonkeyFeedPlugin"];
+let EXPORTED_SYMBOLS = ["StylishFeedPlugin"];
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/codesource.js");
 Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
 Components.utils.import("resource://ubiquity/modules/collection.js");
 
-function GreaseMonkeyFeedPlugin(feedManager, messageService, webJsm) {
+function StylishFeedPlugin(feedManager, messageService, webJsm) {
   
   var self = this;
   
-  this.type = "gm";
+  this.type = "stylish-update-url";
   
-  this.installToWindow = function(window){
-    
-    function onPageLoad(aEvent){
-      if (aEvent.originalTarget.location){
-        var url = aEvent.originalTarget.location.toString();
-        //We check if the page's url ends with .user.js
-        if(url.substr(-8,8) == ".user.js"){
-          messageService.displayMessage("Greasemonkey!");
-          //If it does, we display the subscribe notification bar
-          if (!feedManager.isSubscribedFeed(url)){
-            feedManager.showNotification(self, 
-                                         aEvent.originalTarget,
-                                         url,
-                                         aEvent.originalTarget.type,
-                                         "This page contains a Greasemonkey script " + 
-                                         "which Ubiquity can run. " +
-                                         "If you'd like to subscribe to it, please " +
-                                          "click the button to the right.");
-          }
-        }
-      }
-    }
-    
-    //When a page is loaded, the event is fired
-    var appcontent = window.document.getElementById("appcontent");
-    if (appcontent){
-      appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
-    }    
-  }
+  this.notify_message = "This page contains a Stylish userstyle " + 
+                        "which Ubiquity can run. " +
+                        "If you'd like to subscribe to it, please " +
+                        "click the button to the right.";
 
-  this.onSubscribeClick = function GMFP_onSubscribeClick(targetDoc,
+  this.onSubscribeClick = function SFP_onSubscribeClick(targetDoc,
                                                         commandsUrl,
                                                         mimetype) {
-    //TODO: Display some kind of warning like confirmURL?
-    //Are greasemonkey scripts secure enough?
     feedManager.addSubscribedFeed({url: targetDoc.location.href,
                                    title: targetDoc.title,
                                    sourceUrl: commandsUrl,
                                    type: this.type,
                                    canAutoUpdate: true});
-    messageService.displayMessage("You did it! Subscription successful!");
-                                                        
+    messageService.displayMessage("Succesfully subscribed to Userstyle!");
+                                                            
   };
 
-  this.makeFeed = function GMFP_makeFeed(baseFeedInfo, eventHub) {
-    return new GMFPFeed(baseFeedInfo, eventHub, messageService);
+  this.makeFeed = function SFP_makeFeed(baseFeedInfo, eventHub) {
+    return new SFPFeed(baseFeedInfo, eventHub, messageService);
   };
 
   feedManager.registerPlugin(this);
 }
 
-function GMFPFeed(baseFeedInfo, eventHub, messageService) {
+function SFPFeed(baseFeedInfo, eventHub, messageService) {
                    
    let self = this;
    
-   self.commands = {};
-   // TODO: we need add the GM script code to pageload functions here
-   self.pageLoadFuncs = [];
-   self.nounTypes = [];
-   self.refresh = function refresh() {
-    //Do nothing
+   let Application = Components.classes["@mozilla.org/fuel/application;1"]
+                     .getService(Components.interfaces.fuelIApplication);
+   
+   // Private instance variables.
+   let codeSource;
+   if (RemoteUriCodeSource.isValidUri(baseFeedInfo.srcUri))
+     codeSource = new RemoteUriCodeSource(baseFeedInfo);
+   else
+     codeSource = new LocalUriCodeSource(baseFeedInfo.srcUri.spec);
+   
+   let codeCache;
+   let currentContext = null;
+   
+   function reset(){
+     self.pageLoadFuncs = [];
    }
+   
+   self.nounTypes = [];
+   self.commands = {};
+   
+   self.refresh = function refresh() {
+     let code = codeSource.getCode();
+          
+     if (code != codeCache) {
+       reset();
+       codeCache = code;
+       
+       function addStyle(doc, css) {
+         var head, style;
+         head = doc.getElementsByTagName("head")[0];
+         if (!head) { 
+           return;
+         }
+         style = doc.createElement("style");
+         style.type = "text/css";
+         style.innerHTML = css;
+         head.appendChild(style); 
+       }
+      
+       //We are assuming here that there's no way for the CSS to do something harmful.
+       self.pageLoadFuncs.push(function(doc){
+         addStyle(doc, code.replace("\n", "" , "gi").replace("\"", "\\\"" , "gi") + "\n")}
+       );
+       eventHub.notifyListeners("feed-change", baseFeedInfo.uri);
+      }
+   };
+
+   // Initialization.
+   reset();
+   
    self.__proto__ = baseFeedInfo;
    
 }

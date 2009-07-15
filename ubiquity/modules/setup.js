@@ -47,6 +47,7 @@ Components.utils.import("resource://ubiquity/modules/webpage_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/python_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/gm_feed_plugin.js");
+Components.utils.import("resource://ubiquity/modules/stylish_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
 Components.utils.import("resource://ubiquity/modules/webjsm.js");
@@ -270,6 +271,9 @@ let UbiquitySetup = {
                                                     this.parserVersion);
 
       var gmfp = new GreaseMonkeyFeedPlugin(feedManager, msgService,
+                                            gWebJsModule);
+                                            
+      var sfp = new StylishFeedPlugin(feedManager, msgService,
                                             gWebJsModule);
 
       var ldfPlugin = new LockedDownFeedPlugin(feedManager,

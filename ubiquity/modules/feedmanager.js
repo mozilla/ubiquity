@@ -332,13 +332,17 @@ FMgrProto.showNotification = function showNotification(plugin,
     function onSubscribeClick(notification, button) {
       plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
     }
-
+    
     if(!notify_message){
-      var notify_message = ("This page contains Ubiquity commands.  " +
-       "If you'd like to subscribe to them, please " +
-       "click the button to the right.");
+      if(!plugin.notify_message){
+        var notify_message = ("This page contains Ubiquity commands.  " +
+         "If you'd like to subscribe to them, please " +
+         "click the button to the right.");
+      }else{
+        var notify_message = plugin.notify_message;
+      }
     }
-
+    
     var buttons = [
       {accessKey: "S",
        callback: onSubscribeClick,
