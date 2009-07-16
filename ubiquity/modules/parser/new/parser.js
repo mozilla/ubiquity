@@ -1465,7 +1465,7 @@ Parser.prototype = {
         for each (let newSugg in suggestions) {
           let {nountypeId} = newSugg;
 
-          if (Utils.isEmpty(thisParser._nounCache[x][nountypeId]))
+          if (!(nountypeId in thisParser._nounCache[x]))
             thisParser._nounCache[x][nountypeId] = [];
           
           let thisSuggIsNew = true;
@@ -2486,9 +2486,12 @@ Parse.prototype = {
     }
 
     for each (let {argText, nounTypeIds} in argsAndNounTypeIdsToCheck) {
-      if (!thisQuery._detectionTracker.getComplete(argText,nounTypeIds)
-          && !hasSuggs(argText,nounTypeIds))
-        return false;
+      if (!hasSuggs(argText,nounTypeIds)) {
+        for (let id in nounTypeIds) {
+          if (!thisQuery._detectionTracker.getComplete(argText,id))
+            return false;
+        }
+      }
     }
     // if all is in the nounCache
     return true;
