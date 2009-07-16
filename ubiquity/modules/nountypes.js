@@ -70,7 +70,7 @@ var noun_arb_text = {
   rankLast: true,
   noExternalCalls: true,
   suggest: function(text, html, callback, selectionIndices) {
-    return [CmdUtils.makeSugg(text, html, null, 0.5, selectionIndices)];
+    return [CmdUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
   },
   // hack to import feed-specific globals into this module
   // TODO: What is this here for?  -- Jono
@@ -206,7 +206,7 @@ var noun_type_tag = {
     var suggs = [CmdUtils.makeSugg(null, null,
                                    (uncompletedTag
                                     ? completedTags.concat(uncompletedTag)
-                                    : completedTags), 0.7)];
+                                    : completedTags), 0.3)];
     if (uncompletedTag) {
       let utag = uncompletedTag.toLowerCase();
       for each (let tag in allTags)
@@ -391,7 +391,7 @@ var noun_type_twitter_user = {
     // only letters, numbers, and underscores are allowed in twitter
     // usernames.
     if (/^\w+$/.test(text))
-      suggs.push(CmdUtils.makeSugg(text, null, {}, 0.7));
+      suggs.push(CmdUtils.makeSugg(text, null, {}, 0.5));
     return suggs;
   },
   logins: function(reload) {

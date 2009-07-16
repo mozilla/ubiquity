@@ -159,7 +159,7 @@ NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
 // Calculates the score for use in suggestions from
 // a result array ({{{match}}}) of {{{RegExp#exec}}}.
 
-const SCORE_BASE = 0.5;
+const SCORE_BASE = 0.3;
 const SCORE_LENGTH = 0.3;
 const SCORE_INDEX = 1 - SCORE_BASE - SCORE_LENGTH;
 
