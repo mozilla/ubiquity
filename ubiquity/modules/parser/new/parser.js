@@ -1451,7 +1451,8 @@ Parser.prototype = {
           ids = [ id ];
         else 
           ids = [ id for (id in nounTypeIds)
-                  if (thisParser._nounCache[x][id].length
+                  if ((id in thisParser._nounCache[x]
+                       && thisParser._nounCache[x][id].length)
                        || currentQuery._detectionTracker.getComplete(x,id)
                        )];
 
