@@ -61,8 +61,10 @@ var tunerInterface = {
       return;
 
     var fakeQuery = this.fakeQuery;
-    fakeQuery._requestCount = 0;
-    fakeQuery._outstandingRequests = [];
+    (function(){
+      Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+      fakeQuery._detectionTracker = new NounTypeDetectionTracker(fakeQuery);
+    })();
     
     var nounTypeIdsToCheck = this._allNounTypeIds;
     
