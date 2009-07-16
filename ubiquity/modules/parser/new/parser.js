@@ -1890,9 +1890,12 @@ ParseQuery.prototype = {
            && !thisQuery.finished) {
         thisQuery.dump('calling onResults now');
         
-        var progress = thisQuery._detectionTracker.completionProgress;
 
-        if (progress > 0.3 || asyncFlag)
+        // THROTTLING OF ONRESULTS (#833) - still experimental and currently
+        // not doing too hot.
+
+        // var progress = thisQuery._detectionTracker.completionProgress;
+        // if (progress > 0.3 || asyncFlag)
           thisQuery.onResults();
       }
       return addedAny;
