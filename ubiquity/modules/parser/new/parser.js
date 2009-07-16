@@ -1231,6 +1231,8 @@ Parser.prototype = {
             // here.
 
             let nountypeId = verbArg.nountype.id;
+            if (!(argText in this._nounCache))
+              this._nounCache[argText] = {};
             if (nountypeId in this._nounCache[argText]) {
 
               let suggestions = this._nounCache[argText][nountypeId];
@@ -1408,10 +1410,11 @@ Parser.prototype = {
     }
 
     if (alreadyCached) {
-      //Utils.log('found all required values for '+x+' in cache');
+      var ids = [ id for (id in nounTypeIds) if (this._nounCache[x][id].length) ];
+      currentQuery.dump('found all required values for '+x+' in cache');
       if (typeof callback == 'function') {
         currentQuery.dump("running callback ("+callback.name+") now");
-        callback(x);
+        callback(x,ids);
       }
     } else {
 
@@ -1435,8 +1438,16 @@ Parser.prototype = {
       };
       var thisParser = this;
       var myCallback = function detectNounType_myCallback(suggestions, id) {
-        let ids = [id for (id in nounTypeIds)]
-        currentQuery.dump("finished detecting "+x+" for "+(id || ids));
+        let ids = [];
+        if (id != undefined)
+          ids = [ id ];
+        else 
+          ids = [ id for (id in nounTypeIds)
+                  if (thisParser._nounCache[x][id].length
+                       || currentQuery._detectionTracker.getComplete(x,id)
+                       )];
+
+        currentQuery.dump("finished detecting " + x + " for " + ids );
         if (currentQuery.finished) {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
@@ -1450,21 +1461,16 @@ Parser.prototype = {
           
           let thisSuggIsNew = true;
           for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
-            // Here, we only compare the input, text, and html properies.
+            // Here, we only compare the summary propery.
             // There are a few reasons for this:
             // 1. We want to avoid suggestions which only differ in score
-            // 2. If the text/html are not different, then the data should
+            // 2. If the summary is not different, then the data should
             //    be different, as then the user is forced to choose between
             //    identical suggestions.
             // 3. Checking data is dangerous as isEqual is not made to 
             //    handle xpconnect objects, which are often in data.
             //    (This was, I suspect, the problem with #829.)
-            if (Utils.isEqual({ input: newSugg.input,
-                                text:  newSugg.text,
-                                html:  newSugg.html },
-                              { input: oldSugg.input,
-                                text:  oldSugg.text,
-                                html:  oldSugg.html })) {
+            if (newSugg.summary == oldSugg.summary) {
               thisSuggIsNew = false;
               oldSugg.score = Math.max(oldSugg.score,newSugg.score);
             }
@@ -1476,7 +1482,7 @@ Parser.prototype = {
 
         if (typeof callback == 'function') {
           currentQuery.dump("running callback ("+callback.name+") now");
-          callback(x);
+          callback(x,ids);
         }
       };
 
@@ -1507,10 +1513,13 @@ Parser.prototype = {
             thisParser._nounCache[x][id] = [];
 
           let thisId = id;
+          var dT = currentQuery._detectionTracker;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
             if (suggs.length) {
               suggs = handleSuggs(suggs, thisId);
+              if (!dT.getOutstandingRequests(x,thisId).length)
+                dT.setComplete(x,thisId,true);
               myCallback(suggs, thisId);
             }
           };
@@ -1518,11 +1527,28 @@ Parser.prototype = {
           var resultsFromSuggest = handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
-          for each (result in resultsFromSuggest){
-            if(result.text || result.html){
+          var hadImmediateResults = false;
+          for each (result in resultsFromSuggest) {
+            if (result.text || result.html) {
               returnArray.push(result);
+              hadImmediateResults = true;
             } else {
-              currentQuery._outstandingRequests.push(result);
+              currentQuery._detectionTracker.addOutstandingRequest(x,id,result);
+            }
+          }
+          
+          if (!currentQuery._detectionTracker.getRequestCount(x,id)) {
+            currentQuery._detectionTracker.setComplete(x,id,true);
+
+            // Check whether (a) there were no immediate results and 
+            // (b) no more results are coming. In this case, try to 
+            // complete the parse now.
+            if (!hadImmediateResults) {
+              for each (let parseId in currentQuery._detectionTracker.getParseIdsToCompleteForIds(x,[id])) {
+                currentQuery._verbedParses[parseId].complete = true;
+                if (currentQuery._verbedParses.every(function(parse) parse.complete))
+                  currentQuery.finishQuery();
+              }
             }
           }
         }
@@ -1561,8 +1587,6 @@ var ParseQuery = function(parser, queryString, selObj, context,
   this.maxSuggestions = maxSuggestions;
   this.selObj = selObj;
 
-  // _oustandingRequests are all async calls made for this query
-  this._outstandingRequests = [];
   // _detectionTracker is an instance of NounTypeDetectionTracker which
   // keeps track of all the nountype detections.
   this._detectionTracker = new NounTypeDetectionTracker(this);
@@ -1792,8 +1816,8 @@ ParseQuery.prototype = {
     // handle the scoring.
     var thisQuery = this;
     function completeParse(thisParse) {
-      var requestCount = thisQuery.requestCount;
-
+      var requestCount = thisParse.getRequestCount();
+            
       if (!(thisParse._requestCountLastCompletedWith == undefined)
           && thisParse._requestCountLastCompletedWith == requestCount) {
         return false;
@@ -1803,7 +1827,7 @@ ParseQuery.prototype = {
       thisQuery.dump('completing parse '+thisParse._id+' now');
       thisParse._requestCountLastCompletedWith = requestCount;
 
-      if (requestCount == 0){
+      if (requestCount == 0) {
         thisParse.complete = true;
       }
       
@@ -1827,15 +1851,19 @@ ParseQuery.prototype = {
       return addedAny;
     }
 
-    function tryToCompleteParses(argText) {
+    function tryToCompleteParses(argText,ids) {
+
+      thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
-        return;
+        return false;
       }
 
       var addedAny = false;
-      for each (let parseId in thisQuery._parsesThatIncludeThisArg[argText]) {
+      var dT = thisQuery._detectionTracker;
+      thisQuery.dump('parseIds:'+dT.getParseIdsToCompleteForIds(argText,ids));
+      for each (let parseId in dT.getParseIdsToCompleteForIds(argText,ids)) {
         let thisParse = thisQuery._verbedParses[parseId];
         if (!thisParse.complete &&
             thisParse.allNounTypesDetectionHasCompleted()) {
@@ -1853,29 +1881,34 @@ ParseQuery.prototype = {
         thisQuery.dump('calling onResults now');
         thisQuery.onResults();
       }
+      return addedAny;
     }
 
-    // First create a map from arg's to parses that use them.
-    this._parsesThatIncludeThisArg = {};
     // and also a list of arguments we need to cache
     this._argsToCache = {};
     
-    for (let parseId in this._verbedParses) {
-      let parse = this._verbedParses[parseId];
+    for (let partialParseId in this._verbedParses) {
+      let parse = this._verbedParses[partialParseId];
 
       if (parse.args.__count__ == 0)
         // This parse doesn't have any arguments. Complete it now.
         Utils.setTimeout(completeParse, 0, parse, []);
-      else for each (let arg in parse.args) {
+      else for (let role in parse.args) {
+        let arg = parse.args[role];
         for each (let x in arg) {
           // this is the text we're going to cache
           let argText = x.input;
+          let ids = [ verbArg.nountype.id
+                      for each (verbArg in parse._verb.arguments) 
+                      if (verbArg.role == role)];
 
           if (!(argText in this._argsToCache)) {
             this._argsToCache[argText] = 1;
-            this._parsesThatIncludeThisArg[argText] = [];
           }
-          this._parsesThatIncludeThisArg[argText].push(parseId);
+          
+          for each (let id in ids) {
+            this._detectionTracker.addParseIdToComplete(argText,id,partialParseId);
+          }
         }
       }
     }
@@ -1927,34 +1960,17 @@ ParseQuery.prototype = {
             .slice(0, this.maxSuggestions));
   },
 
-  // ** {{{ParseQuery#requestCount}}} (read-only) **
-  //
-  // A getter for the number of open requests
-  get requestCount() {
-    let numRequests = 0;
-    for each (let req in this._outstandingRequests){
-      if (req.readyState != undefined && req.readyState != 4)
-        numRequests++;
-    }
-    return numRequests;
-  },
-
   // ** {{{ParseQuery#cancel()}}} **
   //
   // If the query is running in async mode, the query will stop at the next
   // {{{yield}}} point when {{{cancel()}}} is called.
   cancel: function PQ_cancel() {
     //Utils.log(this);
-    let reqCount = this.requestCount;
+    let reqCount = this._detectionTracker.getRequestCount();
     this.dump("cancelled! " + reqCount +
               " outstanding request(s) being canceled\n");
-    //abort any async requests that are running
-    for each (let asyncReq in this._outstandingRequests){
-      if (asyncReq.abort)
-        asyncReq.abort();
-    }
-    //reset outstanding requests
-    this._outstandingRequests = [];
+    //abort and reset any async requests that are running
+    this._detectionTracker.abortOutstandingRequests();
 
     this._keepworking = false;
   },
@@ -2048,7 +2064,9 @@ NounTypeDetectionTracker.prototype = {
     if (!(arg in this.detectionSpace))
       this.detectionSpace[arg] = {};
     if (!(id in this.detectionSpace[arg]))
-      this.detectionSpace[arg][id] = { started: false, complete: false };
+      this.detectionSpace[arg][id] = { started: false, complete: false,
+                                       parseIds: [],
+                                       outstandingRequests: [] };
   },
   
   getStarted: function(arg,id) {
@@ -2058,7 +2076,78 @@ NounTypeDetectionTracker.prototype = {
   setStarted: function(arg,id,bool) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].started = bool;
+  },
+  
+  getComplete: function(arg,id) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].complete;
+  },
+  setComplete: function(arg,id,bool) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].complete = bool;
+  },
+  
+  getParseIdsToComplete: function(arg,id) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].parseIds;
+  },
+  getParseIdsToCompleteForIds: function(arg,ids) {
+    let returnHash = {};
+    for each (let id in ids)
+      for each (let parseId in this.getParseIdsToComplete(arg,id))
+        returnHash[+parseId] = true;
+    return [id for (id in returnHash)];
+  },
+  addParseIdToComplete: function(arg,id,parseId) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].parseIds.push(+parseId);
+  },
+  
+  getOutstandingRequests: function(arg,id) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].outstandingRequests;
+  },
+  addOutstandingRequest: function(arg,id,request) {
+    this._ensureNode(arg,id);
+    return this.detectionSpace[arg][id].outstandingRequests.push(request);
+  },
+
+  // ** {{{NounTypeDetectionTracker#getRequestCount}}} **
+  //
+  // A getter for the total number of open requests
+  getRequestCount: function(x,id) {
+    let numRequests = 0;
+    for (let i in this.detectionSpace){
+      if (x && x != i)
+        continue;
+          
+      for (let j in this.detectionSpace[i]) {
+        if (id && id != j)
+          continue;
+
+        for each (let req in this.detectionSpace[i][j].outstandingRequests) {
+          if (req.readyState != undefined && req.readyState != 4)
+            numRequests++;
+        }
+      }
+    }
+    
+    return numRequests;
+  },
+  
+  abortOutstandingRequests: function() {
+    for (let i in this.detectionSpace){
+      for (let j in this.detectionSpace[i]) {
+        for each (let req in this.detectionSpace[i][j].outstandingRequests) {
+          if (req.abort)
+            req.abort();
+        }
+        // actually delete them once they've been aborted.
+        this.detectionSpace[i][j].outstandingRequests = [];
+      }
+    }
   }
+  
 }
 
 var NounCache = function() {
@@ -2310,6 +2399,7 @@ Parse.prototype = {
     if (this._argsAndNounTypeIdsToCheck)
       return this._argsAndNounTypeIdsToCheck;
 
+    var foundNoNounTypesToCheck = true;
     var returnArr = this._argsAndNounTypeIdsToCheck = [];
     var nounTypeIdsWithNoExternalCalls =
                        this._query.parser._nounTypeIdsWithNoExternalCalls;
@@ -2318,37 +2408,72 @@ Parse.prototype = {
       for each (let arg in this.args[role]) {
         // this is the argText to check
         let argText = arg.input;
-        let nounTypeIds = nounTypeIdsWithNoExternalCalls;
-        // verb was not suggested
-        if (!this._suggested) {
-          nounTypeIds = {};
-          for each (let verbArg in this._verb.arguments) {
-            if (verbArg.role == role)
+        let nounTypeIds = {};
+        for each (let verbArg in this._verb.arguments) {
+          if (verbArg.role == role) {
+            let id = verbArg.nountype.id;
+            // verb was not suggested
+//            Utils.log(id,(id in nounTypeIdsWithNoExternalCalls));
+//            if (!this._suggested || (id in nounTypeIdsWithNoExternalCalls))
               nounTypeIds[verbArg.nountype.id] = true;
           }
         }
+
+        if (nounTypeIds.length)
+          foundNoNounTypesToCheck = false;
 
         returnArr.push({argText:argText,
                         nounTypeIds:nounTypeIds});
 
       }
     }
+    
+    // If there are no nounTypeIds found to detect,
+    // that means there's no way that this parse will ever complete
+    // from the nountype detection. Let's put it out of its misery now.
+/*    if (foundNoNounTypesToCheck) {
+      this.complete = true;
+      if (this._query._verbedParses.every(function(parse) parse.complete))
+        this._query.finishQuery();
+    }*/
+    
     return returnArr;
+  },
+
+  getRequestCount: function() {
+    let requestCount = 0;
+    for each (let {argText,nounTypeIds} in
+                                this.getArgsAndNounTypeIdsToCheck()) {
+      for each (let id in nounTypeIds)
+        requestCount += this._query._detectionTracker.getRequestCount(argText,id);
+    }
+    return requestCount;
   },
 
   // **{{{Parse#allNounTypesDetectionHasCompleted()}}} (read-only)**
   //
   // If all of the arguments' nountype detection has completed, returns true.
-  // This means this parse can move onto Step 8
+  // Here, "nountype detection has completed" means that either (arg,nountype)
+  // is marked "complete" (meaning there are no outstanding async requests)
+  // OR there are some suggestions.
+  // This means this parse can move onto Step 8.
   allNounTypesDetectionHasCompleted: function() {
     var argsAndNounTypeIdsToCheck = this.getArgsAndNounTypeIdsToCheck();
-    for each (let {argText, nounTypeIds} in argsAndNounTypeIdsToCheck) {
-      if (!(argText in this._query.parser._nounCache))
+    var thisQuery = this._query;
+    var hasSuggs = function(argText,nounTypeIds) {
+      if (!(argText in thisQuery.parser._nounCache))
         return false;
-      for (let nounTypeId in nounTypeIds){
-        if (!(nounTypeId in this._query.parser._nounCache[argText]))
+      for (let nounTypeId in nounTypeIds) {
+        if (!(nounTypeId in thisQuery.parser._nounCache[argText]))
           return false;
       }
+      return true;
+    }
+
+    for each (let {argText, nounTypeIds} in argsAndNounTypeIdsToCheck) {
+      if (!thisQuery._detectionTracker.getComplete(argText,nounTypeIds)
+          && !hasSuggs(argText,nounTypeIds))
+        return false;
     }
     // if all is in the nounCache
     return true;
