@@ -163,6 +163,7 @@ const GCalcHelp = "http://www.googleguide.com/help/calculator.html";
 const noun_calc = {
   name: "calc",
   label: "expression",
+  noExternalCalls: true,
   suggest: function suggest(text) {
     var simple = this._simple.test(text);
     return [CmdUtils.makeSugg(text, "", simple, simple ? 1 : .5)];
