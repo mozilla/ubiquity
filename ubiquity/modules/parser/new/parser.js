@@ -1162,7 +1162,7 @@ Parser.prototype = {
       let parser = this;
       for (let role in parse.args){
         if (!verb.arguments.some(function(arg){
-	   return (arg.role === role && 
+	        return (arg.role === role && 
                    (!parse._suggested ||
                     parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id] == true))}))
           continue VERBS;
@@ -1431,7 +1431,7 @@ Parser.prototype = {
       if (Utils.isEmpty(this._nounCache[x]))
         this._nounCache[x] = {};
 
-      var handleSuggs = function detectNounType_handleSuggs(suggs, id) {
+      var handleSuggs = function detectNounType_handleSuggs(suggs, id, asyncFlag) {
         if (!suggs || !suggs.length)
           return [];
         if (!Utils.isArray(suggs)) suggs = [suggs];
@@ -1445,7 +1445,7 @@ Parser.prototype = {
         return suggs;
       };
       var thisParser = this;
-      var myCallback = function detectNounType_myCallback(suggestions, id) {
+      var myCallback = function detectNounType_myCallback(suggestions, id, asyncFlag) {
         let ids = [];
         if (id != undefined)
           ids = [ id ];
@@ -1490,7 +1490,7 @@ Parser.prototype = {
 
         if (typeof callback == 'function') {
           currentQuery.dump("running callback ("+callback.name+") now");
-          callback(x,ids);
+          callback(x,ids, asyncFlag);
         }
       };
 
@@ -1524,11 +1524,11 @@ Parser.prototype = {
           var dT = currentQuery._detectionTracker;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
+            if (!dT.getOutstandingRequests(x,thisId).length)
+              dT.setComplete(x,thisId,true);
             if (suggs.length) {
               suggs = handleSuggs(suggs, thisId);
-              if (!dT.getOutstandingRequests(x,thisId).length)
-                dT.setComplete(x,thisId,true);
-              myCallback(suggs, thisId);
+              myCallback(suggs, thisId, true);
             }
           };
 
@@ -1554,6 +1554,7 @@ Parser.prototype = {
             if (!hadImmediateResults) {
               for each (let parseId in currentQuery._detectionTracker.getParseIdsToCompleteForIds(x,[id])) {
                 currentQuery._verbedParses[parseId].complete = true;
+                dT.setComplete(x,id,true);
                 if (currentQuery._verbedParses.every(function(parse) parse.complete))
                   currentQuery.finishQuery();
               }
@@ -1859,7 +1860,7 @@ ParseQuery.prototype = {
       return addedAny;
     }
 
-    function tryToCompleteParses(argText,ids) {
+    function tryToCompleteParses(argText,ids,asyncFlag) {
 
       thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
 
@@ -1870,7 +1871,7 @@ ParseQuery.prototype = {
 
       var addedAny = false;
       var dT = thisQuery._detectionTracker;
-      thisQuery.dump('parseIds:'+dT.getParseIdsToCompleteForIds(argText,ids));
+//      thisQuery.dump('parseIds:'+dT.getParseIdsToCompleteForIds(argText,ids));
       for each (let parseId in dT.getParseIdsToCompleteForIds(argText,ids)) {
         let thisParse = thisQuery._verbedParses[parseId];
         if (!thisParse.complete &&
@@ -1887,7 +1888,11 @@ ParseQuery.prototype = {
       if (addedAny && thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
         thisQuery.dump('calling onResults now');
-        thisQuery.onResults();
+        
+        var progress = thisQuery._detectionTracker.completionProgress;
+
+        if (progress > 0.3 || asyncFlag)
+          thisQuery.onResults();
       }
       return addedAny;
     }
@@ -2149,6 +2154,27 @@ NounTypeDetectionTracker.prototype = {
         this.detectionSpace[i][j].outstandingRequests = [];
       }
     }
+  },
+  get detectionProgress() {
+    var dS = this.detectionSpace;
+    var count = 0;
+    var total = 0;
+    for (let i in dS) {
+      for (let j in dS[i]) {
+        if (!(j in this._query.parser._nounTypes))
+          continue;
+        // detectionProgress only checks for the progress of noExternalCalls
+        // nountypes
+        if (!this._query.parser._nounTypes[j].noExternalCalls)
+          continue;
+          
+        total++;
+        count += dS[i][j].complete;
+//              if (!(dS[i][j].complete)
+//                Utils.log(j);
+      }
+    }
+    return (count/total);
   }
   
 }
