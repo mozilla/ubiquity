@@ -1154,11 +1154,19 @@ Parser.prototype = {
       let verb = verbs[verbId];
       if (verb.disabled) continue;
       // Check each role in our parse.
-      // If none of the role is used by the arguments of the verb,
-      // skip to next verb.
-      for (let role in parse.args)
-        if (!verb.arguments.some(function(arg) arg.role === role))
+      // If none of the roles are used by the arguments of the verb,
+      // skip to the next verb.
+      // Furthermore, if the role is used by an argument of the verb but the parse is using a
+      // suggested verb (i.e. noun first suggestion) and the nountype of the arg uses
+      // an external call, skip to the next verb
+      let parser = this;
+      for (let role in parse.args){
+        if (!verb.arguments.some(function(arg){
+	   return (arg.role === role && 
+                   (!parse._suggested ||
+                    parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id] == true))}))
           continue VERBS;
+      }
 
       let parseCopy = parse.copy();
       // same as before: the verb is copied from the verblist but also
@@ -2401,8 +2409,6 @@ Parse.prototype = {
 
     var foundNoNounTypesToCheck = true;
     var returnArr = this._argsAndNounTypeIdsToCheck = [];
-    var nounTypeIdsWithNoExternalCalls =
-                       this._query.parser._nounTypeIdsWithNoExternalCalls;
     for (let role in this.args) {
       // for each argument of this role...
       for each (let arg in this.args[role]) {
@@ -2412,10 +2418,7 @@ Parse.prototype = {
         for each (let verbArg in this._verb.arguments) {
           if (verbArg.role == role) {
             let id = verbArg.nountype.id;
-            // verb was not suggested
-//            Utils.log(id,(id in nounTypeIdsWithNoExternalCalls));
-//            if (!this._suggested || (id in nounTypeIdsWithNoExternalCalls))
-              nounTypeIds[verbArg.nountype.id] = true;
+            nounTypeIds[verbArg.nountype.id] = true;
           }
         }
 
@@ -2424,7 +2427,6 @@ Parse.prototype = {
 
         returnArr.push({argText:argText,
                         nounTypeIds:nounTypeIds});
-
       }
     }
     
