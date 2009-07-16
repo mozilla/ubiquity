@@ -1451,7 +1451,8 @@ Parser.prototype = {
           ids = [ id ];
         else 
           ids = [ id for (id in nounTypeIds)
-                  if ((id in thisParser._nounCache[x]
+                  if ((typeof thisParser._nounCache[x] == 'object'
+                       && id in thisParser._nounCache[x]
                        && thisParser._nounCache[x][id].length)
                        || currentQuery._detectionTracker.getComplete(x,id)
                        )];
@@ -1461,6 +1462,9 @@ Parser.prototype = {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
         }
+        
+        if (!(x in thisParser._nounCache))
+          thisParser._nounCache[x] = {};
         
         for each (let newSugg in suggestions) {
           let {nountypeId} = newSugg;
