@@ -272,7 +272,7 @@ var noun_type_url = {
         callback([CmdUtils.makeSugg(r.url, null, null, .9)
                   for each (r in results)]);
     }, 1);
-    return [CmdUtils.makeSugg(url, null, null, .7, selectionIndices)];
+    return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices)];
   }
 };
 
