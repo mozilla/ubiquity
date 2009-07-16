@@ -1930,11 +1930,6 @@ ParseQuery.prototype = {
       yield true;
     }
 
-    // now that we have a list of args to cache, let's go through and cache them.
-    /*for (let argText in this._argsToCache) {
-      this.parser.detectNounType(thisQuery, argText, tryToCompleteParses);
-      yield true;
-    }*/
   },
   finishQuery: function() {
     this._next();
@@ -2429,16 +2424,7 @@ Parse.prototype = {
                         nounTypeIds:nounTypeIds});
       }
     }
-    
-    // If there are no nounTypeIds found to detect,
-    // that means there's no way that this parse will ever complete
-    // from the nountype detection. Let's put it out of its misery now.
-/*    if (foundNoNounTypesToCheck) {
-      this.complete = true;
-      if (this._query._verbedParses.every(function(parse) parse.complete))
-        this._query.finishQuery();
-    }*/
-    
+
     return returnArr;
   },
 
