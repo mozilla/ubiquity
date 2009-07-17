@@ -571,6 +571,29 @@ Utils.trim = String.trim || function trim(str) {
   return str.slice(i, j + 1);
 };
 
+// === {{{ Utils.sortBy() }}} ===
+//
+// Sorts an array by specified {{{key}}} and returns it. e.g.:
+// {{{
+// Utils.sortBy(["abc", "d", "ef"], "length") //=> ["d", "ef", "abc"]
+// Utils.sortBy([1, 2, 3], function (x) -x) //=> [3, 2, 1]
+// }}}
+//
+// {{{array}}} is the target array.
+//
+// {{{key}}} is either a string specifying the key property,
+// or a function that maps each of {{{array}}}'s item to a sort key.
+
+function sortBy(array, key) {
+  var pluck = typeof key === "function" ? key : function pluck(x) x[key];
+  var sortee = ([{key: pluck(array[i]), val: array[i]} for (i in array)]
+                .sort(sortBy.sorter));
+  for (let i in sortee) array[i] = sortee[i].val;
+  return array;
+}
+// Because our Monkey uses Merge Sort, "swap the values if plus" works.
+sortBy.sorter = function byKey(a, b) a.key <= b.key ^ 1;
+
 // === {{{ Utils.isArray() }}} ===
 //
 // This function returns whether or not the argument is an instance

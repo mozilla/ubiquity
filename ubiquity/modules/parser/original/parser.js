@@ -297,10 +297,9 @@ Parser.prototype = {
   _sortGenericVerbCache: function P__sortGenericVerbCache() {
     var suggMemory = this._suggestionMemory;
     if (!suggMemory) return;
-    this._rankedVerbsThatUseGenericNouns.sort(
-      function bySMScoreDescending(x, y) (
-        suggMemory.getScore("", y._name) -
-        suggMemory.getScore("", x._name)));
+    Utils.sortBy(
+      this._rankedVerbsThatUseGenericNouns,
+      function minusSMScore(v) -suggMemory.getScore("", v._name));
   },
 };
 

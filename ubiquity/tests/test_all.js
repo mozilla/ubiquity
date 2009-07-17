@@ -338,6 +338,19 @@ function testUtilsTrim() {
   this.assert(Utils.trim("\n  hello   ") == "hello");
 }
 
+function testUtilsSortBy() {
+  var strArray = ["abc", "d", "ef", "ghij", "klm", "nop", "qrstuvw", "xyz"];
+  this.assertEquals(strArray.slice().sort() + "",
+                    Utils.sortBy(strArray.slice(), String) + "");
+  this.assertEquals(
+    strArray.slice().sort(function(a, b) a.length - b.length) + "",
+    Utils.sortBy(strArray.slice(), "length") + "");
+  // (-2|-1|0|1|2) x 99
+  var numArray = [(Math.random() * 5 | 0) - 2 for each(i in Array(99) + 0)];
+  this.assertEquals(numArray.slice().sort(function(a, b) b - a) + '',
+                    Utils.sortBy(numArray, function(x) -x) + '');
+}
+
 function testUtilsComputeCryptoHash() {
   var str = "hello world";
   this.assert(Utils.computeCryptoHash("md5", str) == "5eb63bbbe01eeed093cb22bb8f5acdc3");
