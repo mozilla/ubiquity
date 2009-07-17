@@ -1637,6 +1637,9 @@ var ParseQuery = function(parser, queryString, selObj, context,
   this._verbedParses = [];
   this._topScores = [];
 
+  // The percentage of nountype detection completed on last update
+  this._previousProgress = 0;
+
   // this is a list of all Parse's as created.
   this._allParses = {};
 
@@ -1883,22 +1886,26 @@ ParseQuery.prototype = {
         }
       }
 
-      // Only call onResults if we added any parses.
+      // Only call onResults if we added any parses, or if we just
+      // passed the throttling threshold for displaying results
       // 
       // Also, don't run onResults here if thisQuery.finished,
       // as if the finished flag was just turned on, it would have independently
       // called onResults.
-      if (addedAny && thisQuery.aggregateScoredParses().length > 0
+      if (thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
-        thisQuery.dump('calling onResults now');
         
-
-        // THROTTLING OF ONRESULTS (#833) - still experimental and currently
-        // not doing too hot.
-
+	// THROTTLING OF ONRESULTS (#833) - still experimental
+        var throttleThreshold = 0.5;
         var progress = thisQuery._detectionTracker.detectionProgress;
-        if (progress > 0.5 || asyncFlag)
+        var passedThreshold = thisQuery._previousProgress < throttleThreshold &&
+                              progress >= throttleThreshold;
+        if ((addedAny && (asyncFlag || progress >= throttleThreshold)) ||
+	    passedThreshold){
+          thisQuery.dump('calling onResults now');
           thisQuery.onResults();
+	}
+	thisQuery._previousProgress = progress;
       }
       return addedAny;
     }
