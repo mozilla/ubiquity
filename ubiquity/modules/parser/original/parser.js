@@ -81,7 +81,7 @@ ParserQuery.prototype = {
     this._parsingsList = [];
 
     this.maxSuggestions = maxSuggestions;
-    this.nounCache = {};
+    this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
     this.requests = [];
     this.onResults = null;
   },
@@ -110,7 +110,7 @@ ParserQuery.prototype = {
 
   get pronouns() this._pronouns,
   set pronouns(prons) {
-    this._pronouns = [RegExp("\\b" + p + "\\b") for each (p in prons)];
+    this._pronouns = [RegExp("\\b" + p + "\\b", "i") for each (p in prons)];
   },
 
   // The handler that makes this a listener for partiallyParsedSentences.
@@ -280,10 +280,6 @@ Parser.prototype = {
     return query;
   },
 
-  // TODO instead of getSuggestionList, use query.suggestionList.
-  // instead of getNumSuggestions, use query.suggestionList.length.
-  // instead of getSentence, use query.suggestionList[index].
-
   setCommandList: function P_setCommandList(commandList) {
     this._verbList = [new Verb(cmd) for each (cmd in commandList)];
     this._verbsThatUseSpecificNouns = [];
@@ -295,30 +291,29 @@ Parser.prototype = {
         this._rankedVerbsThatUseGenericNouns.push(verb);
       }
     }
-    if (this._suggestionMemory) {
-      this._sortGenericVerbCache();
-    }
+    this._sortGenericVerbCache();
   },
 
   _sortGenericVerbCache: function P__sortGenericVerbCache() {
     var suggMemory = this._suggestionMemory;
-    let sortFunction = function(x, y) {
-      let xScore = suggMemory.getScore("", x._name);
-      let yScore = suggMemory.getScore("", y._name);
-      return yScore - xScore;
-    };
-    this._rankedVerbsThatUseGenericNouns.sort(sortFunction);
+    if (!suggMemory) return;
+    this._rankedVerbsThatUseGenericNouns.sort(
+      function bySMScoreDescending(x, y) (
+        suggMemory.getScore("", y._name) -
+        suggMemory.getScore("", x._name)));
   },
 };
 
-function ParsedSentence(verb, args, verbMatchScore, selObj) {
+function ParsedSentence(verb, args, verbMatchScore, selObj, query) {
   this._init.apply(this, arguments);
 }
 ParsedSentence.prototype = {
-  _init: function PS__init(verb, argumentSuggestions, verbMatchScore, selObj) {
+  _init:
+  function PS__init(verb, argumentSuggestions, verbMatchScore, selObj, query) {
     this._verb = verb;
     this._argSuggs = argumentSuggestions;
     this._selObj = selObj;
+    this._query = query;
     this.verbMatchScore = verbMatchScore;
     this.duplicateDefaultMatchScore = 100;
     this.frequencyScore = 0;  // not yet tracked
@@ -408,7 +403,7 @@ ParsedSentence.prototype = {
     let argSuggs = this._argSuggs;
     for (let x in argSuggs) newArgSuggs[x] = argSuggs[x];
     return new ParsedSentence(this._verb, newArgSuggs,
-                              this.verbMatchScore, this._selObj);
+                              this.verbMatchScore, this._selObj, this._query);
   },
 
   setArgumentSuggestion: function PS_setArgumentSuggestion(arg, sugg) {
@@ -453,11 +448,13 @@ ParsedSentence.prototype = {
       let defaultValue =
         missingArg.default && NounUtils.makeSugg(missingArg.default);
       if (!defaultValue) {
-        let {type} = missingArg;
-        defaultValue = ((typeof type.default === "function"
-                         ? type.default()
-                         : type.default) ||
-                        {text: "", html: "", data: null, summary: ""});
+        let noun = missingArg.type;
+        let {nounCache} = this._query;
+        defaultValue = nounCache[noun.id] || (nounCache[noun.id] = (
+          (typeof noun.default === "function"
+           ? noun.default()
+           : noun.default) ||
+          nounCache[""]));
       }
 
       let numDefaults = defaultValue.length;
@@ -535,10 +532,8 @@ function PartiallyParsedSentence(
    * If it does take arguments, this initializes the parsedSentence
    * list so that the algorithm in addArgumentSuggestion will work
    * correctly. */
-  this._parsedSentences = [new ParsedSentence(this._verb,
-                                              {},
-                                              this._matchScore,
-                                              this._selObj)];
+  this._parsedSentences =
+    [new ParsedSentence(verb, {}, matchScore, selObj, query)];
   var {pronouns} = query;
   for (let argName in this._verb._arguments) {
     if (argStrings[argName] && argStrings[argName].length > 0) {
