@@ -1550,19 +1550,17 @@ Parser.prototype = {
             }
           }
           
+          // Check whether (a) no more results are coming and
+          // (b) there were no immediate results.
+          // In this case, try to complete the parse now.
           if (!dT.getRequestCount(x,id)) {
             dT.setComplete(x,id,true);
-
-            // Check whether (a) there were no immediate results and 
-            // (b) no more results are coming. In this case, try to 
-            // complete the parse now.
             if (!hadImmediateResults) {
               for each (let parseId in dT.getParseIdsToCompleteForIds(x,[id])) {
                 currentQuery._verbedParses[parseId].complete = true;
-                dT.setComplete(x,id,true);
-                if (currentQuery._verbedParses.every(function(parse) parse.complete))
-                  currentQuery.finishQuery();
               }
+              if (currentQuery._verbedParses.every(function(parse) parse.complete))
+                currentQuery.finishQuery();
             }
           }
         }
