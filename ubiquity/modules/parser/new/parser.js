@@ -1327,18 +1327,18 @@ Parser.prototype = {
       if (missingArg.default) {
         defaultValues = Utils.isArray(missingArg.default) ?
                           missingArg.default : [missingArg.default];
-      } else {
+      }
+      else {
         let noun = missingArg.nountype;
         if (!(noun.id in this._defaultsCache))
-          this._defaultsCache[noun.id] = (noun.default
-                            ? (typeof noun.default === "function"
-                               ? noun.default()
-                               : noun.default)
-                            : {text: "", html: "", data: null, summary: ""})
+          this._defaultsCache[noun.id] = (
+            (typeof noun.default === "function"
+             ? noun.default()
+             : noun.default) ||
+            {text: "", html: "", data: null, summary: ""});
         let defaultValue = this._defaultsCache[noun.id];
         defaultValues = Utils.isArray(defaultValue) ?
                           defaultValue : [defaultValue];
-        //Utils.log(defaultValues);
       }
 
       for each (let defaultValue in defaultValues) {

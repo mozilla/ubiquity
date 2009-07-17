@@ -420,7 +420,7 @@ ParsedSentence.prototype = {
   },
 
   argumentIsFilled: function PS_argumentIsFilled(arg) {
-    return this._argSuggs[arg] != null;
+    return arg in this._argSuggs;
   },
 
   hasFilledArgs: function PS_hasFilledArgs() {
@@ -435,63 +435,61 @@ ParsedSentence.prototype = {
     if (this._verb.cmd !== other._verb.cmd)
       return false;
     let argSuggs = this._argSuggs;
-    for (var x in argSuggs) {
+    for (let x in argSuggs)
       if (argSuggs[x].summary !== other._argSuggs[x].summary)
         return false;
-    }
     return true;
   },
 
   fillMissingArgsWithDefaults: function PS_fillMissingArgsWithDefaults() {
     let newSentences = [this.copy()];
-    let defaultValue;
     let defaultsArray = [];
     let gotArrayOfDefaults = false;
     let defaultsSoFar = {};
-    for (let argName in this._verb._arguments) {
-      if (!this._argSuggs[argName]) {
-        let missingArg = this._verb._arguments[argName];
-        if (missingArg.default)
-          defaultValue = NounUtils.makeSugg(missingArg.default);
-        else if (missingArg.type.default)
-          // Argument value from nountype default
-          defaultValue = missingArg.type.default();
-        else
-          // No argument
-          defaultValue = {text:"", html:"", data:null, summary:""};
+    let args = this._verb._arguments;
+    for (let argName in args) {
+      if (argName in this._argSuggs) continue;
+      let missingArg = args[argName];
+      let defaultValue =
+        missingArg.default && NounUtils.makeSugg(missingArg.default);
+      if (!defaultValue) {
+        let {type} = missingArg;
+        defaultValue = ((typeof type.default === "function"
+                         ? type.default()
+                         : type.default) ||
+                        {text: "", html: "", data: null, summary: ""});
+      }
 
-        let numDefaults = defaultValue.length;
-        if (numDefaults === 1 || (numDefaults > 1 && gotArrayOfDefaults)) {
-          // either this is a single-item array, or
-          // we've already used an array of values for a previous modifier,
-          // so just use first default for this modifier
-          defaultValue = defaultValue[0];
-          numDefaults = 0;
-        }
-
-        if (numDefaults) {
-          // first time we've seen multiple defaults,
-          // so create an array of sentences
-          gotArrayOfDefaults = true;
-          for (let i = 0; i < numDefaults; i++) {
-            if (i) {
-              newSentences[i] = this.copy();
-              for (let arg in defaultsSoFar) {
-                newSentences[i].setArgumentSuggestion(arg, defaultsSoFar[arg]);
-              }
-              // reduce the match score so that multiple entries with the
-              //   same verb are only shown if there are no other verbs
-              newSentences[i].duplicateDefaultMatchScore=
-                this.duplicateDefaultMatchScore / (i + 1);
-            }
-            newSentences[i].setArgumentSuggestion(argName, defaultValue[i]);
+      let numDefaults = defaultValue.length;
+      if (numDefaults === 1 || (numDefaults > 1 && gotArrayOfDefaults)) {
+        // either this is a single-item array, or
+        // we've already used an array of values for a previous modifier,
+        // so just use first default for this modifier
+        defaultValue = defaultValue[0];
+        numDefaults = 0;
+      }
+      if (numDefaults) {
+        // first time we've seen multiple defaults,
+        // so create an array of sentences
+        gotArrayOfDefaults = true;
+        for (let i = 0; i < numDefaults; i++) {
+          if (i) {
+            let newSen = this.copy();
+            for (let arg in defaultsSoFar)
+              newSen.setArgumentSuggestion(arg, defaultsSoFar[arg]);
+            // reduce the match score so that multiple entries with the
+            // same verb are only shown if there are no other verbs
+            newSen.duplicateDefaultMatchScore =
+              this.duplicateDefaultMatchScore / (i + 1);
+            newSentences[i] = newSen;
           }
+          newSentences[i].setArgumentSuggestion(argName, defaultValue[i]);
         }
-        else {
-          for (let sen in newSentences)
-            newSentences[sen].setArgumentSuggestion(argName, defaultValue);
-          defaultsSoFar[argName] = defaultValue;
-        }
+      }
+      else {
+        for (let sen in newSentences)
+          newSentences[sen].setArgumentSuggestion(argName, defaultValue);
+        defaultsSoFar[argName] = defaultValue;
       }
     }
     return newSentences;
@@ -523,7 +521,6 @@ function PartiallyParsedSentence(
    * sentences can produce several completely-parsed sentences, in which
    * final values for all arguments are specified.
    */
-  this._listeners = [];
   this._verb = verb;
   this._argStrings = argStrings;
   this._selObj = selObj;
@@ -569,13 +566,6 @@ function PartiallyParsedSentence(
    */
 }
 PartiallyParsedSentence.prototype = {
-  addListener: function PPS_addListener(listener) {
-    // Listener must be an object with an onNewParseGenerated function.
-    // onNewParseGenerated will be called whenever new parsings are
-    // asynchronously generated.
-    this._listeners.push(listener);
-  },
-
   _argSuggest:
   function PPS__argSuggest(argName, text, html, selectionIndices) {
     /* For the given argument of the verb, sends (text,html) to the nounType
@@ -729,8 +719,6 @@ PartiallyParsedSentence.prototype = {
       let from = this[key];
       for (let x in from) dest[x] = from[x];
     }
-    for each (let listener in this._listeners)
-      newPPSentence.addListener(listener);
     newPPSentence._cameFromNounFirstSuggestion =
       this._cameFromNounFirstSuggestion;
     return newPPSentence;
