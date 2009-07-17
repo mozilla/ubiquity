@@ -203,3 +203,9 @@ function saveTextToFile(text, file) {
 function displayMessage(msg){
   $("#notification-bar").text(msg).show("fast");
 }
+
+$(function ready() {
+  $("#editor").bind("keyup, change", function updateCode(){
+    PrefCommands.setCode(this.value);
+  });
+});
