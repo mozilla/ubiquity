@@ -1896,7 +1896,7 @@ ParseQuery.prototype = {
            && !thisQuery.finished) {
         
 	// THROTTLING OF ONRESULTS (#833) - still experimental
-        var throttleThreshold = 0.5;
+        var throttleThreshold = 0.8;
         var progress = thisQuery._detectionTracker.detectionProgress;
         var passedThreshold = thisQuery._previousProgress < throttleThreshold &&
                               progress >= throttleThreshold;
