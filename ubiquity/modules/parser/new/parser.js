@@ -1508,8 +1508,9 @@ Parser.prototype = {
 //        currentQuery.dump("detecting: " + x + " for " + ids);
 
         for (let id in nounTypeIds) {
+          var dT = currentQuery._detectionTracker;
 
-          if (currentQuery._detectionTracker.getStarted(x,id)) {
+          if (dT.getStarted(x,id)) {
             //currentQuery.dump('detection of this combination has already begun.');
             continue;
           }
@@ -1518,7 +1519,7 @@ Parser.prototype = {
           
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
-          currentQuery._detectionTracker.setStarted(x,id,true);
+          dT.setStarted(x,id,true);
 
           if (!(x in thisParser._nounCache))
             thisParser._nounCache[x] = {};
@@ -1526,7 +1527,6 @@ Parser.prototype = {
             thisParser._nounCache[x][id] = [];
 
           let thisId = id;
-          var dT = currentQuery._detectionTracker;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
             if (!dT.getOutstandingRequests(x,thisId).length)
@@ -1546,18 +1546,18 @@ Parser.prototype = {
               returnArray.push(result);
               hadImmediateResults = true;
             } else {
-              currentQuery._detectionTracker.addOutstandingRequest(x,id,result);
+              dT.addOutstandingRequest(x,id,result);
             }
           }
           
-          if (!currentQuery._detectionTracker.getRequestCount(x,id)) {
-            currentQuery._detectionTracker.setComplete(x,id,true);
+          if (!dT.getRequestCount(x,id)) {
+            dT.setComplete(x,id,true);
 
             // Check whether (a) there were no immediate results and 
             // (b) no more results are coming. In this case, try to 
             // complete the parse now.
             if (!hadImmediateResults) {
-              for each (let parseId in currentQuery._detectionTracker.getParseIdsToCompleteForIds(x,[id])) {
+              for each (let parseId in dT.getParseIdsToCompleteForIds(x,[id])) {
                 currentQuery._verbedParses[parseId].complete = true;
                 dT.setComplete(x,id,true);
                 if (currentQuery._verbedParses.every(function(parse) parse.complete))
@@ -1831,14 +1831,14 @@ ParseQuery.prototype = {
     var thisQuery = this;
     function completeParse(thisParse) {
       var requestCount = thisParse.getRequestCount();
+      //thisQuery.dump('completing parse '+thisParse._id+' now');
+      //dump("request count: " + requestCount + "\n");
             
       if (!(thisParse._requestCountLastCompletedWith == undefined)
           && thisParse._requestCountLastCompletedWith == requestCount) {
         return false;
       }
 
-      //dump("request count: " + requestCount + "\n");
-      thisQuery.dump('completing parse '+thisParse._id+' now');
       thisParse._requestCountLastCompletedWith = requestCount;
 
       if (requestCount == 0) {
