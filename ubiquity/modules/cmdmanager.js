@@ -100,7 +100,7 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
 
   this.__domNodes.suggsIframe.addEventListener(
     "click",
-    function suggClick(ev) {
+    function onSuggClick(ev) {
       var cb = self.__lastAsyncSuggestionCb;
       if (!cb) return;
       var {target} = ev;
@@ -140,31 +140,31 @@ CommandManager.prototype = {
     }
   },
 
-  refresh : function CM_refresh() {
+  refresh: function CM_refresh() {
     this.__cmdSource.refresh();
     this.__hilitedSuggestion = 0;
     this.__lastInput = "";
   },
 
-  moveIndicationUp : function CM_moveIndicationUp(context) {
-    this.__hilitedSuggestion -= 1;
-    if (this.__hilitedSuggestion < 0) {
+  moveIndicationUp: function CM_moveIndicationUp(context) {
+    var index = --this.__hilitedSuggestion;
+    if (index < 0) {
       this.__hilitedSuggestion = this.__activeQuery.suggestionList.length - 1;
     }
     this._previewAndSuggest(context, true);
   },
 
-  moveIndicationDown : function CM_moveIndicationDown(context) {
-    this.__hilitedSuggestion += 1;
-    if (this.__hilitedSuggestion > this.__activeQuery.suggestionList.length - 1) {
+  moveIndicationDown: function CM_moveIndicationDown(context) {
+    var index = ++this.__hilitedSuggestion;
+    if (index >= this.__activeQuery.suggestionList.length) {
       this.__hilitedSuggestion = 0;
     }
     this._previewAndSuggest(context, true);
   },
 
-  _renderSuggestions : function CMD__renderSuggestions() {
+  _renderSuggestions: function CM__renderSuggestions() {
     var content = "";
-    var suggestionList = this.__activeQuery.suggestionList;
+    var {suggestionList} = this.__activeQuery;
     for (let x = 0, l = suggestionList.length; x < l; ++x) {
       let suggText = suggestionList[x].displayText;
       let suggIconUrl = suggestionList[x].icon;
@@ -179,68 +179,53 @@ CommandManager.prototype = {
     this.__domNodes.suggsIframe.contentDocument.body.innerHTML = content;
   },
 
-  _renderPreview : function CM__renderPreview(context) {
-    var wasPreviewShown = false;
-
-    try {
-      var activeSugg = this.__activeQuery.suggestionList[this.__hilitedSuggestion];
-
-      if (activeSugg) {
-        var self = this;
-        var previewUrl = activeSugg.previewUrl;
-
-        this._previewer.queuePreview(
-          previewUrl,
-          activeSugg.previewDelay,
-          function(pblock) { activeSugg.preview(context, pblock); }
-        );
-
-        wasPreviewShown = true;
-      }
-    } catch (e) {
-      this.__msgService.displayMessage(
-        {text: ("An exception occurred while previewing the command '" +
-                this.__lastInput + "'."),
-         exception: e}
-        );
+  _renderPreview: function CM__renderPreview(context) {
+    var activeSugg =
+      this.__activeQuery.suggestionList[this.__hilitedSuggestion];
+    if (activeSugg) {
+      var self = this;
+      this._previewer.queuePreview(
+        activeSugg.previewUrl,
+        activeSugg.previewDelay,
+        function queuedPreview(pblock) {
+          try { activeSugg.preview(context, pblock); }
+          catch (e) {
+            let verb = activeSugg._verb;
+            self.__msgService.displayMessage({
+              text: ('An exception occurred while previewing the command "' +
+                     (verb.cmd || verb).name + '".'),
+              exception: e,
+            });
+          }
+        });
     }
-    return wasPreviewShown;
   },
 
-  _previewAndSuggest : function CM__previewAndSuggest(context) {
+  _previewAndSuggest: function CM__previewAndSuggest(context) {
     this._renderSuggestions();
 
     return this._renderPreview(context);
   },
 
-  reset : function CM_reset() {
-    // TODO: I think?
-    if (this.__activeQuery && !this.__activeQuery.finished)
-      this.__activeQuery.cancel();
+  reset: function CM_reset() {
+    var query = this.__activeQuery;
+    if (query && !query.finished) query.cancel();
   },
 
-  updateInput : function CM_updateInput(input, context, asyncSuggestionCb) {
+  updateInput: function CM_updateInput(input, context, asyncSuggestionCb) {
+    this.reset();
     this.__lastInput = input;
 
-    if (this.__activeQuery) {
-      if (!this.__activeQuery.finished) {
-        dump("last query isn't done yet -- kill it!\n");
-        this.reset();
-      }
-    }
-
-    this.__activeQuery = this.__nlParser.newQuery(input, context,
-                                                  this.maxSuggestions,true);
-
-    this.__activeQuery.onResults = asyncSuggestionCb ||
-                                     this.__lastAsyncSuggestionCb;
+    var query = this.__activeQuery =
+      this.__nlParser.newQuery(input, context, this.maxSuggestions, true);
+    query.onResults = asyncSuggestionCb || this.__lastAsyncSuggestionCb;
 
     if (asyncSuggestionCb)
       this.__lastAsyncSuggestionCb = asyncSuggestionCb;
 
     this.__hilitedSuggestion = 0;
-    if ('run' in this.__activeQuery)
-      this.__activeQuery.run();
+    if ("run" in query)
+      query.run();
     else
       this.onSuggestionsUpdated(input, context);
   },
@@ -249,12 +234,13 @@ CommandManager.prototype = {
     return this.__lastInput;
   },
 
-  onSuggestionsUpdated : function CM_onSuggestionsUpdated(input,
-                                                          context) {
-    dump('rendering suggestions now: '+this.__activeQuery.suggestionList.length+'\n');
+  onSuggestionsUpdated: function CM_onSuggestionsUpdated(input, context) {
+    Utils.dump("rendering",
+               this.__activeQuery.suggestionList.length,
+               "suggestions");
 
     var previewState = "no-suggestions";
-    if (this.__activeQuery.suggestionList.length > 0)// && this._previewAndSuggest(context)
+    if (this.__activeQuery.suggestionList.length > 0)
       previewState = "with-suggestions";
 
     if (!this.__activeQuery.finished)
@@ -264,53 +250,45 @@ CommandManager.prototype = {
     this._previewAndSuggest(context);
   },
 
-  execute : function CM_execute(context) {
+  execute: function CM_execute(context) {
     let suggestionList = this.__activeQuery.suggestionList;
     var parsedSentence = suggestionList[this.__hilitedSuggestion];
     if (!parsedSentence)
-      this.__msgService.displayMessage("No command called " +
-                                       this.__lastInput + ".");
+      this.__msgService.displayMessage('No command called "' +
+                                       this.__lastInput + '".');
     else
       try {
         this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
         parsedSentence.execute(context);
       } catch (e) {
-        this.__msgService.displayMessage(
-          {text: ("An exception occurred while running the command '" +
-                  this.__lastInput + "'."),
-           exception: e}
-        );
+        let verb = parsedSentence._verb;
+        this.__msgService.displayMessage({
+          text: ('An exception occurred while running the command "' +
+                 (verb.cmd || verb).name + '".'),
+          exception: e,
+        });
       }
   },
 
   hasSuggestions: function CM_hasSuggestions() {
-    return (this.__activeQuery && this.__activeQuery.suggestionList.length > 0);
+    let query = this.__activeQuery;
+    return !!(query && query.suggestionList.length);
   },
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
                                                            asyncSuggestionCb) {
-    let noInputQuery = this.__nlParser.newQuery("", context,
-                                                20);
-    noInputQuery.onResults = function() {
-        asyncSuggestionCb( noInputQuery.suggestionList );
+    let noInputQuery = this.__nlParser.newQuery("", context, 20);
+    noInputQuery.onResults = function onResultsNoInput() {
+      asyncSuggestionCb(noInputQuery.suggestionList);
     };
-    return;
   },
 
-  getHilitedSuggestionText : function CM_getHilitedSuggestionText(context) {
-    if(!this.hasSuggestions())
-      return null;
-
-    var suggText = (this.__activeQuery
-                    .suggestionList[this.__hilitedSuggestion]
-                    .completionText);
-    // TODO why is this updating input???? the user's input hasn't changed,
-    // all we've done is requested the hilighted suggestion -- this function
-    // should not have side effects.  If it's part of the autocomplete
-    // feature then it should not have a name starting with 'get'. (--Jono)
-    this.updateInput(suggText, context);
-
-    return suggText;
+  getHilitedSuggestionText: function CM_getHilitedSuggestionText(context) {
+    return (this.hasSuggestions()
+            ? (this.__activeQuery
+               .suggestionList[this.__hilitedSuggestion]
+               .completionText)
+            : "");
   },
 
   getHilitedSuggestionDisplayName: function CM_getHilitedSuggDisplayName() {
