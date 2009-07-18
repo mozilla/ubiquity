@@ -314,13 +314,15 @@ function setLastResult(result) {
 
 // === {{{ CmdUtils.getGeoLocation(callback) }}} ===
 //
-// Uses Geo-IP lookup to get the user's physical location. Will cache the result.
+// Uses Geo-IP lookup to get the user's physical location.
+// Will cache the result.
 // If a result is already in the cache, this function works both
 // asyncronously and synchronously (for backwards compatability).
 // Otherwise it works only asynchronously.
 //
-// {{{ callback }}} Optional callback function.  Will be called back
-// with a geolocation object.
+// {{{callback}}} Optional callback function.  Will be called back
+// with a geolocation object. If specified, {{{getGeoLocation}}} returns
+// the {{{XMLHTTPRequest}}} instance instead of the geolocation object.
 //
 // The geolocation object has the following properties:
 // {{{ city }}}, {{{ state }}}, {{{ country }}}, {{{ country_code }}},
@@ -332,41 +334,31 @@ function setLastResult(result) {
 // directly.
 
 function getGeoLocation(callback) {
-  const {jQuery, globals} = this.__globalObject;
-  if (globals.geoLocation) {
-    if (callback)
-      callback(globals.geoLocation);
-    return globals.geoLocation;
-    // TODO: Why does this function return globals.geolocation if the
-    // value was already cached, but null if it was not?  If it returns
-    // different things depending on what's in the cache, then client
-    // code can't rely on its return value.  And shouldn't client code
-    // always be using the callback anyway?
-  }
-
-  jQuery.ajax({
-    type: "GET",
-    url: "http://j.maxmind.com/app/geoip.js",
-    dataType: "text",
-    async: false,
-    success: function( js ) {
-      eval( js );
-      var loc = geoip_city() + ", " + geoip_region();
-      globals.geoLocation = {
+  if (callback) {
+    var xhr = Utils.currentChromeWindow.XMLHttpRequest();
+    xhr.mozBackgroundRequest = true;
+    xhr.open("GET", "http://j.maxmind.com/app/geoip.js", true);
+    xhr.overrideMimeType("text/plain");
+    xhr.onreadystatechange = function gGL_orsc() {
+      if (xhr.readyState !== 4 || xhr.status !== 200) return;
+      eval(xhr.responseText);
+      callback(getGeoLocation.cache = {
         city: geoip_city(),
         state: geoip_region_name(),
         country: geoip_country_name(),
         country_code: geoip_country_code(),
         lat: geoip_latitude(),
-        "long": geoip_longitude()
-      };
-      if (callback)
-        callback(globals.geoLocation);
-    }
-  });
-
+        "long": geoip_longitude(),
+      });
+    };
+    xhr.send(null);
+    return xhr;
+  }
+  if ("cache" in getGeoLocation) return getGeoLocation.cache;
+  getGeoLocation(function fetch(){});
   return null;
 }
+getGeoLocation(); // prefetch
 
 // TODO: UserCode is only used by experimental-commands.js.  Does it still
 // need to be included here?

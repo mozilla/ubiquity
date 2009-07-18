@@ -587,38 +587,28 @@ var noun_type_contact = {
 var noun_type_geolocation = {
   label: "geolocation",
   rankLast: true,
-  'default': function() {
+  "default": function nt_geoloc_default() {
     var location = CmdUtils.getGeoLocation();
-    if (!location) {
-      // TODO: there needs to be a better way of doing this,
-      // as default() can't currently return null
-      return CmdUtils.makeSugg("", "", null, 0.5);
-    }
-    var fullLocation = (location.city ? location.city + ", " : '')
-                       + location.country;
+    if (!location) return false;
+    var fullLocation = ((location.city ? location.city + ", " : "")
+                        + location.country);
     return CmdUtils.makeSugg(fullLocation, null, null, 0.5);
   },
-  suggest: function(fragment, html, callback, selectionIndices) {
+  suggest: function nt_geoloc_suggest(text, html, callback, selectionIndices) {
     // LONGTERM TODO: try to detect whether fragment is anything like
     // a valid location or not, and don't suggest anything
     // for input that's not a location.
     function addAsyncGeoSuggestions(location) {
-      if (!location)
-        return;
-      var fullLocation = location.city + ", " + location.country;
-      callback([CmdUtils.makeSugg(fullLocation),
+      callback([CmdUtils.makeSugg(location.city + ", " + location.country),
                 CmdUtils.makeSugg(location.city),
                 CmdUtils.makeSugg(location.country)]);
     }
     // TODO: we should try to build this "here" handling into something like
     // magic words (anaphora) handling in Parser 2: make it localizable.
-    var retArray = [CmdUtils.makeSugg(fragment, null, null, 0.5,
-                                      selectionIndices)];
-    if (/\bhere\b/.test(fragment)) {
-      var asyncRequest = CmdUtils.getGeoLocation(addAsyncGeoSuggestions);
-      retArray.push(asyncRequest);
-    }
-    return retArray;
+    var suggs = [CmdUtils.makeSugg(text, null, null, 0.3, selectionIndices)];
+    if (/^here$/i.test(text))
+      suggs.push(CmdUtils.getGeoLocation(addAsyncGeoSuggestions));
+    return suggs;
   }
 };
 
