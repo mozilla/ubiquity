@@ -69,15 +69,14 @@ var noun_arb_text = {
   label: "?",
   rankLast: true,
   noExternalCalls: true,
-  suggest: function(text, html, callback, selectionIndices) {
+  suggest: function nat_suggest(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
   },
   // hack to import feed-specific globals into this module
-  // TODO: What is this here for?  -- Jono
-  loadGlobals: function(source) {
+  // see feed-parts/header/nountypes.js
+  loadGlobals: function nat_loadGlobals(source) {
     var target = (function() this)();
-    for each (let p in ["Utils", "CmdUtils",
-                        "Application", "jQuery", "Date"])
+    for each (let p in ["Utils", "CmdUtils", "Application", "jQuery", "Date"])
       target[p] = source[p];
     this.loadGlobals = function(){};
   }
@@ -101,8 +100,8 @@ var noun_type_email_service = CmdUtils.NounType("email service",
 // The regex is taken from:
 // http://blog.livedoor.jp/dankogai/archives/51190099.html
 //
-// {{{text, html}}} : email address
-// {{{data}}} : match array
+// * {{{text, html}}} : email address
+// * {{{data}}} : match array
 
 var noun_type_email = CmdUtils.NounType(
   "email",
@@ -113,27 +112,23 @@ var noun_type_email = CmdUtils.NounType(
 
 // === {{{ noun_type_percentage }}} ===
 //
-// **//FIXME//**
+// Suggests a percentage value.
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, html}}} : "?%"
+// * {{{data}}} : a float number
 
 var noun_type_percentage = {
   label: "percentage",
   noExternalCalls: true,
   _default: CmdUtils.makeSugg("100%", null, 0.3),
-  "default": function() this._default,
-  suggest: function(text, html) {
-    if (!text)
-      return [];
+  "default": function nt_percentage_default() this._default,
+  suggest: function nt_percentage_suggest(text, html) {
     var number = parseFloat(text);
     if (isNaN(number))
       return [];
-    if (number > 1 && text.indexOf(".") == -1)
+    if (number > 1 && text.indexOf(".") < 0)
       number /= 100;
-    text = number*100 + "%";
-    return [CmdUtils.makeSugg(text, null, number)];
+    return [CmdUtils.makeSugg(number*100 + "%", null, number)];
   }
 };
 
@@ -166,8 +161,9 @@ var noun_type_search_engine = {
   noExternalCalls: true,
   // the default search engine should just get 0.3 or so...
   // if it's actually entered, it can get a higher score.
-  default: function() this._sugg(this._BSS.defaultEngine, 0.3),
-  suggest: function(text) {
+  default: function nt_sengine_default()
+    this._sugg(this._BSS.defaultEngine, 0.3),
+  suggest: function nt_sengine_suggest(text) {
     var suggs = this._BSS.getVisibleEngines({}).map(this._sugg);
     return CmdUtils.grepSuggs(text, suggs);
   },
@@ -188,10 +184,12 @@ var noun_type_search_engine = {
 
 var noun_type_tag = {
   label: "tag1[,tag2 ...]",
+  rankLast: true,
   noExternalCalls: true,
-  default: function() [CmdUtils.makeSugg(tag, null, [tag], 0.3)
-                       for each (tag in PlacesUtils.tagging.allTags)],
-  suggest: function(text) {
+  default: function nt_tag_default()
+    [CmdUtils.makeSugg(tag, null, [tag], 0.3)
+     for each (tag in PlacesUtils.tagging.allTags)],
+  suggest: function nt_tag_suggest(text) {
     text = Utils.trim(text);
     if (!text) return [];
 
@@ -206,14 +204,17 @@ var noun_type_tag = {
     var suggs = [CmdUtils.makeSugg(null, null,
                                    (uncompletedTag
                                     ? completedTags.concat(uncompletedTag)
-                                    : completedTags), 0.3)];
+                                    : completedTags),
+                                   0.3)];
     if (uncompletedTag) {
       let utag = uncompletedTag.toLowerCase();
       for each (let tag in allTags)
         // only match from the beginning of a tag name (not the middle)
         if (tag.length > utag.length &&
             tag.toLowerCase().indexOf(utag) === 0)
-          suggs.push(CmdUtils.makeSugg(null, null, completedTags.concat(tag), 0.7));
+          suggs.push(CmdUtils.makeSugg(null, null,
+                                       completedTags.concat(tag),
+                                       0.7));
     }
     return suggs;
   }
@@ -221,25 +222,26 @@ var noun_type_tag = {
 
 // === {{{ noun_type_awesomebar }}} ===
 //
-// **//FIXME//**
+// Suggests "Awesome Bar" query results.
+// Also suggests the input back with empty data.
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, html}}} : title or input
+// * {{{data}}} : a query result
+//   (see [[#modules/utils.js|Utils]]{{{.history.search}}})
 
 var noun_type_awesomebar = {
   label: "query",
-  noExternalCalls: true,
   rankLast: true,
-  suggest: function(text, html, callback, selectedIndices) {
+  noExternalCalls: true,
+  suggest: function nt_awesome_suggest(text, html, callback, selectedIndices) {
     if (!text) return [];
-    Utils.history.search(text, function(results) {
+    Utils.history.search(text, function nt_awesome_search(results) {
       if (results.length)
         callback([CmdUtils.makeSugg(r.title, null, r, .9)
                   for each (r in results)]);
-    }, 1);
+    }, CmdUtils.maxSuggestions - 1);
     return [CmdUtils.makeSugg(text, html,
-                              {url: text, title: text, favicon: ""},
+                              {url: "", title: "", favicon: ""},
                               .7, selectedIndices)];
   }
 };
@@ -249,29 +251,27 @@ var noun_type_awesomebar = {
 // Suggests a URL from the user's input and/or history.
 // Defaults to the current page's URL if no input is given.
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, hml}}} : URL
 
 var noun_type_url = {
   label: "url",
-  noExternalCalls: true,
   rankLast: true,
-  default: function() (
+  noExternalCalls: true,
+  default: function nt_url_default() (
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
                       null, null, 0.5)),
-  suggest: function(text, html, callback, selectionIndices) {
+  suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
       let p = "http://", n = p.length;
       url = p + url;
       if (selectionIndices) selectionIndices = [n, n + url.length];
     }
-    Utils.history.search(text, function(results) {
+    Utils.history.search(text, function nt_url_search(results) {
       if (results.length)
         callback([CmdUtils.makeSugg(r.url, null, null, .9)
                   for each (r in results)]);
-    }, 1);
+    }, CmdUtils.maxSuggestions / 2);
     return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices)];
   }
 };
@@ -290,7 +290,7 @@ var noun_type_url = {
 
 var noun_type_livemark = {
   label: "title",
-  suggest: function(text, html, cb, selected) {
+  suggest: function nt_livemark_suggest(text, html, cb, selected) {
     if (!text) return [];
 
     var {feeds} = this;
@@ -372,17 +372,16 @@ var noun_type_disabled_command = {
 
 // === {{{ noun_type_twitter_user }}} ===
 //
-// **//FIXME//**
+// Suggests Twitter IDs from the user's login info.
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, html}}} : Twitter ID
+// * {{{data}}} : login data (see {{{nsILoginManager}}})
 
 var noun_type_twitter_user = {
   label: "user",
   rankLast: true,
   noExternalCalls: true,
-  suggest: function(text, html, cb, selected) {
+  suggest: function nt_twuser_suggest(text, html, cb, selected) {
     // reject text from selection.
     if (!text || selected)
       return [];
@@ -394,7 +393,7 @@ var noun_type_twitter_user = {
       suggs.push(CmdUtils.makeSugg(text, null, {}, 0.5));
     return suggs;
   },
-  logins: function(reload) {
+  logins: function nt_twuser_logins(reload) {
     if (this._list && !reload) return this._list;
     var list = [];
     var token = (Cc["@mozilla.org/security/pk11tokendb;1"]
@@ -421,20 +420,19 @@ var noun_type_twitter_user = {
 
 // === {{{ noun_type_number }}} ===
 //
-// **//FIXME//**
+// Suggests a number value. Defaults to 1.
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, html}}} : number text
+// * {{{data}}} : number
 
 var noun_type_number = {
   label: "number",
   noExternalCalls: true,
-  suggest: function(text) {
+  suggest: function nt_number_suggest(text) {
     var num = +text;
     return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
   },
-  "default": function() {
+  "default": function nt_number_default() {
     return CmdUtils.makeSugg("1", null, 1, 0.5);
   }
 };
@@ -445,16 +443,18 @@ var noun_type_number = {
 //
 // * {{{text, html}}} : bookmarklet title
 // * {{{data}}} : bookmarklet (pseudo) url
+//
+// {{{load()}}} : Reloads bookmarklets.
 
 var noun_type_bookmarklet = {
   label: "title",
   noExternalCalls: true,
-  suggest: function(text, html, cb, selected) {
+  suggest: function nt_bookmarklet_suggest(text, html, cb, selected) {
     if (!text) return [];
     return CmdUtils.grepSuggs(text, this.list);
   },
   list: null,
-  load: function(reload) {
+  load: function nt_bookmarklet_load(reload) {
     var list = [];
     var {bookmarks, history} = PlacesUtils;
     var query = history.getNewQuery();
@@ -478,42 +478,35 @@ var noun_type_bookmarklet = {
 }.load();
 
 // === {{{ noun_type_date }}} ===
+// === {{{ noun_type_time }}} ===
 //
-// Suggests a date for input, using the mighty Date.parse().
-// Defaults to today.
+// Suggests a date/time for input, using the mighty {{{Date.parse()}}}.
+// Defaults to today/now.
 //
-// * {{{text, html}}} : date text
-// * {{{data}}} : date object
+// * {{{text, html}}} : date/time text
+// * {{{data}}} : {{{Date}}} instance
 
 var noun_type_date = {
   label: "date",
   noExternalCalls: true,
   "default": function() this._sugg(Date.parse("today")),
-  suggest: function(text) {
+  suggest: function nt_date_suggest(text) {
     var date = Date.parse(text);
     return date ? [this._sugg(date)] : [];
   },
-  _sugg: function(date)
+  _sugg: function nt_date__sugg(date)
     CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date),
 };
-
-// === {{{ noun_type_time }}} ===
-//
-// **//FIXME//**
-//
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
 
 var noun_type_time = {
   label: "time",
   noExternalCalls: true,
-  "default": function() {
+  "default": function nt_time_default() {
     var time = Date.parse("now");
     var text = time.toString("hh:mm tt");
     return CmdUtils.makeSugg(text, null, time, 0.5);
   },
-  suggest: function(text, html) {
+  suggest: function nt_time_suggest(text, html) {
     var time = Date.parse(text);
     return !time ? [] : [CmdUtils.makeSugg(time.toString("hh:mm tt"),
                                            null,
@@ -543,36 +536,33 @@ var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants);
 
 // === {{{ noun_type_contact }}} ===
 //
-// **//FIXME//**
+// Same as {{{noun_type_email}}}, but also suggests
+// the user's contact informations that are fetched from Gmail (for now).
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// * {{{text, data.email}}} : email address
+// * {{{html}}} : %name <%email> (same as {{{summary}}})
+// * {{{data.name}}} : name of contactee
 
-// TODO: noun_type_contact never returns its async suggestions from getContacts.
-// I'm disabling it's async request attribute until this is fixed, so that
-// queries aren't kept open waiting for this noun type to return its async req.
 var noun_type_contact = {
   label: "name or email",
   _list: null,
-  _callback: function(contacts) {
+  _callback: function nt_contact__callback(contacts) {
     var {_list} = noun_type_contact;
     for each (var {name, email} in contacts) {
       var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
       _list.push({
         text: email, html: htm, data: name, summary: htm, score: 0.9,
-        key: name + "\n" + email});
+        _key: name + "\n" + email});
     }
   },
-  suggest: function(text) {
+  suggest: function nt_contact_suggest(text) {
+    var suggs = noun_type_email.suggest.apply(noun_type_email, arguments);
     if (!this._list) {
       this._list = [];
       getContacts(this._callback);
-      return noun_arb_text.suggest.apply(noun_arb_text, arguments);
+      return suggs;
     }
-    return (CmdUtils.grepSuggs(text, this._list, "key")
-            .concat(noun_type_email.suggest.apply(noun_type_email,
-                                                  arguments)));
+    return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
   }
 };
 
@@ -614,11 +604,17 @@ var noun_type_geolocation = {
 
 // === {{{ noun_type_lang_google }}} ===
 //
-// **//FIXME//**
+// Suggests languages used in various Google services.
 //
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
+// === {{{ noun_type_lang_wikipedia }}} ===
+//
+// Suggests languages used in Wikipedia.
+//
+// * {{{text, html}}} : language name
+// * {{{data}}} : language code
+//
+// {{{getLangName(code)}}}
+// returns the corresponding language name for {{{code}}}.
 
 var noun_type_lang_google = CmdUtils.NounType("language", {
   Arabic: "ar",
@@ -663,14 +659,6 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Urdu: "ur",
   Vietnamese: "vi",
 });
-
-// === {{{ noun_type_lang_wikipedia }}} ===
-//
-// **//FIXME//**
-//
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
 // omitting ones with 100+ articles
