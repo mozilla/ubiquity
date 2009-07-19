@@ -47,8 +47,9 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
 
     var context = menupopup.context = {
-      screenX: 0,
-      screenY: 0,
+      screenX: event.screenX,
+      screenY: event.screenY,
+      chromeWindow: window,
       focusedWindow: document.commandDispatcher.focusedWindow,
       focusedElement: document.commandDispatcher.focusedElement,
     };
