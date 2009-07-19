@@ -299,28 +299,11 @@ CommandManager.prototype = {
   },
 
   makeCommandSuggester: function CM_makeCommandSuggester() {
-    // This needs to be completely rewritten to be asynchronous  -- must
-    // pass callback into getSuggestionListNoInput.
     var self = this;
     return function getAvailableCommands(context, popupCb) {
       self.refresh();
-      function cmdSuggCb(suggestions) {
-        var retVal = {};
-        for each (let sugg in suggestions) {
-          let {_verb, score} = sugg;
-          let {name, icon} = _verb.cmd || _verb;
-          let parsedSentence = sugg;
-          let exec = retVal[name] = function execute() {
-            parsedSentence.execute(context);
-          };
-          if (score) exec.score = score;
-          if (icon) exec.icon = icon;
-        }
-        popupCb(retVal);
-      }
-      self.getSuggestionListNoInput(context, cmdSuggCb);
-      return;
-    }
+      self.getSuggestionListNoInput(context, popupCb);
+    };
   },
 
   get maxSuggestions() CommandManager.maxSuggestions,

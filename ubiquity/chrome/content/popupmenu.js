@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
  *   Blair McBride <unfocused@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,65 +37,52 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function UbiquityPopupMenu(contextMenu, popupElement, ubiquityMenu, ubiquitySeparator, cmdSuggester) {
+function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
+                           cmdSuggester) {
+  var {menupopup} = ubiquityMenu;
+
   function contextPopupShowing(event) {
-    
-    if (event.target.id != popupElement.id)
-      return;
-    
-    var context = {
+    if (event.target !== this || !selected()) return;
+
+    for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
+
+    var context = menupopup.context = {
       screenX: 0,
       screenY: 0,
-      lastCmdResult: null
+      focusedWindow: document.commandDispatcher.focusedWindow,
+      focusedElement: document.commandDispatcher.focusedElement,
     };
 
-    if (gContextMenu.isContentSelection() || gContextMenu.onTextInput) {
-      context.focusedWindow = document.commandDispatcher.focusedWindow;
-      context.focusedElement = document.commandDispatcher.focusedElement;
-    }
-
-    function callback(results){
-      dump("refreshing context menu\n");
-      // turn the results object into a list for score-based sorting and
-      // display
-      var resultsList = [];
-      for (var i in results){
-	results[i].label = i;
-        resultsList.push(results[i]);
+    cmdSuggester(context, function onSuggest(suggestions) {
+      for each (var sugg in suggestions) {
+        let {_verb} = sugg, {name, icon} = _verb.cmd || _verb;
+        let menuItem = document.createElement("menuitem");
+        menuItem.setAttribute("label", name);
+        if (icon) {
+          menuItem.setAttribute("class", "menuitem-iconic");
+          menuItem.setAttribute("image", icon);
+        }
+        menuItem.suggestion = sugg;
+        menupopup.appendChild(menuItem);
       }
-      /* Sort the results by their scores in descending order */
-      if(resultsList.length)
-        resultsList.sort(byScoreDescending);
-
-      /* Remove previously added submenus */
-      for(let i=popupElement.childNodes.length - 1; i >= 0; i--) {
-	popupElement.removeChild(popupElement.childNodes.item(i));
-      }
-
-      for (var i=0; i < resultsList.length; i++) {
-        var tempMenu = document.createElement("menuitem");
-		tempMenu.setAttribute("label", resultsList[i].label);
-		if(resultsList[i].icon) {
-			tempMenu.setAttribute("class", "menuitem-iconic");
-			tempMenu.setAttribute("image", resultsList[i].icon);
-		}
-        tempMenu.addEventListener("command", resultsList[i], true);
-        event.target.appendChild(tempMenu);
-      }
-    }
-
-    if (context.focusedWindow) {
-      cmdSuggester(context, callback);
-    }
+    });
   }
-  function toggleUbiquityMenu(event){
-    var isHidden = ! (gContextMenu.isContentSelection() || gContextMenu.onTextInput);
-    ubiquityMenu.hidden = isHidden;
-    ubiquitySeparator.hidden = isHidden;
+  function toggleUbiquityMenu(event) {
+    ubiquityMenu.hidden = ubiquitySeparator.hidden = !selected();
   }
-  
+  function openUbiquity(event) {
+    if (event.target !== this) return;
+    gContextMenu.menu.hidePopup();
+    gUbiquity.openWindow();
+  }
+  function executeMenuCommand(event) {
+    event.target.suggestion.execute(this.context);
+  }
+  function selected() (gContextMenu.isContentSelection() ||
+                       gContextMenu.onTextInput);
+
+  menupopup.addEventListener("popupshowing", contextPopupShowing, false);
+  menupopup.addEventListener("command", executeMenuCommand, false);
   contextMenu.addEventListener("popupshowing", toggleUbiquityMenu, false);
-  popupElement.addEventListener("popupshowing", contextPopupShowing, false);
+  ubiquityMenu.addEventListener("click", openUbiquity, false);
 }
-
-function byScoreDescending(a, b) b.score - a.score;

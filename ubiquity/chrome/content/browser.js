@@ -80,14 +80,6 @@ function ubiquitySetup() {
     },
     false);
 
-  var popupMenu = UbiquityPopupMenu(
-    document.getElementById("contentAreaContextMenu"),
-    document.getElementById("ubiquity-menupopup"),
-    document.getElementById("ubiquity-menu"),
-    document.getElementById("ubiquity-separator"),
-    cmdMan.makeCommandSuggester()
-  );
-
   var panel = document.getElementById("ubiquity-transparent-panel");
 
   gUbiquity = new Ubiquity(panel,
@@ -109,6 +101,12 @@ function ubiquitySetup() {
     window.removeEventListener("unload", ubiquityTeardown, false);
     cmdMan.finalize();
   }, false);
+
+  var popupMenu = UbiquityPopupMenu(
+    document.getElementById("contentAreaContextMenu"),
+    document.getElementById("ubiquity-menu"),
+    document.getElementById("ubiquity-separator"),
+    cmdMan.makeCommandSuggester());
 
   const UBIQ_LOAD_PREF = "extensions.ubiquity.enableUbiquityLoadHandlers";
   if (Application.prefs.getValue(UBIQ_LOAD_PREF, true))
