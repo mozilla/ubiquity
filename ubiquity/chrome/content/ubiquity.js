@@ -61,34 +61,19 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 
   var self = this;
 
-  msgPanel.addEventListener("popupshown",
-                            function() { self.__onShown(); },
-                            false);
-  msgPanel.addEventListener("popuphidden",
-                            function() { self.__onHidden(); },
-                            false);
-  window.addEventListener("mousemove",
-                          function(event) { self.__onMouseMove(event); },
-                          false);
-  textBox.addEventListener("keydown",
-                           function(event) { self.__onKeydown(event); },
-                           true);
-  textBox.addEventListener("keyup",
-                           function(event) { self.__onKeyup(event); },
-                           true);
-  textBox.addEventListener("keypress",
-                           function(event) { self.__onKeyPress(event); },
-                           true);
+  window.addEventListener("mousemove", this, false);
 
-  if (this.Utils.OS === "WINNT") {
-    textBox.addEventListener("blur",
-                             function(event) { self.__onBlur(event); },
-                             false);
-  }
+  textBox.addEventListener("keydown", this, true);
+  textBox.addEventListener("keyup", this, true);
+  textBox.addEventListener("keypress", this, true);
+  if (this.Utils.OS === "WINNT")
+    textBox.addEventListener("blur", this, false);
 
-  // middle: open link, right: close panel, left: both
-  msgPanel.addEventListener("click", function clickPanel(ev) {
-    var {button, target} = ev;
+  msgPanel.addEventListener("popupshown", this, false);
+  msgPanel.addEventListener("popuphidden", this, false);
+  msgPanel.addEventListener("click", function U_onPanelClick(event) {
+    // middle: open link, right: close panel, left: both
+    var {button, target} = event;
     if (button !== 2) {
       do var {href} = target;
       while (!href && (target = target.parentNode));
@@ -96,7 +81,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
       if (/^\w+:/.test(href)) self.Utils.openUrlInBrowser(href);
     }
     if (button !== 1) self.closeWindow();
-    ev.preventDefault();
+    event.preventDefault();
   }, true);
 }
 
@@ -105,62 +90,57 @@ Ubiquity.prototype = {
   __MIN_CMD_PREVIEW_LENGTH: 0,
 
   __KEYCODE_ENTER: KeyEvent.DOM_VK_RETURN,
-  __KEYCODE_UP   : KeyEvent.DOM_VK_UP,
-  __KEYCODE_DOWN : KeyEvent.DOM_VK_DOWN,
   __KEYCODE_TAB  : KeyEvent.DOM_VK_TAB,
 
+  __KEYMAP_MOVE_INDICATION: {
+    38: "moveIndicationUp",
+    40: "moveIndicationDown",
+  },
   __KEYMAP_SCROLL_RATE: {
     33: -.8, // page up
     34: +.8, // page dn
   },
-  
-  get textBox() {
-    return this.__textBox;
+
+  handleEvent: function U_handleEvent(event) {
+    this["__on" + event.type](event);
   },
 
-  get msgPanel() {
-    return this.__msgPanel;
-  },
+  get textBox() this.__textBox,
+  get msgPanel() this.__msgPanel,
+  get cmdManager() this.__cmdManager,
+  get lastKeyEvent() this.__lastKeyEvent,
+  get isWindowOpen() this.__msgPanel.state === "open",
 
-  get cmdManager() {
-    return this.__cmdManager;
-  },
-
-  get lastKeyEvent() {
-    return this.__lastKeyEvent;
-  },
-
-  __onBlur: function __onBlur() {
+  __onblur: function U__onBlur() {
     // Hackish fix for #330.
     this.Utils.setTimeout(function refocusTextbox(self) {
       if (self.isWindowOpen) self.__textBox.focus();
     }, 100, this);
   },
 
-  __onMouseMove: function __onMouseMove(event) {
+  __onmousemove: function U__onMouseMove(event) {
     this.__x = event.screenX;
     this.__y = event.screenY;
   },
 
-  __onKeydown: function __onKeyDown(event) {
+  __onkeydown: function U__onKeyDown(event) {
     var {keyCode} = this.__lastKeyEvent = event;
 
-    if (keyCode === this.__KEYCODE_UP) {
+    var move = this.__KEYMAP_MOVE_INDICATION[keyCode];
+    if (move) {
+      this.__cmdManager[move](this.__makeContext());
       event.preventDefault();
-      this.__cmdManager.moveIndicationUp(this.__makeContext());
-    } else if (keyCode === this.__KEYCODE_DOWN) {
-      event.preventDefault();
-      this.__cmdManager.moveIndicationDown(this.__makeContext());
-    } else if (keyCode === this.__KEYCODE_TAB) {
-      event.preventDefault();
+    }
+    else if (keyCode === this.__KEYCODE_TAB) {
       var suggestionText =
         this.__cmdManager.getHilitedSuggestionText(this.__makeContext());
       if (suggestionText)
         this.__textBox.value = suggestionText;
+      event.preventDefault();
     }
   },
 
-  __onKeyup: function __onKeyup(event) {
+  __onkeyup: function U__onKeyup(event) {
     var {keyCode} = this.__lastKeyEvent = event;
 
     if (event.ctrlKey && event.altKey &&
@@ -173,13 +153,14 @@ Ubiquity.prototype = {
 
     if (keyCode >= KeyEvent.DOM_VK_DELETE ||
         keyCode === KeyEvent.DOM_VK_SPACE ||
-        keyCode === KeyEvent.DOM_VK_BACK_SPACE)
-      // keys that would change input
+        keyCode === KeyEvent.DOM_VK_BACK_SPACE ||
+        keyCode === KeyEvent.DOM_VK_RETURN && !this.__needsToExecute)
+      // Keys that would change input. RETURN is for IME.
       // https://developer.mozilla.org/En/DOM/Event/UIEvent/KeyEvent
       this.__processInput();
   },
 
-  __onKeyPress: function __onKeyPress(event) {
+  __onkeypress: function U__onKeyPress(event) {
     var {keyCode} = event;
     if (keyCode === this.__KEYCODE_ENTER) {
       this.__processInput(true);
@@ -195,37 +176,38 @@ Ubiquity.prototype = {
     }
   },
 
-  __onSuggestionsUpdated: function __onSuggestionsUpdated() {
+  __onSuggestionsUpdated: function U__onSuggestionsUpdated() {
     var input = this.__textBox.value;
     this.__cmdManager.onSuggestionsUpdated(input, this.__makeContext());
   },
 
-  __delayedProcessInput: function __delayedProcessInput() {
-    var self = this;
+  __delayedProcessInput: function U__delayedProcessInput() {
     var input = this.__textBox.value;
+    if (input.length < this.__MIN_CMD_PREVIEW_LENGTH) return;
+
     var context = this.__makeContext();
-    if ((input !== this.__lastValue) ||
-        (!input && this.ContextUtils.getSelection(context))) {
-      this.__lastValue = input;
-      if (input.length >= this.__MIN_CMD_PREVIEW_LENGTH)
-        this.__cmdManager.updateInput(
-          input,
-          context,
-          function() { self.__onSuggestionsUpdated(); });
+    if (input !== this.__lastValue ||
+        !input && this.ContextUtils.getSelection(context)) {
+      var self = this;
+      this.__cmdManager.updateInput(
+        this.__lastValue = input,
+        context,
+        function U___onSU() { self.__onSuggestionsUpdated(); });
     }
   },
 
-  __processInput: function __processInput(forcing) {
+  __processInput: function U__processInput(forcing) {
     this.Utils.clearTimeout(this.__previewTimerID);
     if (forcing)
       this.__delayedProcessInput();
     else
-      this.__previewTimerID = this.Utils.setTimeout(function(self) {
-        self.__delayedProcessInput();
-      }, this.__PROCESS_INPUT_DELAY, this);
+      this.__previewTimerID = this.Utils.setTimeout(
+        function U___delayedPI(self) { self.__delayedProcessInput(); },
+        this.__PROCESS_INPUT_DELAY,
+        this);
   },
 
-  __makeContext: function __makeContext() {
+  __makeContext: function U__makeContext() {
     return {
       screenX: this.__x,
       screenY: this.__y,
@@ -235,7 +217,7 @@ Ubiquity.prototype = {
     };
   },
 
-  __onHidden: function __onHidden() {
+  __onpopuphidden: function U__onHidden() {
     if (this.__needsToExecute) {
       this.__needsToExecute = false;
       this.__cmdManager.execute(this.__makeContext());
@@ -243,12 +225,11 @@ Ubiquity.prototype = {
     var unfocused = this.__focusedElement || this.__focusedWindow;
     if (unfocused) unfocused.focus(); // focus() === unblair()
 
-    this.__focusedWindow = null;
-    this.__focusedElement = null;
+    this.__focusedWindow = this.__focusedElement = null;
     this.__cmdManager.reset();
   },
 
-  __onShown: function __onShown() {
+  __onpopupshown: function U__onShown() {
     this.__lastValue = "";
     this.__textBox.focus();
     this.__textBox.select();
@@ -256,10 +237,10 @@ Ubiquity.prototype = {
     this.__processInput();
   },
 
-  setLocalizedDefaults: function setLocalizedDefaults(langCode) {
+  setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {
   },
 
-  openWindow: function openWindow() {
+  openWindow: function U_openWindow() {
     ({focusedWindow : this.__focusedWindow,
       focusedElement: this.__focusedElement}) = document.commandDispatcher;
     // This is a temporary workaround for #43.
@@ -267,11 +248,11 @@ Ubiquity.prototype = {
     this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
   },
 
-  closeWindow: function closeWindow() {
+  closeWindow: function U_closeWindow() {
     this.__msgPanel.hidePopup();
   },
 
-  toggleWindow: function toggleWindow() {
+  toggleWindow: function U_toggleWindow() {
     switch (this.__msgPanel.state) {
       case "open":
       case "hiding":
@@ -281,8 +262,4 @@ Ubiquity.prototype = {
     }
     this.openWindow();
   },
-
-  get isWindowOpen() {
-    return this.__msgPanel.state === "open";
-  }
 };
