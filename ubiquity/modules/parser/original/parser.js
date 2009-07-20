@@ -258,7 +258,7 @@ Parser.prototype = {
           html: Utils.escapeHtml(input),
           fake: true,
         };
-        selected = true;
+        selected = !!input;
         push.apply(ppss, this._nounFirstSuggestions(selObj,
                                                     maxSuggestions,
                                                     query));
