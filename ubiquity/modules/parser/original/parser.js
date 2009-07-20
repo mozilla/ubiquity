@@ -65,6 +65,7 @@ function registerPluginForLanguage(code, plugin) {
   var roleMap = plugin.roleMap = {};
   for each (let {role, delimiter} in parser.roles)
     if (!(role in roleMap)) roleMap[role] = delimiter;
+  plugin.PRONOUNS = parser.anaphora;
   plugin.pronouns = [
     RegExp(a.replace(/\W/g, "\\$&").replace(/^\b|\b$/g, "\\b"), "i")
     for each (a in parser.anaphora)];
@@ -94,7 +95,6 @@ ParserQuery.prototype = {
     this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
     this.requests = [];
     this.onResults = Boolean;
-    this.pronouns = null;
   },
 
   // TODO: Does query need some kind of destructor?  If this has a ref to the
@@ -248,7 +248,10 @@ Parser.prototype = {
                                                   query));
     else {
       let plugin = this._languagePlugin;
-      if (selected) query.pronouns = plugin.pronouns;
+      if (selected) {
+        query.PRONOUNS = plugin.PRONOUNS
+        query.pronouns = plugin.pronouns;
+      }
       // Language-specific full-sentence suggestions:
       ppss = plugin.parseSentence(
         input,
@@ -351,12 +354,9 @@ ParsedSentence.prototype = {
       if (x === "direct_object") {
         // Check for a valid text/html selection. We'll replace
         // the text with a pronoun for readability
-        let selObj = this._selObj;
-        if (selObj.text === argText ||
-            selObj.html === argText) {
-          //In future, the pronoun should be contextual to the selection
-          argText = "selection";
-        }
+        let {text, html} = this._selObj;
+        if (text === argText || html === argText)
+          argText = this._query.PRONOUNS[0];
         directObjPresent = true;
       }
       else if (argText && directObjPresent)
@@ -537,15 +537,13 @@ function PartiallyParsedSentence(
    * correctly. */
   this._parsedSentences =
     [new ParsedSentence(verb, {}, matchScore, selObj, query)];
-  var {pronouns} = query;
   for (let argName in this._verb._arguments) {
     if (argStrings[argName] && argStrings[argName].length > 0) {
       // If argument is present, try the noun suggestions based both on
       // substituting pronoun...
       let text = argStrings[argName].join(" ");
       let html = Utils.escapeHtml(text);
-      let gotSuggs = pronouns && this._suggestWithPronounSub(argName, text,
-                                                             pronouns);
+      let gotSuggs = this._suggestWithPronounSub(argName, text);
       // and on not substituting pronoun...
       let gotSuggsDirect = this._argSuggest(argName, text, html, null);
       if (!gotSuggs && !gotSuggsDirect) {
@@ -609,11 +607,9 @@ PartiallyParsedSentence.prototype = {
     return suggestions.length > 0;
   },
 
-  _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words,
-                                                              pronounREs) {
-    var {text, html} = this._selObj;
+  _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words) {
     var gotAnySuggestions = false;
-    for each (let regexp in pronounREs) {
+    for each (let regexp in this._query.pronouns) {
       let index = words.search(regexp);
       if (index < 0) continue;
       let selectionIndices = [index, index + text.length];

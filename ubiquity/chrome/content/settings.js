@@ -61,14 +61,10 @@ function onDocumentLoad() {
    * replace with something that detects command localizations automatically.
    */
   var $langSelect = $("#language-select");
-  var langCode = "en";
+  var langCode = UbiquitySetup.languageCode || "en";
   var isNewParser = UbiquitySetup.parserVersion === 2;
   $("#use-new-parser-checkbox")[0].checked = isNewParser;
-  if (isNewParser) {
-    $langSelect[0].disabled = false;
-    langCode = UbiquitySetup.languageCode;
-    $(".parser2").show();
-  }
+  if (isNewParser) $(".parser2").show();
   for each (let code in ["da", "en", "ja", "pt", "ca", "$"]) {
     $langSelect.append(
       "<option value='" + code + "' " +
