@@ -22,6 +22,7 @@
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Maria Emerson <memerson@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -42,12 +43,11 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
-const Application = (Cc["@mozilla.org/fuel/application;1"]
-                     .getService(Ci.fuelIApplication));
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/preview_browser.js");
 
+const {prefs} = Utils.Application;
 const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
 const MIN_MAX_SUGGS = 1;
 const MAX_MAX_SUGGS = 42;
@@ -55,20 +55,22 @@ const MAX_MAX_SUGGS = 42;
 CommandManager.DEFAULT_MAX_SUGGESTIONS = 5;
 CommandManager.MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
 CommandManager.__defineGetter__("maxSuggestions", function () {
-  return Application.prefs.getValue(this.MAX_SUGGESTIONS_PREF,
-                                    this.DEFAULT_MAX_SUGGESTIONS);
+  return prefs.getValue(this.MAX_SUGGESTIONS_PREF,
+                        this.DEFAULT_MAX_SUGGESTIONS);
 });
 CommandManager.__defineSetter__("maxSuggestions", function (value) {
   var num = Math.max(MIN_MAX_SUGGS, Math.min(value | 0, MAX_MAX_SUGGS));
-  Application.prefs.setValue(this.MAX_SUGGESTIONS_PREF, num);
+  prefs.setValue(this.MAX_SUGGESTIONS_PREF, num);
 });
 
 function CommandManager(cmdSource, msgService, parser, suggsNode,
                         previewPaneNode, helpNode) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
-  this.__hilitedSuggestion = 0;
+  this.__hilitedIndex = 0;
   this.__lastInput = "";
+  this.__lastHilitedIndex = -1;
+  this.__lastAsyncSuggestionCb = Boolean;
   this.__nlParser = parser;
   this.__activeQuery = null;
   this.__domNodes = {
@@ -76,7 +78,7 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
     suggsIframe: suggsNode.getElementsByTagName("iframe")[0],
     preview: previewPaneNode,
     help: helpNode};
-  this._previewer = new PreviewBrowser(
+  this.__previewer = new PreviewBrowser(
     previewPaneNode.getElementsByTagNameNS(
       "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
       "browser")[0],
@@ -98,16 +100,15 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
     for (let key in this) delete this[key];
   };
 
-  this.__domNodes.suggsIframe.addEventListener(
+  this.__domNodes.suggsIframe.contentDocument.addEventListener(
     "click",
     function onSuggClick(ev) {
-      var cb = self.__lastAsyncSuggestionCb;
-      if (!cb) return;
       var {target} = ev;
+      if (target === this) return;
       while (!target.hasAttribute("index"))
         if (!(target = target.parentNode)) return;
-      self.__hilitedSuggestion = +target.getAttribute("index");
-      cb();
+      self.__hilitedIndex = +target.getAttribute("index");
+      self.__lastAsyncSuggestionCb();
       ev.preventDefault();
       ev.stopPropagation();
     },
@@ -128,8 +129,8 @@ CommandManager.prototype = {
       nodes.suggs.style.display = "none";
       nodes.preview.style.display = "none";
       nodes.help.style.display = "block";
-      if (this._previewer.isActive)
-        this._previewer.queuePreview(
+      if (this.__previewer.isActive)
+        this.__previewer.queuePreview(
           null,
           0,
           function(pblock) { pblock.innerHTML = ""; }
@@ -142,24 +143,19 @@ CommandManager.prototype = {
 
   refresh: function CM_refresh() {
     this.__cmdSource.refresh();
-    this.__hilitedSuggestion = 0;
-    this.__lastInput = "";
+    this.reset();
   },
 
   moveIndicationUp: function CM_moveIndicationUp(context) {
-    var index = --this.__hilitedSuggestion;
-    if (index < 0) {
-      this.__hilitedSuggestion = this.__activeQuery.suggestionList.length - 1;
-    }
-    this._previewAndSuggest(context, true);
+    if (--this.__hilitedIndex < 0)
+      this.__hilitedIndex = this.__activeQuery.suggestionList.length - 1;
+    this._renderAll(context);
   },
 
   moveIndicationDown: function CM_moveIndicationDown(context) {
-    var index = ++this.__hilitedSuggestion;
-    if (index >= this.__activeQuery.suggestionList.length) {
-      this.__hilitedSuggestion = 0;
-    }
-    this._previewAndSuggest(context, true);
+    if (++this.__hilitedIndex >= this.__activeQuery.suggestionList.length)
+      this.__hilitedIndex = 0;
+    this._renderAll(context);
   },
 
   _renderSuggestions: function CM__renderSuggestions() {
@@ -173,43 +169,48 @@ CommandManager.prototype = {
         suggIcon = '<img src="' + Utils.escapeHtml(suggIconUrl) + '"/>';
       suggText = '<div class="cmdicon">' + suggIcon + "</div>" + suggText;
       content += ('<div class="suggested' +
-                  (x === this.__hilitedSuggestion ? " hilited" : "") +
+                  (x === this.__hilitedIndex ? " hilited" : "") +
                   '" index="' + x + '">' + suggText + "</div>");
     }
     this.__domNodes.suggsIframe.contentDocument.body.innerHTML = content;
   },
 
   _renderPreview: function CM__renderPreview(context) {
-    var activeSugg =
-      this.__activeQuery.suggestionList[this.__hilitedSuggestion];
-    if (activeSugg) {
-      var self = this;
-      this._previewer.queuePreview(
-        activeSugg.previewUrl,
-        activeSugg.previewDelay,
-        function queuedPreview(pblock) {
-          try { activeSugg.preview(context, pblock); }
-          catch (e) {
-            let verb = activeSugg._verb;
-            self.__msgService.displayMessage({
-              text: ('An exception occurred while previewing the command "' +
-                     (verb.cmd || verb).name + '".'),
-              exception: e,
-            });
-          }
-        });
-    }
+    var hindex = this.__hilitedIndex;
+    if (hindex === this.__lastHilitedIndex) return;
+
+    var activeSugg = this.hilitedSuggestion;
+    if (!activeSugg) return;
+    this.__lastHilitedIndex = hindex;
+
+    var self = this;
+    this.__previewer.queuePreview(
+      activeSugg.previewUrl,
+      activeSugg.previewDelay,
+      function queuedPreview(pblock) {
+        try { activeSugg.preview(context, pblock); }
+        catch (e) {
+          let verb = activeSugg._verb;
+          self.__msgService.displayMessage({
+            text: ('An exception occurred while previewing the command "' +
+                   (verb.cmd || verb).name + '".'),
+            exception: e,
+          });
+        }
+      });
   },
 
-  _previewAndSuggest: function CM__previewAndSuggest(context) {
+  _renderAll: function CM__renderAll(context) {
     this._renderSuggestions();
-
-    return this._renderPreview(context);
+    this._renderPreview(context);
   },
 
   reset: function CM_reset() {
     var query = this.__activeQuery;
     if (query && !query.finished) query.cancel();
+    this.__hilitedIndex = 0;
+    this.__lastInput = "";
+    this.__lastHilitedIndex = -1;
   },
 
   updateInput: function CM_updateInput(input, context, asyncSuggestionCb) {
@@ -223,11 +224,7 @@ CommandManager.prototype = {
     if (asyncSuggestionCb)
       this.__lastAsyncSuggestionCb = asyncSuggestionCb;
 
-    this.__hilitedSuggestion = 0;
-    if ("run" in query)
-      query.run();
-    else
-      this.onSuggestionsUpdated(input, context);
+    query.run();
   },
 
   getLastInput: function CM_getLastInput() {
@@ -235,33 +232,30 @@ CommandManager.prototype = {
   },
 
   onSuggestionsUpdated: function CM_onSuggestionsUpdated(input, context) {
-    Utils.dump("rendering",
-               this.__activeQuery.suggestionList.length,
-               "suggestions");
+    if (input !== this.__lastInput) return;
 
-    var previewState = "no-suggestions";
-    if (this.__activeQuery.suggestionList.length > 0)
-      previewState = "with-suggestions";
+    var {suggestionList} = this.__activeQuery;
+    Utils.dump("rendering", suggestionList.length, "suggestions");
 
-    if (!this.__activeQuery.finished)
-      previewState = "computing-suggestions";
-
-    this.setPreviewState(previewState);
-    this._previewAndSuggest(context);
+    this.setPreviewState(this.__activeQuery.finished
+                         ? (suggestionList.length > 0
+                            ? "with-suggestions"
+                            : "no-suggestions")
+                         : "computing-suggestions");
+    this._renderAll(context);
   },
 
   execute: function CM_execute(context) {
-    let suggestionList = this.__activeQuery.suggestionList;
-    var parsedSentence = suggestionList[this.__hilitedSuggestion];
-    if (!parsedSentence)
+    var activeSugg = this.hilitedSuggestion;
+    if (!activeSugg)
       this.__msgService.displayMessage('No command called "' +
                                        this.__lastInput + '".');
     else
       try {
-        this.__nlParser.strengthenMemory(this.__lastInput, parsedSentence);
-        parsedSentence.execute(context);
+        this.__nlParser.strengthenMemory(this.__lastInput, activeSugg);
+        activeSugg.execute(context);
       } catch (e) {
-        let verb = parsedSentence._verb;
+        let verb = activeSugg._verb;
         this.__msgService.displayMessage({
           text: ('An exception occurred while running the command "' +
                  (verb.cmd || verb).name + '".'),
@@ -271,8 +265,7 @@ CommandManager.prototype = {
   },
 
   hasSuggestions: function CM_hasSuggestions() {
-    let query = this.__activeQuery;
-    return !!(query && query.suggestionList.length);
+    return !!(this.__activeQuery || 0).hasResults;
   },
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
@@ -283,19 +276,14 @@ CommandManager.prototype = {
     };
   },
 
-  getHilitedSuggestionText: function CM_getHilitedSuggestionText(context) {
-    return (this.hasSuggestions()
-            ? (this.__activeQuery
-               .suggestionList[this.__hilitedSuggestion]
-               .completionText)
-            : "");
+  getHilitedSuggestionText: function CM_getHilitedSuggestionText() {
+    var sugg = this.hilitedSuggestion;
+    return sugg ? sugg.completionText : "";
   },
 
   getHilitedSuggestionDisplayName: function CM_getHilitedSuggDisplayName() {
-    if(!this.hasSuggestions())
-      return "";
-    var sugg = this.__activeQuery.suggestionList[this.__hilitedSuggestion];
-    return sugg.displayText;
+    var sugg = this.hilitedSuggestion;
+    return sugg ? sugg.displayText : "";
   },
 
   makeCommandSuggester: function CM_makeCommandSuggester() {
@@ -307,5 +295,8 @@ CommandManager.prototype = {
   },
 
   get maxSuggestions() CommandManager.maxSuggestions,
-  get previewBrowser() this._previewer,
+  get previewBrowser() this.__previewer,
+  get hilitedSuggestion() (
+    this.__activeQuery &&
+    this.__activeQuery.suggestionList[this.__hilitedIndex]),
 };
