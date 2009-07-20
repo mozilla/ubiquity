@@ -56,8 +56,19 @@ function makeParserForLanguage(languageCode, verbList,
 
 var plugins = {};
 
-function registerPluginForLanguage(languageCode, plugin) {
-  plugins[languageCode] = plugin;
+function registerPluginForLanguage(code, plugin) {
+  var {Parser} = Cu.import("resource://ubiquity/modules/parser/new/parser.js",
+                           null);
+  var langFile = "resource://ubiquity/modules/parser/new/" + code + ".js";
+  eval(Utils.getLocalUrl(langFile, "utf-8"));
+  var parser = makeParser();
+  var roleMap = plugin.roleMap = {};
+  for each (let {role, delimiter} in parser.roles)
+    if (!(role in roleMap)) roleMap[role] = delimiter;
+  plugin.pronouns = [
+    RegExp(a.replace(/\W/g, "\\$&").replace(/^\b|\b$/g, "\\b"), "i")
+    for each (a in parser.anaphora)];
+  plugins[code] = plugin;
 }
 
 function getPluginForLanguage(languageCode) plugins[languageCode];
@@ -77,13 +88,13 @@ ParserQuery.prototype = {
     this._suggestionList = [];
     this._queryString = queryString;
     this._context = context;
-    this._pronouns = null;
     this._parsingsList = [];
 
     this.maxSuggestions = maxSuggestions;
     this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
     this.requests = [];
     this.onResults = Boolean;
+    this.pronouns = null;
   },
 
   // TODO: Does query need some kind of destructor?  If this has a ref to the
@@ -107,11 +118,6 @@ ParserQuery.prototype = {
   },
   get hasResults() this._suggestionList.length > 0,
   get suggestionList() this._suggestionList,
-
-  get pronouns() this._pronouns,
-  set pronouns(prons) {
-    this._pronouns = [RegExp("\\b" + p + "\\b", "i") for each (p in prons)];
-  },
 
   // The handler that makes this a listener for partiallyParsedSentences.
   onNewParseGenerated: function PQ_onNewParseGenerated() {
@@ -242,7 +248,7 @@ Parser.prototype = {
                                                   query));
     else {
       let plugin = this._languagePlugin;
-      if (selected) query.pronouns = plugin.PRONOUNS;
+      if (selected) query.pronouns = plugin.pronouns;
       // Language-specific full-sentence suggestions:
       ppss = plugin.parseSentence(
         input,
@@ -282,7 +288,8 @@ Parser.prototype = {
   },
 
   setCommandList: function P_setCommandList(commandList) {
-    this._verbList = [new Verb(cmd) for each (cmd in commandList)];
+    this._verbList = [new Verb(cmd, this._languagePlugin.roleMap)
+                      for each (cmd in commandList)];
     this._verbsThatUseSpecificNouns = [];
     this._rankedVerbsThatUseGenericNouns = [];
     for each (let verb in this._verbList) {
@@ -374,7 +381,7 @@ ParsedSentence.prototype = {
       if (summary) {
         let label = obj ? "" : escapeHtml(args[x].flag) + " ";
         sentence += (
-          " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') + 
+          " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') +
           '<span class="' + (obj ? "object" : "argument") + '">' +
           summary + "</span>");
       }
@@ -605,8 +612,6 @@ PartiallyParsedSentence.prototype = {
   _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words,
                                                               pronounREs) {
     var {text, html} = this._selObj;
-    if (!text && !html) return false; // No selection to interpolate.
-
     var gotAnySuggestions = false;
     for each (let regexp in pronounREs) {
       let index = words.search(regexp);
@@ -747,87 +752,71 @@ PartiallyParsedSentence.prototype = {
   }
 };
 
-// This mapping is used to convert Parser 2 commands for use with Parser 1.
-var roleToPrep = {
-  source: "from",
-  goal: "to",
-  location: "near",
-  time: "at",
-  instrument: "with",
-  alias: "as",
-  format: "in",
-  modifier: "of",
-};
+function Verb(cmd, roleMap) {
+  // Picks up noun's label. "_name" is for backward compatiblity
+  function pluckLabel(noun) noun.label || noun._name || "?";
+  // Determines if an object has one or more own keys
+  function hasKey(obj) !!(obj || 0).__count__;
+  // cmd.DOType must be a NounType, if provided.
+  // cmd.modifiers should be a dictionary
+  // keys are prepositions
+  // values are NounTypes.
+  // example: {"from" : City, "to" : City, "on" : Day}
+  this.cmd = cmd;
+  this.matchedName = this._name = cmd.names[0];
+  this._arguments = {};
+  // Use the presence or absence of the "arguments" dictionary
+  // to decide whether this is a version 1 or version 2 command.
+  this._isNewStyle = hasKey(cmd.arguments);
 
-function Verb(cmd) {
-  if (cmd) this._init(cmd);
+  // New-style API: command defines arguments dictionary
+  if (this._isNewStyle) {
+    //if (cmd.takes || cmd.modifiers)
+    //  dump("WARNING: " + cmd.name +
+    //       " apparently follows the (now defunct) Parser 1.5 format\n");
+
+    // if there are arguments, copy them over using
+    // a (semi-arbitrary) choice of preposition
+    for each (let arg in cmd.arguments) {
+      let {role, nountype} = arg;
+      let obj = role === "object";
+      this._arguments[obj ? "direct_object" : role] = {
+        type : nountype,
+        label: arg.label || pluckLabel(nountype),
+        flag : obj ? null : roleMap[role],
+        "default": arg.default,
+      };
+    }
+  }
+  else {
+    // Old-style API for backwards compatibility:
+    //   Command defines DOType/DOLabel and modifiers dictionary.
+    // Convert this to argument dictionary.
+    if (cmd.DOType) {
+      this._arguments.direct_object = {
+        type: cmd.DOType,
+        label: cmd.DOLabel,
+        flag: null,
+        "default": cmd.DODefault
+        };
+    }
+
+    if (hasKey(cmd.modifiers)) {
+      let {modifiers, modifierDefaults} = cmd;
+      for (let x in modifiers) {
+        let type = modifiers[x];
+        this._arguments[x] = {
+          type: type,
+          label: pluckLabel(type),
+          flag: x
+          };
+        if (modifierDefaults)
+          this._arguments[x].default = modifierDefaults[x];
+      }
+    }
+  }
 }
 Verb.prototype = {
-  _init: function V__init(cmd) {
-    // Picks up noun's label. "_name" is for backward compatiblity
-    function pluckLabel(noun) noun.label || noun._name || "?";
-    // Determines if an object has one or more own keys
-    function hasKey(obj) !!(obj || 0).__count__;
-    /* cmd.DOType must be a NounType, if provided.
-       cmd.modifiers should be a dictionary
-       keys are prepositions
-       values are NounTypes.
-       example:  { "from" : City, "to" : City, "on" : Day } */
-    this.cmd = cmd;
-    this.matchedName = this._name = cmd.names[0];
-    this._arguments = {};
-    // Use the presence or absence of the "arguments" dictionary
-    // to decide whether this is a version 1 or version 2 command.
-    this._isNewStyle = hasKey(cmd.arguments);
-
-    // New-style API: command defines arguments dictionary
-    if (this._isNewStyle) {
-      //if (cmd.takes || cmd.modifiers)
-      //  dump("WARNING: " + cmd.name +
-      //       " apparently follows the (now defunct) Parser 1.5 format\n");
-
-      // if there are arguments, copy them over using
-      // a (semi-arbitrary) choice of preposition
-      for each (let arg in cmd.arguments) {
-        let {role, nountype} = arg;
-        let obj = role === "object";
-        this._arguments[obj ? "direct_object" : role] = {
-          type : nountype,
-          label: arg.label || pluckLabel(nountype),
-          flag : obj ? null : roleToPrep[role],
-          "default": arg.default,
-        };
-      }
-    }
-    else {
-      // Old-style API for backwards compatibility:
-      //   Command defines DOType/DOLabel and modifiers dictionary.
-      // Convert this to argument dictionary.
-      if (cmd.DOType) {
-        this._arguments.direct_object = {
-          type: cmd.DOType,
-          label: cmd.DOLabel,
-          flag: null,
-          "default": cmd.DODefault
-        };
-      }
-
-      if (hasKey(cmd.modifiers)) {
-        let {modifiers, modifierDefaults} = cmd;
-        for (let x in modifiers) {
-          let type = modifiers[x];
-          this._arguments[x] = {
-            type: type,
-            label: pluckLabel(type),
-            flag: x
-          };
-          if (modifierDefaults)
-            this._arguments[x].default = modifierDefaults[x];
-        }
-      }
-    }
-  },
-
   get disabled() this.cmd.disabled,
 
   execute: function V_execute(context, argumentValues) {

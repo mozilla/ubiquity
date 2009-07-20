@@ -76,6 +76,7 @@ function onDocumentLoad() {
       parserRegistry[code] +
       "</option>");
   }
+  changeLanguageSettings();
 
   // set the external calls control to the correct value:
   $("#external-calls-on-all-queries")[0].checked =
@@ -104,7 +105,10 @@ function changeLanguageSettings() {
     prefs.setIntPref("parserVersion", useParserVersion);
   }
   var [langSelect] = $("#language-select");
-  if ((langSelect.disabled = useParserVersion < 2))
+  Array.forEach(langSelect.options, function eachOpt(opt) {
+    opt.disabled = useParserVersion < 2 && ["en", "$"].indexOf(opt.value) < 0;
+  });
+  if (langSelect.options[langSelect.selectedIndex].disabled)
     langSelect.value = "en";
 
   var useLanguage = langSelect.value;
