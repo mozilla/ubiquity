@@ -81,11 +81,15 @@ function onDocumentLoad() {
   $("#external-calls-on-all-queries")[0].checked =
     UbiquitySetup.doNounFirstExternals;
 
-  $("#max-suggestions").keyup(function changeMaxSuggestions() {
-    if (!this.value || this.value === this.lastValue) return;
+  $("#max-suggestions").change(function changeMaxSuggestions() {
     CommandManager.maxSuggestions = this.value;
-    this.value = this.lastValue = CommandManager.maxSuggestions;
+    this.value = CommandManager.maxSuggestions;
   }).val(CommandManager.maxSuggestions);
+
+  $("#input-delay").change(function changeInputDelay() {
+    Application.prefs.setValue("extensions.ubiquity.inputDelay",
+                               this.value = Math.abs(~~this.value % 1e4));
+  }).val(Utils.currentChromeWindow.gUbiquity.inputDelay);
 }
 
 function changeLanguageSettings() {

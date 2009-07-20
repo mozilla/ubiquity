@@ -86,7 +86,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 }
 
 Ubiquity.prototype = {
-  __PROCESS_INPUT_DELAY: 50,
+  __DEFAULT_INPUT_DELAY: 50,
   __MIN_CMD_PREVIEW_LENGTH: 0,
 
   __KEYCODE_ENTER: KeyEvent.DOM_VK_RETURN,
@@ -110,6 +110,8 @@ Ubiquity.prototype = {
   get cmdManager() this.__cmdManager,
   get lastKeyEvent() this.__lastKeyEvent,
   get isWindowOpen() this.__msgPanel.state === "open",
+  get inputDelay() Application.prefs.getValue("extensions.ubiquity.inputDelay",
+                                              this.__DEFAULT_INPUT_DELAY),
 
   __onblur: function U__onBlur() {
     // Hackish fix for #330.
@@ -203,7 +205,7 @@ Ubiquity.prototype = {
     else
       this.__previewTimerID = this.Utils.setTimeout(
         function U___delayedPI(self) { self.__delayedProcessInput(); },
-        this.__PROCESS_INPUT_DELAY,
+        this.inputDelay,
         this);
   },
 

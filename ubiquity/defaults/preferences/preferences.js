@@ -14,3 +14,4 @@ pref("extensions.ubiquity.commandList.sortMode", "feed");
 pref("extensions.ubiquity.collectUsageData", false);
 pref("extensions.ubiquity.history.max", 42);
 pref("extensions.ubiquity.doNounFirstExternals", 0);
+pref("extensions.ubiquity.inputDelay", 50);
