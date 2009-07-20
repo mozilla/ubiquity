@@ -41,8 +41,6 @@ function makeParser() {
   zh.usespaces = false;
   zh.joindelimiter = '';
 
-  // this is a hack to get the UTF8 parts to load correctly in chrome space... bleh
-  zhparts = loadLocaleJson("resource://ubiquity/modules/parser/new/zh.json");
   zh.anaphora = ["这个","那个","這個","那個"];
   zh.roles = [
       {role: 'object', delimiter: '把'},
