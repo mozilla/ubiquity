@@ -127,46 +127,21 @@ function makeCommands(arrayOfOptions) {
 function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
   // nountypes; ensure that it doesn't break.
-  var self = this;
+  var jsm = {};
+  Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
+  Components.utils.import("resource://ubiquity/modules/parser/parser.js", jsm);
+  if (jsm.UbiquitySetup.parserVersion < 2) throw new this.SkipTestError();
   try {
-    var jsm = {};
-    Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
-    Components.utils.import("resource://ubiquity/modules/parser/parser.js", jsm);
-
     var services = jsm.UbiquitySetup.createServices();
     // but don't set up windows or chrome or anything... just use this to
     // get installed feeds.
     var NLParser = jsm.NLParserMaker(VER);
-    var nlParser = NLParser.makeParserForLanguage(
-      LANG,
-      [],
-      []
-    );
+    var nlParser = NLParser.makeParserForLanguage(LANG, []);
     // now do what CommandManager does using services.commandSource
     nlParser.setCommandList(services.commandSource.getAllCommands());
   } catch (e) {
-    this.assert(false, "Error caught in smoke test: " + e );
+    this.assert(false, "Error caught in smoke test: " + e);
   }
-
-
-  // Do a query here and make sure one of the builtin commands is
-  // suggested...
- /* var fakeContext = { textSelection: "", htmlSelection: "" };
-  var q = nlParser.newQuery("help", fakeContext, MAX_SUGGESTIONS, true);
-
-
-  var testFunc = self.makeCallback(
-    function(suggestionList) {
-      // TODO for some reason the test is not waiting for this to be called.
-      self.assert( suggestionList[0]._verb.name == "help",
-                   "Should be help command!");
-    });
-
-  q.onResults = function() {
-    testFunc(q.suggestionList);
-  };
-  q.run();*/
-
 }
 
 function testParserTwoDirectOnly() {

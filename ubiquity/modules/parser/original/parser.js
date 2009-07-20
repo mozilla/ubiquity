@@ -608,6 +608,7 @@ PartiallyParsedSentence.prototype = {
   },
 
   _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words) {
+    var {text, html} = this._selObj
     var gotAnySuggestions = false;
     for each (let regexp in this._query.pronouns) {
       let index = words.search(regexp);
