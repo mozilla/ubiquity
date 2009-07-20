@@ -131,7 +131,7 @@ function log() {
 
 function getDocument() Application.activeWindow.activeTab.document;
 
-function getWindow() CmdUtils.getDocument().defaultView;
+function getWindow() getDocument().defaultView;
 
 // === {{{ CmdUtils.getDocumentInsecure() }}} ===
 // === {{{ CmdUtils.getWindowInsecure() }}} ===
@@ -141,9 +141,9 @@ function getWindow() CmdUtils.getDocument().defaultView;
 // it is potentially **unsafe** and {{{CmdUtils.getWindow()}}} should
 // be used in place of this whenever possible.
 
-function getDocumentInsecure() CmdUtils.getDocument().wrappedJSObject;
+function getDocumentInsecure() getDocument().wrappedJSObject;
 
-function getWindowInsecure() CmdUtils.getWindow().wrappedJSObject;
+function getWindowInsecure() getWindow().wrappedJSObject;
 
 // === {{{ CmdUtils.geocodeAddress(address, callback) }}} ===
 //
@@ -169,18 +169,18 @@ function geocodeAddress(address, callback) {
     location: address
   };
 
-  jQuery.get( url, params, function( doc ){
-    var lats  = jQuery( "Latitude", doc );
-    var longs = jQuery( "Longitude", doc );
+  jQuery.get(url, params, function(doc){
+    var lats  = jQuery("Latitude", doc);
+    var longs = jQuery("Longitude", doc);
 
-    var addrs    = jQuery( "Address", doc );
-    var citys    = jQuery( "City", doc );
-    var states   = jQuery( "State", doc );
-    var zips     = jQuery( "Zip", doc );
-    var countrys = jQuery( "Country", doc );
+    var addrs    = jQuery("Address", doc);
+    var citys    = jQuery("City", doc);
+    var states   = jQuery("State", doc);
+    var zips     = jQuery("Zip", doc);
+    var countrys = jQuery("Country", doc);
 
     var points = [];
-    for( var i=0; i<=lats.length; i++ ) {
+    for(var i=0; i<=lats.length; i++) {
       points.push({
         lat: jQuery(lats[i]).text(),
         "long": jQuery(longs[i]).text(),
@@ -192,7 +192,7 @@ function geocodeAddress(address, callback) {
       });
     }
 
-    callback( points );
+    callback(points);
   }, "xml");
 }
 
@@ -204,7 +204,7 @@ function geocodeAddress(address, callback) {
 // {{{ css }}} The CSS source code to inject, in plain text.
 
 function injectCss(css) {
-  var doc = CmdUtils.getDocument();
+  var doc = getDocument();
   var style = doc.createElement("style");
   style.innerHTML = css;
   return doc.body.appendChild(style);
@@ -219,19 +219,19 @@ function injectCss(css) {
 
 function injectHtml(html) {
   const {jQuery} = this.__globalObject;
-  var doc = CmdUtils.getDocument();
+  var doc = getDocument();
   return jQuery("<div>" + html + "</div>").contents().appendTo(doc.body);
 }
 
 // === {{{ CmdUtils.copyToClipboard(text) }}} ===
 //
 // This function places the passed-in text into the OS's clipboard.
+// If the text is empty, the copy isn't performed.
 //
 // {{{text}}} is a plaintext string that will be put into the clipboard.
 
-function copyToClipboard(text) {
-  Utils.clipboard.text = text;
-}
+function copyToClipboard(text) ((text = String(text)) &&
+                                (Utils.clipboard.text = text));
 
 // === {{{ CmdUtils.injectJavascript(src, callback) }}} ===
 //
@@ -248,7 +248,7 @@ function copyToClipboard(text) {
 // of the document (i.e. window).
 
 function injectJavascript(src, callback) {
-  var doc = CmdUtils.getDocument();
+  var doc = getDocument();
   var script = doc.createElement("script");
   script.src = src;
   script.addEventListener("load", function onInjected() {
@@ -259,17 +259,17 @@ function injectJavascript(src, callback) {
   doc.body.appendChild(script);
 }
 
-// === {{{ CmdUtils.loadJQuery(func) }}} ===
+// === {{{ CmdUtils.loadJQuery(callback) }}} ===
 //
 // Injects the jQuery javascript library into the current tab's document.
 //
-// {{{ func }}} Non-optional callback function to call once jQuery has loaded.
+// {{{callback}}} gets passed back the {{{jQuery}}} object once it is loaded.
 
-function loadJQuery(func) {
-  CmdUtils.injectJavascript(
+function loadJQuery(callback) {
+  injectJavascript(
     "resource://ubiquity/scripts/jquery.js",
-    this.safeWrapper(function onJQuery(win) {
-      func(win.wrappedJSObject.jQuery);
+    callback && this.safeWrapper(function onJQuery(win) {
+      callback(win.wrappedJSObject.jQuery);
     }));
 }
 
@@ -327,7 +327,7 @@ function setLastResult(result) {
 // The geolocation object has the following properties:
 // {{{ city }}}, {{{ state }}}, {{{ country }}}, {{{ country_code }}},
 // {{{ lat }}}, {{{ long }}}.
-// (For a list of country codes, refer to http://www.maxmind.com/app/iso3166 )
+// (For a list of country codes, refer to http://www.maxmind.com/app/iso3166)
 //
 // You can choose to use the function synchronously: do not pass in any
 // callback, and the geolocation object will instead be returned
@@ -366,11 +366,11 @@ CmdUtils.UserCode = {
   //Copied with additions from chrome://ubiquity/content/prefcommands.js
   COMMANDS_PREF : "extensions.ubiquity.commands",
 
-  setCode : function(code) {
+  setCode: function UC_setCode(code) {
     Application.prefs.setValue(
       this.COMMANDS_PREF,
       code
-    );
+   );
     //Refresh any code editor tabs that might be open
     Application.activeWindow.tabs.forEach(function (tab){
       if(tab.document.location == "chrome://ubiquity/content/editor.html"){
@@ -379,18 +379,18 @@ CmdUtils.UserCode = {
     });
   },
 
-  getCode : function() {
+  getCode: function UC_getCode() {
     return Application.prefs.getValue(
       this.COMMANDS_PREF,
       ""
-    );
+   );
   },
 
-  appendCode : function(code){
+  appendCode: function UC_appendCode(code){
     this.setCode(this.getCode() + code);
   },
 
-  prependCode : function(code){
+  prependCode: function UC_prependCode(code){
     this.setCode(code + this.getCode());
   }
 };
@@ -404,9 +404,9 @@ CmdUtils.UserCode = {
 // {{{ CmdUtils.getWindowSnapshot() }}}, but probably doesn't need
 // to be used directly by command feeds.
 
-function getHiddenWindow()(Cc["@mozilla.org/appshell/appShellService;1"]
-                           .getService(Ci.nsIAppShellService)
-                           .hiddenDOMWindow);
+function getHiddenWindow() (Cc["@mozilla.org/appshell/appShellService;1"]
+                            .getService(Ci.nsIAppShellService)
+                            .hiddenDOMWindow);
 
 // === {{{ CmdUtils.getTabSnapshot(tab, options) }}} ===
 //
@@ -416,7 +416,7 @@ function getHiddenWindow()(Cc["@mozilla.org/appshell/appShellService;1"]
 
 function getTabSnapshot(tab, options) {
   var win = tab.document.defaultView;
-  return CmdUtils.getWindowSnapshot( win, options );
+  return getWindowSnapshot(win, options);
 }
 
 // === {{{ CmdUtils.getWindowSnapshot(win, options) }}} ===
@@ -437,7 +437,7 @@ function getTabSnapshot(tab, options) {
 function getWindowSnapshot(win, options) {
   if(!options) options = {};
 
-  var hiddenWindow = CmdUtils.getHiddenWindow();
+  var hiddenWindow = getHiddenWindow();
   var thumbnail = hiddenWindow.document.createElementNS(
     "http://www.w3.org/1999/xhtml", "canvas");
 
@@ -469,29 +469,24 @@ function getWindowSnapshot(win, options) {
 // is hosted elsewhere. The bits can then be manipulated at will
 // without worry of same-domain restrictions.
 //
-// {{{url}}} The URL where the image is located.
+// {{{url}}} is where the image is located.
 //
-// {{{callback}}} A function that get's passed back the bits of the
-// image, in DataUrl form.
+// {{{callback}}} gets passed back the bits of the
+// image, in the form of {{{data:image/png;base64,}}}.
 
 function getImageSnapshot(url, callback) {
-  var hiddenWindow = CmdUtils.getHiddenWindow();
-  var body = hiddenWindow.document.body;
-
-  var canvas = hiddenWindow.
-               document.
-               createElementNS("http://www.w3.org/1999/xhtml", "canvas" );
-
-  var img = new hiddenWindow.Image();
+  var {document, Image} = getHiddenWindow();
+  var canvas = document.createElementNS("http://www.w3.org/1999/xhtml",
+                                        "canvas");
+  var img = Image();
   img.src = url;
-  img.addEventListener("load", function(){
+  img.addEventListener("load", function gIS_load(){
     canvas.width = img.width;
     canvas.height = img.height;
-    var ctx = canvas.getContext( "2d" );
-    ctx.drawImage( img, 0, 0 );
-
-    callback( canvas.toDataURL() );
-	}, true);
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    callback(canvas.toDataURL());
+  }, true);
 }
 
 // == PASSWORDS AND OTHER SENSITIVE INFORMATION ==
@@ -522,8 +517,8 @@ function savePassword(opts) {
   //                                password,
   //                                usernameField,
   //                                passwordField);
-  var loginInfo = new nsLoginInfo('chrome://ubiquity/content',
-                                  'UbiquityInformation' + opts.name,
+  var loginInfo = new nsLoginInfo("chrome://ubiquity/content",
+                                  "UbiquityInformation" + opts.name,
                                   null,
                                   opts.username,
                                   opts.password,
@@ -532,51 +527,41 @@ function savePassword(opts) {
 
   try {
      passwordManager.addLogin(loginInfo);
-  } catch(e) {
-     // "This login already exists."
-     var logins = passwordManager.findLogins({},
-                                             "chrome://ubiquity/content",
-                                             'UbiquityInformation' + opts.name,
-                                             null);
-     for each(var login in logins) {
-        if (login.username == opts.username) {
-           //modifyLogin(oldLoginInfo, newLoginInfo);
-           passwordManager.modifyLogin(login, loginInfo);
-           break;
-        }
-     }
+  } catch (e) {
+    // "This login already exists."
+    var logins = passwordManager.findLogins({},
+                                            "chrome://ubiquity/content",
+                                            "UbiquityInformation" + opts.name,
+                                            null);
+    for each (var login in logins) {
+      if (login.username === opts.username) {
+        //modifyLogin(oldLoginInfo, newLoginInfo);
+        passwordManager.modifyLogin(login, loginInfo);
+        break;
+      }
+    }
   }
 }
 
 // === {{{ CmdUtils.retrieveLogins(name) }}} ===
 //
-// Retrieves one or more username/password saved with CmdUtils.savePassword.
+// Retrieves one or more username/password saved with
+// {{{CmdUtils.savePassword()}}}
+// as an array of objects, each of which takes the form
+// {{{{username: "", password: ""}}}}.
 //
 // {{{name}}} The identifier of the username/password pair to retrieve.
 // This must match the {{{opts.name}}} that was passed in to
-// {{{ CmdUtils.savePassword() }}} when the password was stored.
-// Returns: an array of objects, each of which takes the form
-// { username: '', password: '' }
+// {{{savePassword()}}} when the password was stored.
 
-function retrieveLogins(name) {
-  var passwordManager = Cc["@mozilla.org/login-manager;1"].
-                        getService(Ci.nsILoginManager);
-
-  var logins = passwordManager.findLogins({},
-                                          "chrome://ubiquity/content",
-                                          "UbiquityInformation" + name,
-                                          null);
-  var returnedLogins = [];
-
-  for each(var login in logins){
-    loginObj = {
-      username: login.username,
-      password: login.password
-    };
-    returnedLogins.push(loginObj);
-  }
-  return returnedLogins;
-}
+function retrieveLogins(name) [
+  {username: login.username, password: login.password}
+  for each (login in (Cc["@mozilla.org/login-manager;1"]
+                      .getService(Ci.nsILoginManager)
+                      .findLogins({},
+                                  "chrome://ubiquity/content",
+                                  "UbiquityInformation" + name,
+                                  null)))];
 
 // == COMMAND CREATION ==
 
@@ -607,7 +592,7 @@ function retrieveLogins(name) {
 // of the primary argument.  The value of the property must be either a
 // noun type (see
 // https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Nountypes_Reference
-// ) which defines what type of values are valid for the argument,
+//) which defines what type of values are valid for the argument,
 // a regular expression that filters what the argument can consist of,
 // , a dictionary of keys and values, or simply an array of strings.
 // DEPRECATED!  Use {{{ options.arguments }}} for Parser2 compatibility.
@@ -719,16 +704,16 @@ function CreateCommand(options) {
     let verbInitialParensPattern = /^([^\(\)]+?)\s*\((.+)\)$/;
     let verbFinalParensPattern = /^\((.+)\)\s*([^\(\)]+?)$/;
     let nameArgs = [];
-    for ( let x = 0; x < names.length; x++) {
+    for (let x = 0; x < names.length; x++) {
       let aName = names[x];
       let viMatches;
-      if ( viMatches = verbInitialParensPattern( aName ) ) {
+      if (viMatches = verbInitialParensPattern(aName)) {
         names[x] = viMatches[1];
         nameArgs[x] = viMatches[2];
       }
 
       let vfMatches;
-      if ( vfMatches = verbFinalParensPattern( aName ) ) {
+      if (vfMatches = verbFinalParensPattern(aName)) {
         names[x] = vfMatches[2];
         nameArgs[x] = vfMatches[1];
       }
@@ -1105,12 +1090,12 @@ function makeSearchCommand(options) {
 // {{{options.arguments}}}.
 
 function makeBookmarkletCommand(options) {
-  options.execute = function execute_bookmarklet() {
-    CmdUtils.getWindow().location = options.url;
+  options.execute = function bookmarklet_execute() {
+    getWindow().location = options.url;
   };
 
   if (!options.preview)
-    options.preview = function preview_bookmarklet(pblock) {
+    options.preview = function bookmarklet_preview(pblock) {
       pblock.innerHTML = "Executes the <b>" + this.name + "</b> bookmarklet.";
     };
 
@@ -1371,7 +1356,7 @@ function absUrl(data, sourceUrl) {
       jQuery(data).find("*").andSelf().filter("a, img, form, link, embed")
         .each(function au_each(){
           var attr, path = (this.getAttribute(attr = "href") ||
-                            this.getAttribute(attr = "src" ) ||
+                            this.getAttribute(attr = "src") ||
                             this.getAttribute(attr = "action"));
           if (path !== null && /^(?!https?:\/\/)/.test(path))
             this.setAttribute(attr,
@@ -1384,7 +1369,7 @@ function absUrl(data, sourceUrl) {
   return null;
 }
 
-// === {{{ CmdUtils.safeWrapper() }}} ===
+// === {{{ CmdUtils.safeWrapper(func) }}} ===
 //
 // Wraps a function so that exceptions from it are suppressed and notified.
 
@@ -1398,7 +1383,7 @@ function safeWrapper(func) {
         {text: ("An exception occurred while running " +
                 func.name + "()."),
          exception: e}
-      );
+     );
     }
   };
 }
@@ -1422,9 +1407,9 @@ CmdUtils._getPluginsForCmd = function(cmdId) {
   return CmdUtils._pluginRegistry[cmdId];
 };
 
-CmdUtils.registerPlugin = function( cmdId,
-                                    argumentName,
-                                    executeFunction ) {
+CmdUtils.registerPlugin = function(cmdId,
+                                   argumentName,
+                                   executeFunction) {
   if (!CmdUtils._pluginRegistry[cmdId]) {
     CmdUtils._pluginRegistry[cmdId] = {};
   }
@@ -1436,7 +1421,7 @@ CmdUtils.pluginNoun = function(cmdId) {
   var newNoun = {
     _cmdId: cmdId,
     _getPlugins: function() {
-      var plugins = CmdUtils._getPluginsForCmd( newNoun._cmdId );
+      var plugins = CmdUtils._getPluginsForCmd(newNoun._cmdId);
       // suggestion.data will contain the execute function.
       var name;
       return [CmdUtils.makeSugg(name, null, plugins[name])
@@ -1454,7 +1439,7 @@ CmdUtils.pluginNoun = function(cmdId) {
   return newNoun;
 };
 
-CmdUtils.executeBasedOnPlugin = function( cmdId, argRole ) {
+CmdUtils.executeBasedOnPlugin = function(cmdId, argRole) {
   return (function(args) {
     if (args.argRole.text) {
       var plugins = CmdUtils._getPluginsForCmd(cmdId);
