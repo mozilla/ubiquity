@@ -4,10 +4,11 @@
 
 body{
   background: #FFF;
-  font-size:13px;
+  font-size: 13px;
   font-family: "Helvetica", Verdana, Arial, sans-serif;
   max-width: 900px;
-  margin: 0px 4px 8px;
+  margin: 0px auto 8px auto;
+  padding: 0 4px;
   color: #000;
 }
 
@@ -39,10 +40,9 @@ li {
 }
 
 #nav a{
-  margin: 5px;
+  padding: 5px;
   color: white;
   display: block;
-  width: auto;
   height: 100%;
   text-decoration: none;
 }
