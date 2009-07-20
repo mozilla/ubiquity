@@ -590,7 +590,7 @@ function testPartiallyParsedSentence() {
     execute: function(context, directObject, modifiers) {
     }
   };
-  var verbNoArgs = new NLParser1.Verb(cmd_grumble);
+  var verbNoArgs = new NLParser1.Verb(cmd_grumble, {});
   var partiallyParsedNoArgs = new NLParser1.PartiallyParsedSentence(
     verbNoArgs,
     {},
@@ -628,7 +628,7 @@ function testPartiallyParsedSentence() {
     arguments: [{role: "source", nountype: noun_type_foo},
                 {role: "instrument", nountype: noun_type_bar},
                 {role: "location", nountype: noun_type_baz}],
-  });
+  }, {});
 
   var argStrings = {
     source: ["nonihilf"],

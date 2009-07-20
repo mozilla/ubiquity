@@ -178,8 +178,8 @@ ParserQuery.prototype = {
 };
 
 function Parser(verbList, languagePlugin, ContextUtils, suggestionMemory) {
-  this.setCommandList(verbList);
   this._languagePlugin = languagePlugin;
+  this.setCommandList(verbList);
 
   if (!ContextUtils) {
     var ctu = {};
