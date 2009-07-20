@@ -83,7 +83,7 @@ ParserQuery.prototype = {
     this.maxSuggestions = maxSuggestions;
     this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
     this.requests = [];
-    this.onResults = null;
+    this.onResults = Boolean;
   },
 
   // TODO: Does query need some kind of destructor?  If this has a ref to the
@@ -116,10 +116,10 @@ ParserQuery.prototype = {
   // The handler that makes this a listener for partiallyParsedSentences.
   onNewParseGenerated: function PQ_onNewParseGenerated() {
     this._refreshSuggestionList();
-    if (this.onResults) {
-      this.onResults(this._suggestionList, this.finished);
-    }
+    this.onResults();
   },
+
+  run: function PQ_run() { this.onNewParseGenerated(); },
 
   // This method should be called by parser code only, not client code.
   _addPartiallyParsedSentence:
@@ -147,10 +147,10 @@ ParserQuery.prototype = {
        assigned by Verb.getCompletions.  Give them also a frequencyScore based
        on the suggestionMemory:*/
     for each (let sugg in this._suggestionList) {
-      sugg.setFrequencyScore(
+      sugg.frequencyMatchScore =
         this._parser.getSuggestionMemoryScore(
           sugg._cameFromNounFirstSuggestion ? "" : inputVerb,
-          sugg._verb._name));
+          sugg._verb._name);
     }
     this._suggestionList.sort(this._byScoresDescending);
   },
@@ -230,7 +230,7 @@ Parser.prototype = {
 
   // TODO reset is gone
 
-  newQuery: function P_newQuery(input, context, maxSuggestions) {
+  newQuery: function P_newQuery(input, context, maxSuggestions, lazy) {
     var query = new ParserQuery(this, input, context, maxSuggestions);
     var psss = [], {push} = psss;
     var selObj = this._ContextUtils.getSelectionObject(context);
@@ -276,7 +276,7 @@ Parser.prototype = {
       for each (let pps in psss)
         query._addPartiallyParsedSentence(pps);
 
-    query._refreshSuggestionList();
+    if (!lazy) query.run();
     return query;
   },
 
@@ -315,14 +315,14 @@ ParsedSentence.prototype = {
     this._query = query;
     this.verbMatchScore = verbMatchScore;
     this.duplicateDefaultMatchScore = 100;
-    this.frequencyScore = 0;  // not yet tracked
+    this.frequencyMatchScore = 0;
     this.argMatchScore = 0;
     // argument match score starts at 0 and increased for each
     // argument where a specific nountype (i.e. non-arbitrary-text)
     // matches user input.
     let args = verb._arguments;
     for (let argName in argumentSuggestions)
-      this.argMatchScore += ((argName === "direct_object" ? 1 : 1.1) *
+      this.argMatchScore += ((argName === "direct_object" ? .9 : 1) *
                              (args[argName].type.rankLast ? .1 : 1));
   },
 
@@ -500,10 +500,6 @@ ParsedSentence.prototype = {
             this.verbMatchScore,
             this.argMatchScore];
   },
-
-  setFrequencyScore: function PS_setFrequencyScore(freqScore) {
-    this.frequencyMatchScore = freqScore;
-  }
 };
 
 function PartiallyParsedSentence(
@@ -663,14 +659,13 @@ PartiallyParsedSentence.prototype = {
     The reason we don't set the defaults directly on the object is cuz
     an asynchronous call of addArgumentSuggestion could actually fill in
     the missing argument after this.*/
-
-    let parsedSentences = [];
-    // Return nothing if this parsing is invalid due to bad user-supplied args
-    for (let argName in this._invalidArgs) {
-      if (this._invalidArgs[argName] && !this._validArgs[argName])
+    for (let argName in this._invalidArgs)
+      if (!(argName in this._validArgs))
+        // Return nothing if this parsing is invalid
+        // due to bad user-supplied args
         return [];
-    }
 
+    var parsedSentences = [], {push} = parsedSentences;
     if (this._cameFromNounFirstSuggestion) {
       for each (let sen in this._parsedSentences) {
         if (sen.hasFilledArgs()) {
@@ -678,21 +673,17 @@ PartiallyParsedSentence.prototype = {
            * input or selection into an argument of the verb; therefore, explicitly
            * filter out suggestions that fill no arguments.
            */
-          let filledSen = sen.fillMissingArgsWithDefaults();
-
-          for each (let oneSen in filledSen) {
+          for each (let oneSen in sen.fillMissingArgsWithDefaults()) {
             oneSen._cameFromNounFirstSuggestion = true;
             parsedSentences.push(oneSen);
           }
         }
       }
     }
-    else {
-      for each (let sen in this._parsedSentences) {
-        let filledSen = sen.fillMissingArgsWithDefaults();
-        parsedSentences = parsedSentences.concat(filledSen);
-      }
-    }
+    else
+      for each (let sen in this._parsedSentences)
+        push.apply(parsedSentences,
+                   sen.fillMissingArgsWithDefaults());
 
     return parsedSentences;
   },
