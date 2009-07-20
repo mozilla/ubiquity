@@ -1507,8 +1507,8 @@ Parser.prototype = {
         let ids = [id for (id in nounTypeIds)]
 //        currentQuery.dump("detecting: " + x + " for " + ids);
 
+        var dT = currentQuery._detectionTracker;
         for (let id in nounTypeIds) {
-          var dT = currentQuery._detectionTracker;
 
           if (dT.getStarted(x,id)) {
             //currentQuery.dump('detection of this combination has already begun.');
@@ -1895,17 +1895,17 @@ ParseQuery.prototype = {
       if (thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
         
-	// THROTTLING OF ONRESULTS (#833) - still experimental
+        // THROTTLING OF ONRESULTS (#833) - still experimental
         var throttleThreshold = 0.5;
         var progress = thisQuery._detectionTracker.detectionProgress;
         var passedThreshold = thisQuery._previousProgress < throttleThreshold &&
                               progress >= throttleThreshold;
         if ((addedAny && (asyncFlag || progress >= throttleThreshold)) ||
-	    passedThreshold){
+          passedThreshold){
           thisQuery.dump('calling onResults now');
           thisQuery.onResults();
-	}
-	thisQuery._previousProgress = progress;
+        }
+        thisQuery._previousProgress = progress;
       }
       return addedAny;
     }
@@ -1949,7 +1949,7 @@ ParseQuery.prototype = {
     }
 
   },
-  finishQuery: function() {
+  finishQuery: function PQ_finishQuery() {
     this._next();
     this.finished = true;
     this.dump("done!!!");
@@ -2081,7 +2081,7 @@ var NounTypeDetectionTracker = function(query) {
 NounTypeDetectionTracker.prototype = {
   _query: null,
   detectionSpace: {},
-  _ensureNode: function(arg,id) {
+  _ensureNode: function DT__ensureNode(arg,id) {
     if (!(arg in this.detectionSpace))
       this.detectionSpace[arg] = {};
     if (!(id in this.detectionSpace[arg]))
@@ -2090,45 +2090,46 @@ NounTypeDetectionTracker.prototype = {
                                        outstandingRequests: [] };
   },
   
-  getStarted: function(arg,id) {
+  getStarted: function DT_getStarted(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].started;
   },
-  setStarted: function(arg,id,bool) {
+  setStarted: function DT_setStarted(arg,id,bool) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].started = bool;
   },
   
-  getComplete: function(arg,id) {
+  getComplete: function DT_getComplete(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].complete;
   },
-  setComplete: function(arg,id,bool) {
+  setComplete: function DT_setComplete(arg,id,bool) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].complete = bool;
   },
   
-  getParseIdsToComplete: function(arg,id) {
+  getParseIdsToComplete: function DT_getParseIdsToComplete(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].parseIds;
   },
-  getParseIdsToCompleteForIds: function(arg,ids) {
+  getParseIdsToCompleteForIds: function 
+    DT_getParseIdsToCompleteForIds(arg,ids) {
     let returnHash = {};
     for each (let id in ids)
       for each (let parseId in this.getParseIdsToComplete(arg,id))
         returnHash[+parseId] = true;
     return [id for (id in returnHash)];
   },
-  addParseIdToComplete: function(arg,id,parseId) {
+  addParseIdToComplete: function DT_addParseIdToComplete(arg,id,parseId) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].parseIds.push(+parseId);
   },
   
-  getOutstandingRequests: function(arg,id) {
+  getOutstandingRequests: function DT_getOutstandingRequests(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].outstandingRequests;
   },
-  addOutstandingRequest: function(arg,id,request) {
+  addOutstandingRequest: function DT_addOutstandingRequest(arg,id,request) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].outstandingRequests.push(request);
   },
@@ -2136,7 +2137,7 @@ NounTypeDetectionTracker.prototype = {
   // ** {{{NounTypeDetectionTracker#getRequestCount}}} **
   //
   // A getter for the total number of open requests
-  getRequestCount: function(x,id) {
+  getRequestCount: function DT_abortOutstandingRequests(x,id) {
     let numRequests = 0;
     for (let i in this.detectionSpace){
       if (x && x != i)
@@ -2156,7 +2157,7 @@ NounTypeDetectionTracker.prototype = {
     return numRequests;
   },
   
-  abortOutstandingRequests: function() {
+  abortOutstandingRequests: function DT_abortOutstandingRequests() {
     for (let i in this.detectionSpace){
       for (let j in this.detectionSpace[i]) {
         for each (let req in this.detectionSpace[i][j].outstandingRequests) {
@@ -2247,8 +2248,6 @@ var Parse = function(query, input, verb, argString, parent) {
 }
 
 Parse.prototype = {
-  // ** {{{Parse#parseId}}} **
-  // Gives a
 
   // ** {{{Parse#displayText}}} **
   //
@@ -2437,7 +2436,7 @@ Parse.prototype = {
   //
   // This returns an array of pairs of argument strings and the nountypes
   // they must be checked against.
-  getArgsAndNounTypeIdsToCheck: function() {
+  getArgsAndNounTypeIdsToCheck: function PP_getArgsAndNounTypeIdsToCheck() {
     if (this._argsAndNounTypeIdsToCheck)
       return this._argsAndNounTypeIdsToCheck;
 
@@ -2467,7 +2466,7 @@ Parse.prototype = {
     return returnArr;
   },
 
-  getRequestCount: function() {
+  getRequestCount: function PP_getRequestCount() {
     let requestCount = 0;
     for each (let {argText,nounTypeIds} in
                                 this.getArgsAndNounTypeIdsToCheck()) {
@@ -2484,7 +2483,8 @@ Parse.prototype = {
   // is marked "complete" (meaning there are no outstanding async requests)
   // OR there are some suggestions.
   // This means this parse can move onto Step 8.
-  allNounTypesDetectionHasCompleted: function() {
+  allNounTypesDetectionHasCompleted: function 
+    PP_allNounTypesDetectionHasCompleted() {
     var argsAndNounTypeIdsToCheck = this.getArgsAndNounTypeIdsToCheck();
     var thisQuery = this._query;
     var hasSuggs = function(argText,nounTypeIds) {
