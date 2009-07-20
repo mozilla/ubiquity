@@ -263,9 +263,13 @@ var noun_type_url = {
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
     var url = text;
     if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
-      let p = "http://", n = p.length;
+      let p = "http://";
       url = p + url;
-      if (selectionIndices) selectionIndices = [n, n + url.length];
+      if (selectionIndices) {
+        let {length} = p;
+        selectionIndices[0] += length;
+        selectionIndices[1] += length;
+      }
     }
     Utils.history.search(text, function nt_url_search(results) {
       if (results.length)

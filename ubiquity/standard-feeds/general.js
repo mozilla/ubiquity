@@ -163,10 +163,11 @@ const GCalcHelp = "http://www.googleguide.com/help/calculator.html";
 const noun_calc = {
   name: "calc",
   label: "expression",
+  rankLast: true,
   noExternalCalls: true,
-  suggest: function suggest(text) {
+  suggest: function n_calc_suggest(text, html, cb, selIndices) {
     var simple = this._simple.test(text);
-    return [CmdUtils.makeSugg(text, "", simple, simple ? 1 : .5)];
+    return [CmdUtils.makeSugg(text, "", simple, simple ? 1 : .5, selIndices)];
   },
   _simple: /^[\d.+\-*\/^%~(, )]+$/,
 };

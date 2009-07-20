@@ -232,19 +232,19 @@ Parser.prototype = {
 
   newQuery: function P_newQuery(input, context, maxSuggestions, lazy) {
     var query = new ParserQuery(this, input, context, maxSuggestions);
-    var psss = [], {push} = psss;
+    var ppss = [], {push} = ppss;
     var selObj = this._ContextUtils.getSelectionObject(context);
-    var selection = selObj.text || selObj.html;
-    if (!input && selection)
+    var selected = !!(selObj.text || selObj.html);
+    if (!input && selected)
       // selection, no input, noun-first suggestion on selection
-      push.apply(psss, this._nounFirstSuggestions(selObj,
+      push.apply(ppss, this._nounFirstSuggestions(selObj,
                                                   maxSuggestions,
                                                   query));
     else {
       let plugin = this._languagePlugin;
-      if (selection) query.pronouns = plugin.PRONOUNS;
+      if (selected) query.pronouns = plugin.PRONOUNS;
       // Language-specific full-sentence suggestions:
-      psss = plugin.parseSentence(
+      ppss = plugin.parseSentence(
         input,
         this._verbList,
         selObj,
@@ -252,13 +252,14 @@ Parser.prototype = {
           new PartiallyParsedSentence(
             verb, argStrings, selObj, matchScore, query)));
       // noun-first matches on input
-      if (psss.length === 0) {
+      if (ppss.length === 0) {
         let selObj = {
           text: input,
           html: Utils.escapeHtml(input),
+          fake: true,
         };
-        selection = true;
-        push.apply(psss, this._nounFirstSuggestions(selObj,
+        selected = true;
+        push.apply(ppss, this._nounFirstSuggestions(selObj,
                                                     maxSuggestions,
                                                     query));
       }
@@ -266,14 +267,14 @@ Parser.prototype = {
 
     // partials is now a list of PartiallyParsedSentences; if there's a
     // selection, try using it for any missing arguments...
-    if (selection)
-      for each (let pps in psss) {
+    if (selected)
+      for each (let pps in ppss) {
         let withSel = pps.getAlternateSelectionInterpolations();
         for each (let ppsx in withSel)
           query._addPartiallyParsedSentence(ppsx);
       }
     else
-      for each (let pps in psss)
+      for each (let pps in ppss)
         query._addPartiallyParsedSentence(pps);
 
     if (!lazy) query.run();
@@ -723,31 +724,24 @@ PartiallyParsedSentence.prototype = {
      * interpolated into missing arguments -- one for each argument where
      * the selection could go.
      *
-     * If there's no selection, or the selection can't be used, returns a
+     * If the selection can't be used, returns a
      * list containing just this object.
      */
-    var selObj = this._selObj || 0;
-    if (!selObj.text)
-      return [this];
     let unfilledArgs = this._getUnfilledArguments();
-    if (unfilledArgs.length === 0)
-      return [this];
+    if (unfilledArgs.length === 0) return [this];
+
+    let {text, html, fake} = this._selObj;
+    let indices = [0, fake ? 0 : text.length];
     if (unfilledArgs.length === 1) {
-      this._argSuggest(unfilledArgs[0],
-                       selObj.text,
-                       selObj.html,
-                       [0, selObj.text.length]);
+      this._argSuggest(unfilledArgs[0], text, html, indices);
       return [this];
     }
 
     let alternates = [];
     for each (let arg in unfilledArgs) {
       let newParsing = this.copy();
-      let canUseSelection = newParsing._argSuggest(arg,
-                                                   selObj.text,
-                                                   selObj.html,
-                                                   [0, selObj.text.length]);
-      if (canUseSelection) alternates.push(newParsing);
+      if (newParsing._argSuggest(arg, text, html, indices))
+        alternates.push(newParsing);
     }
     return alternates.length ? alternates : [this];
   }

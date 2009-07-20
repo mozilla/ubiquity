@@ -219,18 +219,15 @@ function makeSugg(text, html, data, score, selectionIndices) {
   // we'll stick some html tags into the summary so that the part
   // that comes from the text selection can be visually marked in
   // the suggestion list.
-  if (selectionIndices) {
-    var pre = summary.slice(0, selectionIndices[0]);
-    var middle = summary.slice(selectionIndices[0],
-                               selectionIndices[1]);
-    var post = summary.slice(selectionIndices[1]);
-    summary = (Utils.escapeHtml(pre) +
-               "<span class='selection'>" +
-               Utils.escapeHtml(middle) +
-               "</span>" +
-               Utils.escapeHtml(post));
-  }
-  else summary = Utils.escapeHtml(summary);
+  var [start, end] = selectionIndices || [0, 0];
+  summary = (
+    start < end
+    ? (Utils.escapeHtml(summary.slice(0, start)) +
+       "<span class='selection'>" +
+       Utils.escapeHtml(summary.slice(start, end)) +
+       "</span>" +
+       Utils.escapeHtml(summary.slice(end)))
+    : Utils.escapeHtml(summary));
 
   return {
     text: text, html: html, data: data,
