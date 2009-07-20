@@ -7,9 +7,7 @@ body{
   font-size:13px;
   font-family: "Helvetica", Verdana, Arial, sans-serif;
   max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 0px;
+  margin: 0px 4px 8px;
   color: #000;
 }
 
@@ -37,7 +35,7 @@ li {
   list-style-image:none;
   list-style-position:outside;
   list-style-type:none;
-  width: 149px;
+  width: 144px;
 }
 
 #nav a{
@@ -64,14 +62,14 @@ li {
   float: left;
 }
 
-.col-five{
-  width: 480px;
-  margin-right: 20px;
+.col-four{
+  width: 370px;
   float: left;
 }
 
-.col-four{
-  width: 395px;
+.col-five{
+  width: 480px;
+  margin-right: 20px;
   float: left;
 }
 
@@ -113,9 +111,8 @@ h2{
   border-top: 1px solid black;
   font-variant: small-caps;
   color: black;
-  margin-top: 100px;
-  padding-top: 10px;
-  padding-bottom: 20px;
+  margin-top: 80px;
+  padding: 10px 0;
 }
 
 h2.top{
@@ -160,6 +157,14 @@ em{
 }
 .command .synonyms{
   color: black;
+}
+
+#skin-list{
+  padding: 0;
+}
+
+#skin-list .name{
+  font-style: normal;
 }
 
 #skin-list .current-skin{
