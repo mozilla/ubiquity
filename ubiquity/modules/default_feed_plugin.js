@@ -374,8 +374,8 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   // and keep english as a default, etc.
   // mitcho's guess: we should keep nountypes separate but verbs together... :/
   headerCodeSources.push(
-    new LocalUriCodeSource(basePartsUri + "header/en/nountypes.js"));
-  feeds["Builtin Commands"] = baseFeedsUri + "en/builtincmds.js";
+    new LocalUriCodeSource(basePartsUri + "header/nountypes.js"));
+  feeds["Builtin Commands"] = baseFeedsUri + "builtincmds.js";
 
   return {
     feeds: feeds,
