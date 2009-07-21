@@ -44,8 +44,6 @@ const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/msgservice.js");
-Cu.import("resource://ubiquity/modules/contextutils.js");
-Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
 var gOldAlerted = false;
 
@@ -75,11 +73,12 @@ function Parser(props) {
     for (var key in props) this[key] = props[key];
 }
 Parser.prototype = {
-  // References to contextUtils and suggestionMemory modules; these
-  // can be replaced with stub modules (see makeParserForLanguage in
-  // namespace.js.)
-  _contextUtils: ContextUtils,
-  _suggestionMemory: SuggestionMemory,
+  // References to contextUtils and suggestionMemory modules; makeParserForLanguage()
+  // in namespace.js will, and must, set these to either a stub for testing, or to the
+  // real module.
+  _contextUtils: null,
+  _suggestionMemory: null,
+
   // ** {{{Parser#lang}}} **
   lang: "",
 
@@ -143,7 +142,7 @@ Parser.prototype = {
   // which *don't* have a modifier will be lowered in score.
   //
   // If set, the value is the default non-"" delimiter.
-  // 
+  //
   // Example: think Japanese.
   _objectDelimiter: false,
 
@@ -402,6 +401,15 @@ Parser.prototype = {
       sel: selection
     }];
 
+    var suggMem = this._suggestionMemory;
+    function getVerbFrequencyMultiplier( inputPart, verbId ) {
+      // getScore not a function?? because this._suggestionMemory points to the
+      // SuggestionMemory constructor function???
+      var score = suggMem.getScore(inputPart, verbId);
+      return 1 + score; // TODO this is a crazy multiplier that can be absurdly high.
+      // It will basically swamp everything else.  Is this OK?
+    }
+
     // The match will only give us the prefix that it matched. For example,
     // if we have a verb "shoot" and had input "sho Fred", verbPrefix = "sho"
     // and now we must figure out which verb that corresponded to.
@@ -420,6 +428,18 @@ Parser.prototype = {
         for each (let subname in verbPatterns[verbId]) {
           if (subname.indexOf(vplc) !== 0) continue;
           let {name} = subname;
+          // Score the quality of the verb match.
+          // the sqrt makes it so the score reflects the fact that
+          // initial letters in the verb prefix are more informative,
+          // and that later letters add less to the overall confidence
+          // of the verb match. The 0.3 flooring was added so that these
+          // verb prefix matches, even if they're only one or two
+          // characters, will get higher scoreMultipliers than noun-first
+          // suggestions, which get scoreMultiplier of 0.3. (trac #750)
+          let verbScore = ((0.4 + 0.6 * Math.sqrt(verbPiece.length / name.length))
+                          * (order ? verbFinalMultiplier : verbInitialMultiplier)
+                          * getVerbFrequencyMultiplier(verbPiece, verbId));
+
           returnArray.push({
             _verb: {
               __proto__: verb,
@@ -427,15 +447,7 @@ Parser.prototype = {
               text: name,
               _order: order,
               input: verbPiece,
-              // the sqrt makes it so the score reflects the fact that
-              // initial letters in the verb prefix are more informative,
-              // and that later letters add less to the overall confidence
-              // of the verb match. The 0.3 flooring was added so that these
-              // verb prefix matches, even if they're only one or two
-              // characters, will get higher scoreMultipliers than noun-first
-              // suggestions, which get scoreMultiplier of 0.3. (trac #750)
-              score: ((0.4 + 0.6 * Math.sqrt(verbPiece.length / name.length))
-                      * (order ? verbFinalMultiplier : verbInitialMultiplier)),
+              score: verbScore
             },
             argString: argString,
             sel: selection
@@ -936,7 +948,7 @@ Parser.prototype = {
     // Then, in step 7, object -> other roles interpolation will
     // make sure that the selection gets tried in all roles of
     // the verb that is chosen.
-    
+
     let parseCopy = parse.copy();
 //    if(!parseCopy.input.length){
       if (!('object' in parseCopy.args))
@@ -1062,14 +1074,14 @@ Parser.prototype = {
           rolesToTry[arg.role] = this._otherRolesCache[arg.role];
       }
     }
-    
+
     for (let key in parse.args.object) {
       let object = parse.args.object[key];
       // if the object has a modifier, we don't want to override that
       // so we won't apply this object to other roles.
       if (object.modifier)
         continue; // goes to the next parse.args.object key
-      
+
       // If the argument was not from a selection context (ie., it was from
       // the input (argString)) and the known verb *does* have an object,
       // don't apply. In other words, "weather chicago" > "weather near chicago"
@@ -1162,7 +1174,7 @@ Parser.prototype = {
       let parser = this;
       for (let role in parse.args){
         if (!verb.arguments.some(function(arg){
-	        return (arg.role === role && 
+	        return (arg.role === role &&
                    (!parse._suggested ||
                     parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id] == true))}))
           continue VERBS;
@@ -1449,7 +1461,7 @@ Parser.prototype = {
         let ids = [];
         if (id != undefined)
           ids = [ id ];
-        else 
+        else
           ids = [ id for (id in nounTypeIds)
                   if ((typeof thisParser._nounCache[x] == 'object'
                        && id in thisParser._nounCache[x]
@@ -1462,16 +1474,16 @@ Parser.prototype = {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
         }
-        
+
         if (!(x in thisParser._nounCache))
           thisParser._nounCache[x] = {};
-        
+
         for each (let newSugg in suggestions) {
           let {nountypeId} = newSugg;
 
           if (!(nountypeId in thisParser._nounCache[x]))
             thisParser._nounCache[x][nountypeId] = [];
-          
+
           let thisSuggIsNew = true;
           for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
             // Here, we only compare the summary propery.
@@ -1480,7 +1492,7 @@ Parser.prototype = {
             // 2. If the summary is not different, then the data should
             //    be different, as then the user is forced to choose between
             //    identical suggestions.
-            // 3. Checking data is dangerous as isEqual is not made to 
+            // 3. Checking data is dangerous as isEqual is not made to
             //    handle xpconnect objects, which are often in data.
             //    (This was, I suspect, the problem with #829.)
             if (newSugg.summary == oldSugg.summary) {
@@ -1504,7 +1516,7 @@ Parser.prototype = {
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
 
-        let ids = [id for (id in nounTypeIds)]
+        let ids = [id for (id in nounTypeIds)];
 //        currentQuery.dump("detecting: " + x + " for " + ids);
 
         var dT = currentQuery._detectionTracker;
@@ -1514,9 +1526,9 @@ Parser.prototype = {
             //currentQuery.dump('detection of this combination has already begun.');
             continue;
           }
-          
+
           currentQuery.dump(x+','+id);
-          
+
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
           dT.setStarted(x,id,true);
@@ -1549,7 +1561,7 @@ Parser.prototype = {
               dT.addOutstandingRequest(x,id,result);
             }
           }
-          
+
           // Check whether (a) no more results are coming and
           // (b) there were no immediate results.
           // In this case, try to complete the parse now.
@@ -1570,9 +1582,27 @@ Parser.prototype = {
   },
   // ** {{{Parser#strengthenMemory}}} **
   //
-  // This is a dummy function stub in order to match the interface that
-  // cmdmanager expects. TODO: rethink this.
-  strengthenMemory: function() {}
+  // Strengthen the association between the verb part of the user's input and the
+  // suggestion that the user ended up choosing, in order to give better ranking to
+  // future suggestions.
+  strengthenMemory: function(input, chosenSuggestion) {
+    // Input (current contents of ubiquity input box) is passed to us for API backwards
+    // compatibility reasons, but we can ignore it and get the verb part of the raw input
+    // from verb.input.
+
+    let chosenVerb = chosenSuggestion._verb.id;
+    // Question:  Are the IDs guaranteed to be consistent across runs??
+    let inputVerb = chosenSuggestion._verb.input;
+    // inputVerb is undefined if the suggestion was made without any part of the input
+    // being the verb.
+    if (inputVerb) {
+      this._suggestionMemory.remember(inputVerb, chosenVerb);
+    }
+
+    // TODO
+    // Not doing the remember("", chosenVerb) thing just yet, but we should do that
+    // whenever the suggestion has filled arguments.
+  }
 }
 
 // == {{{ParseQuery}}} ==
@@ -1834,7 +1864,7 @@ ParseQuery.prototype = {
       var requestCount = thisParse.getRequestCount();
       //thisQuery.dump('completing parse '+thisParse._id+' now');
       //dump("request count: " + requestCount + "\n");
-            
+
       if (!(thisParse._requestCountLastCompletedWith == undefined)
           && thisParse._requestCountLastCompletedWith == requestCount) {
         return false;
@@ -1845,7 +1875,7 @@ ParseQuery.prototype = {
       if (requestCount == 0) {
         thisParse.complete = true;
       }
-      
+
       // go through all the arguments in thisParse and suggest args
       // based on the nountype suggestions.
       // If they're good enough, add them to _scoredParses.
@@ -1862,7 +1892,7 @@ ParseQuery.prototype = {
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
-        
+
       return addedAny;
     }
 
@@ -1888,13 +1918,13 @@ ParseQuery.prototype = {
 
       // Only call onResults if we added any parses, or if we just
       // passed the throttling threshold for displaying results
-      // 
+      //
       // Also, don't run onResults here if thisQuery.finished,
       // as if the finished flag was just turned on, it would have independently
       // called onResults.
       if (thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
-        
+
         // THROTTLING OF ONRESULTS (#833) - still experimental
         var throttleThreshold = 0.5;
         var progress = thisQuery._detectionTracker.detectionProgress;
@@ -1912,7 +1942,7 @@ ParseQuery.prototype = {
 
     // and also a list of arguments we need to cache
     this._argsToCache = {};
-    
+
     for (let partialParseId in this._verbedParses) {
       let parse = this._verbedParses[partialParseId];
 
@@ -1925,13 +1955,13 @@ ParseQuery.prototype = {
           // this is the text we're going to cache
           let argText = x.input;
           let ids = [ verbArg.nountype.id
-                      for each (verbArg in parse._verb.arguments) 
+                      for each (verbArg in parse._verb.arguments)
                       if (verbArg.role == role)];
 
           if (!(argText in this._argsToCache)) {
             this._argsToCache[argText] = 1;
           }
-          
+
           for each (let id in ids) {
             this._detectionTracker.addParseIdToComplete(argText,id,partialParseId);
           }
@@ -2022,7 +2052,7 @@ ParseQuery.prototype = {
     if (parseClass != 'verbed' && parseClass != 'scored')
       throw new Error('#addIfGoodEnough\'s parseClass arg must either be '
                      +'"scored" or "verbed".');
-    
+
     var parseCollection = this['_'+parseClass+'Parses'];
 
     let parseIds = [parse._id for each (parse in parseCollection)];
@@ -2070,8 +2100,8 @@ ParseQuery.prototype = {
 
 // == {{{NounTypeDetectionTracker}}} ==
 //
-// {{{NounTypeDetectionTracker}}} is the class for 
-// {{{ParseQuery#_detectionTracker}}} which is used to keep track of which 
+// {{{NounTypeDetectionTracker}}} is the class for
+// {{{ParseQuery#_detectionTracker}}} which is used to keep track of which
 // (argText,nountypeId) pairs have been started or completed
 
 var NounTypeDetectionTracker = function(query) {
@@ -2089,7 +2119,7 @@ NounTypeDetectionTracker.prototype = {
                                        parseIds: [],
                                        outstandingRequests: [] };
   },
-  
+
   getStarted: function DT_getStarted(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].started;
@@ -2098,7 +2128,7 @@ NounTypeDetectionTracker.prototype = {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].started = bool;
   },
-  
+
   getComplete: function DT_getComplete(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].complete;
@@ -2107,12 +2137,12 @@ NounTypeDetectionTracker.prototype = {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].complete = bool;
   },
-  
+
   getParseIdsToComplete: function DT_getParseIdsToComplete(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].parseIds;
   },
-  getParseIdsToCompleteForIds: function 
+  getParseIdsToCompleteForIds: function
     DT_getParseIdsToCompleteForIds(arg,ids) {
     let returnHash = {};
     for each (let id in ids)
@@ -2124,7 +2154,7 @@ NounTypeDetectionTracker.prototype = {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].parseIds.push(+parseId);
   },
-  
+
   getOutstandingRequests: function DT_getOutstandingRequests(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].outstandingRequests;
@@ -2142,7 +2172,7 @@ NounTypeDetectionTracker.prototype = {
     for (let i in this.detectionSpace){
       if (x && x != i)
         continue;
-          
+
       for (let j in this.detectionSpace[i]) {
         if (id && id != j)
           continue;
@@ -2153,10 +2183,10 @@ NounTypeDetectionTracker.prototype = {
         }
       }
     }
-    
+
     return numRequests;
   },
-  
+
   abortOutstandingRequests: function DT_abortOutstandingRequests() {
     for (let i in this.detectionSpace){
       for (let j in this.detectionSpace[i]) {
@@ -2181,7 +2211,7 @@ NounTypeDetectionTracker.prototype = {
         // nountypes
         if (!this._query.parser._nounTypes[j].noExternalCalls)
           continue;
-          
+
         total++;
         count += dS[i][j].complete;
 //              if (!(dS[i][j].complete)
@@ -2190,7 +2220,7 @@ NounTypeDetectionTracker.prototype = {
     }
     return (count/total);
   }
-  
+
 }
 
 var NounCache = function() {
@@ -2204,7 +2234,7 @@ NounCache.prototype = {
     if (!(id in this.cacheSpace[arg]))
       this.cacheSpace[arg][id] = [];
   },
-  
+
   getSuggs: function(arg,id) {
     this._ensureNode(arg,id);
     return this.cacheSpace[arg][id]
@@ -2483,7 +2513,7 @@ Parse.prototype = {
   // is marked "complete" (meaning there are no outstanding async requests)
   // OR there are some suggestions.
   // This means this parse can move onto Step 8.
-  allNounTypesDetectionHasCompleted: function 
+  allNounTypesDetectionHasCompleted: function
     PP_allNounTypesDetectionHasCompleted() {
     var argsAndNounTypeIdsToCheck = this.getArgsAndNounTypeIdsToCheck();
     var thisQuery = this._query;

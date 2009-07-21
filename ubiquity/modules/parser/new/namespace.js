@@ -36,11 +36,13 @@
 
 var EXPORTED_SYMBOLS = ["NLParser2","parserRegistry"];
 
-Components.utils.import("resource://ubiquity/modules/parser/parser.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/parser/parser.js");
+Cu.import("resource://ubiquity/modules/parser/new/parser.js");
 
 // load the parserRegistry
-Components.utils.import("resource://ubiquity/modules/localeutils.js");
+Cu.import("resource://ubiquity/modules/localeutils.js");
 var parserRegistry = loadLocaleJson('resource://ubiquity/modules/parser/new/parser_registry.json');
 
 var NLParser2 = {
@@ -59,10 +61,20 @@ var NLParser2 = {
        * Normally I would do this in the constructor, but because we use
        * parserFactories[]() it's easier to do it here:
        */
-      if (ContextUtils)
+      if (ContextUtils) {
         parser._contextUtils = ContextUtils;
-      if (SuggestionMemory)
+      } else {
+        var ctu = {};
+        Cu.import("resource://ubiquity/modules/contextutils.js", ctu);
+        parser._contextUtils = ctu.ContextUtils;
+      }
+      if (SuggestionMemory) {
         parser._suggestionMemory = SuggestionMemory;
+      } else {
+        var sm = {};
+        Cu.import("resource://ubiquity/modules/suggestion_memory.js", sm);
+        parser._suggestionMemory = new sm.SuggestionMemory("main_parser");
+      }
 
       return parser;
     }
