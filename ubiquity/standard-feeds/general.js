@@ -279,11 +279,11 @@ function translateTo(text, langCodePair, callback, pblock) {
 CmdUtils.CreateCommand({
   DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
   names: ["translate"],
-  arguments: {
-    object_text: noun_arb_text,
-    source: noun_type_lang_google,
-    goal: noun_type_lang_google,
-  },
+  arguments: [
+    {role: "object", nountype: noun_arb_text, label: "text"},
+    {role: "source", nountype: noun_type_lang_google},
+    {role: "goal", nountype: noun_type_lang_google},
+  ],
   description: "Translates from one language to another.",
   icon: "chrome://ubiquity/skin/icons/google.ico",
   help: "" + (

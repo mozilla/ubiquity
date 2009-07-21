@@ -7,7 +7,7 @@ const Apology = ("<p>" +
 
 CmdUtils.CreateCommand({
   names: ["add to google calendar", "quick add"],
-  argument: {object_event: noun_arb_text},
+  argument: {object: noun_arb_text, label: "event"},
   icon: "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (
