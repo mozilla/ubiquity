@@ -1192,6 +1192,10 @@ Parser.prototype = {
                  : this.suggestedVerbOrder),
       };
 
+      // TODO put in call to suggestion memory here... when we are doing noun-first
+      // suggestion, then part of verb's ranking should
+      // include its overall frequency of use.
+
       returnArray.push(parseCopy);
     }
     return returnArray;
@@ -1599,9 +1603,8 @@ Parser.prototype = {
       this._suggestionMemory.remember(inputVerb, chosenVerb);
     }
 
-    // TODO
-    // Not doing the remember("", chosenVerb) thing just yet, but we should do that
-    // whenever the suggestion has filled arguments.
+    // Also keep track of total number of times verb has been used, regardless of input:
+    this._suggestionMemory.remember("", chosenVerb);
   }
 }
 

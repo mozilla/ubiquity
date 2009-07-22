@@ -872,8 +872,7 @@ function testVariableNounWeights() {
 
 }
 
-// Test disabled because SuggestionMemory feature bumped to 0.5.1.
-function DONOTtestSortedBySuggestionMemoryParser2Version() {
+function testSortedBySuggestionMemoryParser2Version() {
   var fakeSource = new BetterFakeCommandSource({
     clock: {names: ["clock"], execute: function(){}},
     calendar: {names: ["calendar"], execute: function(){}},
