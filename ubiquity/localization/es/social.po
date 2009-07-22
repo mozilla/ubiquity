@@ -1,0 +1,163 @@
+# social.po
+#
+# Localizers:
+# Roberto Muñoz Gómez <munoz.roberto@gmail.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:48+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Muñoz Gómez <munoz.roberto@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. twitter command:
+#. use | to separate multiple name values:
+msgctxt "twitter.names"
+msgid "twitter|tweet|share using twitter"
+msgstr "twitter|tweet|compartir usando twitter|comentar en twitter"
+
+msgctxt "twitter.help"
+msgid "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
+msgstr "Necesita una <a href=\"http://twitter.com\">cuenta de Twitter</a>, obviamente. Si no está actualmente registrado se le pedirá que se registre."
+
+msgctxt "twitter.description"
+msgid "Sets your Twitter status to a message of at most 160 characters."
+msgstr "Pone un mensaje de como mucho 160 caracteres como su estado en Twitter."
+
+msgctxt "twitter.preview"
+msgid "Updates your Twitter status ${username} to:"
+msgstr "Actualiza su estado de Twitter ${username} a:"
+
+msgctxt "twitter.preview"
+msgid "Characters remaining: <b>${chars}</b>"
+msgstr "Caracteres restantes: <b>${chars}</b>"
+
+msgctxt "twitter.preview"
+msgid "tip: tweet @mozillaubiquity for help"
+msgstr "consejo: tweet @mozillaubiquity para conseguir ayuda."
+
+msgctxt "twitter.preview"
+msgid "The last <b>${truncate}</b> characters will be truncated!"
+msgstr "¡Los últimos <b>${truncate}</b> caracteres serán truncados!."
+
+msgctxt "twitter.preview"
+msgid "(For user <b>${usernameText}</b>)"
+msgstr "(Para el usuario <b>${usernameText}</b>)"
+
+msgctxt "twitter.execute"
+msgid "requires a status to be entered"
+msgstr "necesita introducir un estado"
+
+msgctxt "twitter.execute"
+msgid "error - status not updated"
+msgstr "error - estado no actualizado"
+
+msgctxt "twitter.execute"
+msgid "direct message sent"
+msgstr "mensaje directo enviado"
+
+msgctxt "twitter.execute"
+msgid "status updated"
+msgstr "estado actualizado"
+
+#. digg command:
+#. use | to separate multiple name values:
+msgctxt "digg.names"
+msgid "digg|share using digg"
+msgstr "digg|compartir usando digg|enviar a digg"
+
+msgctxt "digg.description"
+msgid "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
+msgstr "Si no se ha enviado, envía la página a Digg. En otro caso, le lleva la página de la historia en Digg."
+
+msgctxt "digg.preview"
+msgid "Submit or digg this page. Checking if this page has already been submitted..."
+msgstr "Envía o «digg» esta página. Comprobando si la página ya ha sido enviada..."
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg"
+msgstr "Envía esta página a Digg"
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg with the description:"
+msgstr "Envía esa página a Digg con la descripción:"
+
+msgctxt "digg.preview"
+msgid "Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated."
+msgstr "La descripción sólo puede tener 375 caracteres. Los últimos <b>${chars}</b> caracteres serán truncados."
+
+msgctxt "digg.preview"
+msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
+msgstr "Digg esta página. Esta página ya tiene <b>${diggs}</b> diggs."
+
+#. tinyurl command:
+#. use | to separate multiple name values:
+msgctxt "tinyurl.names"
+msgid "tinyurl"
+msgstr "tinyurl|tiny"
+
+msgctxt "tinyurl.description"
+msgid "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+msgstr "Reemplaza la URL seleccionada por una <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with..."
+msgstr "Reemplaza la URL seleccionada por...."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with <b>${tinyurl}</b>."
+msgstr "Reemplaza la URL seleccionada por <b>${tinyurl}</b>."
+
+#. share (on delicious) command:
+#. use | to separate multiple name values:
+msgctxt "share (on delicious).names"
+msgid "share|delicious"
+msgstr "comparte|delicious"
+
+msgctxt "share (on delicious).help"
+msgid "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."
+msgstr "Selecciones texto de la página para usarlo como nota, o introduzca su propio texto después de la orden. Puede también asignar etiquetas al marcador usando el modificador \"tagged\", y modificar el título de la página predeterminada con el modificador \"entitled\". Note que debe estar ya registrado en delicious.com para usar esta orden."
+
+msgctxt "share (on delicious).description"
+msgid "Share the current page as a bookmark on delicious.com"
+msgstr "Comparte la página actual como un marcador en delicious.com"
+
+msgctxt "share (on delicious).preview"
+msgid "This URL cannot be shared on ${delicious}."
+msgstr "Esta URL no puede ser compartida en ${delicious}."
+
+msgctxt "share (on delicious).preview"
+msgid "No active user found - log in at ${delicious} to use this command."
+msgstr "No hay usuario activo - regístrese en ${delicious} para usar esta orden."
+
+msgctxt "share (on delicious).preview"
+msgid "A title is required for bookmarks on ${delicious}"
+msgstr "Se requiere un título para los marcadores en ${delicious}"
+
+msgctxt "share (on delicious).preview"
+msgid "Share a bookmark at ${delicious}:"
+msgstr "Comparta un marcador en ${delicious}:"
+
+msgctxt "share (on delicious).execute"
+msgid "This URL cannot be shared on delicious."
+msgstr "Esta URL no puede ser compartida en delicious."
+
+msgctxt "share (on delicious).execute"
+msgid "No active user found - log in at delicious.com to use this command."
+msgstr "No hay usuario activo - regístrese en delicious.com para usar esta orden."
+
+msgctxt "share (on delicious).execute"
+msgid "A title is required for bookmarks at delicious.com"
+msgstr "Se requiere un título para los marcadores en delicious.com"
+
+msgctxt "share (on delicious).execute"
+msgid "Bookmark \\\"${description}\\\" shared at delicious.com/${user_name}"
+msgstr "Marcador \\\"${description}\\\" compartido en delicious.com/${user_name}"
+
+msgctxt "share (on delicious).execute"
+msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
+msgstr "ERROR: Marcador \\\"${description}\\\" NO compartido en delicious.com/${user_name}"
+

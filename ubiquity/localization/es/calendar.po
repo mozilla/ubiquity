@@ -1,0 +1,75 @@
+# calendar.po
+#
+# Localizers:
+# LOCALIZER <EMAIL>
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-26 14:21+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Muñoz Gómez <munoz.roberto@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. add to google calendar command:
+#. use | to separate multiple name values:
+msgctxt "add to google calendar.names"
+msgid "add to google calendar|quick add"
+msgstr "añadir a google calendar|añadir rápidamente"
+
+msgctxt "add to google calendar.help"
+msgid ""
+"<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
+". e.g.:\n"
+"<ul>\n"
+"  <li>3pm Lunch with Myk and Thunder</li>\n"
+"  <li>Jono's Birthday on Friday</li>\n"
+"</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr ""
+"<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Añadir Rápidamente\">Introduzca el evento de forma natural</a>\n"
+". p.e.:\n"
+"<ul>\n"
+"  <li>Comida a las 3pm con Carlos y Luis</li>\n"
+"  <li>Cumpleaños de María el viernes</li>\n"
+"</ul><p>Actualmente sólo funciona con <a href=\"http://calendar.google.com\">Google Calendar</a> así que necesita una cuenta de Google para usarlo.</p>"
+
+msgctxt "add to google calendar.description"
+msgid "Adds an event to your calendar."
+msgstr "Añade un evento a su calendario."
+
+msgctxt "add to google calendar.execute"
+msgid "Authorization error"
+msgstr "Error de autorización"
+
+msgctxt "add to google calendar.execute"
+msgid "Please make sure you are logged in to Google Calendar"
+msgstr "Por favor, asegúrese de que está registrado en Google Calendar"
+
+msgctxt "add to google calendar.execute"
+msgid "Event created"
+msgstr "Evento creado"
+
+msgctxt "add to google calendar.execute"
+msgid "Error creating the event"
+msgstr "Error creando el evento"
+
+#. check google calendar command:
+#. use | to separate multiple name values:
+msgctxt "check google calendar.names"
+msgid "check google calendar"
+msgstr "comprobar google calendar"
+
+msgctxt "check google calendar.help"
+msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "Pruebe escribir \"comprobar martes\"<p>Actualmente sólo funciona con <a href=\"http://calendar.google.com\">Google Calendar</a> así que necesita una cuenta de Google para usarlo.</p>"
+
+msgctxt "check google calendar.description"
+msgid "Checks what events are on your calendar for a given date."
+msgstr "Comprueba qué eventos tiene en su calendario para la fecha dada."
+
+msgctxt "check google calendar.preview"
+msgid "Checking Google Calendar for events on ${date}."
+msgstr "Comprobando eventos en Google Calendar para el ${date}."
+

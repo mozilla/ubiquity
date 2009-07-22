@@ -1,0 +1,33 @@
+# map.po
+#
+# Localizers:
+# LOCALIZER <EMAIL>
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-06-20 00:47+0900\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Roberto Muñoz Gómez <munoz.roberto@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "mapea|mapa|localiza|sitúa|busca"
+
+msgctxt "map.help"
+msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+msgstr "Prueba usar &quot;mapea kalamazoo&quot;. Puede hacer click en el mapa en panel de vista previa para hacerlo más grande, interactúe con el mapa haciendo zoom y moviéndose. Puede entonces hacer click en &quot;insertar mapa en página&quot; (si está en un área de texto editable) para insertar el mapa. Así puede, por ejemplo, escribir una dirección en un correo, seleccionarla, &quot;mapearla&quot;, hacer click en la vista previa y entonces insertar el mapa."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Convierte una dirección o nombre de lugar en un Mapa de Google."
+
+msgctxt "map.preview"
+msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr "No se puede insertar en un espacio no editable. Use «editar página» para una página editable."
+

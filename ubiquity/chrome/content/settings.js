@@ -65,7 +65,7 @@ function onDocumentLoad() {
   var isNewParser = UbiquitySetup.parserVersion === 2;
   $("#use-new-parser-checkbox")[0].checked = isNewParser;
   if (isNewParser) $(".parser2").show();
-  for each (let code in ["da", "en", "ja", "pt", "ca", "$"]) {
+  for each (let code in ["da", "en", "ja", "pt", "es", "ca", "$"]) {
     $langSelect.append(
       "<option value='" + code + "' " +
       (code === langCode ? " selected='selected'" : "") + ">" +
