@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *   kelopez
+ *   Roberto Muñoz Gómez <munoz.roberto@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,36 +35,40 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
+ 
 function makeParser() {
-	var es = new Parser('es');
-	es.branching = 'right';
-	es.roles = [
-		{role: 'goal', delimiter: 'hasta'},
-		{role: 'goal', delimiter: 'hacia'},
-		{role: 'goal', delimiter: 'a'},
-		{role: 'source', delimiter: 'desde'},
-		{role: 'source', delimiter: 'de'},
-		{role: 'location', delimiter: 'en'},
-		{role: 'time', delimiter: 'a'},
-		{role: 'instrument', delimiter: 'con'},
-		{role: 'instrument', delimiter: 'usando'},
-		{role: 'format', delimiter: 'en'},
-		{role: 'alias', delimiter: 'como'},
-		{role: 'modifier', delimiter: 'de'},
-	];
-	es.anaphora = ["esto", "eso", "la selección", "él", "ella", "ellos", "ellas"];
+  var es = new Parser('es');
+  es.roles = [
+	{role: 'goal', delimiter: 'hasta'},
+	{role: 'goal', delimiter: 'hacia'},
+	{role: 'goal', delimiter: 'a'},
+	{role: 'source', delimiter: 'desde'},
+	{role: 'source', delimiter: 'de'},
+	{role: 'location', delimiter: 'en'},
+	{role: 'time', delimiter: 'a'},
+	{role: 'instrument', delimiter: 'con'},
+	{role: 'instrument', delimiter: 'usando'},
+	{role: 'format', delimiter: 'en'},
+	{role: 'alias', delimiter: 'como'},
+	{role: 'modifier', delimiter: 'de'},
+  ];
 
-  ja.initializeLanguage = function() {
-    this._patternCache.argumentNormalizer = new RegExp('^(las\\s+)(.+)()$','i');
-  }
+  es.argumentNormalizer = new RegExp('^(el|lo\\s+|la\\s+)(.+)()$','i');
+  es.normalizeArgument = function(input) {
+    let matches = input.match(this.argumentNormalizer);
+    if (matches != null)
+      return [{prefix:matches[1], newInput:matches[2], suffix:matches[3]}];
+    return [];
+  },
 
-	es.normalizeArgument = function(input) {
-		let matches = input.match(this._patternCache.argumentNormalizer);
-		if (matches != null)
-			return [{prefix:matches[1], newInput:matches[2], suffix:matches[3]}];
-		return [];
-	};
+  es.anaphora = ["esto", "eso", "la selecci�n", "�l", "ella", "ellos", "ellas"];
+  
+  es.branching = 'right';
+
+  es.clitics = [
+    {clitic: 'el', role: 'object'},
+    {clitic: 'los', role: 'object'}
+  ];
 
   es.verbFinalMultiplier = 0.3;
 
