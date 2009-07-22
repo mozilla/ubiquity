@@ -891,13 +891,13 @@ function testSortedBySuggestionMemoryParser2Version() {
                                 self.makeCallback(suggMemoryTestFunc1));
 
   function suggMemoryTestFunc1(completions) {
-    self.assert( completions[0].displayText.indexOf("clock") > -1,
+    self.assert( completions[0].displayText.indexOf("crab") > -1,
                 "0th suggestion should be clock" );
-    self.assert( completions[5].displayText.indexOf("coelecanth") > -1,
-                "5th suggestion should be coelecanth" );
+    self.assert( completions[6].displayText.indexOf("coelecanth") > -1,
+                "6th suggestion should be coelecanth" );
 
     // Now strengthen suggestion memory on "c" -> coelecanth...
-    parser.strengthenMemory("c", completions[5]);
+    parser.strengthenMemory("c", completions[6]);
     // Now try a new completion...
     getCompletionsAsyncFromParser("c", parser, null,
                                   self.makeCallback(suggMemoryTestFunc2));
@@ -908,7 +908,7 @@ function testSortedBySuggestionMemoryParser2Version() {
     // of suggestion memory.  Clock should be #2.
     self.assert( completions[0].displayText.indexOf("coelecanth") > -1,
                 "0th suggestion should be coelecanth" );
-    self.assert( completions[1].displayText.indexOf("clock") > -1,
+    self.assert( completions[1].displayText.indexOf("crab") > -1,
                 "1st suggestion should be clock" );
   }
 
