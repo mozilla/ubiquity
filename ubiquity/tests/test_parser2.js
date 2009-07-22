@@ -912,11 +912,65 @@ function testSortedBySuggestionMemoryParser2Version() {
                 "1st suggestion should be clock" );
   }
 
+  // TODO strength one of the other suggestions twice, see that it ranks above
+  // coelecanth.
+
 }
 
 // TODO could also do the above test through command manager and
 // BetterFakeCommandSource, using cmdMan.execute and ensuring that
 // the memory is strengthenend.
+
+
+function testSortedBySuggestionMemoryNounFirstParser2() {
+  // Three commands that take arbitrary text argument...
+  var fakeSource = new BetterFakeCommandSource({
+    throttle: {names: ["throttle"],
+               arguments: {object: noun_arb_text}, execute: function(){}},
+    frozzle: {names: ["frozzle"],
+              arguments: {object: noun_arb_text}, execute: function(){}},
+    wiggle: {names: ["wiggle"],
+             arguments: {object: noun_arb_text}, execute: function(){}}
+    });
+
+  var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
+  var self = this;
+  var fakeContext = {textSelection: "blarrrgh", htmlSelection: "blarrrgh"};
+
+  // Now pretend we have a text selection and empty input...
+  getCompletionsAsyncFromParser("", parser, fakeContext,
+                                self.makeCallback(suggMemoryTestPart1));
+
+  function suggMemoryTestPart1(completions) {
+    self.assert( completions[0].displayText.indexOf("throttle") > -1,
+                "0th suggestion should be throttle" );
+    self.assert( completions[1].displayText.indexOf("frozzle") > -1,
+                "1st suggestion should be frozzle" );
+    self.assert( completions[2].displayText.indexOf("wiggle") > -1,
+                "2nd suggestion should be wiggle" );
+
+    // Now strengthen suggestion memory on wiggle twice, throttle once...
+    parser.strengthenMemory("", completions[2]);
+    parser.strengthenMemory("", completions[2]);
+    parser.strengthenMemory("", completions[0]);
+    // Now try a new completion...
+    getCompletionsAsyncFromParser("", parser, fakeContext,
+                                  self.makeCallback(suggMemoryTestPart2));
+  }
+
+  function suggMemoryTestPart2(completions) {
+    //Now should be wiggle on top, then throttle.
+    self.assert( completions[0].displayText.indexOf("wiggle") > -1,
+                "0th suggestion should be wiggle" );
+    self.assert( completions[1].displayText.indexOf("throttle") > -1,
+                "1st suggestion should be throttle" );
+    self.assert( completions[2].displayText.indexOf("frozzle") > -1,
+                "2nd suggestion should be frozzle" );
+
+  }
+
+
+}
 
 
 /* More tests that should be written:
