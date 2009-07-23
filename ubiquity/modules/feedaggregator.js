@@ -40,14 +40,14 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/eventhub.js");
 
 function FeedAggregator(feedManager, messageService, disabledCommands) {
-  let self = this;
+  var self = this;
   var commands = {};
   var commandNames = [];
   var pageLoadFuncLists = [];
   var ubiquityLoadFuncLists = [];
   var feedsChanged = true;
 
-  let hub = new EventHub();
+  var hub = new EventHub();
   hub.attachMethods(this);
 
   function onFeedManagerChange(eventName, uri) {
@@ -106,38 +106,39 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   };
 
   self.refresh = function FA_refresh() {
-    let feeds = feedManager.getSubscribedFeeds();
+    var feeds = feedManager.getSubscribedFeeds();
+    for each (let feed in feeds) feed.refresh();
+    if (!feedsChanged) return;
 
-    feeds.forEach(function(feed) { feed.refresh(); });
+    commands = {};
+    commandNames = [];
+    pageLoadFuncLists = [];
+    ubiquityLoadFuncLists = [];
+    feedsChanged = false;
 
-    if (feedsChanged) {
-      commands = {};
-      commandNames = [];
-      pageLoadFuncLists = [];
-      ubiquityLoadFuncLists = [];
-
-      feedsChanged = false;
-      feeds.forEach(
-        function processFeed(feed) {
-          for (var name in feed.commands) {
-            var cmd = makeCmdWithDisabler(feed.commands[name]);
-            // if the command specifies limited application compatibility,
-            // then check against current app name.
-            if (cmd.application && cmd.application.indexOf(Utils.appName) == -1)
-              continue;
-            commands[name] = cmd;
-            commandNames.push({id: name,
-                               name: name,
-                               icon: commands[name].icon});
-          }
-          if (feed.pageLoadFuncs.length > 0)
-            pageLoadFuncLists.push(feed.pageLoadFuncs);
-          if ((feed.ubiquityLoadFuncs || 0).length)
-            ubiquityLoadFuncLists.push(feed.ubiquityLoadFuncs);
-        }
-      );
-      hub.notifyListeners("feeds-reloaded", null);
+    for each (let feed in feeds) {
+      for each (let cmd in feed.commands) {
+        // if the command specifies limited application compatibility,
+        // then check against current app name.
+        if (cmd.application && cmd.application.indexOf(Utils.appName) === -1)
+          continue;
+        commandNames.push({id: cmd.id, name: cmd.name, icon: cmd.icon});
+        commands[cmd.id] = makeCmdWithDisabler(cmd);
+      }
+      if ((feed.pageLoadFuncs || '').length)
+        pageLoadFuncLists.push(feed.pageLoadFuncs);
+      if ((feed.ubiquityLoadFuncs || '').length)
+        ubiquityLoadFuncLists.push(feed.ubiquityLoadFuncs);
     }
+    hub.notifyListeners("feeds-reloaded", null);
+
+    var deleted = false;
+    for (let id in disabledCommands) {
+      if (id in commands) continue;
+      delete disabledCommands[id];
+      deleted = true;
+    }
+    if (deleted) hub.notifyListeners("disabled-command-change");
   };
 
   self.__defineGetter__("commandNames",
