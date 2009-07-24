@@ -1545,7 +1545,7 @@ Parser.prototype = {
           let thisId = id;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
-            if (!dT.getOutstandingRequests(x,thisId).length)
+            if (!dT.getRequestCount(x,thisId))
               dT.setComplete(x,thisId,true);
             if (suggs.length) {
               suggs = handleSuggs(suggs, thisId);
@@ -1557,7 +1557,7 @@ Parser.prototype = {
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
           var hadImmediateResults = false;
-          for each (result in resultsFromSuggest) {
+          for each (let result in resultsFromSuggest) {
             if (result.text || result.html) {
               returnArray.push(result);
               hadImmediateResults = true;
@@ -1893,6 +1893,12 @@ ParseQuery.prototype = {
                      || addedAny;
       }
 
+      for each (let vParse in thisQuery._verbedParses){
+	  if (!vParse.complete)
+	    dump("incomplete parse, verb: " + vParse._verb +
+                  ", argString: " + vParse.argString + "\n");
+      }
+
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
 
@@ -2181,7 +2187,7 @@ NounTypeDetectionTracker.prototype = {
           continue;
 
         for each (let req in this.detectionSpace[i][j].outstandingRequests) {
-          if (req.readyState != undefined && req.readyState != 4)
+          if (req.readyState != 4)
             numRequests++;
         }
       }
