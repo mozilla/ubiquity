@@ -922,72 +922,33 @@ Utils.history = {
   // the maximum number of results to return.
 
   search: function history_search(query, callback, maxResults) {
-    var ctrlr = this.__createController(function onComplete() {
-      var results = [];
-      var max = Math.min(ctrlr.matchCount, maxResults || -1 >>> 1);
-      for (let i = 0; i < max; ++i) {
-        let url = ctrlr.getValueAt(i);
-        results.push({
-          url: url,
-          title: ctrlr.getCommentAt(i) || url,
-          favicon: ctrlr.getImageAt(i),
-        });
+      let awesome = Cc["@mozilla.org/autocomplete/search;1?name=history"].
+                    getService(Ci.nsIAutoCompleteSearch);
+
+    awesome.startSearch(query, "", null, ({
+      onSearchResult: function(search, result) {
+        switch (result.searchResult) {
+          case result.RESULT_NOMATCH:
+            callback([]);
+
+          case result.RESULT_SUCCESS_ONGOING:
+          case result.RESULT_SUCCESS:
+            awesome.stopSearch();
+
+            var results = [];
+
+            for(let i = 0; i < result.matchCount; i++){
+                results.push({
+                    title: result.getCommentAt(i),
+                    favicon: result.getImageAt(i),
+                    url: result.getValueAt(i),
+                });
+            }
+            results.slice(0, maxResults)
+            callback(results);
+        }
       }
-      callback(results);
-    });
-    ctrlr.startSearch(query);
+    }));
   },
 
-  __createController: function createController(onSearchComplete) {
-    var controller = (Cc["@mozilla.org/autocomplete/controller;1"]
-                      .getService(Ci.nsIAutoCompleteController));
-    var input = new AutoCompleteInput(["history"]);
-    input.onSearchComplete = onSearchComplete;
-    controller.input = input;
-    return controller;
-  },
-};
-
-function AutoCompleteInput(aSearches) {
-  this.searches = aSearches;
-}
-
-AutoCompleteInput.prototype = {
-  constructor: AutoCompleteInput,
-
-  searches: null,
-
-  minResultsForPopup: 0,
-  timeout: 10,
-  searchParam: "",
-  textValue: "",
-  disableAutoComplete: false,
-  completeDefaultIndex: false,
-
-  get searchCount() {
-    return this.searches.length;
-  },
-
-  getSearchAt: function(aIndex) {
-    return this.searches[aIndex];
-  },
-
-  onSearchBegin: function() {},
-  onSearchComplete: function() {},
-
-  popupOpen: false,
-
-  popup: {
-    setSelectedIndex: function(aIndex) {},
-    invalidate: function() {},
-  },
-};
-
-// nsISupports implementation
-AutoCompleteInput.prototype.popup.QueryInterface =
-AutoCompleteInput.prototype.QueryInterface = function(iid) {
-  if (iid.equals(Ci.nsISupports) ||
-      iid.equals(Ci.nsIAutoCompleteInput))
-    return this;
-  throw Components.results.NS_ERROR_NO_INTERFACE;
 };

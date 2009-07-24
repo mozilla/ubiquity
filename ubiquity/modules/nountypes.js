@@ -235,14 +235,9 @@ var noun_type_awesomebar = {
   noExternalCalls: true,
   suggest: function nt_awesome_suggest(text, html, callback, selectedIndices) {
     if (!text) return [];
-    Utils.history.search(text, function nt_awesome_search(results) {
-      if (results.length)
-        callback([CmdUtils.makeSugg(r.title, null, r, .9)
-                  for each (r in results)]);
-    }, CmdUtils.maxSuggestions - 1);
-    return [CmdUtils.makeSugg(text, html,
-                              {url: "", title: "", favicon: ""},
-                              .7, selectedIndices)];
+    return [CmdUtils.makeSugg(text, html, "", 0.5), Utils.history.search(text, function(results){
+           callback([CmdUtils.makeSugg(r.url, r.title, r.favicon, 0.8) for each (r in results)]);
+         })];
   }
 };
 
