@@ -115,6 +115,7 @@ Parser.prototype = {
   examples: [],
   clitics: [],
   anaphora: ["this"],
+  doNounFirstExternals: false,
 
   // ** {{{Parser#roles}}} **
   //
@@ -214,14 +215,14 @@ Parser.prototype = {
     // Scrape the noun types up here.
     var nouns = this._nounTypes = {};
     var localNounIds = this._nounTypeIdsWithNoExternalCalls = {};
-    var doNounFirstExternals =
+    this.doNounFirstExternals =
       Utils.Application.prefs.getValue(
         "extensions.ubiquity.doNounFirstExternals", 0);
     for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;
         nouns[nt.id] = nt;
-        if (nt.noExternalCalls || doNounFirstExternals)
+        if (nt.noExternalCalls)
           localNounIds[nt.id] = true;
       }
     }
@@ -1144,7 +1145,7 @@ Parser.prototype = {
   //
   // All returning parses also get their {{{scoreMultiplier}}} property set
   // here as well.
-  suggestVerb: function suggestVerb(parse) {
+  suggestVerb: function suggestVerb(parse, inputMatchesSomeVerb) {
     // for parses which already have a verb
     if (parse._verb.id) return [parse];
 
@@ -1174,9 +1175,10 @@ Parser.prototype = {
       let parser = this;
       for (let role in parse.args){
         if (!verb.arguments.some(function(arg){
-	        return (arg.role === role &&
-                   (!parse._suggested ||
-                    parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id] == true))}))
+	       let noExternals = parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id];
+	       let noVerbMatchCase = !inputMatchesSomeVerb &&
+                                      parser.doNounFirstExternals;
+               return (arg.role === role && (noExternals || noVerbMatchCase))}))
           continue VERBS;
       }
 
@@ -1844,8 +1846,11 @@ ParseQuery.prototype = {
     this._next();
 
     // STEP 8: suggest verbs for parses which don't have one
+    var inputMatchesSomeVerb = false;
+    if(this._possibleParses.some(function(parse) !parse._suggested))
+      inputMatchesSomeVerb = true;
     for each (let parse in this._possibleParses) {
-      let newVerbedParses = this.parser.suggestVerb(parse);
+	let newVerbedParses = this.parser.suggestVerb(parse, inputMatchesSomeVerb);
       for each (let newVerbedParse in newVerbedParses) {
         newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
         this.addIfGoodEnough('verbed', newVerbedParse);
