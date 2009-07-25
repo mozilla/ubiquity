@@ -2187,7 +2187,7 @@ NounTypeDetectionTracker.prototype = {
           continue;
 
         for each (let req in this.detectionSpace[i][j].outstandingRequests) {
-          if (req.readyState != 4)
+          if (req.readyState != undefined && req.readyState != 4)
             numRequests++;
         }
       }
