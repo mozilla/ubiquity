@@ -349,7 +349,6 @@ Parser.prototype = {
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
   newQuery: function(queryString, context, maxSuggestions,
                      dontRunImmediately) {
-    Utils.log("Starting a new parse query.\n");
     var selObj = this._contextUtils.getSelectionObject(context);
     if (!selObj.text)
       selObj.text = "";
@@ -626,14 +625,12 @@ Parser.prototype = {
     // { push.apply(x, y) } is better than { x = x.concat(y) }
     var {push} = possibleParses;
 
-    Utils.log("In argFinder, verb " + verb.text + " has score " + verb.score + "\n");
     // Some verbs are coming here with undefined scores??
 
     // if the argString is empty, return a parse with no args.
     if (!argString) {
       let defaultParse = new Parse(thisQuery, input, verb, argString);
       if (defaultParse._verb.id) {
-        Utils.log("This verb " + verb.text + " has an id.\n");
         defaultParse.scoreMultiplier = 1;
       } else {
         thisQuery.dump('there was no argString but there is no verb either... what gives?');
@@ -645,14 +642,12 @@ Parser.prototype = {
       defaultParse._score = defaultParse.scoreMultiplier;
 
       defaultParse.args = {};
-      Utils.log("Parse of " + verb.text + " (with no argstring) has score of " + defaultParse._score + "\n");
       return [defaultParse];
     }
 
     // if the verb doesn't take any arguments but the argString is not empty,
     // kill this parse.
     if (verb.id && !(verb.arguments || 0).length) {
-      Utils.log("No parse!  Can't use arguments.\n");
       return [];
     }
 
@@ -1187,7 +1182,6 @@ Parser.prototype = {
       // past.
       let frequency = this._suggestionMemory.getScore("", verbId);
       let verbScore = 1 - ( 0.7 / ( 1 + frequency ) );
-      Utils.log("I scored verb " + verb.names[0] + " with score " + verbScore + "\n");
       // TODO score is getting assigned correctly... but then having no apparent effect
       // on ranking...  where is the score getting reset?  It's not in argFinder, these
       // verbs assigned here appear not to make it as far as argFinder.
@@ -2075,7 +2069,6 @@ ParseQuery.prototype = {
       throw new Error('#addIfGoodEnough\'s parseClass arg must either be '
                      +'"scored" or "verbed".');
 
-    Utils.log("AddIfGoodEnough called for " + newParse._verb.text + "\n");
     var parseCollection = this['_'+parseClass+'Parses'];
 
     let parseIds = [parse._id for each (parse in parseCollection)];
@@ -2087,7 +2080,6 @@ ParseQuery.prototype = {
     var maxIndex = this.maxSuggestions - 1;
     if (!parseCollection[maxIndex]){
       parseCollection.push(newParse);
-      Utils.log("Added this parse to collection.\n");
       return true;
     }
 
@@ -2118,7 +2110,6 @@ ParseQuery.prototype = {
         parseCollection.pop();
     }
 
-    Utils.log("Added this parse to collection.\n");
     return true;
   }
 };
