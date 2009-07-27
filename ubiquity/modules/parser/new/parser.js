@@ -631,14 +631,10 @@ Parser.prototype = {
       if (defaultParse._verb.id) {
         defaultParse.scoreMultiplier = 1;
       } else {
-        defaultParse.scoreMultiplier = 0.3;
-        defaultParse._suggested = true;
+        thisQuery.dump('there was no argString but there is no verb either... what gives?');
       }
 
       // The verb match's score affects the scoreMultiplier.
-      // If the verb is not set yet, it gets a 1, but that's fine, because by
-      // virtue of having to suggest a verb, the scoreMultiplier has already
-      // been *=0.3 elsewhere.
       defaultParse.scoreMultiplier *= (defaultParse._verb.score || 1);
       // start score off with one point for the verb.
       defaultParse._score = defaultParse.scoreMultiplier;
@@ -897,9 +893,6 @@ Parser.prototype = {
       // Put all of the different delimiterIndices combinations' parses into
       // possibleParses to return it.
       push.apply(possibleParses, theseParses);
-    }
-    for each (let parse in possibleParses) {
-      parse = this.updateScoreMultiplierWithArgs(parse);
     }
 
     return possibleParses;
@@ -1850,8 +1843,9 @@ ParseQuery.prototype = {
     if(this._possibleParses.some(function(parse) !parse._suggested))
       inputMatchesSomeVerb = true;
     for each (let parse in this._possibleParses) {
-	let newVerbedParses = this.parser.suggestVerb(parse, inputMatchesSomeVerb);
+      let newVerbedParses = this.parser.suggestVerb(parse, inputMatchesSomeVerb);
       for each (let newVerbedParse in newVerbedParses) {
+        newVerbedParse = this.parser.updateScoreMultiplierWithArgs(newVerbedParse);
         newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
         this.addIfGoodEnough('verbed', newVerbedParse);
         yield true;
