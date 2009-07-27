@@ -633,7 +633,8 @@ Parser.prototype = {
       if (defaultParse._verb.id) {
         defaultParse.scoreMultiplier = 1;
       } else {
-        thisQuery.dump('there was no argString but there is no verb either... what gives?');
+        defaultParse.scoreMultiplier = 0.3;
+        defaultParse._suggested = true; 
       }
 
       // The verb match's score affects the scoreMultiplier.
