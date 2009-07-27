@@ -228,7 +228,7 @@ CmdUtils.CreateCommand({
   CmdUtils.CreateCommand({
     names: ["go " + way],
     description: "Goes " + way + " in history.",
-    arguments: {object: noun_type_number, label: "steps"},
+    arguments: {object_steps: noun_type_number},
     preview: function(pblock, args) {
       pblock.innerHTML = _(
         "Go " + way + " ${num} step{if num > 1}s{/if} in history.",

@@ -115,6 +115,7 @@ Parser.prototype = {
   examples: [],
   clitics: [],
   anaphora: ["this"],
+  doNounFirstExternals: false,
 
   // ** {{{Parser#roles}}} **
   //
@@ -214,14 +215,14 @@ Parser.prototype = {
     // Scrape the noun types up here.
     var nouns = this._nounTypes = {};
     var localNounIds = this._nounTypeIdsWithNoExternalCalls = {};
-    var doNounFirstExternals =
+    this.doNounFirstExternals =
       Utils.Application.prefs.getValue(
         "extensions.ubiquity.doNounFirstExternals", 0);
     for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;
         nouns[nt.id] = nt;
-        if (nt.noExternalCalls || doNounFirstExternals)
+        if (nt.noExternalCalls)
           localNounIds[nt.id] = true;
       }
     }
@@ -635,15 +636,10 @@ Parser.prototype = {
         Utils.log("This verb " + verb.text + " has an id.\n");
         defaultParse.scoreMultiplier = 1;
       } else {
-        Utils.log("This verb " + verb.text + " does not have an id.\n");
-        defaultParse.scoreMultiplier = 0.3;
-        defaultParse._suggested = true;
+        thisQuery.dump('there was no argString but there is no verb either... what gives?');
       }
 
       // The verb match's score affects the scoreMultiplier.
-      // If the verb is not set yet, it gets a 1, but that's fine, because by
-      // virtue of having to suggest a verb, the scoreMultiplier has already
-      // been *=0.3 elsewhere.
       defaultParse.scoreMultiplier *= (defaultParse._verb.score || 1);
       // start score off with one point for the verb.
       defaultParse._score = defaultParse.scoreMultiplier;
@@ -906,11 +902,6 @@ Parser.prototype = {
       // possibleParses to return it.
       push.apply(possibleParses, theseParses);
     }
-    for each (let parse in possibleParses) {
-      parse = this.updateScoreMultiplierWithArgs(parse);
-      dump("Making parse (one of many?) with score " + parse._score + "\n");
-    }
-
     return possibleParses;
   },
 
@@ -1154,7 +1145,7 @@ Parser.prototype = {
   //
   // All returning parses also get their {{{scoreMultiplier}}} property set
   // here as well.
-  suggestVerb: function suggestVerb(parse) {
+  suggestVerb: function suggestVerb(parse, inputMatchesSomeVerb) {
     // for parses which already have a verb
     if (parse._verb.id) return [parse];
 
@@ -1184,9 +1175,10 @@ Parser.prototype = {
       let parser = this;
       for (let role in parse.args){
         if (!verb.arguments.some(function(arg){
-	        return (arg.role === role &&
-                   (!parse._suggested ||
-                    parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id] == true))}))
+	       let noExternals = parser._nounTypeIdsWithNoExternalCalls[arg.nountype.id];
+	       let noVerbMatchCase = !inputMatchesSomeVerb &&
+                                      parser.doNounFirstExternals;
+               return (arg.role === role && (noExternals || noVerbMatchCase))}))
           continue VERBS;
       }
 
@@ -1562,7 +1554,7 @@ Parser.prototype = {
           let thisId = id;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
-            if (!dT.getOutstandingRequests(x,thisId).length)
+            if (!dT.getRequestCount(x,thisId))
               dT.setComplete(x,thisId,true);
             if (suggs.length) {
               suggs = handleSuggs(suggs, thisId);
@@ -1574,7 +1566,7 @@ Parser.prototype = {
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
 
           var hadImmediateResults = false;
-          for each (result in resultsFromSuggest) {
+          for each (let result in resultsFromSuggest) {
             if (result.text || result.html) {
               returnArray.push(result);
               hadImmediateResults = true;
@@ -1861,9 +1853,13 @@ ParseQuery.prototype = {
     this._next();
 
     // STEP 8: suggest verbs for parses which don't have one
+    var inputMatchesSomeVerb = false;
+    if(this._possibleParses.some(function(parse) !parse._suggested))
+      inputMatchesSomeVerb = true;
     for each (let parse in this._possibleParses) {
-      let newVerbedParses = this.parser.suggestVerb(parse);
+      let newVerbedParses = this.parser.suggestVerb(parse, inputMatchesSomeVerb);
       for each (let newVerbedParse in newVerbedParses) {
+        newVerbedParse = this.parser.updateScoreMultiplierWithArgs(newVerbedParse);
         newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
         this.addIfGoodEnough('verbed', newVerbedParse);
         yield true;
@@ -1908,6 +1904,12 @@ ParseQuery.prototype = {
       for each (let newParse in suggestions) {
         addedAny = thisQuery.addIfGoodEnough('scored',newParse)
                      || addedAny;
+      }
+
+      for each (let vParse in thisQuery._verbedParses){
+	  if (!vParse.complete)
+	    dump("incomplete parse, verb: " + vParse._verb +
+                  ", argString: " + vParse.argString + "\n");
       }
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))

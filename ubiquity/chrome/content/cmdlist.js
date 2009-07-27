@@ -145,11 +145,11 @@ function formatCommandAuthor(authorData) {
 
 function fillTableRowForCmd(row, cmd, className) {
   var checkBoxCell = jQuery(
-    '<td><input type="checkbox" class="activebox"' +
-    (cmd.disabled ? '' : ' checked="checked"') + '/></td>'
-  );
-
-  checkBoxCell.find("input").bind("change", onDisableOrEnableCmd);
+    '<td><input type="checkbox" class="activebox"/></td>');
+  (checkBoxCell.find("input")
+   .val(cmd.id)
+   .attr("checked", cmd.disabled ? "" : "checked")
+   .bind("change", onDisableOrEnableCmd));
 
   var {name, names, nameArg, homepage} = cmd;
   var cmdDisplayName = (names[0] || name);
@@ -309,9 +309,8 @@ function getFeedForCommand(feedMgr, cmd) {
 function onDisableOrEnableCmd() {
   // update the preferences, when the user toggles the active
   // status of a command.
-  var id = $(this).closest("tr").find(".id").attr("name");
   var {commandSource} = UbiquitySetup.createServices();
-  commandSource.getCommand(id).disabled = !this.checked;
+  commandSource.getCommand(this.value).disabled = !this.checked;
 }
 
 // this was to make both subscribed and unsubscribed list entries, but is
