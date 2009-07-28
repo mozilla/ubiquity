@@ -1551,10 +1551,8 @@ Parser.prototype = {
             detectNounType_completeAsyncSuggest(suggs) {
             if (!dT.getRequestCount(x,thisId))
               dT.setComplete(x,thisId,true);
-            if (suggs.length) {
-              suggs = handleSuggs(suggs, thisId);
-              myCallback(suggs, thisId, true);
-            }
+            suggs = handleSuggs(suggs, thisId);
+            myCallback(suggs, thisId, true);
           };
 
           var resultsFromSuggest = handleSuggs(
@@ -2184,7 +2182,7 @@ NounTypeDetectionTracker.prototype = {
   // ** {{{NounTypeDetectionTracker#getRequestCount}}} **
   //
   // A getter for the total number of open requests
-  getRequestCount: function DT_abortOutstandingRequests(x,id) {
+  getRequestCount: function DT_getRequestCount(x,id) {
     let numRequests = 0;
     for (let i in this.detectionSpace){
       if (x && x != i)
@@ -2195,7 +2193,8 @@ NounTypeDetectionTracker.prototype = {
           continue;
 
         for each (let req in this.detectionSpace[i][j].outstandingRequests) {
-          if (req.readyState != undefined && req.readyState != 4)
+          if (req.readyState != undefined && req.readyState != 0 
+              && req.readyState != 4)
             numRequests++;
         }
       }

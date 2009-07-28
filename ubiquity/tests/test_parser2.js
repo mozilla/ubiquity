@@ -43,6 +43,7 @@ BetterFakeCommandSource.prototype = {
 
 var noun_arb_text = {
   label: "?",
+  noExternalCalls: true,
   rankLast: true,
   suggest: function( text, html ) {
     return [ CmdUtils.makeSugg(text, html) ];
@@ -964,8 +965,8 @@ function testSortedBySuggestionMemoryNounFirstParser2() {
                 "0th suggestion should be wiggle" );
     self.assert( completions[1].displayText.indexOf("throttle") > -1,
                 "1st suggestion should be throttle" );
-    self.assert( completions[2].displayText.indexOf("frozzle") > -1,
-                "2nd suggestion should be frozzle" );
+    self.assert( completions[2].displayText.indexOf("wiggle") > -1,
+                "2nd suggestion should be wiggle" );
 
   }
 

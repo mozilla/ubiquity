@@ -1014,6 +1014,8 @@ function NounAsync(label, checker) {
      checker(text, function asyncBack(truthiness) {
        if(truthiness)
          callback([CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]);
+       else
+	 callback([]);
      })]);
   return {
     label: label,
