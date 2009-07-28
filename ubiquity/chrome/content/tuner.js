@@ -51,8 +51,10 @@ var tunerInterface = {
   fakeQuery: {
     dump: function(x) { dump(x+'\n'); },
     finished: false,
-    _requestCount: 0,
-    _outstandingRequests: []
+//    _requestCount: 0,
+//    _outstandingRequests: [],
+    _verbedParses: [],
+    finishQuery: function() {}
   },
   _allNounTypeIds: {},
   run: function() {
@@ -81,11 +83,8 @@ var tunerInterface = {
       if (fakeQuery._requestCount)
         return;
         
-      //Utils.log(fakeQuery._outstandingRequests.length + ' async requests made');
-
       for (let id in tunerInterface.parser._nounCache[x]) {
         let suggs = tunerInterface.parser._nounCache[x][id];
-        $(id+' td.id').attr('rowspan',(suggs.length || 1));
         
         if (!suggs.length)
           continue;
@@ -97,7 +96,7 @@ var tunerInterface = {
         
         while (sugg = suggs.pop()) {
           $('<tr>'
-            +'<td class="sugg">'+sugg.text+'</td>'
+            +'<td class="id">&nbsp;</td><td class="sugg">'+sugg.text+'</td>'
             +'<td class="score"><div class="scorebar" style="width: '
               + Math.min(sugg.score * 500,500) + '"></div> '
               +'<span class="scoreval">'+formatScore(sugg.score)+'</span></td>'
