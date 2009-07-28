@@ -80,7 +80,8 @@ var tunerInterface = {
     }
     
     var displayScore = function(x) {
-      if (fakeQuery._requestCount)
+      Utils.log('running displayScore');
+      if (fakeQuery._detectionTracker.getRequestCount())
         return;
         
       for (let id in tunerInterface.parser._nounCache[x]) {
