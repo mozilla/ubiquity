@@ -126,9 +126,22 @@ var noun_type_percentage = {
     var number = parseFloat(text);
     if (isNaN(number))
       return [];
-    if (number > 1 && text.indexOf(".") < 0)
-      number /= 100;
-    return [CmdUtils.makeSugg(number*100 + "%", null, number)];
+
+    var numOfOkayChars = text.replace(/[^\d%.]/g,'').length;
+    var score = numOfOkayChars / (text.length);
+    if (text.indexOf("%") < 0)
+      score *= 0.9;
+    
+    var returnArr = [CmdUtils.makeSugg(number+"%", null, number, score)];
+    
+    // if the number's below 1 and there's no
+    // % sign, also try interpreting it as a proportion instead of a 
+    // percent and offer it as a suggestion as well, but with a lower
+    // score.
+    if (text.indexOf("%") < 0 && (number <= 1))
+      returnArr.push(
+        CmdUtils.makeSugg(number*100+"%", null, number*100, score * 0.9));
+    return returnArr;
   }
 };
 
