@@ -80,7 +80,6 @@ var tunerInterface = {
     }
     
     var displayScore = function(x) {
-      Utils.log('running displayScore');
       if (fakeQuery._detectionTracker.getRequestCount())
         return;
         
