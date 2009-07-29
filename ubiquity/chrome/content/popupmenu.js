@@ -36,6 +36,7 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
+Components.utils.import("resource://ubiquity/modules/msgservice.js");
 
 function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
                            cmdSuggester) {
@@ -55,6 +56,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     };
 
     cmdSuggester(context, function onSuggest(suggestions) {
+      for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
       for each (var sugg in suggestions) {
         let {_verb} = sugg, {icon} = _verb.cmd || _verb;
         let menuItem = document.createElement("menuitem");
