@@ -36,7 +36,6 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-Components.utils.import("resource://ubiquity/modules/msgservice.js");
 
 function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
                            cmdSuggester) {
