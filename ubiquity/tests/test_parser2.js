@@ -529,10 +529,10 @@ function testDisplayInterpolatedArguments() {
   function displayInterpolatedFunc(completions) {
     debugCompletions(completions);
     self.assert(completions.length == 2, "Should have 2 completions");
-    self.assert(completions[0].displayText.indexOf('the bank'),
+    self.assert(completions[0].displayText().indexOf('the bank'),
               "The input should be in every parse.");
-    self.assert(completions[1].displayText.indexOf('the bank')
-                && completions[1].displayText.indexOf('the bank'),
+    self.assert(completions[1].displayText().indexOf('the bank')
+                && completions[1].displayText().indexOf('the bank'),
     "Both the input argument and the interpolated argument should be displayed.");
 
   }
@@ -623,7 +623,7 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
       self.makeCallback(
         function( suggestionList ) {
           for each ( var comp in suggestionList ) {
-            dump("Completion is " + comp.displayText + "\n");
+            dump("Completion is " + comp.displayText() + "\n");
           }
           self.assert( suggestionList[0]._verb.name == "one",
                       "cmd one should be it" );
@@ -638,7 +638,7 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
       self.makeCallback(
         function( suggestionList ) {
           for each ( var comp in suggestionList ) {
-            dump("Completion is " + comp.displayText + "\n");
+            dump("Completion is " + comp.displayText() + "\n");
           }
           self.assert( suggestionList[0]._verb.name == "two",
                       "cmd two should be it" );
@@ -892,9 +892,9 @@ function testSortedBySuggestionMemoryParser2Version() {
                                 self.makeCallback(suggMemoryTestFunc1));
 
   function suggMemoryTestFunc1(completions) {
-    self.assert( completions[0].displayText.indexOf("crab") > -1,
+    self.assert( completions[0].displayText().indexOf("crab") > -1,
                 "0th suggestion should be clock" );
-    self.assert( completions[6].displayText.indexOf("coelecanth") > -1,
+    self.assert( completions[6].displayText().indexOf("coelecanth") > -1,
                 "6th suggestion should be coelecanth" );
 
     // Now strengthen suggestion memory on "c" -> coelecanth...
@@ -907,9 +907,9 @@ function testSortedBySuggestionMemoryParser2Version() {
   function suggMemoryTestFunc2(completions) {
     // This time around, coelecanth should be top hit because
     // of suggestion memory.  Clock should be #2.
-    self.assert( completions[0].displayText.indexOf("coelecanth") > -1,
+    self.assert( completions[0].displayText().indexOf("coelecanth") > -1,
                 "0th suggestion should be coelecanth" );
-    self.assert( completions[1].displayText.indexOf("crab") > -1,
+    self.assert( completions[1].displayText().indexOf("crab") > -1,
                 "1st suggestion should be clock" );
   }
 
@@ -943,11 +943,11 @@ function testSortedBySuggestionMemoryNounFirstParser2() {
                                 self.makeCallback(suggMemoryTestPart1));
 
   function suggMemoryTestPart1(completions) {
-    self.assert( completions[0].displayText.indexOf("throttle") > -1,
+    self.assert( completions[0].displayText().indexOf("throttle") > -1,
                 "0th suggestion should be throttle" );
-    self.assert( completions[1].displayText.indexOf("frozzle") > -1,
+    self.assert( completions[1].displayText().indexOf("frozzle") > -1,
                 "1st suggestion should be frozzle" );
-    self.assert( completions[2].displayText.indexOf("wiggle") > -1,
+    self.assert( completions[2].displayText().indexOf("wiggle") > -1,
                 "2nd suggestion should be wiggle" );
 
     // Now strengthen suggestion memory on wiggle twice, throttle once...
@@ -961,11 +961,11 @@ function testSortedBySuggestionMemoryNounFirstParser2() {
 
   function suggMemoryTestPart2(completions) {
     //Now should be wiggle on top, then throttle.
-    self.assert( completions[0].displayText.indexOf("wiggle") > -1,
+    self.assert( completions[0].displayText().indexOf("wiggle") > -1,
                 "0th suggestion should be wiggle" );
-    self.assert( completions[1].displayText.indexOf("throttle") > -1,
+    self.assert( completions[1].displayText().indexOf("throttle") > -1,
                 "1st suggestion should be throttle" );
-    self.assert( completions[2].displayText.indexOf("wiggle") > -1,
+    self.assert( completions[2].displayText().indexOf("wiggle") > -1,
                 "2nd suggestion should be wiggle" );
 
   }

@@ -56,9 +56,9 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
 
     cmdSuggester(context, function onSuggest(suggestions) {
       for each (var sugg in suggestions) {
-        let {_verb} = sugg, {name, icon} = _verb.cmd || _verb;
+        let {_verb} = sugg, {icon} = _verb.cmd || _verb;
         let menuItem = document.createElement("menuitem");
-        menuItem.setAttribute("label", name);
+        menuItem.setAttribute("label", sugg.displayText('text'));
         if (icon) {
           menuItem.setAttribute("class", "menuitem-iconic");
           menuItem.setAttribute("image", icon);

@@ -99,7 +99,7 @@ Parser.prototype = {
   // The {{{joindelimiter}}} parameter is the delimiter that gets inserted
   // when gluing arguments and their delimiters back together in display.
   // In the case of most languages, the space (' ') is fine.
-  // See how it's used in {{{Parse.displayText}}}.
+  // See how it's used in {{{Parse.displayText()}}}.
   //
   // TODO: {{{joindelimiter}}} and {{{usespaces}}} may or may not be
   // redundant.
@@ -607,7 +607,7 @@ Parser.prototype = {
   // {{{theseParses}}} to become the basis for the next loop. It's //intense//.
   //
   // Each argument that's set gets a property called {{{_order}}}. This is used
-  // by {{{Parse.displayText}}} in order to reconstruct the input
+  // by {{{Parse.displayText()}}} in order to reconstruct the input
   // for display. The _order values become left-to-right placement values.
   // Each argument gets one _order value for both the argument and the delimiter
   // as we can reconstruct the order of the delimiter wrt the argument using
@@ -2272,7 +2272,7 @@ NounCache.prototype = {
 // throughout the parse process.
 //
 // The constructor takes the {{{branching}}} and {{{joindelimiter}}} parameters
-// from the {{{Parser}}} (which are used for the {{{displayText}}}
+// from the {{{Parser}}} (which are used for the {{{displayText()}}}
 // method) and the {{{verb}}} and {{{argString}}}. Individual arguments in
 // the property {{{args}}} should be set individually afterwards.
 
@@ -2295,12 +2295,15 @@ var Parse = function(query, input, verb, argString, parent) {
 
 Parse.prototype = {
 
-  // ** {{{Parse#displayText}}} **
+  // ** {{{Parse#displayText()}}} **
   //
-  // {{{displayText}}} prints the verb and arguments in the parse by
-  // ordering all of the arguments (and verb) by their {{{_order}}} properties
-  // and displaying them with nice {{{<span class='...'></span>}}} wrappers.
-  get displayText() {
+  // {{{displayText()}}} prints the verb and arguments in the parse by
+  // ordering all of the arguments (and verb) by their {{{_order}}} properties.
+  // It takes a format argument (string) which tells it how to format the
+  // output. If format == 'text' it will give the parses in plain text. If
+  // format == 'html' it will displaying them with nice
+  // {{{<span class='...'></span>}}} wrappers. Format is html by default.
+   displayText: function(format) {
     // This is the main string to be returned.
     let display = '';
     // This string is built in case there's a verb at the end of the sentence,
@@ -2308,14 +2311,30 @@ Parse.prototype = {
     let displayFinal = '';
 
     // If the verb has _order = -1, it means it was at the end of the input.
-    if (this._verb._order != -1)
-      display = "<span class='verb' title='"
-        + (this._verb.id || 'null') + "'>" + (this._verb.text || '<i>null</i>')
-        + "</span>" + this._query.parser.joindelimiter;
-    else
-      displayFinal = this._query.parser.joindelimiter + "<span class='verb' title='"
-      + this._verb.id + "'>" + (this._verb.text || '<i>null</i>') + "</span>";
-
+    if (this._verb._order != -1){
+      if (format == 'text') {
+        display = (this._verb.text || 'null')
+          + this._query.parser.joindelimiter;
+      }
+      else {
+        display = "<span class='verb' title='"
+          + (this._verb.id || 'null') + "'>"
+          + (this._verb.text || '<i>null</i>')
+          + "</span>" + this._query.parser.joindelimiter;
+      }
+    }
+    else {
+      if (format == 'text') {
+        displayFinal = this._query.parser.joindelimiter
+          + (this._verb.text || 'null');
+      }
+      else {
+        displayFinal = this._query.parser.joindelimiter
+          + "<span class='verb' title='"
+          + this._verb.id + "'>" + (this._verb.text || '<i>null</i>')
+          + "</span>";
+      }
+    }
     // Copy all of the arguments into an ordered array called argsArray.
     // This will then be in the right order for display.
     let argsArray = [];
@@ -2348,27 +2367,46 @@ Parse.prototype = {
 
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
-      if (this._query.parser.branching == 'right')
-        display += (arg.outerSpace || '') + (arg.modifier ? "<span class='delimiter' title='"
-          + arg.role+"'>" + arg.modifier + arg.innerSpace
-          + "</span>":'') + "<span class='" + className + "' title=''>"
-          + (arg.inactivePrefix ?
-             "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.summary || arg.input)
-          + (arg.inactiveSuffix ?
-             "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
-          + "</span>";
-      else
-        display += "<span class='" + className
-          + "' title=''>"
-          + (arg.inactivePrefix ?
-             "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.summary || arg.input)
-          + (arg.inactiveSuffix ?
-             "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
-          + "</span>" + (arg.modifier ? "<span class='delimiter' title='" + arg.role + "'>"
-          + arg.innerSpace + arg.modifier + "</span>" : '') + (arg.outerSpace || '');
-
+      if (this._query.parser.branching == 'right') {
+        if (format == 'text') {
+          display += (arg.outerSpace || '')
+            + (arg.modifier ? arg.modifier + arg.innerSpace : '')
+            + (arg.inactivePrefix ? arg.inactivePrefix : '')
+            + (arg.summary || arg.input)
+            + (arg.inactiveSuffix ? arg.inactiveSuffix : '');
+	}
+        else {
+          display += (arg.outerSpace || '') + (arg.modifier ? "<span class='delimiter' title='"
+            + arg.role+"'>" + arg.modifier + arg.innerSpace
+            + "</span>":'') + "<span class='" + className + "' title=''>"
+            + (arg.inactivePrefix ?
+               "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
+            + (arg.summary || arg.input)
+            + (arg.inactiveSuffix ?
+               "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
+            + "</span>";
+	}
+      }
+      else {
+	if (format == 'text') {
+	  display += (arg.inactivePrefix ? arg.inactivePrefix : '')
+            + (arg.summary || arg.input)
+            + (arg.inactiveSuffix ? arg.inactiveSuffix : '')
+            + (arg.modifier ? arg.innerSpace + arg.modifier : '')
+            + (arg.outerSpace || '');
+	}
+	else {
+          display += "<span class='" + className
+            + "' title=''>"
+            + (arg.inactivePrefix ?
+               "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
+            + (arg.summary || arg.input)
+            + (arg.inactiveSuffix ?
+               "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
+            + "</span>" + (arg.modifier ? "<span class='delimiter' title='" + arg.role + "'>"
+            + arg.innerSpace + arg.modifier + "</span>" : '') + (arg.outerSpace || '');
+	}
+      }
     }
 
     for each (let neededArg in this._verb.arguments) {
@@ -2389,14 +2427,19 @@ Parse.prototype = {
           break;
         }
       }
-      display += ' <span class="needarg">' + label + '</span>';
+      if (format == 'text') {
+        display += ' *blank* ';
+      }
+      else {
+        display += ' <span class="needarg">' + label + '</span>';
+      }
     }
 
     return display + displayFinal;
   },
 
   get displayTextDebug()(
-    this._id + ": " + this.displayText + " (" +
+    this._id + ": " + this.displayText() + " (" +
     ((this.score * 100 | 0) / 100 || "<i>no score</i>") + ',' +
     ((this.scoreMultiplier * 100 | 0) / 100 || "<i>no score</i>") +
     ")"),
