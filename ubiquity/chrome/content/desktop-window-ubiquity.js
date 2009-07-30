@@ -240,9 +240,6 @@ Ubiquity.prototype = {
   },
 
   __setLocalizedDefaults: function setLocalizedDefaults( langCode ) {
-    if (langCode == "jp") {
-      this.__DEFAULT_PREVIEW = jpGetDefaultPreview();
-      this.__KEYCODE_ENTER = 39;
-    }
+    // what was this for? removing as I'm removing old jp support - mitcho
   }
 };
