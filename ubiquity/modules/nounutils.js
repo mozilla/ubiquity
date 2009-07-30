@@ -160,13 +160,13 @@ NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
 // a result array ({{{match}}}) of {{{RegExp#exec}}}.
 
 const SCORE_BASE = 0.3;
-const SCORE_LENGTH = 0.3;
+const SCORE_LENGTH = 0.4;
 const SCORE_INDEX = 1 - SCORE_BASE - SCORE_LENGTH;
 
 function matchScore(match) {
   var inLen = match.input.length;
   return (SCORE_BASE
-          + SCORE_LENGTH * Math.pow(match[0].length / inLen, 2)
+          + SCORE_LENGTH * Math.pow(match[0].length / inLen, 0.5)
           + SCORE_INDEX  * (1 - match.index / inLen));
 }
 
