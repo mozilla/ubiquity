@@ -263,7 +263,7 @@ var noun_type_awesomebar = {
     if (!text) return [];
     var reqObj = {readyState: 2};
     
-    Utils.history.search(text, function(results){
+    Utils.history.search(text, function nt_awesome_results(results){
       reqObj.readyState = 4;
       var returnArr = [];
       for each (r in results) {
@@ -310,22 +310,27 @@ var noun_type_url = {
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
                       null, null, 0.5)),
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
+    if (!text) return [];
+    
     var url = text;
-    if (/^(?![A-Za-z][A-Za-z\d.+-]*:)/.test(url)) {
+    if (/^(?![a-z][a-z\d.+-]*:)/i.test(url)) {
       let p = "http://";
       url = p + url;
       if (selectionIndices) {
-        let {length} = p;
-        selectionIndices[0] += length;
-        selectionIndices[1] += length;
+        // TODO: do we really want to offset the first selection index?
+        selectionIndices[0] += p.length;
+        selectionIndices[1] += p.length;
       }
     }
+
+    var reqObj = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
+      reqObj.readyState = 4;
       if (results.length)
         callback([CmdUtils.makeSugg(r.url, null, null, .9)
                   for each (r in results)]);
     });
-    return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices)];
+    return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices),reqObj];
   }
 };
 
