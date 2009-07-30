@@ -505,10 +505,10 @@ function testDontInterpolateInTheMiddleOfAWord() {
   function dontInterpolateFuncTwo(completions) {
     debugCompletions(completions);
     self.assert(completions.length == 2, "Should have 2 completions.");
-    self.assert(completions[0].args.object[0].text == "it erate",
-              "input without interpolation should also be suggested.");
-    self.assert(completions[1].args.object[0].text == "flab erate",
+    self.assert(completions[0].args.object[0].text == "flab erate",
               "Should interpolate 'flab' for 'it'.");
+    self.assert(completions[1].args.object[0].text == "it erate",
+              "input without interpolation should also be suggested.");
   }
 }
 
