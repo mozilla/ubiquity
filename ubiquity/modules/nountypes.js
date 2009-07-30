@@ -302,6 +302,20 @@ var noun_type_awesomebar = {
 //
 // * {{{text, hml}}} : URL
 
+// The "common schemes" are the IANA-registered ones plus a few Mozilla ones.
+// See http://en.wikipedia.org/wiki/URI_scheme .
+var common_URI_schemes = ['aaa','aaas','acap','cap','cid','crid','data','dav','dict',
+  'dns','fax','file','ftp','go','gopher','h323','http','https','icap','im',
+  'imap','info','ipp','iris','iris.beep','iris.xpc','iris.xpcs','iris.lws',
+  'ldap','mailto','mid','modem','msrp','msrps','mtqp','mupdate','news','nfs',
+  'nntp','opaquelocktoken','pop','pres','prospero','rtsp','service','shttp',
+  'sip','sips','snmp','soap.beep','soap.beeps','tag','tel','telnet','tftp',
+  'thismessage','tip','tv','urn','vemmi','wais','xmlrpc.beep','xmpp','z39.50r',
+  'z39.50s',
+  'about','chrome','view-source','wyciwyg'];
+var noun_type_common_URI_schemes = CmdUtils.NounType(
+                     [scheme + '://' for each (scheme in common_URI_schemes) ] );
+
 var noun_type_url = {
   label: "url",
   rankLast: true,
@@ -309,35 +323,108 @@ var noun_type_url = {
   default: function nt_url_default() (
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
                       null, null, 0.5)),
+  _schemeRegExp: new RegExp('^('+common_URI_schemes.join('|')+'):($|/+)'),
+  // LDH charcodes include "Letters, Digits, and Hyphen". We'll throw in . @ : too.
+  _LDHRegExp: /^[a-z\d-.@:]*$/i,
+  _nt_common_URI_schemes: noun_type_common_URI_schemes,
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
     if (!text) return [];
     
     var url = text;
-    if (/^(?![a-z][a-z\d.+-]*:)/i.test(url)) {
-      let p = "http://";
-      url = p + url;
+    var returnArr = [];
+    
+    // if it's part of a common URI scheme, leave it alone and suggest as is.
+    var possibleSchemes = this._nt_common_URI_schemes
+                                      .suggest(url,null,null,selectionIndices);
+    if (possibleSchemes.length) {
+      returnArr = [{__proto__:s, score: 0.8 * s.score}
+                    for each (s in possibleSchemes)];
+    }
+    
+    // check to see whether we have a full URI scheme.
+    var schemeMatch = this._schemeRegExp.exec(url);
+    var noschemeURL;
+    var scheme;
+    var score = 1;
+    var dontAccept = false;
+    if (schemeMatch) {
+      scheme = schemeMatch[0];
+      noschemeURL = url.slice(schemeMatch[0].length);
+      // at least two slashes after the : are normally required.
+      slashMatch = /:\/*$/.exec(scheme);
+      slashesNeeded = 3 - slashMatch[0].length;
+      if (slashesNeeded > 0) {
+        if (slashesNeeded == 1)
+          scheme += '/';
+        else if (slashesNeeded == 2)
+          scheme += '//';
+
+        if (selectionIndices) {
+          // TODO: do we really want to offset the first selection index?
+          selectionIndices[0] += slashesNeeded;
+          selectionIndices[1] += slashesNeeded;
+        }
+      score *= 0.9;          
+      }
+    } else {
+      scheme = 'http://';
+      noschemeURL = url;
+      score *= 0.9;
       if (selectionIndices) {
         // TODO: do we really want to offset the first selection index?
-        selectionIndices[0] += p.length;
-        selectionIndices[1] += p.length;
+        selectionIndices[0] += scheme.length;
+        selectionIndices[1] += scheme.length;
       }
     }
+    
+    if (noschemeURL) {
+      var segments = noschemeURL.split(/\/#?/);
+
+      // if it's just a domain name-looking thing, lower confidence
+      if (segments.length == 1)
+        score *= 0.8;
+      
+      var domain = segments[0];
+      
+      // if the domain doesn't have any dots in it, lower confidence
+      if (domain.indexOf('.') == -1)
+        score *= 0.9;
+
+      // if the domain name is LDH, leave it alone.
+      if (!this._LDHRegExp.test(domain)) {
+        // if it's not LDH, then we should see if it's a valid
+        // international domain name.
+        score *= 0.9;
+        var idn = Components.classes["@mozilla.org/network/idn-service;1"]
+               .createInstance(Components.interfaces.nsIIDNService);
+        var asciiDomain = idn.normalize(domain);
+        // if it's not even a valid IDN, then throw it out.
+        if (!this._LDHRegExp.test(asciiDomain))
+          dontAccept = true;
+      }
+    }
+    
+    var newUrl = scheme + noschemeURL;
+    if (!dontAccept)
+      returnArr.push(CmdUtils.makeSugg(newUrl, null, null, score,
+                                                 selectionIndices));
+                                                   
+    // start the async history check here
 
     var reqObj = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
       reqObj.readyState = 4;
-      var returnArr = [];
       for each (r in results) {
         var urlMatch = r.url.match(text);
         if (!urlMatch)
           continue;
         var urlScore = CmdUtils.matchScore(urlMatch);
-        returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, 0.9));
+        returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, urlScore));
       }
       callback(returnArr);
     });
     
-    return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices),reqObj];
+    return [returnArr,reqObj];
   }
 };
 
