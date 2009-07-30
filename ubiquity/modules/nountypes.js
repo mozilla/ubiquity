@@ -206,28 +206,41 @@ var noun_type_tag = {
     text = Utils.trim(text);
     if (!text) return [];
 
+    // let's start with an initial seed score.
+    var score = 0.3;
+    
     var {allTags} = PlacesUtils.tagging;
+    var lowercaseAllTags = [tag.toLowerCase() for each (tag in allTags)];
+
     // can accept multiple tags, seperated by a comma
     // assume last tag is still being typed - suggest completions for that
     var completedTags = text.split(/\s{0,},\s{0,}/);
     // separate last tag in fragment, from the rest
     var uncompletedTag = completedTags.pop();
+    var utag = (uncompletedTag ? uncompletedTag.toLowerCase() : null);
     completedTags = completedTags.filter(Boolean);
+
+    for each (tag in completedTags) {
+      if (lowercaseAllTags.indexOf(tag.toLowerCase()) > -1)
+        // if preexisting tag, boost score
+        score = Math.pow(score, 0.5);
+    }
 
     var suggs = [CmdUtils.makeSugg(null, null,
                                    (uncompletedTag
                                     ? completedTags.concat(uncompletedTag)
                                     : completedTags),
-                                   0.3)];
+                       (uncompletedTag && lowercaseAllTags.indexOf(utag) > -1)
+                       ? Math.pow(score, 0.5)
+                       : score )];
     if (uncompletedTag) {
-      let utag = uncompletedTag.toLowerCase();
       for each (let tag in allTags)
         // only match from the beginning of a tag name (not the middle)
         if (tag.length > utag.length &&
             tag.toLowerCase().indexOf(utag) === 0)
           suggs.push(CmdUtils.makeSugg(null, null,
                                        completedTags.concat(tag),
-                                       0.7));
+                                       Math.pow(score, 0.5)));
     }
     return suggs;
   }
