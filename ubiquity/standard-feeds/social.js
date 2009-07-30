@@ -33,6 +33,9 @@ CmdUtils.CreateCommand({
     } else if (args.as) {
       usernameText = args.as.text;
     }
+    if (usernameText[0] == '@')
+      usernameText = usernameText.slice(1);
+    
     var previewTemplate = (
       "<div class='twitter'>"+_("Updates your Twitter status ${username} to:")+"<br/>" +
       "<b class='status'>${status}</b><br/><br/>" +

@@ -438,7 +438,7 @@ var noun_type_url = {
 // * {{{data.site}}} : site URL
 // * {{{data.items}}} : an array of items loaded in the livemark
 //
-// {{{feeds} is the getter for all livemarks.
+// {{{feeds}}} is the getter for all livemarks.
 
 var noun_type_livemark = {
   label: "title",
@@ -538,14 +538,28 @@ var noun_type_twitter_user = {
     if (!text || selected)
       return [];
 
+    var foundAt = (text[0] == '@');
+    if (foundAt) text = text.slice(1); // strip off the @
+
     var suggs = CmdUtils.grepSuggs(text, this.logins());
     // only letters, numbers, and underscores are allowed in twitter
     // usernames.
+        
     if (/^\w+$/.test(text))
-      suggs.push(CmdUtils.makeSugg(text, null, {}, 0.5));
+      suggs.push(CmdUtils.makeSugg(text, text, {}, 0.5));
+
+    if (foundAt)
+      suggs = [{__proto__:s,
+                 text: '@' + s.text,
+                 html: '@' + s.html,
+                 summary: '@' + s.summary,
+                 score: Math.pow(s.score,0.8)}
+               for each (s in suggs)];
+
     return suggs;
   },
   logins: function nt_twuser_logins(reload) {
+    // TODO: figure out how often to clear this list cache.
     if (this._list && !reload) return this._list;
     var list = [];
     var token = (Cc["@mozilla.org/security/pk11tokendb;1"]
