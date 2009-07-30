@@ -71,3 +71,7 @@ function createNavLinks() {
 }
 
 $(createNavLinks);
+
+// Also set version string
+Components.utils.import("resource://ubiquity/modules/setup.js");
+$(".version").text(UbiquitySetup.version);

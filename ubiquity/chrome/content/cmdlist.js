@@ -362,10 +362,6 @@ function addAllUnsubscribedFeeds(feedMgr) {
   }
 }
 
-// TODO the following code needs to make its way onto any page that has
-// a version string:
-//  $(".version").text(UbiquitySetup.version);
-
 function rebuildTable() {
   let svc = UbiquitySetup.createServices();
   let feedMgr = svc.feedManager;
