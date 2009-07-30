@@ -326,10 +326,17 @@ var noun_type_url = {
     var reqObj = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
       reqObj.readyState = 4;
-      if (results.length)
-        callback([CmdUtils.makeSugg(r.url, null, null, .9)
-                  for each (r in results)]);
+      var returnArr = [];
+      for each (r in results) {
+        var urlMatch = r.url.match(text);
+        if (!urlMatch)
+          continue;
+        var urlScore = CmdUtils.matchScore(urlMatch);
+        returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, 0.9));
+      }
+      callback(returnArr);
     });
+    
     return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices),reqObj];
   }
 };
