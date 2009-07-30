@@ -40,6 +40,7 @@
 function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
                            cmdSuggester) {
   var {menupopup} = ubiquityMenu;
+  var maxSuggs = 10;
 
   function contextPopupShowing(event) {
     if (event.target !== this || !selected()) return;
@@ -56,7 +57,10 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
 
     cmdSuggester(context, function onSuggest(suggestions) {
       for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
-      for each (var sugg in suggestions) {
+      var suggsToDisplay = suggestions;
+      if (suggestions.length > maxSuggs)
+        suggsToDisplay = suggsToDisplay.slice(0,maxSuggs);
+      for each (var sugg in suggsToDisplay) {
         let {_verb} = sugg, {icon} = _verb.cmd || _verb;
         let menuItem = document.createElement("menuitem");
         menuItem.setAttribute("label", sugg.displayText('text'));

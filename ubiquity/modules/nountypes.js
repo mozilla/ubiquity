@@ -655,29 +655,25 @@ var noun_type_bookmarklet = {
 var noun_type_date = {
   label: "date",
   noExternalCalls: true,
-  "default": function() this._sugg(Date.parse("today")),
+  "default": function nt_date_default() this._sugg(Date.parse("today"), 1),
   suggest: function nt_date_suggest(text) {
     var date = Date.parse(text);
     return date ? [this._sugg(date)] : [];
   },
-  _sugg: function nt_date__sugg(date)
-    CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date),
+  _sugg: function nt_date__sugg(date, score)
+    CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date, score)
 };
 
 var noun_type_time = {
   label: "time",
   noExternalCalls: true,
-  "default": function nt_time_default() {
-    var time = Date.parse("now");
-    var text = time.toString("hh:mm tt");
-    return CmdUtils.makeSugg(text, null, time, 0.5);
-  },
+  "default": function nt_time_default() this._sugg(Date.parse("now"), 1),
   suggest: function nt_time_suggest(text, html) {
     var time = Date.parse(text);
-    return !time ? [] : [CmdUtils.makeSugg(time.toString("hh:mm tt"),
-                                           null,
-                                           time)];
-  }
+    return time ? [this._sugg(time)] : [];
+  },
+  _sugg: function nt_time__sugg(time, score)
+    CmdUtils.makeSugg(time.toString("hh:mm tt"), null, time, score)
 };
 
 // === {{{ noun_type_async_address }}} ===
