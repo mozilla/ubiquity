@@ -264,11 +264,12 @@ var noun_type_awesomebar = {
     var reqObj = {readyState: 2};
     
     Utils.history.search(text, function(results){
-        reqObj.readyState = 4;
-        callback([CmdUtils.makeSugg(r.url, r.title, r, 0.8) for each (r in results)]);
-    })
+      reqObj.readyState = 4;
+      Utils.log(results);
+      callback([CmdUtils.makeSugg(r.url, r.title, r, 0.8) for each (r in results)]);
+    });
     
-    return [CmdUtils.makeSugg("", "", {url:"", title:"", favicon:""}, 0.5, a), reqObj];
+    return [reqObj];
   }
 };
 
@@ -301,7 +302,7 @@ var noun_type_url = {
       if (results.length)
         callback([CmdUtils.makeSugg(r.url, null, null, .9)
                   for each (r in results)]);
-    }, CmdUtils.maxSuggestions / 2);
+    });
     return [CmdUtils.makeSugg(url, null, null, .5, selectionIndices)];
   }
 };

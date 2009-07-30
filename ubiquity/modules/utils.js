@@ -907,7 +907,7 @@ Utils.history = {
     return count;
   },
 
-  // === {{{ Utils.history.search(query, callback, maxResults) }}} ===
+  // === {{{ Utils.history.search(query, callback) }}} ===
   //
   // Searches the pages the user has visited.
   // Given a query string and a callback function, passes an array of results
@@ -917,11 +917,8 @@ Utils.history = {
   // {{{query}}} is the query string.
   //
   // {{{callback}}} is the function called when the search is complete.
-  //
-  // {{{maxResults}}} is an optinal integer specifying
-  // the maximum number of results to return.
 
-  search: function history_search(query, callback, maxResults) {
+  search: function history_search(query, callback) {
       let awesome = Cc["@mozilla.org/autocomplete/search;1?name=history"].
                     getService(Ci.nsIAutoCompleteSearch);
 
@@ -938,13 +935,12 @@ Utils.history = {
             var results = [];
 
             for(let i = 0; i < result.matchCount; i++){
-                results.push({
-                    title: result.getCommentAt(i),
-                    favicon: result.getImageAt(i),
-                    url: result.getValueAt(i),
-                });
+              results.push({
+                title: result.getCommentAt(i),
+                favicon: result.getImageAt(i),
+                url: result.getValueAt(i),
+              });
             }
-            results.slice(0, maxResults)
             callback(results);
         }
       }
