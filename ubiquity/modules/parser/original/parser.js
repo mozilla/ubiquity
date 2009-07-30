@@ -368,26 +368,48 @@ ParsedSentence.prototype = {
     return sentence + " ";
   },
 
-  get displayText() {
+  displayText: function PS_displayText(format) {
     var {escapeHtml} = Utils;
-    // returns html formatted sentence for display in suggestion list
-    var sentence = ('<span class="verb">' +
-                    escapeHtml(this._verb.matchedName) +
-                    '</span>');
+    // Returns sentences for display in suggestion list.
+    // Takes a format argument (string) which tells it how to format the
+    // output. If format == 'text' it will give the parses in plain text. If
+    // format == 'html' it will displaying them with nice
+    // {{{<span class='...'></span>}}} wrappers. Format is html by default.
+    var sentence = '';
+    if (format == 'text') {
+      sentence = this._verb.matchedName;
+    }
+    else {
+      sentence = ('<span class="verb">' +
+                      escapeHtml(this._verb.matchedName) +
+                      '</span>');
+    }
     var args = this._verb._arguments;
     for (let x in args) {
       let obj = x === "direct_object";
       let {summary} = this._argSuggs[x] || 0;
       if (summary) {
-        let label = obj ? "" : escapeHtml(args[x].flag) + " ";
-        sentence += (
-          " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') +
-          '<span class="' + (obj ? "object" : "argument") + '">' +
-          summary + "</span>");
+	if (format == 'text') {
+          let label = obj ? "" : args[x].flag + " ";
+          sentence += (" " + (obj ? "" : label) + summary);
+	}
+	else {
+          let label = obj ? "" : escapeHtml(args[x].flag) + " ";
+          sentence += (
+            " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') +
+            '<span class="' + (obj ? "object" : "argument") + '">' +
+            summary + "</span>");
+	}
       }
       else {
-        let label = (obj ? "" : args[x].flag + " ") + args[x].label;
-        sentence += ' <span class="needarg">' + escapeHtml(label) + "</span>";
+	if (format == 'text') {
+          let label = (obj ? "" : args[x].flag + " ") + args[x].label;
+          sentence += label;
+	}
+	else {
+          let label = (obj ? "" : args[x].flag + " ") + args[x].label;
+          sentence += ' <span class="needarg">' + escapeHtml(label) + "</span>";
+	}
       }
     }
     return sentence;

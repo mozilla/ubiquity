@@ -58,8 +58,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
                            languageCode, baseUri, parserVersion) {
   this.type = DEFAULT_FEED_TYPE;
 
-  let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                    .getService(Components.interfaces.fuelIApplication);
+  let {prefs} = Utils.Application;
 
   let builtins = makeBuiltins(languageCode, baseUri, parserVersion);
   let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService,
@@ -117,7 +116,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
       if (url.scheme != "https")
         return false;
 
-      var domains = Application.prefs.getValue(TRUSTED_DOMAINS_PREF, "");
+      var domains = prefs.getValue(TRUSTED_DOMAINS_PREF, "");
       domains = domains.split(",");
 
       for (var i = 0; i < domains.length; i++) {
@@ -148,7 +147,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   };
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
-    var timeout = Application.prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
+    var timeout = prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
     return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
                        builtins.headers, builtins.footers,
                        webJsm.jQuery, timeout);
@@ -232,13 +231,12 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
     this.canAutoUpdate = true;
 
-  let codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
+  var codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
                                   timeoutInterval);
-
+  var bin = makeBin(feedInfo);
   var codeCache = null;
   var sandbox = null;
-
-  let self = this;
+  var self = this;
 
   function reset() {
     self.commands = {};
@@ -254,7 +252,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       reset();
       codeCache = code;
       sandbox = sandboxFactory.makeSandbox(codeSource);
-      sandbox.Bin = makeBin(feedInfo);
+      sandbox.Bin = bin;
       try {
         sandboxFactory.evalInSandbox(code,
                                      sandbox,
@@ -385,13 +383,12 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
 }
 
 function makeBin(feedInfo) {
-  var bin = null;
+  var bin = feedInfo.getBin();
   return {
     toString: function toString() "[object Bin]",
     valueOf: function valueOf() bin.__count__,
     __iterator__: function iter() Iterator(bin),
     __noSuchMethod__: function pass(key, [val]) {
-      bin || (bin = feedInfo.getBin());
       if (val === void 0) return bin[key];
       if (val === null) {
         var old = bin[key];
@@ -399,7 +396,7 @@ function makeBin(feedInfo) {
       }
       else bin[key] = val;
       bin = feedInfo.setBin(bin);
-      return old || bin[key];
+      return key in bin ? bin[key] : old;
     },
   };
 }
