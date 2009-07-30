@@ -874,13 +874,20 @@ function testVariableNounWeights() {
 
 function testSortedBySuggestionMemoryParser2Version() {
   var fakeSource = new BetterFakeCommandSource({
-    clock: {names: ["clock"], execute: function(){}},
-    calendar: {names: ["calendar"], execute: function(){}},
-    couch: {names: ["couch"], execute: function(){}},
-    conch: {names: ["conch"], execute: function(){}},
-    crouch: {names: ["crouch"], execute: function(){}},
-    coelecanth: {names: ["coelecanth"], execute: function(){}},
-    crab: {names: ["crab"], execute: function(){}}
+    clock: {names: ["clock"],
+	  arguments: {object: noun_arb_text}, execute: function(){}},
+    calendar: {names: ["calendar"],
+	  arguments: {object: noun_arb_text}, execute: function(){}},
+    couch: {names: ["couch"],
+	  arguments: {object: noun_arb_text}, execute: function(){}},
+    conch: {names: ["conch"],
+	  arguments: {object: noun_arb_text}, execute: function(){}},
+    crouch: {names: ["crouch"],
+	  arguments: {object: noun_arb_text}, execute: function(){}},
+    coelecanth: {names: ["coelecanth"],
+	  arguments: {object: noun_arb_text}, execute: function(){}},
+    crab: {names: ["crab"],
+	  arguments: {object: noun_arb_text}, execute: function(){}}
     });
 
   var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
