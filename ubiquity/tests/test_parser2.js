@@ -851,12 +851,19 @@ function testVariableNounWeights() {
 
   var self = this;
   var testFunc = function(completions) {
+    // NOTE: verbs here will contain hyphens in between words if
+    // UbiquitySetup.parserVersion is 1, because when the commands are
+    // made the parserVersion is checked to see if hyphens need to be entered
+    // in between words, since parser 1 doesn't support spaces in verbs
     self.assert( completions.length == 3, "Should be 3 completions" );
-    self.assert( completions[0]._verb.name == "strong verb",
+    self.assert( completions[0]._verb.name == "strong verb"
+                 || completions[0]._verb.name == "strong-verb",
                  "Should be named strong verb");
-    self.assert( completions[1]._verb.name == "medium verb",
+    self.assert( completions[1]._verb.name == "medium verb"
+                 || completions[1]._verb.name == "medium-verb",
                  "Should be named medium verb");
-    self.assert( completions[2]._verb.name == "weak verb",
+    self.assert( completions[2]._verb.name == "weak verb"
+                 || completions[2]._verb.name == "weak-verb",
                  "Should be named weak verb");
   };
 
