@@ -265,8 +265,30 @@ var noun_type_awesomebar = {
     
     Utils.history.search(text, function(results){
       reqObj.readyState = 4;
-      Utils.log(results);
-      callback([CmdUtils.makeSugg(r.url, r.title, r, 0.8) for each (r in results)]);
+      var returnArr = [];
+      for each (r in results) {
+
+        var urlMatch = r.url.match(text);
+        if (urlMatch != null)
+          urlScore = CmdUtils.matchScore(urlMatch);
+        else
+          urlScore = 0;
+
+        var titleMatch = r.title.match(text);
+        if (titleMatch != null)
+          titleScore = CmdUtils.matchScore(titleMatch);
+        else
+          titleScore = 0;
+
+        if (!urlScore && !titleScore)
+          continue;
+
+        if (urlScore >= titleScore)
+          returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, urlScore));
+        else
+          returnArr.push(CmdUtils.makeSugg(r.title, r.title, r, titleScore));
+      }
+      callback(returnArr);
     });
     
     return [reqObj];

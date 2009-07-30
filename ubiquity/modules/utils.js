@@ -907,6 +907,7 @@ Utils.history = {
               results.push({
                 title: result.getCommentAt(i),
                 favicon: result.getImageAt(i),
+                style: result.getStyleAt(i),
                 url: result.getValueAt(i),
               });
             }
