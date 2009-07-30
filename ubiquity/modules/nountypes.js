@@ -726,27 +726,6 @@ var noun_type_date_time = {
     CmdUtils.makeSugg(time.toString("yyyy-MM-dd hh:mm tt"), null, time, score)
 };
 
-
-// === {{{ noun_type_async_address }}} ===
-//
-// **//FIXME//**
-//
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
-
-var noun_type_async_address = NounAsync("address", getAddress);
-
-// === {{{ noun_type_async_restaurant }}} ===
-//
-// **//FIXME//**
-//
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
-
-var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants);
-
 // === {{{ noun_type_contact }}} ===
 //
 // Same as {{{noun_type_email}}}, but also suggests
@@ -1114,6 +1093,39 @@ function getContacts(callback) {
   return getGmailContacts(callback);
 }
 
+// === {{{ NounAsync }}} ===
+//
+// {{{NounAsync}}} is a utility function used in a couple of newer nountypes.
+
+function NounAsync(label, checker) {
+  function asyncSuggest(text, html, callback, selectionIndices) (
+    [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
+     checker(text, function asyncBack(truthiness) {
+       if(truthiness)
+         callback([CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]);
+       else
+         callback([]);
+     })]
+  );
+  return {
+    label: label,
+    rankLast: true,
+    suggest: (CmdUtils.parserVersion > 1
+              ? asyncSuggest
+              : noun_arb_text.suggest),
+  };
+}
+
+// === {{{ noun_type_async_restaurant }}} ===
+//
+// **//FIXME//**
+//
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
+
+var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants);
+
 function getRestaurants(query, callback){
   if (query.length == 0) return;
 
@@ -1168,6 +1180,16 @@ function getRestaurants(query, callback){
   return asyncRequest;
 }
 
+// === {{{ noun_type_async_address }}} ===
+//
+// **//FIXME//**
+//
+// * {{{text}}} :
+// * {{{html}}} :
+// * {{{data}}} :
+
+var noun_type_async_address = NounAsync("address", getAddress);
+
 function getAddress( query, callback ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = Utils.paramsToString({
@@ -1220,24 +1242,6 @@ function getAddress( query, callback ) {
     }
   });
   return asyncRequest;
-}
-
-function NounAsync(label, checker) {
-  function asyncSuggest(text, html, callback, selectionIndices) (
-    [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
-     checker(text, function asyncBack(truthiness) {
-       if(truthiness)
-         callback([CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]);
-       else
-	 callback([]);
-     })]);
-  return {
-    label: label,
-    rankLast: true,
-    suggest: (CmdUtils.parserVersion > 1
-              ? asyncSuggest
-              : noun_arb_text.suggest),
-  };
 }
 
 var EXPORTED_SYMBOLS = (
