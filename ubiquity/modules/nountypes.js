@@ -673,9 +673,9 @@ var noun_type_date = {
       return [this._sugg(new Date(), 0.7)];
       
     var {date, score} = parseAndScoreDateTime(text,10);
-    if (date.isToday())
+    if (date && date.isToday())
       score *= 0.5;
-    if (date.toString("hh:mm tt") != '12:00 AM')
+    if (date && date.toString("hh:mm tt") != '12:00 AM')
       score *= 0.7;
     
     return date ? [this._sugg(date, score)] : [];
@@ -693,9 +693,9 @@ var noun_type_time = {
       return [this._sugg(new Date(), 1)];
       
     var {date, score} = parseAndScoreDateTime(text, 8);
-    if (date.toString("hh:mm tt") == '12:00 AM')
+    if (date && date.toString("hh:mm tt") == '12:00 AM')
       score *= 0.5;
-    if (!date.isToday())
+    if (date && !date.isToday())
       score *= 0.7;
     return date ? [this._sugg(date, score)] : [];
   },
@@ -716,9 +716,9 @@ var noun_type_date_time = {
       return [this._sugg(new Date(Date.parse(new Date().toDateString())),0.7)];
       
     var {date, score} = parseAndScoreDateTime(text, '19');
-    if (date.isToday())
+    if (date && date.isToday())
       score *= 0.7;
-    if (date.toString("hh:mm tt") == '12:00 AM')
+    if (date && date.toString("hh:mm tt") == '12:00 AM')
       score *= 0.7;
     return date ? [this._sugg(date, score)] : [];
   },
