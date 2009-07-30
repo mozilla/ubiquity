@@ -652,13 +652,33 @@ var noun_type_bookmarklet = {
 // * {{{text, html}}} : date/time text
 // * {{{data}}} : {{{Date}}} instance
 
+parseAndScoreDateTime = function(text, outputLength) {
+  var score = 1;
+  if (/^[\d\s]+$/.test(text))
+    score *= 0.8;
+  if (text.length < outputLength)
+    score *= (0.5 + (0.5 * Math.pow(text.length / outputLength, 0.5)));
+  var date = Date.parse(text);
+  return {date: date, score: score};
+}
+
 var noun_type_date = {
   label: "date",
   noExternalCalls: true,
   "default": function nt_date_default() this._sugg(Date.parse("today"), 1),
   suggest: function nt_date_suggest(text) {
-    var date = Date.parse(text);
-    return date ? [this._sugg(date)] : [];
+    if (text == 'today')
+      return [this._sugg(new Date(), 1)];
+    if (text == 'now')
+      return [this._sugg(new Date(), 0.7)];
+      
+    var {date, score} = parseAndScoreDateTime(text,10);
+    if (date.isToday())
+      score *= 0.5;
+    if (date.toString("hh:mm tt") != '12:00 AM')
+      score *= 0.7;
+    
+    return date ? [this._sugg(date, score)] : [];
   },
   _sugg: function nt_date__sugg(date, score)
     CmdUtils.makeSugg(date.toString("yyyy-MM-dd"), null, date, score)
@@ -669,12 +689,43 @@ var noun_type_time = {
   noExternalCalls: true,
   "default": function nt_time_default() this._sugg(Date.parse("now"), 1),
   suggest: function nt_time_suggest(text, html) {
-    var time = Date.parse(text);
-    return time ? [this._sugg(time)] : [];
+    if (text == 'now')
+      return [this._sugg(new Date(), 1)];
+      
+    var {date, score} = parseAndScoreDateTime(text, 8);
+    if (date.toString("hh:mm tt") == '12:00 AM')
+      score *= 0.5;
+    if (!date.isToday())
+      score *= 0.7;
+    return date ? [this._sugg(date, score)] : [];
   },
   _sugg: function nt_time__sugg(time, score)
     CmdUtils.makeSugg(time.toString("hh:mm tt"), null, time, score)
 };
+
+var noun_type_date_time = {
+  label: "date and time",
+  noExternalCalls: true,
+  "default": function nt_date_time_default() this._sugg(Date.parse("now"), 1),
+  suggest: function nt_time_suggest(text, html) {
+    if (text == 'now')
+      return [this._sugg(new Date(), 1)];
+    if (text == 'today')
+      // hits crazy Date(Date(Date(... structure is used to get a Date object
+      // which has today's date but has 12:00 AM as the time.
+      return [this._sugg(new Date(Date.parse(new Date().toDateString())),0.7)];
+      
+    var {date, score} = parseAndScoreDateTime(text, '19');
+    if (date.isToday())
+      score *= 0.7;
+    if (date.toString("hh:mm tt") == '12:00 AM')
+      score *= 0.7;
+    return date ? [this._sugg(date, score)] : [];
+  },
+  _sugg: function nt_date_time__sugg(time, score)
+    CmdUtils.makeSugg(time.toString("yyyy-MM-dd hh:mm tt"), null, time, score)
+};
+
 
 // === {{{ noun_type_async_address }}} ===
 //
