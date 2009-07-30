@@ -257,7 +257,7 @@ function grepSuggs(input, suggs, key) {
   for each (let sugg in suggs) {
     let match = re(sugg[key]);
     if (!match) continue;
-    sugg.score = matchScore(match);
+    sugg.score = matchScore(match) * (sugg.score || 1);
     results[++i + match.index * count] = sugg;
   }
   return results.filter(Boolean);

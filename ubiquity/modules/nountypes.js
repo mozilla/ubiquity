@@ -106,9 +106,9 @@ var noun_type_email_service = CmdUtils.NounType("email service",
 var noun_type_email = CmdUtils.NounType(
   "email",
   let (atom = "[\\w!#$%&'*+/=?^`{}~|-]+") RegExp(
-    "^(?:(?:(?:(?:" + atom + ")(?:\\.(?:" + atom +
-    '))*)|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\")))@(?:(?:(?:' +
-    atom + ")(?:\\.(?:" + atom + "))*))$"));
+    "^(?:" + atom + "(?:\\." + atom +
+    ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@' +
+    atom + "(?:\\." + atom + ")*$"));
 
 // === {{{ noun_type_percentage }}} ===
 //
