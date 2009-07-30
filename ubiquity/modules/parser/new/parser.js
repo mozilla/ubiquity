@@ -1500,8 +1500,8 @@ Parser.prototype = {
             // 2. If the summary is not different, then the data should
             //    be different, as then the user is forced to choose between
             //    identical suggestions.
-            // 3. Checking data is dangerous as isEqual is not made to
-            //    handle xpconnect objects, which are often in data.
+            // 3. Checking data is dangerous as isEqual (now deprecated) is not
+            //    made to handle xpconnect objects, which are often in data.
             //    (This was, I suspect, the problem with #829.)
             if (newSugg.summary == oldSugg.summary) {
               thisSuggIsNew = false;
