@@ -622,32 +622,24 @@ function testCmdManagerSuggestsForEmptyInputWithSelection() {
       {textSelection:"tree"},
       self.makeCallback(
         function( suggestionList ) {
-          for each ( var comp in suggestionList ) {
-            dump("Completion is " + comp.displayText() + "\n");
-          }
           self.assert( suggestionList[0]._verb.name == "one",
                       "cmd one should be it" );
           suggestionList[0].execute();
           self.assert( oneWasCalled == "tree",
                        "Should have been called with text selection tree.");
         }
-      )
-    );
+      ), true );
     cmdMan.getSuggestionListNoInput(
       {textSelection:"mud"},
       self.makeCallback(
         function( suggestionList ) {
-          for each ( var comp in suggestionList ) {
-            dump("Completion is " + comp.displayText() + "\n");
-          }
           self.assert( suggestionList[0]._verb.name == "two",
                       "cmd two should be it" );
           suggestionList[0].execute();
           self.assert( twoWasCalled == "mud",
                        "Should have been called with text selection mud.");
         }
-      )
-    );
+      ), true );
   }
 }
 

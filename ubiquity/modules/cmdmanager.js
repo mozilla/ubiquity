@@ -269,11 +269,18 @@ CommandManager.prototype = {
   },
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
-                                                           asyncSuggestionCb) {
+                                                           asyncSuggestionCb,
+                                                           noAsyncUpdates){
     let noInputQuery = this.__nlParser.newQuery("", context, 20);
-    noInputQuery.onResults = function onResultsNoInput() {
-      asyncSuggestionCb(noInputQuery.suggestionList);
-    };
+    if (noAsyncUpdates)
+      noInputQuery.onResults = function onResultsNoInput() {
+	  if(noInputQuery.finished)
+            asyncSuggestionCb(noInputQuery.suggestionList);
+        };
+    else
+      noInputQuery.onResults = function onResultsNoInput() {
+          asyncSuggestionCb(noInputQuery.suggestionList);
+        };
   },
 
   getHilitedSuggestionText: function CM_getHilitedSuggestionText() {
