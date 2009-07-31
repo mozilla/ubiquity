@@ -776,24 +776,14 @@ function Verb(cmd, roleMap) {
   function pluckLabel(noun) noun.label || noun._name || "?";
   // Determines if an object has one or more own keys
   function hasKey(obj) !!(obj || 0).__count__;
-  // cmd.DOType must be a NounType, if provided.
-  // cmd.modifiers should be a dictionary
-  // keys are prepositions
-  // values are NounTypes.
-  // example: {"from" : City, "to" : City, "on" : Day}
+
   this.cmd = cmd;
   this.matchedName = this._name = cmd.names[0];
   this._arguments = {};
   // Use the presence or absence of the "arguments" dictionary
   // to decide whether this is a version 1 or version 2 command.
-  this._isNewStyle = hasKey(cmd.arguments);
-
-  // New-style API: command defines arguments dictionary
-  if (this._isNewStyle) {
-    //if (cmd.takes || cmd.modifiers)
-    //  dump("WARNING: " + cmd.name +
-    //       " apparently follows the (now defunct) Parser 1.5 format\n");
-
+  if ((this._isNewStyle = hasKey(cmd.arguments))) {
+    // New-style API: command defines arguments dictionary
     // if there are arguments, copy them over using
     // a (semi-arbitrary) choice of preposition
     for each (let arg in cmd.arguments) {
@@ -811,15 +801,19 @@ function Verb(cmd, roleMap) {
     // Old-style API for backwards compatibility:
     //   Command defines DOType/DOLabel and modifiers dictionary.
     // Convert this to argument dictionary.
+    // cmd.DOType must be a NounType, if provided.
     if (cmd.DOType) {
       this._arguments.direct_object = {
         type: cmd.DOType,
         label: cmd.DOLabel,
         flag: null,
-        "default": cmd.DODefault
-        };
+        "default": cmd.DODefault,
+      };
     }
-
+    // cmd.modifiers should be a dictionary
+    // keys are prepositions
+    // values are NounTypes.
+    // example: {"from" : City, "to" : City, "on" : Day}
     if (hasKey(cmd.modifiers)) {
       let {modifiers, modifierDefaults} = cmd;
       for (let x in modifiers) {
@@ -827,8 +821,8 @@ function Verb(cmd, roleMap) {
         this._arguments[x] = {
           type: type,
           label: pluckLabel(type),
-          flag: x
-          };
+          flag: x,
+        };
         if (modifierDefaults)
           this._arguments[x].default = modifierDefaults[x];
       }
@@ -873,26 +867,36 @@ Verb.prototype = {
     return false;
   },
 
+  // Returns a matching score (1 ~ 0) which will be used for sorting.
+  // input should be lowercased.
   match: function V_match(input) {
-    /* returns a float from 0 to 1 telling how good of a match the input
-       is to this verb.  Return value will be used for sorting.
-       The current heuristic is extremely ad-hoc but produces the ordering
-       we want... so far.*/
-    // score = .75 + .25 * lengthRatio - .5 * indexRatio - .25 * namePosition
-    // Perfect match: 1.0 = .75 + .25 * 1 - .5 * 0 - .25 * 0
     var {names} = this.cmd;
     for (let i = 0, l = names.length; i < l; ++i) {
-      let name = names[i];
-      let index = name.toLowerCase().indexOf(input);
-      if (index < 0) continue;
-      this.matchedName = name;
-      return (.75
-              + .25 * input.length / name.length
-              - .5  * index / input.length
-              - .25 * i / l);
+      let score = hagureMetal(input, names[i].toLowerCase());
+      if (score === 0) continue;
+      this.matchedName = names[i];
+      // lower the score based on the name position
+      return score * (l - i) / l;
     }
-    // No match at all!
-    return 0.0;
-    // TODO: disjoint matches, e.g. matching "atc" to "add-to-calendar"
+    return 0;
   }
 };
+
+// Represents how well an abbreviation matches original
+// with a float number 1 (perfect) to 0 (invalid).
+// Inspired by <http://github.com/rmm5t/liquidmetal/tree/master>.
+function hagureMetal(abbr, orig) {
+  var len = orig.length;
+  if (len < abbr.length) return 0;
+  var sum = 0, score = 1, preIndex = -1, {pow} = Math;
+  for each (let c in abbr) {
+    let index = orig.indexOf(c, preIndex + 1);
+    if (index < 0) return 0;
+    sum += (
+      index === preIndex + 1 || /[\s_-]/.test(orig[index - 1])
+      ? score
+      : score = pow((len - index) / len, 3));
+    preIndex = index;
+  }
+  return sum / len;
+}

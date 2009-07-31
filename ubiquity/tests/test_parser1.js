@@ -21,14 +21,11 @@ var emptyContext = {
   htmlSelection: ""
 };
 
-
 function getCompletions(input, verbs, context) {
-  if (!context)
-    context = {textSelection: "", htmlSelection: ""};
   var parser = makeTestParser(LANG,
                               verbs,
                               fakeContextUtils);
-  var query = parser.newQuery(input, context, MAX_SUGGESTIONS);
+  var query = parser.newQuery(input, context || emptyContext, MAX_SUGGESTIONS);
   return query.suggestionList;
 }
 
@@ -483,14 +480,9 @@ function testNounFirstSortedByGeneralFrequency() {
 }
 
 function testSortedByMatchQuality() {
-  var verbList = [{names: ["frobnicate"]},
-                  {names: ["glurgle"]},
-                  {names: ["nonihilf"]},
-                  {names: ["bnurgle"]},
-                  {names: ["fangoriously"]}];
   var assert = this.assert;
-  function testSortedSuggestions( input, expectedList ) {
-    var suggs = getCompletions(input, verbList, emptyContext);
+  function testSortedSuggestions(input, expectedList) {
+    var suggs = getCompletions(input, verbList);
     assert(suggs.length == expectedList.length,
            "Should have " + expectedList.length + " suggestions.");
     suggs.forEach(function (sugg, x) {
@@ -499,10 +491,15 @@ function testSortedByMatchQuality() {
               sugg._verb._name + " should be " + expectedList[x]));
     });
   }
+  var verbList = [{names: ["frobnicate"]},
+                  {names: ["glurgle"]},
+                  {names: ["nonihilf"]},
+                  {names: ["bnurgle"]},
+                  {names: ["fangoriously"]}];
   testSortedSuggestions("g", ["glurgle", "fangoriously", "bnurgle"]);
   testSortedSuggestions("n", ["nonihilf", "bnurgle", "fangoriously",
                               "frobnicate"]);
-  testSortedSuggestions("ni", ["nonihilf", "frobnicate"]);
+  testSortedSuggestions("ni", ["nonihilf", "fangoriously", "frobnicate"]);
   testSortedSuggestions("bn", ["bnurgle", "frobnicate"]);
   testSortedSuggestions("f", ["frobnicate", "fangoriously", "nonihilf"]);
   testSortedSuggestions("frob", ["frobnicate"]);
@@ -514,7 +511,8 @@ function testSortedByMatchQuality() {
               {names: ["bugzilla"]},
               {names: ["get-email-address"]},
               {names: ["highlight"]}];
-  testSortedSuggestions( "g", ["google", "get-email-address", "tag", "digg", "bugzilla", "highlight"]);
+  testSortedSuggestions("g", ["google", "get-email-address", "bugzilla",
+                              "highlight", "digg", "tag"]);
 }
 
 function testSortSpecificNounsBeforeArbText() {
@@ -543,17 +541,17 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var verbList = [
     {names: ["wash"], DOType: dog, DOLabel: "dog"},
     {names: ["play-fetch"], DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
-  var suggs = getCompletions("wash", verbList, emptyContext);
+  var suggs = getCompletions("wash", verbList);
   this.assert( suggs.length == 1, "Should be 1 suggestion (A).");
   this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
-  suggs = getCompletions("play", verbList, emptyContext);
+  suggs = getCompletions("play", verbList);
   this.assert( suggs.length == 1, "Should be 1 suggestion (B).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
-  suggs = getCompletions("play retr", verbList, emptyContext);
+  suggs = getCompletions("play retr", verbList);
   this.assert( suggs.length == 1, "Should be 1 suggestion (C).");
   this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
   this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
@@ -565,17 +563,17 @@ function testSynonyms() {
   var verbList = [{names: ["twiddle", "frobnitz", "twirl"]},
                   {names: ["frobnitz"]},
                   {names: ["frobnicate"]}];
-  var suggs = getCompletions("frob", verbList, emptyContext);
+  var suggs = getCompletions("frob", verbList);
   this.assert( suggs.length == 3, "Should be 3 suggs.");
   this.assert( suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
   this.assert( suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
   this.assert( suggs[2]._verb._name == "twiddle", "twiddle should be third");
 
-  suggs = getCompletions( "twid", verbList, emptyContext);
+  suggs = getCompletions("twid", verbList);
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 
-  suggs = getCompletions( "twirl", verbList, emptyContext);
+  suggs = getCompletions("twirl", verbList);
   this.assert( suggs.length == 1, "Should be 1 sugg.");
   this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
 }
@@ -829,30 +827,35 @@ function testAsyncNounSuggestions() {
 
 
 function testListOfVerbsThatUseSpecificNounType() {
-  var nounTypeOne = new NounUtils.NounType( "thingType", ["tree"] );
+  var nounTypeOne = new NounUtils.NounType("thingType", ["tree"]);
   var verbUsingNounTypeOne = {
     names: ["doStuff"],
     execute: function(context, directObj) {},
     DOLabel: "thing",
     DOType: nounTypeOne};
-  var verbs = [makeSearchCommand("IMDB"), makeSearchCommand("amazon-search"), verbUsingNounTypeOne];
+  var verbs = [makeSearchCommand("IMDB"),
+               makeSearchCommand("amazon-search"),
+               verbUsingNounTypeOne];
   var parser = makeTestParser("en", verbs);
-  this.assert( parser._verbsThatUseSpecificNouns.length == 1, "Too many or not enough" );
-  this.assert( parser._verbsThatUseSpecificNouns[0]._name == "doStuff", "Name mismatch");
+  this.assert(parser._verbsThatUseSpecificNouns.length == 1,
+              "Too many or not enough");
+  this.assert(parser._verbsThatUseSpecificNouns[0]._name == "doStuff",
+              "Name mismatch");
 }
 
 function testWeirdCompletionsThatDontMakeSense() {
+  var input = "ax";
   var cmd_imdb = makeSearchCommand("IMDB");
   var cmd_amazon = makeSearchCommand("amazon-search");
-  var comps = getCompletions("ac", [cmd_imdb, cmd_amazon]);
+  var comps = getCompletions(input, [cmd_imdb, cmd_amazon]);
   // Should be no verb-first suggestions, but since both commands take
   // arb text, both of them should prodcue a suggestion with ac as the
   // argument.
   this.assert(comps.length == 2, "Should have 2 suggestions.");
-  this.assert(comps[0]._argSuggs.direct_object.text == "ac",
-              "object should be ac.");
-  this.assert(comps[1]._argSuggs.direct_object.text == "ac",
-              "this object should be ac too.");
+  this.assert(comps[0]._argSuggs.direct_object.text === input,
+              "object should be " + uneval(input) + ".");
+  this.assert(comps[1]._argSuggs.direct_object.text === input,
+              "this object should be " + uneval(input) + " too.");
 }
 
 function testSynonymsGetDownrankedEvenWithArguments() {
