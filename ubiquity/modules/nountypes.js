@@ -741,23 +741,28 @@ var noun_type_date_time = {
 var noun_type_contact = {
   label: "name or email",
   _list: null,
-  _callback: function nt_contact__callback(contacts) {
-    var {_list} = noun_type_contact;
-    for each (var {name, email} in contacts) {
-      var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
-      _list.push({
-        text: email, html: htm, data: name, summary: htm, score: 0.9,
-        _key: name + "\n" + email});
-    }
-  },
-  suggest: function nt_contact_suggest(text) {
+  suggest: function nt_contact_suggest(text, html, callback) {
     var suggs = noun_type_email.suggest.apply(noun_type_email, arguments);
     if (!this._list) {
       this._list = [];
-      getContacts(this._callback);
-      return suggs;
-    }
-    return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
+
+      var self = this;
+      var contactCallback =
+        function nt_contact__contactCallback(contacts) {
+          var {_list} = noun_type_contact;
+          for each (var {name, email} in contacts) {
+            var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
+            _list.push({
+              text: email, html: htm, data: name, summary: htm, score: 1,
+              _key: name + "\n" + email});
+          }
+          callback(CmdUtils.grepSuggs(text, self._list, "_key"));
+        };
+        
+      contactRequest = getContacts(contactCallback);
+      return suggs.concat(contactRequest);
+    } else
+      return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
   }
 };
 
@@ -767,7 +772,7 @@ function getGmailContacts(callback) {
     {exportType: "ALL", out: "VCARD"},
     function(data) {
       var contacts = [], name = "";
-      for each(var line in data.replace(/\r\n /g, '').split(/\r\n/))
+      for each(let line in data.replace(/\r\n /g, '').split(/\r\n/)) {
         if(/^(FN|EMAIL).*?:(.*)/.test(line)){
           var {$1: key, $2: val} = RegExp;
           if(key === "FN")
@@ -775,6 +780,7 @@ function getGmailContacts(callback) {
           else
             contacts.push({name: name, email: val});
         }
+      }
       callback(contacts);
     },
     "text");
