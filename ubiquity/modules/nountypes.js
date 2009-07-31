@@ -266,17 +266,19 @@ var noun_type_awesomebar = {
     Utils.history.search(text, function nt_awesome_results(results){
       reqObj.readyState = 4;
       var returnArr = [];
-      for each (r in results) {
+      for each (let r in results) {
 
-        var urlMatch = r.url.match(text);
-        if (urlMatch != null)
-          urlScore = CmdUtils.matchScore(urlMatch);
+        var urlIndex = r.url.indexOf(text);
+        if (urlIndex > -1)
+          urlScore = CmdUtils.matchScore(
+                       {index:urlIndex,'0':text,input:r.url});
         else
           urlScore = 0;
 
-        var titleMatch = r.title.match(text);
-        if (titleMatch != null)
-          titleScore = CmdUtils.matchScore(titleMatch);
+        var titleIndex = r.title.indexOf(text);
+        if (titleIndex > -1)
+          titleScore = CmdUtils.matchScore(
+                         {index:titleIndex,'0':text,input:r.title});
         else
           titleScore = 0;
 
@@ -414,11 +416,12 @@ var noun_type_url = {
     var reqObj = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
       reqObj.readyState = 4;
-      for each (r in results) {
-        var urlMatch = r.url.match(text);
-        if (!urlMatch)
+      for each (let r in results) {
+        var urlIndex = r.url.indexOf(text);
+        if (urlIndex === 0)
           continue;
-        var urlScore = CmdUtils.matchScore(urlMatch);
+        var urlScore = CmdUtils.matchScore(
+                       {index:urlIndex,'0':text,input:r.url});
         returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, urlScore));
       }
       callback(returnArr);
@@ -758,6 +761,63 @@ var noun_type_contact = {
   }
 };
 
+function getGmailContacts(callback) {
+  var asyncRequest = jQuery.get(
+    "https://mail.google.com/mail/contacts/data/export",
+    {exportType: "ALL", out: "VCARD"},
+    function(data) {
+      var contacts = [], name = "";
+      for each(var line in data.replace(/\r\n /g, '').split(/\r\n/))
+        if(/^(FN|EMAIL).*?:(.*)/.test(line)){
+          var {$1: key, $2: val} = RegExp;
+          if(key === "FN")
+            name = val;
+          else
+            contacts.push({name: name, email: val});
+        }
+      callback(contacts);
+    },
+    "text");
+  return asyncRequest;
+}
+
+function getYahooContacts( callback ){
+  var url = "http://us.mg1.mail.yahoo.com/yab";
+  //TODO: I have no idea what these params mean
+  var params = {
+    v: "XM",
+    prog: "ymdc",
+    tags: "short",
+    attrs: "1",
+    xf: "sf,mf"
+  };
+
+  var asyncRequest = jQuery.get(url, params, function(data) {
+
+    var contacts = [];
+    for each( var line in jQuery(data).find("ct") ){
+      var name = jQuery(line).attr("yi");
+      //accept it as as long as it is not undefined
+      if(name){
+        var contact = {};
+        contact["name"] = name;
+        //TODO: what about yahoo.co.uk or ymail?
+        contact["email"] = name + "@yahoo.com";
+        contacts.push(contact);
+      }
+    }
+
+    callback(contacts);
+  }, "text");
+
+  return asyncRequest;
+}
+
+function getContacts(callback) {
+  //getYahooContacts(callback);
+  return getGmailContacts(callback);
+}
+
 // === {{{ noun_type_geolocation }}} ===
 //
 // **//FIXME//**
@@ -1034,63 +1094,6 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
     return o;
   }, {});
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
-}
-
-function getGmailContacts(callback) {
-  var asyncRequest = jQuery.get(
-    "https://mail.google.com/mail/contacts/data/export",
-    {exportType: "ALL", out: "VCARD"},
-    function(data) {
-      var contacts = [], name = "";
-      for each(var line in data.replace(/\r\n /g, '').split(/\r\n/))
-        if(/^(FN|EMAIL).*?:(.*)/.test(line)){
-          var {$1: key, $2: val} = RegExp;
-          if(key === "FN")
-            name = val;
-          else
-            contacts.push({name: name, email: val});
-        }
-      callback(contacts);
-    },
-    "text");
-  return asyncRequest;
-}
-
-function getYahooContacts( callback ){
-  var url = "http://us.mg1.mail.yahoo.com/yab";
-  //TODO: I have no idea what these params mean
-  var params = {
-    v: "XM",
-    prog: "ymdc",
-    tags: "short",
-    attrs: "1",
-    xf: "sf,mf"
-  };
-
-  var asyncRequest = jQuery.get(url, params, function(data) {
-
-    var contacts = [];
-    for each( var line in jQuery(data).find("ct") ){
-      var name = jQuery(line).attr("yi");
-      //accept it as as long as it is not undefined
-      if(name){
-        var contact = {};
-        contact["name"] = name;
-        //TODO: what about yahoo.co.uk or ymail?
-        contact["email"] = name + "@yahoo.com";
-        contacts.push(contact);
-      }
-    }
-
-    callback(contacts);
-  }, "text");
-
-  return asyncRequest;
-}
-
-function getContacts(callback) {
-  //getYahooContacts(callback);
-  return getGmailContacts(callback);
 }
 
 // === {{{ NounAsync }}} ===
