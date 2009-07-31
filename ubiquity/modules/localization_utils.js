@@ -46,8 +46,6 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/scripts/gettext/lib/Gettext.js");
 
-const Localizable = RegExp("^" + UbiquitySetup.getBaseUri() +
-                           "(?:standard|builtin)-feeds/");
 const LocalizableProperties = ["names", "help", "description"];
 var commandContext = null;
 var feedContext = null;
@@ -58,8 +56,14 @@ Gettext.prototype.get_lang_refs = function () [];
 
 var LocalizationUtils = {
   GETTEXT: new Gettext(),
-
-  isLocalizable: function LU_isLocalizable(feedUrl) Localizable.test(feedUrl),
+  isLocalizable: function LU_isLocalizable(feedUrl) {
+    Cu.import("resource://ubiquity/modules/utils.js");
+    var baseUrl = UbiquitySetup.getBaseUri();
+    if (feedUrl.indexOf(baseUrl) != 0)
+      return false;
+    var pathPart = feedUrl.slice(baseUrl.length);
+    return (/^(?:standard|builtin)-feeds\//.test(pathPart))
+  },
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
     if (!this.isLocalizable(feedUrl)) return false;
 

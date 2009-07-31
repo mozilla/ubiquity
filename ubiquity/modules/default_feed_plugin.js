@@ -157,10 +157,8 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 }
 
 DefaultFeedPlugin.makeCmdForObj = makeCmdForObj;
-function makeCmdForObj(sandbox, commandObject, feedUri) {
-  const {LocalizationUtils} =
-    Cu.import("resource://ubiquity/modules/localization_utils.js", null);
 
+function makeCmdForObj(sandbox, commandObject, feedUri) {
   // referenceName is set by CreateCommand, so this command must have
   // bypassed CreateCommand. Let's set the referenceName here.
   if (!("referenceName" in commandObject))
@@ -177,6 +175,7 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
        * as-is to the commandObject.execute() method.
        */
       sandbox.context = context;
+      Cu.import("resource://ubiquity/modules/localization_utils.js");
       LocalizationUtils.setLocalizationContext(feedUri,
                                                commandObject.referenceName,
                                                "execute");
@@ -191,6 +190,7 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
        * as-is to the commandObject.preview() method.
        */
       sandbox.context = context;
+      Cu.import("resource://ubiquity/modules/localization_utils.js");
       LocalizationUtils.setLocalizationContext(feedUri,
                                                commandObject.referenceName,
                                                "preview");
