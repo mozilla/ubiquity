@@ -2413,6 +2413,8 @@ Parse.prototype = {
       let arg = this.args[neededArg.role];
       if (arg && (arg[0] || 0).text) continue;
       let {label} = neededArg;
+      if (format == 'text')
+	label = "(" + label + ")";
       if (!label) {
         let nt = neededArg.nountype;
         // _name is for backward compatiblity
@@ -2428,7 +2430,7 @@ Parse.prototype = {
         }
       }
       if (format == 'text') {
-        display += ' *blank* ';
+        display += ' ' + label;
       }
       else {
         display += ' <span class="needarg">' + label + '</span>';
