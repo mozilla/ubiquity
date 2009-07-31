@@ -753,10 +753,12 @@ var noun_type_contact = {
           for each (var {name, email} in contacts) {
             var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
             _list.push({
-              text: email, html: htm, data: name, summary: htm, score: 1,
-              _key: name + "\n" + email});
+              text: email, html: htm, data: name, summary: htm, score: 1});
           }
-          callback(CmdUtils.grepSuggs(text, self._list, "_key"));
+          // include results based on the email address...
+          callback(CmdUtils.grepSuggs(text, self._list, "text")
+          // ...and based on the name.
+                   .concat(CmdUtils.grepSuggs(text, self._list, 'data')));
         };
         
       contactRequest = getContacts(contactCallback);
