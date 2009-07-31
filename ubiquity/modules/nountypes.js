@@ -103,12 +103,34 @@ var noun_type_email_service = CmdUtils.NounType("email service",
 // * {{{text, html}}} : email address
 // * {{{data}}} : match array
 
-var noun_type_email = CmdUtils.NounType(
-  "email",
-  let (atom = "[\\w!#$%&'*+/=?^`{}~|-]+") RegExp(
-    "^(?:" + atom + "(?:\\." + atom +
-    ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@' +
-    atom + "(?:\\." + atom + ")*$"));
+var email_atom = "[\\w!#$%&'*+/=?^`{}~|-]+";
+var noun_type_email = {
+  label: "email",
+  noExternalCalls: true,
+  _email: RegExp("^(?:" + email_atom + "(?:\\." + email_atom
+    + ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@('
+    + email_atom + "(?:\\." + email_atom + ")*)$"),
+  _username: RegExp("^(?:" + email_atom + "(?:\\." + email_atom
+    + ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))$'),
+  suggest: function nt_email_suggest(text, html, cb, selectionIndices) {
+    if (this._username.test(text))
+      return [CmdUtils.makeSugg(text, html, match, 0.3, selectionIndices)];
+
+    var match = text.match(this._email);
+    if (!match) return [];
+    
+    var score = 1;
+    var domain = match[1];
+    
+    // if the domain doesn't have a period or the TLD
+    // has less than two letters, penalize
+    if (!/\.(\d+|[a-z]{2,})$/i.test(domain))
+      score = 0.8;
+    
+    return [CmdUtils.makeSugg(text, html, text, score, selectionIndices)];
+  }
+}
+;
 
 // === {{{ noun_type_percentage }}} ===
 //
