@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>&ubiquity.pagetitle.YourCommands;</title>
+
+	<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
+	<link rel="stylesheet" type="text/css" media="all" href="web-content.css" />
+
+	<script src="resource://ubiquity/scripts/jquery.js"></script>
+	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
+	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
+
+	<script type="application/javascript;version=1.7" src="cmdlist.js"></script>
+
+</head>
+<body dir="&locale.dir;">
+
+	<div class="head">&ubiquity.tagline.YourCommands;</div>
+	<div id="nav-container"></div>
+
+	<br clear="all" />
+
+	<div style="text-align:center;">
+		<p>&ubiquity.pagetip.YourCommands;</p>
+		<p>&ubiquity.commandlist.SubscriptionDetails;</p>
+	</div>
+
+	<div id="cmdlist-help-div" class="ubiq-tutorial" style="display:none;font-size:100%">
+		<ul>
+			<li>&ubiquity.commandlist.CommandHelpParagraph1;</li>
+			<li>&ubiquity.commandlist.CommandHelpParagraph2;</li>
+			<li>&ubiquity.commandlist.CommandHelpParagraph3;</li>
+			<li>&ubiquity.commandlist.CommandHelpParagraph4;</li>
+			<li>&ubiquity.commandlist.CommandHelpParagraph5;</li>
+		</ul>
+	</div>
+
+	<table width="100%">
+		<thead>
+			<tr>
+				<th width="30%" colspan="1">&ubiquity.commandlist.SubscribedFeeds;</th>
+				<th width="70%" colspan="2">&ubiquity.commandlist.AvailableCommands;</th></tr>
+			<tr>
+				<td colspan="3">
+					&ubiquity.commandlist.SortBy; <a onclick="changeSortMode('feed');">&ubiquity.commandlist.SortByFeed;</a> | <a onclick="changeSortMode('feed-date');">&ubiquity.commandlist.SortByDate;</a> | <a onclick="changeSortMode('enabled');">&ubiquity.commandlist.SortByEnabled;</a> | <a onclick="changeSortMode('cmd');">&ubiquity.commandlist.SortByCommand;</a>
+				</td>
+			</tr>
+		</thead>
+
+		<tbody id="commands-and-feeds-table"></tbody>
+	</table>
+
+	<br clear="all" />
+
+	<div id="command-feed-graveyard-div">
+		<h2 id="graveyard">&ubiquity.commandlist.UnsubscribedFeeds;</h2>
+		<p id="command-feed-graveyard-header">&ubiquity.commandlist.GraveYardText;</p>
+
+		<ul id="command-feed-graveyard"></ul>
+	</div>
+
+</body>
+</html>

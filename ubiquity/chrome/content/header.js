@@ -37,12 +37,12 @@
 // This contains the common header for all the about:ubiquity child pages.
 
 var navUrls = [
-  {name: "Tutorial", url: "about:ubiquity"},
-  {name: "Settings", url: "chrome://ubiquity/content/settings.html"},
-  {name: "Your Commands", url: "chrome://ubiquity/content/cmdlist.html"},
-  {name: "Get New Commands", url: "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"},
-  {name: "Support", url: "chrome://ubiquity/content/support.html"},
-  {name: "Hack Ubiquity", url: "chrome://ubiquity/content/editor.html"}
+  {name: _ubundle.GetStringFromName("ubiquity.nav.main"), url: "about:ubiquity"},
+  {name: _ubundle.GetStringFromName("ubiquity.nav.settings"), url: "chrome://ubiquity/content/settings.xhtml"},
+  {name: _ubundle.GetStringFromName("ubiquity.nav.commands"), url: "chrome://ubiquity/content/cmdlist.xhtml"},
+  {name: _ubundle.GetStringFromName("ubiquity.nav.getnewcommands"), url: "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"},
+  {name: _ubundle.GetStringFromName("ubiquity.nav.support"), url: "chrome://ubiquity/content/support.xhtml"},
+  {name: _ubundle.GetStringFromName("ubiquity.nav.hackubiquity"), url: "chrome://ubiquity/content/editor.xhtml"}
 ];
 
 function createNavLinks() {

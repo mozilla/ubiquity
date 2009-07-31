@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>&ubiquity.pagetitle.About;</title>
+
+	<base href="chrome://ubiquity/content"/>
+
+	<link rel="stylesheet" type="text/css" media="all" href="web-content.css" />
+	<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
+	
+	<script type="text/javascript" src="resource://ubiquity/scripts/jsparser.js"></script>
+	<script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
+
+	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
+	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
+
+	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/tutorial.js"></script>
+	<script type="text/javascript" src="prefkeys.js"></script>
+
+</head>
+<body dir="&locale.dir;">
+
+	<div class="head">&ubiquity.tagline.About;</div>
+
+	<div id="nav-container"></div>
+
+	<br clear="all" />
+
+	<div style="text-align:center;" class="not-the-tutorial">
+		<p>&ubiquity.pagetip.About;</p>
+	</div>
+
+	<br clear="all" />
+
+	<div class="col-five">
+
+		<div class="not-the-tutorial">
+			<h2 class="top">&ubiqutiy.about.WhatIsUbiquity;</h2>
+  			<p>&ubiqutiy.about.WhatIsParagraph1;</p>
+  			<p>&ubiqutiy.about.WhatIsParagraph2;</p>
+  			<p>&ubiqutiy.about.WhatIsParagraph3;</p>
+			<!-- todo: an animated gif here? -->
+		</div>
+
+   	<h2 class="not-the-tutorial">&ubiqutiy.about.LearnHow;</h2>
+		<span id="debug"></span>
+
+			<div id="interactive-tutorial-div">
+				<div id="tutorial-instructions-div" class="ubiq-tutorial">
+					<a onclick="startUbiqTutorial();">&ubiqutiy.about.TutorialButton;</a>
+				</div>
+
+			<br clear="all" />
+
+			<div id="tutorial-contents-div"></div>
+
+		</div>
+
+		<div id="canvas-goes-here"></div>
+
+	</div>
+
+	<div class="col-four not-the-tutorial">
+
+		<h2 class="top">&ubiqutiy.about.MoreOnUsingUbiquity;</h2>
+		<p>&ubiqutiy.about.UsingParagraph1;</p>
+		<p>&ubiqutiy.about.UsingParagraph2;</p>
+		<p>&ubiqutiy.about.UsingParagraph3;</p>
+		<p>&ubiqutiy.about.UsingParagraph4;</p>
+
+		<!-- Temporary manual entry of version number until versioning from cmdlist.js is corrected see http://ubiquity.mozilla.com/trac/ticket/842 for details -->
+		<!-- Without version numbering info I took some liberties in rewording things -->
+		<h2>&ubiqutiy.about.Thanks;</h2>
+		<p>&ubiquity.about.ThanksParagraph1;</p>
+
+	</div>
+
+	<br clear="all" />
+
+</body>
+</html>

@@ -48,7 +48,7 @@ UbiquityAboutHandler.prototype = {
                   getService(Ci.nsIIOService);
 
         var channel = ios.newChannel(
-          "chrome://ubiquity/content/about.html",
+          "chrome://ubiquity/content/about.xhtml",
           null,
           null
         );

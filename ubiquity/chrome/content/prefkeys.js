@@ -35,7 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 var PrefKeys = {
-  
+
   KEYCODE_PREF : "extensions.ubiquity.keycode",
   KEYMODIFIER_PREF : "extensions.ubiquity.keymodifier",
   
@@ -51,7 +51,7 @@ var PrefKeys = {
     var keyCombo = this.getKeyCombo();
     var keyText = keyCombo[0] + "+" 
                   + keyCombo[1]
-                  + " (Click here to change)";
+                  + " (" + _ubundle.GetStringFromName("ubiquity.prefkeys.clickhere") + ")";
     $("#keyInputBox").val(keyText);
   },
 	
@@ -60,7 +60,7 @@ var PrefKeys = {
     aEvent.preventDefault();
     aEvent.stopPropagation();
 
-    var keyCode = parseInt(aEvent.keyCode);		
+    var keyCode = parseInt(aEvent.keyCode);
     var keyModifier = (aEvent.altKey) ? "ALT"
                     : (aEvent.ctrlKey) ? "CTRL"
                     : (aEvent.shiftKey) ? "SHIFT"
@@ -68,11 +68,11 @@ var PrefKeys = {
                     : "";
 
     if(keyModifier == ""){
-      $("#keyNotify").text("You must have a modifier like SHIFT, CTRL, ALT or META");
+      $("#keyNotify").text(_ubundle.GetStringFromName("ubiquity.prefkeys.notifybadmodifier"));
       return;
     }
   
-    // Only alphanumeric keys are allowed as shortcuts because 
+    // Only alphanumeric keys are allowed as shortcuts because
     // it does not seem to possible to get keycodes properly for 
     // combinations like "shift+]". In this case, pressing "shift+]"
     // will set the keycode to be that of "}" and displaying "shift+}"
@@ -93,8 +93,8 @@ var PrefKeys = {
                   + this._convertToText(keyCode) 
                   + " (Click here to change)";
     $("#keyInputBox").val(keyText).blur();
-	  $("#keyNotify").text("Your key has been changed to " 
-	                        + keyModifier + "+" 
+	  $("#keyNotify").text(_ubundle.GetStringFromName("ubiquity.prefkeys.confirmchange")
+	                       + " " + keyModifier + "+" 
                           + this._convertToText(keyCode));                          
                           
   },

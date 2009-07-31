@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>&ubiquity.pagetitle.HackUbiquity;</title>
+
+	<link rel="stylesheet" href="web-content.css" type="text/css" />
+	<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
+
+	<script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
+	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
+	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
+
+
+	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/developer-news.js"></script>
+	<script type="application/javascript;version=1.7" src="editor.js"></script>
+	<script type="application/javascript;version=1.7" src="resource://ubiquity/scripts/codemirror/js/codemirror.js"></script>
+	<script type="text/javascript">
+	<!--
+    const PREF_ENABLE_HIGHLIGHTING = "extensions.ubiquity.editor_highlighting";
+
+    // Workaround for #437.
+    function isSyntaxHighlightingBroken() {
+      var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
+                              .getService(Components.interfaces.nsIXULAppInfo);
+      var versionChecker = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+                                     .getService(Components.interfaces.nsIVersionComparator);
+      if (versionChecker.compare(appInfo.version, "3.1b1") >= 0)
+        return true;
+      else
+        return false;
+    }
+
+    function getHighlighting() {
+      if (isSyntaxHighlightingBroken())
+        return false;
+      else
+        return Application.prefs.getValue(PREF_ENABLE_HIGHLIGHTING, true);
+    }
+
+    var file; 
+    var lastModifiedTime = 0; 
+    function initialize() {
+      document.getElementById("feedTypeMenu").value = PrefCommands.type;
+      document.getElementById("editor").value = PrefCommands.getCode();
+      document.getElementById("enableSyntaxHighlighting").checked = getHighlighting();
+      if (isSyntaxHighlightingBroken())
+        $("#editor-options").hide();
+    }
+    function launch() { 
+      file = Editor.launchEditor(document.getElementById('editor').editor.editor.getCode()); 
+      if (file != null && file.exists()) { 
+        lastModifiedTime = file.lastModifiedTime; 
+        setTimeout(watchFile, 500) 
+      } 
+    } 
+    function watchFile() { 
+      if (file != null && file.exists()) { 
+        time = file.lastModifiedTime; 
+        if (time > lastModifiedTime) {
+          document.getElementById('editor').editor.setCode(Editor.readFile(file)); 
+          PrefCommands.setCode(document.getElementById('editor').editor.editor.getCode()); 
+          lastModifiedTime = time;
+        }
+        setTimeout(watchFile, 500);
+      }
+    }
+    function highlight() {
+      if(!getHighlighting()) {
+        setupTextarea();
+        return;
+      }
+      var textarea = document.getElementById("editor");
+      try {
+        var editor = new CodeMirror(CodeMirror.replace(textarea), {
+            height: textarea.clientHeight,
+            content: textarea.value,
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: "resource://ubiquity/scripts/codemirror/css/jscolors.css",
+            path: "resource://ubiquity/scripts/codemirror/js/",
+            autoMatchParens: true,
+            undoDelay: 100,
+            onChange: function() { PrefCommands.setCode(editor.getCode()) },
+            initCallback: function() { editor.win.focus(); editor.jumpToLine(1); },
+            height: textarea.clientHeight+"px"
+          });
+        var iframe = document.getElementsByTagName("iframe")[0];
+        iframe.setAttribute("id", "editor");
+        iframe.editor = editor;
+        window.addEventListener("unload", function() { PrefCommands.setCode(editor.getCode()); }, false);
+      } catch (e) { // Setup matching API for the normal textarea
+        Components.utils.reportError("CodeMirror failed to load: "+e);
+        displayMessage("Error: CodeMirror failed to load: " + e);
+
+        setupTextarea();
+      }
+    }
+    function setupTextarea() {
+      var textarea = document.getElementById("editor");
+      textarea.editor = new Object();
+      textarea.editor.editor = new Object();
+      textarea.editor.editor.getCode = function() { return textarea.value; };
+      textarea.editor.getCode = textarea.editor.editor.getCode;
+      textarea.editor.editor.setCode = function(d) { textarea.value = d; };
+      textarea.editor.setCode = textarea.editor.editor.setCode;
+      textarea.focus();
+    }
+    function enableSyntaxHighlighter(enabled) {
+      Application.prefs.setValue(PREF_ENABLE_HIGHLIGHTING, enabled);
+      window.location.reload();
+    }
+	-->
+	</script>
+
+</head>
+<body dir="&locale.dir;" onload="initialize(); Editor.onLoad(); highlight();">
+
+	<div class="head">&ubiquity.tagline.HackUbiquity;</div>
+	<div id="nav-container"></div>
+
+	<br clear="all" />
+
+	<div style="text-align:center;">
+		<p>&ubiquity.pagetip.HackUbiquity;</p>
+	</div>
+
+	<br clear="all" />
+
+	<h1>&ubiquity.editor.CommandEditorHeader;</h1>
+	<p id="notification-bar" class="notification" style="display:none"></p>
+
+	<div class="col-three">
+		<p>&ubiquity.editor.CommandEditorNewCommands;</p>
+	</div>
+
+	<div class="col-three">
+		<p>&ubiquity.editor.CommandEditorReadAuthTut;</p>
+		<p style="background-color: #F2E78B; padding:5px;">&ubiquity.editor.CommandEditorReadTheDocs;</p>
+	</div>
+
+	<div class="col-two">
+		<p>&ubiquity.editor.CommandEditorGetInvolved;</p>
+	</div>
+
+	<div id="editor-actions">
+		<br clear="all" />
+
+		<div id="external-editor-pref">&ubiquity.editor.YourExternalEd;
+			<input id="editorInputBox" type="file" size="20" style="cursor:pointer" onchange="Editor.onSave()" />
+		</div>
+
+		<br />
+
+		<div id="feed-type-pref">&ubiquity.editor.EditorCommandType;
+			<select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
+				<option value="commands">&ubiquity.editor.CmdTypeRegular;</option>
+				<option value="locked-down-commands">&ubiquity.editor.CmdTypeLocked;</option>
+			</select>
+		</div>
+
+		<div>
+			<span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
+			<span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDesc;</span>
+		</div>
+
+		<br clear="all" />
+
+		<ul class="button-list">
+			<li><a class="button" onclick="importTemplate();return false"><strong>&ubiquity.editor.ImportTemplate;</strong></a></li>
+			<li><a class="button" onclick="launch();return false"><strong>&ubiquity.editor.LaunchExternalEd;</strong></a></li>
+			<li><a class="button" onclick="paste();return false"><strong>&ubiquity.editor.ShareCommand;</strong></a></li>
+			<li><a class="button" onclick="saveAs();return false"><strong>&ubiquity.editor.SaveToFile;</strong></a></li>
+		</ul>
+
+		<br clear="all" />
+
+		<div id="editor-options">
+			<label for="enableSyntaxHighlighting">
+				<input type="checkbox" id="enableSyntaxHighlighting" onchange="enableSyntaxHighlighter(this.checked);"/> &ubiquity.editor.EnableHighlighting;
+			</label>
+		</div>
+	</div>
+
+	<div id="editor-div">
+		<textarea id="editor" rows="40" style="width:99%"></textarea>
+	</div>
+
+	<br clear="all" />
+
+	<div class="col-five">
+
+		<h2>&ubiquity.editor.ShareYourCommands;</h2>
+		<p>&ubiquity.editor.ShareCommandsParagraph1;</p>
+		<p>&ubiquity.editor.ShareCommandsParagraph2;</p>
+
+		<h2>&ubiquity.editor.DevelopingUbiquity;</h2>
+		<p>&ubiquity.editor.DevelopingUbiquityParagraph1;</p>
+		<p>&ubiquity.editor.DevelopingUbiquityParagraph2;</p>
+		<p>&ubiquity.editor.DevelopingUbiquityParagraph3;</p>
+		<p>&ubiquity.editor.DevelopingUbiquityParagraph4;</p>
+	</div>
+
+	<div class="col-four">
+  		<h2>&ubiquity.editor.LatestChangesFeedTitle;</h2>
+		<div id="news"></div>
+	</div>
+
+</body>
+</html>

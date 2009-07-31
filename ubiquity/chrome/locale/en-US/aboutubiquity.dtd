@@ -1,0 +1,151 @@
+<!--
+A NOTE TO TRANSLATORS:
+Hello, and thank you for taking your time to help us translate our strings for Ubiquity!
+As you may expect, not everything here is currently complete or set in stone. But we're
+working diligently in choosing our words wisely to make sure you won't have to translate
+everything many times over.
+
+So please, bear with us as we'll be adding and changing things in the future. But since
+we're such nice people we promise to keep you updated. Happy translating!
+-->
+
+<!-- Page Titles  -->
+<!ENTITY ubiquity.pagetitle.About "About Ubiquity">
+<!ENTITY ubiquity.pagetitle.Settings "Ubiquity Settings &amp; Skins">
+<!ENTITY ubiquity.pagetitle.YourCommands "Ubiquity Commands">
+<!ENTITY ubiquity.pagetitle.Support "Ubiquity Support">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "Ubiquity Command Editor">
+
+<!-- Page header taglines -->
+<!ENTITY ubiquity.tagline.About "Don't Surf the Web. Command it.">
+<!ENTITY ubiquity.tagline.Settings "Settings and Skins">
+<!ENTITY ubiquity.tagline.YourCommands "Wherein are listed the commands at your disposal.">
+<!ENTITY ubiquity.tagline.Support "Help!">
+<!ENTITY ubiquity.tagline.HackUbiquity "Hack It.">
+
+<!-- Header page tips -->
+<!ENTITY ubiquity.pagetip.About "You can get to this page at any time using the &ldquo;Help&rdquo; command.">
+<!ENTITY ubiquity.pagetip.Settings "You can get to this page at any time using the  &ldquo;change ubiquity settings&rdquo; command.">
+<!ENTITY ubiquity.pagetip.YourCommands "You can get to this page at any time using the &ldquo;list ubiquity commands&rdquo; command.">
+<!ENTITY ubiquity.pagetip.Support "You can get to this page at any time using the  &ldquo;get support&rdquo; command.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "You can get to this page at any time using the  &ldquo;write ubiquity commands&rdquo; command.">
+
+<!-- End common elements -->
+<!-- Start by page -->
+
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "What Is Ubiquity?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "Ubiquity is a Firefox add-on that lets you give <strong>commands</strong> to Firefox by entering command words into a special input box.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "Commands are shortcuts for things that you commonly do on the Web; they can eliminate repetitive tasks and let you get more done, faster.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "The coolest thing about Ubiquity is that <em>anyone</em> can write a command and share it with the rest of the world, in much the same way as the Web itself lets everyone write pages and share information with the rest of the world.">
+
+<!ENTITY ubiqutiy.about.LearnHow "Learn How To Use Ubiquity">
+<!ENTITY ubiqutiy.about.TutorialButton "Click Here to Take the Interactive Tutorial">
+
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "More On Using Ubiquity">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "After taking the basic tutorial on this page, you can learn more by reading the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial'>In-depth documentation page</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "<strong>Help us</strong>. Subscribe to the <a href='https://ubiquity.mozilla.com/herd/command-feed/'>Herd</a>, which will add your data to the <a href='https://ubiquity.mozilla.com/herd'>dashboard</a> &mdash; it's completely anonymous and will help us make Ubiquity better and safer.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "For information about the goals of the Ubiquity project and our plans for upcoming releases, check out our <a href='https://wiki.mozilla.org/Labs/Ubiquity/Roadmap'>Roadmap</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "Ubiquity is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Credits'>credits</a> page.">
+
+<!ENTITY ubiqutiy.about.Thanks "Thanks for using Ubiquity <span class='version'></span>!">
+<!ENTITY ubiquity.about.ThanksParagraph1 "This version of Ubiquity addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.1_Release_Notes'>Ubiquity 0.5.1 Release Notes</a>.">
+
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.settings.Skins "Skins">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "Edit Custom Skin">
+
+<!ENTITY ubiquity.settings.KeyCombination "Key Combination">
+<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Invoke</strong> Ubiquity by pressing:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Click above to <strong>Change</strong> the keyboard shortcut used to open/close Ubiquity.">
+
+<!ENTITY ubiquity.settings.LangSettings "Language Settings">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 is Ubiquity's experimental next-generation parser and will not work with all commands.However, it supports multiple languages.">
+<!ENTITY ubiquity.settings.UseParser2 "Use Parser 2 (the next generation parser)">
+<!ENTITY ubiquity.settings.SelectLanguage "Language:">
+
+<!ENTITY ubiquity.settings.MiscSettings "Miscellaneous Settings">
+<!ENTITY ubiquity.settings.MaxSuggestions "Maximum number of suggestions:">
+
+<!ENTITY ubiquity.settings.InputDelay "Input delay:">
+<!ENTITY ubiquity.settings.MilliSeconds "milliseconds">
+
+<!ENTITY ubiquity.settings.Parser2Context "Parser 2">
+<!ENTITY ubiquity.settings.Parser2Details "Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "Enable external calls for all Parser 2 queries">
+
+<!ENTITY ubiquity.settings.CustomSkin "Custom Skin Editor">
+<!ENTITY ubiquity.settings.SaveSkin "Save">
+<!ENTITY ubiquity.settings.SaveSkinAs "Save As">
+<!ENTITY ubiquity.settings.ShareSkin "Share">
+<!ENTITY ubiquity.settings.SaveNotice "Clicking save immediately updates Ubiquity's look.">
+<!ENTITY ubiquity.settings.WindowsWarning "If you are using Windows, then any changes you make to a custom skin can only be seen after a browser restart. This is a <a href='http://ubiquity.mozilla.com/trac/ticket/449'>known bug</a>.">
+
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!-- Note to translators: Please avoid translating HTML markup within this section. Work around it for now. -->
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You have <span id='num-commands'></span> commands in <span id='num-subscribed-feeds'></span> command feeds. | <span id='unsubscribed-feeds-help'>You have unsubscribed from <a href='#graveyard'><span id='num-unsubscribed-feeds'></span> command feeds</a>. | </span><a id='show-hide-cmdlist-help' onclick=''></a>">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that Ubiquity recognizes are listed in the right column.  The black text is the command's name (what you type into Ubiquity to use it).  The grey text explains what the command does.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "The left column shows all the &ldquo;feeds&rdquo; that Ubiquity is subscribed to.  Each feed can contain multiple commands.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "You can view this page sorted by feeds or sorted by commands.  Click any of the links next to &ldquo;sort by&rdquo;, below.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "If there's a command you don't want, uncheck the box next to it.  You can get the command back by re-checking the box.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "If there's a whole command feed you don't want, click the &ldquo;[unsubscribe]&rdquo; link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.">
+
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "Subscribed Feeds">
+<!ENTITY ubiquity.commandlist.AvailableCommands "Commands">
+
+<!ENTITY ubiquity.commandlist.SortBy "Sort By:">
+<!ENTITY ubiquity.commandlist.SortByFeed "Feed Name">
+<!ENTITY ubiquity.commandlist.SortByDate "Date Subscribed">
+<!ENTITY ubiquity.commandlist.SortByEnabled "Enabled">
+<!ENTITY ubiquity.commandlist.SortByCommand "Command Name">
+
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Unsubscribed Feeds">
+<!ENTITY ubiquity.commandlist.GraveYardText "You used to be subscribed to these. If you want one back, click the &ldquo;[resubscribe]&rdquo; link beneath it.">
+
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "Getting Help">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Due to Ubiquity's unusual nature as a Labs experiment, you may run into problems while using it.There are a number of places you can go for help with Ubiquity.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='http://getsatisfaction.com/mozilla/products/mozilla_ubiquity'>Get Satisfaction</a> is a community-driven support site.Many common problems already have answers there, and if you can't find an answer, you can start a new topic.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "The <a href='http://groups.google.com/group/ubiquity-firefox'>Google Group/Mailing List</a> is useful for discussion of command development, user interface, feature suggestions, and other high-level discussions.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "The <a href='https://wiki.mozilla.org/Labs/Ubiquity'>Ubiquity Wiki</a> has information about the entire Ubiquity project, including documentation, tutorials, and links to older versions of Ubiquity.">
+
+<!ENTITY ubiquity.support.ReportBugs "Report A Bug">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "We are working on an automated bug report service, but for the time being you should report any reproducible problems you find using <a href='http://getsatisfaction.com/mozilla/products/mozilla_ubiquity'>Get Satisfaction</a> or <a href='http://groups.google.com/group/ubiquity-firefox'>the mailing list</a>. Please include any information you have about how to reproduce the bug.">
+
+<!ENTITY ubiquity.support.ResetUbiquity "Resetting Ubiquity">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "If Ubiquity becomes completely unresponsive to you, then it may be necessary to reset it to its &ldquo;factory defaults&rdquo; in order to use it again.To do this, click <a href='reset.html'>here</a> &mdash; and our apologies for the inconvenience!">
+
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "Ubiquity Command Editor">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Enter new commands</strong> in the area below. They will automatically be saved as you type, and will be able to be instantly used from the command entry mode.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTut "<strong>Read the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial'>command authoring tutorial</a></strong> to learn more. For examples of built-in commands, look <a href='resource://ubiquity/standard-feeds'>here</a>.">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "<strong>New</strong>: Documentation for the <a href='file.html#index.html'>command APIs</a>.">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Get involved</strong>. Learn how by visiting the <a href='http://wiki.mozilla.org/Labs/Ubiquity'>Ubiquity Wiki</a>.">
+
+<!ENTITY ubiquity.editor.YourExternalEd "Your external editor is">
+<!ENTITY ubiquity.editor.EditorCommandType "The command type is">
+<!ENTITY ubiquity.editor.CmdTypeRegular "Regular">
+<!ENTITY ubiquity.editor.CmdTypeLocked "Locked-Down">
+<!ENTITY ubiquity.editor.RegularCommandDesc "<em>Regular</em> feeds have full freedom to do anything to your computer.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Locked-Down</em> feeds are very safe but don't have much freedom to interact with your computer. For more information, see the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial'>Locked-Down Feed Tutorial</a>.">
+
+<!ENTITY ubiquity.editor.ImportTemplate "Import command template">
+<!ENTITY ubiquity.editor.LaunchExternalEd "Launch an external editor">
+<!ENTITY ubiquity.editor.ShareCommand "Share">
+<!ENTITY ubiquity.editor.SaveToFile "Save to file">
+<!ENTITY ubiquity.editor.EnableHighlighting "Enable syntax highlighting">
+
+<!ENTITY ubiquity.editor.ShareYourCommands "Share Your Commands">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Post your command on the <a href='http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild'>commands in the wild</a> wiki page so that other users can find it.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Also, sign up for the the <a href='https://ubiquity.mozilla.com/herd/command-feed/'>herd command</a> which will then display your command on the <a href='https://ubiquity.mozilla.com/herd/'>dashboard</a>.">
+
+<!ENTITY ubiquity.editor.DevelopingUbiquity "Developing Ubiquity">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Run the <a href='test.html'>unit tests</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Help us test our <a href='feed.html#experimental-commands.html'>experimental commands</a>!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Experiment with parser performance and introspect in the <a href='chrome://ubiquity/content/playpen.html'>parser playpen</a>. Use the <a href='chrome://ubiquity/content/tuner.html'>nountype tuner</a> to check your nountypes' suggestions and scoring.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "And if you're going to be developing Ubiquity itself, check out our <a href='feed.html#core-developer-commands.html'>core developer commands</a>.">
+
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Latest Ubiquity Code Changes">
+
+<!-- Hack chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.reset.1 "">

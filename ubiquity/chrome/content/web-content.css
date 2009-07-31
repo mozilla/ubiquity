@@ -119,7 +119,16 @@ h2.top{
   margin: 0px;
 }
 
-em{
+/*
+ Removed <em> for the time being since I changed <i>'s to <em> in the html sources
+ which are also included into localizations, and mixing redundant tags is kind of ugly.
+ I suggest just using custom classes for specific highlights from now on. I'll later
+ tackle more more of the html and define new styles later. <em class="highlight"> for
+ green texting now. :)
+ - Lech
+*/
+
+.highlight {
   color: #66bb00;
   font-style: normal;
 }
