@@ -36,17 +36,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity/modules/utils.js");
+
 function loadNews( data ) {
   $("item", data).each(function(){
     var p = document.createElement("p");
     var a = document.createElement("a");
 
-
-    $(a).attr("href", $("link", this).text() )
-        .text( $("title", this).text() +"..." );
-
-    var author = $("author", this).text();
-
+    var title = Utils.escapeHtml($("title", this).text());
+    var author = Utils.escapeHtml($("author", this).text());
+    $(a).attr("href", $("link", this).text() ).text( title + "..." );
     $(p).append(a).append("<span class='light'><br/>by " + author + "</span>");
     $("#news").append(p);
   });
