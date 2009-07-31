@@ -211,7 +211,7 @@ function startUbiqTutorial() {
 
   var html = "<h2>Welcome to the Ubiquity Tutorial.</h2>"
     + "<p><a onclick='ubiqTutorialStage1();'>Click Here to Start"
-    + " From The Beginning</a><p>"
+    + " From The Beginning</a></p>"
     + "<p>Start from the middle:</p><ol>"
     + "<li><a onclick='ubiqTutorialStage1();'>How to start Ubiquity</a></li>"
     + "<li><a onclick='ubiqTutorialStage3();'>Previews (Weather command)</a></li>"
@@ -272,14 +272,16 @@ function ubiqTutorialStage4() {
 }
 
 function ubiqTutorialStage5() {
+  // NOTE: For some reason, &mdash; makes the xhtml parser barf, but
+  // &#8212; works.
   let stage5Html = "<p>Even before you're done typing, the <b>preview area</b>"
-    + " shows a preview of the results of your command &mdash; in this case, a "
+    + " shows a preview of the results of your command &#8212; in this case, a "
     + " weather report.</p>"
     + "<p>If you don't enter a location, the <i>weather</i> command takes a"
     + " guess where you are.</p>"
     + "<p>Now let's give it a location: <b>type a space, and then type '"
     + "near chicago'</b>.  (So your whole input will say: 'weather near "
-    + "chicago'.)";
+    + "chicago'.)</p>";
 
   fadeInText(stage5Html);
   destroyCanvas();
@@ -368,7 +370,7 @@ function ubiqTutorialStage12() {
 function ubiqTutorialStage13() {
   moveDivRight();
   let stage13Html = "<p>Let's say you want to search Google for cheese.</p>"
-    + "<b>Type the letter 'g', a space, and the word 'cheese'</b>.</b></p>"
+    + "<p><b>Type the letter 'g', a space, and the word 'cheese'.</b></p>"
     + "<p>(Like, 'g cheese').</p>";
   fadeInText(stage13Html);
   showArrowToInputBox();
@@ -392,7 +394,7 @@ function ubiqTutorialStage14() {
 function ubiqTutorialStage15() {
   let stage15Html = "<p>The <i>Google</i> command preview shows a snippet"
   + " from each search result matching your search term.</p>"
-  + "<p>Those titles are links &mdash; you can click on one of them to "
+  + "<p>Those titles are links &#8212; you can click on one of them to "
   + "open the page in a new tab.</p>"
   + "<p>When you're done, close that page and come back here, or just <b>tap"
   + " escape</b> to move on with the tutorial.</p>";
@@ -408,9 +410,9 @@ function ubiqTutorialStage16() {
   destroyCanvas();
   let stage16Html = "<h2>Part 5 of 6:"
   + " Selecting and Executing</h2><p>Say you're browsing the"
-  + " web and you come across an address &mdash; like the one in the box"
-  + " below &mdash; and you'd like to see it on a map.</p>"
-  + " Ubiquity commands can work on your text selection.  Try it out: "
+  + " web and you come across an address &#8212; like the one in the box"
+  + " below &#8212; and you'd like to see it on a map.</p>"
+  + " <p>Ubiquity commands can work on your text selection.  Try it out: "
   + " Use the mouse to <b>select the address</b> below."
   + " Then <b>summon Ubiquity</b>.</p>";
 
@@ -447,7 +449,7 @@ function ubiqTutorialStage17() {
 
   let stage17Html = "<p>As another example, say you're browsing the web"
   + " and you come across something written in a language you can't read"
-  + " &mdash; like the Japanese text below.  You can use Ubiquity to get"
+  + " &#8212; like the Japanese text below.  You can use Ubiquity to get"
   + " a translation.</p>"
   + "<p>First <b>select the Japanese text below</b>, then bring up Ubiquity"
   + " and <b>use the <i>translate</i> command</b>.</p>"
@@ -469,7 +471,7 @@ function ubiqTutorialStage18() {
     + " you want to have Ubiquity translate.  But as you can see in the preview"
     + " area, Ubiquity is already translating the words that you have"
     + " selected.</p>"
-    + "<p>Next, <b>tap the enter key</b> to execute the command.";
+    + "<p>Next, <b>tap the enter key</b> to execute the command.</p>";
 
   fadeInText(stage18Html);
   waitForUserAction( function() { return contentsDivHas("browser"); },
@@ -490,8 +492,8 @@ function ubiqTutorialStage19() {
 
 function ubiqTutorialStage20() {
   let stage20Html = "<p>Let's do one more example.  Say you're browsing the"
-    + " web and you come across an unfamiliar word &mdash; like the one in the box"
-    + " below &mdash; and you'd like to look it up.</p>"
+    + " web and you come across an unfamiliar word &#8212; like the one in the box"
+    + " below &#8212; and you'd like to look it up.</p>"
     + "<p><b>Select the word in the box below and then summon Ubiquity</b>.</p>";
   let agDiv = $("#tutorial-contents-div");
   agDiv.html("aglet");
@@ -512,7 +514,7 @@ function ubiqTutorialStage21() {
 
 function ubiqTutorialStage22() {
   let stage22Html = "<p>Now, if the preview of the <i>google</i> command"
-    + " tells you what you want to know, then you're done &mdash; you can dismiss"
+    + " tells you what you want to know, then you're done &#8212; you can dismiss"
     + " Ubiquity and go on your way.</p>"
     + "<p>But if you want more information, you can tap the enter key to "
     + " execute the <i>google</i> command, which will open the search results"
@@ -531,7 +533,7 @@ function ubiqTutorialStage23() {
     + "<p>So far you've learned the <i>weather</i>, <i>calculate</i>, "
     + "<i>google</i>, <i>translate</i>, and <i>map</i> commands."
     + " That's a good start, but there are dozens more commands"
-    + " included with Ubiquity &mdash; plus you can find more on the Web.</p>"
+    + " included with Ubiquity &#8212; plus you can find more on the Web.</p>"
     + "<p>How will you find out what commands are available?</p>"
     + "<p>One way is by using the <i>help</i> command.</p>"
     + "<p><b>Summon Ubiquity...</b></p>";
