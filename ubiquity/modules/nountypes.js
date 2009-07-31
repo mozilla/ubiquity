@@ -771,7 +771,7 @@ var noun_type_contact = {
                    .concat(CmdUtils.grepSuggs(text, self._list, 'data')));
         };
         
-      contactRequest = getContacts(contactCallback);
+      var contactRequest = getContacts(contactCallback);
       return suggs.concat(contactRequest);
     } else
       return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
