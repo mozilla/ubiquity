@@ -45,11 +45,11 @@
 // -----------------------------------------------------------------
 
 const Help = "about:ubiquity";
-const Editor = "chrome://ubiquity/content/editor.html";
-const CmdList = "chrome://ubiquity/content/cmdlist.html";
-const Settings = "chrome://ubiquity/content/settings.html";
+const Editor = "chrome://ubiquity/content/editor.xhtml";
+const CmdList = "chrome://ubiquity/content/cmdlist.xhtml";
+const Settings = "chrome://ubiquity/content/settings.xhtml";
 const BugReport = "http://getsatisfaction.com/mozilla/products/mozilla_ubiquity";
-const Support = "chrome://ubiquity/content/support.html";
+const Support = "chrome://ubiquity/content/support.xhtml";
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
