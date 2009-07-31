@@ -57,8 +57,12 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
 
     cmdSuggester(context, function onSuggest(suggestions) {
       for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
-      var suggsToDisplay = suggestions;
-      if (suggestions.length > maxSuggs)
+      var suggsToDisplay = suggestions.filter(function (sugg) {
+                               let arg = sugg.args["object"];
+                               if (arg && (arg[0] || 0).text) return true;
+                               else return false;
+                           });
+      if (suggsToDisplay.length > maxSuggs)
         suggsToDisplay = suggsToDisplay.slice(0,maxSuggs);
       for each (var sugg in suggsToDisplay) {
         let {_verb} = sugg, {icon} = _verb.cmd || _verb;
