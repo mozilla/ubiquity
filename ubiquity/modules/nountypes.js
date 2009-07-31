@@ -249,9 +249,8 @@ var noun_type_tag = {
 // === {{{ noun_type_awesomebar }}} ===
 //
 // Suggests "Awesome Bar" query results.
-// Also suggests the input back with empty data.
 //
-// * {{{text, html}}} : title or input
+// * {{{text, html}}} : title or url
 // * {{{data}}} : a query result
 //   (see [[#modules/utils.js|Utils]]{{{.history.search}}})
 
@@ -259,42 +258,31 @@ var noun_type_awesomebar = {
   label: "query",
   rankLast: true,
   noExternalCalls: true,
-  suggest: function nt_awesome_suggest(text, html, callback, selectedIndices) {
+  suggest: function nt_awesome_suggest(text, html, callback) {
     if (!text) return [];
-    var reqObj = {readyState: 2};
-    
-    Utils.history.search(text, function nt_awesome_results(results){
+
+    var reqObj = {readyState: 2}, {_match} = this;
+    Utils.history.search(text, function nt_awesome_results(results) {
       reqObj.readyState = 4;
-      var returnArr = [];
+      var returnArr = [], lctxt = text.toLowerCase();
       for each (let r in results) {
-
-        var urlIndex = r.url.indexOf(text);
-        if (urlIndex > -1)
-          urlScore = CmdUtils.matchScore(
-                       {index:urlIndex,'0':text,input:r.url});
-        else
-          urlScore = 0;
-
-        var titleIndex = r.title.indexOf(text);
-        if (titleIndex > -1)
-          titleScore = CmdUtils.matchScore(
-                         {index:titleIndex,'0':text,input:r.title});
-        else
-          titleScore = 0;
-
-        if (!urlScore && !titleScore)
-          continue;
-
-        if (urlScore >= titleScore)
-          returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, urlScore));
-        else
-          returnArr.push(CmdUtils.makeSugg(r.title, r.title, r, titleScore));
+        let u = _match(r.url, lctxt);
+        let t = _match(r.title, lctxt);
+        let m = u.score > t.score ? u : t;
+        returnArr.push(CmdUtils.makeSugg(m.input, null, r, m.score,
+                                         [m.index, m.index + text.length]));
       }
       callback(returnArr);
     });
-    
     return [reqObj];
-  }
+  },
+  // creates a fake match object with an applicable score
+  _match: function nt_awesome_match(input, lctxt) {
+    var index = input.toLowerCase().indexOf(lctxt);
+    var match = {index: index, input: input, 0: lctxt};
+    match.score = ~index && CmdUtils.matchScore(match);
+    return match;
+  },
 };
 
 // === {{{ noun_type_url }}} ===

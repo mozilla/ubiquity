@@ -888,33 +888,26 @@ Utils.history = {
   // {{{callback}}} is the function called when the search is complete.
 
   search: function history_search(query, callback) {
-      let awesome = Cc["@mozilla.org/autocomplete/search;1?name=history"].
-                    getService(Ci.nsIAutoCompleteSearch);
-
-    awesome.startSearch(query, "", null, ({
-      onSearchResult: function(search, result) {
+    var awesome = (Cc["@mozilla.org/autocomplete/search;1?name=history"]
+                   .getService(Ci.nsIAutoCompleteSearch));
+    awesome.startSearch(query, "", null, {
+      onSearchResult: function hs_onSearchResult(search, result) {
+        awesome.stopSearch();
         switch (result.searchResult) {
-          case result.RESULT_NOMATCH:
-            callback([]);
-
           case result.RESULT_SUCCESS_ONGOING:
-          case result.RESULT_SUCCESS:
-            awesome.stopSearch();
-
-            var results = [];
-
-            for(let i = 0; i < result.matchCount; i++){
+          case result.RESULT_SUCCESS: {
+            let results = [];
+            for (let i = 0, l = result.matchCount; i < l; ++i)
               results.push({
+                url: result.getValueAt(i),
                 title: result.getCommentAt(i),
                 favicon: result.getImageAt(i),
-                style: result.getStyleAt(i),
-                url: result.getValueAt(i),
               });
-            }
             callback(results);
+          } return;
         }
+        callback([]);
       }
-    }));
+    });
   },
-
 };
