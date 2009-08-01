@@ -866,7 +866,7 @@ var noun_type_geolocation = {
     // TODO: we should try to build this "here" handling into something like
     // magic words (anaphora) handling in Parser 2: make it localizable.
     var suggs = [CmdUtils.makeSugg(text, null, null, 0.3, selectionIndices)];
-    if (/^here$/i.test(text))
+    if (text == 'here')
       suggs.push(CmdUtils.getGeoLocation(addAsyncGeoSuggestions));
     return suggs;
   }
@@ -1118,16 +1118,14 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
 //
 // {{{NounAsync}}} is a utility function used in a couple of newer nountypes.
 
-function NounAsync(label, checker) {
-  function asyncSuggest(text, html, callback, selectionIndices) (
-    [CmdUtils.makeSugg(text, html, null, .5, selectionIndices),
-     checker(text, function asyncBack(truthiness) {
-       if(truthiness)
-         callback([CmdUtils.makeSugg(text, html, null, .9, selectionIndices)]);
-       else
-         callback([]);
-     })]
-  );
+function NounAsync(label, checker, acceptAnything) {
+  function asyncSuggest(text, html, callback, selectionIndices) {
+    var returnArr = [checker(text, callback, selectionIndices)];
+    if (acceptAnything) {
+      returnArr.push(CmdUtils.makeSugg(text, html, null, .3, selectionIndices));
+    }
+    return returnArr;
+  };
   return {
     label: label,
     rankLast: true,
@@ -1145,9 +1143,9 @@ function NounAsync(label, checker) {
 // * {{{html}}} :
 // * {{{data}}} :
 
-var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants);
+var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants, true);
 
-function getRestaurants(query, callback){
+function getRestaurants(query, callback, selectionIndices){
   if (query.length == 0) return;
 
   var baseUrl = "http://api.yelp.com/business_review_search";
@@ -1169,7 +1167,7 @@ function getRestaurants(query, callback){
     url: baseUrl+params,
     dataType: "json",
     error: function() {
-      callback( false, null );
+      callback([]);
     },
     success: function(data) {
       var allBusinesses = data.businesses.map(
@@ -1182,20 +1180,22 @@ function getRestaurants(query, callback){
       for each (business in allBusinesses){
         if(business.name.indexOf(queryToMatch) != -1 ||
            queryToMatch.indexOf(business.name) != -1){
-              callback( true );
+              callback([CmdUtils.makeSugg(query, query, null, .9, 
+                selectionIndices)]);
               return;
         }
         else{
           for each (category in business.categories){
             if(category.name.indexOf(queryToMatch) != -1 ||
               queryToMatch.indexOf(category.name) != -1){
-              callback( true );
+              callback([CmdUtils.makeSugg(query, query, null, .9, 
+                selectionIndices)]);
               return;
             }
           }
         }
       }
-      callback( false );
+      callback([]);
     }
   });
   return asyncRequest;
@@ -1209,9 +1209,9 @@ function getRestaurants(query, callback){
 // * {{{html}}} :
 // * {{{data}}} :
 
-var noun_type_async_address = NounAsync("address", getAddress);
+var noun_type_async_address = NounAsync("address", getLegacyAddress, true);
 
-function getAddress( query, callback ) {
+function getLegacyAddress( query, callback, selectionIndices ) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = Utils.paramsToString({
     location: query,
@@ -1221,7 +1221,7 @@ function getAddress( query, callback ) {
     url: url+params,
     dataType: "xml",
     error: function() {
-      callback( false );
+      callback([]);
     },
     success:function(data) {
       var results = jQuery(data).find("Result");
@@ -1234,15 +1234,15 @@ function getAddress( query, callback ) {
       // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
 
       if( results.length == 0 ){
-        callback( false );
+        callback( [] );
         return;
       }
-
+ 
       function existsMatch( text ){
         var joinedText = allText.join(" ");
         return joinedText.indexOf( text.toLowerCase() ) != -1;
       }
-
+ 
       var missCount = 0;
 
       var queryWords = query.match(/\w+/g);
@@ -1257,12 +1257,151 @@ function getAddress( query, callback ) {
       //displayMessage( missRatio );
 
       if( missRatio < .5 )
-        callback( true );
+        callback( CmdUtils.makeSugg(query, query, null, 0.9, 
+                 selectionIndices) );
       else
-        callback( false );
+        callback([]);
     }
   });
   return asyncRequest;
+}
+
+
+var noun_type_geo_country = NounAsync("country", getCountry, true);
+function getCountry(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 1, 1);
+}
+
+// The region
+// Think American states, provinces in many countries, Japanese prefectures.
+var noun_type_geo_region = NounAsync("region", getRegion, true);
+function getRegion(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 2, 2);
+}
+
+// The subregion
+var noun_type_geo_subregion = NounAsync("subregion", getSubregion, true);
+function getSubregion(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 3, 3);
+}
+
+var noun_type_geo_town = NounAsync("city/town", getTown, true);
+function getTown(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 4, 4);
+}
+
+var noun_type_geo_postal = NounAsync("postal code", getPostal, true);
+function getPostal(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 5, 5);
+}
+
+var noun_type_geo_address = NounAsync("address", getAddress, true);
+function getAddress(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 6, 9);
+}
+
+function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
+  var url = "http://maps.google.com/maps/geo";
+  var params = {
+    q: query,
+    output: 'json',
+    oe: 'utf8',
+    sensor: 'false',
+    key: 'ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w'
+  };
+  var asyncRequest = jQuery.ajax({
+    url: url,
+    data: params,
+    dataType: 'json',
+    error: function() {
+      callback([]);
+    },
+    success: function(data) {
+      if (data.Status.code != '200' ||
+           (data.Placemark && data.Placemark.length == 0)) {
+        callback([]);
+        return;
+      }
+      
+      var returnArr = [];
+      var unusedResults = [];
+
+      var results = data.Placemark;
+      for each (let result in results) {
+        // if there are no AddressDetails, it has no accuracy value either
+        // so let's ignore it.
+        if (!result.AddressDetails)
+          continue;
+
+        if (result.address.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+          var score = CmdUtils.matchScore({input:result.address,index:0,'0':query});
+          score *= accuracyScore(result.AddressDetails.Accuracy,
+                                 minAccuracy, maxAccuracy);
+          returnArr.push(formatGooglePlacemark(result.address,result,score));
+        } else {
+          unusedResults.push(result);
+        }
+      }
+      
+      // if none of the results matched the input, let's take the first
+      // one's data with the original input, but with a penalty.
+      // TODO: See if this is a Bad Idea and think of a Good Idea.
+      if (!returnArr.length && unusedResults.length) {
+        var result = unusedResults[0];
+        var score = 0.7 * accuracyScore(result.AddressDetails.Accuracy,
+                                                 minAccuracy, maxAccuracy);
+        returnArr.push(formatGooglePlacemark(query,unusedResults[0],score));
+      }
+
+      callback(returnArr);
+    }
+  });
+  return asyncRequest;
+}
+
+// used by getGeo
+function accuracyScore(score,minAccuracy,maxAccuracy) {
+  if (score < minAccuracy)
+    return Math.pow(0.8, minAccuracy - score);
+  if (maxAccuracy < score)
+    return Math.pow(0.8, score - maxAccuracy);
+  return 1;
+}
+
+// used by getGeo
+function formatGooglePlacemark(text,placemark,score,selectionIndices) {
+  var ad = placemark.AddressDetails;
+  var data = {coordinates: {lat: placemark.Point.coordinates[1],
+                            lng: placemark.Point.coordinates[0]},
+              address: {}, accuracy: ad.Accuracy};
+
+  if (ad.Country) {
+    data.address.country = ad.Country.CountryName;
+    data.address.countryCode = ad.Country.CountryNameCode;
+
+    var nodesToCrawl = [ad.Country];
+    
+    while (nodesToCrawl[0]) {
+      dump('ntc length:'+nodesToCrawl.length+'\n');
+      var thisNode = nodesToCrawl[0];
+      nodesToCrawl = nodesToCrawl.slice(1);
+      
+      for (let id in thisNode) {
+        dump('id: '+id+'\n');
+        if (id.indexOf('Name') > -1) {
+          var newId  = id[0].toLowerCase() + id.slice(1);
+          newId = newId.replace('Name','');
+          data.address[newId] = thisNode[id];
+        } else {
+          if (typeof thisNode[id] != 'string')
+            nodesToCrawl.push(thisNode[id]);
+        }
+      }
+    }
+  }
+  
+  return CmdUtils.makeSugg(text, text, data, score, 
+            selectionIndices);
 }
 
 var EXPORTED_SYMBOLS = (

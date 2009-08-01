@@ -1018,7 +1018,11 @@ CmdUtils.CreateCommand({
         "zip-codes, too.  You can add 'in celsius' or 'in farenheit' to " +
         "specify the temperature scale.",
   execute: function( {location} ) {
-    location = location.text;
+    // this is some initial support for noun_type_geo_town
+    if (location.data)
+      location = location.data.coordinates.lat + ',' + location.data.coordinates.lng;
+    else 
+      location = location.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
 
