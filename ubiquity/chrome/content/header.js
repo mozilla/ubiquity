@@ -34,6 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity/modules/setup.js");
+
 // This contains the common header for all the about:ubiquity child pages.
 
 var navUrls = [
@@ -44,6 +46,10 @@ var navUrls = [
   {name: _ubundle.GetStringFromName("ubiquity.nav.support"), url: "chrome://ubiquity/content/support.xhtml"},
   {name: _ubundle.GetStringFromName("ubiquity.nav.hackubiquity"), url: "chrome://ubiquity/content/editor.xhtml"}
 ];
+
+function setVersionString() {
+  $(".version").text(UbiquitySetup.version);
+}
 
 function createNavLinks() {
   let containerElem = document.getElementById("nav-container");
@@ -71,7 +77,6 @@ function createNavLinks() {
 }
 
 $(createNavLinks);
+$(setVersionString);
 
-// Also set version string
-Components.utils.import("resource://ubiquity/modules/setup.js");
-$(".version").text(UbiquitySetup.version);
+

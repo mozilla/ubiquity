@@ -49,7 +49,7 @@ we're such nice people we promise to keep you updated. Happy translating!
 <!ENTITY ubiqutiy.about.UsingParagraph4 "Ubiquity is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Credits'>credits</a> page.">
 
 <!ENTITY ubiqutiy.about.Thanks "Thanks for using Ubiquity <span class='version'></span>!">
-<!ENTITY ubiquity.about.ThanksParagraph1 "This version of Ubiquity addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.1_Release_Notes'>Ubiquity 0.5.1 Release Notes</a>.">
+<!ENTITY ubiquity.about.ThanksParagraph1 "Version <span class='version'></span> of Ubiquity addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the <a href='https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.1_Release_Notes'>Ubiquity <span class='version'></span> Release Notes</a>.">
 
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.settings.Skins "Skins">
