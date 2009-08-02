@@ -1,0 +1,151 @@
+<!--
+A NOTE TO TRANSLATORS:
+Hello, and thank you for taking your time to help us translate our strings for Ubiquity!
+As you may expect, not everything here is currently complete or set in stone. But we're
+working diligently in choosing our words wisely to make sure you won't have to translate
+everything many times over.
+
+So please, bear with us as we'll be adding and changing things in the future. But since
+we're such nice people we promise to keep you updated. Happy translating!
+-->
+
+<!-- Page Titles  -->
+<!ENTITY ubiquity.pagetitle.About "Ubiquity について">
+<!ENTITY ubiquity.pagetitle.Settings "Ubiquity の設定とスキン変更">
+<!ENTITY ubiquity.pagetitle.YourCommands "Ubiquity コマンド">
+<!ENTITY ubiquity.pagetitle.Support "Ubiquity サポート">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "Ubiquity コマンドエディタ">
+
+<!-- Page header taglines -->
+<!ENTITY ubiquity.tagline.About "Web サーフィンは時代遅れ！ コマンドで指示を！">
+<!ENTITY ubiquity.tagline.Settings "設定とスキン">
+<!ENTITY ubiquity.tagline.YourCommands "Ubiquity で使用可能なコマンド一覧">
+<!ENTITY ubiquity.tagline.Support "ヘルプ！">
+<!ENTITY ubiquity.tagline.HackUbiquity "Ubiquity をハッキング！">
+
+<!-- Header page tips -->
+<!ENTITY ubiquity.pagetip.About "このページは「ヘルプ」コマンドでいつでも開けます。">
+<!ENTITY ubiquity.pagetip.Settings "このページは「設定」コマンドでいつでも開けます。">
+<!ENTITY ubiquity.pagetip.YourCommands "このページは「コマンドリスト」コマンドでいつでも開けます。">
+<!ENTITY ubiquity.pagetip.Support "このページは「サポート」コマンドでいつでも開けます。">
+<!ENTITY ubiquity.pagetip.HackUbiquity "このページは「コマンドエディタ」コマンドでいつでも開けます。">
+
+<!-- End common elements -->
+<!-- Start by page -->
+
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "Ubiquity って何？">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "Ubiquity は、特別な入力欄にコマンドを入力して Firefox を<strong>操作する</strong> Firefox のアドオンです。">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "コマンドは Web 上で行う一般的な操作のためのショートカットです。繰り返し行う操作もすばやくできます。">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Ubiquity の優れたところは、<em>誰でも</em> 自分のコマンドを書いて世界中のユーザと共有できるところです。ぜひ、ご自分の Web ページでコマンドを公開して共有してください。">
+
+<!ENTITY ubiqutiy.about.LearnHow "Ubiquity の使い方">
+<!ENTITY ubiqutiy.about.TutorialButton "ここをクリックして対話式のチュートリアルを開始してください。">
+
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Ubiquity をさらに使いこなすには">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "基本的なチュートリアルを終えたら、<a href='https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial'>さらに詳しいドキュメント</a> (英語) をお読みください。">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "<strong>ご協力をお願いします</strong>。あなたの利用データを <a href='https://ubiquity.mozilla.com/herd'>ダッシュボード</a> に追加するため、<a href='https://ubiquity.mozilla.com/herd/command-feed/'>Herd</a> を購読してください。このデータは Ubiquity の改善と安全のために使用され、完全に匿名で送信されます。">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "Ubiquity プロジェクトの目標と次期リリース計画についての情報は <a href='https://wiki.mozilla.org/Labs/Ubiquity/Roadmap'>ロードマップ</a> をご覧ください。">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "Ubiquity は世界中の貢献者による共同作業で成り立っています。貢献者のリストは <a href='https://wiki.mozilla.org/Labs/Ubiquity/Credits'>クレジット</a> ページをご覧ください。">
+
+<!ENTITY ubiqutiy.about.Thanks "Ubiquity <span class='version'></span> のご利用ありがとうございます！">
+<!ENTITY ubiquity.about.ThanksParagraph1 "Ubuiquity のバージョン <span class='version'></span> では、ユーザインタフェースのパフォーマンス改善と以前のリリースで見つかったバグの修正に取り組んでいます。このリリースでは、スピード、応答、パーサの正確さが向上しています。新着情報については <a href='https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.1_Release_Notes'>Ubiquity <span class='version'></span> リリースノート</a> をご覧ください。">
+
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.settings.Skins "スキン">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "カスタムスキンの編集">
+
+<!ENTITY ubiquity.settings.KeyCombination "呼び出しキー">
+<!ENTITY ubiquity.settings.InvokingUbiquity "Ubiquity を<strong>呼び出す</strong>キーの組み合わせ:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Ubiquity パネルの開閉に使用する<strong>キーボードショートカットを変更する</strong>には、上のフィールドをクリックしてください。">
+
+<!ENTITY ubiquity.settings.LangSettings "言語設定">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 は Ubiquity の実験的な次世代パーサです。すべてのコマンドは動作しませんが、複数の言語をサポートしています。">
+<!ENTITY ubiquity.settings.UseParser2 "Parser 2 を使用 (次世代パーサ)">
+<!ENTITY ubiquity.settings.SelectLanguage "言語:">
+
+<!ENTITY ubiquity.settings.MiscSettings "その他の設定">
+<!ENTITY ubiquity.settings.MaxSuggestions "表示する候補の最大数:">
+
+<!ENTITY ubiquity.settings.InputDelay "パース開始までの遅延時間:">
+<!ENTITY ubiquity.settings.MilliSeconds "ミリ秒">
+
+<!ENTITY ubiquity.settings.Parser2Context "Parser 2">
+<!ENTITY ubiquity.settings.Parser2Details "Parser 2 は、入力したコマンドに基づく Web サービスからの情報を候補に表示するため、Web サービスに対する外部呼び出しが行えます。現在の実装では多くの API コールが発生してしまうため、デフォルトで無効にされています。">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "すべての Parser 2 クエリについて外部呼び出しを有効にする">
+
+<!ENTITY ubiquity.settings.CustomSkin "カスタムスキンエディタ">
+<!ENTITY ubiquity.settings.SaveSkin "保存">
+<!ENTITY ubiquity.settings.SaveSkinAs "名前をつけて保存">
+<!ENTITY ubiquity.settings.ShareSkin "共有">
+<!ENTITY ubiquity.settings.SaveNotice "保存をクリックするとすぐに Ubiquity の外観が更新されます。">
+<!ENTITY ubiquity.settings.WindowsWarning "Windows で使用している場合、カスタムスキンに変更するにはブラウザを再起動する必要があります。これは<a href='http://ubiquity.mozilla.com/trac/ticket/449'>既知のバグ</a>です。">
+
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!-- Note to translators: Please avoid translating HTML markup within this section. Work around it for now. -->
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "<span id='num-subscribed-feeds'></span> 個のコマンドフィードに含まれる <span id='num-commands'></span> 個のコマンドが使用可能です。| <span id='unsubscribed-feeds-help'><a href='#graveyard'><span id='num-unsubscribed-feeds'></span> 個のコマンドフィードが購読解除されています</a>。|</span><a id='show-hide-cmdlist-help' onclick=''></a>">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Ubiquity で使用可能なコマンドは右側の列に列挙されています。黒色のテキストが (Ubiquity が理解できる) コマンド名です。灰色のテキストはコマンドの説明です。">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "左側の列には Ubiquity で購読しているすべての &ldquo;コマンドフィード&rdquo; が表示されています。各フィードには複数のコマンドが含まれています。">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "このページのリストは、フィード名やコマンド名で並べ替えることができます。&ldquo;並べ替え:&rdquo; の横の各リンクをクリックしてください。">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "使用したくないコマンドがある場合は、そのコマンドのチェックを外してください。再び使用するにはチェックを入れてください。">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "フィードごと使用したくない場合は、フィード名の &ldquo;[unsubscribe]&rdquo; リンクをクリックしてください。フィードに含まれるすべてのコマンドが無効になります。再び使用可能にするには、ページ最下部で再購読できます。">
+
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "フィード">
+<!ENTITY ubiquity.commandlist.AvailableCommands "コマンド">
+
+<!ENTITY ubiquity.commandlist.SortBy "並べ替え:">
+<!ENTITY ubiquity.commandlist.SortByFeed "フィード名">
+<!ENTITY ubiquity.commandlist.SortByDate "購読日">
+<!ENTITY ubiquity.commandlist.SortByEnabled "有効状態">
+<!ENTITY ubiquity.commandlist.SortByCommand "コマンド名">
+
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "購読解除したフィード">
+<!ENTITY ubiquity.commandlist.GraveYardText "以前購読していたフィードです。元に戻すには &ldquo;[resubscribe]&rdquo; リンクをクリックしてください。">
+
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "サポートサイト">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Ubiquity はまだ実験段階にあるため、実行中に問題が起こることがあります。Ubiquity についての質問やサポートはいくつかのサイトが用意されています。">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='http://getsatisfaction.com/mozilla/products/mozilla_ubiquity'>Get Satisfaction</a> はコミュニティが運営するサポートサイトです。すでに多くの問題の答えがあります。答えが見つからないときは、新しいトピックを投稿してください。">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='http://groups.google.com/group/ubiquity-firefox'>Google グループ/メーリングリスト</a>では、コマンド開発やユーザインタフェース、新機能の提案など、開発者向けの議論が行われています。">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='https://wiki.mozilla.org/Labs/Ubiquity'>Ubiquity Wiki</a> は Ubiquity プロジェクト全体についての情報サイトです。ドキュメントやチュートリアル、Ubiquity の古いバージョンへのリンクがあります。">
+
+<!ENTITY ubiquity.support.ReportBugs "バグ報告">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "現在、自動化されたバグ報告サービスを準備しています。再現可能な問題を見つけたときは、<a href='http://getsatisfaction.com/mozilla/products/mozilla_ubiquity'>Get Satisfaction</a> か<a href='http://groups.google.com/group/ubiquity-firefox'>メーリングリスト</a>に報告してください。報告の内容には、必ず、バグを再現するための情報を含めてください。">
+
+<!ENTITY ubiquity.support.ResetUbiquity "Ubiquity 設定の初期化">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Ubiquity が完全に応答しなくなったときは、設定を &ldquo;デフォルト設定&rdquo; に初期化する必要があります。初期化するには<a href='reset.html'>このページ</a>を開いてください。ご不便をおかけして申し訳ありません。">
+
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "Ubiquity コマンドエディタ">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "以下のテキストエリアに<strong>新しいコマンドを記述</strong>してください。記述したコマンドは自動的に保存され、使用可能になります。">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTut "コマンドの記述については、<strong><a href='https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial'>Command authoring tutorial</a> (英語) をお読みください</strong>。埋め込みコマンドの例は <a href='resource://ubiquity/standard-feeds'>こちら</a> から参照してください。">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "<strong>New</strong>: <a href='file.html#index.html'>コマンド API</a> についてのドキュメント">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>開発に参加するには</strong>、<a href='http://wiki.mozilla.org/Labs/Ubiquity'>Ubiquity Wiki</a> をご覧ください。">
+
+<!ENTITY ubiquity.editor.YourExternalEd "外部エディタ:">
+<!ENTITY ubiquity.editor.EditorCommandType "コマンドの形態: ">
+<!ENTITY ubiquity.editor.CmdTypeRegular "Regular">
+<!ENTITY ubiquity.editor.CmdTypeLocked "Locked-Down">
+<!ENTITY ubiquity.editor.RegularCommandDesc "<em>Regular</em> フィードは、あなたのコンピュータに対して何でもできます。">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Locked-Down</em> フィードは、とても安全ですが、あなたのコンピュータに対する操作が制限されます。詳しい情報は <a href='https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial'>Locked-Down Feed Tutorial</a> (英語) をご覧ください。">
+
+<!ENTITY ubiquity.editor.ImportTemplate "コマンドテンプレートを挿入">
+<!ENTITY ubiquity.editor.LaunchExternalEd "外部エディタ起動">
+<!ENTITY ubiquity.editor.ShareCommand "共有">
+<!ENTITY ubiquity.editor.SaveToFile "ファイルに保存">
+<!ENTITY ubiquity.editor.EnableHighlighting "構文強調を有効化">
+
+<!ENTITY ubiquity.editor.ShareYourCommands "コマンドを共有するには">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "あなたのコマンドを <a href='http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild'>commands in the wild</a> Wiki ページに投稿してください。">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "または、<a href='https://ubiquity.mozilla.com/herd/command-feed/'>herd command</a> にサインアップしてください。あなたのコマンドが<a href='https://ubiquity.mozilla.com/herd/'>ダッシュボード</a>に表示されるようになります。">
+
+<!ENTITY ubiquity.editor.DevelopingUbiquity "Ubiquity の開発">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "<a href='test.html'>ユニットテスト</a>を実行してください。">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "<a href='feed.html#experimental-commands.html'>実験段階のコマンド</a>をテストしてください！">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "<a href='chrome://ubiquity/content/playpen.html'>parser playpen</a> でパーサのパフォーマンスと内部動作を実験してください。<a href='chrome://ubiquity/content/tuner.html'>nountype tuner</a> を使用して nountypes の候補表示とスコアをチェックしてください。">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "Ubiquity 自体を開発したいときは、<a href='feed.html#core-developer-commands.html'>core developer commands</a> で点検してください。">
+
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "最近の Ubiquity コードの変更">
+
+<!-- Hack chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.reset.1 "">
