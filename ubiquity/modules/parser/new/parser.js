@@ -1347,22 +1347,22 @@ Parser.prototype = {
           break;
         }
       }
-
+        
       if (missingArg.default) {
         defaultValues = Utils.isArray(missingArg.default) ?
                           missingArg.default : [missingArg.default];
-      }
-      else {
+      } else {
         let noun = missingArg.nountype;
         if (!(noun.id in this._defaultsCache))
           this._defaultsCache[noun.id] = (
             (typeof noun.default === "function"
              ? noun.default()
-             : noun.default) ||
-            {text: "", html: "", data: null, summary: ""});
+             : noun.default) || []);
         let defaultValue = this._defaultsCache[noun.id];
         defaultValues = Utils.isArray(defaultValue) ?
                           defaultValue : [defaultValue];
+        if (!defaultValues.length)
+          defaultValues.push({text: "", html: "", data: null, summary: ""});
       }
 
       for each (let defaultValue in defaultValues) {
@@ -1403,7 +1403,7 @@ Parser.prototype = {
       }
       returnArr = newreturn;
     }
-
+    
     for each (let parse in returnArr) {
       // for each of the roles parsed in the parse
       for (let role in parse.args) {
