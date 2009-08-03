@@ -92,23 +92,28 @@ function testTagCommand() {
       )
     );
 
+    var cleanup = function() {
+      // cleanup
+      tagsvc.untagURI(testURI, null);
+      if (!isBookmarked) {
+        dump('removing now\n');
+        dump(bmsvc.getBookmarkIdsForURI(testURI, {}).length+'\n');
+        if (bmsvc.getBookmarkIdsForURI(testURI, {}).length)
+          bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
+      }
+    }
+
     // test add tags separated by commas
     cmdManager.updateInput("tag bom, la bamba", context,
       self.makeCallback(
         function() {
           cmdManager.execute(context);
           self.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
+          cleanup();
         }
       )
     );
-
-    // cleanup
-    tagsvc.untagURI(testURI, null);
-    if (!isBookmarked) {
-      dump('removing now');
-      if (bmsvc.getBookmarkIdsForURI(testURI, {}).length)
-        bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
-    }
+    
   }
 }
 
