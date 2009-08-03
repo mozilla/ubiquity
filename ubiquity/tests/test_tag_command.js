@@ -37,6 +37,8 @@ function testTagCommand() {
   function onCM(cmdManager) {
     function uriHasTags(aURI, aTags) {
       var tags = tagsvc.getTagsForURI(aURI, {});
+      dump('real tags: '+tagsvc.getTagsForURI(aURI, {}).join()+'\n');
+      dump('aTags: '+aTags.join()+'\n');
       return aTags.every(function(aTag) {
         return tags.indexOf(aTag) > -1;
       }, module);
