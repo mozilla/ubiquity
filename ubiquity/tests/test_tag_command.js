@@ -10,6 +10,9 @@ const Cc = Components.classes;
 var module = this;
 
 function testTagCommand() {
+
+  var self = this;
+  
   this.skipIfXPCShell();
 
   var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
@@ -37,7 +40,7 @@ function testTagCommand() {
   function onCM(cmdManager) {
     function uriHasTags(aURI, aTags) {
       var tags = tagsvc.getTagsForURI(aURI, {});
-      dump('real tags: '+tagsvc.getTagsForURI(aURI, {}).join()+'\n');
+      dump('real tags: '+tags.join()+'\n');
       dump('aTags: '+aTags.join()+'\n');
       return aTags.every(function(aTag) {
         return tags.indexOf(aTag) > -1;
@@ -60,10 +63,19 @@ function testTagCommand() {
       focusedWindow: null};
 
     // test add tag
-    cmdManager.updateInput("tag foo", context);
-    cmdManager.execute(context);
-    dump(uriHasTags(testURI, ["foo"]));
-    this.assert(uriHasTags(testURI, ["foo"]));
+    cmdManager.updateInput("tag foo", context,
+      self.makeCallback(
+        function() {
+//          self.assert( cmdMan.hasSuggestions() );
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo"]));
+//          self.assert( oneWasCalled == "tree",
+//                       "Should have called cmdOne with text selection tree.");
+        }
+      )
+    );
+//    cmdManager.execute(context);
+//    this.assert(uriHasTags(testURI, ["foo"]));
 
     // test tag appended to existing tags
     cmdManager.updateInput("tag bar", context);
