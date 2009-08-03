@@ -403,12 +403,16 @@ Parser.prototype = {
     }];
 
     var suggMem = this._suggestionMemory;
-    function getVerbFrequencyMultiplier( inputPart, verbId ) {
-      // getScore not a function?? because this._suggestionMemory points to the
-      // SuggestionMemory constructor function???
-      var score = suggMem.getScore(inputPart, verbId);
-      return 1 + score; // TODO this is a crazy multiplier that can be absurdly high.
-      // It will basically swamp everything else.  Is this OK?
+    function boostVerbScoreWithFrequency( score, inputPart, verbId ) {
+
+      var reinforcement = suggMem.getScore(inputPart, verbId) + 1;
+      // reinforcement starts at 1 because x^(1/1) = x^1 = x.
+
+      // We return the n-th root of the verb score, where n = reinforcement.
+      // This is good as the score is originally in [0,1], so the return value
+      // will stay in [0,1].
+      return Math.pow(score,1/(reinforcement));
+
     }
 
     // The match will only give us the prefix that it matched. For example,
@@ -437,9 +441,9 @@ Parser.prototype = {
           // verb prefix matches, even if they're only one or two
           // characters, will get higher scoreMultipliers than noun-first
           // suggestions, which get scoreMultiplier of 0.3. (trac #750)
-          let verbScore = ((0.4 + 0.6 * Math.sqrt(verbPiece.length / name.length))
-                          * (order ? verbFinalMultiplier : verbInitialMultiplier)
-                          * getVerbFrequencyMultiplier(verbPiece, verbId));
+          let verbScore = (0.4 + 0.6 * Math.sqrt(verbPiece.length / name.length))
+                          * (order ? verbFinalMultiplier : verbInitialMultiplier);
+          verbScore = boostVerbScoreWithFrequency(verbScore, verbPiece, verbId);
 
           returnArray.push({
             _verb: {
