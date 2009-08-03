@@ -60,6 +60,8 @@ function testTagCommand() {
     // test add tag
     cmdManager.updateInput("tag foo", context);
     cmdManager.execute(context);
+    this.assert(uriHasTags);
+    this.assert(testURI);
     this.assert(uriHasTags(testURI, ["foo"]));
 
     // test tag appended to existing tags
