@@ -66,31 +66,41 @@ function testTagCommand() {
     cmdManager.updateInput("tag foo", context,
       self.makeCallback(
         function() {
-//          self.assert( cmdMan.hasSuggestions() );
           cmdManager.execute(context);
           self.assert(uriHasTags(testURI, ["foo"]));
-//          self.assert( oneWasCalled == "tree",
-//                       "Should have called cmdOne with text selection tree.");
         }
       )
     );
-//    cmdManager.execute(context);
-//    this.assert(uriHasTags(testURI, ["foo"]));
 
     // test tag appended to existing tags
-    cmdManager.updateInput("tag bar", context);
-    cmdManager.execute(context);
-    this.assert(uriHasTags(testURI, ["foo", "bar"]));
+    cmdManager.updateInput("tag bar", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar"]));
+        }
+      )
+    );
 
     // test tag appended again to existing tags
-    cmdManager.updateInput("tag bar", context);
-    cmdManager.execute(context);
-    this.assert(uriHasTags(testURI, ["foo", "bar"]));
+    cmdManager.updateInput("tag bar", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar"]));
+        }
+      )
+    );
 
     // test add tags separated by commas
-    cmdManager.updateInput("tag bom, la bamba", context);
-    cmdManager.execute(context);
-    this.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
+    cmdManager.updateInput("tag bom, la bamba", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
+        }
+      )
+    );
 
     // cleanup
     tagsvc.untagURI(testURI, null);
