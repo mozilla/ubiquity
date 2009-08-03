@@ -104,8 +104,11 @@ function testTagCommand() {
 
     // cleanup
     tagsvc.untagURI(testURI, null);
-    if (!isBookmarked)
+    if (!isBookmarked) {
+      dump('removing now');
+      dump(bmsvc.getBookmarkIdsForURI(testURI, {}).join()+'\n');
       bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
+    }
   }
 }
 
