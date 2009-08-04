@@ -8,10 +8,14 @@ Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
 Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
 Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
+Components.utils.import("resource://ubiquity/modules/setup.js");
 
 const VER = 2;
 const LANG = "en";
 const MAX_SUGGESTIONS = 10;
+
+const Ci = Components.interfaces;
+const Cc = Components.classes;
 
 
 function makeTestParser2(lang, verbs, contextUtils) {
@@ -129,11 +133,10 @@ function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
   // nountypes; ensure that it doesn't break.
   var jsm = {};
-  Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
   Components.utils.import("resource://ubiquity/modules/parser/parser.js", jsm);
-  if (jsm.UbiquitySetup.parserVersion < 2) throw new this.SkipTestError();
+  if (UbiquitySetup.parserVersion < 2) throw new this.SkipTestError();
   try {
-    var services = jsm.UbiquitySetup.createServices();
+    var services = UbiquitySetup.createServices();
     // but don't set up windows or chrome or anything... just use this to
     // get installed feeds.
     var NLParser = jsm.NLParserMaker(VER);
@@ -977,6 +980,110 @@ function testSortedBySuggestionMemoryNounFirstParser2() {
   }
 
 
+}
+
+
+function testTagCommand() {
+
+  var self = this;
+  this.skipIfXPCShell();
+
+  var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+              .getService(Ci.nsINavBookmarksService);
+
+  var tagsvc = Cc["@mozilla.org/browser/tagging-service;1"]
+               .getService(Ci.nsITaggingService);
+
+
+  var Application = Components.classes["@mozilla.org/fuel/application;1"]
+      .getService(Components.interfaces.fuelIApplication);
+
+  var testURI = Application.activeWindow.activeTab.uri;
+
+    // for cleanup
+  var isBookmarked = bmsvc.isBookmarked(testURI);
+
+  var services = UbiquitySetup.createServices();
+  var cmdSource = services.commandSource;
+
+  var cmd = cmdSource.getCommand(UbiquitySetup.getBaseUri() +
+                                   "standard-feeds/firefox.html#tag");
+  this.assert(cmd, "There should be a tag command here");
+
+  var context = {focusedElement: null,
+    focusedWindow: null};
+
+  var cmdMan = makeCommandManager.call(this, cmdSource,
+                                       services.messageService,
+                                       makeTestParser2(),
+                                       onCM);
+
+  function onCM(cmdManager) {
+
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+      .getService(Components.interfaces.fuelIApplication);
+
+    function uriHasTags(aTags) {
+      let aURI = Application.activeWindow.activeTab.uri;
+      let tags = tagsvc.getTagsForURI(aURI, {});
+      dump('real tags: '+tags.join()+'\n');
+      dump('aTags: '+aTags.join()+'\n');
+      let result = aTags.every(function(aTag) {
+          return tags.indexOf(aTag) > -1;
+	  });
+      dump('result: ' + result + '\n');
+      return result;
+    }
+
+    // test add tag
+    getCompletionsAsync("tag foo", [cmd], context,
+      self.makeCallback(
+        function(completions) {
+          completions[0].execute();
+          self.assert(uriHasTags(["foo"]));
+        }
+      )
+    );
+    // test tag appended to existing tags
+    getCompletionsAsync("tag bar", [cmd], context,
+      self.makeCallback(
+	  function(completions) {
+          completions[0].execute();
+          self.assert(uriHasTags(["foo", "bar"]));
+        }
+      )
+    );
+    // test tag appended again to existing tags
+    getCompletionsAsync("tag bar", [cmd], context,
+      self.makeCallback(
+        function(completions) {
+          completions[0].execute();
+          self.assert(uriHasTags(["foo", "bar"]));
+        }
+      )
+    );
+    // test add tags separated by commas
+   getCompletionsAsync("tag bom, la bamba", [cmd], context,
+      self.makeCallback(
+        function(completions) {
+          completions[0].execute();
+          self.assert(uriHasTags(["foo", "bar", "bom", "la bamba"]));
+	  cleanup();
+        }
+      )
+    );
+
+    var cleanup = function() {
+      // cleanup
+      tagsvc.untagURI(testURI, null);
+      if (!isBookmarked) {
+        dump('removing now\n');
+        dump(bmsvc.getBookmarkIdsForURI(testURI, {}).length+'\n');
+        if (bmsvc.getBookmarkIdsForURI(testURI, {}).length)
+          bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
+      }
+    };
+  }
 }
 
 

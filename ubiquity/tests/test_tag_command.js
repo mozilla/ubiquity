@@ -8,7 +8,7 @@ const Ci = Components.interfaces;
 const Cc = Components.classes;
 
 var module = this;
-
+/*
 function testTagCommand() {
 
   var self = this;
@@ -117,5 +117,6 @@ function testTagCommand() {
     );
   }
 }
+*/
 
 exportTests(this);
