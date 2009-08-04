@@ -69,6 +69,7 @@ var noun_arb_text = {
   label: "?",
   rankLast: true,
   noExternalCalls: true,
+  cacheTime: -1,
   suggest: function nat_suggest(text, html, callback, selectionIndices) {
     return [CmdUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
   },
@@ -107,6 +108,7 @@ var email_atom = "[\\w!#$%&'*+/=?^`{}~|-]+";
 var noun_type_email = {
   label: "email",
   noExternalCalls: true,
+  cacheTime: -1,
   _email: RegExp("^(?:" + email_atom + "(?:\\." + email_atom
     + ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@('
     + email_atom + "(?:\\." + email_atom + ")*)$"),
@@ -142,6 +144,7 @@ var noun_type_email = {
 var noun_type_percentage = {
   label: "percentage",
   noExternalCalls: true,
+  cacheTime: -1,
   _default: CmdUtils.makeSugg("100%", null, 0.3),
   "default": function nt_percentage_default() this._default,
   suggest: function nt_percentage_suggest(text, html) {

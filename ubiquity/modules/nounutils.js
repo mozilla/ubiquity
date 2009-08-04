@@ -87,6 +87,7 @@ function NounType(label, expected, defaults) {
   this.suggest = maker.suggest;
   this.label = label;
   this.noExternalCalls = true;
+  this.cacheTime = -1;
   if (this.id) this.id += Utils.computeCryptoHash("MD5", (uneval(expected) +
                                                           uneval(defaults)));
   if (defaults) {
