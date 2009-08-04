@@ -65,56 +65,34 @@ function testTagCommand() {
       focusedWindow: null};
 
     // test add tag
-    function test1() {
-      cmdManager.updateInput("tag foo", context,
-        self.makeCallback(
-          function() {
-            cmdManager.execute(context);
-            self.assert(uriHasTags(testURI, ["foo"]));
-	    test2();
-          }
-        )
-      );
-    }
+    cmdManager.updateInput("tag foo", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo"]));
+        }
+      )
+    );
 
     // test tag appended to existing tags
-    function test2() {
-      cmdManager.updateInput("tag bar", context,
-          self.makeCallback(
-          function() {
-            cmdManager.execute(context);
-            self.assert(uriHasTags(testURI, ["foo", "bar"]));
-	    test3();
-          }
-        )
-      );
-    }
+    cmdManager.updateInput("tag bar", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar"]));
+        }
+      )
+    );
 
     // test tag appended again to existing tags
-    function test3() {
-      cmdManager.updateInput("tag bar", context,
-        self.makeCallback(
-          function() {
-            cmdManager.execute(context);
-            self.assert(uriHasTags(testURI, ["foo", "bar"]));
-	    test4();
-          }
-        )
-      );
-    }
-
-    // test add tags separated by commas
-    function test4() {
-      cmdManager.updateInput("tag bom, la bamba", context,
-        self.makeCallback(
-          function() {
-            cmdManager.execute(context);
-            self.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
-            this.cleanup();
-          }
-        )
-      );
-    }
+    cmdManager.updateInput("tag bar", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar"]));
+        }
+      )
+    );
 
     var cleanup = function() {
       // cleanup
@@ -126,6 +104,17 @@ function testTagCommand() {
           bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
       }
     };
+
+    // test add tags separated by commas
+    cmdManager.updateInput("tag bom, la bamba", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
+          cleanup();
+        }
+      )
+    );
   }
 }
 
