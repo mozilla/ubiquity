@@ -1858,7 +1858,7 @@ ParseQuery.prototype = {
     var thisQuery = this;
     function completeParse(thisParse) {
       var requestCount = thisParse.getRequestCount();
-      thisQuery.dump('completing parse '+thisParse._id+' now');
+//      thisQuery.dump('completing parse '+thisParse._id+' now');
       //dump("request count: " + requestCount + "\n");
 
       if (!(thisParse._requestCountLastCompletedWith == undefined)
@@ -1878,7 +1878,7 @@ ParseQuery.prototype = {
       var suggestions = thisQuery.parser.suggestArgs(thisParse);
       //Utils.log(suggestions);
 
-      thisQuery.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
+//      thisQuery.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
 
       var addedAny = false;
       for each (let newParse in suggestions) {

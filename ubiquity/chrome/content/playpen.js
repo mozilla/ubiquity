@@ -67,7 +67,9 @@ var demoParserInterface = {
     if (this.currentQuery.cancel != undefined)
       if (!this.currentQuery.finished)
         this.currentQuery.cancel();
-    this.currentParser._nounCache = {};
+    
+    if ($('#flushcache').attr('checked'))
+      this.currentParser.flushNounCache();
 
     $('#parseinfo').empty();
     $('#parsetree').empty();
