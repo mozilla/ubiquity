@@ -45,6 +45,7 @@ function testTagCommand() {
       let result = aTags.every(function(aTag) {
         return tags.indexOf(aTag) > -1;
 	}, module);
+      dump('result: ' + result + '\n');
       return result;
     }
 
