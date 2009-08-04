@@ -334,7 +334,7 @@ Parser.prototype = {
   },
 
   flushNounCache: function() {
-    this._nounCache = new NounCache(new);
+    this._nounCache = new NounCache(this);
   },
 
   // ** {{{Parser#initializeLanguage}}} **
