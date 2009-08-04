@@ -132,10 +132,10 @@ $(function(){
   setupHelp();
   var feedUri = location.hash.slice(1);
   if (feedUri) {
-    $(".feedKey").html(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));
-    $(".localization-dir").html(
-      feedUri.replace(/^(.*ubiquity\/)(?:standard|builtin)-feeds\/.*$/g, "$1") +
-      "localization/xx/");
+    $(".feedKey").text(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));
+    $(".localization-dir").text(
+      feedUri.replace(/\b(?:standard|builtin)-feeds\/.*$/g,
+                      "localization/xx/"));
     displayTemplate(feedUri);
   }
 });
