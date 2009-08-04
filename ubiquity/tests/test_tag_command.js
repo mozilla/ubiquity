@@ -39,12 +39,12 @@ function testTagCommand() {
                           onCM);
   function onCM(cmdManager) {
     function uriHasTags(aURI, aTags) {
-      var tags = tagsvc.getTagsForURI(aURI, {});
+      let tags = tagsvc.getTagsForURI(aURI, {});
       dump('real tags: '+tags.join()+'\n');
       dump('aTags: '+aTags.join()+'\n');
       let result = aTags.every(function(aTag) {
-        return tags.indexOf(aTag) > -1;
-	}, module);
+          return tags.indexOf(aTag) > -1;
+	  });
       dump('result: ' + result + '\n');
       return result;
     }
@@ -104,6 +104,17 @@ function testTagCommand() {
           bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
       }
     };
+
+    // test add tags separated by commas
+    cmdManager.updateInput("tag bom, la bamba", context,
+      self.makeCallback(
+        function() {
+          cmdManager.execute(context);
+          self.assert(uriHasTags(testURI, ["foo", "bar", "bom", "la bamba"]));
+          cleanup();
+        }
+      )
+    );
   }
 }
 
