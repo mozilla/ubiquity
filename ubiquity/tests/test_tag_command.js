@@ -42,12 +42,13 @@ function testTagCommand() {
       var tags = tagsvc.getTagsForURI(aURI, {});
       dump('real tags: '+tags.join()+'\n');
       dump('aTags: '+aTags.join()+'\n');
-      return aTags.every(function(aTag) {
+      let result = aTags.every(function(aTag) {
         return tags.indexOf(aTag) > -1;
-      }, module);
+	}, module);
+      return result;
     }
 
-    let Application = Components.classes["@mozilla.org/fuel/application;1"]
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
       .getService(Components.interfaces.fuelIApplication);
 
     var testURI = Application.activeWindow.activeTab.uri;
@@ -101,7 +102,7 @@ function testTagCommand() {
         if (bmsvc.getBookmarkIdsForURI(testURI, {}).length)
           bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
       }
-    }
+    };
 
     // test add tags separated by commas
     cmdManager.updateInput("tag bom, la bamba", context,
