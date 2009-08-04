@@ -1026,12 +1026,9 @@ function testTagCommand() {
     function uriHasTags(aTags) {
       let aURI = Application.activeWindow.activeTab.uri;
       let tags = tagsvc.getTagsForURI(aURI, {});
-      dump('real tags: '+tags.join()+'\n');
-      dump('aTags: '+aTags.join()+'\n');
       let result = aTags.every(function(aTag) {
           return tags.indexOf(aTag) > -1;
 	  });
-      dump('result: ' + result + '\n');
       return result;
     }
 
@@ -1077,8 +1074,6 @@ function testTagCommand() {
       // cleanup
       tagsvc.untagURI(testURI, null);
       if (!isBookmarked) {
-        dump('removing now\n');
-        dump(bmsvc.getBookmarkIdsForURI(testURI, {}).length+'\n');
         if (bmsvc.getBookmarkIdsForURI(testURI, {}).length)
           bmsvc.removeItem(bmsvc.getBookmarkIdsForURI(testURI, {})[0]);
       }

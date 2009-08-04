@@ -645,6 +645,7 @@ function testPartiallyParsedSentence() {
   var parsed  = partiallyParsed.getParsedSentences();
   // two suggestions for foo, two suggestions for bar: should be four
   // combinations.
+  dump("number of parsings: " + parsed.length + "\n");
   this.assert( parsed.length == 4, "Should be four parsings.");
 
   // Add another suggestion for bar.  Now there should be six combinations.
