@@ -9,12 +9,15 @@ So please, bear with us as we'll be adding and changing things in the future. Bu
 we're such nice people we promise to keep you updated. Happy translating!
 -->
 
+<!ENTITY appTitle "Ubiquity">
+
 <!-- Page Titles  -->
 <!ENTITY ubiquity.pagetitle.About "Ubiquity について">
 <!ENTITY ubiquity.pagetitle.Settings "Ubiquity の設定とスキン変更">
 <!ENTITY ubiquity.pagetitle.YourCommands "Ubiquity コマンド">
 <!ENTITY ubiquity.pagetitle.Support "Ubiquity サポート">
 <!ENTITY ubiquity.pagetitle.HackUbiquity "Ubiquity コマンドエディタ">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "信頼されていない源泉からのUbiquity コマンド">
 
 <!-- Page header taglines -->
 <!ENTITY ubiquity.tagline.About "Web サーフィンは時代遅れ！ コマンドで指示を！">
