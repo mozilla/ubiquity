@@ -51,8 +51,8 @@ msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
 msgstr "コマンドを編集する|コマンドエディタ|コマンドを書く"
 
 msgctxt "write ubiquity commands.description"
-msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
-msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/editor.html\">コマンドエディタ</a>ページを開きます。"
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
+msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/editor.xhtml\">コマンドエディタ</a>ページを開きます。"
 
 #. list ubiquity commands command:
 #. use | to separate multiple name values:
@@ -61,9 +61,9 @@ msgid "list ubiquity commands"
 msgstr "コマンドリストを表示する|コマンドリストを表示して|コマンドリストを表示しろ|コマンド一覧"
 
 msgctxt "list ubiquity commands.description"
-msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
+msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
 "      of all Ubiquity commands available and what they all do."
-msgstr "Ubiquity の利用可能な<a href=\"chrome://ubiquity/content/cmdlist.html\">コマンドのリスト</a>を開きます。"
+msgstr "Ubiquity の利用可能な<a href=\"chrome://ubiquity/content/cmdlist.xhtml\">コマンドのリスト</a>を開きます。"
 
 #. change ubiquity settings command:
 #. use | to separate multiple name values:
@@ -72,9 +72,9 @@ msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin
 msgstr "設定を変更する|設定変更|スキンを変更する|スキン変更"
 
 msgctxt "change ubiquity settings.description"
-msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
 "      where you can change your skin, key combinations, etc."
-msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/settings.html\">設定</a>ページを開きます。スキンやキー設定などを変更できます。"
+msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/settings.xhtml\">設定</a>ページを開きます。スキンやキー設定などを変更できます。"
 
 #. get support command:
 #. use | to separate multiple name values:
@@ -83,9 +83,9 @@ msgid "get support"
 msgstr "サポートページ|サポート情報"
 
 msgctxt "get support.description"
-msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
 "    where you can report bugs, get troubleshooting help, etc."
-msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/support.html\">サポート</a>ページを開きます。\n"
+msgstr "Ubiquity の<a href=\"chrome://ubiquity/content/support.xhtml\">サポート</a>ページを開きます。\n"
 "バグ報告やトラブルシューティング等のヘルプがあります。"
 
 #. report bug command:

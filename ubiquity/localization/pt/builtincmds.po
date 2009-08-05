@@ -42,8 +42,8 @@ msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
 msgstr "escrever comando do ubiquity|editar comando do ubiquity|hacker ubiquity"
 
 msgctxt "write ubiquity commands.description"
-msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
-msgstr "Abre a página do <a href=\"chrome://ubiquity/content/editor.html\">editor de comandos</a> do Ubiquity."
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
+msgstr "Abre a página do <a href=\"chrome://ubiquity/content/editor.xhtml\">editor de comandos</a> do Ubiquity."
 
 
 #. list ubiquity commands command:
@@ -53,9 +53,9 @@ msgid "list ubiquity commands"
 msgstr "lista comandos do ubiquity|listar comandos do ubiquity"
 
 msgctxt "list ubiquity commands.description"
-msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
+msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
 "      of all Ubiquity commands available and what they all do."
-msgstr "Abre <a href=\"chrome://ubiquity/content/cmdlist.html\">a lista</a>\n"
+msgstr "Abre <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">a lista</a>\n"
 "      de todos comandos disponíveis do Ubiquity e o que eles fazem."
 
 
@@ -66,9 +66,9 @@ msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin
 msgstr "mudar configurações do ubiquity|mudar preferências do ubiquity|mudar skin do ubiquity|alterar configurações do ubiquity|configurar ubiquity"
 
 msgctxt "change ubiquity settings.description"
-msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
 "      where you can change your skin, key combinations, etc."
-msgstr "Abre a página de <a href=\"chrome://ubiquity/content/settings.html\">configurações</a>,\n"
+msgstr "Abre a página de <a href=\"chrome://ubiquity/content/settings.xhtml\">configurações</a>,\n"
 "      onde você pode alterar as configurações e o skin do Ubiquity."
 
 
@@ -79,9 +79,9 @@ msgid "get support"
 msgstr "suporte"
 
 msgctxt "get support.description"
-msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
 "    where you can report bugs, get troubleshooting help, etc."
-msgstr "Abre a página de <a href=\"chrome://ubiquity/content/support.html\">suporte</a>,\n"
+msgstr "Abre a página de <a href=\"chrome://ubiquity/content/support.xhtml\">suporte</a>,\n"
 "    onde você pode reportar erros e obter ajuda."
 
 

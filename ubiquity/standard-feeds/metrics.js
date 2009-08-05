@@ -1,4 +1,4 @@
-/*   
+/*
   TODO: add following metrics (from http://labs.toolness.com/trac/ticket/409)
 * Which standard feeds are enabled
 * What feeds are subscribed to (to see what feeds are subscribed to but never used)
@@ -9,13 +9,13 @@
 * How often the first suggestion isn't the one that's used
 * How often selected text is used as input (or other contextual information)
 * Whether the command editor is used
-  
+
 
 
 TODO: doesn't currently take into account multiple windows, or the new jsmodule changes
 
 
-also needs to be able to work across applications (FF, TB, SB) 
+also needs to be able to work across applications (FF, TB, SB)
 */
 
 
@@ -43,7 +43,7 @@ Metrics.prefHooks = [];
 Metrics.init = function Metrics__init() {
   Metrics.retrieveBackup();
   Metrics.ensureClientId();
-  
+
   var jsm = {};
   Components.utils.import("resource://ubiquity/modules/setup.js",
                           jsm);
@@ -92,7 +92,7 @@ Metrics.ensureClientId = function Metrics__ensureClientId() {
     Metrics.clientId = -1;
     return;
   }
-  
+
   var clientId = Application.prefs.getValue(Metrics.PREF_BASE + "clientId",
                                             null);
   if (clientId) {
@@ -114,13 +114,13 @@ Metrics.ensureClientId = function Metrics__ensureClientId() {
 Metrics.installHooks = function Metrics__installHooks() {
   if (Metrics.DEBUG)
     CmdUtils.log("Metrics: Installing hooks...");
-  
+
   var window = Metrics.getChromeWindow();
   var hookFunc = null;
   for (var hookName in CmdUtils.__globalObject) {
     if (typeof CmdUtils.__globalObject[hookName] == "function" &&
         hookName.indexOf(Metrics.HOOK_PREFIX) == 0) {
-      
+
       hookFunc = CmdUtils.__globalObject[hookName];
       try {
         if (hookFunc(window) === false) {
@@ -133,7 +133,7 @@ Metrics.installHooks = function Metrics__installHooks() {
       }
     }
   }
-  
+
   if (Metrics.DEBUG)
     CmdUtils.log("Metrics: Done installing hooks.");
 };
@@ -178,16 +178,16 @@ Metrics.submitLogs = function Metrics__submitLogs() {
     CmdUtils.log("Metrics: No client ID obtained, unable to submit.");
     return;
   }
-  
+
   if(Metrics.itemsPendingSubmit.length > 0) {
      Metrics.setSubmitTimer(Metrics.RETRY_INTERVAL);
     return;
   }
-  
+
   Metrics.setSubmitTimer(Metrics.SUBMIT_INTERVAL);
-  
+
   Metrics.setItemsPendingSubmit(Metrics.loggedItems.splice(0));
-  
+
   if (Metrics.DEBUG) {
     CmdUtils.log("Metrics: In debug mode, skipping submission of "
                  + Metrics.itemsPendingSubmit.length + " logged items: ",
@@ -195,14 +195,14 @@ Metrics.submitLogs = function Metrics__submitLogs() {
     Metrics.setItemsPendingSubmit([]);
     return;
   }
-  
+
   function onErrrorSubitting() {
     CmdUtils.log("Metrics: Error submitting metrics. Retrying again in " +
                  Metrics.RETRY_INTERVAL + "ms.")
     Metrics.loggedItems = Metrics.setItemsPendingSubmit([]).concat(Metrics.loggedItems);
     Metrics.setSubmitTimer(Metrics.RETRY_INTERVAL);
   }
-  
+
   jQuery.ajax({
     url: Metrics.BASE_URL + "submit",
     type: "json",
@@ -239,7 +239,7 @@ Metrics.retrieveBackup = function Metrics__retrieveBackup() {
   } catch (e) {
     Metrics.loggedItems = [];
   }
-  
+
   try {
     Metrics.itemsPendingSubmit = Utils.decodeJson(Application.prefs.getValue(Metrics.PREF_BASE + "backup.pending", null));
   } catch (e) {
@@ -251,7 +251,7 @@ Metrics.retrieveBackup = function Metrics__retrieveBackup() {
 Metrics.log = function Metrics__log(aType, aData) {
   if (Metrics.DEBUG)
     CmdUtils.log("Metrics: Logged '" + aType + "' with data: ", aData);
-  
+
   Metrics.loggedItems.push({
     timestamp: (new Date).toString(),
     type: aType,
@@ -288,7 +288,7 @@ Metrics.hookIntoWindow = function Metrics__hookIntoWindow(aCallback) {
 Metrics.hookIntoFunction = function Metrics__wrapFunction(aContext, aFunction, aCallback) {
   if (Metrics.DEBUG)
     CmdUtils.log("Metrics: Hooking into function: ", aContext[aFunction]);
-  
+
   var originalFunction = aContext[aFunction];
   aContext[aFunction] = function Metrics__wrapFunction__wrappedFunction() {
     Metrics.handleCallback(aCallback, arguments);
@@ -305,10 +305,10 @@ Metrics.hookIntoPageLoad = function Metrics__hookIntoPageLoad(aUrlMatch, aCallba
       return;
     if (aUrlMatch instanceof RegExp && !aUrlMatch.test(aDocument.location.toString()))
       return;
-    
+
     Metrics.handleCallback(aCallback, aDocument);
   }
-  
+
   CmdUtils.onPageLoad(onPageLoad);
 };
 
@@ -318,7 +318,7 @@ Metrics.hookIntoPrefs = function Metrics__hookIntoPrefs(aBranch, aCallback) {
   if (typeof(aBranch) == "string") {
     var prefService = Components.classes["@mozilla.org/preferences-service;1"]
                                 .getService(Components.interfaces.nsIPrefService);
-                              
+
     prefBranch = prefService.getBranch(aBranch);
     prefBranch = prefBranch.QueryInterface(Components.interfaces.nsIPrefBranch2);
   } else if (aBranch instanceof Components.interfaces.nsIPrefBranch2) {
@@ -329,7 +329,7 @@ Metrics.hookIntoPrefs = function Metrics__hookIntoPrefs(aBranch, aCallback) {
     CmdUtils.log("Metrics: bad prefs branch passed to Metrics.hookIntoPrefs()");
     return;
   }
-  
+
   var observer = {
     callback : aCallback,
     branch : prefBranch,
@@ -341,7 +341,7 @@ Metrics.hookIntoPrefs = function Metrics__hookIntoPrefs(aBranch, aCallback) {
     }
   };
   Metrics.prefHooks.push(observer);
-  
+
   prefBranch.addObserver("", observer, false);
 }
 
@@ -400,7 +400,7 @@ function hook_startup(aMainWindow) {
                           .getService(Components.interfaces.nsIXULAppInfo);
   var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
                              .getService(Components.interfaces.nsIXULRuntime);
-  
+
   function getXPCOMABI() {
     try {
       return xulRuntime.XPCOMABI;
@@ -408,9 +408,9 @@ function hook_startup(aMainWindow) {
       return "";
     }
   }
-  
+
   function getExtensions() {
-    function mapExtensions(aExtension) { 
+    function mapExtensions(aExtension) {
       return {
         id: aExtension.id,
         name: aExtension.name,
@@ -421,7 +421,7 @@ function hook_startup(aMainWindow) {
     //XXX APP-COMPAT
     return Application.extensions.all.map(mapExtensions);
   }
-  
+
   function getSubscribedFeeds() {
     function filterFeeds(aFeed) {
       var skipSchemes = ["file", "chrome", "resource"];
@@ -436,7 +436,7 @@ function hook_startup(aMainWindow) {
                       .filter(filterFeeds)
                       .map(mapFeeds);
   }
-  
+
   var data = {
     app: {
       name: appInfo.name,
@@ -457,7 +457,7 @@ function hook_startup(aMainWindow) {
       }
     }
   };
-  
+
   Metrics.log("startup", data);
 }
 
@@ -468,12 +468,12 @@ function hook_aboutubiquity_load() {
 
 
 function hook_commandlist_load() {
-  Metrics.hookIntoPageLoad("chrome://ubiquity/content/cmdlist.html", "commandlist-load");
+  Metrics.hookIntoPageLoad("chrome://ubiquity/content/cmdlist.xhtml", "commandlist-load");
 }
 
 
 function hook_commandeditor_load() {
-  Metrics.hookIntoPageLoad("chrome://ubiquity/content/editor.html", "commandeditor-load");
+  Metrics.hookIntoPageLoad("chrome://ubiquity/content/editor.xhtml", "commandeditor-load");
 }
 
 
@@ -493,18 +493,18 @@ function hook_command_preview_update(aMainWindow) {
 
 function hook_command_execute(aMainWindow) {
   var cmdManager = aMainWindow.gUbiquity.__cmdManager;
-  
+
   function commandExecuteCallback() {
     var parsedSentence = cmdManager.__nlParser.getSentence(cmdManager.__hilitedSuggestion);
-    
+
     if (!parsedSentence) {
-      
+
       Metrics.log("command-doesntexist", {
         input: cmdManager.__lastInput // XXX potential privacy breach!
       });
-      
+
     } else {
-      
+
       Metrics.log("command-execute", {
         input: cmdManager.__lastInput, // XXX potential privacy breach!
         //sentance: parsedSentence.getCompletionText(aMainWindow.NLParser.getSelectionObject(context)), // XXX potential privacy breach!
@@ -520,7 +520,7 @@ function hook_command_execute(aMainWindow) {
           args: "" // TODO: fill in this
         }
       });
-      
+
     }
   }
   Metrics.hookIntoFunction(cmdManager, "execute", commandExecuteCallback);
@@ -534,7 +534,7 @@ function hook_hotkey_change(aMainWindow) {
   // but we don't get notified if one of them is set but doesn't change
   const PREF_KEYCODE = "extensions.ubiquity.keycode";
   const PREF_KEYMODIFIER = "extensions.ubiquity.keymodifier";
-  
+
   function queueHotkeyChanged() {
     if (gHotkeyChangeTimer) {
       Utils.clearTimeout(gHotkeyChangeTimer);
@@ -542,7 +542,7 @@ function hook_hotkey_change(aMainWindow) {
     }
     gHotkeyChangeTimer = Utils.setTimeout(100, hotkeyChanged);
   }
-  
+
   function hotkeyChanged() {
     gHotkeyChangeTimer = null;
     var prefService = Components.classes["@mozilla.org/preferences-service;1"]
@@ -554,7 +554,7 @@ function hook_hotkey_change(aMainWindow) {
       keymodifier: prefBranch.getCharPref(PREF_KEYMODIFIER)
     });
   };
-  
+
   Metrics.hookIntoPrefs(PREF_KEYCODE, hotkeyChanged);
   Metrics.hookIntoPrefs(PREF_KEYMODIFIER, hotkeyChanged);
 }

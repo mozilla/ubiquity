@@ -42,7 +42,7 @@ msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
 msgstr ""
 
 msgctxt "write ubiquity commands.description"
-msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
 msgstr ""
 
 
@@ -53,7 +53,7 @@ msgid "list ubiquity commands"
 msgstr ""
 
 msgctxt "list ubiquity commands.description"
-msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
+msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
 "      of all Ubiquity commands available and what they all do."
 msgstr ""
 
@@ -65,7 +65,7 @@ msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin
 msgstr ""
 
 msgctxt "change ubiquity settings.description"
-msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
 "      where you can change your skin, key combinations, etc."
 msgstr ""
 
@@ -77,7 +77,7 @@ msgid "get support"
 msgstr ""
 
 msgctxt "get support.description"
-msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
 "    where you can report bugs, get troubleshooting help, etc."
 msgstr ""
 

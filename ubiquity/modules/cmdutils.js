@@ -373,7 +373,7 @@ CmdUtils.UserCode = {
    );
     //Refresh any code editor tabs that might be open
     Application.activeWindow.tabs.forEach(function (tab){
-      if(tab.document.location == "chrome://ubiquity/content/editor.html"){
+      if(tab.document.location == "chrome://ubiquity/content/editor.xhtml"){
         tab.document.location.reload(true);
       }
     });

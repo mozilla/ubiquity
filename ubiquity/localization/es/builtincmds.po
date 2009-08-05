@@ -48,8 +48,8 @@ msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
 msgstr "escribir órdenes de ubiquity|editar órdendes de ubiquity|hackear ubiquity"
 
 msgctxt "write ubiquity commands.description"
-msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.html\">command editor</a> page."
-msgstr "Le lleva a la página del <a href=\"chrome://ubiquity/content/editor.html\">editor de órdenes</a> de Ubiquity."
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
+msgstr "Le lleva a la página del <a href=\"chrome://ubiquity/content/editor.xhtml\">editor de órdenes</a> de Ubiquity."
 
 #. list ubiquity commands command:
 #. use | to separate multiple name values:
@@ -59,10 +59,10 @@ msgstr "listar las órdenes de ubiquity"
 
 msgctxt "list ubiquity commands.description"
 msgid ""
-"Opens <a href=\"chrome://ubiquity/content/cmdlist.html\">the list</a>\n"
+"Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
 "      of all Ubiquity commands available and what they all do."
 msgstr ""
-"Abre <a href=\"chrome://ubiquity/content/cmdlist.html\">la lista</a>\n"
+"Abre <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">la lista</a>\n"
 "      de todas las órdenes de Ubiquity disponibles y lo que hacen."
 
 #. change ubiquity settings command:
@@ -73,10 +73,10 @@ msgstr "cambiar los ajustes de ubiquity|cambiar las preferencias de ubiquity|cam
 
 msgctxt "change ubiquity settings.description"
 msgid ""
-"Takes you to the <a href=\"chrome://ubiquity/content/settings.html\">settings</a> page,\n"
+"Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
 "      where you can change your skin, key combinations, etc."
 msgstr ""
-"Le lleva a la página de <a href=\"chrome://ubiquity/content/settings.html\">ajustes</a>,\n"
+"Le lleva a la página de <a href=\"chrome://ubiquity/content/settings.xhtml\">ajustes</a>,\n"
 "      donde puede cambiar la piel, combinacion es de teclas, etc."
 
 #. get support command:
@@ -87,10 +87,10 @@ msgstr "obtener soporte"
 
 msgctxt "get support.description"
 msgid ""
-"Takes you to the <a href=\"chrome://ubiquity/content/support.html\">support</a> page,\n"
+"Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
 "    where you can report bugs, get troubleshooting help, etc."
 msgstr ""
-"Le lleva a la página de <a href=\"chrome://ubiquity/content/support.html\">soporte</a>,\n"
+"Le lleva a la página de <a href=\"chrome://ubiquity/content/support.xhtml\">soporte</a>,\n"
 "    donde puede informar de errores, obtener ayuda para localizar y corregir fallos, etc."
 
 #. report bug command:
