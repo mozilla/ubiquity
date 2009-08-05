@@ -166,17 +166,17 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
 
   var serviceDomain = null;
   if (commandObject.url) {
-    let match = commandObject.url.match(/https?:\/\/[\w.]+/)
+    let match = commandObject.url.match(/https?:\/\/([\w.]+)/)
     if (match)
-      serviceDomain = match[0];
+      serviceDomain = match[1];
   }
   
   if (!serviceDomain) {
     let source = commandObject.execute.toString()
                + (commandObject.preview.toString() || '');
-    let match = source.match(/https?:\/\/[\w.]+/);
+    let match = source.match(/https?:\/\/([\w.]+)/);
     if (match)
-      serviceDomain = match[0];
+      serviceDomain = match[1];
   }
   // TODO: also check for serviceDomain in Utils.getCookie type code
 

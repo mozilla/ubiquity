@@ -83,6 +83,7 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
       "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
       "browser")[0],
     DEFAULT_PREVIEW_URL);
+  this.__commandsByServiceDomain = null;
 
   var self = this;
 
@@ -306,4 +307,20 @@ CommandManager.prototype = {
   get hilitedSuggestion() (
     this.__activeQuery &&
     this.__activeQuery.suggestionList[this.__hilitedIndex]),
+  
+  getCommandsByServiceDomain: function() {
+    if (this.__commandsByServiceDomain)
+      return this.__commandsByServiceDomain;
+    let commands = this.__cmdSource.getAllCommands();
+    this.__commandsByServiceDomain = {};
+    for each (cmd in commands) {
+      if (cmd.serviceDomain) {
+        if (!(cmd.serviceDomain in this.__commandsByServiceDomain))
+          this.__commandsByServiceDomain[cmd.serviceDomain] = [];
+        this.__commandsByServiceDomain[cmd.serviceDomain].push(
+          {name:cmd.name, names:cmd.names, id: cmd.id});
+      }
+    }
+    return this.__commandsByServiceDomain;
+  }
 };
