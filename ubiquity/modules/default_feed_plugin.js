@@ -198,7 +198,7 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
       return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
     },
     feedUri: feedUri,
-    serviceDomain: serviceDomain
+    serviceDomain: commandObject.serviceDomain || serviceDomain
   };
 
   if ("preview" in commandObject)
