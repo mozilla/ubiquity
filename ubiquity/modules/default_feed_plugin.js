@@ -49,7 +49,7 @@ Cu.import("resource://ubiquity/modules/sandboxfactory.js");
 Cu.import("resource://ubiquity/modules/collection.js");
 Cu.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
-const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.html";
+const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.xhtml";
 const DEFAULT_FEED_TYPE = "commands";
 const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
 const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";

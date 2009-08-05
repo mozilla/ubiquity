@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml" class="blacklist">
+<head>
+	<title>&ubiquity.pagetitle.ConfirmAddCommand;</title>
+	<link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
+	<link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/blacklist_favicon.png"/>
+
+	<script src="resource://ubiquity/scripts/jquery.js"></script>
+	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
+	<script type="application/javascript;version=1.7" src="confirm-add-command.js"></script>
+
+	<!-- note to self, this is called from /modules/default_feed_plugin.js -->
+</head>
+<body dir="&locale.dir;">
+
+<div id="errorPageContainer">
+	<!-- Error Title -->
+	<div id="errorTitle">
+		<h1>&ubiquity.confirmsubscription.Header;</h1>
+	</div>
+
+	<div id="errorLongContent">
+
+		<div id="errorShortDesc">
+			<p>&ubiquity.confirmsubscription.HeadDescParaPart1; <a href="about:ubiquity">&appTitle;</a> &ubiquity.confirmsubscription.HeadDescParaPart2; <a id="targetLink"></a>. &ubiquity.confirmsubscription.HeadDescParaPart3;</p>
+		</div>
+
+		<div id="errorLongDesc">
+			<p>&ubiquity.confirmsubscription.ScriptSource;</p>
+
+			<div id="sourceCode" style="max-height: 40em; overflow: auto;">
+				<em>&ubiquity.confirmsubscription.WaitSourceLoading;</em>
+			</div>
+
+			<p>&ubiquity.confirmsubscription.BodyDescPara1;</p>
+			<p>&ubiquity.confirmsubscription.BodyDescPara2;</p>
+
+			<!-- TODO: Show code fingerprint (hash+size) too. -->
+
+			<div class="todo" style="border-style:solid; border-width:2px; width:80%; padding:10px; border-color:#ffff00">
+				<p>&ubiquity.confirmsubscription.FingerPrintPlaceHolderText;</p>
+			</div>
+		</div>
+
+		<div id="buttons">
+			<p id="autoupdate-widget">
+
+				<input type="checkbox" id="autoupdate"/>
+				<label for="autoupdate" style="font-size: larger;">&ubiquity.confirmsubscription.CheckAutoUpdateFeed;</label>
+
+				<ul id="autoupdate-warning" style="display: none;">
+					<p>&ubiquity.confirmsubscription.AutoUpdatePara1;</p>
+					<p id="mitm-warning" style="display: none;">&ubiquity.confirmsubscription.AutoUpdatePara2Part1; <a target="_blank" href="http://blog.johnath.com/2008/08/05/ssl-question-corner/">&ubiquity.confirmsubscription.AutoUpdatePara2LinkText;</a>. &ubiquity.confirmsubscription.AutoUpdatePara2Part2;</p>
+				</ul>
+
+				<!-- TODO: Add description. If it's http (not https), -->
+				<!-- we should deliver extra warnings about MITM vulns. -->
+			</p>
+
+			<p>
+				<input type="submit" value="&ubiquity.confirmsubscription.ButtonTextDenyCommand;" onclick="onCancel();"/>
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="submit" value="&ubiquity.confirmsubscription.ButtonTextAcceptCommand;" onclick="onSubmit();"/>
+			</p>
+		</div>
+	</div>
+</div>
+
+<div id="confirmationContainer" style="display: none;">
+	<div id="confirmationShortDesc">
+		<p>&ubiquity.confirmsubscription.SubConfirmationShort;</p>
+	</div>
+
+	<div id="confirmationLongDesc">
+		<p>&ubiquity.confirmsubscription.SubConfirmationLongPart1; <a href="chrome://ubiquity/content/cmdlist.html">&ubiquity.confirmsubscription.SubConfirmationLongLinkText;</a> &ubiquity.confirmsubscription.SubConfirmationLongPart2;</p>
+		<p>You may now close this window.</p>
+	</div>
+</div>
+
+</body>
+</html>

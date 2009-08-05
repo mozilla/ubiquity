@@ -147,5 +147,30 @@ we're such nice people we promise to keep you updated. Happy translating!
 
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "Latest Ubiquity Code Changes">
 
-<!-- Hack chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.reset.1 "">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!ENTITY ubiquity.confirmsubscription.Header "Ubiquity Command from Untrusted Source">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "You are about to subscribe to a">
+<!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "Ubiquity">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart2 "command from an unknown, untrusted third-party source at">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 "If you subscribe, this command could do <em>anything it wants</em> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.">
+
+<!ENTITY ubiquity.confirmsubscription.ScriptSource "Here is the JavaScript source code to the command:">
+<!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Loading code, please wait...">
+
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "If you understand JavaScript, you should read this and use your best judgement to decide whether the command is something that's safe to execute or not. Proceed at your own risk!">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "If you don't understand JavaScript, you should not subscribe to the command unless the link was given to you by someone you know and trust.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "In the future, we plan to have a widget here displaying what we call a &ldquo;social trust network&rdquo;.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of Ubiquity.">
+
+<!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Auto-update this feed.">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Get me outta here!">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "I know what I'm doing. Subscribe to it!">
+
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara1 "This means that the feed will constantly be checked for functionality updates and automatically pushed to your computer. If you check this, make sure that you trust the people who have access to change this code on the server that it's hosted on.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part1 "Note that this feed is served using an insecure protocol, and is therefore subject to">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "man-in-the-middle attacks">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 "Please only auto-update this feed if you are sure about the implications of what you're doing.">
+
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShort "You are now subscribing to the command feed and can use its functionality.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "If you ever want to unsubscribe, you can use the Ubiquity &ldquo;list&rdquo; Ubiquity command at any time to get to the">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "command management page">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "where you can see all commands which you are subscribed to, and cancel any that you no longer want.">

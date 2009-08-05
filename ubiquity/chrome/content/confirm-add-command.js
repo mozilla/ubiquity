@@ -66,8 +66,8 @@ function showConfirmation() {
   $("#errorPageContainer").css("background-image",
                                "url('" + largeIconUrl + "')");
 
-  $("title").text("Ubiquity Command Feed Subscription Successful");
-  $("#errorTitle").html("<h1>Subscription Successful</h1>");
+  $("title").text(_ubundle.GetStringFromName("ubiquity.subscription.successtitle"));
+  $("#errorTitle").html("<h1>" + _ubundle.GetStringFromName("ubiquity.subscription.successheader") + "</h1>");
 
   $("#errorShortDesc").html($("#confirmationShortDesc").html());
   $("#errorLongDesc").html($("#confirmationLongDesc").html());
