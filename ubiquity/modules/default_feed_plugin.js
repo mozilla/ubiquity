@@ -164,6 +164,22 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
   if (!("referenceName" in commandObject))
     commandObject.referenceName = commandObject.name;
 
+  var serviceDomain = null;
+  if (commandObject.url) {
+    let match = commandObject.url.match(/https?:\/\/[\w.]+/)
+    if (match)
+      serviceDomain = match[0];
+  }
+  
+  if (!serviceDomain) {
+    let source = commandObject.execute.toString()
+               + (commandObject.preview.toString() || '');
+    let match = source.match(/https?:\/\/[\w.]+/);
+    if (match)
+      serviceDomain = match[0];
+  }
+  // TODO: also check for serviceDomain in Utils.getCookie type code
+
   var cmd = {
     __proto__: commandObject,
     toString: function CS_toString() {
@@ -181,7 +197,8 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
                                                "execute");
       return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
     },
-    feedUri: feedUri
+    feedUri: feedUri,
+    serviceDomain: serviceDomain
   };
 
   if ("preview" in commandObject)

@@ -1,4 +1,3 @@
-const GCalendar = "https://www.google.com/calendar/";
 const Apology = ("<p>" +
                  "Currently, only works with " +
                  "Google Calendar".link("http://calendar.google.com") +
@@ -32,7 +31,8 @@ CmdUtils.CreateCommand({
       return;
     }
     var req = new XMLHttpRequest;
-    req.open("POST", GCalendar + "feeds/default/private/full", false);
+    req.open("POST", "https://www.google.com/calendar/"
+                     + "feeds/default/private/full", false);
     req.setRequestHeader("Authorization", "GoogleLogin auth=" + authKey);
     req.setRequestHeader("Content-type", "application/atom+xml");
     req.send(<entry xmlns="http://www.w3.org/2005/Atom"
@@ -89,7 +89,7 @@ CmdUtils.CreateCommand({
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check on thursday"' + Apology,
   execute: function gcale_execute({object: {data}}) {
-    Utils.openUrlInBrowser(GCalendar +
+    Utils.openUrlInBrowser("https://www.google.com/calendar/" +
                            Utils.paramsToString(dateParam(data)));
   },
   // url is for recursing pagination
@@ -103,7 +103,7 @@ CmdUtils.CreateCommand({
                          {date: date.toString("dddd, dS MMMM, yyyy")});
     CmdUtils.previewGet(
       pblock,
-      url || GCalendar + "m",
+      url || "https://www.google.com/calendar/m",
       dateParam(date),
       function getCalendar(htm) {
         var [cal] = /<div class[^]+$/(htm) || 0;
