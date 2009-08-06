@@ -264,6 +264,9 @@ FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
 FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   var self = this;
 
+  this.commandReminderPeriod = Utils.Application.prefs.getValue(
+                              "extensions.ubiquity.commandReminderPeriod", 0);
+
   function onPageWithCommands(plugin, pageUrl, commandsUrl, document,
                               mimetype) {
     if (!self.isSubscribedFeed(pageUrl))
@@ -290,10 +293,90 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
 
+
+  // Watch for when a new page is shown and check if the domain of that
+  // page matches a domain used by any installed commands
+  function onPageShow(event) {
+    if(!event.target.baseURI)
+      return;
+
+    var pageDomain = event.target.domain;
+    let cmdManager = Utils.currentChromeWindow.gUbiquity.cmdManager;
+    let commandsByServiceDomain = cmdManager.getCommandsByServiceDomain();
+    let commandsThatMatch = commandsByServiceDomain[pageDomain];
+    if(commandsThatMatch){
+      let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
+      if((visitsToDomain % self.commandReminderPeriod) == 0)
+        self.showEnabledCommandNotification(event.target,
+                                            commandsThatMatch[0].names[0]);
+    }
+  }
+
+  window.addEventListener("pageshow", onPageShow, false);
+
   for (var name in this._plugins) {
     var plugin = this._plugins[name];
     if (plugin.installToWindow)
       plugin.installToWindow(window);
+  }
+};
+
+FMgrProto.showEnabledCommandNotification = 
+  function showEnabledCommandNotification(targetDoc, commandName) {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+
+  // Find the <browser> which contains notifyWindow, by looking
+  // through all the open windows and all the <browsers> in each.
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
+           getService(Ci.nsIWindowMediator);
+  var enumerator = wm.getEnumerator(Utils.appWindowType);
+  var tabbrowser = null;
+  var foundBrowser = null;
+
+  while (!foundBrowser && enumerator.hasMoreElements()) {
+    var win = enumerator.getNext();
+    tabbrowser = win.getBrowser();
+    foundBrowser = tabbrowser.getBrowserForDocument(targetDoc);
+  }
+
+  // Return the notificationBox associated with the browser.
+  if (foundBrowser) {
+    var box = tabbrowser.getNotificationBox(foundBrowser);
+    var BOX_NAME = "ubiquity_notify_enabled_command";
+    var oldNotification = box.getNotificationWithValue(BOX_NAME);
+    if (oldNotification)
+      box.removeNotification(oldNotification);
+
+    // popup Ubiquity and input the verb associated with the website
+    function onShowMeClick(notification, button) {
+      notification.close();
+      Utils.setTimeout(showCommandInUbiquity, 500);
+    }
+
+    function showCommandInUbiquity(){
+      let gUbiquity = Utils.currentChromeWindow.gUbiquity;
+      gUbiquity.openWindow();
+      gUbiquity.__textBox.value = commandName;
+    }
+    
+    var notify_message = ("Did you know that you have a Ubiquity" +
+                              " command for this website?");  
+    var buttons = [
+      {accessKey: "S",
+       callback: onShowMeClick,
+       label: "Show Me!",
+       popup: null}
+    ];
+    box.appendNotification(
+      notify_message,
+      BOX_NAME,
+      "chrome://ubiquity/skin/icons/favicon.ico",
+      box.PRIORITY_INFO_MEDIUM,
+      buttons
+    );
+  } else {
+    Cu.reportError("Couldn't find tab for document");
   }
 };
 
