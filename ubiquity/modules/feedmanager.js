@@ -297,19 +297,27 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   // Watch for when a new page is shown and check if the domain of that
   // page matches a domain used by any installed commands
   function onPageShow(event) {
-    if(!event.target.baseURI)
+    if(!event.target.domain)
       return;
-
     var pageDomain = event.target.domain;
-    let cmdManager = Utils.currentChromeWindow.gUbiquity.cmdManager;
-    let commandsByServiceDomain = cmdManager.getCommandsByServiceDomain();
-    let commandsThatMatch = commandsByServiceDomain[pageDomain];
-    if(commandsThatMatch){
-      let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
-      if((visitsToDomain % self.commandReminderPeriod) == 0)
-        self.showEnabledCommandNotification(event.target,
-                                            commandsThatMatch[0].names[0]);
+    let notTheseSites = noNotificationSites();
+    if(!notTheseSites.some(function (domainToSkip) domainToSkip == pageDomain)){
+      let cmdManager = Utils.currentChromeWindow.gUbiquity.cmdManager;
+      let commandsByServiceDomain = cmdManager.getCommandsByServiceDomain();
+      let commandsThatMatch = commandsByServiceDomain[pageDomain];
+      if(commandsThatMatch){
+        let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
+        if((visitsToDomain % self.commandReminderPeriod) == 0)
+          self.showEnabledCommandNotification(event.target,
+                                              commandsThatMatch[0].names[0]);
+      }
     }
+  }
+
+  function noNotificationSites(){
+    var sites = Utils.Application.prefs.getValue(
+                            "extensions.ubiquity.noNotificationSites", "");
+    return sites.split("|");
   }
 
   window.addEventListener("pageshow", onPageShow, false);
@@ -353,11 +361,25 @@ FMgrProto.showEnabledCommandNotification =
       notification.close();
       Utils.setTimeout(showCommandInUbiquity, 500);
     }
-
     function showCommandInUbiquity(){
       let gUbiquity = Utils.currentChromeWindow.gUbiquity;
       gUbiquity.openWindow();
       gUbiquity.__textBox.value = commandName;
+      addToNoNotifications(targetDoc.domain);
+    }
+
+    // add this domain to the list of domains to not give notifications for
+    function onNoMoreClick(notification, button) {
+      addToNoNotifications(targetDoc.domain);
+    }
+
+    function addToNoNotifications(site){
+      let notTheseSites = Utils.Application.prefs.getValue(
+                            "extensions.ubiquity.noNotificationSites", "");
+      notTheseSites = notTheseSites.concat(site + "|");
+      Utils.Application.prefs.setValue(
+                            "extensions.ubiquity.noNotificationSites",
+                                                   notTheseSites);
     }
     
     var notify_message = ("Did you know that you have a Ubiquity" +
@@ -366,7 +388,11 @@ FMgrProto.showEnabledCommandNotification =
       {accessKey: "S",
        callback: onShowMeClick,
        label: "Show Me!",
-       popup: null}
+       popup: null},
+      {accessKey: "D",
+       callback: onNoMoreClick,
+       label: "Don't show me this anymore",
+       popup:null}
     ];
     box.appendNotification(
       notify_message,

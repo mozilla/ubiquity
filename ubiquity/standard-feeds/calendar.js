@@ -7,6 +7,7 @@ const Apology = ("<p>" +
 CmdUtils.CreateCommand({
   names: ["add to google calendar", "quick add"],
   argument: {object_event: noun_arb_text},
+  serviceDomain: "calendar.google.com",
   icon: "chrome://ubiquity/skin/icons/calendar_add.png",
   description: "Adds an event to your calendar.",
   help: (
@@ -85,6 +86,7 @@ function dateParam(date) ({as_sdt: date.toString("yyyyMMdd")});
 CmdUtils.CreateCommand({
   names: ["check google calendar"],
   argument: {object: noun_type_date},
+  serviceDomain: "calendar.google.com",
   icon : "chrome://ubiquity/skin/icons/calendar.png",
   description: "Checks what events are on your calendar for a given date.",
   help: 'Try issuing "check on thursday"' + Apology,

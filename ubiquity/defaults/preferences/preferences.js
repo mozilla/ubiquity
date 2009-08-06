@@ -16,3 +16,4 @@ pref("extensions.ubiquity.history.max", 42);
 pref("extensions.ubiquity.doNounFirstExternals", 0);
 pref("extensions.ubiquity.inputDelay", 50);
 pref("extensions.ubiquity.commandReminderPeriod", 5);
+pref("extensions.ubiquity.noNotificationSites", "");
