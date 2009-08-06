@@ -93,19 +93,16 @@
     <h2>Settings</h2>
     
     <div>
+      <!--<input type='button' name='clearnouncache' value='clear noun cache' id='clearnouncache'></input>-->
+      <label for='maxSuggestions'>max suggestions per nountype:</label><input id='maxSuggestions' value='5' size='2'/>
+      <!--<input type='checkbox' name='noexternalcalls' id='noexternalcalls'></input><label for='noexternalcalls'>only nountypes with no external calls</label>-->
+      <input type='checkbox' name='autorun' id='autorun'></input><label for='autorun'>automatically run on update</label>
+      <br/>
       <label for='gu-sync'
        title="uses the same parser as the current Ubiquity instance">
        <input type='checkbox' id='gu-sync' checked='checked'/>
        sync with <code>gUbiquity</code>
       </label>
-      <input type='checkbox' name='flushcache' id='flushcache'></input><label for='flushcache'>flush cache on each query</label>
-      
-      <br/>
-    
-      <!--<input type='button' name='clearnouncache' value='clear noun cache' id='clearnouncache'></input>-->
-      <label for='maxSuggestions'>max suggestions per nountype:</label><input id='maxSuggestions' value='5' size='2'/>
-      <!--<input type='checkbox' name='noexternalcalls' id='noexternalcalls'></input><label for='noexternalcalls'>only nountypes with no external calls</label>-->
-      <input type='checkbox' name='autorun' id='autorun'></input><label for='autorun'>automatically run on update</label>
     </div>
     
 		<div id='border'>
@@ -118,7 +115,7 @@
     
     <table id="suggs" border='0'>
     <thead>
-      <tr><th>nountype</th><th><small>suggestion</small><br/>age</th><th>suggestion</th><th><img src='resource://ubiquity/chrome/skin/icons/tuner-top.png'></th></tr>
+      <tr><th>nountype</th><th>suggestion</th><th><img src='resource://ubiquity/chrome/skin/icons/tuner-top.png'></th></tr>
     </thead>
     <tbody>
     </tbody>

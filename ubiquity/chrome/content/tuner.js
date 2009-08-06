@@ -61,9 +61,6 @@ var tunerInterface = {
     let input = $('.input').val();
     if (!input)
       return;
-      
-    if ($('#flushcache').attr('checked'))
-      this.parser.flushNounCache();
 
     var fakeQuery = this.fakeQuery;
     (function(){
@@ -86,12 +83,10 @@ var tunerInterface = {
       if (fakeQuery._detectionTracker.getRequestCount())
         return;
         
-      for (let id in tunerInterface.parser._nounCache.cacheSpace[x]) {
-        let suggs = tunerInterface.parser._nounCache.getSuggs(x,id);
-        let suggTime = tunerInterface.parser._nounCache.getTime(x,id);
+      for (let id in tunerInterface.parser._nounCache[x]) {
+        let suggs = tunerInterface.parser._nounCache[x][id];
         
-        $(id+' td.time').text(suggTime);
-        if (!suggs || !suggs.length)
+        if (!suggs.length)
           continue;
         
         let sugg = suggs.pop();
@@ -101,9 +96,7 @@ var tunerInterface = {
         
         while (sugg = suggs.pop()) {
           $('<tr>'
-            +'<td class="id">&nbsp;</td>'
-            +'<td class="time">&nbsp;</td>'
-            +'<td class="sugg">'+sugg.text+'</td>'
+            +'<td class="id">&nbsp;</td><td class="sugg">'+sugg.text+'</td>'
             +'<td class="score"><div class="scorebar" style="width: '
               + Math.min(sugg.score * 500,500) + '"></div> '
               +'<span class="scoreval">'+formatScore(sugg.score)+'</span></td>'
@@ -120,7 +113,7 @@ var tunerInterface = {
 
 function initialDisplay(nountype) {
   var el = 
-    $('<tr id="'+nountype.id.replace('#','')+'"><td class="id">'+nountype.id+'</td><td class="time"></td><td class="sugg">&nbsp;</td><td class="score"><div class="scorebar" style="width:0px;">&nbsp;</div> <span class="scoreval"></span></td></tr>');
+    $('<tr id="'+nountype.id.replace('#','')+'"><td class="id">'+nountype.id+'</td><td class="sugg">&nbsp;</td><td class="score"><div class="scorebar" style="width:0px;">&nbsp;</div> <span class="scoreval"></span></td></tr>');
   $('#suggs tbody').append(el);
 }
 
