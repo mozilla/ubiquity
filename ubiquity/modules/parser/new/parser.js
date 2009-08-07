@@ -2371,7 +2371,7 @@ Parse.prototype = {
           display += (arg.outerSpace || '')
             + (arg.modifier ? arg.modifier + arg.innerSpace : '')
             + (arg.inactivePrefix ? arg.inactivePrefix : '')
-            + (arg.summary || arg.input)
+            + (arg.label || arg.input)
             + (arg.inactiveSuffix ? arg.inactiveSuffix : '');
 	}
         else {
@@ -2380,7 +2380,7 @@ Parse.prototype = {
             + "</span>":'') + "<span class='" + className + "' title=''>"
             + (arg.inactivePrefix ?
                "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-            + (arg.summary || arg.input)
+            + (arg.label || arg.input)
             + (arg.inactiveSuffix ?
                "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
             + "</span>";
@@ -2389,7 +2389,7 @@ Parse.prototype = {
       else {
 	if (format == 'text') {
 	  display += (arg.inactivePrefix ? arg.inactivePrefix : '')
-            + (arg.summary || arg.input)
+            + (arg.label || arg.input)
             + (arg.inactiveSuffix ? arg.inactiveSuffix : '')
             + (arg.modifier ? arg.innerSpace + arg.modifier : '')
             + (arg.outerSpace || '');
@@ -2399,7 +2399,7 @@ Parse.prototype = {
             + "' title=''>"
             + (arg.inactivePrefix ?
                "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-            + (arg.summary || arg.input)
+            + (arg.label || arg.input)
             + (arg.inactiveSuffix ?
                "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
             + "</span>" + (arg.modifier ? "<span class='delimiter' title='" + arg.role + "'>"
@@ -2412,13 +2412,13 @@ Parse.prototype = {
       let arg = this.args[neededArg.role];
       if (arg && (arg[0] || 0).text) continue;
       let {label} = neededArg;
-      if (format == 'text')
-	label = "(" + label + ")";
       if (!label) {
         let nt = neededArg.nountype;
         // _name is for backward compatiblity
         label = nt.label || nt._name || "?";
       }
+      if (format == 'text')
+	label = "(" + label + ")";
       for each (let parserRole in this._query.parser.roles) {
         if (parserRole.role === neededArg.role) {
           if (this._query.parser.branching === "left")
