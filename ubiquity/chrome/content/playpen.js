@@ -43,7 +43,7 @@ var Cc = Components.classes;
 var Ci = Components.interfaces;
 
 var displayParse = function(parse, labels) (
-  parse._id + ": " + parse.displayText() 
+  parse._id + ": " + parse.displayHtml 
   + (labels && parse._caller ? '<br/>caller: '+parse._caller : '') 
   + (labels && parse._combination ? '<br/>combination: <code>'
     +parse._combination.replace(/},/g,'},<br/>') + '</code>' : '') 
@@ -104,7 +104,7 @@ var demoParserInterface = {
           case 4: 
             $('<h3>step 4: group into arguments</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
-              $('#argParses').append('<li>' + parse.displayText() + '</li>');
+              $('#argParses').append('<li>' + parse.displayHtml + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;
@@ -113,7 +113,7 @@ var demoParserInterface = {
             $('<h3>step 5: anaphora substitution</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#newPossibleParses')
-                .append('<li>' + parse.displayText() + '</li>');
+                .append('<li>' + parse.displayHtml + '</li>');
             }
             $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
             break;

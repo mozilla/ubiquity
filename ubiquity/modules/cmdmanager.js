@@ -163,7 +163,7 @@ CommandManager.prototype = {
     var content = "";
     var {suggestionList} = this.__activeQuery;
     for (let x = 0, l = suggestionList.length; x < l; ++x) {
-      let suggText = suggestionList[x].displayText();
+      let suggText = suggestionList[x].displayHtml;
       let suggIconUrl = suggestionList[x].icon;
       let suggIcon = "";
       if (suggIconUrl)
@@ -286,7 +286,7 @@ CommandManager.prototype = {
 
   getHilitedSuggestionDisplayName: function CM_getHilitedSuggDisplayName() {
     var sugg = this.hilitedSuggestion;
-    return sugg ? sugg.displayText() : "";
+    return sugg ? sugg.displayHtml : "";
   },
 
   makeCommandSuggester: function CM_makeCommandSuggester() {

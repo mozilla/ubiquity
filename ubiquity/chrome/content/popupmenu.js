@@ -60,7 +60,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       for each (var sugg in suggsToDisplay) {
         let {_verb} = sugg, {icon} = _verb.cmd || _verb;
         let menuItem = document.createElement("menuitem");
-        menuItem.setAttribute("label", sugg.displayText('text'));
+        menuItem.setAttribute("label", sugg.displayText);
         if (icon) {
           menuItem.setAttribute("class", "menuitem-iconic");
           menuItem.setAttribute("image", icon);
