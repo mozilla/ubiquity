@@ -126,7 +126,7 @@ function onReady() {
   $("#targetLink").attr("href", gCommandFeedInfo.url);
 
   function onAutoupdateClicked() {
-    if ($("#autoupdate").attr("checked")){
+    if ($("#autoupdate[checked=true]").length){
       $("#autoupdate-warning").slideDown();
       $('html, body').animate({ scrollTop: 10000 }, 1000); //Fixes #280
     }else{
