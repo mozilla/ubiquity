@@ -2354,12 +2354,12 @@ Parse.prototype = {
         display += (arg.outerSpace || '')
           + (arg.modifier ? arg.modifier + arg.innerSpace : '')
           + (arg.inactivePrefix ? arg.inactivePrefix : '')
-          + "[ " + (arg.label || arg.input) + " ]"
+          + "[ " + (arg.text || arg.input || arg.label) + " ]"
           + (arg.inactiveSuffix ? arg.inactiveSuffix : '');
       }
       else {
         display += (arg.inactivePrefix ? arg.inactivePrefix : '')
-          + "[ " + (arg.label || arg.input) + " ]"
+          + "[ " + (arg.text || arg.input || arg.label) + " ]"
           + (arg.inactiveSuffix ? arg.inactiveSuffix : '')
           + (arg.modifier ? arg.innerSpace + arg.modifier : '')
           + (arg.outerSpace || '');
@@ -2432,7 +2432,7 @@ Parse.prototype = {
           + "</span>":'') + "<span class='" + className + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.label || arg.input)
+          + (arg.text || arg.input || arg.label)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>";
@@ -2442,7 +2442,7 @@ Parse.prototype = {
           + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.label || arg.input)
+          + (arg.text || arg.input || arg.label)
           + (arg.inactiveSuffix ?
              "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
           + "</span>" + (arg.modifier ? "<span class='delimiter' title='" + arg.role + "'>"
