@@ -309,10 +309,14 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
       let commandsByServiceDomain = cmdManager.getCommandsByServiceDomain();
       let commandsThatMatch = commandsByServiceDomain[pageDomain];
       if(commandsThatMatch){
-        let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
-        if((visitsToDomain % self.commandReminderPeriod) == 0)
-          self.showEnabledCommandNotification(event.target,
-                                              commandsThatMatch[0].names[0]);
+        let verbId = commandsThatMatch[0].id;
+        let freqOfUse = cmdManager.__nlParser._suggestionMemory.getScore("", verbId);
+	if(freqOfUse == 0){
+          let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
+          if((visitsToDomain % self.commandReminderPeriod) == 0)
+            self.showEnabledCommandNotification(event.target,
+                                                commandsThatMatch[0].names[0]);
+	}
       }
     }
   }

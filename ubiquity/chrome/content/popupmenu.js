@@ -58,6 +58,8 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     cmdSuggester(context, function onSuggest(suggestions) {
       for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
       var suggsToDisplay = suggestions.filter(function (sugg) {
+                               if(!sugg.args)
+			         return false;
                                let arg = sugg.args["object"];
                                if (arg && (arg[0] || 0).text) return true;
                                else return false;
