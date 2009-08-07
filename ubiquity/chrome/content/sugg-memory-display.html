@@ -1,0 +1,19 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html> <head>
+<title>Suggestion Memory Debugger</title>
+<script type="application/javascript;version=1.8">
+function fillTable() {
+  Components.utils.import("resource://ubiquity/modules/suggestion_memory.js");
+  var suggMem = new SuggestionMemory("main_parser");
+  var html = suggMem.displayAllContents();
+  document.getElementById("sugg-mem-table").innerHTML = html;
+}
+</script>
+</head>
+
+<body onload="fillTable();">
+<table><thead><tr><td>Input</td><td>Choice</td><td>Number of times</td></tr></thead><tbody id="sugg-mem-table"></tbody></table>
+
+<p id="pants"></p>
+
+</body> </html>

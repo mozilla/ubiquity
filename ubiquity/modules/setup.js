@@ -183,6 +183,9 @@ let UbiquitySetup = {
             prefs.clearUserPref(name);
         });
 
+      // Reset suggestion memory:
+      new SuggestionMemory("main_parser").wipe();
+
       // This is likely redundant since we just reset all prefs, but we'll
       // do it for completeness...
       this.isResetScheduled = false;
@@ -272,7 +275,7 @@ let UbiquitySetup = {
 
       /*var gmfp = new GreaseMonkeyFeedPlugin(feedManager, msgService,
                                             gWebJsModule);
-      */                                      
+      */
       var sfp = new StylishFeedPlugin(feedManager, msgService,
                                             gWebJsModule);
 

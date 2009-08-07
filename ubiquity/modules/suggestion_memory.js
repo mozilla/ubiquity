@@ -193,6 +193,32 @@ SuggestionMemory.prototype = {
     }
     fetchStmt.finalize();
     return retVals;
+  },
+
+  wipe: function() {
+    // Wipes everything out of this suggestion memory instance.
+    // Be careful with this.
+    let wipeSql = ("DELETE FROM ubiquity_suggestion_memory " +
+                   "WHERE id_string = ?1");
+    let wipeStmt = this._createStatement(wipeSql);
+    wipeStmt.bindUTF8StringParameter(0, this._id);
+    updStmt.execute();
+    updStmt.finalize();
+  },
+
+  displayAllContents: function() {
+    /* Used for debugging purposes only.*/
+    let input;
+    let choice;
+    let html = "";
+    for (input in this._table) {
+      for (choice in this._table[input]) {
+        let num = this._table[input][choice];
+        html += "<tr><td>" + input + "</td><td>" + choice +
+          "</td><td>" + num + "</td></tr";
+      }
+    }
+    return html;
   }
 
 };
@@ -211,3 +237,7 @@ SuggestionMemory.openDatabase = function openDatabase(file) {
                    SQLITE_SCHEMA);
   return connection;
 };
+
+/* TODO: Do we need functions for dealing with multiple SuggestionMemory
+ * instances, e.g. listSuggestionMemoryIds() or wipeAllSuggestionMemory()?
+ */
