@@ -286,21 +286,19 @@ Parser.prototype = {
       for each (let pps in ppss)
         query._addPartiallyParsedSentence(pps);
 
-    lazy || Utils.setTimeout(function P_nQ_delayedRun(){ query.run() });
+    lazy || Utils.setTimeout(function P_nQ_delayedRun() { query.run() });
     return query;
   },
 
   setCommandList: function P_setCommandList(commandList) {
-    this._verbList = [new Verb(cmd, this._languagePlugin.roleMap)
-                      for each (cmd in commandList)];
-    this._verbsThatUseSpecificNouns = [];
-    this._rankedVerbsThatUseGenericNouns = [];
-    for each (let verb in this._verbList) {
-      if (verb.usesAnySpecificNounType()) {
-        this._verbsThatUseSpecificNouns.push(verb);
-      } else {
-        this._rankedVerbsThatUseGenericNouns.push(verb);
-      }
+    var verbs = this._verbList = [];
+    var specifics = this._verbsThatUseSpecificNouns = [];
+    var generics  = this._rankedVerbsThatUseGenericNouns = [];
+    var {roleMap} = this._languagePlugin;
+    for each (let cmd in commandList) {
+      let verb = new Verb(cmd, roleMap);
+      verbs.push(verb);
+      (verb.usesAnySpecificNounType() ? specifics : generics).push(verb);
     }
     this._sortGenericVerbCache();
   },
@@ -368,48 +366,38 @@ ParsedSentence.prototype = {
     return sentence + " ";
   },
 
-  displayText: function PS_displayText(format) {
+  // text formatted sentence for display in popup menu
+  get displayText PS_displayText() {
+    var {matchedName: sentence, _arguments: args} = this._verb;
+    for (let x in args) {
+      let obj = x === "direct_object";
+      let {text} = this._argSuggs[x] || 0;
+      if (text) sentence += (" " +
+                             (obj ? "" : args[x].flag + " ") +
+                             (obj ? "[ " + text + " ]" : text));
+    }
+    return sentence;
+  },
+  // html formatted sentence for display in suggestion list
+  get displayHtml PS_displayHtml() {
     var {escapeHtml} = Utils;
-    // Returns sentences for display in suggestion list.
-    // Takes a format argument (string) which tells it how to format the
-    // output. If format == 'text' it will give the parses in plain text. If
-    // format == 'html' it will displaying them with nice
-    // {{{<span class='...'></span>}}} wrappers. Format is html by default.
-    var sentence = '';
-    if (format == 'text') {
-      sentence = this._verb.matchedName;
-    }
-    else {
-      sentence = ('<span class="verb">' +
-                      escapeHtml(this._verb.matchedName) +
-                      '</span>');
-    }
+    var sentence = ('<span class="verb">' +
+                    escapeHtml(this._verb.matchedName) +
+                    '</span>');
     var args = this._verb._arguments;
     for (let x in args) {
       let obj = x === "direct_object";
       let {summary} = this._argSuggs[x] || 0;
       if (summary) {
-	if (format == 'text') {
-          let label = obj ? "" : args[x].flag + " ";
-          sentence += (" " + (obj ? "" : label) + summary);
-	}
-	else {
-          let label = obj ? "" : escapeHtml(args[x].flag) + " ";
-          sentence += (
-            " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') +
-            '<span class="' + (obj ? "object" : "argument") + '">' +
-            summary + "</span>");
-	}
+        let label = obj ? "" : escapeHtml(args[x].flag) + " ";
+        sentence += (
+          " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') +
+          '<span class="' + (obj ? "object" : "argument") + '">' +
+          summary + "</span>");
       }
       else {
-	if (format == 'text') {
-          let label = (obj ? "" : args[x].flag + " ") + args[x].label;
-          sentence += label;
-	}
-	else {
-          let label = (obj ? "" : args[x].flag + " ") + args[x].label;
-          sentence += ' <span class="needarg">' + escapeHtml(label) + "</span>";
-	}
+        let label = (obj ? "" : args[x].flag + " ") + args[x].label;
+        sentence += ' <span class="needarg">' + escapeHtml(label) + "</span>";
       }
     }
     return sentence;

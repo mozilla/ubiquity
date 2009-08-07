@@ -89,7 +89,8 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       let arg = sugg.args.object;
       return !!(arg && (arg[0] || 0).text);
     }
-    else if (sugg._argSuggs) return !!sugg._argSuggs.direct_object;
+    else if (sugg._argSuggs)
+      return !!(sugg._argSuggs.direct_object || 0).text;
     return false;
   }
   function selected() (gContextMenu.isContentSelection() ||

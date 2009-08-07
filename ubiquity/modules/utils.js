@@ -893,7 +893,6 @@ Utils.history = {
     awesome.startSearch(query, "", null, {
       onSearchResult: function hs_onSearchResult(search, result) {
         switch (result.searchResult) {
-          case result.RESULT_SUCCESS_ONGOING:
           case result.RESULT_SUCCESS: {
             let results = [];
             for (let i = 0, l = result.matchCount; i < l; ++i)
