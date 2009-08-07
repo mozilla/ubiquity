@@ -297,9 +297,12 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   // Watch for when a new page is shown and check if the domain of that
   // page matches a domain used by any installed commands
   function onPageShow(event) {
-    if(!event.target.domain)
-      return;
-    var pageDomain = event.target.domain;
+		var pageDomain = null;
+		try {
+      var pageDomain = event.target.domain;
+		} catch(e) {
+			return;
+		}
     let notTheseSites = noNotificationSites();
     if(!notTheseSites.some(function (domainToSkip) domainToSkip == pageDomain)){
       let cmdManager = Utils.currentChromeWindow.gUbiquity.cmdManager;
