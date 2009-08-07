@@ -123,8 +123,8 @@ function setupHelp() {
     $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
     [this.textContent, this.bin] = [this.bin, this.textContent];
   });
-  toggler.textContent = "Learn How to Use This Page";
-  toggler.bin = "Hide Help";
+  toggler.textContent = _ubundle.GetStringFromName("ubiquity.showhidehelp.show");
+  toggler.bin = _ubundle.GetStringFromName("ubiquity.showhidehelp.hide");
   toggler.off = true;
 }
 
@@ -135,7 +135,7 @@ $(function(){
     $(".feedKey").text(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));
     $(".localization-dir").text(
       feedUri.replace(/\b(?:standard|builtin)-feeds\/.*$/g,
-                      "localization/xx/"));
+                      "localization/XY/"));
     displayTemplate(feedUri);
   }
 });

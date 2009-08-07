@@ -4,7 +4,7 @@
 	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
 		%htmlDTD;
 
-	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
 		%directionDTD;
 
 	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
@@ -16,27 +16,27 @@
 <head>
 	<title>&ubiquity.pagetitle.HackUbiquity;</title>
 
+	<base href="chrome://ubiquity/content" />
+
+	<link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
 	<link rel="stylesheet" href="web-content.css" type="text/css" />
-	<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 
 	<script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
 	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
 	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
 
-
 	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/developer-news.js"></script>
 	<script type="application/javascript;version=1.7" src="editor.js"></script>
 	<script type="application/javascript;version=1.7" src="resource://ubiquity/scripts/codemirror/js/codemirror.js"></script>
+
 	<script type="text/javascript">
 	<![CDATA[
     const PREF_ENABLE_HIGHLIGHTING = "extensions.ubiquity.editor_highlighting";
 
     // Workaround for #437.
     function isSyntaxHighlightingBroken() {
-      var appInfo = Components.classes["@mozilla.org/xre/app-info;1"]
-                              .getService(Components.interfaces.nsIXULAppInfo);
-      var versionChecker = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-                                     .getService(Components.interfaces.nsIVersionComparator);
+      var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
+      var versionChecker = Components.classes["@mozilla.org/xpcom/version-comparator;1"].getService(Components.interfaces.nsIVersionComparator);
       if (versionChecker.compare(appInfo.version, "3.1b1") >= 0)
         return true;
       else
@@ -127,95 +127,95 @@
 </head>
 <body dir="&locale.dir;" onload="initialize(); Editor.onLoad(); highlight();">
 
-	<div class="head">&ubiquity.tagline.HackUbiquity;</div>
-	<div id="nav-container"></div>
+<div class="head">&ubiquity.tagline.HackUbiquity;</div>
 
+<div id="nav-container"></div>
+
+<br clear="all" />
+
+<div style="text-align:center;">
+	<p>&ubiquity.pagetip.HackUbiquity;</p>
+</div>
+
+<br clear="all" />
+
+<h1>&ubiquity.editor.CommandEditorHeader;</h1>
+<p id="notification-bar" class="notification" style="display:none"></p>
+
+<div class="col-three">
+	<p>&ubiquity.editor.CommandEditorNewCommands;</p>
+</div>
+
+<div class="col-three">
+	<p><strong>&ubiquity.editor.CommandEditorReadAuthTutPart1; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial">&ubiquity.editor.CommandEditorReadAuthTutLinkText1;</a></strong> &ubiquity.editor.CommandEditorReadAuthTutPart2; <a href="resource://ubiquity/standard-feeds">&ubiquity.editor.CommandEditorReadAuthTutLinkText2;</a></p>
+	<p style="background-color: #F2E78B; padding:5px;">&ubiquity.editor.CommandEditorReadTheDocs; <a href="file.xhtml#index.html">&ubiquity.editor.CommandEditorReadTheDocsLinkText;</a></p>
+</div>
+
+<div class="col-two">
+	<p>&ubiquity.editor.CommandEditorGetInvolved; <a href="http://wiki.mozilla.org/Labs/Ubiquity">&ubiquity.editor.CommandEditorGetInvolvedLinkText;</a></p>
+</div>
+
+<div id="editor-actions">
 	<br clear="all" />
 
-	<div style="text-align:center;">
-		<p>&ubiquity.pagetip.HackUbiquity;</p>
+	<div id="external-editor-pref">&ubiquity.editor.YourExternalEd;
+		<input id="editorInputBox" type="file" size="20" style="cursor:pointer" onchange="Editor.onSave()" />
 	</div>
 
-	<br clear="all" />
+	<br />
 
-	<h1>&ubiquity.editor.CommandEditorHeader;</h1>
-	<p id="notification-bar" class="notification" style="display:none"></p>
-
-	<div class="col-three">
-		<p>&ubiquity.editor.CommandEditorNewCommands;</p>
+	<div id="feed-type-pref">&ubiquity.editor.EditorCommandType;
+		<select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
+			<option value="commands">&ubiquity.editor.CmdTypeRegular;</option>
+			<option value="locked-down-commands">&ubiquity.editor.CmdTypeLocked;</option>
+		</select>
 	</div>
 
-	<div class="col-three">
-		<p>&ubiquity.editor.CommandEditorReadAuthTut;</p>
-		<p style="background-color: #F2E78B; padding:5px;">&ubiquity.editor.CommandEditorReadTheDocs;</p>
-	</div>
-
-	<div class="col-two">
-		<p>&ubiquity.editor.CommandEditorGetInvolved;</p>
-	</div>
-
-	<div id="editor-actions">
-		<br clear="all" />
-
-		<div id="external-editor-pref">&ubiquity.editor.YourExternalEd;
-			<input id="editorInputBox" type="file" size="20" style="cursor:pointer" onchange="Editor.onSave()" />
-		</div>
-
-		<br />
-
-		<div id="feed-type-pref">&ubiquity.editor.EditorCommandType;
-			<select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
-				<option value="commands">&ubiquity.editor.CmdTypeRegular;</option>
-				<option value="locked-down-commands">&ubiquity.editor.CmdTypeLocked;</option>
-			</select>
-		</div>
-
-		<div>
-			<span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
-			<span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDesc;</span>
-		</div>
-
-		<br clear="all" />
-
-		<ul class="button-list">
-			<li><a class="button" onclick="importTemplate();return false"><strong>&ubiquity.editor.ImportTemplate;</strong></a></li>
-			<li><a class="button" onclick="launch();return false"><strong>&ubiquity.editor.LaunchExternalEd;</strong></a></li>
-			<li><a class="button" onclick="paste();return false"><strong>&ubiquity.editor.ShareCommand;</strong></a></li>
-			<li><a class="button" onclick="saveAs();return false"><strong>&ubiquity.editor.SaveToFile;</strong></a></li>
-		</ul>
-
-		<br clear="all" />
-
-		<div id="editor-options">
-			<label for="enableSyntaxHighlighting">
-				<input type="checkbox" id="enableSyntaxHighlighting" onchange="enableSyntaxHighlighter(this.checked);"/> &ubiquity.editor.EnableHighlighting;
-			</label>
-		</div>
-	</div>
-
-	<div id="editor-div">
-		<textarea id="editor" rows="40" style="width:99%"></textarea>
+	<div>
+		<span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
+		<span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDesc; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial">&ubiquity.editor.LockedCommandDescLinkText;</a></span>
 	</div>
 
 	<br clear="all" />
 
-	<div class="col-five">
+	<ul class="button-list">
+		<li><a class="button" onclick="importTemplate();return false"><strong>&ubiquity.editor.ImportTemplate;</strong></a></li>
+		<li><a class="button" onclick="launch();return false"><strong>&ubiquity.editor.LaunchExternalEd;</strong></a></li>
+		<li><a class="button" onclick="paste();return false"><strong>&ubiquity.editor.ShareCommand;</strong></a></li>
+		<li><a class="button" onclick="saveAs();return false"><strong>&ubiquity.editor.SaveToFile;</strong></a></li>
+	</ul>
 
-		<h2>&ubiquity.editor.ShareYourCommands;</h2>
-		<p>&ubiquity.editor.ShareCommandsParagraph1;</p>
-		<p>&ubiquity.editor.ShareCommandsParagraph2;</p>
+	<br clear="all" />
 
-		<h2>&ubiquity.editor.DevelopingUbiquity;</h2>
-		<p>&ubiquity.editor.DevelopingUbiquityParagraph1;</p>
-		<p>&ubiquity.editor.DevelopingUbiquityParagraph2;</p>
-		<p>&ubiquity.editor.DevelopingUbiquityParagraph3;</p>
-		<p>&ubiquity.editor.DevelopingUbiquityParagraph4;</p>
+	<div id="editor-options">
+		<label for="enableSyntaxHighlighting">
+			<input type="checkbox" id="enableSyntaxHighlighting" onchange="enableSyntaxHighlighter(this.checked);"/> &ubiquity.editor.EnableHighlighting;
+		</label>
 	</div>
+</div>
 
-	<div class="col-four">
-  		<h2>&ubiquity.editor.LatestChangesFeedTitle;</h2>
-		<div id="news"></div>
-	</div>
+<div id="editor-div">
+	<textarea id="editor" rows="40" style="width:99%"></textarea>
+</div>
+
+<br clear="all" />
+
+<div class="col-five">
+	<h2>&ubiquity.editor.ShareYourCommands;</h2>
+	<p>&ubiquity.editor.ShareCommandsParagraph1Part1; <a href="http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">&ubiquity.editor.ShareCommandsParagraph1LinkText;</a> &ubiquity.editor.ShareCommandsParagraph1Part2;</p>
+	<p>&ubiquity.editor.ShareCommandsParagraph2Part1; <a href="https://ubiquity.mozilla.com/herd/command-feed/">&ubiquity.editor.ShareCommandsParagraph2LinkText1;</a> &ubiquity.editor.ShareCommandsParagraph2Part2; <a href="https://ubiquity.mozilla.com/herd/">&ubiquity.editor.ShareCommandsParagraph2LinkText2;</a></p>
+
+	<h2>&ubiquity.editor.DevelopingUbiquity;</h2>
+	<p>&ubiquity.editor.DevelopingUbiquityParagraph1; <a href="test.html">&ubiquity.editor.DevelopingUbiquityParagraph1LinkText;</a></p>
+	<p>&ubiquity.editor.DevelopingUbiquityParagraph2; <a href="feed.xhtml#experimental-commands.html">&ubiquity.editor.DevelopingUbiquityParagraph2LinkText;</a></p>
+	<p>&ubiquity.editor.DevelopingUbiquityParagraph3Part1; <a href="chrome://ubiquity/content/playpen.html">&ubiquity.editor.DevelopingUbiquityParagraph3LinkText1;</a> &ubiquity.editor.DevelopingUbiquityParagraph3Part2; <a href="chrome://ubiquity/content/tuner.html">&ubiquity.editor.DevelopingUbiquityParagraph3LinkText2;</a> &ubiquity.editor.DevelopingUbiquityParagraph3Part3;</p>
+	<p>&ubiquity.editor.DevelopingUbiquityParagraph4; <a href="feed.xhtml#core-developer-commands.html">&ubiquity.editor.DevelopingUbiquityParagraph4LinkText;</a></p>
+</div>
+
+<div class="col-four">
+	<h2>&ubiquity.editor.LatestChangesFeedTitle;</h2>
+	<div id="news"></div>
+</div>
 
 </body>
 </html>

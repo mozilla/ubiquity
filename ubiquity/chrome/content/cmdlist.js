@@ -392,7 +392,7 @@ function viewSourceLink(feed)(
     "feed-action"));
 
 function viewLocalizationTemplate(feed)(
-  A("chrome://ubiquity/content/localization-template.html#" + feed.viewSourceUri.spec,
+  A("chrome://ubiquity/content/localization-template.xhtml#" + feed.viewSourceUri.spec,
     ("[get localization template]"),
     "feed-action"));
 
@@ -401,8 +401,8 @@ function setupHelp() {
     $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
     [this.textContent, this.bin] = [this.bin, this.textContent];
   });
-  toggler.textContent = "Learn How to Use This Page";
-  toggler.bin = "Hide Help";
+  toggler.textContent = _ubundle.GetStringFromName("ubiquity.showhidehelp.show");
+  toggler.bin = _ubundle.GetStringFromName("ubiquity.showhidehelp.hide");
   toggler.off = true;
 }
 

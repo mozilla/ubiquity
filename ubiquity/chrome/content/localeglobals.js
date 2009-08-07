@@ -37,10 +37,10 @@
 /* ********** USAGE **************
  *
  * When included, this file just makes our string vars in the locale-specific
- * ubiquity.properties file globally visible for all other scripts called 
+ * ubiquity.properties file globally visible for all other scripts called
  * within about:Ubiquity pages.
  *
- * Existing strings in .js files should be replaced with something like 
+ * Existing strings in .js files should be replaced with something like
  * the following:
  *
  * _ubundle.GetStringFromName("ubiquity.grouping.uniquestringname")
@@ -60,3 +60,4 @@
 
 var ubiquitylocalBundle = Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService);
 var _ubundle = ubiquitylocalBundle.createBundle("chrome://ubiquity/locale/aboutubiquity.properties");
+var _utbundle = ubiquitylocalBundle.createBundle("chrome://ubiquity/locale/aboutubiquitytutorial.properties");

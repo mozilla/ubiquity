@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>&ubiquity.pagetitle.ResetUbiquity;</title>
+
+	<base href="chrome://ubiquity/content" />
+
+	<link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/warning-16.png" />
+	<link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
+
+	<script type="application/javascript;version=1.7">
+	<![CDATA[
+	Components.utils.import("resource://ubiquity/modules/setup.js");
+
+	// This code was taken from mozilla-central's
+	// toolkit/components/exthelper/extApplication.js file; it's being included in
+	// here because Application.restart() doesn't seem to be part of FUEL for Firefox
+	// 3.0.5.
+
+	var extApplication = {
+	// helper method for correct quitting/restarting
+		_quitWithFlags: function app__quitWithFlags(aFlags) {
+			let os = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+			let cancelQuit = Components.classes["@mozilla.org/supports-PRBool;1"].createInstance(Components.interfaces.nsISupportsPRBool);
+			os.notifyObservers(cancelQuit, "quit-application-requested", null);
+
+			if (cancelQuit.data)
+				return false; // somebody canceled our quit request
+
+			let appStartup = Components.classes['@mozilla.org/toolkit/app-startup;1'].getService(Components.interfaces.nsIAppStartup);
+				appStartup.quit(aFlags);
+				return true;
+		},
+
+		quit: function app_quit() {
+			return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit);
+		},
+
+		restart: function app_restart() {
+			return this._quitWithFlags(Components.interfaces.nsIAppStartup.eAttemptQuit | Components.interfaces.nsIAppStartup.eRestart);
+		},
+	};
+
+	function confirmReset() {
+	UbiquitySetup.isResetScheduled = true;
+	extApplication.restart();
+	}
+	]]>
+	</script>
+	<script src="export-config.js" type="application/javascript;version=1.7"></script>
+
+</head>
+<body dir="&locale.dir;">
+
+<div id="errorPageContainer">
+
+	<div id="errorTitle">
+		<h1>&ubiquity.reset.Header;</h1>
+	</div>
+
+	<div id="errorLongContent">
+
+		<div id="errorShortDesc">
+			<p>&ubiquity.reset.Paragraph1;</p>
+		</div>
+
+		<div id="errorLongDesc">
+			<p>&ubiquity.reset.Paragraph2;</p>
+
+			<ul>
+				<li><a href="cmdlist.xhtml">&ubiquity.reset.Feeds;</a></li>
+				<li><a href="settings.xhtml">&ubiquity.reset.Skins;</a></li>
+				<li><a href="editor.xhtml">&ubiquity.reset.Code;</a></li>
+			</ul>
+
+			<p>&ubiquity.reset.NoReturn;</p>
+
+		</div>
+
+		<p><input type="button" value="&ubiquity.reset.ButtonExport;" onclick="exportConfiguration();" /></p>
+		<p><input type="button" value="&ubiquity.reset.ButtonReset;" onclick="confirmReset();" /></p>
+
+	</div>
+
+</div>
+</body>
+</html>

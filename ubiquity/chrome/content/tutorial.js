@@ -209,27 +209,29 @@ function startUbiqTutorial() {
   hideOtherContent();
   destroyCanvas();
 
-  var html = "<h2>Welcome to the Ubiquity Tutorial.</h2>"
-    + "<p><a onclick='ubiqTutorialStage1();'>Click Here to Start"
-    + " From The Beginning</a></p>"
-    + "<p>Start from the middle:</p><ol>"
-    + "<li><a onclick='ubiqTutorialStage1();'>How to start Ubiquity</a></li>"
-    + "<li><a onclick='ubiqTutorialStage3();'>Previews (Weather command)</a></li>"
-    + "<li><a onclick='ubiqTutorialStage7();'>The Suggestion List (Calculate, Google)</a></li>"
-    + "<li><a onclick='ubiqTutorialStage16();'>Selecting, Executing (Translate, Map)</a></li>"
-    + "<li><a onclick='ubiqTutorialStage23();'>How to get help and learn more commands</a></li>"
+  var html = "<h2>" + _utbundle.GetStringFromName("tutorial.welcome") + "</h2>"
+    + "<p><a onclick='ubiqTutorialStage1();'>" + _utbundle.GetStringFromName("tutorial.fromthestart") + "</a></p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.fromthemiddle") + "</p><ol>"
+    + "<li><a onclick='ubiqTutorialStage1();'>" + _utbundle.GetStringFromName("tutorial.howtostart") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage3();'>" + _utbundle.GetStringFromName("tutorial.previews") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage7();'>" + _utbundle.GetStringFromName("tutorial.suggestions") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage16();'>" + _utbundle.GetStringFromName("tutorial.selecting") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage23();'>" + _utbundle.GetStringFromName("tutorial.morecommands") + "</a></li>"
     + "</ol>";
+
   fadeInText( html );
 }
+
 
 function ubiqTutorialStage1() {
 
   var keyCombo = PrefKeys.getKeyCombo();
-  var introHtml = "<h2>Ubiquity Tutorial, part 1 of 6: How to start Ubiquity</h2>"
-    + "<p>Welcome to the Ubiquity tutorial.  </p>"
-    + "<p>Let's get started.  To summon Ubiquity, do this now:</p>"
-    + "<p><b>Hold down the " +  keyCombo[0] + " key and tap the "
-    + keyCombo[1] + " key.</b></p>";
+  var introHtml = "<h2>" + _utbundle.GetStringFromName("tutorial.stage01h1") + "</h2>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage01p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage01p2") + "</p>"
+    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage01p3") + " "
+    + keyCombo[0] + " " + _utbundle.GetStringFromName("tutorial.stage01p4") + " "
+    + keyCombo[1] + " " + _utbundle.GetStringFromName("tutorial.stage01p5") + "</strong></p>";
 
   fadeInText(introHtml);
 
@@ -238,9 +240,8 @@ function ubiqTutorialStage1() {
 
 function ubiqTutorialStage2() {
   moveDivRight();
-  let stage2Html = "<p>This is the Ubiquity <b>input box</b>.  You can"
-  + " type commands here.</p><p>If you want to get out of Ubiquity without"
-  + " giving a command, <b>tap the Escape key</b>.  Try that now.</p>";
+  let stage2Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage02p1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage02p2") + "</p>";
 
   fadeInText(stage2Html);
   showArrowToInputBox();
@@ -251,11 +252,13 @@ function ubiqTutorialStage2() {
 
 function ubiqTutorialStage3() {
   var keyCombo = PrefKeys.getKeyCombo();
-  let stage3Html = "<h2>Ubiquity Tutorial, part 2 of 6: "
-    + " Weather command and Previews</h2>"
-    + "<p>OK, so now let's learn a command. Summon Ubiquity again...</p>"
-    + "<p>(Remember, <b>hold down the " + keyCombo[0] + " key and tap the "
-    + keyCombo[1] + " key.</b>)</p>";
+  let stage3Html = 
+    "<h2>" + _utbundle.GetStringFromName("tutorial.stage03h1") + "</h2>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage03p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage03p2") + " "
+    + keyCombo[0] + " " + _utbundle.GetStringFromName("tutorial.stage03p3") + " "
+    + keyCombo[1] + " " + _utbundle.GetStringFromName("tutorial.stage03p4") + "</p>";
+
   fadeInText(stage3Html);
   destroyCanvas();
   waitForUserAction( ubiqWindowIsUp,
@@ -264,7 +267,7 @@ function ubiqTutorialStage3() {
 
 function ubiqTutorialStage4() {
   moveDivRight();
-  let stage4Html = "<p>Now type the word <b>weather</b>....</p>";
+  let stage4Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage04p1") + "</p>";
   fadeInText(stage4Html);
   showArrowToInputBox();
   waitForUserAction( function() { return ubiqSuggestionIs("weather"); },
@@ -274,14 +277,10 @@ function ubiqTutorialStage4() {
 function ubiqTutorialStage5() {
   // NOTE: For some reason, &mdash; makes the xhtml parser barf, but
   // &#8212; works.
-  let stage5Html = "<p>Even before you're done typing, the <b>preview area</b>"
-    + " shows a preview of the results of your command &#8212; in this case, a "
-    + " weather report.</p>"
-    + "<p>If you don't enter a location, the <i>weather</i> command takes a"
-    + " guess where you are.</p>"
-    + "<p>Now let's give it a location: <b>type a space, and then type '"
-    + "near chicago'</b>.  (So your whole input will say: 'weather near "
-    + "chicago'.)</p>";
+  let stage5Html = 
+    "<p>" + _utbundle.GetStringFromName("tutorial.stage05p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage05p2") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage05p3") + "</p>";
 
   fadeInText(stage5Html);
   destroyCanvas();
@@ -291,9 +290,8 @@ function ubiqTutorialStage5() {
 }
 
 function ubiqTutorialStage6() {
-  let stage6Html = "<p>See how that works?  Feel free to delete"
-  + " &quot;chicago&quot; and try some other locations.</p>"
-  + " <p>When you're done checking the weather, <b>hit the escape key.</b></p>";
+  let stage6Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage06p1") + "</p>"
+  + " <p>" + _utbundle.GetStringFromName("tutorial.stage06p2") + "</p>";
   destroyCanvas();
   moveDivRight();
   fadeInText(stage6Html);
@@ -303,18 +301,15 @@ function ubiqTutorialStage6() {
 
 function ubiqTutorialStage7() {
   destroyCanvas();
-  let stage7Html = "<h2>Ubiquity Tutorial, part 3 of 6: "
-    + " Calculate command and Abbreviations</h2>"
-    + " <p>Summon Ubiquity again, and we'll learn some"
-    + " more commands.</p>";
+  let stage7Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage07h1") + "</h2>"
+    + " <p>" + _utbundle.GetStringFromName("tutorial.stage07p1") + "</p>";
   fadeInText(stage7Html);
   waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage8 );
 }
 
 function ubiqTutorialStage8() {
   moveDivRight();
-   let stage8Html = "<p>This time, <b>type just the letter 'c'</b>"
-     + " (lower-case) and see what happens.</p>";
+   let stage8Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage08p1") + "</p>";
   fadeInText(stage8Html);
   showArrowToInputBox();
   waitForUserAction( function() {return ubiqInputIs("c" );},
@@ -322,11 +317,8 @@ function ubiqTutorialStage8() {
 }
 
 function ubiqTutorialStage9() {
-   let stage9Html = "<p>The Ubiquity <b>suggestion list</b> displays"
-    + " commands that start with the letter 'C'.</p>"
-    + " <p>Let's say you want the <i>calculate</i> command.  You don't have"
-    + " to type the whole command name.  Just <b>type the letters 'al'</b>"
-    + " (so that your input says <b>'cal'</b>).</p>";
+   let stage9Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage09p1") + "</p>"
+    + " <p>" + _utbundle.GetStringFromName("tutorial.stage09p2") + "</p>";
   fadeInText(stage9Html);
   destroyCanvas();
   showArrowToSuggestionList();
@@ -335,8 +327,7 @@ function ubiqTutorialStage9() {
 }
 
 function ubiqTutorialStage10() {
-   let stage10Html = "<p>Now <b>type a space, and then type 22/7</b>"
-    + " (so that your input says <b>'cal 22/7'</b>.)</p>";
+   let stage10Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage10p1") + "</p>";
   fadeInText(stage10Html);
   destroyCanvas();
   showArrowToInputBox();
@@ -345,10 +336,8 @@ function ubiqTutorialStage10() {
 }
 
 function ubiqTutorialStage11() {
-   let stage11Html = "<p>The <i>calculate</i> command will show you the"
-  + " result of any arithmetic expression you type in.</p>"
-  + "<p>When you're done experimenting with <i>calculate</i>, <b>hit the "
-  + "escape key.</b></p>";
+   let stage11Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage11p1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage11p2") + "</p>";
   fadeInText(stage11Html);
   destroyCanvas();
   showArrowToPreview();
@@ -357,9 +346,8 @@ function ubiqTutorialStage11() {
 }
 
 function ubiqTutorialStage12() {
-  let stage12Html = "<h2>Ubiquity Tutorial, part 4 of 6:"
-    + " Google command and the suggestion list</h2>"
-    + "<p>Summon Ubiquity again...</p>";
+  let stage12Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage12h1") + "</h2>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage12p1") + "</p>";
   fadeInText(stage12Html);
   destroyCanvas();
   moveDivRight();
@@ -369,9 +357,9 @@ function ubiqTutorialStage12() {
 
 function ubiqTutorialStage13() {
   moveDivRight();
-  let stage13Html = "<p>Let's say you want to search Google for cheese.</p>"
-    + "<p><b>Type the letter 'g', a space, and the word 'cheese'.</b></p>"
-    + "<p>(Like, 'g cheese').</p>";
+  let stage13Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage13p1") + "</p>"
+    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage13p2") + "</strong></p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage13p3") + "</p>";
   fadeInText(stage13Html);
   showArrowToInputBox();
   waitForUserAction(  function() {return ubiqSuggestionIs("cheese" );},
@@ -379,11 +367,8 @@ function ubiqTutorialStage13() {
 }
 
 function ubiqTutorialStage14() {
-  let stage14Html = "<p>In the suggestion list, you can see several commands"
-    + " that start with 'g'.  You can use the up-arrow and down-arrow keys"
-    + " to move through the suggestion list.  Try it now:</p>"
-    + "<p><b>tap the down-arrow key</b> until the "
-    + "<i>google</i> command is hilighted.</p>";
+  let stage14Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage14p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage14p2") + "</p>";
   destroyCanvas();
   showArrowToSuggestionList();
   fadeInText(stage14Html);
@@ -392,12 +377,9 @@ function ubiqTutorialStage14() {
 }
 
 function ubiqTutorialStage15() {
-  let stage15Html = "<p>The <i>Google</i> command preview shows a snippet"
-  + " from each search result matching your search term.</p>"
-  + "<p>Those titles are links &#8212; you can click on one of them to "
-  + "open the page in a new tab.</p>"
-  + "<p>When you're done, close that page and come back here, or just <b>tap"
-  + " escape</b> to move on with the tutorial.</p>";
+  let stage15Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage15p1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage15p2") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage15p3") + "</p>";
   fadeInText(stage15Html);
   destroyCanvas();
   showArrowToPreview();
@@ -408,13 +390,9 @@ function ubiqTutorialStage15() {
 function ubiqTutorialStage16() {
   moveDivRight();
   destroyCanvas();
-  let stage16Html = "<h2>Part 5 of 6:"
-  + " Selecting and Executing</h2><p>Say you're browsing the"
-  + " web and you come across an address &#8212; like the one in the box"
-  + " below &#8212; and you'd like to see it on a map.</p>"
-  + " <p>Ubiquity commands can work on your text selection.  Try it out: "
-  + " Use the mouse to <b>select the address</b> below."
-  + " Then <b>summon Ubiquity</b>.</p>";
+  let stage16Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage16ah1") + "</h2>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage16ap1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage16ap2") + "</p>";
 
   fadeInText(stage16Html);
 
@@ -428,17 +406,15 @@ function ubiqTutorialStage16() {
 }
 
 function ubiqTutorialStage16b() {
-   let stage16bhtml = "<p>Now <b>type 'map'</b>.</p>";
+   let stage16bhtml = "<p>" + _utbundle.GetStringFromName("tutorial.stage16bp1") + "</p>";
    fadeInText(stage16bhtml);
    waitForUserAction( function() {return ubiqSuggestionIs("map");},
                       ubiqTutorialStage16c);
 }
 
 function ubiqTutorialStage16c() {
-  let stage16chtml = "<p>The preview shows a Google Map of the address."
-  + " You can click on this map to make it bigger; then you can scroll"
-  + " around on the map by dragging it.  Try that now.</p>"
-  + "<p>When you're done trying out the map, <b>hit escape</b>.</p>";
+  let stage16chtml = "<p>" + _utbundle.GetStringFromName("tutorial.stage16cp1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage16cp2") + "</p>";
   fadeInText(stage16chtml);
 
   waitForUserAction( function() {return !ubiqWindowIsUp();},
@@ -447,13 +423,9 @@ function ubiqTutorialStage16c() {
 
 function ubiqTutorialStage17() {
 
-  let stage17Html = "<p>As another example, say you're browsing the web"
-  + " and you come across something written in a language you can't read"
-  + " &#8212; like the Japanese text below.  You can use Ubiquity to get"
-  + " a translation.</p>"
-  + "<p>First <b>select the Japanese text below</b>, then bring up Ubiquity"
-  + " and <b>use the <i>translate</i> command</b>.</p>"
-  + "<p>(type 'translate', or just 'tr').</p>";
+  let stage17Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage17p1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage17p2") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage17p3") + "</p>";
 
   let jpDiv = $("#tutorial-contents-div");
   jpDiv.addClass("ubiq-tutorial");
@@ -467,11 +439,8 @@ function ubiqTutorialStage17() {
 }
 
 function ubiqTutorialStage18() {
-  let stage18Html = "<p>At this point, you could type in some words that"
-    + " you want to have Ubiquity translate.  But as you can see in the preview"
-    + " area, Ubiquity is already translating the words that you have"
-    + " selected.</p>"
-    + "<p>Next, <b>tap the enter key</b> to execute the command.</p>";
+  let stage18Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage18p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage18p2") + "</p>";
 
   fadeInText(stage18Html);
   waitForUserAction( function() { return contentsDivHas("browser"); },
@@ -479,22 +448,16 @@ function ubiqTutorialStage18() {
 }
 
 function ubiqTutorialStage19() {
-  let stage19Html = "<p>Notice how the Japanese text that you selected was"
-    + " <i>replaced</i> with the translation.  That's because you executed"
-    + " the command by pressing 'enter'.</p>"
-    + "<p>Each command does something different when you execute it.  Most"
-    + " often, it will open a new page, or change something on the current"
-    + " page.</p>"
-    + "<p><a onclick='ubiqTutorialStage20();'>Click here to continue</a></p>";
+  let stage19Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage19p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage19p2") + "</p>"
+    + "<p><a onclick='ubiqTutorialStage20();'>" + _utbundle.GetStringFromName("tutorial.stage19p3") + "</a></p>";
 
   fadeInText(stage19Html);
 }
 
 function ubiqTutorialStage20() {
-  let stage20Html = "<p>Let's do one more example.  Say you're browsing the"
-    + " web and you come across an unfamiliar word &#8212; like the one in the box"
-    + " below &#8212; and you'd like to look it up.</p>"
-    + "<p><b>Select the word in the box below and then summon Ubiquity</b>.</p>";
+  let stage20Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage20p1") + "</p>"
+    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage20p2") + "</strong>.</p>";
   let agDiv = $("#tutorial-contents-div");
   agDiv.html("aglet");
 
@@ -504,8 +467,7 @@ function ubiqTutorialStage20() {
 }
 
 function ubiqTutorialStage21() {
-  let stage21Html = "<p>Now <b>use the google command</b> "
-    + "(type 'google' or just 'goo').</p>";
+  let stage21Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage21p1") + "</p>";
 
   fadeInText(stage21Html);
   waitForUserAction( function() {return ubiqSuggestionIs("google");},
@@ -513,13 +475,9 @@ function ubiqTutorialStage21() {
 }
 
 function ubiqTutorialStage22() {
-  let stage22Html = "<p>Now, if the preview of the <i>google</i> command"
-    + " tells you what you want to know, then you're done &#8212; you can dismiss"
-    + " Ubiquity and go on your way.</p>"
-    + "<p>But if you want more information, you can tap the enter key to "
-    + " execute the <i>google</i> command, which will open the search results"
-    + " in a new page.</p>"
-    + "<p>It's up to you.</p>";
+  let stage22Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage22p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage22p2") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p3") + "</p>";
   fadeInText(stage22Html);
   waitForUserAction( function() {return !ubiqWindowIsUp();},
                      ubiqTutorialStage23 );
@@ -528,23 +486,18 @@ function ubiqTutorialStage22() {
 function ubiqTutorialStage23() {
   $("#tutorial-contents-div").slideUp();
   moveDivRight();
-  let stage23Html = "<h2>Part 6 of 6: Getting Help and Learning"
-    + " More Commands</h2>"
-    + "<p>So far you've learned the <i>weather</i>, <i>calculate</i>, "
-    + "<i>google</i>, <i>translate</i>, and <i>map</i> commands."
-    + " That's a good start, but there are dozens more commands"
-    + " included with Ubiquity &#8212; plus you can find more on the Web.</p>"
-    + "<p>How will you find out what commands are available?</p>"
-    + "<p>One way is by using the <i>help</i> command.</p>"
-    + "<p><b>Summon Ubiquity...</b></p>";
+  let stage23Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage23h1") + "</h2>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p2") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p3") + "</p>"
+    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage23p4") + "</strong></p>";
   fadeInText(stage23Html);
   waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage24 );
 }
 
 function ubiqTutorialStage24() {
-  let stage24Html = "<p>Suppose you want to know if there are any commands"
-    + " that deal with tabs.  You can use the <i>help</i> command like this:"
-    + "</p><p><b>type 'help tab'</b>.</p>";
+  let stage24Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage24p1") + "</p>"
+    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage24p2") + "</strong></p>";
 
   fadeInText(stage24Html);
   waitForUserAction( function() {return ubiqSuggestionIs("help") &&
@@ -553,11 +506,9 @@ function ubiqTutorialStage24() {
 }
 
 function ubiqTutorialStage25() {
-  let stage25Html = "<p>In the suggestion list, you can see all of the commands"
-    + " that have 'tab' in their names.</p>"
-    + "<p>Use the arrow keys to move through the suggestion list.  The preview"
-    + " area shows help information about each command that you highlight.</p>"
-    + "<p>When you're done, <b>tap escape</b>.</p>";
+  let stage25Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage25p1") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage25p2") + "</p>"
+    + "<p>" + _utbundle.GetStringFromName("tutorial.stage25p3") + "</p>";
 
   fadeInText(stage25Html);
   waitForUserAction( function() {return !ubiqWindowIsUp();},
@@ -565,14 +516,10 @@ function ubiqTutorialStage25() {
 }
 
 function ubiqTutorialStage26() {
-  let stage26Html = "<p>Finally, there's the <i>list ubiquity commands</i> command."
-  + " This command will take you to a page that shows every command Ubiquity"
-  + " has installed.  You can learn all sorts of useful things by browsing"
-  + " the command list page!</p>"
-  + "<p>This is the end of the tutorial. Once you go to the command list"
-  + " page, you are on your own to experiment and learn new commands at your own pace.</p>"
-  + "<p><b>Summon Ubiquity, type 'list', and tap the enter key to"
-  + " execute.</b></p><p>Good-bye!</p>";
+  let stage26Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage26p1") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage26p2") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage26p3") + "</p>"
+  + "<p>" + _utbundle.GetStringFromName("tutorial.stage26p4") + "</p>";
 
   fadeInText(stage26Html);
 }
@@ -593,21 +540,56 @@ function ubiqTutorialStage26() {
  *
  * Fix the arrows more better!
  *
+ * > Can we get the width of the ubiquity window and it's input line in any
+ * > way regardless of which skin is in use? If yes, then I think we can 
+ * > move the tutorial to a new page and switch from a properties file to 
+ * > a DTD which could help a ton.
+ * >
+ * > This way we can effectively halve the page [left ubiquity|right tut] 
+ * > (or vice-versa for ltr languages) and make things much more flexible.
+ * > Then slide, flip or fade text in/out of the tutorial portion as the
+ * > user goes through each step.
+ * >
+ * > Additionally if we can grab the width and height then we won't need the
+ * > arrow images in their current form and could instead attach a "<" from
+ * > the tutorial portion and using the width and height offsets we would
+ * > have better targeting.
+ *
  * Translated japanese text, output of calculate command, etc. must be way
  * more obvious -- it looks like nothing has happened.
+ *
+ * > We need to give translators more freedom in applying their own context
+ * > based on their native language/translation. Currently all input is
+ * > expected to be in English with a single Japanese translation. This is
+ * > somewhat limited, but works at the moment.
  *
  * Start by showing an animation of ubiquity in action so they know what to
  * expect.
  *
+ * > Unfold/roll-down with results instead of popping in like we currently do?
+ *
  * Describe the benefit by saying "here's how you would have had to do this
  * before... see how much faster it is"
+ *
+ * > Faster may not exactly be better, although it is made easier by cutting
+ * > away all if not most of the unnecessary steps to reach a given goal.
+ * > ie: "look mom, no tabs!"
  *
  * Needs to be a way to get back to table of contents at any point -- maybe
  * even keep it up and show progress through it.
  *
+ * > The fix for this would be breaking the tutorial out to it's own page
+ * > with an included reachable/interactive TOC. 
+ * > layout: [index | previous] [current content] [next chapter]
+ *
  * Instead of arrows, maybe blink an outline around the actual part of the
  * actual ubiquity box.  OR show a little voodoo-doll and point to or circle
  * part of that one.
+ *
+ * > Underline or hilighting the output result could be useful. Alternately a
+ * > cliche Clippy moment could be created with accompanying chat bubbles :)
+ *
+ * > -L
  */
 
 

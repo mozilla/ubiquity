@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>&ubiquity.redirect.FeedHeader;</title>
+	<link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/information-16.png"/>
+	<link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
+
+</head>
+<body dir="&locale.dir;">
+
+<script type="text/javascript">
+	<![CDATA[
+
+	Components.utils.import("resource://ubiquity/modules/setup.js");
+
+	var isRedirecting = false;
+
+	function maybeRedirect() {
+		if (!isRedirecting && window.location.hash) {
+			var relPath = window.location.hash.slice(1);
+			window.location = UbiquitySetup.standardFeedsUri + relPath;
+			isRedirecting = true;
+		}
+	}
+
+	maybeRedirect();
+	window.setInterval(maybeRedirect, 100);
+
+	]]>
+</script>
+
+<div id="errorPageContainer" style="background-image: url(chrome://global/skin/icons/information-64.png);">
+	<div id="errorTitle"><h1>&ubiquity.redirect.FeedHeader;</h1></div>
+
+	<div id="errorLongContent">
+
+		<div id="errorShortDesc">
+			<p>&ubiquity.redirect.FeedShortDesc;</p>
+		</div>
+
+		<div id="errorLongDesc">
+			<p>&ubiquity.redirect.FeedLongDesc;</p>
+
+			<ul>
+				<li><a href="chrome://ubiquity/content/feed.html#map.html">chrome://ubiquity/content/feed.xhtml#map.html</a></li>
+			</ul>
+
+		</div>
+
+	</div>
+</div>
+
+</body>
+</html>

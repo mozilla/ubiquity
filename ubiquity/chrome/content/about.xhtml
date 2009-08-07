@@ -4,7 +4,7 @@
 	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
 		%htmlDTD;
 
-	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
 		%directionDTD;
 
 	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
@@ -16,11 +16,11 @@
 <head>
 	<title>&ubiquity.pagetitle.About;</title>
 
-	<base href="chrome://ubiquity/content"/>
+	<base href="chrome://ubiquity/content" />
 
 	<link rel="stylesheet" type="text/css" media="all" href="web-content.css" />
-	<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
-	
+	<link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
+
 	<script type="text/javascript" src="resource://ubiquity/scripts/jsparser.js"></script>
 	<script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
 
@@ -33,62 +33,60 @@
 </head>
 <body dir="&locale.dir;">
 
-	<div class="head">&ubiquity.tagline.About;</div>
+<div class="head">&ubiquity.tagline.About;</div>
 
-	<div id="nav-container"></div>
+<div id="nav-container"></div>
 
-	<br clear="all" />
+<br clear="all" />
 
-	<div style="text-align:center;" class="not-the-tutorial">
-		<p>&ubiquity.pagetip.About;</p>
+<div style="text-align:center;" class="not-the-tutorial">
+	<p>&ubiquity.pagetip.About;</p>
+</div>
+
+<br clear="all" />
+
+<div class="col-five">
+
+	<div class="not-the-tutorial">
+		<h2 class="top">&ubiqutiy.about.WhatIsUbiquity;</h2>
+		<p>&ubiqutiy.about.WhatIsParagraph1;</p>
+		<p>&ubiqutiy.about.WhatIsParagraph2;</p>
+		<p>&ubiqutiy.about.WhatIsParagraph3;</p>
+		<!-- todo: an animated gif here? -->
 	</div>
 
-	<br clear="all" />
+  	<h2 class="not-the-tutorial">&ubiqutiy.about.LearnHow;</h2>
+	<span id="debug"></span>
 
-	<div class="col-five">
-
-		<div class="not-the-tutorial">
-			<h2 class="top">&ubiqutiy.about.WhatIsUbiquity;</h2>
-  			<p>&ubiqutiy.about.WhatIsParagraph1;</p>
-  			<p>&ubiqutiy.about.WhatIsParagraph2;</p>
-  			<p>&ubiqutiy.about.WhatIsParagraph3;</p>
-			<!-- todo: an animated gif here? -->
+	<div id="interactive-tutorial-div">
+		<div id="tutorial-instructions-div" class="ubiq-tutorial">
+			<a onclick="startUbiqTutorial();">&ubiqutiy.about.TutorialButton;</a>
 		</div>
 
-   	<h2 class="not-the-tutorial">&ubiqutiy.about.LearnHow;</h2>
-		<span id="debug"></span>
+		<br clear="all" />
 
-			<div id="interactive-tutorial-div">
-				<div id="tutorial-instructions-div" class="ubiq-tutorial">
-					<a onclick="startUbiqTutorial();">&ubiqutiy.about.TutorialButton;</a>
-				</div>
-
-			<br clear="all" />
-
-			<div id="tutorial-contents-div"></div>
-
-		</div>
-
-		<div id="canvas-goes-here"></div>
+		<div id="tutorial-contents-div"></div>
 
 	</div>
 
-	<div class="col-four not-the-tutorial">
+	<div id="canvas-goes-here"></div>
 
-		<h2 class="top">&ubiqutiy.about.MoreOnUsingUbiquity;</h2>
-		<p>&ubiqutiy.about.UsingParagraph1;</p>
-		<p>&ubiqutiy.about.UsingParagraph2;</p>
-		<p>&ubiqutiy.about.UsingParagraph3;</p>
-		<p>&ubiqutiy.about.UsingParagraph4;</p>
+</div>
 
-		<!-- Temporary manual entry of version number until versioning from cmdlist.js is corrected see http://ubiquity.mozilla.com/trac/ticket/842 for details -->
-		<!-- Without version numbering info I took some liberties in rewording things -->
-		<h2>&ubiqutiy.about.Thanks;</h2>
-		<p>&ubiquity.about.ThanksParagraph1;</p>
+<div class="col-four not-the-tutorial">
 
-	</div>
+	<h2 class="top">&ubiqutiy.about.MoreOnUsingUbiquity;</h2>
+	<p>&ubiqutiy.about.UsingParagraph1; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">&ubiqutiy.about.UsingParagraph1LinkText;</a>.</p>
+	<p>&ubiqutiy.about.UsingParagraph2Part1; <a href="https://ubiquity.mozilla.com/herd/command-feed/">&ubiqutiy.about.UsingParagraph2LinkText1;</a> &ubiqutiy.about.UsingParagraph2Part2; <a href="https://ubiquity.mozilla.com/herd">&ubiqutiy.about.UsingParagraph2LinkText2;</a> &ubiqutiy.about.UsingParagraph2Part3;</p>
+	<p>&ubiqutiy.about.UsingParagraph3; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Roadmap">&ubiqutiy.about.UsingParagraph3LinkText;</a>.</p>
+	<p>&ubiqutiy.about.UsingParagraph4; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Credits">&ubiqutiy.about.UsingParagraph4LinkText;</a>.</p>
 
-	<br clear="all" />
+	<h2>&ubiqutiy.about.Thanks;</h2>
+	<p>&ubiquity.about.ThanksParagraph1; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.2_Release_Notes">&appTitle; <span class="version"></span> &ubiquity.about.ThanksParagraph1LinkText;</a>.</p>
+
+</div>
+
+<br clear="all" />
 
 </body>
 </html>

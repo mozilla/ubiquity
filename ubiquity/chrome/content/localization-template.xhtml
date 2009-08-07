@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE html [
+	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+		%htmlDTD;
+
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
+		%directionDTD;
+
+	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+		%ubiquityaboutDTD;
+
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>&ubiquity.pagetitle.LocalizeCmd;</title>
+
+	<link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
+	<link rel="stylesheet" href="web-content.css" type="text/css" />
+
+	<script src="resource://ubiquity/scripts/jquery.js"></script>
+	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
+
+	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
+	<script type="application/javascript;version=1.7" src="localization-template.js"></script>
+
+</head>
+<body dir="&locale.dir;">
+
+	<div class="head">&ubiquity.tagline.LocalizeCmd;</div>
+
+	<div id="nav-container"></div>
+
+	<br clear="all" />
+
+	<div style="text-align:center;">
+		<p>&ubiquity.localizecmd.ForTemplate; <code><span class="feedKey"></span>.po</code> | <a id="show-hide-cmdlist-help" onclick=""></a></p>
+	</div>
+
+	<div id="cmdlist-help-div" class="ubiq-tutorial" style="display:none;font-size:100%">
+		<ul>
+			<li>
+				<p>&ubiquity.localizecmd.HelpParagraph1Part1; <span class="feedKey"></span> &ubiquity.localizecmd.HelpParagraph1Part2; <a href="http://en.wikipedia.org/wiki/Gettext">&ubiquity.localizecmd.HelpParagraph1LinkText;</a> &ubiquity.localizecmd.HelpParagraph1Part3;</p>
+			</li>
+			<li>
+				<p>&ubiquity.localizecmd.HelpParagraph2Part1; <code><span class='localization-dir'></span></code> &ubiquity.localizecmd.HelpParagraph2Part2; <code><span class="feedKey"></span>.po</code></p>
+				<p>&ubiquity.localizecmd.HelpParagraph3;</p>
+			</li>
+		</ul>
+	</div>
+
+	<div>
+		<textarea id="template" rows='30' style='width:100%'></textarea>
+	</div>
+
+</body>
+</html>

@@ -4,7 +4,7 @@
 	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
 		%htmlDTD;
 
-	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd" >
+	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
 		%directionDTD;
 
 	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
@@ -16,8 +16,10 @@
 <head>
 	<title>&ubiquity.pagetitle.Settings;</title>
 
+	<base href="chrome://ubiquity/content" />
+
+	<link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
 	<link rel="stylesheet" type="text/css" media="all" href="web-content.css" />
-	<link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
 
 	<script src="resource://ubiquity/scripts/jquery.js"></script>
 	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
@@ -31,84 +33,86 @@
 </head>
 <body dir="&locale.dir;">
 
-	<div class="head">&ubiquity.tagline.Settings;</div>
-	<div id="nav-container"></div>
+<div class="head">&ubiquity.tagline.Settings;</div>
+<div id="nav-container"></div>
 
-	<br clear="all" />
+<br clear="all" />
 
-	<div style="text-align:center;">
-		<p>&ubiquity.pagetip.Settings;</p>
-	</div>
+<div style="text-align:center;">
+	<p>&ubiquity.pagetip.Settings;</p>
+</div>
 
-	<br clear="all" />
+<br clear="all" />
 
-	<div class="col-five">
-		<h2 class="top">&ubiquity.settings.Skins;</h2>
-		<ul id="skin-list"></ul>
+<div class="col-five">
+	<h2 class="top">&ubiquity.settings.Skins;</h2>
+	<ul id="skin-list"></ul>
 
-		<ul class="button-list">
-			<li><a class="button" id="edit-button" onclick="openSkinEditor()">&ubiquity.settings.ButtonEditCustomSkin;</a></li>
-		</ul>
-	</div>
+	<ul class="button-list">
+		<li><a class="button" id="edit-button" onclick="openSkinEditor()">&ubiquity.settings.ButtonEditCustomSkin;</a></li>
+	</ul>
+</div>
 
-	<div class="col-four">
-		<h2 class="top">&ubiquity.settings.KeyCombination;</h2>
-		<fieldset>
-			<legend>&ubiquity.settings.InvokingUbiquity;</legend>
-			<div style="margin-left:10px;">
+<div class="col-four">
+	<h2 class="top">&ubiquity.settings.KeyCombination;</h2>
+	<fieldset>
+		<legend>&ubiquity.settings.InvokingUbiquity;</legend>
+		<div style="margin-left:10px;">
 
+			<p><input id="keyInputBox" type="text" size="42" style="cursor:pointer"
+				onkeydown="PrefKeys.onKeyChange(event)"
+				onfocus="this.value = _ubundle.GetStringFromName('ubiquity.prefkeys.pressyourcombo')"
+				onblur="PrefKeys.onLoad()"/> <!--  onfocus="this.value = 'Press your combination'" -->
 
-				<p><input id="keyInputBox" type="text" size="42" style="cursor:pointer"
-					onkeydown="PrefKeys.onKeyChange(event)"
-					onfocus="this.value = _ubundle.GetStringFromName('ubiquity.prefkeys.pressyourcombo')"
-					onblur="PrefKeys.onLoad()"/> <!--  onfocus="this.value = 'Press your combination'" -->
+			<br />
+			&ubiquity.settings.ChangeShortcut;
+			<br />
+			</p>
 
-				<br />
-				&ubiquity.settings.ChangeShortcut; <br/></p>
-				<p id="keyNotify"></p>
+			<p id="keyNotify"></p>
 
-			</div>
-		</fieldset>
+		</div>
+	</fieldset>
 
-		<script> PrefKeys.onLoad() </script>
+	<script> PrefKeys.onLoad() </script>
 
-		<h2>&ubiquity.settings.LangSettings;</h2>
-		<p>&ubiquity.settings.LangSettingsParagraph1;</p>
-		<p><label for="use-new-parser-checkbox"><input type="checkbox" id="use-new-parser-checkbox" onchange="changeLanguageSettings();" /><strong>&ubiquity.settings.UseParser2;</strong></label></p>
-		<p><span id="lang-settings-changed-info"></span></p>
-		<p>&ubiquity.settings.SelectLanguage; <select id="language-select" onchange="changeLanguageSettings();"></select></p>
+	<h2>&ubiquity.settings.LangSettings;</h2>
+	<p>&ubiquity.settings.LangSettingsParagraph1;</p>
+	<p><label for="use-new-parser-checkbox"><input type="checkbox" id="use-new-parser-checkbox" onchange="changeLanguageSettings();" /><strong>&ubiquity.settings.UseParser2;</strong></label></p>
+	<p><span id="lang-settings-changed-info"></span></p>
+	<p>&ubiquity.settings.SelectLanguage; <select id="language-select" onchange="changeLanguageSettings();"></select></p>
 
-		<h2>&ubiquity.settings.MiscSettings;</h2>
-		<p>&ubiquity.settings.MaxSuggestions; <input type="text" id="max-suggestions" size="3" style="text-align:center" /></p>
-		<p>&ubiquity.settings.InputDelay; <input type="text" id="input-delay" size="5" style="text-align:center"/> &ubiquity.settings.MilliSeconds;</p>
+	<h2>&ubiquity.settings.MiscSettings;</h2>
+	<p>&ubiquity.settings.MaxSuggestions; <input type="text" id="max-suggestions" size="3" style="text-align:center" /></p>
+	<p>&ubiquity.settings.InputDelay; <input type="text" id="input-delay" size="5" style="text-align:center"/> &ubiquity.settings.MilliSeconds;</p>
 
-		<fieldset class="parser2" style="display:none">
-			<legend>&ubiquity.settings.Parser2Context;</legend>
+	<fieldset class="parser2" style="display:none">
+		<legend>&ubiquity.settings.Parser2Context;</legend>
 
-			<p>&ubiquity.settings.Parser2Details;</p>
-			<label for="external-calls-on-all-queries">
-				<input type="checkbox" id="external-calls-on-all-queries" onchange="changeExternalCallSettings();" />
-				<strong>&ubiquity.settings.Parser2EnableExternal;</strong>
-			</label>
+		<p>&ubiquity.settings.Parser2Details;</p>
+		<label for="external-calls-on-all-queries">
+			<input type="checkbox" id="external-calls-on-all-queries" onchange="changeExternalCallSettings();" />
+			<strong>&ubiquity.settings.Parser2EnableExternal;</strong>
+		</label>
 
-			<p id="external-calls-settings-changed-info"></p>
-		</fieldset>
-	</div>
+		<p id="external-calls-settings-changed-info"></p>
+	</fieldset>
+</div>
 
-	<br clear="all" />
+<br clear="all" />
 
-	<div id="editor-div" style="display:none">
-		<h2>&ubiquity.settings.CustomSkin;</h2>
-		<ul class="button-list">
-			<li><a class="button" onclick="saveCustomSkin()">&ubiquity.settings.SaveSkin;</a> <a class="button" onclick="saveAs()">&ubiquity.settings.SaveSkinAs;</a> <a class="button" onclick="pasteToGist()">&ubiquity.settings.ShareSkin;</a> &ubiquity.settings.SaveNotice;</li>
+<div id="editor-div" style="display:none">
+	<h2>&ubiquity.settings.CustomSkin;</h2>
+	<ul class="button-list">
+		<li><a class="button" onclick="saveCustomSkin()">&ubiquity.settings.SaveSkin;</a> <a class="button" onclick="saveAs()">&ubiquity.settings.SaveSkinAs;</a> <a class="button" onclick="pasteToGist()">&ubiquity.settings.ShareSkin;</a> &ubiquity.settings.SaveNotice;</li>
 
-			<br /><br />
-			<div class="warning">&ubiquity.settings.WindowsWarning;</div>
-			<br /><br />
+		<br /><br />
+		<div class="warning">&ubiquity.settings.WindowsWarning; <a href='http://ubiquity.mozilla.com/trac/ticket/449'>&ubiquity.settings.WindowsWarningLinkText;</a></div>
+		<br /><br />
 
-			<li><textarea rows="30" style="width:92%" id="skin-editor"></textarea></li>
-		</ul>
-	</div>
+		<li><textarea rows="30" style="width:92%" id="skin-editor"></textarea></li>
+	</ul>
+</div>
 
 </body>
 </html>
