@@ -95,7 +95,7 @@ function changeLanguageSettings() {
                .getService(Ci.nsIPrefService)
                .getBranch("extensions.ubiquity."));
 
-  var useParserVersion = $("#use-new-parser-checkbox").attr("checked") ? 2 : 1;
+  var useParserVersion = $("#use-new-parser-checkbox")[0].checked ? 2 : 1;
   if (useParserVersion !== prefs.getIntPref("parserVersion")) {
     changed = true;
     prefs.setIntPref("parserVersion", useParserVersion);
