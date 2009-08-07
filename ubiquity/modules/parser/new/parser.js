@@ -290,8 +290,7 @@ Parser.prototype = {
 
     var wordSep = /[-_\s](?!$)/g;
     var trieSubnames = RegexpTrie();
-    for (let verbId in verbs) {
-      let verb = verbs[verbId];
+    for each (let verb in verbs) {
       // ["cogit ergo sum", "thought being"]
       // => ["cogit ergo sum", "thought being", "ergo sum", "being", "sum"]
       let subnames = [], {names} = verb;
@@ -307,13 +306,13 @@ Parser.prototype = {
           subnames[i + l * lastIndex] = snlc;
         } while (wordSep.test(name));
       }
-      verbPatterns[verbId] = subnames.filter(Boolean); // compact
-      // _rolesCache[verbId] is the subset of roles such that
+      verbPatterns[verb.id] = subnames.filter(Boolean); // compact
+      // _rolesCache[verb.id] is the subset of roles such that
       // there is at least one argument in verb which matches that role
-      rolesCache[verbId] =
+      rolesCache[verb.id] =
         [role for each (role in this.roles)
          if (verb.arguments.some(function(arg) arg.role === role.role))];
-      delimPatterns[verbId] = regexFromDelimeters(rolesCache[verbId]);
+      delimPatterns[verb.id] = regexFromDelimeters(rolesCache[verb.id]);
     }
     var verbMatcher = trieSubnames.toString();
     // verbInitialTest matches a verb at the beginning
@@ -427,10 +426,9 @@ Parser.prototype = {
     var {verbFinalMultiplier, verbInitialMultiplier} = this;
     function addParses(verbPiece, argString, order) {
       var vplc = verbPiece.toLowerCase();
-      for (var verbId in verbs) {
-        let verb = verbs[verbId];
+      for each (let verb in verbs) {
         if (verb.disabled) continue;
-        for each (let subname in verbPatterns[verbId]) {
+        for each (let subname in verbPatterns[verb.id]) {
           if (subname.indexOf(vplc) !== 0) continue;
           let {name} = subname;
           // Score the quality of the verb match.
@@ -443,12 +441,11 @@ Parser.prototype = {
           // suggestions, which get scoreMultiplier of 0.3. (trac #750)
           let verbScore = (0.4 + 0.6 * Math.sqrt(verbPiece.length / name.length))
                           * (order ? verbFinalMultiplier : verbInitialMultiplier);
-          verbScore = boostVerbScoreWithFrequency(verbScore, verbPiece, verbId);
+          verbScore = boostVerbScoreWithFrequency(verbScore, verbPiece, verb.id);
 
           returnArray.push({
             _verb: {
               __proto__: verb,
-              id: verbId,
               text: name,
               _order: order,
               input: verbPiece,
@@ -1163,8 +1160,7 @@ Parser.prototype = {
     }
 
     VERBS:
-    for (let verbId in verbs) {
-      let verb = verbs[verbId];
+    for each (let verb in verbs) {
       if (verb.disabled) continue;
       // Check each role in our parse.
       // If none of the roles are used by the arguments of the verb,
@@ -1185,7 +1181,7 @@ Parser.prototype = {
       // Verb's score is ranked from 0-1 not based on quality of match (there's no text to
       // match to) but solely on how often this verb has been used (for any input) in the
       // past.
-      let frequency = this._suggestionMemory.getScore("", verbId);
+      let frequency = this._suggestionMemory.getScore("", verb.id);
       let verbScore = 1 - ( 0.7 / ( 1 + frequency ) );
       // TODO score is getting assigned correctly... but then having no apparent effect
       // on ranking...  where is the score getting reset?  It's not in argFinder, these
@@ -1196,7 +1192,6 @@ Parser.prototype = {
       // gets some extra properties (id, text, _order) assigned.
       parseCopy._verb = {
         __proto__: verb,
-        id: verbId,
         text: verb.names[0],
         _order: (typeof this.suggestedVerbOrder === "function"
                  ? this.suggestedVerbOrder(verb.names[0])
