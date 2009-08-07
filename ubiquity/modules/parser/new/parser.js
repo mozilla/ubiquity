@@ -2371,7 +2371,7 @@ Parse.prototype = {
           display += (arg.outerSpace || '')
             + (arg.modifier ? arg.modifier + arg.innerSpace : '')
             + (arg.inactivePrefix ? arg.inactivePrefix : '')
-            + (arg.label || arg.input)
+            + "[ " + (arg.label || arg.input) + " ]"
             + (arg.inactiveSuffix ? arg.inactiveSuffix : '');
 	}
         else {
@@ -2389,7 +2389,7 @@ Parse.prototype = {
       else {
 	if (format == 'text') {
 	  display += (arg.inactivePrefix ? arg.inactivePrefix : '')
-            + (arg.label || arg.input)
+            + "[ " + (arg.label || arg.input) + " ]"
             + (arg.inactiveSuffix ? arg.inactiveSuffix : '')
             + (arg.modifier ? arg.innerSpace + arg.modifier : '')
             + (arg.outerSpace || '');
