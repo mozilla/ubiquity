@@ -892,7 +892,6 @@ Utils.history = {
                    .getService(Ci.nsIAutoCompleteSearch));
     awesome.startSearch(query, "", null, {
       onSearchResult: function hs_onSearchResult(search, result) {
-        awesome.stopSearch();
         switch (result.searchResult) {
           case result.RESULT_SUCCESS_ONGOING:
           case result.RESULT_SUCCESS: {

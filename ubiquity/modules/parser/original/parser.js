@@ -286,7 +286,7 @@ Parser.prototype = {
       for each (let pps in ppss)
         query._addPartiallyParsedSentence(pps);
 
-    if (!lazy) query.run();
+    lazy || Utils.setTimeout(function P_nQ_delayedRun(){ query.run() });
     return query;
   },
 

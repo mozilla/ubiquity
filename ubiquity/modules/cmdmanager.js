@@ -273,15 +273,10 @@ CommandManager.prototype = {
                                                            asyncSuggestionCb,
                                                            noAsyncUpdates){
     let noInputQuery = this.__nlParser.newQuery("", context, 20);
-    if (noAsyncUpdates)
-      noInputQuery.onResults = function onResultsNoInput() {
-	  if(noInputQuery.finished)
-            asyncSuggestionCb(noInputQuery.suggestionList);
-        };
-    else
-      noInputQuery.onResults = function onResultsNoInput() {
-          asyncSuggestionCb(noInputQuery.suggestionList);
-        };
+    noInputQuery.onResults = function onResultsNoInput() {
+      if (noAsyncUpdates || noInputQuery.finished)
+        asyncSuggestionCb(noInputQuery.suggestionList);
+    };
   },
 
   getHilitedSuggestionText: function CM_getHilitedSuggestionText() {
@@ -313,7 +308,7 @@ CommandManager.prototype = {
       return this.__commandsByServiceDomain;
     let commands = this.__cmdSource.getAllCommands();
     this.__commandsByServiceDomain = {};
-    for each (cmd in commands) {
+    for each (let cmd in commands) {
       if (cmd.serviceDomain) {
         if (!(cmd.serviceDomain in this.__commandsByServiceDomain))
           this.__commandsByServiceDomain[cmd.serviceDomain] = [];

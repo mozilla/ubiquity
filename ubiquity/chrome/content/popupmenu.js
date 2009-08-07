@@ -45,8 +45,6 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   function contextPopupShowing(event) {
     if (event.target !== this || !selected()) return;
 
-    for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
-
     var context = menupopup.context = {
       screenX: event.screenX,
       screenY: event.screenY,
@@ -55,17 +53,10 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       focusedElement: document.commandDispatcher.focusedElement,
     };
 
+    removeChildren();
     cmdSuggester(context, function onSuggest(suggestions) {
-      for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
-      var suggsToDisplay = suggestions.filter(function (sugg) {
-                               if(!sugg.args)
-			         return false;
-                               let arg = sugg.args["object"];
-                               if (arg && (arg[0] || 0).text) return true;
-                               else return false;
-                           });
-      if (suggsToDisplay.length > maxSuggs)
-        suggsToDisplay = suggsToDisplay.slice(0,maxSuggs);
+      removeChildren();
+      var suggsToDisplay = suggestions.filter(objectOnly).slice(0, maxSuggs);
       for each (var sugg in suggsToDisplay) {
         let {_verb} = sugg, {icon} = _verb.cmd || _verb;
         let menuItem = document.createElement("menuitem");
@@ -89,6 +80,17 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   }
   function executeMenuCommand(event) {
     event.target.suggestion.execute(this.context);
+  }
+  function removeChildren(){
+    for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
+  }
+  function objectOnly(sugg) {
+    if (sugg.args) {
+      let arg = sugg.args.object;
+      return !!(arg && (arg[0] || 0).text);
+    }
+    else if (sugg._argSuggs) return !!sugg._argSuggs.direct_object;
+    return false;
   }
   function selected() (gContextMenu.isContentSelection() ||
                        gContextMenu.onTextInput);
