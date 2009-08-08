@@ -25,7 +25,9 @@ function getCompletions(input, verbs, context) {
   var parser = makeTestParser(LANG,
                               verbs,
                               fakeContextUtils);
-  var query = parser.newQuery(input, context || emptyContext, MAX_SUGGESTIONS);
+  var query = parser.newQuery(input, context || emptyContext, MAX_SUGGESTIONS,
+                              true);
+  query.run();
   return query.suggestionList;
 }
 
@@ -419,7 +421,8 @@ function testSortedBySuggestionMemory() {
                   {names: ["crab"], execute: function(){}} ];
   var nlParser = makeTestParser(LANG, verbList);
   var fakeContext = {textSelection:"", htmlSelection:""};
-  var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS);
+  var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true);
+  query.run();
   var suggestions = query.suggestionList;
   //take the fifth and sixth suggestions, whatever they are...
   var suggFive = suggestions[4];
@@ -433,7 +436,8 @@ function testSortedBySuggestionMemory() {
   nlParser.strengthenMemory("c", suggSix);
 
   // now give the same input again...
-  query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS);
+  query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true);
+  query.run();
   suggestions = query.suggestionList;
   dump("Suggestions has length " + suggestions.length + "\n");
   // the old six should be on top, with the old five in second place:
@@ -452,7 +456,8 @@ function testNounFirstSortedByGeneralFrequency() {
   // Note: Create the parser ourself instead of using getCompletion() because
   // we need the suggestion memory in the parser state.
   var parser = makeTestParser(LANG, verbList, fakeContextUtils);
-  var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS);
+  var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true);
+  query.run();
   var suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
   this.assert(suggestions[0]._verb._name == "foo", "Foo should be first...");
@@ -460,18 +465,21 @@ function testNounFirstSortedByGeneralFrequency() {
   this.assert(suggestions[2]._verb._name == "baz", "Baz should be last...");
 
   // Now we select "baz" twice and "bar" once...
-  query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS);
+  query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS, true);
+  query.run();
   var choice = query.suggestionList[0];
   parser.strengthenMemory("baz", choice);
   parser.strengthenMemory("baz", choice);
 
-  query = parser.newQuery("bar", pantsContext, MAX_SUGGESTIONS);
+  query = parser.newQuery("bar", pantsContext, MAX_SUGGESTIONS, true);
+  query.run();
   choice = query.suggestionList[0];
   parser.strengthenMemory("bar", choice);
 
   // Now when we try the no-input suggestion again, should be ranked
   // with baz first, then bar, then foo.
-  query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS);
+  query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true);
+  query.run();
   suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
   this.assert(suggestions[0]._verb._name == "baz", "Baz should be first...");
@@ -769,44 +777,48 @@ function testAsyncNounSuggestions() {
   // We make the parser ourself instead of calling getCompletions() because
   // we need to do stuff with the query callback.
   var parser = makeTestParser(LANG, [cmd_slow]);
-  var query = parser.newQuery("dostuff hello", emptyContext, MAX_SUGGESTIONS);
-  // register a handler to make sure it gets notified when the
-  // noun produces suggestions asynchronously.
-  query.onResults = function() { observerCalled = true; };
-  var comps = query.suggestionList;
-  var assert = this.assert;
-  var assertDirObj = function( completion, expected) {
+  var {assert} = this;
+  function assertDirObj(completion, expected) {
     assert( completion._argSuggs.direct_object.text == expected,
             "Expected " + expected );
-  };
-  this.assert( comps.length == 1, "there should be 1 completions.");
-  assertDirObj(comps[0], "Robert E. Lee");
-
-  // Now here comes the async suggestion:
-  noun_type_slowness.triggerCallback();
-  // parser.refreshSuggestionList("dostuff hello"); TODO replace this logic
-  comps = query.suggestionList;
-  this.assert( comps.length == 3, "there should be 3 completions.");
-  assertDirObj( comps[0], "Robert E. Lee");
-  assertDirObj( comps[1], "slothitude");
-  assertDirObj( comps[2], "snuffleupagus");
-  this.assert(observerCalled, "observer should have been called.");
+  }
+  var query1 = parser.newQuery("dostuff hello", emptyContext, MAX_SUGGESTIONS,
+                               true);
+  // register a handler to make sure it gets notified when the
+  // noun produces suggestions asynchronously.
+  query1.onResults = this.makeCallback(function() {
+    var comps = query1.suggestionList;
+    assert( comps.length == 1, "there should be 1 completions.");
+    assertDirObj(comps[0], "Robert E. Lee");
+    // Now here comes the async suggestion:
+    query1.onResults = Boolean;
+    noun_type_slowness.triggerCallback();
+    // parser.refreshSuggestionList("dostuff hello"); TODO replace this logic
+    comps = query1.suggestionList;
+    assert( comps.length == 3, "there should be 3 completions.");
+    assertDirObj( comps[0], "Robert E. Lee");
+    assertDirObj( comps[1], "slothitude");
+    assertDirObj( comps[2], "snuffleupagus");
+  });
+  query1.run();
 
   // Now try one where the noun originally suggests nothing, but then comes
   // up with some async suggestions.  What happens?
-  observerCalled = false;
-  query = parser.newQuery("dostuff halifax", emptyContext, MAX_SUGGESTIONS);
-  query.onResults = function() { observerCalled = true; };
-  comps = query.suggestionList;
-  this.assert( comps.length == 0, "there should be 0 completions.");
-  // here comes the async suggestion:
-  noun_type_slowness.triggerCallback();
-  //parser.refreshSuggestionList("dostuff halifax");
-  comps = query.suggestionList;
-  this.assert( comps.length == 2, "there should be 2 completions.");
-  assertDirObj( comps[0], "slothitude");
-  assertDirObj( comps[1], "snuffleupagus");
-  this.assert(observerCalled, "observer should have been called.");
+  var query2 = parser.newQuery("dostuff halifax", emptyContext, MAX_SUGGESTIONS,
+                               true);
+  query2.onResults = this.makeCallback(function() {
+    var comps = query2.suggestionList;
+    assert(comps.length == 0, "there should be 0 completions.");
+    // here comes the async suggestion:
+    query2.onResults = Boolean;
+    noun_type_slowness.triggerCallback();
+    //parser.refreshSuggestionList("dostuff halifax");
+    comps = query2.suggestionList;
+    assert(comps.length == 2, "there should be 2 completions.");
+    assertDirObj(comps[0], "slothitude");
+    assertDirObj(comps[1], "snuffleupagus");
+  });
+  query2.run();
 
   // Now instead of going through the verb directly, we'll go through the
   // command manager and get a suggestion list, then add a new noun suggestion
