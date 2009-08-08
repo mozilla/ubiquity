@@ -379,9 +379,10 @@ var noun_type_url = {
           selectionIndices[0] += slashesNeeded;
           selectionIndices[1] += slashesNeeded;
         }
-      score *= 0.9;          
+      score *= 0.9;
       }
-    } else {
+    }
+else {
       scheme = 'http://';
       noschemeURL = url;
       score *= 0.9;
@@ -391,16 +392,16 @@ var noun_type_url = {
         selectionIndices[1] += scheme.length;
       }
     }
-    
+
     if (noschemeURL) {
       var segments = noschemeURL.split(/\/#?/);
 
       // if it's just a domain name-looking thing, lower confidence
       if (segments.length == 1)
         score *= 0.8;
-      
+
       var domain = segments[0];
-      
+
       // if the domain doesn't have any dots in it, lower confidence
       if (domain.indexOf('.') == -1)
         score *= 0.9;
@@ -410,37 +411,35 @@ var noun_type_url = {
         // if it's not LDH, then we should see if it's a valid
         // international domain name.
         score *= 0.9;
-        var idn = Components.classes["@mozilla.org/network/idn-service;1"]
-               .createInstance(Components.interfaces.nsIIDNService);
+        var idn = (Cc["@mozilla.org/network/idn-service;1"]
+                   .createInstance(Ci.nsIIDNService));
         var asciiDomain = idn.normalize(domain);
         // if it's not even a valid IDN, then throw it out.
         if (!this._LDHRegExp.test(asciiDomain))
           dontAccept = true;
       }
     }
-    
+
     var newUrl = scheme + noschemeURL;
     if (!dontAccept)
       returnArr.push(CmdUtils.makeSugg(newUrl, null, null, score,
                                                  selectionIndices));
-                                                   
-    // start the async history check here
 
+    // start the async history check here
     var reqObj = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
       reqObj.readyState = 4;
+      var suggs = [], tlc = text.toLowerCase();
       for each (let r in results) {
-        var urlIndex = r.url.indexOf(text);
-        if (urlIndex === 0)
-          continue;
-        var urlScore = CmdUtils.matchScore(
-                       {index:urlIndex,'0':text,input:r.url});
-        returnArr.push(CmdUtils.makeSugg(r.url, r.url, r, urlScore));
+        var urlIndex = r.url.toLowerCase().indexOf(tlc);
+        if (urlIndex < 0) continue;
+        var urlScore =
+          CmdUtils.matchScore({index: urlIndex, 0: text, input: r.url});
+        suggs.push(CmdUtils.makeSugg(r.url, null, r, urlScore));
       }
-      callback(returnArr);
+      callback(suggs);
     });
-    
-    return [returnArr,reqObj];
+    return [returnArr, reqObj];
   }
 };
 
@@ -560,7 +559,7 @@ var noun_type_twitter_user = {
     var suggs = CmdUtils.grepSuggs(text, this.logins());
     // only letters, numbers, and underscores are allowed in twitter
     // usernames.
-        
+
     if (/^\w+$/.test(text))
       suggs.push(CmdUtils.makeSugg(text, text, {}, 0.5));
 
@@ -687,13 +686,13 @@ var noun_type_date = {
       return [this._sugg(new Date(), 1)];
     if (text == 'now')
       return [this._sugg(new Date(), 0.7)];
-      
+
     var {date, score} = parseAndScoreDateTime(text,10);
     if (date && date.isToday())
       score *= 0.5;
     if (date && date.toString("hh:mm tt") != '12:00 AM')
       score *= 0.7;
-    
+
     return date ? [this._sugg(date, score)] : [];
   },
   _sugg: function nt_date__sugg(date, score)
@@ -707,7 +706,7 @@ var noun_type_time = {
   suggest: function nt_time_suggest(text, html) {
     if (text == 'now')
       return [this._sugg(new Date(), 1)];
-      
+
     var {date, score} = parseAndScoreDateTime(text, 8);
     if (date && date.toString("hh:mm tt") == '12:00 AM')
       score *= 0.5;
@@ -730,7 +729,7 @@ var noun_type_date_time = {
       // hits crazy Date(Date(Date(... structure is used to get a Date object
       // which has today's date but has 12:00 AM as the time.
       return [this._sugg(new Date(Date.parse(new Date().toDateString())),0.7)];
-      
+
     var {date, score} = parseAndScoreDateTime(text, '19');
     if (date && date.isToday())
       score *= 0.7;
@@ -773,7 +772,7 @@ var noun_type_contact = {
           // ...and based on the name.
                    .concat(CmdUtils.grepSuggs(text, self._list, 'data')));
         };
-        
+
       var contactRequest = getContacts(contactCallback);
       return suggs.concat(contactRequest);
     } else
@@ -1183,7 +1182,7 @@ function getRestaurants(query, callback, selectionIndices){
       for each (business in allBusinesses){
         if(business.name.indexOf(queryToMatch) != -1 ||
            queryToMatch.indexOf(business.name) != -1){
-              callback([CmdUtils.makeSugg(query, query, null, .9, 
+              callback([CmdUtils.makeSugg(query, query, null, .9,
                 selectionIndices)]);
               return;
         }
@@ -1191,7 +1190,7 @@ function getRestaurants(query, callback, selectionIndices){
           for each (category in business.categories){
             if(category.name.indexOf(queryToMatch) != -1 ||
               queryToMatch.indexOf(category.name) != -1){
-              callback([CmdUtils.makeSugg(query, query, null, .9, 
+              callback([CmdUtils.makeSugg(query, query, null, .9,
                 selectionIndices)]);
               return;
             }
@@ -1240,12 +1239,12 @@ function getLegacyAddress( query, callback, selectionIndices ) {
         callback( [] );
         return;
       }
- 
+
       function existsMatch( text ){
         var joinedText = allText.join(" ");
         return joinedText.indexOf( text.toLowerCase() ) != -1;
       }
- 
+
       var missCount = 0;
 
       var queryWords = query.match(/\w+/g);
@@ -1260,7 +1259,7 @@ function getLegacyAddress( query, callback, selectionIndices ) {
       //displayMessage( missRatio );
 
       if( missRatio < .5 )
-        callback( CmdUtils.makeSugg(query, query, null, 0.9, 
+        callback( CmdUtils.makeSugg(query, query, null, 0.9,
                  selectionIndices) );
       else
         callback([]);
@@ -1325,7 +1324,7 @@ function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
         callback([]);
         return;
       }
-      
+
       var returnArr = [];
       var unusedResults = [];
 
@@ -1345,7 +1344,7 @@ function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
           unusedResults.push(result);
         }
       }
-      
+
       // if none of the results matched the input, let's take the first
       // one's data with the original input, but with a penalty.
       // TODO: See if this is a Bad Idea and think of a Good Idea.
@@ -1363,12 +1362,10 @@ function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
 }
 
 // used by getGeo
-function accuracyScore(score,minAccuracy,maxAccuracy) {
-  if (score < minAccuracy)
-    return Math.pow(0.8, minAccuracy - score);
-  if (maxAccuracy < score)
-    return Math.pow(0.8, score - maxAccuracy);
-  return 1;
+function accuracyScore(score, minAccuracy, maxAccuracy) {
+  return (score === minAccuracy
+          ? 1
+          : Math.pow(0.8, Math.abs(minAccuracy - score)));
 }
 
 // used by getGeo
@@ -1383,12 +1380,12 @@ function formatGooglePlacemark(text,placemark,score,selectionIndices) {
     data.address.countryCode = ad.Country.CountryNameCode;
 
     var nodesToCrawl = [ad.Country];
-    
+
     while (nodesToCrawl[0]) {
       dump('ntc length:'+nodesToCrawl.length+'\n');
       var thisNode = nodesToCrawl[0];
       nodesToCrawl = nodesToCrawl.slice(1);
-      
+
       for (let id in thisNode) {
         dump('id: '+id+'\n');
         if (id.indexOf('Name') > -1) {
@@ -1402,9 +1399,8 @@ function formatGooglePlacemark(text,placemark,score,selectionIndices) {
       }
     }
   }
-  
-  return CmdUtils.makeSugg(text, text, data, score, 
-            selectionIndices);
+
+  return CmdUtils.makeSugg(text, text, data, score, selectionIndices);
 }
 
 var EXPORTED_SYMBOLS = (
