@@ -184,7 +184,7 @@ let UbiquitySetup = {
         });
 
       // Reset suggestion memory:
-      new SuggestionMemory("main_parser").wipe();
+      (new SuggestionMemory("main_parser")).wipe();
 
       // This is likely redundant since we just reset all prefs, but we'll
       // do it for completeness...
