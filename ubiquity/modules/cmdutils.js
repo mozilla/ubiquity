@@ -73,11 +73,18 @@ var CmdUtils = {
   // cater to whatever parser the user is using.
   //
   // Ubiquity 0.1.x only supports parser version 1, while
-  // Ubiquity 0.2.x supports parser versions 1 and 2.
+  // Ubiquity 0.5.x supports parser versions 1 and 2.
 
-  get parserVersion() {
-    return Application.prefs.getValue("extensions.ubiquity.parserVersion", 1);
-  }
+  get parserVersion parserVersion() (
+    Application.prefs.getValue("extensions.ubiquity.parserVersion", 1)),
+
+  // === {{{ CmdUtils.maxSuggestions }}} ===
+  //
+  // Gets the current number of max suggestions.
+
+  get maxSuggestions maxSuggestions() (
+    Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
+    .CommandManager.maxSuggestions),
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
@@ -1286,7 +1293,7 @@ function previewCallback(pblock, callback, abortCallback) {
   };
 }
 
-// === {{{ CmdUtils.previewList() }}} ===
+// === {{{ CmdUtils.previewList(block, htmls, callback, css) }}} ===
 //
 // Creates a simple clickable list in the preview.
 //
@@ -1328,43 +1335,45 @@ previewList.CSS = <><![CDATA[
   .preview-list label {display: block; cursor: pointer}
   .preview-list button {
     padding: 0; border-width: 1px;
-    font: bold 108% "Consolas",monospace; text-transform: uppercase}
+    font: bold 108% monospace; text-transform: uppercase}
   ]]></>;
 
 // === {{{ CmdUtils.absUrl(data, sourceUrl) }}} ===
 //
-// Fixes relative urls in data (eg. as returned by AJAX call). Usefull for
-// displaying fetched content in command previews.
+// Fixes relative urls in data (e.g. as returned by AJAX call).
+// Useful for displaying fetched content in command previews.
 //
-// {{{data}}}: The data containing relative urls - accepts HTML, jQuery objects
-// and XML
+// {{{data}}}: The data containing relative urls, which can be
+// a HTML string or a jQuery/DOM/XML object.
 //
 // {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to
-// which the relative paths are relative to)
+// which the relative paths are relative to).
+
 function absUrl(data, sourceUrl) {
-  const {jQuery} = this.__globalObject;
   switch (typeof data) {
-    case "string":
+    case "string": {
       return data.replace(
-        /\b(href|src|action)=([\"\']?)(?!https?:\/\/)([^\s>]+)\2/ig,
-        function au_repl(_, a, q, path)(a + "="
-                                          + q
-                                          + Utils.url({uri: path,
-                                                       base: sourceUrl}).spec
-                                          + q));
-    case "object":
-      jQuery(data).find("*").andSelf().filter("a, img, form, link, embed")
-        .each(function au_each(){
-          var attr, path = (this.getAttribute(attr = "href") ||
-                            this.getAttribute(attr = "src") ||
-                            this.getAttribute(attr = "action"));
-          if (path !== null && /^(?!https?:\/\/)/.test(path))
-            this.setAttribute(attr,
-                              Utils.url({uri: path, base: sourceUrl}).spec);
-        });
+        /\b(href|src|action)=(?![\"\']?https?:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
+        function au_repl(_, a, q, path) (
+          a + "=" + q + Utils.url({uri: path, base: sourceUrl}).spec + q));
+    }
+    case "object": {
+      (this.__globalObject.jQuery(data)
+       .find("*").andSelf()
+       .filter("a, img, form, link, embed")
+       .each(function au_each() {
+         var attr, path = (this.getAttribute(attr = "href") ||
+                           this.getAttribute(attr = "src" ) ||
+                           this.getAttribute(attr = "action"));
+         if (path !== null && /^(?!https?:\/\/)/.test(path))
+           this.setAttribute(attr,
+                             Utils.url({uri: path, base: sourceUrl}).spec);
+       }));
       return data;
-    case "xml":
-      return XML(arguments.callee(data.toXMLString(), sourceUrl));
+    }
+    case "xml": {
+      return XML(arguments.callee.call(this, data.toXMLString(), sourceUrl));
+    }
   }
   return null;
 }
@@ -1379,23 +1388,14 @@ function safeWrapper(func) {
     try {
       func.apply(this, arguments);
     } catch (e) {
-      displayMessage(
-        {text: ("An exception occurred while running " +
-                func.name + "()."),
-         exception: e}
-     );
+      displayMessage({
+        text: ("An exception occurred while running " +
+               func.name + "()."),
+        exception: e,
+      });
     }
   };
 }
-
-// === {{{ CmdUtils.maxSuggestions }}} ===
-//
-// Gets the current number of max suggestions.
-
-CmdUtils.__defineGetter__("maxSuggestions", function maxSuggestions() {
-  return (Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
-          .CommandManager.maxSuggestions);
-});
 
 // CmdUtils.pluginRegistry
 // A registry of provider plugins for overlord verbs
