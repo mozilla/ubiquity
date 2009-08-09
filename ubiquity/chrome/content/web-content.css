@@ -206,11 +206,6 @@ a[onclick] {
   cursor: pointer;
 }
 
-.action {
-  color: #aaa;
-  cursor: pointer;
-}
-
 .error {
   color:#FF0000;
 }
@@ -225,9 +220,18 @@ a[onclick] {
   text-decoration: underline;
 }
 
-.feed-action:visited, .feed-action, .feed-action:hover {
-  color: #aaaaaa;
+.action, .action:visited, .action:hover {
+  color: #aaa;
+  cursor: pointer;
   text-decoration: none;
+}
+
+.action:before {
+  content: "[";
+}
+
+.action:after {
+  content: "]";
 }
 
 .feed-updated {
