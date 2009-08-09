@@ -24,6 +24,7 @@
  *   Abimanyu Raja <abimanyuraja@gmail.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Dietrich Ayala <dietrich@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,123 +42,108 @@
 
 var gUbiquity = null;
 
-(function() {{}
-var jsm = {};
-const Cu = Components.utils;
-Cu.import("resource://ubiquity/modules/setup.js", jsm);
-Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
-Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
-Cu.import("resource://ubiquity/modules/utils.js", jsm);
-Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
-
-function ubiquitySetup() {
-  var services = jsm.UbiquitySetup.createServices();
-
-  jsm.UbiquitySetup.setupWindow(window);
-
-  var NLParser = jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion);
-  var nlParser = NLParser.makeParserForLanguage(
-    jsm.UbiquitySetup.languageCode,
-    []);
-
-  var suggsNode = document.getElementById("ubiquity-suggest-container");
-  var previewNode = document.getElementById("ubiquity-preview-container");
-  var helpNode = document.getElementById("ubiquity-help");
-
-  var cmdMan = new jsm.CommandManager(services.commandSource,
-                                      services.messageService,
-                                      nlParser,
-                                      suggsNode,
-                                      previewNode,
-                                      helpNode);
-
-  var suggsIframe = document.getElementById("ubiquity-suggest");
-
-  suggsIframe.contentDocument.addEventListener(
-    "DOMSubtreeModified",
-    function resizeSuggs() {
-      suggsIframe.height = this.height;
-    },
-    false);
-
-  var panel = document.getElementById("ubiquity-transparent-panel");
-
-  gUbiquity = new Ubiquity(panel,
-                           document.getElementById("ubiquity-entry"),
-                           cmdMan);
-  gUbiquity.setLocalizedDefaults(jsm.UbiquitySetup.languageCode);
-
-  window.addEventListener("command", function refreshUbiquityOnReload(evt) {
-    if (evt.target.id == "Browser:Reload")
-      cmdMan.refresh();
-  }, false);
-
-  // Hack to get the default skin to work on Linux, which we don't
-  // support per-pixel alpha transparency on.
-  if (jsm.Utils.OS === "Linux")
-    panel.style.backgroundColor = "#444";
-
-  window.addEventListener("unload", function ubiquityTeardown() {
-    window.removeEventListener("unload", ubiquityTeardown, false);
-    cmdMan.finalize();
-  }, false);
-
-  var popupMenu = UbiquityPopupMenu(
-    document.getElementById("contentAreaContextMenu"),
-    document.getElementById("ubiquity-menu"),
-    document.getElementById("ubiquity-separator"),
-    cmdMan.makeCommandSuggester());
-
-  const UBIQ_LOAD_PREF = "extensions.ubiquity.enableUbiquityLoadHandlers";
-  if (Application.prefs.getValue(UBIQ_LOAD_PREF, true))
-    services.commandSource.onUbiquityLoad(window);
-}
-
-function ubiquityKeydown(aEvent) {
-  const KEYCODE_PREF ="extensions.ubiquity.keycode";
-  const KEYMODIFIER_PREF = "extensions.ubiquity.keymodifier";
-
-  //Default keys are different for diff platforms
-  // Windows Vista, XP, 2000 & NT: CTRL+SPACE
-  // Mac, Linux, Others : ALT+SPACE
-  var defaultKeyModifier = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
-
-  //The space character
-  var UBIQUITY_KEYCODE = Application.prefs.getValue(KEYCODE_PREF, 32);
-  var UBIQUITY_KEYMODIFIER = Application.prefs.getValue(KEYMODIFIER_PREF,
-                                                        defaultKeyModifier);
-  //Toggle Ubiquity if the key pressed matches the shortcut key
-  if (aEvent.keyCode === UBIQUITY_KEYCODE &&
-      ubiquityEventMatchesModifier(aEvent, UBIQUITY_KEYMODIFIER)) {
-    gUbiquity.toggleWindow();
-    aEvent.preventDefault();
-    aEvent.stopPropagation();
-  }
-}
-
-function ubiquityEventMatchesModifier(aEvent, aModifier) {
-  /* Match only if the user is holding down the modifier key set for
-   * ubiquity AND NO OTHER modifier keys.
-   **/
-  return ((aEvent.shiftKey === (aModifier === "SHIFT")) &&
-          (aEvent.ctrlKey  === (aModifier === "CTRL" )) &&
-          (aEvent.altKey   === (aModifier === "ALT"  )) &&
-          (aEvent.metaKey  === (aModifier === "META" )));
-}
-
 window.addEventListener("load", function onload() {
   window.removeEventListener("load", onload, false);
+
+  const Cu = Components.utils;
+  const {prefs} = Application;
+
+  var jsm = {};
+  Cu.import("resource://ubiquity/modules/utils.js", jsm);
+  Cu.import("resource://ubiquity/modules/setup.js", jsm);
+  Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
+  Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
+  Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
+
+  function ubiquitySetup() {
+    var services = jsm.UbiquitySetup.createServices();
+
+    jsm.UbiquitySetup.setupWindow(window);
+
+    var nlParser = (jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion)
+                    .makeParserForLanguage(jsm.UbiquitySetup.languageCode,
+                                           []));
+    var cmdMan = new jsm.CommandManager(
+      services.commandSource,
+      services.messageService,
+      nlParser,
+      document.getElementById("ubiquity-suggest-container"),
+      document.getElementById("ubiquity-preview-container"),
+      document.getElementById("ubiquity-help"));
+
+    var panel = document.getElementById("ubiquity-transparent-panel");
+
+    gUbiquity = new Ubiquity(panel,
+                             document.getElementById("ubiquity-entry"),
+                             cmdMan);
+
+    window.addEventListener("command", function refreshUbiquityOnReload(evt) {
+      if (evt.target.id === "Browser:Reload")
+        cmdMan.refresh();
+    }, false);
+
+    window.addEventListener("unload", function ubiquityTeardown() {
+      window.removeEventListener("unload", ubiquityTeardown, false);
+      cmdMan.finalize();
+    }, false);
+
+    var suggFrame = document.getElementById("ubiquity-suggest");
+    suggFrame.contentDocument.addEventListener(
+      "DOMSubtreeModified",
+      function resizeSuggs() {
+        suggFrame.height = this.height;
+      },
+      false);
+
+    // Hack to get the default skin to work on Linux, which we don't
+    // support per-pixel alpha transparency on.
+    if (jsm.Utils.OS === "Linux")
+      panel.style.backgroundColor = "#444";
+
+    if (prefs.getValue("extensions.ubiquity.enableUbiquityLoadHandlers", true))
+      services.commandSource.onUbiquityLoad(window);
+
+    UbiquityPopupMenu(
+      document.getElementById("contentAreaContextMenu"),
+      document.getElementById("ubiquity-menu"),
+      document.getElementById("ubiquity-separator"),
+      cmdMan.makeCommandSuggester());
+  }
+
+  function ubiquityKeydown(aEvent) {
+    // Default keys are different for diff platforms
+    //  Windows Vista, XP, 2000 & NT: CTRL+SPACE
+    //  Mac, Linux, Others: ALT+SPACE
+    var keyCode = prefs.getValue("extensions.ubiquity.keycode",
+                                 KeyEvent.DOM_VK_SPACE);
+    var keyModifier = prefs.getValue("extensions.ubiquity.keymodifier",
+                                     jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT");
+    // Toggle Ubiquity if the key pressed matches the shortcut key
+    if (aEvent.keyCode === keyCode &&
+        ubiquityEventMatchesModifier(aEvent, keyModifier)) {
+      gUbiquity.toggleWindow();
+      aEvent.preventDefault();
+      aEvent.stopPropagation();
+    }
+  }
+
+  function ubiquityEventMatchesModifier(aEvent, aModifier) {
+    // Match only if the user is holding down the modifier key set for
+    // Ubiquity AND NO OTHER modifier keys.
+    return ((aEvent.shiftKey === (aModifier === "SHIFT")) &&
+            (aEvent.ctrlKey  === (aModifier === "CTRL" )) &&
+            (aEvent.altKey   === (aModifier === "ALT"  )) &&
+            (aEvent.metaKey  === (aModifier === "META" )));
+  }
+
   jsm.UbiquitySetup.preload(function ubiquitySetupWrapper() {
     try { ubiquitySetup() } catch (e) {
-      var msg = ("Ubiquity Setup: " + e + "\n" +
-                 jsm.ExceptionUtils.stackTrace(e));
-      Cu.reportError(msg);
+      var msg = "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e);
       // in case it doesn't show up in the error console
       jsm.Utils.reportInfo(msg);
+      Cu.reportError("Ubiquity " + msg);
       new jsm.AlertMessageService().displayMessage("Setup failed.");
-      return;
     }
-    window.addEventListener("keydown", ubiquityKeydown, true);
+    if (gUbiquity) window.addEventListener("keydown", ubiquityKeydown, true);
   });
 }, false);
-})();

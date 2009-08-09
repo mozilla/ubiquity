@@ -75,13 +75,13 @@ function WebJsModule(callback, window) {
   iframe.setAttribute("src", "chrome://ubiquity/content/hiddenframe.html");
   iframe.addEventListener(
     "pageshow",
-    function onPageShow() {
-      iframe.removeEventListener("pageshow", onPageShow, false);
+    function WJM__onPageShow() {
+      iframe.removeEventListener("pageshow", arguments.callee, false);
 
       // Have our instance dynamically inherit the properties of the
       // hidden window.
       self.__proto__ = iframe.contentWindow;
-      callback(dump);
+      callback();
     },
     false
   );
@@ -96,12 +96,12 @@ function WebJsModule(callback, window) {
   // Once the script is imported, any globals it created can be
   // directly accessed as properties of the {{{WebJsModule}}} instance.
 
-  this.importScript = function importScript(url) {
-    var wind = iframe.contentWindow;
+  this.importScript = function WJM_importScript(url) {
     if (!(url in importedScripts)) {
-      wind.Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-          .getService(Components.interfaces.mozIJSSubScriptLoader)
-          .loadSubScript(url);
+      (iframe.contentWindow
+       .Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+       .getService(Ci.mozIJSSubScriptLoader)
+       .loadSubScript(url));
       importedScripts[url] = true;
     }
   };
