@@ -166,15 +166,15 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
 
   var serviceDomain = null;
   if (commandObject.url) {
-    let match = commandObject.url.match(/https?:\/\/([\w.]+)/)
+    var match = commandObject.url.match(/https?:\/\/([\w.]+)/)
     if (match)
       serviceDomain = match[1];
   }
   
   if (!serviceDomain) {
-    let source = commandObject.execute.toString()
+    var source = commandObject.execute.toString()
                + (commandObject.preview.toString() || '');
-    let match = source.match(/https?:\/\/([\w.]+)/);
+    var match = source.match(/https?:\/\/([\w.]+)/);
     if (match)
       serviceDomain = match[1];
   }
