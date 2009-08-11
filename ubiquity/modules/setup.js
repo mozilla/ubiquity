@@ -49,6 +49,7 @@ Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js"
 //Components.utils.import("resource://ubiquity/modules/gm_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/stylish_feed_plugin.js");
 Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
+Components.utils.import("resource://ubiquity/modules/suggestion_memory.js");
 Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
 Components.utils.import("resource://ubiquity/modules/webjsm.js");
 Components.utils.import("resource://ubiquity/modules/prefcommands.js");

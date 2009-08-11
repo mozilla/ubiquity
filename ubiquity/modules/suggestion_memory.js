@@ -202,8 +202,8 @@ SuggestionMemory.prototype = {
                    "WHERE id_string = ?1");
     let wipeStmt = this._createStatement(wipeSql);
     wipeStmt.bindUTF8StringParameter(0, this._id);
-    updStmt.execute();
-    updStmt.finalize();
+    wipeStmt.execute();
+    wipeStmt.finalize();
   },
 
   displayAllContents: function() {
