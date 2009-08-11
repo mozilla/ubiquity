@@ -1,0 +1,231 @@
+<!-- Draft #002:NOTE TO TRANSLATORS:Hello, and thanks for taking your time to translate our strings for Ubiquity!As you may have guessed, not everything here is fully baked and our kitchen is still a little messy. But, we're working diligently in choosing our words wisely to make sure you won't have to translate everything many times over. And since we're really nice, we also intend to keep you updated when any ofthese files happen change in the future.So please, bear with us for a moment as things might get a chaotic early on.Thanks a ton and happy translating!Sincerely,- The Ubiquity Team-->
+<!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
+<!ENTITY appTitle "Ubiquity">
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetitle.About "Informacje o &appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "Ustawienia i motywy">
+<!ENTITY ubiquity.pagetitle.YourCommands "Polecenia">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "Polecenia – przykłady lokalizacji">
+<!ENTITY ubiquity.pagetitle.Support "Wsparcie techniczne">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "Edytor poleceń">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Polecenie z niezaufanych źródeł">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Resetuj &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, mamy och-ach!">
+<!-- Page header taglines -->
+<!ENTITY ubiquity.tagline.About "Nie serfuj w sieci – wydawaj jej polecenia.">
+<!ENTITY ubiquity.tagline.Settings "Ustawienia i motywy">
+<!ENTITY ubiquity.tagline.YourCommands "Tutaj są wymienione polecenia udostępnione do Twojej dyspozycji.">
+<!ENTITY ubiquity.tagline.LocalizeCmd "Aby globalizować, trzeba lokalizować.">
+<!ENTITY ubiquity.tagline.Support "Pomocy!">
+<!ENTITY ubiquity.tagline.HackUbiquity "Modyfikuj go!.">
+<!-- Header page tips -->
+<!ENTITY ubiquity.pagetip.About "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „Help”.">
+<!ENTITY ubiquity.pagetip.Settings "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „change ubiquity settings”.">
+<!ENTITY ubiquity.pagetip.YourCommands "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „list ubiquity commands”.">
+<!ENTITY ubiquity.pagetip.Support "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „get support”">
+<!ENTITY ubiquity.pagetip.HackUbiquity "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „write ubiquity commands”.">
+<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
+<!ENTITY ubiquity.generic.ImportTemplate "Importuj z szablonu">
+<!ENTITY ubiquity.generic.LaunchExternalEd "Otwórz zewnętrzny edytor">
+<!ENTITY ubiquity.generic.EnableHighlighting "Włącz wyróżnianie składni">
+<!ENTITY ubiquity.generic.ButtonEdit "Edytuj">
+<!ENTITY ubiquity.generic.ButtonSave "Zapisz">
+<!ENTITY ubiquity.generic.ButtonSaveAs "Zapisz jako…">
+<!ENTITY ubiquity.generic.ButtonShare "Udostępnij">
+<!--- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.- This will also be useful when we do a full about: page overhaul possibly condensing the editors.-->
+<!-- End common elements -->
+<!-- Everything from here down is page by page in no particular page order -->
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "Co to jest &appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; jest dodatkiem dla Firefoksa umożliwiającym stosowanie w Firefoksie &lt;strong&gt;poleceń&lt;/strong&gt; po wprowadzeniu słów do specjalnego elementu.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "Polecenia są skrótami dla rzeczy, które zazwyczaj wykonujesz w Internecie. Mogą one eliminować powtarzanie tych samych zadań i pozwalają wykonać więcej i szybciej.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Najfajniejszą rzeczą w &appTitle; jest to, że &lt;em&gt;każdy&lt;/em&gt; może napisać polecenie i udostępnić je wszystkim na całym świecie w bardzo podobny sposób, jak Internet umożliwia każdemu pisanie stron i dzielenie się informacjami z resztą świata.">
+<!ENTITY ubiqutiy.about.LearnHow "Dowiedz się jak używać &appTitle;">
+<!ENTITY ubiqutiy.about.TutorialButton "Kliknij tutaj, aby uruchomić interaktywny poradnik">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Więcej informacji o używaniu &appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "Po zapoznaniu się z podstawowymi informacjami na tej stronie, możesz dowiedzieć się więcej, przechodząc ">
+<!ENTITY ubiqutiy.about.UsingParagraph1LinkText "na stronę z pełną dokumentacją">
+<!ENTITY ubiqutiy.about.UsingParagraph1Part2 ".">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "&lt;strong&gt;Pomóż nam&lt;/strong&gt; subskrybując ">
+<!ENTITY ubiqutiy.about.UsingParagraph2LinkText1 "Herd">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". To spowoduje dodanie Twoich danych do ">
+<!ENTITY ubiqutiy.about.UsingParagraph2LinkText2 "tablicy">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part3 ". Jest to całkowicie anonimowe i pomoże nam uczynić &appTitle; lepszym i bezpieczniejszym.">
+<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "Aby uzyskać informacje na temat celów projektu &appTitle; i naszych planów rozwojowych, przejdź na stronę ">
+<!ENTITY ubiqutiy.about.UsingParagraph3LinkText "Plany rozwoju">
+<!ENTITY ubiqutiy.about.UsingParagraph3Part2 ".">
+<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&appTitle; jest stworzony zespołowym wysiłkiem programistów z całego świata. Aby zobaczyć listę współtwórców, przejdź na ">
+<!ENTITY ubiqutiy.about.UsingParagraph4LinkText "stronę twórców">
+<!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
+<!ENTITY ubiqutiy.about.Thanks "Dziękujemy za użycie &appTitle; &lt;span class=&apos;version&apos;&gt;&lt;/span&gt;!">
+<!ENTITY ubiquity.about.ThanksParagraph1 "W wersji &lt;span class=&apos;version&apos;&gt;&lt;/span&gt; zostały wyeliminowane najistotniejsze błędy interfejsu użytkownika i wydajności znalezione w poprzednim wydaniu. W tym wydaniu użytkownicy powinni odczuć zwiększenie szybkości, reakcji i dokładności parsera. Aby dowiedzieć się więcej o nowościach, odwiedź stronę">
+<!ENTITY ubiquity.about.ThanksParagraph1LinkText "Informacje o wydaniu">
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.settings.Skins "Motywy">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "Edytuj własny motyw">
+<!ENTITY ubiquity.settings.KeyCombination "Skrót klawiszowy">
+<!ENTITY ubiquity.settings.InvokingUbiquity "&lt;strong&gt;Wywołaj&lt;/strong&gt; &appTitle; naciskając:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Kliknij powyżej, aby &lt;strong&gt;zmienić&lt;/strong&gt; skrót klawiszowy używany do otwierania/zamykania &appTitle;.">
+<!ENTITY ubiquity.settings.LangSettings "Ustawienia językowe">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 jest eksperymentalnym, następnej generacji parserem &appTitle; i nie będzie działał ze wszystkimi poleceniami, jednakże obsługuje on wiele języków.">
+<!ENTITY ubiquity.settings.UseParser2 "Użyj Parser 2 – parsera następnej generacji">
+<!ENTITY ubiquity.settings.SelectLanguage "Język:">
+<!ENTITY ubiquity.settings.MiscSettings "Różne ustawienia">
+<!ENTITY ubiquity.settings.MaxSuggestions "Maksymalna liczba sugestii:">
+<!ENTITY ubiquity.settings.InputDelay "Opóźnienie wprowadzania danych:">
+<!ENTITY ubiquity.settings.MilliSeconds "ms">
+<!ENTITY ubiquity.settings.Parser2Context "Parser 2">
+<!ENTITY ubiquity.settings.Parser2Details "Aby zrozumieć, co oznaczają wprowadzone przez Ciebie dane i dostarczyć sugerowane działania oparte na tych informacjach, Parser 2 może wykonywać zewnętrzne odwołania do usług sieciowych. Obecnie powoduje to dużą liczbę wykonywanych odwołań i z tego powodu jest domyślnie wyłączony.">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "Włącz zewnętrzne odwołania dla wszystkich zapytań Parsera 2">
+<!ENTITY ubiquity.settings.CustomSkin "Edytor motywów">
+<!ENTITY ubiquity.settings.SaveSkin "Zapisz">
+<!ENTITY ubiquity.settings.SaveSkinAs "Zapisz jako…">
+<!ENTITY ubiquity.settings.ShareSkin "Udostępnij">
+<!ENTITY ubiquity.settings.SaveNotice "Kliknięcie spowoduje niezwłoczne zapisanie aktualizacji wyglądu &appTitle;.">
+<!ENTITY ubiquity.settings.Bug449WarningPart1 "Aby zmiany dokonane w motywie zostały zastosowane, należy ponownie uruchomić przeglądarkę. To jest ">
+<!ENTITY ubiquity.settings.Bug449WarningLinkText "znany błąd">
+<!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!ENTITY ubiquity.commandlist.SubDetails1 "Masz">
+<!ENTITY ubiquity.commandlist.SubDetails2 "polecenia w">
+<!ENTITY ubiquity.commandlist.SubDetails3 "Anulowane subskrypcje">
+<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "kanałach poleceń.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Wszystkie rozpoznane przez &appTitle; polecenia są wyświetlone w prawej kolumnie. Nazwa polecenia jest wyświetlona czarną czcionką, szarą czcionką – objaśnienia działania danego polecenia.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "W lewej kolumnie wyświetlane są wszystkie subskrybowane przez &appTitle; „kanały”. Każdy kanał może zawierać wiele poleceń.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Ta strona może być posortowana wg kanałów lub poleceń. Kliknij dowolny odnośnik znajdujący się obok frazy „Sortuj wg”.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Jeśli nie chcesz jakiegoś polecenia, odznacz pole wyboru znajdujące się obok niego. Możesz przywrócić polecenie, zaznaczając je ponownie.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "Jeśli nie chcesz całego kanału poleceń, kliknij odnośnik [anuluj subskrypcję] znajdujący się pod nazwą kanału. Wszystkie polecenia w kanale zostaną wyłączone. Jeśli zmienisz zdanie, na dole strony możesz ponownie dokonać subskrypcji.">
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "Subskrybowane kanały">
+<!ENTITY ubiquity.commandlist.AvailableCommands "Polecenia">
+<!ENTITY ubiquity.commandlist.SortBy "Sortuj wg:">
+<!ENTITY ubiquity.commandlist.SortByFeed "Nazwa kanału">
+<!ENTITY ubiquity.commandlist.SortByDate "Data subskrypcji">
+<!ENTITY ubiquity.commandlist.SortByEnabled "Włączono">
+<!ENTITY ubiquity.commandlist.SortByCommand "Nazwa polecenia">
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Niesubskrybowane kanały">
+<!ENTITY ubiquity.commandlist.GraveYardText "Te kanały były subskrybowane. Jeśli chcesz ponownie je subskrybować, kliknij odnośnik [subskrybuj ponownie] znajdujący się pod nazwą kanału.">
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "Uzyskaj pomoc">
+<!ENTITY ubiquity.support.GetHelpGSFN "Get Satisfaction">
+<!ENTITY ubiquity.support.GetHelpGoogleGroups "Nasza grupa dyskusyjna/lista mailingowa">
+<!ENTITY ubiquity.support.GetHelpUbiquityWiki "&appTitle; Wiki">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Ponieważ aplikacja &appTitle; ma charakter eksperymentalny, mogą podczas jej używania wystąpić różne problemy. Jest wiele miejsc, do których możesz się skierować po pomoc w sprawach &appTitle;.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "jest witryną wsparcia technicznego prowadzoną przez społeczność skupioną wokół &appTitle;. Znajduje się na niej wiele odpowiedzi na różne tematy. Jeśli nie możesz znaleźć odpowiedzi na nurtujący Cię problem, załóż nowy temat.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "jest przydatna do dyskusji na temat rozwoju poleceń, interfejsu użytkownika, proponowaniu nowych funkcji i innych zaawansowanych dyskusji.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "zawiera informacje o całym projekcie &appTitle; włącznie z dokumentacją, poradnikami i odnośnikami do starszych wersji &appTitle;.">
+<!ENTITY ubiquity.support.ReportBugs "Zgłoś błąd">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "Pracujemy nad automatycznym systemem zgłaszania błędów, ale obecnie wszystkie znalezione powtarzalne błędy, należy zgłaszać, używając serwisu Get Satisfaction lub poprzez naszą grupę dyskusyjną/listę mailingową. Zgłaszając błąd, dołącz wszystkie informacje dotyczące odtworzenia błędu.">
+<!ENTITY ubiquity.support.ResetUbiquity "Resetowanie &appTitle;">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "Jeśli masz problemy z &appTitle;, rozwiązaniem może być przywrócenie jego „ustawień domyślnych”. Aby wykonać przywrócenie ustawień domyślnych ">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1LinkText "kliknij tutaj ">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "i przyjmij nasze przeprosiny za powstałe niedogodności!">
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; – Edytor poleceń">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "Wprowadzaj poniżej &lt;strong&gt;nowe polecenia&lt;/strong&gt;. Będą automatycznie zapisywane podczas pisania i będą mogły być natychmiast używane w trybie wprowadzania poleceń.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Zapoznaj się z ">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText1 "poradnikiem tworzenia poleceń">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart2 ", aby dowiedzieć się więcej np. o wbudowanych poleceniach. ">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText2 "Zobacz tutaj">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart3 ".">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Dokumentacja dla ">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocsLinkText "API poleceń">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "&lt;strong&gt;Zaangażuj się&lt;/strong&gt;.">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&appTitle; Wiki">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart2 ".">
+<!ENTITY ubiquity.editor.YourExternalEd "Twój zewnętrzny edytor:">
+<!ENTITY ubiquity.editor.EditorCommandType "Typ polecenia:">
+<!ENTITY ubiquity.editor.CmdTypeRegular "regularne">
+<!ENTITY ubiquity.editor.CmdTypeLocked "chronione">
+<!ENTITY ubiquity.editor.RegularCommandDesc "Polecenia typu &lt;em&gt;regularne&lt;/em&gt; mogą wykonać wszystko na Twoim komputerze.">
+<!ENTITY ubiquity.editor.LockedCommandDescPart1 "Polecenia typu &lt;em&gt;chronione&lt;/em&gt; są bardzo bezpieczne, ale mają ograniczone możliwości interakcji z Twoim komputerem. Aby dowiedzieć się więcej, zapoznaj się z ">
+<!ENTITY ubiquity.editor.LockedCommandDescLinkText "poradnikiem Kanał chroniony">
+<!ENTITY ubiquity.editor.LockedCommandDescPart2 ".">
+<!ENTITY ubiquity.editor.ImportTemplate "Importuj szablon polecenia">
+<!ENTITY ubiquity.editor.LaunchExternalEd "Otwórz zewnętrzny edytor">
+<!ENTITY ubiquity.editor.ShareCommand "Udostępnij">
+<!ENTITY ubiquity.editor.SaveToFile "Zapisz do pliku">
+<!ENTITY ubiquity.editor.EnableHighlighting "Włącz wyróżnianie składni">
+<!ENTITY ubiquity.editor.ShareYourCommands "Udostępnij swoje polecenia">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1Part1 "Opublikuj swoje polecenie w ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1LinkText "środowisku naturalnym poleceń ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1Part2 "– stronie wiki, na której możesz uzyskać informacje od innych użytkowników.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part1 "Załóż także konto na ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2LinkText1 "grupie poleceń">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part2 ", która będzie wyświetlała Twoje polecenia na ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2LinkText2 "tablicy">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part3 ".">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "Rozwój &appTitle;">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part1 "Uruchom ">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1LinkText "testy">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part2 ".">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2Part1 "Pomóż testować nasze ">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2LinkText "polecenia eksperymentalne">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2Part2 "!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part1 "Eksperymentuj z wydajnością parsera i analizuj myśli">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3LinkText1 "w pokoju programistów parsera.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part2 "Użyj">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3LinkText2 "dostrajacza nountype">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part3 ", aby sprawdzić swoje sugestie nountype i oceny.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "Jeśli zamierzasz zostać programistą &appTitle; sam dla siebie, zapoznaj się z naszymi ">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4LinkText "źródłowymi poleceniami">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part2 ".">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Ostatnie zmiany kodu &appTitle;">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!ENTITY ubiquity.confirmsubscription.Header "Polecenia &appTitle; z niezaufanych źródeł">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "Zamierzasz subskrybować polecenie">
+<!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart2 "z nieznanego, niezaufanego źródła">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 "Jeśli dokonasz subskrypcji, polecenie to może z Twoją przeglądarką zrobić &lt;em&gt;co będzie chciało&lt;/em&gt;. Może ukraść numer Twojej karty kredytowej, adres e-mail Twojej babci lub całą historię przeglądania.">
+<!ENTITY ubiquity.confirmsubscription.ScriptSource "Tutaj znajduje się kod źródłowy polecenia">
+<!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Wczytywanie kodu… Proszę czekać.">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Jeśli znasz język JavaScript, przeczytaj to i użyj swojego osądu, aby zdecydować czy polecenie jest bezpieczne do wykonania, czy nie. Kontynuujesz na własne ryzyko!">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "Jeśli nie znasz języka JavaScript, nie powinieneś subskrybować polecenia, chyba, że odnośnik otrzymałeś znanej Ci i zaufanej osoby.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "W przyszłości planujemy tutaj widget wyświetlający, jak my to nazywamy, „sieci społecznego zaufania”. Będzie wówczas możliwość zobaczenia czy ktoś z Twoich znajomych używa tego polecenia. Osoby używające to polecenie mogą poręczyć lub nie za dane polecenie. Mamy nadzieję, że będzie to bardzo pomocne w podjęciu decyzji czy subskrybować, czy też nie, dane polecenie. Funkcja ta powinna być dostępna w następnym wydaniu &appTitle;.">
+<!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Automatycznie aktualizuj ten kanał.">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Zabierz mnie stąd!">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "Wiem co robię. Subskrybuj!">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara1 "Oznacza to, że kanał będzie stale sprawdzany i jeśli pojawi się aktualizacja funkcji, zostanie ona automatycznie przesłana do komputera. Jeśli zamierzasz zaznaczyć te funkcję, upewnij się czy na pewno ufasz osobie, która ma uprawnienia do zmiany kodu tego polecenia.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part1 "Zwróć uwagę, że kanał jest udostępniany za pomocą niezabezpieczonego protokółu i dlatego może być przedmiotem">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "ataków polegających na podsłuchu i modyfikacji wiadomości przesyłanych pomiędzy dwiema stronami bez ich wiedzy (man-in-the-middle).">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 "Aktualizuj ten kanał automatycznie tylko wówczas jeśli masz pewność, że wiesz co robisz.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShort "Subskrybujesz kanał poleceń i możesz używać jego funkcjolnalności.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Jeśli kiedykolwiek zechcesz anulować subskrypcję, możesz użyć polecenia &appTitle; – „list”, by w dowolnym czasie przenieść się na">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "stronę zarządzania poleceniami">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 ", gdzie możesz zobaczyć wszystkie subskrybowane polecenia i anulować niechciane subskrypcje.">
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.reset.Header "Przywrócić ustawienia domyślne &appTitle;?">
+<!ENTITY ubiquity.reset.Paragraph1 "Jeśli &appTitle; nie działa prawidłowo, możesz spróbować przywrócić jego „ustawienia domyślne”. Aby to zrobić, naciśnij przycisk znajdujący się poniżej. Dokończenie operacji nastąpi po ponownym uruchomieniu przeglądarki.">
+<!ENTITY ubiquity.reset.Paragraph2 "&lt;strong&gt;Uwaga!&lt;/strong&gt; Wykonanie tej operacji spowoduje usunięcie wszystkich zmian dokonanych w &appTitle; włącznie, ale nie tylko, w następujących sekcjach:">
+<!ENTITY ubiquity.reset.Feeds "Subskrybowane kanały">
+<!ENTITY ubiquity.reset.Skins "Motywy">
+<!ENTITY ubiquity.reset.Code "Edytor kodu poleceń">
+<!ENTITY ubiquity.reset.NoReturn "&lt;strong&gt;Informacja:&lt;/strong&gt; tej operacji nie można cofnąć.">
+<!ENTITY ubiquity.reset.ButtonExport "Eksportuj moje obecne ustawienia &appTitle; do nowej karty">
+<!ENTITY ubiquity.reset.ButtonReset "Tak, wiem co robię. Resetuj ustawienia &appTitle; i uruchom ponownie Firefoksa.">
+<!-- Command Localization Template chrome/content/localization-template.xhtml -->
+<!ENTITY ubiquity.localizecmd.ForTemplate "To jest szablon dla">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1Part1 "To jest szablon lokalizacji dla kanału polecenia">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1Part2 " w formacie gettext/portable object (*.po). Dowiedz się więcej o">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1LinkText "gettext na Wikipedii">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1Part3 "gdzie znajdziesz także odnośniki do innych przydatnych narzędzi.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2Part1 "Aby przetestować te lokalizację, zapisz ją w katalogu:">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2Part2 "z nazwą">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Upewnij się, że nazwa katalogu XY prawidłowo odzwierciedla odpowiedni kod Twojego języka. Jeśli nie ma katalogu Twojego języka – po prostu go utwórz.">
+<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!ENTITY ubiquity.bug19warning.Header "Nie można wyświetlić przezroczystej wiadomości!">
+<!ENTITY ubiquity.bug19warning.Paragraph1 "&appTitle; nie udało się wyświetlić przezroczystej wiadomości.">
+<!ENTITY ubiquity.bug19warning.Paragraph2Part1 "Z powodu">
+<!ENTITY ubiquity.bug19warning.Paragraph2LinkText1 "błędu w &appTitle;">
+<!ENTITY ubiquity.bug19warning.Paragraph2Part2 "działającym pod kontrolą systemu OS X, możesz potrzebować">
+<!ENTITY ubiquity.bug19warning.Paragraph2LinkText2 "zainstalować Growl">
+<!ENTITY ubiquity.bug19warning.Paragraph2Part3 "jeśli jeszcze nie jest zainstalowany. Po instalacji może wystąpić konieczność ponownego uruchomienia Firefoksa.">
+<!ENTITY ubiquity.bug19warning.Paragraph3 "Nasze przeprosiny za niedogodności.">
+<!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
+<!ENTITY ubiquity.redirect.FeedHeader "Readresator standardowego kanału">
+<!ENTITY ubiquity.redirect.FileHeader "Readresator standardowego pliku">
+<!ENTITY ubiquity.redirect.FeedShortDesc "Ta strona jest prostym readresatorem, którego można użyć do przeniesienia użytkownika z interfejsu Ubiquity: URI do URI dla standardowego kanału.">
+<!ENTITY ubiquity.redirect.FeedLongDesc "Aby użyć readresatora, określ sumę kontrolną URI dla odpowiedniej ścieżki URI standardowego kanału, do którego użytkownik ma być przekierowany. Ścieżka powinna być relatywna do katalogu &appTitle;. Na przykład:">
+<!ENTITY ubiquity.redirect.FileShortDesc "Ta strona jest prostym readresatorem, którego można użyć do przeniesienia użytkownika z interfejsu Ubiquity: URI do pliku: URI.">
+<!ENTITY ubiquity.redirect.FileLongDesc "Aby użyć readresatora, określ sumę kontrolną URI dla odpowiedniej ścieżki URI standardowego kanału, do którego użytkownik ma być przekierowany. Ścieżka powinna być relatywna do katalogu &appTitle;. Na przykład:">
+<!-- TO DO:Localize Dev Tools: playpen, tuner, test, and anything else these guys conjur up :) these will be in the next draft. Stay tuned!-->
+<!-- Next chrome/content/.xhtml -->
