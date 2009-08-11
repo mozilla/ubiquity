@@ -483,7 +483,7 @@ CmdUtils.makeSearchCommand({
   }
 });
 
-const noun_type_amazon_com_index = CmdUtils.NounType("index", {
+var noun_type_amazon_com_index = CmdUtils.NounType("index", {
   All: 0,
   Apparel: 15683091,
   Automotive: 15690151,
@@ -522,9 +522,72 @@ const noun_type_amazon_com_index = CmdUtils.NounType("index", {
   Watches: 378516011,
   Wireless: 408234,
   WirelessAccessories: 408234,
-}, "All"),
-Amazon = "http://www.amazon.com/",
-AmazLink = "Amazon.com".link(Amazon);
+}, "All");
+
+var Amazon = "http://www.amazon.com/";
+var AmazLink = "Amazon.com".link(Amazon);
+var AWS_ENDPOINT = "ecs.amazonaws.com";
+var AWS_REQUESTURI = "/onca/xml";
+// This key is linked to Blair McBride's AWS account - and only free services are enabled.
+// Please don't re-use it or abuse it. Instead, get your own AWS key - its free.
+var AWS_KEY = "08WX39XKK81ZEWHZ52R2";
+var AWS_SECRET = "w0WOQNS+GZcJWjrAmlK885tFi6rcrr9WOgeu6eK3";
+
+function amazon_generateTimestamp() {
+  // must be in the following format (Z meaning UTC): 2009-01-01T12:00:00Z
+  function zeroPad(aNum, aSize) {
+    var size = aSize || 2;
+    var str = aNum + "";
+    while (str.length < size)
+      str = "0" + str;
+    return str;
+  }
+  var now = new Date();
+  var timestamp = "";
+  timestamp += now.getUTCFullYear();
+  timestamp += "-";
+  timestamp += zeroPad(now.getUTCMonth() + 1);
+  timestamp += "-";
+  timestamp += zeroPad(now.getUTCDate());
+  timestamp += "T";
+  timestamp += zeroPad(now.getUTCHours());
+  timestamp += ":";
+  timestamp += zeroPad(now.getUTCMinutes());
+  timestamp += ":";
+  timestamp += zeroPad(now.getUTCSeconds());
+  timestamp += "Z";
+  return timestamp;
+}
+function amazon_doEscape(aString) {
+  var charMap = {
+    "!": "%21",
+    "*": "%2A",
+    "'": "%27",
+    "(": "%28",
+    ")": "%29"
+  };
+  var result = encodeURIComponent(aString);
+  for (var c in charMap)
+    result = result.replace(c, charMap[c]);
+  return result;
+}
+function amazon_signRequest(aParams) {
+  var key;
+  var params = {};
+  for (key in aParams)
+    params[key] = aParams[key];
+  params.Timestamp = amazon_generateTimestamp();
+  params.AWSAccessKeyId = AWS_KEY;
+  var paramArray = [];
+  for (key in params)
+    paramArray.push(amazon_doEscape(key) + "=" + amazon_doEscape(params[key]));
+  paramArray.sort();
+  var paramString = paramArray.join("&");
+  var sigBaseString = "GET\n" + AWS_ENDPOINT + "\n" + AWS_REQUESTURI + "\n" + paramString;
+  var signature = Utils.signHMAC("SHA256", AWS_SECRET, sigBaseString);
+  return "http://" + AWS_ENDPOINT + AWS_REQUESTURI + "?" + paramString + "&Signature=" + amazon_doEscape(signature);
+}
+
 CmdUtils.CreateCommand({
   names: ["amazon"],
   icon: "chrome://ubiquity/skin/icons/amazon.ico",
@@ -550,73 +613,13 @@ CmdUtils.CreateCommand({
       previewBlock.innerHTML = this.description + this.help;
       return;
     }
-    const AWS_ENDPOINT = "ecs.amazonaws.com";
-    const AWS_REQUESTURI = "/onca/xml";
-    // This key is linked to Blair McBride's AWS account - and only free services are enabled.
-    // Please don't re-use it or abuse it. Instead, get your own AWS key - its free.
-    const AWS_KEY = "08WX39XKK81ZEWHZ52R2";
-    const AWS_SECRET = "w0WOQNS+GZcJWjrAmlK885tFi6rcrr9WOgeu6eK3";
-    function generateTimestamp() {
-      // must be in the following format (Z meaning UTC): 2009-01-01T12:00:00Z
-      function zeroPad(aNum, aSize) {
-        var size = aSize || 2;
-        var str = aNum + "";
-        while (str.length < size)
-          str = "0" + str;
-        return str;
-      }
-      var now = new Date();
-      var timestamp = "";
-      timestamp += now.getUTCFullYear();
-      timestamp += "-";
-      timestamp += zeroPad(now.getUTCMonth() + 1);
-      timestamp += "-";
-      timestamp += zeroPad(now.getUTCDate());
-      timestamp += "T";
-      timestamp += zeroPad(now.getUTCHours());
-      timestamp += ":";
-      timestamp += zeroPad(now.getUTCMinutes());
-      timestamp += ":";
-      timestamp += zeroPad(now.getUTCSeconds());
-      timestamp += "Z";
-      return timestamp;
-    }
-    function doEscape(aString) {
-      var charMap = {
-        "!": "%21",
-        "*": "%2A",
-        "'": "%27",
-        "(": "%28",
-        ")": "%29"
-      };
-      var result = encodeURIComponent(aString);
-      for (var c in charMap)
-        result = result.replace(c, charMap[c]);
-      return result;
-    }
-    function signRequest(aParams) {
-      var key;
-      var params = {};
-      for (key in aParams)
-        params[key] = aParams[key];
-      params.Timestamp = generateTimestamp();
-      params.AWSAccessKeyId = AWS_KEY;
-      var paramArray = [];
-      for (key in params)
-        paramArray.push(doEscape(key) + "=" + doEscape(params[key]));
-      paramArray.sort();
-      var paramString = paramArray.join("&");
-      var sigBaseString = "GET\n" + AWS_ENDPOINT + "\n" + AWS_REQUESTURI + "\n" + paramString;
-      var signature = Utils.signHMAC("SHA256", AWS_SECRET, sigBaseString);
-      return "http://" + AWS_ENDPOINT + AWS_REQUESTURI + "?" + paramString + "&Signature=" + doEscape(signature);
-    }
     
     var me = this;
     previewBlock.innerHTML =
       _("Searching ${AmazLink} for items matching <b>${query}</b>.",
         {AmazLink: AmazLink, query: html});
     CmdUtils.previewAjax(previewBlock, {
-      url: signRequest({
+      url: amazon_signRequest({
         Service: "AWSECommerceService",
         Version: "2008-08-19",
         Operation: "ItemSearch",
