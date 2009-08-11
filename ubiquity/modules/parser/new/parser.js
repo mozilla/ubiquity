@@ -1440,9 +1440,9 @@ Parser.prototype = {
 
     if (alreadyCached) {
       var ids = [ id for (id in nounTypeIds) if (this._nounCache[x][id].length) ];
-      currentQuery.dump('found all required values for '+x+' in cache');
+//      currentQuery.dump('found all required values for '+x+' in cache');
       if (typeof callback == 'function') {
-        currentQuery.dump("running callback ("+callback.name+") now");
+//        currentQuery.dump("running callback ("+callback.name+") now");
         callback(x,ids);
       }
     } else {
@@ -1478,7 +1478,7 @@ Parser.prototype = {
                        || currentQuery._detectionTracker.getComplete(x,id)
                        )];
 
-        currentQuery.dump("finished detecting " + x + " for " + ids );
+//        currentQuery.dump("finished detecting " + x + " for " + ids );
         if (currentQuery.finished) {
           currentQuery.dump("this query is already finished... so don't suggest this noun!");
           return;
@@ -1515,7 +1515,7 @@ Parser.prototype = {
         }
 
         if (typeof callback == 'function') {
-          currentQuery.dump("running callback ("+callback.name+") now");
+//          currentQuery.dump("running callback ("+callback.name+") now");
           callback(x,ids, asyncFlag);
         }
       };
@@ -1691,8 +1691,7 @@ var ParseQuery = function(parser, queryString, selObj, context,
 
 ParseQuery.prototype = {
   dump: function PQ_dump(msg) {
-    var it = this._idTime;
-    dump(it + ":" + (new Date - it) + " " + msg + "\n");
+    dump(this._idTime + ":" + (new Date - this._idTime) + " " + msg + "\n");
   },
 
   // ** {{{ParseQuery#run()}}} **
@@ -1710,15 +1709,12 @@ ParseQuery.prototype = {
     // clear the nounCache... for 0.5
     this.parser._nounCache = {};
     this._keepworking = true;
-    this._next();
-
-    this._input = this.parser.wordBreaker(this.input);
-    this._next();
 
     var parseGenerator = this._yieldingParse();
     var self = this;
 
     function doAsyncParse() {
+//      self.dump('doAsyncParse');
       try {
         var ok = parseGenerator.next();
       } catch(e) {
@@ -1774,6 +1770,15 @@ ParseQuery.prototype = {
   // # done!
   _yieldingParse: function() {
 
+    // start with step 1
+    this._next();
+    yield true;
+    
+    // STEP 1: split into words
+    this._input = this.parser.wordBreaker(this.input);
+    yield true;
+    this._next();
+
     // STEP 2: pick possible verbs
     this._preParses = this.parser.verbFinder(this._input, this.selObj.text);
     yield true;
@@ -1781,7 +1786,7 @@ ParseQuery.prototype = {
 
     // STEP 3: pick possible clitics
     // TODO: find clitics
-    yield true;
+    // yield true;
     this._next();
 
     // STEP 4: group into arguments and apply selection interpolation
@@ -1791,8 +1796,9 @@ ParseQuery.prototype = {
                                             this.input,
                                             this);
       this._possibleParses = this._possibleParses.concat(argParses);
-      yield true;
     }
+    yield true;
+    
     //if we have a selection, apply the selection interpolation
     if (this.selObj.text && this.selObj.text.length) {
       let selection = this.selObj.text;
@@ -1800,8 +1806,8 @@ ParseQuery.prototype = {
         let newParses = this.parser.interpolateSelection(parse, selection);
         if (newParses.length)
           this._possibleParses = this._possibleParses.concat(newParses);
-        yield true;
       }
+      yield true;
     }
     this._next();
 
@@ -1817,8 +1823,8 @@ ParseQuery.prototype = {
           if (newParses.length)
             this._possibleParses = this._possibleParses.concat(newParses);
         }
-        yield true;
       }
+      yield true;
     }
     this._next();
 
@@ -1828,8 +1834,8 @@ ParseQuery.prototype = {
       let newParses = this.parser.substituteNormalizedArgs(parse);
       if (newParses.length)
         this._possibleParses = this._possibleParses.concat(newParses);
-      yield true;
     }
+    yield true;
     this._next();
 
     // STEP 7: attempt to apply objects to other roles
@@ -1842,8 +1848,8 @@ ParseQuery.prototype = {
       let newParses = this.parser.applyObjectsToOtherRoles(parse);
       if (newParses.length)
         this._possibleParses = this._possibleParses.concat(newParses);
-      yield true;
     }
+    yield true;
     this._next();
 
     // STEP 8: suggest verbs for parses which don't have one
@@ -1856,9 +1862,9 @@ ParseQuery.prototype = {
         newVerbedParse = this.parser.updateScoreMultiplierWithArgs(newVerbedParse);
         newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
         this.addIfGoodEnough('verbed', newVerbedParse);
-        yield true;
       }
     }
+    yield true;
     this._next();
 
     // STEP 9: do nountype detection + cache
@@ -1900,11 +1906,11 @@ ParseQuery.prototype = {
                      || addedAny;
       }
 
-      for each (let vParse in thisQuery._verbedParses){
-	  if (!vParse.complete)
-	    dump("incomplete parse, verb: " + vParse._verb +
-                  ", argString: " + vParse.argString + "\n");
-      }
+//      for each (let vParse in thisQuery._verbedParses){
+//        if (!vParse.complete)
+//        dump("incomplete parse, verb: " + vParse._verb +
+//                  ", argString: " + vParse.argString + "\n");
+//      }
 
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
@@ -1914,7 +1920,7 @@ ParseQuery.prototype = {
 
     function tryToCompleteParses(argText,ids,asyncFlag) {
 
-      thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
+//      thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -1985,13 +1991,18 @@ ParseQuery.prototype = {
       }
     }
 
+    var count = 0;
     for each (let parse in this._verbedParses) {
       for each (let {argText,nounTypeIds} in
                                         parse.getArgsAndNounTypeIdsToCheck()) {
         this.parser.detectNounType(thisQuery, argText, nounTypeIds,
                                    tryToCompleteParses);
       }
-      yield true;
+
+      // we don't need to yield that often... let's try once every 8 verbedParses
+      // but yield first after four just 
+      if ((count++)%8 == 4)
+        yield true;
     }
 
   },
