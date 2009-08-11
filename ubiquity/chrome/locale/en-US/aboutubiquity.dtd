@@ -1,4 +1,4 @@
-<!-- Draft #002:
+<!--
 NOTE TO TRANSLATORS:
 
 Hello, and thanks for taking your time to translate our strings for Ubiquity!
@@ -13,11 +13,11 @@ Thanks a ton and happy translating!
 
 Sincerely,
 - The Ubiquity Team
-
 -->
 
-<!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
+<!-- Translators: for the moment, do not translate these, as it's used everywhere! -->
 <!ENTITY appTitle "Ubiquity">
+<!ENTITY appVersion "<span class='version'></span>">
 
 <!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.About "About &appTitle;">
@@ -67,43 +67,44 @@ Sincerely,
 
 <!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiqutiy.about.WhatIsUbiquity "What Is &appTitle;?">
-<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; is a Firefox add-on that lets you give <strong>commands</strong> to Firefox by entering command words into a special input box.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; is a Firefox add-on that lets you give commands to Firefox by entering command words into a special input box.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Commands are shortcuts for things that you commonly do on the Web; they can eliminate repetitive tasks and let you get more done, faster.">
-<!ENTITY ubiqutiy.about.WhatIsParagraph3 "The coolest thing about &appTitle; is that <em>anyone</em> can write a command and share it with the rest of the world, in much the same way as the Web itself lets everyone write pages and share information with the rest of the world.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "The coolest thing about &appTitle; is that anyone can write a command and share it with the rest of the world, in much the same way as the Web itself lets everyone write pages and share information with the rest of the world.">
 
 <!ENTITY ubiqutiy.about.LearnHow "Learn How To Use &appTitle;">
 <!ENTITY ubiqutiy.about.TutorialButton "Click Here to Take the Interactive Tutorial">
 
 <!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "More On Using &appTitle;">
 
-<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "After taking the basic tutorial on this page, you can learn more by reading the ">
+<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "After taking the basic tutorial on this page, you can learn more by reading the">
 <!ENTITY ubiqutiy.about.UsingParagraph1LinkText "In-depth documentation page">
 <!ENTITY ubiqutiy.about.UsingParagraph1Part2 ".">
 
-<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "<strong>Help us</strong> by subscribing to the ">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "Help us by subscribing to the">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText1 "Herd">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". This will add your data to the ">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". This will add your data to the">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText2 "dashboard">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part3 " &mdash; it's completely anonymous and will help us make &appTitle; better and safer.">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "&mdash; it's completely anonymous and will help us make &appTitle; better and safer.">
 
-<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "For information about the goals of the &appTitle; project and our plans for upcoming releases, check out our ">
+<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "For information about the goals of the &appTitle; project and our plans for upcoming releases, check out our">
 <!ENTITY ubiqutiy.about.UsingParagraph3LinkText "Roadmap">
 <!ENTITY ubiqutiy.about.UsingParagraph3Part2 ".">
 
-<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&appTitle; is a team effort by contributors from all over the world. For a list of some of the contributors, check out the ">
+<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&appTitle; is a team effort by contributors from all over the world. For a list of some of the contributors, check out the">
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "credits page">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
 
-<!ENTITY ubiqutiy.about.Thanks "Thanks for using &appTitle; <span class='version'></span>!">
-<!ENTITY ubiquity.about.ThanksParagraph1 "Version <span class='version'></span> of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the">
-<!ENTITY ubiquity.about.ThanksParagraph1LinkText "Release Notes">
+<!ENTITY ubiqutiy.about.Thanks "Thanks for using &appTitle; &appVersion;!">
+<!ENTITY ubiquity.about.ThanksParagraphPart1 "Version &appVersion; of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the">
+<!ENTITY ubiquity.about.ThanksParagraphLinkText "Release Notes">
+<!ENTITY ubiquity.about.ThanksParagraphPart2 ".">
 
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.settings.Skins "Skins">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Edit Custom Skin">
 
 <!ENTITY ubiquity.settings.KeyCombination "Key Combination">
-<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Invoke</strong> &appTitle; by pressing:">
+<!ENTITY ubiquity.settings.InvokingUbiquity "Invoke &appTitle; by pressing:">
 <!ENTITY ubiquity.settings.ChangeShortcut "Click above to <strong>Change</strong> the keyboard shortcut used to open/close &appTitle;.">
 
 <!ENTITY ubiquity.settings.LangSettings "Language Settings">
@@ -127,7 +128,7 @@ Sincerely,
 <!ENTITY ubiquity.settings.ShareSkin "Share">
 <!ENTITY ubiquity.settings.SaveNotice "Clicking save immediately updates &appTitle;'s look.">
 
-<!ENTITY ubiquity.settings.Bug449WarningPart1 "Changes you make to a custom skin may not be seen until after a browser restart. This is a ">
+<!ENTITY ubiquity.settings.Bug449WarningPart1 "Changes you make to a custom skin may not be seen until after a browser restart. This is a">
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "known bug">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 
@@ -170,24 +171,24 @@ Sincerely,
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "We are working on an automated bug report service, but for the time being you should report any reproducible problems you find using Get Satisfaction or through our Google Group/Mailing List. Please include any information you have about how to best reproduce the bug.">
 
 <!ENTITY ubiquity.support.ResetUbiquity "Resetting &appTitle;">
-<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "If &appTitle; becomes completely unresponsive to you, then it may be necessary to reset it to its &ldquo;factory defaults&rdquo; in order to use it again. To perform a reset, ">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "If &appTitle; becomes completely unresponsive to you, then it may be necessary to reset it to its &ldquo;factory defaults&rdquo; in order to use it again. To perform a reset,">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1LinkText "click here">
-<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 " &mdash; and please accept our apologies for the inconvenience!">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "&mdash; and please accept our apologies for the inconvenience!">
 
 <!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; Command Editor">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Enter new commands</strong> in the area below. They will automatically be saved as you type, and will be able to be instantly used from the command entry mode.">
 
-<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Read the ">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Read the">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText1 "command authoring tutorial">
-<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart2 " to learn more. For examples of built-in commands, ">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart2 "to learn more. For examples of built-in commands,">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText2 "look here">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart3 ".">
 
-<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentation for the ">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentation for the">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocsLinkText "command APIs">
 
-<!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "<strong>Get involved</strong>. Learn how by visiting the ">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "<strong>Get involved</strong>. Learn how by visiting the">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&appTitle; Wiki">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart2 ".">
 
@@ -197,7 +198,7 @@ Sincerely,
 <!ENTITY ubiquity.editor.CmdTypeLocked "Locked-Down">
 <!ENTITY ubiquity.editor.RegularCommandDesc "<em>Regular</em> feeds have full freedom to do anything to your computer.">
 
-<!ENTITY ubiquity.editor.LockedCommandDescPart1 "<em>Locked-Down</em> feeds are very safe but don't have much freedom to interact with your computer. For more information, see the ">
+<!ENTITY ubiquity.editor.LockedCommandDescPart1 "<em>Locked-Down</em> feeds are very safe but don't have much freedom to interact with your computer. For more information, see the">
 <!ENTITY ubiquity.editor.LockedCommandDescLinkText "Locked-Down Feed Tutorial">
 <!ENTITY ubiquity.editor.LockedCommandDescPart2 ".">
 
@@ -209,23 +210,23 @@ Sincerely,
 
 <!ENTITY ubiquity.editor.ShareYourCommands "Share Your Commands">
 
-<!ENTITY ubiquity.editor.ShareCommandsParagraph1Part1 "Post your command on the ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1Part1 "Post your command on the">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph1LinkText "commands in the wild">
-<!ENTITY ubiquity.editor.ShareCommandsParagraph1Part2 " wiki page so that other users can find it.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1Part2 "wiki page so that other users can find it.">
 
-<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part1 "Also, sign up for the the ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part1 "Also, sign up for the the">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2LinkText1 "herd command">
-<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part2 " which will then display your command on the ">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2Part2 "which will then display your command on the">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2LinkText2 "dashboard">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2Part3 ".">
 
 <!ENTITY ubiquity.editor.DevelopingUbiquity "Developing &appTitle;">
 
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part1 "Run the ">
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1LinkText "unit tests.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part1 "Run the">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1LinkText "unit tests">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part2 ".">
 
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2Part1 "Help us test our ">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2Part1 "Help us test our">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2LinkText "experimental commands">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2Part2 "!">
 
@@ -235,7 +236,7 @@ Sincerely,
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3LinkText2 "nountype tuner">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part3 "to check your nountypes' suggestions and scoring.">
 
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "And if you're going to be developing &appTitle; itself, check out our ">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "And if you're going to be developing &appTitle; itself, check out our">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4LinkText "core developer commands">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part2 ".">
 
@@ -246,7 +247,7 @@ Sincerely,
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "You are about to subscribe to a">
 <!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart2 "command from an unknown, untrusted third-party source at">
-<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 "If you subscribe, this command could do <em>anything it wants</em> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 ". If you subscribe, this command could do <em>anything it wants</em> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.">
 
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "Here is the JavaScript source code to the command:">
 <!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Loading code, please wait...">
@@ -262,7 +263,7 @@ Sincerely,
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara1 "This means that the feed will constantly be checked for functionality updates and automatically pushed to your computer. If you check this, make sure that you trust the people who have access to change this code on the server that it's hosted on.">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part1 "Note that this feed is served using an insecure protocol, and is therefore subject to">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "man-in-the-middle attacks">
-<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 "Please only auto-update this feed if you are sure about the implications of what you're doing.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 ". Please only auto-update this feed if you are sure about the implications of what you're doing.">
 
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationShort "You are now subscribing to the command feed and can use its functionality.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "If you ever want to unsubscribe, you can use the &ldquo;list&rdquo; &appTitle; command at any time to get to the">

@@ -1,36 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!DOCTYPE html [
-	<!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
-		%htmlDTD;
-
-	<!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
-		%directionDTD;
-
-	<!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
-		%ubiquityaboutDTD;
+  <!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+    %htmlDTD;
+  <!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
+    %directionDTD;
+  <!ENTITY % ubiquityaboutDTD SYSTEM "chrome://ubiquity/locale/aboutubiquity.dtd">
+    %ubiquityaboutDTD;
 ]>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
-	<title>&ubiquity.pagetitle.HackUbiquity;</title>
+  <title>&ubiquity.pagetitle.HackUbiquity;</title>
 
-	<base href="chrome://ubiquity/content" />
+  <base href="chrome://ubiquity/content" />
 
-	<link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
-	<link rel="stylesheet" href="web-content.css" type="text/css" />
+  <link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
+  <link rel="stylesheet" href="web-content.css" type="text/css" />
 
-	<script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
-	<script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
-	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
+  <script type="text/javascript" src="resource://ubiquity/scripts/jquery.js"></script>
+  <script type="text/javascript" src="chrome://ubiquity/content/localeglobals.js"></script>
+  <script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
 
-	<script type="application/javascript;version=1.8" src="chrome://ubiquity/content/developer-news.js"></script>
-	<script type="application/javascript;version=1.7" src="editor.js"></script>
-	<script type="application/javascript;version=1.7" src="resource://ubiquity/scripts/codemirror/js/codemirror.js"></script>
+  <script type="application/javascript;version=1.8" src="chrome://ubiquity/content/developer-news.js"></script>
+  <script type="application/javascript;version=1.7" src="editor.js"></script>
+  <script type="application/javascript;version=1.7" src="resource://ubiquity/scripts/codemirror/js/codemirror.js"></script>
 
-	<script type="text/javascript">
-	<![CDATA[
+  <script type="text/javascript">
+  <![CDATA[
     const PREF_ENABLE_HIGHLIGHTING = "extensions.ubiquity.editor_highlighting";
 
     // Workaround for #437.
@@ -124,8 +119,8 @@
       Application.prefs.setValue(PREF_ENABLE_HIGHLIGHTING, enabled);
       window.location.reload();
     }
-	]]>
-	</script>
+  ]]>
+  </script>
 
 </head>
 <body dir="&locale.dir;" onload="initialize(); Editor.onLoad(); highlight();">
@@ -137,7 +132,7 @@
 <br clear="all" />
 
 <div style="text-align:center;">
-	<p>&ubiquity.pagetip.HackUbiquity;</p>
+  <p>&ubiquity.pagetip.HackUbiquity;</p>
 </div>
 
 <br clear="all" />
@@ -146,78 +141,78 @@
 <p id="notification-bar" class="notification" style="display:none"></p>
 
 <div class="col-three">
-	<p>&ubiquity.editor.CommandEditorNewCommands;</p>
+  <p>&ubiquity.editor.CommandEditorNewCommands;</p>
 </div>
 
 <div class="col-three">
-	<p><strong>&ubiquity.editor.CommandEditorReadAuthTutPart1;<a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial">&ubiquity.editor.CommandEditorReadAuthTutLinkText1;</a></strong>&ubiquity.editor.CommandEditorReadAuthTutPart2;<a href="resource://ubiquity/standard-feeds">&ubiquity.editor.CommandEditorReadAuthTutLinkText2;</a>&ubiquity.editor.CommandEditorReadAuthTutPart3;</p>
-	<p style="background-color: #F2E78B; padding:5px;">&ubiquity.editor.CommandEditorReadTheDocs;<a href="file.xhtml#index.html">&ubiquity.editor.CommandEditorReadTheDocsLinkText;</a></p>
+  <p><strong>&ubiquity.editor.CommandEditorReadAuthTutPart1; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial">&ubiquity.editor.CommandEditorReadAuthTutLinkText1;</a></strong>&ubiquity.editor.CommandEditorReadAuthTutPart2; <a href="resource://ubiquity/standard-feeds">&ubiquity.editor.CommandEditorReadAuthTutLinkText2;</a> &ubiquity.editor.CommandEditorReadAuthTutPart3;</p>
+  <p style="background-color: #F2E78B; padding:5px;">&ubiquity.editor.CommandEditorReadTheDocs; <a href="file.xhtml#index.html">&ubiquity.editor.CommandEditorReadTheDocsLinkText;</a></p>
 </div>
 
 <div class="col-two">
-	<p>&ubiquity.editor.CommandEditorGetInvolvedPart1;<a href="http://wiki.mozilla.org/Labs/Ubiquity">&ubiquity.editor.CommandEditorGetInvolvedLinkText;</a>&ubiquity.editor.CommandEditorGetInvolvedPart2;</p>
+  <p>&ubiquity.editor.CommandEditorGetInvolvedPart1; <a href="http://wiki.mozilla.org/Labs/Ubiquity">&ubiquity.editor.CommandEditorGetInvolvedLinkText;</a> &ubiquity.editor.CommandEditorGetInvolvedPart2;</p>
 </div>
 
 <div id="editor-actions">
-	<br clear="all" />
+  <br clear="all" />
 
-	<div id="external-editor-pref">&ubiquity.editor.YourExternalEd;
-		<input id="editorInputBox" type="file" size="20" style="cursor:pointer" onchange="Editor.onSave()" />
-	</div>
+  <div id="external-editor-pref">&ubiquity.editor.YourExternalEd;
+    <input id="editorInputBox" type="file" size="20" style="cursor:pointer" onchange="Editor.onSave()" />
+  </div>
 
-	<br />
+  <br />
 
-	<div id="feed-type-pref">&ubiquity.editor.EditorCommandType;
-		<select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
-			<option value="commands">&ubiquity.editor.CmdTypeRegular;</option>
-			<option value="locked-down-commands">&ubiquity.editor.CmdTypeLocked;</option>
-		</select>
-	</div>
+  <div id="feed-type-pref">&ubiquity.editor.EditorCommandType;
+    <select id="feedTypeMenu" onchange="Editor.onFeedTypeChange()">
+      <option value="commands">&ubiquity.editor.CmdTypeRegular;</option>
+      <option value="locked-down-commands">&ubiquity.editor.CmdTypeLocked;</option>
+    </select>
+  </div>
 
-	<div>
-		<span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
-		<span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDescPart1;<a href="https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial">&ubiquity.editor.LockedCommandDescLinkText;</a>&ubiquity.editor.LockedCommandDescPart2;</span>
-	</div>
+  <div>
+    <span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
+    <span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDescPart1; <a href="https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial">&ubiquity.editor.LockedCommandDescLinkText;</a> &ubiquity.editor.LockedCommandDescPart2;</span>
+  </div>
 
-	<br clear="all" />
+  <br clear="all" />
 
-	<ul class="button-list">
-		<li><a class="button" onclick="importTemplate();return false"><strong>&ubiquity.editor.ImportTemplate;</strong></a></li>
-		<li><a class="button" onclick="launch();return false"><strong>&ubiquity.editor.LaunchExternalEd;</strong></a></li>
-		<li><a class="button" onclick="paste();return false"><strong>&ubiquity.editor.ShareCommand;</strong></a></li>
-		<li><a class="button" onclick="saveAs();return false"><strong>&ubiquity.editor.SaveToFile;</strong></a></li>
-	</ul>
+  <ul class="button-list">
+    <li><a class="button" onclick="importTemplate();return false"><strong>&ubiquity.editor.ImportTemplate;</strong></a></li>
+    <li><a class="button" onclick="launch();return false"><strong>&ubiquity.editor.LaunchExternalEd;</strong></a></li>
+    <li><a class="button" onclick="paste();return false"><strong>&ubiquity.editor.ShareCommand;</strong></a></li>
+    <li><a class="button" onclick="saveAs();return false"><strong>&ubiquity.editor.SaveToFile;</strong></a></li>
+  </ul>
 
-	<br clear="all" />
+  <br clear="all" />
 
-	<div id="editor-options">
-		<label for="enableSyntaxHighlighting">
-			<input type="checkbox" id="enableSyntaxHighlighting" onchange="enableSyntaxHighlighter(this.checked);"/> &ubiquity.editor.EnableHighlighting;
-		</label>
-	</div>
+  <div id="editor-options">
+    <label for="enableSyntaxHighlighting">
+      <input type="checkbox" id="enableSyntaxHighlighting" onchange="enableSyntaxHighlighter(this.checked);"/> &ubiquity.editor.EnableHighlighting;
+    </label>
+  </div>
 </div>
 
 <div id="editor-div">
-	<textarea id="editor" rows="40" style="width:99%"></textarea>
+  <textarea id="editor" rows="40" style="width:99%"></textarea>
 </div>
 
 <br clear="all" />
 
 <div class="col-five">
-	<h2>&ubiquity.editor.ShareYourCommands;</h2>
-	<p>&ubiquity.editor.ShareCommandsParagraph1Part1;<a href="http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">&ubiquity.editor.ShareCommandsParagraph1LinkText;</a>&ubiquity.editor.ShareCommandsParagraph1Part2;</p>
-	<p>&ubiquity.editor.ShareCommandsParagraph2Part1;<a href="https://ubiquity.mozilla.com/herd/command-feed/">&ubiquity.editor.ShareCommandsParagraph2LinkText1;</a>&ubiquity.editor.ShareCommandsParagraph2Part2;<a href="https://ubiquity.mozilla.com/herd/">&ubiquity.editor.ShareCommandsParagraph2LinkText2;</a>&ubiquity.editor.ShareCommandsParagraph2Part3;</p>
+  <h2>&ubiquity.editor.ShareYourCommands;</h2>
+  <p>&ubiquity.editor.ShareCommandsParagraph1Part1; <a href="http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">&ubiquity.editor.ShareCommandsParagraph1LinkText;</a> &ubiquity.editor.ShareCommandsParagraph1Part2;</p>
+  <p>&ubiquity.editor.ShareCommandsParagraph2Part1; <a href="https://ubiquity.mozilla.com/herd/command-feed/">&ubiquity.editor.ShareCommandsParagraph2LinkText1;</a> &ubiquity.editor.ShareCommandsParagraph2Part2; <a href="https://ubiquity.mozilla.com/herd/">&ubiquity.editor.ShareCommandsParagraph2LinkText2;</a> &ubiquity.editor.ShareCommandsParagraph2Part3;</p>
 
-	<h2>&ubiquity.editor.DevelopingUbiquity;</h2>
-	<p>&ubiquity.editor.DevelopingUbiquityParagraph1Part1;<a href="test.html">&ubiquity.editor.DevelopingUbiquityParagraph1LinkText;</a>&ubiquity.editor.DevelopingUbiquityParagraph1Part2;</p>
-	<p>&ubiquity.editor.DevelopingUbiquityParagraph2Part1;<a href="feed.xhtml#experimental-commands.html">&ubiquity.editor.DevelopingUbiquityParagraph2LinkText;</a>&ubiquity.editor.DevelopingUbiquityParagraph2Part2;</p>
-	<p>&ubiquity.editor.DevelopingUbiquityParagraph3Part1; <a href="chrome://ubiquity/content/playpen.html">&ubiquity.editor.DevelopingUbiquityParagraph3LinkText1;</a> &ubiquity.editor.DevelopingUbiquityParagraph3Part2; <a href="chrome://ubiquity/content/tuner.html">&ubiquity.editor.DevelopingUbiquityParagraph3LinkText2;</a> &ubiquity.editor.DevelopingUbiquityParagraph3Part3;</p>
-	<p>&ubiquity.editor.DevelopingUbiquityParagraph4Part1;<a href="feed.xhtml#core-developer-commands.html">&ubiquity.editor.DevelopingUbiquityParagraph4LinkText;</a>&ubiquity.editor.DevelopingUbiquityParagraph4Part2;</p>
+  <h2>&ubiquity.editor.DevelopingUbiquity;</h2>
+  <p>&ubiquity.editor.DevelopingUbiquityParagraph1Part1; <a href="test.html">&ubiquity.editor.DevelopingUbiquityParagraph1LinkText;</a> &ubiquity.editor.DevelopingUbiquityParagraph1Part2;</p>
+  <p>&ubiquity.editor.DevelopingUbiquityParagraph2Part1; <a href="feed.xhtml#experimental-commands.html">&ubiquity.editor.DevelopingUbiquityParagraph2LinkText;</a> &ubiquity.editor.DevelopingUbiquityParagraph2Part2;</p>
+  <p>&ubiquity.editor.DevelopingUbiquityParagraph3Part1; <a href="chrome://ubiquity/content/playpen.html">&ubiquity.editor.DevelopingUbiquityParagraph3LinkText1;</a> &ubiquity.editor.DevelopingUbiquityParagraph3Part2; <a href="chrome://ubiquity/content/tuner.html">&ubiquity.editor.DevelopingUbiquityParagraph3LinkText2;</a> &ubiquity.editor.DevelopingUbiquityParagraph3Part3;</p>
+  <p>&ubiquity.editor.DevelopingUbiquityParagraph4Part1; <a href="feed.xhtml#core-developer-commands.html">&ubiquity.editor.DevelopingUbiquityParagraph4LinkText;</a> &ubiquity.editor.DevelopingUbiquityParagraph4Part2;</p>
 </div>
 
 <div class="col-four">
-	<h2>&ubiquity.editor.LatestChangesFeedTitle;</h2>
-	<div id="news"></div>
+  <h2>&ubiquity.editor.LatestChangesFeedTitle;</h2>
+  <div id="news"></div>
 </div>
 
 </body>
