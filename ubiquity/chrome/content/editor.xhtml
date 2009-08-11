@@ -78,7 +78,10 @@
       }
     }
     function highlight() {
-      if(!getHighlighting()) {
+      //TODO: doing syntax highlighting breaks the editor, so we're always
+      //skipping the syntax highlighting for now. See if we can
+      //fix this at some point.
+      if(true || !getHighlighting()) {
         setupTextarea();
         return;
       }
