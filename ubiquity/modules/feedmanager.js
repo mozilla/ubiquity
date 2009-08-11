@@ -297,12 +297,10 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   // Watch for when a new page is shown and check if the domain of that
   // page matches a domain used by any installed commands
   function onPageShow(event) {
-		var pageDomain = null;
-		try {
+    var pageDomain = null;
+    try {
       var pageDomain = event.target.domain;
-		} catch(e) {
-			return;
-		}
+    } catch(e) { return; }
     let notTheseSites = noNotificationSites();
     if(!notTheseSites.some(function (domainToSkip) domainToSkip == pageDomain)){
       let cmdManager = Utils.currentChromeWindow.gUbiquity.cmdManager;
@@ -311,7 +309,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
       if(commandsThatMatch){
         let verbId = commandsThatMatch[0].id;
         let freqOfUse = cmdManager.__nlParser._suggestionMemory.getScore("", verbId);
-	if(freqOfUse == 0){
+        if(freqOfUse == 0){
           let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
           if((visitsToDomain % self.commandReminderPeriod) == 0)
             self.showEnabledCommandNotification(event.target,
@@ -398,7 +396,7 @@ FMgrProto.showEnabledCommandNotification =
        popup: null},
       {accessKey: "D",
        callback: onNoMoreClick,
-       label: "Don't show me this anymore",
+       label: "Don't remind me again for this website",
        popup:null}
     ];
     box.appendNotification(
