@@ -89,7 +89,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
                 '</span><br/>');
   // add unsubscribe link (but not for built-in feeds)
   if (!feed.isBuiltIn)
-    cell.append(actionLink("unsubscribe", function unsubscribe() {
+    cell.append(actionLink(_ubundle.GetStringFromName("ubiquity.cmdlist.unsubscribefeed"), function unsubscribe() {
       feed.remove();
       cell.slideUp(function onUnsubscribe() {
         $("a[name^='" + feed.uri.spec + "']").closest("tr").hide();
@@ -110,7 +110,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
       if (isAvailable)
         cell.append("<br/>",
                     A(href,
-                      "An update for this feed is available.",
+                      _ubundle.GetStringFromName("ubiquity.cmdlist.feedupdated"),
                       "feed-updated"));
     });
   // if sorting by feed, make feed name large and put a borderline
@@ -142,7 +142,7 @@ function formatCommandAuthor(authorData) {
 
   if ("homepage" in authorData) {
     authorMarkup += ('[<a href="' + escapeHtml(authorData.homepage) +
-                     '">Homepage</a>]');
+                     '">' + _ubundle.GetStringFromName("ubiquity.cmdlist.homepage") + '</a>]');
   }
 
   return authorMarkup;
@@ -176,20 +176,20 @@ function fillTableRowForCmd(row, cmd, className) {
      '<span class="description">' + cmd.description + '</span>' : "") +
     (names.length > 1 ?
      (<div class="synonyms-container light"
-      >also called <span class="synonyms">{names.slice(1).join(", ")}
+      >{_ubundle.GetStringFromName("ubiquity.cmdlist.synonyms")} <span class="synonyms">{names.slice(1).join(", ")}
       </span></div>) : "") +
     '<div class="light">' +
     (authors ?
-     '<span class="author">by ' + formatAuthors(authors) + '</span>' : "") +
+     '<span class="author">' + _ubundle.GetStringFromName("ubiquity.cmdlist.createdby") + ' ' + formatAuthors(authors) + '</span> ' : "") +
     ("license" in cmd ?
-     ('<span class="license"> - licensed as ' +
+     ('<span class="license"> &#8212; ' + _ubundle.GetStringFromName("ubiquity.cmdlist.license") + ' ' +
       escapeHtml(cmd.license) + '</span>') : "") +
     '</div>' +
     (contributors ?
-     ('<div class="contributors light">contributed by ' +
+     ('<div class="contributors light">' + _ubundle.GetStringFromName("ubiquity.cmdlist.contributions") + ' ' +
       formatAuthors(contributors) + '</div>') : "") +
     (homepage ?
-     (<div class="homepage">View more information at
+     (<div class="homepage">{_ubundle.GetStringFromName("ubiquity.cmdlist.viewmoreinfo")}
       <a href={homepage}>{homepage}</a></div>) : "") +
     ("help" in cmd ? '<div class="help">' + cmd.help + '</div>' : "") +
     '</td>');
@@ -198,7 +198,7 @@ function fillTableRowForCmd(row, cmd, className) {
     if (!("arguments" in cmd)) {
       cmdElement.addClass("not-loaded").find(".name").attr(
         "title",
-        "This command was not loaded as it is incompatible with Parser 2.");
+        _ubundle.GetStringFromName("ubiquity.cmdlist.oldparsertitle"));
     }
     if (cmd.oldAPI) {
       cmdElement.addClass("oldAPI").prepend(
@@ -332,7 +332,7 @@ function makeUnsubscribedFeedListElement(info) {
      ["<li>" + escapeHtml(cmd.name) + "</li>"
       for each (cmd in info.commands)].join("") +
      "</ul>"),
-    actionLink("resubscribe", function resubscribe() {
+    actionLink(_ubundle.GetStringFromName("ubiquity.cmdlist.resubscribe"), function resubscribe() {
       info.unremove();
       $li.slideUp(function onResubscribe() {
         updateUnsubscribedCount();
@@ -341,7 +341,7 @@ function makeUnsubscribedFeedListElement(info) {
       });
     }),
     " ",
-    actionLink("purge", function purge() {
+    actionLink(_ubundle.GetStringFromName("ubiquity.cmdlist.purge"), function purge() {
       info.purge();
       $li.slideUp("slow");
     }),
@@ -381,16 +381,20 @@ function changeSortMode(newSortMode) {
 
 function viewSourceLink(feed)(
   A("view-source:" + feed.viewSourceUri.spec,
-    ("view " +
-     (feed.canAutoUpdate ? "auto-updated " : "") +
-     "source"),
+    (_ubundle.GetStringFromName("ubiquity.cmdlist.view") + " " +
+     (feed.canAutoUpdate ? " " + _ubundle.GetStringFromName("ubiquity.cmdlist.autoupdated") + " " : "") +
+     _ubundle.GetStringFromName("ubiquity.cmdlist.source")),
     "action"));
 
 function viewLocalizationTemplate(feed) (
   A(("chrome://ubiquity/content/localization-template.xhtml#" +
      feed.srcUri.spec),
-    "get localization template",
+    _ubundle.GetStringFromName("ubiquity.cmdlist.localetemplate"),
     "action"));
+
+// TO-DO: perform an inventory of similar effects found throughout and move
+// them into a neatly packaged effects library later.
+// Try and tag them for now. (slides/fades/etc).
 
 function setupHelp() {
   var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
