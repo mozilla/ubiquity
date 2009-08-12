@@ -47,6 +47,7 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 var {skinService} = UbiquitySetup.createServices();
 var msgService = new AlertMessageService();
+var {escapeHtml} = Utils;
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 
@@ -176,7 +177,7 @@ function createSkinElement(filepath, origpath, id) {
 
   var skinMeta = {
     name: filepath,
-    homepage: origpath,
+    homepage: /^https?:/.test(origpath) ? origpath : '',
   };
   //look for =skin= ~ =/skin= indicating metadata
   var [, metaData] = /=skin=\s+([^]+)\s+=\/skin=/(css) || 0;
@@ -186,16 +187,16 @@ function createSkinElement(filepath, origpath, id) {
 
   var skinId = "skin_" + id;
 
-  $('#skin-list').append(
-     '<div class="command" id="' + skinId + '">' +
-     ('<input type="radio" name="skins" id="rad_' + skinId +
-      '" value="' + filepath + '"></input>') +
-     '<label class="label light" for="rad_'+ skinId + '">' +
-     '<a class="name"/><br/>' +
-     '<span class="author"/><span class="license"/></label>' +
-     '<div class="email light"></div>' +
-     '<div class="homepage light"></div></div>'
-    );
+  $("#skin-list").append(
+    '<div class="command" id="' + skinId + '">' +
+    ('<input type="radio" name="skins" id="rad_' + skinId +
+     '" value="' + escapeHtml(filepath) + '"></input>') +
+    '<label class="label light" for="rad_'+ skinId + '">' +
+    '<a class="name"/>' +
+    '<div class="author"></div>' +
+    '<div class="license"></div></label>' +
+    '<div class="email light"></div>' +
+    '<div class="homepage light"></div></div>');
 
   var skinEl = $("#" + skinId);
 
@@ -205,25 +206,29 @@ function createSkinElement(filepath, origpath, id) {
                             "skinService.changeSkin('" + filepath + "')");
 
   if (skinMeta.author)
-    skinEl.find(".author").text("by " + skinMeta.author);
+    skinEl.find(".author").text(L("ubiquity.settings.skinauthor",
+                                  skinMeta.author));
 
   if (skinMeta.email)
     skinEl.find(".email")[0].innerHTML = (
-      <>email: <a href={'mailto:' + skinMeta.email}
+      <>email: <a href={"mailto:" + skinMeta.email}
       >{skinMeta.email}</a></>);
 
   if (skinMeta.license)
-    skinEl.find(".license").text(" licensed as " + skinMeta.license);
+    skinEl.find(".license").text(L("ubiquity.settings.skinlicense",
+                                   skinMeta.license));
 
   if (skinMeta.homepage)
     skinEl.find(".homepage")[0].innerHTML =
       <a href={skinMeta.homepage}>{skinMeta.homepage}</a>.toXMLString();
 
   skinEl.append(<a class="action" href={"view-source:" + filepath}
-                target="_blank">[view source]</a>.toXMLString());
+                target="_blank">{
+                  L("ubiquity.settings.viewskinsource")
+                }</a>.toXMLString());
 
   if (filepath !== origpath) (
-    $("<a class='action'>[uninstall]</a>")
+    $('<a class="action">' + L("ubiquity.settings.uninstallskin") + "</a>")
     .click(function uninstall() {
       var before = skinService.currentSkin;
       skinService.uninstall(filepath);
@@ -277,9 +282,9 @@ function pasteToGist() {
 }
 
 function openSkinEditor() {
-  $('#editor-div').show();
+  $("#editor-div").show();
   $("#skin-editor").val(readFile(skinService.CUSTOM_SKIN)).focus();
-  $('#edit-button').hide();
+  $("#edit-button").hide();
 }
 
 function saveAs() {

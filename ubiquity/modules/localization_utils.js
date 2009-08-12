@@ -157,10 +157,10 @@ var LocalizationUtils = {
   // for the given name string. e.g.:
   // {{{
   // (foo.properties)
-  // some.key=%s-%s
+  // some.key=%S-%S
   // --------------
   // var L = propertySelector("foo.properties");
-  // L("some.key") //=> "%s-%s"
+  // L("some.key") //=> "%S-%S"
   // L("some.key", "A", "Z") //=> "A-Z"
   // }}}
 
