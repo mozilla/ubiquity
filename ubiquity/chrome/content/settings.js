@@ -43,13 +43,14 @@ Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 var {skinService} = UbiquitySetup.createServices();
 var msgService = new AlertMessageService();
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/aboutubiquity.properties");
 
 $(onDocumentLoad);
-
-function $$(name) _ubundle.GetStringFromName(name);
 
 function onDocumentLoad() {
   loadSkinList();
@@ -117,7 +118,7 @@ function changeLanguageSettings() {
 
   if (changed) {
     $("#lang-settings-changed-info").html(
-      "<em>" + $$("ubiquity.settings.restartfirefox") + "</em>");
+      "<em>" + L("ubiquity.settings.restartfirefox") + "</em>");
     $(".parser2")[useParserVersion < 2 ? "slideUp": "slideDown"]();
   }
 }
@@ -130,7 +131,7 @@ function changeExternalCallSettings() {
   if (externalCallsOnAllQueries !== prefs.getValue(PREF_NFE, 0)) {
     prefs.setValue(PREF_NFE, externalCallsOnAllQueries);
     $("#external-calls-settings-changed-info").html(
-      "<em>" + $$("ubiquity.settings.opennewwindows") + "</em>");
+      "<em>" + L("ubiquity.settings.opennewwindows") + "</em>");
   }
 }
 
@@ -255,7 +256,7 @@ function saveCustomSkin() {
   foStream.write(data, data.length);
   foStream.close();
 
-  msgService.displayMessage($$("ubiquity.settings.skinsaved"));
+  msgService.displayMessage(L("ubiquity.settings.skinsaved"));
   loadSkinList();
   if (skinService.currentSkin === skinService.CUSTOM_SKIN)
     skinService.loadCurrentSkin();
@@ -286,7 +287,7 @@ function saveAs() {
     skinService.saveAs($("#skin-editor").val(), "custom");
     loadSkinList();
   } catch (e) {
-    msgService.displayMessage($$("ubiquity.settings.skinerror"));
+    msgService.displayMessage(L("ubiquity.settings.skinerror"));
     Cu.reportError(e);
   }
 }

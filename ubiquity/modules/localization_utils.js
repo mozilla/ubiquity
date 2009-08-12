@@ -62,7 +62,7 @@ var LocalizationUtils = {
     if (feedUrl.indexOf(baseUrl) != 0)
       return false;
     var pathPart = feedUrl.slice(baseUrl.length);
-    return (/^(?:standard|builtin)-feeds\//.test(pathPart))
+    return (/^(?:standard|builtin)-feeds\b/.test(pathPart));
   },
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
     if (!this.isLocalizable(feedUrl)) return false;
@@ -100,8 +100,6 @@ var LocalizationUtils = {
 
   getLocalizedString: function LU_getLocalizedString (feedKey, key) {
     try {
-      //dump('gettext('+key+')\n');
-      //dump('return: '+this.GETTEXT.dgettext(feedKey,key)+'\n');
       return this.GETTEXT.dgettext(feedKey,key);
     } catch (ex) {
       return key;
@@ -111,20 +109,17 @@ var LocalizationUtils = {
   getLocalizedStringFromContext:
   function LU_getLocalizedStringFromContext(feedKey, context, key) {
     try {
-      //dump('gettext('+context+','+key+')\n');
       let rv = this.GETTEXT.dpgettext(feedKey,context, key);
       if (rv == key)
         // nothing was found in this context. try the general context
         rv = this.GETTEXT.dgettext(feedKey,key);
-      //dump('return: '+rv+'\n');
       return rv;
     } catch (ex) {
-      //dump('key '+key+' not found\n');
       return key;
     }
   },
 
-  // ** {{{setLocalizationContext}}} **
+  // === {{{setLocalizationContext}}} ===
   //
   // This is used to set the feed and command context for _().
   // {{{displayMode}}} is either "execute" or "preview" depending
@@ -152,7 +147,34 @@ var LocalizationUtils = {
                    (this.displayContext ? "." + displayContext : ""));
     var feedKey = this.getLocalFeedKey(this.feedContext.asciiSpec);
     return this.getLocalizedStringFromContext(feedKey, context, string);
-  }
+  },
+
+  // === {{{ propertySelector(properties) }}} ===
+  //
+  // Creates a {{{nsIStringBundle}}} for the .{{{properties}}} file and
+  // returns a wrapper function which will call {{{GetStringFromName}}} or
+  // {{{formatStringFromName}}} (if extra argument is passed)
+  // for the given name string. e.g.:
+  // {{{
+  // (foo.properties)
+  // some.key=%s-%s
+  // --------------
+  // var L = propertySelector("foo.properties");
+  // L("some.key") //=> "%s-%s"
+  // L("some.key", "A", "Z") //=> "A-Z"
+  // }}}
+
+  propertySelector: function LU_propertySelector(properties) {
+    var bundle = (Cc["@mozilla.org/intl/stringbundle;1"]
+                  .getService(Ci.nsIStringBundleService)
+                  .createBundle(properties));
+    return function stringFor(name) (
+      arguments.length > 1
+      ? bundle.formatStringFromName(name,
+                                    Array.slice(arguments, 1),
+                                    arguments.length - 1)
+      : bundle.GetStringFromName(name));
+  },
 };
 
 // localizeCommand only works with Parser 2 commands.
