@@ -1944,11 +1944,11 @@ ParseQuery.prototype = {
       // Also, don't run onResults here if thisQuery.finished,
       // as if the finished flag was just turned on, it would have independently
       // called onResults.
+
       if (thisQuery.aggregateScoredParses().length > 0
            && !thisQuery.finished) {
-
         // THROTTLING OF ONRESULTS (#833) - still experimental
-        var throttleThreshold = 0.5;
+        var throttleThreshold = 0.8;
         var progress = thisQuery._detectionTracker.detectionProgress;
         var passedThreshold = thisQuery._previousProgress < throttleThreshold &&
                               progress >= throttleThreshold;
