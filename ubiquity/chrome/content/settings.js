@@ -49,6 +49,8 @@ var msgService = new AlertMessageService();
 
 $(onDocumentLoad);
 
+function $$(name) _ubundle.GetStringFromName(name);
+
 function onDocumentLoad() {
   loadSkinList();
 
@@ -115,7 +117,7 @@ function changeLanguageSettings() {
 
   if (changed) {
     $("#lang-settings-changed-info").html(
-      "<i>This change will take effect when you restart Firefox.</i>");
+      "<em>" + $$("ubiquity.settings.restartfirefox") + "</em>");
     $(".parser2")[useParserVersion < 2 ? "slideUp": "slideDown"]();
   }
 }
@@ -128,7 +130,7 @@ function changeExternalCallSettings() {
   if (externalCallsOnAllQueries !== prefs.getValue(PREF_NFE, 0)) {
     prefs.setValue(PREF_NFE, externalCallsOnAllQueries);
     $("#external-calls-settings-changed-info").html(
-      "<em>This change will take effect when you open new windows.</em>");
+      "<em>" + $$("ubiquity.settings.opennewwindows") + "</em>");
   }
 }
 
@@ -166,7 +168,7 @@ function readFile(url) {
 function createSkinElement(filepath, origpath, id) {
   try {
     var css = readFile(filepath);
-  } catch(e) {
+  } catch (e) {
     //If file cannot be read, just move on to the next skin
     return;
   }
@@ -232,7 +234,7 @@ function createSkinElement(filepath, origpath, id) {
 }
 
 function checkSkin(url) {
-  $("#skin-list input:radio").each(function() {
+  $("#skin-list input:radio").each(function radio() {
     if (this.value === url) {
       this.checked = true;
       return false;
@@ -253,7 +255,7 @@ function saveCustomSkin() {
   foStream.write(data, data.length);
   foStream.close();
 
-  msgService.displayMessage("Your skin has been saved!");
+  msgService.displayMessage($$("ubiquity.settings.skinsaved"));
   loadSkinList();
   if (skinService.currentSkin === skinService.CUSTOM_SKIN)
     skinService.loadCurrentSkin();
@@ -266,7 +268,7 @@ function pasteToGist() {
   Utils.openUrlInBrowser(
     "http://gist.github.com/gists/",
     ["file_" + key + "[gistfile1]=" + encodeURIComponent(val)
-     for each([key, val] in Iterator({
+     for each ([key, val] in Iterator({
        ext: ext,
        name: (name || "ubiquity-skin") + ext,
        contents: data,
@@ -283,8 +285,8 @@ function saveAs() {
   try {
     skinService.saveAs($("#skin-editor").val(), "custom");
     loadSkinList();
-  } catch(e) {
-    msgService.displayMessage("Error saving your skin");
+  } catch (e) {
+    msgService.displayMessage($$("ubiquity.settings.skinerror"));
     Cu.reportError(e);
   }
 }
