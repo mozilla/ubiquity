@@ -89,14 +89,16 @@ function fillTableCellForFeed(cell, feed, sortMode) {
                 '</span><br/>');
   // add unsubscribe link (but not for built-in feeds)
   if (!feed.isBuiltIn)
-    cell.append(actionLink(_ubundle.GetStringFromName("ubiquity.cmdlist.unsubscribefeed"), function unsubscribe() {
-      feed.remove();
-      cell.slideUp(function onUnsubscribe() {
-        $("a[name^='" + feed.uri.spec + "']").closest("tr").hide();
-        updateSubscribedCount();
-        buildUnsubscribedFeeds();
-      });
-    }));
+    cell.append(actionLink(
+      L("ubiquity.cmdlist.unsubscribefeed"),
+      function unsubscribe() {
+        feed.remove();
+        cell.slideUp(function onUnsubscribe() {
+          $("a[name^='" + feed.uri.spec + "']").closest("tr").hide();
+          updateSubscribedCount();
+          buildUnsubscribedFeeds();
+        });
+      }));
   // Add link to source (auto-updated or not)
   cell.append(" ", viewSourceLink(feed));
 
@@ -108,10 +110,9 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   feed.checkForManualUpdate(
     function(isAvailable, href) {
       if (isAvailable)
-        cell.append("<br/>",
-                    A(href,
-                      _ubundle.GetStringFromName("ubiquity.cmdlist.feedupdated"),
-                      "feed-updated"));
+        cell.append("<br/>", A(href,
+                               L("ubiquity.cmdlist.feedupdated"),
+                               "feed-updated"));
     });
   // if sorting by feed, make feed name large and put a borderline
   if (/^feed/.test(sortMode)) {
@@ -142,7 +143,7 @@ function formatCommandAuthor(authorData) {
 
   if ("homepage" in authorData) {
     authorMarkup += ('[<a href="' + escapeHtml(authorData.homepage) +
-                     '">' + _ubundle.GetStringFromName("ubiquity.cmdlist.homepage") + '</a>]');
+                     '">' + L("ubiquity.cmdlist.homepage") + '</a>]');
   }
 
   return authorMarkup;
@@ -174,23 +175,30 @@ function fillTableRowForCmd(row, cmd, className) {
      /><span class="name">{cmdDisplayName}</span></>) +
     ("description" in cmd ?
      '<span class="description">' + cmd.description + '</span>' : "") +
-    (names.length > 1 ?
-     (<div class="synonyms-container light"
-      >{_ubundle.GetStringFromName("ubiquity.cmdlist.synonyms")} <span class="synonyms">{names.slice(1).join(", ")}
-      </span></div>) : "") +
-    '<div class="light">' +
-    (authors ?
-     '<span class="author">' + _ubundle.GetStringFromName("ubiquity.cmdlist.createdby") + ' ' + formatAuthors(authors) + '</span> ' : "") +
-    ("license" in cmd ?
-     ('<span class="license"> &#8212; ' + _ubundle.GetStringFromName("ubiquity.cmdlist.license") + ' ' +
-      escapeHtml(cmd.license) + '</span>') : "") +
-    '</div>' +
-    (contributors ?
-     ('<div class="contributors light">' + _ubundle.GetStringFromName("ubiquity.cmdlist.contributions") + ' ' +
-      formatAuthors(contributors) + '</div>') : "") +
-    (homepage ?
-     (<div class="homepage">{_ubundle.GetStringFromName("ubiquity.cmdlist.viewmoreinfo")}
-      <a href={homepage}>{homepage}</a></div>) : "") +
+    (names.length < 2 ? "" :
+     ('<div class="synonyms-container light">' +
+      L("ubiquity.cmdlist.synonyms",
+        ('<span class="synonyms">' +
+         escapeHtml(names.slice(1).join(", ")) +
+         '</span>')) +
+      '</div>')) +
+    (!authors ? "" :
+     '<span class="author light">' +
+     L("ubiquity.cmdlist.createdby", formatAuthors(authors)) +
+     '</span> ') +
+    (!("license" in cmd) ? "" :
+     ('<br/><span class="license light">' +
+      L("ubiquity.cmdlist.license", escapeHtml(cmd.license)) +
+      '</span>')) +
+    (!contributors ? "" :
+     ('<div class="contributors light">' +
+      L("ubiquity.cmdlist.contributions", formatAuthors(contributors)) +
+      '</div>')) +
+    (!homepage ? "" :
+     ('<div class="homepage light">' +
+      L("ubiquity.cmdlist.viewmoreinfo",
+        let (hh = escapeHtml(homepage)) hh.link(hh)) +
+      '</div>')) +
     ("help" in cmd ? '<div class="help">' + cmd.help + '</div>' : "") +
     '</td>');
 
@@ -198,7 +206,7 @@ function fillTableRowForCmd(row, cmd, className) {
     if (!("arguments" in cmd)) {
       cmdElement.addClass("not-loaded").find(".name").attr(
         "title",
-        _ubundle.GetStringFromName("ubiquity.cmdlist.oldparsertitle"));
+        L("ubiquity.cmdlist.oldparsertitle"));
     }
     if (cmd.oldAPI) {
       cmdElement.addClass("oldAPI").prepend(
@@ -332,7 +340,7 @@ function makeUnsubscribedFeedListElement(info) {
      ["<li>" + escapeHtml(cmd.name) + "</li>"
       for each (cmd in info.commands)].join("") +
      "</ul>"),
-    actionLink(_ubundle.GetStringFromName("ubiquity.cmdlist.resubscribe"), function resubscribe() {
+    actionLink(L("ubiquity.cmdlist.resubscribe"), function resubscribe() {
       info.unremove();
       $li.slideUp(function onResubscribe() {
         updateUnsubscribedCount();
@@ -341,7 +349,7 @@ function makeUnsubscribedFeedListElement(info) {
       });
     }),
     " ",
-    actionLink(_ubundle.GetStringFromName("ubiquity.cmdlist.purge"), function purge() {
+    actionLink(L("ubiquity.cmdlist.purge"), function purge() {
       info.purge();
       $li.slideUp("slow");
     }),
@@ -379,17 +387,16 @@ function changeSortMode(newSortMode) {
   buildTable();
 }
 
-function viewSourceLink(feed)(
+function viewSourceLink(feed) (
   A("view-source:" + feed.viewSourceUri.spec,
-    (_ubundle.GetStringFromName("ubiquity.cmdlist.view") + " " +
-     (feed.canAutoUpdate ? " " + _ubundle.GetStringFromName("ubiquity.cmdlist.autoupdated") + " " : "") +
-     _ubundle.GetStringFromName("ubiquity.cmdlist.source")),
+    L("ubiquity.cmdlist." +
+      (feed.canAutoUpdate ? "viewfeedsource" : "viewsource")),
     "action"));
 
 function viewLocalizationTemplate(feed) (
   A(("chrome://ubiquity/content/localization-template.xhtml#" +
      feed.srcUri.spec),
-    _ubundle.GetStringFromName("ubiquity.cmdlist.localetemplate"),
+    L("ubiquity.cmdlist.localetemplate"),
     "action"));
 
 // TO-DO: perform an inventory of similar effects found throughout and move
@@ -401,9 +408,8 @@ function setupHelp() {
     $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
     [this.textContent, this.bin] = [this.bin, this.textContent];
   });
-  toggler.textContent =
-    _ubundle.GetStringFromName("ubiquity.showhidehelp.show");
-  toggler.bin = _ubundle.GetStringFromName("ubiquity.showhidehelp.hide");
+  toggler.textContent = L("ubiquity.showhidehelp.show");
+  toggler.bin = L("ubiquity.showhidehelp.hide");
   toggler.off = true;
 }
 

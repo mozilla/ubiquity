@@ -34,17 +34,23 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/setup.js");
+var Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/aboutubiquity.properties");
 
 // This contains the common header for all the about:ubiquity child pages.
 
 var navUrls = [
-  {name: _ubundle.GetStringFromName("ubiquity.nav.main"), url: "about:ubiquity"},
-  {name: _ubundle.GetStringFromName("ubiquity.nav.settings"), url: "chrome://ubiquity/content/settings.xhtml"},
-  {name: _ubundle.GetStringFromName("ubiquity.nav.commands"), url: "chrome://ubiquity/content/cmdlist.xhtml"},
-  {name: _ubundle.GetStringFromName("ubiquity.nav.getnewcommands"), url: "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"},
-  {name: _ubundle.GetStringFromName("ubiquity.nav.support"), url: "chrome://ubiquity/content/support.xhtml"},
-  {name: _ubundle.GetStringFromName("ubiquity.nav.hackubiquity"), url: "chrome://ubiquity/content/editor.xhtml"}
+  {name: L("ubiquity.nav.main"), url: "about:ubiquity"},
+  {name: L("ubiquity.nav.settings"), url: "chrome://ubiquity/content/settings.xhtml"},
+  {name: L("ubiquity.nav.commands"), url: "chrome://ubiquity/content/cmdlist.xhtml"},
+  {name: L("ubiquity.nav.getnewcommands"), url: "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"},
+  {name: L("ubiquity.nav.support"), url: "chrome://ubiquity/content/support.xhtml"},
+  {name: L("ubiquity.nav.hackubiquity"), url: "chrome://ubiquity/content/editor.xhtml"}
 ];
 
 function setVersionString() {
@@ -78,5 +84,3 @@ function createNavLinks() {
 
 $(createNavLinks);
 $(setVersionString);
-
-

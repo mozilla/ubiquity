@@ -1,0 +1,3 @@
+<!-- Static references for appname, version and other strings that should go untranslated. -->
+<!ENTITY appTitle "Ubiquity">
+<!ENTITY appVersion "<span class='version'></span>">

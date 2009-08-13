@@ -15,10 +15,6 @@ Sincerely,
 - The Ubiquity Team
 -->
 
-<!-- Translators: for the moment, do not translate these, as it's used everywhere! -->
-<!ENTITY appTitle "Ubiquity">
-<!ENTITY appVersion "<span class='version'></span>">
-
 <!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.About "About &appTitle;">
 <!ENTITY ubiquity.pagetitle.Settings "&appTitle; Settings &amp; Skins">
@@ -45,11 +41,7 @@ Sincerely,
 <!ENTITY ubiquity.pagetip.Support "You can get to this page at any time using the  &ldquo;get support&rdquo; command.">
 <!ENTITY ubiquity.pagetip.HackUbiquity "You can get to this page at any time using the  &ldquo;write ubiquity commands&rdquo; command.">
 
-<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
-
-<!--
-- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.
-- This will also be useful when we do a full about: page overhaul possibly condensing the editors.
+<!-- Buttons, Buttons and more Buttons. Here are our generic editor buttons found everywhere an editor resides -->
 
 <!ENTITY ubiquity.generic.ImportTemplate "Import from template">
 <!ENTITY ubiquity.generic.LaunchExternalEd "Launch an external editor">
@@ -59,8 +51,6 @@ Sincerely,
 <!ENTITY ubiquity.generic.ButtonSave "Save">
 <!ENTITY ubiquity.generic.ButtonSaveAs "Save As">
 <!ENTITY ubiquity.generic.ButtonShare "Share">
-
--->
 
 <!-- End common elements -->
 <!-- Everything from here down is page by page in no particular page order -->

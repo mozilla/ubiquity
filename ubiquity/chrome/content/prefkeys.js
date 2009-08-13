@@ -34,6 +34,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://ubiquity/modules/utils.js");
+
 var PrefKeys = {
 
   KEYCODE_PREF : "extensions.ubiquity.keycode",
@@ -51,7 +53,7 @@ var PrefKeys = {
     var keyCombo = this.getKeyCombo();
     var keyText = keyCombo[0] + "+" 
                   + keyCombo[1]
-                  + " (" + _ubundle.GetStringFromName("ubiquity.prefkeys.clickhere") + ")";
+                  + " (" + L("ubiquity.prefkeys.clickhere") + ")";
     $("#keyInputBox").val(keyText);
   },
 	
@@ -68,7 +70,7 @@ var PrefKeys = {
                     : "";
 
     if(keyModifier == ""){
-      $("#keyNotify").text(_ubundle.GetStringFromName("ubiquity.prefkeys.notifybadmodifier"));
+      $("#keyNotify").text(L("ubiquity.prefkeys.notifybadmodifier"));
       return;
     }
   
@@ -93,7 +95,7 @@ var PrefKeys = {
                   + this._convertToText(keyCode) 
                   + " (Click here to change)";
     $("#keyInputBox").val(keyText).blur();
-	  $("#keyNotify").text(_ubundle.GetStringFromName("ubiquity.prefkeys.confirmchange")
+	  $("#keyNotify").text(L("ubiquity.prefkeys.confirmchange")
 	                       + " " + keyModifier + "+" 
                           + this._convertToText(keyCode));                          
                           
@@ -102,14 +104,13 @@ var PrefKeys = {
   getKeyCombo : function(){
     var defaultKeyModifier = "ALT";
     //default key modifier for windows is CTRL
-    var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
-                               .getService(Components.interfaces.nsIXULRuntime);
-    if(xulRuntime.OS == "WINNT"){
+    if (Utils.OS === "WINNT") {
       defaultKeyModifier = "CTRL";
     }
     
     var keyCode = Application.prefs.getValue(this.KEYCODE_PREF, 32);
-    var keyModifier = Application.prefs.getValue(this.KEYMODIFIER_PREF, defaultKeyModifier);
+    var keyModifier = Application.prefs.getValue(this.KEYMODIFIER_PREF,
+                                                 defaultKeyModifier);
     return [keyModifier, this._convertToText(keyCode)];
   }
 }

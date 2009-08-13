@@ -35,21 +35,18 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
-Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 var {skinService} = UbiquitySetup.createServices();
 var msgService = new AlertMessageService();
 var {escapeHtml} = Utils;
-var L = LocalizationUtils.propertySelector(
-  "chrome://ubiquity/locale/aboutubiquity.properties");
 
 $(onDocumentLoad);
 
@@ -192,9 +189,9 @@ function createSkinElement(filepath, origpath, id) {
     ('<input type="radio" name="skins" id="rad_' + skinId +
      '" value="' + escapeHtml(filepath) + '"></input>') +
     '<label class="label light" for="rad_'+ skinId + '">' +
-    '<a class="name"/>' +
-    '<div class="author"></div>' +
-    '<div class="license"></div></label>' +
+    '<a class="name"/><br/>' +
+    '<span class="author"></span><br/>' +
+    '<span class="license"></span></label>' +
     '<div class="email light"></div>' +
     '<div class="homepage light"></div></div>');
 
