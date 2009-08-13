@@ -5,10 +5,10 @@
 <!ENTITY ubiquity.pagetitle.About "Informacje o &appTitle;">
 <!ENTITY ubiquity.pagetitle.Settings "Ustawienia i motywy">
 <!ENTITY ubiquity.pagetitle.YourCommands "Polecenia">
-<!ENTITY ubiquity.pagetitle.LocalizeCmd "Polecenia – przykłady lokalizacji">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "Polecenia – wzorzec lokalizacji">
 <!ENTITY ubiquity.pagetitle.Support "Wsparcie techniczne">
 <!ENTITY ubiquity.pagetitle.HackUbiquity "Edytor poleceń">
-<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Polecenie z niezaufanych źródeł">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Polecenie z niezaufanego źródła">
 <!ENTITY ubiquity.pagetitle.ResetUbiquity "Resetuj &appTitle;">
 <!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, mamy och-ach!">
 <!-- Page header taglines -->
@@ -19,7 +19,7 @@
 <!ENTITY ubiquity.tagline.Support "Pomocy!">
 <!ENTITY ubiquity.tagline.HackUbiquity "Modyfikuj go!.">
 <!-- Header page tips -->
-<!ENTITY ubiquity.pagetip.About "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „Help”.">
+<!ENTITY ubiquity.pagetip.About "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „help”.">
 <!ENTITY ubiquity.pagetip.Settings "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „change ubiquity settings”.">
 <!ENTITY ubiquity.pagetip.YourCommands "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „list ubiquity commands”.">
 <!ENTITY ubiquity.pagetip.Support "Możesz otworzyć tę stronę w dowolnym czasie używając polecenia „get support”">
@@ -37,16 +37,16 @@
 <!-- Everything from here down is page by page in no particular page order -->
 <!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiqutiy.about.WhatIsUbiquity "Co to jest &appTitle;?">
-<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; jest dodatkiem dla Firefoksa umożliwiającym stosowanie w Firefoksie &lt;strong&gt;poleceń&lt;/strong&gt; po wprowadzeniu słów do specjalnego elementu.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; jest dodatkiem dla Firefoksa umożliwiającym stosowanie w Firefoksie <strong>poleceń</strong> po wprowadzeniu słów do specjalnego pola.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Polecenia są skrótami dla rzeczy, które zazwyczaj wykonujesz w Internecie. Mogą one eliminować powtarzanie tych samych zadań i pozwalają wykonać więcej i szybciej.">
-<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Najfajniejszą rzeczą w &appTitle; jest to, że &lt;em&gt;każdy&lt;/em&gt; może napisać polecenie i udostępnić je wszystkim na całym świecie w bardzo podobny sposób, jak Internet umożliwia każdemu pisanie stron i dzielenie się informacjami z resztą świata.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Najfajniejszą rzeczą w &appTitle; jest to, że <em>każdy</em> może napisać polecenie i udostępnić je wszystkim na całym świecie w bardzo podobny sposób, jak Internet umożliwia każdemu pisanie stron i dzielenie się informacjami z resztą świata.">
 <!ENTITY ubiqutiy.about.LearnHow "Dowiedz się jak używać &appTitle;">
 <!ENTITY ubiqutiy.about.TutorialButton "Kliknij tutaj, aby uruchomić interaktywny poradnik">
 <!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Więcej informacji o używaniu &appTitle;">
-<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "Po zapoznaniu się z podstawowymi informacjami na tej stronie, możesz dowiedzieć się więcej, przechodząc ">
+<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "Po zapoznaniu się z podstawowymi informacjami na tej stronie, możesz dowiedzieć się więcej, przechodząc">
 <!ENTITY ubiqutiy.about.UsingParagraph1LinkText "na stronę z pełną dokumentacją">
 <!ENTITY ubiqutiy.about.UsingParagraph1Part2 ".">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "&lt;strong&gt;Pomóż nam&lt;/strong&gt; subskrybując ">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "<strong>Pomóż nam</strong> subskrybując">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText1 "Herd">
 <!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". To spowoduje dodanie Twoich danych do ">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText2 "tablicy">
@@ -57,15 +57,15 @@
 <!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&appTitle; jest stworzony zespołowym wysiłkiem programistów z całego świata. Aby zobaczyć listę współtwórców, przejdź na ">
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "stronę twórców">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
-<!ENTITY ubiqutiy.about.Thanks "Dziękujemy za użycie &appTitle; &lt;span class=&apos;version&apos;&gt;&lt;/span&gt;!">
-<!ENTITY ubiquity.about.ThanksParagraph1 "W wersji &lt;span class=&apos;version&apos;&gt;&lt;/span&gt; zostały wyeliminowane najistotniejsze błędy interfejsu użytkownika i wydajności znalezione w poprzednim wydaniu. W tym wydaniu użytkownicy powinni odczuć zwiększenie szybkości, reakcji i dokładności parsera. Aby dowiedzieć się więcej o nowościach, odwiedź stronę">
+<!ENTITY ubiqutiy.about.Thanks "Dziękujemy za użycie &appTitle; <span class='version'></span>!">
+<!ENTITY ubiquity.about.ThanksParagraph1 "W wersji <span class='version'></span> zostały wyeliminowane najistotniejsze błędy interfejsu użytkownika i wydajności znalezione w poprzednim wydaniu. W tym wydaniu użytkownicy powinni odczuć zwiększenie szybkości, reakcji i dokładności parsera. Aby dowiedzieć się więcej o nowościach, odwiedź stronę">
 <!ENTITY ubiquity.about.ThanksParagraph1LinkText "Informacje o wydaniu">
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.settings.Skins "Motywy">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Edytuj własny motyw">
 <!ENTITY ubiquity.settings.KeyCombination "Skrót klawiszowy">
-<!ENTITY ubiquity.settings.InvokingUbiquity "&lt;strong&gt;Wywołaj&lt;/strong&gt; &appTitle; naciskając:">
-<!ENTITY ubiquity.settings.ChangeShortcut "Kliknij powyżej, aby &lt;strong&gt;zmienić&lt;/strong&gt; skrót klawiszowy używany do otwierania/zamykania &appTitle;.">
+<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Wywołaj</strong> &appTitle; naciskając:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Kliknij powyżej, aby <strong>zmienić</strong> skrót klawiszowy używany do otwierania/zamykania &appTitle;.">
 <!ENTITY ubiquity.settings.LangSettings "Ustawienia językowe">
 <!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 jest eksperymentalnym, następnej generacji parserem &appTitle; i nie będzie działał ze wszystkimi poleceniami, jednakże obsługuje on wiele języków.">
 <!ENTITY ubiquity.settings.UseParser2 "Użyj Parser 2 – parsera następnej generacji">
@@ -88,8 +88,8 @@
 <!-- Commands chrome/content/cmdlist.xhtml -->
 <!ENTITY ubiquity.commandlist.SubDetails1 "Masz">
 <!ENTITY ubiquity.commandlist.SubDetails2 "polecenia w">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Anulowane subskrypcje">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "kanałach poleceń.">
+<!ENTITY ubiquity.commandlist.SubDetails3 "Anulowane subskrypcje w">
+<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "kanałów poleceń.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Wszystkie rozpoznane przez &appTitle; polecenia są wyświetlone w prawej kolumnie. Nazwa polecenia jest wyświetlona czarną czcionką, szarą czcionką – objaśnienia działania danego polecenia.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "W lewej kolumnie wyświetlane są wszystkie subskrybowane przez &appTitle; „kanały”. Każdy kanał może zawierać wiele poleceń.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Ta strona może być posortowana wg kanałów lub poleceń. Kliknij dowolny odnośnik znajdujący się obok frazy „Sortuj wg”.">
@@ -121,7 +121,7 @@
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "i przyjmij nasze przeprosiny za powstałe niedogodności!">
 <!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; – Edytor poleceń">
-<!ENTITY ubiquity.editor.CommandEditorNewCommands "Wprowadzaj poniżej &lt;strong&gt;nowe polecenia&lt;/strong&gt;. Będą automatycznie zapisywane podczas pisania i będą mogły być natychmiast używane w trybie wprowadzania poleceń.">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "Wprowadzaj poniżej <strong>nowe polecenia</strong>. Będą automatycznie zapisywane podczas pisania i będą mogły być natychmiast używane w trybie wprowadzania poleceń.">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Zapoznaj się z ">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText1 "poradnikiem tworzenia poleceń">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart2 ", aby dowiedzieć się więcej np. o wbudowanych poleceniach. ">
@@ -129,15 +129,15 @@
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart3 ".">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Dokumentacja dla ">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocsLinkText "API poleceń">
-<!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "&lt;strong&gt;Zaangażuj się&lt;/strong&gt;.">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "<strong>Zaangażuj się</strong>.">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&appTitle; Wiki">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart2 ".">
 <!ENTITY ubiquity.editor.YourExternalEd "Twój zewnętrzny edytor:">
 <!ENTITY ubiquity.editor.EditorCommandType "Typ polecenia:">
 <!ENTITY ubiquity.editor.CmdTypeRegular "regularne">
 <!ENTITY ubiquity.editor.CmdTypeLocked "chronione">
-<!ENTITY ubiquity.editor.RegularCommandDesc "Polecenia typu &lt;em&gt;regularne&lt;/em&gt; mogą wykonać wszystko na Twoim komputerze.">
-<!ENTITY ubiquity.editor.LockedCommandDescPart1 "Polecenia typu &lt;em&gt;chronione&lt;/em&gt; są bardzo bezpieczne, ale mają ograniczone możliwości interakcji z Twoim komputerem. Aby dowiedzieć się więcej, zapoznaj się z ">
+<!ENTITY ubiquity.editor.RegularCommandDesc "Polecenia typu <em>regularne</em> mogą wykonać wszystko na Twoim komputerze.">
+<!ENTITY ubiquity.editor.LockedCommandDescPart1 "Polecenia typu <em>chronione</em> są bardzo bezpieczne, ale mają ograniczone możliwości interakcji z Twoim komputerem. Aby dowiedzieć się więcej, zapoznaj się z ">
 <!ENTITY ubiquity.editor.LockedCommandDescLinkText "poradnikiem Kanał chroniony">
 <!ENTITY ubiquity.editor.LockedCommandDescPart2 ".">
 <!ENTITY ubiquity.editor.ImportTemplate "Importuj szablon polecenia">
@@ -175,7 +175,7 @@
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "Zamierzasz subskrybować polecenie">
 <!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart2 "z nieznanego, niezaufanego źródła">
-<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 "Jeśli dokonasz subskrypcji, polecenie to może z Twoją przeglądarką zrobić &lt;em&gt;co będzie chciało&lt;/em&gt;. Może ukraść numer Twojej karty kredytowej, adres e-mail Twojej babci lub całą historię przeglądania.">
+<!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 "Jeśli dokonasz subskrypcji, polecenie to może z Twoją przeglądarką zrobić <em>co będzie chciało</em>. Może ukraść numer Twojej karty kredytowej, adres e-mail Twojej babci lub całą historię przeglądania.">
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "Tutaj znajduje się kod źródłowy polecenia">
 <!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Wczytywanie kodu… Proszę czekać.">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Jeśli znasz język JavaScript, przeczytaj to i użyj swojego osądu, aby zdecydować czy polecenie jest bezpieczne do wykonania, czy nie. Kontynuujesz na własne ryzyko!">
@@ -195,11 +195,11 @@
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
 <!ENTITY ubiquity.reset.Header "Przywrócić ustawienia domyślne &appTitle;?">
 <!ENTITY ubiquity.reset.Paragraph1 "Jeśli &appTitle; nie działa prawidłowo, możesz spróbować przywrócić jego „ustawienia domyślne”. Aby to zrobić, naciśnij przycisk znajdujący się poniżej. Dokończenie operacji nastąpi po ponownym uruchomieniu przeglądarki.">
-<!ENTITY ubiquity.reset.Paragraph2 "&lt;strong&gt;Uwaga!&lt;/strong&gt; Wykonanie tej operacji spowoduje usunięcie wszystkich zmian dokonanych w &appTitle; włącznie, ale nie tylko, w następujących sekcjach:">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>Uwaga!</strong> Wykonanie tej operacji spowoduje usunięcie wszystkich zmian dokonanych w &appTitle; włącznie, ale nie tylko, w następujących sekcjach:">
 <!ENTITY ubiquity.reset.Feeds "Subskrybowane kanały">
 <!ENTITY ubiquity.reset.Skins "Motywy">
 <!ENTITY ubiquity.reset.Code "Edytor kodu poleceń">
-<!ENTITY ubiquity.reset.NoReturn "&lt;strong&gt;Informacja:&lt;/strong&gt; tej operacji nie można cofnąć.">
+<!ENTITY ubiquity.reset.NoReturn "<strong>Informacja:</strong> tej operacji nie można cofnąć.">
 <!ENTITY ubiquity.reset.ButtonExport "Eksportuj moje obecne ustawienia &appTitle; do nowej karty">
 <!ENTITY ubiquity.reset.ButtonReset "Tak, wiem co robię. Resetuj ustawienia &appTitle; i uruchom ponownie Firefoksa.">
 <!-- Command Localization Template chrome/content/localization-template.xhtml -->
