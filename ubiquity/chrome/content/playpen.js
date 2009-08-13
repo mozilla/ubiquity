@@ -205,6 +205,7 @@ var demoParserInterface = {
     
     this.currentQuery.onResults = function() {
       if (this.finished && !this.resulted) {
+        this.dump('_timeBetweenAsyncs:'+this._timeBetweenAsyncs+'\n');
         this.resulted = true;
         demoParserInterface.runtimes++;
         $('.current').text(demoParserInterface.runtimes);

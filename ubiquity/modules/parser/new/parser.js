@@ -1713,8 +1713,13 @@ ParseQuery.prototype = {
     var parseGenerator = this._yieldingParse();
     var self = this;
 
+    this._timeBetweenAsyncs = [];
+    this._lastAsync = null;
+
     function doAsyncParse() {
-//      self.dump('doAsyncParse');
+      if (self._lastAsync)
+        self._timeBetweenAsyncs.push(new Date - self._lastAsync);
+      self._lastAsync = new Date;
       try {
         var ok = parseGenerator.next();
       } catch(e) {
