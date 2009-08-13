@@ -156,7 +156,7 @@ ParserQuery.prototype = {
       sugg.frequencyMatchScore =
         this._parser.getSuggestionMemoryScore(
           sugg._cameFromNounFirstSuggestion ? "" : inputVerb,
-          sugg._verb._name);
+          sugg._verb.cmd.id);
     }
     this._suggestionList.sort(this._byScoresDescending);
   },
@@ -179,21 +179,13 @@ ParserQuery.prototype = {
 
 function Parser(verbList, languagePlugin, ContextUtils, suggestionMemory) {
   this._languagePlugin = languagePlugin;
+  this._ContextUtils = ContextUtils ||
+    (Cu.import("resource://ubiquity/modules/contextutils.js", null)
+     .ContextUtils);
+  this._suggestionMemory = suggestionMemory ||
+    new (Cu.import("resource://ubiquity/modules/suggestion_memory.js", null)
+         .SuggestionMemory)("main_parser");
   this.setCommandList(verbList);
-
-  if (!ContextUtils) {
-    var ctu = {};
-    Cu.import("resource://ubiquity/modules/contextutils.js", ctu);
-    ContextUtils = ctu.ContextUtils;
-  }
-  this._ContextUtils = ContextUtils;
-
-  if (!suggestionMemory) {
-    var sm = {};
-    Cu.import("resource://ubiquity/modules/suggestion_memory.js", sm);
-    suggestionMemory = new sm.SuggestionMemory("main_parser");
-  }
-  this._suggestionMemory = suggestionMemory;
   this._sortGenericVerbCache();
 }
 Parser.prototype = {
@@ -213,19 +205,16 @@ Parser.prototype = {
     return sens;
   },
 
-  strengthenMemory: function P__strengthenMemory(input, chosenSuggestion) {
+  strengthenMemory: function P_strengthenMemory(input, chosenSuggestion) {
     // input is the whole input, chosenSuggestion is a parsedSentence.
     // This parser only cares about the verb name.
-    let chosenVerb = chosenSuggestion._verb._name;
-
+    var verb = chosenSuggestion._verb, {id} = verb.cmd;
     if (chosenSuggestion.hasFilledArgs()) {
-      this._suggestionMemory.remember("", chosenVerb);
+      this._suggestionMemory.remember("", id);
       this._sortGenericVerbCache();
     }
     if (!chosenSuggestion._cameFromNounFirstSuggestion) {
-      let inputVerb = input.split(" ", 1)[0];
-      /* TODO English-specific! */
-      this._suggestionMemory.remember(inputVerb, chosenVerb);
+      this._suggestionMemory.remember(verb.input, id);
     }
   },
 
@@ -768,6 +757,7 @@ function Verb(cmd, roleMap) {
 
   this.cmd = cmd;
   this.matchedName = this._name = cmd.names[0];
+  this.input = "";
   this._arguments = {};
   // Use the presence or absence of the "arguments" dictionary
   // to decide whether this is a version 1 or version 2 command.
@@ -862,8 +852,9 @@ Verb.prototype = {
     var {names} = this.cmd;
     for (let i = 0, l = names.length; i < l; ++i) {
       let score = hagureMetal(input, names[i].toLowerCase());
-      if (score === 0) continue;
+      if (!score) continue;
       this.matchedName = names[i];
+      this.input = input;
       // lower the score based on the name position
       return score * (l - i) / l;
     }
