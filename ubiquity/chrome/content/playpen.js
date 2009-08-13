@@ -205,7 +205,10 @@ var demoParserInterface = {
     
     this.currentQuery.onResults = function() {
       if (this.finished && !this.resulted) {
-        this.dump('_timeBetweenAsyncs:'+this._timeBetweenAsyncs+'\n');
+//        this.dump('_timeBetweenAsyncs:'+this._timeBetweenAsyncs);
+        
+//        demoParserInterface.totalTimeBetweenAsyncs = demoParserInterface.totalTimeBetweenAsyncs.concat(this._timeBetweenAsyncs);
+        
         this.resulted = true;
         demoParserInterface.runtimes++;
         $('.current').text(demoParserInterface.runtimes);
@@ -228,6 +231,12 @@ var demoParserInterface = {
             $('#scoredParses')
               .append('<tr><td>' + displayParse(parse) + '</td></tr>');
           }
+
+//          var max = Math.max.apply({},demoParserInterface.totalTimeBetweenAsyncs);
+//          var sum = demoParserInterface.totalTimeBetweenAsyncs.reduce(function(a,b)a+b);
+//          var len = demoParserInterface.totalTimeBetweenAsyncs.length;
+//          Utils.log('total time between asyncs: max: '+max+', avg: '
+//          +(sum/len)+'\n');
  
         }
         
@@ -312,6 +321,7 @@ $(document).ready(function(){
     demoParserInterface.startTime = new Date().getTime();
     $('.runtimes').text($('#times').val());
     demoParserInterface.runtimes = 0;
+//    demoParserInterface.totalTimeBetweenAsyncs = [];
     demoParserInterface.parse();
   }
   

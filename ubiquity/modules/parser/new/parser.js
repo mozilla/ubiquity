@@ -1536,7 +1536,7 @@ Parser.prototype = {
             continue;
           }
 
-          currentQuery.dump(x+','+id);
+//          currentQuery.dump(x+','+id);
 
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
@@ -1713,13 +1713,13 @@ ParseQuery.prototype = {
     var parseGenerator = this._yieldingParse();
     var self = this;
 
-    this._timeBetweenAsyncs = [];
-    this._lastAsync = null;
+//    this._timeBetweenAsyncs = [];
+//    this._lastAsync = null;
 
     function doAsyncParse() {
-      if (self._lastAsync)
-        self._timeBetweenAsyncs.push(new Date - self._lastAsync);
-      self._lastAsync = new Date;
+//      if (self._lastAsync)
+//        self._timeBetweenAsyncs.push(new Date - self._lastAsync);
+//      self._lastAsync = new Date;
       try {
         var ok = parseGenerator.next();
       } catch(e) {
@@ -1859,6 +1859,8 @@ ParseQuery.prototype = {
 
     // STEP 8: suggest verbs for parses which don't have one
     var inputMatchesSomeVerb = false;
+    var STEP_8_YIELD_LOOP_NUM = 10;
+    var count = 0;
     if(this._possibleParses.some(function(parse) !parse._suggested))
       inputMatchesSomeVerb = true;
     for each (let parse in this._possibleParses) {
@@ -1868,8 +1870,11 @@ ParseQuery.prototype = {
         newVerbedParse._suggestionCombinationsThatHaveBeenCompleted = {};
         this.addIfGoodEnough('verbed', newVerbedParse);
       }
+      if ((count++) % STEP_8_YIELD_LOOP_NUM == 0)
+        yield true;
     }
-    yield true;
+    if (count % STEP_8_YIELD_LOOP_NUM != 0)
+      yield true;
     this._next();
 
     // STEP 9: do nountype detection + cache
@@ -1996,7 +2001,8 @@ ParseQuery.prototype = {
       }
     }
 
-    var count = 0;
+    count = 0;
+    var STEP_9_YIELD_LOOP_NUM = 12;
     for each (let parse in this._verbedParses) {
       for each (let {argText,nounTypeIds} in
                                         parse.getArgsAndNounTypeIdsToCheck()) {
@@ -2005,8 +2011,7 @@ ParseQuery.prototype = {
       }
 
       // we don't need to yield that often... let's try once every 8 verbedParses
-      // but yield first after four just 
-      if ((count++)%8 == 4)
+      if ((count++) % STEP_9_YIELD_LOOP_NUM == 0)
         yield true;
     }
 
@@ -2089,7 +2094,7 @@ ParseQuery.prototype = {
 
     let parseIds = [parse._id for each (parse in parseCollection)];
     if (parseIds.indexOf(newParse._id) != -1) {
-      this.dump("already contains parse #"+newParse._id+"!");
+//      this.dump("already contains parse #"+newParse._id+"!");
       return false;
     }
 
