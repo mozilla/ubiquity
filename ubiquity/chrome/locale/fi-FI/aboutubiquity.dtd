@@ -1,7 +1,5 @@
 <!-- Draft #002:NOTE TO TRANSLATORS:Hello, and thanks for taking your time to translate our strings for Ubiquity!As you may have guessed, not everything here is fully baked and our kitchen is still a little messy. But, we're working diligently in choosing our words wisely to make sure you won't have to translate everything many times over. And since we're really nice, we also intend to keep you updated when any ofthese files happen change in the future.So please, bear with us for a moment as things might get a chaotic early on.Thanks a ton and happy translating!Sincerely,- The Ubiquity Team-->
 <!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
-<!ENTITY appTitle "Ubiquity">
-<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.About "Tietoja &appTitle;sta">
 <!ENTITY ubiquity.pagetitle.Settings "&appTitle;: Asetukset ja teemat">
 <!ENTITY ubiquity.pagetitle.YourCommands "&appTitle;: Komennot">
@@ -11,20 +9,20 @@
 <!ENTITY ubiquity.pagetitle.ConfirmAddCommand "&appTitle;: Komento luottamattomasta lähteestä">
 <!ENTITY ubiquity.pagetitle.ResetUbiquity "Nollaa &appTitle;">
 <!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, meillä on ongelma!">
-<!-- Page header taglines -->
+<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.tagline.About "Älä vain selaa verkkoa, komenna sitä.">
 <!ENTITY ubiquity.tagline.Settings "Asetukset ja teemat">
 <!ENTITY ubiquity.tagline.YourCommands "Täällä ovat luetteloituna kaikki komentosi.">
 <!ENTITY ubiquity.tagline.LocalizeCmd "Meidän pitää lokalisoida globalisoidaksemme.">
 <!ENTITY ubiquity.tagline.Support "Apua!">
 <!ENTITY ubiquity.tagline.HackUbiquity "Hakkeroi.">
-<!-- Header page tips -->
+<!-- Page header taglines -->
 <!ENTITY ubiquity.pagetip.About "Pääset tälle sivulle koska tahansa käyttämällä komentoa “help”.">
 <!ENTITY ubiquity.pagetip.Settings "Pääset tälle sivulle koska tahansa käyttämällä komentoa “change ubiquity settings”.">
 <!ENTITY ubiquity.pagetip.YourCommands "Pääset tälle sivulle koska tahansa käyttämällä komentoa “list ubiquity commands”.">
 <!ENTITY ubiquity.pagetip.Support "Pääset tälle sivulle koska tahansa käyttämällä komentoa “get support”.">
 <!ENTITY ubiquity.pagetip.HackUbiquity "Pääset tälle sivulle koska tahansa käyttämällä komentoa “write ubiquity commands”.">
-<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
+<!-- Header page tips -->
 <!ENTITY ubiquity.generic.ImportTemplate "Tuo mallipohjasta">
 <!ENTITY ubiquity.generic.LaunchExternalEd "Käynnistä ulkoinen muokkain">
 <!ENTITY ubiquity.generic.EnableHighlighting "Ota käyttöön syntaksin värikoodaus">
@@ -32,10 +30,9 @@
 <!ENTITY ubiquity.generic.ButtonSave "Tallenna">
 <!ENTITY ubiquity.generic.ButtonSaveAs "Tallenna nimellä">
 <!ENTITY ubiquity.generic.ButtonShare "Jaa">
+<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
 <!--- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.- This will also be useful when we do a full about: page overhaul possibly condensing the editors.-->
 <!-- End common elements -->
-<!-- Everything from here down is page by page in no particular page order -->
-<!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiqutiy.about.WhatIsUbiquity "Mikä on &appTitle;?">
 <!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; on Firefox-lisäosa, joka antaa sinun <strong>komentaa</strong> Firefoxia syöttämällä komentosanoja erityiseen syötekenttään.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Komennot ovat oikopolkuja asioihin, joita teet verkossa; niillä voidaan poistaa toistuvia tehtäviä, ja niillä pystyt työskentelemään tehokkaammin.">
@@ -58,9 +55,10 @@
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "Tekijät-sivulta">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
 <!ENTITY ubiqutiy.about.Thanks "Kiitos, että käytät &appTitle;n versiota <span class='version'></span>!">
-<!ENTITY ubiquity.about.ThanksParagraph1 "&appTitle;n versio <span class='version'></span> korjaa edellisistä versioista löytyneitä virheitä käyttöliittymässä ja suorituskyvyssä. Tämän version myötä saatat huomata nopeamman, reagoivamman, ja tarkemman jäsentäjän. Nähdäksesi listan muutoksista, käy katsomassa">
-<!ENTITY ubiquity.about.ThanksParagraph1LinkText "julkaisutiedot">
-<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.about.ThanksParagraphPart1 "Version &appVersion; of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the">
+<!ENTITY ubiquity.about.ThanksParagraphLinkText "Release Notes">
+<!ENTITY ubiquity.about.ThanksParagraphPart2 ".">
+<!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.settings.Skins "Teemat">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Muokkaa teemaa">
 <!ENTITY ubiquity.settings.KeyCombination "Näppäinyhdistelmä">
@@ -85,7 +83,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningPart1 "Tekemiäsi muutoksia omaan teemaan ei välttämättä näy, ellet käynnistä selainta uudestaan. Tämä on ">
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "tiedossa oleva virhe">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
-<!-- Commands chrome/content/cmdlist.xhtml -->
+<!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiquity.commandlist.SubDetails1 "Sinulla on">
 <!ENTITY ubiquity.commandlist.SubDetails2 "komentoa">
 <!ENTITY ubiquity.commandlist.SubDetails3 "Olet lopettanut tilauksen">
@@ -104,7 +102,7 @@
 <!ENTITY ubiquity.commandlist.SortByCommand "komennon nimi">
 <!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Lopetetut tilaukset">
 <!ENTITY ubiquity.commandlist.GraveYardText "Sinulla oli tilaus näihin syötteisiin. Jos haluat tilauksen takaisin, napsauta “[tilaa uudestaan]” -linkkiä syötteen alla.">
-<!-- Support chrome/content/support.xhtml -->
+<!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.support.GetHelp "Avun hakeminen">
 <!ENTITY ubiquity.support.GetHelpGSFN "Get Satisfaction">
 <!ENTITY ubiquity.support.GetHelpGoogleGroups "Google-ryhmämme/postituslistamme">
@@ -119,7 +117,7 @@
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "Jos &appTitle; ei toimi oikein, sinun pitää ehkä palauttaa se “tehdasasetuksiin”. Tehdäksesi nollauksen, ">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1LinkText "napsauta tästä">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 " — hyväksythän myös anteeksipyyntömme aiheutuvasta vaivasta!">
-<!-- Hack chrome/content/editor.xhtml -->
+<!-- Commands chrome/content/cmdlist.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle;n komentomuokkain">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Luo uusia komentoja</strong> alla olevassa kentässä. Komennot tallennetaan automaattisesti kirjoittaessasi ja ne ovat heti käytettävissäsi.">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Lue ">
@@ -170,7 +168,7 @@
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4LinkText "ydinkehittäjien komennot">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part2 ".">
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "&appTitle;n tuoreet koodimuutokset">
-<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!-- Support chrome/content/support.xhtml -->
 <!ENTITY ubiquity.confirmsubscription.Header "&appTitle;-komento epäluotettavasta lähteestä">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "Olet tilaamassa">
 <!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
@@ -192,7 +190,7 @@
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Jos haluat lopettaa tilauksen, voit käyttää &appTitle;-komentoa “list” päästäksesi">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "komennonhallintasivulle,">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "jossa näet kaikki tilaamasi komennot. Voit myös peruuttaa tilaukset komentoihin, joita et enää halua.">
-<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.reset.Header "Haluatko palauttaa &appTitle;n oletusasetuksiin?">
 <!ENTITY ubiquity.reset.Paragraph1 "Jos &appTitle; ei toimi oikein, voit palauttaa sen alkuperäisiin “tehdasasetuksiin”. Voit tehdä tämän painamalla alla olevaa painiketta. Firefox käynnistetään uudestaan toiminnon suorittamiseksi.">
 <!ENTITY ubiquity.reset.Paragraph2 "<strong>Varoitus:</strong> Toiminto poistaa kaikki muokkaukset, joita olet tehnyt &appTitle;yn, sisältäen (mutta ei rajoitettu):">
@@ -202,7 +200,7 @@
 <!ENTITY ubiquity.reset.NoReturn "<strong>Huomio:</strong> Kun toiminto on suoritettu, sitä ei voi kumota.">
 <!ENTITY ubiquity.reset.ButtonExport "Vie nykyiset &appTitle;-muokkaukset uuteen välilehteen">
 <!ENTITY ubiquity.reset.ButtonReset "Tiedän mitä teen. Nollaa &appTitle; ja käynnistä Firefox uudelleen">
-<!-- Command Localization Template chrome/content/localization-template.xhtml -->
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.localizecmd.ForTemplate "Tämä on mallipohja kohteelle">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part1 "Tämä on lokalisaatiomalli">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part2 "komentosyötteelle muodossa gettext/portable object (*.po). Lue lisää">
@@ -211,7 +209,7 @@
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part1 "Testataksesi lokalisaatiota, tallenna se kohteeseen:">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part2 "nimellä">
 <!ENTITY ubiquity.localizecmd.HelpParagraph3 "Varmista, että XY vastaa haluamasi kielen koodia. Jos lokalisaation koodihakemistoa ei löydy kielellesi, voit luoda sen.">
-<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Läpinäkyvää viestiä ei voitu näyttää!">
 <!ENTITY ubiquity.bug19warning.Paragraph1 "Ubiquity yritti näyttää läpinäkyvän viestin, mutta epäonnistui.">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part1 "&appTitle;ssa olevasta">
@@ -220,12 +218,12 @@
 <!ENTITY ubiquity.bug19warning.Paragraph2LinkText2 "asentaa Growl,">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part3 "jos et ole jo asentanut. Sinun pitää myös käynnistää Firefox uudelleen.">
 <!ENTITY ubiquity.bug19warning.Paragraph3 "Pahoittelemme aiheutuvaa vaivaa.">
-<!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
+<!-- Command Localization Template chrome/content/localization-template.xhtml -->
 <!ENTITY ubiquity.redirect.FeedHeader "Normaali syöteohjaus">
 <!ENTITY ubiquity.redirect.FileHeader "Normaali tiedosto-ohjaus">
 <!ENTITY ubiquity.redirect.FeedShortDesc "Tämä sivu on vain ohjaussivu, jota käytetään viemään käyttäjä Ubiquityn chrome: -osoitteesta syötteen osoitteeseen.">
 <!ENTITY ubiquity.redirect.FeedLongDesc "Aseta osoitteen hash-arvo syötteen osoitteen suhteelliseen polkuun, johon haluat ohjata käyttäjän. Polun tulisi olla sama kuin &appTitle;-laajennuksen juuren <tt>standard-feeds</tt> -hakemiston. Esimerkiksi:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Tämä sivu on vain ohjaussivu, jota käytetään viemään käyttäjä Ubiquityn chrome: -osoitteesta file: -osoitteeseen.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Aseta osoitteen hash-arvo tiedoston osoitteen suhteelliseen polkuun, johon haluat ohjata käyttäjän. Polun tulisi olla sama kuin &appTitle;-laajennuksen juuren. Esimerkiksi:">
-<!-- TO DO:Localize Dev Tools: playpen, tuner, test, and anything else these guys conjur up :) these will be in the next draft. Stay tuned!-->
-<!-- Next chrome/content/.xhtml -->
+<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->

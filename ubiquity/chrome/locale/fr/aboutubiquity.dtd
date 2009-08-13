@@ -1,7 +1,5 @@
 <!-- Draft #002:NOTE TO TRANSLATORS:Hello, and thanks for taking your time to translate our strings for Ubiquity!As you may have guessed, not everything here is fully baked and our kitchen is still a little messy. But, we're working diligently in choosing our words wisely to make sure you won't have to translate everything many times over. And since we're really nice, we also intend to keep you updated when any ofthese files happen change in the future.So please, bear with us for a moment as things might get a chaotic early on.Thanks a ton and happy translating!Sincerely,- The Ubiquity Team-->
 <!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
-<!ENTITY appTitle "Ubiquity">
-<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.About "À propos de Ubiquity">
 <!ENTITY ubiquity.pagetitle.Settings "Paramètres et thèmes de &appTitle;">
 <!ENTITY ubiquity.pagetitle.YourCommands "Commandes de &appTitle;">
@@ -11,20 +9,20 @@
 <!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Commande &appTitle; d'une source non éprouvée">
 <!ENTITY ubiquity.pagetitle.ResetUbiquity "Paramètres par défaut de &appTitle;">
 <!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, nous avons un problème !">
-<!-- Page header taglines -->
+<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.tagline.About "Ne naviguez pas sur le Web. Commandez-le.">
 <!ENTITY ubiquity.tagline.Settings "Paramètres et thèmes">
 <!ENTITY ubiquity.tagline.YourCommands "Les commandes à votre disposition">
 <!ENTITY ubiquity.tagline.LocalizeCmd "Nous devons localiser pour mondialiser">
 <!ENTITY ubiquity.tagline.Support "À l'aide !">
 <!ENTITY ubiquity.tagline.HackUbiquity "Hacker Ubiquity.">
-<!-- Header page tips -->
+<!-- Page header taglines -->
 <!ENTITY ubiquity.pagetip.About "Vous pouvez atteindre cette page à tout moment en utilisant la commande « Help »">
 <!ENTITY ubiquity.pagetip.Settings "Vous pouvez atteindre cette page à tout moment en utilisant la commande « change ubiquity settings »">
 <!ENTITY ubiquity.pagetip.YourCommands "Vous pouvez atteindre cette page à tout moment en utilisant la commande « list ubiquity commands »">
 <!ENTITY ubiquity.pagetip.Support "Vous pouvez atteindre cette page à tout moment en utilisant la commande « get support »">
 <!ENTITY ubiquity.pagetip.HackUbiquity "Vous pouvez atteindre cette page à tout moment en utilisant la commande « write ubiquity commands »">
-<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
+<!-- Header page tips -->
 <!ENTITY ubiquity.generic.ImportTemplate "Importer à partir d'un modèle">
 <!ENTITY ubiquity.generic.LaunchExternalEd "Lancer un éditeur externe">
 <!ENTITY ubiquity.generic.EnableHighlighting "Activer la coloration syntaxique">
@@ -32,10 +30,9 @@
 <!ENTITY ubiquity.generic.ButtonSave "Enregistrer">
 <!ENTITY ubiquity.generic.ButtonSaveAs "Enregistrer sous">
 <!ENTITY ubiquity.generic.ButtonShare "Partager">
+<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
 <!--- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.- This will also be useful when we do a full about: page overhaul possibly condensing the editors.-->
 <!-- End common elements -->
-<!-- Everything from here down is page by page in no particular page order -->
-<!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiqutiy.about.WhatIsUbiquity "Qu'est-ce que &appTitle; ?">
 <!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; est un module complémentaire pour Firefox qui permet de donner des <strong>commandes</strong> à Firefox en saisissant des termes de commandes dans une boîte de texte spéciale.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Les commandes sont des raccourcis pour des choses que vous faites couramment sur le Web ; elles peuvent éliminer des tâches répétitives et vous permettent d'en faire plus, plus rapidement.">
@@ -58,9 +55,10 @@
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "page des crédits">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
 <!ENTITY ubiqutiy.about.Thanks "Merci d'utiliser &appTitle; <span class='version'></span> !">
-<!ENTITY ubiquity.about.ThanksParagraph1 "La version <span class='version'></span> de &appTitle; corrige les bogues de l'interface utilisateur et de performance les plus significatifs observés dans la version précédente. Dans cette version, vous devriez constater des améliorations des temps de réponse, de la réactivité et de la précision de l'analyseur syntaxique. Pour en savoir plus sur les nouveautés, consulter les">
-<!ENTITY ubiquity.about.ThanksParagraph1LinkText "notes de version">
-<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.about.ThanksParagraphPart1 "La version &appVersion; de &appTitle; corrige les bogues d'interface utilisateurs les plus gênants ainsi que d'autres liés aux performances, tels qu'ils apparaissaient dans la version précédente. Avec cette nouvelle version vous devriez remarquer une plus grande vitesse d'exécution, de réactivité, et davantage de précision avec le parser. Pour en savoir plus sur ces nouveautés, jetez un coup d'oeil sur la page">
+<!ENTITY ubiquity.about.ThanksParagraphLinkText "notes de version">
+<!ENTITY ubiquity.about.ThanksParagraphPart2 ".">
+<!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.settings.Skins "Thèmes">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Éditer un thème personnalisé">
 <!ENTITY ubiquity.settings.KeyCombination "Combinaison de touches">
@@ -85,9 +83,9 @@
 <!ENTITY ubiquity.settings.Bug449WarningPart1 "Les changements effectués sur un thème personnalisé peuvent ne pas être vus avant d'avoir redémarré le navigateur. Ceci est un">
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "bogue connu">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
-<!-- Commands chrome/content/cmdlist.xhtml -->
+<!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiquity.commandlist.SubDetails1 "Vous avez">
-<!ENTITY ubiquity.commandlist.SubDetails2 "&nbsp;commandes dans">
+<!ENTITY ubiquity.commandlist.SubDetails2 " commandes dans">
 <!ENTITY ubiquity.commandlist.SubDetails3 "Vous vous êtes désabonné des">
 <!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "flux de commandes.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Toutes les commandes reconnues par &appTitle; sont listées dans la colonne de droite. Le texte en noir est le nom de la commande (ce que vous saisissez dans &appTitle; pour l'utiliser). Le texte en gris explique ce que fait la commande.">
@@ -104,7 +102,7 @@
 <!ENTITY ubiquity.commandlist.SortByCommand "Nom de commande">
 <!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Désabonnement aux flux">
 <!ENTITY ubiquity.commandlist.GraveYardText "Vous aviez souscrit à ces flux. Si vous voulez en récupérer un, cliquez sur le lien « [se réabonner] » en-dessous de celui-ci.">
-<!-- Support chrome/content/support.xhtml -->
+<!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.support.GetHelp "Obtenir de l'aide">
 <!ENTITY ubiquity.support.GetHelpGSFN "Obtenir satisfaction">
 <!ENTITY ubiquity.support.GetHelpGoogleGroups "Notre liste de diffusion/groupe de discussion sur Google">
@@ -119,7 +117,7 @@
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "Si &appTitle; ne répond plus, il peut être alors nécessaire de le réinitialiser avec ses paramètres par défaut pour pouvoir l'utiliser à nouveau. Pour réaliser une réinitialisation,">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1LinkText "cliquez ici">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "— et veuillez accepter nos excuses pour ce désagrément !">
-<!-- Hack chrome/content/editor.xhtml -->
+<!-- Commands chrome/content/cmdlist.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "Éditeur de commandes de &appTitle;">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Saisissez de nouvelles commandes</strong> dans la zone ci-dessous. Elles seront enregistrées automatiquement pendant la saisie, et pourront être utilisées instantanément dans le mode saisie de commande.">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Lisez le">
@@ -170,7 +168,7 @@
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4LinkText "commandes développeur de base">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part2 ".">
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "Derniers changements dans le code de &appTitle;">
-<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!-- Support chrome/content/support.xhtml -->
 <!ENTITY ubiquity.confirmsubscription.Header "Commande &appTitle; de source non éprouvée">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "Vous êtes sur le point de vous abonner à une commande">
 <!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
@@ -192,7 +190,7 @@
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Si vous voulez vous désabonner, vous pouvez utiliser à tout moment la commande « list » pour atteindre la">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "page de gestion des commandes">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "où vous pouvez consulter toutes les commandes auxquelles vous vous êtes abonné, et annuler toutes celles que vous ne voulez plus.">
-<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.reset.Header "Réinitialiser &appTitle; à ses paramètres par défaut ?">
 <!ENTITY ubiquity.reset.Paragraph1 "Si &appTitle; ne fonctionne pas correctement, vous pouvez envisager de réinitialiser &appTitle; à ses paramètres par défaut. Pour faire cela, cliquez sur le bouton ci-dessous. Pour que l'opération soit terminée, Firefox devra être redémarré.">
 <!ENTITY ubiquity.reset.Paragraph2 "<strong>Attention</strong> : en faisant cela, toutes les personnalisations que vous avez faites dans &appTitle; seront supprimées, y compris, mais sans s'y limiter :">
@@ -202,7 +200,7 @@
 <!ENTITY ubiquity.reset.NoReturn "&#60;strong&#62;Note&#60;/strong&#62; : une fois accomplie, cette opération ne peut être annulée.">
 <!ENTITY ubiquity.reset.ButtonExport "Exporter ma configuration &appTitle; courante dans un nouvel onglet">
 <!ENTITY ubiquity.reset.ButtonReset "Oui, je sais ce que je fais. Réinitialiser &appTitle; et redémarrer Firefox.">
-<!-- Command Localization Template chrome/content/localization-template.xhtml -->
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.localizecmd.ForTemplate "Ceci est un modèle pour">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part1 "Ceci est un modèle de localisation pour le">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part2 "flux de commande au format gettext/portable object (*.po). En apprendre plus sur">
@@ -211,7 +209,7 @@
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part1 "Pour tester cette localisation, enregistrez-la sous :">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part2 "avec le nom">
 <!ENTITY ubiquity.localizecmd.HelpParagraph3 "Assurez-vous que XY reflète le code approprié de la locale pour votre répertoire de langue. Si le répertoire pour le code de la locale pour votre langue n'existe pas, il suffit de le créer.">
-<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Un message transparent n'a pas pu être affiché !">
 <!ENTITY ubiquity.bug19warning.Paragraph1 "Ubiquity a essayé d'afficher un message transparent mais a échoué.">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part1 "À cause d'un">
@@ -220,12 +218,12 @@
 <!ENTITY ubiquity.bug19warning.Paragraph2LinkText2 "d'installer Growl">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part3 "si vous ne l'avez pas déjà fait. Après quoi, vous devrez redémarrer Firefox.">
 <!ENTITY ubiquity.bug19warning.Paragraph3 "Veuillez accepter nos excuses pour ce désagrément.">
-<!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
+<!-- Command Localization Template chrome/content/localization-template.xhtml -->
 <!ENTITY ubiquity.redirect.FeedHeader "Redirecteur de flux standard">
 <!ENTITY ubiquity.redirect.FileHeader "Redirecteur de fichier standard">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Cette page est une simmple redirection qui peut être utilisée pour amener l'utilisateur d'une URI chrome: d'Ubiquity vers une URI de flux standard.">
+<!ENTITY ubiquity.redirect.FeedShortDesc "Cette page est une simple redirection qui peut être utilisée pour amener l'utilisateur d'une URI chrome: d'Ubiquity vers une URI de flux standard.">
 <!ENTITY ubiquity.redirect.FeedLongDesc "Pour l'utiliser, définissez le hachage de l'URI pour le chemin relatif de l'URI de flux standard pour y rediriger l'utilisateur. Le chemin doit être relatif à la racine du répertoire <tt>standard-feeds</tt> l'extension &appTitle;. Par exemple :">
 <!ENTITY ubiquity.redirect.FileShortDesc "Cette page est une simple redirection qui peut être utilisée pour amener l'utilisateur d'une URI chrome: d'Ubiquity vers une URI de fichier.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Pour l'utiliser, définissez le hachage de l'URI pour le chemin relatif de l'URI pour y rediriger l'utilisateur. Le chemin doit être relatif à la racine de l'extension &appTitle;. Par exemple :">
-<!-- TO DO:Localize Dev Tools: playpen, tuner, test, and anything else these guys conjur up :) these will be in the next draft. Stay tuned!-->
-<!-- Next chrome/content/.xhtml -->
+<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
