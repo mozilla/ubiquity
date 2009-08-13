@@ -150,11 +150,14 @@ function formatCommandAuthor(authorData) {
 
 function fillTableRowForCmd(row, cmd, className) {
   var checkBoxCell = $(
-    '<td><input type="checkbox" class="activebox"/></td>');
-  (checkBoxCell.find("input")
-   .val(cmd.id)
-   .attr("checked", cmd.disabled ? "" : "checked")
-   .bind("change", onDisableOrEnableCmd));
+    '<td><input type="checkbox"/></td>');
+  var isEnabled = cmd.disabled ? false : true;
+  var checkBox = (checkBoxCell.find("input").val(cmd.id));
+  if (isEnabled)
+    (checkBox.attr("checked", "checked"));
+  else
+    (checkBox.removeAttr("checked"));
+  (checkBox.bind("change", onDisableOrEnableCmd));
 
   var {name, names, nameArg, homepage} = cmd;
   var cmdDisplayName = (names[0] || name);
