@@ -988,7 +988,7 @@ Parser.prototype = {
         let oldArg = args[i].input;
         let newArg = oldArg.replace(this._patternCache.anaphora, selection);
 
-        if (newArg != oldArg) {
+        if (newArg !== oldArg) {
           let parseCopy = parse.copy();
           parseCopy.args[role][i].input = newArg;
           parseCopy.scoreMultiplier *= 1.2;
@@ -1814,7 +1814,7 @@ ParseQuery.prototype = {
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     if (this.selObj.text && this.selObj.text.length) {
-      let selection = this.selObj.text;
+      let selection = this.selObj.text.replace(/\$/g, "$$$$");
       for each (let parse in this._possibleParses) {
         // if there is a selection and if we find some anaphora in the entire
         // input...

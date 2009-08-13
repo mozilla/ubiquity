@@ -620,12 +620,13 @@ PartiallyParsedSentence.prototype = {
   _suggestWithPronounSub: function PPS__suggestWithPronounSub(argName, words) {
     var {text, html} = this._selObj
     var gotAnySuggestions = false;
+    function quoteDollars(x) x.replace(/\$/g, "$$$$");
     for each (let regexp in this._query.pronouns) {
       let index = words.search(regexp);
       if (index < 0) continue;
       let selectionIndices = [index, index + text.length];
-      let textArg = words.replace(regexp, text);
-      let htmlArg = words.replace(regexp, html);
+      let textArg = words.replace(regexp, quoteDollars(text));
+      let htmlArg = words.replace(regexp, quoteDollars(html));
       if (this._argSuggest(argName, textArg, htmlArg, selectionIndices))
         gotAnySuggestions = true;
     }
