@@ -39,11 +39,11 @@
 
 function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
                            cmdSuggester) {
-  var {menupopup} = ubiquityMenu;
   var maxSuggs = 10;
 
   function contextPopupShowing(event) {
-    if (event.target !== this || !selected()) return;
+    var {menupopup} = ubiquityMenu;
+    if (event.target !== menupopup || !selected()) return;
 
     var context = menupopup.context = {
       screenX: event.screenX,
@@ -53,9 +53,9 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       focusedElement: document.commandDispatcher.focusedElement,
     };
 
-    removeChildren();
+    removeChildren(menupopup);
     cmdSuggester(context, function onSuggest(suggestions) {
-      removeChildren();
+      removeChildren(menupopup);
       var suggsToDisplay = suggestions.filter(objectOnly).slice(0, maxSuggs);
       for each (var sugg in suggsToDisplay) {
         let {_verb} = sugg, {icon} = _verb.cmd || _verb;
@@ -69,6 +69,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
         menupopup.appendChild(menuItem);
       }
     });
+    event.stopPropagation();
   }
   function toggleUbiquityMenu(event) {
     ubiquityMenu.hidden = ubiquitySeparator.hidden = !selected();
@@ -81,8 +82,8 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   function executeMenuCommand(event) {
     event.target.suggestion.execute(this.context);
   }
-  function removeChildren(){
-    for (let c; c = menupopup.lastChild;) menupopup.removeChild(c);
+  function removeChildren(menupopup) {
+    for (var c; c = menupopup.lastChild;) menupopup.removeChild(c);
   }
   function objectOnly(sugg) {
     if (sugg.args) {
@@ -96,8 +97,8 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   function selected() (gContextMenu.isContentSelection() ||
                        gContextMenu.onTextInput);
 
-  menupopup.addEventListener("popupshowing", contextPopupShowing, false);
-  menupopup.addEventListener("command", executeMenuCommand, false);
+  ubiquityMenu.addEventListener("popupshowing", contextPopupShowing, false);
+  ubiquityMenu.addEventListener("command", executeMenuCommand, false);
   contextMenu.addEventListener("popupshowing", toggleUbiquityMenu, false);
   ubiquityMenu.addEventListener("click", openUbiquity, false);
 }
