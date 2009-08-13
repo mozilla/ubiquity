@@ -1,6 +1,6 @@
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/prefcommands.js");
-Components.utils.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/prefcommands.js");
+Cu.import("resource://ubiquity/modules/setup.js");
 
 var Editor = {
   EDITOR_PREF : "extensions.ubiquity.editor",
@@ -21,26 +21,16 @@ var Editor = {
   },
   launchEditor : function(value){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
-    if(editor == null || editor == "") {
+    if (editor == null || editor == "") {
       displayMessage('please set your external editor');
     }
 
     // For the mac, wrap with a call to "open".
-    var xulRuntime = Components.classes["@mozilla.org/xre/app-info;1"]
-                          .getService(Components.interfaces.nsIXULRuntime);
-    var isOSX = ("Darwin"== xulRuntime.OS) && (editor.substring(editor.length-4)==".app");
-
-    Application.console.log("Editor        : " + editor);
-    Application.console.log("xulRuntime.OS : " + xulRuntime.OS);
-    Application.console.log("isOSX         : " + isOSX);
-    var executable = Components.classes["@mozilla.org/file/local;1"]
-                .createInstance(Components.interfaces.nsILocalFile);
+    var isOSX = Utils.OS === "Darwin" && editor.slice(-4) === ".app";
+    var executable = (Components.classes["@mozilla.org/file/local;1"]
+                      .createInstance(Components.interfaces.nsILocalFile));
     executable.followLinks = true;
-    if(isOSX) {
-            executable.initWithPath("/usr/bin/open");
-    } else {
-      executable.initWithPath(editor);
-    }
+    executable.initWithPath(isOSX ? "/usr/bin/open" : editor);
     if (executable.exists()) {
       var file = Components.classes["@mozilla.org/file/directory_service;1"]
                            .getService(Components.interfaces.nsIProperties)
@@ -128,7 +118,7 @@ function paste() {
       Utils.openUrlInBrowser(url);
     }
   } catch(e) {
-    Components.utils.reportError(e);
+    Cu.reportError(e);
     displayMessage("Error: " + e);
   }
 }
@@ -178,7 +168,7 @@ function saveAs() {
       $("#editor-div").slideUp();
     }
   } catch(e) {
-    Components.utils.reportError(e);
+    Cu.reportError(e);
     displayMessage("Error: " + e);
   }
 }

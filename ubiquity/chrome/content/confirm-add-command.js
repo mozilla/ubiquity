@@ -36,9 +36,15 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/codesource.js");
-Components.utils.import("resource://ubiquity/modules/setup.js");
+var Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/codesource.js");
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/aboutubiquity.properties");
 
 function getUrlParams() {
   var urlFragments = document.URL.split("?")[1];
@@ -66,8 +72,9 @@ function showConfirmation() {
   $("#errorPageContainer").css("background-image",
                                "url('" + largeIconUrl + "')");
 
-  $("title").text(_ubundle.GetStringFromName("ubiquity.subscription.successtitle"));
-  $("#errorTitle").html("<h1>" + _ubundle.GetStringFromName("ubiquity.subscription.successheader") + "</h1>");
+  $("title").text(L("ubiquity.subscription.successtitle"));
+  $("#errorTitle").html(
+    "<h1>" + L("ubiquity.subscription.successheader") + "</h1>");
 
   $("#errorShortDesc").html($("#confirmationShortDesc").html());
   $("#errorLongDesc").html($("#confirmationLongDesc").html());

@@ -37,6 +37,9 @@
 Components.utils.import("resource://ubiquity/modules/setup.js");
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
+var LT = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/aboutubiquitytutorial.properties");
+
 function waitForUserAction( conditionFunction, callback ) {
   var intervalId;
   intervalId = window.setInterval( function() {
@@ -209,14 +212,14 @@ function startUbiqTutorial() {
   hideOtherContent();
   destroyCanvas();
 
-  var html = "<h2>" + _utbundle.GetStringFromName("tutorial.welcome") + "</h2>"
-    + "<p><a onclick='ubiqTutorialStage1();'>" + _utbundle.GetStringFromName("tutorial.fromthestart") + "</a></p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.fromthemiddle") + "</p><ol>"
-    + "<li><a onclick='ubiqTutorialStage1();'>" + _utbundle.GetStringFromName("tutorial.howtostart") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage3();'>" + _utbundle.GetStringFromName("tutorial.previews") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage7();'>" + _utbundle.GetStringFromName("tutorial.suggestions") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage16();'>" + _utbundle.GetStringFromName("tutorial.selecting") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage23();'>" + _utbundle.GetStringFromName("tutorial.morecommands") + "</a></li>"
+  var html = "<h2>" + LT("tutorial.welcome") + "</h2>"
+    + "<p><a onclick='ubiqTutorialStage1();'>" + LT("tutorial.fromthestart") + "</a></p>"
+    + "<p>" + LT("tutorial.fromthemiddle") + "</p><ol>"
+    + "<li><a onclick='ubiqTutorialStage1();'>" + LT("tutorial.howtostart") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage3();'>" + LT("tutorial.previews") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage7();'>" + LT("tutorial.suggestions") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage16();'>" + LT("tutorial.selecting") + "</a></li>"
+    + "<li><a onclick='ubiqTutorialStage23();'>" + LT("tutorial.morecommands") + "</a></li>"
     + "</ol>";
 
   fadeInText( html );
@@ -226,12 +229,12 @@ function startUbiqTutorial() {
 function ubiqTutorialStage1() {
 
   var keyCombo = PrefKeys.getKeyCombo();
-  var introHtml = "<h2>" + _utbundle.GetStringFromName("tutorial.stage01h1") + "</h2>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage01p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage01p2") + "</p>"
-    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage01p3") + " "
-    + keyCombo[0] + " " + _utbundle.GetStringFromName("tutorial.stage01p4") + " "
-    + keyCombo[1] + " " + _utbundle.GetStringFromName("tutorial.stage01p5") + "</strong></p>";
+  var introHtml = "<h2>" + LT("tutorial.stage01h1") + "</h2>"
+    + "<p>" + LT("tutorial.stage01p1") + "</p>"
+    + "<p>" + LT("tutorial.stage01p2") + "</p>"
+    + "<p><strong>" + LT("tutorial.stage01p3") + " "
+    + keyCombo[0] + " " + LT("tutorial.stage01p4") + " "
+    + keyCombo[1] + " " + LT("tutorial.stage01p5") + "</strong></p>";
 
   fadeInText(introHtml);
 
@@ -240,8 +243,8 @@ function ubiqTutorialStage1() {
 
 function ubiqTutorialStage2() {
   moveDivRight();
-  let stage2Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage02p1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage02p2") + "</p>";
+  let stage2Html = "<p>" + LT("tutorial.stage02p1") + "</p>"
+  + "<p>" + LT("tutorial.stage02p2") + "</p>";
 
   fadeInText(stage2Html);
   showArrowToInputBox();
@@ -253,11 +256,11 @@ function ubiqTutorialStage2() {
 function ubiqTutorialStage3() {
   var keyCombo = PrefKeys.getKeyCombo();
   let stage3Html = 
-    "<h2>" + _utbundle.GetStringFromName("tutorial.stage03h1") + "</h2>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage03p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage03p2") + " "
-    + keyCombo[0] + " " + _utbundle.GetStringFromName("tutorial.stage03p3") + " "
-    + keyCombo[1] + " " + _utbundle.GetStringFromName("tutorial.stage03p4") + "</p>";
+    "<h2>" + LT("tutorial.stage03h1") + "</h2>"
+    + "<p>" + LT("tutorial.stage03p1") + "</p>"
+    + "<p>" + LT("tutorial.stage03p2") + " "
+    + keyCombo[0] + " " + LT("tutorial.stage03p3") + " "
+    + keyCombo[1] + " " + LT("tutorial.stage03p4") + "</p>";
 
   fadeInText(stage3Html);
   destroyCanvas();
@@ -267,7 +270,7 @@ function ubiqTutorialStage3() {
 
 function ubiqTutorialStage4() {
   moveDivRight();
-  let stage4Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage04p1") + "</p>";
+  let stage4Html = "<p>" + LT("tutorial.stage04p1") + "</p>";
   fadeInText(stage4Html);
   showArrowToInputBox();
   waitForUserAction( function() { return ubiqSuggestionIs("weather"); },
@@ -278,9 +281,9 @@ function ubiqTutorialStage5() {
   // NOTE: For some reason, &mdash; makes the xhtml parser barf, but
   // &#8212; works.
   let stage5Html = 
-    "<p>" + _utbundle.GetStringFromName("tutorial.stage05p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage05p2") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage05p3") + "</p>";
+    "<p>" + LT("tutorial.stage05p1") + "</p>"
+    + "<p>" + LT("tutorial.stage05p2") + "</p>"
+    + "<p>" + LT("tutorial.stage05p3") + "</p>";
 
   fadeInText(stage5Html);
   destroyCanvas();
@@ -290,8 +293,8 @@ function ubiqTutorialStage5() {
 }
 
 function ubiqTutorialStage6() {
-  let stage6Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage06p1") + "</p>"
-  + " <p>" + _utbundle.GetStringFromName("tutorial.stage06p2") + "</p>";
+  let stage6Html = "<p>" + LT("tutorial.stage06p1") + "</p>"
+  + " <p>" + LT("tutorial.stage06p2") + "</p>";
   destroyCanvas();
   moveDivRight();
   fadeInText(stage6Html);
@@ -301,15 +304,15 @@ function ubiqTutorialStage6() {
 
 function ubiqTutorialStage7() {
   destroyCanvas();
-  let stage7Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage07h1") + "</h2>"
-    + " <p>" + _utbundle.GetStringFromName("tutorial.stage07p1") + "</p>";
+  let stage7Html = "<h2>" + LT("tutorial.stage07h1") + "</h2>"
+    + " <p>" + LT("tutorial.stage07p1") + "</p>";
   fadeInText(stage7Html);
   waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage8 );
 }
 
 function ubiqTutorialStage8() {
   moveDivRight();
-   let stage8Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage08p1") + "</p>";
+   let stage8Html = "<p>" + LT("tutorial.stage08p1") + "</p>";
   fadeInText(stage8Html);
   showArrowToInputBox();
   waitForUserAction( function() {return ubiqInputIs("c" );},
@@ -317,8 +320,8 @@ function ubiqTutorialStage8() {
 }
 
 function ubiqTutorialStage9() {
-   let stage9Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage09p1") + "</p>"
-    + " <p>" + _utbundle.GetStringFromName("tutorial.stage09p2") + "</p>";
+   let stage9Html = "<p>" + LT("tutorial.stage09p1") + "</p>"
+    + " <p>" + LT("tutorial.stage09p2") + "</p>";
   fadeInText(stage9Html);
   destroyCanvas();
   showArrowToSuggestionList();
@@ -327,7 +330,7 @@ function ubiqTutorialStage9() {
 }
 
 function ubiqTutorialStage10() {
-   let stage10Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage10p1") + "</p>";
+   let stage10Html = "<p>" + LT("tutorial.stage10p1") + "</p>";
   fadeInText(stage10Html);
   destroyCanvas();
   showArrowToInputBox();
@@ -336,8 +339,8 @@ function ubiqTutorialStage10() {
 }
 
 function ubiqTutorialStage11() {
-   let stage11Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage11p1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage11p2") + "</p>";
+   let stage11Html = "<p>" + LT("tutorial.stage11p1") + "</p>"
+  + "<p>" + LT("tutorial.stage11p2") + "</p>";
   fadeInText(stage11Html);
   destroyCanvas();
   showArrowToPreview();
@@ -346,8 +349,8 @@ function ubiqTutorialStage11() {
 }
 
 function ubiqTutorialStage12() {
-  let stage12Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage12h1") + "</h2>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage12p1") + "</p>";
+  let stage12Html = "<h2>" + LT("tutorial.stage12h1") + "</h2>"
+    + "<p>" + LT("tutorial.stage12p1") + "</p>";
   fadeInText(stage12Html);
   destroyCanvas();
   moveDivRight();
@@ -357,9 +360,9 @@ function ubiqTutorialStage12() {
 
 function ubiqTutorialStage13() {
   moveDivRight();
-  let stage13Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage13p1") + "</p>"
-    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage13p2") + "</strong></p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage13p3") + "</p>";
+  let stage13Html = "<p>" + LT("tutorial.stage13p1") + "</p>"
+    + "<p><strong>" + LT("tutorial.stage13p2") + "</strong></p>"
+    + "<p>" + LT("tutorial.stage13p3") + "</p>";
   fadeInText(stage13Html);
   showArrowToInputBox();
   waitForUserAction(  function() {return ubiqSuggestionIs("cheese" );},
@@ -367,8 +370,8 @@ function ubiqTutorialStage13() {
 }
 
 function ubiqTutorialStage14() {
-  let stage14Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage14p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage14p2") + "</p>";
+  let stage14Html = "<p>" + LT("tutorial.stage14p1") + "</p>"
+    + "<p>" + LT("tutorial.stage14p2") + "</p>";
   destroyCanvas();
   showArrowToSuggestionList();
   fadeInText(stage14Html);
@@ -377,9 +380,9 @@ function ubiqTutorialStage14() {
 }
 
 function ubiqTutorialStage15() {
-  let stage15Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage15p1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage15p2") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage15p3") + "</p>";
+  let stage15Html = "<p>" + LT("tutorial.stage15p1") + "</p>"
+  + "<p>" + LT("tutorial.stage15p2") + "</p>"
+  + "<p>" + LT("tutorial.stage15p3") + "</p>";
   fadeInText(stage15Html);
   destroyCanvas();
   showArrowToPreview();
@@ -390,9 +393,9 @@ function ubiqTutorialStage15() {
 function ubiqTutorialStage16() {
   moveDivRight();
   destroyCanvas();
-  let stage16Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage16ah1") + "</h2>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage16ap1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage16ap2") + "</p>";
+  let stage16Html = "<h2>" + LT("tutorial.stage16ah1") + "</h2>"
+  + "<p>" + LT("tutorial.stage16ap1") + "</p>"
+  + "<p>" + LT("tutorial.stage16ap2") + "</p>";
 
   fadeInText(stage16Html);
 
@@ -406,15 +409,15 @@ function ubiqTutorialStage16() {
 }
 
 function ubiqTutorialStage16b() {
-   let stage16bhtml = "<p>" + _utbundle.GetStringFromName("tutorial.stage16bp1") + "</p>";
+   let stage16bhtml = "<p>" + LT("tutorial.stage16bp1") + "</p>";
    fadeInText(stage16bhtml);
    waitForUserAction( function() {return ubiqSuggestionIs("map");},
                       ubiqTutorialStage16c);
 }
 
 function ubiqTutorialStage16c() {
-  let stage16chtml = "<p>" + _utbundle.GetStringFromName("tutorial.stage16cp1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage16cp2") + "</p>";
+  let stage16chtml = "<p>" + LT("tutorial.stage16cp1") + "</p>"
+  + "<p>" + LT("tutorial.stage16cp2") + "</p>";
   fadeInText(stage16chtml);
 
   waitForUserAction( function() {return !ubiqWindowIsUp();},
@@ -423,9 +426,9 @@ function ubiqTutorialStage16c() {
 
 function ubiqTutorialStage17() {
 
-  let stage17Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage17p1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage17p2") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage17p3") + "</p>";
+  let stage17Html = "<p>" + LT("tutorial.stage17p1") + "</p>"
+  + "<p>" + LT("tutorial.stage17p2") + "</p>"
+  + "<p>" + LT("tutorial.stage17p3") + "</p>";
 
   let jpDiv = $("#tutorial-contents-div");
   jpDiv.addClass("ubiq-tutorial");
@@ -439,8 +442,8 @@ function ubiqTutorialStage17() {
 }
 
 function ubiqTutorialStage18() {
-  let stage18Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage18p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage18p2") + "</p>";
+  let stage18Html = "<p>" + LT("tutorial.stage18p1") + "</p>"
+    + "<p>" + LT("tutorial.stage18p2") + "</p>";
 
   fadeInText(stage18Html);
   waitForUserAction( function() { return contentsDivHas("browser"); },
@@ -448,16 +451,16 @@ function ubiqTutorialStage18() {
 }
 
 function ubiqTutorialStage19() {
-  let stage19Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage19p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage19p2") + "</p>"
-    + "<p><a onclick='ubiqTutorialStage20();'>" + _utbundle.GetStringFromName("tutorial.stage19p3") + "</a></p>";
+  let stage19Html = "<p>" + LT("tutorial.stage19p1") + "</p>"
+    + "<p>" + LT("tutorial.stage19p2") + "</p>"
+    + "<p><a onclick='ubiqTutorialStage20();'>" + LT("tutorial.stage19p3") + "</a></p>";
 
   fadeInText(stage19Html);
 }
 
 function ubiqTutorialStage20() {
-  let stage20Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage20p1") + "</p>"
-    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage20p2") + "</strong>.</p>";
+  let stage20Html = "<p>" + LT("tutorial.stage20p1") + "</p>"
+    + "<p><strong>" + LT("tutorial.stage20p2") + "</strong>.</p>";
   let agDiv = $("#tutorial-contents-div");
   agDiv.html("aglet");
 
@@ -467,7 +470,7 @@ function ubiqTutorialStage20() {
 }
 
 function ubiqTutorialStage21() {
-  let stage21Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage21p1") + "</p>";
+  let stage21Html = "<p>" + LT("tutorial.stage21p1") + "</p>";
 
   fadeInText(stage21Html);
   waitForUserAction( function() {return ubiqSuggestionIs("google");},
@@ -475,9 +478,9 @@ function ubiqTutorialStage21() {
 }
 
 function ubiqTutorialStage22() {
-  let stage22Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage22p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage22p2") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p3") + "</p>";
+  let stage22Html = "<p>" + LT("tutorial.stage22p1") + "</p>"
+    + "<p>" + LT("tutorial.stage22p2") + "</p>"
+    + "<p>" + LT("tutorial.stage23p3") + "</p>";
   fadeInText(stage22Html);
   waitForUserAction( function() {return !ubiqWindowIsUp();},
                      ubiqTutorialStage23 );
@@ -486,18 +489,18 @@ function ubiqTutorialStage22() {
 function ubiqTutorialStage23() {
   $("#tutorial-contents-div").slideUp();
   moveDivRight();
-  let stage23Html = "<h2>" + _utbundle.GetStringFromName("tutorial.stage23h1") + "</h2>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p2") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage23p3") + "</p>"
-    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage23p4") + "</strong></p>";
+  let stage23Html = "<h2>" + LT("tutorial.stage23h1") + "</h2>"
+    + "<p>" + LT("tutorial.stage23p1") + "</p>"
+    + "<p>" + LT("tutorial.stage23p2") + "</p>"
+    + "<p>" + LT("tutorial.stage23p3") + "</p>"
+    + "<p><strong>" + LT("tutorial.stage23p4") + "</strong></p>";
   fadeInText(stage23Html);
   waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage24 );
 }
 
 function ubiqTutorialStage24() {
-  let stage24Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage24p1") + "</p>"
-    + "<p><strong>" + _utbundle.GetStringFromName("tutorial.stage24p2") + "</strong></p>";
+  let stage24Html = "<p>" + LT("tutorial.stage24p1") + "</p>"
+    + "<p><strong>" + LT("tutorial.stage24p2") + "</strong></p>";
 
   fadeInText(stage24Html);
   waitForUserAction( function() {return ubiqSuggestionIs("help") &&
@@ -506,9 +509,9 @@ function ubiqTutorialStage24() {
 }
 
 function ubiqTutorialStage25() {
-  let stage25Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage25p1") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage25p2") + "</p>"
-    + "<p>" + _utbundle.GetStringFromName("tutorial.stage25p3") + "</p>";
+  let stage25Html = "<p>" + LT("tutorial.stage25p1") + "</p>"
+    + "<p>" + LT("tutorial.stage25p2") + "</p>"
+    + "<p>" + LT("tutorial.stage25p3") + "</p>";
 
   fadeInText(stage25Html);
   waitForUserAction( function() {return !ubiqWindowIsUp();},
@@ -516,10 +519,10 @@ function ubiqTutorialStage25() {
 }
 
 function ubiqTutorialStage26() {
-  let stage26Html = "<p>" + _utbundle.GetStringFromName("tutorial.stage26p1") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage26p2") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage26p3") + "</p>"
-  + "<p>" + _utbundle.GetStringFromName("tutorial.stage26p4") + "</p>";
+  let stage26Html = "<p>" + LT("tutorial.stage26p1") + "</p>"
+  + "<p>" + LT("tutorial.stage26p2") + "</p>"
+  + "<p>" + LT("tutorial.stage26p3") + "</p>"
+  + "<p>" + LT("tutorial.stage26p4") + "</p>";
 
   fadeInText(stage26Html);
 }

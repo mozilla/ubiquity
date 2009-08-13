@@ -35,7 +35,7 @@ Sincerely,
 <!ENTITY ubiquity.tagline.HackUbiquity "Hack It.">
 
 <!-- Header page tips -->
-<!ENTITY ubiquity.pagetip.About "You can get to this page at any time using the &ldquo;Help&rdquo; command.">
+<!ENTITY ubiquity.pagetip.About "You can get to this page at any time using the &ldquo;help&rdquo; command.">
 <!ENTITY ubiquity.pagetip.Settings "You can get to this page at any time using the  &ldquo;change ubiquity settings&rdquo; command.">
 <!ENTITY ubiquity.pagetip.YourCommands "You can get to this page at any time using the &ldquo;list ubiquity commands&rdquo; command.">
 <!ENTITY ubiquity.pagetip.Support "You can get to this page at any time using the  &ldquo;get support&rdquo; command.">

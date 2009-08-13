@@ -34,11 +34,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Cu = Components.utils;
-
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/aboutubiquity.properties");
 
 function displayTemplate(feedUri) {
   var {feedManager} = UbiquitySetup.createServices();
@@ -123,8 +124,8 @@ function setupHelp() {
     $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
     [this.textContent, this.bin] = [this.bin, this.textContent];
   });
-  toggler.textContent = _ubundle.GetStringFromName("ubiquity.showhidehelp.show");
-  toggler.bin = _ubundle.GetStringFromName("ubiquity.showhidehelp.hide");
+  toggler.textContent = L("ubiquity.showhidehelp.show");
+  toggler.bin = L("ubiquity.showhidehelp.hide");
   toggler.off = true;
 }
 
