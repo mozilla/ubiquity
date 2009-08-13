@@ -55,14 +55,13 @@
 // if feeds-first, feeds by name or by recently subscribed?
 // if cmds-first, by name, author, homepage, licence, or enabledness?
 
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+
 const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
 
 var Cc = Components.classes;
 var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-Cu.import("resource://ubiquity/modules/setup.js");
-Cu.import("resource://ubiquity/modules/utils.js");
 
 var {escapeHtml} = Utils;
 
@@ -399,22 +398,12 @@ function viewLocalizationTemplate(feed) (
     L("ubiquity.cmdlist.localetemplate"),
     "action"));
 
-// TO-DO: perform an inventory of similar effects found throughout and move
+// TODO: perform an inventory of similar effects found throughout and move
 // them into a neatly packaged effects library later.
 // Try and tag them for now. (slides/fades/etc).
 
-function setupHelp() {
-  var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
-    $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
-    [this.textContent, this.bin] = [this.bin, this.textContent];
-  });
-  toggler.textContent = L("ubiquity.showhidehelp.show");
-  toggler.bin = L("ubiquity.showhidehelp.hide");
-  toggler.off = true;
-}
-
 $(function onReady() {
-  setupHelp();
+  setupHelp("#show-hide-cmdlist-help", "#cmdlist-help-div");
   buildTable();
   buildUnsubscribedFeeds();
   // jump to the right anchor

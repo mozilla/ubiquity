@@ -119,18 +119,8 @@ function potCreationDate(date) {
 
 function zeroPadLeft(str, num) (Array(num + 1).join(0) + str).slice(-num);
 
-function setupHelp() {
-  var [toggler] = $("#show-hide-cmdlist-help").click(function toggleHelp() {
-    $("#cmdlist-help-div")[(this.off ^= 1) ? "slideUp" : "slideDown"]();
-    [this.textContent, this.bin] = [this.bin, this.textContent];
-  });
-  toggler.textContent = L("ubiquity.showhidehelp.show");
-  toggler.bin = L("ubiquity.showhidehelp.hide");
-  toggler.off = true;
-}
-
-$(function(){
-  setupHelp();
+$(function ready() {
+  setupHelp("#show-hide-help", "#help-div");
   var feedUri = location.hash.slice(1);
   if (feedUri) {
     $(".feedKey").text(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));

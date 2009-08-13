@@ -82,5 +82,15 @@ function createNavLinks() {
   }
 }
 
+function setupHelp(clickee, help) {
+  var [toggler] = $(clickee).click(function toggleHelp() {
+    $(help)[(this.off ^= 1) ? "slideUp" : "slideDown"]();
+    [this.textContent, this.bin] = [this.bin, this.textContent];
+  });
+  toggler.textContent = L("ubiquity.showhidehelp.show");
+  toggler.bin = L("ubiquity.showhidehelp.hide");
+  toggler.off = true;
+}
+
 $(createNavLinks);
 $(setVersionString);
