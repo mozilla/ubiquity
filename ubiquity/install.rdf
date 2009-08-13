@@ -25,5 +25,16 @@
     <em:homepageURL>http://ubiquity.mozilla.com</em:homepageURL>
     <em:updateURL>https://ubiquity.mozilla.com/xpi/%ITEM_VERSION%/update.rdf</em:updateURL>
     <em:optionsURL>chrome://ubiquity/content/preferences.xul</em:optionsURL>
+
+    <em:translator>queltosh (es-ES)</em:translator>
+    <em:translator>AtteL (fi-FI)</em:translator>
+    <em:translator>ccorazza, Frédéric, Goofy (fr)</em:translator>
+    <em:translator>kkemenczy (hu)</em:translator>
+    <em:translator>mar, satyr (ja)</em:translator>
+    <em:translator>nathansamson (nl-NL)</em:translator>
+    <em:translator>teo (pl-PL)</em:translator>
+    <em:translator>camponez (pt)</em:translator>
+    <em:translator>fernph (pt-BR)</em:translator>
+    <em:translator>yfdyh000 (zh-CN)</em:translator>
   </Description>
 </RDF>
