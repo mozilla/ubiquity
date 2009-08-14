@@ -579,11 +579,7 @@ function testPartiallyParsedSentence() {
   // to not exist.
   // make sure it also works with a no-arg command:
   var fakeQuery = {nounCache: {}};
-  var cmd_grumble = {
-    names: ["grumble"],
-    execute: function(context, directObject, modifiers) {
-    }
-  };
+  var cmd_grumble = {names: ["grumble"]};
   var verbNoArgs = new NLParser1.Verb(cmd_grumble, {});
   var partiallyParsedNoArgs = new NLParser1.PartiallyParsedSentence(
     verbNoArgs,
@@ -641,8 +637,8 @@ function testPartiallyParsedSentence() {
   var parsed  = partiallyParsed.getParsedSentences();
   // two suggestions for foo, two suggestions for bar: should be four
   // combinations.
-  dump("number of parsings: " + parsed.length + "\n");
-  this.assert( parsed.length == 4, "Should be four parsings.");
+  this.assert(parsed.length === 4,
+              "Should be four parsings. " + uneval(parsed));
 
   // Add another suggestion for bar.  Now there should be six combinations.
   partiallyParsed.addArgumentSuggestion("instrument",
