@@ -353,6 +353,7 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       Components: Components,
       feed: {id: codeSource.id,
              dom: codeSource.dom},
+      context: {},
       commands: [],
       pageLoadFuncs: [],
       ubiquityLoadFuncs: [],
@@ -374,23 +375,15 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
   var baseFeedsUri = baseUri + "builtin-feeds/";
   var baseScriptsUri = baseUri + "scripts/";
 
+  var feeds = {
+    "Builtin Commands": baseFeedsUri + "builtincmds.js",
+  };
   var headerCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "header/utils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/cmdutils.js"),
-    new LocalUriCodeSource(basePartsUri + "header/localization_utils.js"),
-    //new LocalUriCodeSource(basePartsUri + "header/experimental_utils.js"),
+    new LocalUriCodeSource(basePartsUri + "header/initial.js"),
   ];
-  var feeds = {};
   var footerCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "footer/final.js")
+    new LocalUriCodeSource(basePartsUri + "footer/final.js"),
   ];
-
-  // TODO: think of a better way to switch nountypes files for different languages
-  // and keep english as a default, etc.
-  // mitcho's guess: we should keep nountypes separate but verbs together... :/
-  headerCodeSources.push(
-    new LocalUriCodeSource(basePartsUri + "header/nountypes.js"));
-  feeds["Builtin Commands"] = baseFeedsUri + "builtincmds.js";
 
   return {
     feeds: feeds,

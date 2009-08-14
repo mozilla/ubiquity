@@ -235,7 +235,9 @@ Ubiquity.prototype = {
     this.__lastValue = "";
     this.__textBox.focus();
     this.__textBox.select();
+    var t = new Date;
     this.__cmdManager.refresh();
+    this.Utils.reportInfo((new Date - t) + "[ms]");
     this.__processInput();
   },
 
