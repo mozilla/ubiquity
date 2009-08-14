@@ -26,8 +26,7 @@ function getCompletions(input, verbs, context) {
                               verbs,
                               fakeContextUtils);
   var query = parser.newQuery(input, context || emptyContext, MAX_SUGGESTIONS,
-                              true);
-  query.run();
+                              true).run();
   return query.suggestionList;
 }
 
@@ -412,17 +411,12 @@ function testSuggestionMemory() {
 }
 
 function testSortedBySuggestionMemory() {
-  var verbList = [{names: ["clock"], execute: function(){}},
-                  {names: ["calendar"], execute: function(){}},
-                  {names: ["couch"], execute: function(){}},
-                  {names: ["conch"], execute: function(){}},
-                  {names: ["crouch"], execute: function(){}},
-                  {names: ["coelecanth"], execute: function(){}},
-                  {names: ["crab"], execute: function(){}} ];
+  var verbList = [{names: [x], id: x}
+                  for each (x in ["clock", "calendar", "couch", "conch",
+                                  "crouch", "coelecanth", "crab"])];
   var nlParser = makeTestParser(LANG, verbList);
-  var fakeContext = {textSelection:"", htmlSelection:""};
-  var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true);
-  query.run();
+  var fakeContext = {textSelection: "", htmlSelection: ""};
+  var query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true).run();
   var suggestions = query.suggestionList;
   //take the fifth and sixth suggestions, whatever they are...
   var suggFive = suggestions[4];
@@ -436,8 +430,7 @@ function testSortedBySuggestionMemory() {
   nlParser.strengthenMemory("c", suggSix);
 
   // now give the same input again...
-  query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true);
-  query.run();
+  query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true).run();
   suggestions = query.suggestionList;
   dump("Suggestions has length " + suggestions.length + "\n");
   // the old six should be on top, with the old five in second place:
@@ -449,15 +442,13 @@ function testNounFirstSortedByGeneralFrequency() {
   var pantsContext = { htmlSelection: "<b>Pants</b>", textSelection: "Pants" };
 
   var verbList = [
-    {names: ["foo"], DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
-    {names: ["bar"], DOType: noun_arb_text, DOLabel:"it", execute: function(){}},
-    {names: ["baz"], DOType: noun_arb_text, DOLabel:"it", execute: function(){}}];
+    {names: [x], id: x, DOType: noun_arb_text, DOLabel:"it"}
+    for each (x in ["foo", "bar", "baz"])];
 
   // Note: Create the parser ourself instead of using getCompletion() because
   // we need the suggestion memory in the parser state.
   var parser = makeTestParser(LANG, verbList, fakeContextUtils);
-  var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true);
-  query.run();
+  var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true).run();
   var suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
   this.assert(suggestions[0]._verb._name == "foo", "Foo should be first...");
@@ -465,21 +456,18 @@ function testNounFirstSortedByGeneralFrequency() {
   this.assert(suggestions[2]._verb._name == "baz", "Baz should be last...");
 
   // Now we select "baz" twice and "bar" once...
-  query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS, true);
-  query.run();
+  query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS, true).run();
   var choice = query.suggestionList[0];
   parser.strengthenMemory("baz", choice);
   parser.strengthenMemory("baz", choice);
 
-  query = parser.newQuery("bar", pantsContext, MAX_SUGGESTIONS, true);
-  query.run();
+  query = parser.newQuery("bar", pantsContext, MAX_SUGGESTIONS, true).run();
   choice = query.suggestionList[0];
   parser.strengthenMemory("bar", choice);
 
   // Now when we try the no-input suggestion again, should be ranked
   // with baz first, then bar, then foo.
-  query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true);
-  query.run();
+  query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true).run();
   suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
   this.assert(suggestions[0]._verb._name == "baz", "Baz should be first...");

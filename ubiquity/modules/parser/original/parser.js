@@ -125,7 +125,10 @@ ParserQuery.prototype = {
     this.onResults();
   },
 
-  run: function PQ_run() { this.onNewParseGenerated(); },
+  run: function PQ_run() {
+    this.onNewParseGenerated();
+    return this;
+  },
 
   // This method should be called by parser code only, not client code.
   _addPartiallyParsedSentence:
