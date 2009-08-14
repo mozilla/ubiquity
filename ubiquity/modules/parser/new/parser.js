@@ -170,8 +170,6 @@ Parser.prototype = {
   // and associated methods. Later in the parse process elements of {{{_nounCache}}}
   // are accessed directly, assuming that the nouns were already cached
   // using {{{Parser#detectNounType}}}.
-  //
-  // TODO: better cleanup + management of {{{_nounCache}}}
   _nounCache: null,
   _defaultsCache: null,
 
@@ -241,7 +239,7 @@ Parser.prototype = {
   // This method is initialized when the language is loaded.
   // Caches a number of commonly used regex's into {{{this._patternCache}}}.
   initializeCache: function initializeCache() {
-    this._nounCache = {};
+    this._nounCache = new NounCache(this);
     this._defaultsCache = {};
     var patternCache = this._patternCache = {};
     var verbPatterns = patternCache.verbs = {};
@@ -333,6 +331,10 @@ Parser.prototype = {
     var boundary = this.usespaces ? "\\b" : "";
     patternCache.anaphora =
       RegExp(boundary + RegexpTrie(this.anaphora) + boundary);
+  },
+
+  flushNounCache: function() {
+    this._nounCache = new NounCache(this);
   },
 
   // ** {{{Parser#initializeLanguage}}} **
@@ -1260,11 +1262,10 @@ Parser.prototype = {
             // here.
 
             let nountypeId = verbArg.nountype.id;
-            if (!(argText in this._nounCache))
-              this._nounCache[argText] = {};
-            if (nountypeId in this._nounCache[argText]) {
+            let suggestions = this._nounCache.getSuggs(argText,nountypeId);//new
+//            Utils.log(suggestions);
+            if (suggestions) {//new
 
-              let suggestions = this._nounCache[argText][nountypeId];
               //suggestions.sort(byReverseScore);
               //suggestions = suggestions.slice(0,maxSuggestions);
 
@@ -1309,7 +1310,7 @@ Parser.prototype = {
       let combinationParse = parse.copy();
       for each (let argOrder in combination) {
         let {role,argText,nountypeId,suggestionId} = argOrder;
-        let suggestion = this._nounCache[argText][nountypeId][suggestionId];
+        let suggestion = this._nounCache.getSuggs(argText,nountypeId)[suggestionId];
         for each (let arg in combinationParse.args[role]) {
           if (arg.input == argText) {
             for(let key in suggestion)
@@ -1428,125 +1429,103 @@ Parser.prototype = {
   // noun type name.
   detectNounType: function detectNounType(currentQuery,x,nounTypeIds,callback) {
 
-    let alreadyCached = true;
-    if (!Utils.isEmpty(this._nounCache[x])) {
-      for (let nounTypeId in nounTypeIds) {
-        if (!(nounTypeId in this._nounCache[x]))
-          alreadyCached = false;
-      }
-    } else {
-      alreadyCached = false;
+    let cachedNounTypeIds = [];
+    let uncachedNounTypeIds = [];
+    
+    // Make a list of nountypes we need to suggest x as, and make a list
+    // of nountypes which have already cached x.
+    //
+    // FLUSH OLD HERE?
+    
+    for (let nounTypeId in nounTypeIds) {
+      if (this._nounCache.getTime(x,nounTypeId))
+        cachedNounTypeIds.push(nounTypeId);
+      else
+        uncachedNounTypeIds.push(nounTypeId);
     }
-
-    if (alreadyCached) {
-      var ids = [ id for (id in nounTypeIds) if (this._nounCache[x][id].length) ];
-//      currentQuery.dump('found all required values for '+x+' in cache');
-      if (typeof callback == 'function') {
-//        currentQuery.dump("running callback ("+callback.name+") now");
-        callback(x,ids);
-      }
-    } else {
-
-      //Utils.log('detecting '+x,nounTypeIds);
-
-      if (Utils.isEmpty(this._nounCache[x]))
-        this._nounCache[x] = {};
-
-      var handleSuggs = function detectNounType_handleSuggs(suggs, id, asyncFlag) {
-        if (!suggs || !suggs.length)
-          return [];
-        if (!Utils.isArray(suggs)) suggs = [suggs];
-        // This extra step here which admittedly looks redundant is to
-        // "fix" arrays which were the product of a nountype from a locked
-        // down feed plugin, to enable proper enumeration. This is due to some
-        // weird behavior which has to do with XPCSafeJSObjectWrapper.
-        // Ask satyr or mitcho for details.
-        suggs = [suggs[key] for (key in suggs)];
-        for each (let s in suggs) s.nountypeId = id;
-        return suggs;
-      };
-      var thisParser = this;
-      var myCallback = function detectNounType_myCallback(suggestions, id, asyncFlag) {
-        let ids = [];
-        if (id != undefined)
-          ids = [ id ];
-        else
-          ids = [ id for (id in nounTypeIds)
-                  if ((typeof thisParser._nounCache[x] == 'object'
-                       && id in thisParser._nounCache[x]
-                       && thisParser._nounCache[x][id].length)
-                       || currentQuery._detectionTracker.getComplete(x,id)
-                       )];
-
-//        currentQuery.dump("finished detecting " + x + " for " + ids );
-        if (currentQuery.finished) {
-          currentQuery.dump("this query is already finished... so don't suggest this noun!");
-          return;
-        }
-
-        if (!(x in thisParser._nounCache))
-          thisParser._nounCache[x] = {};
-
-        for each (let newSugg in suggestions) {
-          let {nountypeId} = newSugg;
-
-          if (!(nountypeId in thisParser._nounCache[x]))
-            thisParser._nounCache[x][nountypeId] = [];
-
-          let thisSuggIsNew = true;
-          for each (let oldSugg in thisParser._nounCache[x][nountypeId]) {
-            // Here, we only compare the summary propery.
-            // There are a few reasons for this:
-            // 1. We want to avoid suggestions which only differ in score
-            // 2. If the summary is not different, then the data should
-            //    be different, as then the user is forced to choose between
-            //    identical suggestions.
-            // 3. Checking data is dangerous as isEqual (now deprecated) is not
-            //    made to handle xpconnect objects, which are often in data.
-            //    (This was, I suspect, the problem with #829.)
-            if (newSugg.summary == oldSugg.summary) {
-              thisSuggIsNew = false;
-              oldSugg.score = Math.max(oldSugg.score,newSugg.score);
-            }
-          }
-
-          if (thisSuggIsNew)
-            thisParser._nounCache[x][nountypeId].push(newSugg);
-        }
-
+    
+    Utils.setTimeout(function detectNounType_cachedCallback() {
+      if (cachedNounTypeIds.length) {
+        currentQuery.dump('found cached values of '+x+' for '+cachedNounTypeIds.join());
         if (typeof callback == 'function') {
 //          currentQuery.dump("running callback ("+callback.name+") now");
-          callback(x,ids, asyncFlag);
+          callback(x,cachedNounTypeIds);
         }
-      };
+      }
+    });
 
-      var activeNounTypes = this._nounTypes;
+    var handleSuggs = function detectNounType_handleSuggs(suggs, id, asyncFlag) {
+      if (!suggs || !suggs.length)
+        return [];
+      if (!Utils.isArray(suggs)) suggs = [suggs];
+      // This extra step here which admittedly looks redundant is to
+      // "fix" arrays which were the product of a nountype from a locked
+      // down feed plugin, to enable proper enumeration. This is due to some
+      // weird behavior which has to do with XPCSafeJSObjectWrapper.
+      // Ask satyr or mitcho for details.
+      suggs = [suggs[key] for (key in suggs)];
+      for each (let s in suggs) s.nountypeId = id;
+      return suggs;
+    };
+    var thisParser = this;
+    var myCallback = function detectNounType_myCallback(suggestions, id, asyncFlag) {
+      let ids = [];
+      if (id != undefined)
+        ids = [ id ];
+      else
+        ids = [ id for each (id in uncachedNounTypeIds)
+                if (thisParser._nounCache.getTime(x,id)
+                     || currentQuery._detectionTracker.getComplete(x,id) )
+               ];
 
+      currentQuery.dump("finished detecting " + x + " for " + ids );
+      if (currentQuery.finished) {
+        currentQuery.dump("this query is already finished... so don't suggest this noun!");
+        return;
+      }
+
+      if (suggestions.length) {
+        for each (let newSugg in suggestions) {
+          let {nountypeId} = newSugg;
+          thisParser._nounCache.addSugg(x,nountypeId,newSugg);
+          thisParser._nounCache.setTime(x,nountypeId);
+        }
+      } else {
+        // TODO: maybe we only want to do this for when the callback is
+        // individual? 
+        for each (let id in ids)
+          thisParser._nounCache.setSuggs(x,id,[]);
+      }
+
+      if (typeof callback == 'function') {
+//        currentQuery.dump("running callback ("+callback.name+") now");
+        callback(x,ids, asyncFlag);
+      }
+    };
+
+    var activeNounTypes = this._nounTypes;
+
+    if (uncachedNounTypeIds.length) {
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
-
-        let ids = [id for (id in nounTypeIds)];
-//        currentQuery.dump("detecting: " + x + " for " + ids);
-
+  
+        let ids = uncachedNounTypeIds;
+        currentQuery.dump("detecting: " + x + " for " + ids);
+  
         var dT = currentQuery._detectionTracker;
-        for (let id in nounTypeIds) {
-
+        for each (let id in uncachedNounTypeIds) {
+  
           if (dT.getStarted(x,id)) {
             //currentQuery.dump('detection of this combination has already begun.');
             continue;
           }
-
+  
 //          currentQuery.dump(x+','+id);
-
+  
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
           dT.setStarted(x,id,true);
-
-          if (!(x in thisParser._nounCache))
-            thisParser._nounCache[x] = {};
-          if (!(id in thisParser._nounCache[x]))
-            thisParser._nounCache[x][id] = [];
-
+  
           let thisId = id;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
@@ -1555,10 +1534,10 @@ Parser.prototype = {
             suggs = handleSuggs(suggs, thisId);
             myCallback(suggs, thisId, true);
           };
-
+  
           var resultsFromSuggest = handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
-
+  
           var hadImmediateResults = false;
           for each (let result in resultsFromSuggest) {
             if (result.text || result.html) {
@@ -1568,7 +1547,7 @@ Parser.prototype = {
               dT.addOutstandingRequest(x,id,result);
             }
           }
-
+  
           // Check whether (a) no more results are coming and
           // (b) there were no immediate results.
           // In this case, try to complete the parse now.
@@ -1707,14 +1686,18 @@ ParseQuery.prototype = {
   // Most of this async code is by Blair.
   run: function PQ_run() {
     // clear the nounCache... for 0.5
-    this.parser._nounCache = {};
+//    this.parser._nounCache = {};
     this._keepworking = true;
+    this._next();
+
+    this._input = this.parser.wordBreaker(this.input);
+    this._next();
 
     var parseGenerator = this._yieldingParse();
     var self = this;
 
-//    this._timeBetweenAsyncs = [];
-//    this._lastAsync = null;
+//    self._lastAsync = null;
+//    self._timeBetweenAsyncs = [];
 
     function doAsyncParse() {
 //      if (self._lastAsync)
@@ -1916,12 +1899,6 @@ ParseQuery.prototype = {
                      || addedAny;
       }
 
-//      for each (let vParse in thisQuery._verbedParses){
-//        if (!vParse.complete)
-//        dump("incomplete parse, verb: " + vParse._verb +
-//                  ", argString: " + vParse.argString + "\n");
-//      }
-
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
 
@@ -1930,7 +1907,7 @@ ParseQuery.prototype = {
 
     function tryToCompleteParses(argText,ids,asyncFlag) {
 
-//      thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
+      thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
 
       if (thisQuery.finished) {
         thisQuery.dump('this query has already finished');
@@ -2094,7 +2071,7 @@ ParseQuery.prototype = {
 
     let parseIds = [parse._id for each (parse in parseCollection)];
     if (parseIds.indexOf(newParse._id) != -1) {
-//      this.dump("already contains parse #"+newParse._id+"!");
+      this.dump("already contains parse #"+newParse._id+"!");
       return false;
     }
 
@@ -2261,29 +2238,74 @@ NounTypeDetectionTracker.prototype = {
 
 }
 
-var NounCache = function() {
+var NounCache = function(parser) {
+  
   this.cacheSpace = {};
 }
 NounCache.prototype = {
   cacheSpace: {},
-  _ensureNode: function(arg,id) {
+  _ensureNode: function NC__ensureNode(arg,id) {
+    if (id === true)
+      Utils.log(this._ensureNode.caller,this._ensureNode.caller.caller);
     if (!(arg in this.cacheSpace))
       this.cacheSpace[arg] = {};
     if (!(id in this.cacheSpace[arg]))
-      this.cacheSpace[arg][id] = [];
+      this.cacheSpace[arg][id] = { setTime: null,
+                                   suggs: [] };
   },
+  getTime: function NC_getTime(arg,id) {
+    this._ensureNode(arg,id);
+    return this.cacheSpace[arg][id].setTime;
+  },
+  setTime: function NC_getTime(arg,id) {
+    this._ensureNode(arg,id);
+    this.cacheSpace[arg][id].setTime = Date.now();
+  },
+  getSuggs: function NC_getSuggs(arg,id) {
+    this._ensureNode(arg,id);
+    // If it's not cached, return null.
+    // This way you can distinguish "never been cached" (null) and
+    // cached [].
+    if (!this.cacheSpace[arg][id].setTime)
+      return null;
+    return this.cacheSpace[arg][id].suggs;
+  },
+  hasSuggsForIds: function NC_hasSuggsForIds(arg,ids) {
+    for (let id in ids) {
+      this._ensureNode(arg,id);
+    }
+    for (let id in ids) {
+      if (!this.cacheSpace[arg][id].setTime)
+        return false;
+    }
+    return true;
+  },
+  setSuggs: function NC_setSugg(arg,id,suggs) {
+    this._ensureNode(arg,id);
+    this.cacheSpace[arg][id].setTime = Date.now();
+    this.cacheSpace[arg][id].suggs = suggs;
+  },
+  addSugg: function NC_addSugg(arg,id,newSugg) {
+    this._ensureNode(arg,id);
+    let thisSuggIsNew = true;
+    for each (let oldSugg in this.cacheSpace[arg][id].suggs) {
+      // Here, we only compare the summary propery.
+      // There are a few reasons for this:
+      // 1. We want to avoid suggestions which only differ in score
+      // 2. If the summary is not different, then the data should
+      //    be different, as then the user is forced to choose between
+      //    identical suggestions.
+      // 3. Checking data is dangerous as isEqual (now deprecated) is not
+      //    made to handle xpconnect objects, which are often in data.
+      //    (This was, I suspect, the problem with #829.)
+      if (newSugg.summary == oldSugg.summary) {
+        thisSuggIsNew = false;
+        oldSugg.score = Math.max(oldSugg.score,newSugg.score);
+      }
+    }
 
-  getSuggs: function(arg,id) {
-    this._ensureNode(arg,id);
-    return this.cacheSpace[arg][id]
-  },
-  setSuggs: function(arg,id,suggs) {
-    this._ensureNode(arg,id);
-    this.cacheSpace[arg][id] = suggs;
-  },
-  addSuggs: function(arg,id,sugg) {
-    this._ensureNode(arg,id);
-    this.cacheSpace[arg][id].push(sugg);
+    if (thisSuggIsNew)
+      this.cacheSpace[arg][id].suggs.push(newSugg);
   }
 }
 
@@ -2632,18 +2654,9 @@ Parse.prototype = {
     PP_allNounTypesDetectionHasCompleted() {
     var argsAndNounTypeIdsToCheck = this.getArgsAndNounTypeIdsToCheck();
     var thisQuery = this._query;
-    var hasSuggs = function(argText,nounTypeIds) {
-      if (!(argText in thisQuery.parser._nounCache))
-        return false;
-      for (let nounTypeId in nounTypeIds) {
-        if (!(nounTypeId in thisQuery.parser._nounCache[argText]))
-          return false;
-      }
-      return true;
-    }
 
     for each (let {argText, nounTypeIds} in argsAndNounTypeIdsToCheck) {
-      if (!hasSuggs(argText,nounTypeIds)) {
+      if (!thisQuery.parser._nounCache.hasSuggsForIds(argText,nounTypeIds)) {
         for (let id in nounTypeIds) {
           if (!thisQuery._detectionTracker.getComplete(argText,id))
             return false;
