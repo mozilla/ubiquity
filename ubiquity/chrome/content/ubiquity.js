@@ -71,18 +71,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 
   msgPanel.addEventListener("popupshown", this, false);
   msgPanel.addEventListener("popuphidden", this, false);
-  msgPanel.addEventListener("click", function U_onPanelClick(event) {
-    // middle: open link, right: close panel, left: both
-    var {button, target} = event;
-    if (button !== 2) {
-      do var {href} = target;
-      while (!href && (target = target.parentNode));
-      if (!href || /^(?:javascript:|#)/.test(href)) return;
-      if (/^\w+:/.test(href)) self.Utils.openUrlInBrowser(href);
-    }
-    if (button !== 1) self.closeWindow();
-    event.preventDefault();
-  }, true);
+  msgPanel.addEventListener("click", this, true);
 }
 
 Ubiquity.prototype = {
@@ -235,10 +224,21 @@ Ubiquity.prototype = {
     this.__lastValue = "";
     this.__textBox.focus();
     this.__textBox.select();
-    var t = new Date;
     this.__cmdManager.refresh();
-    this.Utils.reportInfo((new Date - t) + "[ms]");
     this.__processInput();
+  },
+
+  __onclick: function U__onClick(event) {
+    // middle: open link, right: close panel, left: both
+    var {button, target} = event;
+    if (button !== 2) {
+      do var {href} = target;
+      while (!href && (target = target.parentNode));
+      if (!href || /^(?=javascript:|#)/.test(href)) return;
+      if (/^\w+:/.test(href)) this.Utils.openUrlInBrowser(href);
+    }
+    if (button !== 1) this.closeWindow();
+    event.preventDefault();
   },
 
   setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {
