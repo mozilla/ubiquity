@@ -130,11 +130,11 @@ function makeCommands(arrayOfOptions) {
 // Actual test cases begin here:
 
 function testSmokeTestParserTwo() {
+  if (UbiquitySetup.parserVersion < 2) throw new this.SkipTestError();
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
   // nountypes; ensure that it doesn't break.
   var jsm = {};
   Components.utils.import("resource://ubiquity/modules/parser/parser.js", jsm);
-  if (UbiquitySetup.parserVersion < 2) throw new this.SkipTestError();
   try {
     var services = UbiquitySetup.createServices();
     // but don't set up windows or chrome or anything... just use this to
@@ -976,14 +976,11 @@ function testSortedBySuggestionMemoryNounFirstParser2() {
                 "1st suggestion should be throttle" );
     self.assert( completions[2].displayHtml.indexOf("wiggle") > -1,
                 "2nd suggestion should be wiggle" );
-
   }
-
-
 }
 
-
 function testTagCommand() {
+  if (UbiquitySetup.parserVersion < 2) throw new this.SkipTestError();
 
   var self = this;
   this.skipIfXPCShell();

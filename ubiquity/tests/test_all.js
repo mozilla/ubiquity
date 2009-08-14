@@ -52,7 +52,6 @@ Components.utils.import("resource://ubiquity/tests/test_annotation_memory.js");
 Components.utils.import("resource://ubiquity/tests/test_hiddenbrowser.js");
 Components.utils.import("resource://ubiquity/tests/test_parser1.js");
 Components.utils.import("resource://ubiquity/tests/test_parser2.js");
-Components.utils.import("resource://ubiquity/tests/test_tag_command.js");
 Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
 
 var NLParser = NLParserMaker(1);

@@ -1,19 +1,20 @@
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity/modules/nounutils.js");
-Components.utils.import("resource://ubiquity/modules/parser/original/parser.js");
+var Cu = Components.utils;
 
-Components.utils.import("resource://ubiquity/tests/framework.js");
-Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
-Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/cmdmanager.js");
+Cu.import("resource://ubiquity/modules/nounutils.js");
+Cu.import("resource://ubiquity/modules/parser/original/parser.js");
 
+Cu.import("resource://ubiquity/tests/framework.js");
+Cu.import("resource://ubiquity/tests/test_suggestion_memory.js");
+Cu.import("resource://ubiquity/tests/testing_stubs.js");
 
 const Ci = Components.interfaces;
 const Cc = Components.classes;
 const LANG = "en";
 const MAX_SUGGESTIONS = 10;
 
-EXPORTED_SYMBOLS = ["makeTestParser"];
+var EXPORTED_SYMBOLS = ["makeTestParser"];
 
 // Utility functions:
 var emptyContext = {
@@ -44,8 +45,8 @@ function makeTestParser(lang, verbs, contextUtils) {
 var noun_arb_text = {
   name: "text",
   rankLast: true,
-  suggest: function( text, html ) {
-    return [ NounUtils.makeSugg(text, html) ];
+  suggest: function(text, html) {
+    return [NounUtils.makeSugg(text, html)];
   }
 };
 
@@ -113,19 +114,19 @@ function testParseWithModifier() {
 
   var inputWords = "wash pood with sp";
   var completions = getCompletions(inputWords, [cmd_wash], null);
-  this.assert( completions.length == 2, "Should be 2 completions" );
-  this.assert( completions[0]._verb._name == "wash");
-  this.assert( completions[0]._argSuggs.direct_object.text == "poodle");
-  this.assert( completions[0]._argSuggs.with.text == "sponge");
-  this.assert( completions[1]._verb._name == "wash");
-  this.assert( completions[1]._argSuggs.direct_object.text == "poodle");
-  this.assert( completions[1]._argSuggs.with.text == "spork");
+  this.assert(completions.length == 2, "Should be 2 completions");
+  this.assert(completions[0]._verb._name == "wash");
+  this.assert(completions[0]._argSuggs.direct_object.text == "poodle");
+  this.assert(completions[0]._argSuggs.with.text == "sponge");
+  this.assert(completions[1]._verb._name == "wash");
+  this.assert(completions[1]._argSuggs.direct_object.text == "poodle");
+  this.assert(completions[1]._argSuggs.with.text == "spork");
   completions[0].execute();
-  this.assert( dogGotWashed == "poodle");
-  this.assert( dogGotWashedWith == "sponge");
+  this.assert(dogGotWashed == "poodle");
+  this.assert(dogGotWashedWith == "sponge");
   completions[1].execute();
-  this.assert( dogGotWashed == "poodle");
-  this.assert( dogGotWashedWith == "spork");
+  this.assert(dogGotWashed == "poodle");
+  this.assert(dogGotWashedWith == "spork");
 }
 
 function testCmdManagerSuggestsForEmptyInput() {
@@ -156,21 +157,20 @@ function testCmdManagerSuggestsForEmptyInput() {
                                        onCM);
   function onCM(cmdMan) {
     var getAC = cmdMan.makeCommandSuggester();
-    getAC({textSelection:"tree"}, test1Callback);
-    getAC({textSelection:"mud"}, test2Callback);
-    function test1Callback(suggDict){
-      this.assert( suggDict["Cmd_one"], "cmd one should be in" );
-      this.assert( !suggDict["Cmd_two"], "cmd two should be out" );
-      var execute = suggDict["Cmd_one"];
-      execute();
-      this.assert( oneWasCalled == "tree", "should have been calld with tree" );
+    getAC({textSelection: "tree"}, this.makeCallback(test1Callback));
+    getAC({textSelection: "mud"}, this.makeCallback(test2Callback));
+    var {assert} = this;
+    function test1Callback(suggs) {
+      assert(suggs.length === 1 && suggs[0]._verb._name === 'cmd_one',
+             "only cmd one should be in");
+      suggs[0].execute();
+      assert(oneWasCalled === "tree", "should have been calld with tree");
     }
-    function test2Callback(suggDict){
-      this.assert( !suggDict["Cmd_one"], "cmd one should be out" );
-      this.assert( suggDict["Cmd_two"], "cmd two should be in" );
-      execute = suggDict["Cmd_two"];
-      execute();
-      this.assert( twoWasCalled == "mud", "should have been called with mud" );
+    function test2Callback(suggs) {
+      assert(suggs.length === 1 && suggs[0]._verb._name === 'cmd_two',
+             "only cmd two should be in");
+      suggs[0].execute();
+      assert(twoWasCalled === "mud", "should have been called with mud");
     }
   }
 }
@@ -178,8 +178,8 @@ function testCmdManagerSuggestsForEmptyInput() {
 function testVerbEatsSelection() {
   var foodGotEaten = null;
   var foodGotEatenAt = null;
-  var food = new NounUtils.NounType( "food", ["breakfast", "lunch", "dinner"]);
-  var place = new NounUtils.NounType( "place", ["grill", "diner", "home"]);
+  var food = new NounUtils.NounType("food", ["breakfast", "lunch", "dinner"]);
+  var place = new NounUtils.NounType("place", ["grill", "diner", "home"]);
   var cmd_eat = {
     names: ["eat"],
     execute: function(context, directObject, modifiers) {
@@ -194,8 +194,8 @@ function testVerbEatsSelection() {
   };
   var fakeContext = { textSelection: "lunch", htmlSelection:"lunch" };
   var completions = getCompletions("eat this", [cmd_eat], fakeContext);
-  this.assert( completions.length == 1,
-               "Should be one completion for 'eat this'" );
+  this.assert(completions.length == 1,
+               "Should be one completion for 'eat this'");
   completions[0].execute();
   this.assert(foodGotEaten == "lunch", "obj should be lunch");
   this.assert(foodGotEatenAt == null, "should be no modifier");
@@ -203,7 +203,7 @@ function testVerbEatsSelection() {
   fakeContext.textSelection = "grill";
   fakeContext.htmlSelection = "grill";
   completions = getCompletions("eat breakfast at it", [cmd_eat], fakeContext);
-  this.assert( completions.length == 1, "should be one completion" );
+  this.assert(completions.length == 1, "should be one completion");
   completions[0].execute();
   this.assert(foodGotEaten == "breakfast", "food should be breakfast");
   this.assert(foodGotEatenAt == "grill", "place should be grill");
@@ -211,7 +211,7 @@ function testVerbEatsSelection() {
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
   completions = getCompletions("eat at home this", [cmd_eat], fakeContext);
-  this.assert( completions.length == 1, "second should be one completion" );
+  this.assert(completions.length == 1, "second should be one completion");
   completions[0].execute();
   this.assert(foodGotEaten == "dinner", "food should be dinner");
   this.assert(foodGotEatenAt == "home", "place should be home");
@@ -237,7 +237,7 @@ function testImplicitPronoun() {
   var fakeContext = { textSelection: "lunch", htmlSelection:"lunch" };
 
   var completions = getCompletions("eat", [cmd_eat], fakeContext);
-  this.assert( (completions.length == 1), "Should have 1 completion.");
+  this.assert((completions.length == 1), "Should have 1 completion.");
   completions[0].execute();
   this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
   this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
@@ -290,7 +290,7 @@ function testImplicitPronoun() {
   // argument...
   // TODO FAILURE RIGHT HERE EMPTY SUGGESTION LIST!!!!
   /*debugSuggestionList(completions);
-  this.assert( completions.length == 1, "Should have 1 completion(D)");
+  this.assert(completions.length == 1, "Should have 1 completion(D)");
   completions[0].execute();
   this.assert((foodGotEaten == null), "Should have no valid args.");
   this.assert((foodGotEatenAt == null), "Should have no valid args.");
@@ -299,7 +299,7 @@ function testImplicitPronoun() {
   fakeContext.textSelection = null;
   fakeContext.htmlSelection = null;
   completions = getCompletions("eat this", [cmd_eat], fakeContext);
-  this.assert( completions.length == 0, "should have no completions");
+  this.assert(completions.length == 0, "should have no completions");
 }
 
 function testDontInterpolateInTheMiddleOfAWord() {
@@ -325,17 +325,17 @@ function testMakeSugg() {
   // test that NounUtils.makeSugg doesn't fail on null input, that it preserves
   // html, etc etc.
   var thingy = NounUtils.makeSugg(null, "alksdf");
-  this.assert( thingy.text == "alksdf", "thingy.text should be set.");
+  this.assert(thingy.text == "alksdf", "thingy.text should be set.");
 
   var thingy2 = NounUtils.makeSugg(null, null);
-  this.assert( thingy2 == null, "should return null");
+  this.assert(thingy2 == null, "should return null");
 }
 
 function testModifiersTakeMultipleWords() {
   var wishFound = null;
   var wishFoundIn = null;
-  var wish = new NounUtils.NounType( "wish", ["apartment", "significant other", "job"]);
-  var city = new NounUtils.NounType( "city", ["chicago",
+  var wish = new NounUtils.NounType("wish", ["apartment", "significant other", "job"]);
+  var city = new NounUtils.NounType("city", ["chicago",
                                               "new york",
                                               "los angeles",
                                               "san francisco"]);
@@ -368,21 +368,21 @@ function testModifiersTakeMultipleWords() {
 
 function testSuggestionMemory() {
   var suggMem1 = new TestSuggestionMemory();
-  suggMem1.remember( "p", "peas");
-  suggMem1.remember( "p", "peas");
-  suggMem1.remember( "q", "quinine");
-  suggMem1.remember( "q", "quetzalcoatl");
-  suggMem1.remember( "p", "polymascotfoamulate");
-  suggMem1.remember( "q", "quinine");
+  suggMem1.remember("p", "peas");
+  suggMem1.remember("p", "peas");
+  suggMem1.remember("q", "quinine");
+  suggMem1.remember("q", "quetzalcoatl");
+  suggMem1.remember("p", "polymascotfoamulate");
+  suggMem1.remember("q", "quinine");
 
   this.assert(suggMem1.getScore("q", "quinine") == 2);
   this.assert(suggMem1.getScore("q", "quetzalcoatl") == 1);
-  this.assert(suggMem1.getScore( "q", "peas") == 0 );
-  this.assert(suggMem1.getScore( "q", "qualifier") == 0);
-  this.assert(suggMem1.getScore( "p", "peas") == 2);
-  this.assert(suggMem1.getScore( "p", "polymascotfoamulate") == 1);
-  this.assert(suggMem1.getScore( "p", "popcorn" ) == 0 );
-  this.assert(suggMem1.getScore( "p", "quinine" ) == 0 );
+  this.assert(suggMem1.getScore("q", "peas") == 0);
+  this.assert(suggMem1.getScore("q", "qualifier") == 0);
+  this.assert(suggMem1.getScore("p", "peas") == 2);
+  this.assert(suggMem1.getScore("p", "polymascotfoamulate") == 1);
+  this.assert(suggMem1.getScore("p", "popcorn") == 0);
+  this.assert(suggMem1.getScore("p", "quinine") == 0);
 
   // Get rid of the first suggestion memory object, make a new one:
   suggMem1 = null;
@@ -390,12 +390,12 @@ function testSuggestionMemory() {
   // Should have all the same values.
   this.assert(suggMem2.getScore("q", "quinine") == 2);
   this.assert(suggMem2.getScore("q", "quetzalcoatl") == 1);
-  this.assert(suggMem2.getScore( "q", "peas") == 0 );
-  this.assert(suggMem2.getScore( "q", "qualifier") == 0);
-  this.assert(suggMem2.getScore( "p", "peas") == 2);
-  this.assert(suggMem2.getScore( "p", "polymascotfoamulate") == 1);
-  this.assert(suggMem2.getScore( "p", "popcorn" ) == 0 );
-  this.assert(suggMem2.getScore( "p", "quinine" ) == 0 );
+  this.assert(suggMem2.getScore("q", "peas") == 0);
+  this.assert(suggMem2.getScore("q", "qualifier") == 0);
+  this.assert(suggMem2.getScore("p", "peas") == 2);
+  this.assert(suggMem2.getScore("p", "polymascotfoamulate") == 1);
+  this.assert(suggMem2.getScore("p", "popcorn") == 0);
+  this.assert(suggMem2.getScore("p", "quinine") == 0);
 
   // Now test the getTopRanked function:
   var topRankedQ = suggMem2.getTopRanked("q", 5);
@@ -512,7 +512,7 @@ function testSortedByMatchQuality() {
 }
 
 function testSortSpecificNounsBeforeArbText() {
-  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
+  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
                                             "beagle", "bulldog", "husky"]);
 
   var verbList = [{names: ["mumble"], DOType: noun_arb_text, DOLabel:"stuff"},
@@ -521,11 +521,11 @@ function testSortSpecificNounsBeforeArbText() {
   var beagleContext = {textSelection:"beagle", htmlSelection:"beagle"};
   var suggs = getCompletions("", verbList, beagleContext);
 
-  this.assert( suggs.length == 2, "Should be two suggestions.");
-  this.assert( suggs[0]._verb._name == "wash", "First suggestion should be wash");
-  this.assert( suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
-  this.assert( suggs[0]._cameFromNounFirstSuggestion, "should be noun first");
-  this.assert( suggs[1]._cameFromNounFirstSuggestion, "should be noun first");
+  this.assert(suggs.length == 2, "Should be two suggestions.");
+  this.assert(suggs[0]._verb._name == "wash", "First suggestion should be wash");
+  this.assert(suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+  this.assert(suggs[0]._cameFromNounFirstSuggestion, "should be noun first");
+  this.assert(suggs[1]._cameFromNounFirstSuggestion, "should be noun first");
 }
 
 function testVerbUsesDefaultIfNoArgProvided() {
@@ -538,19 +538,19 @@ function testVerbUsesDefaultIfNoArgProvided() {
     {names: ["wash"], DOType: dog, DOLabel: "dog"},
     {names: ["play-fetch"], DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
   var suggs = getCompletions("wash", verbList);
-  this.assert( suggs.length == 1, "Should be 1 suggestion (A).");
-  this.assert( suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
-  this.assert( suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
+  this.assert(suggs.length == 1, "Should be 1 suggestion (A).");
+  this.assert(suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
+  this.assert(suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
 
   suggs = getCompletions("play", verbList);
-  this.assert( suggs.length == 1, "Should be 1 suggestion (B).");
-  this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert( suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
+  this.assert(suggs.length == 1, "Should be 1 suggestion (B).");
+  this.assert(suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
+  this.assert(suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
 
   suggs = getCompletions("play retr", verbList);
-  this.assert( suggs.length == 1, "Should be 1 suggestion (C).");
-  this.assert( suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert( suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
+  this.assert(suggs.length == 1, "Should be 1 suggestion (C).");
+  this.assert(suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
+  this.assert(suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
 
   //TODO try out defaults for modifier arguments.
 }
@@ -560,18 +560,18 @@ function testSynonyms() {
                   {names: ["frobnitz"]},
                   {names: ["frobnicate"]}];
   var suggs = getCompletions("frob", verbList);
-  this.assert( suggs.length == 3, "Should be 3 suggs.");
-  this.assert( suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
-  this.assert( suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
-  this.assert( suggs[2]._verb._name == "twiddle", "twiddle should be third");
+  this.assert(suggs.length == 3, "Should be 3 suggs.");
+  this.assert(suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
+  this.assert(suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
+  this.assert(suggs[2]._verb._name == "twiddle", "twiddle should be third");
 
   suggs = getCompletions("twid", verbList);
-  this.assert( suggs.length == 1, "Should be 1 sugg.");
-  this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
+  this.assert(suggs.length == 1, "Should be 1 sugg.");
+  this.assert(suggs[0]._verb._name == "twiddle", "twiddle should be it");
 
   suggs = getCompletions("twirl", verbList);
-  this.assert( suggs.length == 1, "Should be 1 sugg.");
-  this.assert( suggs[0]._verb._name == "twiddle", "twiddle should be it");
+  this.assert(suggs.length == 1, "Should be 1 sugg.");
+  this.assert(suggs[0]._verb._name == "twiddle", "twiddle should be it");
 }
 
 function testPartiallyParsedSentence() {
@@ -595,19 +595,19 @@ function testPartiallyParsedSentence() {
 
   var noun_type_foo = {
     id: "foo",
-    suggest: function( text, html ) {
-      return [ NounUtils.makeSugg("foo_a"), NounUtils.makeSugg("foo_b") ];
+    suggest: function(text, html) {
+      return [NounUtils.makeSugg("foo_a"), NounUtils.makeSugg("foo_b")];
     }
   };
   var noun_type_bar = {
     id: "bar",
-    suggest: function( text, html ) {
-      return [ NounUtils.makeSugg("bar_a"), NounUtils.makeSugg("bar_b") ];
+    suggest: function(text, html) {
+      return [NounUtils.makeSugg("bar_a"), NounUtils.makeSugg("bar_b")];
     }
   };
   var noun_type_baz = {
     id: "baz",
-    suggest: function( text, html ) {
+    suggest: function(text, html) {
       return [];
     },
     default: function() NounUtils.makeSugg("super pants"),
@@ -637,25 +637,24 @@ function testPartiallyParsedSentence() {
   var parsed  = partiallyParsed.getParsedSentences();
   // two suggestions for foo, two suggestions for bar: should be four
   // combinations.
-  this.assert(parsed.length === 4,
-              "Should be four parsings. " + uneval(parsed));
+  this.assert(parsed.length === 4, "Should be four parsings.");
 
   // Add another suggestion for bar.  Now there should be six combinations.
   partiallyParsed.addArgumentSuggestion("instrument",
                                         NounUtils.makeSugg("bar_c"));
   parsed  = partiallyParsed.getParsedSentences();
-  this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
+  this.assert(parsed.length == 6, "Should be six (not eight) parsings.");
 
   // All six should have the default for bazArg since we dind't provide any
   for each (var p in parsed)
-    this.assert( p.getArgText("location") === "super pants", "must use default.");
+    this.assert(p.getArgText("location") === "super pants", "must use default.");
 
   // Now provide an actual argument for baz:
   partiallyParsed.addArgumentSuggestion("location",
                                         NounUtils.makeSugg("baz_a"));
   parsed  = partiallyParsed.getParsedSentences();
   // Should still have six
-  this.assert( parsed.length == 6, "Should be six (not eight) parsings.");
+  this.assert(parsed.length == 6, "Should be six (not eight) parsings.");
 
   // All six should have the new value for bazArg.
   for each (var p in parsed)
@@ -672,8 +671,8 @@ function testVerbGetCompletions() {
     }
   };
   var comps = getCompletions("grum", [cmd_grumble], null);
-  this.assert( comps.length == 1, "Should be one suggestion." );
-  this.assert( comps[0]._verb._name == "grumble", "Should be grumble.");
+  this.assert(comps.length == 1, "Should be one suggestion.");
+  this.assert(comps[0]._verb._name == "grumble", "Should be grumble.");
 }
 
 function testTextAndHtmlDifferent() {
@@ -684,9 +683,9 @@ function testTextAndHtmlDifferent() {
   };
   var noun_type_different = {
     id: "different",
-    suggest: function( text, html ) {
+    suggest: function(text, html) {
       if (text.indexOf("Pant") == 0)
-        return [ NounUtils.makeSugg(text, html) ];
+        return [NounUtils.makeSugg(text, html)];
       else
         return [];
     }
@@ -695,7 +694,7 @@ function testTextAndHtmlDifferent() {
     names: ["dostuff"],
     DOLabel: "thing",
     DOType: noun_type_different,
-    execute: function( context, directObject, modifiers) {
+    execute: function(context, directObject, modifiers) {
       executedText = directObject.text;
       executedHtml = directObject.html;
     }
@@ -703,8 +702,8 @@ function testTextAndHtmlDifferent() {
   var comps = getCompletions("dostuff this", [cmd_different], pantsContext);
   this.assert(comps.length == 1, "There should be one completion.");
   comps[0].execute();
-  this.assert( executedText == "Pants", "text should be pants.");
-  this.assert( executedHtml == "<blink>Pants</blink>", "html should blink!");
+  this.assert(executedText == "Pants", "text should be pants.");
+  this.assert(executedHtml == "<blink>Pants</blink>", "html should blink!");
 
   executedText = null;
   executedHtml = null;
@@ -712,8 +711,8 @@ function testTextAndHtmlDifferent() {
   comps = getCompletions("dostuff", [cmd_different], pantsContext);
   this.assert(comps.length == 1, "There should be one completions (2)");
   comps[0].execute();
-  this.assert( executedText == "Pants", "text should be pants.");
-  this.assert( executedHtml == "<blink>Pants</blink>", "html should blink!");
+  this.assert(executedText == "Pants", "text should be pants.");
+  this.assert(executedHtml == "<blink>Pants</blink>", "html should blink!");
 
   // when it's a noun-first suggestion from the parser, should still work...
   executedText = null;
@@ -737,16 +736,15 @@ function testTextAndHtmlDifferent() {
 function testAsyncNounSuggestions() {
   var noun_type_slowness = {
     id: "slowness",
-    suggest: function( text, html, callback ) {
+    suggest: function(text, html, callback) {
       this._callback = callback;
-      if (text.indexOf("hello")== 0) {
-        return [ NounUtils.makeSugg("Robert E. Lee") ];
-      } else
-        return [];
+      return (text.indexOf("hello") === 0
+              ? [NounUtils.makeSugg("Robert E. Lee")]
+              : []);
     },
     triggerCallback: function() {
-      this._callback( NounUtils.makeSugg("slothitude") );
-      this._callback( NounUtils.makeSugg("snuffleupagus") );
+      this._callback(NounUtils.makeSugg("slothitude"));
+      this._callback(NounUtils.makeSugg("snuffleupagus"));
     }
   };
   var cmd_slow = {
@@ -763,8 +761,8 @@ function testAsyncNounSuggestions() {
   var parser = makeTestParser(LANG, [cmd_slow]);
   var {assert} = this;
   function assertDirObj(completion, expected) {
-    assert( completion._argSuggs.direct_object.text == expected,
-            "Expected " + expected );
+    assert(completion._argSuggs.direct_object.text == expected,
+            "Expected " + expected);
   }
   var query1 = parser.newQuery("dostuff hello", emptyContext, MAX_SUGGESTIONS,
                                true);
@@ -772,17 +770,17 @@ function testAsyncNounSuggestions() {
   // noun produces suggestions asynchronously.
   query1.onResults = this.makeCallback(function() {
     var comps = query1.suggestionList;
-    assert( comps.length == 1, "there should be 1 completions.");
+    assert(comps.length == 1, "there should be 1 completions.");
     assertDirObj(comps[0], "Robert E. Lee");
     // Now here comes the async suggestion:
     query1.onResults = Boolean;
     noun_type_slowness.triggerCallback();
     // parser.refreshSuggestionList("dostuff hello"); TODO replace this logic
     comps = query1.suggestionList;
-    assert( comps.length == 3, "there should be 3 completions.");
-    assertDirObj( comps[0], "Robert E. Lee");
-    assertDirObj( comps[1], "slothitude");
-    assertDirObj( comps[2], "snuffleupagus");
+    assert(comps.length == 3, "there should be 3 completions.");
+    assertDirObj(comps[0], "Robert E. Lee");
+    assertDirObj(comps[1], "slothitude");
+    assertDirObj(comps[2], "snuffleupagus");
   });
   query1.run();
 
@@ -814,10 +812,10 @@ function testAsyncNounSuggestions() {
   makeCommandManager.call(this, fakeSource, mockMsgService,
                           makeTestParser(), onCM);
   function onCM(cmdMan) {
-    cmdMan.updateInput( "dostuff halifax", emptyContext, null );
-    this.assert(cmdMan.hasSuggestions() == false, "Should have no completions" );
+    cmdMan.updateInput("dostuff halifax", emptyContext, null);
+    this.assert(cmdMan.hasSuggestions() == false, "Should have no completions");
     noun_type_slowness.triggerCallback();
-    cmdMan.onSuggestionsUpdated( "dostuff h", emptyContext, null );
+    cmdMan.onSuggestionsUpdated("dostuff h", emptyContext, null);
     this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
   }
 }
@@ -930,7 +928,7 @@ function testParseWithComplexQuery() {
     modifiers: {as: noun_user, to: noun_user},
   };
   var completions = getCompletions(inputWords, [cmd_tweet], null);
-  this.assert(completions.length == 2, "Should be 2 completions" );
+  this.assert(completions.length == 2, "Should be 2 completions");
   completions[0].execute();
   this.assert(stat === "might as well", uneval(stat));
   this.assert(user === "bob", uneval(user));
