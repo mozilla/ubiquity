@@ -212,7 +212,7 @@ LocalUriCodeSource.prototype = {
         throw new Error("XHR returned status " + req.status);
     } catch (e) {
       if (!dontReturnError) {
-        Components.utils.reportError(dontReturnError+"Retrieving " + this.uri +
+        Components.utils.reportError("Retrieving " + this.uri +
                                      " raised exception " + e);
       }
       return "";
