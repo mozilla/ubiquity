@@ -453,7 +453,7 @@ function testLocalUriCodeSourceWorksWithBadFilenames() {
   urls.forEach(
     function(url) {
       var lucs = new LocalUriCodeSource(url);
-      self.assertEquals(lucs.getCode(false), "");
+      self.assertEquals(lucs.getCode(true), "");
     });
 }
 

@@ -180,7 +180,7 @@ LocalUriCodeSource.prototype = {
   // The returnError property (true by default) will turn on or off the
   // error thrown when the code source could not be found.
   // This is used avoid an error in testLocalUriCodeSourceWorksWith.
-  getCode : function LUCS_getCode(returnError) {
+  getCode : function LUCS_getCode(dontReturnError) {
     try {
       var url = Utils.url(this.uri);
       if (url.scheme == "file") {
@@ -211,8 +211,8 @@ LocalUriCodeSource.prototype = {
       } else
         throw new Error("XHR returned status " + req.status);
     } catch (e) {
-      if (returnError || true) {
-        Components.utils.reportError("Retrieving " + this.uri +
+      if (!dontReturnError) {
+        Components.utils.reportError(dontReturnError+"Retrieving " + this.uri +
                                      " raised exception " + e);
       }
       return "";
