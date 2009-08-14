@@ -177,7 +177,7 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 };
 
 LocalUriCodeSource.prototype = {
-  // The returnError property (true by default) will turn on or off the
+  // The dontReturnError property will turn off the
   // error thrown when the code source could not be found.
   // This is used avoid an error in testLocalUriCodeSourceWorksWith.
   getCode : function LUCS_getCode(dontReturnError) {
