@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -176,7 +177,10 @@ LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
 };
 
 LocalUriCodeSource.prototype = {
-  getCode : function LUCS_getCode() {
+  // The returnError property (true by default) will turn on or off the
+  // error thrown when the code source could not be found.
+  // This is used avoid an error in testLocalUriCodeSourceWorksWith.
+  getCode : function LUCS_getCode(returnError) {
     try {
       var url = Utils.url(this.uri);
       if (url.scheme == "file") {
@@ -207,8 +211,10 @@ LocalUriCodeSource.prototype = {
       } else
         throw new Error("XHR returned status " + req.status);
     } catch (e) {
-      Components.utils.reportError("Retrieving " + this.uri +
-                                   " raised exception " + e);
+      if (returnError || true) {
+        Components.utils.reportError("Retrieving " + this.uri +
+                                     " raised exception " + e);
+      }
       return "";
     }
   }
