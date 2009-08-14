@@ -67,10 +67,12 @@ var EXPORTED_SYMBOLS = ["ExceptionUtils",
                         "AlertMessageService",
                         "CompositeMessageService"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
+var Cc = Components.classes;
+var Ci = Components.interfaces;
+var Cu = Components.utils;
 
-let Cc = Components.classes;
-let Ci = Components.interfaces;
+Cu.import("resource://ubiquity/modules/utils.js");
+
 
 // == Message Service Implementations ==
 
@@ -81,11 +83,11 @@ let Ci = Components.interfaces;
 // possible.
 
 function ErrorConsoleMessageService() {
-  this.displayMessage = function(msg) {
-    if (typeof(msg) == "object" && msg.exception) {
+  this.displayMessage = function ECMS_displayMessage(msg) {
+    if (typeof msg === "object" && msg.exception) {
       var tb = ExceptionUtils.stackTrace(msg.exception);
-      Components.utils.reportError(msg.exception);
-      Components.utils.reportError("Traceback for last exception:\n" + tb);
+      Cu.reportError(msg.exception);
+      Cu.reportError("Traceback for last exception:\n" + tb);
     }
   };
 }
@@ -101,23 +103,20 @@ function ErrorConsoleMessageService() {
 function AlertMessageService() {
   this.ALERT_IMG = "chrome://ubiquity/skin/icons/favicon.ico";
 
-  this.displayMessage = function(msg) {
+  this.displayMessage = function AMS_displayMessage(msg) {
     var text;
     var title = "Ubiquity Notification";
     var icon = this.ALERT_IMG;
     var textClickable = false;
     var cookie = "";
     var alertListener = null;
-    var name = null;
 
     if (typeof msg === "object") {
       text = String(msg.text);
 
       if (msg.exception) {
-        let Application = Cc["@mozilla.org/fuel/application;1"]
-                          .getService(Ci.fuelIApplication);
         let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
-        let showErr = Application.prefs.getValue(SHOW_ERR_PREF, false);
+        let showErr = Utils.Application.prefs.getValue(SHOW_ERR_PREF, false);
 
         if (showErr)
           text += " (" + msg.exception + ")";
@@ -143,17 +142,17 @@ function AlertMessageService() {
           }
         };
       }
-    } else
-      text = String(msg);
+    }
+    else text = String(msg);
 
     try {
       var alertService = (Cc["@mozilla.org/alerts-service;1"]
                           .getService(Ci.nsIAlertsService));
       alertService.showAlertNotification(icon, title, text, textClickable,
-                                         cookie, alertListener, name);
+                                         cookie, alertListener, null);
     } catch (e) {
-      Components.utils.reportError(e);
-      Utils.focusUrlInBrowser("chrome://ubiquity/content/bug19warning.html");
+      Cu.reportError(e);
+      Utils.focusUrlInBrowser("chrome://ubiquity/content/bug19warning.xhtml");
     }
   };
 }
@@ -172,6 +171,7 @@ function CompositeMessageService() {
 CompositeMessageService.prototype = {
   add: function CMS_add(service) {
     this._services.push(service);
+    return this;
   },
 
   displayMessage: function CMS_displayMessage(msg) {
@@ -186,9 +186,9 @@ CompositeMessageService.prototype = {
 // introspecting JavaScript and XPCOM exceptions.
 
 var ExceptionUtils = {
-  stackTraceFromFrame: function stackTraceFromFrame(frame, formatter) {
+  stackTraceFromFrame: function EU_stackTraceFromFrame(frame, formatter) {
     if (!formatter)
-      formatter = function defaultFormatter(frame) { return frame; };
+      formatter = function EU_defaultFormatter(frame) { return frame; };
 
     var output = "";
 
@@ -200,12 +200,13 @@ var ExceptionUtils = {
     return output;
   },
 
-  stackTrace: function stackTrace(e, formatter) {
+  stackTrace: function EU_stackTrace(e, formatter) {
     var output = "";
     if (e.location) {
       // It's a wrapped nsIException.
       output += this.stackTraceFromFrame(e.location, formatter);
-    } else if (e.stack)
+    }
+    else if (e.stack)
       // It's a standard JS exception.
 
       // TODO: It would be nice if we could parse this string and
