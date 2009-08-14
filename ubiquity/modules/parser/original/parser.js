@@ -756,7 +756,10 @@ function Verb(cmd, roleMap) {
   // Picks up noun's label. "_name" is for backward compatiblity
   function pluckLabel(noun) noun.label || noun._name || "?";
   // Determines if an object has one or more own keys
-  function hasKey(obj) !!(obj || 0).__count__;
+  function hasKey(obj) {
+    for (var key in new Iterator(obj || 0)) return true;
+    return false;
+  }
 
   this.cmd = cmd;
   this.matchedName = this._name = cmd.names[0];
