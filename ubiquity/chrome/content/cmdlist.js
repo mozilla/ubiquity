@@ -406,7 +406,7 @@ function viewLocalizationTemplate(feed) (
 // Try and tag them for now. (slides/fades/etc).
 
 $(function onReady() {
-  setupHelp("#show-hide-cmdlist-help", "#cmdlist-help-div");
+  setupHelp("#show-hide-help", "#cmdlist-help-div");
   buildTable();
   buildUnsubscribedFeeds();
   // jump to the right anchor

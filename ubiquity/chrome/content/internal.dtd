@@ -1,3 +1,9 @@
 <!-- Static references for appname, version and other strings that should go untranslated. -->
 <!ENTITY appTitle "Ubiquity">
 <!ENTITY appVersion "<span class='version'></span>">
+<!ENTITY helpLink "<a id='show-hide-help' onclick=''></a>">
+
+<!-- Command List specific entities -->
+<!ENTITY cmdCount "<span id='num-commands'></span>">
+<!ENTITY feedCount "<span id='num-subscribed-feeds'></span>">
+<!ENTITY unsubCount "<span id='num-unsubscribed-feeds'></span>">
