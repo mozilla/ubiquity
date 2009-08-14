@@ -110,7 +110,7 @@ window.addEventListener("load", function onload() {
       cmdMan.makeCommandSuggester());
   }
 
-  function ubiquityKeydown(aEvent) {
+  function ubiquityKeyup(aEvent) {
     // Default keys are different for diff platforms
     //  Windows Vista, XP, 2000 & NT: CTRL+SPACE
     //  Mac, Linux, Others: ALT+SPACE
@@ -144,6 +144,6 @@ window.addEventListener("load", function onload() {
       Cu.reportError("Ubiquity " + msg);
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }
-    if (gUbiquity) window.addEventListener("keydown", ubiquityKeydown, true);
+    if (gUbiquity) window.addEventListener("keyup", ubiquityKeyup, true);
   });
 }, false);
