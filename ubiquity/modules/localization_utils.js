@@ -37,7 +37,7 @@
 
 // = LocalizationUtils =
 
-var EXPORTED_SYMBOLS = ["LocalizationUtils", "localizeCommand"];
+var EXPORTED_SYMBOLS = ["LocalizationUtils"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
@@ -132,6 +132,35 @@ var LocalizationUtils = {
     return this;
   },
 
+  // === {{{ LocalizationUtils.localizeCommand(cmd) }}} ===
+  //
+  // Only works with Parser 2 commands.
+  // It might magically work with Parser 1, but it's not built to, and not
+  // tested that way.
+
+  localizeCommand: function LU_localizeCommand(cmd) {
+    var url = cmd.feedUri.spec;
+    if (!LocalizationUtils.isLocalizable(url)) return cmd;
+    var feedKey = LocalizationUtils.getLocalFeedKey(url);
+
+    for each (let key in LocalizableProperties) if (cmd[key]) {
+      let val = getLocalizedProperty(feedKey, cmd, key);
+      if (val) cmd[key] = val;
+    }
+
+    if (cmd._previewString) {
+      let context = cmd.referenceName + ".preview";
+      let key = cmd._previewString;
+      let rv =
+        LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
+      if (rv !== key) cmd._previewString = rv;
+    }
+
+    cmd.name = cmd.names[0];
+
+    return cmd;
+  },
+
   // === {{{ LocalizationUtils.propertySelector(properties) }}} ===
   //
   // Creates a {{{nsIStringBundle}}} for the .{{{properties}}} file and
@@ -159,32 +188,6 @@ var LocalizationUtils = {
       : bundle.GetStringFromName(name));
   },
 };
-
-// localizeCommand only works with Parser 2 commands.
-// It might magically work with Parser 1, but it's not built to, and not
-// tested that way.
-function localizeCommand(cmd) {
-  var url = cmd.feedUri.spec;
-  if (!LocalizationUtils.isLocalizable(url)) return cmd;
-  var feedKey = LocalizationUtils.getLocalFeedKey(url);
-
-  for each (let key in LocalizableProperties) if (cmd[key]) {
-    let val = getLocalizedProperty(feedKey, cmd, key);
-    if (val) cmd[key] = val;
-  }
-
-  if (cmd._previewString) {
-    let context = cmd.referenceName + ".preview";
-    let key = cmd._previewString;
-    let rv =
-      LocalizationUtils.getLocalizedStringFromContext(feedKey, context, key);
-    if (rv !== key) cmd._previewString = rv;
-  }
-
-  cmd.name = cmd.names[0];
-
-  return cmd;
-}
 
 function getLocalizedProperty(feedKey, cmd, property) {
   var context = cmd.referenceName + "." + property;
