@@ -1478,7 +1478,7 @@ Parser.prototype = {
                      || currentQuery._detectionTracker.getComplete(x,id) )
                ];
 
-      currentQuery.dump("finished detecting " + x + " for " + ids );
+//      currentQuery.dump("finished detecting " + x + " for " + ids );
       if (currentQuery.finished) {
         currentQuery.dump("this query is already finished... so don't suggest this noun!");
         return;
@@ -1499,7 +1499,7 @@ Parser.prototype = {
 
       if (typeof callback == 'function') {
 //        currentQuery.dump("running callback ("+callback.name+") now");
-        callback(x,ids, asyncFlag);
+        callback(x, ids, asyncFlag);
       }
     };
 
@@ -1798,7 +1798,7 @@ ParseQuery.prototype = {
       yield true;
     }
     this._next();
-
+    
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     if (this.selObj.text && this.selObj.text.length) {
@@ -1858,6 +1858,14 @@ ParseQuery.prototype = {
     }
     if (count % STEP_8_YIELD_LOOP_NUM != 0)
       yield true;
+    
+    // rekey this._verbedParses so we're using the right ID's
+    // this simplifies some things later where we need to track these parse ID's
+    var newVerbedParses = [];
+    for each (var parse in this._verbedParses) {
+      newVerbedParses[parse._id] = parse;
+    }
+    this._verbedParses = newVerbedParses;
     this._next();
 
     // STEP 9: do nountype detection + cache
@@ -1899,6 +1907,7 @@ ParseQuery.prototype = {
                      || addedAny;
       }
 
+      
       if (thisQuery._verbedParses.every(function(parse) parse.complete))
         thisQuery.finishQuery();
 
@@ -1916,7 +1925,7 @@ ParseQuery.prototype = {
 
       var addedAny = false;
       var dT = thisQuery._detectionTracker;
-//      thisQuery.dump('parseIds:'+dT.getParseIdsToCompleteForIds(argText,ids));
+      thisQuery.dump('parseIds:'+dT.getParseIdsToCompleteForIds(argText,ids));
       for each (let parseId in dT.getParseIdsToCompleteForIds(argText,ids)) {
         let thisParse = thisQuery._verbedParses[parseId];
         if (!thisParse.complete &&
@@ -1952,8 +1961,8 @@ ParseQuery.prototype = {
     // and also a list of arguments we need to cache
     this._argsToCache = {};
 
-    for (let partialParseId in this._verbedParses) {
-      let parse = this._verbedParses[partialParseId];
+    for (let parseId in this._verbedParses) {
+      let parse = this._verbedParses[parseId];
 
       if (parse.args.__count__ == 0)
         // This parse doesn't have any arguments. Complete it now.
@@ -1965,14 +1974,14 @@ ParseQuery.prototype = {
           let argText = x.input;
           let ids = [ verbArg.nountype.id
                       for each (verbArg in parse._verb.arguments)
-                      if (verbArg.role == role)];
+                      if (verbArg.role == role) ];
 
           if (!(argText in this._argsToCache)) {
             this._argsToCache[argText] = 1;
           }
 
           for each (let id in ids) {
-            this._detectionTracker.addParseIdToComplete(argText,id,partialParseId);
+            this._detectionTracker.addParseIdToComplete(argText, id, parseId);
           }
         }
       }
@@ -2151,7 +2160,6 @@ NounTypeDetectionTracker.prototype = {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].complete = bool;
   },
-
   getParseIdsToComplete: function DT_getParseIdsToComplete(arg,id) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].parseIds;
@@ -2166,6 +2174,7 @@ NounTypeDetectionTracker.prototype = {
   },
   addParseIdToComplete: function DT_addParseIdToComplete(arg,id,parseId) {
     this._ensureNode(arg,id);
+    dump('addParseIdToComplete('+arg+','+id+','+parseId+')\n');
     return this.detectionSpace[arg][id].parseIds.push(+parseId);
   },
 
@@ -2728,7 +2737,7 @@ Parse.prototype = {
                         this._verb,
                         this.argString,
                         this);
-    //dump('copying '+this._id+' > '+ret._id+'\n');
+    dump('copying '+this._id+' > '+ret._id+'\n');
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies

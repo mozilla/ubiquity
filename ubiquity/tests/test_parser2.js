@@ -901,7 +901,8 @@ function testSortedBySuggestionMemoryParser2Version() {
                                 self.makeCallback(suggMemoryTestFunc1));
 
   function suggMemoryTestFunc1(completions) {
-    self.assert( completions[0].displayHtml.indexOf("crab") > -1,
+    debugCompletions(completions);
+    self.assert( completions[0].displayHtml.indexOf("clock") > -1,
                 "0th suggestion should be clock" );
     self.assert( completions[6].displayHtml.indexOf("coelecanth") > -1,
                 "6th suggestion should be coelecanth" );
