@@ -1875,6 +1875,7 @@ ParseQuery.prototype = {
     // let's keep a list of arguments we need to cache
     this._argsToCache = {};
     var thisQuery = this;
+    var dT = this._detectionTracker;
 
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
@@ -1896,22 +1897,18 @@ ParseQuery.prototype = {
           }
 
           for each (let id in ids) {
-            this._detectionTracker.addParseIdToComplete(argText, id, parseId);
+            dT.addParseIdToComplete(argText, id, parseId);
           }
         }
       }
     }
 
     count = 0;
-    var STEP_9_YIELD_LOOP_NUM = 12;
-    for each (let parse in this._verbedParses) {
-      for each (let {argText,nounTypeIds} in
-                                        parse.getArgsAndNounTypeIdsToCheck()) {
-        this.parser.detectNounType(this, argText, nounTypeIds,
-                                   this.tryToCompleteParses);
-      }
-
-      // we don't need to yield that often... let's try once every 8 verbedParses
+    var STEP_9_YIELD_LOOP_NUM = 4;
+    for each (let {argText,nounTypeIds} in dT.getArgsAndNounTypeIdsToCheck()) {
+      this.parser.detectNounType(this, argText, nounTypeIds,
+                                 this.tryToCompleteParses);
+      // we don't need to yield that often...
       if ((count++) % STEP_9_YIELD_LOOP_NUM == 0)
         yield true;
     }
@@ -1932,8 +1929,9 @@ ParseQuery.prototype = {
 
     var addedAny = false;
     var dT = this._detectionTracker;
-    this.dump('parseIds:' + dT.getParseIdsToCompleteForIds(argText,ids));
-    for each (let parseId in dT.getParseIdsToCompleteForIds(argText,ids)) {
+    var parseIdsToTryToComplete = dT.getParseIdsToCompleteForIds(argText,ids)
+    this.dump('parseIds to try to complete:' + parseIdsToTryToComplete);
+    for each (let parseId in parseIdsToTryToComplete) {
       let thisParse = this._verbedParses[parseId];
       if (!thisParse.complete &&
           thisParse.allNounTypesDetectionHasCompleted()) {
@@ -2184,6 +2182,26 @@ NounTypeDetectionTracker.prototype = {
   addOutstandingRequest: function DT_addOutstandingRequest(arg,id,request) {
     this._ensureNode(arg,id);
     return this.detectionSpace[arg][id].outstandingRequests.push(request);
+  },
+
+  // **{{{NounTypeDetectionTracker#getArgsAndNounTypeIdsToCheck}}}**
+  //
+  // This returns an array of pairs of argument strings and the nountypes
+  // they must be checked against.
+  getArgsAndNounTypeIdsToCheck: function DT_getArgsAndNounTypeIdsToCheck() {
+    var returnArr = [];
+    
+    // note that the argsAndNounTypeIdsToCheck format designates
+    // nounTypeIds to be a *hash*, not array.
+    for (let argText in this.detectionSpace) {
+      var nounTypeIds = {};
+      for (let id in this.detectionSpace[argText])
+        nounTypeIds[id] = true;
+      returnArr.push({argText:argText,
+                      nounTypeIds:nounTypeIds});
+    }
+
+    return returnArr;
   },
 
   // ** {{{NounTypeDetectionTracker#getRequestCount}}} **
@@ -2489,7 +2507,7 @@ Parse.prototype = {
           + "</span>";
       }
       else {
-	display += "<span class='" + className
+        display += "<span class='" + className
           + "' title=''>"
           + (arg.inactivePrefix ?
              "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
