@@ -22,6 +22,7 @@
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,15 +40,17 @@
 
 var EXPORTED_SYMBOLS = ["finishCommand"];
 
+const Cu = Components.utils;
+
 // Default delay to wait before calling a preview function, in ms.
 const DEFAULT_PREVIEW_DELAY = 150;
 
 function finishCommand(cmd) {
-  Components.utils.import("resource://ubiquity/modules/setup.js");
-
-  if (UbiquitySetup.parserVersion === 2) {
+  if (Cu.import("resource://ubiquity/modules/setup.js", null)
+      .UbiquitySetup.parserVersion === 2) {
     // Convert for Parser 2 if it takes no arguments.
-    if (cmd.oldAPI && !cmd.DOType && !cmd.modifiers && isEmpty(cmd.arguments)) {
+    if (cmd.oldAPI && !cmd.DOType && !cmd.modifiers &&
+        isEmpty(cmd.arguments)) {
       dump("converting 1 > 2: " + cmd.name + "\n");
       let clone = {__proto__: cmd, arguments: []};
       if (!cmd.names) clone.names = [cmd.name];
@@ -55,17 +58,15 @@ function finishCommand(cmd) {
     }
     if (!cmd.oldAPI && !cmd.arguments)
       cmd.arguments = [];
-    if (cmd.arguments) {
-      Components.utils.import(
-        "resource://ubiquity/modules/localization_utils.js");
-      cmd = localizeCommand(cmd);
-    }
-  } else {
+    if (cmd.arguments)
+      cmd = (Cu.import("resource://ubiquity/modules/localization_utils.js",
+                       null)
+             .LocalizationUtils.localizeCommand(cmd));
+  }
+  else {
     cmd.name = hyphenize(cmd.name);
-    for each (let key in ["names", "synonyms"]) {
-      let names = cmd[key];
-      for (let i in names) names[i] = hyphenize(names[i]);
-    }
+    let {names} = cmd;
+    for (let i in names) names[i] = hyphenize(names[i]);
   }
 
   if (cmd.previewDelay == null)

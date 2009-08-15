@@ -43,21 +43,27 @@ var L = LocalizationUtils.propertySelector(
 
 function displayTemplate(feedUri) {
   var {feedManager} = UbiquitySetup.createServices();
-  for each (let feed in feedManager.getSubscribedFeeds()) {
+  for each (var feed in feedManager.getSubscribedFeeds()) {
     if (feed.srcUri.asciiSpec !== feedUri) continue;
-    // print header metadata
-    var po = (
-      "# " + feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1") + ".po\n" +
-      "# \n" +
-      "# Localizers:\n" +
-      "# LOCALIZER <EMAIL>\n\n" +
-      'msgid ""\n' +
-      'msgstr ""\n' +
-      '"Project-Id-Version: Ubiquity 0.5\\n"\n' +
-      '"POT-Creation-Date: ' + potCreationDate(new Date) + '\\n"\n\n');
+
+    var po = [
+      "# " + LocalizationUtils.getLocalFeedKey(feedUri) + ".po",
+      "# ",
+      "# Localizers:",
+      "# LOCALIZER <EMAIL>",
+      "",
+      'msgid ""',
+      'msgstr ""',
+      '"Project-Id-Version: Ubiquity 0.5\\n"',
+      '"POT-Creation-Date: ' + potCreationDate(new Date) + '\\n"',
+      "\n\n"].join("\n");
+
+    for each (let gKey in LocalizationUtils.getFeedGlobals(feedUri))
+      po += potMsgs("", gKey);
 
     for each (let cmd in feed.commands)
-      po += cmdTemplate(cmd) + "\n";
+      po += cmdTemplate(cmd);
+
     $("#template").val(po);
     break;
   }
@@ -67,7 +73,7 @@ var localizableProperties = ["names", "help", "description"];
 var contexts = ["preview", "execute"];
 
 function cmdTemplate(cmd) {
-  var po = "#. " + cmd.referenceName + " command:\n";
+  var po = "\n#. " + cmd.referenceName + " command:\n";
   for each (let key in localizableProperties)
     po += cmdPropertyLine(cmd, key);
   for each (let key in contexts) {
@@ -104,8 +110,8 @@ function cmdInlineLine(cmd, cmdCode, context) {
 function cmdPreviewString(cmd) potMsgs(cmd.referenceName + ".preview",
                                        cmd._previewString);
 
-function potMsgs(context, id)(
-  'msgctxt "' + quoteString(context) + '"\n' +
+function potMsgs(context, id) (
+  (context ? 'msgctxt "' + quoteString(context) + '"\n' : "") +
   'msgid "'+ quoteString(id).replace(/\n/g, '\\n"\n"') + '"\n' +
   'msgstr ""\n\n');
 

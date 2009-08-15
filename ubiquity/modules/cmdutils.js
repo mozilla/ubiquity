@@ -95,24 +95,20 @@ for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
 
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
-// === {{{ CmdUtils.log(a, b, c, ...) }}} ===
+// == From ContextUtils ==
 //
-// See [[#modules/utils.js|Utils]]{{{.log}}}.
-
-function log() {
-  Utils.log.apply(Utils, arguments);
-}
+// {{{CmdUtils}}} wraps [[#modules/contextutils.js|ContextUtils]].
 
 // === {{{ CmdUtils.getHtmlSelection() }}} ===
 //
 // Returns a string containing the html representation of the
 // user's current selection, i.e. text including tags.
-//
+
 // === {{{ CmdUtils.getSelection() }}} ===
 //
 // Returns a string containing the text and just the text of the user's
 // current selection, i.e. with html tags stripped out.
-//
+
 // === {{{ CmdUtils.setSelection(content, options) }}} ===
 //
 // Replaces the current selection with new content.
@@ -130,6 +126,14 @@ function log() {
     return ContextUtils[m].apply(ContextUtils, args);
   };
 });
+
+// === {{{ CmdUtils.log(a, b, c, ...) }}} ===
+//
+// See [[#modules/utils.js|Utils]]{{{.log}}}.
+
+function log() {
+  Utils.log.apply(Utils, arguments);
+}
 
 // === {{{ CmdUtils.getDocument() }}} ===
 // === {{{ CmdUtils.getWindow() }}} ===

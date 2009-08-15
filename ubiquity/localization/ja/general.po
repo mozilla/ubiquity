@@ -159,7 +159,7 @@ msgid "Calculates using\n"
 "instead for simple expressions like\n"
 "<code>22/7</code>\n"
 "."
-msgstr "科学計算の機能をすべて備えた <a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a> で計算します。\n
+msgstr "科学計算の機能をすべて備えた <a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a> で計算します。\n"
 "様々な関数や定数、単位、通貨等をサポートしています。\n"
 "<br/>\n"
 "<code>22/7</code> のような簡単な計算式には\n"

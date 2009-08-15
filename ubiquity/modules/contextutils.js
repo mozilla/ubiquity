@@ -24,6 +24,7 @@
  *   Maria Emerson <memerson@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,75 +40,56 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = {{{ ContextUtils }}} =
+
 var EXPORTED_SYMBOLS = ["ContextUtils"];
 
 var ContextUtils = {};
 
-// Take all the relative URLs specified as attributes in the given DOM
-// node (and its descendants) and convert them to absolute URLs. This
-// is a fix for #551.
-function absolutifyUrlsInNode(node) {
-  var URL_ATTRS = ['href', 'src'];
-  URL_ATTRS.forEach(
-    function(attr) {
-      if (node[attr])
-        node.setAttribute(attr, node[attr]);
-    });
-  if (node.nextSibling)
-    absolutifyUrlsInNode(node.nextSibling);
-  if (node.firstChild)
-    absolutifyUrlsInNode(node.firstChild);
+for each (let f in this) if (typeof f === "function") ContextUtils[f.name] = f;
+
+// === {{{ ContextUtils.getHtmlSelection(context) }}} ===
+
+function getHtmlSelection(context) {
+  var range = getFirstRange(context);
+  if (range) {
+    var newNode = context.focusedWindow.document.createElement("div");
+    newNode.appendChild(range.cloneContents());
+    absolutifyUrlsInNode(newNode);
+    return newNode.innerHTML;
+  }
+  return "";
 }
 
-ContextUtils.getHtmlSelection = function getHtmlSelection(context) {
-  if (context.focusedWindow) {
-    var sel = context.focusedWindow.getSelection();
+// === {{{ ContextUtils.getSelection(context) }}} ===
 
-    if (sel.rangeCount >= 1) {
-      var html = sel.getRangeAt(0).cloneContents();
-      var newNode = context.focusedWindow.document.createElement("p");
-      newNode.appendChild(html);
-      absolutifyUrlsInNode(newNode);
-      return newNode.innerHTML;
-    }
-  }
-
-  return null;
-};
-
-ContextUtils.getSelection = function getSelection(context) {
-  var focused = context.focusedElement;
-  var retval = "";
-
-  if (focused) {
-    var start = 0;
-    var end = 0;
+function getSelection(context) {
+  var {focusedElement} = context;
+  if (focusedElement && focusedElement.value) {
     try {
-      start = focused.selectionStart;
-      end = focused.selectionEnd;
+      var {selectionStart, selectionEnd} = focusedElement;
     } catch (e) {
       // It's bizarrely possible for this to occur; see #156.
     }
-    if (start != end)
-      retval = focused.value.substring(start, end);
+    if (selectionStart !== selectionEnd)
+      return focusedElement.value.slice(selectionStart, selectionEnd);
   }
 
-  if (!retval && context.focusedWindow) {
-    var sel = context.focusedWindow.getSelection();
-    if (sel.rangeCount >= 1)
-      retval = sel.toString();
-  }
-  return retval;
-};
+  var range = getFirstRange(context);
+  if (range) return range.toString();
 
-ContextUtils.setSelection = function setSelection(context,
-                                                  content,
-                                                  options) {
-  /* content can be text or html.
-   * options is a dictionary; if it has a "text" property then
-   * that value will be used in place of the html if we're in
-   * a plain-text only editable field.
-   */
+  return "";
+}
+
+// === {{{ ContextUtils.setSelection(context, content, options) }}} ===
+//
+// {{{content}}} can be text or html.
+//
+// {{{options}}} is a dictionary; if it has a {{{text}}} property then
+// that value will be used in place of the html if we're in
+// a plain-text only editable field.
+
+function setSelection(context, content, options) {
   var doc = context.focusedWindow.document;
   var focused = context.focusedElement;
 
@@ -156,7 +138,6 @@ ContextUtils.setSelection = function setSelection(context,
     focused.scrollTop = scrollTop;
     focused.scrollLeft = scrollLeft;
   }
-
   else {
     var sel = context.focusedWindow.getSelection();
 
@@ -167,18 +148,38 @@ ContextUtils.setSelection = function setSelection(context,
       newNode.innerHTML = content;
     }
   }
-};
+}
 
-ContextUtils.getSelectionObject = function getSelectionObject(context) {
-  /* Return an object that bundles up both the plain-text and HTML
-   * selections.  If there is no html selection, the plain-text selection
-   * is used for both. */
-  var selection = ContextUtils.getSelection(context);
-  var htmlSelection = ContextUtils.getHtmlSelection(context);
-  if (!htmlSelection && selection)
-    htmlSelection = selection;
-  return {
-    text: selection,
-    html: htmlSelection
-  };
-};
+// === {{{ ContextUtils.getSelectionObject(context) }}} ===
+//
+// Returns an object that bundles up both the plain-text and HTML
+// selections.  If there is no html selection, the plain-text selection
+// is used for both.
+
+function getSelectionObject(context) {
+  var selection = getSelection(context);
+  var htmlSelection = getHtmlSelection(context);
+  return {text: selection, html: htmlSelection || selection};
+}
+
+// === {{{ ContextUtils.absolutifyUrlsInNode(context) }}} ===
+//
+// Takes all the relative URLs specified as attributes in the given DOM
+// node (and its descendants) and convert them to absolute URLs. This
+// is a fix for [[http://ubiquity.mozilla.com/trac/ticket/551|#551]].
+
+function absolutifyUrlsInNode(node) {
+  if (!node) return;
+  for each (let attr in ["href", "src", "action"])
+    if (node[attr]) node.setAttribute(attr, node[attr]);
+  absolutifyUrlsInNode(node.nextSibling);
+  absolutifyUrlsInNode(node.firstChild);
+}
+
+// === {{{ ContextUtils.getFirstRange(context) }}} ===
+
+function getFirstRange(context) {
+  var win = context.focusedWindow;
+  var sel = win && win.getSelection();
+  return sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+}

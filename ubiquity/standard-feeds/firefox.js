@@ -91,17 +91,21 @@ CmdUtils.CreateCommand({
 // TAB COMMANDS
 // -----------------------------------------------------------------
 
-function tabPreview(msg)(
-  function preview(pblock, {object: {text, data: tab}}) {
-    msg = _(msg); // "Changes to" / "Closes"
+
+function tabPreview(msg) {
+  const PlaceHolder = "%tab%";
+  msg = _(msg + " " + PlaceHolder);
+  return function tab_preview(pblock, {object: {html, data: tab}}) {
     pblock.innerHTML = (
       tab
-      ? <div class="tab">
-          {msg} <b>{text}</b>
-          <p><img src={CmdUtils.getTabSnapshot(tab, {width: 480})}/></p>
-        </div>
+      ? ('<div class="tab">' +
+         msg.replace(PlaceHolder, html.bold()) +
+         '<p><img src="' +
+         Utils.escapeHtml(CmdUtils.getTabSnapshot(tab, {width: 480})) +
+         '"/></p></div>')
       : this.description);
-  });
+  };
+}
 
 CmdUtils.CreateCommand({
   name: "switch to tab",
