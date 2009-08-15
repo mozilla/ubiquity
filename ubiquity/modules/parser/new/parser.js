@@ -1449,7 +1449,7 @@ Parser.prototype = {
         currentQuery.dump('found cached values of '+x+' for '+cachedNounTypeIds.join());
         if (typeof callback == 'function') {
 //          currentQuery.dump("running callback ("+callback.name+") now");
-          callback(x,cachedNounTypeIds);
+          callback.apply(currentQuery, [x,cachedNounTypeIds]);
         }
       }
     });
@@ -1499,7 +1499,7 @@ Parser.prototype = {
 
       if (typeof callback == 'function') {
 //        currentQuery.dump("running callback ("+callback.name+") now");
-        callback(x, ids, asyncFlag);
+        callback.apply(currentQuery, [x, ids, asyncFlag]);
       }
     };
 
@@ -1722,7 +1722,7 @@ ParseQuery.prototype = {
     return true;
   },
 
-  _next: function() {
+  _next: function PQ__next() {
     this._times[this._step++] = new Date;
     this.dump('STEP '+this._step);
   },
@@ -1756,7 +1756,7 @@ ParseQuery.prototype = {
   // # replace arguments with their nountype suggestions
   // # score + rank
   // # done!
-  _yieldingParse: function() {
+  _yieldingParse: function PQ__yieldingParse() {
 
     // start with step 1
     this._next();
@@ -1872,101 +1872,16 @@ ParseQuery.prototype = {
     // STEP 10: suggest arguments with nountype suggestions
     // STEP 11: score
 
-    // Set up tryToCompleteParses()
-    // This function will be called at the end of each nountype detection.
-    // If it finds some parse that that is ready for scoring, it will then
-    // handle the scoring.
-    var thisQuery = this;
-    function completeParse(thisParse) {
-      var requestCount = thisParse.getRequestCount();
-      //thisQuery.dump('completing parse '+thisParse._id+' now');
-      //dump("request count: " + requestCount + "\n");
-
-      if (!(thisParse._requestCountLastCompletedWith == undefined)
-          && thisParse._requestCountLastCompletedWith == requestCount) {
-        return false;
-      }
-
-      thisParse._requestCountLastCompletedWith = requestCount;
-
-      if (requestCount == 0) {
-        thisParse.complete = true;
-      }
-
-      // go through all the arguments in thisParse and suggest args
-      // based on the nountype suggestions.
-      // If they're good enough, add them to _scoredParses.
-      var suggestions = thisQuery.parser.suggestArgs(thisParse);
-      //Utils.log(suggestions);
-
-      //thisQuery.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
-
-      var addedAny = false;
-      for each (let newParse in suggestions) {
-        addedAny = thisQuery.addIfGoodEnough('scored',newParse)
-                     || addedAny;
-      }
-
-      
-      if (thisQuery._verbedParses.every(function(parse) parse.complete))
-        thisQuery.finishQuery();
-
-      return addedAny;
-    }
-
-    function tryToCompleteParses(argText,ids,asyncFlag) {
-
-      thisQuery.dump('tryToCompleteParses('+argText+','+ids+')');
-
-      if (thisQuery.finished) {
-        thisQuery.dump('this query has already finished');
-        return false;
-      }
-
-      var addedAny = false;
-      var dT = thisQuery._detectionTracker;
-      thisQuery.dump('parseIds:'+dT.getParseIdsToCompleteForIds(argText,ids));
-      for each (let parseId in dT.getParseIdsToCompleteForIds(argText,ids)) {
-        let thisParse = thisQuery._verbedParses[parseId];
-        if (!thisParse.complete &&
-            thisParse.allNounTypesDetectionHasCompleted()) {
-          addedAny = completeParse(thisParse) || addedAny;
-        }
-      }
-
-      // Only call onResults if we added any parses, or if we just
-      // passed the throttling threshold for displaying results
-      //
-      // Also, don't run onResults here if thisQuery.finished,
-      // as if the finished flag was just turned on, it would have independently
-      // called onResults.
-
-      if (thisQuery.aggregateScoredParses().length > 0
-           && !thisQuery.finished) {
-        // THROTTLING OF ONRESULTS (#833) - still experimental
-        var throttleThreshold = 0.8;
-        var progress = thisQuery._detectionTracker.detectionProgress;
-        var passedThreshold = thisQuery._previousProgress < throttleThreshold &&
-                              progress >= throttleThreshold;
-        if ((addedAny && (asyncFlag || progress >= throttleThreshold)) ||
-          passedThreshold){
-          thisQuery.dump('calling onResults now');
-          thisQuery.onResults();
-        }
-        thisQuery._previousProgress = progress;
-      }
-      return addedAny;
-    }
-
-    // and also a list of arguments we need to cache
+    // let's keep a list of arguments we need to cache
     this._argsToCache = {};
+    var thisQuery = this;
 
     for (let parseId in this._verbedParses) {
       let parse = this._verbedParses[parseId];
 
       if (parse.args.__count__ == 0)
         // This parse doesn't have any arguments. Complete it now.
-        Utils.setTimeout(completeParse, 0, parse, []);
+        Utils.setTimeout(function(parse,arr){thisQuery.completeParse.apply(thisQuery,[parse,arr])}, 0, parse, []);
       else for (let role in parse.args) {
         let arg = parse.args[role];
         for each (let x in arg) {
@@ -1992,8 +1907,8 @@ ParseQuery.prototype = {
     for each (let parse in this._verbedParses) {
       for each (let {argText,nounTypeIds} in
                                         parse.getArgsAndNounTypeIdsToCheck()) {
-        this.parser.detectNounType(thisQuery, argText, nounTypeIds,
-                                   tryToCompleteParses);
+        this.parser.detectNounType(this, argText, nounTypeIds,
+                                   this.tryToCompleteParses);
       }
 
       // we don't need to yield that often... let's try once every 8 verbedParses
@@ -2002,6 +1917,92 @@ ParseQuery.prototype = {
     }
 
   },
+
+  // Set up tryToCompleteParses()
+  // This function will be called at the end of each nountype detection.
+  // If it finds some parse that that is ready for scoring, it will then
+  // handle the scoring.
+  tryToCompleteParses: function PQ_tryToCompleteParses(argText, ids, asyncFlag) {
+    Utils.log(this);
+    this.dump('tryToCompleteParses('+argText+','+ids+')');
+
+    if (this.finished) {
+      this.dump('this query has already finished');
+      return false;
+    }
+
+    var addedAny = false;
+    var dT = this._detectionTracker;
+    this.dump('parseIds:' + dT.getParseIdsToCompleteForIds(argText,ids));
+    for each (let parseId in dT.getParseIdsToCompleteForIds(argText,ids)) {
+      let thisParse = this._verbedParses[parseId];
+      if (!thisParse.complete &&
+          thisParse.allNounTypesDetectionHasCompleted()) {
+        addedAny = this.completeParse.apply(this,[thisParse]) || addedAny;
+      }
+    }
+
+    // Only call onResults if we added any parses, or if we just
+    // passed the throttling threshold for displaying results
+    //
+    // Also, don't run onResults here if this.finished,
+    // as if the finished flag was just turned on, it would have independently
+    // called onResults.
+
+    if (this.aggregateScoredParses().length > 0
+         && !this.finished) {
+      // THROTTLING OF ONRESULTS (#833) - still experimental
+      var throttleThreshold = 0.8;
+      var progress = this._detectionTracker.detectionProgress;
+      var passedThreshold = this._previousProgress < throttleThreshold &&
+                            progress >= throttleThreshold;
+      if ((addedAny && (asyncFlag || progress >= throttleThreshold)) ||
+        passedThreshold){
+        this.dump('calling onResults now');
+        this.onResults();
+      }
+      this._previousProgress = progress;
+    }
+    return addedAny;
+  },
+
+  completeParse: function PQ_completeParse(thisParse) {
+    var requestCount = thisParse.getRequestCount();
+    //this.dump('completing parse '+thisParse._id+' now');
+    //dump("request count: " + requestCount + "\n");
+
+    if (!(thisParse._requestCountLastCompletedWith == undefined)
+        && thisParse._requestCountLastCompletedWith == requestCount) {
+      return false;
+    }
+
+    thisParse._requestCountLastCompletedWith = requestCount;
+
+    if (requestCount == 0) {
+      thisParse.complete = true;
+    }
+
+    // go through all the arguments in thisParse and suggest args
+    // based on the nountype suggestions.
+    // If they're good enough, add them to _scoredParses.
+    var suggestions = this.parser.suggestArgs(thisParse);
+    //Utils.log(suggestions);
+
+    //this.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
+
+    var addedAny = false;
+    for each (let newParse in suggestions) {
+      addedAny = this.addIfGoodEnough('scored',newParse)
+                   || addedAny;
+    }
+
+    
+    if (this._verbedParses.every(function(parse) parse.complete))
+      this.finishQuery();
+
+    return addedAny;
+  },
+
   finishQuery: function PQ_finishQuery() {
     this._next();
     this.finished = true;
