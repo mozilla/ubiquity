@@ -1923,7 +1923,6 @@ ParseQuery.prototype = {
   // If it finds some parse that that is ready for scoring, it will then
   // handle the scoring.
   tryToCompleteParses: function PQ_tryToCompleteParses(argText, ids, asyncFlag) {
-    Utils.log(this);
     this.dump('tryToCompleteParses('+argText+','+ids+')');
 
     if (this.finished) {
@@ -2738,7 +2737,7 @@ Parse.prototype = {
                         this._verb,
                         this.argString,
                         this);
-    dump('copying '+this._id+' > '+ret._id+'\n');
+//    dump('copying '+this._id+' > '+ret._id+'\n');
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
