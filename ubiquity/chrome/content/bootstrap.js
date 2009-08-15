@@ -6,6 +6,7 @@ function entityify(string) {
 }
 
 function log(text, appendNewline) {
+  //errorToLocalize
   if (typeof(appendNewline) == "undefined")
     appendNewline = true;
   text = entityify(text);

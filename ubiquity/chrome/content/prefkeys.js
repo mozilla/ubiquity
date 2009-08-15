@@ -84,7 +84,7 @@ var PrefKeys = {
     if(((48 > keyCode) || (keyCode > 90)) && (keyCode != 32)){
       //if only shift, alt, ctrl or meta is pressed, don't display warning
       if([16,17,18,224].indexOf(keyCode) == -1){
-    	  $("#keyNotify").text("Only alphanumeric keys or space are allowed");
+    	  $("#keyNotify").text(L("ubiquity.prefkeys.notifyalphanumeric"));
       }
       return;
     }
@@ -93,7 +93,7 @@ var PrefKeys = {
     Application.prefs.setValue(this.KEYMODIFIER_PREF, keyModifier);
     var keyText = keyModifier + "+" 
                   + this._convertToText(keyCode) 
-                  + " (Click here to change)";
+                  + " (" + L("ubiquity.prefkeys.clickhere") + ")";
     $("#keyInputBox").val(keyText).blur();
 	  $("#keyNotify").text(L("ubiquity.prefkeys.confirmchange")
 	                       + " " + keyModifier + "+" 

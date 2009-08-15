@@ -157,10 +157,12 @@ function doSubmit(info) {
      data: Utils.encodeJson(info),
      dataType: "json",
      success: function(data, textStatus) {
+       //errorToLocalize 1
        doFinish("<p>Bug submitted with report id <tt>" + data.report_id +
                 "</tt>.</p>");
      },
      error: function(XMLHttpRequest, textStatus, errorThrown) {
+       //errorToLocalize 2
        doFinish("<p>An error occurred when submitting the report.</p>");
      }
     });

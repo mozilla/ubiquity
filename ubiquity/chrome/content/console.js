@@ -18,7 +18,7 @@ function maybeFixUpUbiquityMessage(target) {
       // sandbox call occurred in, rather than the file the code is
       // in.  Let's at least let the user know about this and tell
       // them what to do to get accurate information.
-
+      //errorToLocalize
       target.setAttribute(
         "msg",
         (target.getAttribute("msg") + "\n\n" +

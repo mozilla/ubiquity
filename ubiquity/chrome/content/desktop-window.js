@@ -90,6 +90,7 @@ function ubiquitySetup()
   }catch(e){
     //If there's any error loading the current skin,
     //load the default and tell the user about the failure
+    //errorToLocalize
     skinService.loadSkin(defaultSkinUrl);
     services.messageService
             .displayMessage("Loading your current skin failed." +

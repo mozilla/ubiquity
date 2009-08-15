@@ -21,6 +21,7 @@ var Editor = {
   },
   launchEditor : function(value){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
+    //errorToLocalize 1
     if (editor == null || editor == "") {
       displayMessage('please set your external editor');
     }
@@ -68,6 +69,7 @@ var Editor = {
         Application.console.log("ret code   : " + ret);
       } catch (e) {
         Application.console.log("Error running editor         : " + e);
+        //errorToLocalize 2
         displayMessage("Error running editor : " + e);
         return null;
       }
@@ -76,6 +78,7 @@ var Editor = {
         deleteTemporaryFileOnExit(file);
       return file;
     }
+    //errorToLocalize 3
     displayMessage(editor + ' is not an executable');
     return null;
   },
@@ -157,9 +160,9 @@ function saveAs() {
 
       editor.editor.setCode("");
       PrefCommands.setCode("");
-
+      //errorToLocalize
       $("#editor-actions").html(
-        "<p>The command source was saved to <b>" + fp.file.path + "</b> " +
+        "<p>The command source was saved to <strong>" + fp.file.path + "</strong> " +
         "and you are now subscribed to that page. Edit that file and any " +
         "changes will take effect the moment you invoke Ubiquity.</p>" +
         "<p>You can remove this subscription on the " +

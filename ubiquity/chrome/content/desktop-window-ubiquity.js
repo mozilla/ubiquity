@@ -87,6 +87,7 @@ Ubiquity.prototype = {
   __KEYCODE_TAB:  9,
   __KEYCODE_ESC: 27,
   __MIN_CMD_PREVIEW_LENGTH: 0,
+  //errorToLocalize
   __DEFAULT_PREVIEW: ("<div class=\"help\">" + "Type the name of a command and press enter to " +
                       "execute it, or <b>help</b> for assistance." + "</div>"),
 
