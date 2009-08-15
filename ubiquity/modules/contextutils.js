@@ -55,6 +55,7 @@ function getHtmlSelection(context) {
   if (range) {
     var newNode = context.focusedWindow.document.createElement("div");
     newNode.appendChild(range.cloneContents());
+    range.detach();
     absolutifyUrlsInNode(newNode);
     return newNode.innerHTML;
   }
@@ -65,7 +66,7 @@ function getHtmlSelection(context) {
 
 function getSelection(context) {
   var {focusedElement} = context;
-  if (focusedElement && focusedElement.value) {
+  if (focusedElement) {
     try {
       var {selectionStart, selectionEnd} = focusedElement;
     } catch (e) {
@@ -76,78 +77,68 @@ function getSelection(context) {
   }
 
   var range = getFirstRange(context);
-  if (range) return range.toString();
+  if (range) {
+    let result = range.toString();
+    range.detach();
+    return result;
+  }
 
   return "";
 }
 
 // === {{{ ContextUtils.setSelection(context, content, options) }}} ===
 //
-// {{{content}}} can be text or html.
+// Replaces the current selection with {{{content}}}.
+// Returns {{{true}}} if succeeds, {{{false}}} if not.
+//
+// {{{content}}} is the HTML string.
 //
 // {{{options}}} is a dictionary; if it has a {{{text}}} property then
-// that value will be used in place of the html if we're in
+// that value will be used in place of the HTML if we're in
 // a plain-text only editable field.
 
 function setSelection(context, content, options) {
   var doc = context.focusedWindow.document;
-  var focused = context.focusedElement;
-
-  if (doc.designMode == "on") {
+  if (doc.designMode === "on") {
     doc.execCommand("insertHTML", false, content);
+    return true;
   }
 
-  else if( focused ) {
-    var plainText = null;
-
-    if (options && options.text){
-      plainText = options.text;
+  var {focusedElement} = context;
+  if (focusedElement) {
+    function html2text(el) {
+      el.innerHTML = "<div>" + content + "</div>";
+      return el.textContent;
     }
-
-    if (plainText == null) {
+    var plainText = (
+      options && options.text ||
       // Rollin' in tha hack-illac: 1.9.0 wants html elements
       // namespaced, whereas 1.9.1+ doesn't.
-      // 3.1.*
-      var el = doc.createElement( "html" );
-      el.innerHTML = "<div>" + content + "</div>";
-      plainText = el.textContent;
-      if (!plainText.length) {
-        // 3.0.*
-        el = doc.createElementNS("http://www.w3.org/1999/xhtml", "html" );
-        el.innerHTML = "<div>" + content + "</div>";
-        plainText = el.textContent;
-      }
-    }
-
-    var selectionEnd = focused.selectionStart + plainText.length;
-    var currentValue = focused.value;
-
-    var beforeText = currentValue.substring(0, focused.selectionStart);
-    var afterText = currentValue.substring(focused.selectionEnd,
-                                           currentValue.length);
-
-    var scrollTop = focused.scrollTop;
-    var scrollLeft = focused.scrollLeft;
-
-    focused.value = beforeText + plainText + afterText;
-    focused.focus();
-
-    //put the cursor after the inserted text
-    focused.setSelectionRange(selectionEnd, selectionEnd);
-
-    focused.scrollTop = scrollTop;
-    focused.scrollLeft = scrollLeft;
+      html2text(doc.createElement("html")) ||
+      html2text(doc.createElementNS("http://www.w3.org/1999/xhtml",
+                                    "html")));
+    var {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
+    focusedElement.value = (value.slice(0, selectionStart) +
+                            plainText +
+                            value.slice(focusedElement.selectionEnd));
+    focusedElement.focus();
+    // put the cursor after the inserted text
+    var endp = selectionStart + plainText.length;
+    focusedElement.setSelectionRange(endp, endp);
+    focusedElement.scrollTop = scrollTop;
+    focusedElement.scrollLeft = scrollLeft;
+    return true;
   }
-  else {
-    var sel = context.focusedWindow.getSelection();
 
-    if (sel.rangeCount >= 1) {
-      var range = sel.getRangeAt(0);
-      var newNode = doc.createElement("span");
-      range.surroundContents(newNode);
-      newNode.innerHTML = content;
-    }
+  var range = getFirstRange(context);
+  if (range) {
+    range.deleteContents();
+    range.insertNode(range.createContextualFragment(content));
+    range.detach();
+    return true;
   }
+
+  return false;
 }
 
 // === {{{ ContextUtils.getSelectionObject(context) }}} ===
@@ -177,9 +168,16 @@ function absolutifyUrlsInNode(node) {
 }
 
 // === {{{ ContextUtils.getFirstRange(context) }}} ===
+//
+//  Returns a copy of the first {{{Range}}} in {{{Selection}}}.
 
 function getFirstRange(context) {
   var win = context.focusedWindow;
   var sel = win && win.getSelection();
-  return sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+  if (!sel || !sel.rangeCount) return null;
+  var range = sel.getRangeAt(0);
+  var newRange = win.document.createRange();
+  newRange.setStart(range.startContainer, range.startOffset);
+  newRange.setEnd(range.endContainer, range.endOffset);
+  return newRange;
 }
