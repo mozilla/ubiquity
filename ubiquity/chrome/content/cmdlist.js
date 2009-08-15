@@ -149,15 +149,11 @@ function formatCommandAuthor(authorData) {
 }
 
 function fillTableRowForCmd(row, cmd, className) {
-  var checkBoxCell = $(
-    '<td><input type="checkbox"/></td>');
-  var isEnabled = cmd.disabled ? false : true;
-  var checkBox = (checkBoxCell.find("input").val(cmd.id));
-  if (isEnabled)
-    (checkBox.attr("checked", "checked"));
-  else
-    (checkBox.removeAttr("checked"));
-  (checkBox.bind("change", onDisableOrEnableCmd));
+  var checkBoxCell = $('<td><input type="checkbox"/></td>');
+  (checkBoxCell.find("input")
+   .val(cmd.id)
+   .bind("change", onDisableOrEnableCmd)
+   [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
   var {name, names, nameArg, homepage} = cmd;
   var cmdDisplayName = (names[0] || name);
@@ -171,10 +167,10 @@ function fillTableRowForCmd(row, cmd, className) {
 
   var cmdElement = $(
     '<td class="command">' +
-    ("icon" in cmd ?
-     <img class="favicon" src={cmd.icon}/>.toXMLString() : "") +
-    (<><a class="id" name={cmd.id}
-     /><span class="name">{cmdDisplayName}</span></>) +
+    (!("icon" in cmd) ? "" :
+     '<img class="favicon" src="' + escapeHtml(cmd.icon) + '"/>') +
+    ('<a class="id" name="' + escapeHtml(cmd.id) + '"/>' +
+     '<span class="name">' + escapeHtml(cmdDisplayName) + '</span>') +
     ("description" in cmd ?
      '<span class="description">' + cmd.description + '</span>' : "") +
     (names.length < 2 ? "" :
@@ -185,13 +181,13 @@ function fillTableRowForCmd(row, cmd, className) {
          '</span>')) +
       '</div>')) +
     (!authors ? "" :
-     '<span class="author light">' +
+     '<div class="author light">' +
      L("ubiquity.cmdlist.createdby", formatAuthors(authors)) +
-     '</span> ') +
+     '</div> ') +
     (!("license" in cmd) ? "" :
-     ('<br/><span class="license light">' +
+     ('<div class="license light">' +
       L("ubiquity.cmdlist.license", escapeHtml(cmd.license)) +
-      '</span>')) +
+      '</div>')) +
     (!contributors ? "" :
      ('<div class="contributors light">' +
       L("ubiquity.cmdlist.contributions", formatAuthors(contributors)) +
@@ -381,7 +377,7 @@ function setSortMode(newSortMode) {
   Application.prefs.setValue(SORT_MODE_PREF, newSortMode);
 }
 
-function getSortMode()(
+function getSortMode() (
   Application.prefs.getValue(SORT_MODE_PREF, "feed"));
 
 function changeSortMode(newSortMode) {
