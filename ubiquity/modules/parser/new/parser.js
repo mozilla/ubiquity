@@ -2174,7 +2174,6 @@ NounTypeDetectionTracker.prototype = {
   },
   addParseIdToComplete: function DT_addParseIdToComplete(arg,id,parseId) {
     this._ensureNode(arg,id);
-    dump('addParseIdToComplete('+arg+','+id+','+parseId+')\n');
     return this.detectionSpace[arg][id].parseIds.push(+parseId);
   },
 
