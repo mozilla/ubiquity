@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,36 +35,38 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
- // = LocalizationUtils =
+// = LocalizationUtils =
 
 var EXPORTED_SYMBOLS = ["LocalizationUtils", "localizeCommand"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/scripts/gettext/lib/Gettext.js");
 
 const LocalizableProperties = ["names", "help", "description"];
-var commandContext = null;
-var feedContext = null;
-var displayContext = null;
 var loadedPo = {};
+var feedGlobalsDict = {
+  // feedUrl: [key0, key1, ...], ...
+};
 
 Gettext.prototype.get_lang_refs = function () [];
 
 var LocalizationUtils = {
   GETTEXT: new Gettext(),
+
+  get loadedPo LU_loadedPo() loadedPo,
+  feedGlobalsDict: feedGlobalsDict,
+
   isLocalizable: function LU_isLocalizable(feedUrl) {
-    Cu.import("resource://ubiquity/modules/utils.js");
     var baseUrl = UbiquitySetup.getBaseUri();
-    if (feedUrl.indexOf(baseUrl) != 0)
+    if (feedUrl.indexOf(baseUrl) !== 0)
       return false;
     var pathPart = feedUrl.slice(baseUrl.length);
-    return (/^(?:standard|builtin)-feeds\b/.test(pathPart));
+    return /^(?:standard|builtin)-feeds\b/.test(pathPart);
   },
+
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
     if (!this.isLocalizable(feedUrl)) return false;
 
@@ -90,17 +93,12 @@ var LocalizationUtils = {
     return true;
   },
 
-  getLoadedPo: function LU_getLoadedPo() {
-    return loadedPo;
-  },
+  getLocalFeedKey:
+  function LU_getLocalFeedKey(path) path.replace(/^.*\/(\w+)\.\w+$/, "$1"),
 
-  getLocalFeedKey: function LU_getLocalFeedKey(path) {
-    return path.replace(/^.*\/(\w+)\.\w+$/g, "$1");
-  },
-
-  getLocalizedString: function LU_getLocalizedString (feedKey, key) {
+  getLocalizedString: function LU_getLocalizedString(feedKey, key) {
     try {
-      return this.GETTEXT.dgettext(feedKey,key);
+      return this.GETTEXT.dgettext(feedKey, key);
     } catch (ex) {
       return key;
     }
@@ -109,38 +107,15 @@ var LocalizationUtils = {
   getLocalizedStringFromContext:
   function LU_getLocalizedStringFromContext(feedKey, context, key) {
     try {
-      let rv = this.GETTEXT.dpgettext(feedKey,context, key);
-      if (rv == key)
+      let rv = this.GETTEXT.dpgettext(feedKey, context, key);
+      if (rv === key)
         // nothing was found in this context. try the general context
-        rv = this.GETTEXT.dgettext(feedKey,key);
+        rv = this.GETTEXT.dgettext(feedKey, key);
       return rv;
     } catch (ex) {
       return key;
     }
   },
-
-  // === {{{setLocalizationContext}}} ===
-  //
-  // This is used to set the feed and command context for _().
-  // {{{displayMode}}} is either "execute" or "preview" depending
-  // on the context. These settings are used in constructing the
-  // appropriate localization keys.
-  setLocalizationContext:
-  function LU_setLocalizationContext(feedUri, cmdName, displayMode) {
-    feedContext = feedUri;
-    commandContext = cmdName;
-    if (displayMode === "execute" || displayMode === "preview")
-      displayContext = displayMode;
-    else
-      displayContext = null;
-    Utils.dump("\n feed   : " + (feedUri.asciiSpec || feedUri),
-               "\n command: " + cmdName,
-               "\n display: " + displayMode);
-  },
-
-  get commandContext() { return commandContext; },
-  get feedContext() { return feedContext; },
-  get displayContext() { return displayContext; },
 
   getLocalized: function LU_getLocalized(string) {
     var context = (this.commandContext +
@@ -149,11 +124,19 @@ var LocalizationUtils = {
     return this.getLocalizedStringFromContext(feedKey, context, string);
   },
 
-  // === {{{ propertySelector(properties) }}} ===
+  getFeedGlobals:
+  function LU_getFeedGlobals(feedUrl) feedGlobalsDict[feedUrl] || [],
+
+  registerFeedGlobal: function LU_registerFeedGlobal(feedUrl, key) {
+    (feedGlobalsDict[feedUrl] || (feedGlobalsDict[feedUrl] = [])).push(key);
+    return this;
+  },
+
+  // === {{{ LocalizationUtils.propertySelector(properties) }}} ===
   //
   // Creates a {{{nsIStringBundle}}} for the .{{{properties}}} file and
-  // returns a wrapper function which will call {{{GetStringFromName}}} or
-  // {{{formatStringFromName}}} (if extra argument is passed)
+  // returns a wrapper function which calls {{{GetStringFromName()}}} or
+  // {{{formatStringFromName()}}} (if extra argument is passed)
   // for the given name string. e.g.:
   // {{{
   // (foo.properties)

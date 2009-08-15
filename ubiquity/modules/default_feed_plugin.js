@@ -22,6 +22,7 @@
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -164,55 +165,38 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
   if (!("referenceName" in commandObject))
     commandObject.referenceName = commandObject.name;
 
-  var serviceDomain = null;
-  if (commandObject.url) {
-    var match = commandObject.url.match(/https?:\/\/([\w.]+)/)
-    if (match)
-      serviceDomain = match[1];
-  }
-  
-  if (!serviceDomain) {
-    var source = commandObject.execute.toString()
-               + (commandObject.preview.toString() || '');
-    var match = source.match(/https?:\/\/([\w.]+)/);
-    if (match)
-      serviceDomain = match[1];
-  }
-  // TODO: also check for serviceDomain in Utils.getCookie type code
-
   var cmd = {
     __proto__: commandObject,
+    id: feedUri.spec + "#" + commandObject.referenceName,
+    feedUri: feedUri,
     toString: function CS_toString() {
       return "[object UbiquityCommand " + this.name + "]";
     },
-    id: feedUri.spec + "#" + commandObject.referenceName,
     execute: function CS_execute(context) {
-      /* Any additional arguments passed in after context will be passed along
-       * as-is to the commandObject.execute() method.
-       */
-      sandbox.context = context;
-      Cu.import("resource://ubiquity/modules/localization_utils.js");
-      LocalizationUtils.setLocalizationContext(feedUri,
-                                               commandObject.referenceName,
-                                               "execute");
+      if (context) {
+        context.l10n = commandObject.referenceName + ".execute";
+        sandbox.context = context;
+      }
       return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
     },
-    feedUri: feedUri,
-    serviceDomain: commandObject.serviceDomain || serviceDomain
+    preview: function CS_preview(context) {
+      if (context) {
+        context.l10n = commandObject.referenceName + ".preview";
+        sandbox.context = context;
+      }
+      return commandObject.preview.apply(cmd, Array.slice(arguments, 1));
+    },
   };
 
-  if ("preview" in commandObject)
-    cmd.preview = function CS_preview(context) {
-      /* Any additional arguments passed in after context will be passed along
-       * as-is to the commandObject.preview() method.
-       */
-      sandbox.context = context;
-      Cu.import("resource://ubiquity/modules/localization_utils.js");
-      LocalizationUtils.setLocalizationContext(feedUri,
-                                               commandObject.referenceName,
-                                               "preview");
-      return commandObject.preview.apply(cmd, Array.slice(arguments, 1));
-    };
+  if (!("serviceDomain" in commandObject)) {
+    let domainRE = /\bhttps?:\/\/([\w.-]+)/;
+    cmd.serviceDomain = ((domainRE.test(commandObject.url) ||
+                          domainRE.test(commandObject.execute) ||
+                          domainRE.test(commandObject.preview))
+                         ? RegExp.$1
+                         : null);
+    // TODO: also check for serviceDomain in Utils.getCookie type code
+  }
 
   return finishCommand(cmd);
 }
@@ -222,14 +206,16 @@ function makeCodeSource(feedInfo, headerSources, footerSources,
   var codeSource;
 
   if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
-    if (feedInfo.canAutoUpdate) {
+    if (feedInfo.canAutoUpdate)
       codeSource = new RemoteUriCodeSource(feedInfo, timeoutInterval);
-    } else
+    else
       codeSource = new StringCodeSource(feedInfo.getCode(),
                                         feedInfo.srcUri.spec);
-  } else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
+  }
+  else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
     codeSource = new LocalUriCodeSource(feedInfo.srcUri.spec);
-  } else {
+  }
+  else {
     throw new Error("Don't know how to make code source for " +
                     feedInfo.srcUri.spec);
   }
