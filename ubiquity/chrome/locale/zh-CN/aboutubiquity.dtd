@@ -14,6 +14,7 @@ Thanks a ton and happy translating!
 Sincerely,
 - The Ubiquity Team
 
+
 -->
 <!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.About "关于 &appTitle;">
@@ -86,8 +87,6 @@ Sincerely,
 <!ENTITY ubiquity.settings.SelectLanguage "Language：">
 <!ENTITY ubiquity.settings.MiscSettings "其他设置">
 <!ENTITY ubiquity.settings.MaxSuggestions "最大的建议数量：">
-<!ENTITY ubiquity.settings.InputDelay "输入延迟：">
-<!ENTITY ubiquity.settings.MilliSeconds "毫秒">
 <!ENTITY ubiquity.settings.Parser2Context "解析器 2">
 <!ENTITY ubiquity.settings.Parser2Details "Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Enable external calls for all Parser 2 queries">
@@ -100,10 +99,7 @@ Sincerely,
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "已知 BUG">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- Commands chrome/content/cmdlist.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "您有">
-<!ENTITY ubiquity.commandlist.SubDetails2 "命令在">
-<!ENTITY ubiquity.commandlist.SubDetails3 "您已取消订阅">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "命令收取点。">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that &appTitle; recognizes are listed in the right column.  The black text is the command's name (what you type into &appTitle; to use it).  The grey text explains what the command does.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "The left column shows all the &ldquo;feeds&rdquo; that &appTitle; is subscribed to.  Each feed can contain multiple commands.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "You can view this page sorted by feeds or sorted by commands.  Click any of the links next to &ldquo;sort by&rdquo;, below.">
@@ -243,6 +239,7 @@ Sincerely,
 <!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &appTitle; extension. For instance:">
 <!-- TO DO:
 Localize Dev Tools: playpen, tuner, test, and anything else these guys conjur up :) these will be in the next draft. Stay tuned!
+
 
 -->
 <!-- Next chrome/content/.xhtml -->

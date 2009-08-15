@@ -70,8 +70,6 @@
 <!ENTITY ubiquity.settings.SelectLanguage "Язык:">
 <!ENTITY ubiquity.settings.MiscSettings "Разные Настройки">
 <!ENTITY ubiquity.settings.MaxSuggestions "Максимальное число предложений:">
-<!ENTITY ubiquity.settings.InputDelay "Задержка при вводе:">
-<!ENTITY ubiquity.settings.MilliSeconds "милисекунд">
 <!ENTITY ubiquity.settings.Parser2Context "Парсер 2">
 <!ENTITY ubiquity.settings.Parser2Details "Парсер 2 может делать внешние вызовы к веб-услугам чтобы понять что значит ваш ввод и предложить вам действия основанные на этой информации. В данный момент это приводит к большому количеству вызовов API, и поэтому эта возможность отключена по-умолчанию">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Включить внешние вызовы для всех запросов Парсера 2">
@@ -84,10 +82,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "известная ошибка">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "У тебя">
-<!ENTITY ubiquity.commandlist.SubDetails2 "команд в">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Отменена подписка к">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "каналам команд">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Все команды известные &appTitle; перечислены в правой колонке. Черный текст &mdash; название команды (то что надо ввести в &appTitle; чтобы ей воспользоваться). Серый текст &mdash; объяснение работы команды.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "Левая колонка перечисляет все &ldquo;каналы&rdquo; к которым подписан &appTitle;. Каждый канал может содержать несколько команд.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Эта страница может быть сортирована по каналам или по командам. Нажми на любую из ссылок рядом с &ldquo;сортировать по&rdquo;.">

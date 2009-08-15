@@ -86,8 +86,6 @@ Sincerely,
 <!ENTITY ubiquity.settings.SelectLanguage "Idioma:">
 <!ENTITY ubiquity.settings.MiscSettings "Outras Definições">
 <!ENTITY ubiquity.settings.MaxSuggestions "Número máximo de sugestões:">
-<!ENTITY ubiquity.settings.InputDelay "Atraso ao digitar:">
-<!ENTITY ubiquity.settings.MilliSeconds "milissegundos">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "O Parser 2 pode fazer chamadas a serviços externos da web para compreender o comando digitado e fornecer acções sugeridas baseadas nessa informação. Actualmente esse recurso resulta num grande número de chamadas a APIs externas e por isso está desactivado por padrão.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Activar chamadas externas para todas as chamadas do Parser 2">
@@ -100,10 +98,7 @@ Sincerely,
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "problema conhecido">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- Commands chrome/content/cmdlist.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "Tem">
-<!ENTITY ubiquity.commandlist.SubDetails2 "comandos em">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Apagou">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "feeds de comandos.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Todos os comandos reconhecidos pelo &appTitle; estão listados na coluna à direita. O texto a preto é o nome do comando (o que deve digitar no &appTitle; para usá-lo). O texto a cinza explica o que o comando faz.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "A coluna à esquerda mostra todos os “feeds” que estão subscrevidos pelo &appTitle;. Cada feed pode conter vários comandos.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Pode ver esta página ordenada por feed ou por comandos. Clique num dos links “Ordenar por”, abaixo.">

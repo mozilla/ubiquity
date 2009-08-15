@@ -70,8 +70,6 @@
 <!ENTITY ubiquity.settings.SelectLanguage "Język:">
 <!ENTITY ubiquity.settings.MiscSettings "Różne ustawienia">
 <!ENTITY ubiquity.settings.MaxSuggestions "Maksymalna liczba sugestii:">
-<!ENTITY ubiquity.settings.InputDelay "Opóźnienie wprowadzania danych:">
-<!ENTITY ubiquity.settings.MilliSeconds "ms">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "Aby zrozumieć, co oznaczają wprowadzone przez Ciebie dane i dostarczyć sugerowane działania oparte na tych informacjach, Parser 2 może wykonywać zewnętrzne odwołania do usług sieciowych. Obecnie powoduje to dużą liczbę wykonywanych odwołań i z tego powodu jest domyślnie wyłączony.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Włącz zewnętrzne odwołania dla wszystkich zapytań Parsera 2">
@@ -84,10 +82,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "znany błąd">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "Masz">
-<!ENTITY ubiquity.commandlist.SubDetails2 "polecenia w">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Anulowane subskrypcje w">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "kanałów poleceń.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Wszystkie rozpoznane przez &appTitle; polecenia są wyświetlone w prawej kolumnie. Nazwa polecenia jest wyświetlona czarną czcionką, szarą czcionką – objaśnienia działania danego polecenia.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "W lewej kolumnie wyświetlane są wszystkie subskrybowane przez &appTitle; „kanały”. Każdy kanał może zawierać wiele poleceń.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Ta strona może być posortowana wg kanałów lub poleceń. Kliknij dowolny odnośnik znajdujący się obok frazy „Sortuj wg”.">

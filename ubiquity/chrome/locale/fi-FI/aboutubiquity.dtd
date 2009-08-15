@@ -70,8 +70,6 @@
 <!ENTITY ubiquity.settings.SelectLanguage "Kieli:">
 <!ENTITY ubiquity.settings.MiscSettings "Sekalaiset asetukset">
 <!ENTITY ubiquity.settings.MaxSuggestions "Ehdotusten enimmäismäärä:">
-<!ENTITY ubiquity.settings.InputDelay "Syötteen viive:">
-<!ENTITY ubiquity.settings.MilliSeconds "millisenkuntia">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "Parser 2 voi tehdä ulkoisia kyselyjä ymmärtääkseen, mitä olet syöttänyt, ja antaa ehdotettuja toimintoja pohjautuen kyseiseen tietoon. Toiminto luo tällä hetkellä suuren määrän API-kyselyjä, joten se on poistettu käytöstä oletuksena.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Salli Parser 2:n luoda ulkoisia kyselyjä aina">
@@ -84,10 +82,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "tiedossa oleva virhe">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "Sinulla on">
-<!ENTITY ubiquity.commandlist.SubDetails2 "komentoa">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Olet lopettanut tilauksen">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "komentosyötteestä.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Kaikki &appTitle;n tunnistamat komennot ovat listattuna oikealla puolella. Musta teksti on komennon nimi (kirjoita tämä &appTitle;yn käyttääksesi sitä). Harmaa teksti kertoo, mitä komento tekee.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "Vasemmalla puolella ovat kaikki “syötteet”, jotka on tilattu &appTitle;yn. Jokaisessa syötteessä voi olla useampia komentoja.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Voit järjestää tämän sivun syötteiden tai komentojen mukaan napsauttamalla mitä tahansa “Lajitteluperuste”-linkeistä alla.">

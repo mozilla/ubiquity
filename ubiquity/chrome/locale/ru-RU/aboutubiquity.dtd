@@ -86,8 +86,6 @@ Sincerely,
 <!ENTITY ubiquity.settings.SelectLanguage "Язык:">
 <!ENTITY ubiquity.settings.MiscSettings "Различные настройки">
 <!ENTITY ubiquity.settings.MaxSuggestions "Максимальное число предложений:">
-<!ENTITY ubiquity.settings.InputDelay "Задержка ввода:">
-<!ENTITY ubiquity.settings.MilliSeconds "миллисекунд">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Enable external calls for all Parser 2 queries">
@@ -100,10 +98,7 @@ Sincerely,
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "известная ошибка">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- Commands chrome/content/cmdlist.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "У вас">
-<!ENTITY ubiquity.commandlist.SubDetails2 "команд в">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Вы отписаны от">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "лент команд">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that &appTitle; recognizes are listed in the right column.  The black text is the command's name (what you type into &appTitle; to use it).  The grey text explains what the command does.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "The left column shows all the &ldquo;feeds&rdquo; that &appTitle; is subscribed to.  Each feed can contain multiple commands.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "You can view this page sorted by feeds or sorted by commands.  Click any of the links next to &ldquo;sort by&rdquo;, below.">

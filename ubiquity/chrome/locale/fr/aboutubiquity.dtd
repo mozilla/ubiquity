@@ -70,8 +70,6 @@
 <!ENTITY ubiquity.settings.SelectLanguage "Langue :">
 <!ENTITY ubiquity.settings.MiscSettings "Autres paramètres">
 <!ENTITY ubiquity.settings.MaxSuggestions "Nombre maximum de suggestions :">
-<!ENTITY ubiquity.settings.InputDelay "Délai de saisie">
-<!ENTITY ubiquity.settings.MilliSeconds "millisecondes">
 <!ENTITY ubiquity.settings.Parser2Context "Analyseur syntaxique 2">
 <!ENTITY ubiquity.settings.Parser2Details "L'analyseur syntaxique 2 peut faire des appels externes à des services Web pour comprendre ce que signifie votre saisie, et pour vous suggérer des actions basées sur ces informations. Cette possibilité entraîne actuellement un trop grand nombre d'appels à des API, elle est donc désactivée par défaut.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Activer les appels externes pour toutes les requêtes de l'analyseur syntaxique 2">
@@ -84,10 +82,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "bogue connu">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "Vous avez">
-<!ENTITY ubiquity.commandlist.SubDetails2 " commandes dans">
-<!ENTITY ubiquity.commandlist.SubDetails3 "Vous vous êtes désabonné des">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "flux de commandes.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Toutes les commandes reconnues par &appTitle; sont listées dans la colonne de droite. Le texte en noir est le nom de la commande (ce que vous saisissez dans &appTitle; pour l'utiliser). Le texte en gris explique ce que fait la commande.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "La colonne de gauche affiche tous les « flux » auxquels est abonné &appTitle;. Chaque flux peut contenir plusieurs commandes.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Vous pouvez afficher cette page en triant par flux ou par commandes. Cliquez sur un des liens à côté de « Trier par » ci-dessous.">

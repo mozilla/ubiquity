@@ -70,8 +70,6 @@
 <!ENTITY ubiquity.settings.SelectLanguage "Taal:">
 <!ENTITY ubiquity.settings.MiscSettings "Diverse Instellingen">
 <!ENTITY ubiquity.settings.MaxSuggestions "Maximaal aantal suggesties:">
-<!ENTITY ubiquity.settings.InputDelay "Invoer vertraging:">
-<!ENTITY ubiquity.settings.MilliSeconds "milliseconden">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "Parser 2 can uitgaande oproepen doen naar web services om uit te zoeken wat uw invoer is, en uw gesuggereerde acties geven gebaseerd op deze informatie. Dit leidt momenteel tot een groot aantal api oproepen, en is daarom standaard uitgeschakeld.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Schakel externe oproepen voor alle Parser 2 queries in">
@@ -84,10 +82,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "gekende fout">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "U hebt">
-<!ENTITY ubiquity.commandlist.SubDetails2 "opdrachten in">
-<!ENTITY ubiquity.commandlist.SubDetails3 "U hebt u uitgeschreven van">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "opdrachten feeds.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that &appTitle; recognizes are listed in the right column.  The black text is the command's name (what you type into &appTitle; to use it).  The grey text explains what the command does.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "The left column shows all the &ldquo;feeds&rdquo; that &appTitle; is subscribed to.  Each feed can contain multiple commands.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "You can view this page sorted by feeds or sorted by commands.  Click any of the links next to &ldquo;sort by&rdquo;, below.">

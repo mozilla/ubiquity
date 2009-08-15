@@ -15,6 +15,7 @@ Sincerely,
 - The Ubiquity Team
 
 
+
 -->
 <!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
 <!ENTITY ubiquity.pagetitle.About "&appTitle; について">
@@ -51,6 +52,7 @@ Sincerely,
 <!--
 - I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.
 - This will also be useful when we do a full about: page overhaul possibly condensing the editors.
+
 
 
 
@@ -95,8 +97,6 @@ Sincerely,
 <!ENTITY ubiquity.settings.SelectLanguage "言語:">
 <!ENTITY ubiquity.settings.MiscSettings "その他の設定">
 <!ENTITY ubiquity.settings.MaxSuggestions "表示する候補の最大数:">
-<!ENTITY ubiquity.settings.InputDelay "パース開始までの遅延時間:">
-<!ENTITY ubiquity.settings.MilliSeconds "ミリ秒">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "Parser 2 は、入力したコマンドに基づく Web サービスからの情報を候補に表示するため、Web サービスに対する外部呼び出しが行えます。現在の実装では多くの API コールが発生してしまうため、デフォルトで無効にされています。">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "すべての Parser 2 クエリについて外部呼び出しを有効にする">
@@ -109,10 +109,7 @@ Sincerely,
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "既知のバグ">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 "です。">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubDetails1 "コマンド：">
-<!ENTITY ubiquity.commandlist.SubDetails2 "個 / 購読フィード:">
-<!ENTITY ubiquity.commandlist.SubDetails3 "購読解除したフィード:">
-<!ENTITY ubiquity.commandlist.SubDetailsCommandFeeds "個">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "&appTitle; で使用可能なコマンドは右側の列に列挙されています。黒色のテキストが (&appTitle; が理解できる) コマンド名です。灰色のテキストはコマンドの説明です。">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "左側の列には &appTitle; で購読しているすべての “コマンドフィード” が表示されています。各フィードには複数のコマンドが含まれています。">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "このページのリストは、フィード名やコマンド名で並べ替えることができます。“並べ替え:” の横の各リンクをクリックしてください。">
