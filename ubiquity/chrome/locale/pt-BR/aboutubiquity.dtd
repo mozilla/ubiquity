@@ -55,8 +55,8 @@
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "página de créditos">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
 <!ENTITY ubiqutiy.about.Thanks "Obrigado por usar o &appTitle; <span class='version'></span>!">
-<!ENTITY ubiquity.about.ThanksParagraphPart1 "Version &appVersion; of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the">
-<!ENTITY ubiquity.about.ThanksParagraphLinkText "Release Notes">
+<!ENTITY ubiquity.about.ThanksParagraphPart1 "A versão &appVersion; do &appTitle; corrige os bugs de desempenho e interface mais significativos encontrados na versão anterior. Com esta versão você deverá perceber melhorias de velocidade, responsividade e precisão do analisador de comandos. Para mais detalhes sobre o que há de novo, leia as">
+<!ENTITY ubiquity.about.ThanksParagraphLinkText "Notas de Lançamento">
 <!ENTITY ubiquity.about.ThanksParagraphPart2 ".">
 <!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.settings.Skins "Temas">
@@ -185,11 +185,11 @@
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara1 "Isso significa que esse repositório será verificado constantemente em busca de atualizações que serão aplicadas automaticamente. Se você marcar essa opção, tenha certeza de que confia em quem possui acesso para alterar esse código no servidor em que o repositório está hospedado.">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part1 "Perceba que esse repositório é transferido usando um protocolo inseguro, e consequentemente está sujeito a">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "ataques main-in-the-middle">
-<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 "Por favor, apenas autoatualize esse repositório se você tiver certeza das implicações do que está fazendo.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 ". Por favor, apenas autoatualize esse repositório se você tiver certeza das implicações do que está fazendo.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationShort "Agora você está inscrito no repositório do comando e já poderá usá-lo.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Se você quiser desinscrever-se, você poderá usar o comando &appTitle; “listar” a qualquer momento para abrir a">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "página de gerenciamento de comandos">
-<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "onde você pode ver todos os comandos aos quais você está inscrito e cancelar qualquer um que você não queira.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 ", onde você pode ver todos os comandos aos quais você está inscrito e cancelar qualquer um que você não queira.">
 <!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.reset.Header "Restaurar &appTitle; para suas configurações padrão?">
 <!ENTITY ubiquity.reset.Paragraph1 "Caso o &appTitle; não esteja funcionando corretamente, existe a possibilidade de você restaurar suas configurações originais. Para prosseguir com a restauração, clique no botão abaixo. Para completar essa operação, o Firefox será reiniciado.">
@@ -205,7 +205,7 @@
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part1 "Este é um modelo de localização para o">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part2 "repositório de comandos no formato gettext/portable object (.po). Saiba mais sobre o">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1LinkText "gettext no Wikipedia">
-<!ENTITY ubiquity.localizecmd.HelpParagraph1Part3 "que também contém links e outras ferramentas úteis.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1Part3 ", que também contém links e outras ferramentas úteis.">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part1 "Para testar esta localização, salve-a em:">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part2 "com o nome">
 <!ENTITY ubiquity.localizecmd.HelpParagraph3 "Tenha certeza de que XY reflete o código de localização apropriado da pasta do seu idioma. Caso a pasta com o código do seu idioma não exista, basta criá-la.">

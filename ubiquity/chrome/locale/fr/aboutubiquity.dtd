@@ -122,7 +122,7 @@
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Saisissez de nouvelles commandes</strong> dans la zone ci-dessous. Elles seront enregistrées automatiquement pendant la saisie, et pourront être utilisées instantanément dans le mode saisie de commande.">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Lisez le">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText1 "tutoriel sur la création de commande">
-<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart2 "pour en apprendre plus. Pour des exemples de commandes intégrées,">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart2 "&#8201;pour en apprendre plus. Pour des exemples de commandes intégrées,">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText2 "regardez ici">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart3 ".">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentation pour les">
