@@ -34,64 +34,54 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var EXPORTED_SYMBOLS = ["NLParser2","parserRegistry"];
+var EXPORTED_SYMBOLS = ["NLParser2", "parserRegistry"];
 
 const Cu = Components.utils;
 
+Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/parser/parser.js");
 Cu.import("resource://ubiquity/modules/parser/new/parser.js");
-
-// load the parserRegistry
-Cu.import("resource://ubiquity/modules/localeutils.js");
-var parserRegistry = loadLocaleJson('resource://ubiquity/modules/parser/new/parser_registry.json');
 
 var NLParser2 = {
   // Namespace object
   parserFactories: {},
   makeParserForLanguage: function(languageCode, verbList,
                                   ContextUtils, SuggestionMemory) {
-    if ( ! NLParser2.parserFactories[languageCode] ) {
+    if (!(languageCode in NLParser2.parserFactories))
       throw "No parser is defined for " + languageCode;
-    } else {
-      let parser = NLParser2.parserFactories[languageCode]();
-      parser.setCommandList(verbList);
-      /* If ContextUtils and/or SuggestionMemory were provided, they are
-       * stub objects for testing purposes.  Set them on the new parser
-       * object; it will use them instead of the real modules.
-       * Normally I would do this in the constructor, but because we use
-       * parserFactories[]() it's easier to do it here:
-       */
-      if (ContextUtils) {
-        parser._contextUtils = ContextUtils;
-      } else {
-        var ctu = {};
-        Cu.import("resource://ubiquity/modules/contextutils.js", ctu);
-        parser._contextUtils = ctu.ContextUtils;
-      }
-      if (SuggestionMemory) {
-        parser._suggestionMemory = SuggestionMemory;
-      } else {
-        var sm = {};
-        Cu.import("resource://ubiquity/modules/suggestion_memory.js", sm);
-        parser._suggestionMemory = new sm.SuggestionMemory("main_parser");
-      }
 
-      return parser;
-    }
+    let parser = NLParser2.parserFactories[languageCode]();
+    parser.setCommandList(verbList);
+    /* If ContextUtils and/or SuggestionMemory were provided, they are
+     * stub objects for testing purposes.  Set them on the new parser
+     * object; it will use them instead of the real modules.
+     * Normally I would do this in the constructor, but because we use
+     * parserFactories[]() it's easier to do it here:
+     */
+    parser._contextUtils = (
+      ContextUtils ||
+      (Cu.import("resource://ubiquity/modules/contextutils.js", null)
+       .ContextUtils));
+    parser._suggestionMemory = (
+      SuggestionMemory ||
+      new (Cu.import("resource://ubiquity/modules/suggestion_memory.js", null)
+           .SuggestionMemory)("main_parser"));
+
+    return parser;
   }
 };
 
-var self = this;
+var parserRegistry = eval(
+  "0," +
+  Utils.getLocalUrl(
+    "resource://ubiquity/modules/parser/new/parser_registry.json",
+    "utf-8"));
 
-// load the resources for all the languages.
-var req = Components.classes["@mozilla.org/xmlextras/xmlhttprequest;1"]
-                    .createInstance(Components.interfaces.nsIXMLHttpRequest);
-for (let code in parserRegistry) {
-  req.open('GET', "resource://ubiquity/modules/parser/new/"+code+".js", false);
-  req.overrideMimeType("text/plain; charset=utf-8");
-  req.send(null);
+for (let code in parserRegistry) loadParserMaker(code);
 
-  eval(req.responseText);
-
+function loadParserMaker(code) {
+  eval(Utils.getLocalUrl(
+    "resource://ubiquity/modules/parser/new/" + code + ".js",
+    "utf-8"));
   NLParser2.parserFactories[code] = makeParser;
 }

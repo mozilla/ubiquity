@@ -45,10 +45,9 @@
 
 var EXPORTED_SYMBOLS = ["Utils"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 var Utils = {
   // === {{{ Utils.currentChromeWindow }}} ===
@@ -542,10 +541,11 @@ function urlToParams(url) {
 // {{{charset}}} is an optional string to specify the character set.
 
 function getLocalUrl(url, charset) {
-  var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-            .createInstance(Ci.nsIXMLHttpRequest);
+  var req = (Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+             .createInstance(Ci.nsIXMLHttpRequest));
   req.open("GET", url, false);
   req.overrideMimeType("text/plain" + (charset ? ";charset=" + charset : ""));
+  req.setRequestHeader("Pragma", "no-cache");
   req.send(null);
   if (req.status === 0)
     return req.responseText;
@@ -902,9 +902,15 @@ Utils.history = {
                 favicon: result.getImageAt(i),
               });
             callback(results);
-          } return;
+            break;
+          }
+          case result.RESULT_IGNORED:
+          case result.RESULT_FAILURE:
+          case result.RESULT_NOMATCH: {
+            callback([]);
+            break;
+          }
         }
-        callback([]);
       }
     });
   },

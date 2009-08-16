@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,24 +36,25 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/nounutils.js");
-Components.utils.import("resource://ubiquity/modules/sandboxfactory.js");
-Components.utils.import("resource://ubiquity/modules/codesource.js");
-Components.utils.import("resource://ubiquity/modules/parser/parser.js");
-Components.utils.import("resource://ubiquity/modules/feedmanager.js");
-Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity/modules/localeutils.js");
-Components.utils.import("resource://ubiquity/modules/collection.js");
+var Cu = Components.utils;
 
-Components.utils.import("resource://ubiquity/tests/framework.js");
-Components.utils.import("resource://ubiquity/tests/test_eventhub.js");
-Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
-Components.utils.import("resource://ubiquity/tests/test_annotation_memory.js");
-Components.utils.import("resource://ubiquity/tests/test_hiddenbrowser.js");
-Components.utils.import("resource://ubiquity/tests/test_parser1.js");
-Components.utils.import("resource://ubiquity/tests/test_parser2.js");
-Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/nounutils.js");
+Cu.import("resource://ubiquity/modules/sandboxfactory.js");
+Cu.import("resource://ubiquity/modules/codesource.js");
+Cu.import("resource://ubiquity/modules/parser/parser.js");
+Cu.import("resource://ubiquity/modules/feedmanager.js");
+Cu.import("resource://ubiquity/modules/cmdmanager.js");
+Cu.import("resource://ubiquity/modules/collection.js");
+
+Cu.import("resource://ubiquity/tests/framework.js");
+Cu.import("resource://ubiquity/tests/test_eventhub.js");
+Cu.import("resource://ubiquity/tests/test_suggestion_memory.js");
+Cu.import("resource://ubiquity/tests/test_annotation_memory.js");
+Cu.import("resource://ubiquity/tests/test_hiddenbrowser.js");
+Cu.import("resource://ubiquity/tests/test_parser1.js");
+Cu.import("resource://ubiquity/tests/test_parser2.js");
+Cu.import("resource://ubiquity/tests/testing_stubs.js");
 
 var NLParser = NLParserMaker(1);
 
@@ -61,7 +63,7 @@ var globalObj = this;
 function debugSuggestionList( list ) {
   dump("There are " + list.length + " items in suggestion list.\n");
   for each (var sugg in list) {
-    dump( sugg.getDisplayText() + "\n" );
+    dump(sugg.getDisplayText() + "\n");
   }
 }
 
@@ -435,7 +437,7 @@ function testSandboxFactoryProtectsSandbox() {
 }
 
 function testXmlScriptCommandsParser() {
-  Components.utils.import("resource://ubiquity/modules/xml_script_commands_parser.js");
+  Cu.import("resource://ubiquity/modules/xml_script_commands_parser.js");
   var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing\n\n\n>]]></script></foo>');
   this.assert(code.length == 1);
   this.assert(code[0].lineNumber == 2, "hi");
@@ -456,10 +458,10 @@ function testLocalUriCodeSourceWorksWithBadFilenames() {
     });
 }
 
-function testLoadLocaleJsonWorks() {
-  var dat = loadLocaleJson("resource://ubiquity/tests/test_all.json");
-  this.assert(dat.testLoadLocaleJsonWorks.length == 1);
-  this.assert(dat.testLoadLocaleJsonWorks == "\u3053");
+function testUtilsGetLocalUrlWorks() {
+  var json = Utils.getLocalUrl("resource://ubiquity/tests/test_all.json",
+                               "utf-8");
+  this.assert(eval(json) === "\u3053", json);
 }
 
 function testUtilsSetTimeoutWorks() {
