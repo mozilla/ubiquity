@@ -34,71 +34,55 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/setup.js");
-Components.utils.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/utils.js");
 
-var LT = LocalizationUtils.propertySelector(
+var T = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquitytutorial.properties");
 
-function waitForUserAction( conditionFunction, callback ) {
-  var intervalId;
-  intervalId = window.setInterval( function() {
-                        if ( conditionFunction() ) {
-                          window.clearInterval(intervalId);
-                          callback();
-                        }
-                      }, 500 );
+function waitForUserAction(conditionFunction, callback) {
+  var intervalId = window.setInterval(function onInterval() {
+    if (conditionFunction()) {
+      window.clearInterval(intervalId);
+      callback();
+    }
+  }, 500);
 }
 
-function fadeInText( text ) {
+function fadeInHtml(htmls) {
   // Start text out white, fade it to black over 1 second
-  let color = 250;
-
-  function setTextColor( colorInt ) {
-    let colorString = "rgb(" + colorInt + ", " + colorInt + ", " + colorInt + ")";
-    $("#tutorial-instructions-div").css( "color", colorString );
-  }
-
-  setTextColor(color);
-  $("#tutorial-instructions-div").html( text );
-
-  var intervalId;
-  intervalId = window.setInterval( function() {
-                                     color -= 25;
-                                     setTextColor( color );
-                                     if (color <= 0) {
-                                       window.clearInterval(intervalId);
-                                     }
-                                   }, 100);
+  ($("#tutorial-instructions-div")
+   .css({brightness: 250})
+   .html(Array.join(arguments, ""))
+   .animate({brightness: 0}, {
+     duration: 1e3,
+     step: function setRGB(now) {
+       now |= 0; // float => int
+       this.style.color = "rgb(" + now + "," + now + "," + now + ")";
+     },
+   }));
 }
 
 function hideOtherContent() {
-  $(".not-the-tutorial").css("display", "none");
+  $(".not-the-tutorial").hide();
 }
 
 function moveDivRight() {
   let left = $(getGUbiq().textBox).width();
-  $("#interactive-tutorial-div").css("position", "absolute");
-  $("#interactive-tutorial-div").css("left", left + "px");
+  $("#interactive-tutorial-div").css({
+    position: "absolute",
+    left: left + "px",
+  });
 }
 
-function getGUbiq() {
-   var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                   .getInterface(Components.interfaces.nsIWebNavigation)
-                   .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
-                  .rootTreeItem
-                   .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                   .getInterface(Components.interfaces.nsIDOMWindow);
-  return mainWindow.gUbiquity;
-}
+function getGUbiq() Utils.currentChromeWindow.gUbiquity;
 
-function ubiqWindowIsUp() {
-  return (getGUbiq().isWindowOpen);
-}
+function ubiqWindowIsUp() getGUbiq().isWindowOpen;
+function ubiqWindowIsDown() !ubiqWindowIsUp();
 
 function ubiqInputIs(text) {
   let input = getGUbiq().cmdManager.getLastInput();
-  return (input.toLowerCase() == text.toLowerCase());
+  return (input.toLowerCase() === text.toLowerCase());
 }
 
 function ubiqSuggestionIs(text) {
@@ -107,21 +91,28 @@ function ubiqSuggestionIs(text) {
 }
 
 function contentsDivHas(word) {
-  return ($("#tutorial-contents-div").text().indexOf(word) > -1 );
+  return ($("#tutorial-contents-div").text().indexOf(word) > -1);
 }
 
-function createCanvas(left, top, width, height) {
-  let canvas = document.createElement("canvas");
-  $(canvas).css("display", "block");
-  $(canvas).css("position", "absolute");
-  $(canvas).css("z-index", 5);
-  $(canvas).css("left", left + "px");
-  $(canvas).css("top", top + "px");
-  $(canvas).attr("width", width );
-  $(canvas).attr("height", height );
+function createCanvas(left, top, width, height) (
+  $(document.createElement("canvas"))
+  .css({
+    "display": "block",
+    "position": "absolute",
+    "z-index": 5,
+    "left": left + "px",
+    "top": top + "px",
+  })
+  .attr({
+    "width": width,
+    "height": height,
+  })
+  .appendTo("#canvas-goes-here")
+  [0]);
 
-  $("#canvas-goes-here").append($(canvas));
-  return canvas;
+function forceDefaultSkin() {
+  var {skinService} = UbiquitySetup.createServices();
+  skinService.changeSkin(skinService.DEFAULT_SKIN);
 }
 
 function destroyCanvas() {
@@ -162,20 +153,20 @@ function showArrowToSuggestionList() {
   let theDiv = $("#interactive-tutorial-div");
   let divBottom = theDiv.offset().top + theDiv.height();
   let divRight = theDiv.offset().left + theDiv.width();
-  let canvas = createCanvas(0, divBottom, divRight, 300 );
+  let canvas = createCanvas(0, divBottom, divRight, 300);
 
   var ctx = canvas.getContext("2d");
   ctx.strokeStyle = "green";
   ctx.lineWidth = 3.0;
   ctx.beginPath();
   let bottomLevel = (ubiqBottom - divBottom);
-  ctx.moveTo( theDiv.offset().left + 50, 0);
-  ctx.lineTo( theDiv.offset().left + 50, bottomLevel);
-  ctx.lineTo( 200, bottomLevel );
-  ctx.lineTo( 200, bottomLevel - 50);
-  ctx.lineTo( 175, bottomLevel - 25);
-  ctx.lineTo( 200, bottomLevel - 50 );
-  ctx.lineTo( 225, bottomLevel - 25);
+  ctx.moveTo(theDiv.offset().left + 50, 0);
+  ctx.lineTo(theDiv.offset().left + 50, bottomLevel);
+  ctx.lineTo(200, bottomLevel);
+  ctx.lineTo(200, bottomLevel - 50);
+  ctx.lineTo(175, bottomLevel - 25);
+  ctx.lineTo(200, bottomLevel - 50);
+  ctx.lineTo(225, bottomLevel - 25);
   ctx.stroke();
 }
 
@@ -187,11 +178,11 @@ function showArrowToPreview() {
   let ubiqTop = panel.boxObject.y;
   let ubiqHeight = panel.boxObject.height; // too high!
 
-  let canvas = createCanvas( theDiv.offset().left, ubiqTop,
+  let canvas = createCanvas(theDiv.offset().left, ubiqTop,
                              50, ubiqHeight);
 
   theDiv.css("left", (theDiv.offset().left + 50) + "px");
-  theDiv.width( theDiv.width() - 50 );
+  theDiv.width(theDiv.width() - 50);
 
   var ctx = canvas.getContext("2d");
   ctx.strokeStyle = "green";
@@ -200,331 +191,273 @@ function showArrowToPreview() {
   ctx.moveTo(0, 0);
   ctx.lineTo(25, 25);
   let centerHite = theDiv.height();
-  ctx.lineTo( 25, centerHite);
-  ctx.lineTo( 50, centerHite);
-  ctx.moveTo( 25, centerHite);
-  ctx.lineTo( 25, ubiqHeight - 25 );
-  ctx.lineTo( 0, ubiqHeight );
+  ctx.lineTo(25, centerHite);
+  ctx.lineTo(50, centerHite);
+  ctx.moveTo(25, centerHite);
+  ctx.lineTo(25, ubiqHeight - 25);
+  ctx.lineTo(0, ubiqHeight);
   ctx.stroke();
 }
 
-function startUbiqTutorial() {
-  hideOtherContent();
-  destroyCanvas();
-
-  var html = "<h2>" + LT("tutorial.welcome") + "</h2>"
-    + "<p><a onclick='ubiqTutorialStage1();'>" + LT("tutorial.fromthestart") + "</a></p>"
-    + "<p>" + LT("tutorial.fromthemiddle") + "</p><ol>"
-    + "<li><a onclick='ubiqTutorialStage1();'>" + LT("tutorial.howtostart") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage3();'>" + LT("tutorial.previews") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage7();'>" + LT("tutorial.suggestions") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage16();'>" + LT("tutorial.selecting") + "</a></li>"
-    + "<li><a onclick='ubiqTutorialStage23();'>" + LT("tutorial.morecommands") + "</a></li>"
-    + "</ol>";
-
-  fadeInText( html );
+for each (let tag in ["h2", "p", "ol", "li", "strong"]) {
+  let beg = "<" + tag + ">", end = "</" + tag + ">";
+  this[tag.toUpperCase()] =
+    function quickTag() beg + Array.join(arguments, "") + end;
 }
 
+function stageLink(number, content) (
+  "<a onclick='ubiqTutorialStage" + number +"();'>" + content + "</a>");
+
+function startUbiqTutorial() {
+  //forceDefaultSkin();
+  hideOtherContent();
+  destroyCanvas();
+  fadeInHtml(
+    H2(T("tutorial.welcome")),
+    P(stageLink(1, T("tutorial.fromthestart"))),
+    P(T("tutorial.fromthemiddle")),
+    OL(LI(stageLink( 1, T("tutorial.howtostart"))),
+       LI(stageLink( 3, T("tutorial.previews"))),
+       LI(stageLink( 7, T("tutorial.suggestions"))),
+       LI(stageLink(16, T("tutorial.selecting"))),
+       LI(stageLink(23, T("tutorial.morecommands")))));
+}
 
 function ubiqTutorialStage1() {
-
   var keyCombo = PrefKeys.getKeyCombo();
-  var introHtml = "<h2>" + LT("tutorial.stage01h1") + "</h2>"
-    + "<p>" + LT("tutorial.stage01p1") + "</p>"
-    + "<p>" + LT("tutorial.stage01p2") + "</p>"
-    + "<p><strong>" + LT("tutorial.stage01p3") + " "
-    + keyCombo[0] + " " + LT("tutorial.stage01p4") + " "
-    + keyCombo[1] + " " + LT("tutorial.stage01p5") + "</strong></p>";
-
-  fadeInText(introHtml);
-
-  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage2 );
+  fadeInHtml(
+    H2(T("tutorial.stage01h1")),
+    P(T("tutorial.stage01p1")),
+    P(T("tutorial.stage01p2")),
+    P(STRONG(T("tutorial.stage01p3", keyCombo[0], keyCombo[1]))));
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage2);
 }
 
 function ubiqTutorialStage2() {
   moveDivRight();
-  let stage2Html = "<p>" + LT("tutorial.stage02p1") + "</p>"
-  + "<p>" + LT("tutorial.stage02p2") + "</p>";
-
-  fadeInText(stage2Html);
+  fadeInHtml(P(T("tutorial.stage02p1")),
+             P(T("tutorial.stage02p2")));
   showArrowToInputBox();
-  waitForUserAction( function() { return !ubiqWindowIsUp(); },
-                     ubiqTutorialStage3 );
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage3);
 }
-
 
 function ubiqTutorialStage3() {
   var keyCombo = PrefKeys.getKeyCombo();
-  let stage3Html = 
-    "<h2>" + LT("tutorial.stage03h1") + "</h2>"
-    + "<p>" + LT("tutorial.stage03p1") + "</p>"
-    + "<p>" + LT("tutorial.stage03p2") + " "
-    + keyCombo[0] + " " + LT("tutorial.stage03p3") + " "
-    + keyCombo[1] + " " + LT("tutorial.stage03p4") + "</p>";
-
-  fadeInText(stage3Html);
+  fadeInHtml(
+    H2(T("tutorial.stage03h1")),
+    P(T("tutorial.stage03p1")),
+    P(T("tutorial.stage03p2", keyCombo[0], keyCombo[1])));
   destroyCanvas();
-  waitForUserAction( ubiqWindowIsUp,
-                     ubiqTutorialStage4 );
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage4);
 }
 
 function ubiqTutorialStage4() {
   moveDivRight();
-  let stage4Html = "<p>" + LT("tutorial.stage04p1") + "</p>";
-  fadeInText(stage4Html);
+  fadeInHtml(P(T("tutorial.stage04p1")));
   showArrowToInputBox();
-  waitForUserAction( function() { return ubiqSuggestionIs("weather"); },
-                     ubiqTutorialStage5 );
+  waitForUserAction(function() ubiqSuggestionIs("weather"),
+                    ubiqTutorialStage5);
 }
 
 function ubiqTutorialStage5() {
   // NOTE: For some reason, &mdash; makes the xhtml parser barf, but
   // &#8212; works.
-  let stage5Html = 
-    "<p>" + LT("tutorial.stage05p1") + "</p>"
-    + "<p>" + LT("tutorial.stage05p2") + "</p>"
-    + "<p>" + LT("tutorial.stage05p3") + "</p>";
-
-  fadeInText(stage5Html);
+  fadeInHtml(P(T("tutorial.stage05p1")),
+             P(T("tutorial.stage05p2")),
+             P(T("tutorial.stage05p3")));
   destroyCanvas();
   showArrowToPreview();
-  waitForUserAction(function() {return ubiqSuggestionIs("chicago"); },
-                    ubiqTutorialStage6 );
+  waitForUserAction(function() ubiqSuggestionIs("chicago"),
+                    ubiqTutorialStage6);
 }
 
 function ubiqTutorialStage6() {
-  let stage6Html = "<p>" + LT("tutorial.stage06p1") + "</p>"
-  + " <p>" + LT("tutorial.stage06p2") + "</p>";
   destroyCanvas();
   moveDivRight();
-  fadeInText(stage6Html);
-  waitForUserAction( function() { return !ubiqWindowIsUp(); },
-                     ubiqTutorialStage7 );
+  fadeInHtml(P(T("tutorial.stage06p1")),
+             P(T("tutorial.stage06p2")));
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage7);
 }
 
 function ubiqTutorialStage7() {
   destroyCanvas();
-  let stage7Html = "<h2>" + LT("tutorial.stage07h1") + "</h2>"
-    + " <p>" + LT("tutorial.stage07p1") + "</p>";
-  fadeInText(stage7Html);
-  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage8 );
+  fadeInHtml(H2(T("tutorial.stage07h1")),
+             P(T("tutorial.stage07p1")));
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage8);
 }
 
 function ubiqTutorialStage8() {
   moveDivRight();
-   let stage8Html = "<p>" + LT("tutorial.stage08p1") + "</p>";
-  fadeInText(stage8Html);
+  fadeInHtml(P(T("tutorial.stage08p1")));
   showArrowToInputBox();
-  waitForUserAction( function() {return ubiqInputIs("c" );},
-                     ubiqTutorialStage9 );
+  waitForUserAction(function() ubiqInputIs("c"), ubiqTutorialStage9);
 }
 
 function ubiqTutorialStage9() {
-   let stage9Html = "<p>" + LT("tutorial.stage09p1") + "</p>"
-    + " <p>" + LT("tutorial.stage09p2") + "</p>";
-  fadeInText(stage9Html);
+  fadeInHtml(P(T("tutorial.stage09p1")),
+             P(T("tutorial.stage09p2")));
   destroyCanvas();
   showArrowToSuggestionList();
-  waitForUserAction( function() {return ubiqSuggestionIs("calculate" );},
-                     ubiqTutorialStage10 );
+  waitForUserAction(function() ubiqSuggestionIs("calculate"),
+                    ubiqTutorialStage10);
 }
 
 function ubiqTutorialStage10() {
-   let stage10Html = "<p>" + LT("tutorial.stage10p1") + "</p>";
-  fadeInText(stage10Html);
+  fadeInHtml(P(T("tutorial.stage10p1")));
   destroyCanvas();
   showArrowToInputBox();
-  waitForUserAction( function() {return ubiqSuggestionIs("22/7" );},
-                     ubiqTutorialStage11 );
+  waitForUserAction(function() ubiqSuggestionIs("22/7"),
+                    ubiqTutorialStage11);
 }
 
 function ubiqTutorialStage11() {
-   let stage11Html = "<p>" + LT("tutorial.stage11p1") + "</p>"
-  + "<p>" + LT("tutorial.stage11p2") + "</p>";
-  fadeInText(stage11Html);
+  fadeInHtml(P(T("tutorial.stage11p1")),
+             P(T("tutorial.stage11p2")));
   destroyCanvas();
   showArrowToPreview();
-  waitForUserAction( function() {return !ubiqWindowIsUp();},
-                     ubiqTutorialStage12 );
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage12);
 }
 
 function ubiqTutorialStage12() {
-  let stage12Html = "<h2>" + LT("tutorial.stage12h1") + "</h2>"
-    + "<p>" + LT("tutorial.stage12p1") + "</p>";
-  fadeInText(stage12Html);
+  fadeInHtml(H2(T("tutorial.stage12h1")),
+             P(T("tutorial.stage12p1")));
   destroyCanvas();
   moveDivRight();
-  waitForUserAction( ubiqWindowIsUp,
-                     ubiqTutorialStage13 );
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage13);
 }
 
 function ubiqTutorialStage13() {
   moveDivRight();
-  let stage13Html = "<p>" + LT("tutorial.stage13p1") + "</p>"
-    + "<p><strong>" + LT("tutorial.stage13p2") + "</strong></p>"
-    + "<p>" + LT("tutorial.stage13p3") + "</p>";
-  fadeInText(stage13Html);
+  fadeInHtml(P(T("tutorial.stage13p1")),
+             P(STRONG(T("tutorial.stage13p2"))),
+             P(T("tutorial.stage13p3")));
   showArrowToInputBox();
-  waitForUserAction(  function() {return ubiqSuggestionIs("cheese" );},
-                     ubiqTutorialStage14 );
+  waitForUserAction( function() ubiqSuggestionIs("cheese"),
+                     ubiqTutorialStage14);
 }
 
 function ubiqTutorialStage14() {
-  let stage14Html = "<p>" + LT("tutorial.stage14p1") + "</p>"
-    + "<p>" + LT("tutorial.stage14p2") + "</p>";
   destroyCanvas();
   showArrowToSuggestionList();
-  fadeInText(stage14Html);
-  waitForUserAction(  function() {return ubiqSuggestionIs("google" );},
-                     ubiqTutorialStage15 );
+  fadeInHtml(P(T("tutorial.stage14p1")),
+             P(T("tutorial.stage14p2")));
+  waitForUserAction(function() ubiqSuggestionIs("google"),
+                    ubiqTutorialStage15);
 }
 
 function ubiqTutorialStage15() {
-  let stage15Html = "<p>" + LT("tutorial.stage15p1") + "</p>"
-  + "<p>" + LT("tutorial.stage15p2") + "</p>"
-  + "<p>" + LT("tutorial.stage15p3") + "</p>";
-  fadeInText(stage15Html);
+  fadeInHtml(P(T("tutorial.stage15p1")),
+             P(T("tutorial.stage15p2")),
+             P(T("tutorial.stage15p3")));
   destroyCanvas();
   showArrowToPreview();
-  waitForUserAction( function() {return !ubiqWindowIsUp();},
-                     ubiqTutorialStage16 );
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage16);
 }
 
 function ubiqTutorialStage16() {
   moveDivRight();
   destroyCanvas();
-  let stage16Html = "<h2>" + LT("tutorial.stage16ah1") + "</h2>"
-  + "<p>" + LT("tutorial.stage16ap1") + "</p>"
-  + "<p>" + LT("tutorial.stage16ap2") + "</p>";
+  fadeInHtml(H2(T("tutorial.stage16ah1")),
+             P(T("tutorial.stage16ap1")),
+             P(T("tutorial.stage16ap2")));
 
-  fadeInText(stage16Html);
+  ($("#tutorial-contents-div")
+   .addClass("ubiq-tutorial")
+   .css("text-align", "center")
+   .html("1981 Landings Drive, Mountain View, CA"));
 
-  let agDiv = $("#tutorial-contents-div");
-  agDiv.addClass("ubiq-tutorial");
-  agDiv.css("text-align", "center");
-
-  agDiv.html("1981 Landings Drive, Mountain View, CA");
-
-  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage16b );
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage16b);
 }
 
 function ubiqTutorialStage16b() {
-   let stage16bhtml = "<p>" + LT("tutorial.stage16bp1") + "</p>";
-   fadeInText(stage16bhtml);
-   waitForUserAction( function() {return ubiqSuggestionIs("map");},
-                      ubiqTutorialStage16c);
+   fadeInHtml(P(T("tutorial.stage16bp1")));
+   waitForUserAction(function() ubiqSuggestionIs("map"),
+                     ubiqTutorialStage16c);
 }
 
 function ubiqTutorialStage16c() {
-  let stage16chtml = "<p>" + LT("tutorial.stage16cp1") + "</p>"
-  + "<p>" + LT("tutorial.stage16cp2") + "</p>";
-  fadeInText(stage16chtml);
-
-  waitForUserAction( function() {return !ubiqWindowIsUp();},
-                     ubiqTutorialStage17 );
+  fadeInHtml(P(T("tutorial.stage16cp1")),
+             P(T("tutorial.stage16cp2")));
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage17);
 }
 
 function ubiqTutorialStage17() {
+  ($("#tutorial-contents-div")
+   .addClass("ubiq-tutorial")
+   .css("text-align", "center")
+   .html("アドオンを選んで、自分だけのブラウザをつくろう。"));
 
-  let stage17Html = "<p>" + LT("tutorial.stage17p1") + "</p>"
-  + "<p>" + LT("tutorial.stage17p2") + "</p>"
-  + "<p>" + LT("tutorial.stage17p3") + "</p>";
-
-  let jpDiv = $("#tutorial-contents-div");
-  jpDiv.addClass("ubiq-tutorial");
-  jpDiv.css("text-align", "center");
-  jpDiv.html("アドオンを選んで、自分だけのブラウザをつくろう。");
-
-  fadeInText(stage17Html);
-
-  waitForUserAction( function() {return ubiqSuggestionIs("translate");},
-                     ubiqTutorialStage18);
+  fadeInHtml(P(T("tutorial.stage17p1")),
+             P(T("tutorial.stage17p2")),
+             P(T("tutorial.stage17p3")));
+  waitForUserAction(function() ubiqSuggestionIs("translate"),
+                    ubiqTutorialStage18);
 }
 
 function ubiqTutorialStage18() {
-  let stage18Html = "<p>" + LT("tutorial.stage18p1") + "</p>"
-    + "<p>" + LT("tutorial.stage18p2") + "</p>";
-
-  fadeInText(stage18Html);
-  waitForUserAction( function() { return contentsDivHas("browser"); },
-                     ubiqTutorialStage19 );
+  fadeInHtml(P(T("tutorial.stage18p1")),
+             P(T("tutorial.stage18p2")));
+  waitForUserAction(function() contentsDivHas("browser"),
+                    ubiqTutorialStage19);
 }
 
 function ubiqTutorialStage19() {
-  let stage19Html = "<p>" + LT("tutorial.stage19p1") + "</p>"
-    + "<p>" + LT("tutorial.stage19p2") + "</p>"
-    + "<p><a onclick='ubiqTutorialStage20();'>" + LT("tutorial.stage19p3") + "</a></p>";
-
-  fadeInText(stage19Html);
+  fadeInHtml(P(T("tutorial.stage19p1")),
+             P(T("tutorial.stage19p2")),
+             P(stageLink(20, T("tutorial.stage19p3"))));
 }
 
 function ubiqTutorialStage20() {
-  let stage20Html = "<p>" + LT("tutorial.stage20p1") + "</p>"
-    + "<p><strong>" + LT("tutorial.stage20p2") + "</strong>.</p>";
-  let agDiv = $("#tutorial-contents-div");
-  agDiv.html("aglet");
-
-  fadeInText(stage20Html);
-
-  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage21 );
+  $("#tutorial-contents-div").html("aglet");
+  fadeInHtml(P(T("tutorial.stage20p1")),
+             P(STRONG(T("tutorial.stage20p2"))));
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage21);
 }
 
 function ubiqTutorialStage21() {
-  let stage21Html = "<p>" + LT("tutorial.stage21p1") + "</p>";
-
-  fadeInText(stage21Html);
-  waitForUserAction( function() {return ubiqSuggestionIs("google");},
-                     ubiqTutorialStage22);
+  fadeInHtml(P(T("tutorial.stage21p1")));
+  waitForUserAction(function() ubiqSuggestionIs("google"),
+                    ubiqTutorialStage22);
 }
 
 function ubiqTutorialStage22() {
-  let stage22Html = "<p>" + LT("tutorial.stage22p1") + "</p>"
-    + "<p>" + LT("tutorial.stage22p2") + "</p>"
-    + "<p>" + LT("tutorial.stage23p3") + "</p>";
-  fadeInText(stage22Html);
-  waitForUserAction( function() {return !ubiqWindowIsUp();},
-                     ubiqTutorialStage23 );
+  fadeInHtml(P(T("tutorial.stage22p1")),
+             P(T("tutorial.stage22p2")),
+             P(T("tutorial.stage23p3")));
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage23);
 }
 
 function ubiqTutorialStage23() {
   $("#tutorial-contents-div").slideUp();
   moveDivRight();
-  let stage23Html = "<h2>" + LT("tutorial.stage23h1") + "</h2>"
-    + "<p>" + LT("tutorial.stage23p1") + "</p>"
-    + "<p>" + LT("tutorial.stage23p2") + "</p>"
-    + "<p>" + LT("tutorial.stage23p3") + "</p>"
-    + "<p><strong>" + LT("tutorial.stage23p4") + "</strong></p>";
-  fadeInText(stage23Html);
-  waitForUserAction( ubiqWindowIsUp, ubiqTutorialStage24 );
+  fadeInHtml(H2(T("tutorial.stage23h1")),
+             P(T("tutorial.stage23p1")),
+             P(T("tutorial.stage23p2")),
+             P(T("tutorial.stage23p3")),
+             P(STRONG(T("tutorial.stage23p4"))));
+  waitForUserAction(ubiqWindowIsUp, ubiqTutorialStage24);
 }
 
 function ubiqTutorialStage24() {
-  let stage24Html = "<p>" + LT("tutorial.stage24p1") + "</p>"
-    + "<p><strong>" + LT("tutorial.stage24p2") + "</strong></p>";
-
-  fadeInText(stage24Html);
-  waitForUserAction( function() {return ubiqSuggestionIs("help") &&
-                                 ubiqSuggestionIs("tab");},
-                     ubiqTutorialStage25);
+  fadeInHtml(P(T("tutorial.stage24p1")),
+             P(STRONG(T("tutorial.stage24p2"))));
+  waitForUserAction(function() (ubiqSuggestionIs("help") &&
+                                ubiqSuggestionIs("tab")),
+                    ubiqTutorialStage25);
 }
 
 function ubiqTutorialStage25() {
-  let stage25Html = "<p>" + LT("tutorial.stage25p1") + "</p>"
-    + "<p>" + LT("tutorial.stage25p2") + "</p>"
-    + "<p>" + LT("tutorial.stage25p3") + "</p>";
-
-  fadeInText(stage25Html);
-  waitForUserAction( function() {return !ubiqWindowIsUp();},
-                     ubiqTutorialStage26 );
+  fadeInHtml(P(T("tutorial.stage25p1")),
+             P(T("tutorial.stage25p2")),
+             P(T("tutorial.stage25p3")));
+  waitForUserAction(ubiqWindowIsDown, ubiqTutorialStage26);
 }
 
 function ubiqTutorialStage26() {
-  let stage26Html = "<p>" + LT("tutorial.stage26p1") + "</p>"
-  + "<p>" + LT("tutorial.stage26p2") + "</p>"
-  + "<p>" + LT("tutorial.stage26p3") + "</p>"
-  + "<p>" + LT("tutorial.stage26p4") + "</p>";
-
-  fadeInText(stage26Html);
+  fadeInHtml(P(T("tutorial.stage26p1")),
+             P(T("tutorial.stage26p2")),
+             P(T("tutorial.stage26p3")),
+             P(T("tutorial.stage26p4")));
 }
 
 
