@@ -110,18 +110,19 @@ window.addEventListener("load", function onload() {
       cmdMan.makeCommandSuggester());
   }
 
-  function ubiquityKeyup(aEvent) {
+  const DEFAULT_KEY_MODIFIER = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
+  function ubiquityKey(aEvent) {
     // Default keys are different for diff platforms
     //  Windows Vista, XP, 2000 & NT: CTRL+SPACE
     //  Mac, Linux, Others: ALT+SPACE
     var keyCode = prefs.getValue("extensions.ubiquity.keycode",
                                  KeyEvent.DOM_VK_SPACE);
     var keyModifier = prefs.getValue("extensions.ubiquity.keymodifier",
-                                     jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT");
+                                     DEFAULT_KEY_MODIFIER);
     // Toggle Ubiquity if the key pressed matches the shortcut key
     if (aEvent.keyCode === keyCode &&
         ubiquityEventMatchesModifier(aEvent, keyModifier)) {
-      gUbiquity.toggleWindow();
+      if (aEvent.type === "keyup") gUbiquity.toggleWindow();
       aEvent.preventDefault();
       aEvent.stopPropagation();
     }
@@ -146,6 +147,9 @@ window.addEventListener("load", function onload() {
       //errorToLocalize 2
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }
-    if (gUbiquity) window.addEventListener("keyup", ubiquityKeyup, true);
+    if (gUbiquity) {
+      window.addEventListener("keydown", ubiquityKey, true);
+      window.addEventListener("keyup", ubiquityKey, true);
+    }
   });
 }, false);

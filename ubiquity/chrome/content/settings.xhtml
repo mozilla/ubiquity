@@ -56,19 +56,17 @@
   <fieldset>
     <legend>&ubiquity.settings.InvokingUbiquity;</legend>
     <div style="margin-left:10px;">
-
-      <p><input id="keyInputBox" type="text" size="42" style="cursor:pointer"
-        onkeydown="PrefKeys.onKeyChange(event)"
-        onfocus="this.value = L('ubiquity.prefkeys.pressyourcombo')"
-        onblur="PrefKeys.onLoad()"/>
-
-      <br />
-      &ubiquity.settings.ChangeShortcut;
-      <br />
+      <p>
+        <input id="keyInputBox" type="text" size="42" style="cursor:pointer"
+          onkeydown="return false"
+          onkeyup="PrefKeys.onKeyChange(event)"
+          onfocus="this.value = L('ubiquity.prefkeys.pressyourcombo')"
+          onblur="PrefKeys.onLoad()"/>
+        <br />
+        &ubiquity.settings.ChangeShortcut;
+        <br />
       </p>
-
       <p id="keyNotify"></p>
-
     </div>
   </fieldset>
 

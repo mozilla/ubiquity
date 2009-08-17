@@ -545,7 +545,7 @@ function getLocalUrl(url, charset) {
              .createInstance(Ci.nsIXMLHttpRequest));
   req.open("GET", url, false);
   req.overrideMimeType("text/plain" + (charset ? ";charset=" + charset : ""));
-  req.setRequestHeader("Pragma", "no-cache");
+  req.setRequestHeader("If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT");
   req.send(null);
   if (req.status === 0)
     return req.responseText;
@@ -595,9 +595,9 @@ sortBy.sorter = function byKey(a, b) a.key <= b.key ^ 1;
 // This function returns whether or not the {{{value}}} is an instance
 // of {{{Array}}}.
 
-function isArray(val) ((val != null &&
-                        typeof val === "object" &&
-                        (val.constructor || 0).name === "Array"));
+function isArray(val) (val != null &&
+                       typeof val === "object" &&
+                       (val.constructor || 0).name === "Array");
 
 // === {{{ Utils.isEmpty(value) }}} ===
 //
