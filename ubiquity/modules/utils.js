@@ -295,10 +295,12 @@ function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
   var timerID = Utils.__timerData.nextID++;
   Utils.__timerData.timers[timerID] = timer;
 
-  timer.initWithCallback(new Utils.__TimerCallback(callback,
-                                                   Array.slice(arguments, 2)),
-                         delay,
-                         timerClass.TYPE_ONE_SHOT);
+  timer.initWithCallback(
+    new Utils.__TimerCallback(
+      callback,
+      arguments.length > 2 ? Array.slice(arguments, 2) : []),
+    delay,
+    timerClass.TYPE_ONE_SHOT);
   return timerID;
 }
 
@@ -322,11 +324,10 @@ function clearTimeout(timerID) {
 Utils.__TimerCallback = function __TimerCallback(callback, args) {
   this._callback = callback;
   this._args = args;
-  this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
 };
 
 Utils.__TimerCallback.prototype = {
-  notify : function notify(timer) {
+  notify: function notify(timer) {
     var {timers} = Utils.__timerData;
     for (let timerID in timers)
       if (timers[timerID] === timer) {
@@ -334,13 +335,11 @@ Utils.__TimerCallback.prototype = {
         break;
       }
     this._callback.apply(null, this._args);
-  }
+  },
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsITimerCallback]),
 };
 
-Utils.__timerData = {
-  nextID: 1,
-  timers: {}
-};
+Utils.__timerData = {nextID: 1, timers: {}};
 
 // === {{{ Utils.uri(spec, defaultUrl) }}} ===
 // === {{{ Utils.url() }}} ===

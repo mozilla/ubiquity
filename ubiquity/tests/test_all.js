@@ -466,20 +466,17 @@ function testUtilsGetLocalUrlWorks() {
 
 function testUtilsSetTimeoutWorks() {
   let self = this;
-  let foo;
-
-  function cb() {
-    self.assertEquals(foo, "foo");
-  }
-
-  Utils.setTimeout(self.makeCallback(cb), 10);
-
-  foo = "foo";
+  let foo = "foo";
+  Utils.setTimeout(self.makeCallback(function cb(x, y) {
+    foo = null;
+    self.assertEquals(x, "bar");
+    self.assertEquals(y, "baz");
+  }), 42, "bar", "baz");
+  self.assertEquals(foo, "foo");
 }
 
 function testNounType() {
   var {NounType} = NounUtils;
-
   var nounWords = new NounType("words", ["foo", "bar", "buz"]);
   this.assertEquals(nounWords.label, "words");
   this.assertEquals([s.text for each (s in nounWords.suggest("b"))] + "",
