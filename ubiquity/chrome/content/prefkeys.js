@@ -40,20 +40,17 @@ var PrefKeys = {
   KEYMODIFIER_PREF : "extensions.ubiquity.keymodifier",
   KEYCODE_DEFAULT: KeyEvent.DOM_VK_SPACE,
   KEYMODIFIER_DEFAULT: Utils.OS === "WINNT" ? "CTRL" : "ALT",
-  CODE2TEXT: {
-    9: "TAB", 13: "ENTER", 32: "SPACE",
-  },
+  CODE2TEXT: (function (dict) {
+    for (var key in KeyEvent)
+      dict[KeyEvent[key]] = key.slice(7); // strip DOM_VK_
+    return dict;
+  })({}),
+  MODIFIER2TEXT: {16: "SHIFT", 17: "CTRL", 18: "ALT", 224: "META"},
 
-  _convertToText: function PK__convertToText(keyCode) (
-    48 <= keyCode && keyCode <= 90
-    ? String.fromCharCode(keyCode) :
-    112 <= keyCode && keyCode <= 123
-    ? "F" + keyCode % 111
-    : this.CODE2TEXT[keyCode] || "[" + keyCode + "]"),
+  _convertToText: function PK__convertToText(keyCode)
+    this.CODE2TEXT[keyCode] || "[" + keyCode + "]",
 
-  isModifier: function PK_isModifier(keyCode)
-    // Shift, Ctrl, Alt, Meta
-    !!~[16, 17, 18, 224].indexOf(keyCode),
+  isModifier: function PK_isModifier(keyCode) keyCode in this.MODIFIER2TEXT,
 
   onLoad: function PK_onLoad() {
     var [mod, key] = this.getKeyCombo();
@@ -77,30 +74,14 @@ var PrefKeys = {
       return;
     }
 
-    // Only alphanumeric/function keys are allowed as shortcuts because
-    // it does not seem to possible to get keycodes properly for
-    // combinations like "shift+]". In this case, pressing "shift+]"
-    // will set the keycode to be that of "}" and displaying "shift+}"
-    // when the user intended "shift+]" is non-intuitive. Besides,
-    // different keyboard layouts might cause problems. SPACE(32) is
-    // allowed as a special case below.
-    var keyText = PrefKeys._convertToText(keyCode);
-    if (keyText[0] === "[") {
-      $("#keyNotify").text(
-        PrefKeys.isModifier(keyCode)
-        ? ""
-        : L("ubiquity.prefkeys.notifyalphanumeric"));
-      return;
-    }
-
     Application.prefs.setValue(this.KEYCODE_PREF, keyCode);
     Application.prefs.setValue(this.KEYMODIFIER_PREF, keyModifier);
 
-    var comboText = keyModifier + "+" + keyText;
+    var comboText = keyModifier + "+" + PrefKeys._convertToText(keyCode);
     $("#keyInputBox").blur().val(
       comboText + " (" + L("ubiquity.prefkeys.clickhere") + ")");
     $("#keyNotify").html(
-      L("ubiquity.prefkeys.confirmchange") + " " + comboText.bold());
+      L("ubiquity.prefkeys.confirmchange", comboText.bold()));
   },
 
   getKeyCombo: function PK_getKeyCombo() {
