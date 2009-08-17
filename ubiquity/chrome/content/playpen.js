@@ -69,6 +69,9 @@ var demoParserInterface = {
         this.currentQuery.cancel();
 //    this.currentParser._nounCache = {};
 
+    if ($('#flushcache').attr('checked'))
+      this.currentParser.flushNounCache();
+
     $('#parseinfo').empty();
     $('#parsetree').empty();
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val(),true); // this last true is for dontRunImmediately
