@@ -40,7 +40,12 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// = {{{ ContextUtils }}} =
+// = ContextUtils =
+//
+// A small library that deals with selection via {{{context}}}.
+//
+// {{{context}}} is a dictionary which must contain
+// {{{focusedWindow}}} and {{{focusedElement}}} fields.
 
 var EXPORTED_SYMBOLS = ["ContextUtils"];
 
@@ -48,18 +53,18 @@ var ContextUtils = {};
 
 for each (let f in this) if (typeof f === "function") ContextUtils[f.name] = f;
 
+Components.utils.import("resource://ubiquity/modules/utils.js");
+
 // === {{{ ContextUtils.getHtmlSelection(context) }}} ===
 
 function getHtmlSelection(context) {
   var range = getFirstRange(context);
-  if (range) {
-    var newNode = context.focusedWindow.document.createElement("div");
-    newNode.appendChild(range.cloneContents());
-    range.detach();
-    absolutifyUrlsInNode(newNode);
-    return newNode.innerHTML;
-  }
-  return "";
+  if (!range) return "";
+  var newNode = context.focusedWindow.document.createElement("div");
+  newNode.appendChild(range.cloneContents());
+  range.detach();
+  absolutifyUrlsInNode(newNode);
+  return newNode.innerHTML;
 }
 
 // === {{{ ContextUtils.getSelection(context) }}} ===
@@ -149,8 +154,10 @@ function setSelection(context, content, options) {
 
 function getSelectionObject(context) {
   var selection = getSelection(context);
-  var htmlSelection = getHtmlSelection(context);
-  return {text: selection, html: htmlSelection || selection};
+  return {
+    text: selection,
+    html: getHtmlSelection(context) || Utils.escapeHtml(selection),
+  };
 }
 
 // === {{{ ContextUtils.absolutifyUrlsInNode(context) }}} ===
@@ -169,7 +176,7 @@ function absolutifyUrlsInNode(node) {
 
 // === {{{ ContextUtils.getFirstRange(context) }}} ===
 //
-//  Returns a copy of the first {{{Range}}} in {{{Selection}}}.
+// Returns a copy of the first {{{Range}}} in {{{Selection}}}.
 
 function getFirstRange(context) {
   var win = context.focusedWindow;

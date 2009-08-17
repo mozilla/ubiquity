@@ -97,7 +97,8 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // == From ContextUtils ==
 //
-// {{{CmdUtils}}} wraps [[#modules/contextutils.js|ContextUtils]].
+// {{{CmdUtils}}} imports and wraps the following three methods from
+// [[#modules/contextutils.js|ContextUtils]].
 
 // === {{{ CmdUtils.getHtmlSelection() }}} ===
 //
@@ -113,19 +114,22 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 //
 // Replaces the current selection with new content.
 //
-// {{{content}}} The text (or html) to set as the selection.
+// {{{content}}} The html string to set as the selection.
 //
-// {{{options}}} is a dictionary; if it has a "text" property then
+// {{{options}}} is a dictionary; if it has a {{{text}}} property then
 // that value will be used in place of the html if we're in
 // a plain-text-only editable field.
 
-["getHtmlSelection", "getSelection", "setSelection"].forEach(function (m) {
-  CmdUtils[m] = function xSelection() {
-    var args = Array.slice(arguments);
-    args.unshift(this.__globalObject.context);
-    return ContextUtils[m].apply(ContextUtils, args);
-  };
-});
+for each (let m in ["getHtmlSelection", "getSelection", "setSelection"]) {
+  eval(<><![CDATA[
+    CmdUtils.@ = function @(x, y) {
+      var c = this.__globalObject.context || {};
+      "focusedWindow" in c && "focusedElement" in c ||
+        (c = Utils.currentChromeWindow.document.commandDispatcher);
+      return ContextUtils.@(c, x, y);
+    };
+    ]]></>.toString().replace(/@/g, m));
+}
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
 //
@@ -148,64 +152,54 @@ function getWindow() getDocument().defaultView;
 // === {{{ CmdUtils.getWindowInsecure() }}} ===
 //
 // Gets the document/window object of the current tab, without the
-// safe XPCNativeWrapper. While this allows access to scripts in the content,
-// it is potentially **unsafe** and {{{CmdUtils.getWindow()}}} should
+// safe {{{XPCNativeWrapper}}}.
+// While this allows access to scripts in the content,
+// it is potentially **unsafe** and {{{getDocument()/getWindow()}}} should
 // be used in place of this whenever possible.
 
 function getDocumentInsecure() getDocument().wrappedJSObject;
 
-function getWindowInsecure() getWindow().wrappedJSObject;
+function getWindowInsecure() getDocumentInsecure().defaultView;
 
-// === {{{ CmdUtils.geocodeAddress(address, callback) }}} ===
+// === {{{ CmdUtils.geocodeAddress(location, callback) }}} ===
 //
 // This function uses the Yahoo geocoding service to take a text
 // string of an address/location and turn it into a structured
 // geo-location.
 //
-// {{{address}}} is a plaintext string of the address or location
+// Returns an array of possible matches, where each match is
+// an object that includes {{{latitude}}} , {{{longitude}}},
+// {{{address}}}, {{{city}}}, {{{state}}}, {{{zip}}}, and {{{country}}}.
+//
+// {{{location}}} is a plaintext string of the address or location
 // to be geocoded.
 //
 // {{{callback}}} is a function which gets passed the return of
 // the geocoding.
-//
-// The function returns an array of possible matches, where each match is
-// an object that includes {{{Latitude}}}, {{{Longitude}}},
-// {{{Address}}}, {{{City}}}, {{{State}}}, {{{Zip}}}, and {{{Country}}}.
 
-function geocodeAddress(address, callback) {
-  const {jQuery} = this.__globalObject;
-  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
-  var params = {
+function geocodeAddress(location, callback) this.__globalObject.jQuery.ajax({
+  url: "http://local.yahooapis.com/MapsService/V1/geocode",
+  data: {
     appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--",
-    location: address
-  };
-
-  jQuery.get(url, params, function(doc){
-    var lats  = jQuery("Latitude", doc);
-    var longs = jQuery("Longitude", doc);
-
-    var addrs    = jQuery("Address", doc);
-    var citys    = jQuery("City", doc);
-    var states   = jQuery("State", doc);
-    var zips     = jQuery("Zip", doc);
-    var countrys = jQuery("Country", doc);
-
-    var points = [];
-    for(var i=0; i<=lats.length; i++) {
-      points.push({
-        lat: jQuery(lats[i]).text(),
-        "long": jQuery(longs[i]).text(),
-        address: jQuery(addrs[i]).text(),
-        city: jQuery(citys[i]).text(),
-        state: jQuery(states[i]).text(),
-        zips: jQuery(zips[i]).text(),
-        country: jQuery(countrys[i]).text()
-      });
-    }
-
-    callback(points);
-  }, "xml");
-}
+    location: location,
+  },
+  dataType: "xml",
+  success: function gA_success(xml) {
+    callback(Array.map(
+      xml.getElementsByTagName("Result"),
+      function gA_eachResult(result) {
+        var dict = {};
+        Array.forEach(
+          result.getElementsByTagName("*"),
+          function gA_eachItem(item) {
+            dict[item.nodeName.toLowerCase()] = item.textContent;
+          });
+        dict.lat  = dict.latitude;
+        dict.long = dict.longitude;
+        return dict;
+      }));
+  },
+});
 
 // === {{{ CmdUtils.injectCss(css) }}} ===
 //
