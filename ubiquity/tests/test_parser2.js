@@ -47,10 +47,11 @@ BetterFakeCommandSource.prototype = {
 
 var noun_arb_text = {
   label: "?",
-  noExternalCalls: true,
   rankLast: true,
-  suggest: function( text, html ) {
-    return [ CmdUtils.makeSugg(text, html) ];
+  noExternalCalls: true,
+  cacheTime: -1,
+  suggest: function nat_suggest(text, html, callback, selectionIndices) {
+    return [CmdUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
   }
 };
 
@@ -785,8 +786,8 @@ function testSortSpecificNounsBeforeArbTextParser2() {
 
   var testFunc = function(suggs) {
     self.assert(suggs.length == 4, "Should be four suggestions.");
-    self.assert(suggs[0]._verb._name == "wash", "First suggestion should be wash");
-    self.assert(suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+    self.assert(suggs[0]._verb.name == "wash", "First suggestion should be wash");
+    self.assert(suggs[1]._verb.name == "mumble", "Second suggestion should be mumble");
   }
   getCompletionsAsyncFromParser("", parser, beagleContext, self.makeCallback(testFunc));
 }
