@@ -46,7 +46,7 @@ function StylishFeedPlugin(feedManager, messageService, webJsm) {
   var self = this;
   
   this.type = "stylish-update-url";
-  //errorToLocalize
+  
   this.notify_message = "This page contains a Stylish userstyle " + 
                         "which Ubiquity can run. " +
                         "If you'd like to subscribe to it, please " +
@@ -60,7 +60,6 @@ function StylishFeedPlugin(feedManager, messageService, webJsm) {
                                    sourceUrl: commandsUrl,
                                    type: this.type,
                                    canAutoUpdate: true});
-    //errorToLocalize
     messageService.displayMessage("Succesfully subscribed to Userstyle!");
                                                             
   };

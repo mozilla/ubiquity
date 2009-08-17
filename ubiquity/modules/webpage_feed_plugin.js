@@ -97,7 +97,6 @@ function WebPageFeedPlugin(feedManager, messageService, webJsm) {
                                    sourceUrl: commandsUrl,
                                    type: this.type,
                                    canAutoUpdate: true});
-    //errorToLocalize
     messageService.displayMessage("Subscription successful!");
     targetDoc.location.reload();
   };

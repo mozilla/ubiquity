@@ -109,7 +109,6 @@ SkinSvc.openDatabase = function openDatabase(file) {
       connection.executeSimpleSQL(SQLITE_SCHEMA);
     }
   } catch(e) {
-    //errorToLocalize
     Components.utils.reportError("Ubiquity's SkinMemory database appears to " +
                                  "have been corrupted - resetting it.");
     if (file.exists()) {
@@ -275,7 +274,6 @@ SkinSvc.prototype = {
   changeSkin: function changeSkin(newSkinPath){
     try {
       this.loadSkin(newSkinPath);
-      //errorToLocalize
       this._msgService.displayMessage("Your Ubiquity skin has been changed!");
     } catch(e) {
       this.loadSkin(this.DEFAULT_SKIN);
@@ -316,7 +314,6 @@ SkinSvc.prototype = {
         dataType: "text",
         success: onSuccess});
     } catch(e) {
-	 	//errorToLocalize
       Components.utils.reportError("Error writing Ubiquity skin to file'" +
                                     localUri + "': " + e);
     }
@@ -337,7 +334,6 @@ SkinSvc.prototype = {
       //If there's any error loading the current skin,
       //load the default and tell the user about the failure
       this.loadSkin(this.DEFAULT_SKIN);
-      //errorToLocalize
       this._msgService.displayMessage("Loading your current skin failed." +
                                       " The default skin will be loaded.");
     }
@@ -370,7 +366,6 @@ SkinSvc.prototype = {
   saveAs: function saveAs(cssText, defaultName) {
     const {nsIFilePicker} = Ci;
     var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
-    //errorToLocalize
     fp.init(Utils.currentChromeWindow,
             "Save your skin",
             nsIFilePicker.modeSave);
@@ -415,13 +410,11 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
       var oldNotification = box.getNotificationWithValue(BOX_NAME);
       if (oldNotification)
         box.removeNotification(oldNotification);
-      //errorToLocalize
       var buttons = [{
         accessKey: "I",
         callback: onSubscribeClick,
         label: "Install...",
         popup: null}];
-      //errorToLocalize
       box.appendNotification(
         ("This page contains a Ubiquity skin.  " +
         "If you'd like to install the skin, please " +

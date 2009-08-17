@@ -56,7 +56,6 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
                        getService(Components.interfaces.nsIXULRuntime);
       if (xulRuntime.OS == "WINNT") {
         messageService.displayMessage(
-          //errorToLocalize
           ("Sorry, Python command feeds aren't yet supported on " +
            "Windows.")
         );
@@ -71,14 +70,12 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
                                        sourceUrl: commandsUrl,
                                        type: self.type,
                                        canAutoUpdate: true});
-        //errorToLocalize
         messageService.displayMessage("Subscription successful!");
       }
 
       if (!PyBootstrap.isJsbridgeStarted) {
         if (!PyBootstrap.startJsbridge(function log() {})) {
           messageService.displayMessage(
-            //errorToLocalize
             ("Before subscribing to the feed, we need to set up " +
              "a few things. You can continue to use your computer " +
              "normally; we'll get back to you when everything is " +
@@ -88,7 +85,6 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
             if (wasSuccessful) {
               subscribe();
             } else
-              //errorToLocalize
               messageService.displayMessage("Setup failed.");
           }
           PyBootstrap.install(function log() {}, onFinished);
@@ -99,7 +95,6 @@ function PythonFeedPlugin(feedManager, messageService, webJsm) {
       if (subscribeNow)
         subscribe();
     } else {
-      //errorToLocalize
       messageService.displayMessage("Subscription to " + scheme + " URLs " +
                                     "is not yet supported.");
     }

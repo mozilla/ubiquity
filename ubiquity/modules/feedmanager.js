@@ -49,10 +49,6 @@ const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/eventhub.js");
-Cu.import("resource://ubiquity/modules/localization_utils.js");
-
-var L = LocalizationUtils.propertySelector(
-  "chrome://ubiquity/locale/coreubiquity.properties");
 
 const FEED_SRC_ANNO = "ubiquity/source";
 const FEED_TYPE_ANNO = "ubiquity/type";
@@ -93,7 +89,6 @@ var FMgrProto = FeedManager.prototype = {};
 
 FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   if (plugin.type in this._plugins)
-    //errorToLocalize
     throw new Error("Feed plugin for type '" + plugin.type +
                     "' already registered.");
 
@@ -131,7 +126,6 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
       subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
     } catch (e) {
       Cu.reportError(
-        //errorToLocalize
         ("An error occurred when retrieving the feed for " +
          confirmedPages[i].spec + ": " + e)
       );
@@ -392,16 +386,17 @@ FMgrProto.showEnabledCommandNotification =
                             "extensions.ubiquity.noNotificationSites",
                                                    notTheseSites);
     }
-
-    var notify_message = (L("ubiquity.feedmanager.didyouknow"));
+    
+    var notify_message = ("Did you know that you have a Ubiquity" +
+                              " command for this website?");  
     var buttons = [
       {accessKey: "S",
        callback: onShowMeClick,
-       label: L("ubiquity.feedmanager.showme"),
+       label: "Show Me!",
        popup: null},
       {accessKey: "D",
        callback: onNoMoreClick,
-       label: L("ubiquity.feedmanager.dontremind"),
+       label: "Don't remind me again for this website",
        popup:null}
     ];
     box.appendNotification(
@@ -412,7 +407,6 @@ FMgrProto.showEnabledCommandNotification =
       buttons
     );
   } else {
-    //errorToLocalize
     Cu.reportError("Couldn't find tab for document");
   }
 };
@@ -452,10 +446,12 @@ FMgrProto.showNotification = function showNotification(plugin,
     function onSubscribeClick(notification, button) {
       plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
     }
-
+    
     if(!notify_message){
       if(!plugin.notify_message){
-        var notify_message = (L("ubiquity.feedmanager.newcommandfound"));
+        var notify_message = ("This page contains Ubiquity commands.  " +
+         "If you'd like to subscribe to them, please " +
+         "click the button to the right.");
       }else{
         var notify_message = plugin.notify_message;
       }
@@ -464,7 +460,7 @@ FMgrProto.showNotification = function showNotification(plugin,
     var buttons = [
       {accessKey: "S",
        callback: onSubscribeClick,
-       label: L("ubiquity.feedmanager.subscribe"),
+       label: "Subscribe...",
        popup: null}
     ];
     box.appendNotification(
@@ -475,7 +471,6 @@ FMgrProto.showNotification = function showNotification(plugin,
       buttons
     );
   } else {
-    //errorToLocalize
     Cu.reportError("Couldn't find tab for document");
   }
 };
@@ -737,7 +732,6 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   let plugin = this._plugins[feedInfo.type];
   if (!plugin)
-    //errorToLocalize
     throw new Error("No feed plugin registered for type '" +
                     feedInfo.type + "'.");
 
