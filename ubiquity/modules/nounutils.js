@@ -109,6 +109,7 @@ NounType.default = function default() this._defaults;
 NounType._fromArray = function NT_Array(words)({
   id: "#na_",
   name: words.slice(0, 2) + (words.length > 2 ? ",..." : ""),
+  cacheTime: -1,
   _list: [makeSugg(w) for each (w in words)],
 });
 
@@ -124,6 +125,7 @@ NounType._fromObject = function NT_Object(dict) {
   return {
     name: ([s.text for each (s in list.slice(0, 2))] +
            (list.length > 2 ? ",..." : "")),
+    cacheTime: -1,
     _list: list,
   };
 };
@@ -143,6 +145,7 @@ NounType._fromArray.suggest = NounType._fromObject.suggest = (
 NounType._fromRegExp = function NT_RegExp(regexp) ({
   id: "#nr_",
   name: regexp + "",
+  cacheTime: -1,
   rankLast: regexp.test(""),
   _regexp: regexp,
 });
