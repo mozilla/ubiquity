@@ -283,6 +283,7 @@ var noun_type_awesomebar = {
   label: "query",
   rankLast: true,
   noExternalCalls: true,
+  cacheTime: 0,
   suggest: function nt_awesome_suggest(text, html, callback) {
     if (!text) return [];
 
@@ -335,6 +336,7 @@ var noun_type_url = {
   label: "url",
   rankLast: true,
   noExternalCalls: true,
+  cacheTime: 0,
   default: function nt_url_default() (
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
                       null, null, 0.5)),
@@ -457,6 +459,7 @@ else {
 
 var noun_type_livemark = {
   label: "title",
+  cacheTime: 0,
   suggest: function nt_livemark_suggest(text, html, cb, selected) {
     if (!text) return [];
 
@@ -496,6 +499,7 @@ var noun_type_livemark = {
 var noun_type_command = {
   label: "name",
   noExternalCalls: true,
+  cacheTime: 0,
   suggest: function nt_command_suggest(text, html, cb, selected) {
     if (!text) return [];
     var grepee = this._get();
@@ -548,6 +552,7 @@ var noun_type_twitter_user = {
   label: "user",
   rankLast: true,
   noExternalCalls: true,
+  cacheTime: 0,
   suggest: function nt_twuser_suggest(text, html, cb, selected) {
     // reject text from selection.
     if (!text || selected)
@@ -609,6 +614,7 @@ var noun_type_twitter_user = {
 var noun_type_number = {
   label: "number",
   noExternalCalls: true,
+  cacheTime: -1,
   suggest: function nt_number_suggest(text) {
     var num = +text;
     return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
@@ -630,6 +636,7 @@ var noun_type_number = {
 var noun_type_bookmarklet = {
   label: "title",
   noExternalCalls: true,
+  cacheTime: 0,
   suggest: function nt_bookmarklet_suggest(text, html, cb, selected) {
     if (!text) return [];
     return CmdUtils.grepSuggs(text, this.list);
@@ -680,6 +687,7 @@ parseAndScoreDateTime = function(text, outputLength) {
 var noun_type_date = {
   label: "date",
   noExternalCalls: true,
+  cacheTime: 0,
   "default": function nt_date_default() this._sugg(Date.parse("today"), 1),
   suggest: function nt_date_suggest(text) {
     if (text == 'today')
@@ -702,6 +710,7 @@ var noun_type_date = {
 var noun_type_time = {
   label: "time",
   noExternalCalls: true,
+  cacheTime: 0,
   "default": function nt_time_default() this._sugg(Date.parse("now"), 1),
   suggest: function nt_time_suggest(text, html) {
     if (text == 'now')
@@ -721,6 +730,7 @@ var noun_type_time = {
 var noun_type_date_time = {
   label: "date and time",
   noExternalCalls: true,
+  cacheTime: 0,
   "default": function nt_date_time_default() this._sugg(Date.parse("now"), 1),
   suggest: function nt_time_suggest(text, html) {
     if (text == 'now')
