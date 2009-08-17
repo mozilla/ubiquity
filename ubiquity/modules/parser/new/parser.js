@@ -1441,13 +1441,13 @@ Parser.prototype = {
     
     for (let nounTypeId in nounTypeIds) {
       var time = this._nounCache.getTime(x,nounTypeId);
-//      Utils.log(nounTypeId,x,time,Date.now(),cacheTime,(cacheTime !== 0),(cacheTime === -1),(Date.now() < time + (cacheTime || DEFAULT_CACHE_TIME) * 60));
       var cacheTime = this._nounTypes[nounTypeId].cacheTime;
-      if (time && cacheTime !== 0 && (cacheTime === -1 || Date.now() < time + (cacheTime || DEFAULT_CACHE_TIME) * 60))
+      if (time && cacheTime !== 0 && (cacheTime === -1 || Date.now() < time + (cacheTime || DEFAULT_CACHE_TIME) * 60)) {
+        currentQuery.dump('detectDecision('+x+','+nounTypeId+'): using CACHED value from '+(Date.now() - time)+'ms ago');
         cachedNounTypeIds.push(nounTypeId);
-      else {
+      } else {
+        currentQuery.dump('detectDecision('+x+','+nounTypeId+'): will compute now...');
         uncachedNounTypeIds.push(nounTypeId);
-//        Utils.log('computing now...');
       }
     }
     
@@ -1487,19 +1487,10 @@ Parser.prototype = {
 
 //      currentQuery.dump("finished detecting " + x + " for " + ids );
 
-      if (suggestions.length) {
-        for each (let newSugg in suggestions) {
-          let {nountypeId} = newSugg;
-          thisParser._nounCache.addSugg(x,nountypeId,newSugg);
-          thisParser._nounCache.setTime(x,nountypeId);
-        }
-      } else {
-        // TODO: maybe we only want to do this for when the callback is
-        // individual? 
-        for each (let id in ids) {
-//          Utils.log('setting blank suggs for '+id);
-          thisParser._nounCache.setSuggs(x,id,[]);
-        }
+      for each (let newSugg in suggestions) {
+        let {nountypeId} = newSugg;
+        thisParser._nounCache.addSugg(x,nountypeId,newSugg);
+        thisParser._nounCache.setTime(x,nountypeId);
       }
 
       if (currentQuery.finished) {
@@ -1523,6 +1514,7 @@ Parser.prototype = {
         currentQuery.dump("detecting: " + x + " for " + ids);
   
         var dT = currentQuery._detectionTracker;
+        var nC = thisParser._nounCache;
         for each (let id in uncachedNounTypeIds) {
   
           if (dT.getStarted(x,id)) {
@@ -1562,6 +1554,7 @@ Parser.prototype = {
           // (b) there were no immediate results.
           // In this case, try to complete the parse now.
           if (!dT.getRequestCount(x,id)) {
+            nC.setTime(x,id); // set as completed now, even if nothing was added
             dT.setComplete(x,id,true);
             if (!hadImmediateResults) {
               for each (let parseId in dT.getParseIdsToCompleteForIds(x,[id])) {
