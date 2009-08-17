@@ -284,7 +284,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
       cb(false);
     else {
       function onSuccess(data) {
-        if (data != self.getCode()) {
+        if (data !== self.getCode()) {
           var confirmUrl = (CONFIRM_URL +
                             "?url=" +
                             encodeURIComponent(self.uri.spec) +
@@ -293,14 +293,16 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                             "&updateCode=" +
                             encodeURIComponent(data));
           cb(true, confirmUrl);
-        } else
+        }
+        else
           cb(false);
       };
-      // TODO: We should call the callback w/ a false value or some kind
-      // of error value if the Ajax request fails.
-      jQuery.ajax({url: this.srcUri.spec,
-                   dataType: "text",
-                   success: onSuccess});
+      jQuery.ajax({
+        url: this.srcUri.spec,
+        dataType: "text",
+        success: onSuccess,
+        error: function onError() { cb(false) },
+      });
     }
   };
 

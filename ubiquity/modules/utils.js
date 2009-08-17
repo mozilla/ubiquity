@@ -296,7 +296,7 @@ function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
   Utils.__timerData.timers[timerID] = timer;
 
   timer.initWithCallback(
-    new Utils.__TimerCallback(
+    new __TimerCallback(
       callback,
       arguments.length > 2 ? Array.slice(arguments, 2) : []),
     delay,
@@ -321,12 +321,11 @@ function clearTimeout(timerID) {
 
 // Support infrastructure for the timeout-related functions.
 
-Utils.__TimerCallback = function __TimerCallback(callback, args) {
+function __TimerCallback(callback, args) {
   this._callback = callback;
   this._args = args;
-};
-
-Utils.__TimerCallback.prototype = {
+}
+__TimerCallback.prototype = {
   notify: function notify(timer) {
     var {timers} = Utils.__timerData;
     for (let timerID in timers)
