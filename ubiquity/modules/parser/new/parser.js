@@ -1437,11 +1437,18 @@ Parser.prototype = {
     //
     // FLUSH OLD HERE?
     
+    var DEFAULT_CACHE_TIME = 60*60*24; // seconds = 1 day
+    
     for (let nounTypeId in nounTypeIds) {
-      if (this._nounCache.getTime(x,nounTypeId))
+      var time = this._nounCache.getTime(x,nounTypeId);
+//      Utils.log(nounTypeId,x,time,Date.now(),cacheTime,(cacheTime !== 0),(cacheTime === -1),(Date.now() < time + (cacheTime || DEFAULT_CACHE_TIME) * 60));
+      var cacheTime = this._nounTypes[nounTypeId].cacheTime;
+      if (time && cacheTime !== 0 && (cacheTime === -1 || Date.now() < time + (cacheTime || DEFAULT_CACHE_TIME) * 60))
         cachedNounTypeIds.push(nounTypeId);
-      else
+      else {
         uncachedNounTypeIds.push(nounTypeId);
+//        Utils.log('computing now...');
+      }
     }
     
     Utils.setTimeout(function detectNounType_cachedCallback() {
@@ -1479,10 +1486,6 @@ Parser.prototype = {
                ];
 
 //      currentQuery.dump("finished detecting " + x + " for " + ids );
-      if (currentQuery.finished) {
-        currentQuery.dump("this query is already finished... so don't suggest this noun!");
-        return;
-      }
 
       if (suggestions.length) {
         for each (let newSugg in suggestions) {
@@ -1493,8 +1496,15 @@ Parser.prototype = {
       } else {
         // TODO: maybe we only want to do this for when the callback is
         // individual? 
-        for each (let id in ids)
+        for each (let id in ids) {
+//          Utils.log('setting blank suggs for '+id);
           thisParser._nounCache.setSuggs(x,id,[]);
+        }
+      }
+
+      if (currentQuery.finished) {
+        currentQuery.dump("this query is already finished... so don't suggest this noun!");
+        return;
       }
 
       if (typeof callback == 'function') {
@@ -2271,8 +2281,6 @@ var NounCache = function(parser) {
 NounCache.prototype = {
   cacheSpace: {},
   _ensureNode: function NC__ensureNode(arg,id) {
-    if (id === true)
-      Utils.log(this._ensureNode.caller,this._ensureNode.caller.caller);
     if (!(arg in this.cacheSpace))
       this.cacheSpace[arg] = {};
     if (!(id in this.cacheSpace[arg]))
@@ -2283,9 +2291,9 @@ NounCache.prototype = {
     this._ensureNode(arg,id);
     return this.cacheSpace[arg][id].setTime;
   },
-  setTime: function NC_getTime(arg,id) {
+  setTime: function NC_getTime(arg,id,time) {
     this._ensureNode(arg,id);
-    this.cacheSpace[arg][id].setTime = Date.now();
+    this.cacheSpace[arg][id].setTime = (time || Date.now());
   },
   getSuggs: function NC_getSuggs(arg,id) {
     this._ensureNode(arg,id);
