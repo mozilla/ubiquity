@@ -62,6 +62,7 @@ var tunerInterface = {
     if (!input)
       return;
 
+    this.parser.flushNounCache();
     var fakeQuery = this.fakeQuery;
     (function(){
       Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
