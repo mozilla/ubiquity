@@ -76,6 +76,7 @@ PyBootstrap.startJsbridge = function startJsbridge(log) {
   var server = jsm.server.server;
   for (var i = 0; i < 10; i++) {
     if (server.port != server.serv.port) {
+      //errorToLocalize
       var msg = "listening on port " + server.port + " failed, trying next.";
       log(msg);
       Utils.reportWarning(msg);
