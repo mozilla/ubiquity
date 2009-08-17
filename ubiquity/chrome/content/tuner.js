@@ -83,10 +83,10 @@ var tunerInterface = {
       if (fakeQuery._detectionTracker.getRequestCount())
         return;
         
-      for (let id in tunerInterface.parser._nounCache[x]) {
-        let suggs = tunerInterface.parser._nounCache[x][id];
+      for (let id in tunerInterface.parser._nounCache.cacheSpace[x]) {
+        let suggs = tunerInterface.parser._nounCache.getSuggs(x,id);
         
-        if (!suggs.length)
+        if (!suggs || !suggs.length)
           continue;
         
         let sugg = suggs.pop();
