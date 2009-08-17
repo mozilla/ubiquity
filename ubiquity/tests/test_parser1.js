@@ -61,7 +61,7 @@ function makeSearchCommand(name) {
 }
 
 
-// Parser tests:
+// Actual test cases begin here:
 
 
 function testParseDirectOnly() {

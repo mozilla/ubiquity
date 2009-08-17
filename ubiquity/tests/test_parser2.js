@@ -664,7 +664,7 @@ function testVerbMatcher() {
 
 // TODO: Failing, but I think it's failing for the same reason as
 // testNounsWithDefaults is failing.  Disabled because Plugin
-// feature has been bumped to ubiquity 0.5.1.
+// feature has been bumped to ubiquity 0.5.5.
 function DONOTtestPluginRegistry() {
   var twitterGotShared = null;
   var diggGotShared = null;
@@ -765,6 +765,30 @@ function testNounsWithDefaults() {
   getCompletionsAsync( "drive", [cmdDrive], null,
                        this.makeCallback(testFunc));
 
+}
+
+function testSortSpecificNounsBeforeArbTextParser2() {
+  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                            "beagle", "bulldog", "husky"]);
+  var self = this;
+  var fakeSource = new BetterFakeCommandSource({
+    mumble: {names: ["mumble"],
+          arguments: [{role:"object", nountype: noun_arb_text, label: "stuff"}],
+          execute: function(){}},
+    wash: {names: ["wash"],
+          arguments: [{role: "object", nountype: dog, label: "dog"}],
+          execute: function(){}}
+    });
+
+  var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
+  var beagleContext = {textSelection:"beagle", htmlSelection:"beagle"};
+
+  var testFunc = function(suggs) {
+    self.assert(suggs.length == 4, "Should be four suggestions.");
+    self.assert(suggs[0]._verb._name == "wash", "First suggestion should be wash");
+    self.assert(suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+  }
+  getCompletionsAsyncFromParser("", parser, beagleContext, self.makeCallback(testFunc));
 }
 
 function testNounsWithMultipleDefaults() {
