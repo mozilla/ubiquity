@@ -60,6 +60,7 @@ var Desktop = {
   },
   unregisterGlobalHotkey: function unregisterGlobalHotkey() {
     if (!gCurrentHotkey)
+      //errorToLocalize
       throw new Error("No hotkey registered.");
     gUdi.unregisterGlobalHotkey();
     gCurrentHotkey = null;

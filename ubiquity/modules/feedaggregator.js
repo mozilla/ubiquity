@@ -83,6 +83,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
           pageLoadFunc(document);
         } catch (e) {
           messageService.displayMessage({
+            //errorToLocalize
             text: ("An exception occurred while running " +
                    pageLoadFunc.name + "()"),
             exception: e});
@@ -99,6 +100,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
           ubiquityLoadFunc(window.gUbiquity, window);
         } catch (e) {
           messageService.displayMessage({
+            //errorToLocalize
             text: ("An exception occurred while running " +
                    ubiquityLoadFunc.name + "()"),
             exception: e});

@@ -209,9 +209,11 @@ LocalUriCodeSource.prototype = {
         this._cached = req.responseText;
         return this._cached;
       } else
+        //errorToLocalize
         throw new Error("XHR returned status " + req.status);
     } catch (e) {
       if (!dontReturnError) {
+        //errorToLocalize
         Components.utils.reportError("Retrieving " + this.uri +
                                      " raised exception " + e);
       }
