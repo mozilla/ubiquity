@@ -216,6 +216,7 @@ function makeCodeSource(feedInfo, headerSources, footerSources,
     codeSource = new LocalUriCodeSource(feedInfo.srcUri.spec);
   }
   else {
+    //errorToLocalize
     throw new Error("Don't know how to make code source for " +
                     feedInfo.srcUri.spec);
   }
@@ -261,6 +262,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                                      sandbox,
                                      codeSource.codeSections);
       } catch (e) {
+        //errorToLocalize
         messageService.displayMessage(
           {text:  "An exception occurred while loading code.",
            exception: e}
