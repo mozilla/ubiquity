@@ -29,10 +29,7 @@
                width="490" height="500" disablesecurity="true"/>
             </div>
           </div>
-          <div id="ubiquity-help">
-            Type the name of a command and press enter to 
-            execute it, or <b>help</b> for assistance.
-          </div>
+          <div id="ubiquity-help"></div>
         </div>
       </div>
     </panel>

@@ -40,9 +40,7 @@
 
 var EXPORTED_SYMBOLS = ["CommandManager"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/preview_browser.js");
@@ -52,19 +50,29 @@ const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
 const MIN_MAX_SUGGS = 1;
 const MAX_MAX_SUGGS = 42;
 
+const DEFAULT_HELP = "" + (
+  <div class="default" xmlns="http://www.w3.org/1999/xhtml">
+  Type the name of a command and press enter to execute it,
+  or <b>help</b> for assistance.
+  </div>);
+
+var gDomNodes = {};
+
 CommandManager.DEFAULT_MAX_SUGGESTIONS = 5;
 CommandManager.MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
-CommandManager.__defineGetter__("maxSuggestions", function () {
-  return prefs.getValue(this.MAX_SUGGESTIONS_PREF,
-                        this.DEFAULT_MAX_SUGGESTIONS);
-});
-CommandManager.__defineSetter__("maxSuggestions", function (value) {
-  var num = Math.max(MIN_MAX_SUGGS, Math.min(value | 0, MAX_MAX_SUGGS));
-  prefs.setValue(this.MAX_SUGGESTIONS_PREF, num);
-});
+CommandManager.__defineGetter__(
+  "maxSuggestions", function CM_getMaxSuggestions() {
+    return prefs.getValue(this.MAX_SUGGESTIONS_PREF,
+                          this.DEFAULT_MAX_SUGGESTIONS);
+  });
+CommandManager.__defineSetter__(
+  "maxSuggestions", function CM_setMaxSuggestions(value) {
+    var num = Math.max(MIN_MAX_SUGGS, Math.min(value | 0, MAX_MAX_SUGGS));
+    prefs.setValue(this.MAX_SUGGESTIONS_PREF, num);
+  });
 
-function CommandManager(cmdSource, msgService, parser, suggsNode,
-                        previewPaneNode, helpNode) {
+function CommandManager(cmdSource, msgService, parser,
+                        suggsNode, previewPaneNode, helpNode) {
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedIndex = 0;
@@ -85,8 +93,6 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
     DEFAULT_PREVIEW_URL);
   this.__commandsByServiceDomain = null;
 
-  var self = this;
-
   function onCommandsReloaded() {
     parser.setCommandList(cmdSource.getAllCommands());
   }
@@ -101,44 +107,51 @@ function CommandManager(cmdSource, msgService, parser, suggsNode,
     for (let key in this) delete this[key];
   };
 
-  this.__domNodes.suggsIframe.contentDocument.addEventListener(
-    "click",
-    function onSuggClick(ev) {
-      var {target} = ev;
-      if (target === this) return;
-      while (!target.hasAttribute("index"))
-        if (!(target = target.parentNode)) return;
-      self.__hilitedIndex = +target.getAttribute("index");
-      self.__lastAsyncSuggestionCb();
-      ev.preventDefault();
-      ev.stopPropagation();
-    },
-    true);
+  this.__domNodes.suggsIframe.contentDocument
+    .addEventListener("click", this, true);
 }
 
 CommandManager.prototype = {
+  handleEvent: function CM_handleEvent(event) {
+    switch (event.type) {
+      case "click": {
+        let {target} = event;
+        do {
+          if (!("hasAttribute" in target)) return;
+          if (target.hasAttribute("index")) break;
+        } while ((target = target.parentNode));
+        this.__hilitedIndex = +target.getAttribute("index");
+        this.__lastAsyncSuggestionCb();
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+      }
+    }
+  },
+
   setPreviewState: function CM_setPreviewState(state) {
-    var nodes = this.__domNodes;
+    var {suggs, preview, help} = this.__domNodes;
     switch (state) {
-    case "computing-suggestions":
-    case "with-suggestions":
-      nodes.suggs.style.display = "block";
-      nodes.preview.style.display = "block";
-      nodes.help.style.display = "none";
-      break;
-    case "no-suggestions":
-      nodes.suggs.style.display = "none";
-      nodes.preview.style.display = "none";
-      nodes.help.style.display = "block";
-      if (this.__previewer.isActive)
-        this.__previewer.queuePreview(
-          null,
-          0,
-          function(pblock) { pblock.innerHTML = ""; }
-        );
-      break;
-    default:
-      throw new Error("Unknown state: " + state);
+      case "computing-suggestions":
+      case "with-suggestions": {
+        suggs.style.display = "block";
+        preview.style.display = "block";
+        help.style.display = "none";
+        break;
+      }
+      case "no-suggestions": {
+        suggs.style.display = "none";
+        preview.style.display = "none";
+        this._setHelp();
+        help.style.display = "block";
+        if (this.__previewer.isActive)
+          this.__previewer.queuePreview(
+            null,
+            0,
+            function clearPreview(pblock) { pblock.innerHTML = ""; });
+        break;
+      }
+      default: throw new Error("Unknown state: " + state);
     }
   },
 
@@ -157,6 +170,47 @@ CommandManager.prototype = {
     if (++this.__hilitedIndex >= this.__activeQuery.suggestionList.length)
       this.__hilitedIndex = 0;
     this._renderAll(context);
+  },
+
+  _setHelp: function CM__setHelp() {
+    var {help} = this.__domNodes;
+    var doc = help.ownerDocument;
+    function createFragment(html) {
+      var range = doc.createRange();
+      var fragment = range.createContextualFragment(html);
+      range.detach();
+      return fragment;
+    }
+    if (!("defaultHelp" in gDomNodes))
+      gDomNodes.defaultHelp = createFragment(DEFAULT_HELP).firstChild;
+    if (!("feedUpdates" in gDomNodes)) {
+      gDomNodes.feedUpdates = doc.createElement("box");
+      let {feedManager} = (
+        Cu.import("resource://ubiquity/modules/setup.js", null)
+        .UbiquitySetup.createServices());
+      let count = 0;
+      feedManager.getSubscribedFeeds().forEach(
+        function eachFeed(feed, i, feeds) {
+          feed.checkForManualUpdate(function check(updated, confirmUrl) {
+            feeds[i] = updated && {title: feed.title, url: confirmUrl};
+            if (++count === feeds.length &&
+                (feeds = feeds.filter(Boolean)).length)
+              gDomNodes.feedUpdates.appendChild(createFragment(
+                <div class="feed-updates" xmlns="http://www.w3.org/1999/xhtml">
+                <h3>The following feeds have updates:</h3>
+                </div>.appendChild(
+                  feeds.reduce(
+                    function accList(list, feed, i) (
+                      list.appendChild(
+                        <li><a href={feed.url} accesskey={(i + 1).toString(36)}
+                        >{feed.title}</a></li>)),
+                    <ol/>))));
+          });
+        });
+    }
+    for (let c; c = help.lastChild;) help.removeChild(c);
+    help.appendChild(gDomNodes.defaultHelp);
+    help.appendChild(gDomNodes.feedUpdates);
   },
 
   _renderSuggestions: function CM__renderSuggestions() {
