@@ -784,12 +784,54 @@ function testSortSpecificNounsBeforeArbTextParser2() {
   var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
   var beagleContext = {textSelection:"beagle", htmlSelection:"beagle"};
 
-  var testFunc = function(suggs) {
+  function testFunc(suggs) {
     self.assert(suggs.length == 4, "Should be four suggestions.");
     self.assert(suggs[0]._verb.name == "wash", "First suggestion should be wash");
     self.assert(suggs[1]._verb.name == "mumble", "Second suggestion should be mumble");
   }
   getCompletionsAsyncFromParser("", parser, beagleContext, self.makeCallback(testFunc));
+}
+
+function testVerbUsesDefaultIfNoArgProvidedParser2() {
+  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                           "beagle", "bulldog", "husky"]);
+  dog.default = function() {return NounUtils.makeSugg("husky");};
+  var self = this;
+  var fakeSource = new BetterFakeCommandSource({
+    wash: {names: ["wash"],
+          arguments: [{role:"object", nountype: dog, label: "dog"}],
+          execute: function(){}},
+    playFetch: {names: ["play fetch"],
+          arguments: [{role: "object", nountype: dog, label: "dog",
+	               default: {text: "basenji"}}],
+          execute: function(){}}
+    });
+  var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
+  getCompletionsAsyncFromParser("wash", parser, null, self.makeCallback(testFunc1));
+
+  function testFunc1(suggs) {
+    self.assert(suggs.length == 1, "Should be 1 suggestion (A).");
+    self.assert(suggs[0]._verb.name == "wash", "Suggestion should be wash\n");
+    self.assert(suggs[0].args.object[0].text == "husky", "Argument should be husky.\n");
+    getCompletionsAsyncFromParser("play", parser, null, self.makeCallback(testFunc2));
+  }
+
+  function testFunc2(suggs) {
+    self.assert(suggs.length == 1, "Should be 1 suggestion (B).");
+    self.assert(suggs[0]._verb.name == "play fetch",
+                  "Suggestion should be play fetch\n");
+    self.assert(suggs[0].args.object[0].text == "basenji",
+                  "Argument should be basenji.\n");
+    getCompletionsAsyncFromParser("play retr", parser, null, self.makeCallback(testFunc3));
+  }
+
+  function testFunc3(suggs) {
+    self.assert(suggs.length == 1, "Should be 1 suggestion (C).");
+    self.assert(suggs[0]._verb.name == "play fetch",
+                  "Suggestion should be play fetch\n");
+    self.assert(suggs[0].args.object[0].text == "golden retreiver",
+                  "Argument should be golden retreiver\n");
+  }
 }
 
 function testNounsWithMultipleDefaults() {

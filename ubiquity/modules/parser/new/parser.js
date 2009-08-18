@@ -1361,7 +1361,6 @@ Parser.prototype = {
           break;
         }
       }
-        
       if (missingArg.default) {
         defaultValues = Utils.isArray(missingArg.default) ?
                           missingArg.default : [missingArg.default];
