@@ -44,6 +44,10 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/preview_browser.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/coreubiquity.properties");
 
 const {prefs} = Utils.Application;
 const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
@@ -51,10 +55,8 @@ const MIN_MAX_SUGGS = 1;
 const MAX_MAX_SUGGS = 42;
 
 const DEFAULT_HELP = "" + (
-  <div class="default" xmlns="http://www.w3.org/1999/xhtml">
-  Type the name of a command and press enter to execute it,
-  or <b>help</b> for assistance.
-  </div>);
+  '<div class="default" xmlns="http://www.w3.org/1999/xhtml">' 
+  + L("ubiquity.cmdmanager.defaulthelp") + '</div>');
 
 var gDomNodes = {};
 
@@ -291,6 +293,7 @@ CommandManager.prototype = {
     if (input !== this.__lastInput) return;
 
     var {suggestionList} = this.__activeQuery;
+    //errorToLocalize
     Utils.dump("rendering", suggestionList.length, "suggestions");
 
     this.setPreviewState(this.__activeQuery.finished
