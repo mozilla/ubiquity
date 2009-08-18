@@ -189,10 +189,10 @@ function reportWarning(aMessage, stackFrameNumber) {
   for (var i = 0; i < stackFrameNumber; i++)
     stackFrame = stackFrame.caller;
 
-  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-                       .getService(Components.interfaces.nsIConsoleService);
-  var scriptError = Components.classes["@mozilla.org/scripterror;1"]
-                    .createInstance(Components.interfaces.nsIScriptError);
+  var consoleService = (Cc["@mozilla.org/consoleservice;1"]
+                        .getService(Ci.nsIConsoleService));
+  var scriptError = (Cc["@mozilla.org/scripterror;1"]
+                     .createInstance(Ci.nsIScriptError));
   var aSourceName = stackFrame.filename;
   var aSourceLine = stackFrame.sourceLine;
   var aLineNumber = stackFrame.lineNumber;
@@ -211,11 +211,10 @@ function reportWarning(aMessage, stackFrameNumber) {
 // unlike {{{Utils.reportWarning()}}}, a stack frame can't be passed
 // in to this function.
 
-function reportInfo(aMessage) {
-  var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
-                       .getService(Components.interfaces.nsIConsoleService);
-  var aCategory = "ubiquity javascript: ";
-  consoleService.logStringMessage(aCategory + aMessage);
+function reportInfo(message) {
+  (Cc["@mozilla.org/consoleservice;1"]
+   .getService(Ci.nsIConsoleService)
+   .logStringMessage("Ubiquity: " + message));
 }
 
 // === {{{ Utils.encodeJson(object) }}} ===
@@ -465,15 +464,15 @@ function focusUrlInBrowser(urlString) {
 // given {{{name}}}.  If no matching cookie exists, {{{null}}} is returned.
 
 function getCookie(domain, name) {
-  var cookieManager = Cc["@mozilla.org/cookiemanager;1"].
-                      getService(Ci.nsICookieManager);
+  var cookieManager = (Cc["@mozilla.org/cookiemanager;1"]
+                       .getService(Ci.nsICookieManager));
   var iter = cookieManager.enumerator, {nsICookie} = Ci;
   while (iter.hasMoreElements()) {
     var cookie = iter.getNext();
     if (cookie instanceof nsICookie &&
         cookie.host == domain &&
         cookie.name == name)
-        return cookie.value;
+      return cookie.value;
   }
   // if no matching cookie:
   return null;
@@ -644,13 +643,13 @@ function powerSet(array) (
 // {{{str}}} is the string to be hashed.
 
 function computeCryptoHash(algo, str) {
-  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                  .createInstance(Ci.nsIScriptableUnicodeConverter);
+  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                   .createInstance(Ci.nsIScriptableUnicodeConverter));
   converter.charset = "UTF-8";
   var result = {};
   var data = converter.convertToByteArray(str, result);
-  var crypto = Cc["@mozilla.org/security/hash;1"]
-               .createInstance(Ci.nsICryptoHash);
+  var crypto = (Cc["@mozilla.org/security/hash;1"]
+                .createInstance(Ci.nsICryptoHash));
   crypto.initWithString(algo);
   crypto.update(data, data.length);
   var hash = crypto.finish(false);
@@ -677,30 +676,30 @@ function computeCryptoHash(algo, str) {
 // {{{str}}} is the string to be hashed.
 
 function signHMAC(algo, key, str) {
-  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                    .createInstance(Ci.nsIScriptableUnicodeConverter);
+  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                   .createInstance(Ci.nsIScriptableUnicodeConverter));
   converter.charset = "UTF-8";
   var data = converter.convertToByteArray(str, {});
-  var crypto = Cc["@mozilla.org/security/hmac;1"]
-                 .createInstance(Ci.nsICryptoHMAC);
-  var keyObject = Cc["@mozilla.org/security/keyobjectfactory;1"]
-                    .getService(Ci.nsIKeyObjectFactory)
-                    .keyFromString(Ci.nsIKeyObject.HMAC, key);
+  var crypto = (Cc["@mozilla.org/security/hmac;1"]
+                .createInstance(Ci.nsICryptoHMAC));
+  var keyObject = (Cc["@mozilla.org/security/keyobjectfactory;1"]
+                   .getService(Ci.nsIKeyObjectFactory)
+                   .keyFromString(Ci.nsIKeyObject.HMAC, key));
   crypto.init(Ci.nsICryptoHMAC[algo], keyObject);
   crypto.update(data, data.length);
   var hash = crypto.finish(true);
   return hash;
 }
 
-// === {{{ Utils.escapeHtml(str) }}} ===
+// === {{{ Utils.escapeHtml(string) }}} ===
 //
-// This function returns a version of the string safe for
+// This function returns a version of the {{{string}}} safe for
 // insertion into HTML. Useful when you just want to
 // concatenate a bunch of strings into an HTML fragment
 // and ensure that everything's escaped properly.
 
-function escapeHtml(str) (
-  String(str)
+function escapeHtml(string) (
+  String(string)
   .replace(/&/g, "&amp;")
   .replace(/</g, "&lt;")
   .replace(/>/g, "&gt;")
@@ -718,8 +717,8 @@ function escapeHtml(str) (
 // {{{text}}} is a unicode string.
 
 function convertFromUnicode(toCharset, text) {
-  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                  .getService(Ci.nsIScriptableUnicodeConverter);
+  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                   .getService(Ci.nsIScriptableUnicodeConverter));
   converter.charset = toCharset;
   return converter.ConvertFromUnicode(text);
 }
@@ -736,8 +735,8 @@ function convertFromUnicode(toCharset, text) {
 // {{{fromCharset}}}.
 
 function convertToUnicode(fromCharset, text) {
-  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                  .getService(Ci.nsIScriptableUnicodeConverter);
+  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                   .getService(Ci.nsIScriptableUnicodeConverter));
   converter.charset = fromCharset;
   return converter.ConvertToUnicode(text);
 }
@@ -911,5 +910,90 @@ Utils.history = {
         }
       }
     });
+  },
+};
+
+// == {{{ Utils.regexp }}} ==
+//
+// Contains {{{RegExp}}} related functions.
+
+Utils.regexp = {
+  // === {{{ Utils.regexp.quote(string) }}} ===
+  //
+  // Returns the {{{string}}} with all {{{RegExp}}} meta characters in it
+  // backslashed.
+
+  quote: function re_quote(string)
+    String(string).replace(/[.?*+^$|()\{\[\]\\]/g, "\\$&"),
+
+  // === {{{ Utils.regexp.Trie(strings, asPrefixes) }}} ===
+  //
+  // Creates a {{{RegexpTrie}}} object that builds an efficient regexp
+  // matching a specific set of {{{strings}}}.
+  // This is a JS port of
+  // [[http://search.cpan.org/~dankogai/Regexp-Trie-0.02/lib/Regexp/Trie.pm]]
+  // with a few additions.
+  //
+  // {{{strings}}} is a optional array of strings to {{{add()}}}
+  // on initialization.
+  // If {{{asPrefixes}}} evaluates to {{{true}}}, {{{addPrefixes()}}}
+  // is used instead.
+
+  Trie: function RegexpTrie(strings, asPrefixes) {
+    var me = {$: {}, __proto__: arguments.callee.fn};
+    if (strings) {
+      let add = asPrefixes ? "addPrefixes" : "add";
+      for each (let str in strings) me[add](str);
+    }
+    return me;
+  },
+};
+Utils.regexp.Trie.fn = {
+  // ** {{{ RegexpTrie#add(string) }}} **
+  //
+  // Adds {{{string}}} to the Trie and returns self.
+  add: function RegexpTrie_add(string) {
+    var ref = this.$;
+    for each (let char in string) ref = ref[char] || (ref[char] = {});
+    ref[""] = 1; // {"": 1} as terminator
+    return this;
+  },
+  // ** {{{ RegexpTrie#addPrefixes(string) }}} **
+  //
+  // Adds every prefix of {{{string}}} to the Trie and returns self. i.e.:
+  // {{{
+  // rt.addPrefixes("str") == rt.add("s").add("st").add("str")
+  // }}}
+  addPrefixes: function RegexpTrie_addPrefixes(string) {
+    var ref = this.$;
+    for each (let char in string) ref = ref[char] || (ref[char] = {"": 1});
+    return this;
+  },
+  // ** {{{ RegexpTrie#toString() }}} **
+  //
+  // ** {{{ RegexpTrie#regexp }}} **
+  //
+  // Returns a string/regexp representation of the Trie.
+  toString: function RegexpTrie_toString() this._regexp(this.$),
+  get regexp RegexpTrie_regexp() RegExp(this),
+  _regexp: function RegexpTrie__regexp($) {
+    I_MISS___count__: if ("" in $) {
+      for (let k in $) if (k) break I_MISS___count__;
+      return "";
+    }
+    var alt = [], cc = [], q;
+    var {quote} = Utils.regexp;
+    for (let char in $) {
+      if ($[char] !== 1) {
+        let recurse = RegexpTrie__regexp($[char]);
+        (recurse ? alt : cc).push(quote(char) + recurse);
+      }
+      else q = 1;
+    }
+    var cconly = !alt.length;
+    if (cc.length) alt.push(1 in cc ?  "[" + cc.join("") + "]" : cc[0]);
+    var result = 1 in alt ? "(?:" + alt.join("|") + ")" : alt[0];
+    if (q) result = cconly ? result + "?" : "(?:" + result + ")?";
+    return result;
   },
 };

@@ -496,4 +496,16 @@ function testNounType() {
                     "123,456,789");
 }
 
+function testUtilsRegexp() {
+  this.assertEquals(Utils.regexp.quote("[^.^]"), "\\[\\^\\.\\^\\]");
+  var words = ["foobar", "fooxar", "foozap", "fooza"]
+  var re = Utils.regexp.Trie(words).regexp;
+  for each (let word in words) this.assert(re.test(word), [re, word]);
+  var rp = Utils.regexp.Trie(words, true).regexp, i = 0;
+  for each (let word in words) {
+    let wp = word.slice(0, --i);
+    this.assert(rp.test(wp), [rp, wp]);
+  }
+}
+
 exportTests(this);
