@@ -691,6 +691,7 @@ function CreateCommand(options) {
   // ensure name and names
   { let names = options.names || options.name;
     if (!names)
+      //errorToLocalize
       throw Error("CreateCommand: name or names is required.");
     if (!Utils.isArray(names))
       names = (names + "").split(/\s{0,}\|\s{0,}/);
@@ -766,6 +767,7 @@ function CreateCommand(options) {
       command.execute = uri ? function executeOpen() {
         Utils.focusUrlInBrowser(uri.spec);
       } : function executeDisplay() {
+        //errorToLocalize
         global.displayMessage(execute || "No action defined.");
       };
     }
@@ -947,9 +949,10 @@ function makeSearchCommand(options) {
       return;
     }
     var {parser} = options;
+    //errorToLocalize
     pblock.innerHTML = (
       "<div class='" + Klass + "'>Searches " + htmlName +
-      " for: <b>" + html + "</b>" +
+      " for: <strong>" + html + "</strong>" +
       (parser ? "<p class='loading'>Loading results...</p>" : "") +
       "</div>");
     if (!parser) return;
@@ -958,6 +961,7 @@ function makeSearchCommand(options) {
       var postData = insertQuery(options.postData, text);
     function searchParser(data) {
       var template = "", results = [], sane = true;
+      //errorToLocalize
       if (!data)
         template = "<p class='error'>Error parsing search results.</p>";
       else if (parser.type === "json") {
@@ -991,6 +995,7 @@ function makeSearchCommand(options) {
           });
         }
         else {
+          //errorToLocalize
           Utils.reportWarning(name + " : " +
                               "falling back to fragile parsing");
           let titles = doc.find(parser.title);
@@ -1049,14 +1054,16 @@ function makeSearchCommand(options) {
         if (!sane)
           // we did not find an equal amount of titles, previews
           // and thumbnails
+          //errorToLocalize
           template += (
             "<p class='error'>Note: no previews have been generated, " +
             "because an error occured while parsing the " +
             "results</p>");
       }
+      //errorToLocalize
       else template = "<p class='empty'>No results.</p>";
       pblock.innerHTML = ("<div class='" + Klass + "'>" +
-                          "Results for <b>" + html + "</b>:" +
+                          "Results for <strong>" + html + "</strong>:" +
                           template +
                           "</div>");
     }
@@ -1101,7 +1108,7 @@ function makeBookmarkletCommand(options) {
 
   if (!options.preview)
     options.preview = function bookmarklet_preview(pblock) {
-      pblock.innerHTML = "Executes the <b>" + this.name + "</b> bookmarklet.";
+      pblock.innerHTML = "Executes the <strong>" + this.name + "</strong> bookmarklet.";
     };
 
   this.CreateCommand(options);
@@ -1387,6 +1394,7 @@ function safeWrapper(func) {
       func.apply(this, arguments);
     } catch (e) {
       displayMessage({
+        //errorToLocalize
         text: ("An exception occurred while running " +
                func.name + "()."),
         exception: e,

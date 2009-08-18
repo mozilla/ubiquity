@@ -247,6 +247,7 @@ CommandManager.prototype = {
         catch (e) {
           let verb = activeSugg._verb;
           self.__msgService.displayMessage({
+            //errorToLocalize
             text: ('An exception occurred while previewing the command "' +
                    (verb.cmd || verb).name + '".'),
             exception: e,
@@ -303,6 +304,7 @@ CommandManager.prototype = {
   execute: function CM_execute(context) {
     var activeSugg = this.hilitedSuggestion;
     if (!activeSugg)
+      //errorToLocalize
       this.__msgService.displayMessage('No command called "' +
                                        this.__lastInput + '".');
     else
@@ -312,6 +314,7 @@ CommandManager.prototype = {
       } catch (e) {
         let verb = activeSugg._verb;
         this.__msgService.displayMessage({
+          //errorToLocalize
           text: ('An exception occurred while running the command "' +
                  (verb.cmd || verb).name + '".'),
           exception: e,
