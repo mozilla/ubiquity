@@ -88,9 +88,11 @@ var LocalizationUtils = {
       this.GETTEXT.parse_locale_data(rv);
       loadedPo[feedKey] = parsed;
     } catch (e) {
+      //errorToLocalize
       Utils.dump("couldn't parse " + poUrl);
       return false;
     }
+    //errorToLocalize
     Utils.dump("loaded " + poUrl);
     return true;
   },
