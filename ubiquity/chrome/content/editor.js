@@ -21,7 +21,7 @@ var Editor = {
   },
   launchEditor : function(value){
     var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
-    //errorToLocalize 1
+    //errorToLocalize
     if (editor == null || editor == "") {
       displayMessage('please set your external editor');
     }
@@ -69,7 +69,7 @@ var Editor = {
         Application.console.log("ret code   : " + ret);
       } catch (e) {
         Application.console.log("Error running editor         : " + e);
-        //errorToLocalize 2
+        //errorToLocalize
         displayMessage("Error running editor : " + e);
         return null;
       }
@@ -78,7 +78,7 @@ var Editor = {
         deleteTemporaryFileOnExit(file);
       return file;
     }
-    //errorToLocalize 3
+    //errorToLocalize
     displayMessage(editor + ' is not an executable');
     return null;
   },

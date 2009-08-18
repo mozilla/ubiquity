@@ -139,12 +139,12 @@ window.addEventListener("load", function onload() {
 
   jsm.UbiquitySetup.preload(function ubiquitySetupWrapper() {
     try { ubiquitySetup() } catch (e) {
-      //errorToLocalize 1
+      //errorToLocalize
       var msg = "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e);
       // in case it doesn't show up in the error console
       jsm.Utils.reportInfo(msg);
       Cu.reportError("Ubiquity " + msg);
-      //errorToLocalize 2
+      //errorToLocalize
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }
     if (gUbiquity) {

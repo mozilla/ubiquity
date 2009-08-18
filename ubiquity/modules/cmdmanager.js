@@ -153,6 +153,7 @@ CommandManager.prototype = {
             function clearPreview(pblock) { pblock.innerHTML = ""; });
         break;
       }
+      //errorToLocalize
       default: throw new Error("Unknown state: " + state);
     }
   },

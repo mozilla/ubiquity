@@ -50,13 +50,15 @@
 
 var EXPORTED_SYMBOLS = ["CmdUtils"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/coreubiquity.properties");
 
 const {Application} = Utils;
 
@@ -933,7 +935,8 @@ function makeSearchCommand(options) {
   }
   if (!("description" in options)) {
     // generate description from the name of the seach command
-    options.description = "Searches " + htmlName + " for your words.";
+    // options.description = "Searches " + htmlName + " for your words.";
+    options.description = L("ubiquity.cmdutils.searchdescription", htmlName);
   }
   if ("parser" in options) {
     let {parser} = options;
@@ -951,8 +954,8 @@ function makeSearchCommand(options) {
     var {parser} = options;
     //errorToLocalize
     pblock.innerHTML = (
-      "<div class='" + Klass + "'>Searches " + htmlName +
-      " for: <strong>" + html + "</strong>" +
+      "<div class='" + Klass + "'>" +
+      L("ubiquity.cmdutils.searchcmd", htmlName, html) +
       (parser ? "<p class='loading'>Loading results...</p>" : "") +
       "</div>");
     if (!parser) return;
@@ -1108,7 +1111,7 @@ function makeBookmarkletCommand(options) {
 
   if (!options.preview)
     options.preview = function bookmarklet_preview(pblock) {
-      pblock.innerHTML = "Executes the <strong>" + this.name + "</strong> bookmarklet.";
+      pblock.innerHTML = L("ubiquity.cmdutils.bookmarkletexec", this.name);
     };
 
   this.CreateCommand(options);
