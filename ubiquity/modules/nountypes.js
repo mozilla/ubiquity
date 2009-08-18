@@ -50,9 +50,7 @@
 // ** {{{noExternalCalls}}}
 // ** {{{label}}} (, {{{name}}}, {{{id}}})
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/cmdutils.js");
 Cu.import("resource://ubiquity/modules/utils.js");
@@ -102,70 +100,65 @@ var noun_type_email_service = CmdUtils.NounType("email service",
 // http://blog.livedoor.jp/dankogai/archives/51190099.html
 //
 // * {{{text, html}}} : email address
-// * {{{data}}} : match array
 
 var email_atom = "[\\w!#$%&'*+/=?^`{}~|-]+";
 var noun_type_email = {
   label: "email",
   noExternalCalls: true,
   cacheTime: -1,
-  _email: RegExp("^(?:" + email_atom + "(?:\\." + email_atom
-    + ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@('
-    + email_atom + "(?:\\." + email_atom + ")*)$"),
-  _username: RegExp("^(?:" + email_atom + "(?:\\." + email_atom
-    + ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))$'),
+  _email: RegExp("^(?:" + email_atom + "(?:\\." + email_atom +
+                 ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@(' +
+                 email_atom + "(?:\\." + email_atom + ")*)$"),
+  _username: RegExp("^(?:" + email_atom + "(?:\\." + email_atom +
+                    ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))$'),
   suggest: function nt_email_suggest(text, html, cb, selectionIndices) {
     if (this._username.test(text))
-      return [CmdUtils.makeSugg(text, html, match, 0.3, selectionIndices)];
+      return [CmdUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
 
     var match = text.match(this._email);
     if (!match) return [];
-    
-    var score = 1;
+
     var domain = match[1];
-    
     // if the domain doesn't have a period or the TLD
     // has less than two letters, penalize
-    if (!/\.(\d+|[a-z]{2,})$/i.test(domain))
-      score = 0.8;
-    
-    return [CmdUtils.makeSugg(text, html, text, score, selectionIndices)];
+    var score = /\.(?:\d+|[a-z]{2,})$/i.test(domain) ? 1 : 0.8;
+
+    return [CmdUtils.makeSugg(text, html, null, score, selectionIndices)];
   }
-}
-;
+};
 
 // === {{{ noun_type_percentage }}} ===
 //
 // Suggests a percentage value.
 //
 // * {{{text, html}}} : "?%"
-// * {{{data}}} : a float number
+// * {{{data}}} : a float number (1.0 for 100% etc.)
 
 var noun_type_percentage = {
   label: "percentage",
   noExternalCalls: true,
   cacheTime: -1,
-  _default: CmdUtils.makeSugg("100%", null, 0.3),
+  _default: CmdUtils.makeSugg("100%", null, 1, 0.3),
   "default": function nt_percentage_default() this._default,
   suggest: function nt_percentage_suggest(text, html) {
     var number = parseFloat(text);
-    if (isNaN(number))
-      return [];
+    if (isNaN(number)) return [];
 
-    var numOfOkayChars = text.replace(/[^\d%.]/g,'').length;
-    var score = numOfOkayChars / (text.length);
-    if (text.indexOf("%") < 0)
-      score *= 0.9;
-    
-    var returnArr = [CmdUtils.makeSugg(number+"%", null, number, score)];
-    
-    // if the number's below 1 and there's no
-    // % sign, also try interpreting it as a proportion instead of a 
+    var numOfOkayChars = text.replace(/[^\d%.e]/g, "").length;
+    var score = numOfOkayChars / text.length;
+    var nopercent = text.indexOf("%") < 0;
+    if (nopercent) score *= 0.9;
+
+    var returnArr =
+      [CmdUtils.makeSugg(number + "%", null, number / 100, score)];
+    // if the number's 10 or less and there's no
+    // % sign, also try interpreting it as a proportion instead of a
     // percent and offer it as a suggestion as well, but with a lower
     // score.
-    if (text.indexOf("%") < 0 && (number <= 1))
+    if (nopercent && number <= 10) {
       returnArr.push(
-        CmdUtils.makeSugg(number*100+"%", null, number*100, score * 0.9));
+        CmdUtils.makeSugg(number * 100 + "%", null, number, score * 0.9));
+    }
     return returnArr;
   }
 };
@@ -175,7 +168,7 @@ var noun_type_percentage = {
 // Suggests currently opened tabs.
 //
 // * {{{text, html}}} : tab title or URL
-// * {{{data}}} : one of 
+// * {{{data}}} : one of
 //   [[https://developer.mozilla.org/en/FUEL/Window|fuelIWindow]]#{{{tabs}}}
 
 var noun_type_tab = {
@@ -233,7 +226,7 @@ var noun_type_tag = {
 
     // let's start with an initial seed score.
     var score = 0.3;
-    
+
     var {allTags} = PlacesUtils.tagging;
     var lowercaseAllTags = [tag.toLowerCase() for each (tag in allTags)];
 
@@ -251,13 +244,14 @@ var noun_type_tag = {
         score = Math.pow(score, 0.5);
     }
 
-    var suggs = [CmdUtils.makeSugg(null, null,
-                                   (uncompletedTag
-                                    ? completedTags.concat(uncompletedTag)
-                                    : completedTags),
-                       (uncompletedTag && lowercaseAllTags.indexOf(utag) > -1)
-                       ? Math.pow(score, 0.5)
-                       : score )];
+    var suggs = [
+      CmdUtils.makeSugg(null, null,
+                        (uncompletedTag
+                         ? completedTags.concat(uncompletedTag)
+                         : completedTags),
+                        (uncompletedTag && lowercaseAllTags.indexOf(utag) >= 0)
+                        ? Math.sqrt(score)
+                        : score)];
     if (uncompletedTag) {
       for each (let tag in allTags)
         // only match from the beginning of a tag name (not the middle)
@@ -265,7 +259,7 @@ var noun_type_tag = {
             tag.toLowerCase().indexOf(utag) === 0)
           suggs.push(CmdUtils.makeSugg(null, null,
                                        completedTags.concat(tag),
-                                       Math.pow(score, 0.5)));
+                                       Math.sqrt(score)));
     }
     return suggs;
   }
@@ -311,6 +305,32 @@ var noun_type_awesomebar = {
   },
 };
 
+// === {{{ noun_type_common_URI_scheme }}} ===
+//
+// The "common schemes" are the IANA-registered ones
+// plus Unofficial ones and a few Mozilla specific ones.
+// See http://en.wikipedia.org/wiki/URI_scheme .
+//
+// * {{{text, hml}}} : URL scheme
+
+var common_URI_schemes = <><![CDATA[
+  aaa aaas acap cap cid crid data dav dict dns fax file ftp go gopher h323
+  http https icap im imap info ipp iris iris.beep iris.xpc iris.xpcs iris.lws
+  ldap mailto mid modem msrp msrps mtqp mupdate news nfs nntp opaquelocktoken
+  pop pres prospero rtsp service shttp sip sips snmp soap.beep soap.beeps tag
+  tel telnet tftp thismessage tip tv urn vemmi wais xmlrpc.beep xmpp
+  z39.50r z39.50s
+  about afp aim apt bolo bzr callto cel cvs daap ed2k feed fish gg git
+  gizmoproject iax2 irc ircs itms lastfm ldaps magnet mms msnim psyc rsync
+  secondlife skype ssh svn sftp smb sms soldat steam unreal ut2004 view-source
+  vzochat webcal wyciwyg xfire ymsgr
+  chrome resource
+  ]]></>.match(/\S+/g);
+
+var noun_type_common_URI_scheme = CmdUtils.NounType(
+  "URI scheme",
+  [scheme + ":" for each (scheme in common_URI_schemes)]);
+
 // === {{{ noun_type_url }}} ===
 //
 // Suggests a URL from the user's input and/or history.
@@ -318,117 +338,70 @@ var noun_type_awesomebar = {
 //
 // * {{{text, hml}}} : URL
 
-// The "common schemes" are the IANA-registered ones plus a few Mozilla ones.
-// See http://en.wikipedia.org/wiki/URI_scheme .
-var common_URI_schemes = ['aaa','aaas','acap','cap','cid','crid','data','dav','dict',
-  'dns','fax','file','ftp','go','gopher','h323','http','https','icap','im',
-  'imap','info','ipp','iris','iris.beep','iris.xpc','iris.xpcs','iris.lws',
-  'ldap','mailto','mid','modem','msrp','msrps','mtqp','mupdate','news','nfs',
-  'nntp','opaquelocktoken','pop','pres','prospero','rtsp','service','shttp',
-  'sip','sips','snmp','soap.beep','soap.beeps','tag','tel','telnet','tftp',
-  'thismessage','tip','tv','urn','vemmi','wais','xmlrpc.beep','xmpp','z39.50r',
-  'z39.50s',
-  'about','chrome','view-source','wyciwyg'];
-var noun_type_common_URI_schemes = CmdUtils.NounType(
-                     [scheme + '://' for each (scheme in common_URI_schemes) ] );
-
 var noun_type_url = {
   label: "url",
   rankLast: true,
   noExternalCalls: true,
   cacheTime: 0,
-  default: function nt_url_default() (
+  default: function nt_url_default()
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
-                      null, null, 0.5)),
-  _schemeRegExp: new RegExp('^('+common_URI_schemes.join('|')+'):($|/+)'),
-  // LDH charcodes include "Letters, Digits, and Hyphen". We'll throw in . @ : too.
-  _LDHRegExp: /^[a-z\d-.@:]*$/i,
-  _nt_common_URI_schemes: noun_type_common_URI_schemes,
+                      null, null, 0.5),
+  _schemeRE: RegExp("^" + Utils.regexp.Trie(common_URI_schemes) +
+                    "(?::/{0,2})?"),
+  // LDH charcodes include "Letters, Digits, and Hyphen".
+  // We'll throw in . @ : too.
+  _LDHRE: /^[a-z\d-.@:]+$/i,
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
     if (!text) return [];
-    
-    var url = text;
-    var returnArr = [];
-    
-    // if it's part of a common URI scheme, leave it alone and suggest as is.
-    var possibleSchemes = this._nt_common_URI_schemes
-                                      .suggest(url,null,null,selectionIndices);
-    if (possibleSchemes.length) {
-      returnArr = [{__proto__:s, score: 0.8 * s.score}
-                    for each (s in possibleSchemes)];
-    }
-    
-    // check to see whether we have a full URI scheme.
-    var schemeMatch = this._schemeRegExp.exec(url);
-    var noschemeURL;
-    var scheme;
-    var score = 1;
-    var dontAccept = false;
-    if (schemeMatch) {
-      scheme = schemeMatch[0];
-      noschemeURL = url.slice(schemeMatch[0].length);
-      // at least two slashes after the : are normally required.
-      slashMatch = /:\/*$/.exec(scheme);
-      slashesNeeded = 3 - slashMatch[0].length;
-      if (slashesNeeded > 0) {
-        if (slashesNeeded == 1)
-          scheme += '/';
-        else if (slashesNeeded == 2)
-          scheme += '//';
 
-        if (selectionIndices) {
-          // TODO: do we really want to offset the first selection index?
-          selectionIndices[0] += slashesNeeded;
-          selectionIndices[1] += slashesNeeded;
-        }
-      score *= 0.9;
-      }
-    }
-else {
-      scheme = 'http://';
-      noschemeURL = url;
-      score *= 0.9;
+    var possibleSchemes =
+      noun_type_common_URI_scheme.suggest.apply(noun_type_common_URI_scheme,
+                                                arguments);
+    var returnArr = (
+      possibleSchemes.length
+      ? [{__proto__: s, score: 0.8 * s.score}
+         for each (s in (Utils.sortBy(possibleSchemes, "score")
+                         .slice(-2).reverse()))]
+      : []);
+    var score = 1;
+    // check to see whether we have a full URI scheme.
+    if (this._schemeRE.test(text))
+      var {lastMatch: scheme, rightContext: noscheme} = RegExp;
+    else {
+      var scheme = "http://", noscheme = text;
       if (selectionIndices) {
-        // TODO: do we really want to offset the first selection index?
         selectionIndices[0] += scheme.length;
         selectionIndices[1] += scheme.length;
       }
+      score *= 0.9;
     }
 
-    if (noschemeURL) {
-      var segments = noschemeURL.split(/\/#?/);
-
+    if (noscheme) {
+      let segments = noscheme.split(/[/?#]/, 2);
       // if it's just a domain name-looking thing, lower confidence
-      if (segments.length == 1)
-        score *= 0.8;
+      if (segments.length === 1) score *= 0.8;
 
-      var domain = segments[0];
-
+      let domain = segments[0];
       // if the domain doesn't have any dots in it, lower confidence
-      if (domain.indexOf('.') == -1)
-        score *= 0.9;
+      if (domain.indexOf('.') === -1) score *= 0.9;
 
-      // if the domain name is LDH, leave it alone.
-      if (!this._LDHRegExp.test(domain)) {
+      if (!this._LDHRE.test(domain)) {
         // if it's not LDH, then we should see if it's a valid
         // international domain name.
-        score *= 0.9;
-        var idn = (Cc["@mozilla.org/network/idn-service;1"]
-                   .createInstance(Ci.nsIIDNService));
-        var asciiDomain = idn.normalize(domain);
+        let asciiDomain = (Cc["@mozilla.org/network/idn-service;1"]
+                           .createInstance(Ci.nsIIDNService)
+                           .normalize(domain));
         // if it's not even a valid IDN, then throw it out.
-        if (!this._LDHRegExp.test(asciiDomain))
-          dontAccept = true;
+        score *= this._LDHRE.test(asciiDomain) ? 0.9 : 0;
       }
     }
 
-    var newUrl = scheme + noschemeURL;
-    if (!dontAccept)
-      returnArr.push(CmdUtils.makeSugg(newUrl, null, null, score,
-                                                 selectionIndices));
+    if (score)
+      returnArr.unshift(CmdUtils.makeSugg(scheme + noscheme, null, null,
+                                          score, selectionIndices));
 
-    // start the async history check here
     var reqObj = {readyState: 2};
+    returnArr.push(reqObj);
     Utils.history.search(text, function nt_url_search(results) {
       reqObj.readyState = 4;
       var suggs = [], tlc = text.toLowerCase();
@@ -441,7 +414,8 @@ else {
       }
       callback(suggs);
     });
-    return [returnArr, reqObj];
+
+    return returnArr;
   }
 };
 
@@ -472,9 +446,9 @@ var noun_type_livemark = {
                   for each (id in feeds)];
     return CmdUtils.grepSuggs(text, suggs);
   },
-  get feeds()(Cc["@mozilla.org/browser/annotation-service;1"]
-              .getService(Ci.nsIAnnotationService)
-              .getItemsWithAnnotation("livemark/feedURI", {})),
+  get feeds() (Cc["@mozilla.org/browser/annotation-service;1"]
+               .getService(Ci.nsIAnnotationService)
+               .getItemsWithAnnotation("livemark/feedURI", {})),
   _proto_: {
     get feed() PlacesUtils.livemarks.getFeedURI(this.id).spec,
     get site() PlacesUtils.livemarks.getSiteURI(this.id).spec,
@@ -569,12 +543,13 @@ var noun_type_twitter_user = {
       suggs.push(CmdUtils.makeSugg(text, text, {}, 0.5));
 
     if (foundAt)
-      suggs = [{__proto__:s,
-                 text: '@' + s.text,
-                 html: '@' + s.html,
-                 summary: '@' + s.summary,
-                 score: Math.pow(s.score,0.8)}
-               for each (s in suggs)];
+      suggs = [{
+        __proto__: s,
+        text: '@' + s.text,
+        html: '@' + s.html,
+        summary: '@' + s.summary,
+        score: Math.pow(s.score, 0.8),
+      } for each (s in suggs)];
 
     return suggs;
   },
@@ -674,12 +649,12 @@ var noun_type_bookmarklet = {
 // * {{{text, html}}} : date/time text
 // * {{{data}}} : {{{Date}}} instance
 
-parseAndScoreDateTime = function(text, outputLength) {
+function parseAndScoreDateTime(text, outputLength) {
   var score = 1;
   if (/^[\d\s]+$/.test(text))
     score *= 0.8;
   if (text.length < outputLength)
-    score *= (0.5 + (0.5 * Math.pow(text.length / outputLength, 0.5)));
+    score *= 0.5 + 0.5 * Math.pow(text.length / outputLength, 0.5);
   var date = Date.parse(text);
   return {date: date, score: score};
 }
@@ -690,15 +665,13 @@ var noun_type_date = {
   cacheTime: 0,
   "default": function nt_date_default() this._sugg(Date.parse("today"), 1),
   suggest: function nt_date_suggest(text) {
-    if (text == 'today')
-      return [this._sugg(new Date(), 1)];
-    if (text == 'now')
-      return [this._sugg(new Date(), 0.7)];
+    if (/^\s*(today|now)\s*$/i.test(text))
+      return [this._sugg(new Date, RegExp.$1.length / 5)];
 
-    var {date, score} = parseAndScoreDateTime(text,10);
+    var {date, score} = parseAndScoreDateTime(text, 10);
     if (date && date.isToday())
       score *= 0.5;
-    if (date && date.toString("hh:mm tt") != '12:00 AM')
+    if (date && date.toString("hh:mm tt") !== "12:00 AM")
       score *= 0.7;
 
     return date ? [this._sugg(date, score)] : [];
@@ -713,11 +686,11 @@ var noun_type_time = {
   cacheTime: 0,
   "default": function nt_time_default() this._sugg(Date.parse("now"), 1),
   suggest: function nt_time_suggest(text, html) {
-    if (text == 'now')
-      return [this._sugg(new Date(), 1)];
+    if (/^\s*now\s*$/i.test(text))
+      return [this._sugg(new Date, 1)];
 
     var {date, score} = parseAndScoreDateTime(text, 8);
-    if (date && date.toString("hh:mm tt") == '12:00 AM')
+    if (date && date.toString("hh:mm tt") === "12:00 AM")
       score *= 0.5;
     if (date && !date.isToday())
       score *= 0.7;
@@ -733,22 +706,24 @@ var noun_type_date_time = {
   cacheTime: 0,
   "default": function nt_date_time_default() this._sugg(Date.parse("now"), 1),
   suggest: function nt_time_suggest(text, html) {
-    if (text == 'now')
-      return [this._sugg(new Date(), 1)];
-    if (text == 'today')
-      // hits crazy Date(Date(Date(... structure is used to get a Date object
+    if (/^\s*now\s*$/i.test(text))
+      return [this._sugg(new Date, 1)];
+    if (/^\s*today\s*$/i.test(text))
+      // this crazy Date(Date(Date(... structure is used to get a Date object
       // which has today's date but has 12:00 AM as the time.
-      return [this._sugg(new Date(Date.parse(new Date().toDateString())),0.7)];
+      return [this._sugg(new Date(Date.parse(new Date().toDateString())),
+                         0.7)];
 
-    var {date, score} = parseAndScoreDateTime(text, '19');
+    var {date, score} = parseAndScoreDateTime(text, 19);
     if (date && date.isToday())
       score *= 0.7;
-    if (date && date.toString("hh:mm tt") == '12:00 AM')
+    if (date && date.toString("hh:mm tt") === "12:00 AM")
       score *= 0.7;
     return date ? [this._sugg(date, score)] : [];
   },
   _sugg: function nt_date_time__sugg(time, score)
-    CmdUtils.makeSugg(time.toString("yyyy-MM-dd hh:mm tt"), null, time, score)
+    CmdUtils.makeSugg(time.toString("yyyy-MM-dd hh:mm tt"), null, time,
+                      score),
 };
 
 // === {{{ noun_type_contact }}} ===
@@ -766,27 +741,20 @@ var noun_type_contact = {
   suggest: function nt_contact_suggest(text, html, callback) {
     var suggs = noun_type_email.suggest.apply(noun_type_email, arguments);
     if (!this._list) {
-      this._list = [];
-
-      var self = this;
-      var contactCallback =
-        function nt_contact__contactCallback(contacts) {
-          var {_list} = noun_type_contact;
-          for each (var {name, email} in contacts) {
-            var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
-            _list.push({
-              text: email, html: htm, data: name, summary: htm, score: 1});
-          }
-          // include results based on the email address...
-          callback(CmdUtils.grepSuggs(text, self._list, "text")
-          // ...and based on the name.
-                   .concat(CmdUtils.grepSuggs(text, self._list, 'data')));
-        };
-
-      var contactRequest = getContacts(contactCallback);
-      return suggs.concat(contactRequest);
-    } else
-      return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
+      var list = this._list = [];
+      return suggs.concat(getContacts(function nt_contact_cb(contacts) {
+        for each (var {name, email} in contacts) {
+          var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
+          list.push({
+            text: email, html: htm, data: name, summary: htm, score: 1});
+        }
+        // include results based on the email address...
+        callback(CmdUtils.grepSuggs(text, list, "text")
+                 // ...and based on the name.
+                 .concat(CmdUtils.grepSuggs(text, list, 'data')));
+      }));
+    }
+    else return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
   }
 };
 
@@ -862,8 +830,8 @@ var noun_type_geolocation = {
   "default": function nt_geoloc_default() {
     var location = CmdUtils.getGeoLocation();
     if (!location) return false;
-    var fullLocation = ((location.city ? location.city + ", " : "")
-                        + location.country);
+    var fullLocation = ((location.city ? location.city + ", " : "") +
+                        location.country);
     return CmdUtils.makeSugg(fullLocation, null, null, 0.5);
   },
   suggest: function nt_geoloc_suggest(text, html, callback, selectionIndices) {
@@ -1134,7 +1102,8 @@ function NounAsync(label, checker, acceptAnything) {
   function asyncSuggest(text, html, callback, selectionIndices) {
     var returnArr = [checker(text, callback, selectionIndices)];
     if (acceptAnything) {
-      returnArr.push(CmdUtils.makeSugg(text, html, null, .3, selectionIndices));
+      returnArr.push(CmdUtils.makeSugg(text, html, null, .3,
+                                       selectionIndices));
     }
     return returnArr;
   };
