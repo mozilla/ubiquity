@@ -323,9 +323,7 @@ function clearTimeout(timerID) {
 function __TimerCallback(callback, args) {
   this._callback = callback;
   this._args = args;
-  if (!this.QueryInterface)
-    __TimerCallback.prototype.QueryInterface =
-      XPCOMUtils.generateQI([Ci.nsITimerCallback]);
+  this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
 }
 __TimerCallback.prototype = {
   notify: function notify(timer) {
