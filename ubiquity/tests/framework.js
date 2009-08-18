@@ -100,6 +100,7 @@ TestCase.prototype = {
   assertEquals : function(a, b, msg) {
     if (!(a == b)) {
       if (!msg)
+        //errorToLocalize
         msg = "'" + a + "' is not equal to '" + b + "'";
       throw new AssertionError(msg,
                                Components.stack.caller.filename,
@@ -115,6 +116,7 @@ TestCase.prototype = {
     } catch (e) {
       wasExceptionThrown = true;
       if (e.message != message) {
+        //errorToLocalize
         throw new AssertionError(("Exception thrown but message '" +
                                   e.message + "' is not equal to '" +
                                   message + "'"),
@@ -123,6 +125,7 @@ TestCase.prototype = {
       }
     }
     if (!wasExceptionThrown)
+      //errorToLocalize
       throw new AssertionError("No exception was thrown",
                                Components.stack.caller.filename,
                                Components.stack.caller.lineNumber);
@@ -157,16 +160,19 @@ TestCase.prototype = {
 
 var DumpTestResponder = {
   onStartTest : function(test) {
+    //errorToLocalize
     dump("Running test: "+test.name+"\n");
   },
 
   onSuccess : function(test) { },
 
   onSkipTest : function(test, e) {
+    //errorToLocalize
     dump("Test skipped: " + test.name + "\n");
   },
 
   onException : function(test, e) {
+    //errorToLocalize
     var text = ("Error in test " +
                 test.name + ": " + e.message);
     if (e.fileName)
@@ -178,16 +184,18 @@ var DumpTestResponder = {
 
   onFinished : function(successes, failures, skips) {
     var total = successes + failures;
-
+    //errorToLocalize
     var text = (successes + " out of " +
                 total + " tests successful (" + failures +
                 " failed).\n");
     if (skips)
+      //errorToLocalize - needs refactoring or rewording. see line 242.
       text += "Additionally, " + skips + " test(s) were skipped.\n";
 
     dump(text);
 
     if (failures)
+      //errorToLocalize
       throw new Error("Some tests were unsuccessful.");
   }
 };
@@ -201,16 +209,19 @@ HtmlTestResponder.prototype = {
   },
 
   onSuccess : function(test) {
+    //errorToLocalize
     var html = "<p class=\"successful\">Passed test " + test.name + ".</p>";
     this._output.innerHTML += html;
   },
 
   onSkipTest : function(test, e) {
+    //errorToLocalize
     var html = "<p class=\"skipped\">Skipping test " + test.name + ".</p>";
     this._output.innerHTML += html;
   },
 
   onException : function(test, e) {
+    //errorToLocalize - same as the one above + replace?
     var html = "<p class=\"failed\">";
     var message = "Error in test " + test.name + ": " + e.message;
     if (e.fileName)
@@ -222,12 +233,13 @@ HtmlTestResponder.prototype = {
 
   onFinished : function(successes, failures, skips) {
     var total = successes + failures;
-
+    //errorToLocalize
     var html = "<p class=\"summary\">" + successes + " out of " +
                 total + " tests successful (" + failures +
                 " failed).</p>";
 
     if (skips) {
+      //errorToLocalize - needs refactoring or rewording. see line 192.
       html += "<p class=\"summary\">Additionally, " + skips + " test";
       if (skips != 1)
         html += "s were";
@@ -283,6 +295,7 @@ TestSuite.prototype = {
 
         Utils.setTimeout(
           function() {
+            //errorToLocalize
             pendingException = new Error("Maximum test execution time " +
                                          "(" + maxTime + " ms) exceeded.");
           },

@@ -4,9 +4,8 @@ let Cc = Components.classes;
 let Ci = Components.interfaces;
 
 let events = {};
-Components.utils.import('resource://jsbridge/modules/events.js', events);
-
-Components.utils.import('resource://ubiquity/modules/utils.js');
+Components.utils.import("resource://jsbridge/modules/events.js", events);
+Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/tests/framework.js");
 
 let INTERVAL_MS = 100;
@@ -34,9 +33,11 @@ function scheduleCheckForUbiquity() {
     var win = Utils.currentChromeWindow;
 
     if (win.gUbiquity) {
+      //errorToLocalize
       dump('Ubiquity found.\n');
       runTests();
     } else {
+      //errorToLocalize
       dump('Waiting ' + INTERVAL_MS + ' ms...\n');
       scheduleCheckForUbiquity();
     }
