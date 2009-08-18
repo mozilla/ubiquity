@@ -333,8 +333,12 @@ Parser.prototype = {
       RegExp(boundary + RegexpTrie(this.anaphora) + boundary);
   },
 
-  flushNounCache: function() {
+  flushNounCache: function Parser_flushNounCache() {
     this._nounCache = new NounCache(this);
+  },
+  
+  flushNounCacheForId: function Parser_flushNounCacheForId(id) {
+    this._nounCache.clearSuggsForId(id)
   },
 
   // ** {{{Parser#initializeLanguage}}} **
@@ -349,8 +353,8 @@ Parser.prototype = {
   //
   // This method returns a new {{{ParseQuery}}} object, as detailed in
   // [[http://ubiquity.mozilla.com/trac/ticket/532|trac #532]]
-  newQuery: function(queryString, context, maxSuggestions,
-                     dontRunImmediately) {
+  newQuery: function Parser_newQuery(queryString, context, maxSuggestions,
+                                     dontRunImmediately) {
     var selObj = this._contextUtils.getSelectionObject(context);
     if (!selObj.text)
       selObj.text = "";
@@ -1688,8 +1692,6 @@ ParseQuery.prototype = {
   //
   // Most of this async code is by Blair.
   run: function PQ_run() {
-    // clear the nounCache... for 0.5
-//    this.parser._nounCache = {};
     this._keepworking = true;
     this._next();
 
@@ -2333,6 +2335,13 @@ NounCache.prototype = {
 
     if (thisSuggIsNew)
       this.cacheSpace[arg][id].suggs.push(newSugg);
+  },
+  clearSuggsForId: function NC_clearSuggsForId(id) {
+    for (var arg in this.cacheSpace) {
+      if (id in this.cacheSpace[arg])
+        this.cacheSpace[arg][id] = { setTime: null,
+                                     suggs: [] };
+    }
   }
 }
 
