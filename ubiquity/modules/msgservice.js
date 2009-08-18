@@ -87,6 +87,7 @@ function ErrorConsoleMessageService() {
     if (typeof msg === "object" && msg.exception) {
       var tb = ExceptionUtils.stackTrace(msg.exception);
       Cu.reportError(msg.exception);
+      //errorToLocalize
       Cu.reportError("Traceback for last exception:\n" + tb);
     }
   };
@@ -105,6 +106,7 @@ function AlertMessageService() {
 
   this.displayMessage = function AMS_displayMessage(msg) {
     var text;
+    //errorToLocalize
     var title = "Ubiquity Notification";
     var icon = this.ALERT_IMG;
     var textClickable = false;
@@ -216,6 +218,7 @@ var ExceptionUtils = {
       output += e.stack;
     else
       // It's some other thrown object, e.g. a bare string.
+      //errorToLocalize
       output += "No traceback available.\n";
 
     return output;
