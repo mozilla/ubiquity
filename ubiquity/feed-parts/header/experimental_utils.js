@@ -71,6 +71,7 @@ ExperimentalUtils.OverlordCmdObj.prototype = {
       if (underling)
 	underling.execute(directObj, modifiers );
       else
+   //errorToLocalize
 	displayMessage("Overlord verb with undefined underling " + choice);
     },
     preview: function( pBlock, directObj, modifiers ) {
@@ -80,6 +81,7 @@ ExperimentalUtils.OverlordCmdObj.prototype = {
       if (underling)
 	underling.preview( pBlock, directObj, modifiers );
       else
+   //errorToLocalize
 	pBlock.innerHTML = "Overlord verb with unrecognized choice " + choice;
     },
     registerNewUnderling: function(argumentValue, options) {
