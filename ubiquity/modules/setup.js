@@ -37,29 +37,27 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["UbiquitySetup"];
+var EXPORTED_SYMBOLS = ["UbiquitySetup"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/msgservice.js");
-Components.utils.import("resource://ubiquity/modules/feedmanager.js");
-Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
-Components.utils.import("resource://ubiquity/modules/webpage_feed_plugin.js");
-Components.utils.import("resource://ubiquity/modules/python_feed_plugin.js");
-Components.utils.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
-//Components.utils.import("resource://ubiquity/modules/gm_feed_plugin.js");
-Components.utils.import("resource://ubiquity/modules/stylish_feed_plugin.js");
-Components.utils.import("resource://ubiquity/modules/annotation_memory.js");
-Components.utils.import("resource://ubiquity/modules/suggestion_memory.js");
-Components.utils.import("resource://ubiquity/modules/feedaggregator.js");
-Components.utils.import("resource://ubiquity/modules/webjsm.js");
-Components.utils.import("resource://ubiquity/modules/prefcommands.js");
-Components.utils.import("resource://ubiquity/modules/skinsvc.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/msgservice.js");
+Cu.import("resource://ubiquity/modules/feedmanager.js");
+Cu.import("resource://ubiquity/modules/default_feed_plugin.js");
+Cu.import("resource://ubiquity/modules/webpage_feed_plugin.js");
+Cu.import("resource://ubiquity/modules/python_feed_plugin.js");
+Cu.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
+//Cu.import("resource://ubiquity/modules/gm_feed_plugin.js");
+//Cu.import("resource://ubiquity/modules/stylish_feed_plugin.js");
+Cu.import("resource://ubiquity/modules/annotation_memory.js");
+Cu.import("resource://ubiquity/modules/suggestion_memory.js");
+Cu.import("resource://ubiquity/modules/feedaggregator.js");
+Cu.import("resource://ubiquity/modules/webjsm.js");
+Cu.import("resource://ubiquity/modules/prefcommands.js");
+Cu.import("resource://ubiquity/modules/skinsvc.js");
 
-let Application = Components.classes["@mozilla.org/fuel/application;1"]
-                  .getService(Components.interfaces.fuelIApplication);
+const {Application} = Utils;
 
 let gServices;
 
@@ -109,8 +107,8 @@ let UbiquitySetup = {
                     title: "Mozilla Web Search Commands"}],
 
   __getExtDir: function __getExtDir() {
-    let extMgr = Cc["@mozilla.org/extensions/manager;1"]
-                 .getService(Components.interfaces.nsIExtensionManager);
+    let extMgr = (Cc["@mozilla.org/extensions/manager;1"]
+                  .getService(Ci.nsIExtensionManager));
     let loc = extMgr.getInstallLocation("ubiquity@labs.mozilla.com");
     let extDir = loc.getItemLocation("ubiquity@labs.mozilla.com");
 
@@ -140,8 +138,8 @@ let UbiquitySetup = {
       }
     };
 
-    var observerSvc = Cc["@mozilla.org/observer-service;1"]
-                      .getService(Ci.nsIObserverService);
+    var observerSvc = (Cc["@mozilla.org/observer-service;1"]
+                       .getService(Ci.nsIObserverService));
     observerSvc.addObserver(observer, "http-on-modify-request", false);
   },
 
@@ -152,8 +150,8 @@ let UbiquitySetup = {
       }
     };
 
-    var observerSvc = Cc["@mozilla.org/observer-service;1"]
-                      .getService(Ci.nsIObserverService);
+    var observerSvc = (Cc["@mozilla.org/observer-service;1"]
+                       .getService(Ci.nsIObserverService));
     observerSvc.addObserver(observer, "quit-application", false);
   },
 
@@ -170,8 +168,8 @@ let UbiquitySetup = {
       // We'll reset the preferences for our extension here.  Unfortunately,
       // there doesn't seem to be an easy way to get this from FUEL, so
       // we'll have to use XPCOM directly.
-      var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                            .getService(Components.interfaces.nsIPrefService);
+      var prefs = (Cc["@mozilla.org/preferences-service;1"]
+                   .getService(Ci.nsIPrefService));
       prefs = prefs.getBranch("extensions.ubiquity.");
 
       // Ideally we'd call prefs.resetBranch() here, but according to MDC
@@ -179,13 +177,13 @@ let UbiquitySetup = {
       // manually.
       var children = prefs.getChildList("", {});
       children.forEach(
-        function(name) {
+        function eachChild(name) {
           if (prefs.prefHasUserValue(name))
             prefs.clearUserPref(name);
         });
 
       // Reset suggestion memory:
-      (new SuggestionMemory("main_parser")).wipe();
+      new SuggestionMemory("main_parser").wipe();
 
       // This is likely redundant since we just reset all prefs, but we'll
       // do it for completeness...
@@ -194,8 +192,8 @@ let UbiquitySetup = {
   },
 
   getBaseUri: function getBaseUri() {
-    let ioSvc = Components.classes["@mozilla.org/network/io-service;1"]
-                .getService(Components.interfaces.nsIIOService);
+    let ioSvc = (Cc["@mozilla.org/network/io-service;1"]
+                 .getService(Ci.nsIIOService));
     let extDir = this.__getExtDir();
     let baseUri = ioSvc.newFileURI(extDir).spec;
 
@@ -203,9 +201,9 @@ let UbiquitySetup = {
   },
 
   isInstalledAsXpi: function isInstalledAsXpi() {
-    let profileDir = Cc["@mozilla.org/file/directory_service;1"]
-                     .getService(Components.interfaces.nsIProperties)
-                     .get("ProfD", Components.interfaces.nsIFile);
+    let profileDir = (Cc["@mozilla.org/file/directory_service;1"]
+                      .getService(Ci.nsIProperties)
+                      .get("ProfD", Ci.nsIFile));
     let extDir = this.__getExtDir();
     if (profileDir.contains(extDir, false))
       return true;
@@ -263,9 +261,8 @@ let UbiquitySetup = {
       msgService.add(new AlertMessageService());
       msgService.add(new ErrorConsoleMessageService());
 
-      var disabledStorage = new DisabledCmdStorage(
-        'extensions.ubiquity.disabledCommands'
-      );
+      var disabledStorage =
+        new DisabledCmdStorage("extensions.ubiquity.disabledCommands");
 
       var defaultFeedPlugin = new DefaultFeedPlugin(feedManager,
                                                     msgService,
@@ -273,12 +270,12 @@ let UbiquitySetup = {
                                                     this.languageCode,
                                                     this.getBaseUri(),
                                                     this.parserVersion);
-
-      /*var gmfp = new GreaseMonkeyFeedPlugin(feedManager, msgService,
+      /*
+      var gmfp = new GreaseMonkeyFeedPlugin(feedManager, msgService,
                                             gWebJsModule);
-      */
       var sfp = new StylishFeedPlugin(feedManager, msgService,
-                                            gWebJsModule);
+                                      gWebJsModule);
+      */
 
       var ldfPlugin = new LockedDownFeedPlugin(feedManager,
                                                msgService,
@@ -353,15 +350,15 @@ let UbiquitySetup = {
   },
 
   get languageCode() {
-    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                .getService(Components.interfaces.nsIPrefBranch);
+    var prefs = (Cc["@mozilla.org/preferences-service;1"]
+                 .getService(Ci.nsIPrefBranch));
     var lang = prefs.getCharPref("extensions.ubiquity.language");
     return lang;
   },
 
   get parserVersion() {
-    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                          .getService(Components.interfaces.nsIPrefService);
+    var prefs = (Cc["@mozilla.org/preferences-service;1"]
+                 .getService(Ci.nsIPrefService));
     prefs = prefs.getBranch("extensions.ubiquity.");
     return prefs.getIntPref("parserVersion");
   },
@@ -375,8 +372,8 @@ let UbiquitySetup = {
   },
 
   get doNounFirstExternals() {
-    var prefs = Components.classes["@mozilla.org/preferences-service;1"]
-                          .getService(Components.interfaces.nsIPrefService);
+    var prefs = (Cc["@mozilla.org/preferences-service;1"]
+                 .getService(Ci.nsIPrefService));
     prefs = prefs.getBranch("extensions.ubiquity.");
     return prefs.getIntPref("doNounFirstExternals");
   }
