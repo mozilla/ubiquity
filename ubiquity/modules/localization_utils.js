@@ -168,8 +168,8 @@ var LocalizationUtils = {
   // === {{{ LocalizationUtils.propertySelector(properties) }}} ===
   //
   // Creates a {{{nsIStringBundle}}} for the .{{{properties}}} file and
-  // returns a wrapper function which calls {{{GetStringFromName()}}} or
-  // {{{formatStringFromName()}}} (if extra argument is passed)
+  // returns a wrapper function which calls {{{GetStringFromName()}}}
+  // (or {{{formatStringFromName()}}} if extra argument is passed)
   // for the given name string. e.g.:
   // {{{
   // (foo.properties)
@@ -181,10 +181,12 @@ var LocalizationUtils = {
   // }}}
 
   propertySelector: function LU_propertySelector(properties) {
+    if (properties in LU_propertySelector)
+      return LU_propertySelector[properties];
     var bundle = (Cc["@mozilla.org/intl/stringbundle;1"]
                   .getService(Ci.nsIStringBundleService)
                   .createBundle(properties));
-    return function stringFor(name) (
+    return LU_propertySelector[properties] = function stringFor(name) (
       arguments.length > 1
       ? bundle.formatStringFromName(name,
                                     Array.slice(arguments, 1),

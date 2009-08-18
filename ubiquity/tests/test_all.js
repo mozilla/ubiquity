@@ -46,6 +46,7 @@ Cu.import("resource://ubiquity/modules/parser/parser.js");
 Cu.import("resource://ubiquity/modules/feedmanager.js");
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
 Cu.import("resource://ubiquity/modules/collection.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 Cu.import("resource://ubiquity/tests/framework.js");
 Cu.import("resource://ubiquity/tests/test_eventhub.js");
@@ -506,6 +507,11 @@ function testUtilsRegexp() {
     let wp = word.slice(0, --i);
     this.assert(rp.test(wp), [rp, wp]);
   }
+}
+
+function testL10nUtilsPropertySelector() {
+  var ps = LocalizationUtils.propertySelector("data:,foo:%S %S");
+  this.assertEquals(ps("foo", "bar", "baz"), "bar baz");
 }
 
 exportTests(this);
