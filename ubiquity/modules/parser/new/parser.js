@@ -225,6 +225,18 @@ Parser.prototype = {
           localNounIds[nt.id] = true;
       }
     }
+    
+    for each (let nt in this._nounTypes) {
+      if ('registerCacheObserver' in nt) {
+        var id = nt.id;
+        var thisParser = this;
+        var flush = function customFlushFunction() {
+          thisParser.flushNounCacheForId(id);
+        }
+        nt.registerCacheObserver(flush);
+      }
+    }
+    
     //dump("loaded nouns:\n" +
     //     [n.id + " " + n.name for each (n in this._nounTypes)].join("\n") +
     //     "\n");
