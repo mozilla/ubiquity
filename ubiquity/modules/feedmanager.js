@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Blair McBride <unfocused@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -49,6 +50,10 @@ const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/eventhub.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/coreubiquity.properties");
 
 const FEED_SRC_ANNO = "ubiquity/source";
 const FEED_TYPE_ANNO = "ubiquity/type";
@@ -61,7 +66,7 @@ const FEED_TITLE_ANNO = "ubiquity/title";
 const FEED_DATE_ANNO = "ubiquity/date";
 const FEED_BIN_ANNO = "ubiquity/bin";
 
-const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_/.test(v))];
+const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_/.test(v) && this[v])];
 
 const DEFAULT_FEED_TYPE = "commands";
 
@@ -89,6 +94,7 @@ var FMgrProto = FeedManager.prototype = {};
 
 FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   if (plugin.type in this._plugins)
+    //errorToLocalize
     throw new Error("Feed plugin for type '" + plugin.type +
                     "' already registered.");
 
@@ -126,6 +132,7 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
       subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
     } catch (e) {
       Cu.reportError(
+        //errorToLocalize
         ("An error occurred when retrieving the feed for " +
          confirmedPages[i].spec + ": " + e)
       );
@@ -302,27 +309,22 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
       var pageDomain = event.target.domain;
     } catch(e) { return; }
     let notTheseSites = noNotificationSites();
-    if(!notTheseSites.some(function (domainToSkip) domainToSkip == pageDomain)){
-      let cmdManager = Utils.currentChromeWindow.gUbiquity.cmdManager;
+    if (notTheseSites.indexOf(pageDomain) === -1) {
+      let {cmdManager} = Utils.currentChromeWindow.gUbiquity;
       let commandsByServiceDomain = cmdManager.getCommandsByServiceDomain();
       let commandsThatMatch = commandsByServiceDomain[pageDomain];
-      if(commandsThatMatch){
+      if (commandsThatMatch) {
         let verbId = commandsThatMatch[0].id;
-        let freqOfUse = cmdManager.__nlParser._suggestionMemory.getScore("", verbId);
-        if(freqOfUse == 0){
+        let freqOfUse =
+          cmdManager.__nlParser._suggestionMemory.getScore("", verbId);
+        if (!freqOfUse) {
           let visitsToDomain = Utils.history.visitsToDomain(pageDomain);
-          if((visitsToDomain % self.commandReminderPeriod) == 0)
+          if (visitsToDomain % self.commandReminderPeriod === 0)
             self.showEnabledCommandNotification(event.target,
                                                 commandsThatMatch[0].names[0]);
-	}
+        }
       }
     }
-  }
-
-  function noNotificationSites(){
-    var sites = Utils.Application.prefs.getValue(
-                            "extensions.ubiquity.noNotificationSites", "");
-    return sites.split("|");
   }
 
   window.addEventListener("pageshow", onPageShow, false);
@@ -334,8 +336,8 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   }
 };
 
-FMgrProto.showEnabledCommandNotification = 
-  function showEnabledCommandNotification(targetDoc, commandName) {
+FMgrProto.showEnabledCommandNotification =
+function showEnabledCommandNotification(targetDoc, commandName) {
   var Cc = Components.classes;
   var Ci = Components.interfaces;
 
@@ -366,7 +368,8 @@ FMgrProto.showEnabledCommandNotification =
       notification.close();
       Utils.setTimeout(showCommandInUbiquity, 500);
     }
-    function showCommandInUbiquity(){
+
+    function showCommandInUbiquity() {
       let gUbiquity = Utils.currentChromeWindow.gUbiquity;
       gUbiquity.openWindow();
       gUbiquity.__textBox.value = commandName;
@@ -378,35 +381,27 @@ FMgrProto.showEnabledCommandNotification =
       addToNoNotifications(targetDoc.domain);
     }
 
-    function addToNoNotifications(site){
-      let notTheseSites = Utils.Application.prefs.getValue(
-                            "extensions.ubiquity.noNotificationSites", "");
-      notTheseSites = notTheseSites.concat(site + "|");
-      Utils.Application.prefs.setValue(
-                            "extensions.ubiquity.noNotificationSites",
-                                                   notTheseSites);
-    }
-    
-    var notify_message = ("Did you know that you have a Ubiquity" +
-                              " command for this website?");  
-    var buttons = [
-      {accessKey: "S",
-       callback: onShowMeClick,
-       label: "Show Me!",
-       popup: null},
-      {accessKey: "D",
-       callback: onNoMoreClick,
-       label: "Don't remind me again for this website",
-       popup:null}
-    ];
+    var notify_message = L("ubiquity.feedmanager.didyouknow");
+    var buttons = [{
+      accessKey: "S",
+      callback: onShowMeClick,
+      label: L("ubiquity.feedmanager.showme"),
+      popup: null,
+    }, {
+      accessKey: "D",
+      callback: onNoMoreClick,
+      label: L("ubiquity.feedmanager.dontremind"),
+      popup:null,
+    }];
     box.appendNotification(
       notify_message,
       BOX_NAME,
       "chrome://ubiquity/skin/icons/favicon.ico",
       box.PRIORITY_INFO_MEDIUM,
-      buttons
-    );
-  } else {
+      buttons);
+  }
+  else {
+    //errorToLocalize
     Cu.reportError("Couldn't find tab for document");
   }
 };
@@ -446,31 +441,24 @@ FMgrProto.showNotification = function showNotification(plugin,
     function onSubscribeClick(notification, button) {
       plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
     }
-    
-    if(!notify_message){
-      if(!plugin.notify_message){
-        var notify_message = ("This page contains Ubiquity commands.  " +
-         "If you'd like to subscribe to them, please " +
-         "click the button to the right.");
-      }else{
-        var notify_message = plugin.notify_message;
-      }
-    }
-    
-    var buttons = [
-      {accessKey: "S",
-       callback: onSubscribeClick,
-       label: "Subscribe...",
-       popup: null}
-    ];
+
+    var buttons = [{
+      accessKey: "S",
+      callback: onSubscribeClick,
+      label: L("ubiquity.feedmanager.subscribe"),
+      popup: null,
+    }];
     box.appendNotification(
-      notify_message,
+      (notify_message ||
+       plugin.notify_message ||
+       L("ubiquity.feedmanager.newcommandfound")),
       BOX_NAME,
       "http://www.mozilla.com/favicon.ico",
       box.PRIORITY_INFO_MEDIUM,
-      buttons
-    );
-  } else {
+      buttons);
+  }
+  else {
+    //errorToLocalize
     Cu.reportError("Couldn't find tab for document");
   }
 };
@@ -536,9 +524,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // button on; it is not necessarily the same page that contains the
   // feed's actual source code. Read-only.
 
-  let feedInfo = {title: title,
-                  uri: uri,
-                  type: type};
+  let feedInfo = {title: title, uri: uri, type: type};
 
   // === {{{Feed#isBuiltIn}}} ===
   //
@@ -549,7 +535,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   feedInfo.__defineGetter__(
     "isBuiltIn",
-    function() {
+    function feedInfo_isBuiltIn() {
       return (annSvc.pageHasAnnotation(uri, FEED_BUILTIN_ANNO));
     }
   );
@@ -560,28 +546,23 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   feedInfo.__defineGetter__(
     "isSubscribed",
-    function() {
+    function feedInfo_isSubscribed() {
       return (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO));
     }
   );
 
-  let expiration;
-
-  if (feedInfo.isBuiltIn)
-    expiration = annSvc.EXPIRE_SESSION;
-  else
-    expiration = annSvc.EXPIRE_NEVER;
+  let expiration =
+    feedInfo.isBuiltIn ? annSvc.EXPIRE_SESSION : annSvc.EXPIRE_NEVER;
 
   // === {{{Feed#purge()}}} ===
   //
   // Permanently deletes the feed.
 
   feedInfo.purge = function feedInfo_purge() {
-    FEED_ANNOS.forEach(
-      function(ann) {
-        if (annSvc.pageHasAnnotation(uri, ann))
-          annSvc.removePageAnnotation(uri, ann);
-      });
+    for each (let ann in FEED_ANNOS) {
+      if (annSvc.pageHasAnnotation(uri, ann))
+        annSvc.removePageAnnotation(uri, ann);
+    }
     hub.notifyListeners("purge", uri);
   };
 
@@ -732,8 +713,20 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   let plugin = this._plugins[feedInfo.type];
   if (!plugin)
+    //errorToLocalize
     throw new Error("No feed plugin registered for type '" +
                     feedInfo.type + "'.");
 
   return plugin.makeFeed(feedInfo, hub);
 };
+
+const PREF_NNSITES = "extensions.ubiquity.noNotificationSites";
+
+function noNotificationSites() (
+  Utils.Application.prefs.getValue(PREF_NNSITES, "").split("|"));
+
+function addToNoNotifications(site) {
+  let notTheseSites = noNotificationSites().filter(Boolean);
+  notTheseSites.push(site);
+  Utils.Application.prefs.setValue(PREF_NNSITES, notTheseSites.join("|"));
+}

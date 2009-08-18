@@ -42,8 +42,10 @@ var EXPORTED_SYMBOLS = ["LocalizationUtils"];
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
-Cu.import("resource://ubiquity/modules/setup.js");
-Cu.import("resource://ubiquity/scripts/gettext/lib/Gettext.js");
+Cu.import("resource://ubiquity/scripts/gettext/lib/Gettext.js")
+Utils.setTimeout(function delayedImport() {
+  Cu.import("resource://ubiquity/modules/setup.js");
+});
 
 const LocalizableProperties = ["names", "help", "description"];
 var loadedPo = {};
