@@ -52,6 +52,7 @@
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 Cu.import("resource://ubiquity/modules/cmdutils.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
@@ -174,6 +175,58 @@ var noun_type_percentage = {
 var noun_type_tab = {
   label: "title or URL",
   noExternalCalls: true,
+  registerCacheObserver: function nt_tab_observer(flush) {
+    var registerListenersForWindow = function(window) {
+      let browser = getBrowser(window);
+      if (browser == null)
+        return;
+      let container = browser.tabContainer;
+      container.addEventListener("TabOpen", function(evt){flush()}, false);
+      container.addEventListener("TabClose", function(evt){flush()}, false);
+    };
+    var unRegisterListenersForWindow = function(window) {
+      let browser = getBrowser(window);
+      if (browser == null)
+        return;
+      let container = browser.tabContainer;
+      container.removeEventListener("TabOpen", this.onTabOpened, false);
+      container.removeEventListener("TabClose", this.onTabClosed, false);
+    };
+    var getBrowser = function(window) {
+      // Make sure the window is browser-like
+      if (typeof window.getBrowser != "function")
+        return null;
+      // Make sure it's a tabbrowser-like window
+      let browser = window.getBrowser();
+      if (browser == null || typeof browser.tabContainer != "object")
+        return null;
+      return browser;
+    };
+    var observe = function (aSubject, aTopic, aData) {
+      /* Called when a window opens or closes.  Make sure that every
+       * window has the appropriate listeners registered. */
+      let window = aSubject.QueryInterface(Ci.nsIDOMWindow);
+      if (aTopic == "domwindowopened") {
+        registerListenersForWindow(window);
+      } else if (aTopic == "domwindowclosed") {
+        unRegisterListenersForWindow(window);
+      }
+    };
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]);
+    // Register as an observer so we can catch windows opening and closing:
+    var ww = Cc["@mozilla.org/embedcomp/window-watcher;1"]
+               .getService(Ci.nsIWindowWatcher);
+    ww.registerNotification({observe: function(aSubject, aTopic, aData){
+                                       observe(aSubject, aTopic, aData)}});
+    /* Also directly register the listeners for any browser window already
+     * open: */
+    let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                   .getService(Components.interfaces.nsIWindowMediator);
+    let enumerator = wm.getEnumerator("navigator:browser");
+    while (enumerator.hasMoreElements()) {
+      registerListenersForWindow(enumerator.getNext());
+    };
+  },
   suggest: function nt_tab_suggest(text, html, cb, selectedIndices)
     [CmdUtils.makeSugg(tab.document.title || tab.document.URL, null, tab,
                        CmdUtils.matchScore(tab.match), selectedIndices)
