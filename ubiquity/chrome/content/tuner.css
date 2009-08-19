@@ -1,0 +1,77 @@
+body {
+  background-color: #ddd;
+  padding: 0px;
+  margin: 0px;
+  font-family: sans-serif;
+}
+			
+h1, h2, h3, .large {
+  color: #333;
+}
+			
+h2 {
+  font-variant: small-caps;
+}
+
+#main {
+  margin: 0 auto;
+  width: 800px;
+  background-color: #fff;
+  padding: 30px;
+}
+      
+#border { 
+  border: 1px black solid;
+  overflow-x: auto;
+}
+
+#border * { 
+  display: inline-block 
+}
+
+input.input {
+  border: none;
+  width: auto;
+  font-size: 0.9em;
+  width: 100%;
+}
+      
+.warning {
+  border: 1px red solid;
+  background-color: #ddd;
+  padding: 10px;
+}
+      
+table#suggs td {
+  border-bottom: 1px solid #ccc;
+  padding: 0px;
+  margin: 0px;
+}
+      
+tr {
+  padding: 0px;
+  margin: 0px;
+}
+      
+tbody {
+  font-size: 0.7em;
+}
+      
+td.id,td.sugg {
+  width: 100px;
+  overflow:none;
+}
+      
+td.score {
+  width: 500px;
+  background-image: url(resource://ubiquity/chrome/skin/icons/tuner-scale.png);
+  background-repeat: repeat-y;
+}
+      
+.scorebar {
+  display: inline-block;
+  background-color: red;
+  height: 0.5em;
+  vertical-align: middle;
+}
+      

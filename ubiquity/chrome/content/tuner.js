@@ -96,8 +96,9 @@ var tunerInterface = {
         $(id+' .scorebar').css('width', Math.min(sugg.score * 500,500));
         
         while (sugg = suggs.pop()) {
+        // Swapped instances of &nbsp; with &#160; for it to show up under xhtml -L
           $('<tr>'
-            +'<td class="id">&nbsp;</td><td class="sugg">'+sugg.text+'</td>'
+            +'<td class="id">&#160;</td><td class="sugg">'+$('<div/>').text(sugg.text).html()+'</td>'
             +'<td class="score"><div class="scorebar" style="width: '
               + Math.min(sugg.score * 500,500) + '"></div> '
               +'<span class="scoreval">'+formatScore(sugg.score)+'</span></td>'
@@ -114,7 +115,7 @@ var tunerInterface = {
 
 function initialDisplay(nountype) {
   var el = 
-    $('<tr id="'+nountype.id.replace('#','')+'"><td class="id">'+nountype.id+'</td><td class="sugg">&nbsp;</td><td class="score"><div class="scorebar" style="width:0px;">&nbsp;</div> <span class="scoreval"></span></td></tr>');
+    $('<tr id="'+nountype.id.replace('#','')+'"><td class="id">'+nountype.id+'</td><td class="sugg">&#160;</td><td class="score"><div class="scorebar" style="width:0px;">&#160;</div> <span class="scoreval"></span></td></tr>');
   $('#suggs tbody').append(el);
 }
 

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html [
+  <!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+    %htmlDTD;
+  <!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
+    %directionDTD;
+  <!ENTITY % ubiquitydevDTD SYSTEM "chrome://ubiquity/locale/devubiquity.dtd">
+    %ubiquitydevDTD;
+  <!ENTITY % ubiquityinternalDTD SYSTEM "chrome://ubiquity/content/internal.dtd">
+    %ubiquityinternalDTD;
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>&ubiquity.pagetitle.TestSuite;</title>
+
+  <link rel="stylesheet" type="text/css" media="all" href="test.css" />
+  <link rel="stylesheet" type="text/css" media="all" href="web-content.css" />
+  <link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
+
+
+  <script type="text/javascript;version=1.8" src="resource://ubiquity/scripts/jquery.js"></script>
+  <script type="text/javascript;version=1.8">
+    
+    Components.utils.import("resource://ubiquity/tests/framework.js");
+    Components.utils.import("resource://ubiquity/tests/test_all.js");
+    Components.utils.import("resource://ubiquity/modules/localization_utils.js");
+
+    var L = LocalizationUtils.propertySelector(
+      "chrome://ubiquity/locale/devubiquity.properties");
+      
+    function startTestSuite() {
+      var outputElement = document.getElementById("test-output");
+      var suite = new TestSuite(new HtmlTestResponder(outputElement), window);
+        suite.start();
+    }
+      
+    function showSuccessfulTests() {
+      var show = document.getElementById("show-tests-successful").checked;
+      var tests = jQuery("#test-output .successful");
+      if(show)
+        tests.show();
+      else
+        tests.hide();
+    }
+      
+    function showSkippedTests() {
+      var show = document.getElementById("show-tests-skipped").checked;
+      var tests = jQuery("#test-output .skipped");
+      if(show)
+        tests.show();
+      else
+        tests.hide();
+    }
+      
+    function showFailedTests() {
+      var show = document.getElementById("show-tests-failed").checked;
+      var tests = jQuery("#test-output .failed");
+      if(show)
+        tests.show();
+      else
+        tests.hide();
+    }
+      
+    function updateCounts() {
+      function updateCountFor(type) {
+        var count = jQuery("#test-output ." + type).length;
+        if (count == 1)
+          count = count + " " + L("ubiquity.testsuite.testsingular");
+        else
+          count = count + " " + L("ubiquity.testsuite.testplural");
+        jQuery("#test-options label[for='show-tests-" + type + "'] .count").text("(" + count + ")");
+      }
+      updateCountFor("successful");
+      updateCountFor("skipped");
+      updateCountFor("failed");
+    }
+      
+    jQuery(document).ready(function() {
+      jQuery("#show-tests-successful").change(showSuccessfulTests);
+      jQuery("#show-tests-skipped").change(showSkippedTests);
+      jQuery("#show-tests-failed").change(showFailedTests);
+        
+      try {
+        startTestSuite();
+        jQuery("#tests-status").hide();
+      } catch (e) {
+        jQuery("#tests-status").text(L("ubiquity.testsuite.runerror", e));
+      }
+        
+      showSuccessfulTests();
+      showSkippedTests();
+      showFailedTests();
+        
+      updateCounts();
+    });
+      
+  </script>
+
+</head>
+<body dir="&locale.dir;">
+    
+<h1>Ubiquity Test Suite</h1>
+    
+<div id="test-options">
+  <label for="show-tests-successful">
+    <input type="checkbox" id="show-tests-successful" />
+      &ubiquity.testsuite.ShowSuccess;
+    <span class="count">(0 tests)</span>
+  </label>
+  <label for="show-tests-skipped">
+    <input type="checkbox" id="show-tests-skipped" />
+      &ubiquity.testsuite.ShowSkipped;
+    <span class="count">(0 tests)</span>
+  </label>
+  <label for="show-tests-failed">
+    <input type="checkbox" id="show-tests-failed" checked="true" />
+      &ubiquity.testsuite.ShowFailed;
+    <span class="count">(0 tests)</span>
+  </label>
+</div>
+    
+<div id="test-output"></div>
+
+<div id="tests-status">&ubiquity.testsuite.TestsRunning;</div>
+    
+</body>
+</html>
