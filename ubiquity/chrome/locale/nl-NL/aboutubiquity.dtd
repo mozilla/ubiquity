@@ -17,7 +17,7 @@
 <!ENTITY ubiquity.tagline.Support "Help!">
 <!ENTITY ubiquity.tagline.HackUbiquity "Hack It.">
 <!-- Page header taglines -->
-<!ENTITY ubiquity.pagetip.About "U kunt deze pagina altijd bereiken door het “Help” opdracht.">
+<!ENTITY ubiquity.pagetip.About "U kunt deze pagina altijd bereiken door het &quot;Help&quot; opdracht.">
 <!ENTITY ubiquity.pagetip.Settings "U kunt deze pagina altijd bereiken door het &quot;change ubiquity settings&quot; opdracht.">
 <!ENTITY ubiquity.pagetip.YourCommands "U kunt deze pagina altijd bereiken door het &quot;list ubiquity commands&quot; opdracht.">
 <!ENTITY ubiquity.pagetip.Support "U kunt deze pagina altijd bereiken door het &quot;get support&quot; opdracht.">
@@ -82,7 +82,7 @@
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "gekende fout">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubscriptionDetails "U hebt &cmdCount: opdrachten in &feedCount; opdrachten feeds. |U bent uitgeschreven van <a href='cmdlist.xhtml#graveyard'>&unsubCount; opdrachten feeds</a>.| &helpLink;">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "U hebt &cmdCount; opdrachten in &feedCount; opdrachten feeds. |U bent uitgeschreven van <a href='cmdlist.xhtml#graveyard'>&unsubCount; opdrachten feeds</a>.| &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Alle opdrachten die &appTitle; herkent worden opgesomd in de rechtse kolom. De zwarte tekst is de opdrachtnaam (wat u typt in &appTitle; om deze te gebruiken). De grijze tekst legt uit wat de opdracht doet.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "De linker kolom toont allle &ldquo;feeds&rdquo; waartoe &appTitle; is ingeschreven. Elke feed kan meerdere opdrachten bevatten.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "U kunt deze pagina gesorteerd op feeds, of gesorteerd op opdrachten bekijken. Klik op de links naast &ldquo;sorteren op &rdquo;, die u hieronder vindt.">
@@ -182,7 +182,7 @@
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "man-in-the-middle aanvallen">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 ". Update deze feed alleen automatisch als u zeker bent van de gevolgen van uw daden.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationShort "U bent nu aan het inschrijven op een opdrachten feed en u kunt de functionaliteit ervan gebruiken.">
-<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Als u zich ooit zou willen uitschrijven, kunt u de &ldquo;list&rdquo; &appTitle opdracht op elk moment gebruiken om op de">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Als u zich ooit zou willen uitschrijven, kunt u de &ldquo;list&rdquo; &appTitle; opdracht op elk moment gebruiken om op de">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "opdrachten beheers pagina te komen">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "waar u alle opdrachten waar u bent ingeschreven kunt zien, en deze die u niet meer wilt kunt annuleren.">
 <!-- Hack chrome/content/editor.xhtml -->
