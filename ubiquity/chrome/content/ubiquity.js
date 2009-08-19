@@ -59,8 +59,6 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   Cu.import("resource://ubiquity/modules/utils.js", this);
   Cu.import("resource://ubiquity/modules/contextutils.js", this);
 
-  var self = this;
-
   window.addEventListener("mousemove", this, false);
 
   textBox.addEventListener("keydown", this, true);
@@ -211,7 +209,7 @@ Ubiquity.prototype = {
   __onpopuphidden: function U__onHidden() {
     if (this.__needsToExecute) {
       this.__needsToExecute = false;
-      this.__cmdManager.execute(this.__makeContext());
+      this.execute();
     }
     var unfocused = this.__focusedElement || this.__focusedWindow;
     if (unfocused) unfocused.focus(); // focus() === unblair()
@@ -244,6 +242,22 @@ Ubiquity.prototype = {
   setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {
   },
 
+  execute: function U_execute(input) {
+    if (input) {
+      this.__textBox.value = input;
+      this.__processInput(true);
+    }
+    this.__cmdManager.execute(this.__makeContext());
+  },
+
+  preview: function U_preview(input) {
+    if (input) this.__textBox.value = input;
+    if (this.isWindowOpen)
+      this.__processInput(true);
+    else
+      this.openWindow();
+  },
+
   openWindow: function U_openWindow() {
     ({focusedWindow : this.__focusedWindow,
       focusedElement: this.__focusedElement}) = document.commandDispatcher;
@@ -257,13 +271,9 @@ Ubiquity.prototype = {
   },
 
   toggleWindow: function U_toggleWindow() {
-    switch (this.__msgPanel.state) {
-      case "open":
-      case "hiding":
-      case "showing":
+    if (/^open$|^(?:hid|show)ing$/.test(this.__msgPanel.state))
       this.closeWindow();
-      return;
-    }
-    this.openWindow();
+    else
+      this.openWindow();
   },
 };
