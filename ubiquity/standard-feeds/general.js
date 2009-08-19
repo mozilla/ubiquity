@@ -234,56 +234,48 @@ CmdUtils.CreateCommand({
 // TRANSLATE COMMANDS
 // -----------------------------------------------------------------
 
-function translateTo(text, langCodePair, callback, pblock) {
-  var url = "http://ajax.googleapis.com/ajax/services/language/translate";
-  var params = {
-    v: "1.0",
-    q: text,
-    langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
-  };
-  function onsuccess(data) {
-    // The usefulness of this command is limited because of the
-    // length restriction enforced by Google. A better way to do
-    // this would be to split up the request into multiple chunks.
-    // The other method is to contact Google and get a special
-    // account.
-    try {
-      var {translatedText} = data.responseData;
-    } catch(e) {
-      // If we get either of these error messages, that means Google wasn't
-      // able to guess the originating language. Let's assume it was English.
-      // TODO: Localize this.
-      var BAD_FROM_LANG_1 = _("invalid translation language pair");
-      var BAD_FROM_LANG_2 = _("could not reliably detect source language");
-      var errMsg = data.responseDetails;
-      if( errMsg == BAD_FROM_LANG_1 || errMsg == BAD_FROM_LANG_2 ) {
-        // Don't do infinite loops. If we already have a guess language
-        // that matches the current forced from language, abort!
-        if( langCodePair.from != "en" )
-          translateTo(text, {from: "en", to: langCodePair.to},
-                      callback, pblock);
-      }
-      else {
-        displayMessage( _("Translation error: ${error}",
-                          {error:data.responseDetails}) );
-      }
-      return;
-    }
-    callback(translatedText);
-  }
+const GTRANSLATE_LIMIT = 5120;
 
-  if (pblock) CmdUtils.previewGet(pblock, url, params, onsuccess, "json");
-  else jQuery.get(url, params, onsuccess, "json");
+function googleTranslate(html, langCodePair, callback, pblock) {
+  var self = this;
+  var options = {
+    type: "POST",
+    url: "http://ajax.googleapis.com/ajax/services/language/translate",
+    data: {
+      v: "1.0",
+      q: html,
+      langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
+      format: "html",
+    },
+    dataType: "json",
+    success: function onTranslateSuccess(data) {
+      switch (data.responseStatus) {
+        case 200: callback(data.responseData); return;
+        case 400: {
+          displayMessage(data.responseDetails, self);
+          if (langCodePair.from === "en") return;
+          langCodePair.from = "en";
+          googleTranslate.call(self, html, langCodePair, callback, pblock);
+          return;
+        }
+        default: displayMessage(data.responseDetails, self);
+      }
+    },
+    error: function onTranslateError(xhr) {
+      Utils.reportInfo("google translate: " +
+                       xhr.status + " " + xhr.statusText);
+    },
+  };
+  pblock ? CmdUtils.previewAjax(pblock, options) : jQuery.ajax(options);
 }
 
 CmdUtils.CreateCommand({
-  DEFAULT_LANG_PREF : "extensions.ubiquity.default_translation_lang",
+  DEFAULT_LANG_PREF: "extensions.ubiquity.default_translation_lang",
   names: ["translate"],
   arguments: [
     {role: "object", nountype: noun_arb_text, label: "text"},
     {role: "source", nountype: noun_type_lang_google},
-    {role: "goal", nountype: noun_type_lang_google},
-  ],
+    {role: "goal", nountype: noun_type_lang_google}],
   description: "Translates from one language to another.",
   icon: "chrome://ubiquity/skin/icons/google.ico",
   help: "" + (
@@ -296,46 +288,58 @@ CmdUtils.CreateCommand({
     to how much it can translate a selection at once.
     If you want to translate a lot of text, leave out the input and
     it will translate the whole page.</>),
-  execute: function ({object, goal, source}) {
+  execute: function translate_execute({object: {html}, goal, source}) {
     var sl = source.data || "";
     var tl = goal.data || this._getDefaultLang();
-    if (object.text)
-      translateTo(object.text,
-                  {from: sl, to: tl},
-                  function(translation) {
-                    CmdUtils.setSelection(translation);
-                  });
+    if (html && html.length <= GTRANSLATE_LIMIT)
+      googleTranslate.call(
+        this,
+        html,
+        {from: sl, to: tl},
+        function translate_execute_onTranslate({translatedText}) {
+          CmdUtils.setSelection(translatedText);
+        });
     else
       Utils.openUrlInBrowser(
         "http://translate.google.com/translate" +
         Utils.paramsToString({
-          u: context.focusedWindow.location.href,
+          u: CmdUtils.getWindow().location.href,
           sl: sl,
           tl: tl,
         }));
   },
-  preview: function (pblock, {object, goal, source}) {
-    var textToTranslate = object && object.text;
+  preview: function translate_preview(pblock, {object: {html}, goal, source}) {
     var defaultLang = this._getDefaultLang();
     var toLang = goal.text || noun_type_lang_google.getLangName(defaultLang);
     var toLangCode = goal.data || defaultLang;
     var fromLangCode = source.data || "";
-    if (!textToTranslate) {
-      var {href} = context.focusedWindow.location;
-      pblock.innerHTML = _("Translates ${url} into <b>${toLang}</b>.",
-                           { url: <a href={href}>{href}</a>.toXMLString(),
-                             toLang: toLang });
+    var limitExceeded = html.length > GTRANSLATE_LIMIT;
+    if (!html || limitExceeded) {
+      var ehref = Utils.escapeHtml(CmdUtils.getWindow().location);
+      pblock.innerHTML = (
+        _("Translates ${url} into <b>${toLang}</b>.",
+          {url: ehref.link(ehref), toLang: toLang}) +
+        (limitExceeded
+         ? ('<p class="error">' +
+            _("The text you selected exceeds the API limit.") +
+            "</p>")
+         : ""));
       return;
     }
-    var html = _(
+    var phtml = pblock.innerHTML =  _(
       "Replaces the selected text with the <b>${toLang}</b> translation:",
       {toLang: toLang});
-    pblock.innerHTML = html;
-    translateTo(
-      textToTranslate,
+    googleTranslate.call(
+      this,
+      html,
       {from: fromLangCode, to: toLangCode},
-      function(translation) {
-        pblock.innerHTML = html + <p><b>{translation}</b></p>;
+      function translate_preview_onTranslate(
+        {translatedText, detectedSourceLanguage: dsl}) {
+        pblock.innerHTML = (
+          phtml + "<br/><br/>" + translatedText +
+          (dsl
+           ? ("<p>(" + dsl + " \u2192 " + toLangCode + ")</p>")
+           : ""));
       },
       pblock);
   },
@@ -343,15 +347,14 @@ CmdUtils.CreateCommand({
   // extensions.ubiquity.default_translation_lang > general.useragent.locale > "en"
   // And also, if there unknown language code is found any of these preference,
   // we fall back to English.
-  _getDefaultLang: function() {
+  _getDefaultLang: function translate__getDefaultLang() {
     var {prefs} = Application;
     var userLocale = prefs.getValue("general.useragent.locale", "en");
     var defaultLang = prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
     // If defaultLang is invalid lang code, fall back to english.
-    if (!noun_type_lang_google.getLangName(defaultLang)) {
-      return "en";
-    }
-    return defaultLang;
+    return (noun_type_lang_google.getLangName(defaultLang)
+            ? defaultLang
+            : "en");
   }
 });
 
@@ -368,12 +371,10 @@ CmdUtils.CreateCommand({
  */
 CmdUtils.CreateCommand({
   names: ["create bookmarklet command"],
-  arguments: [{role: "source",
-               nountype: noun_type_bookmarklet,
-               label: "bookmarklet name"}],
+  arguments: [{role: "source", nountype: noun_type_bookmarklet}],
   description: "Creates a new Ubiquity command from a bookmarklet.",
-  help: "For instance, if you have a bookmarklet called 'press this', " +
-        "you can say 'create bookmarklet command from press this'.",
+  help: ("For instance, if you have a bookmarklet called 'press this', " +
+         "you can say 'create bookmarklet command from press this'."),
   author: {name: "Abimanyu Raja", email: "abimanyuraja@gmail.com"},
   license: "MPL",
   preview: function(previewBlock, {source: {text, data}}) {
@@ -407,31 +408,32 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["create search command"],
-  description: "Creates a new Ubiquity command from a focused search-box " +
-               "and lets you set the command name.",
+  description: ("Creates a new Ubiquity command from a focused search-box " +
+                "and lets you set the command name."),
   help: (<ol style="list-style-image:none">
          <li>Select a searchbox.</li>
          <li>Say 'create search command mysearch'.</li>
          <li>Execute.</li>
          <li>You now have a command called 'mysearch'.</li>
          </ol>) + "",
-  author: {name: "Marcello Herreshoff",
-           homepage: "http://stanford.edu/~marce110/"},
+  author:
+  {name: "Marcello Herreshoff", homepage: "http://stanford.edu/~marce110/"},
   contributors: ["Abimanyu Raja", "satyr"],
   icon: "chrome://ubiquity/skin/icons/search.png",
   license: "GPL/LGPL/MPL",
   homepage:
   "http://stanford.edu/~marce110/verbs/new-command-from-search-box.html",
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: "command name"}],
-  preview: function(pblock, {object: {text}}) {
+  arguments: [{
+    role: "object",
+    nountype: noun_arb_text,
+    label: "command name"}],
+  preview: function csc_preview(pblock, {object: {html}}) {
     pblock.innerHTML = (
-      text
-      ? _("Creates a new search command called <b>${text}</b>", {text: text})
-      : this.description + this.help);
+      html
+      ? _("Creates a new search command called <b>${text}</b>", {text: html})
+      : this.previewDefault());
   },
-  execute: function({object: {text: name}}) {
+  execute: function csc_execute({object: {text: name}}) {
     var node = context.focusedElement || 0;
     var {form} = node;
     if (!node || !form) {
@@ -486,13 +488,14 @@ CmdUtils.CreateCommand({
     //5. Tell the user we finished
     tellTheUserWeFinished(name, this);
   },
-  _encodePair: function(key, val)(encodeURIComponent(key) + "=" +
-                                  encodeURIComponent(val)),
+  _encodePair: function csc__encodePair(key, val)
+    encodeURIComponent(key) + "=" + encodeURIComponent(val),
 });
 
+const MSG_CREATED = _("You have created the command: [ ${name} ]. " +
+                      "You can edit its source-code with the command editor.");
+
 function tellTheUserWeFinished(name, cmd) {
-  displayMessage(_(("You have created the command: ${name}. " +
-                    "You can edit its source-code with the command editor."),
-                   {name: name}),
+  displayMessage(CmdUtils.renderTemplate(MSG_CREATED, {name: name}),
                  cmd);
 }
