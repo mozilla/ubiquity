@@ -295,9 +295,7 @@ function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
   var timer = timerClass.createInstance(Ci.nsITimer);
   // emulate window.setTimeout() by incrementing next ID
   var timerID = __timerData.nextID++;
-  __timerData.timers[timerID] = timer;
-
-  timer.initWithCallback(
+  (__timerData.timers[timerID] = timer).initWithCallback(
     new __TimerCallback(callback,
                         arguments.length > 2 ? Array.slice(arguments, 2) : []),
     delay,
@@ -320,11 +318,10 @@ function clearTimeout(timerID) {
 }
 
 // Support infrastructure for the timeout-related functions.
-
+var __timerData = {nextID: 1, timers: {}};
 function __TimerCallback(callback, args) {
   this._callback = callback;
   this._args = args;
-  this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
 }
 __TimerCallback.prototype = {
   notify: function TC_notify(timer) {
@@ -336,9 +333,8 @@ __TimerCallback.prototype = {
       }
     this._callback.apply(null, this._args);
   },
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsITimerCallback]),
 };
-
-var __timerData = {nextID: 1, timers: {}};
 
 // === {{{ Utils.uri(spec, defaultUrl) }}} ===
 // === {{{ Utils.url() }}} ===
@@ -753,10 +749,7 @@ Utils.dump = function niceDump() {
 //
 // A wrapper function for
 // [[https://developer.mozilla.org/en/XUL/notificationbox|notificationbox]]
-// #{{{appendNotification}}}.
-///
-// For ease of use, the arguments can be passed as a dictionary in place of
-// {{{label}}} (e.g.: {{{notify({label: "...", value: ...})}}}).
+// {{{#appendNotification}}}.
 //
 // * {{{label}}} : The text to show.
 // * {{{value}}} : An optional identifier string. Defaults to {{{label}}}.
@@ -766,6 +759,12 @@ Utils.dump = function niceDump() {
 // * {{{buttons}}} : The button descriptions. See the above link for details.
 // * {{{target}}} : An optional browser/window/document element to which
 //   the notification is appended. Defaults to the current page.
+//
+// For ease of use, the arguments can be passed as a dictionary in place of
+// {{{label}}}. e.g.:
+// {{{
+// notify({label: "!", value: "foo", priority: "Critical_Block"});
+// }}}
 
 function notify(label, value, image, priority, buttons, target) {
   if (classOf(label) === "Object")
