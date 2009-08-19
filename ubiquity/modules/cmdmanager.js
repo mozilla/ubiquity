@@ -54,9 +54,9 @@ const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
 const MIN_MAX_SUGGS = 1;
 const MAX_MAX_SUGGS = 42;
 
-const DEFAULT_HELP = "" + (
-  '<div class="default" xmlns="http://www.w3.org/1999/xhtml">' 
-  + L("ubiquity.cmdmanager.defaulthelp") + '</div>');
+const DEFAULT_HELP = (
+  '<div class="default" xmlns="http://www.w3.org/1999/xhtml">' +
+  L("ubiquity.cmdmanager.defaulthelp") + '</div>');
 
 var gDomNodes = {};
 

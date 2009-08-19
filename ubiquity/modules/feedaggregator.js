@@ -36,13 +36,20 @@
 
 var EXPORTED_SYMBOLS = ["FeedAggregator"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/eventhub.js");
+const Cu = Components.utils;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/eventhub.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/coreubiquity.properties");
 
 function FeedAggregator(feedManager, messageService, disabledCommands) {
   var self = this;
   var commands = {};
   var commandNames = [];
+  var commandsByServiceDomain = {};
   var pageLoadFuncLists = [];
   var ubiquityLoadFuncLists = [];
   var feedsChanged = true;
@@ -88,6 +95,13 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
                    pageLoadFunc.name + "()"),
             exception: e});
         }
+
+    var win = document.defaultView;
+    if (win !== win.top) return; // avoid frames
+    var cmds4domain = [
+      cmd for each (cmd in commandsByServiceDomain[document.domain])
+      if (!cmd.disabled)];
+    if (cmds4domain.length) onDomainWithCommands(document, cmds4domain);
   };
 
   self.onUbiquityLoad = function FA_onUbiquityLoad(window) {
@@ -114,6 +128,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 
     commands = {};
     commandNames = [];
+    commandsByServiceDomain = {};
     pageLoadFuncLists = [];
     ubiquityLoadFuncLists = [];
     feedsChanged = false;
@@ -125,11 +140,15 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
         if (cmd.application && cmd.application.indexOf(Utils.appName) === -1)
           continue;
         commandNames.push({id: cmd.id, name: cmd.name, icon: cmd.icon});
-        commands[cmd.id] = makeCmdWithDisabler(cmd);
+        let cmdwd = commands[cmd.id] = makeCmdWithDisabler(cmd);
+        let {serviceDomain} = cmd;
+        if (serviceDomain)
+          (commandsByServiceDomain[serviceDomain] ||
+           (commandsByServiceDomain[serviceDomain] = [])).push(cmdwd);
       }
-      if ((feed.pageLoadFuncs || '').length)
+      if ((feed.pageLoadFuncs || "").length)
         pageLoadFuncLists.push(feed.pageLoadFuncs);
-      if ((feed.ubiquityLoadFuncs || '').length)
+      if ((feed.ubiquityLoadFuncs || "").length)
         ubiquityLoadFuncLists.push(feed.ubiquityLoadFuncs);
     }
     hub.notifyListeners("feeds-reloaded", null);
@@ -144,7 +163,9 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   };
 
   self.__defineGetter__("commandNames",
-                        function() { return commandNames; });
+                        function FA_cmdNames() commandNames);
+  self.__defineGetter__("commandsByServiceDomain",
+                        function FA_cmdsBySD() commandsByServiceDomain);
 
   self.getAllCommands = function FA_getAllCommands() {
     if (feedsChanged)
@@ -160,3 +181,97 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     return commands[name] || null;
   };
 }
+
+const PREF_NNSITES = "extensions.ubiquity.noNotificationSites";
+
+function onDomainWithCommands(document, commands) {
+  var reminderPeriod = Utils.Application.prefs.getValue(
+    "extensions.ubiquity.commandReminderPeriod", 0);
+  if (!reminderPeriod) return;
+  var {domain} = document;
+  var visitsToDomain = Utils.history.visitsToDomain(domain);
+  if (visitsToDomain % reminderPeriod) return;
+  var nnSites = noNotificationSites();
+  if (~nnSites.indexOf(domain)) return;
+  var cmd = Utils.sortBy(commands, Math.random)[0];
+  // TODO: encapsulation breakage
+  var freqOfUse = (Utils.currentChromeWindow.gUbiquity.cmdManager
+                   .__nlParser._suggestionMemory.getScore("", cmd.id));
+  freqOfUse || showEnabledCommandNotification(document, cmd.name);
+}
+
+function noNotificationSites() (
+  Utils.Application.prefs.getValue(PREF_NNSITES, "").split("|"));
+
+function addToNoNotifications(site) {
+  let nnSites = noNotificationSites().filter(Boolean);
+  nnSites.push(site);
+  Utils.Application.prefs.setValue(PREF_NNSITES, nnSites.join("|"));
+}
+
+function showEnabledCommandNotification(targetDoc, commandName) {
+  var Cc = Components.classes;
+  var Ci = Components.interfaces;
+
+  // Find the <browser> which contains notifyWindow, by looking
+  // through all the open windows and all the <browsers> in each.
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
+           getService(Ci.nsIWindowMediator);
+  var enumerator = wm.getEnumerator(Utils.appWindowType);
+  var tabbrowser = null;
+  var foundBrowser = null;
+
+  while (!foundBrowser && enumerator.hasMoreElements()) {
+    var win = enumerator.getNext();
+    tabbrowser = win.getBrowser();
+    foundBrowser = tabbrowser.getBrowserForDocument(targetDoc);
+  }
+
+  // Return the notificationBox associated with the browser.
+  if (foundBrowser) {
+    var box = tabbrowser.getNotificationBox(foundBrowser);
+    var BOX_NAME = "ubiquity_notify_enabled_command";
+    var oldNotification = box.getNotificationWithValue(BOX_NAME);
+    if (oldNotification)
+      box.removeNotification(oldNotification);
+
+    // popup Ubiquity and input the verb associated with the website
+    function onShowMeClick(notification, button) {
+      notification.close();
+      Utils.setTimeout(showCommandInUbiquity, 500);
+    }
+
+    function showCommandInUbiquity() {
+      Utils.currentChromeWindow.gUbiquity.preview(commandName);
+      addToNoNotifications(targetDoc.domain);
+    }
+
+    // add this domain to the list of domains to not give notifications for
+    function onNoMoreClick(notification, button) {
+      addToNoNotifications(targetDoc.domain);
+    }
+
+    var notify_message = L("ubiquity.feedmanager.didyouknow");
+    var buttons = [{
+      accessKey: "S",
+      callback: onShowMeClick,
+      label: L("ubiquity.feedmanager.showme"),
+      popup: null,
+    }, {
+      accessKey: "D",
+      callback: onNoMoreClick,
+      label: L("ubiquity.feedmanager.dontremind"),
+      popup:null,
+    }];
+    box.appendNotification(
+      notify_message,
+      BOX_NAME,
+      "chrome://ubiquity/skin/icons/favicon.ico",
+      box.PRIORITY_INFO_MEDIUM,
+      buttons);
+  }
+  else {
+    //errorToLocalize
+    Cu.reportError("Couldn't find tab for document");
+  }
+};
