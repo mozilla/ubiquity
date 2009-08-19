@@ -310,55 +310,20 @@ FMgrProto.showNotification = function showNotification(plugin,
                                                        commandsUrl,
                                                        mimetype,
                                                        notify_message) {
-
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-
-  // Find the <browser> which contains notifyWindow, by looking
-  // through all the open windows and all the <browsers> in each.
-  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
-           getService(Ci.nsIWindowMediator);
-  var enumerator = wm.getEnumerator(Utils.appWindowType);
-  var tabbrowser = null;
-  var foundBrowser = null;
-
-  while (!foundBrowser && enumerator.hasMoreElements()) {
-    var win = enumerator.getNext();
-    tabbrowser = win.getBrowser();
-    foundBrowser = tabbrowser.getBrowserForDocument(targetDoc);
-  }
-
-  // Return the notificationBox associated with the browser.
-  if (foundBrowser) {
-    var box = tabbrowser.getNotificationBox(foundBrowser);
-    var BOX_NAME = "ubiquity_notify_commands_available";
-    var oldNotification = box.getNotificationWithValue(BOX_NAME);
-    if (oldNotification)
-      box.removeNotification(oldNotification);
-
-    function onSubscribeClick(notification, button) {
-      plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
-    }
-
-    var buttons = [{
+  Utils.notify({
+    target: targetDoc,
+    label: (notify_message ||
+            plugin.notify_message ||
+            L("ubiquity.feedmanager.newcommandfound")),
+    value: "ubiquity_notify_commands_available",
+    priority: "INFO_MEDIUM",
+    buttons: [{
       accessKey: "S",
-      callback: onSubscribeClick,
+      callback: function onSubscribeClick(notification, button) {
+        plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
+      },
       label: L("ubiquity.feedmanager.subscribe"),
-      popup: null,
-    }];
-    box.appendNotification(
-      (notify_message ||
-       plugin.notify_message ||
-       L("ubiquity.feedmanager.newcommandfound")),
-      BOX_NAME,
-      "http://www.mozilla.com/favicon.ico",
-      box.PRIORITY_INFO_MEDIUM,
-      buttons);
-  }
-  else {
-    //errorToLocalize
-    Cu.reportError("Couldn't find tab for document");
-  }
+    }]});
 };
 
 // === {{{FeedManager#finalize()}}} ===

@@ -749,6 +749,61 @@ Utils.dump = function niceDump() {
        Array.join(arguments, " ") + "\n");
 };
 
+// === {{{ Utils.notify(label, value, image, priority, buttons, target) }}} ===
+//
+// A wrapper function for
+// [[https://developer.mozilla.org/en/XUL/notificationbox|notificationbox]]
+// #{{{appendNotification}}}.
+///
+// For ease of use, the arguments can be passed as a dictionary in place of
+// {{{label}}} (e.g.: {{{notify({label: "...", value: ...})}}}).
+//
+// * {{{label}}} : The text to show.
+// * {{{value}}} : An optional identifier string. Defaults to {{{label}}}.
+// * {{{image}}} : An optional URL string for the icon.
+// * {{{priority}}} : An optional string to specify the priority.
+//   Defaults to {{{"INFO_LOW"}}}.
+// * {{{buttons}}} : The button descriptions. See the above link for details.
+// * {{{target}}} : An optional browser/window/document element to which
+//   the notification is appended. Defaults to the current page.
+
+function notify(label, value, image, priority, buttons, target) {
+  if (classOf(label) === "Object")
+    // pseudo keyword arguments
+    var {label, value, image, priority, buttons, target} = label;
+  if (!target) {
+    var tabbrowser = Utils.currentChromeWindow.gBrowser;
+    var foundBrowser = tabbrowser.selectedBrowser;
+  }
+  else {
+    taget = target.contentDocument || target.document || target;
+    // Find the <browser> which contains notifyWindow, by looking
+    // through all the open windows and all the <browsers> in each.
+    var enumerator = (Cc["@mozilla.org/appshell/window-mediator;1"]
+                      .getService(Ci.nsIWindowMediator)
+                      .getEnumerator(Utils.appWindowType));
+    while (!foundBrowser && enumerator.hasMoreElements()) {
+      tabbrowser = enumerator.getNext().getBrowser();
+      foundBrowser = tabbrowser.getBrowserForDocument(target);
+    }
+  }
+  if (!foundBrowser) {
+    Cu.reportError("Couldn't find tab for document");
+    return null;
+  }
+  value || (value = label);
+  var box = tabbrowser.getNotificationBox(foundBrowser);
+  var oldNotification = box.getNotificationWithValue(value);
+  if (oldNotification) box.removeNotification(oldNotification);
+  return box.appendNotification(
+    label,
+    value,
+    image || "chrome://ubiquity/skin/icons/favicon.ico",
+    (box[("PRIORITY_" + priority).toUpperCase()] ||
+     box.PRIORITY_INFO_LOW),
+    buttons);
+}
+
 // == {{{ Utils.tabs }}} ==
 //
 // This Object contains functions related to Firefox tabs.

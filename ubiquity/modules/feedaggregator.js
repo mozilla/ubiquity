@@ -210,68 +210,28 @@ function addToNoNotifications(site) {
 }
 
 function showEnabledCommandNotification(targetDoc, commandName) {
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-
-  // Find the <browser> which contains notifyWindow, by looking
-  // through all the open windows and all the <browsers> in each.
-  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].
-           getService(Ci.nsIWindowMediator);
-  var enumerator = wm.getEnumerator(Utils.appWindowType);
-  var tabbrowser = null;
-  var foundBrowser = null;
-
-  while (!foundBrowser && enumerator.hasMoreElements()) {
-    var win = enumerator.getNext();
-    tabbrowser = win.getBrowser();
-    foundBrowser = tabbrowser.getBrowserForDocument(targetDoc);
-  }
-
-  // Return the notificationBox associated with the browser.
-  if (foundBrowser) {
-    var box = tabbrowser.getNotificationBox(foundBrowser);
-    var BOX_NAME = "ubiquity_notify_enabled_command";
-    var oldNotification = box.getNotificationWithValue(BOX_NAME);
-    if (oldNotification)
-      box.removeNotification(oldNotification);
-
-    // popup Ubiquity and input the verb associated with the website
-    function onShowMeClick(notification, button) {
-      notification.close();
-      Utils.setTimeout(showCommandInUbiquity, 500);
-    }
-
-    function showCommandInUbiquity() {
-      Utils.currentChromeWindow.gUbiquity.preview(commandName);
-      addToNoNotifications(targetDoc.domain);
-    }
-
+  function toNoNo() {
     // add this domain to the list of domains to not give notifications for
-    function onNoMoreClick(notification, button) {
-      addToNoNotifications(targetDoc.domain);
-    }
-
-    var notify_message = L("ubiquity.feedmanager.didyouknow");
-    var buttons = [{
+    addToNoNotifications(targetDoc.domain);
+  }
+  Utils.notify({
+    target: targetDoc,
+    label: L("ubiquity.feedmanager.didyouknow"),
+    value: "ubiquity_notify_enabled_command",
+    priority: "INFO_MEDIUM",
+    buttons: [{
       accessKey: "S",
-      callback: onShowMeClick,
+      // popup Ubiquity and input the verb associated with the website
+      callback: function onShowMeClick(notification, button) {
+        toNoNo();
+        Utils.setTimeout(function showCommandInUbiquity() {
+          Utils.currentChromeWindow.gUbiquity.preview(commandName);
+        }, 500);
+      },
       label: L("ubiquity.feedmanager.showme"),
-      popup: null,
     }, {
       accessKey: "D",
-      callback: onNoMoreClick,
+      callback: toNoNo,
       label: L("ubiquity.feedmanager.dontremind"),
-      popup:null,
-    }];
-    box.appendNotification(
-      notify_message,
-      BOX_NAME,
-      "chrome://ubiquity/skin/icons/favicon.ico",
-      box.PRIORITY_INFO_MEDIUM,
-      buttons);
-  }
-  else {
-    //errorToLocalize
-    Cu.reportError("Couldn't find tab for document");
-  }
+    }]});
 };
