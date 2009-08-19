@@ -19,15 +19,15 @@ Sincerely,
 
 -->
 <!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
-<!ENTITY ubiquity.pagetitle.About "&amp;amp;appTitle; について">
-<!ENTITY ubiquity.pagetitle.Settings "各種設定 - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.YourCommands "コマンドリスト - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.LocalizeCmd "ローカライズテンプレート - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.Support "サポート - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.HackUbiquity "ハッキング - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "信頼されていないサイトからのコマンド - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.ResetUbiquity "設定の初期化 - &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.bug19warning "通知に失敗しました - &amp;amp;appTitle;">
+<!ENTITY ubiquity.pagetitle.About "&appTitle; について">
+<!ENTITY ubiquity.pagetitle.Settings "各種設定 - &appTitle;">
+<!ENTITY ubiquity.pagetitle.YourCommands "コマンドリスト - &appTitle;">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "ローカライズテンプレート - &appTitle;">
+<!ENTITY ubiquity.pagetitle.Support "サポート - &appTitle;">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "ハッキング - &appTitle;">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "信頼されていないサイトからのコマンド - &appTitle;">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "設定の初期化 - &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "通知に失敗しました - &appTitle;">
 <!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.tagline.About "ubi さ qui ひ ty つのインターネット。">
 <!ENTITY ubiquity.tagline.Settings "各種設定とスキン">
@@ -62,39 +62,39 @@ Sincerely,
 
 -->
 <!-- End common elements -->
-<!ENTITY ubiqutiy.about.WhatIsUbiquity "&amp;amp;appTitle; をご利用いただき、誠にありがとうございます。">
-<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&amp;amp;appTitle; は、特別なパネルにコマンドを入力して Firefox を操作するアドオンです。">
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "&appTitle; をご利用いただき、誠にありがとうございます。">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; は、特別なパネルにコマンドを入力して Firefox を操作するアドオンです。">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "繰り返し行う操作をコマンドとして登録しておけば、高速・快適なブラウジングを体験する事ができます。">
 <!ENTITY ubiqutiy.about.WhatIsParagraph3 "誰でも自分のコマンドを書いて世界中のユーザと共有できます。ぜひ、ご自分の Web ページでコマンドを公開して共有してください。">
-<!ENTITY ubiqutiy.about.LearnHow "&amp;amp;appTitle; の使い方">
+<!ENTITY ubiqutiy.about.LearnHow "&appTitle; の使い方">
 <!ENTITY ubiqutiy.about.TutorialButton "ここをクリックすると、対話式のチュートリアルが始まります。">
-<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "&amp;amp;appTitle; をさらに使いこなすには">
-<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "&amp;amp;appTitle; についてさらに詳しく知りたい場合は、">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "&appTitle; をさらに使いこなすには">
+<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "&appTitle; についてさらに詳しく知りたい場合は、">
 <!ENTITY ubiqutiy.about.UsingParagraph1LinkText "こちら">
 <!ENTITY ubiqutiy.about.UsingParagraph1Part2 "(英語) をお読みください。">
 <!ENTITY ubiqutiy.about.UsingParagraph2Part1 "ご協力をお願いします。">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText1 "Herd">
 <!ENTITY ubiqutiy.about.UsingParagraph2Part2 "にサインアップして、あなたの利用データを">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText2 "ダッシュボード">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "に追加してください。このデータは &amp;amp;appTitle; の改善と安全性向上のために使用され、完全に匿名で送信されます。">
-<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "&amp;amp;appTitle; プロジェクトの目標と次期リリース計画についての情報は">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "に追加してください。このデータは &appTitle; の改善と安全性向上のために使用され、完全に匿名で送信されます。">
+<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "&appTitle; プロジェクトの目標と次期リリース計画についての情報は">
 <!ENTITY ubiqutiy.about.UsingParagraph3LinkText "ロードマップ">
 <!ENTITY ubiqutiy.about.UsingParagraph3Part2 "をご覧ください。">
-<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&amp;amp;appTitle; は世界中の貢献者による共同作業で成り立っています。貢献者のリストは">
+<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&appTitle; は世界中の貢献者による共同作業で成り立っています。貢献者のリストは">
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "クレジットページ">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 "をご覧ください。">
-<!ENTITY ubiqutiy.about.Thanks "現在、バージョン &amp;amp;appVersion; をご利用いただいております。">
-<!ENTITY ubiquity.about.ThanksParagraphPart1 "Ubuiquity のバージョン &amp;amp;appVersion; では、ユーザインタフェースのパフォーマンス改善と以前のリリースで見つかったバグの修正に取り組んでいます。このリリースでは、スピード、応答、パーサの正確さが向上しています。新着情報については">
+<!ENTITY ubiqutiy.about.Thanks "現在、バージョン &appVersion; をご利用いただいております。">
+<!ENTITY ubiquity.about.ThanksParagraphPart1 "Ubuiquity のバージョン &appVersion; では、ユーザインタフェースのパフォーマンス改善と以前のリリースで見つかったバグの修正に取り組んでいます。このリリースでは、スピード、応答、パーサの正確さが向上しています。新着情報については">
 <!ENTITY ubiquity.about.ThanksParagraphLinkText "リリースノート">
 <!ENTITY ubiquity.about.ThanksParagraphPart2 "をご覧ください。">
 <!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.settings.Skins "スキン">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "カスタムスキンの編集">
 <!ENTITY ubiquity.settings.KeyCombination "呼び出しキー">
-<!ENTITY ubiquity.settings.InvokingUbiquity "&amp;amp;appTitle; を呼び出すキーの組み合わせ:">
-<!ENTITY ubiquity.settings.ChangeShortcut "&amp;amp;appTitle; パネルの開閉に使用するキーボードショートカットを変更するには、上のフィールドをクリックしてください。">
+<!ENTITY ubiquity.settings.InvokingUbiquity "&appTitle; を呼び出すキーの組み合わせ:">
+<!ENTITY ubiquity.settings.ChangeShortcut "&appTitle; パネルの開閉に使用するキーボードショートカットを変更するには、上のフィールドをクリックしてください。">
 <!ENTITY ubiquity.settings.LangSettings "言語設定">
-<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 は &amp;amp;appTitle; の実験的な次世代パーサです。すべてのコマンドは動作しませんが、複数の言語をサポートしています。">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 は &appTitle; の実験的な次世代パーサです。すべてのコマンドは動作しませんが、複数の言語をサポートしています。">
 <!ENTITY ubiquity.settings.UseParser2 "Parser 2 (次世代パーサ) を使用">
 <!ENTITY ubiquity.settings.SelectLanguage "言語:">
 <!ENTITY ubiquity.settings.MiscSettings "その他の設定">
@@ -106,14 +106,14 @@ Sincerely,
 <!ENTITY ubiquity.settings.SaveSkin "保存">
 <!ENTITY ubiquity.settings.SaveSkinAs "名前をつけて保存">
 <!ENTITY ubiquity.settings.ShareSkin "gist.github.com に共有">
-<!ENTITY ubiquity.settings.SaveNotice "保存をクリックするとすぐに &amp;amp;appTitle; の外観が更新されます。">
+<!ENTITY ubiquity.settings.SaveNotice "保存をクリックするとすぐに &appTitle; の外観が更新されます。">
 <!ENTITY ubiquity.settings.Bug449WarningPart1 "カスタムスキンの変更にブラウザの再起動を要する場合があります。これは">
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "既知のバグ">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 "です。">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubscriptionDetails "全コマンド: &amp;amp;cmdCount; 個 / 利用中フィード: &amp;amp;feedCount; 個 | 利用停止フィード: <a href='cmdlist.xhtml#graveyard'>&amp;amp;unsubCount; 個</a> | &amp;amp;helpLink;">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "&amp;amp;appTitle; で利用中のコマンドは右側の列に列挙されています。黒色のテキストが (&amp;amp;appTitle; が理解できる) コマンド名です。灰色のテキストはコマンドの説明です。">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "左側の列には &amp;amp;appTitle; で購読しているすべての “コマンドフィード” が表示されています。各フィードには複数のコマンドが含まれています。">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "全コマンド: &cmdCount; 個 / 利用中フィード: &feedCount; 個 | 利用停止フィード: <a href='cmdlist.xhtml#graveyard'>&unsubCount; 個</a> | &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "&appTitle; で利用中のコマンドは右側の列に列挙されています。黒色のテキストが (&appTitle; が理解できる) コマンド名です。灰色のテキストはコマンドの説明です。">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "左側の列には &appTitle; で購読しているすべての “コマンドフィード” が表示されています。各フィードには複数のコマンドが含まれています。">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "このページのリストは、フィード名やコマンド名で並べ替えることができます。“並べ替え:” の横の各リンクをクリックしてください。">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "使用したくないコマンドがある場合は、そのコマンドのチェックを外してください。再び使用するにはチェックを入れてください。">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "いらないフィードがある場合は、フィード名の下の “[利用停止]” リンクをクリックすると、フィードに含まれるすべてのコマンドが無効になります。再び使用可能にするには、ページ最下部で “[利用再開]” をクリックしてください。">
@@ -130,19 +130,19 @@ Sincerely,
 <!ENTITY ubiquity.support.GetHelp "サポートサイト">
 <!ENTITY ubiquity.support.GetHelpGSFN "Get Satisfaction">
 <!ENTITY ubiquity.support.GetHelpGoogleGroups "Google グループ/メーリングリスト">
-<!ENTITY ubiquity.support.GetHelpUbiquityWiki "&amp;amp;appTitle; Wiki">
-<!ENTITY ubiquity.support.GetHelpParagraph1 "&amp;amp;appTitle; はまだ実験段階にあるため、実行中に問題が起こることがあります。&amp;amp;appTitle; についての質問やサポートのために、いくつかのサイトが用意されています。">
+<!ENTITY ubiquity.support.GetHelpUbiquityWiki "&appTitle; Wiki">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "&appTitle; はまだ実験段階にあるため、実行中に問題が起こることがあります。&appTitle; についての質問やサポートのために、いくつかのサイトが用意されています。">
 <!ENTITY ubiquity.support.GetHelpParagraph2 "はコミュニティが運営するサポートサイトです。すでに多くの質問とその回答が寄せられています。答えが見つからないときは、新しいトピックを投稿してください。">
 <!ENTITY ubiquity.support.GetHelpParagraph3 "では、コマンド開発やユーザインタフェース、新機能の提案など、開発者向けの議論が行われています。">
-<!ENTITY ubiquity.support.GetHelpParagraph4 "は &amp;amp;appTitle; プロジェクト全体についての情報サイトです。資料や虎の巻、&amp;amp;appTitle; の古いバージョンへのリンクがあります。">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "は &appTitle; プロジェクト全体についての情報サイトです。資料や虎の巻、&appTitle; の古いバージョンへのリンクがあります。">
 <!ENTITY ubiquity.support.ReportBugs "バグ報告">
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "現在、自動化されたバグ報告サービスを準備しています。こちらが準備できるまでの間に再現可能な問題を見つけた場合は、Get Satisfaction か Google グループ/メーリングリストに報告してください。報告の内容には、必ず、バグの再現手順、実行環境を明記してください。">
-<!ENTITY ubiquity.support.ResetUbiquity "&amp;amp;appTitle; 設定の初期化">
-<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "&amp;amp;appTitle; が完全に動かなくなったときは、設定を初期化する必要があります。初期化するには">
+<!ENTITY ubiquity.support.ResetUbiquity "&appTitle; 設定の初期化">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "&appTitle; が完全に動かなくなったときは、設定を初期化する必要があります。初期化するには">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1LinkText "このページ">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "を開いてください。ご不便をおかけして申し訳ありません。">
 <!-- Commands chrome/content/cmdlist.xhtml -->
-<!ENTITY ubiquity.editor.CommandEditorHeader "&amp;amp;appTitle; コマンドエディタ">
+<!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; コマンドエディタ">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "以下のテキストエリアに新しいコマンドを記述してください。記述したコマンドは自動的に保存され、使用可能になります。">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "コマンドの作成については、">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText1 "チュートリアル">
@@ -152,7 +152,7 @@ Sincerely,
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "​">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocsLinkText "コマンド API ドキュメント">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "開発に参加するには">
-<!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&amp;amp;appTitle; Wiki">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&appTitle; Wiki">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart2 "をご覧ください。">
 <!ENTITY ubiquity.editor.YourExternalEd "外部エディタ:">
 <!ENTITY ubiquity.editor.EditorCommandType "コマンド種別:">
@@ -176,7 +176,7 @@ Sincerely,
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2Part2 "にサインアップしてください。あなたのコマンドが">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2LinkText2 "ダッシュボード">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2Part3 "に表示されるようになります。">
-<!ENTITY ubiquity.editor.DevelopingUbiquity "&amp;amp;appTitle; 本体の開発サポートツール">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "&appTitle; 本体の開発サポートツール">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part1 "​ユニットテストは">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1LinkText "こちら">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part2 "から。">
@@ -188,25 +188,25 @@ Sincerely,
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part2 "で、パーサのパフォーマンスと内部動作を実験できます。">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3LinkText2 "nountype tuner">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part3 "を使用すれば、 nountypes の候補表示とスコアをチェックすることができます。">
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "&amp;amp;appTitle; 本体を開発するなら、">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "&appTitle; 本体を開発するなら、">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4LinkText "core developer commands">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part2 "が役に立つでしょう。">
-<!ENTITY ubiquity.editor.LatestChangesFeedTitle "最近の &amp;amp;appTitle; コードの変更点">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "最近の &appTitle; コードの変更点">
 <!-- Support chrome/content/support.xhtml -->
-<!ENTITY ubiquity.confirmsubscription.Header "信頼されていないサイトからの &amp;amp;appTitle; コマンド">
+<!ENTITY ubiquity.confirmsubscription.Header "信頼されていないサイトからの &appTitle; コマンド">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "未確認の信頼されていないサードパーティのサイトから">
-<!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&amp;amp;appTitle;">
+<!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart2 "コマンドをインストールしようとしています:">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 "インストールすると、あなたのブラウザに対して、このコマンドがしたいことは何でもできるようになります。このコマンドに悪意がある場合、あなたのクレジットカード番号や家族のメールアドレス、あなたの写真、ページの表示履歴を盗むことができます。">
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "このコマンドの JavaScript ソースコードを確認してください:">
 <!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "ソースコードの読み込み中です。しばらくお待ちください...">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "JavaScript コードが理解できる方は、ソースコードをよく読んで、このコマンドを使用しても安全かどうか判定してください。使用する場合は、あなたの自己責任において使用してください！">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "JavaScript コードが理解できない方は、リンク先が信頼できる相手によって提供されている場合を除き、このコマンドを購読してはいけません。">
-<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "将来的に、ここに “social trust network” と呼ばれるウィジェットを表示する予定です。あなたの友人がこのコマンドを使用しているかどうかが分かり、使用者がコマンドの安全性を保証したり、コマンドの危険性を警告したりできます。この報告が、コマンドを購読しても安全かどうか判定するための手がかりになるでしょう。この機能は &amp;amp;appTitle; の将来のリリースで実装されます。">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "将来的に、ここに “social trust network” と呼ばれるウィジェットを表示する予定です。あなたの友人がこのコマンドを使用しているかどうかが分かり、使用者がコマンドの安全性を保証したり、コマンドの危険性を警告したりできます。この報告が、コマンドを購読しても安全かどうか判定するための手がかりになるでしょう。この機能は &appTitle; の将来のリリースで実装されます。">
 <!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "このコマンドフィードを自動更新する">
 <!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "やっぱりインストールしない!">
 <!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "上記すべてを理解の上、このコマンドをインストールする!">
-<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara1 "このコマンドが更新された場合、あなたの &amp;amp;appTitle; に自動的に反映されます。自動更新を有効にする場合は、サーバ上のコードを管理する人物が信頼に足ることを確認してください。">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdatePara1 "このコマンドが更新された場合、あなたの &appTitle; に自動的に反映されます。自動更新を有効にする場合は、サーバ上のコードを管理する人物が信頼に足ることを確認してください。">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part1 "注意： この通信は暗号化されていないため、">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "中間者攻撃">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 "にさらされる可能性があります。危険性を充分理解している場合に限り、自動更新を有効にしてください。">
@@ -215,15 +215,15 @@ Sincerely,
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "コマンド管理ページ">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "を開いてください。">
 <!-- Hack chrome/content/editor.xhtml -->
-<!ENTITY ubiquity.reset.Header "&amp;amp;appTitle; を初期化しますか？">
-<!ENTITY ubiquity.reset.Paragraph1 "&amp;amp;appTitle; が正しく動作しなくなったときは、いわゆる“工場出荷設定” にリセットすることができます。下のボタンをクリックしてください。リセット完了後、Firefox が再起動されます。">
-<!ENTITY ubiquity.reset.Paragraph2 "<strong>警告:</strong> 設定を初期化すると、&amp;amp;appTitle; で設定した内容が削除されます。また、次の項目も含まれます:">
+<!ENTITY ubiquity.reset.Header "&appTitle; を初期化しますか？">
+<!ENTITY ubiquity.reset.Paragraph1 "&appTitle; が正しく動作しなくなったときは、いわゆる“工場出荷設定” にリセットすることができます。下のボタンをクリックしてください。リセット完了後、Firefox が再起動されます。">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>警告:</strong> 設定を初期化すると、&appTitle; で設定した内容が削除されます。また、次の項目も含まれます:">
 <!ENTITY ubiquity.reset.Feeds "利用しているコマンドフィード">
 <!ENTITY ubiquity.reset.Skins "カスタムスキン">
 <!ENTITY ubiquity.reset.Code "コマンドエディタに記述した内容">
 <!ENTITY ubiquity.reset.NoReturn "注意: 一度実行すると、元に戻すことはできません。">
-<!ENTITY ubiquity.reset.ButtonExport "現在の &amp;amp;appTitle; 設定を新しいタブにエクスポートする">
-<!ENTITY ubiquity.reset.ButtonReset "上記の内容を理解した上で、&amp;amp;appTitle; の設定をリセットして Firefox を再起動する">
+<!ENTITY ubiquity.reset.ButtonExport "現在の &appTitle; 設定を新しいタブにエクスポートする">
+<!ENTITY ubiquity.reset.ButtonReset "上記の内容を理解した上で、&appTitle; の設定をリセットして Firefox を再起動する">
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.localizecmd.ForTemplate "​">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part1 "これは">
@@ -231,12 +231,12 @@ Sincerely,
 <!ENTITY ubiquity.localizecmd.HelpParagraph1LinkText "gettext (Wikipedia)">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part3 "を参考にしてください。">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2Part1 "翻訳結果をテストするには、次のパスに保存してください：">
-<!ENTITY ubiquity.localizecmd.HelpParagraph2Part2 "&amp;amp;#x200b;">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2Part2 "&#x200b;">
 <!ENTITY ubiquity.localizecmd.HelpParagraph3 "XY は翻訳先の言語コードです。ディレクトリが存在しない場合は作成してください。">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "通知に失敗しました！">
-<!ENTITY ubiquity.bug19warning.Paragraph1 "&amp;amp;appTitle; はメッセージを表示しようとして失敗しました。">
-<!ENTITY ubiquity.bug19warning.Paragraph2Part1 "これは &amp;amp;appTitle; の">
+<!ENTITY ubiquity.bug19warning.Paragraph1 "&appTitle; はメッセージを表示しようとして失敗しました。">
+<!ENTITY ubiquity.bug19warning.Paragraph2Part1 "これは &appTitle; の">
 <!ENTITY ubiquity.bug19warning.Paragraph2LinkText1 "バグ">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part2 "です。">
 <!ENTITY ubiquity.bug19warning.Paragraph2LinkText2 "Growl">
@@ -246,8 +246,8 @@ Sincerely,
 <!ENTITY ubiquity.redirect.FeedHeader "標準フィードリダイレクタ">
 <!ENTITY ubiquity.redirect.FileHeader "標準ファイルリダイレクタ">
 <!ENTITY ubiquity.redirect.FeedShortDesc "このページは、ユーザを Ubiquity の chrome: URI から標準コマンドフィードの URI へ誘導するために使用される簡易リダイレクタです。">
-<!ENTITY ubiquity.redirect.FeedLongDesc "使用するには、URI のハッシュに、ユーザをリダイレクトする標準コマンドフィード URI の相対パスを設定してください。パスは、&amp;amp;appTitle; 拡張の standard-feeds ディレクトリをルートとする相対パスを指定します。例えば次のように指定します:">
+<!ENTITY ubiquity.redirect.FeedLongDesc "使用するには、URI のハッシュに、ユーザをリダイレクトする標準コマンドフィード URI の相対パスを設定してください。パスは、&appTitle; 拡張の standard-feeds ディレクトリをルートとする相対パスを指定します。例えば次のように指定します:">
 <!ENTITY ubiquity.redirect.FileShortDesc "このページは、ユーザを Ubiquity の chrome: URI から file: URI へ誘導するために使用される簡易リダイレクタです。">
-<!ENTITY ubiquity.redirect.FileLongDesc "使用するには、URI のハッシュに、ユーザをリダイレクトするファイル URI の相対パスを設定してください。パスは、&amp;amp;appTitle; 拡張のディレクトリをルートとする相対パスを指定します。例えば次のように指定します:">
+<!ENTITY ubiquity.redirect.FileLongDesc "使用するには、URI のハッシュに、ユーザをリダイレクトするファイル URI の相対パスを設定してください。パスは、&appTitle; 拡張のディレクトリをルートとする相対パスを指定します。例えば次のように指定します:">
 <!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
 <!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->

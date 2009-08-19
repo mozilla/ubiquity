@@ -1,14 +1,14 @@
 <!-- Draft #002:NOTE TO TRANSLATORS:Hello, and thanks for taking your time to translate our strings for Ubiquity!As you may have guessed, not everything here is fully baked and our kitchen is still a little messy. But, we're working diligently in choosing our words wisely to make sure you won't have to translate everything many times over. And since we're really nice, we also intend to keep you updated when any ofthese files happen change in the future.So please, bear with us for a moment as things might get a chaotic early on.Thanks a ton and happy translating!Sincerely,- The Ubiquity Team-->
 <!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
-<!ENTITY ubiquity.pagetitle.About "Over &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.Settings "&amp;amp;appTitle; Instellingen &amp;amp; Thema's">
-<!ENTITY ubiquity.pagetitle.YourCommands "&amp;amp;appTitle; Opdrachten">
-<!ENTITY ubiquity.pagetitle.LocalizeCmd "&amp;amp;appTitle; Opdrachten - Localisatie sjabloon">
-<!ENTITY ubiquity.pagetitle.Support "&amp;amp;appTitle; Ondersteuning">
-<!ENTITY ubiquity.pagetitle.HackUbiquity "&amp;amp;appTitle; Opdracht bewerker">
-<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "&amp;amp;appTitle; Opdracht van een onbetrouwbare bron">
-<!ENTITY ubiquity.pagetitle.ResetUbiquity "Herinitialiseer &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.bug19warning "&amp;amp;appTitle;, we have uh-oh!">
+<!ENTITY ubiquity.pagetitle.About "Over &appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "&appTitle; Instellingen &amp; Thema's">
+<!ENTITY ubiquity.pagetitle.YourCommands "&appTitle; Opdrachten">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "&appTitle; Opdrachten - Localisatie sjabloon">
+<!ENTITY ubiquity.pagetitle.Support "&appTitle; Ondersteuning">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "&appTitle; Opdracht bewerker">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "&appTitle; Opdracht van een onbetrouwbare bron">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Herinitialiseer &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, we have uh-oh!">
 <!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.tagline.About "Surf niet op het web. Regeer het.">
 <!ENTITY ubiquity.tagline.Settings "Instellingen en thema's">
@@ -18,10 +18,10 @@
 <!ENTITY ubiquity.tagline.HackUbiquity "Hack It.">
 <!-- Page header taglines -->
 <!ENTITY ubiquity.pagetip.About "U kunt deze pagina altijd bereiken door het “Help” opdracht.">
-<!ENTITY ubiquity.pagetip.Settings "U kunt deze pagina altijd bereiken door het &amp;quot;change ubiquity settings&amp;quot; opdracht.">
-<!ENTITY ubiquity.pagetip.YourCommands "U kunt deze pagina altijd bereiken door het &amp;quot;list ubiquity commands&amp;quot; opdracht.">
-<!ENTITY ubiquity.pagetip.Support "U kunt deze pagina altijd bereiken door het &amp;quot;get support&amp;quot; opdracht.">
-<!ENTITY ubiquity.pagetip.HackUbiquity "U kunt deze pagina altijd bereiken door het &amp;quot;write ubiquity commands&amp;quot; opdracht.">
+<!ENTITY ubiquity.pagetip.Settings "U kunt deze pagina altijd bereiken door het &quot;change ubiquity settings&quot; opdracht.">
+<!ENTITY ubiquity.pagetip.YourCommands "U kunt deze pagina altijd bereiken door het &quot;list ubiquity commands&quot; opdracht.">
+<!ENTITY ubiquity.pagetip.Support "U kunt deze pagina altijd bereiken door het &quot;get support&quot; opdracht.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "U kunt deze pagina altijd bereiken door het &quot;write ubiquity commands&quot; opdracht.">
 <!-- Header page tips -->
 <!ENTITY ubiquity.generic.ImportTemplate "Importeer van sjabloon">
 <!ENTITY ubiquity.generic.LaunchExternalEd "Start een externe bewerker">
@@ -33,13 +33,13 @@
 <!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
 <!--- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.- This will also be useful when we do a full about: page overhaul possibly condensing the editors.-->
 <!-- End common elements -->
-<!ENTITY ubiqutiy.about.WhatIsUbiquity "Wat is &amp;amp;appTitle;?">
-<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&amp;amp;appTitle; is een Firefox extensie die u toelaat <strong>opdrachten</strong> te geven aan Firefox door commando's in een speciale invoer box.">
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "Wat is &appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; is een Firefox extensie die u toelaat <strong>opdrachten</strong> te geven aan Firefox door commando's in een speciale invoer box.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Opdrahcten zijn snelkoppelingen voor zaken die u regelmatig gebruikt op het web; ze kunnen repetitieve taken elimineren en uw meer werk, sneller, laten uitvoeren.">
-<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Het leukste aan &amp;amp;appTitle; is dat <em>iedereen</em> een opdracht kan schrijven en dit delen met de rest van de wereld, op dezelfde manier dat iedereen pagina's op het web kan schrijven en informatie delen met de rest van de wereld.">
-<!ENTITY ubiqutiy.about.LearnHow "Leer &amp;amp;appTitle; gebruiken">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Het leukste aan &appTitle; is dat <em>iedereen</em> een opdracht kan schrijven en dit delen met de rest van de wereld, op dezelfde manier dat iedereen pagina's op het web kan schrijven en informatie delen met de rest van de wereld.">
+<!ENTITY ubiqutiy.about.LearnHow "Leer &appTitle; gebruiken">
 <!ENTITY ubiqutiy.about.TutorialButton "Klik hier om de interactieve inleiding te volgen">
-<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Meer over het gebruik van &amp;amp;appTitle;">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Meer over het gebruik van &appTitle;">
 <!ENTITY ubiqutiy.about.UsingParagraph1Part1 "Na het volgen van deze basis inleiding op deze pagina, kunt u nog meer leren door het lezen van de">
 <!ENTITY ubiqutiy.about.UsingParagraph1LinkText "Diepgaande documentatie pagina">
 <!ENTITY ubiqutiy.about.UsingParagraph1Part2 ".">
@@ -47,25 +47,25 @@
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText1 "Herd">
 <!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". Dit zal uw gegevens zenden naar">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText2 "dashboard">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "— het is volledig anoniem en zal ons helpen bij het beter en veiliger maken van &amp;amp;appTitle;.">
-<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "Voor informatie over de doelen van het &amp;amp;appTitile; project en onze plannen voor opkomende releases, kijk naar onze">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "— het is volledig anoniem en zal ons helpen bij het beter en veiliger maken van &appTitle;.">
+<!ENTITY ubiqutiy.about.UsingParagraph3Part1 "Voor informatie over de doelen van het &appTitile; project en onze plannen voor opkomende releases, kijk naar onze">
 <!ENTITY ubiqutiy.about.UsingParagraph3LinkText "Roadmap">
 <!ENTITY ubiqutiy.about.UsingParagraph3Part2 ".">
-<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&amp;amp;appTitle; is een team project door medewerkers van over heel de wereld. Voor een lijst van onze medewerkers bekijk onze">
+<!ENTITY ubiqutiy.about.UsingParagraph4Part1 "&appTitle; is een team project door medewerkers van over heel de wereld. Voor een lijst van onze medewerkers bekijk onze">
 <!ENTITY ubiqutiy.about.UsingParagraph4LinkText "credits pagina">
 <!ENTITY ubiqutiy.about.UsingParagraph4Part2 ".">
-<!ENTITY ubiqutiy.about.Thanks "Bedankt voor &amp;amp;appTitle; <span class='version'></span> te gebruiken!">
-<!ENTITY ubiquity.about.ThanksParagraphPart1 "Version &amp;amp;appVersion; of &amp;amp;appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the">
+<!ENTITY ubiqutiy.about.Thanks "Bedankt voor &appTitle; <span class='version'></span> te gebruiken!">
+<!ENTITY ubiquity.about.ThanksParagraphPart1 "Version &appVersion; of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the">
 <!ENTITY ubiquity.about.ThanksParagraphLinkText "Uitgave opemerkingen">
 <!ENTITY ubiquity.about.ThanksParagraphPart2 ".">
 <!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.settings.Skins "Thema's">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Wijzig aangepast Thema">
 <!ENTITY ubiquity.settings.KeyCombination "Toetsencombinatie">
-<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Roep</strong> &amp;amp;appTitle; op door te klikken op:">
-<!ENTITY ubiquity.settings.ChangeShortcut "Klik hierboven om de sneltoets om &amp;amp;appTitle; te openen/sluiten te <strong>Wijzigen</strong>.">
+<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Roep</strong> &appTitle; op door te klikken op:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Klik hierboven om de sneltoets om &appTitle; te openen/sluiten te <strong>Wijzigen</strong>.">
 <!ENTITY ubiquity.settings.LangSettings "Taal instellingen">
-<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 is &amp;amp;appTitle;'s experimentele nieuwe generatie parser en werkt niet met alle opdrachten. Het ondersteunt wel verschillenden talen.">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 is &appTitle;'s experimentele nieuwe generatie parser en werkt niet met alle opdrachten. Het ondersteunt wel verschillenden talen.">
 <!ENTITY ubiquity.settings.UseParser2 "Gebruik Parser 2 (de nieuwe generatie parser)">
 <!ENTITY ubiquity.settings.SelectLanguage "Taal:">
 <!ENTITY ubiquity.settings.MiscSettings "Diverse Instellingen">
@@ -77,17 +77,17 @@
 <!ENTITY ubiquity.settings.SaveSkin "Opslaan">
 <!ENTITY ubiquity.settings.SaveSkinAs "Opslaan als">
 <!ENTITY ubiquity.settings.ShareSkin "Delen">
-<!ENTITY ubiquity.settings.SaveNotice "Opslaan verandert onmiddelijk &amp;amp;appTitle;'s uitzicht.">
+<!ENTITY ubiquity.settings.SaveNotice "Opslaan verandert onmiddelijk &appTitle;'s uitzicht.">
 <!ENTITY ubiquity.settings.Bug449WarningPart1 "Veranderingen gemaakt aan een aangepast theme zijn mogelijk niet zichtbaar tot na een browser herstart. Dit is een">
 <!ENTITY ubiquity.settings.Bug449WarningLinkText "gekende fout">
 <!ENTITY ubiquity.settings.Bug449WarningPart2 ".">
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiquity.commandlist.SubscriptionDetails "U hebt &amp;amp;cmdCount: opdrachten in &amp;amp;feedCount; opdrachten feeds. |U bent uitgeschreven van <a href='cmdlist.xhtml#graveyard'>&amp;amp;unsubCount; opdrachten feeds</a>.| &amp;amp;helpLink;">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Alle opdrachten die &amp;amp;appTitle; herkent worden opgesomd in de rechtse kolom. De zwarte tekst is de opdrachtnaam (wat u typt in &amp;amp;appTitle; om deze te gebruiken). De grijze tekst legt uit wat de opdracht doet.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "De linker kolom toont allle &amp;amp;ldquo;feeds&amp;amp;rdquo; waartoe &amp;amp;appTitle; is ingeschreven. Elke feed kan meerdere opdrachten bevatten.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "U kunt deze pagina gesorteerd op feeds, of gesorteerd op opdrachten bekijken. Klik op de links naast &amp;amp;ldquo;sorteren op &amp;amp;rdquo;, die u hieronder vindt.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "U hebt &cmdCount: opdrachten in &feedCount; opdrachten feeds. |U bent uitgeschreven van <a href='cmdlist.xhtml#graveyard'>&unsubCount; opdrachten feeds</a>.| &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Alle opdrachten die &appTitle; herkent worden opgesomd in de rechtse kolom. De zwarte tekst is de opdrachtnaam (wat u typt in &appTitle; om deze te gebruiken). De grijze tekst legt uit wat de opdracht doet.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "De linker kolom toont allle &ldquo;feeds&rdquo; waartoe &appTitle; is ingeschreven. Elke feed kan meerdere opdrachten bevatten.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "U kunt deze pagina gesorteerd op feeds, of gesorteerd op opdrachten bekijken. Klik op de links naast &ldquo;sorteren op &rdquo;, die u hieronder vindt.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Als er een opdracht is die u niet wilt, vinkt u de knop ernaast uit. U kan de opdrachten terug krijgen door ze terug aan te vinken.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "If there's a whole command feed you don't want, click the &amp;amp;ldquo;[unsubscribe]&amp;amp;rdquo; link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "If there's a whole command feed you don't want, click the &ldquo;[unsubscribe]&rdquo; link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.">
 <!ENTITY ubiquity.commandlist.SubscribedFeeds "Ingeschreven feeds">
 <!ENTITY ubiquity.commandlist.AvailableCommands "Opdrachten">
 <!ENTITY ubiquity.commandlist.SortBy "Gesorteerd op:">
@@ -96,24 +96,24 @@
 <!ENTITY ubiquity.commandlist.SortByEnabled "Aangezet">
 <!ENTITY ubiquity.commandlist.SortByCommand "Opdrachtnaam">
 <!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Uitgeschreven feeds">
-<!ENTITY ubiquity.commandlist.GraveYardText "U was ooit eens ingeschreven op deze feeds. Als u deze terug wilt klik op de &amp;amp;ldquo;[herinschrijven]&amp;amp;rdquo; link eronder.">
+<!ENTITY ubiquity.commandlist.GraveYardText "U was ooit eens ingeschreven op deze feeds. Als u deze terug wilt klik op de &ldquo;[herinschrijven]&rdquo; link eronder.">
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.support.GetHelp "Help krijgen">
 <!ENTITY ubiquity.support.GetHelpGSFN "Get Satisfaction">
 <!ENTITY ubiquity.support.GetHelpGoogleGroups "Onze Google groep/mailing lijst">
-<!ENTITY ubiquity.support.GetHelpUbiquityWiki "De &amp;amp;appTitle; Wiki">
-<!ENTITY ubiquity.support.GetHelpParagraph1 "Door de ongebruikelijke status van &amp;amp;appTitle; als Labs experiment kunt u problemen ondervinden tijdens het gebruik ervan. Er zijn een aantal plaatsen waar u terecht kunt voor help met &amp;amp;appTitle;">
+<!ENTITY ubiquity.support.GetHelpUbiquityWiki "De &appTitle; Wiki">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Door de ongebruikelijke status van &appTitle; als Labs experiment kunt u problemen ondervinden tijdens het gebruik ervan. Er zijn een aantal plaatsen waar u terecht kunt voor help met &appTitle;">
 <!ENTITY ubiquity.support.GetHelpParagraph2 "is een community gedreven ondersteuningssite. Vele problemen hebben reeds oplossingen hier, als u geen antwoord op uw vraag kunt vinden kunt u een nieuw onderwerp starten.">
 <!ENTITY ubiquity.support.GetHelpParagraph3 "is handig voor discussies van opdracht ontwikkeling, gebruikersinterface, voorstellen voor nieuwe mogelijkheden en andere discussies.">
-<!ENTITY ubiquity.support.GetHelpParagraph4 "heeft ook informatie over het gehele &amp;amp;appTitle; project met onder andere documentatie, tutorials en links naar oudere versie van &amp;amp;appTitle;">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "heeft ook informatie over het gehele &appTitle; project met onder andere documentatie, tutorials en links naar oudere versie van &appTitle;">
 <!ENTITY ubiquity.support.ReportBugs "Een bug rapporteren">
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "We are working on an automated bug report service, but for the time being you should report any reproducible problems you find using Get Satisfaction or through our Google Group/Mailing List. Please include any information you have about how to best reproduce the bug.">
-<!ENTITY ubiquity.support.ResetUbiquity "&amp;amp;appTitle; herinitialiseren">
-<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "Als &amp;amp;appTitle; helemaal niet meer werkt voor u, dan is het mogelijk dat u de &amp;amp;ldquo;fabrieksinstellingen&amp;amp;rdquo; moet herinstellen om het verder te gebruiken. Om een herinitialisatie uit te voeren,">
+<!ENTITY ubiquity.support.ResetUbiquity "&appTitle; herinitialiseren">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part1 "Als &appTitle; helemaal niet meer werkt voor u, dan is het mogelijk dat u de &ldquo;fabrieksinstellingen&rdquo; moet herinstellen om het verder te gebruiken. Om een herinitialisatie uit te voeren,">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1LinkText "klik hier">
-<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "&amp;amp;mdash; en aanvaard onze verontschuldigingen voor het ongemakç">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1Part2 "&mdash; en aanvaard onze verontschuldigingen voor het ongemakç">
 <!-- Commands chrome/content/cmdlist.xhtml -->
-<!ENTITY ubiquity.editor.CommandEditorHeader "&amp;amp;appTitle; Command Editor">
+<!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; Command Editor">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Enter new commands</strong> in the area below. They will automatically be saved as you type, and will be able to be instantly used from the command entry mode.">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutPart1 "Read the">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutLinkText1 "command authoring tutorial">
@@ -123,7 +123,7 @@
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentation for the">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocsLinkText "command APIs">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart1 "<strong>Get involved</strong>. Learn how by visiting the">
-<!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&amp;amp;appTitle; Wiki">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolvedLinkText "&appTitle; Wiki">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolvedPart2 ".">
 <!ENTITY ubiquity.editor.YourExternalEd "Your external editor is">
 <!ENTITY ubiquity.editor.EditorCommandType "The command type is">
@@ -147,7 +147,7 @@
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2Part2 "which will then display your command on the">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2LinkText2 "dashboard">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2Part3 ".">
-<!ENTITY ubiquity.editor.DevelopingUbiquity "Developing &amp;amp;appTitle;">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "Developing &appTitle;">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part1 "Run the">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1LinkText "unit tests">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1Part2 ".">
@@ -159,21 +159,21 @@
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part2 "Use the">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3LinkText2 "nountype tuner">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3Part3 "to check your nountypes' suggestions and scoring.">
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "And if you're going to be developing &amp;amp;appTitle; itself, check out our">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part1 "And if you're going to be developing &appTitle; itself, check out our">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4LinkText "core developer commands">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4Part2 ".">
-<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Latest &amp;amp;appTitle; Code Changes">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Latest &appTitle; Code Changes">
 <!-- Support chrome/content/support.xhtml -->
-<!ENTITY ubiquity.confirmsubscription.Header "&amp;amp;appTitle; Command from Untrusted Source">
+<!ENTITY ubiquity.confirmsubscription.Header "&appTitle; Command from Untrusted Source">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart1 "U bent aan het inschrijven voor een">
-<!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&amp;amp;appTitle;">
+<!ENTITY ubiquity.confirmsubscription.HeadDescLinkText "&appTitle;">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart2 "opdracht van een onbekende, onvertrouwde 3de partij op">
 <!ENTITY ubiquity.confirmsubscription.HeadDescParaPart3 ". Als u zich inschrijft kan deze opdracht <em>alles doen waht het wilt</em> met uw browser. Het kan uw credit kaart gegevens of uw grootmoeder uw gehele afbeeldings geschiedenis doormailen.">
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "Hier is de JavaScript broncode van de opdracht:">
 <!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Code aan het laden, even geduld...">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Als u JavaScript begrijpt moet u dit lezen en zo goed mogelijk oordelen of deze opdracht gevaarlijk is of niet. Ga verder op eigen risico!">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "Als u JavaScript niet kent moet u niet op deze opdracht inschrijven, behalve als deze link aan u werd gegeven door iemand die u kent en vertrouwt.">
-<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "In the future, we plan to have a widget here displaying what we call a &amp;amp;ldquo;social trust network&amp;amp;rdquo;.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of &amp;amp;appTitle;.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "In the future, we plan to have a widget here displaying what we call a &ldquo;social trust network&rdquo;.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of &appTitle;.">
 <!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Deze feed automatisch updaten.">
 <!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Haal me hier weg!">
 <!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "I weet waar ik mee bezig ben. Schrijf me in!">
@@ -182,19 +182,19 @@
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2LinkText "man-in-the-middle aanvallen">
 <!ENTITY ubiquity.confirmsubscription.AutoUpdatePara2Part2 ". Update deze feed alleen automatisch als u zeker bent van de gevolgen van uw daden.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationShort "U bent nu aan het inschrijven op een opdrachten feed en u kunt de functionaliteit ervan gebruiken.">
-<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Als u zich ooit zou willen uitschrijven, kunt u de &amp;amp;ldquo;list&amp;amp;rdquo; &amp;amp;appTitle opdracht op elk moment gebruiken om op de">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "Als u zich ooit zou willen uitschrijven, kunt u de &ldquo;list&rdquo; &appTitle opdracht op elk moment gebruiken om op de">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "opdrachten beheers pagina te komen">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "waar u alle opdrachten waar u bent ingeschreven kunt zien, en deze die u niet meer wilt kunt annuleren.">
 <!-- Hack chrome/content/editor.xhtml -->
-<!ENTITY ubiquity.reset.Header "Herstel &amp;amp;appTitle; zijn standaard instellingen?">
-<!ENTITY ubiquity.reset.Paragraph1 "If &amp;amp;appTitle; isn't working properly, you may want to consider resetting it to its original &amp;amp;ldquo;factory defaults&amp;amp;rdquo;. To do this, click the button below. In order to complete the operation, Firefox will then be restarted.">
-<!ENTITY ubiquity.reset.Paragraph2 "<strong>Warning:</strong> doing this will remove any customizations you've made to &amp;amp;appTitle;, including but not limited to:">
+<!ENTITY ubiquity.reset.Header "Herstel &appTitle; zijn standaard instellingen?">
+<!ENTITY ubiquity.reset.Paragraph1 "If &appTitle; isn't working properly, you may want to consider resetting it to its original &ldquo;factory defaults&rdquo;. To do this, click the button below. In order to complete the operation, Firefox will then be restarted.">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>Warning:</strong> doing this will remove any customizations you've made to &appTitle;, including but not limited to:">
 <!ENTITY ubiquity.reset.Feeds "Ingeschreven feeds">
 <!ENTITY ubiquity.reset.Skins "Aangepaste thema's">
 <!ENTITY ubiquity.reset.Code "Opdracht bewerker code">
 <!ENTITY ubiquity.reset.NoReturn "<strong>Opmerking:</strong> Eens afgelopen kan deze actie niet meer worden ongedaan gemaakt.">
-<!ENTITY ubiquity.reset.ButtonExport "Exporteer mijn huidige &amp;amp;appTitle; configuratie naar een nieuwe tab">
-<!ENTITY ubiquity.reset.ButtonReset "Ja, Ik weet waar ik mee bezig ben. Herinitialiseer &amp;amp;appTitle; en herstart Firefox">
+<!ENTITY ubiquity.reset.ButtonExport "Exporteer mijn huidige &appTitle; configuratie naar een nieuwe tab">
+<!ENTITY ubiquity.reset.ButtonReset "Ja, Ik weet waar ik mee bezig ben. Herinitialiseer &appTitle; en herstart Firefox">
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.localizecmd.ForTemplate "Dit is een sjabloon voor">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1Part1 "Dit is een vertalings sjabloon voor de">
@@ -208,7 +208,7 @@
 <!ENTITY ubiquity.bug19warning.Header "Een doorzichtig bericht kon niet worden getoond!">
 <!ENTITY ubiquity.bug19warning.Paragraph1 "Ubiquity probeerde een transparant bericht te tonen, maar faalde.">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part1 "Door een">
-<!ENTITY ubiquity.bug19warning.Paragraph2LinkText1 "bug in &amp;amp;appTitle;">
+<!ENTITY ubiquity.bug19warning.Paragraph2LinkText1 "bug in &appTitle;">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part2 "in OS X kunt u">
 <!ENTITY ubiquity.bug19warning.Paragraph2LinkText2 "Growl installeren">
 <!ENTITY ubiquity.bug19warning.Paragraph2Part3 "als u dit niet al hebt gedaan. Daarna moet u ook Firefox herstarten.">
@@ -217,8 +217,8 @@
 <!ENTITY ubiquity.redirect.FeedHeader "Standard Feed Redirector">
 <!ENTITY ubiquity.redirect.FileHeader "Standard File Redirector">
 <!ENTITY ubiquity.redirect.FeedShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a URI for a standard feed.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "To use it, just set the URI's hash to the relative path of the standard feed URI to redirect the user to. The path should be relative to the root of the &amp;amp;appTitle; extension's <tt>standard-feeds</tt> directory. For instance:">
+<!ENTITY ubiquity.redirect.FeedLongDesc "To use it, just set the URI's hash to the relative path of the standard feed URI to redirect the user to. The path should be relative to the root of the &appTitle; extension's <tt>standard-feeds</tt> directory. For instance:">
 <!ENTITY ubiquity.redirect.FileShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a file: URI.">
-<!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &amp;amp;appTitle; extension. For instance:">
+<!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &appTitle; extension. For instance:">
 <!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
 <!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
