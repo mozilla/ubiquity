@@ -12,3 +12,6 @@ toolbar[iconsize="small"] #ubiquity-toolbarbutton > .toolbarbutton-icon {
   width:  16px;
   height: 16px;
 }
+#ubiquity-toolbarbutton:active {
+  opacity: 0.5;
+}
