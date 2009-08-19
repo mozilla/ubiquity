@@ -1,0 +1,175 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Ubiquity Parser 2 Playpen</title>
+    <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
+    <script type="text/javascript;version=1.8" charset='utf-8' src='resource://ubiquity/scripts/jquery.js'></script>
+    <script type="text/javascript;version=1.8" 
+     src="resource://ubiquity/modules/parser/new/parser.js"></script>
+    <script type="text/javascript;version=1.8" charset='utf-8' src='persistence.js'></script>
+    <style type="text/css">
+			body {
+				background-color: #ddd;
+				padding: 0px;
+				margin: 0px;
+				font-family: sans-serif;
+			}
+			
+			#awesomebar {
+        margin: 0 auto;
+        height: 500px;
+			}
+			
+			#awesomebar.mac {
+        background-image: url(chrome://ubiquity/skin/icons/screenshot-firefox-mac.png);
+        width: 1123px;
+        margin-top: -52px;
+			}
+
+			#awesomebar.vista {
+        background-image: url(chrome://ubiquity/skin/icons/screenshot-firefox-vista.png);
+        width: 1064px;
+        margin-top: -40px;
+			}
+
+			#awesomebar.linux {
+        background-image: url(chrome://ubiquity/skin/icons/screenshot-firefox-linux.png);
+        width: 1054px;
+        margin-top: -35px;
+			}			
+
+			#input {
+        background-color: transparent;
+        font-size: 10pt;
+			}
+			
+			#awesomebar.mac #inputwrapper {
+        padding-left: 300px;
+        padding-top: 57px;
+        width: 500px;
+			}
+
+			#awesomebar.vista #inputwrapper {
+        padding-left: 250px;
+        padding-top: 69px;
+        width: 500px;
+			}
+
+			#awesomebar.linux #inputwrapper {
+        padding-left: 250px;
+        padding-top: 64px;
+        width: 500px;
+			}
+		
+			h1, h2, h3, .large {
+				color: #333;
+			}
+			
+			h2 {
+				font-variant: small-caps;
+			}
+
+      #main {
+        margin: 0 auto;
+        width: 800px;
+        background-color: #fff;
+        padding: 30px 30px 60px 30px;
+      }
+      
+      #awesomebar * { display: inline-block }
+      
+      input.input {
+        border: none;
+        width: auto;
+        font-size: 0.9em;
+        width: 100%;
+      }
+      
+      #parseinfo, #envinfo {
+        max-height: 400px;
+        overflow:auto;
+      }
+      
+      .warning {
+        border: 1px red solid;
+        background-color: #ddd;
+        padding: 10px;
+      }
+      
+    </style>
+  </head>
+  <body>
+  <div id='main'>
+  
+    <h1>Persistence: <small>an exercise in a persistent Ubiquity</small></h1>
+    
+    <p>What would Ubiquity look like in the Firefox chrome, so you didn't need a keystroke to pull it up? This test page is mean to be act as a playground where you can try out different designs and ideas.</p>
+    
+    <div class='warning' id='parser2' style='display:none'>You're not using Parser 2! Please <a href='chrome://ubiquity/content/settings.xhtml'>turn on Parser 2 (aka Next Generation Parser)</a>, restart Firefox, and try again.</div>
+
+    <div class='warning' id='gubiquity' style='display:none'><code>gUbiquity</code> was not loaded properly. Most likely this means you loaded this page at the same time that you loaded the window, and this page loaded before the window chrome, in which case you can just reload this page and it should work. Otherwise, there may actually be a problem with some code.</div>
+		
+<div>
+<h2 class='toggle'>Setup ⨠</h2>
+
+<label for='onResults'><code>onResults</code> code:</label> <textarea style='width:100%' rows='8' id='onResults' name='onResults'>// access results with results
+var html = results.join('<br/>');
+// Utils.log(results);
+// the results div is #results
+// the input div is #input
+jQuery('#results').html(html);
+jQuery('#results').show();
+</textarea>
+
+<label for='onClose'><code>onClose</code> code: <small>(triggered by <code>ESC</code>)</small></label> <textarea style='width:100%' rows='8' id='onClose' name='onClose'>// access results with results
+// the results div is #results
+jQuery('#results').hide('slow');
+</textarea>
+
+<label for='CSS'>CSS code:</label> <textarea style='width:100%' rows='8' id='CSS' name='CSS'>
+#results {
+  border: 1px solid black;
+  position: absolute;
+  background-color: white;
+  padding: 5px;
+}
+
+.verb {
+  border-bottom: 2px blue solid;
+}
+
+.prefix {
+  border-bottom: 2px orange solid;
+  font-weight: bold;
+}
+
+.argument {
+  border-bottom: 2px orange solid;
+}
+
+.object {
+  border-bottom: 2px black solid;
+}
+
+.inactive, #results.needarg {
+  color: gray;
+}
+</textarea>
+</div>
+
+<label for='os'>Test OS:</label>
+    <input type='radio' name='os' class='os' value='mac' checked='checked'></input><label for='os'>Mac</label> <input type='radio' name='os' class='os' value='vista'></input><label for='os'>Win</label> <input type='radio' name='os' class='os' value='linux'></input><label for='os'>Linux</label>
+
+
+  </div>
+  
+  <style type='text/css' id='realCSS'></style>
+  <div id='awesomebar' class='mac'>
+    <div id='inputwrapper'>
+      <input id='input' class='input'/>
+      <div id='results' style='display:none'>test</div>
+    </div>
+  </div>
+		
+  </body>
+</html>
