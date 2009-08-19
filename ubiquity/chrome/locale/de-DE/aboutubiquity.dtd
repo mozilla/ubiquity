@@ -16,54 +16,54 @@ Sincerely,
 
 -->
 <!-- Page Titles for all documents in this DTD -->
-<!ENTITY ubiquity.pagetitle.About "Informazioni su &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.Settings "Impostazioni e temi di &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.YourCommands "Comandi di &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.LocalizeCmd "Modello per la localizzione di un comando per &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.Support "Guida di &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.HackUbiquity "Editor comandi di &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Comando per &amp;amp;appTitle; proveniente da una fonte non fidata">
-<!ENTITY ubiquity.pagetitle.ResetUbiquity "Azzera &amp;amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.bug19warning "&amp;amp;appTitle; ha ancora qualche piccolo bug da sistemare">
+<!ENTITY ubiquity.pagetitle.About "About &amp;appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "&amp;appTitle; Settings &amp;amp; Skins">
+<!ENTITY ubiquity.pagetitle.YourCommands "&amp;appTitle; Commands">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "&amp;appTitle; Commands - Localization Template">
+<!ENTITY ubiquity.pagetitle.Support "&amp;appTitle; Support">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "&amp;appTitle; Command Editor">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "&amp;appTitle; Command from Untrusted Source">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Reset &amp;appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&amp;appTitle;, we have uh-oh!">
 <!-- Page header taglines -->
-<!ENTITY ubiquity.tagline.About "Non limitarti a navigare sul Web, comandalo.">
-<!ENTITY ubiquity.tagline.Settings "Impostazioni e temi">
-<!ENTITY ubiquity.tagline.YourCommands "In cui vengono elencati i comandi a disposizione">
-<!ENTITY ubiquity.tagline.LocalizeCmd "Bisogna localizzare per poter globalizzare.">
-<!ENTITY ubiquity.tagline.Support "Aiuto!">
+<!ENTITY ubiquity.tagline.About "Don't Surf the Web. Command it.">
+<!ENTITY ubiquity.tagline.Settings "Settings and Skins">
+<!ENTITY ubiquity.tagline.YourCommands "Wherein are listed the commands at your disposal.">
+<!ENTITY ubiquity.tagline.LocalizeCmd "We must localize to globalize.">
+<!ENTITY ubiquity.tagline.Support "Help!">
 <!ENTITY ubiquity.tagline.HackUbiquity "Hack It.">
 <!-- Header page tips -->
-<!ENTITY ubiquity.pagetip.About "È possibile accedere a questa pagina in ogni momento, usando  il comando “Aiuto”.">
-<!ENTITY ubiquity.pagetip.Settings "È possibile accedere a questa pagina in ogni momento usando il comando “change ubiquity settings”.">
-<!ENTITY ubiquity.pagetip.YourCommands "È possibile accedere a questa pagina in ogni momento usando il comando “Elenco comandi disponibile”.">
-<!ENTITY ubiquity.pagetip.Support "È possibile accedere a questa pagina in ogni momento usando il comando “guida di ubiquity”">
-<!ENTITY ubiquity.pagetip.HackUbiquity "È possibile accedere a questa pagina in ogni momento usando il comando “crea un comando per ubiquity”.">
+<!ENTITY ubiquity.pagetip.About "You can get to this page at any time using the &amp;ldquo;help&amp;rdquo; command.">
+<!ENTITY ubiquity.pagetip.Settings "You can get to this page at any time using the  &amp;ldquo;change ubiquity settings&amp;rdquo; command.">
+<!ENTITY ubiquity.pagetip.YourCommands "You can get to this page at any time using the &amp;ldquo;list ubiquity commands&amp;rdquo; command.">
+<!ENTITY ubiquity.pagetip.Support "You can get to this page at any time using the  &amp;ldquo;get support&amp;rdquo; command.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "You can get to this page at any time using the  &amp;ldquo;write ubiquity commands&amp;rdquo; command.">
 <!-- Buttons, Buttons and more Buttons. Here are our generic editor buttons found everywhere an editor resides -->
-<!ENTITY ubiquity.generic.ImportTemplate "Importa da un modello">
-<!ENTITY ubiquity.generic.LaunchExternalEd "Utilizza un editor esterno">
-<!ENTITY ubiquity.generic.EnableHighlighting "Evidenzia la sintassi">
-<!ENTITY ubiquity.generic.ButtonEdit "Modifica">
-<!ENTITY ubiquity.generic.ButtonSave "Salva">
-<!ENTITY ubiquity.generic.ButtonSaveAs "Salva con nome">
-<!ENTITY ubiquity.generic.ButtonShare "Condividi">
+<!ENTITY ubiquity.generic.ImportTemplate "Import from template">
+<!ENTITY ubiquity.generic.LaunchExternalEd "Launch an external editor">
+<!ENTITY ubiquity.generic.EnableHighlighting "Enable syntax highlighting">
+<!ENTITY ubiquity.generic.ButtonEdit "Edit">
+<!ENTITY ubiquity.generic.ButtonSave "Save">
+<!ENTITY ubiquity.generic.ButtonSaveAs "Save As">
+<!ENTITY ubiquity.generic.ButtonShare "Share">
 <!-- End common elements -->
 <!-- Everything from here down is page by page in no particular page order -->
 <!-- About chrome/content/about.xhtml -->
-<!ENTITY ubiqutiy.about.WhatIsUbiquity "Cos'è &amp;amp;appTitle; ?">
-<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&amp;amp;appTitle; è un'estensione per Firefox che permette di eseguire dei comandi digitandoli in un'apposita input box.">
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "What Is &amp;appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&amp;appTitle; is a Firefox add-on that lets you give commands to Firefox by entering command words into a special input box.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Commands are shortcuts for things that you commonly do on the Web; they can eliminate repetitive tasks and let you get more done, faster.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph3 "The coolest thing about &amp;appTitle; is that anyone can write a command and share it with the rest of the world, in much the same way as the Web itself lets everyone write pages and share information with the rest of the world.">
 <!ENTITY ubiqutiy.about.LearnHow "Learn How To Use &amp;appTitle;">
-<!ENTITY ubiqutiy.about.TutorialButton "Fare clic qui per">
-<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Leggi di più sull'utilizzo di &amp;amp;appTitle;">
-<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "Dopo aver imparato le basi leggendo questo tutorial, è possibile approfondire leggendo la">
-<!ENTITY ubiqutiy.about.UsingParagraph1LinkText "documentazione ufficiale.">
+<!ENTITY ubiqutiy.about.TutorialButton "Click Here to Take the Interactive Tutorial">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "More On Using &amp;appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1Part1 "After taking the basic tutorial on this page, you can learn more by reading the">
+<!ENTITY ubiqutiy.about.UsingParagraph1LinkText "In-depth documentation page">
 <!ENTITY ubiqutiy.about.UsingParagraph1Part2 ".">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "È possibile contribuire iscrivendosi a">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part1 "Help us by subscribing to the">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText1 "Herd">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". Questo permetterà di aggiungere i tuoi dati alla">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part2 ". This will add your data to the">
 <!ENTITY ubiqutiy.about.UsingParagraph2LinkText2 "dashboard">
-<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "&amp;amp;mdash; questo è completamente anonimo e permetterà di migliorare e rendere più sicura &amp;amp;appTitle.">
+<!ENTITY ubiqutiy.about.UsingParagraph2Part3 "&amp;mdash; it's completely anonymous and will help us make &amp;appTitle; better and safer.">
 <!ENTITY ubiqutiy.about.UsingParagraph3Part1 "For information about the goals of the &amp;appTitle; project and our plans for upcoming releases, check out our">
 <!ENTITY ubiqutiy.about.UsingParagraph3LinkText "Roadmap">
 <!ENTITY ubiqutiy.about.UsingParagraph3Part2 ".">
