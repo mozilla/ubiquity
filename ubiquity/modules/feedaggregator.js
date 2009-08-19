@@ -96,11 +96,11 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
             exception: e});
         }
 
-    var win = document.defaultView;
-    if (win !== win.top) return; // avoid frames
-    var cmds4domain = [
-      cmd for each (cmd in commandsByServiceDomain[document.domain])
-      if (!cmd.disabled)];
+    try { var {defaultView, domain} = document } catch (e) { return }
+    if (defaultView !== defaultView.top) return; // avoid frames
+    var cmds4domain = [cmd
+                       for each (cmd in commandsByServiceDomain[domain])
+                       if (!cmd.disabled)];
     if (cmds4domain.length) onDomainWithCommands(document, cmds4domain);
   };
 
