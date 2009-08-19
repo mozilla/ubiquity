@@ -122,11 +122,13 @@ CommandManager.prototype = {
           if (!("hasAttribute" in target)) return;
           if (target.hasAttribute("index")) break;
         } while ((target = target.parentNode));
-        this.__hilitedIndex = +target.getAttribute("index");
+        let index = +target.getAttribute("index");
+        if (this.__hilitedIndex === index) return;
+        this.__hilitedIndex = index;
         this.__lastAsyncSuggestionCb();
         event.preventDefault();
         event.stopPropagation();
-        break;
+        return;
       }
     }
   },
@@ -286,10 +288,6 @@ CommandManager.prototype = {
     query.run();
   },
 
-  getLastInput: function CM_getLastInput() {
-    return this.__lastInput;
-  },
-
   onSuggestionsUpdated: function CM_onSuggestionsUpdated(input, context) {
     if (input !== this.__lastInput) return;
 
@@ -326,10 +324,6 @@ CommandManager.prototype = {
       }
   },
 
-  hasSuggestions: function CM_hasSuggestions() {
-    return !!(this.__activeQuery || 0).hasResults;
-  },
-
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
                                                            asyncSuggestionCb,
                                                            noAsyncUpdates){
@@ -340,16 +334,6 @@ CommandManager.prototype = {
     };
   },
 
-  getHilitedSuggestionText: function CM_getHilitedSuggestionText() {
-    var sugg = this.hilitedSuggestion;
-    return sugg ? sugg.completionText : "";
-  },
-
-  getHilitedSuggestionDisplayName: function CM_getHilitedSuggDisplayName() {
-    var sugg = this.hilitedSuggestion;
-    return sugg ? sugg.displayHtml : "";
-  },
-
   makeCommandSuggester: function CM_makeCommandSuggester() {
     var self = this;
     return function getAvailableCommands(context, popupCb) {
@@ -358,25 +342,15 @@ CommandManager.prototype = {
     };
   },
 
-  get maxSuggestions() CommandManager.maxSuggestions,
-  get previewBrowser() this.__previewer,
-  get hilitedSuggestion() (
+  get parser CM_parser() this.__nlParser,
+  get lastInput CM_getLastInput() this.__lastInput,
+  get previewBrowser CM_previewBrowser() this.__previewer,
+
+  get maxSuggestions CM_maxSuggestions() CommandManager.maxSuggestions,
+  get hasSuggestions CM_hasSuggestions()
+    !!(this.__activeQuery || 0).hasResults,
+
+  get hilitedSuggestion CM_hilitedSuggestion() (
     this.__activeQuery &&
     this.__activeQuery.suggestionList[this.__hilitedIndex]),
-  
-  getCommandsByServiceDomain: function() {
-    if (this.__commandsByServiceDomain)
-      return this.__commandsByServiceDomain;
-    let commands = this.__cmdSource.getAllCommands();
-    this.__commandsByServiceDomain = {};
-    for each (let cmd in commands) {
-      if (cmd.serviceDomain) {
-        if (!(cmd.serviceDomain in this.__commandsByServiceDomain))
-          this.__commandsByServiceDomain[cmd.serviceDomain] = [];
-        this.__commandsByServiceDomain[cmd.serviceDomain].push(
-          {name:cmd.name, names:cmd.names, id: cmd.id});
-      }
-    }
-    return this.__commandsByServiceDomain;
-  }
 };

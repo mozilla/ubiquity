@@ -813,10 +813,10 @@ function testAsyncNounSuggestions() {
                           makeTestParser(), onCM);
   function onCM(cmdMan) {
     cmdMan.updateInput("dostuff halifax", emptyContext, null);
-    this.assert(cmdMan.hasSuggestions() == false, "Should have no completions");
+    this.assert(cmdMan.hasSuggestions === false, "Should have no completions");
     noun_type_slowness.triggerCallback();
     cmdMan.onSuggestionsUpdated("dostuff h", emptyContext, null);
-    this.assert(cmdMan.hasSuggestions() == true, "Should have them now.");
+    this.assert(cmdMan.hasSuggestions === true, "Should have them now.");
   }
 }
 

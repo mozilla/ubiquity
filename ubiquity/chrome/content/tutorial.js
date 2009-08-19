@@ -81,13 +81,15 @@ function ubiqWindowIsUp() getGUbiq().isWindowOpen;
 function ubiqWindowIsDown() !ubiqWindowIsUp();
 
 function ubiqInputIs(text) {
-  let input = getGUbiq().cmdManager.getLastInput();
-  return (input.toLowerCase() === text.toLowerCase());
+  let {lastInput} = getGUbiq().cmdManager;
+  return lastInput.toLowerCase() === text.toLowerCase();
 }
 
 function ubiqSuggestionIs(text) {
-  let verb = getGUbiq().cmdManager.getHilitedSuggestionDisplayName();
-  return (verb.toLowerCase().indexOf(text.toLowerCase()) > -1);
+  let {hilitedSuggestion} = getGUbiq().cmdManager;
+  return (hilitedSuggestion &&
+          (hilitedSuggestion.displayText.toLowerCase()
+           .indexOf(text.toLowerCase())) > -1);
 }
 
 function contentsDivHas(word) {

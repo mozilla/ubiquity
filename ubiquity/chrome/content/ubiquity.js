@@ -121,10 +121,8 @@ Ubiquity.prototype = {
       event.preventDefault();
     }
     else if (keyCode === this.__KEYCODE_TAB) {
-      var suggestionText =
-        this.__cmdManager.getHilitedSuggestionText(this.__makeContext());
-      if (suggestionText)
-        this.__textBox.value = suggestionText;
+      var {completionText} = this.__cmdManager.hilitedSuggestion || 0;
+      if (completionText) this.__textBox.value = completionText;
       event.preventDefault();
     }
   },
@@ -153,7 +151,7 @@ Ubiquity.prototype = {
     var {keyCode} = event;
     if (keyCode === this.__KEYCODE_ENTER) {
       this.__processInput(true);
-      this.__needsToExecute = this.__cmdManager.hasSuggestions();
+      this.__needsToExecute = this.__cmdManager.hasSuggestions;
       this.__msgPanel.hidePopup();
       return;
     }

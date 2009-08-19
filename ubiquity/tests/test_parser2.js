@@ -571,21 +571,18 @@ function testCmdManagerSuggestsForNounFirstInput() {
   var cmdMan = makeCommandManager.call(this, fakeSource, null,
                                        makeTestParser2(),
                                        onCM);
-  var noSelection = { textSelection: null, htmlSelection: null };
+  var noSelection = {textSelection: null, htmlSelection: null};
   var self = this;
   function onCM(cmdMan) {
     cmdMan.updateInput(
       "tree",
       noSelection,
-      self.makeCallback(
-        function() {
-          self.assert( cmdMan.hasSuggestions() );
-          cmdMan.execute(noSelection);
-          self.assert( oneWasCalled == "tree",
-                       "Should have called cmdOne with text selection tree.");
-        }
-      )
-    );
+      self.makeCallback(function () {
+        self.assert(cmdMan.hasSuggestions);
+        cmdMan.execute(noSelection);
+        self.assert(oneWasCalled === "tree",
+                    "Should have called cmdOne with text selection tree.");
+      }));
     // TODO I want to put a second test using input "mud", but if they
     // run at the same time the second one will cancel the first one.
   }
