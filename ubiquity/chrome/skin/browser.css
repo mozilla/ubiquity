@@ -3,3 +3,12 @@
   background-color: transparent;
   border-width: 0px;
 }
+
+#ubiquity-toolbarbutton {
+  list-style-image: url("chrome://ubiquity/skin/icons/ubiquibot24.png");
+}
+toolbar[iconsize="small"] #ubiquity-toolbarbutton > .toolbarbutton-icon {
+  list-style-image: url("chrome://ubiquity/skin/icons/favicon.png");
+  width:  16px;
+  height: 16px;
+}

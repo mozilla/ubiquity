@@ -1,9 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://ubiquity/skin/browser.css" type="text/css"?>
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-<head></head>
   <script type="application/javascript;version=1.7"
           src="chrome://ubiquity/content/ubiquity.js"/>
   <script type="application/javascript;version=1.7"
@@ -37,8 +35,12 @@
   <popup id="contentAreaContextMenu">
     <menuseparator id="ubiquity-separator"/>
     <menu id="ubiquity-menu" label="Ubiquity">
-      <menupopup id="ubiquity-menupopup">
-      </menupopup>
+      <menupopup id="ubiquity-menupopup"></menupopup>
     </menu>
   </popup>
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="ubiquity-toolbarbutton" class="toolbarbutton-1"
+      label="Ubiquity" tooltiptext="Open or Close Ubiquity"
+      oncommand="gUbiquity.toggleWindow()"/>
+  </toolbarpalette>
 </overlay>
