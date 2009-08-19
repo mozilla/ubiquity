@@ -23,8 +23,8 @@
           </div>
           <div id="ubiquity-preview-container">
             <div id="ubiquity-preview">
-              <xul:browser id="ubiquity-browser"
-               width="490" height="500" disablesecurity="true"/>
+              <xul:browser id="ubiquity-browser" width="490" height="500"
+                disablesecurity="true" disablehistory="true"/>
             </div>
           </div>
           <div id="ubiquity-help"></div>

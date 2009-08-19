@@ -1,46 +1,44 @@
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-EXPORTED_SYMBOLS = ["FakeCommandSource", "makeCommandManager",
-                   "fakeContextUtils"];
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/cmdmanager.js");
+
+var EXPORTED_SYMBOLS = ["FakeCommandSource", "makeCommandManager",
+                        "fakeContextUtils"];
 
 var fakeContextUtils = {
   getHtmlSelection: function(context) { return context.htmlSelection; },
   getSelection: function(context) { return context.textSelection; },
   getSelectionObject: function(context) {
     return { text: context.textSelection,
-             html: context.htmlSelection
-           };
+             html: context.htmlSelection };
   }
 };
 
-function FakeCommandSource( cmdList ) {
-  for ( var x in cmdList ) {
+function FakeCommandSource(cmdList) {
+  for (var x in cmdList) {
     cmdList[x].names = [x];
   }
   this._cmdList = cmdList;
 }
 FakeCommandSource.prototype = {
-  addListener: function() {},
-  getCommand: function(name) {
+  addListener: function () {},
+  getCommand: function (name) {
     return this._cmdList[name];
   },
-  getAllCommands: function(name) {
+  getAllCommands: function (name) {
     return this._cmdList;
   },
-  refresh: function() {
-  }
+  refresh: function () {}
 };
 
 function makeCommandManager(source, msgService, parser, callback) {
   this.skipIfXPCShell();
 
   var self = this;
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-  var hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"]
-                     .getService(Ci.nsIAppShellService)
-                     .hiddenDOMWindow;
+  var hiddenWindow = (Cc["@mozilla.org/appshell/appShellService;1"]
+                      .getService(Ci.nsIAppShellService)
+                      .hiddenDOMWindow);
   var fakeDom = hiddenWindow.document;
   var xulIframe = fakeDom.createElement("iframe");
   var onload = this.makeCallback(function _onload() {
@@ -50,12 +48,13 @@ function makeCommandManager(source, msgService, parser, callback) {
     var suggFrame = doc.createElementNS("http://www.w3.org/1999/xhtml",
                                         "iframe");
     var prevNode = doc.createElement("div");
+    var pbrowser = doc.createElementNS(
+      "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
+      "browser");
+    pbrowser.setAttribute("disablehistory", true);
 
     suggNode.appendChild(suggFrame).src = "data:text/html,";
-    prevNode.appendChild(
-      doc.createElementNS(
-        "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
-        "browser"));
+    prevNode.appendChild(pbrowser);
 
     callback.call(self,
                   new CommandManager(source, msgService, parser,
