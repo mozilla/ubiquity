@@ -55,9 +55,10 @@ var Utils = {
   // This property is a reference to the application chrome window
   // that currently has focus.
 
-  get currentChromeWindow() (Cc["@mozilla.org/appshell/window-mediator;1"]
-                             .getService(Ci.nsIWindowMediator)
-                             .getMostRecentWindow(Utils.appWindowType)),
+  get currentChromeWindow currentChromeWindow() (
+    Cc["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Ci.nsIWindowMediator)
+    .getMostRecentWindow(Utils.appWindowType)),
 
   __globalObject: this,
 };
@@ -124,7 +125,7 @@ for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
 // console. Otherwise, the output will be routed to the Javascript
 // Console.
 //
-// {{{Utils.log}}} implements smart pretty print, so you
+// {{{Utils.log()}}} implements smart pretty print, so you
 // can use it for inspecting arrays and objects.
 // For details, see: http://getfirebug.com/console.html
 //
@@ -183,7 +184,7 @@ function log(what) {
 function reportWarning(aMessage, stackFrameNumber) {
   var stackFrame = Components.stack.caller;
 
-  if (typeof(stackFrameNumber) != "number")
+  if (typeof stackFrameNumber !== "number")
     stackFrameNumber = 0;
 
   for (var i = 0; i < stackFrameNumber; i++)
@@ -246,16 +247,18 @@ function ellipsify(node, chars) {
     for (var i = 0; i < children.length && chars > 0; i++) {
       var childNode = children[i];
       var childCopy;
-      if (childNode.nodeType == childNode.TEXT_NODE) {
+      if (childNode.nodeType === childNode.TEXT_NODE) {
         var value = childNode.nodeValue;
         if (value.length >= chars) {
           childCopy = doc.createTextNode(value.slice(0, chars) + "\u2026");
           chars = 0;
-        } else {
+        }
+        else {
           childCopy = childNode.cloneNode(false);
           chars -= value.length;
         }
-      } else if (childNode.nodeType == childNode.ELEMENT_NODE) {
+      }
+      else if (childNode.nodeType === childNode.ELEMENT_NODE) {
         childCopy = ellipsify(childNode, chars);
         chars -= childCopy.textContent.length;
       }
@@ -291,13 +294,12 @@ function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
   var timerClass = Cc["@mozilla.org/timer;1"];
   var timer = timerClass.createInstance(Ci.nsITimer);
   // emulate window.setTimeout() by incrementing next ID
-  var timerID = Utils.__timerData.nextID++;
-  Utils.__timerData.timers[timerID] = timer;
+  var timerID = __timerData.nextID++;
+  __timerData.timers[timerID] = timer;
 
   timer.initWithCallback(
-    new __TimerCallback(
-      callback,
-      arguments.length > 2 ? Array.slice(arguments, 2) : []),
+    new __TimerCallback(callback,
+                        arguments.length > 2 ? Array.slice(arguments, 2) : []),
     delay,
     timerClass.TYPE_ONE_SHOT);
   return timerID;
@@ -310,11 +312,10 @@ function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
 // from ever being called.
 
 function clearTimeout(timerID) {
-  var {timers} = Utils.__timerData;
-  var timer = timers[timerID];
+  var timer = __timerData.timers[timerID];
   if (timer) {
     timer.cancel();
-    delete timers[timerID];
+    delete __timerData.timers[timerID];
   }
 }
 
@@ -326,8 +327,8 @@ function __TimerCallback(callback, args) {
   this.QueryInterface = XPCOMUtils.generateQI([Ci.nsITimerCallback]);
 }
 __TimerCallback.prototype = {
-  notify: function notify(timer) {
-    var {timers} = Utils.__timerData;
+  notify: function TC_notify(timer) {
+    var {timers} = __timerData;
     for (let timerID in timers)
       if (timers[timerID] === timer) {
         delete timers[timerID];
@@ -335,10 +336,9 @@ __TimerCallback.prototype = {
       }
     this._callback.apply(null, this._args);
   },
-  QueryInterface: null,
 };
 
-Utils.__timerData = {nextID: 1, timers: {}};
+var __timerData = {nextID: 1, timers: {}};
 
 // === {{{ Utils.uri(spec, defaultUrl) }}} ===
 // === {{{ Utils.url() }}} ===
@@ -398,9 +398,9 @@ Utils.url = uri;
 function openUrlInBrowser(urlString, postData) {
   var postInputStream = null;
   if (postData) {
-    if (postData instanceof Ci.nsIInputStream) {
+    if (postData instanceof Ci.nsIInputStream)
       postInputStream = postData;
-    } else {
+    else {
       if (typeof postData === "object") // json -> string
         postData = Utils.paramsToString(postData, "");
 
@@ -433,12 +433,12 @@ function openUrlInBrowser(urlString, postData) {
     browserWindow.loadURI(urlString, null, postInputStream, false);
   else if (openPref === 3) {
     let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
-    browser[shiftKey ? 'addTab' : 'loadOneTab'](
+    browser[shiftKey ? "addTab" : "loadOneTab"](
       urlString, null, null, postInputStream, false, false);
   }
   else if (openPref === 2)
-    browserWindow.openDialog('chrome://browser/content', '_blank',
-                             'all,dialog=no', urlString, null, null,
+    browserWindow.openDialog("chrome://browser/content", "_blank",
+                             "all,dialog=no", urlString, null, null,
                              postInputStream);
   else
     browserWindow.loadURI(urlString, null, postInputStream, false);
@@ -471,8 +471,8 @@ function getCookie(domain, name) {
   while (iter.hasMoreElements()) {
     var cookie = iter.getNext();
     if (cookie instanceof nsICookie &&
-        cookie.host == domain &&
-        cookie.name == name)
+        cookie.host === domain &&
+        cookie.name === name)
       return cookie.value;
   }
   // if no matching cookie:
@@ -647,20 +647,16 @@ function computeCryptoHash(algo, str) {
   var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                    .createInstance(Ci.nsIScriptableUnicodeConverter));
   converter.charset = "UTF-8";
-  var result = {};
-  var data = converter.convertToByteArray(str, result);
+  var data = converter.convertToByteArray(str, {});
   var crypto = (Cc["@mozilla.org/security/hash;1"]
                 .createInstance(Ci.nsICryptoHash));
   crypto.initWithString(algo);
   crypto.update(data, data.length);
   var hash = crypto.finish(false);
-
-  function toHexString(charCode) {
-    return ("0" + charCode.toString(16)).slice(-2);
-  }
-  var hashString = [toHexString(hash.charCodeAt(i))
-                    for (i in hash)].join("");
-  return hashString;
+  var hexHash = "";
+  for each (var c in hash)
+    hexHash += (c.charCodeAt(0) | 256).toString(16).slice(-2);
+  return hexHash;
 }
 
 // === {{{ Utils.signHMAC(algo, key, str) }}} ===
@@ -767,12 +763,11 @@ Utils.tabs = {
 
   get: function tabs_get(name) {
     var tabs = [], {push} = tabs;
-    for each (let win in Utils.Application.windows)
-      push.apply(tabs, win.tabs);
+    for each (let win in Utils.Application.windows) push.apply(tabs, win.tabs);
     return (name == null
             ? tabs
-            : tabs.filter(function({document: d})(d.title === name ||
-                                                  d.URL   === name)));
+            : tabs.filter(function eachTab({document: d}) (d.title === name ||
+                                                           d.URL   === name)));
   },
 
   // === {{{ Utils.tabs.search(matcher, maxResults) }}} ===
@@ -790,7 +785,7 @@ Utils.tabs = {
     if (classOf(matcher) !== "RegExp") try {
       matcher = RegExp(matcher, "i");
     } catch (e if e instanceof SyntaxError) {
-      matcher = RegExp(String(matcher).replace(/\W/g, "\\$&"), "i");
+      matcher = RegExp(Utils.regexp.quote(matcher), "i");
     }
     if (maxResults == null) maxResults = 1/0;
     var keys = ["title", "URL"];
@@ -828,7 +823,7 @@ Utils.clipboard = {
   //
   // Gets or sets the clipboard text.
 
-  get text() {
+  get text clipboard_getText() {
     var clip = (Cc["@mozilla.org/widget/clipboard;1"]
                 .getService(Ci.nsIClipboard));
     var trans = (Cc["@mozilla.org/widget/transferable;1"]
@@ -839,7 +834,7 @@ Utils.clipboard = {
     trans.getTransferData("text/unicode", ss, {});
     return ss.value.QueryInterface(Ci.nsISupportsString).toString();
   },
-  set text(str) {
+  set text clipboard_setText(str) {
     (Cc["@mozilla.org/widget/clipboardhelper;1"]
      .getService(Ci.nsIClipboardHelper)
      .copyString(str));
