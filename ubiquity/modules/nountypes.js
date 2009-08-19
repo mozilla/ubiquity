@@ -58,6 +58,8 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://gre/modules/utils.js");
 
+const {Application} = Utils;
+
 // === {{{ noun_arb_text }}} ===
 //
 // Suggests the input as is.
@@ -73,12 +75,12 @@ var noun_arb_text = {
     return [CmdUtils.makeSugg(text, html, null, 0.3, selectionIndices)];
   },
   // hack to import feed-specific globals into this module
-  // see feed-parts/header/nountypes.js
+  // see feed-parts/header/initial.js
   loadGlobals: function nat_loadGlobals(source) {
-    var target = (function() this)();
-    for each (let p in ["Utils", "CmdUtils", "Application", "jQuery", "Date"])
+    var target = (function () this)();
+    for each (let p in ["Utils", "CmdUtils", "jQuery", "Date"])
       target[p] = source[p];
-    this.loadGlobals = function(){};
+    this.loadGlobals = function () {};
   }
 };
 
@@ -176,52 +178,50 @@ var noun_type_tab = {
   label: "title or URL",
   noExternalCalls: true,
   registerCacheObserver: function nt_tab_observer(flush) {
-    var registerListenersForWindow = function(window) {
+    function registerListenersForWindow(window) {
       let browser = getBrowser(window);
       if (browser == null)
         return;
       let container = browser.tabContainer;
-      container.addEventListener("TabOpen", function(evt){flush()}, false);
-      container.addEventListener("TabClose", function(evt){flush()}, false);
-    };
-    var unRegisterListenersForWindow = function(window) {
+      container.addEventListener("TabOpen", flush, false);
+      container.addEventListener("TabClose", flush, false);
+    }
+    function unRegisterListenersForWindow(window) {
       let browser = getBrowser(window);
       if (browser == null)
         return;
       let container = browser.tabContainer;
-      container.removeEventListener("TabOpen", function(evt){flush()}, false);
-      container.removeEventListener("TabClose", function(evt){flush()}, false);
-    };
-    var getBrowser = function(window) {
+      container.removeEventListener("TabOpen", flush, false);
+      container.removeEventListener("TabClose", flush, false);
+    }
+    function getBrowser(window) {
       // Make sure the window is browser-like
-      if (typeof window.getBrowser != "function")
+      if (typeof window.getBrowser !== "function")
         return null;
       // Make sure it's a tabbrowser-like window
       let browser = window.getBrowser();
-      if (browser == null || typeof browser.tabContainer != "object")
+      if (browser == null || typeof browser.tabContainer !== "object")
         return null;
       return browser;
-    };
-    var observe = function (aSubject, aTopic, aData) {
-      /* Called when a window opens or closes.  Make sure that every
-       * window has the appropriate listeners registered. */
-      let window = aSubject.QueryInterface(Ci.nsIDOMWindow);
-      if (aTopic == "domwindowopened") {
-        registerListenersForWindow(window);
-      } else if (aTopic == "domwindowclosed") {
-        unRegisterListenersForWindow(window);
-      }
-    };
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver]);
+    }
     // Register as an observer so we can catch windows opening and closing:
-    var ww = Cc["@mozilla.org/embedcomp/window-watcher;1"]
-               .getService(Ci.nsIWindowWatcher);
-    ww.registerNotification({observe: function(aSubject, aTopic, aData){
-                                       observe(aSubject, aTopic, aData)}});
+    var ww = (Cc["@mozilla.org/embedcomp/window-watcher;1"]
+              .getService(Ci.nsIWindowWatcher));
+    ww.registerNotification({
+      observe: function observe(aSubject, aTopic, aData) {
+        /* Called when a window opens or closes.  Make sure that every
+         * window has the appropriate listeners registered. */
+        let window = aSubject.QueryInterface(Ci.nsIDOMWindow);
+        if (aTopic === "domwindowopened")
+          registerListenersForWindow(window);
+        else if (aTopic === "domwindowclosed")
+          unRegisterListenersForWindow(window);
+      }
+    });
     /* Also directly register the listeners for any browser window already
      * open: */
-    let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                   .getService(Components.interfaces.nsIWindowMediator);
+    let wm = (Cc["@mozilla.org/appshell/window-mediator;1"]
+              .getService(Ci.nsIWindowMediator));
     let enumerator = wm.getEnumerator("navigator:browser");
     while (enumerator.hasMoreElements()) {
       registerListenersForWindow(enumerator.getNext());
@@ -253,7 +253,7 @@ var noun_type_search_engine = {
   },
   _BSS: (Cc["@mozilla.org/browser/search-service;1"]
          .getService(Ci.nsIBrowserSearchService)),
-  _sugg: function(engine, score) (
+  _sugg: function nt_sengine__sugg(engine, score) (
     CmdUtils.makeSugg(engine.name, null, engine, score || 1)),
 };
 
@@ -291,7 +291,7 @@ var noun_type_tag = {
     var utag = (uncompletedTag ? uncompletedTag.toLowerCase() : null);
     completedTags = completedTags.filter(Boolean);
 
-    for each (tag in completedTags) {
+    for each (let tag in completedTags) {
       if (lowercaseAllTags.indexOf(tag.toLowerCase()) > -1)
         // if preexisting tag, boost score
         score = Math.pow(score, 0.5);
@@ -302,9 +302,9 @@ var noun_type_tag = {
                         (uncompletedTag
                          ? completedTags.concat(uncompletedTag)
                          : completedTags),
-                        (uncompletedTag && lowercaseAllTags.indexOf(utag) >= 0)
-                        ? Math.sqrt(score)
-                        : score)];
+                        (uncompletedTag && lowercaseAllTags.indexOf(utag) >= 0
+                         ? Math.sqrt(score)
+                         : score))];
     if (uncompletedTag) {
       for each (let tag in allTags)
         // only match from the beginning of a tag name (not the middle)
@@ -422,10 +422,9 @@ var noun_type_url = {
       var {lastMatch: scheme, rightContext: noscheme} = RegExp;
     else {
       var scheme = "http://", noscheme = text;
-      if (selectionIndices) {
-        selectionIndices[0] += scheme.length;
-        selectionIndices[1] += scheme.length;
-      }
+      if (selectionIndices)
+        selectionIndices =
+          [i + scheme.length for each (i in selectionIndices)];
       score *= 0.9;
     }
 
@@ -441,9 +440,11 @@ var noun_type_url = {
       if (!this._LDHRE.test(domain)) {
         // if it's not LDH, then we should see if it's a valid
         // international domain name.
-        let asciiDomain = (Cc["@mozilla.org/network/idn-service;1"]
-                           .createInstance(Ci.nsIIDNService)
-                           .normalize(domain));
+        try { // normalize can fail
+          var asciiDomain = (Cc["@mozilla.org/network/idn-service;1"]
+                             .createInstance(Ci.nsIIDNService)
+                             .normalize(domain));
+        } catch (e) {}
         // if it's not even a valid IDN, then throw it out.
         score *= this._LDHRE.test(asciiDomain) ? 0.9 : 0;
       }
@@ -585,7 +586,7 @@ var noun_type_twitter_user = {
     if (!text || selected)
       return [];
 
-    var foundAt = (text[0] == '@');
+    var foundAt = text[0] === '@';
     if (foundAt) text = text.slice(1); // strip off the @
 
     var suggs = CmdUtils.grepSuggs(text, this.logins());
@@ -593,7 +594,7 @@ var noun_type_twitter_user = {
     // usernames.
 
     if (/^\w+$/.test(text))
-      suggs.push(CmdUtils.makeSugg(text, text, {}, 0.5));
+      suggs.push(CmdUtils.makeSugg(text, null, {}, 0.5));
 
     if (foundAt)
       suggs = [{
@@ -683,7 +684,7 @@ var noun_type_bookmarklet = {
     root.containerOpen = true;
     for (var i = root.childCount; i--;) {
       var node = root.getChild(i);
-      if(/^javascript:/.test(node.uri) &&
+      if (/^javascript:/.test(node.uri) &&
          !bookmarks.getKeywordForBookmark(node.itemId))
         list.push(CmdUtils.makeSugg(node.title, null, node.uri));
     }
@@ -804,7 +805,7 @@ var noun_type_contact = {
         // include results based on the email address...
         callback(CmdUtils.grepSuggs(text, list, "text")
                  // ...and based on the name.
-                 .concat(CmdUtils.grepSuggs(text, list, 'data')));
+                 .concat(CmdUtils.grepSuggs(text, list, "data")));
       }));
     }
     else return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
@@ -815,12 +816,12 @@ function getGmailContacts(callback) {
   var asyncRequest = jQuery.get(
     "https://mail.google.com/mail/contacts/data/export",
     {exportType: "ALL", out: "VCARD"},
-    function(data) {
+    function gGC_success(data) {
       var contacts = [], name = "";
       for each(let line in data.replace(/\r\n /g, '').split(/\r\n/)) {
-        if(/^(FN|EMAIL).*?:(.*)/.test(line)){
+        if (/^(FN|EMAIL).*?:(.*)/.test(line)) {
           var {$1: key, $2: val} = RegExp;
-          if(key === "FN")
+          if (key === "FN")
             name = val;
           else
             contacts.push({name: name, email: val});
@@ -832,7 +833,7 @@ function getGmailContacts(callback) {
   return asyncRequest;
 }
 
-function getYahooContacts( callback ){
+function getYahooContacts(callback) {
   var url = "http://us.mg1.mail.yahoo.com/yab";
   //TODO: I have no idea what these params mean
   var params = {
@@ -843,13 +844,13 @@ function getYahooContacts( callback ){
     xf: "sf,mf"
   };
 
-  var asyncRequest = jQuery.get(url, params, function(data) {
+  var asyncRequest = jQuery.get(url, params, function (data) {
 
     var contacts = [];
-    for each( var line in jQuery(data).find("ct") ){
+    for each(var line in jQuery(data).find("ct")) {
       var name = jQuery(line).attr("yi");
       //accept it as as long as it is not undefined
-      if(name){
+      if (name) {
         var contact = {};
         contact["name"] = name;
         //TODO: what about yahoo.co.uk or ymail?
@@ -899,7 +900,7 @@ var noun_type_geolocation = {
     // TODO: we should try to build this "here" handling into something like
     // magic words (anaphora) handling in Parser 2: make it localizable.
     var suggs = [CmdUtils.makeSugg(text, null, null, 0.3, selectionIndices)];
-    if (text == 'here')
+    if (/^\s*here\s*$/i.test(text))
       suggs.push(CmdUtils.getGeoLocation(addAsyncGeoSuggestions));
     return suggs;
   }
@@ -1140,7 +1141,7 @@ var noun_type_lang_wikipedia = CmdUtils.NounType("language", {
 });
 
 for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
-  ntl._code2name = ntl._list.reduce(function(o, s) {
+  ntl._code2name = ntl._list.reduce(function (o, s) {
     o[s.data] = s.text;
     return o;
   }, {});
@@ -1179,7 +1180,7 @@ function NounAsync(label, checker, acceptAnything) {
 
 var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants, true);
 
-function getRestaurants(query, callback, selectionIndices){
+function getRestaurants(query, callback, selectionIndices) {
   if (query.length == 0) return;
 
   var baseUrl = "http://api.yelp.com/business_review_search";
@@ -1200,30 +1201,30 @@ function getRestaurants(query, callback, selectionIndices){
   var asyncRequest = jQuery.ajax({
     url: baseUrl+params,
     dataType: "json",
-    error: function() {
+    error: function () {
       callback([]);
     },
-    success: function(data) {
+    success: function (data) {
       var allBusinesses = data.businesses.map(
-        function(business){
+        function (business) {
           return {name: business.name.toLowerCase().replace(/\s+/g, ''),
             categories: business.categories};
         });
       // if the business's name or category overlaps with the query
       // then consider it a restaurant match
-      for each (business in allBusinesses){
-        if(business.name.indexOf(queryToMatch) != -1 ||
-           queryToMatch.indexOf(business.name) != -1){
+      for each (business in allBusinesses) {
+        if (business.name.indexOf(queryToMatch) !== -1 ||
+            queryToMatch.indexOf(business.name) !== -1) {
               callback([CmdUtils.makeSugg(query, query, null, .9,
-                selectionIndices)]);
+                                          selectionIndices)]);
               return;
         }
-        else{
-          for each (category in business.categories){
-            if(category.name.indexOf(queryToMatch) != -1 ||
-              queryToMatch.indexOf(category.name) != -1){
+        else {
+          for each (category in business.categories) {
+            if (category.name.indexOf(queryToMatch) !== -1 ||
+              queryToMatch.indexOf(category.name) !== -1) {
               callback([CmdUtils.makeSugg(query, query, null, .9,
-                selectionIndices)]);
+                                          selectionIndices)]);
               return;
             }
           }
@@ -1245,7 +1246,7 @@ function getRestaurants(query, callback, selectionIndices){
 
 var noun_type_async_address = NounAsync("address", getLegacyAddress, true);
 
-function getLegacyAddress( query, callback, selectionIndices ) {
+function getLegacyAddress(query, callback, selectionIndices) {
   var url = "http://local.yahooapis.com/MapsService/V1/geocode";
   var params = Utils.paramsToString({
     location: query,
@@ -1254,45 +1255,42 @@ function getLegacyAddress( query, callback, selectionIndices ) {
   var asyncRequest = jQuery.ajax({
     url: url+params,
     dataType: "xml",
-    error: function() {
+    error: function () {
       callback([]);
     },
-    success:function(data) {
+    success:function (data) {
       var results = jQuery(data).find("Result");
       var allText = jQuery.makeArray(
-                      jQuery(data)
-                        .find(":contains('')")
-                        .map( function(){ return jQuery(this).text().toLowerCase(); } )
-                    );
+        jQuery(data)
+        .find(":contains('')")
+        .map(function () this.textContent.toLowerCase()));
 
       // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
 
-      if( results.length == 0 ){
-        callback( [] );
+      if (results.length === 0){
+        callback([]);
         return;
       }
 
-      function existsMatch( text ){
+      function existsMatch(text) {
         var joinedText = allText.join(" ");
-        return joinedText.indexOf( text.toLowerCase() ) != -1;
+        return joinedText.indexOf(text.toLowerCase()) !== -1;
       }
 
       var missCount = 0;
 
       var queryWords = query.match(/\w+/g);
-      for( var i=0; i < queryWords.length; i++ ){
-        if( existsMatch( queryWords[i] ) == false ) {
+      for (var i = 0, l = queryWords.length; i < l; ++i) {
+        if (!existsMatch(queryWords[i])) {
           missCount += 1;
-          //displayMessage( queryWords[i] );
         }
       }
 
       var missRatio = missCount / queryWords.length;
-      //displayMessage( missRatio );
 
-      if( missRatio < .5 )
-        callback( CmdUtils.makeSugg(query, query, null, 0.9,
-                 selectionIndices) );
+      if (missRatio < .5)
+        callback(CmdUtils.makeSugg(query, query, null, 0.9,
+                                   selectionIndices));
       else
         callback([]);
     }
@@ -1334,25 +1332,25 @@ function getAddress(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 6, 9);
 }
 
-function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
+function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy) {
   var url = "http://maps.google.com/maps/geo";
   var params = {
     q: query,
-    output: 'json',
-    oe: 'utf8',
-    sensor: 'false',
-    key: 'ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w'
+    output: "json",
+    oe: "utf8",
+    sensor: "false",
+    key: "ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w"
   };
   var asyncRequest = jQuery.ajax({
     url: url,
     data: params,
-    dataType: 'json',
-    error: function() {
+    dataType: "json",
+    error: function () {
       callback([]);
     },
-    success: function(data) {
-      if (data.Status.code != '200' ||
-           (data.Placemark && data.Placemark.length == 0)) {
+    success: function (data) {
+      if (data.Status.code != "200" ||
+          (data.Placemark && data.Placemark.length == 0)) {
         callback([]);
         return;
       }
@@ -1367,12 +1365,15 @@ function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
         if (!result.AddressDetails)
           continue;
 
-        if (result.address.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-          var score = CmdUtils.matchScore({input:result.address,index:0,'0':query});
+        if (result.address.toLowerCase()
+            .indexOf(query.toLowerCase()) === 0) {
+          var score = CmdUtils.matchScore(
+            {input: result.address, index: 0, 0: query});
           score *= accuracyScore(result.AddressDetails.Accuracy,
                                  minAccuracy, maxAccuracy);
           returnArr.push(formatGooglePlacemark(result.address,result,score));
-        } else {
+        }
+        else {
           unusedResults.push(result);
         }
       }
@@ -1383,7 +1384,7 @@ function getGeo( query, callback, selectionIndices, minAccuracy, maxAccuracy ) {
       if (!returnArr.length && unusedResults.length) {
         var result = unusedResults[0];
         var score = 0.7 * accuracyScore(result.AddressDetails.Accuracy,
-                                                 minAccuracy, maxAccuracy);
+                                        minAccuracy, maxAccuracy);
         returnArr.push(formatGooglePlacemark(query,unusedResults[0],score));
       }
 
@@ -1420,12 +1421,13 @@ function formatGooglePlacemark(text,placemark,score,selectionIndices) {
 
       for (let id in thisNode) {
         dump('id: '+id+'\n');
-        if (id.indexOf('Name') > -1) {
+        if (id.indexOf("Name") > -1) {
           var newId  = id[0].toLowerCase() + id.slice(1);
-          newId = newId.replace('Name','');
+          newId = newId.replace("Name", "");
           data.address[newId] = thisNode[id];
-        } else {
-          if (typeof thisNode[id] != 'string')
+        }
+        else {
+          if (typeof thisNode[id] !== "string")
             nodesToCrawl.push(thisNode[id]);
         }
       }
@@ -1437,7 +1439,7 @@ function formatGooglePlacemark(text,placemark,score,selectionIndices) {
 
 var EXPORTED_SYMBOLS = (
   [it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
-  .map(function([sym, noun], i) {
+  .map(function ([sym, noun], i) {
     noun.id = "#" + sym;
     noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
     return sym;
