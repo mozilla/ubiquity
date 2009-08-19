@@ -227,8 +227,20 @@ Ubiquity.prototype = {
   },
 
   __onclick: function U__onClick(event) {
-    // middle: open link, right: close panel, left: both
-    var {button, target} = event;
+    // middle: open link / execute, right: close panel, left: both
+    var {button, target, view} = event;
+    MOUSE_EXECUTE:
+    if (button !== 2 &&
+        view.location.href === "chrome://ubiquity/content/suggest.html") {
+      for (let lm = target;; lm = lm.parentNode) {
+        if (!lm || !("hasAttribute" in lm)) break MOUSE_EXECUTE;
+        if (/\bhilited\b/.test(lm.className)) break;
+      }
+      this.execute();
+      if (button === 0) this.closeWindow();
+      event.preventDefault();
+      return;
+    }
     if (button !== 2) {
       do var {href} = target;
       while (!href && (target = target.parentNode));
