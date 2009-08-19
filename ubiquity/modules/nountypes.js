@@ -189,8 +189,8 @@ var noun_type_tab = {
       if (browser == null)
         return;
       let container = browser.tabContainer;
-      container.removeEventListener("TabOpen", this.onTabOpened, false);
-      container.removeEventListener("TabClose", this.onTabClosed, false);
+      container.removeEventListener("TabOpen", function(evt){flush()}, false);
+      container.removeEventListener("TabClose", function(evt){flush()}, false);
     };
     var getBrowser = function(window) {
       // Make sure the window is browser-like
