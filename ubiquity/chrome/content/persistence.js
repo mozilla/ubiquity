@@ -68,8 +68,19 @@ var demoParserInterface = {
       if (this.finished && !this.resulted) {
         this.resulted = true;
       }
-      var resultsHtml = [s.displayHtml for each (s in this.suggestionList)];
-      with ({Utils:Utils,results:resultsHtml,jQuery:jQuery}) {
+      var results = [];
+      for each (let s in this.suggestionList) {
+        var div = content.document.createElement('div');
+        s.preview({},div);
+        results.push({ displayHtml: s.displayHtml,
+                       displayText: s.displayText,
+                       icon: s.icon,
+                       score: s.score,
+                       previewHtml: div.innerHTML
+                     });
+      }
+      
+      with ({Utils:Utils,results:results,jQuery:jQuery}) {
         eval($('#onResults').val());
       }
     }

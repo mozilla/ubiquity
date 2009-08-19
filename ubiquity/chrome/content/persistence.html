@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Ubiquity Parser 2 Playpen</title>
+    <title>The Ubiquity Persistence Project</title>
     <link rel="shortcut icon" href="chrome://ubiquity/skin/icons/favicon.ico" type="image/x-icon" />
     <script type="text/javascript;version=1.8" charset='utf-8' src='resource://ubiquity/scripts/jquery.js'></script>
     <script type="text/javascript;version=1.8" 
@@ -112,13 +112,14 @@
 <div>
 <h2 class='toggle'>Setup ⨠</h2>
 
-<label for='onResults'><code>onResults</code> code:</label> <textarea style='width:100%' rows='8' id='onResults' name='onResults'>// access results with results
-var html = results.join('<br/>');
+<label for='onResults'><code>onResults</code> code:</label> <textarea style='width:100%' rows='8' id='onResults' name='onResults'><![CDATA// Access results with results.
+// Each result has its displayHtml, displayText, previewHtml, icon, and score properties.
+var html = [r.displayHtml for each (r in results)].join('<br/>');
 // Utils.log(results);
 // the results div is #results
 // the input div is #input
 jQuery('#results').html(html);
-jQuery('#results').show();
+jQuery('#results').show();]]>
 </textarea>
 
 <label for='onClose'><code>onClose</code> code: <small>(triggered by <code>ESC</code>)</small></label> <textarea style='width:100%' rows='8' id='onClose' name='onClose'>// access results with results
@@ -151,17 +152,16 @@ jQuery('#results').hide('slow');
   border-bottom: 2px black solid;
 }
 
-.inactive, #results.needarg {
+.inactive, .needarg {
   color: gray;
 }
 </textarea>
 </div>
 
-<label for='os'>Test OS:</label>
+  <label for='os'>Test OS:</label>
     <input type='radio' name='os' class='os' value='mac' checked='checked'></input><label for='os'>Mac</label> <input type='radio' name='os' class='os' value='vista'></input><label for='os'>Win</label> <input type='radio' name='os' class='os' value='linux'></input><label for='os'>Linux</label>
 
-
-  </div>
+</div>
   
   <style type='text/css' id='realCSS'></style>
   <div id='awesomebar' class='mac'>
