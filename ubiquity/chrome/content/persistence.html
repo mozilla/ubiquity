@@ -15,24 +15,24 @@
 				font-family: sans-serif;
 			}
 			
-			#awesomebar {
+			#firefox {
         margin: 0 auto;
         height: 500px;
 			}
 			
-			#awesomebar.mac {
+			#firefox.mac {
         background-image: url(chrome://ubiquity/skin/icons/screenshot-firefox-mac.png);
         width: 1123px;
         margin-top: -52px;
 			}
 
-			#awesomebar.vista {
+			#firefox.vista {
         background-image: url(chrome://ubiquity/skin/icons/screenshot-firefox-vista.png);
         width: 1064px;
         margin-top: -40px;
 			}
 
-			#awesomebar.linux {
+			#firefox.linux {
         background-image: url(chrome://ubiquity/skin/icons/screenshot-firefox-linux.png);
         width: 1054px;
         margin-top: -35px;
@@ -43,22 +43,40 @@
         font-size: 10pt;
 			}
 			
-			#awesomebar.mac #inputwrapper {
+			#firefox.mac #inputwrapper.awesomebar {
         padding-left: 300px;
         padding-top: 57px;
-        width: 500px;
+        width: 400px;
 			}
 
-			#awesomebar.vista #inputwrapper {
+			#firefox.vista #inputwrapper.awesomebar {
         padding-left: 250px;
         padding-top: 69px;
-        width: 500px;
+        width: 400px;
 			}
 
-			#awesomebar.linux #inputwrapper {
+			#firefox.linux #inputwrapper.awesomebar {
         padding-left: 250px;
         padding-top: 64px;
-        width: 500px;
+        width: 400px;
+			}
+		
+			#firefox.mac #inputwrapper.searchbar {
+        padding-left: 786px;
+        padding-top: 57px;
+        width: 250px;
+			}
+
+			#firefox.vista #inputwrapper.searchbar {
+        padding-left: 760px;
+        padding-top: 69px;
+        width: 250px;
+			}
+
+			#firefox.linux #inputwrapper.searchbar {
+        padding-left: 753px;
+        padding-top: 64px;
+        width: 250px;
 			}
 		
 			h1, h2, h3, .large {
@@ -75,8 +93,6 @@
         background-color: #fff;
         padding: 30px 30px 60px 30px;
       }
-      
-/*      #awesomebar { display: inline-block }*/
       
       input.input {
         border: none;
@@ -158,14 +174,17 @@ jQuery('#results').hide('slow');
 </textarea>
 </div>
 
-  <label for='os'>Test OS:</label>
-    <input type='radio' name='os' class='os' value='mac' checked='checked'></input><label for='os'>Mac</label> <input type='radio' name='os' class='os' value='vista'></input><label for='os'>Win</label> <input type='radio' name='os' class='os' value='linux'></input><label for='os'>Linux</label>
+  <p><label for='os'>Test OS:</label>
+    <input type='radio' name='os' class='os' value='mac' checked='checked'></input><label for='os'>Mac</label> <input type='radio' name='os' class='os' value='vista'></input><label for='os'>Win</label> <input type='radio' name='os' class='os' value='linux'></input><label for='os'>Linux</label></p>
+
+  <p><label for='os'>Position:</label>
+    <input type='radio' name='position' class='position' value='awesomebar' checked='checked'></input><label for='position'>URL bar</label> <input type='radio' name='position' class='position' value='searchbar' checked='checked'></input><label for='position'>Search bar</label></p>
 
 </div>
   
   <style type='text/css' id='realCSS'></style>
-  <div id='awesomebar' class='mac'>
-    <div id='inputwrapper'>
+  <div id='firefox' class='mac'>
+    <div id='inputwrapper' class='awesomebar'>
       <input id='input' class='input'/>
       <div id='results' style='display:none'>test</div>
     </div>
