@@ -60,9 +60,9 @@ Cu.import("resource://ubiquity/modules/utils.js");
 
 const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
 
-var {classes: Cc, interfaces: Ci} = Components.classes;
-
 var {escapeHtml} = Utils;
+var {feedManager, commandSource, messageService} = (UbiquitySetup
+                                                    .createServices());
 
 function A(url, text, className) {
   var a = document.createElement("a");
@@ -218,17 +218,14 @@ function fillTableRowForCmd(row, cmd, className) {
     cmdElement.addClass(className);
   }
 
-  var {messageService} = UbiquitySetup.createServices();
   for each (let key in ["description", "help"])
     key in cmd && setTimeout(function appendHtmlData(k) {
-      try {
-        $("." + k, cmdElement)[0].innerHTML = cmd[k];
-      } catch (e if e.result === 0x80004003) {
+      try { $("." + k, cmdElement)[0].innerHTML = cmd[k] }
+      catch (e if e.result === 0x80004003) {
+        var msg = 'XML error in "' + k + '" of [ ' + cmd.name + ' ]';
         messageService.displayMessage({
-          title: cmd.name, icon: cmd.icon,
-          text: "XML error in [ " + k + " ]",
-          onclick: function jump2cmd(){ location.hash = cmd.id }});
-        Cu.reportError(e);
+          text: msg, onclick: function go2cmd() { location.hash = cmd.id }});
+        Cu.reportError(msg);
       }
     }, 0, key);
 
@@ -236,19 +233,16 @@ function fillTableRowForCmd(row, cmd, className) {
 }
 
 function updateSubscribedCount() {
-  var {feedManager, commandSource} = UbiquitySetup.createServices();
   $("#num-commands").html(commandSource.commandNames.length);
   $("#num-subscribed-feeds").html(feedManager.getSubscribedFeeds().length);
 }
 
 function updateUnsubscribedCount() {
   $("#num-unsubscribed-feeds").html(
-    UbiquitySetup.createServices().feedManager
-    .getUnsubscribedFeeds().length);
+    feedManager.getUnsubscribedFeeds().length);
 }
 
 function buildTable() {
-  let {feedManager, commandSource} = UbiquitySetup.createServices();
   let table = $("#commands-and-feeds-table").empty();
   let sortMode = getSortMode();
   let commands = commandSource.getAllCommands();
@@ -336,7 +330,6 @@ function getFeedForCommand(feedManager, cmd) {
 function onDisableOrEnableCmd() {
   // update the preferences, when the user toggles the active
   // status of a command.
-  var {commandSource} = UbiquitySetup.createServices();
   commandSource.getCommand(this.value).disabled = !this.checked;
 }
 
@@ -368,8 +361,7 @@ function makeUnsubscribedFeedListElement(info) {
 }
 
 function buildUnsubscribedFeeds() {
-  var unscrFeeds = (UbiquitySetup.createServices().feedManager
-                    .getUnsubscribedFeeds());
+  var unscrFeeds = feedManager.getUnsubscribedFeeds();
   var isEmpty = !unscrFeeds.length;
 
   updateUnsubscribedCount();
