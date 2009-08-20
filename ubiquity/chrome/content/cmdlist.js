@@ -60,8 +60,7 @@ Cu.import("resource://ubiquity/modules/utils.js");
 
 const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+var {classes: Cc, interfaces: Ci} = Components.classes;
 
 var {escapeHtml} = Utils;
 
@@ -126,7 +125,7 @@ function formatAuthors(authors) (
 function formatCommandAuthor(authorData) {
   if (!authorData) return "";
 
-  if (typeof authorData === "string") return authorData;
+  if (typeof authorData === "string") return escapeHtml(authorData);
 
   var authorMarkup = "";
   if ("name" in authorData && !("email" in authorData)) {
@@ -156,11 +155,10 @@ function fillTableRowForCmd(row, cmd, className) {
    [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
   var {name, names, nameArg, homepage} = cmd;
-  var cmdDisplayName = (names[0] || name);
   if (nameArg)
     // TODO: we need some sort of flag to check whether the nameArg
     // was a prefix or a suffix.
-    cmdDisplayName += " " + nameArg;
+    name += " " + nameArg;
 
   var authors = cmd.authors || cmd.author;
   var contributors = cmd.contributors || cmd.contributor;
@@ -170,9 +168,8 @@ function fillTableRowForCmd(row, cmd, className) {
     (!("icon" in cmd) ? "" :
      '<img class="favicon" src="' + escapeHtml(cmd.icon) + '"/>') +
     ('<a class="id" name="' + escapeHtml(cmd.id) + '"/>' +
-     '<span class="name">' + escapeHtml(cmdDisplayName) + '</span>') +
-    ("description" in cmd ?
-     '<span class="description">' + cmd.description + '</span>' : "") +
+     '<span class="name">' + escapeHtml(name) + '</span>') +
+    '<span class="description"></span>' +
     (names.length < 2 ? "" :
      ('<div class="synonyms-container light">' +
       L("ubiquity.cmdlist.synonyms",
@@ -197,7 +194,7 @@ function fillTableRowForCmd(row, cmd, className) {
       L("ubiquity.cmdlist.viewmoreinfo",
         let (hh = escapeHtml(homepage)) hh.link(hh)) +
       '</div>')) +
-    ("help" in cmd ? '<div class="help">' + cmd.help + '</div>' : "") +
+    '<div class="help"></div>' +
     '</td>');
 
   if (UbiquitySetup.parserVersion === 2) {
@@ -220,6 +217,20 @@ function fillTableRowForCmd(row, cmd, className) {
     checkBoxCell.addClass(className);
     cmdElement.addClass(className);
   }
+
+  var {messageService} = UbiquitySetup.createServices();
+  for each (let key in ["description", "help"])
+    key in cmd && setTimeout(function appendHtmlData(k) {
+      try {
+        $("." + k, cmdElement)[0].innerHTML = cmd[k];
+      } catch (e if e.result === 0x80004003) {
+        messageService.displayMessage({
+          title: cmd.name, icon: cmd.icon,
+          text: "XML error in [ " + k + " ]",
+          onclick: function jump2cmd(){ location.hash = cmd.id }});
+        Cu.reportError(e);
+      }
+    }, 0, key);
 
   return row.append(checkBoxCell, cmdElement);
 }
