@@ -1,0 +1,30 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(40d24d20-f8b7-11dc-95ff-0800200c9a66)]
+interface ISNARLINTERFACE : nsISupports
+{
+  long snShowMessageEx(in AString title, in AString text, in long timeout, in AString iconPath, in long hWndReply, in long uReplyMsg, in AString soundPath, in AString msgClass);
+  long snShowMessage(in AString title, in AString text, in long timeout, in AString iconPath, in long hWndReply, in long uReplyMsg);
+  boolean snRegisterConfig(in long hWnd, in AString appname, in long replyMsg, in string wname);
+  boolean snRegisterConfig2(in long hWnd,in AString appName,in long replyMsg, in AString icon,in string wname);
+  boolean snRevokeConfig(in long hWnd);
+  boolean snRegisterAlert(in AString appName, in AString className);
+  boolean snHideMessage(in long Id);
+  boolean snIsMessageVisible(in long Id);
+  boolean snUpdateMessage(in long id, in AString szTitle, in AString szText, in AString szIconPath);
+  long snSetTimeout(in long Id, in long Timeout);
+  long snGetVersionEx();
+  long snGetWindowHandle(in string wname);
+  boolean snGetIsRunning();
+  /* V39/Snarl 2.1 starts here */
+  long snGetAppMsg();
+  long snRegisterApp(in AString Application, in AString SmallIcon, in AString LargeIcon, in long hWnd, in long ReplyMsg);
+  long snUnregisterApp();
+  long snShowNotification(in AString Class, in AString Title, in AString Text, in long Timeout, in AString Icon, in long hWndReply, in long uReplyMsg, in AString Sound);
+  long snChangeAttribute(in long Id, in long Attr, in AString Value); // Attr is a long because Mozilla doesn't support enums here
+  long snGetRevision();
+  long snGetCurrentMsgWindowHandle();
+  long snSetClassDefault(in AString As, in long Attr, in AString Value);
+  long snAddClass(in AString Class, in AString Description, in long Flags, in AString DefaultTitle, in AString DefaultIcon, in AString DefaultTimeout);
+};
+
