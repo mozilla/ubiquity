@@ -16,24 +16,6 @@
 <!ENTITY ubiquity.common.ButtonRun "run!">
 <!ENTITY ubiquity.common.HeaderSettings "Settings">
 
-<!-- Test Suite chrome/content/persistence.xhtml -->
-<!ENTITY ubiquity.persistence.Header "Persistence: <small>an exercise in a persistent Ubiquity</small>">
-<!ENTITY ubiquity.persistence.ShortDesc "What would Ubiquity look like in the Firefox chrome, so you didn't need a keystroke to pull it up? This test page is meant to be a playground where you can try out different designs and ideas.">
-<!ENTITY ubiquity.persistence.DesignSubmit "Submit your brilliant designs here.">
-<!ENTITY ubiquity.persistence.DesignView "View all submitted designs here.">
-<!ENTITY ubiquity.persistence.HeaderCustomize "Customize">
-<!ENTITY ubiquity.persistence.ClickToggle "click to toggle">
-<!ENTITY ubiquity.persistence.JSonResults "JavaScript code for the <code>onResults</code> handler:">
-<!ENTITY ubiquity.persistence.JSonClose "JavaScript code for the <code>onClose</code> handler: <small>(triggered by <code>ESC</code>)</small>">
-<!ENTITY ubiquity.persistence.ResultStyling "CSS declarations to style the results:">
-<!ENTITY ubiquity.persistence.TestOS "Test OS:">
-<!ENTITY ubiquity.persistence.Linux "Linux">
-<!ENTITY ubiquity.persistence.Mac "Mac">
-<!ENTITY ubiquity.persistence.Windows "Win">
-<!ENTITY ubiquity.persistence.Position "Position:">
-<!ENTITY ubiquity.persistence.AddressBar "Address bar">
-<!ENTITY ubiquity.persistence.SearchBar "Search bar">
-
 <!-- Test Suite chrome/content/playpen.xhtml -->
 <!ENTITY ubiquity.playpen.Header "&appTitle; Parser 2 Playpen">
 <!ENTITY ubiquity.playpen.ShortDesc "This is a parser testing and optimization playpen for the upcoming Ubiquity parser.">
