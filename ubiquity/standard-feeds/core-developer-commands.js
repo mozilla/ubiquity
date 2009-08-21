@@ -10,7 +10,7 @@ CmdUtils.CreateCommand({
   names: ["test", "unit test", "run unit tests"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Run the Ubiquity unit test suite",
-  execute: "chrome://ubiquity/content/test.html"
+  execute: "chrome://ubiquity/content/test.xhtml"
 });
 
 // === {{{playpen}}} command ===
@@ -21,7 +21,18 @@ CmdUtils.CreateCommand({
   names: ["playpen", "parser playpen", "open parser playpen"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Go to the parser playpen",
-  execute: "chrome://ubiquity/content/playpen.html"
+  execute: "chrome://ubiquity/content/playpen.xhtml"
+});
+
+// === {{{tuner}}} command ===
+//
+// Opens the nountype tuner.
+
+CmdUtils.CreateCommand({
+  names: ["tuner", "nountype tuner", "tune nountype"],
+  icon: "chrome://ubiquity/skin/icons/application_view_list.png",
+  description: "Go to the nountype tuner",
+  execute: "chrome://ubiquity/content/tuner.xhtml"
 });
 
 // === {{{markupTickets()}}} ===
