@@ -236,6 +236,7 @@
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart1 "If you ever want to unsubscribe, you can use the &ldquo;list&rdquo; &appTitle; command at any time to get to the">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongLinkText "command management page">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongPart2 "where you can see all commands which you are subscribed to, and cancel any that you no longer want.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "You may now close this window.">
 
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
 <!ENTITY ubiquity.reset.Header "Restore &appTitle; to its default settings?">

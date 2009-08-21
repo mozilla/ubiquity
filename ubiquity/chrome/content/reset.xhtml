@@ -17,8 +17,9 @@
 
   <base href="chrome://ubiquity/content" />
 
-  <link rel="icon" type="image/png" id="favicon" href="chrome://global/skin/icons/warning-16.png" />
+  <link rel="icon" type="image/png" href="chrome://global/skin/icons/question-16.png"/>
   <link rel="stylesheet" href="chrome://global/skin/netError.css" type="text/css" media="all" />
+  <link rel="stylesheet" href="chrome://ubiquity/content/ubiquityError.css" type="text/css" media="all" />
 
   <script type="application/javascript;version=1.8">
   <![CDATA[
@@ -59,10 +60,10 @@
   }
   ]]>
   </script>
-  <script src="export-config.js" type="application/javascript;version=1.7"></script>
+  <script src="export-config.js" type="application/javascript;version=1.8"></script>
 
 </head>
-<body dir="&locale.dir;">
+<body dir="&locale.dir;" class="question">
 
 <div id="errorPageContainer">
 
@@ -77,7 +78,7 @@
     </div>
 
     <div id="errorLongDesc">
-      <p>&ubiquity.reset.Paragraph2;</p>
+      <p class="warnInfo">&ubiquity.reset.Paragraph2;</p>
 
       <ul>
         <li><a href="cmdlist.xhtml">&ubiquity.reset.Feeds;</a></li>

@@ -36,6 +36,10 @@
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 Components.utils.import("resource://ubiquity/modules/setup.js");
+Components.utils.import("resource://ubiquity/modules/localization_utils.js");
+
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/devubiquity.properties");
 
 // set up the interface which will control the parser.
 
@@ -44,15 +48,15 @@ var Ci = Components.interfaces;
 
 var displayParse = function(parse, labels) (
   parse._id + ": " + parse.displayHtml 
-  + (labels && parse._caller ? '<br/>caller: '+parse._caller : '') 
-  + (labels && parse._combination ? '<br/>combination: <code>'
+  + (labels && parse._caller ? '<br/>' + L("ubiquity.playpen.caller") + ' ' + parse._caller : '') 
+  + (labels && parse._combination ? '<br/>' + L("ubiquity.playpen.combo") + ' <code>'
     +parse._combination.replace(/},/g,'},<br/>') + '</code>' : '') 
-  + (labels ? '<br/>argString: '+parse.argString : '') 
+  + (labels ? '<br/>' + L("ubiquity.playpen.argstring") + ' ' + parse.argString : '') 
   + (labels ? '<br/>' : ' (') 
-  + (labels ? 'score: ' : '') 
-    + ((parse.score * 100 | 0) / 100 || "<i>no score</i>") + ', '
-  + (labels ? 'multiplier: ' : '') 
-    + ((parse.scoreMultiplier * 100 | 0) / 100 || "<i>no score</i>")
+  + (labels ? L("ubiquity.playpen.score") + ' ' : '') 
+    + ((parse.score * 100 | 0) / 100 || "<em>" + L("ubiquity.playpen.noscore") + "</em>") + ', '
+  + (labels ? L("ubiquity.playpen.multiplier") + ' ' : '') 
+    + ((parse.scoreMultiplier * 100 | 0) / 100 || "<em>" + L("ubiquity.playpen.noscore") + "</em>")
   + (labels ? '' : ')') 
 )
 
@@ -75,14 +79,14 @@ var demoParserInterface = {
     $('#parseinfo').empty();
     $('#parsetree').empty();
     this.currentQuery = this.currentParser.newQuery($('.input').val(),{},$('#maxSuggestions').val(),true); // this last true is for dontRunImmediately
-    
+
     // custom flag to make sure we don't onResults multiple times per query.
     this.currentQuery.resulted = false;
-    
+
     // override the selection object
     this.currentQuery.selObj = {text: $('#selection').val(), 
                                 html: $('#selection').val()};
-    
+
     $('#scoredParses').empty();
 
     if ($('#displayparseinfo').attr('checked') 
@@ -90,64 +94,64 @@ var demoParserInterface = {
       this.currentQuery.watch('_step',function(id,oldval,newval) {
         switch (oldval) {
           case 1:
-            $('<h3>step 1: split words</h3><code>'+this._input+'</code>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step1") + '</h3><code>'+this._input+'</code>').appendTo($('#parseinfo'));
             break;
-  
+
           case 2:
-            $('<h3>step 2: pick possible verbs</h3><ul id="preParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step2") + '</h3><ul id="preParses"></ul>').appendTo($('#parseinfo'));
             for each (preParse in this._preParses) {
-              $('<li>V: <code title="'+(preParse._verb.id || 'null')+'">'+(preParse._verb.text || '<i>null</i>')+'</code>, argString: <code>'+preParse.argString+'</code>, sel: <code>'+preParse.sel+'</code></li>').appendTo($('#preParses'));
+              $('<li>V: <code title="'+(preParse._verb.id || 'null')+'">'+(preParse._verb.text || '<em>' + L("ubiquity.playpen.null") + '</em>')+'</code>, ' + L("ubiquity.playpen.argstring") + ' <code>'+preParse.argString+'</code>, sel: <code>'+preParse.sel+'</code></li>').appendTo($('#preParses'));
             }
             break;
-        
+
           case 3:
-            $('<h3>step 3: pick possible clitics (TODO)</h3>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step3") + '</h3>').appendTo($('#parseinfo'));
             break;
-  
+
           case 4: 
-            $('<h3>step 4: group into arguments</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step4") + '</h3><ul id="argParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#argParses').append('<li>' + parse.displayText() + '</li>');
             }
-            $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+this._possibleParses.length+' ' + L("ubiquity.playpen.parsespossible") + '</small></p>').appendTo($('#parseinfo'));
             break;
-  
+
           case 5:
-            $('<h3>step 5: anaphora substitution</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step5") + '</h3><ul id="newPossibleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#newPossibleParses')
                 .append('<li>' + parse.displayText() + '</li>');
             }
-            $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+this._possibleParses.length+' ' + L("ubiquity.playpen.parsespossible") + '</small></p>').appendTo($('#parseinfo'));
             break;
-          
+
           case 6:
-            $('<h3>step 6: substitute normalized arguments</h3><ul id="normalizedArgParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step6") + '</h3><ul id="normalizedArgParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#normalizedArgParses')
                 .append('<li>' + displayParse(parse) + '</li>');
             }
-            $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+this._possibleParses.length+' ' + L("ubiquity.playpen.parsespossible") + '</small></p>').appendTo($('#parseinfo'));
             break;
-          
+
           case 7:
-            $('<h3>step 7: apply objects to other roles for parses with no verb</h3><ul id="otherRoleParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step7") + '</h3><ul id="otherRoleParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._possibleParses) {
               $('#otherRoleParses')
                 .append('<li>' + displayParse(parse) + '</li>');
             }
-            $('<p><small>'+this._possibleParses.length+' possible parses</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+this._possibleParses.length+' ' + L("ubiquity.playpen.parsespossible") + '</small></p>').appendTo($('#parseinfo'));
             break;
-          
+
           case 8:
-            $('<h3>step 8: suggest verbs</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
+            $('<h3>' + L("ubiquity.playpen.step8") + '</h3><ul id="verbedParses"></ul>').appendTo($('#parseinfo'));
             for each (var parse in this._verbedParses) {
               $('#verbedParses')
                 .append('<li>' + displayParse(parse) + '</li>');
             }
-            $('<p><small>'+this._verbedParses.length+' parses with verbs</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+this._verbedParses.length+' ' + L("ubiquity.playpen.parsedverbs") + '</small></p>').appendTo($('#parseinfo'));
             break;
-  
+
           case 9:
             /*$('<h3>step 7: noun type detection</h3><ul id="nounCache"></ul>').appendTo($('#parseinfo'));
             for (var text in nounCache) {
@@ -159,22 +163,22 @@ var demoParserInterface = {
               list.appendTo(html);
               html.appendTo($('#nounCache'));
             }*/
-  
-            $('<h3>step 9-11: completion</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
+
+            $('<h3>' + L("ubiquity.playpen.step9") + '</h3><ul id="debugScoredParses"></ul>').appendTo($('#parseinfo'));
             var allScoredParses = this.aggregateScoredParses();
 	          for each (let parse in allScoredParses) {
               $('#debugScoredParses')
                 .append('<li>' + displayParse(parse) + '</li>');
             }
-            $('<p><small>'+allScoredParses.length+' parses with noun suggestions swapped in, and scored</small></p>').appendTo($('#parseinfo'));
+            $('<p><small>'+allScoredParses.length+' ' + L("ubiquity.playpen.parsednouns") + '</small></p>').appendTo($('#parseinfo'));
             break;
-  
+
         }
-        
+
         return newval;
       });
     }
-    
+
     if ($('#displayparsetree').attr('checked') 
         && this.runtimes + 2 > $('.runtimes').text()) {
       this.currentQuery.watch('_step',function(id,oldval,newval) {
@@ -205,22 +209,22 @@ var demoParserInterface = {
         return newval;
       });
     }
-    
+
     this.currentQuery.onResults = function() {
       if (this.finished && !this.resulted) {
         this.resulted = true;
         demoParserInterface.runtimes++;
         $('.current').text(demoParserInterface.runtimes);
-        dump(demoParserInterface.runtimes+' done\n');
+        dump(demoParserInterface.runtimes+' ' + L("ubiquity.playpen.done") + '\n');
         if (demoParserInterface.runtimes < $('.runtimes').text())
           demoParserInterface.parse();
         else {
           demoParserInterface.endTime = new Date().getTime();
 
-          dump('DURATION: '+(demoParserInterface.endTime - demoParserInterface.startTime)+'\n');
+          dump(L("ubiquity.playpen.duration") + ' '+(demoParserInterface.endTime - demoParserInterface.startTime)+'\n');
           $('.total').text(demoParserInterface.endTime - demoParserInterface.startTime);
 
-          dump('AVG: '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
+          dump(L("ubiquity.playpen.average") + ' '+(demoParserInterface.endTime - demoParserInterface.startTime)/demoParserInterface.runtimes+'\n');
           $('.avg').text(Math.round((demoParserInterface.endTime - demoParserInterface.startTime) * 100/demoParserInterface.runtimes)/100);
  
           var suggestionList = this.suggestionList;
@@ -230,9 +234,9 @@ var demoParserInterface = {
             $('#scoredParses')
               .append('<tr><td>' + displayParse(parse) + '</td></tr>');
           }
- 
+
         }
-        
+
         if ($('#displayparsetree').attr('checked') 
             && demoParserInterface.runtimes + 2 > $('.runtimes').text()) {
           for each (let parse in demoParserInterface.currentQuery._allParses) {
@@ -240,10 +244,10 @@ var demoParserInterface = {
             let host = $('#parsetree');
             if (parse._parent && $('#wrap'+parse._parent._id).length)
               host = $('#wrap'+parse._parent._id+' > .children');
-              
+
             let displayStep = (parse._survivedStep || parse._step);
-            $("<div class='treewrap"+(parse._step ? ' step'+parse._step : '')+"' id='wrap"+parse._id+"'>"
-                +(parse._step ? "<div class='badge"+(parse._survivedStep?' winner':'')+" badge"+displayStep+"'>"
+            $("<div class='treewrap"+(parse._step ? ' ' + L("ubiquity.playpen.step") +parse._step : '')+"' id='wrap"+parse._id+"'>"
+                +(parse._step ? "<div class='badge"+(parse._survivedStep?' ' + L("ubiquity.playpen.winner"):'')+" badge"+displayStep+"'>"
                   +displayStep
                 +"</div>" : '')
                 +"<div class='treeleaf' id='leaf"+parse._id+"'>"
@@ -252,11 +256,11 @@ var demoParserInterface = {
               +"</div>").appendTo(host);
           }
         }
-        
+
       }
     }
     this.currentQuery.run();
-    
+
   }
 }
 
@@ -279,13 +283,14 @@ $(document).ready(function(){
   demoParserInterface.currentParser = parser;
 
   for each (let {role, delimiter} in parser.roles) {
+    // may need to switch &quot; to &#34;
     $('<li><code>'+role+'</code>: &quot;'+delimiter+'&quot;</li>').appendTo($('#roles'));
   }
 
   for (let id in parser._nounTypes) {
     let nountype = parser._nounTypes[id];
     $('<li><code>'+id+'</code>: {label: <code>'+nountype.label+'</code>, '
-      +'name: <code>'+nountype.name+'</code>}</li>')
+      + L("ubiquity.playpen.name") + ' <code>'+nountype.name+'</code>}</li>')
       .appendTo($('#nountypes'));
   }
 
@@ -296,9 +301,9 @@ $(document).ready(function(){
     let {names, help, description} = verb;
     let args = $('<ul></ul>');
     for each (let {nountype, role, label} in verb.arguments) {
-      $('<li>role: <code>'+role+'</code>, nountype: <code>'+nountype.id+'</code></li>').appendTo(args);
+      $('<li>' + L("ubiquity.playpen.role") + ' <code>'+role+'</code>, ' + L("ubiquity.playpen.nountype") + ' <code>'+nountype.id+'</code></li>').appendTo(args);
     }
-    let item = $('<li><b><code>'+names[0]+'</code></b></li>');
+    let item = $('<li><strong><code>'+names[0]+'</code></strong></li>');
     if (verb.arguments.length) {
       $(':<br/>').appendTo(item);
       args.appendTo(item);
@@ -316,7 +321,7 @@ $(document).ready(function(){
     demoParserInterface.runtimes = 0;
     demoParserInterface.parse();
   }
-  
+
   $('.input').keyup(function autoParse(e){
     if ($('#autoparse')[0].checked) {
       var input = $('.input').val();
@@ -328,7 +333,7 @@ $(document).ready(function(){
   $('#run').click(run);
 
   //$('#clearnouncache').click(function() { nounCache = []; });
-  
+
   $('.toggle').click(function(e){$(e.currentTarget).siblings().toggle();});
 
 });
