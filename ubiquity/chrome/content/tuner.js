@@ -100,7 +100,7 @@ var tunerInterface = {
           $('<tr>'
             +'<td class="id">&#160;</td><td class="sugg">'+$('<div/>').text(sugg.text).html()+'</td>'
             +'<td class="score"><div class="scorebar" style="width: '
-              + Math.min(sugg.score * 500,500) + '"></div> '
+              + Math.min(sugg.score * 500,500) + 'px"></div> '
               +'<span class="scoreval">'+formatScore(sugg.score)+'</span></td>'
             +'</tr>').insertAfter($(id));
         }
