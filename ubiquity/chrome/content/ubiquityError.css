@@ -1,0 +1,33 @@
+/* Simple over-rides used for pages which are styled using netError.css
+ * Style ideas borrowed from chrome://browser/skin/aboutPrivateBrowsing.css
+ */
+
+body.question > #errorPageContainer {
+  background-image: url("chrome://global/skin/icons/question-48.png");
+}
+
+body.information > #errorPageContainer {
+  background-image: url(chrome://global/skin/icons/information-48.png);
+}
+
+body.error > #errorPageContainer {
+  background-image: url(chrome://global/skin/icons/error-48.png);
+}
+
+.warnInfo {
+  font-size: 110%;
+  -moz-padding-start: 25px;
+  background: url("chrome://global/skin/icons/warning-16.png") no-repeat top left;
+}
+
+.moreInfo {
+  font-size: 110%;
+  -moz-padding-start: 25px;
+  background: url("chrome://global/skin/icons/information-16.png") no-repeat top left;
+}
+
+.errorInfo {
+  font-size: 110%;
+  -moz-padding-start: 25px;
+  background: url("chrome://global/skin/icons/error-16.png") no-repeat top left;
+}
