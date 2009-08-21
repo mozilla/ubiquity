@@ -90,10 +90,16 @@ var demoParserInterface = {
 }
 
 function enforceOS() {
-  $('#awesomebar').removeClass('mac');
-  $('#awesomebar').removeClass('linux');
-  $('#awesomebar').removeClass('vista');
-  $('#awesomebar').addClass($('.os:checked').val());
+  $('#firefox').removeClass('mac');
+  $('#firefox').removeClass('linux');
+  $('#firefox').removeClass('vista');
+  $('#firefox').addClass($('.os:checked').val());
+}
+
+function enforceBar() {
+  $('#inputwrapper').removeClass('awesomebar');
+  $('#inputwrapper').removeClass('searchbar');
+  $('#inputwrapper').addClass($('.position:checked').val());
 }
 
 $(document).ready(function(){
@@ -120,6 +126,9 @@ $(document).ready(function(){
   
   $('.os').click(enforceOS);
   enforceOS();
+
+  $('.position').click(enforceBar);
+  enforceBar();
   
   $('#input').keyup(function autoParse(e){
     var input = $('.input').val();

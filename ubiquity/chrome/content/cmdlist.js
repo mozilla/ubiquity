@@ -60,10 +60,9 @@ Cu.import("resource://ubiquity/modules/utils.js");
 
 const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-
 var {escapeHtml} = Utils;
+var {feedManager, commandSource, messageService} = (UbiquitySetup
+                                                    .createServices());
 
 function A(url, text, className) {
   var a = document.createElement("a");
@@ -126,7 +125,7 @@ function formatAuthors(authors) (
 function formatCommandAuthor(authorData) {
   if (!authorData) return "";
 
-  if (typeof authorData === "string") return authorData;
+  if (typeof authorData === "string") return escapeHtml(authorData);
 
   var authorMarkup = "";
   if ("name" in authorData && !("email" in authorData)) {
@@ -156,11 +155,10 @@ function fillTableRowForCmd(row, cmd, className) {
    [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
   var {name, names, nameArg, homepage} = cmd;
-  var cmdDisplayName = (names[0] || name);
   if (nameArg)
     // TODO: we need some sort of flag to check whether the nameArg
     // was a prefix or a suffix.
-    cmdDisplayName += " " + nameArg;
+    name += " " + nameArg;
 
   var authors = cmd.authors || cmd.author;
   var contributors = cmd.contributors || cmd.contributor;
@@ -170,9 +168,8 @@ function fillTableRowForCmd(row, cmd, className) {
     (!("icon" in cmd) ? "" :
      '<img class="favicon" src="' + escapeHtml(cmd.icon) + '"/>') +
     ('<a class="id" name="' + escapeHtml(cmd.id) + '"/>' +
-     '<span class="name">' + escapeHtml(cmdDisplayName) + '</span>') +
-    ("description" in cmd ?
-     '<span class="description">' + cmd.description + '</span>' : "") +
+     '<span class="name">' + escapeHtml(name) + '</span>') +
+    '<span class="description"></span>' +
     (names.length < 2 ? "" :
      ('<div class="synonyms-container light">' +
       L("ubiquity.cmdlist.synonyms",
@@ -197,7 +194,7 @@ function fillTableRowForCmd(row, cmd, className) {
       L("ubiquity.cmdlist.viewmoreinfo",
         let (hh = escapeHtml(homepage)) hh.link(hh)) +
       '</div>')) +
-    ("help" in cmd ? '<div class="help">' + cmd.help + '</div>' : "") +
+    '<div class="help"></div>' +
     '</td>');
 
   if (UbiquitySetup.parserVersion === 2) {
@@ -221,23 +218,31 @@ function fillTableRowForCmd(row, cmd, className) {
     cmdElement.addClass(className);
   }
 
+  for each (let key in ["description", "help"])
+    key in cmd && setTimeout(function appendHtmlData(k) {
+      try { $("." + k, cmdElement)[0].innerHTML = cmd[k] }
+      catch (e if e.result === 0x80004003) {
+        var msg = 'XML error in "' + k + '" of [ ' + cmd.name + ' ]';
+        messageService.displayMessage({
+          text: msg, onclick: function go2cmd() { location.hash = cmd.id }});
+        Cu.reportError(msg);
+      }
+    }, 0, key);
+
   return row.append(checkBoxCell, cmdElement);
 }
 
 function updateSubscribedCount() {
-  var {feedManager, commandSource} = UbiquitySetup.createServices();
   $("#num-commands").html(commandSource.commandNames.length);
   $("#num-subscribed-feeds").html(feedManager.getSubscribedFeeds().length);
 }
 
 function updateUnsubscribedCount() {
   $("#num-unsubscribed-feeds").html(
-    UbiquitySetup.createServices().feedManager
-    .getUnsubscribedFeeds().length);
+    feedManager.getUnsubscribedFeeds().length);
 }
 
 function buildTable() {
-  let {feedManager, commandSource} = UbiquitySetup.createServices();
   let table = $("#commands-and-feeds-table").empty();
   let sortMode = getSortMode();
   let commands = commandSource.getAllCommands();
@@ -325,7 +330,6 @@ function getFeedForCommand(feedManager, cmd) {
 function onDisableOrEnableCmd() {
   // update the preferences, when the user toggles the active
   // status of a command.
-  var {commandSource} = UbiquitySetup.createServices();
   commandSource.getCommand(this.value).disabled = !this.checked;
 }
 
@@ -357,8 +361,7 @@ function makeUnsubscribedFeedListElement(info) {
 }
 
 function buildUnsubscribedFeeds() {
-  var unscrFeeds = (UbiquitySetup.createServices().feedManager
-                    .getUnsubscribedFeeds());
+  var unscrFeeds = feedManager.getUnsubscribedFeeds();
   var isEmpty = !unscrFeeds.length;
 
   updateUnsubscribedCount();

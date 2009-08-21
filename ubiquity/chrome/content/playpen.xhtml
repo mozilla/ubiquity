@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html [
+  <!ENTITY % htmlDTD PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+    %htmlDTD;
+  <!ENTITY % directionDTD SYSTEM "chrome://global/locale/global.dtd">
+    %directionDTD;
+  <!ENTITY % ubiquitydevDTD SYSTEM "chrome://ubiquity/locale/devubiquity.dtd">
+    %ubiquitydevDTD;
+  <!ENTITY % ubiquityinternalDTD SYSTEM "chrome://ubiquity/content/internal.dtd">
+    %ubiquityinternalDTD;
+]>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <title>&ubiquity.pagetitle.PlayPen;</title>
+
+  <link rel="stylesheet" type="text/css" media="all" href="playpen.css" />
+  <link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
+
+  <script type="text/javascript;version=1.8" src="resource://ubiquity/scripts/jquery.js"></script>
+  <script type="text/javascript;version=1.8" src="resource://ubiquity/modules/parser/new/parser.js"></script>
+  <script type="text/javascript;version=1.8" src="playpen.js"></script>
+
+</head>
+<body dir="&locale.dir;">
+
+<div id="main">
+
+  <h1>&ubiquity.playpen.Header;</h1>
+
+  <p>&ubiquity.playpen.ShortDesc;</p>
+
+  <div class="warning" id="parser2" style="display:none">&ubiquity.error.WarningParser2;</div>
+  <div class="warning" id="gubiquity" style="display:none">&ubiquity.error.WarningGUbiquity;</div>
+
+  <h2>&ubiquity.common.HeaderSettings;</h2>
+
+  <div id="languages"></div>
+
+  <div>
+    <label for="maxSuggestions">&ubiquity.playpen.OptionMaxSuggs;</label>
+    <input id="maxSuggestions" value="5" size="2"/>
+    <input type="checkbox" name="displayparseinfo" id="displayparseinfo"></input>
+    <label title="this will slow things down considerably" for="displayparseinfo">&ubiquity.playpen.OptionShowInfo;</label>
+    <input type="checkbox" name="displayparsetree" id="displayparsetree"></input>
+    <label title="this will *not* affect performance" for="displayparsetree">&ubiquity.playpen.OptionShowLineage;</label>
+    <input type="checkbox" name="autoparse" id="autoparse"></input>
+    <label title="this will slow things down considerably" for="autoparse">&ubiquity.common.OptionAutoRun;</label>
+    
+    <br/>
+
+    <label for="gu-sync" title="uses the same parser as the current Ubiquity instance">
+      <input type="checkbox" id="gu-sync" checked="checked"/>&ubiquity.common.OptionGSync;
+    </label>
+
+    <input type="checkbox" name="flushcache" id="flushcache" checked="checked"></input>
+    <label for="flushcache">&ubiquity.playpen.FlushOnParse;</label>
+  </div>
+
+  <div id="border">
+    <input id="root" class="input" />
+  </div>
+		
+  <input type="button" id="run" value="run!"></input><input id="times" size="4" name="times" value="1" /> times 
+		
+  <br />
+
+  <label for="selection">&ubiquity.playpen.SelectionText;</label>
+  <input id="selection" name="selection"></input>
+
+  <div>
+    <h2 class="toggle">&ubiquity.playpen.EnvironmentInfo;</h2>
+
+    <div class="envinfo" style="display:none;">
+
+      <div>
+        <h2 class="toggle">&ubiquity.playpen.ActiveSemanticRoles;</h2>
+        <ul id="roles"></ul>
+        <p><small>&ubiquity.playpen.NotesOverlapping;</small></p>
+      </div>
+
+      <div>
+        <h2 class="toggle">&ubiquity.playpen.ActiveNounTypes;</h2>
+        <ul id="nountypes"></ul>
+        <p><small>&ubiquity.playpen.ScoreFunctions;</small></p>
+      </div>
+
+      <div>
+        <h2 class="toggle">&ubiquity.playpen.ActiveVerbs;</h2>
+        <ul id="verblist"></ul>
+      </div>
+
+    </div>
+  </div>
+
+  <h2>&ubiquity.playpen.WordSuggestions;</h2>
+  <p>&ubiquity.playpen.WordKey; <span class="verb">&ubiquity.playpen.WordVerb;</span> <span class="object">&ubiquity.playpen.WordObject;</span> <span class="prefix">&ubiquity.playpen.WordPrefix;</span> <span class="argument">&ubiquity.playpen.WordArgument;</span> &ubiquity.playpen.VerbsNote;</p>
+
+  <table id="scoredParses"></table>
+
+  <h2>&ubiquity.playpen.CurrentParse;</h2>
+
+  <span class="current"></span>/<span class="runtimes"></span> = <span class="total"></span> &ubiquity.playpen.AvgTimingResults;
+
+  <div id="parseinfo"></div>
+
+  <h2>&ubiquity.playpen.ParseTree;</h2>
+
+  <div id="parsetree"></div>
+
+</div>
+</body>
+</html>
