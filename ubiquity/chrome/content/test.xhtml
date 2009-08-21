@@ -22,6 +22,7 @@
 
   <script type="text/javascript;version=1.8" src="resource://ubiquity/scripts/jquery.js"></script>
   <script type="text/javascript;version=1.8">
+  <![CDATA[
     
     Components.utils.import("resource://ubiquity/tests/framework.js");
     Components.utils.import("resource://ubiquity/tests/test_all.js");
@@ -29,13 +30,13 @@
 
     var L = LocalizationUtils.propertySelector(
       "chrome://ubiquity/locale/devubiquity.properties");
-      
+
     function startTestSuite() {
       var outputElement = document.getElementById("test-output");
       var suite = new TestSuite(new HtmlTestResponder(outputElement), window);
         suite.start();
     }
-      
+
     function showSuccessfulTests() {
       var show = document.getElementById("show-tests-successful").checked;
       var tests = jQuery("#test-output .successful");
@@ -44,7 +45,7 @@
       else
         tests.hide();
     }
-      
+
     function showSkippedTests() {
       var show = document.getElementById("show-tests-skipped").checked;
       var tests = jQuery("#test-output .skipped");
@@ -53,7 +54,7 @@
       else
         tests.hide();
     }
-      
+
     function showFailedTests() {
       var show = document.getElementById("show-tests-failed").checked;
       var tests = jQuery("#test-output .failed");
@@ -62,7 +63,7 @@
       else
         tests.hide();
     }
-      
+
     function updateCounts() {
       function updateCountFor(type) {
         var count = jQuery("#test-output ." + type).length;
@@ -76,32 +77,33 @@
       updateCountFor("skipped");
       updateCountFor("failed");
     }
-      
+
     jQuery(document).ready(function() {
       jQuery("#show-tests-successful").change(showSuccessfulTests);
       jQuery("#show-tests-skipped").change(showSkippedTests);
       jQuery("#show-tests-failed").change(showFailedTests);
-        
+
       try {
         startTestSuite();
         jQuery("#tests-status").hide();
       } catch (e) {
         jQuery("#tests-status").text(L("ubiquity.testsuite.runerror", e));
       }
-        
+
       showSuccessfulTests();
       showSkippedTests();
       showFailedTests();
-        
+
       updateCounts();
     });
-      
+
+  ]]>
   </script>
 
 </head>
 <body dir="&locale.dir;">
     
-<h1>Ubiquity Test Suite</h1>
+<h1>&ubiquity.pagetitle.TestSuite;</h1>
     
 <div id="test-options">
   <label for="show-tests-successful">
