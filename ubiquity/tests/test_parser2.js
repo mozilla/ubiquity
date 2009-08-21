@@ -101,7 +101,7 @@ function makeCommand(options) {
   return DefaultFeedPlugin.makeCmdForObj(
     fakeGlobal,
     fakeGlobal.commands[0],
-    Utils.url("chrome://ubiquity/content/test.html"));
+    Utils.url("chrome://ubiquity/content/test.xhtml"));
 }
 
 /* this takes an array of options (command primitives) and makes them all
@@ -123,7 +123,7 @@ function makeCommands(arrayOfOptions) {
   return [ DefaultFeedPlugin.makeCmdForObj(
                    fakeGlobal,
                    command,
-                   Utils.url("chrome://ubiquity/content/test.html"))
+                   Utils.url("chrome://ubiquity/content/test.xhtml"))
            for each (command in fakeGlobal.commands) ];
 
 }
