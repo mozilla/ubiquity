@@ -88,6 +88,33 @@ function onDocumentLoad() {
     Application.prefs.setValue("extensions.ubiquity.inputDelay",
                                this.value = Math.abs(~~this.value % 1e4));
   }).val(Utils.currentChromeWindow.gUbiquity.inputDelay);
+  
+  //Notification settings
+  var osString = Cc["@mozilla.org/xre/app-info;1"]
+                 .getService(Ci.nsIXULRuntime).OS;
+  var Application = Cc["@mozilla.org/fuel/application;1"]
+                   .getService(Ci.fuelIApplication);
+  var GFW_PREF = "extensions.ubiquity.gfw";
+                 
+  if(osString == "WINNT"){
+        
+    $("#gfw:checkbox").click(function(){
+     if($(this).is(":checked")){
+       Application.prefs.setValue(GFW_PREF, true);
+       $("#gfw-warning").slideDown();
+     }else{
+       Application.prefs.setValue(GFW_PREF, false);
+       $("#gfw-warning").slideUp();
+     }
+    });
+    
+    if(Application.prefs.getValue(GFW_PREF, false)){
+      $("#gfw").attr("checked", "true");
+      $("#gfw-warning").show();
+    }
+    
+  }
+  
 }
 
 function changeLanguageSettings() {

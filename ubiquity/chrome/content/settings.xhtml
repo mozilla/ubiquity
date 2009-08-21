@@ -77,10 +77,15 @@
   <p><label for="use-new-parser-checkbox"><input type="checkbox" id="use-new-parser-checkbox" onchange="changeLanguageSettings();" /><strong>&ubiquity.settings.UseParser2;</strong></label></p>
   <p><span id="lang-settings-changed-info"></span></p>
   <p>&ubiquity.settings.SelectLanguage; <select id="language-select" onchange="changeLanguageSettings();"></select></p>
+  
+  <h2>Notification Settings</h2>
+  <p>Ubiquity makes extensive use of transparent non-modal notifications. On OS X, it's shown using Growl. On Windows, it shows up as <a href="http://www.fullphat.net/index.php">Snarl</a> notifications, <a href="http://growlforwindows.com/gfw/">Growl for Windows</a> notifications or "toaster" notifications at the bottom-right of the screen. If you have <a href="http://www.fullphat.net/index.php">Snarl</a> installed and running, Ubiquity will automatically detect and use it to send notifications.</p>
+  <p>If you want to use Growl on Windows, check the box below:</p><p><label for='gfw' style='font-weight:bold;'> Use Growl for Windows </label><input type='checkbox' name='gfw' value='gfw' id='gfw' /></p><p id='gfw-warning' style='display:none;color:#922233'>Make sure Growl for Windows is open. If not, you will not receive any notifications.</p>
+  <p>To get <a href="http://www.markshuttleworth.com/archives/265">libnotify notifications</a> working on Linux, you need to install libnotify-bin using the Synaptic Package Manager on Ubuntu or run "sudo aptitude install libnotify-bin" for all distros.</p>
 
   <h2>&ubiquity.settings.MiscSettings;</h2>
   <p>&ubiquity.settings.MaxSuggestions; <input type="text" id="max-suggestions" size="3" style="text-align:center" /></p>
-
+    
   <fieldset class="parser2" style="display:none">
     <legend>&ubiquity.settings.Parser2Context;</legend>
 
