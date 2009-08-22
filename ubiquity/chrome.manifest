@@ -21,6 +21,5 @@ locale ubiquity pl-PL chrome/locale/pl-PL/
 locale ubiquity pt chrome/locale/pt/
 locale ubiquity pt-BR chrome/locale/pt-BR/
 locale ubiquity pt-PT chrome/locale/pt-PT/
-locale ubiquity ru chrome/locale/ru/
 locale ubiquity ru-RU chrome/locale/ru-RU/
 locale ubiquity zh-CN chrome/locale/zh-CN/
