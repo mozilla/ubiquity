@@ -48,7 +48,8 @@ const Help = "about:ubiquity";
 const Editor = "chrome://ubiquity/content/editor.xhtml";
 const CmdList = "chrome://ubiquity/content/cmdlist.xhtml";
 const Settings = "chrome://ubiquity/content/settings.xhtml";
-const BugReport = "http://getsatisfaction.com/mozilla/products/mozilla_ubiquity";
+const BugReport = ("http://getsatisfaction.com/" +
+                   "mozilla/products/mozilla_ubiquity");
 const Support = "chrome://ubiquity/content/support.xhtml";
 
 XML.prettyPrinting = XML.ignoreWhitespace = false;
@@ -60,10 +61,10 @@ CmdUtils.CreateCommand({
     <>Takes you to the Ubiquity <a href={Help}>main help page</a>.<br/>
       Or, enter the name of a command to get help on that command.</>),
   argument: noun_type_command,
-  preview: function(pblock, {object: {data}}) {
+  preview: function help_preview(pblock, {object: {data}}) {
     pblock.innerHTML = data ? data.previewDefault() : this.description;
   },
-  execute: function({object: {data}}) {
+  execute: function help_execute({object: {data}}) {
     if (data)
       Utils.openUrlInBrowser(CmdList + "#" + data.id);
     else
@@ -74,56 +75,25 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["open (ubiquity settings page)",
           "show (ubiquity settings page)"],
-  arguments: [{ role: "object",
-                nountype: ["help",
-                           "command editor",
-                           "command list",
-                           "settings",
-                           "support",
-                           "bug report"],
-                label: "ubiquity settings page" }],
+  argument: CmdUtils.NounType("ubiquity settings page", {
+    "help": Help,
+    "command editor": Editor,
+    "command list": CmdList,
+    "settings": Settings,
+    "support": Support,
+    "bug report": BugReport,
+  }),
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
       <>Opens one of the Ubiquity documentation/settings pages.</>),
-  preview: function( pBlock, args ){
-    if (args.object.text) {
-      pBlock.innerHTML = _("Opens the Ubiquity ${goal} page.",
-                           {goal: args.object.text});
-    }
-    else {
-      pBlock.innerHtml = this.description;
-    }
+  preview: function open_preview(pb, {object: {text}}) {
+    pb.innerHTML = (text
+                    ? _("Opens the Ubiquity ${goal} page.",
+                        {goal: text})
+                    : this.description);
   },
-  execute: function( args ) {
-    var targetPage;
-    if (!args.object || !args.object.text) {
-      targetPage = Help;
-    }
-    else {
-      switch (args.object.text) {
-      // we won't localize these for the time being, as they're
-      // dependent on the nountype being localized
-      case "help":
-        targetPage = Help;
-        break;
-      case "command editor":
-        targetPage = Editor;
-        break;
-      case "command list":
-        targetPage = CmdList;
-        break;
-      case "settings":
-        targetPage = Settings;
-        break;
-      case "support":
-        targetPage = Support;
-        break;
-      case "bug report":
-        targetPage = BugReport;
-        break;
-      }
-    }
-    Utils.openUrlInBrowser( targetPage );
+  execute: function open_execute(args) {
+    Utils.openUrlInBrowser(args.object.data || Help);
   }
 });
 
@@ -180,18 +150,17 @@ CmdUtils.CreateCommand({
     icon: "chrome://ubiquity/skin/icons/favicon.ico",
     description: desc,
     argument: nt,
-    execute: function({object: {text, data: cmd}}) {
+    execute: function xable_cmd_execute({object: {text, data: cmd}}) {
       if (cmd) {
         cmd.disabled = disabled;
         displayMessage(text, this);
       }
     },
-    preview: function(pb, {object: {html, data: cmd}}) {
+    preview: function xable_cmd_preview(pb, {object: {html, data: cmd}}) {
       pb.innerHTML = (
         cmd
-        ? CmdUtils.renderTemplate(tmpl,
-                                  { name: "<b>" + html + "</b>",
-                                    help: cmd.previewDefault() })
+        ? (CmdUtils.renderTemplate(tmpl, {name: "<b>" + html + "</b>"}) +
+           "<hr/>" + cmd.previewDefault())
         : this.description);
     }
   });
@@ -202,24 +171,47 @@ CmdUtils.CreateCommand({
   "show up in the suggestion list."),
  noun_type_enabled_command,
  true,
- "Disables ${name}.<hr/>${help}")
+ _("Disables ${name}."))
 (["enable command"],
  "Re-enables a Ubiquity command that you disabled.",
  noun_type_disabled_command,
  false,
- "Enables ${name}.<hr/>${help}");
+ _("Enables ${name}."));
 
-var ubiquityLoad_commandHistory = (function() {{}
-const
-Name = "command history",
-PHistory = "extensions.ubiquity.history.",
-PBin = PHistory + "bin",
-PMax = PHistory + "max",
-DefaultMax = 42,
-Sep = "\n",
-{prefs} = Application;
+const {prefs} = Application;
+
+var CmdHst = {
+  PREF_BIN: "extensions.ubiquity.history.bin",
+  PREF_MAX: "extensions.ubiquity.history.max",
+  DEFAULT_MAX: 42,
+  SEPARATOR: "\n",
+  add: function CH_add(str) {
+    if (!str) return this;
+    var bin = this.get(), idx = bin.indexOf(str);
+    if (~idx) bin.unshift(bin.splice(idx, 1));
+    else {
+      var max = prefs.getValue(this.PREF_MAX, this.DEFAULT_MAX);
+      if (bin.unshift(str) > max) bin.length = max;
+    }
+    return this._save();
+  },
+  get: function CH_get() {
+    if ("_bin" in this) return this._bin;
+    var a = prefs.getValue(this.PREF_BIN, "").split(this.SEPARATOR);
+    return this._bin = [h for each (h in a) if (h)];
+  },
+  set: function CH_set(arr) {
+    this._bin = arr;
+    return this._save();
+  },
+  _save: function CH__save() {
+    prefs.setValue(this.PREF_BIN, this._bin.join(this.SEPARATOR));
+    return this;
+  },
+};
+
 CmdUtils.CreateCommand({
-  names: [Name, "vita"],
+  names: ["command history", "vita"],
   arguments: {"object filter": noun_arb_text},
   description: "Accesses your command history.",
   help: "" + (
@@ -227,70 +219,58 @@ CmdUtils.CreateCommand({
     <li>Use accesskey or click to reuse.</li>
     <li>Type to filter.</li>
     <li>Execute to delete all matched histories.</li>
-    <li>Edit <a href="about:config"><code>{PMax}</code></a> to
+    <li>Edit <a href="about:config"><code>{CmdHst.PREF_MAX}</code></a> to
       set max number of histories.</li></ul>),
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
-  execute: function({object: {text}}) {
-    var bin = Utils.trim(prefs.getValue(PBin, ""));
-    if (!bin) return;
+  execute: function cmdh_execute({object: {text}}) {
+    var bin = CmdHst.get();
+    if (!bin.length) return;
     if (text) {
-      var rem = this._get(text, true).join(Sep);
+      var rem = this._filter(bin, text, true);
       if (rem.length === bin.length) return;
-      prefs.setValue(PBin, rem);
+      CmdHst.set(rem);
       this._say(_("Deleted matched histories. Click here to undo."),
-                function() { prefs.setValue(PBin, bin) });
-    } else
-      this._say('Type "^" to delete all.');
+                function cmdh__undo() { CmdHst.set(bin) });
+    }
+    else this._say(_('Type "^" to delete all.'));
   },
-  preview: function(pbl, args) {
-    var his = this._get(args.object.text);
-    if (!his[0]) {
-      pbl.innerHTML = "<i>"+_("No histories match.")+"</i>" + this.help;
+  preview: function cmdh_preview(pb, args) {
+    var his = this._filter(CmdHst.get(), args.object.text);
+    if (!his.length) {
+      pb.innerHTML = ("<em>" + _("No histories match.") + "</em>" +
+                      this.help);
       return;
     }
     CmdUtils.previewList(
-      pbl,
+      pb,
       [<span> <code>{h}</code> </span> for each (h in his)],
-      function(i) {
-        var {gUbiquity} = context.chromeWindow;
-        gUbiquity.__textBox.value = his[i];
-        gUbiquity.__delayedProcessInput();
+      function cmdh__reuse(i) {
+        context.chromeWindow.gUbiquity.preview(his[i]);
       });
   },
-  _say: function(txt, cb) {
+  _say: function cmdh__say(txt, cb) {
     displayMessage({text: txt, onclick: cb}, this);
   },
-  _get: function(txt, rev) {
-    var bin = Utils.trim(prefs.getValue(PBin, ""));
-    if (!bin) return [];
-    var his = bin.split(Sep);
+  _filter: function cmdh__filter(his, txt, rev) {
     if (txt) {
       try { var re = RegExp(txt, "i") }
-      catch(e){ re = RegExp(txt.replace(/\W/g, "\\$&"), "i") }
-      his = his.filter(function(h) h && rev ^ re.test(h));
+      catch(e){ re = RegExp(Utils.regexp.quote(txt), "i") }
+      his = [h for each (h in his) if (rev ^ re.test(h))];
     }
     return his;
   },
 });
-return function UL_commandHistory(U) {
-  U.__msgPanel.addEventListener("popuphidden", function saveEntry() {
-    var ent = Utils.trim(U.__textBox.value);
-    if (!ent) return;
-    var his = prefs.getValue(PBin, "").split(Sep), idx = his.indexOf(ent);
-    if (~idx) his.unshift(his.splice(idx, 1));
-    else {
-      var max = prefs.getValue(PMax, DefaultMax);
-      if (his.unshift(ent) > max) his.length = max;
-    }
-    prefs.setValue(PBin, his.join(Sep));
+
+function ubiquityLoad_commandHistory(U) {
+  U.msgPanel.addEventListener("popuphidden", function saveEntry() {
+    CmdHst.add(U.textBox.value);
   }, false);
 };
-})();
 
 function startup_openUbiquityWelcomePage() {
-  if (Components.utils.import("resource://ubiquity/modules/setup.js", null)
+  if (Cu.import("resource://ubiquity/modules/setup.js", null)
       .UbiquitySetup.isNewlyInstalledOrUpgraded)
     Utils.focusUrlInBrowser(Help);
 }

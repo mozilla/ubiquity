@@ -12,7 +12,7 @@ var Utils = {
     if (typeof obj !== "string") return this.__proto__.uri(obj);
     try {
       return this.__proto__.uri(obj);
-    } catch (e if e.result === Components.results.NS_ERROR_MALFORMED_URI) {
+    } catch (e if e.result === Cr.NS_ERROR_MALFORMED_URI) {
       return this.__proto__.uri({uri: obj, base: feed.id});
     }
   }
@@ -64,13 +64,13 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl,
     iframe.docShell.allowImages = false;
 
     // Convert the HTML text into an input stream.
-    var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-      .createInstance(Ci.nsIScriptableUnicodeConverter);
+    var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+                     .createInstance(Ci.nsIScriptableUnicodeConverter));
     converter.charset = "UTF-8";
     var stream = converter.convertToInputStream(htmlText);
     // Set up a channel to load the input stream.
-    var channel = Cc["@mozilla.org/network/input-stream-channel;1"]
-      .createInstance(Ci.nsIInputStreamChannel);
+    var channel = (Cc["@mozilla.org/network/input-stream-channel;1"]
+                   .createInstance(Ci.nsIInputStreamChannel));
     channel.setURI(Utils.url(remoteUrl));
     channel.contentStream = stream;
     // Load in the background so we don't trigger web progress listeners.
@@ -84,25 +84,19 @@ Utils.parseRemoteDocument = function parseRemoteDocument(remoteUrl,
 
     // background loads don't fire "load" events, listen for DOMContentLoaded instead
     iframe.addEventListener("DOMContentLoaded", parseHandler, true);
-    var uriLoader = Cc["@mozilla.org/uriloader;1"]
-      .getService(Ci.nsIURILoader);
+    var uriLoader = Cc["@mozilla.org/uriloader;1"].getService(Ci.nsIURILoader);
     uriLoader.openURI(channel, true, iframe.docShell);
   }
 
   var ajaxOptions = {
     url: remoteUrl,
     type: "GET",
-    datatype: "string",
-    success: function success(responseText) {
-      parseHtml(responseText);
-    },
-    error: function error() {
-      if(errorCallback)
-        errorCallback();
-    }
+    dataType: "text",
+    success: parseHtml,
+    error: errorCallback,
   };
 
-  if(postParams) {
+  if (postParams) {
     ajaxOptions.type = "POST";
     ajaxOptions.data = postParams;
   }
