@@ -220,7 +220,8 @@ function startUbiqTutorial() {
     P(T("tutorial.fromthemiddle")),
     OL(LI(stageLink( 1, T("tutorial.howtostart"))),
        LI(stageLink( 3, T("tutorial.previews"))),
-       LI(stageLink( 7, T("tutorial.suggestions"))),
+       LI(stageLink( 7, T("tutorial.abbreviations"))),
+       LI(stageLink(12, T("tutorial.suggestions"))),
        LI(stageLink(16, T("tutorial.selecting"))),
        LI(stageLink(23, T("tutorial.morecommands")))));
 }
