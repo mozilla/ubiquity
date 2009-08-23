@@ -188,7 +188,7 @@ var CmdHst = {
   add: function CH_add(str) {
     if (!str) return this;
     var bin = this.get(), idx = bin.indexOf(str);
-    if (~idx) bin.unshift(bin.splice(idx, 1));
+    if (~idx) bin.unshift(bin.splice(idx, 1)[0]);
     else {
       var max = prefs.getValue(this.PREF_MAX, this.DEFAULT_MAX);
       if (bin.unshift(str) > max) bin.length = max;
@@ -201,7 +201,8 @@ var CmdHst = {
     return this._bin = [h for each (h in a) if (h)];
   },
   set: function CH_set(arr) {
-    this._bin = arr;
+    var bin = this.get();
+    bin.splice.apply(bin, [0, 1/0].concat(arr));
     return this._save();
   },
   _save: function CH__save() {
@@ -264,8 +265,29 @@ CmdUtils.CreateCommand({
 });
 
 function ubiquityLoad_commandHistory(U) {
+  var cursor = -1, {textBox} = U;
+  textBox.parentNode.addEventListener("keydown", function loadHistory(ev) {
+    if (!ev.ctrlKey) return;
+    switch (ev.keyCode) {
+      case 38: case 40: { // UP DOWN
+        var bin = CmdHst.get();
+        if (cursor === -1 && textBox.value) {
+          CmdHst.add(textBox.value);
+          cursor = 0;
+        }
+        cursor += 39 - ev.keyCode;
+        if (cursor < -1 || bin.length <= cursor) cursor = -1;
+        textBox.value = bin[cursor] || "";
+        break;
+      }
+      default: return;
+    }
+    ev.preventDefault();
+    ev.stopPropagation();
+  }, true);
   U.msgPanel.addEventListener("popuphidden", function saveEntry() {
-    CmdHst.add(U.textBox.value);
+    CmdHst.add(textBox.value);
+    cursor = -1;
   }, false);
 };
 
