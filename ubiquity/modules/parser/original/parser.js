@@ -48,13 +48,13 @@ Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 var NLParser1 = ([f for each (f in this) if (typeof f === "function")]
                  .reduce(function addMethod(o, f) (o[f.name] = f, o), {}));
 
+var plugins = {};
+
 function makeParserForLanguage(languageCode, verbList,
                                ContextUtils, suggestionMemory) {
   return new Parser(verbList, getPluginForLanguage(languageCode),
                     ContextUtils, suggestionMemory);
 }
-
-var plugins = {};
 
 function registerPluginForLanguage(code, plugin) {
   var {Parser} = Cu.import("resource://ubiquity/modules/parser/new/parser.js",
@@ -97,17 +97,14 @@ ParserQuery.prototype = {
     this.onResults = Boolean;
   },
 
-  // TODO: Does query need some kind of destructor?  If this has a ref to the
-  // partiallyParsedSentences and they have a ref back here, it may be a self-
-  // perpetuating cycle that doesn't get GCed.  Investigate.
-
   // Client code should set onResults to a function!!
 
   cancel: function PQ_cancel() {
     for each (let req in this.requests)
       if (req && typeof req.abort === "function")
         req.abort();
-    this.onResults = this._parsingsList = null;
+    this.onResults = Boolean;
+    this._parsingsList = null;
   },
 
   // Read-only properties:
@@ -130,7 +127,6 @@ ParserQuery.prototype = {
     return this;
   },
 
-  // This method should be called by parser code only, not client code.
   _addPartiallyParsedSentence:
   function PQ__addPartiallyParsedSentence(partiallyParsedSentence) {
     this._parsingsList.push(partiallyParsedSentence);
@@ -150,23 +146,21 @@ ParserQuery.prototype = {
   },
 
   _sortSuggestionList: function PQ__sortSuggestionList() {
-    // TODO the following is no good, it's English-specific:
-    let inputVerb = this._queryString.split(" ", 1)[0];
-    /* Each suggestion in the suggestion list should already have a matchScore
-       assigned by Verb.getCompletions.  Give them also a frequencyScore based
-       on the suggestionMemory:*/
+    // Each suggestion in the suggestion list should already have a matchScore
+    // assigned by Verb.match().
+    // Give them also a frequencyScore based on the suggestionMemory:
     for each (let sugg in this._suggestionList) {
       sugg.frequencyMatchScore =
         this._parser.getSuggestionMemoryScore(
-          sugg._cameFromNounFirstSuggestion ? "" : inputVerb,
+          sugg.fromNounFirstSuggestion ? "" : sugg._verb.input,
           sugg._verb.cmd.id);
     }
     this._suggestionList.sort(this._byScoresDescending);
   },
 
-  _byScoresDescending: function PQ_byScoresDescending(x, y) {
-    let xMatchScores = x.getMatchScores();
-    let yMatchScores = y.getMatchScores();
+  _byScoresDescending: function PQ__byScoresDescending(x, y) {
+    let xMatchScores = x.matchScores;
+    let yMatchScores = y.matchScores;
     for (let z in xMatchScores) {
       let diff = yMatchScores[z] - xMatchScores[z];
       if (diff) return diff;
@@ -202,7 +196,7 @@ Parser.prototype = {
       let newPPS = new PartiallyParsedSentence(verb, {}, selObj, 0, query);
       // TODO make a better way of having the parsing remember its source than
       // this encapsulation breaking...
-      newPPS._cameFromNounFirstSuggestion = true;
+      newPPS.fromNounFirstSuggestion = true;
       sens.push(newPPS);
     }
     return sens;
@@ -216,7 +210,7 @@ Parser.prototype = {
       this._suggestionMemory.remember("", id);
       this._sortGenericVerbCache();
     }
-    if (!chosenSuggestion._cameFromNounFirstSuggestion) {
+    if (!chosenSuggestion.fromNounFirstSuggestion) {
       this._suggestionMemory.remember(verb.input, id);
     }
   },
@@ -327,17 +321,13 @@ ParsedSentence.prototype = {
                              (args[argName].type.rankLast ? .1 : 1));
   },
 
-  get completionText() {
-    /* return plain text that we should set the input box to if user hits
-     the key to autocomplete to this sentence. */
-
-    /* TODO: The whole logic of this function looks completely wrong to me
-     * on a cursory read-over.  If this ever generates correct output,
-     * I think it must be by sheer luck.  Rip this whole thing out and
-     * rewrite to make sense! -- JONO */
+  get completionText PS_getCompletionText() {
+    // Returns plain text that we should set the input box to if user hits
+    // the key to autocomplete to this sentence.
     var sentence = this._verb.matchedName;
-    var directObjPresent = false;
-    for (let x in this._verb._arguments) {
+    var hasObject = false;
+    var args = this._verb._arguments;
+    for (let x in args) {
       let argText = (this._argSuggs[x] || 0).text;
       if (!argText) continue;
       let preposition = " ";
@@ -347,12 +337,11 @@ ParsedSentence.prototype = {
         let {text, html} = this._selObj;
         if (text === argText || html === argText)
           argText = this._query.PRONOUNS[0];
-        directObjPresent = true;
+        hasObject = true;
       }
-      else if (argText && directObjPresent)
+      else if (argText && hasObject)
         //only append the modifiers if we have a valid direct-object
-        preposition += x + " ";
-      //Concatenate sentence pieces
+        preposition += args[x].flag + " ";
       sentence += preposition + argText;
     }
     return sentence + " ";
@@ -501,29 +490,30 @@ ParsedSentence.prototype = {
     return newSentences;
   },
 
-  getMatchScores: function PS_getMatchScores() {
-    if (this._cameFromNounFirstSuggestion) {
-      return [this.argMatchScore, this.frequencyMatchScore];
-    }
-    return [this.duplicateDefaultMatchScore,
-            this.frequencyMatchScore,
-            this.verbMatchScore,
-            this.argMatchScore];
-  },
+  get matchScores PS_getMatchScores() (
+    this.fromNounFirstSuggestion
+    ? [this.argMatchScore,
+       this.frequencyMatchScore]
+    : [this.duplicateDefaultMatchScore,
+       this.frequencyMatchScore,
+       this.verbMatchScore,
+       this.argMatchScore]),
 };
 
 function PartiallyParsedSentence(
   verb, argStrings, selObj, matchScore, query, copying) {
-  /*This is a partially parsed sentence.
-   * What that means is that we've decided what the verb is,
-   * and we've assigned all the words of the input to one of the arguments.
-   * What we haven't nailed down yet is the exact value to use for each
-   * argument, because the nountype may produce multiple argument suggestions
-   * from a single argument string.  So one of these partially parsed
-   * sentences can produce several completely-parsed sentences, in which
-   * final values for all arguments are specified.
-   */
+  // This is a partially parsed sentence.
+  // What that means is that we've decided what the verb is,
+  // and we've assigned all the words of the input to one of the arguments.
+  // What we haven't nailed down yet is the exact value to use for each
+  // argument, because the nountype may produce multiple argument suggestions
+  // from a single argument string.  So one of these partially parsed
+  // sentences can produce several completely-parsed sentences, in which
+  // final values for all arguments are specified.
   this._verb = verb;
+  // ArgStrings is a dictionary, where the keys match the argument names in
+  // the verb, and the values are each a ["list", "of", "words"] that have
+  // been assigned to that argument
   this._argStrings = argStrings;
   this._selObj = selObj;
   this._matchScore = matchScore;
@@ -532,15 +522,15 @@ function PartiallyParsedSentence(
   this._query = query;
 
   if (copying) return;
-  /* Create fully parsed sentence with empty arguments:
-   * If this command takes no arguments, this is all we need.
-   * If it does take arguments, this initializes the parsedSentence
-   * list so that the algorithm in addArgumentSuggestion will work
-   * correctly. */
+  // Create fully parsed sentence with empty arguments:
+  // If this command takes no arguments, this is all we need.
+  // If it does take arguments, this initializes the parsedSentence
+  // list so that the algorithm in addArgumentSuggestion will work
+  // correctly.
   this._parsedSentences =
     [new ParsedSentence(verb, {}, matchScore, selObj, query)];
   for (let argName in this._verb._arguments) {
-    if (argStrings[argName] && argStrings[argName].length > 0) {
+    if ((argStrings[argName] || "").length) {
       // If argument is present, try the noun suggestions based both on
       // substituting pronoun...
       let text = argStrings[argName].join(" ");
@@ -549,26 +539,22 @@ function PartiallyParsedSentence(
       // and on not substituting pronoun...
       let gotSuggsDirect = this._argSuggest(argName, text, html, null);
       if (!gotSuggs && !gotSuggsDirect) {
-        /* One of the arguments is supplied by the user, but produces
-         * no suggestions, meaning it's an invalid argument for this
-         * command -- that makes the whole parsing invalid!! */
+        // One of the arguments is supplied by the user, but produces
+        // no suggestions, meaning it's an invalid argument for this
+        // command -- that makes the whole parsing invalid!! */
         this._invalidArgs[argName] = true;
       }
     }
-    /* Otherwise, this argument will simply be left blank (or filled in with
-     * default value later.*/
+    // Otherwise, this argument will simply be left blank.
+    // (or filled in with default value later)
   }
-  /* ArgStrings is a dictionary, where the keys match the argument names in
-   * the verb, and the values are each a ["list", "of", "words"] that have
-   * been assigned to that argument
-   */
 }
 PartiallyParsedSentence.prototype = {
   _argSuggest:
   function PPS__argSuggest(argName, text, html, selectionIndices) {
-    /* For the given argument of the verb, sends (text,html) to the nounType
-     * gets back suggestions for the argument, and adds each suggestion.
-     * Return true if at least one arg suggestion was added in this way. */
+    // For the given argument of the verb, sends (text,html) to the nounType
+    // gets back suggestions for the argument, and adds each suggestion.
+    // Return true if at least one arg suggestion was added in this way.
     var noun = this._verb._arguments[argName].type;
     var {nounCache} = this._query;
     var key = text + "\n" + noun.id;
@@ -638,10 +624,9 @@ PartiallyParsedSentence.prototype = {
   },
 
   addArgumentSuggestion: function PPS_addArgumentSuggestion(arg, sugg) {
-    /* Adds the given sugg as a suggested value for the given arg.
-     * Extends the parsedSentences list with every new combination that
-     * is made possible by the new suggestion.
-     */
+    // Adds the given sugg as a suggested value for the given arg.
+    // Extends the parsedSentences list with every new combination that
+    // is made possible by the new suggestion.
     var newSentences = [];
     this._validArgs[arg] = true;
     EACH_PS: for each (let sen in this._parsedSentences) {
@@ -660,11 +645,11 @@ PartiallyParsedSentence.prototype = {
   },
 
   getParsedSentences: function PPS_getParsedSentences() {
-    /* For any parsed sentence that is missing any arguments, fill in those
-    arguments with the defaults before returning the list of sentences.
-    The reason we don't set the defaults directly on the object is cuz
-    an asynchronous call of addArgumentSuggestion could actually fill in
-    the missing argument after this.*/
+    // For any parsed sentence that is missing any arguments, fill in those
+    // arguments with the defaults before returning the list of sentences.
+    // The reason we don't set the defaults directly on the object is cuz
+    // an asynchronous call of addArgumentSuggestion could actually fill in
+    // the missing argument after this.
     for (let argName in this._invalidArgs)
       if (!(argName in this._validArgs))
         // Return nothing if this parsing is invalid
@@ -672,15 +657,14 @@ PartiallyParsedSentence.prototype = {
         return [];
 
     var parsedSentences = [], {push} = parsedSentences;
-    if (this._cameFromNounFirstSuggestion) {
+    if (this.fromNounFirstSuggestion) {
       for each (let sen in this._parsedSentences) {
         if (sen.hasFilledArgs()) {
-          /* When doing noun-first suggestion, we only want matches that put the
-           * input or selection into an argument of the verb; therefore, explicitly
-           * filter out suggestions that fill no arguments.
-           */
+          // When doing noun-first suggestion, we only want matches that put
+          // the input or selection into an argument of the verb; therefore,
+          // explicitly filter out suggestions that fill no arguments.
           for each (let oneSen in sen.fillMissingArgsWithDefaults()) {
-            oneSen._cameFromNounFirstSuggestion = true;
+            oneSen.fromNounFirstSuggestion = true;
             parsedSentences.push(oneSen);
           }
         }
@@ -710,14 +694,13 @@ PartiallyParsedSentence.prototype = {
       let from = this[key];
       for (let x in from) dest[x] = from[x];
     }
-    newPPSentence._cameFromNounFirstSuggestion =
-      this._cameFromNounFirstSuggestion;
+    newPPSentence.fromNounFirstSuggestion = this.fromNounFirstSuggestion;
     return newPPSentence;
   },
 
   _getUnfilledArguments: function PPS__getUnfilledArguments() {
-    /* Returns list of the names of all arguments the verb expects for which
-     no argument was provided in this partially parsed sentence. */
+    // Returns list of the names of all arguments the verb expects for which
+    // no argument was provided in this partially parsed sentence.
     return [argName
             for (argName in this._verb._arguments)
             if (!(this._argStrings[argName] || "").length)];
@@ -725,13 +708,11 @@ PartiallyParsedSentence.prototype = {
 
   getAlternateSelectionInterpolations:
   function PPS_getAlternateSelectionInterpolations() {
-    /* Returns a list of PartiallyParsedSentences with the selection
-     * interpolated into missing arguments -- one for each argument where
-     * the selection could go.
-     *
-     * If the selection can't be used, returns a
-     * list containing just this object.
-     */
+    // Returns a list of PartiallyParsedSentences with the selection
+    // interpolated into missing arguments -- one for each argument where
+    // the selection could go.
+    // If the selection can't be used, returns a
+    // list containing just this object.
     let unfilledArgs = this._getUnfilledArguments();
     if (unfilledArgs.length === 0) return [this];
 
@@ -819,14 +800,14 @@ Verb.prototype = {
 
   execute: function V_execute(context, argumentValues) {
     if (this._isNewStyle) {
-      /* New-style commands (api 1.5) expect a single dictionary with all
-       * arguments in it, and the object named 'object'*/
+      // New-style commands (api 1.5) expect a single dictionary with all
+      // arguments in it, and the object named 'object'.
       argumentValues.object = argumentValues.direct_object;
       return this.cmd.execute(context, argumentValues);
     }
     else {
-      /* Old-style commands (api 1.0) expect the direct object to be passed
-       * in separately: */
+      // Old-style commands (api 1.0) expect the direct object to be passed
+      // in separately.
       return this.cmd.execute(context,
                               argumentValues.direct_object,
                               argumentValues);
