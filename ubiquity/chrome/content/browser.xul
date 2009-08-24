@@ -2,11 +2,13 @@
 <?xml-stylesheet href="chrome://ubiquity/skin/browser.css" type="text/css"?>
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-  <script type="application/javascript;version=1.7"
+<!DOCTYPE window SYSTEM "chrome://ubiquity/locale/coreubiquity.dtd" >
+
+  <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/ubiquity.js"/>
-  <script type="application/javascript;version=1.7"
+  <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/popupmenu.js"/>
-  <script type="application/javascript;version=1.7"
+  <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/browser.js"/>
   <popupset id="mainPopupSet">
     <panel id="ubiquity-transparent-panel" class="msgPanel">
@@ -40,7 +42,7 @@
   </popup>
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="ubiquity-toolbarbutton" class="toolbarbutton-1"
-      label="Ubiquity" tooltiptext="Open or Close Ubiquity"
+      label="Ubiquity" tooltiptext="&ubiquity.toolbar.tooltip;"
       oncommand="gUbiquity.toggleWindow()"/>
   </toolbarpalette>
 </overlay>
