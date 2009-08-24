@@ -9,17 +9,20 @@ overlay chrome://global/content/console.xul chrome://ubiquity/content/console.xu
 
 style chrome://global/content/customizeToolbar.xul chrome://ubiquity/skin/browser.css
 
-locale ubiquity de-DE chrome/locale/de-DE/
-locale ubiquity en-US chrome/locale/en-US/
-locale ubiquity es-ES chrome/locale/es-ES/
-locale ubiquity fi-FI chrome/locale/fi-FI/
-locale ubiquity fr chrome/locale/fr/
-locale ubiquity hu chrome/locale/hu/
-locale ubiquity ja chrome/locale/ja/
-locale ubiquity nl-NL chrome/locale/nl-NL/
-locale ubiquity pl-PL chrome/locale/pl-PL/
-locale ubiquity pt chrome/locale/pt/
-locale ubiquity pt-BR chrome/locale/pt-BR/
-locale ubiquity pt-PT chrome/locale/pt-PT/
-locale ubiquity ru-RU chrome/locale/ru-RU/
-locale ubiquity zh-CN chrome/locale/zh-CN/
+locale ubiquity ca	chrome/locale/ca/
+locale ubiquity de-DE	chrome/locale/de-DE/
+locale ubiquity en-US	chrome/locale/en-US/
+locale ubiquity es-ES	chrome/locale/es-ES/
+locale ubiquity fi-FI	chrome/locale/fi-FI/
+locale ubiquity fr	chrome/locale/fr/
+locale ubiquity hu	chrome/locale/hu/
+locale ubiquity it-IT	chrome/locale/it-IT/
+locale ubiquity ja	chrome/locale/ja/
+locale ubiquity nl	chrome/locale/nl/
+locale ubiquity pl-PL	chrome/locale/pl-PL/
+locale ubiquity pt	chrome/locale/pt/
+locale ubiquity pt-BR	chrome/locale/pt-BR/
+locale ubiquity pt-PT	chrome/locale/pt-PT/
+locale ubiquity ro-RO	chrome/locale/ro-RO/
+locale ubiquity ru-RU	chrome/locale/ru-RU/
+locale ubiquity zh-CN	chrome/locale/zh-CN/

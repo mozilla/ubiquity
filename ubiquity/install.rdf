@@ -7,8 +7,8 @@
     <em:version>0.5.5pre4</em:version>
     <em:type>2</em:type>
 
-    <!-- Target Application this extension can install into, 
-         with minimum and maximum supported versions. --> 
+    <!-- Target Application this extension can install into,
+         with minimum and maximum supported versions. -->
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
@@ -30,7 +30,7 @@
     <em:translator>Fux, Team erweiterungen.de (de-DE)</em:translator>
     <em:translator>queltosh (es-ES)</em:translator>
     <em:translator>AtteL (fi-FI)</em:translator>
-    <em:translator>ccorazza, Frederic, Goofy, myahoo (fr)</em:translator>
+    <em:translator>ccorazza, Frédéric, Goofy, myahoo (fr)</em:translator>
     <em:translator>kkemenczy (hu)</em:translator>
     <em:translator>gialloporpora (it-IT)</em:translator>
     <em:translator>mar, powchin, satyr (ja)</em:translator>
@@ -39,6 +39,7 @@
     <em:translator>camponez (pt)</em:translator>
     <em:translator>fernph (pt-BR)</em:translator>
     <em:translator>mrfyda (pt-PT)</em:translator>
+    <em:translator>x10firefox (ro-RO)</em:translator>
     <em:translator>Quicksilver tears, SeLarin (ru-RU)</em:translator>
     <em:translator>yfdyh000 (zh-CN)</em:translator>
   </Description>
