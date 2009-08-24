@@ -1,5 +1,2 @@
-<!-- description locale to scrape into install.rdf later -->
-<!ENTITY ubiquity.locale.description "An extension that allows for the use of dynamic commands in Firefox.">
-
 <!-- chrome/content/browser.xul -->
-<!ENTITY ubiquity.toolbar.tooltip "Open or Close Ubiquity">
+<!ENTITY ubiquity.toolbar.tooltip "Open or close Ubiquity">

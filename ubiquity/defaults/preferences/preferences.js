@@ -1,8 +1,11 @@
+pref("extensions.ubiquity@labs.mozilla.com.description",
+     "chrome://ubiquity/locale/coreubiquity.properties");
 pref("extensions.ubiquity.language", "en");
 pref("extensions.ubiquity.parserVersion", 2);
 pref("extensions.ubiquity.trustedDomains",
      "ubiquity.mozilla.com");
-pref("extensions.ubiquity.skin", "old");
+pref("extensions.ubiquity.skin",
+     "chrome://ubiquity/skin/skins/experimental.css");
 pref("extensions.ubiquity.enablePageLoadHandlers", true);
 pref("extensions.ubiquity.enableUbiquityLoadHandlers", true);
 pref("extensions.ubiquity.displayAlertOnError", false);
