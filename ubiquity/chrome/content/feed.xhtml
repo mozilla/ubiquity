@@ -22,45 +22,44 @@
 <body dir="&locale.dir;" class="information">
 
 <script type="text/javascript">
-	<![CDATA[
+  <![CDATA[
 
-	Components.utils.import("resource://ubiquity/modules/setup.js");
+  Components.utils.import("resource://ubiquity/modules/setup.js");
 
-	var isRedirecting = false;
+  var isRedirecting = false;
 
-	function maybeRedirect() {
-		if (!isRedirecting && window.location.hash) {
-			var relPath = window.location.hash.slice(1);
-			window.location = UbiquitySetup.standardFeedsUri + relPath;
-			isRedirecting = true;
-		}
-	}
+  function maybeRedirect() {
+    if (!isRedirecting && window.location.hash) {
+      var relPath = window.location.hash.slice(1);
+      window.location = UbiquitySetup.standardFeedsUri + relPath;
+      isRedirecting = true;
+    }
+  }
 
-	maybeRedirect();
-	window.setInterval(maybeRedirect, 100);
+  maybeRedirect();
+  window.setInterval(maybeRedirect, 100);
 
-	]]>
+  ]]>
 </script>
 
 <div id="errorPageContainer">
-	<div id="errorTitle"><h1>&ubiquity.redirect.FeedHeader;</h1></div>
+  <div id="errorTitle"><h1>&ubiquity.redirect.FeedHeader;</h1></div>
 
-	<div id="errorLongContent">
+  <div id="errorLongContent">
 
-		<div id="errorShortDesc">
-			<p>&ubiquity.redirect.FeedShortDesc;</p>
-		</div>
+    <div id="errorShortDesc">
+      <p>&ubiquity.redirect.FeedShortDesc;</p>
+    </div>
 
-		<div id="errorLongDesc">
-			<p>&ubiquity.redirect.FeedLongDesc;</p>
+    <div id="errorLongDesc">
+      <p>&ubiquity.redirect.FeedLongDesc;</p>
 
-			<ul>
-				<li><a href="chrome://ubiquity/content/feed.html#map.html">chrome://ubiquity/content/feed.xhtml#map.html</a></li>
-			</ul>
+      <ul>
+        <li><a href="&feed.DevelCmds;">&feed.DevelCmds;</a></li>
+      </ul>
 
-		</div>
-
-	</div>
+    </div>
+  </div>
 </div>
 
 </body>

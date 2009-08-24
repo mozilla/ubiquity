@@ -22,43 +22,42 @@
 <body dir="&locale.dir;" class="information">
 
 <script type="text/javascript">
-	<![CDATA[
+  <![CDATA[
 
-	Components.utils.import("resource://ubiquity/modules/setup.js");
+  Components.utils.import("resource://ubiquity/modules/setup.js");
 
-	function maybeRedirect() {
-		if (window.location.hash) {
-			var relPath = window.location.hash.slice(1);
-			var fileUrl = UbiquitySetup.getBaseUri() + relPath;
-			window.location = fileUrl;
-		}
-	}
+  function maybeRedirect() {
+    if (window.location.hash) {
+      var relPath = window.location.hash.slice(1);
+      var fileUrl = UbiquitySetup.getBaseUri() + relPath;
+      window.location = fileUrl;
+    }
+  }
 
-	maybeRedirect();
-	window.setInterval(maybeRedirect, 100);
+  maybeRedirect();
+  window.setInterval(maybeRedirect, 100);
 
-	]]>
+  ]]>
 </script>
 
 <div id="errorPageContainer">
-	<div id="errorTitle"><h1>&ubiquity.redirect.FileHeader;</h1></div>
+  <div id="errorTitle"><h1>&ubiquity.redirect.FileHeader;</h1></div>
 
-	<div id="errorLongContent">
+  <div id="errorLongContent">
 
-		<div id="errorShortDesc">
-			<p>&ubiquity.redirect.FileShortDesc;</p>
-		</div>
+    <div id="errorShortDesc">
+      <p>&ubiquity.redirect.FileShortDesc;</p>
+    </div>
 
-		<div id="errorLongDesc">
-			<p>&ubiquity.redirect.FileLongDesc;</p>
+    <div id="errorLongDesc">
+      <p>&ubiquity.redirect.FileLongDesc;</p>
 
-			<ul>
-				<li><a href="chrome://ubiquity/content/file.html#index.html">chrome://ubiquity/content/file.xhtml#index.xhtml</a></li>
-			</ul>
+      <ul>
+        <li><a href="&file.DevelDocs;">&file.DevelDocs;</a></li>
+      </ul>
 
-		</div>
-
-	</div>
+    </div>
+  </div>
 </div>
 
 </body>

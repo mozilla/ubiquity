@@ -3,7 +3,63 @@
 <!ENTITY appVersion "<span class='version'></span>">
 <!ENTITY helpLink "<a id='show-hide-help' onclick=''></a>">
 
+<!-- confirm-add-command.xhtml -->
+<!ENTITY targetLink "<a id='targetLink'></a>">
+
+<!-- localization-template.xhtml -->
+<!ENTITY feedKey "<span class='feedKey'></span>">
+<!ENTITY localeDir "<span class='localization-dir'></span>">
+
 <!-- Command List specific entities -->
 <!ENTITY cmdCount "<span id='num-commands'></span>">
 <!ENTITY feedCount "<span id='num-subscribed-feeds'></span>">
 <!ENTITY unsubCount "<span id='num-unsubscribed-feeds'></span>">
+
+<!-- confirm-add-command entities -->
+<!ENTITY targetLink "<a id='targetLink'></a>">
+
+<!-- Internal link management chrome./file./feed. -->
+<!ENTITY chrome.about "about:ubiquity">
+<!ENTITY chrome.cmdlist "chrome://ubiquity/content/cmdlist.xhtml">
+<!ENTITY chrome.graveyard "chrome://ubiquity/content/cmdlist.xhtml#graveyard">
+<!ENTITY chrome.settings "chrome://ubiquity/content/settings.xhtml">
+<!ENTITY chrome.tests "chrome://ubiquity/content/test.xhtml">
+<!ENTITY chrome.nounTuner "chrome://ubiquity/content/tuner.xhtml">
+<!ENTITY chrome.playpen "chrome://ubiquity/content/playpen.xhtml">
+<!ENTITY chrome.reset "chrome://ubiquity/content/reset.xhtml">
+
+<!ENTITY file.FeedsIndex "resource://ubiquity/standard-feeds">
+<!ENTITY file.DevelDocs "chrome://ubiquity/content/file.xhtml#index.html">
+
+<!ENTITY feed.DevelCmds "chrome://ubiquity/content/feed.xhtml#core-developer-commands.html">
+<!ENTITY feed.ExperimentalCmds "chrome://ubiquity/content/feed.xhtml#experimental-commands.html">
+
+<!-- External link management just addresses. -->
+<!ENTITY link.releaseNotes "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.4_Release_Notes">
+
+<!-- wiki links -->
+<!ENTITY link.cmdTutorial "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial">
+<!ENTITY link.credits "https://wiki.mozilla.org/Labs/Ubiquity/Credits">
+<!ENTITY link.extDocs "https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">
+<!ENTITY link.herdMain "https://ubiquity.mozilla.com/herd/">
+<!ENTITY link.herdDash "https://ubiquity.mozilla.com/herd/command-feed/">
+<!ENTITY link.lockedFeeds "https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial">
+<!ENTITY link.roadmap "https://wiki.mozilla.org/Labs/Ubiquity/Roadmap">
+<!ENTITY link.wildCmds "http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">
+<!ENTITY link.wikiMain "http://wiki.mozilla.org/Labs/Ubiquity">
+
+<!-- trac links -->
+<!ENTITY link.bug19 "http://ubiquity.mozilla.com/trac/ticket/19">
+<!ENTITY link.bug449 "http://ubiquity.mozilla.com/trac/ticket/449">
+
+<!-- support links -->
+<!ENTITY link.supportGSFN "http://getsatisfaction.com/mozilla/products/mozilla_ubiquity">
+<!ENTITY link.supportMailList "http://groups.google.com/group/ubiquity-firefox">
+
+<!-- other links -->
+<!ENTITY link.growl "http://growl.info/">
+<!ENTITY link.mitmInfo "http://blog.johnath.com/2008/08/05/ssl-question-corner/">
+<!ENTITY link.gettextInfo "http://wikipedia.org/wiki/Gettext">
+<!ENTITY link.snarl "http://www.fullphat.net/">
+<!ENTITY link.growlWin "http://growlforwindows.com/gfw/">
+<!ENTITY link.libNotify "http://www.markshuttleworth.com/archives/265">
