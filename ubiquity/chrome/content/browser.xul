@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://ubiquity/skin/browser.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://ubiquity/locale/coreubiquity.dtd" >
+
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-<!DOCTYPE window SYSTEM "chrome://ubiquity/locale/coreubiquity.dtd" >
 
   <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/ubiquity.js"/>
