@@ -57,7 +57,8 @@
     <legend>&ubiquity.settings.InvokingUbiquity;</legend>
     <div style="margin-left:10px;">
       <p>
-        <input id="keyInputBox" type="text" size="42" style="cursor:pointer"
+        <input id="keyInputBox" type="text" size="42"
+          style="cursor:pointer; padding:1px 1ex"
           onkeydown="return false"
           onkeyup="PrefKeys.onKeyChange(event)"
           onfocus="this.value = L('ubiquity.prefkeys.pressyourcombo')"
@@ -80,8 +81,11 @@
   
   <h2>&ubiquity.settings.NotificationSettings;</h2>
   <p>&ubiquity.settings.NotificationParagraph1;</p>
-  <p><label for="gfw"><input type="checkbox" name="gfw" value="gfw" id="gfw" /><strong>&ubiquity.settings.NotificationEnable;</strong></label></p>
-  <p id="gfw-warning" style="display:none; color:#922233">I&ubiquity.settings.NotificationWarning;</p>
+  <p><label for="gfw">
+    <input type="checkbox" name="gfw" value="gfw" id="gfw"/>
+    <strong>&ubiquity.settings.NotificationEnable;</strong>
+  </label></p>
+  <p id="gfw-warning" style="display:none; color:#922233">&ubiquity.settings.NotificationWarning;</p>
   <p>&ubiquity.settings.NotificationLinuxNote;</p>
 
   <h2>&ubiquity.settings.MiscSettings;</h2>

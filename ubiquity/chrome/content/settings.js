@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Blair McBride <unfocused@gmail.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,17 +36,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
-
-Cu.import("resource://ubiquity/modules/msgservice.js");
-Cu.import("resource://ubiquity/modules/utils.js");
-Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
 
-var {skinService} = UbiquitySetup.createServices();
-var msgService = new AlertMessageService();
+var {skinService, messageService} = UbiquitySetup.createServices();
 var {escapeHtml} = Utils;
 
 $(onDocumentLoad);
@@ -88,33 +81,18 @@ function onDocumentLoad() {
     Application.prefs.setValue("extensions.ubiquity.inputDelay",
                                this.value = Math.abs(~~this.value % 1e4));
   }).val(Utils.currentChromeWindow.gUbiquity.inputDelay);
-  
+
   //Notification settings
-  var osString = Cc["@mozilla.org/xre/app-info;1"]
-                 .getService(Ci.nsIXULRuntime).OS;
-  var Application = Cc["@mozilla.org/fuel/application;1"]
-                   .getService(Ci.fuelIApplication);
   var GFW_PREF = "extensions.ubiquity.gfw";
-                 
-  if(osString == "WINNT"){
-        
-    $("#gfw:checkbox").click(function(){
-     if($(this).is(":checked")){
-       Application.prefs.setValue(GFW_PREF, true);
-       $("#gfw-warning").slideDown();
-     }else{
-       Application.prefs.setValue(GFW_PREF, false);
-       $("#gfw-warning").slideUp();
-     }
+  if (Utils.OS === "WINNT") {
+    let [gfw] = $("#gfw").click(function gfw_checkClick(){
+      var {checked} = this;
+      Application.prefs.setValue(GFW_PREF, checked);
+      $("#gfw-warning")[checked ? "slideDown" : "slideUp"]();
     });
-    
-    if(Application.prefs.getValue(GFW_PREF, false)){
-      $("#gfw").attr("checked", "true");
+    if ((gfw.checked = Application.prefs.getValue(GFW_PREF, false)))
       $("#gfw-warning").show();
-    }
-    
   }
-  
 }
 
 function changeLanguageSettings() {
@@ -122,7 +100,6 @@ function changeLanguageSettings() {
   var prefs = (Cc["@mozilla.org/preferences-service;1"]
                .getService(Ci.nsIPrefService)
                .getBranch("extensions.ubiquity."));
-
   var useParserVersion = $("#use-new-parser-checkbox")[0].checked ? 2 : 1;
   if (useParserVersion !== prefs.getIntPref("parserVersion")) {
     changed = true;
@@ -160,17 +137,18 @@ function changeExternalCallSettings() {
   }
 }
 
-
 function loadSkinList() {
   var {CUSTOM_SKIN, currentSkin, skinList} = skinService;
+  var $list = $("#skin-list").empty();
   var i = 0;
-  $("#skin-list").empty();
-  for each (let {local_uri, download_uri} in skinList)
-    if (local_uri !== CUSTOM_SKIN)
-      createSkinElement(local_uri, download_uri, i++);
-  createSkinElement(CUSTOM_SKIN, CUSTOM_SKIN, i);
+  for each (let skin in skinList)
+    if (skin.localUrl === CUSTOM_SKIN)
+      var customSkin = skin;
+    else
+      $list.append(createSkinElement(skin, i++));
+  $list.append(createSkinElement(customSkin, i));
   checkSkin(currentSkin);
-  //If current skin is custom skin, auto-open the editor
+  // If current skin is custom skin, auto-open the editor
   if (currentSkin === CUSTOM_SKIN)
     openSkinEditor();
 }
@@ -191,27 +169,10 @@ function readFile(url) {
   return str;
 }
 
-function createSkinElement(filepath, origpath, id) {
-  try {
-    var css = readFile(filepath);
-  } catch (e) {
-    //If file cannot be read, just move on to the next skin
-    return;
-  }
-
-  var skinMeta = {
-    name: filepath,
-    homepage: /^https?:/.test(origpath) ? origpath : '',
-  };
-  //look for =skin= ~ =/skin= indicating metadata
-  var [, metaData] = /=skin=\s+([^]+)\s+=\/skin=/(css) || 0;
-  if (metaData)
-    while(/^\s*@(\S+)\s+(.+)/mg.test(metaData))
-      skinMeta[RegExp.$1] = RegExp.$2;
-
+function createSkinElement(skin, id) {
+  var {localUrl: filepath, downloadUrl: origpath, metaData: skinMeta} = skin;
   var skinId = "skin_" + id;
-
-  $("#skin-list").append(
+  var skinEl = $(
     '<div class="command" id="' + skinId + '">' +
     ('<input type="radio" name="skins" id="rad_' + skinId +
      '" value="' + escapeHtml(filepath) + '"></input>') +
@@ -222,37 +183,34 @@ function createSkinElement(filepath, origpath, id) {
     '<div class="email light"></div>' +
     '<div class="homepage light"></div></div>');
 
-  var skinEl = $("#" + skinId);
-
   //Add the name and onchange event
   skinEl.find(".name").text(skinMeta.name);
-  skinEl.find("input").attr("onchange",
-                            "skinService.changeSkin('" + filepath + "')");
+  skinEl.find("input").change(function onRadioChange() {
+    skinService.changeSkin(filepath);
+  });
 
-  if (skinMeta.author)
+  if ("author" in skinMeta)
     skinEl.find(".author").text(L("ubiquity.settings.skinauthor",
                                   skinMeta.author));
-
-  if (skinMeta.email)
-    skinEl.find(".email")[0].innerHTML = (
-      <>email: <a href={"mailto:" + skinMeta.email}
-      >{skinMeta.email}</a></>);
-
-  if (skinMeta.license)
+  if ("email" in skinMeta) {
+    let ee = escapeHtml(skinMeta.email);
+    skinEl.find(".email")[0].innerHTML = "email: " + ee.link("mailto:" + ee);
+  }
+  if ("license" in skinMeta)
     skinEl.find(".license").text(L("ubiquity.settings.skinlicense",
                                    skinMeta.license));
+  if ("homepage" in skinMeta) {
+    let eh = escapeHtml(skinMeta.homepage);
+    skinEl.find(".homepage")[0].innerHTML = eh.link(eh);
+  }
 
-  if (skinMeta.homepage)
-    skinEl.find(".homepage")[0].innerHTML =
-      <a href={skinMeta.homepage}>{skinMeta.homepage}</a>.toXMLString();
-
-  skinEl.append(<a class="action" href={"view-source:" + filepath}
-                target="_blank">{
-                  L("ubiquity.settings.viewskinsource")
-                }</a>.toXMLString());
-
+  ($('<a class="action" target="_blank"></a>')
+   .attr("href", "view-source:" + filepath)
+   .text(L("ubiquity.settings.viewskinsource"))
+   .appendTo(skinEl));
   if (filepath !== origpath) (
-    $('<a class="action">' + L("ubiquity.settings.uninstallskin") + "</a>")
+    $('<a class="action"></a>')
+    .text(L("ubiquity.settings.uninstallskin"))
     .click(function uninstall() {
       var before = skinService.currentSkin;
       skinService.uninstall(filepath);
@@ -261,6 +219,8 @@ function createSkinElement(filepath, origpath, id) {
       skinEl.slideUp();
     })
     .appendTo(skinEl.append(" ")));
+
+  return skinEl;
 }
 
 function checkSkin(url) {
@@ -285,7 +245,7 @@ function saveCustomSkin() {
   foStream.write(data, data.length);
   foStream.close();
 
-  msgService.displayMessage(L("ubiquity.settings.skinsaved"));
+  messageService.displayMessage(L("ubiquity.settings.skinsaved"));
   loadSkinList();
   if (skinService.currentSkin === skinService.CUSTOM_SKIN)
     skinService.loadCurrentSkin();
@@ -293,15 +253,13 @@ function saveCustomSkin() {
 
 function pasteToGist() {
   var data = $("#skin-editor").val();
-  var name = (/@name[ \t]+(.+)/(data) || 0)[1];
   var ext = ".css";
+  var name = Utils.trim((/@name[ \t]+(.+)/(data) || [, "ubiquity-skin"])[1]);
   Utils.openUrlInBrowser(
     "http://gist.github.com/gists/",
     ["file_" + key + "[gistfile1]=" + encodeURIComponent(val)
      for each ([key, val] in Iterator({
-       ext: ext,
-       name: (name || "ubiquity-skin") + ext,
-       contents: data,
+       ext: ext, name: name + ext, contents: data,
      }))].join("&"));
 }
 
@@ -316,7 +274,7 @@ function saveAs() {
     skinService.saveAs($("#skin-editor").val(), "custom");
     loadSkinList();
   } catch (e) {
-    msgService.displayMessage(L("ubiquity.settings.skinerror"));
+    messageService.displayMessage(L("ubiquity.settings.skinerror"));
     Cu.reportError(e);
   }
 }

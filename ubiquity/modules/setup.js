@@ -295,7 +295,7 @@ let UbiquitySetup = {
       );
       disabledStorage.attach(cmdSource);
 
-      var skinService = new SkinSvc(gWebJsModule);
+      var skinService = new SkinSvc(gWebJsModule, msgService);
       skinService.updateAllSkins();
       skinService.loadCurrentSkin();
 

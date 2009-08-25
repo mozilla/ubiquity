@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,24 +35,31 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Cu = Components.utils;
+// The common header for all the about:ubiquity child pages.
 
+var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 
-// This contains the common header for all the about:ubiquity child pages.
-
 var navUrls = [
-  {name: L("ubiquity.nav.main"), url: "about:ubiquity"},
-  {name: L("ubiquity.nav.settings"), url: "chrome://ubiquity/content/settings.xhtml"},
-  {name: L("ubiquity.nav.commands"), url: "chrome://ubiquity/content/cmdlist.xhtml"},
-  {name: L("ubiquity.nav.getnewcommands"), url: "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"},
-  {name: L("ubiquity.nav.support"), url: "chrome://ubiquity/content/support.xhtml"},
-  {name: L("ubiquity.nav.hackubiquity"), url: "chrome://ubiquity/content/editor.xhtml"}
-];
+  [L("ubiquity.nav.main"),
+   "about:ubiquity"],
+  [L("ubiquity.nav.settings"),
+   "chrome://ubiquity/content/settings.xhtml"],
+  [L("ubiquity.nav.commands"),
+   "chrome://ubiquity/content/cmdlist.xhtml"],
+  [L("ubiquity.nav.getnewcommands"),
+   "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"],
+  [L("ubiquity.nav.support"),
+   "chrome://ubiquity/content/support.xhtml"],
+  [L("ubiquity.nav.hackubiquity"),
+   "chrome://ubiquity/content/editor.xhtml"],
+  ];
 
 function setVersionString() {
   $(".version").text(UbiquitySetup.version);
@@ -59,8 +67,7 @@ function setVersionString() {
 
 function createNavLinks() {
   let containerElem = document.getElementById("nav-container");
-  if (!containerElem)
-    return;
+  if (!containerElem) return;
 
   var U = document.createElement("span");
   U.textContent = "Ubiquity: ";
@@ -72,7 +79,7 @@ function createNavLinks() {
   listElem.id = "nav";
   containerElem.appendChild(listElem);
 
-  for each (let {url, name} in navUrls) {
+  for each (let [name, url] in navUrls) {
     let listItem = document.createElement("li");
     listElem.appendChild(listItem);
     let link = document.createElement("a");
