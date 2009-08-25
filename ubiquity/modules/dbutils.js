@@ -34,53 +34,90 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
+// = DbUtils =
+
 var EXPORTED_SYMBOLS = ["DbUtils"];
 
-/* Make a namespace object called DbUtils, to export,
- * which contains each function in this file.*/
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+// Make a namespace object called DbUtils, to export,
+// which contains each function in this file.
 var DbUtils = ([f for each (f in this) if (typeof f === "function")]
-                 .reduce(function(o, f)(o[f.name] = f, o), {}));
+               .reduce(function(o, f)(o[f.name] = f, o), {}));
 
-var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
-                .getService(Ci.nsIProperties);
-var _storSvc = Cc["@mozilla.org/storage/service;1"]
-                 .getService(Ci.mozIStorageService);
+// === {{{ DbUtils.connectLite(tableName, schemaDict, initialRows) }}} ===
+//
+// Creates a simple DB file in the user's profile directory (if nonexistent)
+// and returns a
+// [[https://developer.mozilla.org/en/mozIStorageService|connection]] to it.
+//
+// {{{tableName}}}
+// is the string which is used for both the file name and table name.
+//
+// {{{schemaDict}}} is the dictionary that represents the table schema.
+//
+// {{{initialRows}}} is an optional array of arrays that specifies
+// initial values of the table.
 
-DbUtils.openDatabase = function openDatabase(file) {
+function connectLite(tableName, schemaDict, initialRows) {
+  var file = (Cc["@mozilla.org/file/directory_service;1"]
+              .getService(Ci.nsIProperties)
+              .get("ProfD", Ci.nsIFile));
+  file.append(tableName + ".sqlite");
+  var connection = openDatabase(file);
+  if (connection && !connection.tableExists(tableName)) {
+    let schema = (
+      "CREATE TABLE " + tableName + "(" +
+      [key + " " + schemaDict[key] for (key in schemaDict)].join(",") +
+      ");");
+    for each (let row in initialRows) schema += (
+      "INSERT INTO " + tableName + " VALUES(" +
+      [typeof v === "string"
+       ? "'" + v.replace(/\'/g, "''") + "'"
+       : v == null ? "NULL" : v
+       for each (v in row)].join(",") +
+      ");");
+    try { connection.executeSimpleSQL(schema) }
+    catch (e) {
+      Cu.reportError(
+        tableName + " database table appears to be corrupt. Resetting it." +
+        "\n(" + connection.lastErrorString + ")");
+      // remove corrupt database table
+      file.exists() && file.remove(false);
+      connection = openDatabase(file);
+      connection.executeSimpleSQL(schema);
+    }
+  }
+  return connection;
+}
+
+function openDatabase(file) {
   /* If the pointed-at file doesn't already exist, it means the database
    * has never been initialized */
   var connection = null;
+  var storSvc = (Cc["@mozilla.org/storage/service;1"]
+                 .getService(Ci.mozIStorageService));
   try {
-    connection = _storSvc.openDatabase(file);
-  } catch(e) {
-    Components.utils.reportError(
-      "Opening database failed, database may not have been initialized");
+    connection = storSvc.openDatabase(file);
+  } catch (e) {
+    Cu.reportError(
+      "Opening database failed. It may not have been initialized.");
   }
   return connection;
-};
+}
 
-DbUtils.createTable = function createTable(connection, tableName, schema){
-  var file = connection.databaseFile;
-  try{
-    if(!connection.tableExists(tableName)){
+function createTable(connection, tableName, schema) {
+  if (!connection.tableExists(tableName))
+    try {
+      connection.executeSimpleSQL(schema);
+    } catch (e) {
+      Cu.reportInfo(
+        tableName + " database table appears to be corrupt. Resetting it.");
+      let file = connection.databaseFile;
+      // remove corrupt database table
+      file.exists() && file.remove(false);
+      connection = openDatabase(file);
       connection.executeSimpleSQL(schema);
     }
-    else{
-      dump("database table: " + tableName + " already exists\n");
-    }
-  }
-  catch(e) {
-    Cu.reportError("Ubiquity's " + tableName +
-        " database table appears to be corrupt, resetting it.");
-    if(file.exists()){
-      //remove corrupt database table
-      file.remove(false);
-    }
-    connection = _storSvc.openDatabase(file);
-    connection.executeSimpleSQL(schema);
-  }
   return connection;
-};
+}
