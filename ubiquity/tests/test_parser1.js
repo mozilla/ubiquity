@@ -513,7 +513,7 @@ function testSortedByMatchQuality() {
 
 function testSortSpecificNounsBeforeArbText() {
   var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
-                                            "beagle", "bulldog", "husky"]);
+                                           "beagle", "bulldog", "husky"]);
 
   var verbList = [{names: ["mumble"], DOType: noun_arb_text, DOLabel:"stuff"},
                   {names: ["wash"], DOType: dog, DOLabel: "dog"}];
@@ -524,8 +524,8 @@ function testSortSpecificNounsBeforeArbText() {
   this.assert(suggs.length == 2, "Should be two suggestions.");
   this.assert(suggs[0]._verb._name == "wash", "First suggestion should be wash");
   this.assert(suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
-  this.assert(suggs[0]._cameFromNounFirstSuggestion, "should be noun first");
-  this.assert(suggs[1]._cameFromNounFirstSuggestion, "should be noun first");
+  this.assert(suggs[0].fromNounFirstSuggestion, "should be noun first");
+  this.assert(suggs[1].fromNounFirstSuggestion, "should be noun first");
 }
 
 function testVerbUsesDefaultIfNoArgProvided() {
