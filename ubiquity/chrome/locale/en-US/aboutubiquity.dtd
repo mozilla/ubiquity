@@ -92,7 +92,7 @@
 <!ENTITY ubiquity.settings.Bug449Warning "Changes you make to a custom skin may not be seen until after a browser restart. This is a <a href='&link.bug449;'>known bug</a>.">
 
 <!-- Commands chrome/content/cmdlist.xhtml -->
-<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='cmdlist.xhtml#graveyard'>&unsubCount; command feeds</a>. | &helpLink;">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='&chrome.graveyard;'>&unsubCount; command feeds</a>. | &helpLink;">
 
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that &appTitle; recognizes are listed in the right column.  The black text is the command's name (what you type into &appTitle; to use it).  The grey text explains what the command does.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "The left column shows all the &ldquo;feeds&rdquo; that &appTitle; is subscribed to.  Each feed can contain multiple commands.">
