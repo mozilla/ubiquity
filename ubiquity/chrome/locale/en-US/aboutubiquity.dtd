@@ -153,7 +153,7 @@
 
 <!ENTITY ubiquity.editor.DevelopingUbiquity "Developing &appTitle;">
 
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Run the <a href='chrome.tests'>unit tests</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Run the <a href='&chrome.tests;'>unit tests</a>.">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Help us test our <a href='&feed.ExperimentalCmds;'>experimental commands</a>!">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Experiment with parser performance and introspect in the <a href='&chrome.playpen;'>parser playpen</a>. Use the <a href='&chrome.nounTuner;'>nountype tuner</a> to check your nountypes' suggestions and scoring.">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "And if you're going to be developing &appTitle; itself, check out our <a href='&feed.DevelCmds;'>core developer commands feed</a>.">
