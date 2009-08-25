@@ -569,6 +569,27 @@ var noun_type_disabled_command = {
   get disabled() true,
 };
 
+// === {{{ noun_type_skin }}} ===
+//
+// Suggests each installed skin whose name matches the input.
+//
+// * {{{text, html}}} : skin name
+// * {{{data.downloadUrl}}}
+// * {{{data.localUrl}}}
+// * {{{data.metaData}}} : meta data dictionary
+
+var noun_type_skin = {
+  label: "name",
+  noExternalCalls: true,
+  cacheTime: 0,
+  suggest: function nt_skin_suggest(text, html, cb, selected) {
+    var {skinService} = UbiquitySetup.createServices();
+    var suggs = [CmdUtils.makeSugg(skin.metaData.name, null, skin)
+                 for each (skin in skinService.skinList)];
+    return CmdUtils.grepSuggs(text, suggs);
+  },
+};
+
 // === {{{ noun_type_twitter_user }}} ===
 //
 // Suggests Twitter IDs from the user's login info.

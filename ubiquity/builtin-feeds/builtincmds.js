@@ -52,6 +52,10 @@ const BugReport = ("http://getsatisfaction.com/" +
                    "mozilla/products/mozilla_ubiquity");
 const Support = "chrome://ubiquity/content/support.xhtml";
 
+const {prefs} = Application;
+
+Cu.import("resource://ubiquity/modules/setup.js");
+
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
 CmdUtils.CreateCommand({
@@ -118,8 +122,7 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["change ubiquity settings",
-          "change ubiquity preferences",
-          "change ubiquity skin"],
+          "change ubiquity preferences"],
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
     <>Takes you to the <a href={Settings}>settings</a> page,
@@ -142,6 +145,25 @@ CmdUtils.CreateCommand({
   description: "" + (
     <>Takes you to the <a href={BugReport}>bug report</a> page.</>),
   execute: BugReport
+});
+
+CmdUtils.CreateCommand({
+  names: ["change skin"],
+  icon: "chrome://ubiquity/skin/icons/favicon.ico",
+  description: "Changes your Ubiquity skin.",
+  argument: noun_type_skin,
+  execute: function chskin_execute({object: {data: skin}}) {
+    if (skin)
+      UbiquitySetup.createServices().skinService.changeSkin(skin.localUrl);
+    else
+      Utils.focusUrlInBrowser(Settings);
+  },
+  preview: function chskin_preview(pb, {object: {html}}) {
+    pb.innerHTML = (
+      html
+      ? _("Changes to ${name}.", {name: html.bold()})
+      : this.previewDefault());
+  },
 });
 
 (function toggleCommand(names, desc, nt, disabled, tmpl) {
@@ -177,8 +199,6 @@ CmdUtils.CreateCommand({
  noun_type_disabled_command,
  false,
  _("Enables ${name}."));
-
-const {prefs} = Application;
 
 var CmdHst = {
   PREF_BIN: "extensions.ubiquity.history.bin",

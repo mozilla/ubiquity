@@ -153,22 +153,6 @@ function loadSkinList() {
     openSkinEditor();
 }
 
-// Thanks to code by Torisugari at
-// http://forums.mozillazine.org/viewtopic.php?p=921150#921150
-function readFile(url) {
-  var ioService = (Cc["@mozilla.org/network/io-service;1"]
-                   .getService(Ci.nsIIOService));
-  var scriptableStream = (Cc["@mozilla.org/scriptableinputstream;1"]
-                          .getService(Ci.nsIScriptableInputStream));
-  var channel = ioService.newChannel(url,null,null);
-  var input = channel.open();
-  scriptableStream.init(input);
-  var str = scriptableStream.read(input.available());
-  scriptableStream.close();
-  input.close();
-  return str;
-}
-
 function createSkinElement(skin, id) {
   var {localUrl: filepath, downloadUrl: origpath, metaData: skinMeta} = skin;
   var skinId = "skin_" + id;
@@ -232,23 +216,35 @@ function checkSkin(url) {
   });
 }
 
-function saveCustomSkin() {
-  var data = $("#skin-editor").val();
-  var MY_ID = "ubiquity@labs.mozilla.com";
-  var file = (Cc["@mozilla.org/extensions/manager;1"]
-              .getService(Ci.nsIExtensionManager)
-              .getInstallLocation(MY_ID)
-              .getItemFile(MY_ID, "chrome/skin/skins/custom.css"));
-  var foStream = (Cc["@mozilla.org/network/file-output-stream;1"]
-                  .createInstance(Ci.nsIFileOutputStream));
-  foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
-  foStream.write(data, data.length);
-  foStream.close();
+function openSkinEditor() {
+  $("#editor-div").show();
+  $("#skin-editor").val(Utils.getLocalUrl(skinService.CUSTOM_SKIN)).focus();
+  $("#edit-button").hide();
+}
 
+function saveCustomSkin() {
+  try {
+    skinService.saveCustomSkin($("#skin-editor").val());
+  } catch (e) {
+    messageService.displayMessage(L("ubiquity.settings.skinerror"));
+    Cu.reportError(e);
+    return;
+  }
   messageService.displayMessage(L("ubiquity.settings.skinsaved"));
   loadSkinList();
   if (skinService.currentSkin === skinService.CUSTOM_SKIN)
     skinService.loadCurrentSkin();
+}
+
+function saveAs() {
+  try {
+    skinService.saveAs($("#skin-editor").val(), "custom");
+  } catch (e) {
+    messageService.displayMessage(L("ubiquity.settings.skinerror"));
+    Cu.reportError(e);
+    return;
+  }
+  loadSkinList();
 }
 
 function pasteToGist() {
@@ -261,20 +257,4 @@ function pasteToGist() {
      for each ([key, val] in Iterator({
        ext: ext, name: name + ext, contents: data,
      }))].join("&"));
-}
-
-function openSkinEditor() {
-  $("#editor-div").show();
-  $("#skin-editor").val(readFile(skinService.CUSTOM_SKIN)).focus();
-  $("#edit-button").hide();
-}
-
-function saveAs() {
-  try {
-    skinService.saveAs($("#skin-editor").val(), "custom");
-    loadSkinList();
-  } catch (e) {
-    messageService.displayMessage(L("ubiquity.settings.skinerror"));
-    Cu.reportError(e);
-  }
 }

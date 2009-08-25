@@ -57,11 +57,32 @@ var gConnection = DbUtils.connectLite(
   [let (path = SKIN_ROOT + name + ".css") [path, path]
    for each (name in ["default", "experimental", "old", "custom"])]);
 
+var gMetaDict = {};
+
 function SkinSvc(webJsm, msgService) {
   this._connection = gConnection;
   this._webJsm = webJsm;
   this._msgService = msgService;
 }
+
+SkinSvc.SkinProto = {
+  get metaData() SkinSvc.readMetaData(this),
+};
+
+SkinSvc.readMetaData = function SS_readMetaData(
+  {css, downloadUrl, localUrl, noCache}) {
+  if (!noCache && localUrl in gMetaDict) return gMetaDict[localUrl];
+  var metaData = gMetaDict[localUrl] = {name: localUrl};
+  css || (css = Utils.getLocalUrl(localUrl, "utf-8"));
+  //look for =skin= ~ =/skin= indicating metadata
+  var [, data] = /=skin=\s*([^]+)\s*=\/skin=/(css) || 0;
+  if (data)
+    while(/^[ \t]*@(\w+)[ \t]+(.+)/mg.test(data))
+      metaData[RegExp.$1] = Utils.trim(RegExp.$2);
+  if (!("homepage" in metaData) && /^https?:/.test(downloadUrl))
+    metaData.homepage = downloadUrl;
+  return metaData;
+};
 
 SkinSvc.reset = function SS_reset() {
   var {databaseFile} = gConnection;
@@ -72,19 +93,6 @@ SkinSvc.prototype = {
   PREF: SKIN_PREF,
   DEFAULT_SKIN: SKIN_ROOT + "experimental.css",
   CUSTOM_SKIN : SKIN_ROOT + "custom.css",
-
-  _readMetaData: function SS__readMetaData(downloadUrl, localUrl) {
-    var css = Utils.getLocalUrl(localUrl, "utf-8");
-    var metaData = {name: localUrl};
-    //look for =skin= ~ =/skin= indicating metadata
-    var [, data] = /=skin=\s*([^]+)\s*=\/skin=/(css) || 0;
-    if (data)
-      while(/^[ \t]*@(\w+)[ \t]+(.+)/mg.test(data))
-        metaData[RegExp.$1] = Utils.trim(RegExp.$2);
-    if (!("homepage" in metaData) && /^https?:/.test(downloadUrl))
-      metaData.homepage = downloadUrl;
-    return metaData;
-  },
   
   _createStatement: function SS__createStatement(sql) {
      try {
@@ -123,6 +131,13 @@ SkinSvc.prototype = {
     }
   },
 
+  _writeToLocalUrl: function SS__writeToLocalUrl(url, data) {
+    var file = this._getSkinFolder();
+    file.append(url.slice(url.lastIndexOf("/") + 1));
+    this._writeToFile(file, data);
+    SkinSvc.readMetaData({css: data, localUrl: url, noCache: true});
+  },
+
   _randomKey: function SS__randomKey() Math.random().toString(36).slice(-8),
 
   _hackCssForBug466: function SS__hackCssForBug466(cssPath, sss, action) {
@@ -143,7 +158,7 @@ SkinSvc.prototype = {
         let (VC = (Cc["@mozilla.org/xpcom/version-comparator;1"]
                    .getService(Ci.nsIVersionComparator)),
              XULAI = (Cc["@mozilla.org/xre/app-info;1"]
-                          .getService(Ci.nsIXULAppInfo))
+                      .getService(Ci.nsIXULAppInfo))
              ) VC.compare(XULAI.version, "3.1") < 0) {
       let hackCss =
         Utils.url("chrome://ubiquity/skin/skins/default-717hack.css");
@@ -160,10 +175,7 @@ SkinSvc.prototype = {
       "SELECT COUNT(*) FROM ubiquity_skin_memory " +
       "WHERE download_uri = ?1");
     selStmt.bindUTF8StringParameter(0, url);
-    var count = 0;
-    if (selStmt.executeStep()) {
-      count = selStmt.getInt32(0);
-    }
+    var count = selStmt.executeStep() ? selStmt.getInt32(0) : 0;
     selStmt.finalize();
     return count !== 0;
   },
@@ -200,9 +212,7 @@ SkinSvc.prototype = {
         sss.unregisterSheet(oldCss, sss.USER_SHEET);
       this._hackCssForBug466(oldCss, sss, "unregister");
       this._hackCssForBug717(oldCss, sss, "unregister");
-    } catch (e) {
-      // do nothing
-    }
+    } catch (e) {} // do nothing
     //Load the new skin CSS
     var newCss = Utils.url(newSkinPath);
     sss.loadAndRegisterSheet(newCss, sss.USER_SHEET);
@@ -228,13 +238,7 @@ SkinSvc.prototype = {
   updateSkin: function SS_updateSkin(downloadUrl, localUrl) {
     var self = this;
     this._webJsm.jQuery.get(downloadUrl, null, function onSuccess(data) {
-      //Navigate to chrome://ubiquity/skin/skins
-      var file = self._getSkinFolder();
-      //Select the local file for the skin
-      var filename = localUrl.substr(localUrl.lastIndexOf("/") + 1);
-      file.append(filename);
-      //Write the updated CSS to the file
-      self._writeToFile(file, data);
+      self._writeToLocalUrl(localUrl, data);
     }, "text");
   },
 
@@ -254,8 +258,8 @@ SkinSvc.prototype = {
       //load the default and tell the user about the failure
       this.loadSkin(this.DEFAULT_SKIN);
       //errorToLocalize
-      this._msgService.displayMessage("Loading your current skin failed." +
-                                      " The default skin will be loaded.");
+      this._msgService.displayMessage(
+        "Loading your current skin failed. The default skin will be loaded.");
     }
   },
 
@@ -283,6 +287,10 @@ SkinSvc.prototype = {
       this.changeSkin(this.DEFAULT_SKIN);
   },
 
+  saveCustomSkin: function SS_saveCustomSkin(cssText) {
+    this._writeToLocalUrl(this.CUSTOM_SKIN, cssText);
+  },
+
   saveAs: function SS_saveAs(cssText, defaultName) {
     const {nsIFilePicker} = Ci;
     var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
@@ -299,6 +307,7 @@ SkinSvc.prototype = {
     var {spec} = fp.fileURL;
     this.addSkin("data:,dev/null/" + this._randomKey(), spec);
     this.changeSkin(spec);
+    SkinSvc.readMetaData({css: cssText, localUrl: spec, noCache: true});
     return fp.file.path;
   },
 
@@ -307,14 +316,14 @@ SkinSvc.prototype = {
   },
 
   get skinList SS_getSkinList() {
-    var list = [], self = this;
+    var list = [];
     var selStmt = this._createStatement(
       "SELECT local_uri, download_uri FROM ubiquity_skin_memory");
     while (selStmt.executeStep())
       list.push({
         localUrl: selStmt.getUTF8String(0),
         downloadUrl: selStmt.getUTF8String(1),
-        get metaData() self._readMetaData(this.downloadUrl, this.localUrl),
+        __proto__: SkinSvc.SkinProto,
       });
     selStmt.finalize();
     return list;
@@ -336,7 +345,7 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
       }]});
     function onSubscribeClick(notification, button) {
       if (self._isLocalUrl(skinUrl)) self.install(skinUrl, skinUrl);
-      else self._webJsm.jQuery.ajax(skinUrl, null, function onSuccess(data) {
+      else self._webJsm.jQuery.get(skinUrl, null, function onSuccess(data) {
         //Navigate to chrome://ubiquity/skin/skins/
         var file = self._getSkinFolder();
         //Select a random name for the file
@@ -348,9 +357,11 @@ SkinSvc.prototype.installToWindow = function installToWindow(window) {
         self._writeToFile(file, data);
         var ios = (Cc["@mozilla.org/network/io-service;1"]
                    .getService(Ci.nsIIOService));
-        var url = ios.newFileURI(file);
+        var {spec} = ios.newFileURI(file);
         //Add skin to DB and make it the current skin
-        self.install(skinUrl, url.spec);
+        self.install(skinUrl, spec);
+        SkinSvc.readMetaData({
+          css: data, downloadUrl: skinUrl, localUrl: spec, noCache: true});
       }, "text");
     }
   }
