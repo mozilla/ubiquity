@@ -50,17 +50,17 @@ const SKIN_PREF = "extensions.ubiquity.skin";
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
-var gConnection = DbUtils.connectLite(
+var gConnection = connect();
+var gMetaDict = {};
+
+function connect() DbUtils.connectLite(
   "ubiquity_skin_memory",
   { download_uri: "VARCHAR(256)",
     local_uri   : "VARCHAR(256)" },
   [let (path = SKIN_ROOT + name + ".css") [path, path]
    for each (name in ["default", "experimental", "old", "custom"])]);
 
-var gMetaDict = {};
-
 function SkinSvc(webJsm, msgService) {
-  this._connection = gConnection;
   this._webJsm = webJsm;
   this._msgService = msgService;
 }
@@ -86,7 +86,9 @@ SkinSvc.readMetaData = function SS_readMetaData(
 
 SkinSvc.reset = function SS_reset() {
   var {databaseFile} = gConnection;
+  gConnection.close();
   databaseFile.exists() && databaseFile.remove(false);
+  gConnection = connect();
 };
 
 SkinSvc.prototype = {
@@ -96,14 +98,14 @@ SkinSvc.prototype = {
   
   _createStatement: function SS__createStatement(sql) {
      try {
-       return this._connection.createStatement(sql);
+       return gConnection.createStatement(sql);
      } catch (e) {
-       throw new Error(this._connection.lastErrorString);
+       throw new Error(gConnection.lastErrorString);
      }
   },
 
   _isLocalUrl: function SS__isLocalUrl(skinUrl)
-    /^(?:file|scheme)$/.test(Utils.url(skinUrl).scheme),
+    /^(?:file|chrome)$/.test(Utils.url(skinUrl).scheme),
 
   //Navigate to chrome://ubiquity/skin/skins/ and get the folder
   _getSkinFolder: function SS__getSkinFolder() {
