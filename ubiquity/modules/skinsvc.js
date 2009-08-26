@@ -218,7 +218,7 @@ SkinSvc.prototype = {
     //Load the new skin CSS
     var newCss = Utils.url(newSkinPath);
     sss.loadAndRegisterSheet(newCss, sss.USER_SHEET);
-    Application.prefs.setValue(this.SKIN_PREF, newSkinPath);
+    Application.prefs.setValue(SKIN_PREF, newSkinPath);
     this._hackCssForBug466(newCss, sss, "register");
     this._hackCssForBug717(newCss, sss, "register");
   },
@@ -313,9 +313,8 @@ SkinSvc.prototype = {
     return fp.file.path;
   },
 
-  get currentSkin SS_getCurrentSkin() {
-    return Application.prefs.getValue(this.SKIN_PREF, this.DEFAULT_SKIN);
-  },
+  get currentSkin SS_getCurrentSkin()
+    Application.prefs.getValue(SKIN_PREF, this.DEFAULT_SKIN),
 
   get skinList SS_getSkinList() {
     var list = [];
