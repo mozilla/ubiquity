@@ -59,17 +59,16 @@ Cu.import("resource://ubiquity/modules/skinsvc.js");
 
 const {Application} = Utils;
 
-let gServices;
-
-let gWebJsModule;
+var gServices, gWebJsModule;
 
 const RESET_SCHEDULED_PREF = "extensions.ubiquity.isResetScheduled";
 const VERSION_PREF ="extensions.ubiquity.lastversion";
 const ANN_DB_FILENAME = "ubiquity_ann.sqlite";
 
-let UbiquitySetup = {
+var UbiquitySetup = {
   isNewlyInstalledOrUpgraded: false,
 
+  STANDARD_FEEDS_URI: "resource://ubiquity/standard-feeds/",
   STANDARD_FEEDS: [{page: "firefox.html",
                     source: "firefox.js",
                     title: "Mozilla Browser Commands"},
@@ -229,14 +228,16 @@ let UbiquitySetup = {
   },
 
   __removeExtinctStandardFeeds: function __rmExtinctStdFeeds(feedManager) {
-    var OLD_STD_FEED_URI = "https://ubiquity.mozilla.com/standard-feeds/";
+    var OLD_STD_FEED_URIS = [
+      "https://ubiquity.mozilla.com/standard-feeds/",
+      this.getBaseUri() + "standard-feeds/"];
 
-    feedManager.getSubscribedFeeds().forEach(
-      function removeExtinct(feed) {
-        if (feed.uri.spec.indexOf(OLD_STD_FEED_URI) == 0 ||
-            feed.title == "Mozilla Image-Related Commands")
-          feed.purge();
-      });
+    feedManager.getSubscribedFeeds().forEach(function removeExtinct(feed) {
+      var {spec} = feed.uri;
+      if (OLD_STD_FEED_URIS.some(function (u) spec.indexOf(u) === 0) ||
+          feed.title === "Mozilla Image-Related Commands")
+        feed.purge();
+    });
   },
 
   createServices: function createServices() {
@@ -268,7 +269,7 @@ let UbiquitySetup = {
                                                     msgService,
                                                     gWebJsModule,
                                                     this.languageCode,
-                                                    this.getBaseUri(),
+                                                    "resource://ubiquity/",
                                                     this.parserVersion);
       /*
       var gmfp = new GreaseMonkeyFeedPlugin(feedManager, msgService,
@@ -316,11 +317,9 @@ let UbiquitySetup = {
         // getting the '@mozilla.org/thread-manager;1' service and
         // spinning via a call to processNextEvent() until some kind of
         // I/O is finished?
-        defaultFeedPlugin.installDefaults(
-          this.standardFeedsUri,
-          this.getBaseUri() + "standard-feeds/",
-          this.STANDARD_FEEDS
-        );
+        defaultFeedPlugin.installDefaults(this.STANDARD_FEEDS_URI,
+                                          this.STANDARD_FEEDS_URI,
+                                          this.STANDARD_FEEDS);
       }
 
       cmdSource.refresh();
@@ -365,10 +364,6 @@ let UbiquitySetup = {
 
   get version() {
     return Application.extensions.get("ubiquity@labs.mozilla.com").version;
-  },
-
-  get standardFeedsUri() {
-    return this.getBaseUri() + "standard-feeds/";
   },
 
   get doNounFirstExternals() {

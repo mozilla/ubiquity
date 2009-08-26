@@ -79,8 +79,8 @@ function actionLink(text, action)(
   .addClass("action"));
 
 function fillTableCellForFeed(cell, feed, sortMode) {
-  cell.append(A(feed.uri.spec, feed.title),
-              "<br/>");
+  var feedUrl = feed.uri.spec;
+  cell.append(A(feedUrl, feed.title), "<br/>");
   if (+feed.date)
     cell.append('<span class="feed-date">' +
                 feed.date.toLocaleString() +
@@ -92,7 +92,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
       function unsubscribe() {
         feed.remove();
         cell.slideUp(function onUnsubscribe() {
-          $("a[name^='" + feed.uri.spec + "']").closest("tr").hide();
+          $("a[name^='" + feedUrl + "']").closest("tr").hide();
           updateSubscribedCount();
           buildUnsubscribedFeeds();
         });
@@ -101,17 +101,16 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   cell.append(" ", viewSourceLink(feed));
 
   // if it's one of the builtin or standard feeds, add l10n template link
-  if (/^file:.+\b(?:builtin|standard)-feeds\b/.test(feed.srcUri.spec))
+  if (/^resource:\/\/ubiquity\/(?:builtin|standard)-feeds[/]/.test(feedUrl))
     cell.append(" ", viewLocalizationTemplate(feed));
 
   // If not auto-updating, display link to any updates found
-  feed.checkForManualUpdate(
-    function(isAvailable, href) {
-      if (isAvailable)
-        cell.append("<br/>", A(href,
-                               L("ubiquity.cmdlist.feedupdated"),
-                               "feed-updated"));
-    });
+  feed.checkForManualUpdate(function onCheck(isAvailable, href) {
+    if (isAvailable)
+      cell.append("<br/>", A(href,
+                             L("ubiquity.cmdlist.feedupdated"),
+                             "feed-updated"));
+  });
   // if sorting by feed, make feed name large and put a borderline
   if (/^feed/.test(sortMode)) {
     cell.addClass("topcell command-feed-name");

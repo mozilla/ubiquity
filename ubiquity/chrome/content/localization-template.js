@@ -34,13 +34,6 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Cu.import("resource://ubiquity/modules/setup.js");
-Cu.import("resource://ubiquity/modules/utils.js");
-Cu.import("resource://ubiquity/modules/localization_utils.js");
-
-var L = LocalizationUtils.propertySelector(
-  "chrome://ubiquity/locale/aboutubiquity.properties");
-
 function displayTemplate(feedUri) {
   var {feedManager} = UbiquitySetup.createServices();
   for each (var feed in feedManager.getSubscribedFeeds()) {
@@ -131,8 +124,7 @@ $(function ready() {
   if (feedUri) {
     $(".feedKey").text(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));
     $(".localization-dir").text(
-      feedUri.replace(/\b(?:standard|builtin)-feeds\/.*$/g,
-                      "localization/XY/"));
+      UbiquitySetup.getBaseUri() + "localization/XY/");
     displayTemplate(feedUri);
   }
 });
