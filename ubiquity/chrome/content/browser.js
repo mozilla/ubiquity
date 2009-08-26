@@ -97,59 +97,51 @@ window.addEventListener("load", function onload() {
 
     // Hack to get the default skin to work on Linux, which we don't
     // support per-pixel alpha transparency on.
-    if (jsm.Utils.OS === "Linux")
-      panel.style.backgroundColor = "#444";
-
-    if (prefs.getValue("extensions.ubiquity.enableUbiquityLoadHandlers", true))
-      services.commandSource.onUbiquityLoad(window);
+    if (jsm.Utils.OS === "Linux") panel.style.backgroundColor = "#444";
 
     UbiquityPopupMenu(
       document.getElementById("contentAreaContextMenu"),
       document.getElementById("ubiquity-menu"),
       document.getElementById("ubiquity-separator"),
       cmdMan.makeCommandSuggester());
+
+    if (prefs.getValue("extensions.ubiquity.enableUbiquityLoadHandlers", true))
+      services.commandSource.onUbiquityLoad(window);
   }
 
-  const DEFAULT_KEY_MODIFIER = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
   function ubiquityKey(aEvent) {
-    // Default keys are different for diff platforms
-    //  Windows Vista, XP, 2000 & NT: CTRL+SPACE
-    //  Mac, Linux, Others: ALT+SPACE
     var keyCode = prefs.getValue("extensions.ubiquity.keycode",
                                  KeyEvent.DOM_VK_SPACE);
-    var keyModifier = prefs.getValue("extensions.ubiquity.keymodifier",
-                                     DEFAULT_KEY_MODIFIER);
     // Toggle Ubiquity if the key pressed matches the shortcut key
-    if (aEvent.keyCode === keyCode &&
-        ubiquityEventMatchesModifier(aEvent, keyModifier)) {
-      if (aEvent.type === "keyup") gUbiquity.toggleWindow();
+    if (aEvent.keyCode === keyCode && ubiquityEventMatchesModifier(aEvent)) {
+      gUbiquity.toggleWindow();
       aEvent.preventDefault();
       aEvent.stopPropagation();
     }
   }
 
-  function ubiquityEventMatchesModifier(aEvent, aModifier) {
+  const DEFAULT_KEY_MODIFIER = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
+  function ubiquityEventMatchesModifier(aEvent) {
+    var keyModifier = prefs.getValue("extensions.ubiquity.keymodifier",
+                                     DEFAULT_KEY_MODIFIER);
     // Match only if the user is holding down the modifier key set for
     // Ubiquity AND NO OTHER modifier keys.
-    return ((aEvent.shiftKey === (aModifier === "SHIFT")) &&
-            (aEvent.ctrlKey  === (aModifier === "CTRL" )) &&
-            (aEvent.altKey   === (aModifier === "ALT"  )) &&
-            (aEvent.metaKey  === (aModifier === "META" )));
+    return (aEvent.shiftKey === (keyModifier === "SHIFT") &&
+            aEvent.ctrlKey  === (keyModifier === "CTRL" ) &&
+            aEvent.altKey   === (keyModifier === "ALT"  ) &&
+            aEvent.metaKey  === (keyModifier === "META" ));
   }
 
   jsm.UbiquitySetup.preload(function ubiquitySetupWrapper() {
     try { ubiquitySetup() } catch (e) {
       //errorToLocalize
       var msg = "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e);
+      Cu.reportError("Ubiquity " + msg);
       // in case it doesn't show up in the error console
       jsm.Utils.reportInfo(msg);
-      Cu.reportError("Ubiquity " + msg);
       //errorToLocalize
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }
-    if (gUbiquity) {
-      window.addEventListener("keydown", ubiquityKey, true);
-      window.addEventListener("keyup", ubiquityKey, true);
-    }
+    if (gUbiquity) window.addEventListener("keydown", ubiquityKey, true);
   });
 }, false);
