@@ -260,8 +260,7 @@ CmdUtils.CreateCommand({
   preview: function cmdh_preview(pb, args) {
     var his = this._filter(CmdHst.get(), args.object.text);
     if (!his.length) {
-      pb.innerHTML = ("<em>" + _("No histories match.") + "</em>" +
-                      this.help);
+      pb.innerHTML = "<em>" + _("No histories match.") + "</em>" + this.help;
       return;
     }
     CmdUtils.previewList(
@@ -286,38 +285,33 @@ CmdUtils.CreateCommand({
 
 function ubiquityLoad_commandHistory(U) {
   var cursor = -1, {textBox} = U;
-  textBox.parentNode.addEventListener("keydown", function loadHistory(ev) {
-    if (!ev.ctrlKey) return;
-    switch (ev.keyCode) {
-      case 38: case 40: { // UP DOWN
-        var bin = CmdHst.get();
-        if (cursor === -1 && textBox.value) {
-          CmdHst.add(textBox.value);
-          cursor = 0;
-        }
-        cursor += 39 - ev.keyCode;
-        if (cursor < -1 || bin.length <= cursor) cursor = -1;
-        textBox.value = bin[cursor] || "";
-        break;
+  textBox.parentNode.addEventListener("keydown", function cmdh_onKey(ev) {
+    if (ev.ctrlKey) switch (ev.keyCode) {
+      case 38: case 40: // UP DOWN
+      var bin = CmdHst.get();
+      if (cursor < 0 && textBox.value) {
+        CmdHst.add(textBox.value);
+        cursor = 0;
       }
-      default: return;
+      cursor += 39 - ev.keyCode;
+      if (cursor < -1 || bin.length <= cursor) cursor = -1;
+      U.preview(bin[cursor] || "");
+      ev.preventDefault();
+      ev.stopPropagation();
     }
-    ev.preventDefault();
-    ev.stopPropagation();
   }, true);
-  U.msgPanel.addEventListener("popuphidden", function saveEntry() {
+  U.msgPanel.addEventListener("popuphidden", function cmdh_saveEntry() {
     CmdHst.add(textBox.value);
     cursor = -1;
   }, false);
 };
 
 function startup_openUbiquityWelcomePage() {
-  if (Cu.import("resource://ubiquity/modules/setup.js", null)
-      .UbiquitySetup.isNewlyInstalledOrUpgraded)
+  if (UbiquitySetup.isNewlyInstalledOrUpgraded)
     Utils.focusUrlInBrowser(Help);
 }
 
 function startup_setBasicPreferences() {
   // Allow JS chrome errors to show up in the error console.
-  Application.prefs.setValue("javascript.options.showInConsole", true);
+  prefs.setValue("javascript.options.showInConsole", true);
 }

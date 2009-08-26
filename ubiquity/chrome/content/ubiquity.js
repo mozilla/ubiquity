@@ -183,9 +183,9 @@ Ubiquity.prototype = {
     }
   },
 
-  __processInput: function U__processInput(forcing) {
+  __processInput: function U__processInput(immediate) {
     this.Utils.clearTimeout(this.__previewTimerID);
-    if (forcing)
+    if (immediate)
       this.__delayedProcessInput();
     else
       this.__previewTimerID = this.Utils.setTimeout(
@@ -260,10 +260,10 @@ Ubiquity.prototype = {
     this.__cmdManager.execute(this.__makeContext());
   },
 
-  preview: function U_preview(input) {
+  preview: function U_preview(input, immediate) {
     if (input) this.__textBox.value = input;
     if (this.isWindowOpen)
-      this.__processInput(true);
+      this.__processInput(immediate);
     else
       this.openWindow();
   },
