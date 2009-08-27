@@ -40,11 +40,16 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// = Ubiquity =
+//
 // Creates a Ubiquity interface and binds it to the given message
 // panel and text box.
 //
-// The message panel should be a xul:panel instance, and the text box
-// should be a xul:textbox instance.
+// {{{msgPanel}}} should be a <xul:panel/>.
+//
+// {{{textBox}}} should be a <input type="text"/>.
+//
+// {{{cmdManager}}} is the {{{CommandManager}}} instance.
 
 function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__msgPanel = msgPanel;
@@ -55,7 +60,6 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__previewTimerID = -1;
   this.__lastKeyEvent = {};
 
-  const Cu = Components.utils;
   Cu.import("resource://ubiquity/modules/utils.js", this);
   Cu.import("resource://ubiquity/modules/contextutils.js", this);
 
@@ -89,14 +93,36 @@ Ubiquity.prototype = {
   },
 
   handleEvent: function U_handleEvent(event) {
-    this["__on" + event.type](event);
+    if (this["__on" + event.type](event)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
   },
 
+  // == Read Only Properties ==
+
+  // === {{{ Ubiquity#textBox }}} ===
+
   get textBox() this.__textBox,
+
+  // === {{{ Ubiquity#msgPanel }}} ===
+
   get msgPanel() this.__msgPanel,
+
+  // === {{{ Ubiquity#cmdManager }}} ===
+
   get cmdManager() this.__cmdManager,
+
+  // === {{{ Ubiquity#lastKeyEvent }}} ===
+
   get lastKeyEvent() this.__lastKeyEvent,
+
+  // === {{{ Ubiquity#isWindowOpen }}} ===
+
   get isWindowOpen() this.__msgPanel.state === "open",
+
+  // === {{{ Ubiquity#inputDelay }}} ===
+
   get inputDelay() Application.prefs.getValue("extensions.ubiquity.inputDelay",
                                               this.__DEFAULT_INPUT_DELAY),
 
@@ -118,12 +144,12 @@ Ubiquity.prototype = {
     var move = this.__KEYMAP_MOVE_INDICATION[keyCode];
     if (move) {
       this.__cmdManager[move](this.__makeContext());
-      event.preventDefault();
+      return true;
     }
-    else if (keyCode === this.__KEYCODE_TAB) {
+    if (keyCode === this.__KEYCODE_TAB) {
       var {completionText} = this.__cmdManager.hilitedSuggestion || 0;
       if (completionText) this.__textBox.value = completionText;
-      event.preventDefault();
+      return true;
     }
   },
 
@@ -133,12 +159,10 @@ Ubiquity.prototype = {
     if (event.ctrlKey && event.altKey &&
         KeyEvent.DOM_VK_0 <= keyCode && keyCode <= KeyEvent.DOM_VK_Z) {
       this.__cmdManager.previewBrowser.activateAccessKey(keyCode);
-      event.preventDefault();
-      event.stopPropagation();
-      return;
+      return true;
     }
 
-    if (keyCode >= KeyEvent.DOM_VK_DELETE ||
+    if (keyCode >=  KeyEvent.DOM_VK_DELETE ||
         keyCode === KeyEvent.DOM_VK_SPACE ||
         keyCode === KeyEvent.DOM_VK_BACK_SPACE ||
         keyCode === KeyEvent.DOM_VK_RETURN && !this.__needsToExecute)
@@ -164,8 +188,8 @@ Ubiquity.prototype = {
   },
 
   __onSuggestionsUpdated: function U__onSuggestionsUpdated() {
-    var input = this.__textBox.value;
-    this.__cmdManager.onSuggestionsUpdated(input, this.__makeContext());
+    this.__cmdManager.onSuggestionsUpdated(this.__textBox.value,
+                                           this.__makeContext());
   },
 
   __delayedProcessInput: function U__delayedProcessInput() {
@@ -205,6 +229,7 @@ Ubiquity.prototype = {
   },
 
   __onpopuphidden: function U__onHidden() {
+    this.Utils.clearTimeout(this.__previewTimerID);
     if (this.__needsToExecute) {
       this.__needsToExecute = false;
       this.execute();
@@ -236,8 +261,7 @@ Ubiquity.prototype = {
       }
       this.execute();
       if (button === 0) this.closeWindow();
-      event.preventDefault();
-      return;
+      return true;
     }
     if (button !== 2) {
       do var {href} = target;
@@ -246,11 +270,17 @@ Ubiquity.prototype = {
       if (/^\w+:/.test(href)) this.Utils.openUrlInBrowser(href);
     }
     if (button !== 1) this.closeWindow();
-    event.preventDefault();
+    return true;
   },
+
+  // == Public Methods ==
 
   setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {
   },
+
+  // === {{{ Ubiquity#execute(input) }}} ===
+  //
+  // Executes {{{input}}} or the current entry.
 
   execute: function U_execute(input) {
     if (input) {
@@ -260,6 +290,12 @@ Ubiquity.prototype = {
     this.__cmdManager.execute(this.__makeContext());
   },
 
+  // === {{{ Ubiquity#preview(input, immediate) }}} ===
+  //
+  // Previews {{{input}}} or the current entry,
+  // skipping the input delay if {{{immediate}}} evaluates to {{{true}}}
+  // and opening Ubiquity if it's closed.
+
   preview: function U_preview(input, immediate) {
     if (input) this.__textBox.value = input;
     if (this.isWindowOpen)
@@ -267,6 +303,8 @@ Ubiquity.prototype = {
     else
       this.openWindow();
   },
+
+  // === {{{ Ubiquity#openWindow() }}} ===
 
   openWindow: function U_openWindow() {
     ({focusedWindow : this.__focusedWindow,
@@ -276,9 +314,13 @@ Ubiquity.prototype = {
     this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
   },
 
+  // === {{{ Ubiquity#closeWindow() }}} ===
+
   closeWindow: function U_closeWindow() {
     this.__msgPanel.hidePopup();
   },
+
+  // === {{{ Ubiquity#toggleWindow() }}} ===
 
   toggleWindow: function U_toggleWindow() {
     if (/^open$|^(?:hid|show)ing$/.test(this.__msgPanel.state))
