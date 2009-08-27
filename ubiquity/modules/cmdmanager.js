@@ -146,7 +146,7 @@ CommandManager.prototype = {
       case "no-suggestions": {
         suggs.style.display = "none";
         preview.style.display = "none";
-        this._setHelp();
+        this._setHelp(help);
         help.style.display = "block";
         if (this.__previewer.isActive)
           this.__previewer.queuePreview(
@@ -177,17 +177,22 @@ CommandManager.prototype = {
     this._renderAll(context);
   },
 
-  _setHelp: function CM__setHelp() {
-    var {help} = this.__domNodes;
+  _setHelp: function CM__setHelp(help) {
     var doc = help.ownerDocument;
     function createFragment(html) {
       var range = doc.createRange();
       var fragment = range.createContextualFragment(html);
+      if (!fragment) {
+        range.selectNode(help);
+        fragment = range.createContextualFragment(html);
+      }
       range.detach();
       return fragment;
     }
-    if (!("defaultHelp" in gDomNodes))
+    if (!("defaultHelp" in gDomNodes)) {
       gDomNodes.defaultHelp = createFragment(DEFAULT_HELP).firstChild;
+      help.appendChild(gDomNodes.defaultHelp);
+    }
     if (!("feedUpdates" in gDomNodes)) {
       gDomNodes.feedUpdates = doc.createElement("box");
       let {feedManager} = (
@@ -196,6 +201,10 @@ CommandManager.prototype = {
       let count = 0;
       feedManager.getSubscribedFeeds().forEach(
         function eachFeed(feed, i, feeds) {
+          function accList(list, feed, i)
+            list.appendChild(
+              <li><a href={feed.url} accesskey={(i + 1).toString(36)}
+              >{feed.title}</a></li>);
           feed.checkForManualUpdate(function check(updated, confirmUrl) {
             feeds[i] = updated && {title: feed.title, url: confirmUrl};
             if (++count === feeds.length &&
@@ -203,19 +212,11 @@ CommandManager.prototype = {
               gDomNodes.feedUpdates.appendChild(createFragment(
                 <div class="feed-updates" xmlns="http://www.w3.org/1999/xhtml">
                 <h3>The following feeds have updates:</h3>
-                </div>.appendChild(
-                  feeds.reduce(
-                    function accList(list, feed, i) (
-                      list.appendChild(
-                        <li><a href={feed.url} accesskey={(i + 1).toString(36)}
-                        >{feed.title}</a></li>)),
-                    <ol/>))));
+                </div>.appendChild(feeds.reduce(accList, <ol/>))));
           });
         });
+      help.appendChild(gDomNodes.feedUpdates);
     }
-    for (let c; c = help.lastChild;) help.removeChild(c);
-    help.appendChild(gDomNodes.defaultHelp);
-    help.appendChild(gDomNodes.feedUpdates);
   },
 
   _renderSuggestions: function CM__renderSuggestions() {
