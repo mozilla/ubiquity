@@ -306,23 +306,24 @@ CommandManager.prototype = {
 
   execute: function CM_execute(context) {
     var activeSugg = this.hilitedSuggestion;
-    if (!activeSugg)
+    if (!activeSugg) {
       //errorToLocalize
       this.__msgService.displayMessage('No command called "' +
                                        this.__lastInput + '".');
-    else
-      try {
-        this.__nlParser.strengthenMemory(this.__lastInput, activeSugg);
-        activeSugg.execute(context);
-      } catch (e) {
-        let verb = activeSugg._verb;
-        this.__msgService.displayMessage({
-          //errorToLocalize
-          text: ('An exception occurred while running the command "' +
-                 (verb.cmd || verb).name + '".'),
-          exception: e,
-        });
-      }
+      return;
+    }
+    try {
+      this.__nlParser.strengthenMemory(activeSugg);
+      activeSugg.execute(context);
+    } catch (e) {
+      let verb = activeSugg._verb;
+      this.__msgService.displayMessage({
+        //errorToLocalize
+        text: ('An exception occurred while running the command "' +
+               (verb.cmd || verb).name + '".'),
+        exception: e,
+      });
+    }
   },
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,

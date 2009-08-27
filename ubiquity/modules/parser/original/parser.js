@@ -202,9 +202,7 @@ Parser.prototype = {
     return sens;
   },
 
-  strengthenMemory: function P_strengthenMemory(input, chosenSuggestion) {
-    // input is the whole input, chosenSuggestion is a parsedSentence.
-    // This parser only cares about the verb name.
+  strengthenMemory: function P_strengthenMemory(chosenSuggestion) {
     var verb = chosenSuggestion._verb, {id} = verb.cmd;
     if (chosenSuggestion.hasFilledArgs()) {
       this._suggestionMemory.remember("", id);

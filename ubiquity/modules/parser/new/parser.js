@@ -225,7 +225,7 @@ Parser.prototype = {
           localNounIds[nt.id] = true;
       }
     }
-    
+
     for each (let nt in this._nounTypes) {
       if ('registerCacheObserver' in nt) {
         var id = nt.id;
@@ -236,7 +236,7 @@ Parser.prototype = {
         nt.registerCacheObserver(flush);
       }
     }
-    
+
     //dump("loaded nouns:\n" +
     //     [n.id + " " + n.name for each (n in this._nounTypes)].join("\n") +
     //     "\n");
@@ -348,7 +348,7 @@ Parser.prototype = {
   flushNounCache: function Parser_flushNounCache() {
     this._nounCache = new NounCache(this);
   },
-  
+
   flushNounCacheForId: function Parser_flushNounCacheForId(id) {
     this._nounCache.clearSuggsForId(id)
   },
@@ -655,7 +655,7 @@ Parser.prototype = {
         defaultParse.scoreMultiplier = 1;
       } else {
         defaultParse.scoreMultiplier = 0.3;
-        defaultParse._suggested = true; 
+        defaultParse._suggested = true;
       }
 
       // The verb match's score affects the scoreMultiplier.
@@ -1416,7 +1416,7 @@ Parser.prototype = {
       }
       returnArr = newreturn;
     }
-    
+
     for each (let parse in returnArr) {
       // for each of the roles parsed in the parse
       for (let role in parse.args) {
@@ -1446,14 +1446,14 @@ Parser.prototype = {
 
     let cachedNounTypeIds = [];
     let uncachedNounTypeIds = [];
-    
+
     // Make a list of nountypes we need to suggest x as, and make a list
     // of nountypes which have already cached x.
     //
     // FLUSH OLD HERE?
-    
+
     var DEFAULT_CACHE_TIME = 60*60*24; // seconds = 1 day
-    
+
     for (let nounTypeId in nounTypeIds) {
       var time = this._nounCache.getTime(x,nounTypeId);
       var cacheTime = this._nounTypes[nounTypeId].cacheTime;
@@ -1465,7 +1465,7 @@ Parser.prototype = {
         uncachedNounTypeIds.push(nounTypeId);
       }
     }
-    
+
     Utils.setTimeout(function detectNounType_cachedCallback() {
       if (cachedNounTypeIds.length) {
         currentQuery.dump('found cached values of '+x+' for '+cachedNounTypeIds.join());
@@ -1524,25 +1524,25 @@ Parser.prototype = {
     if (uncachedNounTypeIds.length) {
       Utils.setTimeout(function detectNounType_asyncDetect(){
         var returnArray = [];
-  
+
         let ids = uncachedNounTypeIds;
         currentQuery.dump("detecting: " + x + " for " + ids);
-  
+
         var dT = currentQuery._detectionTracker;
         var nC = thisParser._nounCache;
         for each (let id in uncachedNounTypeIds) {
-  
+
           if (dT.getStarted(x,id)) {
             //currentQuery.dump('detection of this combination has already begun.');
             continue;
           }
-  
+
 //          currentQuery.dump(x+','+id);
-  
+
           // let's mark this x, id pair as checked, meaning detection has
           // already begun for this pair.
           dT.setStarted(x,id,true);
-  
+
           let thisId = id;
           var completeAsyncSuggest = function
             detectNounType_completeAsyncSuggest(suggs) {
@@ -1551,10 +1551,10 @@ Parser.prototype = {
             suggs = handleSuggs(suggs, thisId);
             myCallback(suggs, thisId, true);
           };
-  
+
           var resultsFromSuggest = handleSuggs(
               activeNounTypes[id].suggest(x, x, completeAsyncSuggest), id);
-  
+
           var hadImmediateResults = false;
           for each (let result in resultsFromSuggest) {
             if (result.text || result.html) {
@@ -1564,7 +1564,7 @@ Parser.prototype = {
               dT.addOutstandingRequest(x,id,result);
             }
           }
-  
+
           // Check whether (a) no more results are coming and
           // (b) there were no immediate results.
           // In this case, try to complete the parse now.
@@ -1589,7 +1589,7 @@ Parser.prototype = {
   // Strengthen the association between the verb part of the user's input and the
   // suggestion that the user ended up choosing, in order to give better ranking to
   // future suggestions.
-  strengthenMemory: function(input, chosenSuggestion) {
+  strengthenMemory: function P_strengthenMemory(chosenSuggestion) {
     // Input (current contents of ubiquity input box) is passed to us for API backwards
     // compatibility reasons, but we can ignore it and get the verb part of the raw input
     // from verb.input.
@@ -1777,7 +1777,7 @@ ParseQuery.prototype = {
     // start with step 1
     this._next();
     yield true;
-    
+
     // STEP 1: split into words
     this._input = this.parser.wordBreaker(this.input);
     yield true;
@@ -1802,7 +1802,7 @@ ParseQuery.prototype = {
       this._possibleParses = this._possibleParses.concat(argParses);
     }
     yield true;
-    
+
     //if we have a selection, apply the selection interpolation
     if (this.selObj.text && this.selObj.text.length) {
       let selection = this.selObj.text;
@@ -1814,7 +1814,7 @@ ParseQuery.prototype = {
       yield true;
     }
     this._next();
-    
+
     // STEP 5: substitute anaphora
     // set selection with the text in the selection context
     if (this.selObj.text && this.selObj.text.length) {
@@ -1874,7 +1874,7 @@ ParseQuery.prototype = {
     }
     if (count % STEP_8_YIELD_LOOP_NUM != 0)
       yield true;
-    
+
     // rekey this._verbedParses so we're using the right ID's
     // this simplifies some things later where we need to track these parse ID's
     var newVerbedParses = [];
@@ -2009,7 +2009,7 @@ ParseQuery.prototype = {
                    || addedAny;
     }
 
-    
+
     if (this._verbedParses.every(function(parse) parse.complete))
       this.finishQuery();
 
@@ -2206,7 +2206,7 @@ NounTypeDetectionTracker.prototype = {
   // they must be checked against.
   getArgsAndNounTypeIdsToCheck: function DT_getArgsAndNounTypeIdsToCheck() {
     var returnArr = [];
-    
+
     // note that the argsAndNounTypeIdsToCheck format designates
     // nounTypeIds to be a *hash*, not array.
     for (let argText in this.detectionSpace) {
@@ -2234,7 +2234,7 @@ NounTypeDetectionTracker.prototype = {
           continue;
 
         for each (let req in this.detectionSpace[i][j].outstandingRequests) {
-          if (req.readyState != undefined && req.readyState != 0 
+          if (req.readyState != undefined && req.readyState != 0
               && req.readyState != 4)
             numRequests++;
         }
@@ -2277,11 +2277,9 @@ NounTypeDetectionTracker.prototype = {
     }
     return (count/total);
   }
-
 }
 
 var NounCache = function(parser) {
-  
   this.cacheSpace = {};
 }
 NounCache.prototype = {

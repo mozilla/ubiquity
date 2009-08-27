@@ -425,9 +425,9 @@ function testSortedBySuggestionMemory() {
   var suggSixName = suggSix._verb._name;
   // tell the parser we like sugg five and REALLY like sugg six:
   // TODO replace these strengthenMemory calls with execute() calls!
-  nlParser.strengthenMemory("c", suggFive);
-  nlParser.strengthenMemory("c", suggSix);
-  nlParser.strengthenMemory("c", suggSix);
+  nlParser.strengthenMemory(suggFive);
+  nlParser.strengthenMemory(suggSix);
+  nlParser.strengthenMemory(suggSix);
 
   // now give the same input again...
   query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true).run();
@@ -458,12 +458,12 @@ function testNounFirstSortedByGeneralFrequency() {
   // Now we select "baz" twice and "bar" once...
   query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS, true).run();
   var choice = query.suggestionList[0];
-  parser.strengthenMemory("baz", choice);
-  parser.strengthenMemory("baz", choice);
+  parser.strengthenMemory(choice);
+  parser.strengthenMemory(choice);
 
   query = parser.newQuery("bar", pantsContext, MAX_SUGGESTIONS, true).run();
   choice = query.suggestionList[0];
-  parser.strengthenMemory("bar", choice);
+  parser.strengthenMemory(choice);
 
   // Now when we try the no-input suggestion again, should be ranked
   // with baz first, then bar, then foo.

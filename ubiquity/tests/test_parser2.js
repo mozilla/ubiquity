@@ -972,7 +972,7 @@ function testSortedBySuggestionMemoryParser2Version() {
                 "6th suggestion should be coelecanth" );
 
     // Now strengthen suggestion memory on "c" -> coelecanth...
-    parser.strengthenMemory("c", completions[6]);
+    parser.strengthenMemory(completions[6]);
     // Now try a new completion...
     getCompletionsAsyncFromParser("c", parser, null,
                                   self.makeCallback(suggMemoryTestFunc2));
@@ -1025,9 +1025,9 @@ function testSortedBySuggestionMemoryNounFirstParser2() {
                 "2nd suggestion should be wiggle" );
 
     // Now strengthen suggestion memory on wiggle twice, throttle once...
-    parser.strengthenMemory("", completions[2]);
-    parser.strengthenMemory("", completions[2]);
-    parser.strengthenMemory("", completions[0]);
+    parser.strengthenMemory(completions[2]);
+    parser.strengthenMemory(completions[2]);
+    parser.strengthenMemory(completions[0]);
     // Now try a new completion...
     getCompletionsAsyncFromParser("", parser, fakeContext,
                                   self.makeCallback(suggMemoryTestPart2));
