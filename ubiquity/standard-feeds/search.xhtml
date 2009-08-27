@@ -105,17 +105,17 @@ img {float: left; }
   ${weatherMessage}<br />
   <img src='${w.img}'/>
   <div class="temp">
-    {if w.temp_units == "fahrenheit"} 
-      ${w.tempf}°F 
+    {if w.temp_units === "fahrenheit"}
+      ${w.tempf}&#xb0;F
     {else}
-      ${w.tempc}°C
+      ${w.tempc}&#xb0;C
     {/if}
     <br/>
   </div>
   <div class="extra">
     ${w.condition}<br/>
     ${w.wind}<br/>
-    ${w.humidity}<br/>  
+    ${w.humidity}<br/>
   </div>
 </div>
 </div>
@@ -181,7 +181,7 @@ ${foundMessage}
 
 .content {
   margin-right: 10px;
-  font-size: x-small;  
+  font-size: x-small;
 }
 
 </style>
@@ -213,7 +213,7 @@ ${foundMessage}
       {else}
          ${entry.content.$t}
       {/if} -->
-      
+
       ${entry.content.$t.substr(0,300)}
    </p>
   </div>
@@ -222,12 +222,14 @@ ${foundMessage}
 </div>
 <script class="commands"><![CDATA[
 
+const SEARCH_TERM = _("search term");
+
 // TODO this should use a provider plugin
 CmdUtils.CreateCommand({
-  names: ['search','find','look for'],
+  names: ["search", "find", "look for"],
   arguments: [
-    {role: 'object', label: 'query', nountype: noun_arb_text},
-    {role: 'instrument', nountype: noun_type_searchengine}
+    {role: "object", label: "query", nountype: noun_arb_text},
+    {role: "instrument", nountype: noun_type_searchengine}
   ],
   icon: "chrome://ubiquity/skin/icons/search.png",
   description: "Search using your installed search engines",
@@ -255,7 +257,7 @@ CmdUtils.CreateCommand({
     } else {
       searchEngine = noun_type_searchengine.getDefault();
     }
-    var searchSubmission = searchEngine.getSubmission(args.object.text, 
+    var searchSubmission = searchEngine.getSubmission(args.object.text,
                                                       null);
     Utils.openUrlInBrowser(searchSubmission.uri.spec, searchSubmission.postData);
   }
@@ -285,17 +287,17 @@ CmdUtils.makeSearchCommand({
     CmdUtils.previewGet( pblock, url, params, function(data) {
       var numToDisplay = 3;
       var results = data.responseData.results.splice( 0, numToDisplay );
-      
+
       //for access keys
       for(var i=0;i<results.length;i++){
         var result = results[i];
         result.key = i+1;
       }
-      
+
       var noResultsMessage = _("Your search - ${searchTerm} - did not match any documents.",
                               {searchTerm:searchTerm});
       var tipsMessage = _("Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time.");
-      
+
       pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#google-search", feed.dom).html(),
           { results:results,
@@ -306,6 +308,8 @@ CmdUtils.makeSearchCommand({
       }, "json");
   }
 });
+
+const ARTICLE_ERROR = _("Error retrieving summary");
 
 function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
@@ -321,8 +325,7 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     data: apiParams,
     dataType: "text",
     error: function() {
-      previewBlock.innerHTML = "<p class='error'>"
-                                +_("Error retreiving summary")+"</p>";
+      previewBlock.innerHTML = "<p class='error'>" + ARTICLE_ERROR + "</p>";
     },
     success: function(responseData) {
       responseData = Utils.decodeJson(responseData);
@@ -347,44 +350,29 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
   });
 }
 
-Components.utils.import("resource://ubiquity/modules/setup.js");
-const defaultLang = UbiquitySetup.languageCode;
-
 CmdUtils.CreateCommand({
   names: ["wikipedia", "lookup"],
   arguments: [{role: "object",
                nountype: noun_arb_text,
-               label: "search term"},
+               label: SEARCH_TERM},
               {role: "format",
-               nountype: noun_type_lang_wikipedia,
-               label: "language"}],
-  locale: "en-US",
+               nountype: noun_type_lang_wikipedia}],
   homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
   contributors: ["Viktor Pyatkovka"],
   license: "MPL",
   icon: "chrome://ubiquity/skin/icons/wikipedia.ico",
   description: "Searches Wikipedia for your words, in a given language.",
-  preview: function(previewBlock, arguments) {
-    var langCode = arguments.format.data || defaultLang;
-    var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
-
-    var searchText = jQuery.trim(arguments.object.text);
-    if(searchText.length < 1) {
-      var previewStr = "Searches Wikipedia";
-      var langName = arguments.format.text;
-      if (langName) {
-        var language = langName[0].toUpperCase() + langName.slice(1);
-        previewStr = previewStr + " in " + language;
-      }
-      previewBlock.innerHTML = previewStr;
+  preview: function wikipedia_preview(previewBlock, args) {
+    var searchText = Utils.trim(args.object.text);
+    if (!searchText) {
+      previewBlock.innerHTML = _("Searches Wikipedia in ${lang}.",
+                                 {lang: args.format.html || "English"});
       return;
     }
-
-    var previewTemplate = _("Searching Wikipedia for <b>${query}</b> ...");
-    var previewData = {query: searchText};
-    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
-
+    var previewData = {query: args.object.html};
+    previewBlock.innerHTML = _("Searching Wikipedia for <b>${query}</b> ...",
+                               previewData);
     var apiParams = {
       format: "json",
       action: "query",
@@ -395,17 +383,20 @@ CmdUtils.CreateCommand({
     };
 
     function onerror() {
-      previewBlock.innerHTML = "<p class='error'>"
-                               +_("Error searching Wikipedia")+"</p>";
+      previewBlock.innerHTML =
+        "<p class='error'>" + _("Error searching Wikipedia") + "</p>";
     }
+
+    var langCode = args.format.data || "en";
+    var apiUrl = "http://" + langCode + ".wikipedia.org/w/api.php";
 
     CmdUtils.previewAjax(previewBlock, {
       type: "GET",
       url: apiUrl,
       data: apiParams,
-      datatype: "string",
+      dataType: "text",
       error: onerror,
-      success: function(searchResponse) {
+      success: function wikipedia_success(searchResponse) {
         searchResponse = Utils.decodeJson(searchResponse);
 
         if(!("query" in searchResponse && "search" in searchResponse.query)) {
@@ -417,12 +408,14 @@ CmdUtils.CreateCommand({
           var wikipediaUrl = "http://" + langCode + ".wikipedia.org/wiki/";
           return wikipediaUrl + title.replace(/ /g, "_");
         }
-        
+
         (previewData.results = searchResponse.query.search)
-          .forEach(function(o, i){ o.key = i + 1 });
+          .forEach(function (o, i) { o.key = i + 1 });
         previewData._MODIFIERS = {wikilink: generateWikipediaLink};
-        previewData.foundMessage = _("Wikipedia articles found matching <b>${query}</b>:",previewData);
-        previewData.retrievingArticleSummary = _("Retreiving article summary...");
+        previewData.foundMessage =
+          _("Wikipedia articles found matching <b>${query}</b>:", previewData);
+        previewData.retrievingArticleSummary =
+          _("Retreiving article summary...");
         previewData.noArticlesFound = _("No articles found.");
 
 
@@ -430,17 +423,17 @@ CmdUtils.CreateCommand({
           jQuery("#wikipedia-search", feed.dom).html(),
           previewData);
 
-        jQuery("dd", previewBlock).each(function() {
+        jQuery("dd", previewBlock).each(function eachDD() {
           var article = this.getAttribute("wikiarticle");
           fetchWikipediaArticle(this, article, langCode);
         });
       }
     });
   },
-  execute: function(arguments) {
-    var lang = arguments.format.data || defaultLang;
+  execute: function wikipedia_execute(args) {
+    var lang = args.format.data || "en";
     var searchUrl = "http://" + lang + ".wikipedia.org/wiki/Special:Search";
-    var searchParams = {search: arguments.object.text};
+    var searchParams = {search: args.object.text};
     Utils.openUrlInBrowser(searchUrl + Utils.paramsToString(searchParams));
   }
 });
@@ -449,7 +442,7 @@ CmdUtils.makeSearchCommand({
   names: ["IMDB", "internet movie database", "movie", "actor"],
   url: "http://www.imdb.com/find?s=all&q={QUERY}&x=0&y=0",
   icon: "chrome://ubiquity/skin/icons/imdb.ico",
-  description: "Searches the Internet Movie Database (www.imdb.com) for " + 
+  description: "Searches the Internet Movie Database (www.imdb.com) for " +
                "your words."
 });
 
@@ -598,7 +591,7 @@ CmdUtils.CreateCommand({
       function(dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>+''),
   arguments: [{role: "object",
                nountype: noun_arb_text,
-               label: "search terms"},
+               label: SEARCH_TERM},
               {role: "format",
                nountype: noun_type_amazon_com_index}],
   execute: function({object: {text}, format: {data}}) {
@@ -613,7 +606,7 @@ CmdUtils.CreateCommand({
       previewBlock.innerHTML = this.description + this.help;
       return;
     }
-    
+
     var me = this;
     previewBlock.innerHTML =
       _("Searching ${AmazLink} for items matching <b>${query}</b>.",
@@ -700,8 +693,8 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/videosurf.ico",
   arguments: [{role: "object",
                nountype: noun_arb_text,
-               label: "Search Term"}],
-  _fetchResults: function(pblock, query){  
+               label: SEARCH_TERM}],
+  _fetchResults: function(pblock, query){
     var url = "http://www.videosurf.com/api/ext/services/ubiquityService.php";
     var params = {'query': query};
     jQuery.get( url, params, function( response ) {
@@ -719,7 +712,7 @@ CmdUtils.CreateCommand({
       tiles.mouseout(function(e){
         var img = e.target;
         jQuery("#vs_thumb_"+getVidId(img), pblock)[0].src = originalSrc;
-      });      
+      });
     })
   },
   preview: function( pblock, {object} ) {
@@ -728,7 +721,7 @@ CmdUtils.CreateCommand({
    },
   execute: function({object}) {
      query = object.text.replace(/^ +/,'').replace(/ +$/,'').replace(/ +/g,'+').replace(/[\/]/g,'%2f');
-     var url = "http://www.videosurf.com/videos/" + query + "?vlt=ubiquity"; 
+     var url = "http://www.videosurf.com/videos/" + query + "?vlt=ubiquity";
      Utils.openUrlInBrowser( url );
    }
 });
@@ -748,7 +741,7 @@ CmdUtils.makeSearchCommand({
     }
 
     pblock.innerHTML = "Searches Youtube for <b>" + object.summary + "</b>";
-    
+
     var url = "http://gdata.youtube.com/feeds/api/videos";
     var params = {
       alt: "json",
@@ -757,17 +750,17 @@ CmdUtils.makeSearchCommand({
     };
 
     CmdUtils.previewGet( pblock, url, params, function(data) {
-      
+
       var previewData = {
           results: data.feed.entry,
           query: object.summary,
           numresults: data.feed['openSearch$totalResults']['$t']
       };
-            
+
       pblock.innerHTML = CmdUtils.renderTemplate(
         jQuery("#youtube-search", feed.dom).html(),
         previewData);
-      
+
     }, "json");
   }
 });
@@ -935,17 +928,17 @@ CmdUtils.CreateCommand({
       var stars = CmdUtils.renderTemplate(
                     "<img style='position:relative;top:5px;' src='${starUrl}'/>",
                     {starUrl: data.rating_img_url});
-      
+
       var templateParams = { city: data.city, name: name, stars: stars };
       if( data.neighborhoods.length > 0 ) {
         templateParams.whereUrl = data.neighborhoods[0].url;
         templateParams.where = data.neighborhoods[0].name;
       }
-      
+
       var msg = _("${name} is a ${stars} restaurant in{if defined('where')} <a href='${whereUrl}'>${where},</a>{/if} ${city}.", templateParams)
                 + "<br/>"
                 + _("It's been reviewed ${times} times.", {times: data.review_count});
-      
+
       Utils.log(msg);
 
       CmdUtils.setSelection( msg );
@@ -1024,7 +1017,7 @@ CmdUtils.CreateCommand({
     // this is some initial support for noun_type_geo_town
     if (location.data)
       location = location.data.coordinates.lat + ',' + location.data.coordinates.lng;
-    else 
+    else
       location = location.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
     url += escape( location );
@@ -1219,7 +1212,7 @@ CmdUtils.makeSearchCommand({
             displayMessage(_("Server error"));
             return;
           }
-      
+
           function action(e, image) {
             var rightclick = false;
             if (!e) var e = window.event;
@@ -1244,7 +1237,7 @@ CmdUtils.makeSearchCommand({
             } else {
               // left click
               CmdUtils.setLastResult(image.title);
-              Utils.openUrlInBrowser(image.title);  
+              Utils.openUrlInBrowser(image.title);
             }
 
             var mainWindow = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
@@ -1256,7 +1249,7 @@ CmdUtils.makeSearchCommand({
             mainWindow.gUbiquity.closeWindow();
 
             Application.activeWindow.activeTab.focus();
-      
+
           }
 
           template = '<img id="img${counter}" src="${thumb}" title="${imgurl}" style="position: absolute; height:80px; margin: 5px; border:0px; vertical-align:top; z-index: 0; border: 0px solid #00C600; -moz-border-radius: 3px;" alt="." class="thumbnail"/>';
@@ -1270,7 +1263,7 @@ CmdUtils.makeSearchCommand({
             pblock.innerHTML = _('Sorry, there are no results');
             return;
           }
-      
+
           var resultsArray = responseData.results;
           for (var index = 0; index < numberOfResults; index++) {
             var imgCode = randomCode + index;
@@ -1290,9 +1283,9 @@ CmdUtils.makeSearchCommand({
           var moreButton = jQuery(pblock.ownerDocument).find("div#next");
           var prevButton = jQuery(pblock.ownerDocument).find("div#prev");
           var controls = jQuery(pblock.ownerDocument).find("div.control");
-      
+
           if (numberOfResults != 8) moreButton.css("display", "none");
-      
+
             controls.mouseover(function() {
               jQuery(this).animate({
                 opacity: 1

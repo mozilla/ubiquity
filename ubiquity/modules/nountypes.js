@@ -1159,7 +1159,7 @@ var noun_type_lang_wikipedia = CmdUtils.NounType("language", {
   Lingala: "ln",
   Burmese: "my",
   "Fiji Hindi": "hif",
-});
+}, "^_");
 
 for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl._code2name = ntl._list.reduce(function (o, s) {
@@ -1167,6 +1167,14 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
     return o;
   }, {});
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
+}
+{
+  let locale = /^\w+/(Application.prefs.getValue("general.useragent.locale",
+                                                 "en")) + "";
+  let langName = noun_type_lang_wikipedia.getLangName(locale);
+  if (langName)
+    noun_type_lang_wikipedia._defaults.push(
+      CmdUtils.makeSugg(langName, null, locale));
 }
 
 // === {{{ NounAsync }}} ===
