@@ -235,6 +235,10 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 
 const GTRANSLATE_LIMIT = 5120;
+const PREF_LANG_DEFAULT = "extensions.ubiquity.translate.lang.default";
+const PREF_LANG_ALT     = "extensions.ubiquity.translate.lang.alt";
+
+const PREF_LANG_DEPRECATED = "extensions.ubiquity.default_translation_lang";
 
 function googleTranslate(html, langCodePair, callback, pblock) {
   var self = this;
@@ -248,9 +252,18 @@ function googleTranslate(html, langCodePair, callback, pblock) {
       format: "html",
     },
     dataType: "json",
-    success: function onTranslateSuccess(data) {
+    success: function onGoogleTranslateSuccess(data) {
       switch (data.responseStatus) {
-        case 200: callback(data.responseData); return;
+        case 200: {
+          var alt, dsl = data.responseData.detectedSourceLanguage;
+          if (dsl === langCodePair.to &&
+              dsl !== (alt = Application.prefs.getValue(PREF_LANG_ALT, ""))) {
+            langCodePair.to = alt;
+            googleTranslate.call(self, html, langCodePair, callback, pblock);
+          }
+          else callback(data.responseData);
+          return;
+        }
         case 400: {
           displayMessage(data.responseDetails, self);
           if (langCodePair.from === "en") return;
@@ -261,7 +274,7 @@ function googleTranslate(html, langCodePair, callback, pblock) {
         default: displayMessage(data.responseDetails, self);
       }
     },
-    error: function onTranslateError(xhr) {
+    error: function onGoogleTranslateError(xhr) {
       Utils.reportInfo("google translate: " +
                        xhr.status + " " + xhr.statusText);
     },
@@ -270,10 +283,9 @@ function googleTranslate(html, langCodePair, callback, pblock) {
 }
 
 CmdUtils.CreateCommand({
-  DEFAULT_LANG_PREF: "extensions.ubiquity.default_translation_lang",
   names: ["translate"],
   arguments: [
-    {role: "object", nountype: noun_arb_text, label: "text"},
+    {role: "object", nountype: noun_arb_text},
     {role: "source", nountype: noun_type_lang_google},
     {role: "goal", nountype: noun_type_lang_google}],
   description: "Translates from one language to another.",
@@ -292,8 +304,7 @@ CmdUtils.CreateCommand({
     var sl = source.data || "";
     var tl = goal.data || this._getDefaultLang();
     if (html && html.length <= GTRANSLATE_LIMIT)
-      googleTranslate.call(
-        this,
+      this._translate(
         html,
         {from: sl, to: tl},
         function translate_execute_onTranslate({translatedText}) {
@@ -303,7 +314,7 @@ CmdUtils.CreateCommand({
       Utils.openUrlInBrowser(
         "http://translate.google.com/translate" +
         Utils.paramsToString({
-          u: CmdUtils.getWindow().location.href,
+          u: CmdUtils.getWindow().location,
           sl: sl,
           tl: tl,
         }));
@@ -311,51 +322,43 @@ CmdUtils.CreateCommand({
   preview: function translate_preview(pblock, {object: {html}, goal, source}) {
     var defaultLang = this._getDefaultLang();
     var toLang = goal.text || noun_type_lang_google.getLangName(defaultLang);
-    var toLangCode = goal.data || defaultLang;
-    var fromLangCode = source.data || "";
     var limitExceeded = html.length > GTRANSLATE_LIMIT;
     if (!html || limitExceeded) {
       var ehref = Utils.escapeHtml(CmdUtils.getWindow().location);
       pblock.innerHTML = (
         _("Translates ${url} into <b>${toLang}</b>.",
           {url: ehref.link(ehref), toLang: toLang}) +
-        (limitExceeded
-         ? ('<p class="error">' +
-            _("The text you selected exceeds the API limit.") +
-            "</p>")
-         : ""));
+        (!limitExceeded ? "" :
+         '<p class="error">' +
+         _("The text you selected exceeds the API limit.") +
+         "</p>"));
       return;
     }
     var phtml = pblock.innerHTML =  _(
       "Replaces the selected text with the <b>${toLang}</b> translation:",
       {toLang: toLang});
-    googleTranslate.call(
-      this,
-      html,
-      {from: fromLangCode, to: toLangCode},
-      function translate_preview_onTranslate(
-        {translatedText, detectedSourceLanguage: dsl}) {
-        pblock.innerHTML = (
-          phtml + "<br/><br/>" + translatedText +
-          (dsl
-           ? ("<p>(" + dsl + " \u2192 " + toLangCode + ")</p>")
-           : ""));
-      },
-      pblock);
+    var langCodePair = {from: source.data || "", to: goal.data || defaultLang};
+    this._translate(html, langCodePair, function translate_preview_onTranslate(
+      {translatedText, detectedSourceLanguage: dsl}) {
+      pblock.innerHTML = (
+        phtml + "<br/><br/>" + translatedText +
+        (!dsl ? "" :
+         "<p>(" + dsl + " \u2192 " + langCodePair.to + ")</p>"));
+    }, pblock);
   },
   // Returns the default language for translation.  order of defaults:
-  // extensions.ubiquity.default_translation_lang > general.useragent.locale > "en"
-  // And also, if there unknown language code is found any of these preference,
-  // we fall back to English.
+  // PREF_LANG_DEPRECATED > PREF_LANG_DEFAULT > general.useragent.locale > "en"
   _getDefaultLang: function translate__getDefaultLang() {
     var {prefs} = Application;
     var userLocale = prefs.getValue("general.useragent.locale", "en");
-    var defaultLang = prefs.getValue(this.DEFAULT_LANG_PREF, userLocale);
+    var defaultLang = (prefs.getValue(PREF_LANG_DEPRECATED, "") ||
+                       prefs.getValue(PREF_LANG_DEFAULT, userLocale));
     // If defaultLang is invalid lang code, fall back to english.
     return (noun_type_lang_google.getLangName(defaultLang)
             ? defaultLang
             : "en");
-  }
+  },
+  _translate: googleTranslate,
 });
 
 // -----------------------------------------------------------------
