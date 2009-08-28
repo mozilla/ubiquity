@@ -48,14 +48,14 @@
 
 var EXPORTED_SYMBOLS = ["NounUtils"];
 
-/* Make a namespace object called NounUtils, to export,
- * which contains each function in this file.*/
-var NounUtils = ([f for each (f in this) if (typeof f === "function")]
-                 .reduce(function(o, f)(o[f.name] = f, o), {}));
+var NounUtils = {};
+
+// assign each function in this file
+for each (let f in this) if (typeof f === "function") NounUtils[f.name] = f;
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
 
-// === {{{ NounUtils.NounType() }}} ===
+// === {{{ NounUtils.NounType(label, expected, defaults) }}} ===
 //
 // Constructor of a noun type that accepts a specific set of inputs.
 // See {{{NounType._from*}}} methods for details
@@ -99,7 +99,7 @@ function NounType(label, expected, defaults) {
 }
 NounType.default = function default() this._defaults;
 
-// ** {{{ NounUtils.NounType._fromArray() }}} **
+// ** {{{ NounUtils.NounType._fromArray(words) }}} **
 //
 // Creates a noun type that accepts a finite list of specific words
 // as the only valid inputs. Those words will be suggested as {{{text}}}s.
@@ -113,7 +113,7 @@ NounType._fromArray = function NT_Array(words)({
   _list: [makeSugg(w) for each (w in words)],
 });
 
-// ** {{{ NounUtils.NounType._fromObject() }}} **
+// ** {{{ NounUtils.NounType._fromObject(dict) }}} **
 //
 // Creates a noun type from the given key:value pairs, the key being
 // the {{{text}}} attribute of its suggest and the value {{{data}}}.
@@ -133,7 +133,7 @@ NounType._fromObject = function NT_Object(dict) {
 NounType._fromArray.suggest = NounType._fromObject.suggest = (
   function NT_suggest(text) grepSuggs(text, this._list));
 
-// ** {{{ NounUtils.NounType._fromRegExp() }}} **
+// ** {{{ NounUtils.NounType._fromRegExp(regexp) }}} **
 //
 // Creates a noun type from the given regular expression object
 // and returns it. The {{{data}}} attribute of the noun type is
@@ -158,7 +158,7 @@ NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
   return [makeSugg(text, html, match, score, selectionIndices)];
 };
 
-// === {{{ NounUtils.matchScore() }}} ===
+// === {{{ NounUtils.matchScore(match) }}} ===
 //
 // Calculates the score for use in suggestions from
 // a result array ({{{match}}}) of {{{RegExp#exec}}}.
@@ -174,7 +174,7 @@ function matchScore(match) {
           SCORE_INDEX  * (1 - match.index / inLen));
 }
 
-// === {{{ NounUtils.makeSugg() }}} ===
+// === {{{NounUtils.makeSugg(text, html, data, score, selectionIndices)}}} ===
 //
 // Creates a suggestion object, filling in {{{text}}} and {{{html}}} if missing
 // and constructing {{{summary}}} from {{{text}}} and {{{selectionIndices}}}.
@@ -186,8 +186,8 @@ function matchScore(match) {
 //
 // {{{data}}} can be any value.
 //
-// {{{score = 1}}}
-// is an optional float number representing the score of the suggestion.
+// {{{score}}} is an optional float number representing
+// the score of the suggestion. Defaults to {{{1.0}}}.
 //
 // {{{selectionIndices}}} is an optional array containing the start and end
 // indices of selection within {{{text}}}.
@@ -223,7 +223,7 @@ function makeSugg(text, html, data, score, selectionIndices) {
   // we'll stick some html tags into the summary so that the part
   // that comes from the text selection can be visually marked in
   // the suggestion list.
-  var [start, end] = selectionIndices || [0, 0];
+  var [start, end] = selectionIndices || 0;
   summary = (
     start < end
     ? (Utils.escapeHtml(summary.slice(0, start)) +
@@ -238,24 +238,26 @@ function makeSugg(text, html, data, score, selectionIndices) {
     summary: summary, score: score || 1};
 }
 
-// === {{{ NounUtils.grepSuggs() }}} ===
+// === {{{ NounUtils.grepSuggs(input, suggs, key) }}} ===
 //
 // A helper function to grep a list of suggestion objects by user input.
-// Returns an array of filtered suggetions sorted/scored by matched indices.
+// Returns an array of filtered suggetions, each of them assigned {{{score}}}
+// calculated by {{{NounUtils.matchScore()}}}.
 //
 // {{{input}}} is a string that filters the list.
 //
 // {{{suggs}}} is an array or dictionary of suggestion objects.
 //
-// {{{key = "text"}}} is an optional string to specify the target property
-// to match with.
+// {{{key}}} is an optional string to specify the target property
+// to match with. Defaults to {{{"text"}}}.
 
 function grepSuggs(input, suggs, key) {
   if (!input) return [];
   if (key == null) key = "text";
   var re = Utils.regexp(input, "i"), match;
-  var results = [
-    (sugg.score = matchScore(match) * (sugg.score || 1), sugg)
-    for each (sugg in suggs) if ((match = re(sugg[key])))];
-  return Utils.sortBy(results, "score").reverse();
+  return ([(sugg.score = matchScore(match) * (sugg.score || 1), sugg)
+           for each (sugg in suggs) if ((match = re(sugg[key])))]
+          .sort(byScoreDescending));
 }
+
+function byScoreDescending(a, b) b.score - a.score;

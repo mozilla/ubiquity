@@ -117,16 +117,16 @@ function testParseWithModifier() {
   this.assert(completions.length == 2, "Should be 2 completions");
   this.assert(completions[0]._verb._name == "wash");
   this.assert(completions[0]._argSuggs.direct_object.text == "poodle");
-  this.assert(completions[0]._argSuggs.with.text == "sponge");
+  this.assert(completions[0]._argSuggs.with.text == "spork");
   this.assert(completions[1]._verb._name == "wash");
   this.assert(completions[1]._argSuggs.direct_object.text == "poodle");
-  this.assert(completions[1]._argSuggs.with.text == "spork");
+  this.assert(completions[1]._argSuggs.with.text == "sponge");
   completions[0].execute();
   this.assert(dogGotWashed == "poodle");
-  this.assert(dogGotWashedWith == "sponge");
+  this.assert(dogGotWashedWith == "spork");
   completions[1].execute();
   this.assert(dogGotWashed == "poodle");
-  this.assert(dogGotWashedWith == "spork");
+  this.assert(dogGotWashedWith == "sponge");
 }
 
 function testCmdManagerSuggestsForEmptyInput() {
