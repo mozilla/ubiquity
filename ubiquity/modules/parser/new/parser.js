@@ -2615,8 +2615,18 @@ Parse.prototype = {
   // **{{{Parse#firstArgs}}} (read-only)**
   get firstArgs() {
     let firstArgs = {};
+    var unnecessaryProperties = {_order: true,
+                                 modifier: true,
+                                 nountypeId: true,
+                                 innerSpace: true,
+                                 outerSpace: true,
+                                 role: true};
     for (let role in this.args) {
-      firstArgs[role] = this.args[role][0];
+      firstArgs[role] = {};
+      for (let prop in this.args[role][0]) {
+        if (!(prop in unnecessaryProperties))
+          firstArgs[role][prop] = this.args[role][0][prop];
+      }
     }
     return firstArgs;
   },

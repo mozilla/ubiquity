@@ -14,5 +14,6 @@
   ca: "Català",
   it: "Italiano",
   es: "Español",
-  $: "$"
+  $: "$",
+  nl: "Nederlands"
 }
