@@ -376,7 +376,9 @@ App.navigate = function navigate() {
          error: function onError() {
            newDiv.text("Sorry, couldn't load " + newPage + ".");
          },
-         dataType: "text"}
+         beforeSend: function forceText(xhr) {
+           xhr.overrideMimeType("text/plain");
+         }}
       );
     } else
       onNewPageLoaded();
