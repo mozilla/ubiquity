@@ -1,10 +1,8 @@
 //TODO : convert to xhtml style command
 
 var freebase = {};
-var $ = jQuery;
 
 (function() {
-
     freebase.preview = function(pblock, directObject){
         var searchTerm = directObject.text;
         pblock.innerHTML = 'Searches Freebase for <b>'+searchTerm+'</b>';
@@ -73,20 +71,16 @@ var $ = jQuery;
             var url = 'http://www.freebase.com/api/trans/blurb' + $(blurb).attr('bid') + '?maxlength=190';
             $.get( url, null, function(response) { $(blurb).text(response);  });
         });
-
     }
-
-
 })();
 
-makeSearchCommand({
+CmdUtils.makeSearchCommand({
     name: "freebase",
     url: "http://www.freebase.com/search?query={QUERY}",
     icon: "http://www.freebase.com/favicon.ico",
-    description: 'Searches <a href="http://www.freebase.com>Freebase</a> for your words (shows previews)',
+    description: 'Searches <a href="http://www.freebase.com">Freebase</a> for your words (shows previews)',
     homepage: "http://blog.hamstersoup.com/",
     author: { name: "Will Moffat", email: "will_ub@hamstersoup.com"},
-
     preview: freebase.preview
 });
 
@@ -95,14 +89,15 @@ makeSearchCommand({
 
 var noun_type_song = {
   name: "song name",
-  suggest: function( text, html ) {
+  suggest: function (text, html) {
     var suggestions  = [CmdUtils.makeSugg(text)];
-    if(window.foxytunesGetCurrentTrackTitle){
-  	  suggestions.push(CmdUtils.makeSugg(window.foxytunesGetCurrentTrackTitle()));
-  	}
+    var win = Utils.currentChromeWindow;
+    if (win.foxytunesGetCurrentTrackTitle) {
+      suggestions.push(CmdUtils.makeSugg(win.foxytunesGetCurrentTrackTitle()));
+    }
     return suggestions;
   }
-}
+};
 
 CmdUtils.CreateCommand({
   names: ["get lyrics"],
@@ -173,7 +168,7 @@ CmdUtils.CreateCommand({
                label: "number of degrees" }],
   preview: function(pblock, {object}) {
     if (object.text == "")
-      rot = "180";
+      var rot = "180";
     else
       rot = object.text;
     pblock.innerHTML = "<p>" + _("Rotates entire page ${angle} degrees",
