@@ -10,23 +10,21 @@ CmdUtils.CreateCommand({
                nountype: noun_arb_text,
                label: "code"}],
   icon: "chrome://ubiquity/skin/icons/color_wheel.png",
-  description: "Treats your selection as program source code, guesses its language, and colors it based on syntax.",
-  execute: function({object: {text: code}}) {
-    if (code) {
-      var url = "http://azarask.in/services/syntaxhighlight/color.py";
-      var params = {
-        code: code,
-        style: "native"
-      };
-
-      jQuery.post( url, params, function( html ) {
-                     html = html.replace( /class="highlight"/,
-                     "style='background-color:#222;padding:3px'");
-                     CmdUtils.setSelection( html );
-                   });
-    } else {
+  description: ("Treats your selection as program source code, " +
+                "guesses its language, and colors it based on syntax."),
+  execute: function slh_execute({object: {text: code}}) {
+    if (!code) {
       displayMessage(_("You must select some code to syntax-hilight."));
+      return;
     }
+    jQuery.post(
+      "http://azarask.in/services/syntaxhighlight/color.py",
+      {code: code, style: "native"},
+      function hls_success(html) {
+        CmdUtils.setSelection(
+          html.replace(/\bclass="highlight"/,
+                       "style='background-color:#222;padding:3px'"));
+      });
   },
   preview: "Syntax highlights your code."
 });
@@ -38,11 +36,11 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["view source", "view page source"],
-  description: "Shows you the source-code of the web page you're looking at.",
+  description: "Shows you the source-code of the specified URL.",
   icon: "chrome://ubiquity/skin/icons/page_code.png",
-  execute: function(args) {
-    var url = Application.activeWindow.activeTab.document.location.href;
-    Utils.openUrlInBrowser("view-source:" + url);
+  argument: noun_type_url,
+  execute: function vs_execute(args) {
+    Utils.openUrlInBrowser("view-source:" + args.object.text);
   }
 });
 
@@ -52,89 +50,90 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/html_go.png",
   description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
                                 " with their escape sequences."),
-  preview: function(pb, {object: {html}}) {
+  preview: function ehe_preview(pb, {object: {html}}) {
     pb.innerHTML = (html
                     ? (<>Replaces your selection with:
                        <pre>{Utils.escapeHtml(html)}</pre></>)
                     : this.description);
   },
-  execute: function({object: {html}}) {
+  execute: function ehe_execute({object: {html}}) {
     if (html) {
       var esch = Utils.escapeHtml(html);
       CmdUtils.setSelection(esch, {text: esch});
-    } else {
-      displayMessage(_("No text selected."));
     }
+    else displayMessage(_("No text selected."));
   }
 });
 
+// TODO: Adding <style> to XHTML pages seems to have no effect.
 CmdUtils.CreateCommand({
-  names: ['run selector-selector'],
-  description: ''+ (
+  names: ["run selector-selector"],
+  description: "" + (
     <ul style="list-style-image:none">
     <li>Lets you type a jQuery selector and highlights matched elements.</li>
     <li>Hovering on an element generates a matching selector.</li>
     </ul>),
-  help: ''+ [
+  help: "" + [
     [<b>Left-click / Enter</b>,
-     'Copy and Quit'],
+     "Copy and Quit"],
     [<b>Middle-click / <u>C</u></b>,
-     'Copy'],
+     "Copy"],
     [<b>Right-click / Esc / <u>Q</u></b>,
-     'Quit'],
+     "Quit"],
     [<b><u>M</u></b>,
-     'Move'],
+     "Move"],
     [<b>PageUp/Dn</b>,
-     'Scroll vertically'],
+     "Scroll vertically"],
     [<b>shift + PageUp/Dn</b>,
-     'Scroll horizontally'],
-    ].reduce(function(l, [t, d]) l.appendChild(<><dt>{t}</dt><dd>{d}</dd></>),
+     "Scroll horizontally"],
+    [<b><u>F</u></b>,
+     "Force element names"],
+    ].reduce(function (l, [t, d]) l.appendChild(<dt>{t}</dt> + <dd>{d}</dd>),
              <dl/>),
-  authors: [{name: 'cers',  email: 'cers@geeksbynature.dk'},
-            {name: 'satyr', email: 'murky.satyr@gmail.com'}],
-  license: 'MIT',
+  authors: [{name: "cers",  email: "cers@geeksbynature.dk"},
+            {name: "satyr", email: "murky.satyr@gmail.com"}],
+  license: "MIT",
   icon: "chrome://ubiquity/skin/icons/jquery.ico",
-  execute: function ss_execute(){
+  execute: function ss_execute() {
     const Me = this, Key = "_" + Me._key, Doc = CmdUtils.getDocument();
-    if(Doc.getElementById(Key)) return;
+    if (Doc.getElementById(Key)) return;
 
     XML.prettyPrinting = XML.ignoreWhitespace = false;
-    var $i = jQuery(Doc.body).append(
-      <div><style>
-      {(Me._css +'').replace(/\$/g, Key)
-        .replace(/\s*\}/g, ';}').replace(/;+/g, ' !important;')}
-      </style><iframe id={Key} src={'data:text/html;charset=utf8,'+ Me._htm}
-      width="0" style="left:0; top:0"/></div>+'')
-      .find('#'+ Key).load(load);
+    var $i = $(Doc.body).append(
+      <div><style>{Me._css.replace(/\$/g, Key)}</style><iframe id={Key}
+      src={"data:text/html;charset=utf8," + Me._htm}
+      width="0" style="left:0; top:0"/></div> +'')
+      .find("#" + Key).load(load);
 
-    function load(){
-      var {contentDocument: IDoc, style: IStyle} = this,
-      [ebox] = jQuery('#edit', IDoc).keypress(onkey);
+    function load() {
+      var {contentDocument: IDoc, style: IStyle} = this;
+      var [ebox] = $("#edit", IDoc).keypress(onkey);
+      breadcrumbs.lmnn = $("#lmnn", IDoc)[0];
 
       ebox.style.width = Doc.defaultView.innerWidth * .7;
       this.height = IDoc.height;
       $i.animate({width: IDoc.width}, 333,
-                 function focus_delayed(){ Utils.setTimeout(focus) });
-      jQuery(Doc).mouseover(hover).click(click);
-      jQuery(IDoc).click(onbutton);
+                 function focus_delayed() { Utils.setTimeout(focus) });
+      $(Doc).mouseover(hover).click(click);
+      $(IDoc).click(onbutton);
 
-      function copy(){ copydisp(ebox.value) }
-      function focus(){ ebox.focus() }
-      function onbutton({target}){
-        switch(target.id){
-          case 'quit': quit(); return;
-          case 'copy': copy(); break;
-          case 'move':
-          var props = ['top', 'bottom'], texts = ['\u2193', '\u2191'],
-          which = +/^0/.test(IStyle[props[0]]);
-          IStyle[props[which ^ 1]] = '';
+      function copy() { copydisp(ebox.value) }
+      function focus() { ebox.focus() }
+      function onbutton({target}) {
+        switch (target.id) {
+          case "quit": quit(); return;
+          case "copy": copy(); break;
+          case "move":
+          var props = ["top", "bottom"], texts = ["\u2193", "\u2191"];
+          var which = +/^0/.test(IStyle[props[0]]);
+          IStyle[props[which ^ 1]] = "";
           IStyle[props[which ^ 0]] = 0;
           target.textContent = texts[which];
         }
         focus();
       }
-      function onkey(e){
-        switch(e.keyCode){
+      function onkey(e) {
+        switch (e.keyCode) {
           case 33: // PageUp
           case 34: // PageDn
           scroll(.8 * (e.keyCode * 2 - 67), e.shiftKey);
@@ -144,75 +143,77 @@ CmdUtils.CreateCommand({
           return false;
         }
         var me = this;
-        delay(function onkey_delayed(){
-          if(me.v !== (me.v = me.value))
-            me.style.fontStyle = hilite(me.value) ? '' : 'oblique';
+        delay(function onkey_delayed() {
+          if (me.v !== (me.v = me.value))
+            me.style.fontStyle = hilite(me.value) ? "" : "oblique";
         }, 123);
       }
-      function hover({target}){
-        if(target === $i[0]) return;
-        delay(function hilite_delayed(){
+      function hover({target}) {
+        if (target === $i[0]) return;
+        delay(function hilite_delayed() {
           var path = breadcrumbs(target);
           hilite(path);
           ebox.value = path;
         }, 42);
       }
-      function click({button, target}){
-        if(button !== 2) copydisp(breadcrumbs(target));
-        if(button !== 1) quit();
+      function click({button, target}) {
+        if (button !== 2) copydisp(breadcrumbs(target));
+        if (button !== 1) quit();
         return false;
       }
+      function quit() {
+        $(Doc).unbind("mouseover", hover).unbind("click", click);
+        $i.parent().remove();
+        hilite({});
+      }
     }
-    function scroll(rate, horiz){
-      with(Doc.defaultView)
+    function scroll(rate, horiz) {
+      with (Doc.defaultView)
         scrollBy(innerWidth * rate * horiz, innerHeight * rate * !horiz)
     }
-    function delay(cb, ms){
+    function delay(cb, ms) {
       Utils.clearTimeout(delay.tid);
       delay.tid = Utils.setTimeout(cb, ms);
     }
-    function breadcrumbs(it){
+    function breadcrumbs(it) {
       var doc = it.ownerDocument, htm = doc.documentElement, sels = [], i = -1;
+      var flmnn = breadcrumbs.lmnn.checked;
       do {
-        if(it.id){
-          sels[++i] = '#'+ it.id;
+        var lname = it.nodeName.toLowerCase();
+        if (it.id) {
+          sels[++i] = (flmnn ? lname : "") + "#" + it.id;
           break;
         }
-        var m = (it.className.replace(Key, '')
+        var m = (it.className.replace(Key, "")
                  .match(/[_a-zA-Z\u0080-\uffff][-\w\u0080-\uffff]{0,}/g));
-        sels[++i] = m ? '.'+ m.join('.') : it.nodeName.toLowerCase();
-      } while((it = it.parentNode) !== htm && it !== doc);
-      return sels.reverse().join(' > ');
+        sels[++i] = m ? (flmnn ? lname : "") + "." + m.join(".") : lname;
+      } while ((it = it.parentNode) !== htm && it !== doc);
+      return sels.reverse().join(" > ");
     }
     function hilite(path) {
-      (hilite.cache || jQuery('.'+ Key, Doc)).removeClass(Key);
-      try { hilite.cache = jQuery(path, Doc).addClass(Key) }
-      catch(_){ return false }
+      (hilite.cache || $("." + Key, Doc)).removeClass(Key);
+      try { hilite.cache = $(path, Doc).addClass(Key) }
+      catch (_) { return false }
       return true;
     }
-    function copydisp(txt){
-      if(!txt) return;
-      CmdUtils.copyToClipboard(txt);
-      displayMessage({icon: Me.icon, title: Me.name, text: txt});
-    }
-    function quit(){
-      jQuery(Doc).unbind();
-      $i.parent().remove();
-      hilite({});
+    function copydisp(txt) {
+      txt && displayMessage(CmdUtils.copyToClipboard(txt), Me);
     }
   },
   _key: String.slice(Math.random(), 2),
   _css: <><![CDATA[
     .$ {outline:2px blue solid}
     #$ {position:fixed; z-index:2147483647; border:none; opacity:0.9}
-    ]]></>,
-  _htm: <body><style><![CDATA[
-    body {display:inline-block; overflow:hidden; margin:0em; background:menu}
-    button {font-weight:bolder}
+    ]]></>.toString().replace(/\}/g, ";}").replace(/;+/g, " !important;"),
+  _htm: (
+    <body><style><![CDATA[
+      body {display:inline-block; overflow:hidden; margin:0; background:menu}
+      button {font-weight:bolder}
     ]]></style><nobr
-    ><input id="edit"></input
+    ><input id="edit"/><input id="lmnn" type="checkbox"
+    title="Force element names" accesskey="f"></input
     ><button id="copy" title="Copy" accesskey="c"><u>C</u>opy</button
     ><button id="move" title="Move" accesskey="m">&#x2193;</button
     ><button id="quit" title="Quit" accesskey="q">&#xD7;</button
-    ></nobr></body>,
+    ></nobr></body>),
 });
