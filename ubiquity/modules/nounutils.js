@@ -164,14 +164,14 @@ NounType._fromRegExp.suggest = function NT_RE_suggest(text, html, cb,
 // a result array ({{{match}}}) of {{{RegExp#exec}}}.
 
 const SCORE_BASE = 0.3;
-const SCORE_LENGTH = 0.4;
+const SCORE_LENGTH = 0.25;
 const SCORE_INDEX = 1 - SCORE_BASE - SCORE_LENGTH;
 
 function matchScore(match) {
   var inLen = match.input.length;
-  return (SCORE_BASE
-          + SCORE_LENGTH * Math.pow(match[0].length / inLen, 0.5)
-          + SCORE_INDEX  * (1 - match.index / inLen));
+  return (SCORE_BASE +
+          SCORE_LENGTH * Math.sqrt(match[0].length / inLen) +
+          SCORE_INDEX  * (1 - match.index / inLen));
 }
 
 // === {{{ NounUtils.makeSugg() }}} ===
@@ -216,7 +216,7 @@ function makeSugg(text, html, data, score, selectionIndices) {
   // Create a summary of the text:
   var snippetLength = 35;
   var summary = (text.length > snippetLength
-                 ? text.slice(0, snippetLength-1) + "\u2026"
+                 ? text.slice(0, snippetLength - 1) + "\u2026"
                  : text);
 
   // If the input comes all or in part from a text selection,
@@ -253,16 +253,9 @@ function makeSugg(text, html, data, score, selectionIndices) {
 function grepSuggs(input, suggs, key) {
   if (!input) return [];
   if (key == null) key = "text";
-  try { var re = RegExp(input, "i") }
-  catch (e if e instanceof SyntaxError) {
-    re = RegExp(input.replace(/\W/g, "\\$&"), "i");
-  }
-  var results = [], count = suggs.__count__, i = -1;
-  for each (let sugg in suggs) {
-    let match = re(sugg[key]);
-    if (!match) continue;
-    sugg.score = matchScore(match) * (sugg.score || 1);
-    results[++i + match.index * count] = sugg;
-  }
-  return results.filter(Boolean);
+  var re = Utils.regexp(input, "i"), match;
+  var results = [
+    (sugg.score = matchScore(match) * (sugg.score || 1), sugg)
+    for each (sugg in suggs) if ((match = re(sugg[key])))];
+  return Utils.sortBy(results, "score").reverse();
 }

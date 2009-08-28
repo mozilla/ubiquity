@@ -275,8 +275,7 @@ CmdUtils.CreateCommand({
   },
   _filter: function cmdh__filter(his, txt, rev) {
     if (txt) {
-      try { var re = RegExp(txt, "i") }
-      catch(e){ re = RegExp(Utils.regexp.quote(txt), "i") }
+      var re = Utils.regexp(txt, "i");
       his = [h for each (h in his) if (rev ^ re.test(h))];
     }
     return his;

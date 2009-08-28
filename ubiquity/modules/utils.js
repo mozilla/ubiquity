@@ -268,7 +268,7 @@ function ellipsify(node, chars) {
   return copy;
 }
 
-// === {{{ Utils.setTimeout(callback, delay, arg1, arg2, ...) }}} ===
+// === {{{ Utils.setTimeout(callback, delay, arg0, arg1, ...) }}} ===
 //
 // This function works just like the {{{window.setTimeout()}}} method
 // in content space, but it can only accept a function (not a string)
@@ -281,7 +281,7 @@ function ellipsify(node, chars) {
 // {{{delay}}} is the delay, in milliseconds, after which the callback
 // will be called once.
 //
-// {{{arg1, arg2 ...}}} are optional arguments that will be passed to
+// {{{arg0, arg1, ...}}} are optional arguments that will be passed to
 // the callback.
 //
 // This function returns a timer ID, which can later be given to
@@ -290,16 +290,15 @@ function ellipsify(node, chars) {
 
 // TODO: Allow strings for the first argument like DOM setTimeout() does.
 
-function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
+function setTimeout(callback, delay /*, arg0, arg1, ...*/) {
   var timerClass = Cc["@mozilla.org/timer;1"];
-  var timer = timerClass.createInstance(Ci.nsITimer);
   // emulate window.setTimeout() by incrementing next ID
   var timerID = __timerData.nextID++;
-  (__timerData.timers[timerID] = timer).initWithCallback(
-    new __TimerCallback(callback,
-                        arguments.length > 2 ? Array.slice(arguments, 2) : []),
-    delay,
-    timerClass.TYPE_ONE_SHOT);
+  (__timerData.timers[timerID] = timerClass.createInstance(Ci.nsITimer))
+    .initWithCallback(
+      new __TimerCallback(callback, Array.slice(arguments, 2)),
+      delay,
+      timerClass.TYPE_ONE_SHOT);
   return timerID;
 }
 
@@ -308,16 +307,17 @@ function setTimeout(callback, delay /*, arg1, arg2 ...*/) {
 // This function behaves like the {{{window.clearTimeout()}}} function
 // in content space, and cancels the callback with the given timer ID
 // from ever being called.
+// Returns {{{true}}} if the timer is cancelled, {{{false}}} if already fired.
 
 function clearTimeout(timerID) {
-  var timer = __timerData.timers[timerID];
-  if (timer) {
-    timer.cancel();
-    delete __timerData.timers[timerID];
-  }
+  var {timers} = __timerData;
+  if (!(timerID in timers)) return false;
+  timers[timerID].cancel();
+  delete timers[timerID];
+  return true;
 }
 
-// Support infrastructure for the timeout-related functions.
+// Support infrastructures for the timeout-related functions.
 var __timerData = {nextID: 1, timers: {}};
 function __TimerCallback(callback, args) {
   this._callback = callback;
@@ -798,8 +798,7 @@ function notify(label, value, image, priority, buttons, target) {
     label,
     value,
     image || "chrome://ubiquity/skin/icons/favicon.ico",
-    (box[("PRIORITY_" + priority).toUpperCase()] ||
-     box.PRIORITY_INFO_LOW),
+    box[("PRIORITY_" + priority).toUpperCase()] || box.PRIORITY_INFO_LOW,
     buttons);
 }
 
@@ -965,40 +964,64 @@ Utils.history = {
 
 // == {{{ Utils.regexp }}} ==
 //
-// Contains {{{RegExp}}} related functions.
+// Contains regular expressions related functions.
 
-Utils.regexp = {
-  // === {{{ Utils.regexp.quote(string) }}} ===
-  //
-  // Returns the {{{string}}} with all {{{RegExp}}} meta characters in it
-  // backslashed.
+// === {{{ Utils.regexp(pattern, flags) }}} ===
+//
+// Creates a regexp just like {{{RegExp}}}, but without throwing exceptions.
+// Falls back to a quoted version of {{{pattern}}} if it fails to compile.
+// {{{
+// RegExp("[")          // SyntaxError("unterminated character class")
+// RegExp("@", "image") // SyntaxError("invalid regular expression flag a")
+// RegExp(/:/, "y")     // TypeError("can't supply flags when ...")
+// Utils.regexp("[")          // /\[/
+// Utils.regexp("@", "image") // /@/gim
+// Utils.regexp(/:/, "y")     // /:/y
+// }}}
 
-  quote: function re_quote(string)
-    String(string).replace(/[.?*+^$|()\{\[\]\\]/g, "\\$&"),
+function regexp(pattern, flags) {
+  if (classOf(pattern) === "RegExp") pattern = pattern.source;
+  if (flags != null) flags = String.replace(flags, /[^gimy]/g, "");
+  try {
+    return RegExp(pattern, flags);
+  } catch (e if e instanceof SyntaxError) {
+    return RegExp(regexp.quote(pattern), flags);
+  } catch (e) {
+    return /(?:)/;
+  }
+}
 
-  // === {{{ Utils.regexp.Trie(strings, asPrefixes) }}} ===
-  //
-  // Creates a {{{RegexpTrie}}} object that builds an efficient regexp
-  // matching a specific set of {{{strings}}}.
-  // This is a JS port of
-  // [[http://search.cpan.org/~dankogai/Regexp-Trie-0.02/lib/Regexp/Trie.pm]]
-  // with a few additions.
-  //
-  // {{{strings}}} is a optional array of strings to {{{add()}}}
-  // on initialization.
-  // If {{{asPrefixes}}} evaluates to {{{true}}}, {{{addPrefixes()}}}
-  // is used instead.
+// === {{{ Utils.regexp.quote(string) }}} ===
+//
+// Returns the {{{string}}} with all {{{RegExp}}} meta characters in it
+// backslashed.
 
-  Trie: function RegexpTrie(strings, asPrefixes) {
-    var me = {$: {}, __proto__: arguments.callee.fn};
-    if (strings) {
-      let add = asPrefixes ? "addPrefixes" : "add";
-      for each (let str in strings) me[add](str);
-    }
-    return me;
-  },
+regexp.quote = function re_quote(string) (
+  String(string).replace(/[.?*+^$|()\{\[\]\\]/g, "\\$&"));
+
+// === {{{ Utils.regexp.Trie(strings, asPrefixes) }}} ===
+//
+// Creates a {{{RegexpTrie}}} object that builds an efficient regexp
+// matching a specific set of {{{strings}}}.
+// This is a JS port of
+// [[http://search.cpan.org/~dankogai/Regexp-Trie-0.02/lib/Regexp/Trie.pm]]
+// with a few additions.
+//
+// {{{strings}}} is a optional array of strings to {{{add()}}}
+// on initialization.
+// If {{{asPrefixes}}} evaluates to {{{true}}}, {{{addPrefixes()}}}
+// is used instead.
+
+regexp.Trie = function RegexpTrie(strings, asPrefixes) {
+  var me = {$: {}, __proto__: arguments.callee.prototype};
+  if (strings) {
+    let add = asPrefixes ? "addPrefixes" : "add";
+    for each (let str in strings) me[add](str);
+  }
+  return me;
 };
-Utils.regexp.Trie.fn = {
+regexp.Trie.prototype = {
+  constructor: regexp.Trie,
   // ** {{{ RegexpTrie#add(string) }}} **
   //
   // Adds {{{string}}} to the Trie and returns self.
@@ -1012,7 +1035,7 @@ Utils.regexp.Trie.fn = {
   //
   // Adds every prefix of {{{string}}} to the Trie and returns self. i.e.:
   // {{{
-  // rt.addPrefixes("str") == rt.add("s").add("st").add("str")
+  // RegexpTrie().addPrefixes("ab") == RegexpTrie().add("a").add("ab")
   // }}}
   addPrefixes: function RegexpTrie_addPrefixes(string) {
     var ref = this.$;
@@ -1044,6 +1067,6 @@ Utils.regexp.Trie.fn = {
     if (cc.length) alt.push(1 in cc ?  "[" + cc.join("") + "]" : cc[0]);
     var result = 1 in alt ? "(?:" + alt.join("|") + ")" : alt[0];
     if (q) result = cconly ? result + "?" : "(?:" + result + ")?";
-    return result;
+    return result || "";
   },
 };

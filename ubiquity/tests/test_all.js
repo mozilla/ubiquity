@@ -468,11 +468,14 @@ function testUtilsGetLocalUrlWorks() {
 function testUtilsSetTimeoutWorks() {
   let self = this;
   let foo = "foo";
-  Utils.setTimeout(self.makeCallback(function cb(x, y) {
+  let zoo = "zoo";
+  Utils.setTimeout(self.makeCallback(function _foo(x, y) {
     foo = null;
     self.assertEquals(x, "bar");
     self.assertEquals(y, "baz");
+    self.assertEquals(zoo, "zoo");
   }), 42, "bar", "baz");
+  Utils.clearTimeout(Utils.setTimeout(function _zoo() { zoo = null }));
   self.assertEquals(foo, "foo");
 }
 
@@ -498,7 +501,14 @@ function testNounType() {
 }
 
 function testUtilsRegexp() {
-  this.assertEquals(Utils.regexp.quote("[^.^]"), "\\[\\^\\.\\^\\]");
+  this.assertEquals(Utils.regexp("[") + "",
+                    /\[/);
+  this.assertEquals(Utils.regexp("@", "image") + "",
+                    /@/gim);
+  this.assertEquals(Utils.regexp(/:/, "y") + "",
+                    /:/y);
+  this.assertEquals(Utils.regexp.quote("[^.^]"),
+                    "\\[\\^\\.\\^\\]");
   var words = ["foobar", "fooxar", "foozap", "fooza"]
   var re = Utils.regexp.Trie(words).regexp;
   for each (let word in words) this.assert(re.test(word), [re, word]);
@@ -510,8 +520,12 @@ function testUtilsRegexp() {
 }
 
 function testL10nUtilsPropertySelector() {
-  var ps = LocalizationUtils.propertySelector("data:,foo:%S %S");
+  var ps = LocalizationUtils.propertySelector("data:," + encodeURI(<![CDATA[
+    foo=%S %S
+    colon:works too
+    ]]>));
   this.assertEquals(ps("foo", "bar", "baz"), "bar baz");
+  this.assertEquals(ps("colon"), "works too");
 }
 
 exportTests(this);
