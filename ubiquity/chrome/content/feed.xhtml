@@ -31,7 +31,8 @@
   function maybeRedirect() {
     if (!isRedirecting && window.location.hash) {
       var relPath = window.location.hash.slice(1);
-      window.location = UbiquitySetup.standardFeedsUri + relPath;
+      window.location =
+        UbiquitySetup.getBaseUri() + "standard-feeds/" + relPath;
       isRedirecting = true;
     }
   }

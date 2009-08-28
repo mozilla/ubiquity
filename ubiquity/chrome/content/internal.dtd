@@ -32,7 +32,7 @@
 <!ENTITY file.DevelDocs "chrome://ubiquity/content/file.xhtml#index.html">
 
 <!ENTITY feed.DevelCmds "chrome://ubiquity/content/feed.xhtml#core-developer-commands.html">
-<!ENTITY feed.ExperimentalCmds "chrome://ubiquity/content/feed.xhtml#experimental-commands.html">
+<!ENTITY feed.ExperimentalCmds "resource://ubiquity/standard-feeds/experimental-commands.html">
 
 <!-- External link management just addresses. -->
 <!ENTITY link.releaseNotes "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.4_Release_Notes">
