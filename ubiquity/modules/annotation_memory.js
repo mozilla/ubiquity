@@ -145,11 +145,11 @@ function AnnotationService(connection) {
     function AS_pageHasAnnotation(uri, name)
       uri.spec in ann && name in ann[uri.spec];
 
-  // === {{{AnnotationService#toJSON()}}} ===
+  // === {{{AnnotationService#toJSONString()}}} ===
   //
   // This method returns the annotation service's data as a JSON string.
 
-  self.toJSON = function AS_toJSON() {
+  self.toJSONString = function AS_toJSONString() {
     var json = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
     return json.encode(ann);
   };
