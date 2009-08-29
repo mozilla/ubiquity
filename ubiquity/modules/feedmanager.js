@@ -458,27 +458,37 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0, expiration);
   };
 
-  // === {{{Feed#getBin()}}} ===
+  // === {{{Feed#getJSONStorage()}}} ===
   //
-  // Gets the persistent json storage for the feed.
+  // Gets the persistent JSON storage for the feed.
 
   var {json} = Utils;
 
-  feedInfo.getBin = function feedInfo_getBin()
+  feedInfo.getJSONStorage = function feedInfo_getJSONStorage()
     json.decode(annSvc.getPageAnnotation(uri, FEED_BIN_ANNO, "{}"));
 
-  // === {{{Feed#setBin(obj)}}} ===
+  // === {{{Feed#setJSONStorage(obj)}}} ===
   //
-  // Sets the persistent json storage for the feed and
+  // Sets the persistent JSON storage for the feed and
   // returns the stored result as a new object.
   //
-  // {{{obj}}} should be a json-encodable object.
+  // {{{obj}}} should be a JSON-encodable object.
 
-  feedInfo.setBin = function feedInfo_setBin(obj) {
+  feedInfo.setJSONStorage = function feedInfo_setJSONStorage(obj) {
     var data = json.encode(obj);
     annSvc.setPageAnnotation(uri, FEED_BIN_ANNO, data, 0, expiration);
     return json.decode(data);
   };
+
+  // === {{{Feed#makeBin()}}} ===
+  //
+  // Creates {{{Bin}}} for the feed.
+
+  feedInfo.makeBin = function feedInfo_makeBin() ({
+    __proto__: Bin,
+    __parent__: this,
+    __bin__: this.getJSONStorage(),
+  });
 
   // === {{{Feed#checkForManualUpdate()}}} ===
   //
@@ -529,4 +539,54 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                     feedInfo.type + "'.");
 
   return plugin.makeFeed(feedInfo, hub);
+};
+
+// == Bin ==
+//
+// A simple interface to access the feed's persistent JSON storage.
+// {{{
+// Bin.myKey("some value");    // set a value for the key
+// let val = Bin.myKey();      // get the value for a key
+// Bin.myKey(null);            // delete the key
+// let num = +Bin;             // count keys
+// for (let [k, v] in Bin) ... // iterate over keys and values
+// }}}
+
+var Bin = {
+  __proto__: null,
+
+  // === {{{ Bin.__noSuchMethod__(value) }}} ===
+  //
+  // {{{Bin}}} allows arbitrary keys
+  // (except for the ones already in use, such as "toString")
+  // to be called as methods for getting/setting/deleting their values.
+  // Returns the value stored for the key.
+  //
+  // {{{value}}} is an optional JSON-encodable value to be set for the key.
+  // If this equals to {{{null}}}, the key is deleted.
+
+  __noSuchMethod__: function __noSuchMethod__(key, [val]) {
+    var bin = this.__bin__;
+    if (val === void 0) return bin[key];
+    if (val === null) {
+      var old = bin[key];
+      delete bin[key];
+    }
+    else bin[key] = val;
+    bin = this.__bin__ = this.__parent__.setJSONStorage(bin);
+    return key in bin ? bin[key] : old;
+  },
+
+  // === {{{ Bin.__iterator__() }}} ===
+  // Returns an {{{Iterator}}} for the inner dictionary.
+
+  __iterator__: function __iterator__() new Iterator(this.__bin__),
+
+  toJSON: function toJSON() this.__bin__,
+  toString: function toString() "[object Bin]",
+
+  // === {{{ Bin.valueOf() }}} ===
+  // Returns the number of keys currently stored.
+
+  valueOf: function valueOf() this.__bin__.__count__,
 };

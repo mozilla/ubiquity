@@ -40,9 +40,7 @@
 
 var EXPORTED_SYMBOLS = ["DefaultFeedPlugin"];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/codesource.js");
@@ -78,8 +76,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   this.installDefaults = function DFP_installDefaults(baseUri,
                                                       baseLocalUri,
                                                       infos) {
-    for (let i = 0; i < infos.length; i++) {
-      let info = infos[i];
+    for each (let info in infos) {
       let uri = Utils.url(baseUri + info.page);
 
       if (!feedManager.isUnsubscribedFeed(uri)) {
@@ -237,7 +234,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
   var codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
                                   timeoutInterval);
-  var bin = makeBin(feedInfo);
+  var bin = feedInfo.makeBin();
   var codeCache = null;
   var sandbox = null;
   var self = this;
@@ -379,24 +376,5 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     feeds: feeds,
     headers: new IterableCollection(headerCodeSources),
     footers: new IterableCollection(footerCodeSources)
-  };
-}
-
-function makeBin(feedInfo) {
-  var bin = feedInfo.getBin();
-  return {
-    toString: function toString() "[object Bin]",
-    valueOf: function valueOf() bin.__count__,
-    __iterator__: function iter() Iterator(bin),
-    __noSuchMethod__: function pass(key, [val]) {
-      if (val === void 0) return bin[key];
-      if (val === null) {
-        var old = bin[key];
-        delete bin[key];
-      }
-      else bin[key] = val;
-      bin = feedInfo.setBin(bin);
-      return key in bin ? bin[key] : old;
-    },
   };
 }
