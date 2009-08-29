@@ -939,8 +939,6 @@ CmdUtils.CreateCommand({
                 + "<br/>"
                 + _("It's been reviewed ${times} times.", {times: data.review_count});
 
-      Utils.log(msg);
-
       CmdUtils.setSelection( msg );
       return;
     }
@@ -1005,7 +1003,7 @@ var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunders
 
 CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
-  arguments: {location: noun_type_geolocation,
+  arguments: {location: noun_type_geo_town,
               format: noun_type_temperature_units},
   icon: "chrome://ubiquity/skin/icons/wunderground.ico",
   description: "Checks the weather for a given location. It detects your " +
@@ -1026,13 +1024,18 @@ CmdUtils.CreateCommand({
   },
 
   preview: function(pblock, {location, format}) {
-    location = location.text;
-    if (location.length < 1) {
+    if (location.text.length < 1) {
       pblock.innerHTML = _("Gets the weather for a zip code/city.");
       return;
     }
 
-    pblock.innerHTML = _("Weather for ${location}",{location:location});
+    pblock.innerHTML = _("Weather for ${location}",{location:location.text});
+
+    var query = null;
+    if (location.data)
+      query = location.data.coordinates.lat + ',' + location.data.coordinates.lng;
+    else
+      query = location.text;
 
     var user_location = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
@@ -1045,47 +1048,57 @@ CmdUtils.CreateCommand({
       temp_units = format.text;
     }
 
-    var url = "http://www.google.com/ig/api";
-    CmdUtils.previewGet( pblock, url, {weather: location}, function(xml) {
-      var el = jQuery(xml).find("current_conditions");
-      if (el.length == 0)
+    var geoUrl = "http://api.wunderground.com/auto/wui/geo/GeoLookupXML";
+    CmdUtils.previewGet( pblock, geoUrl, {query: query}, function(xml) {
+      var stations = jQuery(xml).find("station");
+      if (stations.length == 0)
         return;
 
-      var condition = el.find("condition").attr("data");
+      var station = stations.find('icao').eq(0).text();
 
-      var place = jQuery(xml).find("forecast_information > city").attr("data");
+      var wUrl = "http://api.wunderground.com/auto/wui/geo/WXCurrentObXML";
+      CmdUtils.previewGet(pblock, wUrl, {query:station}, function(xml){
+        var weather = jQuery(xml);
+        var city = weather.find("observation_location > full").text();
+        var country = weather.find("observation_location > country").text();
+        var condition = weather.find("weather").text();
+        
+        var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
+        if (weatherId == -1) // not Found
+          dump('condition not found');
+        var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
+        imgSrc += weatherId + "d.png";
 
-      var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
-      var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
-      imgSrc += weatherId + "d.png";
+        //change wind speed to kmh based on geolocation
+        var wind_text = weather.find("wind_string").text().split("at");
+        var wind_speed = parseFloat(weather.find("wind_mph").text());
+        var wind_units = "mph";
+        //http://en.wikipedia.org/wiki/Si_units
+        //UK uses mph
+        if (user_location && ["US","UM", "LR", "MM", "GB"].indexOf(user_location.country_code) == -1) {
+          wind_units = "km/h";
+          wind_speed = wind_speed * 1.6;
+        }
+        var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
 
-      //change wind speed to kmh based on geolocation
-      var wind_text = el.find("wind_condition").attr("data").split("at");
-      var wind_speed = parseInt(wind_text[1].split(" ")[1]);
-      var wind_units = "mph";
-      //http://en.wikipedia.org/wiki/Si_units
-      //UK uses mph
-      if (user_location && ["US","UM", "LR", "MM", "GB"].indexOf(user_location.country_code) == -1) {
-        wind_units = "km/h";
-        wind_speed = wind_speed * 1.6;
-      }
+        var weather = {
+          condition: condition,
+          temp_units: temp_units,
+          tempc: weather.find("temp_c").text(),
+          tempf: weather.find("temp_f").text(),
+          humidity: weather.find("relative_humidity").text(),
+          wind: wind,
+          img: imgSrc
+        };
 
-      var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
-      var weather = {
-        condition: condition,
-        temp_units: temp_units,
-        tempc: el.find("temp_c").attr("data"),
-        tempf: el.find("temp_f").attr("data"),
-        humidity: el.find("humidity").attr("data"),
-        wind: wind,
-        img: imgSrc
-      };
-
-      pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#weather-search", feed.dom).html(),
-        {w: weather, location: place,
-         weatherMessage: _("Weather for ${location}", {location: place})}
-      );
+        pblock.innerHTML = CmdUtils.renderTemplate(
+          jQuery("#weather-search", feed.dom).html(),
+          {w: weather, location: city + ', ' + country,
+           weatherMessage: _("Weather for ${location}", {location: city + ', ' + country})}
+        );
+        
+        
+      },'xml');
 
     }, "xml");
   }
