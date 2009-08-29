@@ -1381,7 +1381,7 @@ function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy) {
       // if no results found, accept whatever input with a low score (0.3)
       if (data.Status.code != "200" ||
           (data.Placemark && data.Placemark.length == 0)) {
-        callback(CmdUtils.makeSugg(text, html, null, .3,
+        callback(CmdUtils.makeSugg(query, query, null, .3,
                                        selectionIndices));
         return;
       }
