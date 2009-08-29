@@ -1328,35 +1328,35 @@ function getLegacyAddress(query, callback, selectionIndices) {
 }
 
 
-var noun_type_geo_country = NounAsync("country", getCountry, true);
+var noun_type_geo_country = NounAsync("country", getCountry, false);
 function getCountry(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 1, 1);
 }
 
 // The region
 // Think American states, provinces in many countries, Japanese prefectures.
-var noun_type_geo_region = NounAsync("region", getRegion, true);
+var noun_type_geo_region = NounAsync("region", getRegion, false);
 function getRegion(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 2, 2);
 }
 
 // The subregion
-var noun_type_geo_subregion = NounAsync("subregion", getSubregion, true);
+var noun_type_geo_subregion = NounAsync("subregion", getSubregion, false);
 function getSubregion(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 3, 3);
 }
 
-var noun_type_geo_town = NounAsync("city/town", getTown, true);
+var noun_type_geo_town = NounAsync("city/town", getTown, false);
 function getTown(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 4, 4);
 }
 
-var noun_type_geo_postal = NounAsync("postal code", getPostal, true);
+var noun_type_geo_postal = NounAsync("postal code", getPostal, false);
 function getPostal(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 5, 5);
 }
 
-var noun_type_geo_address = NounAsync("address", getAddress, true);
+var noun_type_geo_address = NounAsync("address", getAddress, false);
 function getAddress(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 6, 9);
 }
@@ -1378,9 +1378,11 @@ function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy) {
       callback([]);
     },
     success: function (data) {
+      // if no results found, accept whatever input with a low score (0.3)
       if (data.Status.code != "200" ||
           (data.Placemark && data.Placemark.length == 0)) {
-        callback([]);
+        callback(CmdUtils.makeSugg(text, html, null, .3,
+                                       selectionIndices));
         return;
       }
 
