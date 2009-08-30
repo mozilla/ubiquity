@@ -55,7 +55,7 @@ var extApplication = { // helper method for correct quitting/restarting
 CmdUtils.CreateCommand({
   names: ["exit firefox"],
   description: "Exits Firefox.",
-  execute: function() {
+  execute: function exit_execute() {
     extApplication.quit();
   }
 });
@@ -63,7 +63,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["restart firefox"],
   description: "Restarts Firefox.",
-  execute: function() {
+  execute: function restart_execute() {
     extApplication.restart();
   }
 });
@@ -72,7 +72,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["close window"],
   description: "Closes current window.",
-  execute: function() {
+  execute: function closewin_execute() {
     extApplication.close();
   }
 });
@@ -82,7 +82,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
   description: "Toggles fullscreen mode.",
-  execute: function() {
+  execute: function fullscreen_execute() {
     CmdUtils.getWindow().fullScreen ^= 1;
   }
 });
@@ -90,7 +90,6 @@ CmdUtils.CreateCommand({
 // -----------------------------------------------------------------
 // TAB COMMANDS
 // -----------------------------------------------------------------
-
 
 function tabPreview(msg) {
   const PlaceHolder = "%tab%";
@@ -112,7 +111,7 @@ CmdUtils.CreateCommand({
   argument: noun_type_tab,
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab whose title or URL matches the input.",
-  execute: function({object: {data: tab}}) {
+  execute: function swtab_execute({object: {data: tab}}) {
     if (!tab) return;
     // TODO: window.focus() is missing on 1.9.2pre
     var win = tab._window;
@@ -130,7 +129,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: ("Closes the tab whose title or URL matches the input " +
                 "or the current tab if no tab matches."),
-  execute: function(args) {
+  execute: function cltab_execute(args) {
     (args.object.data || Application.activeWindow.activeTab).close();
   },
   preview: tabPreview("Closes"),
@@ -141,13 +140,13 @@ CmdUtils.CreateCommand({
   arguments: [{ role: 'object', nountype: noun_arb_text, label: 'related word'}],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
-  execute: function({object: {text}}) {
+  execute: function clatab_execute({object: {text}}) {
     if (!text) return;
     var tabs = Utils.tabs.search(text);
     for each (var t in tabs) t.close();
     displayMessage(_("${num} tabs closed.", {num: tabs.length}), this);
   },
-  preview: function(pblock, {object: {text, html}}) {
+  preview: function clatab_preview(pblock, {object: {text, html}}) {
     if (!text) {
       pblock.innerHTML = this.description;
       return;
@@ -167,7 +166,7 @@ CmdUtils.CreateCommand({
         html: html,
         _MODIFIERS: {asList: this._lister} });
   },
-  _lister: function({document}) "" + (
+  _lister: function clatab__lister({document}) "" + (
     <li>{document.title}<br/><code><small>{document.URL}</small></code></li>),
 });
 
@@ -177,13 +176,13 @@ CmdUtils.CreateCommand({
                 "filter term to count number of tabs matching filter term.",
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
-  execute: function(args) {
+  execute: function cntab_execute(args) {
     displayMessage($(this._count(args)).text(), this);
   },
-  preview: function(pblock, args) {
+  preview: function cntab_preview(pblock, args) {
     pblock.innerHTML = this._count(args);
   },
-  _count: function({object: {text, html}}) {
+  _count: function cntab__count({object: {text, html}}) {
     var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
     return _('<div class="count-tabs"><b>${count}</b> ' +
              'tab{if count > 1}s{/if} ' +
@@ -196,16 +195,15 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["refresh", "reload"],
   description: "Refreshes the current page.",
-  execute: function() {
-    var win = CmdUtils.getWindow();
-    win.location.reload(true);
+  execute: function reload_execute() {
+    CmdUtils.getWindow().location.reload(true);
   }
 });
 
 CmdUtils.CreateCommand({
   names: ["bookmark"],
   description: "Adds the current page to bookmarks.",
-  execute: function() {
+  execute: function bookmark_execute() {
     var {title, URL} = CmdUtils.getDocument();
     try {
       Application.bookmarks.unfiled.addBookmark(title, Utils.url(URL));
@@ -221,24 +219,23 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["print"],
   description: "Prints the current page.",
-  execute: function() {
-    var win = CmdUtils.getWindow();
-    win.print();
+  execute: function print_execute() {
+    CmdUtils.getWindow().print();
   }
 });
 
 // goes back/forward in history
 (function historyCommand(way, sign) {
+  var tmpl = _("Go " + way + " ${num} step{if num > 1}s{/if} in history.");
   CmdUtils.CreateCommand({
     names: ["go " + way],
     description: "Goes " + way + " in history.",
     arguments: {object_steps: noun_type_number},
-    preview: function(pblock, args) {
-      pblock.innerHTML = _(
-        "Go " + way + " ${num} step{if num > 1}s{/if} in history.",
-        {num: args.object.data});
+    preview: function go_preview(pblock, args) {
+      pblock.innerHTML =
+        CmdUtils.renderTemplate(tmpl, {num: args.object.data});
     },
-    execute: function(args) {
+    execute: function go_execute(args) {
       CmdUtils.getWindow().history.go(args.object.data * sign);
     }
   });
@@ -248,7 +245,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["go home"],
   description: "Goes to home page.",
-  execute: function() {
+  execute: function home_execute() {
     CmdUtils.getWindow().home();
   }
 });
@@ -273,12 +270,12 @@ CmdUtils.CreateCommand({
   argument: noun_type_percentage,
   icon: "chrome://ubiquity/skin/icons/magnifier.png",
   description: "Zooms the Firefox window in or out.",
-  preview: function(pBlock, args) {
+  preview: function zoom_preview(pBlock, args) {
     pBlock.innerHTML = _(
       "Zooms the Firefox window to ${text} of its normal size.",
       args.object);
   },
-  execute: function(args) {
+  execute: function zoom_execute(args) {
     setFullPageZoom(args.object.data);
   }
 });
@@ -302,13 +299,13 @@ CmdUtils.CreateCommand({
   license: "MPL/GPL/LGPL",
   icon: "chrome://mozapps/skin/places/tagContainerIcon.png",
   argument: noun_type_tag,
-  preview: function(aEl, args) {
+  preview: function tag_preview(aEl, args) {
     aEl.innerHTML = _(
       ("Describes the current page with" +
        "{if html} these tags:<p><b>${html}</b></p>{else} tags.{/if}"),
       args.object);
   },
-  execute: function({object: {text, data}}) {
+  execute: function tag_execute({object: {text, data}}) {
     var doc = CmdUtils.getDocument();
     var {tagging, bookmarks} = PlacesUtils;
     var currentURI = Utils.url(doc.URL);
@@ -330,14 +327,14 @@ CmdUtils.CreateCommand({
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   argument: noun_type_bookmarklet,
-  execute: function({object}) {
+  execute: function bml_execute({object}) {
     if (object.data) CmdUtils.getWindow().location = object.data;
     else {
       noun_type_bookmarklet.load();
       displayMessage("Reloaded", this);
     }
   },
-  preview: function(pbl, {object: {data}}) {
+  preview: function bml_preview(pbl, {object: {data}}) {
     pbl.innerHTML = (
       data
       ? (<pre class="bookmarklet" style="white-space:pre-wrap">{data}</pre>)
@@ -358,49 +355,48 @@ CmdUtils.CreateCommand({
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
   arguments: {"object title or URL": noun_arb_text},
-  execute: function(args) {
+  execute: function uct_execute(args) {
     for each(var {id} in this._find(args.object.text)) this._undo(id);
   },
-  preview: function(pbl, args) {
+  preview: function uct_preview(pbl, args) {
     var me = this;
     if (!me._SS.getClosedTabCount(context.chromeWindow)) {
       me._puts(pbl, _("No closed tabs."));
       return;
     }
     var tabs = me._find(args.object.text);
-    if (!tabs[0]) {
+    if (!tabs.length) {
       me._puts(pbl, _("No matched tabs."));
       return;
     }
     CmdUtils.previewList(pbl, tabs.map(me._html), function(i, ev) {
-      $(ev.target).closest("li").remove();
+      $(ev.target).closest("li").slideUp();
       me._undo(tabs[i].id);
     }, me._css);
   },
   previewDelay: 256,
   _list: null,
-  _html: function({title, image, url})(
-    <> <img class="icon" src={image}/> <span class="title">{title}</span>
-       <code class="url">{url}</code></>),
-  _puts: function(pbl, msg) {
+  _html: function utc__html({title, image, url}) (
+    <><img class="icon" src={image}/> <span class="title">{title}</span>
+      <code class="url">{url}</code></>),
+  _puts: function utc__puts(pbl, msg) {
     pbl.innerHTML = <i>{msg}</i>.toXMLString() + this.help;
   },
-  _find: function(txt) {
+  _find: function utc__find(txt) {
     var list = this._list =
       eval(this._SS.getClosedTabData(context.chromeWindow));
     list.forEach(this._mark);
     if (txt) {
-      try { var re = RegExp(txt, "i") }
-      catch(e){ re = RegExp(txt.replace(/\W/g, "\\$&"), "i") }
-      list = list.filter(function(t) re.test(t.title) || re.test(t.url));
+      var re = Utils.regexp(txt);
+      list = [t for each (t in list) if (re.test(t.title) || re.test(t.url))];
     }
     return list;
   },
-  _mark: function(tab, i) {
+  _mark: function utc__mark(tab, i) {
     tab.id = i;
     tab.url = tab.state.entries[0].url;
   },
-  _undo: function(id) {
+  _undo: function utc__undo(id) {
     this._list.every(function(tab, i, list) {
       if (id !== tab.id) return true;
       this._SS.undoCloseTab(context.chromeWindow, i);
@@ -424,18 +420,18 @@ CmdUtils.CreateCommand({
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   icon: "chrome://browser/skin/livemark-folder.png",
   argument: noun_type_livemark,
-  execute: function({object: {data}}) {
+  execute: function clm_execute({object: {data}}) {
     if (data) this._open(data.site);
   },
-  preview: function(pb, {object: {data}}) {
+  preview: function clm_preview(pb, {object: {data}}) {
     if (!data) {
       pb.innerHTML = this.description;
       return;
     }
     var dict = {};
     for each (var it in data.items)
-      dict[it.uri] = <span> <a href={it.uri}>{it.title}</a> </span>;
+      dict[it.uri] = <span><a href={it.uri}>{it.title}</a></span>;
     CmdUtils.previewList(pb, dict, this._open);
   },
-  _open: function(u) { Utils.openUrlInBrowser(u) },
+  _open: function clm__open(u) { Utils.openUrlInBrowser(u) },
 });

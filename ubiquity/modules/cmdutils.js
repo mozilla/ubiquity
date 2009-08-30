@@ -1303,7 +1303,8 @@ function previewCallback(pblock, callback, abortCallback) {
 
 // === {{{ CmdUtils.previewList(block, htmls, callback, css) }}} ===
 //
-// Creates a simple clickable list in the preview.
+// Creates a simple clickable list in the preview block and
+// returns the list element.
 //
 // {{{block}}} is the DOM element the list will be placed into.
 //
@@ -1317,34 +1318,35 @@ function previewCallback(pblock, callback, abortCallback) {
 // {{{css}}} is an optional CSS string inserted along with the list.
 
 function previewList(block, htmls, callback, css) {
-  var list = [], i = -1;
+  var list = "", i = -1, {escapeHtml} = Utils;
   for (let id in htmls) {
     let k = ++i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
-    list.push('<li><label for="', i, '"><button id="', i, '" accesskey="',
-              k, '" value="' + id + '">', k, '</button>',
-              htmls[id], '</label></li>');
+    list += ('<li><label for="' + i + '"><button id="' + i + '" accesskey="' +
+             k + '" value="' + escapeHtml(id) + '">' + k + '</button>' +
+             htmls[id] + '</label></li>');
   }
-  block.innerHTML = ('<style>' + previewList.CSS + (css || "") +
-                     '</style><ol class="preview-list">' +
-                     list.join("") + '</ol>');
-  if (typeof callback !== "function") return;
-  block.getElementsByTagName("ol")[0]
-    .addEventListener("focus", function previewListFocus(ev) {
+  block.innerHTML = ('<ol class="preview-list"><style>' +
+                     previewList.CSS + (css || "") +
+                     '</style>' + list + '</ol>');
+  var [ol] = block.getElementsByClassName("preview-list");
+  if (typeof callback === "function")
+    ol.addEventListener("focus", function previewListFocused(ev) {
       var {target} = ev;
       if (!/^button$/i.test(target.nodeName)) return;
       target.blur();
       target.disabled = true;
       callback(target.value, ev);
     }, true);
+  return ol;
 }
-previewList.CSS = <><![CDATA[
+previewList.CSS = "" + <![CDATA[
   .preview-list {margin: 0; padding: 0; list-style-type: none}
   .preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
   .preview-list label {display: block; cursor: pointer}
   .preview-list button {
-    padding: 0; border-width: 1px;
+    margin-right: 0.3em; padding: 0; border-width: 1px;
     font: bold 108% monospace; text-transform: uppercase}
-  ]]></>;
+  ]]>;
 
 // === {{{ CmdUtils.absUrl(data, sourceUrl) }}} ===
 //
