@@ -1330,38 +1330,44 @@ function getLegacyAddress(query, callback, selectionIndices) {
 
 var noun_type_geo_country = NounAsync("country", getCountry, false);
 function getCountry(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 1, 1);
+  return getGeo(query, callback, selectionIndices, 1, 1, false);
 }
 
 // The region
 // Think American states, provinces in many countries, Japanese prefectures.
 var noun_type_geo_region = NounAsync("region", getRegion, false);
 function getRegion(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 2, 2);
+  return getGeo(query, callback, selectionIndices, 2, 2, false);
 }
 
 // The subregion
 var noun_type_geo_subregion = NounAsync("subregion", getSubregion, false);
 function getSubregion(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 3, 3);
+  return getGeo(query, callback, selectionIndices, 3, 3, false);
 }
 
 var noun_type_geo_town = NounAsync("city/town", getTown, false);
 function getTown(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 4, 4);
+  return getGeo(query, callback, selectionIndices, 4, 4, false);
 }
 
 var noun_type_geo_postal = NounAsync("postal code", getPostal, false);
 function getPostal(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 5, 5);
+  return getGeo(query, callback, selectionIndices, 5, 5, false);
 }
 
 var noun_type_geo_address = NounAsync("address", getAddress, false);
 function getAddress(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 6, 9);
+  return getGeo(query, callback, selectionIndices, 6, 9, false);
 }
 
-function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy) {
+var noun_type_geo_address_or_anything = NounAsync("address", getAddressAny, false);
+function getAddressAny(query, callback, selectionIndices) {
+  return getGeo(query, callback, selectionIndices, 6, 9, true);
+}
+
+function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy,
+                acceptAnything) {
   var url = "http://maps.google.com/maps/geo";
   var params = {
     q: query,
@@ -1381,8 +1387,11 @@ function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy) {
       // if no results found, accept whatever input with a low score (0.3)
       if (data.Status.code != "200" ||
           (data.Placemark && data.Placemark.length == 0)) {
-        callback(CmdUtils.makeSugg(query, query, null, .3,
-                                       selectionIndices));
+        if (acceptAnything)
+          callback([CmdUtils.makeSugg(query, query, null, .3,
+                                         selectionIndices)]);
+        else
+          callback([]);
         return;
       }
 

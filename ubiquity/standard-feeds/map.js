@@ -4,7 +4,7 @@ var API_KEY = "ABQIAAAAO0oNFUXoUNx4MuxcPwakNhR3yUCx-o6JvWtDFa7jNOakHN7MrBSTsaKtG
 
 CmdUtils.CreateCommand({
   names: ["map"],
-  arguments: {object: noun_type_geo_address},
+  arguments: {object: noun_type_geo_address_or_anything},
   icon: "chrome://ubiquity/skin/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
   help: "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a" +
