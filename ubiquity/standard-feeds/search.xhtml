@@ -1048,59 +1048,49 @@ CmdUtils.CreateCommand({
       temp_units = format.text;
     }
 
-    var geoUrl = "http://api.wunderground.com/auto/wui/geo/GeoLookupXML";
-    CmdUtils.previewGet( pblock, geoUrl, {query: query}, function(xml) {
-      var stations = jQuery(xml).find("station");
-      if (stations.length == 0)
-        return;
+    var wUrl = "http://api.wunderground.com/auto/wui/geo/WXCurrentObXML";
+    CmdUtils.previewGet(pblock, wUrl, {query:query}, function(xml){
+      var weather = jQuery(xml);
+      var city = weather.find("observation_location > full").text();
+      var country = weather.find("observation_location > country").text();
+      var condition = weather.find("weather").text();
+      
+      var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
+      if (weatherId == -1) // not Found
+        dump('condition not found');
+      var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
+      imgSrc += weatherId + "d.png";
 
-      var station = stations.find('icao').eq(0).text();
+      //change wind speed to kmh based on geolocation
+      var wind_text = weather.find("wind_string").text().split("at");
+      var wind_speed = parseFloat(weather.find("wind_mph").text());
+      var wind_units = "mph";
+      //http://en.wikipedia.org/wiki/Si_units
+      //UK uses mph
+      if (user_location && ["US","UM", "LR", "MM", "GB"].indexOf(user_location.country_code) == -1) {
+        wind_units = "km/h";
+        wind_speed = wind_speed * 1.6;
+      }
+      var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
 
-      var wUrl = "http://api.wunderground.com/auto/wui/geo/WXCurrentObXML";
-      CmdUtils.previewGet(pblock, wUrl, {query:station}, function(xml){
-        var weather = jQuery(xml);
-        var city = weather.find("observation_location > full").text();
-        var country = weather.find("observation_location > country").text();
-        var condition = weather.find("weather").text();
-        
-        var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
-        if (weatherId == -1) // not Found
-          dump('condition not found');
-        var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
-        imgSrc += weatherId + "d.png";
+      var weather = {
+        condition: condition,
+        temp_units: temp_units,
+        tempc: weather.find("temp_c").text(),
+        tempf: weather.find("temp_f").text(),
+        humidity: weather.find("relative_humidity").text(),
+        wind: wind,
+        img: imgSrc
+      };
 
-        //change wind speed to kmh based on geolocation
-        var wind_text = weather.find("wind_string").text().split("at");
-        var wind_speed = parseFloat(weather.find("wind_mph").text());
-        var wind_units = "mph";
-        //http://en.wikipedia.org/wiki/Si_units
-        //UK uses mph
-        if (user_location && ["US","UM", "LR", "MM", "GB"].indexOf(user_location.country_code) == -1) {
-          wind_units = "km/h";
-          wind_speed = wind_speed * 1.6;
-        }
-        var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
-
-        var weather = {
-          condition: condition,
-          temp_units: temp_units,
-          tempc: weather.find("temp_c").text(),
-          tempf: weather.find("temp_f").text(),
-          humidity: weather.find("relative_humidity").text(),
-          wind: wind,
-          img: imgSrc
-        };
-
-        pblock.innerHTML = CmdUtils.renderTemplate(
-          jQuery("#weather-search", feed.dom).html(),
-          {w: weather, location: city + ', ' + country,
-           weatherMessage: _("Weather for ${location}", {location: city + ', ' + country})}
-        );
-        
-        
-      },'xml');
-
-    }, "xml");
+      pblock.innerHTML = CmdUtils.renderTemplate(
+        jQuery("#weather-search", feed.dom).html(),
+        {w: weather, location: city + ', ' + country,
+         weatherMessage: _("Weather for ${location}", {location: city + ', ' + country})}
+      );
+      
+      
+    },'xml');
   }
 });
 
