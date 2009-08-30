@@ -103,7 +103,7 @@ img {float: left; }
 </style>
 <div class="weather">
   ${weatherMessage}<br />
-  <img src='${w.img}'/>
+  {if w.showImg}<img src='${w.img}'/>{/if}
   <div class="temp">
     {if w.temp_units === "fahrenheit"}
       ${w.tempf}&#xb0;F
@@ -1001,6 +1001,70 @@ var noun_type_temperature_units = new CmdUtils.NounType( "temperature units", Te
 
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
+var YAHOO_WEATHER_MAP = {
+  'unknown': null,
+  'snow grains': 'light snow showers',
+  'ice crystals': 'hail',
+  'ice pellets': 'hail',
+  mist: 'rain',
+  fog: 'foggy',
+  smoke: 'smoky',
+  'volcanic ash': 'haze',
+  'widespread dust': 'dust',
+  sand: null,
+  spray: null,
+  'dust whirls': 'dust',
+  'showers rain': 'rain',
+  sandstorm: null,
+  'low drifting snow': 'snow',
+  'low drifting widespread dust': 'dust',
+  'low drifting sand': null,
+  'blowing widespread dust': 'dust',
+  'blowing sand': null,
+  'rain showers': 'scattered showers',
+  'ice pellet showers': 'mixed rain and hail',
+  'hail showers': 'hail',
+  'small hail showers': 'hail',
+  thunderstorm: 'thunderstorms',
+  'thunderstorms and rain': 'thunderstorms',
+  'thunderstorms and snow': 'mixed rain and snow',
+  'thunderstorms and ice pellets': 'mixed rain and hail',
+  'thunderstorms with hail': 'mixed rain and hail',
+  'thunderstorms with small hail': 'mixed rain and hail',
+  'freezing fog': 'foggy',
+  'overcast': 'cloudy',
+  'scattered clouds': 'partly cloudy',
+  'n/a': null,
+  // forcast conditions
+  'flurries': 'snow flurries',
+  'freezing rain': 'mixed rain and snow',
+  'a thunderstorm': 'thunderstorms',
+  hazy: 'haze',
+  'mostly sunny': 'sunny',
+  'partly sunny': 'sunny'
+};
+
+function yahooWeatherImage(condition,dayOrNight) {
+  // dayOrNight must be 'd' or 'n'. By default, it'll be 'd'.
+  var conditionCode = condition.toLowerCase().trim();
+  if (conditionCode != 'heavy snow' && conditionCode != 'light snow showers')
+    conditionCode = conditionCode.replace(/^(heavy|light) /,'');
+  conditionCode = conditionCode.replace(/^chance of /,'');
+  
+  // map some Weather Underground weather codes to Yahoo! ones.
+  if (conditionCode in YAHOO_WEATHER_MAP)
+    conditionCode = YAHOO_WEATHER_MAP[conditionCode];
+  
+  if (!conditionCode)
+    return null;
+
+  var weatherId = WEATHER_TYPES.indexOf(conditionCode);
+  var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
+  imgSrc += weatherId + (dayOrNight || 'd') + ".png";
+
+  return imgSrc;
+}
+
 CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
   arguments: {location: noun_type_geo_town,
@@ -1029,7 +1093,7 @@ CmdUtils.CreateCommand({
       return;
     }
 
-    pblock.innerHTML = _("Weather for ${location}",{location:location.text});
+    pblock.innerHTML = _("Weather for ${location}",{location:location.text}) + '...';
 
     var query = null;
     if (location.data)
@@ -1055,12 +1119,8 @@ CmdUtils.CreateCommand({
       var country = weather.find("observation_location > country").text();
       var condition = weather.find("weather").text();
       
-      var weatherId = WEATHER_TYPES.indexOf( condition.toLowerCase() );
-      if (weatherId == -1) // not Found
-        dump('condition not found');
-      var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
-      imgSrc += weatherId + "d.png";
-
+      var imgSrc = yahooWeatherImage(condition);
+      
       //change wind speed to kmh based on geolocation
       var wind_text = weather.find("wind_string").text().split("at");
       var wind_speed = parseFloat(weather.find("wind_mph").text());
@@ -1080,7 +1140,8 @@ CmdUtils.CreateCommand({
         tempf: weather.find("temp_f").text(),
         humidity: weather.find("relative_humidity").text(),
         wind: wind,
-        img: imgSrc
+        img: imgSrc,
+        showImg: (imgSrc != null)
       };
 
       pblock.innerHTML = CmdUtils.renderTemplate(
