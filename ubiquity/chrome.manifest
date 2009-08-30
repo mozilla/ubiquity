@@ -10,15 +10,17 @@ overlay chrome://global/content/console.xul chrome://ubiquity/content/console.xu
 style chrome://global/content/customizeToolbar.xul chrome://ubiquity/skin/browser.css
 
 locale ubiquity ca	chrome/locale/ca/
+locale ubiquity cs-CZ	chrome/locale/cs-CZ/
 locale ubiquity de-DE	chrome/locale/de-DE/
 locale ubiquity en-US	chrome/locale/en-US/
 locale ubiquity es-ES	chrome/locale/es-ES/
 locale ubiquity fi-FI	chrome/locale/fi-FI/
 locale ubiquity fr	chrome/locale/fr/
+locale ubiquity fy-NL	chrome/locale/fy-NL/
 locale ubiquity hu	chrome/locale/hu/
 locale ubiquity it-IT	chrome/locale/it-IT/
 locale ubiquity ja	chrome/locale/ja/
-locale ubiquity nl	chrome/locale/nl/
+
 locale ubiquity pl-PL	chrome/locale/pl-PL/
 locale ubiquity pt	chrome/locale/pt/
 locale ubiquity pt-BR	chrome/locale/pt-BR/
