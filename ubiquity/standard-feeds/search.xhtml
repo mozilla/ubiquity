@@ -299,7 +299,7 @@ CmdUtils.makeSearchCommand({
       var tipsMessage = _("Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time.");
 
       pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#google-search", feed.dom).html(),
+        feed.dom.getElementById("google-search").innerHTML,
           { results:results,
             searchTerm:searchTerm,
             noResultsMessage:noResultsMessage,
@@ -329,8 +329,10 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     },
     success: function(responseData) {
       responseData = Utils.decodeJson(responseData);
-
-      var parse = jQuery("<div>" + responseData.parse.text["*"]);
+      //remove relative <img>s beforehand to suppress
+      //the "No chrome package registered for ..." message
+      var parse = jQuery(("<div>" + responseData.parse.text["*"])
+                         .replace(/<img src="\/[^>]+>/g, ""));
       //take only the text from summary because links won't work either way
       var articleSummary = parse.find("p:first").text();
       //remove citations [3], [citation needed], etc.
@@ -338,14 +340,11 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
       //TODO: also remove audio links (.audiolink & .audiolinkinfo)
       //TODO: remove "may refer to" summaries
       var articleImageSrc = (parse.find(".infobox img").attr("src") ||
-                             parse.find(".thumbimage") .attr("src"));
-      previewBlock.innerHTML =
-        <span>
-          {articleImageSrc
-           ? <img src={articleImageSrc} class="thumbnail"/>
-           : ""}
-          {articleSummary}
-        </span>.toXMLString();
+                             parse.find(".thumbimage") .attr("src") || "");
+      previewBlock.innerHTML = (
+        (articleImageSrc &&
+         <img src={articleImageSrc} class="thumbnail"/>.toXMLString()) +
+        Utils.escapeHtml(articleSummary));
     }
   });
 }
@@ -404,13 +403,12 @@ CmdUtils.CreateCommand({
           return;
         }
 
-        function generateWikipediaLink(title) {
-          var wikipediaUrl = "http://" + langCode + ".wikipedia.org/wiki/";
-          return wikipediaUrl + title.replace(/ /g, "_");
-        }
+        function generateWikipediaLink(title) (
+          "http://" + langCode + ".wikipedia.org/wiki/" + 
+          title.replace(/ /g, "_"));
 
         (previewData.results = searchResponse.query.search)
-          .forEach(function (o, i) { o.key = i + 1 });
+          .forEach(function genKey(o, i) { o.key = i + 1 });
         previewData._MODIFIERS = {wikilink: generateWikipediaLink};
         previewData.foundMessage =
           _("Wikipedia articles found matching <b>${query}</b>:", previewData);
@@ -420,7 +418,7 @@ CmdUtils.CreateCommand({
 
 
         previewBlock.innerHTML = CmdUtils.renderTemplate(
-          jQuery("#wikipedia-search", feed.dom).html(),
+          feed.dom.getElementById("wikipedia-search").innerHTML,
           previewData);
 
         jQuery("dd", previewBlock).each(function eachDD() {
@@ -469,7 +467,7 @@ CmdUtils.makeSearchCommand({
 
     CmdUtils.previewGet( pblock, url, params, function(data) {
       pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#yahoo-search", feed.dom).html(),
+        feed.dom.getElementById("yahoo-search").innerHTML,
         {results:data.ResultSet.Result}
       );
     }, "json");
@@ -758,7 +756,7 @@ CmdUtils.makeSearchCommand({
       };
 
       pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#youtube-search", feed.dom).html(),
+        feed.dom.getElementById("youtube-search").innerHTML,
         previewData);
 
     }, "json");
@@ -817,7 +815,7 @@ CmdUtils.makeSearchCommand({
         };
 
         previewBlock.innerHTML = CmdUtils.renderTemplate(
-          jQuery("#flickr-search", feed.dom).html(),
+          feed.dom.getElementById("flickr-search").innerHTML,
           previewData);
     }
   });
@@ -980,7 +978,7 @@ CmdUtils.CreateCommand({
     CmdUtils.previewGet( pblock, url, params, function(data) {
       globals.yelp = data.businesses;
       pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#yelp-search", feed.dom).html(),
+        feed.dom.getElementById("yelp-search").innerHTML,
         {businesses: data.businesses,
          _MODIFIERS: {yelpBusiness: formatYelpBusiness}}
       );
@@ -1050,11 +1048,11 @@ function yahooWeatherImage(condition,dayOrNight) {
   if (conditionCode != 'heavy snow' && conditionCode != 'light snow showers')
     conditionCode = conditionCode.replace(/^(heavy|light) /,'');
   conditionCode = conditionCode.replace(/^chance of /,'');
-  
+
   // map some Weather Underground weather codes to Yahoo! ones.
   if (conditionCode in YAHOO_WEATHER_MAP)
     conditionCode = YAHOO_WEATHER_MAP[conditionCode];
-  
+
   if (!conditionCode)
     return null;
 
@@ -1118,9 +1116,9 @@ CmdUtils.CreateCommand({
       var city = weather.find("observation_location > full").text();
       var country = weather.find("observation_location > country").text();
       var condition = weather.find("weather").text();
-      
+
       var imgSrc = yahooWeatherImage(condition);
-      
+
       //change wind speed to kmh based on geolocation
       var wind_text = weather.find("wind_string").text().split("at");
       var wind_speed = parseFloat(weather.find("wind_mph").text());
@@ -1145,12 +1143,10 @@ CmdUtils.CreateCommand({
       };
 
       pblock.innerHTML = CmdUtils.renderTemplate(
-        jQuery("#weather-search", feed.dom).html(),
+        feed.dom.getElementById("weather-search").innerHTML,
         {w: weather, location: city + ', ' + country,
          weatherMessage: _("Weather for ${location}", {location: city + ', ' + country})}
       );
-      
-      
     },'xml');
   }
 });
