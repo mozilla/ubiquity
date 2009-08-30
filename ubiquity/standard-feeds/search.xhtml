@@ -96,28 +96,51 @@ ${matchMessage}
 
 
 <div id="weather-search" style="display: none;">
-<style>
-img {float: left; }
-.weather{ font-family: arial, helvetica; color:white;}
-.temp{ font-size: 60px; }
-</style>
-<div class="weather">
-  ${weatherMessage}<br />
-  {if w.showImg}<img src='${w.img}'/>{/if}
-  <div class="temp">
-    {if w.temp_units === "fahrenheit"}
-      ${w.tempf}&#xb0;F
-    {else}
-      ${w.tempc}&#xb0;C
-    {/if}
-    <br/>
+  <style>
+  .mainimg { float: left; }
+  .weather{ font-family: arial, helvetica; color:white;}
+  .forecast { clear: both; }
+  .forecast img { width: 70px; }
+  .temp { font-size: 60px; }
+  .high { color: red; }
+  .low { color: blue; }
+  </style>
+  <div class="weather">
+    ${weatherMessage}<br />
+    {if w.showImg}<img class='mainimg' src='${w.img}'/>{/if}
+    <div class="temp">
+      {if w.temp_units === "fahrenheit"}
+        ${w.tempf}&#xb0;F
+      {else}
+        ${w.tempc}&#xb0;C
+      {/if}
+      <br/>
+    </div>
+    <div class="extra">
+      ${w.condition}<br/>
+      ${w.wind}<br/>
+      ${w.humidity}<br/>
+    </div>
+    <div class="forecast">
+      <table>
+      <tr>{for day in w.forecast}
+        <td>{if day.showImg}<img src='${day.img}'/>{/if}</td>
+      {/for}</tr>
+      <tr>{for day in w.forecast}
+        <th>${day.label}</th>
+      {/for}</tr>
+      <tr>{for day in w.forecast}
+        <td>${day.condition}</td>
+      {/for}</tr>
+      <tr>{for day in w.forecast}
+        <td class='high'>${day.high}</td>
+      {/for}</tr>
+      <tr>{for day in w.forecast}
+        <td class='low'>${day.low}</td>
+      {/for}</tr>
+      </table>
+    </div>
   </div>
-  <div class="extra">
-    ${w.condition}<br/>
-    ${w.wind}<br/>
-    ${w.humidity}<br/>
-  </div>
-</div>
 </div>
 
 
@@ -1109,19 +1132,31 @@ CmdUtils.CreateCommand({
     } else {
       temp_units = format.text;
     }
+    
+    var weatherObj = null;
+    var forecastObj = null;
 
-    var wUrl = "http://api.wunderground.com/auto/wui/geo/WXCurrentObXML";
-    CmdUtils.previewGet(pblock, wUrl, {query:query}, function(xml){
-      var weather = jQuery(xml);
-      var city = weather.find("observation_location > full").text();
-      var country = weather.find("observation_location > country").text();
-      var condition = weather.find("weather").text();
+    var recordWeatherAndTryToPreview = function(wXml) {
+      weatherObj = jQuery(wXml);
+      tryToPreview();
+    };
+    var recordForecastAndTryToPreview = function(fXml) {
+      forecastObj = jQuery(fXml);
+      tryToPreview();
+    };
+    var tryToPreview = function weather_tryToPreview() {
+      if (weatherObj == null || forecastObj == null)
+        return false;
+        
+      var city = weatherObj.find("observation_location > full").text();
+      var country = weatherObj.find("observation_location > country").text();
+      var condition = weatherObj.find("weather").text();
 
       var imgSrc = yahooWeatherImage(condition);
 
       //change wind speed to kmh based on geolocation
-      var wind_text = weather.find("wind_string").text().split("at");
-      var wind_speed = parseFloat(weather.find("wind_mph").text());
+      var wind_text = weatherObj.find("wind_string").text().split("at");
+      var wind_speed = parseFloat(weatherObj.find("wind_mph").text());
       var wind_units = "mph";
       //http://en.wikipedia.org/wiki/Si_units
       //UK uses mph
@@ -1134,20 +1169,48 @@ CmdUtils.CreateCommand({
       var weather = {
         condition: condition,
         temp_units: temp_units,
-        tempc: weather.find("temp_c").text(),
-        tempf: weather.find("temp_f").text(),
-        humidity: weather.find("relative_humidity").text(),
+        tempc: weatherObj.find("temp_c").text(),
+        tempf: weatherObj.find("temp_f").text(),
+        humidity: weatherObj.find("relative_humidity").text(),
         wind: wind,
         img: imgSrc,
-        showImg: (imgSrc != null)
+        showImg: (imgSrc != null),
+        forecast: []
       };
+      
+      var today = true;
+      forecastObj.find('simpleforecast forecastday').each(function(i,day) {
+        var day = jQuery(day);
+        var label = _("${month}/${day}",{month:day.find('month').text(),
+                                         day:day.find('day').text()});
+        if (today) {
+          label = _('today');
+          today = false;
+        }
+        var condition = day.find('conditions').text();
+        var imgSrc = yahooWeatherImage(condition);
+        weather.forecast.push({label: label,
+                               condition: condition,
+                               img: imgSrc,
+                               showImg: (imgSrc != null),
+                               high: day.find('high > '+temp_units).text(),
+                               low: day.find('low > '+temp_units).text()});
+      });
 
       pblock.innerHTML = CmdUtils.renderTemplate(
         feed.dom.getElementById("weather-search").innerHTML,
         {w: weather, location: city + ', ' + country,
          weatherMessage: _("Weather for ${location}", {location: city + ', ' + country})}
       );
-    },'xml');
+      
+    };
+
+    var wUrl = "http://api.wunderground.com/auto/wui/geo/WXCurrentObXML";
+    CmdUtils.previewGet(pblock, wUrl, {query:query}, recordWeatherAndTryToPreview, 'xml');
+    var fUrl = "http://api.wunderground.com/auto/wui/geo/ForecastXML";
+    CmdUtils.previewGet(pblock, fUrl, {query:query}, recordForecastAndTryToPreview, 'xml');
+
+
   }
 });
 
