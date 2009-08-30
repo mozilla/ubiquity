@@ -1,23 +1,28 @@
 const AS = (Cc["@mozilla.org/browser/annotation-service;1"]
             .getService(Ci.nsIAnnotationService));
-const IOS = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+const IOS = (Cc["@mozilla.org/network/io-service;1"]
+             .getService(Ci.nsIIOService));
 
-const ToRemove = "_toRemove";
+const CLASS_TO_REMOVE = "_toRemove";
+const ANNO_EDIT = "ubiquity/edit";
 
 CmdUtils.CreateCommand({
   names: ["delete"],
   description: "Deletes the selected chunk of HTML from the page.",
   icon: "chrome://ubiquity/skin/icons/delete.png",
   execute: function delete_execute() {
-    var sel = context.focusedWindow.getSelection();
-    var document = context.focusedWindow.document;
+    var {focusedWindow} = context;
+    var {document} = focusedWindow;
+    var sel = focusedWindow.getSelection();
     for (var i = sel.rangeCount; i--;) {
       var range = sel.getRangeAt(i);
-      var newNode = document.createElement("div");
-      newNode.className = ToRemove;
-      range.surroundContents(newNode);
+      var div = document.createElement("div");
+      div.className = CLASS_TO_REMOVE;
+      div.appendChild(range.cloneContents());
+      range.deleteContents();
+      range.insertNode(div);
     }
-    jQuery("." + ToRemove, document).slideUp();
+    jQuery("." + CLASS_TO_REMOVE, document).slideUp();
   }
 });
 
@@ -26,7 +31,7 @@ CmdUtils.CreateCommand({
   description: "Restores the HTML deleted by the delete command.",
   icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
   execute: function undelete_execute() {
-    jQuery("." + ToRemove, context.focusedWindow.document)
+    jQuery("." + CLASS_TO_REMOVE, context.focusedWindow.document)
       .slideDown(function onUndelete() {
         var $div = jQuery(this);
         $div.after($div.contents()).remove();
@@ -43,8 +48,15 @@ function stopEditingPage() {
 
 CmdUtils.CreateCommand({
   names: ["edit page", "turn on edit mode"],
-  description: "Puts the web page into a mode where you can edit the contents.",
-  help: "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue \'bold\', \'italic\', or \'underline\' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode.",
+  description:
+  "Puts the web page into a mode where you can edit the contents.",
+  help: ("In edit mode, you can edit the page like any document: " +
+         "Select text, delete it, add to it, copy and paste it.  " +
+         "Issue 'bold', 'italic', or 'underline' commands to add " +
+         "formatting.  Issue the 'save' command to save your changes " +
+         "so they persist even when you reload the page.  " +
+         "Issue 'stop-editing-page' when you're done to go back to the " +
+         "normal page viewing mode."),
   icon: "chrome://ubiquity/skin/icons/page_edit.png",
   execute: function edit_page_execute() {
     var doc = CmdUtils.getDocument();
@@ -55,10 +67,10 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["stop editing page", "turn off edit mode"],
-  description: "If you used the 'edit page' command to put the page into " +
-               "editable mode, use this command to end that mode and go " +
+  description: ("If you used the 'edit page' command to put the page into " +
+                "editable mode, use this command to end that mode and go " +
                 "back to normal page viewing. If you want the changes to " +
-                "persist on page reload, issue the 'save' command first.",
+                "persist on page reload, issue the 'save' command first."),
   icon: "chrome://ubiquity/skin/icons/page_refresh.png",
   execute: stopEditingPage,
 });
@@ -72,7 +84,7 @@ CmdUtils.CreateCommand({
   execute: function save_edits_execute() {
     var {location, body} = stopEditingPage();
     AS.setPageAnnotation(IOS.newURI(location.href, null, null),
-                         "ubiquity/edit", body.innerHTML, 0, 4);
+                         ANNO_EDIT, body.innerHTML, 0, 4);
   }
 });
 
@@ -93,7 +105,7 @@ function pageLoad_restorePageAnnotations(document) {
 
   var uri = IOS.newURI(document.location.href, null, null);
   AS.getPageAnnotationNames(uri, {}).forEach(function eachAN(annoName) {
-    if (annoName === "ubiquity/edit") {
+    if (annoName === ANNO_EDIT) {
       document.body.innerHTML = AS.getPageAnnotation(uri, annoName);
       // TODO: Fix "TypeError: head is not defined" on some pages
     }
