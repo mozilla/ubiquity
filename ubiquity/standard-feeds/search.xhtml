@@ -1088,6 +1088,10 @@ function yahooWeatherImage(condition,dayOrNight) {
 
 CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
+  author: {
+      name: "mitcho (Michael Yoshitaka Erlewine)",
+      email: "mitcho@mitcho.com"
+  },
   arguments: {location: noun_type_geo_town,
               format: noun_type_temperature_units},
   icon: "chrome://ubiquity/skin/icons/wunderground.ico",
