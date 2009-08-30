@@ -1,1 +1,59 @@
-<!-- This file is just a placeholder for localizations to dev tools -->
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetitle.PlayPen "&appTitle; – Parser 2 Playpen">
+<!ENTITY ubiquity.pagetitle.QuickLaunch "&appTitle; – Szybkie uruchamianie">
+<!ENTITY ubiquity.pagetitle.Persistence "&appTitle; – Ubiquity Persistence Project">
+<!ENTITY ubiquity.pagetitle.SuggMemDebug "&appTitle; – Suggestion Memory Debugger">
+<!ENTITY ubiquity.pagetitle.TestSuite "&appTitle; – Testy">
+<!ENTITY ubiquity.pagetitle.Tuner "&appTitle; – Tuner nountype">
+<!-- Common errors -->
+<!ENTITY ubiquity.error.WarningParser2 "Nie używasz Parsera 2! Tuner nountype obecnie pracuje tylko z Parserem 2. Przełącz na <a href='chrome://ubiquity/content/settings.xhtml'>Parser 2 (zwany parserem nowej generacji)</a>, uruchom ponownie Firefoksa i spróbuj jeszcze raz.">
+<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> nie został wczytany prawidłowo. Zazwyczaj dzieje się tak, gdy strona ta była wczytywana w tym samym czasie, gdy było wczytywane okno i strona została wczytana wcześnijej. W takim przypadku, należy ponownie wczytać stronę i wszystko powinno działać. Jeśli nie działa – może być to problem z poprawnością kodu.">
+<!-- Common strings -->
+<!ENTITY ubiquity.common.OptionAutoRun "automatycznie przetwarzaj podczas aktualizacji">
+<!ENTITY ubiquity.common.OptionGSync "synchronizuj z <code>gUbiquity</code>">
+<!ENTITY ubiquity.common.ButtonRun "uruchom">
+<!ENTITY ubiquity.common.HeaderSettings "Ustawienia">
+<!-- Test Suite chrome/content/playpen.xhtml -->
+<!ENTITY ubiquity.playpen.Header "Parser 2 Playpen">
+<!ENTITY ubiquity.playpen.ShortDesc "To jest miejsce testowania i optymalizacji nowego parsera Ubiquity.">
+<!ENTITY ubiquity.playpen.OptionMaxSuggs "maksymalna liczba sugesti:">
+<!ENTITY ubiquity.playpen.OptionShowInfo "wyświetlaj informacje parsowania">
+<!ENTITY ubiquity.playpen.OptionShowLineage "wyświetlaj rodowód parsowania">
+<!ENTITY ubiquity.playpen.FlushOnParse "opróżnij bufor podczas parsowania (niezbędne dla dokładnych przebiegów czasowych)">
+<!ENTITY ubiquity.playpen.WordTimes "razy">
+<!ENTITY ubiquity.playpen.SelectionText "wybrany tekst (dla zamienienia anafory):">
+<!ENTITY ubiquity.playpen.EnvironmentInfo "Informacje o środowisku <small>(kliknij, aby przełączyć)</small>">
+<!ENTITY ubiquity.playpen.ActiveSemanticRoles "Aktywne znaczenia semantyczne:">
+<!ENTITY ubiquity.playpen.NotesOverlapping "(pokrywanie się znaczeń z takimi samymi delimiterami wskazującymi równoznaczne delimitery)">
+<!ENTITY ubiquity.playpen.ActiveNounTypes "Aktywne typy rzeczowników:">
+<!ENTITY ubiquity.playpen.ScoreFunctions "(zobacz źródło, aby zobaczyć wyniki funkcji)">
+<!ENTITY ubiquity.playpen.ActiveVerbs "Aktywne czasowniki:">
+<!ENTITY ubiquity.playpen.WordSuggestions "Sugestie">
+<!ENTITY ubiquity.playpen.WordKey "Słowa kluczowe:">
+<!ENTITY ubiquity.playpen.WordVerb "czasownik">
+<!ENTITY ubiquity.playpen.WordObject "obiekt">
+<!ENTITY ubiquity.playpen.WordPrefix "prefiks">
+<!ENTITY ubiquity.playpen.WordArgument "argument">
+<!ENTITY ubiquity.playpen.VerbsNote "(umieść kursor myszy nad czasownikiem, aby zobaczyć aktualny czasownik i nad prefiksem, aby zobaczyć skojarzone znaczenie semantyczne)">
+<!ENTITY ubiquity.playpen.CurrentParse "Obecne parsowanie:">
+<!ENTITY ubiquity.playpen.AvgTimingResults "ms (średnia: <span class='avg'></span> ms)">
+<!ENTITY ubiquity.playpen.ParseTree "Aktualne drzewo parsowania zapytań:">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
+<!ENTITY ubiquity.quicklaunch.Header "Desktop QuickLaunch">
+<!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>Desktop QuickLaunch</strong> jest bardzo eksperymentalną funkcją, która pozwala na wywoływanie &appTitle; poza przeglądarką do używania na komputerze.">
+<!ENTITY ubiquity.quicklaunch.LongDesc1 "Obecnie funkcja ta jest obsługiwana przez system operacyjny OS X, ale planujemy, aby w przyszłości działała na innych platformach systemowych.">
+<!ENTITY ubiquity.quicklaunch.LongDesc2 "Aby włączyć Desktop QuickLaunch, naciśnij znajdujący się poniżej przycisk. Po włączeniu, naciśnij option+space, aby wywołać Ubiquity.">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
+<!ENTITY ubiquity.testsuite.ShowSuccess "Wyświetl zaliczone testy">
+<!ENTITY ubiquity.testsuite.ShowSkipped "Wyświetl pominięte testy">
+<!ENTITY ubiquity.testsuite.ShowFailed "Wyświetl niezaliczone testy">
+<!ENTITY ubiquity.testsuite.TestsRunning "Testy w toku…">
+<!-- Test Suite chrome/content/tuner.xhtml -->
+<!ENTITY ubiquity.tuner.Header "Tuner Nountype">
+<!ENTITY ubiquity.tuner.ShortDesc "Ten tuner pozwala testować różne dane wejściowe względem aktywnych nountypes i weryfikować ich sugestie. Jest to szczególnie pomocne programistom, aby otrzymać wskazówki w celu poprawienia wyników sugestii nountype. <strong>Informacja: Tuner nountype czyści <code>bufor</code> podczas każdego uruchomienia.</strong>">
+<!ENTITY ubiquity.tuner.OptionMaxSuggs "maksymalna liczba sugestii dla nountype:">
+<!ENTITY ubiquity.tuner.OptionParserTip "używa tego samego parsera, jak obecne wystąpienie &appTitle;">
+<!ENTITY ubiquity.tuner.OptionGSync "synchronizuj z <code>gUbiquity</code>">
+<!ENTITY ubiquity.tuner.HeaderSuggestions "Sugestie">
+<!ENTITY ubiquity.tuner.THeadNounType "nountype">
+<!ENTITY ubiquity.tuner.THeadSuggestion "sugestia">

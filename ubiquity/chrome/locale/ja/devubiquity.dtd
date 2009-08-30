@@ -1,1 +1,53 @@
 <!-- This file is just a placeholder for localizations to dev tools -->
+<!ENTITY ubiquity.pagetitle.PlayPen "&appTitle; Parser 2 Playpen">
+<!ENTITY ubiquity.pagetitle.QuickLaunch "&appTitle; Desktop QuickLaunch">
+<!ENTITY ubiquity.pagetitle.Persistence "&appTitle; Persistence Project">
+<!ENTITY ubiquity.pagetitle.SuggMemDebug "Suggestion Memory Debugger">
+<!ENTITY ubiquity.pagetitle.TestSuite "&appTitle; Test Suite">
+<!ENTITY ubiquity.pagetitle.Tuner "&appTitle; Nountype Tuner">
+<!ENTITY ubiquity.error.WarningParser2 "Parser 2 に設定されていません！ Nountype Tuner は今のところ Parser 2 でのみ動作します。設定を <a href='chrome://ubiquity/content/settings.xhtml'>Parser 2 (次世代パーサ) に切り替え</a>て Firefox を再起動してください。">
+<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> が読み込まれていません。おそらく、新しく開いたウィンドウの chrome が読み込まれる前に、このページが読み込まれています。ページを再度読み込んでください。動作しない場合はソースコードに問題がある可能性があります。">
+<!ENTITY ubiquity.common.OptionAutoRun "入力と同時に自動的にパースする">
+<!ENTITY ubiquity.common.OptionGSync "<code>gUbiquity</code> と同期する">
+<!ENTITY ubiquity.common.ButtonRun "実行！">
+<!ENTITY ubiquity.common.HeaderSettings "設定">
+<!ENTITY ubiquity.playpen.Header "&appTitle; Parser 2 Playpen">
+<!ENTITY ubiquity.playpen.ShortDesc "開発中の Ubiquity パーサのテストと最適化のためのページです。">
+<!ENTITY ubiquity.playpen.OptionMaxSuggs "最大候補数:">
+<!ENTITY ubiquity.playpen.OptionShowInfo "パース情報を表示">
+<!ENTITY ubiquity.playpen.OptionShowLineage "パース過程を表示">
+<!ENTITY ubiquity.playpen.FlushOnParse "パースのキャッシュをフラッシュ (正確なタイミングのために必要)">
+<!ENTITY ubiquity.playpen.WordTimes "回">
+<!ENTITY ubiquity.playpen.SelectionText "選択テキスト (「これ」などの代名詞を置き換える):">
+<!ENTITY ubiquity.playpen.EnvironmentInfo "パース情報 <small>(クリックで表示切り替え)</small>">
+<!ENTITY ubiquity.playpen.ActiveSemanticRoles "アクティブな semantic roles (意味的役割):">
+<!ENTITY ubiquity.playpen.NotesOverlapping "(同じ区切りの roles は同義の区切りであることを示しています)">
+<!ENTITY ubiquity.playpen.ActiveNounTypes "アクティブな noun types (名詞型):">
+<!ENTITY ubiquity.playpen.ScoreFunctions "(スコア機能はソースコード参照)">
+<!ENTITY ubiquity.playpen.ActiveVerbs "アクティブな verbs (動詞):">
+<!ENTITY ubiquity.playpen.WordSuggestions "コマンド候補">
+<!ENTITY ubiquity.playpen.WordKey "キー:">
+<!ENTITY ubiquity.playpen.WordVerb "動詞:">
+<!ENTITY ubiquity.playpen.WordObject "目的語">
+<!ENTITY ubiquity.playpen.WordPrefix "接頭辞">
+<!ENTITY ubiquity.playpen.WordArgument "引数">
+<!ENTITY ubiquity.playpen.VerbsNote "(動詞をマウスでポイントすると実際の動詞を表示し、接頭辞をポイントすると関連付けられた意味的役割がが表示されます)">
+<!ENTITY ubiquity.playpen.CurrentParse "現在のパース:">
+<!ENTITY ubiquity.playpen.AvgTimingResults "ms (平均: <span class='avg'></span> ms)">
+<!ENTITY ubiquity.playpen.ParseTree "現在のクエリのパースツリー:">
+<!ENTITY ubiquity.quicklaunch.Header "Desktop QuickLaunch">
+<!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>Desktop QuickLaunch</strong> は、&appTitle; をブラウザ外でコンピュータ上のどこからでも呼び出せるようにする実験段階の機能です。">
+<!ENTITY ubiquity.quicklaunch.LongDesc1 "今のところ、この機能は OS X 上でのみ使用できますが、他のプラットフォームでも利用可能になる予定です。">
+<!ENTITY ubiquity.quicklaunch.LongDesc2 "Desktop QuickLaunch を有効にするには下のボタンをクリックしてください。有効にすると、コンピュータ上のどこからでも「option + スペースキー」で Ubiquity を呼び出せます。">
+<!ENTITY ubiquity.testsuite.ShowSuccess "成功したテストを表示">
+<!ENTITY ubiquity.testsuite.ShowSkipped "スキップしたテストを表示">
+<!ENTITY ubiquity.testsuite.ShowFailed "失敗したテストを表示">
+<!ENTITY ubiquity.testsuite.TestsRunning "テストの実行中です...">
+<!ENTITY ubiquity.tuner.Header "&appTitle; Nountype Tuner">
+<!ENTITY ubiquity.tuner.ShortDesc "このチューナーはアクティブな nountypes に対して異なる入力をテストし、それらの候補を検証します。これは、開発者が nountype の候補のスコアを調整するのに役立ちます。<strong>注意: Nountype Tuner は、実行するたびに <code>nounCache</code> を消去します。</strong>">
+<!ENTITY ubiquity.tuner.OptionMaxSuggs "nountype ごとの最大候補数:">
+<!ENTITY ubiquity.tuner.OptionParserTip "現在の &appTitle; 設定と同じパーサを使用する">
+<!ENTITY ubiquity.tuner.OptionGSync "<code>gUbiquity</code> と同期する">
+<!ENTITY ubiquity.tuner.HeaderSuggestions "候補">
+<!ENTITY ubiquity.tuner.THeadNounType "nountype">
+<!ENTITY ubiquity.tuner.THeadSuggestion "候補">

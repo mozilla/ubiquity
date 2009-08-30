@@ -1,1 +1,47 @@
 <!-- This file is just a placeholder for localizations to dev tools -->
+<!ENTITY ubiquity.pagetitle.PlayPen "&appTitle; 解析器 2 Playpen">
+<!ENTITY ubiquity.pagetitle.QuickLaunch "&appTitle; 桌面快速启动">
+<!ENTITY ubiquity.pagetitle.Persistence "Ubiquity 持久性项目">
+<!ENTITY ubiquity.pagetitle.SuggMemDebug "建议内存调试">
+<!ENTITY ubiquity.pagetitle.TestSuite "&appTitle; 测试套件">
+<!ENTITY ubiquity.pagetitle.Tuner "&appTitle; Nountype Tuner">
+<!ENTITY ubiquity.error.WarningParser2 "您没有使用解析器 2！nountype tuner 目前只适用于解析器 2。请 <a href='chrome://ubiquity/content/settings.xhtml'>打开 解析器 2 (又名下一代解析器)</a>，重新启动 Firefox，然后再试一次。">
+<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> 没有正确加载。Most likely this means you loaded this page at the same time that you loaded the window，and this page loaded before the window chrome，在这种情况下，您可以刚刚重新加载这个页并它应该工作。否则，我们可能是一些代码的问题。">
+<!ENTITY ubiquity.common.OptionAutoRun "自动更新解析">
+<!ENTITY ubiquity.common.OptionGSync "用 <code>gUbiquity</code> 同步">
+<!ENTITY ubiquity.common.ButtonRun "运行！">
+<!ENTITY ubiquity.common.HeaderSettings "设置">
+<!ENTITY ubiquity.playpen.Header "&appTitle; 解析器 2 Playpen">
+<!ENTITY ubiquity.playpen.ShortDesc "这是一个解析器测试和优化 playpen 为即将到来的 Ubiquity 解析器。">
+<!ENTITY ubiquity.playpen.OptionMaxSuggs "最大的建议：">
+<!ENTITY ubiquity.playpen.OptionShowInfo "显示解析信息">
+<!ENTITY ubiquity.playpen.OptionShowLineage "显示解析 lineage">
+<!ENTITY ubiquity.playpen.FlushOnParse "刷新解析缓存 (需要精确计时)">
+<!ENTITY ubiquity.playpen.WordTimes "时间">
+<!ENTITY ubiquity.playpen.SelectionText "选择文本 (for anaphora substitution)：">
+<!ENTITY ubiquity.playpen.EnvironmentInfo "环境信息 <small>(按我切换)</small>">
+<!ENTITY ubiquity.playpen.ActiveNounTypes "主动名词类型：">
+<!ENTITY ubiquity.playpen.ScoreFunctions "（查看开源的评分功能）">
+<!ENTITY ubiquity.playpen.ActiveVerbs "主动动词：">
+<!ENTITY ubiquity.playpen.WordSuggestions "建议">
+<!ENTITY ubiquity.playpen.WordVerb "动词">
+<!ENTITY ubiquity.playpen.WordObject "对象">
+<!ENTITY ubiquity.playpen.WordPrefix "前缀">
+<!ENTITY ubiquity.playpen.WordArgument "理由">
+<!ENTITY ubiquity.playpen.CurrentParse "当前解析：">
+<!ENTITY ubiquity.playpen.AvgTimingResults "ms (avg: <span class='avg'></span> ms)">
+<!ENTITY ubiquity.playpen.ParseTree "当前查询的解析树：">
+<!ENTITY ubiquity.quicklaunch.Header "桌面快速启动">
+<!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>桌面快速启动</strong> 是一个非常实验性功能，它允许 &appTitle; 在您的计算机上的任何地方（包括浏览器之外）调用 Ubiquity。">
+<!ENTITY ubiquity.quicklaunch.LongDesc1 "目前此功能只支持 OS X， 但我们确实计划使其今后在其他平台运行。">
+<!ENTITY ubiquity.quicklaunch.LongDesc2 "要启动桌面快速启动，点击下面的按钮。一旦启用了它，你可以按 option+space 在任何地方调用 Ubiquity。">
+<!ENTITY ubiquity.testsuite.ShowSuccess "显示成功的测试">
+<!ENTITY ubiquity.testsuite.ShowSkipped "显示跳过的测试">
+<!ENTITY ubiquity.testsuite.ShowFailed "显示失败的测试">
+<!ENTITY ubiquity.testsuite.TestsRunning "运行测试...">
+<!ENTITY ubiquity.tuner.Header "&appTitle; Nountype Tuner">
+<!ENTITY ubiquity.tuner.OptionMaxSuggs "每 nountype 最大的建议：">
+<!ENTITY ubiquity.tuner.OptionParserTip "使用与当前 &appTitle; 例子相同的解析器">
+<!ENTITY ubiquity.tuner.OptionGSync "用 <code>gUbiquity</code> 同步">
+<!ENTITY ubiquity.tuner.HeaderSuggestions "建议">
+<!ENTITY ubiquity.tuner.THeadSuggestion "建议">

@@ -1,1 +1,52 @@
-<!-- This file is just a placeholder for localizations to dev tools -->
+<!ENTITY ubiquity.pagetitle.PlayPen "Песочница для &appTitle; Parser 2">
+<!ENTITY ubiquity.pagetitle.QuickLaunch "Быстрый запуск &appTitle;">
+<!ENTITY ubiquity.pagetitle.Persistence "Проект Ubiquity Persistence">
+<!ENTITY ubiquity.pagetitle.SuggMemDebug "Отладчик памяти о предложениях">
+<!ENTITY ubiquity.pagetitle.TestSuite "Набор тестов &appTitle;">
+<!ENTITY ubiquity.pagetitle.Tuner "Механизм настройки типов имён &appTitle;">
+<!ENTITY ubiquity.error.WarningParser2 "Вы не используете Parser 2 в данный момент! Механизм настройки типа имён в данный момент работает только с Parser 2. Пожалуйста, <a href='chrome://ubiquity/content/settings.xhtml'>включите Parser 2 (он же анализатор следующего поколения)</a>, перезапустите Firefox и попробуйте снова.">
+<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> не был корректно загружен. Наиболее вероятно, это означает, что вы загрузили эту страницу одновременно с загрузкой окна и, следовательно, она была загружена до загрузки chrome окна. В этом случае вы можете просто обновить страницу и <code>gUbiquity</code> должен заработать. В противном случае возможно наличие проблемы с какой-то частью кода.">
+<!ENTITY ubiquity.common.OptionAutoRun "автоматически анализировать при обновлении">
+<!ENTITY ubiquity.common.OptionGSync "синхронизировать с <code>gUbiquity</code>">
+<!ENTITY ubiquity.common.ButtonRun "запуск!">
+<!ENTITY ubiquity.common.HeaderSettings "Настройки">
+<!ENTITY ubiquity.playpen.Header "Песочница &appTitle; Parser 2">
+<!ENTITY ubiquity.playpen.ShortDesc "Это песочница для тестирования и оптимизации нового анализатора &appTitle;.">
+<!ENTITY ubiquity.playpen.OptionMaxSuggs "максимум предложений:">
+<!ENTITY ubiquity.playpen.OptionShowInfo "показывать информацию об анализе">
+<!ENTITY ubiquity.playpen.OptionShowLineage "показывать последовательность анализа">
+<!ENTITY ubiquity.playpen.FlushOnParse "сбрасывать кэш при анализе (необходимо для точного замера времени)">
+<!ENTITY ubiquity.playpen.WordTimes "раз(а)">
+<!ENTITY ubiquity.playpen.SelectionText "текст выделения (для подстановки вместо анафоры)">
+<!ENTITY ubiquity.playpen.EnvironmentInfo "Информация об окружении <small>(щелкните для переключения)</small>">
+<!ENTITY ubiquity.playpen.ActiveSemanticRoles "Активные семантические роли:">
+<!ENTITY ubiquity.playpen.NotesOverlapping "(перекрывающиеся роли с одинаковыми разделителями обозначают синонимичные разделители)">
+<!ENTITY ubiquity.playpen.ActiveNounTypes "Активные типы имён:">
+<!ENTITY ubiquity.playpen.ScoreFunctions "(см. функции оценки в исходном коде)">
+<!ENTITY ubiquity.playpen.ActiveVerbs "Активные глаголы:">
+<!ENTITY ubiquity.playpen.WordSuggestions "Предложения">
+<!ENTITY ubiquity.playpen.WordKey "Ключ:">
+<!ENTITY ubiquity.playpen.WordVerb "глагол">
+<!ENTITY ubiquity.playpen.WordObject "дополнение">
+<!ENTITY ubiquity.playpen.WordPrefix "префикс">
+<!ENTITY ubiquity.playpen.WordArgument "аргумент">
+<!ENTITY ubiquity.playpen.VerbsNote "(наведите курсор мыши на глагол, чтобы увидеть действующий глагол, или на префиксы, чтобы определить ассоциированные семантические роли)">
+<!ENTITY ubiquity.playpen.CurrentParse "Текущий анализ:">
+<!ENTITY ubiquity.playpen.AvgTimingResults "мс (в среднем <span class='avg'></span> мс)">
+<!ENTITY ubiquity.playpen.ParseTree "Текущее дерево анализа запроса:">
+<!ENTITY ubiquity.quicklaunch.Header "Быстрый запуск">
+<!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>Быстрый запуск</strong> — экспериментальная функция, позволяющая вызывать &appTitle; извне браузера, для его использования в любом месте вашей системы.">
+<!ENTITY ubiquity.quicklaunch.LongDesc1 "В настоящее время данная функция поддерживается только в Mac OS X, но мы планируем в будущем сделать её доступной и на других платформах.">
+<!ENTITY ubiquity.quicklaunch.LongDesc2 "Чтобы включить Быстрый запуск, щёлкните по кнопке ниже. Когда вы включите его, вы можете нажать Option+Пробел, чтобы вызвать &appTitle; из любого места вашей системы.">
+<!ENTITY ubiquity.testsuite.ShowSuccess "Показать пройденные тесты">
+<!ENTITY ubiquity.testsuite.ShowSkipped "Показать пропущенные тесты">
+<!ENTITY ubiquity.testsuite.ShowFailed "Показать неудавшиеся тесты">
+<!ENTITY ubiquity.testsuite.TestsRunning "Выполняются тесты...">
+<!ENTITY ubiquity.tuner.Header "Механизм настройки типов имён &appTitle;">
+<!ENTITY ubiquity.tuner.ShortDesc "Этот механизм позволяет протестировать различные входные данные по отношению к текущим типам имён и проверить предположения о типах. Особенно он полезен для разработчиков, чтобы понять как настроить баллы предположений для их типов имён. <strong>ВНИМАНИЕ: механизм настройки типов имён очищает <code>nounCache</code> при каждом запуске.</strong>">
+<!ENTITY ubiquity.tuner.OptionMaxSuggs "максимальное количество предположения для каждого типа имён:">
+<!ENTITY ubiquity.tuner.OptionParserTip "использует тот же анализатор, что и текущий экземпляр &appTitle;">
+<!ENTITY ubiquity.tuner.OptionGSync "синхронизировать с <code>gUbiquity</code>">
+<!ENTITY ubiquity.tuner.HeaderSuggestions "Предположения">
+<!ENTITY ubiquity.tuner.THeadNounType "тип имени">
+<!ENTITY ubiquity.tuner.THeadSuggestion "предположение">
