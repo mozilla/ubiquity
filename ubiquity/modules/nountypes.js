@@ -1265,69 +1265,6 @@ function getRestaurants(query, callback, selectionIndices) {
   return asyncRequest;
 }
 
-// === {{{ noun_type_async_address }}} ===
-//
-// **//FIXME//**
-//
-// * {{{text}}} :
-// * {{{html}}} :
-// * {{{data}}} :
-
-var noun_type_async_address = NounAsync("address", getLegacyAddress, true);
-
-function getLegacyAddress(query, callback, selectionIndices) {
-  var url = "http://local.yahooapis.com/MapsService/V1/geocode";
-  var params = Utils.paramsToString({
-    location: query,
-    appid: "YD-9G7bey8_JXxQP6rxl.fBFGgCdNjoDMACQA--"
-  });
-  var asyncRequest = jQuery.ajax({
-    url: url+params,
-    dataType: "xml",
-    error: function () {
-      callback([]);
-    },
-    success:function (data) {
-      var results = jQuery(data).find("Result");
-      var allText = jQuery.makeArray(
-        jQuery(data)
-        .find(":contains('')")
-        .map(function () this.textContent.toLowerCase()));
-
-      // TODO: Handle non-abbriviated States. Like Illinois instead of IL.
-
-      if (results.length === 0){
-        callback([]);
-        return;
-      }
-
-      function existsMatch(text) {
-        var joinedText = allText.join(" ");
-        return joinedText.indexOf(text.toLowerCase()) !== -1;
-      }
-
-      var missCount = 0;
-
-      var queryWords = query.match(/\w+/g);
-      for (var i = 0, l = queryWords.length; i < l; ++i) {
-        if (!existsMatch(queryWords[i])) {
-          missCount += 1;
-        }
-      }
-
-      var missRatio = missCount / queryWords.length;
-
-      if (missRatio < .5)
-        callback(CmdUtils.makeSugg(query, query, null, 0.9,
-                                   selectionIndices));
-      else
-        callback([]);
-    }
-  });
-  return asyncRequest;
-}
-
-
 var noun_type_geo_country = NounAsync("country", getCountry, false);
 function getCountry(query, callback, selectionIndices) {
   return getGeo(query, callback, selectionIndices, 1, 1, false);
@@ -1495,6 +1432,7 @@ for (let [old, now] in Iterator({
   commands: noun_type_command,
   emailservice: noun_type_email_service,
   searchengine: noun_type_search_engine,
+  async_address: noun_type_geo_address
 })) {
   let sym = "noun_type_" + old;
   this[sym] = now;
