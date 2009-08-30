@@ -5,15 +5,14 @@ function exportConfiguration() {
   var jsm = {};
   Components.utils.import("resource://ubiquity/modules/setup.js", jsm);
   Components.utils.import("resource://ubiquity/modules/utils.js", jsm);
-  Components.utils.import("resource://ubiquity/modules/skinsvc.js", jsm);
 
   var services = jsm.UbiquitySetup.createServices();
   if (services.feedManager._annSvc) {
     var annSvc = services.feedManager._annSvc;
-    config.annotations = jsm.Utils.decodeJson(annSvc.toJSON());
+    config.annotations = jsm.Utils.decodeJson(annSvc.toJSONString());
   }
 
-  config.skins = (new jsm.SkinSvc()).skinList;
+  config.skins = services.skinService.skinList;
 
   // Iterate through all preferences and write them out.
   config.prefs = {};

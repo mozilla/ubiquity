@@ -66,7 +66,7 @@ const FEED_TITLE_ANNO = "ubiquity/title";
 const FEED_DATE_ANNO = "ubiquity/date";
 const FEED_BIN_ANNO = "ubiquity/bin";
 
-const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_/.test(v) && this[v])];
+const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_.+_ANNO$/.test(v))];
 
 const DEFAULT_FEED_TYPE = "commands";
 
@@ -103,18 +103,13 @@ FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
 
 // === {{{FeedManager#getUnsubscribedFeeds()}}} ===
 //
-// Returns an Array of {{{Feed}}} objects that represent all feeds
+// Returns an {{{Array}}} of {{{Feed}}} objects that represent all feeds
 // that were once subscribed, but are currently unsubscribed.
 
 FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
-  let annSvc = this._annSvc;
-  let removedUris = annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO, {});
-  let unsubscribedFeeds = [];
-
-  for (let i = 0; i < removedUris.length; i++)
-    unsubscribedFeeds.push(this.__getFeed(removedUris[i]));
-
-  return unsubscribedFeeds;
+  let removedUris =
+    this._annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO);
+  return [this.__getFeed(uri) for each (uri in removedUris)];
 };
 
 // === {{{FeedManager#getSubscribedFeeds()}}} ===
@@ -123,30 +118,28 @@ FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
 // that are currently subscribed.
 
 FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
-  let annSvc = this._annSvc;
-  let confirmedPages = annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO, {});
+  let confirmedPages =
+    this._annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO);
   let subscribedFeeds = [];
 
-  for (let i = 0; i < confirmedPages.length; i++) {
+  for each (let uri in confirmedPages) {
     try {
-      subscribedFeeds.push(this.__getFeed(confirmedPages[i]));
+      subscribedFeeds.push(this.__getFeed(uri));
     } catch (e) {
       Cu.reportError(
         //errorToLocalize
-        ("An error occurred when retrieving the feed for " +
-         confirmedPages[i].spec + ": " + e)
-      );
+        "An error occurred when retrieving the feed for " +
+        uri.spec + ": " + e);
     }
   }
 
   return subscribedFeeds;
 };
 
-// === {{{FeedManager#getFeedForUrl()}}} ===
-//
+// === {{{FeedManager#getFeedForUrl(url)}}} ===
 //
 // Returns the feed for the given URL, if it exists. If it doesn't,
-// this function returns null.
+// this function returns {{{null}}}.
 
 FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
   // TODO: This function is implemented terribly inefficiently.
@@ -164,7 +157,7 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
 // === {{{FeedManager#addSubscribedFeed()}}} ===
 //
 // Adds a feed with the given information to the {{{FeedManager}}}. The
-// information should be passed as a single Object with keys that
+// information should be passed as a single {{{Object}}} with keys that
 // correspond to values:
 //
 //   * {{{isBuiltIn}}} is a boolean that indicates whether the feed is
@@ -177,7 +170,7 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
 //     the feed.
 //   * {{{url}}} is the URL of the feed.
 //   * {{{sourceUrl}}} is the URL of the source code of the feed.
-//   * {{{sourceCode}}} is the actual source code for the feed, which
+//   * {{{sourceCode}}} is the actual source code for the feed,
 //     which is cached.
 //   * {{{canAutoUpdate}}} specifies whether or not the latest version
 //     of the feed's source code should be fetched from the
@@ -185,48 +178,33 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
 //     only ever use the cached version of the source code.
 //   * {{{title}}} is the human-readable name for the feed.
 
-FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
-  // Overlay defaults atop the passed-in information without destructively
-  // modifying our arguments.
-  let info = new Object();
-
-  if (!baseInfo.type)
-    info.type = DEFAULT_FEED_TYPE;
-
-  info.__proto__ = baseInfo;
-
-  // Now add the feed.
+FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
   let annSvc = this._annSvc;
   let uri = Utils.url(info.url);
-  let expiration;
-
-  if (info.isBuiltIn)
-    expiration = annSvc.EXPIRE_SESSION;
-  else
-    expiration = annSvc.EXPIRE_NEVER;
+  let expiration = annSvc[info.isBuiltIn ? "EXPIRE_SESSION" : "EXPIRE_NEVER"];
 
   if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO))
     annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 
-  annSvc.setPageAnnotation(uri, FEED_TYPE_ANNO, info.type, 0,
-                           expiration);
-  annSvc.setPageAnnotation(uri, FEED_SRC_URL_ANNO, info.sourceUrl, 0,
-                           expiration);
-  annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, info.sourceCode, 0,
-                           expiration);
-  annSvc.setPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, info.canAutoUpdate, 0,
-                           expiration);
-  annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
-                           expiration);
+  annSvc.setPageAnnotation(uri, FEED_TYPE_ANNO,
+                           info.type || DEFAULT_FEED_TYPE, 0, expiration);
+  annSvc.setPageAnnotation(uri, FEED_SRC_URL_ANNO,
+                           info.sourceUrl, 0, expiration);
+  annSvc.setPageAnnotation(uri, FEED_SRC_ANNO,
+                           info.sourceCode, 0, expiration);
+  annSvc.setPageAnnotation(uri, FEED_AUTOUPDATE_ANNO,
+                           info.canAutoUpdate, 0, expiration);
+  annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO,
+                           "true", 0, expiration);
   if (info.title)
-    annSvc.setPageAnnotation(uri, FEED_TITLE_ANNO, info.title, 0,
-                             expiration);
+    annSvc.setPageAnnotation(uri, FEED_TITLE_ANNO,
+                             info.title, 0, expiration);
   if (info.isBuiltIn)
-    annSvc.setPageAnnotation(uri, FEED_BUILTIN_ANNO, "true", 0,
-                             expiration);
+    annSvc.setPageAnnotation(uri, FEED_BUILTIN_ANNO,
+                             "true", 0, expiration);
   else
-    annSvc.setPageAnnotation(uri, FEED_DATE_ANNO, new Date().toUTCString(), 0,
-                             expiration);
+    annSvc.setPageAnnotation(uri, FEED_DATE_ANNO,
+                             new Date().toUTCString(), 0, expiration);
 
   this._hub.notifyListeners("subscribe", uri);
 };
@@ -236,22 +214,16 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(baseInfo) {
 // Returns whether or not the given feed URL is currently being
 // subscribed to.
 
-FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) {
-  let annSvc = this._annSvc;
-  uri = Utils.url(uri);
-  return annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO);
-};
+FMgrProto.isSubscribedFeed = function FMgr_isSubscribedFeed(uri) (
+  this._annSvc.pageHasAnnotation(Utils.uri(uri), FEED_SUBSCRIBED_ANNO));
 
-// === {{{FeedManager#isSubscribedFeed()}}} ===
+// === {{{FeedManager#isUnsubscribedFeed()}}} ===
 //
 // Returns whether or not the given feed URL was once subscribed
 // to, but is no longer.
 
-FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) {
-  let annSvc = this._annSvc;
-  uri = Utils.url(uri);
-  return annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
-};
+FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) (
+  this._annSvc.pageHasAnnotation(Utils.uri(uri), FEED_UNSUBSCRIBED_ANNO));
 
 // === {{{FeedManager#installToWindow()}}} ===
 //
@@ -277,31 +249,29 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
       self.showNotification(plugin, document, commandsUrl, mimetype);
   }
 
-  // Watch for any tags of the form <link rel="commands">
+  // Watch for any tags of the form <link rel="...">
   // on pages and add annotations for them if they exist.
   function onLinkAdded(event) {
-    if (!(event.target.rel in self._plugins) || !event.target.href)
+    var {target} = event;
+    if (!(target.rel in self._plugins) || !target.href)
       return;
 
-    var pageUrl = event.target.baseURI;
+    var pageUrl = target.baseURI;
     var hashIndex = pageUrl.indexOf("#");
-    if (hashIndex != -1)
+    if (hashIndex !== -1)
       pageUrl = pageUrl.slice(0, hashIndex);
 
-    onPageWithCommands(self._plugins[event.target.rel],
+    onPageWithCommands(self._plugins[target.rel],
                        pageUrl,
-                       event.target.href,
-                       event.target.ownerDocument,
-                       event.target.type);
+                       target.href,
+                       target.ownerDocument,
+                       target.type);
   }
 
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
 
-  for (var name in this._plugins) {
-    var plugin = this._plugins[name];
-    if (plugin.installToWindow)
-      plugin.installToWindow(window);
-  }
+  for each (let plugin in this._plugins)
+    (plugin.installToWindow || isNaN)(window);
 };
 
 // TODO: Add Documentation for this
@@ -332,8 +302,7 @@ FMgrProto.showNotification = function showNotification(plugin,
 // called when the feed manager no longer needs to be used.
 
 FMgrProto.finalize = function FMgr_finalize() {
-  for (var url in this._feeds)
-    this._feeds[url].finalize();
+  for each (var feed in this._feeds) feed.finalize();
 };
 
 FMgrProto.__getFeed = function FMgr___getFeed(uri) {
@@ -342,13 +311,12 @@ FMgrProto.__getFeed = function FMgr___getFeed(uri) {
     var feed = self.__makeFeed(uri);
     self._feeds[uri.spec] = feed;
 
-    function onPurge(eventName, aUri) {
+    self.addListener("purge", function onPurge(eventName, aUri) {
       if (aUri == uri) {
         delete self._feeds[uri.spec];
         self.removeListener("purge", onPurge);
       }
-    }
-    self.addListener("purge", onPurge);
+    });
   }
 
   return this._feeds[uri.spec];
@@ -367,9 +335,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   //
   // The human-readable name for the feed. Read-only.
 
-  let title = uri.spec;
-  if (annSvc.pageHasAnnotation(uri, FEED_TITLE_ANNO))
-    title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO);
+  let title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO, uri.spec);
 
   // === {{{Feed#type}}} ===
   //
@@ -398,10 +364,8 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   feedInfo.__defineGetter__(
     "isBuiltIn",
-    function feedInfo_isBuiltIn() {
-      return (annSvc.pageHasAnnotation(uri, FEED_BUILTIN_ANNO));
-    }
-  );
+    function feedInfo_isBuiltIn() (
+      annSvc.pageHasAnnotation(uri, FEED_BUILTIN_ANNO)));
 
   // === {{{Feed#isSubscribed}}} ===
   //
@@ -409,13 +373,11 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   feedInfo.__defineGetter__(
     "isSubscribed",
-    function feedInfo_isSubscribed() {
-      return (annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO));
-    }
-  );
+    function feedInfo_isSubscribed() (
+      annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)));
 
   let expiration =
-    feedInfo.isBuiltIn ? annSvc.EXPIRE_SESSION : annSvc.EXPIRE_NEVER;
+    annSvc[feedInfo.isBuiltIn ? "EXPIRE_SESSION" : "EXPIRE_NEVER"];
 
   // === {{{Feed#purge()}}} ===
   //
@@ -432,7 +394,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // === {{{Feed#remove()}}} ===
   //
   // If the feed is currently being subscribed to, unsubscribes
-  // it. This isn't permanent; the feed can be resubscribed-to later
+  // it. This isn't permanent; the feed can be resubscribed later
   // with {{{Feed#unremove()}}}.
 
   feedInfo.remove = function feedInfo_remove() {
@@ -448,7 +410,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   //
   // If the feed is currently unsubscribed, re-subscribes it.
 
-  feedInfo.unremove = function feedInfo_undelete() {
+  feedInfo.unremove = function feedInfo_unremove() {
     if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO)) {
       annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
       annSvc.setPageAnnotation(uri, FEED_SUBSCRIBED_ANNO, "true", 0,
@@ -462,74 +424,71 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // An {{{nsIURI}}} corresponding to the URL for the feed's source code.
   // Read-only.
 
-  var val = annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO);
-  feedInfo.srcUri = Utils.url(val, "data:text/plain,");
+  feedInfo.srcUri = Utils.url(annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO),
+                              "data:text/plain,");
 
   // === {{{Feed#date}}} ===
   //
   // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
   // Read-only.
 
-  var val = annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0);
-  feedInfo.date = new Date(val);
+  feedInfo.date = new Date(annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0));
 
   // === {{{Feed#canAutoUpdate}}} ===
   //
   // Whether or not the latest version of the feed's source code should
   // be fetched from the network. See
-  // {{{FeedManager#addSubscribedFeed()}}} for more
-  // information. Read-only.
+  // {{{FeedManager#addSubscribedFeed()}}} for more information. Read-only.
 
-  if (annSvc.pageHasAnnotation(uri, FEED_AUTOUPDATE_ANNO))
-    // fern: there's no not-hackish way of parsing a string to a boolean.
-    feedInfo.canAutoUpdate = (/^true$/i).test(
-      annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO)
-    );
-  else
-    feedInfo.canAutoUpdate = false;
+  feedInfo.canAutoUpdate =
+    annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, "") === "true";
 
   // === {{{Feed#getCode()}}} ===
   //
   // Returns the cached source code for the feed, if any.
 
-  feedInfo.getCode = function feedInfo_getCode() {
-    if (annSvc.pageHasAnnotation(uri, FEED_SRC_ANNO))
-      return annSvc.getPageAnnotation(uri, FEED_SRC_ANNO);
-    else
-      return "";
-  };
+  feedInfo.getCode = function feedInfo_getCode()
+    annSvc.getPageAnnotation(uri, FEED_SRC_ANNO, "");
 
-  // === {{{Feed#setCode()}}} ===
+  // === {{{Feed#setCode(code)}}} ===
   //
   // Sets the cached source code for the feed.
 
   feedInfo.setCode = function feedInfo_setCode(code) {
-    annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0,
-                             expiration);
+    annSvc.setPageAnnotation(uri, FEED_SRC_ANNO, code, 0, expiration);
   };
 
-  // === {{{Feed#getBin}}} ===
+  // === {{{Feed#getJSONStorage()}}} ===
   //
-  // Gets the persistent json storage for the feed.
-
-  // === {{{Feed#setBin}}} ===
-  //
-  // Sets the persistent json storage for the feed and
-  // returns the stored result as a new object.
-  //
-  // {bin} should be a json-encodable object.
+  // Gets the persistent JSON storage for the feed.
 
   var {json} = Utils;
-  feedInfo.getBin = function feedInfo_getBin() {
-    return (annSvc.pageHasAnnotation(uri, FEED_BIN_ANNO)
-            ? json.decode(annSvc.getPageAnnotation(uri, FEED_BIN_ANNO))
-            : {});
-  };
-  feedInfo.setBin = function feedInfo_setBin(bin) {
-    var data = json.encode(bin);
+
+  feedInfo.getJSONStorage = function feedInfo_getJSONStorage()
+    json.decode(annSvc.getPageAnnotation(uri, FEED_BIN_ANNO, "{}"));
+
+  // === {{{Feed#setJSONStorage(obj)}}} ===
+  //
+  // Sets the persistent JSON storage for the feed and
+  // returns the stored result as a new object.
+  //
+  // {{{obj}}} should be a JSON-encodable object.
+
+  feedInfo.setJSONStorage = function feedInfo_setJSONStorage(obj) {
+    var data = json.encode(obj);
     annSvc.setPageAnnotation(uri, FEED_BIN_ANNO, data, 0, expiration);
     return json.decode(data);
   };
+
+  // === {{{Feed#makeBin()}}} ===
+  //
+  // Creates {{{Bin}}} for the feed.
+
+  feedInfo.makeBin = function feedInfo_makeBin() ({
+    __proto__: Bin,
+    __parent__: this,
+    __bin__: this.getJSONStorage(),
+  });
 
   // === {{{Feed#checkForManualUpdate()}}} ===
   //
@@ -557,8 +516,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                    escape(feedInfo.getCode()));
         return Utils.url(uri);
       }
-    }
-  );
+    });
 
   // === {{{Feed#finalize()}}} ===
   //
@@ -581,4 +539,54 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
                     feedInfo.type + "'.");
 
   return plugin.makeFeed(feedInfo, hub);
+};
+
+// == Bin ==
+//
+// A simple interface to access the feed's persistent JSON storage.
+// {{{
+// Bin.myKey("some value");    // set a value for the key
+// let val = Bin.myKey();      // get the value for a key
+// Bin.myKey(null);            // delete the key
+// let num = +Bin;             // count keys
+// for (let [k, v] in Bin) ... // iterate over keys and values
+// }}}
+
+var Bin = {
+  __proto__: null,
+
+  // === {{{ Bin.__noSuchMethod__(value) }}} ===
+  //
+  // {{{Bin}}} allows arbitrary keys
+  // (except for the ones already in use, such as "toString")
+  // to be called as methods for getting/setting/deleting their values.
+  // Returns the value stored for the key.
+  //
+  // {{{value}}} is an optional JSON-encodable value to be set for the key.
+  // If this equals to {{{null}}}, the key is deleted.
+
+  __noSuchMethod__: function __noSuchMethod__(key, [val]) {
+    var bin = this.__bin__;
+    if (val === void 0) return bin[key];
+    if (val === null) {
+      var old = bin[key];
+      delete bin[key];
+    }
+    else bin[key] = val;
+    bin = this.__bin__ = this.__parent__.setJSONStorage(bin);
+    return key in bin ? bin[key] : old;
+  },
+
+  // === {{{ Bin.__iterator__() }}} ===
+  // Returns an {{{Iterator}}} for the inner dictionary.
+
+  __iterator__: function __iterator__() new Iterator(this.__bin__),
+
+  toJSON: function toJSON() this.__bin__,
+  toString: function toString() "[object Bin]",
+
+  // === {{{ Bin.valueOf() }}} ===
+  // Returns the number of keys currently stored.
+
+  valueOf: function valueOf() this.__bin__.__count__,
 };
