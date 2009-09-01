@@ -20,31 +20,35 @@ var extApplication = { // helper method for correct quitting/restarting
                        .createInstance(Ci.nsISupportsPRBool);
       os.notifyObservers(cancelQuit, "quit-application-requested", null);
       if (cancelQuit.data) return false; // somebody canceled our quit request
-    } return true; // assume yes
+    }
+    return true; // assume yes
   },
   _quitWithFlags: function app__quitWithFlags(aFlags, event) {
     if (this._warnOnClose(event)) {
-      var appStartup = Cc['@mozilla.org/toolkit/app-startup;1']
-                                 .getService(Ci.nsIAppStartup);
+      var appStartup = (Cc["@mozilla.org/toolkit/app-startup;1"]
+                        .getService(Ci.nsIAppStartup));
       appStartup.quit(aFlags);
       return true;
-    } return false;
+    }
+    return false;
   },
   quit: function app_quit() {
     return this._quitWithFlags(Ci.nsIAppStartup.eAttemptQuit, "quit");
   },
   restart: function app_restart() {
-    return this._quitWithFlags(Ci.nsIAppStartup.eAttemptQuit |
-                               Ci.nsIAppStartup.eRestart, "restart");
+    return this._quitWithFlags((Ci.nsIAppStartup.eAttemptQuit |
+                                Ci.nsIAppStartup.eRestart),
+                               "restart");
   },
   close: function app_close() {
     if (this._warnOnClose("close")) {
-      Cc["@mozilla.org/appshell/window-mediator;1"]
-                .getService(Ci.nsIWindowMediator)
-                .getMostRecentWindow(null)
-                .close();
+      (Cc["@mozilla.org/appshell/window-mediator;1"]
+       .getService(Ci.nsIWindowMediator)
+       .getMostRecentWindow(null)
+       .close());
       return true;
-    } return false;
+    }
+    return false;
   }
 };
 
@@ -77,8 +81,6 @@ CmdUtils.CreateCommand({
   }
 });
 
-// TODO this should maybe become a 'toggle' command, i.e. the verb is
-// 'turn on' or 'turn off'.
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
   description: "Toggles fullscreen mode.",
@@ -113,12 +115,12 @@ CmdUtils.CreateCommand({
   description: "Switches to the tab whose title or URL matches the input.",
   execute: function swtab_execute({object: {data: tab}}) {
     if (!tab) return;
-    // TODO: window.focus() is missing on 1.9.2pre
-    var win = tab._window;
-    if (win && win.focus) win.focus();
-    tab.focus();
-    // Focus on tab content
-    if (win && win.content) win.content.focus();
+    Utils.setTimeout(function delayedFocus() {
+      var win = tab._window._window;
+      win.focus();
+      tab.focus();
+      win.content.focus();
+    });
   },
   preview: tabPreview("Changes to"),
 });
@@ -137,7 +139,10 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["close all tabs with"],
-  arguments: [{ role: 'object', nountype: noun_arb_text, label: 'related word'}],
+  arguments: [{
+    role: "object",
+    nountype: noun_arb_text,
+    label: "related word"}],
   icon: "chrome://ubiquity/skin/icons/tab_delete.png",
   description: "Closes all open tabs that have the given word in common.",
   execute: function clatab_execute({object: {text}}) {
@@ -376,27 +381,27 @@ CmdUtils.CreateCommand({
   },
   previewDelay: 256,
   _list: null,
-  _html: function utc__html({title, image, url}) (
+  _html: function uct__html({title, image, url}) (
     <><img class="icon" src={image}/> <span class="title">{title}</span>
       <code class="url">{url}</code></>),
-  _puts: function utc__puts(pbl, msg) {
+  _puts: function uct__puts(pbl, msg) {
     pbl.innerHTML = <i>{msg}</i>.toXMLString() + this.help;
   },
-  _find: function utc__find(txt) {
+  _find: function uct__find(txt) {
     var list = this._list =
       eval(this._SS.getClosedTabData(context.chromeWindow));
     list.forEach(this._mark);
     if (txt) {
-      var re = Utils.regexp(txt);
+      var re = Utils.regexp(txt, "i");
       list = [t for each (t in list) if (re.test(t.title) || re.test(t.url))];
     }
     return list;
   },
-  _mark: function utc__mark(tab, i) {
+  _mark: function uct__mark(tab, i) {
     tab.id = i;
     tab.url = tab.state.entries[0].url;
   },
-  _undo: function utc__undo(id) {
+  _undo: function uct__undo(id) {
     this._list.every(function(tab, i, list) {
       if (id !== tab.id) return true;
       this._SS.undoCloseTab(context.chromeWindow, i);
