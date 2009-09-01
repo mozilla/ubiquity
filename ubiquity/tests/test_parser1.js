@@ -81,10 +81,10 @@ function testParseDirectOnly() {
   var completions = getCompletions("pet b", [cmd_pet], null);
   this.assert(completions.length == 2, "should be 2 completions");
   this.assert(completions[0]._verb._name == "pet", "verb should be pet");
-  this.assert(completions[0]._argSuggs.direct_object.text == "beagle",
+  this.assert(completions[0]._argSuggs.object.text == "beagle",
               "obj should be beagle");
   this.assert(completions[1]._verb._name == "pet", "verb should be pet");
-  this.assert(completions[1]._argSuggs.direct_object.text == "bulldog",
+  this.assert(completions[1]._argSuggs.object.text == "bulldog",
               "obj should be bulldog");
   completions[0].execute();
   this.assert(dogGotPetted == "beagle");
@@ -116,10 +116,10 @@ function testParseWithModifier() {
   var completions = getCompletions(inputWords, [cmd_wash], null);
   this.assert(completions.length == 2, "Should be 2 completions");
   this.assert(completions[0]._verb._name == "wash");
-  this.assert(completions[0]._argSuggs.direct_object.text == "poodle");
+  this.assert(completions[0]._argSuggs.object.text == "poodle");
   this.assert(completions[0]._argSuggs.with.text == "spork");
   this.assert(completions[1]._verb._name == "wash");
-  this.assert(completions[1]._argSuggs.direct_object.text == "poodle");
+  this.assert(completions[1]._argSuggs.object.text == "poodle");
   this.assert(completions[1]._argSuggs.with.text == "sponge");
   completions[0].execute();
   this.assert(dogGotWashed == "poodle");
@@ -310,14 +310,14 @@ function testDontInterpolateInTheMiddleOfAWord() {
   var completions = getCompletions("google iterate", [cmd_google],
                                    fakeContext);
   this.assert(completions.length == 1, "Should have 1 completion");
-  this.assert(completions[0]._argSuggs.direct_object.text == "iterate",
+  this.assert(completions[0]._argSuggs.object.text == "iterate",
               "Should not interpolate for the 'it' in 'iterate'.");
   completions = getCompletions("google it erate", [cmd_google],
                                fakeContext);
   this.assert(completions.length == 2, "Should have 2 completions.");
-  this.assert(completions[0]._argSuggs.direct_object.text == "flab erate",
+  this.assert(completions[0]._argSuggs.object.text == "flab erate",
               "Should interpolate 'flab' for 'it'.");
-  this.assert(completions[1]._argSuggs.direct_object.text == "it erate",
+  this.assert(completions[1]._argSuggs.object.text == "it erate",
               "input without interpolation should also be suggested.");
 }
 
@@ -353,16 +353,16 @@ function testModifiersTakeMultipleWords() {
   };
   var completions = getCompletions("find job in chicago", [cmd_find],
                                    null);
-  this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
+  this.assert(completions[0]._argSuggs.object.text == "job", "should be job.");
   this.assert(completions[0]._argSuggs["in"].text == "chicago", "should be chicago");
 
   completions = getCompletions("find significant other in chicago",
                                [cmd_find], null);
   this.assert(completions[0]._argSuggs["in"].text == "chicago", "should be chicago");
-  this.assert(completions[0]._argSuggs.direct_object.text == "significant other", "should be SO.");
+  this.assert(completions[0]._argSuggs.object.text == "significant other", "should be SO.");
 
   completions = getCompletions("find job in new york", [cmd_find], null);
-  this.assert(completions[0]._argSuggs.direct_object.text == "job", "should be job.");
+  this.assert(completions[0]._argSuggs.object.text == "job", "should be job.");
   this.assert(completions[0]._argSuggs["in"].text == "new york", "should be NY");
 }
 
@@ -540,17 +540,17 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var suggs = getCompletions("wash", verbList);
   this.assert(suggs.length == 1, "Should be 1 suggestion (A).");
   this.assert(suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
-  this.assert(suggs[0]._argSuggs.direct_object.text == "husky", "Argument should be husky.\n");
+  this.assert(suggs[0]._argSuggs.object.text == "husky", "Argument should be husky.\n");
 
   suggs = getCompletions("play", verbList);
   this.assert(suggs.length == 1, "Should be 1 suggestion (B).");
   this.assert(suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert(suggs[0]._argSuggs.direct_object.text == "basenji", "Argument should be basenji.\n");
+  this.assert(suggs[0]._argSuggs.object.text == "basenji", "Argument should be basenji.\n");
 
   suggs = getCompletions("play retr", verbList);
   this.assert(suggs.length == 1, "Should be 1 suggestion (C).");
   this.assert(suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert(suggs[0]._argSuggs.direct_object.text == "golden retreiver", "Argument should be g.retr.\n");
+  this.assert(suggs[0]._argSuggs.object.text == "golden retreiver", "Argument should be g.retr.\n");
 
   //TODO try out defaults for modifier arguments.
 }
@@ -760,7 +760,7 @@ function testAsyncNounSuggestions() {
   var parser = makeTestParser(LANG, [cmd_slow]);
   var {assert} = this;
   function assertDirObj(completion, expected) {
-    assert(completion._argSuggs.direct_object.text == expected,
+    assert(completion._argSuggs.object.text == expected,
             "Expected " + expected);
   }
   var query1 = parser.newQuery("dostuff hello", emptyContext, MAX_SUGGESTIONS,
@@ -846,9 +846,9 @@ function testWeirdCompletionsThatDontMakeSense() {
   // arb text, both of them should prodcue a suggestion with ac as the
   // argument.
   this.assert(comps.length == 2, "Should have 2 suggestions.");
-  this.assert(comps[0]._argSuggs.direct_object.text === input,
+  this.assert(comps[0]._argSuggs.object.text === input,
               "object should be " + uneval(input) + ".");
-  this.assert(comps[1]._argSuggs.direct_object.text === input,
+  this.assert(comps[1]._argSuggs.object.text === input,
               "this object should be " + uneval(input) + " too.");
 }
 
@@ -866,10 +866,10 @@ function testSynonymsGetDownrankedEvenWithArguments() {
   // "youtube m" is the second suggestion (due to its synonym "video").
   this.assert(comps.length == 2, "Should have 2 suggestions.");
   this.assert(comps[0]._verb._name == "define", "Should be define.");
-  this.assert(comps[0]._argSuggs.direct_object.text == "m",
+  this.assert(comps[0]._argSuggs.object.text == "m",
               "object should be m.");
   this.assert(comps[1]._verb._name == "youtube", "Should be youtube.");
-  this.assert(comps[1]._argSuggs.direct_object.text == "m",
+  this.assert(comps[1]._argSuggs.object.text == "m",
               "object should be m.");
 }
 
@@ -889,17 +889,17 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
   // and "as" argument.  Make sure both get generated.
   this.assert(comps.length === 6, "Should have 6 suggestions.");
   var expected;
-  this.assert(comps[0]._argSuggs.direct_object.text ===
+  this.assert(comps[0]._argSuggs.object.text ===
               (expected = "i am happy as a clam"),
               "First suggestion direct obj should be " + uneval(expected));
   this.assert(comps[0]._argSuggs.as.text === (expected = "fern"),
               "First suggestion AS should be " + uneval(expected));
-  this.assert(comps[1]._argSuggs.direct_object.text ===
+  this.assert(comps[1]._argSuggs.object.text ===
               (expected = "i am happy"),
               "Second suggestion direct obj should be " + uneval(expected));
   this.assert(comps[1]._argSuggs.as.text === (expected = "a clam as fern"),
               "Second suggestion AS should be " + uneval(expected));
-  this.assert(comps[5]._argSuggs.direct_object.text ===
+  this.assert(comps[5]._argSuggs.object.text ===
               (expected = "i am happy as a clam as fern"),
               "Last suggestion direct obj should be " + uneval(expected));
   this.assert(!comps[5]._argSuggs.as.text,
@@ -907,7 +907,7 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
 }
 
 function testParseWithComplexQuery() {
-  // the "!" should be dropped off for the direct_object (#571)
+  // the "!" should be dropped off for the object (#571)
   var inputWords = "tw might as well as b !";
   var stat = null;
   var user = null;

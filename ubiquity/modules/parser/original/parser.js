@@ -300,7 +300,7 @@ ParsedSentence.prototype = {
       let argText = (this._argSuggs[x] || 0).text;
       if (!argText || this._argFlags[x] & FLAG_DEFAULT) continue;
       let preposition = " ";
-      if (x === "direct_object") {
+      if (x === "object") {
         // Check for a valid text selection. We'll replace
         // the text with a pronoun for readability
         if (this._selObj.text === argText)
@@ -316,7 +316,7 @@ ParsedSentence.prototype = {
   get displayText PS_displayText() {
     var {matchedName: sentence, _arguments: args} = this._verb;
     for (let x in args) {
-      let obj = x === "direct_object";
+      let obj = x === "object";
       let {text} = this._argSuggs[x] || 0;
       if (text) sentence += (" " +
                              (obj ? "" : args[x].flag + " ") +
@@ -332,7 +332,7 @@ ParsedSentence.prototype = {
                     '</span>');
     var args = this._verb._arguments;
     for (let x in args) {
-      let obj = x === "direct_object";
+      let obj = x === "object";
       let {summary} = this._argSuggs[x] || 0;
       if (summary) {
         let label = obj ? "" : escapeHtml(args[x].flag) + " ";
@@ -466,7 +466,7 @@ ParsedSentence.prototype = {
       // matches user input.
       let ams = 0, args = this._verb._arguments, suggs = this._argSuggs;
       for (let name in suggs) if (suggs[name].summary)
-        ams += ((name === "direct_object" ? .9 : 1) *
+        ams += ((name === "object" ? .9 : 1) *
                 (args[name].type.rankLast ? .1 : 1));
       this.argMatchScore = ams;
     }
@@ -727,7 +727,7 @@ function Verb(cmd, roleMap) {
     for each (let arg in cmd.arguments) {
       let {role, nountype} = arg;
       let obj = role === "object";
-      this._arguments[obj ? "direct_object" : role] = {
+      this._arguments[obj ? "object" : role] = {
         type : nountype,
         label: arg.label || pluckLabel(nountype),
         flag : obj ? null : roleMap[role],
@@ -741,7 +741,7 @@ function Verb(cmd, roleMap) {
     // Convert this to argument dictionary.
     // cmd.DOType must be a NounType, if provided.
     if (cmd.DOType) {
-      this._arguments.direct_object = {
+      this._arguments.object = {
         type: cmd.DOType,
         label: cmd.DOLabel,
         flag: null,
@@ -771,31 +771,22 @@ Verb.prototype = {
   get disabled() this.cmd.disabled,
 
   execute: function V_execute(context, argumentValues) {
-    if (this._isNewStyle) {
+    return (
+      this._isNewStyle
       // New-style commands (api 1.5) expect a single dictionary with all
       // arguments in it, and the object named 'object'.
-      argumentValues.object = argumentValues.direct_object;
-      return this.cmd.execute(context, argumentValues);
-    }
-    else {
+      ? this.cmd.execute(context, argumentValues)
       // Old-style commands (api 1.0) expect the direct object to be passed
       // in separately.
-      return this.cmd.execute(context,
-                              argumentValues.direct_object,
-                              argumentValues);
-    }
+      : this.cmd.execute(context, argumentValues.object, argumentValues));
   },
 
   preview: function V_preview(context, previewBlock, argumentValues) {
     // Same logic as the execute command -- see comment above.
-    if (this._isNewStyle) {
-      argumentValues.object = argumentValues.direct_object;
-      this.cmd.preview(context, previewBlock, argumentValues);
-    }
-    else {
-      this.cmd.preview(context, previewBlock,
-                       argumentValues.direct_object, argumentValues);
-    }
+    (this._isNewStyle
+     ? this.cmd.preview(context, previewBlock, argumentValues)
+     : this.cmd.preview(context, previewBlock,
+                        argumentValues.object, argumentValues));
   },
 
   usesAnySpecificNounType: function V_usesAnySpecificNounType() {
