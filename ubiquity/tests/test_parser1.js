@@ -4,6 +4,7 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
 Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/parser/original/parser.js");
+Cu.import("resource://ubiquity/modules/parser/original/locale_en.js");
 
 Cu.import("resource://ubiquity/tests/framework.js");
 Cu.import("resource://ubiquity/tests/test_suggestion_memory.js");
@@ -887,54 +888,66 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
                              [cmd_twitter]);
   // There are two places where we could make the division between status
   // and "as" argument.  Make sure both get generated.
-  this.assert(comps.length === 6, "Should have 6 suggestions.");
+  this.assert(comps.length === 3, "Should have 3 suggestions.");
   var expected;
   this.assert(comps[0]._argSuggs.object.text ===
-              (expected = "i am happy as a clam"),
+              (expected = "i am happy"),
               "First suggestion direct obj should be " + uneval(expected));
-  this.assert(comps[0]._argSuggs.as.text === (expected = "fern"),
+  this.assert(comps[0]._argSuggs.as.text ===
+              (expected = "a clam as fern"),
               "First suggestion AS should be " + uneval(expected));
   this.assert(comps[1]._argSuggs.object.text ===
-              (expected = "i am happy"),
+              (expected = "i am happy as a clam"),
               "Second suggestion direct obj should be " + uneval(expected));
-  this.assert(comps[1]._argSuggs.as.text === (expected = "a clam as fern"),
+  this.assert(comps[1]._argSuggs.as.text ===
+              (expected = "fern"),
               "Second suggestion AS should be " + uneval(expected));
-  this.assert(comps[5]._argSuggs.object.text ===
+  this.assert(comps[2]._argSuggs.object.text ===
               (expected = "i am happy as a clam as fern"),
               "Last suggestion direct obj should be " + uneval(expected));
-  this.assert(!comps[5]._argSuggs.as.text,
+  this.assert(!comps[2]._argSuggs.as.text,
               "Last suggestion AS should be empty.");
 }
 
-function testParseWithComplexQuery() {
-  // the "!" should be dropped off for the object (#571)
-  var inputWords = "tw might as well as b !";
-  var stat = null;
-  var user = null;
-  var noun_stat = {
-    names: ["stat"],
-    suggest: function(txt) [NounUtils.makeSugg(txt)],
-  };
-  var noun_user = new NounUtils.NounType("user", ["alice", "bob", "cindy"]);
-  var cmd_tweet = {
-    execute: function(context, directObject, modifiers) {
-      stat = directObject.text;
-      user = modifiers.as.text;
-    },
-    names: ["tweet"],
-    DOLabel:"status",
-    DOType: noun_stat,
-    modifiers: {as: noun_user, to: noun_user},
-  };
-  var completions = getCompletions(inputWords, [cmd_tweet], null);
-  this.assert(completions.length == 2, "Should be 2 completions");
-  completions[0].execute();
-  this.assert(stat === "might as well", uneval(stat));
-  this.assert(user === "bob", uneval(user));
-  stat = user = 0;
-  completions[1].execute();
-  this.assert(stat === /^\S+ (.*)/(inputWords)[1], uneval(stat));
-  this.assert(!user, uneval(user));
+function testEnParserRecursiveParse() {
+  var {recursiveParse} = EnParser.__parent__;
+  var {assertEquals} = this;
+  function serialize(olist) [uneval(o) for each (o in olist)].sort() + "";
+  function assertEqualsSerialized(x, y) {
+    assertEquals(serialize(x), serialize(y));
+  }
+  assertEqualsSerialized(
+    recursiveParse(
+      "near here".split(" "), {},
+      false, {location: "near"}),
+    [{location:["here"]}]);
+  assertEqualsSerialized(
+    recursiveParse(
+      "beer near here".split(" "), {},
+      false, {location: "near"}),
+    []);
+  assertEqualsSerialized(
+    recursiveParse(
+      "beer near here".split(" "), {},
+      true, {location: "near"}),
+    [{object:["beer", "near", "here"]},
+     {object:["beer"], location:["here"]}]);
+  assertEqualsSerialized(
+    recursiveParse(
+      "i am happy as a clam as fern".split(" "), {},
+      true, {as: "as"}),
+    [{object:["i", "am", "happy"], as:["a", "clam", "as", "fern"]},
+     {object:["i", "am", "happy", "as", "a", "clam"], as:["fern"]},
+     {object:["i", "am", "happy", "as", "a", "clam", "as", "fern"]}]);
+  assertEqualsSerialized(
+    recursiveParse(
+      "to ja from en it".split(" "), {},
+      true, {from: "from", to: "to"}),
+    [{object:["to", "ja", "from", "en", "it"]},
+     {object:["to", "ja"], from:["en", "it"]},
+     {object:["it"], to:["ja"], from:["en"]},
+     {to:["ja"], from:["en", "it"]},
+     {to:["ja", "from", "en", "it"]}]);
 }
 
 // TESTS TO WRITE:

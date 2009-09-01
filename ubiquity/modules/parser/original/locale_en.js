@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,117 +42,83 @@ var EnParser = {
   PRONOUNS: ["this", "that", "it", "selection", "him", "her", "them"],
 };
 
-function _recursiveParse(unusedWords,
-                         filledArgs,
-                         unfilledArgs,
-                         creationCallback) {
-  // First, the termination conditions of the recursion:
-  if (!unusedWords.length) {
-    // We've used the whole sentence; no more words. Return what we have.
-    return [creationCallback(filledArgs)];
-  }
+var {push} = Array.prototype;
 
-  // separate names of prepositions and direct_object
-  var unfilledNames = [], directName;
-  for (var name in unfilledArgs) {
-    if (unfilledArgs[name].flag === null)
-      directName = name;
-    else
-      unfilledNames.push(name);
-  }
-  if (!name) {
+function recursiveParse(unusedWords, filledArgs, objYet, prepsYet) {
+  // First, the termination conditions of the recursion:
+  if (!unusedWords.length)
+    // We've used the whole sentence; no more words. Return what we have.
+    return [filledArgs];
+
+  NO_MORE_PREPS: {
+    for (let key in prepsYet) break NO_MORE_PREPS;
+    if (objYet) {
+      // If only direct object remains, give it all and we're done.
+      let filled = {object: unusedWords};
+      for (let key in filledArgs) filled[key] = filledArgs[key];
+      return [filled];
+    }
     // We've used up all arguments, so we can't continue parsing, but
     // there are still unused words.  This was a bad parsing; don't use it.
     return [];
   }
 
-  if (!unfilledNames.length && directName) {
-    // If only direct_object remains, give it all and we're done.
-    let newFilledArgs = {};
-    newFilledArgs[directName] = unusedWords;
-    for (let key in filledArgs) {
-      newFilledArgs[key] = filledArgs[key];
+  var completions = [];
+  var len = unusedWords.length;
+  for (let i = 0, to = objYet ? len - 1 : 1; i < to; ++i) {
+    let word = unusedWords[i];
+    for (let name in prepsYet) {
+      if (word !== prepsYet[name]) continue;
+      // Found a prep
+      let objNext = objYet && !i; // next only if we're at leftmost
+      for (let j = i + 2; j <= len; ++j) {
+        let prepsNext = {};
+        for (let key in prepsYet) prepsNext[key] = prepsYet[key];
+        delete prepsNext[name];
+        let filled = {};
+        for (let key in filledArgs) filled[key] = filledArgs[key];
+        if (i) filled.object = unusedWords.slice(0, i);
+        filled[name] = unusedWords.slice(i + 1, j);
+        push.apply(completions, recursiveParse(unusedWords.slice(j), filled,
+                                               objNext, prepsNext));
+      }
+      break;
     }
-    return [creationCallback(newFilledArgs)];
   }
-
-  // "pop" off the LAST unfilled argument in the sentence and try to fill it
-  // newUnfilledArgs is the same as unfilledArgs without argName
-  var argName, newUnfilledArgs = {};
-  for (var argName in unfilledArgs) {
-    newUnfilledArgs[argName] = unfilledArgs[argName];
+  ONLY_OBJ: if (objYet) {
+    for (var key in filledArgs) break ONLY_OBJ;
+    completions.push({object: unusedWords});
   }
-  delete newUnfilledArgs[argName];
-
-  // Get the completions with the argName left blank
-  var completions = _recursiveParse(unusedWords,
-                                    filledArgs,
-                                    newUnfilledArgs,
-                                    creationCallback);
-  var preposition = unfilledArgs[argName].flag;
-  // the last word can't be a preposition
-  var x = unusedWords.length - 1;
-  while (x --> 0) if (preposition === unusedWords[x]) {
-      /* a match for the preposition is found at position x!
-        (require exact matches for prepositions.)
-        Things after modifiers which do not match the noun type are thrown out.
-        Check every possibility starting from "all remaining words" and
-        working backwards down to "just the word after the preposition."
-      */
-    let lastWord = unusedWords.length, lastWordEnd = x + 1;
-    for (; lastWord > lastWordEnd; --lastWord) {
-      let newFilledArgs = {};
-      for (let key in filledArgs) newFilledArgs[key] = filledArgs[key];
-      // copy words from preposition up to lastWord, as nounWords:
-      newFilledArgs[argName] = unusedWords.slice(lastWordEnd, lastWord);
-      // copy the array without the preposition and the remaining words.
-      let newUnusedWords = unusedWords.slice(0, x);
-      completions = completions.concat(_recursiveParse(newUnusedWords,
-                                                       newFilledArgs,
-                                                       newUnfilledArgs,
-                                                       creationCallback));
-    }
-  } // end for each unused word that matches preposition
-
   return completions;
 }
 
-function parseSentence(inputString, verbList, selObj, newPPS) {
+function parseSentence(inputString, verbList, selObj, makePPS) {
   // Returns a list of PartiallyParsedSentences.
-  // Language-specific.  This one is for English.
   let parsings = [];
-
   // English uses spaces between words:
   // If input is "dostuff " (note space) then splitting on space will
   //  produce ["dostuff", ""].  We don't want the empty string, so drop
   //  all zero-length strings:
   let words = [word for each (word in inputString.split(" ")) if (word)];
   if (!words.length) return parsings;
-  // English puts verb at the beginning of the sentence:
-  let inputVerb = words.shift();
-  // And the arguments after it:
-  let inputArguments = words;
 
+  // English puts verb at the beginning of the sentence:
+  let inputVerb = words.shift().toLowerCase(); // Verb#match() uses lower-case
+  // And the arguments after it:
+  let inputArgs = words;
   // Try matching the verb against all the words we know:
-  let {push} = parsings;
-  // Verb#match() uses lower-case
-  inputVerb = inputVerb.toLowerCase();
   for each (let verb in verbList) if (!verb.disabled) {
     let matchScore = verb.match(inputVerb);
-    if (matchScore === 0) continue;
-
-    function makeParse(argStrings)
-      newPPS(verb, argStrings, selObj, matchScore);
-    if (inputArguments.length)
-      // Recursively parse to assign arguments
-      push.apply(parsings, _recursiveParse(inputArguments,
-                                           {},
-                                           verb._arguments,
-                                           makeParse));
-    else
-      // No arguments
-      parsings.push(makeParse({}));
+    if (!matchScore) continue;
+    // Recursively parse to assign arguments
+    let preps = {}; // {source: "to", goal: "from", ...}
+    let args = verb._arguments;
+    for (let key in args) preps[key] = args[key].flag;
+    delete preps.object;
+    let argStringsList = recursiveParse(inputArgs, {},
+                                        "object" in args, preps);
+    for each (let argStrings in argStringsList)
+      parsings.push(makePPS(verb, argStrings, selObj, matchScore));
   }
-
   return parsings;
 }
