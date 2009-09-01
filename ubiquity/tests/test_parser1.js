@@ -585,13 +585,12 @@ function testPartiallyParsedSentence() {
     verbNoArgs,
     {},
     selObj,
-    0,
+    1,
     fakeQuery);
 
-  var parsedNoArgs  = partiallyParsedNoArgs.getParsedSentences();
-  this.assert(parsedNoArgs.length == 1, "Should have 1 parsing.");
-  this.assert(parsedNoArgs[0]._verb._name == "grumble");
-
+  var parsedNoArgs = partiallyParsedNoArgs.getParsedSentences();
+  this.assert(parsedNoArgs.length === 1, "Should have 1 parsing.");
+  this.assert(parsedNoArgs[0]._verb._name === "grumble");
 
   var noun_type_foo = {
     id: "foo",
