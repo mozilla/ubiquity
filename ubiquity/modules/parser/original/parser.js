@@ -22,6 +22,7 @@
  *   Blair McBride <unfocused@gmail.com>
  *   Atul Varma <atul@mozilla.com>
  *   Brandon Pung <brandonpung@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -159,8 +160,7 @@ ParserQuery.prototype = {
         sugg._verb.cmd.id);
       sugg.frequencyMatchScore = pow(.1, 1 / (freq + 1));
     }
-    Utils.sortBy(this._suggestionList,
-                 function scoreNegated(sugg) -sugg.score);
+    Utils.sortBy(this._suggestionList, "score", "v");
   },
 };
 

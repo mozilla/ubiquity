@@ -561,7 +561,7 @@ Utils.trim = String.trim || function trim(str) {
   return str.slice(i, j + 1);
 };
 
-// === {{{ Utils.sortBy(array, key) }}} ===
+// === {{{ Utils.sortBy(array, key, descending) }}} ===
 //
 // Sorts an array by specified {{{key}}} and returns it. e.g.:
 // {{{
@@ -573,16 +573,19 @@ Utils.trim = String.trim || function trim(str) {
 //
 // {{{key}}} is either a string specifying the key property,
 // or a function that maps each of {{{array}}}'s item to a sort key.
+//
+// Sorts descending if {{{descending}}}.
 
-function sortBy(array, key) {
+function sortBy(array, key, descending) {
   var pluck = typeof key === "function" ? key : function pluck(x) x[key];
-  var sortee = ([{key: pluck(array[i]), val: array[i]} for (i in array)]
-                .sort(sortBy.sorter));
+  var sortee = ([{key: pluck(v), val: v} for each (v in array)]
+                .sort(descending ? sortBy.dSorter : sortBy.aSorter));
   for (let i in sortee) array[i] = sortee[i].val;
   return array;
 }
 // Because our Monkey uses Merge Sort, "swap the values if plus" works.
-sortBy.sorter = function byKey(a, b) a.key <= b.key ^ 1;
+sortBy.aSorter = function byKeyAsc(a, b) a.key > b.key;
+sortBy.dSorter = function byKeyDsc(a, b) a.key < b.key;
 
 // === {{{ Utils.isArray(value) }}} ===
 //

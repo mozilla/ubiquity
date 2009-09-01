@@ -344,6 +344,8 @@ function testUtilsSortBy() {
   var strArray = ["abc", "d", "ef", "ghij", "klm", "nop", "qrstuvw", "xyz"];
   this.assertEquals(strArray.slice().sort() + "",
                     Utils.sortBy(strArray.slice(), String) + "");
+  this.assertEquals(strArray.slice().sort().reverse() + "",
+                    Utils.sortBy(strArray.slice(), String, true) + "");
   this.assertEquals(
     strArray.slice().sort(function(a, b) a.length - b.length) + "",
     Utils.sortBy(strArray.slice(), "length") + "");
