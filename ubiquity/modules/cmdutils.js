@@ -805,6 +805,116 @@ CreateCommand.previewDefault = function previewDefault(pb) {
   return html;
 };
 
+// == COMMAND ALIAS CREATION ==
+
+// === {{{ CmdUtils.CreateAlias(options) }}} ===
+//
+// NEW with Ubiquity 0.5.5
+// 
+// Creates and registers an alias to another (target) Ubiquity command. Aliases
+// can be simple synonyms, but they can also specify certain pre-defined
+// argument values to be used in the parse/preview/execution.
+//
+// {{{ options }}} is a dictionary object which ** must have the following
+// properties: **
+//
+// {{{ options.names }}} An array of names for the alias. Do not use the same
+// name as the verb itself.
+//
+// {{{ options.verb }}} (string) the canonical name of the verb which is being
+// aliased. Note, the "canonical name" is the first element of the verb's
+// {{{names}}}. TODO (maybe): let this also accept verb objects or ID's directly.
+//
+// ** The following property is used to specify arguments for the target verb: **
+//
+// {{{ options.arguments }}} Specifies pre-determined arguments for the target verb.
+// This is an array of dictionary objects. The required properties of each argument
+// is the {{{role}}} property to specify its semantic role and the {{{input}}}
+// property to specify the text input. The parser will then run your {{{input}}}
+// through the nountype associated with that semantic role for the target verb
+// and use that argument in parse/preview/execution.
+//
+// === The following properties are optional: ===
+// 
+// {{{ options.help }}} A string containing a longer description of
+// your alias, also displayed on the command-list page, which can go
+// into more depth, include examples of usage, etc. Can include HTML
+// tags.
+// 
+// {{{ options.description }}} A string containing a short description
+// of your alias, to be displayed on the command-list page. Can include
+// HTML tags.
+//
+// {{{ options.icon }}} A string containing the URL of a small image (favicon-sized) to
+// be displayed alongside the name of your alias in the interface.
+//
+// {{{ options.author }}} A dictionary object describing the alias's
+// author.  Can have {{{options.author.name}}}, {{{options.author.email}}},
+// and {{{options.author.homepage}}} properties, all strings.
+//
+// {{{ options.homepage }}} The URL of the alias's homepage, if any.
+//
+// {{{ options.contributors }}} An array of strings naming other people
+// who have contributed to your alias.
+//
+// {{{ options.license }}} A string naming the license under which your
+// alias is distributed, for example "MPL".
+
+
+function CreateAlias(options) {
+  dump('creating alias now\n');
+  var me = this;
+  var global = this.__globalObject;
+
+  // we've already stored these arguments as givenArgs. alias.arguments
+  // will return the arguments specification of the target verb.
+  var givenArgs = options.arguments;
+  delete(options.arguments);
+
+  var alias = {
+    __proto__: options,
+    proto: options,
+    thisIsAnAlias: true,
+    givenArgs: (options.arguments || []),
+    targetVerb: null,
+    get arguments() (this.targetVerb ? this.targetVerb.arguments : []),
+    get serviceDomain() (this.targetVerb.serviceDomain)
+  };
+
+  var names = alias.names;
+  // ensure name and names
+  if (!names)
+    //errorToLocalize
+    throw Error("CreateCommand: name or names is required.");
+  if (!Utils.isArray(alias.names))
+    names = (names + "").split(/\s{0,}\|\s{0,}/);
+
+  // we must keep the first name from the original feed around as an
+  // identifier. This is used in the command id and in localizations
+  alias.referenceName = names[0];
+  alias.name = names[0];
+
+  alias.preview = function(pblock,args) {
+    // WARNING: getting the context this way could be considered a *hack*...
+    // but currently is necessary due to the slightly-convoluted way in which
+    // commands are created. Search for "makeCmdFromObj" in the codebase
+    // to learn more.
+    var context = alias.preview.caller.arguments[0];
+    if (this.targetVerb.preview == null) {
+      CreateCommand.previewDefault.apply(this,[pblock]);
+    } else {
+      this.targetVerb.preview.apply(this,[context,pblock,args]);
+    }
+  };
+  
+  alias.execute = function(pblock,args) {
+    var context = alias.execute.caller.arguments[0];
+    this.targetVerb.execute.apply(this.targetVerb,[context,pblock,args]);
+  }
+  
+  global.commands.push(alias);
+}
+
 // === {{{ CmdUtils.makeSearchCommand(options) }}} ===
 //
 // A specialized version of {{{CmdUtils.CreateCommand()}}}, this lets

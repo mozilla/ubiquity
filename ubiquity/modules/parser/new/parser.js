@@ -218,6 +218,8 @@ Parser.prototype = {
       Utils.Application.prefs.getValue(
         "extensions.ubiquity.doNounFirstExternals", 0);
     for each (let verb in verbs) {
+      if (verb.thisIsAnAlias)
+        continue;
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;
         nouns[nt.id] = nt;
@@ -234,6 +236,18 @@ Parser.prototype = {
           thisParser.flushNounCacheForId(id);
         }
         nt.registerCacheObserver(flush);
+      }
+    }
+    
+    for each (let alias in verbs) {
+      if (!alias.thisIsAnAlias)
+        continue;
+      for each (let verb in verbs) {
+        if (alias.verb == verb.name) {
+          alias.targetVerb = verb;
+          alias.__proto__.targetVerb = verb;
+//          alias.proto.targetVerb = verb;
+        }
       }
     }
 
