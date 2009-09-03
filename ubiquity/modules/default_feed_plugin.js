@@ -324,10 +324,8 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
   var globalObjects = {};
 
   return function makeGlobals(codeSource) {
-    var id = codeSource.id;
-
-    if (!(id in globalObjects))
-      globalObjects[id] = {};
+    var {id} = codeSource;
+    if (!(id in globalObjects)) globalObjects[id] = {};
 
     return {
       XPathResult: webJsm.XPathResult,
@@ -337,17 +335,17 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
       Template: webJsm.TrimPath,
       Application: webJsm.Application,
       Date: webJsm.Date,
+      KeyEvent: webJsm.KeyEvent,
       Components: Components,
-      feed: {id: codeSource.id,
-             dom: codeSource.dom},
+      feed: {id: id, dom: codeSource.dom},
       context: {},
       commands: [],
       pageLoadFuncs: [],
       ubiquityLoadFuncs: [],
       globals: globalObjects[id],
       displayMessage: function displayMessage(msg, cmd) {
+        if (Utils.classOf(msg) !== "Object") msg = {text: msg};
         if (cmd) {
-          if (typeof msg === "string") msg = {text: msg};
           msg.icon  = cmd.icon;
           msg.title = cmd.name;
         }
