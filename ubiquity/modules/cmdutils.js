@@ -27,6 +27,7 @@
  *   Christian Sonne <cers@geeksbynature.dk>
  *   Satoshi Murakami <murky.satyr@gmail.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Louis-Remi Babe <lrbabe@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -162,6 +163,73 @@ function getWindow() getDocument().defaultView;
 function getDocumentInsecure() getDocument().wrappedJSObject;
 
 function getWindowInsecure() getDocumentInsecure().defaultView;
+
+// ** {{{ CmdUtils.__getUbiquity( ) }}} **
+//
+// Get a reference to Ubiquity. This is used by
+// {{{ CmdUtils.closeUbiquity() }}} and {{{ CmdUtils.getCommandByName() }}}, but
+// probably doesn't need to be used directly by command feeds.
+ 
+function __getUbiquity() {
+  // TODO: Understand why it doesn't work with a simple test.
+  try {
+    return context.chromeWindow.gUbiquity;
+  } catch(e) {
+    return Utils.currentChromeWindow.gUbiquity;
+  }
+};
+
+// ** {{{ CmdUtils.__getCommandByName( ) }}} **
+//
+// Get a reference to a Ubiquity command. This is used by
+// alias related functions, but probably doesn't need to be used directly
+// by command feeds.
+//
+// {{{ name }}} The ID or name of the command.
+ 
+function __getCommandByName( name ) {
+  var cs = CmdUtils.__getUbiquity().__cmdManager.__cmdSource;
+  // try to find it by ID first and then by referenceName
+  return cs.getCommand( name ) || cs.getCommandByName( name );
+};
+
+// ** {{{ CmdUtils.executeCommand }}} **
+//
+// Execute an existing Ubiquity command.
+//
+// {{{ command }}} either the id or name of the Ubiquity command that will be
+// executed or a direct reference to the command itself.
+// TODO: test direct reference
+//
+// {{{ args }}} An object containing the modifiers values that will
+// be passed to the execute function of the target command. Example:
+// {source: {data: 'en', text: 'english'}, goal: {data: 'fr', text: 'french'}}
+ 
+function executeCommand(command, args) {
+  var context = this.__globalObject.context || {};
+  if (command.constructor == String)
+    return CmdUtils.__getCommandByName(command).execute(context, args);
+  return command.execute(args);
+};
+
+// ** {{{ CmdUtils.previewCommand }}} **
+//
+// Preview an existing Ubiquity command.
+//
+// {{{ command }}} either the id or name of the Ubiquity command that will be
+// previewed or a direct reference to the command itself.
+// TODO: test direct reference
+//
+// {{{ args }}} An object containing the modifiers values that will
+// be passed to the execute function of the target command. Example:
+// {source: {data: 'en', text: 'english'}, goal: {data: 'fr', text: 'french'}}
+ 
+function previewCommand(pblock, command, args) {
+  var context = this.__globalObject.context || {};
+  if (command.constructor == String)
+    return CmdUtils.__getCommandByName(command).preview(context, pblock, args);
+  return command.context(pblock, args);
+};
 
 // === {{{ CmdUtils.geocodeAddress(location, callback) }}} ===
 //

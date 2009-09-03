@@ -174,12 +174,25 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     return commands;
   };
 
-  self.getCommand = function FA_getCommand(name) {
+  self.getCommand = function FA_getCommand(id) {
     if (feedsChanged)
       self.refresh();
 
-    return commands[name] || null;
+    return commands[id] || null;
   };
+
+  self.getCommandByName = function FA_getCommandByName(name) {
+    if (feedsChanged)
+      self.refresh();
+
+    for each (var command in commands)
+      if (command.referenceName == name)
+        return command;
+
+    return null;
+  };
+
+
 }
 
 const PREF_NNSITES = "extensions.ubiquity.noNotificationSites";
