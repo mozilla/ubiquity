@@ -91,7 +91,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       return !!(arg && (arg[0] || 0).text);
     }
     if (sugg._argSuggs)
-      return !!(sugg._argSuggs.direct_object || 0).text;
+      return !!(sugg._argSuggs.object || 0).text;
     return false;
   }
   function selected() (gContextMenu.isContentSelection() ||
@@ -99,6 +99,6 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
 
   ubiquityMenu.addEventListener("popupshowing", contextPopupShowing, false);
   ubiquityMenu.addEventListener("command", executeMenuCommand, false);
-  contextMenu.addEventListener("popupshowing", toggleUbiquityMenu, false);
   ubiquityMenu.addEventListener("click", openUbiquity, false);
+  contextMenu.addEventListener("popupshowing", toggleUbiquityMenu, false);
 }

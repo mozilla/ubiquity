@@ -78,31 +78,25 @@ function registerPluginForLanguage(code, plugin) {
 
 function getPluginForLanguage(languageCode) plugins[languageCode];
 
-/* ParserQuery: An object that wraps a request to the parser for suggestions
- * based on a given query string.  Multiple ParserQueries may be in action at
- * a single time; each is independent.  A ParserQuery can execute
- * asynchronously, producing a suggestion list that changes over time as the
- * results of network calls come in.
- */
+// ParserQuery: An object that wraps a request to the parser for suggestions
+// based on a given query string.  Multiple ParserQueries may be in action at
+// a single time; each is independent.  A ParserQuery can execute
+// asynchronously, producing a suggestion list that changes over time as the
+// results of network calls come in.
 function ParserQuery(parser, queryString, context, maxSuggestions) {
-  this._init.apply(this, arguments);
+  this._parser = parser;
+  this._suggestionList = [];
+  this._queryString = queryString;
+  this._context = context;
+  this._parsingsList = [];
+
+  this.maxSuggestions = maxSuggestions;
+  this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
+  this.requests = [];
+  // Client code should set a function to onResults!
+  this.onResults = Boolean;
 }
 ParserQuery.prototype = {
-  _init: function PQ__init(parser, queryString, context, maxSuggestions) {
-    this._parser = parser;
-    this._suggestionList = [];
-    this._queryString = queryString;
-    this._context = context;
-    this._parsingsList = [];
-
-    this.maxSuggestions = maxSuggestions;
-    this.nounCache = {"": {text: "", html: "", data: null, summary: ""}};
-    this.requests = [];
-    this.onResults = Boolean;
-  },
-
-  // Client code should set onResults to a function!!
-
   cancel: function PQ_cancel() {
     for each (let req in this.requests)
       if (req && typeof req.abort === "function")
@@ -112,13 +106,13 @@ ParserQuery.prototype = {
   },
 
   // Read-only properties:
-  get finished() {
+  get finished PQ_finished() {
     for each (let req in this.requests)
       if ((req.readyState || 4) !== 4) return false;
     return true;
   },
-  get hasResults() !!this._suggestionList.length,
-  get suggestionList() this._suggestionList,
+  get hasResults PQ_hasResults() !!this._suggestionList.length,
+  get suggestionList PQ_getSuggestionList() this._suggestionList,
 
   // The handler that makes this a listener for partiallyParsedSentences.
   onNewParseGenerated: function PQ_onNewParseGenerated() {
@@ -186,7 +180,7 @@ Parser.prototype = {
 
   strengthenMemory: function P_strengthenMemory(chosenSuggestion) {
     var verb = chosenSuggestion._verb, {id} = verb.cmd;
-    if (chosenSuggestion.hasFilledArgs()) {
+    if (chosenSuggestion.hasFilledArgs) {
       this._suggestionMemory.remember("", id);
       this._sortGenericVerbCache();
     }
@@ -196,15 +190,11 @@ Parser.prototype = {
   },
 
   getSuggestionMemoryScore:
-  function P_getSuggestionMemoryScore(inputVerb, suggestedVerb) {
-    return this._suggestionMemory.getScore(inputVerb, suggestedVerb);
-  },
-
-  // TODO reset is gone
+  function P_getSuggestionMemoryScore(input, cmdId)
+    this._suggestionMemory.getScore(input, cmdId),
 
   newQuery: function P_newQuery(input, context, maxSuggestions, lazy) {
     var query = new ParserQuery(this, input, context, maxSuggestions);
-    var ppss = [];
     var selObj = this._ContextUtils.getSelectionObject(context);
     var selected = !!(selObj.text || selObj.html);
     var plugin = this._languagePlugin;
@@ -214,9 +204,7 @@ Parser.prototype = {
     }
     if (!input && selected)
       // selection, no input, noun-first suggestion on selection
-      push.apply(ppss, this._nounFirstSuggestions(selObj,
-                                                  maxSuggestions,
-                                                  query));
+      var ppss = this._nounFirstSuggestions(selObj, maxSuggestions, query);
     else {
       // Language-specific full-sentence suggestions:
       ppss = plugin.parseSentence(
@@ -230,16 +218,14 @@ Parser.prototype = {
             verb, argStrings, selObj, matchScore, query);
         });
       // noun-first matches on input
-      if (ppss.length === 0) {
+      if (!ppss.length) {
         let selObj = {
           text: input,
           html: Utils.escapeHtml(input),
           fake: true,
         };
         selected = !!input;
-        push.apply(ppss, this._nounFirstSuggestions(selObj,
-                                                    maxSuggestions,
-                                                    query));
+        ppss = this._nounFirstSuggestions(selObj, maxSuggestions, query);
       }
     }
 
@@ -274,7 +260,7 @@ Parser.prototype = {
     if (!suggMemory) return;
     Utils.sortBy(
       this._rankedVerbsThatUseGenericNouns,
-      function minusSMScore(v) -suggMemory.getScore("", v._name));
+      function minusSMScore(v) -suggMemory.getScore("", v.cmd.id));
   },
 };
 
@@ -287,33 +273,32 @@ function ParsedSentence(verb, args, verbMatchScore, selObj, query) {
   this.verbMatchScore = verbMatchScore;
   this.duplicateDefaultMatchScore = 1;
   // assigned later
-  // this.frequencyMatchScore = 0;
-  // this.argMatchScore = 0;
+  this.frequencyMatchScore = -1;
+  this.argMatchScore = -1;
 }
 ParsedSentence.prototype = {
   get completionText PS_getCompletionText() {
     // Returns plain text that we should set the input box to if user hits
     // the key to autocomplete to this sentence.
-    var sentence = this._verb.matchedName;
-    var args = this._verb._arguments;
+    var {matchedName: sentence, _arguments: args} = this._verb;
     for (let x in args) {
-      let argText = (this._argSuggs[x] || 0).text;
-      if (!argText || this._argFlags[x] & FLAG_DEFAULT) continue;
+      let {text} = this._argSuggs[x] || 0;
+      if (!text || this._argFlags[x] & FLAG_DEFAULT) continue;
       let preposition = " ";
       if (x === "object") {
         // Check for a valid text selection. We'll replace
         // the text with a pronoun for readability
-        if (this._selObj.text === argText)
-          argText = this._query.PRONOUNS[0];
+        if (this._selObj.text === text)
+          text = this._query.PRONOUNS[0];
       }
       else preposition += args[x].flag + " ";
-      sentence += preposition + argText;
+      sentence += preposition + text;
     }
     return sentence + " ";
   },
 
   // text formatted sentence for display in popup menu
-  get displayText PS_displayText() {
+  get displayText PS_getDisplayText() {
     var {matchedName: sentence, _arguments: args} = this._verb;
     for (let x in args) {
       let obj = x === "object";
@@ -325,11 +310,11 @@ ParsedSentence.prototype = {
     return sentence;
   },
   // html formatted sentence for display in suggestion list
-  get displayHtml PS_displayHtml() {
+  get displayHtml PS_getDisplayHtml() {
     var {escapeHtml} = Utils;
     var sentence = ('<span class="verb">' +
                     escapeHtml(this._verb.matchedName) +
-                    '</span>');
+                    "</span>");
     var args = this._verb._arguments;
     for (let x in args) {
       let obj = x === "object";
@@ -337,7 +322,7 @@ ParsedSentence.prototype = {
       if (summary) {
         let label = obj ? "" : escapeHtml(args[x].flag) + " ";
         sentence += (
-          " " + (obj ? "" : '<span class="delimiter">' + label + '</span>') +
+          " " + (obj ? "" : '<span class="delimiter">' + label + "</span>") +
           '<span class="' + (obj ? "object" : "argument") + '">' +
           summary + "</span>");
       }
@@ -349,9 +334,9 @@ ParsedSentence.prototype = {
     return sentence;
   },
 
-  get icon() this._verb.cmd.icon,
-  get previewUrl() this._verb.cmd.previewUrl,
-  get previewDelay() this._verb.cmd.previewDelay,
+  get icon PS_getIcon() this._verb.cmd.icon,
+  get previewUrl PS_getPreviewUrl() this._verb.cmd.previewUrl,
+  get previewDelay PS_getPreviewDelay() this._verb.cmd.previewDelay,
 
   execute: function PS_execute(context) {
     return this._verb.execute(context, this._argSuggs);
@@ -385,7 +370,7 @@ ParsedSentence.prototype = {
     return arg in this._argSuggs;
   },
 
-  hasFilledArgs: function PS_hasFilledArgs() {
+  get hasFilledArgs PS_hasFilledArgs() {
     /* True if suggestion has at least one filled argument.
      False if verb has no arguments to fill, or if it has arguments but
      none of them are filled. */
@@ -460,18 +445,20 @@ ParsedSentence.prototype = {
   },
 
   get score PS_getScore() {
-    if (!("argMatchScore" in this)) {
+    if (this.argMatchScore < 0) {
       // argument match score starts at 0 and increased for each
       // argument where a specific nountype (i.e. non-arbitrary-text)
       // matches user input.
-      let ams = 0, args = this._verb._arguments, suggs = this._argSuggs;
-      for (let name in suggs) if (suggs[name].summary)
-        ams += ((name === "object" ? .9 : 1) *
-                (args[name].type.rankLast ? .1 : 1));
+      let ams = 0, {_verb: {_arguments}, _argFlags} = this;
+      for (let name in _argFlags)
+        if (!(_argFlags[name] & FLAG_DEFAULT))
+          ams += ((name === "object" ? .9 : 1) *
+                  (_arguments[name].type.rankLast ? .1 : 1));
       this.argMatchScore = ams;
     }
     return (this.fromNounFirstSuggestion
-            ? this.argMatchScore / 10 + this.frequencyMatchScore / 100
+            ? (this.argMatchScore / 10 +
+               this.frequencyMatchScore / 100)
             : (this.duplicateDefaultMatchScore +
                this.frequencyMatchScore / 10 +
                this.verbMatchScore / 100 +
@@ -637,7 +624,7 @@ PartiallyParsedSentence.prototype = {
     var parsedSentences = [];
     if (this.fromNounFirstSuggestion) {
       for each (let sen in this._parsedSentences) {
-        if (sen.hasFilledArgs()) {
+        if (sen.hasFilledArgs) {
           // When doing noun-first suggestion, we only want matches that put
           // the input or selection into an argument of the verb; therefore,
           // explicitly filter out suggestions that fill no arguments.
@@ -822,10 +809,10 @@ function hagureMetal(abbr, orig) {
   for each (let c in abbr) {
     let index = orig.indexOf(c, preIndex + 1);
     if (index < 0) return 0;
-    sum += (
-      index === preIndex + 1 || /[\s_-]/.test(orig[index - 1])
-      ? score
-      : score = pow((len - index) / len, 3));
+    sum += ((index === preIndex + 1 ||       // continuous from last match
+             /[\s_-]/.test(orig[index - 1])) // beginning of a word
+            ? score
+            : score = pow((len - index) / len, 3));
     preIndex = index;
   }
   return sum / len;

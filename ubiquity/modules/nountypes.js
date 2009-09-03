@@ -389,7 +389,7 @@ var noun_type_common_URI_scheme = CmdUtils.NounType(
 // Suggests a URL from the user's input and/or history.
 // Defaults to the current page's URL if no input is given.
 //
-// * {{{text, hml}}} : URL
+// * {{{text, html}}} : URL
 
 var noun_type_url = {
   label: "url",
