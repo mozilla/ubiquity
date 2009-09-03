@@ -44,55 +44,45 @@ var EnParser = {
 
 var {push} = Array.prototype;
 
-function recursiveParse(unusedWords, filledArgs, objYet, prepsYet) {
-  // First, the termination conditions of the recursion:
-  if (!unusedWords.length)
-    // We've used the whole sentence; no more words. Return what we have.
-    return [filledArgs];
+function shallowCopy(dic) {
+  var dup = {};
+  for (var key in dic) dup[key] = dic[key];
+  return dup;
+}
 
-  NO_MORE_PREPS: {
-    for (let key in prepsYet) break NO_MORE_PREPS;
-    if (objYet) {
-      // If only direct object remains, give it all and we're done.
-      let filled = {object: unusedWords};
-      for (let key in filledArgs) filled[key] = filledArgs[key];
-      return [filled];
-    }
-    // We've used up all arguments, so we can't continue parsing, but
-    // there are still unused words.  This was a bad parsing; don't use it.
-    return [];
-  }
+function recursiveParse(unusedWords, filledArgs, objYet, prepDict) {
+  var len = unusedWords.length;
+  if (!len) return [filledArgs]; // no more words; return what we have
 
   var completions = [];
-  var len = unusedWords.length;
-  for (let i = 0, to = objYet ? len - 1 : 1; i < to; ++i) {
+  for (var prepYet in prepDict) break;
+  if (prepYet) for (let i = 0, z = objYet ? len : 1; i < z; ++i) {
     let word = unusedWords[i];
-    for (let name in prepsYet) {
-      if (word !== prepsYet[name]) continue;
-      // Found a prep
-      let objNext = objYet && !i; // next only if we're at leftmost
-      for (let j = i + 2; j <= len; ++j) {
-        let prepsNext = {};
-        for (let key in prepsYet) prepsNext[key] = prepsYet[key];
-        delete prepsNext[name];
-        let filled = {};
-        for (let key in filledArgs) filled[key] = filledArgs[key];
+    for (let name in prepDict) if (prepDict[name].indexOf(word) === 0) {
+      // found a preposition
+      let objNext = objYet && !i;  // next only if we're at leftmost
+      // +1 loop to allow a preposition at last if we're at rightmost
+      for (let j = i + 2, z = len + (i + 1 === len); j <= z; ++j) {
+        let prepNext = shallowCopy(prepDict);
+        delete prepNext[name];
+        let filled = shallowCopy(filledArgs);
         if (i) filled.object = unusedWords.slice(0, i);
         filled[name] = unusedWords.slice(i + 1, j);
         push.apply(completions, recursiveParse(unusedWords.slice(j), filled,
-                                               objNext, prepsNext));
+                                               objNext, prepNext));
       }
       break;
     }
   }
-  ONLY_OBJ: if (objYet) {
-    for (var key in filledArgs) break ONLY_OBJ;
-    completions.push({object: unusedWords});
+  if (objYet) {
+    let filled = shallowCopy(filledArgs);
+    filled.object = unusedWords;
+    completions.push(filled);
   }
   return completions;
 }
 
-function parseSentence(inputString, verbList, selObj, makePPS) {
+function parseSentence(inputString, verbList, makePPS) {
   // Returns a list of PartiallyParsedSentences.
   let parsings = [];
   // English uses spaces between words:
@@ -113,12 +103,12 @@ function parseSentence(inputString, verbList, selObj, makePPS) {
     // Recursively parse to assign arguments
     let preps = {}; // {source: "to", goal: "from", ...}
     let args = verb._arguments;
-    for (let key in args) preps[key] = args[key].flag;
+    for (let key in args) preps[key] = args[key].preposition;
     delete preps.object;
     let argStringsList = recursiveParse(inputArgs, {},
                                         "object" in args, preps);
     for each (let argStrings in argStringsList)
-      parsings.push(makePPS(verb, argStrings, selObj, matchScore));
+      parsings.push(makePPS(verb, argStrings, matchScore));
   }
   return parsings;
 }

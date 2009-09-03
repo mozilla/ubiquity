@@ -210,10 +210,11 @@ Parser.prototype = {
       ppss = plugin.parseSentence(
         input,
         this._verbList,
-        selObj,
-        function makePPS(verb, argStrings, selObj, matchScore) {
-          for (var key in argStrings)
-            argStrings[key] = argStrings[key].join(" ");
+        function makePPS(verb, argStrings, matchScore) {
+          for (var x in verb._arguments)
+            // ensure all args in argStrings
+            // will be used for reconstructing the sentence
+            argStrings[x] = x in argStrings && argStrings[x].join(" ");
           return new PartiallyParsedSentence(
             verb, argStrings, selObj, matchScore, query);
         });
@@ -264,10 +265,12 @@ Parser.prototype = {
   },
 };
 
-function ParsedSentence(verb, args, verbMatchScore, selObj, query) {
+function ParsedSentence(
+  verb, args, verbMatchScore, selObj, argStrings, query) {
   this._verb = verb;
   this._argSuggs = args;
   this._argFlags = {};
+  this._argStrings = argStrings;
   this._selObj = selObj;
   this._query = query;
   this.verbMatchScore = verbMatchScore;
@@ -281,7 +284,7 @@ ParsedSentence.prototype = {
     // Returns plain text that we should set the input box to if user hits
     // the key to autocomplete to this sentence.
     var {matchedName: sentence, _arguments: args} = this._verb;
-    for (let x in args) {
+    for (let x in this._argStrings) {
       let {text} = this._argSuggs[x] || 0;
       if (!text || this._argFlags[x] & FLAG_DEFAULT) continue;
       let preposition = " ";
@@ -291,20 +294,19 @@ ParsedSentence.prototype = {
         if (this._selObj.text === text)
           text = this._query.PRONOUNS[0];
       }
-      else preposition += args[x].flag + " ";
+      else preposition += args[x].preposition + " ";
       sentence += preposition + text;
     }
     return sentence + " ";
   },
-
   // text formatted sentence for display in popup menu
   get displayText PS_getDisplayText() {
     var {matchedName: sentence, _arguments: args} = this._verb;
-    for (let x in args) {
+    for (let x in this._argStrings) {
       let obj = x === "object";
       let {text} = this._argSuggs[x] || 0;
       if (text) sentence += (" " +
-                             (obj ? "" : args[x].flag + " ") +
+                             (obj ? "" : args[x].preposition + " ") +
                              (obj ? "[ " + text + " ]" : text));
     }
     return sentence;
@@ -316,18 +318,18 @@ ParsedSentence.prototype = {
                     escapeHtml(this._verb.matchedName) +
                     "</span>");
     var args = this._verb._arguments;
-    for (let x in args) {
+    for (let x in this._argStrings) {
       let obj = x === "object";
       let {summary} = this._argSuggs[x] || 0;
       if (summary) {
-        let label = obj ? "" : escapeHtml(args[x].flag) + " ";
+        let label = obj ? "" : escapeHtml(args[x].preposition) + " ";
         sentence += (
-          " " + (obj ? "" : '<span class="delimiter">' + label + "</span>") +
+          (obj ? " " : ' <span class="delimiter">' + label + "</span>") +
           '<span class="' + (obj ? "object" : "argument") + '">' +
           summary + "</span>");
       }
       else {
-        let label = (obj ? "" : args[x].flag + " ") + args[x].label;
+        let label = (obj ? "" : args[x].preposition + " ") + args[x].label;
         sentence += ' <span class="needarg">' + escapeHtml(label) + "</span>";
       }
     }
@@ -359,7 +361,7 @@ ParsedSentence.prototype = {
   setArgumentSuggestion:
   function PS_setArgumentSuggestion(arg, sugg, isDefault) {
     this._argSuggs[arg] = sugg;
-    this._argFlags[arg] |= isDefault ? FLAG_DEFAULT : 0;
+    this._argFlags[arg] |= isDefault && FLAG_DEFAULT;
   },
 
   getArgText: function PS_getArgText(arg) {
@@ -457,17 +459,16 @@ ParsedSentence.prototype = {
       this.argMatchScore = ams;
     }
     return (this.fromNounFirstSuggestion
-            ? (this.argMatchScore / 10 +
-               this.frequencyMatchScore / 100)
-            : (this.duplicateDefaultMatchScore +
-               this.frequencyMatchScore / 10 +
-               this.verbMatchScore / 100 +
-               this.argMatchScore / 1000));
+            ? (1e-1 * this.argMatchScore +
+               1e-2 * this.frequencyMatchScore)
+            : (1e-0 * this.duplicateDefaultMatchScore +
+               1e-1 * this.frequencyMatchScore +
+               1e-2 * this.verbMatchScore +
+               1e-3 * this.argMatchScore));
   }
 };
 
-function PartiallyParsedSentence(
-  verb, argStrings, selObj, matchScore, query, copying) {
+function PartiallyParsedSentence(verb, argStrings, selObj, matchScore, query) {
   // This is a partially parsed sentence.
   // What that means is that we've decided what the verb is,
   // and we've assigned all the words of the input to one of the arguments.
@@ -493,8 +494,8 @@ function PartiallyParsedSentence(
   // list so that the algorithm in addArgumentSuggestion will work
   // correctly.
   this._parsedSentences =
-    [new ParsedSentence(verb, {}, matchScore, selObj, query, this)];
-  for (let argName in this._verb._arguments) {
+    [new ParsedSentence(verb, {}, matchScore, selObj, argStrings, query)];
+  for (let argName in argStrings) {
     let text = argStrings[argName];
     if (text) {
       // If argument is present, try the noun suggestions
@@ -623,15 +624,13 @@ PartiallyParsedSentence.prototype = {
 
     var parsedSentences = [];
     if (this.fromNounFirstSuggestion) {
-      for each (let sen in this._parsedSentences) {
-        if (sen.hasFilledArgs) {
-          // When doing noun-first suggestion, we only want matches that put
-          // the input or selection into an argument of the verb; therefore,
-          // explicitly filter out suggestions that fill no arguments.
-          for each (let oneSen in sen.fillMissingArgsWithDefaults()) {
-            oneSen.fromNounFirstSuggestion = true;
-            parsedSentences.push(oneSen);
-          }
+      for each (let sen in this._parsedSentences) if (sen.hasFilledArgs) {
+        // When doing noun-first suggestion, we only want matches that put
+        // the input or selection into an argument of the verb; therefore,
+        // explicitly filter out suggestions that fill no arguments.
+        for each (let oneSen in sen.fillMissingArgsWithDefaults()) {
+          oneSen.fromNounFirstSuggestion = true;
+          parsedSentences.push(oneSen);
         }
       }
     }
@@ -717,7 +716,7 @@ function Verb(cmd, roleMap) {
       this._arguments[obj ? "object" : role] = {
         type : nountype,
         label: arg.label || pluckLabel(nountype),
-        flag : obj ? null : roleMap[role],
+        preposition: obj ? "" : roleMap[role],
         "default": arg.default,
       };
     }
@@ -731,7 +730,7 @@ function Verb(cmd, roleMap) {
       this._arguments.object = {
         type: cmd.DOType,
         label: cmd.DOLabel,
-        flag: null,
+        preposition: "",
         "default": cmd.DODefault,
       };
     }
@@ -746,7 +745,7 @@ function Verb(cmd, roleMap) {
         this._arguments[x] = {
           type: type,
           label: pluckLabel(type),
-          flag: x,
+          preposition: x,
         };
         if (modifierDefaults)
           this._arguments[x].default = modifierDefaults[x];

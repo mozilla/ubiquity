@@ -888,7 +888,7 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
                              [cmd_twitter]);
   // There are two places where we could make the division between status
   // and "as" argument.  Make sure both get generated.
-  this.assert(comps.length === 3, "Should have 3 suggestions.");
+  this.assert(comps.length === 4, "Should have 4 suggestions.");
   var expected;
   this.assert(comps[0]._argSuggs.object.text ===
               (expected = "i am happy"),
@@ -897,57 +897,55 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
               (expected = "a clam as fern"),
               "First suggestion AS should be " + uneval(expected));
   this.assert(comps[1]._argSuggs.object.text ===
-              (expected = "i am happy as a clam"),
+              (expected = "i am happy as"),
               "Second suggestion direct obj should be " + uneval(expected));
   this.assert(comps[1]._argSuggs.as.text ===
-              (expected = "fern"),
+              (expected = "clam as fern"),
               "Second suggestion AS should be " + uneval(expected));
-  this.assert(comps[2]._argSuggs.object.text ===
+  this.assert(comps[3]._argSuggs.object.text ===
               (expected = "i am happy as a clam as fern"),
               "Last suggestion direct obj should be " + uneval(expected));
-  this.assert(!comps[2]._argSuggs.as.text,
+  this.assert(!comps[3]._argSuggs.as.text,
               "Last suggestion AS should be empty.");
 }
 
 function testEnParserRecursiveParse() {
   var {recursiveParse} = EnParser.__parent__;
   var {assertEquals} = this;
-  function serialize(olist) [uneval(o) for each (o in olist)].sort() + "";
-  function assertEqualsSerialized(x, y) {
-    assertEquals(serialize(x), serialize(y));
-  }
-  assertEqualsSerialized(
-    recursiveParse(
-      "near here".split(" "), {},
-      false, {location: "near"}),
-    [{location:["here"]}]);
-  assertEqualsSerialized(
-    recursiveParse(
-      "beer near here".split(" "), {},
-      false, {location: "near"}),
-    []);
-  assertEqualsSerialized(
-    recursiveParse(
-      "beer near here".split(" "), {},
-      true, {location: "near"}),
-    [{object:["beer", "near", "here"]},
-     {object:["beer"], location:["here"]}]);
-  assertEqualsSerialized(
-    recursiveParse(
-      "i am happy as a clam as fern".split(" "), {},
-      true, {as: "as"}),
-    [{object:["i", "am", "happy"], as:["a", "clam", "as", "fern"]},
-     {object:["i", "am", "happy", "as", "a", "clam"], as:["fern"]},
-     {object:["i", "am", "happy", "as", "a", "clam", "as", "fern"]}]);
-  assertEqualsSerialized(
-    recursiveParse(
-      "to ja from en it".split(" "), {},
-      true, {from: "from", to: "to"}),
-    [{object:["to", "ja", "from", "en", "it"]},
-     {object:["to", "ja"], from:["en", "it"]},
-     {object:["it"], to:["ja"], from:["en"]},
-     {to:["ja"], from:["en", "it"]},
-     {to:["ja", "from", "en", "it"]}]);
+  function pp(olist) [uneval(o) for each (o in olist)].sort() + "";
+  function parse(input, hasObj, preps)
+    pp(recursiveParse(input.split(" "), {}, hasObj, preps));
+  assertEquals(
+    parse("near here", false, {location: "near", time: "at"}),
+    pp([{location:["here"]}]));
+  assertEquals(
+    parse("beer near here", false, {location: "near", time: "at"}),
+    "");
+  assertEquals(
+    parse("beer near here >", true,
+          {location: "near", time: "at", direction: ">"}),
+    // preposition at last
+    pp([{object:["beer"], location:["here"], direction:[]},
+        {object:["beer"], location:["here", ">"]},
+        {object:["beer", "near", "here"], direction:[]},
+        {object:["beer", "near", "here", ">"]}]));
+  assertEquals(
+    parse("i am happy as a clam as fern", true, {as: "as"}),
+    pp([{object:["i", "am", "happy"], as:["a", "clam", "as", "fern"]},
+        // partial match for preposition
+        {object:["i", "am", "happy", "as"], as:["clam", "as", "fern"]},
+        {object:["i", "am", "happy", "as", "a", "clam"], as:["fern"]},
+        {object:["i", "am", "happy", "as", "a", "clam", "as", "fern"]}]));
+  assertEquals(
+    parse("to ja from en it", true, {from: "from", to: "to"}),
+    pp([{object:["to", "ja", "from", "en", "it"]},
+        {object:["to", "ja"], from:["en", "it"]},
+        {to:["ja"], from:["en"], object:["it"]},
+        {to:["ja"], from:["en", "it"]},
+        {to:["ja"], object:["from", "en", "it"]},
+        {to:["ja", "from"], object:["en", "it"]},
+        {to:["ja", "from", "en"], object:["it"]},
+        {to:["ja", "from", "en", "it"]}]));
 }
 
 // TESTS TO WRITE:
