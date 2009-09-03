@@ -39,7 +39,12 @@
 <!ENTITY ubiqutiy.about.LearnHow "Aprenda a usar o &appTitle;">
 <!ENTITY ubiqutiy.about.TutorialButton "Clique aqui para obter um Tutorial Interativo">
 <!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Mais sobre o uso do &appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "Após o tutorial básico nesta página, você poderá saber mais lendo a <a href='&link.extDocs;' hreflang='en'>Documentação Aprofundada</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Ajude-nos assinando o <a href='&link.herdMain;' hreflang='en'>Herd</a>. Isso adicionará seus dados ao <a href='&link.herdDash;'>painel de comandos</a> &mdash; esse processo é completamente anônimo e nos ajudará a tornar o &appTitle; melhor e mais seguro.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "Para informações sobre os objetivos do projeto &appTitle; e nossos planos para futuras versões, visite o nosso <a href='&link.roadmap;'>Roadmap</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "O &appTitle; é um esforço coletivo de colaboradores do mundo todo. Para uma lista com alguns colaboradores, visite a <a href='&link.credits;'>página de créditos</a>.">
 <!ENTITY ubiqutiy.about.Thanks "Obrigado por usar o &appTitle; <span class='version'></span>!">
+<!ENTITY ubiquity.about.ThanksParagraph "A versão &appVersion; do &appTitle; corrige os bugs de desempenho e interface mais significativos encontrados na versão anterior. Com esta versão você deverá perceber melhorias de velocidade, responsividade e precisão do analisador de comandos. Para saber mais sobre o que há de novo, leia as <a href='&link.releaseNotes;'>Notas de lançamento do &appTitle; &appVersion;</a>.">
 <!-- End common elements -->
 <!ENTITY ubiquity.settings.Skins "Temas">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Editar tema personalizado">
@@ -55,11 +60,17 @@
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "O Parser 2 pode fazer chamadas a serviços externos da web para compreender o comando digitado e fornecer ações sugeridas baseadas nessa informação. Atualmente esse recurso resulta em um grande número de chamadas a APIs externas e por isso está desativado por padrão.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Ativar chamadas externas para todas as consultas do Parser 2">
+<!ENTITY ubiquity.settings.NotificationWarning "Se você estiver usando o Growl para Windows, certifique-se de que ele esteja sendo executado. Caso não esteja, você não receberá quaisquer notificações.">
+<!ENTITY ubiquity.settings.NotificationLinuxNote "Para que as <a href='&link.libNotify;'>notificações da libnotify</a> funcionem no Linux, você deverá instalar o pacote libnotify-bin usando o Gerenciador de Pacotes ou executando o comando <code>sudo apt-get install libnotify-bin</code> (Ubuntu ou outros baseados em Debian) ou o comando equivalente da sua distribuição.">
+<!ENTITY ubiquity.settings.NotificationSettings "Configurações de notificação">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "O &appTitle; faz uso intensivo de notificações transparentes não-modais. No Mac OS X, isso poderá ser visto usando o Growl. No Windows, elas serão exibidas usando o <a href='&link.snarl;'>Snarl</a>, <a href='&link.growlWin;'>Growl para Windows</a> ou como notificações &ldquo;toaster&rdquo; no canto inferior direito da tela. Se você tiver o <a href='&link.snarl;'>Snarl</a> instalado e sendo executado, o Ubiquity tentará detectá-lo automaticamente e usá-lo para exibir notificações.">
+<!ENTITY ubiquity.settings.NotificationEnable "Ativar serviços de notificação">
 <!ENTITY ubiquity.settings.CustomSkin "Editor de temas personalizados">
 <!ENTITY ubiquity.settings.SaveSkin "Salvar">
 <!ENTITY ubiquity.settings.SaveSkinAs "Salvar como">
 <!ENTITY ubiquity.settings.ShareSkin "Compartilhar">
 <!ENTITY ubiquity.settings.SaveNotice "Clicar em Salvar atualizará imediatamente a aparência do &appTitle;">
+<!ENTITY ubiquity.settings.Bug449Warning "Alterações feitas em um tema personalizado poderão não ser vistas até que o navegador seja reiniciado. Esse é um <a href='&link.bug449;'>problema conhecido</a>.">
 <!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.commandlist.SubscriptionDetails "Você tem &cmdCount; comandos em &feedCount; repositórios de comandos. | Você desisncreveu-se de <a href='cmdlist.xhtml#graveyard'>&unsubCount; repositórios de comandos</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Todos os comandos reconhecidos pelo &appTitle; estão listados na coluna à direita. O texto em preto é o nome do comando (o que você digita no &appTitle; para usá-lo). O texto em cinza explica o que o comando faz.">
@@ -85,15 +96,19 @@
 <!ENTITY ubiquity.support.ReportBugs "Informar sobre um bug">
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "Estamos trabalhando em um serviço de relatos de bugs automatizado, mas por enquanto você deverá relatar qualquer problema que você encontrar utilizando o Get Satisfaction ou pela nossa lista/grupo do Google. Lembre-se de incluir qualquer informação que possa ajudar a reproduzir o problema.">
 <!ENTITY ubiquity.support.ResetUbiquity "Restaurando o &appTitle;">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Caso o &appTitle; apresente-se completamente irresponsivo para você, talvez seja necessário executar uma restauração das &ldquo;configurações de fábrica&rdquo; antes de poder usá-lo novamente. Para executar a restauração, <a href='&chrome.reset;'>clique aqui</a> &mdash; e aceite nossas sinceras desculpas pela inconveniência!">
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "Editor de comandos do &appTitle;">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Digite novos comandos</strong> na área abaixo. Eles serão salvos automaticamente ao serem digitados e poderão ser usados instantaneamente no modo de digitação.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "<strong>Leia o <a href='&link.cmdTutorial;'>tutorial de ciração de comandos</a></strong> para saber mais. Para exemplos de comandos internos, <a href='&file.FeedsIndex;'>veja aqui</a>.">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentação da">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Envolva-se</strong>. Saiba como visitando a <a href='&link.wikiMain;'>Wiki do &appTitle;</a>.">
 <!ENTITY ubiquity.editor.YourExternalEd "Seu editor externo:">
 <!ENTITY ubiquity.editor.EditorCommandType "O tipo de comando é">
 <!ENTITY ubiquity.editor.CmdTypeRegular "Normal">
 <!ENTITY ubiquity.editor.CmdTypeLocked "Controlado (Locked-Down)">
 <!ENTITY ubiquity.editor.RegularCommandDesc "Repositórios do tipo <em>Normal</em> têm total liberdade para fazer qualquer coisa em seu computador.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Repositórios Controlados</em> são muito seguros mas não têm tanta liberdade para interagir com o seu computador. Para mais informações, leia o <a href='&link.lockedFeed;'>Tutorial de repositórios controlados</a>.">
 <!ENTITY ubiquity.editor.ImportTemplate "Importar modelo de comando">
 <!ENTITY ubiquity.editor.LaunchExternalEd "Abrir editor externo">
 <!ENTITY ubiquity.editor.ShareCommand "Compartilhar">

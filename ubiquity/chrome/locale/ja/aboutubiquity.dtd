@@ -22,6 +22,7 @@ Sincerely,
 
 
 
+
 -->
 <!ENTITY ubiquity.pagetitle.About "&appTitle; について">
 <!ENTITY ubiquity.pagetitle.Settings "各種設定 - &appTitle;">
@@ -58,6 +59,7 @@ Sincerely,
 <!--
 - I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.
 - This will also be useful when we do a full about: page overhaul possibly condensing the editors.
+
 
 
 

@@ -63,7 +63,7 @@
 <!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.commandlist.SubscriptionDetails "Tiene &cmdCount; órdenes en &feedCount; flujos de órdenes.| Necesita desregistrarse de <a href='cmdlist.xhtml#graveyard'>&unsubCount; flujos de órdenes</a>.| &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Todas las órdenes que reconoce &appTitle; están listadas en la columna derecha.  El texto negro es el nombre de la orden (lo que teclea en &appTitle; para usarla).  El texto gris explica lo que hace la orden.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "La columna de la izquierda muestra todos los &ldquo;flujos&rdquo; a los que &appTitle está suscrito. Cada flujo puede contener varias órdenes.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "La columna de la izquierda muestra todos los &ldquo;flujos&rdquo; a los que &amp;appTitle está suscrito. Cada flujo puede contener varias órdenes.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Puede ver esta página ordenada por flujos o por órdenes. Pulse cualquiera de los enlaces cercanos a &ldquo;ordenar por&rdquo; más abajo.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Si hay una ordena que no quiera, deseleccione la caja de al lado de ella. Puede volver a tener la orden volviendo a seleccionar la casilla.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "Si hay un flujo completo de órdenes que no desee, pulse el enlace &ldquo;[desuscribirse]&rdquo; debajo del nombre del flujo. Todas las órndees en el flujo dejarán de funcionar. Si cambia de opinión puede resuscribirse al final de la página.">
