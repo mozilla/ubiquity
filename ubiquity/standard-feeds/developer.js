@@ -41,6 +41,13 @@ CmdUtils.CreateCommand({
   argument: noun_type_url,
   execute: function vs_execute(args) {
     Utils.openUrlInBrowser("view-source:" + args.object.text);
+  },
+  preview: function vs_preview(pb, {object: {html, data}}) {
+    pb.innerHTML = (
+      this.previewDefault() +
+      (!data || !data.title ? "" :
+       "<p>" + Utils.escapeHtml(data.title) + "</p>") +
+      (html && "<pre>" + html.link(html) + "</pre>"));
   }
 });
 
