@@ -76,23 +76,6 @@ function onDocumentLoad() {
     CommandManager.maxSuggestions = this.value;
     this.value = CommandManager.maxSuggestions;
   }).val(CommandManager.maxSuggestions);
-
-  $("#input-delay").change(function changeInputDelay() {
-    Application.prefs.setValue("extensions.ubiquity.inputDelay",
-                               this.value = Math.abs(~~this.value % 1e4));
-  }).val(Utils.currentChromeWindow.gUbiquity.inputDelay);
-
-  //Notification settings
-  var GFW_PREF = "extensions.ubiquity.gfw";
-  if (Utils.OS === "WINNT") {
-    let [gfw] = $("#gfw").click(function gfw_checkClick(){
-      var {checked} = this;
-      Application.prefs.setValue(GFW_PREF, checked);
-      $("#gfw-warning")[checked ? "slideDown" : "slideUp"]();
-    });
-    if ((gfw.checked = Application.prefs.getValue(GFW_PREF, false)))
-      $("#gfw-warning").show();
-  }
 }
 
 function changeLanguageSettings() {

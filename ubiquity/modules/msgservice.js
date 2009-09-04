@@ -67,12 +67,13 @@ var EXPORTED_SYMBOLS = ["ExceptionUtils",
                         "AlertMessageService",
                         "CompositeMessageService"];
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
-var Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
 
+var L = LocalizationUtils.propertySelector(
+  "chrome://ubiquity/locale/coreubiquity.properties");
 
 // == Message Service Implementations ==
 
@@ -82,82 +83,78 @@ Cu.import("resource://ubiquity/modules/utils.js");
 // the JavaScript error console, also logging their stack traces if
 // possible.
 
-function ErrorConsoleMessageService() {
-  this.displayMessage = function ECMS_displayMessage(msg) {
+function ErrorConsoleMessageService() {}
+
+ErrorConsoleMessageService.prototype = {
+  displayMessage: function ECMS_displayMessage(msg) {
     if (typeof msg === "object" && msg.exception) {
       var tb = ExceptionUtils.stackTrace(msg.exception);
       Cu.reportError(msg.exception);
       //errorToLocalize
       Cu.reportError("Traceback for last exception:\n" + tb);
     }
-  };
-}
+  }
+};
 
 // === {{{AlertMessageService}}} ===
 //
 // This {{{MessageService}}} uses {{{nsIAlertsService}}} to
-// non-modally display the message to the user. On Windows, 
-// it uses Growl for Windows (user needs to check a box on Settings page) 
-// or Snarl (auto-detected). If the user has neither GFW nor Snarl,
-// this showsup as a "toaster" notification at the bottom-right of the
+// non-modally display the message to the user. On Windows, this shows
+// up as a "toaster" notification at the bottom-right of the
 // screen. On OS X, it's shown using
 // [[http://en.wikipedia.org/wiki/Growl_%28software%29|Growl]].
-// On Linux, it is shown with libnotify if the user has the library installed.
-// If not, it it uses the "toaster" notifications
 
+function AlertMessageService() {}
 
-function AlertMessageService() {
-  
-  this.ALERT_IMG = "chrome://ubiquity/skin/icons/favicon.ico";
-  this.EXTENSION_ID = "ubiquity@labs.mozilla.com";
-  this.ICON_RELATIVE_PATH_WINDOWS = "\\chrome\\skin\\icons\\favicon.ico";
-  this.ICON_RELATIVE_PATH_LINUX = "/chrome/skin/icons/favicon.ico";
+AlertMessageService.prototype = {
+  DEFAULT_ICON : "chrome://ubiquity/skin/icons/favicon.ico",
+  DEFAULT_TITLE: L("ubiquity.msgservice.defaultmsgtitle"),
+  displayMessage: function AMS_displayMessage(msg) {
+    var text  = "";
+    var title = this.DEFAULT_TITLE;
+    var icon  = this.DEFAULT_ICON;
+    var textClickable = false;
+    var cookie = "";
+    var alertListener = null;
+    var name = null;
 
-  this.displayMessage = function AMS_displayMessage(msg) {
-    var text;
-    //errorToLocalize
-    var self = this;
-    if (typeof msg === "object") {
-      text = String(msg.text);
-      
-      if (msg.exception) {
+    if (Utils.classOf(msg) !== "Object")
+      text = String(msg);
+    else {
+      if ("exception" in msg) {
         let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
-        let showErr = Utils.Application.prefs.getValue(SHOW_ERR_PREF, false);
-
-        if (showErr)
+        if (Utils.Application.prefs.getValue(SHOW_ERR_PREF, false))
           text += " (" + msg.exception + ")";
         else
           return;
       }
-      msg.description = text;
-    }
-    else{
-      msg = {"description" : String(msg)};
-    }
 
+      if ("text"  in msg) text  = String(msg.text);
+      if ("title" in msg) title = String(msg.title);
+      if ("icon"  in msg) icon  = String(msg.icon);
+
+      let {onclick, onfinished} = msg;
+      if (onclick) textClickable = true;
+      if (onclick || onfinished)
+        alertListener = {
+          observe: function AMS_observe(subject, topic, data) {
+            if (topic === "alertclickcallback" && onclick)
+              onclick();
+            else if (topic === "alertfinished" && onfinished)
+              onfinished();
+          }
+        };
+    }
     try {
-      var yip = Cc['@abi.sh/yip;1']
-                .getService().wrappedJSObject;
-      
-      var extension = Cc["@mozilla.org/extensions/manager;1"]
-                      .getService(Ci.nsIExtensionManager)
-                      .getInstallLocation(self.EXTENSION_ID)
-                      .getItemLocation(self.EXTENSION_ID);
-      
-      //Kind of redudant to send so many icon URLs, I know
-      yip.displayNotification(
-        msg, 
-        "Ubiquity", 
-        self.ALERT_IMG,
-        extension.path + self.ICON_RELATIVE_PATH_WINDOWS,
-        extension.path + self.ICON_RELATIVE_PATH_LINUX
-      );
+      Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService)
+        .showAlertNotification(icon, title, text, textClickable,
+                               cookie, alertListener, name);
     } catch (e) {
       Cu.reportError(e);
       Utils.focusUrlInBrowser("chrome://ubiquity/content/bug19warning.xhtml");
     }
-  };
-}
+  }
+};
 
 // === {{{CompositeMessageService}}} ===
 //
@@ -180,7 +177,7 @@ CompositeMessageService.prototype = {
     for each (let service in this._services)
       service.displayMessage(msg);
   }
-}
+};
 
 // == Exception Utilities ==
 //
