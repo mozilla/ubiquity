@@ -1,9 +1,9 @@
-/*CmdUtils.CreateAlias({
+CmdUtils.CreateAlias({
   names: ["anglicize"],
   verb: "translate",
-  arguments: { goal: { input: "English" } },
+  givenArgs: { goal: { input: "English" } },
   icon: "resource://ubiquity/chrome/skin/icons/union_jack.ico"
-});*/
+});
 
 CmdUtils.CreateCommand({
   names: ["germanize"],
