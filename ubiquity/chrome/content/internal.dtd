@@ -41,8 +41,17 @@
 <!ENTITY link.cmdTutorial "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial">
 <!ENTITY link.credits "https://wiki.mozilla.org/Labs/Ubiquity/Credits">
 <!ENTITY link.extDocs "https://wiki.mozilla.org/Labs/Ubiquity/Latest_Ubiquity_User_Tutorial">
+<!-- 
+Commenting these out for the time being at the request of Jono as Herd is 
+currently "offline" and not answering requests. This should reflect changes
+found in the 0.1 branch.
+
 <!ENTITY link.herdMain "https://ubiquity.mozilla.com/herd/">
 <!ENTITY link.herdDash "https://ubiquity.mozilla.com/herd/command-feed/">
+-->
+<!ENTITY link.herdMain "http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">
+<!ENTITY link.herdDash "http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">
+
 <!ENTITY link.lockedFeeds "https://wiki.mozilla.org/Labs/Ubiquity/Locked-Down_Feed_Tutorial">
 <!ENTITY link.roadmap "https://wiki.mozilla.org/Labs/Ubiquity/Roadmap">
 <!ENTITY link.wildCmds "http://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild">
