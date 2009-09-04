@@ -366,7 +366,7 @@ Parser.prototype = {
           if (argSpec.role == role) {
             var nounTypeIds = {};
             nounTypeIds[argSpec.nountype.id] = true;
-            aatd.push({argText:alias.givenArgs[role].input,
+            aatd.push({argText:alias.givenArgs[role],
                        nounTypeIds: nounTypeIds});
             foundArgSpec = true;
             break;

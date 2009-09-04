@@ -896,11 +896,10 @@ CreateCommand.previewDefault = function previewDefault(pb) {
 // ** The following property is used to specify arguments for the target verb: **
 //
 // {{{ options.givenArgs }}} Specifies pre-determined arguments for the target
-// verb. This is a hash keyed by semantic roles. The required properties of
-// each argument is the {{{input}}} property to specify the text input. The
-// parser will then run your {{{input}}} through the nountype associated with
-// that semantic role for the target verb and use that argument in
-// parse/preview/execution.
+// verb. This is a hash keyed by semantic roles. The values are the text input
+// value for that argument. The parser will then run that value through the
+// nountype associated with that semantic role for the target verb and use that
+// argument in parse/preview/execution.
 //
 // === The following properties are optional: ===
 // 
@@ -964,19 +963,16 @@ function CreateAlias(options) {
       var cachedGivenArgs = {};
       for (var role in this.givenArgs) {
         var nounTypeId = null;
-        var givenInfo = this.givenArgs[role];
+        var givenText = this.givenArgs[role];
         // if we don't have the necessary fields, find the appropriate nountype
-        if (!('summary' in this.givenArgs[role])
-            || !('data' in this.givenArgs[role])) {
-          for each (var targetArgSpec in args) {
-            if (targetArgSpec.role == role) {
-              nounTypeId = targetArgSpec.nountype.id;
-              break;
-            }
+        for each (var targetArgSpec in args) {
+          if (targetArgSpec.role == role) {
+            nounTypeId = targetArgSpec.nountype.id;
+            break;
           }
-          var nc = CmdUtils.__getUbiquity().__cmdManager.__nlParser._nounCache;
-          cachedGivenArgs[role] = nc.getBestSugg(givenInfo.input, nounTypeId);
         }
+        var nc = CmdUtils.__getUbiquity().__cmdManager.__nlParser._nounCache;
+        cachedGivenArgs[role] = nc.getBestSugg(givenText, nounTypeId);
       }
       return cachedGivenArgs;
     },
