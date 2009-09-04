@@ -895,12 +895,12 @@ CreateCommand.previewDefault = function previewDefault(pb) {
 //
 // ** The following property is used to specify arguments for the target verb: **
 //
-// {{{ options.arguments }}} Specifies pre-determined arguments for the target verb.
-// This is an array of dictionary objects. The required properties of each argument
-// is the {{{role}}} property to specify its semantic role and the {{{input}}}
-// property to specify the text input. The parser will then run your {{{input}}}
-// through the nountype associated with that semantic role for the target verb
-// and use that argument in parse/preview/execution.
+// {{{ options.givenArgs }}} Specifies pre-determined arguments for the target
+// verb. This is a hash keyed by semantic roles. The required properties of
+// each argument is the {{{input}}} property to specify the text input. The
+// parser will then run your {{{input}}} through the nountype associated with
+// that semantic role for the target verb and use that argument in
+// parse/preview/execution.
 //
 // === The following properties are optional: ===
 // 
@@ -928,24 +928,58 @@ CreateCommand.previewDefault = function previewDefault(pb) {
 // {{{ options.license }}} A string naming the license under which your
 // alias is distributed, for example "MPL".
 
-
 function CreateAlias(options) {
   dump('creating alias now\n');
   var me = this;
   var global = this.__globalObject;
 
-  // we've already stored these arguments as givenArgs. alias.arguments
-  // will return the arguments specification of the target verb.
-  var givenArgs = options.arguments;
-  delete(options.arguments);
-
   var alias = {
     __proto__: options,
     proto: options,
     thisIsAnAlias: true,
-    givenArgs: (options.arguments || []),
-    targetVerb: null,
-    get arguments() (this.targetVerb ? this.targetVerb.arguments : []),
+    get targetVerb() {
+      try {
+        if (this.verb.constructor == String)
+          return CmdUtils.__getCommandByName(this.verb);
+        return this.verb;
+      } catch(e) {
+        return null;
+      }
+    },
+    get arguments() {
+      var args = this.targetVerb ? this.targetVerb.arguments : [];
+      var realArgSpecs = [];
+      for (var key in args) {
+        var takeThisArgSpec = true;
+        for (var role in this.givenArgs)
+          if (args[key].role == role)
+            takeThisArgSpec = false;
+        if (takeThisArgSpec)
+          realArgSpecs.push(args[key]);
+      }
+      return realArgSpecs;
+    },
+    get cachedGivenArgs() {
+      var args = this.targetVerb ? this.targetVerb.arguments : [];
+      var cachedGivenArgs = {};
+      for (var role in this.givenArgs) {
+        var nounTypeId = null;
+        var givenInfo = this.givenArgs[role];
+        // if we don't have the necessary fields, find the appropriate nountype
+        if (!('summary' in this.givenArgs[role])
+            || !('data' in this.givenArgs[role])) {
+          for each (var targetArgSpec in args) {
+            if (targetArgSpec.role == role) {
+              nounTypeId = targetArgSpec.nountype.id;
+              break;
+            }
+          }
+          var nc = CmdUtils.__getUbiquity().__cmdManager.__nlParser._nounCache;
+          cachedGivenArgs[role] = nc.getBestSugg(givenInfo.input, nounTypeId);
+        }
+      }
+      return cachedGivenArgs;
+    },
     get serviceDomain() (this.targetVerb.serviceDomain)
   };
 
@@ -963,10 +997,8 @@ function CreateAlias(options) {
   alias.name = names[0];
 
   alias.preview = function(pblock,args) {
-    // WARNING: getting the context this way could be considered a *hack*...
-    // but currently is necessary due to the slightly-convoluted way in which
-    // commands are created. Search for "makeCmdFromObj" in the codebase
-    // to learn more.
+    for (var role in this.cachedGivenArgs)
+      args[role] = this.cachedGivenArgs[role];
     var context = alias.preview.caller.arguments[0];
     if (this.targetVerb.preview == null) {
       CreateCommand.previewDefault.apply(this,[pblock]);
@@ -976,6 +1008,8 @@ function CreateAlias(options) {
   };
   
   alias.execute = function(pblock,args) {
+    for (var role in this.cachedGivenArgs)
+      args[role] = this.cachedGivenArgs[role];
     var context = alias.execute.caller.arguments[0];
     this.targetVerb.execute.apply(this.targetVerb,[context,pblock,args]);
   }

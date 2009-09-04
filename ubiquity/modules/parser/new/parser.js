@@ -194,6 +194,7 @@ Parser.prototype = {
   setCommandList: function setCommandList(commandList) {
     // First we'll register the verbs themselves.
     var verbs = this._verbList = [];
+    
     var skippedSomeVerbs = false;
     for each (let verb in commandList) {
       if (!verb.oldAPI || verb.arguments)
@@ -236,18 +237,6 @@ Parser.prototype = {
           thisParser.flushNounCacheForId(id);
         }
         nt.registerCacheObserver(flush);
-      }
-    }
-    
-    for each (let alias in verbs) {
-      if (!alias.thisIsAnAlias)
-        continue;
-      for each (let verb in verbs) {
-        if (alias.verb == verb.name) {
-          alias.targetVerb = verb;
-          alias.__proto__.targetVerb = verb;
-//          alias.proto.targetVerb = verb;
-        }
       }
     }
 
@@ -357,6 +346,38 @@ Parser.prototype = {
     var boundary = this.usespaces ? "\\b" : "";
     patternCache.anaphora =
       RegExp(boundary + RegexpTrie(this.anaphora) + boundary);
+  },
+
+  // ** {{{Parser#setAliasArgsToDetect()}}} **
+  //
+  // Identify the given args of aliases as we will need to always run this
+  // through the nountype detection. Thankfully, we have noun caching now, so
+  // this doesn't directly translate to lots of extra nountype detection
+  // overhead.
+  setAliasArgsToDetect: function setAliasArgsToDetect() {
+    var aatd = this.aliasArgsToDetect = [];
+    for each (var alias in this._verbList) {
+      if (!("targetVerb" in alias))
+        continue;
+      for (var role in alias.givenArgs) {
+        var targetVerbArgs = alias.targetVerb.arguments;
+        var foundArgSpec = false;
+        for each (var argSpec in targetVerbArgs) {
+          if (argSpec.role == role) {
+            var nounTypeIds = {};
+            nounTypeIds[argSpec.nountype.id] = true;
+            aatd.push({argText:alias.givenArgs[role].input,
+                       nounTypeIds: nounTypeIds});
+            foundArgSpec = true;
+            break;
+          }
+        }
+        if (!foundArgSpec)
+          // errorToLocalize
+          throw new Error('Alias can\'t find appropriate role in target verb:'
+                          + ' '+ alias.referenceName + ', '+ role);
+      }
+    }
   },
 
   flushNounCache: function Parser_flushNounCache() {
@@ -1935,7 +1956,8 @@ ParseQuery.prototype = {
 
     count = 0;
     var STEP_9_YIELD_LOOP_NUM = 4;
-    for each (let {argText,nounTypeIds} in dT.getArgsAndNounTypeIdsToCheck()) {
+    for each (let {argText,nounTypeIds} in 
+              dT.getArgsAndNounTypeIdsToCheck(this.parser)) {
       this.parser.detectNounType(this, argText, nounTypeIds,
                                  this.tryToCompleteParses);
       // we don't need to yield that often...
@@ -2218,8 +2240,13 @@ NounTypeDetectionTracker.prototype = {
   //
   // This returns an array of pairs of argument strings and the nountypes
   // they must be checked against.
-  getArgsAndNounTypeIdsToCheck: function DT_getArgsAndNounTypeIdsToCheck() {
-    var returnArr = [];
+  // 
+  // Now takes the current parser to get 
+  getArgsAndNounTypeIdsToCheck: function 
+                                DT_getArgsAndNounTypeIdsToCheck(parser) {
+    if (!("aliasArgsToDetect" in parser))
+      parser.setAliasArgsToDetect();
+    var returnArr = parser.aliasArgsToDetect || [];
 
     // note that the argsAndNounTypeIdsToCheck format designates
     // nounTypeIds to be a *hash*, not array.
@@ -2321,6 +2348,16 @@ NounCache.prototype = {
     if (!this.cacheSpace[arg][id].setTime)
       return null;
     return this.cacheSpace[arg][id].suggs;
+  },
+  getBestSugg: function NC_getBestSugg(arg,id) {
+    this._ensureNode(arg,id);
+    if (!this.cacheSpace[arg][id].setTime)
+      return null;
+    var bestSugg = null;
+    for each (var sugg in this.cacheSpace[arg][id].suggs)
+      if (sugg.score > (bestSugg != null ? bestSugg.score : 0))
+        bestSugg = sugg;
+    return bestSugg;
   },
   hasSuggsForIds: function NC_hasSuggsForIds(arg,ids) {
     for (let id in ids) {
