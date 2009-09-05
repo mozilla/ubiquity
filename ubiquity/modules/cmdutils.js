@@ -54,14 +54,17 @@ var EXPORTED_SYMBOLS = ["CmdUtils"];
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
+const {Application} = Utils;
+
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
-const {Application} = Utils;
+var {commandSource} = UbiquitySetup.createServices();
 
 var CmdUtils = {
   __globalObject: null,
@@ -164,72 +167,44 @@ function getDocumentInsecure() getDocument().wrappedJSObject;
 
 function getWindowInsecure() getDocumentInsecure().defaultView;
 
-// ** {{{ CmdUtils.__getUbiquity( ) }}} **
+// === {{{ CmdUtils.getCommand(id) }}} ===
 //
-// Get a reference to Ubiquity. This is used by
-// {{{ CmdUtils.closeUbiquity() }}} and {{{ CmdUtils.getCommandByName() }}}, but
-// probably doesn't need to be used directly by command feeds.
+// Gets a reference to a Ubiquity command by its ID or reference name
+// (the first name in English).
+// ID should be preferred whenever possible,
+// as reference name isn't cannonical across feeds.
+//
+// {{{id}}} is the id or name of the command.
  
-function __getUbiquity() {
-  // TODO: Understand why it doesn't work with a simple test.
-  try {
-    return context.chromeWindow.gUbiquity;
-  } catch(e) {
-    return Utils.currentChromeWindow.gUbiquity;
-  }
-};
+function getCommand(id) commandSource.getCommand(id);
 
-// ** {{{ CmdUtils.__getCommandByName( ) }}} **
+// === {{{ CmdUtils.executeCommand(command, args) }}} ===
+// === {{{ CmdUtils.previewCommand(command, pblock, args) }}} ===
 //
-// Get a reference to a Ubiquity command. This is used by
-// alias related functions, but probably doesn't need to be used directly
-// by command feeds.
+// Executes/previews an existing Ubiquity command.
 //
-// {{{ name }}} The ID or name of the command.
- 
-function __getCommandByName( name ) {
-  var cs = CmdUtils.__getUbiquity().__cmdManager.__cmdSource;
-  // try to find it by ID first and then by referenceName
-  return cs.getCommand( name ) || cs.getCommandByName( name );
-};
+// {{{command}}} is either the id or name of the Ubiquity command that will be
+// executed or a direct reference to the command.
+//
+// {{{pblock}}} is the preview block.
+//
+// {{{args}}} is an object containing the modifiers values that will
+// be passed to the execute function of the target command. e.g.:
+// {{{
+// {source: CmdUtils.makeSugg("English", null, "en"), goal: ...}
+// }}}
 
-// ** {{{ CmdUtils.executeCommand }}} **
-//
-// Execute an existing Ubiquity command.
-//
-// {{{ command }}} either the id or name of the Ubiquity command that will be
-// executed or a direct reference to the command itself.
-// TODO: test direct reference
-//
-// {{{ args }}} An object containing the modifiers values that will
-// be passed to the execute function of the target command. Example:
-// {source: {data: 'en', text: 'english'}, goal: {data: 'fr', text: 'french'}}
- 
-function executeCommand(command, args) {
-  var context = this.__globalObject.context || {};
-  if (command.constructor == String)
-    return CmdUtils.__getCommandByName(command).execute(context, args);
-  return command.execute(args);
-};
+function executeCommand(command, args, mods) {
+  var {context} = this.__globalObject;
+  if (typeof command === "string") command = CmdUtils.getCommand(command);
+  return command.execute(context, args, mods);
+}
 
-// ** {{{ CmdUtils.previewCommand }}} **
-//
-// Preview an existing Ubiquity command.
-//
-// {{{ command }}} either the id or name of the Ubiquity command that will be
-// previewed or a direct reference to the command itself.
-// TODO: test direct reference
-//
-// {{{ args }}} An object containing the modifiers values that will
-// be passed to the execute function of the target command. Example:
-// {source: {data: 'en', text: 'english'}, goal: {data: 'fr', text: 'french'}}
- 
-function previewCommand(pblock, command, args) {
-  var context = this.__globalObject.context || {};
-  if (command.constructor == String)
-    return CmdUtils.__getCommandByName(command).preview(context, pblock, args);
-  return command.context(pblock, args);
-};
+function previewCommand(command, pblock, args, mods) {
+  var {context} = this.__globalObject;
+  if (typeof command === "string") command = CmdUtils.getCommand(command);
+  return command.preview(context, pblock, args, mods);
+}
 
 // === {{{ CmdUtils.geocodeAddress(location, callback) }}} ===
 //

@@ -49,6 +49,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   var self = this;
   var commands = {};
   var commandNames = [];
+  var commandsByName = {};
   var commandsByServiceDomain = {};
   var pageLoadFuncLists = [];
   var ubiquityLoadFuncLists = [];
@@ -128,6 +129,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 
     commands = {};
     commandNames = [];
+    commandsByName = {};
     commandsByServiceDomain = {};
     pageLoadFuncLists = [];
     ubiquityLoadFuncLists = [];
@@ -140,11 +142,13 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
         if (cmd.application && cmd.application.indexOf(Utils.appName) === -1)
           continue;
         commandNames.push({id: cmd.id, name: cmd.name, icon: cmd.icon});
-        let cmdwd = commands[cmd.id] = makeCmdWithDisabler(cmd);
+        let cmdwd = makeCmdWithDisabler(cmd);
+        commands[cmd.id] = commandsByName[cmd.referenceName] = cmdwd;
         let {serviceDomain} = cmd;
         if (serviceDomain)
-          (commandsByServiceDomain[serviceDomain] ||
-           (commandsByServiceDomain[serviceDomain] = [])).push(cmdwd);
+          (serviceDomain in commandsByServiceDomain
+           ? commandsByServiceDomain[serviceDomain]
+           : commandsByServiceDomain[serviceDomain] = []).push(cmdwd);
       }
       if ((feed.pageLoadFuncs || "").length)
         pageLoadFuncLists.push(feed.pageLoadFuncs);
@@ -164,6 +168,8 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 
   self.__defineGetter__("commandNames",
                         function FA_cmdNames() commandNames);
+  self.__defineGetter__("commandsByName",
+                        function FA_cmdsByName() commandsByName);
   self.__defineGetter__("commandsByServiceDomain",
                         function FA_cmdsBySD() commandsByServiceDomain);
 
@@ -178,21 +184,8 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     if (feedsChanged)
       self.refresh();
 
-    return commands[id] || null;
+    return commands[id] || commandsByName[id] || null;
   };
-
-  self.getCommandByName = function FA_getCommandByName(name) {
-    if (feedsChanged)
-      self.refresh();
-
-    for each (var command in commands)
-      if (command.referenceName == name)
-        return command;
-
-    return null;
-  };
-
-
 }
 
 const PREF_NNSITES = "extensions.ubiquity.noNotificationSites";
