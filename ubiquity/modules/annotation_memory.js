@@ -21,6 +21,7 @@
  *   Vladimir Markin <v.markin@utoronto.ca>
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Atul Varma <atul@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -174,6 +175,8 @@ function AnnotationService(connection) {
 
   self.setPageAnnotation = function AS_setPageAnnotation(uri, name, value,
                                                          dummy, expiration) {
+    value = String(value);
+
     if (!(uri.spec in ann)) {
       ann[uri.spec] = {};
       urls[uri.spec] = uri;
