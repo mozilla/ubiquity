@@ -201,8 +201,14 @@ a:hover {
   text-decoration: underline;
 }
 
-a[onclick] {
+a[onclick], .sort-switch {
   cursor: pointer;
+}
+
+.sort-switch.selected {
+  color: inherit;
+  cursor: inherit;
+  text-decoration: none;
 }
 
 .error {

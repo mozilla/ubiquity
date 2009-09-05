@@ -398,12 +398,35 @@ function viewLocalizationTemplate(feed) (
     L("ubiquity.cmdlist.localetemplate"),
     "action"));
 
+function setupSortSwitches() {
+  var $switches = $(".sort-switch");
+  var selected = "selected";
+  function select(it) {
+    $switches.removeClass(selected);
+    $(it).addClass(selected);
+  }
+  ($switches
+   .each(function initSwitch(mode) {
+     if (this.getAttribute("value") === mode) {
+       select(this);
+       return false;
+     }
+   }, [getSortMode()])
+   .click(function onSwitch() {
+     var mode = this.getAttribute("value");
+     if (mode === getSortMode()) return;
+     select(this);
+     setTimeout(changeSortMode, 0, mode);
+   }));
+}
+
 // TODO: perform an inventory of similar effects found throughout and move
 // them into a neatly packaged effects library later.
 // Try and tag them for now. (slides/fades/etc).
 
 $(function onReady() {
   setupHelp("#show-hide-help", "#cmdlist-help-div");
+  setupSortSwitches();
   buildTable();
   buildUnsubscribedFeeds();
   jump();
