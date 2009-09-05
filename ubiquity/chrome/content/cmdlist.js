@@ -217,16 +217,15 @@ function fillTableRowForCmd(row, cmd, className) {
     cmdElement.addClass(className);
   }
 
-  for each (let key in ["description", "help"])
-    key in cmd && setTimeout(function appendHtmlData(k) {
-      try { $("." + k, cmdElement)[0].innerHTML = cmd[k] }
-      catch (e if e.result === 0x80004003) {
-        var msg = 'XML error in "' + k + '" of [ ' + cmd.name + ' ]';
-        messageService.displayMessage({
-          text: msg, onclick: function go2cmd() { location.hash = cmd.id }});
-        Cu.reportError(msg);
-      }
-    }, 0, key);
+  for each (let key in ["description", "help"]) if (key in cmd) {
+    try { $("." + key, cmdElement)[0].innerHTML = cmd[key] }
+    catch (e if e.result === 0x80004003) {
+      var msg = 'XML error in "' + key + '" of [ ' + cmd.name + ' ]';
+      messageService.displayMessage({
+        text: msg, onclick: function go2cmd() { jump(cmd.id) }});
+      Cu.reportError(msg);
+    }
+  }
 
   return row.append(checkBoxCell, cmdElement);
 }
@@ -346,7 +345,7 @@ function makeUnsubscribedFeedListElement(info) {
       $li.slideUp(function onResubscribe() {
         updateUnsubscribedCount();
         buildTable();
-        location.hash = "graveyard";
+        jump("graveyard");
       });
     }),
     " ",
@@ -399,6 +398,13 @@ function viewLocalizationTemplate(feed) (
     L("ubiquity.cmdlist.localetemplate"),
     "action"));
 
+// Jumps to the specified hash (re-jump if omitted),
+// without using location.hash which doesn't work for about: URIs.
+function jump(hash) {
+  var {href} = location;
+  location = hash ? href.replace(/#.*|$/, "#" + hash) : href;
+}
+
 // TODO: perform an inventory of similar effects found throughout and move
 // them into a neatly packaged effects library later.
 // Try and tag them for now. (slides/fades/etc).
@@ -408,5 +414,5 @@ $(function onReady() {
   buildTable();
   buildUnsubscribedFeeds();
   // jump to the right anchor
-  if (location.hash) location.hash += "";
+  if (~location.href.indexOf("#")) jump();
 });
