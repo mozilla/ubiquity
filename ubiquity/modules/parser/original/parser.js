@@ -284,7 +284,9 @@ ParsedSentence.prototype = {
     // Returns plain text that we should set the input box to if user hits
     // the key to autocomplete to this sentence.
     var {matchedName: sentence, _arguments: args} = this._verb;
-    for (let x in this._argStrings) {
+    for (let x in (this.fromNounFirstSuggestion
+                   ? this._argSuggs
+                   : this._argStrings)) {
       let {text} = this._argSuggs[x] || 0;
       if (!text || this._argFlags[x] & FLAG_DEFAULT) continue;
       let preposition = " ";
@@ -302,7 +304,9 @@ ParsedSentence.prototype = {
   // text formatted sentence for display in popup menu
   get displayText PS_getDisplayText() {
     var {matchedName: sentence, _arguments: args} = this._verb;
-    for (let x in this._argStrings) {
+    for (let x in (this.fromNounFirstSuggestion
+                   ? this._argSuggs
+                   : this._argStrings)) {
       let obj = x === "object";
       let {text} = this._argSuggs[x] || 0;
       if (text) sentence += (" " +
@@ -318,7 +322,9 @@ ParsedSentence.prototype = {
                     escapeHtml(this._verb.matchedName) +
                     "</span>");
     var args = this._verb._arguments;
-    for (let x in this._argStrings) {
+    for (let x in (this.fromNounFirstSuggestion
+                   ? this._argSuggs
+                   : this._argStrings)) {
       let obj = x === "object";
       let {summary} = this._argSuggs[x] || 0;
       if (summary) {
@@ -670,28 +676,23 @@ PartiallyParsedSentence.prototype = {
 
   getAlternateSelectionInterpolations:
   function PPS_getAlternateSelectionInterpolations() {
+    let alternates = [this];
     // Returns a list of PartiallyParsedSentences with the selection
     // interpolated into missing arguments -- one for each argument where
     // the selection could go.
     // If the selection can't be used, returns a
     // list containing just this object.
     let unfilledArgs = this._getUnfilledArguments();
-    if (unfilledArgs.length === 0) return [this];
+    if (unfilledArgs.length === 0) return alternates;
 
     let {text, html, fake} = this._selObj;
     let indices = [0, fake ? 0 : text.length];
-    if (unfilledArgs.length === 1) {
-      this._argSuggest(unfilledArgs[0], text, html, indices);
-      return [this];
-    }
-
-    let alternates = [];
     for each (let arg in unfilledArgs) {
       let newParsing = this.copy();
       if (newParsing._argSuggest(arg, text, html, indices))
         alternates.push(newParsing);
     }
-    return alternates.length ? alternates : [this];
+    return alternates;
   },
 
   get fromNounFirstSuggestion PPS_fromNounFirstSuggestion() !this._matchScore,

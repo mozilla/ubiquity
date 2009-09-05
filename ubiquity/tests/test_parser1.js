@@ -238,47 +238,47 @@ function testImplicitPronoun() {
   var fakeContext = { textSelection: "lunch", htmlSelection:"lunch" };
 
   var completions = getCompletions("eat", [cmd_eat], fakeContext);
-  this.assert((completions.length == 1), "Should have 1 completion.");
+  this.assert((completions.length === 2), "Should have 1 completion.");
   completions[0].execute();
-  this.assert((foodGotEaten == "lunch"), "DirectObj should have been lunch.");
-  this.assert((foodGotEatenAt == null), "Indirectobj should not be set.");
+  this.assert(foodGotEaten === "lunch", "DirectObj should have been lunch.");
+  this.assert(foodGotEatenAt === null, "Indirectobj should not be set.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   completions = getCompletions("eat", [cmd_eat], fakeContext);
 
-  this.assert(completions.length == 2, "Should have 3 completions.");
+  this.assert(completions.length === 3, "Should have 3 completions.");
   // first completion should be direct object null, place is diner
   completions[0].execute();
-  this.assert(foodGotEaten == null, "DO should be null.");
-  this.assert(foodGotEatenAt == "diner", "Place should be diner.");
+  this.assert(foodGotEaten === null, "DO should be null.");
+  this.assert(foodGotEatenAt === "diner", "Place should be diner.");
   // second completion should be directObject is dinner
   foodGotEaten = null;
   foodGotEatenAt = null;
   completions[1].execute();
-  this.assert(foodGotEaten == "dinner", "DO should have been dinner.");
-  this.assert(foodGotEatenAt == null, "IndirectObjs shouldn't be set.");
+  this.assert(foodGotEaten === "dinner", "DO should have been dinner.");
+  this.assert(foodGotEatenAt === null, "IndirectObjs shouldn't be set.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
   completions = getCompletions("eat lunch at selection", [cmd_eat], fakeContext);
-  this.assert(completions.length == 1, "Sould have 1 completion");
+  this.assert(completions.length === 1, "Sould have 1 completion");
   completions[0].execute();
-  this.assert(foodGotEaten == "lunch", "Should have eaten lunch");
-  this.assert(foodGotEatenAt == "diner", "Should have eaten it at diner");
+  this.assert(foodGotEaten === "lunch", "Should have eaten lunch");
+  this.assert(foodGotEatenAt === "diner", "Should have eaten it at diner");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
   fakeContext.textSelection = "din";
   fakeContext.htmlSelection = "din";
   completions = getCompletions("eat at grill", [cmd_eat], fakeContext);
-  this.assert(completions.length == 1, "Should have 1 completion");
+  this.assert(completions.length === 2, "Should have 2 completions");
   completions[0].execute();
-  this.assert(foodGotEaten == "dinner", "DO should be dinner.");
-  this.assert(foodGotEatenAt == "grill", "ate at grill.");
+  this.assert(foodGotEaten === "dinner", "DO should be dinner.");
+  this.assert(foodGotEatenAt === "grill", "ate at grill.");
 
   foodGotEaten = null;
   foodGotEatenAt = null;
@@ -703,19 +703,19 @@ function testTextAndHtmlDifferent() {
     }
   };
   var comps = getCompletions("dostuff this", [cmd_different], pantsContext);
-  this.assert(comps.length == 1, "There should be one completion.");
+  this.assert(comps.length === 1, "There should be one completions.");
   comps[0].execute();
-  this.assert(executedText == "Pants", "text should be pants.");
-  this.assert(executedHtml == "<blink>Pants</blink>", "html should blink!");
+  this.assert(executedText === "Pants", "text should be pants.");
+  this.assert(executedHtml === "<blink>Pants</blink>", "html should blink!");
 
   executedText = null;
   executedHtml = null;
   //without any explicit 'this', should still work...
   comps = getCompletions("dostuff", [cmd_different], pantsContext);
-  this.assert(comps.length == 1, "There should be one completions (2)");
+  this.assert(comps.length === 2, "There should be 2 completions.");
   comps[0].execute();
-  this.assert(executedText == "Pants", "text should be pants.");
-  this.assert(executedHtml == "<blink>Pants</blink>", "html should blink!");
+  this.assert(executedText === "Pants", "text should be pants.");
+  this.assert(executedHtml === "<blink>Pants</blink>", "html should blink!");
 
   // when it's a noun-first suggestion from the parser, should still work...
   executedText = null;
@@ -726,14 +726,14 @@ function testTextAndHtmlDifferent() {
   };
   comps = nlParser._nounFirstSuggestions(selObj, MAX_SUGGESTIONS,
                                          {nounCache: {}});
-  this.assert(comps.length == 1, "There should be one partial completion");
+  this.assert(comps.length === 1, "There should be one partial completion.");
   comps = comps[0].getAlternateSelectionInterpolations();
-  this.assert(comps.length == 1, "There should still be one partial completion");
-  comps = comps[0].getParsedSentences();
-  this.assert(comps.length == 1, "There should be one completion (3)");
+  this.assert(comps.length === 2, "There should be two partial completions.");
+  comps = comps[1].getParsedSentences();
+  this.assert(comps.length === 1, "There should be one completion.");
   comps[0].execute();
-  this.assert(executedText == "Pantalones", "text should be pantalones.");
-  this.assert(executedHtml == "<blink>Pantalones</blink>", "html should blink!");
+  this.assert(executedText === "Pantalones", "text should be pantalones.");
+  this.assert(executedHtml === "<blink>Pantalones</blink>", "html should blink!");
 }
 
 function testAsyncNounSuggestions() {
