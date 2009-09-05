@@ -398,13 +398,6 @@ function viewLocalizationTemplate(feed) (
     L("ubiquity.cmdlist.localetemplate"),
     "action"));
 
-// Jumps to the specified hash (re-jump if omitted),
-// without using location.hash which doesn't work for about: URIs.
-function jump(hash) {
-  var {href} = location;
-  location = hash ? href.replace(/#.*|$/, "#" + hash) : href;
-}
-
 // TODO: perform an inventory of similar effects found throughout and move
 // them into a neatly packaged effects library later.
 // Try and tag them for now. (slides/fades/etc).
@@ -413,6 +406,5 @@ $(function onReady() {
   setupHelp("#show-hide-help", "#cmdlist-help-div");
   buildTable();
   buildUnsubscribedFeeds();
-  // jump to the right anchor
-  if (~location.href.indexOf("#")) jump();
+  jump();
 });

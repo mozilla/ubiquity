@@ -61,10 +61,6 @@ var navUrls = [
    "chrome://ubiquity/content/editor.xhtml"],
   ];
 
-function setVersionString() {
-  $(".version").text(UbiquitySetup.version);
-}
-
 function createNavLinks() {
   let containerElem = document.getElementById("nav-container");
   if (!containerElem) return;
@@ -99,5 +95,18 @@ function setupHelp(clickee, help) {
   toggler.off = true;
 }
 
-$(createNavLinks);
-$(setVersionString);
+// Jumps to the specified hash (re-jump if omitted),
+// without using location.hash which doesn't work for about: URIs.
+function jump(hash) {
+  var {href} = location;
+  if (hash)
+    location = href.replace(/#.*|$/, "#" + hash);
+  else if (~href.indexOf("#"))
+    location = href;
+}
+
+$(function onReady() {
+  $(".version").text(UbiquitySetup.version);
+  createNavLinks();
+  jump();
+});

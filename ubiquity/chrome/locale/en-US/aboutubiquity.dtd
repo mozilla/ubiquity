@@ -210,11 +210,7 @@
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Our apologies for the inconvenience.">
 
 <!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Standard Feed Redirector">
-<!ENTITY ubiquity.redirect.FileHeader "Standard File Redirector">
-
-<!ENTITY ubiquity.redirect.FeedShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a URI for a standard feed.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "To use it, just set the URI's hash to the relative path of the standard feed URI to redirect the user to. The path should be relative to the root of the &appTitle; extension's <tt>standard-feeds</tt> directory. For instance:">
+<!ENTITY ubiquity.redirect.FileHeader "File Redirector">
 
 <!ENTITY ubiquity.redirect.FileShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a file: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &appTitle; extension. For instance:">

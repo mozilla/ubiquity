@@ -31,7 +31,7 @@
 <!ENTITY file.FeedsIndex "resource://ubiquity/standard-feeds">
 <!ENTITY file.DevelDocs "chrome://ubiquity/content/file.xhtml#index.html">
 
-<!ENTITY feed.DevelCmds "chrome://ubiquity/content/feed.xhtml#core-developer-commands.html">
+<!ENTITY feed.DevelCmds "chrome://ubiquity/content/file.xhtml#standard-feeds/core-developer-commands.html">
 <!ENTITY feed.ExperimentalCmds "resource://ubiquity/standard-feeds/experimental-commands.html">
 
 <!-- External link management just addresses. -->
