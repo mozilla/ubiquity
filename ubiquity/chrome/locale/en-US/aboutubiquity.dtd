@@ -209,7 +209,7 @@
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Due to a <a href='&link.bug19;'>bug in &appTitle;</a> under OS X, you may need to <a href='&link.growl;'>install Growl</a> if you haven't already done so. Afterwards you may also need to restart Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Our apologies for the inconvenience.">
 
-<!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
+<!-- File/Feed redirectors chrome/content/file.xhtml -->
 <!ENTITY ubiquity.redirect.FileHeader "File Redirector">
 
 <!ENTITY ubiquity.redirect.FileShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a file: URI.">
