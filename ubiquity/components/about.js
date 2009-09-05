@@ -34,38 +34,35 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-function UbiquityAboutHandler() {
-}
+function UbiquityAboutHandler() {}
 
 UbiquityAboutHandler.prototype = {
-    newChannel : function(aURI) {
-        var ios = Cc["@mozilla.org/network/io-service;1"].
-                  getService(Ci.nsIIOService);
+  newChannel: function UAH_newChannel(aURI) {
+    var ios = (Cc["@mozilla.org/network/io-service;1"]
+               .getService(Ci.nsIIOService));
+    var name = /\?(\w+)/.test(aURI.spec) ? RegExp.$1 : "about";
+    var channel = ios.newChannel(
+      "chrome://ubiquity/content/" + name + ".xhtml",
+      null,
+      null);
 
-        var channel = ios.newChannel(
-          "chrome://ubiquity/content/about.xhtml",
-          null,
-          null
-        );
+    channel.originalURI = aURI;
+    return channel;
+  },
 
-        channel.originalURI = aURI;
-        return channel;
-    },
+  getURIFlags: function UAH_getURIFlags(aURI) {
+    return Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT;
+  },
 
-    getURIFlags: function(aURI) {
-        return Ci.nsIAboutModule.URI_SAFE_FOR_UNTRUSTED_CONTENT;
-    },
-
-    classDescription: "About Ubiquity Page",
-    classID: Components.ID("3a54db0f-281a-4af7-931c-de747c37b423"),
-    contractID: "@mozilla.org/network/protocol/about;1?what=ubiquity",
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIAboutModule])
-}
+  classDescription: "About Ubiquity Page",
+  classID: Components.ID("3a54db0f-281a-4af7-931c-de747c37b423"),
+  contractID: "@mozilla.org/network/protocol/about;1?what=ubiquity",
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIAboutModule]),
+};
 
 function NSGetModule(aCompMgr, aFileSpec) {
   return XPCOMUtils.generateModule([UbiquityAboutHandler]);
