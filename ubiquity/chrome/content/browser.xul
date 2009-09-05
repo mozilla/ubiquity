@@ -44,6 +44,6 @@
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="ubiquity-toolbarbutton" class="toolbarbutton-1"
       label="Ubiquity" tooltiptext="&ubiquity.toolbar.tooltip;"
-      oncommand="gUbiquity.toggleWindow()"/>
+      oncommand="gUbiquity.openWindow()"/>
   </toolbarpalette>
 </overlay>
