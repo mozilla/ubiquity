@@ -194,16 +194,16 @@ function getCommand(id) commandSource.getCommand(id);
 // {source: CmdUtils.makeSugg("English", null, "en"), goal: ...}
 // }}}
 
+// ToDo: If the command doesn't exist, should we notify and/or fail gracefully?
+
 function executeCommand(command, args, mods) {
-  var {context} = this.__globalObject;
   if (typeof command === "string") command = CmdUtils.getCommand(command);
-  return command.execute(context, args, mods);
+  return command.execute(this.__globalObject.context, args, mods);
 }
 
 function previewCommand(command, pblock, args, mods) {
-  var {context} = this.__globalObject;
   if (typeof command === "string") command = CmdUtils.getCommand(command);
-  return command.preview(context, pblock, args, mods);
+  return command.preview(this.__globalObject.context, pblock, args, mods);
 }
 
 // === {{{ CmdUtils.geocodeAddress(location, callback) }}} ===
@@ -833,6 +833,7 @@ function CreateCommand(options) {
     command.previewUrl = global.Utils.url(options.previewUrl);
 
   global.commands.push(command);
+  return command;
 }
 CreateCommand.previewDefault = function previewDefault(pb) {
   var html = "";
@@ -876,116 +877,40 @@ CreateCommand.previewDefault = function previewDefault(pb) {
 // nountype associated with that semantic role for the target verb and use that
 // argument in parse/preview/execution.
 //
-// === The following properties are optional: ===
-// 
-// {{{ options.help }}} A string containing a longer description of
-// your alias, also displayed on the command-list page, which can go
-// into more depth, include examples of usage, etc. Can include HTML
-// tags.
-// 
-// {{{ options.description }}} A string containing a short description
-// of your alias, to be displayed on the command-list page. Can include
-// HTML tags.
-//
-// {{{ options.icon }}} A string containing the URL of a small image (favicon-sized) to
-// be displayed alongside the name of your alias in the interface.
-//
-// {{{ options.author }}} A dictionary object describing the alias's
-// author.  Can have {{{options.author.name}}}, {{{options.author.email}}},
-// and {{{options.author.homepage}}} properties, all strings.
-//
-// {{{ options.homepage }}} The URL of the alias's homepage, if any.
-//
-// {{{ options.contributors }}} An array of strings naming other people
-// who have contributed to your alias.
-//
-// {{{ options.license }}} A string naming the license under which your
-// alias is distributed, for example "MPL".
+// See {{{CmdUtils.CreateCommand()}}} for other properties available.
 
 function CreateAlias(options) {
-  dump('creating alias now\n');
-  var me = this;
-  var global = this.__globalObject;
-
-  var alias = {
-    __proto__: options,
-    proto: options,
-    thisIsAnAlias: true,
-    get targetVerb() {
-      try {
-        if (this.verb.constructor == String)
-          return CmdUtils.__getCommandByName(this.verb);
-        return this.verb;
-      } catch(e) {
-        return null;
-      }
-    },
-    get arguments() {
-      var args = this.targetVerb ? this.targetVerb.arguments : [];
-      var realArgSpecs = [];
-      for (var key in args) {
-        var takeThisArgSpec = true;
-        for (var role in this.givenArgs)
-          if (args[key].role == role)
-            takeThisArgSpec = false;
-        if (takeThisArgSpec)
-          realArgSpecs.push(args[key]);
-      }
-      return realArgSpecs;
-    },
-    get cachedGivenArgs() {
-      var args = this.targetVerb ? this.targetVerb.arguments : [];
-      var cachedGivenArgs = {};
-      for (var role in this.givenArgs) {
-        var nounTypeId = null;
-        var givenText = this.givenArgs[role];
-        // if we don't have the necessary fields, find the appropriate nountype
-        for each (var targetArgSpec in args) {
-          if (targetArgSpec.role == role) {
-            nounTypeId = targetArgSpec.nountype.id;
-            break;
-          }
+  var CU = this;
+  var {verb} = options;
+  var cmd = CU.CreateCommand(options);
+  cmd.__defineGetter__("arguments", function alias_lazyArgs() {
+    var target = getCommand(verb);
+    if (!target) return [];
+    var args = target.arguments;
+    var {givenArgs} = cmd;
+    if (givenArgs) {
+      let as = [];
+      for each (let arg in args) {
+        let a = {};
+        for (let k in arg) a[k] = arg[k];
+        if (a.role in givenArgs) {
+          a.default = givenArgs[a.role];
+          a.hidden = true;
         }
-        var nc = CmdUtils.__getUbiquity().__cmdManager.__nlParser._nounCache;
-        cachedGivenArgs[role] = nc.getBestSugg(givenText, nounTypeId);
+        as.push(a);
       }
-      return cachedGivenArgs;
-    },
-    get serviceDomain() (this.targetVerb.serviceDomain)
-  };
-
-  var names = alias.names;
-  // ensure name and names
-  if (!names)
-    //errorToLocalize
-    throw Error("CreateCommand: name or names is required.");
-  if (!Utils.isArray(alias.names))
-    names = (names + "").split(/\s{0,}\|\s{0,}/);
-
-  // we must keep the first name from the original feed around as an
-  // identifier. This is used in the command id and in localizations
-  alias.referenceName = names[0];
-  alias.name = names[0];
-
-  alias.preview = function(pblock,args) {
-    for (var role in this.cachedGivenArgs)
-      args[role] = this.cachedGivenArgs[role];
-    var context = alias.preview.caller.arguments[0];
-    if (this.targetVerb.preview == null) {
-      CreateCommand.previewDefault.apply(this,[pblock]);
-    } else {
-      this.targetVerb.preview.apply(this,[context,pblock,args]);
+      args = as;
     }
+    delete cmd.arguments;
+    return cmd.arguments = args;
+  });
+  cmd.execute = function alias_execute(args) {
+    CU.executeCommand(verb, args);
   };
-  
-  alias.execute = function(pblock,args) {
-    for (var role in this.cachedGivenArgs)
-      args[role] = this.cachedGivenArgs[role];
-    var context = alias.execute.caller.arguments[0];
-    this.targetVerb.execute.apply(this.targetVerb,[context,pblock,args]);
-  }
-  
-  global.commands.push(alias);
+  cmd.preview = function alias_preview(pb, args) {
+    CU.previewCommand(verb, pb, args);
+  };
+  return cmd;
 }
 
 // === {{{ CmdUtils.makeSearchCommand(options) }}} ===

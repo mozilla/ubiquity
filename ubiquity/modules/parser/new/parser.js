@@ -1396,11 +1396,18 @@ Parser.prototype = {
           break;
         }
       }
-      if (missingArg.default) {
-        defaultValues = Utils.isArray(missingArg.default) ?
-                          missingArg.default : [missingArg.default];
-      } else {
-        let noun = missingArg.nountype;
+      let noun = missingArg.nountype;
+      let input = missingArg.default;
+      if (input) {
+        let suggs = this._nounCache.getSuggs(input, noun.id);
+        if (!suggs) {
+          suggs = noun.suggest(input, Utils.escapeHtml(input),
+                               function () {}, null);
+          this._nounCache.setSuggs(input, noun.id, suggs);
+        }
+        defaultValues = suggs;
+      }
+      else {
         if (!(noun.id in this._defaultsCache))
           this._defaultsCache[noun.id] = (
             (typeof noun.default === "function"
@@ -2463,7 +2470,10 @@ Parse.prototype = {
     let maxArgsNumber = 100; // HACK
     let negativeArgsArray = [];
     let unfilledArgs = []; // unfilled args are displayed at the end
+    let hiddenRoles = [a.role for each (a in this._verb.arguments)
+                       if (a.hidden)];
     for (let role in this.args) {
+      if (~hiddenRoles.indexOf(role)) continue;
       for each (let argument in this.args[role]) {
         if (argument.text) {
           if ("_order" in argument) {
@@ -2539,7 +2549,10 @@ Parse.prototype = {
     let maxArgsNumber = 100; // HACK
     let negativeArgsArray = [];
     let unfilledArgs = []; // unfilled args are displayed at the end
+    let hiddenRoles = [a.role for each (a in this._verb.arguments)
+                       if (a.hidden)];
     for (let role in this.args) {
+      if (~hiddenRoles.indexOf(role)) continue;
       for each (let argument in this.args[role]) {
         if (argument.text) {
           if ("_order" in argument) {

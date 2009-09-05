@@ -795,39 +795,44 @@ function testVerbUsesDefaultIfNoArgProvidedParser2() {
   dog.default = function() {return NounUtils.makeSugg("husky");};
   var self = this;
   var fakeSource = new BetterFakeCommandSource({
-    wash: {names: ["wash"],
-          arguments: [{role:"object", nountype: dog, label: "dog"}],
-          execute: function(){}},
-    playFetch: {names: ["play fetch"],
-          arguments: [{role: "object", nountype: dog, label: "dog",
-	               default: {text: "basenji"}}],
-          execute: function(){}}
-    });
+    wash: {
+      names: ["wash"],
+      arguments: [{role:"object", nountype: dog, label: "dog"}],
+    },
+    playFetch: {
+      names: ["play fetch"],
+      arguments: [{
+        role: "object", nountype: dog, label: "dog", default: "beagle"}],
+    }
+  });
   var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
   getCompletionsAsyncFromParser("wash", parser, null, self.makeCallback(testFunc1));
 
   function testFunc1(suggs) {
-    self.assert(suggs.length == 1, "Should be 1 suggestion (A).");
-    self.assert(suggs[0]._verb.name == "wash", "Suggestion should be wash\n");
-    self.assert(suggs[0].args.object[0].text == "husky", "Argument should be husky.\n");
+    self.assert(suggs.length === 1, "Should be 1 suggestion (A).");
+    self.assert(suggs[0]._verb.name === "wash",
+                "Suggestion should be wash");
+    self.assert(suggs[0].args.object[0].text === "husky",
+                "Argument should be husky.");
     getCompletionsAsyncFromParser("play", parser, null, self.makeCallback(testFunc2));
   }
 
   function testFunc2(suggs) {
-    self.assert(suggs.length == 1, "Should be 1 suggestion (B).");
-    self.assert(suggs[0]._verb.name == "play fetch",
-                  "Suggestion should be play fetch\n");
-    self.assert(suggs[0].args.object[0].text == "basenji",
-                  "Argument should be basenji.\n");
-    getCompletionsAsyncFromParser("play retr", parser, null, self.makeCallback(testFunc3));
+    self.assert(suggs.length === 1, "Should be 1 suggestion (B).");
+    self.assert(/^play[ -]fetch$/.test(suggs[0]._verb.name),
+                "Suggestion should be 'play fetch'");
+    self.assert(suggs[0].args.object[0].text === "beagle",
+                "Argument should be beagle.");
+    getCompletionsAsyncFromParser("play retr", parser, null,
+                                  self.makeCallback(testFunc3));
   }
 
   function testFunc3(suggs) {
-    self.assert(suggs.length == 1, "Should be 1 suggestion (C).");
-    self.assert(suggs[0]._verb.name == "play fetch",
-                  "Suggestion should be play fetch\n");
-    self.assert(suggs[0].args.object[0].text == "golden retreiver",
-                  "Argument should be golden retreiver\n");
+    self.assert(suggs.length === 1, "Should be 1 suggestion (C).");
+    self.assert(/^play[ -]fetch$/.test(suggs[0]._verb.name),
+                "Suggestion should be play fetch");
+    self.assert(suggs[0].args.object[0].text === "golden retreiver",
+                "Argument should be golden retreiver");
   }
 }
 
@@ -1068,12 +1073,11 @@ function testTagCommand() {
   var services = UbiquitySetup.createServices();
   var cmdSource = services.commandSource;
 
-  var cmd = cmdSource.getCommand(UbiquitySetup.getBaseUri() +
-                                   "standard-feeds/firefox.html#tag");
+  var cmd = cmdSource.getCommand(UbiquitySetup.STANDARD_FEEDS_URI +
+                                 "firefox.html#tag");
   this.assert(cmd, "There should be a tag command here");
 
-  var context = {focusedElement: null,
-    focusedWindow: null};
+  var context = {focusedElement: null, focusedWindow: null};
 
   var cmdMan = makeCommandManager.call(this, cmdSource,
                                        services.messageService,

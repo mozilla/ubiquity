@@ -9,18 +9,14 @@ CmdUtils.CreateCommand({
   execute: function germanize_execute(args) {
     CmdUtils.executeCommand("translate", this._setArgs(args));
   },
-  _setArgs: function germanize__setArgs(args){
-    var a = {};
-    for (var [k, v] in new Iterator(args)) a[k] = v;
-    a.goal = this._goal;
-    return a;
-  },
+  _setArgs: function germanize__setArgs(args)
+    ({__proto__: args, goal: this._goal}),
   _goal: noun_type_lang_google.suggest("^German$")[0],
 });
 
 CmdUtils.CreateAlias({
   names: ["anglicize"],
-  verb: "translate",
-  givenArgs: { goal: "English" },
-  icon: "resource://ubiquity/chrome/skin/icons/union_jack.ico"
+  verb: "resource://ubiquity/standard-feeds/general.html#translate",
+  givenArgs: {goal: "English"},
+  icon: "chrome://ubiquity/skin/icons/union_jack.ico"
 });

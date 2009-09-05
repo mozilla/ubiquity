@@ -532,26 +532,29 @@ function testSortSpecificNounsBeforeArbText() {
 function testVerbUsesDefaultIfNoArgProvided() {
   var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
                                            "beagle", "bulldog", "husky"]);
-  dog.default = function() {
-    return NounUtils.makeSugg("husky");
-  };
+  dog.default = function () NounUtils.makeSugg("husky");
   var verbList = [
     {names: ["wash"], DOType: dog, DOLabel: "dog"},
-    {names: ["play-fetch"], DOType: dog, DOLabel: "dog", DODefault: "basenji"}];
+    {names: ["play-fetch"], DOType: dog, DOLabel: "dog", DODefault: "beagle"}];
   var suggs = getCompletions("wash", verbList);
-  this.assert(suggs.length == 1, "Should be 1 suggestion (A).");
-  this.assert(suggs[0]._verb._name == "wash", "Suggestion should be wash\n");
-  this.assert(suggs[0]._argSuggs.object.text == "husky", "Argument should be husky.\n");
+  this.assert(suggs.length === 1, "Should be 1 suggestion (A).");
+  this.assert(suggs[0]._verb._name === "wash", "Suggestion should be wash");
+  this.assert(suggs[0]._argSuggs.object.text === "husky",
+              "Argument should be husky.");
 
   suggs = getCompletions("play", verbList);
-  this.assert(suggs.length == 1, "Should be 1 suggestion (B).");
-  this.assert(suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert(suggs[0]._argSuggs.object.text == "basenji", "Argument should be basenji.\n");
+  this.assert(suggs.length === 1, "Should be 1 suggestion (B).");
+  this.assert(suggs[0]._verb._name === "play-fetch",
+              "Suggestion should be play-fetch");
+  this.assert(suggs[0]._argSuggs.object.text === "beagle",
+              "Argument should be beagle.");
 
   suggs = getCompletions("play retr", verbList);
-  this.assert(suggs.length == 1, "Should be 1 suggestion (C).");
-  this.assert(suggs[0]._verb._name == "play-fetch", "Suggestion should be play-fetch\n");
-  this.assert(suggs[0]._argSuggs.object.text == "golden retreiver", "Argument should be g.retr.\n");
+  this.assert(suggs.length === 1, "Should be 1 suggestion (C).");
+  this.assert(suggs[0]._verb._name === "play-fetch",
+              "Suggestion should be play-fetch");
+  this.assert(suggs[0]._argSuggs.object.text ===
+              "golden retreiver", "Argument should be g.retr.");
 
   //TODO try out defaults for modifier arguments.
 }

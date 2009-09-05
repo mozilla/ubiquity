@@ -398,11 +398,17 @@ ParsedSentence.prototype = {
     for (let argName in args) {
       if (argName in this._argSuggs) continue;
       let missingArg = args[argName];
-      let defaultValue =
-        missingArg.default && NounUtils.makeSugg(missingArg.default);
-      if (!defaultValue) {
-        let noun = missingArg.type;
-        let {nounCache} = this._query;
+      let noun = missingArg.type;
+      let {nounCache} = this._query;
+      let input = missingArg.default;
+      if (input) {
+        let key = input + "\n" + noun.id;
+        var defaultValue = (
+          nounCache[key] ||
+          (nounCache[key] = noun.suggest(input, Utils.escapeHtml(input),
+                                         function () {}, null)));
+      }
+      else {
         defaultValue = nounCache[noun.id] || (nounCache[noun.id] = (
           (typeof noun.default === "function"
            ? noun.default()
