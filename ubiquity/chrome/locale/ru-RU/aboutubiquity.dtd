@@ -55,7 +55,7 @@
 <!ENTITY ubiquity.settings.NotificationWarning "Если вы используете Growl на Windows, удостоверьтесь, что он запущен. Если этого не сделано, вы не будете получать уведомления.">
 <!ENTITY ubiquity.settings.NotificationLinuxNote "Чтобы использовать <a href='&link.libNotify;'>уведомления</a>, работающие в Linux, сперва вы должны установить libnotify-bin. Для этого используйте менеджер пакетов или терминал (<code>sudo aptitude install libnotify-bin</code> для Ubuntu или эквивалент для вашего дистрибутива).">
 <!ENTITY ubiquity.settings.NotificationSettings "Настройки уведомлений">
-<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity допускает широкое использование прозрачных немодальных уведомлений. В Mac OS X это может быть увидено на примере использования Growl. В Windows — уведомления <a href='&link.snarl;'>Snarl</a>, <a href='&link.growlWin;'>Growl для Windows</a> или &ldquo;всплывающие уведомления&rdquo; в нижнем правом углу экрана. Если у вас установлен и запущен <a href='&link.snarl;'>Snarl</a>, Ubiquity попытается автоматически обнаружить его и использовать для отправки уведомлений.">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity допускает широкое использование прозрачных немодальных уведомлений. В Mac OS X это может быть увидено на примере использования Growl. В Windows — уведомления <a href='&link.snarl;'>Snarl</a>, <a href='&link.growlWin;'>Growl для Windows</a> или “всплывающие уведомления” в нижнем правом углу экрана. Если у вас установлен и запущен <a href='&link.snarl;'>Snarl</a>, Ubiquity попытается автоматически обнаружить его и использовать для отправки уведомлений.">
 <!ENTITY ubiquity.settings.NotificationEnable "Использовать сервисы уведомлений">
 <!ENTITY ubiquity.settings.CustomSkin "Редактор оформления">
 <!ENTITY ubiquity.settings.SaveSkin "Сохранить">
@@ -80,9 +80,9 @@
 <!ENTITY ubiquity.commandlist.GraveYardText "Ранее вы были подписаны на перечисленные далее ленты. Если вы хотите снова их использовать, щёлкните по расположенной ниже ссылке “[подписаться заново]”.">
 <!ENTITY ubiquity.support.GetHelp "Помощь пользователям">
 <!ENTITY ubiquity.support.GetHelpParagraph1 "По причине того, что Ubiquity является экспериментом Mozilla Labs, у вас могут возникнуть проблемы во время использования этого дополнения. Далее перечислены места, где вы сможете получить помощь в случае необходимости.">
-<!ENTITY ubiquity.support.GetHelpParagraph2 "— это управляемый сообществом сайт поддержки. Он содержит рекомендации по решению множества проблем. Если вы не нашли ответ на интересующий вас вопрос, просто начните новую тему.">
-<!ENTITY ubiquity.support.GetHelpParagraph3 "— полезна для дискуссий о разработке команд, пользовательского интерфейса, просьб о функциях и других разговоров.">
-<!ENTITY ubiquity.support.GetHelpParagraph4 "также содержит информацию о проекте &appTitle;, включая документацию, руководства пользователей и ссылки на более ранние версии дополнения.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a> — это управляемый сообществом сайт поддержки. Он содержит рекомендации по решению множества проблем. Если вы не нашли ответ на интересующий вас вопрос, просто начните новую тему.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='&link.supportMailList;'>Наша группа на Google/Почтовая рассылка</a> — полезна для дискуссий о разработке команд, пользовательского интерфейса, просьб о функциях и других разговоров.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='&link.wikiMain;'>The &appTitle; Wiki</a> также содержит информацию о проекте &appTitle;, включая документацию, руководства пользователей и ссылки на более ранние версии дополнения.">
 <!ENTITY ubiquity.support.ReportBugs "Сообщить об ошибке">
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "Мы работаем над автоматической системой сообщения об ошибках, но на данный момент вы должны сообщать обо всех воспроизводимых проблемах, которые нашли, с помощью сайта Get Satisfaction или через группу Google/почтовую рассылку. Пожалуйста, добавляйте к описанию проблемы всю подробную информацию, которая у вас есть.">
 <!ENTITY ubiquity.support.ResetUbiquity "Сброс настроек &appTitle;">
