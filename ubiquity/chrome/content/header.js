@@ -47,19 +47,19 @@ var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 
 var navUrls = [
-  [L("ubiquity.nav.main"),
-   "about:ubiquity"],
-  [L("ubiquity.nav.settings"),
-   "chrome://ubiquity/content/settings.xhtml"],
+  [L("ubiquity.nav.main"), 
+    "about:ubiquity"],
+  [L("ubiquity.nav.settings"), 
+    "about:ubiquity?settings"],
   [L("ubiquity.nav.commands"),
-   "chrome://ubiquity/content/cmdlist.xhtml"],
+    "about:ubiquity?cmdlist"],
   [L("ubiquity.nav.getnewcommands"),
-   "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"],
-  [L("ubiquity.nav.support"),
-   "chrome://ubiquity/content/support.xhtml"],
-  [L("ubiquity.nav.hackubiquity"),
-   "chrome://ubiquity/content/editor.xhtml"],
-  ];
+    "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"],
+  [L("ubiquity.nav.support"), 
+    "about:ubiquity?support"],
+  [L("ubiquity.nav.hackubiquity"), 
+    "about:ubiquity?editor"],
+];
 
 function createNavLinks() {
   let containerElem = document.getElementById("nav-container");

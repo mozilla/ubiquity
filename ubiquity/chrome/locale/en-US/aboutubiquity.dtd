@@ -116,7 +116,7 @@
 <!ENTITY ubiquity.support.GetHelp "Getting Help">
 
 <!ENTITY ubiquity.support.GetHelpParagraph1 "Due to &appTitle;'s unusual nature as a Labs experiment, you may run into problems while using it.There are a number of places you can go for help with &appTitle;.">
-<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a>is a community-driven support site. Many common &appTitle; problems already have answers there, and if you can't find an answer to your particular question, you can start a new topic.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a> is a community-driven support site. Many common &appTitle; problems already have answers there, and if you can't find an answer to your particular question, you can start a new topic.">
 <!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='&link.supportMailList;'>Our Google Group/Mailing List</a> is useful for discussion of command development, user interface, feature suggestions, as well as other high-level discussions.">
 <!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='&link.wikiMain;'>The &appTitle; Wiki</a> also has information about the entire &appTitle; project, including documentation, tutorials, and links to older versions of &appTitle;.">
 
