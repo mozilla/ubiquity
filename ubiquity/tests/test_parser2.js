@@ -1,22 +1,20 @@
-Components.utils.import("resource://ubiquity/modules/utils.js");
-Components.utils.import("resource://ubiquity/modules/cmdmanager.js");
-Components.utils.import("resource://ubiquity/modules/cmdutils.js");
-Components.utils.import("resource://ubiquity/modules/nounutils.js");
-Components.utils.import("resource://ubiquity/modules/default_feed_plugin.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/namespace.js");
-Components.utils.import("resource://ubiquity/modules/parser/new/parser.js");
-Components.utils.import("resource://ubiquity/tests/test_suggestion_memory.js");
-Components.utils.import("resource://ubiquity/tests/testing_stubs.js");
-Components.utils.import("resource://ubiquity/tests/framework.js");
-Components.utils.import("resource://ubiquity/modules/setup.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/cmdmanager.js");
+Cu.import("resource://ubiquity/modules/cmdutils.js");
+Cu.import("resource://ubiquity/modules/nounutils.js");
+Cu.import("resource://ubiquity/modules/default_feed_plugin.js");
+Cu.import("resource://ubiquity/modules/parser/new/namespace.js");
+Cu.import("resource://ubiquity/modules/parser/new/parser.js");
+Cu.import("resource://ubiquity/tests/test_suggestion_memory.js");
+Cu.import("resource://ubiquity/tests/testing_stubs.js");
+Cu.import("resource://ubiquity/tests/framework.js");
+Cu.import("resource://ubiquity/modules/setup.js");
 
 const VER = 2;
 const LANG = "en";
 const MAX_SUGGESTIONS = 10;
-
-const Ci = Components.interfaces;
-const Cc = Components.classes;
-
 
 function makeTestParser2(lang, verbs, contextUtils) {
   return NLParser2.makeParserForLanguage(
@@ -135,7 +133,7 @@ function testSmokeTestParserTwo() {
   // Instantiate a ubiquity with Parser 2 and all the built-in feeds and
   // nountypes; ensure that it doesn't break.
   var jsm = {};
-  Components.utils.import("resource://ubiquity/modules/parser/parser.js", jsm);
+  Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
   try {
     var services = UbiquitySetup.createServices();
     // but don't set up windows or chrome or anything... just use this to
@@ -151,8 +149,8 @@ function testSmokeTestParserTwo() {
 
 function testParserTwoDirectOnly() {
   var dogGotPetted = false;
-  var dog = new NounUtils.NounType( "dog", ["poodle", "golden retreiver",
-                                            "beagle", "bulldog", "husky"]);
+  var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
+                                           "beagle", "bulldog", "husky"]);
 
   var cmd_pet = {
     execute: function(context, args) {
@@ -947,19 +945,19 @@ function testVariableNounWeights() {
 function testSortedBySuggestionMemoryParser2Version() {
   var fakeSource = new BetterFakeCommandSource({
     clock: {names: ["clock"],
-	  arguments: {object: noun_arb_text}, execute: function(){}},
+      arguments: {object: noun_arb_text}, execute: function(){}},
     calendar: {names: ["calendar"],
-	  arguments: {object: noun_arb_text}, execute: function(){}},
+      arguments: {object: noun_arb_text}, execute: function(){}},
     couch: {names: ["couch"],
-	  arguments: {object: noun_arb_text}, execute: function(){}},
+      arguments: {object: noun_arb_text}, execute: function(){}},
     conch: {names: ["conch"],
-	  arguments: {object: noun_arb_text}, execute: function(){}},
+      arguments: {object: noun_arb_text}, execute: function(){}},
     crouch: {names: ["crouch"],
-	  arguments: {object: noun_arb_text}, execute: function(){}},
+      arguments: {object: noun_arb_text}, execute: function(){}},
     coelecanth: {names: ["coelecanth"],
-	  arguments: {object: noun_arb_text}, execute: function(){}},
+      arguments: {object: noun_arb_text}, execute: function(){}},
     crab: {names: ["crab"],
-	  arguments: {object: noun_arb_text}, execute: function(){}}
+      arguments: {object: noun_arb_text}, execute: function(){}}
     });
 
   var parser = makeTestParser2(LANG, fakeSource.getAllCommands());
@@ -1067,7 +1065,7 @@ function testTagCommand() {
 
   var testURI = Application.activeWindow.activeTab.uri;
 
-    // for cleanup
+  // for cleanup
   var isBookmarked = bmsvc.isBookmarked(testURI);
 
   var services = UbiquitySetup.createServices();
@@ -1075,7 +1073,8 @@ function testTagCommand() {
 
   var cmd = cmdSource.getCommand(UbiquitySetup.STANDARD_FEEDS_URI +
                                  "firefox.html#tag");
-  this.assert(cmd, "There should be a tag command here");
+
+  if (!cmd || cmd.disabled) throw new this.SkipTestError();
 
   var context = {focusedElement: null, focusedWindow: null};
 
@@ -1085,16 +1084,14 @@ function testTagCommand() {
                                        onCM);
 
   function onCM(cmdManager) {
-
-    var Application = Components.classes["@mozilla.org/fuel/application;1"]
-      .getService(Components.interfaces.fuelIApplication);
+    var {Application} = Utils;
 
     function uriHasTags(aTags) {
       let aURI = Application.activeWindow.activeTab.uri;
       let tags = tagsvc.getTagsForURI(aURI, {});
       let result = aTags.every(function(aTag) {
           return tags.indexOf(aTag) > -1;
-	  });
+      });
       return result;
     }
 
@@ -1110,7 +1107,7 @@ function testTagCommand() {
     // test tag appended to existing tags
     getCompletionsAsync("tag bar", [cmd], context,
       self.makeCallback(
-	  function(completions) {
+        function(completions) {
           completions[0].execute();
           self.assert(uriHasTags(["foo", "bar"]));
         }
@@ -1131,7 +1128,7 @@ function testTagCommand() {
         function(completions) {
           completions[0].execute();
           self.assert(uriHasTags(["foo", "bar", "bom", "la bamba"]));
-	  cleanup();
+          cleanup();
         }
       )
     );
