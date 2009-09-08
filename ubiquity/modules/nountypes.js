@@ -399,65 +399,35 @@ var noun_type_url = {
   default: function nt_url_default()
     CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
                       null, null, 0.5),
-  _schemeRE: RegExp("^" + Utils.regexp.Trie(common_URI_schemes) +
-                    "(?::/{0,2})?"),
-  // LDH charcodes include "Letters, Digits, and Hyphen".
-  // We'll throw in . @ : too.
-  _LDHRE: /^[a-z\d-.@:]+$/i,
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
+    text = Utils.trim(text);
     if (!text) return [];
 
-    var possibleSchemes =
-      noun_type_common_URI_scheme.suggest.apply(noun_type_common_URI_scheme,
-                                                arguments);
-    var returnArr = (
-      possibleSchemes.length
-      ? [{__proto__: s, score: 0.8 * s.score}
-         for each (s in (Utils.sortBy(possibleSchemes, "score")
-                         .slice(-2).reverse()))]
-      : []);
     var score = 1;
-    // check to see whether we have a full URI scheme.
     if (this._schemeRE.test(text))
-      var {lastMatch: scheme, rightContext: noscheme} = RegExp;
+      var {lastMatch: scheme, rightContext: postScheme} = RegExp;
     else {
-      var scheme = "http://", noscheme = text;
-      if (selectionIndices)
-        selectionIndices =
-          [i + scheme.length for each (i in selectionIndices)];
+      var scheme = "http://", postScheme = text;
+      selectionIndices = (selectionIndices &&
+                          [i + scheme.length
+                           for each (i in selectionIndices)]);
       score *= 0.9;
     }
-
-    if (noscheme) {
-      let segments = noscheme.split(/[/?#]/, 2);
+    if (postScheme) {
+      let segments = postScheme.split(/[/?#]/, 2);
       // if it's just a domain name-looking thing, lower confidence
-      if (segments.length === 1) score *= 0.8;
+      if (segments.length === 1) score *= 0.9;
 
       let domain = segments[0];
       // if the domain doesn't have any dots in it, lower confidence
-      if (domain.indexOf('.') === -1) score *= 0.9;
+      if (domain.indexOf(".") < 0) score *= 0.9;
 
-      if (!this._LDHRE.test(domain)) {
-        // if it's not LDH, then we should see if it's a valid
-        // international domain name.
-        try { // normalize can fail
-          var asciiDomain = (Cc["@mozilla.org/network/idn-service;1"]
-                             .createInstance(Ci.nsIIDNService)
-                             .normalize(domain));
-        } catch (e) {}
-        // if it's not even a valid IDN, then throw it out.
-        score *= this._LDHRE.test(asciiDomain) ? 0.9 : 0;
-      }
+      if (!this._LDHRE.test(domain)) score *= 0.9;
     }
 
-    if (score)
-      returnArr.unshift(CmdUtils.makeSugg(scheme + noscheme, null, null,
-                                          score, selectionIndices));
-
-    var reqObj = {readyState: 2};
-    returnArr.push(reqObj);
+    var fakeRequest = {readyState: 2};
     Utils.history.search(text, function nt_url_search(results) {
-      reqObj.readyState = 4;
+      fakeRequest.readyState = 4;
       var suggs = [], tlc = text.toLowerCase();
       for each (let r in results) {
         var urlIndex = r.url.toLowerCase().indexOf(tlc);
@@ -469,8 +439,14 @@ var noun_type_url = {
       callback(suggs);
     });
 
-    return returnArr;
-  }
+    return [CmdUtils.makeSugg(scheme + postScheme, null, null,
+                              score, selectionIndices),
+            fakeRequest];
+  },
+  _schemeRE: /^[\w.-]+:\/{0,2}/,
+  // LDH charcodes include "Letters, Digits, and Hyphen".
+  // We'll throw in . @ : too.
+  _LDHRE: /^[A-Za-z\d-.@:]+$/,
 };
 
 // === {{{ noun_type_livemark }}} ===
