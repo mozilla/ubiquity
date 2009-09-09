@@ -358,13 +358,31 @@ var noun_type_awesomebar = {
   },
 };
 
+// === {{{ noun_type_addon }}} ===
+//
+// Suggests installed add-ons.
+//
+// * {{{text, html}}} : add-on name
+// * {{{data}}} : https://developer.mozilla.org/en/Toolkit_API/extIExtension
+
+var noun_type_addon = {
+  label: "add-on name",
+  suggest: function nt_addon_suggest(text) {
+    var grepee = [{text: ext.name, data: ext}
+                  for each (ext in Application.extensions.all)];
+    var suggs = CmdUtils.grepSuggs(text, grepee);
+    for each (let s in suggs) s.html = s.summary = Utils.escapeHtml(s.text);
+    return suggs;
+  },
+};
+
 // === {{{ noun_type_common_URI_scheme }}} ===
 //
-// The "common schemes" are the IANA-registered ones
+// Suggests common URI schemes, which are the IANA-registered ones
 // plus Unofficial ones and a few Mozilla specific ones.
-// See http://en.wikipedia.org/wiki/URI_scheme .
+// See [[http://en.wikipedia.org/wiki/URI_scheme]].
 //
-// * {{{text, hml}}} : URL scheme
+// * {{{text, html}}} : URI scheme
 
 var common_URI_schemes = <><![CDATA[
   aaa aaas acap cap cid crid data dav dict dns fax file ftp go gopher h323
@@ -386,7 +404,7 @@ var noun_type_common_URI_scheme = CmdUtils.NounType(
 
 // === {{{ noun_type_url }}} ===
 //
-// Suggests a URL from the user's input and/or history.
+// Suggests URLs from the user's input and/or history.
 // Defaults to the current page's URL if no input is given.
 //
 // * {{{text, html}}} : URL

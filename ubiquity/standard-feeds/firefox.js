@@ -440,3 +440,81 @@ CmdUtils.CreateCommand({
   },
   _open: function clm__open(u) { Utils.openUrlInBrowser(u) },
 });
+
+CmdUtils.CreateCommand({
+  names: ["view add-on", "view extension"],
+  icon: "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png",
+  author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  argument: noun_type_addon,
+  execute: function ao_execute({object: {data}}) {
+    Utils.setTimeout(this._open, 7, this, data && data.id);
+  },
+  preview: function ao_preview(pb, {object: {text, data}}) {
+    if (!text) return void this.previewDefault(pb);
+
+    this._addData(data);
+    XML.prettyPrinting = XML.ignoreWhitespace = false;
+    pb.innerHTML = <div class="add-on" enabled={data.enabled}/>.appendChild(
+      (<style><![CDATA[
+        .add-on[enabled=false] {opacity:0.7}
+        .icon {float:left; vertical-align:top; border:none; margin-right:1ex}
+        .version {margin-left:1ex}
+        .description, .buttons {padding-top:0.5ex}
+       ]]></style>) +
+      <a href={data.homepageURL} accesskey="h"/>.appendChild(
+        (<img class="icon" src={data.iconURL}/>) +
+        (<strong class="name">{text}</strong>)) +
+      (<span class="version">{data.version}</span>) +
+      (<div class="description">{data.description || ""}</div>) +
+      <div class="buttons"/>.appendChild(
+        (<button class="options" accesskey="o"> </button>)));
+    var opts = pb.getElementsByClassName("options")[0];
+    if (data.enabled && data.optionsURL) {
+      opts.innerHTML = _("<u>O</u>ptions");
+      opts.onfocus = function openOptions() {
+        this.blur();
+        context.chromeWindow.openDialog(data.optionsURL, "", "");
+      };
+    }
+    else opts.style.display = "none";
+  },
+  _urn: function ao__urn(id) "urn:mozilla:item:" + id,
+  _open: function ao__open(self, id) {
+    const Pane = "extensions";
+    var em = (Cc["@mozilla.org/appshell/window-mediator;1"]
+              .getService(Ci.nsIWindowMediator)
+              .getMostRecentWindow("Extension:Manager"));
+    if (em) {
+      em.focus();
+      em.showView(Pane);
+      id && self._select(self, em, id);
+    }
+    else {
+      em = context.chromeWindow.openDialog(
+        "chrome://mozapps/content/extensions/extensions.xul", "", "", Pane);
+      id && em.addEventListener("load", function onEmLoad() {
+        em.removeEventListener("load", arguments.callee, false);
+        Utils.setTimeout(self._select, 7, self, em, id);
+      }, false);
+    }
+  },
+  _select: function ao__select(self, em, id) {
+    em.gExtensionsView.selectItem(em.document.getElementById(self._urn(id)));
+  },
+  _addData: function ao__addData(data) {
+    const PREFIX_NS_EM = "http://www.mozilla.org/2004/em-rdf#";
+    var rdfs = (Cc["@mozilla.org/rdf/rdf-service;1"]
+                .getService(Ci.nsIRDFService));
+    var {datasource} = (Cc["@mozilla.org/extensions/manager;1"]
+                        .getService(Ci.nsIExtensionManager));
+    var itemResource = rdfs.GetResource(this._urn(data.id));
+    for each (var key in ["description", "homepageURL",
+                          "iconURL", "optionsURL"]) {
+      var target = datasource.GetTarget(itemResource,
+                                        rdfs.GetResource(PREFIX_NS_EM + key),
+                                        true);
+      if (target instanceof Ci.nsIRDFLiteral) data[key] = target.Value;
+    }
+    return data;
+  },
+});
