@@ -423,6 +423,7 @@ CmdUtils.CreateCommand({
   description: "Checks your livemarks.",
   help: "Execute to open the site.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  license: "MIT",
   icon: "chrome://browser/skin/livemark-folder.png",
   argument: noun_type_livemark,
   execute: function clm_execute({object: {data}}) {
@@ -443,40 +444,49 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["view add-on", "view extension"],
-  icon: "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png",
+  description: "Accesses Add-ons.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
+  license: "MIT",
+  icon: "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png",
   argument: noun_type_addon,
   execute: function ao_execute({object: {data}}) {
     Utils.setTimeout(this._open, 7, this, data && data.id);
   },
-  preview: function ao_preview(pb, {object: {text, data}}) {
-    if (!text) return void this.previewDefault(pb);
+  preview: function ao_preview(pb, {object: {data}}) {
+    if (!data) return void this.previewDefault(pb);
 
-    this._addData(data);
+    var xdata = this._extraData(data.id);
     XML.prettyPrinting = XML.ignoreWhitespace = false;
     pb.innerHTML = <div class="add-on" enabled={data.enabled}/>.appendChild(
       (<style><![CDATA[
         .add-on[enabled=false] {opacity:0.7}
         .icon {float:left; vertical-align:top; border:none; margin-right:1ex}
         .version {margin-left:1ex}
-        .description, .buttons {padding-top:0.5ex}
+        .creator {font-size: 88%}
+        .creator, .description, .buttons {padding-top:0.5ex}
+        .options {display:none}
        ]]></style>) +
-      <a href={data.homepageURL} accesskey="h"/>.appendChild(
-        (<img class="icon" src={data.iconURL}/>) +
-        (<strong class="name">{text}</strong>)) +
+      <a class="homepage" accesskey="h"/>.appendChild(
+        (<img class="icon" src={xdata.iconURL || this.icon}/>) +
+        (<strong class="name">{data.name}</strong>)) +
       (<span class="version">{data.version}</span>) +
-      (<div class="description">{data.description || ""}</div>) +
+      ("creator" in xdata ?
+       <div class="creator">{xdata.creator}</div> : <></>) +
+      ("description" in xdata ?
+       <div class="description">{xdata.description}</div> : <></>) +
       <div class="buttons"/>.appendChild(
         (<button class="options" accesskey="o"> </button>)));
-    var opts = pb.getElementsByClassName("options")[0];
-    if (data.enabled && data.optionsURL) {
+    if ("homepageURL" in xdata)
+      pb.getElementsByClassName("homepage")[0].href = xdata.homepageURL;
+    if (data.enabled && "optionsURL" in xdata) {
+      var opts = pb.getElementsByClassName("options")[0];
       opts.innerHTML = _("<u>O</u>ptions");
       opts.onfocus = function openOptions() {
         this.blur();
-        context.chromeWindow.openDialog(data.optionsURL, "", "");
+        context.chromeWindow.openDialog(xdata.optionsURL, "", "");
       };
+      opts.style.display = "inline";
     }
-    else opts.style.display = "none";
   },
   _urn: function ao__urn(id) "urn:mozilla:item:" + id,
   _open: function ao__open(self, id) {
@@ -501,15 +511,16 @@ CmdUtils.CreateCommand({
   _select: function ao__select(self, em, id) {
     em.gExtensionsView.selectItem(em.document.getElementById(self._urn(id)));
   },
-  _addData: function ao__addData(data) {
+  _extraData: function ao__extraData(id) {
     const PREFIX_NS_EM = "http://www.mozilla.org/2004/em-rdf#";
     var rdfs = (Cc["@mozilla.org/rdf/rdf-service;1"]
                 .getService(Ci.nsIRDFService));
     var {datasource} = (Cc["@mozilla.org/extensions/manager;1"]
                         .getService(Ci.nsIExtensionManager));
-    var itemResource = rdfs.GetResource(this._urn(data.id));
-    for each (var key in ["description", "homepageURL",
-                          "iconURL", "optionsURL"]) {
+    var itemResource = rdfs.GetResource(this._urn(id));
+    var data = {};
+    for each (var key in ["creator", "description",
+                          "homepageURL", "iconURL", "optionsURL"]) {
       var target = datasource.GetTarget(itemResource,
                                         rdfs.GetResource(PREFIX_NS_EM + key),
                                         true);
