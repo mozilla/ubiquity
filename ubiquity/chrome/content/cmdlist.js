@@ -59,6 +59,8 @@ Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 
 const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
+const SHOW_L10N_TEMPLATE = (UbiquitySetup.parserVersion >= 2 &&
+                            UbiquitySetup.languageCode === "en");
 
 var {escapeHtml} = Utils;
 var {feedManager, commandSource, messageService} = (UbiquitySetup
@@ -100,8 +102,8 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   // Add link to source (auto-updated or not)
   cell.append(" ", viewSourceLink(feed));
 
-  // if it's one of the builtin or standard feeds, add l10n template link
-  if (/^resource:\/\/ubiquity\/(?:builtin|standard)-feeds[/]/.test(feedUrl))
+  if (SHOW_L10N_TEMPLATE &&
+      /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds[/]/.test(feedUrl))
     cell.append(" ", viewLocalizationTemplate(feed));
 
   // If not auto-updating, display link to any updates found
