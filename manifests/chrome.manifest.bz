@@ -10,7 +10,9 @@ overlay chrome://global/content/console.xul chrome://ubiquity/content/console.xu
 style chrome://global/content/customizeToolbar.xul chrome://ubiquity/skin/browser.css
 
 locale ubiquity ca    chrome/locale/ca/
+locale ubiquity ca-AD chrome/locale/ca-AD/
 locale ubiquity cs-CZ chrome/locale/cs-CZ/
+locale ubiquity da-DK chrome/locale/da-DK/
 locale ubiquity de    chrome/locale/de/
 locale ubiquity en-US chrome/locale/en-US/
 locale ubiquity es-ES chrome/locale/es-ES/
