@@ -134,7 +134,7 @@
 <!ENTITY ubiquity.reset.Skins "Собственные темы оформления">
 <!ENTITY ubiquity.reset.Code "Код редактора команд">
 <!ENTITY ubiquity.reset.NoReturn "<strong>Примечание:</strong> будучи выполненной эта операция не может быть отменена.">
-<!ENTITY ubiquity.reset.ButtonExport "кспортировать мою текущую конфигурацию &appTitle; в новую вкладку">
+<!ENTITY ubiquity.reset.ButtonExport "экспортировать мою текущую конфигурацию &appTitle; в новую вкладку">
 <!ENTITY ubiquity.reset.ButtonReset "Да, я знаю, что делаю. Сбросить настройки &appTitle; и перезапустить Firefox">
 <!ENTITY ubiquity.localizecmd.ForTemplate "Это шаблон для">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1 "Это шаблон локализации для &feedKey; из ленты команд в формате gettext/portable object (*.po). Узнайте больше из статьи про <a href='&link.gettextInfo;'>gettext на Wikipedia</a>, которая также содержит ссылки на другие полезные инструменты.">
@@ -144,9 +144,6 @@
 <!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity попыталось отобразить всплывающее сообщение, но это закончилось неудачей.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "По причине <a href='&link.bug19;'>ошибки в &appTitle;</a> под Mac OS X, вам может понадобиться <a href='&link.growl;'>установить Growl</a>, если вы ещё не сделали этого. Сразу после этого вам может понадобиться перезапустить Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Наши извинения за неудобства.">
-<!ENTITY ubiquity.redirect.FeedHeader "Перенаправление лент">
 <!ENTITY ubiquity.redirect.FileHeader "Перенаправление файлов">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Данная страница может быть использована для перенаправления пользователя с chrome: URI Ubiquity на URI ленты.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Для его использования просто добавьте в URI после # относительный путь ленты для перенаправления пользователя в нужное место. Путь должен быть относителен корню папки <tt>standard-feeds</tt> дополнения &appTitle;. Например:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Данная страница может быть использована для перенаправления пользователя с chrome: URI Ubiquity на file: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Для его использования просто добавьте в URI после # относительный путь файла для перенаправления пользователя в нужное место. Путь должен быть относителен корню папки дополнения &appTitle;. Например:">

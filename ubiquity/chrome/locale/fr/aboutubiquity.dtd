@@ -160,9 +160,6 @@
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "En raison de <a href='&link.bug19;'>ce bogue d'&appTitle;</a> avec OS X, il se peut que vous deviez <a href='&link.growl;'>installer Growl</a> si ce n'est déjà fait. Après quoi vous devrez aussi redémarrer Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Désolé pour le désagrément.">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Redirecteur de flux standard">
 <!ENTITY ubiquity.redirect.FileHeader "Redirecteur de fichier standard">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Cette page est une simple redirection qui peut être utilisée pour amener l'utilisateur d'une URI chrome: d'Ubiquity vers une URI de flux standard.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Pour l'utiliser, définissez le hachage de l'URI pour le chemin relatif de l'URI de flux standard pour y rediriger l'utilisateur. Le chemin doit être relatif à la racine du répertoire <tt>standard-feeds</tt> l'extension &appTitle;. Par exemple :">
 <!ENTITY ubiquity.redirect.FileShortDesc "Cette page est une simple redirection qui peut être utilisée pour amener l'utilisateur d'une URI chrome: d'Ubiquity vers une URI de fichier.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Pour l'utiliser, définissez le hachage de l'URI pour le chemin relatif de l'URI pour y rediriger l'utilisateur. Le chemin doit être relatif à la racine de l'extension &appTitle;. Par exemple :">

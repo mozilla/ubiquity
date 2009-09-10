@@ -22,6 +22,7 @@ Sincerely,
 
 
 
+
 -->
 <!ENTITY ubiquity.pagetitle.About "关于 &appTitle;">
 <!ENTITY ubiquity.pagetitle.Settings "&appTitle; 设置 &amp; 皮肤">
@@ -184,9 +185,6 @@ Sincerely,
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "由于一个 <a href='&link.bug19;'>BUG 在 &appTitle;</a> 在 OS X，您可能需要 <a href='&link.growl;'>安装 Growl</a> 如果你还没有这样做。之后您可能还需要重新启动 Firefox。">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "造成的不便我们表示歉意。">
 <!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "标准收取点重定向">
-<!ENTITY ubiquity.redirect.FileHeader "标准文件重定向">
-<!ENTITY ubiquity.redirect.FeedShortDesc "这页是一个简单的重定向器，可用于采取使用者，从某个 Ubiquity chrome：一个得标准的收取点 URI 到一个 URI。">
-<!ENTITY ubiquity.redirect.FeedLongDesc "使用它 刚刚设置的URL的 Hash 的相对路径的URL的标准重定向，以用户重定向到。 路径应该是相对的根源 &appTitle; 扩展 <tt>标准收取点</tt> 文件夹。例如：">
+<!ENTITY ubiquity.redirect.FileHeader "文件重定向">
 <!ENTITY ubiquity.redirect.FileShortDesc "这页是一个简单的重定向器，可用于采取使用者，从某个 Ubiquity chrome： URI 到一个文件： URI。">
 <!ENTITY ubiquity.redirect.FileLongDesc "使用它， 刚刚设置的URL的 Hash 的相对路径的URL文件，以将用户重定向到。路径应该是相对的根源 &appTitle; 扩展。例如：">

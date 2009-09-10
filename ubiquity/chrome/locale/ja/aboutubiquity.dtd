@@ -23,6 +23,7 @@ Sincerely,
 
 
 
+
 -->
 <!ENTITY ubiquity.pagetitle.About "&appTitle; について">
 <!ENTITY ubiquity.pagetitle.Settings "各種設定 - &appTitle;">
@@ -59,6 +60,7 @@ Sincerely,
 <!--
 - I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.
 - This will also be useful when we do a full about: page overhaul possibly condensing the editors.
+
 
 
 
@@ -195,16 +197,13 @@ Sincerely,
 <!ENTITY ubiquity.localizecmd.ForTemplate "​<code>&feedKey;.po</code>">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1 "これはコマンドフィードを翻訳するための gettext (*.po) テンプレートです。詳しくは <a href='&link.gettextInfo;'>gettext (Wikipedia)</a> を参考にしてください。">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2 "翻訳結果をテストするには、&localeDir; 下に <code>&feedKey;.po</code> という名前で保存してください。">
-<!ENTITY ubiquity.localizecmd.HelpParagraph3 "&ldquo;/XY/&rdquo; は翻訳先の言語コードです。ディレクトリが存在しない場合は作成してください。">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "“/XY/” は翻訳先の言語コードです。ディレクトリが存在しない場合は作成してください。">
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "通知に失敗しました！">
 <!ENTITY ubiquity.bug19warning.ShortDesc "&appTitle; からの通知メッセージの表示に失敗しました。">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "<a href='&link.bug19;'>&appTitle; のバグ</a>が原因で、OS X 下では <a href='&link.growl;'>Growl をインストール</a>する必要があります。インストール後、Firefox を再起動してください。">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "ご迷惑をおかけして申し訳ありません。">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "標準フィードリダイレクタ">
-<!ENTITY ubiquity.redirect.FileHeader "標準ファイルリダイレクタ">
-<!ENTITY ubiquity.redirect.FeedShortDesc "このページは、ユーザを Ubiquity の chrome: URI から標準コマンドフィードの URI へ誘導するために使用される簡易リダイレクタです。">
-<!ENTITY ubiquity.redirect.FeedLongDesc "使用するには、URI のハッシュに、ユーザをリダイレクトする標準コマンドフィード URI の相対パスを設定してください。パスは、&appTitle; 拡張の standard-feeds ディレクトリをルートとする相対パスを指定します。例えば次のように指定します:">
-<!ENTITY ubiquity.redirect.FileShortDesc "このページは、ユーザを Ubiquity の chrome: URI から file: URI へ誘導するために使用される簡易リダイレクタです。">
+<!ENTITY ubiquity.redirect.FileHeader "ファイルリダイレクタ">
+<!ENTITY ubiquity.redirect.FileShortDesc "このページは、ユーザを Ubiquity の chrome: URI から file: URI へ誘導するための簡易リダイレクタです。">
 <!ENTITY ubiquity.redirect.FileLongDesc "使用するには、URI のハッシュに、ユーザをリダイレクトするファイル URI の相対パスを設定してください。パスは、&appTitle; 拡張のディレクトリをルートとする相対パスを指定します。例えば次のように指定します:">

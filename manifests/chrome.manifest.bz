@@ -11,7 +11,7 @@ style chrome://global/content/customizeToolbar.xul chrome://ubiquity/skin/browse
 
 locale ubiquity ca    chrome/locale/ca/
 locale ubiquity cs-CZ chrome/locale/cs-CZ/
-locale ubiquity de-DE chrome/locale/de-DE/
+locale ubiquity de    chrome/locale/de/
 locale ubiquity en-US chrome/locale/en-US/
 locale ubiquity es-ES chrome/locale/es-ES/
 locale ubiquity fi-FI chrome/locale/fi-FI/
@@ -27,3 +27,4 @@ locale ubiquity pt-PT chrome/locale/pt-PT/
 locale ubiquity ro-RO chrome/locale/ro-RO/
 locale ubiquity ru-RU chrome/locale/ru-RU/
 locale ubiquity zh-CN chrome/locale/zh-CN/
+locale ubiquity zh-TW chrome/locale/zh-TW/

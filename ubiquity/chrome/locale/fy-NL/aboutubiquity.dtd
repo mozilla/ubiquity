@@ -160,9 +160,6 @@
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Due to a <a href='&link.bug19;'>bug in &appTitle;</a> under OS X, you may need to <a href='&link.growl;'>install Growl</a> if you haven't already done so. Afterwards you may also need to restart Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Our apologies for the inconvenience.">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Standaard feed doorverbinder">
 <!ENTITY ubiquity.redirect.FileHeader "Standaard bestands doorverbinder">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Deze pagina is een simpele doorverbinder die kan gebruikt worden om de gebruiker van een Ubiquity chrome: URI naar een URI voor een standaard feed te nemen.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Om deze te gebruiken moet u de URI's hash naar het relatieve pad van de standaard URI om de gebruiker naar toe te sturen zetten. Dit pad moet relatief zijn tot de root van de &appTitle; extensie. Bijvoorbeeld:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Deze pagina is een simpele doorverbinderen die kan gebruikt worden om de gebruiker van een Ubiquity chrome: URI naar een bestands: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Om deze te gebruiken moet u de URI's hash naar het relatieve pad van de bestands URI om de gebruiker naar toe te sturen zetten. Dit pad moet relatief zijn tot de root van de &appTitle; extensie. Bijvoorbeeld:">

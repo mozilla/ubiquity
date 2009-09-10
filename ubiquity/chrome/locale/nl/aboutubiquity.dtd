@@ -39,6 +39,10 @@
 <!ENTITY ubiqutiy.about.LearnHow "Leer &appTitle; gebruiken">
 <!ENTITY ubiqutiy.about.TutorialButton "Klik hier om de interactieve handleiding te volgen">
 <!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Meer over het gebruik van &appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "Na het volgen van deze basis handleiding op deze pagina, kunt u nog meer leren door het lezen van de <a href='&link.extDocs;'>diepgaande documentatie pagina</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Help ons door u in te schrijven bij <a href='&link.herdMain;'>Herd</a>. Dit zal uw date naar het <a href='&link.herdDash;'>dashboard</a> sturen &mdash; het is compleet anoniem en  zal ons helpen dor &appTitle; beter en veiliger te maken.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "Meer informatie over de doelen van het &appTitle; project en onze plannen voor opkomende releases kijk naar onze <a href='&link.roadmap;'>Roadmap</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; is een team prestatie door medewerkers over de hele wereld. Voor een lijst van medewerkers: <a href='&link.credits;'>credits pagina</a>.">
 <!ENTITY ubiqutiy.about.Thanks "Bedankt voor het gebruiken van &appTitle; &appVersion;!">
 <!-- End common elements -->
 <!ENTITY ubiquity.settings.Skins "Thema's">
@@ -55,11 +59,17 @@
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
 <!ENTITY ubiquity.settings.Parser2Details "Parser 2 kan uitgaande oproepen doen naar web services om uit te zoeken wat uw invoer is, en uw gesuggereerde acties geven gebaseerd op deze informatie. Dit leidt momenteel tot een groot aantal api oproepen, en is daarom standaard uitgeschakeld.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Schakel externe oproepen voor alle Parser 2 queries in">
+<!ENTITY ubiquity.settings.NotificationWarning "Als u Growl voor Windows gebruikt, controleer dan of het opstaat. Als het niet opstaat zult u geen meldingen krijgen.">
+<!ENTITY ubiquity.settings.NotificationLinuxNote "Om <a href='&link.libNotify;'>libnotify meldingen</a> te laten werken op Linux, moet u eerst libnotify-bin installeren met Synaptic Pakketbeheer op Ubuntu of door <code>sudo aptitude install libnotify-bin</code> uit te voeren, of een equivalent te gebruiken voor uw distributie.">
+<!ENTITY ubiquity.settings.NotificationSettings "Meldingen instellingen">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity maakt extensief gebruik van transparante niet-modale meldingen. In OS X kan met dit zien door Growl. Op Windows verschijnt het als <a href='&link.snarl;'>Snarl</a> meldingen,  <a href='&link.growlWin;'>Growl voor Windows</a> or &quot;toaster&quot; meldingen in de rechter-onderhoek van het scherm. Als u <a href='&link.snarl;'>Snarl</a> hebt geïnstalleerd en draait, zal Ubiquity proberen dit automatisch te detecteren en er gebruik van maken om meldingen te tonen.">
+<!ENTITY ubiquity.settings.NotificationEnable "Schakel meldingsservices in">
 <!ENTITY ubiquity.settings.CustomSkin "Aangepast thema bewerker">
 <!ENTITY ubiquity.settings.SaveSkin "Opslaan">
 <!ENTITY ubiquity.settings.SaveSkinAs "Opslaan als">
 <!ENTITY ubiquity.settings.ShareSkin "Delen">
 <!ENTITY ubiquity.settings.SaveNotice "Opslaan verandert onmiddelijk &appTitle;'s uitzicht.">
+<!ENTITY ubiquity.settings.Bug449Warning "Veranderingen gemaakt aan uw aangepast thema zijn mogelijk pas zichtbaar na een browser herstart. Dit is een <a href='&link.bug449;'>gekend probleem</a>.">
 <!-- Everything from here down is page by page in no particular page order -->
 <!ENTITY ubiquity.commandlist.SubscriptionDetails "U hebt &cmdCount; opdrachten in &feedCount; opdrachten feeds. |U bent uitgeschreven van <a href='cmdlist.xhtml#graveyard'>&unsubCount; opdrachten feeds</a>.| &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Alle opdrachten die &appTitle; herkent worden opgesomd in de rechtse kolom. De zwarte tekst is de opdrachtnaam (wat u typt in &appTitle; om deze te gebruiken). De grijze tekst legt uit wat de opdracht doet.">
@@ -85,25 +95,36 @@
 <!ENTITY ubiquity.support.ReportBugs "Een bug rapporteren">
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "We zijn bezig met een geautomatiseerde foutmeldingen rapporteer service, maar op het ogenblik moet u elk reproduceerbaar probleem dat u vindt melden op Get Satisfaction of de Google Groep/Mailinglijst. Voeg alle informatie toe die u hebt om het probleem na te bootsen.">
 <!ENTITY ubiquity.support.ResetUbiquity "&appTitle; herinitialiseren">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Als &appTitle; compleet onbruikbaar voor u wordt, is het mogelijk dat u &appTitle; moet herïnitialiseren om de &quot;fabrieksinstellingen&quot; te gebruiken voordat u het terug kunt gebruiken. Om te herïnitialiseren, <a href='&chrome.reset;'>klik hier</a> &mdash; en aanvaard onze excuses voor het ongemak.">
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; Opdracht bewerker">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Type nieuwe opdrachten</strong> in het veld hieronder. Deze zullen automatisch worden opgeslagen als u typt, en zullen onmmiddelijk gebruikt worden van het opdracht invoer modus.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "<strong>Leest <a href='&link.cmdTutorial;'>opdracht schrijven handleiding</a></strong> om meer te leren. Voorbeelden van ingebouwde opdrahcten vindt u <a href='&file.FeedsIndex;'>hier</a>.">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentatie voor de">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Werk mee</strong>. Lees hoe door het bezoeken van de <a href='&link.wikiMain;'>&appTitle; Wiki</a>.">
 <!ENTITY ubiquity.editor.YourExternalEd "Uw externe editor is">
 <!ENTITY ubiquity.editor.EditorCommandType "Het opdrachttype is">
 <!ENTITY ubiquity.editor.CmdTypeRegular "Normaal">
 <!ENTITY ubiquity.editor.CmdTypeLocked "Beperkt">
 <!ENTITY ubiquity.editor.RegularCommandDesc "<em>Normale</em> feeds hebebn volledig toegang tot heel uw computer.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Beperkte</em> feedz zijn zeer veilig maar hebben weinig mogelijkheden om met uw computer te gebruiken. Voor meer informatie zie de <a href='&link.lockedFeeds;'>Beperkte feed handleiding</a>.">
 <!ENTITY ubiquity.editor.ImportTemplate "Importeer opdracht sjabloon">
 <!ENTITY ubiquity.editor.LaunchExternalEd "Start een externe editor">
 <!ENTITY ubiquity.editor.ShareCommand "Delen">
 <!ENTITY ubiquity.editor.SaveToFile "Opslaan naar bestand">
 <!ENTITY ubiquity.editor.EnableHighlighting "Zet syntaxkleuring aan">
 <!ENTITY ubiquity.editor.ShareYourCommands "Deel uw opdrachten">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Plaats uw opdrachten op de <a href='&link.wildCmds;'>opdrachten in het wild</a> wiki pagina zodat anderen deze kunnen vinden.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Schrijf u ook in voor de <a href='&link.herdDash;'>herd opdracht</a> die al uw opdrachten zal plaatsen op het <a href='&link.herdMain;'>dashboard</a>.">
 <!ENTITY ubiquity.editor.DevelopingUbiquity "&appTitle; Ontwikkelen">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Draai de <a href='&chrome.tests;'>unit testen</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Help ons bij het testen van de <a href='&feed.ExperimentalCmds;'>experimentele opdrachten</a>!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Experimenteer met de parser perormance en introspectie in de <a href='&chrome.playpen;'>parser playpen</a>. Gebruik de <a href='&chrome.nounTuner;'>naamwoord tuner</a> om de naamwoorden suggesties en score te controleren.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "Als u van plan bent bij het helpen van het ontwikkelen van &appTitle;, kijk dan naar onze <a href='&feed.DevelCmds;'>kern ontwikkelaars opdracht feed</a>.">
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "Laatste &appTitle; code veranderingen">
 <!-- Commands chrome/content/cmdlist.xhtml -->
 <!ENTITY ubiquity.confirmsubscription.Header "&appTitle; Opdracht van onbetrouwbare bron">
+<!ENTITY ubiquity.confirmsubscription.ShortDesc "U bent zicht aan het inschrijven op een <a href='&chrome.about;'>&appTitle; opdracht</a> van een onbekende, onbetrouwbare derde partij op &targetlink;. Als u zich inschrijft kan deze opdracht <em>alles doen wat het wilt</em> met uw browser. Het kan uw krediet kaart gegevens stelen, of uw grootmoeder uw gehele afbeeldings browsing geschiedenis doormailen.">
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "Hier is de JavaScript broncode van de opdracht:">
 <!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Code aan het laden, even geduld...">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Als u JavaScript begrijpt moet u dit lezen en zo goed mogelijk oordelen of deze opdracht gevaarlijk is of niet. Ga verder op eigen risico!">
@@ -112,6 +133,11 @@
 <!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Deze feed automatisch updaten.">
 <!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Haal me hier weg!">
 <!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "Ik weet waar ik mee bezig ben. Schrijf me in!">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph1 "Dit betekent dat een feed regelmatig zal worden gecontroleerd op updates en automatisch zal worden gebruikt op uw computer. Als u dit aanvinkt, controleer dan eerst dat u de personen vertrouwd die toegang hebben tot de code op de server waar deze is gehost.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph2 "Merk op dat deze feed wordt geleverd door een onveilig protocol, en daarom onderhevig kan zijn aan <a href='&link.mitmInfo;'>man-in-het-midden aanvallen</a>. Gebruik alleen maar de auto-update voor deze feed als u weet wat u aan het doen bent.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShortDesc "U bent aan het inschrijven voor een opdracht feed, en kunt de functionaliteit gebruiken">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongDesc "Als u zich ooit zo willen uitschrijven kunt u de &quot;lijst&quot; opdracht van &appTitle; op elk moment gebruiken om de <a href='&chrome.cmdlist;'>opdracht beheerspagina</a>  te bezoeken waar u alle opdrachten waarop u bent ingeschreven kunt zien en diegene die u niet meer wilt kunt annuleren.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "U kunt nu dit venster sluiten.">
 <!-- Support chrome/content/support.xhtml -->
 <!ENTITY ubiquity.reset.Header "Herstel &appTitle; zijn standaard instellingen?">
 <!ENTITY ubiquity.reset.Paragraph1 "Als &appTitle; niet correct werkt moet u overwegen om het naar de oorspronkelijke &quot;fabrieksinstellingen&quot; te herinitialiseren. Om dit te doen klikt u op de knop hieroner. Om de operatie te vervolledigen moet Firefox opnieuw worden opgestart.">
@@ -124,13 +150,15 @@
 <!ENTITY ubiquity.reset.ButtonReset "Ja, Ik weet waar ik mee bezig ben. Herinitialiseer &appTitle; en herstart Firefox">
 <!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.localizecmd.ForTemplate "Dit is een sjabloon voor">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1 "Dit is een vertalingssjabloon voor de &feedKey; opdracht feed in gettext/portable object (*.po) formaat. Leer meer over <a href='&link.gettextInfo;'>gettext op Wikipedia</a> dat ook links naar handige hulpmiddelen bevat.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2 "Om deze vertaling te testen sla deze op in: &localeDir; met de naam <code>&amp;feedKey.po</code>">
 <!ENTITY ubiquity.localizecmd.HelpParagraph3 "Controleer dat XY de correcte taal code voor uw taal map weergeeft. Als de taalcode voor uw taal niet bestaat moet u ze eerst maken.">
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Een doorzichtig bericht kon niet worden getoond!">
+<!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity probeerde om een transparant bericht te tonen maar faalde.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Door een <a href='&link.bug19;'>fout in &appTitle;</a> onder OS X, moet u <a href='&link.growl;'>Growl installeren</a> als u dit niet hebt gedaan. Nadien moet u mogelijk Firefox herstarten.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Onze verontschuldigingen voor het ongemak.">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Standaard feed doorverbinder">
 <!ENTITY ubiquity.redirect.FileHeader "Standaard bestands doorverbinder">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Deze pagina is een simpele doorverbinder die kan gebruikt worden om de gebruiker van een Ubiquity chrome: URI naar een URI voor een standaard feed te nemen.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Om deze te gebruiken moet u de URI's hash naar het relatieve pad van de standaard URI om de gebruiker naar toe te sturen zetten. Dit pad moet relatief zijn tot de root van de &appTitle; extensie. Bijvoorbeeld:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Deze pagina is een simpele doorverbinderen die kan gebruikt worden om de gebruiker van een Ubiquity chrome: URI naar een bestands: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Om deze te gebruiken moet u de URI's hash naar het relatieve pad van de bestands URI om de gebruiker naar toe te sturen zetten. Dit pad moet relatief zijn tot de root van de &appTitle; extensie. Bijvoorbeeld:">

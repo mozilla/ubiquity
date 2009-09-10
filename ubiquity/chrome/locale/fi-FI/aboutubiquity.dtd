@@ -128,9 +128,6 @@
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Läpinäkyvää viestiä ei voitu näyttää!">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Normaali syöteohjaus">
 <!ENTITY ubiquity.redirect.FileHeader "Normaali tiedosto-ohjaus">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Tämä sivu on vain ohjaussivu, jota käytetään viemään käyttäjä Ubiquityn chrome: -osoitteesta syötteen osoitteeseen.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Aseta osoitteen hash-arvo syötteen osoitteen suhteelliseen polkuun, johon haluat ohjata käyttäjän. Polun tulisi olla sama kuin &appTitle;-laajennuksen juuren <tt>standard-feeds</tt> -hakemiston. Esimerkiksi:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Tämä sivu on vain ohjaussivu, jota käytetään viemään käyttäjä Ubiquityn chrome: -osoitteesta file: -osoitteeseen.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Aseta osoitteen hash-arvo tiedoston osoitteen suhteelliseen polkuun, johon haluat ohjata käyttäjän. Polun tulisi olla sama kuin &appTitle;-laajennuksen juuren. Esimerkiksi:">

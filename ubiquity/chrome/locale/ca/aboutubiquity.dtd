@@ -150,3 +150,6 @@ Sincerely,
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Per un <a href='&link.bug19;'>error a l'&appTitle;</a> sota Mac OS X, potser que us calgui <a href='&link.growl;'>instal·lar el Growl</a> si encara no ho haguéssiu fet. A continuació, caldria que reiniciéssiu el Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Disculpeu per les molèsties.">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.redirect.FileHeader "Redirecció de fitxers">
+<!ENTITY ubiquity.redirect.FileShortDesc "Aquesta pàgina és una simple redirecció que pot utilitzar-se per a portar l'usuari d'un chrome de l'Ubiquity: URI a un fitxer: URI.">
+<!ENTITY ubiquity.redirect.FileLongDesc "Per a utilitzar-ho, simplement definiu el resum de l'URI al camí relatiu de l'URI del fitxer per tal de redirigir-hi l'usuari. El camí cal que sigui relatiu a l'arrel de l'extensió de l'&appTitle;. Per exemple:">

@@ -21,6 +21,7 @@ Sincerely,
 
 
 
+
 -->
 <!ENTITY ubiquity.pagetitle.About "Sobre o &appTitle;">
 <!ENTITY ubiquity.pagetitle.Settings "Definições &amp; Temas do &appTitle;">
@@ -183,9 +184,6 @@ Sincerely,
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Devido a um <a href='&link.bug19;'>bug no &appTitle;</a> no OS X, talvez precise de <a href='&link.growl;'>instalar o Growl</a> caso não o tenha já instalado. Após isso, talvez precise também de reiniciar o Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "As nossas desculpas pelo inconveniente.">
 <!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Redireccionador de Feeds">
 <!ENTITY ubiquity.redirect.FileHeader "Redireccionador de Ficheiros">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Esta página é um redireccionador simples que pode ser usado para mover o utilizador de um URL chrome: do Ubiquity para um URI de um feed padrão.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Para usá-lo, defina o hash do URI para o caminho relativo da URL do feed para o qual deseja redireccionar o utilizador. O caminho deve ser relativo à raiz da pasta <tt>standard-feeds</tt> do &appTitle;. Por exemplo:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Esta página é um redireccionador simples que pode ser usado para mover o usuário de um URI chrome: para um URI file:.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Para usá-lo, defina o hash do URI para o caminho relativo do URI para a qual deseja redireccionar o utilizador. O caminho deve ser relativo à raiz do &appTitle;. Por exemplo:">

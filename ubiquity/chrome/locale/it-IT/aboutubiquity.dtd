@@ -144,9 +144,6 @@
 <!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity ha provato a visualizzare un messaggio trasparente, ma l'operazione è fallita.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "A causa di un <a href='&link.bug19;'>bug di &appTitle;</a> su sistemi OS X, è necessario, se non è presente, <a href='&link.growl;'>installare Growl</a> e riavviare Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Ci scusiamo per l'inconveniente.">
-<!ENTITY ubiquity.redirect.FeedHeader "Standard Feed Redirector">
 <!ENTITY ubiquity.redirect.FileHeader "Standard File Redirector">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Questa pagina è un semplice strumento di redirezione che può servire per reindirizzare da un Ubiquity Chrome URI ad un normale feed URI.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Per utilizzare questo strumento, impostare l'hash del URI dove rimandare l'utente. Il  percorso deve essere un path relativo rispetto alla cartella  <tt>standard-feeds</tt> di Ubiquity. Per esempio:">
 <!ENTITY ubiquity.redirect.FileShortDesc "Questa pagina è un semplice strumento di reindirizzamento per rimandare l'utente da un  Ubiquity chrome: URI  a un file: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Per utilizzare questo strumento,  impostare l'hash del  URI  del percorso relativo del file dove si vuole rimandare l'utente. Il percorso deve essere relativo alla cartella di Ubiquity. Per esempio:">

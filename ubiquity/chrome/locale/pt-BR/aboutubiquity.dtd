@@ -143,9 +143,6 @@
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Uma mensagem transparente não pôde ser exibida!">
 <!-- Resetting Ubiquity chrome/content/reset.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Redirecionador de Repositórios">
 <!ENTITY ubiquity.redirect.FileHeader "Redirecionador de Arquivos">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Esta página é um redirecionador simples que pode ser usado para mover o usuário de uma URL chrome: do Ubiquity para uma URL de um repositório padrão.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Para usá-lo, ajuste o hash da URL para o caminho relativo da URL do repositório para o qual você deseja redirecionar o usuário. O caminho deve ser relativo à raiz da pasta <tt>standard-feeds</tt> do &appTitle;.">
 <!ENTITY ubiquity.redirect.FileShortDesc "Esta página é um redirecionador simples que pode ser usado para mover o usuário cd uma URL chrome: para uma URL file:.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Para usá-lo, ajuste o hash da URL para o caminho relativo da URL para a qual você deseja redirecionar o usuário. O caminho deve ser relativo à raiz do &appTitle;. Por exemplo:">

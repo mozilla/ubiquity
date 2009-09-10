@@ -4,9 +4,9 @@
 <!ENTITY ubiquity.pagetitle.Persistence "Ubiquity 持久性项目">
 <!ENTITY ubiquity.pagetitle.SuggMemDebug "建议内存调试">
 <!ENTITY ubiquity.pagetitle.TestSuite "&appTitle; 测试套件">
-<!ENTITY ubiquity.pagetitle.Tuner "&appTitle; Nountype Tuner">
-<!ENTITY ubiquity.error.WarningParser2 "您没有使用解析器 2！nountype tuner 目前只适用于解析器 2。请 <a href='chrome://ubiquity/content/settings.xhtml'>打开 解析器 2 (又名下一代解析器)</a>，重新启动 Firefox，然后再试一次。">
-<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> 没有正确加载。Most likely this means you loaded this page at the same time that you loaded the window，and this page loaded before the window chrome，在这种情况下，您可以刚刚重新加载这个页并它应该工作。否则，我们可能是一些代码的问题。">
+<!ENTITY ubiquity.pagetitle.Tuner "&appTitle; 名词输入调谐器">
+<!ENTITY ubiquity.error.WarningParser2 "您没有使用解析器 2！名词输入调谐器目前只适用于解析器 2。请 <a href='chrome://ubiquity/content/settings.xhtml'>打开 解析器 2 (又名下一代解析器)</a>，并重新启动 Firefox，然后再试一次。">
+<!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> 没有正确加载。Most likely this means you loaded this page at the same time that you loaded the window，and this page loaded before the window chrome，在这种情况下，您可以刚刚重新加载这个页并它应该工作。除此以外，可能是一些代码的问题。">
 <!ENTITY ubiquity.common.OptionAutoRun "自动更新解析">
 <!ENTITY ubiquity.common.OptionGSync "用 <code>gUbiquity</code> 同步">
 <!ENTITY ubiquity.common.ButtonRun "运行！">
@@ -20,6 +20,7 @@
 <!ENTITY ubiquity.playpen.WordTimes "时间">
 <!ENTITY ubiquity.playpen.SelectionText "选择文本 (for anaphora substitution)：">
 <!ENTITY ubiquity.playpen.EnvironmentInfo "环境信息 <small>(按我切换)</small>">
+<!ENTITY ubiquity.playpen.ActiveSemanticRoles "主动语义作用：">
 <!ENTITY ubiquity.playpen.ActiveNounTypes "主动名词类型：">
 <!ENTITY ubiquity.playpen.ScoreFunctions "（查看开源的评分功能）">
 <!ENTITY ubiquity.playpen.ActiveVerbs "主动动词：">

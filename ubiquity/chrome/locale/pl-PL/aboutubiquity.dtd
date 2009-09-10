@@ -153,16 +153,13 @@
 <!ENTITY ubiquity.localizecmd.ForTemplate "To jest szablon dla <code>&feedKey;.po</code>">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1 "To jest szablon lokalizacji dla źródła polecenia &feedKey; w formacie gettext/portable object (*.po). Dowiedz się więcej o <a href='&link.gettextInfo;'>gettext na Wikipedii</a>, gdzie znajdziesz także odnośniki do innych przydatnych narzędzi.">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2 "Aby wykonać testy tej lokalizacji, zapisz ją w katalogu: &localeDir; z nazwą <code>&feedKey;.po</code>">
-<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Upewnij się, że nazwa katalogu &bdquo;/XY/&rdquo; prawidłowo odzwierciedla odpowiedni kod Twojego języka. Jeśli nie ma katalogu Twojego języka – po prostu go utwórz.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Upewnij się, że nazwa katalogu „/XY/” prawidłowo odzwierciedla odpowiedni kod Twojego języka. Jeśli nie ma katalogu Twojego języka – po prostu go utwórz.">
 <!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Nie można wyświetlić przezroczystej wiadomości!">
 <!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity nie udało się wyświetlić przezroczystej wiadomości.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Z powodu <a href='&link.bug19;'>błędu w &appTitle;</a> działającym pod kontrolą systemu OS X, możesz potrzebować, jeśli jeszcze nie jest zainstalowany, <a href='&link.growl;'>zainstalować Growl</a>. Po instalacji może wystąpić konieczność ponownego uruchomienia Firefoksa.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Nasze przeprosiny za niedogodności.">
 <!-- File/Feed redirectors chrome/content/file.xhtml and feed.xhtml -->
-<!ENTITY ubiquity.redirect.FeedHeader "Readresator standardowego zasobu">
-<!ENTITY ubiquity.redirect.FileHeader "Readresator standardowego pliku">
-<!ENTITY ubiquity.redirect.FeedShortDesc "Ta strona jest prostym readresatorem, którego można użyć do przeniesienia użytkownika z interfejsu Ubiquity: URI do URI dla standardowego zasobu.">
-<!ENTITY ubiquity.redirect.FeedLongDesc "Aby użyć readresatora, określ tablicę URI do relatywnej ścieżki URI standardowego zasobu, do którego użytkownik ma być przekierowany. Ścieżka powinna być relatywna do katalogu &appTitle; <tt>standard-feeds</tt>. Na przykład:">
+<!ENTITY ubiquity.redirect.FileHeader "Readresator pliku">
 <!ENTITY ubiquity.redirect.FileShortDesc "Ta strona jest prostym readresatorem, którego można użyć do przeniesienia użytkownika z interfejsu Ubiquity: URI do pliku: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Aby użyć readresatora, określ tablicę URI do relatywnej ścieżki pliku URI do którego użytkownik ma być przekierowany. Ścieżka powinna być relatywna do katalogu &appTitle;. Na przykład:">
