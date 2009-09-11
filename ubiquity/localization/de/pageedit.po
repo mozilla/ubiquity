@@ -1,0 +1,75 @@
+# pageedit.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. delete command:
+#. use | to separate multiple name values:
+msgctxt "delete.names"
+msgid "delete"
+msgstr "löschen|entfernen|delete"
+
+msgctxt "delete.description"
+msgid "Deletes the selected chunk of HTML from the page."
+msgstr "Löscht den Inhalt der Markierung von der HTML Seite."
+
+
+#. undelete command:
+#. use | to separate multiple name values:
+msgctxt "undelete.names"
+msgid "undelete"
+msgstr "rückgängig löschen|rückgängig entfernen|rückgängig delete"
+
+msgctxt "undelete.description"
+msgid "Restores the HTML deleted by the delete command."
+msgstr "Stellt die gelöschten Inhalte wiederher."
+
+
+#. edit page command:
+#. use | to separate multiple name values:
+msgctxt "edit page.names"
+msgid "edit page|turn on edit mode"
+msgstr "seite bearbeiten|edit page|seite editierbar machen"
+
+msgctxt "edit page.help"
+msgid "In edit mode, you can edit the page like any document: Select text, delete it, add to it, copy and paste it.  Issue 'bold', 'italic', or 'underline' commands to add formatting.  Issue the 'save' command to save your changes so they persist even when you reload the page.  Issue 'stop-editing-page' when you're done to go back to the normal page viewing mode."
+msgstr "Im editierungsmodus können Sie die HTML Seite wie ein Textdokument verändern: Text markieren, löschen, hinzufügen, kopieren und einfügen. Verwenden Sie 'fett' 'kursiv' oder 'unterstrichen' um die Formatierung zu ändern. Verwenden Sie 'speichern' um die HTML Seite dauerhaft zu speichern.Sie könne .Sie könne mit 'stop seite bearbeiten' wieder in den normalen Modus zurückkehren"
+
+msgctxt "edit page.description"
+msgid "Puts the web page into a mode where you can edit the contents."
+msgstr "Macht die Website editierbar."
+
+
+#. stop editing page command:
+#. use | to separate multiple name values:
+msgctxt "stop editing page.names"
+msgid "stop editing page|turn off edit mode"
+msgstr "stop seite bearbeiten|stop editing page|seite nicht editierbar machen"
+
+msgctxt "stop editing page.description"
+msgid "If you used the 'edit page' command to put the page into editable mode, use this command to end that mode and go back to normal page viewing. If you want the changes to persist on page reload, issue the 'save' command first."
+msgstr "Bringt Die Website wieder in den normalen Modus. Wenn sie die Änderungen an der Website behalten möchten, führen Sie das 'speichern' Kommando vor diesem Kommando aus."
+
+
+#. save page edits command:
+#. use | to separate multiple name values:
+msgctxt "save page edits.names"
+msgid "save page edits"
+msgstr "speichern|seite speichern"
+
+msgctxt "save page edits.description"
+msgid "Saves edits you've made to this page in an annotation. They will persist on page reload. You can remove them with the 'undo page edits' command."
+msgstr "Speichert die Änderungen der aktuellen Seite. Sie können mit 'rückgängig seite bearbeiten' die orginale Website wiederherstellen."
+
+
+#. undo page edits command:
+#. use | to separate multiple name values:
+msgctxt "undo page edits.names"
+msgid "undo page edits|remove annotations"
+msgstr "rückgängig seite bearbeiten|entferne änderungen|undo page edits"
+
+msgctxt "undo page edits.description"
+msgid "Resets any annotation changes you've made to this page."
+msgstr "Stellt die Orginalversion dieser Website wiederher."
+
+

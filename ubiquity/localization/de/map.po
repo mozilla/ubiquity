@@ -1,0 +1,24 @@
+# map.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "karte|map"
+
+msgctxt "map.help"
+msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+msgstr "Probieren Sie das Kommando \"karte kalamazoo\". Sie können auf die Vorschau der Karte klicken, um eine größere interaktive Karte zu bekomjmen. Sie können auf     \"insert map in page\" (wenn Sie in einem editierbaren Texfeld sind) um die Karte einzufügen. Sie können z.B. eine Email-Adresse eintippen, sie markieren, das Kommando     \"karte\" eintippen und danach die Karte einfügen."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Verwandelt eine Adresse in eine Google Karte."
+
+msgctxt "map.preview"
+msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr "Sie können die Karte hier nicht einfügen. Benutzen Sie 'edit page' um die Seite editierbar zu machen."
+
+

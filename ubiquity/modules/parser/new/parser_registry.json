@@ -15,5 +15,6 @@
   it: "Italiano",
   es: "Español",
   $: "$",
-  nl: "Nederlands"
+  nl: "Nederlands",
+  de: "Deutsch"
 }

@@ -1,0 +1,101 @@
+# email.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. email command:
+#. use | to separate multiple name values:
+msgctxt "email.names"
+msgid "email|mail|send email|gmail.com"
+msgstr "email|mail|sende email|gmail.com"
+
+msgctxt "email.help"
+msgid "Currently only works with\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    so you'll need a Gmail account to use it.\n"
+"<br/>\n"
+"Try selecting part of a web page (including links, images, etc)\n"
+"    and then issuing \"email this\".\n"
+"<br/>\n"
+"You can also specify the recipient of the email using the word \"to\"\n"
+"    and the name of someone from your contact list.\n"
+"    For example, try issuing \"email hello to jono\"\n"
+"    (assuming you have a friend named \"jono\")."
+msgstr "Funktioniert nur mit Google Mail\n"
+"<a href=\"http://mail.google.com\">Google Mail</a>\n"
+",\n"
+"    Sie benötigen ein Google Mail Konto.\n"
+"<br/>\n"
+"Markieren Sie ein Teil einer Website (inklusive Links, Bilder, etc.)\n"
+"    und geben Sie \"email markierung\" ein.\n"
+"<br/>\n"
+"Sie können auch einen Empfänger angeben, dazu geben Sie \"an\"\n"
+"    und den Namen einer Person von Ihrer Kontaktliste ein.\n"
+"    Sie können z.B. \"email hallo an jono\"\n"
+"    (unter der Annahme, dass Sie einen Freund namens \"jono\" haben)."
+
+
+msgctxt "email.description"
+msgid "Begins composing an email to a person from your contact list."
+msgstr "Setzt ein email an eine Person aus Ihrer Kontaktliste auf."
+
+msgctxt "email.preview"
+msgid "Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}."
+msgstr "Erzeugt ein Email {if recipient} an ${recipient}{/if} mit einem Link zu Ihrer aktuellen Seite{if content} und diesem Inhalt:<br/><br/>${content}{/if}."
+
+msgctxt "email.execute"
+msgid "A gmonkey exception occurred."
+msgstr "Ein Fehler mit gmonkey trat auf."
+
+
+#. get last email command:
+#. use | to separate multiple name values:
+msgctxt "get last email.names"
+msgid "get last email"
+msgstr "download letztes email|letztes email"
+
+msgctxt "get last email.description"
+msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
+msgstr "Zeigt das aktuellste, eingegangene Email. Benötigt ein <a href=\"http://mail.google.com\">Gmail</a> Konto."
+
+msgctxt "get last email.preview"
+msgid "Displays your most recent incoming email..."
+msgstr "Zeigt ihr aktuellstes Email an..."
+
+msgctxt "get last email.preview"
+msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgstr "Letztes ungelesenes Email: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> sagt: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+
+msgctxt "get last email.preview"
+msgid "<b>You have no new mail!</b>"
+msgstr "<b>Sie haben ein neues Email!</b>"
+
+msgctxt "get last email.preview"
+msgid "You are not logged in!<br />Press enter to log in."
+msgstr "Sie sind nicht eingeloggt!<br />Drücken Sie Enter um sich einzuloggen."
+
+msgctxt "get last email.execute"
+msgid "You have new email! ${lastEmail.author} says: ${lastEmail.subject}"
+msgstr "Sie haben ein neues Email! ${lastEmail.author} sagt: ${lastEmail.subject}"
+
+msgctxt "get last email.execute"
+msgid "You have no new mail."
+msgstr "Sie haben keine neuen Emails."
+
+
+#. get email address command:
+#. use | to separate multiple name values:
+msgctxt "get email address.names"
+msgid "get email address"
+msgstr "hent e-mail-adresse"
+
+msgctxt "get email address.help"
+msgid "Execute the command to copy the address to your clipboard."
+msgstr "Eksekver for at kopiere e-mail-adressen til dit clipboard."
+
+msgctxt "get email address.description"
+msgid "Looks up the email address of a person from your contacts list given their name. "
+msgstr "Laver et opslag på en e-mail-adresse fra en person i din kontaktliste, ud fra deres navn. "
+
+

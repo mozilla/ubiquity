@@ -1,0 +1,263 @@
+# general.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. bold command:
+#. use | to separate multiple name values:
+msgctxt "bold.names"
+msgid "bold"
+msgstr "fett|bold"
+
+msgctxt "bold.description"
+msgid "If you're in a rich-text-edit area, makes the selected text bold."
+msgstr "Macht markierten Text fett."
+
+msgctxt "bold.execute"
+msgid "You're not in a rich text editing field."
+msgstr "Sie haben keinen formatierten Text markiert."
+
+
+#. italicize command:
+#. use | to separate multiple name values:
+msgctxt "italicize.names"
+msgid "italicize"
+msgstr "kursiv"
+
+msgctxt "italicize.description"
+msgid "If you're in a rich-text-edit area, makes the selected text italic."
+msgstr "Macht markierten Text kursiv."
+
+msgctxt "italicize.execute"
+msgid "You're not in a rich text editing field."
+msgstr "Sie haben keinen formatierten Text markiert."
+
+
+#. underline command:
+#. use | to separate multiple name values:
+msgctxt "underline.names"
+msgid "underline"
+msgstr "unterstreichen|underline"
+
+msgctxt "underline.description"
+msgid "If you're in a rich-text-edit area, underlines the selected text."
+msgstr "Unterstreicht markierten Text"
+
+msgctxt "underline.execute"
+msgid "You're not in a rich text editing field."
+msgstr "Sie haben keinen formatierten Text markiert."
+
+
+#. highlight command:
+#. use | to separate multiple name values:
+msgctxt "highlight.names"
+msgid "highlight|hilite"
+msgstr "hervorheben|einfärben|highlite|hilite"
+
+msgctxt "highlight.description"
+msgid "Highlights your current selection, like <span style=\"background: yellow; color: black;\">this</span>."
+msgstr "Hebt Ihre Markierung hervor, z.B. <span style=\"background: yellow; color: black;\">Dies</span>."
+
+
+#. undo text edit command:
+#. use | to separate multiple name values:
+msgctxt "undo text edit.names"
+msgid "undo text edit"
+msgstr "rückgängig text veränderung|rückgängig text"
+
+msgctxt "undo text edit.description"
+msgid "If you're in a rich-text-edit area, undoes your latest style/formatting or page-editing changes."
+msgstr "Hebt hinzugefüght Textmarkierungen auf."
+
+msgctxt "undo text edit.execute"
+msgid "You're not in a rich text editing field."
+msgstr "Sie haben keinen formatierten Text markiert."
+
+
+#. redo text edit command:
+#. use | to separate multiple name values:
+msgctxt "redo text edit.names"
+msgid "redo text edit"
+msgstr "wiederhole text veränderung|wiederhole text"
+
+msgctxt "redo text edit.description"
+msgid "If you're in a rich-text-edit area, redoes your latest style/formatting or page-editing changes."
+msgstr "Führt die letzte Textmarkierung nochmals aus."
+
+msgctxt "redo text edit.execute"
+msgid "You're not in a rich text editing field."
+msgstr "Sie haben keinen formatierten Text markiert."
+
+
+#. count words command:
+#. use | to separate multiple name values:
+msgctxt "count words.names"
+msgid "count words|word count"
+msgstr "zähle wörter|wörter zählen"
+
+msgctxt "count words.description"
+msgid "Displays the number of words in a selection."
+msgstr "Zeigt Ihnen die Anzahl der Wörter in einem markierten Text an"
+
+msgctxt "count words.preview"
+msgid "<b>${num}</b> words"
+msgstr "${num} Wörter"
+
+msgctxt "count words.preview"
+msgid "Displays the number of words in a selection."
+msgstr "Zeigt Ihnen die Anzahl der Wörter in einem markierten Text an"
+
+msgctxt "count words.execute"
+msgid "${num} words"
+msgstr "${num} Wörter"
+
+msgctxt "count words.execute"
+msgid "No words selected."
+msgstr "Keine Wörter markiert"
+
+
+#. link to wikipedia command:
+#. use | to separate multiple name values:
+msgctxt "link to wikipedia.names"
+msgid "link to wikipedia"
+msgstr "link zu wikipedia|link to wikipedia"
+
+msgctxt "link to wikipedia.description"
+msgid "Turns a phrase into a link to the matching Wikipedia article."
+msgstr "Erstellt einen Link mit dem Wikipedia-Artikel zur Markierung."
+
+
+#. calculate command:
+#. use | to separate multiple name values:
+msgctxt "calculate.names"
+msgid "calculate|gcalculate"
+msgstr "rechne|calculate"
+
+msgctxt "calculate.help"
+msgid "Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
+msgstr "Probieren Sie <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
+"Hinweis: Es funktionieren nur englische Kommandos"
+
+msgctxt "calculate.description"
+msgid "Calculates using\n"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a>\n"
+"which has all the features of a scientific calculator,\n"
+"    knows constants such as the speed of light,\n"
+"    and can convert between units and currencies.\n"
+"<br/>\n"
+"Uses\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"instead for simple expressions like\n"
+"<code>22/7</code>\n"
+"."
+msgstr "Berechnet mit"
+"<a href=\"http://www.googleguide.com/help/calculator.html\">Google Calculator</a>\n"
+"    der alle Funktionen eines wissenschaftlichen Taschenrechners hat,\n"
+"    Konstanten wie die Lichtgeschwindigkeit kennt,\n"
+"    zwischen Einheiten rechnen und die Wechselkurse kennt.\n"
+"<br/>\n"
+"Verwendet\n"
+"<a href=\"http://jsfromhell.com/classes/math-parser\">MathParser</a>\n"
+"statt einfacher Berechnungen wie z.B.\n"
+"<code>22/7</code>\n"
+"."
+
+
+#. translate command:
+#. use | to separate multiple name values:
+msgctxt "translate.names"
+msgid "translate"
+msgstr "übersetzen|translate"
+
+msgctxt "translate.help"
+msgid "You can specify the language to translate to,\n"
+"    and the language to translate from.\n"
+"    For example, try issuing \"translate mother from english to chinese\".\n"
+"    If you leave out the languages, it will try to guess what you want.\n"
+"    It works on selected text in any web page,\n"
+"    but there's a limit (a couple of paragraphs)\n"
+"    to how much it can translate a selection at once.\n"
+"    If you want to translate a lot of text, leave out the input and\n"
+"    it will translate the whole page."
+msgstr "Sie können die Sprachen angeben in die der Text übersetzt werden soll\n"
+"    und die Sprache in der er geschrieben ist.\n"
+"    Sie können z.B. \"übersetzen Mutter von Deutsch nach Chinesisch\".\n"
+"    Wenn sie keine Ursprungssprache angeben, wird sie geraten.\n"
+"    Es funktioniert mit markiertem Text von jeder Website,\n"
+"    aber es gibt eine Obergrenze (ein paar Paragraphen)\n"
+"    die Sie auf einmal übersetzen können.\n"
+"    Wenn Sie die gesamte Website übersetzten wollen, markieren Sie nichts\n"
+"    und es wird die gesamte Website übersetzt."
+
+
+msgctxt "translate.description"
+msgid "Translates from one language to another."
+msgstr "Übersetzt von einer Sprache in eine andere."
+
+msgctxt "translate.preview"
+msgid "Translates ${url} into <b>${toLang}</b>."
+msgstr "Übersetze ${url} zu <b>${toLang}</b>."
+
+msgctxt "translate.preview"
+msgid "Replaces the selected text with the <b>${toLang}</b> translation:"
+msgstr "Ersetzt den ausgewählten Text mit der <b>${toLang}</b> Übersetzung:"
+
+# shared strings in the function translateTo
+# manually added by mitcho
+msgid "Translation error: ${error}"
+msgstr "Fehler beim Übersetzten: ${error}"
+
+msgid "invalid translation language pair"
+msgstr "Ungültige Sprachen"
+
+msgid "could not reliably detect source language"
+msgstr "Konnte die Sprache des Ursprungtextes nicht ermitteln"
+
+
+#. create bookmarklet command command:
+#. use | to separate multiple name values:
+msgctxt "create bookmarklet command.names"
+msgid "create bookmarklet command"
+msgstr "erzeuge bookmarklet kommando"
+
+msgctxt "create bookmarklet command.help"
+msgid "For instance, if you have a bookmarklet called 'press this', you can say 'create bookmarklet command from press this'."
+msgstr "Z:B. wenn sie ein Bookmarklet mit dem Namen 'drücke das' haben , können Sie 'erzeuge bookmarklet kommand aus drücke das' eingeben."
+
+msgctxt "create bookmarklet command.description"
+msgid "Creates a new Ubiquity command from a bookmarklet."
+msgstr "Erzeuge neues Ubiquity Kommando von einem Bookmarklet."
+
+
+#. create search command command:
+#. use | to separate multiple name values:
+msgctxt "create search command.names"
+msgid "create search command"
+msgstr "erzeuge suchen kommando"
+
+msgctxt "create search command.help"
+msgid "<ol style=\"list-style-image:none\">\n"
+"  <li>Select a searchbox.</li>\n"
+"  <li>Say 'create search command mysearch'.</li>\n"
+"  <li>Execute.</li>\n"
+"  <li>You now have a command called 'mysearch'.</li>\n"
+"</ol>"
+msgstr "<ol style=\"list-style-image:none\">\n"
+"  <li>Klicke in die Box der Suchmaschiene.</li>\n"
+"  <li>Tippe 'erzeuge suchen kommando meinesuche'.</li>\n
+"  <li>Sie haben nun ein Kommando mit dem Namen 'meinesuche' erstellt</li>\n"
+"</ol>"
+
+msgctxt "create search command.description"
+msgid "Creates a new Ubiquity command from a focused search-box and lets you set the command name."
+msgstr "Erzeugt ein neues Ubiquity Kommando der Box einer Suchmaschiene und lässt Sie den Kommandonamen auswählen."
+
+msgctxt "create search command.preview"
+msgid "Creates a new search command called <b>${text}</b>"
+msgstr "Erzeugt ein neues Such-Kommando mit dem Namen <b>${text}</b>"
+
+msgctxt "create search command.execute"
+msgid "You need to focus a searchbox before running this command."
+msgstr "Sie müssen in die Box einer Suchmaschiene klicken, bevor Sie dieses Kommando ausführen."
+
+

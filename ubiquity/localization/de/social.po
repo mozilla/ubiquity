@@ -1,0 +1,157 @@
+# social.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. twitter command:
+#. use | to separate multiple name values:
+msgctxt "twitter.names"
+msgid "twitter|tweet|share using twitter"
+msgstr "twitter|tweet|verteile mit twitter"
+
+msgctxt "twitter.help"
+msgid "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
+msgstr "Sie benötigen ein <a href=\"http://twitter.com\">Twitter Konto</a>. Wenn Sie nicht bereits eingeloogt sind, bitte loogen Sie Sich jetzt ein."
+
+msgctxt "twitter.description"
+msgid "Sets your Twitter status to a message of at most 160 characters."
+msgstr "Schreibt eine Nachricht mit max. 160 Wörtern."
+
+msgctxt "twitter.preview"
+msgid "Updates your Twitter status ${username} to:"
+msgstr "Aktualisiert Ihren Twitter Status ${username} zu:"
+
+msgctxt "twitter.preview"
+msgid "Characters remaining: <b>${chars}</b>"
+msgstr "Verbleibende Buchstaben: <b>${chars}</b>"
+
+msgctxt "twitter.preview"
+msgid "tip: tweet @mozillaubiquity for help"
+msgstr "Tippen Sie 'tweet @mozillaubiquity' für Hilfe"
+
+msgctxt "twitter.preview"
+msgid "The last <b>${truncate}</b> characters will be truncated!"
+msgstr "Die letzten <b>${truncate}</b> Buchstaben werden nicht gesendet!"
+
+msgctxt "twitter.preview"
+msgid "(For user <b>${usernameText}</b>)"
+msgstr "(Für Nutzer <b>${usernameText}</b>)"
+
+msgctxt "twitter.execute"
+msgid "requires a status to be entered"
+msgstr "Erfordert die Eingabe eines Status"
+
+msgctxt "twitter.execute"
+msgid "error - status not updated"
+msgstr "Error - Status konnte nicht aktualisiert werden"
+
+msgctxt "twitter.execute"
+msgid "direct message sent"
+msgstr "Direkte Nachricht wurde versandt"
+
+msgctxt "twitter.execute"
+msgid "status updated"
+msgstr "Status aktualisiert"
+
+
+#. digg command:
+#. use | to separate multiple name values:
+msgctxt "digg.names"
+msgid "digg|share using digg"
+msgstr "digg|verbreite mit digg"
+
+msgctxt "digg.description"
+msgid "If not yet submitted, submits the page to Digg. Otherwise, it takes you to the story's Digg page."
+msgstr "Wenn die Website noch nicht abgeschickt wurde, wird Sie jetzt abgeschickt. Falls Sie bereits gesendet wurde kommen Sie zu der Digg Story Page."
+
+msgctxt "digg.preview"
+msgid "Submit or digg this page. Checking if this page has already been submitted..."
+msgstr "Sendet diese Website an Digg. Überprüfe ob die Website gesendet wurde..."
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg"
+msgstr "Sende diese Website an Digg"
+
+msgctxt "digg.preview"
+msgid "Submit this page to Digg with the description:"
+msgstr "Sende diese Website an Digg mit der Beschreibung:"
+
+msgctxt "digg.preview"
+msgid "Description can only be 375 characters. The last <b>${chars}</b> characters will be truncated."
+msgstr "Die Beschreibung ist auf 375 Buchstaben begrenzt. Die letzten <b>${chars}</b> Buchstaben werden nicht gesendet."
+
+msgctxt "digg.preview"
+msgid "Digg this page. This page already has <b>${diggs}</b> diggs."
+msgstr "Digg diese Website. Diese Website hat bereits <b>${diggs}</b> diggs."
+
+
+#. tinyurl command:
+#. use | to separate multiple name values:
+msgctxt "tinyurl.names"
+msgid "tinyurl"
+msgstr "tinyurl"
+
+msgctxt "tinyurl.description"
+msgid "Replaces the selected URL with a <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+msgstr "Ersetzt die markierte URL mit <a href=\"http://www.tinyurl.com\">TinyURL</a>."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with..."
+msgstr "Ersetze die markierte URL mit..."
+
+msgctxt "tinyurl.preview"
+msgid "Replaces the selected URL with <b>${tinyurl}</b>."
+msgstr "Ersetzt die markierte URL mit <b>${tinyurl}</b>."
+
+
+#. share (on delicious) command:
+#. use | to separate multiple name values:
+msgctxt "share (on delicious).names"
+msgid "share|delicious"
+msgstr "delicious|teile"
+
+msgctxt "share (on delicious).help"
+msgid "Select text on the page to use as notes, or enter your own text after the command word.  You can also assign tags to the bookmark with the \"tagged\" modifier, and alter the bookmark default page title with the \"entitled\" modifier.  Note that you must also already be logged in at delicious.com to use this command."
+msgstr "Verbreitet den markierten Text oder Ihre Eingabe nach dem Kommando. Sie müssen breits in delicious.com eingeloogt sein, um dieses Kommando verwenden zu können."
+
+msgctxt "share (on delicious).description"
+msgid "Share the current page as a bookmark on delicious.com"
+msgstr "Verbreitet die aktuelle Website als Lesezeichen auf delicious.com"
+
+msgctxt "share (on delicious).preview"
+msgid "This URL cannot be shared on ${delicious}."
+msgstr "Diese URL kann nicht auf ${delicious} verbreitet werden."
+
+msgctxt "share (on delicious).preview"
+msgid "No active user found - log in at ${delicious} to use this command."
+msgstr "Es wurde kein aktiver User gefunden - Um dieses Kommando zu nutzen loogen Sie sich bei ${delicious} ein"
+
+msgctxt "share (on delicious).preview"
+msgid "A title is required for bookmarks on ${delicious}"
+msgstr "Ein Titel wird für die Lesezeichen auf ${delicious} benötigt"
+
+msgctxt "share (on delicious).preview"
+msgid "Share a bookmark at ${delicious}:"
+msgstr "Verbreite diese Seite auf ${delicious}:"
+
+msgctxt "share (on delicious).execute"
+msgid "This URL cannot be shared on delicious."
+msgstr "Diese URL konnte nicht auf delicious verteilt werden."
+
+msgctxt "share (on delicious).execute"
+msgid "No active user found - log in at delicious.com to use this command."
+msgstr "Es wurde kein aktiver User gefunden - Um dieses Kommando zu nutzen loogen Sie sich bei delicious.com ein."
+
+msgctxt "share (on delicious).execute"
+msgid "A title is required for bookmarks at delicious.com"
+msgstr "Ein Titel wird für die Lesezeichen auf delicious.com benötigt"
+
+msgctxt "share (on delicious).execute"
+msgid "Bookmark \\\"${description}\\\" shared at delicious.com/${user_name}"
+msgstr "Lesezeichen \\\"${description}\\\" wurde auf delicious.com/${user_name} verteilt"
+
+msgctxt "share (on delicious).execute"
+msgid "ERROR: Bookmark \\\"${description}\\\" NOT shared on delicious.com/${user_name}"
+msgstr "ERROR: Bookmark \\\"${description}\\\" konnte NICHT auf delicious.com/${user_name} verteilt werden"
+
+

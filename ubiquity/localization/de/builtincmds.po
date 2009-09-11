@@ -1,0 +1,149 @@
+# builtincmds.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. help command:
+#. use | to separate multiple name values:
+msgctxt "help.names"
+msgid "help|about|?"
+msgstr "hilfe|über|?"
+
+msgctxt "help.description"
+msgid "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
+"      Or, enter the name of a command to get help on that command."
+msgstr "Bringt Sie zu der <a href=\"about:ubiquity\">Ubiquity Hilfe</a>,<br/>\n"
+"      Oder geben Sie den Namen eines Kommandos ein, um weitere Informationen zu erhalten."
+
+
+#. open (ubiquity settings page) command:
+#. use | to separate multiple name values:
+msgctxt "open (ubiquity settings page).names"
+msgid "open|show"
+msgstr "öffne|zeige"
+
+msgctxt "open (ubiquity settings page).description"
+msgid "Opens one of the Ubiquity documentation/settings pages."
+msgstr "Öffnet eine Ubiquity Hilfe- oder Einstellungsseite"
+
+msgctxt "open (ubiquity settings page).preview"
+msgid "Opens the Ubiquity ${goal} page."
+msgstr "Öffnet Ubiquitys ${goal}-seite."
+
+#. write ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "write ubiquity commands.names"
+msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
+msgstr "schreibe ubiquity kommandos|editiere ubiquity kommandos|hack ubiquity"
+
+msgctxt "write ubiquity commands.description"
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
+msgstr "Bringt Sie zu der <a href=\"chrome://ubiquity/content/editor.xhtml\">Kommando Editor</a> Seite."
+
+
+#. list ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "list ubiquity commands.names"
+msgid "list ubiquity commands"
+msgstr "list ubiquity kommandos|zeige ubiquity kommandos"
+
+msgctxt "list ubiquity commands.description"
+msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
+"      of all Ubiquity commands available and what they all do."
+msgstr "Zeigt <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">eine Liste</a>\n"
+"      aller verfügbaren Kommandos und ihrer Funktionsweise an."
+
+
+#. change ubiquity settings command:
+#. use | to separate multiple name values:
+msgctxt "change ubiquity settings.names"
+msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin"
+msgstr "verändere ubiquity einstellungen|verändere ubiquity voreinstellungen|verändere ubiquitys aussehn"
+
+msgctxt "change ubiquity settings.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
+"      where you can change your skin, key combinations, etc."
+msgstr "Bringt Sie zu der <a href=\"chrome://ubiquity/content/settings.xhtml\">Einstellungs</a>seite, \n"
+"      wo Sie Aussehen, Einstellungen und vieles mehr verändern können."
+
+
+#. get support command:
+#. use | to separate multiple name values:
+msgctxt "get support.names"
+msgid "get support"
+msgstr "unterstüzung"
+
+msgctxt "get support.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
+"    where you can report bugs, get troubleshooting help, etc."
+msgstr "Bringt Sie zu der <a href=\"chrome://ubiquity/content/support.xhtml\">Untersüzungs</a>seite,\n"
+"    wo sie Fehler melden und Hilfe bekommen können."
+
+
+#. report bug command:
+#. use | to separate multiple name values:
+msgctxt "report bug.names"
+msgid "report bug"
+msgstr "melde fehler"
+
+msgctxt "report bug.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/report-bug.html\">bug report</a> page."
+msgstr "Bringt Sie zu der <a href=\"chrome://ubiquity/content/report-bug.html\">Fehlermeldungs</a>seite."
+
+
+#. disable command command:
+#. use | to separate multiple name values:
+msgctxt "disable command.names"
+msgid "disable command"
+msgstr "deaktiviere kommando"
+
+msgctxt "disable command.description"
+msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
+msgstr "Deaktiviert ein Kommando, so das es nicht mehr in der Verbesserungsliste aufscheint."
+
+
+#. enable command command:
+#. use | to separate multiple name values:
+msgctxt "enable command.names"
+msgid "enable command"
+msgstr "aktiviere kommando"
+
+msgctxt "enable command.description"
+msgid "Re-enables a Ubiquity command that you disabled."
+msgstr "Re-aktiviert ein Kommando."
+
+
+#. command history command:
+#. use | to separate multiple name values:
+msgctxt "command history.names"
+msgid "command history|vita"
+msgstr "kommando verlauf|kommando chronik"
+
+msgctxt "command history.help"
+msgid "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to reuse.</li>\n"
+"    <li>Type to filter.</li>\n"
+"    <li>Execute to delete all matched histories.</li>\n"
+"    <li>Edit <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> to\n"
+"      set max number of histories.</li></ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"    <li>Verwenden Sie eine Tastenkombination oder klicken Sie um wiederherzustellen.</li>\n"
+"    <li>Geben Sie einen Filter ein.</li>\n"
+"    <li>Drücken Sie die Eingabetaste, um alle passenden chroniken zu löschen.</li>\n"
+"    <li>Editieren Sie <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> um\n"
+"      die maximale Anzahl an Chroniken festzulegen.</li></ul>"
+
+
+msgctxt "command history.description"
+msgid "Accesses your command history."
+msgstr "Zeigt Ihre Befehls-Chronik an."
+
+msgctxt "command history.preview"
+msgid "No histories match."
+msgstr "Es wurde kein Treffer für Ihre Suche gefunden."
+
+msgctxt "command history.execute"
+msgid "Deleted matched histories. Click here to undo."
+msgstr "Die gefundenen Chroniken wurden entfernt. Klicken Sie hier um dies rückgängig zu machen."
+
+

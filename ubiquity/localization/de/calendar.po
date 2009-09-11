@@ -1,0 +1,65 @@
+# calendar.po
+# 
+# Localizers:
+# Felix Schaber
+
+#. add to google calendar command:
+#. use | to separate multiple name values:
+msgctxt "add to google calendar.names"
+msgid "add to google calendar|quick add"
+msgstr "hinzufüge|füge zu google calendar hinzu"
+
+msgctxt "add to google calendar.help"
+msgid "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Quick Add\">Enter the event naturally</a>\n"
+". e.g.:\n"
+"<ul>\n"
+"  <li>3pm Lunch with Myk and Thunder</li>\n"
+"  <li>Jono's Birthday on Friday</li>\n"
+"</ul><p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "<a href=\"http://www.google.com/support/calendar/bin/answer.py?answer=36604\" title=\"Schneller Eintrag\">Geben Sie das Ereigniss ein</a>\n"
+". z.B.:\n"
+"<ul>\n"
+"  <li>15:00 Mittagessen mit Myk und Thunder</li>\n"
+"  <li>Jonos Geburstag am Freitag</li>\n"
+"</ul><p>Bis jetzt funktioniert das nur mit <a href=\"http://calendar.google.com\">Google Kalender</a>, Sie benötigen ein Google Kalender Konto.</p>"
+
+msgctxt "add to google calendar.description"
+msgid "Adds an event to your calendar."
+msgstr "Fügt ein Ereigniss zu Ihrem Kalender hinzu."
+
+msgctxt "add to google calendar.execute"
+msgid "Authorization error"
+msgstr "Falsche Authentifikation"
+
+msgctxt "add to google calendar.execute"
+msgid "Please make sure you are logged in to Google Calendar"
+msgstr "Bitte versichern Sie Sich, dass Sie in Google Kalender eingeloggt sind"
+
+msgctxt "add to google calendar.execute"
+msgid "Event created"
+msgstr "Ereigniss wurde erstellt"
+
+msgctxt "add to google calendar.execute"
+msgid "Error creating the event"
+msgstr "Beim erstellen des Ereignisses ist ein Fehler aufgetreten"
+
+
+#. check google calendar command:
+#. use | to separate multiple name values:
+msgctxt "check google calendar.names"
+msgid "check google calendar"
+msgstr "zeige google kalender|zeige gkalender"
+
+msgctxt "check google calendar.help"
+msgid "Try issuing \"check on thursday\"<p>Currently, only works with <a href=\"http://calendar.google.com\">Google Calendar</a> so you'll need a Google account to use it.</p>"
+msgstr "Probieren Sie den Befehl \"zeige donnerstag\"<p>Bis jetzt funktioniert das nur mit <a href=\"http://calendar.google.com\">Google Kalender</a>, Sie benötigen ein Google Kalender Konto.</p>"
+
+msgctxt "check google calendar.description"
+msgid "Checks what events are on your calendar for a given date."
+msgstr "Zeigt, welche Ereignisse für das gegebene Datum gespeichert sind."
+
+msgctxt "check google calendar.preview"
+msgid "Checking Google Calendar for events on ${date}."
+msgstr "Zeige Google Kalender für ein Ereigniss am ${date}."
+
+
