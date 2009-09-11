@@ -45,12 +45,12 @@
 // -----------------------------------------------------------------
 
 const Help = "about:ubiquity";
-const Editor = "chrome://ubiquity/content/editor.xhtml";
-const CmdList = "chrome://ubiquity/content/cmdlist.xhtml";
-const Settings = "chrome://ubiquity/content/settings.xhtml";
+const Editor = "about:ubiquity?editor";
+const CmdList = "about:ubiquity?cmdlist";
+const Settings = "about:ubiquity?settings";
 const BugReport = ("http://getsatisfaction.com/" +
                    "mozilla/products/mozilla_ubiquity");
-const Support = "chrome://ubiquity/content/support.xhtml";
+const Support = "about:ubiquity?support";
 
 const {prefs} = Application;
 

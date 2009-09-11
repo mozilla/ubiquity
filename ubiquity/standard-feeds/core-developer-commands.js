@@ -10,7 +10,7 @@ CmdUtils.CreateCommand({
   names: ["test", "unit test", "run unit tests"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Run the Ubiquity unit test suite",
-  execute: "chrome://ubiquity/content/test.xhtml"
+  execute: "about:ubiquity?test"
 });
 
 // === {{{playpen}}} command ===
@@ -21,7 +21,7 @@ CmdUtils.CreateCommand({
   names: ["playpen", "parser playpen", "open parser playpen"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Go to the parser playpen",
-  execute: "chrome://ubiquity/content/playpen.xhtml"
+  execute: "about:ubiquity?playpen"
 });
 
 // === {{{tuner}}} command ===
@@ -32,7 +32,7 @@ CmdUtils.CreateCommand({
   names: ["tuner", "nountype tuner", "tune nountype"],
   icon: "chrome://ubiquity/skin/icons/application_view_list.png",
   description: "Go to the nountype tuner",
-  execute: "chrome://ubiquity/content/tuner.xhtml"
+  execute: "about:ubiquity?tuner"
 });
 
 // === {{{markupTickets()}}} ===
@@ -40,14 +40,12 @@ CmdUtils.CreateCommand({
 // This function finds any text in the given JQuery query that looks like
 // a Trac ticket and hyperlinks the text to the ticket.
 function markupTickets(query) {
-  var regexps = [/(#)([0-9]+)/g,
-                 /([T|t]icket )([0-9]+)/g];
+  var regexps = [/#([0-9]+)/g,
+                 /\bticket ([0-9]+)/ig];
   var template = ('<a href="https://ubiquity.mozilla.com/' +
-                  'trac/ticket/$2">$1$2</a>');
-  regexps.forEach(
-    function(regexp) {
-      query.html(query.html().replace(regexp, template));
-    });
+                  'trac/ticket/$1">$&</a>');
+  for each (var regexp in regexps)
+    query.html(query.html().replace(regexp, template));
 }
 
 // === {{{addMoreLinks()}}} ===
@@ -129,16 +127,17 @@ function addBuildbotInfo(doc) {
 // This function is a page-load function that applies transformations
 // to certain developer-related web pages to provide added functionality.
 function pageLoad_developerCommands(doc) {
-  if ((doc.location.protocol == "http:" ||
-       doc.location.protocol == "https:") &&
-      doc.location.host == 'ubiquity.mozilla.com') {
+  var {location} = doc;
+  if (/^https?:$/.test(location.protocol) &&
+      location.host === "ubiquity.mozilla.com") {
     var regexp = /\/hg\/ubiquity-firefox\/rev\/([0-9a-f]+)/;
-    var match = doc.location.pathname.match(regexp);
+    var match = location.pathname.match(regexp);
     if (match) {
       var rev = match[1];
       markupTickets(jQuery(".description", doc));
       addMoreLinks(rev, doc);
-    } else if (doc.location.pathname == '/hg/ubiquity-firefox/') {
+    }
+    else if (location.pathname === "/hg/ubiquity-firefox/") {
       addBuildbotInfo(doc);
     }
   }

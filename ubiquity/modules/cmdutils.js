@@ -415,26 +415,20 @@ getGeoLocation(); // prefetch
 CmdUtils.UserCode = {
   //Copied with additions from chrome://ubiquity/content/prefcommands.js
   COMMANDS_PREF : "extensions.ubiquity.commands",
+  EDITOR_RE: RegExp(
+    "^(?:" +
+    ["chrome://ubiquity/content/editor.xhtml",
+     "about:ubiquity?editor"].map(Utils.regexp.quote).join("|") +
+    ")$"),
 
   setCode: function UC_setCode(code) {
-    Application.prefs.setValue(
-      this.COMMANDS_PREF,
-      code
-   );
+    Application.prefs.setValue(this.COMMANDS_PREF, code);
     //Refresh any code editor tabs that might be open
-    Application.activeWindow.tabs.forEach(function (tab){
-      if(tab.document.location == "chrome://ubiquity/content/editor.xhtml"){
-        tab.document.location.reload(true);
-      }
-    });
+    Utils.tabs.reload(this.EDITOR_RE);
   },
 
-  getCode: function UC_getCode() {
-    return Application.prefs.getValue(
-      this.COMMANDS_PREF,
-      ""
-   );
-  },
+  getCode: function UC_getCode()
+    Application.prefs.getValue(this.COMMANDS_PREF, ""),
 
   appendCode: function UC_appendCode(code){
     this.setCode(this.getCode() + code);
