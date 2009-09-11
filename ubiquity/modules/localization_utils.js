@@ -62,11 +62,17 @@ var LocalizationUtils = {
   feedGlobalsDict: feedGlobalsDict,
 
   isLocalizable: function LU_isLocalizable(feedUrl) {
-    var baseUrl = UbiquitySetup.getBaseUri();
-    if (feedUrl.indexOf(baseUrl) !== 0)
-      return false;
-    var pathPart = feedUrl.slice(baseUrl.length);
-    return /^(?:standard|builtin)-feeds\b/.test(pathPart);
+    var baseFileUrl = UbiquitySetup.getBaseUri();
+    var baseResourceUrl = "resource://ubiquity/";
+    if (feedUrl.indexOf(baseFileUrl) == 0) {
+      var pathPart = feedUrl.slice(baseFileUrl.length);
+      return /^(?:standard|builtin)-feeds\b/.test(pathPart);
+    }
+    if (feedUrl.indexOf(baseResourceUrl) == 0) {
+      var pathPart = feedUrl.slice(baseResourceUrl.length);
+      return /^(?:standard|builtin)-feeds\b/.test(pathPart);
+    }
+    return false;
   },
 
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
