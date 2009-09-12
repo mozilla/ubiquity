@@ -936,7 +936,10 @@ var noun_type_geolocation = {
 // returns the corresponding language name for {{{code}}}.
 
 var noun_type_lang_google = CmdUtils.NounType("language", {
+  Afrikaans: "af",
+  Albanian: "sq",
   Arabic: "ar",
+  Belarusian: "be",
   Bulgarian: "bg",
   Catalan: "ca",
   "Chinese Simplified": "zh-CN",
@@ -950,6 +953,7 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Filipino: "tl",
   Finnish: "fi",
   French: "fr",
+  Galician: "gl",
   German: "de",
   Greek: "el",
   Hebrew: "iw",
@@ -957,12 +961,17 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Hungarian: "hu",
   Icelandic: "is",
   Indonesian: "id",
+  Irish: "ga",
   Italian: "it",
   Japanese: "ja",
   Korean: "ko",
   Latvian: "lv",
   Lithuanian: "lt",
+  Macedonian: "mk",
+  Malay: "ms",
+  Maltese: "mt",
   Norwegian: "no",
+  Persian: "fa",
   Polish: "pl",
   Portuguese: "pt",
   Romanian: "ro",
@@ -971,12 +980,14 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Slovak: "sk",
   Slovenian: "sl",
   Spanish: "es",
+  Swahili: "sw",
   Swedish: "sv",
   Thai: "th",
   Turkish: "tr",
   Ukrainian: "uk",
-  Urdu: "ur",
   Vietnamese: "vi",
+  Welsh: "cy",
+  Yiddish: "yi",
 });
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
