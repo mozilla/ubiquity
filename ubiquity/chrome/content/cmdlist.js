@@ -102,8 +102,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   // Add link to source (auto-updated or not)
   cell.append(" ", viewSourceLink(feed));
 
-  if (SHOW_L10N_TEMPLATE &&
-      /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds[/]/.test(feedUrl))
+  if (SHOW_L10N_TEMPLATE && LocalizationUtils.isLocalizableFeed(feedUrl))
     cell.append(" ", viewLocalizationTemplate(feed));
 
   // If not auto-updating, display link to any updates found

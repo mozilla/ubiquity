@@ -59,24 +59,12 @@ var LocalizationUtils = {
   GETTEXT: new Gettext(),
 
   get loadedPo LU_loadedPo() loadedPo,
-  feedGlobalsDict: feedGlobalsDict,
 
-  isLocalizable: function LU_isLocalizable(feedUrl) {
-    var baseFileUrl = UbiquitySetup.getBaseUri();
-    var baseResourceUrl = "resource://ubiquity/";
-    if (feedUrl.indexOf(baseFileUrl) == 0) {
-      var pathPart = feedUrl.slice(baseFileUrl.length);
-      return /^(?:standard|builtin)-feeds\b/.test(pathPart);
-    }
-    if (feedUrl.indexOf(baseResourceUrl) == 0) {
-      var pathPart = feedUrl.slice(baseResourceUrl.length);
-      return /^(?:standard|builtin)-feeds\b/.test(pathPart);
-    }
-    return false;
-  },
+  isLocalizableFeed: function LU_isLocalizableFeed(feedUrl)
+    /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds\b/.test(feedUrl),
 
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
-    if (!this.isLocalizable(feedUrl)) return false;
+    if (!LocalizationUtils.isLocalizableFeed(feedUrl)) return false;
 
     var feedKey = this.getLocalFeedKey(feedUrl);
     if (feedKey in loadedPo) return true;
@@ -150,7 +138,7 @@ var LocalizationUtils = {
 
   localizeCommand: function LU_localizeCommand(cmd) {
     var url = cmd.feedUri.spec;
-    if (!LocalizationUtils.isLocalizable(url)) return cmd;
+    if (!LocalizationUtils.isLocalizableFeed(url)) return cmd;
     var feedKey = LocalizationUtils.getLocalFeedKey(url);
 
     for each (let key in LocalizableProperties) if (cmd[key]) {
