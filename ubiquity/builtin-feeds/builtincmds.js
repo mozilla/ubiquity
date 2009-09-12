@@ -153,10 +153,11 @@ CmdUtils.CreateCommand({
   description: "Changes your Ubiquity skin.",
   argument: noun_type_skin,
   execute: function chskin_execute({object: {data: skin}}) {
-    if (skin)
+    if (skin) {
       UbiquitySetup.createServices().skinService.changeSkin(skin.localUrl);
-    else
-      Utils.focusUrlInBrowser(Settings);
+      Utils.tabs.reload(/^about:ubiquity\?settings\b/);
+    }
+    else Utils.focusUrlInBrowser(Settings);
   },
   preview: function chskin_preview(pb, {object: {html}}) {
     pb.innerHTML = (

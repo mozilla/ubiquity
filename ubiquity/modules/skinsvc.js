@@ -95,7 +95,7 @@ SkinSvc.prototype = {
   PREF: SKIN_PREF,
   DEFAULT_SKIN: SKIN_ROOT + "experimental.css",
   CUSTOM_SKIN : SKIN_ROOT + "custom.css",
-  
+
   _createStatement: function SS__createStatement(sql) {
      try {
        return gConnection.createStatement(sql);
@@ -268,7 +268,7 @@ SkinSvc.prototype = {
   install: function SS_install(remote, local) {
     this.addSkin(remote, local);
     this.changeSkin(local);
-    Utils.tabs.reload(/^chrome:\/\/ubiquity\/content\/settings\b/);
+    Utils.tabs.reload(/^about:ubiquity\?settings\b/);
   },
 
   uninstall: function SS_uninstall(url) {
