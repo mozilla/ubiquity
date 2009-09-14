@@ -14,7 +14,9 @@ locale ubiquity ca-AD chrome/locale/ca-AD/
 locale ubiquity cs-CZ chrome/locale/cs-CZ/
 locale ubiquity da-DK chrome/locale/da-DK/
 locale ubiquity de    chrome/locale/de/
+locale ubiquity de-DE chrome/locale/de-DE/
 locale ubiquity en-US chrome/locale/en-US/
+locale ubiquity es    chrome/locale/es/
 locale ubiquity es-ES chrome/locale/es-ES/
 locale ubiquity fi-FI chrome/locale/fi-FI/
 locale ubiquity fr    chrome/locale/fr/
@@ -22,11 +24,13 @@ locale ubiquity fy-NL chrome/locale/fy-NL/
 locale ubiquity hu    chrome/locale/hu/
 locale ubiquity it-IT chrome/locale/it-IT/
 locale ubiquity ja    chrome/locale/ja/
+locale ubiquity nl    chrome/locale/nl/
 locale ubiquity pl-PL chrome/locale/pl-PL/
 locale ubiquity pt    chrome/locale/pt/
 locale ubiquity pt-BR chrome/locale/pt-BR/
 locale ubiquity pt-PT chrome/locale/pt-PT/
 locale ubiquity ro-RO chrome/locale/ro-RO/
 locale ubiquity ru-RU chrome/locale/ru-RU/
+locale ubiquity zh    chrome/locale/zh/
 locale ubiquity zh-CN chrome/locale/zh-CN/
 locale ubiquity zh-TW chrome/locale/zh-TW/
