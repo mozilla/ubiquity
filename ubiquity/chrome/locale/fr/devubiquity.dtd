@@ -5,12 +5,15 @@
 <!ENTITY ubiquity.pagetitle.SuggMemDebug "Débogueur de la mémoire de suggestion">
 <!ENTITY ubiquity.pagetitle.TestSuite "Série de tests d'&appTitle;">
 <!ENTITY ubiquity.pagetitle.Tuner "Régleur du types de nom pour &appTitle;">
+<!-- Common errors -->
 <!ENTITY ubiquity.error.WarningParser2 "Vous n'utilisez pas le Parser 2 ! Le régleur de types de nom ne fonctionne qu'avec le Parser 2. Veuillez <a href='chrome://ubiquity/content/settings.xhtml'>passer au Parser 2 (aka Next Generation Parser)</a>, redémarrer Firefox, et réessayer.">
 <!ENTITY ubiquity.error.WarningGUbiquity "**** <code>gUbiquity</code> n'a pas été chargé correctement. La plupart du temps cela signifie que vous avez ****">
+<!-- Common strings -->
 <!ENTITY ubiquity.common.OptionAutoRun "analyser automatiquement lors des mises à jour">
 <!ENTITY ubiquity.common.OptionGSync "synchro avec <code>gUbiquity</code>">
 <!ENTITY ubiquity.common.ButtonRun "exécuter !">
 <!ENTITY ubiquity.common.HeaderSettings "Paramètres">
+<!-- Test Suite chrome/content/playpen.xhtml -->
 <!ENTITY ubiquity.playpen.Header "Terrain de jeu du parser pour &appTitle;">
 <!ENTITY ubiquity.playpen.ShortDesc "C'est un test qui teste et optimise le terrain de jeu en vue du futur parser d'Ubiquity.">
 <!ENTITY ubiquity.playpen.OptionMaxSuggs "nombre maximum de suggestions :">
@@ -35,14 +38,17 @@
 <!ENTITY ubiquity.playpen.CurrentParse "Parsing en cours :">
 <!ENTITY ubiquity.playpen.AvgTimingResults "ms (moyenne : <span class='avg'></span> ms)">
 <!ENTITY ubiquity.playpen.ParseTree "Arbre de la requête de parsing :">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.quicklaunch.Header "Lancement rapide">
 <!ENTITY ubiquity.quicklaunch.ShortDesc "Le <strong>Lancement rapide</strong> est une fonctionnalité très expérimentale qui permet d'invoquer &appTitle; hors du navigateur pour l'utiliser n'importe où sur votre ordinateur.">
 <!ENTITY ubiquity.quicklaunch.LongDesc1 "Pour l'instant cette fonctionnalité n'est prise en charge que sous OS X, mais nous prévoyons de l'implanter sur d'autres plateformes à l'avenir.">
 <!ENTITY ubiquity.quicklaunch.LongDesc2 "Pour activer le lancement rapide, cliquez sur le bouton ci-dessous. Un fois activé, vous pouvez appuyer sur option+espace pour appeler Ubiquity depuis n'importe quel endroit de votre ordinateur.">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.testsuite.ShowSuccess "Afficher les tests réussis">
 <!ENTITY ubiquity.testsuite.ShowSkipped "Afficher les tests non exécutés">
 <!ENTITY ubiquity.testsuite.ShowFailed "Afficher les tests échoués">
 <!ENTITY ubiquity.testsuite.TestsRunning "Tests en cours d'exécution…">
+<!-- Test Suite chrome/content/tuner.xhtml -->
 <!ENTITY ubiquity.tuner.Header "Régleur de type de nom pour &appTitle;">
 <!ENTITY ubiquity.tuner.ShortDesc "Ce régleur vous permet de tester diverses entrées comme types de nom et de vérifier leurs suggestions. Il est particulièrement utile aux développeurs d'avoir une idée de ce qu'ils pourraient modifier dans les types de noms pour en obtenir de meilleures suggestions. <strong>NOTE : le régleur de type de nom efface le <code>Cache de noms</code> à chaque essai.</strong>">
 <!ENTITY ubiquity.tuner.OptionMaxSuggs "nombre maxi de suggestions pour le type de nom :">

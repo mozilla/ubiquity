@@ -1,3 +1,4 @@
+<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.About "О &appTitle;">
 <!ENTITY ubiquity.pagetitle.Settings "Настройки и оформление &appTitle;">
 <!ENTITY ubiquity.pagetitle.YourCommands "Команды &appTitle;">
@@ -7,17 +8,20 @@
 <!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Команда для &appTitle; из недоверенного источника">
 <!ENTITY ubiquity.pagetitle.ResetUbiquity "Сброс настроек &appTitle;">
 <!ENTITY ubiquity.pagetitle.bug19warning "В &appTitle; возникла проблема!">
+<!-- Page header taglines -->
 <!ENTITY ubiquity.tagline.About "Не плыви по течению Сети. Управляй им.">
 <!ENTITY ubiquity.tagline.Settings "Настройки и оформление">
 <!ENTITY ubiquity.tagline.YourCommands "Список команд, находящихся в вашем распоряжении.">
 <!ENTITY ubiquity.tagline.LocalizeCmd "Локализация для глобализации.">
 <!ENTITY ubiquity.tagline.Support "На помощь!">
 <!ENTITY ubiquity.tagline.HackUbiquity "Изучайте.">
+<!-- Header page tips -->
 <!ENTITY ubiquity.pagetip.About "Вы можете открыть эту страницу в любое время воспользовавшись командой “Help”.">
 <!ENTITY ubiquity.pagetip.Settings "Вы можете открыть эту страницу в любое время воспользовавшись командой “change ubiquity settings”.">
 <!ENTITY ubiquity.pagetip.YourCommands "Вы можете открыть эту страницу в любое время воспользовавшись командой “list ubiquity commands”.">
 <!ENTITY ubiquity.pagetip.Support "Вы можете открыть эту страницу в любое время воспользовавшись командой “get support”.">
 <!ENTITY ubiquity.pagetip.HackUbiquity "Вы можете открыть эту страницу в любое время воспользовавшись командой “write ubiquity commands”.">
+<!-- Buttons, Buttons and more Buttons. Here are our generic editor buttons found everywhere an editor resides -->
 <!ENTITY ubiquity.generic.ImportTemplate "Импортировать из шаблона">
 <!ENTITY ubiquity.generic.LaunchExternalEd "Запустить во внешнем редакторе">
 <!ENTITY ubiquity.generic.EnableHighlighting "Использовать подсветку синтаксиса">
@@ -25,6 +29,9 @@
 <!ENTITY ubiquity.generic.ButtonSave "Сохранить">
 <!ENTITY ubiquity.generic.ButtonSaveAs "Сохранить как">
 <!ENTITY ubiquity.generic.ButtonShare "Поделиться">
+<!-- End common elements -->
+<!-- Everything from here down is page by page in no particular page order -->
+<!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiqutiy.about.WhatIsUbiquity "Что такое &appTitle;?">
 <!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; — это дополнение для Firefox, позволяющее вам выполнять специфические действия с помощью команд, вводимых в специальное текстовое поле.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Команды, как горячие клавиши для вещей, которые вы обычно делаете в Сети. Они могут упрощать рутинные задачи и позволят вам делать большее за меньшее время.">
@@ -38,6 +45,7 @@
 <!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; — это результат усилий добровольцев со всего мира. Чтобы ознакомиться со списком основных участников, смотрите <a href='&link.credits;'>страницу авторов</a>.">
 <!ENTITY ubiqutiy.about.Thanks "Спасибо за использование &appTitle; &appVersion;!">
 <!ENTITY ubiquity.about.ThanksParagraph "Релиз &appTitle; &appVersion; привносит исправление недостатков в пользовательском интерфейсе и улучшает стабильность работы за счёт исправления ошибок, найденных ранее. В этой версии вы почувствуете увеличение скорости работы, уменьшение времени отклика на выполняемые действия и более точную работу анализатора. Чтобы узнать больше информации о нововведениях, прочитайте <a href='&link.releaseNotes;'>комментарии к релизу &appTitle; &appVersion;</a>.">
+<!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.settings.Skins "Оформление">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Редактирование оформления">
 <!ENTITY ubiquity.settings.KeyCombination "Горячая клавиша">
@@ -63,6 +71,7 @@
 <!ENTITY ubiquity.settings.ShareSkin "Поделиться">
 <!ENTITY ubiquity.settings.SaveNotice "Нажатие на кнопку 'Сохранить' мгновенно обновляет оформление &appTitle;.">
 <!ENTITY ubiquity.settings.Bug449Warning "Изменения, которые вы вносите в собственное оформление, могут не отображаться до перезапуска браузера. Это <a href='&link.bug449;'>известная ошибка</a>.">
+<!-- Commands chrome/content/cmdlist.xhtml -->
 <!ENTITY ubiquity.commandlist.SubscriptionDetails "Всего команд: &cmdCount;. Всего лент: &feedCount;. | Вы отписаны от <a href='cmdlist.xhtml#graveyard'>&unsubCount; лент</a>. | &helpLink;">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Все команды, которые распознаёт &appTitle;, расположены в правом столбце. Текст, написанный чёрным цветом, является именем команды (которое вы вводите в &appTitle;, когда используете). Текст, написанный серым цветом, объясняет, что какое действие команда выполняет.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "В левом столбце расположены “ленты”, на которые вы подписаны в &appTitle;. Каждая лента может содержать несколько команд.">
@@ -78,6 +87,7 @@
 <!ENTITY ubiquity.commandlist.SortByCommand "Имя команды">
 <!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Ленты без подписки">
 <!ENTITY ubiquity.commandlist.GraveYardText "Ранее вы были подписаны на перечисленные далее ленты. Если вы хотите снова их использовать, щёлкните по расположенной ниже ссылке “[подписаться заново]”.">
+<!-- Support chrome/content/support.xhtml -->
 <!ENTITY ubiquity.support.GetHelp "Помощь пользователям">
 <!ENTITY ubiquity.support.GetHelpParagraph1 "По причине того, что Ubiquity является экспериментом Mozilla Labs, у вас могут возникнуть проблемы во время использования этого дополнения. Далее перечислены места, где вы сможете получить помощь в случае необходимости.">
 <!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a> — это управляемый сообществом сайт поддержки. Он содержит рекомендации по решению множества проблем. Если вы не нашли ответ на интересующий вас вопрос, просто начните новую тему.">
@@ -87,6 +97,7 @@
 <!ENTITY ubiquity.support.ReportBugsParagraph1 "Мы работаем над автоматической системой сообщения об ошибках, но на данный момент вы должны сообщать обо всех воспроизводимых проблемах, которые нашли, с помощью сайта Get Satisfaction или через группу Google/почтовую рассылку. Пожалуйста, добавляйте к описанию проблемы всю подробную информацию, которая у вас есть.">
 <!ENTITY ubiquity.support.ResetUbiquity "Сброс настроек &appTitle;">
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Если &appTitle; перестал реагировать на те действия, которые вы делаете, для дальнейшего использования, возможно, целесообразно будет сбросить его настройки на те, что были по умолчанию. Чтобы это выполнить, <a href='&chrome.reset;'>нажмите здесь</a>, и, пожалуйста, примите наши извинения за неудобства!">
+<!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "Редактор команд &appTitle;">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Вводите новые команды</strong> в текстовое поле, расположенное ниже. Они будут сохраняться автоматически по мере ввода и будут мгновенно доступны для использования в режиме ввода команд.">
 <!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "<strong>Прочитайте <a href='&link.cmdTutorial;'>руководство по разработке команд</a></strong>, чтобы узнать больше. Например список встроенных команд <a href='&file.FeedsIndex;'>смотрите здесь</a>.">
@@ -112,6 +123,7 @@
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Экспериментируйте с рабочими характеристиками анализатора и всесторонне изучайте его <a href='&chrome.playpen;'>в специальной песочнице</a>. Используйте <a href='&chrome.nounTuner;'>механизм настройки типа имён</a> для проверки предложений по нему и по оценке вариантов.">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "И если вы собираетесь разрабатывать &appTitle; самостоятельно, сверьтесь с <a href='&feed.DevelCmds;'>основными командами для разработки</a>.">
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "Последние изменения в коде &appTitle;">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.confirmsubscription.Header "Команды для &appTitle; из недоверенного источника">
 <!ENTITY ubiquity.confirmsubscription.ShortDesc "Вы собираетесь подписаться <a href='&chrome.about;'>на команды для &appTitle;</a> из неизвестного и недоверенного стороннего источника, расположенного по адресу &targetLink;. Если вы подпишитесь, эти команды смогут выполнить <em>любые действия</em> в вашем браузере. Это может привести к краже номера вашей кредитной карты или отправить по электронной почте вашей бабушке всю историю просмотренных вами изображений.">
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "Здесь исходный код команды на JavaScript:">
@@ -127,6 +139,7 @@
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationShortDesc "Сейчас вы подписываетесь на ленту с командами и сможете использовать их функциональность.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationLongDesc "Если вы когда-либо захотите отписаться от ленты, используйте “список” команд &appTitle;, чтобы попасть на <a href='&chrome.cmdlist;'>страницу управления ими</a>. Там вы сможете увидеть все команды, на которые подписаны, и убрать те из них, которые не хотите более использовать.">
 <!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "Теперь вы можете закрыть это окно.">
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
 <!ENTITY ubiquity.reset.Header "Восстановить настройки &appTitle; на те, что были по умолчанию?">
 <!ENTITY ubiquity.reset.Paragraph1 "Если &appTitle; работает некорректно, вы можете сбросить все настройки на те, что были по умолчанию. Чтобы сделать это, нажмите на кнопку ниже. Чтобы операция была завершена, необходимо после этого перезапустить Firefox.">
 <!ENTITY ubiquity.reset.Paragraph2 "<strong>Предупреждение:</strong> эта операция удалит все настройки, которые вы сделали в &appTitle;, включая, но не ограничиваясь:">
@@ -136,14 +149,17 @@
 <!ENTITY ubiquity.reset.NoReturn "<strong>Примечание:</strong> будучи выполненной эта операция не может быть отменена.">
 <!ENTITY ubiquity.reset.ButtonExport "экспортировать мою текущую конфигурацию &appTitle; в новую вкладку">
 <!ENTITY ubiquity.reset.ButtonReset "Да, я знаю, что делаю. Сбросить настройки &appTitle; и перезапустить Firefox">
+<!-- Command Localization Template chrome/content/localization-template.xhtml -->
 <!ENTITY ubiquity.localizecmd.ForTemplate "Это шаблон для">
 <!ENTITY ubiquity.localizecmd.HelpParagraph1 "Это шаблон локализации для &feedKey; из ленты команд в формате gettext/portable object (*.po). Узнайте больше из статьи про <a href='&link.gettextInfo;'>gettext на Wikipedia</a>, которая также содержит ссылки на другие полезные инструменты.">
 <!ENTITY ubiquity.localizecmd.HelpParagraph2 "Для тестирования этой локализации сохраните её на &localeDir; под именем <code>&feedKey;.po</code>">
 <!ENTITY ubiquity.localizecmd.HelpParagraph3 "Удостоверьтесь, что XY правильно отражает надлежащий код локали. Если папка с кодом локали используемого вами языка не существует, просто создайте её.">
+<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
 <!ENTITY ubiquity.bug19warning.Header "Не получается отобразить всплывающее сообщение!">
 <!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity попыталось отобразить всплывающее сообщение, но это закончилось неудачей.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph1 "По причине <a href='&link.bug19;'>ошибки в &appTitle;</a> под Mac OS X, вам может понадобиться <a href='&link.growl;'>установить Growl</a>, если вы ещё не сделали этого. Сразу после этого вам может понадобиться перезапустить Firefox.">
 <!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Наши извинения за неудобства.">
+<!-- File/Feed redirectors chrome/content/file.xhtml -->
 <!ENTITY ubiquity.redirect.FileHeader "Перенаправление файлов">
 <!ENTITY ubiquity.redirect.FileShortDesc "Данная страница может быть использована для перенаправления пользователя с chrome: URI Ubiquity на file: URI.">
 <!ENTITY ubiquity.redirect.FileLongDesc "Для его использования просто добавьте в URI после # относительный путь файла для перенаправления пользователя в нужное место. Путь должен быть относителен корню папки дополнения &appTitle;. Например:">

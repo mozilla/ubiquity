@@ -5,12 +5,15 @@
 <!ENTITY ubiquity.pagetitle.SuggMemDebug "Suggestion Memory Debugger">
 <!ENTITY ubiquity.pagetitle.TestSuite "&appTitle; Test Suite">
 <!ENTITY ubiquity.pagetitle.Tuner "&appTitle; Nountype Tuner">
+<!-- Common errors -->
 <!ENTITY ubiquity.error.WarningParser2 "Parser 2 に設定されていません！ Nountype Tuner は今のところ Parser 2 でのみ動作します。設定を <a href='chrome://ubiquity/content/settings.xhtml'>Parser 2 (次世代パーサ) に切り替え</a>て Firefox を再起動してください。">
 <!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> が読み込まれていません。おそらく、新しく開いたウィンドウの chrome が読み込まれる前に、このページが読み込まれています。ページを再度読み込んでください。動作しない場合はソースコードに問題がある可能性があります。">
+<!-- Common strings -->
 <!ENTITY ubiquity.common.OptionAutoRun "入力と同時に自動的にパースする">
 <!ENTITY ubiquity.common.OptionGSync "<code>gUbiquity</code> と同期する">
 <!ENTITY ubiquity.common.ButtonRun "実行！">
 <!ENTITY ubiquity.common.HeaderSettings "設定">
+<!-- Test Suite chrome/content/playpen.xhtml -->
 <!ENTITY ubiquity.playpen.Header "&appTitle; Parser 2 Playpen">
 <!ENTITY ubiquity.playpen.ShortDesc "開発中の Ubiquity パーサのテストと最適化のためのページです。">
 <!ENTITY ubiquity.playpen.OptionMaxSuggs "最大候補数:">
@@ -35,14 +38,17 @@
 <!ENTITY ubiquity.playpen.CurrentParse "現在のパース:">
 <!ENTITY ubiquity.playpen.AvgTimingResults "ms (平均: <span class='avg'></span> ms)">
 <!ENTITY ubiquity.playpen.ParseTree "現在のクエリのパースツリー:">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.quicklaunch.Header "Desktop QuickLaunch">
 <!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>Desktop QuickLaunch</strong> は、&appTitle; をブラウザ外でコンピュータ上のどこからでも呼び出せるようにする実験段階の機能です。">
 <!ENTITY ubiquity.quicklaunch.LongDesc1 "今のところ、この機能は OS X 上でのみ使用できますが、他のプラットフォームでも利用可能になる予定です。">
 <!ENTITY ubiquity.quicklaunch.LongDesc2 "Desktop QuickLaunch を有効にするには下のボタンをクリックしてください。有効にすると、コンピュータ上のどこからでも「option + スペースキー」で Ubiquity を呼び出せます。">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.testsuite.ShowSuccess "成功したテストを表示">
 <!ENTITY ubiquity.testsuite.ShowSkipped "スキップしたテストを表示">
 <!ENTITY ubiquity.testsuite.ShowFailed "失敗したテストを表示">
 <!ENTITY ubiquity.testsuite.TestsRunning "テストの実行中です...">
+<!-- Test Suite chrome/content/tuner.xhtml -->
 <!ENTITY ubiquity.tuner.Header "&appTitle; Nountype Tuner">
 <!ENTITY ubiquity.tuner.ShortDesc "このチューナーはアクティブな nountypes に対して異なる入力をテストし、それらの候補を検証します。これは、開発者が nountype の候補のスコアを調整するのに役立ちます。<strong>注意: Nountype Tuner は、実行するたびに <code>nounCache</code> を消去します。</strong>">
 <!ENTITY ubiquity.tuner.OptionMaxSuggs "nountype ごとの最大候補数:">

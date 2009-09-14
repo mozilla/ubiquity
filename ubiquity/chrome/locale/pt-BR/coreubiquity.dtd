@@ -1,1 +1,2 @@
-<!ENTITY ubiquity.toolbar.tooltip "Abrir ou fechar o Ubiquity">
+<!-- chrome/content/browser.xul -->
+<!ENTITY ubiquity.toolbar.tooltip "Abrir o Ubiquity">

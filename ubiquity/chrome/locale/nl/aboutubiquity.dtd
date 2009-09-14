@@ -44,6 +44,7 @@
 <!ENTITY ubiqutiy.about.UsingParagraph3 "Meer informatie over de doelen van het &appTitle; project en onze plannen voor opkomende releases kijk naar onze <a href='&link.roadmap;'>Roadmap</a>.">
 <!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; is een team prestatie door medewerkers over de hele wereld. Voor een lijst van medewerkers: <a href='&link.credits;'>credits pagina</a>.">
 <!ENTITY ubiqutiy.about.Thanks "Bedankt voor het gebruiken van &appTitle; &appVersion;!">
+<!ENTITY ubiquity.about.ThanksParagraph "Version &appVersion; van &appTitle; lost de meest belangrijke gebruikersinterface en performantie problemen op die in de vorige versie werden gevonden. In deze versie zult u verbeteringen in snelheid, reactietijd en accuraatheid van de parser zien. Voor meer details over de nieuwigheden kunt u de <a href='&link.releaseNotes;'>&appTitle; &appVersion; Uitgave opmerkingen</a> nakijken.">
 <!-- End common elements -->
 <!ENTITY ubiquity.settings.Skins "Thema's">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Wijzig aangepast Thema">
@@ -124,7 +125,7 @@
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "Laatste &appTitle; code veranderingen">
 <!-- Commands chrome/content/cmdlist.xhtml -->
 <!ENTITY ubiquity.confirmsubscription.Header "&appTitle; Opdracht van onbetrouwbare bron">
-<!ENTITY ubiquity.confirmsubscription.ShortDesc "U bent zicht aan het inschrijven op een <a href='&chrome.about;'>&appTitle; opdracht</a> van een onbekende, onbetrouwbare derde partij op &targetlink;. Als u zich inschrijft kan deze opdracht <em>alles doen wat het wilt</em> met uw browser. Het kan uw krediet kaart gegevens stelen, of uw grootmoeder uw gehele afbeeldings browsing geschiedenis doormailen.">
+<!ENTITY ubiquity.confirmsubscription.ShortDesc "U bent zicht aan het inschrijven op een <a href='&chrome.about;'>&appTitle; opdracht</a> van een onbekende, onbetrouwbare derde partij op &targetLink;. Als u zich inschrijft kan deze opdracht <em>alles doen wat het wilt</em> met uw browser. Het kan uw krediet kaart gegevens stelen, of uw grootmoeder uw gehele afbeeldings browsing geschiedenis doormailen.">
 <!ENTITY ubiquity.confirmsubscription.ScriptSource "Hier is de JavaScript broncode van de opdracht:">
 <!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Code aan het laden, even geduld...">
 <!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Als u JavaScript begrijpt moet u dit lezen en zo goed mogelijk oordelen of deze opdracht gevaarlijk is of niet. Ga verder op eigen risico!">

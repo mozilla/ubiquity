@@ -1,15 +1,19 @@
+<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.PlayPen "Песочница для &appTitle; Parser 2">
 <!ENTITY ubiquity.pagetitle.QuickLaunch "Быстрый запуск &appTitle;">
 <!ENTITY ubiquity.pagetitle.Persistence "Проект Ubiquity Persistence">
 <!ENTITY ubiquity.pagetitle.SuggMemDebug "Отладчик памяти о предложениях">
 <!ENTITY ubiquity.pagetitle.TestSuite "Набор тестов &appTitle;">
 <!ENTITY ubiquity.pagetitle.Tuner "Механизм настройки типов имён &appTitle;">
+<!-- Common errors -->
 <!ENTITY ubiquity.error.WarningParser2 "Вы не используете Parser 2 в данный момент! Механизм настройки типа имён в данный момент работает только с Parser 2. Пожалуйста, <a href='chrome://ubiquity/content/settings.xhtml'>включите Parser 2 (он же анализатор следующего поколения)</a>, перезапустите Firefox и попробуйте снова.">
 <!ENTITY ubiquity.error.WarningGUbiquity "<code>gUbiquity</code> не был корректно загружен. Наиболее вероятно, это означает, что вы загрузили эту страницу одновременно с загрузкой окна и, следовательно, она была загружена до загрузки chrome окна. В этом случае вы можете просто обновить страницу и <code>gUbiquity</code> должен заработать. В противном случае возможно наличие проблемы с какой-то частью кода.">
+<!-- Common strings -->
 <!ENTITY ubiquity.common.OptionAutoRun "автоматически анализировать при обновлении">
 <!ENTITY ubiquity.common.OptionGSync "синхронизировать с <code>gUbiquity</code>">
 <!ENTITY ubiquity.common.ButtonRun "запуск!">
 <!ENTITY ubiquity.common.HeaderSettings "Настройки">
+<!-- Test Suite chrome/content/playpen.xhtml -->
 <!ENTITY ubiquity.playpen.Header "Песочница &appTitle; Parser 2">
 <!ENTITY ubiquity.playpen.ShortDesc "Это песочница для тестирования и оптимизации нового анализатора &appTitle;.">
 <!ENTITY ubiquity.playpen.OptionMaxSuggs "максимум предложений:">
@@ -34,14 +38,17 @@
 <!ENTITY ubiquity.playpen.CurrentParse "Текущий анализ:">
 <!ENTITY ubiquity.playpen.AvgTimingResults "мс (в среднем <span class='avg'></span> мс)">
 <!ENTITY ubiquity.playpen.ParseTree "Текущее дерево анализа запроса:">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.quicklaunch.Header "Быстрый запуск">
 <!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>Быстрый запуск</strong> — экспериментальная функция, позволяющая вызывать &appTitle; извне браузера, для его использования в любом месте вашей системы.">
 <!ENTITY ubiquity.quicklaunch.LongDesc1 "В настоящее время данная функция поддерживается только в Mac OS X, но мы планируем в будущем сделать её доступной и на других платформах.">
 <!ENTITY ubiquity.quicklaunch.LongDesc2 "Чтобы включить Быстрый запуск, щёлкните по кнопке ниже. Когда вы включите его, вы можете нажать Option+Пробел, чтобы вызвать &appTitle; из любого места вашей системы.">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.testsuite.ShowSuccess "Показать пройденные тесты">
 <!ENTITY ubiquity.testsuite.ShowSkipped "Показать пропущенные тесты">
 <!ENTITY ubiquity.testsuite.ShowFailed "Показать неудавшиеся тесты">
 <!ENTITY ubiquity.testsuite.TestsRunning "Выполняются тесты...">
+<!-- Test Suite chrome/content/tuner.xhtml -->
 <!ENTITY ubiquity.tuner.Header "Механизм настройки типов имён &appTitle;">
 <!ENTITY ubiquity.tuner.ShortDesc "Этот механизм позволяет протестировать различные входные данные по отношению к текущим типам имён и проверить предположения о типах. Особенно он полезен для разработчиков, чтобы понять как настроить баллы предположений для их типов имён. <strong>ВНИМАНИЕ: механизм настройки типов имён очищает <code>nounCache</code> при каждом запуске.</strong>">
 <!ENTITY ubiquity.tuner.OptionMaxSuggs "максимальное количество предположения для каждого типа имён:">

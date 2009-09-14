@@ -1,15 +1,19 @@
+<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.PlayPen "Parser 2 Playpen do &appTitle;">
 <!ENTITY ubiquity.pagetitle.QuickLaunch "Iniciação Rápida do &appTitle;">
 <!ENTITY ubiquity.pagetitle.Persistence "Projecto Persistence do Ubiquity">
 <!ENTITY ubiquity.pagetitle.SuggMemDebug "Debugger da Memória de Sugestões">
 <!ENTITY ubiquity.pagetitle.TestSuite "Suite de testes do &appTitle;">
 <!ENTITY ubiquity.pagetitle.Tuner "Afinador de tipos de substantivos (Nountype Tuner) do &appTitle;">
+<!-- Common errors -->
 <!ENTITY ubiquity.error.WarningParser2 "Não está a usar o Parser 2! O afinador de tipos de substantivos só funciona com o Parser 2. Por favor <a href='chrome://ubiquity/content/settings.xhtml'>active o Parser 2 (o novo analisador de comandos)</a>, reinicie o Firefox, e tente novamente.">
 <!ENTITY ubiquity.error.WarningGUbiquity "O <code>gUbiquity</code> não foi carregado devidamente. Provavelmente isto significa que carregou esta página ao mesmo tempo que toda a janela, se for o caso, recarregue a página e já deve funcionar. Caso contrário, pode ser um problema de código.">
+<!-- Common strings -->
 <!ENTITY ubiquity.common.OptionAutoRun "analisar automaticamente ao actualizar">
 <!ENTITY ubiquity.common.OptionGSync "sincronizar com o <code>gUbiquity</code>">
 <!ENTITY ubiquity.common.ButtonRun "correr!">
 <!ENTITY ubiquity.common.HeaderSettings "Definições">
+<!-- Test Suite chrome/content/playpen.xhtml -->
 <!ENTITY ubiquity.playpen.Header "Parser 2 Playpen do &appTitle;">
 <!ENTITY ubiquity.playpen.ShortDesc "Este é um teste para optimização do novo analisador de comandos do Ubiquity.">
 <!ENTITY ubiquity.playpen.OptionMaxSuggs "máx. de sugestões:">
@@ -34,14 +38,17 @@
 <!ENTITY ubiquity.playpen.CurrentParse "Análise actual:">
 <!ENTITY ubiquity.playpen.AvgTimingResults "ms (média: <span class='avg'></span> ms)">
 <!ENTITY ubiquity.playpen.ParseTree "Árvore da análise actual:">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.quicklaunch.Header "Iniciação Rápida">
 <!ENTITY ubiquity.quicklaunch.ShortDesc "A <strong>Iniciação Rápida</strong> é uma funcionalidade altamente experimental que permite que o &appTitle; seja chamado fora do browser e usado em qualquer parte do seu computador.">
 <!ENTITY ubiquity.quicklaunch.LongDesc1 "Neste momento, esta funcionalidade só é suportada no Mac OS X, mas temos a intenção de torná-la disponível noutras plataformas de futuro.">
 <!ENTITY ubiquity.quicklaunch.LongDesc2 "Para activar a Iniciação Rápida, clique no botão abaixo. Depois de a activar,pode carregar option+espaço para chamar o Ubiquity em qualquer parte do seu computador.">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.testsuite.ShowSuccess "Mostra os testes com êxito">
 <!ENTITY ubiquity.testsuite.ShowSkipped "Mostra os testes não realizados">
 <!ENTITY ubiquity.testsuite.ShowFailed "Mostra os testes falhados">
 <!ENTITY ubiquity.testsuite.TestsRunning "Os testes estão a correr...">
+<!-- Test Suite chrome/content/tuner.xhtml -->
 <!ENTITY ubiquity.tuner.Header "Afinador de tipos de substantivos do &appTitle;">
 <!ENTITY ubiquity.tuner.ShortDesc "Este afinador permite-lhe testar diferentes comandos com os tipos de substantivos activos e verificar as suas sugestões. É particularmente útil para os programadores de comandos terem uma ideia de como ajustar a sua pontuação de sugestões por tipo de substantivo. <strong>NOTA: o afinador limpa a <code>cache de substantivos (nounCache)</code> a cada teste.</strong>">
 <!ENTITY ubiquity.tuner.OptionMaxSuggs "máx. de sugestões por tipo de substantivo:">

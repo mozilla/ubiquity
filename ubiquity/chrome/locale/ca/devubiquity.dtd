@@ -1,15 +1,19 @@
+<!-- Page Titles for all documents in this DTD -->
 <!ENTITY ubiquity.pagetitle.PlayPen "Entorn de prova del Parser 2 de l'&appTitle;">
 <!ENTITY ubiquity.pagetitle.QuickLaunch "Inici ràpid des de l'escriptori de l'&appTitle;">
 <!ENTITY ubiquity.pagetitle.Persistence "El projecte de persistència de l'Ubiquity">
 <!ENTITY ubiquity.pagetitle.SuggMemDebug "Depurador de memòria dels suggeriments">
 <!ENTITY ubiquity.pagetitle.TestSuite "Conjunt de prova de l'&appTitle;">
 <!ENTITY ubiquity.pagetitle.Tuner "Afinador de tipus de nom de l'&appTitle;">
+<!-- Common errors -->
 <!ENTITY ubiquity.error.WarningParser2 "No feu servir el Parser 2! L'afinador de tipus de nom només funciona amb el Parser 2. Consulteu l'<a href='chrome://ubiquity/content/settings.xhtml'>activació del Parser 2 (aka Next Generation Parser)</a>, reinicieu el Firefox, i torneu-ho a provar.">
 <!ENTITY ubiquity.error.WarningGUbiquity "El <code>gUbiquity</code> no s'ha carregat correctament. Molt probablement això vol dir que heu carregat la pàgina mentre carregàveu la finestra, i la pàgina s'ha carregat abans del chrome de la finestra; en aquest cas, podeu tornar a carregar la pàgina i hauria de funcionar. Alternativament, podria haver-hi algun problema amb algun codi.">
+<!-- Common strings -->
 <!ENTITY ubiquity.common.OptionAutoRun "analitza automàticament en cada actualització">
 <!ENTITY ubiquity.common.OptionGSync "sincronitza amb el <code>gUbiquity</code>">
 <!ENTITY ubiquity.common.ButtonRun "executa!">
 <!ENTITY ubiquity.common.HeaderSettings "Paràmetres">
+<!-- Test Suite chrome/content/playpen.xhtml -->
 <!ENTITY ubiquity.playpen.Header "Entorn de prova del Parser 2 de l'&appTitle;">
 <!ENTITY ubiquity.playpen.ShortDesc "Això és un entorn de prova i d'optimització de l'analitzador per al proper analitzador de l'Ubiquity.">
 <!ENTITY ubiquity.playpen.OptionMaxSuggs "màxim de suggeriments:">
@@ -34,14 +38,17 @@
 <!ENTITY ubiquity.playpen.CurrentParse "Analitzador actual:">
 <!ENTITY ubiquity.playpen.AvgTimingResults "ms (mitja: <span class='avg'></span> ms)">
 <!ENTITY ubiquity.playpen.ParseTree "Arbre actual d'anàlisi de consultes:">
+<!-- Desktop QuickLaunch chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.quicklaunch.Header "Inici ràpid des de l'escriptori">
 <!ENTITY ubiquity.quicklaunch.ShortDesc "<strong>L'inici ràpid des de l'escriptori</strong> és una característica molt experimental que permet cridar a l'&appTitle; des de fora de l'ordinador, arreu del vostre ordinador.">
 <!ENTITY ubiquity.quicklaunch.LongDesc1 "Ara mateix aquesta característica només funciona al Mac OS X, però planegem fer-la disponible en altres plataformes en un futur.">
 <!ENTITY ubiquity.quicklaunch.LongDesc2 "Per a habilitar l'inici ràpid des de l'escriptori, cliqueu al botó a continuació. Una vegada l'habiliteu, podeu prémer opció+espai per a invocar l'Ubiquity arreu des del vostre ordinador.">
+<!-- Test Suite chrome/content/desktop-quicklaunch.xhtml -->
 <!ENTITY ubiquity.testsuite.ShowSuccess "Mostra els tests amb èxit">
 <!ENTITY ubiquity.testsuite.ShowSkipped "Mostra els tests omesos">
 <!ENTITY ubiquity.testsuite.ShowFailed "Mostra els tests fallats">
 <!ENTITY ubiquity.testsuite.TestsRunning "S'estan executant els tests…">
+<!-- Test Suite chrome/content/tuner.xhtml -->
 <!ENTITY ubiquity.tuner.Header "Afinament dels tipus de nom de l'&appTitle;">
 <!ENTITY ubiquity.tuner.ShortDesc "L'afinador us permet provar les diferents entrades respecte als tipus de nom actius i verificar-ne llur suggeriments. És especialment útil per als desenvolupadors per tal de fer-se una idea de com ajustar les puntuacions dels suggeriments dels tipus de nom. <strong>NOTA: l'afinador de tipus de nom neteja <code>la memòria cau dels noms</code> per cada execució.</strong>">
 <!ENTITY ubiquity.tuner.OptionMaxSuggs "màxim de suggeriments per tipus de nom:">
