@@ -1,0 +1,156 @@
+# builtincmds.po
+# 
+# Localizers:
+# Nathan Samson <nathansamson@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-08-22 17:43+0200\n"
+
+
+
+#. help command:
+#. use | to separate multiple name values:
+msgctxt "help.names"
+msgid "help|about|?"
+msgstr "help|over|?"
+
+msgctxt "help.description"
+msgid "Takes you to the Ubiquity <a href=\"about:ubiquity\">main help page</a>.<br/>\n"
+"      Or, enter the name of a command to get help on that command."
+msgstr "Neemt u mee naar de Ubiquity <a href=\"about:ubiquity\">help pagina</a>.<br/>\n"
+"       Of, geef de naam in van de opdracht waar u meer info over wilt hebben."
+
+
+#. open (ubiquity settings page) command:
+#. use | to separate multiple name values:
+msgctxt "open (ubiquity settings page).names"
+msgid "open|show"
+msgstr "openen|toon"
+
+msgctxt "open (ubiquity settings page).description"
+msgid "Opens one of the Ubiquity documentation/settings pages."
+msgstr "Opent een van de Ubiquity documentatie/instellingen paginas."
+
+msgctxt "open (ubiquity settings page).preview"
+msgid "Opens the Ubiquity ${goal} page."
+msgstr "Opent de Ubiquity ${goal} pagina."
+
+
+#. write ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "write ubiquity commands.names"
+msgid "write ubiquity commands|edit ubiquity commands|hack ubiquity"
+msgstr "Maak ubiquity opdrachten|wijzig ubiquity opdrachten"
+
+msgctxt "write ubiquity commands.description"
+msgid "Takes you to the Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">command editor</a> page."
+msgstr "Neemt u mee naar de Ubiquity <a href=\"chrome://ubiquity/content/editor.xhtml\">opdracht editor</a> pagina."
+
+
+#. list ubiquity commands command:
+#. use | to separate multiple name values:
+msgctxt "list ubiquity commands.names"
+msgid "list ubiquity commands"
+msgstr "som ubiquity opdrachten op"
+
+msgctxt "list ubiquity commands.description"
+msgid "Opens <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">the list</a>\n"
+"      of all Ubiquity commands available and what they all do."
+msgstr "Opent <a href=\"chrome://ubiquity/content/cmdlist.xhtml\">de lijst</a>\n"
+"      van alle beschikbare Ubiquity opdrachten en wat ze doen."
+
+
+#. change ubiquity settings command:
+#. use | to separate multiple name values:
+msgctxt "change ubiquity settings.names"
+msgid "change ubiquity settings|change ubiquity preferences|change ubiquity skin"
+msgstr "Wijzig ubiquity's instellingen|wijzig ubiquity's voorkeuren|wijzig ubiquity's thema"
+
+msgctxt "change ubiquity settings.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/settings.xhtml\">settings</a> page,\n"
+"      where you can change your skin, key combinations, etc."
+msgstr "Neemt u mee naar de <a href=\"chrome://ubiquity/content/settings.xhtml\">instellingen</a>,\n"
+"      waar u uw thema, toetsencombinatie, en meer, kunt wijzigen."
+
+
+#. get support command:
+#. use | to separate multiple name values:
+msgctxt "get support.names"
+msgid "get support"
+msgstr "vind ondersteuning"
+
+msgctxt "get support.description"
+msgid "Takes you to the <a href=\"chrome://ubiquity/content/support.xhtml\">support</a> page,\n"
+"    where you can report bugs, get troubleshooting help, etc."
+msgstr "Neemt u mee naar de<a href=\"chrome://ubiquity/content/support.xhtml\">ondersteunings</a> pagina,\n"
+"    waar u fouten kunt melden, help krijgen."
+
+
+#. report bug command:
+#. use | to separate multiple name values:
+msgctxt "report bug.names"
+msgid "report bug"
+msgstr "rapporteer een fout"
+
+msgctxt "report bug.description"
+msgid "Takes you to the <a href=\"http://getsatisfaction.com/mozilla/products/mozilla_ubiquity\">bug report</a> page."
+msgstr "Neemt u mee naar de <a href=\"http://getsatisfaction.com/mozilla/products/mozilla_ubiquity\">fouten rapporteren</a> pagina."
+
+
+#. disable command command:
+#. use | to separate multiple name values:
+msgctxt "disable command.names"
+msgid "disable command"
+msgstr "opdracht uitschakelen"
+
+msgctxt "disable command.description"
+msgid "Disables a Ubiquity command, so that it will no longer show up in the suggestion list."
+msgstr "Schakelt een Ubiquity opdracht uit, zodat deze niet langer meer zichtbaar is in de suggestielijst."
+
+
+#. enable command command:
+#. use | to separate multiple name values:
+msgctxt "enable command.names"
+msgid "enable command"
+msgstr "opdracht inschakelen"
+
+msgctxt "enable command.description"
+msgid "Re-enables a Ubiquity command that you disabled."
+msgstr "Schakelt een Ubiquity opdracht terug in die u ervoor had uitgeschakeld."
+
+
+#. command history command:
+#. use | to separate multiple name values:
+msgctxt "command history.names"
+msgid "command history|vita"
+msgstr "opdrachtsgeschiedenis"
+
+msgctxt "command history.help"
+msgid "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to reuse.</li>\n"
+"    <li>Type to filter.</li>\n"
+"    <li>Execute to delete all matched histories.</li>\n"
+"    <li>Edit <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> to\n"
+"      set max number of histories.</li></ul>"
+msgstr "<ul style=\"list-style-image:none\">\n"
+"    <li>Use accesskey or click to reuse.</li>\n"
+"    <li>Type om te filteren.</li>\n"
+"    <li>Verwijder alle overeenkomstige geschiedenis.</li>\n"
+"    <li>Wijzig <a href=\"about:config\"><code>extensions.ubiquity.history.max</code></a> om\n"
+"      maximum aantal geschiedenissuggesties in te stellen.</li></ul>"
+
+msgctxt "command history.description"
+msgid "Accesses your command history."
+msgstr "Bekijk uw opdrachts gecschiedenis"
+
+msgctxt "command history.preview"
+msgid "No histories match."
+msgstr "Geen overeenkomst in geschiedenis"
+
+msgctxt "command history.execute"
+msgid "Deleted matched histories. Click here to undo."
+msgstr "Overeenkomstige geschiedenis verwijdert. Klik hier om ongedaan te maken"
+
+

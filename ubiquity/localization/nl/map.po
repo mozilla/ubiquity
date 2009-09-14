@@ -1,0 +1,29 @@
+# map.po
+# 
+# Localizers:
+# Nathan Samson <nathansamson@gmail.com>
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Ubiquity 0.5\n"
+"POT-Creation-Date: 2009-08-22 01:48+0200\n"
+
+
+
+#. map command:
+#. use | to separate multiple name values:
+msgctxt "map.names"
+msgid "map"
+msgstr "kaart"
+
+msgctxt "map.help"
+msgid "Try issuing &quot;map kalamazoo&quot;.  You can click on the map in the preview pane to get a larger, interactive map that you can zoom and pan around.  You can then click the &quot;insert map in page&quot; (if you're in an editable text area) to insert the map.  So you can, for example, type an address in an email,  select it, issue &quot;map&quot;, click on the preview, and then insert the map."
+msgstr "Probeer 'kaart kalamazoo' uit te voeren. U kunt klikken op de kaart in het voorbeeldpaneel om een grotere, interactieve kaart te krijgen waar u kunt inzoomen en de kaart verplaatsen. U kunt de kaart dan ook klikken op 'invoegen in de pagina' (als u op een wijzigbare tekstveld bent) om de pagina in te voegen. Zo kan u bijvoorbeeld een adres in een mail typen, deze selecteren, de kaart opdracht uitvoeren, klikken op het voorbeeld en dan de kaart invoegen."
+
+msgctxt "map.description"
+msgid "Turns an address or location name into a Google Map."
+msgstr "Verandert een adres of een plaatsnaam in een Google Map."
+
+msgctxt "map.preview"
+msgid "Cannot insert in a non-editable space. Use 'edit page' for an editable page."
+msgstr "Kan niet invoegen in een niet-bewerkbare plaats. Gebruik 'wijzig pagina' voor een wijzigbare pagina."
