@@ -800,7 +800,8 @@ function testVerbUsesDefaultIfNoArgProvidedParser2() {
     playFetch: {
       names: ["play fetch"],
       arguments: [{
-        role: "object", nountype: dog, label: "dog", default: "beagle"}],
+        role: "object", nountype: dog, label: "dog",
+        default: NounUtils.makeSugg("beagle")}],
     }
   });
   var parser = makeTestParser2(LANG, fakeSource.getAllCommands());

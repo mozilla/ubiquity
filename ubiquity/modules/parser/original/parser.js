@@ -406,15 +406,8 @@ ParsedSentence.prototype = {
       let missingArg = args[argName];
       let noun = missingArg.type;
       let {nounCache} = this._query;
-      let input = missingArg.default;
-      if (input) {
-        let key = input + "\n" + noun.id;
-        var defaultValue = (
-          nounCache[key] ||
-          (nounCache[key] = noun.suggest(input, Utils.escapeHtml(input),
-                                         function () {}, null)));
-      }
-      else {
+      let defaultValue = missingArg.default;
+      if (!defaultValue) {
         defaultValue = nounCache[noun.id] || (nounCache[noun.id] = (
           (typeof noun.default === "function"
            ? noun.default()
@@ -509,20 +502,20 @@ function PartiallyParsedSentence(verb, argStrings, selObj, matchScore, query) {
     [new ParsedSentence(verb, {}, matchScore, selObj, argStrings, query)];
   for (let argName in argStrings) {
     let text = argStrings[argName];
-    if (text) {
-      // If argument is present, try the noun suggestions
-      // based both on substituting pronoun...
-      // (but not for noun-first)
-      let gotSuggs = matchScore && this._suggestWithPronounSub(argName, text);
-      // and on not substituting pronoun...
-      let gotSuggsDirect = this._argSuggest(argName, text,
-                                            Utils.escapeHtml(text), null);
-      if (!gotSuggs && !gotSuggsDirect) {
-        // One of the arguments is supplied by the user, but produces
-        // no suggestions, meaning it's an invalid argument for this
-        // command -- that makes the whole parsing invalid!!
-        this._invalidArgs[argName] = true;
-      }
+    // If argument is present, try the noun suggestions
+    // based both on substituting pronoun...
+    // (but not for noun-first)
+    let gotSuggs = (text && matchScore &&
+                    this._suggestWithPronounSub(argName, text));
+    // and on not substituting pronoun...
+    let gotSuggsDirect = ((text || (text = verb._arguments[argName].input)) &&
+                          this._argSuggest(argName, text,
+                                           Utils.escapeHtml(text), null));
+    if (text && !gotSuggs && !gotSuggsDirect) {
+      // One of the arguments is supplied by the user, but produces
+      // no suggestions, meaning it's an invalid argument for this
+      // command -- that makes the whole parsing invalid!!
+      this._invalidArgs[argName] = true;
     }
     // Otherwise, this argument will simply be left blank.
     // (or filled in with default value later)
@@ -725,6 +718,7 @@ function Verb(cmd, roleMap) {
         label: arg.label || pluckLabel(nountype),
         preposition: obj ? "" : roleMap[role],
         "default": arg.default,
+        input: arg.input,
       };
     }
   }

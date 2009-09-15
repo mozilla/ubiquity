@@ -533,9 +533,12 @@ function testVerbUsesDefaultIfNoArgProvided() {
   var dog = new NounUtils.NounType("dog", ["poodle", "golden retreiver",
                                            "beagle", "bulldog", "husky"]);
   dog.default = function () NounUtils.makeSugg("husky");
-  var verbList = [
-    {names: ["wash"], DOType: dog, DOLabel: "dog"},
-    {names: ["play-fetch"], DOType: dog, DOLabel: "dog", DODefault: "beagle"}];
+  var verbList = [{
+    names: ["wash"], DOType: dog, DOLabel: "dog",
+  }, {
+    names: ["play-fetch"], DOType: dog, DOLabel: "dog",
+    DODefault: dog.suggest("beagle"),
+  }];
   var suggs = getCompletions("wash", verbList);
   this.assert(suggs.length === 1, "Should be 1 suggestion (A).");
   this.assert(suggs[0]._verb._name === "wash", "Suggestion should be wash");

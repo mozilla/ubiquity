@@ -888,7 +888,7 @@ function CreateAlias(options) {
         let a = {};
         for (let k in arg) a[k] = arg[k];
         if (a.role in givenArgs) {
-          a.default = givenArgs[a.role];
+          a.input = givenArgs[a.role];
           a.hidden = true;
         }
         as.push(a);
