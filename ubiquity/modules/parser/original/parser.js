@@ -805,8 +805,8 @@ Verb.prototype = {
   }
 };
 
-// Represents how well an abbreviation matches original
-// with a float number 1 (perfect) to 0 (invalid).
+// Represents how well an abbreviation matches the original
+// as a float number 1 (perfect) to 0 (invalid).
 // Inspired by <http://github.com/rmm5t/liquidmetal/tree/master>.
 function hagureMetal(abbr, orig) {
   var len = orig.length;
@@ -815,10 +815,10 @@ function hagureMetal(abbr, orig) {
   for each (let c in abbr) {
     let index = orig.indexOf(c, preIndex + 1);
     if (index < 0) return 0;
-    sum += ((index === preIndex + 1 ||       // continuous from last match
-             /[\s_-]/.test(orig[index - 1])) // beginning of a word
-            ? score
-            : score = pow((len - index) / len, 3));
+    if (index !== preIndex + 1) score = pow((len - index) / len, 3);
+    sum += (/[\s_-]/.test(orig[index - 1])
+            ? pow(score, .3) // beginning of a word
+            : score);
     preIndex = index;
   }
   return sum / len;
