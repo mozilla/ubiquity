@@ -600,7 +600,10 @@ function isArray(val) (val != null &&
 //
 // This function returns whether or not the {{{value}}} has no own properties.
 
-function isEmpty(val) val == null || !val.__count__;
+function isEmpty(val) {
+  if (val) for (var _ in new Iterator(val, true)) return false;
+  return true;
+}
 
 // === {{{ Utils.classOf(value) }}} ===
 //

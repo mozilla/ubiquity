@@ -521,6 +521,15 @@ function testUtilsRegexp() {
   }
 }
 
+function testUtilsIsEmpty() {
+  var {assert} = this, {isEmpty} = Utils;
+  assert(isEmpty(""));
+  assert(isEmpty([]));
+  assert(isEmpty({__proto__: [1]}));
+  assert(!isEmpty([1]));
+  assert(!isEmpty(Utils));
+}
+
 function testL10nUtilsPropertySelector() {
   var ps = LocalizationUtils.propertySelector("data:," + encodeURI(<![CDATA[
     foo=%S %S
