@@ -58,13 +58,13 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       removeChildren(menupopup);
       var suggsToDisplay = suggestions.filter(objectOnly).slice(0, maxSuggs);
       for each (var sugg in suggsToDisplay) {
-        let {_verb} = sugg, {icon} = _verb.cmd || _verb;
         let menuItem = document.createElement("menuitem");
-        menuItem.setAttribute("label", sugg.displayText);
+        let {icon} = sugg._verb;
         if (icon) {
           menuItem.setAttribute("class", "menuitem-iconic");
           menuItem.setAttribute("image", icon);
         }
+        menuItem.setAttribute("label", sugg.displayText);
         menuItem.suggestion = sugg;
         menupopup.appendChild(menuItem);
       }

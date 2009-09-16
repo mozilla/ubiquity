@@ -81,10 +81,10 @@ function testParseDirectOnly() {
 
   var completions = getCompletions("pet b", [cmd_pet], null);
   this.assert(completions.length == 2, "should be 2 completions");
-  this.assert(completions[0]._verb._name == "pet", "verb should be pet");
+  this.assert(completions[0]._verb.name === "pet", "verb should be pet");
   this.assert(completions[0]._argSuggs.object.text == "beagle",
               "obj should be beagle");
-  this.assert(completions[1]._verb._name == "pet", "verb should be pet");
+  this.assert(completions[1]._verb.name === "pet", "verb should be pet");
   this.assert(completions[1]._argSuggs.object.text == "bulldog",
               "obj should be bulldog");
   completions[0].execute();
@@ -116,10 +116,10 @@ function testParseWithModifier() {
   var inputWords = "wash pood with sp";
   var completions = getCompletions(inputWords, [cmd_wash], null);
   this.assert(completions.length == 2, "Should be 2 completions");
-  this.assert(completions[0]._verb._name == "wash");
+  this.assert(completions[0]._verb.name === "wash");
   this.assert(completions[0]._argSuggs.object.text == "poodle");
   this.assert(completions[0]._argSuggs.with.text == "spork");
-  this.assert(completions[1]._verb._name == "wash");
+  this.assert(completions[1]._verb.name === "wash");
   this.assert(completions[1]._argSuggs.object.text == "poodle");
   this.assert(completions[1]._argSuggs.with.text == "sponge");
   completions[0].execute();
@@ -162,13 +162,13 @@ function testCmdManagerSuggestsForEmptyInput() {
     getAC({textSelection: "mud"}, this.makeCallback(test2Callback));
     var {assert} = this;
     function test1Callback(suggs) {
-      assert(suggs.length === 1 && suggs[0]._verb._name === 'cmd_one',
+      assert(suggs.length === 1 && suggs[0]._verb.name === 'cmd_one',
              "only cmd one should be in");
       suggs[0].execute();
       assert(oneWasCalled === "tree", "should have been calld with tree");
     }
     function test2Callback(suggs) {
-      assert(suggs.length === 1 && suggs[0]._verb._name === 'cmd_two',
+      assert(suggs.length === 1 && suggs[0]._verb.name === 'cmd_two',
              "only cmd two should be in");
       suggs[0].execute();
       assert(twoWasCalled === "mud", "should have been called with mud");
@@ -421,9 +421,9 @@ function testSortedBySuggestionMemory() {
   var suggestions = query.suggestionList;
   //take the fifth and sixth suggestions, whatever they are...
   var suggFive = suggestions[4];
-  var suggFiveName = suggFive._verb._name;
+  var suggFiveName = suggFive._verb.name;
   var suggSix = suggestions[5];
-  var suggSixName = suggSix._verb._name;
+  var suggSixName = suggSix._verb.name;
   // tell the parser we like sugg five and REALLY like sugg six:
   // TODO replace these strengthenMemory calls with execute() calls!
   nlParser.strengthenMemory(suggFive);
@@ -435,8 +435,8 @@ function testSortedBySuggestionMemory() {
   suggestions = query.suggestionList;
   dump("Suggestions has length " + suggestions.length + "\n");
   // the old six should be on top, with the old five in second place:
-  this.assert(suggestions[0]._verb._name == suggSixName, "Six should be one");
-  this.assert(suggestions[1]._verb._name == suggFiveName, "Five should be two");
+  this.assert(suggestions[0]._verb.name == suggSixName, "Six should be one");
+  this.assert(suggestions[1]._verb.name == suggFiveName, "Five should be two");
 }
 
 function testNounFirstSortedByGeneralFrequency() {
@@ -452,9 +452,9 @@ function testNounFirstSortedByGeneralFrequency() {
   var query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true).run();
   var suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
-  this.assert(suggestions[0]._verb._name == "foo", "Foo should be first...");
-  this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
-  this.assert(suggestions[2]._verb._name == "baz", "Baz should be last...");
+  this.assert(suggestions[0]._verb.name == "foo", "Foo should be first...");
+  this.assert(suggestions[1]._verb.name == "bar", "Bar should be second...");
+  this.assert(suggestions[2]._verb.name == "baz", "Baz should be last...");
 
   // Now we select "baz" twice and "bar" once...
   query = parser.newQuery("baz", pantsContext, MAX_SUGGESTIONS, true).run();
@@ -471,9 +471,9 @@ function testNounFirstSortedByGeneralFrequency() {
   query = parser.newQuery("", pantsContext, MAX_SUGGESTIONS, true).run();
   suggestions = query.suggestionList;
   this.assert(suggestions.length == 3, "Should be 3 suggs");
-  this.assert(suggestions[0]._verb._name == "baz", "Baz should be first...");
-  this.assert(suggestions[1]._verb._name == "bar", "Bar should be second...");
-  this.assert(suggestions[2]._verb._name == "foo", "Foo should be last...");
+  this.assert(suggestions[0]._verb.name == "baz", "Baz should be first...");
+  this.assert(suggestions[1]._verb.name == "bar", "Bar should be second...");
+  this.assert(suggestions[2]._verb.name == "foo", "Foo should be last...");
 }
 
 function testSortedByMatchQuality() {
@@ -483,9 +483,9 @@ function testSortedByMatchQuality() {
     assert(suggs.length == expectedList.length,
            "Should have " + expectedList.length + " suggestions.");
     suggs.forEach(function (sugg, x) {
-      assert(sugg._verb._name === expectedList[x],
+      assert(sugg._verb.name === expectedList[x],
              ("for " + uneval(input) + ", " +
-              sugg._verb._name + " should be " + expectedList[x]));
+              sugg._verb.name + " should be " + expectedList[x]));
     });
   }
   var verbList = [{names: ["frobnicate"]},
@@ -523,8 +523,8 @@ function testSortSpecificNounsBeforeArbText() {
   var suggs = getCompletions("", verbList, beagleContext);
 
   this.assert(suggs.length == 2, "Should be two suggestions.");
-  this.assert(suggs[0]._verb._name == "wash", "First suggestion should be wash");
-  this.assert(suggs[1]._verb._name == "mumble", "Second suggestion should be mumble");
+  this.assert(suggs[0]._verb.name == "wash", "First suggestion should be wash");
+  this.assert(suggs[1]._verb.name == "mumble", "Second suggestion should be mumble");
   this.assert(suggs[0].fromNounFirstSuggestion, "should be noun first");
   this.assert(suggs[1].fromNounFirstSuggestion, "should be noun first");
 }
@@ -541,20 +541,20 @@ function testVerbUsesDefaultIfNoArgProvided() {
   }];
   var suggs = getCompletions("wash", verbList);
   this.assert(suggs.length === 1, "Should be 1 suggestion (A).");
-  this.assert(suggs[0]._verb._name === "wash", "Suggestion should be wash");
+  this.assert(suggs[0]._verb.name === "wash", "Suggestion should be wash");
   this.assert(suggs[0]._argSuggs.object.text === "husky",
               "Argument should be husky.");
 
   suggs = getCompletions("play", verbList);
   this.assert(suggs.length === 1, "Should be 1 suggestion (B).");
-  this.assert(suggs[0]._verb._name === "play-fetch",
+  this.assert(suggs[0]._verb.name === "play-fetch",
               "Suggestion should be play-fetch");
   this.assert(suggs[0]._argSuggs.object.text === "beagle",
               "Argument should be beagle.");
 
   suggs = getCompletions("play retr", verbList);
   this.assert(suggs.length === 1, "Should be 1 suggestion (C).");
-  this.assert(suggs[0]._verb._name === "play-fetch",
+  this.assert(suggs[0]._verb.name === "play-fetch",
               "Suggestion should be play-fetch");
   this.assert(suggs[0]._argSuggs.object.text ===
               "golden retreiver", "Argument should be g.retr.");
@@ -568,17 +568,17 @@ function testSynonyms() {
                   {names: ["frobnicate"]}];
   var suggs = getCompletions("frob", verbList);
   this.assert(suggs.length == 3, "Should be 3 suggs.");
-  this.assert(suggs[0]._verb._name == "frobnitz", "frobnitz should be first");
-  this.assert(suggs[1]._verb._name == "frobnicate", "frobnicate should be second");
-  this.assert(suggs[2]._verb._name == "twiddle", "twiddle should be third");
+  this.assert(suggs[0]._verb.name == "frobnitz", "frobnitz should be first");
+  this.assert(suggs[1]._verb.name == "frobnicate", "frobnicate should be second");
+  this.assert(suggs[2]._verb.name == "twiddle", "twiddle should be third");
 
   suggs = getCompletions("twid", verbList);
   this.assert(suggs.length == 1, "Should be 1 sugg.");
-  this.assert(suggs[0]._verb._name == "twiddle", "twiddle should be it");
+  this.assert(suggs[0]._verb.name == "twiddle", "twiddle should be it");
 
   suggs = getCompletions("twirl", verbList);
   this.assert(suggs.length == 1, "Should be 1 sugg.");
-  this.assert(suggs[0]._verb._name == "twiddle", "twiddle should be it");
+  this.assert(suggs[0]._verb.name == "twiddle", "twiddle should be it");
 }
 
 function testPartiallyParsedSentence() {
@@ -597,7 +597,7 @@ function testPartiallyParsedSentence() {
 
   var parsedNoArgs = partiallyParsedNoArgs.getParsedSentences();
   this.assert(parsedNoArgs.length === 1, "Should have 1 parsing.");
-  this.assert(parsedNoArgs[0]._verb._name === "grumble");
+  this.assert(parsedNoArgs[0]._verb.name === "grumble");
 
   var noun_type_foo = {
     id: "foo",
@@ -678,7 +678,7 @@ function testVerbGetCompletions() {
   };
   var comps = getCompletions("grum", [cmd_grumble], null);
   this.assert(comps.length == 1, "Should be one suggestion.");
-  this.assert(comps[0]._verb._name == "grumble", "Should be grumble.");
+  this.assert(comps[0]._verb.name == "grumble", "Should be grumble.");
 }
 
 function testTextAndHtmlDifferent() {
@@ -840,7 +840,7 @@ function testListOfVerbsThatUseSpecificNounType() {
   var parser = makeTestParser("en", verbs);
   this.assert(parser._verbsThatUseSpecificNouns.length == 1,
               "Too many or not enough");
-  this.assert(parser._verbsThatUseSpecificNouns[0]._name == "doStuff",
+  this.assert(parser._verbsThatUseSpecificNouns[0].name === "doStuff",
               "Name mismatch");
 }
 
@@ -872,10 +872,10 @@ function testSynonymsGetDownrankedEvenWithArguments() {
   // "define m" should be the first suggestion, while
   // "youtube m" is the second suggestion (due to its synonym "video").
   this.assert(comps.length == 2, "Should have 2 suggestions.");
-  this.assert(comps[0]._verb._name == "define", "Should be define.");
+  this.assert(comps[0]._verb.name == "define", "Should be define.");
   this.assert(comps[0]._argSuggs.object.text == "m",
               "object should be m.");
-  this.assert(comps[1]._verb._name == "youtube", "Should be youtube.");
+  this.assert(comps[1]._verb.name == "youtube", "Should be youtube.");
   this.assert(comps[1]._argSuggs.object.text == "m",
               "object should be m.");
 }

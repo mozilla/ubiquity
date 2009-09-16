@@ -46,7 +46,6 @@ var NLParser1 = ([f for each (f in this) if (typeof f === "function")]
 const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
-Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
 const FLAG_DEFAULT = 1;
@@ -211,7 +210,7 @@ Parser.prototype = {
         input,
         this._verbList,
         function makePPS(verb, argStrings, matchScore) {
-          for (var x in verb._arguments)
+          for (var x in verb.args)
             // ensure all args in argStrings
             // will be used for reconstructing the sentence
             argStrings[x] = x in argStrings && argStrings[x].join(" ");
@@ -283,7 +282,7 @@ ParsedSentence.prototype = {
   get completionText PS_getCompletionText() {
     // Returns plain text that we should set the input box to if user hits
     // the key to autocomplete to this sentence.
-    var {matchedName: sentence, _arguments: args} = this._verb;
+    var {matchedName: sentence, args} = this._verb;
     for (let x in (this.fromNounFirstSuggestion
                    ? this._argSuggs
                    : this._argStrings)) {
@@ -303,7 +302,7 @@ ParsedSentence.prototype = {
   },
   // text formatted sentence for display in popup menu
   get displayText PS_getDisplayText() {
-    var {matchedName: sentence, _arguments: args} = this._verb;
+    var {matchedName: sentence, args} = this._verb;
     for (let x in (this.fromNounFirstSuggestion
                    ? this._argSuggs
                    : this._argStrings)) {
@@ -321,7 +320,7 @@ ParsedSentence.prototype = {
     var sentence = ('<span class="verb">' +
                     escapeHtml(this._verb.matchedName) +
                     "</span>");
-    var args = this._verb._arguments;
+    var {args} = this._verb;
     for (let x in (this.fromNounFirstSuggestion
                    ? this._argSuggs
                    : this._argStrings)) {
@@ -400,7 +399,7 @@ ParsedSentence.prototype = {
     let newSentences = [this.copy()];
     let gotArrayOfDefaults = false;
     let defaultsSoFar = {};
-    let args = this._verb._arguments;
+    let args = this._verb.args;
     for (let argName in args) {
       if (argName in this._argSuggs) continue;
       let missingArg = args[argName];
@@ -456,11 +455,11 @@ ParsedSentence.prototype = {
       // argument match score starts at 0 and increased for each
       // argument where a specific nountype (i.e. non-arbitrary-text)
       // matches user input.
-      let ams = 0, {_verb: {_arguments}, _argFlags} = this;
+      let ams = 0, {_argFlags, _argSuggs} = this;
       for (let name in _argFlags)
         if (!(_argFlags[name] & FLAG_DEFAULT))
           ams += ((name === "object" ? .9 : 1) *
-                  (_arguments[name].type.rankLast ? .1 : 1));
+                  (_argSuggs[name].score || 1));
       this.argMatchScore = ams;
     }
     return (this.fromNounFirstSuggestion
@@ -508,7 +507,7 @@ function PartiallyParsedSentence(verb, argStrings, selObj, matchScore, query) {
     let gotSuggs = (text && matchScore &&
                     this._suggestWithPronounSub(argName, text));
     // and on not substituting pronoun...
-    let gotSuggsDirect = ((text || (text = verb._arguments[argName].input)) &&
+    let gotSuggsDirect = ((text || (text = verb.args[argName].input)) &&
                           this._argSuggest(argName, text,
                                            Utils.escapeHtml(text), null));
     if (text && !gotSuggs && !gotSuggsDirect) {
@@ -527,7 +526,7 @@ PartiallyParsedSentence.prototype = {
     // For the given argument of the verb, sends (text,html) to the nounType
     // gets back suggestions for the argument, and adds each suggestion.
     // Return true if at least one arg suggestion was added in this way.
-    var noun = this._verb._arguments[argName].type;
+    var noun = this._verb.args[argName].type;
     var {nounCache} = this._query;
     var key = text + "\n" + noun.id;
     var suggestions = nounCache[key];
@@ -555,7 +554,7 @@ PartiallyParsedSentence.prototype = {
         if (e && e.stack) e += "\n" + /[^\n]+/(e.stack);
         Cu.reportError(
           'Exception occured while getting suggestions for "' +
-          this._verb._name + '" with noun "' + (noun.name || noun.id) +
+          this._verb.name + '" with noun "' + (noun.name || noun.id) +
           '"\n' + e);
         return false;
       }
@@ -663,7 +662,7 @@ PartiallyParsedSentence.prototype = {
     // Returns list of the names of all arguments the verb expects for which
     // no argument was provided in this partially parsed sentence.
     return [argName
-            for (argName in this._verb._arguments)
+            for (argName in this._verb.args)
             if (!this._argStrings[argName])];
   },
 
@@ -694,26 +693,21 @@ PartiallyParsedSentence.prototype = {
 function Verb(cmd, roleMap) {
   // Picks up noun's label. "_name" is for backward compatiblity
   function pluckLabel(noun) noun.label || noun._name || "?";
-  // Determines if an object has one or more own keys
-  function hasKey(obj) {
-    for (var key in new Iterator(obj || 0)) return true;
-    return false;
-  }
 
   this.cmd = cmd;
-  this.matchedName = this._name = cmd.names[0];
+  this.matchedName = cmd.names[0];
   this.input = "";
-  this._arguments = {};
+  var args = this.args = {};
   // Use the presence or absence of the "arguments" dictionary
   // to decide whether this is a version 1 or version 2 command.
-  if ((this._isNewStyle = hasKey(cmd.arguments))) {
+  if ((this._isNewStyle = !Utils.isEmpty(cmd.arguments))) {
     // New-style API: command defines arguments dictionary
     // if there are arguments, copy them over using
     // a (semi-arbitrary) choice of preposition
     for each (let arg in cmd.arguments) {
       let {role, nountype} = arg;
       let obj = role === "object";
-      this._arguments[obj ? "object" : role] = {
+      args[obj ? "object" : role] = {
         type : nountype,
         label: arg.label || pluckLabel(nountype),
         preposition: obj ? "" : roleMap[role],
@@ -728,7 +722,7 @@ function Verb(cmd, roleMap) {
     // Convert this to argument dictionary.
     // cmd.DOType must be a NounType, if provided.
     if (cmd.DOType) {
-      this._arguments.object = {
+      args.object = {
         type: cmd.DOType,
         label: cmd.DOLabel,
         preposition: "",
@@ -739,23 +733,25 @@ function Verb(cmd, roleMap) {
     // keys are prepositions
     // values are NounTypes.
     // example: {"from" : City, "to" : City, "on" : Day}
-    if (hasKey(cmd.modifiers)) {
+    if (!Utils.isEmpty(cmd.modifiers)) {
       let {modifiers, modifierDefaults} = cmd;
       for (let x in modifiers) {
         let type = modifiers[x];
-        this._arguments[x] = {
+        args[x] = {
           type: type,
           label: pluckLabel(type),
           preposition: x,
         };
         if (modifierDefaults)
-          this._arguments[x].default = modifierDefaults[x];
+          args[x].default = modifierDefaults[x];
       }
     }
   }
 }
 Verb.prototype = {
-  get disabled() this.cmd.disabled,
+  get name V_name() this.cmd.names[0],
+  get icon V_icon() this.cmd.icon,
+  get disabled V_disabled() this.cmd.disabled,
 
   execute: function V_execute(context, argumentValues) {
     return (
@@ -777,7 +773,7 @@ Verb.prototype = {
   },
 
   usesAnySpecificNounType: function V_usesAnySpecificNounType() {
-    for each (let arg in this._arguments)
+    for each (let arg in this.args)
       if (!arg.type.rankLast)
         return true;
     return false;

@@ -42,6 +42,9 @@ var EnParser = {
   PRONOUNS: ["this", "that", "it", "selection", "him", "her", "them"],
 };
 
+Components.utils.import("resource://ubiquity/modules/utils.js");
+
+var {isEmpty} = Utils;
 var {push} = Array.prototype;
 
 function shallowCopy(dic) {
@@ -100,15 +103,26 @@ function parseSentence(inputString, verbList, makePPS) {
   for each (let verb in verbList) if (!verb.disabled) {
     let matchScore = verb.match(inputVerb);
     if (!matchScore) continue;
+    let {args} = verb;
+    if (isEmpty(args)) {
+      parsings.push(makePPS(verb, {}, matchScore));
+      continue;
+    }
     // Recursively parse to assign arguments
     let preps = {}; // {source: "to", goal: "from", ...}
-    let args = verb._arguments;
     for (let key in args) preps[key] = args[key].preposition;
     delete preps.object;
-    let argStringsList = recursiveParse(inputArgs, {},
-                                        "object" in args, preps);
+    let hasObj = "object" in args;
+    let argStringsList = recursiveParse(inputArgs, {}, hasObj , preps);
     for each (let argStrings in argStringsList)
       parsings.push(makePPS(verb, argStrings, matchScore));
+    if (!argStringsList.length && !hasObj)
+      // manual interpolations for required prepositions
+      for (let arg in args) {
+        let argStr = {};
+        argStr[arg] = inputArgs;
+        parsings.push(makePPS(verb, argStr, matchScore));
+      }
   }
   return parsings;
 }
