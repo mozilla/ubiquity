@@ -47,7 +47,7 @@ function PreviewBrowser(browser, defaultUrl) {
 
   function resizeContainer(ev) {
     Utils.clearTimeout(resizeContainer.tid);
-    resizeContainer.tid = Utils.setTimeout(resizeDelayed, 16, this);
+    resizeContainer.tid = Utils.setTimeout(resizeDelayed, 99, this);
   }
   function resizeDelayed(doc) {
     browser.parentNode.style.height = doc.height + "px";
