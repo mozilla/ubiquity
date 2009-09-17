@@ -42,6 +42,11 @@ var EXPORTED_SYMBOLS = ["Parser"];
 
 const Cu = Components.utils;
 
+// This turns on a number of checks which disallow parses with
+// multiple arguments in the same role.
+// This speeds things up considerably for longer parses.
+const DONT_PARSE_MULTIPLE_ARGS_PER_ROLE = true;
+
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/msgservice.js");
 
@@ -922,6 +927,22 @@ Parser.prototype = {
         // argument assignments.
         theseParses = newParses;
       }
+      
+      var oneArgPerRole = function oneArgPerRole(parse) {
+        // Returns true if there is only one argument per role.
+        // Returns false otherwise. The "object" role is not checked.
+        for (let role in parse.args) {
+          if (role !== 'object' && parse.args[role].length > 1) {
+            //dump("parse "+parse._id+" had more than one "+role+"\n");
+            return false;
+          }
+        }
+        return true;
+      }
+      
+      if (DONT_PARSE_MULTIPLE_ARGS_PER_ROLE)
+        theseParses = theseParses.filter(oneArgPerRole);
+      
       // Put all of the different delimiterIndices combinations' parses into
       // possibleParses to return it.
       push.apply(possibleParses, theseParses);
@@ -1118,6 +1139,8 @@ Parser.prototype = {
       for (let role in rolesToTry) {
         let delimiter = rolesToTry[role];
         for each (let baseParse in baseParses) {
+          if (DONT_PARSE_MULTIPLE_ARGS_PER_ROLE && role in baseParse.args)
+            continue;
           let parseCopy = baseParse.copy();
           let objectCopy = {__proto__: object,
                             modifier: delimiter,
