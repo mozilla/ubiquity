@@ -247,9 +247,9 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
   reset();
 
-  this.refresh = function refresh() {
+  this.refresh = function refresh(anyway) {
     var code = codeSource.getCode();
-    if (code !== codeCache) {
+    if (anyway || code !== codeCache) {
       reset();
       codeCache = code;
       sandbox = sandboxFactory.makeSandbox(codeSource);

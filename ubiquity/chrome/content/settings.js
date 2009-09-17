@@ -103,8 +103,6 @@ function changeLanguageSettings() {
   }
 
   if (changed) {
-    $("#lang-settings-changed-info").html(
-      "<em>" + L("ubiquity.settings.restartfirefox") + "</em>");
     $(".parser2")[useParserVersion < 2 ? "slideUp": "slideDown"]();
   }
 }

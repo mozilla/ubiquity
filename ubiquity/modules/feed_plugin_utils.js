@@ -42,15 +42,19 @@ var EXPORTED_SYMBOLS = ["finishCommand"];
 
 const Cu = Components.utils;
 
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/localization_utils.js");
+Utils.setTimeout(function delayedImport() {
+  Cu.import("resource://ubiquity/modules/setup.js");
+});
 // Default delay to wait before calling a preview function, in ms.
 const DEFAULT_PREVIEW_DELAY = 150;
 
 function finishCommand(cmd) {
-  if (Cu.import("resource://ubiquity/modules/setup.js", null)
-      .UbiquitySetup.parserVersion === 2) {
+  if (UbiquitySetup.parserVersion === 2) {
     // Convert for Parser 2 if it takes no arguments.
     if (cmd.oldAPI && !cmd.DOType && !cmd.modifiers &&
-        isEmpty(cmd.arguments)) {
+        Utils.isEmpty(cmd.arguments)) {
       dump("converting 1 > 2: " + cmd.name + "\n");
       let clone = {__proto__: cmd, arguments: []};
       if (!cmd.names) clone.names = [cmd.name];
@@ -59,9 +63,7 @@ function finishCommand(cmd) {
     if (!cmd.oldAPI && !cmd.arguments)
       cmd.arguments = [];
     if (cmd.arguments)
-      cmd = (Cu.import("resource://ubiquity/modules/localization_utils.js",
-                       null)
-             .LocalizationUtils.localizeCommand(cmd));
+      cmd = LocalizationUtils.localizeCommand(cmd);
   }
   else {
     cmd.name = hyphenize(cmd.name);
@@ -74,7 +76,5 @@ function finishCommand(cmd) {
 
   return cmd;
 }
-
-function isEmpty(obj) !obj || !obj.__count__;
 
 function hyphenize(name) name.replace(/ /g, "-");

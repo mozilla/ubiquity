@@ -43,6 +43,8 @@ var EXPORTED_SYMBOLS = ["CommandManager"];
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/setup.js");
+Cu.import("resource://ubiquity/modules/parser/parser.js");
 Cu.import("resource://ubiquity/modules/preview_browser.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
@@ -82,6 +84,8 @@ function CommandManager(cmdSource, msgService, parser,
   this.__lastHilitedIndex = -1;
   this.__lastAsyncSuggestionCb = Boolean;
   this.__nlParser = parser;
+  this.__dynaLoad = !parser;
+  this.__parserType = null;
   this.__activeQuery = null;
   this.__domNodes = {
     suggs: suggsNode,
@@ -95,19 +99,17 @@ function CommandManager(cmdSource, msgService, parser,
     DEFAULT_PREVIEW_URL);
   this.__commandsByServiceDomain = null;
 
-  function onCommandsReloaded() {
-    parser.setCommandList(cmdSource.getAllCommands());
-  }
+  var self = this;
+  function onFeedsReloaded() { self._loadCommands() }
 
-  cmdSource.addListener("feeds-reloaded", onCommandsReloaded);
-  onCommandsReloaded();
-
-  this.setPreviewState("no-suggestions");
-
+  cmdSource.addListener("feeds-reloaded", onFeedsReloaded);
   this.finalize = function CM_finalize() {
     cmdSource.removeListener("feeds-reloaded", onCommandsReloaded);
-    for (let key in this) delete this[key];
+    for (let key in new Iterator(this, true)) delete this[key];
   };
+
+  if (parser) this._loadCommands();
+  this.setPreviewState("no-suggestions");
 
   this.__domNodes.suggsIframe.contentDocument
     .addEventListener("click", this, true);
@@ -161,7 +163,20 @@ CommandManager.prototype = {
   },
 
   refresh: function CM_refresh() {
-    this.__cmdSource.refresh();
+    if (this.__dynaLoad) {
+      let {parserVersion, languageCode} = UbiquitySetup;
+      if ((this.__parserType) !==
+          (this.__parserType = parserVersion + languageCode)) {
+        this.__nlParser = null;
+        this.__cmdSource.refresh(true);
+        this.__nlParser = (
+          NLParserMaker(parserVersion)
+          .makeParserForLanguage(languageCode,
+                                 this.__cmdSource.getAllCommands()));
+        var refreshed = true;
+      }
+    }
+    refreshed || this.__cmdSource.refresh();
     this.reset();
   },
 
@@ -175,6 +190,11 @@ CommandManager.prototype = {
     if (++this.__hilitedIndex >= this.__activeQuery.suggestionList.length)
       this.__hilitedIndex = 0;
     this._renderAll(context);
+  },
+
+  _loadCommands: function CM__loadCommands() {
+    if (this.__nlParser)
+      this.__nlParser.setCommandList(this.__cmdSource.getAllCommands());
   },
 
   _setHelp: function CM__setHelp(help) {
@@ -270,6 +290,7 @@ CommandManager.prototype = {
   reset: function CM_reset() {
     var query = this.__activeQuery;
     if (query && !query.finished) query.cancel();
+    this.__activeQuery = null;
     this.__hilitedIndex = 0;
     this.__lastInput = "";
     this.__lastHilitedIndex = -1;

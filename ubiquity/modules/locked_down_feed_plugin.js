@@ -189,14 +189,16 @@ function LDFPFeed(baseFeedInfo, eventHub, messageService, htmlSanitize) {
 
   self.commands = {};
   
-  // === {{{LDFPFeed#refresh()}}} ===
+  // === {{{LDFPFeed#refresh(anyway)}}} ===
   //
   // This public method is called whenever Ubiquity would like the feed
   // to check for any changes in itself. It has no return value.
+  //
+  // If {{{anyway}}}, the feed is refreshed regardless of code-change.
 
-  self.refresh = function refresh() {
+  self.refresh = function refresh(anyway) {
     let code = codeSource.getCode();
-    if (code != codeCache) {
+    if (anyway || code !== codeCache) {
       reset();
       codeCache = code;
 

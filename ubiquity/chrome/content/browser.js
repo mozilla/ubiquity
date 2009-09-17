@@ -53,20 +53,16 @@ window.addEventListener("load", function onload() {
   Cu.import("resource://ubiquity/modules/setup.js", jsm);
   Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
   Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
-  Cu.import("resource://ubiquity/modules/parser/parser.js", jsm);
 
   function ubiquitySetup() {
     var services = jsm.UbiquitySetup.createServices();
 
     jsm.UbiquitySetup.setupWindow(window);
 
-    var nlParser = (jsm.NLParserMaker(jsm.UbiquitySetup.parserVersion)
-                    .makeParserForLanguage(jsm.UbiquitySetup.languageCode,
-                                           []));
     var cmdMan = new jsm.CommandManager(
       services.commandSource,
       services.messageService,
-      nlParser,
+      null,
       document.getElementById("ubiquity-suggest-container"),
       document.getElementById("ubiquity-preview-container"),
       document.getElementById("ubiquity-help"));

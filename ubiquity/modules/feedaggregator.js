@@ -122,9 +122,9 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
         }
   };
 
-  self.refresh = function FA_refresh() {
+  self.refresh = function FA_refresh(anyway) {
     var feeds = feedManager.getSubscribedFeeds();
-    for each (let feed in feeds) feed.refresh();
+    for each (let feed in feeds) feed.refresh(anyway);
     if (!feedsChanged) return;
 
     commands = {};

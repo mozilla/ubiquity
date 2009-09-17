@@ -48,6 +48,7 @@ Utils.setTimeout(function delayedImport() {
 });
 
 const LocalizableProperties = ["names", "help", "description"];
+const DefaultLanguageCodes  = ["en", "$"];
 var loadedPo = {};
 var feedGlobalsDict = {
   // feedUrl: [key0, key1, ...], ...
@@ -60,8 +61,9 @@ var LocalizationUtils = {
 
   get loadedPo LU_loadedPo() loadedPo,
 
-  isLocalizableFeed: function LU_isLocalizableFeed(feedUrl)
-    /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds\b/.test(feedUrl),
+  isLocalizableFeed: function LU_isLocalizableFeed(feedUrl) (
+    DefaultLanguageCodes.indexOf(UbiquitySetup.languageCode) < 0 &&
+    /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds\b/.test(feedUrl)),
 
   loadLocalPo: function LU_loadLocalPo(feedUrl) {
     if (!LocalizationUtils.isLocalizableFeed(feedUrl)) return false;
@@ -69,9 +71,7 @@ var LocalizationUtils = {
     var feedKey = this.getLocalFeedKey(feedUrl);
     if (feedKey in loadedPo) return true;
 
-    var poUrl = ("resource://ubiquity/localization/" +
-                 UbiquitySetup.languageCode + "/" +
-                 feedKey + ".po");
+    var poUrl = "resource://ubiquity/localization/" + feedKey + ".po";
     try { var po = Utils.getLocalUrl(poUrl, "utf-8"); } catch (e) {}
     if (!po) return false;
 
@@ -91,8 +91,8 @@ var LocalizationUtils = {
     return true;
   },
 
-  getLocalFeedKey:
-  function LU_getLocalFeedKey(path) path.replace(/^.*\/(\w+)\.\w+$/, "$1"),
+  getLocalFeedKey: function LU_getLocalFeedKey(path)
+    UbiquitySetup.languageCode + /\/\w+(?=\.\w+$)/(path),
 
   getLocalizedString: function LU_getLocalizedString(feedKey, key) {
     try {

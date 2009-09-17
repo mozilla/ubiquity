@@ -71,6 +71,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   if (this.Utils.OS === "WINNT")
     textBox.addEventListener("blur", this, false);
 
+  msgPanel.addEventListener("popupshowing", this, false);
   msgPanel.addEventListener("popupshown", this, false);
   msgPanel.addEventListener("popuphidden", this, false);
   msgPanel.addEventListener("click", this, true);
@@ -223,8 +224,10 @@ Ubiquity.prototype = {
       screenX: this.__x,
       screenY: this.__y,
       chromeWindow: window,
-      focusedWindow : this.__focusedWindow,
-      focusedElement: this.__focusedElement,
+      focusedWindow:
+      this.__focusedWindow  || document.commandDispatcher.focusedWindow,
+      focusedElement:
+      this.__focusedElement || document.commandDispatcher.focusedElement,
     };
   },
 
@@ -241,11 +244,14 @@ Ubiquity.prototype = {
     this.__cmdManager.reset();
   },
 
+  __onpopupshowing: function U__onShowing() {
+    this.__cmdManager.refresh();
+  },
+
   __onpopupshown: function U__onShown() {
-    this.__lastValue = "";
     this.__textBox.focus();
     this.__textBox.select();
-    this.__cmdManager.refresh();
+    this.__lastValue = "";
     this.__processInput();
   },
 
