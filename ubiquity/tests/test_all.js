@@ -527,7 +527,7 @@ function testUtilsListenOnce() {
   this.skipIfXPCShell();
   var {assertEquals} = this;
   var {document} = Utils.currentChromeWindow;
-  var i = 0, type = "foo", event = document.createEvent("Event");
+  var i = 0, type = "foo";
   function listener1(ev) {
     assertEquals(ev.type, type);
     assertEquals(ev.target, this);
@@ -541,9 +541,11 @@ function testUtilsListenOnce() {
   }};
   Utils.listenOnce(document, type, listener1);
   Utils.listenOnce(document, type, listener2, true);
-  event.initEvent(type, false, false);
-  document.dispatchEvent(event);
-  document.dispatchEvent(event);
+  for(let j = 0; j < 2; ++j) {
+    let event = document.createEvent("Event");
+    event.initEvent(type, false, false);
+    document.dispatchEvent(event);
+  }
   assertEquals(i, 2);
 }
 
