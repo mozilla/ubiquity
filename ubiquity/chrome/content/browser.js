@@ -78,10 +78,9 @@ window.addEventListener("load", function onload() {
         cmdMan.refresh();
     }, false);
 
-    window.addEventListener("unload", function ubiquityTeardown() {
-      window.removeEventListener("unload", ubiquityTeardown, false);
+    jsm.Utils.listenOnce(window, "unload", function ubiquityTeardown() {
       cmdMan.finalize();
-    }, false);
+    });
 
     var suggFrame = document.getElementById("ubiquity-suggest");
     suggFrame.contentDocument.addEventListener(

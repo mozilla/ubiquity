@@ -61,13 +61,6 @@ var NLParser = NLParserMaker(1);
 
 var globalObj = this;
 
-function debugSuggestionList( list ) {
-  dump("There are " + list.length + " items in suggestion list.\n");
-  for each (var sugg in list) {
-    dump(sugg.getDisplayText() + "\n");
-  }
-}
-
 function testXhtmlCodeSourceWorks() {
   var code = "function cmd_foo() {};";
   var xhtml = '<html xmlns="http://www.w3.org/1999/xhtml"><script>a = 1;</script><script class="commands">' + code + '</script></html>';
@@ -528,6 +521,30 @@ function testUtilsIsEmpty() {
   assert(isEmpty({__proto__: [1]}));
   assert(!isEmpty([1]));
   assert(!isEmpty(Utils));
+}
+
+function testUtilsListenOnce() {
+  this.skipIfXPCShell();
+  var {assertEquals} = this;
+  var {document} = Utils.currentChromeWindow;
+  var i = 0, type = "foo", event = document.createEvent("Event");
+  function listener1(ev) {
+    assertEquals(ev.type, type);
+    assertEquals(ev.target, this);
+    assertEquals(document,  this);
+    ++i;
+  }
+  var listener2 = {handleEvent: function handler(ev) {
+    assertEquals(ev.type, type);
+    assertEquals(this.handleEvent, handler);
+    ++i;
+  }};
+  Utils.listenOnce(document, type, listener1);
+  Utils.listenOnce(document, type, listener2, true);
+  event.initEvent(type, false, false);
+  document.dispatchEvent(event);
+  document.dispatchEvent(event);
+  assertEquals(i, 2);
 }
 
 function testL10nUtilsPropertySelector() {

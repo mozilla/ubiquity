@@ -502,10 +502,9 @@ CmdUtils.CreateCommand({
     else {
       em = context.chromeWindow.openDialog(
         "chrome://mozapps/content/extensions/extensions.xul", "", "", Pane);
-      id && em.addEventListener("load", function onEmLoad() {
-        em.removeEventListener("load", arguments.callee, false);
+      id && Utils.listenOnce(em, "load", function onEmLoad() {
         Utils.setTimeout(self._select, 7, self, em, id);
-      }, false);
+      });
     }
   },
   _select: function ao__select(self, em, id) {

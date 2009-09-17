@@ -808,6 +808,22 @@ function notify(label, value, image, priority, buttons, target) {
     buttons);
 }
 
+// === {{{ Utils.listenOnce(element, eventType, listener, useCapture) }}} ===
+// 
+// Same as [[https://developer.mozilla.org/en/DOM/element.addEventListener]],
+// except that the {{{listener}}} will be automatically removed on its
+// first execution.
+
+function listenOnce(element, eventType, listener, useCapture) {
+  element.addEventListener(eventType, function _listenOnce(event) {
+    element.removeEventListener(eventType, _listenOnce, useCapture);
+    if (typeof listener === "function")
+      listener.call(this, event);
+    else
+      listener.handleEvent(event);
+  }, useCapture);
+}
+
 // == {{{ Utils.tabs }}} ==
 //
 // This Object contains functions related to Firefox tabs.
