@@ -58,21 +58,22 @@ CmdUtils.CreateCommand({
   description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
                                 " with their escape sequences."),
   preview: function ehe_preview(pb, {object: {html}}) {
-    pb.innerHTML = (html
-                    ? (<>Replaces your selection with:
-                       <pre>{Utils.escapeHtml(html)}</pre></>)
-                    : this.description);
+    pb.innerHTML = (
+      html
+      ? _("Replaces your selection with:${pre}",
+          {pre: <pre>{html}</pre>.toXMLString()})
+      : this.previewDefault());
   },
   execute: function ehe_execute({object: {html}}) {
-    if (html) {
-      var esch = Utils.escapeHtml(html);
-      CmdUtils.setSelection(esch, {text: esch});
-    }
-    else displayMessage(_("No text selected."));
+    if (html)
+      (CmdUtils.getSelection()
+       ? CmdUtils.setSelection(Utils.escapeHtml(html), {text: html})
+       : CmdUtils.copyToClipboard(html));
+    else
+       displayMessage(_("No text selected."));
   }
 });
 
-// TODO: Adding <style> to XHTML pages seems to have no effect.
 CmdUtils.CreateCommand({
   names: ["run selector-selector"],
   description: "" + (
@@ -102,15 +103,15 @@ CmdUtils.CreateCommand({
   license: "MIT",
   icon: "chrome://ubiquity/skin/icons/jquery.ico",
   execute: function ss_execute() {
-    const Me = this, Key = "_" + Me._key, Doc = CmdUtils.getDocument();
+    const Me = this, Key = Me._key, Doc = CmdUtils.getDocument();
     if (Doc.getElementById(Key)) return;
 
     XML.prettyPrinting = XML.ignoreWhitespace = false;
-    var $i = $(Doc.body).append(
-      <div><style>{Me._css.replace(/\$/g, Key)}</style><iframe id={Key}
-      src={"data:text/html;charset=utf8," + Me._htm}
-      width="0" style="left:0; top:0"/></div> +'')
-      .find("#" + Key).load(load);
+    var $i = $(<iframe id={Key} src={"data:text/html;charset=utf8," + Me._htm}
+               width="0" style="left:0; top:0"/>.toXMLString()).load(load);
+    ($(Doc.createElement("div"))
+     .append($i, $("<style>" + Me._css.replace(/\$/g, Key) + "</style>"))
+     .appendTo(Doc.body));
 
     function load() {
       var {contentDocument: IDoc, style: IStyle} = this;
@@ -207,11 +208,11 @@ CmdUtils.CreateCommand({
       txt && displayMessage(CmdUtils.copyToClipboard(txt), Me);
     }
   },
-  _key: String.slice(Math.random(), 2),
+  _key: "_" + String.slice(Math.random(), 2),
   _css: <><![CDATA[
-    .$ {outline:2px blue solid}
-    #$ {position:fixed; z-index:2147483647; border:none; opacity:0.9}
-    ]]></>.toString().replace(/\}/g, ";}").replace(/;+/g, " !important;"),
+    .$ {outline:2px blue solid;}
+    #$ {position:fixed; z-index:2147483647; border:none; opacity:0.9;}
+    ]]></>.toString().replace(/;/g, " !important;"),
   _htm: (
     <body><style><![CDATA[
       body {display:inline-block; overflow:hidden; margin:0; background:menu}
