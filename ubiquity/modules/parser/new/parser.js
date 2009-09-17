@@ -1440,13 +1440,12 @@ Parser.prototype = {
   // noun type name.
   detectNounType:
   function detectNounType(currentQuery, x, nounTypeIds, callback) {
+
     let cachedNounTypeIds = [];
     let uncachedNounTypeIds = [];
 
     // Make a list of nountypes we need to suggest x as, and make a list
     // of nountypes which have already cached x.
-    //
-    // FLUSH OLD HERE?
 
     var DEFAULT_CACHE_TIME = 60*60*24; // seconds = 1 day
 
@@ -1689,10 +1688,6 @@ ParseQuery.prototype = {
   // Most of this async code is by Blair.
   run: function PQ_run() {
     this._keepworking = true;
-    this._next();
-
-    this._input = this.parser.wordBreaker(this.input);
-    this._next();
 
     var parseGenerator = this._yieldingParse();
     var self = this;
@@ -1761,8 +1756,7 @@ ParseQuery.prototype = {
 
     // start with step 1
     this._next();
-    yield true;
-
+    
     // STEP 1: split into words
     this._input = this.parser.wordBreaker(this.input);
     yield true;
