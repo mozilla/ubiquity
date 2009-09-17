@@ -1465,19 +1465,18 @@ function absUrl(data, sourceUrl) {
   switch (typeof data) {
     case "string": {
       return data.replace(
-        /\b(href|src|action)=(?![\"\']?https?:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
+        /\b(href|src|action)=(?![\"\']?[a-z]+:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
         function au_repl(_, a, q, path) (
           a + "=" + q + Utils.url({uri: path, base: sourceUrl}).spec + q));
     }
     case "object": {
       (this.__globalObject.jQuery(data)
        .find("*").andSelf()
-       .filter("a, img, form, link, embed")
        .each(function au_each() {
          var attr, path = (this.getAttribute(attr = "href") ||
                            this.getAttribute(attr = "src" ) ||
                            this.getAttribute(attr = "action"));
-         if (path !== null && /^(?!https?:\/\/)/.test(path))
+         if (path !== null)
            this.setAttribute(attr,
                              Utils.url({uri: path, base: sourceUrl}).spec);
        }));

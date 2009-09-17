@@ -63,8 +63,7 @@ function getHtmlSelection(context) {
   var newNode = context.focusedWindow.document.createElement("div");
   newNode.appendChild(range.cloneContents());
   range.detach();
-  absolutifyUrlsInNode(newNode);
-  return newNode.innerHTML;
+  return absolutifyUrlsInNode(newNode).innerHTML;
 }
 
 // === {{{ ContextUtils.getSelection(context) }}} ===
@@ -160,20 +159,6 @@ function getSelectionObject(context) {
   };
 }
 
-// === {{{ ContextUtils.absolutifyUrlsInNode(context) }}} ===
-//
-// Takes all the relative URLs specified as attributes in the given DOM
-// node (and its descendants) and convert them to absolute URLs. This
-// is a fix for [[http://ubiquity.mozilla.com/trac/ticket/551|#551]].
-
-function absolutifyUrlsInNode(node) {
-  if (!node) return;
-  for each (let attr in ["href", "src", "action"])
-    if (node[attr]) node.setAttribute(attr, node[attr]);
-  absolutifyUrlsInNode(node.nextSibling);
-  absolutifyUrlsInNode(node.firstChild);
-}
-
 // === {{{ ContextUtils.getFirstRange(context) }}} ===
 //
 // Returns a copy of the first {{{Range}}} in {{{Selection}}}.
@@ -187,4 +172,21 @@ function getFirstRange(context) {
   newRange.setStart(range.startContainer, range.startOffset);
   newRange.setEnd(range.endContainer, range.endOffset);
   return newRange;
+}
+
+// ==== {{{ ContextUtils.absolutifyUrls(node) }}} ====
+//
+// Takes all the URLs specified as attributes in descendants of
+// the given DOM and convert them to absolute URLs. This
+// is a fix for [[http://ubiquity.mozilla.com/trac/ticket/551|#551]].
+
+function absolutifyUrlsInNode(node) {
+  var attrs = ["href", "src", "action"];
+  for each (let n in Array.slice(node.getElementsByTagName("*")))
+    for each (let a in attrs)
+      if (a in n) {
+        n.setAttribute(a, n[a]);
+        break;
+      }
+  return node;
 }
