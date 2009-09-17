@@ -159,7 +159,7 @@ Ubiquity.prototype = {
 
     if (event.ctrlKey && event.altKey &&
         KeyEvent.DOM_VK_0 <= keyCode && keyCode <= KeyEvent.DOM_VK_Z) {
-      this.__cmdManager.previewBrowser.activateAccessKey(keyCode);
+      this.__cmdManager.previewer.activateAccessKey(keyCode);
       return true;
     }
 
@@ -183,7 +183,7 @@ Ubiquity.prototype = {
     var rate = this.__KEYMAP_SCROLL_RATE[keyCode];
     if (rate) {
       let [x, y] = event.shiftKey ? [rate, 0] : [0, rate];
-      this.__cmdManager.previewBrowser.scroll(x, y);
+      this.__cmdManager.previewer.scroll(x, y);
       return;
     }
   },

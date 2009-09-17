@@ -104,7 +104,8 @@ function CommandManager(cmdSource, msgService, parser,
 
   cmdSource.addListener("feeds-reloaded", onFeedsReloaded);
   this.finalize = function CM_finalize() {
-    cmdSource.removeListener("feeds-reloaded", onCommandsReloaded);
+    cmdSource.removeListener("feeds-reloaded", onFeedsReloaded);
+    self.__previewer.finalize();
     for (let key in new Iterator(this, true)) delete this[key];
   };
 
@@ -366,8 +367,8 @@ CommandManager.prototype = {
   },
 
   get parser CM_parser() this.__nlParser,
-  get lastInput CM_getLastInput() this.__lastInput,
-  get previewBrowser CM_previewBrowser() this.__previewer,
+  get lastInput CM_lastInput() this.__lastInput,
+  get previewer CM_previewer() this.__previewer,
 
   get maxSuggestions CM_maxSuggestions() CommandManager.maxSuggestions,
   get hasSuggestions CM_hasSuggestions()

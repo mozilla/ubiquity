@@ -43,7 +43,6 @@ function PreviewBrowser(browser, defaultUrl) {
   this.__defaultUrl = defaultUrl;
   this.__queuedPreview = null;
   this.__previewBrowser = browser;
-  this.__previewBrowserCreatedCallback = null;
   this.__previewBrowserUrlLoadedCallback = null;
 
   function resizeContainer(ev) {
@@ -63,42 +62,15 @@ function PreviewBrowser(browser, defaultUrl) {
 }
 
 PreviewBrowser.prototype = {
-  get isActive() {
-    return this.__isActive;
-  },
+  get isActive PB_isActive() this.__isActive,
 
-  _onPreviewBrowserCreate : function PB__onPreviewBrowserCreate(browser) {
-    this.__previewBrowser = browser;
-    var cb = this.__previewBrowserCreatedCallback;
-    this.__previewBrowserCreatedCallback = null;
-    cb();
-  },
-
-  _ensurePreviewBrowser : function PB__ensurePreviewBrowser(cb) {
-    if (this.__previewBrowser)
-      cb();
-    else {
-      if (this.__previewBrowserCreatedCallback)
-        this.__previewBrowserCreatedCallback = cb;
-      else {
-        var self = this;
-        this.__previewBrowserCreatedCallback = cb;
-        makePreviewBrowser(this.__containingNode,
-                           this.__defaultUrl,
-                           function(browser) {
-                             self._onPreviewBrowserCreate(browser);
-                           });
-      }
-    }
-  },
-
-  _onPreviewBrowserLoadUrl : function PB__onPreviewBrowserLoadUrl() {
+  _onPreviewBrowserLoadUrl: function PB__onPreviewBrowserLoadUrl() {
     var cb = this.__previewBrowserUrlLoadedCallback;
     this.__previewBrowserUrlLoadedCallback = null;
     cb();
   },
 
-  _ensurePreviewBrowserUrlLoaded : function PB__EPBUL(url, cb) {
+  _ensurePreviewBrowserUrlLoaded: function PB__EPBUL(url, cb) {
     var currUrl = this.__previewBrowser.getAttribute("src");
     if (url === currUrl) {
       if (this.__previewBrowserUrlLoadedCallback)
@@ -110,17 +82,14 @@ PreviewBrowser.prototype = {
     }
     else {
       var self = this;
-      function onLoad() {
-        self.__previewBrowser.removeEventListener("load", onLoad, true);
+      this.__previewBrowserUrlLoadedCallback = cb;
+      this.__previewBrowser.setAttribute("src", url);
+      Utils.listenOnce(this.__previewBrowser, "load", function onLoad() {
         // The source URL may actually have changed while our URL was loading,
         // if the user switched command previews really fast, so make sure that
         // we're still on the same URL.
-        if (self.__previewBrowser.getAttribute("src") == url)
-          self._onPreviewBrowserLoadUrl();
-      }
-      this.__previewBrowserUrlLoadedCallback = cb;
-      this.__previewBrowser.addEventListener("load", onLoad, true);
-      this.__previewBrowser.setAttribute("src", url);
+        if (this.getAttribute("src") === url) self._onPreviewBrowserLoadUrl();
+      }, true);
     }
   },
 
@@ -144,42 +113,29 @@ PreviewBrowser.prototype = {
       }
   },
 
-  queuePreview : function PB__queuePreview(url, delay, cb) {
+  queuePreview: function PB__queuePreview(url, delay, cb) {
     var self = this;
-
-    self.__isActive = true;
-
     function showPreview() {
-      self._ensurePreviewBrowser(
-        function() {
-          if (self.__queuedPreview == showPreview) {
-            if (url)
-              url = Utils.url(url).spec;
-            else
-              url = self.__defaultUrl;
+      if (self.__queuedPreview !== showPreview) return;
 
-            self._ensurePreviewBrowserUrlLoaded(
-              url,
-              function() {
-                if (self.__queuedPreview == showPreview) {
-                  self.__queuedPreview = null;
-                  cb(self.__previewBrowser.contentDocument.body);
-                }
-              });
+      self._ensurePreviewBrowserUrlLoaded(
+        url ? Utils.url(url).spec : self.__defaultUrl,
+        function PB___onUrlLoaded() {
+          if (self.__queuedPreview === showPreview) {
+            self.__queuedPreview = null;
+            cb(self.__previewBrowser.contentDocument.body);
           }
         });
     }
 
+    this.__isActive = true;
     this.__queuedPreview = showPreview;
 
-    if (this.__previewBrowser &&
-        this.__previewBrowser.contentDocument) {
-      var previewPane = this.__previewBrowser.contentDocument.body;
-      if (previewPane) {
-        var evt = previewPane.ownerDocument.createEvent("HTMLEvents");
-        evt.initEvent("preview-change", false, false);
-        previewPane.dispatchEvent(evt);
-      }
+    var {contentDocument} = this.__previewBrowser;
+    if (contentDocument && contentDocument.body) {
+      var evt = contentDocument.createEvent("HTMLEvents");
+      evt.initEvent("preview-change", false, false);
+      contentDocument.body.dispatchEvent(evt);
     }
 
     if (delay)
@@ -194,6 +150,6 @@ PreviewBrowser.prototype = {
   },
 
   finalize: function PB_finalize() {
-    for (var key in this) delete this[key];
+    for (var key in new Iterator(this, true)) delete this[key];
   }
 };
