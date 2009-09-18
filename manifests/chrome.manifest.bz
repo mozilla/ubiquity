@@ -28,6 +28,7 @@ locale ubiquity hu    chrome/locale/hu/
 locale ubiquity hu-HU chrome/locale/hu-HU/
 locale ubiquity it-IT chrome/locale/it-IT/
 locale ubiquity ja    chrome/locale/ja/
+locale ubiquity ko-KR chrome/locale/ko-KR/
 locale ubiquity nl    chrome/locale/nl/
 locale ubiquity pl-PL chrome/locale/pl-PL/
 locale ubiquity pt    chrome/locale/pt/
