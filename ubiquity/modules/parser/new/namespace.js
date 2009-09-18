@@ -39,7 +39,6 @@ var EXPORTED_SYMBOLS = ["NLParser2", "parserRegistry"];
 const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
-Cu.import("resource://ubiquity/modules/parser/parser.js");
 Cu.import("resource://ubiquity/modules/parser/new/parser.js");
 
 var NLParser2 = {
@@ -47,8 +46,12 @@ var NLParser2 = {
   parserFactories: {},
   makeParserForLanguage: function(languageCode, verbList,
                                   ContextUtils, SuggestionMemory) {
-    if (!(languageCode in NLParser2.parserFactories))
-      throw "No parser is defined for " + languageCode;
+    if (!(languageCode in NLParser2.parserFactories)) {
+      try { loadParserMaker(languageCode) }
+      catch (e if e.result === Components.results.NS_ERROR_FILE_NOT_FOUND) {
+        throw Error("No parser is defined for " + uneval(languageCode));
+      }
+    }
 
     let parser = NLParser2.parserFactories[languageCode]();
     parser.setCommandList(verbList);
@@ -76,8 +79,6 @@ var parserRegistry = eval(
   Utils.getLocalUrl(
     "resource://ubiquity/modules/parser/new/parser_registry.json",
     "utf-8"));
-
-for (let code in parserRegistry) loadParserMaker(code);
 
 function loadParserMaker(code) {
   eval(Utils.getLocalUrl(
