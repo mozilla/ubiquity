@@ -26,11 +26,11 @@
     <em:updateURL>https://ubiquity.mozilla.com/xpi/%ITEM_VERSION%/update.rdf</em:updateURL>
     <em:optionsURL>chrome://ubiquity/content/preferences.xul</em:optionsURL>
 
-    <em:translator>egamonal, toniher (ca)</em:translator>
-    <em:translator>cers (da-DK)</em:translator>
+    <em:translator>Edu Gamonal, Toni Hermoso Pulido (ca)</em:translator>
+    <em:translator>Christian (cers) Sonne (da-DK)</em:translator>
     <em:translator>cmos (de)</em:translator>
     <em:translator>Fux, Team erweiterungen.de (de-DE)</em:translator>
-    <em:translator>queltosh (es-ES)</em:translator>
+    <em:translator>Roberto Muñoz Gómez (es-ES)</em:translator>
     <em:translator>AtteL (fi-FI)</em:translator>
     <em:translator>ccorazza, Frédéric, Goofy, myahoo (fr)</em:translator>
     <em:translator>moZes (fy-NL)</em:translator>
@@ -38,9 +38,9 @@
     <em:translator>gialloporpora (it-IT)</em:translator>
     <em:translator>mar, powchin, satyr (ja)</em:translator>
     <em:translator>nathansamson (nl)</em:translator>
-    <em:translator>teo (pl-PL)</em:translator>
+    <em:translator>Leszek (teo) Życzkowski (pl-PL)</em:translator>
     <em:translator>camponez (pt)</em:translator>
-    <em:translator>brunomagrani, fernph (pt-BR)</em:translator>
+    <em:translator>Bruno Magrani, fernph (pt-BR)</em:translator>
     <em:translator>mrfyda (pt-PT)</em:translator>
     <em:translator>x10firefox (ro-RO)</em:translator>
     <em:translator>Quicksilver tears, SeLarin (ru-RU)</em:translator>
