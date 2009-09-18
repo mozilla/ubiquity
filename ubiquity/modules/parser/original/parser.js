@@ -50,7 +50,7 @@ Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 Cu.import("resource://ubiquity/modules/parser/original/locale_en.js");
 Cu.import("resource://ubiquity/modules/parser/new/namespace.js");
 
-const PLUGINS = {en: EnParser, $: {parseSentence: EnParser.parserSentence}};
+const PLUGINS = {en: EnParser, $: {parseSentence: EnParser.parseSentence}};
 const FLAG_DEFAULT = 1;
 
 var {push} = Array.prototype;
