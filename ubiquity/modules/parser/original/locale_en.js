@@ -95,23 +95,19 @@ function parseSentence(inputString, verbList, makePPS) {
   if (!words.length) return parsings;
 
   var inputs = (words.length === 1
-                ? [words]
-                : [[words[0], words.slice(1)], [words.pop(), words]]);
-  //var inputVerb = words.shift().toLowerCase(); // Verb#match() uses lower-case
-  // And the arguments after it:
-  //var inputArgs = words;
-  // Try matching the verb against all the words we know:
+                ? [[words[0], null, 1]]
+                : [[words[0], words.slice(1), 1], [words.pop(), words, .5]]);
   for each (let verb in verbList) if (!verb.disabled)
-    VERB: for each (let [inputVerb, inputArgs] in inputs) {
-      let matchScore = verb.match(inputVerb);
+    VERB: for each (let input in inputs) {
+      let matchScore = verb.match(input[0]);
       if (!matchScore) continue;
 
-      let {args} = verb;
+      let [, inputArgs, weight] = input, {args} = verb;
+      matchScore *= weight;
       if (!inputArgs || isEmpty(args)) {
         parsings.push(makePPS(verb, {}, matchScore));
         break VERB;
       }
-      // Recursively parse to assign arguments
       let preps = {}; // {source: "to", goal: "from", ...}
       for (let arg in args) preps[arg] = args[arg].preposition;
       delete preps.object;
