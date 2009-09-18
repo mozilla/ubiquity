@@ -102,13 +102,13 @@ function getSelection(context) {
 // a plain-text only editable field.
 
 function setSelection(context, content, options) {
-  var doc = context.focusedWindow.document;
-  if (doc.designMode === "on") {
-    doc.execCommand("insertHTML", false, content);
+  var {focusedWindow, focusedElement} = context;
+
+  if (focusedWindow && focusedWindow.document.designMode === "on") {
+    focusedWindow.document.execCommand("insertHTML", false, content);
     return true;
   }
 
-  var {focusedElement} = context;
   if (focusedElement) {
     function html2text(el) {
       el.innerHTML = "<div>" + content + "</div>";

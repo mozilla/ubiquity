@@ -176,7 +176,7 @@ Ubiquity.prototype = {
     var {keyCode} = event;
     if (keyCode === this.__KEYCODE_ENTER) {
       this.__processInput(true);
-      this.__needsToExecute = this.__cmdManager.hasSuggestions;
+      this.__needsToExecute = !!this.__textBox.value;
       this.__msgPanel.hidePopup();
       return;
     }
@@ -193,11 +193,11 @@ Ubiquity.prototype = {
                                            this.__makeContext());
   },
 
-  __delayedProcessInput: function U__delayedProcessInput() {
+  __delayedProcessInput: function U__delayedProcessInput(context) {
     var input = this.__textBox.value;
     if (input.length < this.__MIN_CMD_PREVIEW_LENGTH) return;
 
-    var context = this.__makeContext();
+    context || (context = this.__makeContext());
     if (input !== this.__lastValue ||
         !input && this.ContextUtils.getSelection(context)) {
       var self = this;
@@ -208,27 +208,28 @@ Ubiquity.prototype = {
     }
   },
 
-  __processInput: function U__processInput(immediate) {
+  __processInput: function U__processInput(immediate, context) {
     this.Utils.clearTimeout(this.__previewTimerID);
     if (immediate)
-      this.__delayedProcessInput();
+      this.__delayedProcessInput(context);
     else
       this.__previewTimerID = this.Utils.setTimeout(
-        function U___delayedPI(self) { self.__delayedProcessInput(); },
+        function U___delayedPI(self) { self.__delayedProcessInput(context); },
         this.inputDelay,
         this);
   },
 
-  __makeContext: function U__makeContext() {
+  __makeContext: function U__makeContext(ensureFocus) {
     return {
       screenX: this.__x,
       screenY: this.__y,
       chromeWindow: window,
-      focusedWindow:
-      this.__focusedWindow  || document.commandDispatcher.focusedWindow,
-      focusedElement:
-      this.__focusedElement || document.commandDispatcher.focusedElement,
-    };
+      focusedWindow : this.__focusedWindow  ||
+        (ensureFocus ? document.commandDispatcher.focusedWindow  : null),
+      focusedElement: this.__focusedElement ||
+        (ensureFocus ? document.commandDispatcher.focusedElement : null),
+      isWindowOpen: this.isWindowOpen,
+    }
   },
 
   __onpopuphidden: function U__onHidden() {
@@ -237,11 +238,11 @@ Ubiquity.prototype = {
       this.__needsToExecute = false;
       this.execute();
     }
-    var unfocused = this.__focusedElement || this.__focusedWindow;
-    if (unfocused) unfocused.focus(); // focus() === unblair()
+    else this.__cmdManager.reset();
 
+    var unfocused = this.__focusedElement || this.__focusedWindow;
+    if (unfocused) unfocused.focus();
     this.__focusedWindow = this.__focusedElement = null;
-    this.__cmdManager.reset();
   },
 
   __onpopupshowing: function U__onShowing() {
@@ -289,11 +290,13 @@ Ubiquity.prototype = {
   // Executes {{{input}}} or the current entry.
 
   execute: function U_execute(input) {
-    if (input) {
+    var context = this.__makeContext(!!input);
+    if (input != null) {
+      this.__lastValue = "";
       this.__textBox.value = input;
-      this.__processInput(true);
+      this.__processInput(true, context);
     }
-    this.__cmdManager.execute(this.__makeContext());
+    this.__cmdManager.execute(context);
   },
 
   // === {{{ Ubiquity#preview(input, immediate) }}} ===
@@ -303,7 +306,7 @@ Ubiquity.prototype = {
   // and opening Ubiquity if it's closed.
 
   preview: function U_preview(input, immediate) {
-    if (input) this.__textBox.value = input;
+    if (input != null) this.__textBox.value = input;
     if (this.isWindowOpen)
       this.__processInput(immediate);
     else

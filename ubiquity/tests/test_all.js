@@ -119,12 +119,12 @@ function testCompositeCollectionWorks() {
 }
 
 function testMixedCodeSourceWorks() {
-  let a = new StringCodeSource('a', 'a');
-  let b = new StringCodeSource('b', 'b');
-  let c = new StringCodeSource('c', 'c');
-  let d = new StringCodeSource('d', 'd');
-  let e = new StringCodeSource('e', 'e');
-  let f = new StringCodeSource('f', 'f');
+  let a = new StringCodeSource("a", "a");
+  let b = new StringCodeSource("b", "b");
+  let c = new StringCodeSource("c", "c");
+  let d = new StringCodeSource("d", "d");
+  let e = new StringCodeSource("e", "e");
+  let f = new StringCodeSource("f", "f");
 
   let headers = new IterableCollection([a, b]);
   let footers = new IterableCollection([e, f]);
@@ -134,21 +134,21 @@ function testMixedCodeSourceWorks() {
     new MixedCodeSource(d, headers, footers)
   ];
 
-  this.assert(codeSources[0].getCode() == 'abcef');
-  this.assert(codeSources[0].id == 'c');
-  this.assert(codeSources[0].codeSections[1].filename == 'b');
-  this.assert(codeSources[0].codeSections[1].length == 1);
+  this.assertEquals(codeSources[0].getCode(), "abcef");
+  this.assertEquals(codeSources[0].id, "c");
+  this.assertEquals(codeSources[0].codeSections[1].filename, "b");
+  this.assertEquals(codeSources[0].codeSections[1].length, 1);
 
-  this.assert(codeSources[1].getCode() == 'abdef');
-  this.assert(codeSources[1].id == 'd');
-  this.assert(codeSources[1].codeSections[2].filename == 'd');
-  this.assert(codeSources[1].codeSections[2].length == 1);
+  this.assertEquals(codeSources[1].getCode(), "abdef");
+  this.assertEquals(codeSources[1].id, "d");
+  this.assertEquals(codeSources[1].codeSections[2].filename, "d");
+  this.assertEquals(codeSources[1].codeSections[2].length, 1);
 }
 
 function testFeedManagerWorks() {
   var FMgr = new FeedManager(new TestAnnotationMemory(this));
   var fakeFeedPlugin = {
-    type: 'fake',
+    type: "fake",
     makeFeed: function makeFeed(baseFeedInfo, hub) {
       var feedInfo = {};
 
@@ -176,7 +176,7 @@ function testFeedManagerWorks() {
                           sourceUrl: sourceUrl,
                           sourceCode: code,
                           canAutoUpdate: false,
-                          type: 'fake'});
+                          type: "fake"});
   this.assert(FMgr.isSubscribedFeed(url));
 
   var results = FMgr.getSubscribedFeeds();
@@ -193,7 +193,7 @@ function testFeedManagerWorks() {
                           sourceUrl: "http://www.bar.com/code.js",
                           sourceCode: moreCode,
                           canAutoUpdate: false,
-                          type: 'fake'});
+                          type: "fake"});
   results = FMgr.getSubscribedFeeds();
 
   this.assert(results[0].getCode() == code);
@@ -294,28 +294,10 @@ function testCmdManagerCatchesExceptionsInCmds() {
   }
 }
 
-function testCmdManagerDisplaysNoCmdError() {
-  var fakeSource = new FakeCommandSource ( {} );
-  var mockMsgService = {
-    displayMessage : function(msg) { this.lastMsg = msg; }
-  };
-  var fakeContext = {focusedElement: null,
-                     focusedWindow: null};
-
-  makeCommandManager.call(this, fakeSource, mockMsgService,
-                          makeTestParser(), onCM);
-  function onCM(cmdMan) {
-    cmdMan.updateInput("nonexistentcommand", fakeContext);
-    cmdMan.execute(fakeContext);
-    this.assertIsDefined(mockMsgService.lastMsg,
-                         "Command manager must display a message.");
-  }
-}
-
 function testIterableCollectionWorks() {
   var fakeCodeSource = {
     getCode: function() { return "a = 1"; },
-    id: 'http://www.foo.com/bar.js'
+    id: "http://www.foo.com/bar.js"
   };
 
   var coll = new IterableCollection([fakeCodeSource]);
@@ -344,39 +326,39 @@ function testUtilsSortBy() {
     Utils.sortBy(strArray.slice(), "length") + "");
   // (-2|-1|0|1|2) x 99
   var numArray = [(Math.random() * 5 | 0) - 2 for each(i in Array(99) + 0)];
-  this.assertEquals(numArray.slice().sort(function(a, b) b - a) + '',
-                    Utils.sortBy(numArray, function(x) -x) + '');
+  this.assertEquals(numArray.slice().sort(function (a, b) b - a) + "",
+                    Utils.sortBy(numArray, function (x) -x) + "");
 }
 
 function testUtilsComputeCryptoHash() {
   var str = "hello world";
-  this.assert(Utils.computeCryptoHash("md5", str) == "5eb63bbbe01eeed093cb22bb8f5acdc3");
-  this.assert(Utils.computeCryptoHash("sha1", str) == "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+  this.assertEquals(Utils.computeCryptoHash("md5", str),
+                    "5eb63bbbe01eeed093cb22bb8f5acdc3");
+  this.assertEquals(Utils.computeCryptoHash("sha1", str),
+                    "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
 }
 
 function testUtilsParamsToString() {
   var data = {};
   var expected = "?";
-  this.assert(Utils.paramsToString(data) == expected);
+  this.assertEquals(Utils.paramsToString(data), expected);
 
-  data = {
-    hello: "world"
-  };
+  data = {hello: "world"};
   expected = "?hello=world";
-  this.assert(Utils.paramsToString(data) == expected);
+  this.assertEquals(Utils.paramsToString(data), expected);
 
   data = {
     hello: "world",
     life: 42
   };
   expected = "?hello=world&life=42";
-  this.assert(Utils.paramsToString(data) == expected);
+  this.assertEquals(Utils.paramsToString(data), expected);
 
   data = {
     multiple: ["one", "two", "three"]
   };
   expected = "?multiple=one&multiple=two&multiple=three";
-  this.assert(Utils.paramsToString(data) == expected);
+  this.assertEquals(Utils.paramsToString(data), expected);
 
   data = {
     obj: {
@@ -385,8 +367,8 @@ function testUtilsParamsToString() {
     }
   };
   expected = "?obj=hello_world";
-  this.assert(Utils.paramsToString(data) == expected);
-  this.assert(Utils.paramsToString(data, "") == expected.slice(1));
+  this.assertEquals(Utils.paramsToString(data), expected);
+  this.assertEquals(Utils.paramsToString(data, ""), expected.slice(1));
 }
 
 function testUtilsIsArray() {
@@ -434,10 +416,13 @@ function testSandboxFactoryProtectsSandbox() {
 
 function testXmlScriptCommandsParser() {
   Cu.import("resource://ubiquity/modules/xml_script_commands_parser.js");
-  var code = parseCodeFromXml('<foo>\n<script class="commands"><![CDATA[testing\n\n\n>]]></script></foo>');
-  this.assert(code.length == 1);
-  this.assert(code[0].lineNumber == 2, "hi");
-  this.assert(code[0].code == 'testing\n\n\n>');
+  var code = parseCodeFromXml(
+    '<foo>\n<script class="commands">' +
+    '<![CDATA[testing\n\n\n>]]>' +
+    '</script></foo>');
+  this.assertEquals(code.length, 1);
+  this.assertEquals(code[0].lineNumber, 2);
+  this.assertEquals(code[0].code, "testing\n\n\n>");
 }
 
 function testLocalUriCodeSourceWorksWithBadFilenames() {
@@ -541,7 +526,7 @@ function testUtilsListenOnce() {
   }};
   Utils.listenOnce(document, type, listener1);
   Utils.listenOnce(document, type, listener2, true);
-  for(let j = 0; j < 2; ++j) {
+  for (let j = 0; j < 2; ++j) {
     let event = document.createEvent("Event");
     event.initEvent(type, false, false);
     document.dispatchEvent(event);

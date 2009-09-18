@@ -42,8 +42,8 @@
 
 var gUbiquity = null;
 
-window.addEventListener("load", function onload() {
-  window.removeEventListener("load", onload, false);
+addEventListener("load", function onload() {
+  removeEventListener("load", onload, false);
 
   const Cu = Components.utils;
   const {prefs} = Application;
@@ -73,9 +73,9 @@ window.addEventListener("load", function onload() {
                              document.getElementById("ubiquity-entry"),
                              cmdMan);
 
-    window.addEventListener("command", function refreshUbiquityOnReload(evt) {
-      if (evt.target.id === "Browser:Reload")
-        cmdMan.refresh();
+    cmdMan.refresh();
+    addEventListener("command", function refreshUbiquityOnReload(evt) {
+      if (evt.target.id === "Browser:Reload") cmdMan.refresh();
     }, false);
 
     jsm.Utils.listenOnce(window, "unload", function ubiquityTeardown() {
@@ -137,6 +137,6 @@ window.addEventListener("load", function onload() {
       //errorToLocalize
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }
-    if (gUbiquity) window.addEventListener("keydown", ubiquityKey, true);
+    if (gUbiquity) addEventListener("keydown", ubiquityKey, true);
   });
 }, false);

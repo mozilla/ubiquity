@@ -53,26 +53,30 @@ var L = LocalizationUtils.propertySelector(
 
 const {prefs} = Utils.Application;
 const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
+const DEFAULT_MAX_SUGGESTIONS = 5;
+const PREF_MAX_SUGGESTIONS = "extensions.ubiquity.maxSuggestions";
 const MIN_MAX_SUGGS = 1;
 const MAX_MAX_SUGGS = 42;
 
+const NS_XHTML = "http://www.w3.org/1999/xhtml";
+const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
 const DEFAULT_HELP = (
-  '<div class="default" xmlns="http://www.w3.org/1999/xhtml">' +
-  L("ubiquity.cmdmanager.defaulthelp") + '</div>');
+  '<div class="default" xmlns="' + NS_XHTML + '">' +
+  L("ubiquity.cmdmanager.defaulthelp") +
+  '</div>');
 
 var gDomNodes = {};
 
-CommandManager.DEFAULT_MAX_SUGGESTIONS = 5;
-CommandManager.MAX_SUGGESTIONS_PREF = "extensions.ubiquity.maxSuggestions";
 CommandManager.__defineGetter__(
   "maxSuggestions", function CM_getMaxSuggestions() {
-    return prefs.getValue(this.MAX_SUGGESTIONS_PREF,
-                          this.DEFAULT_MAX_SUGGESTIONS);
+    return prefs.getValue(PREF_MAX_SUGGESTIONS,
+                          DEFAULT_MAX_SUGGESTIONS);
   });
 CommandManager.__defineSetter__(
   "maxSuggestions", function CM_setMaxSuggestions(value) {
     var num = Math.max(MIN_MAX_SUGGS, Math.min(value | 0, MAX_MAX_SUGGS));
-    prefs.setValue(this.MAX_SUGGESTIONS_PREF, num);
+    prefs.setValue(PREF_MAX_SUGGESTIONS, num);
   });
 
 function CommandManager(cmdSource, msgService, parser,
@@ -82,6 +86,7 @@ function CommandManager(cmdSource, msgService, parser,
   this.__hilitedIndex = 0;
   this.__lastInput = "";
   this.__lastHilitedIndex = -1;
+  this.__queuedExecute = null;
   this.__lastAsyncSuggestionCb = Boolean;
   this.__nlParser = parser;
   this.__dynaLoad = !parser;
@@ -91,17 +96,14 @@ function CommandManager(cmdSource, msgService, parser,
     suggs: suggsNode,
     suggsIframe: suggsNode.getElementsByTagName("iframe")[0],
     preview: previewPaneNode,
-    help: helpNode};
+    help: helpNode,
+  };
   this.__previewer = new PreviewBrowser(
-    previewPaneNode.getElementsByTagNameNS(
-      "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul",
-      "browser")[0],
+    previewPaneNode.getElementsByTagNameNS(NS_XUL, "browser")[0],
     DEFAULT_PREVIEW_URL);
-  this.__commandsByServiceDomain = null;
 
   var self = this;
   function onFeedsReloaded() { self._loadCommands() }
-
   cmdSource.addListener("feeds-reloaded", onFeedsReloaded);
   this.finalize = function CM_finalize() {
     cmdSource.removeListener("feeds-reloaded", onFeedsReloaded);
@@ -168,8 +170,10 @@ CommandManager.prototype = {
       let {parserVersion, languageCode} = UbiquitySetup;
       if ((this.__parserType) !==
           (this.__parserType = parserVersion + languageCode)) {
-        this.__nlParser = null;
-        this.__cmdSource.refresh(true);
+        if (this.__nlParser) {
+          this.__nlParser = null;
+          this.__cmdSource.refresh(true);
+        }
         this.__nlParser = (
           NLParserMaker(parserVersion)
           .makeParserForLanguage(languageCode,
@@ -216,9 +220,7 @@ CommandManager.prototype = {
     }
     if (!("feedUpdates" in gDomNodes)) {
       gDomNodes.feedUpdates = doc.createElement("box");
-      let {feedManager} = (
-        Cu.import("resource://ubiquity/modules/setup.js", null)
-        .UbiquitySetup.createServices());
+      let {feedManager} = UbiquitySetup.createServices();
       let count = 0;
       feedManager.getSubscribedFeeds().forEach(
         function eachFeed(feed, i, feeds) {
@@ -231,7 +233,7 @@ CommandManager.prototype = {
             if (++count === feeds.length &&
                 (feeds = feeds.filter(Boolean)).length)
               gDomNodes.feedUpdates.appendChild(createFragment(
-                <div class="feed-updates" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="feed-updates" xmlns={NS_XHTML}>
                 <h3>The following feeds have updates:</h3>
                 </div>.appendChild(feeds.reduce(accList, <ol/>))));
           });
@@ -284,6 +286,7 @@ CommandManager.prototype = {
   },
 
   _renderAll: function CM__renderAll(context) {
+    if (!context.isWindowOpen) return;
     this._renderSuggestions();
     this._renderPreview(context);
   },
@@ -295,6 +298,7 @@ CommandManager.prototype = {
     this.__hilitedIndex = 0;
     this.__lastInput = "";
     this.__lastHilitedIndex = -1;
+    this.__queuedExecute = null;
   },
 
   updateInput: function CM_updateInput(input, context, asyncSuggestionCb) {
@@ -314,12 +318,14 @@ CommandManager.prototype = {
   onSuggestionsUpdated: function CM_onSuggestionsUpdated(input, context) {
     if (input !== this.__lastInput) return;
 
-    var {suggestionList} = this.__activeQuery;
-    //errorToLocalize
-    Utils.dump("rendering", suggestionList.length, "suggestions");
+    var {hilitedSuggestion} = this;
+    if (this.__queuedExecute && hilitedSuggestion) {
+      this.__queuedExecute(hilitedSuggestion);
+      this.__queuedExecute = null;
+    }
 
     this.setPreviewState(this.__activeQuery.finished
-                         ? (suggestionList.length > 0
+                         ? (hilitedSuggestion
                             ? "with-suggestions"
                             : "no-suggestions")
                          : "computing-suggestions");
@@ -327,25 +333,24 @@ CommandManager.prototype = {
   },
 
   execute: function CM_execute(context) {
-    var activeSugg = this.hilitedSuggestion;
-    if (!activeSugg) {
-      //errorToLocalize
-      this.__msgService.displayMessage('No command called "' +
-                                       this.__lastInput + '".');
-      return;
+    function doExecute(activeSugg) {
+      try {
+        this.__nlParser.strengthenMemory(activeSugg);
+        activeSugg.execute(context);
+      } catch (e) {
+        this.__msgService.displayMessage({
+          //errorToLocalize
+          text: ('An exception occurred while running the command "' +
+                 activeSugg._verb.name + '".'),
+          exception: e,
+        });
+      }
     }
-    try {
-      this.__nlParser.strengthenMemory(activeSugg);
-      activeSugg.execute(context);
-    } catch (e) {
-      let verb = activeSugg._verb;
-      this.__msgService.displayMessage({
-        //errorToLocalize
-        text: ('An exception occurred while running the command "' +
-               (verb.cmd || verb).name + '".'),
-        exception: e,
-      });
-    }
+    var {hilitedSuggestion} = this;
+    if (hilitedSuggestion)
+      doExecute.call(this, hilitedSuggestion);
+    else
+      this.__queuedExecute = doExecute;
   },
 
   getSuggestionListNoInput: function CM_getSuggListNoInput(context,
