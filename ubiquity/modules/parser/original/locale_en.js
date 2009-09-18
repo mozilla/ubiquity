@@ -39,7 +39,6 @@ var EXPORTED_SYMBOLS = ["EnParser"];
 
 var EnParser = {
   parseSentence: parseSentence,
-  PRONOUNS: ["this", "that", "it", "selection", "him", "her", "them"],
 };
 
 Components.utils.import("resource://ubiquity/modules/utils.js");
@@ -87,42 +86,47 @@ function recursiveParse(unusedWords, filledArgs, objYet, prepDict) {
 
 function parseSentence(inputString, verbList, makePPS) {
   // Returns a list of PartiallyParsedSentences.
-  let parsings = [];
+  var parsings = [];
   // English uses spaces between words:
   // If input is "dostuff " (note space) then splitting on space will
   //  produce ["dostuff", ""].  We don't want the empty string, so drop
   //  all zero-length strings:
-  let words = [word for each (word in inputString.split(" ")) if (word)];
+  var words = [word for each (word in inputString.split(" ")) if (word)];
   if (!words.length) return parsings;
 
-  // English puts verb at the beginning of the sentence:
-  let inputVerb = words.shift().toLowerCase(); // Verb#match() uses lower-case
+  var inputs = (words.length === 1
+                ? [words]
+                : [[words[0], words.slice(1)], [words.pop(), words]]);
+  //var inputVerb = words.shift().toLowerCase(); // Verb#match() uses lower-case
   // And the arguments after it:
-  let inputArgs = words;
+  //var inputArgs = words;
   // Try matching the verb against all the words we know:
-  for each (let verb in verbList) if (!verb.disabled) {
-    let matchScore = verb.match(inputVerb);
-    if (!matchScore) continue;
-    let {args} = verb;
-    if (isEmpty(args)) {
-      parsings.push(makePPS(verb, {}, matchScore));
-      continue;
-    }
-    // Recursively parse to assign arguments
-    let preps = {}; // {source: "to", goal: "from", ...}
-    for (let key in args) preps[key] = args[key].preposition;
-    delete preps.object;
-    let hasObj = "object" in args;
-    let argStringsList = recursiveParse(inputArgs, {}, hasObj , preps);
-    for each (let argStrings in argStringsList)
-      parsings.push(makePPS(verb, argStrings, matchScore));
-    if (!argStringsList.length && !hasObj)
-      // manual interpolations for required prepositions
-      for (let arg in args) {
-        let argStr = {};
-        argStr[arg] = inputArgs;
-        parsings.push(makePPS(verb, argStr, matchScore));
+  for each (let verb in verbList) if (!verb.disabled)
+    VERB: for each (let [inputVerb, inputArgs] in inputs) {
+      let matchScore = verb.match(inputVerb);
+      if (!matchScore) continue;
+
+      let {args} = verb;
+      if (!inputArgs || isEmpty(args)) {
+        parsings.push(makePPS(verb, {}, matchScore));
+        break VERB;
       }
-  }
+      // Recursively parse to assign arguments
+      let preps = {}; // {source: "to", goal: "from", ...}
+      for (let arg in args) preps[arg] = args[arg].preposition;
+      delete preps.object;
+      let hasObj = "object" in args;
+      let argStringsList = recursiveParse(inputArgs, {}, hasObj , preps);
+      for each (let argStrings in argStringsList)
+        parsings.push(makePPS(verb, argStrings, matchScore));
+      if (!argStringsList.length && !hasObj)
+        // manual interpolations for required prepositions
+        for (let arg in args) {
+          let argStr = {};
+          argStr[arg] = inputArgs;
+          parsings.push(makePPS(verb, argStr, matchScore));
+        }
+      break VERB;
+    }
   return parsings;
 }

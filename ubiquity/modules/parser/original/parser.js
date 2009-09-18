@@ -47,24 +47,25 @@ const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
+Cu.import("resource://ubiquity/modules/parser/original/locale_en.js");
+Cu.import("resource://ubiquity/modules/parser/new/namespace.js");
 
+const PLUGINS = {en: EnParser, $: {parseSentence: EnParser.parserSentence}};
 const FLAG_DEFAULT = 1;
 
 var {push} = Array.prototype;
-var plugins = {};
 
 function makeParserForLanguage(languageCode, verbList,
                                ContextUtils, suggestionMemory) {
-  return new Parser(verbList, getPluginForLanguage(languageCode),
+  var plugin = PLUGINS[languageCode];
+  if (!plugin) plugin = EnParser, languageCode = "en";
+  return new Parser(verbList, setupPlugin(plugin, languageCode),
                     ContextUtils, suggestionMemory);
 }
 
-function registerPluginForLanguage(code, plugin) {
-  var {Parser} = Cu.import("resource://ubiquity/modules/parser/new/parser.js",
-                           null);
-  var langFile = "resource://ubiquity/modules/parser/new/" + code + ".js";
-  eval(Utils.getLocalUrl(langFile, "utf-8"));
-  var parser = makeParser();
+function setupPlugin(plugin, code) {
+  if ("roleMap" in plugin) return plugin;
+  var parser = NLParser2.makeParserForLanguage(code, {}, {}, {});
   var roleMap = plugin.roleMap = {};
   for each (let {role, delimiter} in parser.roles)
     if (!(role in roleMap)) roleMap[role] = delimiter;
@@ -72,10 +73,8 @@ function registerPluginForLanguage(code, plugin) {
   plugin.pronouns = [
     RegExp(a.replace(/\W/g, "\\$&").replace(/^\b|\b$/g, "\\b"), "i")
     for each (a in parser.anaphora)];
-  plugins[code] = plugin;
+  return plugin;
 }
-
-function getPluginForLanguage(languageCode) plugins[languageCode];
 
 // ParserQuery: An object that wraps a request to the parser for suggestions
 // based on a given query string.  Multiple ParserQueries may be in action at
