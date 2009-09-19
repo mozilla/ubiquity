@@ -770,7 +770,7 @@ function CreateCommand(options) {
   }
   OLD_DEPRECATED_ARGUMENT_API:
   { let {takes, modifiers} = options;
-    if (takes || modifiers) command.oldAPI = true;
+    command.oldAPI = !!(takes || modifiers);
     for (let label in takes) {
       command.DOLabel = label;
       command.DOType = takes[label];
@@ -781,7 +781,10 @@ function CreateCommand(options) {
   }
   NEW_IMPROVED_ARGUMENT_API:
   { let args = options.arguments || options.argument;
-    if (!args) break NEW_IMPROVED_ARGUMENT_API;
+    if (!args) {
+      command.arguments = [];
+      break NEW_IMPROVED_ARGUMENT_API;
+    }
     // handle simplified syntax
     if (typeof args.suggest === "function")
       // argument: noun

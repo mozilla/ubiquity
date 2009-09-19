@@ -47,18 +47,20 @@ const Cu = Components.utils;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
-Cu.import("resource://ubiquity/modules/parser/original/locale_en.js");
 Cu.import("resource://ubiquity/modules/parser/new/namespace.js");
+Cu.import("resource://ubiquity/modules/parser/original/locale_en.js");
 
-const PLUGINS = {en: EnParser, $: {parseSentence: EnParser.parseSentence}};
+const PLUGINS = {en: EnParser};
 const FLAG_DEFAULT = 1;
 
 var {push} = Array.prototype;
 
 function makeParserForLanguage(languageCode, verbList,
                                ContextUtils, suggestionMemory) {
-  var plugin = PLUGINS[languageCode];
-  if (!plugin) plugin = EnParser, languageCode = "en";
+  var plugin = (
+    languageCode in PLUGINS
+    ? PLUGINS[languageCode]
+    : PLUGINS[languageCode] = {parseSentence: EnParser.parseSentence});
   return new Parser(verbList, setupPlugin(plugin, languageCode),
                     ContextUtils, suggestionMemory);
 }
@@ -696,10 +698,11 @@ function Verb(cmd, roleMap) {
   this.cmd = cmd;
   this.matchedName = cmd.names[0];
   this.input = "";
+  this.newAPI = !("DOType" in cmd || "modifiers" in cmd);
   var args = this.args = {};
   // Use the presence or absence of the "arguments" dictionary
   // to decide whether this is a version 1 or version 2 command.
-  if ((this._isNewStyle = !Utils.isEmpty(cmd.arguments))) {
+  if (this.newAPI) {
     // New-style API: command defines arguments dictionary
     // if there are arguments, copy them over using
     // a (semi-arbitrary) choice of preposition
@@ -754,7 +757,7 @@ Verb.prototype = {
 
   execute: function V_execute(context, argumentValues) {
     return (
-      this._isNewStyle
+      this.newAPI
       // New-style commands (api 1.5) expect a single dictionary with all
       // arguments in it, and the object named 'object'.
       ? this.cmd.execute(context, argumentValues)
@@ -765,7 +768,7 @@ Verb.prototype = {
 
   preview: function V_preview(context, previewBlock, argumentValues) {
     // Same logic as the execute command -- see comment above.
-    (this._isNewStyle
+    (this.newAPI
      ? this.cmd.preview(context, previewBlock, argumentValues)
      : this.cmd.preview(context, previewBlock,
                         argumentValues.object, argumentValues));

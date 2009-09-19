@@ -43,9 +43,6 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/scripts/gettext/lib/Gettext.js")
-Utils.setTimeout(function delayedImport() {
-  Cu.import("resource://ubiquity/modules/setup.js");
-});
 
 const LocalizableProperties = ["names", "help", "description"];
 const DefaultLanguageCodes  = ["en", "$"];
@@ -61,14 +58,17 @@ var LocalizationUtils = {
 
   get loadedPo LU_loadedPo() loadedPo,
 
-  isLocalizableFeed: function LU_isLocalizableFeed(feedUrl) (
-    DefaultLanguageCodes.indexOf(UbiquitySetup.languageCode) < 0 &&
-    /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds\b/.test(feedUrl)),
+  isLocalizableLang: function LU_isLocalizableLang(langCode)
+    DefaultLanguageCodes.indexOf(langCode) < 0,
 
-  loadLocalPo: function LU_loadLocalPo(feedUrl) {
-    if (!LocalizationUtils.isLocalizableFeed(feedUrl)) return false;
+  isLocalizableFeed: function LU_isLocalizableFeed(feedUrl)
+    /^resource:\/\/ubiquity\/(?:builtin|standard)-feeds\b/.test(feedUrl),
 
-    var feedKey = this.getLocalFeedKey(feedUrl);
+  loadLocalPo: function LU_loadLocalPo(feedUrl, langCode) {
+    if (!LocalizationUtils.isLocalizableLang(langCode) ||
+        !LocalizationUtils.isLocalizableFeed(feedUrl)) return false;
+
+    var feedKey = this.getLocalFeedKey(feedUrl, langCode);
     if (feedKey in loadedPo) return true;
 
     var poUrl = "resource://ubiquity/localization/" + feedKey + ".po";
@@ -91,8 +91,8 @@ var LocalizationUtils = {
     return true;
   },
 
-  getLocalFeedKey: function LU_getLocalFeedKey(path)
-    UbiquitySetup.languageCode + /\/\w+(?=\.\w+$)/(path),
+  getLocalFeedKey: function LU_getLocalFeedKey(path, langCode)
+    langCode + /\/\w+(?=\.\w+$)/(path),
 
   getLocalizedString: function LU_getLocalizedString(feedKey, key) {
     try {
@@ -130,17 +130,19 @@ var LocalizationUtils = {
     return this;
   },
 
-  // === {{{ LocalizationUtils.localizeCommand(cmd) }}} ===
+  // === {{{ LocalizationUtils.localizeCommand(cmd, langCode) }}} ===
   //
   // Only works with Parser 2 commands.
   // It might magically work with Parser 1, but it's not built to, and not
   // tested that way.
 
-  localizeCommand: function LU_localizeCommand(cmd) {
+  localizeCommand: function LU_localizeCommand(cmd, langCode) {
+    if (!LocalizationUtils.isLocalizableLang(langCode)) return cmd;
+
     var url = cmd.feedUri.spec;
     if (!LocalizationUtils.isLocalizableFeed(url)) return cmd;
-    var feedKey = LocalizationUtils.getLocalFeedKey(url);
 
+    var feedKey = LocalizationUtils.getLocalFeedKey(url);
     for each (let key in LocalizableProperties) if (cmd[key]) {
       let val = getLocalizedProperty(feedKey, cmd, key);
       if (val) cmd[key] = val;

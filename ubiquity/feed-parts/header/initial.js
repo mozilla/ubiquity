@@ -114,16 +114,15 @@ var CmdUtils = {
 Cu.import("resource://ubiquity/modules/nountypes.js");
 noun_arb_text.loadGlobals(this);
 
-var _ = (function prepareGettext({LocalizationUtils}) {
+var _ = (function prepareGettext({LocalizationUtils}, {UbiquitySetup}) {
   function renderTemplate(x, data) (
     data
     ? Template.parseTemplate(x).process(data, {keepWhitespace: true})
     : x);
-  if (CmdUtils.parserVersion < 2) return renderTemplate;
 
-  if (!LocalizationUtils.loadLocalPo(feed.id))
+  if (!LocalizationUtils.loadLocalPo(feed.id, UbiquitySetup.languageCode))
     return function registerTemplate(x, data) {
-      context.l10n || LocalizationUtils.registerFeedGlobal(feed.id, x);
+      "l10n" in context || LocalizationUtils.registerFeedGlobal(feed.id, x);
       return renderTemplate(x, data);
     };
 
@@ -136,4 +135,5 @@ var _ = (function prepareGettext({LocalizationUtils}) {
        : LocalizationUtils.getLocalizedString(feedKey, x)),
       data);
   };
-})(Cu.import("resource://ubiquity/modules/localization_utils.js", null));
+})(Cu.import("resource://ubiquity/modules/localization_utils.js", null),
+   Cu.import("resource://ubiquity/modules/setup.js", null));

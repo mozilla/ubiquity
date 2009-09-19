@@ -51,21 +51,9 @@ Utils.setTimeout(function delayedImport() {
 const DEFAULT_PREVIEW_DELAY = 150;
 
 function finishCommand(cmd) {
-  if (UbiquitySetup.parserVersion === 2) {
-    // Convert for Parser 2 if it takes no arguments.
-    if (cmd.oldAPI && !cmd.DOType && !cmd.modifiers &&
-        Utils.isEmpty(cmd.arguments)) {
-      dump("converting 1 > 2: " + cmd.name + "\n");
-      let clone = {__proto__: cmd, arguments: []};
-      if (!cmd.names) clone.names = [cmd.name];
-      cmd = clone;
-    }
-    if (!cmd.oldAPI && !cmd.arguments)
-      cmd.arguments = [];
-    if (cmd.arguments)
-      cmd = LocalizationUtils.localizeCommand(cmd);
-  }
-  else {
+  LocalizationUtils.localizeCommand(cmd, UbiquitySetup.languageCode);
+
+  if (UbiquitySetup.parserVersion < 2) {
     cmd.name = hyphenize(cmd.name);
     let {names} = cmd;
     for (let i in names) names[i] = hyphenize(names[i]);

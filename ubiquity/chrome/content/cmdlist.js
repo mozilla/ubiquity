@@ -59,12 +59,12 @@ Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://ubiquity/modules/utils.js");
 
 const SORT_MODE_PREF = "extensions.ubiquity.commandList.sortMode";
-const SHOW_L10N_TEMPLATE = (UbiquitySetup.parserVersion >= 2 &&
-                            UbiquitySetup.languageCode === "en");
+const SHOW_L10N_TEMPLATE = !(
+  LocalizationUtils.isLocalizableLang(UbiquitySetup.languageCode));
 
 var {escapeHtml} = Utils;
-var {feedManager, commandSource, messageService} = (UbiquitySetup
-                                                    .createServices());
+var {feedManager, commandSource, messageService} = (
+  UbiquitySetup.createServices());
 
 function A(url, text, className) {
   var a = document.createElement("a");

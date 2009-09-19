@@ -89,14 +89,7 @@ function changeLanguageSettings() {
     changed = true;
     prefs.setIntPref("parserVersion", useParserVersion);
   }
-  var [langSelect] = $("#language-select");
-  Array.forEach(langSelect.options, function eachOpt(opt) {
-    opt.disabled = useParserVersion < 2 && ["en", "$"].indexOf(opt.value) < 0;
-  });
-  if (langSelect.options[langSelect.selectedIndex].disabled)
-    langSelect.value = "en";
-
-  var useLanguage = langSelect.value;
+  var useLanguage = $("#language-select").val();
   if (useLanguage !== prefs.getCharPref("language")) {
     changed = true;
     prefs.setCharPref("language", useLanguage);
@@ -236,7 +229,7 @@ function pasteToGist() {
   Utils.openUrlInBrowser(
     "http://gist.github.com/gists/",
     ["file_" + key + "[gistfile1]=" + encodeURIComponent(val)
-     for each ([key, val] in Iterator({
+     for each ([key, val] in new Iterator({
        ext: ext, name: name + ext, contents: data,
      }))].join("&"));
 }
