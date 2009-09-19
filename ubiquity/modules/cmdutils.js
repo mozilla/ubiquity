@@ -1410,6 +1410,8 @@ function previewCallback(pblock, callback, abortCallback) {
 //
 // Creates a simple clickable list in the preview block and
 // returns the list element.
+// Activating {{{accesskey="0"}}} rotates the accesskeys
+// in case the list is longer than available keys.
 //
 // {{{block}}} is the DOM element the list will be placed into.
 //
@@ -1423,25 +1425,34 @@ function previewCallback(pblock, callback, abortCallback) {
 // {{{css}}} is an optional CSS string inserted along with the list.
 
 function previewList(block, htmls, callback, css) {
-  var list = "", i = -1, {escapeHtml} = Utils;
+  var list = "", num = 0, {escapeHtml} = Utils;
   for (let id in htmls) {
-    let k = ++i < 35 ? (i+1).toString(36) : "0-^@;:[],./\\"[i - 35] || "_";
-    list += ('<li><label for="' + i + '"><button id="' + i + '" accesskey="' +
-             k + '" value="' + escapeHtml(id) + '">' + k + '</button>' +
-             htmls[id] + '</label></li>');
+    let k = ++num < 36 ? num.toString(36) : "-";
+    list += ('<li><label for="' + num + '"><button id="' + num +
+             '" value="' + escapeHtml(id) + '" accesskey="' + k + '">' + k +
+             '</button>' + htmls[id] + '</label></li>');
   }
-  block.innerHTML = ('<ol class="preview-list"><style>' +
-                     previewList.CSS + (css || "") +
-                     '</style>' + list + '</ol>');
-  var [ol] = block.getElementsByClassName("preview-list");
-  if (typeof callback === "function")
-    ol.addEventListener("focus", function previewListFocused(ev) {
-      var {target} = ev;
-      if (!/^button$/i.test(target.nodeName)) return;
-      target.blur();
-      target.disabled = true;
-      callback(target.value, ev);
-    }, true);
+  block.innerHTML = (
+    '<ol class="preview-list">' +
+    '<style>' + previewList.CSS + (css || "") + '</style>' +
+    '<li id="keyshifter"><button id="0" accesskey="0">0</button></li>' +
+    list + '</ol>');
+  var [ol] = block.getElementsByClassName("preview-list"), start = 0;
+  ol.addEventListener("focus", function previewListFocused(ev) {
+    var {target} = ev;
+    if (!/^button$/i.test(target.nodeName)) return;
+    target.blur();
+    if (target.id === "0") {
+      if (num < 36) return;
+      let buttons = Array.slice(this.getElementsByTagName("button"), 1);
+      start = (start + 35) % buttons.length;
+      buttons = buttons.splice(start).concat(buttons);
+      for (let i = 0, b; b = buttons[i];)
+        b.textContent = b.accessKey = ++i < 36 ? i.toString(36) : "-";
+      return;
+    }
+    if (callback) target.disabled = !callback(target.value, ev);
+  }, true);
   return ol;
 }
 previewList.CSS = "" + <![CDATA[
@@ -1451,6 +1462,7 @@ previewList.CSS = "" + <![CDATA[
   .preview-list button {
     margin-right: 0.3em; padding: 0; border-width: 1px;
     font: bold 108% monospace; text-transform: uppercase}
+  #keyshifter {position:absolute; top:-9999px}
   ]]>;
 
 // === {{{ CmdUtils.absUrl(data, sourceUrl) }}} ===
