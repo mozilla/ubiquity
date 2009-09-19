@@ -38,6 +38,8 @@
 
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
 
+const PREF_NFE = "extensions.ubiquity.doNounFirstExternals";
+
 var {skinService, messageService} = UbiquitySetup.createServices();
 var {escapeHtml} = Utils;
 
@@ -55,7 +57,7 @@ function onDocumentLoad() {
    * replace with something that detects command localizations automatically.
    */
   var $langSelect = $("#language-select");
-  var langCode = UbiquitySetup.languageCode || "en";
+  var langCode = UbiquitySetup.languageCode;
   var isNewParser = UbiquitySetup.parserVersion === 2;
   $("#use-new-parser-checkbox")[0].checked = isNewParser;
   if (isNewParser) $(".parser2").show();
@@ -67,11 +69,10 @@ function onDocumentLoad() {
       parserRegistry[code] +
       "</option>");
   }
-  changeLanguageSettings();
 
   // set the external calls control to the correct value:
   $("#external-calls-on-all-queries")[0].checked =
-    UbiquitySetup.doNounFirstExternals;
+    Application.prefs.getValue(PREF_NFE, 0);
 
   $("#max-suggestions").change(function changeMaxSuggestions() {
     CommandManager.maxSuggestions = this.value;
@@ -101,7 +102,6 @@ function changeLanguageSettings() {
 }
 
 function changeExternalCallSettings() {
-  const PREF_NFE = "extensions.ubiquity.doNounFirstExternals";
   var {prefs} = Application;
   var externalCallsOnAllQueries =
     +$("#external-calls-on-all-queries")[0].checked;

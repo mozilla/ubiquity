@@ -59,7 +59,7 @@ Cu.import("resource://ubiquity/modules/skinsvc.js");
 
 const {Application} = Utils;
 
-var gServices, gWebJsModule;
+var gServices, gWebJsModule, gPrefs = Application.prefs;
 
 const RESET_SCHEDULED_PREF = "extensions.ubiquity.isResetScheduled";
 const VERSION_PREF ="extensions.ubiquity.lastversion";
@@ -119,7 +119,7 @@ var UbiquitySetup = {
     // modified the User-Agent string without uninstalling cleanly.
     // See #471 for more information.
     const USERAGENT_PREF = "general.useragent.extra.ubiquity";
-    Application.prefs.setValue(USERAGENT_PREF, "");
+    gPrefs.setValue(USERAGENT_PREF, "");
 
     // If we're talking to ubiquity.mozilla.com, pass extra information
     // in the User-Agent string so it knows what version of the
@@ -220,11 +220,11 @@ var UbiquitySetup = {
   },
 
   get isResetScheduled() {
-    return Application.prefs.getValue(RESET_SCHEDULED_PREF, false);
+    return gPrefs.getValue(RESET_SCHEDULED_PREF, false);
   },
 
   set isResetScheduled(value) {
-    Application.prefs.setValue(RESET_SCHEDULED_PREF, value);
+    gPrefs.setValue(RESET_SCHEDULED_PREF, value);
   },
 
   __removeExtinctStandardFeeds: function __rmExtinctStdFeeds(feedManager) {
@@ -244,9 +244,9 @@ var UbiquitySetup = {
     if (!gServices) {
       // Compare the version in our preferences from our version in the
       // install.rdf.
-      var currVersion = Application.prefs.getValue(VERSION_PREF, "firstrun");
+      var currVersion = gPrefs.getValue(VERSION_PREF, "firstrun");
       if (currVersion != this.version) {
-        Application.prefs.setValue(VERSION_PREF, this.version);
+        gPrefs.setValue(VERSION_PREF, this.version);
         this.isNewlyInstalledOrUpgraded = true;
       }
 
@@ -335,7 +335,7 @@ var UbiquitySetup = {
     var PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
 
     function onPageLoad(aEvent) {
-      var isEnabled = Application.prefs.getValue(PAGE_LOAD_PREF, true);
+      var isEnabled = gPrefs.getValue(PAGE_LOAD_PREF, true);
       if (!isEnabled)
         return;
 
@@ -348,41 +348,23 @@ var UbiquitySetup = {
       appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
   },
 
-  get languageCode() {
-    var prefs = (Cc["@mozilla.org/preferences-service;1"]
-                 .getService(Ci.nsIPrefBranch));
-    var lang = prefs.getCharPref("extensions.ubiquity.language");
-    return lang;
-  },
+  get languageCode() gPrefs.getValue("extensions.ubiquity.language", "en"),
 
-  get parserVersion() {
-    var prefs = (Cc["@mozilla.org/preferences-service;1"]
-                 .getService(Ci.nsIPrefService));
-    prefs = prefs.getBranch("extensions.ubiquity.");
-    return prefs.getIntPref("parserVersion");
-  },
+  get parserVersion() gPrefs.getValue("extensions.ubiquity.parserVersion", 2),
 
-  get version() {
-    return Application.extensions.get("ubiquity@labs.mozilla.com").version;
-  },
-
-  get doNounFirstExternals() {
-    var prefs = (Cc["@mozilla.org/preferences-service;1"]
-                 .getService(Ci.nsIPrefService));
-    prefs = prefs.getBranch("extensions.ubiquity.");
-    return prefs.getIntPref("doNounFirstExternals");
-  }
+  get version()
+    Application.extensions.get("ubiquity@labs.mozilla.com").version,
 };
 function DisabledCmdStorage(prefName) {
   var disabledCommands =
-    Utils.json.decode(Application.prefs.getValue(prefName, "{}"));
+    Utils.json.decode(gPrefs.getValue(prefName, "{}"));
 
   this.getDisabledCommands = function getDisabledCommands() {
     return disabledCommands;
   };
 
   function onDisableChange(eventName) {
-    Application.prefs.setValue(prefName, Utils.json.encode(disabledCommands));
+    gPrefs.setValue(prefName, Utils.json.encode(disabledCommands));
   }
 
   this.attach = function attach(cmdSource) {
