@@ -412,7 +412,8 @@ function testSuggestionMemory() {
 }
 
 function testSortedBySuggestionMemory() {
-  var verbList = [{names: [x], id: x}
+  var verbList = [{names: [(x + 1234567890).slice(0, 12)], id: x}
+                  // ^align length to ensure identical verbMatchScore
                   for each (x in ["clock", "calendar", "couch", "conch",
                                   "crouch", "coelecanth", "crab"])];
   var nlParser = makeTestParser(LANG, verbList);
@@ -433,7 +434,6 @@ function testSortedBySuggestionMemory() {
   // now give the same input again...
   query = nlParser.newQuery("c", fakeContext, MAX_SUGGESTIONS, true).run();
   suggestions = query.suggestionList;
-  dump("Suggestions has length " + suggestions.length + "\n");
   // the old six should be on top, with the old five in second place:
   this.assert(suggestions[0]._verb.name == suggSixName, "Six should be one");
   this.assert(suggestions[1]._verb.name == suggFiveName, "Five should be two");

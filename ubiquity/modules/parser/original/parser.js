@@ -276,8 +276,8 @@ function ParsedSentence(
   this.verbMatchScore = verbMatchScore;
   this.duplicateDefaultMatchScore = 1;
   // assigned later
-  this.frequencyMatchScore = -1;
-  this.argMatchScore = -1;
+  this.argMatchScore = 0;
+  this.frequencyMatchScore = 0;
 }
 ParsedSentence.prototype = {
   get completionText PS_getCompletionText() {
@@ -452,24 +452,18 @@ ParsedSentence.prototype = {
   },
 
   get score PS_getScore() {
-    if (this.argMatchScore < 0) {
+    if (!this.argMatchScore) {
       // argument match score starts at 0 and increased for each
       // argument where a specific nountype (i.e. non-arbitrary-text)
       // matches user input.
-      let ams = 0, {_argFlags, _argSuggs} = this;
+      let ams = 1, {_argFlags, _argSuggs} = this;
       for (let name in _argFlags)
         if (!(_argFlags[name] & FLAG_DEFAULT))
-          ams += ((name === "object" ? .9 : 1) *
-                  (_argSuggs[name].score || 1));
+          ams += _argSuggs[name].score || 1;
       this.argMatchScore = ams;
     }
-    return (this.fromNounFirstSuggestion
-            ? (1e-1 * this.argMatchScore +
-               1e-2 * this.frequencyMatchScore)
-            : (1e-0 * this.duplicateDefaultMatchScore +
-               1e-1 * this.frequencyMatchScore +
-               1e-2 * this.verbMatchScore +
-               1e-3 * this.argMatchScore));
+    return (this.verbMatchScore * this.duplicateDefaultMatchScore +
+            this.argMatchScore * this.frequencyMatchScore / 99);
   }
 };
 

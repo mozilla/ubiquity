@@ -96,7 +96,7 @@ function parseSentence(inputString, verbList, makePPS) {
 
   var inputs = (words.length === 1
                 ? [[words[0], null, 1]]
-                : [[words[0], words.slice(1), 1], [words.pop(), words, .5]]);
+                : [[words[0], words.slice(1), 1], [words.pop(), words, .1]]);
   for each (let verb in verbList) if (!verb.disabled)
     VERB: for each (let input in inputs) {
       let matchScore = verb.match(input[0]);
