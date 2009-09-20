@@ -39,11 +39,10 @@
 // necessary post-processing and other finalization on the
 // contents of the sandbox.
 
-(function() {
+(function finalize() {
   function findFunctionsWithPrefix(prefix) {
     var re = RegExp("^" + prefix);
-    return [this[name]
-            for (name in this)
+    return [this[name] for (name in this)
             if (re.test(name) && typeof this[name] === "function")];
   }
   const CMD_PREFIX = "cmd_";
@@ -53,10 +52,11 @@
       name: func.name.slice(CMD_PREFIX.length).replace(/_/g, " "),
       execute: func,
     });
-  for each (var func in findFunctionsWithPrefix("pageLoad_"))
-    pageLoadFuncs.push(func);
-  for each (var func in findFunctionsWithPrefix("ubiquityLoad_"))
-    ubiquityLoadFuncs.push(func);
+  var {push} = Array.prototype;
+  push.apply(pageLoadFuncs,
+             findFunctionsWithPrefix("pageLoad_"));
+  push.apply(ubiquityLoadFuncs,
+             findFunctionsWithPrefix("ubiquityLoad_"));
 
   if (!globals.hasRunOnce) {
     globals.hasRunOnce = true;

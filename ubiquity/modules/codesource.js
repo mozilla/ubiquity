@@ -36,63 +36,50 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-EXPORTED_SYMBOLS = ["MixedCodeSource",
-                    "StringCodeSource",
-                    "RemoteUriCodeSource",
-                    "LocalUriCodeSource",
-                    "XhtmlCodeSource"];
+var EXPORTED_SYMBOLS = [
+  "MixedCodeSource",
+  "StringCodeSource",
+  "RemoteUriCodeSource",
+  "LocalUriCodeSource",
+  "XhtmlCodeSource"];
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-var Cc = Components.classes;
-var Ci = Components.interfaces;
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/xml_script_commands_parser.js");
 
-function MixedCodeSource(bodySource,
-                         headerSources,
-                         footerSources) {
+const VALID_SCHEMES_REMOTE = ["http", "https"];
+const VALID_SCHEMES_LOCAL  = ["file", "chrome", "resource", "ubiquity"];
+
+var gRPH = (Utils.IOService.getProtocolHandler("resource")
+            .QueryInterface(Ci.nsIResProtocolHandler));
+
+function MixedCodeSource(bodySource, headerSources, footerSources) {
   this.id = bodySource.id;
-
-  this.getCode = function getCode() {
-    let code;
-    let codeSections = [];
-    let headerCode = '';
-    let headerCodeSections = [];
-
-    for (var headerCs in headerSources) {
-      code = headerCs.getCode();
-      headerCode += code;
-      headerCodeSections.push({length: code.length,
-                               filename: headerCs.id,
-                               lineNumber: 1});
-    }
-
-    let footerCode = '';
-    let footerCodeSections = [];
-    for (var footerCs in footerSources) {
-      code = footerCs.getCode();
-      footerCode += code;
-      footerCodeSections.push({length: code.length,
-                               filename: footerCs.id,
-                               lineNumber: 1});
-    }
-
-    code = bodySource.getCode();
-    codeSections = codeSections.concat(headerCodeSections);
-    if (bodySource.codeSections)
-      codeSections = codeSections.concat(bodySource.codeSections);
-    else
-      codeSections.push({length: code.length,
-                         filename: bodySource.id,
-                         lineNumber: 1});
-    codeSections = codeSections.concat(footerCodeSections);
-    code = headerCode + code + footerCode;
-
-    this.codeSections = codeSections;
-    this.dom = bodySource.dom;
-
-    return code;
-  };
+  this._bodySource = bodySource;
+  this._sources = headerSources.concat(bodySource, footerSources);
 }
+
+MixedCodeSource.prototype = {
+  getCode: function MCS_getCode() {
+    this.dom = this._bodySource.dom;
+
+    var code = "", c;
+    var codeSections = this.codeSections = [];
+    for each (let cs in this._sources) {
+      let c = cs.getCode();
+      code += c;
+      if (cs.codeSections)
+        codeSections.push.apply(codeSections, cs.codeSections);
+      else
+        codeSections.push({
+          length: c.length,
+          filename: cs.id,
+          lineNumber: 1});
+    }
+    return code;
+  }
+};
 
 function StringCodeSource(code, id, dom, codeSections) {
   this._code = code;
@@ -102,9 +89,7 @@ function StringCodeSource(code, id, dom, codeSections) {
 }
 
 StringCodeSource.prototype = {
-  getCode: function SCS_getCode() {
-    return this._code;
-  }
+  getCode: function SCS_getCode() this._code,
 };
 
 // timeoutInterval is the minimum amount of time to wait before
@@ -117,31 +102,26 @@ function RemoteUriCodeSource(feedInfo, timeoutInterval) {
   this.timeoutInterval = timeoutInterval;
 };
 
-RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) {
-  uri = Utils.url(uri);
-  return (uri.scheme == "http" ||
-          uri.scheme == "https");
-};
+RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) (
+  VALID_SCHEMES_REMOTE.indexOf(Utils.uri(uri).scheme) >= 0);
 
 RemoteUriCodeSource.prototype = {
-  getCode : function RUCS_getCode() {
+  getCode: function RUCS_getCode() {
     if (!this._req && !this._hasCheckedRecently) {
       this._hasCheckedRecently = true;
 
       // Queue another XMLHttpRequest to fetch the latest code.
-
       var self = this;
-      self._req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-                  .createInstance(Ci.nsIXMLHttpRequest);
-      self._req.mozBackgroundRequest = true;
-      self._req.open('GET', this._feedInfo.srcUri.spec, true);
-      self._req.overrideMimeType("text/plain");
-
-      self._req.onreadystatechange = function RUCS__onXhrChange() {
-        if (self._req.readyState == 4) {
-          if (self._req.status == 200)
+      var req = self._req = (Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                             .createInstance(Ci.nsIXMLHttpRequest));
+      req.mozBackgroundRequest = true;
+      req.open("GET", this._feedInfo.srcUri.spec, true);
+      req.overrideMimeType("text/plain");
+      req.onreadystatechange = function RUCS__onXhrChange() {
+        if (req.readyState === 4) {
+          if (req.status === 200)
             // Update our cache.
-            self._feedInfo.setCode(self._req.responseText);
+            self._feedInfo.setCode(req.responseText);
           self._req = null;
 
           function clearTimeout() { self._hasCheckedRecently = false; }
@@ -152,8 +132,7 @@ RemoteUriCodeSource.prototype = {
             clearTimeout();
         }
       };
-
-      this._req.send(null);
+      req.send(null);
     }
 
     // Return whatever we've got cached for now.
@@ -163,115 +142,94 @@ RemoteUriCodeSource.prototype = {
 
 function LocalUriCodeSource(uri) {
   this.id = uri;
-  this.uri = uri;
+  this.uri = Utils.uri(uri, "data:,");
   this._cached = null;
   this._cachedTimestamp = 0;
+  if (this.uri.scheme === "resource")
+    try { this.uri = Utils.uri(gRPH.resolveURI(this.uri)) } catch (e) {}
 }
 
-LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) {
-  uri = Utils.url(uri);
-  return (uri.scheme == "file" ||
-          uri.scheme == "chrome" ||
-          uri.scheme == "resource" ||
-          uri.scheme == "ubiquity");
-};
+LocalUriCodeSource.isValidUri = function LUCS_isValidUri(uri) (
+  VALID_SCHEMES_LOCAL.indexOf(Utils.uri(uri).scheme) >= 0);
 
 LocalUriCodeSource.prototype = {
-  // The dontReturnError property will turn off the
+  // The throwNoError property will turn off the
   // error thrown when the code source could not be found.
   // This is used avoid an error in testLocalUriCodeSourceWorksWith.
-  getCode : function LUCS_getCode(dontReturnError) {
+  getCode: function LUCS_getCode(throwNoError) {
     try {
-      var url = Utils.url(this.uri);
-      if (url.scheme == "file") {
-        var file = url.QueryInterface(Components.interfaces.nsIFileURL).file;
+      if (this.uri.scheme === "file") {
+        var {file} = this.uri.QueryInterface(Ci.nsIFileURL);
         if (file.exists()) {
-          var lastModifiedTime = file.lastModifiedTime;
-
-          if (this._cached && this._cachedTimestamp == lastModifiedTime)
+          var {lastModifiedTime} = file;
+          if (this._cached != null &&
+              this._cachedTimestamp === lastModifiedTime)
             return this._cached;
-
           this._cachedTimestamp = lastModifiedTime;
         }
-        else
-          return "";
+        else return "";
       }
 
-      var req = Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
-                .createInstance(Ci.nsIXMLHttpRequest);
-      req.open('GET', this.uri, false);
-      req.overrideMimeType("text/javascript");
+      var req = (Cc["@mozilla.org/xmlextras/xmlhttprequest;1"]
+                 .createInstance(Ci.nsIXMLHttpRequest));
+      req.open("GET", this.id, false);
+      req.overrideMimeType("text/plain");
       req.send(null);
 
-      if (req.status == 0) {
-        if (req.responseText.indexOf("ERROR:") == 0)
-          throw new Error(req.responseText);
-        this._cached = req.responseText;
-        return this._cached;
-      } else
-        //errorToLocalize
-        throw new Error("XHR returned status " + req.status);
-    } catch (e) {
-      if (!dontReturnError) {
-        //errorToLocalize
-        Components.utils.reportError("Retrieving " + this.uri +
-                                     " raised exception " + e);
+      if (req.status === 0) {
+        let code = req.responseText;
+        if (/^ERROR:/.test(code)) throw new Error(code);
+        return this._cached = code;
       }
+      //errorToLocalize
+      else throw new Error("XHR returned status " + req.status);
+    } catch (e) {
+      if (!throwNoError)
+        //errorToLocalize
+        Cu.reportError("Retrieving " + this.id + " raised exception " + e);
       return "";
     }
   }
 };
 
 function XhtmlCodeSource(codeSource) {
-  var dom;
-  var codeSections;
-  var lastCode;
-  var finalCode;
+  var dom = null;
+  var codeSections = null;
+  var lastCode = null;
+  var finalCode = null;
 
-  this.__defineGetter__("dom",
-                        function() { return dom ? dom : undefined; });
-
-  this.__defineGetter__("id",
-                        function() { return codeSource.id; });
-
+  this.__defineGetter__("dom", function XCS_dom() dom);
+  this.__defineGetter__("id", function XCS_id() codeSource.id);
   this.__defineGetter__("codeSections",
-                        function() { return codeSections; });
+                        function XCS_codeSections() codeSections);
 
-  this.getCode = function XHTMLCS_getCode() {
+  this.getCode = function XCS_getCode() {
     var code = codeSource.getCode();
-    if (code == lastCode)
-      return finalCode;
+    if (code === lastCode) return finalCode;
 
     lastCode = code;
-
-    var trimmedCode = Utils.trim(code);
-    if (trimmedCode.length > 0 &&
-        trimmedCode[0] == "<") {
-      var klass = Components.classes["@mozilla.org/xmlextras/domparser;1"];
-      var parser = klass.createInstance(Components.interfaces.nsIDOMParser);
-
+    if (/^\s*</.test(code)) {
       // TODO: What if this fails?  Right now the behavior generally
       // seems ok simply because an exception doesn't get thrown here
       // if the XML isn't well-formed, we just get an error results
       // DOM back, which contains no command code.
-      dom = parser.parseFromString(code, "text/xml");
+      dom = (Cc["@mozilla.org/xmlextras/domparser;1"]
+             .createInstance(Ci.nsIDOMParser)
+             .parseFromString(code, "text/xml"));
 
       codeSections = [];
-      var newCode = "";
-      var xmlparser = {};
-      Components.utils.import("resource://ubiquity/modules/xml_script_commands_parser.js", xmlparser);
-      var info = xmlparser.parseCodeFromXml(code);
-      for (var i = 0; i < info.length; i++) {
-        newCode += info[i].code;
-        codeSections.push({length: info[i].code.length,
-                           filename: codeSource.id,
-                           lineNumber: info[i].lineNumber});
+      finalCode = "";
+      for each (let info in parseCodeFromXml(code)) {
+        let c = info.code;
+        finalCode += c;
+        codeSections.push({
+          length: c.length,
+          filename: codeSource.id,
+          lineNumber: info.lineNumber});
       }
-
-      finalCode = newCode;
-    } else {
-      dom = undefined;
-      codeSections = undefined;
+    }
+    else {
+      dom = codeSections = null;
       finalCode = code;
     }
     return finalCode;

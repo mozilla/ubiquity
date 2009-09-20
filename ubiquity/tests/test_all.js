@@ -126,8 +126,8 @@ function testMixedCodeSourceWorks() {
   let e = new StringCodeSource("e", "e");
   let f = new StringCodeSource("f", "f");
 
-  let headers = new IterableCollection([a, b]);
-  let footers = new IterableCollection([e, f]);
+  let headers = [a, b];
+  let footers = [e, f];
 
   let codeSources = [
     new MixedCodeSource(c, headers, footers),
