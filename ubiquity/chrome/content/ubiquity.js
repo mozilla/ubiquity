@@ -157,12 +157,6 @@ Ubiquity.prototype = {
   __onkeyup: function U__onKeyup(event) {
     var {keyCode} = this.__lastKeyEvent = event;
 
-    if (event.ctrlKey && event.altKey &&
-        KeyEvent.DOM_VK_0 <= keyCode && keyCode <= KeyEvent.DOM_VK_Z) {
-      this.__cmdManager.previewer.activateAccessKey(keyCode);
-      return true;
-    }
-
     if (keyCode >=  KeyEvent.DOM_VK_DELETE ||
         keyCode === KeyEvent.DOM_VK_SPACE ||
         keyCode === KeyEvent.DOM_VK_BACK_SPACE ||
@@ -173,18 +167,23 @@ Ubiquity.prototype = {
   },
 
   __onkeypress: function U__onKeyPress(event) {
-    var {keyCode} = event;
+    var {keyCode, which} = event;
+
+    if (event.ctrlKey && event.altKey && which &&
+        this.__cmdManager.previewer.activateAccessKey(which))
+      return true;
+
     if (keyCode === this.__KEYCODE_ENTER) {
       this.__processInput(true);
       this.__needsToExecute = !!this.__textBox.value;
       this.__msgPanel.hidePopup();
-      return;
+      return true;
     }
     var rate = this.__KEYMAP_SCROLL_RATE[keyCode];
     if (rate) {
       let [x, y] = event.shiftKey ? [rate, 0] : [0, rate];
       this.__cmdManager.previewer.scroll(x, y);
-      return;
+      return true;
     }
   },
 

@@ -95,7 +95,7 @@ PreviewBrowser.prototype = {
 
   activateAccessKey: function PB_activateAccessKey(code) {
     var doc = this.__previewBrowser.contentDocument;
-    if (!doc) return;
+    if (!doc) return false;
     var win = doc.defaultView;
     var key = String.fromCharCode(code).toLowerCase();
     var xpr = doc.evaluate('/html/body//*[@accesskey]', doc, null,
@@ -109,8 +109,9 @@ PreviewBrowser.prototype = {
           lmn.dispatchEvent(evt);
         }
         else lmn.focus();
-        break;
+        return true;
       }
+    return false;
   },
 
   queuePreview: function PB__queuePreview(url, delay, cb) {

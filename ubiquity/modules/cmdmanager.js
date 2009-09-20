@@ -274,11 +274,10 @@ CommandManager.prototype = {
       function queuedPreview(pblock) {
         try { activeSugg.preview(context, pblock); }
         catch (e) {
-          let verb = activeSugg._verb;
           self.__msgService.displayMessage({
             //errorToLocalize
             text: ('An exception occurred while previewing the command "' +
-                   (verb.cmd || verb).name + '".'),
+                   activeSugg._verb.name + '".'),
             exception: e,
           });
         }
@@ -286,9 +285,11 @@ CommandManager.prototype = {
   },
 
   _renderAll: function CM__renderAll(context) {
-    if (!context.isWindowOpen) return;
-    this._renderSuggestions();
-    this._renderPreview(context);
+    if ("chromeWindow" in context &&
+        context.chromeWindow.gUbiquity.isWindowOpen) {
+      this._renderSuggestions();
+      this._renderPreview(context);
+    }
   },
 
   reset: function CM_reset() {
