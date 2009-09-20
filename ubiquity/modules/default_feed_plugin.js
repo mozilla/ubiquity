@@ -45,7 +45,6 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/codesource.js");
 Cu.import("resource://ubiquity/modules/sandboxfactory.js");
-Cu.import("resource://ubiquity/modules/collection.js");
 Cu.import("resource://ubiquity/modules/feed_plugin_utils.js");
 
 const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.xhtml";
@@ -64,7 +63,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
                                                     webJsm);
   let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
 
-  for (let [title, url] in Iterator(builtins.feeds))
+  for (let [title, url] in new Iterator(builtins.feeds))
     feedManager.addSubscribedFeed({
       url: url,
       sourceUrl: url,
@@ -236,6 +235,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                                   timeoutInterval);
   var bin = feedInfo.makeBin();
   var codeCache = null;
+  var domCache = null;
   var sandbox = null;
   var self = this;
 
@@ -249,9 +249,11 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
   this.refresh = function refresh(anyway) {
     var code = codeSource.getCode();
-    if (anyway || code !== codeCache) {
+    var {dom} = codeSource;
+    if (anyway || code !== codeCache || dom !== domCache) {
       reset();
       codeCache = code;
+      domCache = dom;
       sandbox = sandboxFactory.makeSandbox(codeSource);
       sandbox.Bin = bin;
       try {
@@ -358,21 +360,10 @@ function makeBuiltinGlobalsMaker(msgService, webJsm) {
 function makeBuiltins(languageCode, baseUri, parserVersion) {
   var basePartsUri = baseUri + "feed-parts/";
   var baseFeedsUri = baseUri + "builtin-feeds/";
-  var baseScriptsUri = baseUri + "scripts/";
-
-  var feeds = {
-    "Builtin Commands": baseFeedsUri + "builtincmds.js",
-  };
-  var headerCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "header/initial.js"),
-  ];
-  var footerCodeSources = [
-    new LocalUriCodeSource(basePartsUri + "footer/final.js"),
-  ];
-
+  //var baseScriptsUri = baseUri + "scripts/";
   return {
-    feeds: feeds,
-    headers: new IterableCollection(headerCodeSources),
-    footers: new IterableCollection(footerCodeSources)
+    feeds: {"Builtin Commands": baseFeedsUri + "builtincmds.js"},
+    headers: [new LocalUriCodeSource(basePartsUri + "header/initial.js")],
+    footers: [new LocalUriCodeSource(basePartsUri + "footer/final.js")],
   };
 }
