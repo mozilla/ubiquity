@@ -77,6 +77,13 @@ var Utils = {
 
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
+  // === {{{ Utils.IOService }}} ===
+  //
+  // Shortcut to {{{nsIIOService}}}.
+
+  function IOService() (Cc["@mozilla.org/network/io-service;1"]
+                        .getService(Ci.nsIIOService)),
+
   // === {{{ Utils.appName }}} ===
   //
   // This property provides the chrome application name
@@ -337,7 +344,6 @@ __TimerCallback.prototype = {
 };
 
 // === {{{ Utils.uri(spec, defaultUrl) }}} ===
-// === {{{ Utils.url() }}} ===
 //
 // Given a string representing an absolute URL or a {{{nsIURI}}}
 // object, returns an equivalent {{{nsIURI}}} object.  Alternatively,
@@ -362,19 +368,21 @@ function uri(spec, defaultUri) {
       return spec;
 
     // Assume jQuery-style dictionary with keyword args was passed in.
-    base = spec.base ? uri(spec.base, defaultUri) : null;
+    base = "base" in spec ? uri(spec.base, defaultUri) : null;
     spec = spec.uri || null;
   }
 
-  var ios = (Cc["@mozilla.org/network/io-service;1"]
-             .getService(Ci.nsIIOService));
   try {
-    return ios.newURI(spec, null, base);
-  } catch (e if (e.result === Components.results.NS_ERROR_MALFORMED_URI &&
-                 defaultUri)) {
-    return Utils.url(defaultUri);
+    return Utils.IOService.newURI(spec, null, base);
+  } catch (e if defaultUri) {
+    return uri(defaultUri);
   }
 }
+
+// === {{{ Utils.url(spec, defaultUrl) }}} ===
+//
+// Alias of {{{Utils.uri()}}}.
+
 Utils.url = uri;
 
 // === {{{ Utils.openUrlInBrowser(urlString, postData) }}} ===
