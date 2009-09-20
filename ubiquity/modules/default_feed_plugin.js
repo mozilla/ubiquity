@@ -59,8 +59,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   let {prefs} = Utils.Application;
 
   let builtins = makeBuiltins(languageCode, baseUri, parserVersion);
-  let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService,
-                                                    webJsm);
+  let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService, webJsm);
   let sandboxFactory = new SandboxFactory(builtinGlobalsMaker);
 
   for (let [title, url] in new Iterator(builtins.feeds))
@@ -80,11 +79,12 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 
       if (!feedManager.isUnsubscribedFeed(uri)) {
         let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
-        feedManager.addSubscribedFeed({url: uri,
-                                       sourceUrl: baseUri + info.source,
-                                       sourceCode: lcs.getCode(),
-                                       canAutoUpdate: true,
-                                       title: info.title});
+        feedManager.addSubscribedFeed({
+          url: uri,
+          sourceUrl: baseUri + info.source,
+          sourceCode: lcs.getCode(),
+          canAutoUpdate: true,
+          title: info.title});
       }
     }
   };
@@ -93,10 +93,11 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
                                                         commandsUrl,
                                                         mimetype) {
     // Clicking on "subscribe" takes them to the warning page:
-    var confirmUrl = (CONFIRM_URL + "?url=" +
-                      encodeURIComponent(targetDoc.location.href) +
-                      "&sourceUrl=" + encodeURIComponent(commandsUrl) +
-                      "&title=" + encodeURIComponent(targetDoc.title));
+    var confirmUrl = CONFIRM_URL + Utils.paramsToString({
+      url: targetDoc.location.href,
+      sourceUrl: commandsUrl,
+      title: targetDoc.title,
+    });
 
     function isTrustedUrl(commandsUrl, mimetype) {
       // Even if the command feed resides on a trusted host, if the
@@ -104,13 +105,12 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
       // application/xhtml+xml-untrusted, the host itself doesn't
       // trust it (perhaps because it's mirroring code from
       // somewhere else).
-      if (mimetype == "application/x-javascript-untrusted" ||
-          mimetype == "application/xhtml+xml-untrusted")
+      if (mimetype === "application/x-javascript-untrusted" ||
+          mimetype === "application/xhtml+xml-untrusted")
         return false;
 
       var url = Utils.url(commandsUrl);
-
-      if (url.scheme != "https")
+      if (url.scheme !== "https")
         return false;
 
       var domains = prefs.getValue(TRUSTED_DOMAINS_PREF, "");
@@ -126,21 +126,23 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
 
     if (isTrustedUrl(commandsUrl, mimetype)) {
       function onSuccess(data) {
-        feedManager.addSubscribedFeed({url: targetDoc.location.href,
-                                       sourceUrl: commandsUrl,
-                                       canAutoUpdate: true,
-                                       sourceCode: data});
+        feedManager.addSubscribedFeed({
+          url: targetDoc.location.href,
+          sourceUrl: commandsUrl,
+          canAutoUpdate: true,
+          sourceCode: data});
         Utils.openUrlInBrowser(confirmUrl);
       }
 
-      if (RemoteUriCodeSource.isValidUri(commandsUrl)) {
-        webJsm.jQuery.ajax({url: commandsUrl,
-                            dataType: "text",
-                            success: onSuccess});
-      } else
+      if (RemoteUriCodeSource.isValidUri(commandsUrl))
+        webJsm.jQuery.ajax({
+          url: commandsUrl,
+          dataType: "text",
+          success: onSuccess});
+      else
         onSuccess("");
-    } else
-      Utils.openUrlInBrowser(confirmUrl);
+    }
+    else Utils.openUrlInBrowser(confirmUrl);
   };
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
@@ -234,26 +236,19 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   var codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
                                   timeoutInterval);
   var bin = feedInfo.makeBin();
-  var codeCache = null;
-  var domCache = null;
   var sandbox = null;
   var self = this;
 
   function reset() {
     self.commands = {};
-    self.pageLoadFuncs = [];
-    self.ubiquityLoadFuncs = [];
   }
 
   reset();
 
   this.refresh = function refresh(anyway) {
     var code = codeSource.getCode();
-    var {dom} = codeSource;
-    if (anyway || code !== codeCache || dom !== domCache) {
+    if (anyway || codeSource.updated) {
       reset();
-      codeCache = code;
-      domCache = dom;
       sandbox = sandboxFactory.makeSandbox(codeSource);
       sandbox.Bin = bin;
       try {
@@ -262,10 +257,10 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                                      codeSource.codeSections);
       } catch (e) {
         //errorToLocalize
-        messageService.displayMessage(
-          {text:  "An exception occurred while loading code.",
-           exception: e}
-        );
+        messageService.displayMessage({
+          text: "An exception occurred while loading code.",
+          exception: e,
+        });
       }
 
       for each (let cmd in sandbox.commands) {

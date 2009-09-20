@@ -64,8 +64,11 @@ var globalObj = this;
 function testXhtmlCodeSourceWorks() {
   var code = "function cmd_foo() {};";
   var xhtml = '<html xmlns="http://www.w3.org/1999/xhtml"><script>a = 1;</script><script class="commands">' + code + '</script></html>';
-  var fakeSource = {getCode: function() { return xhtml; },
-                    id: "blah"};
+  var fakeSource = {
+    id: "blah",
+    updated: true,
+    getCode: function() { return xhtml; },
+  };
 
   var xcs = new XhtmlCodeSource(fakeSource);
 

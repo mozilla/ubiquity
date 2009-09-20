@@ -62,10 +62,9 @@ function MixedCodeSource(bodySource, headerSources, footerSources) {
 
 MixedCodeSource.prototype = {
   getCode: function MCS_getCode() {
-    this.dom = this._bodySource.dom;
-
     var code = "", c;
     var codeSections = this.codeSections = [];
+    this.updated = false;
     for each (let cs in this._sources) {
       let c = cs.getCode();
       code += c;
@@ -76,30 +75,37 @@ MixedCodeSource.prototype = {
           length: c.length,
           filename: cs.id,
           lineNumber: 1});
+      if (cs.updated) this.updated = true;
     }
+    this.dom = this._bodySource.dom;
     return code;
   }
 };
 
 function StringCodeSource(code, id, dom, codeSections) {
   this._code = code;
+  this._count = 0;
   this.id = id;
   this.dom = dom;
   this.codeSections = codeSections;
 }
 
 StringCodeSource.prototype = {
-  getCode: function SCS_getCode() this._code,
+  getCode: function SCS_getCode() {
+    this.updated = !this._count++;
+    return this._code;
+  }
 };
 
 // timeoutInterval is the minimum amount of time to wait before
 // re-requesting the content of a code source, in milliseconds.
 function RemoteUriCodeSource(feedInfo, timeoutInterval) {
   this.id = feedInfo.srcUri.spec;
+  this.timeoutInterval = timeoutInterval;
   this._feedInfo = feedInfo;
   this._req = null;
   this._hasCheckedRecently = false;
-  this.timeoutInterval = timeoutInterval;
+  this._cache = null;
 };
 
 RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) (
@@ -118,32 +124,33 @@ RemoteUriCodeSource.prototype = {
       req.open("GET", this._feedInfo.srcUri.spec, true);
       req.overrideMimeType("text/plain");
       req.onreadystatechange = function RUCS__onXhrChange() {
-        if (req.readyState === 4) {
-          if (req.status === 200)
-            // Update our cache.
-            self._feedInfo.setCode(req.responseText);
-          self._req = null;
+        if (req.readyState < 4) return;
+        if (req.status === 200)
+          // Update our cache.
+          self._feedInfo.setCode(req.responseText);
+        self._req = null;
 
-          function clearTimeout() { self._hasCheckedRecently = false; }
+        function clearTimeout() { self._hasCheckedRecently = false; }
 
-          if (self.timeoutInterval)
-            Utils.setTimeout(clearTimeout, self.timeoutInterval);
-          else
-            clearTimeout();
-        }
+        if (self.timeoutInterval)
+          Utils.setTimeout(clearTimeout, self.timeoutInterval);
+        else
+          clearTimeout();
       };
       req.send(null);
     }
 
     // Return whatever we've got cached for now.
-    return this._feedInfo.getCode();
+    var code = this._feedInfo.getCode();
+    this.updated = this._cache !== code;
+    return this._cache = code;
   }
 };
 
 function LocalUriCodeSource(uri) {
   this.id = uri;
   this.uri = Utils.uri(uri, "data:,");
-  this._cached = null;
+  this._cachedCode = null;
   this._cachedTimestamp = 0;
   if (this.uri.scheme === "resource")
     try { this.uri = Utils.uri(gRPH.resolveURI(this.uri)) } catch (e) {}
@@ -162,9 +169,11 @@ LocalUriCodeSource.prototype = {
         var {file} = this.uri.QueryInterface(Ci.nsIFileURL);
         if (file.exists()) {
           var {lastModifiedTime} = file;
-          if (this._cached != null &&
-              this._cachedTimestamp === lastModifiedTime)
-            return this._cached;
+          if (this._cachedCode != null &&
+              this._cachedTimestamp === lastModifiedTime) {
+            this.updated = false;
+            return this._cachedCode;
+          }
           this._cachedTimestamp = lastModifiedTime;
         }
         else return "";
@@ -176,17 +185,19 @@ LocalUriCodeSource.prototype = {
       req.overrideMimeType("text/plain");
       req.send(null);
 
-      if (req.status === 0) {
-        let code = req.responseText;
-        if (/^ERROR:/.test(code)) throw new Error(code);
-        return this._cached = code;
-      }
-      //errorToLocalize
-      else throw new Error("XHR returned status " + req.status);
+      if (req.status !== 0)
+        //errorToLocalize
+        throw new Error("XHR returned status " + req.status);
+
+      let code = req.responseText;
+      if (/^ERROR:/.test(code)) throw new Error(code);
+      this.updated = this._cachedCode !== code;
+      return this._cachedCode = code;
     } catch (e) {
       if (!throwNoError)
         //errorToLocalize
         Cu.reportError("Retrieving " + this.id + " raised exception " + e);
+      this.updated = false;
       return "";
     }
   }
@@ -195,7 +206,6 @@ LocalUriCodeSource.prototype = {
 function XhtmlCodeSource(codeSource) {
   var dom = null;
   var codeSections = null;
-  var lastCode = null;
   var finalCode = null;
 
   this.__defineGetter__("dom", function XCS_dom() dom);
@@ -205,9 +215,8 @@ function XhtmlCodeSource(codeSource) {
 
   this.getCode = function XCS_getCode() {
     var code = codeSource.getCode();
-    if (code === lastCode) return finalCode;
+    if (!(this.updated = codeSource.updated)) return finalCode;
 
-    lastCode = code;
     if (/^\s*</.test(code)) {
       // TODO: What if this fails?  Right now the behavior generally
       // seems ok simply because an exception doesn't get thrown here
@@ -216,7 +225,6 @@ function XhtmlCodeSource(codeSource) {
       dom = (Cc["@mozilla.org/xmlextras/domparser;1"]
              .createInstance(Ci.nsIDOMParser)
              .parseFromString(code, "text/xml"));
-
       codeSections = [];
       finalCode = "";
       for each (let info in parseCodeFromXml(code)) {
