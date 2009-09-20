@@ -354,13 +354,12 @@ CommandManager.prototype = {
       this.__queuedExecute = doExecute;
   },
 
-  getSuggestionListNoInput: function CM_getSuggListNoInput(context,
-                                                           asyncSuggestionCb,
-                                                           noAsyncUpdates){
-    let noInputQuery = this.__nlParser.newQuery("", context, 20);
+  getSuggestionListNoInput:
+  function CM_getSuggListNoInput(context, asyncSuggestionCb) {
+    let noInputQuery = this.__nlParser.newQuery(
+      "", context, 4 * CommandManager.maxSuggestions);
     noInputQuery.onResults = function onResultsNoInput() {
-      if (noAsyncUpdates || noInputQuery.finished)
-        asyncSuggestionCb(noInputQuery.suggestionList);
+      asyncSuggestionCb(noInputQuery.suggestionList);
     };
   },
 
@@ -379,7 +378,10 @@ CommandManager.prototype = {
   get maxSuggestions CM_maxSuggestions() CommandManager.maxSuggestions,
   get hasSuggestions CM_hasSuggestions()
     !!(this.__activeQuery || 0).hasResults,
-
+  get suggestions CM_suggestions() (
+    this.__activeQuery
+    ? this.__activeQuery.suggestionList
+    : []),
   get hilitedSuggestion CM_hilitedSuggestion() (
     this.__activeQuery &&
     this.__activeQuery.suggestionList[this.__hilitedIndex]),

@@ -39,7 +39,8 @@
 
 function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
                            cmdSuggester) {
-  var maxSuggs = 10;
+  var maxSuggs =
+    2 * Application.prefs.getValue("extensions.ubiquity.maxSuggestions", 5);
 
   function contextPopupShowing(event) {
     var {menupopup} = ubiquityMenu;
@@ -56,7 +57,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     removeChildren(menupopup);
     cmdSuggester(context, function onSuggest(suggestions) {
       removeChildren(menupopup);
-      var suggsToDisplay = suggestions.filter(objectOnly).slice(0, maxSuggs);
+      var suggsToDisplay = suggestions.filter(hasObject).slice(0, maxSuggs);
       for each (var sugg in suggsToDisplay) {
         let menuItem = document.createElement("menuitem");
         let {icon} = sugg._verb;
@@ -85,7 +86,7 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
   function removeChildren(menupopup) {
     for (var c; c = menupopup.lastChild;) menupopup.removeChild(c);
   }
-  function objectOnly(sugg) {
+  function hasObject(sugg) {
     if (sugg.args) {
       let arg = sugg.args.object;
       return !!(arg && (arg[0] || 0).text);

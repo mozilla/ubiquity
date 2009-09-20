@@ -227,7 +227,6 @@ Ubiquity.prototype = {
         (ensureFocus ? document.commandDispatcher.focusedWindow  : null),
       focusedElement: this.__focusedElement ||
         (ensureFocus ? document.commandDispatcher.focusedElement : null),
-      isWindowOpen: this.isWindowOpen,
     }
   },
 
