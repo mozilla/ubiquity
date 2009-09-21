@@ -60,6 +60,8 @@ Cu.import("resource://gre/modules/utils.js");
 
 const {Application} = Utils;
 
+var {commandSource, skinService} = UbiquitySetup.createServices();
+
 // === {{{ noun_arb_text }}} ===
 //
 // Suggests the input as is.
@@ -523,28 +525,23 @@ var noun_type_command = {
   label: "name",
   noExternalCalls: true,
   cacheTime: 0,
-  suggest: function nt_command_suggest(text, html, cb, selected) {
+  suggest: function nt_command_suggest(text) {
     if (!text) return [];
     var grepee = this._get();
-    if (!grepee.length) return [];
-    var res = CmdUtils.grepSuggs(text, grepee);
-    if (!res.length) return [];
-    // removing duplicates
-    var dic = {};
-    for each (let r in res) let ({id} = r.cmd) {
-      if (!(id in dic) || dic[id].score < r.score) dic[id] = r;
-    }
-    return [CmdUtils.makeSugg(r.text, null, r.cmd, r.score)
-            for each (r in dic)];
+    if (!grepee.length) return grepee;
+    var suggs = CmdUtils.grepSuggs(text, grepee);
+    if (!suggs.length) return suggs;
+    Utils.uniq(suggs, function nt_command_id(s) s.data.id);
+    for each (let s in suggs) s.html = s.summary = Utils.escapeHtml(s.text);
+    return suggs;
   },
-  _cmdSource: UbiquitySetup.createServices().commandSource,
   _get: function nt_command__get() {
-    var cmds = this._cmdSource.getAllCommands();
+    var cmds = commandSource.getAllCommands();
     if ("disabled" in this) {
       let {disabled} = this;
       cmds = [cmd for each (cmd in cmds) if (cmd.disabled === disabled)];
     }
-    return [{cmd: cmd, text: name}
+    return [{text: name, data: cmd}
             for each (cmd in cmds) for each (name in cmd.names)];
   },
 };
@@ -578,7 +575,6 @@ var noun_type_skin = {
   noExternalCalls: true,
   cacheTime: 0,
   suggest: function nt_skin_suggest(text, html, cb, selected) {
-    var {skinService} = UbiquitySetup.createServices();
     var suggs = [CmdUtils.makeSugg(skin.metaData.name, null, skin)
                  for each (skin in skinService.skinList)];
     return CmdUtils.grepSuggs(text, suggs);
@@ -798,53 +794,51 @@ var noun_type_date_time = {
 // Same as {{{noun_type_email}}}, but also suggests
 // the user's contact informations that are fetched from Gmail (for now).
 //
-// * {{{text, data.email}}} : email address
-// * {{{html}}} : %name <%email> (same as {{{summary}}})
-// * {{{data.name}}} : name of contactee
+// * {{{text}}} : email address
+// * {{{html}}} : same as {{{summary}}}
+// * {{{data}}} : name of contactee
 
 var noun_type_contact = {
   label: "name or email",
-  _list: null,
   suggest: function nt_contact_suggest(text, html, callback) {
     var suggs = noun_type_email.suggest.apply(noun_type_email, arguments);
-    if (!this._list) {
-      var list = this._list = [];
-      return suggs.concat(getContacts(function nt_contact_cb(contacts) {
-        for each (var {name, email} in contacts) {
-          var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
-          list.push({
-            text: email, html: htm, data: name, summary: htm, score: 1});
-        }
-        // include results based on the email address...
-        callback(CmdUtils.grepSuggs(text, list, "text")
-                 // ...and based on the name.
-                 .concat(CmdUtils.grepSuggs(text, list, "data")));
-      }));
-    }
-    else return CmdUtils.grepSuggs(text, this._list, "_key").concat(suggs);
-  }
+    if (this._list) return this._grep(text).concat(suggs);
+
+    var list = this._list = [], self = this;
+    return suggs.concat(getGmailContacts(function nt_contact_cb(contacts) {
+      for each (var {name, email} in contacts) {
+        var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
+        list.push({
+          text: email, html: htm, data: name, summary: htm, score: 1});
+      }
+      callback(self._grep(text));
+    }));
+  },
+  _list: null,
+  _grep: function nt_contact__grep(text)
+    Utils.uniq([].concat(CmdUtils.grepSuggs(text, this._list, "data"),
+                         CmdUtils.grepSuggs(text, this._list)),
+               "text"),
 };
 
-function getGmailContacts(callback) {
-  var asyncRequest = jQuery.get(
-    "https://mail.google.com/mail/contacts/data/export",
-    {exportType: "ALL", out: "VCARD"},
-    function gGC_success(data) {
-      var contacts = [], name = "";
-      for each(let line in data.replace(/\r\n /g, '').split(/\r\n/)) {
-        if (/^(FN|EMAIL).*?:(.*)/.test(line)) {
-          var {$1: key, $2: val} = RegExp;
-          if (key === "FN")
-            name = val;
-          else
-            contacts.push({name: name, email: val});
-        }
+function getGmailContacts(callback) jQuery.ajax({
+  url: "https://mail.google.com/mail/contacts/data/export",
+  data: {exportType: "ALL", out: "VCARD"},
+  success: function gGC_success(data) {
+    var contacts = [], name = "";
+    for each (let line in data.replace(/\r\n /g, "").split(/\r\n/)) {
+      if (/^(FN|EMAIL).*?:(.*)/.test(line)) {
+        let {$1: key, $2: val} = RegExp;
+        if (key === "FN")
+          name = val !== "null" ? val : "";
+        else
+          contacts.push({name: name, email: val});
       }
-      callback(contacts);
-    },
-    "text");
-  return asyncRequest;
-}
+    }
+    callback(contacts);
+  },
+  error: function gGC_error() { callback([]) },
+});
 
 function getYahooContacts(callback) {
   var url = "http://us.mg1.mail.yahoo.com/yab";
