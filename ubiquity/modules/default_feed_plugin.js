@@ -52,11 +52,11 @@ const DEFAULT_FEED_TYPE = "commands";
 const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
 const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
 
+var gPrefs = Utils.Application.prefs;
+
 function DefaultFeedPlugin(feedManager, messageService, webJsm,
                            languageCode, baseUri, parserVersion) {
   this.type = DEFAULT_FEED_TYPE;
-
-  let {prefs} = Utils.Application;
 
   let builtins = makeBuiltins(languageCode, baseUri, parserVersion);
   let builtinGlobalsMaker = makeBuiltinGlobalsMaker(messageService, webJsm);
@@ -92,67 +92,71 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   this.onSubscribeClick = function DFP_onSubscribeClick(targetDoc,
                                                         commandsUrl,
                                                         mimetype) {
+    var {title, location} = targetDoc;
+    try { var {host} = location } catch (e) {}
+    if (host === "gist.github.com") {
+      if (location.hash)
+        title = location.hash.slice(1) || title;
+      else if (location.search) try {
+        title = decodeURIComponent(location.search).slice(1) || title;
+      } catch (e) {}
+    }
     // Clicking on "subscribe" takes them to the warning page:
     var confirmUrl = CONFIRM_URL + Utils.paramsToString({
-      url: targetDoc.location.href,
+      url: location.href,
       sourceUrl: commandsUrl,
-      title: targetDoc.title,
+      title: title,
     });
 
-    function isTrustedUrl(commandsUrl, mimetype) {
-      // Even if the command feed resides on a trusted host, if the
-      // mime-type is application/x-javascript-untrusted or
-      // application/xhtml+xml-untrusted, the host itself doesn't
-      // trust it (perhaps because it's mirroring code from
-      // somewhere else).
-      if (mimetype === "application/x-javascript-untrusted" ||
-          mimetype === "application/xhtml+xml-untrusted")
-        return false;
-
-      var url = Utils.url(commandsUrl);
-      if (url.scheme !== "https")
-        return false;
-
-      var domains = prefs.getValue(TRUSTED_DOMAINS_PREF, "");
-      domains = domains.split(",");
-
-      for (var i = 0; i < domains.length; i++) {
-        if (domains[i] == url.host)
-          return true;
-      }
-
-      return false;
+    if (!isTrustedUrl(commandsUrl, mimetype)) {
+      Utils.openUrlInBrowser(confirmUrl);
+      return;
     }
 
-    if (isTrustedUrl(commandsUrl, mimetype)) {
-      function onSuccess(data) {
-        feedManager.addSubscribedFeed({
-          url: targetDoc.location.href,
-          sourceUrl: commandsUrl,
-          canAutoUpdate: true,
-          sourceCode: data});
-        Utils.openUrlInBrowser(confirmUrl);
-      }
-
-      if (RemoteUriCodeSource.isValidUri(commandsUrl))
-        webJsm.jQuery.ajax({
-          url: commandsUrl,
-          dataType: "text",
-          success: onSuccess});
-      else
-        onSuccess("");
+    function onSuccess(data) {
+      feedManager.addSubscribedFeed({
+        url: location.href,
+        sourceUrl: commandsUrl,
+        canAutoUpdate: true,
+        sourceCode: data});
+      Utils.openUrlInBrowser(confirmUrl);
     }
-    else Utils.openUrlInBrowser(confirmUrl);
+
+    if (RemoteUriCodeSource.isValidUri(commandsUrl))
+      webJsm.jQuery.ajax({
+        url: commandsUrl,
+        dataType: "text",
+        success: onSuccess});
+    else
+      onSuccess("");
   };
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
-    var timeout = prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
+    var timeout = gPrefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
     return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
                        builtins.headers, builtins.footers,
                        webJsm.jQuery, timeout);
   };
 
   feedManager.registerPlugin(this);
+}
+
+function isTrustedUrl(commandsUrl, mimetype) {
+  // Even if the command feed resides on a trusted host, if the
+  // mime-type is application/x-javascript-untrusted or
+  // application/xhtml+xml-untrusted, the host itself doesn't
+  // trust it (perhaps because it's mirroring code from
+  // somewhere else).
+  if (mimetype === "application/x-javascript-untrusted" ||
+      mimetype === "application/xhtml+xml-untrusted") return false;
+
+  var {scheme, host} = Utils.uri(commandsUrl);
+  if (scheme !== "https") return false;
+
+  let domains = gPrefs.getValue(TRUSTED_DOMAINS_PREF, "").split(",");
+  for each (let d in domains) if (d === host) return true;
+
+  return false;
 }
 
 DefaultFeedPlugin.makeCmdForObj = makeCmdForObj;
@@ -276,37 +280,33 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   };
 
   this.checkForManualUpdate = function checkForManualUpdate(cb) {
-    if (LocalUriCodeSource.isValidUri(this.srcUri))
+    if (LocalUriCodeSource.isValidUri(this.srcUri)) {
       cb(false);
-    else {
-      function onSuccess(data) {
-        if (data !== self.getCode()) {
-          var confirmUrl = (CONFIRM_URL +
-                            "?url=" +
-                            encodeURIComponent(self.uri.spec) +
-                            "&sourceUrl=" +
-                            encodeURIComponent(self.srcUri.spec) +
-                            "&updateCode=" +
-                            encodeURIComponent(data));
-          cb(true, confirmUrl);
-        }
-        else
-          cb(false);
-      };
-      jQuery.ajax({
-        url: this.srcUri.spec,
-        dataType: "text",
-        success: onSuccess,
-        error: function onError() { cb(false) },
-      });
+      return;
     }
+
+    function onSuccess(data) {
+      if (data === self.getCode())
+        cb(false);
+      else
+        cb(true, CONFIRM_URL + Utils.paramsToString({
+          url: self.uri.spec,
+          sourceUrl: self.srcUri.spec,
+          updateCode: data,
+        }));
+    }
+    jQuery.ajax({
+      url: this.srcUri.spec,
+      dataType: "text",
+      success: onSuccess,
+      error: function onError() { cb(false) },
+    });
   };
 
   this.finalize = function finalize() {
     // Not sure exactly why, but we get memory leaks if we don't
     // manually remove these.
-    jQuery = null;
-    sandbox.jQuery = null;
+    jQuery = sandbox.jQuery = sandbox.$ = null;
   };
 
   this.__proto__ = feedInfo;
