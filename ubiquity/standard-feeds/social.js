@@ -14,105 +14,76 @@ const TWITTER_STATUS_MAXLEN = 140;
 
 CmdUtils.CreateCommand({
   names: ["twitter", "tweet", "share using twitter"],
-  //ja: ["呟く","呟け","呟いて","つぶやく","つぶやけ","つぶやいて"]
-  arguments: [
-    {role: "object", label: 'status', nountype: noun_arb_text},
-    {role: "alias", nountype: noun_type_twitter_user}
-  ],
-  icon: "chrome://ubiquity/skin/icons/twitter.ico",
   description:
   "Sets your Twitter status to a message of at most 160 characters.",
   help: ("You'll need a <a href=\"http://twitter.com\">Twitter account</a>," +
          " obviously.  If you're not already logged in" +
          " you'll be asked to log in."),
-  preview: function(previewBlock, args) {
-    var statusText = (args.object ? args.object.text : '');
-    var usernameText = "";
-    if (args.alias) {
-      usernameText = args.alias.text;
-    } else if (args.as) {
-      usernameText = args.as.text;
-    }
-    if (usernameText[0] == '@')
-      usernameText = usernameText.slice(1);
-    
+  icon: "chrome://ubiquity/skin/icons/twitter.ico",
+  arguments: [{role: "object", label: "status", nountype: noun_arb_text},
+              {role: "alias", nountype: noun_type_twitter_user}],
+  preview: function twitter_preview(previewBlock, args) {
+    var statusText = args.object.text;
+    var usernameText = args.alias.text;
     var previewTemplate = (
-      "<div class='twitter'>"+_("Updates your Twitter status ${username} to:")+"<br/>" +
+      "<div class='twitter'>"+
+      _("Updates your Twitter status ${username} to:") + "<br/>" +
       "<b class='status'>${status}</b><br/><br/>" +
       _("Characters remaining: <b>${chars}</b>") +
-      "<p><small>"+_("tip: tweet @mozillaubiquity for help")+"</small></p></div>");
-    var truncateTemplate = (
-      "<strong>"+_("The last <b>${truncate}</b> characters will be truncated!")+"</strong>");
+      "<p><small>" +
+      _("tip: tweet @mozillaubiquity for help") +
+      "</small></p></div>");
     var previewData = {
-      status: <>{statusText}</>.toXMLString(),
-      username: usernameText && _("(For user <b>${usernameText}</b>)"),
-      chars: TWITTER_STATUS_MAXLEN - statusText.length
+      status: args.object.html,
+      username: usernameText && _("(For user <b>${usernameText}</b>)",
+                                  {usernameText: args.alias.html}),
+      chars: TWITTER_STATUS_MAXLEN - statusText.length,
     };
 
-    var previewHTML = CmdUtils.renderTemplate(
-                        CmdUtils.renderTemplate(previewTemplate, previewData),
-                        {usernameText:usernameText});
+    var previewHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
 
-    if (previewData.chars < 0) {
-      var truncateData = {
-        truncate: 0 - previewData.chars
-      };
-
-      previewHTML += CmdUtils.renderTemplate(truncateTemplate, truncateData);
-    }
+    if (previewData.chars < 0)
+      previewHTML += (
+        "<strong>" +
+        _("The last <b>${truncate}</b> characters will be truncated!",
+          {truncate: -previewData.chars}) +
+        "</strong>");
 
     previewBlock.innerHTML = previewHTML;
   },
-  execute: function(args) {
+  execute: function twitter_execute(args) {
     var statusText = args.object.text;
-    if(statusText.length < 1) {
+    if (!statusText.length) {
       this._show(_("requires a status to be entered"));
       return;
     }
 
-    var updateUrl = "https://twitter.com/statuses/update.json";
-    var updateParams = {
-      source: "ubiquity",
-      status: statusText
-      //dont cut the input since sometimes, the user selects a big url,
-      //and the total lenght is more than 140, but tinyurl takes care of that
-    };
     var me = this;
-
-    function sendMessage() {
-      jQuery.ajax({
-        type: "POST",
-        url: updateUrl,
-        data: updateParams,
-        dataType: "json",
-        error: function() {
-          me._show(_("error - status not updated"));
-        },
-        success: function() {
-          me._show(/^d /.test(statusText)
-                   ? _("direct message sent")
-                   : _("status updated"));
-        },
-        username: login.username,
-        password: login.password
-      });
-    }
-
-    var login;
-    var alias = args.alias;
-    if (alias && alias.text && alias.data) {
-      login = alias.data;
-      sendMessage();
-    } else {
-      login = {username: null,
-               password: null};
-      if (alias && alias.text)
-        login.username = alias.text;
-      sendMessage();
-    }
+    var login = args.alias.data || {};
+    jQuery.ajax({
+      type: "POST",
+      url: "https://twitter.com/statuses/update.json",
+      data: {
+        //dont cut the input since sometimes, the user selects a big url,
+        //and the total lenght is more than 140, but bit.ly takes care of that
+        status: statusText,
+        source: "ubiquity",
+      },
+      dataType: "json",
+      error: function twitter_error() {
+        me._show(_("error - status not updated"));
+      },
+      success: function twitter_success() {
+        me._show(/^d /.test(statusText)
+                 ? _("direct message sent")
+                 : _("status updated"));
+      },
+      username: login.username,
+      password: login.password,
+    });
   },
-  _show: function(txt){
-    displayMessage({icon: this.icon, title: this.name, text: txt});
+  _show: function twitter__show(txt) {
+    displayMessage(txt, this);
   }
 });
 

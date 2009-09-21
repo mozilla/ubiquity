@@ -595,27 +595,21 @@ var noun_type_twitter_user = {
   cacheTime: 0,
   suggest: function nt_twuser_suggest(text, html, cb, selected) {
     // reject text from selection.
-    if (!text || selected)
-      return [];
+    if (!text || selected) return [];
 
-    var foundAt = text[0] === '@';
+    var foundAt = text[0] === "@";
     if (foundAt) text = text.slice(1); // strip off the @
 
     var suggs = CmdUtils.grepSuggs(text, this.logins());
-    // only letters, numbers, and underscores are allowed in twitter
-    // usernames.
 
-    if (/^\w+$/.test(text))
-      suggs.push(CmdUtils.makeSugg(text, null, {}, 0.5));
+    // only letters, numbers, and underscores are allowed in twitter usernames.
+    if (/^\w+$/.test(text)) suggs.push(CmdUtils.makeSugg(text, null, {}, .4));
 
-    if (foundAt)
-      suggs = [{
-        __proto__: s,
-        text: '@' + s.text,
-        html: '@' + s.html,
-        summary: '@' + s.summary,
-        score: Math.pow(s.score, 0.8),
-      } for each (s in suggs)];
+    if (foundAt) suggs = [
+      { __proto__: s,
+        summary: "@" + s.summary,
+        score: Math.pow(s.score, 0.8) }
+      for each (s in suggs)];
 
     return suggs;
   },

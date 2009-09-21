@@ -255,7 +255,7 @@ function grepSuggs(input, suggs, key) {
   if (!input) return [];
   if (key == null) key = "text";
   var re = Utils.regexp(input, "i"), match;
-  return ([(sugg.score = matchScore(match) * (sugg.score || 1), sugg)
+  return ([(sugg.score = matchScore(match), sugg)
            for each (sugg in suggs) if ((match = re(sugg[key])))]
           .sort(byScoreDescending));
 }
