@@ -333,6 +333,19 @@ function testUtilsSortBy() {
                     Utils.sortBy(numArray, function (x) -x) + "");
 }
 
+function testUtilsUniq() {
+  var ones = [1, "+1", ["1e0"], true];
+  this.assertEquals(uneval(Utils.uniq(ones.slice())),
+                    uneval(ones));
+  this.assertEquals(uneval(Utils.uniq(ones, Number)),
+                    "[1]");
+  var objs = [{}, {}, {}];
+  this.assertEquals(uneval(Utils.uniq(objs.slice())),
+                    "[{}]");
+  this.assertEquals(uneval(Utils.uniq(objs, null, true)),
+                    uneval(objs));
+}
+
 function testUtilsComputeCryptoHash() {
   var str = "hello world";
   this.assertEquals(Utils.computeCryptoHash("md5", str),

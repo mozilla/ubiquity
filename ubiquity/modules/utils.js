@@ -371,7 +371,6 @@ function uri(spec, defaultUri) {
     base = "base" in spec ? uri(spec.base, defaultUri) : null;
     spec = spec.uri || null;
   }
-
   try {
     return Utils.IOService.newURI(spec, null, base);
   } catch (e if defaultUri) {
@@ -594,6 +593,53 @@ function sortBy(array, key, descending) {
 // Because our Monkey uses Merge Sort, "swap the values if plus" works.
 sortBy.aSorter = function byKeyAsc(a, b) a.key > b.key;
 sortBy.dSorter = function byKeyDsc(a, b) a.key < b.key;
+
+// === {{{ Utils.uniq(array, key, strict) }}} ===
+//
+// Remove duplicates from an array by comparing string versions of them
+// (or strict equality if {{{strict}}} evaluates to {{{true}}}) and returns it.
+// If {{{key}}} is provided, the comparison is made to mappings of it instead.
+// {{{
+// Utils.uniq([1, 1.0, "1", [1]])         //=> [1, "1", [1]]
+// Utils.uniq([1, 1.0, "1", [1]], Number) //=> [1]
+// Utils.uniq([{}, {}, {}], null)         //=> [{}]
+// Utils.uniq([{}, {}, {}], null, true)   //=> [{}, {}, {}]
+// }}}
+//
+// {{{array}}} is the target array.
+//
+// {{{key}}} is an optional function or string
+// ({{{"foo"}}} is identical to {{{function(x) x.foo}}} for this purpose)
+// that maps each of {{{array}}}'s item to a comparison key.
+//
+// {{{strict}}} is an optional flag to make {{{uniq()}}} use
+// {{{===}}} comparison instead of {{{toString()}}}.
+// Accurate, but slower.
+
+function uniq(array, key, strict) {
+  var f = (key == null
+           ? function identity(x) x
+           : typeof key === "function" ? key : function pluck(x) x[key]);
+  var args = [0, 1/0];
+  if (strict) {
+    let keys = [];
+    for each (let x in array) let (k = f(x)) {
+      if (~keys.indexOf(k)) continue;
+      keys.push(k);
+      args.push(x);
+    }
+  }
+  else {
+    let dict = {__proto__: null};
+    for each (let x in array) let (k = f(x)) {
+      if (k in dict) continue;
+      dict[k] = 1;
+      args.push(x);
+    }
+  }
+  array.splice.apply(array, args);
+  return array;
+}
 
 // === {{{ Utils.isArray(value) }}} ===
 //
