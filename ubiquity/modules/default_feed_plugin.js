@@ -92,20 +92,12 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   this.onSubscribeClick = function DFP_onSubscribeClick(targetDoc,
                                                         commandsUrl,
                                                         mimetype) {
-    var {title, location} = targetDoc;
-    try { var {host} = location } catch (e) {}
-    if (host === "gist.github.com") {
-      if (location.hash)
-        title = location.hash.slice(1) || title;
-      else if (location.search) try {
-        title = decodeURIComponent(location.search).slice(1) || title;
-      } catch (e) {}
-    }
+    var {location} = targetDoc;
     // Clicking on "subscribe" takes them to the warning page:
     var confirmUrl = CONFIRM_URL + Utils.paramsToString({
       url: location.href,
       sourceUrl: commandsUrl,
-      title: title,
+      title: Utils.gist.getName(targetDoc) || targetDoc.title,
     });
 
     if (!isTrustedUrl(commandsUrl, mimetype)) {

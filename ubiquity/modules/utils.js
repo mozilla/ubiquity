@@ -867,15 +867,19 @@ function notify(label, value, image, priority, buttons, target) {
 // Same as [[https://developer.mozilla.org/en/DOM/element.addEventListener]],
 // except that the {{{listener}}} will be automatically removed on its
 // first execution.
+// Returns the added wrapper function which can be called/removed
+// manually if needed.
 
 function listenOnce(element, eventType, listener, useCapture) {
-  element.addEventListener(eventType, function _listenOnce(event) {
-    element.removeEventListener(eventType, _listenOnce, useCapture);
+  function listener1(event) {
+    element.removeEventListener(eventType, listener1, useCapture);
     if (typeof listener === "function")
       listener.call(this, event);
     else
       listener.handleEvent(event);
-  }, useCapture);
+  }
+  element.addEventListener(eventType, listener1, useCapture);
+  return listener1;
 }
 
 // == {{{ Utils.tabs }}} ==
@@ -1144,5 +1148,55 @@ regexp.Trie.prototype = {
     var result = 1 in alt ? "(?:" + alt.join("|") + ")" : alt[0];
     if (q) result = cconly ? result + "?" : "(?:" + result + ")?";
     return result || "";
+  },
+};
+
+// == {{{ Utils.gist }}} ==
+//
+// [[http://gist.github.com/|Gist]] related utilities.
+
+Utils.gist = {
+  // === {{{ Utils.gist.paste(files, id) }}} ===
+  //
+  // Pastes code to Gist.
+  //
+  // {{{files}}} is the dictionary of name:code pairs.
+  //
+  // {{{id}}} is an optional number that specifies target Gist.
+  // The user needs to be the owner of that Gist.
+
+  paste: function gist_paste(files, id) { 
+    var data = id ? ["_method=put"] : [], i = 1;
+    for (let name in files) {
+      for (let [k, v] in new Iterator({
+        name: name, contents: files[name] || "", ext: ""}))
+        data.push("file_" + k + "[gistfile" + i + "]=" +
+                  encodeURIComponent(v));
+      ++i;
+    }
+    Utils.openUrlInBrowser("http://gist.github.com/gists/" + (id || ""),
+                           data.join("&"));
+  },
+
+  // === {{{ Utils.gist.getName(document) }}} ===
+  //
+  // Extracts the name of a Gist via DOM {{{document}}}.
+
+  getName: function gist_getName(document) {
+    try { var {domain} = document } catch (e) {}
+    if (domain !== "gist.github.com") return "";
+
+    var {hash, search} = document.location;
+    if (hash.length > 1) return hash.slice(1);
+    if (search.length > 1)
+      try { return decodeURIComponent(search).slice(1) } catch (e) {}
+
+    var info = document.getElementsByClassName("info")[0];
+    if (info && /^\s*([^.]+)/(info.textContent)) {
+      let name = RegExp.$1;
+      if (name.length > 1) return name;
+    }
+
+    return "";
   },
 };

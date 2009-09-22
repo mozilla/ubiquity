@@ -223,13 +223,9 @@ function saveAs() {
 }
 
 function pasteToGist() {
-  var data = $("#skin-editor").val();
-  var ext = ".css";
+  var file = {};
+  var data = $("#skin-editor").val()
   var name = Utils.trim((/@name[ \t]+(.+)/(data) || [, "ubiquity-skin"])[1]);
-  Utils.openUrlInBrowser(
-    "http://gist.github.com/gists/",
-    ["file_" + key + "[gistfile1]=" + encodeURIComponent(val)
-     for each ([key, val] in new Iterator({
-       ext: ext, name: name + ext, contents: data,
-     }))].join("&"));
+  file[name + ".css"] = data;
+  Utils.gist.paste(file);
 }
