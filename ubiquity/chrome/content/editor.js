@@ -2,6 +2,25 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/prefcommands.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 
+
+function BespinEditor() {};
+BespinEditor.prototype = {
+  CHARSET: 'utf-8',
+  _component: null,
+  initUI: function initUI(divId, window) {
+    // Loads and configures the objects that the editor needs
+    var self = this;
+    var save;
+    self._component = new bespin.editor.Component(divId,{language:    "js", 
+                                                         loadfromdiv: true,
+                                                         set: {tabmode: "off",
+                                                               tabsize: 2,
+                                                               closepairs: "on",
+                                                               autoindent: "on"}});
+    document.getElementById(divId)._editor = self._component;
+  },
+};
+
 var Editor = {
   EDITOR_PREF : "extensions.ubiquity.editor",
 
@@ -106,8 +125,8 @@ var Editor = {
 function paste() {
   try {
     var feedType = $("#feedTypeMenu").val();
-    var editor = document.getElementById("editor");
-    var code = editor.editor.editor.getCode();
+    var editor = document.getElementById("editor-div");
+    var code = editor._editor.getContent();
     if (feedType == "commands") {
       var file = encodeURIComponent("[gistfile1]");
       var quickPaste = ("file_ext" + file + "=.js&file_name" +
@@ -127,11 +146,12 @@ function paste() {
 }
 
 function importTemplate() {
-  var {editor} = document.getElementById("editor");
+  var {_editor} = document.getElementById("editor-div");
   var code = (Utils.getLocalUrl("command-template.js") +
-              editor.getCode());
-  editor.setCode(code);
+              _editor.getContent());
+  _editor.setContent(code);
   PrefCommands.setCode(code);
+  document.getElementById("canvas").focus();
 }
 
 function saveAs() {
@@ -148,9 +168,9 @@ function saveAs() {
 
     var rv = fp.show();
     if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {
-      let editor = document.getElementById("editor");
+      let editor = document.getElementById("editor-div");
 
-      saveTextToFile(editor.editor.editor.getCode(), fp.file);
+      saveTextToFile(editor._editor.getContent(), fp.file);
 
       let feedMgr = UbiquitySetup.createServices().feedManager;
       feedMgr.addSubscribedFeed({url: fp.fileURL.spec,
@@ -158,17 +178,15 @@ function saveAs() {
                                         sourceCode: "",
                                         canAutoUpdate: true});
 
-      editor.editor.setCode("");
+      editor._editor.setContent("");
       PrefCommands.setCode("");
       //errorToLocalize
-      $("#editor-actions").html(
+      $("#editor-log").html(
         "<p>The command source was saved to <strong>" + fp.file.path + "</strong> " +
         "and you are now subscribed to that page. Edit that file and any " +
         "changes will take effect the moment you invoke Ubiquity.</p>" +
         "<p>You can remove this subscription on the " +
-        "<a href='about:ubiquity'>Ubiquity main page</a></p>" +
-        "<p><a href=''>Reload this page</a> to create a new command.</p>");
-      $("#editor-div").slideUp();
+        "<a href='about:ubiquity'>Ubiquity main page</a></p>");
     }
   } catch(e) {
     Cu.reportError(e);
@@ -198,7 +216,7 @@ function displayMessage(msg){
 }
 
 $(function ready() {
-  $("#editor").bind("keyup, change", function updateCode(){
-    PrefCommands.setCode(this.value);
+  $("#editor-div").bind("keyup", function updateCode(){
+    PrefCommands.setCode(this._editor.getContent());
   });
 });
