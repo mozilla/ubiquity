@@ -32,7 +32,6 @@
     var lastModifiedTime = 0; 
     function initialize() {
       document.getElementById("feedTypeMenu").value = PrefCommands.type;
-      document.getElementById("editor-div").innerHTML = PrefCommands.getCode();
     }
     function launch() { 
       file = Editor.launchEditor(document.getElementById('editor-div')._editor.getContent()); 

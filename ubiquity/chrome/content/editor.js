@@ -12,12 +12,13 @@ BespinEditor.prototype = {
     var self = this;
     var save;
     self._component = new bespin.editor.Component(divId,{language:    "js", 
-                                                         loadfromdiv: true,
+                                                         loadfromdiv: false,
                                                          set: {tabmode: "off",
                                                                tabsize: 2,
                                                                closepairs: "on",
                                                                autoindent: "on"}});
     document.getElementById(divId)._editor = self._component;
+    self._component.setContent(PrefCommands.getCode());
   },
 };
 
