@@ -222,10 +222,8 @@ function saveAs() {
   loadSkinList();
 }
 
-function pasteToGist() {
-  var file = {};
+function shareSkin() {
   var data = $("#skin-editor").val()
   var name = Utils.trim((/@name[ \t]+(.+)/(data) || [, "ubiquity-skin"])[1]);
-  file[name + ".css"] = data;
-  Utils.gist.paste(file);
+  pasteToGist(name, data, "css");
 }

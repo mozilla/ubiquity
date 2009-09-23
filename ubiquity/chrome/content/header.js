@@ -105,6 +105,14 @@ function jump(hash) {
     location = href;
 }
 
+function pasteToGist(name, code, ext) {
+  name = prompt("Pasting to gist.github.com with name:", name);
+  if (!name) return;
+  var file = {};
+  file[name + "." + ext] = code;
+  Utils.gist.paste(file);
+}
+
 $(function onReady() {
   $(".version").text(UbiquitySetup.version);
   createNavLinks();
