@@ -300,7 +300,7 @@ function ubiquityLoad_commandHistory(U) {
       ev.stopPropagation();
     }
   }, true);
-  U.msgPanel.addEventListener("popuphidden", function cmdh_saveEntry() {
+  textBox.addEventListener("blur", function cmdh_saveEntry() {
     CmdHst.add(textBox.value);
     cursor = -1;
   }, false);
