@@ -218,5 +218,8 @@ $(function ready() {
    .bind("keyup", function updateCode() {
      PrefCommands.setCode(this._editor.getContent());
    })
-   .bind("DOMMouseScroll", function preventPageScroll() false));
+   .bind("DOMMouseScroll", function preventPageScroll() {
+     document.getElementById("canvas").focus();
+     return false;
+   }));
 });
