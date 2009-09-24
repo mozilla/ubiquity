@@ -51,6 +51,7 @@ const CONFIRM_URL = "chrome://ubiquity/content/confirm-add-command.xhtml";
 const DEFAULT_FEED_TYPE = "commands";
 const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
 const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
+const COMMANDS_BIN_PREF = "extensions.ubiquity.commands.bin";
 
 var gPrefs = Utils.Application.prefs;
 
@@ -228,12 +229,14 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
                  headerSources, footerSources, jQuery, timeoutInterval) {
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
     this.canAutoUpdate = true;
+  if (feedInfo.isBuiltIn)
+    for (let [k, v] in new Iterator(BuiltInFeedProto)) feedInfo[k] = v;
 
+  var self = this;
   var codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
                                   timeoutInterval);
-  var bin = feedInfo.makeBin();
   var sandbox = null;
-  var self = this;
+  var bin = feedInfo.makeBin();
 
   function reset() {
     self.commands = {};
@@ -354,3 +357,13 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
     footers: [new LocalUriCodeSource(basePartsUri + "footer/final.js")],
   };
 }
+
+var BuiltInFeedProto = {
+  getJSONStorage: function BF_getJSONStorage()
+    Utils.json.decode(gPrefs.getValue(COMMANDS_BIN_PREF, "{}")),
+  setJSONStorage: function BF_setJSONStorage(obj) {
+    var data = Utils.json.encode(obj);
+    gPrefs.setValue(COMMANDS_BIN_PREF, data);
+    return Utils.json.decode(data);
+  },
+};
