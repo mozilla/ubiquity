@@ -958,9 +958,10 @@ function CreateAlias(options) {
 // An extra option {{{options.parser}}} can be passed, which will make
 // Ubiquity automatically generate a keyboard navigatable preview of
 // the results. It is passed as an object containing at the very least
-// {{{options.parser.title}}}, a jQuery selector that matches the
-// titles of the results. Optionally, you can include members It is
-// highly recommended that you include {{{options.parser.container}}},
+// {{{options.parser.title}}}, either a jQuery selector that matches the
+// titles of the results or a function given a single argument (the container 
+// of the result) that must return a string to be used as title. 
+// It is highly recommended that you include {{{options.parser.container}}},
 // a jQuery selector that will match an element that groups
 // result-data.  If this is not passed, Ubiquity will fall back to a
 // fragile method of pairing titles, previews and thumbnails, which
@@ -968,10 +969,10 @@ function CreateAlias(options) {
 // jQuery selector that will match the preview returned by the search
 // provider or a function that will receive a single argument (the
 // container grouping the result-data) and must return a string that will
-// be used as preview; {{{options.parser.baseurl}}}, a string that will
-// be prefixed to relative links, such that relative paths will still
-// work out of context. If not passed, it will be auto-generated from
-// {{{options.url}}} (and thus //may// be incorrect)
+// be used as preview or a jQuery object; {{{options.parser.baseurl}}}, 
+// a string that will be prefixed to relative links, such that relative paths 
+// will still work out of context. If not passed, it will be auto-generated 
+// from {{{options.url}}} (and thus //may// be incorrect)
 // {{{options.parser.thumbnail}}}, a jQuery selector that will match a
 // thumbnail which will automatically be displayed in the
 // preview. Note: if it doesn't point to an {{{<img>}}} element,
@@ -1092,11 +1093,17 @@ function makeSearchCommand(options) {
         if ("container" in parser) {
           doc.find(parser.container).each(function eachContainer() {
             let result = {}, $this = jQuery(this);
-            result.title = $this.find(parser.title);
+            result.title = (typeof parser.title === "function"
+                            ? parser.title(this)
+                            : $this.find(parser.title));
             if ("preview" in parser)
               result.preview = (typeof parser.preview === "function"
                                 ? parser.preview(this)
                                 : $this.find(parser.preview));
+            if ("href" in parser)
+              result.href = (typeof parser.href === "function"
+                             ? parser.href(this)
+                             : $this.find(parser.href));
             if ("thumbnail" in parser)
               result.thumbnail = $this.find(parser.thumbnail);
             results.push(result);
@@ -1125,17 +1132,19 @@ function makeSearchCommand(options) {
           }
         }
         results = results.filter(function filterResults(result) {
-          var {title, thumbnail, preview} = result;
+          var {title, thumbnail, preview, href} = result;
           if (!(title || 0).length) return false;
-          if (title[0].nodeName !== "A") title = title.find("A:first");
-          result.href = title.attr("href");
+          if (!href) {
+            if (title[0].nodeName !== "A") title = title.find("A:first");
+            result.href = title.attr("href");
+          }
           result.title = title.html();
           if ((thumbnail || 0).length) {
             if (thumbnail[0].nodeName !== "IMG")
               thumbnail = thumbnail.find("img:first");
             result.thumbnail = thumbnail.attr("src");
           }
-          if (preview) result.preview = preview.html();
+          if (preview && typeof preview !== "string") result.preview = preview.html();
           return true;
         });
       }
