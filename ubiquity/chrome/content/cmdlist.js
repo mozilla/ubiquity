@@ -66,11 +66,12 @@ var {escapeHtml} = Utils;
 var {feedManager, commandSource, messageService} = (
   UbiquitySetup.createServices());
 
-function A(url, text, className) {
+function A(url, text, className, attrs) {
   var a = document.createElement("a");
   a.href = url;
   a.textContent = text || url;
-  a.className = className || "";
+  if (className) a.className = className;
+  for (let attr in attrs) a.setAttribute(attr, attrs[attr]);
   return a;
 }
 
@@ -82,7 +83,7 @@ function actionLink(text, action)(
 
 function fillTableCellForFeed(cell, feed, sortMode) {
   var feedUrl = feed.uri.spec;
-  cell.append(A(feedUrl, feed.title), "<br/>");
+  cell.append(A(feedUrl, feed.title, "", {name: feedUrl}), "<br/>");
   if (+feed.date)
     cell.append('<span class="feed-date">' +
                 feed.date.toLocaleString() +
@@ -94,7 +95,7 @@ function fillTableCellForFeed(cell, feed, sortMode) {
       function unsubscribe() {
         feed.remove();
         cell.slideUp(function onUnsubscribe() {
-          $("a[name^='" + feedUrl + "']").closest("tr").hide();
+          $("a[name^='" + feedUrl + "']").closest("tr").remove();
           updateSubscribedCount();
           buildUnsubscribedFeeds();
         });
