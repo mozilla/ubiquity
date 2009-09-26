@@ -144,4 +144,19 @@ body {
   font-size: x-small;  
 }
 
+.search-command kbd:before {
+  content: "[";
+}
+.search-command kbd:after {
+  content: "]";
+}
+
+.search-command .thumbnail {
+  float: left; margin: 5px 10px 0 0;
+}
+
+.search-command .title {
+  clear: both;
+}
+
 }
