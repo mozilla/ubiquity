@@ -12,7 +12,7 @@ BespinEditor.prototype = {
     var save;
     self._component = new bespin.editor.Component(divId, {
       language: "js",
-      loadfromdiv: true,
+      loadfromdiv: false,
       set: {
         tabmode: "off",
         tabsize: 2,
