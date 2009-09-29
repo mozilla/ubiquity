@@ -273,49 +273,40 @@ var noun_type_tag = {
   rankLast: true,
   noExternalCalls: true,
   default: function nt_tag_default()
-    [CmdUtils.makeSugg(tag, null, [tag], 0.3)
+    [CmdUtils.makeSugg(tag, null, [tag], .3)
      for each (tag in PlacesUtils.tagging.allTags)],
   suggest: function nt_tag_suggest(text) {
-    text = Utils.trim(text);
-    if (!text) return [];
+    // can accept multiple tags, seperated by commas
+    var tags = text.split(/(?:\s*,\s*)+/).filter(/\S/);
+    if (!tags.length) return tags;
 
-    // let's start with an initial seed score.
-    var score = 0.3;
-
+    var score = .3, {pow} = Math;
     var {allTags} = PlacesUtils.tagging;
-    var lowercaseAllTags = [tag.toLowerCase() for each (tag in allTags)];
+    var allTagsLC = [tag.toLowerCase() for each (tag in allTags)];
+    for each (let [i, tag] in new Iterator(tags)) {
+      let index = allTagsLC.indexOf(tag.toLowerCase());
+      if (~index) {
+        // if preexisting, boost score
+        score = pow(score, .5);
+        // replace with the one with proper case
+        tags[i] = allTags[index];
+      }
+      else
+        // if multi-word, unboost score
+        score /= pow(2, (tag.match(/\s+/g) || "").length);
+    }
+    var suggs = [CmdUtils.makeSugg(null, null, tags, score)];
 
-    // can accept multiple tags, seperated by a comma
     // assume last tag is still being typed - suggest completions for that
-    var completedTags = text.split(/\s{0,},\s{0,}/);
-    // separate last tag in fragment, from the rest
-    var uncompletedTag = completedTags.pop();
-    var utag = (uncompletedTag ? uncompletedTag.toLowerCase() : null);
-    completedTags = completedTags.filter(Boolean);
+    var lastTagLC = tags[tags.length - 1].toLowerCase();
+    for (let [i, atagLC] in new Iterator(allTagsLC))
+      // only match from the beginning of a tag name (not the middle)
+      if (lastTagLC.length < atagLC.length &&
+          atagLC.indexOf(lastTagLC) === 0)
+        suggs.push(CmdUtils.makeSugg(null, null,
+                                     tags.slice(0, -1).concat(allTags[i]),
+                                     pow(score, .5)));
 
-    for each (let tag in completedTags) {
-      if (lowercaseAllTags.indexOf(tag.toLowerCase()) > -1)
-        // if preexisting tag, boost score
-        score = Math.pow(score, 0.5);
-    }
-
-    var suggs = [
-      CmdUtils.makeSugg(null, null,
-                        (uncompletedTag
-                         ? completedTags.concat(uncompletedTag)
-                         : completedTags),
-                        (uncompletedTag && lowercaseAllTags.indexOf(utag) >= 0
-                         ? Math.sqrt(score)
-                         : score))];
-    if (uncompletedTag) {
-      for each (let tag in allTags)
-        // only match from the beginning of a tag name (not the middle)
-        if (tag.length > utag.length &&
-            tag.toLowerCase().indexOf(utag) === 0)
-          suggs.push(CmdUtils.makeSugg(null, null,
-                                       completedTags.concat(tag),
-                                       Math.sqrt(score)));
-    }
     return suggs;
   }
 };
