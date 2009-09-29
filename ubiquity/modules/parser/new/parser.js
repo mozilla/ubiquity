@@ -2477,25 +2477,22 @@ Parse.prototype = {
   // It returns the parses with nice {{{<span class='...'></span>}}}
   // wrappers.
   get displayHtml() {
+    let {parser} = this._query;
     // This is the main string to be returned.
-    let display = '';
+    let display = "";
     // This string is built in case there's a verb at the end of the sentence,
     // in which case we slap this on at the end.
-    let displayFinal = '';
+    let displayFinal = "";
 
-    // If the verb has _order = -1, it means it was at the end of the input.
-    if (this._verb._order != -1){
-      display = "<span class='verb' title='"
-        + (this._verb.id || 'null') + "'>"
-        + (this._verb.text || '<i>null</i>')
-        + "</span>" + this._query.parser.joindelimiter;
-    }
-    else {
-      displayFinal = this._query.parser.joindelimiter
-        + "<span class='verb' title='"
-        + this._verb.id + "'>" + (this._verb.text || '<i>null</i>')
-        + "</span>";
-    }
+    let verb = (
+      '<span class="verb" title="' + (this._verb.id || "null") + '">' +
+      (this._verb.text || "<i>null</i>") +
+      "</span>");
+    if (this._verb._order === -1)
+      // the verb was at the end of the input.
+      displayFinal = parser.joindelimiter + verb;
+    else
+      display = verb + parser.joindelimiter;
     // Copy all of the arguments into an ordered array called argsArray.
     // This will then be in the right order for display.
     let argsArray = [];
@@ -2512,12 +2509,13 @@ Parse.prototype = {
             if (argument._order > 0) {
               argsArray[argument._order] = argument;
               argsArray[argument._order].role = role;
-            } else {
+            }
+            else {
               negativeArgsArray[maxArgsNumber + argument._order] = argument;
               negativeArgsArray[maxArgsNumber + argument._order].role = role;
             }
-          } else
-            unfilledArgs.push(argument);
+          }
+          else unfilledArgs.push(argument);
         }
       }
     }
@@ -2525,34 +2523,23 @@ Parse.prototype = {
     argsArray = argsArray.concat(negativeArgsArray).concat(unfilledArgs);
 
     for each (let arg in argsArray) {
-      let className = 'argument';
-      if (!arg.modifier)
-        className = 'object';
-
+      let summary = (
+        '<span class="' + (arg.modifier ? "argument" : "object") + '">' +
+        (!arg.inactivePrefix ? "" :
+         '<span class="inactive">' + arg.inactivePrefix + "</span>") +
+        arg.summary +
+        (!arg.inactiveSuffix ? "" :
+         "<span class='inactive'>" + arg.inactiveSuffix + "</span>") +
+        "</span>");
+      let mod = (!arg.modifier ? "" :
+                 '<span class="delimiter" title="' + arg.role + '">' +
+                 arg.modifier + arg.innerSpace + "</span>");
+      let outersp = arg.outerSpace || "";
       // Depending on the _branching parameter, the delimiter goes on a
       // different side of the argument.
-      if (this._query.parser.branching == 'right') {
-        display += (arg.outerSpace || '') + (arg.modifier ? "<span class='delimiter' title='"
-          + arg.role+"'>" + arg.modifier + arg.innerSpace
-          + "</span>":'') + "<span class='" + className + "' title=''>"
-          + (arg.inactivePrefix ?
-             "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.summary || arg.text || arg.input || arg.label)
-          + (arg.inactiveSuffix ?
-             "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
-          + "</span>";
-      }
-      else {
-        display += "<span class='" + className
-          + "' title=''>"
-          + (arg.inactivePrefix ?
-             "<span class='inactive'>" + arg.inactivePrefix + "</span>" : '')
-          + (arg.summary || arg.text || arg.input || arg.label)
-          + (arg.inactiveSuffix ?
-             "<span class='inactive'>" + arg.inactiveSuffix + "</span>" : '')
-          + "</span>" + (arg.modifier ? "<span class='delimiter' title='" + arg.role + "'>"
-          + arg.innerSpace + arg.modifier + "</span>" : '') + (arg.outerSpace || '');
-      }
+      display += (parser.branching === "right"
+                  ? outersp + mod + summary
+                  : summary + mod + outersp);
     }
 
     for each (let neededArg in this._verb.arguments) {
@@ -2561,19 +2548,23 @@ Parse.prototype = {
       let {label} = neededArg;
       if (!label) {
         let nt = neededArg.nountype;
-        // _name is for backward compatiblity
+        // _name is for backward compatibility
         label = nt.label || nt._name || "?";
       }
-      for each (let parserRole in this._query.parser.roles) {
+      label = ('<span class="' +
+               (arg.modifier ? "argument" : "object") +
+               '">' + label + "</span>");
+      for each (let parserRole in parser.roles)
         if (parserRole.role === neededArg.role) {
-          if (this._query.parser.branching === "left")
-            label += this._query.parser.joindelimiter + parserRole.delimiter;
-          else
-            label = parserRole.delimiter + this._query.parser.joindelimiter + label;
+          let delim = ('<span class="delimiter" title="' + parserRole.role +
+                       '">' + parserRole.delimiter + "</span>");
+          label = (parser.branching === "right"
+                   ? delim + parser.joindelimiter + label
+                   : label + parser.joindelimiter + delim);
           break;
         }
-      }
-      display += ' <span class="needarg">' + label + '</span>';
+      display += (parser.joindelimiter +
+                  '<span class="needarg">' + label + "</span>");
     }
     return display + displayFinal;
   },

@@ -318,28 +318,27 @@ ParsedSentence.prototype = {
   // html formatted sentence for display in suggestion list
   get displayHtml PS_getDisplayHtml() {
     var {escapeHtml} = Utils;
-    var sentence = ('<span class="verb">' +
-                    escapeHtml(this._verb.matchedName) +
-                    "</span>");
-    var {args} = this._verb;
+    var {matchedName, args} = this._verb;
+    var html = '<span class="verb">' + escapeHtml(matchedName) + "</span> ";
     for (let x in (this.fromNounFirstSuggestion
                    ? this._argSuggs
                    : this._argStrings)) {
       let obj = x === "object";
+      let prearg = (
+        (obj ? "" :
+         '<span class="delimiter">' +
+         escapeHtml(args[x].preposition) +
+         "</span> ") +
+        '<span class="' + (obj ? "object" : "argument") + '">');
       let {summary} = this._argSuggs[x] || 0;
-      if (summary) {
-        let label = obj ? "" : escapeHtml(args[x].preposition) + " ";
-        sentence += (
-          (obj ? " " : ' <span class="delimiter">' + label + "</span>") +
-          '<span class="' + (obj ? "object" : "argument") + '">' +
-          summary + "</span>");
-      }
-      else {
-        let label = (obj ? "" : args[x].preposition + " ") + args[x].label;
-        sentence += ' <span class="needarg">' + escapeHtml(label) + "</span>";
-      }
+      html += (
+        summary
+        ? prearg + summary + "</span> "
+        : ('<span class="needarg">' +
+           prearg + escapeHtml(args[x].label) +
+           "</span></span> "));
     }
-    return sentence;
+    return html;
   },
 
   get icon PS_getIcon() this._verb.cmd.icon,
