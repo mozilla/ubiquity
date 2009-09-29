@@ -142,7 +142,7 @@ var LocalizationUtils = {
     var url = cmd.feedUri.spec;
     if (!LocalizationUtils.isLocalizableFeed(url)) return cmd;
 
-    var feedKey = LocalizationUtils.getLocalFeedKey(url);
+    var feedKey = LocalizationUtils.getLocalFeedKey(url, langCode);
     for each (let key in LocalizableProperties) if (cmd[key]) {
       let val = getLocalizedProperty(feedKey, cmd, key);
       if (val) cmd[key] = val;

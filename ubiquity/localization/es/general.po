@@ -61,7 +61,7 @@ msgstr "destacar|resaltar"
 
 msgctxt "highlight.description"
 msgid "Highlights your current selection, like <span style=\"background: yellow; color: black;\">this</span>."
-msgstr "Destaca su actual selección, como <span style=\"background: yellow; color: black;\">esto</span>.
+msgstr "Destaca su actual selección, como <span style=\"background: yellow; color: black;\">esto</span>."
 
 
 #. undo text edit command:

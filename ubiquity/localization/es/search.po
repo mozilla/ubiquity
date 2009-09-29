@@ -105,7 +105,7 @@ msgstr "yahoo"
 
 msgctxt "yahoo.description"
 msgid "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words."
-msgstr "Busca en <a href=\"http://search.yahoo.com\"> páginas que encajen con sus palabras."
+msgstr "Busca en <a href=\"http://search.yahoo.com\">Yahoo</a> páginas que encajen con sus palabras."
 
 #. amazon command:
 #. use | to separate multiple name values:

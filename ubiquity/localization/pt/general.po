@@ -140,7 +140,7 @@ msgstr "calcular|calculadora"
 
 msgctxt "calculate.help"
 msgid "Try <code>22/7, 25% of 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, speed of light in miles per hour, 3 dollars in euros, 242 in hex, MCMXVI in decimal</code>."
-msgstr "Exemplos: <code>22/7, 25% de 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, velocidade da luz em milhas por hora, 3 doláres em euros, 242 em hex, MCMXVI em decimal"
+msgstr "Exemplos: <code>22/7, 25% de 700, sin(sqrt(ln(pi))), (1+i)^3, 15 mod 9, (5 choose 2) / 3!, velocidade da luz em milhas por hora, 3 doláres em euros, 242 em hex, MCMXVI em decimal</code>"
 
 msgctxt "calculate.description"
 msgid "Calculates using\n"

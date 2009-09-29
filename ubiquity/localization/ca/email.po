@@ -68,16 +68,16 @@ msgstr ""
 
 msgctxt "get last email.description"
 msgid "Displays your most recent incoming email. Requires a <a href=\"http://mail.google.com\">Gmail</a> account."
-msgstr "Mostra el vostre correu entrant més recent… Cal un compte de <a href="\"http://mail.google.com\">Gmail</a>."
+msgstr "Mostra el vostre correu entrant més recent… Cal un compte de <a href=\"http://mail.google.com\">Gmail</a>."
 
 msgctxt "get last email.preview"
 msgid "Displays your most recent incoming email..."
 msgstr "Mostra el vostre correu entrant més recent…"
 
 msgctxt "get last email.preview"
-msgid "Last unread e-mail: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+msgid "Last unread e-mail: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> says: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
 msgstr ""
-"Darrer correu per lleigr: <a href=\\\"${lastEmail.href}\\\"> <p><b>${lastEmail.author}</b> diu: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
+"Darrer correu per lleigr: <a href=\"${lastEmail.href}\"> <p><b>${lastEmail.author}</b> diu: <b>${lastEmail.subject}</b></p> <p>${lastEmail.summary}</p></a>"
 
 msgctxt "get last email.preview"
 msgid "<b>You have no new mail!</b>"

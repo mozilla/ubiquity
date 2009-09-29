@@ -16,7 +16,7 @@ msgstr "twitter|tweet|postar no twitter"
 
 msgctxt "twitter.help"
 msgid "You'll need a <a href=\"http://twitter.com\">Twitter account</a>, obviously.  If you're not already logged in you'll be asked to log in."
-msgstr "Você precisa de uma conta no <a href=\"http://twitter.com\">."
+msgstr "Você precisa de uma conta no <a href=\"http://twitter.com\">Twitter</a>."
 
 msgctxt "twitter.description"
 msgid "Sets your Twitter status to a message of at most 160 characters."
