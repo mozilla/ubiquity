@@ -33,7 +33,7 @@ msgstr "Twitter にあなたの今していることを 140 字以内で書き�
 
 msgctxt "twitter.preview"
 msgid "Updates your Twitter status ${username} to:"
-msgstr "あなた (${username}) の呟きを Twitter に書き込みます: "
+msgstr "あなた${username}の呟きを Twitter に書き込みます: "
 
 msgctxt "twitter.preview"
 msgid "Characters remaining: <b>${chars}</b>"

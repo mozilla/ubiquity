@@ -34,13 +34,13 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-function displayTemplate(feedUri) {
+function displayTemplate(feedUri, feedKey) {
   var {feedManager} = UbiquitySetup.createServices();
   for each (var feed in feedManager.getSubscribedFeeds()) {
     if (feed.srcUri.asciiSpec !== feedUri) continue;
 
     var po = [
-      "# " + LocalizationUtils.getLocalFeedKey(feedUri) + ".po",
+      "# " + feedKey + ".po",
       "# ",
       "# Localizers:",
       "# LOCALIZER <EMAIL>",
@@ -104,7 +104,7 @@ function cmdPreviewString(cmd) potMsgs(cmd.referenceName + ".preview",
                                        cmd._previewString);
 
 function potMsgs(context, id) (
-  (context ? 'msgctxt "' + quoteString(context) + '"\n' : "") +
+  (context && 'msgctxt "' + quoteString(context) + '"\n') +
   'msgid "'+ quoteString(id).replace(/\n/g, '\\n"\n"') + '"\n' +
   'msgstr ""\n\n');
 
@@ -122,9 +122,10 @@ $(function ready() {
   setupHelp("#show-hide-help", "#help-div");
   var feedUri = location.hash.slice(1);
   if (feedUri) {
-    $(".feedKey").text(feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1"));
+    let feedKey = feedUri.replace(/^.*\/(\w+)\.\w+$/g, "$1");
+    $(".feedKey").text(feedKey);
     $(".localization-dir").text(
       UbiquitySetup.getBaseUri() + "localization/XY/");
-    displayTemplate(feedUri);
+    displayTemplate(feedUri, feedKey);
   }
 });

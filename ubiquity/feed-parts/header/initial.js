@@ -120,13 +120,14 @@ var _ = (function prepareGettext({LocalizationUtils}, {UbiquitySetup}) {
     ? Template.parseTemplate(x).process(data, {keepWhitespace: true})
     : x);
 
-  if (!LocalizationUtils.loadLocalPo(feed.id, UbiquitySetup.languageCode))
+  var {languageCode} = UbiquitySetup;
+  if (!LocalizationUtils.loadLocalPo(feed.id, languageCode))
     return function registerTemplate(x, data) {
       "l10n" in context || LocalizationUtils.registerFeedGlobal(feed.id, x);
       return renderTemplate(x, data);
     };
 
-  var feedKey = LocalizationUtils.getLocalFeedKey(feed.id);
+  var feedKey = LocalizationUtils.getLocalFeedKey(feed.id, languageCode);
   return function gettext(x, data) {
     var msgctxt = context.l10n;
     return renderTemplate(
