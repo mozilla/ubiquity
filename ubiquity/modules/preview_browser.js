@@ -95,23 +95,26 @@ PreviewBrowser.prototype = {
 
   activateAccessKey: function PB_activateAccessKey(code) {
     var doc = this.__previewBrowser.contentDocument;
-    if (!doc) return false;
-    var win = doc.defaultView;
-    var key = String.fromCharCode(code).toLowerCase();
-    var xpr = doc.evaluate('/html/body//*[@accesskey]', doc, null,
-                           win.XPathResult.ORDERED_NODE_ITERATOR_TYPE , null);
-    for (let lmn; (lmn = xpr.iterateNext());)
-      if (lmn.getAttribute("accesskey").toLowerCase() === key) {
-        if (/^a$/i.test(lmn.nodeName)) {
-          let evt = doc.createEvent("MouseEvents");
-          evt.initMouseEvent("click", true, true, win, 0, 0, 0, 0, 0,
-                             false, false, false, false, 0, null);
-          lmn.dispatchEvent(evt);
-        }
-        else lmn.focus();
-        return true;
-      }
-    return false;
+    var key = String.fromCharCode(code).toUpperCase();
+    var keylc = key.toLowerCase();
+    if (key !== keylc) key += keylc;
+    var xpath = ("/html/body//*[@accesskey][contains(" +
+                 (key === "'" ? '"' + key + '"' : "'" + key + "'") +
+                 ",@accesskey)]");
+    var node = doc.evaluate(xpath, doc, null, 9, // FIRST_ORDERED_NODE_TYPE
+                            null).singleNodeValue;
+    if (!node) return false;
+
+    var namelc = node.nodeName.toLowerCase();
+    if (namelc === "a" ||
+        namelc === "input" && /^(?:submit|button)$/i.test(node.type)) {
+      let evt = doc.createEvent("MouseEvents");
+      evt.initMouseEvent("click", true, true, doc.defaultView,
+                         0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      node.dispatchEvent(evt);
+    }
+    else node.focus();
+    return true;
   },
 
   queuePreview: function PB__queuePreview(url, delay, cb) {
