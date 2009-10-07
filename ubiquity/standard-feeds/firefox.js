@@ -464,7 +464,7 @@ CmdUtils.CreateCommand({
         .version {margin-left:1ex}
         .creator {font-size: 88%}
         .creator, .description, .buttons {padding-top:0.5ex}
-        .options {display:none}
+        button {display:none}
        ]]></style>) +
       <a class="homepage" accesskey="h"/>.appendChild(
         (<img class="icon" src={xdata.iconURL || this.icon}/>) +
@@ -475,17 +475,32 @@ CmdUtils.CreateCommand({
       ("description" in xdata ?
        <div class="description">{xdata.description}</div> : <></>) +
       <div class="buttons"/>.appendChild(
-        (<button class="options" accesskey="o"> </button>)));
+        (<button id="options"   accesskey="o">-</button>) +
+        (<button id="directory" accesskey="d">-</button>)));
     if ("homepageURL" in xdata)
       pb.getElementsByClassName("homepage")[0].href = xdata.homepageURL;
     if (data.enabled && "optionsURL" in xdata) {
-      var opts = pb.getElementsByClassName("options")[0];
-      opts.innerHTML = _("<u>O</u>ptions");
-      opts.onfocus = function openOptions() {
+      var opt = pb.ownerDocument.getElementById("options");
+      opt.innerHTML = _("<u>O</u>ptions");
+      opt.onfocus = function ao_options() {
         this.blur();
         context.chromeWindow.openDialog(xdata.optionsURL, "", "");
       };
-      opts.style.display = "inline";
+      opt.style.display = "inline";
+    }
+    var file = (Cc["@mozilla.org/file/directory_service;1"]
+                .getService(Ci.nsIProperties)
+                .get("ProfD", Ci.nsIFile));
+    file.append("extensions");
+    file.append(data.id);
+    if (file.exists() && file.isDirectory()) {
+      var dir = pb.ownerDocument.getElementById("directory");
+      dir.innerHTML = _("<u>D</u>irectory");
+      dir.onfocus = function ao_dir() {
+        this.blur();
+        Utils.openUrlInBrowser(Utils.IOService.newFileURI(file).spec);
+      };
+      dir.style.display = "inline";
     }
   },
   _urn: function ao__urn(id) "urn:mozilla:item:" + id,
