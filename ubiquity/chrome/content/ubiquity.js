@@ -285,13 +285,15 @@ Ubiquity.prototype = {
 
   // === {{{ Ubiquity#execute(input) }}} ===
   //
-  // Executes {{{input}}} or the current entry.
+  // Executes {{{input}}} or the highlighted suggestion.
+  // If {{{input}}} is provided but empty, the current entry is used instead.
 
   execute: function U_execute(input) {
-    var context = this.__makeContext(!!input);
-    if (input != null) {
+    var external = input != null;
+    var context = this.__makeContext(external);
+    if (external) {
+      if (input) this.__textBox.value = input;
       this.__lastValue = "";
-      this.__textBox.value = input;
       this.__processInput(true, context);
     }
     this.__cmdManager.execute(context);
@@ -299,7 +301,7 @@ Ubiquity.prototype = {
 
   // === {{{ Ubiquity#preview(input, immediate) }}} ===
   //
-  // Previews {{{input}}} or the current entry,
+  // Previews {{{input}}} or the highlighted suggestion,
   // skipping the input delay if {{{immediate}}} evaluates to {{{true}}}
   // and opening Ubiquity if it's closed.
 
