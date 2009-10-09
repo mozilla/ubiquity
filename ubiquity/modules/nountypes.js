@@ -351,17 +351,17 @@ var noun_type_awesomebar = {
   },
 };
 
-// === {{{ noun_type_addon }}} ===
+// === {{{ noun_type_extension }}} ===
 //
-// Suggests installed add-ons.
+// Suggests installed extensions.
 //
-// * {{{text, html}}} : add-on name
+// * {{{text, html}}} : extension name
 // * {{{data}}} : https://developer.mozilla.org/en/Toolkit_API/extIExtension
 
-var noun_type_addon = {
-  label: "add-on name",
+var noun_type_extension = {
+  label: "name",
   noExternalCalls: true,
-  suggest: function nt_addon_suggest(text) {
+  suggest: function nt_ext_suggest(text) {
     var grepee = [{text: ext.name, data: ext}
                   for each (ext in Application.extensions.all)];
     var suggs = CmdUtils.grepSuggs(text, grepee);

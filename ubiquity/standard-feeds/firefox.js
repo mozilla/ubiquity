@@ -443,27 +443,27 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["view add-on", "view extension"],
-  description: "Accesses Add-ons.",
+  names: ["view extension"],
+  description: "Accesses extensions.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
   icon: "chrome://mozapps/skin/xpinstall/xpinstallItemGeneric.png",
-  argument: noun_type_addon,
-  execute: function ao_execute({object: {data}}) {
+  argument: noun_type_extension,
+  execute: function ve_execute({object: {data}}) {
     Utils.setTimeout(this._open, 7, this, data && data.id);
   },
-  preview: function ao_preview(pb, {object: {data}}) {
+  preview: function ve_preview(pb, {object: {data}}) {
     if (!data) return void this.previewDefault(pb);
 
     var xdata = this._extraData(data.id);
     XML.prettyPrinting = XML.ignoreWhitespace = false;
-    pb.innerHTML = <div class="add-on" enabled={data.enabled}/>.appendChild(
+    pb.innerHTML = <div class="extension" enabled={data.enabled}/>.appendChild(
       (<style><![CDATA[
-        .add-on[enabled=false] {opacity:0.7}
+        .extension[enabled=false] {opacity:0.7}
         .icon {float:left; vertical-align:top; border:none; margin-right:1ex}
         .version {margin-left:1ex}
         .creator {font-size: 88%}
-        .creator, .description, .buttons {padding-top:0.5ex}
+        .creator, .description {margin-top:0.5ex}
         button {display:none}
        ]]></style>) +
       <a class="homepage" accesskey="h"/>.appendChild(
@@ -474,7 +474,7 @@ CmdUtils.CreateCommand({
        <div class="creator">{xdata.creator}</div> : <></>) +
       ("description" in xdata ?
        <div class="description">{xdata.description}</div> : <></>) +
-      <div class="buttons"/>.appendChild(
+      <p class="buttons"/>.appendChild(
         (<button id="options"   accesskey="o">-</button>) +
         (<button id="directory" accesskey="d">-</button>)));
     if ("homepageURL" in xdata)
@@ -482,7 +482,7 @@ CmdUtils.CreateCommand({
     if (data.enabled && "optionsURL" in xdata) {
       var opt = pb.ownerDocument.getElementById("options");
       opt.innerHTML = _("<u>O</u>ptions");
-      opt.onfocus = function ao_options() {
+      opt.onfocus = function ve_options() {
         this.blur();
         context.chromeWindow.openDialog(xdata.optionsURL, "", "");
       };
@@ -496,15 +496,15 @@ CmdUtils.CreateCommand({
     if (file.exists() && file.isDirectory()) {
       var dir = pb.ownerDocument.getElementById("directory");
       dir.innerHTML = _("<u>D</u>irectory");
-      dir.onfocus = function ao_dir() {
+      dir.onfocus = function ve_dir() {
         this.blur();
         Utils.openUrlInBrowser(Utils.IOService.newFileURI(file).spec);
       };
       dir.style.display = "inline";
     }
   },
-  _urn: function ao__urn(id) "urn:mozilla:item:" + id,
-  _open: function ao__open(self, id) {
+  _urn: function ve__urn(id) "urn:mozilla:item:" + id,
+  _open: function ve__open(self, id) {
     const Pane = "extensions";
     var em = (Cc["@mozilla.org/appshell/window-mediator;1"]
               .getService(Ci.nsIWindowMediator)
@@ -522,10 +522,10 @@ CmdUtils.CreateCommand({
       });
     }
   },
-  _select: function ao__select(self, em, id) {
+  _select: function ve__select(self, em, id) {
     em.gExtensionsView.selectItem(em.document.getElementById(self._urn(id)));
   },
-  _extraData: function ao__extraData(id) {
+  _extraData: function ve__extraData(id) {
     const PREFIX_NS_EM = "http://www.mozilla.org/2004/em-rdf#";
     var rdfs = (Cc["@mozilla.org/rdf/rdf-service;1"]
                 .getService(Ci.nsIRDFService));
