@@ -778,8 +778,9 @@ Verb.prototype = {
   // input should be lowercased.
   match: function V_match(input) {
     var {names} = this.cmd;
+    var inputLC = input.toLowerCase();
     for (let i = 0, l = names.length; i < l; ++i) {
-      let score = hagureMetal(input, names[i].toLowerCase());
+      let score = hagureMetal(inputLC, names[i].toLowerCase());
       if (!score) continue;
       this.matchedName = names[i];
       this.input = input;
@@ -806,5 +807,5 @@ function hagureMetal(abbr, orig) {
             : score);
     preIndex = index;
   }
-  return sum / len;
+  return pow(sum / len, .3);
 }
