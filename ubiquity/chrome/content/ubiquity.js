@@ -318,9 +318,16 @@ Ubiquity.prototype = {
   openWindow: function U_openWindow() {
     ({focusedWindow : this.__focusedWindow,
       focusedElement: this.__focusedElement}) = document.commandDispatcher;
-    // This is a temporary workaround for #43.
-    var anchor = document.getElementById("content").selectedBrowser;
-    this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
+    var xy = Application.prefs.getValue("extensions.ubiquity.openAt", "");
+    if (xy) {
+      let [x, y] = xy.split(",");
+      this.__msgPanel.openPopupAtScreen(x, y);
+    }
+    else {
+      // This is a temporary workaround for #43.
+      var anchor = document.getElementById("content").selectedBrowser;
+      this.__msgPanel.openPopup(anchor, "overlap", 0, 0, false, true);
+    }
   },
 
   // === {{{ Ubiquity#closeWindow() }}} ===
