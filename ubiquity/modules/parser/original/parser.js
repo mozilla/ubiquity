@@ -452,7 +452,7 @@ ParsedSentence.prototype = {
 
   get score PS_getScore() {
     if (!this.argMatchScore) {
-      // argument match score starts at 0 and increased for each
+      // argument match score starts at 1 and increased for each
       // argument where a specific nountype (i.e. non-arbitrary-text)
       // matches user input.
       let ams = 1, {_argFlags, _argSuggs} = this;
@@ -534,11 +534,13 @@ PartiallyParsedSentence.prototype = {
       // Callback function for asynchronously generated suggestions:
       function callback(suggs) {
         var suggestions = self._handleSuggestions(argName, suggs);
-        var {length} = suggestions;
-        if (!length) return;
-        for each (let [pps, arg] in callback.otherSentences)
-          for (let i = 0; i < length; ++i)
-            pps.addArgumentSuggestion(arg, suggestions[i]);
+        if (!suggestions.length) return;
+
+        for each (let sugg in suggestions) {
+          sugg.score = (sugg.score || 1) / 4;
+          for each (let [pps, arg] in callback.otherSentences)
+            pps.addArgumentSuggestion(arg, sugg);
+        }
         self._query.onNewParseGenerated();
       }
       try {
