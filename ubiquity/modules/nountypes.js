@@ -1231,11 +1231,9 @@ function getRestaurants(query, callback, selectionIndices) {
 
 var noun_type_geo_country = NounGeo("country", 1, 1);
 
-// The region
 // Think American states, provinces in many countries, Japanese prefectures.
 var noun_type_geo_region = NounGeo("region", 2, 2);
 
-// The subregion
 var noun_type_geo_subregion = NounGeo("subregion", 3, 3);
 
 var noun_type_geo_town = NounGeo("city/town", 4, 4);
@@ -1258,44 +1256,25 @@ function getGeo(query, callback, minAccuracy, maxAccuracy) jQuery.ajax({
     output: "json",
     oe: "utf8",
     sensor: "false",
-    key: "ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w",
+    key: ("ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjF" +
+          "X6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w"),
   },
   dataType: "json",
-  error: function ggeo_error() { callback([]) },
   success: function ggeo_success(data) {
-    if (data.Status.code !== 200 || !(data.Placemark || "").length) {
-      callback([]);
-      return;
-    }
+    if (data.Status.code !== 200 || !(data.Placemark || "").length) return;
 
     var results = [];
-    var unusedResults = [];
-    var queryLC = query.toLowerCase();
     for each (let result in data.Placemark) {
       // if there are no AddressDetails, it has no accuracy value either
       // so let's ignore it.
       if (!result.AddressDetails) continue;
 
-      if (result.address.toLowerCase().indexOf(queryLC) === 0) {
-        let score = CmdUtils.matchScore(
-          {input: result.address, index: 0, 0: query});
-        score *= accuracyScore(result.AddressDetails.Accuracy,
-                               minAccuracy, maxAccuracy);
-        results.push(formatGooglePlacemark(result, score));
-      }
-      else unusedResults.push(result);
+      // matchScore() isn't suitable, as the API allows ambiguous matching.
+      // e.g.:  nrth -> north / can -> Çan / akihabara -> 秋葉原
+      let score = accuracyScore(result.AddressDetails.Accuracy,
+                                minAccuracy, maxAccuracy);
+      results.push(formatGooglePlacemark(result, score));
     }
-
-    // if none of the results matched the input, let's take the first
-    // one's data with the original input, but with a penalty.
-    // TODO: See if this is a Bad Idea and think of a Good Idea.
-    if (!results.length && unusedResults.length) {
-      var result = unusedResults[0];
-      var score = 0.7 * accuracyScore(result.AddressDetails.Accuracy,
-                                      minAccuracy, maxAccuracy);
-      results.push(formatGooglePlacemark(unusedResults[0], score));
-    }
-
     callback(results);
   }
 });
