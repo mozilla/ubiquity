@@ -261,3 +261,30 @@ function grepSuggs(input, suggs, key) {
 }
 
 function byScoreDescending(a, b) b.score - a.score;
+
+// === {{{ NounUtils.mixNouns(label, nouns) }}} ===
+//
+// Creates a noun by combining two or more nouns.
+//
+// {{{label}}} is an optional string specifying the created noun's label.
+//
+// {{{nouns}}} is the array of nouns.
+
+function mixNouns(label) {
+  var gotLabel = typeof label === "string";
+  var nouns = gotLabel ? arguments[1] : label;
+  if (!Utils.isArray(nouns))
+    nouns = Array.slice(arguments, gotLabel? 1 : 0);
+  function mixer(method) function suggestMixed() {
+    var suggsList = [noun[method].apply(noun, arguments)
+                     for each (noun in nouns) if (method in noun)];
+    return suggsList.concat.apply([], suggsList); // flatten
+  };
+  return {
+    label: gotLabel ? label : [n.label || "?" for each(n in nouns)].join("|"),
+    rankLast: nouns.some(function (n) n.rankLast),
+    noExternalCalls: nouns.every(function (n) n.noExternalCalls),
+    suggest: mixer("suggest"),
+    default: nouns.some(function (n) "default" in n) && mixer("default"),
+  };
+}
