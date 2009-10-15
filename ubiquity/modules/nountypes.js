@@ -1159,25 +1159,12 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
       CmdUtils.makeSugg(langName, null, locale));
 }
 
-// === {{{ NounAsync }}} ===
-//
-// {{{NounAsync}}} is a utility function used in a couple of newer nountypes.
-
-function NounAsync(label, checker, acceptAnything) {
-  function asyncSuggest(text, html, callback, selectionIndices) {
-    var returnArr = [checker(text, callback, selectionIndices)];
-    if (acceptAnything) {
-      returnArr.push(CmdUtils.makeSugg(text, html, null, .3,
-                                       selectionIndices));
-    }
-    return returnArr;
-  };
+function NounAsync(label, checker) {
   return {
     label: label,
-    rankLast: true,
-    suggest: (CmdUtils.parserVersion > 1
-              ? asyncSuggest
-              : noun_arb_text.suggest),
+    suggest: function asyncSuggest(text, html, callback, selectionIndices) {
+      return [checker(text, callback, selectionIndices)];
+    },
   };
 }
 
@@ -1189,28 +1176,24 @@ function NounAsync(label, checker, acceptAnything) {
 // * {{{html}}} :
 // * {{{data}}} :
 
-var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants, true);
+var noun_type_async_restaurant = NounAsync("restaurant", getRestaurants);
 
 function getRestaurants(query, callback, selectionIndices) {
-  if (query.length == 0) return;
+  if (!query) return;
 
   var baseUrl = "http://api.yelp.com/business_review_search";
   var queryToMatch = query.toLowerCase().replace(/\s+/g, '');
-  var near = "";
   var loc = CmdUtils.getGeoLocation();
-  if (loc)
-    near = loc.city + "," + loc.state;
+  var near = loc ? loc.city + "," + loc.state : "";
 
-  var params = Utils.paramsToString({
-    term: query,
-    num_biz_requested: 1,
-    location: near,
-    category: "restaurants",
-    ywsid: "HbSZ2zXYuMnu1VTImlyA9A"
-  });
-
-  var asyncRequest = jQuery.ajax({
-    url: baseUrl+params,
+  return jQuery.ajax({
+    url: baseUrl + Utils.paramsToString({
+      term: query,
+      num_biz_requested: 1,
+      location: near,
+      category: "restaurants",
+      ywsid: "HbSZ2zXYuMnu1VTImlyA9A",
+    }),
     dataType: "json",
     error: function () {
       callback([]);
@@ -1223,18 +1206,18 @@ function getRestaurants(query, callback, selectionIndices) {
         });
       // if the business's name or category overlaps with the query
       // then consider it a restaurant match
-      for each (business in allBusinesses) {
+      for each (let business in allBusinesses) {
         if (business.name.indexOf(queryToMatch) !== -1 ||
             queryToMatch.indexOf(business.name) !== -1) {
-              callback([CmdUtils.makeSugg(query, query, null, .9,
+              callback([CmdUtils.makeSugg(query, null, null, .9,
                                           selectionIndices)]);
               return;
         }
         else {
-          for each (category in business.categories) {
+          for each (let category in business.categories) {
             if (category.name.indexOf(queryToMatch) !== -1 ||
               queryToMatch.indexOf(category.name) !== -1) {
-              callback([CmdUtils.makeSugg(query, query, null, .9,
+              callback([CmdUtils.makeSugg(query, null, null, .9,
                                           selectionIndices)]);
               return;
             }
@@ -1244,160 +1227,94 @@ function getRestaurants(query, callback, selectionIndices) {
       callback([]);
     }
   });
-  return asyncRequest;
 }
 
-var noun_type_geo_country = NounAsync("country", getCountry, false);
-function getCountry(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 1, 1, false);
-}
+var noun_type_geo_country = NounGeo("country", 1, 1);
 
 // The region
 // Think American states, provinces in many countries, Japanese prefectures.
-var noun_type_geo_region = NounAsync("region", getRegion, false);
-function getRegion(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 2, 2, false);
-}
+var noun_type_geo_region = NounGeo("region", 2, 2);
 
 // The subregion
-var noun_type_geo_subregion = NounAsync("subregion", getSubregion, false);
-function getSubregion(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 3, 3, false);
-}
+var noun_type_geo_subregion = NounGeo("subregion", 3, 3);
 
-var noun_type_geo_town = NounAsync("city/town", getTown, false);
-function getTown(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 4, 4, false);
-}
+var noun_type_geo_town = NounGeo("city/town", 4, 4);
 
-var noun_type_geo_postal = NounAsync("postal code", getPostal, false);
-function getPostal(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 5, 5, false);
-}
+var noun_type_geo_postal = NounGeo("postal code", 5, 5);
 
-var noun_type_geo_address = NounAsync("address", getAddress, false);
-function getAddress(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 6, 9, false);
-}
+var noun_type_geo_address = NounGeo("address", 6, 9);
 
-var noun_type_geo_address_or_anything = NounAsync("address", getAddressAny, false);
-function getAddressAny(query, callback, selectionIndices) {
-  return getGeo(query, callback, selectionIndices, 6, 9, true);
-}
-
-function getGeo(query, callback, selectionIndices, minAccuracy, maxAccuracy,
-                acceptAnything) {
-  var url = "http://maps.google.com/maps/geo";
-  var params = {
+// http://code.google.com/intl/ja/apis/maps/documentation/reference.html
+// #GGeoAddressAccuracy
+function NounGeo(label, minAccuracy, maxAccuracy) ({
+  label: label,
+  suggest: function geo_suggest(text, html, callback)
+    [getGeo(text, callback, minAccuracy, maxAccuracy)],
+});
+function getGeo(query, callback, minAccuracy, maxAccuracy) jQuery.ajax({
+  url: "http://maps.google.com/maps/geo",
+  data: {
     q: query,
     output: "json",
     oe: "utf8",
     sensor: "false",
-    key: "ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w"
-  };
-  var asyncRequest = jQuery.ajax({
-    url: url,
-    data: params,
-    dataType: "json",
-    error: function () {
+    key: "ABQIAAAAzBIC_wxmje-aKLT3RzZx7BQFk1cXV-t8vQsDjFX6X7KZv96YRxSFucHgmE5u4oZ5fuzOrPHpaB_Z2w",
+  },
+  dataType: "json",
+  error: function ggeo_error() { callback([]) },
+  success: function ggeo_success(data) {
+    if (data.Status.code !== 200 || !(data.Placemark || "").length) {
       callback([]);
-    },
-    success: function (data) {
-      // if no results found, accept whatever input with a low score (0.3)
-      if (data.Status.code != "200" ||
-          (data.Placemark && data.Placemark.length == 0)) {
-        if (acceptAnything)
-          callback([CmdUtils.makeSugg(query, query, null, .3,
-                                         selectionIndices)]);
-        else
-          callback([]);
-        return;
-      }
-
-      var returnArr = [];
-      var unusedResults = [];
-
-      var results = data.Placemark;
-      for each (let result in results) {
-        // if there are no AddressDetails, it has no accuracy value either
-        // so let's ignore it.
-        if (!result.AddressDetails)
-          continue;
-
-        if (result.address.toLowerCase()
-            .indexOf(query.toLowerCase()) === 0) {
-          var score = CmdUtils.matchScore(
-            {input: result.address, index: 0, 0: query});
-          score *= accuracyScore(result.AddressDetails.Accuracy,
-                                 minAccuracy, maxAccuracy);
-          returnArr.push(formatGooglePlacemark(result.address,result,score));
-        }
-        else {
-          unusedResults.push(result);
-        }
-      }
-
-      // if none of the results matched the input, let's take the first
-      // one's data with the original input, but with a penalty.
-      // TODO: See if this is a Bad Idea and think of a Good Idea.
-      if (!returnArr.length && unusedResults.length) {
-        var result = unusedResults[0];
-        var score = 0.7 * accuracyScore(result.AddressDetails.Accuracy,
-                                        minAccuracy, maxAccuracy);
-        returnArr.push(formatGooglePlacemark(query,unusedResults[0],score));
-      }
-
-      callback(returnArr);
+      return;
     }
-  });
-  return asyncRequest;
-}
 
-// used by getGeo
-function accuracyScore(score, minAccuracy, maxAccuracy) {
-  return (score === minAccuracy
-          ? 1
-          : Math.pow(0.8, Math.abs(minAccuracy - score)));
-}
+    var results = [];
+    var unusedResults = [];
+    var queryLC = query.toLowerCase();
+    for each (let result in data.Placemark) {
+      // if there are no AddressDetails, it has no accuracy value either
+      // so let's ignore it.
+      if (!result.AddressDetails) continue;
 
-// used by getGeo
-function formatGooglePlacemark(text,placemark,score,selectionIndices) {
-  var ad = placemark.AddressDetails;
-  var data = {coordinates: {lat: placemark.Point.coordinates[1],
-                            lng: placemark.Point.coordinates[0]},
-              address: {}, accuracy: ad.Accuracy};
-
-  if (ad.Country) {
-    data.address.country = ad.Country.CountryName;
-    data.address.countryCode = ad.Country.CountryNameCode;
-
-    var nodesToCrawl = [ad.Country];
-
-    while (nodesToCrawl[0]) {
-      dump('ntc length:'+nodesToCrawl.length+'\n');
-      var thisNode = nodesToCrawl[0];
-      nodesToCrawl = nodesToCrawl.slice(1);
-
-      for (let id in thisNode) {
-        dump('id: '+id+'\n');
-        if (id.indexOf("Name") > -1) {
-          var newId  = id[0].toLowerCase() + id.slice(1);
-          newId = newId.replace("Name", "");
-          data.address[newId] = thisNode[id];
-        }
-        else {
-          if (typeof thisNode[id] !== "string")
-            nodesToCrawl.push(thisNode[id]);
-        }
+      if (result.address.toLowerCase().indexOf(queryLC) === 0) {
+        let score = CmdUtils.matchScore(
+          {input: result.address, index: 0, 0: query});
+        score *= accuracyScore(result.AddressDetails.Accuracy,
+                               minAccuracy, maxAccuracy);
+        results.push(formatGooglePlacemark(result, score));
       }
+      else unusedResults.push(result);
     }
+
+    // if none of the results matched the input, let's take the first
+    // one's data with the original input, but with a penalty.
+    // TODO: See if this is a Bad Idea and think of a Good Idea.
+    if (!results.length && unusedResults.length) {
+      var result = unusedResults[0];
+      var score = 0.7 * accuracyScore(result.AddressDetails.Accuracy,
+                                      minAccuracy, maxAccuracy);
+      results.push(formatGooglePlacemark(unusedResults[0], score));
+    }
+
+    callback(results);
   }
+});
 
-  return CmdUtils.makeSugg(text, text, data, score, selectionIndices);
+function accuracyScore(score, minAccuracy, maxAccuracy) (
+  score < minAccuracy
+  ? Math.pow(0.8, minAccuracy - score) :
+  score > maxAccuracy
+  ? Math.pow(0.8, score - maxAccuracy)
+  : 1);
+
+function formatGooglePlacemark(placemark, score) {
+  var data = placemark.AddressDetails;
+  [data.lon, data.lat] = placemark.Point.coordinates;
+  return CmdUtils.makeSugg(placemark.address, null, data, score);
 }
 
 var EXPORTED_SYMBOLS = (
-  [it for (it in Iterator(this)) if (/^noun_/.test(it[0]))]
+  [it for (it in new Iterator(this)) if (/^noun_/.test(it[0]))]
   .map(function ([sym, noun], i) {
     noun.id = "#" + sym;
     noun.name = /^noun_(?:type_)?(.*)/(sym)[1];
@@ -1409,7 +1326,7 @@ var EXPORTED_SYMBOLS = (
 // {{{noun_type_commands}}}\\
 // {{{noun_type_emailservice}}}\\
 // {{{noun_type_searchengine}}}
-for (let [old, now] in Iterator({
+for (let [old, now] in new Iterator({
   language: noun_type_lang_google,
   commands: noun_type_command,
   emailservice: noun_type_email_service,

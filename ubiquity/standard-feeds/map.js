@@ -1,7 +1,9 @@
 // TODO: Update to use Google Maps API V3, which doesn't require a key (#814)
 CmdUtils.CreateCommand({
   names: ["map"],
-  arguments: {object: noun_type_geo_address_or_anything},
+  arguments: {object: CmdUtils.mixNouns("address",
+                                        noun_arb_text,
+                                        noun_type_geo_address)},
   icon: "chrome://ubiquity/skin/icons/map.png",
   description: "Turns an address or location name into a Google Map.",
   help: ("Try issuing &quot;map kalamazoo&quot;.  " +
