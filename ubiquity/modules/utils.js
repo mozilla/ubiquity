@@ -773,7 +773,7 @@ function convertFromUnicode(toCharset, text) {
   var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
                    .getService(Ci.nsIScriptableUnicodeConverter));
   converter.charset = toCharset;
-  return converter.ConvertFromUnicode(text);
+  return converter.ConvertFromUnicode(text) + converter.Finish();
 }
 
 // === {{{ Utils.convertToUnicode(fromCharset, text) }}} ===

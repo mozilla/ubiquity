@@ -979,6 +979,7 @@ function CreateAlias(options) {
 // ubiquity will try and find a child of the node of type {{{img}}}
 // inside the element, and use the first-found one.
 // {{{options.parser.maxResults (= 4)}}} specifies the max number of results.
+// {{{options.charset}}} specifies the query charset.
 //
 // Examples:
 // {{{
@@ -1010,31 +1011,46 @@ function CreateAlias(options) {
 //     maxResults: 8,
 //   },
 // });
+// CmdUtils.makeSearchCommand({
+//   names: ["video.baidu", "百度视频"],
+//   url: "http://video.baidu.com/v?word={QUERY}",
+//   charset: "gb2312",
+//   parser: {
+//     container: "#result td",
+//     title: ".r a",
+//     thumbnail: "img",
+//     maxResults: 20,
+//   },
+// });
 // }}}
 
 function makeSearchCommand(options) {
   const {jQuery, noun_arb_text} = this.__globalObject, CU = this;
-  function insertQuery (target, query) {
+  function insertQuery(target, query, charset) {
     var re = /%s|{QUERY}/g;
+    var fn = charset ? escape : encodeURIComponent;
+    if (charset) query = Utils.convertFromUnicode(charset, query);
     if (typeof target === "object") {
       var ret = {};
       for (var key in target) ret[key] = target[key].replace(re, query);
       return ret;
     }
-    return target && target.replace(re, encodeURIComponent(query));
+    return target && target.replace(re, fn(query));
   }
   options.arguments = {"object search term": noun_arb_text};
   options.execute = function searchExecute({object: {text}}) {
     if (!text && "defaultUrl" in options)
       Utils.openUrlInBrowser(options.defaultUrl);
     else
-      Utils.openUrlInBrowser(insertQuery(options.url, text),
-                             insertQuery(options.postData, text));
+      Utils.openUrlInBrowser(
+        insertQuery(options.url, text, charset),
+        insertQuery(options.postData, text, charset));
   };
   var [baseurl, domain] = /^.*?:\/\/([^?#/]+)/(options.url) || [""];
-  var name = (options.names || 0)[0] || options.name;
+  var [name] = [].concat(options.names || options.name);
   if (!name) name = options.name = domain;
   var htmlName = Utils.escapeHtml(name);
+  var {charset} = options;
   if (!("icon" in options)) {
     // guess where the favicon is
     options.icon = baseurl + "/favicon.ico";
@@ -1065,9 +1081,9 @@ function makeSearchCommand(options) {
       (parser ? "<p class='loading'>Loading results...</p>" : "") +
       "</div>");
     if (!parser) return;
-    var url = insertQuery(parser.url || options.url, text);
+    var url = insertQuery(parser.url || options.url, text, charset);
     if ("postData" in options)
-      var postData = insertQuery(options.postData, text);
+      var postData = insertQuery(options.postData, text, charset);
     function searchParser(data) {
       var template = "", results = [], sane = true;
       //errorToLocalize
@@ -1089,7 +1105,7 @@ function makeSearchCommand(options) {
         }
       }
       else {
-        let doc = jQuery(data);
+        let doc = jQuery("<div>" + data + "</div>");
         if ("container" in parser) {
           doc.find(parser.container).each(function eachContainer() {
             let result = {}, $this = jQuery(this);
