@@ -220,12 +220,13 @@ function fillTableRowForCmd(row, cmd, className) {
   }
 
   for each (let key in ["description", "help"]) if (key in cmd) {
-    try { $("." + key, cmdElement)[0].innerHTML = cmd[key] }
-    catch (e if e.result === 0x80004003) {
-      var msg = 'XML error in "' + key + '" of [ ' + cmd.name + ' ]';
+    let node = cmdElement[0].getElementsByClassName(key)[0];
+    try { node.innerHTML = cmd[key] }
+    catch (e) {
+      let msg = 'XML error in "' + key + '" of [ ' + cmd.name + ' ]';
       messageService.displayMessage({
         text: msg, onclick: function go2cmd() { jump(cmd.id) }});
-      Cu.reportError(msg);
+      Cu.reportError(e);
     }
   }
 
