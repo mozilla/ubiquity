@@ -46,18 +46,8 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 
-function getUrlParams() {
-  var urlFragments = document.URL.split("?")[1];
-  urlFragments = urlFragments.split("&");
-  var params = {};
-  for( var x in urlFragments ) {
-    var fragFrags = urlFragments[x].split("=");
-    params[ fragFrags[0] ] = decodeURIComponent(fragFrags[1]);
-  }
-  return params;
-}
-
-var gCommandFeedInfo = getUrlParams();
+var gCommandFeedInfo = Utils.urlToParams(document.URL);
+var {feedManager} = UbiquitySetup.createServices();
 
 function showConfirmation() {
   var smallIconUrl = "chrome://global/skin/icons/information-16.png";
@@ -83,14 +73,13 @@ function showConfirmation() {
 
 function onSubmit() {
   var code = $("#sourceCode").text();
-  var canAutoUpdate = $("#autoupdate").attr("checked") ? true : false;
   if (code) {
-    var feedMgr = UbiquitySetup.createServices().feedManager;
-    feedMgr.addSubscribedFeed({url: gCommandFeedInfo.url,
-                               sourceUrl: gCommandFeedInfo.sourceUrl,
-                               sourceCode: code,
-                               canAutoUpdate: canAutoUpdate,
-                               title: gCommandFeedInfo.title});
+    feedManager.addSubscribedFeed({
+      url: gCommandFeedInfo.url,
+      sourceUrl: gCommandFeedInfo.sourceUrl,
+      sourceCode: code,
+      canAutoUpdate: $("#autoupdate")[0].checked,
+      title: gCommandFeedInfo.title});
     showConfirmation();
   }
 }
@@ -100,9 +89,12 @@ function onCancel() {
 }
 
 function displayCode(data) {
-    $("#sourceCode").css({whiteSpace: "pre-wrap",
-                          fontFamily: "Monospace"});
-    $("#sourceCode").text(data);
+  ($("#sourceCode")
+   .css({
+     whiteSpace: "pre-wrap",
+     fontFamily: "monospace"})
+   .text(data));
+  $("#submit")[0].disabled = false;
 }
 
 function fetchSource(uri, onSuccess) {
@@ -110,7 +102,8 @@ function fetchSource(uri, onSuccess) {
     $("#autoupdate-widget").hide();
     var codeSource = new LocalUriCodeSource(uri);
     onSuccess(codeSource.getCode());
-  } else {
+  }
+  else {
     jQuery.ajax({url: uri,
                  dataType: "text",
                  success: onSuccess});
@@ -118,32 +111,30 @@ function fetchSource(uri, onSuccess) {
 }
 
 function onReady() {
-  var feedMgr = UbiquitySetup.createServices().feedManager;
-  if (feedMgr.isSubscribedFeed(gCommandFeedInfo.url)) {
-    if (gCommandFeedInfo.updateCode)
+  var {url, sourceUrl, updateCode} = gCommandFeedInfo;
+  if (feedManager.isSubscribedFeed(url)) {
+    if (updateCode)
       // TODO: Also check to see if updateCode is different from
       // the current code.
-      displayCode(gCommandFeedInfo.updateCode);
+      displayCode(updateCode);
     else
       showConfirmation();
-  } else
-    fetchSource(gCommandFeedInfo.sourceUrl, displayCode);
+  }
+  else fetchSource(sourceUrl, displayCode);
 
-  $("#targetLink").text(gCommandFeedInfo.url);
-  $("#targetLink").attr("href", gCommandFeedInfo.url);
+  $("#targetLink").text(url).attr("href", url);
 
   function onAutoupdateClicked() {
-    if ($("#autoupdate[checked=true]").length){
+    if ($("#autoupdate")[0].checked) {
       $("#autoupdate-warning").slideDown();
-      $('html, body').animate({ scrollTop: 10000 }, 1000); //Fixes #280
-    }else{
-      $("#autoupdate-warning").slideUp();
+      $("html, body").animate({scrollTop: 10000}, 1000); //Fixes #280
     }
+    else $("#autoupdate-warning").slideUp();
   }
 
-  var urlScheme = Utils.url(gCommandFeedInfo.sourceUrl).scheme;
+  var urlScheme = Utils.uri(sourceUrl).scheme;
   var safeSchemes = ["https", "chrome", "file", "resource"];
-  if (safeSchemes.indexOf(urlScheme) == -1)
+  if (safeSchemes.indexOf(urlScheme) < 0)
     $("#mitm-warning").show();
 
   $("#autoupdate").click(onAutoupdateClicked);

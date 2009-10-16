@@ -425,7 +425,10 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
   // Read-only.
 
-  feedInfo.date = new Date(annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0));
+  feedInfo.__defineGetter__(
+    "date",
+    function feedInfo_date() (
+      new Date(annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0))));
 
   // === {{{Feed#canAutoUpdate}}} ===
   //
@@ -433,8 +436,10 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // be fetched from the network. See
   // {{{FeedManager#addSubscribedFeed()}}} for more information. Read-only.
 
-  feedInfo.canAutoUpdate =
-    annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, "") === "true";
+  feedInfo.__defineGetter__(
+    "canAutoUpdate",
+    function feedInfo_canAutoUpdate() (
+      annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, "") === "true"));
 
   // === {{{Feed#getCode()}}} ===
   //

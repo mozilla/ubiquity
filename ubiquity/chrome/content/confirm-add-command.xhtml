@@ -71,11 +71,15 @@
       </p>
 
       <p>
-        <input type="submit" value="&ubiquity.confirmsubscription.ButtonTextDenyCommand;" onclick="onCancel();"/>
+        <input type="submit"
+          value="&ubiquity.confirmsubscription.ButtonTextDenyCommand;"
+          onclick="onCancel();"/>
         &nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="submit" value="&ubiquity.confirmsubscription.ButtonTextAcceptCommand;" onclick="onSubmit();"/>
+        <input id="submit" type="submit"
+          value="&ubiquity.confirmsubscription.ButtonTextAcceptCommand;"
+          onclick="onSubmit();"
+          disabled="disabled"/>
       </p>
-
     </div>
   </div>
 </div>
