@@ -70,7 +70,7 @@ const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_.+_ANNO$/.test(v))];
 
 const DEFAULT_FEED_TYPE = "commands";
 
-// == The FeedManager Class =
+// == The FeedManager Class ==
 //
 // The constructor for this class takes an instance of an annotation
 // service, which has an interface that's virtually identical to
@@ -101,39 +101,39 @@ FMgrProto.registerPlugin = function FMgr_registerPlugin(plugin) {
   this._plugins[plugin.type] = plugin;
 };
 
+FMgrProto.__getFeedsForAnnotation = function FMgr__gFFA(anno) {
+  var feeds = [];
+  for each (let uri in this._annSvc.getPagesWithAnnotation(anno)) {
+    let feed = this.__getFeed(uri);
+    if (feed) feeds.push(feed);
+  }
+  return feeds;
+};
+
+// === {{{FeedManager#getAllFeeds()}}} ===
+//
+// Returns an array of all known {{{Feed}}} objects.
+
+FMgrProto.getAllFeeds = function FMgr_getAllFeeds() {
+  return this.__getFeedsForAnnotation(FEED_TYPE_ANNO);
+};
+
 // === {{{FeedManager#getUnsubscribedFeeds()}}} ===
 //
-// Returns an {{{Array}}} of {{{Feed}}} objects that represent all feeds
+// Returns an array of {{{Feed}}} objects that represent all feeds
 // that were once subscribed, but are currently unsubscribed.
 
 FMgrProto.getUnsubscribedFeeds = function FMgr_getUnsubscribedFeeds() {
-  let removedUris =
-    this._annSvc.getPagesWithAnnotation(FEED_UNSUBSCRIBED_ANNO);
-  return [this.__getFeed(uri) for each (uri in removedUris)];
+  return this.__getFeedsForAnnotation(FEED_UNSUBSCRIBED_ANNO);
 };
 
 // === {{{FeedManager#getSubscribedFeeds()}}} ===
 //
-// Returns an Array of {{{Feed}}} objects that represent all feeds
+// Returns an array of {{{Feed}}} objects that represent all feeds
 // that are currently subscribed.
 
 FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
-  let confirmedPages =
-    this._annSvc.getPagesWithAnnotation(FEED_SUBSCRIBED_ANNO);
-  let subscribedFeeds = [];
-
-  for each (let uri in confirmedPages) {
-    try {
-      subscribedFeeds.push(this.__getFeed(uri));
-    } catch (e) {
-      Cu.reportError(
-        //errorToLocalize
-        "An error occurred when retrieving the feed for " +
-        uri.spec + ": " + e);
-    }
-  }
-
-  return subscribedFeeds;
+  return this.__getFeedsForAnnotation(FEED_SUBSCRIBED_ANNO);
 };
 
 // === {{{FeedManager#getFeedForUrl(url)}}} ===
@@ -142,16 +142,7 @@ FMgrProto.getSubscribedFeeds = function FMgr_getSubscribedFeeds() {
 // this function returns {{{null}}}.
 
 FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
-  // TODO: This function is implemented terribly inefficiently.
-  var {spec} = Utils.url(url);
-  var feedLists = [this.getSubscribedFeeds(),
-                   this.getUnsubscribedFeeds()];
-
-  for each (let feeds in feedLists)
-    for each (let feed in feeds)
-      if (feed.uri.spec === spec)
-        return feed;
-  return null;
+  return this.__getFeed(Utils.uri(url));
 };
 
 // === {{{FeedManager#addSubscribedFeed()}}} ===
@@ -271,7 +262,7 @@ FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   window.addEventListener("DOMLinkAdded", onLinkAdded, false);
 
   for each (let plugin in this._plugins)
-    (plugin.installToWindow || isNaN)(window);
+    if ("installToWindow" in plugin) plugin.installToWindow(window);
 };
 
 // TODO: Add Documentation for this
@@ -306,20 +297,25 @@ FMgrProto.finalize = function FMgr_finalize() {
 };
 
 FMgrProto.__getFeed = function FMgr___getFeed(uri) {
-  if (!(uri.spec in this._feeds)) {
+  var {spec} = uri;
+  if (!(spec in this._feeds)) {
+    try { this._feeds[spec] = this.__makeFeed(uri) } catch (e) {
+      Cu.reportError(
+        //errorToLocalize
+        "An error occurred when retrieving the feed for " + spec + ": " + e);
+      // remove the mal-URI here, since we can't "purge" it as feed
+      removeAnnotationsForUri(this._annSvc, uri);
+      return null;
+    }
     var self = this;
-    var feed = self.__makeFeed(uri);
-    self._feeds[uri.spec] = feed;
-
     self.addListener("purge", function onPurge(eventName, aUri) {
-      if (aUri == uri) {
-        delete self._feeds[uri.spec];
+      if (aUri.spec === spec) {
+        delete self._feeds[spec];
         self.removeListener("purge", onPurge);
       }
     });
   }
-
-  return this._feeds[uri.spec];
+  return this._feeds[spec];
 };
 
 // == The Feed Class ==
@@ -384,10 +380,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   // Permanently deletes the feed.
 
   feedInfo.purge = function feedInfo_purge() {
-    for each (let ann in FEED_ANNOS) {
-      if (annSvc.pageHasAnnotation(uri, ann))
-        annSvc.removePageAnnotation(uri, ann);
-    }
+    removeAnnotationsForUri(annSvc, uri);
     hub.notifyListeners("purge", uri);
   };
 
@@ -540,6 +533,12 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   return plugin.makeFeed(feedInfo, hub);
 };
+
+function removeAnnotationsForUri(annSvc, uri) {
+  for each (var ann in FEED_ANNOS)
+    if (annSvc.pageHasAnnotation(uri, ann))
+      annSvc.removePageAnnotation(uri, ann);
+}
 
 // == Bin ==
 //

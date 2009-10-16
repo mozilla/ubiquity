@@ -232,7 +232,7 @@ var UbiquitySetup = {
       "https://ubiquity.mozilla.com/standard-feeds/",
       this.getBaseUri() + "standard-feeds/"];
 
-    feedManager.getSubscribedFeeds().forEach(function removeExtinct(feed) {
+    feedManager.getAllFeeds().forEach(function removeExtinct(feed) {
       var {spec} = feed.uri;
       if (OLD_STD_FEED_URIS.some(function (u) spec.indexOf(u) === 0) ||
           feed.title === "Mozilla Image-Related Commands")
