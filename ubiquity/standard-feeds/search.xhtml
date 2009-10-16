@@ -4,14 +4,16 @@
 <head>
   <title>Ubiquity Web Search Commands</title>
 </head>
+<style>
+  div[id] {display: none}
+  script {display: block; white-space: pre; font-family: monospace}
+</style>
 <body>
 <p>This xhtml source contains commands for searching the Web.  Its
 corresponding feed is <a href="search.html">here</a>.</p>
-<script src="fake-infrastructure.js"></script>
 
-
-
-<div id="google-search" style="display: none;">
+<div id="google-search">
+{if results.length}
 {for result in results}
 <div class="gresult">
   <div>
@@ -20,15 +22,14 @@ corresponding feed is <a href="search.html">here</a>.</p>
   <xul:description class="gresult-content">${result.content}</xul:description>
   <div class="gresult-url">${result.visibleUrl}</div>
 </div>
-{forelse}
-  <b>${noResultsMessage}</b>
 {/for}
 <small>${tipsMessage}</small>
+{else}
+${noResultsMessage}
+{/if}
 </div>
 
-
-
-<div id="amazon-search" style="display: none;">
+<div id="amazon-search">
 <style>
   ol, ul {list-style: none; margin: 0; padding: 0}
   img {float: right; margin: 0 0 0.5em 0.5em}
@@ -72,9 +73,7 @@ ${matchMessage}
 </ol>
 </div>
 
-
-
-<div id="flickr-search" style="display: none;">
+<div id="flickr-search">
 <b>${foundMessage}</b><br/><br/>
 <table style="border-width: 0px;">
 {for photo in photos}
@@ -93,9 +92,7 @@ ${matchMessage}
 </table>
 </div>
 
-
-
-<div id="weather-search" style="display: none;">
+<div id="weather-search">
   <style>
   .mainimg { float: left; }
   .weather{ font-family: arial, helvetica; color:white;}
@@ -143,9 +140,7 @@ ${matchMessage}
   </div>
 </div>
 
-
-
-<div id="wikipedia-search" style="display: none;">
+<div id="wikipedia-search">
 <style>
 .wikipedia { margin: 0 }
 .title { clear: left; margin-top: 0.4em }
@@ -173,7 +168,7 @@ ${foundMessage}
 {/for}
 </dl>
 </div>
-<div id="yahoo-search" style="display: none;">
+<div id="yahoo-search">
 {for result in results}
 <div class="gresult">
   <div>
@@ -184,9 +179,7 @@ ${foundMessage}
 {/for}
 </div>
 
-
-
-<div id="yelp-search" style="display: none;">
+<div id="yelp-search">
 <style>
 .biz {
   margin-bottom: 10px;
@@ -206,7 +199,6 @@ ${foundMessage}
   margin-right: 10px;
   font-size: x-small;
 }
-
 </style>
 
 {for biz in businesses}
@@ -216,7 +208,7 @@ ${foundMessage}
 </div>
 {/for}
 </div>
-<div id="youtube-search" style="display: none;">
+<div id="youtube-search">
   <p>
    Found <b>${numresults}</b> YouTube Videos matching <b>${query}</b>
   </p>
@@ -243,49 +235,32 @@ ${foundMessage}
   {/for}
   <br/><br/>
 </div>
-<script class="commands"><![CDATA[
+
+<script type="?" class="commands"><![CDATA[
 
 const SEARCH_TERM = _("search term");
 
 // TODO this should use a provider plugin
 CmdUtils.CreateCommand({
   names: ["search", "find", "look for"],
-  arguments: [
-    {role: "object", label: "query", nountype: noun_arb_text},
-    {role: "instrument", nountype: noun_type_searchengine}
-  ],
-  icon: "chrome://ubiquity/skin/icons/search.png",
   description: "Search using your installed search engines",
   help: "Specify any Open Search engine you have installed by entering " +
         "e.g. 'search with google', 'search with yahoo', etc.",
-  preview: function(previewBlock, args) {
-    var instrument = args.instrument;
-    if (instrument && instrument.data) {
-      searchEngine = instrument.data;
-    } else {
-      searchEngine = noun_type_searchengine.getDefault();
-    }
-
-    var previewTemplate = _("Search using <b>${engine}</b> for:<br /><b>${query}</b>");
-    var previewData = {
-      engine: searchEngine.name,
-      query: args.object.text
-    };
-    previewBlock.innerHTML = CmdUtils.renderTemplate(previewTemplate, previewData);
+  icon: "chrome://ubiquity/skin/icons/search.png",
+  arguments: [
+    {role: "object", nountype: noun_arb_text, label: SEARCH_TERM},
+    {role: "instrument", nountype: noun_type_search_engine},
+  ],
+  preview: function search_preview(previewBlock, {object, instrument}) {
+    previewBlock.innerHTML = _(
+      "Search using <b>${engine}</b> for:<br /><b>${query}</b>",
+      {engine: instrument.data.name, query : object.text});
   },
-  execute: function(args) {
-    var instrument = args.instrument;
-    if (instrument && instrument.data) {
-      searchEngine = instrument.data;
-    } else {
-      searchEngine = noun_type_searchengine.getDefault();
-    }
-    var searchSubmission = searchEngine.getSubmission(args.object.text,
-                                                      null);
-    Utils.openUrlInBrowser(searchSubmission.uri.spec, searchSubmission.postData);
+  execute: function search_execute({object, instrument}) {
+    var submission = instrument.data.getSubmission(object.text, null);
+    Utils.openUrlInBrowser(submission.uri.spec, submission.postData);
   }
 });
-
 
 CmdUtils.makeSearchCommand({
   names: ["Google"],
@@ -294,41 +269,33 @@ CmdUtils.makeSearchCommand({
   description: "Searches Google for your words.",
   help: "You can use the keyboard shortcut ctrl + alt + number to open one " +
         "of the Google results shown in the preview.",
-  preview: function(pblock, {object}) {
+  preview: function google_preview(pblock, {object}) {
     var searchTerm = object.text;
     // Don't even display any text before fetching search results,
     // since the results come back nearly instantaneously. In the
     // future, we can display a throbber.
-    if(searchTerm.length < 1) {
-      pblock.innerHTML = _("Searches Google for your words.");
-      return;
-    }
+    if (!searchTerm) return void this.previewDefault(pblock);
 
     var url = "http://ajax.googleapis.com/ajax/services/search/web";
-    var params = { v: "1.0", q: searchTerm };
+    var params = {v: "1.0", q: searchTerm, rsz: "small"};
 
-    CmdUtils.previewGet( pblock, url, params, function(data) {
-      var numToDisplay = 3;
-      var results = data.responseData.results.splice( 0, numToDisplay );
+    CmdUtils.previewGet(pblock, url, params, function google_get(data) {
+      var {results} = data.responseData;
+      results.forEach(function (r, i) { r.key = i + 1 });
 
-      //for access keys
-      for(var i=0;i<results.length;i++){
-        var result = results[i];
-        result.key = i+1;
-      }
-
-      var noResultsMessage = _("Your search - ${searchTerm} - did not match any documents.",
-                              {searchTerm:searchTerm});
-      var tipsMessage = _("Tip: You can go to any result in this preview by pressing control, alt, and the result number at the same time.");
+      var noResultsMessage = _(
+        "Your search - ${searchTerm} - did not match any documents.",
+        {searchTerm: object.html.bold()});
+      var tipsMessage = _(
+        "Tip: You can go to any result in this preview by pressing " +
+        "control, alt, and the result number at the same time.");
 
       pblock.innerHTML = CmdUtils.renderTemplate(
         feed.dom.getElementById("google-search").innerHTML,
-          { results:results,
-            searchTerm:searchTerm,
-            noResultsMessage:noResultsMessage,
-            tipsMessage:tipsMessage
-          });
-      }, "json");
+        { results: results,
+          noResultsMessage: noResultsMessage,
+          tipsMessage: tipsMessage });
+    }, "json");
   }
 });
 
@@ -1213,24 +1180,8 @@ CmdUtils.CreateCommand({
     CmdUtils.previewGet(pblock, wUrl, {query:query}, recordWeatherAndTryToPreview, 'xml');
     var fUrl = "http://api.wunderground.com/auto/wui/geo/ForecastXML";
     CmdUtils.previewGet(pblock, fUrl, {query:query}, recordForecastAndTryToPreview, 'xml');
-
-
   }
 });
-
-
-function defineWord(word, callback) {
-  var url = "http://services.aonaware.com/DictService/DictService.asmx/DefineInDict";
-  var params = Utils.paramsToString({
-    dictId: "wn", //wn: WordNet, gcide: Collaborative Dictionary
-    word: word
-  });
-
-  Utils.ajaxGet(url + params, function(xml) {
-    var text = jQuery(xml).find("WordDefinition > Definitions > Definition:first-child > WordDefinition").text();
-    callback(text);
-  });
-}
 
 CmdUtils.CreateCommand({
   names: ["define", "get definition"],
@@ -1240,25 +1191,33 @@ CmdUtils.CreateCommand({
   arguments: [{role: "object",
                nountype: noun_arb_text,
                label: "word"}],
-  execute: function({object}) {
-    var word = object.text;
-    Utils.openUrlInBrowser( "http://www.answers.com/" + escape(word) );
+  execute: function define_execute({object}) {
+    Utils.openUrlInBrowser("http://www.answers.com/" + escape(object.text));
   },
-  preview: function(pblock, {object}) {
-    var word = object.text;
-    if (word.length < 2) {
-      pblock.innerHTML = _("Gives the definition of a word.");
-    } else {
-      pblock.innerHTML = _("Gives the definition of the word ${word}.",
-                           {word:word});
-      defineWord( word, function(text) {
-        text = text.replace(/(\d+:)/g, "<br/><b>$&</b>");
-        text = text.replace(/(1:)/g, "<br/>$&");
-        text = text.replace(word, "<span style='font-size:18px;'>$&</span>");
-        text = text.replace(/\[[^\]]*\]/g, "");
-        pblock.innerHTML = text;
-      });
-    }
+  preview: function define_preview(pblock, {object: {text: word, html}}) {
+    if (!word) return void this.previewDefault(pblock);
+
+    pblock.innerHTML = _("Gives the definition of the word ${word}.",
+                         {word: html});
+    CmdUtils.previewAjax(pblock, {
+      url: ("http://services.aonaware.com/" +
+            "DictService/DictService.asmx/DefineInDict"),
+      data: {
+        word: word,
+        dictId: "wn", // wn: WordNet, gcide: Collaborative Dictionary
+      },
+      success: function define_success(xml) {
+        pblock.innerHTML = (
+          jQuery(xml)
+          .find("WordDefinition > Definitions > Definition:first-child" +
+                " > WordDefinition")
+          .text()
+          .replace(/^\s*.+/, "<h2>$&</h2>")
+          .replace(/\[[^\]]*\]/g, "")
+          .replace(/\d+:/g, "<br/><strong>$&</strong>")
+          .replace(/1:/g, "<br/>$&"));
+      },
+    });
   }
 });
 
@@ -1518,7 +1477,6 @@ CmdUtils.makeSearchCommand({
     refresh(1, this.imgsPerPage);
   }
 });
-
 
 ]]></script>
 </body>
