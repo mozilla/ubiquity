@@ -327,62 +327,86 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   let annSvc = this._annSvc;
   let hub = this._hub;
 
-  // === {{{Feed#title}}} ===
-  //
-  // The human-readable name for the feed. Read-only.
+  let feedInfo = {
+    // === {{{Feed#uri}}} ===
+    //
+    // A {{{nsIURI}}} corresponding to the feed's URL. This is the
+    // human-readable page that the end-user clicked the "Subscribe..."
+    // button on; it is not necessarily the same page that contains the
+    // feed's actual source code. Read-only.
+    uri: uri,
 
-  let title = annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO, uri.spec);
+    // === {{{Feed#srcUri}}} ===
+    //
+    // An {{{nsIURI}}} corresponding to the URL for the feed's source code.
+    // Read-only.
+    srcUri: Utils.uri(annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO),
+                      "data:,"),
 
-  // === {{{Feed#type}}} ===
-  //
-  // A string identifying the type of the feed. This is usually the
-  // same as the {{{rel}}} attribute contained in a HTML page's
-  // {{{<link>}}} tag, and determines what feed plugin is used to load
-  // and process the feed. Read-only.
+    // === {{{Feed#viewSourceUri}}} ===
+    //
+    // Returns the {{{nsIURI}}} for the feed's source code. If the source
+    // code only exists as cached data, this may be a data URI.
+    get viewSourceUri feedInfo_viewSourceUri() (
+      this.canAutoUpdate
+      ? this.srcUri
+      : Utils.uri("data:," + escape(this.getCode()))),
 
-  let type = annSvc.getPageAnnotation(uri, FEED_TYPE_ANNO, DEFAULT_FEED_TYPE);
+    // === {{{Feed#type}}} ===
+    //
+    // A string identifying the type of the feed. This is usually the
+    // same as the {{{rel}}} attribute contained in a HTML page's
+    // {{{<link>}}} tag, and determines what feed plugin is used to load
+    // and process the feed. Read-only.
+    type: annSvc.getPageAnnotation(uri, FEED_TYPE_ANNO, DEFAULT_FEED_TYPE),
 
-  // === {{{Feed#uri}}} ===
-  //
-  // A {{{nsIURI}}} corresponding to the feed's URL. This is the
-  // human-readable page that the end-user clicked the "Subscribe..."
-  // button on; it is not necessarily the same page that contains the
-  // feed's actual source code. Read-only.
+    // === {{{Feed#title}}} ===
+    //
+    // The human-readable name for the feed. Read-only.
+    get title feedInfo_title()
+      annSvc.getPageAnnotation(uri, FEED_TITLE_ANNO, uri.spec),
 
-  let feedInfo = {title: title, uri: uri, type: type};
+    // === {{{Feed#date}}} ===
+    //
+    // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
+    // Read-only.
+    get date feedInfo_date()
+      new Date(annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0)),
 
-  // === {{{Feed#isBuiltIn}}} ===
-  //
-  // This is a boolean that indicates whether the feed is to be treated
-  // as a built-in feed. See the documentation for
-  // {{{FeedManager#addSubscribedFeed()}}} for more
-  // information. Read-only.
+    // === {{{Feed#isBuiltIn}}} ===
+    //
+    // This is a boolean that indicates whether the feed is to be treated
+    // as a built-in feed. See the documentation for
+    // {{{FeedManager#addSubscribedFeed()}}} for more
+    // information. Read-only.
+    get isBuiltIn feedInfo_isBuiltIn()
+      annSvc.pageHasAnnotation(uri, FEED_BUILTIN_ANNO),
 
-  feedInfo.__defineGetter__(
-    "isBuiltIn",
-    function feedInfo_isBuiltIn() (
-      annSvc.pageHasAnnotation(uri, FEED_BUILTIN_ANNO)));
+    // === {{{Feed#isSubscribed}}} ===
+    //
+    // Whether the feed is currently being subscribed to or not. Read-only.
+    get isSubscribed feedInfo_isSubscribed()
+      annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO),
 
-  // === {{{Feed#isSubscribed}}} ===
-  //
-  // Whether the feed is currently being subscribed to or not. Read-only.
+    // === {{{Feed#canAutoUpdate}}} ===
+    //
+    // Whether or not the latest version of the feed's source code should
+    // be fetched from the network. See
+    // {{{FeedManager#addSubscribedFeed()}}} for more information. Read-only.
+    get canAutoUpdate feedInfo_canAutoUpdate()
+      annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, "") === "true",
 
-  feedInfo.__defineGetter__(
-    "isSubscribed",
-    function feedInfo_isSubscribed() (
-      annSvc.pageHasAnnotation(uri, FEED_SUBSCRIBED_ANNO)));
+    // === {{{Feed#purge()}}} ===
+    //
+    // Permanently deletes the feed.
+    purge: function feedInfo_purge() {
+      removeAnnotationsForUri(annSvc, uri);
+      hub.notifyListeners("purge", uri);
+    },
+  };
 
   let expiration =
     annSvc[feedInfo.isBuiltIn ? "EXPIRE_SESSION" : "EXPIRE_NEVER"];
-
-  // === {{{Feed#purge()}}} ===
-  //
-  // Permanently deletes the feed.
-
-  feedInfo.purge = function feedInfo_purge() {
-    removeAnnotationsForUri(annSvc, uri);
-    hub.notifyListeners("purge", uri);
-  };
 
   // === {{{Feed#remove()}}} ===
   //
@@ -411,35 +435,6 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
       hub.notifyListeners("subscribe", uri);
     }
   };
-
-  // === {{{Feed#srcUri}}} ===
-  //
-  // An {{{nsIURI}}} corresponding to the URL for the feed's source code.
-  // Read-only.
-
-  feedInfo.srcUri = Utils.url(annSvc.getPageAnnotation(uri, FEED_SRC_URL_ANNO),
-                              "data:text/plain,");
-
-  // === {{{Feed#date}}} ===
-  //
-  // Subscribed {{{Date}}} of the feed. {{{new Date(0)}}} for builtin feeds.
-  // Read-only.
-
-  feedInfo.__defineGetter__(
-    "date",
-    function feedInfo_date() (
-      new Date(annSvc.getPageAnnotation(uri, FEED_DATE_ANNO, 0))));
-
-  // === {{{Feed#canAutoUpdate}}} ===
-  //
-  // Whether or not the latest version of the feed's source code should
-  // be fetched from the network. See
-  // {{{FeedManager#addSubscribedFeed()}}} for more information. Read-only.
-
-  feedInfo.__defineGetter__(
-    "canAutoUpdate",
-    function feedInfo_canAutoUpdate() (
-      annSvc.getPageAnnotation(uri, FEED_AUTOUPDATE_ANNO, "") === "true"));
 
   // === {{{Feed#getCode()}}} ===
   //
@@ -498,23 +493,6 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
   feedInfo.checkForManualUpdate = function feedInfo_checkForManualUpdate(cb) {
     cb(false);
   };
-
-  // === {{{Feed#viewSourceUri}}} ===
-  //
-  // Returns the {{{nsIURI}}} for the feed's source code. If the source
-  // code only exists as cached data, this may be a data URI.
-
-  feedInfo.__defineGetter__(
-    "viewSourceUri",
-    function feedInfo_viewSource() {
-      if (feedInfo.canAutoUpdate)
-        return feedInfo.srcUri;
-      else {
-        let uri = ("data:application/x-javascript," +
-                   escape(feedInfo.getCode()));
-        return Utils.url(uri);
-      }
-    });
 
   // === {{{Feed#finalize()}}} ===
   //
