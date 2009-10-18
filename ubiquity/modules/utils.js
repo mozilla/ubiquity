@@ -1186,17 +1186,21 @@ Utils.gist = {
     try { var {domain} = document } catch (e) {}
     if (domain !== "gist.github.com") return "";
 
-    var {hash, search} = document.location;
+    var {hash, search, pathname} = document.location;
     if (hash.length > 1) return hash.slice(1);
     if (search.length > 1)
       try { return decodeURIComponent(search).slice(1) } catch (e) {}
 
-    var info = document.getElementsByClassName("info")[0];
-    if (info && /^\s*([^.]+)/(info.textContent)) {
-      let name = RegExp.$1;
-      if (name.length > 1) return name;
-    }
+    const SEP = " \u2013 ";
+    var name = "gist:" + /\d+/(pathname);
+    var desc = document.getElementById("gist-text-description");
+    if (desc && /\S/.test(desc.textContent))
+      return name + SEP + desc.textContent;
 
-    return "";
+    var info = document.getElementsByClassName("info")[0];
+    if (info && /^\s*([^.]{2,})/.test(info.textContent))
+      return name + SEP + RegExp.$1;
+
+    return name;
   },
 };
