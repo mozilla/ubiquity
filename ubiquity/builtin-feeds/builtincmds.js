@@ -296,9 +296,24 @@ function ubiquityLoad_commandHistory(U) {
       cursor += 39 - ev.keyCode;
       if (cursor < -1 || bin.length <= cursor) cursor = -1;
       U.preview(bin[cursor] || "");
-      ev.preventDefault();
-      ev.stopPropagation();
+      return ok();
     }
+    if (ev.shiftKey && ev.keyCode === KeyEvent.DOM_VK_TAB) {
+      var {value} = textBox;
+      if (!value) return;
+      var bin = CmdHst.get(), vi = bin.indexOf(value) + 1;
+      if (vi) bin = bin.slice(vi);
+      var keyEnd = textBox.selectionStart || value.length;
+      var re = RegExp("^" + Utils.regexp.quote(value.slice(0, keyEnd)), "i");
+      for each (var his in bin) if (re.test(his)) {
+        U.preview(his);
+        textBox.selectionStart = keyEnd;
+        textBox.selectionEnd = textBox.textLength;
+        break;
+      }
+      return ok();
+    }
+    function ok() { ev.preventDefault(); ev.stopPropagation() }
   }, true);
   textBox.addEventListener("blur", function cmdh_saveEntry() {
     CmdHst.add(textBox.value);
