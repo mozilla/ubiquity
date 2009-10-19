@@ -824,7 +824,7 @@ function CreateCommand(options) {
     }
   }
 
-  if (options.previewUrl)
+  if ("previewUrl" in options && !options.__lookupGetter__("previewUrl"))
     // Call our "patched" Utils.url(), which has the ability
     // to base a relative URL on the current feed's URL.
     command.previewUrl = global.Utils.url(options.previewUrl);
@@ -990,8 +990,7 @@ function CreateAlias(options) {
 //            title: "div h3",
 //            preview: "div.abstr, div.sm-abs"}
 // });
-// }}}
-// {{{
+//
 // CmdUtils.makeSearchCommand({
 //   name: "Google",
 //   url: "http://www.google.com/search?q={QUERY}",
@@ -999,8 +998,7 @@ function CreateAlias(options) {
 //            title: "h3.r",
 //            preview: "div.s"}
 // });
-// }}}
-// {{{
+//
 // CmdUtils.makeSearchCommand({
 //   name: "IMDb",
 //   url: "http://www.imdb.com/find?s=all&q={QUERY}",
@@ -1011,6 +1009,7 @@ function CreateAlias(options) {
 //     maxResults: 8,
 //   },
 // });
+//
 // CmdUtils.makeSearchCommand({
 //   names: ["video.baidu", "百度视频"],
 //   url: "http://video.baidu.com/v?word={QUERY}",
@@ -1069,10 +1068,8 @@ function makeSearchCommand(options) {
                                                                     args) {
     const Klass = "search-command";
     var {text, html} = args.object;
-    if (!text) {
-      pblock.innerHTML = this.description;
-      return;
-    }
+    if (!text) return void this.previewDefault(pblock);
+
     var {parser} = options;
     //errorToLocalize
     pblock.innerHTML = (
@@ -1081,6 +1078,7 @@ function makeSearchCommand(options) {
       (parser ? "<p class='loading'>Loading results...</p>" : "") +
       "</div>");
     if (!parser) return;
+
     var url = insertQuery(parser.url || options.url, text, charset);
     if ("postData" in options)
       var postData = insertQuery(options.postData, text, charset);
@@ -1149,18 +1147,19 @@ function makeSearchCommand(options) {
         }
         results = results.filter(function filterResults(result) {
           var {title, thumbnail, preview, href} = result;
-          if (!(title || 0).length) return false;
+          if (!(title || "").length) return false;
           if (!href) {
             if (title[0].nodeName !== "A") title = title.find("A:first");
             result.href = title.attr("href");
           }
           result.title = title.html();
-          if ((thumbnail || 0).length) {
+          if ((thumbnail || "").length) {
             if (thumbnail[0].nodeName !== "IMG")
               thumbnail = thumbnail.find("img:first");
             result.thumbnail = thumbnail.attr("src");
           }
-          if (preview && typeof preview !== "string") result.preview = preview.html();
+          if (preview && typeof preview !== "string")
+            result.preview = preview.html();
           return true;
         });
       }
@@ -1184,14 +1183,9 @@ function makeSearchCommand(options) {
             template += "<dd class='preview'>" + result.preview + "</dd>";
         }
         template += "</dl>";
-        if (!sane)
-          // we did not find an equal amount of titles, previews
-          // and thumbnails
-          //errorToLocalize
-          template += (
-            "<p class='error'>Note: no previews have been generated, " +
-            "because an error occured while parsing the " +
-            "results</p>");
+        sane || Utils.reportWarning(
+          name + " : we did not find an equal amount of titles, " +
+          "previews and thumbnails");
       }
       //errorToLocalize
       else template = "<p class='empty'>No results.</p>";
@@ -1211,7 +1205,7 @@ function makeSearchCommand(options) {
     }
     CU.previewAjax(pblock, params);
   });
-  this.CreateCommand(options);
+  return this.CreateCommand(options);
 }
 
 // === {{{ CmdUtils.makeBookmarkletCommand(options) }}} ===
@@ -1244,7 +1238,7 @@ function makeBookmarkletCommand(options) {
       pblock.innerHTML = L("ubiquity.cmdutils.bookmarkletexec", this.name);
     };
 
-  this.CreateCommand(options);
+  return this.CreateCommand(options);
 }
 
 // == TEMPLATING ==
