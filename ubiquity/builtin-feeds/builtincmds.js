@@ -286,7 +286,8 @@ CmdUtils.CreateCommand({
 function ubiquityLoad_commandHistory(U) {
   var cursor = -1, {textBox} = U;
   textBox.parentNode.addEventListener("keydown", function cmdh_onKey(ev) {
-    if (ev.ctrlKey) switch (ev.keyCode) {
+    if (!ev.ctrlKey || ev.altKey || ev.metaKey) return;
+    switch (ev.keyCode) {
       case 38: case 40: // UP DOWN
       var bin = CmdHst.get();
       if (cursor < 0 && textBox.value) {
@@ -298,13 +299,15 @@ function ubiquityLoad_commandHistory(U) {
       U.preview(bin[cursor] || "");
       return ok();
     }
-    if (ev.shiftKey && ev.keyCode === KeyEvent.DOM_VK_TAB) {
-      var {value} = textBox;
-      if (!value) return;
-      var bin = CmdHst.get(), vi = bin.indexOf(value) + 1;
+    if (ev.keyCode === KeyEvent.DOM_VK_TAB) {
+      var text = Utils.trim(textBox.value);
+      if (!text) return;
+      var bin = CmdHst.get();
+      if (ev.shiftKey) bin = bin.slice().reverse();
+      var vi = bin.indexOf(text) + 1;
       if (vi) bin = bin.slice(vi);
-      var keyEnd = textBox.selectionStart || value.length;
-      var re = RegExp("^" + Utils.regexp.quote(value.slice(0, keyEnd)), "i");
+      var keyEnd = textBox.selectionStart || text.length;
+      var re = RegExp("^" + Utils.regexp.quote(text.slice(0, keyEnd)), "i");
       for each (var his in bin) if (re.test(his)) {
         U.preview(his);
         textBox.selectionStart = keyEnd;
