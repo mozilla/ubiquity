@@ -1429,8 +1429,10 @@ function previewCallback(pblock, callback, abortCallback) {
 //
 // Creates a simple clickable list in the preview block and
 // returns the list element.
-// Activating {{{accesskey="0"}}} rotates the accesskeys
-// in case the list is longer than available keys.
+// * Activating {{{accesskey="0"}}} rotates the accesskeys
+//   in case the list is longer than the number of available keys.
+// * The buttons are disabled upon activation to prevent duplicate calls.
+//   To re-enable them, make {{{callback}}} return {{{true}}}.
 //
 // {{{block}}} is the DOM element the list will be placed into.
 //
@@ -1454,14 +1456,14 @@ function previewList(block, htmls, callback, css) {
   block.innerHTML = (
     '<ol class="preview-list">' +
     '<style>' + previewList.CSS + (css || "") + '</style>' +
-    '<li id="keyshifter"><button id="0" accesskey="0">0</button></li>' +
+    '<button id="keyshifter" accesskey="0">0</button>' +
     list + '</ol>');
-  var [ol] = block.getElementsByClassName("preview-list"), start = 0;
-  ol.addEventListener("focus", function previewListFocused(ev) {
+  var ol = block.firstChild, start = 0;
+  callback && ol.addEventListener("focus", function onPreviewListFocus(ev) {
     var {target} = ev;
-    if (!/^button$/i.test(target.nodeName)) return;
+    if (/^(?!button$)/i.test(target.nodeName)) return;
     target.blur();
-    if (target.id === "0") {
+    if (target.id === "keyshifter") {
       if (num < 36) return;
       let buttons = Array.slice(this.getElementsByTagName("button"), 1);
       start = (start + 35) % buttons.length;
@@ -1470,7 +1472,9 @@ function previewList(block, htmls, callback, css) {
         b.textContent = b.accessKey = ++i < 36 ? i.toString(36) : "-";
       return;
     }
-    if (callback) target.disabled = !callback(target.value, ev);
+    target.disabled = true;
+    if (callback(target.value, ev))
+      Utils.setTimeout(function reenable() { target.disabled = false });
   }, true);
   return ol;
 }
