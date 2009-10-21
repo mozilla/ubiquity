@@ -98,13 +98,12 @@ TestCase.prototype = {
   },
 
   assertEquals : function(a, b, msg) {
-    if (!(a == b)) {
-      if (!msg)
+    if (a !== b) {
+      throw new AssertionError(
         //errorToLocalize
-        msg = "'" + a + "' is not equal to '" + b + "'";
-      throw new AssertionError(msg,
-                               Components.stack.caller.filename,
-                               Components.stack.caller.lineNumber);
+        msg || "'" + a + "' is not equal to '" + b + "'",
+        Components.stack.caller.filename,
+        Components.stack.caller.lineNumber);
     }
   },
 

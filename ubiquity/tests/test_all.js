@@ -36,7 +36,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Cu = Components.utils;
+var {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/nounutils.js");
@@ -81,7 +81,7 @@ function testXhtmlCodeSourceWorks() {
 }
 
 function testUtilsUrlWorksWithNsURI() {
-  var ios = Components.classes["@mozilla.org/network/io-service;1"]
+  var ios = Cc["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService);
   var uri = ios.newURI("http://www.foo.com", null, null);
 
@@ -422,25 +422,19 @@ function testSandboxFactoryProtectsSandbox() {
   // This is a regression test for #434.
   this.skipIfXPCShell();
 
-  var Cc = Components.classes;
-  var Ci = Components.interfaces;
-
-  var Application = Components.classes["@mozilla.org/fuel/application;1"]
-                    .getService(Components.interfaces.fuelIApplication);
-
   var sbf = new SandboxFactory({}, globalObj);
   var sandbox = sbf.makeSandbox();
   var code = "Application.activeWindow.activeTab.document.defaultView";
-  sandbox.Application = Application;
+  sandbox.Application = Utils.Application;
 
   this.assertEquals(
-    sbf.evalInSandbox(code,
-                      sandbox,
-                      [{filename: "__arbitraryString://blarg/",
-                        lineNumber: 1,
-                        length: code.length}]),
-    "[object XPCNativeWrapper [object Window]]"
-  );
+    String(sbf.evalInSandbox(
+      code,
+      sandbox,
+      [{filename: "__arbitraryString://blarg/",
+        lineNumber: 1,
+        length: code.length}])),
+    "[object XPCNativeWrapper [object Window]]");
 }
 
 function testXmlScriptCommandsParser() {
@@ -510,12 +504,12 @@ function testNounType() {
 }
 
 function testUtilsRegexp() {
-  this.assertEquals(Utils.regexp("[") + "",
-                    /\[/);
-  this.assertEquals(Utils.regexp("@", "image") + "",
-                    /@/gim);
-  this.assertEquals(Utils.regexp(/:/, "y") + "",
-                    /:/y);
+  this.assertEquals(uneval(Utils.regexp("[")),
+                    uneval(/\[/));
+  this.assertEquals(uneval(Utils.regexp("@", "image")),
+                    uneval(/@/gim));
+  this.assertEquals(uneval(Utils.regexp(/:/, "y")),
+                    uneval(/:/y));
   this.assertEquals(Utils.regexp.quote("[^.^]"),
                     "\\[\\^\\.\\^\\]");
   var words = ["foobar", "fooxar", "foozap", "fooza"]
