@@ -387,8 +387,21 @@ function testUtilsParamsToString() {
   this.assertEquals(Utils.paramsToString(data, ""), expected.slice(1));
 }
 
+function testUtilsUrlToParams() {
+  this.assertEquals(
+    uneval(Utils.urlToParams("foo=bar")),
+    uneval({foo: "bar"}));
+  this.assertEquals(
+    uneval(Utils.urlToParams("http://foo.com/?bar=baz#quux")),
+    uneval({bar: "baz"}));
+  this.assertEquals(
+    uneval(Utils.urlToParams("?dup=1&dup=2&%3F%26%3D%23=%E6%84%9B=+")),
+    uneval({dup: ["1", "2"], "?&=#": "\u611B= "}));
+}
+
 function testUtilsIsArray() {
   this.assert(Utils.isArray([]));
+  this.assert(!Utils.isArray({}));
 }
 
 // This tests bug #25.

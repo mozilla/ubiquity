@@ -519,14 +519,14 @@ function paramsToString(params, prefix) {
 // values retrieved from its query-part.
 
 function urlToParams(url) {
-  var params = {};
-  for each (let param in url.slice(url.indexOf("?") + 1).split("&")) {
-    var [key, val] = param.split("=");
-    val = val ? val.replace(/\+/g, " ") : "";
+  var params = {}, dict = {__proto__: null};
+  for each (let param in /^(?:[^?]*\?)?([^#]*)/(url)[1].split("&")) {
+    let [key, val] = /[^=]*(?==?(.*))/(param);
+    val = val.replace(/\+/g, " ");
+    try { key = decodeURIComponent(key) } catch (e) {};
     try { val = decodeURIComponent(val) } catch (e) {};
-    params[key] = (key in params
-                   ? [].concat(params[key], val)
-                   : val);
+    params[key] = key in dict ? [].concat(params[key], val) : val;
+    dict[key] = 1;
   }
   return params;
 }
