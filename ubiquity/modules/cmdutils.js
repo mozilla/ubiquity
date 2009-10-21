@@ -1167,17 +1167,17 @@ function makeSearchCommand(options) {
         template = "<dl class='list'>";
         let max = Math.min(results.length, parser.maxResults || 4);
         let {baseurl} = parser;
-        let {escapeHtml, url} = Utils;
+        let {escapeHtml, uri} = Utils;
         for (let i = 0; i < max; ++i) {
           let result = results[i], key = i < 35 ? (i+1).toString(36) : "-";
           template += (
             "<dt class='title'><kbd>" + key + "</kbd> <a href='" +
-            escapeHtml(url({uri: result.href, base: baseurl}).spec) +
+            escapeHtml(uri({uri: result.href, base: baseurl}).spec) +
             "' accesskey='" + key + "'>" + result.title + "</a></dt>");
           if ("thumbnail" in result)
             template += (
               "<dd class='thumbnail'><img src='" +
-              escapeHtml(url({uri: result.thumbnail, base: baseurl}).spec) +
+              escapeHtml(uri({uri: result.thumbnail, base: baseurl}).spec) +
               "'/></dd>");
           if ("preview" in result)
             template += "<dd class='preview'>" + result.preview + "</dd>";
