@@ -41,9 +41,6 @@ var EnParser = {
   parseSentence: parseSentence,
 };
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-
-var {isEmpty} = Utils;
 var {push} = Array.prototype;
 
 function shallowCopy(dic) {
@@ -94,21 +91,24 @@ function parseSentence(inputString, verbList, makePPS) {
   var words = [word for each (word in inputString.split(" ")) if (word)];
   if (!words.length) return parsings;
 
-  var inputs = (words.length === 1
+  var verbOnly = words.length === 1;
+  var inputs = (verbOnly
                 ? [[words[0], null, 1]]
                 : [[words[0], words.slice(1), 1], [words.pop(), words, .1]]);
-  for each (let verb in verbList) if (!verb.disabled)
+  for each (let verb in verbList) if ((verbOnly || verb.argCount) &&
+                                      !verb.disabled)
     VERB: for each (let input in inputs) {
       let matchScore = verb.match(input[0]);
       if (!matchScore) continue;
 
-      let [, inputArgs, weight] = input, {args} = verb;
+      let [, inputArgs, weight] = input;
       matchScore *= weight;
-      if (!inputArgs || isEmpty(args)) {
+      if (!inputArgs) {
         parsings.push(makePPS(verb, {}, matchScore));
         break VERB;
       }
-      let preps = {}; // {source: "to", goal: "from", ...}
+
+      let {args} = verb, preps = {}; // {source: "to", goal: "from", ...}
       for (let arg in args) preps[arg] = args[arg].preposition;
       delete preps.object;
       let hasObj = "object" in args;

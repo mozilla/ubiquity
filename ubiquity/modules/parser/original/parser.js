@@ -698,7 +698,7 @@ function Verb(cmd, roleMap) {
   // Use the presence or absence of the "arguments" dictionary
   // to decide whether this is a version 1 or version 2 command.
   if (this.newAPI) {
-    // New-style API: command defines arguments dictionary
+    // New-style API: command defines arguments array
     // if there are arguments, copy them over using
     // a (semi-arbitrary) choice of preposition
     for each (let arg in cmd.arguments) {
@@ -718,7 +718,7 @@ function Verb(cmd, roleMap) {
     //   Command defines DOType/DOLabel and modifiers dictionary.
     // Convert this to argument dictionary.
     // cmd.DOType must be a NounType, if provided.
-    if (cmd.DOType) {
+    if ("DOType" in cmd) {
       args.object = {
         type: cmd.DOType,
         label: cmd.DOLabel,
@@ -744,6 +744,7 @@ function Verb(cmd, roleMap) {
       }
     }
   }
+  this.argCount = [0 for (_ in args)].length;
 }
 Verb.prototype = {
   get name V_name() this.cmd.names[0],
