@@ -150,7 +150,10 @@ function log() {
 //
 // Gets the document/window of the current tab in a secure way.
 
-function getDocument() Application.activeWindow.activeTab.document;
+function getDocument() {
+  var {activeTab, tabs} = Application.activeWindow;
+  return tabs[activeTab.index].document;
+}
 
 function getWindow() getDocument().defaultView;
 
@@ -165,7 +168,14 @@ function getWindow() getDocument().defaultView;
 
 function getDocumentInsecure() getDocument().wrappedJSObject;
 
-function getWindowInsecure() getDocumentInsecure().defaultView;
+function getWindowInsecure() getWindow().wrappedJSObject;
+
+for each(let m in ["document", "window"]){
+  for each(let s in ["", "Insecure"])
+    CmdUtils.__defineGetter__(
+      m + s,
+      this["get" + m[0].toUpperCase() + m.slice(1) + s]);
+}
 
 // === {{{ CmdUtils.getCommand(id) }}} ===
 //
