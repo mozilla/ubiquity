@@ -207,8 +207,6 @@ Parser.prototype = {
       else
         skippedSomeVerbs = true;
     }
-    //dump("loaded verbs:\n" +
-    //     this._verbList.map(function(v) v.names[0]).join("\n") + "\n");
 
     if (skippedSomeVerbs && !gOldAlerted) {
       var msgService = new AlertMessageService();
@@ -250,10 +248,6 @@ Parser.prototype = {
         nt.registerCacheObserver(flush);
       }
     }
-
-    //dump("loaded nouns:\n" +
-    //     [n.id + " " + n.name for each (n in this._nounTypes)].join("\n") +
-    //     "\n");
 
     this.initializeCache();
     // run language-specific setup code
@@ -751,7 +745,7 @@ Parser.prototype = {
       // argument.
       if (this.branching === "right" && lastIndex === words.length - 1 ||
           this.branching === "left" && delimiterIndices[0] === 0)
-        dump('maybe this is why I\'m dead.\n');
+        Utils.dump("maybe this is why I'm dead.");
       // TODO check if this breaks things and, if it does, kill these
       // delimiter combinations right here.
 
@@ -931,12 +925,9 @@ Parser.prototype = {
       var oneArgPerRole = function oneArgPerRole(parse) {
         // Returns true if there is only one argument per role.
         // Returns false otherwise. The "object" role is not checked.
-        for (let role in parse.args) {
-          if (role !== 'object' && parse.args[role].length > 1) {
-            //dump("parse "+parse._id+" had more than one "+role+"\n");
+        for (let role in parse.args)
+          if (role !== "object" && parse.args[role].length > 1)
             return false;
-          }
-        }
         return true;
       }
       
@@ -1695,7 +1686,7 @@ var ParseQuery = function(parser, queryString, selObj, context,
 
 ParseQuery.prototype = {
   dump: function PQ_dump(msg) {
-    dump(this._idTime + ":" + (new Date - this._idTime) + " " + msg + "\n");
+    Utils.dump(this._idTime + ":" + (new Date - this._idTime), msg);
   },
 
   // ** {{{ParseQuery#run()}}} **
@@ -1743,7 +1734,7 @@ ParseQuery.prototype = {
 
   _next: function PQ__next() {
     this._times[this._step++] = new Date;
-    this.dump('STEP '+this._step);
+    this.dump("STEP " + this._step);
   },
 
   // ** {{{ParseQuery#_yieldingParse()}}} **
@@ -1935,17 +1926,17 @@ ParseQuery.prototype = {
   // If it finds some parse that that is ready for scoring, it will then
   // handle the scoring.
   tryToCompleteParses: function PQ_tryToCompleteParses(argText, ids, asyncFlag) {
-    this.dump('tryToCompleteParses('+argText+','+ids+')');
+    this.dump("tryToCompleteParses(" + argText + "," + ids + ")");
 
     if (this.finished) {
-      this.dump('this query has already finished');
+      this.dump("this query has already finished");
       return false;
     }
 
     var addedAny = false;
     var dT = this._detectionTracker;
     var parseIdsToTryToComplete = dT.getParseIdsToCompleteForIds(argText,ids)
-    this.dump('parseIds to try to complete:' + parseIdsToTryToComplete);
+    this.dump("parseIds to try to complete:" + parseIdsToTryToComplete);
     for each (let parseId in parseIdsToTryToComplete) {
       let thisParse = this._verbedParses[parseId];
       if (!thisParse.complete &&
@@ -1970,7 +1961,7 @@ ParseQuery.prototype = {
                             progress >= throttleThreshold;
       if ((addedAny && (asyncFlag || progress >= throttleThreshold)) ||
         passedThreshold){
-        this.dump('calling onResults now');
+        this.dump("calling onResults now");
         this.onResults();
       }
       this._previousProgress = progress;
@@ -1980,8 +1971,6 @@ ParseQuery.prototype = {
 
   completeParse: function PQ_completeParse(thisParse) {
     var requestCount = thisParse.getRequestCount();
-    //this.dump('completing parse '+thisParse._id+' now');
-    //dump("request count: " + requestCount + "\n");
 
     if (!(thisParse._requestCountLastCompletedWith == undefined)
         && thisParse._requestCountLastCompletedWith == requestCount) {
@@ -1998,16 +1987,10 @@ ParseQuery.prototype = {
     // based on the nountype suggestions.
     // If they're good enough, add them to _scoredParses.
     var suggestions = this.parser.suggestArgs(thisParse);
-    //Utils.log(suggestions);
-
-    //this.dump('completed '+thisParse._id+': created '+[parse._id for each (parse in suggestions)]);
 
     var addedAny = false;
-    for each (let newParse in suggestions) {
-      addedAny = this.addIfGoodEnough('scored',newParse)
-                   || addedAny;
-    }
-
+    for each (let newParse in suggestions)
+      addedAny = this.addIfGoodEnough("scored", newParse) || addedAny;
 
     if (this._verbedParses.every(function(parse) parse.complete))
       this.finishQuery();
@@ -2055,7 +2038,7 @@ ParseQuery.prototype = {
     //Utils.log(this);
     let reqCount = this._detectionTracker.getRequestCount();
     this.dump("cancelled! " + reqCount +
-              " outstanding request(s) being canceled\n");
+              " outstanding request(s) being canceled");
     //abort and reset any async requests that are running
     this._detectionTracker.abortOutstandingRequests();
 
@@ -2093,7 +2076,7 @@ ParseQuery.prototype = {
 
     let parseIds = [parse._id for each (parse in parseCollection)];
     if (parseIds.indexOf(newParse._id) != -1) {
-      this.dump("already contains parse #"+newParse._id+"!");
+      this.dump("already contains parse #" + newParse._id + "!");
       return false;
     }
 
@@ -2791,7 +2774,6 @@ Parse.prototype = {
                         this._verb,
                         this.argString,
                         this);
-//    dump('copying '+this._id+' > '+ret._id+'\n');
     // NOTE: at one point we copied these args by
     // ret.args = {__proto__: this.args}
     // This, however, created duplicate parses (or, rather, the prototype copies
