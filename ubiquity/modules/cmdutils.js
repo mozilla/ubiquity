@@ -94,6 +94,10 @@ var CmdUtils = {
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
+for each (let g in ["document", "documentInsecure",
+                    "window", "windowInsecure", "hiddenWindow"]) {
+  CmdUtils.__defineGetter__(g, this["get" + g[0].toUpperCase() + g.slice(1)]);
+}
 
 // == From NounUtils ==
 //
@@ -170,12 +174,17 @@ function getDocumentInsecure() getDocument().wrappedJSObject;
 
 function getWindowInsecure() getWindow().wrappedJSObject;
 
-for each(let m in ["document", "window"]){
-  for each(let s in ["", "Insecure"])
-    CmdUtils.__defineGetter__(
-      m + s,
-      this["get" + m[0].toUpperCase() + m.slice(1) + s]);
-}
+// === {{{ CmdUtils.getHiddenWindow() }}} ===
+//
+// Returns the application's hidden window.  (Every Mozilla
+// application has a global singleton hidden window.  This is used by
+// {{{ CmdUtils.getWindowSnapshot() }}}, but probably doesn't need
+// to be used directly by command feeds.
+
+function getHiddenWindow() (
+  Cc["@mozilla.org/appshell/appShellService;1"]
+  .getService(Ci.nsIAppShellService)
+  .hiddenDOMWindow);
 
 // === {{{ CmdUtils.getCommand(id) }}} ===
 //
@@ -450,17 +459,6 @@ CmdUtils.UserCode = {
 };
 
 // == SNAPSHOT ==
-
-// === {{{ CmdUtils.getHiddenWindow() }}} ===
-//
-// Returns the application's hidden window.  (Every Mozilla
-// application has a global singleton hidden window.  This is used by
-// {{{ CmdUtils.getWindowSnapshot() }}}, but probably doesn't need
-// to be used directly by command feeds.
-
-function getHiddenWindow() (Cc["@mozilla.org/appshell/appShellService;1"]
-                            .getService(Ci.nsIAppShellService)
-                            .hiddenDOMWindow);
 
 // === {{{ CmdUtils.getTabSnapshot(tab, options) }}} ===
 //
