@@ -800,6 +800,8 @@ function convertToUnicode(fromCharset, text) {
 // displays caller's name, concats arguments and appends a line feed.
 
 Utils.dump = function niceDump() {
+  if (!Utils.Application.prefs.getValue("extensions.ubiquity.dump", false))
+    return;
   var {caller} = arguments.callee;
   dump((caller ? caller.name + ": " : "") +
        Array.join(arguments, " ") + "\n");
