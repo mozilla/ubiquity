@@ -1,12 +1,10 @@
 /*
   =skin=
-  
   @name Custom
   @author You
   @homepage http://www.yourpage.com
   @email you@you.com
   @license MPL/LGPL/GPL
-
   =/skin=
 */
 
@@ -106,7 +104,7 @@
 }
 
 /* Formatting for the Preview box */
-@-moz-document url(chrome://ubiquity/content/preview.html) {
+@-moz-document url(resource://ubiquity/preview.html) {
 
 body {
   margin: 0;

@@ -24,8 +24,8 @@ CmdUtils.CreateCommand({
   preview: function map_preview(pblock, {object}) {
     // TODO: This isn't terribly safe; ideally, we should be communicating
     // with the other page via DOM events, etc.
-    var {Ubiquity} =
-      XPCSafeJSObjectWrapper(pblock.ownerDocument.defaultView);
+    var {Ubiquity} = XPCSafeJSObjectWrapper(
+      pblock.ownerDocument.defaultView.wrappedJSObject);
     Ubiquity.insertHtml = function map_insertHtml(html, text) {
       if (typeof html !== "string") return;
 

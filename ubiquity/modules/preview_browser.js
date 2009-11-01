@@ -57,7 +57,6 @@ function PreviewBrowser(browser, defaultUrl) {
       this.contentDocument.addEventListener(h, resizeContainer, true);
   }, true);
 
-  browser.setAttribute("type", "content");
   browser.setAttribute("src", defaultUrl);
 }
 
@@ -121,9 +120,16 @@ PreviewBrowser.prototype = {
     var self = this;
     function showPreview() {
       if (self.__queuedPreview !== showPreview) return;
-
+      if (url) {
+        var uri = Utils.uri(url);
+        if (uri.scheme === "chrome") { // #714
+          Utils.reportInfo(
+            "PreviewBrowser: chrome URL is forbidden! (" + uri.spec + ")");
+          return;
+        }
+      }
       self._ensurePreviewBrowserUrlLoaded(
-        url ? Utils.url(url).spec : self.__defaultUrl,
+        url ? uri.spec : self.__defaultUrl,
         function PB___onUrlLoaded() {
           if (self.__queuedPreview === showPreview) {
             self.__queuedPreview = null;

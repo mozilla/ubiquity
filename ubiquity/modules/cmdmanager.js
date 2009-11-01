@@ -52,7 +52,7 @@ var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
 const {prefs} = Utils.Application;
-const DEFAULT_PREVIEW_URL = "chrome://ubiquity/content/preview.html";
+const DEFAULT_PREVIEW_URL = "resource://ubiquity/preview.html";
 const DEFAULT_MAX_SUGGESTIONS = 5;
 const PREF_MAX_SUGGESTIONS = "extensions.ubiquity.maxSuggestions";
 const MIN_MAX_SUGGS = 1;

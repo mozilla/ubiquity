@@ -117,7 +117,7 @@ body {
 
 }
 
-@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+@-moz-document url-prefix(resource://ubiquity/preview.html) {
 
 body {
   margin: 0;

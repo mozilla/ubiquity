@@ -141,7 +141,7 @@
 }
 
 /* Formatting for the Preview box */
-@-moz-document url-prefix(chrome://ubiquity/content/preview.html) {
+@-moz-document url-prefix(resource://ubiquity/preview.html) {
 
 body {
   color: #ffffff;

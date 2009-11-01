@@ -4,7 +4,6 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
-
   <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/ubiquity.js"/>
   <script type="application/javascript;version=1.8"
@@ -12,7 +11,7 @@
   <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/browser.js"/>
   <popupset id="mainPopupSet">
-    <panel id="ubiquity-transparent-panel" class="msgPanel">
+    <panel id="ubiquity-transparent-panel">
       <div id="ubiquity-panel"
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -26,7 +25,8 @@
           </div>
           <div id="ubiquity-preview-container">
             <div id="ubiquity-preview">
-              <xul:browser id="ubiquity-browser" width="490" height="500"
+              <xul:browser id="ubiquity-browser"
+                type="content" width="490" height="500"
                 disablesecurity="true" disablehistory="true"/>
             </div>
           </div>
