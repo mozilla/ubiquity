@@ -139,6 +139,8 @@ for each (let m in ["getHtmlSelection", "getSelection", "setSelection"]) {
       return ContextUtils.@(c, x, y);
     };
     ]]></>.toString().replace(/@/g, m));
+  if (m[0] === 'g')
+    CmdUtils.__defineGetter__(m[3].toLowerCase() + m.slice(4), CmdUtils[m]);
 }
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
