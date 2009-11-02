@@ -79,6 +79,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 
 Ubiquity.prototype = {
   __DEFAULT_INPUT_DELAY: 50,
+  __DEFAULT_INPUT_LIMIT: 512,
   __MIN_CMD_PREVIEW_LENGTH: 0,
 
   __KEYCODE_ENTER: KeyEvent.DOM_VK_RETURN,
@@ -126,6 +127,11 @@ Ubiquity.prototype = {
 
   get inputDelay() Application.prefs.getValue("extensions.ubiquity.inputDelay",
                                               this.__DEFAULT_INPUT_DELAY),
+
+  // === {{{ Ubiquity#inputLimit }}} ===
+
+  get inputLimit() Application.prefs.getValue("extensions.ubiquity.inputLimit",
+                                              this.__DEFAULT_INPUT_LIMIT),
 
   __onblur: function U__onBlur() {
     // Hackish fix for #330.
@@ -193,8 +199,9 @@ Ubiquity.prototype = {
   },
 
   __delayedProcessInput: function U__delayedProcessInput(context) {
-    var input = this.__textBox.value;
-    if (input.length < this.__MIN_CMD_PREVIEW_LENGTH) return;
+    var input = this.__textBox.value, {length} = input;
+    if (length < this.__MIN_CMD_PREVIEW_LENGTH ||
+        length > this.inputLimit) return;
 
     context || (context = this.__makeContext());
     if (input !== this.__lastValue ||
