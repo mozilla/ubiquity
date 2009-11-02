@@ -482,10 +482,10 @@ CmdUtils.CreateCommand({
     if (data.enabled && "optionsURL" in xdata) {
       var opt = pb.ownerDocument.getElementById("options");
       opt.innerHTML = _("<u>O</u>ptions");
-      opt.onfocus = function ve_options() {
+      opt.addEventListener("focus", function ve_options() {
         this.blur();
         context.chromeWindow.openDialog(xdata.optionsURL, "", "");
-      };
+      }, false);
       opt.style.display = "inline";
     }
     var file = (Cc["@mozilla.org/file/directory_service;1"]
@@ -496,10 +496,10 @@ CmdUtils.CreateCommand({
     if (file.exists() && file.isDirectory()) {
       var dir = pb.ownerDocument.getElementById("directory");
       dir.innerHTML = _("<u>D</u>irectory");
-      dir.onfocus = function ve_dir() {
+      dir.addEventListener("focus", function ve_dir() {
         this.blur();
         Utils.openUrlInBrowser(Utils.IOService.newFileURI(file).spec);
-      };
+      }, false);
       dir.style.display = "inline";
     }
   },
