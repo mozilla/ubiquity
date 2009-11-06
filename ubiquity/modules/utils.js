@@ -145,7 +145,8 @@ function log(what) {
   if (typeof what === "string") logPrefix += " " + args.shift();
 
   var {Firebug} = Utils.currentChromeWindow;
-  if (Firebug && Firebug.toggleBar(true)) {
+  if (Firebug && Firebug.Console.isEnabled() &&
+      Firebug.toggleBar(true, "console")) {
     args.unshift(logPrefix);
     Firebug.Console.logFormatted(args);
     return;
