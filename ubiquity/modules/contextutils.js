@@ -110,24 +110,20 @@ function setSelection(context, content, options) {
   }
 
   if (focusedElement) {
-    function html2text(el) {
-      el.innerHTML = "<div>" + content + "</div>";
-      return el.textContent;
+    let plainText = options && options.text;
+    if (!plainText) {
+      let html = (focusedElement.ownerDocument
+                  .createElementNS("http://www.w3.org/1999/xhtml", "html"));
+      html.innerHTML = "<div>" + content + "</div>";
+      plainText = html.textContent;
     }
-    var plainText = (
-      options && options.text ||
-      // Rollin' in tha hack-illac: 1.9.0 wants html elements
-      // namespaced, whereas 1.9.1+ doesn't.
-      html2text(doc.createElement("html")) ||
-      html2text(doc.createElementNS("http://www.w3.org/1999/xhtml",
-                                    "html")));
-    var {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
+    let {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
     focusedElement.value = (value.slice(0, selectionStart) +
                             plainText +
                             value.slice(focusedElement.selectionEnd));
     focusedElement.focus();
     // put the cursor after the inserted text
-    var endp = selectionStart + plainText.length;
+    let endp = selectionStart + plainText.length;
     focusedElement.setSelectionRange(endp, endp);
     focusedElement.scrollTop = scrollTop;
     focusedElement.scrollLeft = scrollLeft;
