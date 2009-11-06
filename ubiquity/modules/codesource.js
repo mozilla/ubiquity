@@ -99,6 +99,7 @@ StringCodeSource.prototype = {
 
 // timeoutInterval is the minimum amount of time to wait before
 // re-requesting the content of a code source, in milliseconds.
+// If negative, the request is never made (used for non-autoupdating feeds).
 function RemoteUriCodeSource(feedInfo, timeoutInterval) {
   this.id = feedInfo.srcUri.spec;
   this.timeoutInterval = timeoutInterval;
@@ -113,7 +114,8 @@ RemoteUriCodeSource.isValidUri = function RUCS_isValidUri(uri) (
 
 RemoteUriCodeSource.prototype = {
   getCode: function RUCS_getCode() {
-    if (!this._req && !this._hasCheckedRecently) {
+    if (this.timeoutInterval >= 0 &&
+        !this._req && !this._hasCheckedRecently) {
       this._hasCheckedRecently = true;
 
       // Queue another XMLHttpRequest to fetch the latest code.

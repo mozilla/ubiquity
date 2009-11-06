@@ -240,7 +240,7 @@ a[onclick], .sort-switch {
 }
 
 .feed-updated {
-  font-size: 8pt;
+  font-size: smaller;
   color: #009900;
 }
 

@@ -125,10 +125,9 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
   };
 
   this.makeFeed = function DFP_makeFeed(baseFeedInfo, hub) {
-    var timeout = gPrefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10);
     return new DFPFeed(baseFeedInfo, hub, messageService, sandboxFactory,
                        builtins.headers, builtins.footers,
-                       webJsm.jQuery, timeout);
+                       webJsm.jQuery);
   };
 
   feedManager.registerPlugin(this);
@@ -196,25 +195,20 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
   return finishCommand(cmd);
 }
 
-function makeCodeSource(feedInfo, headerSources, footerSources,
-                        timeoutInterval) {
-  var codeSource;
+function makeCodeSource(feedInfo, headerSources, footerSources) {
+  var codeSource, {srcUri} = feedInfo;
 
-  if (RemoteUriCodeSource.isValidUri(feedInfo.srcUri)) {
-    if (feedInfo.canAutoUpdate)
-      codeSource = new RemoteUriCodeSource(feedInfo, timeoutInterval);
-    else
-      codeSource = new StringCodeSource(feedInfo.getCode(),
-                                        feedInfo.srcUri.spec);
-  }
-  else if (LocalUriCodeSource.isValidUri(feedInfo.srcUri)) {
-    codeSource = new LocalUriCodeSource(feedInfo.srcUri.spec);
-  }
-  else {
+  if (RemoteUriCodeSource.isValidUri(srcUri))
+    codeSource = new RemoteUriCodeSource(
+      feedInfo,
+      (feedInfo.canAutoUpdate
+       ? gPrefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10)
+       : -1));
+  else if (LocalUriCodeSource.isValidUri(srcUri))
+    codeSource = new LocalUriCodeSource(srcUri.spec);
+  else
     //errorToLocalize
-    throw new Error("Don't know how to make code source for " +
-                    feedInfo.srcUri.spec);
-  }
+    throw new Error("Don't know how to make code source for " + srcUri.spec);
 
   codeSource = new XhtmlCodeSource(codeSource);
 
@@ -226,15 +220,14 @@ function makeCodeSource(feedInfo, headerSources, footerSources,
 }
 
 function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
-                 headerSources, footerSources, jQuery, timeoutInterval) {
+                 headerSources, footerSources, jQuery) {
   if (LocalUriCodeSource.isValidUri(feedInfo.srcUri))
     this.canAutoUpdate = true;
   if (feedInfo.isBuiltIn)
     for (let [k, v] in new Iterator(BuiltInFeedProto)) feedInfo[k] = v;
 
   var self = this;
-  var codeSource = makeCodeSource(feedInfo, headerSources, footerSources,
-                                  timeoutInterval);
+  var codeSource = makeCodeSource(feedInfo, headerSources, footerSources);
   var sandbox = null;
   var bin = feedInfo.makeBin();
 
