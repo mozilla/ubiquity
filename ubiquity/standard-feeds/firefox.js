@@ -153,11 +153,11 @@ CmdUtils.CreateCommand({
   },
   preview: function clatab_preview(pblock, {object: {text, html}}) {
     if (!text) {
-      pblock.innerHTML = this.description;
+      this.previewDefault(pblock);
       return;
     }
     pblock.innerHTML = _(
-      <><![CDATA[
+      "" + <><![CDATA[
         <div class="close-all-tabs">
         {if tabs.length}
           Closes tabs related to <b>${html}</b> :
@@ -166,7 +166,7 @@ CmdUtils.CreateCommand({
           No tabs are related to <b>${html}</b>.
         {/if}
         </div>
-        ]]></> + "",
+        ]]></>,
       { tabs: Utils.tabs.search(text),
         html: html,
         _MODIFIERS: {asList: this._lister} });
@@ -361,7 +361,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
   arguments: {"object title or URL": noun_arb_text},
   execute: function uct_execute(args) {
-    for each(var {id} in this._find(args.object.text)) this._undo(id);
+    for each (var {id} in this._find(args.object.text)) this._undo(id);
   },
   preview: function uct_preview(pbl, args) {
     var me = this;
@@ -374,18 +374,20 @@ CmdUtils.CreateCommand({
       me._puts(pbl, _("No matched tabs."));
       return;
     }
-    CmdUtils.previewList(pbl, tabs.map(me._html), function(i, ev) {
-      $(ev.target).closest("li").slideUp();
+    CmdUtils.previewList(pbl, tabs.map(me._html), function uct__act(i, ev) {
+      $(ev.target).closest("li").remove();
       me._undo(tabs[i].id);
     }, me._css);
   },
   previewDelay: 256,
   _list: null,
-  _html: function uct__html({title, image, url}) (
-    <><img class="icon" src={image}/> <span class="title">{title}</span>
-      <code class="url">{url}</code></>),
+  _html: function uct__html({title, image, url}) {
+    var span = <span>{title} <code class="url">{url}</code></span>;
+    if (image) span.prependChild(<><img class="icon" src={image}/> </>);
+    return span;
+  },
   _puts: function uct__puts(pbl, msg) {
-    pbl.innerHTML = <i>{msg}</i>.toXMLString() + this.help;
+    pbl.innerHTML = "<em>" + Utils.escapeHtml(msg) + "</em>" + this.help;
   },
   _find: function uct__find(txt) {
     var list = this._list =
@@ -402,14 +404,14 @@ CmdUtils.CreateCommand({
     tab.url = tab.state.entries[0].url;
   },
   _undo: function uct__undo(id) {
-    this._list.every(function(tab, i, list) {
+    this._list.every(function uct__every(tab, i, list) {
       if (id !== tab.id) return true;
       this._SS.undoCloseTab(context.chromeWindow, i);
       list.splice(i, 1);
       return false;
     }, this);
   },
-  _css: <><![CDATA[
+  _css: "" + <><![CDATA[
     li {white-space: nowrap}
     .icon {width: 16px; height: 16px; vertical-align: middle}
     .url {font-size: smaller}
@@ -431,7 +433,7 @@ CmdUtils.CreateCommand({
   },
   preview: function clm_preview(pb, {object: {data}}) {
     if (!data) {
-      pb.innerHTML = this.description;
+      this.previewDefault(pb);
       return;
     }
     var dict = {};
