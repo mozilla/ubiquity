@@ -174,8 +174,7 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
   let uri = Utils.url(info.url);
   let expiration = annSvc[info.isBuiltIn ? "EXPIRE_SESSION" : "EXPIRE_NEVER"];
 
-  if (annSvc.pageHasAnnotation(uri, FEED_UNSUBSCRIBED_ANNO))
-    annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
+  annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
 
   annSvc.setPageAnnotation(uri, FEED_TYPE_ANNO,
                            info.type || DEFAULT_FEED_TYPE, 0, expiration);
@@ -304,7 +303,7 @@ FMgrProto.__getFeed = function FMgr___getFeed(uri) {
         //errorToLocalize
         "An error occurred when retrieving the feed for " + spec + ": " + e);
       // remove the mal-URI here, since we can't "purge" it as feed
-      removeAnnotationsForUri(this._annSvc, uri);
+      this._annSvc.removePageAnnotations(uri);
       return null;
     }
     var self = this;
@@ -400,7 +399,7 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
     //
     // Permanently deletes the feed.
     purge: function feedInfo_purge() {
-      removeAnnotationsForUri(annSvc, uri);
+      annSvc.removePageAnnotations(uri);
       hub.notifyListeners("purge", uri);
     },
   };
@@ -516,12 +515,6 @@ FMgrProto.__makeFeed = function FMgr___makeFeed(uri) {
 
   return plugin.makeFeed(feedInfo, hub);
 };
-
-function removeAnnotationsForUri(annSvc, uri) {
-  for each (var ann in FEED_ANNOS)
-    if (annSvc.pageHasAnnotation(uri, ann))
-      annSvc.removePageAnnotation(uri, ann);
-}
 
 // == Bin ==
 //

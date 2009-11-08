@@ -192,25 +192,34 @@ function testFeedManagerWorks() {
 
   // Add another subscribed feed and make sure things still make sense.
   var moreCode = "function narg() {}";
-  FMgr.addSubscribedFeed({url: "http://www.bar.com",
-                          sourceUrl: "http://www.bar.com/code.js",
-                          sourceCode: moreCode,
-                          canAutoUpdate: false,
-                          type: "fake"});
+  FMgr.addSubscribedFeed({
+    url: "http://www.bar.com",
+    sourceUrl: "http://www.bar.com/code.js",
+    sourceCode: moreCode,
+    canAutoUpdate: false,
+    type: "fake"});
   results = FMgr.getSubscribedFeeds();
 
-  this.assert(results[0].getCode() == code);
-  this.assert(results[1].getCode() == moreCode);
+  this.assertEquals(results[0].getCode(), code);
+  this.assertEquals(results[1].getCode(), moreCode);
 
-  results[0].setCode("// new code");
-  this.assert(results[0].getCode() == "// new code");
+  var newCode = "// new code";
+  results[0].setCode(newCode);
+  this.assertEquals(results[0].getCode(), newCode);
 
   // TODO: Iterate through the collection and ensure that it behaves
   // how we think it should.
 
   results[0].remove();
-
   this.assert(!FMgr.isSubscribedFeed(url));
+  this.assert(FMgr.isUnsubscribedFeed(url));
+
+  results[0].unremove();
+  this.assert(FMgr.isSubscribedFeed(url));
+  this.assert(!FMgr.isUnsubscribedFeed(url));
+
+  results[0].purge();
+  this.assertEquals(FMgr.getFeedForUrl(url), null);
 }
 
 function getNounList() {

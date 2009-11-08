@@ -46,12 +46,12 @@ var EXPORTED_SYMBOLS = ["AnnotationService"];
 
 const {classes: Cc, interfaces: Ci} = Components;
 
-var SQLITE_SCHEMA =
-  ("CREATE TABLE ubiquity_annotation_memory(" +
-   "  uri VARCHAR(256)," +
-   "  name VARCHAR(256)," +
-   "  value MEDIUMTEXT," +
-   " PRIMARY KEY (uri, name));");
+var SQLITE_SCHEMA = (
+  "CREATE TABLE ubiquity_annotation_memory(" +
+  "  uri VARCHAR(256)," +
+  "  name VARCHAR(256)," +
+  "  value MEDIUMTEXT," +
+  " PRIMARY KEY (uri, name));");
 
 // == The NiceConnection Class ==
 //
@@ -205,9 +205,9 @@ function AnnotationService(connection) {
       observer.onPageAnnotationSet(uri, name);
   };
 
-  self.removePageAnnotation = function(uri, name) {
-    if (!self.pageHasAnnotation(uri, name))
-      throw Error("No such annotation");
+  self.removePageAnnotation = function AS_removePageAnnotation(uri, name) {
+    if (!self.pageHasAnnotation(uri, name)) return;
+
     delete ann[uri.spec][name];
 
     // Delete from DB
@@ -220,6 +220,21 @@ function AnnotationService(connection) {
     updStmt.finalize();
     for each (let observer in observers)
       observer.onPageAnnotationRemoved(uri, name);
+  };
+
+  self.removePageAnnotations = function AS_removePageAnnotations(uri) {
+    var {spec} = uri;
+    if (!(spec in ann)) return;
+
+    delete ann[spec];
+
+    var stmt = connection.createStatement(
+      "DELETE FROM ubiquity_annotation_memory WHERE uri = ?1");
+    stmt.bindUTF8StringParameter(0, spec);
+    stmt.execute();
+    stmt.finalize();
+    for each (let observer in observers)
+      observer.onPageAnnotationRemoved(uri, "");
   };
 
   // These values don't actually mean anything, but are provided to

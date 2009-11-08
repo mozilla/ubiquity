@@ -107,10 +107,16 @@ function testGetPageAnnotation() {
 function testRemovePageAnnotation() {
   var annSvc = new AnnotationService(getTempConnection(this));
 
-  var url = Utils.url("http://www.foo.com");
-  annSvc.setPageAnnotation(url, "blah", "foo");
-  annSvc.removePageAnnotation(url, "blah");
+  var uri = Utils.uri("http://www.foo.com");
+  annSvc.setPageAnnotation(uri, "blah", "foo");
+  annSvc.removePageAnnotation(uri, "blah");
   this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);
+
+  annSvc.setPageAnnotation(uri, "blah", true);
+  annSvc.setPageAnnotation(uri, "bleh", 42);
+  annSvc.removePageAnnotations(uri);
+  this.assertEquals(annSvc.getPagesWithAnnotation("blah").length, 0);
+  this.assertEquals(annSvc.getPagesWithAnnotation("bleh").length, 0);
 }
 
 function testPageAnnotationObserversWork() {
@@ -132,22 +138,33 @@ function testPageAnnotationObserversWork() {
   };
 
   var annSvc = new AnnotationService(getTempConnection(this));
-  var url = Utils.url("http://www.foo.com");
+  var uri = Utils.uri("http://www.foo.com");
   annSvc.addObserver(ob);
 
-  annSvc.setPageAnnotation(url, "blah", "foo");
+  annSvc.setPageAnnotation(uri, "blah", "foo");
   this.assertEquals(obSetCalled, true);
-  annSvc.removePageAnnotation(url, "blah");
+  annSvc.removePageAnnotation(uri, "blah");
   this.assertEquals(obRemoveCalled, true);
 
   obSetCalled = false;
   obRemoveCalled = false;
   annSvc.removeObserver(ob);
 
-  annSvc.setPageAnnotation(url, "blah", "foo");
+  annSvc.setPageAnnotation(uri, "blah", "foo");
   this.assertEquals(obSetCalled, false);
-  annSvc.removePageAnnotation(url, "blah");
+  annSvc.removePageAnnotation(uri, "blah");
   this.assertEquals(obRemoveCalled, false);
+
+  annSvc.setPageAnnotation(uri, "blah", "foo");
+  annSvc.addObserver({
+    onPageAnnotationRemoved: function(uri, name) {
+      self.assertEquals(uri.spec, "http://www.foo.com/");
+      self.assertEquals(name, "");
+      obRemoveCalled = true;
+    }
+  });
+  annSvc.removePageAnnotations(uri);
+  this.assertEquals(obRemoveCalled, true);
 }
 
 exportTests(this);
