@@ -285,19 +285,26 @@ CmdUtils.CreateCommand({
 
 function ubiquityLoad_commandHistory(U) {
   var cursor = -1, {textBox} = U;
+  function go(num){
+    var bin = CmdHst.get();
+    if (cursor < 0 && textBox.value) {
+      CmdHst.add(textBox.value);
+      cursor = 0;
+    }
+    cursor -= num;
+    if (cursor < -1 || bin.length <= cursor) cursor = -1;
+    U.preview(bin[cursor] || "");
+  }
+  function halt(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
   textBox.parentNode.addEventListener("keydown", function cmdh_onKey(ev) {
     if (!ev.ctrlKey || ev.altKey || ev.metaKey) return;
     switch (ev.keyCode) {
       case 38: case 40: // UP DOWN
-      var bin = CmdHst.get();
-      if (cursor < 0 && textBox.value) {
-        CmdHst.add(textBox.value);
-        cursor = 0;
-      }
-      cursor += 39 - ev.keyCode;
-      if (cursor < -1 || bin.length <= cursor) cursor = -1;
-      U.preview(bin[cursor] || "");
-      return ok();
+      go(ev.keyCode - 39);
+      return halt(ev);
     }
     if (ev.keyCode === KeyEvent.DOM_VK_TAB) {
       var text = Utils.trim(textBox.value);
@@ -314,10 +321,12 @@ function ubiquityLoad_commandHistory(U) {
         textBox.selectionEnd = textBox.textLength;
         break;
       }
-      return ok();
+      return halt(ev);
     }
-    function ok() { ev.preventDefault(); ev.stopPropagation() }
   }, true);
+  textBox.addEventListener("DOMMouseScroll", function cmdh_onWheel(ev) {
+    go(ev.detail > 0 ? 1 : -1);
+  }, false);
   textBox.addEventListener("blur", function cmdh_saveEntry() {
     CmdHst.add(textBox.value);
     cursor = -1;
