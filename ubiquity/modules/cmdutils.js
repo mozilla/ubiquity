@@ -1489,7 +1489,8 @@ function previewList(block, htmls, callback, css) {
   return ol;
 }
 previewList.CSS = "" + <![CDATA[
-  .preview-list {margin: 0; padding: 0; list-style-type: none}
+  .preview-list {margin: 0; padding-left: 1.5em; list-style-type: none}
+  .preview-list > li {line-height: 1.4; text-indent: -1.5em}
   .preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
   .preview-list label {display: block; cursor: pointer}
   .preview-list button {
