@@ -812,11 +812,27 @@ CmdUtils.makeSearchCommand({
 }
 });
 
-CmdUtils.makeSearchCommand({
+CmdUtils.CreateCommand({
   names: ["Bugzilla"],
-  url: "https://bugzilla.mozilla.org/buglist.cgi?query_format=specific&order=relevance+desc&bug_status=__open__&content={QUERY}",
+  description: (
+    'Searches <a href="http://bugzilla.mozilla.com">Bugzilla</a>' +
+    ' for Mozilla bugs matching the given words.'),
   icon: "chrome://ubiquity/skin/icons/mozilla.ico",
-  description: "Searches <a href=\"http://bugzilla.mozilla.com\">Bugzilla</a> for Mozilla bugs matching the given words."
+  argument: {
+    name: "Bugzilla Number/Query",
+    suggest: function bugz_suggest(txt, htm, cb, sx) (
+      (txt = Utils.trim(txt))
+      ? [CmdUtils.makeSugg(txt, null, null, /^\d+$/.test(txt) ? .9 : .3, sx)]
+      : []),
+  },
+  execute: function bugz_execute({object: {text, score}}) {
+    Utils.openUrlInBrowser("https://bugzilla.mozilla.org/" + (
+      text &&
+      (score > .5
+       ? "show_bug.cgi?id=" + +text
+       : ("buglist.cgi?query_format=specific&order=relevance+desc&" +
+          "bug_status=__open__&content=" + encodeURIComponent(text)))));
+  },
 });
 
 CmdUtils.makeSearchCommand({
