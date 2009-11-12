@@ -42,14 +42,11 @@ function UbiquityAboutHandler() {}
 
 UbiquityAboutHandler.prototype = {
   newChannel: function UAH_newChannel(aURI) {
-    var ios = (Cc["@mozilla.org/network/io-service;1"]
-               .getService(Ci.nsIIOService));
-    var name = /\?(\w+)/.test(aURI.spec) ? RegExp.$1 : "about";
-    var channel = ios.newChannel(
-      "chrome://ubiquity/content/" + name + ".xhtml",
-      null,
-      null);
-
+    var name = /\?([\w.-]+)/.test(aURI.spec) ? RegExp.$1 : "about";
+    if (!/\./.test(name)) name += ".xhtml";
+    var channel = (
+      Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService)
+      .newChannel("chrome://ubiquity/content/" + name, null, null));
     channel.originalURI = aURI;
     return channel;
   },
