@@ -428,24 +428,27 @@ function openUrlInBrowser(urlString, postData) {
                      .getService(Ci.nsIPrefBranch));
   var openPref = prefService.getIntPref("browser.link.open_newwindow");
 
-  //2 (default in SeaMonkey and Firefox 1.5): In a new window
   //3 (default in Firefox 2 and above): In a new tab
+  //2 (default in SeaMonkey and Firefox 1.5): In a new window
   //1 (or anything else): In the current tab or window
-
-  if (browser.mCurrentBrowser.currentURI.spec === "about:blank" &&
-      !browser.webProgress.isLoadingDocument)
-    browserWindow.loadURI(urlString, null, postInputStream, false);
-  else if (openPref === 3) {
-    let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
-    browser[shiftKey ? "addTab" : "loadOneTab"](
-      urlString, null, null, postInputStream, false, false);
+  if (browser.mCurrentBrowser.currentURI.spec !== "about:blank" ||
+      browser.webProgress.isLoadingDocument) {
+    if (openPref === 3) {
+      let tab = browser.addTab(
+        urlString, null, null, postInputStream, false, false);
+      let fore = !prefService.getBoolPref("browser.tabs.loadInBackground");
+      let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
+      if (fore ^ shiftKey) browser.selectedTab = tab;
+      return;
+    }
+    if (openPref === 2) {
+      browserWindow.openDialog(
+        "chrome://browser/content", "_blank", "all,dialog=no",
+        urlString, null, null, postInputStream);
+      return;
+    }
   }
-  else if (openPref === 2)
-    browserWindow.openDialog("chrome://browser/content", "_blank",
-                             "all,dialog=no", urlString, null, null,
-                             postInputStream);
-  else
-    browserWindow.loadURI(urlString, null, postInputStream, false);
+  browserWindow.loadURI(urlString, null, postInputStream, false);
 }
 
 // === {{{ Utils.focusUrlInBrowser(urlString) }}} ===
