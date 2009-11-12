@@ -53,7 +53,7 @@ function PrefKeys(path, defaultKey, defaultMod) {
   return {
     __proto__: PrefKeysProto,
     KEYCODE_PREF: pref + "keycode",
-    KEYCODE_DEFAULT: defaultKey || "",
+    KEYCODE_DEFAULT: defaultKey || 0,
     KEYMODIFIER_PREF: pref + "keymodifier",
     KEYMODIFIER_DEFAULT: defaultMod || "",
   };
@@ -75,8 +75,11 @@ var PrefKeysProto = {
   registerUI: function PK_registerUI(textInput, notifier) {
     var pk = this;
     function prompt() {
-      textInput.value =
-        pk.keyComboText + " (" + L("ubiquity.prefkeys.clickhere") + ")";
+      var {keyComboText} = pk;
+      textInput.value = (
+        keyComboText.length > 1
+        ? keyComboText + " (" + L("ubiquity.prefkeys.clickhere") + ")"
+        : "");
     }
     prompt();
     textInput.addEventListener("blur", prompt, false);
@@ -136,7 +139,9 @@ var PrefKeysProto = {
     return [
       gPrefs.getValue(this.KEYMODIFIER_PREF,
                       this.KEYMODIFIER_DEFAULT),
-      PrefKeys.CODE2TEXT[keyCode] || "[" + keyCode + "]"];
+      keyCode
+      ? PrefKeys.CODE2TEXT[keyCode] || "[" + keyCode + "]"
+      : ""];
   },
 
   get keyComboText PK_getKeyComboText() this.keyCombo.join("+"),
