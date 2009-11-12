@@ -408,15 +408,17 @@ var noun_type_url = {
   rankLast: true,
   noExternalCalls: true,
   cacheTime: 0,
-  default: function nt_url_default()
-    CmdUtils.makeSugg(Application.activeWindow.activeTab.uri.spec,
-                      null, null, 0.5),
+  default: function nt_url_default() {
+    var {window} = CmdUtils, {href} = window.location;
+    if (/^https:\/\/www\.google\.[a-z.]+\/reader\/view\b/.test(href))
+      try { href = window.wrappedJSObject.getPermalink().url } catch(e) {}
+    return CmdUtils.makeSugg(href, null, null, 0.5);
+  },
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
-    text = Utils.trim(text);
-    if (!text) return [];
+    if (!(text = Utils.trim(text))) return [];
 
     var score = 1;
-    if (this._schemeRE.test(text))
+    if (/^[\w.-]+:\/{0,2}/.test(text))
       var {lastMatch: scheme, rightContext: postScheme} = RegExp;
     else {
       var scheme = "http://", postScheme = text;
@@ -434,7 +436,9 @@ var noun_type_url = {
       // if the domain doesn't have any dots in it, lower confidence
       if (domain.indexOf(".") < 0) score *= 0.9;
 
-      if (!this._LDHRE.test(domain)) score *= 0.9;
+      // LDH charcodes include "Letters, Digits, and Hyphen".
+      // We'll throw in . @ : too.
+      if (/^(?![A-Za-z\d-.@:]+$)/.test(domain)) score *= 0.9;
     }
 
     var fakeRequest = {readyState: 2};
@@ -455,10 +459,6 @@ var noun_type_url = {
                               score, selectionIndices),
             fakeRequest];
   },
-  _schemeRE: /^[\w.-]+:\/{0,2}/,
-  // LDH charcodes include "Letters, Digits, and Hyphen".
-  // We'll throw in . @ : too.
-  _LDHRE: /^[A-Za-z\d-.@:]+$/,
 };
 
 // === {{{ noun_type_livemark }}} ===
