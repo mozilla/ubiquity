@@ -11,7 +11,6 @@
 ]>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
   <title>&ubiquity.pagetitle.Settings;</title>
 
@@ -24,13 +23,16 @@
   <script type="application/javascript;version=1.8" src="chrome://ubiquity/content/header.js"></script>
 
   <script type="application/javascript;version=1.8" src="settings.js"></script>
-  <script type="application/javascript;version=1.8" src="prefkeys.js"></script>
 
-  <style>.warning{ background-color: #FFFCBA; border: 1px solid #F09B9A; width: 740px; padding: 5px;}</style>
-
+  <style>
+    .warning {
+      width: 740px; padding: 5px; border: 1px solid #F09B9A;
+      background-color: #FFFCBA;
+    }
+    .prefkeys { width: 88%; cursor: pointer; padding: 1px 1ex }
+  </style>
 </head>
 <body dir="&locale.dir;">
-
 <div class="head">&ubiquity.tagline.Settings;</div>
 <div id="nav-container"></div>
 
@@ -57,21 +59,16 @@
     <legend>&ubiquity.settings.InvokingUbiquity;</legend>
     <div style="margin-left:10px;">
       <p>
-        <input id="keyInputBox" type="text" size="42"
-          style="cursor:pointer; padding:1px 1ex"
-          onkeydown="return false"
-          onkeyup="PrefKeys.onKeyChange(event)"
-          onfocus="this.value = L('ubiquity.prefkeys.pressyourcombo')"
-          onblur="PrefKeys.onLoad()"/>
-        <br />
+        <input type="text" id="keyInput" class="prefkeys"/><br />
         &ubiquity.settings.ChangeShortcut;
-        <br />
       </p>
       <p id="keyNotify"></p>
+      <p>
+        <input type="text" id="repeatKeyInput" class="prefkeys"/><br />
+        Additionally, you can specify a combo to repeat the last command.
+      </p>
     </div>
   </fieldset>
-
-  <script> PrefKeys.onLoad() </script>
 
   <h2>&ubiquity.settings.LangSettings;</h2>
   <p>&ubiquity.settings.LangSettingsParagraph1;</p>
@@ -79,8 +76,12 @@
   <p>&ubiquity.settings.SelectLanguage; <select id="language-select" onchange="changeLanguageSettings();"></select></p>
 
   <h2>&ubiquity.settings.MiscSettings;</h2>
-  <p>&ubiquity.settings.MaxSuggestions; <input type="text" id="max-suggestions" size="3" style="text-align:center" /></p>
-    
+  <p>
+    &ubiquity.settings.MaxSuggestions;
+    <input type="text" id="max-suggestions"
+      size="3" style="text-align:center"/>
+  </p>
+
   <fieldset class="parser2" style="display:none">
     <legend>&ubiquity.settings.Parser2Context;</legend>
 
@@ -113,6 +114,5 @@
     <li><textarea rows="30" style="width:92%" id="skin-editor"></textarea></li>
   </ul>
 </div>
-
 </body>
 </html>

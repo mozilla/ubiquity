@@ -37,6 +37,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 Cu.import("resource://ubiquity/modules/cmdmanager.js");
+Cu.import("resource://ubiquity/modules/prefkeys.js")
 
 const PREF_NFE = "extensions.ubiquity.doNounFirstExternals";
 
@@ -78,6 +79,9 @@ function onDocumentLoad() {
     CommandManager.maxSuggestions = this.value;
     this.value = CommandManager.maxSuggestions;
   }).val(CommandManager.maxSuggestions);
+
+  new PrefKeys().registerUI($("#keyInput")[0], $("#keyNotify")[0]);
+  new PrefKeys("repeat").registerUI($("#repeatKeyInput")[0], {});
 }
 
 function changeLanguageSettings() {

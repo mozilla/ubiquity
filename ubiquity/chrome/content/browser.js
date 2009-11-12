@@ -53,6 +53,7 @@ addEventListener("load", function onload() {
   Cu.import("resource://ubiquity/modules/setup.js", jsm);
   Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
   Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
+  Cu.import("resource://ubiquity/modules/prefkeys.js", jsm);
 
   function ubiquitySetup() {
     var services = jsm.UbiquitySetup.createServices();
@@ -106,27 +107,14 @@ addEventListener("load", function onload() {
       services.commandSource.onUbiquityLoad(window);
   }
 
-  function ubiquityKey(aEvent) {
-    var keyCode = prefs.getValue("extensions.ubiquity.keycode",
-                                 KeyEvent.DOM_VK_SPACE);
-    // Toggle Ubiquity if the key pressed matches the shortcut key
-    if (aEvent.keyCode === keyCode && ubiquityEventMatchesModifier(aEvent)) {
-      gUbiquity.toggleWindow();
-      aEvent.preventDefault();
-      aEvent.stopPropagation();
-    }
-  }
-
-  const DEFAULT_KEY_MODIFIER = jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT";
-  function ubiquityEventMatchesModifier(aEvent) {
-    var keyModifier = prefs.getValue("extensions.ubiquity.keymodifier",
-                                     DEFAULT_KEY_MODIFIER);
-    // Match only if the user is holding down the modifier key set for
-    // Ubiquity AND NO OTHER modifier keys.
-    return (aEvent.shiftKey === (keyModifier === "SHIFT") &&
-            aEvent.ctrlKey  === (keyModifier === "CTRL" ) &&
-            aEvent.altKey   === (keyModifier === "ALT"  ) &&
-            aEvent.metaKey  === (keyModifier === "META" ));
+  var toggleKeys = new jsm.PrefKeys(
+    "",
+    KeyEvent.DOM_VK_SPACE,
+    jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT");
+  var repeatKeys = new jsm.PrefKeys("repeat");
+  function ubiquityKey(event) {
+    if (toggleKeys.match(event)) return gUbiquity.toggleWindow();
+    if (repeatKeys.match(event)) return gUbiquity.execute("");
   }
 
   jsm.UbiquitySetup.preload(function ubiquitySetupWrapper() {
@@ -139,6 +127,8 @@ addEventListener("load", function onload() {
       //errorToLocalize
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }
-    if (gUbiquity) addEventListener("keydown", ubiquityKey, true);
+    if (!gUbiquity) return;
+    addEventListener("keydown",  ubiquityKey, true);
+    addEventListener("keypress", ubiquityKey, true);
   });
 }, false);

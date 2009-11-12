@@ -34,9 +34,9 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Cu.import("resource://ubiquity/modules/setup.js");
-Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/prefkeys.js");
 
+var gPrefKeys = new PrefKeys;
 var T = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquitytutorial.properties");
 
@@ -227,7 +227,7 @@ function startUbiqTutorial() {
 }
 
 function ubiqTutorialStage1() {
-  var keyCombo = PrefKeys.getKeyCombo();
+  var {keyCombo} = gPrefKeys;
   fadeInHtml(
     H2(T("tutorial.stage01h1")),
     P(T("tutorial.stage01p1")),
@@ -245,7 +245,7 @@ function ubiqTutorialStage2() {
 }
 
 function ubiqTutorialStage3() {
-  var keyCombo = PrefKeys.getKeyCombo();
+  var {keyCombo} = gPrefKeys;
   fadeInHtml(
     H2(T("tutorial.stage03h1")),
     P(T("tutorial.stage03p1")),
