@@ -66,10 +66,9 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   window.addEventListener("mousemove", this, false);
 
   textBox.addEventListener("keydown", this, true);
-  textBox.addEventListener("keyup", this, true);
   textBox.addEventListener("keypress", this, true);
-  if (this.Utils.OS === "WINNT")
-    textBox.addEventListener("blur", this, false);
+  textBox.addEventListener("keyup", this, true);
+  if (this.Utils.OS === "WINNT") textBox.addEventListener("blur", this, false);
 
   msgPanel.addEventListener("popupshowing", this, false);
   msgPanel.addEventListener("popupshown", this, false);
@@ -78,6 +77,9 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 }
 
 Ubiquity.prototype = {
+  constructor: Ubiquity,
+  toString: function U_toString() "[object Ubiquity]",
+
   __DEFAULT_INPUT_DELAY: 50,
   __DEFAULT_INPUT_LIMIT: 512,
   __MIN_CMD_PREVIEW_LENGTH: 0,
@@ -125,19 +127,19 @@ Ubiquity.prototype = {
 
   // === {{{ Ubiquity#inputDelay }}} ===
 
-  get inputDelay() Application.prefs.getValue("extensions.ubiquity.inputDelay",
-                                              this.__DEFAULT_INPUT_DELAY),
+  get inputDelay() Application.prefs.getValue(
+    "extensions.ubiquity.inputDelay", this.__DEFAULT_INPUT_DELAY),
 
   // === {{{ Ubiquity#inputLimit }}} ===
 
-  get inputLimit() Application.prefs.getValue("extensions.ubiquity.inputLimit",
-                                              this.__DEFAULT_INPUT_LIMIT),
+  get inputLimit() Application.prefs.getValue(
+    "extensions.ubiquity.inputLimit", this.__DEFAULT_INPUT_LIMIT),
 
   __onblur: function U__onBlur() {
     // Hackish fix for #330.
-    this.Utils.setTimeout(function refocusTextbox(self) {
+    setTimeout(function refocusTextBox(self) {
       if (self.isWindowOpen) self.__textBox.focus();
-    }, 100, this);
+    }, 99, this);
   },
 
   __onmousemove: function U__onMouseMove(event) {
@@ -215,11 +217,11 @@ Ubiquity.prototype = {
   },
 
   __processInput: function U__processInput(immediate, context) {
-    this.Utils.clearTimeout(this.__previewTimerID);
+    clearTimeout(this.__previewTimerID);
     if (immediate)
       this.__delayedProcessInput(context);
     else
-      this.__previewTimerID = this.Utils.setTimeout(
+      this.__previewTimerID = setTimeout(
         function U___delayedPI(self) { self.__delayedProcessInput(context); },
         this.inputDelay,
         this);
@@ -238,7 +240,7 @@ Ubiquity.prototype = {
   },
 
   __onpopuphidden: function U__onHidden() {
-    this.Utils.clearTimeout(this.__previewTimerID);
+    clearTimeout(this.__previewTimerID);
     if (this.__needsToExecute) {
       this.__needsToExecute = false;
       this.execute();
@@ -287,8 +289,7 @@ Ubiquity.prototype = {
 
   // == Public Methods ==
 
-  setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {
-  },
+  setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {},
 
   // === {{{ Ubiquity#execute(input) }}} ===
   //
