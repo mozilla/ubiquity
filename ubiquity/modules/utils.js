@@ -55,34 +55,53 @@ var Utils = {
   // This property is a reference to the application chrome window
   // that currently has focus.
 
-  get currentChromeWindow currentChromeWindow() (
-    Cc["@mozilla.org/appshell/window-mediator;1"]
-    .getService(Ci.nsIWindowMediator)
-    .getMostRecentWindow(Utils.appWindowType)),
+  get currentChromeWindow currentChromeWindow()
+    Utils.WindowMediator.getMostRecentWindow(Utils.appWindowType),
+
+  // === {{{ Utils.chromeWindows }}} ===
+  //
+  // An array of application chrome windows currently opened.
+
+  get chromeWindows chromeWindows() {
+    var wins = [];
+    var enum = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
+    while (enum.hasMoreElements()) wins.push(enum.getNext());
+    return wins;
+  },
+
+  // === {{{ Utils.currentTab }}} ===
+  //
+  // A reference to the focused tab, wrapped with {{{Utils.BrowserTab}}}.
+
+  get currentTab currentTab()
+    new BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
   __globalObject: this,
 };
 
 [
   // === {{{ Utils.Application }}} ===
-  //
   // Shortcut to
   // [[https://developer.mozilla.org/en/FUEL/Application|Application]].
   function Application() (Cc["@mozilla.org/fuel/application;1"]
                           .getService(Ci.fuelIApplication)),
 
   // === {{{ Utils.json }}} ===
-  //
   // Shortcut to {{{nsIJSON}}}.
 
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
   // === {{{ Utils.IOService }}} ===
-  //
   // Shortcut to {{{nsIIOService}}}.
 
   function IOService() (Cc["@mozilla.org/network/io-service;1"]
                         .getService(Ci.nsIIOService)),
+
+  // === {{{ Utils.WindowMediator }}} ===
+  // Shortcut to {{{nsIWindowMediator}}}.
+
+  function WindowMediator() (Cc["@mozilla.org/appshell/window-mediator;1"]
+                             .getService(Ci.nsIWindowMediator)),
 
   // === {{{ Utils.appName }}} ===
   //
@@ -422,7 +441,7 @@ function openUrlInBrowser(urlString, postData) {
   }
 
   var browserWindow = Utils.currentChromeWindow;
-  var browser = browserWindow.getBrowser();
+  var browser = browserWindow.gBrowser;
 
   var prefService = (Cc["@mozilla.org/preferences-service;1"]
                      .getService(Ci.nsIPrefBranch));
@@ -458,12 +477,9 @@ function openUrlInBrowser(urlString, postData) {
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
 function focusUrlInBrowser(urlString) {
-  for each (let tab in Utils.Application.activeWindow.tabs)
-    if (tab.uri.spec === urlString) {
-      tab.focus();
-      return;
-    }
-  Utils.openUrlInBrowser(urlString);
+  var [tab] = Utils.tabs.get(urlString);
+  if (tab) tab.focus();
+  else Utils.openUrlInBrowser(urlString);
 }
 
 // === {{{ Utils.getCookie(domain, name) }}} ===
@@ -844,11 +860,9 @@ function notify(label, value, image, priority, buttons, target) {
     taget = target.contentDocument || target.document || target;
     // Find the <browser> which contains notifyWindow, by looking
     // through all the open windows and all the <browsers> in each.
-    var enumerator = (Cc["@mozilla.org/appshell/window-mediator;1"]
-                      .getService(Ci.nsIWindowMediator)
-                      .getEnumerator(Utils.appWindowType));
+    var enumerator = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
     while (!foundBrowser && enumerator.hasMoreElements()) {
-      tabbrowser = enumerator.getNext().getBrowser();
+      tabbrowser = enumerator.getNext().gBrowser;
       foundBrowser = tabbrowser.getBrowserForDocument(target);
     }
   }
@@ -888,6 +902,59 @@ function listenOnce(element, eventType, listener, useCapture) {
   return listener1;
 }
 
+// == {{{ Utils.BrowserTab(tabbrowser_tab) }}} ==
+//
+// A wrapper for browser tabs. Supports roughly the same features as
+// https://developer.mozilla.org/en/FUEL/BrowserTab (minus {{{events}}}).
+
+function BrowserTab(tabbrowser_tab) {
+  this.raw = tabbrowser_tab;
+}
+BrowserTab.prototype = {
+  constructor: BrowserTab,
+  raw: null,
+
+  get browser BT_browser() this.raw.linkedBrowser,
+  get tabbrowser BT_tabbrowser() this.browser.getTabBrowser(),
+  get uri BT_uri() this.browser.currentURI,
+  get title BT_title() this.browser.contentTitle,
+  get window BT_window() this.browser.contentWindow,
+  get document BT_document() this.browser.contentDocument,
+  get index BT_index() {
+    var {browser} = this, {mTabs} = browser.getTabBrowser();
+    for (let i = 0, l = mTabs.length; i < l; ++i)
+      if (mTabs[i].linkedBrowser === browser) return i;
+    return -1;
+  },
+  get chromeWindow BT_chromeWindow() {
+    var {tabbrowser} = this;
+    for each (let win in Utils.chromeWindows)
+      if (win.gBrowser === tabbrowser) return win;
+    return null;
+  },
+
+  toString: function BT_toString() "[object BrowserTab]",
+  valueOf: function BT_valueOf() this.index,
+  load: function BT_load(uriString, referrer, charset) {
+    this.browser.loadURI(uriString, referrer, charset);
+  },
+  focus: function BT_focus() {
+    var {tabbrowser} = this;
+    tabbrowser.selectedTab = this.raw;
+    tabbrowser.focus();
+  },
+  close: function BT_close() {
+    this.tabbrowser.removeTab(this.raw);
+  },
+  moveBefore: function BT_moveBefore(target) {
+    this.tabbrowser.moveTabTo(this.raw, (target || 0).index || target);
+  },
+  moveToEnd: function BT_moveEnd() {
+    var {tabbrowser} = this;
+    tabbrowser.moveTabTo(this.raw, tabbrowser.browsers.length);
+  },
+};
+
 // == {{{ Utils.tabs }}} ==
 //
 // This Object contains functions related to Firefox tabs.
@@ -897,12 +964,15 @@ Utils.tabs = {
   //
   // Gets an array of open tabs.
   //
-  // {{{name}}} is an optional string tab name (title or URL).
+  // {{{name}}} is an optional tab name (title or URL) string.
   // If supplied, this function returns tabs that exactly match with it.
 
   get: function tabs_get(name) {
-    var tabs = [], {push} = tabs;
-    for each (let win in Utils.Application.windows) push.apply(tabs, win.tabs);
+    var tabs = [];
+    for each (let win in Utils.chromeWindows) {
+      let {mTabs} = win.gBrowser, i = -1, l = mTabs.length;
+      while (++i < l) tabs.push(new BrowserTab(mTabs[i]));
+    }
     return (name == null
             ? tabs
             : tabs.filter(function eachTab({document: d}) (d.title === name ||
@@ -927,17 +997,13 @@ Utils.tabs = {
       matcher = RegExp(Utils.regexp.quote(matcher), "i");
     }
     if (maxResults == null) maxResults = 1/0;
-    var keys = ["title", "URL"];
-    for each (let win in Utils.Application.windows)
-      for each (let tab in win.tabs) {
-        for each (let key in keys) {
-          let match = matcher(tab.document[key]);
-          if (!match) continue;
-          tab.match = match;
-          if (results.push(tab) >= maxResults) return results;
-          break;
-        }
-      }
+    for each (let tab in Utils.tabs.get()) {
+      let {document} = tab;
+      let match = matcher(document.title) || matcher(document.URL);
+      if (!match) continue;
+      tab.match = match;
+      if (results.push(tab) >= maxResults) break;
+    }
     return results;
   },
 
@@ -949,7 +1015,7 @@ Utils.tabs = {
 
   reload: function tabs_reload(matcher) {
     for each (let tab in Utils.tabs.search(matcher))
-      tab._browser.reload();
+      tab.browser.reload();
   },
 };
 

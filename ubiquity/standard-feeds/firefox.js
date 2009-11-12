@@ -116,7 +116,7 @@ CmdUtils.CreateCommand({
   execute: function swtab_execute({object: {data: tab}}) {
     if (!tab) return;
     Utils.setTimeout(function delayedFocus() {
-      var win = tab._window._window;
+      var win = tab.chromeWindow;
       win.focus();
       tab.focus();
       win.content.focus();
@@ -132,7 +132,7 @@ CmdUtils.CreateCommand({
   description: ("Closes the tab whose title or URL matches the input " +
                 "or the current tab if no tab matches."),
   execute: function cltab_execute(args) {
-    (args.object.data || Application.activeWindow.activeTab).close();
+    (args.object.data || Utils.currentTab).close();
   },
   preview: tabPreview("Closes"),
 });
@@ -149,7 +149,7 @@ CmdUtils.CreateCommand({
     if (!text) return;
     var tabs = Utils.tabs.search(text);
     for each (var t in tabs) t.close();
-    displayMessage(_("${num} tabs closed.", {num: tabs.length}), this);
+    displayMessage(_("${num} tab(s) closed.", {num: tabs.length}), this);
   },
   preview: function clatab_preview(pblock, {object: {text, html}}) {
     if (!text) {

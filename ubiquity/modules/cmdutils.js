@@ -151,30 +151,25 @@ function log() {
   Utils.log.apply(Utils, arguments);
 }
 
-// === {{{ CmdUtils.getDocument() }}} ===
 // === {{{ CmdUtils.getWindow() }}} ===
+// === {{{ CmdUtils.getDocument() }}} ===
 //
-// Gets the document/window of the current tab in a secure way.
+// Gets the window/document of the current tab in a secure way.
 
-function getDocument() {
-  var {activeTab, tabs} = Application.activeWindow;
-  return tabs[activeTab.index].document;
-}
+function getWindow() Utils.currentChromeWindow.content;
+function getDocument() getWindow().document;
 
-function getWindow() getDocument().defaultView;
-
-// === {{{ CmdUtils.getDocumentInsecure() }}} ===
 // === {{{ CmdUtils.getWindowInsecure() }}} ===
+// === {{{ CmdUtils.getDocumentInsecure() }}} ===
 //
-// Gets the document/window object of the current tab, without the
+// Gets the window/document object of the current tab, without the
 // safe {{{XPCNativeWrapper}}}.
 // While this allows access to scripts in the content,
-// it is potentially **unsafe** and {{{getDocument()/getWindow()}}} should
+// it is potentially **unsafe** and {{{getWindow()/getDocument()}}} should
 // be used in place of this whenever possible.
 
-function getDocumentInsecure() getDocument().wrappedJSObject;
-
 function getWindowInsecure() getWindow().wrappedJSObject;
+function getDocumentInsecure() getDocument().wrappedJSObject;
 
 // === {{{ CmdUtils.getHiddenWindow() }}} ===
 //
