@@ -86,9 +86,11 @@ addEventListener("load", function onload() {
     suggFrame.contentDocument.addEventListener(
       "DOMSubtreeModified",
       function resizeSuggs() {
-        suggFrame.height = this.height;
+        clearTimeout(resizeSuggs.tid);
+        resizeSuggs.tid = setTimeout(resizeSuggsDelayed, 99, this);
       },
       false);
+    function resizeSuggsDelayed(doc) { suggFrame.height = doc.height }
 
     // Hack to get the default skin to work on Linux, which we don't
     // support per-pixel alpha transparency on.

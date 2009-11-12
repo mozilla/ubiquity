@@ -79,7 +79,7 @@ var Utils = {
   __globalObject: this,
 };
 
-[
+for each (let f in [
   // === {{{ Utils.Application }}} ===
   // Shortcut to
   // [[https://developer.mozilla.org/en/FUEL/Application|Application]].
@@ -133,12 +133,7 @@ var Utils = {
                  .getService(Ci.nsIXULRuntime)
                  .OS),
 
-  ].forEach(function eachGetter(func) {
-    Utils.__defineGetter__(func.name, function lazyGetter() {
-      delete Utils[func.name];
-      return Utils[func.name] = func();
-    });
-  });
+  ]) defineLazyProperty(Utils, f);
 
 for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
 
@@ -902,7 +897,21 @@ function listenOnce(element, eventType, listener, useCapture) {
   return listener1;
 }
 
-// == {{{ Utils.BrowserTab(tabbrowser_tab) }}} ==
+// === {{{ Utils.defineLazyProperty(obj, func, name) }}} ===
+//
+// Defines a temporary getter {{{name}}} (or {{{func.name}}} if omitted)
+// to {{{obj}}}, which will be replaced with the return value of {{{func}}}
+// after the first access.
+
+function defineLazyProperty(obj, func, name) {
+  if (name == null) name = func.name;
+  obj.__defineGetter__(name, function lazyProperty() {
+    delete obj[name];
+    return obj[name] = func.call(obj);
+  });
+}
+
+// === {{{ Utils.BrowserTab(tabbrowser_tab) }}} ===
 //
 // A wrapper for browser tabs. Supports roughly the same features as
 // https://developer.mozilla.org/en/FUEL/BrowserTab (minus {{{events}}}).
