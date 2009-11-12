@@ -76,8 +76,14 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
     ubiquityMenu.hidden = ubiquitySeparator.hidden = !selected();
   }
   function openUbiquity(event) {
-    if (event.target !== this) return;
-    gContextMenu.menu.hidePopup();
+    var {target} = event;
+    if (event.button !== 0 && "suggestion" in target) {
+      // nonleft click on a menuitem suggestion
+      popdown(event)
+      gUbiquity.preview(target.suggestion.completionText);
+    }
+    if (target !== this) return;
+    popdown(event);
     gUbiquity.openWindow();
   }
   function executeMenuCommand(event) {
@@ -95,11 +101,16 @@ function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
       return !!(sugg._argSuggs.object || 0).text;
     return false;
   }
+  function popdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    gContextMenu.menu.hidePopup();
+  }
   function selected() (gContextMenu.isContentSelection() ||
                        gContextMenu.onTextInput);
 
   ubiquityMenu.addEventListener("popupshowing", contextPopupShowing, false);
   ubiquityMenu.addEventListener("command", executeMenuCommand, false);
-  ubiquityMenu.addEventListener("click", openUbiquity, false);
+  ubiquityMenu.addEventListener("click", openUbiquity, true);
   contextMenu.addEventListener("popupshowing", toggleUbiquityMenu, false);
 }
