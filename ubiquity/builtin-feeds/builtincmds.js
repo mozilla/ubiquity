@@ -331,14 +331,9 @@ function ubiquityLoad_commandHistory(U) {
     CmdHst.add(textBox.value);
     cursor = -1;
   }, false);
-};
+}
 
 function startup_openUbiquityWelcomePage() {
   if (UbiquitySetup.isNewlyInstalledOrUpgraded)
     Utils.focusUrlInBrowser(Help);
-}
-
-function startup_setBasicPreferences() {
-  // Allow JS chrome errors to show up in the error console.
-  prefs.setValue("javascript.options.showInConsole", true);
 }
