@@ -38,7 +38,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = Utils =
-//
 // This is a small library of all-purpose, general utility functions
 // for use by chrome code.  Everything clients need is contained within
 // the {{{Utils}}} namespace.
@@ -46,6 +45,7 @@
 var EXPORTED_SYMBOLS = ["Utils"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const LogPrefix = "Ubiquity: ";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -56,7 +56,6 @@ var Utils = {
   toString: function toString() "[object UbiquityUtils]",
 
   // === {{{ Utils.currentChromeWindow }}} ===
-  //
   // This property is a reference to the application chrome window
   // that currently has focus.
 
@@ -64,7 +63,6 @@ var Utils = {
     Utils.WindowMediator.getMostRecentWindow(Utils.appWindowType),
 
   // === {{{ Utils.chromeWindows }}} ===
-  //
   // An array of application chrome windows currently opened.
 
   get chromeWindows chromeWindows() {
@@ -75,7 +73,6 @@ var Utils = {
   },
 
   // === {{{ Utils.currentTab }}} ===
-  //
   // A reference to the focused tab, wrapped with {{{Utils.BrowserTab}}}.
 
   get currentTab currentTab()
@@ -89,6 +86,11 @@ for each (let f in [
   // Shortcut to [[https://developer.mozilla.org/en/FUEL/Application]].
   function Application() (
     Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication)),
+
+  // === {{{ Utils.ConsoleService }}} ===
+  // Shortcut to {{{nsIConsoleService}}}.
+  function ConsoleService() (
+    Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService)),
 
   // === {{{ Utils.IOService }}} ===
   // Shortcut to {{{nsIIOService}}}.
@@ -111,7 +113,6 @@ for each (let f in [
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
   // === {{{ Utils.appName }}} ===
-  //
   // This property provides the chrome application name
   // found in {{{nsIXULAppInfo}}}.
   // Examples values are "Firefox", "Songbird", "Thunderbird".
@@ -120,7 +121,6 @@ for each (let f in [
     Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name),
 
   // === {{{ Utils.appWindowType }}} ===
-  //
   // This property provides the name of "main" application windows for the chrome
   // application.
   // Examples values are "navigator:browser" for Firefox", and
@@ -131,7 +131,6 @@ for each (let f in [
   })[Utils.appName] || "navigator:browser",
 
   // === {{{ Utils.OS }}} ===
-  //
   // This property provides the platform name found in {{{nsIXULRuntime}}}.
   // See: https://developer.mozilla.org/en/OS_TARGET
 
@@ -143,7 +142,6 @@ for each (let f in [
 for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
 
 // === {{{ Utils.log(a, b, c, ...) }}} ===
-//
 // One of the most useful functions to know both for development
 // and debugging. This logging function takes
 // an arbitrary number of arguments and will log them to the most
@@ -160,41 +158,38 @@ for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
 function log(what) {
   if (!arguments.length) return;
 
-  var args = Array.slice(arguments), logPrefix = "Ubiquity:";
-  if (typeof what === "string") logPrefix += " " + args.shift();
+  var args = Array.slice(arguments), formatting = typeof what === "string";
 
   var {Firebug} = Utils.currentChromeWindow;
   if (Firebug && Firebug.Console.isEnabled() &&
       Firebug.toggleBar(true, "console")) {
-    args.unshift(logPrefix);
+    if (formatting) args[0] = LogPrefix + what;
+    else args.unshift(LogPrefix);
     Firebug.Console.logFormatted(args);
     return;
   }
 
-  Utils.Application.console.log(
-    args.reduce(
-      function log_acc(msg, arg) msg + " " + pp(arg),
-      logPrefix.replace(/%[sdifo]/g, function format($) {
-        if (!args.length) return $;
-        var a = args.shift();
-        switch ($) {
-          case "%s": return a;
-          case "%d":
-          case "%i": return parseInt(a);
-          case "%f": return parseFloat(a);
-        }
-        return pp(a);
-      })));
-  function pp(o) {
-    try { return uneval(o) } catch (e) {
-      try { return Utils.encodeJson(o) }
-      catch (e) { return o }
-    }
+  function log_pp(o) {
+    try { return uneval(o) } catch (e) {}
+    try { return Utils.json.encode(o) } finally { return o }
   }
+  var lead = !formatting ? log_pp(args.shift()) :
+    args.shift().replace(/%[sdifo]/g, function log_format($) {
+      if (!args.length) return $;
+      var a = args.shift();
+      switch ($) {
+        case "%s": return a;
+        case "%d":
+        case "%i": return parseInt(a);
+        case "%f": return parseFloat(a);
+      }
+      return log_pp(a);
+    });
+  Utils.reportInfo(
+    args.reduce(function log_acc(msg, arg) msg + " " + log_pp(arg), lead));
 }
 
 // === {{{ Utils.reportWarning(aMessage, stackFrameNumber) }}} ===
-//
 // This function can be used to report a warning to the JS Error Console,
 // which can be displayed in Firefox by choosing "Error Console" from
 // the "Tools" menu.
@@ -217,8 +212,6 @@ function reportWarning(aMessage, stackFrameNumber) {
   for (var i = 0; i < stackFrameNumber; i++)
     stackFrame = stackFrame.caller;
 
-  var consoleService = (Cc["@mozilla.org/consoleservice;1"]
-                        .getService(Ci.nsIConsoleService));
   var scriptError = (Cc["@mozilla.org/scripterror;1"]
                      .createInstance(Ci.nsIScriptError));
   var aSourceName = stackFrame.filename;
@@ -229,38 +222,32 @@ function reportWarning(aMessage, stackFrameNumber) {
   var aCategory = "ubiquity javascript";
   scriptError.init(aMessage, aSourceName, aSourceLine, aLineNumber,
                    aColumnNumber, aFlags, aCategory);
-  consoleService.logMessage(scriptError);
+  Utils.ConsoleService.logMessage(scriptError);
 }
 
 // === {{{ Utils.reportInfo(message) }}} ===
-//
 // Reports a purely informational {{{message}}} to the JS Error Console.
 // Source code links aren't provided for informational messages, so
 // unlike {{{Utils.reportWarning()}}}, a stack frame can't be passed
 // in to this function.
 
 function reportInfo(message) {
-  (Cc["@mozilla.org/consoleservice;1"]
-   .getService(Ci.nsIConsoleService)
-   .logStringMessage("Ubiquity: " + message));
+  Utils.ConsoleService.logStringMessage(LogPrefix + message);
 }
 
 // === {{{ Utils.encodeJson(object) }}} ===
-//
 // This function serializes the given {{{object}}} using JavaScript Object
 // Notation (JSON).
 
 function encodeJson(object) Utils.json.encode(object);
 
 // === {{{ Utils.decodeJson(string) }}} ===
-//
 // This function unserializes the given {{{string}}} in JavaScript Object
 // Notation (JSON) format and returns the result.
 
 function decodeJson(string) Utils.json.decode(string);
 
 // === {{{Utils.ellipsify(node, characters)}}} ===
-//
 // Given a DOM {{{node}}} and a maximum number of {{{characters}}}, returns a
 // new DOM node that has the same contents truncated to that number of
 // characters. If any truncation was performed, an ellipsis is placed
@@ -296,7 +283,6 @@ function ellipsify(node, chars) {
 }
 
 // === {{{ Utils.setTimeout(callback, delay, arg0, arg1, ...) }}} ===
-//
 // This function works just like the {{{window.setTimeout()}}} method
 // in content space, but it can only accept a function (not a string)
 // as the callback argument.
@@ -330,7 +316,6 @@ function setTimeout(callback, delay /*, arg0, arg1, ...*/) {
 }
 
 // === {{{ Utils.clearTimeout(timerID) }}} ===
-//
 // This function behaves like the {{{window.clearTimeout()}}} function
 // in content space, and cancels the callback with the given timer ID
 // from ever being called.
@@ -364,7 +349,6 @@ __TimerCallback.prototype = {
 };
 
 // === {{{ Utils.uri(spec, defaultUrl) }}} ===
-//
 // Given a string representing an absolute URL or a {{{nsIURI}}}
 // object, returns an equivalent {{{nsIURI}}} object.  Alternatively,
 // an object with keyword arguments as keys can also be passed in; the
@@ -399,13 +383,10 @@ function uri(spec, defaultUri) {
 }
 
 // === {{{ Utils.url(spec, defaultUrl) }}} ===
-//
 // Alias of {{{Utils.uri()}}}.
-
 Utils.url = uri;
 
 // === {{{ Utils.openUrlInBrowser(urlString, postData) }}} ===
-//
 // This function opens the given URL in the user's browser, using
 // their current preferences for how new URLs should be opened (e.g.,
 // in a new window vs. a new tab, etc).
@@ -425,7 +406,7 @@ function openUrlInBrowser(urlString, postData) {
       postInputStream = postData;
     else {
       if (typeof postData === "object") // json -> string
-        postData = Utils.paramsToString(postData, "");
+        postData = paramsToString(postData, "");
 
       var stringStream = (Cc["@mozilla.org/io/string-input-stream;1"]
                           .createInstance(Ci.nsIStringInputStream));
@@ -468,7 +449,6 @@ function openUrlInBrowser(urlString, postData) {
 }
 
 // === {{{ Utils.focusUrlInBrowser(urlString) }}} ===
-//
 // This function focuses a tab with the given URL if one exists in the
 // current window; otherwise, it delegates the opening of the URL in a
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
@@ -480,7 +460,6 @@ function focusUrlInBrowser(urlString) {
 }
 
 // === {{{ Utils.getCookie(domain, name) }}} ===
-//
 // This function returns the cookie for the given {{{domain}}} and with the
 // given {{{name}}}.  If no matching cookie exists, {{{null}}} is returned.
 
@@ -500,7 +479,6 @@ function getCookie(domain, name) {
 }
 
 // === {{{ Utils.paramsToString(params, prefix = "?") }}} ===
-//
 // This function takes the given Object containing keys and
 // values into a querystring suitable for inclusion in an HTTP
 // GET or POST request.
@@ -531,7 +509,6 @@ function paramsToString(params, prefix) {
 }
 
 // === {{{ Utils.urlToParams(urlString) }}} ===
-//
 // This function takes the given url and returns an Object containing keys and
 // values retrieved from its query-part.
 
@@ -549,7 +526,6 @@ function urlToParams(url) {
 }
 
 // === {{{ Utils.getLocalUrl(urlString, charset) }}} ===
-//
 // This function synchronously retrieves the content of the given
 // local URL, such as a {{{file:}}} or {{{chrome:}}} URL, and returns
 // it.
@@ -565,14 +541,11 @@ function getLocalUrl(url, charset) {
   req.overrideMimeType("text/plain" + (charset ? ";charset=" + charset : ""));
   req.setRequestHeader("If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT");
   req.send(null);
-  if (req.status === 0)
-    return req.responseText;
-  else
-    throw new Error("Failed to get " + url);
+  if (req.status !== 0) throw Error("failed to get " + url);
+  return req.responseText;
 }
 
 // === {{{ Utils.trim(str) }}} ===
-//
 // This function removes all whitespace surrounding a string and
 // returns the result.
 
@@ -586,7 +559,6 @@ Utils.trim = String.trim || function trim(str) {
 };
 
 // === {{{ Utils.sortBy(array, key, descending) }}} ===
-//
 // Sorts an array by specified {{{key}}} and returns it. e.g.:
 // {{{
 // Utils.sortBy(["abc", "d", "ef"], "length") //=> ["d", "ef", "abc"]
@@ -612,7 +584,6 @@ sortBy.aSorter = function byKeyAsc(a, b) a.key > b.key;
 sortBy.dSorter = function byKeyDsc(a, b) a.key < b.key;
 
 // === {{{ Utils.uniq(array, key, strict) }}} ===
-//
 // Remove duplicates from an array by comparing string versions of them
 // (or strict equality if {{{strict}}} evaluates to {{{true}}}) and returns it.
 // If {{{key}}} is provided, the comparison is made to mappings of it instead.
@@ -659,7 +630,6 @@ function uniq(array, key, strict) {
 }
 
 // === {{{ Utils.isArray(value) }}} ===
-//
 // This function returns whether or not the {{{value}}} is an instance
 // of {{{Array}}}.
 
@@ -677,15 +647,14 @@ function isEmpty(val) {
 }
 
 // === {{{ Utils.classOf(value) }}} ===
-//
 // This function returns the internal {{{[[Class]]}}} property of
 // the {{{value}}}.
 // ref. http://bit.ly/CkhjS#instanceof-considered-harmful
 
-function classOf(val) Object.prototype.toString.call(val).slice(8, -1);
+const TO_STRING = Object.prototype.toString;
+function classOf(val) TO_STRING.call(val).slice(8, -1);
 
 // === {{{ Utils.powerSet(array) }}} ===
-//
 // The "power set" of a set
 // is a set of all the subsets of the original set.
 // For example: a power set of [1,2] is [[],[1],[2],[1,2]]
@@ -701,12 +670,11 @@ function classOf(val) Object.prototype.toString.call(val).slice(8, -1);
 
 function powerSet(array) (
   array.reduce(
-    function pS_acc(last, current) last.concat([a.concat(current)
-                                                for each (a in last)]),
+    function powerSet_acc(last, current) (
+      last.concat([a.concat(current) for each (a in last)])),
     [[]]));
 
 // === {{{ Utils.computeCryptoHash(algo, str) }}} ===
-//
 // Computes and returns a cryptographic hash for a string given an
 // algorithm.
 //
@@ -733,7 +701,6 @@ function computeCryptoHash(algo, str) {
 }
 
 // === {{{ Utils.signHMAC(algo, key, str) }}} ===
-//
 // Computes and returns a cryptographicly signed hash for a string given an
 // algorithm. It is derived from a given key.
 //
@@ -741,7 +708,7 @@ function computeCryptoHash(algo, str) {
 // can be any one of {{{MD2}}}, {{{MD5}}}, {{{SHA1}}}, {{{SHA256}}},
 // {{{SHA384}}}, or {{{SHA512}}}.
 //
-// {{{key}}} is a key (string) to use to sign
+// {{{key}}} is a key string to sign with.
 //
 // {{{str}}} is the string to be hashed.
 
@@ -762,7 +729,6 @@ function signHMAC(algo, key, str) {
 }
 
 // === {{{ Utils.escapeHtml(string) }}} ===
-//
 // This function returns a version of the {{{string}}} safe for
 // insertion into HTML. Useful when you just want to
 // concatenate a bunch of strings into an HTML fragment
@@ -777,7 +743,6 @@ function escapeHtml(string) (
   .replace(/\'/g, "&#39;"));
 
 // === {{{ Utils.convertFromUnicode(toCharset, text) }}} ===
-//
 // Encodes the given unicode text to a given character set and
 // returns the result.
 //
@@ -794,7 +759,6 @@ function convertFromUnicode(toCharset, text) {
 }
 
 // === {{{ Utils.convertToUnicode(fromCharset, text) }}} ===
-//
 // Decodes the given text from a character set to unicode and returns
 // the result.
 //
@@ -812,7 +776,6 @@ function convertToUnicode(fromCharset, text) {
 }
 
 // === {{{ Utils.dump(a, b, c, ...) }}} ===
-//
 // A nicer {{{dump()}}} that
 // displays caller's name, concats arguments and appends a line feed.
 
@@ -825,7 +788,6 @@ Utils.dump = function niceDump() {
 };
 
 // === {{{ Utils.notify(label, value, image, priority, buttons, target) }}} ===
-//
 // A wrapper function for
 // [[https://developer.mozilla.org/en/XUL/notificationbox|notificationbox]]
 // {{{#appendNotification}}}.
@@ -900,7 +862,6 @@ function listenOnce(element, eventType, listener, useCapture) {
 }
 
 // === {{{ Utils.defineLazyProperty(obj, func, name) }}} ===
-//
 // Defines a temporary getter {{{name}}} (or {{{func.name}}} if omitted)
 // to {{{obj}}}, which will be replaced with the return value of {{{func}}}
 // after the first access.
@@ -914,7 +875,6 @@ function defineLazyProperty(obj, func, name) {
 }
 
 // == {{{ Utils.prefs }}} ==
-//
 // Proxy to an {{{nsIPrefBranch2}}} service.
 
 const {PREF_STRING, PREF_BOOL, PREF_INT} = Ci.nsIPrefBranch;
@@ -958,9 +918,9 @@ Utils.prefs.getValue = Utils.prefs.get;
 Utils.prefs.setValue = Utils.prefs.set;
 
 // === {{{ Utils.BrowserTab(tabbrowser_tab) }}} ===
-//
-// A wrapper for browser tabs. Supports roughly the same features as
-// https://developer.mozilla.org/en/FUEL/BrowserTab (minus {{{events}}}).
+// Wrapper for browser tabs. Supports roughly the same features as
+// https://developer.mozilla.org/en/FUEL/BrowserTab
+// (minus {{{events}}}, to avoid memory leaks).
 
 function BrowserTab(tabbrowser_tab) {
   this.raw = tabbrowser_tab;
@@ -1011,12 +971,10 @@ BrowserTab.prototype = {
 };
 
 // == {{{ Utils.tabs }}} ==
-//
 // This Object contains functions related to Firefox tabs.
 
 Utils.tabs = {
   // === {{{ Utils.tabs.get(name) }}} ===
-  //
   // Gets an array of open tabs.
   //
   // {{{name}}} is an optional tab name (title or URL) string.
@@ -1035,7 +993,6 @@ Utils.tabs = {
   },
 
   // === {{{ Utils.tabs.search(matcher, maxResults) }}} ===
-  //
   // Searches for tabs by title or URL and returns an array of tab references.
   // The match result is set to {{{tab.match}}}.
   //
@@ -1063,7 +1020,6 @@ Utils.tabs = {
   },
 
   // === {{{ Utils.tabs.reload(matcher) }}} ===
-  //
   // Reloads all matched tabs.
   //
   // {{{matcher}}} is a string or {{{RegExp}}} object to match with.
@@ -1075,12 +1031,10 @@ Utils.tabs = {
 };
 
 // == {{{ Utils.clipboard }}} ==
-//
 // This object contains functions related to clipboard.
 
 Utils.clipboard = {
   // === {{{ Utils.clipboard.text }}} ===
-  //
   // Gets or sets the clipboard text.
 
   get text clipboard_getText() {
@@ -1102,13 +1056,11 @@ Utils.clipboard = {
 };
 
 // == {{{ Utils.history }}} ==
-//
 // This object contains functions that make it easy to access
 // information about the user's browsing history.
 
 Utils.history = {
   // === {{{ Utils.history.visitsToDomain(domain) }}} ===
-  //
   // This function returns the number of times the user has visited
   // the given {{{domain}}} string.
 
@@ -1130,7 +1082,6 @@ Utils.history = {
   },
 
   // === {{{ Utils.history.search(query, callback) }}} ===
-  //
   // Searches the pages the user has visited.
   // Given a query string and a callback function, passes an array of results
   // (objects with {{{url}}}, {{{title}}} and {{{favicon}}} properties)
@@ -1170,11 +1121,9 @@ Utils.history = {
 };
 
 // == {{{ Utils.regexp }}} ==
-//
 // Contains regular expressions related functions.
 
 // === {{{ Utils.regexp(pattern, flags) }}} ===
-//
 // Creates a regexp just like {{{RegExp}}}, but without throwing exceptions.
 // Falls back to a quoted version of {{{pattern}}} if it fails to compile.
 // {{{
@@ -1199,7 +1148,6 @@ function regexp(pattern, flags) {
 }
 
 // === {{{ Utils.regexp.quote(string) }}} ===
-//
 // Returns the {{{string}}} with all {{{RegExp}}} meta characters in it
 // backslashed.
 
@@ -1207,7 +1155,6 @@ regexp.quote = function re_quote(string) (
   String(string).replace(/[.?*+^$|()\{\[\]\\]/g, "\\$&"));
 
 // === {{{ Utils.regexp.Trie(strings, asPrefixes) }}} ===
-//
 // Creates a {{{RegexpTrie}}} object that builds an efficient regexp
 // matching a specific set of {{{strings}}}.
 // This is a JS port of
@@ -1229,8 +1176,7 @@ regexp.Trie = function RegexpTrie(strings, asPrefixes) {
 };
 regexp.Trie.prototype = {
   constructor: regexp.Trie,
-  // ** {{{ RegexpTrie#add(string) }}} **
-  //
+  // ** {{{ RegexpTrie#add(string) }}} **\\
   // Adds {{{string}}} to the Trie and returns self.
   add: function RegexpTrie_add(string) {
     var ref = this.$;
@@ -1238,8 +1184,7 @@ regexp.Trie.prototype = {
     ref[""] = 1; // {"": 1} as terminator
     return this;
   },
-  // ** {{{ RegexpTrie#addPrefixes(string) }}} **
-  //
+  // ** {{{ RegexpTrie#addPrefixes(string) }}} **\\
   // Adds every prefix of {{{string}}} to the Trie and returns self. i.e.:
   // {{{
   // RegexpTrie().addPrefixes("ab") == RegexpTrie().add("a").add("ab")
@@ -1249,10 +1194,8 @@ regexp.Trie.prototype = {
     for each (let char in string) ref = ref[char] || (ref[char] = {"": 1});
     return this;
   },
-  // ** {{{ RegexpTrie#toString() }}} **
-  //
-  // ** {{{ RegexpTrie#regexp }}} **
-  //
+  // ** {{{ RegexpTrie#toString() }}} **\\
+  // ** {{{ RegexpTrie#regexp }}} **\\
   // Returns a string/regexp representation of the Trie.
   toString: function RegexpTrie_toString() this._regexp(this.$),
   get regexp RegexpTrie_regexp() RegExp(this),
@@ -1279,12 +1222,10 @@ regexp.Trie.prototype = {
 };
 
 // == {{{ Utils.gist }}} ==
-//
 // [[http://gist.github.com/|Gist]] related utilities.
 
 Utils.gist = {
   // === {{{ Utils.gist.paste(files, id) }}} ===
-  //
   // Pastes code to Gist.
   //
   // {{{files}}} is the dictionary of name:code pairs.
@@ -1306,7 +1247,6 @@ Utils.gist = {
   },
 
   // === {{{ Utils.gist.getName(document) }}} ===
-  //
   // Extracts the name of a Gist via DOM {{{document}}}.
 
   getName: function gist_getName(document) {
