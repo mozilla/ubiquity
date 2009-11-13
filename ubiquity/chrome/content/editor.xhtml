@@ -24,42 +24,36 @@
   <script type="application/javascript;version=1.8" src="chrome://ubiquity/content/developer-news.js"></script>
   <script type="application/javascript;version=1.8" src="editor.js"></script>
   <script type="application/javascript" src="bespin-embedded.js"></script>
-  <script type="application/javascript;version=1.8" src="resource://ubiquity/scripts/codemirror/js/codemirror.js"></script>
 
-  <script type="text/javascript">
-  <![CDATA[
-    var file;
-    var lastModifiedTime = 0;
-    function initialize() {
-      document.getElementById("feedTypeMenu").value = PrefCommands.type;
-    }
-    function launch() {
-      file = Editor.launchEditor(document.getElementById('editor-div')._editor.getContent());
-      if (file != null && file.exists()) {
-        lastModifiedTime = file.lastModifiedTime;
-        setTimeout(watchFile, 500);
-      }
-    }
-    function watchFile() {
-      if (file != null && file.exists()) {
-        time = file.lastModifiedTime;
-        if (time > lastModifiedTime) {
-          document.getElementById('editor-div')._editor.setContent(Editor.readFile(file));
-          PrefCommands.setCode(document.getElementById('editor-div')._editor.getContent());
-          lastModifiedTime = time;
-        }
-        setTimeout(watchFile, 500);
-      }
-    }
-    window.addEventListener("load",
-                            function() {
-                              initialize();
-                              var editor = new BespinEditor();
-                              editor.initUI('editor-div', window);
-                            },
-                            false);
-  ]]>
-  </script>
+<script type="application/javascript;version=1.8"><![CDATA[
+var file;
+var lastModifiedTime = 0;
+function initialize() {
+  document.getElementById("feedTypeMenu").value = PrefCommands.type;
+}
+function launch() {
+  file = Editor.launchEditor(document.getElementById("editor-div")
+                             ._editor.getContent());
+  if (!file || !file.exists()) return;
+  lastModifiedTime = file.lastModifiedTime;
+  setTimeout(watchFile, 500);
+}
+function watchFile() {
+  if (!file || !file.exists()) return;
+  var time = file.lastModifiedTime;
+  if (time > lastModifiedTime) {
+    let {_editor} = document.getElementById("editor-div");
+    _editor.setContent(Editor.readFile(file));
+    PrefCommands.setCode(_editor.getContent());
+    lastModifiedTime = time;
+  }
+  setTimeout(watchFile, 500);
+}
+function onload() {
+  initialize();
+  new BespinEditor().initUI("editor-div", window);
+}
+]]></script>
 
 </head>
 <body dir="&locale.dir;">
@@ -73,8 +67,6 @@
 <div class="page-tip">
   <p>&ubiquity.pagetip.HackUbiquity;</p>
 </div>
-
-<br clear="all" />
 
 <h1>&ubiquity.editor.CommandEditorHeader;</h1>
 <p id="notification-bar" class="notification" style="display:none"></p>
