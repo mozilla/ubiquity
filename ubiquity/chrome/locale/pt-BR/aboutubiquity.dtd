@@ -108,7 +108,7 @@
 <!ENTITY ubiquity.editor.CmdTypeRegular "Normal">
 <!ENTITY ubiquity.editor.CmdTypeLocked "Controlado (Locked-Down)">
 <!ENTITY ubiquity.editor.RegularCommandDesc "Repositórios do tipo <em>Normal</em> têm total liberdade para fazer qualquer coisa em seu computador.">
-<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Repositórios Controlados</em> são muito seguros mas não têm tanta liberdade para interagir com o seu computador. Para mais informações, leia o <a href='&link.lockedFeed;'>Tutorial de repositórios controlados</a>.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Repositórios Controlados</em> são muito seguros mas não têm tanta liberdade para interagir com o seu computador. Para mais informações, leia o <a href='&link.lockedFeeds;'>Tutorial de repositórios controlados</a>.">
 <!ENTITY ubiquity.editor.ImportTemplate "Importar modelo de comando">
 <!ENTITY ubiquity.editor.LaunchExternalEd "Abrir editor externo">
 <!ENTITY ubiquity.editor.ShareCommand "Compartilhar">

@@ -1,0 +1,165 @@
+<!-- Draft #002:NOTE TO TRANSLATORS:Hello, and thanks for taking your time to translate our strings for Ubiquity!As you may have guessed, not everything here is fully baked and our kitchen is still a little messy. But, we're working diligently in choosing our words wisely to make sure you won't have to translate everything many times over. And since we're really nice, we also intend to keep you updated when any ofthese files happen change in the future.So please, bear with us for a moment as things might get a chaotic early on.Thanks a ton and happy translating!Sincerely,- The Ubiquity Team-->
+<!ENTITY ubiquity.pagetitle.About "Sobre &appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "Parámetros y Temas de &appTitle;">
+<!ENTITY ubiquity.pagetitle.YourCommands "Órdenes de &appTitle;">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "&appTitle; órdenes - Plantilla de localización">
+<!ENTITY ubiquity.pagetitle.Support "Soporte &appTitle;">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "Editor de órdenes de &appTitle;">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Orden de &appTitle; de fuente no fiable">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Reiniciar &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, tenemos un uh-oh!">
+<!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
+<!ENTITY ubiquity.tagline.About "No navegue la web. Contrólela.">
+<!ENTITY ubiquity.tagline.Settings "Parámetros y Temas">
+<!ENTITY ubiquity.tagline.YourCommands "Donde se listan las órdenes que están a su disposición.">
+<!ENTITY ubiquity.tagline.LocalizeCmd "Debemos localizar para globalizar.">
+<!ENTITY ubiquity.tagline.Support "¡Ayuda!">
+<!ENTITY ubiquity.tagline.HackUbiquity "Hackéalo.">
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetip.About "Puede llegar a esta página en cualquier momento usando la orden &ldquo;ayuda&rdquo;.">
+<!ENTITY ubiquity.pagetip.Settings "Puede llegar a esta página en cualquier momento usando la órden &ldquo;cambiar parámetros de ubiquity&rdquo;.">
+<!ENTITY ubiquity.pagetip.YourCommands "Puede llegar a esta página en cualquier momento usando la orden &ldquo;listar órdenes de ubiquity&rdquo;.">
+<!ENTITY ubiquity.pagetip.Support "Puede llegar a esta página en cualquier momento usando la orden &ldquo;obtener soporte&rdquo;.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "Puede llegar a esta página en cualquier momento usando la órden &ldquo;escribir orden de ubiquity&rdquo;.">
+<!-- Page header taglines -->
+<!ENTITY ubiquity.generic.ImportTemplate "Importar desde plantilla">
+<!ENTITY ubiquity.generic.LaunchExternalEd "Lanzar un editor externo">
+<!ENTITY ubiquity.generic.EnableHighlighting "Activar resaltado de sintaxis">
+<!ENTITY ubiquity.generic.ButtonEdit "Editar">
+<!ENTITY ubiquity.generic.ButtonSave "Guardar">
+<!ENTITY ubiquity.generic.ButtonSaveAs "Guardar como">
+<!ENTITY ubiquity.generic.ButtonShare "Compartir">
+<!-- Header page tips -->
+<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
+<!--- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.- This will also be useful when we do a full about: page overhaul possibly condensing the editors.-->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "¿Qué es &appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; es un añadido para Firefox que le permite dar <strong>órdenes</strong> a Firefox tecleando órdenes en un caja de entrada de texto especial.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "Las órdenes son atajos para cosas que normalmente hace en la Web; puede eliminar tareas repetitivas y le permite hacer más cosas más rápido.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Lo que más mola de &appTitle; es que <em>cualquiera</em> puede escribir una orden y compartirla con el resto del mundo, casi del mismo modo en la Web misma permite a cualquiera escribir páginas  y compartir información con el resto del mundo.">
+<!ENTITY ubiqutiy.about.LearnHow "Aprenda cómo usar &appTitle;">
+<!ENTITY ubiqutiy.about.TutorialButton "Pulse aquí para hacer el tutorial interactivo">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Más sobre le uso de &appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "Después de hacer el tutorial básico en esta página, puede aprender más leyendo la <a href='&link.extDocs;'>página de documentación en profundidad</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Ayúdenos suscribiéndose a la <a href='&link.herdMain;'>manada</a>. Esto añadirá sus datos al <a href='&link.herdDash;'>tablero de mandos</a> &mdash; es completamente anónimo y nos ayudará a hacer &appTitle; mejor y más seguro.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "Para informase sobre los objetivos del proyecto &appTitle; y sus planes para próximos lanzamientos, compruebe nuestro <a href='&link.roadmap;'>Roadmap</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; es un esfuerzo en equipo de contribuyentes de todo el mundo. Una lista de algunos de los contribuyentes la puede ver en la <a href='&link.credits;'>página de créditos</a>.">
+<!ENTITY ubiqutiy.about.Thanks "Gracias por usar &appTitle; <span class='version'></span>!">
+<!ENTITY ubiquity.about.ThanksParagraph "La versión &appVersion; de &appTitle; resuelve los más significantes fallos de seguridad y problemas de rendimiento encontrados en el lanzamiento anterior. Con este lanzamiento debería nota un incremento en la velocidad, respuesta y precisión del analizador. Para saber más detalles sobre qué hay nuevo, visite las <a href='&link.releaseNotes;'>notas de lanzamiento de &appTitle; &appVersion;</a>.">
+<!-- End common elements -->
+<!ENTITY ubiquity.settings.Skins "Temas">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "Editar tema personalizado">
+<!ENTITY ubiquity.settings.KeyCombination "Combinación de teclas">
+<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Invocar</strong> &appTitle; pulsando:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Pulse arriba para <strong>Cambiar</strong> el atajo de teclado usado para abrir/cerrar &appTitle;.">
+<!ENTITY ubiquity.settings.LangSettings "Parámetros de idioma">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Analizador 2 es un analizador experimental de nueva generación de &appTitle; y no funciona con todas las órdenes. Aunque admite múltiples idiomas.">
+<!ENTITY ubiquity.settings.UseParser2 "Usar Analizador 2 (el analizador de nueva generación)">
+<!ENTITY ubiquity.settings.SelectLanguage "Idioma:">
+<!ENTITY ubiquity.settings.MiscSettings "Otros parámetros">
+<!ENTITY ubiquity.settings.MaxSuggestions "Número máximo de sugerencias:">
+<!ENTITY ubiquity.settings.Parser2Context "Analizador 2">
+<!ENTITY ubiquity.settings.Parser2Details "El Analizador 2 puede hacer llamadas a servicios web externos para averigüar qué es lo que ha escrito, y proporcionar sugerencias de acciones basadas en esa información. Esto termina actualmente en un gran número de llamadas a API, y por ello está desactivado por omisión.">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "Activar llamadas externas para todas las consultas del Analizador 2">
+<!ENTITY ubiquity.settings.NotificationWarning "Si está usando Growl para Windows asegúrese de que está corriendo. Si no lo está no recibirá ninguna notificación.">
+<!ENTITY ubiquity.settings.NotificationLinuxNote "Para tener <a href='&link.libNotify;'>notificaciones de libnotify</a> en Linux, necesita instalar libnotify-bin usando el Gestor de paquetes Synaptic en Ubuntu o ejecutando <code>sudo aptitude install libnotify-bin</code>, o el equivalente en su distribución.">
+<!ENTITY ubiquity.settings.NotificationSettings "Parámetros de notificación.">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity hace un uso exhaustivo de notificaciones transparentes no modales. En OS X, esto se consigue con Growl. En Windows, se muestran como notifiaciones <a href='&link.snarl;'>Snarl</a>, notificaciones <a href='&link.growlWin;'>Growl para Windows</a> o notificaciones &ldquo;toaster&rdquo; en el borde inferior derecho de la pantalla. Si tiene <a href='&link.snarl;'>Snarl</a> instalado y corriendo, Ubiquity intentará detectarlo automáticamente y usarlo para enviar notificaciones.">
+<!ENTITY ubiquity.settings.NotificationEnable "Activar servicios de notificación">
+<!ENTITY ubiquity.settings.CustomSkin "Editor de temas personalizados">
+<!ENTITY ubiquity.settings.SaveSkin "Guardar">
+<!ENTITY ubiquity.settings.SaveSkinAs "Guardar como">
+<!ENTITY ubiquity.settings.ShareSkin "Compartir">
+<!ENTITY ubiquity.settings.SaveNotice "Pulsando guardar, se actualiza inmediatamente el aspecto de &appTitle;.">
+<!ENTITY ubiquity.settings.Bug449Warning "Los cambios que ha hecho a un tema personalizado pueden no verse hasta el próximo reinicio del navegador. Esto es un <a href='&link.bug449;'>error conocido</a>.">
+<!-- Everything from here down is page by page in no particular page order -->
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "Tiene &cmdCount; órdenes en &feedCount; flujos de órdenes.| Necesita desregistrarse de <a href='cmdlist.xhtml#graveyard'>&unsubCount; flujos de órdenes</a>.| &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Todas las órdenes que reconoce &appTitle; están listadas en la columna derecha.  El texto negro es el nombre de la orden (lo que teclea en &appTitle; para usarla).  El texto gris explica lo que hace la orden.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "La columna de la izquierda muestra todos los &ldquo;flujos&rdquo; a los que &amp;appTitle está suscrito. Cada flujo puede contener varias órdenes.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Puede ver esta página ordenada por flujos o por órdenes. Pulse cualquiera de los enlaces cercanos a &ldquo;ordenar por&rdquo; más abajo.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Si hay una ordena que no quiera, deseleccione la caja de al lado de ella. Puede volver a tener la orden volviendo a seleccionar la casilla.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "Si hay un flujo completo de órdenes que no desee, pulse el enlace &ldquo;[desuscribirse]&rdquo; debajo del nombre del flujo. Todas las órndees en el flujo dejarán de funcionar. Si cambia de opinión puede resuscribirse al final de la página.">
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "Flujos suscritos">
+<!ENTITY ubiquity.commandlist.AvailableCommands "Órdenes">
+<!ENTITY ubiquity.commandlist.SortBy "Ordenar por:">
+<!ENTITY ubiquity.commandlist.SortByFeed "Nobre del flujo">
+<!ENTITY ubiquity.commandlist.SortByDate "Suscrito el día">
+<!ENTITY ubiquity.commandlist.SortByEnabled "Activado">
+<!ENTITY ubiquity.commandlist.SortByCommand "Nombre de la orden">
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Flujos desuscritos">
+<!ENTITY ubiquity.commandlist.GraveYardText "Solía estar suscrito a éste. Si lo desea de vuelta pulse el enlace &ldquo;[resuscribirse]&rdquo; debajo de él.">
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "Obtener ayuda">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Debido a la &appTitle; naturaleza extraña de este experimentos de laboratorio, puede haber problemar al usarlo. Hay unos cuantos lugares a los que puede pedir ayuda con &appTitle;.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "es una página de soporte de la comunidad. Muchos problemas comunes se han resuelto ya ahí, y si no no encuentra respuestas siempre puede iniciar un nuevo hilo.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "ayuda a la discusión de desarrollo de órdenes, interfaz de usuario, sugerencia de características y otras discusiones de alto nivel.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "también tiene información completa sobre el proyecto &appTitle;, incluyendo documentación, tutoriales y enlaces a versiones antiguas de &appTitle;.">
+<!ENTITY ubiquity.support.ReportBugs "Informar de un error">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "Estamos trabajando en un servicio de informe automático de errores, pero por el momento debe informar cualquier error reproducible que encuentre usando Obtener Satisfacción o a través de nuestro Grupo de Google/Lista de correo. Por favor, incluya cualquier información que tenga sobre la mejor manera de reproducir el error.">
+<!ENTITY ubiquity.support.ResetUbiquity "Reiniciando &appTitle;">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Si &appTitle; se bloquea completamente, entonces puede ser necesario hacer un reinicio para que &appTitle; se restaure a sus &ldquo;parámetros predeterminados de fábrica&rdquo; antes de usarlo otra vez. Para hacer un reinicio, <a href='&chrome.reset;'>pulse aquí</a> &mdash; y por favor acepte nuestras disculpas por los inconvenientes.">
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "Editor de órdenes de &appTitle;">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Introduzca nuevas órdenes</strong> en el área de debajo. Éstas se guardarán automáticamente según las teclea, y podrán ser usadas instantáneamente desde el modo de entrada de órdenes.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "<strong>Lea el <a href='&link.cmdTutorial;'>tutorial para la creación de órdenes</a></strong> para saber más. Por ejemplo para las órdenes incorporadas, <a href='&file.FeedsIndex;'>mire aquí</a>.">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentación para las">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Get involved</strong>. Learn how by visiting the <a href='&link.wikiMain;'>&appTitle; Wiki</a>.">
+<!ENTITY ubiquity.editor.YourExternalEd "Su editor externo es">
+<!ENTITY ubiquity.editor.EditorCommandType "La orden que escrita es">
+<!ENTITY ubiquity.editor.CmdTypeRegular "Nomal">
+<!ENTITY ubiquity.editor.CmdTypeLocked "Cerrado">
+<!ENTITY ubiquity.editor.RegularCommandDesc "Los flujos <em>Normales</em> tienen total libertad de hacer cualquier cosa en su ordenador.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Locked-Down</em> feeds are very safe but don't have much freedom to interact with your computer. For more information, see the <a href='&link.lockedFeeds;'>Locked-Down Feed Tutorial</a>.">
+<!ENTITY ubiquity.editor.ImportTemplate "Importar plantilla de órdenes">
+<!ENTITY ubiquity.editor.LaunchExternalEd "Lanzar un editor externo">
+<!ENTITY ubiquity.editor.ShareCommand "Compartir">
+<!ENTITY ubiquity.editor.SaveToFile "Guardar en fichero">
+<!ENTITY ubiquity.editor.EnableHighlighting "Activar realzado de sintaxis">
+<!ENTITY ubiquity.editor.ShareYourCommands "Comparta sus órdenes">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Post your command on the <a href='&link.wildCmds;'>commands in the wild</a> wiki page so that other users can find it.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Also, sign up for the the <a href='&link.herdDash;'>herd command</a> which will then display your command on the <a href='&link.herdMain;'>dashboard</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "Desarrollando &appTitle;">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Run the <a href='&chrome.tests;'>unit tests</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Help us test our <a href='&feed.ExperimentalCmds;'>experimental commands</a>!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Experiment with parser performance and introspect in the <a href='&chrome.playpen;'>parser playpen</a>. Use the <a href='&chrome.nounTuner;'>nountype tuner</a> to check your nountypes' suggestions and scoring.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "And if you're going to be developing &appTitle; itself, check out our <a href='&feed.DevelCmds;'>core developer commands feed</a>.">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Latest &appTitle; Code Changes">
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!ENTITY ubiquity.confirmsubscription.Header "&appTitle; Command from Untrusted Source">
+<!ENTITY ubiquity.confirmsubscription.ShortDesc "You are about to subscribe to a <a href='&chrome.about;'>&appTitle; command</a> from an unknown, untrusted third-party source located at &targetLink;. If you subscribe, this command could do <em>anything it wants</em> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.">
+<!ENTITY ubiquity.confirmsubscription.ScriptSource "Here is the JavaScript source code to the command:">
+<!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Loading code, please wait...">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "If you understand JavaScript, you should read this and use your best judgement to decide whether the command is something that's safe to execute or not. Proceed at your own risk!">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "If you don't understand JavaScript, you should not subscribe to the command unless the link was given to you by someone you know and trust.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "In the future, we plan to have a widget here displaying what we call a &ldquo;social trust network&rdquo;.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of &appTitle;.">
+<!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Auto-update this feed.">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Get me outta here!">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "I know what I'm doing. Subscribe to it!">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph1 "This means that the feed will constantly be checked for functionality updates and automatically pushed to your computer. If you check this, make sure that you trust the people who have access to change this code on the server that it's hosted on.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph2 "Note that this feed is served using an insecure protocol, and is therefore subject to <a href='&link.mitmInfo;'>man-in-the-middle attacks</a>. Please only auto-update this feed if you are sure about the implications of what you're doing.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShortDesc "You are now subscribing to the command feed and can use its functionality.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongDesc "If you ever want to unsubscribe, you can use the &ldquo;list&rdquo; &appTitle; command at any time to get to the <a href='&chrome.cmdlist;'>command management page</a> where you can see all commands which you are subscribed to, and cancel any that you no longer want.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "You may now close this window.">
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.reset.Header "Restore &appTitle; to its default settings?">
+<!ENTITY ubiquity.reset.Paragraph1 "If &appTitle; isn't working properly, you may want to consider resetting it to its original &ldquo;factory defaults&rdquo;. To do this, click the button below. In order to complete the operation, Firefox will then be restarted.">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>Warning:</strong> doing this will remove any customizations you've made to &appTitle;, including but not limited to:">
+<!ENTITY ubiquity.reset.Feeds "Subscribed feeds">
+<!ENTITY ubiquity.reset.Skins "Custom skins">
+<!ENTITY ubiquity.reset.Code "Command editor code">
+<!ENTITY ubiquity.reset.NoReturn "<strong>Note:</strong> Once complete, this operation cannot be undone.">
+<!ENTITY ubiquity.reset.ButtonExport "Export my current &appTitle; configuration to a new tab">
+<!ENTITY ubiquity.reset.ButtonReset "Yes, I know what I'm doing. Reset &appTitle; and restart Firefox">
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.localizecmd.ForTemplate "This is a template for">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1 "This is a localization template for the &feedKey; command feed in gettext/portable object (*.po) format. Learn more about <a href='&link.gettextInfo;'>gettext on Wikipedia</a> which also contains links to other useful tools.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2 "To test this localization, save it to: &localeDir; with the name <code>&feedKey;.po</code>">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Make sure XY correctly reflects the appropriate locale code for you language directory. If the locale code directory for your language doesn't exist, simply create it.">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!ENTITY ubiquity.bug19warning.Header "A transparent message couldn't be displayed!">
+<!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity tried to display a transparent message but failed.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Due to a <a href='&link.bug19;'>bug in &appTitle;</a> under OS X, you may need to <a href='&link.growl;'>install Growl</a> if you haven't already done so. Afterwards you may also need to restart Firefox.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Our apologies for the inconvenience.">
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.redirect.FileHeader "Standard File Redirector">
+<!ENTITY ubiquity.redirect.FileShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a file: URI.">
+<!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &appTitle; extension. For instance:">

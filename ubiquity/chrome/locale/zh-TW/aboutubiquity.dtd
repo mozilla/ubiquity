@@ -1,0 +1,165 @@
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetitle.About "關於 &appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "&appTitle; 設定與佈景">
+<!ENTITY ubiquity.pagetitle.YourCommands "&appTitle; 命令">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "&appTitle; 命令 - 在地化範本">
+<!ENTITY ubiquity.pagetitle.Support "&appTitle; 支援">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "&appTitle; 命令編輯器">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "來自不被信任來源的 &appTitle; 命令">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "重設 &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "哇咧，&appTitle;！">
+<!-- Page header taglines -->
+<!ENTITY ubiquity.tagline.About "Don't Surf the Web. Command it.">
+<!ENTITY ubiquity.tagline.Settings "設定與佈景">
+<!ENTITY ubiquity.tagline.YourCommands "Wherein are listed the commands at your disposal.">
+<!ENTITY ubiquity.tagline.LocalizeCmd "在地化才能國際化。">
+<!ENTITY ubiquity.tagline.Support "幫幫忙呀！">
+<!ENTITY ubiquity.tagline.HackUbiquity "Hack It.">
+<!-- Header page tips -->
+<!ENTITY ubiquity.pagetip.About "You can get to this page at any time using the &ldquo;help&rdquo; command.">
+<!ENTITY ubiquity.pagetip.Settings "You can get to this page at any time using the  &ldquo;change ubiquity settings&rdquo; command.">
+<!ENTITY ubiquity.pagetip.YourCommands "You can get to this page at any time using the &ldquo;list ubiquity commands&rdquo; command.">
+<!ENTITY ubiquity.pagetip.Support "You can get to this page at any time using the  &ldquo;get support&rdquo; command.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "You can get to this page at any time using the  &ldquo;write ubiquity commands&rdquo; command.">
+<!-- Buttons, Buttons and more Buttons. Here are our generic editor buttons found everywhere an editor resides -->
+<!ENTITY ubiquity.generic.ImportTemplate "從範本匯入">
+<!ENTITY ubiquity.generic.LaunchExternalEd "啟動外部編輯器">
+<!ENTITY ubiquity.generic.EnableHighlighting "啟用語法標記">
+<!ENTITY ubiquity.generic.ButtonEdit "編輯">
+<!ENTITY ubiquity.generic.ButtonSave "儲存">
+<!ENTITY ubiquity.generic.ButtonSaveAs "另存新檔">
+<!ENTITY ubiquity.generic.ButtonShare "分享">
+<!-- End common elements -->
+<!-- Everything from here down is page by page in no particular page order -->
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "什麼是 &appTitle;？">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; is a Firefox add-on that lets you give commands to Firefox by entering command words into a special input box.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "Commands are shortcuts for things that you commonly do on the Web; they can eliminate repetitive tasks and let you get more done, faster.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "The coolest thing about &appTitle; is that anyone can write a command and share it with the rest of the world, in much the same way as the Web itself lets everyone write pages and share information with the rest of the world.">
+<!ENTITY ubiqutiy.about.LearnHow "學習如何使用 &appTitle;">
+<!ENTITY ubiqutiy.about.TutorialButton "按這裡以開啟互動式教學">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "More On Using &appTitle;">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "After taking the basic tutorial on this page, you can learn more by reading the <a href='&link.extDocs;'>In-depth documentation page</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Help us by subscribing to the <a href='&link.herdMain;'>Herd</a>. This will add your data to the <a href='&link.herdDash;'>dashboard</a> &mdash; it's completely anonymous and will help us make &appTitle; better and safer.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "For information about the goals of the &appTitle; project and our plans for upcoming releases, check out our <a href='&link.roadmap;'>Roadmap</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "&appTitle; is a team effort by contributors from all over the world. For a list of some of the contributors, check out the <a href='&link.credits;'>credits page</a>.">
+<!ENTITY ubiqutiy.about.Thanks "感謝使用 &appTitle; &appVersion;！">
+<!ENTITY ubiquity.about.ThanksParagraph "Version &appVersion; of &appTitle; addresses the most significant user interface and performance bugs found in the previous release. With this release you should notice increases in the speed, responsiveness, and accuracy of the parser. To learn more details about what's new, check out the <a href='&link.releaseNotes;'>&appTitle; &appVersion; Release notes</a>.">
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.settings.Skins "佈景">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "編輯自訂佈景">
+<!ENTITY ubiquity.settings.KeyCombination "按鍵組合">
+<!ENTITY ubiquity.settings.InvokingUbiquity "按下列以叫出 &appTitle;：">
+<!ENTITY ubiquity.settings.ChangeShortcut "點選以上來<strong>變更</strong>用來開啟與關閉 &appTitle; 的鍵盤捷徑。">
+<!ENTITY ubiquity.settings.LangSettings "語言設定">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "第二代剖析器是 &appTitle; 的下一代剖析器。">
+<!ENTITY ubiquity.settings.UseParser2 "使用第二代剖析器">
+<!ENTITY ubiquity.settings.SelectLanguage "語言：">
+<!ENTITY ubiquity.settings.MiscSettings "雜項設定：">
+<!ENTITY ubiquity.settings.MaxSuggestions "建議項目最高數：">
+<!ENTITY ubiquity.settings.Parser2Context "第二代剖析器">
+<!ENTITY ubiquity.settings.Parser2Details "Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "Enable external calls for all Parser 2 queries">
+<!ENTITY ubiquity.settings.NotificationWarning "If you're using Growl for Windows make sure it is running. If it is not, you will not receive any notifications.">
+<!ENTITY ubiquity.settings.NotificationLinuxNote "To get <a href='&link.libNotify;'>libnotify notifications</a> working on Linux, you will first need to install libnotify-bin using the Synaptic Package Manager on Ubuntu or by running <code>sudo aptitude install libnotify-bin</code> or its equivalent for your distribution.">
+<!ENTITY ubiquity.settings.NotificationSettings "通知設定">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity makes extensive use of transparent non-modal notifications. In OS X, this is can be seen by using Growl. On Windows, it shows up as <a href='&link.snarl;'>Snarl</a> notifications, <a href='&link.growlWin;'>Growl for Windows</a> notifications or &ldquo;toaster&rdquo; notifications at the bottom-right of the screen. If you have <a href='&link.snarl;'>Snarl</a> installed and running, Ubiquity will attempt to automatically detect and use it to send notifications.">
+<!ENTITY ubiquity.settings.NotificationEnable "啟用通知服務">
+<!ENTITY ubiquity.settings.CustomSkin "自訂佈景編輯器">
+<!ENTITY ubiquity.settings.SaveSkin "儲存">
+<!ENTITY ubiquity.settings.SaveSkinAs "另存新檔">
+<!ENTITY ubiquity.settings.ShareSkin "分享">
+<!ENTITY ubiquity.settings.SaveNotice "Clicking save immediately updates &appTitle;'s look.">
+<!ENTITY ubiquity.settings.Bug449Warning "Changes you make to a custom skin may not be seen until after a browser restart. This is a <a href='&link.bug449;'>known bug</a>.">
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "You Have &cmdCount; commands in &feedCount; command feeds. | You have unsubscribed from <a href='&chrome.graveyard;'>&unsubCount; command feeds</a>. | &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that &appTitle; recognizes are listed in the right column.  The black text is the command's name (what you type into &appTitle; to use it).  The grey text explains what the command does.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "The left column shows all the &ldquo;feeds&rdquo; that &appTitle; is subscribed to.  Each feed can contain multiple commands.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "You can view this page sorted by feeds or sorted by commands.  Click any of the links next to &ldquo;sort by&rdquo;, below.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "If there's a command you don't want, uncheck the box next to it.  You can get the command back by re-checking the box.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "If there's a whole command feed you don't want, click the &ldquo;[unsubscribe]&rdquo; link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.">
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "已訂閱的命令來源">
+<!ENTITY ubiquity.commandlist.AvailableCommands "命令">
+<!ENTITY ubiquity.commandlist.SortBy "排序：">
+<!ENTITY ubiquity.commandlist.SortByFeed "命令來源名稱">
+<!ENTITY ubiquity.commandlist.SortByDate "訂閱日期">
+<!ENTITY ubiquity.commandlist.SortByEnabled "已啟用">
+<!ENTITY ubiquity.commandlist.SortByCommand "命令名稱">
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "已取消訂閱的命令來源">
+<!ENTITY ubiquity.commandlist.GraveYardText "You used to be subscribed to these. If you want one back, click the &ldquo;[resubscribe]&rdquo; link beneath it.">
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "取得說明">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Due to &appTitle;'s unusual nature as a Labs experiment, you may run into problems while using it.There are a number of places you can go for help with &appTitle;.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a>is a community-driven support site. Many common &appTitle; problems already have answers there, and if you can't find an answer to your particular question, you can start a new topic.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='&link.supportMailList;'>Our Google Group/Mailing List</a> is useful for discussion of command development, user interface, feature suggestions, as well as other high-level discussions.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='&link.wikiMain;'>The &appTitle; Wiki</a> also has information about the entire &appTitle; project, including documentation, tutorials, and links to older versions of &appTitle;.">
+<!ENTITY ubiquity.support.ReportBugs "回報臭蟲">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "We are working on an automated bug report service, but for the time being you should report any reproducible problems you find using Get Satisfaction or through our Google Group/Mailing List. Please include any information you have about how to best reproduce the bug.">
+<!ENTITY ubiquity.support.ResetUbiquity "重設 &appTitle;">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "If &appTitle; becomes completely unresponsive for you, then it may be necessary to perform a reset in order restore &appTitle; to its &ldquo;factory default settings&rdquo; before being able to use it again. To perform a reset, <a href='&chrome.reset;'>click here</a> &mdash; and please accept our apologies for the inconvenience!">
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle; 命令編輯器">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Enter new commands</strong> in the area below. They will automatically be saved as you type, and will be able to be instantly used from the command entry mode.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "<strong>Read the <a href='&link.cmdTutorial;'>command authoring tutorial</a></strong> to learn more. For examples of built-in commands, <a href='&file.FeedsIndex;'>look here</a>.">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentation for the <a href='&file.DevelDocs;'>command APIs</a>">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Get involved</strong>. Learn how by visiting the <a href='&link.wikiMain;'>&appTitle; Wiki</a>.">
+<!ENTITY ubiquity.editor.YourExternalEd "你的外部編輯器是">
+<!ENTITY ubiquity.editor.EditorCommandType "命令類型是">
+<!ENTITY ubiquity.editor.CmdTypeRegular "正常">
+<!ENTITY ubiquity.editor.CmdTypeLocked "已鎖定">
+<!ENTITY ubiquity.editor.RegularCommandDesc "<em>正常</em>的命令來源對於控制你的電腦有完全的自由。">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>已鎖定</em>的命令來源非常安全，但是並沒有太多與你電腦互動的自由。要瞭解更多資訊，請見<a href='&link.lockedFeeds;'>已鎖定命令來源教學</a>。">
+<!ENTITY ubiquity.editor.ImportTemplate "匯入命令範本">
+<!ENTITY ubiquity.editor.LaunchExternalEd "啟動外部編輯器">
+<!ENTITY ubiquity.editor.ShareCommand "分享">
+<!ENTITY ubiquity.editor.SaveToFile "儲存到檔案">
+<!ENTITY ubiquity.editor.EnableHighlighting "啟用語法標記">
+<!ENTITY ubiquity.editor.ShareYourCommands "分享你的命令">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Post your command on the <a href='&link.wildCmds;'>commands in the wild</a> wiki page so that other users can find it.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Also, sign up for the the <a href='&link.herdDash;'>herd command</a> which will then display your command on the <a href='&link.herdMain;'>dashboard</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "開發 &appTitle;">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Run the <a href='&chrome.tests;'>unit tests</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Help us test our <a href='&feed.ExperimentalCmds;'>experimental commands</a>!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Experiment with parser performance and introspect in the <a href='&chrome.playpen;'>parser playpen</a>. Use the <a href='&chrome.nounTuner;'>nountype tuner</a> to check your nountypes' suggestions and scoring.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "And if you're going to be developing &appTitle; itself, check out our <a href='&feed.DevelCmds;'>core developer commands feed</a>.">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "Latest &appTitle; Code Changes">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!ENTITY ubiquity.confirmsubscription.Header "&appTitle; Command from Untrusted Source">
+<!ENTITY ubiquity.confirmsubscription.ShortDesc "You are about to subscribe to a <a href='&chrome.about;'>&appTitle; command</a> from an unknown, untrusted third-party source located at &targetLink;. If you subscribe, this command could do <em>anything it wants</em> to your browser. It could steal your credit card number or e-mail your grandmother your entire image browsing history.">
+<!ENTITY ubiquity.confirmsubscription.ScriptSource "以下是命令的 JavaScript 原始碼：">
+<!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "載入程式碼中，請稍候...">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "If you understand JavaScript, you should read this and use your best judgement to decide whether the command is something that's safe to execute or not. Proceed at your own risk!">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "If you don't understand JavaScript, you should not subscribe to the command unless the link was given to you by someone you know and trust.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "In the future, we plan to have a widget here displaying what we call a &ldquo;social trust network&rdquo;.You'll be able to see whether any of your friends have tried out this command.They can either vouch for the command's safety or leave a warning about the command's dangers.We hope this will help people make informed decisions about whether to subscribe to commands or not. This feature should be coming in a future release of &appTitle;.">
+<!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "自動更新此命令來源">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "帶我離開這裡！">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "我知道我在做什麼。訂閱吧！">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph1 "This means that the feed will constantly be checked for functionality updates and automatically pushed to your computer. If you check this, make sure that you trust the people who have access to change this code on the server that it's hosted on.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph2 "Note that this feed is served using an insecure protocol, and is therefore subject to <a href='&link.mitmInfo;'>man-in-the-middle attacks</a>. Please only auto-update this feed if you are sure about the implications of what you're doing.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShortDesc "You are now subscribing to the command feed and can use its functionality.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongDesc "If you ever want to unsubscribe, you can use the &ldquo;list&rdquo; &appTitle; command at any time to get to the <a href='&chrome.cmdlist;'>command management page</a> where you can see all commands which you are subscribed to, and cancel any that you no longer want.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "你現在可以關閉此視窗了。">
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.reset.Header "重設 &appTitle; 到預設設定嗎？">
+<!ENTITY ubiquity.reset.Paragraph1 "If &appTitle; isn't working properly, you may want to consider resetting it to its original &ldquo;factory defaults&rdquo;. To do this, click the button below. In order to complete the operation, Firefox will then be restarted.">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>Warning:</strong> doing this will remove any customizations you've made to &appTitle;, including but not limited to:">
+<!ENTITY ubiquity.reset.Feeds "已訂閱的命令來源">
+<!ENTITY ubiquity.reset.Skins "自訂佈景">
+<!ENTITY ubiquity.reset.Code "Command editor code">
+<!ENTITY ubiquity.reset.NoReturn "<strong>Note:</strong> Once complete, this operation cannot be undone.">
+<!ENTITY ubiquity.reset.ButtonExport "匯出我目前的 &appTitle; 設定到新分頁">
+<!ENTITY ubiquity.reset.ButtonReset "Yes, I know what I'm doing. Reset &appTitle; and restart Firefox">
+<!-- Command Localization Template chrome/content/localization-template.xhtml -->
+<!ENTITY ubiquity.localizecmd.ForTemplate "This is a template for <code>&feedKey;.po</code>">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1 "This is a localization template for the &feedKey; command feed in gettext/portable object (*.po) format. Learn more about <a href='&link.gettextInfo;'>gettext on Wikipedia</a> which also contains links to other useful tools.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2 "To test this localization, save it to: &localeDir; with the name <code>&feedKey;.po</code>">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Make sure that &ldquo;/XY/&rdquo; correctly reflects the appropriate locale code for your language. If the directory doesn't exist, simply create it.">
+<!-- Bug 19 Warning chrome/content/bug19warning.xhtml -->
+<!ENTITY ubiquity.bug19warning.Header "A transparent message couldn't be displayed!">
+<!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity tried to display a transparent message but failed.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph1 "Due to a <a href='&link.bug19;'>bug in &appTitle;</a> under OS X, you may need to <a href='&link.growl;'>install Growl</a> if you haven't already done so. Afterwards you may also need to restart Firefox.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph2 "我們為此不便感到抱歉。">
+<!-- File/Feed redirectors chrome/content/file.xhtml -->
+<!ENTITY ubiquity.redirect.FileHeader "檔案重新導向器">
+<!ENTITY ubiquity.redirect.FileShortDesc "This page is a simple redirector that can be used to take the user from a Ubiquity chrome: URI to a file: URI.">
+<!ENTITY ubiquity.redirect.FileLongDesc "To use it, just set the URI's hash to the relative path of the file URI to redirect the user to. The path should be relative to the root of the &appTitle; extension. For instance:">

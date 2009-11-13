@@ -1,0 +1,165 @@
+<!-- Draft #002:NOTE TO TRANSLATORS:Hello, and thanks for taking your time to translate our strings for Ubiquity!As you may have guessed, not everything here is fully baked and our kitchen is still a little messy. But, we're working diligently in choosing our words wisely to make sure you won't have to translate everything many times over. And since we're really nice, we also intend to keep you updated when any ofthese files happen change in the future.So please, bear with us for a moment as things might get a chaotic early on.Thanks a ton and happy translating!Sincerely,- The Ubiquity Team-->
+<!ENTITY ubiquity.pagetitle.About "Tietoja &appTitle;sta">
+<!ENTITY ubiquity.pagetitle.Settings "&appTitle;: Asetukset ja teemat">
+<!ENTITY ubiquity.pagetitle.YourCommands "&appTitle;: Komennot">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "&appTitle;: Komennot - lokalisaatiomalli">
+<!ENTITY ubiquity.pagetitle.Support "&appTitle;: Tuki">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "&appTitle;: Komentomuokkain">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "&appTitle;: Komento luottamattomasta lähteestä">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Nollaa &appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, meillä on ongelma!">
+<!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
+<!ENTITY ubiquity.tagline.About "Älä vain selaa verkkoa, komenna sitä.">
+<!ENTITY ubiquity.tagline.Settings "Asetukset ja teemat">
+<!ENTITY ubiquity.tagline.YourCommands "Täällä ovat luetteloituna kaikki komentosi.">
+<!ENTITY ubiquity.tagline.LocalizeCmd "Meidän pitää lokalisoida globalisoidaksemme.">
+<!ENTITY ubiquity.tagline.Support "Apua!">
+<!ENTITY ubiquity.tagline.HackUbiquity "Hakkeroi.">
+<!-- Page Titles for all documents in this DTD -->
+<!ENTITY ubiquity.pagetip.About "Pääset tälle sivulle koska tahansa käyttämällä komentoa “help”.">
+<!ENTITY ubiquity.pagetip.Settings "Pääset tälle sivulle koska tahansa käyttämällä komentoa “change ubiquity settings”.">
+<!ENTITY ubiquity.pagetip.YourCommands "Pääset tälle sivulle koska tahansa käyttämällä komentoa “list ubiquity commands”.">
+<!ENTITY ubiquity.pagetip.Support "Pääset tälle sivulle koska tahansa käyttämällä komentoa “get support”.">
+<!ENTITY ubiquity.pagetip.HackUbiquity "Pääset tälle sivulle koska tahansa käyttämällä komentoa “write ubiquity commands”.">
+<!-- Page header taglines -->
+<!ENTITY ubiquity.generic.ImportTemplate "Tuo mallipohjasta">
+<!ENTITY ubiquity.generic.LaunchExternalEd "Käynnistä ulkoinen muokkain">
+<!ENTITY ubiquity.generic.EnableHighlighting "Ota käyttöön syntaksin värikoodaus">
+<!ENTITY ubiquity.generic.ButtonEdit "Muokkaa">
+<!ENTITY ubiquity.generic.ButtonSave "Tallenna">
+<!ENTITY ubiquity.generic.ButtonSaveAs "Tallenna nimellä">
+<!ENTITY ubiquity.generic.ButtonShare "Jaa">
+<!-- Header page tips -->
+<!-- Buttons, Buttons and more Buttons. If you haven't guessed, this area contains generic buttons found everywhere! -->
+<!--- I think we can minimize the redundancy of having multiple buttons if we intelligently group them in a generic fashion.- This will also be useful when we do a full about: page overhaul possibly condensing the editors.-->
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "Mikä on &appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "&appTitle; on Firefox-lisäosa, joka antaa sinun <strong>komentaa</strong> Firefoxia syöttämällä komentosanoja erityiseen syötekenttään.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph2 "Komennot ovat oikopolkuja asioihin, joita teet verkossa; niillä voidaan poistaa toistuvia tehtäviä, ja niillä pystyt työskentelemään tehokkaammin.">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "Hienointa &appTitle;ssa on kuitenkin se, että <em>kuka tahansa</em> voi luoda komentoja ja jakaa niitä muun maailman kanssa, samaan tapaan kuin verkossa itsessään kuka tahansa voi luoda sivuja ja jakaa tietoa muun maailman kanssa.">
+<!ENTITY ubiqutiy.about.LearnHow "Opi käyttämään &appTitle;a">
+<!ENTITY ubiqutiy.about.TutorialButton "Aloita tästä interaktiivinen opas">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Lisätietoa &appTitle;n käytöstä">
+<!ENTITY ubiqutiy.about.UsingParagraph1 "Kun olet tehnyt tämän sivun oppaan, voit oppia lisää lukemalla <a href='&link.extDocs;'>dokumentaatiosivun</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Autat meitä tilaamalla syötteen <a href='&link.herdMain;'>Herd</a>. Tämä lisää tietosi <a href='&link.herdDash;'>kojelaudalle</a> — se on täysin anonyymiä ja auttaa meitä tekemään Ubiquitysta paremman ja turvallisemman.">
+<!ENTITY ubiqutiy.about.UsingParagraph3 "Jos haluat lisätietoja Ubiquity-projektin päämääristä ja suunnitelmista, käy katsomassa <a href='&link.roadmap;'>etenemissuunnitelmamme</a>.">
+<!ENTITY ubiqutiy.about.UsingParagraph4 "Ubiquity on eri puolilta maailmaa olevien ihmisten tiimityöskentelyn tulos. Voit katsella listaa avustajista <a href='&link.credits;'>Tekijät-sivulta</a>.">
+<!ENTITY ubiqutiy.about.Thanks "Kiitos, että käytät &appTitle;n versiota &appVersion;!">
+<!ENTITY ubiquity.about.ThanksParagraph "&appTitle;n versio &appVersion; korjaa edellisistä versioista löytyneitä virheitä käyttöliittymässä ja suorituskyvyssä. Tämän version myötä saatat huomata nopeamman, reagoivamman, ja tarkemman jäsentäjän. Jos haluat lisätietoja muutoksista, käy katsomassa <a href='&link.releaseNotes;'>&appTitle; &appVersion; -julkaisutiedot</a>.">
+<!-- End common elements -->
+<!ENTITY ubiquity.settings.Skins "Teemat">
+<!ENTITY ubiquity.settings.ButtonEditCustomSkin "Muokkaa teemaa">
+<!ENTITY ubiquity.settings.KeyCombination "Näppäinyhdistelmä">
+<!ENTITY ubiquity.settings.InvokingUbiquity "<strong>Avaa</strong> &appTitle; painamalla:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Napsauta yllä olevaa tekstikenttää <strong>muuttaaksesi</strong> näppäinyhdistelmää, jolla &appTitle; avataan ja suljetaan.">
+<!ENTITY ubiquity.settings.LangSettings "Kieliasetukset">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 on &appTitle;n koekäytössä oleva seuraavan sukupolven jäsentäjä, joka ei toimi kaikkien komentojen kanssa. Se tukee kuitenkin useampia kieliä.">
+<!ENTITY ubiquity.settings.UseParser2 "Käytä Parser 2:ta (seuraavan sukupolven jäsentäjä)">
+<!ENTITY ubiquity.settings.SelectLanguage "Kieli:">
+<!ENTITY ubiquity.settings.MiscSettings "Sekalaiset asetukset">
+<!ENTITY ubiquity.settings.MaxSuggestions "Ehdotusten enimmäismäärä:">
+<!ENTITY ubiquity.settings.Parser2Context "Parser 2">
+<!ENTITY ubiquity.settings.Parser2Details "Parser 2 voi tehdä ulkoisia kyselyjä ymmärtääkseen, mitä olet syöttänyt, ja ehdottaa toimintoja kyseiseen tietoon pohjautuen. Toiminto luo tällä hetkellä suuren määrän API-kyselyjä, joten se on poistettu käytöstä oletuksena.">
+<!ENTITY ubiquity.settings.Parser2EnableExternal "Salli Parser 2:n luoda ulkoisia kyselyjä aina">
+<!ENTITY ubiquity.settings.NotificationWarning "Jos käytät Growl for Windowsia, varmista että se on käynnissä. Jos se ei ole, et saa mitään ilmoituksia.">
+<!ENTITY ubiquity.settings.NotificationLinuxNote "Saadaksesi <a href='&link.libNotify;'>libnotify-ilmoitukset</a> toimimaan Linuxilla, sinun pitää ensin asentaa libnotify-bin käyttämällä Synaptic-pakettienhallintaa Ubuntussa tai suorittamalla <code>sudo aptitude install libnotify-bin</code> tai vastaavaa omassa jakelussasi.">
+<!ENTITY ubiquity.settings.NotificationSettings "Ilmoitusasetukset">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "Ubiquity käyttää paljon läpinäkyviä ilmoituksia. OS X:ssä näitä voidaan nähdä Growlin avulla. Windowsilla ne näkyvät <a href='&link.snarl;'>Snarl</a>-ilmoituksina, <a href='&link.growlWin;'>Growl for Windows</a> -ilmoituksina tai “toaster”-ilmoituksina näytön oikeassa alareunassa. Jos olet asentanut <a href='&link.snarl;'>Snarl</a>in, Ubiquity yrittää automaattisesti tunnistaa ja käyttää sitä ilmoituksien lähettämiseen.">
+<!ENTITY ubiquity.settings.NotificationEnable "Salli ilmoituspalvelut">
+<!ENTITY ubiquity.settings.CustomSkin "Mukautetun teeman muokkaus">
+<!ENTITY ubiquity.settings.SaveSkin "Tallenna">
+<!ENTITY ubiquity.settings.SaveSkinAs "Tallenna nimellä">
+<!ENTITY ubiquity.settings.ShareSkin "Jaa">
+<!ENTITY ubiquity.settings.SaveNotice "Tallenna-painikkeen napsautus päivittää &appTitle;n ilmeen välittömästi.">
+<!ENTITY ubiquity.settings.Bug449Warning "Tekemiäsi muutoksia mukautettuun teemaan ei välttämättä näy, ellet käynnistä selainta uudestaan. Tämä on <a href='&link.bug449;'>tiedossa oleva virhe</a>.">
+<!-- Everything from here down is page by page in no particular page order -->
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "Sinulla on &cmdCount; komentoa &feedCount; komentosyötteessä. | Olet lopettanut <a href='cmdlist.xhtml#graveyard'>&unsubCount; komentosyötteen</a> tilauksen. | &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Kaikki &appTitle;n tunnistamat komennot ovat listattuna oikealla puolella. Musta teksti on komennon nimi (kirjoita tämä &appTitle;yn käyttääksesi sitä). Harmaa teksti kertoo, mitä komento tekee.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "Vasemmalla puolella ovat kaikki “syötteet”, jotka on tilattu &appTitle;yn. Jokaisessa syötteessä voi olla useampia komentoja.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Voit järjestää tämän sivun syötteiden tai komentojen mukaan napsauttamalla mitä tahansa “Lajitteluperuste”-linkeistä alla.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Jos et halua käyttää tiettyä komentoa, poista valinta sen valintalaatikosta. Saat komennon takaisin käyttöön valitsemalla valintalaatikon uudelleen.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "Jos et halua käyttää tiettyä komentosyötettä, napsauta “[lopeta tilaus]” -linkkiä syötteen nimen alla, jolloin kaikki syötteen komennot poistetaan käytöstä. Jos muutat mielesi, voit tilata syötteen uudestaan sivun alalaidassa.">
+<!ENTITY ubiquity.commandlist.SubscribedFeeds "Tilatut syötteet">
+<!ENTITY ubiquity.commandlist.AvailableCommands "Komennot">
+<!ENTITY ubiquity.commandlist.SortBy "Lajitteluperuste:">
+<!ENTITY ubiquity.commandlist.SortByFeed "syötteen nimi">
+<!ENTITY ubiquity.commandlist.SortByDate "tilauspäivä">
+<!ENTITY ubiquity.commandlist.SortByEnabled "käytössä">
+<!ENTITY ubiquity.commandlist.SortByCommand "komennon nimi">
+<!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Lopetetut tilaukset">
+<!ENTITY ubiquity.commandlist.GraveYardText "Sinulla oli tilaus näihin syötteisiin. Jos haluat tilauksen takaisin, napsauta “[tilaa uudestaan]” -linkkiä syötteen alla.">
+<!-- About chrome/content/about.xhtml -->
+<!ENTITY ubiquity.support.GetHelp "Avun hakeminen">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Voit kohdata ongelmia käyttäessäsi &appTitle;a, sillä &appTitle; on Mozilla Labsin koelaajennus. Olemme järjestäneet useita paikkoja, joissa voit saada apua &appTitle;n käytön kanssa.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "on yhteisön ylläpitämä tukisivusto. Moniin yleisiin ongelmiin on jo vastattu täällä. Jos et löydä vastausta, voit aloittaa uuden aiheen.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "on hyödyllinen komentokehitykseen, käyttöliittymään ja toimintoehdotuksiin liittyviin keskusteluihin.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "on lisätietoa koko &appTitle;-projektista, sisältäen ohjeet, oppaat ja linkit vanhempiin &appTitle;-versioihin.">
+<!ENTITY ubiquity.support.ReportBugs "Ilmoita virheestä">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "Teemme töitä luodaksemme automaattisen virheenilmoitusjärjestelmän, mutta tällä välin sinun tulisi ilmoittaa löytämäsi virheet Get Satisfactioniin tai Google-ryhmäämme/postituslistallemme. Annathan kaikki tarvittavat tiedot, jotta voimme testata virheen uudelleen.">
+<!ENTITY ubiquity.support.ResetUbiquity "&appTitle;n nollaus">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Jos &appTitle; ei toimi oikein, sinun pitää ehkä palauttaa se “tehdasasetuksiin”. Tehdäksesi nollauksen, <a href='&chrome.reset;'>napsauta tästä</a> — hyväksythän myös anteeksipyyntömme aiheutuvasta vaivasta!">
+<!-- Settings chrome/content/settings.xhtml -->
+<!ENTITY ubiquity.editor.CommandEditorHeader "&appTitle;n komentomuokkain">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Luo uusia komentoja</strong> alla olevassa kentässä. Komennot tallennetaan automaattisesti kirjoittaessasi ja ne ovat heti käytettävissäsi.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "<strong>Lue <a href='&link.cmdTutorial;'>komentojen luontiohjeet</a></strong> oppiaksesi lisää. Saadaksesi esimerkkejä sisäänrakennetuista komennoista, <a href='&file.FeedsIndex;'>katso tänne</a>.">
+<!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Lue">
+<!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Tule mukaan</strong>. Vieraile <a href='&link.wikiMain;'>&appTitle; Wikissä</a> tietääksesi miten.">
+<!ENTITY ubiquity.editor.YourExternalEd "Ulkoinen muokkaimesi on">
+<!ENTITY ubiquity.editor.EditorCommandType "Komennon tyyppi on">
+<!ENTITY ubiquity.editor.CmdTypeRegular "Tavallinen">
+<!ENTITY ubiquity.editor.CmdTypeLocked "Lukittu">
+<!ENTITY ubiquity.editor.RegularCommandDesc "<em>Tavallisilla</em> syötteillä on täysi oikeus tehdä mitä tahansa koneellasi.">
+<!ENTITY ubiquity.editor.LockedCommandDesc "<em>Lukitut</em> syötteet ovat todella turvallisia eikä niillä ole kovinkaan paljon oikeuksia koneellesi. Lue <a href='&link.lockedFeeds;'>lukittujen syötteiden opas</a> saadaksesi lisätietoja.">
+<!ENTITY ubiquity.editor.ImportTemplate "Tuo komentomalli">
+<!ENTITY ubiquity.editor.LaunchExternalEd "Käynnistä ulkoinen muokkain">
+<!ENTITY ubiquity.editor.ShareCommand "Jaa">
+<!ENTITY ubiquity.editor.SaveToFile "Tallenna tiedostoon">
+<!ENTITY ubiquity.editor.EnableHighlighting "Ota käyttöön syntaksin väritys">
+<!ENTITY ubiquity.editor.ShareYourCommands "Jaa komentosi">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Lähetä komentosi <a href='&link.wildCmds;'>saatavilla olevien komentojen</a> wikisivulle, jotta muut käyttäjät voivat löytää ne.">
+<!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Voit myös rekisteröityä <a href='&link.herdDash;'>Herd-komentoihin</a>, mikä näyttää komentosi <a href='&link.herdMain;'>kojelaudalla</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquity "&appTitle;n kehittäminen">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Käynnistä <a href='&chrome.tests;'>testiohjelmat</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "Auta meitä testaamaan <a href='&feed.ExperimentalCmds;'>kokeellisia komentoja</a>!">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Kokeile jäsentäjän suorituskykyä <a href='&chrome.playpen;'>jäsentäjän leikkikehässä</a>. Käytä <a href='&chrome.nounTuner;'>substantiivityyppien virittäjää</a> tarkistaaksesi ehdotukset.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "Jos haluat kehittää &appTitle;a itseään, tutustu <a href='&feed.DevelCmds;'>ydinkehittäjän komentosyötteeseen</a>.">
+<!ENTITY ubiquity.editor.LatestChangesFeedTitle "&appTitle;n tuoreet koodimuutokset">
+<!-- Commands chrome/content/cmdlist.xhtml -->
+<!ENTITY ubiquity.confirmsubscription.Header "&appTitle;-komento epäluotettavasta lähteestä">
+<!ENTITY ubiquity.confirmsubscription.ShortDesc "Olet tilaamassa <a href='&chrome.about;'>&appTitle;-komennon</a> tuntemattomasta ja epäluotettavasta kolmannen osapuolen lähteestä, joka sijaitsee osoitteessa &targetLink;. Jos tilaat komennon, se voi tehdä <em>mitä tahansa</em> selaimellasi. Se voi varastaa luottokorttisi numeron tai lähettää koko selaushistoriasi sähköpostilla isoäidillesi.">
+<!ENTITY ubiquity.confirmsubscription.ScriptSource "Tässä on komennon JavaScript-lähdekoodi:">
+<!ENTITY ubiquity.confirmsubscription.WaitSourceLoading "Ladataan koodia, odota hetki...">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara1 "Jos ymmärrät JavaScriptiä, sinun tulisi lukea tämä ja käyttää parasta arviotasi päättämään, onko komentoa turvallista suorittaa. Jatka omalla vastuullasi!">
+<!ENTITY ubiquity.confirmsubscription.BodyDescPara2 "Jos et ymmärrä JavaScriptiä, sinun ei tule tilata tätä komentoa, ellet saanut sitä luottamaltasi henkilöltä.">
+<!ENTITY ubiquity.confirmsubscription.FingerPrintPlaceHolderText "Suunnittelemme lisäävämme tähän “sosiaalisen luotettavuusverkon”, jotta voit nähdä, ovatko ystäväsi kokeilleet näitä komentoja. He voivat joko taata komennon luotettavuuden tai jättää varoituksen komennon vaaroista. Toivomme, että tämä auttaa tekemään järkeviä päätöksiä komentojen tilaamisesta. Tämä toiminto tulee käyttöön &appTitle;n tulevassa versiossa.">
+<!ENTITY ubiquity.confirmsubscription.CheckAutoUpdateFeed "Päivitä syöte automaattisesti">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextDenyCommand "Hommaa minut pois täältä!">
+<!ENTITY ubiquity.confirmsubscription.ButtonTextAcceptCommand "Tiedän mitä teen, tilaa syöte!">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph1 "Tämä tarkoittaa, että syöte tarkistetaan väliajoin toimintopäivitysten varalta. Päivitykset lähetetään koneellesi automaattisesti. Jos valitset tämän, varmista, että luotat hebkilöihin, joilla on mahdollisuus muokata koodia syötteen palvelimella.">
+<!ENTITY ubiquity.confirmsubscription.AutoUpdateParagraph2 "Huomaa, että tämä syöte käyttää salaamatonta protokollaa, ja on siten vaarassa <a href='&link.mitmInfo;'>välistävetohyökkäyksille</a>. Salli automaattinen päivitys vain, jos tiedostat tekojesi seuraukset.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationShortDesc "Olet nyt tilaamassa komentosyötteen ja voit käyttää sen toimintoja.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationLongDesc "Jos haluat lopettaa tilauksen, voit käyttää &appTitle;n &ldquo;list&rdquo;-komentoa milloin tahansa päästäksesi <a href='&chrome.cmdlist;'>komentojen hallintasivulle</a>, jossa voit nähdä kaikki tilaamasi komennot ja lopettaa tilauksia.">
+<!ENTITY ubiquity.confirmsubscription.SubConfirmationComplete "Voit nyt sulkea tämän ikkunan.">
+<!-- Support chrome/content/support.xhtml -->
+<!ENTITY ubiquity.reset.Header "Haluatko palauttaa &appTitle;n oletusasetuksiin?">
+<!ENTITY ubiquity.reset.Paragraph1 "Jos &appTitle; ei toimi oikein, voit palauttaa sen alkuperäisiin “tehdasasetuksiin”. Voit tehdä tämän painamalla alla olevaa painiketta. Firefox käynnistetään uudestaan toiminnon suorittamiseksi.">
+<!ENTITY ubiquity.reset.Paragraph2 "<strong>Varoitus:</strong> Toiminto poistaa kaikki muokkaukset, joita olet tehnyt &appTitle;yn, sisältäen (mutta ei rajoitettu):">
+<!ENTITY ubiquity.reset.Feeds "tilatut syötteet">
+<!ENTITY ubiquity.reset.Skins "mukautetut teemat">
+<!ENTITY ubiquity.reset.Code "komentomuokkaimen koodit">
+<!ENTITY ubiquity.reset.NoReturn "<strong>Huomio:</strong> Kun toiminto on suoritettu, sitä ei voi kumota.">
+<!ENTITY ubiquity.reset.ButtonExport "Vie nykyiset &appTitle;-muokkaukset uuteen välilehteen">
+<!ENTITY ubiquity.reset.ButtonReset "Tiedän mitä teen. Nollaa &appTitle; ja käynnistä Firefox uudelleen">
+<!-- Hack chrome/content/editor.xhtml -->
+<!ENTITY ubiquity.localizecmd.ForTemplate "Tämä on mallipohja kohteelle">
+<!ENTITY ubiquity.localizecmd.HelpParagraph1 "Tämä on lokalisaatiomalli &feedKey; -komentosyötteelle gettext-formaatissa (*.po). Voit lukea lisää <a href='&link.gettextInfo;'>gettextistä Wikipediassa</a>, jossa on myös linkkejä hyödyllisiin työkaluihin.">
+<!ENTITY ubiquity.localizecmd.HelpParagraph2 "Voit testata lokalisaatiota tallentamalla sen kohteeseen: &localeDir; nimellä <code>&feedKey;.po</code>">
+<!ENTITY ubiquity.localizecmd.HelpParagraph3 "Varmista, että &ldquo;/XY/&rdquo; vastaa haluamasi kielen koodia. Jos lokalisaation koodihakemistoa ei löydy kielellesi, voit luoda sen.">
+<!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
+<!ENTITY ubiquity.bug19warning.Header "Läpinäkyvää viestiä ei voitu näyttää!">
+<!ENTITY ubiquity.bug19warning.ShortDesc "Ubiquity yritti näyttää läpinäkyvää viestiä, mutta epäonnistui siinä.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph1 "<a href='&link.bug19;'>&appTitle;n ohjelmointivirheen takia</a> Mac OS X:llä saatat joutua <a href='&link.growl;'>asentamaan Growlin</a>, ellet ole jo tehnyt sitä. Tämän jälkeen voit joutua käynnistämään Firefoxin uudestaan.">
+<!ENTITY ubiquity.bug19warning.LongDescParagraph2 "Pahoittelemme aiheutuvaa vaivaa.">
+<!-- Resetting Ubiquity chrome/content/reset.xhtml -->
+<!ENTITY ubiquity.redirect.FileHeader "Normaali tiedosto-ohjaus">
+<!ENTITY ubiquity.redirect.FileShortDesc "Tämä sivu on vain ohjaussivu, jota käytetään viemään käyttäjä Ubiquityn chrome: -osoitteesta file: -osoitteeseen.">
+<!ENTITY ubiquity.redirect.FileLongDesc "Aseta osoitteen hash-arvo tiedoston osoitteen suhteelliseen polkuun, johon haluat ohjata käyttäjän. Polun tulisi olla sama kuin &appTitle;-laajennuksen juuren. Esimerkiksi:">

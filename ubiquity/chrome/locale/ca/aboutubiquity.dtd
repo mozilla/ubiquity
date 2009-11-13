@@ -19,15 +19,15 @@ Sincerely,
 
 
 -->
-<!ENTITY ubiquity.pagetitle.About "Quant a &amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.Settings "Configuració i aparences de l'&amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.YourCommands "Ordres de l'&amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.LocalizeCmd "Ordres de l'&amp;appTitle; - Plantilla de localització">
-<!ENTITY ubiquity.pagetitle.Support "Assistència de l'&amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.HackUbiquity "Editor d'ordres de l'&amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Ordre de l'&amp;appTitle; d'una font en què no es pot confiar">
-<!ENTITY ubiquity.pagetitle.ResetUbiquity "Reinicia l'&amp;appTitle;">
-<!ENTITY ubiquity.pagetitle.bug19warning "&amp;appTitle;, tenim uh-oh!">
+<!ENTITY ubiquity.pagetitle.About "Quant a &appTitle;">
+<!ENTITY ubiquity.pagetitle.Settings "Configuració i aparences de l'&appTitle;">
+<!ENTITY ubiquity.pagetitle.YourCommands "Ordres de l'&appTitle;">
+<!ENTITY ubiquity.pagetitle.LocalizeCmd "Ordres de l'&appTitle; - Plantilla de localització">
+<!ENTITY ubiquity.pagetitle.Support "Assistència de l'&appTitle;">
+<!ENTITY ubiquity.pagetitle.HackUbiquity "Editor d'ordres de l'&appTitle;">
+<!ENTITY ubiquity.pagetitle.ConfirmAddCommand "Ordre de l'&appTitle; d'una font en què no es pot confiar">
+<!ENTITY ubiquity.pagetitle.ResetUbiquity "Reinicia l'&appTitle;">
+<!ENTITY ubiquity.pagetitle.bug19warning "&appTitle;, tenim uh-oh!">
 <!-- Translators: for the moment, do not translate appTitle, as it's used everywhere! -->
 <!ENTITY ubiquity.tagline.About "No navegueu pel Web, ordeneu-lo.">
 <!ENTITY ubiquity.tagline.Settings "Configuració i aparences">
@@ -36,11 +36,11 @@ Sincerely,
 <!ENTITY ubiquity.tagline.Support "Ajuda!">
 <!ENTITY ubiquity.tagline.HackUbiquity "Remeneu-ho.">
 <!-- Page Titles for all documents in this DTD -->
-<!ENTITY ubiquity.pagetip.About "Podeu arribar a aquesta pàgina sempre que vulgueu amb l'ordre &amp;ldquo;help&amp;rdquo;.">
-<!ENTITY ubiquity.pagetip.Settings "You can get to this page at any time using the  &ldquo;change ubiquity settings&rdquo; command.">
-<!ENTITY ubiquity.pagetip.YourCommands "You can get to this page at any time using the &ldquo;list ubiquity commands&rdquo; command.">
-<!ENTITY ubiquity.pagetip.Support "You can get to this page at any time using the  &ldquo;get support&rdquo; command.">
-<!ENTITY ubiquity.pagetip.HackUbiquity "You can get to this page at any time using the  &ldquo;write ubiquity commands&rdquo; command.">
+<!ENTITY ubiquity.pagetip.About "Podeu arribar a aquesta pàgina sempre que vulgueu amb l'ordre «ajuda».">
+<!ENTITY ubiquity.pagetip.Settings "Podeu arribar a aquesta pàgina en qualsevol moment fent servir l'ordre «canvia els paràmetres de l'ubiquity».">
+<!ENTITY ubiquity.pagetip.YourCommands "Podeu arribar a aquesta pàgina en qualsevol moment fent servir l'ordre «llista els paràmetres de l'ubiquity».">
+<!ENTITY ubiquity.pagetip.Support "Podeu arribar a aquesta pàgina en qualsevol moment fent servir l'ordre «aconsegueix ajuda».">
+<!ENTITY ubiquity.pagetip.HackUbiquity "Podeu arribar a aquesta pàgina en qualsevol moment fent servir l'ordre «escriu ordres de l'ubiquity».">
 <!-- Page header taglines -->
 <!ENTITY ubiquity.generic.ImportTemplate "Importa d'una plantilla">
 <!ENTITY ubiquity.generic.LaunchExternalEd "Executa un editor extern">
@@ -63,52 +63,52 @@ Sincerely,
 
 
 -->
-<!ENTITY ubiqutiy.about.WhatIsUbiquity "Què és l'&amp;appTitle;?">
-<!ENTITY ubiqutiy.about.WhatIsParagraph1 "L'&amp;appTitle;? és un complement del Firefox que us permet donar-li ordres introduint ordres en un quadre de diàleg especial.">
+<!ENTITY ubiqutiy.about.WhatIsUbiquity "Què és l'&appTitle;?">
+<!ENTITY ubiqutiy.about.WhatIsParagraph1 "L'&appTitle;? és un complement del Firefox que us permet donar-li ordres introduint ordres en un quadre de diàleg especial.">
 <!ENTITY ubiqutiy.about.WhatIsParagraph2 "Les ordres són dreceres d'accions habituals a la xarxa; poden servir-vos per a simplificar tasques repetitives per tal que sigueu més ràpid.">
-<!ENTITY ubiqutiy.about.WhatIsParagraph3 "El millor de l'&amp;appTitle; és que tothom pot escriure una ordre i compartir-lo amb la resta del món, de la mateixa manera que des de la xarxa hom pot escriure-hi pàgines i compartir informació amb tothom.">
-<!ENTITY ubiqutiy.about.LearnHow "Apreneu com utilitzar l'&amp;appTitle;">
+<!ENTITY ubiqutiy.about.WhatIsParagraph3 "El millor de l'&appTitle; és que tothom pot escriure una ordre i compartir-lo amb la resta del món, de la mateixa manera que des de la xarxa hom pot escriure-hi pàgines i compartir informació amb tothom.">
+<!ENTITY ubiqutiy.about.LearnHow "Apreneu com utilitzar l'&appTitle;">
 <!ENTITY ubiqutiy.about.TutorialButton "Feu clic aquí per a seguir una guia d'aprenentatge interactiva">
-<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Més informació de com utilitzar l'&amp;appTitle;">
+<!ENTITY ubiqutiy.about.MoreOnUsingUbiquity "Més informació de com utilitzar l'&appTitle;">
 <!ENTITY ubiqutiy.about.UsingParagraph1 "Després de seguir la guia bàsica d'aquesta pàgina, podeu aprendre'n més llegint la <a href='&link.extDocs;'>pàgina de documentació avançada</a>.">
-<!ENTITY ubiqutiy.about.UsingParagraph2 "Ajudeu-nos subscrivint-vos al <a href='&link.herdMain;'>Ramat</a>. Això afegirà les vostres dades al <a href='&link.herdDash;'>tauler</a> &mdash; és completament anònim i us ajudarà a fer l'&appTitle; millor i més segur.">
+<!ENTITY ubiqutiy.about.UsingParagraph2 "Ajudeu-nos subscrivint-vos al <a href='&link.herdMain;'>Ramat</a>. Això afegirà les vostres dades al <a href='&link.herdDash;'>tauler</a> — és completament anònim i us ajudarà a fer l'&appTitle; millor i més segur.">
 <!ENTITY ubiqutiy.about.UsingParagraph3 "Per a més informació dels objectius del projecte &appTitle; i els nostres plans per a properes versions, consulteu el nostre <a href='&link.roadmap;'>full de ruta</a>.">
 <!ENTITY ubiqutiy.about.UsingParagraph4 "L'&appTitle; és un projecte d'equip amb col·laboradors d'arreu del món. Si voleu saber alguns dels qui han col·laborat, consulteu la <a href='&link.credits;'>pàgina de crèdits</a>.">
-<!ENTITY ubiqutiy.about.Thanks "Gràcies per utilitzar l'&amp;appTitle; &amp;appVersion;!">
+<!ENTITY ubiqutiy.about.Thanks "Gràcies per utilitzar l'&appTitle; &appVersion;!">
 <!ENTITY ubiquity.about.ThanksParagraph "La versió &appVersion; de l'&appTitle; resol els errors més significatius d'interfície d'usuari i rendiments trobats en la versió anterior. Amb aquesta versió, hauríeu de notar millores en la velocitat, resposta i precisió de l'analitzador. Per a conèixer més detalls de les novetats, consulteu les <a href='&link.releaseNotes;'>notes de versió de l'&appTitle; &appVersion;</a>.">
 <!-- End common elements -->
 <!ENTITY ubiquity.settings.Skins "Aparences">
 <!ENTITY ubiquity.settings.ButtonEditCustomSkin "Edita l'aparença personalitzada">
 <!ENTITY ubiquity.settings.KeyCombination "Combinació de tecles">
-<!ENTITY ubiquity.settings.InvokingUbiquity "Invoca l'&amp;appTitle; en prémer:">
-<!ENTITY ubiquity.settings.ChangeShortcut "Click above to <strong>Change</strong> the keyboard shortcut used to open &amp; close &appTitle;.">
+<!ENTITY ubiquity.settings.InvokingUbiquity "Invoca l'&appTitle; en prémer:">
+<!ENTITY ubiquity.settings.ChangeShortcut "Feu clic a la drecera de teclat de <strong>Canvia</strong> que s'utilita per a obrir i tancar el &appTitle;.">
 <!ENTITY ubiquity.settings.LangSettings "Paràmetres lingüístics">
-<!ENTITY ubiquity.settings.LangSettingsParagraph1 "Parser 2 is &appTitle;'s experimental next-generation parser and will not work with all commands. However, it supports multiple languages.">
-<!ENTITY ubiquity.settings.UseParser2 "Use Parser 2 (the next generation parser)">
+<!ENTITY ubiquity.settings.LangSettingsParagraph1 "El Parser 2 és un analitzador de pròxima generació experimental de l'&appTitle; i no funcionarà amb totes les ordres. No obstant això, ja permet utilitzar-hi diferents llengües.">
+<!ENTITY ubiquity.settings.UseParser2 "Utiltiza el Parser 2 (l'analitzador de pròxima generació)">
 <!ENTITY ubiquity.settings.SelectLanguage "Llengua:">
 <!ENTITY ubiquity.settings.MiscSettings "Paràmetres miscel·lanis">
 <!ENTITY ubiquity.settings.MaxSuggestions "Nombre màxim de suggeriments:">
 <!ENTITY ubiquity.settings.Parser2Context "Parser 2">
-<!ENTITY ubiquity.settings.Parser2Details "Parser 2 can do external calls to web services to figure out what your input is, and provide you with suggested actions based on that information. This currently results in a large number of api calls being made, and is therefore disabled by default.">
+<!ENTITY ubiquity.settings.Parser2Details "El Parser 2 permet fer crides externes a serveis web per a esbrinar-ne l'entrada, i proporcionar-vos accions suggerides d'acord amb la informació. Això actualment implica un gran nombre de crides d'interfície, i està inhabilitat per defecte.">
 <!ENTITY ubiquity.settings.Parser2EnableExternal "Habilita les crides externes per a totes les consultes del Parser 2">
 <!ENTITY ubiquity.settings.NotificationWarning "Si esteu fent servir el Growl per a Windows, assegureu-vos que s'està executant. Si no, no rebreu cap notificació.">
 <!ENTITY ubiquity.settings.NotificationLinuxNote "Per a rebre <a href='&link.libNotify;'>notificacions libnotify</a> quan sou a Linux, caldrà primer que instal·leu libnotify-bin amb el gesto de paquets Synaptic a l'Ubuntu, o bé executant <code>sudo aptitude install libnotify-bin</code>  l'equivalent a la vostra distribució.">
 <!ENTITY ubiquity.settings.NotificationSettings "Paràmetres de notificació">
-<!ENTITY ubiquity.settings.NotificationParagraph1 "L'Ubiquity realitza un ampli ús de les notificacions transparents no modals. Al Mac OS X, es pot aconseguir fent servir el Growl. Al Windows, es mostren com a notificacions <a href='&link.snarl;'>Snarl</a>, notificacions <a href='&link.growlWin;'>Growl per a Windows</a>, o bé notificacions de &ldquo;torradora&rdquo; a l'extrem inferior dret de la pantalla. Si teniu instal·lat el <a href='&link.snarl;'>Snarl</a> i funcionant, l'Ubiquity provarà de detectar-lo automàticament i utilitzar-lo per a enviar-ne notificacions.">
+<!ENTITY ubiquity.settings.NotificationParagraph1 "L'Ubiquity realitza un ampli ús de les notificacions transparents no modals. Al Mac OS X, es pot aconseguir fent servir el Growl. Al Windows, es mostren com a notificacions <a href='&link.snarl;'>Snarl</a>, notificacions <a href='&link.growlWin;'>Growl per a Windows</a>, o bé notificacions de “torradora” a l'extrem inferior dret de la pantalla. Si teniu instal·lat el <a href='&link.snarl;'>Snarl</a> i funcionant, l'Ubiquity provarà de detectar-lo automàticament i utilitzar-lo per a enviar-ne notificacions.">
 <!ENTITY ubiquity.settings.NotificationEnable "Habilita els serveis de notificació">
 <!ENTITY ubiquity.settings.CustomSkin "Editor d'aparença personalitzada">
 <!ENTITY ubiquity.settings.SaveSkin "Desa">
 <!ENTITY ubiquity.settings.SaveSkinAs "Anomena i desa">
 <!ENTITY ubiquity.settings.ShareSkin "Comparteix">
-<!ENTITY ubiquity.settings.SaveNotice "En clicar a Desa s'actualitza automàticament l'aspecte de l'&amp;appTitle;">
+<!ENTITY ubiquity.settings.SaveNotice "En clicar a Desa s'actualitza automàticament l'aspecte de l'&appTitle;">
 <!ENTITY ubiquity.settings.Bug449Warning "Els canvis que feu a una aparença personalitzada no es veuran fins que no reinicieu el vostre navegador. Es tracta d'un <a href='&link.bug449;'>error conegut</a>.">
 <!-- Everything from here down is page by page in no particular page order -->
-<!ENTITY ubiquity.commandlist.SubscriptionDetails "Teniu &amp;cmdCount; ordres en els canals d'ordres. | Heu deixat la subscripció de <a href='cmdlist.xhtml#graveyard'>&amp;unsubCount; canals d'ordres</a>. | &amp;helpLink;">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "All the commands that &appTitle; recognizes are listed in the right column.  The black text is the command's name (what you type into &appTitle; to use it).  The grey text explains what the command does.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "La columna esquerra mostra tots els &amp;ldquo;canals&amp;rdquo; en què l'&amp;appTitle; està subscrit. Cada canal conté diferents ordres.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Podeu visualitzar la pàgina ordenada per canals o per ordres. Cliqueu a qualsevol dels enllaços al costat de &amp;ldquo;ordena per&amp;rdquo;, a continuació.">
+<!ENTITY ubiquity.commandlist.SubscriptionDetails "Teniu &cmdCount; ordres en els canals d'ordres. | Heu deixat la subscripció de <a href='cmdlist.xhtml#graveyard'>&unsubCount; canals d'ordres</a>. | &helpLink;">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph1 "Totes les ordres que reconeix l'&appTitle; es llisten a la columna de la dreta. El text en negreta és el nom de l'orde (allò que escriviu des de l'&appTitle;). El text en gris explica què fa l'ordre.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph2 "La columna esquerra mostra tots els &ldquo;canals&rdquo; en què l'&appTitle; està subscrit. Cada canal conté diferents ordres.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph3 "Podeu visualitzar la pàgina ordenada per canals o per ordres. Cliqueu a qualsevol dels enllaços al costat de &ldquo;ordena per&rdquo;, a continuació.">
 <!ENTITY ubiquity.commandlist.CommandHelpParagraph4 "Si hi ha cap ordre que no voleu, desmarqueu la casella que hi ha al seu costat. Podeu tornar a activar l'ordre de nou tornant a marcar-la.">
-<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "If there's a whole command feed you don't want, click the &ldquo;[unsubscribe]&rdquo; link beneath the feed name.  All of the commands in the feed will stop working.  If you change your mind, you can re-subscribe at the bottom of the page.">
+<!ENTITY ubiquity.commandlist.CommandHelpParagraph5 "Si hi ha tot un canal d'ordres que no voleu, cliqueu a l'enllaç &ldquo;[deixa la subscripció]&rdquo; al costat del nom del canal. Totes les ordres del canal deixaran de funcionar. Si canvieu d'idea, sempre us podreu tornar a subscriure des de la part inferior de la pàgina.">
 <!ENTITY ubiquity.commandlist.SubscribedFeeds "Canals subscrits">
 <!ENTITY ubiquity.commandlist.AvailableCommands "Ordres">
 <!ENTITY ubiquity.commandlist.SortBy "Ordena per:">
@@ -117,17 +117,17 @@ Sincerely,
 <!ENTITY ubiquity.commandlist.SortByEnabled "Habilitada">
 <!ENTITY ubiquity.commandlist.SortByCommand "Nom de l'ordre">
 <!ENTITY ubiquity.commandlist.UnsubscribedFeeds "Canals no subscrits">
-<!ENTITY ubiquity.commandlist.GraveYardText "Estàveu subcrit a aquests. Si els voleu de nou, feu clic a l'enllaç de sota &amp;ldquo;[torna a subscriure-m'hi]&amp;rdquo;.">
+<!ENTITY ubiquity.commandlist.GraveYardText "Estàveu subcrit a aquests. Si els voleu de nou, feu clic a l'enllaç de sota &ldquo;[torna a subscriure-m'hi]&rdquo;.">
 <!-- About chrome/content/about.xhtml -->
 <!ENTITY ubiquity.support.GetHelp "Obteniu ajuda">
-<!ENTITY ubiquity.support.GetHelpParagraph1 "Due to &appTitle;'s unusual nature as a Labs experiment, you may run into problems while using it.There are a number of places you can go for help with &appTitle;.">
-<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a>is a community-driven support site. Many common &appTitle; problems already have answers there, and if you can't find an answer to your particular question, you can start a new topic.">
-<!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='&link.supportMailList;'>Our Google Group/Mailing List</a> is useful for discussion of command development, user interface, feature suggestions, as well as other high-level discussions.">
-<!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='&link.wikiMain;'>The &appTitle; Wiki</a> also has information about the entire &appTitle; project, including documentation, tutorials, and links to older versions of &appTitle;.">
+<!ENTITY ubiquity.support.GetHelpParagraph1 "Atès que l'&appTitle; és encara un projecte experimental, us podeu trobar amb problemes quan l'empreu. Hi ha diferents llocs on podeu demanar ajuda sobre l'&appTitle;.">
+<!ENTITY ubiquity.support.GetHelpParagraph2 "<a href='&link.supportGSFN;'>Get Satisfaction</a> és un lloc web d'assistència d'enfocament comunitari. Molts problemes comuns de l'&appTitle; potser ja hi tenen una resposta, i si no trobeu la resposta a un de particular, podeu iniciar un fil de discussió.">
+<!ENTITY ubiquity.support.GetHelpParagraph3 "<a href='&link.supportMailList;'>El nostre grup de Google / llista de correu</a> és un lloc útil per a parlar del desenvolupament de les ordres, la interfície d'usuari, suggerir-hi característiques, i també discussions d'alt nivell.">
+<!ENTITY ubiquity.support.GetHelpParagraph4 "<a href='&link.wikiMain;'>El wiki de l'&appTitle; Wiki</a> té també informació del projecte &appTitle; sencer, incloent-hi documentació, guies d'aprenentatge, i enllaços a versions antigues de l'&appTitle;.">
 <!ENTITY ubiquity.support.ReportBugs "Informa d'un error">
-<!ENTITY ubiquity.support.ReportBugsParagraph1 "We are working on an automated bug report service, but for the time being you should report any reproducible problems you find using Get Satisfaction or through our Google Group/Mailing List. Please include any information you have about how to best reproduce the bug.">
-<!ENTITY ubiquity.support.ResetUbiquity "S'està reiniciant l'&amp;appTitle;">
-<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Si el &appTitle; no respon, pot caler realitzar un reinici per a restaurar el &appTitle; i els seus paràmetres per defecte abans d'utilitzar-lo de nou. Per a realitzar un reinici, <a href='&chrome.reset;'>feu clic aquí</a> &mdash; accepteu les nostres disculpes per les molèsties!">
+<!ENTITY ubiquity.support.ReportBugsParagraph1 "Estem trebalant en un servei automàtic d'informe d'incidències, però ara mateix encara haureu d'informar d'un problema reproduïble fent servir 'Get Satisfaction' o a través de la nostra llista de correu / grup de Google. Si us plau, incloeu-hi sempre tota la informació que pugueu per tal de reproduir el millor possible l'error.">
+<!ENTITY ubiquity.support.ResetUbiquity "S'està reiniciant l'&appTitle;">
+<!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Si el &appTitle; no respon, pot caler realitzar un reinici per a restaurar el &appTitle; i els seus paràmetres per defecte abans d'utilitzar-lo de nou. Per a realitzar un reinici, <a href='&chrome.reset;'>feu clic aquí</a> — accepteu les nostres disculpes per les molèsties!">
 <!-- Settings chrome/content/settings.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "Editor d'ordres de l'&appTitle;">
 <!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Introduïu noves ordres</strong> en l'àrea a continuació. Es desaran automàticament a mesura que escriviu, i podran utilitzar-se al moment des del mode d'entrada d'ordres.">
