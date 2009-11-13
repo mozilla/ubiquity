@@ -44,7 +44,7 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
-var gPrefs = Utils.Application.prefs;
+var gPrefs = Utils.prefs;
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 

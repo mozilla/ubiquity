@@ -542,6 +542,7 @@ function testUtilsIsEmpty() {
 
 function testUtilsListenOnce() {
   this.skipIfXPCShell();
+
   var {assertEquals} = this;
   var {document} = Utils.currentChromeWindow;
   var i = 0, type = "foo";
@@ -564,6 +565,19 @@ function testUtilsListenOnce() {
     document.dispatchEvent(event);
   }
   assertEquals(i, 2);
+}
+
+function testUtilsPrefs() {
+  this.skipIfXPCShell();
+
+  var {prefs} = Utils;
+  var p = "extensions.ubiquity.test";
+  this.assertEquals(prefs.getValue(p, p), p);
+  for each (let v in ["str", true, 42]) {
+    prefs.setValue(p, v);
+    this.assertEquals(prefs.getValue(p), v);
+    prefs.deleteBranch(p);
+  }
 }
 
 function testL10nUtilsPropertySelector() {

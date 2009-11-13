@@ -82,7 +82,7 @@ var CmdUtils = {
   // Ubiquity 0.5.x supports parser versions 1 and 2.
 
   get parserVersion parserVersion() (
-    Application.prefs.getValue("extensions.ubiquity.parserVersion", 1)),
+    Utils.prefs.getValue("extensions.ubiquity.parserVersion", 1)),
 
   // === {{{ CmdUtils.maxSuggestions }}} ===
   //
@@ -438,13 +438,13 @@ CmdUtils.UserCode = {
     ")$"),
 
   setCode: function UC_setCode(code) {
-    Application.prefs.setValue(this.COMMANDS_PREF, code);
+    Utils.prefs.setValue(this.COMMANDS_PREF, code);
     //Refresh any code editor tabs that might be open
     Utils.tabs.reload(this.EDITOR_RE);
   },
 
   getCode: function UC_getCode()
-    Application.prefs.getValue(this.COMMANDS_PREF, ""),
+    Utils.prefs.getValue(this.COMMANDS_PREF, ""),
 
   appendCode: function UC_appendCode(code){
     this.setCode(this.getCode() + code);

@@ -1151,8 +1151,8 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
 }
 {
-  let locale = /^\w+/(Application.prefs.getValue("general.useragent.locale",
-                                                 "en")) + "";
+  let locale = Utils.prefs.getValue("general.useragent.locale", "en");
+  locale = /^\w{0,}/(locale)[0];
   let langName = noun_type_lang_wikipedia.getLangName(locale);
   if (langName)
     noun_type_lang_wikipedia._defaults.push(

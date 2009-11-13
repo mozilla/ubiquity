@@ -123,7 +123,7 @@ AlertMessageService.prototype = {
     else {
       if ("exception" in msg) {
         let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
-        if (Utils.Application.prefs.getValue(SHOW_ERR_PREF, false))
+        if (Utils.prefs.getValue(SHOW_ERR_PREF, false))
           text += " (" + msg.exception + ")";
         else
           return;

@@ -51,7 +51,7 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
-const {prefs} = Utils.Application;
+const {prefs} = Utils;
 const DEFAULT_PREVIEW_URL = "resource://ubiquity/preview.html";
 const DEFAULT_MAX_SUGGESTIONS = 5;
 const PREF_MAX_SUGGESTIONS = "extensions.ubiquity.maxSuggestions";

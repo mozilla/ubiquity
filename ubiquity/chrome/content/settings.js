@@ -73,7 +73,7 @@ function onDocumentLoad() {
 
   // set the external calls control to the correct value:
   $("#external-calls-on-all-queries")[0].checked =
-    Application.prefs.getValue(PREF_NFE, 0);
+    Utils.prefs.getValue(PREF_NFE, 0);
 
   $("#max-suggestions").change(function changeMaxSuggestions() {
     CommandManager.maxSuggestions = this.value;
@@ -106,7 +106,7 @@ function changeLanguageSettings() {
 }
 
 function changeExternalCallSettings() {
-  var {prefs} = Application;
+  var {prefs} = Utils;
   var externalCallsOnAllQueries =
     +$("#external-calls-on-all-queries")[0].checked;
   if (externalCallsOnAllQueries !== prefs.getValue(PREF_NFE, 0)) {

@@ -39,8 +39,8 @@
 
 function UbiquityPopupMenu(contextMenu, ubiquityMenu, ubiquitySeparator,
                            cmdSuggester) {
-  var maxSuggs =
-    2 * Application.prefs.getValue("extensions.ubiquity.maxSuggestions", 5);
+  var maxSuggs = 2 * gUbiquity.Utils.prefs.getValue(
+    "extensions.ubiquity.maxSuggestions", 5);
 
   function contextPopupShowing(event) {
     var {menupopup} = ubiquityMenu;

@@ -49,7 +49,12 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+var gPrefBranch = (
+  Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2));
+
 var Utils = {
+  toString: function toString() "[object UbiquityUtils]",
+
   // === {{{ Utils.currentChromeWindow }}} ===
   //
   // This property is a reference to the application chrome window
@@ -81,27 +86,29 @@ var Utils = {
 
 for each (let f in [
   // === {{{ Utils.Application }}} ===
-  // Shortcut to
-  // [[https://developer.mozilla.org/en/FUEL/Application|Application]].
-  function Application() (Cc["@mozilla.org/fuel/application;1"]
-                          .getService(Ci.fuelIApplication)),
-
-  // === {{{ Utils.json }}} ===
-  // Shortcut to {{{nsIJSON}}}.
-
-  function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
+  // Shortcut to [[https://developer.mozilla.org/en/FUEL/Application]].
+  function Application() (
+    Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication)),
 
   // === {{{ Utils.IOService }}} ===
   // Shortcut to {{{nsIIOService}}}.
+  function IOService() (
+    Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService)),
 
-  function IOService() (Cc["@mozilla.org/network/io-service;1"]
-                        .getService(Ci.nsIIOService)),
+  // === {{{ Utils.PrefService }}} ===
+  // Shortcut to {{{nsIPrefService}}}.
+  function PrefService() (
+    Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService)),
 
   // === {{{ Utils.WindowMediator }}} ===
   // Shortcut to {{{nsIWindowMediator}}}.
+  function WindowMediator() (
+    Cc["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Ci.nsIWindowMediator)),
 
-  function WindowMediator() (Cc["@mozilla.org/appshell/window-mediator;1"]
-                             .getService(Ci.nsIWindowMediator)),
+  // === {{{ Utils.json }}} ===
+  // A cached {{{nsIJSON}}} instance.
+  function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
   // === {{{ Utils.appName }}} ===
   //
@@ -109,9 +116,8 @@ for each (let f in [
   // found in {{{nsIXULAppInfo}}}.
   // Examples values are "Firefox", "Songbird", "Thunderbird".
 
-  function appName() (Cc["@mozilla.org/xre/app-info;1"]
-                      .getService(Ci.nsIXULAppInfo)
-                      .name),
+  function appName() (
+    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name),
 
   // === {{{ Utils.appWindowType }}} ===
   //
@@ -129,9 +135,8 @@ for each (let f in [
   // This property provides the platform name found in {{{nsIXULRuntime}}}.
   // See: https://developer.mozilla.org/en/OS_TARGET
 
-  function OS() (Cc["@mozilla.org/xre/app-info;1"]
-                 .getService(Ci.nsIXULRuntime)
-                 .OS),
+  function OS() (
+    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS),
 
   ]) defineLazyProperty(Utils, f);
 
@@ -437,10 +442,7 @@ function openUrlInBrowser(urlString, postData) {
 
   var browserWindow = Utils.currentChromeWindow;
   var browser = browserWindow.gBrowser;
-
-  var prefService = (Cc["@mozilla.org/preferences-service;1"]
-                     .getService(Ci.nsIPrefBranch));
-  var openPref = prefService.getIntPref("browser.link.open_newwindow");
+  var openPref = gPrefBranch.getIntPref("browser.link.open_newwindow");
 
   //3 (default in Firefox 2 and above): In a new tab
   //2 (default in SeaMonkey and Firefox 1.5): In a new window
@@ -450,7 +452,7 @@ function openUrlInBrowser(urlString, postData) {
     if (openPref === 3) {
       let tab = browser.addTab(
         urlString, null, null, postInputStream, false, false);
-      let fore = !prefService.getBoolPref("browser.tabs.loadInBackground");
+      let fore = !gPrefBranch.getBoolPref("browser.tabs.loadInBackground");
       let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
       if (fore ^ shiftKey) browser.selectedTab = tab;
       return;
@@ -815,7 +817,7 @@ function convertToUnicode(fromCharset, text) {
 // displays caller's name, concats arguments and appends a line feed.
 
 Utils.dump = function niceDump() {
-  if (!Utils.Application.prefs.getValue("extensions.ubiquity.dump", false))
+  if (!Utils.prefs.getValue("extensions.ubiquity.dump", false))
     return;
   var {caller} = arguments.callee;
   dump((caller ? caller.name + ": " : "") +
@@ -910,6 +912,50 @@ function defineLazyProperty(obj, func, name) {
     return obj[name] = func.call(obj);
   });
 }
+
+// == {{{ Utils.prefs }}} ==
+//
+// Proxy to an {{{nsIPrefBranch2}}} service.
+
+const {PREF_STRING, PREF_BOOL, PREF_INT} = Ci.nsIPrefBranch;
+const {nsISupportsString} = Ci;
+
+Utils.prefs = {
+  // === {{{ Utils.prefs.getValue(name, value) }}} ===
+  // === {{{ Utils.prefs.setValue(name, value) }}} ===
+  // Copycats of
+  // [[https://developer.mozilla.org/en/Toolkit_API/extIPreferenceBranch]]'s
+  // namesakes. Also available in the names of {{{get()}}} and {{{set()}}}.
+  get: function prefs_get(name, value) {
+    var type = gPrefBranch.getPrefType(name);
+    return (
+      type === PREF_STRING
+      ? gPrefBranch.getComplexValue(name, nsISupportsString).data :
+      type === PREF_BOOL
+      ? gPrefBranch.getBoolPref(name) :
+      type === PREF_INT
+      ? gPrefBranch.getIntPref(name)
+      : value);
+  },
+  set: function prefs_set(name, value) {
+    switch (typeof value) {
+      case "string": {
+        let ss = (Cc["@mozilla.org/supports-string;1"]
+                  .createInstance(nsISupportsString));
+        ss.data = value;
+        return gPrefBranch.setComplexValue(name, nsISupportsString, ss);
+      }
+      case "boolean": return gPrefBranch.setBoolPref(name, value);
+      case "number": return gPrefBranch.setIntPref(name, value);
+    }
+    throw TypeError("invalid pref value");
+  },
+  __noSuchMethod__:
+  function prefs__noSuchMethod__(name, args)
+    gPrefBranch[name].apply(gPrefBranch, args),
+};
+Utils.prefs.getValue = Utils.prefs.get;
+Utils.prefs.setValue = Utils.prefs.set;
 
 // === {{{ Utils.BrowserTab(tabbrowser_tab) }}} ===
 //

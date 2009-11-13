@@ -59,7 +59,7 @@ Cu.import("resource://ubiquity/modules/skinsvc.js");
 
 const {Application} = Utils;
 
-var gServices, gWebJsModule, gPrefs = Application.prefs;
+var gServices, gWebJsModule, gPrefs = Utils.prefs;
 
 const RESET_SCHEDULED_PREF = "extensions.ubiquity.isResetScheduled";
 const VERSION_PREF ="extensions.ubiquity.lastversion";

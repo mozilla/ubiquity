@@ -191,7 +191,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
 const PREF_NNSITES = "extensions.ubiquity.noNotificationSites";
 
 function onDomainWithCommands(document, commands) {
-  var reminderPeriod = Utils.Application.prefs.getValue(
+  var reminderPeriod = Utils.prefs.getValue(
     "extensions.ubiquity.commandReminderPeriod", 0);
   if (!reminderPeriod) return;
   var {domain} = document;
@@ -207,12 +207,12 @@ function onDomainWithCommands(document, commands) {
 }
 
 function noNotificationSites() (
-  Utils.Application.prefs.getValue(PREF_NNSITES, "").split("|"));
+  Utils.prefs.getValue(PREF_NNSITES, "").split("|"));
 
 function addToNoNotifications(site) {
   let nnSites = noNotificationSites().filter(Boolean);
   nnSites.push(site);
-  Utils.Application.prefs.setValue(PREF_NNSITES, nnSites.join("|"));
+  Utils.prefs.setValue(PREF_NNSITES, nnSites.join("|"));
 }
 
 function showEnabledCommandNotification(targetDoc, commandName) {

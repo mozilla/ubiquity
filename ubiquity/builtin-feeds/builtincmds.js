@@ -52,7 +52,7 @@ const BugReport = ("http://getsatisfaction.com/" +
                    "mozilla/products/mozilla_ubiquity");
 const Support = "about:ubiquity?support";
 
-const {prefs} = Application;
+const {prefs} = Utils;
 
 Cu.import("resource://ubiquity/modules/setup.js");
 

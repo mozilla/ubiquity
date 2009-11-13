@@ -153,7 +153,7 @@ function doSubmit(info) {
   jQuery.ajax(
     {contentType: "application/json",
      type: "POST",
-     url: Application.prefs.getValue(BUG_REPORT_PREF, ""),
+     url: Utils.prefs.getValue(BUG_REPORT_PREF, ""),
      data: Utils.encodeJson(info),
      dataType: "json",
      success: function(data, textStatus) {

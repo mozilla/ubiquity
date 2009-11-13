@@ -219,9 +219,8 @@ Parser.prototype = {
     var nouns = this._nounTypes = {};
     var localNounIds = this._nounTypeIdsWithNoExternalCalls = {};
     var nounIdsForGivenInputs = {};
-    this.doNounFirstExternals =
-      Utils.Application.prefs.getValue(
-        "extensions.ubiquity.doNounFirstExternals", 0);
+    this.doNounFirstExternals = Utils.prefs.getValue(
+      "extensions.ubiquity.doNounFirstExternals", 0);
     for each (let verb in verbs) {
       for each (let arg in verb.arguments) {
         let nt = arg.nountype;

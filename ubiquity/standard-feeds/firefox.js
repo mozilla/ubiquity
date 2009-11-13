@@ -7,13 +7,13 @@ Cu.import("resource://gre/modules/utils.js");
 XML.prettyPrinting = XML.ignoreWhitespace = false;
 
 var extApplication = { // helper method for correct quitting/restarting
-  _warnOnClose: function app__warnOnClose( event ) {
+  _warnOnClose: function app__warnOnClose(event) {
     var prefs = {
       close:   "browser.tabs.warnOnClose",
       restart: "browser.warnOnRestart",
       quit:    "browser.warnOnQuit"
     };
-    if (!(event in prefs) || Application.prefs.getValue(prefs[event], true)) {
+    if (!(event in prefs) || Utils.prefs.getValue(prefs[event], true)) {
       var os = Cc["@mozilla.org/observer-service;1"]
                .getService(Ci.nsIObserverService);
       var cancelQuit = Cc["@mozilla.org/supports-PRBool;1"]

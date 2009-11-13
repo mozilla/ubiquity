@@ -378,11 +378,11 @@ function buildUnsubscribedFeeds() {
 }
 
 function setSortMode(newSortMode) {
-  Application.prefs.setValue(SORT_MODE_PREF, newSortMode);
+  Utils.prefs.setValue(SORT_MODE_PREF, newSortMode);
 }
 
 function getSortMode() (
-  Application.prefs.getValue(SORT_MODE_PREF, "feed"));
+  Utils.prefs.getValue(SORT_MODE_PREF, "feed"));
 
 function changeSortMode(newSortMode) {
   setSortMode(newSortMode);

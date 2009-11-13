@@ -52,6 +52,9 @@
 // {{{cmdManager}}} is the {{{CommandManager}}} instance.
 
 function Ubiquity(msgPanel, textBox, cmdManager) {
+  Cu.import("resource://ubiquity/modules/utils.js", this);
+  Cu.import("resource://ubiquity/modules/contextutils.js", this);
+
   this.__msgPanel = msgPanel;
   this.__textBox = textBox;
   this.__cmdManager = cmdManager;
@@ -59,9 +62,7 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   this.__lastValue = "";
   this.__previewTimerID = -1;
   this.__lastKeyEvent = {};
-
-  Cu.import("resource://ubiquity/modules/utils.js", this);
-  Cu.import("resource://ubiquity/modules/contextutils.js", this);
+  this.__prefs = this.Utils.prefs;
 
   window.addEventListener("mousemove", this, false);
 
@@ -127,12 +128,12 @@ Ubiquity.prototype = {
 
   // === {{{ Ubiquity#inputDelay }}} ===
 
-  get inputDelay() Application.prefs.getValue(
+  get inputDelay() this.__prefs.getValue(
     "extensions.ubiquity.inputDelay", this.__DEFAULT_INPUT_DELAY),
 
   // === {{{ Ubiquity#inputLimit }}} ===
 
-  get inputLimit() Application.prefs.getValue(
+  get inputLimit() this.__prefs.getValue(
     "extensions.ubiquity.inputLimit", this.__DEFAULT_INPUT_LIMIT),
 
   __onblur: function U__onBlur() {
@@ -326,7 +327,7 @@ Ubiquity.prototype = {
   openWindow: function U_openWindow() {
     ({focusedWindow : this.__focusedWindow,
       focusedElement: this.__focusedElement}) = document.commandDispatcher;
-    var xy = Application.prefs.getValue("extensions.ubiquity.openAt", "");
+    var xy = this.__prefs.getValue("extensions.ubiquity.openAt", "");
     if (xy) {
       let [x, y] = xy.split(",");
       this.__msgPanel.openPopupAtScreen(x, y);

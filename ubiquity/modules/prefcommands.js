@@ -36,12 +36,9 @@
 
 var EXPORTED_SYMBOLS = ["PrefCommands"];
 
-var ubiquityProtocol = Components.utils.import(
-  "resource://ubiquity/modules/ubiquity_protocol.js"
-);
-
-var Application = Components.classes["@mozilla.org/fuel/application;1"]
-                  .getService(Components.interfaces.fuelIApplication);
+const Cu = Components.utils;
+Cu.import("resource://ubiquity/modules/utils.js");
+Cu.import("resource://ubiquity/modules/ubiquity_protocol.js");
 
 var PrefCommands = {
   COMMANDS_PREF : "extensions.ubiquity.commands",
@@ -50,11 +47,12 @@ var PrefCommands = {
   __feedManager: null,
 
   __subscribeFeed: function subscribeFeed() {
-    this.__feedManager.addSubscribedFeed({url: this.id,
-                                          type: this.type,
-                                          sourceUrl: this.id,
-                                          canAutoUpdate: true,
-                                          isBuiltIn: true});
+    this.__feedManager.addSubscribedFeed({
+      url: this.id,
+      type: this.type,
+      sourceUrl: this.id,
+      canAutoUpdate: true,
+      isBuiltIn: true});
   },
 
   init : function(feedManager) {
@@ -67,7 +65,7 @@ var PrefCommands = {
       return;
 
     var oldType = this.type;
-    Application.prefs.setValue(
+    Utils.prefs.setValue(
       this.FEED_TYPE_PREF,
       newType
     );
@@ -84,21 +82,21 @@ var PrefCommands = {
   },
 
   setCode : function(code) {
-    Application.prefs.setValue(
+    Utils.prefs.setValue(
       this.COMMANDS_PREF,
       code
     );
   },
 
   getCode : function() {
-    return Application.prefs.getValue(
+    return Utils.prefs.getValue(
       this.COMMANDS_PREF,
       ""
     );
   },
 
   get type() {
-    return Application.prefs.getValue(
+    return Utils.prefs.getValue(
       this.FEED_TYPE_PREF,
       "commands"
     );
@@ -109,11 +107,8 @@ var PrefCommands = {
   }
 };
 
-ubiquityProtocol.setPath(
+setPath(
   "command-editor-code",
-  function makeDataUri() {
-    let uri = ("data:application/x-javascript," +
-               encodeURIComponent(PrefCommands.getCode()));
-    return uri;
-  }
-);
+  function makeDataUri() (
+    "data:application/x-javascript," +
+    encodeURIComponent(PrefCommands.getCode())));

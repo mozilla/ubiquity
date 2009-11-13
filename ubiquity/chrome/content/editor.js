@@ -33,15 +33,15 @@ var Editor = {
     $("#" + value).show();
   },
   onLoad: function () {
-    var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
+    var editor = Utils.prefs.getValue(this.EDITOR_PREF, null);
     $("#editorInputBox").val(editor);
     this.onFeedTypeChange();
   },
   onSave: function () {
-    Application.prefs.setValue(this.EDITOR_PREF, $("#editorInputBox").val());
+    Utils.prefs.setValue(this.EDITOR_PREF, $("#editorInputBox").val());
   },
   launchEditor: function (value) {
-    var editor = Application.prefs.getValue(this.EDITOR_PREF, null);
+    var editor = Utils.prefs.getValue(this.EDITOR_PREF, null);
     //errorToLocalize
     if (!editor) {
       displayMessage("please set your external editor");
@@ -162,7 +162,7 @@ function saveAs() {
 
     //Save as a javascript file
     //fp.appendFilters(nsIFilePicker.filterAll);
-    fp.appendFilter("Javascript","*.js");
+    fp.appendFilter("Javascript", "*.js");
 
     var rv = fp.show();
     if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace) {

@@ -1061,10 +1061,7 @@ function testTagCommand() {
                .getService(Ci.nsITaggingService);
 
 
-  var Application = Components.classes["@mozilla.org/fuel/application;1"]
-      .getService(Components.interfaces.fuelIApplication);
-
-  var testURI = Application.activeWindow.activeTab.uri;
+  var testURI = Utils.currentTab.uri;
 
   // for cleanup
   var isBookmarked = bmsvc.isBookmarked(testURI);
@@ -1085,11 +1082,9 @@ function testTagCommand() {
                                        onCM);
 
   function onCM(cmdManager) {
-    var {Application} = Utils;
-
     function uriHasTags(aTags) {
-      let aURI = Application.activeWindow.activeTab.uri;
-      let tags = tagsvc.getTagsForURI(aURI, {});
+      let {uri} = Utils.currentTab;
+      let tags = tagsvc.getTagsForURI(uri, {});
       let result = aTags.every(function(aTag) {
           return tags.indexOf(aTag) > -1;
       });

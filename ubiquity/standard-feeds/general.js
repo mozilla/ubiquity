@@ -257,7 +257,7 @@ function googleTranslate(html, langCodePair, callback, pblock) {
         case 200: {
           var alt, dsl = data.responseData.detectedSourceLanguage;
           if (dsl === langCodePair.to &&
-              dsl !== (alt = Application.prefs.getValue(PREF_LANG_ALT, ""))) {
+              dsl !== (alt = Utils.prefs.getValue(PREF_LANG_ALT, ""))) {
             langCodePair.to = alt;
             googleTranslate.call(self, html, langCodePair, callback, pblock);
           }
@@ -349,7 +349,7 @@ CmdUtils.CreateCommand({
   // Returns the default language for translation.  order of defaults:
   // PREF_LANG_DEPRECATED > PREF_LANG_DEFAULT > general.useragent.locale > "en"
   _getDefaultLang: function translate__getDefaultLang() {
-    var {prefs} = Application;
+    var {prefs} = Utils;
     var userLocale = prefs.getValue("general.useragent.locale", "en");
     var defaultLang = (prefs.getValue(PREF_LANG_DEPRECATED, "") ||
                        prefs.getValue(PREF_LANG_DEFAULT, userLocale));

@@ -53,8 +53,6 @@ const TRUSTED_DOMAINS_PREF = "extensions.ubiquity.trustedDomains";
 const REMOTE_URI_TIMEOUT_PREF = "extensions.ubiquity.remoteUriTimeout";
 const COMMANDS_BIN_PREF = "extensions.ubiquity.commands.bin";
 
-var gPrefs = Utils.Application.prefs;
-
 function DefaultFeedPlugin(feedManager, messageService, webJsm,
                            languageCode, baseUri, parserVersion) {
   this.type = DEFAULT_FEED_TYPE;
@@ -145,7 +143,7 @@ function isTrustedUrl(commandsUrl, mimetype) {
   var {scheme, host} = Utils.uri(commandsUrl);
   if (scheme !== "https") return false;
 
-  let domains = gPrefs.getValue(TRUSTED_DOMAINS_PREF, "").split(",");
+  let domains = Utils.prefs.getValue(TRUSTED_DOMAINS_PREF, "").split(",");
   for each (let d in domains) if (d === host) return true;
 
   return false;
@@ -202,7 +200,7 @@ function makeCodeSource(feedInfo, headerSources, footerSources) {
     codeSource = new RemoteUriCodeSource(
       feedInfo,
       (feedInfo.canAutoUpdate
-       ? gPrefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10)
+       ? Utils.prefs.getValue(REMOTE_URI_TIMEOUT_PREF, 10)
        : -1));
   else if (LocalUriCodeSource.isValidUri(srcUri))
     codeSource = new LocalUriCodeSource(srcUri.spec);
@@ -353,10 +351,10 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
 
 var BuiltInFeedProto = {
   getJSONStorage: function BF_getJSONStorage()
-    Utils.json.decode(gPrefs.getValue(COMMANDS_BIN_PREF, "{}")),
+    Utils.json.decode(Utils.prefs.getValue(COMMANDS_BIN_PREF, "{}")),
   setJSONStorage: function BF_setJSONStorage(obj) {
     var data = Utils.json.encode(obj);
-    gPrefs.setValue(COMMANDS_BIN_PREF, data);
+    Utils.prefs.setValue(COMMANDS_BIN_PREF, data);
     return Utils.json.decode(data);
   },
 };

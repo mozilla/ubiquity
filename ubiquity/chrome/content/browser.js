@@ -46,7 +46,6 @@ addEventListener("load", function onload() {
   removeEventListener("load", onload, false);
 
   const Cu = Components.utils;
-  const {prefs} = Application;
 
   var jsm = {};
   Cu.import("resource://ubiquity/modules/utils.js", jsm);
@@ -54,6 +53,8 @@ addEventListener("load", function onload() {
   Cu.import("resource://ubiquity/modules/cmdmanager.js", jsm);
   Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
   Cu.import("resource://ubiquity/modules/prefkeys.js", jsm);
+
+  const {prefs} = jsm.Utils;
 
   function ubiquitySetup() {
     var services = jsm.UbiquitySetup.createServices();
