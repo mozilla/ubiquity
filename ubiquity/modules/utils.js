@@ -76,7 +76,7 @@ var Utils = {
   // A reference to the focused tab, wrapped with {{{Utils.BrowserTab}}}.
 
   get currentTab currentTab()
-    new BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
+    BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
   __globalObject: this,
 };
@@ -381,7 +381,6 @@ function uri(spec, defaultUri) {
     return uri(defaultUri);
   }
 }
-
 // === {{{ Utils.url(spec, defaultUrl) }}} ===
 // Alias of {{{Utils.uri()}}}.
 Utils.url = uri;
@@ -390,6 +389,7 @@ Utils.url = uri;
 // This function opens the given URL in the user's browser, using
 // their current preferences for how new URLs should be opened (e.g.,
 // in a new window vs. a new tab, etc).
+// Returns the opened page as {{{Utils.BrowserTab}}} or {{{ChromeWindow}}}.
 //
 // {{{urlString}}} is a string corresponding to the URL to be
 // opened.
@@ -405,7 +405,7 @@ function openUrlInBrowser(urlString, postData) {
     if (postData instanceof Ci.nsIInputStream)
       postInputStream = postData;
     else {
-      if (typeof postData === "object") // json -> string
+      if (typeof postData === "object")
         postData = paramsToString(postData, "");
 
       var stringStream = (Cc["@mozilla.org/io/string-input-stream;1"]
@@ -436,16 +436,16 @@ function openUrlInBrowser(urlString, postData) {
       let fore = !gPrefBranch.getBoolPref("browser.tabs.loadInBackground");
       let {shiftKey} = (browserWindow.gUbiquity || 0).lastKeyEvent || 0;
       if (fore ^ shiftKey) browser.selectedTab = tab;
-      return;
+      return BrowserTab(tab);
     }
     if (openPref === 2) {
-      browserWindow.openDialog(
+      return browserWindow.openDialog(
         "chrome://browser/content", "_blank", "all,dialog=no",
         urlString, null, null, postInputStream);
-      return;
     }
   }
   browserWindow.loadURI(urlString, null, postInputStream, false);
+  return BrowserTab(browser.mCurrentTab);
 }
 
 // === {{{ Utils.focusUrlInBrowser(urlString) }}} ===
@@ -455,8 +455,8 @@ function openUrlInBrowser(urlString, postData) {
 
 function focusUrlInBrowser(urlString) {
   var [tab] = Utils.tabs.get(urlString);
-  if (tab) tab.focus();
-  else Utils.openUrlInBrowser(urlString);
+  (tab || (tab = openUrlInBrowser(urlString))).focus();
+  return tab;
 }
 
 // === {{{ Utils.getCookie(domain, name) }}} ===
@@ -922,9 +922,10 @@ Utils.prefs.setValue = Utils.prefs.set;
 // https://developer.mozilla.org/en/FUEL/BrowserTab
 // (minus {{{events}}}, to avoid memory leaks).
 
-function BrowserTab(tabbrowser_tab) {
-  this.raw = tabbrowser_tab;
-}
+function BrowserTab(tabbrowser_tab) ({
+  raw: tabbrowser_tab,
+  __proto__: BrowserTab.prototype,
+});
 BrowserTab.prototype = {
   constructor: BrowserTab,
   raw: null,
@@ -952,21 +953,26 @@ BrowserTab.prototype = {
   valueOf: function BT_valueOf() this.index,
   load: function BT_load(uriString, referrer, charset) {
     this.browser.loadURI(uriString, referrer, charset);
+    return this;
   },
   focus: function BT_focus() {
     var {tabbrowser} = this;
     tabbrowser.selectedTab = this.raw;
     tabbrowser.focus();
+    return this;
   },
   close: function BT_close() {
     this.tabbrowser.removeTab(this.raw);
+    return this;
   },
   moveBefore: function BT_moveBefore(target) {
     this.tabbrowser.moveTabTo(this.raw, (target || 0).index || target);
+    return this;
   },
   moveToEnd: function BT_moveEnd() {
     var {tabbrowser} = this;
     tabbrowser.moveTabTo(this.raw, tabbrowser.browsers.length);
+    return this;
   },
 };
 
@@ -984,12 +990,13 @@ Utils.tabs = {
     var tabs = [];
     for each (let win in Utils.chromeWindows) {
       let {mTabs} = win.gBrowser, i = -1, l = mTabs.length;
-      while (++i < l) tabs.push(new BrowserTab(mTabs[i]));
+      while (++i < l) tabs.push(BrowserTab(mTabs[i]));
     }
-    return (name == null
-            ? tabs
-            : tabs.filter(function eachTab({document: d}) (d.title === name ||
-                                                           d.URL   === name)));
+    return (
+      name == null
+      ? tabs
+      : tabs.filter(function _tabsift({document: d}) (d.title === name ||
+                                                      d.URL   === name)));
   },
 
   // === {{{ Utils.tabs.search(matcher, maxResults) }}} ===
