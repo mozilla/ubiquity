@@ -51,6 +51,10 @@ li {
   background-color: #66bb00;
 }
 
+.page-tip{
+  text-align: center;
+}
+
 .col-two{
   width: 225px;
   float: left;

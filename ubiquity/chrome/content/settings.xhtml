@@ -16,7 +16,8 @@
 
   <base href="chrome://ubiquity/content" />
 
-  <link rel="icon" type="image/x-icon" id="favicon" href="chrome://ubiquity/skin/icons/favicon.ico" />
+  <link rel="icon" type="image/x-icon" id="favicon"
+    href="chrome://ubiquity/skin/icons/favicon.ico" />
   <link rel="stylesheet" type="text/css" media="all" href="web-content.css" />
 
   <script src="resource://ubiquity/scripts/jquery.js"></script>
@@ -37,7 +38,7 @@
 
 <br clear="all" />
 
-<div style="text-align:center;">
+<div class="page-tip">
   <p>&ubiquity.pagetip.Settings;</p>
 </div>
 
@@ -71,8 +72,15 @@
 
   <h2>&ubiquity.settings.LangSettings;</h2>
   <p>&ubiquity.settings.LangSettingsParagraph1;</p>
-  <p><label for="use-new-parser-checkbox"><input type="checkbox" id="use-new-parser-checkbox" onchange="changeLanguageSettings();" /><strong>&ubiquity.settings.UseParser2;</strong></label></p>
-  <p>&ubiquity.settings.SelectLanguage; <select id="language-select" onchange="changeLanguageSettings();"></select></p>
+  <p><label for="use-new-parser-checkbox">
+    <input type="checkbox" id="use-new-parser-checkbox"
+      onchange="changeLanguageSettings();" />
+    <strong>&ubiquity.settings.UseParser2;</strong>
+  </label></p>
+  <p>
+    &ubiquity.settings.SelectLanguage;
+    <select id="language-select" onchange="changeLanguageSettings();"></select>
+  </p>
 
   <h2>&ubiquity.settings.MiscSettings;</h2>
   <p>

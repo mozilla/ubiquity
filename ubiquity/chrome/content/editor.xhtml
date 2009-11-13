@@ -28,24 +28,24 @@
 
   <script type="text/javascript">
   <![CDATA[
-    var file; 
-    var lastModifiedTime = 0; 
+    var file;
+    var lastModifiedTime = 0;
     function initialize() {
       document.getElementById("feedTypeMenu").value = PrefCommands.type;
     }
-    function launch() { 
-      file = Editor.launchEditor(document.getElementById('editor-div')._editor.getContent()); 
-      if (file != null && file.exists()) { 
-        lastModifiedTime = file.lastModifiedTime; 
-        setTimeout(watchFile, 500) 
-      } 
-    } 
-    function watchFile() { 
-      if (file != null && file.exists()) { 
-        time = file.lastModifiedTime; 
+    function launch() {
+      file = Editor.launchEditor(document.getElementById('editor-div')._editor.getContent());
+      if (file != null && file.exists()) {
+        lastModifiedTime = file.lastModifiedTime;
+        setTimeout(watchFile, 500);
+      }
+    }
+    function watchFile() {
+      if (file != null && file.exists()) {
+        time = file.lastModifiedTime;
         if (time > lastModifiedTime) {
-          document.getElementById('editor-div')._editor.setContent(Editor.readFile(file)); 
-          PrefCommands.setCode(document.getElementById('editor-div')._editor.getContent()); 
+          document.getElementById('editor-div')._editor.setContent(Editor.readFile(file));
+          PrefCommands.setCode(document.getElementById('editor-div')._editor.getContent());
           lastModifiedTime = time;
         }
         setTimeout(watchFile, 500);
@@ -57,8 +57,7 @@
                               var editor = new BespinEditor();
                               editor.initUI('editor-div', window);
                             },
-                            false
-    );  
+                            false);
   ]]>
   </script>
 
@@ -71,7 +70,7 @@
 
 <br clear="all" />
 
-<div style="text-align:center;">
+<div class="page-tip">
   <p>&ubiquity.pagetip.HackUbiquity;</p>
 </div>
 
