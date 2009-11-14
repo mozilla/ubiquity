@@ -44,10 +44,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = CmdUtils =
-//
-// This is a small library of general utility functions
-// for use by command code.  Everything clients need is contained within
-// the {{{CmdUtils}}} namespace.
+// A library of general utility functions for use by command code.
+// Everything clients need is contained within the {{{CmdUtils}}} namespace.
 
 var EXPORTED_SYMBOLS = ["CmdUtils"];
 
@@ -67,11 +65,11 @@ var L = LocalizationUtils.propertySelector(
 var {commandSource} = UbiquitySetup.createServices();
 
 var CmdUtils = {
+  toString: function toString() "[object CmdUtils]",
   __globalObject: null,
   __nextId: null,
 
   // === {{{ CmdUtils.parserVersion }}} ===
-  //
   // This attribute contains the parser version that Ubiquity is
   // using. A command can provide different options to
   // {{{CmdUtils.CreateCommand()}}} and behave differently
@@ -85,8 +83,7 @@ var CmdUtils = {
     Utils.prefs.getValue("extensions.ubiquity.parserVersion", 1)),
 
   // === {{{ CmdUtils.maxSuggestions }}} ===
-  //
-  // Gets the current number of max suggestions.
+  // The current number of max suggestions.
 
   get maxSuggestions maxSuggestions() (
     Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
@@ -100,31 +97,26 @@ for each (let g in ["document", "documentInsecure",
 }
 
 // == From NounUtils ==
-//
 // {{{CmdUtils}}} inherits [[#modules/nounutils.js|NounUtils]].
 
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // == From ContextUtils ==
-//
 // {{{CmdUtils}}} imports and wraps the following three methods from
 // [[#modules/contextutils.js|ContextUtils]].
 
 // === {{{ CmdUtils.getHtmlSelection() }}} ===
-//
 // Returns a string containing the html representation of the
 // user's current selection, i.e. text including tags.
 
 // === {{{ CmdUtils.getSelection() }}} ===
-//
 // Returns a string containing the text and just the text of the user's
 // current selection, i.e. with html tags stripped out.
 
 // === {{{ CmdUtils.setSelection(content, options) }}} ===
-//
 // Replaces the current selection with new content.
 //
-// {{{content}}} The html string to set as the selection.
+// {{{content}}} is the HTML string to set as the selection.
 //
 // {{{options}}} is a dictionary; if it has a {{{text}}} property then
 // that value will be used in place of the html if we're in
@@ -139,21 +131,17 @@ for each (let m in ["getHtmlSelection", "getSelection", "setSelection"]) {
       return ContextUtils.@(c, x, y);
     };
     ]]></>.toString().replace(/@/g, m));
-  if (m[0] === 'g')
-    CmdUtils.__defineGetter__(m[3].toLowerCase() + m.slice(4), CmdUtils[m]);
+  CmdUtils["__define" + m[0].toUpperCase() + "etter__"](
+    m[3].toLowerCase() + m.slice(4), CmdUtils[m]);
 }
 
 // === {{{ CmdUtils.log(a, b, c, ...) }}} ===
-//
 // See [[#modules/utils.js|Utils]]{{{.log}}}.
 
-function log() {
-  Utils.log.apply(Utils, arguments);
-}
+function log() Utils.log.apply(Utils, arguments);
 
 // === {{{ CmdUtils.getWindow() }}} ===
 // === {{{ CmdUtils.getDocument() }}} ===
-//
 // Gets the window/document of the current tab in a secure way.
 
 function getWindow() Utils.currentChromeWindow.content;
@@ -161,7 +149,6 @@ function getDocument() getWindow().document;
 
 // === {{{ CmdUtils.getWindowInsecure() }}} ===
 // === {{{ CmdUtils.getDocumentInsecure() }}} ===
-//
 // Gets the window/document object of the current tab, without the
 // safe {{{XPCNativeWrapper}}}.
 // While this allows access to scripts in the content,
@@ -172,10 +159,9 @@ function getWindowInsecure() getWindow().wrappedJSObject;
 function getDocumentInsecure() getDocument().wrappedJSObject;
 
 // === {{{ CmdUtils.getHiddenWindow() }}} ===
-//
 // Returns the application's hidden window.  (Every Mozilla
 // application has a global singleton hidden window.  This is used by
-// {{{ CmdUtils.getWindowSnapshot() }}}, but probably doesn't need
+// {{{CmdUtils.getWindowSnapshot()}}}, but probably doesn't need
 // to be used directly by command feeds.
 
 function getHiddenWindow() (
@@ -184,11 +170,10 @@ function getHiddenWindow() (
   .hiddenDOMWindow);
 
 // === {{{ CmdUtils.getCommand(id) }}} ===
-//
 // Gets a reference to a Ubiquity command by its ID or reference name
 // (the first name in English).
-// ID should be preferred whenever possible,
-// as reference name isn't cannonical across feeds.
+// ID should be used whenever possible,
+// as reference names aren't cannonical across feeds.
 //
 // {{{id}}} is the id or name of the command.
  
@@ -196,8 +181,7 @@ function getCommand(id) commandSource.getCommand(id);
 
 // === {{{ CmdUtils.executeCommand(command, args) }}} ===
 // === {{{ CmdUtils.previewCommand(command, pblock, args) }}} ===
-//
-// Executes/previews an existing Ubiquity command.
+// Executes/Previews an existing Ubiquity command.
 //
 // {{{command}}} is either the id or name of the Ubiquity command that will be
 // executed or a direct reference to the command.
@@ -223,7 +207,6 @@ function previewCommand(command, pblock, args, mods) {
 }
 
 // === {{{ CmdUtils.geocodeAddress(location, callback) }}} ===
-//
 // This function uses the Yahoo geocoding service to take a text
 // string of an address/location and turn it into a structured
 // geo-location.
@@ -263,11 +246,10 @@ function geocodeAddress(location, callback) this.__globalObject.jQuery.ajax({
 });
 
 // === {{{ CmdUtils.injectCss(css) }}} ===
-//
 // Injects CSS source code into the current tab's document.
 // Returns the injected style elment for later use.
 //
-// {{{ css }}} The CSS source code to inject, in plain text.
+// {{{css}}} is the CSS source code to inject, in plain text.
 
 function injectCss(css) {
   var doc = getDocument();
@@ -277,11 +259,10 @@ function injectCss(css) {
 }
 
 // === {{{ CmdUtils.injectHtml(html) }}} ===
-//
 // Injects HTML source code at the end of the current tab's document.
 // Returns the injected elements as a jQuery object.
 //
-// {{{ html }}} The HTML source code to inject, in plain text.
+// {{{html}}} is the HTML source code to inject, in plain text.
 
 function injectHtml(html) {
   const {jQuery} = this.__globalObject;
@@ -290,17 +271,15 @@ function injectHtml(html) {
 }
 
 // === {{{ CmdUtils.copyToClipboard(text) }}} ===
-//
 // This function places the passed-in text into the OS's clipboard.
 // If the text is empty, the copy isn't performed.
 //
 // {{{text}}} is a plaintext string that will be put into the clipboard.
 
-function copyToClipboard(text) ((text = String(text)) &&
-                                (Utils.clipboard.text = text));
+function copyToClipboard(text) (
+  (text = String(text)) && (Utils.clipboard.text = text));
 
 // === {{{ CmdUtils.injectJavascript(src, callback) }}} ===
-//
 // Injects Javascript from a URL into the current tab's document,
 // and calls an optional callback function once the script has loaded.
 //
@@ -326,7 +305,6 @@ function injectJavascript(src, callback) {
 }
 
 // === {{{ CmdUtils.loadJQuery(callback) }}} ===
-//
 // Injects the jQuery javascript library into the current tab's document.
 //
 // {{{callback}}} gets passed back the {{{jQuery}}} object once it is loaded.
@@ -340,7 +318,6 @@ function loadJQuery(callback) {
 }
 
 // === {{{ CmdUtils.onPageLoad(callback) }}} ===
-//
 // Sets up a function to be run whenever a page is loaded.
 //
 // {{{ callback }}} Non-optional callback function.  Each time a new
@@ -353,7 +330,6 @@ function onPageLoad(callback) {
 }
 
 // === {{{ CmdUtils.onUbiquityLoad(callback) }}} ===
-//
 // Sets up a function to be run whenever a Ubiqutiy instance is created.
 //
 // {{{ callback }}} Non-optional callback function. Each time a new
@@ -379,7 +355,6 @@ function setLastResult(result) {
 }
 
 // === {{{ CmdUtils.getGeoLocation(callback) }}} ===
-//
 // Uses Geo-IP lookup to get the user's physical location.
 // Will cache the result.
 // If a result is already in the cache, this function works both
@@ -458,61 +433,56 @@ CmdUtils.UserCode = {
 // == SNAPSHOT ==
 
 // === {{{ CmdUtils.getTabSnapshot(tab, options) }}} ===
-//
 // Creates a thumbnail image of the contents of a given tab.
-// {{{ tab }}} a tab object.
-// {{{ options }}} see getWindowSnapshot().
+//
+// {{{tab}}} is a {{{BrowserTab}}} instance.
+//
+// See {{{getWindowSnapshot()}}} for {{{options}}}.
 
-function getTabSnapshot(tab, options) {
-  var win = tab.document.defaultView;
-  return getWindowSnapshot(win, options);
-}
+function getTabSnapshot(tab, options) (
+  getWindowSnapshot(tab.document.defaultView, options));
 
 // === {{{ CmdUtils.getWindowSnapshot(win, options) }}} ===
-//
 // Creates a thumbnail image of the contents of the given window.
-// {{{ window }}} a window object.
-// {{{ options }}} an optional dictionary which can contain any or all
-// of the following properties:
-// {{{ options.width }}} the desired width of the image.  Height will be
-// determined automatically to maintain the aspect ratio.
-// If not provided, the default width is 200 pixels.
-// {{{ options.callback }}} A function which, if provided, will be
-// called back with the image data.
 //
-// If a callback is not provided, this function will return a URL
-// pointing to a JPEG of the image data.
+// {{{window}}} is a {{{Window}}} object.
+//
+// {{{options}}} is an optional dictionary which can contain any or all
+// of the following properties:
+// *{{{width (= 200)}}}\\
+// Height will be determined automatically to maintain the aspect ratio.
+// *{{{type (= "jpeg")}}}\\
+// *{{{quality (= 80)}}}\\
+// *{{{background (= "rgb(255,255,255)")}}}\\
 
 function getWindowSnapshot(win, options) {
-  if(!options) options = {};
+  var opts = {
+    width: 200,
+    type: "jpeg",
+    quality: 80,
+    background: "rgb(255,255,255)",
+  };
+  for (let k in options) opts[k] = options[k];
 
-  var hiddenWindow = getHiddenWindow();
-  var thumbnail = hiddenWindow.document.createElementNS(
+  var {width} = opts, {innerWidth, innerHeight} = win;
+  var canvas = getHiddenWindow().document.createElementNS(
     "http://www.w3.org/1999/xhtml", "canvas");
+  canvas.mozOpaque = true;
+  canvas.width = width;
+  canvas.height = width * innerHeight / innerWidth;
 
-  var width = options.width || 200; // Default to 200px width
-
-  var widthScale =  width / win.innerWidth;
-  var aspectRatio = win.innerHeight / win.innerWidth;
-
-  thumbnail.mozOpaque = true;
-  thumbnail.width = width;
-  thumbnail.height = thumbnail.width * aspectRatio;
-  var ctx = thumbnail.getContext("2d");
+  var widthScale =  width / innerWidth;
+  var ctx = canvas.getContext("2d");
   ctx.scale(widthScale, widthScale);
-  ctx.drawWindow(win, win.scrollX, win.scrollY,
-                 win.innerWidth, win.innerWidth, "rgb(255,255,255)");
+  ctx.drawWindow(win, win.scrollX, win.scrollY, innerWidth, innerWidth,
+                 opts.background);
 
-  var data = thumbnail.toDataURL("image/jpeg", "quality=80");
-  if (options.callback) {
-    options.callback(data);
-  } else {
-    return data;
-  }
+  return canvas.toDataURL(
+    "image/" + opts.type,
+    opts.type === "jpeg" ? "quality=" + opts.quality : "");
 }
 
 // === {{{ CmdUtils.getImageSnapshot(url, callback) }}} ===
-//
 // Takes a snapshot of an image residing at the passed-in URL. This
 // is useful for when you want to get the bits of an image when it
 // is hosted elsewhere. The bits can then be manipulated at will
@@ -541,165 +511,118 @@ function getImageSnapshot(url, callback) {
 // == PASSWORDS AND OTHER SENSITIVE INFORMATION ==
 
 // === {{{ CmdUtils.savePassword(opts) }}} ===
-//
 // Saves a pair of username/password (or username/api key) to the password
 // manager.
 //
-// {{{opts}}} A dictionary object which must have the following properties:
-// {{{opts.name}}} a unique string used to identify this username/password
-// pair; for instance, you can use the name of your command.
-// {{{opts.username}}} the username to store
-// {{{opts.password}}} the password (or other private data, such as an API key)
+// {{{opts}}} is a dictionary object which must have the following properties:
+// *{{{name}}} : a unique string used to identify this username/password
+// pair (for instance, you can use the name of your command)
+// *{{{username}}} : the username to store
+// *{{{password}}} : the password (or other private data, such as an API key)
 // corresponding to the username
 
 function savePassword(opts) {
-  var passwordManager = Cc["@mozilla.org/login-manager;1"].
-                        getService(Ci.nsILoginManager);
-  var nsLoginInfo = new Components.
-                        Constructor("@mozilla.org/login-manager/loginInfo;1",
-                                    Ci.nsILoginInfo,
-                                    "init");
-  //var loginInfo = new nsLoginInfo(hostname,
-  //                                formSubmitURL,
-  //                                httprealm,
-  //                                username,
-  //                                password,
-  //                                usernameField,
-  //                                passwordField);
-  var loginInfo = new nsLoginInfo("chrome://ubiquity/content",
-                                  "UbiquityInformation" + opts.name,
-                                  null,
-                                  opts.username,
-                                  opts.password,
-                                  "",
-                                  "");
+  var loginManager =
+    Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
+  var nsLoginInfo = new Components.Constructor(
+    "@mozilla.org/login-manager/loginInfo;1",
+    Ci.nsILoginInfo,
+    "init");
+  var hostname = "chrome://ubiquity/content";
+  var formSubmitURL = "UbiquityInformation" + opts.name;
+  var loginInfo = new nsLoginInfo(
+    hostname, formSubmitURL, null, opts.username, opts.password, "", "");
 
-  try {
-     passwordManager.addLogin(loginInfo);
-  } catch (e) {
+  try { loginManager.addLogin(loginInfo) } catch (e) {
     // "This login already exists."
-    var logins = passwordManager.findLogins({},
-                                            "chrome://ubiquity/content",
-                                            "UbiquityInformation" + opts.name,
-                                            null);
-    for each (var login in logins) {
-      if (login.username === opts.username) {
-        //modifyLogin(oldLoginInfo, newLoginInfo);
-        passwordManager.modifyLogin(login, loginInfo);
-        break;
-      }
+    var logins = loginManager.findLogins(
+      {}, hostname, formSubmitURL, null);
+    for each (var login in logins) if (login.username === opts.username) {
+      loginManager.modifyLogin(login, loginInfo);
+      break;
     }
   }
 }
 
 // === {{{ CmdUtils.retrieveLogins(name) }}} ===
-//
 // Retrieves one or more username/password saved with
 // {{{CmdUtils.savePassword()}}}
 // as an array of objects, each of which takes the form
 // {{{{username: "", password: ""}}}}.
 //
-// {{{name}}} The identifier of the username/password pair to retrieve.
+// {{{name}}} is the identifier of the username/password pair to retrieve.
 // This must match the {{{opts.name}}} that was passed in to
 // {{{savePassword()}}} when the password was stored.
 
 function retrieveLogins(name) [
   {username: login.username, password: login.password}
-  for each (login in (Cc["@mozilla.org/login-manager;1"]
-                      .getService(Ci.nsILoginManager)
-                      .findLogins({},
-                                  "chrome://ubiquity/content",
-                                  "UbiquityInformation" + name,
-                                  null)))];
+  for each (login in (
+    Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager)
+    .findLogins({}, "chrome://ubiquity/content",
+                "UbiquityInformation" + name, null)))];
 
 // == COMMAND CREATION ==
 
 // === {{{ CmdUtils.CreateCommand(options) }}} ===
-//
 // Creates and registers a Ubiquity command.
 //
-// {{{ options }}} is a dictionary object which ** must have the following
-// properties: **
-//
-// {{{ options.name }}} The name of your command, which the user will
-// type into the command line, or choose from the context menu, to
-// activate it.  Cannot contain spaces.  DEPRECATED; use {{{ options.names }}}
-// for Parser2 compatibility.
-//
-// {{{ options.execute }}} The function which gets run when the user
-// executes your command, or the string which is notified or opened (if URL).
+// {{{options}}} is a dictionary object which
+// ** must have the following properties: **
+// *{{{name}}}/{{{names}}}\\
+// The string or array of strings which will be the name or
+// names of your command the user will type into the command line,
+// or choose from the context menu, to activate it.
+// *{{{execute}}}\\
+// The function which gets run when the user executes your command,
+// or the string which is notified or opened (if URL).
 // If your command takes arguments (see below),
 // your execute method will be passed an dictionary object containing
 // the arguments assigned by the parser.
 //
 // ** The following properties are used if you want your command to
 // accept arguments: **
-//
-// {{{ options.takes }}} Defines the primary argument of the command,
-// a.k.a. the direct-object of the verb.  A dictionary object with a
-// single property.  The name of the property will be the display name
-// of the primary argument.  The value of the property must be either a
-// noun type (see
-// https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Nountypes_Reference
-//) which defines what type of values are valid for the argument,
-// a regular expression that filters what the argument can consist of,
-// , a dictionary of keys and values, or simply an array of strings.
-// DEPRECATED!  Use {{{ options.arguments }}} for Parser2 compatibility.
-//
-// {{{ options.modifiers }}} Defines any number of secondary arguments
-// of the command, a.k.a. indirect objects of the verb.  A dictionary
-// object with any number of properties; the name of each property
-// should be a preposition-word ('to', 'from', 'with', etc.), and the
-// value is either the noun type or regular expression for the
-// argument.  The name of the property is the word that the user will
-// type on the command line to invoke the modifier, and the noun type
-// or regular expression determines the range of valid values.
-// DEPRECATED!  Use {{{ options.arguments }}} for Parser2 compatibility.
-//
-// For more about the use of arguments in your command, see
-// https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.1_Author_Tutorial#Commands_with_Arguments
+// *{{{arguments}}}\\
+// Defines the primary arguments of the command.
+// See [[http://bit.ly/Ubiquity05_AuthorTutorial#Commands_with_Arguments]].
 //
 // ** The following properties are optional but strongly recommended to
 // make your command easier for users to learn: **
 //
-// {{{ options.description }}} A string containing a short description
-// of your command, to be displayed on the command-list page. Can include
-// HTML tags.
-//
-// {{{ options.help }}} A string containing a longer description of
+// *{{{description}}}\\
+// An XHTML string containing a short description of your command, to be displayed
+// on the command-list page.
+// *{{{help}}}\\
+// An XHTML string containing a longer description of
 // your command, also displayed on the command-list page, which can go
-// into more depth, include examples of usage, etc. Can include HTML
-// tags.
+// into more depth, include examples of usage, etc.
 //
-// === The following properties are optional: ===
-//
-// {{{ options.icon }}} A string containing the URL of a small image (favicon-sized) to
+// ** The following properties are optional: **
+// *{{{icon}}}\\
+// A URL string pointing to a small image (favicon-sized) to
 // be displayed alongside the name of your command in the interface.
-//
-// {{{ options.author }}} A dictionary object describing the command's
-// author.  Can have {{{options.author.name}}}, {{{options.author.email}}},
-// and {{{options.author.homepage}}} properties, all strings.
-//
-// {{{ options.homepage }}} The URL of the command's homepage, if any.
-//
-// {{{ options.contributors }}} An array of strings naming other people
-// who have contributed to your command.
-//
-// {{{ options.license }}} A string naming the license under which your
-// command is distributed, for example "MPL".
-//
-// {{{ options.preview }}} A description of what your command will do,
+// *{{{author}}}/{{{authors}}}, {{{contributor}}}/{{{contributors}}}\\
+// A plain text or dictionary object (which can have {{{name}}}, {{{email}}},
+// and {{{homepage}}} properties, all plain text)
+// describing the command's author/contributor.
+// Can be an array of them if multiple.
+// *{{{homepage}}}\\
+// A URL string of the command's homepage, if any.
+// *{{{license}}}\\
+// A string naming the license under which your
+// command is distributed, for example {{{"MPL"}}}.
+// *{{{preview}}}\\
+// A description of what your command will do,
 // to be displayed to the user before the command is executed.  Can be
 // either a string or a function.  If a string, it will simply be
 // displayed as-is. If preview is a function, it will be called and
 // passed a {{{pblock}}} argument, which is a reference to the
 // preview display element.  Your function can generate and display
-// arbitrary HTML by setting the value of {{{pblock.innerHTML}}}. If
-// your command takes arguments (see above), your preview method will
-// be passed the direct object as its second argument, and a modifiers
-// dictionary as its third argument.
-//
-// {{{ options.previewDelay }}} Specifies the amount in time, in
+// arbitrary HTML by setting the value of {{{pblock.innerHTML}}}.
+// Use {{{this.previewDefault(pblock)}}} to set the default preview.
+// If your command takes arguments (see above), your preview method will
+// be passed the dictionary as the second argument.
+// *{{{previewDelay}}}\\
+// Specifies the amount in time, in
 // milliseconds, to wait before calling the preview function defined
 // in {{{options.preview}}}. If the user presses a key before this
 // amount of time has passed, then the preview function isn't
@@ -708,8 +631,8 @@ function retrieveLogins(name) [
 // display it once the user has stopped typing for a bit. If
 // {{{options.preview}}} isn't a function, then this option is
 // ignored.
-//
-// {{{ options.previewUrl }}} Specifies the URL which the preview
+// *{{{previewUrl}}}\\
+// Specifies the URL which the preview
 // pane's browser should load before calling the command's preview
 // function. When the command's preview function is called, its
 // {{{pblock}}} argument will be the {{{<body>}}} node of this URL's
@@ -854,26 +777,19 @@ CreateCommand.previewDefault = function previewDefault(pb) {
 // == COMMAND ALIAS CREATION ==
 
 // === {{{ CmdUtils.CreateAlias(options) }}} ===
-//
-// NEW with Ubiquity 0.5.5
-// 
 // Creates and registers an alias to another (target) Ubiquity command. Aliases
 // can be simple synonyms, but they can also specify certain pre-defined
 // argument values to be used in the parse/preview/execution.
 //
-// {{{ options }}} is a dictionary object which ** must have the following
-// properties: **
-//
-// {{{ options.names }}} An array of names for the alias. Do not use the same
-// name as the verb itself.
-//
-// {{{ options.verb }}} (string) the canonical name of the verb which is being
-// aliased. Note, the "canonical name" is the first element of the verb's
-// {{{names}}}. TODO (maybe): let this also accept verb objects or ID's directly.
-//
-// ** The following property is used to specify arguments for the target verb: **
-//
-// {{{ options.givenArgs }}} Specifies pre-determined arguments for the target
+// {{{options}}} is a dictionary object with following properties.
+// *{{{name}}}/{{{names}}}\\
+// The name string or array of strings for the alias.
+// Don't use the same name as the verb itself.
+// *{{{verb}}}\\
+// The canonical name of the verb which is being aliased.
+// Note, the "canonical name" is the first element of the verb's {{{names}}}.
+// *{{{givenArgs}}} (optional)\\
+// Specifies pre-determined arguments for the target
 // verb. This is a hash keyed by semantic roles. The values are the text input
 // value for that argument. The parser will then run that value through the
 // nountype associated with that semantic role for the target verb and use that
@@ -885,8 +801,8 @@ function CreateAlias(options) {
   var CU = this;
   var {verb} = options;
   var cmd = CU.CreateCommand(options);
-  cmd.__defineGetter__("arguments", function alias_lazyArgs() {
-    var target = getCommand(verb);
+  Utils.defineLazyGetter(cmd, "arguments", function alias_lazyArgs() {
+    var target = getCommand(verb) || verb;
     if (!target) return [];
     var args = target.arguments;
     var {givenArgs} = cmd;
@@ -903,8 +819,7 @@ function CreateAlias(options) {
       }
       args = as;
     }
-    delete cmd.arguments;
-    return cmd.arguments = args;
+    return args;
   });
   cmd.execute = function alias_execute(args) {
     CU.executeCommand(verb, args);
@@ -916,7 +831,6 @@ function CreateAlias(options) {
 }
 
 // === {{{ CmdUtils.makeSearchCommand(options) }}} ===
-//
 // A specialized version of {{{CmdUtils.CreateCommand()}}}, this lets
 // you make commands that interface with search engines, without
 // having to write so much boilerplate code.
@@ -924,19 +838,18 @@ function CreateAlias(options) {
 // {{{options}}} as the argument of {{{CmdUtils.CreateCommand()}}},
 // except that instead of {{{options.arguments}}}, {{{options.execute}}},
 // and {{{options.preview}}} you only need a single property:
-//
-// {{{options.url}}} The url of a search results page from the search
-// engine of your choice.  Must contain the literal string
-// {{{{QUERY}}}}, which will be replaced with the user's search term
+// *{{{url}}}\\
+// The URL of a search results page from the search
+// engine of your choice.  Must contain the literal string {{{{QUERY}}}} or
+// {{{%s}}}, which will be replaced with the user's search term
 // to generate a URL that should point to the correct page of search
 // results.  (We're assuming that the user's search term appears in
 // the URL of the search results page, which is true for most search
 // engines.)  For example: {{{http://www.google.com/search?q={QUERY}}}}
 //
 // Also note that {{{options.icon}}} if not passed, will be generated from
-// the url passed in {{{options.url}}}, and {{{options.description}}} if
-// not passed, will be auto generated from a template and
-// {{{options.name}}}.
+// the URL passed in {{{options.url}}}, and {{{options.description}}} if
+// not passed, will be auto generated from a template and {{{options.name}}}.
 //
 // The {{{options.execute}}}, {{{options.preview}}}, and
 // {{{options.takes}}} properties are all automatically generated for you
@@ -946,18 +859,19 @@ function CreateAlias(options) {
 // {{{CmdUtils.CreateCommand()}}}.  You can also override the auto-generated
 // {{{preview()}}} function by providing your own as {{{options.preview}}}.
 //
-// {{{options.postData}}} will make the command use POST instead of GET,
-// and the data (key:value pairs or string) are all passed to the url passed in
-// {{{options.url}}}. Instead of passing the search params in the url, pass
+// *{{{postData}}}\\
+// Will make the command use POST instead of GET,
+// and the data (key:value pairs or string) are all passed to the URL passed in
+// {{{options.url}}}. Instead of passing the search params in the URL, pass
 // it (along with any other params) like so:
-//
-//   {{{postData: {"q": "{QUERY}", "hl": "en"}}}}
-//
-//   {{{postData: "q={QUERY}&hl=en"}}}
-//
+// {{{
+//   postData: {"q": "{QUERY}", "hl": "en"}
+//   postData: "q={QUERY}&hl=en"
+// }}}
 // When this is done, the query will be substituted in as usual.
 //
-// {{{options.defaultUrl}}} specifies the URL that will be opened in the case
+// *{{{defaultUrl}}}\\
+// Specifies the URL that will be opened in the case
 // where the user has not provided a search string.
 //
 // An extra option {{{options.parser}}} can be passed, which will make
@@ -1214,22 +1128,20 @@ function makeSearchCommand(options) {
 }
 
 // === {{{ CmdUtils.makeBookmarkletCommand(options) }}} ===
-//
 // Creates and registers a Ubiquity command based on a bookmarklet.
 // When the command is run, it will invoke the bookmarklet.
 //
 // {{{options}}} as the argument of CmdUtils.CreateCommand, except that
 // you must provide a property called:
-//
-// {{{options.url}}} the url of the bookmarklet code.
-// Must start with "javascript:".
+// *{{{url}}}\\
+// The URL of the bookmarklet code. Must start with {{{javascript:}}}.
 //
 // {{{options.execute}}} and {{{options.preview}}} are generated for you
-// from the url, so all you need to provide is {{{options.url}}} and
+// from the URL., so all you need to provide is {{{options.url}}} and
 // {{{options.name}}}.
 //
 // You can choose to provide other optional properties, which work the
-// same way as they do for {{{CmdUtils.CreateCommand}}}, except that
+// same way as they do for {{{CmdUtils.CreateCommand()}}}, except that
 // since bookmarklets can't take arguments, there's no reason to provide
 // {{{options.arguments}}}.
 
@@ -1237,34 +1149,29 @@ function makeBookmarkletCommand(options) {
   options.execute = function bookmarklet_execute() {
     getWindow().location = options.url;
   };
-
-  if (!options.preview)
-    options.preview = function bookmarklet_preview(pblock) {
+  "preview" in options ||
+    (options.preview = function bookmarklet_preview(pblock) {
       pblock.innerHTML = L("ubiquity.cmdutils.bookmarkletexec", this.name);
-    };
-
+    });
   return this.CreateCommand(options);
 }
 
 // == TEMPLATING ==
 
 // === {{{ CmdUtils.renderTemplate(template, data) }}} ===
-//
-// Renders a template by substituting values from a dictionary into
-// a template string or file. The templating language used is
-// trimpath, which is defined here:
-// http://code.google.com/p/trimpath/wiki/JavaScriptTemplates
+// Renders a {{{template}}} by substituting values from a dictionary.
+// The templating language used is trimpath, which is defined at
+// [[http://code.google.com/p/trimpath/wiki/JavaScriptTemplates]].
 //
 // {{{template}}} can be either a string, in which case the string is used
 // for the template, or else it can be {file: "filename"}, in which
 // case the following happens:
-//    * If the feed is on the user's local filesystem, the file's path
-//      is assumed to be relative and the file's contents are read and
-//      used as the template.
-//
-//    * Otherwise, the file's path is assumed to be a key into a global
-//      object called Attachments, which is defined by the feed.  The
-//      value of this key is used as the template.
+// * If the feed is on the user's local filesystem, the file's path
+//   is assumed to be relative and the file's contents are read and
+//   used as the template.
+// * Otherwise, the file's path is assumed to be a key into a global
+//   object called {{{Attachments}}}, which is defined by the feed.
+//   The value of this key is used as the template.
 //
 // The reason this is done is so that a command feed can be developed
 // locally and then easily deployed to a remote server as a single
@@ -1275,30 +1182,21 @@ function makeBookmarkletCommand(options) {
 // the command feed's code.
 //
 // {{{data}}} is a dictionary of values to be substituted.
-//
-// Returns a string containing the result of processing the template.
 
 function renderTemplate(template, data) {
-  var templStr;
-  if (typeof template == "string")
-    templStr = template;
-  else if (template.file) {
-    if (Utils.url(feed.id).scheme == "file") {
-      var url = Utils.url({uri: template.file, base: feed.id});
-      templStr = Utils.getLocalUrl(url.spec);
-    } else {
-      templStr = Attachments[template.file];
-    }
-  }
+  const {feed, Template, Attachments} = this.__globalObject;
+  if ("file" in template || {})
+    template = (
+      Utils.uri(feed.id).scheme === "file"
+      ? Utils.getLocalUrl(Utils.uri({uri: template.file, base: feed.id}).spec)
+      : Attachments[template.file]);
 
-  var templateObject = this.__globalObject.Template.parseTemplate(templStr);
-  return templateObject.process(data);
+  return Template.parseTemplate(template).process(data);
 }
 
 // == PREVIEW ==
 
 // === {{{ CmdUtils.previewAjax(pblock, options) }}} ===
-//
 // Does an asynchronous request to a remote web service.  It is used
 // just like {{{jQuery.ajax()}}}, which is documented at
 // http://docs.jquery.com/Ajax/jQuery.ajax.
@@ -1310,26 +1208,16 @@ function renderTemplate(template, data) {
 function previewAjax(pblock, options) {
   const {jQuery} = this.__globalObject;
   var xhr;
+  function abort() { if (xhr) xhr.abort() }
+
   var newOptions = {};
-  function abort() {
-    if (xhr)
-      xhr.abort();
-  }
-  for (var key in options) {
-    if (typeof options[key] === "function")
-      newOptions[key] = CmdUtils.previewCallback(pblock,
-                                                 options[key],
-                                                 abort);
-    else
-      newOptions[key] = options[key];
-  }
+  for (var key in options) newOptions[key] = (
+    typeof options[key] === "function"
+    ? CmdUtils.previewCallback(pblock, options[key], abort)
+    : newOptions[key] = options[key]);
 
-  var wrappedXhr;
-  if (newOptions.xhr)
-    wrappedXhr = newOptions.xhr;
-  else
-    wrappedXhr = jQuery.ajaxSettings.xhr; // see: scripts/jquery_setup.js
-
+  // see scripts/jquery_setup.js
+  var wrappedXhr = newOptions.xhr || jQuery.ajaxSettings.xhr;
   function backgroundXhr() {
     var newXhr = wrappedXhr.apply(this, arguments);
     newXhr.mozBackgroundRequest = true;
@@ -1337,101 +1225,66 @@ function previewAjax(pblock, options) {
   }
   newOptions.xhr = backgroundXhr;
 
-  xhr = jQuery.ajax(newOptions);
-  return xhr;
+  return xhr = jQuery.ajax(newOptions);
 }
 
 // === {{{ CmdUtils.previewGet(pblock, url, data, callback, type) }}} ===
-//
-// Does an asynchronous request to a remote web service.  It is used
-// just like {{{jQuery.get()}}}, which is documented at
-// http://docs.jquery.com/Ajax/jQuery.get.
-// The difference is that {{{CmdUtils.previewGet()}}} is designed to handle
-// command previews, which can be canceled by the user between the
-// time that it's requested and the time it displays.  If the preview
-// is canceled, the given callback will not be called.
-
-function previewGet(pblock, url, data, callback, type) {
-  if (typeof data === "function") {
-    callback = data;
-    data = null;
-  }
-
-  return this.previewAjax(pblock,
-                          { type: "GET",
-                            url: url,
-                            data: data,
-                            success: callback,
-                            dataType: type});
-}
-
 // === {{{ CmdUtils.previewPost(pblock, url, data, callback, type) }}} ===
-//
-// Does an asynchronous request to a remote web service.  It is used
-// just like {{{jQuery.post()}}}, which is documented at
-// http://docs.jquery.com/Ajax/jQuery.post.
-// The difference is that {{{CmdUtils.previewPost()}}} is designed to handle
-// command previews, which can be canceled by the user between the
+// Does an asynchronous request to a remote web service.
+// It is used just like {{{jQuery.get()}}}/{{{jQuery.post()}}},
+// which is documented at [[http://docs.jquery.com/Ajax]].
+// The difference is that {{{previewGet()}}}/{{{previewPost()}}} is designed to
+// handle command previews, which can be cancelled by the user between the
 // time that it's requested and the time it displays.  If the preview
-// is canceled, the given callback will not be called.
+// is cancelled, the given callback will not be called.
 
-function previewPost(pblock, url, data, callback, type) {
-  if (typeof data === "function") {
-    callback = data;
-    data = {};
-  }
-
-  return this.previewAjax(pblock,
-                          { type: "POST",
-                            url: url,
-                            data: data,
-                            success: callback,
-                            dataType: type});
-}
+for each (let m in ["Get", "Post"]) eval(<><![CDATA[
+  CmdUtils.preview@ = function preview@(pblock, url, data, callback, type) {
+    if (typeof data === "function") {
+      callback = data;
+      data = null;
+    }
+    return this.previewAjax(pblock, {
+      type: "@",
+      url: url,
+      data: data,
+      success: callback,
+      dataType: type});
+  }]]></>.toString().replace(/@/g, m));
 
 // === {{{ CmdUtils.previewCallback(pblock, callback, abortCallback) }}} ===
-//
 // Creates a 'preview callback': a wrapper for a function which
 // first checks to see if the current preview has been canceled,
 // and if not, calls the real callback.
 //
-// {{{pblock}}}: the preview display element (the same one which is
+// {{{pblock}}} is the preview display element (the same one which is
 // passed in as the first argument to the {{{preview()}}} method of every
 // command.
 //
-// {{{callback}}}: the function to be called if the preview is not
+// {{{callback}}} is the function to be called if the preview is not
 // cancelled.
 //
-// {{{abortCallback}}}: (optional) a function that will be called instead
+// {{{abortCallback}}} is an optional function that will be called instead
 // if the preview is cancelled.
 
 function previewCallback(pblock, callback, abortCallback) {
   var previewChanged = false;
-
   function onPreviewChange() {
-    pblock.removeEventListener("preview-change",
-                               onPreviewChange,
-                               false);
+    pblock.removeEventListener("preview-change", onPreviewChange, false);
     previewChanged = true;
-    if (abortCallback)
-      abortCallback();
+    if (abortCallback) abortCallback();
   }
-
   pblock.addEventListener("preview-change", onPreviewChange, false);
 
   return function wrappedCallback() {
-    if (!previewChanged) {
-      pblock.removeEventListener("preview-change",
-                                 onPreviewChange,
-                                 false);
-      return callback.apply(this, arguments);
-    }
-    return null;
+    if (previewChanged) return null;
+
+    pblock.removeEventListener("preview-change", onPreviewChange, false);
+    return callback.apply(this, arguments);
   };
 }
 
 // === {{{ CmdUtils.previewList(block, htmls, callback, css) }}} ===
-//
 // Creates a simple clickable list in the preview block and
 // returns the list element.
 // * Activating {{{accesskey="0"}}} rotates the accesskeys
@@ -1445,8 +1298,8 @@ function previewCallback(pblock, callback, abortCallback) {
 //
 // {{{callback(id, ev)}}} is the function called
 // when one of the list item becomes focused.
-// * {{{id}}} : one of the keys of {{{htmls}}}
-// * {{{ev}}} : the event object
+// *{{{id}}} : one of the keys of {{{htmls}}}
+// *{{{ev}}} : the event object
 //
 // {{{css}}} is an optional CSS string inserted along with the list.
 
@@ -1495,114 +1348,51 @@ previewList.CSS = "" + <![CDATA[
   ]]>;
 
 // === {{{ CmdUtils.absUrl(data, sourceUrl) }}} ===
-//
-// Fixes relative urls in data (e.g. as returned by AJAX call).
+// Fixes relative URLs in {{{data}}} (e.g. as returned by AJAX call).
 // Useful for displaying fetched content in command previews.
 //
-// {{{data}}}: The data containing relative urls, which can be
-// a HTML string or a jQuery/DOM/XML object.
+// {{{data}}} is the data containing relative URLs, which can be
+// an HTML string or a jQuery/DOM/XML object.
 //
-// {{{sourceUrl}}}: The url used to fetch the data (that is to say; the url to
-// which the relative paths are relative to).
+// {{{sourceUrl}}} is the URL used to fetch the data (that is to say;
+// the URL to which the relative paths are relative to).
 
 function absUrl(data, sourceUrl) {
   switch (typeof data) {
-    case "string": {
-      return data.replace(
-        /\b(href|src|action)=(?![\"\']?[a-z]+:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
-        function au_repl(_, a, q, path) (
-          a + "=" + q + Utils.url({uri: path, base: sourceUrl}).spec + q));
-    }
+    case "string": return data.replace(
+      /\b(href|src|action)=(?![\"\']?[a-z]+:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
+      function absUrl_gsub(_, a, q, path) (
+        a + "=" + q + Utils.url({uri: path, base: sourceUrl}).spec + q));
     case "object": {
       (this.__globalObject.jQuery(data)
        .find("*").andSelf()
-       .each(function au_each() {
+       .each(function absUrl_iter() {
          var attr, path = (this.getAttribute(attr = "href") ||
                            this.getAttribute(attr = "src" ) ||
                            this.getAttribute(attr = "action"));
          if (path !== null)
-           this.setAttribute(attr,
-                             Utils.url({uri: path, base: sourceUrl}).spec);
+           this.setAttribute(
+             attr, Utils.url({uri: path, base: sourceUrl}).spec);
        }));
       return data;
     }
-    case "xml": {
-      return XML(arguments.callee.call(this, data.toXMLString(), sourceUrl));
-    }
+    case "xml": return (
+      XML(arguments.callee.call(this, data.toXMLString(), sourceUrl)));
   }
   return null;
 }
 
 // === {{{ CmdUtils.safeWrapper(func) }}} ===
-//
 // Wraps a function so that exceptions from it are suppressed and notified.
 
 function safeWrapper(func) {
   var {displayMessage} = this.__globalObject;
-  return function safeWrappedFunc() {
-    try {
-      func.apply(this, arguments);
-    } catch (e) {
+  return function safeWrapped() {
+    try { func.apply(this, arguments) } catch (e) {
       displayMessage({
         //errorToLocalize
-        text: ("An exception occurred while running " +
-               func.name + "()."),
-        exception: e,
-      });
+        text: ("An exception occurred while running " + func.name + "()."),
+        exception: e});
     }
   };
 }
-
-// CmdUtils.pluginRegistry
-// A registry of provider plugins for overlord verbs
-// Tricky part is that it must work even if the plugin is registered
-// after the pluginNoun is created.
-CmdUtils._pluginRegistry = {};
-
-CmdUtils._getPluginsForCmd = function(cmdId) {
-  return CmdUtils._pluginRegistry[cmdId];
-};
-
-CmdUtils.registerPlugin = function(cmdId,
-                                   argumentName,
-                                   executeFunction) {
-  if (!CmdUtils._pluginRegistry[cmdId]) {
-    CmdUtils._pluginRegistry[cmdId] = {};
-  }
-  CmdUtils._pluginRegistry[cmdId][argumentName] = executeFunction;
-};
-
-/* TODO: make this rank super high. */
-CmdUtils.pluginNoun = function(cmdId) {
-  var newNoun = {
-    _cmdId: cmdId,
-    _getPlugins: function() {
-      var plugins = CmdUtils._getPluginsForCmd(newNoun._cmdId);
-      // suggestion.data will contain the execute function.
-      var name;
-      return [CmdUtils.makeSugg(name, null, plugins[name])
-              for (name in plugins)];
-    },
-
-    suggest: function(text, html, callback, selectionIndices) {
-      return CmdUtils.grepSuggs(text, newNoun._getPlugins());
-    },
-    default: function() {
-      // Default to returning all.
-      return newNoun._getPlugins();
-    }
-  };
-  return newNoun;
-};
-
-CmdUtils.executeBasedOnPlugin = function(cmdId, argRole) {
-  return (function(args) {
-    if (args.argRole.text) {
-      var plugins = CmdUtils._getPluginsForCmd(cmdId);
-      var pluginFunction = plugins[args.argRole.text];
-      if (pluginFunction) {
-        return pluginFunction(args);
-      }
-    }
-  });
-};
