@@ -659,41 +659,15 @@ function CreateCommand(options) {
   { let names = options.names || options.name;
     if (!names)
       //errorToLocalize
-      throw Error("CreateCommand: name or names is required.");
+      throw Error("CreateCommand: name or names is required");
     if (!Utils.isArray(names))
-      names = (names + "").split(/\s{0,}\|\s{0,}/);
+      names = String(names).split(/\s{0,}\|\s{0,}/);
     if (Utils.isArray(options.synonyms)) // for old API
       names.push.apply(names, options.synonyms);
 
-    // we must keep the first name from the original feed around as an
+    // We must keep the first name from the original feed around as an
     // identifier. This is used in the command id and in localizations
-    command.referenceName = names[0];
-
-    /* If there are parenthesis in any name, separate the part in the
-     * parens and store it separately... this is to support multiple distinct
-     * commands with the same verb.
-     * For the time being, attempt both verb-initial and verb-final variants.*/
-
-    let verbInitialParensPattern = /^([^\(\)]+?)\s*\((.+)\)$/;
-    let verbFinalParensPattern = /^\((.+)\)\s*([^\(\)]+?)$/;
-    let nameArgs = [];
-    for (let x = 0; x < names.length; x++) {
-      let aName = names[x];
-      let viMatches;
-      if (viMatches = verbInitialParensPattern(aName)) {
-        names[x] = viMatches[1];
-        nameArgs[x] = viMatches[2];
-      }
-
-      let vfMatches;
-      if (vfMatches = verbFinalParensPattern(aName)) {
-        names[x] = vfMatches[2];
-        nameArgs[x] = vfMatches[1];
-      }
-    }
-    if (nameArgs.length > 0)
-      command.nameArg = nameArgs[0]; // other nameArgs not used
-    command.name = names[0];
+    command.referenceName = command.name = names[0];
     command.names = names;
   }
   OLD_DEPRECATED_ARGUMENT_API:
@@ -1185,7 +1159,7 @@ function makeBookmarkletCommand(options) {
 
 function renderTemplate(template, data) {
   const {feed, Template, Attachments} = this.__globalObject;
-  if ("file" in template || {})
+  if (template.file)
     template = (
       Utils.uri(feed.id).scheme === "file"
       ? Utils.getLocalUrl(Utils.uri({uri: template.file, base: feed.id}).spec)

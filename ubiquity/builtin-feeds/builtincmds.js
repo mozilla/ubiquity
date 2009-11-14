@@ -47,10 +47,10 @@
 const Help = "about:ubiquity";
 const Editor = "about:ubiquity?editor";
 const CmdList = "about:ubiquity?cmdlist";
-const Settings = "about:ubiquity?settings";
-const BugReport = ("http://getsatisfaction.com/" +
-                   "mozilla/products/mozilla_ubiquity");
 const Support = "about:ubiquity?support";
+const Settings = "about:ubiquity?settings";
+const BugReport = (
+  "http://getsatisfaction.com/mozilla/products/mozilla_ubiquity");
 
 const {prefs} = Utils;
 
@@ -77,27 +77,32 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["open (ubiquity settings page)",
-          "show (ubiquity settings page)"],
-  argument: CmdUtils.NounType("ubiquity settings page", {
-    "help": Help,
-    "command editor": Editor,
-    "command list": CmdList,
-    "settings": Settings,
-    "support": Support,
-    "bug report": BugReport,
-  }),
+  names: ["open", "show"],
+  argument: CmdUtils.mixNouns(
+    "?",
+    CmdUtils.NounType("ubiquity pages", {
+      "Help": Help,
+      "Settings": Settings,
+      "Command List": CmdList,
+      "Command Editor": Editor,
+      "Support": Support,
+      "Bug Report": BugReport,
+    }),
+    noun_type_awesomebar),
   icon: "chrome://ubiquity/skin/icons/favicon.ico",
   description: "" + (
-      <>Opens one of the Ubiquity documentation/settings pages.</>),
-  preview: function open_preview(pb, {object: {text}}) {
-    pb.innerHTML = (text
-                    ? _("Opens the Ubiquity ${goal} page.",
-                        {goal: text})
-                    : this.description);
+    <>Opens one of the Ubiquity documentation/settings pages.</>),
+  preview: function open_preview(pb, {object: {text, data}}) {
+    pb.innerHTML = (
+      typeof data === "string"
+      ? (text
+         ? _("Opens the Ubiquity ${goal} page.", {goal: text})
+         : this.previewDefault())
+      : (<div class="open"><img src={data.favicon.slice(17)}
+         /> {data.title}<p><code>{data.url}</code></p></div>));
   },
-  execute: function open_execute(args) {
-    Utils.openUrlInBrowser(args.object.data || Help);
+  execute: function open_execute({object: {data}}) {
+    Utils.openUrlInBrowser(data ? data.url || data : Settings);
   }
 });
 

@@ -155,12 +155,7 @@ function fillTableRowForCmd(row, cmd, className) {
    .bind("change", onDisableOrEnableCmd)
    [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
-  var {name, names, nameArg, homepage} = cmd;
-  if (nameArg)
-    // TODO: we need some sort of flag to check whether the nameArg
-    // was a prefix or a suffix.
-    name += " " + nameArg;
-
+  var {name, names, homepage} = cmd;
   var authors = cmd.authors || cmd.author;
   var contributors = cmd.contributors || cmd.contributor;
 
