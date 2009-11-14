@@ -45,11 +45,9 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/msgservice.js");
 Cu.import("resource://ubiquity/modules/feedmanager.js");
 Cu.import("resource://ubiquity/modules/default_feed_plugin.js");
-Cu.import("resource://ubiquity/modules/webpage_feed_plugin.js");
-Cu.import("resource://ubiquity/modules/python_feed_plugin.js");
+//Cu.import("resource://ubiquity/modules/webpage_feed_plugin.js");
+//Cu.import("resource://ubiquity/modules/python_feed_plugin.js");
 Cu.import("resource://ubiquity/modules/locked_down_feed_plugin.js");
-//Cu.import("resource://ubiquity/modules/gm_feed_plugin.js");
-//Cu.import("resource://ubiquity/modules/stylish_feed_plugin.js");
 Cu.import("resource://ubiquity/modules/annotation_memory.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 Cu.import("resource://ubiquity/modules/feedaggregator.js");
@@ -271,24 +269,18 @@ var UbiquitySetup = {
                                                     this.languageCode,
                                                     "resource://ubiquity/",
                                                     this.parserVersion);
-      /*
-      var gmfp = new GreaseMonkeyFeedPlugin(feedManager, msgService,
-                                            gWebJsModule);
-      var sfp = new StylishFeedPlugin(feedManager, msgService,
-                                      gWebJsModule);
-      */
 
       var ldfPlugin = new LockedDownFeedPlugin(feedManager,
                                                msgService,
                                                gWebJsModule);
-
+      /*
       var wpfp = new WebPageFeedPlugin(feedManager, msgService,
                                        gWebJsModule);
 
       var pfp = new PythonFeedPlugin(feedManager,
                                      msgService,
                                      gWebJsModule);
-
+       */
       var cmdSource = new FeedAggregator(
         feedManager,
         msgService,
