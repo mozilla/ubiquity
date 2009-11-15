@@ -98,14 +98,13 @@ def resolve_options(options, ext_subdir = EXT_SUBDIR):
     options.profile_dir = find_profile_dir(options.profile)
     options.path_to_ext_root = os.path.join(options.my_dir, ext_subdir)
 
-    options.ext_id = get_install_rdf_property(options.path_to_ext_root,
-                                              "em:id")
+    options.ext_id = get_install_rdf_property(options.path_to_ext_root, "id")
 
     options.ext_version = get_install_rdf_property(options.path_to_ext_root,
-                                                   "em:version")
+                                                   "version")
 
     options.ext_name = get_install_rdf_property(options.path_to_ext_root,
-                                                "em:name")
+                                                "name")
 
     if options.profile_dir:
         options.extension_file = os.path.join(options.profile_dir,
