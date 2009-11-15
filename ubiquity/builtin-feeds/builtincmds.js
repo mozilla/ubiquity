@@ -93,13 +93,13 @@ CmdUtils.CreateCommand({
   description: "" + (
     <>Opens one of the Ubiquity documentation/settings pages.</>),
   preview: function open_preview(pb, {object: {text, data}}) {
+    if (!data) return void this.previewDefault(pb);
+
     pb.innerHTML = (
       typeof data === "string"
-      ? (text
-         ? _("Opens the Ubiquity ${goal} page.", {goal: text})
-         : this.previewDefault())
-      : (<div class="open"><img src={data.favicon.slice(17)}
-         /> {data.title}<p><code>{data.url}</code></p></div>));
+      ? _("Opens the Ubiquity ${goal} page.", {goal: text})
+      : (<div class="open"><img src={data.favicon}
+            /> {data.title}<p><code>{data.url}</code></p></div>));
   },
   execute: function open_execute({object: {data}}) {
     Utils.openUrlInBrowser(data ? data.url || data : Settings);

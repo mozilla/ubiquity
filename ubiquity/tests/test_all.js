@@ -540,6 +540,32 @@ function testUtilsIsEmpty() {
   assert(!isEmpty(Utils));
 }
 
+function testUtilsPowerSet() {
+  var {assertEquals} = this, {powerSet} = Utils;
+  assertEquals(
+    uneval(powerSet([0,1,2])),
+    uneval([[], [0], [1], [0,1], [2], [0,2], [1,2], [0,1,2]]));
+  assertEquals(
+    uneval(powerSet("ab")),
+    uneval([[], ["a"], ["b"], ["a","b"]]));
+}
+
+function testUtilsSeq() {
+  var {assertEquals} = this, {seq} = Utils;
+  assertEquals(
+    uneval([i for (i in seq(1, 3))]),
+    uneval([1, 2, 3]));
+  assertEquals(
+    uneval([i for (i in seq(3))]),
+    uneval([0, 1, 2]));
+  assertEquals(
+    uneval([i for (i in seq(4, 2, -1))]),
+    uneval([4, 3, 2]));
+  assertEquals(
+    uneval(seq(7).slice(2, -2)),
+    uneval([2, 3, 4]));
+}
+
 function testUtilsListenOnce() {
   this.skipIfXPCShell();
 

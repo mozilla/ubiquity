@@ -210,15 +210,10 @@ Utils.dump = function niceDump() {
 
 function reportWarning(aMessage, stackFrameNumber) {
   var stackFrame = Components.stack.caller;
+  for (let i = stackFrameNumber | 0; i --> 0;) stackFrame = stackFrame.caller;
 
-  if (typeof stackFrameNumber !== "number")
-    stackFrameNumber = 0;
-
-  for (var i = 0; i < stackFrameNumber; i++)
-    stackFrame = stackFrame.caller;
-
-  var scriptError = (Cc["@mozilla.org/scripterror;1"]
-                     .createInstance(Ci.nsIScriptError));
+  var scriptError =
+    Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError);
   var aSourceName = stackFrame.filename;
   var aSourceLine = stackFrame.sourceLine;
   var aLineNumber = stackFrame.lineNumber;
@@ -349,13 +344,10 @@ __TimerCallback.prototype = {
 // object, returns an equivalent {{{nsIURI}}} object.  Alternatively,
 // an object with keyword arguments as keys can also be passed in; the
 // following arguments are supported:
-//
 // * {{{uri}}} is a string or {{{nsIURI}}} representing an absolute or
 //   relative URL.
-//
 // * {{{base}}} is a string or {{{nsIURI}}} representing an absolute
-//   URL, which is used as the base URL for the {{{uri}}} keyword
-//   argument.
+//   URL, which is used as the base URL for the {{{uri}}} keyword argument.
 //
 // An optional second argument may also be passed in, which specifies
 // a default URL to return if the given URL can't be parsed.
@@ -456,8 +448,8 @@ function focusUrlInBrowser(urlString) (
 // If no matching cookie exists, {{{null}}} is returned.
 
 function getCookie(domain, name) {
-  var cookieManager = (Cc["@mozilla.org/cookiemanager;1"]
-                       .getService(Ci.nsICookieManager));
+  var cookieManager =
+    Cc["@mozilla.org/cookiemanager;1"].getService(Ci.nsICookieManager);
   var iter = cookieManager.enumerator, {nsICookie} = Ci;
   while (iter.hasMoreElements()) {
     var cookie = iter.getNext();
@@ -482,20 +474,16 @@ function getCookie(domain, name) {
 function paramsToString(params, prefix) {
   var stringPairs = [];
   function addPair(key, value) {
-    // note: explicitly ignoring values that are functions/null/undefined!
+    // explicitly ignoring values that are functions/null/undefined
     if (typeof value !== "function" && value != null)
       stringPairs.push(
         encodeURIComponent(key) + "=" + encodeURIComponent(value));
   }
-  for (var key in params) {
-    if (Utils.isArray(params[key])) {
-      params[key].forEach(function p2s_each(item) {
-        addPair(key, item);
-      });
-    } else {
+  for (var key in params)
+    if (isArray(params[key]))
+      params[key].forEach(function p2s_each(item) { addPair(key, item) });
+    else
       addPair(key, params[key]);
-    };
-  }
   return (prefix == null ? "?" : prefix) + stringPairs.join("&");
 }
 
@@ -547,7 +535,7 @@ Utils.trim = String.trim || function trim(str) {
   return str.slice(i, j + 1);
 };
 
-// === {{{ Utils.sortBy(array, key, descending) }}} ===
+// === {{{ Utils.sortBy(array, key, descending = false) }}} ===
 // Sorts an array by specified {{{key}}} and returns it. e.g.:
 // {{{
 // sortBy(["abc", "d", "ef"], "length") //=> ["d", "ef", "abc"]
@@ -651,6 +639,39 @@ function powerSet(arrayLike) Array.reduce(
   function powerSet_acc(last, current) (
     last.concat([a.concat(current) for each (a in last)])),
   [[]]);
+
+// === {{{ Utils.seq(lead_or_count, end, step = 1) }}} ===
+// Creates a simple sequence iterator.
+// {{{
+// [i for (i in seq(1, 3))]     // [1, 2, 3]
+// [i for (i in seq(3))]        // [0, 1, 2]
+// [i for (i in seq(4, 2, -1))] // [4, 3, 2]
+// seq(7).slice(2, -2)          // [2, 3, 4]
+// }}}
+
+Utils.seq = Sequence;
+function Sequence(lead, end, step) {
+  if (end == null) [lead, end] = [0, lead - 1];
+  return {
+    __proto__: Sequence.prototype,
+    lead: lead, end: end, step: step || 1,
+  };
+};
+Sequence.prototype = {
+  constructor: Sequence,
+  __iterator__: function seq_iter() {
+    var {lead: i, end, step} = this;
+    if (i > end)
+      for (; i >= end; i += step) yield i;
+    else
+      for (; i <= end; i += step) yield i;
+  },
+  __noSuchMethod__:
+  function seq_pass(name, args) args[name].apply([x for (x in this)], args),
+  get length seq_length() +this,
+  valueOf: function seq_valueOf() (this.end - this.lead) / this.step + 1 | 0,
+  toString: function seq_toString() "[object Sequence]",
+};
 
 // === {{{ Utils.computeCryptoHash(algo, str) }}} ===
 // Computes and returns a cryptographic hash for a string given an
@@ -837,9 +858,9 @@ function defineLazyProperty(obj, func, name) {
 }
 
 // == {{{ Utils.prefs }}} ==
-// Proxy to an {{{nsIPrefBranch2}}} service.
+// Proxy to {{{nsIPrefBranch2}}} set to root.
 
-const {PREF_STRING, PREF_BOOL, PREF_INT} = Ci.nsIPrefBranch;
+const {PREF_STRING, PREF_BOOL, PREF_INT} = gPrefBranch;
 
 var gPrefs = Utils.prefs = {
   // === {{{ Utils.prefs.getValue(name, value = undefined) }}} ===
@@ -873,8 +894,7 @@ var gPrefs = Utils.prefs = {
     throw TypeError("invalid pref value");
   },
   __noSuchMethod__:
-  function prefs__noSuchMethod__(name, args)
-    gPrefBranch[name].apply(gPrefBranch, args),
+  function prefs_pass(name, args) gPrefBranch[name].apply(gPrefBranch, args),
 };
 gPrefs.getValue = gPrefs.get;
 gPrefs.setValue = gPrefs.set;
@@ -943,7 +963,7 @@ BrowserTab.prototype = {
 // Also contains functions related to them.
 
 var gTabs = Utils.tabs = {
-  __iterator__: function tabs__iterator__() {
+  __iterator__: function tabs_iter() {
     for each (var win in Utils.chromeWindows) if ("gBrowser" in win) {
       let {mTabs} = win.gBrowser, i = -1, l = mTabs.length;
       while (++i < l) yield BrowserTab(mTabs[i]);
@@ -1062,23 +1082,18 @@ Utils.history = {
     awesome.startSearch(query, "", null, {
       onSearchResult: function hs_onSearchResult(search, result) {
         switch (result.searchResult) {
-          case result.RESULT_SUCCESS: {
-            let results = [];
-            for (let i = 0, l = result.matchCount; i < l; ++i)
-              results.push({
-                url: result.getValueAt(i),
-                title: result.getCommentAt(i),
-                favicon: result.getImageAt(i),
-              });
-            callback(results);
-            break;
-          }
+          case result.RESULT_SUCCESS:
+          callback([{
+            url: result.getValueAt(i),
+            title: result.getCommentAt(i),
+            favicon: result.getImageAt(i).replace(/^moz-anno:favicon:/, ""),
+          } for (i in Sequence(result.matchCount))]);
+          break;
+
           case result.RESULT_IGNORED:
           case result.RESULT_FAILURE:
-          case result.RESULT_NOMATCH: {
-            callback([]);
-            break;
-          }
+          case result.RESULT_NOMATCH:
+          callback([]);
         }
       }
     });
