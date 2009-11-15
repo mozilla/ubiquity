@@ -282,16 +282,17 @@ function testCmdManagerExecutesCmd() {
 
 function testCmdManagerCatchesExceptionsInCmds() {
   var mockMsgService = {
-    displayMessage: function(msg) { this.lastMsg = msg; }
+    displayMessage: function (msg) { this.lastMsg = msg; }
   };
+  var fakeSource = new FakeCommandSource({
+    existentcommand: {execute: function () { throw 1 }}
+  });
+  var fakeContext = {focusedElement: null, focusedWindow: null};
 
-  var fakeSource = new FakeCommandSource (
-    {
-      existentcommand:{execute:function() {throw 1;}}
-    }
-  );
-  var fakeContext = {focusedElement: null,
-                     focusedWindow: null};
+  const PREF_DAOE = "extensions.ubiquity.displayAlertOnError";
+  var daoe = Utils.prefs.get(PREF_DAOE);
+  Utils.prefs.set(PREF_DAOE, true);
+  this.addToTeardown(function () { Utils.prefs.set(PREF_DAOE, daoe) });
 
   makeCommandManager.call(this, fakeSource, mockMsgService,
                           makeTestParser(), onCM);
@@ -299,10 +300,8 @@ function testCmdManagerCatchesExceptionsInCmds() {
     cmdMan.updateInput("existentcommand", fakeContext);
     cmdMan.execute(fakeContext);
     this.assert(
-      (mockMsgService.lastMsg.text.indexOf("exception occurred") >= 0 &&
-       mockMsgService.lastMsg.exception),
-      "Command manager must log exception."
-      );
+      ~mockMsgService.lastMsg.indexOf("exception occurred"),
+      "Command manager must log exception.");
   }
 }
 

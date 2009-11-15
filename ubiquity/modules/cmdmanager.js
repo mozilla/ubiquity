@@ -272,14 +272,13 @@ CommandManager.prototype = {
       activeSugg.previewUrl,
       activeSugg.previewDelay,
       function queuedPreview(pblock) {
-        try { activeSugg.preview(context, pblock); }
-        catch (e) {
-          self.__msgService.displayMessage({
+        try { activeSugg.preview(context, pblock) } catch (e) {
+          Utils.reportError(e);
+          if (prefs.get("extensions.ubiquity.displayAlertOnError"))
             //errorToLocalize
-            text: ('An exception occurred while previewing the command "' +
-                   activeSugg._verb.name + '".'),
-            exception: e,
-          });
+            self.__msgService.displayMessage(
+              'An exception occurred while previewing the command "' +
+              activeSugg._verb.name + '".');
         }
       });
   },
@@ -339,12 +338,12 @@ CommandManager.prototype = {
         this.__nlParser.strengthenMemory(activeSugg);
         activeSugg.execute(context);
       } catch (e) {
-        this.__msgService.displayMessage({
+        Utils.reportError(e);
+        if (prefs.get("extensions.ubiquity.displayAlertOnError"))
           //errorToLocalize
-          text: ('An exception occurred while running the command "' +
-                 activeSugg._verb.name + '".'),
-          exception: e,
-        });
+          this.__msgService.displayMessage(
+            'An exception occurred while running the command "' +
+            activeSugg._verb.name + '".');
       }
     }
     var {hilitedSuggestion} = this;

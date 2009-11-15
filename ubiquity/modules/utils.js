@@ -195,6 +195,18 @@ Utils.dump = function niceDump() {
        Array.join(arguments, " ") + "\n");
 };
 
+// === {{{ Utils.reportError(error) }}} ===
+// Given an {{{error}}} object, reports it to the JS Error Console
+// as if it was thrown from the original location.
+
+function reportError(error) {
+  var scriptError =
+    Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError);
+  scriptError.init(error, error.fileName, null, error.lineNumber,
+                   null, scriptError.errorFlag, null);
+  Utils.ConsoleService.logMessage(scriptError);
+}
+
 // === {{{ Utils.reportWarning(aMessage, stackFrameNumber) }}} ===
 // Reports a warning to the JS Error Console, which can be displayed in Firefox
 // by choosing "Error Console" from the "Tools" menu.

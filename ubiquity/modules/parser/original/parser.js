@@ -49,6 +49,7 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 Cu.import("resource://ubiquity/modules/parser/new/namespace.js");
 Cu.import("resource://ubiquity/modules/parser/original/locale_en.js");
+Cu.import("resource://ubiquity/modules/msgservice.js");
 
 const PLUGINS = {en: EnParser};
 const FLAG_DEFAULT = 1;
@@ -544,14 +545,14 @@ PartiallyParsedSentence.prototype = {
         self._query.onNewParseGenerated();
       }
       try {
-        // This is where the suggestion is actually built.
         suggestions = noun.suggest(text, html, callback, selectionIndices);
       } catch (e) {
-        if (e && e.stack) e += "\n" + /[^\n]+/(e.stack);
-        Cu.reportError(
-          'Exception occured while getting suggestions for "' +
-          this._verb.name + '" with noun "' + (noun.name || noun.id) +
-          '"\n' + e);
+        Utils.reportError(e);
+        if (Utils.prefs.get("extensions.ubiquity.displayAlertOnError"))
+          //errorToLocalize
+          new AlertMessageService().displayMessage(
+            'Exception occured while getting suggestions for "' +
+            this._verb.name + '" with noun "' + (noun.name || noun.id) + '".');
         return false;
       }
       suggestions = this._handleSuggestions(argName, suggestions);
