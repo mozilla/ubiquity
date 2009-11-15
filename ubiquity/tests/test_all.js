@@ -564,6 +564,7 @@ function testUtilsSeq() {
   assertEquals(
     uneval(seq(7).slice(2, -2)),
     uneval([2, 3, 4]));
+  for (let i in seq(0)) assert(false);
 }
 
 function testUtilsListenOnce() {

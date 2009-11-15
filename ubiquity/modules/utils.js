@@ -58,13 +58,13 @@ var Utils = {
   // === {{{ Utils.currentChromeWindow }}} ===
   // A reference to the application chrome window that currently has focus.
 
-  get currentChromeWindow currentChromeWindow()
+  get currentChromeWindow getCurrentChromeWindow()
     Utils.WindowMediator.getMostRecentWindow(Utils.appWindowType),
 
   // === {{{ Utils.chromeWindows }}} ===
   // An array of application chrome windows currently opened.
 
-  get chromeWindows chromeWindows() {
+  get chromeWindows getChromeWindows() {
     var wins = [];
     var enum = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
     while (enum.hasMoreElements()) wins.push(enum.getNext());
@@ -74,7 +74,7 @@ var Utils = {
   // === {{{ Utils.currentTab }}} ===
   // A reference to the focused tab as {{{Utils.BrowserTab}}}.
 
-  get currentTab currentTab()
+  get currentTab getCurrentTab()
     BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
   __globalObject: this,
@@ -565,10 +565,10 @@ sortBy.dSorter = function byKeyDsc(a, b) a.key < b.key;
 // (or strict equality if {{{strict}}} evaluates to {{{true}}}) and returns it.
 // If {{{key}}} is provided, the comparison is made to mappings of it instead.
 // {{{
-// Utils.uniq([1, 1.0, "1", [1]])         //=> [1, "1", [1]]
-// Utils.uniq([1, 1.0, "1", [1]], Number) //=> [1]
-// Utils.uniq([{}, {}, {}], null)         //=> [{}]
-// Utils.uniq([{}, {}, {}], null, true)   //=> [{}, {}, {}]
+// uniq([1, 1.0, "1", [1]])         //=> [1, "1", [1]]
+// uniq([1, 1.0, "1", [1]], Number) //=> [1]
+// uniq([{}, {}, {}], null)         //=> [{}]
+// uniq([{}, {}, {}], null, true)   //=> [{}, {}, {}]
 // }}}
 //
 // {{{array}}} is the target array.
@@ -578,8 +578,7 @@ sortBy.dSorter = function byKeyDsc(a, b) a.key < b.key;
 // that maps each of {{{array}}}'s item to a comparison key.
 //
 // {{{strict}}} is an optional flag to make {{{uniq()}}} use
-// {{{===}}} comparison instead of {{{toString()}}}.
-// Accurate, but slower.
+// **{{{===}}}** instead of {{{toString()}}}. Accurate, but slower.
 
 function uniq(array, key, strict) {
   var f = (key == null
@@ -641,7 +640,7 @@ function powerSet(arrayLike) Array.reduce(
   [[]]);
 
 // === {{{ Utils.seq(lead_or_count, end, step = 1) }}} ===
-// Creates a simple sequence iterator.
+// Creates an iterator of simple number sequence.
 // {{{
 // [i for (i in seq(1, 3))]     // [1, 2, 3]
 // [i for (i in seq(3))]        // [0, 1, 2]
@@ -651,25 +650,26 @@ function powerSet(arrayLike) Array.reduce(
 
 Utils.seq = Sequence;
 function Sequence(lead, end, step) {
-  if (end == null) [lead, end] = [0, lead - 1];
+  if (end == null) [lead, end] = [0, lead - 1 | 0];
   return {
     __proto__: Sequence.prototype,
-    lead: lead, end: end, step: step || 1,
+    lead: +lead, end: +end, step: +step || 1,
   };
-};
+}
 Sequence.prototype = {
   constructor: Sequence,
   __iterator__: function seq_iter() {
     var {lead: i, end, step} = this;
-    if (i > end)
+    if (step < 0)
       for (; i >= end; i += step) yield i;
     else
       for (; i <= end; i += step) yield i;
   },
   __noSuchMethod__:
-  function seq_pass(name, args) args[name].apply([x for (x in this)], args),
-  get length seq_length() +this,
-  valueOf: function seq_valueOf() (this.end - this.lead) / this.step + 1 | 0,
+  function seq_pass(name, args) args[name].apply(this.toJSON(), args),
+  __proto__: null,
+  get length seq_getLength() (this.end - this.lead) / this.step + 1 | 0,
+  toJSON: function seq_toJSON() [x for (x in this)],
   toString: function seq_toString() "[object Sequence]",
 };
 
@@ -772,8 +772,7 @@ function convertToUnicode(fromCharset, text) {
 
 // === {{{ Utils.notify(label, value, image, priority, buttons, target) }}} ===
 // A wrapper function for
-// [[https://developer.mozilla.org/en/XUL/notificationbox|notificationbox]]
-// {{{#appendNotification}}}.
+// [[http://bit.ly/mdc_notificationbox#m-appendNotification|notificationbox]].
 //
 // * {{{label}}} : The text to show.
 // * {{{value}}} : An optional identifier string. Defaults to {{{label}}}.
@@ -829,7 +828,7 @@ function notify(label, value, image, priority, buttons, target) {
 // Same as [[https://developer.mozilla.org/en/DOM/element.addEventListener]],
 // except that the {{{listener}}} will be automatically removed on its
 // first execution.
-// Returns the added wrapper function which can be called/removed
+// Returns the listening wrapper function which can be called/removed
 // manually if needed.
 
 function listenOnce(element, eventType, listener, useCapture) {
@@ -905,32 +904,30 @@ gPrefs.setValue = gPrefs.set;
 // (minus {{{events}}}, to avoid memory leaks).
 
 function BrowserTab(tabbrowser_tab) ({
-  raw: tabbrowser_tab,
   __proto__: BrowserTab.prototype,
+  raw: tabbrowser_tab,
 });
 BrowserTab.prototype = {
   constructor: BrowserTab,
-  raw: null,
-
-  get browser BT_browser() this.raw.linkedBrowser,
-  get tabbrowser BT_tabbrowser() this.browser.getTabBrowser(),
-  get uri BT_uri() this.browser.currentURI,
-  get title BT_title() this.browser.contentTitle,
-  get window BT_window() this.browser.contentWindow,
-  get document BT_document() this.browser.contentDocument,
-  get index BT_index() {
+  get browser BT_getBrowser() this.raw.linkedBrowser,
+  get tabbrowser BT_getTabbrowser() this.browser.getTabBrowser(),
+  get uri BT_getUri() this.browser.currentURI,
+  get title BT_getTitle() this.browser.contentTitle,
+  get window BT_getWindow() this.browser.contentWindow,
+  get document BT_getDocument() this.browser.contentDocument,
+  get index BT_getIndex() {
     var {browser} = this, {mTabs} = browser.getTabBrowser();
     for (let i = 0, l = mTabs.length; i < l; ++i)
       if (mTabs[i].linkedBrowser === browser) return i;
     return -1;
   },
-  get chromeWindow BT_chromeWindow() {
+  get chromeWindow BT_getChromeWindow() {
     var {tabbrowser} = this;
     for each (let win in Utils.chromeWindows)
       if (win.gBrowser === tabbrowser) return win;
     return null;
   },
-
+  toJSON: function BT_toJSON() this.uri.spec,
   toString: function BT_toString() "[object BrowserTab]",
   valueOf: function BT_valueOf() this.index,
   load: function BT_load(uriString, referrer, charset) {
@@ -1126,8 +1123,7 @@ function regexp(pattern, flags) {
 }
 
 // === {{{ Utils.regexp.quote(string) }}} ===
-// Returns the {{{string}}} with all {{{RegExp}}} meta characters in it
-// backslashed.
+// Returns the {{{string}}} with all regexp meta characters in it backslashed.
 
 regexp.quote = function re_quote(string) (
   String(string).replace(/[.?*+^$|()\{\[\]\\]/g, "\\$&"));
