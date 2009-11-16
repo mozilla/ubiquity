@@ -40,7 +40,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = Built-in Noun Types =
-//
 // **//FIXME//**
 // \\Explain:
 // * how nouns work.
@@ -63,9 +62,7 @@ const {Application} = Utils;
 var {commandSource, skinService} = UbiquitySetup.createServices();
 
 // === {{{ noun_arb_text }}} ===
-//
 // Suggests the input as is.
-//
 // * {{{text, html}}} : user input
 
 var noun_arb_text = {
@@ -87,9 +84,7 @@ var noun_arb_text = {
 };
 
 // === {{{ noun_type_email_service }}} ===
-//
 // **//FIXME//**
-//
 // * {{{text}}} :
 // * {{{html}}} :
 // * {{{data}}} :
@@ -99,22 +94,20 @@ var noun_type_email_service = CmdUtils.NounType("email service",
                                                 "gmail");
 
 // === {{{ noun_type_email }}} ===
-//
 // Suggests an email address (RFC2822 minus domain-lit).
 // The regex is taken from:
 // http://blog.livedoor.jp/dankogai/archives/51190099.html
-//
 // * {{{text, html}}} : email address
 
-var email_atom = "[\\w!#$%&'*+/=?^`{}~|-]+";
+const EMAIL_ATOM = "[\\w!#$%&'*+/=?^`{}~|-]+";
 var noun_type_email = {
   label: "email",
   noExternalCalls: true,
   cacheTime: -1,
-  _email: RegExp("^(?:" + email_atom + "(?:\\." + email_atom +
+  _email: RegExp("^(?:" + EMAIL_ATOM + "(?:\\." + EMAIL_ATOM +
                  ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))@(' +
-                 email_atom + "(?:\\." + email_atom + ")*)$"),
-  _username: RegExp("^(?:" + email_atom + "(?:\\." + email_atom +
+                 EMAIL_ATOM + "(?:\\." + EMAIL_ATOM + ")*)$"),
+  _username: RegExp("^(?:" + EMAIL_ATOM + "(?:\\." + EMAIL_ATOM +
                     ')*|(?:\\"(?:\\\\[^\\r\\n]|[^\\\\\\"])*\\"))$'),
   suggest: function nt_email_suggest(text, html, cb, selectionIndices) {
     if (this._username.test(text))
@@ -133,9 +126,7 @@ var noun_type_email = {
 };
 
 // === {{{ noun_type_percentage }}} ===
-//
 // Suggests a percentage value.
-//
 // * {{{text, html}}} : "?%"
 // * {{{data}}} : a float number (1.0 for 100% etc.)
 
@@ -169,9 +160,7 @@ var noun_type_percentage = {
 };
 
 // === {{{ noun_type_tab }}} ===
-//
 // Suggests currently opened tabs.
-//
 // * {{{text, html}}} : tab title or URL
 // * {{{data}}} : one of
 //   [[https://developer.mozilla.org/en/FUEL/Window|fuelIWindow]]#{{{tabs}}}
@@ -236,9 +225,7 @@ var noun_type_tab = {
 };
 
 // === {{{ noun_type_search_engine }}} ===
-//
 // **//FIXME//**
-//
 // * {{{text, html}}} : name of the engine
 // * {{{data}}} : engine object (see {{{nsIBrowserSearchService}}})
 
@@ -260,11 +247,9 @@ var noun_type_search_engine = {
 };
 
 // === {{{ noun_type_tag }}} ===
-//
 // Suggests the input as comma separated tags,
 // plus completions based on existing tags.
 // Defaults to all tags.
-//
 // * {{{text, html}}} : comma separated tags
 // * {{{data}}} : an array of tags
 
@@ -312,9 +297,7 @@ var noun_type_tag = {
 };
 
 // === {{{ noun_type_awesomebar }}} ===
-//
 // Suggests "Awesome Bar" query results.
-//
 // * {{{text, html}}} : title or url
 // * {{{data}}} : a query result
 //   (see [[#modules/utils.js|Utils]]{{{.history.search}}})
@@ -352,9 +335,7 @@ var noun_type_awesomebar = {
 };
 
 // === {{{ noun_type_extension }}} ===
-//
 // Suggests installed extensions.
-//
 // * {{{text, html}}} : extension name
 // * {{{data}}} : https://developer.mozilla.org/en/Toolkit_API/extIExtension
 
@@ -371,11 +352,9 @@ var noun_type_extension = {
 };
 
 // === {{{ noun_type_common_URI_scheme }}} ===
-//
 // Suggests common URI schemes, which are the IANA-registered ones
 // plus Unofficial ones and a few Mozilla specific ones.
 // See [[http://en.wikipedia.org/wiki/URI_scheme]].
-//
 // * {{{text, html}}} : URI scheme
 
 var common_URI_schemes = <><![CDATA[
@@ -397,10 +376,8 @@ var noun_type_common_URI_scheme = CmdUtils.NounType(
   [scheme + ":" for each (scheme in common_URI_schemes)]);
 
 // === {{{ noun_type_url }}} ===
-//
 // Suggests URLs from the user's input and/or history.
 // Defaults to the current page's URL if no input is given.
-//
 // * {{{text, html}}} : URL
 
 var noun_type_url = {
@@ -462,15 +439,12 @@ var noun_type_url = {
 };
 
 // === {{{ noun_type_livemark }}} ===
-//
 // Suggests each livemark whose title matches the input.
-//
 // * {{{text, html}}} : title
 // * {{{data.id}}} : id
 // * {{{data.feed}}} : feed URL
 // * {{{data.site}}} : site URL
 // * {{{data.items}}} : an array of items loaded in the livemark
-//
 // {{{feeds}}} is the getter for all livemarks.
 
 var noun_type_livemark = {
@@ -506,9 +480,7 @@ var noun_type_livemark = {
 };
 
 // === {{{ noun_type_command }}} ===
-//
 // Suggests each installed command whose name matches the input.
-//
 // * {{{text, html}}} : command name
 // * {{{data}}} : command object
 
@@ -539,7 +511,6 @@ var noun_type_command = {
 
 // === {{{ noun_type_enabled_command }}} ===
 // === {{{ noun_type_disabled_command }}} ===
-//
 // Same as {{{noun_type_command}}}, but with only enabled/disabled commands.
 
 var noun_type_enabled_command = {
@@ -553,9 +524,7 @@ var noun_type_disabled_command = {
 };
 
 // === {{{ noun_type_skin }}} ===
-//
 // Suggests each installed skin whose name matches the input.
-//
 // * {{{text, html}}} : skin name
 // * {{{data.downloadUrl}}}
 // * {{{data.localUrl}}}
@@ -573,9 +542,7 @@ var noun_type_skin = {
 };
 
 // === {{{ noun_type_twitter_user }}} ===
-//
 // Suggests Twitter IDs from the user's login info.
-//
 // * {{{text, html}}} : Twitter ID
 // * {{{data}}} : login data (see {{{nsILoginManager}}})
 
@@ -631,9 +598,7 @@ var noun_type_twitter_user = {
 };
 
 // === {{{ noun_type_number }}} ===
-//
 // Suggests a number value. Defaults to 1.
-//
 // * {{{text, html}}} : number text
 // * {{{data}}} : number
 
@@ -651,12 +616,9 @@ var noun_type_number = {
 };
 
 // === {{{ noun_type_bookmarklet }}} ===
-//
 // Suggests each bookmarklet whose title matches the input.
-//
 // * {{{text, html}}} : bookmarklet title
 // * {{{data}}} : bookmarklet (pseudo) url
-//
 // {{{load()}}} : Reloads bookmarklets.
 
 var noun_type_bookmarklet = {
@@ -693,10 +655,8 @@ var noun_type_bookmarklet = {
 
 // === {{{ noun_type_date }}} ===
 // === {{{ noun_type_time }}} ===
-//
 // Suggests a date/time for input, using the mighty {{{Date.parse()}}}.
 // Defaults to today/now.
-//
 // * {{{text, html}}} : date/time text
 // * {{{data}}} : {{{Date}}} instance
 
@@ -775,10 +735,8 @@ var noun_type_date_time = {
 };
 
 // === {{{ noun_type_contact }}} ===
-//
 // Same as {{{noun_type_email}}}, but also suggests
 // the user's contact informations that are fetched from Gmail (for now).
-//
 // * {{{text}}} : email address
 // * {{{html}}} : same as {{{summary}}}
 // * {{{data}}} : name of contactee
@@ -789,40 +747,49 @@ var noun_type_contact = {
     var suggs = noun_type_email.suggest.apply(noun_type_email, arguments);
     if (this._list) return this._grep(text).concat(suggs);
 
-    var list = this._list = [], self = this;
-    return suggs.concat(getGmailContacts(function nt_contact_cb(contacts) {
-      for each (var {name, email} in contacts) {
-        var htm = <>{name} &lt;{email}&gt;</>.toXMLString();
-        list.push({
-          text: email, html: htm, data: name, summary: htm, score: 1});
-      }
-      callback(self._grep(text));
-    }));
+    var self = this;
+    this._list = [];
+    getGmailContacts(
+      function nt_contact_ok(contacts) {
+        var list = self._list;
+        for each (var {name, email} in contacts) {
+          let htm = <>{name} &lt;{email}&gt;</>.toXMLString();
+          list.push({
+            text: email, html: htm, data: name, summary: htm, score: 1});
+        }
+        callback(self._grep(text));
+      },
+      function nt_contact_ng(info){
+        Utils.setTimeout(function nt_contact_reset() { self._list = null },
+                         self._retryInterval *= 2);
+        Utils.dump(info, "(retrying in", self._retryInterval / 1e3, "sec.)");
+      });
+    return suggs;
   },
   _list: null,
+  _retryInterval: 5 * 1e3,
   _grep: function nt_contact__grep(text)
     Utils.uniq([].concat(CmdUtils.grepSuggs(text, this._list, "data"),
                          CmdUtils.grepSuggs(text, this._list)),
                "text"),
 };
 
-function getGmailContacts(callback) jQuery.ajax({
-  url: "https://mail.google.com/mail/contacts/data/export",
+function getGmailContacts(ok, ng) jQuery.ajax({
+  url: "http://mail.google.com/mail/contacts/data/export",
   data: {exportType: "ALL", out: "VCARD"},
-  success: function gGC_success(data) {
+  success: function getGC_success(data) {
     var contacts = [], name = "";
     for each (let line in data.replace(/\r\n /g, "").split(/\r\n/)) {
-      if (/^(FN|EMAIL).*?:(.*)/.test(line)) {
-        let {$1: key, $2: val} = RegExp;
-        if (key === "FN")
-          name = val !== "null" ? val : "";
-        else
-          contacts.push({name: name, email: val});
-      }
+      if (!/^(FN|EMAIL).*?:(.*)/.test(line)) continue;
+      let {$1: key, $2: val} = RegExp;
+      if (key === "FN")
+        name = val !== "null" ? val : "";
+      else
+        contacts.push({name: name, email: val});
     }
-    callback(contacts);
+    contacts.length ? ok(contacts) : ng(data);
   },
-  error: function gGC_error() { callback([]) },
+  error: function getGC_error(x) { ng(x.status + " " +x.statusText) },
 });
 
 function getYahooContacts(callback) {
@@ -835,9 +802,7 @@ function getYahooContacts(callback) {
     attrs: "1",
     xf: "sf,mf"
   };
-
-  var asyncRequest = jQuery.get(url, params, function (data) {
-
+  return jQuery.get(url, params, function (data) {
     var contacts = [];
     for each(var line in jQuery(data).find("ct")) {
       var name = jQuery(line).attr("yi");
@@ -850,22 +815,12 @@ function getYahooContacts(callback) {
         contacts.push(contact);
       }
     }
-
     callback(contacts);
   }, "text");
-
-  return asyncRequest;
-}
-
-function getContacts(callback) {
-  //getYahooContacts(callback);
-  return getGmailContacts(callback);
 }
 
 // === {{{ noun_type_geolocation }}} ===
-//
 // **//FIXME//**
-//
 // * {{{text}}} :
 // * {{{html}}} :
 // * {{{data}}} :
@@ -899,18 +854,12 @@ var noun_type_geolocation = {
 };
 
 // === {{{ noun_type_lang_google }}} ===
-//
 // Suggests languages used in various Google services.
-//
-// === {{{ noun_type_lang_wikipedia }}} ===
-//
-// Suggests languages used in Wikipedia.
-//
 // * {{{text, html}}} : language name
 // * {{{data}}} : language code
 //
-// {{{getLangName(code)}}}
-// returns the corresponding language name for {{{code}}}.
+// {{{getLangName(code)}}} returns the corresponding language name
+// for {{{code}}}.
 
 var noun_type_lang_google = CmdUtils.NounType("language", {
   Afrikaans: "af",
@@ -966,6 +915,10 @@ var noun_type_lang_google = CmdUtils.NounType("language", {
   Welsh: "cy",
   Yiddish: "yi",
 });
+
+// === {{{ noun_type_lang_wikipedia }}} ===
+// Suggests languages used in Wikipedia.
+// Works as same as noun_{{{type_lang_google}}}.
 
 // from http://meta.wikimedia.org/wiki/List_of_Wikipedias
 // omitting ones with 100+ articles
@@ -1169,9 +1122,7 @@ function NounAsync(label, checker) {
 }
 
 // === {{{ noun_type_async_restaurant }}} ===
-//
 // **//FIXME//**
-//
 // * {{{text}}} :
 // * {{{html}}} :
 // * {{{data}}} :
@@ -1229,17 +1180,19 @@ function getRestaurants(query, callback, selectionIndices) {
   });
 }
 
-var noun_type_geo_country = NounGeo("country", 1, 1);
+// === {{{ noun_type_geo_country }}} ===
+// === {{{ noun_type_geo_region }}} ===
+// === {{{ noun_type_geo_subregion }}} ===
+// === {{{ noun_type_geo_town }}} ===
+// === {{{ noun_type_geo_postal }}} ===
+// === {{{ noun_type_geo_adress }}} ===
 
+var noun_type_geo_country = NounGeo("country", 1, 1);
 // Think American states, provinces in many countries, Japanese prefectures.
 var noun_type_geo_region = NounGeo("region", 2, 2);
-
 var noun_type_geo_subregion = NounGeo("subregion", 3, 3);
-
 var noun_type_geo_town = NounGeo("city/town", 4, 4);
-
 var noun_type_geo_postal = NounGeo("postal code", 5, 5);
-
 var noun_type_geo_address = NounGeo("address", 6, 9);
 
 // http://code.google.com/intl/ja/apis/maps/documentation/reference.html
