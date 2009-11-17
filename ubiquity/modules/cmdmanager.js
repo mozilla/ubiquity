@@ -81,6 +81,8 @@ CommandManager.__defineSetter__(
 
 function CommandManager(cmdSource, msgService, parser,
                         suggsNode, previewPaneNode, helpNode) {
+  var suggDoc = suggsNode.getElementsByTagName("iframe")[0].contentDocument;
+
   this.__cmdSource = cmdSource;
   this.__msgService = msgService;
   this.__hilitedIndex = 0;
@@ -94,7 +96,7 @@ function CommandManager(cmdSource, msgService, parser,
   this.__activeQuery = null;
   this.__domNodes = {
     suggs: suggsNode,
-    suggsIframe: suggsNode.getElementsByTagName("iframe")[0],
+    suggsDocument: suggDoc,
     preview: previewPaneNode,
     help: helpNode,
   };
@@ -114,8 +116,8 @@ function CommandManager(cmdSource, msgService, parser,
   if (parser) this._loadCommands();
   this.setPreviewState("no-suggestions");
 
-  this.__domNodes.suggsIframe.contentDocument
-    .addEventListener("click", this, true);
+  suggDoc.addEventListener("click", this, true);
+  suggDoc.addEventListener("DOMMouseScroll", this, true);
 }
 
 CommandManager.prototype = {
@@ -131,10 +133,15 @@ CommandManager.prototype = {
         if (this.__hilitedIndex === index) return;
         this.__hilitedIndex = index;
         this.__lastAsyncSuggestionCb();
-        event.preventDefault();
-        event.stopPropagation();
-        return;
+        break;
       }
+      case "DOMMouseScroll": {
+        this[event.detail < 0 ? "moveIndicationUp" : "moveIndicationDown"]();
+        this.__lastAsyncSuggestionCb();
+        break;
+      }
+      event.preventDefault();
+      event.stopPropagation();
     }
   },
 
@@ -188,13 +195,13 @@ CommandManager.prototype = {
   moveIndicationUp: function CM_moveIndicationUp(context) {
     if (--this.__hilitedIndex < 0)
       this.__hilitedIndex = this.__activeQuery.suggestionList.length - 1;
-    this._renderAll(context);
+    if (context) this._renderAll(context);
   },
 
   moveIndicationDown: function CM_moveIndicationDown(context) {
     if (++this.__hilitedIndex >= this.__activeQuery.suggestionList.length)
       this.__hilitedIndex = 0;
-    this._renderAll(context);
+    if (context) this._renderAll(context);
   },
 
   _loadCommands: function CM__loadCommands() {
@@ -256,7 +263,7 @@ CommandManager.prototype = {
                   (x === this.__hilitedIndex ? " hilited" : "") +
                   '" index="' + x + '">' + suggText + "</div>");
     }
-    this.__domNodes.suggsIframe.contentDocument.body.innerHTML = content;
+    this.__domNodes.suggsDocument.body.innerHTML = content;
   },
 
   _renderPreview: function CM__renderPreview(context) {
