@@ -41,7 +41,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = Ubiquity =
-//
 // Creates a Ubiquity interface and binds it to the given message
 // panel and text box.
 //
@@ -107,32 +106,28 @@ Ubiquity.prototype = {
   // == Read Only Properties ==
 
   // === {{{ Ubiquity#textBox }}} ===
-
   get textBox() this.__textBox,
 
   // === {{{ Ubiquity#msgPanel }}} ===
-
   get msgPanel() this.__msgPanel,
 
   // === {{{ Ubiquity#cmdManager }}} ===
-
   get cmdManager() this.__cmdManager,
 
   // === {{{ Ubiquity#lastKeyEvent }}} ===
-
+  // The last captured key event on the {{{textBox}}}.
   get lastKeyEvent() this.__lastKeyEvent,
 
   // === {{{ Ubiquity#isWindowOpen }}} ===
-
   get isWindowOpen() this.__msgPanel.state === "open",
 
   // === {{{ Ubiquity#inputDelay }}} ===
-
+  // Delay between the user's last keyup and parsing in milliseconds.
   get inputDelay() this.__prefs.getValue(
     "extensions.ubiquity.inputDelay", this.__DEFAULT_INPUT_DELAY),
 
   // === {{{ Ubiquity#inputLimit }}} ===
-
+  // Input length where Ubiquity starts to hesitate parsing. See #507.
   get inputLimit() this.__prefs.getValue(
     "extensions.ubiquity.inputLimit", this.__DEFAULT_INPUT_LIMIT),
 
@@ -242,6 +237,7 @@ Ubiquity.prototype = {
 
   __onpopuphidden: function U__onHidden() {
     clearTimeout(this.__previewTimerID);
+    this.__cmdManager.remember();
     if (this.__needsToExecute) {
       this.__needsToExecute = false;
       this.execute();
@@ -293,7 +289,6 @@ Ubiquity.prototype = {
   setLocalizedDefaults: function U_setLocalizedDefaults(langCode) {},
 
   // === {{{ Ubiquity#execute(input) }}} ===
-  //
   // Executes {{{input}}} or the highlighted suggestion.
   // If {{{input}}} is provided but empty, the current entry is used instead.
 
@@ -309,7 +304,6 @@ Ubiquity.prototype = {
   },
 
   // === {{{ Ubiquity#preview(input, immediate) }}} ===
-  //
   // Previews {{{input}}} or the highlighted suggestion,
   // skipping the input delay if {{{immediate}}} evaluates to {{{true}}}
   // and opening Ubiquity if it's closed.

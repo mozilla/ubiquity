@@ -368,6 +368,11 @@ CommandManager.prototype = {
     };
   },
 
+  remember: function CM_remember() {
+    var {hilitedSuggestion} = this;
+    if (hilitedSuggestion) this.__nlParser.strengthenMemory(hilitedSuggestion);
+  },
+
   get parser CM_parser() this.__nlParser,
   get lastInput CM_lastInput() this.__lastInput,
   get previewer CM_previewer() this.__previewer,
