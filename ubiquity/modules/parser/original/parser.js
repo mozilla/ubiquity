@@ -547,12 +547,11 @@ PartiallyParsedSentence.prototype = {
       try {
         suggestions = noun.suggest(text, html, callback, selectionIndices);
       } catch (e) {
-        Utils.reportError(e);
-        if (Utils.prefs.get("extensions.ubiquity.displayAlertOnError"))
-          //errorToLocalize
-          new AlertMessageService().displayMessage(
-            'Exception occured while getting suggestions for "' +
-            this._verb.name + '" with noun "' + (noun.name || noun.id) + '".');
+        new ErrorConsoleMessageService().displayMessage({exception: e});
+        //errorToLocalize
+        new AlertMessageService().displayMessage(
+          'Exception occured while getting suggestions for "' +
+          this._verb.name + '" with noun "' + (noun.name || noun.id) + '".');
         return false;
       }
       suggestions = this._handleSuggestions(argName, suggestions);

@@ -196,7 +196,7 @@ Utils.dump = function niceDump() {
 };
 
 // === {{{ Utils.reportError(error) }}} ===
-// Given an {{{error}}} object, reports it to the JS Error Console
+// Given an {{{Error}}} object, reports it to the JS Error Console
 // as if it was thrown from the original location.
 
 function reportError(error) {

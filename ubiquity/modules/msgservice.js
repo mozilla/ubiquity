@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -35,16 +36,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = Message Services =
-//
 // {{{MessageService}}} is the name of an interface that provides a
 // means for notifying the end-user of important events in a non-intrusive
 // manner.
 //
 // An object that implements the {{{MessageService}}} interface must
 // expose the following method:
-//
+
 // === {{{MessageService#displayMessage(msg)}}} ===
-//
 // Displays the given message. {{{msg}}} may be a simple string, but it
 // can also be a JavaScript object with the following keys, all of them
 // optional:
@@ -72,32 +71,32 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
+const PREF_SHOW_ERROR = "extensions.ubiquity.displayAlertOnError";
+
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
 // == Message Service Implementations ==
 
 // === {{{ErrorConsoleMessageService}}} ===
-//
 // This {{{MessageService}}} logs messages containing exceptions to
 // the JavaScript error console, also logging their stack traces if
 // possible.
 
 function ErrorConsoleMessageService() {}
-
 ErrorConsoleMessageService.prototype = {
   displayMessage: function ECMS_displayMessage(msg) {
-    if (typeof msg === "object" && msg.exception) {
-      var tb = ExceptionUtils.stackTrace(msg.exception);
-      Cu.reportError(msg.exception);
-      //errorToLocalize
-      Cu.reportError("Traceback for last exception:\n" + tb);
-    }
+    var {exception} = msg || 0;
+    if (exception == null) return;
+
+    Utils.reportError(exception);
+    var tb = ExceptionUtils.stackTrace(exception);
+    //errorToLocalize
+    if (tb) Utils.reportError("Traceback for last exception:\n" + tb);
   }
 };
 
 // === {{{AlertMessageService}}} ===
-//
 // This {{{MessageService}}} uses {{{nsIAlertsService}}} to
 // non-modally display the message to the user. On Windows, this shows
 // up as a "toaster" notification at the bottom-right of the
@@ -105,7 +104,6 @@ ErrorConsoleMessageService.prototype = {
 // [[http://en.wikipedia.org/wiki/Growl_%28software%29|Growl]].
 
 function AlertMessageService() {}
-
 AlertMessageService.prototype = {
   DEFAULT_ICON : "chrome://ubiquity/skin/icons/favicon.ico",
   DEFAULT_TITLE: L("ubiquity.msgservice.defaultmsgtitle"),
@@ -121,15 +119,11 @@ AlertMessageService.prototype = {
     if (Utils.classOf(msg) !== "Object")
       text = String(msg);
     else {
+      if ("text" in msg) text = String(msg.text);
       if ("exception" in msg) {
-        let SHOW_ERR_PREF = "extensions.ubiquity.displayAlertOnError";
-        if (Utils.prefs.getValue(SHOW_ERR_PREF, false))
-          text += " (" + msg.exception + ")";
-        else
-          return;
+        if (!Utils.prefs.getValue(PREF_SHOW_ERROR, false)) return;
+        text += " (" + msg.exception + ")";
       }
-
-      if ("text"  in msg) text  = String(msg.text);
       if ("title" in msg) title = String(msg.title);
       if ("icon"  in msg) icon  = String(msg.icon);
 
@@ -157,7 +151,6 @@ AlertMessageService.prototype = {
 };
 
 // === {{{CompositeMessageService}}} ===
-//
 // Combines one or more {{{MessageService}}} implementations under a
 // single {{{MessageService}}} interface.
 //
@@ -166,7 +159,6 @@ AlertMessageService.prototype = {
 function CompositeMessageService() {
   this._services = [];
 }
-
 CompositeMessageService.prototype = {
   add: function CMS_add(service) {
     this._services.push(service);
@@ -180,7 +172,6 @@ CompositeMessageService.prototype = {
 };
 
 // == Exception Utilities ==
-//
 // The {{{ExceptionUtils}}} namespace provides some functionality for
 // introspecting JavaScript and XPCOM exceptions.
 
@@ -215,8 +206,7 @@ var ExceptionUtils = {
       output += e.stack;
     else
       // It's some other thrown object, e.g. a bare string.
-      //errorToLocalize
-      output += "No traceback available.\n";
+      ;
 
     return output;
   }
