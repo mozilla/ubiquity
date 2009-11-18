@@ -448,12 +448,17 @@ function openUrlInBrowser(urlString, postData) {
 }
 
 // === {{{ Utils.focusUrlInBrowser(urlString) }}} ===
-// Focuses a tab with the given URL if one exists in the
-// current window; otherwise, it delegates the opening of the URL in a
+// Focuses a tab with the given URL if one exists;
+// otherwise, it delegates the opening of the URL in a
 // new window or tab to {{{Utils.openUrlInBrowser()}}}.
 
-function focusUrlInBrowser(urlString) (
-  (gTabs.get(urlString)[0] || openUrlInBrowser(urlString)).focus());
+function focusUrlInBrowser(urlString) {
+  var it = gTabs.get(urlString)[0] || openUrlInBrowser(urlString);
+  if (it instanceof BrowserTab) setTimeout(function focusLater() {
+    it.chromeWindow.focus();
+    it.focus();
+  });
+}
 
 // === {{{ Utils.getCookie(domain, name) }}} ===
 // Returns the cookie for the given {{{domain}}} and with the given {{{name}}}.
