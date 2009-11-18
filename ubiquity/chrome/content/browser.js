@@ -42,10 +42,8 @@
 
 var gUbiquity = null;
 
-addEventListener("load", function onload() {
-  removeEventListener("load", onload, false);
-
-  const Cu = Components.utils;
+addEventListener("load", function ubiquityBoot() {
+  removeEventListener("load", ubiquityBoot, false);
 
   var jsm = {};
   Cu.import("resource://ubiquity/modules/utils.js", jsm);
@@ -54,12 +52,13 @@ addEventListener("load", function onload() {
   Cu.import("resource://ubiquity/modules/msgservice.js", jsm);
   Cu.import("resource://ubiquity/modules/prefkeys.js", jsm);
 
-  const {prefs} = jsm.Utils;
+  const {Utils, UbiquitySetup, PrefKeys} = jsm;
+  const {prefs} = Utils;
 
   function ubiquitySetup() {
-    var services = jsm.UbiquitySetup.createServices();
+    var services = UbiquitySetup.createServices();
 
-    jsm.UbiquitySetup.setupWindow(window);
+    UbiquitySetup.setupWindow(window);
 
     var cmdMan = new jsm.CommandManager(
       services.commandSource,
@@ -80,7 +79,7 @@ addEventListener("load", function onload() {
       if (evt.target.id === "Browser:Reload") cmdMan.refresh();
     }, false);
 
-    jsm.Utils.listenOnce(window, "unload", function ubiquityTeardown() {
+    Utils.listenOnce(window, "unload", function ubiquityTeardown() {
       cmdMan.finalize();
     });
 
@@ -96,7 +95,7 @@ addEventListener("load", function onload() {
 
     // Hack to get the default skin to work on Linux, which we don't
     // support per-pixel alpha transparency on.
-    if (jsm.Utils.OS === "Linux") panel.style.backgroundColor = "#444";
+    if (Utils.OS === "Linux") panel.style.backgroundColor = "#444";
 
     UbiquityPopupMenu(
       document.getElementById("contentAreaContextMenu"),
@@ -108,23 +107,21 @@ addEventListener("load", function onload() {
       services.commandSource.onUbiquityLoad(window);
   }
 
-  var toggleKeys = new jsm.PrefKeys(
-    "",
-    KeyEvent.DOM_VK_SPACE,
-    jsm.Utils.OS === "WINNT" ? "CTRL" : "ALT");
-  var repeatKeys = new jsm.PrefKeys("repeat");
+  var toggleKeys = new PrefKeys("",
+                                KeyEvent.DOM_VK_SPACE,
+                                Utils.OS === "WINNT" ? "CTRL" : "ALT");
+  var repeatKeys = new PrefKeys("repeat");
   function ubiquityKey(event) {
     if (toggleKeys.match(event)) return gUbiquity.toggleWindow();
     if (repeatKeys.match(event)) return gUbiquity.execute("");
   }
 
-  jsm.UbiquitySetup.preload(function ubiquitySetupWrapper() {
+  UbiquitySetup.preload(function ubiquitySetupWrapper() {
     try { ubiquitySetup() } catch (e) {
+      Utils.reportError(e);
       //errorToLocalize
-      var msg = "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e);
-      Cu.reportError("Ubiquity " + msg);
-      // in case it doesn't show up in the error console
-      jsm.Utils.reportInfo(msg);
+      Utils.reportInfo(
+        "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e));
       //errorToLocalize
       new jsm.AlertMessageService().displayMessage("Setup failed.");
     }

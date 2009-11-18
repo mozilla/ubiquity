@@ -223,7 +223,6 @@ CommandManager.prototype = {
     }
     if (!("defaultHelp" in gDomNodes)) {
       gDomNodes.defaultHelp = createFragment(DEFAULT_HELP).firstChild;
-      help.appendChild(gDomNodes.defaultHelp);
     }
     if (!("feedUpdates" in gDomNodes)) {
       gDomNodes.feedUpdates = doc.createElement("box");
@@ -245,8 +244,9 @@ CommandManager.prototype = {
                 </div>.appendChild(feeds.reduce(accList, <ol/>))));
           });
         });
-      help.appendChild(gDomNodes.feedUpdates);
     }
+    help.appendChild(gDomNodes.defaultHelp);
+    help.appendChild(gDomNodes.feedUpdates);
   },
 
   _renderSuggestions: function CM__renderSuggestions() {

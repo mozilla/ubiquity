@@ -74,6 +74,11 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   msgPanel.addEventListener("popupshown", this, false);
   msgPanel.addEventListener("popuphidden", this, false);
   msgPanel.addEventListener("click", this, true);
+
+  var self = this;
+  self.__onSuggestionsUpdated = function U__onSuggestionsUpdated() {
+    cmdManager.onSuggestionsUpdated(textBox.value, self.__makeContext());
+  };
 }
 
 Ubiquity.prototype = {
@@ -82,7 +87,6 @@ Ubiquity.prototype = {
 
   __DEFAULT_INPUT_DELAY: 50,
   __DEFAULT_INPUT_LIMIT: 512,
-  __MIN_CMD_PREVIEW_LENGTH: 0,
 
   __KEYCODE_ENTER: KeyEvent.DOM_VK_RETURN,
   __KEYCODE_TAB  : KeyEvent.DOM_VK_TAB,
@@ -119,7 +123,7 @@ Ubiquity.prototype = {
   get lastKeyEvent() this.__lastKeyEvent,
 
   // === {{{ Ubiquity#isWindowOpen }}} ===
-  get isWindowOpen() this.__msgPanel.state === "open",
+  get isWindowOpen() /^(?:open|showing)$/.test(this.__msgPanel.state),
 
   // === {{{ Ubiquity#inputDelay }}} ===
   // Delay between the user's last keyup and parsing in milliseconds.
@@ -179,7 +183,7 @@ Ubiquity.prototype = {
 
     if (keyCode === this.__KEYCODE_ENTER) {
       this.__processInput(true);
-      this.__needsToExecute = !!this.__textBox.value;
+      this.__needsToExecute = true;
       this.__msgPanel.hidePopup();
       return true;
     }
@@ -191,36 +195,26 @@ Ubiquity.prototype = {
     }
   },
 
-  __onSuggestionsUpdated: function U__onSuggestionsUpdated() {
-    this.__cmdManager.onSuggestionsUpdated(this.__textBox.value,
-                                           this.__makeContext());
-  },
+  __delayedProcessInput: function U__delayedProcessInput(self, context) {
+    var input = self.__textBox.value;
+    if (input.length > self.inputLimit ||
+        input && input === self.__lastValue &&
+        document.commandDispatcher.focusedWindow.getSelection().isCollapsed)
+      return;
 
-  __delayedProcessInput: function U__delayedProcessInput(context) {
-    var input = this.__textBox.value, {length} = input;
-    if (length < this.__MIN_CMD_PREVIEW_LENGTH ||
-        length > this.inputLimit) return;
-
-    context || (context = this.__makeContext());
-    if (input !== this.__lastValue ||
-        !input && this.ContextUtils.getSelection(context)) {
-      var self = this;
-      this.__cmdManager.updateInput(
-        this.__lastValue = input,
-        context,
-        function U___onSU() { self.__onSuggestionsUpdated(); });
-    }
+    self.__cmdManager.updateInput(
+      self.__lastValue = input,
+      context || self.__makeContext(),
+      self.__onSuggestionsUpdated);
   },
 
   __processInput: function U__processInput(immediate, context) {
     clearTimeout(this.__previewTimerID);
     if (immediate)
-      this.__delayedProcessInput(context);
+      this.__delayedProcessInput(this, context);
     else
       this.__previewTimerID = setTimeout(
-        function U___delayedPI(self) { self.__delayedProcessInput(context); },
-        this.inputDelay,
-        this);
+        this.__delayedProcessInput, this.inputDelay, this, context);
   },
 
   __makeContext: function U__makeContext(ensureFocus) {
@@ -251,13 +245,13 @@ Ubiquity.prototype = {
 
   __onpopupshowing: function U__onShowing() {
     this.__cmdManager.refresh();
+    this.__lastValue = "";
+    this.__processInput(true);
   },
 
   __onpopupshown: function U__onShown() {
     this.__textBox.focus();
     this.__textBox.select();
-    this.__lastValue = "";
-    this.__processInput();
   },
 
   __onclick: function U__onClick(event) {
@@ -277,7 +271,7 @@ Ubiquity.prototype = {
     if (button !== 2) {
       do var {href} = target;
       while (!href && (target = target.parentNode));
-      if (!href || /^(?=javascript:|#)/.test(href)) return;
+      if (!href || /^(?=javascript:|#)/i.test(href)) return;
       if (/^\w+:/.test(href)) this.Utils.openUrlInBrowser(href);
     }
     if (button !== 1) this.closeWindow();
@@ -342,7 +336,7 @@ Ubiquity.prototype = {
   // === {{{ Ubiquity#toggleWindow() }}} ===
 
   toggleWindow: function U_toggleWindow() {
-    if (/^open$|^(?:hid|show)ing$/.test(this.__msgPanel.state))
+    if (this.isWindowOpen)
       this.closeWindow();
     else
       this.openWindow();
