@@ -46,7 +46,7 @@ var PrefCommands = {
 
   __feedManager: null,
 
-  __subscribeFeed: function subscribeFeed() {
+  __subscribeFeed: function PC__subscribeFeed() {
     this.__feedManager.addSubscribedFeed({
       url: this.id,
       type: this.type,
@@ -55,60 +55,38 @@ var PrefCommands = {
       isBuiltIn: true});
   },
 
-  init : function(feedManager) {
+  init: function PC_init(feedManager) {
     this.__feedManager = feedManager;
     this.__subscribeFeed();
   },
 
-  changeType : function(newType) {
-    if (newType == this.type)
-      return;
+  changeType: function PC_changeType(newType) {
+    if (newType === this.type) return;
 
-    var oldType = this.type;
-    Utils.prefs.setValue(
-      this.FEED_TYPE_PREF,
-      newType
-    );
+    Utils.prefs.setValue(this.FEED_TYPE_PREF, newType);
     // TODO: If we're storing the feed type in a preference, we really need
     // to attach an observer to the preference and have the following code
     // execute whenever the preference changes, so that we behave the same
     // way if e.g. the user uses about:config to change the pref instead
     // of calling this method.
-    var self = this;
-    var feed = self.__feedManager.getFeedForUrl(self.id);
-    if (feed)
-      feed.purge();
-    self.__subscribeFeed();
+    var feed = this.__feedManager.getFeedForUrl(this.id);
+    if (feed) feed.purge();
+    this.__subscribeFeed();
   },
 
-  setCode : function(code) {
-    Utils.prefs.setValue(
-      this.COMMANDS_PREF,
-      code
-    );
+  setCode: function PC_setCode(code) {
+    Utils.prefs.setValue(this.COMMANDS_PREF, code);
   },
 
-  getCode : function() {
-    return Utils.prefs.getValue(
-      this.COMMANDS_PREF,
-      ""
-    );
-  },
+  getCode: function PC_getCode() Utils.prefs.getValue(this.COMMANDS_PREF, ""),
 
-  get type() {
-    return Utils.prefs.getValue(
-      this.FEED_TYPE_PREF,
-      "commands"
-    );
-  },
+  get type() Utils.prefs.getValue(this.FEED_TYPE_PREF, "commands"),
 
-  get id() {
-    return "ubiquity://command-editor-code";
-  }
+  get id() "ubiquity://command-editor-code",
 };
 
 setPath(
   "command-editor-code",
   function makeDataUri() (
-    "data:application/x-javascript," +
+    "data:application/javascript," +
     encodeURIComponent(PrefCommands.getCode())));
