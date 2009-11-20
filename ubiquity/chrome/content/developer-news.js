@@ -21,6 +21,7 @@
  *   Atul Varma <atul@mozilla.com>
  *   Aza Raskin <aza@mozilla.com>
  *   Abimanyu Raja <abimanyuraja@gmail.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -36,24 +37,19 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://ubiquity/modules/utils.js");
-
-function loadNews( data ) {
-  $("item", data).each(function(){
+function loadNews(data) {
+  $("item", data).each(function () {
     var p = document.createElement("p");
     var a = document.createElement("a");
-
-    var title = Utils.escapeHtml($("title", this).text());
     var author = Utils.escapeHtml($("author", this).text());
-    $(a).attr("href", $("link", this).text() ).text( title + "..." );
+
+    a.href = $("link", this).text();
+    a.textContent = $("title", this).text();
     $(p).append(a).append("<span class='light'><br/>by " + author + "</span>");
     $("#news").append(p);
   });
 }
 
-$(window).ready(
-  function() {
-    jQuery.get("http://ubiquity.mozilla.com/hg/ubiquity-firefox/rss-log",
-               loadNews);
-  }
-);
+$(function () {
+  $.get("http://ubiquity.mozilla.com/hg/ubiquity-firefox/rss-log", loadNews);
+});
