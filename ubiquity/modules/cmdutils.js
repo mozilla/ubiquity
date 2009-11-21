@@ -996,7 +996,9 @@ function makeSearchCommand(options) {
         }
       }
       else {
-        let doc = jQuery("<div>" + data + "</div>");
+        let div = pblock.ownerDocument.createElement("div");
+        div.innerHTML = data;
+        let doc = jQuery(div);
         if ("container" in parser) {
           doc.find(parser.container).each(function eachContainer() {
             let result = {}, $this = jQuery(this);
