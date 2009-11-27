@@ -53,7 +53,7 @@ function PrefKeys(path, defaultKey, defaultMod) {
   return {
     __proto__: PrefKeysProto,
     KEYCODE_PREF: pref + "keycode",
-    KEYCODE_DEFAULT: defaultKey || 0,
+    KEYCODE_DEFAULT: defaultKey || "",
     KEYMODIFIER_PREF: pref + "keymodifier",
     KEYMODIFIER_DEFAULT: defaultMod || "",
   };
