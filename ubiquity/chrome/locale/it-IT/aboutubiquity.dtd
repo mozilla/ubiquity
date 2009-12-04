@@ -99,8 +99,8 @@
 <!ENTITY ubiquity.support.ResetUbiquityParagraph1 "Se &appTitle; dovesse diventare completamente ingovernabile, potrebbe essere necessario dover azzerare le impostazioni ripristinando la “configurazione iniziale” prima di poter usare nuovamente &appTitle;. Per azzerare &appTitle;, <a href='&chrome.reset;'>fare clic qui</a> — e, per favore, accetta le nostre scuse per il disagio arrecato.">
 <!-- Hack chrome/content/editor.xhtml -->
 <!ENTITY ubiquity.editor.CommandEditorHeader "Editor comandi di &appTitle;">
-<!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Crea nuovi comandi</strong>inserendo il codice nell'area testuale qui sotto. Essi verranno salvati mentre si sta scrivendo e saranno immediatamente disponibili per essere utilizzati.">
-<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "Per saperne di più, strong&gt;consultare il <a href='&link.cmdTutorial;'>tutorial sulla creazione di un comando</a></strong>. Per esempio di commandi built-in, <a href='&file.FeedsIndex;'>dare un'occhiata qui</a>.">
+<!ENTITY ubiquity.editor.CommandEditorNewCommands "<strong>Crea nuovif comandi</strong>inserendo il codice nell'area testuale qui sotto. Essi verranno salvati mentre si sta scrivendo e saranno immediatamente disponibili per essere utilizzati.">
+<!ENTITY ubiquity.editor.CommandEditorReadAuthTutorial "Per saperne di più, <strong>consultare il <a href='&link.cmdTutorial;'>tutorial sulla creazione di un comando</a></strong>. Per esempio di commandi built-in, <a href='&file.FeedsIndex;'>dare un'occhiata qui</a>.">
 <!ENTITY ubiquity.editor.CommandEditorReadTheDocs "Documentazione delle<a href='&file.DevelDocs;'>API per la creazione di un comando</a>">
 <!ENTITY ubiquity.editor.CommandEditorGetInvolved "<strong>Rimani connesso</strong>. Per saperne di più, visita <a href='&link.wikiMain;'>la wiki del progetto &appTitle;</a>.">
 <!ENTITY ubiquity.editor.YourExternalEd "L'editor esterno predefinito è">
@@ -118,10 +118,10 @@
 <!ENTITY ubiquity.editor.ShareCommandsParagraph1 "Segnalare il proprio comando nella pagina <a href='&link.wildCmds;'>commands in the wild</a> della wiki del progetto Ubiquity, in modo da farli conoscere anche ad altri utenti.">
 <!ENTITY ubiquity.editor.ShareCommandsParagraph2 "Inoltre, attivando il comando <a href='&link.herdDash;'>herd</a>, sarà possibile visualizzare i comandi in uso nella <a href='&link.herdMain;'>Herd dashboard</a>.">
 <!ENTITY ubiquity.editor.DevelopingUbiquity "Sviluppare &appTitle;">
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Eseguire l' <a href='&chrome.tests;'>unit tests&lt;//a&gt;.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph1 "Eseguire l' <a href='&chrome.tests;'>unit tests</a>.">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph2 "È possibile aiutarci testando i <a href='&feed.ExperimentalCmds;'>nuovi comandi sperimentali</a>!">
 <!ENTITY ubiquity.editor.DevelopingUbiquityParagraph3 "Sperimentare le prestazioni del parser e fare introspezione con <a href='&chrome.playpen;'>parser playpen</a>. UUtilizzare  il <a href='&chrome.nounTuner;'>nountype tuner</a> per verificare i suggerimenti dei propri nountype e il punteggio che essi ricevono.">
-<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "e, se si desidera partecipare allo sviluppo di &appTitle;, dare un'occhiata a i comandi contenuti nel  <a href='&feed.DevelCmds;'core devel feed</a>.">
+<!ENTITY ubiquity.editor.DevelopingUbiquityParagraph4 "e, se si desidera partecipare allo sviluppo di &appTitle;, dare un'occhiata a i comandi contenuti nel  <a href='&feed.DevelCmds;'>core devel feed</a>.">
 <!ENTITY ubiquity.editor.LatestChangesFeedTitle "Ultime modifiche al codice di &appTitle;">
 <!-- Command Subscription Warning chrome/content/confirm-add-command.xhtml -->
 <!ENTITY ubiquity.confirmsubscription.Header "Comando di &appTitle; proveniente da una fonte non affidabile">
