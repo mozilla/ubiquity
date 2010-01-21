@@ -75,9 +75,10 @@ SkinSvc.readMetaData = function SS_readMetaData(
   css || (css = Utils.getLocalUrl(localUrl, "utf-8"));
   //look for =skin= ~ =/skin= indicating metadata
   var [, data] = /=skin=\s*([^]+)\s*=\/skin=/(css) || 0;
-  if (data)
-    while(/^[ \t]*@(\w+)[ \t]+(.+)/mg.test(data))
-      metaData[RegExp.$1] = Utils.trim(RegExp.$2);
+  if (data) {
+    let re = /^[ \t]*@(\w+)[ \t]+(.+)/mg, m;
+    while ((m = re.exec(data))) metaData[m[1]] = m[2].trim();
+  }
   if (!("homepage" in metaData) && /^https?:/.test(downloadUrl))
     metaData.homepage = downloadUrl;
   return metaData;
