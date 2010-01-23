@@ -141,53 +141,47 @@ CmdUtils.CreateCommand({
     html = <p><a href={URL}>{title}</a></p> + "\n" + html;
     title = "'" + title + "'";
 
-    var gmailTab = findGmailTab() || 0;
-    // Note that this is technically insecure because we're
-    // accessing wrappedJSObject, but we're only executing this
-    // in a Gmail tab, and Gmail is trusted code.
-    var {gmonkey} = gmailTab && gmailTab.document.defaultView.wrappedJSObject;
-    if (!gmonkey) {
-      // No Gmail  tab open?  Open a new one:
-      Utils.openUrlInBrowser(
-        "http://mail.google.com/mail/" +
-        Utils.paramsToString({
-          fs: 1, tf: 1, view: "cm",
-          su: title, to: toAddress, body: text,
-        }));
+    function last(xs) Array.slice(xs, -1)[0];
+    function setBody(doc) {
+      var rich = last(doc.getElementsByTagName("iframe"));
+      if (rich && rich.parentNode.style.display !== "none") {
+        let {body} = rich.contentDocument;
+        body.innerHTML = html + body.innerHTML;
+      }
+      else {
+        let ta = last(doc.getElementsByName("body"));
+        ta.value = text + ta.value;
+      }
+    }
+    var gmailTab = findGmailTab();
+    if (!gmailTab) {
+      let {browser} = Utils.openUrlInBrowser(
+        "http://mail.google.com/mail/" + Utils.paramsToString({
+          fs: 1, tf: 1, view: "cm", su: title, to: toAddress}));
+      browser.addEventListener("load", function onCMLoad(){
+        var cf = browser.contentDocument.getElementById("canvas_frame");
+        if (!cf) return;
+        var doc = cf.contentDocument;
+        if (!doc.getElementsByTagName("form").length) return;
+        browser.removeEventListener("load", onCMLoad, true);
+        setBody(doc);
+      }, true);
       return;
     }
-    var me = this;
-    gmonkey.load("1.0", function continuer(gmail) {
-      // For some reason continuer.apply() won't work--we get
-      // a security violation on Function.__parent__--so we'll
-      // manually safety-wrap this.
-      try {
-        var sidebar = gmail.getNavPaneElement();
-        var composeMail = sidebar.getElementsByTagName("span")[0];
-        //var composeMail = sidebar.getElementById(":qw");
-        var event = composeMail.ownerDocument.createEvent("Events");
-        event.initEvent("click", true, false);
-        composeMail.dispatchEvent(event);
-        var active = gmail.getActiveViewElement();
-        var toField = composeMail.ownerDocument.getElementsByName("to")[0];
-        toField.value = toAddress;
-        var subject = active.getElementsByTagName("input")[0];
-        if (subject) subject.value = title;
-        var iframe = active.getElementsByTagName("iframe")[0];
-        if (iframe)
-          iframe.contentDocument.execCommand("insertHTML", false, html);
-        else {
-          var body = composeMail.ownerDocument.getElementsByName("body")[0];
-          body.value = text + body.value;
-        }
-        gmailTab.focus();
-      } catch (e) {
-        displayMessage({
-          text: _("A gmonkey exception occurred."),
-          exception: e}, me);
-      }
-    });
-  }
+    var doc =
+      gmailTab.document.getElementById("canvas_frame").contentDocument;
+    var cm = doc.querySelector("span[idlink]");
+    if (cm) {
+      let ev = doc.createEvent("MouseEvents");
+      ev.initMouseEvent(
+        "click", 1, 1, doc.defaultView, 0, 0,0,0,0, 0,0,0,0, 0, cm);
+      cm.dispatchEvent(ev);
+    }
+    last(doc.getElementsByName("to")).value = toAddress;
+    last(doc.getElementsByName("subject")).value = title;
+    setBody(doc);
+    gmailTab.focus();
+  },
 });
 
 function gmailChecker(callback, service) {
