@@ -308,18 +308,24 @@ var noun_type_awesomebar = {
   noExternalCalls: true,
   cacheTime: 0,
   suggest: function nt_awesome_suggest(text, html, callback) {
+    text = text.trim();
     if (!text) return [];
 
     var reqObj = {readyState: 2}, {_match} = this;
     Utils.history.search(text, function nt_awesome_results(results) {
       reqObj.readyState = 4;
+      if (/\s/.test(text)) { // multi-word query
+        //TODO: should we calculate scores for these as well? if so, how?
+        callback([CmdUtils.makeSugg(r.title || r.url, null, r)
+                  for each(r in results)]);
+        return;
+      }
       var returnArr = [], lctxt = text.toLowerCase();
       for each (let r in results) {
         let u = _match(r.url, lctxt);
         let t = _match(r.title, lctxt);
         let m = u.score > t.score ? u : t;
-        returnArr.push(CmdUtils.makeSugg(m.input, null, r, m.score,
-                                         [m.index, m.index + text.length]));
+        returnArr.push(CmdUtils.makeSugg(m.input, null, r, m.score));
       }
       callback(returnArr);
     });
@@ -382,7 +388,6 @@ var noun_type_common_URI_scheme = CmdUtils.NounType(
 
 var noun_type_url = {
   label: "url",
-  rankLast: true,
   noExternalCalls: true,
   cacheTime: 0,
   default: function nt_url_default() {
@@ -392,16 +397,17 @@ var noun_type_url = {
     return CmdUtils.makeSugg(href, null, null, 0.5);
   },
   suggest: function nt_url_suggest(text, html, callback, selectionIndices) {
-    if (!(text = Utils.trim(text))) return [];
+    text = text.trim();
+    if (!text || /\s/.test(text)) return [];
 
     var score = 1;
     if (/^[\w.-]+:\/{0,2}/.test(text))
       var {lastMatch: scheme, rightContext: postScheme} = RegExp;
     else {
       var scheme = "http://", postScheme = text;
-      selectionIndices = (selectionIndices &&
-                          [i + scheme.length
-                           for each (i in selectionIndices)]);
+      if (selectionIndices)
+        selectionIndices =
+          [i + scheme.length for each (i in selectionIndices)];
       score *= 0.9;
     }
     if (postScheme) {
@@ -423,11 +429,13 @@ var noun_type_url = {
       fakeRequest.readyState = 4;
       var suggs = [], tlc = text.toLowerCase();
       for each (let r in results) {
-        var urlIndex = r.url.toLowerCase().indexOf(tlc);
+        let urlIndex = r.url.toLowerCase().indexOf(tlc);
         if (urlIndex < 0) continue;
-        var urlScore =
+        let urlScore =
           CmdUtils.matchScore({index: urlIndex, 0: text, input: r.url});
-        suggs.push(CmdUtils.makeSugg(r.url, null, r, urlScore));
+        suggs.push(CmdUtils.makeSugg(
+          r.url, null, r, urlScore,
+          selectionIndices && [urlIndex, urlIndex + text.length]));
       }
       callback(suggs);
     });
