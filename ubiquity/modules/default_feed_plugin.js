@@ -93,10 +93,11 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
                                                         mimetype) {
     var {location} = targetDoc;
     // Clicking on "subscribe" takes them to the warning page:
+    var title = Utils.gist.getName(targetDoc) || targetDoc.title;
     var confirmUrl = CONFIRM_URL + Utils.paramsToString({
       url: location.href,
       sourceUrl: commandsUrl,
-      title: Utils.gist.getName(targetDoc) || targetDoc.title,
+      title: title,
     });
 
     if (!isTrustedUrl(commandsUrl, mimetype)) {
@@ -108,6 +109,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
       feedManager.addSubscribedFeed({
         url: location.href,
         sourceUrl: commandsUrl,
+        title: title,
         canAutoUpdate: true,
         sourceCode: data});
       Utils.openUrlInBrowser(confirmUrl);
