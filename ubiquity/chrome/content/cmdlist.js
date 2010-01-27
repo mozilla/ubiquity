@@ -95,7 +95,8 @@ function fillTableCellForFeed(cell, feed, sortMode) {
       function unsubscribe() {
         feed.remove();
         cell.slideUp(function onUnsubscribe() {
-          $("a[name^='" + feedUrl + "']").closest("tr").remove();
+          $(".id").filter(function() ~this.name.lastIndexOf(feedUrl, 0))
+            .closest("tr").remove();
           updateSubscribedCount();
           buildUnsubscribedFeeds();
         });
