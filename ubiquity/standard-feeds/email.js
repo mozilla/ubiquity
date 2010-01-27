@@ -129,11 +129,15 @@ CmdUtils.CreateCommand({
     and the name of someone from your contact list.
     For example, try issuing "email hello to jono"
     (assuming you have a friend named "jono").</>),
-  preview: function(pblock, {object, goal}) {
-    pblock.innerHTML = _("Creates an email message {if recipient} to ${recipient}{/if} with a link to the current page{if content} and these contents:<br/><br/>${content}{/if}.",
-        {recipient: goal.text, content: object.html});
+  preview: function email_preview(pblock, {object, goal}) {
+    pblock.innerHTML = _(
+      "Creates an email message {if recipient} to ${recipient}{/if}" +
+      " with a link to the current page" +
+      "{if content} and these contents:<br/><br/>${content}{/if}.",
+      {recipient: goal.text, content: object.html});
   },
-  execute: function({object: {text, html}, goal: {text: toAddress}}) {
+  execute: function email_execute({
+    object: {text, html}, goal: {text: toAddress}}) {
     var {title, URL} = context.focusedWindow.document;
     // #574: no one I tested liked the stock "You might be interested in"
     //       just offer a link and the selected text.
@@ -141,46 +145,39 @@ CmdUtils.CreateCommand({
     html = <p><a href={URL}>{title}</a></p> + "\n" + html;
     title = "'" + title + "'";
 
-    function last(xs) Array.slice(xs, -1)[0];
-    function setBody(doc) {
-      var rich = last(doc.getElementsByTagName("iframe"));
-      if (rich && rich.parentNode.style.display !== "none") {
+    var gmailTab =
+      findGmailTab() || Utils.openUrlInBrowser("http://mail.google.com/mail");
+    var {browser} = gmailTab;
+    nabFrame() || browser.addEventListener("load", nabFrame, true);
+
+    function nabFrame() {
+      var {contentDocument: doc} =
+        browser.contentDocument.getElementById("canvas_frame") || 0;
+      if (!doc) return false;
+      browser.removeEventListener("load", nabFrame, true);
+      compose(doc) || doc.addEventListener("load", function onDocLoad(){
+        compose(doc) && doc.removeEventListener("load", onDocLoad, true);
+      }, true);
+      gmailTab.focus();
+      return true;
+    }
+    function compose(doc) {
+      var ta, rich;
+      doc.defaultView.parent.location.hash = "compose";
+      if (text && (ta = last(doc.getElementsByName("body")))) {
+        last(doc.getElementsByName("to")).value = toAddress;
+        last(doc.getElementsByName("subject")).value = title;
+        ta.value = text + ta.value;
+        text = '';
+      }
+      if (html && (rich = last(doc.getElementsByTagName("iframe")))) {
         let {body} = rich.contentDocument;
         body.innerHTML = html + body.innerHTML;
+        html = '';
       }
-      else {
-        let ta = last(doc.getElementsByName("body"));
-        ta.value = text + ta.value;
-      }
+      return !html;
     }
-    var gmailTab = findGmailTab();
-    if (!gmailTab) {
-      let {browser} = Utils.openUrlInBrowser(
-        "http://mail.google.com/mail/" + Utils.paramsToString({
-          fs: 1, tf: 1, view: "cm", su: title, to: toAddress}));
-      browser.addEventListener("load", function onCMLoad(){
-        var cf = browser.contentDocument.getElementById("canvas_frame");
-        if (!cf) return;
-        var doc = cf.contentDocument;
-        if (!doc.getElementsByTagName("form").length) return;
-        browser.removeEventListener("load", onCMLoad, true);
-        setBody(doc);
-      }, true);
-      return;
-    }
-    var doc =
-      gmailTab.document.getElementById("canvas_frame").contentDocument;
-    var cm = doc.querySelector("span[idlink]");
-    if (cm) {
-      let ev = doc.createEvent("MouseEvents");
-      ev.initMouseEvent(
-        "click", 1, 1, doc.defaultView, 0, 0,0,0,0, 0,0,0,0, 0, cm);
-      cm.dispatchEvent(ev);
-    }
-    last(doc.getElementsByName("to")).value = toAddress;
-    last(doc.getElementsByName("subject")).value = title;
-    setBody(doc);
-    gmailTab.focus();
+    function last(xs) Array.slice(xs, -1)[0];
   },
 });
 
