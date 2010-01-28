@@ -227,13 +227,20 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
   var sandbox = null;
   var bin = feedInfo.makeBin();
 
+  function teardown() {
+    if (sandbox) for (let [k, v] in new Iterator(sandbox))
+      if (~k.lastIndexOf("teardown_", 0) && typeof v === 'function')
+        try { v() } catch (e) { Cu.reportError(e) }
+  }
+
   function reset() {
+    teardown();
     self.commands = {};
   }
 
   reset();
 
-  this.refresh = function refresh(anyway) {
+  this.refresh = function DFPF_refresh(anyway) {
     var code = codeSource.getCode();
     if (anyway || codeSource.updated) {
       reset();
@@ -265,7 +272,7 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
     }
   };
 
-  this.checkForManualUpdate = function checkForManualUpdate(cb) {
+  this.checkForManualUpdate = function DFPF_checkForManualUpdate(cb) {
     if (LocalUriCodeSource.isValidUri(this.srcUri)) {
       cb(false);
       return;
@@ -289,10 +296,16 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
     });
   };
 
-  this.finalize = function finalize() {
+  this.finalize = function DFPF_finalize() {
     // Not sure exactly why, but we get memory leaks if we don't
     // manually remove these.
     jQuery = sandbox.jQuery = sandbox.$ = null;
+  };
+
+  this.purge = function DFPF_purge() {
+    teardown();
+    this.finalize();
+    this.__proto__.purge();
   };
 
   this.__proto__ = feedInfo;
