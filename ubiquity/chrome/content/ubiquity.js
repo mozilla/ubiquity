@@ -260,9 +260,9 @@ Ubiquity.prototype = {
     MOUSE_EXECUTE:
     if (button !== 2 &&
         view.location.href === "chrome://ubiquity/content/suggest.html") {
-      for (let lm = target;; lm = lm.parentNode) {
+      for (let lm = target, hilited = /\bhilited\b/;; lm = lm.parentNode) {
         if (!lm || !("hasAttribute" in lm)) break MOUSE_EXECUTE;
-        if (/\bhilited\b/.test(lm.className)) break;
+        if (hilited.test(lm.className)) break;
       }
       this.execute();
       if (button === 0) this.closeWindow();
@@ -271,8 +271,11 @@ Ubiquity.prototype = {
     if (button !== 2) {
       do var {href} = target;
       while (!href && (target = target.parentNode));
-      if (!href || /^(?=javascript:|#)/i.test(href)) return;
-      if (/^\w+:/.test(href)) this.Utils.openUrlInBrowser(href);
+      if (!href ||
+          /^javascript:/.test(href) ||
+          ~href.lastIndexOf("resource://ubiquity/preview.html#", 0))
+        return false;
+      this.Utils.openUrlInBrowser(href);
     }
     if (button !== 1) this.closeWindow();
     return true;
