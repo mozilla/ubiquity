@@ -70,7 +70,7 @@ PreviewBrowser.prototype = {
   },
 
   _ensurePreviewBrowserUrlLoaded: function PB__EPBUL(url, cb) {
-    var currUrl = this.__previewBrowser.getAttribute("src");
+    var currUrl = this.__previewBrowser.currentURI.spec;
     if (url === currUrl) {
       if (this.__previewBrowserUrlLoadedCallback)
         // The URL is still loading.
@@ -82,12 +82,12 @@ PreviewBrowser.prototype = {
     else {
       var self = this;
       this.__previewBrowserUrlLoadedCallback = cb;
-      this.__previewBrowser.setAttribute("src", url);
-      Utils.listenOnce(this.__previewBrowser, "load", function onLoad() {
+      this.__previewBrowser.loadURI(url);
+      Utils.listenOnce(this.__previewBrowser, "load", function onPBLoad() {
         // The source URL may actually have changed while our URL was loading,
         // if the user switched command previews really fast, so make sure that
         // we're still on the same URL.
-        if (this.getAttribute("src") === url) self._onPreviewBrowserLoadUrl();
+        if (this.currentURI.spec === url) self._onPreviewBrowserLoadUrl();
       }, true);
     }
   },
@@ -97,11 +97,11 @@ PreviewBrowser.prototype = {
     var key = String.fromCharCode(code).toUpperCase();
     var keylc = key.toLowerCase();
     if (key !== keylc) key += keylc;
-    var xpath = ("/html/body//*[@accesskey][contains(" +
-                 (key === "'" ? '"' + key + '"' : "'" + key + "'") +
-                 ",@accesskey)]");
-    var node = doc.evaluate(xpath, doc, null, 9, // FIRST_ORDERED_NODE_TYPE
-                            null).singleNodeValue;
+    var keyq = key === "'" ? '"' + key + '"' : "'" + key + "'";
+    var node = doc.evaluate(
+      "/html/body//*[@accesskey][contains(" + keyq + ",@accesskey)]",
+      doc, null, 9, // FIRST_ORDERED_NODE_TYPE
+      null).singleNodeValue;
     if (!node) return false;
 
     var namelc = node.nodeName.toLowerCase();
