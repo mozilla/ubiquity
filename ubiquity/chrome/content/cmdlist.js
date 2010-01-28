@@ -84,6 +84,7 @@ function actionLink(text, action)(
 function fillTableCellForFeed(cell, feed, sortMode) {
   var feedUrl = feed.uri.spec;
   cell.append(A(feedUrl, feed.title, "", {name: feedUrl}), "<br/>");
+  cell.append(formatMetaData(feed.metaData));
   if (+feed.date)
     cell.append('<span class="feed-date">' +
                 feed.date.toLocaleString() +
@@ -116,15 +117,31 @@ function fillTableCellForFeed(cell, feed, sortMode) {
   });
   // if sorting by feed, make feed name large and put a borderline
   if (/^feed/.test(sortMode)) {
-    cell.addClass("topcell command-feed-name");
+    cell.addClass("topcell command-feed");
   }
 }
 
-function formatAuthors(authors) (
-  [formatCommandAuthor(a)
-   for each (a in [].concat(authors))].join(", "));
+function formatMetaData(md) {
+  var authors = md.authors || md.author;
+  var contributors = md.contributors || md.contributor;
+  var {license, homepage} = md;
+  function div(data, format, klass, lkey) !data ? "" : (
+    '<div class="' + klass + '">' +
+    L("ubiquity.cmdlist." + lkey, format(data)) +
+    '</div>');
+  return (
+    '<div class="meta">' +
+    div(authors, formatAuthors, "author", "createdby") +
+    div(license, escapeHtml, "license", "license") +
+    div(contributors, formatAuthors, "contributors", "contributions") +
+    div(homepage, formatUrl, "homepage", "viewmoreinfo") +
+    '</div>');
+}
 
-function formatCommandAuthor(authorData) {
+function formatAuthors(authors) (
+  [formatAuthor(a) for each (a in [].concat(authors))].join(", "));
+
+function formatAuthor(authorData) {
   if (!authorData) return "";
 
   if (typeof authorData === "string") return escapeHtml(authorData);
@@ -149,6 +166,8 @@ function formatCommandAuthor(authorData) {
   return authorMarkup;
 }
 
+function formatUrl(url) let (hu = escapeHtml(url)) hu.link(hu);
+
 function fillTableRowForCmd(row, cmd, className) {
   var checkBoxCell = $('<td><input type="checkbox"/></td>');
   (checkBoxCell.find("input")
@@ -156,10 +175,7 @@ function fillTableRowForCmd(row, cmd, className) {
    .bind("change", onDisableOrEnableCmd)
    [cmd.disabled ? "removeAttr" : "attr"]("checked", "checked"));
 
-  var {name, names, homepage} = cmd;
-  var authors = cmd.authors || cmd.author;
-  var contributors = cmd.contributors || cmd.contributor;
-
+  var {name, names} = cmd;
   var cmdElement = $(
     '<td class="command">' +
     (!("icon" in cmd) ? "" :
@@ -174,23 +190,7 @@ function fillTableRowForCmd(row, cmd, className) {
          escapeHtml(names.slice(1).join(", ")) +
          '</span>')) +
       '</div>')) +
-    (!authors ? "" :
-     '<div class="author light">' +
-     L("ubiquity.cmdlist.createdby", formatAuthors(authors)) +
-     '</div> ') +
-    (!("license" in cmd) ? "" :
-     ('<div class="license light">' +
-      L("ubiquity.cmdlist.license", escapeHtml(cmd.license)) +
-      '</div>')) +
-    (!contributors ? "" :
-     ('<div class="contributors light">' +
-      L("ubiquity.cmdlist.contributions", formatAuthors(contributors)) +
-      '</div>')) +
-    (!homepage ? "" :
-     ('<div class="homepage light">' +
-      L("ubiquity.cmdlist.viewmoreinfo",
-        let (hh = escapeHtml(homepage)) hh.link(hh)) +
-      '</div>')) +
+    formatMetaData(cmd) +
     '<div class="help"></div>' +
     '</td>');
 

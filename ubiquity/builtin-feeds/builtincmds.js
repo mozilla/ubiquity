@@ -342,3 +342,5 @@ function startup_openUbiquityWelcomePage() {
   if (UbiquitySetup.isNewlyInstalledOrUpgraded)
     Utils.focusUrlInBrowser(Help);
 }
+
+feed.author = "Ubiquity Team";

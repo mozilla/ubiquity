@@ -253,11 +253,13 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
       for each (let cmd in sandbox.commands) {
         let newCmd = makeCmdForObj(sandbox, cmd, feedInfo.uri);
-        this.commands[newCmd.id] = newCmd;
+        self.commands[newCmd.id] = newCmd;
       }
 
       for each (let p in ["pageLoadFuncs", "ubiquityLoadFuncs"])
-        this[p] = sandbox[p];
+        self[p] = sandbox[p];
+
+      feedInfo.metaData = sandbox.feed;
 
       hub.notifyListeners("feed-change", feedInfo.uri);
     }

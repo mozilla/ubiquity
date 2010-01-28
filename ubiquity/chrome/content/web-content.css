@@ -2,7 +2,7 @@
  * CSS inspired by Hemingway: http://warpspire.com/hemingway
  */
 
-body{
+body {
   background: #FFF;
   font-size: 13px;
   font-family: "Helvetica", Verdana, Arial, sans-serif;
@@ -12,18 +12,18 @@ body{
   color: #000;
 }
 
-#nav-container{
+#nav-container {
   margin-left: -40px;
   float: left;
 }
 
 li {
-    padding: 3px;
+  padding: 3px;
 }
 
-#nav ul{}
+#nav ul {}
 
-#nav li{
+#nav li {
   background-color:#aaa;
   border-left:1px solid #CCCCCC;
 
@@ -39,7 +39,7 @@ li {
   width: 144px;
 }
 
-#nav a{
+#nav a {
   padding: 5px;
   color: white;
   display: block;
@@ -47,41 +47,41 @@ li {
   text-decoration: none;
 }
 
-#nav li:hover{
+#nav li:hover {
   background-color: #66bb00;
 }
 
-.page-tip{
+.page-tip {
   text-align: center;
 }
 
-.col-two{
+.col-two {
   width: 225px;
   float: left;
 }
 
-.col-three{
+.col-three {
   width: 315px;
   margin-right: 20px;
   float: left;
 }
 
-.col-four{
+.col-four {
   width: 370px;
   float: left;
 }
 
-.col-five{
+.col-five {
   width: 480px;
   margin-right: 20px;
   float: left;
 }
 
-.light{
+.light, .meta {
   color: #999;
 }
 
-.head{
+.head {
   font-weight: bold;
   background-color: white;
   color: black;
@@ -92,12 +92,12 @@ li {
   margin-top: 10px;
 }
 
-.left{
+.left {
   text-align: left;
   padding-left: 10px;
 }
 
-.large{
+.large {
   font-size: 36pt;
 }
 
@@ -118,7 +118,7 @@ h2{
   padding: 10px 0;
 }
 
-h2.top{
+h2.top {
   margin: 0px;
 }
 
@@ -140,12 +140,12 @@ h2.top{
   padding: 10px;
 }
 
-.command, #skin-list .command{
+.command, #skin-list .command {
   margin: 15px;
   margin-bottom: 20px;
 }
 
-.command .name, #skin-list .command .name{
+.command .name, #skin-list .command .name {
   font-size: 15pt;
 }
 
@@ -154,44 +154,44 @@ h2.top{
   text-decoration: line-through;
 }
 
-.command .homepage, #skin-list .command .homepage{
+.command .homepage, #skin-list .command .homepage {
 }
 
-.command .author, #skin-list .command .author{
+.command .author, #skin-list .command .author {
   font-size: 90%;
 }
 
-.command .description, #skin-list .command .description{
+.command .description, #skin-list .command .description {
   display: inline;
   font-size: 12pt;
   margin-left: 10px;
   color: #a7a7a7;
 }
-.command .synonyms{
+.command .synonyms {
   color: black;
 }
 
-#skin-list{
+#skin-list {
   padding: 0;
 }
 
-#skin-list .name{
+#skin-list .name {
   font-style: normal;
 }
 
-#skin-list .current-skin{
+#skin-list .current-skin {
   color: blue;
   font-weight: 800;
 }
 
-.command .help{
+.command .help {
   margin-top: 5px;
   color: #777;
 }
 
 
 
-#preview-image{
+#preview-image {
   border: 3px solid #000;
   padding: 2px;
 }
@@ -243,6 +243,10 @@ a[onclick], .sort-switch {
   content: "]";
 }
 
+.command-feed .action {
+  display: block;
+}
+
 .feed-updated {
   font-size: smaller;
   color: #009900;
@@ -258,15 +262,19 @@ a[onclick], .sort-switch {
   font-size: 15pt;
 }
 
-div#editor-div iframe {border: 1px black solid !important; clear: both; margin: 1em auto;}
+div#editor-div iframe {
+  border: 1px black solid !important; clear: both; margin: 1em auto;
+}
 
-/* Using FreakCERS's CSS from http://users.skumleren.net/cers/examples/ubiquitybutton.html*/
+/* Using FreakCERS's CSS from
+ * http://users.skumleren.net/cers/examples/ubiquitybutton.html
+ */
 
 ul.button-list {
   list-style: none;
 }
 
-ul.button-list li{
+ul.button-list li {
   padding: 0px;
 }
 
@@ -290,8 +298,12 @@ ul a:active.button {
   background-position: 0 -22px;
 }
 
-td.command-feed-name {
+td.command-feed {
   font-size: 18px;
+}
+
+.command-feed .meta {
+  font-size: 76%;
 }
 
 ul#command-feed-graveyard {
@@ -374,4 +386,8 @@ div.ubiq-tutorial h2 {
 
 .badge a img {
   border: none;
+}
+
+.favicon {
+  width: 16px; height: 16px; margin: 0 2px -1px 0;
 }
