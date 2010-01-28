@@ -159,36 +159,32 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
   if (!("referenceName" in commandObject))
     commandObject.referenceName = commandObject.name;
 
+  function proxy(type) function withContext(context) {
+    if (context) {
+      context.l10n = commandObject.referenceName + "." + type;
+      sandbox.context = context;
+    }
+    return commandObject[type].apply(cmd, Array.slice(arguments, 1));
+  };
+
   var cmd = {
     __proto__: commandObject,
     id: feedUri.spec + "#" + commandObject.referenceName,
     feedUri: feedUri,
-    toString: function CS_toString() {
-      return "[object UbiquityCommand " + this.name + "]";
-    },
-    execute: function CS_execute(context) {
-      if (context) {
-        context.l10n = commandObject.referenceName + ".execute";
-        sandbox.context = context;
-      }
-      return commandObject.execute.apply(cmd, Array.slice(arguments, 1));
-    },
-    preview: function CS_preview(context) {
-      if (context) {
-        context.l10n = commandObject.referenceName + ".preview";
-        sandbox.context = context;
-      }
-      return commandObject.preview.apply(cmd, Array.slice(arguments, 1));
-    },
+    toString: function UC_toString()
+      "[object UbiquityCommand<" + this.id + ">]",
+    execute: proxy("execute"),
+    preview: proxy("preview"),
   };
 
   if (!("serviceDomain" in commandObject)) {
-    let domainRE = /\bhttps?:\/\/([\w.-]+)/;
-    cmd.serviceDomain = ((domainRE.test(commandObject.url) ||
-                          domainRE.test(commandObject.execute) ||
-                          domainRE.test(commandObject.preview))
-                         ? RegExp.$1
-                         : null);
+    let domain = /\bhttps?:\/\/([\w.-]+)/;
+    cmd.serviceDomain = (
+      (domain.test(commandObject.url) ||
+       domain.test(commandObject.execute) ||
+       domain.test(commandObject.preview))
+      ? RegExp.$1
+      : null);
     // TODO: also check for serviceDomain in Utils.getCookie type code
   }
 
@@ -196,7 +192,7 @@ function makeCmdForObj(sandbox, commandObject, feedUri) {
 }
 
 function makeCodeSource(feedInfo, headerSources, footerSources) {
-  var codeSource, {srcUri} = feedInfo;
+  var {srcUri} = feedInfo, codeSource;
 
   if (RemoteUriCodeSource.isValidUri(srcUri))
     codeSource = new RemoteUriCodeSource(
