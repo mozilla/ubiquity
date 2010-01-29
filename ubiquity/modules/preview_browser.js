@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -105,14 +106,17 @@ PreviewBrowser.prototype = {
     if (!node) return false;
 
     var namelc = node.nodeName.toLowerCase();
-    if (namelc === "a" ||
-        namelc === "input" && /^(?:submit|button)$/i.test(node.type)) {
+    if (namelc === "a") {
       let evt = doc.createEvent("MouseEvents");
       evt.initMouseEvent("click", true, true, doc.defaultView,
                          0, 0, 0, 0, 0, false, false, false, false, 0, null);
       node.dispatchEvent(evt);
     }
-    else node.focus();
+    else if (namelc === "input" &&
+             /^(?!text|password|hidden|file)/.test(node.type))
+      node.click();
+    else
+      node.focus();
     return true;
   },
 
