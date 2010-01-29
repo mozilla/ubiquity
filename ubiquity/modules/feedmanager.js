@@ -286,25 +286,25 @@ FMgrProto.finalize = function FMgr_finalize() {
 };
 
 FMgrProto.__getFeed = function FMgr___getFeed(uri) {
-  var {spec} = uri;
-  if (!(spec in this._feeds)) {
-    try { this._feeds[spec] = this.__makeFeed(uri) } catch (e) {
-      Cu.reportError(
+  var {spec} = uri, self = this, feeds = self._feeds;
+  if (!(spec in feeds)) {
+    try { feeds[spec] = self.__makeFeed(uri) } catch (e) {
+      Cu.reportError(e);
+      Utils.reportInfo(
         //errorToLocalize
-        "An error occurred when retrieving the feed for " + spec + ": " + e);
+        "An error occurred when retrieving the feed for " + spec);
       // remove the mal-URI here, since we can't "purge" it as feed
-      this._annSvc.removePageAnnotations(uri);
+      self._annSvc.removePageAnnotations(uri);
       return null;
     }
-    var self = this;
     self.addListener("purge", function onPurge(eventName, aUri) {
-      if (aUri.spec === spec) {
-        delete self._feeds[spec];
-        self.removeListener("purge", onPurge);
-      }
+      if (aUri.spec !== spec) return;
+      feeds[spec].finalize();
+      delete feeds[spec];
+      self.removeListener("purge", onPurge);
     });
   }
-  return this._feeds[spec];
+  return feeds[spec];
 };
 
 // == The Feed Class ==
