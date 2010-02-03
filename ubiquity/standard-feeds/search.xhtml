@@ -1092,7 +1092,7 @@ CmdUtils.CreateCommand({
   execute: function( {location} ) {
     // this is some initial support for noun_type_geo_town
     if (location.data)
-      location = location.data.coordinates.lat + ',' + location.data.coordinates.lng;
+      location = location.data.lat + ',' + location.data.lon;
     else
       location = location.text;
     var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
@@ -1111,7 +1111,7 @@ CmdUtils.CreateCommand({
 
     var query = null;
     if (location.data)
-      query = location.data.coordinates.lat + ',' + location.data.coordinates.lng;
+      query = location.data.lat + ',' + location.data.lon;
     else
       query = location.text;
 

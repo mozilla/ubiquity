@@ -238,8 +238,8 @@ function geocodeAddress(location, callback) this.__globalObject.jQuery.ajax({
           function gA_eachItem(item) {
             dict[item.nodeName.toLowerCase()] = item.textContent;
           });
-        dict.lat  = dict.latitude;
-        dict.long = dict.longitude;
+        dict.lat = dict.latitude;
+        dict.lon = dict.longitude;
         return dict;
       }));
   },
@@ -380,16 +380,16 @@ function getGeoLocation(callback) {
     xhr.mozBackgroundRequest = true;
     xhr.open("GET", "http://j.maxmind.com/app/geoip.js", true);
     xhr.overrideMimeType("text/plain");
-    xhr.onreadystatechange = function gGL_orsc() {
-      if (xhr.readyState !== 4 || xhr.status !== 200) return;
+    xhr.onload = function gGL_orsc() {
       eval(xhr.responseText);
+      var lon = geoip_longitude();
       callback(getGeoLocation.cache = {
         city: geoip_city(),
         state: geoip_region_name(),
         country: geoip_country_name(),
         country_code: geoip_country_code(),
         lat: geoip_latitude(),
-        "long": geoip_longitude(),
+        lon: lon, "long": lon,
       });
     };
     xhr.send(null);
