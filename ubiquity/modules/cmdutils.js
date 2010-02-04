@@ -57,8 +57,6 @@ Cu.import("resource://ubiquity/modules/nounutils.js");
 Cu.import("resource://ubiquity/modules/contextutils.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
 
-const {Application} = Utils;
-
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
 
@@ -92,7 +90,8 @@ var CmdUtils = {
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
 for each (let g in ["document", "documentInsecure",
-                    "window", "windowInsecure", "hiddenWindow"]) {
+                    "window", "windowInsecure", "hiddenWindow",
+                    "geoLocation"]) {
   CmdUtils.__defineGetter__(g, this["get" + g[0].toUpperCase() + g.slice(1)]);
 }
 
@@ -367,7 +366,7 @@ function setLastResult(result) {
 //
 // The geolocation object has the following properties:
 // {{{ city }}}, {{{ state }}}, {{{ country }}}, {{{ country_code }}},
-// {{{ lat }}}, {{{ long }}}.
+// {{{ lat }}}, {{{ lon }}}.
 // (For a list of country codes, refer to http://www.maxmind.com/app/iso3166)
 //
 // You can choose to use the function synchronously: do not pass in any
@@ -380,7 +379,7 @@ function getGeoLocation(callback) {
     xhr.mozBackgroundRequest = true;
     xhr.open("GET", "http://j.maxmind.com/app/geoip.js", true);
     xhr.overrideMimeType("text/plain");
-    xhr.onload = function gGL_orsc() {
+    xhr.onload = function getGL_onload() {
       eval(xhr.responseText);
       var lon = geoip_longitude();
       callback(getGeoLocation.cache = {
@@ -1186,20 +1185,17 @@ function previewAjax(pblock, options) {
   var xhr;
   function abort() { if (xhr) xhr.abort() }
 
-  var newOptions = {};
-  for (var key in options) newOptions[key] = (
-    typeof options[key] === "function"
-    ? CmdUtils.previewCallback(pblock, options[key], abort)
-    : newOptions[key] = options[key]);
+  var newOptions = {__proto__: options};
+  for (var key in options) if (typeof options[key] === "function")
+    newOptions[key] = previewCallback(pblock, options[key], abort);
 
   // see scripts/jquery_setup.js
   var wrappedXhr = newOptions.xhr || jQuery.ajaxSettings.xhr;
-  function backgroundXhr() {
+  newOptions.xhr = function backgroundXhr() {
     var newXhr = wrappedXhr.apply(this, arguments);
     newXhr.mozBackgroundRequest = true;
     return newXhr;
   }
-  newOptions.xhr = backgroundXhr;
 
   return xhr = jQuery.ajax(newOptions);
 }
@@ -1280,7 +1276,7 @@ function previewCallback(pblock, callback, abortCallback) {
 // {{{css}}} is an optional CSS string inserted along with the list.
 
 function previewList(block, htmls, callback, css) {
-  var list = "", num = 0, {escapeHtml} = Utils;
+  var {escapeHtml} = Utils, list = "", num = 0;
   for (let id in htmls) {
     let k = ++num < 36 ? num.toString(36) : "-";
     list += ('<li><label for="' + num + '"><button id="' + num +
