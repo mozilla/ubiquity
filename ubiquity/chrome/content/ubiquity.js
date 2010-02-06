@@ -238,7 +238,7 @@ Ubiquity.prototype = {
     }
     else this.__cmdManager.reset();
 
-    var unfocused = this.__focusedElement || this.__focusedWindow;
+    var unfocused = this.__focusedWindow;
     if (unfocused) unfocused.focus();
     this.__focusedWindow = this.__focusedElement = null;
   },
