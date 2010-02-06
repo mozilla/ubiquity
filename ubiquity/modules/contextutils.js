@@ -41,7 +41,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 // = ContextUtils =
-//
 // A small library that deals with selection via {{{context}}}.
 //
 // {{{context}}} is a dictionary which must contain
@@ -60,6 +59,7 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 function getHtmlSelection(context) {
   var range = getFirstRange(context);
   if (!range) return "";
+
   var newNode = context.focusedWindow.document.createElement("div");
   newNode.appendChild(range.cloneContents());
   range.detach();
@@ -70,14 +70,9 @@ function getHtmlSelection(context) {
 
 function getSelection(context) {
   var {focusedElement} = context;
-  if (focusedElement) {
-    try {
-      var {selectionStart, selectionEnd} = focusedElement;
-    } catch (e) {
-      // It's bizarrely possible for this to occur; see #156.
-    }
-    if (selectionStart !== selectionEnd)
-      return focusedElement.value.slice(selectionStart, selectionEnd);
+  if (isTextBox(focusedElement)) {
+    let {selectionStart: ss, selectionEnd: se} = focusedElement;
+    if (ss !== se) return focusedElement.value.slice(ss, se);
   }
 
   var range = getFirstRange(context);
@@ -91,7 +86,6 @@ function getSelection(context) {
 }
 
 // === {{{ ContextUtils.setSelection(context, content, options) }}} ===
-//
 // Replaces the current selection with {{{content}}}.
 // Returns {{{true}}} if succeeds, {{{false}}} if not.
 //
@@ -109,7 +103,7 @@ function setSelection(context, content, options) {
     return true;
   }
 
-  if (focusedElement) {
+  if (isTextBox(focusedElement)) {
     let plainText = options && options.text;
     if (!plainText) {
       let html = (focusedElement.ownerDocument
@@ -118,31 +112,35 @@ function setSelection(context, content, options) {
       plainText = html.textContent;
     }
     let {value, scrollTop, scrollLeft, selectionStart} = focusedElement;
-    focusedElement.value = (value.slice(0, selectionStart) +
-                            plainText +
-                            value.slice(focusedElement.selectionEnd));
-    focusedElement.focus();
-    // put the cursor after the inserted text
-    let endp = selectionStart + plainText.length;
-    focusedElement.setSelectionRange(endp, endp);
+    focusedElement.value = (
+      value.slice(0, selectionStart) + plainText +
+      value.slice(focusedElement.selectionEnd));
+    focusedElement.selectionStart = selectionStart;
+    focusedElement.selectionEnd = selectionStart + plainText.length;
     focusedElement.scrollTop = scrollTop;
     focusedElement.scrollLeft = scrollLeft;
     return true;
   }
 
-  var range = getFirstRange(context);
-  if (range) {
-    range.deleteContents();
-    range.insertNode(range.createContextualFragment(content));
-    range.detach();
-    return true;
-  }
+  if (!focusedWindow) return false;
 
-  return false;
+  var sel = focusedWindow.getSelection();
+  if (!sel.rangeCount) return false;
+
+  var range = sel.getRangeAt(0);
+  var fragment = range.createContextualFragment(content);
+  sel.removeRange(range);
+  range.deleteContents();
+  var {lastChild} = fragment;
+  if (lastChild) {
+    range.insertNode(fragment);
+    range.setEndAfter(lastChild);
+  }
+  sel.addRange(range);
+  return true;
 }
 
 // === {{{ ContextUtils.getSelectionObject(context) }}} ===
-//
 // Returns an object that bundles up both the plain-text and HTML
 // selections.  If there is no html selection, the plain-text selection
 // is used for both.
@@ -156,13 +154,13 @@ function getSelectionObject(context) {
 }
 
 // === {{{ ContextUtils.getFirstRange(context) }}} ===
-//
 // Returns a copy of the first {{{Range}}} in {{{Selection}}}.
 
 function getFirstRange(context) {
   var win = context.focusedWindow;
   var sel = win && win.getSelection();
   if (!sel || !sel.rangeCount) return null;
+
   var range = sel.getRangeAt(0);
   var newRange = win.document.createRange();
   newRange.setStart(range.startContainer, range.startOffset);
@@ -170,8 +168,7 @@ function getFirstRange(context) {
   return newRange;
 }
 
-// ==== {{{ ContextUtils.absolutifyUrls(node) }}} ====
-//
+// ==== {{{ ContextUtils.absolutifyUrlsInNode(node) }}} ====
 // Takes all the URLs specified as attributes in descendants of
 // the given DOM and convert them to absolute URLs. This
 // is a fix for [[http://ubiquity.mozilla.com/trac/ticket/551|#551]].
@@ -185,4 +182,11 @@ function absolutifyUrlsInNode(node) {
         break;
       }
   return node;
+}
+
+// === {{{ ContextUtils.isTextBox(node) }}} ===
+
+function isTextBox(node) {
+  try { return typeof node.selectionEnd === "number" } catch (_) {}
+  return false;
 }
