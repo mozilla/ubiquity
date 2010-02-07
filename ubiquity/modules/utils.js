@@ -932,6 +932,7 @@ BrowserTab.prototype = {
   get title BT_getTitle() this.browser.contentTitle,
   get window BT_getWindow() this.browser.contentWindow,
   get document BT_getDocument() this.browser.contentDocument,
+  get icon BT_getIcon() this.raw.image,
   get index BT_getIndex() {
     var {browser} = this, {mTabs} = browser.getTabBrowser();
     for (let i = 0, l = mTabs.length; i < l; ++i)
@@ -947,14 +948,16 @@ BrowserTab.prototype = {
   toJSON: function BT_toJSON() this.uri.spec,
   toString: function BT_toString() "[object BrowserTab]",
   valueOf: function BT_valueOf() this.index,
-  load: function BT_load(uriString, referrer, charset) {
-    this.browser.loadURI(uriString, referrer, charset);
+  load: function BT_load(uri, referrer, charset) {
+    this.browser.loadURI(uri.spec || uri, referrer, charset);
     return this;
   },
   focus: function BT_focus() {
-    var {tabbrowser} = this;
+    var {chromeWindow, tabbrowser} = this;
     tabbrowser.selectedTab = this.raw;
+    chromeWindow.focus();
     tabbrowser.focus();
+    chromeWindow.content.focus();
     return this;
   },
   close: function BT_close() {
@@ -965,7 +968,7 @@ BrowserTab.prototype = {
     this.tabbrowser.moveTabTo(this.raw, (target || 0).index || target);
     return this;
   },
-  moveToEnd: function BT_moveEnd() {
+  moveToEnd: function BT_moveToEnd() {
     var {tabbrowser} = this;
     tabbrowser.moveTabTo(this.raw, tabbrowser.browsers.length);
     return this;

@@ -114,13 +114,7 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   description: "Switches to the tab whose title or URL matches the input.",
   execute: function swtab_execute({object: {data: tab}}) {
-    if (!tab) return;
-    Utils.setTimeout(function delayedFocus() {
-      var win = tab.chromeWindow;
-      win.focus();
-      tab.focus();
-      win.content.focus();
-    });
+    if (tab) Utils.setTimeout("_.focus()", 0, tab);
   },
   preview: tabPreview("Changes to"),
 });
