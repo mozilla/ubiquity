@@ -248,23 +248,24 @@ function googleTranslate(html, langCodePair, callback, pblock) {
     data: {
       v: "1.0",
       q: html,
-      langpair: (langCodePair.from || "") + "|" + (langCodePair.to || ""),
+      langpair: langCodePair.from + "|" + langCodePair.to,
       format: "html",
     },
     dataType: "json",
     success: function onGoogleTranslateSuccess(data) {
       switch (data.responseStatus) {
         case 200: {
-          var alt, dsl = data.responseData.detectedSourceLanguage;
+          let alt, dsl = data.responseData.detectedSourceLanguage;
           if (dsl === langCodePair.to &&
-              dsl !== (alt = Utils.prefs.getValue(PREF_LANG_ALT, ""))) {
+              (alt = Utils.prefs.getValue(PREF_LANG_ALT)) &&
+              dsl !== alt) {
             langCodePair.to = alt;
             googleTranslate.call(self, html, langCodePair, callback, pblock);
           }
           else callback(data.responseData);
           return;
         }
-        case 400: {
+        case 400: { // invalid translation language pair
           displayMessage(data.responseDetails, self);
           if (langCodePair.from === "en") return;
           langCodePair.from = "en";
@@ -275,8 +276,9 @@ function googleTranslate(html, langCodePair, callback, pblock) {
       }
     },
     error: function onGoogleTranslateError(xhr) {
-      Utils.reportInfo("google translate: " +
-                       xhr.status + " " + xhr.statusText);
+      var stat = xhr.status + " " + xhr.statusText;
+      displayMessage(stat, self);
+      Utils.reportInfo(self.name + ": " + stat);
     },
   };
   pblock ? CmdUtils.previewAjax(pblock, options) : jQuery.ajax(options);
@@ -320,8 +322,8 @@ CmdUtils.CreateCommand({
         }));
   },
   preview: function translate_preview(pblock, {object: {html}, goal, source}) {
-    var defaultLang = this._getDefaultLang();
-    var toLang = goal.text || noun_type_lang_google.getLangName(defaultLang);
+    var defaultLang;
+    var toLang = goal.text || (defaultLang = this._getDefaultLang()).name;
     var limitExceeded = html.length > GTRANSLATE_LIMIT;
     if (!html || limitExceeded) {
       var ehref = Utils.escapeHtml(CmdUtils.getWindow().location);
@@ -337,26 +339,27 @@ CmdUtils.CreateCommand({
     var phtml = pblock.innerHTML =  _(
       "Replaces the selected text with the <b>${toLang}</b> translation:",
       {toLang: toLang});
-    var langCodePair = {from: source.data || "", to: goal.data || defaultLang};
+    var langCodePair =
+      {from: source.data || "", to: goal.data || defaultLang.code};
     this._translate(html, langCodePair, function translate_preview_onTranslate(
       {translatedText, detectedSourceLanguage: dsl}) {
       pblock.innerHTML = (
         phtml + "<br/><br/>" + translatedText +
-        (!dsl ? "" :
-         "<p>(" + dsl + " \u2192 " + langCodePair.to + ")</p>"));
+        (dsl ? "<p>(" + dsl + " \u2192 " + langCodePair.to + ")</p>" : ""));
     }, pblock);
   },
   // Returns the default language for translation.  order of defaults:
   // PREF_LANG_DEPRECATED > PREF_LANG_DEFAULT > general.useragent.locale > "en"
   _getDefaultLang: function translate__getDefaultLang() {
     var {prefs} = Utils;
-    var userLocale = prefs.getValue("general.useragent.locale", "en");
-    var defaultLang = (prefs.getValue(PREF_LANG_DEPRECATED, "") ||
-                       prefs.getValue(PREF_LANG_DEFAULT, userLocale));
-    // If defaultLang is invalid lang code, fall back to english.
-    return (noun_type_lang_google.getLangName(defaultLang)
-            ? defaultLang
-            : "en");
+    var code = (
+      prefs.getValue(PREF_LANG_DEPRECATED, "") ||
+      prefs.getValue(
+        PREF_LANG_DEFAULT,
+        prefs.getValue("general.useragent.locale", "en").slice(0, 2)));
+    var name = (noun_type_lang_google.getLangName(code) ||
+                noun_type_lang_google.getLangName(code = "en"));
+    return {name: name, code: code};
   },
   _translate: googleTranslate,
 });
