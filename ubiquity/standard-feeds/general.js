@@ -304,7 +304,7 @@ CmdUtils.CreateCommand({
     it will translate the whole page.</>),
   execute: function translate_execute({object: {html}, goal, source}) {
     var sl = source.data || "";
-    var tl = goal.data || this._getDefaultLang();
+    var tl = goal.data || this._getDefaultLang().code;
     if (html && html.length <= GTRANSLATE_LIMIT)
       this._translate(
         html,
@@ -315,11 +315,7 @@ CmdUtils.CreateCommand({
     else
       Utils.openUrlInBrowser(
         "http://translate.google.com/translate" +
-        Utils.paramsToString({
-          u: CmdUtils.getWindow().location,
-          sl: sl,
-          tl: tl,
-        }));
+        Utils.paramsToString({u: CmdUtils.window.location, sl: sl, tl: tl}));
   },
   preview: function translate_preview(pblock, {object: {html}, goal, source}) {
     var defaultLang;
