@@ -540,17 +540,10 @@ function getLocalUrl(url, charset) {
   return req.responseText;
 }
 
-// === {{{ Utils.trim(str) }}} ===
-// Removes all whitespace surrounding a string and returns the result.
+// ** {{{ Utils.trim(str) }}} **
+// **//Deprecated.//** Use native {{{trim()}}} instead.
 
-Utils.trim = String.trim || function trim(str) {
-  http://blog.stevenlevithan.com/archives/faster-trim-javascript
-  var i = str.search(/\S/);
-  if (i < 0) return "";
-  var j = str.length;
-  while (/\s/.test(str[--j]));
-  return str.slice(i, j + 1);
-};
+Utils.trim = String.trim;
 
 // === {{{ Utils.sortBy(array, key, descending = false) }}} ===
 // Sorts an array by specified {{{key}}} and returns it. e.g.:
