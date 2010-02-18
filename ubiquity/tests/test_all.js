@@ -533,13 +533,16 @@ function testUtilsIsEmpty() {
 }
 
 function testUtilsPowerSet() {
-  var {assertEquals} = this, {powerSet} = Utils;
+  var {assertEquals} = this, {powerSet} = Utils, a = [], b = {};
   assertEquals(
     uneval(powerSet([0,1,2])),
     uneval([[], [0], [1], [0,1], [2], [0,2], [1,2], [0,1,2]]));
   assertEquals(
     uneval(powerSet("ab")),
     uneval([[], ["a"], ["b"], ["a","b"]]));
+  assertEquals(
+    uneval(powerSet([a,b])),
+    uneval([[], [a], [b], [a,b]]));
 }
 
 function testUtilsSeq() {

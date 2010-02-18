@@ -637,17 +637,20 @@ function classOf(val) TO_STRING.call(val).slice(8, -1);
 
 // === {{{ Utils.powerSet(set) }}} ===
 // Creates a [[http://en.wikipedia.org/wiki/Power_set|power set]] of
-// a {{{set}}}. e.g.:
+// an array like {{{set}}}. e.g.:
 // {{{
 // powerSet([0,1,2]) // [[], [0], [1], [0,1], [2], [0,2], [1,2], [0,1,2]]
 // powerSet("ab")    // [[], ["a"], ["b"], ["a","b"]]
 // }}}
 
-function powerSet(arrayLike) Array.reduce(
-  arrayLike,
-  function powerSet_acc(last, current) (
-    last.concat([a.concat(current) for each (a in last)])),
-  [[]]);
+function powerSet(arrayLike) {
+  var ps = [[]];
+  for (let i = 0, l = arrayLike.length; i < l; ++i) {
+    let next = [arrayLike[i]];
+    for each (let a in ps) ps.push(a.concat(next));
+  }
+  return ps;
+}
 
 // === {{{ Utils.seq(lead_or_count, end, step = 1) }}} ===
 // Creates an iterator of simple number sequence.
