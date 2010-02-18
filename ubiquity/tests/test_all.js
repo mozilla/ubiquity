@@ -402,7 +402,7 @@ function testUtilsUrlToParams() {
 
 function testUtilsIsArray() {
   this.assert(Utils.isArray([]));
-  this.assert(!Utils.isArray({}));
+  this.assert(!Utils.isArray({length: 0}));
 }
 
 // This tests bug #25.

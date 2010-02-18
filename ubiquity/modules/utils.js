@@ -46,6 +46,7 @@ var EXPORTED_SYMBOLS = ["Utils"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 const LogPrefix = "Ubiquity: ";
+const ToString = Object.prototype.toString;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -497,7 +498,7 @@ function paramsToString(params, prefix) {
         encodeURIComponent(key) + "=" + encodeURIComponent(value));
   }
   for (var key in params)
-    if (isArray(params[key]))
+    if (Utils.isArray(params[key]))
       params[key].forEach(function p2s_each(item) { addPair(key, item) });
     else
       addPair(key, params[key]);
@@ -618,7 +619,9 @@ function uniq(array, key, strict) {
 // === {{{ Utils.isArray(value) }}} ===
 // Returns whether or not the {{{value}}} is an {{{Array}}} instance.
 
-function isArray(val) val && classOf(val) === "Array";
+Utils.isArray = Array.isArray || function isArray(val) {
+  return val != null && ToString.call(val) === "[object Array]";
+};
 
 // === {{{ Utils.isEmpty(value) }}} ===
 // Returns whether or not the {{{value}}} has no own properties.
@@ -632,8 +635,7 @@ function isEmpty(val) {
 // Returns the internal {{{[[Class]]}}} property of the {{{value}}}.
 // See [[http://bit.ly/CkhjS#instanceof-considered-harmful]].
 
-const TO_STRING = Object.prototype.toString;
-function classOf(val) TO_STRING.call(val).slice(8, -1);
+function classOf(val) ToString.call(val).slice(8, -1);
 
 // === {{{ Utils.powerSet(set) }}} ===
 // Creates a [[http://en.wikipedia.org/wiki/Power_set|power set]] of
