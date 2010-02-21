@@ -78,6 +78,11 @@ var Utils = {
   get currentTab getCurrentTab()
     BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
+  // === {{{ Utils.currentTabs }}} ===
+  // An array of tabs within the current window.
+
+  get currentTabs getCurrentTabs() gTabs.from(Utils.currentChromeWindow),
+
   __globalObject: this,
 };
 
@@ -1027,7 +1032,15 @@ var gTabs = Utils.tabs = {
 
   reload: function tabs_reload(matcher) {
     for each (let tab in gTabs.search(matcher)) tab.browser.reload();
+    return this;
   },
+
+  // === {{{ Utils.tabs.from(container) }}} ===
+  // Returns tabs within {{{container}}}, which can be
+  // either a {{{ChromeWindow}}} or {{{tabbrowser}}}.
+
+  from: function tabs_from(container)
+    Array.map((container.gBrowser || container).mTabs || [], BrowserTab),
 };
 
 // == {{{ Utils.clipboard }}} ==
