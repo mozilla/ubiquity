@@ -348,15 +348,14 @@ var UbiquitySetup = {
     Application.extensions.get("ubiquity@labs.mozilla.com").version,
 };
 function DisabledCmdStorage(prefName) {
-  var disabledCommands =
-    Utils.json.decode(gPrefs.getValue(prefName, "{}"));
+  var disabledCommands = JSON.parse(gPrefs.getValue(prefName, "{}"));
 
   this.getDisabledCommands = function getDisabledCommands() {
     return disabledCommands;
   };
 
   function onDisableChange(eventName) {
-    gPrefs.setValue(prefName, Utils.json.encode(disabledCommands));
+    gPrefs.setValue(prefName, JSON.stringify(disabledCommands));
   }
 
   this.attach = function attach(cmdSource) {

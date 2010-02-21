@@ -69,8 +69,6 @@ const FEED_ANNOS = [this[v] for (v in this) if (/^FEED_\w+_ANNO$/.test(v))];
 
 const DEFAULT_FEED_TYPE = "commands";
 
-var gJSON = Utils.json;
-
 // == The FeedManager Class ==
 // The constructor for this class takes an instance of an annotation
 // service, which has an interface that's virtually identical to
@@ -430,17 +428,17 @@ Feed.prototype = {
   // === {{{Feed#getJSONStorage()}}} ===
   // Gets the persistent JSON storage for the feed.
   getJSONStorage: function Feed_getJSONStorage()
-    gJSON.decode(
+    JSON.parse(
       this._annSvc.getPageAnnotation(this.uri, FEED_BIN_ANNO, "{}")),
 
   // === {{{Feed#setJSONStorage(object)}}} ===
   // Sets a JSON-encodable {{{object}}} as the persistent JSON storage
   // for the feed and returns the stored result as a new object.
   setJSONStorage: function Feed_setJSONStorage(obj) {
-    var data = gJSON.encode(obj);
+    var data = JSON.stringify(obj);
     this._annSvc.setPageAnnotation(this.uri, FEED_BIN_ANNO, data, 0,
                                    this._expiration);
-    return gJSON.decode(data);
+    return JSON.parse(data);
   },
 
   // === {{{Feed#makeBin()}}} ===

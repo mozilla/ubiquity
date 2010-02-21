@@ -364,10 +364,10 @@ function makeBuiltins(languageCode, baseUri, parserVersion) {
 
 var BuiltInFeedProto = {
   getJSONStorage: function BF_getJSONStorage()
-    Utils.json.decode(Utils.prefs.getValue(COMMANDS_BIN_PREF, "{}")),
+    JSON.parse(Utils.prefs.getValue(COMMANDS_BIN_PREF, "{}")),
   setJSONStorage: function BF_setJSONStorage(obj) {
-    var data = Utils.json.encode(obj);
+    var data = JSON.stringify(obj);
     Utils.prefs.setValue(COMMANDS_BIN_PREF, data);
-    return Utils.json.decode(data);
+    return JSON.parse(data);
   },
 };

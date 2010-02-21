@@ -583,7 +583,7 @@ function safeConvertRegExp(regExp) {
 // safe version of it native to the given sandbox.
 
 function makeSafeObj(obj, sandboxFactory, sandbox) {
-  var json = Utils.encodeJson(obj);
+  var json = JSON.stringify(obj);
   var code = "(" + json + ")";
   var newObj = sandboxFactory.evalInSandbox(
     code,
@@ -627,7 +627,7 @@ function setMetadata(metadata, object, schema, htmlSanitize) {
         break;
       }
     } else if (typeof(propVal) == "object") {
-      propVal = Utils.decodeJson(Utils.encodeJson(propVal));
+      propVal = JSON.parse(JSON.stringify(propVal));
       if (typeof(propType) == "object") {
         object[propName] = new Object();
         setMetadata(propVal, object[propName], propType, htmlSanitize);

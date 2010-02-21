@@ -114,7 +114,7 @@ for each (let f in [
     Cc["@mozilla.org/appshell/window-mediator;1"]
     .getService(Ci.nsIWindowMediator)),
 
-  // === {{{ Utils.json }}} ===
+  // ** {{{ Utils.json }}} **
   // A cached {{{nsIJSON}}} instance.
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
@@ -253,14 +253,13 @@ function reportInfo(message) {
   Utils.ConsoleService.logStringMessage(LogPrefix + message);
 }
 
-// === {{{ Utils.encodeJson(object) }}} ===
-// Serializes the given {{{object}}} using JavaScript Object Notation (JSON).
+// ** {{{ Utils.encodeJson(object) }}} **
+// **//Deprecated.//** Use {{{JSON.stringify()}}} instead.
 
 function encodeJson(object) Utils.json.encode(object);
 
-// === {{{ Utils.decodeJson(string) }}} ===
-// Unserializes the given {{{string}}} in JavaScript Object
-// Notation (JSON) format and returns the result.
+// ** {{{ Utils.decodeJson(string) }}} **
+// **//Deprecated.//** Use {{{JSON.parse()}}} instead.
 
 function decodeJson(string) Utils.json.decode(string);
 
@@ -1014,7 +1013,7 @@ var gTabs = Utils.tabs = {
     if (classOf(matcher) !== "RegExp") try {
       matcher = RegExp(matcher, "i");
     } catch (e if e instanceof SyntaxError) {
-      matcher = RegExp(Utils.regexp.quote(matcher), "i");
+      matcher = RegExp(regexp.quote(matcher), "i");
     }
     if (maxResults == null) maxResults = 1/0;
     for (let tab in gTabs) {
@@ -1208,8 +1207,7 @@ regexp.Trie.prototype = {
       for (let k in $) if (k) break I_MISS___count__;
       return "";
     }
-    var alt = [], cc = [], q;
-    var {quote} = Utils.regexp;
+    var {quote} = regexp, alt = [], cc = [], q;
     for (let char in $) {
       if ($[char] !== 1) {
         let recurse = RegexpTrie__regexp($[char]);

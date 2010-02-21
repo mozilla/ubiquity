@@ -9,7 +9,7 @@ function exportConfiguration() {
   var services = jsm.UbiquitySetup.createServices();
   if (services.feedManager._annSvc) {
     var annSvc = services.feedManager._annSvc;
-    config.annotations = jsm.Utils.decodeJson(annSvc.toJSONString());
+    config.annotations = JSON.parse(annSvc.toJSONString());
   }
 
   config.skins = services.skinService.skinList;
@@ -43,6 +43,6 @@ function exportConfiguration() {
   // JSONify the data, write it out to a data: URI and open it in
   // a new browser tab so it's saved for as long as the user
   // wants to keep the tab open.
-  var json = jsm.Utils.encodeJson(config);
+  var json = JSON.stringify(config);
   jsm.Utils.openUrlInBrowser("data:text/plain," + encodeURI(json));
 }

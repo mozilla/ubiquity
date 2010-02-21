@@ -95,8 +95,7 @@ function cmdInlineLine(cmd, cmdCode, context) {
   inlineChecker.lastIndex = 0;
   var po = "";
   while (inlineChecker.test(cmdCode))
-    po += potMsgs(cmd.referenceName + "." + context,
-                  Utils.json.decode(RegExp.$1));
+    po += potMsgs(cmd.referenceName + "." + context, JSON.parse(RegExp.$1));
   return po;
 }
 

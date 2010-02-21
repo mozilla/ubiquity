@@ -13,7 +13,7 @@ function _getExtensionInfo(Application) {
     extensions[ext.name] = {
       version:  ext.version,
       firstRun: ext.firstRun,
-      enabled:  ext._enabled
+      enabled:  ext._enabled,
     };
   });
   return extensions;
@@ -34,7 +34,7 @@ function _getBrowserInfo(Application) {
     numberOfTabs:    numTabs,
     cookieEnabled:   nav.cookieEnabled,
     language:        nav.language,
-    buildID:         nav.buildID
+    buildID:         nav.buildID,
   };
 }
 
@@ -43,7 +43,7 @@ function _getOSInfo() {
 
   return {
     oscpu:    hostJS.oscpu,
-    platform: hostJS.platform
+    platform: hostJS.platform,
   };
 }
 
@@ -54,15 +54,14 @@ function _getPluginInfo() {
     plugins.push({
       name: hostJS.plugins[i].name,
       //description: hostJS.plugins[i].description,
-      filename: hostJS.plugins[i].filename
+      filename: hostJS.plugins[i].filename,
     });
   }
   return plugins;
 }
 
 function _getErrorInfo() {
-  var consoleService = Cc["@mozilla.org/consoleservice;1"].
-                       getService(Ci.nsIConsoleService);
+  var consoleService = Utils.ConsoleService;
 
   // Get the last five errors
   var errors = {};
@@ -76,12 +75,14 @@ function _getErrorInfo() {
       var info;
       try {
         var scriptErr = error.QueryInterface(Ci.nsIScriptError);
-        info = {message: scriptErr.errorMessage,
-                flags: scriptErr.flags,
-                category: scriptErr.category,
-                filename: scriptErr.sourceName,
-                lineno: scriptErr.lineNumber};
-      } catch (e if e.result == Components.results.NS_NOINTERFACE) {
+        info = {
+          message: scriptErr.errorMessage,
+          flags: scriptErr.flags,
+          category: scriptErr.category,
+          filename: scriptErr.sourceName,
+          lineno: scriptErr.lineNumber,
+        };
+      } catch (e if e.result === Components.results.NS_NOINTERFACE) {
         info = {message: error.message};
       }
       errorList.push(info);
@@ -96,7 +97,7 @@ function _getDebugInfo() {
     extensions: _getExtensionInfo(Application),
     plugins:    _getPluginInfo(),
     os:         _getOSInfo(),
-    errors:     _getErrorInfo()
+    errors:     _getErrorInfo(),
   };
 }
 
@@ -148,24 +149,24 @@ function doSubmit(info) {
                });
   }
 
-  Components.utils.reportError("Utils.encodeJson(info) is " +
-    Utils.encodeJson(info));
-  jQuery.ajax(
-    {contentType: "application/json",
-     type: "POST",
-     url: Utils.prefs.getValue(BUG_REPORT_PREF, ""),
-     data: Utils.encodeJson(info),
-     dataType: "json",
-     success: function(data, textStatus) {
-       //errorToLocalize
-       doFinish("<p>Bug submitted with report id <tt>" + data.report_id +
-                "</tt>.</p>");
-     },
-     error: function(XMLHttpRequest, textStatus, errorThrown) {
-       //errorToLocalize
-       doFinish("<p>An error occurred when submitting the report.</p>");
-     }
-    });
+  var json = JSON.stringify(info);
+  Utils.reportInfo("submitting: " + json);
+  jQuery.ajax({
+    contentType: "application/json",
+    type: "POST",
+    url: Utils.prefs.getValue(BUG_REPORT_PREF, ""),
+    data: json,
+    dataType: "json",
+    success: function(data, textStatus) {
+      //errorToLocalize
+      doFinish("<p>Bug submitted with report id <tt>" + data.report_id +
+               "</tt>.</p>");
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      //errorToLocalize
+      doFinish("<p>An error occurred when submitting the report.</p>");
+    }
+  });
 }
 
 function onReady() {
@@ -174,8 +175,10 @@ function onReady() {
 
   visualize(info, elem);
   $("#description").focus();
-  $("#form").submit(function(aEvt) { aEvt.preventDefault();
-                                     doSubmit(info); });
+  $("#form").submit(function(aEvt) {
+    aEvt.preventDefault();
+    doSubmit(info);
+  });
 }
 
 $(window).ready(onReady);
