@@ -1045,27 +1045,72 @@ var gTabs = Utils.tabs = {
 // == {{{ Utils.clipboard }}} ==
 // Contains functions related to clipboard.
 
-Utils.clipboard = {
-  // === {{{ Utils.clipboard.text }}} ===
-  // Gets or sets the clipboard text.
+var gClipboard = Utils.clipboard = {
+  flavors: {
+    __proto__: null,
+    text: "text/unicode",
+    html: "text/html",
+  },
 
-  get text clipboard_getText() {
-    var clip = (Cc["@mozilla.org/widget/clipboard;1"]
-                .getService(Ci.nsIClipboard));
+  // === {{{ Utils.clipboard.get(flavor) }}} ===
+  // Gets the clipboard content(s) of specified flavor(s).\\
+  // {{{flavor}}} can be either a string or array of strings. e.g.:
+  // {{{
+  // var txt = Utils.clipboard.get("text/unicode");
+  // var [txt, htm] = Utils.clipboard.get(["text", "html"]);
+  // }}}
+
+  get: function clipboard_get(flavor) {
+    const {service, service: {kGlobalClipboard}, flavors} = gClipboard;
+    function get(flavor) {
+      flavor = flavors[flavor] || flavor;
+      if (!service.hasDataMatchingFlavors([flavor], 1, kGlobalClipboard))
+        return "";
+      var trans = (Cc["@mozilla.org/widget/transferable;1"]
+                   .createInstance(Ci.nsITransferable));
+      trans.addDataFlavor(flavor);
+      service.getData(trans, kGlobalClipboard);
+      var data = {};
+      trans.getTransferData(flavor, data, {});
+      return data.value.QueryInterface(Ci.nsISupportsString).data;
+    }
+    return (
+      arguments.length > 1
+      ? Array.map(arguments, get)
+      : Utils.isArray(flavor) ? flavor.map(get) : get(flavor));
+  },
+
+  // === {{{ Utils.clipboard.set(dict) }}} ===
+  // Sets the clipboard content(s) of specified flavor(s).\\
+  // {{{dict}}} should be a dictionary of flavor:data pairs.
+
+  set: function clipboard_set(dict) {
+    const {service, flavors} = gClipboard;
     var trans = (Cc["@mozilla.org/widget/transferable;1"]
                  .createInstance(Ci.nsITransferable));
-    trans.addDataFlavor("text/unicode");
-    clip.getData(trans, clip.kGlobalClipboard);
-    var ss = {};
-    trans.getTransferData("text/unicode", ss, {});
-    return ss.value.QueryInterface(Ci.nsISupportsString).toString();
-  },
-  set text clipboard_setText(str) {
-    (Cc["@mozilla.org/widget/clipboardhelper;1"]
-     .getService(Ci.nsIClipboardHelper)
-     .copyString(str));
+    for (let [flavor, data] in new Iterator(dict)) {
+      let ss = (Cc["@mozilla.org/supports-string;1"]
+                .createInstance(Ci.nsISupportsString));
+      ss.data = data = String(data);
+      trans.addDataFlavor(flavor = flavors[flavor] || flavor);
+      trans.setTransferData(flavor, ss, data.length * 2);
+    }
+    service.setData(trans, null, service.kGlobalClipboard);
   },
 };
+// === {{{ Utils.clipboard.text }}} ===
+// === {{{ Utils.clipboard.html }}} ===
+// Gets or sets the clipboard text or html.
+[(gClipboard.__defineGetter__(name, function getCB() gClipboard.get(name)),
+  gClipboard.__defineSetter__(name, function setCB(data){
+    var dict = {};
+    dict[name] = data;
+    gClipboard.set(dict);
+  }))
+ for (name in new Iterator(gClipboard.flavors, true))];
+defineLazyProperty(
+  gClipboard, function service()
+    Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard));
 
 // == {{{ Utils.history }}} ==
 // Contains functions that make it easy to access
