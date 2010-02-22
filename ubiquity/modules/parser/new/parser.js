@@ -1327,7 +1327,7 @@ Parser.prototype = {
     let returnArr = [];
 
     for each (let combination in combinations) {
-      let combinationJson = Utils.encodeJson(combination);
+      let combinationJson = JSON.stringify(combination);
       // if we've already completed this combination of suggestions
       // before, don't do it again.
       if (parse._suggestionCombinationsThatHaveBeenCompleted[combinationJson])
@@ -1377,12 +1377,14 @@ Parser.prototype = {
         defaultValues = [].concat(missingArg.default);
       else {
         if (!(noun.id in this._defaultsCache)) {
-          let defaultValue = ((typeof noun.default === "function"
-                               ? noun.default()
-                               : noun.default) ||
-                              {text: "", html: "", data: null, summary: ""});
-          this._defaultsCache[noun.id] =
-            Utils.isArray(defaultValue) ? defaultValue : [defaultValue];
+          let dvals = (typeof noun.default === "function"
+                       ? noun.default()
+                       : noun.default);
+          Utils.isArray(dvals) ||
+            (dvals = [dvals]);
+          dvals[0] ||
+            (dvals = [{text: "", html: "", data: null, summary: ""}]);
+          this._defaultsCache[noun.id] = dvals;
         }
         defaultValues = this._defaultsCache[noun.id];
       }
