@@ -203,9 +203,12 @@ CmdUtils.CreateCommand({
   names: ["bookmark"],
   description: "Adds the current page to bookmarks.",
   execute: function bookmark_execute() {
-    var {title, URL} = CmdUtils.getDocument();
+    const NBS = (Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
+                 .getService(Ci.nsINavBookmarksService));
+    var {title, uri} = Utils.currentTab;
     try {
-      Application.bookmarks.unfiled.addBookmark(title, Utils.url(URL));
+      NBS.insertBookmark(
+        NBS.unfiledBookmarksFolder, uri, NBS.DEFAULT_INDEX, title);
     } catch (e) {
       displayMessage({
         text: _("Page could not be bookmarked!"),
@@ -453,58 +456,57 @@ CmdUtils.CreateCommand({
 
     var xdata = this._extraData(data.id);
     XML.prettyPrinting = XML.ignoreWhitespace = false;
-    pb.innerHTML = <div class="extension" enabled={data.enabled}/>.appendChild(
-      (<style><![CDATA[
-        .extension[enabled=false] {opacity:0.7}
-        .icon {float:left; vertical-align:top; border:none; margin-right:1ex}
-        .version {margin-left:1ex}
-        .creator {font-size: 88%}
-        .creator, .description {margin-top:0.5ex}
-        button {display:none}
-       ]]></style>) +
-      <a class="homepage" accesskey="h"/>.appendChild(
-        (<img class="icon" src={xdata.iconURL || this.icon}/>) +
-        (<strong class="name">{data.name}</strong>)) +
-      (<span class="version">{data.version}</span>) +
-      ("creator" in xdata ?
-       <div class="creator">{xdata.creator}</div> : <></>) +
-      ("description" in xdata ?
-       <div class="description">{xdata.description}</div> : <></>) +
+    var div = <div class="extension"><style><![CDATA[
+      .disabled {opacity:0.7}
+      .icon {float:left; vertical-align:top; border:none; margin-right:1ex}
+      .version {margin-left:1ex}
+      .creator {font-size: 88%}
+      .creator, .description {margin-top:0.5ex}
+      .action:not([accesskey]) {display:none}
+       ]]></style></div>;
+    if (xdata.disabled) div.@class += " disabled";
+    var name = <a class="homepage" accesskey="H"/>.appendChild(
+      (<img class="icon" src={xdata.iconURL || this.icon}/>) +
+      (<strong class="name">{data.name}</strong>));
+    if (xdata.homepageURL) name.@href = xdata.homepageURL;
+    div.appendChild(name);
+    div.appendChild(<span class="version">{data.version}</span>);
+    if (xdata.creator)
+      div.appendChild(<div class="creator">{xdata.creator}</div>);
+    if (xdata.description)
+      div.appendChild(<div class="description">{xdata.description}</div>);
+    pb.innerHTML = div.appendChild(
       <p class="buttons"/>.appendChild(
-        (<button id="options"   accesskey="o">-</button>) +
-        (<button id="directory" accesskey="d">-</button>)));
-    if ("homepageURL" in xdata)
-      pb.getElementsByClassName("homepage")[0].href = xdata.homepageURL;
-    if (data.enabled && "optionsURL" in xdata) {
+        (<input type="button" class="action" id="options"/>) +
+        (<input type="button" class="action" id="directory"/>)));
+    if (!xdata.disabled && xdata.optionsURL) {
       var opt = pb.ownerDocument.getElementById("options");
-      opt.innerHTML = _("<u>O</u>ptions");
-      opt.addEventListener("focus", function ve_options() {
-        this.blur();
+      opt.value = _("Options");
+      opt.accessKey = "O";
+      opt.addEventListener("click", function ve_options() {
         context.chromeWindow.openDialog(xdata.optionsURL, "", "");
+        this.blur();
       }, false);
-      opt.style.display = "inline";
     }
-    var file = (Cc["@mozilla.org/file/directory_service;1"]
-                .getService(Ci.nsIProperties)
-                .get("ProfD", Ci.nsIFile));
+    var file = (
+      Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties)
+      .get("ProfD", Ci.nsIFile));
     file.append("extensions");
     file.append(data.id);
     if (file.exists() && file.isDirectory()) {
       var dir = pb.ownerDocument.getElementById("directory");
-      dir.innerHTML = _("<u>D</u>irectory");
-      dir.addEventListener("focus", function ve_dir() {
-        this.blur();
+      dir.value = _("Directory");
+      dir.accessKey = "D";
+      dir.addEventListener("click", function ve_dir() {
         Utils.openUrlInBrowser(Utils.IOService.newFileURI(file).spec);
+        this.blur();
       }, false);
-      dir.style.display = "inline";
     }
   },
   _urn: function ve__urn(id) "urn:mozilla:item:" + id,
   _open: function ve__open(self, id) {
     const Pane = "extensions";
-    var em = (Cc["@mozilla.org/appshell/window-mediator;1"]
-              .getService(Ci.nsIWindowMediator)
-              .getMostRecentWindow("Extension:Manager"));
+    var em = Utils.WindowMediator.getMostRecentWindow("Extension:Manager");
     if (em) {
       em.focus();
       em.showView(Pane);
@@ -523,19 +525,20 @@ CmdUtils.CreateCommand({
   },
   _extraData: function ve__extraData(id) {
     const PREFIX_NS_EM = "http://www.mozilla.org/2004/em-rdf#";
-    var rdfs = (Cc["@mozilla.org/rdf/rdf-service;1"]
-                .getService(Ci.nsIRDFService));
-    var {datasource} = (Cc["@mozilla.org/extensions/manager;1"]
-                        .getService(Ci.nsIExtensionManager));
+    var rdfs =
+      Cc["@mozilla.org/rdf/rdf-service;1"].getService(Ci.nsIRDFService);
+    var {datasource} = Utils.ExtensionManager;
     var itemResource = rdfs.GetResource(this._urn(id));
-    var data = {};
-    for each (var key in ["creator", "description",
-                          "homepageURL", "iconURL", "optionsURL"]) {
-      var target = datasource.GetTarget(itemResource,
-                                        rdfs.GetResource(PREFIX_NS_EM + key),
-                                        true);
+    var data = {
+      creator: "", description: "", isDisabled: "",
+      homepageURL: "", iconURL: "", optionsURL: "",
+    };
+    for (let key in data) {
+      let target = datasource.GetTarget(
+        itemResource, rdfs.GetResource(PREFIX_NS_EM + key), true);
       if (target instanceof Ci.nsIRDFLiteral) data[key] = target.Value;
     }
+    data.disabled = data.isDisabled === "true";
     return data;
   },
 });

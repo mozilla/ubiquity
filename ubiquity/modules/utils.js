@@ -79,7 +79,7 @@ var Utils = {
     BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
   // === {{{ Utils.currentTabs }}} ===
-  // An array of tabs within the current window.
+  // An array of tabs within the current chrome window.
 
   get currentTabs getCurrentTabs() gTabs.from(Utils.currentChromeWindow),
 
@@ -90,23 +90,28 @@ for each (let f in this) if (typeof f === "function") Utils[f.name] = f;
 for each (let f in [
   // === {{{ Utils.Application }}} ===
   // Shortcut to [[https://developer.mozilla.org/en/FUEL/Application]].
-  function Application() (
-    Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication)),
+  function Application()
+    Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication),
 
   // === {{{ Utils.ConsoleService }}} ===
   // Shortcut to {{{nsIConsoleService}}}.
-  function ConsoleService() (
-    Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService)),
+  function ConsoleService()
+    Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService),
+
+  // === {{{ Utils.ExtensionManager }}} ===
+  // Shortcut to {{{nsIExtensionManager}}}.
+  function ExtensionManager()
+    Cc["@mozilla.org/extensions/manager;1"].getService(Ci.nsIExtensionManager),
 
   // === {{{ Utils.IOService }}} ===
   // Shortcut to {{{nsIIOService}}}.
-  function IOService() (
-    Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService)),
+  function IOService()
+    Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
 
   // === {{{ Utils.PrefService }}} ===
   // Shortcut to {{{nsIPrefService}}}.
-  function PrefService() (
-    Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService)),
+  function PrefService()
+    Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService),
 
   // === {{{ Utils.WindowMediator }}} ===
   // Shortcut to {{{nsIWindowMediator}}}.
@@ -115,30 +120,30 @@ for each (let f in [
     .getService(Ci.nsIWindowMediator)),
 
   // ** {{{ Utils.json }}} **
-  // A cached {{{nsIJSON}}} instance.
+  // **//Deprecated.//** A cached {{{nsIJSON}}} instance.
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
   // === {{{ Utils.appName }}} ===
   // The chrome application name found in {{{nsIXULAppInfo}}}.
   // Example values are {{{"Firefox"}}}, {{{"Songbird"}}}, {{{"Thunderbird"}}}.
 
-  function appName() (
-    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name),
+  function appName()
+    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name,
 
   // === {{{ Utils.appWindowType }}} ===
   // The name of "main" application windows for the chrome application.
   // Example values are {{{"navigator:browser"}}} for Firefox/Thunderbird
   // and {{{"Songbird:Main"}}} for Songbird.
 
-  function appWindowType() (
-    {Songbird: "Songbird:Main"}[Utils.appName] || "navigator:browser"),
+  function appWindowType()
+    ({Songbird: "Songbird:Main"})[Utils.appName] || "navigator:browser",
 
   // === {{{ Utils.OS }}} ===
   // The platform name found in {{{nsIXULRuntime}}}.
   // See [[https://developer.mozilla.org/en/OS_TARGET]].
 
-  function OS() (
-    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS),
+  function OS()
+    Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
 
   ]) defineLazyProperty(Utils, f);
 

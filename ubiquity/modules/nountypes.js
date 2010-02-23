@@ -57,8 +57,6 @@ Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/setup.js");
 Cu.import("resource://gre/modules/utils.js");
 
-const {Application} = Utils;
-
 var {commandSource, skinService} = UbiquitySetup.createServices();
 
 // === {{{ noun_arb_text }}} ===
@@ -343,15 +341,15 @@ var noun_type_awesomebar = {
 // === {{{ noun_type_extension }}} ===
 // Suggests installed extensions.
 // * {{{text, html}}} : extension name
-// * {{{data}}} : https://developer.mozilla.org/en/Toolkit_API/extIExtension
+// * {{{data}}} : contains extension {{{id}}}, {{{name}}} and {{{version}}}
 
 var noun_type_extension = {
   label: "name",
   noExternalCalls: true,
   suggest: function nt_ext_suggest(text) {
-    var grepee = [{text: ext.name, data: ext}
-                  for each (ext in Application.extensions.all)];
-    var suggs = CmdUtils.grepSuggs(text, grepee);
+    var exts = Utils.ExtensionManager.getItemList(2, {}); // TYPE_EXTENSION
+    var suggs = CmdUtils.grepSuggs(
+      text, [{text: ext.name, data: ext} for each (ext in exts)]);
     for each (let s in suggs) s.html = s.summary = Utils.escapeHtml(s.text);
     return suggs;
   },

@@ -22,6 +22,7 @@
  *   Jono DiCarlo <jdicarlo@mozilla.com>
  *   Maria Emerson <memerson@mozilla.com>
  *   Michael Yoshitaka Erlewine <mitcho@mitcho.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -54,8 +55,6 @@ Cu.import("resource://ubiquity/modules/feedaggregator.js");
 Cu.import("resource://ubiquity/modules/webjsm.js");
 Cu.import("resource://ubiquity/modules/prefcommands.js");
 Cu.import("resource://ubiquity/modules/skinsvc.js");
-
-const {Application} = Utils;
 
 var gServices, gWebJsModule, gPrefs = Utils.prefs;
 
@@ -345,7 +344,7 @@ var UbiquitySetup = {
   get parserVersion() gPrefs.getValue("extensions.ubiquity.parserVersion", 2),
 
   get version()
-    Application.extensions.get("ubiquity@labs.mozilla.com").version,
+    Utils.ExtensionManager.getItemForID("ubiquity@labs.mozilla.com").version,
 };
 function DisabledCmdStorage(prefName) {
   var disabledCommands = JSON.parse(gPrefs.getValue(prefName, "{}"));
