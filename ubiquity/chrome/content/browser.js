@@ -70,15 +70,10 @@ addEventListener("load", function ubiquityBoot() {
 
     var panel = document.getElementById("ubiquity-transparent-panel");
 
-    gUbiquity = new Ubiquity(panel,
-                             document.getElementById("ubiquity-entry"),
-                             cmdMan);
-
     cmdMan.refresh();
     addEventListener("command", function refreshUbiquityOnReload(evt) {
       if (evt.target.id === "Browser:Reload") cmdMan.refresh();
     }, false);
-
     Utils.listenOnce(window, "unload", function ubiquityTeardown() {
       cmdMan.finalize();
     });
@@ -96,6 +91,10 @@ addEventListener("load", function ubiquityBoot() {
     // Hack to get the default skin to work on Linux, which we don't
     // support per-pixel alpha transparency on.
     if (Utils.OS === "Linux") panel.style.backgroundColor = "#444";
+
+    gUbiquity = new Ubiquity(panel,
+                             document.getElementById("ubiquity-entry"),
+                             cmdMan);
 
     UbiquityPopupMenu(
       document.getElementById("contentAreaContextMenu"),
