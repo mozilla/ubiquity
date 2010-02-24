@@ -1106,13 +1106,14 @@ var gClipboard = Utils.clipboard = {
 // === {{{ Utils.clipboard.text }}} ===
 // === {{{ Utils.clipboard.html }}} ===
 // Gets or sets the clipboard text or html.
-[(gClipboard.__defineGetter__(name, function getCB() gClipboard.get(name)),
-  gClipboard.__defineSetter__(name, function setCB(data){
+for (let n in gClipboard.flavors) let (name = n) {
+  gClipboard.__defineGetter__(name, function getCB() gClipboard.get(name));
+  gClipboard.__defineSetter__(name, function setCB(data) {
     var dict = {};
     dict[name] = data;
     gClipboard.set(dict);
-  }))
- for (name in new Iterator(gClipboard.flavors, true))];
+  });
+}
 defineLazyProperty(
   gClipboard, function service()
     Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard));
