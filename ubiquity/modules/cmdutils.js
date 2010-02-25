@@ -163,15 +163,8 @@ function getWindowInsecure() getWindow().wrappedJSObject;
 function getDocumentInsecure() getDocument().wrappedJSObject;
 
 // === {{{ CmdUtils.getHiddenWindow() }}} ===
-// Returns the application's hidden window.  (Every Mozilla
-// application has a global singleton hidden window.  This is used by
-// {{{CmdUtils.getWindowSnapshot()}}}, but probably doesn't need
-// to be used directly by command feeds.
 
-function getHiddenWindow() (
-  Cc["@mozilla.org/appshell/appShellService;1"]
-  .getService(Ci.nsIAppShellService)
-  .hiddenDOMWindow);
+function getHiddenWindow() Utils.hiddenWindow;
 
 // === {{{ CmdUtils.getCommand(id) }}} ===
 // Gets a reference to a Ubiquity command by its ID or reference name

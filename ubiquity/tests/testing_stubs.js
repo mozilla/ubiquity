@@ -36,9 +36,7 @@ function makeCommandManager(source, msgService, parser, callback) {
   this.skipIfXPCShell();
 
   var self = this;
-  var hiddenWindow = (Cc["@mozilla.org/appshell/appShellService;1"]
-                      .getService(Ci.nsIAppShellService)
-                      .hiddenDOMWindow);
+  var {hiddenWindow} = Utils;
   var fakeDom = hiddenWindow.document;
   var xulIframe = fakeDom.createElement("iframe");
   var onload = this.makeCallback(function _onload() {

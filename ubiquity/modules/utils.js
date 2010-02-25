@@ -123,10 +123,15 @@ for each (let f in [
   // **//Deprecated.//** A cached {{{nsIJSON}}} instance.
   function json() Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON),
 
+  // === {{{ Utils.hiddenWindow }}} ===
+  // Returns the application's global hidden window.
+  function hiddenWindow() (
+    Cc["@mozilla.org/appshell/appShellService;1"]
+    .getService(Ci.nsIAppShellService).hiddenDOMWindow),
+
   // === {{{ Utils.appName }}} ===
   // The chrome application name found in {{{nsIXULAppInfo}}}.
   // Example values are {{{"Firefox"}}}, {{{"Songbird"}}}, {{{"Thunderbird"}}}.
-
   function appName()
     Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).name,
 
@@ -134,14 +139,12 @@ for each (let f in [
   // The name of "main" application windows for the chrome application.
   // Example values are {{{"navigator:browser"}}} for Firefox/Thunderbird
   // and {{{"Songbird:Main"}}} for Songbird.
-
   function appWindowType()
     ({Songbird: "Songbird:Main"})[Utils.appName] || "navigator:browser",
 
   // === {{{ Utils.OS }}} ===
   // The platform name found in {{{nsIXULRuntime}}}.
   // See [[https://developer.mozilla.org/en/OS_TARGET]].
-
   function OS()
     Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS,
 
