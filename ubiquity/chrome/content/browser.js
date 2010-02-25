@@ -122,7 +122,10 @@ addEventListener("load", function ubiquityBoot() {
       Utils.reportInfo(
         "Setup: " + e + "\n" + jsm.ExceptionUtils.stackTrace(e));
       //errorToLocalize
-      new jsm.AlertMessageService().displayMessage("Setup failed.");
+      new jsm.AlertMessageService().displayMessage({
+        text: "Setup failed. See Error Console for details.",
+        onfinished: window.toErrorConsole,
+      });
     }
     if (!gUbiquity) return;
     addEventListener("keydown",  ubiquityKey, true);
