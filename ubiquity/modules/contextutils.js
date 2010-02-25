@@ -57,25 +57,27 @@ Components.utils.import("resource://ubiquity/modules/utils.js");
 // === {{{ ContextUtils.getHtmlSelection(context) }}} ===
 
 function getHtmlSelection(context) {
-  var range = getFirstRange(context);
+  var range = cloneFirstRange(context);
   if (!range) return "";
 
-  var newNode = context.focusedWindow.document.createElement("div");
-  newNode.appendChild(range.cloneContents());
+  var div = context.focusedWindow.document.createElement("div");
+  div.appendChild(range.cloneContents());
   range.detach();
-  return absolutifyUrlsInNode(newNode).innerHTML;
+  // fix for #551
+  Array.forEach(div.getElementsByTagName("*"), Utils.absolutifyUrlAttribute);
+  return div.innerHTML;
 }
 
 // === {{{ ContextUtils.getSelection(context) }}} ===
 
 function getSelection(context) {
   var {focusedElement} = context;
-  if (isTextBox(focusedElement)) {
+  if (Utils.isTextBox(focusedElement)) {
     let {selectionStart: ss, selectionEnd: se} = focusedElement;
     if (ss !== se) return focusedElement.value.slice(ss, se);
   }
 
-  var range = getFirstRange(context);
+  var range = cloneFirstRange(context);
   if (range) {
     let result = range.toString();
     range.detach();
@@ -103,7 +105,7 @@ function setSelection(context, content, options) {
     return true;
   }
 
-  if (isTextBox(focusedElement)) {
+  if (Utils.isTextBox(focusedElement)) {
     let plainText = options && options.text;
     if (!plainText) {
       let html = (focusedElement.ownerDocument
@@ -153,40 +155,44 @@ function getSelectionObject(context) {
   };
 }
 
-// === {{{ ContextUtils.getFirstRange(context) }}} ===
-// Returns a copy of the first {{{Range}}} in {{{Selection}}}.
+// === {{{ ContextUtils.getSelectedNodes(context, selector) }}} ===
+// Returns all nodes in all selections.
+//
+// {{{selector}}} is an optional CSS selector string or a function
+// that filters each node.
 
-function getFirstRange(context) {
-  var win = context.focusedWindow;
-  var sel = win && win.getSelection();
-  if (!sel || !sel.rangeCount) return null;
-
-  var range = sel.getRangeAt(0);
-  var newRange = win.document.createRange();
-  newRange.setStart(range.startContainer, range.startOffset);
-  newRange.setEnd(range.endContainer, range.endOffset);
-  return newRange;
-}
-
-// ==== {{{ ContextUtils.absolutifyUrlsInNode(node) }}} ====
-// Takes all the URLs specified as attributes in descendants of
-// the given DOM and convert them to absolute URLs. This
-// is a fix for [[http://ubiquity.mozilla.com/trac/ticket/551|#551]].
-
-function absolutifyUrlsInNode(node) {
-  var attrs = ["href", "src", "action"];
-  for each (let n in Array.slice(node.getElementsByTagName("*")))
-    for each (let a in attrs)
-      if (a in n) {
-        n.setAttribute(a, n[a]);
-        break;
+function getSelectedNodes(context, selector) {
+  var nodes = [], win = context.focusedWindow, sel = win && win.getSelection();
+  if (!sel) return nodes;
+  const ELEMENT = 1, TEXT = 3;
+  var aua = Utils.absolutifyUrlAttribute, ok = selector;
+  if (typeof ok !== "function")
+    ok = !selector ? Boolean : function gsn_ok(node) {
+      return node.nodeType === ELEMENT && node.mozMatchesSelector(selector);
+    };
+  for (let i = 0, l = sel.rangeCount; i < l; ++i) {
+    let range = sel.getRangeAt(i), node = range.startContainer;
+    if (node.nodeType === TEXT &&
+        /\S/.test(node.nodeValue.slice(range.startOffset))) {
+      let pn = node.parentNode;
+      if (ok(pn)) nodes.push(aua(pn));
+    }
+    WALK: do {
+      if (ok(node)) nodes.push(aua(node));
+      if (node.hasChildNodes()) node = node.firstChild;
+      else {
+        while (!node.nextSibling) if (!(node = node.parentNode)) break WALK;
+        node = node.nextSibling;
       }
-  return node;
+    } while (range.isPointInRange(node, 0));
+  }
+  return nodes;
 }
 
-// === {{{ ContextUtils.isTextBox(node) }}} ===
+// ==== {{{ ContextUtils.cloneFirstRange(context) }}} ====
+// Returns a copy of the first range in selection.
 
-function isTextBox(node) {
-  try { return typeof node.selectionEnd === "number" } catch (_) {}
-  return false;
+function cloneFirstRange(context) {
+  var win = context.focusedWindow, sel = win && win.getSelection();
+  return sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
 }

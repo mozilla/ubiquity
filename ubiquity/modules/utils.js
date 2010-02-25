@@ -260,12 +260,10 @@ function reportInfo(message) {
 
 // ** {{{ Utils.encodeJson(object) }}} **
 // **//Deprecated.//** Use {{{JSON.stringify()}}} instead.
-
 function encodeJson(object) Utils.json.encode(object);
 
 // ** {{{ Utils.decodeJson(string) }}} **
 // **//Deprecated.//** Use {{{JSON.parse()}}} instead.
-
 function decodeJson(string) Utils.json.decode(string);
 
 // === {{{Utils.ellipsify(node, characters)}}} ===
@@ -301,6 +299,28 @@ function ellipsify(node, chars) {
     }
   }
   return copy;
+}
+
+// === {{{ Utils.absolutifyUrlAttribute(element) }}} ===
+// Takes the URL specified as an attribute in the given DOM {{{element}}}
+// and convert it to an absolute URL.
+
+const URL_ATTRS = ["href", "src", "action"];
+
+function absolutifyUrlAttribute(element) {
+  for each (let attr in URL_ATTRS) if (attr in element) {
+    element.setAttribute(attr, element[attr]);
+    break;
+  }
+  return element;
+}
+
+// === {{{ Utils.isTextBox(node) }}} ===
+// Returns whether or not the given DOM {{{node}}} is a textbox.
+
+function isTextBox(node) {
+  try { return node.selectionEnd >= 0 } catch (_) {}
+  return false;
 }
 
 // === {{{ Utils.setTimeout(callback, delay = 0, arg0, arg1, ...) }}} ===

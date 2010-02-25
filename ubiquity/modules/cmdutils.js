@@ -104,13 +104,17 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 // {{{CmdUtils}}} imports and wraps the following three methods from
 // [[#modules/contextutils.js|ContextUtils]].
 
-// === {{{ CmdUtils.getHtmlSelection() }}} ===
-// Returns a string containing the html representation of the
-// user's current selection, i.e. text including tags.
-
 // === {{{ CmdUtils.getSelection() }}} ===
 // Returns a string containing the text and just the text of the user's
-// current selection, i.e. with html tags stripped out.
+// current selection, i.e. with HTML tags stripped out.
+
+// === {{{ CmdUtils.getHtmlSelection() }}} ===
+// Returns a string containing the HTML representation of the
+// user's current selection, i.e. text including tags.
+
+// === {{{ CmdUtils.getSelectedNodes(selector) }}} ===
+// Returns selected nodes as filtered by {{{selector}}},
+// which can be either a CSS string or a function.
 
 // === {{{ CmdUtils.setSelection(content, options) }}} ===
 // Replaces the current selection with new content.
@@ -121,7 +125,8 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 // that value will be used in place of the html if we're in
 // a plain-text-only editable field.
 
-for each (let m in ["getHtmlSelection", "getSelection", "setSelection"]) {
+for each (let m in ["getSelection", "getHtmlSelection", "getSelectedNodes",
+                    "setSelection"]) {
   eval(<><![CDATA[
     CmdUtils.@ = function @(x, y) {
       var c = this.__globalObject.context || {};
