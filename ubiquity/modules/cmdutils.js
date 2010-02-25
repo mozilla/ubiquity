@@ -1335,26 +1335,27 @@ previewList.CSS = "" + <![CDATA[
 // the URL to which the relative paths are relative to).
 
 function absUrl(data, sourceUrl) {
+  var {uri} = Utils;
   switch (typeof data) {
     case "string": return data.replace(
       /\b(href|src|action)=(?![\"\']?[a-z]+:\/\/)([\"\']?)([^\s>\"\']+)\2/ig,
       function absUrl_gsub(_, a, q, path) (
-        a + "=" + q + Utils.url({uri: path, base: sourceUrl}).spec + q));
+        a + "=" + q + uri({uri: path, base: sourceUrl}).spec + q));
     case "object": {
       (this.__globalObject.jQuery(data)
        .find("*").andSelf()
        .each(function absUrl_iter() {
-         var attr, path = (this.getAttribute(attr = "href") ||
-                           this.getAttribute(attr = "src" ) ||
-                           this.getAttribute(attr = "action"));
+         if (!("getAttribute" in this)) return;
+         var attr, path = (
+           this.getAttribute(attr = "href") ||
+           this.getAttribute(attr = "src" ) ||
+           this.getAttribute(attr = "action"));
          if (path !== null)
-           this.setAttribute(
-             attr, Utils.url({uri: path, base: sourceUrl}).spec);
+           this.setAttribute(attr, uri({uri: path, base: sourceUrl}).spec);
        }));
       return data;
     }
-    case "xml": return (
-      XML(arguments.callee.call(this, data.toXMLString(), sourceUrl)));
+    case "xml": return XML(absUrl.call(this, data.toXMLString(), sourceUrl));
   }
   return null;
 }
