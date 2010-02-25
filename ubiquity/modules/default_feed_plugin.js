@@ -224,11 +224,11 @@ function DFPFeed(feedInfo, hub, messageService, sandboxFactory,
 
   var self = this;
   var codeSource = makeCodeSource(feedInfo, headerSources, footerSources);
-  var sandbox = null;
+  var sandbox = {};
   var bin = feedInfo.makeBin();
 
   function teardown() {
-    if (sandbox) for (let [k, v] in new Iterator(sandbox))
+    for (let [k, v] in new Iterator(sandbox))
       if (~k.lastIndexOf("teardown_", 0) && typeof v === 'function')
         try { v() } catch (e) { Cu.reportError(e) }
   }
