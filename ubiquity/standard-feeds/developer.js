@@ -74,6 +74,157 @@ CmdUtils.CreateCommand({
   }
 });
 
+var {slice} = Array, gXS = Utils.hiddenWindow.XMLSerializer();
+function qsaa(lm, sl) slice(lm.querySelectorAll(sl));
+function qstc(lm, sl) (lm = lm.querySelector(sl)) ? lm.textContent : "";
+function qsxs(lm, sl) (
+  (lm = lm.querySelector(sl)) ? gXS.serializeToString(lm) : "");
+
+const JQAPI = "http://api.jquery.com/";
+var jQACmd = CmdUtils.CreateCommand({
+  name: "jQuery API",
+  description: "Browses " + "jQuery API".link(JQAPI) + ".",
+  author: "satyr",
+  license: "MIT",
+  icon: "chrome://ubiquity/skin/icons/jquery.ico",
+  argument: {
+    name: JQAPI,
+    label: "category/method/selector",
+    default: function jqa_default(cb) {
+      var me = this;
+      function jqa_scs(xml) {
+        var {makeSugg} = CmdUtils, list = me._list, cdic = {__proto__: null};
+        for each (let c in qsaa(xml, "categories, categories category")) {
+          if (c.hasChildNodes()) c.categories = slice(c.children);
+          let name = c.getAttribute("name");
+          if (name) {
+            cdic[name] = c;
+            let path = name.toLowerCase().replace(/ /g, "-");
+            c.url = JQAPI + "category/" + path + "/";
+            c.entries = [];
+          }
+          else name = "All", c.url = JQAPI;
+          list.push(makeSugg(c.text = name, null, c));
+        }
+        for each (let e in qsaa(xml, "entries > entry")) {
+          for each (let ec in qsaa(e, "category")) {
+            let name = ec.getAttribute("name");
+            if (name in cdic) cdic[name].entries.push(e);
+          }
+          let name = e.name = e.getAttribute("name");
+          let type = e.type = e.getAttribute("type");
+          let path = name, text;
+          if (type === "selector") {
+            path = name.replace(/[A-Z]/g, "-$&").toLowerCase() + "-selector";
+            text = qstc(e, "sample");
+          }
+          else let (arg = e.querySelector("signature > argument"))
+            text = name + "(" + (arg ? arg.getAttribute("name") : "") + ")";
+          e.url = JQAPI + path + "/";
+          e.desc = qsxs(e, "signature + desc");
+          e.longdesc = qsxs(e, "longdesc");
+          list.push(makeSugg(e.text = text, null, e));
+        }
+        delete jQACmd.icon;
+        [me.default] = list;
+        cb && cb();
+      }
+      function jqa_err(x) {
+        Utils.reportInfo(
+          "Failed to get <" + this.url + ">.\n" +
+          x.status + " " + x.statusText + "\n" + x.responseText);
+        Utils.setTimeout(
+          function jqa_r() { me.default = me._default },
+          1e3 * (1 << ++me._retries));
+      }
+      $.ajax({
+        url: JQAPI + "api/", dataType: "xml",
+        success: jqa_scs, error: jqa_err,
+      });
+      me._default = jqa_default;
+      jQACmd.icon = "chrome://global/skin/icons/loading_16.png";
+      return me.default = {text: "", summary: "..."};
+    },
+    suggest: function jqa_suggest(txt, htm, cb, sx) {
+      var me = this, suggs = me._grep(txt);
+      if (txt) {
+        if (typeof this.default === "function")
+          this.default(function jqa_async() { cb(me._grep(txt)) });
+        suggs.push(CmdUtils.makeSugg(txt, null, null, .1, sx));
+      }
+      return suggs;
+    },
+    _grep: function jqa_grep(txt) CmdUtils.grepSuggs(txt, this._list),
+    _list: [],
+    _retries: 0,
+  },
+  execute: function jqa_execute({object: {text, data}}) {
+    Utils.openUrlInBrowser(
+      data ? data.url : JQAPI + encodeURIComponent(text));
+  },
+  preview: function jqa_preview(pb, {object: {data}}) {
+    if (!data) return void this.previewDefault(pb);
+    pb.ownerDocument.defaultView.scrollTo(0, 0);
+    let nodes = data.categories || data.entries;
+    if (nodes) {
+      let htmls = [], div = function (s) s && "<div>" + s + "</div>";
+      for each (let n in nodes) let (t = n.text.link(n.url).bold())
+        htmls.push(
+          "categories" in n
+          ? t + div([c.text for each (c in n.categories)].join("&nbsp; ")) :
+          "entries" in n
+          ? t + div(["<code>" + e.text + "</code>"
+                     for each (e in n.entries)].join("&nbsp; "))
+          : "<code>" + t + "</code> " + div(n.desc));
+      if (data.nodeName === "category") htmls.push("<b>..</b>");
+      CmdUtils.previewList(pb, htmls, function jqa_browse(i) {
+        jQACmd.preview(pb, {object: {data: nodes[i] || data.parentNode}});
+      }, "div {text-indent:0em; padding-bottom:0.4ex; font-size:88%}");
+      return;
+    }
+    var ttl, lst = "", sel = data.type === "selector";
+    if (sel) ttl = data.name + " selector";
+    else {
+      ttl = data.text;
+      let r = data.getAttribute("return");
+      if (r) ttl +=
+        " \u226B <em class='type'>" + r.replace(/\w+/g, this._type) + "</em>";
+    }
+    for each (let sig in qsaa(data, "signature")) {
+      let args = [], dds = "";
+      for each (let a in qsaa(sig, "argument")) {
+        let n = a.getAttribute("name"), o = a.hasAttribute("optional");
+        dds += (
+          "<dd><var class='argument" + (o ? " optional'>" : "'>") + n +
+          "</var> " + gXS.serializeToString(a.firstElementChild) + "</dd>");
+        sel || args.push(o ? "[" + n + "]" : n);
+      }
+      let t = (sel
+               ? "$('" + data.text + "')"
+               : data.name + "(" + args.join(", ") + ")");
+      lst += "<dt><code>" + t + "</code>" + this._added(sig) + "</dt>" + dds;
+    }
+    pb.innerHTML = (
+      "<div id='jquery-api' class='" + data.type +"'>" + this._style +
+      "<h1>" + ttl + "</h1><dl>" + lst + "</dl>" +
+      (data.longdesc.length > 23 ? data.longdesc : data.desc) + "</div>");
+    CmdUtils.absUrl($("a", pb), JQAPI);
+  },
+  _type: function jqa_type(t) t.link("http://docs.jquery.com/Types#" + t),
+  _added: function jqa_added(lm) let(v = qstc(lm, "added")) (
+    "<span class='added'>" +
+    v.link(JQAPI + "category/version/" + v + "/") + "</span>"),
+  _style: "<style>" + <![CDATA[
+    h1 {margin:0.3ex 0 0; font-size:116%}
+    dl {margin-top:0; padding:0 0.5em}
+    dt {margin-top:0.3ex; border-bottom:solid 1px; font-size:108%}
+    dd {margin-left:0em}
+    dd, longdesc, div > desc, .type, h1 > .added {font-size:92%}
+    dt, .argument {font-weight:bold}
+    .added {float:right}
+    ]]> + "</style>",
+});
+
 CmdUtils.CreateCommand({
   names: ["run selector-selector"],
   description: "" + (
