@@ -947,7 +947,9 @@ function makeSearchCommand(options) {
   if (!("description" in options)) {
     // generate description from the name of the seach command
     // options.description = "Searches " + htmlName + " for your words.";
-    options.description = L("ubiquity.cmdutils.searchdescription", htmlName);
+    options.description = L(
+      "ubiquity.cmdutils.searchdescription",
+      "defaultUrl" in options ? htmlName.link(options.defaultUrl) : htmlName);
   }
   if ("parser" in options) {
     let {parser} = options;
@@ -1081,15 +1083,19 @@ function makeSearchCommand(options) {
       }
       //errorToLocalize
       else template = "<p class='empty'>No results.</p>";
-      pblock.innerHTML = ("<div class='" + Klass + "'>" +
-                          "Results for <strong>" + html + "</strong>:" +
-                          template +
-                          "</div>");
+      pblock.innerHTML = (
+        "<div class='" + Klass + "'>Results for <strong>" + html +
+        "</strong>:" + template + "</div>");
     }
     var params = {
       url: url,
-      success: searchParser,
       dataType: parser.type || "html",
+      success: searchParser,
+      error: function searchError(xhr) {
+        pblock.innerHTML = (
+          "<div class='" + Klass + "'><span class='error'>" +
+          xhr.status + " " + xhr.statusText + "</span></div>");
+      },
     };
     if (postData) {
       params.type = "POST";
