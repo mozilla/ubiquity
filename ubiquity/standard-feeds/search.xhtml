@@ -79,7 +79,7 @@ ${matchMessage}
 {for photo in photos}
   {if photo_index % numcols == 0}
   <tr height="100">
-  {/if} 
+  {/if}
   <td>
     <a href="http://www.flickr.com/photos/${photo.owner}/${photo.id}" title="${photo.title|escape}">
       <img src="http://farm${photo.farm}.static.flickr.com/${photo.server}/${photo.id}_${photo.secret}_t.jpg" />
@@ -167,16 +167,6 @@ ${foundMessage}
   <p class='error'>${noArticlesFound}</p>
 {/for}
 </dl>
-</div>
-<div id="yahoo-search">
-{for result in results}
-<div class="gresult">
-  <div>
-    <a href="${result.Url}">${result.Title}</a>
-  </div>
-  <xul:description class="gresult-content">${result.Summary}</xul:description>
-</div>
-{/for}
 </div>
 
 <div id="yelp-search">
@@ -313,12 +303,11 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
     type: "GET",
     url: apiUrl,
     data: apiParams,
-    dataType: "text",
+    dataType: "json",
     error: function() {
       previewBlock.innerHTML = "<p class='error'>" + ARTICLE_ERROR + "</p>";
     },
     success: function(responseData) {
-      responseData = Utils.decodeJson(responseData);
       //remove relative <img>s beforehand to suppress
       //the "No chrome package registered for ..." message
       var parse = jQuery(("<div>" + responseData.parse.text["*"])
@@ -340,12 +329,10 @@ function fetchWikipediaArticle(previewBlock, articleTitle, langCode) {
 }
 
 CmdUtils.CreateCommand({
-  names: ["wikipedia", "lookup"],
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: SEARCH_TERM},
-              {role: "format",
-               nountype: noun_type_lang_wikipedia}],
+  names: ["Wikipedia", "lookup"],
+  arguments: [
+    {role: "object", nountype: noun_arb_text, label: SEARCH_TERM},
+    {role: "format", nountype: noun_type_lang_wikipedia}],
   homepage: "http://theunfocused.net/moz/ubiquity/verbs/",
   author: {name: "Blair McBride", email: "blair@theunfocused.net"},
   contributors: ["Viktor Pyatkovka"],
@@ -383,18 +370,16 @@ CmdUtils.CreateCommand({
       type: "GET",
       url: apiUrl,
       data: apiParams,
-      dataType: "text",
+      dataType: "json",
       error: onerror,
       success: function wikipedia_success(searchResponse) {
-        searchResponse = Utils.decodeJson(searchResponse);
-
-        if(!("query" in searchResponse && "search" in searchResponse.query)) {
+        if (!("query" in searchResponse && "search" in searchResponse.query)) {
           onerror();
           return;
         }
 
         function generateWikipediaLink(title) (
-          "http://" + langCode + ".wikipedia.org/wiki/" + 
+          "http://" + langCode + ".wikipedia.org/wiki/" +
           title.replace(/ /g, "_"));
 
         (previewData.results = searchResponse.query.search)
@@ -427,11 +412,10 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  names: ["IMDB", "internet movie database", "movie", "actor"],
+  names: ["IMDb", "internet movie database", "movie", "actor"],
   url: "http://www.imdb.com/find?s=all&q={QUERY}",
+  defaultUrl: "http://www.imdb.com/",
   icon: "chrome://ubiquity/skin/icons/imdb.ico",
-  description:
-  "Searches the Internet Movie Database (www.imdb.com) for your words.",
   parser: {
     container: "#main > table > tbody > tr",
     title: "td + td + td > a",
@@ -441,33 +425,31 @@ CmdUtils.makeSearchCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  names: ["yahoo"],
-  url: "http://search.yahoo.com/search?p={QUERY}&ei=UTF-8",
+  names: ["Yahoo!"],
+  url: "http://search.yahoo.com/search?ei=UTF-8&p={QUERY}",
+  defaultUrl: "http://www.yahoo.com/",
   icon: "chrome://ubiquity/skin/icons/yahoo.ico",
-  description: "Searches <a href=\"http://search.yahoo.com\">Yahoo</a> for pages matching your words.",
-  preview: function(pblock, {object}){
+  description: ("Searches <a href='http://search.yahoo.com/'>Yahoo!</a> " +
+                "for pages matching your words."),
+  parser : {
     //TODO: Figure out some way around rate limits
     //Currently, Yahoo rate limits to 5000 queries per IP per day
-    var searchTerm = object.text;
-    var pTemplate = "Searches Yahoo for <b>${query}</b>";
-    var pData = {query: searchTerm};
-    pblock.innerHTML = CmdUtils.renderTemplate(pTemplate, pData);
-
-    var url = "http://search.yahooapis.com/WebSearchService/V1/webSearch";
-    var params = {
-      appid: "wZ.3jHnV34GC4QakIuzfgHTGiU..1SfNPwPAuasmt.L5ytoIPOuZAdP1txE4s6KfRBp9",
-      query: searchTerm,
-      results: 3,
-      output: "json"
-    };
-
-    CmdUtils.previewGet( pblock, url, params, function(data) {
-      pblock.innerHTML = CmdUtils.renderTemplate(
-        feed.dom.getElementById("yahoo-search").innerHTML,
-        {results:data.ResultSet.Result}
-      );
-    }, "json");
-  }
+    url: (
+      "http://search.yahooapis.com/WebSearchService/V1/webSearch" +
+      Utils.paramsToString({
+        appid: ("wZ.3jHnV34GC4QakIuzfgHTGiU..1SfNPw" +
+                "PAuasmt.L5ytoIPOuZAdP1txE4s6KfRBp9"),
+        query: "%s",
+        results: 6,
+        output: "json",
+      })),
+    type: "json",
+    container: "ResultSet.Result",
+    href: "Url",
+    title: "Title",
+    preview: "Summary",
+    maxResults: 6,
+  },
 });
 
 var noun_type_amazon_com_index = CmdUtils.NounType("index", {
@@ -520,91 +502,53 @@ var AWS_REQUESTURI = "/onca/xml";
 var AWS_KEY = "08WX39XKK81ZEWHZ52R2";
 var AWS_SECRET = "w0WOQNS+GZcJWjrAmlK885tFi6rcrr9WOgeu6eK3";
 
-function amazon_generateTimestamp() {
-  // must be in the following format (Z meaning UTC): 2009-01-01T12:00:00Z
-  function zeroPad(aNum, aSize) {
-    var size = aSize || 2;
-    var str = aNum + "";
-    while (str.length < size)
-      str = "0" + str;
-    return str;
-  }
-  var now = new Date();
-  var timestamp = "";
-  timestamp += now.getUTCFullYear();
-  timestamp += "-";
-  timestamp += zeroPad(now.getUTCMonth() + 1);
-  timestamp += "-";
-  timestamp += zeroPad(now.getUTCDate());
-  timestamp += "T";
-  timestamp += zeroPad(now.getUTCHours());
-  timestamp += ":";
-  timestamp += zeroPad(now.getUTCMinutes());
-  timestamp += ":";
-  timestamp += zeroPad(now.getUTCSeconds());
-  timestamp += "Z";
-  return timestamp;
-}
-function amazon_doEscape(aString) {
-  var charMap = {
-    "!": "%21",
-    "*": "%2A",
-    "'": "%27",
-    "(": "%28",
-    ")": "%29"
-  };
-  var result = encodeURIComponent(aString);
-  for (var c in charMap)
-    result = result.replace(c, charMap[c]);
-  return result;
-}
+function amazon_doEscape(aString) (
+  encodeURIComponent(aString)
+  .replace(/[!\'()]+/g, escape)
+  .replace(/[*]/g, "%2A"));
 function amazon_signRequest(aParams) {
   var key;
   var params = {};
   for (key in aParams)
     params[key] = aParams[key];
-  params.Timestamp = amazon_generateTimestamp();
+  params.Timestamp = new Date().toISOString().slice(0, -5) + "Z";
   params.AWSAccessKeyId = AWS_KEY;
   var paramArray = [];
   for (key in params)
     paramArray.push(amazon_doEscape(key) + "=" + amazon_doEscape(params[key]));
   paramArray.sort();
   var paramString = paramArray.join("&");
-  var sigBaseString = "GET\n" + AWS_ENDPOINT + "\n" + AWS_REQUESTURI + "\n" + paramString;
+  var sigBaseString =
+    "GET\n" + AWS_ENDPOINT + "\n" + AWS_REQUESTURI + "\n" + paramString;
   var signature = Utils.signHMAC("SHA256", AWS_SECRET, sigBaseString);
-  return "http://" + AWS_ENDPOINT + AWS_REQUESTURI + "?" + paramString + "&Signature=" + amazon_doEscape(signature);
+  return ("http://" + AWS_ENDPOINT + AWS_REQUESTURI + "?" +
+          paramString + "&Signature=" + amazon_doEscape(signature));
 }
 
 CmdUtils.CreateCommand({
-  names: ["amazon"],
+  names: ["Amazon.com"],
   icon: "chrome://ubiquity/skin/icons/amazon.ico",
   description: "Searches " + AmazLink + " for items matching your words.",
-  help: (
+  help: "" + (
     <dl><dt>Available Indices</dt>
     {noun_type_amazon_com_index._list.reduce(
-      function(dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>+''),
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: SEARCH_TERM},
-              {role: "format",
-               nountype: noun_type_amazon_com_index}],
-  execute: function({object: {text}, format: {data}}) {
-    Utils.openUrlInBrowser(Amazon + "s/ref=nb_ss_gw" +
-                           Utils.paramsToString(
-                             { url: "node=" + data,
-                               "field-keywords": text}));
+      function (dd, s) dd.appendChild(<b>{s.text}</b>), <dd/>)}</dl>),
+  arguments: [
+    {role: "object", nountype: noun_arb_text, label: SEARCH_TERM},
+    {role: "format", nountype: noun_type_amazon_com_index}],
+  execute: function amazon_execute({object: {text}, format: {data}}) {
+    Utils.openUrlInBrowser(
+      Amazon + "s/ref=nb_ss_gw" +
+      Utils.paramsToString({url: "node=" + data, "field-keywords": text}));
   },
   preview: function(previewBlock,
-                    {object: {text, html}, format: {text: searchIndex}}) {
-    if (!text) {
-      previewBlock.innerHTML = this.description + this.help;
-      return;
-    }
+                    {object: {text, summary}, format: {text: searchIndex}}) {
+    if (!text) return void this.previewDefault(previewBlock);
 
     var me = this;
     previewBlock.innerHTML =
       _("Searching ${AmazLink} for items matching <b>${query}</b>.",
-        {AmazLink: AmazLink, query: html});
+        {AmazLink: AmazLink, query: summary});
     CmdUtils.previewAjax(previewBlock, {
       url: amazon_signRequest({
         Service: "AWSECommerceService",
@@ -617,19 +561,15 @@ CmdUtils.CreateCommand({
         Keywords: text,
       }),
       dataType: "xml",
-      error: function(xhr, info) {
-        if (info)
-          info = " (" + _(info) + ")";
-        else
-          info = "";
-        previewBlock.innerHTML = "<p class='error'>"
-          + _("Error searching ${AmazLink}.", {AmazLink: AmazLink})
-          + "<br/><em>"
-          + xhr.status + " " + xhr.statusText + info + "</em></p>";
-          // Note: this info could be anything...
-          // TODO: think of a better way to localize API errors, if possible.
+      error: function amazon_error(xhr, info) {
+        previewBlock.innerHTML = (
+          "<p class='error'>" +
+          _("Error searching ${AmazLink}.", {AmazLink: AmazLink}) +
+          "<br/><em>" + xhr.status + " " + xhr.statusText +
+          " (" + info + ")</em></p>");
+        // TODO: think of a better way to localize API errors, if possible.
       },
-      success: function(responseData) {
+      success: function amazon_success(responseData) {
         responseData = jQuery(responseData);
         var errorMessage = responseData.find("Error > Message").text();
         if (errorMessage) {
@@ -679,143 +619,110 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
-  names: ["VideoSurf", "video", "videos"],
+  names: ["VideoSurf", "videos"],
   homepage: "http://www.videosurf.com/",
-  author: { name: "Udi Falkson", email: "udi@videosurf.com"},
+  author: {name: "Udi Falkson", email: "udi@videosurf.com"},
   description: "Performs a VideoSurf video search with advanced preview.",
-  help: "Please email us at feedback@videosurf.com if you have any trouble or feature ideas!",
+  help: ("Please email us at feedback@videosurf.com " +
+         "if you have any trouble or feature ideas!"),
   icon: "chrome://ubiquity/skin/icons/videosurf.ico",
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: SEARCH_TERM}],
-  _fetchResults: function(pblock, query){
+  arguments: [{role: "object", nountype: noun_arb_text, label: SEARCH_TERM}],
+  preview: function vsurf_preview(pblock, {object: {text}}) {
+    pblock.innerHTML = _("Loading videos...");
     var url = "http://www.videosurf.com/api/ext/services/ubiquityService.php";
-    var params = {'query': query};
-    jQuery.get( url, params, function( response ) {
+    $.get(url, {query: text}, function vsurf_success(response) {
       pblock.innerHTML = response;
-
+      function getThumb(img) $("#vs_thumb_" + img.id.split("_")[2], pblock)[0];
       var originalSrc = null;
-      var getVidId = function(img){ return img.id.split("_")[2]; };
-      var tiles = jQuery(".tiles li a img", pblock);
-      tiles.mouseover(function(e){
-        var img = e.target;
-        var thumb = jQuery("#vs_thumb_"+getVidId(img), pblock)[0];
-        originalSrc = thumb.src;
-        thumb.src = img.src;
+      $(".tiles li a img", pblock).hover(
+        function vsurf_mouseover({target: img}) {
+          var thumb = getThumb(img);
+          originalSrc = thumb.src;
+          thumb.src = img.src;
+        },
+        function vsurf_mouseout({target: img}) {
+          getThumb(img).src = originalSrc;
         });
-      tiles.mouseout(function(e){
-        var img = e.target;
-        jQuery("#vs_thumb_"+getVidId(img), pblock)[0].src = originalSrc;
-      });
-    })
+    });
   },
-  preview: function( pblock, {object} ) {
-     pblock.innerHTML = _("Loading videos...");
-     this._fetchResults(pblock, object.text);
-   },
-  execute: function({object}) {
-     var query = object.text.replace(/^ +/,'').replace(/ +$/,'').replace(/ +/g,'+').replace(/[\/]/g,'%2f');
-     var url = "http://www.videosurf.com/videos/" + query + "?vlt=ubiquity";
-     Utils.openUrlInBrowser(url);
-   }
+  execute: function vsurf_execute({object: {text}}) {
+    Utils.openUrlInBrowser(
+      "http://www.videosurf.com/videos/" +
+      encodeURI(text.trim()).replace(/%20/g, "+") + "?vlt=ubiquity");
+  }
 });
 
 CmdUtils.makeSearchCommand({
   names: ["YouTube"],
-  url: "http://www.youtube.com/results?search_type=search_videos&search_sort=relevance&search_query={QUERY}&search=Search",
+  url: ("http://www.youtube.com/results?search_type=search_videos" +
+        "&search=Search&search_sort=relevance&search_query={QUERY}"),
   icon: "chrome://ubiquity/skin/icons/youtube.ico",
-  description: "Searches <a href=\"http://www.youtube.com\">YouTube</a> for videos matching your words. Previews the top results.",
-  preview: function(pblock, {object}){
-    var searchTerm = object.text;
-    pblock.innerHTML = "Searches Youtube for <b>" + object.summary + "</b>";
+  description: ("Searches <a href='http://www.youtube.com'>YouTube</a> " +
+                "for videos matching your words. Previews the top results."),
+  preview: function(pblock, {object: {text, summary}}) {
+    if (!text) return void this.previewDefault(pblock);
 
-    if(searchTerm.length < 1) {
-      pblock.innerHTML = "Searches for videos on Youtube";
-      return;
-    }
-
-    pblock.innerHTML = "Searches Youtube for <b>" + object.summary + "</b>";
-
-    var url = "http://gdata.youtube.com/feeds/api/videos";
-    var params = {
-      alt: "json",
-      "max-results": 3,
-      vq: searchTerm
-    };
-
-    CmdUtils.previewGet( pblock, url, params, function(data) {
-
-      var previewData = {
-          results: data.feed.entry,
-          query: object.summary,
-          numresults: data.feed['openSearch$totalResults']['$t']
-      };
-
-      pblock.innerHTML = CmdUtils.renderTemplate(
-        feed.dom.getElementById("youtube-search").innerHTML,
-        previewData);
-
-    }, "json");
+    pblock.innerHTML = _("Searches YouTube for ${it}.", {it: summary.bold()});
+    CmdUtils.previewGet(
+      pblock,
+      "http://gdata.youtube.com/feeds/api/videos",
+      {alt: "json", "max-results": 3, vq: text},
+      function youtube_success(data) {
+        pblock.innerHTML = CmdUtils.renderTemplate(
+          feed.dom.getElementById("youtube-search").innerHTML, {
+            results: data.feed.entry,
+            query: summary,
+            numresults: data.feed["openSearch$totalResults"]["$t"],
+          });
+      },
+      "json");
   }
 });
 
 CmdUtils.makeSearchCommand({
   names: ["Flickr", "images"],
-  url: "http://www.flickr.com/search/?q={QUERY}&w=all",
+  url: "http://www.flickr.com/search/?w=all&q={QUERY}",
   icon: "chrome://ubiquity/skin/icons/flickr.ico",
-  description: "Searches <a href=\"http://www.flickr.com\">Flickr</a> for pictures matching your keywords. Previews the top pictures.",
-  preview : function(previewBlock, {object}){
-    var inputText = object.text;
-
-    if(inputText.length < 1) {
-      previewBlock.innerHTML = _("Searches for photos on Flickr.");
-      return;
-    }
+  description: (
+    "Searches <a href=\"http://www.flickr.com\">Flickr</a> " +
+    "for pictures matching your keywords. Previews the top pictures."),
+  preview: function flickr_preview(previewBlock, {object: {text: inputText}}) {
+    if (!inputText) return void this.previewDefault(previewBlock);
 
     previewBlock.innerHTML = _("Searching for photos on Flickr...");
-
-    var apiUrl = "http://api.flickr.com/services/rest/";
-    var apiParams = {
-      api_key: "4ca9aaaf5c2d83260eba9ab68ac1b1ac",
-      format: "json",
-      nojsoncallback: 1,
-      method: "flickr.photos.search",
-      media: "photos",
-      text: inputText,
-      per_page: 8,
-      sort: "relevance"
-    };
-
     CmdUtils.previewAjax(previewBlock, {
-      type: "GET",
-      url: apiUrl,
-      data: apiParams,
-      datatype: "string",
-      error: function() {
-        previewBlock.innerHTML = "<p class='error'>"+_("Error searching Flickr")+"</i>";
+      url: "http://api.flickr.com/services/rest/",
+      data: {
+        api_key: "4ca9aaaf5c2d83260eba9ab68ac1b1ac",
+        format: "json",
+        nojsoncallback: 1,
+        method: "flickr.photos.search",
+        media: "photos",
+        text: inputText,
+        per_page: 12,
+        sort: "relevance",
       },
-      success: function(responseData) {
-        responseData = Utils.decodeJson(responseData);
-
-        if(responseData.stat != "ok") {
-          previewBlock.innerHTML = "<p class='error'>"
-                                   +_("Error searching Flickr.")+"</p>";
+      dataType: "json",
+      error: function flickr_error({statusText}) {
+        previewBlock.innerHTML = (
+          "<p class='error'>" + _("Error searching Flickr.") +
+          " (" + Utils.escapeHtml(statusText) + ")</p>");
+      },
+      success: function flickr_success(responseData) {
+        if (responseData.stat !== "ok") {
+          this.error({statusText: responseData.stat});
           return;
         }
-
-        var previewData = {
-          numcols: 4,
-          photos: responseData.photos.photo,
-          foundMessage: _("${nummatches} photos were found on Flickr.",
-                          {nummatches: responseData.photos.total})
-        };
-
         previewBlock.innerHTML = CmdUtils.renderTemplate(
-          feed.dom.getElementById("flickr-search").innerHTML,
-          previewData);
-    }
-  });
-}
+          feed.dom.getElementById("flickr-search").innerHTML, {
+            numcols: 4,
+            photos: responseData.photos.photo,
+            foundMessage: _("${nummatches} photos were found on Flickr.",
+                            {nummatches: responseData.photos.total}),
+          });
+      },
+    });
+  },
 });
 
 CmdUtils.CreateCommand({
@@ -827,7 +734,7 @@ CmdUtils.CreateCommand({
   argument: {
     name: "Bugzilla Number/Query",
     suggest: function bugz_suggest(txt, htm, cb, sx) (
-      (txt = Utils.trim(txt))
+      (txt = txt.trim())
       ? [CmdUtils.makeSugg(txt, null, null, /^\d+$/.test(txt) ? .9 : .3, sx)]
       : []),
   },
@@ -839,14 +746,27 @@ CmdUtils.CreateCommand({
        : ("buglist.cgi?query_format=specific&order=relevance+desc&" +
           "bug_status=__open__&content=" + encodeURIComponent(text)))));
   },
+  preview: function bugz_preview(pb, {object: {text}}) {
+    var me = this;
+    if (!text) return void me.previewDefault(pb);
+
+    var shortUrl = "http://bugzil.la/" + encodeURI(text);
+    pb.innerHTML = (
+      "<div id='bugzilla'>" +
+      "<input type='button' class='copy' value='Copy' accesskey='C'/> " +
+      "<a href='" + shortUrl + "' accesskey='H'>" + shortUrl + "</a>" +
+      "</div>");
+    pb.querySelector(".copy").addEventListener("click", function bugz_copy() {
+      displayMessage(Utils.clipboard.text = shortUrl, me);
+    }, false);
+  },
 });
 
 CmdUtils.makeSearchCommand({
   names: ["bing"],
   url: "http://www.bing.com/search?q=%s",
+  defaultUrl: "http://www.bing.com/",
   icon: "chrome://ubiquity/skin/icons/bing.ico",
-  description:
-  'Searches <a href="http://www.bing.com/">Bing</a> for the given words.',
   parser: {
     container: "#results li",
     title: "h3 > a",
@@ -855,24 +775,23 @@ CmdUtils.makeSearchCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  names: ["ebay"],
+  names: ["eBay"],
   url: "http://search.ebay.com/search/search.dll?satitle={QUERY}",
+  defaultUrl: "http://www.ebay.com/",
   icon: "chrome://ubiquity/skin/icons/ebay.ico",
-  description: "Searches <a href=\"http://search.ebay.com\">eBay</a> for auctions matching the given words.",
-  preview: function(pBlock, {object}) {
-    if (object.text)
-      pBlock.innerHTML = _("Searches eBay for ${query}",{query:object.text});
-    else
-      pBlock.innerHTML = _("Searches eBay for the given words.");
-  }
+  parser: {
+    container: ".pcell",
+    title: ".title",
+    preview: ".prchold",
+    thumbnail: "img",
+  },
 });
 
 CmdUtils.makeSearchCommand({
-  names: ["ask"],
+  names: ["Ask.com"],
   url: "http://www.ask.com/web?q={QUERY}",
+  defaultUrl: "http://www.ask.com/",
   icon: "chrome://ubiquity/skin/icons/ask.ico",
-  description:
-  'Searches <a href="http://www.ask.com/">Ask.com</a> for the given words.',
   parser: {
     container: "#result-table > tbody > tr > td",
     title: "a:first",
@@ -881,11 +800,10 @@ CmdUtils.makeSearchCommand({
 });
 
 CmdUtils.makeSearchCommand({
-  names: ["answers"],
+  names: ["Answers.com"],
   url: "http://www.answers.com/{QUERY}",
+  defaultUrl: "http://www.answers.com",
   icon: "chrome://ubiquity/skin/icons/answers.ico",
-  description:
-  'Searches <a href="http://www.answers.com">Answers.com</a> for the given words.',
   parser: {
     container: "#new_left > a + div",
     title: ".DsAndEntryName a",
@@ -901,7 +819,7 @@ var formatYelpBusiness = function(biz) {
 };
 
 CmdUtils.CreateCommand({
-  names: ["yelp"],
+  names: ["Yelp"],
   arguments: [
     {role: "object", label: "restaurant", nountype: noun_type_async_restaurant},
     {role: "location", nountype: noun_type_geo_town}
@@ -1002,64 +920,62 @@ CmdUtils.CreateCommand({
 // WEATHER COMMANDS
 // -----------------------------------------------------------------
 
-var Temperature_Units = [
-  'fahrenheit',
-  'celsius'
-];
+var Temperature_Units = ["fahrenheit", "celsius"];
 
-var noun_type_temperature_units = new CmdUtils.NounType( "temperature units", Temperature_Units );
+var noun_type_temperature_unit = CmdUtils.NounType("temperature unit",
+                                                   Temperature_Units);
 
 var WEATHER_TYPES = "none|tropical storm|hurricane|severe thunderstorms|thunderstorms|mixed rain and snow|mixed rain and sleet|mixed snow and sleet|freezing drizzle|drizzle|freezing rain|rain|rain|snow flurries|light snow showers|blowing snow|snow|hail|sleet|dust|foggy|haze|smoky|blustery|windy|cold|cloudy|mostly cloudy|mostly cloudy|partly cloudy|partly cloudy|clear|sunny|fair|fair|mixed rain and hail|hot|isolated thunderstorms|scattered thunderstorms|scattered thunderstorms|scattered showers|heavy snow|scattered snow showers|heavy snow|partly cloudy|thundershowers|snow showers|isolated thundershowers".split("|");
 
 var YAHOO_WEATHER_MAP = {
-  'unknown': null,
-  'snow grains': 'light snow showers',
-  'ice crystals': 'hail',
-  'ice pellets': 'hail',
-  mist: 'rain',
-  fog: 'foggy',
-  smoke: 'smoky',
-  'volcanic ash': 'haze',
-  'widespread dust': 'dust',
+  "unknown": null,
+  "snow grains": "light snow showers",
+  "ice crystals": "hail",
+  "ice pellets": "hail",
+  mist: "rain",
+  fog: "foggy",
+  smoke: "smoky",
+  "volcanic ash": "haze",
+  "widespread dust": "dust",
   sand: null,
   spray: null,
-  'dust whirls': 'dust',
-  'showers rain': 'rain',
+  "dust whirls": "dust",
+  "showers rain": "rain",
   sandstorm: null,
-  'low drifting snow': 'snow',
-  'low drifting widespread dust': 'dust',
-  'low drifting sand': null,
-  'blowing widespread dust': 'dust',
-  'blowing sand': null,
-  'rain showers': 'scattered showers',
-  'ice pellet showers': 'mixed rain and hail',
-  'hail showers': 'hail',
-  'small hail showers': 'hail',
-  thunderstorm: 'thunderstorms',
-  'thunderstorms and rain': 'thunderstorms',
-  'thunderstorms and snow': 'mixed rain and snow',
-  'thunderstorms and ice pellets': 'mixed rain and hail',
-  'thunderstorms with hail': 'mixed rain and hail',
-  'thunderstorms with small hail': 'mixed rain and hail',
-  'freezing fog': 'foggy',
-  'overcast': 'cloudy',
-  'scattered clouds': 'partly cloudy',
-  'n/a': null,
+  "low drifting snow": "snow",
+  "low drifting widespread dust": "dust",
+  "low drifting sand": null,
+  "blowing widespread dust": "dust",
+  "blowing sand": null,
+  "rain showers": "scattered showers",
+  "ice pellet showers": "mixed rain and hail",
+  "hail showers": "hail",
+  "small hail showers": "hail",
+  thunderstorm: "thunderstorms",
+  "thunderstorms and rain": "thunderstorms",
+  "thunderstorms and snow": "mixed rain and snow",
+  "thunderstorms and ice pellets": "mixed rain and hail",
+  "thunderstorms with hail": "mixed rain and hail",
+  "thunderstorms with small hail": "mixed rain and hail",
+  "freezing fog": "foggy",
+  "overcast": "cloudy",
+  "scattered clouds": "partly cloudy",
+  "n/a": null,
   // forcast conditions
-  'flurries': 'snow flurries',
-  'freezing rain': 'mixed rain and snow',
-  'a thunderstorm': 'thunderstorms',
-  hazy: 'haze',
-  'mostly sunny': 'sunny',
-  'partly sunny': 'sunny'
+  "flurries": "snow flurries",
+  "freezing rain": "mixed rain and snow",
+  "a thunderstorm": "thunderstorms",
+  hazy: "haze",
+  "mostly sunny": "sunny",
+  "partly sunny": "sunny"
 };
 
 function yahooWeatherImage(condition,dayOrNight) {
   // dayOrNight must be 'd' or 'n'. By default, it'll be 'd'.
   var conditionCode = condition.toLowerCase().trim();
-  if (conditionCode != 'heavy snow' && conditionCode != 'light snow showers')
-    conditionCode = conditionCode.replace(/^(heavy|light) /,'');
-  conditionCode = conditionCode.replace(/^chance of /,'');
+  if (conditionCode != "heavy snow" && conditionCode != "light snow showers")
+    conditionCode = conditionCode.replace(/^(?:heavy|light) /, "");
+  conditionCode = conditionCode.replace(/^chance of /, "");
 
   // map some Weather Underground weather codes to Yahoo! ones.
   if (conditionCode in YAHOO_WEATHER_MAP)
@@ -1069,78 +985,54 @@ function yahooWeatherImage(condition,dayOrNight) {
     return null;
 
   var weatherId = WEATHER_TYPES.indexOf(conditionCode);
-  var imgSrc = "http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/";
-  imgSrc += weatherId + (dayOrNight || 'd') + ".png";
-
-  return imgSrc;
+  return ("http://l.yimg.com/us.yimg.com/i/us/nws/weather/gr/" +
+          weatherId + (dayOrNight || "d") + ".png");
 }
+
+function formatLatLon(data) data && data.lat + "," + data.lon;
 
 CmdUtils.CreateCommand({
   names: ["check weather", "get weather", "weather"],
   author: {
-      name: "mitcho (Michael Yoshitaka Erlewine)",
-      email: "mitcho@mitcho.com"
+    name: "mitcho (Michael Yoshitaka Erlewine)",
+    email: "mitcho@mitcho.com",
   },
-  arguments: {location: noun_type_geo_town,
-              format: noun_type_temperature_units},
+  arguments: {
+    location: noun_type_geo_town,
+    format: noun_type_temperature_unit,
+  },
   icon: "chrome://ubiquity/skin/icons/wunderground.ico",
   description: "Checks the weather for a given location. It detects your " +
                "current location as a default.",
   help: "Try issuing &quot;weather near chicago&quot;.  It works with " +
         "zip-codes, too.  You can add 'in celsius' or 'in farenheit' to " +
         "specify the temperature scale.",
-  execute: function( {location} ) {
-    // this is some initial support for noun_type_geo_town
-    if (location.data)
-      location = location.data.lat + ',' + location.data.lon;
-    else
-      location = location.text;
-    var url = "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=";
-    url += escape( location );
-
-    Utils.openUrlInBrowser( url );
+  execute: function weather_execute({location: {text, data}}) {
+    Utils.openUrlInBrowser(
+      "http://www.wunderground.com/cgi-bin/findweather/getForecast?query=" +
+      encodeURIComponent(formatLatLon(data) || text));
   },
-
-  preview: function(pblock, {location, format}) {
-    if (location.text.length < 1) {
+  preview: function weather_preview(pblock, {
+    location: {text, data}, format: {text: temp_units}}) {
+    if (!text) {
       pblock.innerHTML = _("Gets the weather for a zip code/city.");
       return;
     }
 
-    pblock.innerHTML = _("Weather for ${location}",{location:location.text}) + '...';
+    pblock.innerHTML = _("Weather for ${location}", {location: text}) + "...";
 
-    var query = null;
-    if (location.data)
-      query = location.data.lat + ',' + location.data.lon;
-    else
-      query = location.text;
-
+    var query = formatLatLon(data) || text;
     var user_location = CmdUtils.getGeoLocation();
     //use either the specified "in" unit or get from geolocation
-    var temp_units = 'celsius';
-    if (!format.text) {
-      if (user_location && ["US","UM","BZ"].indexOf(user_location.country_code) != -1) {
-        temp_units = 'fahrenheit';
-      }
-    } else {
-      temp_units = format.text;
-    }
-    
-    var weatherObj = null;
-    var forecastObj = null;
+    if (!temp_units) temp_units = (
+      user_location && /^(?:U[SM]|BZ)$/.test(user_location.country_code)
+      ? "fahrenheit"
+      : "cersius");
+    var xmls = {}, param = {query: query};
+    function weather_tryToPreview() {
+      var {WXCurrentObXML: weatherObj, ForecastXML: forecastObj} = xmls;
+      if (!weatherObj || !forecastObj) return;
 
-    var recordWeatherAndTryToPreview = function(wXml) {
-      weatherObj = jQuery(wXml);
-      tryToPreview();
-    };
-    var recordForecastAndTryToPreview = function(fXml) {
-      forecastObj = jQuery(fXml);
-      tryToPreview();
-    };
-    var tryToPreview = function weather_tryToPreview() {
-      if (weatherObj == null || forecastObj == null)
-        return false;
-        
       var city = weatherObj.find("observation_location > full").text();
       var country = weatherObj.find("observation_location > country").text();
       var condition = weatherObj.find("weather").text();
@@ -1153,12 +1045,12 @@ CmdUtils.CreateCommand({
       var wind_units = "mph";
       //http://en.wikipedia.org/wiki/Si_units
       //UK uses mph
-      if (user_location && ["US","UM", "LR", "MM", "GB"].indexOf(user_location.country_code) == -1) {
+      if (user_location &&
+          /^(?:U[SM]|LR|MM|GB)$/.test(user_location.country_code)) {
         wind_units = "km/h";
         wind_speed = wind_speed * 1.6;
       }
       var wind = wind_text[0] + " at " + wind_speed.toFixed(1) + wind_units;
-
       var weather = {
         condition: condition,
         temp_units: temp_units,
@@ -1170,38 +1062,44 @@ CmdUtils.CreateCommand({
         showImg: (imgSrc != null),
         forecast: []
       };
-      
+
       var today = true;
-      forecastObj.find('simpleforecast forecastday').each(function(i,day) {
+      forecastObj.find("simpleforecast forecastday").each(function (i, day) {
         var day = jQuery(day);
-        var label = _("${month}/${day}",{month:day.find('month').text(),
-                                         day:day.find('day').text()});
+        var label = _("${month}/${day}", {
+          month: day.find("month").text(),
+          day: day.find("day").text(),
+        });
         if (today) {
-          label = _('today');
+          label = _("today");
           today = false;
         }
-        var condition = day.find('conditions').text();
+        var condition = day.find("conditions").text();
         var imgSrc = yahooWeatherImage(condition);
-        weather.forecast.push({label: label,
-                               condition: condition,
-                               img: imgSrc,
-                               showImg: (imgSrc != null),
-                               high: day.find('high > '+temp_units).text(),
-                               low: day.find('low > '+temp_units).text()});
+        weather.forecast.push({
+          label: label,
+          condition: condition,
+          img: imgSrc,
+          showImg: (imgSrc != null),
+          high: day.find("high > " + temp_units).text(),
+          low: day.find("low > " + temp_units).text(),
+        });
       });
 
+      //city may be like "Kansai, "
+      var loc = city.replace(/,\s*$/, "") + ", " + country;
       pblock.innerHTML = CmdUtils.renderTemplate(
-        feed.dom.getElementById("weather-search").innerHTML,
-        {w: weather, location: city + ', ' + country,
-         weatherMessage: _("Weather for ${location}", {location: city + ', ' + country})}
-      );
-      
-    };
-
-    var wUrl = "http://api.wunderground.com/auto/wui/geo/WXCurrentObXML";
-    CmdUtils.previewGet(pblock, wUrl, {query:query}, recordWeatherAndTryToPreview, 'xml');
-    var fUrl = "http://api.wunderground.com/auto/wui/geo/ForecastXML";
-    CmdUtils.previewGet(pblock, fUrl, {query:query}, recordForecastAndTryToPreview, 'xml');
+        feed.dom.getElementById("weather-search").innerHTML, {
+          w: weather, location: loc,
+          weatherMessage: _("Weather for ${location}", {location: loc}),
+        });
+    }
+    var xmls = {}, param = {query: query};
+    ["WXCurrentObXML", "ForecastXML"].forEach(function (api) {
+      CmdUtils.previewGet(
+        pblock, "http://api.wunderground.com/auto/wui/geo/" + api, param,
+        function (x) { xmls[api] = $(x); weather_tryToPreview(); }, "xml");
+    });
   }
 });
 
@@ -1210,11 +1108,9 @@ CmdUtils.CreateCommand({
   description: "Gives the meaning of a word, using answers.com.",
   help: "Try issuing &quot;define aglet&quot;",
   icon: "chrome://ubiquity/skin/icons/answers.ico",
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: "word"}],
+  arguments: [{role: "object", nountype: noun_arb_text, label: "word"}],
   execute: function define_execute({object}) {
-    Utils.openUrlInBrowser("http://www.answers.com/" + escape(object.text));
+    Utils.openUrlInBrowser("http://www.answers.com/" + encodeURI(object.text));
   },
   preview: function define_preview(pblock, {object: {text: word, html}}) {
     if (!word) return void this.previewDefault(pblock);
@@ -1299,7 +1195,7 @@ CmdUtils.makeSearchCommand({
 
         success: function(response) {
           try {
-            var {responseData} = Utils.decodeJson(response);
+            var {responseData} = JSON.parse(response);
           }
           catch(e) {
             pblock.innerHTML = "<p>" + _("Server error") + "</p>";
@@ -1387,7 +1283,6 @@ CmdUtils.makeSearchCommand({
           nextInputButton.click(function() {
             nextPage();
           });
-
 
           prevInputButton.click(function() {
             prevPage();

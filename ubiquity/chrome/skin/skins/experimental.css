@@ -279,19 +279,24 @@ a:active {
   font-weight: bolder;
 }
 
-.search-command kbd:before {
+.search-command .list {
+  margin: 1ex 0;
+}
+.search-command kbd::before {
   content: "[";
 }
-.search-command kbd:after {
+.search-command kbd::after {
   content: "]";
 }
-
-.search-command .thumbnail {
-  float: left; margin: 5px 10px 0 0;
-}
-
 .search-command .title {
   clear: both;
+}
+.search-command .thumbnail {
+  float: left;
+  margin: 5px 10px 0 0;
+}
+.search-command .preview {
+  margin: 0 0 0.5ex 2em;
 }
 
 }
