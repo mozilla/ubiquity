@@ -59,6 +59,7 @@ var extApplication = { // helper method for correct quitting/restarting
 CmdUtils.CreateCommand({
   names: ["exit firefox"],
   description: "Exits Firefox.",
+  icon: "chrome://global/skin/icons/Close.gif",
   execute: function exit_execute() {
     extApplication.quit();
   }
@@ -67,6 +68,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["restart firefox"],
   description: "Restarts Firefox.",
+  icon: "chrome://global/skin/icons/Restore.gif",
   execute: function restart_execute() {
     extApplication.restart();
   }
@@ -76,6 +78,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["close window"],
   description: "Closes current window.",
+  icon: "chrome://ubiquity/skin/icons/delete.png",
   execute: function closewin_execute() {
     extApplication.close();
   }
@@ -84,6 +87,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["fullscreen"],
   description: "Toggles fullscreen mode.",
+  icon: "chrome://global/skin/icons/monitor.png",
   execute: function fullscreen_execute() {
     CmdUtils.getWindow().fullScreen ^= 1;
   }
@@ -190,10 +194,18 @@ CmdUtils.CreateCommand({
   }
 });
 
+CmdUtils.CreateCommand({
+  names: ["stop"],
+  description: "Stops the current page.",
+  execute: function stop_execute() {
+    CmdUtils.getWindow().stop();
+  }
+});
 
 CmdUtils.CreateCommand({
   names: ["refresh", "reload"],
   description: "Refreshes the current page.",
+  icon: "chrome://ubiquity/skin/icons/page_refresh.png",
   execute: function reload_execute() {
     CmdUtils.getWindow().location.reload(true);
   }
@@ -202,6 +214,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["bookmark"],
   description: "Adds the current page to bookmarks.",
+  icon: "chrome://browser/skin/places/starred48.png",
   execute: function bookmark_execute() {
     const NBS = (Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
                  .getService(Ci.nsINavBookmarksService));
@@ -221,8 +234,19 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["print"],
   description: "Prints the current page.",
+  icon: "chrome://global/skin/icons/Portrait.png",
   execute: function print_execute() {
     CmdUtils.getWindow().print();
+  }
+});
+
+CmdUtils.CreateCommand({
+  names: ["print preview"],
+  description: "Shows the print preview of the current page.",
+  icon: "chrome://global/skin/icons/Print-preview.png",
+  execute: function pprint_execute() {
+    context.chromeWindow.document
+      .getElementById("cmd_printPreview").doCommand();
   }
 });
 
@@ -232,6 +256,7 @@ CmdUtils.CreateCommand({
   CmdUtils.CreateCommand({
     names: ["go " + way],
     description: "Goes " + way + " in history.",
+    icon: "chrome://browser/skin/menu-" + way + ".png",
     arguments: {object_steps: noun_type_number},
     preview: function go_preview(pblock, args) {
       pblock.innerHTML =
@@ -249,6 +274,16 @@ CmdUtils.CreateCommand({
   description: "Goes to home page.",
   execute: function home_execute() {
     CmdUtils.getWindow().home();
+  }
+});
+
+CmdUtils.CreateCommand({
+  names: ["open error console"],
+  description: "Opens Error Console.",
+  icon: "chrome://global/skin/icons/error-16.png",
+  execute: function errcon_execute() {
+    var cwin = context.chromeWindow;
+    (cwin.toErrorConsole || cwin.toJavaScriptConsole)(); // Console^2 or normal
   }
 });
 
@@ -327,7 +362,7 @@ CmdUtils.CreateCommand({
   help: "Enter nothing to reload the list.",
   author: {name: "satyr", email: "murky.satyr@gmail.com"},
   license: "MIT",
-  icon: "chrome://ubiquity/skin/icons/application_view_list.png",
+  icon: "moz-icon://.js?size=16",
   argument: noun_type_bookmarklet,
   execute: function bml_execute({object}) {
     if (object.data) CmdUtils.getWindow().location = object.data;

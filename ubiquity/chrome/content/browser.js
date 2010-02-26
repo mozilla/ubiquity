@@ -124,7 +124,7 @@ addEventListener("load", function ubiquityBoot() {
       //errorToLocalize
       new jsm.AlertMessageService().displayMessage({
         text: "Setup failed. See Error Console for details.",
-        onfinished: window.toErrorConsole,
+        onfinished: window.toErrorConsole || window.toJavaScriptConsole,
       });
     }
     if (!gUbiquity) return;
