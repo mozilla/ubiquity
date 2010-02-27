@@ -101,7 +101,7 @@ for each (let g in ["document", "documentInsecure",
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // == From ContextUtils ==
-// {{{CmdUtils}}} imports and wraps the following three methods from
+// {{{CmdUtils}}} imports and wraps the following methods from
 // [[#modules/contextutils.js|ContextUtils]].
 
 // === {{{ CmdUtils.getSelection() }}} ===
@@ -267,15 +267,6 @@ function injectHtml(html) {
   return jQuery("<div>" + html + "</div>").contents().appendTo(doc.body);
 }
 
-// === {{{ CmdUtils.copyToClipboard(text) }}} ===
-// This function places the passed-in text into the OS's clipboard.
-// If the text is empty, the copy isn't performed.
-//
-// {{{text}}} is a plaintext string that will be put into the clipboard.
-
-function copyToClipboard(text) (
-  (text = String(text)) && (Utils.clipboard.text = text));
-
 // === {{{ CmdUtils.injectJavascript(src, callback) }}} ===
 // Injects Javascript from a URL into the current tab's document,
 // and calls an optional callback function once the script has loaded.
@@ -314,32 +305,56 @@ function loadJQuery(callback) {
     }));
 }
 
-// === {{{ CmdUtils.onPageLoad(callback) }}} ===
+// === {{{ CmdUtils.copyToClipboard(text) }}} ===
+// This function places the passed-in text into the OS's clipboard.
+// If the text is empty, the copy isn't performed.
+//
+// {{{text}}} is a plaintext string that will be put into the clipboard.
+
+function copyToClipboard(text) (
+  (text = String(text)) && (Utils.clipboard.text = text));
+
+// === {{{ CmdUtils.onPageLoad(callback, includes = "*", excludes = []) }}} ===
 // Sets up a function to be run whenever a page is loaded.
 //
-// {{{ callback }}} Non-optional callback function.  Each time a new
-// page or tab is loaded in the window, the callback function will be
-// called; it is passed a single argument, which is the window's document
-// object.
+// {{{callback}}} is the callback function called each time a new page is
+// loaded; it is passed a single argument, which is the page's document object.
+//
+// {{{includes}}}/{{{excludes}}} are optional regexps/strings
+// (or arrays of them) that select pages to include/exclude by their URLs
+// a la [http://wiki.greasespot.net/Include_and_exclude_rules|GreaseMonkey].
+// * if string, it matches the whole URL with asterisks as wildcards.
 
-function onPageLoad(callback) {
-  this.__globalObject.pageLoadFuncs.push(callback);
+function onPageLoad(callback, includes, excludes) {
+  var {pageLoadFuncs} = this.__globalObject;
+  if (!includes && !excludes) return pageLoadFuncs.push(callback);
+
+  function enwild(a)
+    Utils.regexp.quote(String(a).replace(/[*]/g, "\0")).replace(/\0/g, ".*?");
+  [includes, excludes] = [includes || /^/, excludes].map(
+    function toRegExps(filters) [
+      Utils.classOf(f) === "RegExp" ? f : RegExp("^" + enwild(f) + "$")
+      for each (f in [].concat(filters || []))]);
+  return pageLoadFuncs.push(function pageLoadProxy(document) {
+    var {href} = document.location;
+    for each (let r in excludes) if (r.test(href)) return;
+    for each (let r in includes) if (r.test(href)) return callback(document);
+  });
 }
 
 // === {{{ CmdUtils.onUbiquityLoad(callback) }}} ===
 // Sets up a function to be run whenever a Ubiqutiy instance is created.
 //
-// {{{ callback }}} Non-optional callback function. Each time a new
-// Ubiquity instance is created, the callback function will be
-// called; it is passed two arguments, which is the Ubiquity instance and
-// the chromeWindow associated with it.
+// {{{callback}}} is the callback function called each time a new
+// [[#chrome/content/ubiquity.js|Ubiquity]] instance is created;
+// it is passed two arguments, which are the Ubiquity instance and
+// the chrome window associated with it.
 
 function onUbiquityLoad(callback) {
   this.__globalObject.ubiquityLoadFuncs.push(callback);
 }
 
 // ** {{{ CmdUtils.setLastResult(result) }}} **
-//
 // **//Deprecated. Do not use.//**
 //
 // Sets the last result of a command's execution, for use in command piping.
