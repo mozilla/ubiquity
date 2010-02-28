@@ -8,27 +8,31 @@
  * selection, there is nothing for any of these commands to do.
  */
 (function textFormattingCommand(format, desc, icon, name) {
+  var xxdo = /do$/.test(format), tag = format[0] + ">";
   CmdUtils.CreateCommand({
     names: [name || format],
-    description:
-    "If you're in a rich-text-edit area, " + desc + ".",
+    description: desc + ".",
     icon: "chrome://ubiquity/skin/icons/" + icon + ".png",
-    execute: function () {
+    execute: function txtfmt_execute() {
       var doc = context.focusedWindow.document;
       if (doc.designMode === "on")
         doc.execCommand(format, false, null);
+      else if (xxdo)
+        context.chromeWindow.document
+          .getElementById("cmd_" + format).doCommand();
       else
-        displayMessage(_("You're not in a rich text editing field."), this);
+        let (htm = "<" + tag + CmdUtils.htmlSelection + "</" + tag)
+          CmdUtils.setSelection(htm, {text: htm});
     }
   });
   return arguments.callee;
 })
-("bold", "makes the selected text bold", "text_bold")
-("italic", "makes the selected text italic", "text_italic", "italicize")
-("underline", "underlines the selected text", "text_underline")
-("undo", "undoes your latest style/formatting or page-editing changes",
+("bold", "Makes the selected text bold", "text_bold")
+("italic", "Makes the selected text italic", "text_italic", "italicize")
+("underline", "Underlines the selected text", "text_underline")
+("undo", "Undoes your latest style/formatting or page-editing changes",
  "arrow_undo", "undo text edit")
-("redo", "redoes your latest style/formatting or page-editing changes",
+("redo", "Redoes your latest style/formatting or page-editing changes",
  "arrow_redo", "redo text edit")
 ;
 
@@ -38,7 +42,7 @@ CmdUtils.CreateCommand({
     'Highlights your current selection, ' +
     'like <span style="background: yellow; color: black;">this</span>.'),
   icon: "chrome://ubiquity/skin/icons/textfield_rename.png",
-  execute: function () {
+  execute: function hilite_execute() {
     var win = context.focusedWindow;
     var doc = win.document;
     var sel = win.getSelection();
@@ -53,9 +57,8 @@ CmdUtils.CreateCommand({
   }
 });
 
-/* TODO should the object text instead be an "in" argument, as in
- * "count words in this" ?
- */
+const NUM_WORDS = _("${num} words.");
+
 function wordCount(t) (t.match(/\S+/g) || "").length;
 
 CmdUtils.CreateCommand({
@@ -64,27 +67,26 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/sum.png",
   description: "Displays the number of words in a selection.",
   execute: function ({object: {text}}) {
-    displayMessage((text
-                    ? _("${num} words", {num: wordCount(text)})
-                    : _("No words selected.")),
-                   this);
+    displayMessage(
+      text
+      ? _(NUM_WORDS, {num: wordCount(text)})
+      : _("No words selected."),
+      this);
   },
   preview: function (pb, {object: {text}}) {
-    pb.innerHTML = (text
-                    ? _("<b>${num}</b> words", {num: wordCount(text)})
-                    : this.description);
+    pb.innerHTML = (
+      text
+      ? _(NUM_WORDS, {num: "<strong>" + wordCount(text) + "</strong>"})
+      : this.previewDefault());
   }
 });
-
-Components.utils.import("resource://ubiquity/modules/setup.js");
-const defaultLang = UbiquitySetup.languageCode;
 
 /* TODO the dummy argument "wikipedia" could become a plugin argument
  * and this command could become a general purpose "insert link"
  * command.
  */
 CmdUtils.CreateCommand({
-  names: ["link to wikipedia"],
+  names: ["link to Wikipedia"],
   arguments: {
     object: noun_arb_text,
     format: noun_type_lang_wikipedia,
@@ -93,7 +95,7 @@ CmdUtils.CreateCommand({
   "Turns a phrase into a link to the matching Wikipedia article.",
   icon: "chrome://ubiquity/skin/icons/wikipedia.ico",
   _link: function({object: {text, html}, format: {data}}){
-    var url = ("http://" + (data || defaultLang) +
+    var url = ("http://" + (data || "en") +
                ".wikipedia.org/wiki/Special%3ASearch/" +
                encodeURIComponent(text.replace(/ /g, "_")));
     return ['<a href="' + Utils.escapeHtml(url) + '">' + html + "</a>", url];
@@ -104,9 +106,9 @@ CmdUtils.CreateCommand({
   },
   preview: function (pbl, args) {
     var [htm, url] = this._link(args);
-    pbl.innerHTML = (this.description +
-                     "<p>" + htm + "</p>" +
-                     <code>{url}</code>.toXMLString());
+    pbl.innerHTML = (
+      this.previewDefault() +
+      (htm && ("<p>" + htm + "</p>" + <code>{url}</code>.toXMLString())));
   }
 });
 
