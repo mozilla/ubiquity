@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Jono DiCarlo <jdicarlo@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -34,156 +35,145 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var Ci = Components.interfaces;
-var Cc = Components.classes;
-var Cu = Components.utils;
+// = SuggestionMemory =
 
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const Z = {__proto__: null}; // keep this empty!
+
+Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/dbutils.js");
 
 var EXPORTED_SYMBOLS = ["SuggestionMemory"];
 
-var SQLITE_FILE = "ubiquity_suggestion_memory.sqlite";
-/* In this schema, one row represents that fact that for the
- * named suggestionMemory object identified by (id_string),
- * it happened (score) number of times that the user typed in
- * the string (input) and, out of all the suggested completions,
- * the one the user chose was (suggestion).
- */
-var SQLITE_SCHEMA =
-    "CREATE TABLE ubiquity_suggestion_memory(" +
-    "  id_string VARCHAR(256)," +
-    "  input VARCHAR(256)," +
-    "  suggestion VARCHAR(256)," +
-    "  score INTEGER);";
-var _gDatabaseConnection = null;
-var _dirSvc = Cc["@mozilla.org/file/directory_service;1"]
-                .getService(Ci.nsIProperties);
-var _storSvc = Cc["@mozilla.org/storage/service;1"]
-                 .getService(Ci.mozIStorageService);
+// In this schema, one row represents that fact that for the
+// named suggestionMemory object identified by (id_string),
+// it happened (score) number of times that the user typed in
+// the string (input) and, out of all the suggested completions,
+// the one the user chose was (suggestion).
+function openDatabase(file) DbUtils.connectLite(
+  "ubiquity_suggestion_memory",
+  { id_string  : "VARCHAR(256)",
+    input      : "VARCHAR(256)",
+    suggestion : "VARCHAR(256)",
+    score      : "INTEGER" },
+  [], file);
 
-function _connectToDatabase() {
-  // Only create a new connection if we don't already have one open.
-  if (!_gDatabaseConnection) {
-    // We really want to put the file in the profile directory:
-    var file = _dirSvc.get("ProfD", Ci.nsIFile);
-    file.append(SQLITE_FILE);
-    _gDatabaseConnection = SuggestionMemory.openDatabase(file);
-  }
-  return _gDatabaseConnection;
-}
+Utils.defineLazyProperty(this, openDatabase, "gDatabaseConnection");
+
+var gTables = {__proto__: null};
 
 // TODO: when and how do we need to close our database connection?
 
-function SuggestionMemory(id, connection) {
-  /* Id is a unique string which will keep this suggestion memory
-   distinct from the others in the database when persisting. */
+// == SuggestionMemory(id, connection) ==
+// The constructor.
+//
+// {{{id}}} is a unique string which will keep this suggestion memory
+// distinct from the others in the database when persisting.
+//
+// {{{connection}}} is an optional {{{mozIStorageConnection}}}
+// object to specify its database connection.
 
+function SuggestionMemory(id, connection) {
   this._init(id, connection);
 }
 SuggestionMemory.prototype = {
-  _createStatement: function _createStatement(selectSql) {
+  constructor: SuggestionMemory,
+  toString: function SM_toString() "[object SuggestionMemory]",
+  toJSON: function SM_toJSON() this._table,
+
+  _createStatement: function SM__createStatement(selectSql) {
     try {
-      var selStmt = this._connection.createStatement(selectSql);
-      return selStmt;
+      return this._connection.createStatement(selectSql);
     } catch (e) {
-      throw new Error(this._connection.lastErrorString);
+      e.message = this._connection.lastErrorString;
+      throw e;
     }
   },
 
-  _init: function(id, connection) {
-    if (!connection)
-      connection = _connectToDatabase();
-    this._connection = connection;
-    this._id = id;
-    this._table = {};
-    /* this._table is a JSON kind of object with a format like this:
-     * {
-     *   "input1" : {
-     *                "suggestion1" : 3,
-     *                "suggestion2" : 4
-     *              }
-     *   "input2" : {
-     *                "suggestion3" : 1
-     *              }
-     * }
-     */
+  _getScores: function SM__getScores(input)
+    this._table[input] || (this._table[input] = {__proto__: null}),
 
-    /* So now, get everything from the database that matches our ID,
-     * and turn each row into an entry in this._table:
-     */
-    let selectSql = "SELECT input, suggestion, score " +
-		    "FROM ubiquity_suggestion_memory " +
-                    "WHERE id_string == ?1";
-    var selStmt = this._createStatement(selectSql);
-    selStmt.bindUTF8StringParameter(0, this._id);
+  _init: function SM__init(id, connection) {
+    this._id = id;
+    this._connection = connection || gDatabaseConnection;
+    this._table = gTables[id] || (gTables[id] = {__proto__: null});
+    // this._table is a dictionary of dictionaries with a format like this:
+    // {
+    //   input1: {
+    //     suggestion1: 3,
+    //     suggestion2: 4,
+    //   },
+    //   input2: {
+    //     suggestion3: 1,
+    //   }
+    // }
+
+    // So now, get everything from the database that matches our ID,
+    // and turn each row into an entry in this._table:
+    var selStmt = this._createStatement(
+      "SELECT input, suggestion, score " +
+      "FROM ubiquity_suggestion_memory " +
+      "WHERE id_string == ?1");
+    selStmt.bindUTF8StringParameter(0, id);
     while (selStmt.executeStep()) {
-      let input = selStmt.getUTF8String(0);
-      let suggestion = selStmt.getUTF8String(1);
-      let score = selStmt.getUTF8String(2);
-      if (!this._table[input])
-	      this._table[input] = {};
-      this._table[input][suggestion] =+ score;
+      let suggs = this._getScores(selStmt.getUTF8String(0));
+      suggs[selStmt.getUTF8String(1)] = +selStmt.getUTF8String(2);
     }
     selStmt.finalize();
   },
 
-  remember: function(input, chosenSuggestion) {
-    /* increase the strength of the association between this input and
-       the chosen suggestion. */
-
-    let sql = "";
-
-    if (!this._table[input])
-      this._table[input] = {};
-
-    if (!this._table[input][chosenSuggestion]) {
-      this._table[input][chosenSuggestion] = 1;
-      let insertSql = "INSERT INTO ubiquity_suggestion_memory " +
-                      "VALUES (?1, ?2, ?3, 1)";
-      var insStmt = this._createStatement(insertSql);
-      insStmt.bindUTF8StringParameter(0, this._id);
-      insStmt.bindUTF8StringParameter(1, input);
-      insStmt.bindUTF8StringParameter(2, chosenSuggestion);
-      insStmt.execute();
-      insStmt.finalize();
+  // === {{{ SuggestionMemory#remember(input, suggestion, ammount) }}}
+  // Increases the strength of the association between {{{input}}} and
+  // {{{suggestion}}}.
+  remember: function SM_remember(input, suggestion, ammount) {
+    ammount = +ammount || 1;
+    var scores = this._getScores(input);
+    if (suggestion in scores) {
+      var score = scores[suggestion] += ammount;
+      var stmt = this._createStatement(
+        "UPDATE ubiquity_suggestion_memory " +
+        "SET score = ?1 " +
+        "WHERE id_string = ?2 AND input = ?3 AND " +
+        "suggestion = ?4");
+      stmt.bindInt32Parameter(0, score);
+      stmt.bindUTF8StringParameter(1, this._id);
+      stmt.bindUTF8StringParameter(2, input);
+      stmt.bindUTF8StringParameter(3, suggestion);
     }
     else {
-      let score = parseInt(this._table[input][chosenSuggestion]) + 1;
-      this._table[input][chosenSuggestion] = score;
-      let updateSql = ("UPDATE ubiquity_suggestion_memory " +
-                       "SET score = ?1 " +
-                       "WHERE id_string = ?2 AND input = ?3 AND " +
-                       "suggestion = ?4");
-      var updStmt = this._createStatement(updateSql);
-      updStmt.bindInt32Parameter(0, score);
-      updStmt.bindUTF8StringParameter(1, this._id);
-      updStmt.bindUTF8StringParameter(2, input);
-      updStmt.bindUTF8StringParameter(3, chosenSuggestion);
-      updStmt.execute();
-      updStmt.finalize();
+      var score = scores[suggestion] = ammount;
+      var stmt = this._createStatement(
+        "INSERT INTO ubiquity_suggestion_memory " +
+        "VALUES (?1, ?2, ?3, ?4)");
+      stmt.bindUTF8StringParameter(0, this._id);
+      stmt.bindUTF8StringParameter(1, input);
+      stmt.bindUTF8StringParameter(2, suggestion);
+      stmt.bindInt32Parameter(3, score);
     }
+    stmt.execute();
+    stmt.finalize();
+    return score;
   },
 
-  getScore: function(input, suggestion) {
-    /* Return the number of times that this suggestion has been associated
-       with this input. */
-    if (!this._table[input])
-      return 0;
-    if (! this._table[input][suggestion])
-      return 0;
-    return this._table[input][suggestion];
-  },
+  // === {{{ SuggestionMemory#getScore(input, suggestion) }}} ===
+  // === {{{ SuggestionMemory#setScore(input, suggestion, score) }}} ===
+  // Gets/Sets the number of times that {{{suggestion}}} has been associated
+  // with {{{input}}}.
+  getScore: function SM_getScore(input, suggestion)
+    (this._table[input] || Z)[suggestion] || 0,
+  setScore: function SM_setScore(input, suggestion, score)
+    this.remember(input, suggestion, score - this.getScore(input, suggestion)),
 
-  getTopRanked: function(input, numResults) {
-    /* Return the top (numResults) number of suggestions that have the highest
-     * correlation with (input), sorted.
-     * May return fewer than numResults, if there aren't enough suggestions in
-     * the table.*/
-
-    let fetchSql = "SELECT suggestion FROM ubiquity_suggestion_memory " +
-                   "WHERE id_string = ?1 AND input = ?2 ORDER BY score DESC " +
-                   "LIMIT ?3";
-    let fetchStmt = this._createStatement(fetchSql);
+  // === {{{ SuggestionMemory#getTopRanked(input, numResults) }}} ===
+  // Returns the top {{{numResults}}} number of suggestions that have
+  // the highest correlation with {{{input}}}, sorted.
+  // May return fewer than {{{numResults}}},
+  // if there aren't enough suggestions in the table.
+  getTopRanked: function SM_getTopRanked(input, numResults) {
+    let fetchStmt = this._createStatement(
+      "SELECT suggestion FROM ubiquity_suggestion_memory " +
+      "WHERE id_string = ?1 AND input = ?2 ORDER BY score DESC " +
+      "LIMIT ?3");
     fetchStmt.bindUTF8StringParameter(0, this._id);
     fetchStmt.bindUTF8StringParameter(1, input);
     fetchStmt.bindInt32Parameter(2, numResults);
@@ -195,49 +185,27 @@ SuggestionMemory.prototype = {
     return retVals;
   },
 
-  wipe: function() {
-    // Wipes everything out of this suggestion memory instance.
-    // Be careful with this.
-    let wipeSql = ("DELETE FROM ubiquity_suggestion_memory " +
-                   "WHERE id_string = ?1");
-    let wipeStmt = this._createStatement(wipeSql);
-    wipeStmt.bindUTF8StringParameter(0, this._id);
+  // === {{{ SuggestionMemory#wipe(input, suggestion) }}} ===
+  // Wipes the specified entry out of this suggestion memory instance.
+  // Omitting both {{{input}}} and {{{suggestion}}} deletes everything.
+  // Be careful with this.
+  wipe: function SM_wipe(input, suggestion) {
+    let wheres =
+      [["id_string", this._id], ["input", input], ["suggestion", suggestion]];
+    let wipeStmt = this._createStatement(
+      "DELETE FROM ubiquity_suggestion_memory WHERE " +
+      [k + " = ?" + (i + 1)
+       for ([i, [k]] in new Iterator(wheres))].join(" AND "));
+    for (let [i, [, v]] in new Iterator(wheres))
+      wipeStmt.bindUTF8StringParameter(i, v);
     wipeStmt.execute();
     wipeStmt.finalize();
+    gTables[this._id] = null;
+    this._init(this._id, this._connection);
   },
-
-  displayAllContents: function() {
-    /* Used for debugging purposes only.*/
-    let input;
-    let choice;
-    let html = "";
-    for (input in this._table) {
-      for (choice in this._table[input]) {
-        let num = this._table[input][choice];
-        html += "<tr><td>" + input + "</td><td>" + choice +
-          "</td><td>" + num + "</td></tr";
-      }
-    }
-    return html;
-  }
-
 };
 
-// Static functions
+SuggestionMemory.openDatabase = openDatabase;
 
-SuggestionMemory.openDatabase = function openDatabase(file) {
-  /* If the pointed-at file doesn't already exist, it means the database
-   * has never been initialized, so we'll have to do it now by running
-   * the CREATE TABLE sql. */
-  // openDatabase will create empty file if it's not there yet:
-  var connection = DbUtils.openDatabase(file);
-  if(connection)
-    connection = DbUtils.createTable(
-                   connection, "ubiquity_suggestion_memory",
-                   SQLITE_SCHEMA);
-  return connection;
-};
-
-/* TODO: Do we need functions for dealing with multiple SuggestionMemory
- * instances, e.g. listSuggestionMemoryIds() or wipeAllSuggestionMemory()?
- */
+// TODO: Do we need functions for dealing with multiple SuggestionMemory
+// instances, e.g. listSuggestionMemoryIds() or wipeAllSuggestionMemory()?

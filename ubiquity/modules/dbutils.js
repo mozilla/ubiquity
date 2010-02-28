@@ -45,8 +45,7 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 var DbUtils = ([f for each (f in this) if (typeof f === "function")]
                .reduce(function(o, f)(o[f.name] = f, o), {}));
 
-// === {{{ DbUtils.connectLite(tableName, schemaDict, initialRows) }}} ===
-//
+// === {{{ DbUtils.connectLite(tableName, schemaDict, initialRows, file) }}}
 // Creates a simple DB file in the user's profile directory (if nonexistent)
 // and returns a
 // [[https://developer.mozilla.org/en/mozIStorageService|connection]] to it.
@@ -58,12 +57,15 @@ var DbUtils = ([f for each (f in this) if (typeof f === "function")]
 //
 // {{{initialRows}}} is an optional array of arrays that specifies
 // initial values of the table.
+//
+// {{{file}}} is an optional {{{nsIFile}}} instance specifying the DB file.
 
-function connectLite(tableName, schemaDict, initialRows) {
-  var file = (Cc["@mozilla.org/file/directory_service;1"]
+function connectLite(tableName, schemaDict, initialRows, file) {
+  if (!file)
+    ((file = (Cc["@mozilla.org/file/directory_service;1"]
               .getService(Ci.nsIProperties)
-              .get("ProfD", Ci.nsIFile));
-  file.append(tableName + ".sqlite");
+              .get("ProfD", Ci.nsIFile)))
+     .append(tableName + ".sqlite"));
   var connection = openDatabase(file);
   if (connection && !connection.tableExists(tableName)) {
     let schema = (

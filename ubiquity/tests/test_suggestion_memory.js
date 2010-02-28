@@ -1,17 +1,14 @@
 EXPORTED_SYMBOLS = ["TestSuggestionMemory"];
 
-Components.utils.import("resource://ubiquity/tests/framework.js");
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
-var RealSuggestionMemory = {};
-Components.utils.import("resource://ubiquity/modules/suggestion_memory.js",
-                        RealSuggestionMemory);
-RealSuggestionMemory = RealSuggestionMemory.SuggestionMemory;
+Cu.import("resource://ubiquity/tests/framework.js");
+Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
 function getTempDbFile() {
-  var Ci = Components.interfaces;
-  var dirSvc = Components.classes["@mozilla.org/file/directory_service;1"]
-                         .getService(Ci.nsIProperties);
-  var file = dirSvc.get("TmpD", Ci.nsIFile);
+  var file = (Cc["@mozilla.org/file/directory_service;1"]
+              .getService(Ci.nsIProperties)
+              .get("TmpD", Ci.nsIFile));
   file.append("testdb.sqlite");
   file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0x600);
   return file;
@@ -19,31 +16,24 @@ function getTempDbFile() {
 var suggestiondb_file = getTempDbFile();
 var suggestiondb_connection = null;
 
-
-TestSuggestionMemory = function TestSuggestionMemory() {
+function TestSuggestionMemory() {
   if (!suggestiondb_connection) {
-    function suggestionMemoryTeardown() {
+    try {
+      if (suggestiondb_file.exists())
+        suggestiondb_file.remove(false);
+    } catch (e) { }
+    suggestiondb_connection = SuggestionMemory.openDatabase(suggestiondb_file);
+    let self = this;
+    TestSuite.currentTest.addToTeardown(function suggestionMemoryTeardown() {
+      self.wipe();
       suggestiondb_connection.close();
       suggestiondb_connection = null;
       try {
         suggestiondb_file.remove(false);
       } catch (e) { }
-    };
-
-    try {
-      if (suggestiondb_file.exists())
-        suggestiondb_file.remove(false);
-    } catch (e) { }
-
-    suggestiondb_connection = RealSuggestionMemory.openDatabase(suggestiondb_file);
-    TestSuite.currentTest.addToTeardown(suggestionMemoryTeardown);
+    });
   }
+  SuggestionMemory.call(this, "test", suggestiondb_connection);
+}
 
-  var connection = suggestiondb_connection;
-  var id = "test";
-
-  this.__RealSuggestionMemory = RealSuggestionMemory;
-  this.__RealSuggestionMemory(id, connection);
-};
-
-TestSuggestionMemory.prototype = RealSuggestionMemory.prototype;
+TestSuggestionMemory.prototype = SuggestionMemory.prototype;

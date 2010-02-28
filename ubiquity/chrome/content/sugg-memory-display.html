@@ -1,19 +1,52 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html> <head>
-<title>Suggestion Memory Debugger</title>
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Suggestion Memory Debugger</title>
+</head>
+<body>
+<table>
+  <thead><tr>
+    <th>Input</th><th>Choice</th><th>Number of times</th>
+  </tr></thead>
+  <tbody id="sugg-mem-table"></tbody>
+</table>
+<p id="pants"></p>
+<script src="resource://ubiquity/scripts/jquery.js"></script>
 <script type="application/javascript;version=1.8">
-function fillTable() {
+$(function fillTable() {
   Components.utils.import("resource://ubiquity/modules/suggestion_memory.js");
-  var suggMem = new SuggestionMemory("main_parser");
-  var html = suggMem.displayAllContents();
-  document.getElementById("sugg-mem-table").innerHTML = html;
+  displayTable(gSM = new SuggestionMemory("main_parser"));
+});
+function displayTable(sm) {
+  var html = "", tbl = sm._table;
+  var delbtn =
+    <input type="image" src="chrome://ubiquity/skin/icons/delete.png"/>;
+  for (let input in tbl)
+    for (let [choice, score] in new Iterator(tbl[input])) {
+      let [, url, name] = /^(\w+:[^#]+#)?(.*)/(choice);
+      html += <tr/>.appendChild(
+        (<td>{input}</td>) +
+        (<td title={choice}><a href={url}>{name}</a></td>) +
+        (<td><input value={score}/>{delbtn}</td>));
+    }
+  $("#sugg-mem-table").html(html).change(onchange).click(onclick);
+  function onchange(e) {
+    var $in = $(e.target), [input, choice, score] = values($in);
+    $in.val(sm.setScore(input, choice, score));
+    $in.hide().fadeIn();
+  }
+  function onclick(e) {
+    var $in = $(e.target);
+    if ($in[0].type !== "image") return;
+    var [input, choice, , $tr] = values($in)
+    sm.wipe(input, choice);
+    $tr.fadeOut(111);
+  }
+  function values($in) {
+    var $tr = $in.closest("tr"), $td = $tr.children();
+    return [$td[0].textContent, $td[1].title, $in.val(), $tr];
+  }
 }
 </script>
-</head>
-
-<body onload="fillTable();">
-<table><thead><tr><td>Input</td><td>Choice</td><td>Number of times</td></tr></thead><tbody id="sugg-mem-table"></tbody></table>
-
-<p id="pants"></p>
-
-</body> </html>
+</body>
+</html>
