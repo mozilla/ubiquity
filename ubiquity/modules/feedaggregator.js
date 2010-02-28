@@ -19,6 +19,7 @@
  *
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
+ *   Satoshi Murakami <murky.satyr@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,6 +42,7 @@ const Cu = Components.utils;
 Cu.import("resource://ubiquity/modules/utils.js");
 Cu.import("resource://ubiquity/modules/eventhub.js");
 Cu.import("resource://ubiquity/modules/localization_utils.js");
+Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/coreubiquity.properties");
@@ -50,7 +52,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   var commands = {};
   var commandNames = [];
   var commandsByName = {};
-  var commandsByServiceDomain = {};
+  var commandsByDomain = {};
   var pageLoadFuncLists = [];
   var ubiquityLoadFuncLists = [];
   var feedsChanged = true;
@@ -97,12 +99,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
             exception: e});
         }
 
-    try { var {defaultView, domain} = document } catch (e) { return }
-    if (defaultView !== defaultView.top) return; // avoid frames
-    var cmds4domain = [cmd
-                       for each (cmd in commandsByServiceDomain[domain])
-                       if (!cmd.disabled)];
-    if (cmds4domain.length) onDomainWithCommands(document, cmds4domain);
+    maybeRemindCommand(document, commandsByDomain);
   };
 
   self.onUbiquityLoad = function FA_onUbiquityLoad(window) {
@@ -130,7 +127,7 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     commands = {};
     commandNames = [];
     commandsByName = {};
-    commandsByServiceDomain = {};
+    commandsByDomain = {};
     pageLoadFuncLists = [];
     ubiquityLoadFuncLists = [];
     feedsChanged = false;
@@ -146,9 +143,9 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
         commands[cmd.id] = commandsByName[cmd.referenceName] = cmdwd;
         let {serviceDomain} = cmd;
         if (serviceDomain)
-          (serviceDomain in commandsByServiceDomain
-           ? commandsByServiceDomain[serviceDomain]
-           : commandsByServiceDomain[serviceDomain] = []).push(cmdwd);
+          (serviceDomain in commandsByDomain
+           ? commandsByDomain[serviceDomain]
+           : commandsByDomain[serviceDomain] = []).push(cmdwd);
       }
       if ((feed.pageLoadFuncs || "").length)
         pageLoadFuncLists.push(feed.pageLoadFuncs);
@@ -170,8 +167,8 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
                         function FA_cmdNames() commandNames);
   self.__defineGetter__("commandsByName",
                         function FA_cmdsByName() commandsByName);
-  self.__defineGetter__("commandsByServiceDomain",
-                        function FA_cmdsBySD() commandsByServiceDomain);
+  self.__defineGetter__("commandsByDomain",
+                        function FA_cmdsByDomain() commandsByDomain);
 
   self.getAllCommands = function FA_getAllCommands() {
     if (feedsChanged)
@@ -188,32 +185,41 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   };
 }
 
+// TODO: Move below into a separate module.
+
+const PREF_REMPERIOD = "extensions.ubiquity.commandReminderPeriod";
 const PREF_NNSITES = "extensions.ubiquity.noNotificationSites";
 
-function onDomainWithCommands(document, commands) {
-  var reminderPeriod = Utils.prefs.getValue(
-    "extensions.ubiquity.commandReminderPeriod", 0);
-  if (!reminderPeriod) return;
-  var {domain} = document;
-  var visitsToDomain = Utils.history.visitsToDomain(domain);
-  if (visitsToDomain % reminderPeriod) return;
-  var nnSites = noNotificationSites();
-  if (~nnSites.indexOf(domain)) return;
+function maybeRemindCommand(document, commandsByDomain) {
+  var reminderPeriod = Utils.prefs.get(PREF_REMPERIOD, 0);
+  if (reminderPeriod < 1) return;
+
+  try { var {domain, defaultView: window} = document } catch (e) { return }
+  if (window !== window.top) return; // avoid frames
+
+  if (~noNotificationSites().indexOf(domain)) return;
+
+  var commands = [
+    cmd for each (cmd in commandsByDomain[domain]) if (!cmd.disabled)];
+  if (!commands.length) return;
+
+  if (reminderPeriod > 1 &&
+      Utils.history.visitsToDomain(domain) % reminderPeriod) return;
+
   var cmd = Utils.sortBy(commands, Math.random)[0];
-  // TODO: encapsulation breakage
-  var freqOfUse = (Utils.currentChromeWindow.gUbiquity.cmdManager
-                   .__nlParser._suggestionMemory.getScore("", cmd.id));
-  freqOfUse || showEnabledCommandNotification(document, cmd.name);
+  new SuggestionMemory("main_parser").getScore("", cmd.id) ||
+    showEnabledCommandNotification(document, cmd.name);
 }
 
-function noNotificationSites() (
-  Utils.prefs.getValue(PREF_NNSITES, "").split("|"));
+function noNotificationSites() Utils.prefs.get(PREF_NNSITES, "").split("|");
 
 function addToNoNotifications(site) {
   let nnSites = noNotificationSites().filter(Boolean);
   nnSites.push(site);
-  Utils.prefs.setValue(PREF_NNSITES, nnSites.join("|"));
+  Utils.prefs.set(PREF_NNSITES, nnSites.join("|"));
 }
+
+function stopNotifications() { Utils.prefs.set(PREF_REMPERIOD, 0) }
 
 function showEnabledCommandNotification(targetDoc, commandName) {
   function toNoNo() {
@@ -239,5 +245,10 @@ function showEnabledCommandNotification(targetDoc, commandName) {
       accessKey: "D",
       callback: toNoNo,
       label: L("ubiquity.feedmanager.dontremind"),
+    }, {
+      accessKey: "N",
+      callback: stopNotifications,
+      label: "Never", //ToLocalize
+      //label: L("ubiquity.feedmanager.never"),
     }]});
 };
