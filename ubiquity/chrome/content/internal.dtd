@@ -54,7 +54,7 @@ later delete remove these. Keeping them as a backup for now.
 -->
 
 <!-- External link management just addresses. -->
-<!ENTITY link.releaseNotes "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.4_Release_Notes">
+<!ENTITY link.releaseNotes "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5.5_Release_Notes">
 
 <!-- wiki links -->
 <!ENTITY link.cmdTutorial "https://wiki.mozilla.org/Labs/Ubiquity/Ubiquity_0.5_Author_Tutorial">
