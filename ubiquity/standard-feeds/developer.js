@@ -6,9 +6,7 @@
 // TODO: Add the ability to select the style of code highlighting.
 CmdUtils.CreateCommand({
   names: ["highlight syntax", "hilite syntax"],
-  arguments: [{role: "object",
-               nountype: noun_arb_text,
-               label: "code"}],
+  arguments: [{role: "object", nountype: noun_arb_text, label: "code"}],
   icon: "chrome://ubiquity/skin/icons/color_wheel.png",
   description: ("Treats your selection as program source code, " +
                 "guesses its language, and colors it based on syntax."),
@@ -52,26 +50,88 @@ CmdUtils.CreateCommand({
 });
 
 CmdUtils.CreateCommand({
+  name: "view selection source",
+  description: "Shows you the source-code of the selected HTML.",
+  author: "satyr",
+  license: "MIT",
+  icon: "chrome://ubiquity/skin/icons/page_code.png",
+  execute: function vss_execute() {
+    context.chromeWindow.nsContextMenu.prototype
+      .viewPartialSource.call(0, "selection");
+  },
+  preview: function vss_preview(pb) {
+    var {window} = CmdUtils, sel = window.getSelection();
+    if (sel.isCollapsed) return void this.previewDefault(pb);
+
+    XML.prettyPrinting = true;
+    XML.prettyIndent = 2;
+    XML.ignoreWhitespace = XML.ignoreComments = false;
+    var pretties = [], xs = new window.XMLSerializer;
+    var re_ns = / xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"(?=\/?>)/g;
+    for (let i = 0, c = sel.rangeCount; i < c; ++i) {
+      let xml = xs.serializeToString(sel.getRangeAt(i).cloneContents());
+      if (xml) pretties.push(
+        XML("<_>" + xml + "</_>").*.toXMLString().replace(re_ns, ""));
+    }
+    pb.innerHTML = ('<pre id="selection-source">' +
+                    pretties.map(Utils.escapeHtml).join("<hr/>"));
+  },
+});
+
+const REP_WITH = _("Replaces your input with:");
+const COPIED = _("Copied: %s");
+
+function copyAndShow(text, self) {
+  Utils.clipboard.text = text;
+  displayMessage(COPIED.replace("%s", Utils.ellipsify(text, 80)), self);
+}
+
+CmdUtils.CreateCommand({
   names: ["escape HTML entities"],
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/html_go.png",
-  description: Utils.escapeHtml("Replaces html entities (<, >, &, \" and ')" +
-                                " with their escape sequences."),
+  description: Utils.escapeHtml(
+    "Replaces HTML entities (<, >, &, \" and ')" +
+    " with their entity references."),
   preview: function ehe_preview(pb, {object: {html}}) {
-    pb.innerHTML = (
-      html
-      ? _("Replaces your selection with:${pre}",
-          {pre: <pre>{html}</pre>.toXMLString()})
-      : this.previewDefault());
+    if (!html) return void this.previewDefault(pb);
+    pb.innerHTML = REP_WITH + <pre>{html}</pre>.toXMLString();
   },
   execute: function ehe_execute({object: {html}}) {
-    if (html)
-      (CmdUtils.getSelection()
-       ? CmdUtils.setSelection(Utils.escapeHtml(html), {text: html})
-       : CmdUtils.copyToClipboard(html));
-    else
-       displayMessage(_("No text selected."));
-  }
+    if (!html) return;
+    if (CmdUtils.isSelected)
+      CmdUtils.setSelection(Utils.escapeHtml(html), {text: html});
+    else copyAndShow(html, this);
+  },
+});
+
+CmdUtils.CreateCommand({
+  names: ["unescape HTML entities"],
+  arguments: {object: noun_arb_text},
+  icon: "chrome://ubiquity/skin/icons/html_go.png",
+  description: Utils.escapeHtml(
+    "Replaces HTML character references" +
+    " (e.g. &spades;, &#x2665;, &9827;, ...)" +
+    " with their corresponding Unicode characters."),
+  preview: function uhe_preview(pb, {object: {html}}) {
+    if (!html) return void this.previewDefault(pb);
+    pb.innerHTML = REP_WITH + "<br/><br/>" + this._unescape(html);
+  },
+  execute: function uhe_execute({object: {html}}) {
+    if (!html) return;
+    var uhtml = this._unescape(html);
+    var uuhtml = this._unescape(uhtml);
+    if (CmdUtils.isSelected)
+      CmdUtils.setSelection(uhtml, {text: uuhtml});
+    else copyAndShow(uuhtml, this);
+  },
+  _unescape: function uhe_unescape(text) {
+    var div = Utils.hiddenWindow.document.createElement("div");
+    return text.replace(/&#?\w+;/g, function uhe_parse(ref) {
+      div.innerHTML = ref;
+      return div.textContent;
+    });
+  },
 });
 
 var {slice} = Array, gXS = Utils.hiddenWindow.XMLSerializer();
