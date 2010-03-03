@@ -2,14 +2,21 @@
 // DEVELOPER COMMANDS
 // -----------------------------------------------------------------
 
+var {slice} = Array, gXS = Utils.hiddenWindow.XMLSerializer();
+function qsaa(lm, sl) slice(lm.querySelectorAll(sl));
+function qstc(lm, sl) (lm = lm.querySelector(sl)) ? lm.textContent : "";
+function qsxs(lm, sl) (
+  (lm = lm.querySelector(sl)) ? gXS.serializeToString(lm) : "");
+
 // TODO: Add the ability to manually set the language being highlighted.
 // TODO: Add the ability to select the style of code highlighting.
 CmdUtils.CreateCommand({
   names: ["highlight syntax", "hilite syntax"],
-  arguments: [{role: "object", nountype: noun_arb_text, label: "code"}],
-  icon: "chrome://ubiquity/skin/icons/color_wheel.png",
   description: ("Treats your selection as program source code, " +
                 "guesses its language, and colors it based on syntax."),
+  author: {name: "Aza", email: "azaaza@gmail.com"},
+  icon: "chrome://ubiquity/skin/icons/color_wheel.png",
+  arguments: [{role: "object", nountype: noun_arb_text, label: "code"}],
   execute: function slh_execute({object: {text: code}}) {
     if (!code) {
       displayMessage(_("You must select some code to syntax-hilight."));
@@ -24,7 +31,7 @@ CmdUtils.CreateCommand({
                        "style='background-color:#222;padding:3px'"));
       });
   },
-  preview: "Syntax highlights your code."
+  preview: "Syntax highlights your code.",
 });
 
 
@@ -35,6 +42,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["view source", "view page source"],
   description: "Shows you the source-code of the specified URL.",
+  author: "Aza",
   icon: "chrome://ubiquity/skin/icons/page_code.png",
   argument: noun_type_url,
   execute: function vs_execute(args) {
@@ -66,10 +74,10 @@ CmdUtils.CreateCommand({
     XML.prettyPrinting = true;
     XML.prettyIndent = 2;
     XML.ignoreWhitespace = XML.ignoreComments = false;
-    var pretties = [], xs = new window.XMLSerializer;
+    var pretties = [];
     var re_ns = / xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"(?=\/?>)/g;
     for (let i = 0, c = sel.rangeCount; i < c; ++i) {
-      let xml = xs.serializeToString(sel.getRangeAt(i).cloneContents());
+      let xml = gXS.serializeToString(sel.getRangeAt(i).cloneContents());
       if (xml) pretties.push(
         XML("<_>" + xml + "</_>").*.toXMLString().replace(re_ns, ""));
     }
@@ -88,11 +96,12 @@ function copyAndShow(text, self) {
 
 CmdUtils.CreateCommand({
   names: ["escape HTML entities"],
-  arguments: {object: noun_arb_text},
-  icon: "chrome://ubiquity/skin/icons/html_go.png",
   description: Utils.escapeHtml(
     "Replaces HTML entities (<, >, &, \" and ')" +
     " with their entity references."),
+  authors: ["Aza?", "satyr"],
+  icon: "chrome://ubiquity/skin/icons/html_go.png",
+  arguments: {object: noun_arb_text},
   preview: function ehe_preview(pb, {object: {html}}) {
     if (!html) return void this.previewDefault(pb);
     pb.innerHTML = REP_WITH + <pre>{html}</pre>.toXMLString();
@@ -107,12 +116,13 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["unescape HTML entities"],
-  arguments: {object: noun_arb_text},
-  icon: "chrome://ubiquity/skin/icons/html_go.png",
   description: Utils.escapeHtml(
-    "Replaces HTML character references" +
-    " (e.g. &spades;, &#x2665;, &9827;, ...)" +
+    "Replaces HTML character references (e.g. &spades; &#x2665; &9827; ...)" +
     " with their corresponding Unicode characters."),
+  author: "satyr",
+  license: "MIT",
+  icon: "chrome://ubiquity/skin/icons/html_go.png",
+  arguments: {object: noun_arb_text},
   preview: function uhe_preview(pb, {object: {html}}) {
     if (!html) return void this.previewDefault(pb);
     pb.innerHTML = REP_WITH + "<br/><br/>" + this._unescape(html);
@@ -133,12 +143,6 @@ CmdUtils.CreateCommand({
     });
   },
 });
-
-var {slice} = Array, gXS = Utils.hiddenWindow.XMLSerializer();
-function qsaa(lm, sl) slice(lm.querySelectorAll(sl));
-function qstc(lm, sl) (lm = lm.querySelector(sl)) ? lm.textContent : "";
-function qsxs(lm, sl) (
-  (lm = lm.querySelector(sl)) ? gXS.serializeToString(lm) : "");
 
 const JQAPI = "http://api.jquery.com/";
 var jQACmd = CmdUtils.CreateCommand({
@@ -293,20 +297,20 @@ CmdUtils.CreateCommand({
     <li>Hovering on an element generates a matching selector.</li>
     </ul>),
   help: "" + [
-    [<b>Left-click / Enter</b>,
+    [<b>Enter / Left-click</b>,
      "Copy and Quit"],
-    [<b>Middle-click / <u>C</u></b>,
+    [<b><u>C</u> / Middle-click</b>,
      "Copy"],
-    [<b>Right-click / Esc / <u>Q</u></b>,
+    [<b><u>Q</u> / Esc / Right-click</b>,
      "Quit"],
     [<b><u>M</u></b>,
      "Move"],
-    [<b>PageUp/Dn</b>,
-     "Scroll vertically"],
-    [<b>shift + PageUp/Dn</b>,
-     "Scroll horizontally"],
     [<b><u>F</u></b>,
      "Force element names"],
+    [<b>PageUp/PageDn</b>,
+     "Scroll vertically"],
+    [<b>shift + PageUp/PageDn</b>,
+     "Scroll horizontally"],
     ].reduce(function (l, [t, d]) l.appendChild(<dt>{t}</dt> + <dd>{d}</dd>),
              <dl/>),
   authors: [{name: "cers",  email: "cers@geeksbynature.dk"},
@@ -333,8 +337,10 @@ CmdUtils.CreateCommand({
       this.height = IDoc.height;
       $i.animate({width: IDoc.width}, 333,
                  function focus_delayed() { Utils.setTimeout(focus) });
-      $(Doc).mouseover(hover).click(click);
       $(IDoc).click(onbutton);
+      Doc.addEventListener("mouseover", hover, true);
+      Doc.addEventListener("click", click, true);
+      IDoc.addEventListener("click", onbutton, false);
 
       function copy() { copydisp(ebox.value) }
       function focus() { ebox.focus() }
@@ -356,10 +362,10 @@ CmdUtils.CreateCommand({
           case 33: // PageUp
           case 34: // PageDn
           scroll(.8 * (e.keyCode * 2 - 67), e.shiftKey);
-          return false;
+          return halt(e);
           case 13: copy(); // Enter
           case 27: quit(); // Escape
-          return false;
+          return halt(e);
         }
         var me = this;
         delay(function onkey_delayed() {
@@ -375,20 +381,22 @@ CmdUtils.CreateCommand({
           ebox.value = path;
         }, 42);
       }
-      function click({button, target}) {
-        if (button !== 2) copydisp(breadcrumbs(target));
-        if (button !== 1) quit();
-        return false;
+      function click(e) {
+        if (e.button !== 2) copydisp(breadcrumbs(e.target));
+        if (e.button !== 1) quit();
+        return halt(e);
       }
+      function halt(e) { e.preventDefault(); e.stopPropagation() }
       function quit() {
-        $(Doc).unbind("mouseover", hover).unbind("click", click);
+        Doc.removeEventListener("mouseover", hover, true);
+        Doc.removeEventListener("click", click, true);
         $i.parent().remove();
         hilite({});
       }
     }
     function scroll(rate, horiz) {
       with (Doc.defaultView)
-        scrollBy(innerWidth * rate * horiz, innerHeight * rate * !horiz)
+        scrollBy(innerWidth * rate * horiz, innerHeight * rate * !horiz);
     }
     function delay(cb, ms) {
       Utils.clearTimeout(delay.tid);
