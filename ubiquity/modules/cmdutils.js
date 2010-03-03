@@ -76,16 +76,18 @@ var CmdUtils = {
   //
   // Ubiquity 0.1.x only supports parser version 1, while
   // Ubiquity 0.5.x supports parser versions 1 and 2.
-
   get parserVersion parserVersion() (
     Utils.prefs.getValue("extensions.ubiquity.parserVersion", 1)),
 
   // === {{{ CmdUtils.maxSuggestions }}} ===
   // The current number of max suggestions.
-
   get maxSuggestions maxSuggestions() (
     Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
     .CommandManager.maxSuggestions),
+
+  // === {{{ CmdUtils.isSelected }}} ===
+  // Whether or not the current page has selections.
+  get isSelected isSelected() !getWindow().getSelection().isCollapsed,
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
