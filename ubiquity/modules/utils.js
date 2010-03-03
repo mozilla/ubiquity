@@ -270,13 +270,17 @@ function encodeJson(object) Utils.json.encode(object);
 function decodeJson(string) Utils.json.decode(string);
 
 // === {{{Utils.ellipsify(node, characters)}}} ===
-// Given a DOM {{{node}}} and a maximum number of {{{characters}}}, returns a
-// new DOM node that has the same contents truncated to that number of
-// characters. If any truncation was performed, an ellipsis is placed
-// at the end of the content.
+// Given a DOM {{{node}}} (or string) and a maximum number of {{{characters}}},
+// returns a new DOM node or string that has the same contents truncated to
+// that number of characters. If any truncation was performed, an ellipsis is
+// placed at the end of the content.
 
 function ellipsify(node, chars) {
   var doc = node.ownerDocument;
+  if (!doc) {
+    var str = String(node);
+    return str.length >= chars ? str.slice(0, chars) + "\u2026" : str;
+  }
   var copy = node.cloneNode(false);
   if (node.hasChildNodes()) {
     var children = node.childNodes;
