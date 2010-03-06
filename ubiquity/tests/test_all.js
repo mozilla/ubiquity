@@ -492,15 +492,14 @@ function testNounType() {
   this.assertEquals(nounWords.id, NounType(["foo", "bar", "buz"]).id);
 
   var nounRegex = NounType(/(.)_(.)/, ["foo_bar"]);
-  this.assertEquals(nounRegex.default().pop().data + "",
-                    "o_b,o,b");
+  this.assertEquals(nounRegex.default[0].data + "", "o_b,o,b");
 
   var nounDict = NounType({
     foooo: 123,
     barrr: 456,
     buzzz: 789,
   }, "o r z");
-  this.assertEquals([s.data for each (s in nounDict.default())] + "",
+  this.assertEquals([s.data for each (s in nounDict.default)] + "",
                     "123,456,789");
 }
 

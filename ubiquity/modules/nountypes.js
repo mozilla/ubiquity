@@ -1109,7 +1109,7 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
     Utils.prefs.getValue("general.useragent.locale", "en").slice(0, 2);
   let langName = noun_type_lang_wikipedia.getLangName(locale);
   if (langName)
-    noun_type_lang_wikipedia._defaults.push(
+    noun_type_lang_wikipedia.default.push(
       CmdUtils.makeSugg(langName, null, locale));
 }
 

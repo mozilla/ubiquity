@@ -83,7 +83,7 @@ function NounType(label, expected, defaults) {
   defaults = maybe_qw(defaults);
 
   var maker = NounType["_from" + Utils.classOf(expected)];
-  for (let [k, v] in Iterator(maker(expected))) this[k] = v;
+  for (let [k, v] in new Iterator(maker(expected))) this[k] = v;
   this.suggest = maker.suggest;
   this.label = label;
   this.noExternalCalls = true;
@@ -92,12 +92,10 @@ function NounType(label, expected, defaults) {
                                                           uneval(defaults)));
   if (defaults) {
     // [[a], [b, c], ...] => [a].concat([b, c], ...) => [a, b, c, ...]
-    this._defaults =
+    this.default =
       Array.concat.apply(0, [this.suggest(d) for each (d in defaults)]);
-    this.default = NounType.default;
   }
 }
-NounType.default = function default() this._defaults;
 
 // ** {{{ NounUtils.NounType._fromArray(words) }}} **
 //
@@ -109,7 +107,6 @@ NounType.default = function default() this._defaults;
 NounType._fromArray = function NT_Array(words)({
   id: "#na_",
   name: words.slice(0, 2) + (words.length > 2 ? ",..." : ""),
-  cacheTime: -1,
   _list: [makeSugg(w) for each (w in words)],
 });
 
@@ -125,7 +122,6 @@ NounType._fromObject = function NT_Object(dict) {
   return {
     name: ([s.text for each (s in list.slice(0, 2))] +
            (list.length > 2 ? ",..." : "")),
-    cacheTime: -1,
     _list: list,
   };
 };
@@ -145,7 +141,6 @@ NounType._fromArray.suggest = NounType._fromObject.suggest = (
 NounType._fromRegExp = function NT_RegExp(regexp) ({
   id: "#nr_",
   name: regexp + "",
-  cacheTime: -1,
   rankLast: regexp.test(""),
   _regexp: regexp,
 });
@@ -274,14 +269,16 @@ function mixNouns(label) {
   var gotLabel = typeof label === "string";
   var nouns = gotLabel ? arguments[1] : label;
   if (!Utils.isArray(nouns))
-    nouns = Array.slice(arguments, gotLabel? 1 : 0);
-  function mixer(method) function suggestMixed() {
-    var suggsList = [noun[method].apply(noun, arguments)
-                     for each (noun in nouns) if (method in noun)];
+    nouns = Array.slice(arguments, gotLabel ? 1 : 0);
+  function mixer(key) function suggestMixed() {
+    var suggsList = [
+      let (val = noun[key]) (
+        typeof val === "function" ? val.apply(noun, arguments) : val)
+      for each (noun in nouns)];
     return suggsList.concat.apply([], suggsList); // flatten
   };
   return {
-    label: gotLabel ? label : [n.label || "?" for each(n in nouns)].join("|"),
+    label: gotLabel ? label : [n.label || "?" for each (n in nouns)].join("|"),
     rankLast: nouns.some(function (n) n.rankLast),
     noExternalCalls: nouns.every(function (n) n.noExternalCalls),
     suggest: mixer("suggest"),
