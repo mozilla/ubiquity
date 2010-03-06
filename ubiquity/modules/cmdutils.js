@@ -249,67 +249,80 @@ function geocodeAddress(location, callback) this.__globalObject.jQuery.ajax({
   },
 });
 
-// === {{{ CmdUtils.injectCss(css) }}} ===
-// Injects CSS source code into the current tab's document.
-// Returns the injected style elment for later use.
-//
-// {{{css}}} is the CSS source code to inject, in plain text.
+const RE_URL_INJECTABLE = /^(?:https?|file|data|chrome|resource):/;
 
-function injectCss(css) {
-  var doc = getDocument();
-  var style = doc.createElement("style");
-  style.innerHTML = css;
-  return doc.body.appendChild(style);
+// === {{{ CmdUtils.injectCss(css, [document]) }}} ===
+// Injects CSS into the current tab's document or {{{document}}}.
+// Returns the injected element for later use.
+//
+// {{{css}}} is a string that can be either
+// a CSS source code or a URL to a CSS file.
+
+function injectCss(css, document) {
+  var doc = document || getDocument(), lmn;
+  if (RE_URL_INJECTABLE.test(css)) {
+    lmn = doc.createElement("link");
+    lmn.rel = "stylesheet";
+    lmn.href = css;
+  }
+  else {
+    lmn = doc.createElement("style");
+    lmn.innerHTML = css;
+  }
+  return doc.body.appendChild(lmn);
 }
 
-// === {{{ CmdUtils.injectHtml(html) }}} ===
-// Injects HTML source code at the end of the current tab's document.
-// Returns the injected elements as a jQuery object.
+// === {{{ CmdUtils.injectHtml(html, [document]) }}} ===
+// Injects HTML source code at the end of the current tab's document or
+// {{{document}}}. Returns the injected elements as a jQuery object.
 //
 // {{{html}}} is the HTML source code to inject, in plain text.
 
-function injectHtml(html) {
+function injectHtml(html, document) {
   const {jQuery} = this.__globalObject;
-  var doc = getDocument();
+  var doc = document || getDocument();
   return jQuery("<div>" + html + "</div>").contents().appendTo(doc.body);
 }
 
-// === {{{ CmdUtils.injectJavascript(src, callback) }}} ===
-// Injects Javascript from a URL into the current tab's document,
+// === {{{ CmdUtils.injectJavascript(src, callback, [document]) }}} ===
+// Injects JavaScript into the current tab's document or {{{document}}},
 // and calls an optional callback function once the script has loaded.
 //
 // Note that this is **not** intended to be used as a
-// way of importing Javascript into the command's sandbox.
+// way of importing JavaScript into the command's sandbox.
 //
-// {{{src}}} is the source URL of the Javascript to inject.
+// {{{src}}} is the source URL/code of the JavaScript to inject.
 //
 // {{{callback}}} is an optional callback function to be called once the script
 // has loaded in the document. The 1st argument will be the global object
 // of the document (i.e. window).
 
-function injectJavascript(src, callback) {
-  var doc = getDocument();
+function injectJavascript(src, callback, document) {
+  var doc = document || getDocument();
   var script = doc.createElement("script");
-  script.src = src;
+  script.type = "application/javascript;version=1.8";
+  script.src = RE_URL_INJECTABLE.test(src) ? src : "data:," + encodeURI(src);
   script.addEventListener("load", function onInjected() {
     doc.body.removeChild(script);
     if (typeof callback === "function")
-      callback(doc.defaultView);
-  }, true);
+      callback(doc.defaultView, doc);
+  }, false);
   doc.body.appendChild(script);
 }
 
-// === {{{ CmdUtils.loadJQuery(callback) }}} ===
-// Injects the jQuery javascript library into the current tab's document.
+// === {{{ CmdUtils.loadJQuery(callback, [document]) }}} ===
+// Injects the jQuery javascript library into the current tab's document or
+// {{{document}}}.
 //
 // {{{callback}}} gets passed back the {{{jQuery}}} object once it is loaded.
 
-function loadJQuery(callback) {
+function loadJQuery(callback, document) {
   injectJavascript(
     "resource://ubiquity/scripts/jquery.js",
     callback && this.safeWrapper(function onJQuery(win) {
       callback(win.wrappedJSObject.jQuery);
-    }));
+    }),
+    document);
 }
 
 // === {{{ CmdUtils.copyToClipboard(text) }}} ===
