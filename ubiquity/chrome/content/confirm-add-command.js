@@ -46,6 +46,7 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 
+var gCode = "";
 var gCommandFeedInfo = Utils.urlToParams(document.URL);
 var {feedManager} = UbiquitySetup.createServices();
 
@@ -72,12 +73,11 @@ function showConfirmation() {
 }
 
 function onSubmit() {
-  var code = $("#sourceCode").text();
-  if (code) {
+  if (gCode) {
     feedManager.addSubscribedFeed({
       url: gCommandFeedInfo.url,
       sourceUrl: gCommandFeedInfo.sourceUrl,
-      sourceCode: code,
+      sourceCode: gCode,
       canAutoUpdate: $("#autoupdate")[0].checked,
       title: gCommandFeedInfo.title});
     showConfirmation();
@@ -89,11 +89,21 @@ function onCancel() {
 }
 
 function displayCode(data) {
-  ($("#sourceCode")
-   .css({
-     whiteSpace: "pre-wrap",
-     fontFamily: "monospace"})
-   .text(data));
+  gCode = data;
+  var page = (
+    "<pre class='prettyprint lang-js'>" + Utils.escapeHtml(data) + "</pre>" +
+    "<link rel='stylesheet' href='resource://ubiquity/scripts/prettify.css'>" +
+    ("<style>" + <![CDATA[
+      body, pre {margin: 0; background-color: #eee}
+      .prettyprint {border: 0 !important; font-size: smaller}
+     ]]> + "</style>") +
+    "<script src='resource://ubiquity/scripts/prettify.js'></script>" +
+    "<script> prettyPrint() </script>");
+  $("#sourceCode").empty().append($("<iframe>", {
+    css: {width: "100%", maxHeight: "40em", borderWidth: 0},
+    src: "data:text/html," + encodeURI(page),
+    load: function () { this.height = this.contentDocument.height },
+  }));
   $("#submit")[0].disabled = false;
 }
 
