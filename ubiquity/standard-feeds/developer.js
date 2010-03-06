@@ -8,41 +8,56 @@ function qstc(lm, sl) (lm = lm.querySelector(sl)) ? lm.textContent : "";
 function qsxs(lm, sl) (
   (lm = lm.querySelector(sl)) ? gXS.serializeToString(lm) : "");
 
-// TODO: Add the ability to manually set the language being highlighted.
-// TODO: Add the ability to select the style of code highlighting.
 CmdUtils.CreateCommand({
-  names: ["highlight syntax", "hilite syntax"],
+  names: ["highlight syntax", "hilite syntax", "prettify code"],
   description: ("Treats your selection as program source code, " +
                 "guesses its language, and colors it based on syntax."),
-  author: {name: "Aza", email: "azaaza@gmail.com"},
+  homepage: "http://code.google.com/p/google-code-prettify/",
+  author: "satyr",
+  license: "MIT",
   icon: "chrome://ubiquity/skin/icons/color_wheel.png",
-  arguments: [{role: "object", nountype: noun_arb_text, label: "code"}],
-  execute: function slh_execute({object: {text: code}}) {
-    if (!code) {
-      displayMessage(_("You must select some code to syntax-hilight."));
-      return;
+  execute: function prettify_execute() {
+    var codes = this._codes();
+    if (!codes.length) return displayMessage(
+      _("You must select some code to syntax-hilight."));
+
+    for each (let code in codes) code.className += " prettyprint";
+    var doc = codes[0].ownerDocument;
+    if (doc.getElementById(this._id))
+      this._onload(doc);
+    else {
+      CmdUtils.injectCss("resource://ubiquity/scripts/prettify.css", doc)
+        .id = this._id;
+      CmdUtils.injectJavascript(
+        "resource://ubiquity/scripts/prettify.js", this._onload, doc);
     }
-    jQuery.post(
-      "http://azarask.in/services/syntaxhighlight/color.py",
-      {code: code, style: "native"},
-      function hls_success(html) {
-        CmdUtils.setSelection(
-          html.replace(/\bclass="highlight"/,
-                       "style='background-color:#222;padding:3px'"));
-      });
   },
-  preview: "Syntax highlights your code.",
+  preview: function prettify_preview(pb) {
+    this.previewDefault(pb);
+    for each (let code in this._codes()) {
+      pb.appendChild(pb.ownerDocument.createElement("hr"));
+      pb.appendChild(Utils.ellipsify(code, 80));
+    }
+  },
+  _codes: function prettify_codes() {
+    const SLCTR = "pre:not(.prettyprint), code:not(.prettyprint)";
+    var codes = CmdUtils.getSelectedNodes(SLCTR);
+    if (!codes.length)
+      codes = $(context.focusedElement).closest(SLCTR).get();
+    if (!codes.length)
+      codes = qsaa(CmdUtils.document, SLCTR);
+    return codes;
+  },
+  _onload: function prettify_onload({location}) {
+    location.href = "javascript:prettyPrint()";
+  },
+  _id: Math.random().toString(36).slice(2),
 });
-
-
-// -----------------------------------------------------------------
-// MISC COMMANDS
-// -----------------------------------------------------------------
 
 CmdUtils.CreateCommand({
   names: ["view source", "view page source"],
   description: "Shows you the source-code of the specified URL.",
-  author: "Aza",
+  author: {name: "Aza", email: "azaaza@gmail.com"},
   icon: "chrome://ubiquity/skin/icons/page_code.png",
   argument: noun_type_url,
   execute: function vs_execute(args) {
@@ -117,7 +132,7 @@ CmdUtils.CreateCommand({
 CmdUtils.CreateCommand({
   names: ["unescape HTML entities"],
   description: Utils.escapeHtml(
-    "Replaces HTML character references (e.g. &spades; &#x2665; &9827; ...)" +
+    "Replaces HTML character references (e.g. &spades; &#x2665; &#9827; ...)" +
     " with their corresponding Unicode characters."),
   author: "satyr",
   license: "MIT",
