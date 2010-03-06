@@ -291,30 +291,21 @@ CmdUtils.CreateCommand({
 // ZOOM RELATED
 // -----------------------------------------------------------------
 
-function setFullPageZoom(level) {
-  var navigator1 = context.chromeWindow.
-                   QueryInterface(Ci.nsIInterfaceRequestor).
-                   getInterface(Ci.nsIWebNavigation);
-  var docShell = navigator1.QueryInterface(Ci.nsIDocShell);
-  var docviewer = docShell.
-                  contentViewer.
-                  QueryInterface(Ci.nsIMarkupDocumentViewer);
-  docviewer.fullZoom = level;
-}
-
 CmdUtils.CreateCommand({
   names: ["zoom"],
   argument: noun_type_percentage,
   icon: "chrome://ubiquity/skin/icons/magnifier.png",
-  description: "Zooms the Firefox window in or out.",
+  description: "Zooms the current page in or out.",
   preview: function zoom_preview(pBlock, args) {
     pBlock.innerHTML = _(
-      "Zooms the Firefox window to ${text} of its normal size.",
+      "Zooms the current page to ${text} of its normal size.",
       args.object);
   },
   execute: function zoom_execute(args) {
-    setFullPageZoom(args.object.data);
-  }
+    var win = context.chromeWindow, ZM = win.ZoomManager;
+    ZM.zoom = Math.max(ZM.MIN, Math.min(args.object.data, ZM.MAX));
+    win.FullZoom._applySettingToPref();
+  },
 });
 
 // -----------------------------------------------------------------
