@@ -75,8 +75,7 @@ var noun_arb_text = {
   // see feed-parts/header/initial.js
   loadGlobals: function nat_loadGlobals(source) {
     var target = (function () this)();
-    for each (let p in ["Utils", "CmdUtils", "jQuery", "Date"])
-      target[p] = source[p];
+    for each (let p in ["jQuery", "Date"]) target[p] = source[p];
     this.loadGlobals = function () {};
   }
 };
@@ -132,36 +131,31 @@ var noun_type_percentage = {
   label: "percentage",
   noExternalCalls: true,
   cacheTime: -1,
-  _default: CmdUtils.makeSugg("100%", null, 1, 0.3),
-  "default": function nt_percentage_default() this._default,
+  default: CmdUtils.makeSugg("100%", null, 1, 0.3),
   suggest: function nt_percentage_suggest(text, html) {
     var number = parseFloat(text);
     if (isNaN(number)) return [];
 
-    var numOfOkayChars = text.replace(/[^\d%.e]/g, "").length;
-    var score = numOfOkayChars / text.length;
+    var score = text.replace(/[^-\d.Ee%]/g, "").length / text.length;
     var nopercent = text.indexOf("%") < 0;
     if (nopercent) score *= 0.9;
 
-    var returnArr =
-      [CmdUtils.makeSugg(number + "%", null, number / 100, score)];
+    var suggs = [CmdUtils.makeSugg(number + "%", null, number / 100, score)];
     // if the number's 10 or less and there's no
     // % sign, also try interpreting it as a proportion instead of a
     // percent and offer it as a suggestion as well, but with a lower
     // score.
-    if (nopercent && number <= 10) {
-      returnArr.push(
-        CmdUtils.makeSugg(number * 100 + "%", null, number, score * 0.9));
-    }
-    return returnArr;
-  }
+    if (nopercent && number <= 10)
+      suggs.push(CmdUtils.makeSugg(
+        number * 100 + "%", null, number, score * 0.9));
+    return suggs;
+  },
 };
 
 // === {{{ noun_type_tab }}} ===
 // Suggests currently opened tabs.
 // * {{{text, html}}} : tab title or URL
-// * {{{data}}} : one of
-//   [[https://developer.mozilla.org/en/FUEL/Window|fuelIWindow]]#{{{tabs}}}
+// * {{{data}}} : [[#modules/utils.js|Utils]]{{{.BrowserTab}}} instance
 
 var noun_type_tab = {
   label: "title or URL",
@@ -346,14 +340,15 @@ var noun_type_awesomebar = {
 var noun_type_extension = {
   label: "name",
   noExternalCalls: true,
-  suggest: function nt_ext_suggest(text) {
-    var exts = Utils.ExtensionManager.getItemList(2, {}); // TYPE_EXTENSION
-    var suggs = CmdUtils.grepSuggs(
-      text, [{text: ext.name, data: ext} for each (ext in exts)]);
-    for each (let s in suggs) s.html = s.summary = Utils.escapeHtml(s.text);
-    return suggs;
-  },
+  suggest: function nt_ext_suggest(text) CmdUtils.grepSuggs(text, this._list),
 };
+Utils.defineLazyProperty(noun_type_extension, function _list() {
+  var {escapeHtml} = Utils;
+  return [
+    let (h = escapeHtml(ext.name)) {
+      text: ext.name, data: ext, html: h, summary: h}
+    for each (ext in Utils.ExtensionManager.getItemList(2, {}))];
+});
 
 // === {{{ noun_type_common_URI_scheme }}} ===
 // Suggests common URI schemes, which are the IANA-registered ones
@@ -383,9 +378,10 @@ var noun_type_common_URI_scheme = CmdUtils.NounType(
 // Suggests URLs from the user's input and/or history.
 // Defaults to the current page's URL if no input is given.
 // * {{{text, html}}} : URL
+// * {{{data}}} : null or query result (same as {{{noun_type_awesomebar}}})
 
 var noun_type_url = {
-  label: "url",
+  label: "URL",
   noExternalCalls: true,
   cacheTime: 0,
   default: function nt_url_default() {
@@ -616,9 +612,7 @@ var noun_type_number = {
     var num = +text;
     return isNaN(num) ? [] : [CmdUtils.makeSugg(text, null, num)];
   },
-  "default": function nt_number_default() {
-    return CmdUtils.makeSugg("1", null, 1, 0.5);
-  }
+  default: CmdUtils.makeSugg("1", null, 1, 0.5),
 };
 
 // === {{{ noun_type_bookmarklet }}} ===
@@ -661,6 +655,7 @@ var noun_type_bookmarklet = {
 
 // === {{{ noun_type_date }}} ===
 // === {{{ noun_type_time }}} ===
+// === {{{ noun_type_date_time }}} ===
 // Suggests a date/time for input, using the mighty {{{Date.parse()}}}.
 // Defaults to today/now.
 // * {{{text, html}}} : date/time text
@@ -1110,8 +1105,8 @@ for each (let ntl in [noun_type_lang_google, noun_type_lang_wikipedia]) {
   ntl.getLangName = function getLangName(langCode) this._code2name[langCode];
 }
 {
-  let locale = Utils.prefs.getValue("general.useragent.locale", "en");
-  locale = /^\w{0,}/(locale)[0];
+  let locale =
+    Utils.prefs.getValue("general.useragent.locale", "en").slice(0, 2);
   let langName = noun_type_lang_wikipedia.getLangName(locale);
   if (langName)
     noun_type_lang_wikipedia._defaults.push(
@@ -1191,7 +1186,7 @@ function getRestaurants(query, callback, selectionIndices) {
 // === {{{ noun_type_geo_subregion }}} ===
 // === {{{ noun_type_geo_town }}} ===
 // === {{{ noun_type_geo_postal }}} ===
-// === {{{ noun_type_geo_adress }}} ===
+// === {{{ noun_type_geo_address }}} ===
 
 var noun_type_geo_country = NounGeo("country", 1, 1);
 // Think American states, provinces in many countries, Japanese prefectures.
