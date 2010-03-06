@@ -189,6 +189,15 @@ function getSelectedNodes(context, selector) {
   return nodes;
 }
 
+// === {{{ ContextUtils.getIsSelected(context) }}} ===
+// Returns whether or not the {{{context}}} has a non-collapsed selection.
+
+function getIsSelected(context) (
+  let (flm = context.focusedElement) (
+    Utils.isTextBox(flm)
+    ? flm.selectionStart < flm.selectionEnd
+    : !context.focusedWindow.getSelection().isCollapsed));
+
 // ==== {{{ ContextUtils.cloneFirstRange(context) }}} ====
 // Returns a copy of the first range in selection.
 

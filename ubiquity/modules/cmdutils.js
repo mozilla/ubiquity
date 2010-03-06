@@ -84,10 +84,6 @@ var CmdUtils = {
   get maxSuggestions maxSuggestions() (
     Cu.import("resource://ubiquity/modules/cmdmanager.js", null)
     .CommandManager.maxSuggestions),
-
-  // === {{{ CmdUtils.isSelected }}} ===
-  // Whether or not the current page has selections.
-  get isSelected isSelected() !getWindow().getSelection().isCollapsed,
 };
 
 for each (let f in this) if (typeof f === "function") CmdUtils[f.name] = f;
@@ -103,8 +99,11 @@ for each (let g in ["document", "documentInsecure",
 for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 
 // == From ContextUtils ==
-// {{{CmdUtils}}} imports and wraps the following methods from
+// {{{CmdUtils}}} imports and wraps the following properties/methods from
 // [[#modules/contextutils.js|ContextUtils]].
+
+// === {{{ CmdUtils.isSelected }}} ===
+// Whether or not the user has one or more non-collapsed selections.
 
 // === {{{ CmdUtils.getSelection() }}} ===
 // Returns a string containing the text and just the text of the user's
@@ -118,6 +117,12 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 // Returns selected nodes as filtered by {{{selector}}},
 // which can be either a CSS string or a function.
 
+// === {{{ CmdUtils.getSelectionObject() }}} ===
+// Returns an object containing both the plain-text and HTML selections. Usage:
+// {{{
+// let {text, html} = CmdUtils.selectionObject;
+// }}}
+
 // === {{{ CmdUtils.setSelection(content, options) }}} ===
 // Replaces the current selection with new content.
 //
@@ -128,7 +133,7 @@ for (let k in NounUtils) CmdUtils[k] = NounUtils[k];
 // a plain-text-only editable field.
 
 for each (let m in ["getSelection", "getHtmlSelection", "getSelectedNodes",
-                    "setSelection"]) {
+                    "getSelectionObject", "getIsSelected", "setSelection"]) {
   eval(<><![CDATA[
     CmdUtils.@ = function @(x, y) {
       var c = this.__globalObject.context || {};
