@@ -66,6 +66,8 @@ const DEFAULT_HELP = (
   L("ubiquity.cmdmanager.defaulthelp") +
   '</div>');
 
+const NULL_QUERY = {suggestionList: [], finished: true, hasResults: false};
+
 var gDomNodes = {};
 
 CommandManager.__defineGetter__(
@@ -93,7 +95,7 @@ function CommandManager(cmdSource, msgService, parser,
   this.__nlParser = parser;
   this.__dynaLoad = !parser;
   this.__parserType = null;
-  this.__activeQuery = null;
+  this.__activeQuery = NULL_QUERY;
   this.__domNodes = {
     suggs: suggsNode,
     suggsDocument: suggDoc,
@@ -250,18 +252,15 @@ CommandManager.prototype = {
   },
 
   _renderSuggestions: function CM__renderSuggestions() {
-    var content = "";
-    var {suggestionList} = this.__activeQuery;
-    for (let x = 0, l = suggestionList.length; x < l; ++x) {
-      let suggText = suggestionList[x].displayHtml;
-      let suggIconUrl = suggestionList[x].icon;
-      let suggIcon = "";
-      if (suggIconUrl)
-        suggIcon = '<img src="' + Utils.escapeHtml(suggIconUrl) + '"/>';
-      suggText = '<div class="cmdicon">' + suggIcon + "</div>" + suggText;
-      content += ('<div class="suggested' +
-                  (x === this.__hilitedIndex ? " hilited" : "") +
-                  '" index="' + x + '">' + suggText + "</div>");
+    var {escapeHtml} = Utils, content = "";
+    var {__activeQuery: {suggestionList}, __hilitedIndex: hindex} = this;
+    for (let i = 0, l = suggestionList.length; i < l; ++i) {
+      let {displayHtml, icon} = suggestionList[i];
+      content += (
+        '<div class="suggested' + (i === hindex ? " hilited" : "") +
+        '" index="' + i + '"><div class="cmdicon">' +
+        (icon ? '<img src="' + escapeHtml(icon) + '"/>' : "") +
+        "</div>" + displayHtml + "</div>");
     }
     this.__domNodes.suggsDocument.body.innerHTML = content;
   },
@@ -270,11 +269,11 @@ CommandManager.prototype = {
     var hindex = this.__hilitedIndex;
     if (hindex === this.__lastHilitedIndex) return;
 
-    var activeSugg = this.hilitedSuggestion;
+    var activeSugg = this.suggestions[hindex];
     if (!activeSugg) return;
-    this.__lastHilitedIndex = hindex;
 
     var self = this;
+    this.__lastHilitedIndex = hindex;
     this.__previewer.queuePreview(
       activeSugg.previewUrl,
       activeSugg.previewDelay,
@@ -299,8 +298,8 @@ CommandManager.prototype = {
 
   reset: function CM_reset() {
     var query = this.__activeQuery;
-    if (query && !query.finished) query.cancel();
-    this.__activeQuery = null;
+    if (!query.finished) query.cancel();
+    this.__activeQuery = NULL_QUERY;
     this.__hilitedIndex = 0;
     this.__lastInput = "";
     this.__lastHilitedIndex = -1;
@@ -385,13 +384,8 @@ CommandManager.prototype = {
   get previewer CM_previewer() this.__previewer,
 
   get maxSuggestions CM_maxSuggestions() CommandManager.maxSuggestions,
-  get hasSuggestions CM_hasSuggestions()
-    !!(this.__activeQuery || 0).hasResults,
-  get suggestions CM_suggestions() (
-    this.__activeQuery
-    ? this.__activeQuery.suggestionList
-    : []),
-  get hilitedSuggestion CM_hilitedSuggestion() (
-    this.__activeQuery &&
-    this.__activeQuery.suggestionList[this.__hilitedIndex]),
+  get hasSuggestions CM_hasSuggestions() this.__activeQuery.hasResults,
+  get suggestions CM_suggestions() this.__activeQuery.suggestionList,
+  get hilitedSuggestion CM_hilitedSuggestion()
+    this.__activeQuery.suggestionList[this.__hilitedIndex],
 };
