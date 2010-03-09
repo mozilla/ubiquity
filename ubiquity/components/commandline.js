@@ -37,7 +37,6 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://ubiquity/modules/utils.js");
 
 var NSGetModule = XPCOMUtils.generateNSGetModule([UbiquityCommandLineHandler]);
 function UbiquityCommandLineHandler() {}
@@ -46,7 +45,8 @@ UbiquityCommandLineHandler.prototype = {
   classID: Components.ID("{bef32df0-b9f6-4833-a3c6-ad361137ae69}"),
   contractID:
   "@mozilla.org/commandlinehandler/general-startup;1?type=ubiquity",
-  QueryInterface: XPCOMUtils.generateQI(["nsICommandLineHandler", "nsIFactory"]),
+  QueryInterface:
+  XPCOMUtils.generateQI(["nsICommandLineHandler", "nsIFactory"]),
   _xpcom_categories: [
     {category: "command-line-handler", entry: "m-ubiquity"}],
 
@@ -62,18 +62,25 @@ UbiquityCommandLineHandler.prototype = {
     var opts = {execute: ["ubiquity", "ubiq"], preview: ["ubipuity", "ubip"]};
     for (let [method, flags] in new Iterator(opts))
       for each (let flag in flags) {
-        let param;
+        let param = "";
         try {
-          if (!(param = cmdln.handleFlagWithParam(flag, false))) continue;
-        } catch (e if e.result === Cr.NS_ERROR_INVALID_ARG) { param = "" }
-        handled || rendezvous(method, param);
+          param = cmdln.handleFlagWithParam(flag, false);
+          if (param === null) continue;
+        } catch (e if e.result === Cr.NS_ERROR_INVALID_ARG) {
+          cmdln.handleFlag(flag, false);
+        }
+        if (!handled) {
+          Cu.import("resource://ubiquity/modules/utils.js");
+          rendezvous(method, param);
+        }
         handled = true;
       }
   },
 };
 
-function rendezvous(method, param) {
+function rendezvous(method, param, i) {
+  if (i > 999) return;
   var {gUbiquity} = Utils.currentChromeWindow || 0;
   if (gUbiquity) gUbiquity[method](param);
-  else Utils.setTimeout(rendezvous, 99, method, param);
+  else Utils.setTimeout(rendezvous, 99, method, param, -~i);
 }
