@@ -52,7 +52,6 @@
 
 function Ubiquity(msgPanel, textBox, cmdManager) {
   Cu.import("resource://ubiquity/modules/utils.js", this);
-  Cu.import("resource://ubiquity/modules/contextutils.js", this);
 
   this.__msgPanel = msgPanel;
   this.__textBox = textBox;
@@ -198,9 +197,7 @@ Ubiquity.prototype = {
   __delayedProcessInput: function U__delayedProcessInput(self, context) {
     var input = self.__textBox.value;
     if (input.length > self.inputLimit ||
-        input && input === self.__lastValue &&
-        document.commandDispatcher.focusedWindow.getSelection().isCollapsed)
-      return;
+        input && input === self.__lastValue) return;
 
     self.__cmdManager.updateInput(
       self.__lastValue = input,
