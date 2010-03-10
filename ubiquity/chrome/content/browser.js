@@ -106,9 +106,7 @@ addEventListener("load", function ubiquityBoot() {
       services.commandSource.onUbiquityLoad(window);
   }
 
-  var toggleKeys = new PrefKeys("",
-                                KeyEvent.DOM_VK_SPACE,
-                                Utils.OS === "WINNT" ? "CTRL" : "ALT");
+  var toggleKeys = new PrefKeys;
   var repeatKeys = new PrefKeys("repeat");
   function ubiquityKey(event) {
     if (toggleKeys.match(event)) return gUbiquity.toggleWindow();

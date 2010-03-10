@@ -53,9 +53,11 @@ function PrefKeys(path, defaultKey, defaultMod) {
   return {
     __proto__: PrefKeysProto,
     KEYCODE_PREF: pref + "keycode",
-    KEYCODE_DEFAULT: defaultKey || "",
+    KEYCODE_DEFAULT:
+    defaultKey || (path ? "" : PrefKeys.KeyEvent.DOM_VK_SPACE),
     KEYMODIFIER_PREF: pref + "keymodifier",
-    KEYMODIFIER_DEFAULT: defaultMod || "",
+    KEYMODIFIER_DEFAULT:
+    defaultMod || (path ? "" : Utils.OS === "WINNT" ? "CTRL" : "ALT"),
   };
 }
 Utils.defineLazyProperty(PrefKeys, function KeyEvent() {
@@ -89,15 +91,16 @@ var PrefKeysProto = {
       haltEvent(ev);
 
       var {keyCode} = ev;
+      if (isModifier(keyCode)) return;
+
       var keyModifier = (
         ev.altKey   ? "ALT"   :
         ev.ctrlKey  ? "CTRL"  :
-        ev.shiftKey ? "SHIFT" :
         ev.metaKey  ? "META"  :
+        ev.shiftKey ? "SHIFT" :
         "");
       if (!keyModifier) {
-        isModifier(keyCode) ||
-          (notifier.textContent = L("ubiquity.prefkeys.notifybadmodifier"));
+        notifier.textContent = L("ubiquity.prefkeys.notifybadmodifier");
         return;
       }
 
