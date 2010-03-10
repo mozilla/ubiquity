@@ -22,3 +22,4 @@ pref("extensions.ubiquity.inputLimit", 512);
 pref("extensions.ubiquity.commandReminderPeriod", 5);
 pref("extensions.ubiquity.noNotificationSites", "");
 pref("extensions.ubiquity.dump", false);
+pref("extensions.ubiquity.editor.useBespin", true);

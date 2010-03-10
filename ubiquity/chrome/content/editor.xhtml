@@ -23,38 +23,6 @@
 
   <script type="application/javascript;version=1.8" src="chrome://ubiquity/content/developer-news.js"></script>
   <script type="application/javascript;version=1.8" src="editor.js"></script>
-  <script type="application/javascript" src="bespin-embedded.js"></script>
-
-<script type="application/javascript;version=1.8"><![CDATA[
-var file;
-var lastModifiedTime = 0;
-function initialize() {
-  document.getElementById("feedTypeMenu").value = PrefCommands.type;
-}
-function launch() {
-  file = Editor.launchEditor(document.getElementById("editor-div")
-                             ._editor.getContent());
-  if (!file || !file.exists()) return;
-  lastModifiedTime = file.lastModifiedTime;
-  setTimeout(watchFile, 500);
-}
-function watchFile() {
-  if (!file || !file.exists()) return;
-  var time = file.lastModifiedTime;
-  if (time > lastModifiedTime) {
-    let {_editor} = document.getElementById("editor-div");
-    _editor.setContent(Editor.readFile(file));
-    PrefCommands.setCode(_editor.getContent());
-    lastModifiedTime = time;
-  }
-  setTimeout(watchFile, 500);
-}
-function onload() {
-  initialize();
-  new BespinEditor().initUI("editor-div", window);
-}
-]]></script>
-
 </head>
 <body dir="&locale.dir;">
 
@@ -106,6 +74,13 @@ function onload() {
     <span class="feed-type-desc" id="commands">&ubiquity.editor.RegularCommandDesc;</span>
     <span class="feed-type-desc" id="locked-down-commands">&ubiquity.editor.LockedCommandDesc;</span>
   </div>
+
+  <br />
+
+  <label for="usebespin">
+   <input type="checkbox" id="usebespin" accesskey="B"/>
+   Use <a href="https://bespin.mozillalabs.com/"><u>B</u>espin</a>
+  </label>
 
   <br clear="all" />
 

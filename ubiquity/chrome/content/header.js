@@ -46,20 +46,7 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
 
-var navUrls = [
-  [L("ubiquity.nav.main"), 
-    "about:ubiquity"],
-  [L("ubiquity.nav.settings"), 
-    "about:ubiquity?settings"],
-  [L("ubiquity.nav.commands"),
-    "about:ubiquity?cmdlist"],
-  [L("ubiquity.nav.getnewcommands"),
-    "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"],
-  [L("ubiquity.nav.support"), 
-    "about:ubiquity?support"],
-  [L("ubiquity.nav.hackubiquity"), 
-    "about:ubiquity?editor"],
-];
+var gPrefs = Utils.prefs;
 
 function createNavLinks() {
   let containerElem = document.getElementById("nav-container");
@@ -74,6 +61,20 @@ function createNavLinks() {
   let listElem = document.createElement("ul");
   listElem.id = "nav";
   containerElem.appendChild(listElem);
+
+  var navUrls = [
+    [L("ubiquity.nav.main"),
+     "about:ubiquity"],
+    [L("ubiquity.nav.settings"),
+     "about:ubiquity?settings"],
+    [L("ubiquity.nav.commands"),
+     "about:ubiquity?cmdlist"],
+    [L("ubiquity.nav.getnewcommands"),
+     "https://wiki.mozilla.org/Labs/Ubiquity/Commands_In_The_Wild"],
+    [L("ubiquity.nav.support"),
+     "about:ubiquity?support"],
+    [L("ubiquity.nav.hackubiquity"),
+     "about:ubiquity?editor"]];
 
   for each (let [name, url] in navUrls) {
     let listItem = document.createElement("li");
@@ -106,7 +107,8 @@ function jump(hash) {
 }
 
 function pasteToGist(name, code, ext) {
-  name = prompt("Pasting to gist.github.com with name:", name);
+  //ToLocalize
+  name = prompt("Pasting to gist.github.com with the following name:", name);
   if (!name) return;
   var file = {};
   file[name + "." + ext] = code;
