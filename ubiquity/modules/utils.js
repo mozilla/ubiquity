@@ -45,26 +45,23 @@
 var EXPORTED_SYMBOLS = ["Utils"];
 
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
+const {nsISupportsString, nsITransferable} = Ci;
+
 const LogPrefix = "Ubiquity: ";
 const ToString = Object.prototype.toString;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-var gPrefBranch = (
-  Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2));
 
 var Utils = {
   toString: function toString() "[object UbiqUtils]",
 
   // === {{{ Utils.currentChromeWindow }}} ===
   // A reference to the application chrome window that currently has focus.
-
   get currentChromeWindow getCurrentChromeWindow()
     Utils.WindowMediator.getMostRecentWindow(Utils.appWindowType),
 
   // === {{{ Utils.chromeWindows }}} ===
   // An array of application chrome windows currently opened.
-
   get chromeWindows getChromeWindows() {
     var wins = [];
     var enum = Utils.WindowMediator.getEnumerator(Utils.appWindowType);
@@ -74,13 +71,11 @@ var Utils = {
 
   // === {{{ Utils.currentTab }}} ===
   // A reference to the focused tab as {{{Utils.BrowserTab}}}.
-
   get currentTab getCurrentTab()
     BrowserTab(Utils.currentChromeWindow.gBrowser.mCurrentTab),
 
   // === {{{ Utils.currentTabs }}} ===
   // An array of tabs within the current chrome window.
-
   get currentTabs getCurrentTabs() gTabs.from(Utils.currentChromeWindow),
 
   __globalObject: this,
@@ -108,10 +103,11 @@ for each (let f in [
   function IOService()
     Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService),
 
-  // === {{{ Utils.PrefService }}} ===
-  // Shortcut to {{{nsIPrefService}}}.
-  function PrefService()
-    Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService),
+  // === {{{ Utils.UnicodeConverter }}} ===
+  // Shortcut to {{{nsIScriptableUnicodeConverter}}}.
+  function UnicodeConverter() (
+    Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+    .getService(Ci.nsIScriptableUnicodeConverter)),
 
   // === {{{ Utils.WindowMediator }}} ===
   // Shortcut to {{{nsIWindowMediator}}}.
@@ -495,6 +491,7 @@ function focusUrlInBrowser(urlString) {
     it.chromeWindow.focus();
     it.focus();
   });
+  return it;
 }
 
 // === {{{ Utils.getCookie(domain, name) }}} ===
@@ -735,8 +732,7 @@ Sequence.prototype = {
 // {{{str}}} is the string to be hashed.
 
 function computeCryptoHash(algo, str) {
-  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                   .createInstance(Ci.nsIScriptableUnicodeConverter));
+  var converter = Utils.UnicodeConverter;
   converter.charset = "UTF-8";
   var data = converter.convertToByteArray(str, {});
   var crypto = (Cc["@mozilla.org/security/hash;1"]
@@ -763,8 +759,7 @@ function computeCryptoHash(algo, str) {
 // {{{str}}} is the string to be hashed.
 
 function signHMAC(algo, key, str) {
-  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                   .createInstance(Ci.nsIScriptableUnicodeConverter));
+  var converter = Utils.UnicodeConverter;
   converter.charset = "UTF-8";
   var data = converter.convertToByteArray(str, {});
   var crypto = (Cc["@mozilla.org/security/hmac;1"]
@@ -800,8 +795,7 @@ function escapeHtml(string) (
 // {{{text}}} is a unicode string.
 
 function convertFromUnicode(toCharset, text) {
-  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                   .getService(Ci.nsIScriptableUnicodeConverter));
+  var converter = Utils.UnicodeConverter;
   converter.charset = toCharset;
   return converter.ConvertFromUnicode(text) + converter.Finish();
 }
@@ -815,8 +809,7 @@ function convertFromUnicode(toCharset, text) {
 // {{{text}}} is a string encoded in the character set {{{fromCharset}}}.
 
 function convertToUnicode(fromCharset, text) {
-  var converter = (Cc["@mozilla.org/intl/scriptableunicodeconverter"]
-                   .getService(Ci.nsIScriptableUnicodeConverter));
+  var converter = Utils.UnicodeConverter;
   converter.charset = fromCharset;
   return converter.ConvertToUnicode(text);
 }
@@ -910,7 +903,10 @@ function defineLazyProperty(obj, func, name) {
 // == {{{ Utils.prefs }}} ==
 // Proxy to {{{nsIPrefBranch2}}} set to root.
 
-const {PREF_STRING, PREF_BOOL, PREF_INT} = gPrefBranch;
+const {PREF_STRING, PREF_BOOL, PREF_INT} = Ci.nsIPrefBranch;
+
+defineLazyProperty(this, function gPrefBranch() (
+  Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2)));
 
 var gPrefs = Utils.prefs = {
   // === {{{ Utils.prefs.getValue(name, value = undefined) }}} ===
@@ -919,29 +915,29 @@ var gPrefs = Utils.prefs = {
   // [[https://developer.mozilla.org/en/Toolkit_API/extIPreferenceBranch]]'s
   // namesakes. Also available in the names of {{{get()}}} and {{{set()}}}.
   get: function prefs_get(name, value) {
-    var type = gPrefBranch.getPrefType(name);
-    return (
-      type === PREF_STRING
-      ? gPrefBranch.getComplexValue(name, Ci.nsISupportsString).data :
-      type === PREF_BOOL
-      ? gPrefBranch.getBoolPref(name) :
-      type === PREF_INT
-      ? gPrefBranch.getIntPref(name)
-      : value);
+    switch (gPrefBranch.getPrefType(name)) {
+      case PREF_STRING:
+      return gPrefBranch.getComplexValue(name, nsISupportsString).data;
+      case PREF_BOOL:
+      return gPrefBranch.getBoolPref(name);
+      case PREF_INT:
+      return gPrefBranch.getIntPref(name);
+    }
+    return value;
   },
   set: function prefs_set(name, value) {
     switch (typeof value) {
       case "string": {
-        let {nsISupportsString} = Ci;
         let ss = (Cc["@mozilla.org/supports-string;1"]
                   .createInstance(nsISupportsString));
         ss.data = value;
-        return gPrefBranch.setComplexValue(name, nsISupportsString, ss);
-      }
-      case "boolean": return gPrefBranch.setBoolPref(name, value);
-      case "number": return gPrefBranch.setIntPref(name, value);
+        gPrefBranch.setComplexValue(name, nsISupportsString, ss);
+      } break;
+      case "boolean": gPrefBranch.setBoolPref(name, value); break;
+      case "number": gPrefBranch.setIntPref(name, value); break;
+      default: throw TypeError("invalid pref value");
     }
-    throw TypeError("invalid pref value");
+    return value;
   },
   __noSuchMethod__:
   function prefs_pass(name, args) gPrefBranch[name].apply(gPrefBranch, args),
@@ -1099,12 +1095,12 @@ var gClipboard = Utils.clipboard = {
       if (!service.hasDataMatchingFlavors([flavor], 1, kGlobalClipboard))
         return "";
       var trans = (Cc["@mozilla.org/widget/transferable;1"]
-                   .createInstance(Ci.nsITransferable));
+                   .createInstance(nsITransferable));
       trans.addDataFlavor(flavor);
       service.getData(trans, kGlobalClipboard);
       var data = {};
       trans.getTransferData(flavor, data, {});
-      return data.value.QueryInterface(Ci.nsISupportsString).data;
+      return data.value.QueryInterface(nsISupportsString).data;
     }
     return (
       arguments.length > 1
@@ -1119,10 +1115,10 @@ var gClipboard = Utils.clipboard = {
   set: function clipboard_set(dict) {
     const {service, flavors} = gClipboard;
     var trans = (Cc["@mozilla.org/widget/transferable;1"]
-                 .createInstance(Ci.nsITransferable));
+                 .createInstance(nsITransferable));
     for (let [flavor, data] in new Iterator(dict)) {
       let ss = (Cc["@mozilla.org/supports-string;1"]
-                .createInstance(Ci.nsISupportsString));
+                .createInstance(nsISupportsString));
       ss.data = data = String(data);
       trans.addDataFlavor(flavor = flavors[flavor] || flavor);
       trans.setTransferData(flavor, ss, data.length * 2);
