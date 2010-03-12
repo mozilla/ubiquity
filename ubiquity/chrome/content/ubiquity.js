@@ -109,34 +109,36 @@ Ubiquity.prototype = {
   // == Read Only Properties ==
 
   // === {{{ Ubiquity#textBox }}} ===
-  get textBox() this.__textBox,
+  get textBox U_getTextBox() this.__textBox,
 
   // === {{{ Ubiquity#msgPanel }}} ===
-  get msgPanel() this.__msgPanel,
+  get msgPanel U_getPanel() this.__msgPanel,
 
   // === {{{ Ubiquity#cmdManager }}} ===
-  get cmdManager() this.__cmdManager,
+  get cmdManager U_getCmdManager() this.__cmdManager,
 
   // === {{{ Ubiquity#lastKeyEvent }}} ===
   // The last captured key event on the {{{textBox}}}.
-  get lastKeyEvent() this.__lastKeyEvent,
+  get lastKeyEvent U_getLastKeyEvent() this.__lastKeyEvent,
 
   // === {{{ Ubiquity#isWindowOpen }}} ===
-  get isWindowOpen() /^(?:open|showing)$/.test(this.__msgPanel.state),
+  get isWindowOpen U_getIsWindowOpen()
+    this.__msgPanel.state in this.__STATES_OPEN,
+  __STATES_OPEN: {open: 1, showing: 1},
 
   // === {{{ Ubiquity#inputDelay }}} ===
   // Delay between the user's last keyup and parsing in milliseconds.
-  get inputDelay() this.__prefs.getValue(
+  get inputDelay U_getInputDelay() this.__prefs.getValue(
     "extensions.ubiquity.inputDelay", this.__DEFAULT_INPUT_DELAY),
 
   // === {{{ Ubiquity#inputLimit }}} ===
   // Input length where Ubiquity starts to hesitate parsing. See #507.
-  get inputLimit() this.__prefs.getValue(
+  get inputLimit U_getInputLimit() this.__prefs.getValue(
     "extensions.ubiquity.inputLimit", this.__DEFAULT_INPUT_LIMIT),
 
   __onblur: function U__onBlur() {
     // Hackish fix for #330.
-    setTimeout(function refocusTextBox(self) {
+    setTimeout(function U__refocusTextBox(self) {
       if (self.isWindowOpen) self.__textBox.focus();
     }, 99, this);
   },

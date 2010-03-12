@@ -70,17 +70,18 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
   feedManager.addListener("feed-change", onFeedManagerChange);
 
   function makeCmdWithDisabler(cmd) {
-    return {
-      __proto__: cmd,
-      get disabled() this.id in disabledCommands,
-      set disabled(value) {
-        if (value)
-          disabledCommands[this.id] = 1;
-        else
-          delete disabledCommands[this.id];
-        hub.notifyListeners("disabled-command-change");
-      }
-    };
+    var cwd = {__proto__: cmd};
+    cwd.__defineGetter__("disabled", FA_cmd_getDisabled);
+    cwd.__defineSetter__("disabled", FA_cmd_setDisabled);
+    return cwd;
+  }
+  function FA_cmd_getDisabled() this.id in disabledCommands;
+  function FA_cmd_setDisabled(value) {
+    if (value)
+      disabledCommands[this.id] = 1;
+    else
+      delete disabledCommands[this.id];
+    hub.notifyListeners("disabled-command-change");
   }
 
   self.onPageLoad = function FA_onPageLoad(document) {

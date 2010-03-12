@@ -216,11 +216,11 @@ var UbiquitySetup = {
     gWebJsModule = new WebJsModule(callback);
   },
 
-  get isResetScheduled() {
+  get isResetScheduled getIsResetScheduled() {
     return gPrefs.getValue(RESET_SCHEDULED_PREF, false);
   },
 
-  set isResetScheduled(value) {
+  set isResetScheduled setIsResetScheduled(value) {
     gPrefs.setValue(RESET_SCHEDULED_PREF, value);
   },
 
@@ -323,7 +323,7 @@ var UbiquitySetup = {
     gServices.feedManager.installToWindow(window);
     gServices.skinService.installToWindow(window);
 
-    var PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
+    const PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
 
     function onPageLoad(aEvent) {
       var isEnabled = gPrefs.getValue(PAGE_LOAD_PREF, true);
@@ -339,11 +339,13 @@ var UbiquitySetup = {
       appcontent.addEventListener("DOMContentLoaded", onPageLoad, true);
   },
 
-  get languageCode() gPrefs.getValue("extensions.ubiquity.language", "en"),
+  get languageCode getLanguageCode()
+    gPrefs.getValue("extensions.ubiquity.language", "en"),
 
-  get parserVersion() gPrefs.getValue("extensions.ubiquity.parserVersion", 2),
+  get parserVersion getParserVersion()
+    gPrefs.getValue("extensions.ubiquity.parserVersion", 2),
 
-  get version()
+  get version getVersion()
     Utils.ExtensionManager.getItemForID("ubiquity@labs.mozilla.com").version,
 };
 function DisabledCmdStorage(prefName) {
