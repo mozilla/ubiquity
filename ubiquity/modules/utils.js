@@ -1008,8 +1008,9 @@ BrowserTab.prototype = {
 // == {{{ Utils.tabs }}} ==
 // Iterates all tabs currently opened as {{{Utils.BrowserTab}}}.
 // Also contains functions related to them.
-
 var gTabs = Utils.tabs = {
+  toString: function tabs_toString() "[object tabs]",
+  valueOf: function tabs_valueOf() this.length,
   __iterator__: function tabs_iter() {
     for each (var win in Utils.chromeWindows) if ("gBrowser" in win) {
       let {mTabs} = win.gBrowser, i = -1, l = mTabs.length;
@@ -1017,10 +1018,18 @@ var gTabs = Utils.tabs = {
     }
   },
 
-  // === {{{ Utils.tabs.get(name) }}} ===
-  // Returns an array of open tabs. If {{{name}}} is supplied, returns only
-  // the ones whose title or URL exactly match with it.
+  // === {{{ Utils.tabs.length }}} ===
+  // The total number of opened tabs.
+  get length tabs_getLength() {
+    var num = 0;
+    for each (var win in Utils.chromeWindows) if ("gBrowser" in win)
+      num += win.gBrowser.mTabs.length;
+    return num;
+  },
 
+  // === {{{ Utils.tabs.get(name) }}} ===
+  // Returns an array of opened tabs. If {{{name}}} is supplied, returns only
+  // the ones whose title or URL exactly match with it.
   get: function tabs_get(name) (
     name == null
     ? [t for (t in gTabs)]
@@ -1035,7 +1044,6 @@ var gTabs = Utils.tabs = {
   //
   // {{{maxResults}}} is an optinal integer specifying
   // the maximum number of results to return.
-
   search: function tabs_search(matcher, maxResults) {
     var results = [];
     if (classOf(matcher) !== "RegExp") try {
@@ -1056,7 +1064,6 @@ var gTabs = Utils.tabs = {
 
   // === {{{ Utils.tabs.reload(matcher) }}} ===
   // Reloads all tabs {{{matcher}}} matches.
-
   reload: function tabs_reload(matcher) {
     for each (let tab in gTabs.search(matcher)) tab.browser.reload();
     return this;
@@ -1065,7 +1072,6 @@ var gTabs = Utils.tabs = {
   // === {{{ Utils.tabs.from(container) }}} ===
   // Returns tabs within {{{container}}}, which can be
   // either a {{{ChromeWindow}}} or {{{tabbrowser}}}.
-
   from: function tabs_from(container)
     Array.map((container.gBrowser || container).mTabs || [], BrowserTab),
 };

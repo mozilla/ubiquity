@@ -175,8 +175,8 @@ CmdUtils.CreateCommand({
 
 CmdUtils.CreateCommand({
   names: ["count tabs"],
-  description: "Counts the number of opened tabs. Takes an optional " +
-                "filter term to count number of tabs matching filter term.",
+  description: ("Counts the number of opened tabs. Takes an optional " +
+                "filter term to count number of tabs matching filter term."),
   arguments: {object: noun_arb_text},
   icon: "chrome://ubiquity/skin/icons/tab_go.png",
   execute: function cntab_execute(args) {
@@ -186,7 +186,7 @@ CmdUtils.CreateCommand({
     pblock.innerHTML = this._count(args);
   },
   _count: function cntab__count({object: {text, html}}) {
-    var count = (text ? Utils.tabs.search(text) : Utils.tabs.get()).length;
+    var count = (text ? Utils.tabs.search(text) : Utils.tabs).length;
     return _('<div class="count-tabs"><b>${count}</b> ' +
              'tab{if count > 1}s{/if} ' +
              '{if html}matching <b>${html}</b>{else}total{/if}.</div>',
