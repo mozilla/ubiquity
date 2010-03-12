@@ -54,7 +54,7 @@ var NLParser2 = {
     }
 
     let parser = NLParser2.parserFactories[languageCode]();
-    parser.setCommandList(verbList);
+    if (!Utils.isEmpty(verbList)) parser.setCommandList(verbList);
     /* If ContextUtils and/or SuggestionMemory were provided, they are
      * stub objects for testing purposes.  Set them on the new parser
      * object; it will use them instead of the real modules.
