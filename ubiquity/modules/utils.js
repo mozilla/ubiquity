@@ -1045,12 +1045,7 @@ var gTabs = Utils.tabs = {
   // {{{maxResults}}} is an optinal integer specifying
   // the maximum number of results to return.
   search: function tabs_search(matcher, maxResults) {
-    var results = [];
-    if (classOf(matcher) !== "RegExp") try {
-      matcher = RegExp(matcher, "i");
-    } catch (e if e instanceof SyntaxError) {
-      matcher = RegExp(regexp.quote(matcher), "i");
-    }
+    var results = [], matcher = regexp(matcher, "i");
     if (maxResults == null) maxResults = 1/0;
     for (let tab in gTabs) {
       let {document} = tab;
@@ -1208,28 +1203,26 @@ Utils.history = {
 };
 
 // == {{{ Utils.regexp(pattern, flags) }}} ==
-// Creates a regexp just like {{{RegExp}}}, but without throwing exceptions.
-// Falls back to a quoted version of {{{pattern}}} if it fails to compile.
+// Creates a regexp just like {{{RegExp}}}, except that it:
+// * falls back to a quoted version of {{{pattern}}} if the compile fails
+// * returns the {{{pattern}}} as is if it's already a regexp
+//
 // {{{
 // RegExp("[")          // SyntaxError("unterminated character class")
-// RegExp("@", "image") // SyntaxError("invalid regular expression flag a")
 // RegExp(/:/, "y")     // TypeError("can't supply flags when ...")
 // regexp("[")          // /\[/
-// regexp("@", "image") // /@/gim
-// regexp(/:/, "y")     // /:/y
+// regexp(/:/, "y")     // /:/
 // }}}
 // Also contains regexp related functions.
 
 function regexp(pattern, flags) {
-  if (classOf(pattern) === "RegExp") pattern = pattern.source;
-  if (flags != null) flags = String.replace(flags, /[^gimy]/g, "");
+  if (classOf(pattern) === "RegExp") return pattern;
   try {
     return RegExp(pattern, flags);
   } catch (e if e instanceof SyntaxError) {
     return RegExp(regexp.quote(pattern), flags);
-  } catch (e) {
-    return /(?:)/;
   }
+  return RegExp();
 }
 
 // === {{{ Utils.regexp.quote(string) }}} ===
@@ -1278,10 +1271,11 @@ regexp.Trie.prototype = {
     return this;
   },
   // ** {{{ RegexpTrie#toString() }}} **\\
-  // ** {{{ RegexpTrie#regexp }}} **\\
-  // Returns a string/regexp representation of the Trie.
+  // Returns a string representation of the Trie.
   toString: function RegexpTrie_toString() this._regexp(this.$),
-  get regexp RegexpTrie_regexp() RegExp(this),
+  // ** {{{ RegexpTrie#toRegExp(flag) }}} **\\
+  // Returns a regexp representation of the Trie with {{{flag}}}.
+  toRegExp: function RegexpTrie_toRegExp(flag) RegExp(this, flag),
   _regexp: function RegexpTrie__regexp($) {
     I_MISS___count__: if ("" in $) {
       for (let k in $) if (k) break I_MISS___count__;

@@ -504,18 +504,16 @@ function testNounType() {
 }
 
 function testUtilsRegexp() {
+  var re = /:/;
+  this.assertEquals(Utils.regexp(re, "y"), re),
   this.assertEquals(uneval(Utils.regexp("[")),
                     uneval(/\[/));
-  this.assertEquals(uneval(Utils.regexp("@", "image")),
-                    uneval(/@/gim));
-  this.assertEquals(uneval(Utils.regexp(/:/, "y")),
-                    uneval(/:/y));
   this.assertEquals(Utils.regexp.quote("[^.^]"),
                     "\\[\\^\\.\\^\\]");
   var words = ["foobar", "fooxar", "foozap", "fooza"]
-  var re = Utils.regexp.Trie(words).regexp;
+  var re = Utils.regexp.Trie(words).toRegExp();
   for each (let word in words) this.assert(re.test(word), [re, word]);
-  var rp = Utils.regexp.Trie(words, true).regexp, i = 0;
+  var rp = Utils.regexp.Trie(words, true).toRegExp(), i = 0;
   for each (let word in words) {
     let wp = word.slice(0, --i);
     this.assert(rp.test(wp), [rp, wp]);
