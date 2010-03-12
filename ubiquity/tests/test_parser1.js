@@ -918,7 +918,7 @@ function testModifierWordsCanAlsoBeInArbTextDirectObj() {
 function testEnParserRecursiveParse() {
   var {recursiveParse} = EnParser.__parent__;
   var {assertEquals} = this;
-  function pp(olist) [uneval(o) for each (o in olist)].sort() + "";
+  function pp(olist) [JSON.stringify(o) for each (o in olist)].sort() + "";
   function parse(input, hasObj, preps)
     pp(recursiveParse(input.split(" "), {}, hasObj, preps));
   assertEquals(

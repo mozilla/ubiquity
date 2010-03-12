@@ -44,7 +44,7 @@ var EnParser = {
 var {push} = Array.prototype;
 
 function shallowCopy(dic) {
-  var dup = {};
+  var dup = {__proto__: null};
   for (var key in dic) dup[key] = dic[key];
   return dup;
 }
@@ -104,21 +104,23 @@ function parseSentence(inputString, verbList, makePPS) {
       let [, inputArgs, weight] = input;
       matchScore *= weight;
       if (!inputArgs) {
-        parsings.push(makePPS(verb, {}, matchScore));
+        parsings.push(makePPS(verb, {__proto__: null}, matchScore));
         break VERB;
       }
 
-      let {args} = verb, preps = {}; // {source: "to", goal: "from", ...}
+      let preps = {__proto__: null}; // {source: "to", goal: "from", ...}
+      let {args} = verb;
       for (let arg in args) preps[arg] = args[arg].preposition;
       delete preps.object;
       let hasObj = "object" in args;
-      let argStringsList = recursiveParse(inputArgs, {}, hasObj , preps);
+      let argStringsList =
+        recursiveParse(inputArgs, {__proto__: null}, hasObj , preps);
       for each (let argStrings in argStringsList)
         parsings.push(makePPS(verb, argStrings, matchScore));
       if (!argStringsList.length && !hasObj)
         // manual interpolations for required prepositions
         for (let arg in args) {
-          let argStr = {};
+          let argStr = {__proto__: null};
           argStr[arg] = inputArgs;
           parsings.push(makePPS(verb, argStr, matchScore));
         }

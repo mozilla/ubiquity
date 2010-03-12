@@ -69,7 +69,7 @@ function makeParserForLanguage(languageCode, verbList,
 function setupPlugin(plugin, code) {
   if ("roleMap" in plugin) return plugin;
   var parser = NLParser2.makeParserForLanguage(code, {}, {}, {});
-  var roleMap = plugin.roleMap = {};
+  var roleMap = plugin.roleMap = {__proto__: null};
   for each (let {role, delimiter} in parser.roles)
     if (!(role in roleMap)) roleMap[role] = delimiter;
   plugin.PRONOUNS = parser.anaphora;
@@ -175,8 +175,9 @@ Parser.prototype = {
     let topGenerics =
       this._rankedVerbsThatUseGenericNouns.slice(0, maxSuggestions);
     let verbsToTry = this._verbsThatUseSpecificNouns.concat(topGenerics);
-    return [new PartiallyParsedSentence(verb, {}, selObj, 0, query)
-            for each (verb in verbsToTry) if (!verb.disabled)];
+    return [
+      new PartiallyParsedSentence(verb, {__proto__: null}, selObj, 0, query)
+      for each (verb in verbsToTry) if (!verb.disabled)];
   },
 
   strengthenMemory: function P_strengthenMemory(chosenSuggestion) {
@@ -270,7 +271,7 @@ function ParsedSentence(
   verb, args, verbMatchScore, selObj, argStrings, query) {
   this._verb = verb;
   this._argSuggs = args;
-  this._argFlags = {};
+  this._argFlags = {__proto__: null};
   this._argStrings = argStrings;
   this._selObj = selObj;
   this._query = query;
@@ -357,7 +358,7 @@ ParsedSentence.prototype = {
   copy: function PS_copy() {
     var newPS = {__proto__: this};
     for each (let key in ["_argSuggs", "_argFlags"]) {
-      let dest = newPS[key] = {};
+      let dest = newPS[key] = {__proto__: null};
       let from = this[key];
       for (let x in from) dest[x] = from[x];
     }
@@ -399,7 +400,7 @@ ParsedSentence.prototype = {
   fillMissingArgsWithDefaults: function PS_fillMissingArgsWithDefaults() {
     let newSentences = [this.copy()];
     let gotArrayOfDefaults = false;
-    let defaultsSoFar = {};
+    let defaultsSoFar = {__proto__: null};
     let args = this._verb.args;
     for (let argName in args) {
       if (argName in this._argSuggs) continue;
@@ -483,8 +484,8 @@ function PartiallyParsedSentence(verb, argStrings, selObj, matchScore, query) {
   this._argStrings = argStrings;
   this._selObj = selObj;
   this._matchScore = matchScore;
-  this._invalidArgs = {};
-  this._validArgs = {};
+  this._invalidArgs = {__proto__: null};
+  this._validArgs = {__proto__: null};
   this._query = query;
 
   // Create fully parsed sentence with empty arguments:
@@ -492,8 +493,8 @@ function PartiallyParsedSentence(verb, argStrings, selObj, matchScore, query) {
   // If it does take arguments, this initializes the parsedSentence
   // list so that the algorithm in addArgumentSuggestion will work
   // correctly.
-  this._parsedSentences =
-    [new ParsedSentence(verb, {}, matchScore, selObj, argStrings, query)];
+  this._parsedSentences = [new ParsedSentence(
+    verb, {__proto__: null}, matchScore, selObj, argStrings, query)];
   for (let argName in argStrings) {
     let text = argStrings[argName];
     // If argument is present, try the noun suggestions
@@ -647,7 +648,7 @@ PartiallyParsedSentence.prototype = {
     newPPS._parsedSentences =
       [ps.copy() for each (ps in this._parsedSentences)];
     for each (let key in ["_invalidArgs", "_validArgs"]) {
-      let dest = newPPS[key] = {};
+      let dest = newPPS[key] = {__proto__: null};
       let from = this[key];
       for (let x in from) dest[x] = from[x];
     }
@@ -694,7 +695,7 @@ function Verb(cmd, roleMap) {
   this.matchedName = cmd.names[0];
   this.input = "";
   this.newAPI = !("DOType" in cmd || "modifiers" in cmd);
-  var args = this.args = {};
+  var args = this.args = {__proto__: null};
   // Use the presence or absence of the "arguments" dictionary
   // to decide whether this is a version 1 or version 2 command.
   if (this.newAPI) {
@@ -801,14 +802,16 @@ function hagureMetal(abbr, orig) {
   var len = orig.length;
   if (len < abbr.length) return 0;
   var sum = 0, score = 1, preIndex = -1, {pow} = Math;
+  var {nonWord} = hagureMetal;
   for each (let c in abbr) {
     let index = orig.indexOf(c, preIndex + 1);
     if (index < 0) return 0;
     if (index !== preIndex + 1) score = pow((len - index) / len, 3);
-    sum += (/[\s_-]/.test(orig[index - 1])
+    sum += (nonWord.test(orig[index - 1])
             ? pow(score, .3) // beginning of a word
             : score);
     preIndex = index;
   }
   return pow(sum / len, .3);
 }
+hagureMetal.nonWord = /^\W/;
