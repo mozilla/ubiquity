@@ -83,7 +83,7 @@ CmdUtils.CreateCommand({
       .viewPartialSource.call(0, "selection");
   },
   preview: function vss_preview(pb) {
-    var {window} = CmdUtils, sel = window.getSelection();
+    var sel = context.focusedWindow.getSelection();
     if (sel.isCollapsed) return void this.previewDefault(pb);
 
     XML.prettyPrinting = true;
