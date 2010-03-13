@@ -1175,7 +1175,7 @@ CmdUtils.makeSearchCommand({
       // This number will be the base for img elements naming.
       var randomCode = Math.floor(Math.random() * 1000000001);
       CmdUtils.previewAjax(pblock, {
-        type: "GET",
+        dataType: "json",
         url: "http://ajax.googleapis.com/ajax/services/search/images",
         data: {
           q: nameText,
@@ -1191,16 +1191,7 @@ CmdUtils.makeSearchCommand({
           pblock.innerHTML =
             "<em class='error'>" + _("Connection error") + "</em>";
         },
-
-        success: function(response) {
-          try {
-            var {responseData} = JSON.parse(response);
-          }
-          catch(e) {
-            pblock.innerHTML = "<p>" + _("Server error") + "</p>";
-            return;
-          }
-
+        success: function({responseData}) {
           function action(e, image) {
             var rightclick = false;
             if (e.which) rightclick = (e.which == 3);
