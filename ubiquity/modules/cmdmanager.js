@@ -126,6 +126,7 @@ CommandManager.prototype = {
   handleEvent: function CM_handleEvent(event) {
     switch (event.type) {
       case "click": {
+        if (event.button === 2) return;
         let {target} = event;
         do {
           if (!("hasAttribute" in target)) return;

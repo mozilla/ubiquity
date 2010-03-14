@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://ubiquity/skin/browser.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://ubiquity/locale/coreubiquity.dtd" >
-
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:svg="http://www.w3.org/2000/svg">
   <script type="application/javascript;version=1.8"
@@ -11,13 +10,15 @@
   <script type="application/javascript;version=1.8"
           src="chrome://ubiquity/content/browser.js"/>
   <popupset id="mainPopupSet">
-    <panel id="ubiquity-transparent-panel">
+    <panel id="ubiquity-transparent-panel"
+      context="contentAreaContextMenu"
+      oncontextmenu="gUbiquity.closeWindow(); return false">
       <div id="ubiquity-panel"
         xmlns="http://www.w3.org/1999/xhtml"
         xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
         <div id="ubiquity-frame">
           <div id="ubiquity-entry-container">
-            <input id="ubiquity-entry"/>
+            <input id="ubiquity-entry" oncontextmenu="event.stopPropagation()"/>
           </div>
           <div id="ubiquity-suggest-container">
             <iframe id="ubiquity-suggest"
@@ -27,6 +28,7 @@
             <div id="ubiquity-preview">
               <xul:browser id="ubiquity-browser"
                 type="content" width="490" height="500"
+                tooltip="aHTMLTooltip" oncontextmenu="event.stopPropagation()"
                 disablesecurity="true" disablehistory="true"/>
             </div>
           </div>

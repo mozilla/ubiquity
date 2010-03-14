@@ -67,7 +67,6 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
   textBox.addEventListener("keydown", this, false);
   textBox.addEventListener("keypress", this, false);
   textBox.addEventListener("keyup", this, false);
-  if (this.Utils.OS === "WINNT") textBox.addEventListener("blur", this, false);
 
   msgPanel.addEventListener("popupshowing", this, false);
   msgPanel.addEventListener("popupshown", this, false);
@@ -135,13 +134,6 @@ Ubiquity.prototype = {
   // Input length where Ubiquity starts to hesitate parsing. See #507.
   get inputLimit U_getInputLimit() this.__prefs.getValue(
     "extensions.ubiquity.inputLimit", this.__DEFAULT_INPUT_LIMIT),
-
-  __onblur: function U__onBlur() {
-    // Hackish fix for #330.
-    setTimeout(function U__refocusTextBox(self) {
-      if (self.isWindowOpen) self.__textBox.focus();
-    }, 99, this);
-  },
 
   __onmousemove: function U__onMouseMove(event) {
     this.__x = event.screenX;
@@ -254,29 +246,24 @@ Ubiquity.prototype = {
   },
 
   __onclick: function U__onClick(event) {
-    // middle: open link / execute, right: close panel, left: both
+    // left: open link / execute; middle: same but without closing panel
     var {button, target, view} = event;
-    MOUSE_EXECUTE:
-    if (button !== 2 &&
-        view.location.href === "chrome://ubiquity/content/suggest.html") {
+    if (button === 2) return;
+    if (view.location.href === "chrome://ubiquity/content/suggest.html") {
       for (let lm = target, hilited = /\bhilited\b/;; lm = lm.parentNode) {
-        if (!lm || !("hasAttribute" in lm)) break MOUSE_EXECUTE;
+        if (!lm || !("className" in lm)) return;
         if (hilited.test(lm.className)) break;
       }
       this.execute();
-      if (button === 0) this.closeWindow();
-      return true;
     }
-    if (button !== 2) {
-      do var {href} = target;
-      while (!href && (target = target.parentNode));
+    else {
+      do var {href} = target; while (!href && (target = target.parentNode));
       if (!href ||
-          /^javascript:/.test(href) ||
-          ~href.lastIndexOf("resource://ubiquity/preview.html#", 0))
-        return false;
+          ~href.lastIndexOf("javascript:", 0) ||
+          ~href.lastIndexOf("resource://ubiquity/preview.html#", 0)) return;
       this.Utils.openUrlInBrowser(href);
     }
-    if (button !== 1) this.closeWindow();
+    if (button === 0) this.closeWindow();
     return true;
   },
 
