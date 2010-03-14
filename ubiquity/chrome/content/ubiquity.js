@@ -257,6 +257,9 @@ Ubiquity.prototype = {
       this.execute();
     }
     else {
+      target.accessKey && setTimeout(function U_refocusTextBox(self) {
+        if (self.isWindowOpen) self.__textBox.focus();
+      }, 99, this);
       do var {href} = target; while (!href && (target = target.parentNode));
       if (!href ||
           ~href.lastIndexOf("javascript:", 0) ||

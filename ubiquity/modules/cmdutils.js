@@ -936,7 +936,7 @@ function CreateAlias(options) {
 // });
 //
 // CmdUtils.makeSearchCommand({
-//   names: ["video.baidu", "百度视频"],
+//   names: ["video.baidu", "\u767E\u5EA6\u89C6\u9891"],
 //   url: "http://video.baidu.com/v?word={QUERY}",
 //   charset: "gb2312",
 //   parser: {
@@ -1315,45 +1315,47 @@ function previewCallback(pblock, callback, abortCallback) {
 // {{{css}}} is an optional CSS string inserted along with the list.
 
 function previewList(block, htmls, callback, css) {
-  var {escapeHtml} = Utils, list = "", num = 0;
-  for (let id in htmls) {
+  var {escapeHtml} = Utils, list = "", num = 0, CU = this;
+  for (let key in htmls) {
     let k = ++num < 36 ? num.toString(36) : "-";
-    list += ('<li><label for="' + num + '"><button id="' + num +
-             '" value="' + escapeHtml(id) + '" accesskey="' + k + '">' + k +
-             '</button>' + htmls[id] + '</label></li>');
+    list += ('<li><label for="' + num + '"><input type="button" id="' + num +
+             '" class="button" value="' + k + '" accesskey="' + k +
+             '" key="' + escapeHtml(key) + '"/>' + htmls[key] +
+             '</label></li>');
   }
   block.innerHTML = (
     '<ol class="preview-list">' +
     '<style>' + previewList.CSS + (css || "") + '</style>' +
-    '<button id="keyshifter" accesskey="0">0</button>' +
-    list + '</ol>');
+    '<input type="button" class="button" id="keyshifter"' +
+    ' value="0" accesskey="0"/>' + list + '</ol>');
   var ol = block.firstChild, start = 0;
-  callback && ol.addEventListener("focus", function onPreviewListFocus(ev) {
+  callback && ol.addEventListener("click", function onPreviewListClick(ev) {
     var {target} = ev;
-    if (/^(?!button$)/i.test(target.nodeName)) return;
-    target.blur();
+    if (target.type !== "button") return;
+    ev.preventDefault();
     if (target.id === "keyshifter") {
       if (num < 36) return;
-      let buttons = Array.slice(this.getElementsByTagName("button"), 1);
+      let buttons = Array.slice(this.getElementsByClassName("button"), 1);
       start = (start + 35) % buttons.length;
       buttons = buttons.splice(start).concat(buttons);
       for (let i = 0, b; b = buttons[i];)
-        b.textContent = b.accessKey = ++i < 36 ? i.toString(36) : "-";
+        b.value = b.accessKey = ++i < 36 ? i.toString(36) : "-";
       return;
     }
     target.disabled = true;
-    if (callback(target.value, ev))
-      Utils.setTimeout(function reenable() { target.disabled = false });
-  }, true);
+    if (callback.call(this, target.getAttribute("key"), ev))
+      Utils.setTimeout(function reenableButton() { target.disabled = false });
+  }, false);
   return ol;
 }
 previewList.CSS = "" + <![CDATA[
   .preview-list {margin: 0; padding-left: 1.5em; list-style-type: none}
-  .preview-list > li {line-height: 1.4; text-indent: -1.5em}
+  .preview-list > li {position: relative; min-height: 3ex}
   .preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
   .preview-list label {display: block; cursor: pointer}
-  .preview-list button {
-    margin-right: 0.3em; padding: 0; border-width: 1px;
+  .preview-list .button {
+    position: absolute; left: -1.5em; height: 3ex;
+    padding: 0; border-width: 1px;
     font: bold 108% monospace; text-transform: uppercase}
   #keyshifter {position:absolute; top:-9999px}
   ]]>;
