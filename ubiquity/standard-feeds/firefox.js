@@ -384,7 +384,8 @@ CmdUtils.CreateCommand({
   icon: "chrome://ubiquity/skin/icons/arrow_undo.png",
   arguments: {"object title or URL": noun_arb_text},
   execute: function uct_execute(args) {
-    for each (var {id} in this._find(args.object.text)) this._undo(id);
+    var ids = [id for each ({id} in this._find(args.object.text))];
+    if (ids.length) this._undo(ids);
   },
   preview: function uct_preview(pbl, args) {
     var me = this;
@@ -399,11 +400,10 @@ CmdUtils.CreateCommand({
     }
     CmdUtils.previewList(pbl, tabs.map(me._html), function uct__act(i, ev) {
       $(ev.target).closest("li").remove();
-      me._undo(tabs[i].id);
+      me._undo([tabs[i].id]);
     }, me._css);
   },
   previewDelay: 256,
-  _list: null,
   _html: function uct__html({title, image, url}) {
     var span = <span>{title} <code class="url">{url}</code></span>;
     if (image) span.prependChild(<><img class="icon" src={image}/> </>);
@@ -413,26 +413,24 @@ CmdUtils.CreateCommand({
     pbl.innerHTML = "<em>" + Utils.escapeHtml(msg) + "</em>" + this.help;
   },
   _find: function uct__find(txt) {
-    var list = this._list =
-      eval(this._SS.getClosedTabData(context.chromeWindow));
-    list.forEach(this._mark);
+    var tabs = eval(this._SS.getClosedTabData(context.chromeWindow));
+    for each (let tab in tabs)
+      [{url: tab.url, ID: tab.id}] = tab.state.entries;
     if (txt) {
       var re = Utils.regexp(txt, "i");
-      list = [t for each (t in list) if (re.test(t.title) || re.test(t.url))];
+      tabs = [t for each (t in tabs) if (re.test(t.title) || re.test(t.url))];
     }
-    return list;
+    return tabs;
   },
-  _mark: function uct__mark(tab, i) {
-    tab.id = i;
-    tab.url = tab.state.entries[0].url;
-  },
-  _undo: function uct__undo(id) {
-    this._list.every(function uct__every(tab, i, list) {
-      if (id !== tab.id) return true;
-      this._SS.undoCloseTab(context.chromeWindow, i);
-      list.splice(i, 1);
-      return false;
-    }, this);
+  _undo: function uct__undo(ids) {
+    var tabs = eval(this._SS.getClosedTabData(context.chromeWindow));
+    for each (let id in ids)
+      for (let [i, t] in new Iterator(tabs)) {
+        if (id !== t.state.entries[0].ID) continue;
+        this._SS.undoCloseTab(context.chromeWindow, i);
+        tabs.splice(i, 1);
+        break;
+      }
   },
   _css: "" + <><![CDATA[
     li {white-space: nowrap}
