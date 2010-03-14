@@ -64,15 +64,15 @@ function Ubiquity(msgPanel, textBox, cmdManager) {
 
   window.addEventListener("mousemove", this, false);
 
-  textBox.addEventListener("keydown", this, true);
-  textBox.addEventListener("keypress", this, true);
-  textBox.addEventListener("keyup", this, true);
+  textBox.addEventListener("keydown", this, false);
+  textBox.addEventListener("keypress", this, false);
+  textBox.addEventListener("keyup", this, false);
   if (this.Utils.OS === "WINNT") textBox.addEventListener("blur", this, false);
 
   msgPanel.addEventListener("popupshowing", this, false);
   msgPanel.addEventListener("popupshown", this, false);
   msgPanel.addEventListener("popuphidden", this, false);
-  msgPanel.addEventListener("click", this, true);
+  msgPanel.addEventListener("click", this, false);
 
   var self = this;
   self.__onSuggestionsUpdated = function U__onSuggestionsUpdated() {

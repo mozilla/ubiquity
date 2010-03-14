@@ -118,8 +118,8 @@ function CommandManager(cmdSource, msgService, parser,
   if (parser) this._loadCommands();
   this.setPreviewState("no-suggestions");
 
-  suggDoc.addEventListener("click", this, true);
-  suggDoc.addEventListener("DOMMouseScroll", this, true);
+  suggDoc.addEventListener("click", this, false);
+  suggDoc.addEventListener("DOMMouseScroll", this, false);
 }
 
 CommandManager.prototype = {
@@ -135,16 +135,15 @@ CommandManager.prototype = {
         if (this.__hilitedIndex === index) return;
         this.__hilitedIndex = index;
         this.__lastAsyncSuggestionCb();
-        break;
-      }
+      } break;
       case "DOMMouseScroll": {
         this[event.detail < 0 ? "moveIndicationUp" : "moveIndicationDown"]();
         this.__lastAsyncSuggestionCb();
-        break;
-      }
-      event.preventDefault();
-      event.stopPropagation();
+      } break;
+      default: return;
     }
+    event.preventDefault();
+    event.stopPropagation();
   },
 
   setPreviewState: function CM_setPreviewState(state) {

@@ -1222,7 +1222,6 @@ function regexp(pattern, flags) {
   } catch (e if e instanceof SyntaxError) {
     return RegExp(regexp.quote(pattern), flags);
   }
-  return RegExp();
 }
 
 // === {{{ Utils.regexp.quote(string) }}} ===
