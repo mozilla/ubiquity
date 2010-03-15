@@ -1324,7 +1324,7 @@ function previewList(block, htmls, callback, css) {
              '</label></li>');
   }
   block.innerHTML = (
-    '<ol class="preview-list">' +
+    '<ol id="preview-list">' +
     '<style>' + previewList.CSS + (css || "") + '</style>' +
     '<input type="button" class="button" id="keyshifter"' +
     ' value="0" accesskey="0"/>' + list + '</ol>');
@@ -1349,11 +1349,11 @@ function previewList(block, htmls, callback, css) {
   return ol;
 }
 previewList.CSS = "" + <![CDATA[
-  .preview-list {margin: 0; padding-left: 1.5em; list-style-type: none}
-  .preview-list > li {position: relative; min-height: 3ex}
-  .preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
-  .preview-list label {display: block; cursor: pointer}
-  .preview-list .button {
+  #preview-list {margin: 0; padding-left: 1.5em; list-style-type: none}
+  #preview-list > li {position: relative; min-height: 3ex}
+  #preview-list > li:hover {outline: 1px solid; -moz-outline-radius: 8px}
+  #preview-list label {display: block; cursor: pointer}
+  #preview-list .button {
     position: absolute; left: -1.5em; height: 3ex;
     padding: 0; border-width: 1px;
     font: bold 108% monospace; text-transform: uppercase}
