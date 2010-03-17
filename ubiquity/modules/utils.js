@@ -900,6 +900,23 @@ function defineLazyProperty(obj, func, name) {
   });
 }
 
+// === {{{ Utils.extend(target, object1, [objectN ...]) }}} ===
+// Extends {{{target}}} by copying properties from the rest of arguments.
+// Deals with getters/setters properly. Returns {{{target}}}.
+
+function extend(target) {
+  for (let i = 1, l = arguments.length; i < l; ++i) {
+    let obj = arguments[i];
+    for (let key in obj) {
+      let g, s;
+      (g = obj.__lookupGetter__(key)) && target.__defineGetter__(key, g);
+      (s = obj.__lookupSetter__(key)) && target.__defineSetter__(key, s);
+      g || s || (target[key] = obj[key]);
+    }
+  }
+  return target;
+}
+
 // == {{{ Utils.prefs }}} ==
 // Proxy to {{{nsIPrefBranch2}}} set to root.
 
@@ -1076,7 +1093,6 @@ var gTabs = Utils.tabs = {
 
 var gClipboard = Utils.clipboard = {
   flavors: {
-    __proto__: null,
     text: "text/unicode",
     html: "text/html",
   },
@@ -1088,7 +1104,6 @@ var gClipboard = Utils.clipboard = {
   // var txt = Utils.clipboard.get("text/unicode");
   // var [txt, htm] = Utils.clipboard.get(["text", "html"]);
   // }}}
-
   get: function clipboard_get(flavor) {
     const {service, service: {kGlobalClipboard}, flavors} = gClipboard;
     function get(flavor) {
@@ -1112,7 +1127,6 @@ var gClipboard = Utils.clipboard = {
   // === {{{ Utils.clipboard.set(dict) }}} ===
   // Sets the clipboard content(s) of specified flavor(s).\\
   // {{{dict}}} should be a dictionary of flavor:data pairs.
-
   set: function clipboard_set(dict) {
     const {service, flavors} = gClipboard;
     var trans = (Cc["@mozilla.org/widget/transferable;1"]
@@ -1307,7 +1321,6 @@ Utils.gist = {
   //
   // {{{id}}} is an optional number that specifies target Gist.
   // The user needs to be the owner of that Gist.
-
   paste: function gist_paste(files, id) { 
     var data = id ? ["_method=put"] : [], i = 1;
     for (let name in files) {
@@ -1322,26 +1335,22 @@ Utils.gist = {
   },
 
   // === {{{ Utils.gist.getName(document) }}} ===
-  // Extracts the name of a Gist via DOM {{{document}}}.
-
+  // Extracts the name of a Gist via its DOM {{{document}}}.
   getName: function gist_getName(document) {
-    try { var {domain} = document } catch (e) {}
-    if (domain !== "gist.github.com") return "";
+    try { var {hostname, pathname, search} = document.location } catch (e) {}
+    if (hostname !== "gist.github.com") return "";
 
-    var {hash, search, pathname} = document.location;
-    if (hash.length > 1) return hash.slice(1);
     if (search.length > 1)
       try { return decodeURIComponent(search).slice(1) } catch (e) {}
 
-    const SEP = " \u2013 ";
-    var name = "gist:" + /\d+/(pathname);
+    var name = "gist:" + /\d+/(pathname), sep = " \u2013 ";
+
     var desc = document.getElementById("gist-text-description");
     if (desc && /\S/.test(desc.textContent))
-      return name + SEP + desc.textContent;
+      return name + sep + desc.textContent;
 
-    var info = document.getElementsByClassName("info")[0];
-    if (info && /^\s*([^.]{2,})/.test(info.textContent))
-      return name + SEP + RegExp.$1;
+    var info = document.querySelector(".file .info");
+    if (info) return name + sep + info.textContent.trim().slice(0, -2);
 
     return name;
   },
