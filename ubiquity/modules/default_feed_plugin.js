@@ -74,7 +74,7 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
                                                       baseLocalUri,
                                                       infos) {
     for each (let info in infos) {
-      let uri = Utils.url(baseUri + info.page);
+      let uri = Utils.uri(baseUri + info.page);
 
       if (!feedManager.isUnsubscribedFeed(uri)) {
         let lcs = new LocalUriCodeSource(baseLocalUri + info.source);
@@ -88,30 +88,30 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
     }
   };
 
-  this.onSubscribeClick = function DFP_onSubscribeClick(targetDoc,
-                                                        commandsUrl,
-                                                        mimetype) {
-    var {location} = targetDoc;
+  this.onSubscribeClick = function DFP_onSubscribeClick(pageUrl, targetLink) {
+    var doc = targetLink.ownerDocument;
+    var title = targetLink.title || Utils.gist.getName(doc) || doc.title;
+    var commandsUrl = targetLink.href;
     // Clicking on "subscribe" takes them to the warning page:
-    var title = Utils.gist.getName(targetDoc) || targetDoc.title;
     var confirmUrl = CONFIRM_URL + Utils.paramsToString({
-      url: location.href,
+      url: pageUrl,
       sourceUrl: commandsUrl,
       title: title,
     });
 
-    if (!isTrustedUrl(commandsUrl, mimetype)) {
+    if (!isTrustedUrl(commandsUrl, targetLink.type)) {
       Utils.openUrlInBrowser(confirmUrl);
       return;
     }
 
     function onSuccess(data) {
       feedManager.addSubscribedFeed({
-        url: location.href,
+        url: pageUrl,
         sourceUrl: commandsUrl,
         title: title,
         canAutoUpdate: true,
-        sourceCode: data});
+        sourceCode: data,
+      });
       Utils.openUrlInBrowser(confirmUrl);
     }
 
@@ -119,7 +119,9 @@ function DefaultFeedPlugin(feedManager, messageService, webJsm,
       webJsm.jQuery.ajax({
         url: commandsUrl,
         dataType: "text",
-        success: onSuccess});
+        success: onSuccess,
+        error: Utils.log,
+      });
     else
       onSuccess("");
   };

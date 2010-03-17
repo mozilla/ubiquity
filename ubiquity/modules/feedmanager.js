@@ -77,13 +77,13 @@ const DEFAULT_FEED_TYPE = "commands";
 
 function FeedManager(annSvc) {
   this._annSvc = annSvc;
-  this._plugins = {};
-  this._feeds = {};
+  this._plugins = {__proto__: null};
+  this._feeds = {__proto__: null};
   this._hub = new EventHub();
   this._hub.attachMethods(this);
 }
 
-var FMgrProto = FeedManager.prototype = {};
+var FMgrProto = FeedManager.prototype;
 
 // === {{{FeedManager#registerPlugin()}}} ===
 // Registers a feed plugin with the feed manager. For an example feed
@@ -163,7 +163,7 @@ FMgrProto.getFeedForUrl = function FMgr_getFeedForUrl(url) {
 
 FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
   let annSvc = this._annSvc;
-  let uri = Utils.url(info.url);
+  let uri = Utils.uri(info.url);
   let expiration = annSvc[info.isBuiltIn ? "EXPIRE_SESSION" : "EXPIRE_NEVER"];
 
   annSvc.removePageAnnotation(uri, FEED_UNSUBSCRIBED_ANNO);
@@ -189,6 +189,7 @@ FMgrProto.addSubscribedFeed = function FMgr_addSubscribedFeed(info) {
                              new Date().toUTCString(), 0, expiration);
 
   this._hub.notifyListeners("subscribe", uri);
+  return this;
 };
 
 // === {{{FeedManager#isSubscribedFeed()}}} ===
@@ -222,57 +223,40 @@ FMgrProto.isUnsubscribedFeed = function FMgr_isSubscribedFeed(uri) (
 FMgrProto.installToWindow = function FMgr_installToWindow(window) {
   var self = this;
 
-  function onPageWithCommands(plugin, pageUrl, commandsUrl, document,
-                              mimetype) {
-    if (!self.isSubscribedFeed(pageUrl))
-      self.showNotification(plugin, document, commandsUrl, mimetype);
+  function onRelatedPage(plugin, pageUrl, link) {
+    if (self.isSubscribedFeed(pageUrl) ||
+        self.isSubscribedFeed(link.href)) return;
+
+    Utils.notify({
+      target: link.ownerDocument,
+      label: (plugin.notifyMessage ||
+              L("ubiquity.feedmanager.newcommandfound")),
+      value: "ubiquity_notify_feed_available",
+      priority: "INFO_MEDIUM",
+      buttons: [{
+        accessKey: "S",
+        callback: function onSubscribeClick(notification, button) {
+          plugin.onSubscribeClick(pageUrl, link);
+        },
+        label: L("ubiquity.feedmanager.subscribe"),
+      }]});
   }
 
   // Watch for any tags of the form <link rel="...">
   // on pages and add annotations for them if they exist.
-  function onLinkAdded(event) {
+  window.addEventListener("DOMLinkAdded", function onLinkAdded(event) {
     var {target} = event;
-    if (!(target.rel in self._plugins) || !target.href)
-      return;
+    if (!(target.rel in self._plugins) || !target.href) return;
 
     var pageUrl = target.baseURI;
     var hashIndex = pageUrl.indexOf("#");
-    if (hashIndex !== -1)
-      pageUrl = pageUrl.slice(0, hashIndex);
+    if (hashIndex !== -1) pageUrl = pageUrl.slice(0, hashIndex);
 
-    onPageWithCommands(self._plugins[target.rel],
-                       pageUrl,
-                       target.href,
-                       target.ownerDocument,
-                       target.type);
-  }
-
-  window.addEventListener("DOMLinkAdded", onLinkAdded, false);
+    onRelatedPage(self._plugins[target.rel], pageUrl, target);
+  }, false);
 
   for each (let plugin in this._plugins)
     if ("installToWindow" in plugin) plugin.installToWindow(window);
-};
-
-// TODO: Add Documentation for this
-FMgrProto.showNotification = function showNotification(plugin,
-                                                       targetDoc,
-                                                       commandsUrl,
-                                                       mimetype,
-                                                       notify_message) {
-  Utils.notify({
-    target: targetDoc,
-    label: (notify_message ||
-            plugin.notify_message ||
-            L("ubiquity.feedmanager.newcommandfound")),
-    value: "ubiquity_notify_commands_available",
-    priority: "INFO_MEDIUM",
-    buttons: [{
-      accessKey: "S",
-      callback: function onSubscribeClick(notification, button) {
-        plugin.onSubscribeClick(targetDoc, commandsUrl, mimetype);
-      },
-      label: L("ubiquity.feedmanager.subscribe"),
-    }]});
 };
 
 // === {{{FeedManager#finalize()}}} ===

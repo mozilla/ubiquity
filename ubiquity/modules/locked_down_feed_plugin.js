@@ -77,18 +77,16 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
 
   this.type = "locked-down-commands";
 
-  // === {{{LDFP#onSubscribeClick()}}} ===
+  // === {{{LDFP#onSubscribeClick(pageUrl, targetLink)}}} ===
   //
   // This method is called by the feed manager whenever the user clicks
   // the "Subscribe..." button for any LDFP feed that they're presented
   // with.
   //
-  //   * {{{targetDoc}}} is the HTML document of the page with a
-  //     {{{<link rel="locked-down-commands">}}} tag.
-  //   * {{{commandsUrl}}} is the URL pointed to by the {{{href}}}
-  //     attribute of the aforementioned {{{<link>}}} tag.
-  //   * {{{mimetype}}} is the MIME type specified by the {{{type}}}
-  //     attribute of the aforementioned {{{<link>}}} tag.
+  // * {{{pageUrl}}} is the URL of the page that includes {{{targetLink}}}.
+  //   Its fragment (hash) part is stripped beforehand.
+  // * {{{targetLink}}} is the {{{<link rel="locked-down-commands">}}}
+  //   DOM element.
   //
   // This function has no return value.
   //
@@ -97,14 +95,14 @@ function LockedDownFeedPlugin(feedManager, messageService, webJsm) {
   // the user to the feed and then displays a non-modal message
   // confirming the subscription.
 
-  this.onSubscribeClick = function LDFP_onSubscribeClick(targetDoc,
-                                                         commandsUrl,
-                                                         mimetype) {
-    feedManager.addSubscribedFeed({url: targetDoc.location.href,
-                                   title: targetDoc.title,
-                                   sourceUrl: commandsUrl,
-                                   type: this.type,
-                                   canAutoUpdate: true});
+  this.onSubscribeClick = function LDFP_onSubscribeClick(pageUrl, targetLink) {
+    feedManager.addSubscribedFeed({
+      url: pageUrl,
+      title: targetLink.title || targetLink.ownerDocument.title,
+      sourceUrl: targetLink.href,
+      type: this.type,
+      canAutoUpdate: true,
+    });
     //errorToLocalize
     messageService.displayMessage("Subscription successful!");
   };
