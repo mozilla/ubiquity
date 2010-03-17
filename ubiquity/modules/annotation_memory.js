@@ -95,8 +95,8 @@ function NiceConnection(connection) {
 // for storage.
 
 function AnnotationService(connection) {
-  var ann = {};
-  var urls = {};
+  var ann = {__proto__: null};
+  var urls = {__proto__: null};
   var observers = [];
   var self = this;
 
@@ -117,7 +117,7 @@ function AnnotationService(connection) {
         let name = selStmt.getUTF8String(1);
         let value = selStmt.getUTF8String(2);
         if (!(uri_spec in ann)) {
-          ann[uri_spec] = {};
+          ann[uri_spec] = {__proto__: null};
           urls[uri_spec] = ioSvc.newURI(uri_spec, null, null);
         }
         ann[uri_spec][name] = value;
@@ -175,7 +175,7 @@ function AnnotationService(connection) {
     value = String(value);
 
     if (!(uri.spec in ann)) {
-      ann[uri.spec] = {};
+      ann[uri.spec] = {__proto__: null};
       urls[uri.spec] = uri;
     }
 

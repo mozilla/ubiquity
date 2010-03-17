@@ -49,10 +49,10 @@ var L = LocalizationUtils.propertySelector(
 
 function FeedAggregator(feedManager, messageService, disabledCommands) {
   var self = this;
-  var commands = {};
+  var commands = {__proto__: null};
   var commandNames = [];
-  var commandsByName = {};
-  var commandsByDomain = {};
+  var commandsByName = {__proto__: null};
+  var commandsByDomain = {__proto__: null};
   var pageLoadFuncLists = [];
   var ubiquityLoadFuncLists = [];
   var feedsChanged = true;
@@ -125,10 +125,10 @@ function FeedAggregator(feedManager, messageService, disabledCommands) {
     for each (let feed in feeds) feed.refresh(anyway);
     if (!feedsChanged) return;
 
-    commands = {};
+    commands = {__proto__: null};
     commandNames = [];
-    commandsByName = {};
-    commandsByDomain = {};
+    commandsByName = {__proto__: null};
+    commandsByDomain = {__proto__: null};
     pageLoadFuncLists = [];
     ubiquityLoadFuncLists = [];
     feedsChanged = false;
