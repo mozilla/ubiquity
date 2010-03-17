@@ -54,7 +54,7 @@ Cu.import("resource://ubiquity/modules/suggestion_memory.js");
 Cu.import("resource://ubiquity/modules/feedaggregator.js");
 Cu.import("resource://ubiquity/modules/webjsm.js");
 Cu.import("resource://ubiquity/modules/prefcommands.js");
-Cu.import("resource://ubiquity/modules/skinsvc.js");
+Cu.import("resource://ubiquity/modules/skin_feed_plugin.js");
 
 var gServices, gWebJsModule, gPrefs = Utils.prefs;
 
@@ -158,9 +158,6 @@ var UbiquitySetup = {
       if (annDb.exists())
         annDb.remove(false);
 
-      // Reset all skins.
-      SkinSvc.reset();
-
       // We'll reset the preferences for our extension here.  Unfortunately,
       // there doesn't seem to be an easy way to get this from FUEL, so
       // we'll have to use XPCOM directly.
@@ -187,23 +184,15 @@ var UbiquitySetup = {
     }
   },
 
-  getBaseUri: function getBaseUri() {
-    let ioSvc = (Cc["@mozilla.org/network/io-service;1"]
-                 .getService(Ci.nsIIOService));
-    let extDir = this.__getExtDir();
-    let baseUri = ioSvc.newFileURI(extDir).spec;
-
-    return baseUri;
-  },
+  getBaseUri: function getBaseUri()
+    Utils.IOService.newFileURI(this.__getExtDir()).spec,
 
   isInstalledAsXpi: function isInstalledAsXpi() {
     let profileDir = (Cc["@mozilla.org/file/directory_service;1"]
                       .getService(Ci.nsIProperties)
                       .get("ProfD", Ci.nsIFile));
     let extDir = this.__getExtDir();
-    if (profileDir.contains(extDir, false))
-      return true;
-    return false;
+    return profileDir.contains(extDir, false);
   },
 
   preload: function preload(callback) {
@@ -216,13 +205,10 @@ var UbiquitySetup = {
     gWebJsModule = new WebJsModule(callback);
   },
 
-  get isResetScheduled getIsResetScheduled() {
-    return gPrefs.getValue(RESET_SCHEDULED_PREF, false);
-  },
-
-  set isResetScheduled setIsResetScheduled(value) {
-    gPrefs.setValue(RESET_SCHEDULED_PREF, value);
-  },
+  get isResetScheduled getIsResetScheduled()
+    gPrefs.get(RESET_SCHEDULED_PREF, false),
+  set isResetScheduled setIsResetScheduled(value)
+    gPrefs.set(RESET_SCHEDULED_PREF, value),
 
   __removeExtinctStandardFeeds: function __rmExtinctStdFeeds(feedManager) {
     var OLD_STD_FEED_URIS = [
@@ -287,14 +273,12 @@ var UbiquitySetup = {
       );
       disabledStorage.attach(cmdSource);
 
-      var skinService = new SkinSvc(gWebJsModule, msgService);
-      skinService.updateAllSkins();
-      skinService.loadCurrentSkin();
-
-      gServices = {commandSource: cmdSource,
-                   feedManager: feedManager,
-                   messageService: msgService,
-                   skinService: skinService};
+      gServices = {
+        commandSource: cmdSource,
+        feedManager: feedManager,
+        messageService: msgService,
+        skinService: SkinFeedPlugin(feedManager, msgService, gWebJsModule),
+      };
 
       this.__setupFinalizer();
 
@@ -321,7 +305,6 @@ var UbiquitySetup = {
 
   setupWindow: function setupWindow(window) {
     gServices.feedManager.installToWindow(window);
-    gServices.skinService.installToWindow(window);
 
     const PAGE_LOAD_PREF = "extensions.ubiquity.enablePageLoadHandlers";
 

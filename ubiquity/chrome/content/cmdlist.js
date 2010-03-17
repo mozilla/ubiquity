@@ -66,6 +66,10 @@ var {escapeHtml} = Utils;
 var {feedManager, commandSource, messageService} = (
   UbiquitySetup.createServices());
 
+function getFeeds(type) [
+  feed for each (feed in feedManager["get" + type + "Feeds"]())
+  if ("commands" in feed)];
+
 function A(url, text, className, attrs) {
   var a = document.createElement("a");
   a.href = url;
@@ -231,12 +235,11 @@ function fillTableRowForCmd(row, cmd, className) {
 
 function updateSubscribedCount() {
   $("#num-commands").html(commandSource.commandNames.length);
-  $("#num-subscribed-feeds").html(feedManager.getSubscribedFeeds().length);
+  $("#num-subscribed-feeds").text(getFeeds("Subscribed").length);
 }
 
 function updateUnsubscribedCount() {
-  $("#num-unsubscribed-feeds").html(
-    feedManager.getUnsubscribedFeeds().length);
+  $("#num-unsubscribed-feeds").text(getFeeds("Unsubscribed").length);
 }
 
 function buildTable() {
@@ -267,10 +270,8 @@ function buildTable() {
   function addCmdToTable(cmd) {
     let aRow = $("<tr></tr>");
     let feedCell = $("<td></td>");
-    let feed = getFeedForCommand(feedManager, cmd);
-    if (feed) {
-      fillTableCellForFeed(feedCell, feed);
-    }
+    let feed = feedManager.getFeedForUrl(cmd.feedUri);
+    if (feed) fillTableCellForFeed(feedCell, feed);
     aRow.append(feedCell);
     fillTableRowForCmd(aRow, cmd);
     table.append(aRow);
@@ -279,7 +280,7 @@ function buildTable() {
   updateSubscribedCount();
 
   if (/^feed/.test(sortMode))
-    (feedManager.getSubscribedFeeds()
+    (getFeeds("Subscribed")
      .sort(/date$/.test(sortMode) ? byDate : byTitle)
      .forEach(addFeedToTable));
   else
@@ -313,14 +314,6 @@ function sortCmdListBy(cmdList, key) {
   function checksort(a, b) a.disabled - b.disabled;
 
   return cmdList.sort(key === "enabled" ? checksort : alphasort);
-}
-
-function getFeedForCommand(feedManager, cmd) {
-  // This is a really hacky implementation -- it involves going through
-  // all feeds looking for one containing a command with a matching name.
-  for each (let feed in feedManager.getSubscribedFeeds())
-    if (cmd.id in (feed.commands || {})) return feed;
-  return null;
 }
 
 // Bind this to checkbox "change".

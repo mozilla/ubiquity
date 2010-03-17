@@ -45,6 +45,7 @@ Cu.import("resource://ubiquity/modules/localization_utils.js");
 
 var L = LocalizationUtils.propertySelector(
   "chrome://ubiquity/locale/aboutubiquity.properties");
+var H = Utils.escapeHtml;
 
 var gPrefs = Utils.prefs;
 

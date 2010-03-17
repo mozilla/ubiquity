@@ -528,9 +528,7 @@ var noun_type_disabled_command = {
 // === {{{ noun_type_skin }}} ===
 // Suggests each installed skin whose name matches the input.
 // * {{{text, html}}} : skin name
-// * {{{data.downloadUrl}}}
-// * {{{data.localUrl}}}
-// * {{{data.metaData}}} : meta data dictionary
+// * {{{data}}} : [[#modules/skin_feed_plugin.js|SkinFeed]] instance
 
 var noun_type_skin = {
   label: "name",
@@ -538,7 +536,7 @@ var noun_type_skin = {
   cacheTime: 0,
   suggest: function nt_skin_suggest(text, html, cb, selected) {
     var suggs = [CmdUtils.makeSugg(skin.metaData.name, null, skin)
-                 for each (skin in skinService.skinList)];
+                 for each (skin in skinService.skins)];
     return CmdUtils.grepSuggs(text, suggs);
   },
 };
