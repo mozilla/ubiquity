@@ -554,9 +554,11 @@ function testUtilsSeq() {
     uneval([i for (i in seq(4, 2, -1))]),
     uneval([4, 3, 2]));
   assertEquals(
-    uneval(seq(7).slice(2, -2)),
-    uneval([2, 3, 4]));
+    uneval(seq(-7).slice(2, -2)),
+    uneval([4, 3, 2]));
   for (let i in seq(0)) assert(false);
+  for (let i in seq( )) assert(false);
+  for (let i in seq(1,0,1)) assert(false);
 }
 
 function testUtilsListenOnce() {

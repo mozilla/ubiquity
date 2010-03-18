@@ -693,19 +693,19 @@ function powerSet(arrayLike) {
 // [i for (i in seq(1, 3))]     // [1, 2, 3]
 // [i for (i in seq(3))]        // [0, 1, 2]
 // [i for (i in seq(4, 2, -1))] // [4, 3, 2]
-// seq(7).slice(2, -2)          // [2, 3, 4]
+// seq(-7).slice(2, -2)         // [4, 3, 2]
 // }}}
 
 Utils.seq = Sequence;
 function Sequence(lead, end, step) {
-  if (end == null) [lead, end] = [0, lead - 1 | 0];
+  if (end == null && lead)
+    [lead, end, step] = lead < 0 ? [~lead, 0, -1] : [0, ~-lead];
   return {
     __proto__: Sequence.prototype,
     lead: +lead, end: +end, step: +step || 1,
   };
 }
-Sequence.prototype = {
-  constructor: Sequence,
+extend(Sequence.prototype, {
   __iterator__: function seq_iter() {
     var {lead: i, end, step} = this;
     if (step < 0)
@@ -715,11 +715,11 @@ Sequence.prototype = {
   },
   __noSuchMethod__:
   function seq_pass(name, args) args[name].apply(this.toJSON(), args),
-  __proto__: null,
   get length seq_getLength() (this.end - this.lead) / this.step + 1 | 0,
   toJSON: function seq_toJSON() [x for (x in this)],
-  toString: function seq_toString() "[object Sequence]",
-};
+  toString: function seq_toString()
+    "[object Sequence(" + this.lead + "," + this.end + "," + this.step + ")]",
+});
 
 // === {{{ Utils.computeCryptoHash(algo, str) }}} ===
 // Computes and returns a cryptographic hash for a string given an
@@ -907,7 +907,7 @@ function defineLazyProperty(obj, func, name) {
 function extend(target) {
   for (let i = 1, l = arguments.length; i < l; ++i) {
     let obj = arguments[i];
-    for (let key in obj) {
+    for (let key in new Iterator(obj, true)) {
       let g, s;
       (g = obj.__lookupGetter__(key)) && target.__defineGetter__(key, g);
       (s = obj.__lookupSetter__(key)) && target.__defineSetter__(key, s);
